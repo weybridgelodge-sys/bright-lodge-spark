@@ -1,0 +1,109 @@
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+import PageHeader from "@/components/PageHeader";
+import { motion } from "framer-motion";
+import { Phone, Mail, MapPin, CheckCircle } from "lucide-react";
+
+const reasons = [
+  "Make lifelong friendships with like-minded men",
+  "Be part of a global network of over 6 million members",
+  "Support charitable causes in your local community",
+  "Develop leadership and personal skills",
+  "Enjoy a rich social calendar with family events",
+  "Become part of a tradition dating back centuries",
+];
+
+const JoinUs = () => {
+  return (
+    <div className="min-h-screen">
+      <Header />
+      <main>
+        <PageHeader
+          title="Join Us"
+          subtitle="Take the first step on an extraordinary journey"
+        />
+
+        {/* Why Join */}
+        <section className="py-20 md:py-28 bg-warm-white">
+          <div className="container mx-auto px-6 max-w-4xl">
+            <div className="grid md:grid-cols-2 gap-16 items-start">
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6 }}
+              >
+                <div className="h-0.5 w-16 bg-gold mb-6" />
+                <h2 className="text-3xl md:text-4xl font-serif text-foreground mb-6">Why Join Freemasonry?</h2>
+                <p className="text-muted-foreground font-sans leading-relaxed mb-8">
+                  Freemasonry offers a unique experience that enriches lives. Whether you are looking for fellowship, personal growth, or the chance to give back to your community, membership opens doors to extraordinary opportunities.
+                </p>
+                <ul className="space-y-4">
+                  {reasons.map((reason) => (
+                    <li key={reason} className="flex items-start gap-3">
+                      <CheckCircle className="w-5 h-5 text-gold mt-0.5 flex-shrink-0" />
+                      <span className="text-foreground font-sans text-sm">{reason}</span>
+                    </li>
+                  ))}
+                </ul>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+                className="bg-card rounded-sm border border-border shadow-lg p-8"
+              >
+                <h3 className="text-xl font-serif text-foreground mb-6">Get In Touch</h3>
+
+                <div className="space-y-6">
+                  <div className="flex items-start gap-4">
+                    <Phone className="w-5 h-5 text-gold mt-0.5 shrink-0" />
+                    <div>
+                      <p className="font-sans font-medium text-foreground text-sm">Call our Membership Secretary</p>
+                      <a href="tel:07921589039" className="text-gold hover:text-gold-light font-sans transition-colors">
+                        07921 589 039
+                      </a>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-4">
+                    <Mail className="w-5 h-5 text-gold mt-0.5 shrink-0" />
+                    <div>
+                      <p className="font-sans font-medium text-foreground text-sm">Email Us</p>
+                      <a href="mailto:secretary@weybridgelodge.org.uk" className="text-gold hover:text-gold-light font-sans transition-colors text-sm break-all">
+                        secretary@weybridgelodge.org.uk
+                      </a>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-4">
+                    <MapPin className="w-5 h-5 text-gold mt-0.5 shrink-0" />
+                    <div>
+                      <p className="font-sans font-medium text-foreground text-sm">We Meet At</p>
+                      <p className="text-muted-foreground font-sans text-sm">
+                        South West Surrey Masonic Centre<br />
+                        Hitherbury Close, Guildford GU2 4DR
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <a
+                  href="tel:07921589039"
+                  className="block w-full text-center bg-gold-shimmer text-accent-foreground py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity mt-8"
+                >
+                  Call Now
+                </a>
+              </motion.div>
+            </div>
+          </div>
+        </section>
+      </main>
+      <Footer />
+    </div>
+  );
+};
+
+export default JoinUs;
