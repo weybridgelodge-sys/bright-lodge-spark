@@ -1,5 +1,6 @@
 import { Instagram, Facebook, Twitter } from "lucide-react";
-import emblem from "@/assets/masonic-emblem.png";
+import logo from "@/assets/weybridge-logo.svg";
+import charterMark from "@/assets/charter-mark.png";
 
 const Footer = () => {
   return (
@@ -8,15 +9,16 @@ const Footer = () => {
         <div className="grid md:grid-cols-3 gap-12 mb-12">
           <div>
             <div className="flex items-center gap-3 mb-4">
-              <img src={emblem} alt="Weybridge Lodge" className="h-10 w-10" />
+              <img src={logo} alt="Weybridge Lodge" className="h-10 w-10" />
               <div>
                 <p className="font-serif text-primary-foreground text-sm font-semibold">Weybridge Lodge No. 6787</p>
                 <p className="text-gold text-xs font-sans">Province of Surrey</p>
               </div>
             </div>
-            <p className="text-primary-foreground/50 text-sm font-sans leading-relaxed">
+            <p className="text-primary-foreground/50 text-sm font-sans leading-relaxed mb-4">
               A Freemasons Lodge based in Guildford, Surrey. Consecrated 1949.
             </p>
+            <img src={charterMark} alt="UGLE Charter Mark" className="h-12 w-auto opacity-60" />
           </div>
 
           <div>
