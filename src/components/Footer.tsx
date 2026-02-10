@@ -15,9 +15,10 @@ const Footer = () => {
                 <p className="text-gold text-xs font-sans">Province of Surrey</p>
               </div>
             </div>
-            <p className="text-primary-foreground/50 text-sm font-sans leading-relaxed">
+            <p className="text-primary-foreground/50 text-sm font-sans leading-relaxed mb-4">
               A Freemasons Lodge based in Guildford, Surrey. Consecrated 1949.
             </p>
+            <img src={charterMark} alt="UGLE Charter Mark" className="h-12 w-auto opacity-60" />
           </div>
 
           <div>

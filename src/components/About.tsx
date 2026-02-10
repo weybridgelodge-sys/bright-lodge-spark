@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
-import emblem from "@/assets/masonic-emblem.png";
+import logo from "@/assets/weybridge-logo.svg";
+import anniversaryPhoto from "@/assets/75th-anniversary.webp";
 
 const About = () => {
   return (
@@ -33,21 +34,21 @@ const About = () => {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="flex justify-center"
+            className="flex flex-col items-center gap-8"
           >
-            <div className="relative">
-              <div className="w-72 h-72 md:w-96 md:h-96 rounded-full bg-navy/5 flex items-center justify-center">
-                <div className="w-60 h-60 md:w-80 md:h-80 rounded-full border-2 border-gold/30 flex items-center justify-center">
-                  <img
-                    src={emblem}
-                    alt="Masonic Square and Compasses"
-                    className="w-40 h-40 md:w-52 md:h-52 object-contain"
-                  />
-                </div>
+            <div className="relative w-full overflow-hidden rounded-sm shadow-lg">
+              <img
+                src={anniversaryPhoto}
+                alt="Weybridge Lodge brethren celebrating their 75th Anniversary in February 2024"
+                className="w-full h-auto object-cover"
+              />
+              <div className="absolute bottom-0 left-0 right-0 bg-navy/80 backdrop-blur-sm px-4 py-3">
+                <p className="text-primary-foreground/90 text-xs font-sans">
+                  Celebrating our 75th Anniversary — February 2024
+                </p>
               </div>
-              <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-gold/10 rounded-full blur-2xl" />
-              <div className="absolute -top-4 -left-4 w-32 h-32 bg-navy/5 rounded-full blur-2xl" />
             </div>
+            <img src={logo} alt="Weybridge Lodge crest" className="w-20 h-20 opacity-60" />
           </motion.div>
         </div>
       </div>
