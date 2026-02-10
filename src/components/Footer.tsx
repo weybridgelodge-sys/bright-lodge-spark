@@ -60,12 +60,12 @@ const Footer = () => {
             © {new Date().getFullYear()} Weybridge Lodge No. 6787. All rights reserved.
           </p>
           <div className="flex gap-6">
-            <a href="#" className="text-xs text-primary-foreground/30 hover:text-gold transition-colors font-sans">
+            <Link to="/data-protection" className="text-xs text-primary-foreground/30 hover:text-gold transition-colors font-sans">
               Data Protection Policy
-            </a>
-            <a href="#" className="text-xs text-primary-foreground/30 hover:text-gold transition-colors font-sans">
-              Accessibility
-            </a>
+            </Link>
+            <Link to="/what-is-freemasonry" className="text-xs text-primary-foreground/30 hover:text-gold transition-colors font-sans">
+              What is Freemasonry
+            </Link>
           </div>
         </div>
       </div>
