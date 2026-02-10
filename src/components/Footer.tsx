@@ -1,5 +1,6 @@
 import { Instagram, Facebook, Twitter } from "lucide-react";
-import emblem from "@/assets/masonic-emblem.png";
+import logo from "@/assets/weybridge-logo.svg";
+import charterMark from "@/assets/charter-mark.png";
 
 const Footer = () => {
   return (
