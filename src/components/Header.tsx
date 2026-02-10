@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Menu, X, Phone } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import emblem from "@/assets/masonic-emblem.png";
+import logo from "@/assets/weybridge-logo.svg";
 
 const navItems = [
   { label: "About Us", href: "#about" },
