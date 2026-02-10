@@ -1,4 +1,5 @@
 import { Instagram, Facebook, Twitter } from "lucide-react";
+import { Link } from "react-router-dom";
 import logo from "@/assets/weybridge-logo.svg";
 import charterMark from "@/assets/charter-mark.png";
 
