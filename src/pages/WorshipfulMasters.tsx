@@ -117,9 +117,9 @@ const WorshipfulMasters = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
-              className="overflow-x-auto"
+              className="overflow-x-auto -mx-6 px-6 md:mx-0 md:px-0"
             >
-              <div className="bg-primary-foreground/5 border border-gold/20 rounded-sm p-6 md:p-8 backdrop-blur-sm">
+              <div className="bg-primary-foreground/5 border border-gold/20 rounded-sm p-4 sm:p-6 md:p-8 backdrop-blur-sm min-w-[480px] md:min-w-0">
                 <table className="w-full text-left">
                   <thead>
                     <tr className="border-b border-gold/30">

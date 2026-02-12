@@ -24,9 +24,9 @@ const JoinUs = () => {
         />
 
         {/* Why Join */}
-        <section className="py-20 md:py-28 bg-warm-white">
-          <div className="container mx-auto px-6 max-w-4xl">
-            <div className="grid md:grid-cols-2 gap-16 items-start">
+        <section className="py-12 sm:py-20 md:py-28 bg-warm-white">
+          <div className="container mx-auto px-4 sm:px-6 max-w-4xl">
+            <div className="grid md:grid-cols-2 gap-8 sm:gap-12 md:gap-16 items-start">
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
                 whileInView={{ opacity: 1, x: 0 }}
@@ -53,7 +53,7 @@ const JoinUs = () => {
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.6, delay: 0.2 }}
-                className="bg-card rounded-sm border border-border shadow-lg p-8"
+                className="bg-card rounded-sm border border-border shadow-lg p-5 sm:p-8"
               >
                 <h3 className="text-xl font-serif text-foreground mb-6">Get In Touch</h3>
 

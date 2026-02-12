@@ -15,7 +15,7 @@ const PageHeader = ({ title, subtitle }: PageHeaderProps) => {
       />
       <div className="absolute inset-0 bg-navy-gradient opacity-90" />
 
-      <div className="relative z-10 container mx-auto px-6 text-center">
+      <div className="relative z-10 container mx-auto px-4 sm:px-6 text-center">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

@@ -6,8 +6,8 @@ import charterMark from "@/assets/charter-mark.png";
 const Footer = () => {
   return (
     <footer className="bg-navy-dark py-16 border-t border-gold/10">
-      <div className="container mx-auto px-6">
-        <div className="grid md:grid-cols-3 gap-12 mb-12">
+      <div className="container mx-auto px-4 sm:px-6">
+        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-8 sm:gap-12 mb-12">
           <div>
             <div className="flex items-center gap-3 mb-4">
               <img src={logo} alt="Weybridge Lodge" className="h-10 w-10" />
@@ -55,7 +55,7 @@ const Footer = () => {
           </div>
         </div>
 
-        <div className="border-t border-gold/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+        <div className="border-t border-gold/10 pt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
           <p className="text-xs text-primary-foreground/30 font-sans">
             © {new Date().getFullYear()} Weybridge Lodge No. 6787. All rights reserved.
           </p>
