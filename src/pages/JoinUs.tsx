@@ -90,12 +90,36 @@ const JoinUs = () => {
                   </div>
                 </div>
 
-                <a
-                  href="tel:07921589039"
-                  className="block w-full text-center bg-gold-shimmer text-accent-foreground py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity mt-8"
+                {/* Everest Forms compatible form */}
+                <form
+                  className="mt-8 space-y-4 border-t border-border pt-8"
+                  method="post"
+                  id="everest-forms-enquiry"
                 >
-                  Call Now
-                </a>
+                  <h4 className="text-lg font-serif text-foreground mb-2">Enquiry Form</h4>
+                  <div>
+                    <label htmlFor="evf-name" className="block text-sm font-sans font-medium text-foreground mb-1">Full Name <span className="text-destructive">*</span></label>
+                    <input type="text" id="evf-name" name="evf-name" required className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" placeholder="Your full name" />
+                  </div>
+                  <div>
+                    <label htmlFor="evf-email" className="block text-sm font-sans font-medium text-foreground mb-1">Email Address <span className="text-destructive">*</span></label>
+                    <input type="email" id="evf-email" name="evf-email" required className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" placeholder="you@example.com" />
+                  </div>
+                  <div>
+                    <label htmlFor="evf-phone" className="block text-sm font-sans font-medium text-foreground mb-1">Contact Number</label>
+                    <input type="tel" id="evf-phone" name="evf-phone" className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" placeholder="07xxx xxx xxx" />
+                  </div>
+                  <div>
+                    <label htmlFor="evf-reason" className="block text-sm font-sans font-medium text-foreground mb-1">Reason for Enquiry <span className="text-destructive">*</span></label>
+                    <textarea id="evf-reason" name="evf-reason" required rows={4} className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" placeholder="Tell us why you're interested in joining..." />
+                  </div>
+                  <button
+                    type="submit"
+                    className="block w-full text-center bg-gold-shimmer text-accent-foreground py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity"
+                  >
+                    Start Your Journey
+                  </button>
+                </form>
               </motion.div>
             </div>
           </div>
