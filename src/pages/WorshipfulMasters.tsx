@@ -119,24 +119,26 @@ const WorshipfulMasters = () => {
               transition={{ duration: 0.6 }}
               className="overflow-x-auto"
             >
-              <table className="w-full text-left">
-                <thead>
-                  <tr className="border-b border-gold/30">
-                    <th className="text-gold text-xs font-sans uppercase tracking-widest py-4 pr-6">Year</th>
-                    <th className="text-gold text-xs font-sans uppercase tracking-widest py-4 pr-6">Name</th>
-                    <th className="text-gold text-xs font-sans uppercase tracking-widest py-4">Honours</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {masters.map((m, i) => (
-                    <tr key={i} className="border-b border-primary-foreground/10">
-                      <td className="text-primary-foreground/80 font-sans text-sm py-3 pr-6">{m.year}</td>
-                      <td className="text-primary-foreground font-sans text-sm py-3 pr-6">{m.name}</td>
-                      <td className="text-primary-foreground/60 font-sans text-xs py-3">{m.honours}</td>
+              <div className="bg-primary-foreground/5 border border-gold/20 rounded-sm p-6 md:p-8 backdrop-blur-sm">
+                <table className="w-full text-left">
+                  <thead>
+                    <tr className="border-b border-gold/30">
+                      <th className="text-gold text-xs font-sans uppercase tracking-widest py-4 pr-6">Year</th>
+                      <th className="text-gold text-xs font-sans uppercase tracking-widest py-4 pr-6">Name</th>
+                      <th className="text-gold text-xs font-sans uppercase tracking-widest py-4">Honours</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {masters.map((m, i) => (
+                      <tr key={i} className="border-b border-primary-foreground/10 hover:bg-primary-foreground/5 transition-colors">
+                        <td className="text-primary-foreground/80 font-sans text-sm py-3 pr-6">{m.year}</td>
+                        <td className="text-primary-foreground font-sans text-sm py-3 pr-6">{m.name}</td>
+                        <td className="text-primary-foreground/60 font-sans text-xs py-3">{m.honours}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </motion.div>
 
             <div className="text-center mt-12">
