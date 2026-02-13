@@ -15,8 +15,9 @@ const stats = [
 const FreemasonryCharity = () => {
   return (
     <div className="min-h-screen">
+      <a href="#main-content" className="skip-to-content">Skip to main content</a>
       <Header />
-      <main>
+      <main id="main-content">
         <PageHeader
           title="Freemasonry & Charity"
           subtitle="One of the largest private charitable donors in the United Kingdom"

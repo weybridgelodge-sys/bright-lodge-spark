@@ -8,6 +8,8 @@ const Hero = () => {
       <div
         className="absolute inset-0 bg-cover bg-center"
         style={{ backgroundImage: `url(${heroImage})` }}
+        role="img"
+        aria-label="Weybridge Lodge building exterior"
       />
       <div className="absolute inset-0 hero-overlay" />
 
@@ -56,8 +58,9 @@ const Hero = () => {
         animate={{ opacity: 1 }}
         transition={{ delay: 1.5 }}
         className="absolute bottom-10 left-1/2 -translate-x-1/2 text-primary-foreground/60 hover:text-gold transition-colors"
+        aria-label="Scroll to About section"
       >
-        <ChevronDown className="w-8 h-8 animate-bounce" />
+        <ChevronDown className="w-8 h-8 animate-bounce" aria-hidden="true" />
       </motion.a>
     </section>
   );

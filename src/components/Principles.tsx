@@ -55,7 +55,7 @@ const Principles = () => {
               className="group text-center p-8 rounded-sm border border-gold/10 hover:border-gold/30 transition-all duration-500 bg-navy-light/30"
             >
               <div className="inline-flex items-center justify-center w-16 h-16 rounded-full border border-gold/30 mb-6 group-hover:bg-gold/10 transition-colors duration-500">
-                <principle.icon className="w-7 h-7 text-gold" />
+                <principle.icon className="w-7 h-7 text-gold" aria-hidden="true" />
               </div>
               <h3 className="text-xl font-serif text-primary-foreground mb-3">
                 {principle.title}

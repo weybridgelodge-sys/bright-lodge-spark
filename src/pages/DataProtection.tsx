@@ -5,8 +5,9 @@ import PageHeader from "@/components/PageHeader";
 const DataProtection = () => {
   return (
     <div className="min-h-screen">
+      <a href="#main-content" className="skip-to-content">Skip to main content</a>
       <Header />
-      <main>
+      <main id="main-content">
         <PageHeader title="Data Protection Policy" />
 
         <section className="py-20 md:py-28 bg-warm-white">

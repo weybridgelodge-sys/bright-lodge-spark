@@ -88,8 +88,9 @@ const masters = [
 const WorshipfulMasters = () => {
   return (
     <div className="min-h-screen">
+      <a href="#main-content" className="skip-to-content">Skip to main content</a>
       <Header />
-      <main>
+      <main id="main-content">
         <PageHeader
           title="Worshipful Masters"
           subtitle="Roll of Honour — 1949 to Present"
@@ -122,10 +123,10 @@ const WorshipfulMasters = () => {
               <div className="bg-primary-foreground/5 border border-gold/20 rounded-sm p-4 sm:p-6 md:p-8 backdrop-blur-sm min-w-[480px] md:min-w-0">
                 <table className="w-full text-left">
                   <thead>
-                    <tr className="border-b border-gold/30">
-                      <th className="text-gold text-xs font-sans uppercase tracking-widest py-4 pr-6">Year</th>
-                      <th className="text-gold text-xs font-sans uppercase tracking-widest py-4 pr-6">Name</th>
-                      <th className="text-gold text-xs font-sans uppercase tracking-widest py-4">Honours</th>
+                   <tr className="border-b border-gold/30">
+                      <th scope="col" className="text-gold text-xs font-sans uppercase tracking-widest py-4 pr-6">Year</th>
+                      <th scope="col" className="text-gold text-xs font-sans uppercase tracking-widest py-4 pr-6">Name</th>
+                      <th scope="col" className="text-gold text-xs font-sans uppercase tracking-widest py-4">Honours</th>
                     </tr>
                   </thead>
                   <tbody>

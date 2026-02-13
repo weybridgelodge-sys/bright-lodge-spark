@@ -72,10 +72,15 @@ const DropdownMenu = ({ item }: { item: NavItem }) => {
       <button
         onClick={() => setOpen(!open)}
         onMouseEnter={() => setOpen(true)}
+        onKeyDown={(e) => {
+          if (e.key === "Escape") setOpen(false);
+        }}
+        aria-expanded={open}
+        aria-haspopup="true"
         className="flex items-center gap-1 text-sm font-sans text-primary-foreground/80 hover:text-gold transition-colors duration-300 tracking-wide uppercase"
       >
         {item.label}
-        <ChevronDown className={`w-3 h-3 transition-transform ${open ? "rotate-180" : ""}`} />
+        <ChevronDown className={`w-3 h-3 transition-transform ${open ? "rotate-180" : ""}`} aria-hidden="true" />
       </button>
       <AnimatePresence>
         {open && (
@@ -85,12 +90,14 @@ const DropdownMenu = ({ item }: { item: NavItem }) => {
             exit={{ opacity: 0, y: 8 }}
             transition={{ duration: 0.15 }}
             onMouseLeave={() => setOpen(false)}
+            role="menu"
             className="absolute top-full left-0 mt-2 w-56 bg-navy-dark border border-gold/15 rounded-sm shadow-xl z-50"
           >
             {item.children!.map((child) => (
               <Link
                 key={child.label}
                 to={child.href}
+                role="menuitem"
                 onClick={() => setOpen(false)}
                 className="block px-5 py-3 text-sm font-sans text-primary-foreground/70 hover:text-gold hover:bg-navy-light/30 transition-colors"
               >
@@ -126,10 +133,11 @@ const Header = () => {
         <div key={item.label}>
           <button
             onClick={() => setMobileExpanded(isExpanded ? null : item.label)}
+            aria-expanded={isExpanded}
             className="flex items-center justify-between w-full text-sm font-sans text-primary-foreground/80 hover:text-gold transition-colors uppercase tracking-wide py-2"
           >
             {item.label}
-            <ChevronDown className={`w-4 h-4 transition-transform ${isExpanded ? "rotate-180" : ""}`} />
+            <ChevronDown className={`w-4 h-4 transition-transform ${isExpanded ? "rotate-180" : ""}`} aria-hidden="true" />
           </button>
           <AnimatePresence>
             {isExpanded && (
@@ -241,7 +249,7 @@ const Header = () => {
           </div>
         </Link>
 
-        <nav className="hidden lg:flex items-center gap-7">
+        <nav aria-label="Main navigation" className="hidden lg:flex items-center gap-7">
           {navItems.map((item) => renderDesktopItem(item))}
         </nav>
 
@@ -271,7 +279,7 @@ const Header = () => {
             exit={{ height: 0, opacity: 0 }}
             className="lg:hidden bg-navy-dark border-t border-gold/10 overflow-hidden"
           >
-            <nav className="flex flex-col px-6 py-4 gap-2">
+            <nav aria-label="Mobile navigation" className="flex flex-col px-6 py-4 gap-2">
               {navItems.map((item) => renderMobileItem(item))}
               <Link
                 to="/join-us"

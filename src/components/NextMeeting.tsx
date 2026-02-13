@@ -40,7 +40,7 @@ const NextMeeting = () => {
 
           <div className="p-8 space-y-6">
             <div className="flex items-start gap-4">
-              <MapPin className="w-5 h-5 text-gold mt-0.5 shrink-0" />
+              <MapPin className="w-5 h-5 text-gold mt-0.5 shrink-0" aria-hidden="true" />
               <div>
                 <p className="font-sans font-medium text-foreground">South West Surrey Masonic Centre</p>
                 <p className="text-sm text-muted-foreground font-sans">Hitherbury Close, Guildford GU2 4DR</p>
@@ -48,7 +48,7 @@ const NextMeeting = () => {
             </div>
 
             <div className="flex items-start gap-4">
-              <Calendar className="w-5 h-5 text-gold mt-0.5 shrink-0" />
+              <Calendar className="w-5 h-5 text-gold mt-0.5 shrink-0" aria-hidden="true" />
               <div>
                 <p className="font-sans font-medium text-foreground">Wednesday, 18 February 2026</p>
                 <p className="text-sm text-muted-foreground font-sans">Now open for bookings</p>
@@ -56,7 +56,7 @@ const NextMeeting = () => {
             </div>
 
             <div className="flex items-start gap-4">
-              <Clock className="w-5 h-5 text-gold mt-0.5 shrink-0" />
+              <Clock className="w-5 h-5 text-gold mt-0.5 shrink-0" aria-hidden="true" />
               <div>
                 <p className="font-sans font-medium text-foreground">Dining to follow</p>
                 <p className="text-sm text-muted-foreground font-sans">Contact us to book your place</p>

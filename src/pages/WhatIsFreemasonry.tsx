@@ -59,8 +59,9 @@ const degrees = [
 const WhatIsFreemasonry = () => {
   return (
     <div className="min-h-screen">
+      <a href="#main-content" className="skip-to-content">Skip to main content</a>
       <Header />
-      <main>
+      <main id="main-content">
         <PageHeader
           title="What is Freemasonry?"
           subtitle="One of the oldest social and charitable organisations in the world"

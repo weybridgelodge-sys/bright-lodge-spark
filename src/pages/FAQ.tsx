@@ -64,8 +64,9 @@ const faqs = [
 const FAQ = () => {
   return (
     <div className="min-h-screen">
+      <a href="#main-content" className="skip-to-content">Skip to main content</a>
       <Header />
-      <main>
+      <main id="main-content">
         <PageHeader
           title="Frequently Asked Questions"
           subtitle="Common questions about Freemasonry answered"

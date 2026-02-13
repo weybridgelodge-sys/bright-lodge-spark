@@ -7,8 +7,9 @@ import { Link } from "react-router-dom";
 const History = () => {
   return (
     <div className="min-h-screen">
+      <a href="#main-content" className="skip-to-content">Skip to main content</a>
       <Header />
-      <main>
+      <main id="main-content">
         <PageHeader
           title="Our History"
           subtitle="Discover the history of Weybridge Lodge"
