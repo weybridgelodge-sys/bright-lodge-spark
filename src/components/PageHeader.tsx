@@ -12,6 +12,8 @@ const PageHeader = ({ title, subtitle }: PageHeaderProps) => {
       <div
         className="absolute inset-0 bg-cover bg-center"
         style={{ backgroundImage: `url(${heroImage})` }}
+        role="img"
+        aria-label="Decorative header background"
       />
       <div className="absolute inset-0 bg-navy-gradient opacity-90" />
 

@@ -16,8 +16,9 @@ const reasons = [
 const JoinUs = () => {
   return (
     <div className="min-h-screen">
+      <a href="#main-content" className="skip-to-content">Skip to main content</a>
       <Header />
-      <main>
+      <main id="main-content">
         <PageHeader
           title="Join Us"
           subtitle="Take the first step on an extraordinary journey"

@@ -3,9 +3,9 @@ import { Phone, Mail } from "lucide-react";
 
 const JoinCTA = () => {
   return (
-    <section id="contact" className="py-24 md:py-32 bg-navy-gradient relative overflow-hidden">
-      <div className="absolute top-0 left-0 w-64 h-64 bg-gold/5 rounded-full -translate-x-1/2 -translate-y-1/2 blur-3xl" />
-      <div className="absolute bottom-0 right-0 w-96 h-96 bg-gold/5 rounded-full translate-x-1/3 translate-y-1/3 blur-3xl" />
+    <section id="contact" className="py-24 md:py-32 bg-navy-gradient relative overflow-hidden" aria-labelledby="join-heading">
+      <div className="absolute top-0 left-0 w-64 h-64 bg-gold/5 rounded-full -translate-x-1/2 -translate-y-1/2 blur-3xl" aria-hidden="true" />
+      <div className="absolute bottom-0 right-0 w-96 h-96 bg-gold/5 rounded-full translate-x-1/3 translate-y-1/3 blur-3xl" aria-hidden="true" />
 
       <div className="container mx-auto px-6 relative z-10">
         <motion.div
@@ -16,7 +16,7 @@ const JoinCTA = () => {
           className="max-w-2xl mx-auto text-center"
         >
           <div className="h-0.5 w-16 bg-gold mx-auto mb-6" />
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif text-primary-foreground mb-6">
+          <h2 id="join-heading" className="text-3xl md:text-4xl lg:text-5xl font-serif text-primary-foreground mb-6">
             Interested in Joining?
           </h2>
           <p className="text-primary-foreground/70 font-sans leading-relaxed mb-10 text-lg">

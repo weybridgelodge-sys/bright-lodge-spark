@@ -5,7 +5,7 @@ import charterMark from "@/assets/charter-mark.png";
 
 const Footer = () => {
   return (
-    <footer className="bg-navy-dark py-16 border-t border-gold/10">
+    <footer className="bg-navy-dark py-16 border-t border-gold/10" role="contentinfo">
       <div className="container mx-auto px-4 sm:px-6">
         <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-8 sm:gap-12 mb-12">
           <div>

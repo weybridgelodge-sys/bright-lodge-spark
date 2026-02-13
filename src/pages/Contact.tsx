@@ -8,8 +8,9 @@ import { Link } from "react-router-dom";
 const Contact = () => {
   return (
     <div className="min-h-screen">
+      <a href="#main-content" className="skip-to-content">Skip to main content</a>
       <Header />
-      <main>
+      <main id="main-content">
         <PageHeader
           title="Contact Us"
           subtitle="Get in touch with Weybridge Lodge Freemasons"
