@@ -28,7 +28,6 @@ const navItems: NavItem[] = [
     href: "/what-is-freemasonry",
     children: [
       { label: "What is Freemasonry", href: "/what-is-freemasonry" },
-      { label: "FAQ", href: "/faq" },
       { label: "Video Hub", href: "/video-hub" },
     ],
   },
