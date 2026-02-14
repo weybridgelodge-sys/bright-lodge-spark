@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { ChevronDown } from "lucide-react";
+import { Link } from "react-router-dom";
 import heroImage from "@/assets/hero-lodge.jpg";
 
 const Hero = () => {
@@ -36,12 +37,12 @@ const Hero = () => {
             An open, friendly and sociable Freemasons Lodge within the Province of Surrey, based in the heart of Guildford.
           </p>
           <div className="flex flex-col sm:flex-row gap-4">
-            <a
-              href="#contact"
+            <Link
+              to="/join-us"
               className="inline-flex items-center justify-center bg-gold-shimmer text-accent-foreground px-8 py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity"
             >
               Begin Your Journey
-            </a>
+            </Link>
             <a
               href="#about"
               className="inline-flex items-center justify-center border border-primary-foreground/30 text-primary-foreground px-8 py-4 rounded-sm text-sm font-sans uppercase tracking-widest hover:border-gold hover:text-gold transition-colors"
