@@ -64,7 +64,7 @@ const NextMeeting = () => {
             </div>
 
             <a
-              href="mailto:secretary@weybridgelodge.org.uk"
+              href="/bookings"
               className="block w-full text-center bg-gold-shimmer text-accent-foreground py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity mt-4"
             >
               Book Your Place
