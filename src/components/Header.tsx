@@ -244,7 +244,7 @@ const Header = () => {
     <header className="fixed top-0 left-0 right-0 z-50 bg-navy/95 backdrop-blur-md border-b border-gold/20">
       <div className="container mx-auto px-4 sm:px-6 flex items-center justify-between h-16 md:h-20">
         <Link to="/" className="flex items-center gap-3">
-          <img src={logo} alt="Weybridge Lodge" className="h-10 w-10 md:h-12 md:w-12" />
+          <img src={logo} alt="Weybridge Lodge" className="h-10 w-10 md:h-12 md:w-12 bg-primary-foreground/80 rounded-full p-0.5" />
           <div className="hidden sm:block">
             <p className="font-serif text-primary-foreground text-sm md:text-base font-semibold leading-tight">Weybridge Lodge</p>
             <p className="text-gold text-xs">No. 6787</p>
