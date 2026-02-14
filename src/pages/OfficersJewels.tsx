@@ -53,7 +53,7 @@ const progressiveOfficers: OfficerJewel[] = [
     image: deaconImg,
     title: "Senior Deacon",
     alt: "Masonic Lodge Officers Jewel - Deacons Jewel",
-    description: "",
+    description: "The Senior Deacon acts as the personal attendant to the Worshipful Master and carries out his commands. He also assists in the ceremonies by conducting candidates and carrying messages between the Master and the Senior Warden. Like the Junior Deacon, he carries a wand as a badge of office.",
   },
   {
     image: jwImg,
