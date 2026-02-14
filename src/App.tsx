@@ -22,6 +22,8 @@ import MasonicLinks from "./pages/MasonicLinks";
 import Bookings from "./pages/Bookings";
 import OfficersJewels from "./pages/OfficersJewels";
 import News from "./pages/News";
+import Anniversary75th from "./pages/news/Anniversary75th";
+import SandsCharity from "./pages/news/SandsCharity";
 
 const queryClient = new QueryClient();
 
@@ -50,6 +52,8 @@ const App = () => (
           <Route path="/bookings" element={<Bookings />} />
           <Route path="/officers-jewels" element={<OfficersJewels />} />
           <Route path="/news" element={<News />} />
+          <Route path="/news/75th-anniversary" element={<Anniversary75th />} />
+          <Route path="/news/sands-charity" element={<SandsCharity />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
