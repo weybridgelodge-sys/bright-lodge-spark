@@ -21,6 +21,7 @@ import VideoHub from "./pages/VideoHub";
 import MasonicLinks from "./pages/MasonicLinks";
 import Bookings from "./pages/Bookings";
 import OfficersJewels from "./pages/OfficersJewels";
+import News from "./pages/News";
 
 const queryClient = new QueryClient();
 
@@ -48,6 +49,7 @@ const App = () => (
           <Route path="/masonic-links" element={<MasonicLinks />} />
           <Route path="/bookings" element={<Bookings />} />
           <Route path="/officers-jewels" element={<OfficersJewels />} />
+          <Route path="/news" element={<News />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

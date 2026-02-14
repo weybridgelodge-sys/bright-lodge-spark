@@ -40,6 +40,7 @@ const navItems: NavItem[] = [
       { label: "Our Charities", href: "/our-charities" },
     ],
   },
+  { label: "News", href: "/news" },
   { label: "Contact", href: "/contact" },
   { label: "Bookings", href: "/bookings" },
   { label: "FAQ", href: "/faq" },
