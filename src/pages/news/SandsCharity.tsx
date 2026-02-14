@@ -4,6 +4,7 @@ import PageHeader from "@/components/PageHeader";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Calendar, User, ArrowLeft } from "lucide-react";
+import PostNavigation from "@/components/PostNavigation";
 
 import heroImg from "@/assets/news/sands-cheque.webp";
 import wayneImg from "@/assets/news/wayne-griffiths.png";
@@ -153,6 +154,9 @@ const SandsCharity = () => {
                 Julien is the current Mentor and Tech Guy for Weybridge Lodge and has been a member since 2019.
               </p>
             </div>
+
+            {/* Post Navigation */}
+            <PostNavigation currentSlug="sands-charity" />
           </div>
         </section>
       </main>
