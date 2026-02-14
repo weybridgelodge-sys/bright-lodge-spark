@@ -3,6 +3,7 @@ import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
+import pastMastersJewel from "@/assets/news/past-masters-jewel.png";
 
 const meetingDates = [
   "3rd Wednesday in February",
@@ -36,9 +37,20 @@ const LodgeProfile = () => {
               <p className="text-muted-foreground font-sans leading-relaxed mb-4">
                 Weybridge Lodge No. 6787 is a Lodge of Freemasons in Guildford, Surrey. Founded by members of Noel Money Lodge and workers from the Vickers Armstrong factory in Weybridge, it was Consecrated on January 29th, 1949.
               </p>
-              <p className="text-muted-foreground font-sans leading-relaxed">
+              <p className="text-muted-foreground font-sans leading-relaxed mb-6">
                 Early membership was heavily influenced by Vickers factory workers and local shopkeepers of Weybridge town. However, since then membership has changed substantially. Today the Lodge has members in a wide spectrum of occupations and ages.
               </p>
+              <figure className="my-8">
+                <img
+                  src={pastMastersJewel}
+                  alt="A Past Masters Jewel depicting the bridge over the River Wey at Weybridge between the two columns from the entrance of King Solomon's temple with a builder's square set below"
+                  className="w-full max-w-xs mx-auto rounded-sm"
+                  loading="lazy"
+                />
+                <figcaption className="text-xs text-muted-foreground text-center mt-2 italic">
+                  Example of a Past Masters Jewel. This one was presented in 1980 to W.Bro R Rattle.
+                </figcaption>
+              </figure>
             </motion.div>
           </div>
         </section>
