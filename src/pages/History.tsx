@@ -3,6 +3,9 @@ import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
+import vickersImg from "@/assets/history/vickers-factory.png";
+import honoraryImg from "@/assets/history/honorary-members.jpg";
+import foundersImg from "@/assets/history/lodge-founders.jpg";
 
 const History = () => {
   return (
@@ -31,9 +34,44 @@ const History = () => {
               <p className="text-muted-foreground font-sans leading-relaxed mb-4">
                 Brooklands in Weybridge, Surrey was the largest aircraft manufacturing centre in Britain with Vickers-Armstrong (the third largest manufacturing employer in Britain) producing both military and civilian aircraft there. Hawker, Blériot and Martinsyde also had factories at Brooklands. The Hawker Hurricane, which was deemed instrumental to victory in the Battle of Britain, first flew at Brooklands on 6 November 1935.
               </p>
-              <p className="text-muted-foreground font-sans leading-relaxed">
+              <p className="text-muted-foreground font-sans leading-relaxed mb-6">
                 The aircraft factories in the area became vital to the war effort. Despite being heavily camouflaged during World War II, the Vickers factory was bombed by the Luftwaffe on 4 September 1940 which resulted in the death of 90 aircraft workers. The Hawker factory was bombed two days later without major damage or any loss of life.
               </p>
+              <figure className="my-8">
+                <img
+                  src={vickersImg}
+                  alt="The Vickers factory in Brooklands, Weybridge, Surrey from the air in about 1939"
+                  className="w-full rounded-sm"
+                  loading="lazy"
+                />
+                <figcaption className="text-xs text-muted-foreground text-center mt-2 italic">
+                  The Vickers factory from the air in about 1939. Picture courtesy of the Spirit of Brooklands Museum.
+                </figcaption>
+              </figure>
+              <div className="grid sm:grid-cols-2 gap-6 mt-8">
+                <figure>
+                  <img
+                    src={honoraryImg}
+                    alt="The original Honorary Members of Weybridge Lodge"
+                    className="w-full rounded-sm"
+                    loading="lazy"
+                  />
+                  <figcaption className="text-xs text-muted-foreground text-center mt-2 italic">
+                    The original Honorary Members of Weybridge Lodge
+                  </figcaption>
+                </figure>
+                <figure>
+                  <img
+                    src={foundersImg}
+                    alt="Weybridge Lodge founder members"
+                    className="w-full rounded-sm"
+                    loading="lazy"
+                  />
+                  <figcaption className="text-xs text-muted-foreground text-center mt-2 italic">
+                    Weybridge Lodge founder members
+                  </figcaption>
+                </figure>
+              </div>
             </motion.div>
           </div>
         </section>
