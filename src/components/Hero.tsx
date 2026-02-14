@@ -43,12 +43,12 @@ const Hero = () => {
             >
               Begin Your Journey
             </Link>
-            <a
-              href="#about"
+            <Link
+              to="/what-is-freemasonry"
               className="inline-flex items-center justify-center border border-primary-foreground/30 text-primary-foreground px-8 py-4 rounded-sm text-sm font-sans uppercase tracking-widest hover:border-gold hover:text-gold transition-colors"
             >
               Discover More
-            </a>
+            </Link>
           </div>
         </motion.div>
       </div>
