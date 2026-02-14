@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import logo from "@/assets/weybridge-logo.svg";
+import surreyGold from "@/assets/surrey-2030-gold.png";
 import anniversaryPhoto from "@/assets/75th-anniversary.webp";
 
 const About = () => {
@@ -48,7 +48,12 @@ const About = () => {
                 </p>
               </div>
             </div>
-            <img src={logo} alt="Weybridge Lodge crest" className="w-20 h-20 opacity-60" />
+            <div className="flex flex-col items-center gap-2">
+              <div className="w-24 h-24 rounded-full bg-white shadow-md flex items-center justify-center p-1">
+                <img src={surreyGold} alt="Surrey 2030 Festival Gold Award" className="w-full h-full object-contain rounded-full" />
+              </div>
+              <p className="text-sm font-sans font-bold text-foreground text-center">A Surrey 2030 Festival Gold Award Lodge</p>
+            </div>
           </motion.div>
         </div>
       </div>
