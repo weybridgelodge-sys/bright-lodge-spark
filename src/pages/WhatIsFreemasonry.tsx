@@ -104,11 +104,12 @@ const WhatIsFreemasonry = () => {
               {principles.map((p, i) => (
                 <motion.div
                   key={p.title}
+                  id={p.title.toLowerCase()}
                   initial={{ opacity: 0, y: 30 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.6, delay: i * 0.1 }}
-                  className="p-8 rounded-sm border border-gold/10 bg-navy-light/30"
+                  className="p-8 rounded-sm border border-gold/10 bg-navy-light/30 scroll-mt-24"
                 >
                   <div className="inline-flex items-center justify-center w-14 h-14 rounded-full border border-gold/30 mb-5">
                     <p.icon className="w-6 h-6 text-gold" />
