@@ -48,30 +48,6 @@ const History = () => {
                   The Vickers factory from the air in about 1939. Picture courtesy of the Spirit of Brooklands Museum.
                 </figcaption>
               </figure>
-              <div className="grid sm:grid-cols-2 gap-6 mt-8">
-                <figure>
-                  <img
-                    src={honoraryImg}
-                    alt="The original Honorary Members of Weybridge Lodge"
-                    className="w-full rounded-sm"
-                    loading="lazy"
-                  />
-                  <figcaption className="text-xs text-muted-foreground text-center mt-2 italic">
-                    The original Honorary Members of Weybridge Lodge
-                  </figcaption>
-                </figure>
-                <figure>
-                  <img
-                    src={foundersImg}
-                    alt="Weybridge Lodge founder members"
-                    className="w-full rounded-sm"
-                    loading="lazy"
-                  />
-                  <figcaption className="text-xs text-muted-foreground text-center mt-2 italic">
-                    Weybridge Lodge founder members
-                  </figcaption>
-                </figure>
-              </div>
             </motion.div>
           </div>
         </section>
@@ -95,6 +71,30 @@ const History = () => {
               <p className="text-primary-foreground/70 font-sans leading-relaxed">
                 Further expansion of the Lodge membership meant that it needed to hold its meetings in other local areas; St. George's Hill Tennis Club 1952, the Masonic Hall, Chertsey 1956, Surbiton Masonic Hall 1960 and finally to its current home at the Guildford Masonic Centre in 1986.
               </p>
+              <div className="grid sm:grid-cols-2 gap-6 mt-8">
+                <figure>
+                  <img
+                    src={honoraryImg}
+                    alt="The original Honorary Members of Weybridge Lodge"
+                    className="w-full rounded-sm"
+                    loading="lazy"
+                  />
+                  <figcaption className="text-xs text-primary-foreground/50 text-center mt-2 italic">
+                    The original Honorary Members of Weybridge Lodge
+                  </figcaption>
+                </figure>
+                <figure>
+                  <img
+                    src={foundersImg}
+                    alt="Weybridge Lodge founder members"
+                    className="w-full rounded-sm"
+                    loading="lazy"
+                  />
+                  <figcaption className="text-xs text-primary-foreground/50 text-center mt-2 italic">
+                    Weybridge Lodge founder members
+                  </figcaption>
+                </figure>
+              </div>
             </motion.div>
           </div>
         </section>
