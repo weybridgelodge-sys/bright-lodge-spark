@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { Heart, Users, Shield, HandHelping } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const principles = [
   {
@@ -52,17 +53,21 @@ const Principles = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-50px" }}
               transition={{ duration: 0.6, delay: index * 0.15 }}
-              className="group text-center p-8 rounded-sm border border-gold/10 hover:border-gold/30 transition-all duration-500 bg-navy-light/30"
             >
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full border border-gold/30 mb-6 group-hover:bg-gold/10 transition-colors duration-500">
-                <principle.icon className="w-7 h-7 text-gold" aria-hidden="true" />
-              </div>
-              <h3 className="text-xl font-serif text-primary-foreground mb-3">
-                {principle.title}
-              </h3>
-              <p className="text-sm text-primary-foreground/60 font-sans leading-relaxed">
-                {principle.description}
-              </p>
+              <Link
+                to={`/what-is-freemasonry#${principle.title.toLowerCase()}`}
+                className="group block text-center p-8 rounded-sm border border-gold/10 hover:border-gold/30 transition-all duration-500 bg-navy-light/30 h-full"
+              >
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full border border-gold/30 mb-6 group-hover:bg-gold/10 transition-colors duration-500">
+                  <principle.icon className="w-7 h-7 text-gold" aria-hidden="true" />
+                </div>
+                <h3 className="text-xl font-serif text-primary-foreground mb-3">
+                  {principle.title}
+                </h3>
+                <p className="text-sm text-primary-foreground/60 font-sans leading-relaxed">
+                  {principle.description}
+                </p>
+              </Link>
             </motion.div>
           ))}
         </div>
