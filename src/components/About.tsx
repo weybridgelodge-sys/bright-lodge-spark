@@ -49,7 +49,7 @@ const About = () => {
               </div>
             </div>
             <div className="flex flex-col items-center gap-2">
-              <div className="w-24 h-24 rounded-full bg-white shadow-md flex items-center justify-center p-1">
+              <div className="w-24 h-24 rounded-full bg-warm-white shadow-md flex items-center justify-center p-1">
                 <img src={surreyGold} alt="Surrey 2030 Festival Gold Award" className="w-full h-full object-contain rounded-full" />
               </div>
               <p className="text-sm font-sans font-bold text-foreground text-center">A Surrey 2030 Festival Gold Award Lodge</p>
