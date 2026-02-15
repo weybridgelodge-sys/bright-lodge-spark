@@ -5,15 +5,19 @@ interface SEOProps {
   description: string;
   canonical?: string;
   type?: string;
+  image?: string;
   schema?: object | object[];
 }
 
 const SITE_NAME = "Weybridge Lodge No. 6787";
 const BASE_URL = "https://www.weybridgelodge.org.uk";
 
-const SEO = ({ title, description, canonical, type = "website", schema }: SEOProps) => {
+const DEFAULT_OG_IMAGE = `${BASE_URL}/og-image.png`;
+
+const SEO = ({ title, description, canonical, type = "website", image, schema }: SEOProps) => {
   const fullTitle = title === SITE_NAME ? title : `${title} | ${SITE_NAME}`;
   const url = canonical ? `${BASE_URL}${canonical}` : undefined;
+  const ogImage = image || DEFAULT_OG_IMAGE;
 
   const schemas = schema
     ? Array.isArray(schema)
@@ -31,10 +35,15 @@ const SEO = ({ title, description, canonical, type = "website", schema }: SEOPro
       <meta property="og:description" content={description} />
       <meta property="og:type" content={type} />
       {url && <meta property="og:url" content={url} />}
+      <meta property="og:image" content={ogImage} />
+      <meta property="og:image:width" content="1200" />
+      <meta property="og:image:height" content="630" />
+      <meta property="og:site_name" content={SITE_NAME} />
 
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content={fullTitle} />
       <meta name="twitter:description" content={description} />
+      <meta name="twitter:image" content={ogImage} />
 
       {schemas.map((s, i) => (
         <script key={i} type="application/ld+json">
