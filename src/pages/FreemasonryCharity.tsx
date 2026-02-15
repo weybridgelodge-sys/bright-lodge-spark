@@ -44,7 +44,7 @@ const FreemasonryCharity = () => {
               transition={{ duration: 0.6 }}
             >
               <p className="text-muted-foreground font-sans leading-relaxed text-lg mb-6">
-                What many people may not know is that Freemasonry is a great contributor to charities. Through the generosity of Freemasons and their families we are able to raise almost £1,000,000 a week in the cause of charity — an astounding figure.
+                What many people may not know is that Freemasonry is one of the largest charitable contributors in the United Kingdom. Through the generosity of Freemasons and their families we are able to raise almost £1,000,000 a week in the cause of charity — an astounding figure. Here in Guildford, Freemasons charity work is at the heart of everything we do at Weybridge Lodge.
               </p>
               <p className="text-muted-foreground font-sans leading-relaxed text-lg">
                 Built upon the founding precepts of helping those who are less fortunate, this work continues today amongst not only its members and their dependents, but the wider community — with over 50% of funds raised being given to non-masonic national and local charities. This includes long-term funding for medical research such as prostate and ovarian cancer.

@@ -60,6 +60,14 @@ const faqs = [
     question: "Can women become Freemasons?",
     answer: "Yes they can. There are two main Grand Lodges in the UK exclusively for women: The Order of Women Freemasons and Freemasonry for Women (HFAF). Both follow similar ceremonies and rituals to male Freemasons and actively participate in community and charity work.",
   },
+  {
+    question: "How do I join Freemasonry in Guildford?",
+    answer: "To become a Freemason in Guildford, the simplest route is to contact our Membership Secretary via our Join Us page. We'll invite you for an informal visit to the South West Surrey Masonic Centre to meet some of our members. There's no pressure — the visit is simply an opportunity to ask questions and see if Freemasonry is right for you.",
+  },
+  {
+    question: "What social events do Freemasons in Surrey enjoy?",
+    answer: "Masonic social events in Surrey go well beyond lodge meetings. At Weybridge Lodge we enjoy darts nights, Topgolf outings, clay pigeon shoots, an Annual Charity Golf Day and a festive December dinner complete with Christmas carols. Many events are open to partners and family members too.",
+  },
 ];
 
 const FAQ = () => {
