@@ -26,7 +26,7 @@ const Hero = () => {
           <img
             src={logo}
             alt="Weybridge Lodge logo"
-            className="w-[120px] h-[120px] object-contain brightness-0 invert"
+            className="w-[150px] h-[150px] object-contain brightness-0 invert"
           />
         </motion.div>
 
