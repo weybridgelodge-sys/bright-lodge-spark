@@ -31,7 +31,7 @@ const JoinUs = () => {
       <main id="main-content">
         <PageHeader
           title="Join Us"
-          subtitle="Take the first step on an extraordinary journey"
+          subtitle="How to Join Freemasonry in Guildford, Surrey"
         />
 
         {/* Why Join */}
