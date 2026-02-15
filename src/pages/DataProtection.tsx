@@ -2,6 +2,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
 import SEO from "@/components/SEO";
+import { Link } from "react-router-dom";
 
 const DataProtection = () => {
   return (
@@ -49,6 +50,15 @@ const DataProtection = () => {
 
             <h2>Where your data is sent</h2>
             <p>Visitor comments may be checked through an automated spam detection service.</p>
+          </div>
+
+          <div className="text-center mt-12">
+            <Link
+              to="/contact"
+              className="inline-flex items-center justify-center border border-border text-foreground px-8 py-4 rounded-sm text-sm font-sans uppercase tracking-widest hover:border-gold hover:text-gold transition-colors"
+            >
+              Contact Us
+            </Link>
           </div>
         </section>
       </main>
