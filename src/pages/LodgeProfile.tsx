@@ -1,6 +1,7 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
+import SEO, { breadcrumbSchema } from "@/components/SEO";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import pastMastersJewel from "@/assets/news/past-masters-jewel.png";
@@ -16,6 +17,16 @@ const meetingDates = [
 const LodgeProfile = () => {
   return (
     <div className="min-h-screen">
+      <SEO
+        title="Lodge Profile | Freemasons Lodge in Guildford, Surrey"
+        description="Weybridge Lodge No. 6787 meets at the South West Surrey Masonic Centre in Guildford. A diverse, friendly Lodge with members of all ages — learn about our meetings, social events and values."
+        canonical="/lodge-profile"
+        schema={breadcrumbSchema([
+          { name: "Home", url: "/" },
+          { name: "About Us", url: "/#about" },
+          { name: "Lodge Profile", url: "/lodge-profile" },
+        ])}
+      />
       <a href="#main-content" className="skip-to-content">Skip to main content</a>
       <Header />
       <main id="main-content">

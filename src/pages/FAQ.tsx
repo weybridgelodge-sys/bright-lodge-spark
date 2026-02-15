@@ -1,6 +1,7 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
+import SEO, { faqSchema, breadcrumbSchema } from "@/components/SEO";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import {
@@ -64,6 +65,18 @@ const faqs = [
 const FAQ = () => {
   return (
     <div className="min-h-screen">
+      <SEO
+        title="Freemasonry FAQ | Questions About Joining in Guildford"
+        description="Common questions about becoming a Freemason in Guildford, Surrey — fees, initiation, meetings, values and more. Answered by Weybridge Lodge No. 6787."
+        canonical="/faq"
+        schema={[
+          faqSchema(faqs),
+          breadcrumbSchema([
+            { name: "Home", url: "/" },
+            { name: "FAQ", url: "/faq" },
+          ]),
+        ]}
+      />
       <a href="#main-content" className="skip-to-content">Skip to main content</a>
       <Header />
       <main id="main-content">

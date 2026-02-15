@@ -1,6 +1,7 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
+import SEO, { breadcrumbSchema } from "@/components/SEO";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 
@@ -31,6 +32,16 @@ const officers = [
 const Officers = () => {
   return (
     <div className="min-h-screen">
+      <SEO
+        title="Officers of the Lodge | Weybridge Lodge Guildford"
+        description="Meet the current officers of Weybridge Lodge No. 6787 — Freemasons in Guildford, Surrey. View the full list of lodge officers for the 2025–2026 Masonic year."
+        canonical="/officers"
+        schema={breadcrumbSchema([
+          { name: "Home", url: "/" },
+          { name: "About Us", url: "/#about" },
+          { name: "Officers", url: "/officers" },
+        ])}
+      />
       <a href="#main-content" className="skip-to-content">Skip to main content</a>
       <Header />
       <main id="main-content">

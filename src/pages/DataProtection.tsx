@@ -1,10 +1,16 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
+import SEO from "@/components/SEO";
 
 const DataProtection = () => {
   return (
     <div className="min-h-screen">
+      <SEO
+        title="Data Protection Policy | Weybridge Lodge"
+        description="Data protection and privacy policy for Weybridge Lodge No. 6787 website."
+        canonical="/data-protection"
+      />
       <a href="#main-content" className="skip-to-content">Skip to main content</a>
       <Header />
       <main id="main-content">

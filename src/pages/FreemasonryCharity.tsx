@@ -1,6 +1,7 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
+import SEO, { breadcrumbSchema } from "@/components/SEO";
 import { motion } from "framer-motion";
 import { Heart, PoundSterling, Stethoscope, Users } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -15,6 +16,16 @@ const stats = [
 const FreemasonryCharity = () => {
   return (
     <div className="min-h-screen">
+      <SEO
+        title="Freemasons Charity Guildford | Masonic Charitable Giving"
+        description="Freemasons raise nearly £1 million a week for charity. Discover how Weybridge Lodge and the Masonic Charitable Foundation support local and national causes in Surrey."
+        canonical="/freemasonry-and-charity"
+        schema={breadcrumbSchema([
+          { name: "Home", url: "/" },
+          { name: "Charity", url: "/freemasonry-and-charity" },
+          { name: "Freemasonry & Charity", url: "/freemasonry-and-charity" },
+        ])}
+      />
       <a href="#main-content" className="skip-to-content">Skip to main content</a>
       <Header />
       <main id="main-content">

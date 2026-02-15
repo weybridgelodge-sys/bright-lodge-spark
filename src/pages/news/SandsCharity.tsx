@@ -1,6 +1,7 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
+import SEO, { articleSchema, breadcrumbSchema } from "@/components/SEO";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Calendar, User, ArrowLeft } from "lucide-react";
@@ -20,6 +21,16 @@ const tocItems = [
 const SandsCharity = () => {
   return (
     <div className="min-h-screen">
+      <SEO
+        title="Weybridge Lodge Raise £31,000 for SANDS Charity"
+        description="Weybridge Lodge No. 6787 raised £31,331 for Sands charity supporting bereaved parents. A record-breaking Freemasons charity donation in Guildford, Surrey."
+        canonical="/news/sands-charity"
+        type="article"
+        schema={[
+          articleSchema({ title: "Weybridge Lodge Raise £31,000 for SANDS Charity", date: "2024-12-12", description: "Weybridge Lodge raised £31,331 for Sands charity.", url: "/news/sands-charity" }),
+          breadcrumbSchema([{ name: "Home", url: "/" }, { name: "News", url: "/news" }, { name: "SANDS Charity", url: "/news/sands-charity" }]),
+        ]}
+      />
       <a href="#main-content" className="skip-to-content">Skip to main content</a>
       <Header />
       <main id="main-content">

@@ -1,6 +1,7 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
+import SEO, { breadcrumbSchema } from "@/components/SEO";
 import { motion } from "framer-motion";
 import { Shield, Users, Heart, HandHelping, Landmark, UtensilsCrossed, GraduationCap } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -59,6 +60,15 @@ const degrees = [
 const WhatIsFreemasonry = () => {
   return (
     <div className="min-h-screen">
+      <SEO
+        title="What is Freemasonry? | Principles, Values & Traditions"
+        description="Discover what Freemasonry is — its principles of integrity, friendship, respect and service. Learn about Masonic meetings, the three degrees, and how to join in Guildford, Surrey."
+        canonical="/what-is-freemasonry"
+        schema={breadcrumbSchema([
+          { name: "Home", url: "/" },
+          { name: "What is Freemasonry", url: "/what-is-freemasonry" },
+        ])}
+      />
       <a href="#main-content" className="skip-to-content">Skip to main content</a>
       <Header />
       <main id="main-content">

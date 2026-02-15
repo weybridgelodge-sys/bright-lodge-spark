@@ -1,6 +1,7 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
+import SEO, { breadcrumbSchema } from "@/components/SEO";
 import { motion } from "framer-motion";
 
 const videos = [
@@ -24,6 +25,16 @@ const videos = [
 const VideoHub = () => {
   return (
     <div className="min-h-screen">
+      <SEO
+        title="Freemasonry Videos | Learn About Becoming a Freemason"
+        description="Watch videos about Freemasonry from the United Grand Lodge of England. Learn what it means to be a Freemason and discover the values of the Craft."
+        canonical="/video-hub"
+        schema={breadcrumbSchema([
+          { name: "Home", url: "/" },
+          { name: "Discover Freemasonry", url: "/what-is-freemasonry" },
+          { name: "Video Hub", url: "/video-hub" },
+        ])}
+      />
       <a href="#main-content" className="skip-to-content">Skip to main content</a>
       <Header />
       <main id="main-content">

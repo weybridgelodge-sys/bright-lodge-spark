@@ -1,6 +1,7 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
+import SEO, { breadcrumbSchema } from "@/components/SEO";
 import { motion } from "framer-motion";
 import { Phone, Mail, MapPin, CheckCircle } from "lucide-react";
 
@@ -16,6 +17,15 @@ const reasons = [
 const JoinUs = () => {
   return (
     <div className="min-h-screen">
+      <SEO
+        title="Join Freemasons in Guildford | Become a Freemason in Surrey"
+        description="Interested in becoming a Freemason in Guildford or Surrey? Join Weybridge Lodge No. 6787 — contact our Membership Secretary to start your Masonic journey today."
+        canonical="/join-us"
+        schema={breadcrumbSchema([
+          { name: "Home", url: "/" },
+          { name: "Join Us", url: "/join-us" },
+        ])}
+      />
       <a href="#main-content" className="skip-to-content">Skip to main content</a>
       <Header />
       <main id="main-content">

@@ -1,6 +1,7 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
+import SEO, { breadcrumbSchema } from "@/components/SEO";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 
@@ -178,6 +179,16 @@ const JewelCard = ({ officer, index }: { officer: OfficerJewel; index: number })
 const OfficersJewels = () => {
   return (
     <div className="min-h-screen">
+      <SEO
+        title="Masonic Officers Roles & Jewels Explained"
+        description="Learn about the roles and jewels of Masonic Lodge officers — from the Worshipful Master to the Tyler. Discover what each officer does and the meaning behind their jewels."
+        canonical="/officers-jewels"
+        schema={breadcrumbSchema([
+          { name: "Home", url: "/" },
+          { name: "Discover Freemasonry", url: "/what-is-freemasonry" },
+          { name: "Officers Roles & Jewels", url: "/officers-jewels" },
+        ])}
+      />
       <a href="#main-content" className="skip-to-content">Skip to main content</a>
       <Header />
       <main id="main-content">

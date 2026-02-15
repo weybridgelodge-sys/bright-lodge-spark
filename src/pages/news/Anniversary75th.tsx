@@ -1,6 +1,7 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
+import SEO, { articleSchema, breadcrumbSchema } from "@/components/SEO";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Calendar, User, ArrowLeft } from "lucide-react";
@@ -23,6 +24,16 @@ const tocItems = [
 const Anniversary75th = () => {
   return (
     <div className="min-h-screen">
+      <SEO
+        title="75th Anniversary Masonic Meeting | Weybridge Lodge"
+        description="Weybridge Lodge No. 6787 celebrated its 75th anniversary at a special Masonic meeting in February 2024 at the South West Surrey Masonic Centre, Guildford."
+        canonical="/news/75th-anniversary"
+        type="article"
+        schema={[
+          articleSchema({ title: "Special Masonic Meeting For 75th Anniversary February 2024", date: "2024-02-28", description: "Weybridge Lodge celebrated its 75th anniversary.", url: "/news/75th-anniversary" }),
+          breadcrumbSchema([{ name: "Home", url: "/" }, { name: "News", url: "/news" }, { name: "75th Anniversary", url: "/news/75th-anniversary" }]),
+        ]}
+      />
       <a href="#main-content" className="skip-to-content">Skip to main content</a>
       <Header />
       <main id="main-content">
