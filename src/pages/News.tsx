@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
@@ -12,6 +13,10 @@ const News = () => {
   const filteredPosts = activeCategory
     ? posts.filter((p) => p.category === activeCategory)
     : posts;
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [activeCategory]);
 
   return (
     <div className="min-h-screen">
