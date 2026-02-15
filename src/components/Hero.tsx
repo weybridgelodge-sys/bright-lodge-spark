@@ -16,6 +16,20 @@ const Hero = () => {
       <div className="absolute inset-0 hero-overlay" />
 
       <div className="relative z-10 container mx-auto px-4 sm:px-6 pt-20">
+        {/* Mobile logo - centered at top */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 1, delay: 0.5 }}
+          className="flex md:hidden justify-center mb-8"
+        >
+          <img
+            src={logo}
+            alt="Weybridge Lodge logo"
+            className="w-[120px] h-[120px] object-contain brightness-0 invert"
+          />
+        </motion.div>
+
         <div className="flex items-center justify-between gap-8">
           <motion.div
             initial={{ opacity: 0, y: 40 }}
