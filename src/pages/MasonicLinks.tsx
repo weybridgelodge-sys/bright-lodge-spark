@@ -4,6 +4,7 @@ import PageHeader from "@/components/PageHeader";
 import SEO, { breadcrumbSchema } from "@/components/SEO";
 import { motion } from "framer-motion";
 import { ExternalLink } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const links = [
   {
@@ -95,6 +96,15 @@ const MasonicLinks = () => {
                   </div>
                 </motion.a>
               ))}
+            </div>
+
+            <div className="text-center mt-16">
+              <Link
+                to="/join-us"
+                className="inline-flex items-center justify-center bg-gold-shimmer text-accent-foreground px-8 py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity"
+              >
+                Join Weybridge Lodge
+              </Link>
             </div>
           </div>
         </section>

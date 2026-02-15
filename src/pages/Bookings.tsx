@@ -3,6 +3,7 @@ import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
 import SEO, { eventSchema, breadcrumbSchema } from "@/components/SEO";
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 import { Calendar, Clock, MapPin, Shirt, CalendarClock, UtensilsCrossed } from "lucide-react";
 import { useState } from "react";
 
@@ -428,6 +429,16 @@ const Bookings = () => {
                 </fieldset>
               </form>
             </motion.div>
+          </div>
+        </section>
+        <section className="py-16 bg-warm-white">
+          <div className="container mx-auto px-4 sm:px-6 text-center">
+            <Link
+              to="/contact"
+              className="inline-flex items-center justify-center border border-border text-foreground px-8 py-4 rounded-sm text-sm font-sans uppercase tracking-widest hover:border-gold hover:text-gold transition-colors"
+            >
+              Contact Us
+            </Link>
           </div>
         </section>
       </main>

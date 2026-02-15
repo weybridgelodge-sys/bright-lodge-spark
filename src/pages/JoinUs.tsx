@@ -3,6 +3,7 @@ import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
 import SEO, { breadcrumbSchema } from "@/components/SEO";
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 import { Phone, Mail, MapPin, CheckCircle } from "lucide-react";
 
 const reasons = [
@@ -132,6 +133,15 @@ const JoinUs = () => {
                   </button>
                 </form>
               </motion.div>
+            </div>
+
+            <div className="text-center mt-12">
+              <Link
+                to="/faq"
+                className="inline-flex items-center justify-center border border-border text-foreground px-8 py-4 rounded-sm text-sm font-sans uppercase tracking-widest hover:border-gold hover:text-gold transition-colors"
+              >
+                Frequently Asked Questions
+              </Link>
             </div>
           </div>
         </section>
