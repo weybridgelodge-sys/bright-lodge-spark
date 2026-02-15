@@ -1,6 +1,7 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
+import SEO, { breadcrumbSchema } from "@/components/SEO";
 import { motion } from "framer-motion";
 import { ExternalLink } from "lucide-react";
 
@@ -50,6 +51,16 @@ const links = [
 const MasonicLinks = () => {
   return (
     <div className="min-h-screen">
+      <SEO
+        title="Masonic Links | UGLE, Provincial Grand Lodge of Surrey"
+        description="Useful Masonic links including the United Grand Lodge of England (UGLE), Provincial Grand Lodge of Surrey, and the Masonic Charitable Foundation."
+        canonical="/masonic-links"
+        schema={breadcrumbSchema([
+          { name: "Home", url: "/" },
+          { name: "About Us", url: "/#about" },
+          { name: "Masonic Links", url: "/masonic-links" },
+        ])}
+      />
       <a href="#main-content" className="skip-to-content">Skip to main content</a>
       <Header />
       <main id="main-content">

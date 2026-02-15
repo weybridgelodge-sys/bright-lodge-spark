@@ -1,6 +1,7 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
+import SEO, { breadcrumbSchema } from "@/components/SEO";
 import { motion } from "framer-motion";
 import { Phone, Mail, MapPin } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -8,12 +9,21 @@ import { Link } from "react-router-dom";
 const Contact = () => {
   return (
     <div className="min-h-screen">
+      <SEO
+        title="Contact Weybridge Lodge | Freemasons Guildford"
+        description="Contact Weybridge Lodge No. 6787 — Freemasons in Guildford, Surrey. Call, email or visit us at the South West Surrey Masonic Centre, Hitherbury Close, GU2 4DR."
+        canonical="/contact"
+        schema={breadcrumbSchema([
+          { name: "Home", url: "/" },
+          { name: "Contact", url: "/contact" },
+        ])}
+      />
       <a href="#main-content" className="skip-to-content">Skip to main content</a>
       <Header />
       <main id="main-content">
         <PageHeader
           title="Contact Us"
-          subtitle="Get in touch with Weybridge Lodge Freemasons"
+          subtitle="Get in touch with Weybridge Lodge Freemasons in Guildford"
         />
 
         <section className="py-20 md:py-28 bg-warm-white">

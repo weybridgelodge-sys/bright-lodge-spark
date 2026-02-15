@@ -1,6 +1,7 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
+import SEO, { breadcrumbSchema } from "@/components/SEO";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 
@@ -88,6 +89,16 @@ const masters = [
 const WorshipfulMasters = () => {
   return (
     <div className="min-h-screen">
+      <SEO
+        title="Worshipful Masters Since 1949 | Weybridge Lodge History"
+        description="Complete roll of honour of all Worshipful Masters of Weybridge Lodge No. 6787 from 1949 to present day. A proud Masonic history in Guildford, Surrey."
+        canonical="/worshipful-masters"
+        schema={breadcrumbSchema([
+          { name: "Home", url: "/" },
+          { name: "About Us", url: "/#about" },
+          { name: "Worshipful Masters", url: "/worshipful-masters" },
+        ])}
+      />
       <a href="#main-content" className="skip-to-content">Skip to main content</a>
       <Header />
       <main id="main-content">

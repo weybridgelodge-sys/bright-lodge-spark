@@ -1,6 +1,7 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
+import SEO, { articleSchema, breadcrumbSchema } from "@/components/SEO";
 import PostNavigation from "@/components/PostNavigation";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
@@ -21,6 +22,16 @@ const tocItems = [
 const InstallationMeeting = () => {
   return (
     <div className="min-h-screen">
+      <SEO
+        title="Masonic Installation Meeting October 2023 | Guildford"
+        description="Weybridge Lodge's Masonic installation meeting in October 2023, welcoming W Bro. Murray Grubb Jnr as the new Master at the South West Surrey Masonic Centre."
+        canonical="/news/installation-meeting-october-2023"
+        type="article"
+        schema={[
+          articleSchema({ title: "Masonic Installation Meeting October 2023", date: "2023-10-31", description: "Installation of W Bro. Murray Grubb Jnr as Master.", url: "/news/installation-meeting-october-2023" }),
+          breadcrumbSchema([{ name: "Home", url: "/" }, { name: "News", url: "/news" }, { name: "Installation Meeting", url: "/news/installation-meeting-october-2023" }]),
+        ]}
+      />
       <a href="#main-content" className="skip-to-content">Skip to main content</a>
       <Header />
       <main id="main-content">

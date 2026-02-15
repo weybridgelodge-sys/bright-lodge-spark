@@ -1,6 +1,7 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
+import SEO, { eventSchema, breadcrumbSchema } from "@/components/SEO";
 import { motion } from "framer-motion";
 import { Calendar, Clock, MapPin, Shirt, CalendarClock, UtensilsCrossed } from "lucide-react";
 import { useState } from "react";
@@ -41,6 +42,22 @@ const Bookings = () => {
 
   return (
     <div className="min-h-screen">
+      <SEO
+        title="Dining & Bookings | Masonic Meeting Guildford"
+        description="Book your place at the next Weybridge Lodge meeting at the South West Surrey Masonic Centre, Guildford. View the festive board menu and reserve your seat."
+        canonical="/bookings"
+        schema={[
+          eventSchema({
+            name: "Double Initiation — February Meeting",
+            date: "2026-02-18T17:30:00",
+            description: "Double initiation ceremony at Weybridge Lodge No. 6787 with visit from the Provincial Grand Master.",
+          }),
+          breadcrumbSchema([
+            { name: "Home", url: "/" },
+            { name: "Bookings", url: "/bookings" },
+          ]),
+        ]}
+      />
       <a href="#main-content" className="skip-to-content">Skip to main content</a>
       <Header />
       <main id="main-content">

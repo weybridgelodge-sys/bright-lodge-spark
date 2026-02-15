@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
+import SEO, { breadcrumbSchema } from "@/components/SEO";
 import { motion } from "framer-motion";
 import { Link, useSearchParams } from "react-router-dom";
 import { Calendar, Tag, X } from "lucide-react";
@@ -20,6 +21,15 @@ const News = () => {
 
   return (
     <div className="min-h-screen">
+      <SEO
+        title="News | Weybridge Lodge Freemasons Guildford"
+        description="Latest news and updates from Weybridge Lodge No. 6787 — Masonic meetings, charity events and social gatherings in Guildford, Surrey."
+        canonical="/news"
+        schema={breadcrumbSchema([
+          { name: "Home", url: "/" },
+          { name: "News", url: "/news" },
+        ])}
+      />
       <a href="#main-content" className="skip-to-content">
         Skip to main content
       </a>

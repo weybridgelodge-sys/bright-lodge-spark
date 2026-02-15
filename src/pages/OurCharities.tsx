@@ -1,6 +1,7 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
+import SEO, { breadcrumbSchema } from "@/components/SEO";
 import { motion } from "framer-motion";
 import { ExternalLink } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -23,6 +24,16 @@ const charities = [
 const OurCharities = () => {
   return (
     <div className="min-h-screen">
+      <SEO
+        title="Our Charities | Weybridge Lodge Charitable Work"
+        description="Weybridge Lodge No. 6787 supports charities including SANDS and TLC Appeal Surrey. See how Freemasons in Guildford give back to their community."
+        canonical="/our-charities"
+        schema={breadcrumbSchema([
+          { name: "Home", url: "/" },
+          { name: "Charity", url: "/freemasonry-and-charity" },
+          { name: "Our Charities", url: "/our-charities" },
+        ])}
+      />
       <a href="#main-content" className="skip-to-content">Skip to main content</a>
       <Header />
       <main id="main-content">

@@ -1,6 +1,7 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
+import SEO, { breadcrumbSchema } from "@/components/SEO";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import vickersImg from "@/assets/history/vickers-factory.png";
@@ -10,12 +11,22 @@ import foundersImg from "@/assets/history/lodge-founders.jpg";
 const History = () => {
   return (
     <div className="min-h-screen">
+      <SEO
+        title="Masonic History of Weybridge Lodge | Founded 1949"
+        description="Explore the history of Weybridge Lodge No. 6787, from its roots at the Vickers-Armstrong factory in Brooklands to becoming a thriving Freemasons Lodge in Guildford, Surrey."
+        canonical="/history"
+        schema={breadcrumbSchema([
+          { name: "Home", url: "/" },
+          { name: "About Us", url: "/#about" },
+          { name: "Our History", url: "/history" },
+        ])}
+      />
       <a href="#main-content" className="skip-to-content">Skip to main content</a>
       <Header />
       <main id="main-content">
         <PageHeader
           title="Our History"
-          subtitle="Discover the history of Weybridge Lodge"
+          subtitle="Discover the history of Weybridge Lodge in Guildford"
         />
 
         <section className="py-20 md:py-28 bg-warm-white">
