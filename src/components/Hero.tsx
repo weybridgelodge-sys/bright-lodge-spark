@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 import { Link } from "react-router-dom";
 import heroImage from "@/assets/hero-lodge.jpg";
+import logo from "@/assets/weybridge-logo.svg";
 
 const Hero = () => {
   return (
@@ -15,42 +16,53 @@ const Hero = () => {
       <div className="absolute inset-0 hero-overlay" />
 
       <div className="relative z-10 container mx-auto px-4 sm:px-6 pt-20">
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, ease: "easeOut" }}
-          className="max-w-2xl"
-        >
+        <div className="flex items-center justify-between gap-8">
           <motion.div
-            initial={{ width: 0 }}
-            animate={{ width: "80px" }}
-            transition={{ duration: 0.8, delay: 0.3 }}
-            className="h-0.5 bg-gold mb-8"
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, ease: "easeOut" }}
+            className="max-w-2xl"
+          >
+            <motion.div
+              initial={{ width: 0 }}
+              animate={{ width: "80px" }}
+              transition={{ duration: 0.8, delay: 0.3 }}
+              className="h-0.5 bg-gold mb-8"
+            />
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-serif text-primary-foreground leading-tight mb-6">
+              Weybridge Lodge
+              <span className="block text-gradient-gold text-2xl sm:text-3xl md:text-4xl mt-2">
+                No. 6787
+              </span>
+            </h1>
+            <p className="text-lg md:text-xl text-primary-foreground/80 font-sans font-light leading-relaxed mb-10 max-w-xl">
+              An open, friendly and sociable Freemasons Lodge within the Province of Surrey, based in the heart of Guildford.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <Link
+                to="/join-us"
+                className="inline-flex items-center justify-center bg-gold-shimmer text-accent-foreground px-8 py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity"
+              >
+                Begin Your Journey
+              </Link>
+              <Link
+                to="/what-is-freemasonry"
+                className="inline-flex items-center justify-center border border-primary-foreground/30 text-primary-foreground px-8 py-4 rounded-sm text-sm font-sans uppercase tracking-widest hover:border-gold hover:text-gold transition-colors"
+              >
+                Discover More
+              </Link>
+            </div>
+          </motion.div>
+
+          <motion.img
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 1, delay: 0.5 }}
+            src={logo}
+            alt="Weybridge Lodge logo"
+            className="hidden md:block w-[200px] h-[200px] object-contain shrink-0"
           />
-          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-serif text-primary-foreground leading-tight mb-6">
-            Weybridge Lodge
-            <span className="block text-gradient-gold text-2xl sm:text-3xl md:text-4xl mt-2">
-              No. 6787
-            </span>
-          </h1>
-          <p className="text-lg md:text-xl text-primary-foreground/80 font-sans font-light leading-relaxed mb-10 max-w-xl">
-            An open, friendly and sociable Freemasons Lodge within the Province of Surrey, based in the heart of Guildford.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4">
-            <Link
-              to="/join-us"
-              className="inline-flex items-center justify-center bg-gold-shimmer text-accent-foreground px-8 py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity"
-            >
-              Begin Your Journey
-            </Link>
-            <Link
-              to="/what-is-freemasonry"
-              className="inline-flex items-center justify-center border border-primary-foreground/30 text-primary-foreground px-8 py-4 rounded-sm text-sm font-sans uppercase tracking-widest hover:border-gold hover:text-gold transition-colors"
-            >
-              Discover More
-            </Link>
-          </div>
-        </motion.div>
+        </div>
       </div>
 
       <motion.a
