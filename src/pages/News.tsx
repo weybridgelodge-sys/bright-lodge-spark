@@ -2,11 +2,17 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
-import { Calendar, Tag } from "lucide-react";
+import { Link, useSearchParams } from "react-router-dom";
+import { Calendar, Tag, X } from "lucide-react";
 import { posts, categories, formatDate } from "@/data/posts";
 
 const News = () => {
+  const [searchParams] = useSearchParams();
+  const activeCategory = searchParams.get("category");
+  const filteredPosts = activeCategory
+    ? posts.filter((p) => p.category === activeCategory)
+    : posts;
+
   return (
     <div className="min-h-screen">
       <a href="#main-content" className="skip-to-content">
@@ -21,8 +27,16 @@ const News = () => {
             <div className="flex flex-col lg:flex-row gap-10">
               {/* Main grid */}
               <div className="flex-1">
+                {activeCategory && (
+                  <div className="flex items-center gap-2 mb-6">
+                    <h2 className="text-lg font-serif text-foreground">Category: {activeCategory}</h2>
+                    <Link to="/news" className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors">
+                      <X className="h-3.5 w-3.5" /> Clear filter
+                    </Link>
+                  </div>
+                )}
                 <div className="grid gap-8 sm:grid-cols-2">
-                  {posts.map((post, i) => (
+                  {filteredPosts.map((post, i) => (
                     <motion.article
                       key={post.slug}
                       initial={{ opacity: 0, y: 20 }}
@@ -112,15 +126,21 @@ const News = () => {
                   <div className="flex flex-wrap gap-2">
                     {categories.map((cat) => {
                       const count = posts.filter((p) => p.category === cat).length;
+                      const isActive = activeCategory === cat;
                       return (
-                        <span
+                        <Link
                           key={cat}
-                          className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/50 px-3 py-1 text-xs font-sans text-foreground"
+                          to={`/news?category=${encodeURIComponent(cat)}`}
+                          className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-sans transition-colors ${
+                            isActive
+                              ? "border-primary bg-primary/10 text-primary font-medium"
+                              : "border-border bg-muted/50 text-foreground hover:border-primary hover:text-primary"
+                          }`}
                         >
                           <Tag className="h-3 w-3 text-primary" />
                           {cat}
                           <span className="text-muted-foreground">({count})</span>
-                        </span>
+                        </Link>
                       );
                     })}
                   </div>
