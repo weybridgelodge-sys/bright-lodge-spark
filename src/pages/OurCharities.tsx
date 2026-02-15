@@ -3,7 +3,7 @@ import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
 import SEO, { breadcrumbSchema } from "@/components/SEO";
 import { motion } from "framer-motion";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const charities = [
@@ -12,6 +12,7 @@ const charities = [
     highlight: "Our proudest achievement so far",
     description: "Weybridge Lodge have made their largest charitable donation to date. £31,331.15 was given to SANDS, a charity who support parents affected by stillborn or neonatal death.",
     url: "https://www.farnboroughsands.co.uk/",
+    postUrl: "/news/sands-charity",
   },
   {
     name: "TLC Appeal Surrey — Teddies For Loving Care",
@@ -79,6 +80,14 @@ const OurCharities = () => {
                 <p className="text-gold text-sm font-sans uppercase tracking-wide mb-2">{charity.highlight}</p>
                 <h3 className="text-2xl font-serif text-primary-foreground mb-4">{charity.name}</h3>
                 <p className="text-primary-foreground/70 font-sans leading-relaxed mb-6">{charity.description}</p>
+                {charity.postUrl && (
+                  <Link
+                    to={charity.postUrl}
+                    className="inline-flex items-center gap-2 text-gold hover:text-gold-light transition-colors text-sm font-sans mb-3"
+                  >
+                    Read the Full Story <ArrowRight className="w-4 h-4" />
+                  </Link>
+                )}
                 <a
                   href={charity.url}
                   target="_blank"
