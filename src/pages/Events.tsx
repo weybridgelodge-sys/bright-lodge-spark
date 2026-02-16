@@ -6,6 +6,7 @@ import SEO, { breadcrumbSchema, eventSchema } from "@/components/SEO";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Calendar as CalendarIcon, MapPin, Clock, Ticket, ExternalLink, Users, Music, Gift, UtensilsCrossed } from "lucide-react";
+import ladiesFestivalImg from "@/assets/events/ladies-festival-venue.jpg";
 import { Calendar } from "@/components/ui/calendar";
 import { format, isSameDay } from "date-fns";
 
@@ -251,14 +252,22 @@ const Events = () => {
               transition={{ duration: 0.7, delay: 0.2 }}
               className="border border-border rounded-sm shadow-lg overflow-hidden"
             >
-              <div className="bg-navy-gradient p-8 text-center">
-                <p className="text-gold uppercase tracking-widest text-sm font-sans mb-2">Black Tie</p>
-                <p className="text-3xl md:text-4xl font-serif text-primary-foreground">
-                  Saturday 22nd August 2026
-                </p>
-                <p className="text-primary-foreground/60 font-sans text-sm mt-2">
-                  6.30 pm – 1.00 am
-                </p>
+              <div className="relative">
+                <img
+                  src={ladiesFestivalImg}
+                  alt="Elegant black tie gala dinner setting with round tables and chandeliers"
+                  className="w-full h-56 md:h-72 object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[hsl(var(--primary))]/90 to-[hsl(var(--primary))]/40" />
+                <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-8">
+                  <p className="text-gold uppercase tracking-widest text-sm font-sans mb-2">Black Tie</p>
+                  <p className="text-3xl md:text-4xl font-serif text-primary-foreground">
+                    Saturday 22nd August 2026
+                  </p>
+                  <p className="text-primary-foreground/60 font-sans text-sm mt-2">
+                    6.30 pm – 1.00 am
+                  </p>
+                </div>
               </div>
 
               <div className="p-8 space-y-6">
