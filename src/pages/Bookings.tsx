@@ -434,10 +434,10 @@ const Bookings = () => {
         <section className="py-16 bg-warm-white">
           <div className="container mx-auto px-4 sm:px-6 text-center">
             <Link
-              to="/contact"
+              to="/events"
               className="inline-flex items-center justify-center border border-border text-foreground px-8 py-4 rounded-sm text-sm font-sans uppercase tracking-widest hover:border-gold hover:text-gold transition-colors"
             >
-              Contact Us
+              View All Events
             </Link>
           </div>
         </section>
