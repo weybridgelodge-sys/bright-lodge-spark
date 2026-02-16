@@ -26,6 +26,7 @@ import News from "./pages/News";
 import Anniversary75th from "./pages/news/Anniversary75th";
 import SandsCharity from "./pages/news/SandsCharity";
 import InstallationMeeting from "./pages/news/InstallationMeeting";
+import Events from "./pages/Events";
 
 const queryClient = new QueryClient();
 
@@ -54,6 +55,7 @@ const App = () => (
           <Route path="/masonic-links" element={<MasonicLinks />} />
           <Route path="/bookings" element={<Bookings />} />
           <Route path="/officers-jewels" element={<OfficersJewels />} />
+          <Route path="/events" element={<Events />} />
           <Route path="/news" element={<News />} />
           <Route path="/news/75th-anniversary" element={<Anniversary75th />} />
           <Route path="/news/sands-charity" element={<SandsCharity />} />
