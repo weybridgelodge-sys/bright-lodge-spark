@@ -97,32 +97,71 @@ const Events = () => {
     .filter((e) => e.date >= new Date())
     .sort((a, b) => a.date.getTime() - b.date.getTime());
 
+  const ladiesFestivalSchema = {
+    "@context": "https://schema.org",
+    "@type": "SocialEvent",
+    name: "Weybridge & Astolat Lodges Ladies Festival 2026",
+    startDate: "2026-08-22T18:30:00+01:00",
+    endDate: "2026-08-23T01:00:00+01:00",
+    description: "Black tie charity gala dinner in aid of Guildford Young Carers. Three-course dinner, DJ, Grand Raffle and more at the Macdonald Frimley Hall Hotel.",
+    image: "https://www.weybridgelodge.org.uk/og-image.png",
+    eventStatus: "https://schema.org/EventScheduled",
+    eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
+    location: {
+      "@type": "Place",
+      name: "Macdonald Frimley Hall Hotel",
+      address: {
+        "@type": "PostalAddress",
+        streetAddress: "Lime Avenue, Frimley",
+        addressLocality: "Camberley",
+        addressRegion: "Surrey",
+        postalCode: "GU15 2BG",
+        addressCountry: "GB",
+      },
+    },
+    organizer: {
+      "@type": "Organization",
+      name: "Weybridge Lodge No. 6787",
+      url: "https://www.weybridgelodge.org.uk",
+    },
+    offers: {
+      "@type": "Offer",
+      price: "80",
+      priceCurrency: "GBP",
+      availability: "https://schema.org/InStock",
+      url: "https://www.weybridgelodge.org.uk/events",
+    },
+  };
+
   const schemas = [
     breadcrumbSchema([
       { name: "Home", url: "/" },
       { name: "Events", url: "/events" },
     ]),
-    ...events.map((e) =>
-      eventSchema({
-        name: e.title,
-        date: e.date.toISOString().split("T")[0],
-        description: e.description || e.title,
-      })
-    ),
+    ...events
+      .filter((e) => e.title !== "Weybridge & Astolat Lodges Ladies Festival")
+      .map((e) =>
+        eventSchema({
+          name: e.title,
+          date: e.date.toISOString().split("T")[0],
+          description: e.description || e.title,
+        })
+      ),
+    ladiesFestivalSchema,
   ];
 
   return (
     <div className="min-h-screen">
       <SEO
-        title="Events | Masonic Meetings & Social Events"
-        description="Upcoming Masonic meetings, social events and Lodge of Instruction evenings at Weybridge Lodge No. 6787 in Guildford, Surrey."
+        title="Events – Masonic Meetings, Ladies Festival & Lodge of Instruction Guildford"
+        description="View upcoming Freemasons meetings, the 2026 Ladies Festival black tie gala, and weekly Lodge of Instruction evenings at Weybridge Lodge No. 6787, Guildford, Surrey."
         canonical="/events"
         schema={schemas}
       />
       <a href="#main-content" className="skip-to-content">Skip to main content</a>
       <Header />
       <main id="main-content">
-        <PageHeader title="Events" subtitle="Masonic meetings, social events & Lodge of Instruction" />
+        <PageHeader title="Events" subtitle="Masonic meetings, social events & Lodge of Instruction in Guildford, Surrey" />
 
         {/* ── Calendar + Upcoming ── */}
         <section className="py-16 md:py-24 bg-warm-white">
