@@ -149,7 +149,10 @@ const ApgmVisit = () => {
                 <div className="h-0.5 w-16 bg-gold mb-6" />
                 <h2 className="text-2xl font-serif text-foreground mb-4">Charity & Giving Back</h2>
                 <p className="text-muted-foreground font-sans leading-relaxed">
-                  Charity lies at the very heart of Freemasonry, and the evening was no exception. The brethren took the opportunity to support charitable causes close to their hearts, reinforcing the Lodge's longstanding commitment to giving back to the community.
+                  Charity lies at the very heart of Freemasonry, and the evening was no exception. £565 was raised from the raffle and charity column which will be donated to the{" "}
+                  <a href="https://www.brigittetrust.org/our-services/bereavement-support/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                    Brigitte Trust
+                  </a>, a Surrey based charity that supports people struggling with bereavement through group counselling sessions.
                 </p>
                 <p className="text-muted-foreground font-sans leading-relaxed mt-4">
                   Weybridge Lodge has a proud record of charitable fundraising, most recently{" "}
