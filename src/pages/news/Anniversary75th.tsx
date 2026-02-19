@@ -7,6 +7,7 @@ import { Link } from "react-router-dom";
 import { Calendar, User, ArrowLeft } from "lucide-react";
 import PostNavigation from "@/components/PostNavigation";
 import SocialShare from "@/components/SocialShare";
+import CommentsSection, { commentCount } from "@/components/CommentsSection";
 
 import heroImg from "@/assets/news/75th-anniversary-group.png";
 import fellowcraftImg from "@/assets/news/fellowcraft-apron.jpg";
@@ -70,7 +71,7 @@ const Anniversary75th = () => {
               className="w-full rounded-sm mb-10"
             />
 
-            <SocialShare url="/news/75th-anniversary" title="Special Masonic Meeting For 75th Anniversary February 2024" />
+            <SocialShare url="/news/75th-anniversary" title="Special Masonic Meeting For 75th Anniversary February 2024" commentCount={commentCount} />
 
             {/* Table of Contents */}
             <motion.nav
@@ -205,6 +206,8 @@ const Anniversary75th = () => {
                 Julien is the current Mentor and Tech Guy for Weybridge Lodge and has been a member since 2019.
               </p>
             </div>
+
+            <CommentsSection />
 
             {/* Post Navigation */}
             <PostNavigation currentSlug="75th-anniversary" />

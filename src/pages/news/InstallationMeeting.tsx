@@ -4,6 +4,7 @@ import PageHeader from "@/components/PageHeader";
 import SEO, { articleSchema, breadcrumbSchema } from "@/components/SEO";
 import PostNavigation from "@/components/PostNavigation";
 import SocialShare from "@/components/SocialShare";
+import CommentsSection, { commentCount } from "@/components/CommentsSection";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Calendar, User, ArrowLeft } from "lucide-react";
@@ -68,7 +69,7 @@ const InstallationMeeting = () => {
               className="w-full rounded-sm mb-10"
             />
 
-            <SocialShare url="/news/installation-meeting-october-2023" title="Masonic Installation Meeting October 2023" />
+            <SocialShare url="/news/installation-meeting-october-2023" title="Masonic Installation Meeting October 2023" commentCount={commentCount} />
 
             {/* Table of Contents */}
             <motion.nav
@@ -191,6 +192,8 @@ const InstallationMeeting = () => {
                 Julien is the current Mentor and Tech Guy for Weybridge Lodge and has been a member since 2019.
               </p>
             </div>
+
+            <CommentsSection />
 
             {/* Post Navigation */}
             <PostNavigation currentSlug="installation-meeting-october-2023" />

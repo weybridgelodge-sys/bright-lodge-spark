@@ -4,6 +4,7 @@ import PageHeader from "@/components/PageHeader";
 import SEO, { articleSchema, breadcrumbSchema } from "@/components/SEO";
 import PostNavigation from "@/components/PostNavigation";
 import SocialShare from "@/components/SocialShare";
+import CommentsSection, { commentCount } from "@/components/CommentsSection";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Calendar, User, ArrowLeft } from "lucide-react";
@@ -78,7 +79,7 @@ const ApgmVisit = () => {
               className="w-full rounded-sm mb-10"
             />
 
-            <SocialShare url="/news/pgm-visit-february-2026" title="PGM Official Visit to Weybridge Lodge February 2026" />
+            <SocialShare url="/news/pgm-visit-february-2026" title="PGM Official Visit to Weybridge Lodge February 2026" commentCount={commentCount} />
 
             {/* Table of Contents */}
             <motion.nav
@@ -208,6 +209,8 @@ const ApgmVisit = () => {
                 Weybridge Lodge meets at the South West Surrey Masonic Centre in Guildford and has been going strong since 1949.
               </p>
             </div>
+
+            <CommentsSection />
 
             {/* Post Navigation */}
             <PostNavigation currentSlug="pgm-visit-february-2026" />
