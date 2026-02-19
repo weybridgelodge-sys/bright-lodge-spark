@@ -25,7 +25,7 @@ const ApgmVisit = () => {
       <SEO
         title="PGM Official Visit to Weybridge Lodge February 2026 | Guildford"
         description="The Provincial Grand Master visited Weybridge Lodge No. 6787 for a First Degree Initiation ceremony at the South West Surrey Masonic Centre, Guildford."
-        canonical="/news/apgm-visit-february-2026"
+        canonical="/news/pgm-visit-february-2026"
         type="article"
         schema={[
           articleSchema({
@@ -33,12 +33,12 @@ const ApgmVisit = () => {
             date: "2026-02-19",
             description:
               "The Provincial Grand Master of Surrey visited Weybridge Lodge No. 6787 for an official visit and First Degree Initiation ceremony.",
-            url: "/news/apgm-visit-february-2026",
+            url: "/news/pgm-visit-february-2026",
           }),
           breadcrumbSchema([
             { name: "Home", url: "/" },
             { name: "News", url: "/news" },
-            { name: "PGM Visit February 2026", url: "/news/apgm-visit-february-2026" },
+            { name: "PGM Visit February 2026", url: "/news/pgm-visit-february-2026" },
           ]),
         ]}
       />
@@ -207,7 +207,7 @@ const ApgmVisit = () => {
             </div>
 
             {/* Post Navigation */}
-            <PostNavigation currentSlug="apgm-visit-february-2026" />
+            <PostNavigation currentSlug="pgm-visit-february-2026" />
           </div>
         </section>
       </main>
