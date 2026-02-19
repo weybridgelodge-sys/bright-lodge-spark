@@ -10,6 +10,7 @@ import { Calendar, User, ArrowLeft } from "lucide-react";
 import heroImg from "@/assets/news/apgm-visit-full.jpg";
 import officersImg from "@/assets/news/apgm-visit-group.jpg";
 import groupImg from "@/assets/news/apgm-visit-officers.jpg";
+import brigitteLogo from "@/assets/news/brigitte-trust-logo.png";
 
 const tocItems = [
   { id: "pgm-visit", label: "The PGM's Official Visit" },
@@ -154,7 +155,15 @@ const ApgmVisit = () => {
                     Brigitte Trust
                   </a>, a Surrey based charity that supports people struggling with bereavement through group counselling sessions.
                 </p>
-                <p className="text-muted-foreground font-sans leading-relaxed mt-4">
+                <a href="https://www.brigittetrust.org/our-services/bereavement-support/" target="_blank" rel="noopener noreferrer" className="block my-6">
+                  <img
+                    src={brigitteLogo}
+                    alt="The Brigitte Trust logo"
+                    className="w-48 mx-auto hover:opacity-80 transition-opacity"
+                    loading="lazy"
+                  />
+                </a>
+                <p className="text-muted-foreground font-sans leading-relaxed">
                   Weybridge Lodge has a proud record of charitable fundraising, most recently{" "}
                   <Link to="/news/sands-charity" className="text-primary hover:underline">
                     raising over £31,000 for the SANDS charity
