@@ -8,8 +8,8 @@ import { Link } from "react-router-dom";
 import { Calendar, User, ArrowLeft } from "lucide-react";
 
 import heroImg from "@/assets/news/apgm-visit-full.jpg";
-import officersImg from "@/assets/news/apgm-visit-officers.jpg";
-import groupImg from "@/assets/news/apgm-visit-group.jpg";
+import officersImg from "@/assets/news/apgm-visit-group.jpg";
+import groupImg from "@/assets/news/apgm-visit-officers.jpg";
 
 const tocItems = [
   { id: "pgm-visit", label: "The PGM's Official Visit" },
