@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Calendar, User, ArrowLeft } from "lucide-react";
 import PostNavigation from "@/components/PostNavigation";
+import SocialShare from "@/components/SocialShare";
 
 import heroImg from "@/assets/news/sands-cheque.webp";
 import wayneImg from "@/assets/news/wayne-griffiths.png";
@@ -65,6 +66,8 @@ const SandsCharity = () => {
               alt="Weybridge Lodge of Freemasons present a large charity cheque for £31,000 to SANDS, a local charity who support parents affected by pregnancy loss"
               className="w-full rounded-sm mb-10"
             />
+
+            <SocialShare url="/news/sands-charity" title="Weybridge Lodge Raise £31,000 for SANDS Charity" />
 
             {/* Table of Contents */}
             <motion.nav

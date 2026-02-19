@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Calendar, User, ArrowLeft } from "lucide-react";
 import PostNavigation from "@/components/PostNavigation";
+import SocialShare from "@/components/SocialShare";
 
 import heroImg from "@/assets/news/75th-anniversary-group.png";
 import fellowcraftImg from "@/assets/news/fellowcraft-apron.jpg";
@@ -68,6 +69,8 @@ const Anniversary75th = () => {
               alt="The brethren of Weybridge Lodge No.6787 gathered in the temple after our 75th anniversary meeting February 2024"
               className="w-full rounded-sm mb-10"
             />
+
+            <SocialShare url="/news/75th-anniversary" title="Special Masonic Meeting For 75th Anniversary February 2024" />
 
             {/* Table of Contents */}
             <motion.nav

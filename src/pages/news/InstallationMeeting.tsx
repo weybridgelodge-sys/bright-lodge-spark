@@ -3,6 +3,7 @@ import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
 import SEO, { articleSchema, breadcrumbSchema } from "@/components/SEO";
 import PostNavigation from "@/components/PostNavigation";
+import SocialShare from "@/components/SocialShare";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Calendar, User, ArrowLeft } from "lucide-react";
@@ -66,6 +67,8 @@ const InstallationMeeting = () => {
               alt="The brethren of Weybridge Lodge No.6787 gathered in the temple after our Installation meeting October 2023"
               className="w-full rounded-sm mb-10"
             />
+
+            <SocialShare url="/news/installation-meeting-october-2023" title="Masonic Installation Meeting October 2023" />
 
             {/* Table of Contents */}
             <motion.nav
