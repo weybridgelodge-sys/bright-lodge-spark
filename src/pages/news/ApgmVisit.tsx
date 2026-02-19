@@ -159,7 +159,7 @@ const ApgmVisit = () => {
                   <img
                     src={brigitteLogo}
                     alt="The Brigitte Trust logo"
-                    className="w-48 mx-auto hover:opacity-80 transition-opacity"
+                    className="w-36 mx-auto hover:opacity-80 transition-opacity"
                     loading="lazy"
                   />
                 </a>
