@@ -3,6 +3,7 @@ import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
 import SEO, { articleSchema, breadcrumbSchema } from "@/components/SEO";
 import PostNavigation from "@/components/PostNavigation";
+import SocialShare from "@/components/SocialShare";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Calendar, User, ArrowLeft } from "lucide-react";
@@ -76,6 +77,8 @@ const ApgmVisit = () => {
               alt="The brethren of Weybridge Lodge No. 6787 and visiting brethren gathered in the temple with the Provincial Grand Master, beneath the Truth Honour and Virtue inscription"
               className="w-full rounded-sm mb-10"
             />
+
+            <SocialShare url="/news/pgm-visit-february-2026" title="PGM Official Visit to Weybridge Lodge February 2026" />
 
             {/* Table of Contents */}
             <motion.nav
