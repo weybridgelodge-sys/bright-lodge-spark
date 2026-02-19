@@ -33,19 +33,19 @@ const SocialShare = ({ url, title }: SocialShareProps) => {
 
   const links = [
     {
-      label: "Share on Facebook",
-      href: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
-      icon: <Facebook className="h-4 w-4" />,
-    },
-    {
-      label: "Share on X",
-      href: `https://x.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`,
-      icon: <XIcon className="h-4 w-4" />,
-    },
-    {
       label: "Share on WhatsApp",
       href: `https://wa.me/?text=${encodedTitle}%20${encodedUrl}`,
       icon: <WhatsAppIcon className="h-4 w-4" />,
+    },
+    {
+      label: "Share via Email",
+      href: `mailto:?subject=${encodedTitle}&body=${encodedUrl}`,
+      icon: <Mail className="h-4 w-4" />,
+    },
+    {
+      label: "Share on Facebook",
+      href: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
+      icon: <Facebook className="h-4 w-4" />,
     },
     {
       label: "Share on Instagram",
@@ -53,9 +53,9 @@ const SocialShare = ({ url, title }: SocialShareProps) => {
       icon: <InstagramIcon className="h-4 w-4" />,
     },
     {
-      label: "Share via Email",
-      href: `mailto:?subject=${encodedTitle}&body=${encodedUrl}`,
-      icon: <Mail className="h-4 w-4" />,
+      label: "Share on X",
+      href: `https://x.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`,
+      icon: <XIcon className="h-4 w-4" />,
     },
   ];
 
@@ -75,7 +75,7 @@ const SocialShare = ({ url, title }: SocialShareProps) => {
             target="_blank"
             rel="noopener noreferrer"
             aria-label={link.label}
-            className="inline-flex items-center justify-center h-9 w-9 rounded-full border border-border bg-card text-muted-foreground hover:text-primary hover:border-primary transition-colors"
+            className="inline-flex items-center justify-center h-9 w-9 rounded-full bg-gold text-primary hover:opacity-80 transition-opacity"
           >
             {link.icon}
           </a>
