@@ -135,12 +135,12 @@ const ApgmVisit = () => {
                 </p>
                 <img
                   src={groupImg}
-                  alt="Members and officers of Weybridge Lodge with the PGM after the First Degree Initiation ceremony"
+                  alt="The PGM, Worshipful Master and two initiates after the ceremony"
                   className="w-full rounded-sm mt-6"
                   loading="lazy"
                 />
                 <p className="text-xs text-muted-foreground text-center mt-2 italic">
-                  Members and officers of Weybridge Lodge gathered with the PGM after the ceremony
+                  The PGM, Worshipful Master and two initiates after the ceremony
                 </p>
               </section>
 
