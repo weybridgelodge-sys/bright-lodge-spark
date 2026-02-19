@@ -7,6 +7,7 @@ import { Link } from "react-router-dom";
 import { Calendar, User, ArrowLeft } from "lucide-react";
 import PostNavigation from "@/components/PostNavigation";
 import SocialShare from "@/components/SocialShare";
+import CommentsSection, { commentCount } from "@/components/CommentsSection";
 
 import heroImg from "@/assets/news/sands-cheque.webp";
 import wayneImg from "@/assets/news/wayne-griffiths.png";
@@ -67,7 +68,7 @@ const SandsCharity = () => {
               className="w-full rounded-sm mb-10"
             />
 
-            <SocialShare url="/news/sands-charity" title="Weybridge Lodge Raise £31,000 for SANDS Charity" />
+            <SocialShare url="/news/sands-charity" title="Weybridge Lodge Raise £31,000 for SANDS Charity" commentCount={commentCount} />
 
             {/* Table of Contents */}
             <motion.nav
@@ -168,6 +169,8 @@ const SandsCharity = () => {
                 Julien is the current Mentor and Tech Guy for Weybridge Lodge and has been a member since 2019.
               </p>
             </div>
+
+            <CommentsSection />
 
             {/* Post Navigation */}
             <PostNavigation currentSlug="sands-charity" />

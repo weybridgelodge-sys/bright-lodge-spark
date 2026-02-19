@@ -1,9 +1,10 @@
-import { Facebook, Mail } from "lucide-react";
+import { Facebook, Mail, MessageSquare } from "lucide-react";
 import { motion } from "framer-motion";
 
 interface SocialShareProps {
   url: string;
   title: string;
+  commentCount?: number;
 }
 
 const XIcon = ({ className }: { className?: string }) => (
@@ -26,7 +27,7 @@ const InstagramIcon = ({ className }: { className?: string }) => (
 
 const BASE_URL = "https://www.weybridgelodge.org.uk";
 
-const SocialShare = ({ url, title }: SocialShareProps) => {
+const SocialShare = ({ url, title, commentCount }: SocialShareProps) => {
   const fullUrl = `${BASE_URL}${url}`;
   const encodedUrl = encodeURIComponent(fullUrl);
   const encodedTitle = encodeURIComponent(title);
@@ -64,23 +65,34 @@ const SocialShare = ({ url, title }: SocialShareProps) => {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: 0.2 }}
-      className="flex items-center gap-3 mb-10"
+      className="flex items-center justify-between mb-10"
     >
-      <span className="text-xs font-sans text-muted-foreground uppercase tracking-wider">Share</span>
-      <div className="flex gap-2">
-        {links.map((link) => (
-          <a
-            key={link.label}
-            href={link.href}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label={link.label}
-            className="inline-flex items-center justify-center h-9 w-9 rounded-full bg-gold text-primary hover:opacity-80 transition-opacity"
-          >
-            {link.icon}
-          </a>
-        ))}
+      <div className="flex items-center gap-3">
+        <span className="text-xs font-sans text-muted-foreground uppercase tracking-wider">Share</span>
+        <div className="flex gap-2">
+          {links.map((link) => (
+            <a
+              key={link.label}
+              href={link.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={link.label}
+              className="inline-flex items-center justify-center h-9 w-9 rounded-full bg-gold text-primary hover:opacity-80 transition-opacity"
+            >
+              {link.icon}
+            </a>
+          ))}
+        </div>
       </div>
+      {commentCount !== undefined && (
+        <a
+          href="#comments"
+          className="inline-flex items-center gap-1.5 text-xs font-sans text-muted-foreground hover:text-primary transition-colors"
+        >
+          <MessageSquare className="h-4 w-4" />
+          {commentCount} {commentCount === 1 ? "Comment" : "Comments"}
+        </a>
+      )}
     </motion.div>
   );
 };
