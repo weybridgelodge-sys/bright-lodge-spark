@@ -1,3 +1,4 @@
+import apgmVisitImg from "@/assets/news/apgm-visit-full.jpg";
 import sandsImg from "@/assets/news/sands-cheque.webp";
 import anniversaryImg from "@/assets/news/75th-anniversary-group.png";
 import installationImg from "@/assets/news/installation-meeting-group.jpg";
@@ -13,6 +14,15 @@ export interface BlogPost {
 
 // Ordered newest first
 export const posts: BlogPost[] = [
+  {
+    slug: "apgm-visit-february-2026",
+    title: "APGM Official Visit to Weybridge Lodge February 2026",
+    date: "2026-02-19",
+    category: "Lodge Meetings",
+    excerpt:
+      "Weybridge Lodge was honoured to welcome the Assistant Provincial Grand Master of Surrey for an official visit and Second Degree Passing ceremony at the South West Surrey Masonic Centre.",
+    image: apgmVisitImg,
+  },
   {
     slug: "sands-charity",
     title: "Weybridge Lodge Raise £31,000 for SANDS Charity",

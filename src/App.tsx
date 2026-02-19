@@ -26,6 +26,7 @@ import News from "./pages/News";
 import Anniversary75th from "./pages/news/Anniversary75th";
 import SandsCharity from "./pages/news/SandsCharity";
 import InstallationMeeting from "./pages/news/InstallationMeeting";
+import ApgmVisit from "./pages/news/ApgmVisit";
 import Events from "./pages/Events";
 
 const queryClient = new QueryClient();
@@ -60,6 +61,7 @@ const App = () => (
           <Route path="/news/75th-anniversary" element={<Anniversary75th />} />
           <Route path="/news/sands-charity" element={<SandsCharity />} />
           <Route path="/news/installation-meeting-october-2023" element={<InstallationMeeting />} />
+          <Route path="/news/apgm-visit-february-2026" element={<ApgmVisit />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
