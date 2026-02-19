@@ -15,7 +15,7 @@ export interface BlogPost {
 // Ordered newest first
 export const posts: BlogPost[] = [
   {
-    slug: "apgm-visit-february-2026",
+    slug: "pgm-visit-february-2026",
     title: "PGM Official Visit to Weybridge Lodge February 2026",
     date: "2026-02-19",
     category: "Lodge Meetings",
