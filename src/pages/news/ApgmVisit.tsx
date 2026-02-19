@@ -99,7 +99,7 @@ const ApgmVisit = () => {
             {/* Article body */}
             <article className="prose-custom space-y-10">
               <p className="text-muted-foreground font-sans leading-relaxed">
-                Weybridge Lodge No. 6787 was honoured to welcome the Provincial Grand Master (PGM) of the Province of Surrey for an official visit on Wednesday 18th February 2026. Held at the South West Surrey Masonic Centre in Guildford, the evening was a truly memorable occasion that combined an excellent First Degree Initiation ceremony, charitable endeavour and warm fraternal fellowship.
+                Weybridge Lodge No. 6787 was honoured to welcome the Provincial Grand Master (PGM) of the Province of Surrey, RW Bro Nicholas Burger for an official visit on Wednesday 18th February 2026. Held at the South West Surrey Masonic Centre in Guildford, the evening was a truly memorable occasion that combined an excellent First Degree Initiation ceremony, charitable endeavour and warm fraternal fellowship.
               </p>
 
               {/* The PGM's Official Visit */}
