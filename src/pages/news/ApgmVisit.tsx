@@ -12,31 +12,32 @@ import officersImg from "@/assets/news/apgm-visit-officers.jpg";
 import groupImg from "@/assets/news/apgm-visit-group.jpg";
 
 const tocItems = [
-  { id: "apgm-visit", label: "The APGM's Official Visit" },
-  { id: "ceremony", label: "A Second Degree Passing Ceremony" },
-  { id: "fellowship", label: "Brotherhood & Fellowship" },
+  { id: "pgm-visit", label: "The PGM's Official Visit" },
+  { id: "initiation", label: "A First Degree Initiation Ceremony" },
+  { id: "charity", label: "Charity & Giving Back" },
+  { id: "festive-board", label: "The Festive Board" },
 ];
 
 const ApgmVisit = () => {
   return (
     <div className="min-h-screen">
       <SEO
-        title="APGM Official Visit to Weybridge Lodge February 2026 | Guildford"
-        description="The Assistant Provincial Grand Master visited Weybridge Lodge No. 6787 for a Second Degree Passing ceremony at the South West Surrey Masonic Centre, Guildford."
+        title="PGM Official Visit to Weybridge Lodge February 2026 | Guildford"
+        description="The Provincial Grand Master visited Weybridge Lodge No. 6787 for a First Degree Initiation ceremony at the South West Surrey Masonic Centre, Guildford."
         canonical="/news/apgm-visit-february-2026"
         type="article"
         schema={[
           articleSchema({
-            title: "APGM Official Visit to Weybridge Lodge February 2026",
+            title: "PGM Official Visit to Weybridge Lodge February 2026",
             date: "2026-02-19",
             description:
-              "The Assistant Provincial Grand Master of Surrey visited Weybridge Lodge No. 6787 for an official visit and Second Degree Passing ceremony.",
+              "The Provincial Grand Master of Surrey visited Weybridge Lodge No. 6787 for an official visit and First Degree Initiation ceremony.",
             url: "/news/apgm-visit-february-2026",
           }),
           breadcrumbSchema([
             { name: "Home", url: "/" },
             { name: "News", url: "/news" },
-            { name: "APGM Visit February 2026", url: "/news/apgm-visit-february-2026" },
+            { name: "PGM Visit February 2026", url: "/news/apgm-visit-february-2026" },
           ]),
         ]}
       />
@@ -44,7 +45,7 @@ const ApgmVisit = () => {
       <Header />
       <main id="main-content">
         <PageHeader
-          title="APGM Official Visit to Weybridge Lodge"
+          title="PGM Official Visit to Weybridge Lodge"
           subtitle="Lodge Meetings"
         />
 
@@ -71,7 +72,7 @@ const ApgmVisit = () => {
               animate={{ opacity: 1 }}
               transition={{ duration: 0.6 }}
               src={heroImg}
-              alt="The brethren of Weybridge Lodge No. 6787 and visiting brethren gathered in the temple with the Assistant Provincial Grand Master, beneath the Truth Honour and Virtue inscription"
+              alt="The brethren of Weybridge Lodge No. 6787 and visiting brethren gathered in the temple with the Provincial Grand Master, beneath the Truth Honour and Virtue inscription"
               className="w-full rounded-sm mb-10"
             />
 
@@ -98,60 +99,79 @@ const ApgmVisit = () => {
             {/* Article body */}
             <article className="prose-custom space-y-10">
               <p className="text-muted-foreground font-sans leading-relaxed">
-                Weybridge Lodge No. 6787 was honoured to welcome the Assistant Provincial Grand Master (APGM) of the Province of Surrey for an official visit on Wednesday 18th February 2026. Held at the South West Surrey Masonic Centre in Guildford, the evening was a memorable occasion that combined excellent ceremony with warm fraternal fellowship.
+                Weybridge Lodge No. 6787 was honoured to welcome the Provincial Grand Master (PGM) of the Province of Surrey for an official visit on Wednesday 18th February 2026. Held at the South West Surrey Masonic Centre in Guildford, the evening was a truly memorable occasion that combined an excellent First Degree Initiation ceremony, charitable endeavour and warm fraternal fellowship.
               </p>
 
-              {/* The APGM's Official Visit */}
-              <section id="apgm-visit">
+              {/* The PGM's Official Visit */}
+              <section id="pgm-visit">
                 <div className="h-0.5 w-16 bg-gold mb-6" />
-                <h2 className="text-2xl font-serif text-foreground mb-4">The APGM's Official Visit</h2>
+                <h2 className="text-2xl font-serif text-foreground mb-4">The PGM's Official Visit</h2>
                 <p className="text-muted-foreground font-sans leading-relaxed">
-                  An official visit from the Assistant Provincial Grand Master is one of the highlights of any Lodge's calendar. It is a mark of recognition and support from the Provincial Grand Lodge of Surrey, and the brethren of Weybridge Lodge were delighted to receive such a distinguished guest.
+                  An official visit from the Provincial Grand Master is the highest honour a Lodge can receive and one of the most prestigious occasions in the Masonic calendar. The PGM was accompanied by a full delegation of Provincial officers, and the Lodge also welcomed visiting brethren from across the Province, making for an outstanding turnout in the temple.
                 </p>
                 <p className="text-muted-foreground font-sans leading-relaxed mt-4">
-                  The APGM was accompanied by a delegation of Provincial officers, and the Lodge also welcomed visiting brethren from across the Province, making for a truly impressive turnout in the temple.
+                  The brethren of Weybridge Lodge were delighted to receive such a distinguished guest and the evening was a fitting tribute to the hard work and dedication of the Lodge's members.
                 </p>
                 <img
                   src={officersImg}
-                  alt="The Assistant Provincial Grand Master with the Worshipful Master and officers of Weybridge Lodge"
+                  alt="The Provincial Grand Master with the Worshipful Master and officers of Weybridge Lodge"
                   className="w-full max-w-md mx-auto rounded-sm mt-6"
                   loading="lazy"
                 />
                 <p className="text-xs text-muted-foreground text-center mt-2 italic">
-                  The Assistant Provincial Grand Master with the Worshipful Master and brethren of Weybridge Lodge
+                  The Provincial Grand Master with the Worshipful Master and brethren of Weybridge Lodge
                 </p>
               </section>
 
-              {/* Ceremony */}
-              <section id="ceremony">
+              {/* Initiation Ceremony */}
+              <section id="initiation">
                 <div className="h-0.5 w-16 bg-gold mb-6" />
-                <h2 className="text-2xl font-serif text-foreground mb-4">A Second Degree Passing Ceremony</h2>
+                <h2 className="text-2xl font-serif text-foreground mb-4">A First Degree Initiation Ceremony</h2>
                 <p className="text-muted-foreground font-sans leading-relaxed">
-                  The centrepiece of the evening was a Second Degree Passing ceremony, in which a Brother was advanced to the degree of Fellowcraft. The ceremony was conducted with precision and sincerity, reflecting the high standards that Weybridge Lodge is known for.
+                  The centrepiece of the evening was a First Degree Initiation ceremony, in which a new candidate was welcomed into the Craft as an Entered Apprentice. Performed in the presence of the Provincial Grand Master, the ceremony was conducted with great precision and sincerity, reflecting the high standards of ritual work that Weybridge Lodge is known for.
                 </p>
                 <p className="text-muted-foreground font-sans leading-relaxed mt-4">
-                  The Passing ceremony is a significant step in a Freemason's journey, marking the transition from the First Degree of Entered Apprentice to the Second Degree of Fellowcraft. It introduces the candidate to further Masonic knowledge and encourages him to deepen his understanding of the principles of the Craft.
+                  The Initiation ceremony is the beginning of a Freemason's journey. It marks the moment a candidate takes his first steps into the Craft, receiving the secrets and symbols of the First Degree and pledging himself to the principles of Brotherly Love, Relief and Truth.
                 </p>
                 <img
                   src={groupImg}
-                  alt="Members and officers of Weybridge Lodge with the APGM after the Second Degree Passing ceremony"
+                  alt="Members and officers of Weybridge Lodge with the PGM after the First Degree Initiation ceremony"
                   className="w-full rounded-sm mt-6"
                   loading="lazy"
                 />
                 <p className="text-xs text-muted-foreground text-center mt-2 italic">
-                  Members and officers of Weybridge Lodge gathered with the APGM after the ceremony
+                  Members and officers of Weybridge Lodge gathered with the PGM after the ceremony
                 </p>
               </section>
 
-              {/* Fellowship */}
-              <section id="fellowship">
+              {/* Charity */}
+              <section id="charity">
                 <div className="h-0.5 w-16 bg-gold mb-6" />
-                <h2 className="text-2xl font-serif text-foreground mb-4">Brotherhood & Fellowship</h2>
+                <h2 className="text-2xl font-serif text-foreground mb-4">Charity & Giving Back</h2>
                 <p className="text-muted-foreground font-sans leading-relaxed">
-                  Following the ceremony, the brethren retired to the festive board where an excellent meal was enjoyed by all. The APGM praised the Lodge for the quality of its ritual work and the warmth of its hospitality, noting that Weybridge Lodge continues to thrive as a welcoming and active Lodge within the Province of Surrey.
+                  Charity lies at the very heart of Freemasonry, and the evening was no exception. The brethren took the opportunity to support charitable causes close to their hearts, reinforcing the Lodge's longstanding commitment to giving back to the community.
                 </p>
                 <p className="text-muted-foreground font-sans leading-relaxed mt-4">
-                  Evenings such as these are a wonderful reminder of what makes Freemasonry special — the coming together of like-minded men from all walks of life, united by shared values of integrity, friendship and charity.
+                  Weybridge Lodge has a proud record of charitable fundraising, most recently{" "}
+                  <Link to="/news/sands-charity" className="text-primary hover:underline">
+                    raising over £31,000 for the SANDS charity
+                  </Link>{" "}
+                  through its Ladies Festival. The Lodge continues to support both Masonic and non-Masonic charities throughout the year, embodying the principle of Relief that is central to the Craft.
+                </p>
+              </section>
+
+              {/* Festive Board */}
+              <section id="festive-board">
+                <div className="h-0.5 w-16 bg-gold mb-6" />
+                <h2 className="text-2xl font-serif text-foreground mb-4">The Festive Board</h2>
+                <p className="text-muted-foreground font-sans leading-relaxed">
+                  Following the ceremony, the brethren retired to the festive board where an excellent meal was enjoyed by all. The PGM praised the Lodge for the quality of its ritual work and the warmth of its hospitality, noting that Weybridge Lodge continues to thrive as a welcoming and active Lodge within the Province of Surrey.
+                </p>
+                <p className="text-muted-foreground font-sans leading-relaxed mt-4">
+                  A highlight of the festive board was the traditional Entered Apprentice Song, performed in honour of the newly initiated Brother. This centuries-old Masonic tradition is always a rousing and emotional moment, welcoming the newest member into the fraternity with song and applause.
+                </p>
+                <p className="text-muted-foreground font-sans leading-relaxed mt-4">
+                  The evening concluded with the Initiate's Chain — a wonderful custom in which every Brother present shakes the hand of the new Initiate, forming a chain of friendship and fellowship that symbolises the bond shared by all Freemasons. It is a powerful reminder that from the moment of Initiation, a new Brother is never alone.
                 </p>
                 <p className="text-muted-foreground font-sans leading-relaxed mt-4">
                   If you are interested in finding out more about Freemasonry or joining Weybridge Lodge, please visit our{" "}

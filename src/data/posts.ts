@@ -16,11 +16,11 @@ export interface BlogPost {
 export const posts: BlogPost[] = [
   {
     slug: "apgm-visit-february-2026",
-    title: "APGM Official Visit to Weybridge Lodge February 2026",
+    title: "PGM Official Visit to Weybridge Lodge February 2026",
     date: "2026-02-19",
     category: "Lodge Meetings",
     excerpt:
-      "Weybridge Lodge was honoured to welcome the Assistant Provincial Grand Master of Surrey for an official visit and Second Degree Passing ceremony at the South West Surrey Masonic Centre.",
+      "Weybridge Lodge was honoured to welcome the Provincial Grand Master of Surrey for an official visit and First Degree Initiation ceremony at the South West Surrey Masonic Centre.",
     image: apgmVisitImg,
   },
   {
