@@ -65,7 +65,7 @@ const SocialShare = ({ url, title, commentCount }: SocialShareProps) => {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: 0.2 }}
-      className="flex items-center justify-between mb-10"
+      className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-10"
     >
       <div className="flex items-center gap-3">
         <span className="text-xs font-sans text-muted-foreground uppercase tracking-wider">Share</span>
