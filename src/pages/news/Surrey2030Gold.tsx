@@ -117,7 +117,7 @@ const Surrey2030Gold = () => {
                 <div className="h-0.5 w-16 bg-gold mb-6" />
                 <h2 className="text-2xl font-serif text-foreground mb-4">A Grand Launch at Old Thorns</h2>
                 <p className="text-muted-foreground font-sans leading-relaxed">
-                  The Surrey 2030 Festival was officially set in motion by the Provincial Grand Master, RW Bro Nicholas Burger, on Saturday, 30th November 2024. The gala launch at the{" "}
+                  The Surrey 2030 Festival was officially set in motion by the Provincial Grand Master, RW Bro. Nicholas Burger, on Saturday, 30th November 2024. The gala launch at the{" "}
                   <a href="https://www.oldthorns.com/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
                     Old Thorns Hotel and Resort
                   </a>{" "}
