@@ -39,7 +39,7 @@ const About = () => {
             <div className="relative w-full overflow-hidden rounded-sm shadow-lg">
               <img
                 src={anniversaryPhoto}
-                alt="Weybridge Lodge brethren celebrating their 75th Anniversary in February 2024"
+                alt="Brethren of Weybridge Lodge No. 6787 gathered in the temple at the South West Surrey Masonic Centre to celebrate the Lodge's 75th anniversary in February 2024"
                 className="w-full h-auto object-cover"
               />
               <div className="absolute bottom-0 left-0 right-0 bg-navy/80 backdrop-blur-sm px-4 py-3">
@@ -50,7 +50,7 @@ const About = () => {
             </div>
             <div className="flex flex-col items-center gap-2">
               <div className="w-36 h-36 rounded-full bg-warm-white shadow-md flex items-center justify-center p-1.5">
-                <img src={surreyGold} alt="Surrey 2030 Festival Gold Award" className="w-full h-full object-contain rounded-full" />
+                <img src={surreyGold} alt="Surrey 2030 Festival Gold Award badge presented to Weybridge Lodge for outstanding charitable contributions" className="w-full h-full object-contain rounded-full" />
               </div>
               <p className="text-base font-sans font-bold text-foreground text-center">A Surrey 2030 Festival Gold Award Lodge</p>
             </div>

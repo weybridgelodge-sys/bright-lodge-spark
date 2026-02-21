@@ -144,7 +144,7 @@ const Anniversary75th = () => {
                 </p>
                 <img
                   src={fellowcraftImg}
-                  alt="The Fellowcraft Mason's apron"
+                  alt="A Fellowcraft Freemason's apron worn during the Second Degree ceremony in a Masonic Lodge"
                   className="w-full max-w-md mx-auto rounded-sm mt-6"
                   loading="lazy"
                 />
@@ -162,7 +162,7 @@ const Anniversary75th = () => {
                 </p>
                 <img
                   src={certificateImg}
-                  alt="Grand Lodge Certificate"
+                  alt="A United Grand Lodge of England Grand Lodge Certificate presented to a Master Mason of Weybridge Lodge"
                   className="w-full max-w-md mx-auto rounded-sm mt-6"
                   loading="lazy"
                 />

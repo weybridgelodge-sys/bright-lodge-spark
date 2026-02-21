@@ -162,7 +162,7 @@ const ApgmVisit = () => {
                 <a href="https://www.brigittetrust.org/our-services/bereavement-support/" target="_blank" rel="noopener noreferrer" className="block my-6">
                   <img
                     src={brigitteLogo}
-                    alt="The Brigitte Trust logo"
+                    alt="The Brigitte Trust charity logo — a Surrey-based bereavement support organisation"
                     className="w-36 mx-auto hover:opacity-80 transition-opacity"
                     loading="lazy"
                   />
