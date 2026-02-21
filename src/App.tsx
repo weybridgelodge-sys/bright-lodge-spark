@@ -27,6 +27,7 @@ import Anniversary75th from "./pages/news/Anniversary75th";
 import SandsCharity from "./pages/news/SandsCharity";
 import InstallationMeeting from "./pages/news/InstallationMeeting";
 import ApgmVisit from "./pages/news/ApgmVisit";
+import Surrey2030Gold from "./pages/news/Surrey2030Gold";
 import Events from "./pages/Events";
 
 const queryClient = new QueryClient();
@@ -62,6 +63,7 @@ const App = () => (
           <Route path="/news/sands-charity" element={<SandsCharity />} />
           <Route path="/news/installation-meeting-october-2023" element={<InstallationMeeting />} />
           <Route path="/news/pgm-visit-february-2026" element={<ApgmVisit />} />
+          <Route path="/news/surrey-2030-festival-gold" element={<Surrey2030Gold />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

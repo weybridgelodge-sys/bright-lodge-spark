@@ -2,6 +2,7 @@ import apgmVisitImg from "@/assets/news/apgm-visit-full.jpg";
 import sandsImg from "@/assets/news/sands-cheque.webp";
 import anniversaryImg from "@/assets/news/75th-anniversary-group.png";
 import installationImg from "@/assets/news/installation-meeting-group.jpg";
+import surrey2030Img from "@/assets/news/surrey-2030-gold-award.jpg";
 
 export interface BlogPost {
   slug: string;
@@ -14,6 +15,15 @@ export interface BlogPost {
 
 // Ordered newest first
 export const posts: BlogPost[] = [
+  {
+    slug: "surrey-2030-festival-gold",
+    title: "Weybridge Lodge Strikes Gold: Surrey 2030 Festival Success",
+    date: "2025-05-01",
+    category: "Charity",
+    excerpt:
+      "Weybridge Lodge has officially secured the prestigious Gold Festival Award for the Surrey 2030 Festival, raising over £15,800 for the Masonic Charitable Foundation in just five months.",
+    image: surrey2030Img,
+  },
   {
     slug: "pgm-visit-february-2026",
     title: "PGM Official Visit to Weybridge Lodge February 2026",
