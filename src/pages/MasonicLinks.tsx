@@ -48,7 +48,7 @@ const links = [
   },
   {
     name: "Holy Royal Arch",
-    url: "https://www.royalarch.com/",
+    url: "https://www.ugle.org.uk/about-us/royal-arch/supreme-grand-chapter",
     description: "The Supreme Grand Chapter of Royal Arch Masons of England.",
     logo: royalarchLogo,
   },
