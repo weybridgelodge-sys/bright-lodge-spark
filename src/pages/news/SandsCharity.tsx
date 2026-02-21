@@ -129,7 +129,7 @@ const SandsCharity = () => {
                 <div className="flex flex-col sm:flex-row items-start gap-5 mt-6 p-5 border border-border rounded-sm bg-card">
                   <img
                     src={wayneImg}
-                    alt="Wayne Griffiths, Chair and Befriender, Farnborough Sands"
+                    alt="Wayne Griffiths, Chair and Befriender of Farnborough SANDS stillbirth and neonatal death charity"
                     className="w-20 h-20 rounded-full object-cover shrink-0"
                     loading="lazy"
                   />

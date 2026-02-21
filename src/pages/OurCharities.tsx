@@ -84,7 +84,7 @@ const OurCharities = () => {
                 <div className="flex items-start gap-5 mb-4">
                   <img
                     src={charity.logo}
-                    alt={`${charity.name} logo`}
+                    alt={`${charity.name} charity logo`}
                     className="w-14 h-14 object-contain flex-shrink-0 rounded-sm bg-white p-1"
                     loading="lazy"
                   />

@@ -11,7 +11,7 @@ const Hero = () => {
         className="absolute inset-0 bg-cover bg-center"
         style={{ backgroundImage: `url(${heroImage})` }}
         role="img"
-        aria-label="Weybridge Lodge building exterior"
+        aria-label="South West Surrey Masonic Centre exterior in Guildford, home of Weybridge Lodge No. 6787"
       />
       <div className="absolute inset-0 hero-overlay" />
 
@@ -25,7 +25,7 @@ const Hero = () => {
         >
           <img
             src={logo}
-            alt="Weybridge Lodge logo"
+            alt="Weybridge Lodge No. 6787 crest — Freemasons Lodge in Guildford, Surrey"
             className="w-[150px] h-[150px] object-contain brightness-0 invert"
           />
         </motion.div>
@@ -73,7 +73,7 @@ const Hero = () => {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 1, delay: 0.5 }}
             src={logo}
-            alt="Weybridge Lodge logo"
+            alt="Weybridge Lodge No. 6787 crest — Freemasons Lodge in Guildford, Surrey"
             className="hidden md:block w-[250px] h-[250px] object-contain shrink-0 brightness-0 invert"
           />
         </div>
