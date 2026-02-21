@@ -31,7 +31,7 @@ const Surrey2030Gold = () => {
         schema={[
           articleSchema({
             title: "Weybridge Lodge Strikes Gold: Surrey 2030 Festival Success",
-            date: "2025-05-01",
+            date: "2025-05-10",
             description:
               "Weybridge Lodge secures the Gold Festival Award for the Surrey 2030 Festival, exceeding their £15,300 target within five months.",
             url: "/news/surrey-2030-festival-gold",
@@ -64,7 +64,7 @@ const Surrey2030Gold = () => {
                 <ArrowLeft className="h-4 w-4" /> Back to News
               </Link>
               <span className="hidden sm:inline">|</span>
-              <span className="inline-flex items-center gap-1"><Calendar className="h-3.5 w-3.5" /> 1 May 2025</span>
+              <span className="inline-flex items-center gap-1"><Calendar className="h-3.5 w-3.5" /> 10 May 2025</span>
               <span className="inline-flex items-center gap-1"><User className="h-3.5 w-3.5" /> Weybridge Lodge</span>
             </motion.div>
 
@@ -154,7 +154,7 @@ const Surrey2030Gold = () => {
                   ))}
                 </div>
                 <p className="text-muted-foreground font-sans leading-relaxed">
-                  In an incredible display of generosity, the Lodge exceeded the Gold target within just <strong className="text-foreground">five months</strong>, raising a total of <strong className="text-foreground">£15,800</strong>.
+                  In an incredible display of generosity, the Lodge exceeded the Gold target within just <strong className="text-foreground">five months</strong>, raising a total of <strong className="text-foreground">£15,800</strong>. With the festival running until 2030, the Lodge hopes to increase this total to over <strong className="text-foreground">£20,000</strong> before the end of the festival, if not more.
                 </p>
 
                 {/* Surrey 2030 Festival Logo */}

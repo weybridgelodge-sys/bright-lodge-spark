@@ -18,7 +18,7 @@ export const posts: BlogPost[] = [
   {
     slug: "surrey-2030-festival-gold",
     title: "Weybridge Lodge Strikes Gold: Surrey 2030 Festival Success",
-    date: "2025-05-01",
+    date: "2025-05-10",
     category: "Charity",
     excerpt:
       "Weybridge Lodge has officially secured the prestigious Gold Festival Award for the Surrey 2030 Festival, raising over £15,800 for the Masonic Charitable Foundation in just five months.",
