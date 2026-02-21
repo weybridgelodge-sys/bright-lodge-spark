@@ -59,8 +59,8 @@ const links = [
     logo: museumLogo,
   },
   {
-    name: "Lodge of Astolat",
-    url: "https://astolatlodge.co.uk/",
+    name: "Astolat Lodge No. 5848",
+    url: "https://astolat.org.uk/",
     description: "A sister lodge also meeting at the South West Surrey Masonic Centre.",
     logo: astolatLogo,
   },
