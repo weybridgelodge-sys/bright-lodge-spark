@@ -11,7 +11,7 @@ import surreyLogo from "@/assets/links/surrey-logo.png";
 import metglLogo from "@/assets/links/metgl-logo.png";
 import mcfLogo from "@/assets/links/mcf-logo.png";
 import hfafLogo from "@/assets/links/hfaf-logo.png";
-import royalarchLogo from "@/assets/links/royalarch-logo.png";
+import royalarchLogo from "@/assets/links/royalarch-logo.svg";
 import museumLogo from "@/assets/links/museum-freemasonry-logo.png";
 import astolatLogo from "@/assets/links/astolat-logo.png";
 
