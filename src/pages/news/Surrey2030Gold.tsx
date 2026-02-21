@@ -14,7 +14,7 @@ import festivalLogo from "@/assets/surrey-2030-gold.png";
 
 const tocItems = [
   { id: "grand-launch", label: "A Grand Launch at Old Thorns" },
-  { id: "driving-force", label: "The Driving Force: WBro. Julien Tidmarsh" },
+  { id: "driving-force", label: "The Driving Force: W Bro. Julien Tidmarsh" },
   { id: "road-to-gold", label: "Weybridge Lodge: The Road to Gold" },
   { id: "what-is-festival", label: "What is the Surrey 2030 Festival?" },
   { id: "who-benefits", label: "Who Benefits? The Impact of Your Giving" },
@@ -128,9 +128,9 @@ const Surrey2030Gold = () => {
               {/* The Driving Force */}
               <section id="driving-force">
                 <div className="h-0.5 w-16 bg-gold mb-6" />
-                <h2 className="text-2xl font-serif text-foreground mb-4">The Driving Force: WBro. Julien Tidmarsh</h2>
+                <h2 className="text-2xl font-serif text-foreground mb-4">The Driving Force: W Bro. Julien Tidmarsh</h2>
                 <p className="text-muted-foreground font-sans leading-relaxed">
-                  The Lodge's incredible momentum was fueled by the leadership of their current Worshipful Master, WBro. Julien Tidmarsh. Having been distinguished with the appointment of Vice Chairman of the Surrey 2030 Festival team, WBro. Tidmarsh's dedication to the cause inspired the members to get behind the appeal from day one, leading by example and driving the Lodge toward its ambitious goals.
+                  The Lodge's incredible momentum was fueled by the leadership of their current Worshipful Master, W Bro. Julien Tidmarsh. Having been distinguished with the appointment of Vice Chairman of the Surrey 2030 Festival team, W Bro. Tidmarsh's dedication to the cause inspired the members to get behind the appeal from day one, leading by example and driving the Lodge toward its ambitious goals.
                 </p>
               </section>
 
