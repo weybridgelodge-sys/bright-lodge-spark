@@ -7,8 +7,17 @@ import { ExternalLink, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import sandsLogo from "@/assets/links/sands-logo.jpg";
 import tlcLogo from "@/assets/links/tlc-logo.ico";
+import surrey2030Logo from "@/assets/surrey-2030-gold.png";
 
 const charities = [
+  {
+    name: "Surrey 2030 Festival — Masonic Charitable Foundation",
+    highlight: "Gold Festival Award achieved",
+    description: "Weybridge Lodge has officially secured the prestigious Gold Festival Award for the Surrey 2030 Festival, raising over £15,800 for the Masonic Charitable Foundation in just five months. The Festival supports life-changing grants for individuals and families in times of need, funding medical treatment, education, and daily living assistance.",
+    url: "https://surreymason.org.uk/surrey-2030-festival/",
+    postUrl: "/news/surrey-2030-festival-gold",
+    logo: surrey2030Logo,
+  },
   {
     name: "Farnborough SANDS",
     highlight: "Our proudest achievement so far",
