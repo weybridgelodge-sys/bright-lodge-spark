@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import surreyGold from "@/assets/surrey-2030-gold.png";
+import tlcPatron from "@/assets/tlc-patron.jpg";
 import anniversaryPhoto from "@/assets/75th-anniversary.webp";
 
 const About = () => {
@@ -48,11 +49,19 @@ const About = () => {
                 </p>
               </div>
             </div>
-            <div className="flex flex-col items-center gap-2">
-              <div className="w-36 h-36 rounded-full bg-warm-white shadow-md flex items-center justify-center p-1.5">
-                <img src={surreyGold} alt="Surrey 2030 Festival Gold Award badge presented to Weybridge Lodge for outstanding charitable contributions" className="w-full h-full object-contain rounded-full" />
+            <div className="flex flex-wrap justify-center gap-8">
+              <div className="flex flex-col items-center gap-2">
+                <div className="w-36 h-36 rounded-full bg-warm-white shadow-md flex items-center justify-center p-1.5">
+                  <img src={surreyGold} alt="Surrey 2030 Festival Gold Award badge presented to Weybridge Lodge for outstanding charitable contributions" className="w-full h-full object-contain rounded-full" />
+                </div>
+                <p className="text-base font-sans font-bold text-foreground text-center">Festival Gold Award</p>
               </div>
-              <p className="text-base font-sans font-bold text-foreground text-center">A Surrey 2030 Festival Gold Award Lodge</p>
+              <div className="flex flex-col items-center gap-2">
+                <div className="w-36 h-36 rounded-full bg-warm-white shadow-md flex items-center justify-center p-1.5">
+                  <img src={tlcPatron} alt="TLC Patron pin awarded to Weybridge Lodge for charitable patronage" className="w-full h-full object-contain rounded-full" />
+                </div>
+                <p className="text-base font-sans font-bold text-foreground text-center">TLC Patron</p>
+              </div>
             </div>
           </motion.div>
         </div>
