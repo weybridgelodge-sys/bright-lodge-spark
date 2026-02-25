@@ -58,7 +58,7 @@ const NextMeeting = () => {
             <div className="flex items-start gap-4">
               <Clock className="w-5 h-5 text-gold mt-0.5 shrink-0" aria-hidden="true" />
               <div>
-                <p className="font-sans font-medium text-foreground">Dining to follow</p>
+                <p className="font-sans font-medium text-foreground">Followed by the Festive Board</p>
                 <p className="text-sm text-muted-foreground font-sans">Contact us to book your place</p>
               </div>
             </div>
