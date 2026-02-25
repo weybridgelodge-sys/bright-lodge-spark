@@ -31,7 +31,7 @@ const NextMeeting = () => {
           <div className="bg-navy-gradient p-8 text-center">
             <p className="text-gold uppercase tracking-widest text-sm font-sans mb-2">Initiation Ceremony</p>
             <p className="text-3xl md:text-4xl font-serif text-primary-foreground">
-              15th April 2026, 6 pm
+              15th April 2026
             </p>
             <p className="text-primary-foreground/60 font-sans text-sm mt-2">
               April Meeting
@@ -50,7 +50,7 @@ const NextMeeting = () => {
             <div className="flex items-start gap-4">
               <Calendar className="w-5 h-5 text-gold mt-0.5 shrink-0" aria-hidden="true" />
               <div>
-                <p className="font-sans font-medium text-foreground">Wednesday, 15 April 2026</p>
+                <p className="font-sans font-medium text-foreground">Wednesday, 15 April 2026, 6 pm</p>
                 <p className="text-sm text-muted-foreground font-sans">Now open for bookings</p>
               </div>
             </div>
