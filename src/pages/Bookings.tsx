@@ -90,7 +90,7 @@ const Bookings = () => {
                 For those who remember their own initiation, this is a chance to revisit the solemnity and symbolism of that first step. Come and share this experience with us as we witness our new initiate begin their Masonic journey.
               </p>
               <p className="text-muted-foreground font-sans leading-relaxed">
-                Following the ceremony, we'll gather for a festive board filled with cheer, good food, and heartfelt fellowship. Let's come together to welcome our newest members and celebrate the enduring spirit of Freemasonry.
+                Following the ceremony, we'll gather for a festive board filled with cheer, good food, and heartfelt fellowship. Let's come together to welcome our newest member and celebrate the enduring spirit of Freemasonry.
               </p>
             </motion.div>
           </div>
