@@ -26,22 +26,14 @@ interface LodgeEvent {
 const events: LodgeEvent[] = [
   // Regular meetings 2025-2026
   {
-    title: "Double Initiation Meeting",
-    date: new Date(2026, 1, 18),
-    time: "Evening",
-    venue: "South West Surrey Masonic Centre",
-    address: "Hitherbury Close, Guildford GU2 4DR",
-    type: "meeting",
-    description: "Visit by the Provincial Grand Master RW Nick Burger PGM, PDepGDC. A historic evening for Weybridge Lodge.",
-    highlight: true,
-  },
-  {
-    title: "Third Degree Ceremony",
+    title: "Initiation Ceremony",
     date: new Date(2026, 3, 15),
-    time: "Evening",
+    time: "6.00 pm",
     venue: "South West Surrey Masonic Centre",
     address: "Hitherbury Close, Guildford GU2 4DR",
     type: "meeting",
+    description: "Initiation ceremony welcoming a new candidate into Freemasonry — our fifth of the year.",
+    highlight: true,
   },
   {
     title: "Installation Meeting",
