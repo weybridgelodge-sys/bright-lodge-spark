@@ -31,7 +31,7 @@ const NextMeeting = () => {
           <div className="bg-navy-gradient p-8 text-center">
             <p className="text-gold uppercase tracking-widest text-sm font-sans mb-2">Initiation Ceremony</p>
             <p className="text-3xl md:text-4xl font-serif text-primary-foreground">
-              15th April 2026
+              15th April 2026, 6 pm
             </p>
             <p className="text-primary-foreground/60 font-sans text-sm mt-2">
               April Meeting
