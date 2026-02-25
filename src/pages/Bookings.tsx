@@ -87,7 +87,7 @@ const Bookings = () => {
                 Weybridge Lodge is delighted to announce a truly special occasion: another initiation ceremony welcoming one more new candidate into Freemasonry, our fifth of the year.
               </p>
               <p className="text-muted-foreground font-sans leading-relaxed mb-4">
-                For those who remember their own initiation, this is a chance to revisit the solemnity and symbolism of that first step. When shared between two candidates, it takes on a deeper resonance as these initiates begin their Masonic journey side by side.
+                For those who remember their own initiation, this is a chance to revisit the solemnity and symbolism of that first step. Come and share this experience with us as we witness our new initiate begin their Masonic journey.
               </p>
               <p className="text-muted-foreground font-sans leading-relaxed">
                 Following the ceremony, we'll gather for a festive board filled with cheer, good food, and heartfelt fellowship. Let's come together to welcome our newest members and celebrate the enduring spirit of Freemasonry.
