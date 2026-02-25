@@ -45,9 +45,9 @@ const events: LodgeEvent[] = [
     description: "Installation of the new Worshipful Master for the ensuing year.",
   },
   {
-    title: "First Rising & Second Degree",
+    title: "Initiation Ceremony",
     date: new Date(2026, 11, 16),
-    time: "Evening",
+    time: "5.30 pm",
     venue: "South West Surrey Masonic Centre",
     address: "Hitherbury Close, Guildford GU2 4DR",
     type: "meeting",
