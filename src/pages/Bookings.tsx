@@ -8,11 +8,11 @@ import { Calendar, Clock, MapPin, Shirt, CalendarClock, UtensilsCrossed } from "
 import { useState } from "react";
 
 const meetingDetails = [
-  { icon: Calendar, label: "Meeting Date", value: "Wednesday, 18th February 2026" },
-  { icon: Clock, label: "Meeting Times", value: "Tyling at 5.30 pm prompt, Festive Board Dining at 7:45 pm" },
+  { icon: Calendar, label: "Meeting Date", value: "Wednesday, 15th April 2026" },
+  { icon: Clock, label: "Meeting Times", value: "Tyling at 6.00 pm prompt, Festive Board Dining at 7:45 pm" },
   { icon: MapPin, label: "Location", value: "Guildford Masonic Centre, Hitherbury Close, Portsmouth Road, Guildford GU2 4DR" },
   { icon: Shirt, label: "Dress Code", value: "Normal Masonic attire — Provincial, Black or Craft Tie, Dark Suit and White Gloves" },
-  { icon: CalendarClock, label: "Booking Deadline", value: "Wednesday, 11th February 2026" },
+  { icon: CalendarClock, label: "Booking Deadline", value: "Wednesday, 8th April 2026" },
 ];
 
 const menuItems = [
@@ -49,9 +49,9 @@ const Bookings = () => {
         canonical="/bookings"
         schema={[
           eventSchema({
-            name: "Double Initiation — February Meeting",
-            date: "2026-02-18T17:30:00",
-            description: "Double initiation ceremony at Weybridge Lodge No. 6787 with visit from the Provincial Grand Master.",
+            name: "Initiation Ceremony — April Meeting",
+            date: "2026-04-15T18:00:00",
+            description: "Initiation ceremony at Weybridge Lodge No. 6787 welcoming a new candidate into Freemasonry.",
           }),
           breadcrumbSchema([
             { name: "Home", url: "/" },
@@ -78,13 +78,13 @@ const Bookings = () => {
             >
               <div className="h-0.5 w-16 bg-gold mb-6" />
               <h2 className="text-2xl md:text-3xl font-serif text-foreground mb-4">
-                Double Initiation — February Meeting
+                Initiation Ceremony — April Meeting
               </h2>
               <p className="text-muted-foreground font-sans leading-relaxed mb-4">
-                W Bro. Julien Tidmarsh, Worshipful Master of Weybridge Lodge No. 6787, cordially invites you to attend a Double Initiation Meeting on <strong>Wednesday, 18th February 2026, commencing at 5.30 pm</strong>.
+                W Bro. Julien Tidmarsh, Worshipful Master of Weybridge Lodge No. 6787, cordially invites you to attend an Initiation Meeting on <strong>Wednesday, 15th April 2026, commencing at 6.00 pm</strong>.
               </p>
               <p className="text-muted-foreground font-sans leading-relaxed mb-4">
-                Weybridge Lodge is delighted to announce a truly special occasion: a double initiation ceremony welcoming two new candidates into Freemasonry. In addition, we will be honoured to receive an official visit from the <strong>Provincial Grand Master, RW Nicholas Burger</strong>.
+                Weybridge Lodge is delighted to announce a truly special occasion: another initiation ceremony welcoming one more new candidate into Freemasonry, our fifth of the year.
               </p>
               <p className="text-muted-foreground font-sans leading-relaxed mb-4">
                 For those who remember their own initiation, this is a chance to revisit the solemnity and symbolism of that first step. When shared between two candidates, it takes on a deeper resonance as these initiates begin their Masonic journey side by side.
@@ -185,7 +185,7 @@ const Bookings = () => {
                 Please complete the form below for yourself and any guests. Online payments can be made using Debit and Credit Cards. Bank transfers are also accepted.
               </p>
               <p className="text-gold font-sans text-sm font-semibold">
-                ALL BOOKINGS MUST BE RECEIVED BY WEDNESDAY, 11th FEBRUARY.
+                ALL BOOKINGS MUST BE RECEIVED BY WEDNESDAY, 8th APRIL.
               </p>
               <p className="text-primary-foreground/60 font-sans text-xs mt-2">
                 Queries? Email{" "}
