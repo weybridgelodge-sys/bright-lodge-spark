@@ -613,7 +613,7 @@ const LadiesFestival = () => {
                     type="submit"
                     className="w-full bg-gold-shimmer text-accent-foreground py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity h-auto"
                   >
-                    <Send className="w-4 h-4 mr-2" /> Send Booking Enquiry
+                    <Send className="w-4 h-4 mr-2" /> Secure My Place
                   </Button>
 
                   <p className="text-xs text-muted-foreground font-sans text-center">
