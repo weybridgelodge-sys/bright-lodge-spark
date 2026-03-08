@@ -340,7 +340,7 @@ const LadiesFestival = () => {
               </div>
 
               <p className="text-xs text-muted-foreground font-sans italic text-center pt-4">
-                Vegetarian, vegan, and other dietary requirements will be catered for — please advise when booking.
+                Other dietary requirements will of course be catered for — please advise us on your booking form.
               </p>
             </motion.div>
           </div>
