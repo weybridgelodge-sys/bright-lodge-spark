@@ -92,11 +92,50 @@ const ladiesFestivalSchema = {
   },
 };
 
+const menuChoices = {
+  starter: [
+    { value: "soup", label: "Roasted Butternut Squash Soup (V)" },
+    { value: "terrine", label: "Ham Hock & Pea Terrine" },
+  ],
+  main: [
+    { value: "chicken", label: "Corn Fed Chicken Breast (GF)" },
+    { value: "strudel", label: "Mediterranean Roasted Vegetable Strudel (V)" },
+  ],
+  dessert: [
+    { value: "sticky-toffee", label: "Sticky Toffee Pudding" },
+    { value: "frimley-mess", label: "Frimley Mess (V)" },
+  ],
+};
+
+type GuestInfo = {
+  name: string;
+  starter: string;
+  main: string;
+  dessert: string;
+};
+
 /* ── Component ── */
 const LadiesFestival = () => {
   const countdown = useCountdown();
   const { toast } = useToast();
   const [wineOrders, setWineOrders] = useState<Record<string, number>>({});
+  const [guestCount, setGuestCount] = useState(1);
+  const [guests, setGuests] = useState<GuestInfo[]>([{ name: "", starter: "", main: "", dessert: "" }]);
+
+  const updateGuestCount = (count: number) => {
+    const clamped = Math.max(1, Math.min(20, count));
+    setGuestCount(clamped);
+    setGuests((prev) => {
+      if (clamped > prev.length) {
+        return [...prev, ...Array.from({ length: clamped - prev.length }, () => ({ name: "", starter: "", main: "", dessert: "" }))];
+      }
+      return prev.slice(0, clamped);
+    });
+  };
+
+  const updateGuest = (index: number, field: keyof GuestInfo, value: string) => {
+    setGuests((prev) => prev.map((g, i) => (i === index ? { ...g, [field]: value } : g)));
+  };
 
   const updateWine = (id: string, delta: number) => {
     setWineOrders((prev) => {
