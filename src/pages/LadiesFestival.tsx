@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import {
   MapPin, Clock, Ticket, ExternalLink, Users, Music, Gift,
-  UtensilsCrossed, CalendarDays, Hotel, Car, Heart, Send,
+  UtensilsCrossed, CalendarDays, Hotel, Car, Heart, Send, Wine, Plus, Minus,
 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -35,13 +35,22 @@ function useCountdown() {
   return { days, hours, minutes, seconds };
 }
 
+/* ── Wine list ── */
+const wineOptions = [
+  { id: "prosecco", name: "Prosecco", price: 28, note: "per bottle" },
+  { id: "house-white", name: "House White Wine", price: 24, note: "per bottle" },
+  { id: "house-red", name: "House Red Wine", price: 24, note: "per bottle" },
+  { id: "champagne", name: "Champagne", price: 48, note: "per bottle" },
+];
+
 /* ── Booking form schema ── */
 const bookingSchema = z.object({
-  name: z.string().min(2, "Please enter your name"),
-  email: z.string().email("Please enter a valid email"),
+  name: z.string().trim().min(2, "Please enter your name").max(100, "Name must be under 100 characters"),
+  email: z.string().trim().email("Please enter a valid email").max(255, "Email must be under 255 characters"),
+  phone: z.string().trim().optional(),
   guests: z.string().min(1, "Please enter number of guests"),
-  dietary: z.string().optional(),
-  message: z.string().optional(),
+  dietary: z.string().max(500, "Please keep dietary notes under 500 characters").optional(),
+  message: z.string().max(1000, "Please keep your message under 1000 characters").optional(),
 });
 type BookingValues = z.infer<typeof bookingSchema>;
 
@@ -87,19 +96,58 @@ const ladiesFestivalSchema = {
 const LadiesFestival = () => {
   const countdown = useCountdown();
   const { toast } = useToast();
+  const [wineOrders, setWineOrders] = useState<Record<string, number>>({});
+
+  const updateWine = (id: string, delta: number) => {
+    setWineOrders((prev) => {
+      const current = prev[id] || 0;
+      const next = Math.max(0, current + delta);
+      if (next === 0) {
+        const { [id]: _, ...rest } = prev;
+        return rest;
+      }
+      return { ...prev, [id]: next };
+    });
+  };
+
+  const wineTotal = Object.entries(wineOrders).reduce((sum, [id, qty]) => {
+    const wine = wineOptions.find((w) => w.id === id);
+    return sum + (wine ? wine.price * qty : 0);
+  }, 0);
 
   const form = useForm<BookingValues>({
     resolver: zodResolver(bookingSchema),
-    defaultValues: { name: "", email: "", guests: "", dietary: "", message: "" },
+    defaultValues: { name: "", email: "", phone: "", guests: "", dietary: "", message: "" },
   });
 
   const onSubmit = (data: BookingValues) => {
-    const subject = encodeURIComponent("Ladies Festival 2026 – Ticket Enquiry");
+    const wineLines = Object.entries(wineOrders)
+      .filter(([, qty]) => qty > 0)
+      .map(([id, qty]) => {
+        const wine = wineOptions.find((w) => w.id === id);
+        return wine ? `  ${wine.name} x${qty} (£${wine.price * qty})` : "";
+      })
+      .join("\n");
+
+    const subject = encodeURIComponent("Ladies Festival 2026 – Booking");
     const body = encodeURIComponent(
-      `Name: ${data.name}\nEmail: ${data.email}\nGuests: ${data.guests}\nDietary: ${data.dietary || "None"}\n\n${data.message || ""}`
+      [
+        `Name: ${data.name}`,
+        `Email: ${data.email}`,
+        data.phone ? `Phone: ${data.phone}` : null,
+        `Number of Guests: ${data.guests}`,
+        `Dietary Requirements: ${data.dietary || "None"}`,
+        wineLines ? `\nWine Pre-Order:\n${wineLines}\nWine Total: £${wineTotal}` : null,
+        data.message ? `\nMessage: ${data.message}` : null,
+      ]
+        .filter(Boolean)
+        .join("\n")
     );
     window.location.href = `mailto:secretary@astolat.org?subject=${subject}&body=${body}`;
-    toast({ title: "Opening your email client…", description: "If nothing happens, please email secretary@astolat.org directly." });
+    toast({
+      title: "Opening your email client…",
+      description: "If nothing happens, please email secretary@astolat.org directly.",
+    });
   };
 
   const countdownUnits = [
@@ -206,7 +254,7 @@ const LadiesFestival = () => {
               </p>
             </motion.div>
 
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {[
                 { icon: UtensilsCrossed, title: "Three-Course Dinner", desc: "Exquisite dining with dietary requirements catered for" },
                 { icon: Music, title: "DJ & Dancing", desc: "Dance the night away until 1 am" },
@@ -226,26 +274,63 @@ const LadiesFestival = () => {
                 </motion.div>
               ))}
             </div>
+          </div>
+        </section>
+
+        {/* ── Menu ── */}
+        <section id="menu" className="py-16 md:py-24 bg-card scroll-mt-20">
+          <div className="container mx-auto px-4 sm:px-6 max-w-3xl">
+            <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="text-center mb-10">
+              <div className="h-0.5 w-16 bg-gold mx-auto mb-6" />
+              <h2 className="text-3xl md:text-4xl font-serif text-foreground">The Menu</h2>
+              <p className="text-muted-foreground font-sans mt-3">Three-course dinner with coffee &amp; petits fours</p>
+            </motion.div>
 
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-              className="mt-12 bg-card border border-border rounded-sm p-8 max-w-2xl mx-auto shadow-sm"
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="bg-warm-white border border-border rounded-sm p-8 md:p-10 shadow-sm space-y-8"
             >
-              <div className="flex items-center gap-3 mb-4">
-                <Ticket className="w-5 h-5 text-gold shrink-0" aria-hidden="true" />
-                <h3 className="font-serif text-foreground text-xl">Tickets</h3>
+              {[
+                {
+                  course: "Starter",
+                  title: "To Be Confirmed",
+                  description: "Details coming soon.",
+                },
+                {
+                  course: "Main Course",
+                  title: "To Be Confirmed",
+                  description: "Details coming soon.",
+                },
+                {
+                  course: "Dessert",
+                  title: "To Be Confirmed",
+                  description: "Details coming soon.",
+                },
+              ].map((item, i) => (
+                <div key={item.course} className={i > 0 ? "border-t border-border pt-8" : ""}>
+                  <p className="text-gold uppercase tracking-widest text-xs font-sans font-semibold mb-2">{item.course}</p>
+                  <h3 className="font-serif text-foreground text-xl mb-1">{item.title}</h3>
+                  <p className="text-sm text-muted-foreground font-sans">{item.description}</p>
+                </div>
+              ))}
+
+              <div className="border-t border-border pt-8">
+                <p className="text-gold uppercase tracking-widest text-xs font-sans font-semibold mb-2">To Finish</p>
+                <h3 className="font-serif text-foreground text-xl mb-1">Coffee &amp; Petits Fours</h3>
               </div>
-              <p className="text-3xl font-serif text-gold mb-1">£75 <span className="text-base text-muted-foreground font-sans">per person</span></p>
-              <p className="text-sm text-muted-foreground font-sans">Includes three-course dinner, entertainment and all activities.</p>
+
+              <p className="text-xs text-muted-foreground font-sans italic text-center pt-4">
+                Vegetarian, vegan, and other dietary requirements will be catered for — please advise when booking.
+              </p>
             </motion.div>
           </div>
         </section>
 
         {/* ── Venue & Accommodation ── */}
-        <section id="venue" className="py-16 md:py-24 bg-card scroll-mt-20">
+        <section id="venue" className="py-16 md:py-24 bg-warm-white scroll-mt-20">
           <div className="container mx-auto px-4 sm:px-6 max-w-5xl">
             <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="text-center mb-12">
               <div className="h-0.5 w-16 bg-gold mx-auto mb-6" />
@@ -297,12 +382,12 @@ const LadiesFestival = () => {
                 </div>
               </motion.div>
 
-              {/* Map */}
+              {/* Map — centred on Macdonald Frimley Hall Hotel using place ID */}
               <motion.div initial={{ opacity: 0, x: 20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }}>
                 <div className="border border-border rounded-sm overflow-hidden shadow-sm h-full min-h-[320px]">
                   <iframe
                     title="Macdonald Frimley Hall Hotel location"
-                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2504.8!2d-0.7473!3d51.3172!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x48742e8b8b8b8b8b%3A0x1234567890abcdef!2sMacdonald+Frimley+Hall+Hotel!5e0!3m2!1sen!2suk!4v1700000000000!5m2!1sen!2suk"
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2498.5!2d-0.7438!3d51.3189!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4875d3b0b1b6e6e7%3A0x9c2b84e50c84a30e!2sMacdonald%20Frimley%20Hall%20Hotel%20%26%20Spa!5e0!3m2!1sen!2suk!4v1700000000001!5m2!1sen!2suk"
                     width="100%"
                     height="100%"
                     style={{ border: 0, minHeight: "320px" }}
@@ -317,7 +402,7 @@ const LadiesFestival = () => {
         </section>
 
         {/* ── Charity Spotlight ── */}
-        <section className="py-16 md:py-24 bg-warm-white">
+        <section className="py-16 md:py-24 bg-card">
           <div className="container mx-auto px-4 sm:px-6 max-w-4xl">
             <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }}>
               <div className="text-center mb-10">
@@ -325,7 +410,7 @@ const LadiesFestival = () => {
                 <h2 className="text-3xl md:text-4xl font-serif text-foreground">In Aid of Guildford Young Carers</h2>
               </div>
 
-              <div className="bg-card border border-border rounded-sm p-8 md:p-10 shadow-sm">
+              <div className="bg-warm-white border border-border rounded-sm p-8 md:p-10 shadow-sm">
                 <div className="flex items-center gap-3 mb-6">
                   <Heart className="w-6 h-6 text-gold" aria-hidden="true" />
                   <h3 className="font-serif text-foreground text-xl">Making a Difference Locally</h3>
@@ -366,20 +451,20 @@ const LadiesFestival = () => {
           </div>
         </section>
 
-        {/* ── Booking Enquiry Form ── */}
-        <section id="booking" className="py-16 md:py-24 bg-card scroll-mt-20">
+        {/* ── Booking Form with Wine Pre-Order ── */}
+        <section id="booking" className="py-16 md:py-24 bg-warm-white scroll-mt-20">
           <div className="container mx-auto px-4 sm:px-6 max-w-2xl">
             <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="text-center mb-10">
               <div className="h-0.5 w-16 bg-gold mx-auto mb-6" />
-              <h2 className="text-3xl md:text-4xl font-serif text-foreground">Enquire About Tickets</h2>
+              <h2 className="text-3xl md:text-4xl font-serif text-foreground">Book Your Tickets</h2>
               <p className="text-muted-foreground font-sans mt-3 max-w-lg mx-auto">
-                Complete the form below and we'll be in touch to confirm your booking.
+                £75 per person &bull; Complete the form below and we'll be in touch to confirm your booking.
               </p>
             </motion.div>
 
             <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.2 }}>
               <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 bg-warm-white border border-border rounded-sm p-8 shadow-sm">
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 bg-card border border-border rounded-sm p-8 shadow-sm">
                   <FormField
                     control={form.control}
                     name="name"
@@ -394,19 +479,34 @@ const LadiesFestival = () => {
                     )}
                   />
 
-                  <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="font-sans text-foreground">Email Address *</FormLabel>
-                        <FormControl>
-                          <Input type="email" placeholder="john@example.com" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  <div className="grid sm:grid-cols-2 gap-6">
+                    <FormField
+                      control={form.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="font-sans text-foreground">Email Address *</FormLabel>
+                          <FormControl>
+                            <Input type="email" placeholder="john@example.com" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="phone"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="font-sans text-foreground">Phone Number</FormLabel>
+                          <FormControl>
+                            <Input type="tel" placeholder="07xxx xxxxxx" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
 
                   <FormField
                     control={form.control}
@@ -415,7 +515,7 @@ const LadiesFestival = () => {
                       <FormItem>
                         <FormLabel className="font-sans text-foreground">Number of Guests *</FormLabel>
                         <FormControl>
-                          <Input type="number" min="1" placeholder="2" {...field} />
+                          <Input type="number" min="1" max="20" placeholder="2" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -436,6 +536,65 @@ const LadiesFestival = () => {
                     )}
                   />
 
+                  {/* ── Wine Pre-Order ── */}
+                  <div className="border-t border-border pt-6">
+                    <div className="flex items-center gap-2 mb-4">
+                      <Wine className="w-5 h-5 text-gold" aria-hidden="true" />
+                      <h3 className="font-serif text-foreground text-lg">Pre-Order Wine for Your Table</h3>
+                    </div>
+                    <p className="text-sm text-muted-foreground font-sans mb-5">
+                      Save time on the night — pre-order bottles for your party and they'll be waiting at your table.
+                    </p>
+
+                    <div className="space-y-4">
+                      {wineOptions.map((wine) => {
+                        const qty = wineOrders[wine.id] || 0;
+                        return (
+                          <div
+                            key={wine.id}
+                            className="flex items-center justify-between gap-4 bg-warm-white border border-border rounded-sm p-4"
+                          >
+                            <div className="min-w-0">
+                              <p className="font-sans font-medium text-foreground text-sm">{wine.name}</p>
+                              <p className="text-xs text-muted-foreground font-sans">
+                                £{wine.price} {wine.note}
+                              </p>
+                            </div>
+                            <div className="flex items-center gap-2 shrink-0">
+                              <button
+                                type="button"
+                                onClick={() => updateWine(wine.id, -1)}
+                                disabled={qty === 0}
+                                className="w-8 h-8 rounded-sm border border-border flex items-center justify-center text-muted-foreground hover:bg-muted/50 disabled:opacity-30 transition-colors"
+                                aria-label={`Remove one ${wine.name}`}
+                              >
+                                <Minus className="w-4 h-4" />
+                              </button>
+                              <span className="w-8 text-center font-sans text-sm font-medium text-foreground tabular-nums">
+                                {qty}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => updateWine(wine.id, 1)}
+                                className="w-8 h-8 rounded-sm border border-border flex items-center justify-center text-muted-foreground hover:bg-muted/50 transition-colors"
+                                aria-label={`Add one ${wine.name}`}
+                              >
+                                <Plus className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {wineTotal > 0 && (
+                      <p className="mt-4 text-right font-sans text-sm">
+                        <span className="text-muted-foreground">Wine total: </span>
+                        <span className="font-semibold text-foreground">£{wineTotal}</span>
+                      </p>
+                    )}
+                  </div>
+
                   <FormField
                     control={form.control}
                     name="message"
@@ -450,8 +609,11 @@ const LadiesFestival = () => {
                     )}
                   />
 
-                  <Button type="submit" className="w-full bg-gold-shimmer text-accent-foreground py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity h-auto">
-                    <Send className="w-4 h-4 mr-2" /> Send Enquiry
+                  <Button
+                    type="submit"
+                    className="w-full bg-gold-shimmer text-accent-foreground py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity h-auto"
+                  >
+                    <Send className="w-4 h-4 mr-2" /> Send Booking Enquiry
                   </Button>
 
                   <p className="text-xs text-muted-foreground font-sans text-center">
