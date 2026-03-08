@@ -852,7 +852,7 @@ const LadiesFestival = () => {
                       <Button
                         type="button"
                         onClick={() => goToStep(2)}
-                        className="w-full bg-gold-shimmer text-accent-foreground py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity h-auto"
+                        className="w-full bg-gold-shimmer text-accent-foreground py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity h-auto whitespace-normal text-center leading-snug"
                       >
                         Continue to Drinks Pre-Order <ChevronRight className="w-4 h-4 ml-2" />
                       </Button>
