@@ -231,7 +231,7 @@ const LadiesFestival = () => {
                 href="#booking"
                 className="inline-flex items-center justify-center bg-gold-shimmer text-accent-foreground px-8 py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity"
               >
-                Book Tickets
+                Reserve Your Place
               </a>
               <a
                 href="#venue"
@@ -456,7 +456,7 @@ const LadiesFestival = () => {
           <div className="container mx-auto px-4 sm:px-6 max-w-2xl">
             <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="text-center mb-10">
               <div className="h-0.5 w-16 bg-gold mx-auto mb-6" />
-              <h2 className="text-3xl md:text-4xl font-serif text-foreground">Book Your Tickets</h2>
+              <h2 className="text-3xl md:text-4xl font-serif text-foreground">Secure Your Seat</h2>
               <p className="text-muted-foreground font-sans mt-3 max-w-lg mx-auto">
                 £75 per person &bull; Complete the form below and we'll be in touch to confirm your booking.
               </p>
@@ -613,7 +613,7 @@ const LadiesFestival = () => {
                     type="submit"
                     className="w-full bg-gold-shimmer text-accent-foreground py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity h-auto"
                   >
-                    <Send className="w-4 h-4 mr-2" /> Send Booking Enquiry
+                    <Send className="w-4 h-4 mr-2" /> Secure My Place
                   </Button>
 
                   <p className="text-xs text-muted-foreground font-sans text-center">
