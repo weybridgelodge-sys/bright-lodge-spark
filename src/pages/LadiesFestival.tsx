@@ -329,7 +329,7 @@ const LadiesFestival = () => {
                     <p className="text-sm text-muted-foreground font-sans">Toffee sauce, clotted cream ice cream</p>
                   </div>
                   <div>
-                    <h3 className="font-serif text-foreground text-lg">Frimley Mess</h3>
+                    <h3 className="font-serif text-foreground text-lg">Frimley Mess <span className="italic text-sm text-muted-foreground">(V)</span></h3>
                   </div>
                 </div>
               </div>
