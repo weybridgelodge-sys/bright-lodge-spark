@@ -58,6 +58,7 @@ const bookingSchema = z.object({
   email: z.string().trim().email("Please enter a valid email").max(255, "Email must be under 255 characters"),
   phone: z.string().trim().optional(),
   guests: z.string().min(1, "Please enter number of guests"),
+  seatingPreference: z.string().max(500, "Please keep seating notes under 500 characters").optional(),
   dietary: z.string().max(500, "Please keep dietary notes under 500 characters").optional(),
   message: z.string().max(1000, "Please keep your message under 1000 characters").optional(),
 });
