@@ -129,8 +129,24 @@ const LadiesFestival = () => {
   const countdown = useCountdown();
   const { toast } = useToast();
   const [wineOrders, setWineOrders] = useState<Record<string, number>>({});
+  const [beerOrders, setBeerOrders] = useState<Record<string, number>>({});
   const [guestCount, setGuestCount] = useState(1);
   const [guests, setGuests] = useState<GuestInfo[]>([{ name: "", starter: "", main: "", dessert: "" }]);
+  const [formStep, setFormStep] = useState(1);
+
+  const form = useForm<BookingValues>({
+    resolver: zodResolver(bookingSchema),
+    defaultValues: { name: "", email: "", phone: "", guests: "", seatingPreference: "", dietary: "", message: "" },
+  });
+
+  const contactName = form.watch("name");
+
+  // Prefill guest 1 name with contact name when only 1 guest
+  useEffect(() => {
+    if (guestCount === 1 && contactName) {
+      setGuests((prev) => [{ ...prev[0], name: contactName }]);
+    }
+  }, [contactName, guestCount]);
 
   const updateGuestCount = (count: number) => {
     const clamped = Math.max(1, Math.min(20, count));
@@ -159,17 +175,31 @@ const LadiesFestival = () => {
     });
   };
 
+  const updateBeer = (id: string, delta: number) => {
+    setBeerOrders((prev) => {
+      const current = prev[id] || 0;
+      const next = Math.max(0, current + delta);
+      if (next === 0) {
+        const { [id]: _, ...rest } = prev;
+        return rest;
+      }
+      return { ...prev, [id]: next };
+    });
+  };
+
   const wineTotal = Object.entries(wineOrders).reduce((sum, [id, qty]) => {
     const wine = wineOptions.find((w) => w.id === id);
     return sum + (wine ? wine.price * qty : 0);
   }, 0);
 
-  const form = useForm<BookingValues>({
-    resolver: zodResolver(bookingSchema),
-    defaultValues: { name: "", email: "", phone: "", guests: "", dietary: "", message: "" },
-  });
+  const beerTotal = Object.entries(beerOrders).reduce((sum, [id, qty]) => {
+    const beer = beerOptions.find((b) => b.id === id);
+    return sum + (beer ? beer.price * qty : 0);
+  }, 0);
 
-  const onSubmit = (data: BookingValues) => {
+  const ticketSubtotal = guestCount * TICKET_PRICE;
+  const drinksTotal = wineTotal + beerTotal;
+  const grandTotal = ticketSubtotal + drinksTotal;
     const wineLines = Object.entries(wineOrders)
       .filter(([, qty]) => qty > 0)
       .map(([id, qty]) => {
