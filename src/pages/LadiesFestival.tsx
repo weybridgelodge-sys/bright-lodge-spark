@@ -43,6 +43,15 @@ const wineOptions = [
   { id: "champagne", name: "Champagne", price: 48, note: "per bottle" },
 ];
 
+/* ── Beer list ── */
+const beerOptions = [
+  { id: "lager", name: "Lager (Pint)", price: 6, note: "per pint" },
+  { id: "ale", name: "Ale (Pint)", price: 6, note: "per pint" },
+  { id: "beer-bucket", name: "Beer Bucket (5 bottles)", price: 25, note: "per bucket" },
+];
+
+const TICKET_PRICE = 75;
+
 /* ── Booking form schema ── */
 const bookingSchema = z.object({
   name: z.string().trim().min(2, "Please enter your name").max(100, "Name must be under 100 characters"),
