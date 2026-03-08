@@ -314,6 +314,9 @@ const LadiesFestival = () => {
               <p className="text-primary-foreground/60 font-sans text-base">
                 Saturday 22nd August 2026 &bull; 6.30 pm – 1.00 am
               </p>
+              <p className="text-primary-foreground/50 font-sans text-sm mt-1">
+                Macdonald Frimley Hall Hotel &amp; Spa
+              </p>
             </motion.div>
 
             {/* Countdown */}
