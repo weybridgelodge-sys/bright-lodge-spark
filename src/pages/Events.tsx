@@ -21,6 +21,7 @@ interface LodgeEvent {
   type: "meeting" | "social" | "loi";
   description?: string;
   highlight?: boolean;
+  link?: string;
 }
 
 const events: LodgeEvent[] = [
@@ -61,6 +62,7 @@ const events: LodgeEvent[] = [
     type: "social",
     description: "Black Tie evening in aid of Guildford Young Carers featuring three-course dinner, DJ, Grand Raffle, and more.",
     highlight: true,
+    link: "/ladies-festival",
   },
 ];
 
@@ -248,6 +250,15 @@ const Events = () => {
                         </div>
                         {ev.description && (
                           <p className="mt-3 text-sm text-muted-foreground font-sans leading-relaxed">{ev.description}</p>
+                        )}
+                        {ev.link && (
+                          <Link
+                            to={ev.link}
+                            className="inline-flex items-center gap-1.5 mt-4 text-sm font-sans font-medium text-gold hover:opacity-80 transition-opacity"
+                          >
+                            View Full Details
+                            <ExternalLink className="w-3.5 h-3.5" />
+                          </Link>
                         )}
                       </div>
                     </motion.div>
