@@ -57,7 +57,7 @@ const TICKET_PRICE = 75;
 const bookingSchema = z.object({
   name: z.string().trim().min(2, "Please enter your name").max(100, "Name must be under 100 characters"),
   email: z.string().trim().email("Please enter a valid email").max(255, "Email must be under 255 characters"),
-  phone: z.string().trim().optional(),
+  phone: z.string().trim().min(5, "Please enter a valid phone number").max(20, "Phone number must be under 20 characters"),
   guests: z.string().min(1, "Please enter number of guests"),
   seatingPreference: z.string().max(500, "Please keep seating notes under 500 characters").optional(),
   dietary: z.string().max(500, "Please keep dietary notes under 500 characters").optional(),
