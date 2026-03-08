@@ -297,7 +297,7 @@ const LadiesFestival = () => {
                 <p className="text-gold uppercase tracking-widest text-xs font-sans font-semibold mb-3">Starters</p>
                 <div className="space-y-3">
                   <div>
-                    <h3 className="font-serif text-foreground text-lg">Roasted Butternut Squash Soup</h3>
+                    <h3 className="font-serif text-foreground text-lg">Roasted Butternut Squash Soup <span className="italic text-sm text-muted-foreground">(V)</span></h3>
                     <p className="text-sm text-muted-foreground font-sans">Curried oil</p>
                   </div>
                   <div>
@@ -315,7 +315,7 @@ const LadiesFestival = () => {
                     <p className="text-sm text-muted-foreground font-sans">Red wine jus, thyme roasted potato, glazed carrots and fine beans <span className="italic">(GF)</span></p>
                   </div>
                   <div>
-                    <h3 className="font-serif text-foreground text-lg">Mediterranean Roasted Vegetable Strudel</h3>
+                    <h3 className="font-serif text-foreground text-lg">Mediterranean Roasted Vegetable Strudel <span className="italic text-sm text-muted-foreground">(V)</span></h3>
                     <p className="text-sm text-muted-foreground font-sans">Thyme roasted potato and broccoli basil tomato sauce</p>
                   </div>
                 </div>
@@ -329,7 +329,7 @@ const LadiesFestival = () => {
                     <p className="text-sm text-muted-foreground font-sans">Toffee sauce, clotted cream ice cream</p>
                   </div>
                   <div>
-                    <h3 className="font-serif text-foreground text-lg">Frimley Mess</h3>
+                    <h3 className="font-serif text-foreground text-lg">Frimley Mess <span className="italic text-sm text-muted-foreground">(V)</span></h3>
                   </div>
                 </div>
               </div>
@@ -340,7 +340,7 @@ const LadiesFestival = () => {
               </div>
 
               <p className="text-xs text-muted-foreground font-sans italic text-center pt-4">
-                Vegetarian, vegan, and other dietary requirements will be catered for — please advise when booking.
+                Other dietary requirements will of course be catered for — please advise us on your booking form.
               </p>
             </motion.div>
           </div>
