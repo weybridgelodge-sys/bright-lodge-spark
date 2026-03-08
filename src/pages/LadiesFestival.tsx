@@ -586,7 +586,7 @@ const LadiesFestival = () => {
           </div>
         </section>
 
-        {/* ── Booking Form with Wine Pre-Order ── */}
+        {/* ── Booking Form – Multi-Step ── */}
         <section id="booking" className="py-16 md:py-24 bg-warm-white scroll-mt-20">
           <div className="container mx-auto px-4 sm:px-6 max-w-2xl">
             <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="text-center mb-10">
@@ -597,253 +597,503 @@ const LadiesFestival = () => {
               </p>
             </motion.div>
 
+            {/* Step indicators */}
+            <div className="flex items-center justify-center gap-2 mb-8">
+              {[
+                { num: 1, label: "Booking Details" },
+                { num: 2, label: "Drinks Pre-Order" },
+                { num: 3, label: "Review & Submit" },
+              ].map((s, i) => (
+                <div key={s.num} className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => s.num < formStep && setFormStep(s.num)}
+                    className={`flex items-center gap-1.5 text-sm font-sans transition-colors ${
+                      formStep === s.num
+                        ? "text-gold font-semibold"
+                        : formStep > s.num
+                          ? "text-foreground cursor-pointer hover:text-gold"
+                          : "text-muted-foreground"
+                    }`}
+                  >
+                    <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold border ${
+                      formStep === s.num
+                        ? "bg-gold text-accent-foreground border-gold"
+                        : formStep > s.num
+                          ? "bg-foreground text-background border-foreground"
+                          : "border-border text-muted-foreground"
+                    }`}>
+                      {s.num}
+                    </span>
+                    <span className="hidden sm:inline">{s.label}</span>
+                  </button>
+                  {i < 2 && <ChevronRight className="w-4 h-4 text-muted-foreground" />}
+                </div>
+              ))}
+            </div>
+
             <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.2 }}>
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 bg-card border border-border rounded-sm p-8 shadow-sm">
-                  <FormField
-                    control={form.control}
-                    name="name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="font-sans text-foreground">Full Name *</FormLabel>
-                        <FormControl>
-                          <Input placeholder="John Smith" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
 
-                  <div className="grid sm:grid-cols-2 gap-6">
-                    <FormField
-                      control={form.control}
-                      name="email"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="font-sans text-foreground">Email Address *</FormLabel>
-                          <FormControl>
-                            <Input type="email" placeholder="john@example.com" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="phone"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="font-sans text-foreground">Phone Number</FormLabel>
-                          <FormControl>
-                            <Input type="tel" placeholder="07xxx xxxxxx" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  {/* Number of Guests */}
-                  <FormField
-                    control={form.control}
-                    name="guests"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="font-sans text-foreground">Number of Guests *</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            min="1"
-                            max="20"
-                            placeholder="2"
-                            {...field}
-                            onChange={(e) => {
-                              field.onChange(e);
-                              const val = parseInt(e.target.value);
-                              if (!isNaN(val) && val > 0) updateGuestCount(val);
-                            }}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  {/* Guest Names */}
-                  <div className="border-t border-border pt-6">
-                    <div className="flex items-center gap-2 mb-4">
-                      <Users className="w-5 h-5 text-gold" aria-hidden="true" />
-                      <h3 className="font-serif text-foreground text-lg">Guest Names</h3>
-                    </div>
-                    <div className="space-y-3">
-                      {guests.map((guest, i) => (
-                        <div key={i}>
-                          <label className="text-sm font-sans text-foreground font-medium mb-1.5 block">Guest {i + 1}</label>
-                          <Input
-                            placeholder={`Guest ${i + 1} full name`}
-                            value={guest.name}
-                            onChange={(e) => updateGuest(i, "name", e.target.value)}
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Menu Choices */}
-                  <div className="border-t border-border pt-6">
-                    <div className="flex items-center gap-2 mb-4">
-                      <UtensilsCrossed className="w-5 h-5 text-gold" aria-hidden="true" />
-                      <h3 className="font-serif text-foreground text-lg">Menu Choices</h3>
-                    </div>
-                    <p className="text-sm text-muted-foreground font-sans mb-5">
-                      Please select a starter, main and dessert for each guest.
-                    </p>
+                  {/* ═══ STEP 1: Booking Details ═══ */}
+                  {formStep === 1 && (
                     <div className="space-y-6">
-                      {guests.map((guest, i) => (
-                        <div key={i} className="bg-warm-white border border-border rounded-sm p-4 space-y-3">
-                          <p className="font-sans font-medium text-foreground text-sm">{guest.name || `Guest ${i + 1}`}</p>
-                          <div>
-                            <label className="text-xs font-sans text-muted-foreground uppercase tracking-wider mb-1 block">Starter</label>
-                            <select
-                              value={guest.starter}
-                              onChange={(e) => updateGuest(i, "starter", e.target.value)}
-                              className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm font-sans text-foreground ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                            >
-                              <option value="">Select starter…</option>
-                              {menuChoices.starter.map((c) => (
-                                <option key={c.value} value={c.value}>{c.label}</option>
-                              ))}
-                            </select>
+                      <FormField
+                        control={form.control}
+                        name="name"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="font-sans text-foreground">Full Name *</FormLabel>
+                            <FormControl>
+                              <Input placeholder="John Smith" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <div className="grid sm:grid-cols-2 gap-6">
+                        <FormField
+                          control={form.control}
+                          name="email"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="font-sans text-foreground">Email Address *</FormLabel>
+                              <FormControl>
+                                <Input type="email" placeholder="john@example.com" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="phone"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="font-sans text-foreground">Phone Number</FormLabel>
+                              <FormControl>
+                                <Input type="tel" placeholder="07xxx xxxxxx" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+
+                      {/* Number of Guests */}
+                      <FormField
+                        control={form.control}
+                        name="guests"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="font-sans text-foreground">Number of Guests *</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                min="1"
+                                max="20"
+                                placeholder="2"
+                                {...field}
+                                onChange={(e) => {
+                                  field.onChange(e);
+                                  const val = parseInt(e.target.value);
+                                  if (!isNaN(val) && val > 0) updateGuestCount(val);
+                                }}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      {/* Guest Names */}
+                      <div className="border-t border-border pt-6">
+                        <div className="flex items-center gap-2 mb-4">
+                          <Users className="w-5 h-5 text-gold" aria-hidden="true" />
+                          <h3 className="font-serif text-foreground text-lg">Guest Names</h3>
+                        </div>
+                        <div className="space-y-3">
+                          {guests.map((guest, i) => (
+                            <div key={i}>
+                              <label className="text-sm font-sans text-foreground font-medium mb-1.5 block">Guest {i + 1}</label>
+                              <Input
+                                placeholder={`Guest ${i + 1} full name`}
+                                value={guest.name}
+                                onChange={(e) => updateGuest(i, "name", e.target.value)}
+                                disabled={i === 0 && guestCount === 1}
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Table Seating Preference */}
+                      <FormField
+                        control={form.control}
+                        name="seatingPreference"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="font-sans text-foreground">Table Seating Preference</FormLabel>
+                            <FormControl>
+                              <Textarea placeholder="e.g. We'd like to sit with the Jones party" rows={2} {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      {/* Menu Choices */}
+                      <div className="border-t border-border pt-6">
+                        <div className="flex items-center gap-2 mb-4">
+                          <UtensilsCrossed className="w-5 h-5 text-gold" aria-hidden="true" />
+                          <h3 className="font-serif text-foreground text-lg">Menu Choices</h3>
+                        </div>
+                        <p className="text-sm text-muted-foreground font-sans mb-5">
+                          Please select a starter, main and dessert for each guest.
+                        </p>
+                        <div className="space-y-6">
+                          {guests.map((guest, i) => (
+                            <div key={i} className="bg-warm-white border border-border rounded-sm p-4 space-y-3">
+                              <p className="font-sans font-medium text-foreground text-sm">{guest.name || `Guest ${i + 1}`}</p>
+                              <div>
+                                <label className="text-xs font-sans text-muted-foreground uppercase tracking-wider mb-1 block">Starter</label>
+                                <select
+                                  value={guest.starter}
+                                  onChange={(e) => updateGuest(i, "starter", e.target.value)}
+                                  className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm font-sans text-foreground ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                >
+                                  <option value="">Select starter…</option>
+                                  {menuChoices.starter.map((c) => (
+                                    <option key={c.value} value={c.value}>{c.label}</option>
+                                  ))}
+                                </select>
+                              </div>
+                              <div>
+                                <label className="text-xs font-sans text-muted-foreground uppercase tracking-wider mb-1 block">Main</label>
+                                <select
+                                  value={guest.main}
+                                  onChange={(e) => updateGuest(i, "main", e.target.value)}
+                                  className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm font-sans text-foreground ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                >
+                                  <option value="">Select main…</option>
+                                  {menuChoices.main.map((c) => (
+                                    <option key={c.value} value={c.value}>{c.label}</option>
+                                  ))}
+                                </select>
+                              </div>
+                              <div>
+                                <label className="text-xs font-sans text-muted-foreground uppercase tracking-wider mb-1 block">Dessert</label>
+                                <select
+                                  value={guest.dessert}
+                                  onChange={(e) => updateGuest(i, "dessert", e.target.value)}
+                                  className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm font-sans text-foreground ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                >
+                                  <option value="">Select dessert…</option>
+                                  {menuChoices.dessert.map((c) => (
+                                    <option key={c.value} value={c.value}>{c.label}</option>
+                                  ))}
+                                </select>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Dietary Requirements */}
+                      <FormField
+                        control={form.control}
+                        name="dietary"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="font-sans text-foreground">Dietary Requirements</FormLabel>
+                            <FormControl>
+                              <Input placeholder="e.g. Gluten-free, nut allergy" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      {/* Ticket Subtotal */}
+                      <div className="border-t border-border pt-6">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <Ticket className="w-5 h-5 text-gold" aria-hidden="true" />
+                            <span className="font-sans text-foreground font-medium">Ticket Subtotal</span>
                           </div>
-                          <div>
-                            <label className="text-xs font-sans text-muted-foreground uppercase tracking-wider mb-1 block">Main</label>
-                            <select
-                              value={guest.main}
-                              onChange={(e) => updateGuest(i, "main", e.target.value)}
-                              className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm font-sans text-foreground ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                            >
-                              <option value="">Select main…</option>
-                              {menuChoices.main.map((c) => (
-                                <option key={c.value} value={c.value}>{c.label}</option>
-                              ))}
-                            </select>
-                          </div>
-                          <div>
-                            <label className="text-xs font-sans text-muted-foreground uppercase tracking-wider mb-1 block">Dessert</label>
-                            <select
-                              value={guest.dessert}
-                              onChange={(e) => updateGuest(i, "dessert", e.target.value)}
-                              className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm font-sans text-foreground ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                            >
-                              <option value="">Select dessert…</option>
-                              {menuChoices.dessert.map((c) => (
-                                <option key={c.value} value={c.value}>{c.label}</option>
-                              ))}
-                            </select>
+                          <div className="text-right">
+                            <p className="font-sans text-foreground font-semibold text-lg">£{ticketSubtotal}</p>
+                            <p className="text-xs text-muted-foreground font-sans">{guestCount} × £{TICKET_PRICE}</p>
                           </div>
                         </div>
-                      ))}
+                      </div>
+
+                      <Button
+                        type="button"
+                        onClick={() => goToStep(2)}
+                        className="w-full bg-gold-shimmer text-accent-foreground py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity h-auto"
+                      >
+                        Continue to Drinks Pre-Order <ChevronRight className="w-4 h-4 ml-2" />
+                      </Button>
                     </div>
-                  </div>
+                  )}
 
-                  {/* Dietary Requirements */}
-                  <FormField
-                    control={form.control}
-                    name="dietary"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="font-sans text-foreground">Dietary Requirements</FormLabel>
-                        <FormControl>
-                          <Input placeholder="e.g. Gluten-free, nut allergy" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  {/* ═══ STEP 2: Drinks Pre-Order ═══ */}
+                  {formStep === 2 && (
+                    <div className="space-y-6">
+                      {/* Wine Pre-Order */}
+                      <div>
+                        <div className="flex items-center gap-2 mb-4">
+                          <Wine className="w-5 h-5 text-gold" aria-hidden="true" />
+                          <h3 className="font-serif text-foreground text-lg">Pre-Order Wine for Your Table</h3>
+                        </div>
+                        <p className="text-sm text-muted-foreground font-sans mb-5">
+                          Save time on the night — pre-order bottles for your party and they'll be waiting at your table.
+                        </p>
 
-                  {/* ── Wine Pre-Order ── */}
-                  <div className="border-t border-border pt-6">
-                    <div className="flex items-center gap-2 mb-4">
-                      <Wine className="w-5 h-5 text-gold" aria-hidden="true" />
-                      <h3 className="font-serif text-foreground text-lg">Pre-Order Wine for Your Table</h3>
+                        <div className="space-y-4">
+                          {wineOptions.map((wine) => {
+                            const qty = wineOrders[wine.id] || 0;
+                            return (
+                              <div
+                                key={wine.id}
+                                className="flex items-center justify-between gap-4 bg-warm-white border border-border rounded-sm p-4"
+                              >
+                                <div className="min-w-0">
+                                  <p className="font-sans font-medium text-foreground text-sm">{wine.name}</p>
+                                  <p className="text-xs text-muted-foreground font-sans">
+                                    £{wine.price} {wine.note}
+                                  </p>
+                                </div>
+                                <div className="flex items-center gap-2 shrink-0">
+                                  <button
+                                    type="button"
+                                    onClick={() => updateWine(wine.id, -1)}
+                                    disabled={qty === 0}
+                                    className="w-8 h-8 rounded-sm border border-border flex items-center justify-center text-muted-foreground hover:bg-muted/50 disabled:opacity-30 transition-colors"
+                                    aria-label={`Remove one ${wine.name}`}
+                                  >
+                                    <Minus className="w-4 h-4" />
+                                  </button>
+                                  <span className="w-8 text-center font-sans text-sm font-medium text-foreground tabular-nums">
+                                    {qty}
+                                  </span>
+                                  <button
+                                    type="button"
+                                    onClick={() => updateWine(wine.id, 1)}
+                                    className="w-8 h-8 rounded-sm border border-border flex items-center justify-center text-muted-foreground hover:bg-muted/50 transition-colors"
+                                    aria-label={`Add one ${wine.name}`}
+                                  >
+                                    <Plus className="w-4 h-4" />
+                                  </button>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+
+                        {wineTotal > 0 && (
+                          <p className="mt-4 text-right font-sans text-sm">
+                            <span className="text-muted-foreground">Wine total: </span>
+                            <span className="font-semibold text-foreground">£{wineTotal}</span>
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Beer Pre-Order */}
+                      <div className="border-t border-border pt-6">
+                        <div className="flex items-center gap-2 mb-4">
+                          <Beer className="w-5 h-5 text-gold" aria-hidden="true" />
+                          <h3 className="font-serif text-foreground text-lg">Pre-Order Beer</h3>
+                        </div>
+
+                        <div className="space-y-4">
+                          {beerOptions.map((beer) => {
+                            const qty = beerOrders[beer.id] || 0;
+                            return (
+                              <div
+                                key={beer.id}
+                                className="flex items-center justify-between gap-4 bg-warm-white border border-border rounded-sm p-4"
+                              >
+                                <div className="min-w-0">
+                                  <p className="font-sans font-medium text-foreground text-sm">{beer.name}</p>
+                                  <p className="text-xs text-muted-foreground font-sans">
+                                    £{beer.price} {beer.note}
+                                  </p>
+                                </div>
+                                <div className="flex items-center gap-2 shrink-0">
+                                  <button
+                                    type="button"
+                                    onClick={() => updateBeer(beer.id, -1)}
+                                    disabled={qty === 0}
+                                    className="w-8 h-8 rounded-sm border border-border flex items-center justify-center text-muted-foreground hover:bg-muted/50 disabled:opacity-30 transition-colors"
+                                    aria-label={`Remove one ${beer.name}`}
+                                  >
+                                    <Minus className="w-4 h-4" />
+                                  </button>
+                                  <span className="w-8 text-center font-sans text-sm font-medium text-foreground tabular-nums">
+                                    {qty}
+                                  </span>
+                                  <button
+                                    type="button"
+                                    onClick={() => updateBeer(beer.id, 1)}
+                                    className="w-8 h-8 rounded-sm border border-border flex items-center justify-center text-muted-foreground hover:bg-muted/50 transition-colors"
+                                    aria-label={`Add one ${beer.name}`}
+                                  >
+                                    <Plus className="w-4 h-4" />
+                                  </button>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+
+                        {beerTotal > 0 && (
+                          <p className="mt-4 text-right font-sans text-sm">
+                            <span className="text-muted-foreground">Beer total: </span>
+                            <span className="font-semibold text-foreground">£{beerTotal}</span>
+                          </p>
+                        )}
+                      </div>
+
+                      {drinksTotal > 0 && (
+                        <div className="border-t border-border pt-4">
+                          <p className="text-right font-sans text-sm">
+                            <span className="text-muted-foreground">Drinks total: </span>
+                            <span className="font-semibold text-foreground">£{drinksTotal}</span>
+                          </p>
+                        </div>
+                      )}
+
+                      <div className="flex gap-4">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => setFormStep(1)}
+                          className="flex-1 py-4 rounded-sm text-sm font-sans uppercase tracking-widest h-auto"
+                        >
+                          <ChevronLeft className="w-4 h-4 mr-2" /> Back
+                        </Button>
+                        <Button
+                          type="button"
+                          onClick={() => setFormStep(3)}
+                          className="flex-1 bg-gold-shimmer text-accent-foreground py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity h-auto"
+                        >
+                          Review Booking <ChevronRight className="w-4 h-4 ml-2" />
+                        </Button>
+                      </div>
                     </div>
-                    <p className="text-sm text-muted-foreground font-sans mb-5">
-                      Save time on the night — pre-order bottles for your party and they'll be waiting at your table.
-                    </p>
+                  )}
 
-                    <div className="space-y-4">
-                      {wineOptions.map((wine) => {
-                        const qty = wineOrders[wine.id] || 0;
-                        return (
-                          <div
-                            key={wine.id}
-                            className="flex items-center justify-between gap-4 bg-warm-white border border-border rounded-sm p-4"
-                          >
-                            <div className="min-w-0">
-                              <p className="font-sans font-medium text-foreground text-sm">{wine.name}</p>
-                              <p className="text-xs text-muted-foreground font-sans">
-                                £{wine.price} {wine.note}
+                  {/* ═══ STEP 3: Review & Submit ═══ */}
+                  {formStep === 3 && (
+                    <div className="space-y-6">
+                      <div className="flex items-center gap-2 mb-2">
+                        <CreditCard className="w-5 h-5 text-gold" aria-hidden="true" />
+                        <h3 className="font-serif text-foreground text-lg">Review Your Booking</h3>
+                      </div>
+
+                      {/* Summary */}
+                      <div className="bg-warm-white border border-border rounded-sm p-6 space-y-4">
+                        <div className="flex justify-between text-sm font-sans">
+                          <span className="text-muted-foreground">Contact</span>
+                          <span className="text-foreground font-medium">{form.getValues("name")}</span>
+                        </div>
+                        <div className="flex justify-between text-sm font-sans">
+                          <span className="text-muted-foreground">Email</span>
+                          <span className="text-foreground font-medium">{form.getValues("email")}</span>
+                        </div>
+                        <div className="flex justify-between text-sm font-sans">
+                          <span className="text-muted-foreground">Guests</span>
+                          <span className="text-foreground font-medium">{guestCount}</span>
+                        </div>
+
+                        <div className="border-t border-border pt-4 space-y-2">
+                          {guests.map((g, i) => (
+                            <div key={i} className="text-sm font-sans">
+                              <p className="text-foreground font-medium">{g.name || `Guest ${i + 1}`}</p>
+                              <p className="text-muted-foreground text-xs">
+                                {menuChoices.starter.find((c) => c.value === g.starter)?.label || "No starter"} ·{" "}
+                                {menuChoices.main.find((c) => c.value === g.main)?.label || "No main"} ·{" "}
+                                {menuChoices.dessert.find((c) => c.value === g.dessert)?.label || "No dessert"}
                               </p>
                             </div>
-                            <div className="flex items-center gap-2 shrink-0">
-                              <button
-                                type="button"
-                                onClick={() => updateWine(wine.id, -1)}
-                                disabled={qty === 0}
-                                className="w-8 h-8 rounded-sm border border-border flex items-center justify-center text-muted-foreground hover:bg-muted/50 disabled:opacity-30 transition-colors"
-                                aria-label={`Remove one ${wine.name}`}
-                              >
-                                <Minus className="w-4 h-4" />
-                              </button>
-                              <span className="w-8 text-center font-sans text-sm font-medium text-foreground tabular-nums">
-                                {qty}
-                              </span>
-                              <button
-                                type="button"
-                                onClick={() => updateWine(wine.id, 1)}
-                                className="w-8 h-8 rounded-sm border border-border flex items-center justify-center text-muted-foreground hover:bg-muted/50 transition-colors"
-                                aria-label={`Add one ${wine.name}`}
-                              >
-                                <Plus className="w-4 h-4" />
-                              </button>
-                            </div>
+                          ))}
+                        </div>
+
+                        {form.getValues("seatingPreference") && (
+                          <div className="border-t border-border pt-4 text-sm font-sans">
+                            <span className="text-muted-foreground">Seating: </span>
+                            <span className="text-foreground">{form.getValues("seatingPreference")}</span>
                           </div>
-                        );
-                      })}
-                    </div>
+                        )}
 
-                    {wineTotal > 0 && (
-                      <p className="mt-4 text-right font-sans text-sm">
-                        <span className="text-muted-foreground">Wine total: </span>
-                        <span className="font-semibold text-foreground">£{wineTotal}</span>
+                        {form.getValues("dietary") && (
+                          <div className="text-sm font-sans">
+                            <span className="text-muted-foreground">Dietary: </span>
+                            <span className="text-foreground">{form.getValues("dietary")}</span>
+                          </div>
+                        )}
+
+                        {/* Cost breakdown */}
+                        <div className="border-t border-border pt-4 space-y-2">
+                          <div className="flex justify-between text-sm font-sans">
+                            <span className="text-muted-foreground">Tickets ({guestCount} × £{TICKET_PRICE})</span>
+                            <span className="text-foreground">£{ticketSubtotal}</span>
+                          </div>
+                          {drinksTotal > 0 && (
+                            <div className="flex justify-between text-sm font-sans">
+                              <span className="text-muted-foreground">Drinks pre-order</span>
+                              <span className="text-foreground">£{drinksTotal}</span>
+                            </div>
+                          )}
+                          <div className="flex justify-between text-sm font-sans font-semibold border-t border-border pt-2">
+                            <span className="text-foreground">Total</span>
+                            <span className="text-gold text-lg">£{grandTotal}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Additional message */}
+                      <FormField
+                        control={form.control}
+                        name="message"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="font-sans text-foreground">Additional Message</FormLabel>
+                            <FormControl>
+                              <Textarea placeholder="Any other requests or questions?" rows={3} {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <div className="flex gap-4">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => setFormStep(2)}
+                          className="flex-1 py-4 rounded-sm text-sm font-sans uppercase tracking-widest h-auto"
+                        >
+                          <ChevronLeft className="w-4 h-4 mr-2" /> Back
+                        </Button>
+                        <Button
+                          type="submit"
+                          className="flex-1 bg-gold-shimmer text-accent-foreground py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity h-auto"
+                        >
+                          <Send className="w-4 h-4 mr-2" /> Submit Booking
+                        </Button>
+                      </div>
+
+                      <p className="text-xs text-muted-foreground font-sans text-center">
+                        Your details will be emailed to the festival organisers. We won't store or share your data.
                       </p>
-                    )}
-                  </div>
+                    </div>
+                  )}
 
-                  <FormField
-                    control={form.control}
-                    name="message"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="font-sans text-foreground">Table Preferences / Message</FormLabel>
-                        <FormControl>
-                          <Textarea placeholder="e.g. We'd like to sit with the Jones party" rows={3} {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <Button
-                    type="submit"
-                    className="w-full bg-gold-shimmer text-accent-foreground py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity h-auto"
-                  >
-                    <Send className="w-4 h-4 mr-2" /> Secure My Place
-                  </Button>
-
-                  <p className="text-xs text-muted-foreground font-sans text-center">
-                    Your details will be emailed to the festival organisers. We won't store or share your data.
-                  </p>
                 </form>
               </Form>
             </motion.div>
