@@ -283,7 +283,7 @@ const LadiesFestival = () => {
             <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="text-center mb-10">
               <div className="h-0.5 w-16 bg-gold mx-auto mb-6" />
               <h2 className="text-3xl md:text-4xl font-serif text-foreground">The Menu</h2>
-              <p className="text-muted-foreground font-sans mt-3">Three-course dinner with coffee &amp; petits fours</p>
+              <p className="text-muted-foreground font-sans mt-3">Three-course dinner with coffee — two choices per course</p>
             </motion.div>
 
             <motion.div
@@ -293,33 +293,50 @@ const LadiesFestival = () => {
               transition={{ duration: 0.6, delay: 0.2 }}
               className="bg-warm-white border border-border rounded-sm p-8 md:p-10 shadow-sm space-y-8"
             >
-              {[
-                {
-                  course: "Starter",
-                  title: "To Be Confirmed",
-                  description: "Details coming soon.",
-                },
-                {
-                  course: "Main Course",
-                  title: "To Be Confirmed",
-                  description: "Details coming soon.",
-                },
-                {
-                  course: "Dessert",
-                  title: "To Be Confirmed",
-                  description: "Details coming soon.",
-                },
-              ].map((item, i) => (
-                <div key={item.course} className={i > 0 ? "border-t border-border pt-8" : ""}>
-                  <p className="text-gold uppercase tracking-widest text-xs font-sans font-semibold mb-2">{item.course}</p>
-                  <h3 className="font-serif text-foreground text-xl mb-1">{item.title}</h3>
-                  <p className="text-sm text-muted-foreground font-sans">{item.description}</p>
+              <div>
+                <p className="text-gold uppercase tracking-widest text-xs font-sans font-semibold mb-3">Starters</p>
+                <div className="space-y-3">
+                  <div>
+                    <h3 className="font-serif text-foreground text-lg">Roasted Butternut Squash Soup</h3>
+                    <p className="text-sm text-muted-foreground font-sans">Curried oil</p>
+                  </div>
+                  <div>
+                    <h3 className="font-serif text-foreground text-lg">Ham Hock &amp; Pea Terrine</h3>
+                    <p className="text-sm text-muted-foreground font-sans">Plum chutney, balsamic glaze, seasonal greens and herb croutons</p>
+                  </div>
                 </div>
-              ))}
+              </div>
+
+              <div className="border-t border-border pt-8">
+                <p className="text-gold uppercase tracking-widest text-xs font-sans font-semibold mb-3">Mains</p>
+                <div className="space-y-3">
+                  <div>
+                    <h3 className="font-serif text-foreground text-lg">Corn Fed Chicken Breast</h3>
+                    <p className="text-sm text-muted-foreground font-sans">Red wine jus, thyme roasted potato, glazed carrots and fine beans <span className="italic">(GF)</span></p>
+                  </div>
+                  <div>
+                    <h3 className="font-serif text-foreground text-lg">Mediterranean Roasted Vegetable Strudel</h3>
+                    <p className="text-sm text-muted-foreground font-sans">Thyme roasted potato and broccoli basil tomato sauce</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="border-t border-border pt-8">
+                <p className="text-gold uppercase tracking-widest text-xs font-sans font-semibold mb-3">Desserts</p>
+                <div className="space-y-3">
+                  <div>
+                    <h3 className="font-serif text-foreground text-lg">Sticky Toffee Pudding</h3>
+                    <p className="text-sm text-muted-foreground font-sans">Toffee sauce, clotted cream ice cream</p>
+                  </div>
+                  <div>
+                    <h3 className="font-serif text-foreground text-lg">Frimley Mess</h3>
+                  </div>
+                </div>
+              </div>
 
               <div className="border-t border-border pt-8">
                 <p className="text-gold uppercase tracking-widest text-xs font-sans font-semibold mb-2">To Finish</p>
-                <h3 className="font-serif text-foreground text-xl mb-1">Coffee &amp; Petits Fours</h3>
+                <h3 className="font-serif text-foreground text-lg">Coffee</h3>
               </div>
 
               <p className="text-xs text-muted-foreground font-sans italic text-center pt-4">
