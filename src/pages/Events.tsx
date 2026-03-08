@@ -62,6 +62,7 @@ const events: LodgeEvent[] = [
     type: "social",
     description: "Black Tie evening in aid of Guildford Young Carers featuring three-course dinner, DJ, Grand Raffle, and more.",
     highlight: true,
+    link: "/ladies-festival",
   },
 ];
 
