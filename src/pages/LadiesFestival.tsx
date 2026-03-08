@@ -238,7 +238,7 @@ const LadiesFestival = () => {
                 <Ticket className="w-5 h-5 text-gold shrink-0" aria-hidden="true" />
                 <h3 className="font-serif text-foreground text-xl">Tickets</h3>
               </div>
-              <p className="text-3xl font-serif text-gold mb-1">£80 <span className="text-base text-muted-foreground font-sans">per person</span></p>
+              <p className="text-3xl font-serif text-gold mb-1">£75 <span className="text-base text-muted-foreground font-sans">per person</span></p>
               <p className="text-sm text-muted-foreground font-sans">Includes three-course dinner, entertainment and all activities.</p>
             </motion.div>
           </div>
