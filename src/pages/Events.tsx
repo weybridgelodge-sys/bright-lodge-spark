@@ -21,6 +21,7 @@ interface LodgeEvent {
   type: "meeting" | "social" | "loi";
   description?: string;
   highlight?: boolean;
+  link?: string;
 }
 
 const events: LodgeEvent[] = [
