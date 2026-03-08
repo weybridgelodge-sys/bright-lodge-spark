@@ -375,7 +375,8 @@ const LadiesFestival = () => {
                 { icon: Music, title: "DJ & Dancing", desc: "Acclaimed DJ Lee Russell will keep you groovin' and movin' all night long" },
                 { icon: Dice5, title: "Fun Casino", desc: "Try your luck at Roulette or Blackjack with our professional croupiers — it's Vegas, but posher" },
                 { icon: Camera, title: "Photo Memories", desc: "Capture the magic of the evening with our professional photographer — stunning portrait photos to treasure forever" },
-                { icon: Gift, title: "Charity Grand Raffle", desc: "Fantastic prizes in aid of Guildford Young Carers" },
+                { icon: Gift, title: "Gift for Each Lady", desc: "As a special thank you for joining us, every lady will receive a beautiful keepsake gift to remember the evening" },
+                { icon: Heart, title: "Charity Grand Raffle & More", desc: "Fantastic prizes in aid of Guildford Young Carers" },
               ].map((item, i) => (
                 <motion.div
                   key={item.title}
