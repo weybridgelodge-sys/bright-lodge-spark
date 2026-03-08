@@ -315,7 +315,7 @@ const LadiesFestival = () => {
                     <p className="text-sm text-muted-foreground font-sans">Red wine jus, thyme roasted potato, glazed carrots and fine beans <span className="italic">(GF)</span></p>
                   </div>
                   <div>
-                    <h3 className="font-serif text-foreground text-lg">Mediterranean Roasted Vegetable Strudel</h3>
+                    <h3 className="font-serif text-foreground text-lg">Mediterranean Roasted Vegetable Strudel <span className="italic text-sm text-muted-foreground">(V)</span></h3>
                     <p className="text-sm text-muted-foreground font-sans">Thyme roasted potato and broccoli basil tomato sauce</p>
                   </div>
                 </div>
