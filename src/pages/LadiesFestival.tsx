@@ -431,7 +431,7 @@ const LadiesFestival = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="bg-warm-white border border-border rounded-sm p-8 md:p-10 shadow-sm space-y-8"
+              className="bg-warm-white border border-border rounded-sm p-8 md:p-10 shadow-sm space-y-8 text-center"
             >
               <div>
                 <p className="text-gold uppercase tracking-widest text-xs font-sans font-semibold mb-3">Starters</p>
