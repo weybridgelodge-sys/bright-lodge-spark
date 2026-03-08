@@ -547,7 +547,7 @@ const LadiesFestival = () => {
                 <div className="border border-border rounded-sm overflow-hidden shadow-sm h-full min-h-[320px]">
                   <iframe
                     title="Macdonald Frimley Hall Hotel location"
-                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2498.5!2d-0.7438!3d51.3189!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4875d3b0b1b6e6e7%3A0x9c2b84e50c84a30e!2sMacdonald%20Frimley%20Hall%20Hotel%20%26%20Spa!5e0!3m2!1sen!2suk!4v1700000000001!5m2!1sen!2suk"
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2498.5!2d-0.7438!3d51.3189!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4875d4a9b5a7c4e1%3A0x27712c09b8e0a4e!2sMacdonald+Frimley+Hall+Hotel+%26+Spa!5e0!3m2!1sen!2suk!4v1700000000000!5m2!1sen!2suk&zoom=15"
                     width="100%"
                     height="100%"
                     style={{ border: 0, minHeight: "320px" }}
