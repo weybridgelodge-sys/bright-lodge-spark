@@ -297,7 +297,7 @@ const LadiesFestival = () => {
                 <p className="text-gold uppercase tracking-widest text-xs font-sans font-semibold mb-3">Starters</p>
                 <div className="space-y-3">
                   <div>
-                    <h3 className="font-serif text-foreground text-lg">Roasted Butternut Squash Soup</h3>
+                    <h3 className="font-serif text-foreground text-lg">Roasted Butternut Squash Soup <span className="italic text-sm text-muted-foreground">(V)</span></h3>
                     <p className="text-sm text-muted-foreground font-sans">Curried oil</p>
                   </div>
                   <div>
