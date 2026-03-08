@@ -344,7 +344,7 @@ const LadiesFestival = () => {
                   {[
                     { stat: "5–18", label: "Age range supported" },
                     { stat: "100%", label: "Funds stay local" },
-                    { stat: "£80", label: "Your ticket helps" },
+                    { stat: "£75", label: "Your ticket helps" },
                   ].map((item) => (
                     <div key={item.label} className="text-center p-4 bg-muted/30 border border-border rounded-sm">
                       <p className="text-2xl font-serif text-gold">{item.stat}</p>

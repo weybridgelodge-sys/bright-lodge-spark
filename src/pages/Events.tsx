@@ -336,7 +336,6 @@ const Events = () => {
                 <ul className="grid sm:grid-cols-2 gap-3 text-sm font-sans text-muted-foreground">
                   <li className="flex items-center gap-2"><Music className="w-4 h-4 text-gold shrink-0" /> DJ &amp; dancing</li>
                   <li className="flex items-center gap-2"><Gift className="w-4 h-4 text-gold shrink-0" /> Charity Grand Raffle</li>
-                  <li className="flex items-center gap-2"><Users className="w-4 h-4 text-gold shrink-0" /> Photographer &amp; Photo Booth</li>
                   <li className="flex items-center gap-2"><Ticket className="w-4 h-4 text-gold shrink-0" /> Fun Casino</li>
                 </ul>
 
