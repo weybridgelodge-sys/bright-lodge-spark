@@ -456,7 +456,7 @@ const LadiesFestival = () => {
           <div className="container mx-auto px-4 sm:px-6 max-w-2xl">
             <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="text-center mb-10">
               <div className="h-0.5 w-16 bg-gold mx-auto mb-6" />
-              <h2 className="text-3xl md:text-4xl font-serif text-foreground">Book Your Tickets</h2>
+              <h2 className="text-3xl md:text-4xl font-serif text-foreground">Secure Your Seat</h2>
               <p className="text-muted-foreground font-sans mt-3 max-w-lg mx-auto">
                 £75 per person &bull; Complete the form below and we'll be in touch to confirm your booking.
               </p>
