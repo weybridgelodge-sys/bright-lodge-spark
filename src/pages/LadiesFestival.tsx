@@ -577,6 +577,7 @@ const LadiesFestival = () => {
                     />
                   </div>
 
+                  {/* Number of Guests */}
                   <FormField
                     control={form.control}
                     name="guests"
@@ -584,13 +585,102 @@ const LadiesFestival = () => {
                       <FormItem>
                         <FormLabel className="font-sans text-foreground">Number of Guests *</FormLabel>
                         <FormControl>
-                          <Input type="number" min="1" max="20" placeholder="2" {...field} />
+                          <Input
+                            type="number"
+                            min="1"
+                            max="20"
+                            placeholder="2"
+                            {...field}
+                            onChange={(e) => {
+                              field.onChange(e);
+                              const val = parseInt(e.target.value);
+                              if (!isNaN(val) && val > 0) updateGuestCount(val);
+                            }}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
 
+                  {/* Guest Names */}
+                  <div className="border-t border-border pt-6">
+                    <div className="flex items-center gap-2 mb-4">
+                      <Users className="w-5 h-5 text-gold" aria-hidden="true" />
+                      <h3 className="font-serif text-foreground text-lg">Guest Names</h3>
+                    </div>
+                    <div className="space-y-3">
+                      {guests.map((guest, i) => (
+                        <div key={i}>
+                          <label className="text-sm font-sans text-foreground font-medium mb-1.5 block">Guest {i + 1}</label>
+                          <Input
+                            placeholder={`Guest ${i + 1} full name`}
+                            value={guest.name}
+                            onChange={(e) => updateGuest(i, "name", e.target.value)}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Menu Choices */}
+                  <div className="border-t border-border pt-6">
+                    <div className="flex items-center gap-2 mb-4">
+                      <UtensilsCrossed className="w-5 h-5 text-gold" aria-hidden="true" />
+                      <h3 className="font-serif text-foreground text-lg">Menu Choices</h3>
+                    </div>
+                    <p className="text-sm text-muted-foreground font-sans mb-5">
+                      Please select a starter, main and dessert for each guest.
+                    </p>
+                    <div className="space-y-6">
+                      {guests.map((guest, i) => (
+                        <div key={i} className="bg-warm-white border border-border rounded-sm p-4 space-y-3">
+                          <p className="font-sans font-medium text-foreground text-sm">{guest.name || `Guest ${i + 1}`}</p>
+                          <div>
+                            <label className="text-xs font-sans text-muted-foreground uppercase tracking-wider mb-1 block">Starter</label>
+                            <select
+                              value={guest.starter}
+                              onChange={(e) => updateGuest(i, "starter", e.target.value)}
+                              className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm font-sans text-foreground ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                            >
+                              <option value="">Select starter…</option>
+                              {menuChoices.starter.map((c) => (
+                                <option key={c.value} value={c.value}>{c.label}</option>
+                              ))}
+                            </select>
+                          </div>
+                          <div>
+                            <label className="text-xs font-sans text-muted-foreground uppercase tracking-wider mb-1 block">Main</label>
+                            <select
+                              value={guest.main}
+                              onChange={(e) => updateGuest(i, "main", e.target.value)}
+                              className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm font-sans text-foreground ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                            >
+                              <option value="">Select main…</option>
+                              {menuChoices.main.map((c) => (
+                                <option key={c.value} value={c.value}>{c.label}</option>
+                              ))}
+                            </select>
+                          </div>
+                          <div>
+                            <label className="text-xs font-sans text-muted-foreground uppercase tracking-wider mb-1 block">Dessert</label>
+                            <select
+                              value={guest.dessert}
+                              onChange={(e) => updateGuest(i, "dessert", e.target.value)}
+                              className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm font-sans text-foreground ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                            >
+                              <option value="">Select dessert…</option>
+                              {menuChoices.dessert.map((c) => (
+                                <option key={c.value} value={c.value}>{c.label}</option>
+                              ))}
+                            </select>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Dietary Requirements */}
                   <FormField
                     control={form.control}
                     name="dietary"
@@ -598,7 +688,7 @@ const LadiesFestival = () => {
                       <FormItem>
                         <FormLabel className="font-sans text-foreground">Dietary Requirements</FormLabel>
                         <FormControl>
-                          <Input placeholder="e.g. Vegetarian, gluten-free" {...field} />
+                          <Input placeholder="e.g. Gluten-free, nut allergy" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
