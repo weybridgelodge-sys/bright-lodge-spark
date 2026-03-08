@@ -258,7 +258,7 @@ const LadiesFestival = () => {
     if (step > formStep) {
       // Validate step 1 fields before proceeding
       if (formStep === 1) {
-        const valid = await form.trigger(["name", "email", "guests"]);
+        const valid = await form.trigger(["name", "email", "phone", "guests"]);
         if (!valid) return;
       }
     }
