@@ -168,14 +168,24 @@ const LadiesFestival = () => {
       })
       .join("\n");
 
+    const guestLines = guests
+      .map((g, i) => {
+        const starterLabel = menuChoices.starter.find((c) => c.value === g.starter)?.label || "Not selected";
+        const mainLabel = menuChoices.main.find((c) => c.value === g.main)?.label || "Not selected";
+        const dessertLabel = menuChoices.dessert.find((c) => c.value === g.dessert)?.label || "Not selected";
+        return `  Guest ${i + 1}: ${g.name || "Name not provided"}\n    Starter: ${starterLabel}\n    Main: ${mainLabel}\n    Dessert: ${dessertLabel}`;
+      })
+      .join("\n");
+
     const subject = encodeURIComponent("Ladies Festival 2026 – Booking");
     const body = encodeURIComponent(
       [
         `Name: ${data.name}`,
         `Email: ${data.email}`,
         data.phone ? `Phone: ${data.phone}` : null,
-        `Number of Guests: ${data.guests}`,
-        `Dietary Requirements: ${data.dietary || "None"}`,
+        `Number of Guests: ${guestCount}`,
+        `\nGuests & Menu Choices:\n${guestLines}`,
+        data.dietary ? `\nDietary Requirements: ${data.dietary}` : null,
         wineLines ? `\nWine Pre-Order:\n${wineLines}\nWine Total: £${wineTotal}` : null,
         data.message ? `\nMessage: ${data.message}` : null,
       ]
