@@ -231,7 +231,7 @@ const LadiesFestival = () => {
                 href="#booking"
                 className="inline-flex items-center justify-center bg-gold-shimmer text-accent-foreground px-8 py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity"
               >
-                Book Tickets
+                Reserve Your Place
               </a>
               <a
                 href="#venue"
