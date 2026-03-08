@@ -76,7 +76,7 @@ const ladiesFestivalSchema = {
   },
   offers: {
     "@type": "Offer",
-    price: "80",
+    price: "75",
     priceCurrency: "GBP",
     availability: "https://schema.org/InStock",
     url: "https://www.weybridgelodge.org.uk/ladies-festival",
