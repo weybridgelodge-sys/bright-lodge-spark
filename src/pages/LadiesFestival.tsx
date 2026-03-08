@@ -57,7 +57,7 @@ const TICKET_PRICE = 75;
 const bookingSchema = z.object({
   name: z.string().trim().min(2, "Please enter your name").max(100, "Name must be under 100 characters"),
   email: z.string().trim().email("Please enter a valid email").max(255, "Email must be under 255 characters"),
-  phone: z.string().trim().optional(),
+  phone: z.string().trim().min(5, "Please enter a valid phone number").max(20, "Phone number must be under 20 characters"),
   guests: z.string().min(1, "Please enter number of guests"),
   seatingPreference: z.string().max(500, "Please keep seating notes under 500 characters").optional(),
   dietary: z.string().max(500, "Please keep dietary notes under 500 characters").optional(),
@@ -258,7 +258,7 @@ const LadiesFestival = () => {
     if (step > formStep) {
       // Validate step 1 fields before proceeding
       if (formStep === 1) {
-        const valid = await form.trigger(["name", "email", "guests"]);
+        const valid = await form.trigger(["name", "email", "phone", "guests"]);
         if (!valid) return;
       }
     }
@@ -375,7 +375,8 @@ const LadiesFestival = () => {
                 { icon: Music, title: "DJ & Dancing", desc: "Acclaimed DJ Lee Russell will keep you groovin' and movin' all night long" },
                 { icon: Dice5, title: "Fun Casino", desc: "Try your luck at Roulette or Blackjack with our professional croupiers — it's Vegas, but posher" },
                 { icon: Camera, title: "Photo Memories", desc: "Capture the magic of the evening with our professional photographer — stunning portrait photos to treasure forever" },
-                { icon: Gift, title: "Charity Grand Raffle", desc: "Fantastic prizes in aid of Guildford Young Carers" },
+                { icon: Gift, title: "Gift for Each Lady", desc: "As a special thank you for joining us, every lady will receive a beautiful keepsake gift to remember the evening" },
+                { icon: Heart, title: "Charity Grand Raffle & More", desc: "Fantastic prizes in aid of Guildford Young Carers" },
               ].map((item, i) => (
                 <motion.div
                   key={item.title}
@@ -677,7 +678,7 @@ const LadiesFestival = () => {
                           name="phone"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel className="font-sans text-foreground">Phone Number</FormLabel>
+                              <FormLabel className="font-sans text-foreground">Phone Number *</FormLabel>
                               <FormControl>
                                 <Input type="tel" placeholder="07xxx xxxxxx" {...field} />
                               </FormControl>
@@ -972,19 +973,19 @@ const LadiesFestival = () => {
                         </div>
                       )}
 
-                      <div className="flex gap-4">
+                      <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                         <Button
                           type="button"
                           variant="outline"
                           onClick={() => setFormStep(1)}
-                          className="flex-1 py-4 rounded-sm text-sm font-sans uppercase tracking-widest h-auto"
+                          className="w-full sm:flex-1 py-4 rounded-sm text-sm font-sans uppercase tracking-widest h-auto"
                         >
                           <ChevronLeft className="w-4 h-4 mr-2" /> Back
                         </Button>
                         <Button
                           type="button"
                           onClick={() => setFormStep(3)}
-                          className="flex-1 bg-gold-shimmer text-accent-foreground py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity h-auto"
+                          className="w-full sm:flex-1 bg-gold-shimmer text-accent-foreground py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity h-auto"
                         >
                           Review Booking <ChevronRight className="w-4 h-4 ml-2" />
                         </Button>
@@ -1076,18 +1077,18 @@ const LadiesFestival = () => {
                         )}
                       />
 
-                      <div className="flex gap-4">
+                      <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                         <Button
                           type="button"
                           variant="outline"
                           onClick={() => setFormStep(2)}
-                          className="flex-1 py-4 rounded-sm text-sm font-sans uppercase tracking-widest h-auto"
+                          className="w-full sm:flex-1 py-4 rounded-sm text-sm font-sans uppercase tracking-widest h-auto"
                         >
                           <ChevronLeft className="w-4 h-4 mr-2" /> Back
                         </Button>
                         <Button
                           type="submit"
-                          className="flex-1 bg-gold-shimmer text-accent-foreground py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity h-auto"
+                          className="w-full sm:flex-1 bg-gold-shimmer text-accent-foreground py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity h-auto"
                         >
                           <Send className="w-4 h-4 mr-2" /> Submit Booking
                         </Button>
