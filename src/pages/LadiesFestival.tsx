@@ -211,7 +211,6 @@ const LadiesFestival = () => {
                 { icon: UtensilsCrossed, title: "Three-Course Dinner", desc: "Exquisite dining with dietary requirements catered for" },
                 { icon: Music, title: "DJ & Dancing", desc: "Dance the night away until 1 am" },
                 { icon: Gift, title: "Charity Grand Raffle", desc: "Fantastic prizes in aid of Guildford Young Carers" },
-                { icon: Users, title: "Photo Booth & Casino", desc: "Fun casino tables and a photographer to capture the night" },
               ].map((item, i) => (
                 <motion.div
                   key={item.title}
