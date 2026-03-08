@@ -365,8 +365,21 @@ const LadiesFestival = () => {
               <div className="h-0.5 w-16 bg-gold mx-auto mb-6" />
               <h2 className="text-3xl md:text-4xl font-serif text-foreground">An Evening to Remember</h2>
               <p className="text-muted-foreground font-sans mt-3 max-w-xl mx-auto">
-                Celebrate with friends, family and fellow Freemasons at this spectacular black tie evening.
-              </p>
+                 Celebrate with friends, family and fellow Freemasons at this spectacular black tie evening.
+               </p>
+
+               <div className="flex flex-wrap justify-center gap-6 sm:gap-10 mt-6 mb-2">
+                 {[
+                   { time: "6.30 pm", label: "Arrival" },
+                   { time: "7.30 pm", label: "Dinner" },
+                   { time: "1.00 am", label: "Carriages" },
+                 ].map((item) => (
+                   <div key={item.label} className="flex flex-col items-center">
+                     <span className="text-xl sm:text-2xl font-serif text-gold">{item.time}</span>
+                     <span className="text-xs text-muted-foreground font-sans uppercase tracking-widest mt-1">{item.label}</span>
+                   </div>
+                 ))}
+               </div>
             </motion.div>
 
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
