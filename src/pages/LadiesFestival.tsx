@@ -457,7 +457,7 @@ const LadiesFestival = () => {
 
               <div className="border-t border-border pt-8">
                 <p className="text-gold uppercase tracking-widest text-xs font-sans font-semibold mb-2">To Finish</p>
-                <h3 className="font-serif text-foreground text-lg">Coffee</h3>
+                <h3 className="font-serif text-foreground text-lg">Coffee &amp; Tea</h3>
               </div>
 
               <p className="text-xs text-muted-foreground font-sans italic text-center pt-4">
