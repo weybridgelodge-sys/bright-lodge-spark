@@ -7,7 +7,7 @@ import { Link } from "react-router-dom";
 import {
   MapPin, Clock, Ticket, ExternalLink, Users, Music, Gift,
   UtensilsCrossed, CalendarDays, Hotel, Car, Heart, Send, Wine, Plus, Minus,
-  ChevronRight, ChevronLeft, Beer, CreditCard,
+  ChevronRight, ChevronLeft, Beer, CreditCard, Dice5, Camera,
 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
