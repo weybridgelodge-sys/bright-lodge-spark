@@ -137,7 +137,7 @@ const LadiesFestival = () => {
 
   const form = useForm<BookingValues>({
     resolver: zodResolver(bookingSchema),
-    defaultValues: { name: "", email: "", phone: "", guests: "", seatingPreference: "", dietary: "", message: "" },
+    defaultValues: { name: "", email: "", phone: "", guests: "1", seatingPreference: "", dietary: "", message: "" },
   });
 
   const contactName = form.watch("name");
