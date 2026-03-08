@@ -76,7 +76,7 @@ const ladiesFestivalSchema = {
   },
   offers: {
     "@type": "Offer",
-    price: "80",
+    price: "75",
     priceCurrency: "GBP",
     availability: "https://schema.org/InStock",
     url: "https://www.weybridgelodge.org.uk/ladies-festival",
@@ -113,7 +113,7 @@ const LadiesFestival = () => {
     <div className="min-h-screen">
       <SEO
         title="Ladies Festival 2026 – Black Tie Gala Dinner, Frimley Hall"
-        description="Join Weybridge & Astolat Lodges for a black tie charity gala on 22 August 2026 at Macdonald Frimley Hall Hotel. Three-course dinner, DJ, raffle — in aid of Guildford Young Carers. Tickets £80."
+        description="Join Weybridge & Astolat Lodges for a black tie charity gala on 22 August 2026 at Macdonald Frimley Hall Hotel. Three-course dinner, DJ, raffle — in aid of Guildford Young Carers. Tickets £75."
         canonical="/ladies-festival"
         schema={[
           breadcrumbSchema([
@@ -211,7 +211,6 @@ const LadiesFestival = () => {
                 { icon: UtensilsCrossed, title: "Three-Course Dinner", desc: "Exquisite dining with dietary requirements catered for" },
                 { icon: Music, title: "DJ & Dancing", desc: "Dance the night away until 1 am" },
                 { icon: Gift, title: "Charity Grand Raffle", desc: "Fantastic prizes in aid of Guildford Young Carers" },
-                { icon: Users, title: "Photo Booth & Casino", desc: "Fun casino tables and a photographer to capture the night" },
               ].map((item, i) => (
                 <motion.div
                   key={item.title}
@@ -239,7 +238,7 @@ const LadiesFestival = () => {
                 <Ticket className="w-5 h-5 text-gold shrink-0" aria-hidden="true" />
                 <h3 className="font-serif text-foreground text-xl">Tickets</h3>
               </div>
-              <p className="text-3xl font-serif text-gold mb-1">£80 <span className="text-base text-muted-foreground font-sans">per person</span></p>
+              <p className="text-3xl font-serif text-gold mb-1">£75 <span className="text-base text-muted-foreground font-sans">per person</span></p>
               <p className="text-sm text-muted-foreground font-sans">Includes three-course dinner, entertainment and all activities.</p>
             </motion.div>
           </div>
@@ -345,7 +344,7 @@ const LadiesFestival = () => {
                   {[
                     { stat: "5–18", label: "Age range supported" },
                     { stat: "100%", label: "Funds stay local" },
-                    { stat: "£80", label: "Your ticket helps" },
+                    { stat: "£75", label: "Your ticket helps" },
                   ].map((item) => (
                     <div key={item.label} className="text-center p-4 bg-muted/30 border border-border rounded-sm">
                       <p className="text-2xl font-serif text-gold">{item.stat}</p>

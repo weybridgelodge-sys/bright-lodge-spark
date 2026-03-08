@@ -118,7 +118,7 @@ const Events = () => {
     },
     offers: {
       "@type": "Offer",
-      price: "80",
+      price: "75",
       priceCurrency: "GBP",
       availability: "https://schema.org/InStock",
       url: "https://www.weybridgelodge.org.uk/events",
@@ -313,7 +313,7 @@ const Events = () => {
                 <div className="flex items-start gap-4">
                   <Ticket className="w-5 h-5 text-gold mt-0.5 shrink-0" aria-hidden="true" />
                   <div>
-                    <p className="font-sans font-medium text-foreground">Tickets: £80 per person</p>
+                    <p className="font-sans font-medium text-foreground">Tickets: £75 per person</p>
                     <p className="text-sm text-muted-foreground font-sans">Three-course dinner included</p>
                   </div>
                 </div>
@@ -336,7 +336,6 @@ const Events = () => {
                 <ul className="grid sm:grid-cols-2 gap-3 text-sm font-sans text-muted-foreground">
                   <li className="flex items-center gap-2"><Music className="w-4 h-4 text-gold shrink-0" /> DJ &amp; dancing</li>
                   <li className="flex items-center gap-2"><Gift className="w-4 h-4 text-gold shrink-0" /> Charity Grand Raffle</li>
-                  <li className="flex items-center gap-2"><Users className="w-4 h-4 text-gold shrink-0" /> Photographer &amp; Photo Booth</li>
                   <li className="flex items-center gap-2"><Ticket className="w-4 h-4 text-gold shrink-0" /> Fun Casino</li>
                 </ul>
 
