@@ -29,6 +29,7 @@ import InstallationMeeting from "./pages/news/InstallationMeeting";
 import ApgmVisit from "./pages/news/ApgmVisit";
 import Surrey2030Gold from "./pages/news/Surrey2030Gold";
 import Events from "./pages/Events";
+import LadiesFestival from "./pages/LadiesFestival";
 
 const queryClient = new QueryClient();
 
