@@ -374,9 +374,12 @@ const LadiesFestival = () => {
                 <div className="flex items-start gap-4">
                   <Hotel className="w-5 h-5 text-gold mt-1 shrink-0" aria-hidden="true" />
                   <div>
-                    <h3 className="font-sans font-medium text-foreground">Overnight Stay</h3>
+                    <h3 className="font-sans font-medium text-foreground">Overnight Stay – 20% Discount</h3>
                     <p className="text-sm text-muted-foreground font-sans">
-                      Rooms available at a special rate for festival guests. Contact the hotel directly and mention the Weybridge &amp; Astolat Ladies Festival.
+                      We have secured a 20% discount off standard room rates for those wishing to stay over. The discount code and booking link for rooms will be sent via your ticket confirmation.
+                    </p>
+                    <p className="text-sm text-muted-foreground font-sans mt-2">
+                      The overnight stay price includes breakfast and access to the onsite spa and gym (treatments at an additional cost).
                     </p>
                     <a
                       href="https://www.macdonaldhotels.co.uk/frimley-hall"
