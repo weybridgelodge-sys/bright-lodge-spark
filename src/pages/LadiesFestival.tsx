@@ -372,7 +372,7 @@ const LadiesFestival = () => {
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {[
                 { icon: UtensilsCrossed, title: "Three-Course Dinner", desc: "Exquisite dining with dietary requirements catered for" },
-                { icon: Music, title: "DJ & Dancing", desc: "Dance the night away until 1 am" },
+                { icon: Music, title: "DJ & Dancing", desc: "Acclaimed DJ Lee Russell will keep you groovin' and movin' all night long" },
                 { icon: Gift, title: "Charity Grand Raffle", desc: "Fantastic prizes in aid of Guildford Young Carers" },
               ].map((item, i) => (
                 <motion.div
