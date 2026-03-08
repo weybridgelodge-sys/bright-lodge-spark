@@ -313,7 +313,7 @@ const Events = () => {
                 <div className="flex items-start gap-4">
                   <Ticket className="w-5 h-5 text-gold mt-0.5 shrink-0" aria-hidden="true" />
                   <div>
-                    <p className="font-sans font-medium text-foreground">Tickets: £80 per person</p>
+                    <p className="font-sans font-medium text-foreground">Tickets: £75 per person</p>
                     <p className="text-sm text-muted-foreground font-sans">Three-course dinner included</p>
                   </div>
                 </div>
