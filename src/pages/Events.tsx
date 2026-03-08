@@ -251,6 +251,15 @@ const Events = () => {
                         {ev.description && (
                           <p className="mt-3 text-sm text-muted-foreground font-sans leading-relaxed">{ev.description}</p>
                         )}
+                        {ev.link && (
+                          <Link
+                            to={ev.link}
+                            className="inline-flex items-center gap-1.5 mt-4 text-sm font-sans font-medium text-gold hover:opacity-80 transition-opacity"
+                          >
+                            View Full Details
+                            <ExternalLink className="w-3.5 h-3.5" />
+                          </Link>
+                        )}
                       </div>
                     </motion.div>
                   ))}
