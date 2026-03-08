@@ -200,11 +200,20 @@ const LadiesFestival = () => {
   const ticketSubtotal = guestCount * TICKET_PRICE;
   const drinksTotal = wineTotal + beerTotal;
   const grandTotal = ticketSubtotal + drinksTotal;
+  const onSubmit = (data: BookingValues) => {
     const wineLines = Object.entries(wineOrders)
       .filter(([, qty]) => qty > 0)
       .map(([id, qty]) => {
         const wine = wineOptions.find((w) => w.id === id);
         return wine ? `  ${wine.name} x${qty} (£${wine.price * qty})` : "";
+      })
+      .join("\n");
+
+    const beerLines = Object.entries(beerOrders)
+      .filter(([, qty]) => qty > 0)
+      .map(([id, qty]) => {
+        const beer = beerOptions.find((b) => b.id === id);
+        return beer ? `  ${beer.name} x${qty} (£${beer.price * qty})` : "";
       })
       .join("\n");
 
@@ -224,9 +233,14 @@ const LadiesFestival = () => {
         `Email: ${data.email}`,
         data.phone ? `Phone: ${data.phone}` : null,
         `Number of Guests: ${guestCount}`,
+        `Ticket Subtotal: £${ticketSubtotal}`,
         `\nGuests & Menu Choices:\n${guestLines}`,
+        data.seatingPreference ? `\nTable Seating Preference: ${data.seatingPreference}` : null,
         data.dietary ? `\nDietary Requirements: ${data.dietary}` : null,
-        wineLines ? `\nWine Pre-Order:\n${wineLines}\nWine Total: £${wineTotal}` : null,
+        wineLines ? `\nWine Pre-Order:\n${wineLines}` : null,
+        beerLines ? `\nBeer Pre-Order:\n${beerLines}` : null,
+        drinksTotal > 0 ? `\nDrinks Total: £${drinksTotal}` : null,
+        `\nGrand Total: £${grandTotal}`,
         data.message ? `\nMessage: ${data.message}` : null,
       ]
         .filter(Boolean)
@@ -237,6 +251,17 @@ const LadiesFestival = () => {
       title: "Opening your email client…",
       description: "If nothing happens, please email secretary@astolat.org directly.",
     });
+  };
+
+  const goToStep = async (step: number) => {
+    if (step > formStep) {
+      // Validate step 1 fields before proceeding
+      if (formStep === 1) {
+        const valid = await form.trigger(["name", "email", "guests"]);
+        if (!valid) return;
+      }
+    }
+    setFormStep(step);
   };
 
   const countdownUnits = [
