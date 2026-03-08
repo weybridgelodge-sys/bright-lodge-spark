@@ -677,7 +677,7 @@ const LadiesFestival = () => {
                           name="phone"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel className="font-sans text-foreground">Phone Number</FormLabel>
+                              <FormLabel className="font-sans text-foreground">Phone Number *</FormLabel>
                               <FormControl>
                                 <Input type="tel" placeholder="07xxx xxxxxx" {...field} />
                               </FormControl>
