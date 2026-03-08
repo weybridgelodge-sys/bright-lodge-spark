@@ -1077,18 +1077,18 @@ const LadiesFestival = () => {
                         )}
                       />
 
-                      <div className="flex gap-4">
+                      <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                         <Button
                           type="button"
                           variant="outline"
                           onClick={() => setFormStep(2)}
-                          className="flex-1 py-4 rounded-sm text-sm font-sans uppercase tracking-widest h-auto"
+                          className="w-full sm:flex-1 py-4 rounded-sm text-sm font-sans uppercase tracking-widest h-auto"
                         >
                           <ChevronLeft className="w-4 h-4 mr-2" /> Back
                         </Button>
                         <Button
                           type="submit"
-                          className="flex-1 bg-gold-shimmer text-accent-foreground py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity h-auto"
+                          className="w-full sm:flex-1 bg-gold-shimmer text-accent-foreground py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity h-auto"
                         >
                           <Send className="w-4 h-4 mr-2" /> Submit Booking
                         </Button>
