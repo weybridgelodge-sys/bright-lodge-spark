@@ -44,26 +44,26 @@ const Hero = () => {
               className="h-0.5 bg-gold mb-8"
             />
             <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-serif text-primary-foreground leading-tight mb-6">
-              Weybridge Lodge
-              <span className="block text-gradient-gold text-2xl sm:text-3xl md:text-4xl mt-2">
-                No. 6787
+              Looking for something
+              <span className="block text-gradient-gold text-3xl sm:text-4xl md:text-5xl mt-3">
+                more than just a night out?
               </span>
             </h1>
             <p className="text-lg md:text-xl text-primary-foreground/80 font-sans font-light leading-relaxed mb-10 max-w-xl">
-              An open, friendly and sociable Freemasons Lodge within the Province of Surrey, based in the heart of Guildford.
+              Weybridge Lodge No. 6787 is a friendly group of men in Guildford — aged 32 to 80 — who meet to make genuine friendships, support local charities, and grow as people. New members are always welcome.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <Link
                 to="/join-us"
                 className="inline-flex items-center justify-center bg-gold-shimmer text-accent-foreground px-8 py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity"
               >
-                Begin Your Journey
+                Enquire About Joining
               </Link>
               <Link
-                to="/what-is-freemasonry"
+                to="/first-visit"
                 className="inline-flex items-center justify-center border border-primary-foreground/30 text-primary-foreground px-8 py-4 rounded-sm text-sm font-sans uppercase tracking-widest hover:border-gold hover:text-gold transition-colors"
               >
-                Discover More
+                What Happens On Your First Visit
               </Link>
             </div>
           </motion.div>
