@@ -30,7 +30,7 @@ const faqs = [
   },
   {
     question: "Is there a fee?",
-    answer: "Yes, there is an annual membership fee (currently £240) which helps support lodge activities and charitable projects. A single one-off registration fee of around £100 is also payable on joining. The only other costs are for the Festive Board dinner that we hold after each meeting (£32 for a 3 course dinner).",
+    answer: "Yes, there is an annual membership fee of £250 which helps support lodge activities and charitable projects. A one-off joining fee of £132 is also payable on initiation. The only other costs are for the Festive Board dinner that we hold after each meeting (£32 for a 3 course dinner).",
   },
   {
     question: "Can anyone join?",
