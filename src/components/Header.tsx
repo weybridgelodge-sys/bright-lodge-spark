@@ -1,61 +1,98 @@
 import { useState, useRef, useEffect } from "react";
-import { Menu, X, Phone, ChevronDown } from "lucide-react";
+import { Menu, X, Phone, ChevronDown, Mail } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link, useLocation } from "react-router-dom";
 import logo from "@/assets/weybridge-logo.svg";
 
+interface NavChild {
+  label: string;
+  href: string;
+  badge?: string;
+  accent?: boolean;
+}
+
+interface NavSection {
+  heading?: string;
+  items: NavChild[];
+}
+
 interface NavItem {
   label: string;
   href: string;
-  children?: { label: string; href: string }[];
+  sections?: NavSection[];
 }
 
 const navItems: NavItem[] = [
   {
     label: "About Us",
-    href: "/#about",
-    children: [
-      { label: "Lodge Profile", href: "/lodge-profile" },
-      { label: "Our History", href: "/history" },
-      { label: "Worshipful Masters", href: "/worshipful-masters" },
-      { label: "Officers of the Lodge", href: "/officers" },
-      { label: "Masonic Links", href: "/masonic-links" },
+    href: "/lodge-profile",
+    sections: [
+      {
+        items: [
+          { label: "Lodge Profile", href: "/lodge-profile" },
+          { label: "Our History", href: "/history" },
+          { label: "Worshipful Masters", href: "/worshipful-masters" },
+          { label: "Officers of the Lodge", href: "/officers" },
+        ],
+      },
+      {
+        heading: "Deep Dive",
+        items: [
+          { label: "Lodge Traditions", href: "/lodge-traditions" },
+          { label: "Officers' Roles & Jewels", href: "/officers-jewels" },
+        ],
+      },
     ],
   },
-  { label: "Join Our Lodge", href: "/join-us" },
   {
-    label: "Discover Freemasonry",
-    href: "/what-is-freemasonry",
-    children: [
-      { label: "What is Freemasonry", href: "/what-is-freemasonry" },
-      { label: "Your Masonic Journey", href: "/your-journey" },
-      { label: "Lodge Traditions", href: "/lodge-traditions" },
-      { label: "Your Initiation Night", href: "/first-visit" },
-      { label: "Officers Roles & Jewels", href: "/officers-jewels" },
-      { label: "Video Hub", href: "/video-hub" },
+    label: "Becoming a Mason",
+    href: "/join-us",
+    sections: [
+      {
+        heading: "Your Journey",
+        items: [
+          { label: "What is Freemasonry?", href: "/what-is-freemasonry" },
+          { label: "Your First Visit", href: "/first-visit" },
+          { label: "Your Masonic Journey", href: "/your-journey" },
+          { label: "FAQ", href: "/faq" },
+        ],
+      },
+      {
+        heading: "Interactive",
+        items: [
+          { label: "Is it for me? Take the Quiz", href: "/quiz", badge: "2 min", accent: true },
+          { label: "Join Our Lodge", href: "/join-us", accent: true },
+        ],
+      },
+    ],
+  },
+  {
+    label: "News & Media",
+    href: "/news",
+    sections: [
+      {
+        items: [
+          { label: "News Hub", href: "/news" },
+          { label: "Events Calendar", href: "/events" },
+          { label: "Bookings", href: "/bookings" },
+          { label: "Ladies Festival 2026", href: "/ladies-festival" },
+          { label: "Video Hub", href: "/video-hub" },
+        ],
+      },
     ],
   },
   {
     label: "Charity",
     href: "/freemasonry-and-charity",
-    children: [
-      { label: "Freemasonry & Charity", href: "/freemasonry-and-charity" },
-      { label: "Our Charities", href: "/our-charities" },
+    sections: [
+      {
+        items: [
+          { label: "Freemasonry & Charity", href: "/freemasonry-and-charity" },
+          { label: "Our Charities", href: "/our-charities" },
+        ],
+      },
     ],
   },
-  {
-    label: "Events",
-    href: "/events",
-    children: [
-      { label: "All Events & Calendar", href: "/events" },
-      { label: "Ladies Festival 2026", href: "/ladies-festival" },
-      { label: "Bookings", href: "/bookings" },
-    ],
-  },
-  { label: "News", href: "/news" },
-  { label: "Is It For Me? (Quiz)", href: "/quiz" },
-  { label: "Contact", href: "/contact" },
-  { label: "FAQ", href: "/faq" },
 ];
 
 const DropdownMenu = ({ item }: { item: NavItem }) => {
