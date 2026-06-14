@@ -22,7 +22,7 @@ const faqs = [
   },
   {
     question: "How do I join?",
-    answer: "Joining is straightforward. Visit our Join Us page to read our joining process. We will contact you to start the process which will include a visit to Guildford Masonic Centre and an informal interview. If you already know somebody who is a Freemason, that also helps but is not essential.",
+    answer: "Joining is straightforward. Start by contacting our Membership Secretary by phone or email. We'll arrange an informal visit to the South West Surrey Masonic Centre so you can meet a few members and see the building. If you decide to proceed, you'll complete an application form and attend a relaxed informal interview where a few necessary questions are asked — nothing personal. Once that's complete and your application is approved, we confirm your initiation date. If you already know a Freemason, that helps but is not essential.",
   },
   {
     question: "What are the benefits?",
