@@ -1,135 +1,102 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
+import { ArrowRight, RotateCcw, CheckCircle2, HelpCircle } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
 import SEO, { breadcrumbSchema } from "@/components/SEO";
-import { motion, AnimatePresence } from "framer-motion";
-import { Link } from "react-router-dom";
-import { ArrowRight, RotateCcw, Sparkles } from "lucide-react";
-import { Progress } from "@/components/ui/progress";
-
-interface Option {
-  label: string;
-  scores: Partial<Record<"values" | "social" | "curiosity" | "service", number>>;
-}
+import { Button } from "@/components/ui/button";
 
 interface Question {
-  q: string;
-  options: Option[];
+  id: number;
+  text: string;
+  options: { text: string; score: "high" | "neutral" | "low" }[];
 }
 
-const questions: Question[] = [
+const quizQuestions: Question[] = [
   {
-    q: "When you spend time with a group of people, what matters most to you?",
+    id: 1,
+    text: "What primarily draws your interest toward joining Freemasonry?",
     options: [
-      { label: "Shared values and integrity", scores: { values: 2 } },
-      { label: "Good conversation and friendship", scores: { social: 2 } },
-      { label: "Learning something new", scores: { curiosity: 2 } },
-      { label: "Doing something useful together", scores: { service: 2 } },
+      { text: "A desire for personal growth, moral development, and self-improvement.", score: "high" },
+      { text: "A sense of community, camaraderie, and participating in local charity.", score: "high" },
+      { text: "Curiosity about historic traditions and esoteric symbols.", score: "neutral" },
+      { text: "Looking for business networking opportunities or career advancement.", score: "low" },
     ],
   },
   {
-    q: "Which of these would you most enjoy on a Wednesday evening?",
+    id: 2,
+    text: "Freemasonry requires a belief in a Supreme Being (regardless of your specific religion or faith). Does this align with your personal worldview?",
     options: [
-      { label: "A formal dinner with welcoming company", scores: { social: 2, values: 1 } },
-      { label: "A traditional ceremony rich in symbolism", scores: { curiosity: 2, values: 1 } },
-      { label: "Helping organise a charity event", scores: { service: 2 } },
-      { label: "Quietly reflecting on personal growth", scores: { values: 2, curiosity: 1 } },
+      { text: "Yes, I hold a belief in a Supreme Being / higher power.", score: "high" },
+      { text: "I am open to spiritual concepts, but unsure.", score: "neutral" },
+      { text: "No, I am strictly an atheist or do not hold any spiritual beliefs.", score: "low" },
     ],
   },
   {
-    q: "What appeals to you about an old institution like Freemasonry?",
+    id: 3,
+    text: "Lodge attendance requires a regular commitment (usually one evening a month for meetings, plus occasional practices). Can you comfortably balance this with your family and work responsibilities?",
     options: [
-      { label: "Centuries of ritual and tradition", scores: { curiosity: 2 } },
-      { label: "A clear moral framework", scores: { values: 2 } },
-      { label: "A community that supports its members", scores: { social: 2, service: 1 } },
-      { label: "The charity work it enables", scores: { service: 2 } },
+      { text: "Yes, I can comfortably commit to a regular evening each month.", score: "high" },
+      { text: "I have a busy schedule, but I can make time for something important.", score: "neutral" },
+      { text: "My schedule is completely unpredictable and leaves very little free time.", score: "low" },
     ],
   },
   {
-    q: "How do you feel about wearing a dinner jacket and following a formal etiquette?",
+    id: 4,
+    text: "Our fraternity is heavily focused on community support and charitable giving. How do you view charitable involvement?",
     options: [
-      { label: "Love it — it makes the evening feel special", scores: { social: 2 } },
-      { label: "Happy to, if it's part of the tradition", scores: { values: 1, curiosity: 1 } },
-      { label: "Don't mind, as long as people are friendly", scores: { social: 1 } },
-      { label: "It's a small price for something meaningful", scores: { values: 2 } },
+      { text: "It is deeply important to me, and I want to actively support local causes.", score: "high" },
+      { text: "I am happy to contribute financially when my budget allows.", score: "neutral" },
+      { text: "I rarely think about or participate in charitable activities.", score: "low" },
     ],
   },
   {
-    q: "Which sounds most rewarding?",
+    id: 5,
+    text: "How do you feel about participating in traditional, historic ceremonies and dramatic ritual plays?",
     options: [
-      { label: "Raising thousands for local young carers", scores: { service: 2 } },
-      { label: "Meeting people of all walks of life", scores: { social: 2 } },
-      { label: "Understanding ancient ceremonies", scores: { curiosity: 2 } },
-      { label: "Becoming a better version of yourself", scores: { values: 2 } },
+      { text: "I appreciate tradition and would enjoy learning and taking part in rituals.", score: "high" },
+      { text: "I am comfortable watching ceremonies, though public speaking makes me a bit nervous.", score: "neutral" },
+      { text: "I strongly dislike formal traditions, rituals, or symbolic ceremonies.", score: "low" },
     ],
   },
 ];
 
-type Bucket = "values" | "social" | "curiosity" | "service";
-
-const interpretations: Record<Bucket, { title: string; body: string; cta: string; href: string }> = {
-  values: {
-    title: "You're drawn to principle and self-improvement",
-    body: "Freemasonry's emphasis on integrity, brotherly love and personal development is likely to resonate strongly with you. Many members describe it as a structured path to becoming a better version of themselves.",
-    cta: "Read about your Masonic journey",
-    href: "/your-journey",
-  },
-  social: {
-    title: "You'd thrive in our community",
-    body: "Friendship and shared meals are at the heart of Lodge life. From our festive board to our Ladies Festival, you'll find a warm, welcoming group of all ages and backgrounds.",
-    cta: "See our upcoming events",
-    href: "/events",
-  },
-  curiosity: {
-    title: "You'd love the ritual and history",
-    body: "Freemasonry preserves centuries-old ceremonies rich in allegory and symbolism. If history, philosophy and meaningful tradition interest you, you'll find much to explore.",
-    cta: "Discover what Freemasonry is",
-    href: "/what-is-freemasonry",
-  },
-  service: {
-    title: "You'd be inspired by our charity work",
-    body: "Charitable giving is central to Freemasonry. Weybridge Lodge has earned the Surrey 2030 Festival Gold Award and actively supports local causes including Guildford Young Carers, SANDS and the Brigitte Trust.",
-    cta: "Explore our charities",
-    href: "/our-charities",
-  },
-};
-
 const Quiz = () => {
-  const [step, setStep] = useState(0);
-  const [scores, setScores] = useState<Record<Bucket, number>>({
-    values: 0,
-    social: 0,
-    curiosity: 0,
-    service: 0,
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [scores, setScores] = useState<{ high: number; neutral: number; low: number }>({
+    high: 0,
+    neutral: 0,
+    low: 0,
   });
-  const [done, setDone] = useState(false);
+  const [quizComplete, setQuizComplete] = useState(false);
 
-  const handleAnswer = (opt: Option) => {
-    const next = { ...scores };
-    (Object.keys(opt.scores) as Bucket[]).forEach((k) => {
-      next[k] = (next[k] || 0) + (opt.scores[k] || 0);
-    });
-    setScores(next);
-    if (step + 1 >= questions.length) {
-      setDone(true);
+  const handleOptionClick = (scoreType: "high" | "neutral" | "low") => {
+    const updatedScores = { ...scores, [scoreType]: scores[scoreType] + 1 };
+    setScores(updatedScores);
+
+    if (currentQuestionIndex < quizQuestions.length - 1) {
+      setCurrentQuestionIndex(currentQuestionIndex + 1);
     } else {
-      setStep(step + 1);
+      setQuizComplete(true);
     }
   };
 
-  const reset = () => {
-    setStep(0);
-    setScores({ values: 0, social: 0, curiosity: 0, service: 0 });
-    setDone(false);
+  const resetQuiz = () => {
+    setCurrentQuestionIndex(0);
+    setScores({ high: 0, neutral: 0, low: 0 });
+    setQuizComplete(false);
   };
 
-  const topBucket = (Object.keys(scores) as Bucket[]).reduce((a, b) =>
-    scores[a] >= scores[b] ? a : b
-  );
+  const getOutcome = () => {
+    if (scores.low >= 2) return "not-fit";
+    if (scores.high >= 3) return "high-fit";
+    return "neutral-fit";
+  };
 
-  const progress = ((step + (done ? 1 : 0)) / questions.length) * 100;
-  const result = interpretations[topBucket];
+  const outcome = getOutcome();
+  const progress = ((currentQuestionIndex + (quizComplete ? 1 : 0)) / quizQuestions.length) * 100;
 
   return (
     <div className="min-h-screen">
@@ -153,79 +120,129 @@ const Quiz = () => {
         <section className="py-16 md:py-24 bg-warm-white">
           <div className="container mx-auto px-6 max-w-2xl">
             <div className="mb-6">
-              <Progress value={progress} className="h-2" />
-              <p className="text-xs font-sans text-muted-foreground mt-2 text-right">
-                {done ? "Complete" : `Question ${step + 1} of ${questions.length}`}
+              <div className="w-full bg-border h-1.5 rounded-full overflow-hidden">
+                <div
+                  className="bg-gold h-1.5 transition-all duration-300"
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
+              <p className="text-xs font-sans text-muted-foreground mt-2 text-right uppercase tracking-wider">
+                {quizComplete
+                  ? "Assessment Complete"
+                  : `Question ${currentQuestionIndex + 1} of ${quizQuestions.length}`}
               </p>
             </div>
 
-            <AnimatePresence mode="wait">
-              {!done ? (
-                <motion.div
-                  key={step}
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  transition={{ duration: 0.3 }}
-                  className="bg-card border border-border rounded-sm shadow-sm p-6 md:p-8"
-                >
-                  <h2 className="text-xl md:text-2xl font-serif text-foreground mb-6">
-                    {questions[step].q}
-                  </h2>
-                  <div className="space-y-3">
-                    {questions[step].options.map((opt, i) => (
-                      <button
-                        key={i}
-                        onClick={() => handleAnswer(opt)}
-                        className="w-full text-left p-4 border border-border rounded-sm font-sans text-foreground hover:border-gold hover:bg-gold/5 transition-all group flex items-center justify-between gap-3"
-                      >
-                        <span>{opt.label}</span>
-                        <ArrowRight className="w-4 h-4 text-gold opacity-0 group-hover:opacity-100 transition-opacity" />
-                      </button>
-                    ))}
-                  </div>
-                </motion.div>
-              ) : (
-                <motion.div
-                  key="result"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5 }}
-                  className="bg-card border border-border rounded-sm shadow-lg overflow-hidden"
-                >
-                  <div className="bg-navy-gradient text-primary-foreground p-8 text-center">
-                    <Sparkles className="w-8 h-8 text-gold mx-auto mb-3" />
-                    <p className="text-gold text-xs uppercase tracking-widest font-sans mb-2">Your Result</p>
-                    <h2 className="text-2xl md:text-3xl font-serif">{result.title}</h2>
-                  </div>
-                  <div className="p-6 md:p-8 space-y-6">
-                    <p className="text-muted-foreground font-sans leading-relaxed">{result.body}</p>
-
-                    <div className="border-t border-border pt-6 space-y-3">
-                      <Link
-                        to={result.href}
-                        className="block w-full text-center bg-gold-shimmer text-accent-foreground py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity"
-                      >
-                        {result.cta}
-                      </Link>
-                      <Link
-                        to="/join-us"
-                        className="block w-full text-center border border-gold text-foreground py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:bg-gold/10 transition-colors"
-                      >
-                        Enquire About Joining
-                      </Link>
-                      <button
-                        onClick={reset}
-                        className="w-full inline-flex items-center justify-center gap-2 text-sm font-sans text-muted-foreground hover:text-gold transition-colors py-2"
-                      >
-                        <RotateCcw className="w-4 h-4" />
-                        Retake the quiz
-                      </button>
+            <div className="bg-card border border-border rounded-sm shadow-sm p-6 md:p-8">
+              <AnimatePresence mode="wait">
+                {!quizComplete ? (
+                  <motion.div
+                    key={currentQuestionIndex}
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground uppercase tracking-wider mb-6">
+                      <HelpCircle className="h-3.5 w-3.5 text-gold" />
+                      <span>Suitability Assessment</span>
                     </div>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+
+                    <h2 className="font-serif text-xl md:text-2xl text-card-foreground mb-6 leading-tight">
+                      {quizQuestions[currentQuestionIndex].text}
+                    </h2>
+
+                    <div className="space-y-3">
+                      {quizQuestions[currentQuestionIndex].options.map((option, index) => (
+                        <button
+                          key={index}
+                          onClick={() => handleOptionClick(option.score)}
+                          className="w-full text-left p-4 rounded-sm border border-border bg-background hover:border-gold hover:bg-gold/5 transition-all duration-200 text-foreground text-sm sm:text-base leading-relaxed flex items-start gap-3 group"
+                        >
+                          <span className="inline-flex items-center justify-center border border-border group-hover:border-gold h-5 w-5 rounded-full text-xs font-bold text-muted-foreground group-hover:text-gold shrink-0 mt-0.5">
+                            {String.fromCharCode(65 + index)}
+                          </span>
+                          {option.text}
+                        </button>
+                      ))}
+                    </div>
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="result"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 }}
+                    className="text-center py-4"
+                  >
+                    <div className="inline-flex items-center justify-center p-3 bg-gold/10 rounded-full mb-6">
+                      <CheckCircle2 className="h-10 w-10 text-gold" />
+                    </div>
+
+                    {outcome === "high-fit" && (
+                      <div>
+                        <h2 className="font-serif text-2xl md:text-3xl font-bold text-card-foreground mb-4">
+                          Strong Alignment Found
+                        </h2>
+                        <p className="text-muted-foreground text-sm sm:text-base mb-8 max-w-md mx-auto leading-relaxed">
+                          Your values, personal commitments, and community mindset align perfectly with the foundational tenets of Freemasonry. We welcome you to take the next step in your journey with Weybridge Lodge.
+                        </p>
+                        <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                          <Button asChild className="bg-gold hover:bg-gold/90 text-navy font-semibold px-6 py-5 rounded-sm">
+                            <Link to="/join-us" className="flex items-center justify-center gap-2">
+                              Apply to Join <ArrowRight className="h-4 w-4" />
+                            </Link>
+                          </Button>
+                          <Button asChild variant="outline" className="border-border text-foreground px-6 py-5 rounded-sm">
+                            <Link to="/first-visit">Read First Visit Guide</Link>
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+
+                    {outcome === "neutral-fit" && (
+                      <div>
+                        <h2 className="font-serif text-2xl md:text-3xl font-bold text-card-foreground mb-4">
+                          Curious & Exploring
+                        </h2>
+                        <p className="text-muted-foreground text-sm sm:text-base mb-8 max-w-md mx-auto leading-relaxed">
+                          You demonstrate a solid interest in community and personal reflection, but you might still have lingering questions about how the fraternity fits into your lifestyle. We recommend exploring our comprehensive FAQ page.
+                        </p>
+                        <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                          <Button asChild className="bg-gold hover:bg-gold/90 text-navy font-semibold px-6 py-5 rounded-sm">
+                            <Link to="/faq">Browse Our FAQs</Link>
+                          </Button>
+                          <Button asChild variant="outline" className="border-border text-foreground px-6 py-5 rounded-sm">
+                            <Link to="/contact">Ask a Question</Link>
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+
+                    {outcome === "not-fit" && (
+                      <div>
+                        <h2 className="font-serif text-2xl md:text-3xl font-bold text-card-foreground mb-4">
+                          Thank You for Your Interest
+                        </h2>
+                        <p className="text-muted-foreground text-sm sm:text-base mb-8 max-w-md mx-auto leading-relaxed">
+                          Based on your responses regarding time commitments, worldview, or core goals, Freemasonry might not be the ideal fit for you at this exact moment in your life. We appreciate your curiosity and time spent learning about our history.
+                        </p>
+                        <Button asChild variant="outline" className="border-border text-foreground px-6 py-5 rounded-sm">
+                          <Link to="/">Return Home</Link>
+                        </Button>
+                      </div>
+                    )}
+
+                    <button
+                      onClick={resetQuiz}
+                      className="mt-12 inline-flex items-center gap-2 text-xs font-semibold text-muted-foreground hover:text-gold tracking-wide uppercase transition-colors"
+                    >
+                      <RotateCcw className="h-3.5 w-3.5" /> Restart Assessment
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
         </section>
       </main>
