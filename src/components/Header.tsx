@@ -43,10 +43,18 @@ const navItems: NavItem[] = [
       { label: "Our Charities", href: "/our-charities" },
     ],
   },
-  { label: "Events", href: "/events" },
+  {
+    label: "Events",
+    href: "/events",
+    children: [
+      { label: "All Events & Calendar", href: "/events" },
+      { label: "Ladies Festival 2026", href: "/ladies-festival" },
+      { label: "Bookings", href: "/bookings" },
+    ],
+  },
   { label: "News", href: "/news" },
+  { label: "Is It For Me? (Quiz)", href: "/quiz" },
   { label: "Contact", href: "/contact" },
-  { label: "Bookings", href: "/bookings" },
   { label: "FAQ", href: "/faq" },
 ];
 
