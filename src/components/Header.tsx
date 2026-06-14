@@ -1,61 +1,98 @@
 import { useState, useRef, useEffect } from "react";
-import { Menu, X, Phone, ChevronDown } from "lucide-react";
+import { Menu, X, Phone, ChevronDown, Mail } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link, useLocation } from "react-router-dom";
 import logo from "@/assets/weybridge-logo.svg";
 
+interface NavChild {
+  label: string;
+  href: string;
+  badge?: string;
+  accent?: boolean;
+}
+
+interface NavSection {
+  heading?: string;
+  items: NavChild[];
+}
+
 interface NavItem {
   label: string;
   href: string;
-  children?: { label: string; href: string }[];
+  sections?: NavSection[];
 }
 
 const navItems: NavItem[] = [
   {
     label: "About Us",
-    href: "/#about",
-    children: [
-      { label: "Lodge Profile", href: "/lodge-profile" },
-      { label: "Our History", href: "/history" },
-      { label: "Worshipful Masters", href: "/worshipful-masters" },
-      { label: "Officers of the Lodge", href: "/officers" },
-      { label: "Masonic Links", href: "/masonic-links" },
+    href: "/lodge-profile",
+    sections: [
+      {
+        items: [
+          { label: "Lodge Profile", href: "/lodge-profile" },
+          { label: "Our History", href: "/history" },
+          { label: "Worshipful Masters", href: "/worshipful-masters" },
+          { label: "Officers of the Lodge", href: "/officers" },
+        ],
+      },
+      {
+        heading: "Deep Dive",
+        items: [
+          { label: "Lodge Traditions", href: "/lodge-traditions" },
+          { label: "Officers' Roles & Jewels", href: "/officers-jewels" },
+        ],
+      },
     ],
   },
-  { label: "Join Our Lodge", href: "/join-us" },
   {
-    label: "Discover Freemasonry",
-    href: "/what-is-freemasonry",
-    children: [
-      { label: "What is Freemasonry", href: "/what-is-freemasonry" },
-      { label: "Your Masonic Journey", href: "/your-journey" },
-      { label: "Lodge Traditions", href: "/lodge-traditions" },
-      { label: "Your Initiation Night", href: "/first-visit" },
-      { label: "Officers Roles & Jewels", href: "/officers-jewels" },
-      { label: "Video Hub", href: "/video-hub" },
+    label: "Becoming a Mason",
+    href: "/join-us",
+    sections: [
+      {
+        heading: "Your Journey",
+        items: [
+          { label: "What is Freemasonry?", href: "/what-is-freemasonry" },
+          { label: "Your First Visit", href: "/first-visit" },
+          { label: "Your Masonic Journey", href: "/your-journey" },
+          { label: "FAQ", href: "/faq" },
+        ],
+      },
+      {
+        heading: "Interactive",
+        items: [
+          { label: "Is it for me? Take the Quiz", href: "/quiz", badge: "2 min", accent: true },
+          { label: "Join Our Lodge", href: "/join-us", accent: true },
+        ],
+      },
+    ],
+  },
+  {
+    label: "News & Media",
+    href: "/news",
+    sections: [
+      {
+        items: [
+          { label: "News Hub", href: "/news" },
+          { label: "Events Calendar", href: "/events" },
+          { label: "Bookings", href: "/bookings" },
+          { label: "Ladies Festival 2026", href: "/ladies-festival" },
+          { label: "Video Hub", href: "/video-hub" },
+        ],
+      },
     ],
   },
   {
     label: "Charity",
     href: "/freemasonry-and-charity",
-    children: [
-      { label: "Freemasonry & Charity", href: "/freemasonry-and-charity" },
-      { label: "Our Charities", href: "/our-charities" },
+    sections: [
+      {
+        items: [
+          { label: "Freemasonry & Charity", href: "/freemasonry-and-charity" },
+          { label: "Our Charities", href: "/our-charities" },
+        ],
+      },
     ],
   },
-  {
-    label: "Events",
-    href: "/events",
-    children: [
-      { label: "All Events & Calendar", href: "/events" },
-      { label: "Ladies Festival 2026", href: "/ladies-festival" },
-      { label: "Bookings", href: "/bookings" },
-    ],
-  },
-  { label: "News", href: "/news" },
-  { label: "Is It For Me? (Quiz)", href: "/quiz" },
-  { label: "Contact", href: "/contact" },
-  { label: "FAQ", href: "/faq" },
 ];
 
 const DropdownMenu = ({ item }: { item: NavItem }) => {
@@ -105,18 +142,36 @@ const DropdownMenu = ({ item }: { item: NavItem }) => {
             transition={{ duration: 0.15 }}
             onMouseLeave={() => setOpen(false)}
             role="menu"
-            className="absolute top-full left-0 mt-2 w-56 bg-navy-dark border border-gold/15 rounded-sm shadow-xl z-50"
+            className="absolute top-full left-0 mt-2 w-64 bg-navy-dark border border-gold/15 rounded-sm shadow-xl z-50 py-2"
           >
-            {item.children!.map((child) => (
-              <Link
-                key={child.label}
-                to={child.href}
-                role="menuitem"
-                onClick={() => setOpen(false)}
-                className="block px-5 py-3 text-sm font-sans text-primary-foreground/70 hover:text-gold hover:bg-navy-light/30 transition-colors"
-              >
-                {child.label}
-              </Link>
+            {item.sections!.map((section, sIdx) => (
+              <div key={sIdx} className={sIdx > 0 ? "mt-1 pt-2 border-t border-gold/10" : ""}>
+                {section.heading && (
+                  <div className="px-5 py-1.5 text-[10px] font-sans uppercase tracking-[0.18em] text-gold/60">
+                    {section.heading}
+                  </div>
+                )}
+                {section.items.map((child) => (
+                  <Link
+                    key={child.label}
+                    to={child.href}
+                    role="menuitem"
+                    onClick={() => setOpen(false)}
+                    className={`flex items-center justify-between gap-2 px-5 py-2.5 text-sm font-sans transition-colors ${
+                      child.accent
+                        ? "text-gold hover:bg-gold/10"
+                        : "text-primary-foreground/70 hover:text-gold hover:bg-navy-light/30"
+                    }`}
+                  >
+                    <span>{child.label}</span>
+                    {child.badge && (
+                      <span className="text-[10px] font-semibold uppercase tracking-wider bg-gold/15 text-gold px-2 py-0.5 rounded-full">
+                        {child.badge}
+                      </span>
+                    )}
+                  </Link>
+                ))}
+              </div>
             ))}
           </motion.div>
         )}
@@ -141,7 +196,7 @@ const Header = () => {
   };
 
   const renderMobileItem = (item: NavItem) => {
-    if (item.children) {
+    if (item.sections) {
       const isExpanded = mobileExpanded === item.label;
       return (
         <div key={item.label}>
@@ -161,15 +216,31 @@ const Header = () => {
                 exit={{ height: 0, opacity: 0 }}
                 className="overflow-hidden pl-4 border-l border-gold/20"
               >
-                {item.children.map((child) => (
-                  <Link
-                    key={child.label}
-                    to={child.href}
-                    onClick={() => setMobileOpen(false)}
-                    className="block text-sm font-sans text-primary-foreground/60 hover:text-gold transition-colors py-2"
-                  >
-                    {child.label}
-                  </Link>
+                {item.sections.map((section, sIdx) => (
+                  <div key={sIdx} className={sIdx > 0 ? "mt-2 pt-2 border-t border-gold/10" : ""}>
+                    {section.heading && (
+                      <div className="text-[10px] font-sans uppercase tracking-[0.18em] text-gold/60 py-1.5">
+                        {section.heading}
+                      </div>
+                    )}
+                    {section.items.map((child) => (
+                      <Link
+                        key={child.label}
+                        to={child.href}
+                        onClick={() => setMobileOpen(false)}
+                        className={`flex items-center justify-between gap-2 text-sm font-sans py-2 transition-colors ${
+                          child.accent ? "text-gold" : "text-primary-foreground/60 hover:text-gold"
+                        }`}
+                      >
+                        <span>{child.label}</span>
+                        {child.badge && (
+                          <span className="text-[10px] font-semibold uppercase tracking-wider bg-gold/15 text-gold px-2 py-0.5 rounded-full">
+                            {child.badge}
+                          </span>
+                        )}
+                      </Link>
+                    ))}
+                  </div>
                 ))}
               </motion.div>
             )}
@@ -214,7 +285,7 @@ const Header = () => {
   };
 
   const renderDesktopItem = (item: NavItem) => {
-    if (item.children) {
+    if (item.sections) {
       return <DropdownMenu key={item.label} item={item} />;
     }
 
@@ -267,7 +338,14 @@ const Header = () => {
           {navItems.map((item) => renderDesktopItem(item))}
         </nav>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 md:gap-3">
+          <Link
+            to="/contact"
+            className="hidden md:inline-flex items-center gap-2 border border-gold/50 text-gold px-4 py-2 rounded-sm text-sm font-semibold font-sans hover:bg-gold/10 transition-colors"
+          >
+            <Mail className="w-4 h-4" />
+            Contact
+          </Link>
           <Link
             to="/join-us"
             className="hidden md:flex items-center gap-2 bg-gold-shimmer text-accent-foreground px-5 py-2.5 rounded-sm text-sm font-semibold font-sans hover:opacity-90 transition-opacity"
@@ -296,9 +374,17 @@ const Header = () => {
             <nav aria-label="Mobile navigation" className="flex flex-col px-6 py-4 gap-2">
               {navItems.map((item) => renderMobileItem(item))}
               <Link
+                to="/contact"
+                onClick={() => setMobileOpen(false)}
+                className="flex items-center justify-center gap-2 border border-gold/50 text-gold px-5 py-3 rounded-sm text-sm font-semibold font-sans mt-2"
+              >
+                <Mail className="w-4 h-4" />
+                Contact Us
+              </Link>
+              <Link
                 to="/join-us"
                 onClick={() => setMobileOpen(false)}
-                className="flex items-center justify-center gap-2 bg-gold-shimmer text-accent-foreground px-5 py-3 rounded-sm text-sm font-semibold font-sans mt-2"
+                className="flex items-center justify-center gap-2 bg-gold-shimmer text-accent-foreground px-5 py-3 rounded-sm text-sm font-semibold font-sans"
               >
                 <Phone className="w-4 h-4" />
                 Interested in Joining?
