@@ -338,7 +338,14 @@ const Header = () => {
           {navItems.map((item) => renderDesktopItem(item))}
         </nav>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 md:gap-3">
+          <Link
+            to="/contact"
+            className="hidden md:inline-flex items-center gap-2 border border-gold/50 text-gold px-4 py-2 rounded-sm text-sm font-semibold font-sans hover:bg-gold/10 transition-colors"
+          >
+            <Mail className="w-4 h-4" />
+            Contact
+          </Link>
           <Link
             to="/join-us"
             className="hidden md:flex items-center gap-2 bg-gold-shimmer text-accent-foreground px-5 py-2.5 rounded-sm text-sm font-semibold font-sans hover:opacity-90 transition-opacity"
