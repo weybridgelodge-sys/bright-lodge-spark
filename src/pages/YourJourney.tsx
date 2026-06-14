@@ -4,7 +4,7 @@ import PageHeader from "@/components/PageHeader";
 import SEO, { breadcrumbSchema } from "@/components/SEO";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { Compass, BookOpen, Crown, KeyRound, MessageCircle, Users, CheckSquare, Sun, Phone, FileText } from "lucide-react";
+import { Compass, BookOpen, Crown, KeyRound, MessageCircle, Users, CheckSquare, Sun, Phone, FileText, Shield, Star, CalendarDays } from "lucide-react";
 
 const degrees = [
   {
@@ -65,6 +65,90 @@ const joinSteps = [
     body: "Your application is put to a formal ballot in open Lodge. Freemasonry sets great store by the unanimous agreement of the members. Once accepted, we confirm your initiation date — your first visit as a member of Weybridge Lodge.",
   },
 ];
+
+interface TimelineStep {
+  title: string;
+  duration?: string;
+  description: string;
+  icon: React.ReactNode;
+}
+
+const timelineData: TimelineStep[] = [
+  {
+    title: "1. Initial Enquiry & Casual Meet",
+    duration: "1 – 3 months",
+    description: "After submitting your interest online, a member of our committee will reach out for an informal chat over coffee or a drink. This is a relaxed, two-way conversation to answer your initial questions and get to know each other.",
+    icon: <CalendarDays className="h-5 w-5 text-gold" />,
+  },
+  {
+    title: "2. The Committee Interview",
+    duration: "1 evening",
+    description: "You will be invited to the Guildford Masonic Centre to meet a small panel of our members. Do not let the word 'interview' worry you; it is simply a friendly discussion to ensure our values align and that your family commitments comfortably support joining.",
+    icon: <Shield className="h-5 w-5 text-gold" />,
+  },
+  {
+    title: "3. The First Degree: Initiation",
+    duration: "Your First Meeting",
+    description: "The night you officially become a Freemason. You enter as a Candidate and leave as an Entered Apprentice. The traditional ceremony is solemn, deeply memorable, and focuses on the core principles of charity, integrity, and self-reflection.",
+    icon: <BookOpen className="h-5 w-5 text-gold" />,
+  },
+  {
+    title: "4. The Second Degree: Passing",
+    duration: "3 – 6 months later",
+    description: "As a Fellowcraft Freemason, this stage symbolizes adulthood and the development of the mind. The ceremony focuses on the study of arts, sciences, and the importance of lifelong education and intellectual growth.",
+    icon: <BookOpen className="h-5 w-5 text-gold" />,
+  },
+  {
+    title: "5. The Third Degree: Raising",
+    duration: "3 – 6 months later",
+    description: "The pinnacle of your initial journey. You are raised to the sublime degree of a Master Mason. This profound ceremony reflects on human nature, mortality, and the ultimate triumph of integrity and moral strength.",
+    icon: <Star className="h-5 w-5 text-gold" />,
+  },
+];
+
+function JourneyTimelineSection() {
+  return (
+    <section className="bg-background py-16 px-4 sm:px-6 lg:px-8 border-t border-border">
+      <div className="max-w-3xl mx-auto">
+        <div className="text-center mb-12">
+          <span className="text-gold font-semibold tracking-wide uppercase text-sm">Chronology</span>
+          <h2 className="mt-2 text-3xl font-extrabold text-foreground tracking-tight sm:text-4xl font-serif">
+            Step-by-Step Progression
+          </h2>
+          <p className="mt-4 text-base text-muted-foreground max-w-xl mx-auto">
+            From your first message to your installation as a Master Mason, here is the chronological path and estimated timing for your joining process.
+          </p>
+        </div>
+
+        <div className="relative border-l border-border ml-4 md:ml-6 space-y-12">
+          {timelineData.map((step, index) => (
+            <div key={index} className="relative pl-8 sm:pl-10 group">
+              <div className="absolute -left-[21px] top-0 bg-card border-2 border-border group-hover:border-gold transition-colors p-2 rounded-full shadow-sm z-10">
+                {step.icon}
+              </div>
+
+              <div className="bg-card p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 border border-border">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+                  <h3 className="text-xl font-bold text-card-foreground tracking-tight font-serif">
+                    {step.title}
+                  </h3>
+                  {step.duration && (
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gold/10 text-gold border border-gold/20 whitespace-nowrap self-start sm:self-center">
+                      {step.duration}
+                    </span>
+                  )}
+                </div>
+                <p className="text-muted-foreground text-sm leading-relaxed">
+                  {step.description}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
 
 const YourJourney = () => {
   return (
@@ -136,6 +220,8 @@ const YourJourney = () => {
             })}
           </div>
         </section>
+
+        <JourneyTimelineSection />
 
         {/* Royal Arch */}
         <section className="py-12 sm:py-20 bg-navy-gradient">
