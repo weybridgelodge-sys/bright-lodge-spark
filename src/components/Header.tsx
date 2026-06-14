@@ -285,7 +285,7 @@ const Header = () => {
   };
 
   const renderDesktopItem = (item: NavItem) => {
-    if (item.children) {
+    if (item.sections) {
       return <DropdownMenu key={item.label} item={item} />;
     }
 
