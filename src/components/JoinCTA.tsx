@@ -25,18 +25,18 @@ const JoinCTA = () => {
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a
-              href="tel:07921589039"
-              className="inline-flex items-center justify-center gap-3 bg-gold-shimmer text-accent-foreground px-8 py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity"
-            >
-              <Phone className="w-4 h-4" />
-              07921 589 039
-            </a>
-            <a
               href="mailto:secretary@weybridgelodge.org.uk?subject=Weybridge%20Lodge%20Membership%20Enquiry"
-              className="inline-flex items-center justify-center gap-3 border border-primary-foreground/30 text-primary-foreground px-8 py-4 rounded-sm text-sm font-sans uppercase tracking-widest hover:border-gold hover:text-gold transition-colors"
+              className="inline-flex items-center justify-center gap-3 bg-gold-shimmer text-accent-foreground px-8 py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity"
             >
               <Mail className="w-4 h-4" />
               Email Us
+            </a>
+            <a
+              href="tel:07921589039"
+              className="inline-flex items-center justify-center gap-3 border border-primary-foreground/30 text-primary-foreground px-8 py-4 rounded-sm text-sm font-sans uppercase tracking-widest hover:border-gold hover:text-gold transition-colors"
+            >
+              <Phone className="w-4 h-4" />
+              07921 589 039
             </a>
           </div>
         </motion.div>
