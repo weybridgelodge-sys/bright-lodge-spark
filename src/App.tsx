@@ -33,6 +33,9 @@ import LadiesFestival from "./pages/LadiesFestival";
 import FirstVisit from "./pages/FirstVisit";
 import YourJourney from "./pages/YourJourney";
 import LodgeTraditions from "./pages/LodgeTraditions";
+import Quiz from "./pages/Quiz";
+
+
 
 const queryClient = new QueryClient();
 
@@ -66,6 +69,8 @@ const App = () => (
           <Route path="/officers-jewels" element={<OfficersJewels />} />
           <Route path="/events" element={<Events />} />
           <Route path="/ladies-festival" element={<LadiesFestival />} />
+          <Route path="/ladies-night" element={<LadiesFestival />} />
+          <Route path="/quiz" element={<Quiz />} />
           <Route path="/news" element={<News />} />
           <Route path="/news/75th-anniversary" element={<Anniversary75th />} />
           <Route path="/news/sands-charity" element={<SandsCharity />} />
