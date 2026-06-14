@@ -3,10 +3,67 @@ import { Link } from "react-router-dom";
 import logo from "@/assets/weybridge-logo.svg";
 import charterMark from "@/assets/charter-mark.png";
 
+interface FooterLink {
+  label: string;
+  href: string;
+  external?: boolean;
+}
+
+interface FooterColumn {
+  heading: string;
+  links: FooterLink[];
+}
+
+const footerColumns: FooterColumn[] = [
+  {
+    heading: "About Us",
+    links: [
+      { label: "Lodge Profile", href: "/lodge-profile" },
+      { label: "Our History", href: "/history" },
+      { label: "Worshipful Masters", href: "/worshipful-masters" },
+      { label: "Officers of the Lodge", href: "/officers" },
+      { label: "Lodge Traditions", href: "/lodge-traditions" },
+      { label: "Officers' Jewels", href: "/officers-jewels" },
+    ],
+  },
+  {
+    heading: "Becoming a Mason",
+    links: [
+      { label: "What is Freemasonry?", href: "/what-is-freemasonry" },
+      { label: "Your First Visit", href: "/first-visit" },
+      { label: "Your Masonic Journey", href: "/your-journey" },
+      { label: "FAQ", href: "/faq" },
+      { label: "Take the Quiz", href: "/quiz" },
+      { label: "Join Our Lodge", href: "/join-us" },
+    ],
+  },
+  {
+    heading: "News & Media",
+    links: [
+      { label: "News Hub", href: "/news" },
+      { label: "Events Calendar", href: "/events" },
+      { label: "Bookings", href: "/bookings" },
+      { label: "Ladies Festival 2026", href: "/ladies-festival" },
+      { label: "Video Hub", href: "/video-hub" },
+    ],
+  },
+  {
+    heading: "Charity & More",
+    links: [
+      { label: "Freemasonry & Charity", href: "/freemasonry-and-charity" },
+      { label: "Our Charities", href: "/our-charities" },
+      { label: "Masonic Links", href: "/masonic-links" },
+      { label: "Contact Us", href: "/contact" },
+      { label: "Data Protection", href: "/data-protection" },
+    ],
+  },
+];
+
 const Footer = () => {
   return (
     <footer className="bg-navy-dark py-16 border-t border-gold/10" role="contentinfo">
       <div className="container mx-auto px-4 sm:px-6">
+        {/* Top: brand + meeting + social */}
         <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-8 sm:gap-12 mb-12">
           <div>
             <div className="flex items-center gap-3 mb-4">
@@ -44,16 +101,39 @@ const Footer = () => {
                 <Twitter className="w-5 h-5" />
               </a>
             </div>
-            <div className="mt-6 flex gap-4">
+            <div className="mt-6 flex flex-col gap-2">
               <a href="https://surreyfreemasons.org.uk/" target="_blank" rel="noopener noreferrer" className="text-xs text-primary-foreground/40 hover:text-gold transition-colors font-sans">
                 Provincial Grand Lodge of Surrey
               </a>
               <a href="https://www.ugle.org.uk/" target="_blank" rel="noopener noreferrer" className="text-xs text-primary-foreground/40 hover:text-gold transition-colors font-sans">
-                UGLE
+                United Grand Lodge of England
               </a>
             </div>
           </div>
         </div>
+
+        {/* Sitemap columns */}
+        <nav aria-label="Footer sitemap" className="border-t border-gold/10 pt-10 pb-10">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            {footerColumns.map((col) => (
+              <div key={col.heading}>
+                <h4 className="font-serif text-primary-foreground text-sm mb-4">{col.heading}</h4>
+                <ul className="space-y-2.5">
+                  {col.links.map((link) => (
+                    <li key={link.label}>
+                      <Link
+                        to={link.href}
+                        className="text-xs font-sans font-light tracking-wide text-primary-foreground/55 hover:text-gold transition-colors"
+                      >
+                        {link.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </nav>
 
         <div className="border-t border-gold/10 pt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
           <p className="text-xs text-primary-foreground/30 font-sans">
