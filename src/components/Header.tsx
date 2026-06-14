@@ -283,7 +283,7 @@ const Header = () => {
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            className="lg:hidden bg-navy-dark border-t border-gold/10 overflow-hidden"
+            className="lg:hidden bg-navy-dark border-t border-gold/10 overflow-hidden max-h-[calc(100vh-4rem)] overflow-y-auto"
           >
             <nav aria-label="Mobile navigation" className="flex flex-col px-6 py-4 gap-2">
               {navItems.map((item) => renderMobileItem(item))}
