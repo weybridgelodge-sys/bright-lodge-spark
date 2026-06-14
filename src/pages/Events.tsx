@@ -9,7 +9,7 @@ import { Calendar as CalendarIcon, MapPin, Clock, Ticket, ExternalLink, Users, M
 import ladiesFestivalImg from "@/assets/events/ladies-festival-venue.jpg";
 import { Calendar } from "@/components/ui/calendar";
 import { format, isSameDay } from "date-fns";
-import { events, typeLabel, typeBadgeClass, type LodgeEvent } from "@/data/events";
+import { events, typeLabel, typeBadgeClass } from "@/data/events";
 
 const eventDates = events.map((e) => e.date);
 
