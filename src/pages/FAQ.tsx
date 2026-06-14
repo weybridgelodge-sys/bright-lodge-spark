@@ -26,7 +26,7 @@ const faqs = [
   },
   {
     question: "What are the benefits?",
-    answer: "Members experience personal growth, networking opportunities, and a chance to give back to their community through charitable efforts.",
+    answer: "Members experience personal growth, friendship, and a chance to give back to their community through charitable efforts. Contrary to common misconceptions, there are absolutely NO financial benefits to joining Freemasonry.",
   },
   {
     question: "Is there a fee?",
