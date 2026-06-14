@@ -63,7 +63,7 @@ const Hero = () => {
                 to="/first-visit"
                 className="inline-flex items-center justify-center border border-primary-foreground/30 text-primary-foreground px-8 py-4 rounded-sm text-sm font-sans uppercase tracking-widest hover:border-gold hover:text-gold transition-colors"
               >
-                What Happens On Your First Visit
+                Your Initiation Night
               </Link>
             </div>
           </motion.div>

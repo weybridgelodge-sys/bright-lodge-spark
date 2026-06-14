@@ -4,38 +4,38 @@ import PageHeader from "@/components/PageHeader";
 import SEO, { breadcrumbSchema } from "@/components/SEO";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { Car, Coffee, Users, Utensils, Handshake, Clock, Shirt, ParkingCircle } from "lucide-react";
+import { Car, DoorOpen, Sparkles, Utensils, Moon, Clock, Shirt, ParkingCircle, Users } from "lucide-react";
 
 const timeline = [
   {
-    time: "5:30 pm",
-    icon: ParkingCircle,
-    title: "You arrive",
-    body: "Free parking on site at the South West Surrey Masonic Centre, Hitherbury Close, Guildford GU2 4DR. Look for the gold sign — someone will be at the door to greet you by name.",
-  },
-  {
-    time: "5:40 pm",
-    icon: Coffee,
-    title: "Tea, coffee & introductions",
-    body: "You'll meet a few members in the bar area — including your sponsor and our Membership Secretary. No pressure, no quizzes. Just a friendly chat to put you at ease.",
-  },
-  {
-    time: "6:00 pm",
+    time: "Before the night",
     icon: Users,
-    title: "We go in — but not you (yet)",
-    body: "Members head into the Lodge room for the formal meeting. As a visitor exploring membership, you'll relax in our comfortable lounge with a drink, a host, and any questions you have.",
+    title: "Everything that leads here",
+    body: "By the time you reach your initiation night, we've already spoken on the phone, exchanged emails, shown you around the Masonic Centre, and met for a relaxed informal interview. You've completed your application form and your ballot has been successful. Now all that remains is the evening itself.",
   },
   {
-    time: "7:30 pm",
+    time: "5:15 pm",
+    icon: DoorOpen,
+    title: "Arrival & greeting",
+    body: "You'll arrive at the South West Surrey Masonic Centre, Hitherbury Close, Guildford GU2 4DR, and be greeted warmly by your sponsor and the Director of Ceremonies. There'll be time to settle in, meet a few familiar faces, and calm any nerves. Free parking is available on site.",
+  },
+  {
+    time: "5:30 pm",
+    icon: Sparkles,
+    title: "The ceremony of Initiation",
+    body: "You'll be escorted into the Lodge room and prepared for the ceremony. Don't worry — you don't need to memorise anything, and you won't be left alone for a single moment. Your sponsor is with you throughout. The initiation is a beautiful, time-honoured ceremony rich in symbolism. Think of it as a short allegorical play in which you are the central character, depicting a journey from darkness into light — the beginning of your Masonic life.",
+  },
+  {
+    time: "7:00 pm",
     icon: Utensils,
-    title: "Dinner together",
-    body: "Everyone reconvenes for a proper three-course meal in the dining room. This is where most of the real conversation happens — relaxed, sociable, and where you'll get a genuine sense of who we are.",
+    title: "The Festive Board",
+    body: "After the ceremony, everyone retires to the dining room for a celebratory three-course meal. This is where the real celebration happens — your new brethren will want to congratulate you, welcome you properly, and hear your first impressions. It's relaxed, warm, and one of the best parts of the evening.",
   },
   {
-    time: "9:30 pm",
-    icon: Handshake,
-    title: "No pressure. No obligation.",
-    body: "You go home, sleep on it, and let us know if you'd like to come back. Joining is your decision, on your timeline. Most prospective members visit two or three times before deciding.",
+    time: "9:00 pm",
+    icon: Moon,
+    title: "Home as a Freemason",
+    body: "You leave with new friends, a new title — Entered Apprentice — and the start of a journey that lasts a lifetime. Most men describe their initiation as one of the most memorable and positive experiences they've ever had. You'll sleep well that night.",
   },
 ];
 
@@ -43,20 +43,20 @@ const FirstVisit = () => {
   return (
     <div className="min-h-screen">
       <SEO
-        title="Your First Visit to Weybridge Lodge | Guildford Freemasons"
-        description="Curious about Freemasonry in Guildford? Here's exactly what happens when you visit Weybridge Lodge No. 6787 for the first time — timings, dress, dinner and more."
+        title="Your Initiation Night | Becoming a Freemason at Weybridge Lodge"
+        description="What actually happens on your initiation night at Weybridge Lodge No. 6787 — from arrival to the Festive Board. Your first visit as a Freemason in Guildford."
         canonical="/first-visit"
         schema={breadcrumbSchema([
           { name: "Home", url: "/" },
-          { name: "Your First Visit", url: "/first-visit" },
+          { name: "Your Initiation Night", url: "/first-visit" },
         ])}
       />
       <a href="#main-content" className="skip-to-content">Skip to main content</a>
       <Header />
       <main id="main-content">
         <PageHeader
-          title="Your First Visit"
-          subtitle="What actually happens — minute by minute — when you come to meet us"
+          title="Your Initiation Night"
+          subtitle="Your first visit to Weybridge Lodge — what to expect, minute by minute"
         />
 
         {/* Intro */}
@@ -70,10 +70,10 @@ const FirstVisit = () => {
             >
               <div className="h-0.5 w-16 bg-gold mx-auto mb-6" />
               <h2 className="text-3xl md:text-4xl font-serif text-foreground mb-6">
-                It's a lot less mysterious than you'd think
+                The beginning of a remarkable journey
               </h2>
               <p className="text-muted-foreground font-sans leading-relaxed">
-                A first visit isn't an interview, an audition, or a leap of faith. It's just dinner with a group of welcoming people who'd like to get to know you — and for you to get to know us. Here's how a typical evening unfolds.
+                Every Freemason remembers his initiation night. It is the moment you formally enter the Craft, received into the Lodge by your new brethren in a ceremony that has been performed for centuries. There is nothing to fear and nothing to memorise — your sponsor will be beside you throughout. Here is how the evening unfolds.
               </p>
             </motion.div>
           </div>
@@ -125,7 +125,7 @@ const FirstVisit = () => {
               {[
                 { icon: Shirt, title: "What to wear", body: "A dark business suit, white shirt, plain dark tie. Smart but standard — nothing you don't already own." },
                 { icon: Car, title: "Getting here", body: "Free on-site parking. Five minutes from Guildford station by taxi, or a 15-minute walk." },
-                { icon: Clock, title: "How long it takes", body: "Plan for about four hours, door to door. You're free to leave any time after dinner." },
+                { icon: Clock, title: "How long it takes", body: "Plan for about four hours, door to door. The ceremony itself lasts around 90 minutes, followed by dinner." },
                 { icon: Utensils, title: "Dietary needs", body: "Just let us know in advance — vegetarian, vegan, gluten-free, allergies. All easily handled." },
               ].map(({ icon: Icon, title, body }) => (
                 <div key={title} className="bg-card border border-border rounded-sm p-6">
@@ -142,16 +142,16 @@ const FirstVisit = () => {
         <section className="py-16 bg-navy">
           <div className="container mx-auto px-4 sm:px-6 max-w-2xl text-center">
             <h2 className="text-2xl md:text-3xl font-serif text-primary-foreground mb-4">
-              Ready to come along?
+              Ready to begin the journey?
             </h2>
             <p className="text-primary-foreground/70 font-sans mb-8">
-              Drop us a quick line and we'll suggest the next suitable evening to visit. There's no commitment beyond a friendly meal.
+              Every Freemason started with a single conversation. Drop us a line and we'll talk you through the steps — no pressure, no obligation.
             </p>
             <Link
               to="/join-us"
               className="inline-flex items-center justify-center bg-gold-shimmer text-accent-foreground px-8 py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity"
             >
-              Arrange A Visit
+              Enquire About Joining
             </Link>
           </div>
         </section>

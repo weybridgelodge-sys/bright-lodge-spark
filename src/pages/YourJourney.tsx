@@ -4,7 +4,7 @@ import PageHeader from "@/components/PageHeader";
 import SEO, { breadcrumbSchema } from "@/components/SEO";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { Compass, BookOpen, Crown, KeyRound, MessageCircle, Users, CheckSquare, Sun } from "lucide-react";
+import { Compass, BookOpen, Crown, KeyRound, MessageCircle, Users, CheckSquare, Sun, Phone, FileText } from "lucide-react";
 
 const degrees = [
   {
@@ -36,21 +36,33 @@ const degrees = [
 const joinSteps = [
   {
     n: "1",
-    icon: MessageCircle,
-    title: "Express Your Interest",
-    body: "Speak to whoever brought you here, or contact our Secretary directly through the Join Us page. There is no formal paperwork at this stage — simply a conversation. You are welcome to ask as many questions as you like before taking any further step.",
+    icon: Phone,
+    title: "Initial Contact",
+    body: "It starts with a simple phone call or email to our Membership Secretary. We'll answer your questions, tell you a bit about the Lodge, and suggest a time to meet in person. No pressure, no obligation — just a friendly conversation.",
   },
   {
     n: "2",
     icon: Users,
-    title: "Meet the Members",
-    body: "You will be invited to an informal meeting with a small committee of Lodge members. It is not an interview in any daunting sense — simply an opportunity for you to get to know a few of the brethren, and for them to get to know you. Relaxed, friendly, usually over a cup of tea or a drink.",
+    title: "Informal Visit & Tour",
+    body: "We'll invite you to the South West Surrey Masonic Centre for an informal look around. You'll meet a few of the brethren, see where we meet, and get a feel for who we are. It's relaxed, sociable, and a chance for you to ask anything that's on your mind.",
   },
   {
     n: "3",
+    icon: FileText,
+    title: "Application Form",
+    body: "If you decide you'd like to proceed, we'll ask you to complete a straightforward application form. This is simply a formal record of your interest and a few basic details so we can begin the joining process.",
+  },
+  {
+    n: "4",
+    icon: MessageCircle,
+    title: "Informal Interview",
+    body: "A small committee of Lodge members will meet with you for a relaxed, informal chat. A few necessary questions will be asked — nothing personal or intrusive. It's simply to ensure Freemasonry is right for you, and that you're comfortable with us.",
+  },
+  {
+    n: "5",
     icon: CheckSquare,
-    title: "The Ballot",
-    body: "If you wish to proceed, your application is put to a formal ballot in open Lodge. Freemasonry sets great store by the unanimous agreement of the members, so this step ensures every brother is content to welcome you. If successful, your Initiation is arranged at a convenient meeting.",
+    title: "Ballot & Initiation Date",
+    body: "Your application is put to a formal ballot in open Lodge. Freemasonry sets great store by the unanimous agreement of the members. Once accepted, we confirm your initiation date — your first visit as a member of Weybridge Lodge.",
   },
 ];
 
@@ -212,13 +224,13 @@ const YourJourney = () => {
               className="text-center mb-12"
             >
               <div className="h-0.5 w-16 bg-gold mx-auto mb-6" />
-              <h2 className="text-3xl md:text-4xl font-serif text-foreground mb-4">How To Join — In Three Steps</h2>
+              <h2 className="text-3xl md:text-4xl font-serif text-foreground mb-4">How To Join</h2>
               <p className="text-muted-foreground font-sans max-w-2xl mx-auto">
                 Straightforward, unhurried and entirely on your own terms.
               </p>
             </motion.div>
 
-            <div className="grid md:grid-cols-3 gap-5">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-5">
               {joinSteps.map((s, i) => {
                 const Icon = s.icon;
                 return (

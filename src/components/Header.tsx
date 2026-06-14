@@ -30,7 +30,7 @@ const navItems: NavItem[] = [
       { label: "What is Freemasonry", href: "/what-is-freemasonry" },
       { label: "Your Masonic Journey", href: "/your-journey" },
       { label: "Lodge Traditions", href: "/lodge-traditions" },
-      { label: "Your First Visit", href: "/first-visit" },
+      { label: "Your Initiation Night", href: "/first-visit" },
       { label: "Officers Roles & Jewels", href: "/officers-jewels" },
       { label: "Video Hub", href: "/video-hub" },
     ],
