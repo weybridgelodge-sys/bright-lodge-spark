@@ -31,6 +31,7 @@ import Surrey2030Gold from "./pages/news/Surrey2030Gold";
 import Events from "./pages/Events";
 import LadiesFestival from "./pages/LadiesFestival";
 import FirstVisit from "./pages/FirstVisit";
+import YourInitiation from "./pages/YourInitiation";
 import YourJourney from "./pages/YourJourney";
 import LodgeTraditions from "./pages/LodgeTraditions";
 import Quiz from "./pages/Quiz";
@@ -54,6 +55,7 @@ const App = () => (
           <Route path="/our-charities" element={<OurCharities />} />
           <Route path="/join-us" element={<JoinUs />} />
           <Route path="/first-visit" element={<FirstVisit />} />
+          <Route path="/your-initiation" element={<YourInitiation />} />
           <Route path="/your-journey" element={<YourJourney />} />
           <Route path="/lodge-traditions" element={<LodgeTraditions />} />
           <Route path="/data-protection" element={<DataProtection />} />
