@@ -26,16 +26,16 @@ const timeline = [
     body: "You'll be escorted into the Lodge room and prepared for the ceremony. Don't worry — you don't need to memorise anything, and you won't be left alone for a single moment. Your sponsor is with you throughout. The initiation is a beautiful, time-honoured ceremony rich in symbolism. Think of it as a short allegorical play in which you are the central character, depicting a journey from darkness into light — the beginning of your Masonic life.",
   },
   {
-    time: "7:00 pm",
+    time: "7:30 pm",
     icon: Utensils,
     title: "The Festive Board",
     body: "After the ceremony, everyone retires to the dining room for a celebratory three-course meal. This is where the real celebration happens — your new brethren will want to congratulate you, welcome you properly, and hear your first impressions. It's relaxed, warm, and one of the best parts of the evening.",
   },
   {
-    time: "9:00 pm",
+    time: "9:30 pm",
     icon: Moon,
     title: "Home as a Freemason",
-    body: "You leave with new friends, a new title — Entered Apprentice — and the start of a journey that lasts a lifetime. Most men describe their initiation as one of the most memorable and positive experiences they've ever had. You'll sleep well that night.",
+    body: "You leave with new friends, a new title — Entered Apprentice — and the start of a journey that lasts a lifetime. Most men describe their initiation as one of the most memorable and positive experiences they've ever had. Or stay for a few drinks with your new lodge mates — the bar stays open for those who want to linger.",
   },
 ];
 
