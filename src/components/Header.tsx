@@ -142,7 +142,7 @@ const DropdownMenu = ({ item }: { item: NavItem }) => {
             transition={{ duration: 0.15 }}
             onMouseLeave={() => setOpen(false)}
             role="menu"
-            className="absolute top-full left-0 mt-2 w-72 max-w-[calc(100vw-2rem)] bg-navy-dark border border-gold/15 rounded-sm shadow-xl z-50 py-3"
+            className="absolute top-full left-0 mt-2 w-72 max-w-[calc(100vw-2rem)] bg-navy-dark border border-gold/15 rounded-sm shadow-xl z-50 py-3 before:content-[''] before:absolute before:-top-2 before:left-0 before:right-0 before:h-2"
           >
             {item.sections!.map((section, sIdx) => (
               <div key={sIdx} className={sIdx > 0 ? "mt-2 pt-3 border-t border-gold/10" : ""}>
