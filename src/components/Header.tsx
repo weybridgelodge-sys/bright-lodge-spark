@@ -196,7 +196,7 @@ const Header = () => {
   };
 
   const renderMobileItem = (item: NavItem) => {
-    if (item.children) {
+    if (item.sections) {
       const isExpanded = mobileExpanded === item.label;
       return (
         <div key={item.label}>
@@ -216,15 +216,31 @@ const Header = () => {
                 exit={{ height: 0, opacity: 0 }}
                 className="overflow-hidden pl-4 border-l border-gold/20"
               >
-                {item.children.map((child) => (
-                  <Link
-                    key={child.label}
-                    to={child.href}
-                    onClick={() => setMobileOpen(false)}
-                    className="block text-sm font-sans text-primary-foreground/60 hover:text-gold transition-colors py-2"
-                  >
-                    {child.label}
-                  </Link>
+                {item.sections.map((section, sIdx) => (
+                  <div key={sIdx} className={sIdx > 0 ? "mt-2 pt-2 border-t border-gold/10" : ""}>
+                    {section.heading && (
+                      <div className="text-[10px] font-sans uppercase tracking-[0.18em] text-gold/60 py-1.5">
+                        {section.heading}
+                      </div>
+                    )}
+                    {section.items.map((child) => (
+                      <Link
+                        key={child.label}
+                        to={child.href}
+                        onClick={() => setMobileOpen(false)}
+                        className={`flex items-center justify-between gap-2 text-sm font-sans py-2 transition-colors ${
+                          child.accent ? "text-gold" : "text-primary-foreground/60 hover:text-gold"
+                        }`}
+                      >
+                        <span>{child.label}</span>
+                        {child.badge && (
+                          <span className="text-[10px] font-semibold uppercase tracking-wider bg-gold/15 text-gold px-2 py-0.5 rounded-full">
+                            {child.badge}
+                          </span>
+                        )}
+                      </Link>
+                    ))}
+                  </div>
                 ))}
               </motion.div>
             )}
