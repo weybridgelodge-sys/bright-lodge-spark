@@ -31,6 +31,8 @@ import Surrey2030Gold from "./pages/news/Surrey2030Gold";
 import Events from "./pages/Events";
 import LadiesFestival from "./pages/LadiesFestival";
 import FirstVisit from "./pages/FirstVisit";
+import YourJourney from "./pages/YourJourney";
+import LodgeTraditions from "./pages/LodgeTraditions";
 
 const queryClient = new QueryClient();
 
@@ -49,6 +51,8 @@ const App = () => (
           <Route path="/our-charities" element={<OurCharities />} />
           <Route path="/join-us" element={<JoinUs />} />
           <Route path="/first-visit" element={<FirstVisit />} />
+          <Route path="/your-journey" element={<YourJourney />} />
+          <Route path="/lodge-traditions" element={<LodgeTraditions />} />
           <Route path="/data-protection" element={<DataProtection />} />
           <Route path="/lodge-profile" element={<LodgeProfile />} />
           <Route path="/history" element={<History />} />
