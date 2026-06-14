@@ -135,7 +135,13 @@ const JoinUs = () => {
               </motion.div>
             </div>
 
-            <div className="text-center mt-12">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mt-12">
+              <Link
+                to="/first-visit"
+                className="inline-flex items-center justify-center border border-gold text-gold px-8 py-4 rounded-sm text-sm font-sans uppercase tracking-widest hover:bg-gold hover:text-accent-foreground transition-colors"
+              >
+                What Happens On Your First Visit
+              </Link>
               <Link
                 to="/faq"
                 className="inline-flex items-center justify-center border border-border text-foreground px-8 py-4 rounded-sm text-sm font-sans uppercase tracking-widest hover:border-gold hover:text-gold transition-colors"
@@ -143,6 +149,72 @@ const JoinUs = () => {
                 Frequently Asked Questions
               </Link>
             </div>
+          </div>
+        </section>
+
+        {/* Costs & Commitment */}
+        <section className="py-12 sm:py-20 md:py-24 bg-background">
+          <div className="container mx-auto px-4 sm:px-6 max-w-5xl">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="text-center mb-12"
+            >
+              <div className="h-0.5 w-16 bg-gold mx-auto mb-6" />
+              <h2 className="text-3xl md:text-4xl font-serif text-foreground mb-4">Costs &amp; Commitment</h2>
+              <p className="text-muted-foreground font-sans max-w-2xl mx-auto">
+                We believe in being upfront. Here's exactly what membership costs, with no surprises.
+              </p>
+            </motion.div>
+
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+              {[
+                {
+                  icon: PoundSterling,
+                  title: "UGLE Registration",
+                  amount: "£132",
+                  note: "One-off fee paid to the United Grand Lodge of England when you join.",
+                  badge: "50% off for under-21s",
+                },
+                {
+                  icon: CalendarDays,
+                  title: "Annual Subscription",
+                  amount: "£250 / year",
+                  note: "Pro-rated based on when you join during the year.",
+                  badge: "50% off for under-21s",
+                },
+                {
+                  icon: Utensils,
+                  title: "Dining at Meetings",
+                  amount: "~£32 per meeting",
+                  note: "A proper three-course dinner with members after every Lodge meeting.",
+                },
+                {
+                  icon: Ticket,
+                  title: "Incidentals",
+                  amount: "A few pounds",
+                  note: "Raffle tickets, drinks at the bar, and other optional extras on the night.",
+                },
+              ].map(({ icon: Icon, title, amount, note, badge }) => (
+                <div key={title} className="bg-card border border-border rounded-sm p-6 flex flex-col">
+                  <Icon className="w-6 h-6 text-gold mb-3" aria-hidden="true" />
+                  <h3 className="font-serif text-foreground text-lg mb-1">{title}</h3>
+                  <p className="text-2xl font-serif text-gold mb-3">{amount}</p>
+                  <p className="text-muted-foreground font-sans text-sm leading-relaxed flex-1">{note}</p>
+                  {badge && (
+                    <p className="mt-4 inline-flex self-start text-xs font-sans uppercase tracking-widest text-gold border border-gold/40 px-2 py-1 rounded-sm">
+                      {badge}
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            <p className="text-center text-muted-foreground font-sans text-sm mt-10 max-w-2xl mx-auto">
+              Time-wise, we meet on a handful of evenings each year — easy to fit around work and family. There is no expectation to attend every social event, though most members find they want to.
+            </p>
           </div>
         </section>
       </main>
