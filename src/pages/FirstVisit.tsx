@@ -14,7 +14,7 @@ const timeline = [
     body: "By the time you reach your initiation night, we've already spoken on the phone, exchanged emails, shown you around the Masonic Centre, and met for a relaxed informal interview. You've completed your application form and your ballot has been successful. Now all that remains is the evening itself.",
   },
   {
-    time: "5:15 pm",
+    time: "4:30 pm",
     icon: DoorOpen,
     title: "Arrival & greeting",
     body: "You'll arrive at the South West Surrey Masonic Centre, Hitherbury Close, Guildford GU2 4DR, and be greeted warmly by your sponsor and the Director of Ceremonies. There'll be time to settle in, meet a few familiar faces, and calm any nerves. Free parking is available on site.",
