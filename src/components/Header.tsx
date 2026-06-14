@@ -374,9 +374,17 @@ const Header = () => {
             <nav aria-label="Mobile navigation" className="flex flex-col px-6 py-4 gap-2">
               {navItems.map((item) => renderMobileItem(item))}
               <Link
+                to="/contact"
+                onClick={() => setMobileOpen(false)}
+                className="flex items-center justify-center gap-2 border border-gold/50 text-gold px-5 py-3 rounded-sm text-sm font-semibold font-sans mt-2"
+              >
+                <Mail className="w-4 h-4" />
+                Contact Us
+              </Link>
+              <Link
                 to="/join-us"
                 onClick={() => setMobileOpen(false)}
-                className="flex items-center justify-center gap-2 bg-gold-shimmer text-accent-foreground px-5 py-3 rounded-sm text-sm font-semibold font-sans mt-2"
+                className="flex items-center justify-center gap-2 bg-gold-shimmer text-accent-foreground px-5 py-3 rounded-sm text-sm font-semibold font-sans"
               >
                 <Phone className="w-4 h-4" />
                 Interested in Joining?
