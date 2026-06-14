@@ -140,7 +140,7 @@ const JoinUs = () => {
                 to="/first-visit"
                 className="inline-flex items-center justify-center border border-gold text-gold px-8 py-4 rounded-sm text-sm font-sans uppercase tracking-widest hover:bg-gold hover:text-accent-foreground transition-colors"
               >
-                What Happens On Your First Visit
+                Your Initiation Night
               </Link>
               <Link
                 to="/faq"

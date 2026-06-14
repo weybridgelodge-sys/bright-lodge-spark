@@ -62,8 +62,8 @@ const faqs = [
   },
   {
     question: "How do I join Freemasonry in Guildford?",
-    answer: "To become a Freemason in Guildford, the simplest route is to contact our Membership Secretary via our Join Us page. We'll invite you for an informal visit to the South West Surrey Masonic Centre to meet some of our members. There's no pressure — the visit is simply an opportunity to ask questions and see if Freemasonry is right for you.",
-    renderAnswer: (<>To become a Freemason in Guildford, the simplest route is to contact our Membership Secretary via our <Link to="/join-us" className="text-gold underline hover:opacity-80 transition-opacity">Join Us</Link> page. We'll invite you for an informal visit to the South West Surrey Masonic Centre to meet some of our members. There's no pressure — the visit is simply an opportunity to ask questions and see if Freemasonry is right for you.</>),
+    answer: "To become a Freemason in Guildford, the simplest route is to contact our Membership Secretary via our Join Us page. We'll invite you for an informal visit to the South West Surrey Masonic Centre to meet some of our members, show you around, and answer your questions. If you decide to proceed, you'll complete an application form and attend a relaxed informal interview. Once approved, we confirm your initiation date — your first visit as a Freemason. There's no pressure at any stage.",
+    renderAnswer: (<>To become a Freemason in Guildford, the simplest route is to contact our Membership Secretary via our <Link to="/join-us" className="text-gold underline hover:opacity-80 transition-opacity">Join Us</Link> page. We'll invite you for an informal visit to the South West Surrey Masonic Centre to meet some of our members, show you around, and answer your questions. If you decide to proceed, you'll complete an application form and attend a relaxed informal interview. Once approved, we confirm your initiation date — your first visit as a Freemason. There's no pressure at any stage.</>),
   },
   {
     question: "What social events do Freemasons in Surrey enjoy?",
