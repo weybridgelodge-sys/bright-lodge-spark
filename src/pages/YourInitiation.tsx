@@ -161,4 +161,4 @@ const YourInitiation = () => {
   );
 };
 
-export default FirstVisit;
+export default YourInitiation;
