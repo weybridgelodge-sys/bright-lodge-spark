@@ -30,6 +30,7 @@ import ApgmVisit from "./pages/news/ApgmVisit";
 import Surrey2030Gold from "./pages/news/Surrey2030Gold";
 import Events from "./pages/Events";
 import LadiesFestival from "./pages/LadiesFestival";
+import FirstVisit from "./pages/FirstVisit";
 
 const queryClient = new QueryClient();
 
@@ -47,6 +48,7 @@ const App = () => (
           <Route path="/freemasonry-and-charity" element={<FreemasonryCharity />} />
           <Route path="/our-charities" element={<OurCharities />} />
           <Route path="/join-us" element={<JoinUs />} />
+          <Route path="/first-visit" element={<FirstVisit />} />
           <Route path="/data-protection" element={<DataProtection />} />
           <Route path="/lodge-profile" element={<LodgeProfile />} />
           <Route path="/history" element={<History />} />

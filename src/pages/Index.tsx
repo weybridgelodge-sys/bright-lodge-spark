@@ -2,6 +2,7 @@ import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import About from "@/components/About";
 import Principles from "@/components/Principles";
+import Testimonials from "@/components/Testimonials";
 import NextMeeting from "@/components/NextMeeting";
 import JoinCTA from "@/components/JoinCTA";
 import Footer from "@/components/Footer";
@@ -22,6 +23,7 @@ const Index = () => {
         <Hero />
         <About />
         <Principles />
+        <Testimonials />
         <NextMeeting />
         <JoinCTA />
       </main>
