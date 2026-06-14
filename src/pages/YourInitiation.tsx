@@ -39,16 +39,16 @@ const timeline = [
   },
 ];
 
-const FirstVisit = () => {
+const YourInitiation = () => {
   return (
     <div className="min-h-screen">
       <SEO
         title="Your Initiation Night | Becoming a Freemason at Weybridge Lodge"
         description="What actually happens on your initiation night at Weybridge Lodge No. 6787 — from arrival to the Festive Board. Your first visit as a Freemason in Guildford."
-        canonical="/first-visit"
+        canonical="/your-initiation"
         schema={breadcrumbSchema([
           { name: "Home", url: "/" },
-          { name: "Your Initiation Night", url: "/first-visit" },
+          { name: "Your Initiation Night", url: "/your-initiation" },
         ])}
       />
       <a href="#main-content" className="skip-to-content">Skip to main content</a>
