@@ -54,7 +54,7 @@ const faqs = [
   },
   {
     question: "Is Freemasonry a secret society?",
-    answer: "Freemasonry is not a secret society, though it does have some secrets. While Freemasonry emphasizes openness and welcomes public scrutiny, it also maintains certain traditions and rituals that are not publicly disclosed.",
+    answer: "Freemasonry is not a secret society, though it does have some secrets. While Freemasonry emphasizes openness and welcomes public scrutiny, it also maintains certain traditions and rituals that are not publicly disclosed. The secrets relate primarily to forms of recognition used to identify members.",
   },
   {
     question: "Can women become Freemasons?",
