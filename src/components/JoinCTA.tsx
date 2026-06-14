@@ -32,7 +32,7 @@ const JoinCTA = () => {
               07921 589 039
             </a>
             <a
-              href="mailto:secretary@weybridgelodge.org.uk"
+              href="mailto:secretary@weybridgelodge.org.uk?subject=Weybridge%20Lodge%20Membership%20Enquiry"
               className="inline-flex items-center justify-center gap-3 border border-primary-foreground/30 text-primary-foreground px-8 py-4 rounded-sm text-sm font-sans uppercase tracking-widest hover:border-gold hover:text-gold transition-colors"
             >
               <Mail className="w-4 h-4" />
