@@ -142,35 +142,37 @@ const DropdownMenu = ({ item }: { item: NavItem }) => {
             transition={{ duration: 0.15 }}
             onMouseLeave={() => setOpen(false)}
             role="menu"
-            className="absolute top-full left-0 mt-2 w-64 bg-navy-dark border border-gold/15 rounded-sm shadow-xl z-50 py-2"
+            className="absolute top-full left-0 mt-2 w-72 max-w-[calc(100vw-2rem)] bg-navy-dark border border-gold/15 rounded-sm shadow-xl z-50 py-3"
           >
             {item.sections!.map((section, sIdx) => (
-              <div key={sIdx} className={sIdx > 0 ? "mt-1 pt-2 border-t border-gold/10" : ""}>
+              <div key={sIdx} className={sIdx > 0 ? "mt-2 pt-3 border-t border-gold/10" : ""}>
                 {section.heading && (
-                  <div className="px-5 py-1.5 text-[10px] font-sans uppercase tracking-[0.18em] text-gold/60">
+                  <div className="px-5 pb-2 text-[10px] font-sans uppercase tracking-[0.18em] text-gold/60">
                     {section.heading}
                   </div>
                 )}
-                {section.items.map((child) => (
-                  <Link
-                    key={child.label}
-                    to={child.href}
-                    role="menuitem"
-                    onClick={() => setOpen(false)}
-                    className={`flex items-center justify-between gap-2 px-5 py-2.5 text-sm font-sans transition-colors ${
-                      child.accent
-                        ? "text-gold hover:bg-gold/10"
-                        : "text-primary-foreground/70 hover:text-gold hover:bg-navy-light/30"
-                    }`}
-                  >
-                    <span>{child.label}</span>
-                    {child.badge && (
-                      <span className="text-[10px] font-semibold uppercase tracking-wider bg-gold/15 text-gold px-2 py-0.5 rounded-full">
-                        {child.badge}
-                      </span>
-                    )}
-                  </Link>
-                ))}
+                <div className="space-y-0.5">
+                  {section.items.map((child) => (
+                    <Link
+                      key={child.label}
+                      to={child.href}
+                      role="menuitem"
+                      onClick={() => setOpen(false)}
+                      className={`flex items-center justify-between gap-2 px-5 py-2 text-sm font-sans font-light tracking-wide transition-colors ${
+                        child.accent
+                          ? "text-gold hover:bg-gold/10"
+                          : "text-primary-foreground/70 hover:text-gold hover:bg-navy-light/30"
+                      }`}
+                    >
+                      <span>{child.label}</span>
+                      {child.badge && (
+                        <span className="text-[10px] font-semibold uppercase tracking-wider bg-gold/15 text-gold px-2 py-0.5 rounded-full">
+                          {child.badge}
+                        </span>
+                      )}
+                    </Link>
+                  ))}
+                </div>
               </div>
             ))}
           </motion.div>
@@ -369,7 +371,7 @@ const Header = () => {
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            className="lg:hidden bg-navy-dark border-t border-gold/10 overflow-hidden max-h-[calc(100vh-4rem)] overflow-y-auto"
+            className="lg:hidden bg-navy-dark border-t border-gold/10 max-h-[calc(100vh-4rem)] overflow-y-auto overflow-x-hidden"
           >
             <nav aria-label="Mobile navigation" className="flex flex-col px-6 py-4 gap-2">
               {navItems.map((item) => renderMobileItem(item))}
