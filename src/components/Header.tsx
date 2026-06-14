@@ -142,18 +142,36 @@ const DropdownMenu = ({ item }: { item: NavItem }) => {
             transition={{ duration: 0.15 }}
             onMouseLeave={() => setOpen(false)}
             role="menu"
-            className="absolute top-full left-0 mt-2 w-56 bg-navy-dark border border-gold/15 rounded-sm shadow-xl z-50"
+            className="absolute top-full left-0 mt-2 w-64 bg-navy-dark border border-gold/15 rounded-sm shadow-xl z-50 py-2"
           >
-            {item.children!.map((child) => (
-              <Link
-                key={child.label}
-                to={child.href}
-                role="menuitem"
-                onClick={() => setOpen(false)}
-                className="block px-5 py-3 text-sm font-sans text-primary-foreground/70 hover:text-gold hover:bg-navy-light/30 transition-colors"
-              >
-                {child.label}
-              </Link>
+            {item.sections!.map((section, sIdx) => (
+              <div key={sIdx} className={sIdx > 0 ? "mt-1 pt-2 border-t border-gold/10" : ""}>
+                {section.heading && (
+                  <div className="px-5 py-1.5 text-[10px] font-sans uppercase tracking-[0.18em] text-gold/60">
+                    {section.heading}
+                  </div>
+                )}
+                {section.items.map((child) => (
+                  <Link
+                    key={child.label}
+                    to={child.href}
+                    role="menuitem"
+                    onClick={() => setOpen(false)}
+                    className={`flex items-center justify-between gap-2 px-5 py-2.5 text-sm font-sans transition-colors ${
+                      child.accent
+                        ? "text-gold hover:bg-gold/10"
+                        : "text-primary-foreground/70 hover:text-gold hover:bg-navy-light/30"
+                    }`}
+                  >
+                    <span>{child.label}</span>
+                    {child.badge && (
+                      <span className="text-[10px] font-semibold uppercase tracking-wider bg-gold/15 text-gold px-2 py-0.5 rounded-full">
+                        {child.badge}
+                      </span>
+                    )}
+                  </Link>
+                ))}
+              </div>
             ))}
           </motion.div>
         )}
