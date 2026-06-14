@@ -9,76 +9,9 @@ import { Calendar as CalendarIcon, MapPin, Clock, Ticket, ExternalLink, Users, M
 import ladiesFestivalImg from "@/assets/events/ladies-festival-venue.jpg";
 import { Calendar } from "@/components/ui/calendar";
 import { format, isSameDay } from "date-fns";
-
-/* ── Event Data ── */
-
-interface LodgeEvent {
-  title: string;
-  date: Date;
-  time?: string;
-  venue: string;
-  address?: string;
-  type: "meeting" | "social" | "loi";
-  description?: string;
-  highlight?: boolean;
-  link?: string;
-}
-
-const events: LodgeEvent[] = [
-  // Regular meetings 2025-2026
-  {
-    title: "Initiation Ceremony",
-    date: new Date(2026, 3, 15),
-    time: "6.00 pm",
-    venue: "South West Surrey Masonic Centre",
-    address: "Hitherbury Close, Guildford GU2 4DR",
-    type: "meeting",
-    description: "Initiation ceremony welcoming a new candidate into Freemasonry — our fifth of the year.",
-    highlight: true,
-  },
-  {
-    title: "Installation Meeting",
-    date: new Date(2026, 9, 21),
-    time: "Evening",
-    venue: "South West Surrey Masonic Centre",
-    address: "Hitherbury Close, Guildford GU2 4DR",
-    type: "meeting",
-    description: "Installation of the new Worshipful Master for the ensuing year.",
-  },
-  {
-    title: "Initiation Ceremony",
-    date: new Date(2026, 11, 16),
-    time: "5.30 pm",
-    venue: "South West Surrey Masonic Centre",
-    address: "Hitherbury Close, Guildford GU2 4DR",
-    type: "meeting",
-  },
-  // Social events
-  {
-    title: "Weybridge & Astolat Lodges Ladies Festival",
-    date: new Date(2026, 7, 22),
-    time: "6.30 pm – 1.00 am",
-    venue: "Macdonald Frimley Hall Hotel",
-    type: "social",
-    description: "Black Tie evening in aid of Guildford Young Carers featuring three-course dinner, DJ, Grand Raffle, and more.",
-    highlight: true,
-    link: "/ladies-festival",
-  },
-];
+import { events, typeLabel, typeBadgeClass } from "@/data/events";
 
 const eventDates = events.map((e) => e.date);
-
-const typeLabel: Record<string, string> = {
-  meeting: "Lodge Meeting",
-  social: "Social Event",
-  loi: "Lodge of Instruction",
-};
-
-const typeBadgeClass: Record<string, string> = {
-  meeting: "bg-primary text-primary-foreground",
-  social: "bg-accent text-accent-foreground",
-  loi: "bg-secondary text-secondary-foreground",
-};
 
 const Events = () => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();

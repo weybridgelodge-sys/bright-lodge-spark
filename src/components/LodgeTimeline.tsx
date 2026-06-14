@@ -50,8 +50,8 @@ const LodgeTimeline = () => {
   const [active, setActive] = useState(0);
 
   return (
-    <section className="py-20 md:py-28 bg-navy-gradient text-primary-foreground">
-      <div className="container mx-auto px-6 max-w-5xl">
+    <section className="py-16 sm:py-20 md:py-28 bg-navy-gradient text-primary-foreground">
+      <div className="container mx-auto px-4 sm:px-6 max-w-5xl">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -69,7 +69,7 @@ const LodgeTimeline = () => {
         {/* Timeline rail */}
         <div className="relative">
           <div className="absolute left-0 right-0 top-7 h-px bg-gold/30 hidden md:block" />
-          <div className="grid grid-cols-2 md:grid-cols-6 gap-4 relative">
+          <div className="grid grid-cols-3 md:grid-cols-6 gap-3 sm:gap-4 relative">
             {milestones.map((m, i) => (
               <button
                 key={m.year}
@@ -86,7 +86,7 @@ const LodgeTimeline = () => {
                   }`}
                 />
                 <span
-                  className={`mt-3 font-serif text-sm md:text-base transition-colors ${
+                  className={`mt-3 font-serif text-xs sm:text-sm md:text-base transition-colors ${
                     i === active ? "text-gold" : "text-primary-foreground/60 group-hover:text-primary-foreground"
                   }`}
                 >
@@ -101,7 +101,7 @@ const LodgeTimeline = () => {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
-            className="mt-10 max-w-2xl mx-auto bg-navy-dark/60 border border-gold/20 rounded-sm p-6 md:p-8 text-center"
+            className="mt-10 max-w-2xl mx-auto bg-navy-dark/60 border border-gold/20 rounded-sm p-5 sm:p-6 md:p-8 text-center"
           >
             <p className="text-gold uppercase tracking-widest text-xs font-sans mb-2">
               {milestones[active].year}
