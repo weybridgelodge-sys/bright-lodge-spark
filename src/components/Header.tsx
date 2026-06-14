@@ -185,6 +185,11 @@ const DropdownMenu = ({ item }: { item: NavItem }) => {
 const Header = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileExpanded, setMobileExpanded] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!mobileOpen) setMobileExpanded(null);
+  }, [mobileOpen]);
+
   const location = useLocation();
 
   const handleNavClick = (href: string) => {
