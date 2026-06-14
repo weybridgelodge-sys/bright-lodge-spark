@@ -158,7 +158,7 @@ const DropdownMenu = ({ item }: { item: NavItem }) => {
                       to={child.href}
                       role="menuitem"
                       onClick={() => setOpen(false)}
-                      className={`flex items-center justify-between gap-2 px-5 py-2 text-sm font-sans font-light tracking-wide transition-colors ${
+                      className={`flex items-center justify-between gap-2 px-5 py-2.5 text-sm font-sans font-light tracking-wide transition-colors ${
                         child.accent
                           ? "text-gold hover:bg-gold/10"
                           : "text-primary-foreground/70 hover:text-gold hover:bg-navy-light/30"
@@ -340,7 +340,7 @@ const Header = () => {
           {navItems.map((item) => renderDesktopItem(item))}
         </nav>
 
-        <div className="flex items-center gap-2 md:gap-3">
+        <div className="flex items-center gap-2 md:gap-4">
           <Link
             to="/contact"
             className="hidden md:inline-flex items-center gap-2 border border-gold/50 text-gold px-4 py-2 rounded-sm text-sm font-semibold font-sans hover:bg-gold/10 transition-colors"
