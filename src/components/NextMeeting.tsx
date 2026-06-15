@@ -29,12 +29,12 @@ const NextMeeting = () => {
           className="max-w-2xl mx-auto bg-card rounded-sm border border-border shadow-lg overflow-hidden"
         >
           <div className="bg-navy-gradient p-8 text-center">
-            <p className="text-gold uppercase tracking-widest text-sm font-sans mb-2">Initiation Ceremony</p>
+            <p className="text-gold uppercase tracking-widest text-sm font-sans mb-2">Super Saturday Triple Passing</p>
             <p className="text-3xl md:text-4xl font-serif text-primary-foreground">
-              15th April 2026
+              12th September 2026
             </p>
             <p className="text-primary-foreground/60 font-sans text-sm mt-2">
-              April Meeting
+              September Meeting
             </p>
           </div>
 
@@ -50,7 +50,7 @@ const NextMeeting = () => {
             <div className="flex items-start gap-4">
               <Calendar className="w-5 h-5 text-gold mt-0.5 shrink-0" aria-hidden="true" />
               <div>
-                <p className="font-sans font-medium text-foreground">Wednesday, 15 April 2026, 6 pm</p>
+                <p className="font-sans font-medium text-foreground">Saturday, 12 September 2026, 11 am</p>
                 <p className="text-sm text-muted-foreground font-sans">Now open for bookings</p>
               </div>
             </div>
@@ -58,7 +58,7 @@ const NextMeeting = () => {
             <div className="flex items-start gap-4">
               <Clock className="w-5 h-5 text-gold mt-0.5 shrink-0" aria-hidden="true" />
               <div>
-                <p className="font-sans font-medium text-foreground">Followed by the Festive Board</p>
+                <p className="font-sans font-medium text-foreground">Followed by a Festive Board lunch</p>
                 <p className="text-sm text-muted-foreground font-sans">Contact us to book your place</p>
               </div>
             </div>
