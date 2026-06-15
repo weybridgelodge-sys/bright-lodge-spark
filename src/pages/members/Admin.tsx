@@ -146,6 +146,7 @@ export default function MembersAdmin() {
                 <th className="text-left p-3">Member</th>
                 <th className="text-left p-3">Status</th>
                 <th className="text-left p-3">Role</th>
+                <th className="text-left p-3">Degree</th>
                 <th className="text-right p-3">Actions</th>
               </tr>
             </thead>
@@ -177,6 +178,18 @@ export default function MembersAdmin() {
                     </span>
                   </td>
                   <td className="p-3 text-xs uppercase tracking-wider">{isAdmin(p.id) ? "Admin" : "Member"}</td>
+                  <td className="p-3">
+                    <select
+                      value={p.degree ?? "entered_apprentice"}
+                      onChange={(e) => setDegree(p.id, e.target.value as Degree)}
+                      className="bg-navy border border-gold/20 rounded-sm px-2 py-1 text-xs focus:outline-none focus:border-gold"
+                      aria-label={`Set degree for ${p.full_name || p.email}`}
+                    >
+                      <option value="entered_apprentice">Entered Apprentice</option>
+                      <option value="fellow_craft">Fellow Craft</option>
+                      <option value="master_mason">Master Mason</option>
+                    </select>
+                  </td>
                   <td className="p-3">
                     <div className="flex items-center gap-1 justify-end">
                       {p.status !== "active" && (
