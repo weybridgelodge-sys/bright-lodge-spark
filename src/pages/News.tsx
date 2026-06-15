@@ -4,13 +4,19 @@ import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
 import SEO, { breadcrumbSchema } from "@/components/SEO";
 import { motion } from "framer-motion";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams, useParams } from "react-router-dom";
 import { Calendar, Tag, X } from "lucide-react";
 import { posts, categories, formatDate } from "@/data/posts";
 
+const slugify = (s: string) => s.toLowerCase().replace(/\s+/g, "-");
+
 const News = () => {
   const [searchParams] = useSearchParams();
-  const activeCategory = searchParams.get("category");
+  const { category: categorySlug } = useParams<{ category?: string }>();
+  const categoryFromSlug = categorySlug
+    ? categories.find((c) => slugify(c) === categorySlug.toLowerCase()) ?? null
+    : null;
+  const activeCategory = categoryFromSlug || searchParams.get("category");
   const filteredPosts = activeCategory
     ? posts.filter((p) => p.category === activeCategory)
     : posts;
