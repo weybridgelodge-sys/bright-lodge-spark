@@ -57,7 +57,7 @@ export default function MembersAdmin() {
 
   const load = async () => {
     const [{ data: p }, { data: r }, { data: n }] = await Promise.all([
-      supabase.from("profiles").select("id,email,full_name,ugle_reg_number,mother_lodge,status,degree,created_at").order("created_at", { ascending: false }),
+      supabase.from("profiles").select("id,email,full_name,ugle_reg_number,mother_lodge,status,degree,is_past_master,created_at").order("created_at", { ascending: false }),
       supabase.from("user_roles").select("user_id,role"),
       supabase.from("member_notices").select("*").order("created_at", { ascending: false }),
     ]);
