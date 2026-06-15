@@ -328,23 +328,24 @@ export default function MembersAdmin() {
             <label className="text-xs uppercase tracking-wider text-primary-foreground/60">
               Degree
               <select
-                value={aDegree}
-                onChange={(e) => setADegree(e.target.value as Degree)}
+                value={aPastMaster ? "past_master" : aDegree}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  if (v === "past_master") {
+                    setAPastMaster(true);
+                    setADegree("master_mason");
+                  } else {
+                    setAPastMaster(false);
+                    setADegree(v as Degree);
+                  }
+                }}
                 className="mt-1 w-full bg-navy border border-gold/20 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-gold normal-case tracking-normal text-primary-foreground"
               >
                 <option value="entered_apprentice">Entered Apprentice</option>
                 <option value="fellow_craft">Fellow Craft</option>
                 <option value="master_mason">Master Mason</option>
+                <option value="past_master">Past Master (incl. Installed Masters ritual)</option>
               </select>
-            </label>
-            <label className="sm:col-span-2 flex items-center gap-2 text-xs text-primary-foreground/80 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={aPastMaster}
-                onChange={(e) => setAPastMaster(e.target.checked)}
-                className="accent-gold"
-              />
-              Past Master (grants access to Installed Masters ritual)
             </label>
             <input
               value={aRank}
