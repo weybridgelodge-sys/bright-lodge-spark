@@ -14,6 +14,10 @@ import {
   detectDuplicateInitiations,
   masonicYear,
   formatMasonicYear,
+  NON_PROGRESSIVE_ORDER,
+  NON_PROGRESSIVE_LABELS,
+  NonProgressiveKey,
+  tenureSince,
 } from "@/lib/officersProgression";
 import { Loader2, AlertTriangle, Crown, Download, UserPlus, Lock, ShieldAlert, X } from "lucide-react";
 import jsPDF from "jspdf";
@@ -365,14 +369,26 @@ export default function OfficersTracker() {
         )}
 
         {tab === "board" && (
-          <BoardView
-            projection={projection.grid[currentYear]}
-            year={currentYear}
-            members={members}
-            appointments={appointments}
-            onAssign={(pos, mid) => assignToOffice(pos, mid, currentYear)}
-            onClear={(id) => removeAppointment(id)}
-          />
+          <>
+            <BoardView
+              projection={projection.grid[currentYear]}
+              year={currentYear}
+              members={members}
+              appointments={appointments}
+              onAssign={(pos, mid) => assignToOffice(pos, mid, currentYear)}
+              onClear={(id) => removeAppointment(id)}
+            />
+            <NonProgressiveBoard
+              year={currentYear}
+              members={members}
+              appointments={appointments}
+              onAssign={(pos, mid, appointedOn) =>
+                assignToOffice(pos as unknown as PositionKey, mid, currentYear, { appointedOn })
+              }
+              onClear={(id) => removeAppointment(id)}
+              onUpdateDate={(id, appointedOn) => updateAppointmentDate(id, appointedOn)}
+            />
+          </>
         )}
 
         {tab === "ladder" && (
