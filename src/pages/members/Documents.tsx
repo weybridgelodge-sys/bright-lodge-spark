@@ -113,7 +113,7 @@ export default function MembersDocuments() {
     <MembersLayout>
       <div className="mb-6">
         <h1 className="font-serif text-3xl text-gold mb-2">Documents</h1>
-        <p className="text-sm text-primary-foreground/60">Summons, minutes, ritual notes, and Lodge papers.</p>
+        <p className="text-sm text-primary-foreground/60">Summons, meeting minutes, committee minutes, agendas, media files, ritual notes, and Lodge papers.</p>
       </div>
 
       {isAdmin && (
