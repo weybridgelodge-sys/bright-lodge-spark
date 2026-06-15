@@ -21,6 +21,7 @@ type Profile = {
   mother_lodge: string | null;
   status: "pending" | "active" | "suspended";
   degree: Degree;
+  is_past_master: boolean;
   created_at: string;
 };
 
