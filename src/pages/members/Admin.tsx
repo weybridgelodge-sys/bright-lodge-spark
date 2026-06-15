@@ -21,6 +21,7 @@ type Profile = {
   mother_lodge: string | null;
   status: "pending" | "active" | "suspended";
   degree: Degree;
+  is_past_master: boolean;
   created_at: string;
 };
 
@@ -50,12 +51,13 @@ export default function MembersAdmin() {
   const [aName, setAName] = useState("");
   const [aInit, setAInit] = useState("");
   const [aDegree, setADegree] = useState<Degree>("master_mason");
+  const [aPastMaster, setAPastMaster] = useState(false);
   const [aRank, setARank] = useState("");
   const [aBusy, setABusy] = useState(false);
 
   const load = async () => {
     const [{ data: p }, { data: r }, { data: n }] = await Promise.all([
-      supabase.from("profiles").select("id,email,full_name,ugle_reg_number,mother_lodge,status,degree,created_at").order("created_at", { ascending: false }),
+      supabase.from("profiles").select("id,email,full_name,ugle_reg_number,mother_lodge,status,degree,is_past_master,created_at").order("created_at", { ascending: false }),
       supabase.from("user_roles").select("user_id,role"),
       supabase.from("member_notices").select("*").order("created_at", { ascending: false }),
     ]);
@@ -81,6 +83,15 @@ export default function MembersAdmin() {
     if (error) toast.error(error.message);
     else {
       toast.success(`Degree set to ${DEGREE_LABEL[degree]}`);
+      load();
+    }
+  };
+
+  const togglePastMaster = async (id: string, value: boolean) => {
+    const { error } = await supabase.from("profiles").update({ is_past_master: value }).eq("id", id);
+    if (error) toast.error(error.message);
+    else {
+      toast.success(value ? "Marked as Past Master" : "Past Master removed");
       load();
     }
   };
@@ -133,6 +144,7 @@ export default function MembersAdmin() {
         full_name: aName.trim(),
         initiation_date: aInit || null,
         degree: aDegree,
+        is_past_master: aPastMaster,
         rank: aRank.trim() || null,
         status: "active",
       },
@@ -149,6 +161,7 @@ export default function MembersAdmin() {
     setAInit("");
     setARank("");
     setADegree("master_mason");
+    setAPastMaster(false);
     setTab("users");
     load();
   };
@@ -227,6 +240,15 @@ export default function MembersAdmin() {
                       <option value="fellow_craft">Fellow Craft</option>
                       <option value="master_mason">Master Mason</option>
                     </select>
+                    <label className="mt-1 flex items-center gap-1.5 text-[11px] text-primary-foreground/70 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={!!p.is_past_master}
+                        onChange={(e) => togglePastMaster(p.id, e.target.checked)}
+                        className="accent-gold"
+                      />
+                      Past Master
+                    </label>
                   </td>
                   <td className="p-3">
                     <div className="flex items-center gap-1 justify-end">
@@ -314,6 +336,15 @@ export default function MembersAdmin() {
                 <option value="fellow_craft">Fellow Craft</option>
                 <option value="master_mason">Master Mason</option>
               </select>
+            </label>
+            <label className="sm:col-span-2 flex items-center gap-2 text-xs text-primary-foreground/80 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={aPastMaster}
+                onChange={(e) => setAPastMaster(e.target.checked)}
+                className="accent-gold"
+              />
+              Past Master (grants access to Installed Masters ritual)
             </label>
             <input
               value={aRank}

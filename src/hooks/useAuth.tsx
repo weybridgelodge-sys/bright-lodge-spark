@@ -12,7 +12,8 @@ type Profile = {
   phone: string | null;
   avatar_url: string | null;
   status: "pending" | "active" | "suspended";
-  degree: "entered_apprentice" | "fellow_craft" | "master_mason";
+  degree: "entered_apprentice" | "fellow_craft" | "master_mason" | "installed_master";
+  is_past_master?: boolean;
   initiation_date?: string | null;
 };
 

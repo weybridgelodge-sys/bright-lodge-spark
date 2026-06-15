@@ -216,6 +216,7 @@ export type Database = {
           full_name: string | null
           id: string
           initiation_date: string | null
+          is_past_master: boolean
           joined_year: number | null
           mother_lodge: string | null
           office: string | null
@@ -233,6 +234,7 @@ export type Database = {
           full_name?: string | null
           id: string
           initiation_date?: string | null
+          is_past_master?: boolean
           joined_year?: number | null
           mother_lodge?: string | null
           office?: string | null
@@ -250,6 +252,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           initiation_date?: string | null
+          is_past_master?: boolean
           joined_year?: number | null
           mother_lodge?: string | null
           office?: string | null
@@ -351,7 +354,11 @@ export type Database = {
         | "media_files"
         | "ritual"
         | "other"
-      masonic_degree: "entered_apprentice" | "fellow_craft" | "master_mason"
+      masonic_degree:
+        | "entered_apprentice"
+        | "fellow_craft"
+        | "master_mason"
+        | "installed_master"
       member_status: "pending" | "active" | "suspended"
       progression_readiness: "ready" | "needs_experience" | "non_progressive"
     }
@@ -491,7 +498,12 @@ export const Constants = {
         "ritual",
         "other",
       ],
-      masonic_degree: ["entered_apprentice", "fellow_craft", "master_mason"],
+      masonic_degree: [
+        "entered_apprentice",
+        "fellow_craft",
+        "master_mason",
+        "installed_master",
+      ],
       member_status: ["pending", "active", "suspended"],
       progression_readiness: ["ready", "needs_experience", "non_progressive"],
     },
