@@ -148,7 +148,7 @@ export default function OfficersTracker() {
     () =>
       computeProjection({
         currentYear,
-        yearsAhead: 6,
+        yearsAhead: 7,
         appointments: appointmentsLite,
         readyQueue,
         membersById,
@@ -315,7 +315,7 @@ export default function OfficersTracker() {
         <header>
           <h1 className="font-serif text-3xl text-primary-foreground">Progressive Officers Tracker</h1>
           <p className="text-primary-foreground/70 text-sm mt-1">
-            Weybridge Lodge No. 6787 · Seven-year projection based on initiation seniority.
+            Weybridge Lodge No. 6787 · Eight-year progression based on initiation seniority, plus non-progressive offices.
           </p>
         </header>
 
