@@ -9,6 +9,8 @@ type Profile = {
   id: string;
   email: string | null;
   full_name: string | null;
+  ugle_reg_number: string | null;
+  mother_lodge: string | null;
   status: "pending" | "active" | "suspended";
   created_at: string;
 };
@@ -36,7 +38,7 @@ export default function MembersAdmin() {
 
   const load = async () => {
     const [{ data: p }, { data: r }, { data: n }] = await Promise.all([
-      supabase.from("profiles").select("id,email,full_name,status,created_at").order("created_at", { ascending: false }),
+      supabase.from("profiles").select("id,email,full_name,ugle_reg_number,mother_lodge,status,created_at").order("created_at", { ascending: false }),
       supabase.from("user_roles").select("user_id,role"),
       supabase.from("member_notices").select("*").order("created_at", { ascending: false }),
     ]);
@@ -135,6 +137,13 @@ export default function MembersAdmin() {
                   <td className="p-3">
                     <p className="font-medium">{p.full_name || "(No name)"}</p>
                     <p className="text-xs text-primary-foreground/50">{p.email}</p>
+                    {(p.ugle_reg_number || p.mother_lodge) && (
+                      <p className="text-[11px] text-primary-foreground/50 mt-1">
+                        {p.ugle_reg_number && <>UGLE #{p.ugle_reg_number}</>}
+                        {p.ugle_reg_number && p.mother_lodge && <> · </>}
+                        {p.mother_lodge}
+                      </p>
+                    )}
                   </td>
                   <td className="p-3 text-xs uppercase tracking-wider">
                     <span
