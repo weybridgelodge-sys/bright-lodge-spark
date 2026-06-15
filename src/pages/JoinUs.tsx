@@ -204,7 +204,7 @@ const JoinUs = () => {
                   <p className="text-2xl font-serif text-gold-dark mb-3">{amount}</p>
                   <p className="text-muted-foreground font-sans text-sm leading-relaxed flex-1">{note}</p>
                   {badge && (
-                    <p className="mt-4 inline-flex self-start text-xs font-sans uppercase tracking-widest text-gold-dark border border-gold-dark/50 px-2 py-1 rounded-sm">
+                    <p className="mt-4 inline-flex self-start text-xs font-sans uppercase tracking-widest text-gold-dark border border-gold-dark/50 px-2 py-1 rounded-sm text-center">
                       {badge}
                     </p>
                   )}
