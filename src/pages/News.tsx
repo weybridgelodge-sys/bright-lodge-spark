@@ -28,13 +28,29 @@ const News = () => {
   return (
     <div className="min-h-screen">
       <SEO
-        title="News | Weybridge Lodge Freemasons Guildford"
-        description="Latest news and updates from Weybridge Lodge No. 6787 — Masonic meetings, charity events and social gatherings in Guildford, Surrey."
-        canonical="/news"
-        schema={breadcrumbSchema([
-          { name: "Home", url: "/" },
-          { name: "News", url: "/news" },
-        ])}
+        title={
+          categoryFromSlug
+            ? `${categoryFromSlug} News | Weybridge Lodge`
+            : "News | Weybridge Lodge Freemasons Guildford"
+        }
+        description={
+          categoryFromSlug
+            ? `${categoryFromSlug} news and updates from Weybridge Lodge No. 6787 in Guildford, Surrey.`
+            : "Latest news and updates from Weybridge Lodge No. 6787 — Masonic meetings, charity events and social gatherings in Guildford, Surrey."
+        }
+        canonical={categoryFromSlug ? `/news/category/${slugify(categoryFromSlug)}` : "/news"}
+        schema={breadcrumbSchema(
+          categoryFromSlug
+            ? [
+                { name: "Home", url: "/" },
+                { name: "News", url: "/news" },
+                { name: categoryFromSlug, url: `/news/category/${slugify(categoryFromSlug)}` },
+              ]
+            : [
+                { name: "Home", url: "/" },
+                { name: "News", url: "/news" },
+              ]
+        )}
       />
       <a href="#main-content" className="skip-to-content">
         Skip to main content
