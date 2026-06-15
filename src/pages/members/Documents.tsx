@@ -193,7 +193,7 @@ export default function MembersDocuments() {
                 <div className="min-w-0">
                   <p className="text-sm truncate">{d.title}</p>
                   <p className="text-[11px] text-primary-foreground/50">
-                    {d.category} · {new Date(d.created_at).toLocaleDateString("en-GB")}
+                    {CATEGORY_LABELS[d.category]} · {new Date(d.created_at).toLocaleDateString("en-GB")}
                   </p>
                 </div>
               </div>
