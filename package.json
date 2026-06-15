@@ -4,7 +4,9 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "predev": "bunx tsx scripts/generate-sitemap-and-feed.ts",
     "dev": "vite",
+    "prebuild": "bunx tsx scripts/generate-sitemap-and-feed.ts",
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
