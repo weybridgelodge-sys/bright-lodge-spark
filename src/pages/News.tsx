@@ -167,7 +167,7 @@ const News = () => {
                       return (
                         <Link
                           key={cat}
-                          to={`/news?category=${encodeURIComponent(cat)}`}
+                          to={`/news/category/${slugify(cat)}`}
                           className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-sans transition-colors ${
                             isActive
                               ? "border-primary bg-primary/10 text-primary font-medium"
