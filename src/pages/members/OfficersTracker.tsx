@@ -14,6 +14,10 @@ import {
   detectDuplicateInitiations,
   masonicYear,
   formatMasonicYear,
+  NON_PROGRESSIVE_ORDER,
+  NON_PROGRESSIVE_LABELS,
+  NonProgressiveKey,
+  tenureSince,
 } from "@/lib/officersProgression";
 import { Loader2, AlertTriangle, Crown, Download, UserPlus, Lock, ShieldAlert, X } from "lucide-react";
 import jsPDF from "jspdf";
@@ -148,7 +152,7 @@ export default function OfficersTracker() {
     () =>
       computeProjection({
         currentYear,
-        yearsAhead: 6,
+        yearsAhead: 7,
         appointments: appointmentsLite,
         readyQueue,
         membersById,
@@ -169,7 +173,7 @@ export default function OfficersTracker() {
 
   // ---------- Mutations ----------
 
-  const assignToOffice = async (positionKey: PositionKey, memberId: string | null, year: number, opts?: { reason?: string; isOverride?: boolean }) => {
+  const assignToOffice = async (positionKey: PositionKey, memberId: string | null, year: number, opts?: { reason?: string; isOverride?: boolean; appointedOn?: string | null }) => {
     if (!user) return;
     const existing = appointments.find((a) => a.position_key === positionKey && a.lodge_year === year);
     const payload = {
@@ -177,7 +181,12 @@ export default function OfficersTracker() {
       member_id: memberId,
       lodge_year: year,
       is_projection: year > currentYear,
-      appointed_on: year === currentYear ? new Date().toISOString().slice(0, 10) : null,
+      appointed_on:
+        opts?.appointedOn !== undefined
+          ? opts.appointedOn
+          : year === currentYear
+            ? new Date().toISOString().slice(0, 10)
+            : null,
       override_reason: opts?.isOverride ? opts.reason ?? null : null,
       override_by: opts?.isOverride ? user.id : null,
     };
@@ -191,6 +200,18 @@ export default function OfficersTracker() {
       toast.error(error.message);
     } else {
       toast.success("Appointment saved");
+      await load();
+    }
+  };
+
+  const updateAppointmentDate = async (id: string, appointedOn: string | null) => {
+    const { error } = await supabase
+      .from("officer_appointments")
+      .update({ appointed_on: appointedOn })
+      .eq("id", id);
+    if (error) toast.error(error.message);
+    else {
+      toast.success("Date updated");
       await load();
     }
   };
@@ -315,7 +336,7 @@ export default function OfficersTracker() {
         <header>
           <h1 className="font-serif text-3xl text-primary-foreground">Progressive Officers Tracker</h1>
           <p className="text-primary-foreground/70 text-sm mt-1">
-            Weybridge Lodge No. 6787 · Seven-year projection based on initiation seniority.
+            Weybridge Lodge No. 6787 · Eight-year progression based on initiation seniority, plus non-progressive offices.
           </p>
         </header>
 
@@ -365,14 +386,26 @@ export default function OfficersTracker() {
         )}
 
         {tab === "board" && (
-          <BoardView
-            projection={projection.grid[currentYear]}
-            year={currentYear}
-            members={members}
-            appointments={appointments}
-            onAssign={(pos, mid) => assignToOffice(pos, mid, currentYear)}
-            onClear={(id) => removeAppointment(id)}
-          />
+          <>
+            <BoardView
+              projection={projection.grid[currentYear]}
+              year={currentYear}
+              members={members}
+              appointments={appointments}
+              onAssign={(pos, mid) => assignToOffice(pos, mid, currentYear)}
+              onClear={(id) => removeAppointment(id)}
+            />
+            <NonProgressiveBoard
+              year={currentYear}
+              members={members}
+              appointments={appointments}
+              onAssign={(pos, mid, appointedOn) =>
+                assignToOffice(pos as unknown as PositionKey, mid, currentYear, { appointedOn })
+              }
+              onClear={(id) => removeAppointment(id)}
+              onUpdateDate={(id, appointedOn) => updateAppointmentDate(id, appointedOn)}
+            />
+          </>
         )}
 
         {tab === "ladder" && (
@@ -837,5 +870,140 @@ function ReadinessView({
         </table>
       </div>
     </div>
+  );
+}
+
+// ============= Non-progressive offices board =============
+
+function NonProgressiveBoard({
+  year,
+  members,
+  appointments,
+  onAssign,
+  onClear,
+  onUpdateDate,
+}: {
+  year: number;
+  members: ProfileRow[];
+  appointments: AppointmentRow[];
+  onAssign: (pos: NonProgressiveKey, memberId: string | null, appointedOn: string | null) => void;
+  onClear: (id: string) => void;
+  onUpdateDate: (id: string, appointedOn: string | null) => void;
+}) {
+  // For each non-progressive office, find the most recent appointment (any year)
+  // so we can show who currently holds it and when they first did.
+  const holderFor = (pos: NonProgressiveKey) => {
+    const all = appointments
+      .filter((a) => a.position_key === pos && a.member_id)
+      .sort((a, b) => (b.lodge_year ?? 0) - (a.lodge_year ?? 0));
+    return all[0];
+  };
+
+  // Earliest appointed_on across all years for the same (position, member)
+  const firstHeld = (pos: NonProgressiveKey, memberId: string) => {
+    const dates = appointments
+      .filter((a) => a.position_key === pos && a.member_id === memberId && a.appointed_on)
+      .map((a) => a.appointed_on as string)
+      .sort();
+    return dates[0] ?? null;
+  };
+
+  return (
+    <section className="mt-10">
+      <header className="mb-4">
+        <h2 className="font-serif text-2xl text-gold">Non-Progressive Offices</h2>
+        <p className="text-xs text-primary-foreground/60 mt-1">
+          Appointed annually outside the ladder. The “First held” date shows tenure so you
+          can see who has served longest, in case it’s time to give another brother a chance.
+        </p>
+      </header>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {NON_PROGRESSIVE_ORDER.map((pos) => {
+          const appt = holderFor(pos);
+          const memberId = appt?.member_id ?? "";
+          const memberName = memberId
+            ? members.find((m) => m.id === memberId)?.full_name ?? "—"
+            : "— vacant —";
+          const since = memberId ? firstHeld(pos, memberId) ?? appt?.appointed_on ?? null : null;
+          const vacant = !memberId;
+
+          return (
+            <div
+              key={pos}
+              className={`rounded-sm border p-4 ${
+                vacant ? "border-amber-500/40 bg-amber-500/5" : "border-gold/20 bg-navy-light/30"
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-[10px] uppercase tracking-wider text-gold/70">
+                    {vacant ? "Vacant" : "Officer"}
+                  </p>
+                  <h3 className="font-serif text-base text-primary-foreground">
+                    {NON_PROGRESSIVE_LABELS[pos]}
+                  </h3>
+                </div>
+                {!vacant && appt && (
+                  <button
+                    onClick={() => onClear(appt.id)}
+                    className="text-primary-foreground/40 hover:text-amber-300"
+                    title="Clear appointment"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+
+              <p className="font-sans text-primary-foreground mt-3 text-sm font-medium">
+                {memberName}
+              </p>
+
+              {!vacant && (
+                <p className="text-[11px] text-primary-foreground/60 mt-1">
+                  First held: <span className="text-gold">{since ?? "—"}</span>
+                  {since && <span className="ml-1">· {tenureSince(since)}</span>}
+                </p>
+              )}
+
+              <div className="mt-3 space-y-2">
+                <label className="block text-[10px] uppercase tracking-wider text-primary-foreground/60">
+                  Holder
+                </label>
+                <select
+                  value={memberId}
+                  onChange={(e) => onAssign(pos, e.target.value || null, since)}
+                  className="w-full bg-navy-dark border border-gold/20 text-primary-foreground rounded-sm px-2 py-1.5 text-sm"
+                >
+                  <option value="">— select member —</option>
+                  {members.map((m) => (
+                    <option key={m.id} value={m.id}>
+                      {m.full_name ?? m.email}
+                    </option>
+                  ))}
+                </select>
+
+                {!vacant && appt && (
+                  <div>
+                    <label className="block text-[10px] uppercase tracking-wider text-primary-foreground/60 mb-1">
+                      Date first held this post
+                    </label>
+                    <input
+                      type="date"
+                      defaultValue={appt.appointed_on ?? ""}
+                      onBlur={(e) => {
+                        const v = e.target.value || null;
+                        if (v !== (appt.appointed_on ?? null)) onUpdateDate(appt.id, v);
+                      }}
+                      className="w-full bg-navy-dark border border-gold/20 text-primary-foreground rounded-sm px-2 py-1.5 text-sm"
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </section>
   );
 }
