@@ -1,6 +1,6 @@
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { LayoutDashboard, Users, FileText, User as UserIcon, ShieldCheck, LogOut, Shield, CalendarDays, CreditCard, BookOpen } from "lucide-react";
+import { LayoutDashboard, Users, FileText, User as UserIcon, ShieldCheck, LogOut, Shield, CalendarDays, CreditCard, BookOpen, Crown } from "lucide-react";
 import logo from "@/assets/weybridge-logo.svg";
 
 const navCls = ({ isActive }: { isActive: boolean }) =>
@@ -9,7 +9,7 @@ const navCls = ({ isActive }: { isActive: boolean }) =>
   }`;
 
 export default function MembersLayout({ children }: { children: React.ReactNode }) {
-  const { profile, isAdmin, signOut } = useAuth();
+  const { profile, isAdmin, canManageProgression, signOut } = useAuth();
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
@@ -63,6 +63,11 @@ export default function MembersLayout({ children }: { children: React.ReactNode 
             <NavLink to="/members/profile" className={navCls}>
               <UserIcon className="w-4 h-4" /> My Profile
             </NavLink>
+            {canManageProgression && (
+              <NavLink to="/members/officers-tracker" className={navCls}>
+                <Crown className="w-4 h-4" /> Officers Tracker
+              </NavLink>
+            )}
             {isAdmin && (
               <NavLink to="/members/admin" className={navCls}>
                 <ShieldCheck className="w-4 h-4" /> Admin

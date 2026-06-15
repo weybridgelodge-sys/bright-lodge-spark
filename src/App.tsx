@@ -47,6 +47,8 @@ import MembersDocuments from "./pages/members/Documents";
 import MembersProfile from "./pages/members/Profile";
 import MembersAdmin from "./pages/members/Admin";
 import MembersRitual from "./pages/members/Ritual";
+import OfficersTracker from "./pages/members/OfficersTracker";
+import ProgressionRoute from "./components/members/ProgressionRoute";
 
 const queryClient = new QueryClient();
 
@@ -103,6 +105,8 @@ const App = () => (
             <Route path="/members/ritual" element={<ProtectedRoute><MembersRitual /></ProtectedRoute>} />
             <Route path="/members/profile" element={<ProtectedRoute><MembersProfile /></ProtectedRoute>} />
             <Route path="/members/admin" element={<ProtectedRoute adminOnly><MembersAdmin /></ProtectedRoute>} />
+            <Route path="/members/officers-tracker" element={<ProgressionRoute><OfficersTracker /></ProgressionRoute>} />
+
 
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
