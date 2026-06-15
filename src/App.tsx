@@ -46,6 +46,7 @@ import MembersDirectory from "./pages/members/Directory";
 import MembersDocuments from "./pages/members/Documents";
 import MembersProfile from "./pages/members/Profile";
 import MembersAdmin from "./pages/members/Admin";
+import MembersRitual from "./pages/members/Ritual";
 
 const queryClient = new QueryClient();
 
@@ -99,6 +100,7 @@ const App = () => (
             <Route path="/members" element={<ProtectedRoute><MembersDashboard /></ProtectedRoute>} />
             <Route path="/members/directory" element={<ProtectedRoute><MembersDirectory /></ProtectedRoute>} />
             <Route path="/members/documents" element={<ProtectedRoute><MembersDocuments /></ProtectedRoute>} />
+            <Route path="/members/ritual" element={<ProtectedRoute><MembersRitual /></ProtectedRoute>} />
             <Route path="/members/profile" element={<ProtectedRoute><MembersProfile /></ProtectedRoute>} />
             <Route path="/members/admin" element={<ProtectedRoute adminOnly><MembersAdmin /></ProtectedRoute>} />
 

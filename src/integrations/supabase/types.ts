@@ -81,6 +81,7 @@ export type Database = {
         Row: {
           avatar_url: string | null
           created_at: string
+          degree: Database["public"]["Enums"]["masonic_degree"]
           email: string | null
           full_name: string | null
           id: string
@@ -96,6 +97,7 @@ export type Database = {
         Insert: {
           avatar_url?: string | null
           created_at?: string
+          degree?: Database["public"]["Enums"]["masonic_degree"]
           email?: string | null
           full_name?: string | null
           id: string
@@ -111,6 +113,7 @@ export type Database = {
         Update: {
           avatar_url?: string | null
           created_at?: string
+          degree?: Database["public"]["Enums"]["masonic_degree"]
           email?: string | null
           full_name?: string | null
           id?: string
@@ -122,6 +125,42 @@ export type Database = {
           status?: Database["public"]["Enums"]["member_status"]
           ugle_reg_number?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      ritual_documents: {
+        Row: {
+          created_at: string
+          description: string | null
+          file_path: string
+          file_size_bytes: number | null
+          id: string
+          required_degree: Database["public"]["Enums"]["masonic_degree"]
+          title: string
+          updated_at: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          file_path: string
+          file_size_bytes?: number | null
+          id?: string
+          required_degree?: Database["public"]["Enums"]["masonic_degree"]
+          title: string
+          updated_at?: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          file_path?: string
+          file_size_bytes?: number | null
+          id?: string
+          required_degree?: Database["public"]["Enums"]["masonic_degree"]
+          title?: string
+          updated_at?: string
+          uploaded_by?: string | null
         }
         Relationships: []
       }
@@ -151,6 +190,11 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      current_user_degree_level: { Args: { _user_id: string }; Returns: number }
+      degree_level: {
+        Args: { _d: Database["public"]["Enums"]["masonic_degree"] }
+        Returns: number
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -163,6 +207,7 @@ export type Database = {
     Enums: {
       app_role: "member" | "admin"
       doc_category: "summons" | "minutes" | "ritual" | "other"
+      masonic_degree: "entered_apprentice" | "fellow_craft" | "master_mason"
       member_status: "pending" | "active" | "suspended"
     }
     CompositeTypes: {
@@ -293,6 +338,7 @@ export const Constants = {
     Enums: {
       app_role: ["member", "admin"],
       doc_category: ["summons", "minutes", "ritual", "other"],
+      masonic_degree: ["entered_apprentice", "fellow_craft", "master_mason"],
       member_status: ["pending", "active", "suspended"],
     },
   },

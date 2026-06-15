@@ -5,6 +5,14 @@ import { toast } from "sonner";
 import { Check, X, ShieldPlus, ShieldMinus, Plus, Trash2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
+type Degree = "entered_apprentice" | "fellow_craft" | "master_mason";
+
+const DEGREE_LABEL: Record<Degree, string> = {
+  entered_apprentice: "Entered Apprentice",
+  fellow_craft: "Fellow Craft",
+  master_mason: "Master Mason",
+};
+
 type Profile = {
   id: string;
   email: string | null;
@@ -12,6 +20,7 @@ type Profile = {
   ugle_reg_number: string | null;
   mother_lodge: string | null;
   status: "pending" | "active" | "suspended";
+  degree: Degree;
   created_at: string;
 };
 
@@ -38,7 +47,7 @@ export default function MembersAdmin() {
 
   const load = async () => {
     const [{ data: p }, { data: r }, { data: n }] = await Promise.all([
-      supabase.from("profiles").select("id,email,full_name,ugle_reg_number,mother_lodge,status,created_at").order("created_at", { ascending: false }),
+      supabase.from("profiles").select("id,email,full_name,ugle_reg_number,mother_lodge,status,degree,created_at").order("created_at", { ascending: false }),
       supabase.from("user_roles").select("user_id,role"),
       supabase.from("member_notices").select("*").order("created_at", { ascending: false }),
     ]);
@@ -55,6 +64,15 @@ export default function MembersAdmin() {
     if (error) toast.error(error.message);
     else {
       toast.success(`Member ${status}`);
+      load();
+    }
+  };
+
+  const setDegree = async (id: string, degree: Degree) => {
+    const { error } = await supabase.from("profiles").update({ degree }).eq("id", id);
+    if (error) toast.error(error.message);
+    else {
+      toast.success(`Degree set to ${DEGREE_LABEL[degree]}`);
       load();
     }
   };
@@ -128,6 +146,7 @@ export default function MembersAdmin() {
                 <th className="text-left p-3">Member</th>
                 <th className="text-left p-3">Status</th>
                 <th className="text-left p-3">Role</th>
+                <th className="text-left p-3">Degree</th>
                 <th className="text-right p-3">Actions</th>
               </tr>
             </thead>
@@ -159,6 +178,18 @@ export default function MembersAdmin() {
                     </span>
                   </td>
                   <td className="p-3 text-xs uppercase tracking-wider">{isAdmin(p.id) ? "Admin" : "Member"}</td>
+                  <td className="p-3">
+                    <select
+                      value={p.degree ?? "entered_apprentice"}
+                      onChange={(e) => setDegree(p.id, e.target.value as Degree)}
+                      className="bg-navy border border-gold/20 rounded-sm px-2 py-1 text-xs focus:outline-none focus:border-gold"
+                      aria-label={`Set degree for ${p.full_name || p.email}`}
+                    >
+                      <option value="entered_apprentice">Entered Apprentice</option>
+                      <option value="fellow_craft">Fellow Craft</option>
+                      <option value="master_mason">Master Mason</option>
+                    </select>
+                  </td>
                   <td className="p-3">
                     <div className="flex items-center gap-1 justify-end">
                       {p.status !== "active" && (
