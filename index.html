@@ -28,25 +28,94 @@
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
-        "@type": "Organization",
-        "name": "Weybridge Lodge No. 6787",
-        "alternateName": "Weybridge Lodge",
-        "url": "https://bright-lodge-spark.lovable.app/",
-        "logo": "https://bright-lodge-spark.lovable.app/favicon.ico",
-        "description": "A Freemasons Lodge based in Guildford, Surrey. Consecrated 1949. Part of the Province of Surrey under the United Grand Lodge of England.",
-        "foundingDate": "1949",
-        "address": {
-          "@type": "PostalAddress",
-          "streetAddress": "South West Surrey Masonic Centre, Hitherbury Close",
-          "addressLocality": "Guildford",
-          "postalCode": "GU2 4DR",
-          "addressRegion": "Surrey",
-          "addressCountry": "GB"
-        },
-        "sameAs": [
-          "https://instagram.com/weybridgelodge/",
-          "https://facebook.com/people/Weybridge-Lodge-No-6787/61551808420513/",
-          "https://twitter.com/weybridgelodge"
+        "@graph": [
+          {
+            "@type": ["Organization", "FraternalOrganization"],
+            "@id": "https://www.weybridgelodge.org.uk/#organization",
+            "name": "Weybridge Lodge No. 6787",
+            "alternateName": "Weybridge Masonic Lodge",
+            "url": "https://www.weybridgelodge.org.uk/",
+            "logo": {
+              "@type": "ImageObject",
+              "url": "https://www.weybridgelodge.org.uk/weybridge-logo.svg",
+              "width": 512,
+              "height": 512
+            },
+            "image": "https://www.weybridgelodge.org.uk/weybridge-logo.svg",
+            "description": "An open, friendly Freemasons Lodge in Guildford, Surrey. Consecrated 1949. Part of the Province of Surrey under the United Grand Lodge of England.",
+            "foundingDate": "1949-01-29",
+            "email": "secretary@weybridgelodge.org.uk",
+            "telephone": "+44-7921-589039",
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "South West Surrey Masonic Centre, Hitherbury Close",
+              "addressLocality": "Guildford",
+              "postalCode": "GU2 4DR",
+              "addressRegion": "Surrey",
+              "addressCountry": "GB"
+            },
+            "sameAs": [
+              "https://instagram.com/weybridgelodge/",
+              "https://facebook.com/people/Weybridge-Lodge-No-6787/61551808420513/",
+              "https://twitter.com/weybridgelodge"
+            ],
+            "memberOf": [
+              { "@type": "Organization", "name": "United Grand Lodge of England", "url": "https://www.ugle.org.uk/" },
+              { "@type": "Organization", "name": "Provincial Grand Lodge of Surrey", "url": "https://surreyfreemasons.org.uk/" }
+            ]
+          },
+          {
+            "@type": "LocalBusiness",
+            "@id": "https://www.weybridgelodge.org.uk/#localbusiness",
+            "name": "Weybridge Lodge No. 6787",
+            "url": "https://www.weybridgelodge.org.uk/",
+            "image": "https://www.weybridgelodge.org.uk/weybridge-logo.svg",
+            "logo": "https://www.weybridgelodge.org.uk/weybridge-logo.svg",
+            "description": "Freemasons Lodge meeting at the South West Surrey Masonic Centre in Guildford. Visitors and enquirers warmly welcomed.",
+            "telephone": "+44-7921-589039",
+            "email": "secretary@weybridgelodge.org.uk",
+            "priceRange": "Free to enquire",
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "South West Surrey Masonic Centre, Hitherbury Close",
+              "addressLocality": "Guildford",
+              "postalCode": "GU2 4DR",
+              "addressRegion": "Surrey",
+              "addressCountry": "GB"
+            },
+            "geo": {
+              "@type": "GeoCoordinates",
+              "latitude": 51.2362,
+              "longitude": -0.5745
+            },
+            "areaServed": [
+              { "@type": "Place", "name": "Guildford" },
+              { "@type": "AdministrativeArea", "name": "Surrey" }
+            ],
+            "openingHoursSpecification": [
+              {
+                "@type": "OpeningHoursSpecification",
+                "dayOfWeek": "Thursday",
+                "opens": "19:00",
+                "closes": "22:00",
+                "description": "Lodge of Instruction — weekly rehearsals"
+              }
+            ],
+            "parentOrganization": { "@id": "https://www.weybridgelodge.org.uk/#organization" },
+            "sameAs": [
+              "https://instagram.com/weybridgelodge/",
+              "https://facebook.com/people/Weybridge-Lodge-No-6787/61551808420513/",
+              "https://twitter.com/weybridgelodge"
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://www.weybridgelodge.org.uk/#website",
+            "url": "https://www.weybridgelodge.org.uk/",
+            "name": "Weybridge Lodge No. 6787",
+            "publisher": { "@id": "https://www.weybridgelodge.org.uk/#organization" },
+            "inLanguage": "en-GB"
+          }
         ]
       }
     </script>
