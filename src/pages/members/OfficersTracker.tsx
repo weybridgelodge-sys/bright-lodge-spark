@@ -409,21 +409,33 @@ export default function OfficersTracker() {
         )}
 
         {tab === "ladder" && (
-          <LadderView
-            years={projection.years}
-            grid={projection.grid}
-            members={members}
-            appointments={appointments}
-            currentYear={currentYear}
-            onOverride={(pos, mid, year, reason) =>
-              assignToOffice(pos, mid, year, { isOverride: true, reason })
-            }
-            onClearOverride={(pos, year) => {
-              const ex = appointments.find((a) => a.position_key === pos && a.lodge_year === year);
-              if (ex) removeAppointment(ex.id);
-            }}
-            onExport={exportPdf}
-          />
+          <>
+            <LadderView
+              years={projection.years}
+              grid={projection.grid}
+              members={members}
+              appointments={appointments}
+              currentYear={currentYear}
+              onOverride={(pos, mid, year, reason) =>
+                assignToOffice(pos, mid, year, { isOverride: true, reason })
+              }
+              onClearOverride={(pos, year) => {
+                const ex = appointments.find((a) => a.position_key === pos && a.lodge_year === year);
+                if (ex) removeAppointment(ex.id);
+              }}
+              onExport={exportPdf}
+            />
+            <NonProgressiveBoard
+              year={currentYear}
+              members={members}
+              appointments={appointments}
+              onAssign={(pos, mid, appointedOn) =>
+                assignToOffice(pos as unknown as PositionKey, mid, currentYear, { appointedOn })
+              }
+              onClear={(id) => removeAppointment(id)}
+              onUpdateDate={(id, appointedOn) => updateAppointmentDate(id, appointedOn)}
+            />
+          </>
         )}
 
         {tab === "readiness" && (
