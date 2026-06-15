@@ -64,7 +64,7 @@ const Footer = () => {
     <footer className="bg-navy-dark py-16 border-t border-gold/10" role="contentinfo">
       <div className="container mx-auto px-4 sm:px-6">
         {/* Top: brand + meeting + social */}
-        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-8 sm:gap-12 mb-12">
+        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-8 sm:gap-12 mb-12 items-start">
           <div className="text-left">
             <img src={logo} alt="Weybridge Lodge No. 6787 crest — Freemasons Lodge in Guildford, Surrey" width={40} height={40} loading="lazy" decoding="async" className="h-10 w-10 mb-3" />
             <p className="font-serif text-primary-foreground text-sm font-semibold">Weybridge Lodge No. 6787</p>
@@ -72,7 +72,7 @@ const Footer = () => {
             <p className="text-white/70 text-sm font-sans leading-relaxed mb-4 whitespace-nowrap">
               A Freemasons Lodge in Guildford, Surrey. Consecrated 1949.
             </p>
-            <img src={charterMark} alt="United Grand Lodge of England Charter Mark awarded to Weybridge Lodge" width={180} height={72} loading="lazy" decoding="async" className="h-16 w-auto brightness-0 invert opacity-95" />
+            <img src={charterMark} alt="United Grand Lodge of England Charter Mark awarded to Weybridge Lodge" width={270} height={108} loading="lazy" decoding="async" className="h-24 w-auto brightness-0 invert opacity-95" />
           </div>
 
           <div>
