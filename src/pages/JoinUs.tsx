@@ -138,7 +138,7 @@ const JoinUs = () => {
             <div className="flex flex-col sm:flex-row gap-4 justify-center mt-12">
               <Link
                 to="/first-visit"
-                className="inline-flex items-center justify-center border border-gold text-gold px-8 py-4 rounded-sm text-sm font-sans uppercase tracking-widest hover:bg-gold hover:text-accent-foreground transition-colors"
+                className="inline-flex items-center justify-center border border-gold-dark text-gold-dark px-8 py-4 rounded-sm text-sm font-sans uppercase tracking-widest hover:bg-gold-dark hover:text-accent-foreground transition-colors"
               >
                 Your Initiation Night
               </Link>
