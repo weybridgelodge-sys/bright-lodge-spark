@@ -15,7 +15,7 @@ export default function MembersPending() {
   return (
     <div className="min-h-screen bg-navy text-primary-foreground flex items-center justify-center p-4">
       <div className="max-w-md w-full bg-navy-dark/70 border border-gold/20 rounded-sm p-8 text-center backdrop-blur">
-        <img src={logo} alt="" className="h-14 w-14 mx-auto bg-primary-foreground/80 rounded-full p-1 mb-4" />
+        <img src={logo} alt="" width={56} height={56} decoding="async" className="h-14 w-14 mx-auto bg-primary-foreground/80 rounded-full p-1 mb-4" />
         <Clock className="w-10 h-10 text-gold mx-auto mb-4" aria-hidden="true" />
         <h1 className="font-serif text-2xl text-gold mb-3">Awaiting approval</h1>
         <p className="text-sm text-primary-foreground/70 mb-2">

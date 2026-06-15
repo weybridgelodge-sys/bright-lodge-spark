@@ -16,6 +16,8 @@ const Hero = () => {
           src={heroJpg.url}
           alt="South West Surrey Masonic Centre exterior in Guildford, home of Weybridge Lodge No. 6787"
           className="absolute inset-0 w-full h-full object-cover"
+          width={1920}
+          height={1080}
           fetchPriority="high"
           decoding="async"
         />
@@ -33,6 +35,9 @@ const Hero = () => {
           <img
             src={logo}
             alt="Weybridge Lodge No. 6787 crest — Freemasons Lodge in Guildford, Surrey"
+            width={150}
+            height={150}
+            decoding="async"
             className="w-[150px] h-[150px] object-contain brightness-0 invert"
           />
         </motion.div>
@@ -81,6 +86,9 @@ const Hero = () => {
             transition={{ duration: 1, delay: 0.5 }}
             src={logo}
             alt="Weybridge Lodge No. 6787 crest — Freemasons Lodge in Guildford, Surrey"
+            width={250}
+            height={250}
+            decoding="async"
             className="hidden md:block w-[250px] h-[250px] object-contain shrink-0 brightness-0 invert"
           />
         </div>
