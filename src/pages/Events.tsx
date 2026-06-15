@@ -106,6 +106,7 @@ const Events = () => {
                 <div className="border border-border rounded-sm bg-card p-4 shadow-sm">
                   <Calendar
                     mode="single"
+                    showOutsideDays={false}
                     selected={selectedDate}
                     onSelect={setSelectedDate}
                     className="p-3 pointer-events-auto"
