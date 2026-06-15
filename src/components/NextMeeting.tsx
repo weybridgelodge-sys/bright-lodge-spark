@@ -29,12 +29,12 @@ const NextMeeting = () => {
           className="max-w-2xl mx-auto bg-card rounded-sm border border-border shadow-lg overflow-hidden"
         >
           <div className="bg-navy-gradient p-8 text-center">
-            <p className="text-gold uppercase tracking-widest text-sm font-sans mb-2">Initiation Ceremony</p>
+            <p className="text-gold uppercase tracking-widest text-sm font-sans mb-2">Super Saturday Triple Passing</p>
             <p className="text-3xl md:text-4xl font-serif text-primary-foreground">
-              15th April 2026
+              12th September 2026
             </p>
             <p className="text-primary-foreground/60 font-sans text-sm mt-2">
-              April Meeting
+              September Meeting
             </p>
           </div>
 
