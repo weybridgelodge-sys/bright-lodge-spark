@@ -160,7 +160,7 @@ const News = () => {
                     })}
                   </div>
                 </motion.div>
-              </aside>
+              </div>
             </div>
           </div>
         </section>
