@@ -337,6 +337,15 @@ export default function MembersAdmin() {
                 <option value="master_mason">Master Mason</option>
               </select>
             </label>
+            <label className="sm:col-span-2 flex items-center gap-2 text-xs text-primary-foreground/80 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={aPastMaster}
+                onChange={(e) => setAPastMaster(e.target.checked)}
+                className="accent-gold"
+              />
+              Past Master (grants access to Installed Masters ritual)
+            </label>
             <input
               value={aRank}
               onChange={(e) => setARank(e.target.value)}
