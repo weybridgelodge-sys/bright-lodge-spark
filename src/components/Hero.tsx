@@ -86,6 +86,9 @@ const Hero = () => {
             transition={{ duration: 1, delay: 0.5 }}
             src={logo}
             alt="Weybridge Lodge No. 6787 crest — Freemasons Lodge in Guildford, Surrey"
+            width={250}
+            height={250}
+            decoding="async"
             className="hidden md:block w-[250px] h-[250px] object-contain shrink-0 brightness-0 invert"
           />
         </div>

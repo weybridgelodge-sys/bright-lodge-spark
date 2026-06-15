@@ -136,7 +136,7 @@ export default function MembersLogin() {
 
       <div className="w-full max-w-md relative">
         <Link to="/" className="flex items-center justify-center gap-3 mb-8">
-          <img src={logo} alt="Weybridge Lodge crest" className="h-12 w-12 bg-primary-foreground/80 rounded-full p-0.5" />
+          <img src={logo} alt="Weybridge Lodge crest" width={48} height={48} decoding="async" className="h-12 w-12 bg-primary-foreground/80 rounded-full p-0.5" />
           <div className="text-center">
             <p className="font-serif text-lg font-semibold">Weybridge Lodge</p>
             <p className="text-gold text-xs uppercase tracking-[0.18em]">No. 6787 · Members Portal</p>

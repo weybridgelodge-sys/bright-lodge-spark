@@ -232,6 +232,10 @@ const Events = () => {
                 <img
                   src={ladiesFestivalImg}
                   alt="Elegant black-tie gala dinner venue with round tables and chandeliers — Ladies Festival 2026 by Weybridge and Astolat Lodges"
+                  width={1600}
+                  height={900}
+                  loading="lazy"
+                  decoding="async"
                   className="w-full h-56 md:h-72 object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[hsl(var(--primary))]/90 to-[hsl(var(--primary))]/40" />

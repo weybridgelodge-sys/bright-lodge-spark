@@ -22,7 +22,7 @@ export default function MembersLayout({ children }: { children: React.ReactNode 
       <header className="border-b border-gold/20 bg-navy-dark/80 backdrop-blur sticky top-0 z-40">
         <div className="container mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <Link to="/members" className="flex items-center gap-3">
-            <img src={logo} alt="Weybridge Lodge crest" className="h-9 w-9 bg-primary-foreground/80 rounded-full p-0.5" />
+            <img src={logo} alt="Weybridge Lodge crest" width={36} height={36} decoding="async" className="h-9 w-9 bg-primary-foreground/80 rounded-full p-0.5" />
             <div>
               <p className="font-serif text-sm font-semibold leading-tight">Members Portal</p>
               <p className="text-gold text-[10px] uppercase tracking-wider">Weybridge Lodge 6787</p>
