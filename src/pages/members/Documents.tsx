@@ -9,13 +9,31 @@ type Doc = {
   id: string;
   title: string;
   description: string | null;
-  category: "summons" | "minutes" | "ritual" | "other";
+  category: "summons" | "meeting_minutes" | "committee_minutes" | "committee_agendas" | "media_files" | "ritual" | "other";
   file_path: string;
   file_size_bytes: number | null;
   created_at: string;
 };
 
-const CATEGORIES = ["summons", "minutes", "ritual", "other"] as const;
+const CATEGORIES = [
+  "summons",
+  "meeting_minutes",
+  "committee_minutes",
+  "committee_agendas",
+  "media_files",
+  "ritual",
+  "other",
+] as const;
+
+const CATEGORY_LABELS: Record<typeof CATEGORIES[number], string> = {
+  summons: "Summons",
+  meeting_minutes: "Meeting minutes",
+  committee_minutes: "Committee minutes",
+  committee_agendas: "Committee agendas",
+  media_files: "Media files",
+  ritual: "Ritual",
+  other: "Other",
+};
 
 export default function MembersDocuments() {
   const { isAdmin, user } = useAuth();
@@ -95,7 +113,7 @@ export default function MembersDocuments() {
     <MembersLayout>
       <div className="mb-6">
         <h1 className="font-serif text-3xl text-gold mb-2">Documents</h1>
-        <p className="text-sm text-primary-foreground/60">Summons, minutes, ritual notes, and Lodge papers.</p>
+        <p className="text-sm text-primary-foreground/60">Summons, meeting minutes, committee minutes, agendas, media files, ritual notes, and Lodge papers.</p>
       </div>
 
       {isAdmin && (
@@ -121,7 +139,7 @@ export default function MembersDocuments() {
           >
             {CATEGORIES.map((c) => (
               <option key={c} value={c}>
-                {c}
+                {CATEGORY_LABELS[c]}
               </option>
             ))}
           </select>
@@ -159,7 +177,7 @@ export default function MembersDocuments() {
                 : "border-gold/20 text-primary-foreground/60 hover:text-gold"
             }`}
           >
-            {c}
+            {c === "all" ? "All" : CATEGORY_LABELS[c]}
           </button>
         ))}
       </div>
@@ -175,7 +193,7 @@ export default function MembersDocuments() {
                 <div className="min-w-0">
                   <p className="text-sm truncate">{d.title}</p>
                   <p className="text-[11px] text-primary-foreground/50">
-                    {d.category} · {new Date(d.created_at).toLocaleDateString("en-GB")}
+                    {CATEGORY_LABELS[d.category]} · {new Date(d.created_at).toLocaleDateString("en-GB")}
                   </p>
                 </div>
               </div>

@@ -206,7 +206,14 @@ export type Database = {
     }
     Enums: {
       app_role: "member" | "admin"
-      doc_category: "summons" | "minutes" | "ritual" | "other"
+      doc_category:
+        | "summons"
+        | "meeting_minutes"
+        | "committee_minutes"
+        | "committee_agendas"
+        | "media_files"
+        | "ritual"
+        | "other"
       masonic_degree: "entered_apprentice" | "fellow_craft" | "master_mason"
       member_status: "pending" | "active" | "suspended"
     }
@@ -337,7 +344,15 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["member", "admin"],
-      doc_category: ["summons", "minutes", "ritual", "other"],
+      doc_category: [
+        "summons",
+        "meeting_minutes",
+        "committee_minutes",
+        "committee_agendas",
+        "media_files",
+        "ritual",
+        "other",
+      ],
       masonic_degree: ["entered_apprentice", "fellow_craft", "master_mason"],
       member_status: ["pending", "active", "suspended"],
     },
