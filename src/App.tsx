@@ -105,6 +105,8 @@ const App = () => (
             <Route path="/members/ritual" element={<ProtectedRoute><MembersRitual /></ProtectedRoute>} />
             <Route path="/members/profile" element={<ProtectedRoute><MembersProfile /></ProtectedRoute>} />
             <Route path="/members/admin" element={<ProtectedRoute adminOnly><MembersAdmin /></ProtectedRoute>} />
+            <Route path="/members/officers-tracker" element={<ProgressionRoute><OfficersTracker /></ProgressionRoute>} />
+
 
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
