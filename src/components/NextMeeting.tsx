@@ -50,7 +50,7 @@ const NextMeeting = () => {
             <div className="flex items-start gap-4">
               <Calendar className="w-5 h-5 text-gold mt-0.5 shrink-0" aria-hidden="true" />
               <div>
-                <p className="font-sans font-medium text-foreground">Wednesday, 15 April 2026, 6 pm</p>
+                <p className="font-sans font-medium text-foreground">Saturday, 12 September 2026, 11 am</p>
                 <p className="text-sm text-muted-foreground font-sans">Now open for bookings</p>
               </div>
             </div>
