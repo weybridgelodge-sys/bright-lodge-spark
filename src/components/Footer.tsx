@@ -73,10 +73,10 @@ const Footer = () => {
                 <p className="text-gold text-xs font-sans">Province of Surrey</p>
               </div>
             </div>
-            <p className="text-white/70 text-sm font-sans leading-relaxed mb-4">
-              A Freemasons Lodge based in Guildford, Surrey. Consecrated 1949.
+            <p className="text-white/70 text-sm font-sans leading-relaxed mb-4 whitespace-nowrap">
+              A Freemasons Lodge in Guildford, Surrey. Consecrated 1949.
             </p>
-            <img src={charterMark} alt="United Grand Lodge of England Charter Mark awarded to Weybridge Lodge" width={120} height={48} loading="lazy" decoding="async" className="h-12 w-auto brightness-0 invert opacity-90" />
+            <img src={charterMark} alt="United Grand Lodge of England Charter Mark awarded to Weybridge Lodge" width={180} height={72} loading="lazy" decoding="async" className="h-16 w-auto brightness-0 invert opacity-95" />
           </div>
 
           <div>
