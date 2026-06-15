@@ -77,6 +77,133 @@ export type Database = {
         }
         Relationships: []
       }
+      member_progression_status: {
+        Row: {
+          created_at: string
+          member_id: string
+          notes: string | null
+          readiness: Database["public"]["Enums"]["progression_readiness"]
+          seniority_initiation_date: string | null
+          seniority_tiebreaker: number | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          member_id: string
+          notes?: string | null
+          readiness?: Database["public"]["Enums"]["progression_readiness"]
+          seniority_initiation_date?: string | null
+          seniority_tiebreaker?: number | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          member_id?: string
+          notes?: string | null
+          readiness?: Database["public"]["Enums"]["progression_readiness"]
+          seniority_initiation_date?: string | null
+          seniority_tiebreaker?: number | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "member_progression_status_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "member_progression_status_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      officer_appointments: {
+        Row: {
+          appointed_on: string | null
+          created_at: string
+          id: string
+          is_projection: boolean
+          lodge_year: number
+          member_id: string | null
+          override_by: string | null
+          override_reason: string | null
+          position_key: string
+          updated_at: string
+        }
+        Insert: {
+          appointed_on?: string | null
+          created_at?: string
+          id?: string
+          is_projection?: boolean
+          lodge_year: number
+          member_id?: string | null
+          override_by?: string | null
+          override_reason?: string | null
+          position_key: string
+          updated_at?: string
+        }
+        Update: {
+          appointed_on?: string | null
+          created_at?: string
+          id?: string
+          is_projection?: boolean
+          lodge_year?: number
+          member_id?: string | null
+          override_by?: string | null
+          override_reason?: string | null
+          position_key?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "officer_appointments_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "officer_appointments_override_by_fkey"
+            columns: ["override_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "officer_appointments_position_key_fkey"
+            columns: ["position_key"]
+            isOneToOne: false
+            referencedRelation: "officer_positions"
+            referencedColumns: ["key"]
+          },
+        ]
+      }
+      officer_positions: {
+        Row: {
+          key: string
+          label: string
+          order_index: number
+        }
+        Insert: {
+          key: string
+          label: string
+          order_index: number
+        }
+        Update: {
+          key?: string
+          label?: string
+          order_index?: number
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -85,6 +212,7 @@ export type Database = {
           email: string | null
           full_name: string | null
           id: string
+          initiation_date: string | null
           joined_year: number | null
           mother_lodge: string | null
           office: string | null
@@ -101,6 +229,7 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id: string
+          initiation_date?: string | null
           joined_year?: number | null
           mother_lodge?: string | null
           office?: string | null
@@ -117,6 +246,7 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id?: string
+          initiation_date?: string | null
           joined_year?: number | null
           mother_lodge?: string | null
           office?: string | null
@@ -195,6 +325,10 @@ export type Database = {
         Args: { _d: Database["public"]["Enums"]["masonic_degree"] }
         Returns: number
       }
+      effective_initiation_date: {
+        Args: { _member_id: string }
+        Returns: string
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -216,6 +350,7 @@ export type Database = {
         | "other"
       masonic_degree: "entered_apprentice" | "fellow_craft" | "master_mason"
       member_status: "pending" | "active" | "suspended"
+      progression_readiness: "ready" | "needs_experience" | "non_progressive"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -355,6 +490,7 @@ export const Constants = {
       ],
       masonic_degree: ["entered_apprentice", "fellow_craft", "master_mason"],
       member_status: ["pending", "active", "suspended"],
+      progression_readiness: ["ready", "needs_experience", "non_progressive"],
     },
   },
 } as const
