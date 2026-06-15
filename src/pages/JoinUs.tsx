@@ -74,7 +74,7 @@ const JoinUs = () => {
                     <Phone className="w-5 h-5 text-gold mt-0.5 shrink-0" />
                     <div>
                       <p className="font-sans font-medium text-foreground text-sm">Call our Membership Secretary</p>
-                      <a href="tel:07921589039" className="text-gold hover:text-gold-light font-sans transition-colors">
+                      <a href="tel:07921589039" className="text-gold-dark hover:text-gold font-sans transition-colors">
                         07921 589 039
                       </a>
                     </div>
@@ -84,7 +84,7 @@ const JoinUs = () => {
                     <Mail className="w-5 h-5 text-gold mt-0.5 shrink-0" />
                     <div>
                       <p className="font-sans font-medium text-foreground text-sm">Email Us</p>
-                      <a href="mailto:secretary@weybridgelodge.org.uk" className="text-gold hover:text-gold-light font-sans transition-colors text-sm break-all">
+                      <a href="mailto:secretary@weybridgelodge.org.uk" className="text-gold-dark hover:text-gold font-sans transition-colors text-sm break-all">
                         secretary@weybridgelodge.org.uk
                       </a>
                     </div>
@@ -138,7 +138,7 @@ const JoinUs = () => {
             <div className="flex flex-col sm:flex-row gap-4 justify-center mt-12">
               <Link
                 to="/first-visit"
-                className="inline-flex items-center justify-center border border-gold text-gold px-8 py-4 rounded-sm text-sm font-sans uppercase tracking-widest hover:bg-gold hover:text-accent-foreground transition-colors"
+                className="inline-flex items-center justify-center border border-gold-dark text-gold-dark px-8 py-4 rounded-sm text-sm font-sans uppercase tracking-widest hover:bg-gold-dark hover:text-accent-foreground transition-colors"
               >
                 Your Initiation Night
               </Link>
@@ -201,10 +201,10 @@ const JoinUs = () => {
                 <div key={title} className="bg-card border border-border rounded-sm p-6 flex flex-col">
                   <Icon className="w-6 h-6 text-gold mb-3" aria-hidden="true" />
                   <h3 className="font-serif text-foreground text-lg mb-1">{title}</h3>
-                  <p className="text-2xl font-serif text-gold mb-3">{amount}</p>
+                  <p className="text-2xl font-serif text-gold-dark mb-3">{amount}</p>
                   <p className="text-muted-foreground font-sans text-sm leading-relaxed flex-1">{note}</p>
                   {badge && (
-                    <p className="mt-4 inline-flex self-start text-xs font-sans uppercase tracking-widest text-gold border border-gold/40 px-2 py-1 rounded-sm">
+                    <p className="mt-4 inline-flex self-start text-xs font-sans uppercase tracking-widest text-gold-dark border border-gold-dark/50 px-2 py-1 rounded-sm">
                       {badge}
                     </p>
                   )}

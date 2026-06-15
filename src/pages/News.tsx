@@ -94,7 +94,7 @@ const News = () => {
               </div>
 
               {/* Sidebar */}
-              <aside className="lg:w-72 shrink-0 space-y-8">
+              <div className="lg:w-72 shrink-0 space-y-8" aria-label="News sidebar">
                 {/* Recent Posts */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
@@ -160,7 +160,7 @@ const News = () => {
                     })}
                   </div>
                 </motion.div>
-              </aside>
+              </div>
             </div>
           </div>
         </section>
