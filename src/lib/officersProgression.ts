@@ -180,16 +180,14 @@ export function computeProjection(input: ProjectionInput): ProjectionResult {
   let readyIdx = 0;
 
   // Seed current year from appointments (current year is authoritative)
-  const currentBoard: Record<PositionKey, string | null> = {
-    inner_guard: null,
-    junior_deacon: null,
-    senior_deacon: null,
-    junior_warden: null,
-    senior_warden: null,
-    worshipful_master: null,
-  };
+  const emptyBoard = (): Record<PositionKey, string | null> =>
+    Object.fromEntries(POSITION_ORDER.map((p) => [p, null])) as Record<PositionKey, string | null>;
+
+  const currentBoard: Record<PositionKey, string | null> = emptyBoard();
   for (const a of appointments.filter((x) => x.lodge_year === currentYear)) {
-    currentBoard[a.position_key] = a.member_id;
+    if ((POSITION_ORDER as readonly string[]).includes(a.position_key)) {
+      currentBoard[a.position_key] = a.member_id;
+    }
   }
 
   // Build current year cells
