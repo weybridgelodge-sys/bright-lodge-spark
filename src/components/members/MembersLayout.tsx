@@ -1,6 +1,6 @@
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { LayoutDashboard, Users, FileText, User as UserIcon, ShieldCheck, LogOut, Shield, CalendarDays, CreditCard, BookOpen } from "lucide-react";
+import { LayoutDashboard, Users, FileText, User as UserIcon, ShieldCheck, LogOut, Shield, CalendarDays, CreditCard, BookOpen, Crown } from "lucide-react";
 import logo from "@/assets/weybridge-logo.svg";
 
 const navCls = ({ isActive }: { isActive: boolean }) =>
