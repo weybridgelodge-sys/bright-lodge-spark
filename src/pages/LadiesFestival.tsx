@@ -784,7 +784,7 @@ const LadiesFestival = () => {
                               <p className="font-sans font-medium text-foreground text-sm">{guest.name || `Guest ${i + 1}`}</p>
                               <div>
                                 <label className="text-xs font-sans text-muted-foreground uppercase tracking-wider mb-1 block">Starter</label>
-                                <select aria-label="Starter"
+                                <select aria-label={`Starter for ${guest.name || `Guest ${i + 1}`}`}
                                   value={guest.starter}
                                   onChange={(e) => updateGuest(i, "starter", e.target.value)}
                                   className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm font-sans text-foreground ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
