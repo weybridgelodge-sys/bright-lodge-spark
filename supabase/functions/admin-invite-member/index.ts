@@ -67,6 +67,7 @@ Deno.serve(async (req) => {
         full_name: b.full_name,
         initiation_date: b.initiation_date ?? null,
         degree: b.degree,
+        is_past_master: b.is_past_master ?? false,
         rank: b.rank ?? null,
         office: b.office ?? null,
         status: b.status,
