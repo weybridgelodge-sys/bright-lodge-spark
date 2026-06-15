@@ -145,7 +145,7 @@ const Surrey2030Gold = () => {
                   {[
                     { tier: "Bronze", amount: "£7,650", colour: "bg-amber-700/20 text-amber-800 border-amber-700/30" },
                     { tier: "Silver", amount: "£10,200", colour: "bg-zinc-300/30 text-zinc-700 border-zinc-400/40" },
-                    { tier: "Gold", amount: "£15,300", colour: "bg-yellow-400/20 text-yellow-700 border-yellow-500/30" },
+                    { tier: "Gold", amount: "£15,300", colour: "bg-yellow-400/20 text-yellow-900 border-yellow-500/30" },
                   ].map((m) => (
                     <div key={m.tier} className={`rounded-sm border p-4 text-center ${m.colour}`}>
                       <p className="text-xs font-sans font-semibold uppercase tracking-wider mb-1">{m.tier}</p>
