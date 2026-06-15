@@ -404,6 +404,13 @@ const Header = () => {
                 <Phone className="w-4 h-4" />
                 Interested in Joining?
               </Link>
+              <Link
+                to="/members"
+                onClick={() => setMobileOpen(false)}
+                className="flex items-center justify-center gap-2 text-xs text-primary-foreground/70 hover:text-gold uppercase tracking-wider py-2"
+              >
+                <Lock className="w-3.5 h-3.5" /> Members Portal
+              </Link>
             </nav>
           </motion.div>
         )}
