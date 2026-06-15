@@ -84,7 +84,7 @@ const JoinUs = () => {
                     <Mail className="w-5 h-5 text-gold mt-0.5 shrink-0" />
                     <div>
                       <p className="font-sans font-medium text-foreground text-sm">Email Us</p>
-                      <a href="mailto:secretary@weybridgelodge.org.uk" className="text-gold-dark hover:text-gold font-sans transition-colors text-sm break-all">
+                      <a href="mailto:secretary@weybridgelodge.org.uk?subject=Weybridge%20Lodge%20Website%20Enquiry" className="text-gold-dark hover:text-gold font-sans transition-colors text-sm break-all">
                         secretary@weybridgelodge.org.uk
                       </a>
                     </div>
