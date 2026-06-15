@@ -138,37 +138,49 @@ export default function MembersRitual() {
             <Upload className="w-4 h-4" />
             <h2 className="font-serif text-base">Upload ritual document</h2>
           </div>
-          <input
-            required
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="Title (e.g. First Degree Tracing Board)"
-            className="bg-navy border border-gold/20 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-gold"
-          />
-          <select
-            value={degree}
-            onChange={(e) => setDegree(e.target.value as Degree)}
-            className="bg-navy border border-gold/20 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-gold"
-          >
-            {DEGREES.map((d) => (
-              <option key={d} value={d}>
-                {DEGREE_LABEL[d]}
-              </option>
-            ))}
-          </select>
-          <input
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder="Optional description"
-            className="md:col-span-2 bg-navy border border-gold/20 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-gold"
-          />
-          <input
-            id="ritual-file"
-            required
-            type="file"
-            onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-            className="md:col-span-2 text-sm text-primary-foreground/70 file:mr-3 file:border-0 file:bg-gold/15 file:text-gold file:px-3 file:py-1.5 file:rounded-sm file:text-xs"
-          />
+          <label className="flex flex-col gap-1">
+            <span className="text-[11px] uppercase tracking-wider text-gold/70 font-semibold">Title</span>
+            <input
+              required
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="e.g. First Degree Tracing Board"
+              className="bg-navy border border-gold/20 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-gold"
+            />
+          </label>
+          <label className="flex flex-col gap-1">
+            <span className="text-[11px] uppercase tracking-wider text-gold/70 font-semibold">Degree</span>
+            <select
+              value={degree}
+              onChange={(e) => setDegree(e.target.value as Degree)}
+              className="bg-navy border border-gold/20 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-gold"
+            >
+              {DEGREES.map((d) => (
+                <option key={d} value={d}>
+                  {DEGREE_LABEL[d]}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="md:col-span-2 flex flex-col gap-1">
+            <span className="text-[11px] uppercase tracking-wider text-gold/70 font-semibold">Description (optional)</span>
+            <input
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Short summary or notes"
+              className="bg-navy border border-gold/20 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-gold"
+            />
+          </label>
+          <label className="md:col-span-2 flex flex-col gap-1">
+            <span className="text-[11px] uppercase tracking-wider text-gold/70 font-semibold">File</span>
+            <input
+              id="ritual-file"
+              required
+              type="file"
+              onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+              className="text-sm text-primary-foreground/70 file:mr-3 file:border-0 file:bg-gold/15 file:text-gold file:px-3 file:py-1.5 file:rounded-sm file:text-xs"
+            />
+          </label>
           <button
             disabled={busy}
             className="md:col-span-2 bg-gold-shimmer text-accent-foreground px-4 py-2 rounded-sm text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-50"
