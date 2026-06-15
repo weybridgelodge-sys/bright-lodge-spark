@@ -6,15 +6,30 @@ import SEO, { breadcrumbSchema } from "@/components/SEO";
 import { motion } from "framer-motion";
 import { Link, useSearchParams, useParams } from "react-router-dom";
 import { Calendar, Tag, X } from "lucide-react";
-import { posts, categories, formatDate } from "@/data/posts";
-
-const slugify = (s: string) => s.toLowerCase().replace(/\s+/g, "-");
+import { useQuery } from "@tanstack/react-query";
+import {
+  sanityClient,
+  POSTS_QUERY,
+  type SanityPost,
+  formatDate,
+  slugifyCategory,
+  getPostThumbnail,
+  getPostHref,
+} from "@/lib/sanity";
 
 const News = () => {
   const [searchParams] = useSearchParams();
   const { category: categorySlug } = useParams<{ category?: string }>();
+
+  const { data: posts = [], isLoading } = useQuery<SanityPost[]>({
+    queryKey: ["posts"],
+    queryFn: () => sanityClient.fetch(POSTS_QUERY),
+  });
+
+  const categories = Array.from(new Set(posts.map((p) => p.category)));
+
   const categoryFromSlug = categorySlug
-    ? categories.find((c) => slugify(c) === categorySlug.toLowerCase()) ?? null
+    ? categories.find((c) => slugifyCategory(c) === categorySlug.toLowerCase()) ?? null
     : null;
   const activeCategory = categoryFromSlug || searchParams.get("category");
   const filteredPosts = activeCategory
@@ -38,13 +53,13 @@ const News = () => {
             ? `${categoryFromSlug} news and updates from Weybridge Lodge No. 6787 in Guildford, Surrey.`
             : "Latest news and updates from Weybridge Lodge No. 6787 — Masonic meetings, charity events and social gatherings in Guildford, Surrey."
         }
-        canonical={categoryFromSlug ? `/news/category/${slugify(categoryFromSlug)}` : "/news"}
+        canonical={categoryFromSlug ? `/news/category/${slugifyCategory(categoryFromSlug)}` : "/news"}
         schema={breadcrumbSchema(
           categoryFromSlug
             ? [
                 { name: "Home", url: "/" },
                 { name: "News", url: "/news" },
-                { name: categoryFromSlug, url: `/news/category/${slugify(categoryFromSlug)}` },
+                { name: categoryFromSlug, url: `/news/category/${slugifyCategory(categoryFromSlug)}` },
               ]
             : [
                 { name: "Home", url: "/" },
@@ -72,46 +87,63 @@ const News = () => {
                     </Link>
                   </div>
                 )}
+
+                {isLoading && (
+                  <div className="text-center text-muted-foreground py-12">Loading posts…</div>
+                )}
+
+                {!isLoading && filteredPosts.length === 0 && (
+                  <div className="text-center text-muted-foreground py-12">
+                    No posts found{activeCategory ? ` in “${activeCategory}”` : ""}.
+                  </div>
+                )}
+
                 <div className="grid gap-8 sm:grid-cols-2">
-                  {filteredPosts.map((post, i) => (
-                    <motion.article
-                      key={post.slug}
-                      initial={{ opacity: 0, y: 20 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 0.5, delay: i * 0.08 }}
-                      className="group flex flex-col overflow-hidden rounded-sm border border-border bg-card shadow-sm hover:shadow-md transition-shadow"
-                    >
-                      <Link to={`/news/${post.slug}`} className="contents">
-                        <div className="aspect-video overflow-hidden bg-muted">
-                          <img
-                            src={post.image}
-                            alt={`${post.title} — Weybridge Lodge No. 6787 news`}
-                            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                            loading="lazy"
-                          />
-                        </div>
-                        <div className="flex flex-1 flex-col p-5">
-                          <div className="flex items-center gap-3 text-xs text-muted-foreground mb-2">
-                            <span className="inline-flex items-center gap-1">
-                              <Calendar className="h-3.5 w-3.5" />
-                              <time dateTime={post.date}>{formatDate(post.date)}</time>
-                            </span>
-                            <span className="inline-flex items-center gap-1 text-primary font-medium">
-                              <Tag className="h-3 w-3" />
-                              {post.category}
-                            </span>
+                  {filteredPosts.map((post, i) => {
+                    const thumb = getPostThumbnail(post);
+                    const href = getPostHref(post);
+                    return (
+                      <motion.article
+                        key={post._id}
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.5, delay: i * 0.08 }}
+                        className="group flex flex-col overflow-hidden rounded-sm border border-border bg-card shadow-sm hover:shadow-md transition-shadow"
+                      >
+                        <Link to={href} className="contents">
+                          {thumb && (
+                            <div className="aspect-video overflow-hidden bg-muted">
+                              <img
+                                src={thumb}
+                                alt={`${post.title} — Weybridge Lodge No. 6787 news`}
+                                className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                loading="lazy"
+                              />
+                            </div>
+                          )}
+                          <div className="flex flex-1 flex-col p-5">
+                            <div className="flex items-center gap-3 text-xs text-muted-foreground mb-2">
+                              <span className="inline-flex items-center gap-1">
+                                <Calendar className="h-3.5 w-3.5" />
+                                <time dateTime={post.publishedAt}>{formatDate(post.publishedAt)}</time>
+                              </span>
+                              <span className="inline-flex items-center gap-1 text-primary font-medium">
+                                <Tag className="h-3 w-3" />
+                                {post.category}
+                              </span>
+                            </div>
+                            <h2 className="text-lg font-serif text-foreground mb-2 leading-snug group-hover:text-primary transition-colors">
+                              {post.title}
+                            </h2>
+                            <p className="text-sm text-muted-foreground leading-relaxed flex-1">
+                              {post.excerpt}
+                            </p>
                           </div>
-                          <h2 className="text-lg font-serif text-foreground mb-2 leading-snug group-hover:text-primary transition-colors">
-                            {post.title}
-                          </h2>
-                          <p className="text-sm text-muted-foreground leading-relaxed flex-1">
-                            {post.excerpt}
-                          </p>
-                        </div>
-                      </Link>
-                    </motion.article>
-                  ))}
+                        </Link>
+                      </motion.article>
+                    );
+                  })}
                 </div>
               </div>
 
@@ -127,27 +159,30 @@ const News = () => {
                 >
                   <h3 className="text-base font-serif text-foreground mb-4">Recent Posts</h3>
                   <ul className="space-y-3">
-                    {posts.slice(0, 5).map((post) => (
-                      <li key={post.slug}>
-                        <Link
-                          to={`/news/${post.slug}`}
-                          className="group flex gap-3 items-start"
-                        >
-                          <img
-                            src={post.image}
-                            alt={`Thumbnail for ${post.title}`}
-                            className="w-14 h-14 rounded-sm object-cover shrink-0"
-                            loading="lazy"
-                          />
-                          <div className="min-w-0">
-                            <p className="text-sm font-sans text-foreground leading-snug group-hover:text-primary transition-colors line-clamp-2">
-                              {post.title}
-                            </p>
-                            <p className="text-xs text-muted-foreground mt-0.5">{formatDate(post.date)}</p>
-                          </div>
-                        </Link>
-                      </li>
-                    ))}
+                    {posts.slice(0, 5).map((post) => {
+                      const thumb = getPostThumbnail(post, 120, 120);
+                      const href = getPostHref(post);
+                      return (
+                        <li key={post._id}>
+                          <Link to={href} className="group flex gap-3 items-start">
+                            {thumb && (
+                              <img
+                                src={thumb}
+                                alt={`Thumbnail for ${post.title}`}
+                                className="w-14 h-14 rounded-sm object-cover shrink-0"
+                                loading="lazy"
+                              />
+                            )}
+                            <div className="min-w-0">
+                              <p className="text-sm font-sans text-foreground leading-snug group-hover:text-primary transition-colors line-clamp-2">
+                                {post.title}
+                              </p>
+                              <p className="text-xs text-muted-foreground mt-0.5">{formatDate(post.publishedAt)}</p>
+                            </div>
+                          </Link>
+                        </li>
+                      );
+                    })}
                   </ul>
                 </motion.div>
 
@@ -167,7 +202,7 @@ const News = () => {
                       return (
                         <Link
                           key={cat}
-                          to={`/news/category/${slugify(cat)}`}
+                          to={`/news/category/${slugifyCategory(cat)}`}
                           className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-sans transition-colors ${
                             isActive
                               ? "border-primary bg-primary/10 text-primary font-medium"

@@ -23,6 +23,7 @@ import MasonicLinks from "./pages/MasonicLinks";
 import Bookings from "./pages/Bookings";
 import OfficersJewels from "./pages/OfficersJewels";
 import News from "./pages/News";
+import SanityPost from "./pages/news/SanityPost";
 import Anniversary75th from "./pages/news/Anniversary75th";
 import SandsCharity from "./pages/news/SandsCharity";
 import InstallationMeeting from "./pages/news/InstallationMeeting";
@@ -80,6 +81,8 @@ const App = () => (
           <Route path="/news/installation-meeting-october-2023" element={<InstallationMeeting />} />
           <Route path="/news/pgm-visit-february-2026" element={<ApgmVisit />} />
           <Route path="/news/surrey-2030-festival-gold" element={<Surrey2030Gold />} />
+          {/* Sanity-backed catch-all for any new posts added via Sanity Studio */}
+          <Route path="/news/:slug" element={<SanityPost />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
