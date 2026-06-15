@@ -12,6 +12,8 @@ import {
   computeProjection,
   sortBySeniority,
   detectDuplicateInitiations,
+  masonicYear,
+  formatMasonicYear,
 } from "@/lib/officersProgression";
 import { Loader2, AlertTriangle, Crown, Download, UserPlus, Lock, ShieldAlert, X } from "lucide-react";
 import jsPDF from "jspdf";
@@ -66,7 +68,7 @@ export default function OfficersTracker() {
   const [statuses, setStatuses] = useState<StatusRow[]>([]);
   const [appointments, setAppointments] = useState<AppointmentRow[]>([]);
 
-  const currentYear = new Date().getFullYear();
+  const currentYear = masonicYear();
 
   const load = async () => {
     setLoading(true);
@@ -242,7 +244,7 @@ export default function OfficersTracker() {
     doc.setTextColor(60, 60, 60);
     doc.text(`Generated ${new Date().toLocaleDateString("en-GB")} · Prepared by ${profile?.full_name ?? "Secretary"}`, 40, 76);
 
-    const head = [["Office", ...projection.years.map((y) => String(y))]];
+    const head = [["Office", ...projection.years.map((y) => formatMasonicYear(y))]];
     const body = POSITION_ORDER.map((pos) => {
       const row: string[] = [POSITION_LABELS[pos]];
       for (const y of projection.years) {
@@ -292,7 +294,7 @@ export default function OfficersTracker() {
       }
     }
 
-    doc.save(`weybridge-officers-projection-${currentYear}.pdf`);
+    doc.save(`weybridge-officers-projection-${formatMasonicYear(currentYear)}.pdf`);
   };
 
   // ---------- UI ----------
@@ -545,7 +547,7 @@ function LadderView({
                     y === currentYear ? "text-gold" : "text-primary-foreground/80"
                   }`}
                 >
-                  {y}
+                  {formatMasonicYear(y)}
                   {y === currentYear && (
                     <span className="ml-1 text-[10px] uppercase">(current)</span>
                   )}
@@ -607,7 +609,7 @@ function LadderView({
             <div className="flex justify-between items-start">
               <div>
                 <h3 className="font-serif text-lg text-primary-foreground">
-                  {POSITION_LABELS[editing.pos]} · {editing.year}
+                  {POSITION_LABELS[editing.pos]} · {formatMasonicYear(editing.year)}
                 </h3>
                 <p className="text-xs text-primary-foreground/60">
                   {editing.year === currentYear

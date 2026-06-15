@@ -39,11 +39,19 @@ export default function MembersAdmin() {
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [roles, setRoles] = useState<Role[]>([]);
   const [notices, setNotices] = useState<Notice[]>([]);
-  const [tab, setTab] = useState<"users" | "notices">("users");
+  const [tab, setTab] = useState<"users" | "add" | "notices">("users");
 
   const [nTitle, setNTitle] = useState("");
   const [nBody, setNBody] = useState("");
   const [nDate, setNDate] = useState("");
+
+  // Add-member form
+  const [aEmail, setAEmail] = useState("");
+  const [aName, setAName] = useState("");
+  const [aInit, setAInit] = useState("");
+  const [aDegree, setADegree] = useState<Degree>("master_mason");
+  const [aRank, setARank] = useState("");
+  const [aBusy, setABusy] = useState(false);
 
   const load = async () => {
     const [{ data: p }, { data: r }, { data: n }] = await Promise.all([
@@ -115,6 +123,36 @@ export default function MembersAdmin() {
     load();
   };
 
+  const addMember = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!aEmail.trim() || !aName.trim()) return;
+    setABusy(true);
+    const { data, error } = await supabase.functions.invoke("admin-invite-member", {
+      body: {
+        email: aEmail.trim(),
+        full_name: aName.trim(),
+        initiation_date: aInit || null,
+        degree: aDegree,
+        rank: aRank.trim() || null,
+        status: "active",
+      },
+    });
+    setABusy(false);
+    if (error || (data as { error?: unknown })?.error) {
+      const msg = (data as { error?: string })?.error ?? error?.message ?? "Could not add member";
+      toast.error(typeof msg === "string" ? msg : "Could not add member");
+      return;
+    }
+    toast.success(`${aName} added — they can sign in with ${aEmail}`);
+    setAEmail("");
+    setAName("");
+    setAInit("");
+    setARank("");
+    setADegree("master_mason");
+    setTab("users");
+    load();
+  };
+
   const isAdmin = (uid: string) => roles.some((r) => r.user_id === uid && r.role === "admin");
 
   return (
@@ -125,7 +163,7 @@ export default function MembersAdmin() {
       </div>
 
       <div className="flex gap-2 border-b border-gold/15 mb-6">
-        {(["users", "notices"] as const).map((t) => (
+        {(["users", "add", "notices"] as const).map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
@@ -133,7 +171,7 @@ export default function MembersAdmin() {
               tab === t ? "border-gold text-gold" : "border-transparent text-primary-foreground/60 hover:text-gold"
             }`}
           >
-            {t}
+            {t === "add" ? "Add Member" : t}
           </button>
         ))}
       </div>
@@ -228,6 +266,71 @@ export default function MembersAdmin() {
           </table>
         </div>
       )}
+
+      {tab === "add" && (
+        <form onSubmit={addMember} className="bg-navy-dark/60 border border-gold/15 rounded-sm p-5 space-y-3 max-w-xl">
+          <div className="flex items-center gap-2 text-gold">
+            <Plus className="w-4 h-4" />
+            <h2 className="font-serif text-base">Pre-create a member</h2>
+          </div>
+          <p className="text-xs text-primary-foreground/60">
+            Adds the brother to the portal with an active account so they can sign in via
+            magic link or Google as soon as we go live — no registration step required.
+            Use this to seed the Officers Progression Tracker.
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <input
+              required
+              value={aName}
+              onChange={(e) => setAName(e.target.value)}
+              placeholder="Full name (e.g. W Bro. John Smith)"
+              className="w-full bg-navy border border-gold/20 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-gold"
+            />
+            <input
+              required
+              type="email"
+              value={aEmail}
+              onChange={(e) => setAEmail(e.target.value)}
+              placeholder="Email address"
+              className="w-full bg-navy border border-gold/20 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-gold"
+            />
+            <label className="text-xs uppercase tracking-wider text-primary-foreground/60 sm:col-span-1">
+              Initiation date
+              <input
+                type="date"
+                value={aInit}
+                onChange={(e) => setAInit(e.target.value)}
+                className="mt-1 w-full bg-navy border border-gold/20 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-gold normal-case tracking-normal text-primary-foreground"
+              />
+            </label>
+            <label className="text-xs uppercase tracking-wider text-primary-foreground/60">
+              Degree
+              <select
+                value={aDegree}
+                onChange={(e) => setADegree(e.target.value as Degree)}
+                className="mt-1 w-full bg-navy border border-gold/20 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-gold normal-case tracking-normal text-primary-foreground"
+              >
+                <option value="entered_apprentice">Entered Apprentice</option>
+                <option value="fellow_craft">Fellow Craft</option>
+                <option value="master_mason">Master Mason</option>
+              </select>
+            </label>
+            <input
+              value={aRank}
+              onChange={(e) => setARank(e.target.value)}
+              placeholder="Rank (optional, e.g. PPrJGW)"
+              className="sm:col-span-2 w-full bg-navy border border-gold/20 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-gold"
+            />
+          </div>
+          <button
+            disabled={aBusy}
+            className="bg-gold-shimmer text-accent-foreground px-4 py-2 rounded-sm text-sm font-semibold disabled:opacity-50"
+          >
+            {aBusy ? "Adding…" : "Add member"}
+          </button>
+        </form>
+      )}
+
 
       {tab === "notices" && (
         <div className="space-y-6">

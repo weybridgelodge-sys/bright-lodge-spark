@@ -26,6 +26,18 @@ export const POSITION_LABELS: Record<PositionKey, string> = {
   worshipful_master: "Worshipful Master",
 };
 
+// Masonic year runs October → September. Returns the starting calendar year.
+// e.g. 15 Jun 2026 → 2025 (the 2025/26 year); 5 Oct 2026 → 2026 (2026/27).
+export function masonicYear(d: Date = new Date()): number {
+  return d.getMonth() >= 9 ? d.getFullYear() : d.getFullYear() - 1;
+}
+
+// Format a Masonic year as "2026/27".
+export function formatMasonicYear(y: number): string {
+  const next = (y + 1) % 100;
+  return `${y}/${next.toString().padStart(2, "0")}`;
+}
+
 export type MemberLite = {
   id: string;
   full_name: string | null;
