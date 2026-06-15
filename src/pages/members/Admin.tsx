@@ -39,11 +39,19 @@ export default function MembersAdmin() {
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [roles, setRoles] = useState<Role[]>([]);
   const [notices, setNotices] = useState<Notice[]>([]);
-  const [tab, setTab] = useState<"users" | "notices">("users");
+  const [tab, setTab] = useState<"users" | "add" | "notices">("users");
 
   const [nTitle, setNTitle] = useState("");
   const [nBody, setNBody] = useState("");
   const [nDate, setNDate] = useState("");
+
+  // Add-member form
+  const [aEmail, setAEmail] = useState("");
+  const [aName, setAName] = useState("");
+  const [aInit, setAInit] = useState("");
+  const [aDegree, setADegree] = useState<Degree>("master_mason");
+  const [aRank, setARank] = useState("");
+  const [aBusy, setABusy] = useState(false);
 
   const load = async () => {
     const [{ data: p }, { data: r }, { data: n }] = await Promise.all([
@@ -115,6 +123,36 @@ export default function MembersAdmin() {
     load();
   };
 
+  const addMember = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!aEmail.trim() || !aName.trim()) return;
+    setABusy(true);
+    const { data, error } = await supabase.functions.invoke("admin-invite-member", {
+      body: {
+        email: aEmail.trim(),
+        full_name: aName.trim(),
+        initiation_date: aInit || null,
+        degree: aDegree,
+        rank: aRank.trim() || null,
+        status: "active",
+      },
+    });
+    setABusy(false);
+    if (error || (data as { error?: unknown })?.error) {
+      const msg = (data as { error?: string })?.error ?? error?.message ?? "Could not add member";
+      toast.error(typeof msg === "string" ? msg : "Could not add member");
+      return;
+    }
+    toast.success(`${aName} added — they can sign in with ${aEmail}`);
+    setAEmail("");
+    setAName("");
+    setAInit("");
+    setARank("");
+    setADegree("master_mason");
+    setTab("users");
+    load();
+  };
+
   const isAdmin = (uid: string) => roles.some((r) => r.user_id === uid && r.role === "admin");
 
   return (
@@ -125,7 +163,7 @@ export default function MembersAdmin() {
       </div>
 
       <div className="flex gap-2 border-b border-gold/15 mb-6">
-        {(["users", "notices"] as const).map((t) => (
+        {(["users", "add", "notices"] as const).map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
@@ -133,7 +171,7 @@ export default function MembersAdmin() {
               tab === t ? "border-gold text-gold" : "border-transparent text-primary-foreground/60 hover:text-gold"
             }`}
           >
-            {t}
+            {t === "add" ? "Add Member" : t}
           </button>
         ))}
       </div>
