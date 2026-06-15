@@ -250,8 +250,8 @@ export function computeProjection(input: ProjectionInput): ProjectionResult {
         position: pos,
         year: y,
         member: memberId ? membersById[memberId] ?? null : null,
-        isOverride: !!ovr,
-        overrideReason: ovr?.override_reason ?? null,
+        isOverride: !!ovr?.override_reason?.trim(),
+        overrideReason: ovr?.override_reason?.trim() || null,
         overrideBy: ovr?.override_by_name ?? null,
         source: memberId
           ? ovr
