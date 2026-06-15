@@ -1,0 +1,254 @@
+import { useEffect, useState } from "react";
+import MembersLayout from "@/components/members/MembersLayout";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import { Check, X, ShieldPlus, ShieldMinus, Plus, Trash2 } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+
+type Profile = {
+  id: string;
+  email: string | null;
+  full_name: string | null;
+  status: "pending" | "active" | "suspended";
+  created_at: string;
+};
+
+type Role = { user_id: string; role: "member" | "admin" };
+
+type Notice = {
+  id: string;
+  title: string;
+  body: string;
+  event_date: string | null;
+  created_at: string;
+};
+
+export default function MembersAdmin() {
+  const { user } = useAuth();
+  const [profiles, setProfiles] = useState<Profile[]>([]);
+  const [roles, setRoles] = useState<Role[]>([]);
+  const [notices, setNotices] = useState<Notice[]>([]);
+  const [tab, setTab] = useState<"users" | "notices">("users");
+
+  const [nTitle, setNTitle] = useState("");
+  const [nBody, setNBody] = useState("");
+  const [nDate, setNDate] = useState("");
+
+  const load = async () => {
+    const [{ data: p }, { data: r }, { data: n }] = await Promise.all([
+      supabase.from("profiles").select("id,email,full_name,status,created_at").order("created_at", { ascending: false }),
+      supabase.from("user_roles").select("user_id,role"),
+      supabase.from("member_notices").select("*").order("created_at", { ascending: false }),
+    ]);
+    setProfiles((p as Profile[]) ?? []);
+    setRoles((r as Role[]) ?? []);
+    setNotices((n as Notice[]) ?? []);
+  };
+  useEffect(() => {
+    load();
+  }, []);
+
+  const setStatus = async (id: string, status: Profile["status"]) => {
+    const { error } = await supabase.from("profiles").update({ status }).eq("id", id);
+    if (error) toast.error(error.message);
+    else {
+      toast.success(`Member ${status}`);
+      load();
+    }
+  };
+
+  const toggleAdmin = async (uid: string, makeAdmin: boolean) => {
+    if (makeAdmin) {
+      const { error } = await supabase.from("user_roles").insert({ user_id: uid, role: "admin" });
+      if (error) toast.error(error.message);
+      else toast.success("Promoted to admin");
+    } else {
+      const { error } = await supabase.from("user_roles").delete().eq("user_id", uid).eq("role", "admin");
+      if (error) toast.error(error.message);
+      else toast.success("Admin removed");
+    }
+    load();
+  };
+
+  const addNotice = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) return;
+    const { error } = await supabase.from("member_notices").insert({
+      title: nTitle.trim(),
+      body: nBody.trim(),
+      event_date: nDate ? new Date(nDate).toISOString() : null,
+      author_id: user.id,
+    });
+    if (error) toast.error(error.message);
+    else {
+      toast.success("Notice posted");
+      setNTitle("");
+      setNBody("");
+      setNDate("");
+      load();
+    }
+  };
+
+  const deleteNotice = async (id: string) => {
+    if (!confirm("Delete this notice?")) return;
+    await supabase.from("member_notices").delete().eq("id", id);
+    load();
+  };
+
+  const isAdmin = (uid: string) => roles.some((r) => r.user_id === uid && r.role === "admin");
+
+  return (
+    <MembersLayout>
+      <div className="mb-6">
+        <h1 className="font-serif text-3xl text-gold mb-2">Admin</h1>
+        <p className="text-sm text-primary-foreground/60">Manage members, roles, and notices.</p>
+      </div>
+
+      <div className="flex gap-2 border-b border-gold/15 mb-6">
+        {(["users", "notices"] as const).map((t) => (
+          <button
+            key={t}
+            onClick={() => setTab(t)}
+            className={`px-3 py-2 text-sm uppercase tracking-wider border-b-2 -mb-px ${
+              tab === t ? "border-gold text-gold" : "border-transparent text-primary-foreground/60 hover:text-gold"
+            }`}
+          >
+            {t}
+          </button>
+        ))}
+      </div>
+
+      {tab === "users" && (
+        <div className="bg-navy-dark/60 border border-gold/15 rounded-sm overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead className="text-xs uppercase tracking-wider text-primary-foreground/50">
+              <tr>
+                <th className="text-left p-3">Member</th>
+                <th className="text-left p-3">Status</th>
+                <th className="text-left p-3">Role</th>
+                <th className="text-right p-3">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gold/10">
+              {profiles.map((p) => (
+                <tr key={p.id}>
+                  <td className="p-3">
+                    <p className="font-medium">{p.full_name || "(No name)"}</p>
+                    <p className="text-xs text-primary-foreground/50">{p.email}</p>
+                  </td>
+                  <td className="p-3 text-xs uppercase tracking-wider">
+                    <span
+                      className={
+                        p.status === "active"
+                          ? "text-gold"
+                          : p.status === "pending"
+                          ? "text-amber-400"
+                          : "text-red-400"
+                      }
+                    >
+                      {p.status}
+                    </span>
+                  </td>
+                  <td className="p-3 text-xs uppercase tracking-wider">{isAdmin(p.id) ? "Admin" : "Member"}</td>
+                  <td className="p-3">
+                    <div className="flex items-center gap-1 justify-end">
+                      {p.status !== "active" && (
+                        <button
+                          onClick={() => setStatus(p.id, "active")}
+                          className="p-1.5 text-gold hover:bg-gold/10 rounded-sm"
+                          aria-label="Approve"
+                          title="Approve"
+                        >
+                          <Check className="w-4 h-4" />
+                        </button>
+                      )}
+                      {p.status !== "suspended" && (
+                        <button
+                          onClick={() => setStatus(p.id, "suspended")}
+                          className="p-1.5 text-red-400 hover:bg-red-500/10 rounded-sm"
+                          aria-label="Suspend"
+                          title="Suspend"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      )}
+                      <button
+                        onClick={() => toggleAdmin(p.id, !isAdmin(p.id))}
+                        className="p-1.5 text-primary-foreground/70 hover:text-gold hover:bg-gold/10 rounded-sm"
+                        aria-label={isAdmin(p.id) ? "Remove admin" : "Make admin"}
+                        title={isAdmin(p.id) ? "Remove admin" : "Make admin"}
+                      >
+                        {isAdmin(p.id) ? <ShieldMinus className="w-4 h-4" /> : <ShieldPlus className="w-4 h-4" />}
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {tab === "notices" && (
+        <div className="space-y-6">
+          <form onSubmit={addNotice} className="bg-navy-dark/60 border border-gold/15 rounded-sm p-5 space-y-3">
+            <div className="flex items-center gap-2 text-gold">
+              <Plus className="w-4 h-4" />
+              <h2 className="font-serif text-base">Post a notice</h2>
+            </div>
+            <input
+              required
+              value={nTitle}
+              onChange={(e) => setNTitle(e.target.value)}
+              placeholder="Title"
+              className="w-full bg-navy border border-gold/20 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-gold"
+            />
+            <textarea
+              required
+              value={nBody}
+              onChange={(e) => setNBody(e.target.value)}
+              placeholder="Message…"
+              rows={4}
+              className="w-full bg-navy border border-gold/20 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-gold"
+            />
+            <input
+              type="datetime-local"
+              value={nDate}
+              onChange={(e) => setNDate(e.target.value)}
+              className="bg-navy border border-gold/20 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-gold"
+            />
+            <button className="bg-gold-shimmer text-accent-foreground px-4 py-2 rounded-sm text-sm font-semibold">
+              Post notice
+            </button>
+          </form>
+
+          <ul className="space-y-3">
+            {notices.map((n) => (
+              <li
+                key={n.id}
+                className="bg-navy-dark/60 border border-gold/15 rounded-sm p-4 flex items-start justify-between gap-3"
+              >
+                <div>
+                  <p className="font-semibold">{n.title}</p>
+                  {n.event_date && (
+                    <p className="text-[11px] text-gold mb-1">
+                      {new Date(n.event_date).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" })}
+                    </p>
+                  )}
+                  <p className="text-xs text-primary-foreground/70 whitespace-pre-wrap">{n.body}</p>
+                </div>
+                <button
+                  onClick={() => deleteNotice(n.id)}
+                  className="text-red-400 p-2 hover:bg-red-500/10 rounded-sm shrink-0"
+                  aria-label="Delete notice"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </MembersLayout>
+  );
+}
