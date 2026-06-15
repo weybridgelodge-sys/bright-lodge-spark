@@ -65,7 +65,7 @@ const VideoHub = () => {
                   viewport={{ once: true }}
                   transition={{ duration: 0.6, delay: i * 0.1 }}
                 >
-                  <h3 className="text-xl font-serif text-foreground mb-2">{video.title}</h3>
+                  <h2 className="text-xl font-serif text-foreground mb-2">{video.title}</h2>
                   <p className="text-muted-foreground font-sans text-sm mb-4">{video.channel}</p>
                   <div className="relative w-full aspect-video rounded-sm overflow-hidden border border-border shadow-lg">
                     <iframe
