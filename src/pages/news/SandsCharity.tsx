@@ -50,7 +50,7 @@ const SandsCharity = () => {
               transition={{ duration: 0.5 }}
               className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mb-8"
             >
-              <Link to="/news" className="inline-flex items-center gap-1 text-primary hover:underline font-sans">
+              <Link to="/news" className="inline-flex items-center gap-1 text-primary underline decoration-primary/40 hover:decoration-primary font-sans">
                 <ArrowLeft className="h-4 w-4" /> Back to News
               </Link>
               <span className="hidden sm:inline">|</span>
@@ -82,7 +82,7 @@ const SandsCharity = () => {
               <ol className="list-decimal list-inside space-y-1.5">
                 {tocItems.map((item) => (
                   <li key={item.id}>
-                    <a href={`#${item.id}`} className="text-sm font-sans text-primary hover:underline">
+                    <a href={`#${item.id}`} className="text-sm font-sans text-primary underline decoration-primary/40 hover:decoration-primary">
                       {item.label}
                     </a>
                   </li>
@@ -157,7 +157,7 @@ const SandsCharity = () => {
                 <h2 className="text-2xl font-serif text-foreground mb-4">Inspired By What You Have Read?</h2>
                 <p className="text-muted-foreground font-sans leading-relaxed">
                   If you have been inspired by our efforts and feel that taking that first step into Freemasonry is for you, or if you are a company that would like to partner with us on future fundraising events, please{" "}
-                  <Link to="/contact" className="text-primary hover:underline">contact Weybridge Lodge</Link>.
+                  <Link to="/contact" className="text-primary underline decoration-primary/40 hover:decoration-primary">contact Weybridge Lodge</Link>.
                 </p>
               </section>
             </article>

@@ -303,7 +303,7 @@ const LadiesFestival = () => {
 
           <div className="relative z-10 container mx-auto px-4 sm:px-6 text-center py-32">
             <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
-              <p className="text-gold uppercase tracking-[0.3em] text-sm font-sans mb-4">Black Tie Charity Gala</p>
+              <p className="text-gold-dark uppercase tracking-[0.3em] text-sm font-sans mb-4">Black Tie Charity Gala</p>
               <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-serif text-primary-foreground leading-tight mb-2">
                 Ladies Festival
                 <span className="block text-gradient-gold text-2xl sm:text-3xl md:text-4xl mt-3">2026</span>
@@ -329,7 +329,7 @@ const LadiesFestival = () => {
             >
               {countdownUnits.map((u) => (
                 <div key={u.label} className="flex flex-col items-center">
-                  <span className="text-3xl sm:text-5xl md:text-6xl font-serif text-gold tabular-nums">
+                  <span className="text-3xl sm:text-5xl md:text-6xl font-serif text-gold-dark tabular-nums">
                     {String(u.value).padStart(2, "0")}
                   </span>
                   <span className="text-primary-foreground/50 text-xs sm:text-sm font-sans uppercase tracking-widest mt-1">
@@ -353,7 +353,7 @@ const LadiesFestival = () => {
               </a>
               <a
                 href="#venue"
-                className="inline-flex items-center justify-center border border-primary-foreground/30 text-primary-foreground px-8 py-4 rounded-sm text-sm font-sans uppercase tracking-widest hover:border-gold hover:text-gold transition-colors"
+                className="inline-flex items-center justify-center border border-primary-foreground/30 text-primary-foreground px-8 py-4 rounded-sm text-sm font-sans uppercase tracking-widest hover:border-gold-dark hover:text-gold-dark-dark transition-colors"
               >
                 View Venue
               </a>
@@ -368,7 +368,7 @@ const LadiesFestival = () => {
               <div className="h-0.5 w-16 bg-gold mx-auto mb-6" />
               <h2 className="text-3xl md:text-4xl font-serif text-foreground">An Evening to Remember</h2>
               <p className="text-muted-foreground font-sans mt-3 max-w-xl mx-auto">
-                The Worshipful Masters of Weybridge and Astolat Lodges warmly invite you to a spectacular evening in aid of <span className="text-gold font-semibold">"Guildford Young Carers"</span>.
+                The Worshipful Masters of Weybridge and Astolat Lodges warmly invite you to a spectacular evening in aid of <span className="text-gold-dark font-semibold">"Guildford Young Carers"</span>.
               </p>
               <p className="text-muted-foreground font-sans mt-3 max-w-xl mx-auto">
                 Join us for an unforgettable black‑tie celebration with friends, family and fellow Freemasons — an evening of fine dining, dancing and entertainment you won't want to miss.
@@ -381,7 +381,7 @@ const LadiesFestival = () => {
                    { time: "1.00 am", label: "Carriages" },
                  ].map((item) => (
                    <div key={item.label} className="flex flex-col items-center">
-                     <span className="text-xl sm:text-2xl font-serif text-gold">{item.time}</span>
+                     <span className="text-xl sm:text-2xl font-serif text-gold-dark">{item.time}</span>
                      <span className="text-xs text-muted-foreground font-sans uppercase tracking-widest mt-1">{item.label}</span>
                    </div>
                  ))}
@@ -405,7 +405,7 @@ const LadiesFestival = () => {
                   transition={{ duration: 0.5, delay: i * 0.1 }}
                   className="bg-card border border-border rounded-sm p-6 text-center shadow-sm"
                 >
-                  <item.icon className="w-8 h-8 text-gold mx-auto mb-4" aria-hidden="true" />
+                  <item.icon className="w-8 h-8 text-gold-dark mx-auto mb-4" aria-hidden="true" />
                   <h3 className="font-serif text-foreground text-lg mb-2">{item.title}</h3>
                   <p className="text-sm text-muted-foreground font-sans">{item.desc}</p>
                 </motion.div>
@@ -434,7 +434,7 @@ const LadiesFestival = () => {
               className="bg-warm-white border border-border rounded-sm p-8 md:p-10 shadow-sm space-y-8 text-center"
             >
               <div>
-                <p className="text-gold uppercase tracking-widest text-xs font-sans font-semibold mb-3">Starters</p>
+                <p className="text-gold-dark uppercase tracking-widest text-xs font-sans font-semibold mb-3">Starters</p>
                 <div className="space-y-3">
                   <div>
                     <h3 className="font-serif text-foreground text-lg">Roasted Butternut Squash Soup <span className="italic text-sm text-muted-foreground">(V)</span></h3>
@@ -448,7 +448,7 @@ const LadiesFestival = () => {
               </div>
 
               <div className="border-t border-border pt-8">
-                <p className="text-gold uppercase tracking-widest text-xs font-sans font-semibold mb-3">Mains</p>
+                <p className="text-gold-dark uppercase tracking-widest text-xs font-sans font-semibold mb-3">Mains</p>
                 <div className="space-y-3">
                   <div>
                     <h3 className="font-serif text-foreground text-lg">Corn Fed Chicken Breast</h3>
@@ -462,7 +462,7 @@ const LadiesFestival = () => {
               </div>
 
               <div className="border-t border-border pt-8">
-                <p className="text-gold uppercase tracking-widest text-xs font-sans font-semibold mb-3">Desserts</p>
+                <p className="text-gold-dark uppercase tracking-widest text-xs font-sans font-semibold mb-3">Desserts</p>
                 <div className="space-y-3">
                   <div>
                     <h3 className="font-serif text-foreground text-lg">Sticky Toffee Pudding</h3>
@@ -475,7 +475,7 @@ const LadiesFestival = () => {
               </div>
 
               <div className="border-t border-border pt-8">
-                <p className="text-gold uppercase tracking-widest text-xs font-sans font-semibold mb-2">To Finish</p>
+                <p className="text-gold-dark uppercase tracking-widest text-xs font-sans font-semibold mb-2">To Finish</p>
                 <h3 className="font-serif text-foreground text-lg">Coffee &amp; Tea</h3>
               </div>
 
@@ -498,21 +498,21 @@ const LadiesFestival = () => {
               {/* Venue details */}
               <motion.div initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="space-y-6">
                 <div className="flex items-start gap-4">
-                  <MapPin className="w-5 h-5 text-gold mt-1 shrink-0" aria-hidden="true" />
+                  <MapPin className="w-5 h-5 text-gold-dark mt-1 shrink-0" aria-hidden="true" />
                   <div>
                     <h3 className="font-sans font-medium text-foreground">Macdonald Frimley Hall Hotel</h3>
                     <p className="text-sm text-muted-foreground font-sans">Lime Avenue, Frimley, Camberley, Surrey GU15 2BG</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-4">
-                  <Clock className="w-5 h-5 text-gold mt-1 shrink-0" aria-hidden="true" />
+                  <Clock className="w-5 h-5 text-gold-dark mt-1 shrink-0" aria-hidden="true" />
                   <div>
                     <h3 className="font-sans font-medium text-foreground">Arrival from 6.30 pm</h3>
                     <p className="text-sm text-muted-foreground font-sans">Reception drinks, followed by dinner and entertainment until 1.00 am.</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-4">
-                  <Hotel className="w-5 h-5 text-gold mt-1 shrink-0" aria-hidden="true" />
+                  <Hotel className="w-5 h-5 text-gold-dark mt-1 shrink-0" aria-hidden="true" />
                   <div>
                     <h3 className="font-sans font-medium text-foreground">Overnight Stay – 20% Discount</h3>
                     <p className="text-sm text-muted-foreground font-sans">
@@ -525,14 +525,14 @@ const LadiesFestival = () => {
                       href="https://www.macdonaldhotels.co.uk/frimley-hall"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 text-sm font-sans text-gold hover:opacity-80 transition-opacity mt-2"
+                      className="inline-flex items-center gap-1.5 text-sm font-sans text-gold-dark hover:opacity-80 transition-opacity mt-2"
                     >
                       Visit hotel website <ExternalLink className="w-3.5 h-3.5" />
                     </a>
                   </div>
                 </div>
                 <div className="flex items-start gap-4">
-                  <Car className="w-5 h-5 text-gold mt-1 shrink-0" aria-hidden="true" />
+                  <Car className="w-5 h-5 text-gold-dark mt-1 shrink-0" aria-hidden="true" />
                   <div>
                     <h3 className="font-sans font-medium text-foreground">Getting There</h3>
                     <p className="text-sm text-muted-foreground font-sans">
@@ -572,7 +572,7 @@ const LadiesFestival = () => {
 
               <div className="bg-warm-white border border-border rounded-sm p-8 md:p-10 shadow-sm">
                 <div className="flex items-center gap-3 mb-6">
-                  <Heart className="w-6 h-6 text-gold" aria-hidden="true" />
+                  <Heart className="w-6 h-6 text-gold-dark" aria-hidden="true" />
                   <h3 className="font-serif text-foreground text-xl">Making a Difference Locally</h3>
                 </div>
                 <p className="text-muted-foreground font-sans leading-relaxed mb-4">
@@ -592,7 +592,7 @@ const LadiesFestival = () => {
                     { stat: "£75", label: "Your ticket helps" },
                   ].map((item) => (
                     <div key={item.label} className="text-center p-4 bg-muted/30 border border-border rounded-sm">
-                      <p className="text-2xl font-serif text-gold">{item.stat}</p>
+                      <p className="text-2xl font-serif text-gold-dark">{item.stat}</p>
                       <p className="text-xs text-muted-foreground font-sans mt-1">{item.label}</p>
                     </div>
                   ))}
@@ -602,7 +602,7 @@ const LadiesFestival = () => {
                   href="https://www.cfsurrey.org.uk/fund/guildfordyoungcarers"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 text-sm font-sans font-medium text-gold hover:opacity-80 transition-opacity"
+                  className="inline-flex items-center gap-2 text-sm font-sans font-medium text-gold-dark hover:opacity-80 transition-opacity"
                 >
                   Learn more about Guildford Young Carers <ExternalLink className="w-4 h-4" />
                 </a>
@@ -635,15 +635,15 @@ const LadiesFestival = () => {
                     onClick={() => s.num < formStep && setFormStep(s.num)}
                     className={`flex items-center gap-1.5 text-sm font-sans transition-colors ${
                       formStep === s.num
-                        ? "text-gold font-semibold"
+                        ? "text-gold-dark font-semibold"
                         : formStep > s.num
-                          ? "text-foreground cursor-pointer hover:text-gold"
+                          ? "text-foreground cursor-pointer hover:text-gold-dark-dark"
                           : "text-muted-foreground"
                     }`}
                   >
                     <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold border ${
                       formStep === s.num
-                        ? "bg-gold text-accent-foreground border-gold"
+                        ? "bg-gold text-accent-foreground border-gold-dark"
                         : formStep > s.num
                           ? "bg-foreground text-background border-foreground"
                           : "border-border text-muted-foreground"
@@ -736,7 +736,7 @@ const LadiesFestival = () => {
                       {/* Guest Names */}
                       <div className="border-t border-border pt-6">
                         <div className="flex items-center gap-2 mb-4">
-                          <Users className="w-5 h-5 text-gold" aria-hidden="true" />
+                          <Users className="w-5 h-5 text-gold-dark" aria-hidden="true" />
                           <h3 className="font-serif text-foreground text-lg">Guest Names</h3>
                         </div>
                         <div className="space-y-3">
@@ -772,7 +772,7 @@ const LadiesFestival = () => {
                       {/* Menu Choices */}
                       <div className="border-t border-border pt-6">
                         <div className="flex items-center gap-2 mb-4">
-                          <UtensilsCrossed className="w-5 h-5 text-gold" aria-hidden="true" />
+                          <UtensilsCrossed className="w-5 h-5 text-gold-dark" aria-hidden="true" />
                           <h3 className="font-serif text-foreground text-lg">Menu Choices</h3>
                         </div>
                         <p className="text-sm text-muted-foreground font-sans mb-5">
@@ -784,7 +784,7 @@ const LadiesFestival = () => {
                               <p className="font-sans font-medium text-foreground text-sm">{guest.name || `Guest ${i + 1}`}</p>
                               <div>
                                 <label className="text-xs font-sans text-muted-foreground uppercase tracking-wider mb-1 block">Starter</label>
-                                <select
+                                <select aria-label={`Starter for ${guest.name || `Guest ${i + 1}`}`}
                                   value={guest.starter}
                                   onChange={(e) => updateGuest(i, "starter", e.target.value)}
                                   className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm font-sans text-foreground ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
@@ -797,7 +797,7 @@ const LadiesFestival = () => {
                               </div>
                               <div>
                                 <label className="text-xs font-sans text-muted-foreground uppercase tracking-wider mb-1 block">Main</label>
-                                <select
+                                <select aria-label={`Main for ${guest.name || `Guest ${i + 1}`}`}
                                   value={guest.main}
                                   onChange={(e) => updateGuest(i, "main", e.target.value)}
                                   className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm font-sans text-foreground ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
@@ -810,7 +810,7 @@ const LadiesFestival = () => {
                               </div>
                               <div>
                                 <label className="text-xs font-sans text-muted-foreground uppercase tracking-wider mb-1 block">Dessert</label>
-                                <select
+                                <select aria-label={`Dessert for ${guest.name || `Guest ${i + 1}`}`}
                                   value={guest.dessert}
                                   onChange={(e) => updateGuest(i, "dessert", e.target.value)}
                                   className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm font-sans text-foreground ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
@@ -845,7 +845,7 @@ const LadiesFestival = () => {
                       <div className="border-t border-border pt-6">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
-                            <Ticket className="w-5 h-5 text-gold" aria-hidden="true" />
+                            <Ticket className="w-5 h-5 text-gold-dark" aria-hidden="true" />
                             <span className="font-sans text-foreground font-medium">Ticket Subtotal</span>
                           </div>
                           <div className="text-right">
@@ -871,7 +871,7 @@ const LadiesFestival = () => {
                       {/* Wine Pre-Order */}
                       <div>
                         <div className="flex items-center gap-2 mb-4">
-                          <Wine className="w-5 h-5 text-gold" aria-hidden="true" />
+                          <Wine className="w-5 h-5 text-gold-dark" aria-hidden="true" />
                           <h3 className="font-serif text-foreground text-lg">Pre-Order Wine for Your Table</h3>
                         </div>
                         <p className="text-sm text-muted-foreground font-sans mb-5">
@@ -930,7 +930,7 @@ const LadiesFestival = () => {
                       {/* Beer Pre-Order */}
                       <div className="border-t border-border pt-6">
                         <div className="flex items-center gap-2 mb-4">
-                          <Beer className="w-5 h-5 text-gold" aria-hidden="true" />
+                          <Beer className="w-5 h-5 text-gold-dark" aria-hidden="true" />
                           <h3 className="font-serif text-foreground text-lg">Pre-Order Beer</h3>
                         </div>
 
@@ -1016,7 +1016,7 @@ const LadiesFestival = () => {
                   {formStep === 3 && (
                     <div className="space-y-6">
                       <div className="flex items-center gap-2 mb-2">
-                        <CreditCard className="w-5 h-5 text-gold" aria-hidden="true" />
+                        <CreditCard className="w-5 h-5 text-gold-dark" aria-hidden="true" />
                         <h3 className="font-serif text-foreground text-lg">Review Your Booking</h3>
                       </div>
 
@@ -1076,7 +1076,7 @@ const LadiesFestival = () => {
                           )}
                           <div className="flex justify-between text-sm font-sans font-semibold border-t border-border pt-2">
                             <span className="text-foreground">Total</span>
-                            <span className="text-gold text-lg">£{grandTotal}</span>
+                            <span className="text-gold-dark text-lg">£{grandTotal}</span>
                           </div>
                         </div>
                       </div>

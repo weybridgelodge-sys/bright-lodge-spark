@@ -97,12 +97,12 @@ const YourInitiation = () => {
                       className="relative flex gap-5 sm:gap-8"
                     >
                       <div className="relative shrink-0">
-                        <div className="w-12 h-12 rounded-full bg-navy text-gold flex items-center justify-center border border-gold/40 shadow-md">
+                        <div className="w-12 h-12 rounded-full bg-navy text-gold-dark flex items-center justify-center border border-gold-dark/40 shadow-md">
                           <Icon className="w-5 h-5" aria-hidden="true" />
                         </div>
                       </div>
                       <div className="flex-1 pt-1">
-                        <p className="text-gold font-sans text-xs uppercase tracking-widest mb-1">{step.time}</p>
+                        <p className="text-gold-dark font-sans text-xs uppercase tracking-widest mb-1">{step.time}</p>
                         <h3 className="text-xl font-serif text-foreground mb-2">{step.title}</h3>
                         <p className="text-muted-foreground font-sans text-sm leading-relaxed">{step.body}</p>
                       </div>
@@ -129,7 +129,7 @@ const YourInitiation = () => {
                 { icon: Utensils, title: "Dietary needs", body: "Just let us know in advance — vegetarian, vegan, gluten-free, allergies. All easily handled." },
               ].map(({ icon: Icon, title, body }) => (
                 <div key={title} className="bg-card border border-border rounded-sm p-6">
-                  <Icon className="w-6 h-6 text-gold mb-3" aria-hidden="true" />
+                  <Icon className="w-6 h-6 text-gold-dark mb-3" aria-hidden="true" />
                   <h3 className="font-serif text-foreground text-lg mb-2">{title}</h3>
                   <p className="text-muted-foreground font-sans text-sm leading-relaxed">{body}</p>
                 </div>

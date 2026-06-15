@@ -111,9 +111,9 @@ const MasonicLinks = () => {
                         loading="lazy"
                       />
                       <div>
-                        <h3 className="font-serif text-foreground group-hover:text-gold transition-colors mb-1">
+                        <h2 className="font-serif text-foreground group-hover:text-gold transition-colors mb-1">
                           {link.name}
-                        </h3>
+                        </h2>
                         <p className="text-muted-foreground font-sans text-sm">{link.description}</p>
                       </div>
                     </div>

@@ -92,7 +92,7 @@ const LodgeTraditions = () => {
                     <div className="w-12 h-12 rounded-full bg-navy text-gold flex items-center justify-center border border-gold/30 mb-4">
                       <Icon className="w-5 h-5" aria-hidden="true" />
                     </div>
-                    <h3 className="font-serif text-foreground text-xl mb-2">{t.title}</h3>
+                    <h2 className="font-serif text-foreground text-xl mb-2">{t.title}</h2>
                     <p className="text-muted-foreground font-sans text-sm leading-relaxed">{t.body}</p>
                   </motion.div>
                 );
