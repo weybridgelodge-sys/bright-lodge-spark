@@ -109,6 +109,7 @@ export default function MembersRitual() {
   };
 
   const myDegree = (profile as { degree?: Degree } | null)?.degree ?? "entered_apprentice";
+  const isPastMaster = (profile as { is_past_master?: boolean } | null)?.is_past_master ?? false;
 
   return (
     <MembersLayout>
@@ -120,7 +121,8 @@ export default function MembersRitual() {
             {profile && (
               <>
                 {" "}— currently{" "}
-                <span className="text-gold font-medium">{DEGREE_LABEL[myDegree]}</span>.
+                <span className="text-gold font-medium">{DEGREE_LABEL[myDegree]}</span>
+                {isPastMaster && <span className="text-gold/80"> · Past Master (Installed Masters access)</span>}.
               </>
             )}
           </p>
