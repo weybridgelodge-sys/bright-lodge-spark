@@ -240,6 +240,15 @@ export default function MembersAdmin() {
                       <option value="fellow_craft">Fellow Craft</option>
                       <option value="master_mason">Master Mason</option>
                     </select>
+                    <label className="mt-1 flex items-center gap-1.5 text-[11px] text-primary-foreground/70 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={!!p.is_past_master}
+                        onChange={(e) => togglePastMaster(p.id, e.target.checked)}
+                        className="accent-gold"
+                      />
+                      Past Master
+                    </label>
                   </td>
                   <td className="p-3">
                     <div className="flex items-center gap-1 justify-end">
