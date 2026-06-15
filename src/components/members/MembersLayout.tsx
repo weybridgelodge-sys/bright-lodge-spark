@@ -57,6 +57,9 @@ export default function MembersLayout({ children }: { children: React.ReactNode 
             <NavLink to="/members/documents" className={navCls}>
               <FileText className="w-4 h-4" /> Documents
             </NavLink>
+            <NavLink to="/members/ritual" className={navCls}>
+              <BookOpen className="w-4 h-4" /> Ritual
+            </NavLink>
             <NavLink to="/members/profile" className={navCls}>
               <UserIcon className="w-4 h-4" /> My Profile
             </NavLink>
@@ -84,7 +87,7 @@ export default function MembersLayout({ children }: { children: React.ReactNode 
           <CreditCard className="h-5 w-5" />
           Accounts
         </NavLink>
-        <NavLink to="/members/documents" className={({ isActive }) => `flex flex-col items-center justify-center text-[10px] font-bold ${isActive ? "text-gold" : "text-muted-foreground"}`}>
+        <NavLink to="/members/ritual" className={({ isActive }) => `flex flex-col items-center justify-center text-[10px] font-bold ${isActive ? "text-gold" : "text-muted-foreground"}`}>
           <BookOpen className="h-5 w-5" />
           Ritual
         </NavLink>

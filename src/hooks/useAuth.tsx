@@ -12,6 +12,7 @@ type Profile = {
   phone: string | null;
   avatar_url: string | null;
   status: "pending" | "active" | "suspended";
+  degree: "entered_apprentice" | "fellow_craft" | "master_mason";
 };
 
 type AuthCtx = {
