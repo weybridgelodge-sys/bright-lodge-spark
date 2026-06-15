@@ -210,14 +210,7 @@ export function computeProjection(input: ProjectionInput): ProjectionResult {
   // Project each subsequent year
   let prevYearBoard = { ...currentBoard };
   for (let y = currentYear + 1; y <= currentYear + yearsAhead; y++) {
-    const yearBoard: Record<PositionKey, string | null> = {
-      inner_guard: null,
-      junior_deacon: null,
-      senior_deacon: null,
-      junior_warden: null,
-      senior_warden: null,
-      worshipful_master: null,
-    };
+    const yearBoard: Record<PositionKey, string | null> = emptyBoard();
 
     // Advance everyone one rung up (idx 0 → 1 → 2 ... → 5 off the top)
     for (let i = 0; i < POSITION_ORDER.length - 1; i++) {
