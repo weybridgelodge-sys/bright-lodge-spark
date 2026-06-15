@@ -177,7 +177,7 @@ export default function MembersDocuments() {
                 : "border-gold/20 text-primary-foreground/60 hover:text-gold"
             }`}
           >
-            {c}
+            {c === "all" ? "All" : CATEGORY_LABELS[c]}
           </button>
         ))}
       </div>
