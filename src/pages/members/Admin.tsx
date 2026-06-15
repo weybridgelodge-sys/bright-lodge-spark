@@ -87,6 +87,15 @@ export default function MembersAdmin() {
     }
   };
 
+  const togglePastMaster = async (id: string, value: boolean) => {
+    const { error } = await supabase.from("profiles").update({ is_past_master: value }).eq("id", id);
+    if (error) toast.error(error.message);
+    else {
+      toast.success(value ? "Marked as Past Master" : "Past Master removed");
+      load();
+    }
+  };
+
   const toggleAdmin = async (uid: string, makeAdmin: boolean) => {
     if (makeAdmin) {
       const { error } = await supabase.from("user_roles").insert({ user_id: uid, role: "admin" });
