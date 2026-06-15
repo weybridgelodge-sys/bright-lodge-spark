@@ -265,6 +265,44 @@ export default function OfficersTracker() {
     doc.setTextColor(60, 60, 60);
     doc.text(`Generated ${new Date().toLocaleDateString("en-GB")} · Prepared by ${profile?.full_name ?? "Secretary"}`, 40, 76);
 
+    // ----- Summary banner -----
+    const cyGrid = projection.grid[currentYear];
+    const inLine = POSITION_ORDER.filter((p) => cyGrid[p].member).length;
+    const vacantFeeders = POSITION_ORDER.filter((p) => !cyGrid[p].member).length;
+    const jwMemberId = cyGrid["junior_warden"].member?.id;
+    let jwChairYear = "—";
+    if (jwMemberId) {
+      const found = projection.years.find(
+        (y) => projection.grid[y]["worshipful_master"].member?.id === jwMemberId
+      );
+      jwChairYear = found ? formatMasonicYear(found) : "Not projected";
+    }
+
+    const bannerY = 92;
+    const bannerH = 56;
+    const pageW = doc.internal.pageSize.getWidth();
+    const margin = 40;
+    const bannerW = pageW - margin * 2;
+    doc.setFillColor(27, 42, 74);
+    doc.roundedRect(margin, bannerY, bannerW, bannerH, 4, 4, "F");
+    const colW = bannerW / 3;
+    const stats: [string, string][] = [
+      [String(inLine), "Officers in progressive line"],
+      [String(vacantFeeders), "Vacant feeder positions"],
+      [jwChairYear, "JW projected to Chair"],
+    ];
+    stats.forEach(([val, label], i) => {
+      const cx = margin + colW * i + colW / 2;
+      doc.setFont("times", "bold");
+      doc.setFontSize(20);
+      doc.setTextColor(201, 164, 50);
+      doc.text(val, cx, bannerY + 26, { align: "center" });
+      doc.setFont("times", "normal");
+      doc.setFontSize(9);
+      doc.setTextColor(240, 235, 220);
+      doc.text(label, cx, bannerY + 44, { align: "center" });
+    });
+
     const head = [["Office", ...projection.years.map((y) => formatMasonicYear(y))]];
     const body = POSITION_ORDER.map((pos) => {
       const row: string[] = [POSITION_LABELS[pos]];
@@ -278,7 +316,7 @@ export default function OfficersTracker() {
     });
 
     autoTable(doc, {
-      startY: 95,
+      startY: bannerY + bannerH + 14,
       head,
       body,
       theme: "grid",
