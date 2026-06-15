@@ -144,10 +144,41 @@
         ]
       }
     </script>
+
+    <!-- Critical above-the-fold CSS (inlined to eliminate render-blocking round trip) -->
+    <style>
+      html,body{margin:0;padding:0;background:#0b1322;color:#f0e6cc;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+      *,*::before,*::after{box-sizing:border-box}
+      .skeleton-hero{position:relative;min-height:100vh;display:flex;align-items:center;justify-content:flex-start;overflow:hidden;background:linear-gradient(135deg,#0b1322 0%,#1B2A4A 60%,#0b1322 100%)}
+      .skeleton-hero::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(11,19,34,.55) 0%,rgba(11,19,34,.85) 100%)}
+      .skeleton-wrap{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:5rem 1.25rem 2rem;width:100%}
+      .skeleton-rule{width:80px;height:2px;background:#C9A432;margin:0 auto 2rem}
+      .skeleton-title{font-family:"Playfair Display",Georgia,serif;font-weight:700;font-size:clamp(2rem,7vw,4.5rem);line-height:1.1;margin:0 0 1rem;color:#f0e6cc;text-align:left;max-width:42rem}
+      .skeleton-sub{font-family:"Playfair Display",Georgia,serif;display:block;font-size:clamp(1.25rem,4.5vw,2.75rem);margin-top:.5rem;background:linear-gradient(135deg,#C9A432,#e4c97a);-webkit-background-clip:text;background-clip:text;color:transparent}
+      .skeleton-lede{font-size:1.05rem;line-height:1.6;max-width:38rem;color:rgba(240,230,204,.82);margin:0 0 2rem;font-weight:300}
+      .skeleton-brand{position:absolute;top:1rem;left:1.25rem;z-index:2;font-family:"Playfair Display",Georgia,serif;font-size:1rem;letter-spacing:.08em;color:#f0e6cc}
+      @media(min-width:768px){.skeleton-wrap{padding:6rem 2rem 3rem}.skeleton-rule{margin-left:0}.skeleton-title{text-align:left}}
+    </style>
   </head>
 
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!-- Static skeleton: paints on first byte before React hydrates -->
+      <header class="skeleton-brand">Weybridge Lodge No. 6787</header>
+      <section class="skeleton-hero" aria-hidden="true">
+        <div class="skeleton-wrap">
+          <div class="skeleton-rule"></div>
+          <h1 class="skeleton-title">
+            Looking for something
+            <span class="skeleton-sub">more than just a night out?</span>
+          </h1>
+          <p class="skeleton-lede">
+            Weybridge Lodge No. 6787 is a friendly group of men in Guildford — aged 32 to 80 — who meet to make genuine friendships, support local charities, and grow as people.
+          </p>
+        </div>
+      </section>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
+
