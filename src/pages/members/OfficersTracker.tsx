@@ -173,7 +173,7 @@ export default function OfficersTracker() {
 
   // ---------- Mutations ----------
 
-  const assignToOffice = async (positionKey: PositionKey, memberId: string | null, year: number, opts?: { reason?: string; isOverride?: boolean }) => {
+  const assignToOffice = async (positionKey: PositionKey, memberId: string | null, year: number, opts?: { reason?: string; isOverride?: boolean; appointedOn?: string | null }) => {
     if (!user) return;
     const existing = appointments.find((a) => a.position_key === positionKey && a.lodge_year === year);
     const payload = {
@@ -181,7 +181,12 @@ export default function OfficersTracker() {
       member_id: memberId,
       lodge_year: year,
       is_projection: year > currentYear,
-      appointed_on: year === currentYear ? new Date().toISOString().slice(0, 10) : null,
+      appointed_on:
+        opts?.appointedOn !== undefined
+          ? opts.appointedOn
+          : year === currentYear
+            ? new Date().toISOString().slice(0, 10)
+            : null,
       override_reason: opts?.isOverride ? opts.reason ?? null : null,
       override_by: opts?.isOverride ? user.id : null,
     };
@@ -195,6 +200,18 @@ export default function OfficersTracker() {
       toast.error(error.message);
     } else {
       toast.success("Appointment saved");
+      await load();
+    }
+  };
+
+  const updateAppointmentDate = async (id: string, appointedOn: string | null) => {
+    const { error } = await supabase
+      .from("officer_appointments")
+      .update({ appointed_on: appointedOn })
+      .eq("id", id);
+    if (error) toast.error(error.message);
+    else {
+      toast.success("Date updated");
       await load();
     }
   };
