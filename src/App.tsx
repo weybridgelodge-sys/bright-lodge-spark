@@ -47,6 +47,8 @@ import MembersDocuments from "./pages/members/Documents";
 import MembersProfile from "./pages/members/Profile";
 import MembersAdmin from "./pages/members/Admin";
 import MembersRitual from "./pages/members/Ritual";
+import OfficersTracker from "./pages/members/OfficersTracker";
+import ProgressionRoute from "./components/members/ProgressionRoute";
 
 const queryClient = new QueryClient();
 
