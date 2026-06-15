@@ -188,7 +188,7 @@ const JoinUs = () => {
                 {
                   icon: Utensils,
                   title: "Dining at Meetings",
-                  amount: "~£32 per meeting",
+                  amount: "~£32 per meal",
                   note: "A proper three-course dinner with members after every Lodge meeting.",
                 },
                 {
