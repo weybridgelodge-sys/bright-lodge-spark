@@ -9,13 +9,31 @@ type Doc = {
   id: string;
   title: string;
   description: string | null;
-  category: "summons" | "minutes" | "ritual" | "other";
+  category: "summons" | "meeting_minutes" | "committee_minutes" | "committee_agendas" | "media_files" | "ritual" | "other";
   file_path: string;
   file_size_bytes: number | null;
   created_at: string;
 };
 
-const CATEGORIES = ["summons", "minutes", "ritual", "other"] as const;
+const CATEGORIES = [
+  "summons",
+  "meeting_minutes",
+  "committee_minutes",
+  "committee_agendas",
+  "media_files",
+  "ritual",
+  "other",
+] as const;
+
+const CATEGORY_LABELS: Record<typeof CATEGORIES[number], string> = {
+  summons: "Summons",
+  meeting_minutes: "Meeting minutes",
+  committee_minutes: "Committee minutes",
+  committee_agendas: "Committee agendas",
+  media_files: "Media files",
+  ritual: "Ritual",
+  other: "Other",
+};
 
 export default function MembersDocuments() {
   const { isAdmin, user } = useAuth();
