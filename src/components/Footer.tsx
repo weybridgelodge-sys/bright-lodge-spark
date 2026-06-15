@@ -66,7 +66,7 @@ const Footer = () => {
         {/* Top: brand + meeting + social */}
         <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-8 sm:gap-12 mb-12">
           <div className="text-left">
-            <img src={logo} alt="Weybridge Lodge No. 6787 crest — Freemergency Lodge in Guildford, Surrey" width={40} height={40} loading="lazy" decoding="async" className="h-10 w-10 mb-3" />
+            <img src={logo} alt="Weybridge Lodge No. 6787 crest — Freemasons Lodge in Guildford, Surrey" width={40} height={40} loading="lazy" decoding="async" className="h-10 w-10 mb-3" />
             <p className="font-serif text-primary-foreground text-sm font-semibold">Weybridge Lodge No. 6787</p>
             <p className="text-gold text-xs font-sans mb-3">Province of Surrey</p>
             <p className="text-white/70 text-sm font-sans leading-relaxed mb-4 whitespace-nowrap">
