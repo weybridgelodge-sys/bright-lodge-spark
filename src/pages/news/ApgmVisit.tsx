@@ -61,7 +61,7 @@ const ApgmVisit = () => {
               transition={{ duration: 0.5 }}
               className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mb-8"
             >
-              <Link to="/news" className="inline-flex items-center gap-1 text-primary hover:underline font-sans">
+              <Link to="/news" className="inline-flex items-center gap-1 text-primary underline decoration-primary/40 hover:decoration-primary font-sans">
                 <ArrowLeft className="h-4 w-4" /> Back to News
               </Link>
               <span className="hidden sm:inline">|</span>
@@ -93,7 +93,7 @@ const ApgmVisit = () => {
               <ol className="list-decimal list-inside space-y-1.5">
                 {tocItems.map((item) => (
                   <li key={item.id}>
-                    <a href={`#${item.id}`} className="text-sm font-sans text-primary hover:underline">
+                    <a href={`#${item.id}`} className="text-sm font-sans text-primary underline decoration-primary/40 hover:decoration-primary">
                       {item.label}
                     </a>
                   </li>
@@ -155,7 +155,7 @@ const ApgmVisit = () => {
                 <h2 className="text-2xl font-serif text-foreground mb-4">Charity & Giving Back</h2>
                 <p className="text-muted-foreground font-sans leading-relaxed">
                   Charity lies at the very heart of Freemasonry, and the evening was no exception. £565 was raised from the raffle and charity column which will be donated to the{" "}
-                  <a href="https://www.brigittetrust.org/our-services/bereavement-support/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                  <a href="https://www.brigittetrust.org/our-services/bereavement-support/" target="_blank" rel="noopener noreferrer" className="text-primary underline decoration-primary/40 hover:decoration-primary">
                     Brigitte Trust
                   </a>, a Surrey based charity that supports people struggling with bereavement through group counselling sessions.
                 </p>
@@ -169,7 +169,7 @@ const ApgmVisit = () => {
                 </a>
                 <p className="text-muted-foreground font-sans leading-relaxed">
                   Weybridge Lodge has a proud record of charitable fundraising, most recently{" "}
-                  <Link to="/news/sands-charity" className="text-primary hover:underline">
+                  <Link to="/news/sands-charity" className="text-primary underline decoration-primary/40 hover:decoration-primary">
                     raising over £31,000 for the SANDS charity
                   </Link>{" "}
                   through its Ladies Festival. The Lodge continues to support both Masonic and non-Masonic charities throughout the year, embodying the principle of Relief that is central to the Craft.
@@ -191,11 +191,11 @@ const ApgmVisit = () => {
                 </p>
                 <p className="text-muted-foreground font-sans leading-relaxed mt-4">
                   If you are interested in finding out more about Freemasonry or joining Weybridge Lodge, please visit our{" "}
-                  <Link to="/join-us" className="text-primary hover:underline">
+                  <Link to="/join-us" className="text-primary underline decoration-primary/40 hover:decoration-primary">
                     Join Us
                   </Link>{" "}
                   page or{" "}
-                  <Link to="/contact" className="text-primary hover:underline">
+                  <Link to="/contact" className="text-primary underline decoration-primary/40 hover:decoration-primary">
                     get in touch
                   </Link>.
                 </p>

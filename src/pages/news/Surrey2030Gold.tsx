@@ -60,7 +60,7 @@ const Surrey2030Gold = () => {
               transition={{ duration: 0.5 }}
               className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mb-8"
             >
-              <Link to="/news" className="inline-flex items-center gap-1 text-primary hover:underline font-sans">
+              <Link to="/news" className="inline-flex items-center gap-1 text-primary underline decoration-primary/40 hover:decoration-primary font-sans">
                 <ArrowLeft className="h-4 w-4" /> Back to News
               </Link>
               <span className="hidden sm:inline">|</span>
@@ -102,7 +102,7 @@ const Surrey2030Gold = () => {
               <ol className="list-decimal list-inside space-y-1.5">
                 {tocItems.map((item) => (
                   <li key={item.id}>
-                    <a href={`#${item.id}`} className="text-sm font-sans text-primary hover:underline">
+                    <a href={`#${item.id}`} className="text-sm font-sans text-primary underline decoration-primary/40 hover:decoration-primary">
                       {item.label}
                     </a>
                   </li>
@@ -118,7 +118,7 @@ const Surrey2030Gold = () => {
                 <h2 className="text-2xl font-serif text-foreground mb-4">A Grand Launch at Old Thorns</h2>
                 <p className="text-muted-foreground font-sans leading-relaxed">
                   The Surrey 2030 Festival was officially set in motion by the Provincial Grand Master, RW Bro. Nicholas Burger, on Saturday, 30th November 2024. The gala launch at the{" "}
-                  <a href="https://www.oldthorns.com/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                  <a href="https://www.oldthorns.com/" target="_blank" rel="noopener noreferrer" className="text-primary underline decoration-primary/40 hover:decoration-primary">
                     Old Thorns Hotel and Resort
                   </a>{" "}
                   marked the start of a five-year fundraising journey designed to unite Surrey Freemasons in a "party with a purpose."
@@ -174,7 +174,7 @@ const Surrey2030Gold = () => {
                 <h2 className="text-2xl font-serif text-foreground mb-4">What is the Surrey 2030 Festival?</h2>
                 <p className="text-muted-foreground font-sans leading-relaxed">
                   The festival is a coordinated, province-wide fundraising appeal lasting until 2030. According to the{" "}
-                  <a href="https://surreyfestival2030.org/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                  <a href="https://surreyfestival2030.org/" target="_blank" rel="noopener noreferrer" className="text-primary underline decoration-primary/40 hover:decoration-primary">
                     Official Surrey Festival Website
                   </a>, its core aims are to:
                 </p>
@@ -238,7 +238,7 @@ const Surrey2030Gold = () => {
                 </p>
                 <p className="text-muted-foreground font-sans leading-relaxed mt-4">
                   If you'd like to find out more about the Surrey 2030 Festival or how to contribute, please visit our{" "}
-                  <Link to="/contact" className="text-primary hover:underline">Contact</Link>{" "}
+                  <Link to="/contact" className="text-primary underline decoration-primary/40 hover:decoration-primary">Contact</Link>{" "}
                   page or speak to any Lodge member at our next meeting.
                 </p>
               </section>
