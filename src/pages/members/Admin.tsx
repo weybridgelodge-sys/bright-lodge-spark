@@ -144,6 +144,7 @@ export default function MembersAdmin() {
         full_name: aName.trim(),
         initiation_date: aInit || null,
         degree: aDegree,
+        is_past_master: aPastMaster,
         rank: aRank.trim() || null,
         status: "active",
       },
@@ -160,6 +161,7 @@ export default function MembersAdmin() {
     setAInit("");
     setARank("");
     setADegree("master_mason");
+    setAPastMaster(false);
     setTab("users");
     load();
   };
