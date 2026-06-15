@@ -139,7 +139,7 @@ export default function MembersDocuments() {
           >
             {CATEGORIES.map((c) => (
               <option key={c} value={c}>
-                {c}
+                {CATEGORY_LABELS[c]}
               </option>
             ))}
           </select>
