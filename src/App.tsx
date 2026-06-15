@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -22,8 +23,8 @@ import VideoHub from "./pages/VideoHub";
 import MasonicLinks from "./pages/MasonicLinks";
 import Bookings from "./pages/Bookings";
 import OfficersJewels from "./pages/OfficersJewels";
-import News from "./pages/News";
-import SanityPost from "./pages/news/SanityPost";
+const News = lazy(() => import("./pages/News"));
+const SanityPost = lazy(() => import("./pages/news/SanityPost"));
 import Anniversary75th from "./pages/news/Anniversary75th";
 import SandsCharity from "./pages/news/SandsCharity";
 import InstallationMeeting from "./pages/news/InstallationMeeting";
@@ -57,6 +58,7 @@ const App = () => (
         <AuthProvider>
           <ScrollToTop />
           <ScrollToTopButton />
+          <Suspense fallback={null}>
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/what-is-freemasonry" element={<WhatIsFreemasonry />} />
@@ -103,6 +105,7 @@ const App = () => (
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
+          </Suspense>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
