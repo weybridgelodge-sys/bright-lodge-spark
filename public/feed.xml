@@ -1,65 +1,51 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/elements/1.1/">
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Weybridge Lodge No. 6787 — News</title>
     <link>https://www.weybridgelodge.org.uk/news</link>
     <atom:link href="https://www.weybridgelodge.org.uk/feed.xml" rel="self" type="application/rss+xml" />
-    <description>Latest news, charity updates and events from Weybridge Lodge No. 6787, an open and friendly Freemasons Lodge in Guildford, Surrey.</description>
-    <language>en-GB</language>
-    <copyright>© Weybridge Lodge No. 6787</copyright>
-    <managingEditor>secretary@weybridgelodge.org.uk (Weybridge Lodge Secretary)</managingEditor>
-    <webMaster>secretary@weybridgelodge.org.uk (Weybridge Lodge)</webMaster>
-    <lastBuildDate>Mon, 15 Jun 2026 00:00:00 +0000</lastBuildDate>
-    <ttl>1440</ttl>
-
+    <description>Latest news, meetings and charity updates from Weybridge Lodge No. 6787 in Guildford, Surrey.</description>
+    <language>en-gb</language>
+    <lastBuildDate>Mon, 15 Jun 2026 10:55:54 GMT</lastBuildDate>
     <item>
       <title>PGM Official Visit to Weybridge Lodge February 2026</title>
       <link>https://www.weybridgelodge.org.uk/news/pgm-visit-february-2026</link>
       <guid isPermaLink="true">https://www.weybridgelodge.org.uk/news/pgm-visit-february-2026</guid>
-      <pubDate>Thu, 19 Feb 2026 19:00:00 +0000</pubDate>
+      <pubDate>Thu, 19 Feb 2026 10:00:00 GMT</pubDate>
       <category>Lodge Meetings</category>
-      <dc:creator>Weybridge Lodge No. 6787</dc:creator>
-      <description><![CDATA[Weybridge Lodge was honoured to welcome the Provincial Grand Master of Surrey for an official visit and First Degree Initiation ceremony at the South West Surrey Masonic Centre.]]></description>
+      <description>Weybridge Lodge was honoured to welcome the Provincial Grand Master of Surrey for an official visit and First Degree Initiation ceremony at the South West Surrey Masonic Centre.</description>
     </item>
-
     <item>
       <title>Weybridge Lodge Strikes Gold: Surrey 2030 Festival Success</title>
       <link>https://www.weybridgelodge.org.uk/news/surrey-2030-festival-gold</link>
       <guid isPermaLink="true">https://www.weybridgelodge.org.uk/news/surrey-2030-festival-gold</guid>
-      <pubDate>Sat, 10 May 2025 09:00:00 +0000</pubDate>
+      <pubDate>Sat, 10 May 2025 10:00:00 GMT</pubDate>
       <category>Charity</category>
-      <dc:creator>Weybridge Lodge No. 6787</dc:creator>
-      <description><![CDATA[Weybridge Lodge has officially secured the prestigious Gold Festival Award for the Surrey 2030 Festival, raising over £15,800 for the Masonic Charitable Foundation in just five months.]]></description>
+      <description>Weybridge Lodge has officially secured the prestigious Gold Festival Award for the Surrey 2030 Festival, raising over £15,800 for the Masonic Charitable Foundation in just five months.</description>
     </item>
-
     <item>
       <title>Weybridge Lodge Raise £31,000 for SANDS Charity</title>
       <link>https://www.weybridgelodge.org.uk/news/sands-charity</link>
       <guid isPermaLink="true">https://www.weybridgelodge.org.uk/news/sands-charity</guid>
-      <pubDate>Thu, 12 Dec 2024 09:00:00 +0000</pubDate>
+      <pubDate>Thu, 12 Dec 2024 10:00:00 GMT</pubDate>
       <category>Charity</category>
-      <dc:creator>Weybridge Lodge No. 6787</dc:creator>
-      <description><![CDATA[In a testament to the power of community and compassion, Weybridge Masonic Lodge has helped raise a staggering £31,331.15 in support of Sands through the Lodge's Ladies Festival.]]></description>
+      <description>In a testament to the power of community and compassion, Weybridge Masonic Lodge has helped raise a staggering £31,331.15 in support of Sands through the Lodge&apos;s Ladies Festival.</description>
     </item>
-
     <item>
       <title>Special Masonic Meeting For 75th Anniversary February 2024</title>
       <link>https://www.weybridgelodge.org.uk/news/75th-anniversary</link>
       <guid isPermaLink="true">https://www.weybridgelodge.org.uk/news/75th-anniversary</guid>
-      <pubDate>Wed, 28 Feb 2024 09:00:00 +0000</pubDate>
+      <pubDate>Wed, 28 Feb 2024 10:00:00 GMT</pubDate>
       <category>Lodge Meetings</category>
-      <dc:creator>Weybridge Lodge No. 6787</dc:creator>
-      <description><![CDATA[The founders of Weybridge Lodge would be proud to see that what they started 75 years ago is still going strong. On Wednesday 21st February we celebrated our 375th Regular Masonic Meeting.]]></description>
+      <description>The founders of Weybridge Lodge would be proud to see that what they started 75 years ago is still going strong. On Wednesday 21st February we celebrated our 75th anniversary at our 374th Regular Masonic Meeting.</description>
     </item>
-
     <item>
       <title>Masonic Installation Meeting October 2023</title>
       <link>https://www.weybridgelodge.org.uk/news/installation-meeting-october-2023</link>
       <guid isPermaLink="true">https://www.weybridgelodge.org.uk/news/installation-meeting-october-2023</guid>
-      <pubDate>Tue, 31 Oct 2023 09:00:00 +0000</pubDate>
+      <pubDate>Tue, 31 Oct 2023 10:00:00 GMT</pubDate>
       <category>Lodge Meetings</category>
-      <dc:creator>Weybridge Lodge No. 6787</dc:creator>
-      <description><![CDATA[The Masonic Installation Meeting for a new Master of the Lodge — the honour bestowed to W Bro. Murray Grubb Jnr.]]></description>
+      <description>Well, it&apos;s that time of year again that gets every Masonic Lodge excited… the Masonic Installation Meeting for a new Master of the Lodge and in this instance the honour was bestowed to W Bro. Murray Grubb Jnr.</description>
     </item>
   </channel>
 </rss>
