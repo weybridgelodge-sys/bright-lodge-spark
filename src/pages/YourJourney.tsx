@@ -29,7 +29,7 @@ const degrees = [
     subtitle: "The Third Degree — Master Mason",
     when: "Typically 1–2 years after Initiation",
     icon: Crown,
-    body: "The Third Degree — being 'raised' to Master Mason — is the most solemn and dramatic of the three ceremonies. It brings you to full membership of the Craft, with the right to visit other Lodges, take on offices, and in time progress to the Chair of the Lodge as Worshipful Master. Many Freemasons describe it as one of the most profound experiences of their lives.",
+    body: "The Third Degree — being 'raised' to Master Mason — is the most solemn and dramatic of the three ceremonies. It brings you to full membership of the Craft, with the right to visit other Lodges without restriction, take on more senior offices, and in time progress to the Chair of the Lodge as Worshipful Master. Many Freemasons describe it as one of the most profound experiences of their lives.",
   },
 ];
 
