@@ -67,7 +67,27 @@ export default function MembersLayout({ children }: { children: React.ReactNode 
             )}
           </nav>
         </aside>
-        <main>{children}</main>
+        <main className="pb-20 lg:pb-0">{children}</main>
+      </div>
+
+      {/* Mobile Bottom Sticky Navigation Strip — Visible below 1024px */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 h-16 bg-card border-t border-border flex items-center justify-around z-50">
+        <NavLink to="/members" end className={({ isActive }) => `flex flex-col items-center justify-center text-[10px] font-bold ${isActive ? "text-gold" : "text-muted-foreground"}`}>
+          <Shield className="h-5 w-5" />
+          Hub
+        </NavLink>
+        <NavLink to="/members/directory" className={({ isActive }) => `flex flex-col items-center justify-center text-[10px] font-bold ${isActive ? "text-gold" : "text-muted-foreground"}`}>
+          <CalendarDays className="h-5 w-5" />
+          Trestle
+        </NavLink>
+        <NavLink to="/members/profile" className={({ isActive }) => `flex flex-col items-center justify-center text-[10px] font-bold ${isActive ? "text-gold" : "text-muted-foreground"}`}>
+          <CreditCard className="h-5 w-5" />
+          Accounts
+        </NavLink>
+        <NavLink to="/members/documents" className={({ isActive }) => `flex flex-col items-center justify-center text-[10px] font-bold ${isActive ? "text-gold" : "text-muted-foreground"}`}>
+          <BookOpen className="h-5 w-5" />
+          Ritual
+        </NavLink>
       </div>
     </div>
   );
