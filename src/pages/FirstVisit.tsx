@@ -31,7 +31,7 @@ const FirstVisit = () => {
 
             {/* Intro */}
             <div className="text-center mb-16">
-              <span className="text-gold font-sans font-semibold tracking-widest uppercase text-xs">Guest Protocol</span>
+              <span className="text-gold-dark font-sans font-semibold tracking-widest uppercase text-xs">Guest Protocol</span>
               <h2 className="font-serif mt-3 text-3xl sm:text-4xl font-bold text-foreground tracking-tight">
                 What to expect on the night
               </h2>
@@ -65,7 +65,7 @@ const FirstVisit = () => {
                 },
               ].map(({ icon: Icon, title, body }) => (
                 <div key={title} className="bg-card p-6 rounded-xl border border-border flex gap-4">
-                  <div className="p-3 bg-gold/10 rounded-lg h-fit text-gold shrink-0">
+                  <div className="p-3 bg-gold/10 rounded-lg h-fit text-gold-dark shrink-0">
                     <Icon className="h-5 w-5" aria-hidden="true" />
                   </div>
                   <div>
@@ -79,7 +79,7 @@ const FirstVisit = () => {
             {/* Narrative */}
             <div className="bg-card p-8 rounded-2xl border border-border mb-12">
               <h2 className="font-serif text-2xl font-bold text-card-foreground mb-4 flex items-center gap-2">
-                <HelpCircle className="h-5 w-5 text-gold" aria-hidden="true" /> What Happens on the Night?
+                <HelpCircle className="h-5 w-5 text-gold-dark" aria-hidden="true" /> What Happens on the Night?
               </h2>
               <div className="space-y-4 text-muted-foreground font-sans text-sm sm:text-base leading-relaxed">
                 <p>
@@ -117,7 +117,7 @@ const FirstVisit = () => {
             {/* Cross-link to Initiation page */}
             <p className="text-center text-sm text-muted-foreground font-sans mt-10">
               Already passed your ballot?{" "}
-              <Link to="/your-initiation" className="text-gold hover:underline font-medium">
+              <Link to="/your-initiation" className="text-gold-dark hover:underline font-medium">
                 Read what happens on your Initiation Night →
               </Link>
             </p>

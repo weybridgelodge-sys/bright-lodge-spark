@@ -167,17 +167,17 @@ const Events = () => {
                         </div>
                         <div className="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-sm text-muted-foreground font-sans">
                           <span className="inline-flex items-center gap-1.5">
-                            <CalendarIcon className="w-4 h-4 text-gold" />
+                            <CalendarIcon className="w-4 h-4 text-gold-dark" />
                             {format(ev.date, "EEEE d MMMM yyyy")}
                           </span>
                           {ev.time && (
                             <span className="inline-flex items-center gap-1.5">
-                              <Clock className="w-4 h-4 text-gold" />
+                              <Clock className="w-4 h-4 text-gold-dark" />
                               {ev.time}
                             </span>
                           )}
                           <span className="inline-flex items-center gap-1.5">
-                            <MapPin className="w-4 h-4 text-gold" />
+                            <MapPin className="w-4 h-4 text-gold-dark" />
                             {ev.venue}
                           </span>
                         </div>
@@ -187,7 +187,7 @@ const Events = () => {
                         {ev.link && (
                           <Link
                             to={ev.link}
-                            className="inline-flex items-center gap-1.5 mt-4 text-sm font-sans font-medium text-gold hover:opacity-80 transition-opacity"
+                            className="inline-flex items-center gap-1.5 mt-4 text-sm font-sans font-medium text-gold-dark hover:opacity-80 transition-opacity"
                           >
                             View Full Details
                             <ExternalLink className="w-3.5 h-3.5" />
@@ -235,7 +235,7 @@ const Events = () => {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[hsl(var(--primary))]/90 to-[hsl(var(--primary))]/40" />
                 <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-8">
-                  <p className="text-gold uppercase tracking-widest text-sm font-sans mb-2">Black Tie</p>
+                  <p className="text-gold-dark uppercase tracking-widest text-sm font-sans mb-2">Black Tie</p>
                   <p className="text-3xl md:text-4xl font-serif text-primary-foreground">
                     Saturday 22nd August 2026
                   </p>
@@ -247,7 +247,7 @@ const Events = () => {
 
               <div className="p-8 space-y-6">
                 <div className="flex items-start gap-4">
-                  <MapPin className="w-5 h-5 text-gold mt-0.5 shrink-0" aria-hidden="true" />
+                  <MapPin className="w-5 h-5 text-gold-dark mt-0.5 shrink-0" aria-hidden="true" />
                   <div>
                     <p className="font-sans font-medium text-foreground">Macdonald Frimley Hall Hotel</p>
                     <p className="text-sm text-muted-foreground font-sans">Lime Avenue, Frimley, Camberley GU15 2BG</p>
@@ -255,7 +255,7 @@ const Events = () => {
                 </div>
 
                 <div className="flex items-start gap-4">
-                  <Ticket className="w-5 h-5 text-gold mt-0.5 shrink-0" aria-hidden="true" />
+                  <Ticket className="w-5 h-5 text-gold-dark mt-0.5 shrink-0" aria-hidden="true" />
                   <div>
                     <p className="font-sans font-medium text-foreground">Tickets: £75 per person</p>
                     <p className="text-sm text-muted-foreground font-sans">Three-course dinner included</p>
@@ -263,14 +263,14 @@ const Events = () => {
                 </div>
 
                 <div className="flex items-start gap-4">
-                  <UtensilsCrossed className="w-5 h-5 text-gold mt-0.5 shrink-0" aria-hidden="true" />
+                  <UtensilsCrossed className="w-5 h-5 text-gold-dark mt-0.5 shrink-0" aria-hidden="true" />
                   <div>
                     <p className="font-sans font-medium text-foreground">Three-Course Dinner</p>
                     <div className="mt-2 bg-muted/50 border border-border rounded-sm p-4 text-sm text-muted-foreground font-sans space-y-2">
                       <p className="font-medium text-foreground">Menu</p>
-                      <p><span className="text-gold font-medium">Starter:</span> To be confirmed</p>
-                      <p><span className="text-gold font-medium">Main:</span> To be confirmed</p>
-                      <p><span className="text-gold font-medium">Dessert:</span> To be confirmed</p>
+                      <p><span className="text-gold-dark font-medium">Starter:</span> To be confirmed</p>
+                      <p><span className="text-gold-dark font-medium">Main:</span> To be confirmed</p>
+                      <p><span className="text-gold-dark font-medium">Dessert:</span> To be confirmed</p>
                       <p className="text-xs italic mt-2">Full menu details coming soon. Dietary requirements will be catered for — please advise when booking.</p>
                     </div>
                   </div>
@@ -278,9 +278,9 @@ const Events = () => {
 
                 <h3 className="text-lg font-serif text-foreground pt-2">The Evening Includes</h3>
                 <ul className="grid sm:grid-cols-2 gap-3 text-sm font-sans text-muted-foreground">
-                  <li className="flex items-center gap-2"><Music className="w-4 h-4 text-gold shrink-0" /> DJ &amp; dancing</li>
-                  <li className="flex items-center gap-2"><Gift className="w-4 h-4 text-gold shrink-0" /> Charity Grand Raffle</li>
-                  <li className="flex items-center gap-2"><Ticket className="w-4 h-4 text-gold shrink-0" /> Fun Casino</li>
+                  <li className="flex items-center gap-2"><Music className="w-4 h-4 text-gold-dark shrink-0" /> DJ &amp; dancing</li>
+                  <li className="flex items-center gap-2"><Gift className="w-4 h-4 text-gold-dark shrink-0" /> Charity Grand Raffle</li>
+                  <li className="flex items-center gap-2"><Ticket className="w-4 h-4 text-gold-dark shrink-0" /> Fun Casino</li>
                 </ul>
 
                 {/* Charity info */}
@@ -296,7 +296,7 @@ const Events = () => {
                     href="https://www.cfsurrey.org.uk/fund/guildfordyoungcarers"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 text-sm font-sans font-medium text-gold hover:opacity-80 transition-opacity"
+                    className="inline-flex items-center gap-2 text-sm font-sans font-medium text-gold-dark hover:opacity-80 transition-opacity"
                   >
                     Learn more about Guildford Young Carers
                     <ExternalLink className="w-4 h-4" />
@@ -341,7 +341,7 @@ const Events = () => {
               className="max-w-2xl mx-auto border border-border rounded-sm bg-card shadow-sm overflow-hidden"
             >
               <div className="bg-navy-gradient p-8 text-center">
-                <p className="text-gold uppercase tracking-widest text-sm font-sans mb-2">Weekly Sessions</p>
+                <p className="text-gold-dark uppercase tracking-widest text-sm font-sans mb-2">Weekly Sessions</p>
                 <p className="text-2xl md:text-3xl font-serif text-primary-foreground">
                   Thursday Evenings — 7.30 pm
                 </p>
@@ -352,7 +352,7 @@ const Events = () => {
 
               <div className="p-8 space-y-6">
                 <div className="flex items-start gap-4">
-                  <MapPin className="w-5 h-5 text-gold mt-0.5 shrink-0" aria-hidden="true" />
+                  <MapPin className="w-5 h-5 text-gold-dark mt-0.5 shrink-0" aria-hidden="true" />
                   <div>
                     <p className="font-sans font-medium text-foreground">South West Surrey Masonic Centre</p>
                     <p className="text-sm text-muted-foreground font-sans">Hitherbury Close, Guildford GU2 4DR</p>

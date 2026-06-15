@@ -78,31 +78,31 @@ const timelineData: TimelineStep[] = [
     title: "1. Initial Enquiry & Casual Meet",
     duration: "1 – 3 months",
     description: "After submitting your interest online, a member of our committee will reach out for an informal chat over coffee or a drink. This is a relaxed, two-way conversation to answer your initial questions and get to know each other.",
-    icon: <CalendarDays className="h-5 w-5 text-gold" />,
+    icon: <CalendarDays className="h-5 w-5 text-gold-dark" />,
   },
   {
     title: "2. The Committee Interview",
     duration: "1 evening",
     description: "You will be invited to the Guildford Masonic Centre to meet a small panel of our members. Do not let the word 'interview' worry you; it is simply a friendly discussion to ensure our values align and that your family commitments comfortably support joining.",
-    icon: <Shield className="h-5 w-5 text-gold" />,
+    icon: <Shield className="h-5 w-5 text-gold-dark" />,
   },
   {
     title: "3. The First Degree: Initiation",
     duration: "Your First Meeting",
     description: "The night you officially become a Freemason. You enter as a Candidate and leave as an Entered Apprentice. The traditional ceremony is solemn, deeply memorable, and focuses on the core principles of charity, integrity, and self-reflection.",
-    icon: <BookOpen className="h-5 w-5 text-gold" />,
+    icon: <BookOpen className="h-5 w-5 text-gold-dark" />,
   },
   {
     title: "4. The Second Degree: Passing",
     duration: "3 – 6 months later",
     description: "As a Fellowcraft Freemason, this stage symbolizes adulthood and the development of the mind. The ceremony focuses on the study of arts, sciences, and the importance of lifelong education and intellectual growth.",
-    icon: <BookOpen className="h-5 w-5 text-gold" />,
+    icon: <BookOpen className="h-5 w-5 text-gold-dark" />,
   },
   {
     title: "5. The Third Degree: Raising",
     duration: "3 – 6 months later",
     description: "The pinnacle of your initial journey. You are raised to the sublime degree of a Master Mason. This profound ceremony reflects on human nature, mortality, and the ultimate triumph of integrity and moral strength.",
-    icon: <Star className="h-5 w-5 text-gold" />,
+    icon: <Star className="h-5 w-5 text-gold-dark" />,
   },
 ];
 
@@ -111,7 +111,7 @@ function JourneyTimelineSection() {
     <section className="bg-background py-16 px-4 sm:px-6 lg:px-8 border-t border-border">
       <div className="max-w-3xl mx-auto">
         <div className="text-center mb-12">
-          <span className="text-gold font-semibold tracking-wide uppercase text-sm">Chronology</span>
+          <span className="text-gold-dark font-semibold tracking-wide uppercase text-sm">Chronology</span>
           <h2 className="mt-2 text-3xl font-extrabold text-foreground tracking-tight sm:text-4xl font-serif">
             Step-by-Step Progression
           </h2>
@@ -123,7 +123,7 @@ function JourneyTimelineSection() {
         <div className="relative border-l border-border ml-4 md:ml-6 space-y-12">
           {timelineData.map((step, index) => (
             <div key={index} className="relative pl-8 sm:pl-10 group">
-              <div className="absolute -left-[21px] top-0 bg-card border-2 border-border group-hover:border-gold transition-colors p-2 rounded-full shadow-sm z-10">
+              <div className="absolute -left-[21px] top-0 bg-card border-2 border-border group-hover:border-gold-dark transition-colors p-2 rounded-full shadow-sm z-10">
                 {step.icon}
               </div>
 
@@ -133,7 +133,7 @@ function JourneyTimelineSection() {
                     {step.title}
                   </h3>
                   {step.duration && (
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gold/10 text-gold border border-gold/20 whitespace-nowrap self-start sm:self-center">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gold/10 text-gold-dark border border-gold-dark/20 whitespace-nowrap self-start sm:self-center">
                       {step.duration}
                     </span>
                   )}
@@ -205,12 +205,12 @@ const YourJourney = () => {
                   className="bg-card border border-border rounded-sm p-6 sm:p-8 flex flex-col sm:flex-row gap-6"
                 >
                   <div className="shrink-0">
-                    <div className="w-14 h-14 rounded-full bg-navy text-gold flex items-center justify-center border border-gold/30">
+                    <div className="w-14 h-14 rounded-full bg-navy text-gold-dark flex items-center justify-center border border-gold-dark/30">
                       <Icon className="w-6 h-6" aria-hidden="true" />
                     </div>
                   </div>
                   <div className="flex-1">
-                    <p className="text-gold font-sans text-xs uppercase tracking-widest mb-1">{d.stage} · {d.when}</p>
+                    <p className="text-gold-dark font-sans text-xs uppercase tracking-widest mb-1">{d.stage} · {d.when}</p>
                     <h3 className="text-2xl font-serif text-foreground mb-1">{d.title}</h3>
                     <p className="text-muted-foreground font-sans italic mb-3">{d.subtitle}</p>
                     <p className="text-muted-foreground font-sans text-sm leading-relaxed">{d.body}</p>
@@ -231,14 +231,14 @@ const YourJourney = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
-              className="bg-navy-light/30 border border-gold/20 rounded-sm p-8 sm:p-10"
+              className="bg-navy-light/30 border border-gold-dark/20 rounded-sm p-8 sm:p-10"
             >
               <div className="flex flex-col sm:flex-row gap-6 items-start">
-                <div className="w-14 h-14 rounded-full bg-gold/10 flex items-center justify-center border border-gold/40 shrink-0">
-                  <KeyRound className="w-6 h-6 text-gold" />
+                <div className="w-14 h-14 rounded-full bg-gold/10 flex items-center justify-center border border-gold-dark/40 shrink-0">
+                  <KeyRound className="w-6 h-6 text-gold-dark" />
                 </div>
                 <div>
-                  <p className="text-gold font-sans text-xs uppercase tracking-widest mb-2">The Fourth Step</p>
+                  <p className="text-gold-dark font-sans text-xs uppercase tracking-widest mb-2">The Fourth Step</p>
                   <h2 className="text-2xl md:text-3xl font-serif text-primary-foreground mb-4">The Holy Royal Arch</h2>
                   <p className="text-primary-foreground/70 font-sans leading-relaxed mb-3">
                     The Holy Royal Arch is considered the natural and essential completion of the Third Degree — described by the United Grand Lodge of England as the fourth and completing step of a Master Mason's journey.
@@ -276,8 +276,8 @@ const YourJourney = () => {
                 { dir: "South", title: "Junior Warden", body: "The Junior Warden sits in the South and looks after the welfare of the brethren, particularly at refreshment." },
               ].map((p) => (
                 <div key={p.dir} className="bg-card border border-border rounded-sm p-6 text-center">
-                  <Sun className="w-6 h-6 text-gold mx-auto mb-3" aria-hidden="true" />
-                  <p className="text-gold text-xs font-sans uppercase tracking-widest mb-1">{p.dir}</p>
+                  <Sun className="w-6 h-6 text-gold-dark mx-auto mb-3" aria-hidden="true" />
+                  <p className="text-gold-dark text-xs font-sans uppercase tracking-widest mb-1">{p.dir}</p>
                   <h3 className="font-serif text-foreground text-lg mb-2">{p.title}</h3>
                   <p className="text-muted-foreground font-sans text-sm leading-relaxed">{p.body}</p>
                 </div>
@@ -291,7 +291,7 @@ const YourJourney = () => {
             <div className="text-center mt-8">
               <Link
                 to="/officers-jewels"
-                className="inline-flex items-center justify-center border border-gold text-gold px-6 py-3 rounded-sm text-sm font-sans uppercase tracking-widest hover:bg-gold hover:text-accent-foreground transition-colors"
+                className="inline-flex items-center justify-center border border-gold-dark text-gold-dark px-6 py-3 rounded-sm text-sm font-sans uppercase tracking-widest hover:bg-gold hover:text-accent-foreground transition-colors"
               >
                 Explore the Officers' Jewels
               </Link>
@@ -328,8 +328,8 @@ const YourJourney = () => {
                     transition={{ duration: 0.5, delay: i * 0.1 }}
                     className="bg-card border border-border rounded-sm p-6 relative"
                   >
-                    <p className="absolute top-4 right-4 text-5xl font-serif text-gold/15 leading-none">{s.n}</p>
-                    <Icon className="w-6 h-6 text-gold mb-3" aria-hidden="true" />
+                    <p className="absolute top-4 right-4 text-5xl font-serif text-gold-dark/15 leading-none">{s.n}</p>
+                    <Icon className="w-6 h-6 text-gold-dark mb-3" aria-hidden="true" />
                     <h3 className="font-serif text-foreground text-lg mb-2">{s.title}</h3>
                     <p className="text-muted-foreground font-sans text-sm leading-relaxed">{s.body}</p>
                   </motion.div>
