@@ -10,6 +10,7 @@ const Body = z.object({
   full_name: z.string().trim().min(2).max(160),
   initiation_date: z.string().trim().regex(/^\d{4}-\d{2}-\d{2}$/).optional().nullable(),
   degree: z.enum(["entered_apprentice", "fellow_craft", "master_mason"]).default("master_mason"),
+  is_past_master: z.boolean().optional().default(false),
   rank: z.string().trim().max(80).optional().nullable(),
   office: z.string().trim().max(80).optional().nullable(),
   status: z.enum(["pending", "active"]).default("active"),
