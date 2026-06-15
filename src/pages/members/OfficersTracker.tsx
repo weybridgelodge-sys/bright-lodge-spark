@@ -894,7 +894,7 @@ function NonProgressiveBoard({
   // so we can show who currently holds it and when they first did.
   const holderFor = (pos: NonProgressiveKey) => {
     const all = appointments
-      .filter((a) => a.position_key === pos && a.member_id)
+      .filter((a) => (a.position_key as string) === pos && a.member_id)
       .sort((a, b) => (b.lodge_year ?? 0) - (a.lodge_year ?? 0));
     return all[0];
   };
@@ -902,7 +902,7 @@ function NonProgressiveBoard({
   // Earliest appointed_on across all years for the same (position, member)
   const firstHeld = (pos: NonProgressiveKey, memberId: string) => {
     const dates = appointments
-      .filter((a) => a.position_key === pos && a.member_id === memberId && a.appointed_on)
+      .filter((a) => (a.position_key as string) === pos && a.member_id === memberId && a.appointed_on)
       .map((a) => a.appointed_on as string)
       .sort();
     return dates[0] ?? null;
