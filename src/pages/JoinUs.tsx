@@ -74,7 +74,7 @@ const JoinUs = () => {
                     <Phone className="w-5 h-5 text-gold mt-0.5 shrink-0" />
                     <div>
                       <p className="font-sans font-medium text-foreground text-sm">Call our Membership Secretary</p>
-                      <a href="tel:07921589039" className="text-gold hover:text-gold-light font-sans transition-colors">
+                      <a href="tel:07921589039" className="text-gold-dark hover:text-gold font-sans transition-colors">
                         07921 589 039
                       </a>
                     </div>
@@ -84,7 +84,7 @@ const JoinUs = () => {
                     <Mail className="w-5 h-5 text-gold mt-0.5 shrink-0" />
                     <div>
                       <p className="font-sans font-medium text-foreground text-sm">Email Us</p>
-                      <a href="mailto:secretary@weybridgelodge.org.uk" className="text-gold hover:text-gold-light font-sans transition-colors text-sm break-all">
+                      <a href="mailto:secretary@weybridgelodge.org.uk" className="text-gold-dark hover:text-gold font-sans transition-colors text-sm break-all">
                         secretary@weybridgelodge.org.uk
                       </a>
                     </div>
