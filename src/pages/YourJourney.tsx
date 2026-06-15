@@ -62,7 +62,7 @@ const joinSteps = [
     n: "5",
     icon: CheckSquare,
     title: "Ballot & Initiation Date",
-    body: "Your application is put to a formal ballot in open Lodge. Freemasonry sets great store by the unanimous agreement of the members. Once accepted, we confirm your initiation date — your first visit as a member of Weybridge Lodge.",
+    body: "Your application is put to a formal ballot in open Lodge. Freemasonry sets great store by the unanimous agreement of the members. Once accepted, we will conduct your initiation ceremony — your first visit as a member of Weybridge Lodge.",
   },
 ];
 
