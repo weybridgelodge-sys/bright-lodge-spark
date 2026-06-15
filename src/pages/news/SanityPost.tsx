@@ -136,7 +136,7 @@ const SanityPostPage = () => {
         title={`${data.title} | Weybridge Lodge News`}
         description={data.excerpt}
         canonical={`/news/${data.slug}`}
-        ogImage={heroImage ?? undefined}
+        image={heroImage ?? undefined}
         schema={[
           breadcrumbSchema([
             { name: "Home", url: "/" },
@@ -202,7 +202,10 @@ const SanityPostPage = () => {
             </article>
 
             <div className="mt-12 pt-8 border-t border-border">
-              <SocialShare title={data.title} />
+              <SocialShare
+                url={`https://www.weybridgelodge.org.uk/news/${data.slug}`}
+                title={data.title}
+              />
             </div>
           </div>
         </section>

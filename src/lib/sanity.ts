@@ -1,6 +1,8 @@
 import { createClient, type SanityClient } from "@sanity/client";
 import imageUrlBuilder from "@sanity/image-url";
-import type { SanityImageSource } from "@sanity/image-url/lib/types/types";
+
+// Loose type for any Sanity image reference accepted by imageUrlBuilder.
+type SanityImageSource = Parameters<ReturnType<typeof imageUrlBuilder>["image"]>[0];
 
 // Bundled fallback images for the 5 originally hand-coded posts so the
 // listing keeps its existing thumbnails even though the Sanity documents
