@@ -99,7 +99,7 @@ const OurCharities = () => {
                   />
                   <div>
                     <p className="text-gold text-sm font-sans uppercase tracking-wide mb-2">{charity.highlight}</p>
-                    <h3 className="text-2xl font-serif text-primary-foreground">{charity.name}</h3>
+                    <h2 className="text-2xl font-serif text-primary-foreground">{charity.name}</h2>
                   </div>
                 </div>
                 <p className="text-primary-foreground/70 font-sans leading-relaxed mb-6">{charity.description}</p>
