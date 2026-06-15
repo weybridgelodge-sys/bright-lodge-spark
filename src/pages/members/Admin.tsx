@@ -68,6 +68,15 @@ export default function MembersAdmin() {
     }
   };
 
+  const setDegree = async (id: string, degree: Degree) => {
+    const { error } = await supabase.from("profiles").update({ degree }).eq("id", id);
+    if (error) toast.error(error.message);
+    else {
+      toast.success(`Degree set to ${DEGREE_LABEL[degree]}`);
+      load();
+    }
+  };
+
   const toggleAdmin = async (uid: string, makeAdmin: boolean) => {
     if (makeAdmin) {
       const { error } = await supabase.from("user_roles").insert({ user_id: uid, role: "admin" });
