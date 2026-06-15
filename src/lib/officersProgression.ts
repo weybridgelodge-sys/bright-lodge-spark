@@ -7,6 +7,8 @@
 // Manual overrides for a specific (year, position) lock that cell.
 
 export const POSITION_ORDER = [
+  "steward",
+  "senior_steward",
   "inner_guard",
   "junior_deacon",
   "senior_deacon",
@@ -18,6 +20,8 @@ export const POSITION_ORDER = [
 export type PositionKey = (typeof POSITION_ORDER)[number];
 
 export const POSITION_LABELS: Record<PositionKey, string> = {
+  steward: "Steward",
+  senior_steward: "Senior Steward",
   inner_guard: "Inner Guard",
   junior_deacon: "Junior Deacon",
   senior_deacon: "Senior Deacon",
@@ -25,6 +29,52 @@ export const POSITION_LABELS: Record<PositionKey, string> = {
   senior_warden: "Senior Warden",
   worshipful_master: "Worshipful Master",
 };
+
+// Non-progressive offices — appointed annually, no automatic progression.
+export const NON_PROGRESSIVE_ORDER = [
+  "immediate_past_master",
+  "chaplain",
+  "treasurer",
+  "secretary",
+  "assistant_secretary",
+  "director_of_ceremonies",
+  "assistant_director_of_ceremonies",
+  "almoner",
+  "charity_steward",
+  "tyler",
+  "assistant_tyler",
+] as const;
+
+export type NonProgressiveKey = (typeof NON_PROGRESSIVE_ORDER)[number];
+
+export const NON_PROGRESSIVE_LABELS: Record<NonProgressiveKey, string> = {
+  immediate_past_master: "Immediate Past Master",
+  chaplain: "Chaplain",
+  treasurer: "Treasurer",
+  secretary: "Secretary",
+  assistant_secretary: "Assistant Secretary",
+  director_of_ceremonies: "Director of Ceremonies",
+  assistant_director_of_ceremonies: "Assistant Director of Ceremonies",
+  almoner: "Almoner",
+  charity_steward: "Charity Steward",
+  tyler: "Tyler",
+  assistant_tyler: "Assistant Tyler",
+};
+
+export function tenureSince(isoDate: string | null | undefined): string {
+  if (!isoDate) return "—";
+  const start = new Date(isoDate);
+  if (isNaN(start.getTime())) return "—";
+  const now = new Date();
+  let months = (now.getFullYear() - start.getFullYear()) * 12 + (now.getMonth() - start.getMonth());
+  if (now.getDate() < start.getDate()) months -= 1;
+  if (months < 1) return "less than a month";
+  const years = Math.floor(months / 12);
+  const rem = months % 12;
+  if (years === 0) return `${months} month${months === 1 ? "" : "s"}`;
+  if (rem === 0) return `${years} year${years === 1 ? "" : "s"}`;
+  return `${years}y ${rem}m`;
+}
 
 // Masonic year runs October → September. Returns the starting calendar year.
 // e.g. 15 Jun 2026 → 2025 (the 2025/26 year); 5 Oct 2026 → 2026 (2026/27).
