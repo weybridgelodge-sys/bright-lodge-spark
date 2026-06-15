@@ -51,6 +51,7 @@ export default function MembersAdmin() {
   const [aName, setAName] = useState("");
   const [aInit, setAInit] = useState("");
   const [aDegree, setADegree] = useState<Degree>("master_mason");
+  const [aPastMaster, setAPastMaster] = useState(false);
   const [aRank, setARank] = useState("");
   const [aBusy, setABusy] = useState(false);
 
