@@ -201,7 +201,7 @@ const JoinUs = () => {
                 <div key={title} className="bg-card border border-border rounded-sm p-6 flex flex-col">
                   <Icon className="w-6 h-6 text-gold mb-3" aria-hidden="true" />
                   <h3 className="font-serif text-foreground text-lg mb-1">{title}</h3>
-                  <p className="text-2xl font-serif text-gold-dark mb-3 whitespace-nowrap">{amount}</p>
+                  <p className="text-xl font-serif text-gold-dark mb-3 whitespace-nowrap">{amount}</p>
                   <p className="text-muted-foreground font-sans text-sm leading-relaxed flex-1">{note}</p>
                   {badge && (
                     <p className="mt-4 inline-flex self-start text-xs font-sans uppercase tracking-widest text-gold-dark border border-gold-dark/50 px-2 py-1 rounded-sm text-center">
