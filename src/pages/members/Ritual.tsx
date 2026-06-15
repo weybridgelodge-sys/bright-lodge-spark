@@ -5,14 +5,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { BookOpen, Upload, Trash2, Download, Loader2, ShieldCheck, Clock } from "lucide-react";
 import { toast } from "sonner";
 
-type Degree = "entered_apprentice" | "fellow_craft" | "master_mason";
+type Degree = "entered_apprentice" | "fellow_craft" | "master_mason" | "installed_master";
 
-const DEGREES: Degree[] = ["entered_apprentice", "fellow_craft", "master_mason"];
+const DEGREES: Degree[] = ["entered_apprentice", "fellow_craft", "master_mason", "installed_master"];
 
 const DEGREE_LABEL: Record<Degree, string> = {
   entered_apprentice: "Entered Apprentice",
   fellow_craft: "Fellow Craft",
   master_mason: "Master Mason",
+  installed_master: "Installed Masters",
 };
 
 type Doc = {
