@@ -85,10 +85,12 @@ export type Database = {
           full_name: string | null
           id: string
           joined_year: number | null
+          mother_lodge: string | null
           office: string | null
           phone: string | null
           rank: string | null
           status: Database["public"]["Enums"]["member_status"]
+          ugle_reg_number: string | null
           updated_at: string
         }
         Insert: {
@@ -98,10 +100,12 @@ export type Database = {
           full_name?: string | null
           id: string
           joined_year?: number | null
+          mother_lodge?: string | null
           office?: string | null
           phone?: string | null
           rank?: string | null
           status?: Database["public"]["Enums"]["member_status"]
+          ugle_reg_number?: string | null
           updated_at?: string
         }
         Update: {
@@ -111,10 +115,12 @@ export type Database = {
           full_name?: string | null
           id?: string
           joined_year?: number | null
+          mother_lodge?: string | null
           office?: string | null
           phone?: string | null
           rank?: string | null
           status?: Database["public"]["Enums"]["member_status"]
+          ugle_reg_number?: string | null
           updated_at?: string
         }
         Relationships: []
