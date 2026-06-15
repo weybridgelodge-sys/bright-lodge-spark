@@ -1,18 +1,25 @@
 import { motion } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 import { Link } from "react-router-dom";
-import heroImage from "@/assets/hero-lodge.jpg";
+import heroAvif from "@/assets/hero-lodge.avif.asset.json";
+import heroWebp from "@/assets/hero-lodge.webp.asset.json";
+import heroJpg from "@/assets/hero-lodge.optimized.jpg.asset.json";
 import logo from "@/assets/weybridge-logo.svg";
 
 const Hero = () => {
   return (
     <section className="relative min-h-screen flex items-center justify-start overflow-hidden">
-      <div
-        className="absolute inset-0 bg-cover bg-center"
-        style={{ backgroundImage: `url(${heroImage})` }}
-        role="img"
-        aria-label="South West Surrey Masonic Centre exterior in Guildford, home of Weybridge Lodge No. 6787"
-      />
+      <picture>
+        <source srcSet={heroAvif.url} type="image/avif" />
+        <source srcSet={heroWebp.url} type="image/webp" />
+        <img
+          src={heroJpg.url}
+          alt="South West Surrey Masonic Centre exterior in Guildford, home of Weybridge Lodge No. 6787"
+          className="absolute inset-0 w-full h-full object-cover"
+          fetchPriority="high"
+          decoding="async"
+        />
+      </picture>
       <div className="absolute inset-0 hero-overlay" />
 
       <div className="relative z-10 container mx-auto px-4 sm:px-6 pt-20">

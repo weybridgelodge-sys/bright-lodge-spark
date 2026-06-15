@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import heroImage from "@/assets/hero-lodge.jpg";
+import heroJpg from "@/assets/hero-lodge.optimized.jpg.asset.json";
 
 interface PageHeaderProps {
   title: string;
@@ -11,7 +11,7 @@ const PageHeader = ({ title, subtitle }: PageHeaderProps) => {
     <section className="relative pt-32 pb-20 md:pt-40 md:pb-28 overflow-hidden">
       <div
         className="absolute inset-0 bg-cover bg-center"
-        style={{ backgroundImage: `url(${heroImage})` }}
+        style={{ backgroundImage: `url(${heroJpg.url})` }}
         role="img"
         aria-label="South West Surrey Masonic Centre, Guildford — meeting place of Weybridge Lodge"
       />
