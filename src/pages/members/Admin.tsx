@@ -267,6 +267,71 @@ export default function MembersAdmin() {
         </div>
       )}
 
+      {tab === "add" && (
+        <form onSubmit={addMember} className="bg-navy-dark/60 border border-gold/15 rounded-sm p-5 space-y-3 max-w-xl">
+          <div className="flex items-center gap-2 text-gold">
+            <Plus className="w-4 h-4" />
+            <h2 className="font-serif text-base">Pre-create a member</h2>
+          </div>
+          <p className="text-xs text-primary-foreground/60">
+            Adds the brother to the portal with an active account so they can sign in via
+            magic link or Google as soon as we go live — no registration step required.
+            Use this to seed the Officers Progression Tracker.
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <input
+              required
+              value={aName}
+              onChange={(e) => setAName(e.target.value)}
+              placeholder="Full name (e.g. W Bro. John Smith)"
+              className="w-full bg-navy border border-gold/20 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-gold"
+            />
+            <input
+              required
+              type="email"
+              value={aEmail}
+              onChange={(e) => setAEmail(e.target.value)}
+              placeholder="Email address"
+              className="w-full bg-navy border border-gold/20 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-gold"
+            />
+            <label className="text-xs uppercase tracking-wider text-primary-foreground/60 sm:col-span-1">
+              Initiation date
+              <input
+                type="date"
+                value={aInit}
+                onChange={(e) => setAInit(e.target.value)}
+                className="mt-1 w-full bg-navy border border-gold/20 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-gold normal-case tracking-normal text-primary-foreground"
+              />
+            </label>
+            <label className="text-xs uppercase tracking-wider text-primary-foreground/60">
+              Degree
+              <select
+                value={aDegree}
+                onChange={(e) => setADegree(e.target.value as Degree)}
+                className="mt-1 w-full bg-navy border border-gold/20 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-gold normal-case tracking-normal text-primary-foreground"
+              >
+                <option value="entered_apprentice">Entered Apprentice</option>
+                <option value="fellow_craft">Fellow Craft</option>
+                <option value="master_mason">Master Mason</option>
+              </select>
+            </label>
+            <input
+              value={aRank}
+              onChange={(e) => setARank(e.target.value)}
+              placeholder="Rank (optional, e.g. PPrJGW)"
+              className="sm:col-span-2 w-full bg-navy border border-gold/20 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-gold"
+            />
+          </div>
+          <button
+            disabled={aBusy}
+            className="bg-gold-shimmer text-accent-foreground px-4 py-2 rounded-sm text-sm font-semibold disabled:opacity-50"
+          >
+            {aBusy ? "Adding…" : "Add member"}
+          </button>
+        </form>
+      )}
+
+
       {tab === "notices" && (
         <div className="space-y-6">
           <form onSubmit={addNotice} className="bg-navy-dark/60 border border-gold/15 rounded-sm p-5 space-y-3">
