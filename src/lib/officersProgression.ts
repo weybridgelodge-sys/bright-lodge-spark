@@ -7,7 +7,11 @@
 // Manual overrides for a specific (year, position) lock that cell.
 
 export const POSITION_ORDER = [
-  "steward",
+  "steward_5",
+  "steward_4",
+  "steward_3",
+  "steward_2",
+  "steward_1",
   "senior_steward",
   "inner_guard",
   "junior_deacon",
@@ -20,7 +24,11 @@ export const POSITION_ORDER = [
 export type PositionKey = (typeof POSITION_ORDER)[number];
 
 export const POSITION_LABELS: Record<PositionKey, string> = {
-  steward: "Steward",
+  steward_5: "Steward 5",
+  steward_4: "Steward 4",
+  steward_3: "Steward 3",
+  steward_2: "Steward 2",
+  steward_1: "Steward 1",
   senior_steward: "Senior Steward",
   inner_guard: "Inner Guard",
   junior_deacon: "Junior Deacon",
