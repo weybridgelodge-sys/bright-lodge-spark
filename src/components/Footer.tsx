@@ -116,7 +116,7 @@ const Footer = () => {
         <nav aria-label="Footer sitemap" className="border-t border-gold/10 pt-10 pb-10">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {footerColumns.map((col) => (
-              <div key={col.heading}>
+              <div key={col.heading} className="text-left">
                 <h2 className="font-serif text-primary-foreground text-sm mb-4">{col.heading}</h2>
                 <ul className="space-y-2.5">
                   {col.links.map((link) => (
