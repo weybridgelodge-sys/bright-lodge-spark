@@ -94,7 +94,7 @@ const News = () => {
               </div>
 
               {/* Sidebar */}
-              <div className="lg:w-72 shrink-0 space-y-8" role="complementary" aria-label="News sidebar">
+              <div className="lg:w-72 shrink-0 space-y-8" aria-label="News sidebar">
                 {/* Recent Posts */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
