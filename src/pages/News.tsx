@@ -4,13 +4,19 @@ import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
 import SEO, { breadcrumbSchema } from "@/components/SEO";
 import { motion } from "framer-motion";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams, useParams } from "react-router-dom";
 import { Calendar, Tag, X } from "lucide-react";
 import { posts, categories, formatDate } from "@/data/posts";
 
+const slugify = (s: string) => s.toLowerCase().replace(/\s+/g, "-");
+
 const News = () => {
   const [searchParams] = useSearchParams();
-  const activeCategory = searchParams.get("category");
+  const { category: categorySlug } = useParams<{ category?: string }>();
+  const categoryFromSlug = categorySlug
+    ? categories.find((c) => slugify(c) === categorySlug.toLowerCase()) ?? null
+    : null;
+  const activeCategory = categoryFromSlug || searchParams.get("category");
   const filteredPosts = activeCategory
     ? posts.filter((p) => p.category === activeCategory)
     : posts;
@@ -22,13 +28,29 @@ const News = () => {
   return (
     <div className="min-h-screen">
       <SEO
-        title="News | Weybridge Lodge Freemasons Guildford"
-        description="Latest news and updates from Weybridge Lodge No. 6787 — Masonic meetings, charity events and social gatherings in Guildford, Surrey."
-        canonical="/news"
-        schema={breadcrumbSchema([
-          { name: "Home", url: "/" },
-          { name: "News", url: "/news" },
-        ])}
+        title={
+          categoryFromSlug
+            ? `${categoryFromSlug} News | Weybridge Lodge`
+            : "News | Weybridge Lodge Freemasons Guildford"
+        }
+        description={
+          categoryFromSlug
+            ? `${categoryFromSlug} news and updates from Weybridge Lodge No. 6787 in Guildford, Surrey.`
+            : "Latest news and updates from Weybridge Lodge No. 6787 — Masonic meetings, charity events and social gatherings in Guildford, Surrey."
+        }
+        canonical={categoryFromSlug ? `/news/category/${slugify(categoryFromSlug)}` : "/news"}
+        schema={breadcrumbSchema(
+          categoryFromSlug
+            ? [
+                { name: "Home", url: "/" },
+                { name: "News", url: "/news" },
+                { name: categoryFromSlug, url: `/news/category/${slugify(categoryFromSlug)}` },
+              ]
+            : [
+                { name: "Home", url: "/" },
+                { name: "News", url: "/news" },
+              ]
+        )}
       />
       <a href="#main-content" className="skip-to-content">
         Skip to main content
@@ -145,7 +167,7 @@ const News = () => {
                       return (
                         <Link
                           key={cat}
-                          to={`/news?category=${encodeURIComponent(cat)}`}
+                          to={`/news/category/${slugify(cat)}`}
                           className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-sans transition-colors ${
                             isActive
                               ? "border-primary bg-primary/10 text-primary font-medium"
