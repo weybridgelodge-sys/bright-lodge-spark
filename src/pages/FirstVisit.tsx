@@ -51,7 +51,7 @@ const FirstVisit = () => {
                 {
                   icon: Shirt,
                   title: "Dress Code",
-                  body: "For an informal open evening or dinner as a guest, a standard lounge suit, jacket and tie, or smart-casual attire is perfectly appropriate.",
+                  body: "For an informal dinner as a guest, a standard lounge suit, jacket, and tie will suffice. If coming for your initial contact, drinks or a discovery meeting and tour, then casual wear is absolutely fine.",
                 },
                 {
                   icon: Clock,
