@@ -231,24 +231,25 @@ export default function MembersAdmin() {
                   <td className="p-3 text-xs uppercase tracking-wider">{isAdmin(p.id) ? "Admin" : "Member"}</td>
                   <td className="p-3">
                     <select
-                      value={p.degree ?? "entered_apprentice"}
-                      onChange={(e) => setDegree(p.id, e.target.value as Degree)}
+                      value={p.is_past_master ? "past_master" : (p.degree ?? "entered_apprentice")}
+                      onChange={async (e) => {
+                        const v = e.target.value;
+                        if (v === "past_master") {
+                          if (p.degree !== "master_mason") await setDegree(p.id, "master_mason");
+                          if (!p.is_past_master) await togglePastMaster(p.id, true);
+                        } else {
+                          if (p.is_past_master) await togglePastMaster(p.id, false);
+                          if (p.degree !== v) await setDegree(p.id, v as Degree);
+                        }
+                      }}
                       className="bg-navy border border-gold/20 rounded-sm px-2 py-1 text-xs focus:outline-none focus:border-gold"
                       aria-label={`Set degree for ${p.full_name || p.email}`}
                     >
                       <option value="entered_apprentice">Entered Apprentice</option>
                       <option value="fellow_craft">Fellow Craft</option>
                       <option value="master_mason">Master Mason</option>
+                      <option value="past_master">Past Master</option>
                     </select>
-                    <label className="mt-1 flex items-center gap-1.5 text-[11px] text-primary-foreground/70 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={!!p.is_past_master}
-                        onChange={(e) => togglePastMaster(p.id, e.target.checked)}
-                        className="accent-gold"
-                      />
-                      Past Master
-                    </label>
                   </td>
                   <td className="p-3">
                     <div className="flex items-center gap-1 justify-end">
@@ -328,23 +329,24 @@ export default function MembersAdmin() {
             <label className="text-xs uppercase tracking-wider text-primary-foreground/60">
               Degree
               <select
-                value={aDegree}
-                onChange={(e) => setADegree(e.target.value as Degree)}
+                value={aPastMaster ? "past_master" : aDegree}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  if (v === "past_master") {
+                    setAPastMaster(true);
+                    setADegree("master_mason");
+                  } else {
+                    setAPastMaster(false);
+                    setADegree(v as Degree);
+                  }
+                }}
                 className="mt-1 w-full bg-navy border border-gold/20 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-gold normal-case tracking-normal text-primary-foreground"
               >
                 <option value="entered_apprentice">Entered Apprentice</option>
                 <option value="fellow_craft">Fellow Craft</option>
                 <option value="master_mason">Master Mason</option>
+                <option value="past_master">Past Master (incl. Installed Masters ritual)</option>
               </select>
-            </label>
-            <label className="sm:col-span-2 flex items-center gap-2 text-xs text-primary-foreground/80 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={aPastMaster}
-                onChange={(e) => setAPastMaster(e.target.checked)}
-                className="accent-gold"
-              />
-              Past Master (grants access to Installed Masters ritual)
             </label>
             <input
               value={aRank}
