@@ -188,16 +188,19 @@ export type Database = {
       }
       officer_positions: {
         Row: {
+          is_progressive: boolean
           key: string
           label: string
           order_index: number
         }
         Insert: {
+          is_progressive?: boolean
           key: string
           label: string
           order_index: number
         }
         Update: {
+          is_progressive?: boolean
           key?: string
           label?: string
           order_index?: number
