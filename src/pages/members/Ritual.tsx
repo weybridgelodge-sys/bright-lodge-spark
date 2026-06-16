@@ -121,6 +121,11 @@ export default function MembersRitual() {
   const myDegree = (profile as { degree?: Degree } | null)?.degree ?? "entered_apprentice";
   const isPastMaster = (profile as { is_past_master?: boolean } | null)?.is_past_master ?? false;
 
+  const visibleDocs =
+    isAdmin && previewDegree
+      ? docs.filter((d) => DEGREE_LEVEL[d.required_degree] <= DEGREE_LEVEL[previewDegree])
+      : docs;
+
   return (
     <MembersLayout>
       <div className="mb-8 flex items-start justify-between gap-3 border-b border-gold/15 pb-4">
