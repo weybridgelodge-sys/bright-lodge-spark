@@ -50,6 +50,7 @@ import MembersAdmin from "./pages/members/Admin";
 import EventsAdmin from "./pages/members/EventsAdmin";
 import MembersRitual from "./pages/members/Ritual";
 import OfficersTracker from "./pages/members/OfficersTracker";
+import Kpis from "./pages/members/Kpis";
 import ProgressionRoute from "./components/members/ProgressionRoute";
 
 const queryClient = new QueryClient();
