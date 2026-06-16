@@ -73,6 +73,11 @@ export default function MembersLayout({ children }: { children: React.ReactNode 
                 <CalendarPlus className="w-4 h-4" /> Meetings
               </NavLink>
             )}
+            {canManageProgression && (
+              <NavLink to="/members/kpis" className={navCls}>
+                <BarChart3 className="w-4 h-4" /> KPIs
+              </NavLink>
+            )}
             {isAdmin && (
               <NavLink to="/members/admin" className={navCls}>
                 <ShieldCheck className="w-4 h-4" /> Admin
