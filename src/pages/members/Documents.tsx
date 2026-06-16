@@ -21,18 +21,17 @@ const CATEGORIES = [
   "committee_minutes",
   "committee_agendas",
   "media_files",
-  "ritual",
   "other",
 ] as const;
 
-const CATEGORY_LABELS: Record<typeof CATEGORIES[number], string> = {
+const CATEGORY_LABELS: Record<typeof CATEGORIES[number] | "ritual", string> = {
   summons: "Summons",
   meeting_minutes: "Meeting minutes",
   committee_minutes: "Committee minutes",
   committee_agendas: "Committee agendas",
   media_files: "Media files",
-  ritual: "Ritual",
   other: "Other",
+  ritual: "Ritual",
 };
 
 export default function MembersDocuments() {
