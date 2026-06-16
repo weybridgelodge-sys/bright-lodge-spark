@@ -7,54 +7,107 @@ import { StripeEmbeddedCheckoutPanel, type BookingLineItem } from "@/components/
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Calendar, Clock, MapPin, Shirt, CalendarClock, UtensilsCrossed, CheckCircle, Loader2 } from "lucide-react";
-import { useState, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { getStripeEnvironment } from "@/lib/stripe";
+import { fetchNextEvent, type EventBundle } from "@/lib/lodgeEvents";
 
-const meetingDetails = [
-  { icon: Calendar, label: "Meeting Date", value: "Wednesday, 15th April 2026" },
-  { icon: Clock, label: "Meeting Times", value: "Tyling at 6.00 pm prompt, Festive Board Dining at 7:45 pm" },
-  { icon: MapPin, label: "Location", value: "Guildford Masonic Centre, Hitherbury Close, Portsmouth Road, Guildford GU2 4DR" },
-  { icon: Shirt, label: "Dress Code", value: "Normal Masonic attire — Provincial, Black or Craft Tie, Dark Suit and White Gloves" },
-  { icon: CalendarClock, label: "Booking Deadline", value: "Wednesday, 8th April 2026" },
-];
+// Safe fallback if the database has no published event yet
+const FALLBACK: EventBundle = {
+  event: {
+    id: "fallback",
+    slug: "festive_board_april_2026",
+    title: "Initiation Ceremony — April Meeting",
+    intro_heading: "Initiation Ceremony — April Meeting",
+    intro:
+      "W Bro. Julien Tidmarsh, Worshipful Master of Weybridge Lodge No. 6787, cordially invites you to attend an Initiation Meeting on **Wednesday, 15th April 2026, commencing at 6.00 pm**.\n\nFollowing the ceremony, we'll gather for a festive board filled with cheer, good food, and heartfelt fellowship.",
+    event_date: "2026-04-15T18:00:00+01:00",
+    tyling_time: "Tyling at 6.00 pm prompt",
+    dining_time: "Festive Board Dining at 7:45 pm",
+    location: "Guildford Masonic Centre, Hitherbury Close, Portsmouth Road, Guildford GU2 4DR",
+    dress_code: "Normal Masonic attire — Provincial, Black or Craft Tie, Dark Suit and White Gloves",
+    booking_deadline: "2026-04-08",
+    published: true,
+    sort_order: 0,
+  },
+  courses: [
+    { id: "c1", event_id: "fallback", course_label: "Entree", dish: "Halloumi, Carrot, Orange & Watercress Salad", description: "With honey & mustard dressing.", position: 1 },
+    { id: "c2", event_id: "fallback", course_label: "Main", dish: "Irish Stew with Soda Bread", description: "Lamb, smoked bacon, root vegetables, potatoes & pearl barley, slowly cooked.", position: 2 },
+    { id: "c3", event_id: "fallback", course_label: "Dessert", dish: "Warm Chocolate Brownie (Gluten-Free)", description: "Served with sauce & ice cream.", position: 3 },
+  ],
+  diningOptions: [
+    { id: "o1", event_id: "fallback", label: "Festive Board (3-course dinner)", price_pence: 3200, position: 1, is_default: true },
+  ],
+};
 
-const menuItems = [
-  { course: "Entree", dish: "Halloumi, Carrot, Orange & Watercress Salad", description: "With honey & mustard dressing." },
-  { course: "Main", dish: "Irish Stew with Soda Bread", description: "Lamb, smoked bacon, root vegetables, potatoes & pearl barley, slowly cooked." },
-  { course: "Dessert", dish: "Warm Chocolate Brownie (Gluten-Free)", description: "Served with sauce & ice cream." },
-  { course: "Cheese & Port", dish: "Worshipful Masters' Cheese & Port", description: "Platters of Cheese & Biscuits with a glass of Port, courtesy of the Worshipful Master." },
-  { course: "To Finish", dish: "Tea or Coffee", description: "" },
-];
+const fmtFullDate = (iso: string) =>
+  new Date(iso).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
 
-const SEAT_PRICE_PENCE = 3200; // £32.00
+const fmtDeadline = (d: string | null) =>
+  d ? new Date(d + "T00:00:00").toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" }) : "";
+
+// Render simple **bold** markup inside intro paragraphs
+function renderParagraph(text: string) {
+  const parts = text.split(/(\*\*[^*]+\*\*)/g);
+  return parts.map((p, i) =>
+    p.startsWith("**") && p.endsWith("**") ? <strong key={i}>{p.slice(2, -2)}</strong> : <span key={i}>{p}</span>
+  );
+}
 
 type Guest = { name: string };
 
 const Bookings = () => {
   const { toast } = useToast();
+  const [bundle, setBundle] = useState<EventBundle>(FALLBACK);
+  const [loadingEvent, setLoadingEvent] = useState(true);
+
+  useEffect(() => {
+    fetchNextEvent().then((b) => {
+      if (b) setBundle(b);
+      setLoadingEvent(false);
+    });
+  }, []);
+
+  const { event, courses, diningOptions } = bundle;
+  const introParagraphs = useMemo(() => event.intro.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean), [event.intro]);
+
+  const meetingDetails = useMemo(() => [
+    { icon: Calendar, label: "Meeting Date", value: fmtFullDate(event.event_date) },
+    { icon: Clock, label: "Meeting Times", value: [event.tyling_time, event.dining_time].filter(Boolean).join(", ") },
+    { icon: MapPin, label: "Location", value: event.location },
+    { icon: Shirt, label: "Dress Code", value: event.dress_code },
+    ...(event.booking_deadline ? [{ icon: CalendarClock, label: "Booking Deadline", value: fmtDeadline(event.booking_deadline) }] : []),
+  ], [event]);
+
+  // Form state
   const [step, setStep] = useState(1);
   const [showCheckout, setShowCheckout] = useState(false);
   const [submissionStatus, setSubmissionStatus] = useState<"idle" | "submitting" | "meeting-only" | "apologies" | "bank-transfer" | "cash-cheque" | "error">("idle");
-
-  // Step 1
   const [title, setTitle] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [lodge, setLodge] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
-
-  // Step 2
   const [meetingOption, setMeetingOption] = useState<"meeting-and-festive-board" | "meeting-only" | "apologies" | "">("");
   const [guestCount, setGuestCount] = useState<number>(0);
   const [guests, setGuests] = useState<Guest[]>([]);
   const [dietary, setDietary] = useState("");
-
-  // Step 3
+  const [diningOptionId, setDiningOptionId] = useState<string>("");
   const [paymentMethod, setPaymentMethod] = useState<"card" | "bank-transfer" | "cash-cheque" | "">("");
   const [coverFee, setCoverFee] = useState(false);
+
+  // Pick default dining option once loaded
+  useEffect(() => {
+    if (!diningOptionId && diningOptions.length) {
+      const def = diningOptions.find((o) => o.is_default) || diningOptions[0];
+      setDiningOptionId(def.id);
+    }
+  }, [diningOptions, diningOptionId]);
+
+  const selectedOption = diningOptions.find((o) => o.id === diningOptionId) || diningOptions[0];
+  const seatPricePence = selectedOption?.price_pence ?? 0;
 
   const inputClass = "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2";
   const selectClass = "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2";
@@ -69,11 +122,13 @@ const Bookings = () => {
   };
 
   const seatsToCharge = meetingOption === "meeting-and-festive-board" ? 1 + guestCount : 0;
-  const subtotalPence = seatsToCharge * SEAT_PRICE_PENCE;
+  const subtotalPence = seatsToCharge * seatPricePence;
   const feePence = paymentMethod === "card" && coverFee ? Math.ceil(subtotalPence * 0.02) : 0;
   const totalPence = subtotalPence + feePence;
-
   const fmtGbp = (p: number) => `£${(p / 100).toFixed(2)}`;
+
+  const shortDate = useMemo(() => new Date(event.event_date).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }), [event.event_date]);
+  const eventLabel = `${event.title} — ${shortDate}`;
 
   const validateStep1 = (): boolean => {
     if (!title || !firstName.trim() || !lastName.trim() || !lodge.trim() || !email.trim() || !phone.trim()) {
@@ -92,43 +147,45 @@ const Bookings = () => {
       toast({ title: "Select a meeting option", variant: "destructive" });
       return false;
     }
-    if (meetingOption === "meeting-and-festive-board" && guests.some((g) => !g.name.trim())) {
-      toast({ title: "Guest names required", description: "Please name each guest.", variant: "destructive" });
-      return false;
+    if (meetingOption === "meeting-and-festive-board") {
+      if (!diningOptionId) {
+        toast({ title: "Choose a dining option", variant: "destructive" });
+        return false;
+      }
+      if (guests.some((g) => !g.name.trim())) {
+        toast({ title: "Guest names required", description: "Please name each guest.", variant: "destructive" });
+        return false;
+      }
     }
     return true;
   };
 
   const lineItems: BookingLineItem[] = useMemo(() => {
-    if (seatsToCharge === 0) return [];
-    return [
-      {
-        label: "Festive Board — 15 April 2026 (per head)",
-        qty: seatsToCharge,
-        unit_price_pence: SEAT_PRICE_PENCE,
-      },
-    ];
-  }, [seatsToCharge]);
+    if (seatsToCharge === 0 || !selectedOption) return [];
+    return [{
+      label: `${selectedOption.label} — ${shortDate} (per head)`,
+      qty: seatsToCharge,
+      unit_price_pence: seatPricePence,
+    }];
+  }, [seatsToCharge, selectedOption, seatPricePence, shortDate]);
 
   const saveBooking = async (finalStatus: "meeting-only" | "apologies" | "bank-transfer" | "cash-cheque") => {
     setSubmissionStatus("submitting");
     try {
       const { data, error } = await supabase.functions.invoke("save-meeting-response", {
         body: {
-          event_key: "festive_board_april_2026",
-          event_label: "Festive Board — 15 April 2026",
+          event_key: event.slug,
+          event_label: eventLabel,
           contact_name: `${title} ${firstName} ${lastName}`.trim(),
           contact_email: email,
           contact_phone: phone,
           meeting_option: meetingOption,
           details: {
             title, firstName, lastName, lodge,
-            meetingOption,
-            guestCount,
-            guests,
-            dietary,
-            paymentMethod,
-            totalPence,
+            meetingOption, guestCount, guests, dietary,
+            diningOption: selectedOption?.label,
+            unitPricePence: seatPricePence,
+            paymentMethod, totalPence,
           },
           environment: getStripeEnvironment(),
         },
@@ -146,12 +203,10 @@ const Bookings = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateStep1() || !validateStep2()) return;
-
     if (meetingOption === "apologies" || meetingOption === "meeting-only") {
       await saveBooking(meetingOption);
       return;
     }
-
     if (!paymentMethod) {
       toast({ title: "Choose a payment method", variant: "destructive" });
       return;
@@ -171,9 +226,9 @@ const Bookings = () => {
         canonical="/bookings"
         schema={[
           eventSchema({
-            name: "Initiation Ceremony — April Meeting",
-            date: "2026-04-15T18:00:00",
-            description: "Initiation ceremony at Weybridge Lodge No. 6787 welcoming a new candidate into Freemasonry.",
+            name: event.title,
+            date: event.event_date,
+            description: introParagraphs[0]?.replace(/\*\*/g, "") || event.title,
           }),
           breadcrumbSchema([
             { name: "Home", url: "/" },
@@ -192,19 +247,14 @@ const Bookings = () => {
           <div className="container mx-auto px-4 sm:px-6 max-w-3xl">
             <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }}>
               <div className="h-0.5 w-16 bg-gold mb-6" />
-              <h2 className="text-2xl md:text-3xl font-serif text-foreground mb-4">Initiation Ceremony — April Meeting</h2>
-              <p className="text-muted-foreground font-sans leading-relaxed mb-4">
-                W Bro. Julien Tidmarsh, Worshipful Master of Weybridge Lodge No. 6787, cordially invites you to attend an Initiation Meeting on <strong>Wednesday, 15th April 2026, commencing at 6.00 pm</strong>.
-              </p>
-              <p className="text-muted-foreground font-sans leading-relaxed mb-4">
-                Weybridge Lodge is delighted to announce a truly special occasion: another initiation ceremony welcoming one more new candidate into Freemasonry, our fifth of the year.
-              </p>
-              <p className="text-muted-foreground font-sans leading-relaxed mb-4">
-                For those who remember their own initiation, this is a chance to revisit the solemnity and symbolism of that first step. Come and share this experience with us as we witness our new initiate begin their Masonic journey.
-              </p>
-              <p className="text-muted-foreground font-sans leading-relaxed">
-                Following the ceremony, we'll gather for a festive board filled with cheer, good food, and heartfelt fellowship. Let's come together to welcome our newest member and celebrate the enduring spirit of Freemasonry.
-              </p>
+              <h2 className="text-2xl md:text-3xl font-serif text-foreground mb-4">{event.intro_heading || event.title}</h2>
+              {loadingEvent && event.id === "fallback" ? (
+                <div className="flex items-center gap-2 text-muted-foreground text-sm"><Loader2 className="w-4 h-4 animate-spin" /> Loading meeting…</div>
+              ) : (
+                introParagraphs.map((p, i) => (
+                  <p key={i} className="text-muted-foreground font-sans leading-relaxed mb-4 last:mb-0">{renderParagraph(p)}</p>
+                ))
+              )}
             </motion.div>
           </div>
         </section>
@@ -231,26 +281,28 @@ const Bookings = () => {
         </section>
 
         {/* Menu */}
-        <section className="py-20 md:py-28 bg-warm-white">
-          <div className="container mx-auto px-4 sm:px-6 max-w-3xl">
-            <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="text-center mb-12">
-              <div className="h-0.5 w-16 bg-gold mx-auto mb-6" />
-              <h2 className="text-3xl md:text-4xl font-serif text-foreground">
-                <UtensilsCrossed className="inline w-8 h-8 text-gold mr-3 -mt-1" aria-hidden="true" />
-                Festive Board Menu
-              </h2>
-            </motion.div>
-            <div className="space-y-6 max-w-xl mx-auto">
-              {menuItems.map((item, i) => (
-                <motion.div key={item.course} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: i * 0.08 }} className="text-center">
-                  <p className="text-gold text-xs font-sans uppercase tracking-widest mb-1">{item.course}</p>
-                  <h3 className="text-lg font-serif text-foreground mb-1">{item.dish}</h3>
-                  {item.description && <p className="text-muted-foreground font-sans text-sm">{item.description}</p>}
-                </motion.div>
-              ))}
+        {courses.length > 0 && (
+          <section className="py-20 md:py-28 bg-warm-white">
+            <div className="container mx-auto px-4 sm:px-6 max-w-3xl">
+              <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="text-center mb-12">
+                <div className="h-0.5 w-16 bg-gold mx-auto mb-6" />
+                <h2 className="text-3xl md:text-4xl font-serif text-foreground">
+                  <UtensilsCrossed className="inline w-8 h-8 text-gold mr-3 -mt-1" aria-hidden="true" />
+                  Festive Board Menu
+                </h2>
+              </motion.div>
+              <div className="space-y-6 max-w-xl mx-auto">
+                {courses.map((item, i) => (
+                  <motion.div key={item.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: i * 0.08 }} className="text-center">
+                    <p className="text-gold text-xs font-sans uppercase tracking-widest mb-1">{item.course_label}</p>
+                    <h3 className="text-lg font-serif text-foreground mb-1">{item.dish}</h3>
+                    {item.description && <p className="text-muted-foreground font-sans text-sm">{item.description}</p>}
+                  </motion.div>
+                ))}
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
+        )}
 
         {/* Booking Form */}
         <section className="py-20 md:py-28 bg-navy-gradient" aria-labelledby="booking-heading">
@@ -261,9 +313,11 @@ const Bookings = () => {
               <p className="text-primary-foreground/70 font-sans text-sm leading-relaxed mb-2">
                 Please complete the form below for yourself and any guests. Pay securely by Debit or Credit Card, or by bank transfer.
               </p>
-              <p className="text-gold font-sans text-sm font-semibold">
-                ALL BOOKINGS MUST BE RECEIVED BY WEDNESDAY, 8th APRIL.
-              </p>
+              {event.booking_deadline && (
+                <p className="text-gold font-sans text-sm font-semibold">
+                  ALL BOOKINGS MUST BE RECEIVED BY {fmtDeadline(event.booking_deadline).toUpperCase()}.
+                </p>
+              )}
               <p className="text-primary-foreground/60 font-sans text-xs mt-2">
                 Queries? Email{" "}
                 <a href="mailto:assistantsecretary@weybridgelodge.org.uk" className="text-gold hover:text-gold-light transition-colors">
@@ -322,8 +376,8 @@ const Bookings = () => {
                   {feePence > 0 && <> (includes {fmtGbp(feePence)} card fee)</>}
                 </p>
                 <StripeEmbeddedCheckoutPanel
-                  event_key="festive_board_april_2026"
-                  event_label="Festive Board — 15 April 2026"
+                  event_key={event.slug}
+                  event_label={eventLabel}
                   contact_name={`${title} ${firstName} ${lastName}`.trim()}
                   contact_email={email}
                   contact_phone={phone}
@@ -331,10 +385,9 @@ const Bookings = () => {
                   line_items={lineItems}
                   details={{
                     title, firstName, lastName, lodge,
-                    meetingOption,
-                    guestCount,
-                    guests,
-                    dietary,
+                    meetingOption, guestCount, guests, dietary,
+                    diningOption: selectedOption?.label,
+                    unitPricePence: seatPricePence,
                     paymentMethod,
                   }}
                   return_url={`${window.location.origin}/checkout/return?session_id={CHECKOUT_SESSION_ID}`}
@@ -344,7 +397,6 @@ const Bookings = () => {
             ) : (
               <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.1 }}>
                 <form onSubmit={handleSubmit} className="bg-card rounded-sm border border-border shadow-lg p-5 sm:p-8">
-                  {/* Step indicators */}
                   <div className="flex items-center justify-center gap-2 mb-8" role="tablist" aria-label="Form steps">
                     {[1, 2, 3].map((s) => {
                       const hidePayment = s === 3 && meetingOption !== "meeting-and-festive-board";
@@ -419,6 +471,18 @@ const Bookings = () => {
                       </div>
                       {meetingOption === "meeting-and-festive-board" && (
                         <>
+                          {diningOptions.length > 1 && (
+                            <div>
+                              <label htmlFor="evf-dining" className={labelClass}>Dining Option <span className="text-destructive">*</span></label>
+                              <select id="evf-dining" value={diningOptionId} onChange={(e) => setDiningOptionId(e.target.value)} required className={selectClass}>
+                                {diningOptions.map((o) => (
+                                  <option key={o.id} value={o.id}>
+                                    {o.label} — {fmtGbp(o.price_pence)} per head
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+                          )}
                           <div>
                             <label htmlFor="evf-guests" className={labelClass}>Are You Bringing Any Guests? <span className="text-destructive">*</span></label>
                             <select id="evf-guests" value={String(guestCount)} onChange={(e) => updateGuestCount(parseInt(e.target.value, 10))} required className={selectClass}>
@@ -443,7 +507,7 @@ const Bookings = () => {
                             />
                           </div>
                           <div className="bg-warm-white border border-border rounded-sm p-4 flex items-center justify-between">
-                            <span className="font-sans text-sm text-foreground">Subtotal ({seatsToCharge} × £32.00)</span>
+                            <span className="font-sans text-sm text-foreground">Subtotal ({seatsToCharge} × {fmtGbp(seatPricePence)})</span>
                             <span className="font-sans font-semibold text-foreground">{fmtGbp(subtotalPence)}</span>
                           </div>
                         </>
