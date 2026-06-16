@@ -110,19 +110,45 @@ const Bookings = () => {
     ];
   }, [seatsToCharge]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateStep1() || !validateStep2()) return;
+
+    if (meetingOption === "apologies" || meetingOption === "meeting-only") {
+      setSubmissionStatus("submitting");
+      try {
+        const { data, error } = await supabase.functions.invoke("save-meeting-response", {
+          body: {
+            event_key: "festive_board_april_2026",
+            event_label: "Festive Board — 15 April 2026",
+            contact_name: `${title} ${firstName} ${lastName}`.trim(),
+            contact_email: email,
+            contact_phone: phone,
+            meeting_option: meetingOption,
+            details: {
+              title, firstName, lastName, lodge,
+              meetingOption,
+              guestCount,
+              guests,
+              dietary,
+              paymentMethod,
+            },
+            environment: getStripeEnvironment(),
+          },
+        });
+        if (error || !data?.bookingId) {
+          throw new Error(error?.message || "Failed to save response");
+        }
+        setSubmissionStatus(meetingOption);
+      } catch (err: any) {
+        setSubmissionStatus("error");
+        toast({ title: "Error", description: err?.message || "Could not save your response. Please try again.", variant: "destructive" });
+      }
+      return;
+    }
+
     if (!paymentMethod) {
       toast({ title: "Choose a payment method", variant: "destructive" });
-      return;
-    }
-    if (meetingOption === "apologies") {
-      toast({ title: "Apologies recorded", description: "Thank you — we've noted your absence." });
-      return;
-    }
-    if (meetingOption === "meeting-only") {
-      toast({ title: "Booking received", description: "Thank you — your attendance has been noted." });
       return;
     }
     if (paymentMethod !== "card") {
