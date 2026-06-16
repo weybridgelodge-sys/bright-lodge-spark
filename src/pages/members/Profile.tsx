@@ -5,23 +5,33 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
-const RANKS = ["Bro.", "W Bro.", "RW Bro."];
+const TITLES = ["Bro", "W Bro", "VW Bro", "RW Bro"];
 
 export default function MembersProfile() {
   const { profile, user, refreshProfile } = useAuth();
-  const [full_name, setFullName] = useState("");
-  const [rank, setRank] = useState("");
-  const [office, setOffice] = useState("");
-  const [joined_year, setJoinedYear] = useState<string>("");
+  const [title, setTitle] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [provincialRank, setProvincialRank] = useState("");
+  const [grandRank, setGrandRank] = useState("");
+  const [dateOfBirth, setDateOfBirth] = useState("");
+  const [initiationDate, setInitiationDate] = useState("");
+  const [isRoyalArch, setIsRoyalArch] = useState(false);
+  const [isHonoraryMember, setIsHonoraryMember] = useState(false);
   const [phone, setPhone] = useState("");
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
     if (!profile) return;
-    setFullName(profile.full_name ?? "");
-    setRank(profile.rank ?? "");
-    setOffice(profile.office ?? "");
-    setJoinedYear(profile.joined_year?.toString() ?? "");
+    setTitle(profile.title ?? "");
+    setFirstName(profile.first_name ?? "");
+    setLastName(profile.last_name ?? "");
+    setProvincialRank(profile.provincial_rank ?? "");
+    setGrandRank(profile.grand_rank ?? "");
+    setDateOfBirth(profile.date_of_birth ?? "");
+    setInitiationDate(profile.initiation_date ?? "");
+    setIsRoyalArch(!!profile.is_royal_arch);
+    setIsHonoraryMember(!!profile.is_honorary_member);
     setPhone(profile.phone ?? "");
   }, [profile]);
 
@@ -29,13 +39,20 @@ export default function MembersProfile() {
     e.preventDefault();
     if (!user) return;
     setBusy(true);
+    const composedName = [title, firstName.trim(), lastName.trim()].filter(Boolean).join(" ").trim();
     const { error } = await supabase
       .from("profiles")
       .update({
-        full_name: full_name.trim() || null,
-        rank: rank || null,
-        office: office.trim() || null,
-        joined_year: joined_year ? parseInt(joined_year, 10) : null,
+        title: title || null,
+        first_name: firstName.trim() || null,
+        last_name: lastName.trim() || null,
+        full_name: composedName || null,
+        provincial_rank: provincialRank.trim() || null,
+        grand_rank: grandRank.trim() || null,
+        date_of_birth: dateOfBirth || null,
+        initiation_date: initiationDate || null,
+        is_royal_arch: isRoyalArch,
+        is_honorary_member: isHonoraryMember,
         phone: phone.trim() || null,
       })
       .eq("id", user.id);
@@ -48,6 +65,10 @@ export default function MembersProfile() {
     }
   };
 
+  const inputCls =
+    "w-full bg-navy border border-gold/20 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-gold";
+  const labelCls = "block text-xs uppercase tracking-wider text-primary-foreground/60 mb-1";
+
   return (
     <MembersLayout>
       <div className="mb-6">
@@ -55,63 +76,115 @@ export default function MembersProfile() {
         <p className="text-sm text-primary-foreground/60">
           Status:{" "}
           <span className="text-gold uppercase tracking-wider text-xs">{profile?.status}</span>
+          {profile?.degree && (
+            <>
+              {" · "}Degree:{" "}
+              <span className="text-gold uppercase tracking-wider text-xs">
+                {profile.degree.replace(/_/g, " ")}
+              </span>
+            </>
+          )}
         </p>
       </div>
 
-      <form onSubmit={save} className="max-w-xl space-y-4 bg-navy-dark/60 border border-gold/15 rounded-sm p-6">
-        <div>
-          <label className="block text-xs uppercase tracking-wider text-primary-foreground/60 mb-1">Full name</label>
-          <input
-            value={full_name}
-            onChange={(e) => setFullName(e.target.value)}
-            className="w-full bg-navy border border-gold/20 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-gold"
-          />
-        </div>
-        <div className="grid grid-cols-2 gap-4">
+      <form
+        onSubmit={save}
+        className="max-w-2xl space-y-4 bg-navy-dark/60 border border-gold/15 rounded-sm p-6"
+      >
+        <div className="grid grid-cols-1 sm:grid-cols-[120px_1fr_1fr] gap-4">
           <div>
-            <label className="block text-xs uppercase tracking-wider text-primary-foreground/60 mb-1">Rank</label>
-            <select
-              value={rank}
-              onChange={(e) => setRank(e.target.value)}
-              className="w-full bg-navy border border-gold/20 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-gold"
-            >
+            <label className={labelCls}>Title</label>
+            <select value={title} onChange={(e) => setTitle(e.target.value)} className={inputCls}>
               <option value="">—</option>
-              {RANKS.map((r) => (
-                <option key={r} value={r}>
-                  {r}
+              {TITLES.map((t) => (
+                <option key={t} value={t}>
+                  {t}
                 </option>
               ))}
             </select>
           </div>
           <div>
-            <label className="block text-xs uppercase tracking-wider text-primary-foreground/60 mb-1">Joined year</label>
+            <label className={labelCls}>First name</label>
+            <input value={firstName} onChange={(e) => setFirstName(e.target.value)} className={inputCls} />
+          </div>
+          <div>
+            <label className={labelCls}>Last name</label>
+            <input value={lastName} onChange={(e) => setLastName(e.target.value)} className={inputCls} />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className={labelCls}>Provincial rank</label>
             <input
-              type="number"
-              min={1949}
-              max={new Date().getFullYear()}
-              value={joined_year}
-              onChange={(e) => setJoinedYear(e.target.value)}
-              className="w-full bg-navy border border-gold/20 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-gold"
+              value={provincialRank}
+              onChange={(e) => setProvincialRank(e.target.value)}
+              placeholder="e.g. PPrJGW"
+              className={inputCls}
+            />
+          </div>
+          <div>
+            <label className={labelCls}>Grand rank</label>
+            <input
+              value={grandRank}
+              onChange={(e) => setGrandRank(e.target.value)}
+              placeholder="e.g. PAGDC"
+              className={inputCls}
             />
           </div>
         </div>
-        <div>
-          <label className="block text-xs uppercase tracking-wider text-primary-foreground/60 mb-1">Office</label>
-          <input
-            value={office}
-            onChange={(e) => setOffice(e.target.value)}
-            placeholder="e.g. Senior Warden"
-            className="w-full bg-navy border border-gold/20 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-gold"
-          />
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className={labelCls}>Date of birth</label>
+            <input
+              type="date"
+              value={dateOfBirth}
+              onChange={(e) => setDateOfBirth(e.target.value)}
+              className={inputCls}
+            />
+          </div>
+          <div>
+            <label className={labelCls}>Initiation / joining date</label>
+            <input
+              type="date"
+              value={initiationDate}
+              onChange={(e) => setInitiationDate(e.target.value)}
+              className={inputCls}
+            />
+          </div>
         </div>
+
         <div>
-          <label className="block text-xs uppercase tracking-wider text-primary-foreground/60 mb-1">Phone (optional)</label>
-          <input
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            className="w-full bg-navy border border-gold/20 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-gold"
-          />
+          <label className={labelCls}>Phone (optional)</label>
+          <input value={phone} onChange={(e) => setPhone(e.target.value)} className={inputCls} />
         </div>
+
+        <div className="flex flex-wrap gap-6 pt-2">
+          <label className="flex items-center gap-2 text-sm text-primary-foreground/80">
+            <input
+              type="checkbox"
+              checked={isRoyalArch}
+              onChange={(e) => setIsRoyalArch(e.target.checked)}
+              className="accent-gold w-4 h-4"
+            />
+            Royal Arch
+          </label>
+          <label className="flex items-center gap-2 text-sm text-primary-foreground/80">
+            <input
+              type="checkbox"
+              checked={isHonoraryMember}
+              onChange={(e) => setIsHonoraryMember(e.target.checked)}
+              className="accent-gold w-4 h-4"
+            />
+            Honorary member
+          </label>
+        </div>
+
+        <p className="text-xs text-primary-foreground/50 pt-2 border-t border-gold/10">
+          Degree, Past Master status and active/pending status can only be changed by an admin.
+        </p>
+
         <button
           disabled={busy}
           className="bg-gold-shimmer text-accent-foreground px-5 py-2 rounded-sm text-sm font-semibold flex items-center gap-2 disabled:opacity-50"
