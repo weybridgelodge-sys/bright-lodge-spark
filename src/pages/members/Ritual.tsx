@@ -2,12 +2,19 @@ import { useEffect, useState } from "react";
 import MembersLayout from "@/components/members/MembersLayout";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { BookOpen, Upload, Trash2, Download, Loader2, ShieldCheck, Clock } from "lucide-react";
+import { BookOpen, Upload, Trash2, Download, Loader2, ShieldCheck, Clock, Eye } from "lucide-react";
 import { toast } from "sonner";
 
 type Degree = "entered_apprentice" | "fellow_craft" | "master_mason" | "installed_master";
 
 const DEGREES: Degree[] = ["entered_apprentice", "fellow_craft", "master_mason", "installed_master"];
+
+const DEGREE_LEVEL: Record<Degree, number> = {
+  entered_apprentice: 1,
+  fellow_craft: 2,
+  master_mason: 3,
+  installed_master: 4,
+};
 
 const DEGREE_LABEL: Record<Degree, string> = {
   entered_apprentice: "Entered Apprentice",
@@ -31,6 +38,9 @@ export default function MembersRitual() {
   const { isAdmin, user, profile } = useAuth();
   const [docs, setDocs] = useState<Doc[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // admin "preview as member" toggle — null = full admin view
+  const [previewDegree, setPreviewDegree] = useState<Degree | null>(null);
 
   // upload form
   const [title, setTitle] = useState("");
@@ -111,6 +121,11 @@ export default function MembersRitual() {
   const myDegree = (profile as { degree?: Degree } | null)?.degree ?? "entered_apprentice";
   const isPastMaster = (profile as { is_past_master?: boolean } | null)?.is_past_master ?? false;
 
+  const visibleDocs =
+    isAdmin && previewDegree
+      ? docs.filter((d) => DEGREE_LEVEL[d.required_degree] <= DEGREE_LEVEL[previewDegree])
+      : docs;
+
   return (
     <MembersLayout>
       <div className="mb-8 flex items-start justify-between gap-3 border-b border-gold/15 pb-4">
@@ -131,6 +146,31 @@ export default function MembersRitual() {
           <ShieldCheck className="h-3.5 w-3.5" /> Secure Archive
         </div>
       </div>
+
+      {isAdmin && (
+        <div className="mb-6 bg-gold/5 border border-gold/20 rounded-sm p-3 flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-2 text-gold text-[11px] font-semibold uppercase tracking-wider">
+            <Eye className="w-3.5 h-3.5" /> Preview as member
+          </div>
+          <select
+            value={previewDegree ?? ""}
+            onChange={(e) => setPreviewDegree((e.target.value || null) as Degree | null)}
+            className="bg-navy border border-gold/20 rounded-sm px-3 py-1.5 text-xs focus:outline-none focus:border-gold text-primary-foreground"
+          >
+            <option value="">Full admin view (all degrees)</option>
+            {DEGREES.map((d) => (
+              <option key={d} value={d}>
+                {DEGREE_LABEL[d]}
+              </option>
+            ))}
+          </select>
+          {previewDegree && (
+            <span className="text-[11px] text-primary-foreground/60">
+              Showing what a <span className="text-gold">{DEGREE_LABEL[previewDegree]}</span> would see.
+            </span>
+          )}
+        </div>
+      )}
 
       {isAdmin && (
         <form
@@ -198,13 +238,15 @@ export default function MembersRitual() {
         <div className="text-center py-12 text-primary-foreground/60 text-sm flex items-center justify-center gap-2">
           <Loader2 className="w-4 h-4 animate-spin" /> Validating credentials…
         </div>
-      ) : docs.length === 0 ? (
+      ) : visibleDocs.length === 0 ? (
         <p className="text-sm text-primary-foreground/50">
-          No ritual material is available at your current degree.
+          {isAdmin && previewDegree
+            ? `No ritual material visible to a ${DEGREE_LABEL[previewDegree]}.`
+            : "No ritual material is available at your current degree."}
         </p>
       ) : (
         <ul className="space-y-3">
-          {docs.map((d) => (
+          {visibleDocs.map((d) => (
             <li
               key={d.id}
               className="bg-navy-dark/60 border border-gold/15 rounded-sm p-4 flex items-start justify-between gap-3 hover:border-gold/30 transition-colors"
