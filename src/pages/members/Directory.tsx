@@ -35,20 +35,29 @@ export default function MembersDirectory() {
 
       const { data: a } = await supabase
         .from("officer_appointments")
-        .select("member_id, position:officer_positions(label, order_index)")
+        .select("member_id, position:officer_positions(label, order_index, is_progressive)")
         .eq("lodge_year", currentLodgeYear());
 
-      const map: Record<string, { label: string; order: number }[]> = {};
-      ((a as { member_id: string; position: { label: string; order_index: number } | null }[]) ?? []).forEach(
+      const map: Record<string, { label: string; order: number; isProgressive: boolean }[]> = {};
+      ((a as { member_id: string; position: { label: string; order_index: number; is_progressive: boolean } | null }[]) ?? []).forEach(
         (row) => {
           if (!row.position) return;
-          (map[row.member_id] ??= []).push({ label: row.position.label, order: row.position.order_index });
+          (map[row.member_id] ??= []).push({
+            label: row.position.label,
+            order: row.position.order_index,
+            isProgressive: row.position.is_progressive,
+          });
         }
       );
       const flat: Record<string, string> = {};
       Object.entries(map).forEach(([k, list]) => {
-        // Sort by order_index desc so progressive/senior offices come first
-        list.sort((a, b) => b.order - a.order);
+        // Progressive offices first, then by seniority (order_index desc)
+        list.sort((a, b) => {
+          if (a.isProgressive !== b.isProgressive) {
+            return a.isProgressive ? -1 : 1;
+          }
+          return b.order - a.order;
+        });
         flat[k] = list.map((x) => x.label).join(", ");
       });
       setOffices(flat);
