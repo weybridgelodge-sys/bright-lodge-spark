@@ -69,7 +69,7 @@ const Footer = () => {
             <img src={logo} alt="Weybridge Lodge No. 6787 crest — Freemasons Lodge in Guildford, Surrey" width={40} height={40} loading="lazy" decoding="async" className="absolute right-0 top-0 h-10 w-10" />
             <p className="font-serif text-primary-foreground text-sm font-semibold">Weybridge Lodge No. 6787</p>
             <p className="text-gold text-xs font-sans mb-3">Province of Surrey</p>
-            <p className="text-white/70 text-sm font-sans leading-relaxed mb-4 whitespace-nowrap">
+            <p className="text-white/70 text-sm font-sans leading-relaxed mb-4">
               A Freemasons Lodge in Guildford, Surrey. Consecrated 1949.
             </p>
             <img src={charterMark} alt="United Grand Lodge of England Charter Mark awarded to Weybridge Lodge" width={270} height={108} loading="lazy" decoding="async" className="h-24 w-auto brightness-0 invert opacity-95" />
