@@ -106,7 +106,9 @@ export default function MembersDocuments() {
     load();
   };
 
-  const filtered = docs.filter((d) => filter === "all" || d.category === filter);
+  const filtered = docs
+    .filter((d) => d.category !== "ritual")
+    .filter((d) => filter === "all" || d.category === filter);
 
   return (
     <MembersLayout>
