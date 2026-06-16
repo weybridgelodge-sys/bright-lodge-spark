@@ -86,6 +86,10 @@ Deno.serve(async (req) => {
       rank: b.rank ?? null,
       status: b.status,
       email: b.email,
+      passing_date: b.passing_date ?? null,
+      raising_date: b.raising_date ?? null,
+      joined_lodge_date: b.joined_lodge_date ?? null,
+      is_ugle_portal_registered: b.is_ugle_portal_registered ?? false,
     };
 
     let userId = b.id;
