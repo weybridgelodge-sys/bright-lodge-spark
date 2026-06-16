@@ -9,6 +9,13 @@ type Degree = "entered_apprentice" | "fellow_craft" | "master_mason" | "installe
 
 const DEGREES: Degree[] = ["entered_apprentice", "fellow_craft", "master_mason", "installed_master"];
 
+const DEGREE_LEVEL: Record<Degree, number> = {
+  entered_apprentice: 1,
+  fellow_craft: 2,
+  master_mason: 3,
+  installed_master: 4,
+};
+
 const DEGREE_LABEL: Record<Degree, string> = {
   entered_apprentice: "Entered Apprentice",
   fellow_craft: "Fellow Craft",
