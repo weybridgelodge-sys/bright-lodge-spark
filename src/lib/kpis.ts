@@ -28,6 +28,7 @@ export type KpiMember = {
   raising_date: string | null;
   joined_lodge_date: string | null;
   is_ugle_portal_registered: boolean;
+  provincial_rank: string | null;
   updated_at: string;
 };
 
