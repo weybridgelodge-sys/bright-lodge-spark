@@ -38,19 +38,19 @@ export default function MembersDirectory() {
         .select("member_id, position:officer_positions(label, order_index)")
         .eq("lodge_year", currentLodgeYear());
 
-      const map: Record<string, { label: string; order: number }> = {};
+      const map: Record<string, { label: string; order: number }[]> = {};
       ((a as { member_id: string; position: { label: string; order_index: number } | null }[]) ?? []).forEach(
         (row) => {
           if (!row.position) return;
-          const prev = map[row.member_id];
-          // Highest order_index wins (most senior office)
-          if (!prev || row.position.order_index > prev.order) {
-            map[row.member_id] = { label: row.position.label, order: row.position.order_index };
-          }
+          (map[row.member_id] ??= []).push({ label: row.position.label, order: row.position.order_index });
         }
       );
       const flat: Record<string, string> = {};
-      Object.entries(map).forEach(([k, v]) => (flat[k] = v.label));
+      Object.entries(map).forEach(([k, list]) => {
+        // Sort by order_index desc so progressive/senior offices come first
+        list.sort((a, b) => b.order - a.order);
+        flat[k] = list.map((x) => x.label).join(", ");
+      });
       setOffices(flat);
     })();
   }, []);
