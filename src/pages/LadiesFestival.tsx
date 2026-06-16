@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEO, { breadcrumbSchema } from "@/components/SEO";
+import { PaymentTestModeBanner } from "@/components/payments/PaymentTestModeBanner";
+import { StripeEmbeddedCheckoutPanel, type BookingLineItem } from "@/components/payments/StripeEmbeddedCheckout";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import {
@@ -134,6 +136,9 @@ const LadiesFestival = () => {
   const [guestCount, setGuestCount] = useState(1);
   const [guests, setGuests] = useState<GuestInfo[]>([{ name: "", starter: "", main: "", dessert: "" }]);
   const [formStep, setFormStep] = useState(1);
+  const [showCheckout, setShowCheckout] = useState(false);
+  const [coverFee, setCoverFee] = useState(false);
+  const [submitted, setSubmitted] = useState<BookingValues | null>(null);
 
   const form = useForm<BookingValues>({
     resolver: zodResolver(bookingSchema),
