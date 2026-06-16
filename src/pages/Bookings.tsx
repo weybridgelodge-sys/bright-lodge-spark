@@ -36,6 +36,7 @@ const Bookings = () => {
   const { toast } = useToast();
   const [step, setStep] = useState(1);
   const [showCheckout, setShowCheckout] = useState(false);
+  const [submissionStatus, setSubmissionStatus] = useState<"idle" | "submitting" | "meeting-only" | "apologies" | "error">("idle");
 
   // Step 1
   const [title, setTitle] = useState("");
