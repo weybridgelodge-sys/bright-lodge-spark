@@ -110,40 +110,44 @@ const Bookings = () => {
     ];
   }, [seatsToCharge]);
 
+  const submitNonPayment = async () => {
+    setSubmissionStatus("submitting");
+    try {
+      const { data, error } = await supabase.functions.invoke("save-meeting-response", {
+        body: {
+          event_key: "festive_board_april_2026",
+          event_label: "Festive Board — 15 April 2026",
+          contact_name: `${title} ${firstName} ${lastName}`.trim(),
+          contact_email: email,
+          contact_phone: phone,
+          meeting_option: meetingOption,
+          details: {
+            title, firstName, lastName, lodge,
+            meetingOption,
+            guestCount,
+            guests,
+            dietary,
+            paymentMethod,
+          },
+          environment: getStripeEnvironment(),
+        },
+      });
+      if (error || !data?.bookingId) {
+        throw new Error(error?.message || "Failed to save response");
+      }
+      setSubmissionStatus(meetingOption as "meeting-only" | "apologies");
+    } catch (err: any) {
+      setSubmissionStatus("error");
+      toast({ title: "Error", description: err?.message || "Could not save your response. Please try again.", variant: "destructive" });
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateStep1() || !validateStep2()) return;
 
     if (meetingOption === "apologies" || meetingOption === "meeting-only") {
-      setSubmissionStatus("submitting");
-      try {
-        const { data, error } = await supabase.functions.invoke("save-meeting-response", {
-          body: {
-            event_key: "festive_board_april_2026",
-            event_label: "Festive Board — 15 April 2026",
-            contact_name: `${title} ${firstName} ${lastName}`.trim(),
-            contact_email: email,
-            contact_phone: phone,
-            meeting_option: meetingOption,
-            details: {
-              title, firstName, lastName, lodge,
-              meetingOption,
-              guestCount,
-              guests,
-              dietary,
-              paymentMethod,
-            },
-            environment: getStripeEnvironment(),
-          },
-        });
-        if (error || !data?.bookingId) {
-          throw new Error(error?.message || "Failed to save response");
-        }
-        setSubmissionStatus(meetingOption);
-      } catch (err: any) {
-        setSubmissionStatus("error");
-        toast({ title: "Error", description: err?.message || "Could not save your response. Please try again.", variant: "destructive" });
-      }
+      await submitNonPayment();
       return;
     }
 
@@ -431,7 +435,14 @@ const Bookings = () => {
                       <button type="button" onClick={() => setStep(1)} className="border border-border text-foreground px-6 py-3 rounded-sm text-sm font-sans uppercase tracking-widest hover:border-gold hover:text-gold transition-colors">
                         Back
                       </button>
-                      <button type="button" onClick={() => { if (validateStep2()) setStep(3); }} className="bg-gold-shimmer text-accent-foreground px-8 py-3 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity">
+                      <button type="button" onClick={() => {
+                        if (!validateStep2()) return;
+                        if (meetingOption === "meeting-and-festive-board") {
+                          setStep(3);
+                        } else {
+                          submitNonPayment();
+                        }
+                      }} className="bg-gold-shimmer text-accent-foreground px-8 py-3 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity">
                         Next
                       </button>
                     </div>
