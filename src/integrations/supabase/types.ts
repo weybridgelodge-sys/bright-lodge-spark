@@ -350,7 +350,6 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      current_office_label: { Args: { _user_id: string }; Returns: string }
       current_user_degree_level: { Args: { _user_id: string }; Returns: number }
       degree_level: {
         Args: { _d: Database["public"]["Enums"]["masonic_degree"] }
