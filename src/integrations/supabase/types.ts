@@ -14,6 +14,75 @@ export type Database = {
   }
   public: {
     Tables: {
+      bookings: {
+        Row: {
+          contact_email: string
+          contact_name: string
+          contact_phone: string | null
+          created_at: string
+          currency: string
+          details: Json
+          environment: string
+          event_key: string
+          event_label: string
+          fee_pence: number
+          id: string
+          line_items: Json
+          paid_at: string | null
+          payment_status: string
+          stripe_payment_intent_id: string | null
+          stripe_session_id: string | null
+          subtotal_pence: number
+          total_pence: number
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          contact_email: string
+          contact_name: string
+          contact_phone?: string | null
+          created_at?: string
+          currency?: string
+          details?: Json
+          environment?: string
+          event_key: string
+          event_label: string
+          fee_pence?: number
+          id?: string
+          line_items?: Json
+          paid_at?: string | null
+          payment_status?: string
+          stripe_payment_intent_id?: string | null
+          stripe_session_id?: string | null
+          subtotal_pence?: number
+          total_pence?: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          contact_email?: string
+          contact_name?: string
+          contact_phone?: string | null
+          created_at?: string
+          currency?: string
+          details?: Json
+          environment?: string
+          event_key?: string
+          event_label?: string
+          fee_pence?: number
+          id?: string
+          line_items?: Json
+          paid_at?: string | null
+          payment_status?: string
+          stripe_payment_intent_id?: string | null
+          stripe_session_id?: string | null
+          subtotal_pence?: number
+          total_pence?: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       lodge_documents: {
         Row: {
           category: Database["public"]["Enums"]["doc_category"]
