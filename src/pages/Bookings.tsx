@@ -272,7 +272,26 @@ const Bookings = () => {
               </p>
             </motion.div>
 
-            {showCheckout ? (
+            {submissionStatus === "meeting-only" || submissionStatus === "apologies" ? (
+              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="bg-card rounded-sm border border-border shadow-lg p-5 sm:p-8 text-center space-y-6">
+                <div className="w-16 h-16 bg-gold/10 rounded-full flex items-center justify-center mx-auto">
+                  <CheckCircle className="w-8 h-8 text-gold" aria-hidden="true" />
+                </div>
+                <div className="space-y-4">
+                  <h3 className="text-xl font-serif text-foreground">
+                    {submissionStatus === "meeting-only" ? "Booking Confirmed" : "Apologies Recorded"}
+                  </h3>
+                  <p className="text-muted-foreground font-sans leading-relaxed whitespace-pre-line">
+                    {submissionStatus === "meeting-only"
+                      ? "Thank you for booking into our next meeting, we look forward to seeing you.\n\nSincerely and Fraternally,\nWM Weybridge Lodge 6787"
+                      : "Sorry to hear that you are unable to attend this meeting, your apologies will be duly recorded with the Secretary. We hope to see you at a future meeting.\n\nSincerely and Fraternally,\nWM Weybridge Lodge 6787"}
+                  </p>
+                </div>
+                <Link to="/" className="inline-flex items-center justify-center bg-gold-shimmer text-accent-foreground px-8 py-3 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity">
+                  Back to Home
+                </Link>
+              </motion.div>
+            ) : showCheckout ? (
               <div className="bg-card rounded-sm border border-border shadow-lg p-5 sm:p-8 space-y-4">
                 <div className="flex items-center justify-between">
                   <h3 className="text-lg font-serif text-foreground">Secure Card Payment</h3>
