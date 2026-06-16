@@ -111,6 +111,7 @@ const App = () => (
             <Route path="/members/admin" element={<ProtectedRoute adminOnly><MembersAdmin /></ProtectedRoute>} />
             <Route path="/members/events" element={<ProtectedRoute><EventsAdmin /></ProtectedRoute>} />
             <Route path="/members/officers-tracker" element={<ProgressionRoute><OfficersTracker /></ProgressionRoute>} />
+            <Route path="/members/kpis" element={<ProgressionRoute><Kpis /></ProgressionRoute>} />
 
 
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
