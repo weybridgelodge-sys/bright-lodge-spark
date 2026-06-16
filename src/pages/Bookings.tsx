@@ -36,7 +36,7 @@ const Bookings = () => {
   const { toast } = useToast();
   const [step, setStep] = useState(1);
   const [showCheckout, setShowCheckout] = useState(false);
-  const [submissionStatus, setSubmissionStatus] = useState<"idle" | "submitting" | "meeting-only" | "apologies" | "error">("idle");
+  const [submissionStatus, setSubmissionStatus] = useState<"idle" | "submitting" | "meeting-only" | "apologies" | "bank-transfer" | "cash-cheque" | "error">("idle");
 
   // Step 1
   const [title, setTitle] = useState("");
@@ -110,7 +110,7 @@ const Bookings = () => {
     ];
   }, [seatsToCharge]);
 
-  const submitNonPayment = async () => {
+  const saveBooking = async (finalStatus: "meeting-only" | "apologies" | "bank-transfer" | "cash-cheque") => {
     setSubmissionStatus("submitting");
     try {
       const { data, error } = await supabase.functions.invoke("save-meeting-response", {
@@ -128,6 +128,7 @@ const Bookings = () => {
             guests,
             dietary,
             paymentMethod,
+            totalPence,
           },
           environment: getStripeEnvironment(),
         },
@@ -135,7 +136,7 @@ const Bookings = () => {
       if (error || !data?.bookingId) {
         throw new Error(error?.message || "Failed to save response");
       }
-      setSubmissionStatus(meetingOption as "meeting-only" | "apologies");
+      setSubmissionStatus(finalStatus);
     } catch (err: any) {
       setSubmissionStatus("error");
       toast({ title: "Error", description: err?.message || "Could not save your response. Please try again.", variant: "destructive" });
@@ -147,7 +148,7 @@ const Bookings = () => {
     if (!validateStep1() || !validateStep2()) return;
 
     if (meetingOption === "apologies" || meetingOption === "meeting-only") {
-      await submitNonPayment();
+      await saveBooking(meetingOption);
       return;
     }
 
@@ -155,13 +156,8 @@ const Bookings = () => {
       toast({ title: "Choose a payment method", variant: "destructive" });
       return;
     }
-    if (paymentMethod !== "card") {
-      toast({
-        title: "Booking received",
-        description: paymentMethod === "bank-transfer"
-          ? "Please complete your bank transfer using the reference shown."
-          : "Please bring cash or cheque on the night.",
-      });
+    if (paymentMethod === "bank-transfer" || paymentMethod === "cash-cheque") {
+      await saveBooking(paymentMethod);
       return;
     }
     setShowCheckout(true);
@@ -276,20 +272,38 @@ const Bookings = () => {
               </p>
             </motion.div>
 
-            {submissionStatus === "meeting-only" || submissionStatus === "apologies" ? (
+            {submissionStatus === "meeting-only" || submissionStatus === "apologies" || submissionStatus === "bank-transfer" || submissionStatus === "cash-cheque" ? (
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="bg-card rounded-sm border border-border shadow-lg p-5 sm:p-8 text-center space-y-6">
                 <div className="w-16 h-16 bg-gold/10 rounded-full flex items-center justify-center mx-auto">
                   <CheckCircle className="w-8 h-8 text-gold" aria-hidden="true" />
                 </div>
                 <div className="space-y-4">
                   <h3 className="text-xl font-serif text-foreground">
-                    {submissionStatus === "meeting-only" ? "Booking Confirmed" : "Apologies Recorded"}
+                    {submissionStatus === "apologies" ? "Apologies Recorded" : "Booking Confirmed"}
                   </h3>
-                  <p className="text-muted-foreground font-sans leading-relaxed whitespace-pre-line">
-                    {submissionStatus === "meeting-only"
-                      ? "Thank you for booking into our next meeting, we look forward to seeing you.\n\nSincerely and Fraternally,\nWM Weybridge Lodge 6787"
-                      : "Sorry to hear that you are unable to attend this meeting, your apologies will be duly recorded with the Secretary. We hope to see you at a future meeting.\n\nSincerely and Fraternally,\nWM Weybridge Lodge 6787"}
-                  </p>
+                  <div className="text-muted-foreground font-sans leading-relaxed whitespace-pre-line text-left sm:text-center">
+                    {submissionStatus === "meeting-only" && (
+                      <p>{"Thank you for booking into our next meeting, we look forward to seeing you.\n\nSincerely and Fraternally,\nWM Weybridge Lodge 6787"}</p>
+                    )}
+                    {submissionStatus === "apologies" && (
+                      <p>{"Sorry to hear that you are unable to attend this meeting, your apologies will be duly recorded with the Secretary. We hope to see you at a future meeting.\n\nSincerely and Fraternally,\nWM Weybridge Lodge 6787"}</p>
+                    )}
+                    {submissionStatus === "bank-transfer" && (
+                      <div className="space-y-4">
+                        <p>Thank you for your booking. Please send the full dining amount of <strong className="text-foreground">{fmtGbp(totalPence)}</strong> to the following bank account:</p>
+                        <div className="bg-muted/50 rounded-sm p-4 text-sm text-foreground space-y-1">
+                          <div><span className="text-muted-foreground">Account name:</span> Weybridge Lodge No 6787</div>
+                          <div><span className="text-muted-foreground">Sort code:</span> 30-99-80</div>
+                          <div><span className="text-muted-foreground">Account no:</span> 14878862</div>
+                          <div><span className="text-muted-foreground">Reference:</span> Dining + {lastName || "Your Surname"}</div>
+                        </div>
+                        <p>{"We look forward to seeing you on the night.\n\nSincerely and Fraternally,\nWM Weybridge Lodge 6787"}</p>
+                      </div>
+                    )}
+                    {submissionStatus === "cash-cheque" && (
+                      <p>{`Thank you for your booking. Please see the Treasurer on the night to settle your dining fee of ${fmtGbp(totalPence)} by cash or cheque (cheques payable to "Weybridge Lodge No 6787").\n\nWe look forward to seeing you on the night.\n\nSincerely and Fraternally,\nWM Weybridge Lodge 6787`}</p>
+                    )}
+                  </div>
                 </div>
                 <Link to="/" className="inline-flex items-center justify-center bg-gold-shimmer text-accent-foreground px-8 py-3 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity">
                   Back to Home
@@ -444,7 +458,7 @@ const Bookings = () => {
                         if (meetingOption === "meeting-and-festive-board") {
                           setStep(3);
                         } else {
-                          submitNonPayment();
+                          saveBooking(meetingOption as "meeting-only" | "apologies");
                         }
                       }} className="bg-gold-shimmer text-accent-foreground px-8 py-3 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity">
                         Next
