@@ -215,6 +215,10 @@ export default function MembersAdmin() {
       is_honorary_member: form.is_honorary_member,
       rank: form.rank.trim() || null,
       status: form.status,
+      is_ugle_portal_registered: form.is_ugle_portal_registered,
+      passing_date: form.passing_date || null,
+      raising_date: form.raising_date || null,
+      joined_lodge_date: form.joined_lodge_date || null,
     };
     if (form.id) payload.id = form.id;
 
