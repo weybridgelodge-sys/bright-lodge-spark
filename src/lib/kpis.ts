@@ -118,7 +118,7 @@ export function snapshot(members: KpiMember[]) {
   const multipleLabel = ["", "single", "double", "triple", "quadruple", "quintuple"][lastSameDay.length] ?? `${lastSameDay.length}-up`;
 
   const raCount = subscribing.filter((m) => m.is_royal_arch).length;
-  const lightBlues = subscribing.filter((m) => !m.is_royal_arch && !m.is_past_master);
+  const lightBlues = subscribing.filter((m) => !m.provincial_rank || !m.provincial_rank.trim());
 
   return {
     subscribingCount: subscribing.length,
