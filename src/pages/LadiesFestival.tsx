@@ -1089,22 +1089,66 @@ const LadiesFestival = () => {
                           type="submit"
                           className="w-full sm:flex-1 bg-gold-shimmer text-accent-foreground py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity h-auto"
                         >
-                          <Send className="w-4 h-4 mr-2" /> Submit Booking
+                          <CreditCard className="w-4 h-4 mr-2" /> Continue to Payment
                         </Button>
                       </div>
 
-                      <p className="text-xs text-muted-foreground font-sans text-center">
-                        Your details will be emailed to the festival organisers. We won't store or share your data.
-                      </p>
+                      <div className="border-t border-border pt-4 space-y-2">
+                        <label className="flex items-start gap-3 cursor-pointer">
+                          <input type="checkbox" checked={coverFee} onChange={(e) => setCoverFee(e.target.checked)} className="mt-1 accent-[hsl(var(--gold))]" />
+                          <span className="text-sm font-sans text-foreground">
+                            Add ~2% (£{(Math.ceil(grandTotal * 100 * 0.02) / 100).toFixed(2)}) to cover card processing fees
+                          </span>
+                        </label>
+                        <p className="text-xs text-muted-foreground font-sans text-center">
+                          You'll pay £{(totalPence / 100).toFixed(2)} securely by debit / credit card on the next step.
+                        </p>
+                      </div>
                     </div>
                   )}
 
                 </form>
               </Form>
+
+              {showCheckout && submitted && (
+                <div className="mt-6 bg-card rounded-sm border border-border shadow-lg p-5 sm:p-8 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-serif text-foreground">Secure Card Payment</h3>
+                    <button onClick={() => setShowCheckout(false)} className="text-sm text-muted-foreground hover:text-foreground underline">
+                      Back
+                    </button>
+                  </div>
+                  <p className="text-sm text-muted-foreground font-sans">
+                    Total: <strong className="text-foreground">£{(totalPence / 100).toFixed(2)}</strong>
+                    {feePence > 0 && <> (includes £{(feePence / 100).toFixed(2)} card fee)</>}
+                  </p>
+                  <StripeEmbeddedCheckoutPanel
+                    event_key="ladies_festival_2026"
+                    event_label="Ladies Festival 2026 — 22 Aug"
+                    contact_name={submitted.name}
+                    contact_email={submitted.email}
+                    contact_phone={submitted.phone}
+                    cover_fee={coverFee}
+                    line_items={buildLineItems()}
+                    details={{
+                      guestCount,
+                      guests,
+                      seatingPreference: submitted.seatingPreference,
+                      dietary: submitted.dietary,
+                      message: submitted.message,
+                      wineOrders,
+                      beerOrders,
+                    }}
+                    return_url={`${window.location.origin}/checkout/return?session_id={CHECKOUT_SESSION_ID}`}
+                    onError={(msg) => toast({ title: "Checkout error", description: msg, variant: "destructive" })}
+                  />
+                </div>
+              )}
             </motion.div>
           </div>
         </section>
       </main>
+
 
       <Footer />
     </div>
