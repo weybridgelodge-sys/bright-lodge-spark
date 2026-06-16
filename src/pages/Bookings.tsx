@@ -332,13 +332,17 @@ const Bookings = () => {
                 <form onSubmit={handleSubmit} className="bg-card rounded-sm border border-border shadow-lg p-5 sm:p-8">
                   {/* Step indicators */}
                   <div className="flex items-center justify-center gap-2 mb-8" role="tablist" aria-label="Form steps">
-                    {[1, 2, 3].map((s) => (
-                      <button key={s} type="button" onClick={() => setStep(s)} role="tab" aria-selected={step === s} aria-label={`Step ${s}`}
-                        className={`w-8 h-8 rounded-full text-xs font-sans font-semibold transition-colors ${
-                          step === s ? "bg-gold text-accent-foreground" : step > s ? "bg-gold/30 text-foreground" : "bg-muted text-muted-foreground"
-                        }`}
-                      >{s}</button>
-                    ))}
+                    {[1, 2, 3].map((s) => {
+                      const hidePayment = s === 3 && meetingOption !== "meeting-and-festive-board";
+                      if (hidePayment) return null;
+                      return (
+                        <button key={s} type="button" onClick={() => setStep(s)} role="tab" aria-selected={step === s} aria-label={`Step ${s}`}
+                          className={`w-8 h-8 rounded-full text-xs font-sans font-semibold transition-colors ${
+                            step === s ? "bg-gold text-accent-foreground" : step > s ? "bg-gold/30 text-foreground" : "bg-muted text-muted-foreground"
+                          }`}
+                        >{s}</button>
+                      );
+                    })}
                   </div>
 
                   {/* Step 1 */}
