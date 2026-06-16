@@ -213,13 +213,8 @@ function EventEditor({ id, onBack, onDeleted }: { id: string; onBack: () => void
       }
 
       toast.success("Meeting saved");
-      const fresh = await fetchEventBundle(event.id);
-      if (fresh) {
-        setEvent(fresh.event);
-        setCourses(fresh.courses);
-        setOptions(fresh.diningOptions);
-      }
-    } catch (err: any) {
+      onBack();
+      return;
       toast.error(err.message || "Could not save meeting");
     } finally {
       setSaving(false);
