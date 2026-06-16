@@ -440,7 +440,7 @@ const Bookings = () => {
                         if (meetingOption === "meeting-and-festive-board") {
                           setStep(3);
                         } else {
-                          submitNonPayment();
+                          saveBooking(meetingOption as "meeting-only" | "apologies");
                         }
                       }} className="bg-gold-shimmer text-accent-foreground px-8 py-3 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity">
                         Next
