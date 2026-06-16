@@ -23,6 +23,7 @@ import VideoHub from "./pages/VideoHub";
 import MasonicLinks from "./pages/MasonicLinks";
 import Bookings from "./pages/Bookings";
 import OfficersJewels from "./pages/OfficersJewels";
+import CheckoutReturn from "./pages/CheckoutReturn";
 const News = lazy(() => import("./pages/News"));
 const SanityPost = lazy(() => import("./pages/news/SanityPost"));
 import Anniversary75th from "./pages/news/Anniversary75th";
@@ -83,6 +84,7 @@ const App = () => (
             <Route path="/masonic-links" element={<MasonicLinks />} />
             <Route path="/bookings" element={<Bookings />} />
             <Route path="/officers-jewels" element={<OfficersJewels />} />
+            <Route path="/checkout/return" element={<CheckoutReturn />} />
             <Route path="/events" element={<Events />} />
             <Route path="/ladies-festival" element={<LadiesFestival />} />
             <Route path="/ladies-night" element={<LadiesFestival />} />

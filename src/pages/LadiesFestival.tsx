@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEO, { breadcrumbSchema } from "@/components/SEO";
+import { PaymentTestModeBanner } from "@/components/payments/PaymentTestModeBanner";
+import { StripeEmbeddedCheckoutPanel, type BookingLineItem } from "@/components/payments/StripeEmbeddedCheckout";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import {
@@ -134,6 +136,9 @@ const LadiesFestival = () => {
   const [guestCount, setGuestCount] = useState(1);
   const [guests, setGuests] = useState<GuestInfo[]>([{ name: "", starter: "", main: "", dessert: "" }]);
   const [formStep, setFormStep] = useState(1);
+  const [showCheckout, setShowCheckout] = useState(false);
+  const [coverFee, setCoverFee] = useState(false);
+  const [submitted, setSubmitted] = useState<BookingValues | null>(null);
 
   const form = useForm<BookingValues>({
     resolver: zodResolver(bookingSchema),
@@ -201,57 +206,32 @@ const LadiesFestival = () => {
   const ticketSubtotal = guestCount * TICKET_PRICE;
   const drinksTotal = wineTotal + beerTotal;
   const grandTotal = ticketSubtotal + drinksTotal;
+  const subtotalPence = grandTotal * 100;
+  const feePence = coverFee ? Math.ceil(subtotalPence * 0.02) : 0;
+  const totalPence = subtotalPence + feePence;
+
+  const buildLineItems = (): BookingLineItem[] => {
+    const items: BookingLineItem[] = [
+      { label: `Ladies Festival 2026 — ticket`, qty: guestCount, unit_price_pence: TICKET_PRICE * 100 },
+    ];
+    for (const [id, qty] of Object.entries(wineOrders)) {
+      if (qty > 0) {
+        const w = wineOptions.find((x) => x.id === id);
+        if (w) items.push({ label: w.name, qty, unit_price_pence: w.price * 100 });
+      }
+    }
+    for (const [id, qty] of Object.entries(beerOrders)) {
+      if (qty > 0) {
+        const b = beerOptions.find((x) => x.id === id);
+        if (b) items.push({ label: b.name, qty, unit_price_pence: b.price * 100 });
+      }
+    }
+    return items;
+  };
+
   const onSubmit = (data: BookingValues) => {
-    const wineLines = Object.entries(wineOrders)
-      .filter(([, qty]) => qty > 0)
-      .map(([id, qty]) => {
-        const wine = wineOptions.find((w) => w.id === id);
-        return wine ? `  ${wine.name} x${qty} (£${wine.price * qty})` : "";
-      })
-      .join("\n");
-
-    const beerLines = Object.entries(beerOrders)
-      .filter(([, qty]) => qty > 0)
-      .map(([id, qty]) => {
-        const beer = beerOptions.find((b) => b.id === id);
-        return beer ? `  ${beer.name} x${qty} (£${beer.price * qty})` : "";
-      })
-      .join("\n");
-
-    const guestLines = guests
-      .map((g, i) => {
-        const starterLabel = menuChoices.starter.find((c) => c.value === g.starter)?.label || "Not selected";
-        const mainLabel = menuChoices.main.find((c) => c.value === g.main)?.label || "Not selected";
-        const dessertLabel = menuChoices.dessert.find((c) => c.value === g.dessert)?.label || "Not selected";
-        return `  Guest ${i + 1}: ${g.name || "Name not provided"}\n    Starter: ${starterLabel}\n    Main: ${mainLabel}\n    Dessert: ${dessertLabel}`;
-      })
-      .join("\n");
-
-    const subject = encodeURIComponent("Ladies Festival 2026 – Booking");
-    const body = encodeURIComponent(
-      [
-        `Name: ${data.name}`,
-        `Email: ${data.email}`,
-        data.phone ? `Phone: ${data.phone}` : null,
-        `Number of Guests: ${guestCount}`,
-        `Ticket Subtotal: £${ticketSubtotal}`,
-        `\nGuests & Menu Choices:\n${guestLines}`,
-        data.seatingPreference ? `\nTable Seating Preference: ${data.seatingPreference}` : null,
-        data.dietary ? `\nDietary Requirements: ${data.dietary}` : null,
-        wineLines ? `\nWine Pre-Order:\n${wineLines}` : null,
-        beerLines ? `\nBeer Pre-Order:\n${beerLines}` : null,
-        drinksTotal > 0 ? `\nDrinks Total: £${drinksTotal}` : null,
-        `\nGrand Total: £${grandTotal}`,
-        data.message ? `\nMessage: ${data.message}` : null,
-      ]
-        .filter(Boolean)
-        .join("\n")
-    );
-    window.location.href = `mailto:secretary@astolat.org?subject=${subject}&body=${body}`;
-    toast({
-      title: "Opening your email client…",
-      description: "If nothing happens, please email secretary@astolat.org directly.",
-    });
+    setSubmitted(data);
+    setShowCheckout(true);
   };
 
   const goToStep = async (step: number) => {
@@ -1109,22 +1089,66 @@ const LadiesFestival = () => {
                           type="submit"
                           className="w-full sm:flex-1 bg-gold-shimmer text-accent-foreground py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity h-auto"
                         >
-                          <Send className="w-4 h-4 mr-2" /> Submit Booking
+                          <CreditCard className="w-4 h-4 mr-2" /> Continue to Payment
                         </Button>
                       </div>
 
-                      <p className="text-xs text-muted-foreground font-sans text-center">
-                        Your details will be emailed to the festival organisers. We won't store or share your data.
-                      </p>
+                      <div className="border-t border-border pt-4 space-y-2">
+                        <label className="flex items-start gap-3 cursor-pointer">
+                          <input type="checkbox" checked={coverFee} onChange={(e) => setCoverFee(e.target.checked)} className="mt-1 accent-[hsl(var(--gold))]" />
+                          <span className="text-sm font-sans text-foreground">
+                            Add ~2% (£{(Math.ceil(grandTotal * 100 * 0.02) / 100).toFixed(2)}) to cover card processing fees
+                          </span>
+                        </label>
+                        <p className="text-xs text-muted-foreground font-sans text-center">
+                          You'll pay £{(totalPence / 100).toFixed(2)} securely by debit / credit card on the next step.
+                        </p>
+                      </div>
                     </div>
                   )}
 
                 </form>
               </Form>
+
+              {showCheckout && submitted && (
+                <div className="mt-6 bg-card rounded-sm border border-border shadow-lg p-5 sm:p-8 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-serif text-foreground">Secure Card Payment</h3>
+                    <button onClick={() => setShowCheckout(false)} className="text-sm text-muted-foreground hover:text-foreground underline">
+                      Back
+                    </button>
+                  </div>
+                  <p className="text-sm text-muted-foreground font-sans">
+                    Total: <strong className="text-foreground">£{(totalPence / 100).toFixed(2)}</strong>
+                    {feePence > 0 && <> (includes £{(feePence / 100).toFixed(2)} card fee)</>}
+                  </p>
+                  <StripeEmbeddedCheckoutPanel
+                    event_key="ladies_festival_2026"
+                    event_label="Ladies Festival 2026 — 22 Aug"
+                    contact_name={submitted.name}
+                    contact_email={submitted.email}
+                    contact_phone={submitted.phone}
+                    cover_fee={coverFee}
+                    line_items={buildLineItems()}
+                    details={{
+                      guestCount,
+                      guests,
+                      seatingPreference: submitted.seatingPreference,
+                      dietary: submitted.dietary,
+                      message: submitted.message,
+                      wineOrders,
+                      beerOrders,
+                    }}
+                    return_url={`${window.location.origin}/checkout/return?session_id={CHECKOUT_SESSION_ID}`}
+                    onError={(msg) => toast({ title: "Checkout error", description: msg, variant: "destructive" })}
+                  />
+                </div>
+              )}
             </motion.div>
           </div>
         </section>
       </main>
+
 
       <Footer />
     </div>
