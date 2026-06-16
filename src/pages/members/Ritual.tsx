@@ -288,7 +288,7 @@ export default function MembersRitual() {
                   )}
                   <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-[11px] text-primary-foreground/55">
                     <span className="text-gold bg-gold/5 px-2 py-0.5 rounded-sm border border-gold/15">
-                      {DEGREE_LABEL[d.required_degree]}
+                      {d.is_general ? GENERAL_LABEL : DEGREE_LABEL[d.required_degree]}
                     </span>
                     <span className="flex items-center gap-1">
                       <Clock className="w-3 h-3" />
