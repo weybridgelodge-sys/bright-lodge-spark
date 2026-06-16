@@ -295,6 +295,7 @@ export type Database = {
           file_path: string
           file_size_bytes: number | null
           id: string
+          is_general: boolean
           required_degree: Database["public"]["Enums"]["masonic_degree"]
           title: string
           updated_at: string
@@ -306,6 +307,7 @@ export type Database = {
           file_path: string
           file_size_bytes?: number | null
           id?: string
+          is_general?: boolean
           required_degree?: Database["public"]["Enums"]["masonic_degree"]
           title: string
           updated_at?: string
@@ -317,6 +319,7 @@ export type Database = {
           file_path?: string
           file_size_bytes?: number | null
           id?: string
+          is_general?: boolean
           required_degree?: Database["public"]["Enums"]["masonic_degree"]
           title?: string
           updated_at?: string
