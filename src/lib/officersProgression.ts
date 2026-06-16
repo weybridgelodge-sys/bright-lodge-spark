@@ -50,6 +50,7 @@ export const NON_PROGRESSIVE_ORDER = [
   "almoner",
   "charity_steward",
   "mentor",
+  "membership_officer",
   "tyler",
   "assistant_tyler",
 ] as const;
