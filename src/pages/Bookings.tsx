@@ -110,7 +110,7 @@ const Bookings = () => {
     ];
   }, [seatsToCharge]);
 
-  const submitNonPayment = async () => {
+  const saveBooking = async (finalStatus: "meeting-only" | "apologies" | "bank-transfer" | "cash-cheque") => {
     setSubmissionStatus("submitting");
     try {
       const { data, error } = await supabase.functions.invoke("save-meeting-response", {
@@ -128,6 +128,7 @@ const Bookings = () => {
             guests,
             dietary,
             paymentMethod,
+            totalPence,
           },
           environment: getStripeEnvironment(),
         },
@@ -135,7 +136,7 @@ const Bookings = () => {
       if (error || !data?.bookingId) {
         throw new Error(error?.message || "Failed to save response");
       }
-      setSubmissionStatus(meetingOption as "meeting-only" | "apologies");
+      setSubmissionStatus(finalStatus);
     } catch (err: any) {
       setSubmissionStatus("error");
       toast({ title: "Error", description: err?.message || "Could not save your response. Please try again.", variant: "destructive" });
@@ -147,7 +148,7 @@ const Bookings = () => {
     if (!validateStep1() || !validateStep2()) return;
 
     if (meetingOption === "apologies" || meetingOption === "meeting-only") {
-      await submitNonPayment();
+      await saveBooking(meetingOption);
       return;
     }
 
@@ -155,13 +156,8 @@ const Bookings = () => {
       toast({ title: "Choose a payment method", variant: "destructive" });
       return;
     }
-    if (paymentMethod !== "card") {
-      toast({
-        title: "Booking received",
-        description: paymentMethod === "bank-transfer"
-          ? "Please complete your bank transfer using the reference shown."
-          : "Please bring cash or cheque on the night.",
-      });
+    if (paymentMethod === "bank-transfer" || paymentMethod === "cash-cheque") {
+      await saveBooking(paymentMethod);
       return;
     }
     setShowCheckout(true);
