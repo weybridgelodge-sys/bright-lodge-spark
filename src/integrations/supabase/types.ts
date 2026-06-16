@@ -211,54 +211,78 @@ export type Database = {
         Row: {
           avatar_url: string | null
           created_at: string
+          date_of_birth: string | null
           degree: Database["public"]["Enums"]["masonic_degree"]
           email: string | null
+          first_name: string | null
           full_name: string | null
+          grand_rank: string | null
           id: string
           initiation_date: string | null
+          is_honorary_member: boolean
           is_past_master: boolean
+          is_royal_arch: boolean
           joined_year: number | null
+          last_name: string | null
           mother_lodge: string | null
           office: string | null
           phone: string | null
+          provincial_rank: string | null
           rank: string | null
           status: Database["public"]["Enums"]["member_status"]
+          title: string | null
           ugle_reg_number: string | null
           updated_at: string
         }
         Insert: {
           avatar_url?: string | null
           created_at?: string
+          date_of_birth?: string | null
           degree?: Database["public"]["Enums"]["masonic_degree"]
           email?: string | null
+          first_name?: string | null
           full_name?: string | null
+          grand_rank?: string | null
           id: string
           initiation_date?: string | null
+          is_honorary_member?: boolean
           is_past_master?: boolean
+          is_royal_arch?: boolean
           joined_year?: number | null
+          last_name?: string | null
           mother_lodge?: string | null
           office?: string | null
           phone?: string | null
+          provincial_rank?: string | null
           rank?: string | null
           status?: Database["public"]["Enums"]["member_status"]
+          title?: string | null
           ugle_reg_number?: string | null
           updated_at?: string
         }
         Update: {
           avatar_url?: string | null
           created_at?: string
+          date_of_birth?: string | null
           degree?: Database["public"]["Enums"]["masonic_degree"]
           email?: string | null
+          first_name?: string | null
           full_name?: string | null
+          grand_rank?: string | null
           id?: string
           initiation_date?: string | null
+          is_honorary_member?: boolean
           is_past_master?: boolean
+          is_royal_arch?: boolean
           joined_year?: number | null
+          last_name?: string | null
           mother_lodge?: string | null
           office?: string | null
           phone?: string | null
+          provincial_rank?: string | null
           rank?: string | null
           status?: Database["public"]["Enums"]["member_status"]
+          title?: string | null
           ugle_reg_number?: string | null
           updated_at?: string
         }
