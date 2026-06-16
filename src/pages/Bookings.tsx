@@ -6,9 +6,11 @@ import { PaymentTestModeBanner } from "@/components/payments/PaymentTestModeBann
 import { StripeEmbeddedCheckoutPanel, type BookingLineItem } from "@/components/payments/StripeEmbeddedCheckout";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { Calendar, Clock, MapPin, Shirt, CalendarClock, UtensilsCrossed } from "lucide-react";
+import { Calendar, Clock, MapPin, Shirt, CalendarClock, UtensilsCrossed, CheckCircle, Loader2 } from "lucide-react";
 import { useState, useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { getStripeEnvironment } from "@/lib/stripe";
 
 const meetingDetails = [
   { icon: Calendar, label: "Meeting Date", value: "Wednesday, 15th April 2026" },
@@ -34,6 +36,7 @@ const Bookings = () => {
   const { toast } = useToast();
   const [step, setStep] = useState(1);
   const [showCheckout, setShowCheckout] = useState(false);
+  const [submissionStatus, setSubmissionStatus] = useState<"idle" | "submitting" | "meeting-only" | "apologies" | "error">("idle");
 
   // Step 1
   const [title, setTitle] = useState("");
@@ -107,19 +110,45 @@ const Bookings = () => {
     ];
   }, [seatsToCharge]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateStep1() || !validateStep2()) return;
+
+    if (meetingOption === "apologies" || meetingOption === "meeting-only") {
+      setSubmissionStatus("submitting");
+      try {
+        const { data, error } = await supabase.functions.invoke("save-meeting-response", {
+          body: {
+            event_key: "festive_board_april_2026",
+            event_label: "Festive Board — 15 April 2026",
+            contact_name: `${title} ${firstName} ${lastName}`.trim(),
+            contact_email: email,
+            contact_phone: phone,
+            meeting_option: meetingOption,
+            details: {
+              title, firstName, lastName, lodge,
+              meetingOption,
+              guestCount,
+              guests,
+              dietary,
+              paymentMethod,
+            },
+            environment: getStripeEnvironment(),
+          },
+        });
+        if (error || !data?.bookingId) {
+          throw new Error(error?.message || "Failed to save response");
+        }
+        setSubmissionStatus(meetingOption);
+      } catch (err: any) {
+        setSubmissionStatus("error");
+        toast({ title: "Error", description: err?.message || "Could not save your response. Please try again.", variant: "destructive" });
+      }
+      return;
+    }
+
     if (!paymentMethod) {
       toast({ title: "Choose a payment method", variant: "destructive" });
-      return;
-    }
-    if (meetingOption === "apologies") {
-      toast({ title: "Apologies recorded", description: "Thank you — we've noted your absence." });
-      return;
-    }
-    if (meetingOption === "meeting-only") {
-      toast({ title: "Booking received", description: "Thank you — your attendance has been noted." });
       return;
     }
     if (paymentMethod !== "card") {
@@ -243,7 +272,26 @@ const Bookings = () => {
               </p>
             </motion.div>
 
-            {showCheckout ? (
+            {submissionStatus === "meeting-only" || submissionStatus === "apologies" ? (
+              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="bg-card rounded-sm border border-border shadow-lg p-5 sm:p-8 text-center space-y-6">
+                <div className="w-16 h-16 bg-gold/10 rounded-full flex items-center justify-center mx-auto">
+                  <CheckCircle className="w-8 h-8 text-gold" aria-hidden="true" />
+                </div>
+                <div className="space-y-4">
+                  <h3 className="text-xl font-serif text-foreground">
+                    {submissionStatus === "meeting-only" ? "Booking Confirmed" : "Apologies Recorded"}
+                  </h3>
+                  <p className="text-muted-foreground font-sans leading-relaxed whitespace-pre-line">
+                    {submissionStatus === "meeting-only"
+                      ? "Thank you for booking into our next meeting, we look forward to seeing you.\n\nSincerely and Fraternally,\nWM Weybridge Lodge 6787"
+                      : "Sorry to hear that you are unable to attend this meeting, your apologies will be duly recorded with the Secretary. We hope to see you at a future meeting.\n\nSincerely and Fraternally,\nWM Weybridge Lodge 6787"}
+                  </p>
+                </div>
+                <Link to="/" className="inline-flex items-center justify-center bg-gold-shimmer text-accent-foreground px-8 py-3 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity">
+                  Back to Home
+                </Link>
+              </motion.div>
+            ) : showCheckout ? (
               <div className="bg-card rounded-sm border border-border shadow-lg p-5 sm:p-8 space-y-4">
                 <div className="flex items-center justify-between">
                   <h3 className="text-lg font-serif text-foreground">Secure Card Payment</h3>
