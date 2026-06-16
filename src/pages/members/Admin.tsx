@@ -2,10 +2,13 @@ import { useEffect, useState } from "react";
 import MembersLayout from "@/components/members/MembersLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Check, X, ShieldPlus, ShieldMinus, Plus, Trash2 } from "lucide-react";
+import { Check, X, ShieldPlus, ShieldMinus, Plus, Trash2, Pencil } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
 type Degree = "entered_apprentice" | "fellow_craft" | "master_mason";
+type Title = "Bro" | "W Bro" | "VW Bro" | "RW Bro";
+
+const TITLES: Title[] = ["Bro", "W Bro", "VW Bro", "RW Bro"];
 
 const DEGREE_LABEL: Record<Degree, string> = {
   entered_apprentice: "Entered Apprentice",
@@ -17,11 +20,21 @@ type Profile = {
   id: string;
   email: string | null;
   full_name: string | null;
+  title: Title | null;
+  first_name: string | null;
+  last_name: string | null;
+  provincial_rank: string | null;
+  grand_rank: string | null;
+  date_of_birth: string | null;
+  initiation_date: string | null;
+  rank: string | null;
   ugle_reg_number: string | null;
   mother_lodge: string | null;
   status: "pending" | "active" | "suspended";
   degree: Degree;
   is_past_master: boolean;
+  is_royal_arch: boolean;
+  is_honorary_member: boolean;
   created_at: string;
 };
 
@@ -35,6 +48,24 @@ type Notice = {
   created_at: string;
 };
 
+const EMPTY_FORM = {
+  id: "" as string,
+  email: "",
+  title: "" as "" | Title,
+  first_name: "",
+  last_name: "",
+  provincial_rank: "",
+  grand_rank: "",
+  date_of_birth: "",
+  initiation_date: "",
+  degree: "master_mason" as Degree,
+  is_past_master: false,
+  is_royal_arch: false,
+  is_honorary_member: false,
+  rank: "",
+  status: "active" as Profile["status"],
+};
+
 export default function MembersAdmin() {
   const { user } = useAuth();
   const [profiles, setProfiles] = useState<Profile[]>([]);
@@ -46,18 +77,19 @@ export default function MembersAdmin() {
   const [nBody, setNBody] = useState("");
   const [nDate, setNDate] = useState("");
 
-  // Add-member form
-  const [aEmail, setAEmail] = useState("");
-  const [aName, setAName] = useState("");
-  const [aInit, setAInit] = useState("");
-  const [aDegree, setADegree] = useState<Degree>("master_mason");
-  const [aPastMaster, setAPastMaster] = useState(false);
-  const [aRank, setARank] = useState("");
-  const [aBusy, setABusy] = useState(false);
+  // Member form (create + edit)
+  const [form, setForm] = useState(EMPTY_FORM);
+  const [busy, setBusy] = useState(false);
+  const isEdit = !!form.id;
 
   const load = async () => {
     const [{ data: p }, { data: r }, { data: n }] = await Promise.all([
-      supabase.from("profiles").select("id,email,full_name,ugle_reg_number,mother_lodge,status,degree,is_past_master,created_at").order("created_at", { ascending: false }),
+      supabase
+        .from("profiles")
+        .select(
+          "id,email,full_name,title,first_name,last_name,provincial_rank,grand_rank,date_of_birth,initiation_date,rank,ugle_reg_number,mother_lodge,status,degree,is_past_master,is_royal_arch,is_honorary_member,created_at"
+        )
+        .order("created_at", { ascending: false }),
       supabase.from("user_roles").select("user_id,role"),
       supabase.from("member_notices").select("*").order("created_at", { ascending: false }),
     ]);
@@ -74,24 +106,6 @@ export default function MembersAdmin() {
     if (error) toast.error(error.message);
     else {
       toast.success(`Member ${status}`);
-      load();
-    }
-  };
-
-  const setDegree = async (id: string, degree: Degree) => {
-    const { error } = await supabase.from("profiles").update({ degree }).eq("id", id);
-    if (error) toast.error(error.message);
-    else {
-      toast.success(`Degree set to ${DEGREE_LABEL[degree]}`);
-      load();
-    }
-  };
-
-  const togglePastMaster = async (id: string, value: boolean) => {
-    const { error } = await supabase.from("profiles").update({ is_past_master: value }).eq("id", id);
-    if (error) toast.error(error.message);
-    else {
-      toast.success(value ? "Marked as Past Master" : "Past Master removed");
       load();
     }
   };
@@ -134,39 +148,73 @@ export default function MembersAdmin() {
     load();
   };
 
-  const addMember = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!aEmail.trim() || !aName.trim()) return;
-    setABusy(true);
-    const { data, error } = await supabase.functions.invoke("admin-invite-member", {
-      body: {
-        email: aEmail.trim(),
-        full_name: aName.trim(),
-        initiation_date: aInit || null,
-        degree: aDegree,
-        is_past_master: aPastMaster,
-        rank: aRank.trim() || null,
-        status: "active",
-      },
+  const startEdit = (p: Profile) => {
+    setForm({
+      id: p.id,
+      email: p.email ?? "",
+      title: (p.title as Title) ?? "",
+      first_name: p.first_name ?? "",
+      last_name: p.last_name ?? "",
+      provincial_rank: p.provincial_rank ?? "",
+      grand_rank: p.grand_rank ?? "",
+      date_of_birth: p.date_of_birth ?? "",
+      initiation_date: p.initiation_date ?? "",
+      degree: p.degree,
+      is_past_master: p.is_past_master,
+      is_royal_arch: p.is_royal_arch,
+      is_honorary_member: p.is_honorary_member,
+      rank: p.rank ?? "",
+      status: p.status,
     });
-    setABusy(false);
-    if (error || (data as { error?: unknown })?.error) {
-      const msg = (data as { error?: string })?.error ?? error?.message ?? "Could not add member";
-      toast.error(typeof msg === "string" ? msg : "Could not add member");
+    setTab("add");
+  };
+
+  const resetForm = () => setForm(EMPTY_FORM);
+
+  const saveMember = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!form.email.trim() || !form.first_name.trim() || !form.last_name.trim()) {
+      toast.error("Title, first name, last name and email are required");
       return;
     }
-    toast.success(`${aName} added — they can sign in with ${aEmail}`);
-    setAEmail("");
-    setAName("");
-    setAInit("");
-    setARank("");
-    setADegree("master_mason");
-    setAPastMaster(false);
+    setBusy(true);
+    const payload: Record<string, unknown> = {
+      email: form.email.trim(),
+      title: form.title || null,
+      first_name: form.first_name.trim(),
+      last_name: form.last_name.trim(),
+      provincial_rank: form.provincial_rank.trim() || null,
+      grand_rank: form.grand_rank.trim() || null,
+      date_of_birth: form.date_of_birth || null,
+      initiation_date: form.initiation_date || null,
+      degree: form.degree,
+      is_past_master: form.is_past_master,
+      is_royal_arch: form.is_royal_arch,
+      is_honorary_member: form.is_honorary_member,
+      rank: form.rank.trim() || null,
+      status: form.status,
+    };
+    if (form.id) payload.id = form.id;
+
+    const { data, error } = await supabase.functions.invoke("admin-invite-member", { body: payload });
+    setBusy(false);
+
+    if (error || (data as { error?: unknown })?.error) {
+      const msg = (data as { error?: string })?.error ?? error?.message ?? "Could not save member";
+      toast.error(typeof msg === "string" ? msg : "Could not save member");
+      return;
+    }
+    toast.success(isEdit ? "Member updated" : `${form.first_name} ${form.last_name} added`);
+    resetForm();
     setTab("users");
     load();
   };
 
-  const isAdmin = (uid: string) => roles.some((r) => r.user_id === uid && r.role === "admin");
+  const isAdminUser = (uid: string) => roles.some((r) => r.user_id === uid && r.role === "admin");
+
+  const inputCls =
+    "w-full bg-navy border border-gold/20 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-gold";
+  const labelCls = "text-xs uppercase tracking-wider text-primary-foreground/60 block";
 
   return (
     <MembersLayout>
@@ -179,12 +227,15 @@ export default function MembersAdmin() {
         {(["users", "add", "notices"] as const).map((t) => (
           <button
             key={t}
-            onClick={() => setTab(t)}
+            onClick={() => {
+              if (t === "add" && tab !== "add") resetForm();
+              setTab(t);
+            }}
             className={`px-3 py-2 text-sm uppercase tracking-wider border-b-2 -mb-px ${
               tab === t ? "border-gold text-gold" : "border-transparent text-primary-foreground/60 hover:text-gold"
             }`}
           >
-            {t === "add" ? "Add Member" : t}
+            {t === "add" ? (isEdit ? "Edit Member" : "Add Member") : t}
           </button>
         ))}
       </div>
@@ -197,7 +248,7 @@ export default function MembersAdmin() {
                 <th className="text-left p-3">Member</th>
                 <th className="text-left p-3">Status</th>
                 <th className="text-left p-3">Role</th>
-                <th className="text-left p-3">Degree</th>
+                <th className="text-left p-3">Flags</th>
                 <th className="text-right p-3">Actions</th>
               </tr>
             </thead>
@@ -207,11 +258,9 @@ export default function MembersAdmin() {
                   <td className="p-3">
                     <p className="font-medium">{p.full_name || "(No name)"}</p>
                     <p className="text-xs text-primary-foreground/50">{p.email}</p>
-                    {(p.ugle_reg_number || p.mother_lodge) && (
-                      <p className="text-[11px] text-primary-foreground/50 mt-1">
-                        {p.ugle_reg_number && <>UGLE #{p.ugle_reg_number}</>}
-                        {p.ugle_reg_number && p.mother_lodge && <> · </>}
-                        {p.mother_lodge}
+                    {(p.provincial_rank || p.grand_rank) && (
+                      <p className="text-[11px] text-primary-foreground/60 mt-1">
+                        {p.grand_rank ? `Grand: ${p.grand_rank}` : `Prov: ${p.provincial_rank}`}
                       </p>
                     )}
                   </td>
@@ -228,31 +277,25 @@ export default function MembersAdmin() {
                       {p.status}
                     </span>
                   </td>
-                  <td className="p-3 text-xs uppercase tracking-wider">{isAdmin(p.id) ? "Admin" : "Member"}</td>
-                  <td className="p-3">
-                    <select
-                      value={p.is_past_master ? "past_master" : (p.degree ?? "entered_apprentice")}
-                      onChange={async (e) => {
-                        const v = e.target.value;
-                        if (v === "past_master") {
-                          if (p.degree !== "master_mason") await setDegree(p.id, "master_mason");
-                          if (!p.is_past_master) await togglePastMaster(p.id, true);
-                        } else {
-                          if (p.is_past_master) await togglePastMaster(p.id, false);
-                          if (p.degree !== v) await setDegree(p.id, v as Degree);
-                        }
-                      }}
-                      className="bg-navy border border-gold/20 rounded-sm px-2 py-1 text-xs focus:outline-none focus:border-gold"
-                      aria-label={`Set degree for ${p.full_name || p.email}`}
-                    >
-                      <option value="entered_apprentice">Entered Apprentice</option>
-                      <option value="fellow_craft">Fellow Craft</option>
-                      <option value="master_mason">Master Mason</option>
-                      <option value="past_master">Past Master</option>
-                    </select>
+                  <td className="p-3 text-xs uppercase tracking-wider">
+                    {isAdminUser(p.id) ? "Admin" : "Member"}
+                  </td>
+                  <td className="p-3 text-[11px] text-primary-foreground/70 space-y-0.5">
+                    <div>{DEGREE_LABEL[p.degree]}</div>
+                    {p.is_past_master && <div className="text-gold">PM</div>}
+                    {p.is_royal_arch && <div>RA</div>}
+                    {p.is_honorary_member && <div>Honorary</div>}
                   </td>
                   <td className="p-3">
                     <div className="flex items-center gap-1 justify-end">
+                      <button
+                        onClick={() => startEdit(p)}
+                        className="p-1.5 text-primary-foreground/70 hover:text-gold hover:bg-gold/10 rounded-sm"
+                        aria-label="Edit member"
+                        title="Edit member"
+                      >
+                        <Pencil className="w-4 h-4" />
+                      </button>
                       {p.status !== "active" && (
                         <button
                           onClick={() => setStatus(p.id, "active")}
@@ -274,12 +317,16 @@ export default function MembersAdmin() {
                         </button>
                       )}
                       <button
-                        onClick={() => toggleAdmin(p.id, !isAdmin(p.id))}
+                        onClick={() => toggleAdmin(p.id, !isAdminUser(p.id))}
                         className="p-1.5 text-primary-foreground/70 hover:text-gold hover:bg-gold/10 rounded-sm"
-                        aria-label={isAdmin(p.id) ? "Remove admin" : "Make admin"}
-                        title={isAdmin(p.id) ? "Remove admin" : "Make admin"}
+                        aria-label={isAdminUser(p.id) ? "Remove admin" : "Make admin"}
+                        title={isAdminUser(p.id) ? "Remove admin" : "Make admin"}
                       >
-                        {isAdmin(p.id) ? <ShieldMinus className="w-4 h-4" /> : <ShieldPlus className="w-4 h-4" />}
+                        {isAdminUser(p.id) ? (
+                          <ShieldMinus className="w-4 h-4" />
+                        ) : (
+                          <ShieldPlus className="w-4 h-4" />
+                        )}
                       </button>
                     </div>
                   </td>
@@ -291,56 +338,132 @@ export default function MembersAdmin() {
       )}
 
       {tab === "add" && (
-        <form onSubmit={addMember} className="bg-navy-dark/60 border border-gold/15 rounded-sm p-5 space-y-3 max-w-xl">
-          <div className="flex items-center gap-2 text-gold">
-            <Plus className="w-4 h-4" />
-            <h2 className="font-serif text-base">Pre-create a member</h2>
+        <form
+          onSubmit={saveMember}
+          className="bg-navy-dark/60 border border-gold/15 rounded-sm p-5 space-y-4 max-w-2xl"
+        >
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 text-gold">
+              {isEdit ? <Pencil className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+              <h2 className="font-serif text-base">
+                {isEdit ? "Edit member" : "Pre-create a member"}
+              </h2>
+            </div>
+            {isEdit && (
+              <button
+                type="button"
+                onClick={resetForm}
+                className="text-xs uppercase tracking-wider text-primary-foreground/60 hover:text-gold"
+              >
+                + New instead
+              </button>
+            )}
           </div>
-          <p className="text-xs text-primary-foreground/60">
-            Adds the brother to the portal with an active account so they can sign in via
-            magic link or Google as soon as we go live — no registration step required.
-            Use this to seed the Officers Progression Tracker.
-          </p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <input
-              required
-              value={aName}
-              onChange={(e) => setAName(e.target.value)}
-              placeholder="Full name (e.g. W Bro. John Smith)"
-              className="w-full bg-navy border border-gold/20 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-gold"
-            />
-            <input
-              required
-              type="email"
-              value={aEmail}
-              onChange={(e) => setAEmail(e.target.value)}
-              placeholder="Email address"
-              className="w-full bg-navy border border-gold/20 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-gold"
-            />
-            <label className="text-xs uppercase tracking-wider text-primary-foreground/60 sm:col-span-1">
-              Initiation date
+
+          {!isEdit && (
+            <p className="text-xs text-primary-foreground/60">
+              Adds the brother to the portal with an active account so he can sign in via magic
+              link or Google straight away — no registration step required.
+            </p>
+          )}
+
+          <div className="grid grid-cols-1 sm:grid-cols-6 gap-3">
+            <label className={`${labelCls} sm:col-span-2`}>
+              Title
+              <select
+                value={form.title}
+                onChange={(e) => setForm({ ...form, title: e.target.value as "" | Title })}
+                className={`mt-1 ${inputCls} normal-case tracking-normal text-primary-foreground`}
+              >
+                <option value="">—</option>
+                {TITLES.map((t) => (
+                  <option key={t} value={t}>
+                    {t}.
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className={`${labelCls} sm:col-span-2`}>
+              First name
               <input
-                type="date"
-                value={aInit}
-                onChange={(e) => setAInit(e.target.value)}
-                className="mt-1 w-full bg-navy border border-gold/20 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-gold normal-case tracking-normal text-primary-foreground"
+                required
+                value={form.first_name}
+                onChange={(e) => setForm({ ...form, first_name: e.target.value })}
+                className={`mt-1 ${inputCls} normal-case tracking-normal text-primary-foreground`}
               />
             </label>
-            <label className="text-xs uppercase tracking-wider text-primary-foreground/60">
+            <label className={`${labelCls} sm:col-span-2`}>
+              Last name
+              <input
+                required
+                value={form.last_name}
+                onChange={(e) => setForm({ ...form, last_name: e.target.value })}
+                className={`mt-1 ${inputCls} normal-case tracking-normal text-primary-foreground`}
+              />
+            </label>
+
+            <label className={`${labelCls} sm:col-span-6`}>
+              Email address
+              <input
+                required
+                type="email"
+                value={form.email}
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
+                className={`mt-1 ${inputCls} normal-case tracking-normal text-primary-foreground`}
+              />
+            </label>
+
+            <label className={`${labelCls} sm:col-span-3`}>
+              Provincial rank
+              <input
+                value={form.provincial_rank}
+                onChange={(e) => setForm({ ...form, provincial_rank: e.target.value })}
+                placeholder="e.g. PPrJGW"
+                className={`mt-1 ${inputCls} normal-case tracking-normal text-primary-foreground`}
+              />
+            </label>
+            <label className={`${labelCls} sm:col-span-3`}>
+              Grand rank
+              <input
+                value={form.grand_rank}
+                onChange={(e) => setForm({ ...form, grand_rank: e.target.value })}
+                placeholder="e.g. PAGDC"
+                className={`mt-1 ${inputCls} normal-case tracking-normal text-primary-foreground`}
+              />
+            </label>
+
+            <label className={`${labelCls} sm:col-span-3`}>
+              Date of birth
+              <input
+                type="date"
+                value={form.date_of_birth}
+                onChange={(e) => setForm({ ...form, date_of_birth: e.target.value })}
+                className={`mt-1 ${inputCls} normal-case tracking-normal text-primary-foreground`}
+              />
+            </label>
+            <label className={`${labelCls} sm:col-span-3`}>
+              Initiation / Joining date
+              <input
+                type="date"
+                value={form.initiation_date}
+                onChange={(e) => setForm({ ...form, initiation_date: e.target.value })}
+                className={`mt-1 ${inputCls} normal-case tracking-normal text-primary-foreground`}
+              />
+            </label>
+
+            <label className={`${labelCls} sm:col-span-6`}>
               Degree
               <select
-                value={aPastMaster ? "past_master" : aDegree}
+                value={form.is_past_master ? "past_master" : form.degree}
                 onChange={(e) => {
                   const v = e.target.value;
                   if (v === "past_master") {
-                    setAPastMaster(true);
-                    setADegree("master_mason");
+                    setForm({ ...form, is_past_master: true, degree: "master_mason" });
                   } else {
-                    setAPastMaster(false);
-                    setADegree(v as Degree);
+                    setForm({ ...form, is_past_master: false, degree: v as Degree });
                   }
                 }}
-                className="mt-1 w-full bg-navy border border-gold/20 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-gold normal-case tracking-normal text-primary-foreground"
+                className={`mt-1 ${inputCls} normal-case tracking-normal text-primary-foreground`}
               >
                 <option value="entered_apprentice">Entered Apprentice</option>
                 <option value="fellow_craft">Fellow Craft</option>
@@ -348,22 +471,51 @@ export default function MembersAdmin() {
                 <option value="past_master">Past Master (incl. Installed Masters ritual)</option>
               </select>
             </label>
-            <input
-              value={aRank}
-              onChange={(e) => setARank(e.target.value)}
-              placeholder="Rank (optional, e.g. PPrJGW)"
-              className="sm:col-span-2 w-full bg-navy border border-gold/20 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-gold"
-            />
+
+            <div className="sm:col-span-6 flex flex-wrap gap-4 pt-1">
+              <label className="flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={form.is_royal_arch}
+                  onChange={(e) => setForm({ ...form, is_royal_arch: e.target.checked })}
+                  className="accent-gold w-4 h-4"
+                />
+                Royal Arch
+              </label>
+              <label className="flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={form.is_honorary_member}
+                  onChange={(e) => setForm({ ...form, is_honorary_member: e.target.checked })}
+                  className="accent-gold w-4 h-4"
+                />
+                Honorary member
+              </label>
+            </div>
           </div>
-          <button
-            disabled={aBusy}
-            className="bg-gold-shimmer text-accent-foreground px-4 py-2 rounded-sm text-sm font-semibold disabled:opacity-50"
-          >
-            {aBusy ? "Adding…" : "Add member"}
-          </button>
+
+          <div className="flex items-center gap-3 pt-1">
+            <button
+              disabled={busy}
+              className="bg-gold-shimmer text-accent-foreground px-4 py-2 rounded-sm text-sm font-semibold disabled:opacity-50"
+            >
+              {busy ? "Saving…" : isEdit ? "Save changes" : "Add member"}
+            </button>
+            {isEdit && (
+              <button
+                type="button"
+                onClick={() => {
+                  resetForm();
+                  setTab("users");
+                }}
+                className="text-sm text-primary-foreground/60 hover:text-gold"
+              >
+                Cancel
+              </button>
+            )}
+          </div>
         </form>
       )}
-
 
       {tab === "notices" && (
         <div className="space-y-6">
@@ -377,7 +529,7 @@ export default function MembersAdmin() {
               value={nTitle}
               onChange={(e) => setNTitle(e.target.value)}
               placeholder="Title"
-              className="w-full bg-navy border border-gold/20 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-gold"
+              className={inputCls}
             />
             <textarea
               required
@@ -385,13 +537,13 @@ export default function MembersAdmin() {
               onChange={(e) => setNBody(e.target.value)}
               placeholder="Message…"
               rows={4}
-              className="w-full bg-navy border border-gold/20 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-gold"
+              className={inputCls}
             />
             <input
               type="datetime-local"
               value={nDate}
               onChange={(e) => setNDate(e.target.value)}
-              className="bg-navy border border-gold/20 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-gold"
+              className={inputCls}
             />
             <button className="bg-gold-shimmer text-accent-foreground px-4 py-2 rounded-sm text-sm font-semibold">
               Post notice
@@ -408,7 +560,10 @@ export default function MembersAdmin() {
                   <p className="font-semibold">{n.title}</p>
                   {n.event_date && (
                     <p className="text-[11px] text-gold mb-1">
-                      {new Date(n.event_date).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" })}
+                      {new Date(n.event_date).toLocaleString("en-GB", {
+                        dateStyle: "medium",
+                        timeStyle: "short",
+                      })}
                     </p>
                   )}
                   <p className="text-xs text-primary-foreground/70 whitespace-pre-wrap">{n.body}</p>
