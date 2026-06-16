@@ -7,8 +7,18 @@ import { useAuth } from "@/hooks/useAuth";
 
 type Degree = "entered_apprentice" | "fellow_craft" | "master_mason";
 type Title = "Bro" | "W Bro" | "VW Bro" | "RW Bro";
+type Status = "pending" | "active" | "suspended" | "year_out" | "resigned" | "excluded" | "deceased";
 
 const TITLES: Title[] = ["Bro", "W Bro", "VW Bro", "RW Bro"];
+const STATUSES: { value: Status; label: string }[] = [
+  { value: "pending", label: "Pending" },
+  { value: "active", label: "Active" },
+  { value: "year_out", label: "Year Out" },
+  { value: "suspended", label: "Suspended" },
+  { value: "resigned", label: "Resigned" },
+  { value: "excluded", label: "Excluded" },
+  { value: "deceased", label: "Deceased" },
+];
 
 const DEGREE_LABEL: Record<Degree, string> = {
   entered_apprentice: "Entered Apprentice",
