@@ -6,14 +6,22 @@ type Profile = {
   id: string;
   email: string | null;
   full_name: string | null;
+  title: string | null;
+  first_name: string | null;
+  last_name: string | null;
   rank: string | null;
   office: string | null;
+  provincial_rank: string | null;
+  grand_rank: string | null;
+  date_of_birth: string | null;
   joined_year: number | null;
   phone: string | null;
   avatar_url: string | null;
   status: "pending" | "active" | "suspended";
   degree: "entered_apprentice" | "fellow_craft" | "master_mason" | "installed_master";
   is_past_master?: boolean;
+  is_royal_arch?: boolean;
+  is_honorary_member?: boolean;
   initiation_date?: string | null;
 };
 
