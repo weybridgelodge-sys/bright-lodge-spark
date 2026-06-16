@@ -50,6 +50,7 @@ export const NON_PROGRESSIVE_ORDER = [
   "almoner",
   "charity_steward",
   "mentor",
+  "membership_officer",
   "tyler",
   "assistant_tyler",
 ] as const;
@@ -67,6 +68,7 @@ export const NON_PROGRESSIVE_LABELS: Record<NonProgressiveKey, string> = {
   almoner: "Almoner",
   charity_steward: "Charity Steward",
   mentor: "Mentor",
+  membership_officer: "Membership Officer",
   tyler: "Tyler",
   assistant_tyler: "Assistant Tyler",
 };
