@@ -151,6 +151,17 @@ function EventEditor({ id, onBack, onDeleted }: { id: string; onBack: () => void
     setSaving(true);
     try {
       const slug = event.slug?.trim() || slugify(event.title);
+
+      // Enforce single-published: if this event is being published, revert all others to draft.
+      if (event.published) {
+        const { error: unpubErr } = await supabase
+          .from("lodge_events")
+          .update({ published: false })
+          .eq("published", true)
+          .neq("id", event.id);
+        if (unpubErr) throw unpubErr;
+      }
+
       const { error: evErr } = await supabase
         .from("lodge_events")
         .update({
