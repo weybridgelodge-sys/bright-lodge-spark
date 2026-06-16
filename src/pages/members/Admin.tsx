@@ -183,6 +183,10 @@ export default function MembersAdmin() {
       is_honorary_member: p.is_honorary_member,
       rank: p.rank ?? "",
       status: p.status,
+      is_ugle_portal_registered: p.is_ugle_portal_registered ?? false,
+      passing_date: p.passing_date ?? "",
+      raising_date: p.raising_date ?? "",
+      joined_lodge_date: p.joined_lodge_date ?? "",
     });
     setTab("add");
   };
