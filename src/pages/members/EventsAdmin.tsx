@@ -214,7 +214,7 @@ function EventEditor({ id, onBack, onDeleted }: { id: string; onBack: () => void
 
       toast.success("Meeting saved");
       onBack();
-      return;
+    } catch (err: any) {
       toast.error(err.message || "Could not save meeting");
     } finally {
       setSaving(false);
