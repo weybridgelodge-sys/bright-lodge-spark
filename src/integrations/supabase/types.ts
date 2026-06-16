@@ -330,6 +330,44 @@ export type Database = {
           },
         ]
       }
+      member_wm_terms: {
+        Row: {
+          created_at: string
+          id: string
+          member_id: string
+          notes: string | null
+          updated_at: string
+          year_ended: number | null
+          year_started: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          member_id: string
+          notes?: string | null
+          updated_at?: string
+          year_ended?: number | null
+          year_started: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          member_id?: string
+          notes?: string | null
+          updated_at?: string
+          year_ended?: number | null
+          year_started?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "member_wm_terms_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       officer_appointments: {
         Row: {
           appointed_on: string | null
@@ -427,12 +465,16 @@ export type Database = {
           is_honorary_member: boolean
           is_past_master: boolean
           is_royal_arch: boolean
+          is_ugle_portal_registered: boolean
+          joined_lodge_date: string | null
           joined_year: number | null
           last_name: string | null
           mother_lodge: string | null
           office: string | null
+          passing_date: string | null
           phone: string | null
           provincial_rank: string | null
+          raising_date: string | null
           rank: string | null
           status: Database["public"]["Enums"]["member_status"]
           title: string | null
@@ -453,12 +495,16 @@ export type Database = {
           is_honorary_member?: boolean
           is_past_master?: boolean
           is_royal_arch?: boolean
+          is_ugle_portal_registered?: boolean
+          joined_lodge_date?: string | null
           joined_year?: number | null
           last_name?: string | null
           mother_lodge?: string | null
           office?: string | null
+          passing_date?: string | null
           phone?: string | null
           provincial_rank?: string | null
+          raising_date?: string | null
           rank?: string | null
           status?: Database["public"]["Enums"]["member_status"]
           title?: string | null
@@ -479,12 +525,16 @@ export type Database = {
           is_honorary_member?: boolean
           is_past_master?: boolean
           is_royal_arch?: boolean
+          is_ugle_portal_registered?: boolean
+          joined_lodge_date?: string | null
           joined_year?: number | null
           last_name?: string | null
           mother_lodge?: string | null
           office?: string | null
+          passing_date?: string | null
           phone?: string | null
           provincial_rank?: string | null
+          raising_date?: string | null
           rank?: string | null
           status?: Database["public"]["Enums"]["member_status"]
           title?: string | null
@@ -529,6 +579,33 @@ export type Database = {
           title?: string
           updated_at?: string
           uploaded_by?: string | null
+        }
+        Relationships: []
+      }
+      succession_risks: {
+        Row: {
+          created_at: string
+          flagged_by: string | null
+          id: string
+          note: string | null
+          role_key: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          flagged_by?: string | null
+          id?: string
+          note?: string | null
+          role_key: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          flagged_by?: string | null
+          id?: string
+          note?: string | null
+          role_key?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -592,7 +669,14 @@ export type Database = {
         | "fellow_craft"
         | "master_mason"
         | "installed_master"
-      member_status: "pending" | "active" | "suspended"
+      member_status:
+        | "pending"
+        | "active"
+        | "suspended"
+        | "year_out"
+        | "resigned"
+        | "excluded"
+        | "deceased"
       progression_readiness: "ready" | "needs_experience" | "non_progressive"
     }
     CompositeTypes: {
@@ -737,7 +821,15 @@ export const Constants = {
         "master_mason",
         "installed_master",
       ],
-      member_status: ["pending", "active", "suspended"],
+      member_status: [
+        "pending",
+        "active",
+        "suspended",
+        "year_out",
+        "resigned",
+        "excluded",
+        "deceased",
+      ],
       progression_readiness: ["ready", "needs_experience", "non_progressive"],
     },
   },
