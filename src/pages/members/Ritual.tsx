@@ -39,6 +39,9 @@ export default function MembersRitual() {
   const [docs, setDocs] = useState<Doc[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // admin "preview as member" toggle — null = full admin view
+  const [previewDegree, setPreviewDegree] = useState<Degree | null>(null);
+
   // upload form
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
