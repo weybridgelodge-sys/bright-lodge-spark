@@ -23,11 +23,10 @@ const CheckoutReturn = () => {
     let attempts = 0;
     const poll = async () => {
       attempts += 1;
-      const { data } = await supabase
-        .from("bookings")
-        .select("*")
-        .eq("stripe_session_id", sessionId)
-        .maybeSingle();
+      const { data: resp } = await supabase.functions.invoke("get-booking-by-session", {
+        body: { session_id: sessionId },
+      });
+      const data = resp?.booking ?? null;
       if (cancelled) return;
       if (data?.payment_status === "paid") {
         setBooking(data);

@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.payments-webhook]
 verify_jwt = false
+
+[functions.get-booking-by-session]
+verify_jwt = false
