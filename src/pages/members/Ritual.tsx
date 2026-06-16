@@ -108,10 +108,22 @@ export default function MembersRitual() {
     }
   };
 
-  const handleDownload = async (d: Doc) => {
+  const handleView = async (d: Doc) => {
     const { data, error } = await supabase.storage
       .from("ritual-docs")
       .createSignedUrl(d.file_path, 60);
+    if (error || !data) {
+      toast.error("Couldn't open document");
+      return;
+    }
+    window.open(data.signedUrl, "_blank", "noopener");
+  };
+
+  const handleDownload = async (d: Doc) => {
+    const filename = d.file_path.split("/").pop() || d.title;
+    const { data, error } = await supabase.storage
+      .from("ritual-docs")
+      .createSignedUrl(d.file_path, 60, { download: filename });
     if (error || !data) {
       toast.error("Couldn't generate download link");
       return;
