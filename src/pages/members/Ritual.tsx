@@ -148,6 +148,31 @@ export default function MembersRitual() {
       </div>
 
       {isAdmin && (
+        <div className="mb-6 bg-gold/5 border border-gold/20 rounded-sm p-3 flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-2 text-gold text-[11px] font-semibold uppercase tracking-wider">
+            <Eye className="w-3.5 h-3.5" /> Preview as member
+          </div>
+          <select
+            value={previewDegree ?? ""}
+            onChange={(e) => setPreviewDegree((e.target.value || null) as Degree | null)}
+            className="bg-navy border border-gold/20 rounded-sm px-3 py-1.5 text-xs focus:outline-none focus:border-gold text-primary-foreground"
+          >
+            <option value="">Full admin view (all degrees)</option>
+            {DEGREES.map((d) => (
+              <option key={d} value={d}>
+                {DEGREE_LABEL[d]}
+              </option>
+            ))}
+          </select>
+          {previewDegree && (
+            <span className="text-[11px] text-primary-foreground/60">
+              Showing what a <span className="text-gold">{DEGREE_LABEL[previewDegree]}</span> would see.
+            </span>
+          )}
+        </div>
+      )}
+
+      {isAdmin && (
         <form
           onSubmit={handleUpload}
           className="bg-navy-dark/60 border border-gold/15 rounded-sm p-5 mb-6 grid grid-cols-1 md:grid-cols-2 gap-3"
