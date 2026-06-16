@@ -238,13 +238,15 @@ export default function MembersRitual() {
         <div className="text-center py-12 text-primary-foreground/60 text-sm flex items-center justify-center gap-2">
           <Loader2 className="w-4 h-4 animate-spin" /> Validating credentials…
         </div>
-      ) : docs.length === 0 ? (
+      ) : visibleDocs.length === 0 ? (
         <p className="text-sm text-primary-foreground/50">
-          No ritual material is available at your current degree.
+          {isAdmin && previewDegree
+            ? `No ritual material visible to a ${DEGREE_LABEL[previewDegree]}.`
+            : "No ritual material is available at your current degree."}
         </p>
       ) : (
         <ul className="space-y-3">
-          {docs.map((d) => (
+          {visibleDocs.map((d) => (
             <li
               key={d.id}
               className="bg-navy-dark/60 border border-gold/15 rounded-sm p-4 flex items-start justify-between gap-3 hover:border-gold/30 transition-colors"
