@@ -24,6 +24,13 @@ const DEGREE_LABEL: Record<Degree, string> = {
   installed_master: "Installed Masters",
 };
 
+const GENERAL_LABEL = "General Ritual";
+
+const UPLOAD_OPTIONS: { value: DegreeOrGeneral; label: string }[] = [
+  { value: "general", label: GENERAL_LABEL },
+  ...DEGREES.map((d) => ({ value: d, label: DEGREE_LABEL[d] })),
+];
+
 type Doc = {
   id: string;
   title: string;
