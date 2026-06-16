@@ -54,7 +54,7 @@ export default function MembersRitual() {
   // upload form
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [degree, setDegree] = useState<Degree>("entered_apprentice");
+  const [degree, setDegree] = useState<DegreeOrGeneral>("general");
   const [file, setFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
 
