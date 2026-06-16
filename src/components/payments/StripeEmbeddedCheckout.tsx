@@ -9,7 +9,7 @@ export type BookingLineItem = {
 };
 
 export interface CheckoutRequest {
-  event_key: "festive_board_april_2026" | "ladies_festival_2026";
+  event_key: string;
   event_label: string;
   contact_name: string;
   contact_email: string;
