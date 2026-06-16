@@ -116,6 +116,142 @@ export type Database = {
         }
         Relationships: []
       }
+      lodge_event_courses: {
+        Row: {
+          course_label: string
+          created_at: string
+          description: string
+          dish: string
+          event_id: string
+          id: string
+          position: number
+          updated_at: string
+        }
+        Insert: {
+          course_label: string
+          created_at?: string
+          description?: string
+          dish: string
+          event_id: string
+          id?: string
+          position?: number
+          updated_at?: string
+        }
+        Update: {
+          course_label?: string
+          created_at?: string
+          description?: string
+          dish?: string
+          event_id?: string
+          id?: string
+          position?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lodge_event_courses_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "lodge_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lodge_event_dining_options: {
+        Row: {
+          created_at: string
+          event_id: string
+          id: string
+          is_default: boolean
+          label: string
+          position: number
+          price_pence: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          id?: string
+          is_default?: boolean
+          label: string
+          position?: number
+          price_pence: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          id?: string
+          is_default?: boolean
+          label?: string
+          position?: number
+          price_pence?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lodge_event_dining_options_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "lodge_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lodge_events: {
+        Row: {
+          booking_deadline: string | null
+          created_at: string
+          dining_time: string
+          dress_code: string
+          event_date: string
+          id: string
+          intro: string
+          intro_heading: string | null
+          location: string
+          published: boolean
+          slug: string
+          sort_order: number
+          title: string
+          tyling_time: string
+          updated_at: string
+        }
+        Insert: {
+          booking_deadline?: string | null
+          created_at?: string
+          dining_time?: string
+          dress_code?: string
+          event_date: string
+          id?: string
+          intro?: string
+          intro_heading?: string | null
+          location?: string
+          published?: boolean
+          slug: string
+          sort_order?: number
+          title: string
+          tyling_time?: string
+          updated_at?: string
+        }
+        Update: {
+          booking_deadline?: string | null
+          created_at?: string
+          dining_time?: string
+          dress_code?: string
+          event_date?: string
+          id?: string
+          intro?: string
+          intro_heading?: string | null
+          location?: string
+          published?: boolean
+          slug?: string
+          sort_order?: number
+          title?: string
+          tyling_time?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       member_notices: {
         Row: {
           author_id: string | null
