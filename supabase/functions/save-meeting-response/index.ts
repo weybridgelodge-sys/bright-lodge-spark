@@ -1,0 +1,74 @@
+import { createClient } from "npm:@supabase/supabase-js@2";
+import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
+
+const supabase = createClient(
+  Deno.env.get("SUPABASE_URL")!,
+  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+);
+
+Deno.serve(async (req) => {
+  if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+  if (req.method !== "POST") {
+    return new Response("Method not allowed", { status: 405, headers: corsHeaders });
+  }
+
+  try {
+    const body = await req.json();
+
+    const {
+      event_key,
+      event_label,
+      contact_name,
+      contact_email,
+      contact_phone,
+      meeting_option,
+      details,
+      environment,
+    } = body;
+
+    if (!event_key || !event_label || !contact_name || !contact_email || !meeting_option) {
+      return new Response(
+        JSON.stringify({ error: "Missing required fields" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
+    const { data: booking, error } = await supabase
+      .from("bookings")
+      .insert({
+        event_key,
+        event_label,
+        contact_name,
+        contact_email,
+        contact_phone: contact_phone ?? null,
+        details: details ?? {},
+        line_items: [],
+        subtotal_pence: 0,
+        fee_pence: 0,
+        total_pence: 0,
+        payment_status: meeting_option === "apologies" ? "apologies" : "confirmed",
+        environment: environment ?? "sandbox",
+      })
+      .select()
+      .single();
+
+    if (error || !booking) {
+      console.error("Booking insert failed:", error);
+      return new Response(
+        JSON.stringify({ error: error?.message || "Could not save response." }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
+    return new Response(
+      JSON.stringify({ bookingId: booking.id }),
+      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+    );
+  } catch (e) {
+    console.error("save-meeting-response error:", e);
+    return new Response(
+      JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+    );
+  }
+});
