@@ -36,6 +36,7 @@ type Doc = {
   title: string;
   description: string | null;
   required_degree: Degree;
+  is_general: boolean;
   file_path: string;
   file_size_bytes: number | null;
   created_at: string;
