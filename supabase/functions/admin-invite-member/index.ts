@@ -24,7 +24,13 @@ const Body = z.object({
   is_royal_arch: z.boolean().optional().default(false),
   is_honorary_member: z.boolean().optional().default(false),
   rank: z.string().trim().max(80).optional().nullable(),
-  status: z.enum(["pending", "active", "suspended"]).default("active"),
+  status: z
+    .enum(["pending", "active", "suspended", "year_out", "resigned", "excluded", "deceased"])
+    .default("active"),
+  passing_date: z.string().trim().regex(/^\d{4}-\d{2}-\d{2}$/).optional().nullable(),
+  raising_date: z.string().trim().regex(/^\d{4}-\d{2}-\d{2}$/).optional().nullable(),
+  joined_lodge_date: z.string().trim().regex(/^\d{4}-\d{2}-\d{2}$/).optional().nullable(),
+  is_ugle_portal_registered: z.boolean().optional().default(false),
 });
 
 function composeFullName(title: string | null | undefined, first: string, last: string) {
