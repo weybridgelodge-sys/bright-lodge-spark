@@ -40,11 +40,15 @@ type Profile = {
   rank: string | null;
   ugle_reg_number: string | null;
   mother_lodge: string | null;
-  status: "pending" | "active" | "suspended";
+  status: Status;
   degree: Degree;
   is_past_master: boolean;
   is_royal_arch: boolean;
   is_honorary_member: boolean;
+  is_ugle_portal_registered: boolean;
+  passing_date: string | null;
+  raising_date: string | null;
+  joined_lodge_date: string | null;
   created_at: string;
 };
 
