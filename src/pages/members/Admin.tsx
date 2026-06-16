@@ -77,7 +77,11 @@ const EMPTY_FORM = {
   is_royal_arch: false,
   is_honorary_member: false,
   rank: "",
-  status: "active" as Profile["status"],
+  status: "active" as Status,
+  is_ugle_portal_registered: false,
+  passing_date: "",
+  raising_date: "",
+  joined_lodge_date: "",
 };
 
 export default function MembersAdmin() {
