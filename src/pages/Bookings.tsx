@@ -6,9 +6,11 @@ import { PaymentTestModeBanner } from "@/components/payments/PaymentTestModeBann
 import { StripeEmbeddedCheckoutPanel, type BookingLineItem } from "@/components/payments/StripeEmbeddedCheckout";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { Calendar, Clock, MapPin, Shirt, CalendarClock, UtensilsCrossed } from "lucide-react";
+import { Calendar, Clock, MapPin, Shirt, CalendarClock, UtensilsCrossed, CheckCircle, Loader2 } from "lucide-react";
 import { useState, useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { getStripeEnvironment } from "@/lib/stripe";
 
 const meetingDetails = [
   { icon: Calendar, label: "Meeting Date", value: "Wednesday, 15th April 2026" },
