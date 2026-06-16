@@ -79,13 +79,16 @@ export default function MembersRitual() {
     setBusy(true);
     try {
       const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
-      const path = `${degree}/${Date.now()}-${safeName}`;
+      const isGeneral = degree === "general";
+      const folder = isGeneral ? "general" : degree;
+      const path = `${folder}/${Date.now()}-${safeName}`;
       const { error: upErr } = await supabase.storage.from("ritual-docs").upload(path, file);
       if (upErr) throw upErr;
       const { error: dbErr } = await supabase.from("ritual_documents").insert({
         title: title.trim(),
         description: description.trim() || null,
-        required_degree: degree,
+        required_degree: isGeneral ? "entered_apprentice" : (degree as Degree),
+        is_general: isGeneral,
         file_path: path,
         file_size_bytes: file.size,
         uploaded_by: user.id,
