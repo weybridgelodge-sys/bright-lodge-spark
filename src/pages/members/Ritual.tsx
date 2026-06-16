@@ -2,10 +2,11 @@ import { useEffect, useState } from "react";
 import MembersLayout from "@/components/members/MembersLayout";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { BookOpen, Upload, Trash2, Download, Loader2, ShieldCheck, Clock, Eye } from "lucide-react";
+import { BookOpen, Upload, Trash2, Download, Loader2, ShieldCheck, Clock, Eye, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 
 type Degree = "entered_apprentice" | "fellow_craft" | "master_mason" | "installed_master";
+type DegreeOrGeneral = Degree | "general";
 
 const DEGREES: Degree[] = ["entered_apprentice", "fellow_craft", "master_mason", "installed_master"];
 
@@ -23,11 +24,19 @@ const DEGREE_LABEL: Record<Degree, string> = {
   installed_master: "Installed Masters",
 };
 
+const GENERAL_LABEL = "General Ritual";
+
+const UPLOAD_OPTIONS: { value: DegreeOrGeneral; label: string }[] = [
+  { value: "general", label: GENERAL_LABEL },
+  ...DEGREES.map((d) => ({ value: d, label: DEGREE_LABEL[d] })),
+];
+
 type Doc = {
   id: string;
   title: string;
   description: string | null;
   required_degree: Degree;
+  is_general: boolean;
   file_path: string;
   file_size_bytes: number | null;
   created_at: string;
@@ -45,7 +54,7 @@ export default function MembersRitual() {
   // upload form
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [degree, setDegree] = useState<Degree>("entered_apprentice");
+  const [degree, setDegree] = useState<DegreeOrGeneral>("general");
   const [file, setFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -70,13 +79,16 @@ export default function MembersRitual() {
     setBusy(true);
     try {
       const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
-      const path = `${degree}/${Date.now()}-${safeName}`;
+      const isGeneral = degree === "general";
+      const folder = isGeneral ? "general" : degree;
+      const path = `${folder}/${Date.now()}-${safeName}`;
       const { error: upErr } = await supabase.storage.from("ritual-docs").upload(path, file);
       if (upErr) throw upErr;
       const { error: dbErr } = await supabase.from("ritual_documents").insert({
         title: title.trim(),
         description: description.trim() || null,
-        required_degree: degree,
+        required_degree: isGeneral ? "entered_apprentice" : (degree as Degree),
+        is_general: isGeneral,
         file_path: path,
         file_size_bytes: file.size,
         uploaded_by: user.id,
@@ -96,10 +108,22 @@ export default function MembersRitual() {
     }
   };
 
-  const handleDownload = async (d: Doc) => {
+  const handleView = async (d: Doc) => {
     const { data, error } = await supabase.storage
       .from("ritual-docs")
       .createSignedUrl(d.file_path, 60);
+    if (error || !data) {
+      toast.error("Couldn't open document");
+      return;
+    }
+    window.open(data.signedUrl, "_blank", "noopener");
+  };
+
+  const handleDownload = async (d: Doc) => {
+    const filename = d.file_path.split("/").pop() || d.title;
+    const { data, error } = await supabase.storage
+      .from("ritual-docs")
+      .createSignedUrl(d.file_path, 60, { download: filename });
     if (error || !data) {
       toast.error("Couldn't generate download link");
       return;
@@ -123,7 +147,9 @@ export default function MembersRitual() {
 
   const visibleDocs =
     isAdmin && previewDegree
-      ? docs.filter((d) => DEGREE_LEVEL[d.required_degree] <= DEGREE_LEVEL[previewDegree])
+      ? docs.filter(
+          (d) => d.is_general || DEGREE_LEVEL[d.required_degree] <= DEGREE_LEVEL[previewDegree]
+        )
       : docs;
 
   return (
@@ -195,12 +221,12 @@ export default function MembersRitual() {
             <span className="text-[11px] uppercase tracking-wider text-gold/70 font-semibold">Degree</span>
             <select
               value={degree}
-              onChange={(e) => setDegree(e.target.value as Degree)}
+              onChange={(e) => setDegree(e.target.value as DegreeOrGeneral)}
               className="bg-navy border border-gold/20 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-gold"
             >
-              {DEGREES.map((d) => (
-                <option key={d} value={d}>
-                  {DEGREE_LABEL[d]}
+              {UPLOAD_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
                 </option>
               ))}
             </select>
@@ -262,7 +288,7 @@ export default function MembersRitual() {
                   )}
                   <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-[11px] text-primary-foreground/55">
                     <span className="text-gold bg-gold/5 px-2 py-0.5 rounded-sm border border-gold/15">
-                      {DEGREE_LABEL[d.required_degree]}
+                      {d.is_general ? GENERAL_LABEL : DEGREE_LABEL[d.required_degree]}
                     </span>
                     <span className="flex items-center gap-1">
                       <Clock className="w-3 h-3" />
@@ -272,6 +298,14 @@ export default function MembersRitual() {
                 </div>
               </div>
               <div className="flex items-center gap-1 shrink-0">
+                <button
+                  onClick={() => handleView(d)}
+                  className="p-2 text-gold hover:bg-gold/10 rounded-sm"
+                  aria-label="Open in new tab"
+                  title="Open in new tab"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                </button>
                 <button
                   onClick={() => handleDownload(d)}
                   className="p-2 text-gold hover:bg-gold/10 rounded-sm"
