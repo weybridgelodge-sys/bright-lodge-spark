@@ -50,6 +50,7 @@ import MembersAdmin from "./pages/members/Admin";
 import EventsAdmin from "./pages/members/EventsAdmin";
 import MembersRitual from "./pages/members/Ritual";
 import OfficersTracker from "./pages/members/OfficersTracker";
+import Kpis from "./pages/members/Kpis";
 import ProgressionRoute from "./components/members/ProgressionRoute";
 
 const queryClient = new QueryClient();
@@ -110,6 +111,7 @@ const App = () => (
             <Route path="/members/admin" element={<ProtectedRoute adminOnly><MembersAdmin /></ProtectedRoute>} />
             <Route path="/members/events" element={<ProtectedRoute><EventsAdmin /></ProtectedRoute>} />
             <Route path="/members/officers-tracker" element={<ProgressionRoute><OfficersTracker /></ProgressionRoute>} />
+            <Route path="/members/kpis" element={<ProgressionRoute><Kpis /></ProgressionRoute>} />
 
 
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

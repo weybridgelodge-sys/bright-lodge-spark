@@ -1,60 +1,91 @@
-## Progressive Officers Tracker
+## Lodge KPI Dashboard
 
-A new section inside the existing member portal at `/members/officers-tracker`, restricted to members holding the new `secretary` or `worshipful_master` roles (admins also allowed). Styled with the existing dark navy + gold + Playfair Display + cream theme.
+A new admin-section page that pulls live figures from `profiles` plus a handful of new fields, broken into 7 always-visible sections (collapsible on mobile), with two PDF exports.
 
-### Backend (Lovable Cloud)
+### Access
 
-New role values added to `app_role` enum: `secretary`, `worshipful_master` (alongside existing `member`, `admin`).
+- Visible to users with `admin` role OR `secretary` role OR currently appointed Worshipful Master (via `officer_appointments` for the current Masonic year, position_key = `wm`).
+- New nav entry "KPIs" inside the members portal, between Meetings and Admin.
+- Route: `/members/kpis`, guarded by `ProtectedRoute` with a role check.
 
-New tables (all RLS-protected; only `secretary` / `worshipful_master` / `admin` may read or write):
+### Database changes (one migration)
 
-1. **`officer_positions`** — the six progressive offices, ordered:
-   - `key` (text PK): `inner_guard`, `junior_deacon`, `senior_deacon`, `junior_warden`, `senior_warden`, `worshipful_master`
-   - `label`, `order_index`
-   - Seeded once.
+Add to `public.profiles`:
 
-2. **`officer_appointments`** — who holds which office, and for which lodge year:
-   - `position_key`, `member_id` (FK profiles), `lodge_year` (int, e.g. 2026), `appointed_on`, `is_projection` (bool), `override_reason` (text, nullable), `override_by` (FK profiles, nullable), `created_at/updated_at`.
-   - Unique on `(position_key, lodge_year)`.
-   - Current year rows have `is_projection = false`; projections for years +1…+6 have `is_projection = true`.
+- `is_ugle_portal_registered boolean NOT NULL DEFAULT false`
+- `passing_date date` (FC)
+- `raising_date date` (MM)
+- `joined_lodge_date date` (date joined Weybridge from another lodge — distinct from initiation)
+- Extend `profile_status` enum with `year_out`, `resigned`, `excluded`, `deceased` (keep existing `pending`, `active`, `suspended`).
 
-3. **`member_progression_status`** — readiness tagging:
-   - `member_id` (PK FK profiles), `readiness` enum (`ready`, `needs_experience`, `non_progressive`), `seniority_initiation_date` (date, nullable — override for joining members whose UGLE initiation was elsewhere), `seniority_tiebreaker` (int, nullable — manual precedence when two brothers share an initiation date), `notes`, `updated_by`, `updated_at`.
+New tables (all with grants + RLS, admin/secretary write, members read):
 
-4. **`profiles` additions** — add `initiation_date date` column (nullable). Form in Profile + Admin lets the Secretary edit it.
+- `member_wm_terms(id, member_id, year_started int, year_ended int, notes)` — supports repeat Masters.
+- `succession_risks(id, role_key text, note text, flagged_by, flagged_at)` — Secretary free-text flag per critical role (`secretary`, `treasurer`, `almoner`, `dc`).
+- `app_role` enum: add `secretary`.
 
-Helper SQL function `effective_initiation_date(profile_id)` returns `coalesce(seniority_initiation_date, profiles.initiation_date)` for seniority sorting.
+Admin > Members form gains inputs for: UGLE Portal registered, passing date, raising date, joined-lodge date, status dropdown (full set), and a "WM terms" sub-section (year list).
 
-### Frontend
+### Computation (client-side, single fetch)
 
-New menu link "Officers Tracker" appears in `MembersLayout` only when the user has Secretary, WM, or Admin role.
+One `useKpis()` hook does a single `select *` from profiles plus joins for `member_wm_terms`, `officer_appointments` (current Masonic year), `user_roles`, `succession_risks`. Derives:
 
-Page `src/pages/members/OfficersTracker.tsx` with three tabs:
+- Subscribing = status `active` AND not honorary.
+- Average age from `date_of_birth`.
+- Age bands: <30, 30-39, 40-49, 50-59, 60-69, 70-79, 80+.
+- Last Initiation: max `initiation_date`; group same-date count → "double / triple / quadruple…".
+- Royal Arch %: `is_royal_arch` over subscribing.
+- Light Blues: subscribing AND not Royal Arch.
+- Movement (rolling 12 months from today):
+  - In: initiations (initiation_date in range), joiners (joined_lodge_date in range AND initiation_date outside range or null).
+  - Out: status changes — derived from a new `profile_status_history` table written by a trigger so we can date `resigned/excluded/deceased`. Year Out shown as separate line, not counted in net.
+- UGLE %: registered over Active subscribing (excludes year_out/resigned/excluded/deceased). List of unregistered Active members.
+- RA conversion: Light Blues with `raising_date <= today - 1 month`, sorted oldest raising_date first, with months-eligible computed.
+- Milestones (current Masonic year = Oct→Sep):
+  - Initiation anniversaries 10/25/30/40/50.
+  - WM anniversaries 25/30/40 (from earliest `member_wm_terms.year_started`).
+  - Birthdays in next 30 days (uses date_of_birth month/day).
+- Officers & succession:
+  - Pull existing progressive positions from `officer_positions` + current-year `officer_appointments` → filled vs vacant counts.
+  - Critical roles (`secretary`, `treasurer`, `almoner`, `dc`): show successor flag from `succession_risks` with editable note (Secretary inline edit).
+- Pipeline:
+  - Candidates = a new `candidates` table? No — keep scope tight: re-use `profiles.status = 'pending'` AND no `initiation_date` as "Candidate awaiting Initiation".
+  - EA not Passed = degree `entered_apprentice` AND `passing_date IS NULL`.
+  - FC not Raised = degree `fellow_craft` AND `raising_date IS NULL`.
+  - Funnel = horizontal stepped bar.
 
-1. **Current Year Board** — six office cards in progression order showing holder name, year appointed, years in office. Vacant offices rendered with an amber-outlined card and a "Vacant" badge.
+### UI
 
-2. **Progression Ladder** — a 7-column table (Current Year + Years +1…+6). Rows are the six offices. Each cell shows the projected holder. Algorithm: starting from the current year board, each subsequent year advances every officer one step up (Inner Guard → JD → SD → JW → SW → WM → off the top), with the bottom slot (Inner Guard) filled from the readiness panel queue (members tagged `ready`, sorted by effective initiation date, oldest first, then tiebreaker). Manual overrides (a row in `officer_appointments` for a future year) lock that cell and display a gold flag with the reason + Secretary name. Warnings render at the top: vacant feeder offices, duplicate initiation dates among ready members, gaps in projection. Export-to-PDF button (`@react-pdf/renderer` or the existing reportlab-style approach via `pdf-lib` in the browser) produces a styled landscape PDF with the lodge crest, all 7 years, names, overrides, and warnings.
+- File: `src/pages/members/Kpis.tsx`, uses `MembersLayout`.
+- Sections rendered as cards on dark navy with gold-border accents, Playfair Display headings, Inter body — matches existing portal pages.
+- Bar/funnel charts via lightweight SVG (no extra deps) to stay consistent with current bundle.
+- `<details>` collapsible wrappers on `md:` and below; always-open on desktop.
+- Two buttons in the header: **Export VO Report** and **Export Full KPI Summary**.
 
-3. **Member Readiness Panel** — list of all active members NOT currently holding a progressive office, sorted strictly by effective initiation date ascending. Columns: full name, initiation date, current rank, years of membership, readiness tag (editable select). A "Promote to ladder" action lets the Secretary insert a `ready` member into the next available Inner Guard slot for a chosen year (drag-and-drop via `@dnd-kit/core`, with a click-fallback select). Inserting respects seniority — the UI warns if the chosen position violates initiation-date order.
+### PDF export
 
-All mutations capture `updated_by = auth.uid()` so overrides display the Secretary's name.
+- Use `jspdf` + `jspdf-autotable` (add deps).
+- VO Report: replicates the Surrey St Andrew Group "Membership Snapshot" table — single page, header with Lodge name & number (6787), date, and the Section 1 rows in their original table layout.
+- Full KPI Summary: multi-page, all 7 sections with tables and the funnel rendered as text bars; footer with generation timestamp and Secretary's name.
+- Both saved client-side via `doc.save(...)`.
 
-### Technical Details
+### Files
 
-- Migration order: enum extension → `profiles.initiation_date` column → new tables with GRANTs (authenticated only; no anon) → RLS policies using `has_role(auth.uid(), 'secretary' | 'worshipful_master' | 'admin')` → seed `officer_positions` → `effective_initiation_date` SQL function → updated_at triggers.
-- Reuse existing `useAuth` hook; extend it to expose `isSecretary` / `isWorshipfulMaster` booleans derived from `user_roles`.
-- Projection logic lives in a single pure function `computeProjection(currentBoard, readyQueue, overrides, years=7)` so it's unit-testable and used by both the Ladder view and the PDF export.
-- PDF: use `@react-pdf/renderer` (works in-browser, easy to style with Playfair Display via Google Fonts, matches existing brand).
-- Drag-and-drop: `@dnd-kit/core` + `@dnd-kit/sortable`.
+Created:
+- `src/pages/members/Kpis.tsx`
+- `src/lib/kpis.ts` (data fetch + derivations, pure functions for testability)
+- `src/lib/kpiExports.ts` (PDF builders)
+- One new migration
 
-### Out of scope
+Edited:
+- `src/App.tsx` (route)
+- `src/components/members/MembersLayout.tsx` (nav link, role gate)
+- `src/components/members/ProtectedRoute.tsx` (allow secretary/wm)
+- `src/pages/members/Admin.tsx` (new profile fields in form + status dropdown + WM terms editor)
+- `supabase/functions/admin-invite-member/index.ts` (accept the new fields)
 
-- No changes to existing public site or other member pages beyond the nav link and an `initiation_date` field on Profile/Admin edit forms.
-- No email notifications.
-- No historic year archive view (current + 6 future years only, per spec).
+### Out of scope (flag for follow-up)
 
-### Confirmations needed before build
-
-1. The six offices listed are the complete progressive ladder for Weybridge Lodge — no Chaplain, Almoner, DC, or Stewards included in the *progressive* path? (They can still appear in the Officers public page; they just don't form part of this projection.)
-2. OK to add `initiation_date` to the `profiles` table (Secretary fills it in for existing members)? Otherwise we can't compute seniority.
-3. Should the Worshipful Master have **edit** rights, or **read-only** access to the tracker? (Spec says "accessible to" both — I'll default to both can edit unless you'd prefer WM read-only.)
+- A dedicated `candidates` table with full prospect tracking — using `profiles.status='pending'` for now.
+- Email reminders for milestones/RA conversion — dashboard only.
+- Historical movement before today (relies on trigger going forward; back-fill needs a one-off script if you want full 12 months from go-live).

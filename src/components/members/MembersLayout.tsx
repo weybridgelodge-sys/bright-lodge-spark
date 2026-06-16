@@ -1,6 +1,6 @@
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { LayoutDashboard, Users, FileText, User as UserIcon, ShieldCheck, LogOut, Shield, CalendarDays, CreditCard, BookOpen, Crown, CalendarPlus } from "lucide-react";
+import { LayoutDashboard, Users, FileText, User as UserIcon, ShieldCheck, LogOut, Shield, CalendarDays, CreditCard, BookOpen, Crown, CalendarPlus, BarChart3 } from "lucide-react";
 import logo from "@/assets/weybridge-logo.svg";
 
 const navCls = ({ isActive }: { isActive: boolean }) =>
@@ -71,6 +71,11 @@ export default function MembersLayout({ children }: { children: React.ReactNode 
             {(isAdmin || isSecretary) && (
               <NavLink to="/members/events" className={navCls}>
                 <CalendarPlus className="w-4 h-4" /> Meetings
+              </NavLink>
+            )}
+            {canManageProgression && (
+              <NavLink to="/members/kpis" className={navCls}>
+                <BarChart3 className="w-4 h-4" /> KPIs
               </NavLink>
             )}
             {isAdmin && (

@@ -7,8 +7,18 @@ import { useAuth } from "@/hooks/useAuth";
 
 type Degree = "entered_apprentice" | "fellow_craft" | "master_mason";
 type Title = "Bro" | "W Bro" | "VW Bro" | "RW Bro";
+type Status = "pending" | "active" | "suspended" | "year_out" | "resigned" | "excluded" | "deceased";
 
 const TITLES: Title[] = ["Bro", "W Bro", "VW Bro", "RW Bro"];
+const STATUSES: { value: Status; label: string }[] = [
+  { value: "pending", label: "Pending" },
+  { value: "active", label: "Active" },
+  { value: "year_out", label: "Year Out" },
+  { value: "suspended", label: "Suspended" },
+  { value: "resigned", label: "Resigned" },
+  { value: "excluded", label: "Excluded" },
+  { value: "deceased", label: "Deceased" },
+];
 
 const DEGREE_LABEL: Record<Degree, string> = {
   entered_apprentice: "Entered Apprentice",
@@ -30,11 +40,15 @@ type Profile = {
   rank: string | null;
   ugle_reg_number: string | null;
   mother_lodge: string | null;
-  status: "pending" | "active" | "suspended";
+  status: Status;
   degree: Degree;
   is_past_master: boolean;
   is_royal_arch: boolean;
   is_honorary_member: boolean;
+  is_ugle_portal_registered: boolean;
+  passing_date: string | null;
+  raising_date: string | null;
+  joined_lodge_date: string | null;
   created_at: string;
 };
 
@@ -63,7 +77,11 @@ const EMPTY_FORM = {
   is_royal_arch: false,
   is_honorary_member: false,
   rank: "",
-  status: "active" as Profile["status"],
+  status: "active" as Status,
+  is_ugle_portal_registered: false,
+  passing_date: "",
+  raising_date: "",
+  joined_lodge_date: "",
 };
 
 export default function MembersAdmin() {
@@ -87,7 +105,7 @@ export default function MembersAdmin() {
       supabase
         .from("profiles")
         .select(
-          "id,email,full_name,title,first_name,last_name,provincial_rank,grand_rank,date_of_birth,initiation_date,rank,ugle_reg_number,mother_lodge,status,degree,is_past_master,is_royal_arch,is_honorary_member,created_at"
+          "id,email,full_name,title,first_name,last_name,provincial_rank,grand_rank,date_of_birth,initiation_date,rank,ugle_reg_number,mother_lodge,status,degree,is_past_master,is_royal_arch,is_honorary_member,is_ugle_portal_registered,passing_date,raising_date,joined_lodge_date,created_at"
         )
         .order("created_at", { ascending: false }),
       supabase.from("user_roles").select("user_id,role"),
@@ -165,6 +183,10 @@ export default function MembersAdmin() {
       is_honorary_member: p.is_honorary_member,
       rank: p.rank ?? "",
       status: p.status,
+      is_ugle_portal_registered: p.is_ugle_portal_registered ?? false,
+      passing_date: p.passing_date ?? "",
+      raising_date: p.raising_date ?? "",
+      joined_lodge_date: p.joined_lodge_date ?? "",
     });
     setTab("add");
   };
@@ -193,6 +215,10 @@ export default function MembersAdmin() {
       is_honorary_member: form.is_honorary_member,
       rank: form.rank.trim() || null,
       status: form.status,
+      is_ugle_portal_registered: form.is_ugle_portal_registered,
+      passing_date: form.passing_date || null,
+      raising_date: form.raising_date || null,
+      joined_lodge_date: form.joined_lodge_date || null,
     };
     if (form.id) payload.id = form.id;
 
@@ -472,6 +498,47 @@ export default function MembersAdmin() {
               </select>
             </label>
 
+            <label className={`${labelCls} sm:col-span-2`}>
+              Date Passed (FC)
+              <input
+                type="date"
+                value={form.passing_date}
+                onChange={(e) => setForm({ ...form, passing_date: e.target.value })}
+                className={`mt-1 ${inputCls} normal-case tracking-normal text-primary-foreground`}
+              />
+            </label>
+            <label className={`${labelCls} sm:col-span-2`}>
+              Date Raised (MM)
+              <input
+                type="date"
+                value={form.raising_date}
+                onChange={(e) => setForm({ ...form, raising_date: e.target.value })}
+                className={`mt-1 ${inputCls} normal-case tracking-normal text-primary-foreground`}
+              />
+            </label>
+            <label className={`${labelCls} sm:col-span-2`}>
+              Joined this Lodge
+              <input
+                type="date"
+                value={form.joined_lodge_date}
+                onChange={(e) => setForm({ ...form, joined_lodge_date: e.target.value })}
+                className={`mt-1 ${inputCls} normal-case tracking-normal text-primary-foreground`}
+              />
+            </label>
+
+            <label className={`${labelCls} sm:col-span-3`}>
+              Member status
+              <select
+                value={form.status}
+                onChange={(e) => setForm({ ...form, status: e.target.value as Status })}
+                className={`mt-1 ${inputCls} normal-case tracking-normal text-primary-foreground`}
+              >
+                {STATUSES.map((s) => (
+                  <option key={s.value} value={s.value}>{s.label}</option>
+                ))}
+              </select>
+            </label>
+
             <div className="sm:col-span-6 flex flex-wrap gap-4 pt-1">
               <label className="flex items-center gap-2 text-sm">
                 <input
@@ -491,8 +558,18 @@ export default function MembersAdmin() {
                 />
                 Honorary member
               </label>
+              <label className="flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={form.is_ugle_portal_registered}
+                  onChange={(e) => setForm({ ...form, is_ugle_portal_registered: e.target.checked })}
+                  className="accent-gold w-4 h-4"
+                />
+                UGLE Portal registered
+              </label>
             </div>
           </div>
+
 
           <div className="flex items-center gap-3 pt-1">
             <button
