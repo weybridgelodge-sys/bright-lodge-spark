@@ -147,7 +147,9 @@ export default function MembersRitual() {
 
   const visibleDocs =
     isAdmin && previewDegree
-      ? docs.filter((d) => DEGREE_LEVEL[d.required_degree] <= DEGREE_LEVEL[previewDegree])
+      ? docs.filter(
+          (d) => d.is_general || DEGREE_LEVEL[d.required_degree] <= DEGREE_LEVEL[previewDegree]
+        )
       : docs;
 
   return (
