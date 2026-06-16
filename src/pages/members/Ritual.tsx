@@ -221,12 +221,12 @@ export default function MembersRitual() {
             <span className="text-[11px] uppercase tracking-wider text-gold/70 font-semibold">Degree</span>
             <select
               value={degree}
-              onChange={(e) => setDegree(e.target.value as Degree)}
+              onChange={(e) => setDegree(e.target.value as DegreeOrGeneral)}
               className="bg-navy border border-gold/20 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-gold"
             >
-              {DEGREES.map((d) => (
-                <option key={d} value={d}>
-                  {DEGREE_LABEL[d]}
+              {UPLOAD_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
                 </option>
               ))}
             </select>
