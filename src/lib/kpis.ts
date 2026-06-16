@@ -28,6 +28,7 @@ export type KpiMember = {
   raising_date: string | null;
   joined_lodge_date: string | null;
   is_ugle_portal_registered: boolean;
+  provincial_rank: string | null;
   updated_at: string;
 };
 
@@ -74,7 +75,7 @@ export async function fetchKpiBundle(): Promise<KpiBundle> {
     supabase
       .from("profiles")
       .select(
-        "id,full_name,first_name,last_name,title,status,degree,is_past_master,is_royal_arch,is_honorary_member,date_of_birth,initiation_date,passing_date,raising_date,joined_lodge_date,is_ugle_portal_registered,updated_at"
+        "id,full_name,first_name,last_name,title,status,degree,is_past_master,is_royal_arch,is_honorary_member,date_of_birth,initiation_date,passing_date,raising_date,joined_lodge_date,is_ugle_portal_registered,provincial_rank,updated_at"
       ),
     (supabase.from as any)("member_wm_terms").select("id,member_id,year_started,year_ended"),
     (supabase.from as any)("succession_risks").select("id,role_key,note"),
@@ -117,7 +118,7 @@ export function snapshot(members: KpiMember[]) {
   const multipleLabel = ["", "single", "double", "triple", "quadruple", "quintuple"][lastSameDay.length] ?? `${lastSameDay.length}-up`;
 
   const raCount = subscribing.filter((m) => m.is_royal_arch).length;
-  const lightBlues = subscribing.filter((m) => !m.is_royal_arch && !m.is_past_master);
+  const lightBlues = subscribing.filter((m) => !m.provincial_rank || !m.provincial_rank.trim());
 
   return {
     subscribingCount: subscribing.length,
