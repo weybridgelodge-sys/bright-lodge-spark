@@ -299,59 +299,65 @@ const BackCoverPanel: React.FC<{
 
       <View style={s.thinDivider} />
 
-      {!hidden.has("regular_meetings") && template.regular_meeting_pattern && (
-        <>
-          <Text style={s.sectionHeading}>Regular Meetings</Text>
-          <Text style={s.smallText}>{template.regular_meeting_pattern}</Text>
-        </>
-      )}
-      {!hidden.has("loi") && template.loi_details && (
-        <>
-          <Text style={s.sectionHeading}>Lodge of Instruction</Text>
-          <Text style={s.smallText}>{template.loi_details}</Text>
-        </>
-      )}
-      {template.progression_notice_text && (
-        <Text style={[s.smallText, s.bold, { marginTop: 3 }]}>
-          {template.progression_notice_text}
-        </Text>
-      )}
-      {template.royal_arch_rep && (
-        <Text style={[s.smallText, { marginTop: 4 }]}>
-          <Text style={s.bold}>Royal Arch Representative: </Text>
-          {template.royal_arch_rep}
-        </Text>
-      )}
-      {template.mcf_contact && (
-        <Text style={s.smallText}>
-          <Text style={s.bold}>Masonic Charitable Foundation: </Text>
-          {template.mcf_contact}
-        </Text>
-      )}
-      {template.provincial_website && (
-        <Text style={[s.smallText, s.bold]}>
-          Provincial website: {template.provincial_website}
-        </Text>
-      )}
+      <View style={s.noticeTable}>
+        <View style={s.noticeCol}>
+          {!hidden.has("regular_meetings") && template.regular_meeting_pattern && (
+            <>
+              <Text style={s.sectionHeading}>Regular Meetings</Text>
+              <Text style={s.smallText}>{template.regular_meeting_pattern}</Text>
+            </>
+          )}
+          {!hidden.has("loi") && template.loi_details && (
+            <>
+              <Text style={s.sectionHeading}>Lodge of Instruction</Text>
+              <Text style={s.smallText}>{template.loi_details}</Text>
+            </>
+          )}
+          {template.progression_notice_text && (
+            <Text style={[s.smallText, s.bold, { marginTop: 3 }]}>
+              {template.progression_notice_text}
+            </Text>
+          )}
+          {template.royal_arch_rep && (
+            <Text style={[s.smallText, { marginTop: 4 }]}>
+              <Text style={s.bold}>Royal Arch Representative: </Text>
+              {template.royal_arch_rep}
+            </Text>
+          )}
+          {template.mcf_contact && (
+            <Text style={s.smallText}>
+              <Text style={s.bold}>Masonic Charitable Foundation: </Text>
+              {template.mcf_contact}
+            </Text>
+          )}
+          {template.provincial_website && (
+            <Text style={[s.smallText, s.bold]}>
+              Provincial website: {template.provincial_website}
+            </Text>
+          )}
+        </View>
 
-      {!hidden.has("data_protection") && template.data_protection_text && (
-        <>
-          <Text style={s.sectionHeading}>Data Protection Act</Text>
-          <Text style={s.micro}>
-            {shortened.has("data_protection")
-              ? (template.data_protection_text_short ||
-                  "See lodge data protection notice — copies available from the Secretary.")
-              : template.data_protection_text}
-          </Text>
-        </>
-      )}
+        <View style={s.noticeCol}>
+          {!hidden.has("data_protection") && template.data_protection_text && (
+            <>
+              <Text style={s.sectionHeading}>Data Protection Act</Text>
+              <Text style={s.micro}>
+                {shortened.has("data_protection")
+                  ? (template.data_protection_text_short ||
+                      "See lodge data protection notice — copies available from the Secretary.")
+                  : template.data_protection_text}
+              </Text>
+            </>
+          )}
 
-      {!hidden.has("overseas") && template.overseas_attendance_text && (
-        <>
-          <Text style={s.sectionHeading}>Attendance at Lodges Overseas</Text>
-          <Text style={s.micro}>{template.overseas_attendance_text}</Text>
-        </>
-      )}
+          {!hidden.has("overseas") && template.overseas_attendance_text && (
+            <>
+              <Text style={s.sectionHeading}>Attendance at Lodges Overseas</Text>
+              <Text style={s.micro}>{template.overseas_attendance_text}</Text>
+            </>
+          )}
+        </View>
+      </View>
 
       {/* overflow.fontSize is currently informational only — members already
           render at a fixed compact size that fits the A5 panel. */}
