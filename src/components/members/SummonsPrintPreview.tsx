@@ -81,7 +81,7 @@ export default function SummonsPrintPreview({ template, officers, members }: Pro
         </p>
       ) : (
         <div className="summons-print-root bg-white text-black mx-auto shadow-xl">
-          <Sheet1 template={template} summons={current} members={sortedMembers} />
+          <Sheet1 template={template} summons={current} members={sortedMembers} officers={officers} />
           <Sheet2 template={template} summons={current} officers={officers} />
         </div>
       )}
