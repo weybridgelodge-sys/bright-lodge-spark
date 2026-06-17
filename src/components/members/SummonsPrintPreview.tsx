@@ -215,7 +215,8 @@ function Sheet1({
             <div>
               <p className="text-slate-500 uppercase text-[9px] tracking-wider mb-0.5">Worshipful Master</p>
               <p className="text-[11px] font-bold whitespace-pre-line">
-                {officers.find((o) => o.label === "Worshipful Master")?.member
+                {officers.find((o) => o.label === "Worshipful Master")?.member_formal
+                  || officers.find((o) => o.label === "Worshipful Master")?.member
                   || template.wm_contact?.split("\n")[0]
                   || "—"}
               </p>
@@ -223,7 +224,8 @@ function Sheet1({
             <div>
               <p className="text-slate-500 uppercase text-[9px] tracking-wider mb-0.5">Secretary</p>
               <p className="text-[11px] font-bold whitespace-pre-line">
-                {officers.find((o) => o.label === "Secretary")?.member
+                {officers.find((o) => o.label === "Secretary")?.member_formal
+                  || officers.find((o) => o.label === "Secretary")?.member
                   || template.secretary_contact?.split("\n")[0]
                   || "—"}
               </p>
