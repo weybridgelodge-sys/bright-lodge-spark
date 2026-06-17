@@ -35,6 +35,7 @@ type ProfileRow = {
   joined_year: number | null;
   status: string;
   initiation_date: string | null;
+  is_past_master: boolean | null;
 };
 
 type StatusRow = {
@@ -79,7 +80,7 @@ export default function OfficersTracker() {
     const [{ data: m, error: e1 }, { data: s, error: e2 }, { data: a, error: e3 }] = await Promise.all([
       supabase
         .from("profiles")
-        .select("id,full_name,email,rank,office,joined_year,status,initiation_date")
+        .select("id,full_name,email,rank,office,joined_year,status,initiation_date,is_past_master")
         .eq("status", "active")
         .order("full_name", { ascending: true }),
       supabase.from("member_progression_status").select("*"),
@@ -789,9 +790,9 @@ function ReadinessView({
   onSetInitiation: (mid: string, d: string | null) => void;
   onPromote: (mid: string) => void;
 }) {
-  // Members NOT currently on ladder, sorted by effective initiation date oldest first
+  // Members NOT currently on ladder and not Past Masters, sorted by effective initiation date oldest first
   const eligible = useMemo(() => {
-    const off = members.filter((m) => !onLadderIds.has(m.id));
+    const off = members.filter((m) => !onLadderIds.has(m.id) && !m.is_past_master);
     const lite = off.map((m) => membersById[m.id]).filter(Boolean) as MemberLite[];
     const sorted = sortBySeniority(lite);
     return sorted.map((l) => members.find((m) => m.id === l.id)!).filter(Boolean);
