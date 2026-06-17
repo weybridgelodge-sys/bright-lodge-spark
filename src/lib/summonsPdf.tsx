@@ -554,7 +554,7 @@ const SummonsDocument: React.FC<{
           />
         </View>
         <View style={{ flex: 1, padding: 0 }}>
-          <FrontCoverPanel template={template} summons={summons} />
+          <FrontCoverPanel template={template} summons={summons} officers={officers} />
         </View>
       </Page>
 
