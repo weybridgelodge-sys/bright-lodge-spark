@@ -18,6 +18,7 @@ import {
   type KpiBundle,
 } from "@/lib/kpis";
 import { exportVoReport, exportFullKpi } from "@/lib/kpiExports";
+import AttendanceCharts from "@/components/members/AttendanceCharts";
 
 function Section({ title, children, defaultOpen = true }: { title: string; children: React.ReactNode; defaultOpen?: boolean }) {
   return (
@@ -300,7 +301,13 @@ export default function Kpis() {
             <BarRow label="MM" value={pl.mm.length} max={funnelMax} />
           </div>
         </Section>
+
+        {/* Section 8 */}
+        <Section title="8 · Attendance Analytics" defaultOpen={false}>
+          <AttendanceCharts />
+        </Section>
       </div>
+
     </MembersLayout>
   );
 }
