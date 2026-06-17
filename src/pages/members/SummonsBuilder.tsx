@@ -743,7 +743,7 @@ function Section({ title, subtitle, children }: { title: string; subtitle?: stri
 }
 
 // ===================== History Tab =====================
-function HistoryTab() {
+function HistoryTab({ onEdit }: { onEdit: (id: string) => void }) {
   const [rows, setRows] = useState<any[]>([]);
   useEffect(() => {
     (async () => {
@@ -758,6 +758,13 @@ function HistoryTab() {
     const { data, error } = await supabase.storage.from("lodge-docs").createSignedUrl(path, 60 * 5);
     if (error) { toast.error(error.message); return; }
     window.open(data.signedUrl, "_blank");
+  };
+  const remove = async (id: string) => {
+    if (!confirm("Delete this summons from history? The PDF will remain in storage.")) return;
+    const { error } = await supabase.from("summonses").delete().eq("id", id);
+    if (error) { toast.error(error.message); return; }
+    setRows((rs) => rs.filter((r) => r.id !== id));
+    toast.success("Summons deleted");
   };
   return (
     <div className="bg-navy-light/40 border border-gold/20 rounded p-4">
@@ -774,11 +781,19 @@ function HistoryTab() {
                 <td>{r.meeting_type}</td>
                 <td><Badge variant="outline">{r.status}</Badge></td>
                 <td>{r.sent_to_count ?? "—"}</td>
-                <td>{r.pdf_storage_path && (
-                  <Button size="sm" variant="outline" onClick={() => open(r.pdf_storage_path)}>
-                    <FileText className="w-3.5 h-3.5 mr-1" /> Open
-                  </Button>
-                )}</td>
+                <td>
+                  <div className="flex gap-2 justify-end py-1.5">
+                    <Button size="sm" variant="outline" onClick={() => onEdit(r.id)}>Edit</Button>
+                    {r.pdf_storage_path && (
+                      <Button size="sm" variant="outline" onClick={() => open(r.pdf_storage_path)}>
+                        <FileText className="w-3.5 h-3.5 mr-1" /> Open
+                      </Button>
+                    )}
+                    <Button size="sm" variant="destructive" onClick={() => remove(r.id)}>
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </Button>
+                  </div>
+                </td>
               </tr>
             ))}
           </tbody>
@@ -787,3 +802,4 @@ function HistoryTab() {
     </div>
   );
 }
+
