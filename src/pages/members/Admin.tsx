@@ -49,6 +49,12 @@ type Profile = {
   passing_date: string | null;
   raising_date: string | null;
   joined_lodge_date: string | null;
+  address_line1: string | null;
+  address_line2: string | null;
+  address_line3: string | null;
+  town: string | null;
+  county: string | null;
+  postcode: string | null;
   created_at: string;
 };
 
