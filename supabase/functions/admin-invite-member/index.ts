@@ -31,6 +31,12 @@ const Body = z.object({
   raising_date: z.string().trim().regex(/^\d{4}-\d{2}-\d{2}$/).optional().nullable(),
   joined_lodge_date: z.string().trim().regex(/^\d{4}-\d{2}-\d{2}$/).optional().nullable(),
   is_ugle_portal_registered: z.boolean().optional().default(false),
+  address_line1: z.string().trim().max(120).optional().nullable(),
+  address_line2: z.string().trim().max(120).optional().nullable(),
+  address_line3: z.string().trim().max(120).optional().nullable(),
+  town: z.string().trim().max(80).optional().nullable(),
+  county: z.string().trim().max(80).optional().nullable(),
+  postcode: z.string().trim().max(20).optional().nullable(),
 });
 
 function composeFullName(title: string | null | undefined, first: string, last: string) {
