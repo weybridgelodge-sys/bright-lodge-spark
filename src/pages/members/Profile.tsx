@@ -21,6 +21,12 @@ export default function MembersProfile() {
   const [isRoyalArch, setIsRoyalArch] = useState(false);
   const [isHonoraryMember, setIsHonoraryMember] = useState(false);
   const [phone, setPhone] = useState("");
+  const [addressLine1, setAddressLine1] = useState("");
+  const [addressLine2, setAddressLine2] = useState("");
+  const [addressLine3, setAddressLine3] = useState("");
+  const [town, setTown] = useState("");
+  const [county, setCounty] = useState("");
+  const [postcode, setPostcode] = useState("");
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
