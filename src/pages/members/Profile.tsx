@@ -74,6 +74,12 @@ export default function MembersProfile() {
         is_royal_arch: isRoyalArch,
         is_honorary_member: isHonoraryMember,
         phone: phone.trim() || null,
+        address_line1: addressLine1.trim() || null,
+        address_line2: addressLine2.trim() || null,
+        address_line3: addressLine3.trim() || null,
+        town: town.trim() || null,
+        county: county.trim() || null,
+        postcode: postcode.trim() || null,
       })
       .eq("id", user.id);
     setBusy(false);
