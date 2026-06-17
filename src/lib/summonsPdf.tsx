@@ -167,7 +167,7 @@ const s = StyleSheet.create({
   memberCol: { flex: 1, paddingHorizontal: 2 },
   memberRow: { flexDirection: "row", marginBottom: 1 },
   memberDate: { width: 60, fontSize: 6.8 },
-  memberMark: { width: 8, fontSize: 6.8, textAlign: "center" },
+  memberMark: { width: 16, fontSize: 6.8, textAlign: "center" },
   memberName: { flex: 1, fontSize: 6.8 },
 
   // Officers
