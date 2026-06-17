@@ -75,6 +75,7 @@ const EMPTY_FORM = {
   title: "" as "" | Title,
   first_name: "",
   last_name: "",
+  preferred_name: "",
   provincial_rank: "",
   grand_rank: "",
   date_of_birth: "",
