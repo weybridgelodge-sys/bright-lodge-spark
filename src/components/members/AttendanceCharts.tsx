@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Users, BarChart3, TrendingUp, Calendar } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { LOI_KPI_CATEGORIES, autoKpiCategory, kpiCategoryLabel } from "@/lib/loi";
 
 // Mock data — to be wired to bookings/lodge_events later
 const regularMeetingsData = [
@@ -13,12 +15,66 @@ const regularMeetingsData = [
   { month: "May 25", subscribing: 15, visitors: 7, total: 22 },
 ];
 
-const loiRehearsalData = [
+const loiRehearsalFallback = [
   { block: "Oct Inst. Prep", sessionsCount: 4, engagementRate: 92 },
   { block: "Dec Degree Prep", sessionsCount: 3, engagementRate: 78 },
   { block: "Feb Degree Prep", sessionsCount: 4, engagementRate: 86 },
   { block: "May Degree Prep", sessionsCount: 3, engagementRate: 71 },
 ];
+
+type LiveLoi = {
+  data: { block: string; sessionsCount: number; engagementRate: number }[];
+  avgTurnout: number;
+  overallEngagement: number;
+  totalSessions: number;
+};
+
+function useLiveLoi(): LiveLoi | null {
+  const [state, setState] = useState<LiveLoi | null>(null);
+  useEffect(() => {
+    (async () => {
+      const [s, a, m] = await Promise.all([
+        supabase.from("loi_sessions").select("id,session_date,kpi_category"),
+        supabase.from("loi_attendance").select("session_id"),
+        supabase.from("profiles").select("id", { count: "exact", head: true }).eq("status", "active"),
+      ]);
+      const sessions = (s.data as { id: string; session_date: string; kpi_category: string | null }[]) ?? [];
+      const attendance = (a.data as { session_id: string }[]) ?? [];
+      const activeCount = m.count ?? 0;
+      if (sessions.length === 0 || activeCount === 0) {
+        setState(null);
+        return;
+      }
+      const countBySession: Record<string, number> = {};
+      for (const r of attendance) countBySession[r.session_id] = (countBySession[r.session_id] ?? 0) + 1;
+      const grouped: Record<string, { sessions: number; attendees: number }> = {};
+      for (const sess of sessions) {
+        const cat = sess.kpi_category || autoKpiCategory(sess.session_date);
+        const g = (grouped[cat] ??= { sessions: 0, attendees: 0 });
+        g.sessions += 1;
+        g.attendees += countBySession[sess.id] ?? 0;
+      }
+      const data = LOI_KPI_CATEGORIES.filter((c) => grouped[c.value])
+        .map((c) => {
+          const g = grouped[c.value];
+          return {
+            block: c.label,
+            sessionsCount: g.sessions,
+            engagementRate: Math.round((g.attendees / (g.sessions * activeCount)) * 100),
+          };
+        });
+      const totalSessions = sessions.length;
+      const totalAtt = attendance.length;
+      setState({
+        data,
+        avgTurnout: Math.round(totalAtt / totalSessions),
+        overallEngagement: Math.round((totalAtt / (totalSessions * activeCount)) * 100),
+        totalSessions,
+      });
+    })();
+  }, []);
+  return state;
+}
 
 export default function AttendanceCharts() {
   const [activeTab, setActiveTab] = useState<"festive" | "loi">("festive");
