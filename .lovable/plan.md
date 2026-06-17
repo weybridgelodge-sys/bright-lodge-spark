@@ -1,82 +1,90 @@
-# Festive Board Attendance Register
+# Summons Builder
 
-A new Trestle section module mirroring the LOI Register pattern, replacing the mock Festive Board KPI data with live records.
+A new Trestle module for Secretary / Assistant Secretary to assemble, preview, PDF-export and email the lodge's monthly summons. Pulls Members, Officers Tracker, Meeting Events, and Festive Board records so only genuinely new content is entered each month.
 
-## Scope
+## Roles & access
 
-In: manual + historical entry, member multi-select, visitor repeater (name + lodge + number), auto/override headcount, attendance status per booking, late "paid on night" entries, KPI wiring to Attendance Analytics.
-
-Out (this iteration): Stripe live booking auto-population (placeholder hook only — table schema supports it so the future Stripe webhook can insert rows directly), Treasurer/Accounts view (data is there, dedicated screen later).
+- Add new role `assistant_secretary` to the `app_role` enum.
+- New `canManageSummons = isAdmin || isSecretary || isAssistantSecretary`.
+- Route `/members/summons` + sidebar entry (gated). Admin user-role assignment already supports new roles via Admin page.
 
 ## Database (one migration)
 
-**`festive_board_meetings`** — one row per Festive Board occurrence
-- `meeting_date` (date)
-- `meeting_type` enum: `regular` | `installation` | `emergency`
-- `notes` (text, nullable)
-- `headcount_override` (int, nullable) — when set, supersedes computed total
+**`lodge_template`** — singleton, one row keyed `id = 'default'`
+- Lodge identity: name, number, province, consecration_date
+- Logo URL (stored in existing `lodge-docs` bucket)
+- Venue address, regular meeting pattern text, LOI day/time/venue text
+- Provincial website URL, MCF contact text, dining booking URL
+- Static notices: data_protection_text, overseas_attendance_text, progression_notice_text (+ short variants for overflow)
+- WM home address/contact, Secretary contact block, Royal Arch Rep name+rank
+- Honorary members (text), lodge_representatives (jsonb array of {role, name})
+
+**`summonses`** — one per meeting
+- `meeting_number` (int, auto-increment from MAX+1, editable)
+- `lodge_event_id` → `lodge_events` (date/time/type pulled from here)
+- `dress_code`, `minutes_confirmation_date`, `next_meeting_date`, `officer_night_date`
+- `agenda` jsonb: ordered `[{ id, label, kind: 'standing'|'variable'|'candidate' }]`
+- `candidates` jsonb: ordered `[{ name, dob, occupation, address, proposer, seconder, date_proposed, ceremony_type }]`
+- `dining_enquiry_name`, `dining_enquiry_email`
+- `notice_overrides` jsonb (which static blocks were auto/manually trimmed)
+- `pdf_storage_path` (set after generation), `sent_at`, `sent_to_count`
+- `status`: draft | finalised | sent
 - `created_by`, timestamps
 
-**`festive_board_attendance`** — one row per attendee (member or visitor)
-- `meeting_id` → cascade
-- `member_id` (nullable, → profiles) — set for member rows
-- `visitor_name`, `visitor_lodge_name`, `visitor_lodge_number` (nullable) — set for visitor rows
-- `attendance_status` enum: `booked` | `attended` | `no_show` | `cancelled_refunded` (default `booked`)
-- `payment_method` enum: `stripe` | `paid_on_night_cash` | `paid_on_night_card` | `complimentary` | `unknown`
-- `booking_id` (nullable, → bookings) — links Stripe-originated rows
-- `amount_pence` (int, default 0) — for Treasurer totals
-- `created_by`, timestamps
-- CHECK: exactly one of `member_id` OR `visitor_name` set
-- UNIQUE (meeting_id, member_id) where member_id not null
+**`summons_email_log`** — per-recipient send rows for the archive
+- `summons_id`, `recipient_email`, `status`, `error`, `sent_at`
 
-**RLS / GRANTs**
-- All active members can SELECT both tables (matches LOI transparency).
-- INSERT/UPDATE/DELETE restricted via `has_role` to `admin`, `secretary`, `worshipful_master`, `director_of_ceremonies` (same `canManageLOI` set; rename the flag to `canManageRegisters` or add a parallel `canManageFestiveBoard` mirror — leaning toward reusing `canManageLOI` since the role set is identical).
-- `service_role` full access (future Stripe webhook).
+GRANTs + RLS:
+- `lodge_template`: SELECT for `authenticated`; ALL via `canManageSummons` roles. `service_role` ALL.
+- `summonses` + `summons_email_log`: same pattern. Active members may SELECT finalised/sent rows so future "View past summonses" is possible.
 
 ## Frontend
 
-**New route** `/members/festive-register` (`src/pages/members/FestiveBoardRegister.tsx`)
-- Personal "My Festive Board attendance" panel (matches LOI page style)
-- Meetings list, collapsible, with headcount + attended count
-- Manager-only "New Meeting" dialog:
-  - Date picker, meeting type select, notes
-  - Members grid (active, non-honorary) with attendance status dropdown per checked row
-  - Visitors repeater (name / lodge / number / status / payment method / amount)
-  - Headcount override input (placeholder = computed)
-- Per-meeting "Mark attendance" mode for post-meeting reconciliation: bulk-toggle Booked → Attended / No Show
-- Late booking entry: "Add walk-in" button inside meeting detail → adds member or visitor row with payment_method = paid_on_night_*
+**New files**
+- `src/pages/members/SummonsBuilder.tsx` — tabs: **Template**, **Officer Roll**, **New Summons**, **History**
+- `src/components/members/summons/TemplateForm.tsx`
+- `src/components/members/summons/SummonsEditor.tsx` — agenda DnD, candidate repeater, dining auto-fill, overflow warning
+- `src/components/members/summons/SummonsPreview.tsx` — on-screen A4 booklet preview (the same React tree used by the PDF)
+- `src/components/members/summons/MembersListPanel.tsx` — two-column auto-balanced list with symbols (+ # ✚ Triple-Tau)
+- `src/lib/summons.ts` — standing agenda template, preset variable items, overflow priority logic, member-list balancing
+- `src/lib/summonsPdf.ts` — `@react-pdf/renderer` document (A4 landscape, 4 pages = folded booklet)
 
-**Navigation**
-- Add "Festive Board" sidebar link in `MembersLayout.tsx` under LOI Register.
-
-**Auth**
-- Reuse existing `canManageLOI` (same role set). No new role.
-
-## KPI wiring
-
-Update `src/components/members/AttendanceCharts.tsx` — `festive` tab:
-- New `useLiveFestive()` hook fetching `festive_board_meetings` + `festive_board_attendance`
-- For each meeting compute: subscribing = COUNT(member_id where attended), visitors = COUNT(visitor rows where attended), total = headcount_override ?? (subscribing + visitors)
-- Label format: existing `Mon YY (Inst.)` derived from `meeting_date` + `meeting_type`
-- Last 6 meetings shown (consistent with current chart)
-- Fall back to `regularMeetingsData` mock only when zero rows exist
-- Stat banners (Avg member dining, Total guest diners, Peak covers) recompute from live rows
-- Drop the "Mock data — visual placeholder" caption when live data is present
-
-## Files
-
-Created
-- `supabase/migrations/<ts>_festive_board_register.sql`
-- `src/pages/members/FestiveBoardRegister.tsx`
-- `src/lib/festiveBoard.ts` (enums, label helpers, computeHeadcount)
-
-Edited
+**Edited**
+- `src/components/members/MembersLayout.tsx` — Summons sidebar link
+- `src/hooks/useAuth.tsx` — `isAssistantSecretary`, `canManageSummons`
 - `src/App.tsx` — route
-- `src/components/members/MembersLayout.tsx` — sidebar link
-- `src/components/members/AttendanceCharts.tsx` — live festive hook + render
-- `src/integrations/supabase/types.ts` — regenerated after migration
+- `src/pages/members/Admin.tsx` — show new role in user-role selector
+
+## Edge function
+
+`supabase/functions/send-summons-email/` (verify_jwt enforced; role-checked)
+- Input: `{ summons_id }`
+- Fetches PDF from storage, lists `profiles.email WHERE status='active'`, sends via existing Brevo/Lovable email path (single template `summons-distribution`), writes `summons_email_log`, updates `summonses.sent_at` + `sent_to_count`.
+
+## Per-meeting flow
+
+1. Pick a `lodge_events` row (date/time/type pre-fill).
+2. Standing agenda pre-loads: Open → Welcome visitors → **[variable slot]** → Officer reports → Charity Column → Risings → Close.
+3. Add variable items from presets (`Confirm minutes`, `Ballot/Initiate`, `Pass`, `Raise`, `Declare nominations`, `Elect Auditors`, custom) — DnD reorderable, numbering auto from index.
+4. Candidate blocks: each appended block auto-inserts a matching agenda line; remove cascades.
+5. Dining auto-pulls menu/price/deadline from the linked Festive Board record; QR code generated client-side from template `dining_booking_url` (using `qrcode` lib).
+6. Members list renders from `profiles` ordered by `COALESCE(initiation_date, joined_year-01-01)` ASC, with symbols (`+` past master, `#` past master in lodge, Triple Tau Unicode `☥`/SVG for `is_royal_arch`), post-nominals from `rank`/`grand_rank`.
+7. Overflow engine measures rendered height of members panel; if over budget, step-down: font-size 9→8.5→8pt, then trim notices in the spec'd order, surfacing a yellow banner with a "Choose what to trim" override.
+8. Preview → **Generate PDF** (writes to `lodge-docs/summonses/<id>.pdf`) → **Email to all members**.
+
+## Technical notes
+
+- PDF via `@react-pdf/renderer` (only new dep besides `qrcode`); A4 portrait single sheet, 4 page faces arranged for fold (Page 1 = front cover/officers, Page 2 = members list + notices, Page 3 = agenda/candidates, Page 4 = dining + next meeting).
+- Auto-balance algorithm: ceil(n/2) left, floor(n/2) right (odd → left gets extra), recomputed on render.
+- Meeting number auto-increment: `SELECT COALESCE(MAX(meeting_number),0)+1 FROM summonses` when opening a new draft.
+- Triple Tau: rendered as inline SVG (no font dependency risk in PDF).
+
+## Out of scope (this iteration)
+
+- Per-member opt-out from summons emails (use existing `status='active'` filter).
+- Editing past archived summonses after send (read-only history).
+- WYSIWYG rich-text on static notices (plain textarea with line breaks).
 
 ## Open question
 
-Confirm: reuse `canManageLOI` (admin / secretary / WM / DC) for Festive Board management, or restrict to admin + secretary + WM only (excluding DC, since the brief names "Secretary or DC" for attendance marking but doesn't mention DC for record creation)? Default plan: **reuse `canManageLOI`** for simplicity.
+Confirm Assistant Secretary should be a **new role** (`assistant_secretary`) rather than just granting `secretary`. Default plan: **new role** so audit trail and Officers Tracker can distinguish the two appointments.

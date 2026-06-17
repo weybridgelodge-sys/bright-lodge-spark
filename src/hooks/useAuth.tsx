@@ -25,7 +25,7 @@ type Profile = {
   initiation_date?: string | null;
 };
 
-type Role = "member" | "admin" | "secretary" | "worshipful_master" | "director_of_ceremonies";
+type Role = "member" | "admin" | "secretary" | "assistant_secretary" | "worshipful_master" | "director_of_ceremonies";
 
 type AuthCtx = {
   session: Session | null;
@@ -33,10 +33,12 @@ type AuthCtx = {
   profile: Profile | null;
   isAdmin: boolean;
   isSecretary: boolean;
+  isAssistantSecretary: boolean;
   isWorshipfulMaster: boolean;
   isDirectorOfCeremonies: boolean;
   canManageProgression: boolean;
   canManageLOI: boolean;
+  canManageSummons: boolean;
   loading: boolean;
   refreshProfile: () => Promise<void>;
   signOut: () => Promise<void>;
@@ -91,13 +93,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const isAdmin = roles.includes("admin");
   const isSecretary = roles.includes("secretary");
+  const isAssistantSecretary = roles.includes("assistant_secretary");
   const isWorshipfulMaster = roles.includes("worshipful_master");
   const isDirectorOfCeremonies = roles.includes("director_of_ceremonies");
   const canManageProgression = isAdmin || isSecretary || isWorshipfulMaster;
   const canManageLOI = isAdmin || isSecretary || isWorshipfulMaster || isDirectorOfCeremonies;
+  const canManageSummons = isAdmin || isSecretary || isAssistantSecretary;
 
   return (
-    <Ctx.Provider value={{ session, user: session?.user ?? null, profile, isAdmin, isSecretary, isWorshipfulMaster, isDirectorOfCeremonies, canManageProgression, canManageLOI, loading, refreshProfile, signOut }}>
+    <Ctx.Provider value={{ session, user: session?.user ?? null, profile, isAdmin, isSecretary, isAssistantSecretary, isWorshipfulMaster, isDirectorOfCeremonies, canManageProgression, canManageLOI, canManageSummons, loading, refreshProfile, signOut }}>
       {children}
     </Ctx.Provider>
   );

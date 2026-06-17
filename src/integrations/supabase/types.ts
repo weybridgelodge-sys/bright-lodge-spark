@@ -417,6 +417,87 @@ export type Database = {
         }
         Relationships: []
       }
+      lodge_template: {
+        Row: {
+          consecration_date: string | null
+          created_at: string
+          data_protection_text: string | null
+          data_protection_text_short: string | null
+          dining_booking_url: string | null
+          honorary_members: string | null
+          id: string
+          lodge_name: string
+          lodge_number: string
+          lodge_representatives: Json
+          logo_url: string | null
+          loi_details: string | null
+          mcf_contact: string | null
+          overseas_attendance_text: string | null
+          progression_notice_text: string | null
+          province: string
+          provincial_website: string | null
+          regular_meeting_pattern: string | null
+          royal_arch_rep: string | null
+          secretary_contact: string | null
+          updated_at: string
+          updated_by: string | null
+          venue_address: string | null
+          wm_contact: string | null
+        }
+        Insert: {
+          consecration_date?: string | null
+          created_at?: string
+          data_protection_text?: string | null
+          data_protection_text_short?: string | null
+          dining_booking_url?: string | null
+          honorary_members?: string | null
+          id?: string
+          lodge_name?: string
+          lodge_number?: string
+          lodge_representatives?: Json
+          logo_url?: string | null
+          loi_details?: string | null
+          mcf_contact?: string | null
+          overseas_attendance_text?: string | null
+          progression_notice_text?: string | null
+          province?: string
+          provincial_website?: string | null
+          regular_meeting_pattern?: string | null
+          royal_arch_rep?: string | null
+          secretary_contact?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          venue_address?: string | null
+          wm_contact?: string | null
+        }
+        Update: {
+          consecration_date?: string | null
+          created_at?: string
+          data_protection_text?: string | null
+          data_protection_text_short?: string | null
+          dining_booking_url?: string | null
+          honorary_members?: string | null
+          id?: string
+          lodge_name?: string
+          lodge_number?: string
+          lodge_representatives?: Json
+          logo_url?: string | null
+          loi_details?: string | null
+          mcf_contact?: string | null
+          overseas_attendance_text?: string | null
+          progression_notice_text?: string | null
+          province?: string
+          provincial_website?: string | null
+          regular_meeting_pattern?: string | null
+          royal_arch_rep?: string | null
+          secretary_contact?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          venue_address?: string | null
+          wm_contact?: string | null
+        }
+        Relationships: []
+      }
       loi_attendance: {
         Row: {
           created_at: string
@@ -873,6 +954,127 @@ export type Database = {
         }
         Relationships: []
       }
+      summons_email_log: {
+        Row: {
+          error: string | null
+          id: string
+          recipient_email: string
+          recipient_user_id: string | null
+          sent_at: string
+          status: string
+          summons_id: string
+        }
+        Insert: {
+          error?: string | null
+          id?: string
+          recipient_email: string
+          recipient_user_id?: string | null
+          sent_at?: string
+          status?: string
+          summons_id: string
+        }
+        Update: {
+          error?: string | null
+          id?: string
+          recipient_email?: string
+          recipient_user_id?: string | null
+          sent_at?: string
+          status?: string
+          summons_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "summons_email_log_summons_id_fkey"
+            columns: ["summons_id"]
+            isOneToOne: false
+            referencedRelation: "summonses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      summonses: {
+        Row: {
+          agenda: Json
+          candidates: Json
+          created_at: string
+          created_by: string | null
+          dining_enquiry_email: string | null
+          dining_enquiry_name: string | null
+          dress_code: string | null
+          id: string
+          lodge_event_id: string | null
+          meeting_date: string | null
+          meeting_number: number
+          meeting_time: string | null
+          meeting_type: string | null
+          minutes_confirmation_date: string | null
+          next_meeting_date: string | null
+          notice_overrides: Json
+          officer_night_date: string | null
+          pdf_storage_path: string | null
+          sent_at: string | null
+          sent_to_count: number | null
+          status: Database["public"]["Enums"]["summons_status"]
+          updated_at: string
+        }
+        Insert: {
+          agenda?: Json
+          candidates?: Json
+          created_at?: string
+          created_by?: string | null
+          dining_enquiry_email?: string | null
+          dining_enquiry_name?: string | null
+          dress_code?: string | null
+          id?: string
+          lodge_event_id?: string | null
+          meeting_date?: string | null
+          meeting_number: number
+          meeting_time?: string | null
+          meeting_type?: string | null
+          minutes_confirmation_date?: string | null
+          next_meeting_date?: string | null
+          notice_overrides?: Json
+          officer_night_date?: string | null
+          pdf_storage_path?: string | null
+          sent_at?: string | null
+          sent_to_count?: number | null
+          status?: Database["public"]["Enums"]["summons_status"]
+          updated_at?: string
+        }
+        Update: {
+          agenda?: Json
+          candidates?: Json
+          created_at?: string
+          created_by?: string | null
+          dining_enquiry_email?: string | null
+          dining_enquiry_name?: string | null
+          dress_code?: string | null
+          id?: string
+          lodge_event_id?: string | null
+          meeting_date?: string | null
+          meeting_number?: number
+          meeting_time?: string | null
+          meeting_type?: string | null
+          minutes_confirmation_date?: string | null
+          next_meeting_date?: string | null
+          notice_overrides?: Json
+          officer_night_date?: string | null
+          pdf_storage_path?: string | null
+          sent_at?: string | null
+          sent_to_count?: number | null
+          status?: Database["public"]["Enums"]["summons_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "summonses_lodge_event_id_fkey"
+            columns: ["lodge_event_id"]
+            isOneToOne: false
+            referencedRelation: "lodge_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -925,6 +1127,7 @@ export type Database = {
         | "secretary"
         | "worshipful_master"
         | "director_of_ceremonies"
+        | "assistant_secretary"
       candidate_stage:
         | "enquiry"
         | "face_to_face"
@@ -967,6 +1170,7 @@ export type Database = {
         | "excluded"
         | "deceased"
       progression_readiness: "ready" | "needs_experience" | "non_progressive"
+      summons_status: "draft" | "finalised" | "sent"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1100,6 +1304,7 @@ export const Constants = {
         "secretary",
         "worshipful_master",
         "director_of_ceremonies",
+        "assistant_secretary",
       ],
       candidate_stage: [
         "enquiry",
@@ -1149,6 +1354,7 @@ export const Constants = {
         "deceased",
       ],
       progression_readiness: ["ready", "needs_experience", "non_progressive"],
+      summons_status: ["draft", "finalised", "sent"],
     },
   },
 } as const
