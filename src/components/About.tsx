@@ -1,19 +1,17 @@
-import { motion } from "framer-motion";
 import surreyGold from "@/assets/surrey-2030-gold.png";
 import tlcPatron from "@/assets/tlc-patron.jpg";
 import anniversaryPhoto from "@/assets/75th-anniversary.webp";
+import { useScrollReveal } from "@/hooks/useScrollReveal";
 
 const About = () => {
+  const leftRef = useScrollReveal<HTMLDivElement>();
+  const rightRef = useScrollReveal<HTMLDivElement>();
+
   return (
     <section id="about" className="py-24 md:py-32 bg-warm-white">
       <div className="container mx-auto px-6">
         <div className="grid md:grid-cols-2 gap-16 items-center">
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.8 }}
-          >
+          <div ref={leftRef} className="reveal-on-scroll">
             <div className="h-0.5 w-16 bg-gold mb-6" />
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif text-foreground mb-6 leading-tight">
               Welcome to <br />
@@ -28,15 +26,9 @@ const About = () => {
             <p className="text-muted-foreground font-sans leading-relaxed">
               If you have any questions or are interested in taking your first step into Freemasonry, please feel free to contact us. We warmly welcome prospective candidates from all walks of life.
             </p>
-          </motion.div>
+          </div>
 
-          <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="flex flex-col items-center gap-8"
-          >
+          <div ref={rightRef} className="reveal-on-scroll flex flex-col items-center gap-8">
             <div className="relative w-full overflow-hidden rounded-sm shadow-lg">
               <img
                 src={anniversaryPhoto}
@@ -67,7 +59,7 @@ const About = () => {
                 <p className="text-base font-sans font-bold text-foreground text-center">TLC Patron</p>
               </div>
             </div>
-          </motion.div>
+          </div>
         </div>
       </div>
     </section>
