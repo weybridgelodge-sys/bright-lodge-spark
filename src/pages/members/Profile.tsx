@@ -11,6 +11,7 @@ export default function MembersProfile() {
   const { profile, user, refreshProfile } = useAuth();
   const [title, setTitle] = useState("");
   const [firstName, setFirstName] = useState("");
+  const [preferredName, setPreferredName] = useState("");
   const [lastName, setLastName] = useState("");
   const [provincialRank, setProvincialRank] = useState("");
   const [grandRank, setGrandRank] = useState("");
@@ -33,6 +34,7 @@ export default function MembersProfile() {
     if (!profile) return;
     setTitle(profile.title ?? "");
     setFirstName(profile.first_name ?? "");
+    setPreferredName((profile as { preferred_name?: string | null }).preferred_name ?? "");
     setLastName(profile.last_name ?? "");
     setProvincialRank(profile.provincial_rank ?? "");
     setGrandRank(profile.grand_rank ?? "");
@@ -64,6 +66,7 @@ export default function MembersProfile() {
       .update({
         title: title || null,
         first_name: firstName.trim() || null,
+        preferred_name: preferredName.trim() || null,
         last_name: lastName.trim() || null,
         full_name: composedName || null,
         provincial_rank: provincialRank.trim() || null,
@@ -137,6 +140,16 @@ export default function MembersProfile() {
             <label className={labelCls}>Last name</label>
             <input value={lastName} onChange={(e) => setLastName(e.target.value)} className={inputCls} />
           </div>
+        </div>
+
+        <div>
+          <label className={labelCls}>Preferred name (optional)</label>
+          <input
+            value={preferredName}
+            onChange={(e) => setPreferredName(e.target.value)}
+            placeholder="e.g. Bob (shown as 'Welcome Bob' in the portal)"
+            className={inputCls}
+          />
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
