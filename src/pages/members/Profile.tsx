@@ -16,6 +16,8 @@ export default function MembersProfile() {
   const [grandRank, setGrandRank] = useState("");
   const [dateOfBirth, setDateOfBirth] = useState("");
   const [initiationDate, setInitiationDate] = useState("");
+  const [joinedLodgeDate, setJoinedLodgeDate] = useState("");
+  const [entryType, setEntryType] = useState<"initiate" | "joiner">("initiate");
   const [isRoyalArch, setIsRoyalArch] = useState(false);
   const [isHonoraryMember, setIsHonoraryMember] = useState(false);
   const [phone, setPhone] = useState("");
@@ -30,6 +32,9 @@ export default function MembersProfile() {
     setGrandRank(profile.grand_rank ?? "");
     setDateOfBirth(profile.date_of_birth ?? "");
     setInitiationDate(profile.initiation_date ?? "");
+    const jld = (profile as { joined_lodge_date?: string | null }).joined_lodge_date ?? "";
+    setJoinedLodgeDate(jld);
+    setEntryType(jld && jld !== (profile.initiation_date ?? "") ? "joiner" : "initiate");
     setIsRoyalArch(!!profile.is_royal_arch);
     setIsHonoraryMember(!!profile.is_honorary_member);
     setPhone(profile.phone ?? "");
@@ -40,6 +45,7 @@ export default function MembersProfile() {
     if (!user) return;
     setBusy(true);
     const composedName = [title, firstName.trim(), lastName.trim()].filter(Boolean).join(" ").trim();
+    const joinedLodge = entryType === "initiate" ? (initiationDate || null) : (joinedLodgeDate || null);
     const { error } = await supabase
       .from("profiles")
       .update({
@@ -51,6 +57,7 @@ export default function MembersProfile() {
         grand_rank: grandRank.trim() || null,
         date_of_birth: dateOfBirth || null,
         initiation_date: initiationDate || null,
+        joined_lodge_date: joinedLodge,
         is_royal_arch: isRoyalArch,
         is_honorary_member: isHonoraryMember,
         phone: phone.trim() || null,
