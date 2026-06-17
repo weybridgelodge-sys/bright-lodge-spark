@@ -129,12 +129,14 @@ export default function SummonsBuilder() {
         <Tabs value={tab} onValueChange={setTab} className="space-y-4">
           <TabsList className="bg-navy-light/60 border border-gold/20">
             <TabsTrigger value="new">{editingId ? "Edit Summons" : "New Summons"}</TabsTrigger>
+            <TabsTrigger value="preview">Print Preview</TabsTrigger>
             <TabsTrigger value="template">Lodge Template</TabsTrigger>
             <TabsTrigger value="officers">Officer Roll</TabsTrigger>
             <TabsTrigger value="history">History</TabsTrigger>
           </TabsList>
 
           <TabsContent value="new"><NewSummonsTab editingId={editingId} onDoneEditing={() => setEditingId(null)} /></TabsContent>
+          <TabsContent value="preview"><PrintPreviewTab /></TabsContent>
           <TabsContent value="template"><TemplateTab /></TabsContent>
           <TabsContent value="officers"><OfficerRollTab /></TabsContent>
           <TabsContent value="history"><HistoryTab onEdit={startEdit} /></TabsContent>
