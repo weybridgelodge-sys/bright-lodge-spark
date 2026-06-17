@@ -154,7 +154,9 @@ function TemplateTab() {
     (async () => {
       const { data } = await supabase.from("lodge_template").select("*").eq("id", "default").maybeSingle();
       if (data) {
-        setT({ ...EMPTY_TEMPLATE, ...(data as any), lodge_representatives: (data as any).lodge_representatives ?? [] });
+        const merged = { ...EMPTY_TEMPLATE, ...(data as any), lodge_representatives: (data as any).lodge_representatives ?? [] };
+        if (!merged.logo_url) merged.logo_url = EMPTY_TEMPLATE.logo_url;
+        setT(merged);
         setReps(((data as any).lodge_representatives ?? []) as Rep[]);
       }
     })();
