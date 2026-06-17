@@ -31,6 +31,12 @@ const Body = z.object({
   raising_date: z.string().trim().regex(/^\d{4}-\d{2}-\d{2}$/).optional().nullable(),
   joined_lodge_date: z.string().trim().regex(/^\d{4}-\d{2}-\d{2}$/).optional().nullable(),
   is_ugle_portal_registered: z.boolean().optional().default(false),
+  address_line1: z.string().trim().max(120).optional().nullable(),
+  address_line2: z.string().trim().max(120).optional().nullable(),
+  address_line3: z.string().trim().max(120).optional().nullable(),
+  town: z.string().trim().max(80).optional().nullable(),
+  county: z.string().trim().max(80).optional().nullable(),
+  postcode: z.string().trim().max(20).optional().nullable(),
 });
 
 function composeFullName(title: string | null | undefined, first: string, last: string) {
@@ -90,6 +96,12 @@ Deno.serve(async (req) => {
       raising_date: b.raising_date ?? null,
       joined_lodge_date: b.joined_lodge_date ?? null,
       is_ugle_portal_registered: b.is_ugle_portal_registered ?? false,
+      address_line1: b.address_line1 ?? null,
+      address_line2: b.address_line2 ?? null,
+      address_line3: b.address_line3 ?? null,
+      town: b.town ?? null,
+      county: b.county ?? null,
+      postcode: b.postcode ?? null,
     };
 
     let userId = b.id;

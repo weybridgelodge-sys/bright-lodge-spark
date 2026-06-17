@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import MembersLayout from "@/components/members/MembersLayout";
 import { supabase } from "@/integrations/supabase/client";
-import { Search, Mail, Phone } from "lucide-react";
+import { Search, Mail, Phone, MapPin } from "lucide-react";
 
 type Member = {
   id: string;
@@ -12,6 +12,12 @@ type Member = {
   email: string | null;
   phone: string | null;
   avatar_url: string | null;
+  address_line1: string | null;
+  address_line2: string | null;
+  address_line3: string | null;
+  town: string | null;
+  county: string | null;
+  postcode: string | null;
 };
 
 // Lodge year rolls over in October (installation season)
@@ -28,7 +34,7 @@ export default function MembersDirectory() {
     (async () => {
       const { data: m } = await supabase
         .from("profiles")
-        .select("id,full_name,rank,office,joined_year,email,phone,avatar_url")
+        .select("id,full_name,rank,office,joined_year,email,phone,avatar_url,address_line1,address_line2,address_line3,town,county,postcode")
         .eq("status", "active")
         .order("full_name");
       setMembers((m as Member[]) ?? []);
@@ -125,6 +131,16 @@ export default function MembersDirectory() {
                       <Phone className="w-3 h-3" /> {m.phone}
                     </a>
                   )}
+                  {(() => {
+                    const parts = [m.address_line1, m.address_line2, m.address_line3, m.town, m.county, m.postcode].filter(Boolean) as string[];
+                    if (parts.length === 0) return null;
+                    return (
+                      <div className="flex items-start gap-2 text-primary-foreground/70">
+                        <MapPin className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                        <span>{parts.join(", ")}</span>
+                      </div>
+                    );
+                  })()}
                 </div>
               </div>
             );

@@ -21,6 +21,12 @@ export default function MembersProfile() {
   const [isRoyalArch, setIsRoyalArch] = useState(false);
   const [isHonoraryMember, setIsHonoraryMember] = useState(false);
   const [phone, setPhone] = useState("");
+  const [addressLine1, setAddressLine1] = useState("");
+  const [addressLine2, setAddressLine2] = useState("");
+  const [addressLine3, setAddressLine3] = useState("");
+  const [town, setTown] = useState("");
+  const [county, setCounty] = useState("");
+  const [postcode, setPostcode] = useState("");
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
@@ -38,6 +44,13 @@ export default function MembersProfile() {
     setIsRoyalArch(!!profile.is_royal_arch);
     setIsHonoraryMember(!!profile.is_honorary_member);
     setPhone(profile.phone ?? "");
+    const p = profile as unknown as Record<string, string | null>;
+    setAddressLine1(p.address_line1 ?? "");
+    setAddressLine2(p.address_line2 ?? "");
+    setAddressLine3(p.address_line3 ?? "");
+    setTown(p.town ?? "");
+    setCounty(p.county ?? "");
+    setPostcode(p.postcode ?? "");
   }, [profile]);
 
   const save = async (e: React.FormEvent) => {
@@ -61,6 +74,12 @@ export default function MembersProfile() {
         is_royal_arch: isRoyalArch,
         is_honorary_member: isHonoraryMember,
         phone: phone.trim() || null,
+        address_line1: addressLine1.trim() || null,
+        address_line2: addressLine2.trim() || null,
+        address_line3: addressLine3.trim() || null,
+        town: town.trim() || null,
+        county: county.trim() || null,
+        postcode: postcode.trim() || null,
       })
       .eq("id", user.id);
     setBusy(false);
@@ -198,6 +217,37 @@ export default function MembersProfile() {
           <label className={labelCls}>Phone (optional)</label>
           <input value={phone} onChange={(e) => setPhone(e.target.value)} className={inputCls} />
         </div>
+
+        <div className="pt-3 mt-2 border-t border-gold/10">
+          <p className="text-xs uppercase tracking-wider text-gold/70 mb-3">Address</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="sm:col-span-2">
+              <label className={labelCls}>Address line 1</label>
+              <input value={addressLine1} onChange={(e) => setAddressLine1(e.target.value)} className={inputCls} />
+            </div>
+            <div className="sm:col-span-2">
+              <label className={labelCls}>Address line 2</label>
+              <input value={addressLine2} onChange={(e) => setAddressLine2(e.target.value)} className={inputCls} />
+            </div>
+            <div className="sm:col-span-2">
+              <label className={labelCls}>Address line 3</label>
+              <input value={addressLine3} onChange={(e) => setAddressLine3(e.target.value)} className={inputCls} />
+            </div>
+            <div>
+              <label className={labelCls}>Town</label>
+              <input value={town} onChange={(e) => setTown(e.target.value)} className={inputCls} />
+            </div>
+            <div>
+              <label className={labelCls}>County</label>
+              <input value={county} onChange={(e) => setCounty(e.target.value)} className={inputCls} />
+            </div>
+            <div>
+              <label className={labelCls}>Post code</label>
+              <input value={postcode} onChange={(e) => setPostcode(e.target.value)} className={`${inputCls} uppercase`} />
+            </div>
+          </div>
+        </div>
+
 
         <div className="flex flex-wrap gap-6 pt-2">
           <label className="flex items-center gap-2 text-sm text-primary-foreground/80">

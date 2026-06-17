@@ -49,6 +49,12 @@ type Profile = {
   passing_date: string | null;
   raising_date: string | null;
   joined_lodge_date: string | null;
+  address_line1: string | null;
+  address_line2: string | null;
+  address_line3: string | null;
+  town: string | null;
+  county: string | null;
+  postcode: string | null;
   created_at: string;
 };
 
@@ -82,6 +88,12 @@ const EMPTY_FORM = {
   passing_date: "",
   raising_date: "",
   joined_lodge_date: "",
+  address_line1: "",
+  address_line2: "",
+  address_line3: "",
+  town: "",
+  county: "",
+  postcode: "",
 };
 
 export default function MembersAdmin() {
@@ -105,7 +117,7 @@ export default function MembersAdmin() {
       supabase
         .from("profiles")
         .select(
-          "id,email,full_name,title,first_name,last_name,provincial_rank,grand_rank,date_of_birth,initiation_date,rank,ugle_reg_number,mother_lodge,status,degree,is_past_master,is_royal_arch,is_honorary_member,is_ugle_portal_registered,passing_date,raising_date,joined_lodge_date,created_at"
+          "id,email,full_name,title,first_name,last_name,provincial_rank,grand_rank,date_of_birth,initiation_date,rank,ugle_reg_number,mother_lodge,status,degree,is_past_master,is_royal_arch,is_honorary_member,is_ugle_portal_registered,passing_date,raising_date,joined_lodge_date,address_line1,address_line2,address_line3,town,county,postcode,created_at"
         )
         .order("created_at", { ascending: false }),
       supabase.from("user_roles").select("user_id,role"),
@@ -187,6 +199,12 @@ export default function MembersAdmin() {
       passing_date: p.passing_date ?? "",
       raising_date: p.raising_date ?? "",
       joined_lodge_date: p.joined_lodge_date ?? "",
+      address_line1: p.address_line1 ?? "",
+      address_line2: p.address_line2 ?? "",
+      address_line3: p.address_line3 ?? "",
+      town: p.town ?? "",
+      county: p.county ?? "",
+      postcode: p.postcode ?? "",
     });
     setTab("add");
   };
@@ -235,6 +253,12 @@ export default function MembersAdmin() {
       passing_date: form.passing_date || null,
       raising_date: form.raising_date || null,
       joined_lodge_date: joinedLodge,
+      address_line1: form.address_line1.trim() || null,
+      address_line2: form.address_line2.trim() || null,
+      address_line3: form.address_line3.trim() || null,
+      town: form.town.trim() || null,
+      county: form.county.trim() || null,
+      postcode: form.postcode.trim() || null,
     };
     if (form.id) payload.id = form.id;
 
@@ -576,6 +600,59 @@ export default function MembersAdmin() {
                 />
               </label>
             )}
+
+            <div className="sm:col-span-6 pt-2 mt-2 border-t border-gold/10">
+              <p className="text-xs uppercase tracking-wider text-gold/70 mb-2">Address</p>
+            </div>
+            <label className={`${labelCls} sm:col-span-3`}>
+              Address line 1
+              <input
+                value={form.address_line1}
+                onChange={(e) => setForm({ ...form, address_line1: e.target.value })}
+                className={`mt-1 ${inputCls} normal-case tracking-normal text-primary-foreground`}
+              />
+            </label>
+            <label className={`${labelCls} sm:col-span-3`}>
+              Address line 2
+              <input
+                value={form.address_line2}
+                onChange={(e) => setForm({ ...form, address_line2: e.target.value })}
+                className={`mt-1 ${inputCls} normal-case tracking-normal text-primary-foreground`}
+              />
+            </label>
+            <label className={`${labelCls} sm:col-span-3`}>
+              Address line 3
+              <input
+                value={form.address_line3}
+                onChange={(e) => setForm({ ...form, address_line3: e.target.value })}
+                className={`mt-1 ${inputCls} normal-case tracking-normal text-primary-foreground`}
+              />
+            </label>
+            <label className={`${labelCls} sm:col-span-3`}>
+              Town
+              <input
+                value={form.town}
+                onChange={(e) => setForm({ ...form, town: e.target.value })}
+                className={`mt-1 ${inputCls} normal-case tracking-normal text-primary-foreground`}
+              />
+            </label>
+            <label className={`${labelCls} sm:col-span-3`}>
+              County
+              <input
+                value={form.county}
+                onChange={(e) => setForm({ ...form, county: e.target.value })}
+                className={`mt-1 ${inputCls} normal-case tracking-normal text-primary-foreground`}
+              />
+            </label>
+            <label className={`${labelCls} sm:col-span-3`}>
+              Post code
+              <input
+                value={form.postcode}
+                onChange={(e) => setForm({ ...form, postcode: e.target.value })}
+                className={`mt-1 ${inputCls} normal-case tracking-normal text-primary-foreground uppercase`}
+              />
+            </label>
+
 
             <label className={`${labelCls} sm:col-span-3`}>
               Member status
