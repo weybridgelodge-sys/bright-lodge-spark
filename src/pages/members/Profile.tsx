@@ -142,6 +142,16 @@ export default function MembersProfile() {
           </div>
         </div>
 
+        <div>
+          <label className={labelCls}>Preferred name (optional)</label>
+          <input
+            value={preferredName}
+            onChange={(e) => setPreferredName(e.target.value)}
+            placeholder="e.g. Bob (shown as 'Welcome Bob' in the portal)"
+            className={inputCls}
+          />
+        </div>
+
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className={labelCls}>Provincial rank</label>
