@@ -52,6 +52,7 @@ import MembersRitual from "./pages/members/Ritual";
 import OfficersTracker from "./pages/members/OfficersTracker";
 import Kpis from "./pages/members/Kpis";
 import LoiRegister from "./pages/members/LoiRegister";
+import FestiveBoardRegister from "./pages/members/FestiveBoardRegister";
 import ProgressionRoute from "./components/members/ProgressionRoute";
 
 const queryClient = new QueryClient();
@@ -114,6 +115,7 @@ const App = () => (
             <Route path="/members/officers-tracker" element={<ProgressionRoute><OfficersTracker /></ProgressionRoute>} />
             <Route path="/members/kpis" element={<ProgressionRoute><Kpis /></ProgressionRoute>} />
             <Route path="/members/loi-register" element={<ProtectedRoute><LoiRegister /></ProtectedRoute>} />
+            <Route path="/members/festive-register" element={<ProtectedRoute><FestiveBoardRegister /></ProtectedRoute>} />
 
 
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
