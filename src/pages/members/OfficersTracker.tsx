@@ -790,9 +790,9 @@ function ReadinessView({
   onSetInitiation: (mid: string, d: string | null) => void;
   onPromote: (mid: string) => void;
 }) {
-  // Members NOT currently on ladder, sorted by effective initiation date oldest first
+  // Members NOT currently on ladder and not Past Masters, sorted by effective initiation date oldest first
   const eligible = useMemo(() => {
-    const off = members.filter((m) => !onLadderIds.has(m.id));
+    const off = members.filter((m) => !onLadderIds.has(m.id) && !m.is_past_master);
     const lite = off.map((m) => membersById[m.id]).filter(Boolean) as MemberLite[];
     const sorted = sortBySeniority(lite);
     return sorted.map((l) => members.find((m) => m.id === l.id)!).filter(Boolean);
