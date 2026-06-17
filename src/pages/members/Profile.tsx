@@ -44,6 +44,13 @@ export default function MembersProfile() {
     setIsRoyalArch(!!profile.is_royal_arch);
     setIsHonoraryMember(!!profile.is_honorary_member);
     setPhone(profile.phone ?? "");
+    const p = profile as unknown as Record<string, string | null>;
+    setAddressLine1(p.address_line1 ?? "");
+    setAddressLine2(p.address_line2 ?? "");
+    setAddressLine3(p.address_line3 ?? "");
+    setTown(p.town ?? "");
+    setCounty(p.county ?? "");
+    setPostcode(p.postcode ?? "");
   }, [profile]);
 
   const save = async (e: React.FormEvent) => {
