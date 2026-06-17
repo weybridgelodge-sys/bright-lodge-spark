@@ -34,6 +34,7 @@ export default function MembersProfile() {
     if (!profile) return;
     setTitle(profile.title ?? "");
     setFirstName(profile.first_name ?? "");
+    setPreferredName((profile as { preferred_name?: string | null }).preferred_name ?? "");
     setLastName(profile.last_name ?? "");
     setProvincialRank(profile.provincial_rank ?? "");
     setGrandRank(profile.grand_rank ?? "");
