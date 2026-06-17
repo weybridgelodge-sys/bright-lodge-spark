@@ -36,13 +36,40 @@ export type WmTerm = { id: string; member_id: string; year_started: number; year
 export type SuccessionRisk = { id: string; role_key: string; note: string | null };
 export type Appointment = { position_key: string; member_id: string; lodge_year: number };
 
+export type CandidateStage =
+  | "enquiry"
+  | "face_to_face"
+  | "form_p"
+  | "interviewed"
+  | "read_in_lodge"
+  | "initiated"
+  | "withdrawn";
+
+export type Candidate = {
+  id: string;
+  first_name: string;
+  last_name: string;
+  email: string | null;
+  phone: string | null;
+  proposer: string | null;
+  seconder: string | null;
+  stage: CandidateStage;
+  notes: string | null;
+  date_of_enquiry: string | null;
+  converted_member_id: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
 export type KpiBundle = {
   members: KpiMember[];
   wmTerms: WmTerm[];
   risks: SuccessionRisk[];
   appointments: Appointment[];
   positions: { key: string; label: string; is_progressive: boolean; order_index: number }[];
+  candidates: Candidate[];
 };
+
 
 export function currentMasonicYear(d = new Date()): number {
   return d.getMonth() + 1 >= 10 ? d.getFullYear() : d.getFullYear() - 1;
