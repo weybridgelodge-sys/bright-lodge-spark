@@ -167,7 +167,7 @@ const s = StyleSheet.create({
   memberCol: { flex: 1, paddingHorizontal: 2 },
   memberRow: { flexDirection: "row", marginBottom: 1 },
   memberDate: { width: 60, fontSize: 6.8 },
-  memberMark: { width: 8, fontSize: 6.8, textAlign: "center" },
+  memberMark: { width: 16, fontSize: 6.8, textAlign: "center" },
   memberName: { flex: 1, fontSize: 6.8 },
 
   // Officers
@@ -277,7 +277,7 @@ const BackCoverPanel: React.FC<{
     const sym = memberSymbols(m);
     const date = formatDateShort(m.initiation_date || m.joined_lodge_date);
     const tag = m.initiation_date ? "(I)" : m.joined_lodge_date ? "(J)" : "";
-    const mark = sym.pastMaster ? "+" : sym.royalArch ? "✠" : "";
+    const mark = `${sym.pastMaster ? "+" : ""}${sym.royalArch ? "†" : ""}`;
     return (
       <View key={m.id} style={s.memberRow}>
         <Text style={s.memberDate}>{date} {tag}</Text>
@@ -295,7 +295,7 @@ const BackCoverPanel: React.FC<{
         <View style={s.memberCol}>{right.map(memberLine)}</View>
       </View>
       <Text style={[s.micro, { marginTop: 4 }]}>
-        + Past Master of the Lodge   # Past Master in the Lodge   ✠ HRA Chapter
+        + Past Master of the Lodge   # Past Master in the Lodge   † HRA Chapter
       </Text>
 
       {template.honorary_members && (

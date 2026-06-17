@@ -153,7 +153,7 @@ function Sheet1({
           <div className="space-y-[2px]">{right.map((m) => <MemberLine key={m.id} m={m} />)}</div>
         </div>
         <p className="text-[7px] text-slate-600 mt-2">
-          + Past Master of the Lodge &nbsp; # Past Master in the Lodge &nbsp; ✠ HRA Chapter
+          + Past Master of the Lodge &nbsp; # Past Master in the Lodge &nbsp; † HRA Chapter
         </p>
 
         {template.honorary_members && (
@@ -385,11 +385,11 @@ function Sheet2({
 function MemberLine({ m }: { m: MemberRow }) {
   const date = formatDateShort(m.initiation_date || m.joined_lodge_date);
   const tag = m.initiation_date ? "(I)" : m.joined_lodge_date ? "(J)" : "";
-  const mark = m.is_past_master ? "+" : m.is_royal_arch ? "✠" : "";
+  const mark = `${m.is_past_master ? "+" : ""}${m.is_royal_arch ? "†" : ""}`;
   return (
     <div className="flex gap-1">
       <span className="w-[60px] shrink-0">{date} {tag}</span>
-      <span className="w-[8px] text-center shrink-0">{mark}</span>
+      <span className="w-[16px] text-center shrink-0">{mark}</span>
       <span className="flex-1">{formatMemberLine(m)}</span>
     </div>
   );

@@ -745,7 +745,7 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
           const cell = (m: MemberRow) => (
             <div key={m.id} className="text-primary-foreground/80">
               {(m.is_past_master ? "+ " : "  ")}
-              {(m.is_royal_arch ? "✠ " : "")}
+              {(m.is_royal_arch ? "† " : "")}
               {formatDateShort(m.initiation_date || m.joined_lodge_date)} — {formatMemberLine(m)}
             </div>
           );
