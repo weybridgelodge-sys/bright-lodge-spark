@@ -66,6 +66,7 @@ export default function MembersProfile() {
       .update({
         title: title || null,
         first_name: firstName.trim() || null,
+        preferred_name: preferredName.trim() || null,
         last_name: lastName.trim() || null,
         full_name: composedName || null,
         provincial_rank: provincialRank.trim() || null,
