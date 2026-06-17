@@ -170,6 +170,9 @@ const s = StyleSheet.create({
   memberMark: { width: 8, fontSize: 6.8, textAlign: "center" },
   memberName: { flex: 1, fontSize: 6.8 },
 
+  noticeTable: { flexDirection: "row", marginTop: 4 },
+  noticeCol: { flex: 1, paddingHorizontal: 2 },
+
   // Officers
   officerRow: { flexDirection: "row", marginBottom: 1 },
   officerName: { flex: 1, fontSize: 7.5, paddingRight: 4 },
