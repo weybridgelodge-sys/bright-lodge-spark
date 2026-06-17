@@ -537,6 +537,7 @@ export type Database = {
           passing_date: string | null
           phone: string | null
           postcode: string | null
+          preferred_name: string | null
           provincial_rank: string | null
           raising_date: string | null
           rank: string | null
@@ -573,6 +574,7 @@ export type Database = {
           passing_date?: string | null
           phone?: string | null
           postcode?: string | null
+          preferred_name?: string | null
           provincial_rank?: string | null
           raising_date?: string | null
           rank?: string | null
@@ -609,6 +611,7 @@ export type Database = {
           passing_date?: string | null
           phone?: string | null
           postcode?: string | null
+          preferred_name?: string | null
           provincial_rank?: string | null
           raising_date?: string | null
           rank?: string | null
