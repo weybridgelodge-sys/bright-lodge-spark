@@ -131,11 +131,14 @@ function Sheet1({
   template,
   summons,
   members,
+  officers,
 }: {
   template: LodgeTemplate;
   summons: SummonsData;
   members: MemberRow[];
+  officers: OfficerRollRow[];
 }) {
+
   const { left, right } = splitTwoColumns(members);
 
   return (
