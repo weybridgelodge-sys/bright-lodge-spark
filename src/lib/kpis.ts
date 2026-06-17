@@ -287,24 +287,33 @@ export function milestones(members: KpiMember[], wmTerms: WmTerm[]): Milestone[]
     }
   }
 
-  // WM anniversaries — use earliest year_started per member
+  // WM anniversaries — earliest year a member was installed as WM.
+  // Source 1: member_wm_terms table. Source 2: name match against the
+  // historical Worshipful Masters roll (src/data/worshipfulMasters.ts).
   const firstWmByMember = new Map<string, number>();
   for (const t of wmTerms) {
     const cur = firstWmByMember.get(t.member_id);
     if (cur == null || t.year_started < cur) firstWmByMember.set(t.member_id, t.year_started);
   }
   for (const m of members) {
+    const fromRoll = firstWmYearForMember(m.first_name, m.last_name);
+    if (fromRoll != null) {
+      const cur = firstWmByMember.get(m.id);
+      if (cur == null || fromRoll < cur) firstWmByMember.set(m.id, fromRoll);
+    }
+  }
+  for (const m of members) {
     const first = firstWmByMember.get(m.id);
     if (!first) continue;
-    for (const target of [25, 30, 40, 50]) {
-      const anniv = new Date(first + target, 9, 1); // installation typically Oct
+    for (const target of [10, 25, 30, 40, 50]) {
+      const anniv = new Date(first + target, 9, 1); // installation is in October
       if (anniv >= yearStart && anniv <= yearEnd) {
         out.push({
           member: m,
           kind: "wm",
           years: target,
           date: anniv.toISOString().slice(0, 10),
-          label: `${target} years since first installed`,
+          label: `${target} years since first installed as WM`,
         });
       }
     }
