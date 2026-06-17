@@ -34,7 +34,7 @@ export default function MembersDirectory() {
     (async () => {
       const { data: m } = await supabase
         .from("profiles")
-        .select("id,full_name,rank,office,joined_year,email,phone,avatar_url")
+        .select("id,full_name,rank,office,joined_year,email,phone,avatar_url,address_line1,address_line2,address_line3,town,county,postcode")
         .eq("status", "active")
         .order("full_name");
       setMembers((m as Member[]) ?? []);
