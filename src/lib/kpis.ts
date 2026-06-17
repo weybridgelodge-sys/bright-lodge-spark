@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { firstWmYearForMember } from "@/data/worshipfulMasters";
 
 export type MemberStatus =
   | "pending"
