@@ -193,6 +193,17 @@ export default function MembersAdmin() {
 
   const resetForm = () => setForm(EMPTY_FORM);
 
+  const entryType: "initiate" | "joiner" =
+    form.joined_lodge_date && form.joined_lodge_date !== form.initiation_date ? "joiner" : "initiate";
+
+  const setEntryType = (t: "initiate" | "joiner") => {
+    if (t === "initiate") {
+      setForm({ ...form, joined_lodge_date: "" });
+    } else {
+      setForm({ ...form, joined_lodge_date: form.joined_lodge_date || form.initiation_date });
+    }
+  };
+
   const saveMember = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.email.trim() || !form.first_name.trim() || !form.last_name.trim()) {
@@ -200,6 +211,11 @@ export default function MembersAdmin() {
       return;
     }
     setBusy(true);
+    // For initiates, joined_lodge_date mirrors initiation_date so KPI "movement in" still works.
+    const joinedLodge =
+      entryType === "initiate"
+        ? form.initiation_date || null
+        : form.joined_lodge_date || null;
     const payload: Record<string, unknown> = {
       email: form.email.trim(),
       title: form.title || null,
@@ -218,7 +234,7 @@ export default function MembersAdmin() {
       is_ugle_portal_registered: form.is_ugle_portal_registered,
       passing_date: form.passing_date || null,
       raising_date: form.raising_date || null,
-      joined_lodge_date: form.joined_lodge_date || null,
+      joined_lodge_date: joinedLodge,
     };
     if (form.id) payload.id = form.id;
 
