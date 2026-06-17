@@ -311,6 +311,84 @@ export type Database = {
         }
         Relationships: []
       }
+      loi_attendance: {
+        Row: {
+          created_at: string
+          id: string
+          member_id: string
+          part: string
+          part_other: string | null
+          session_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          member_id: string
+          part: string
+          part_other?: string | null
+          session_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          member_id?: string
+          part?: string
+          part_other?: string | null
+          session_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "loi_attendance_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "loi_attendance_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "loi_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      loi_sessions: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          focus: string
+          focus_other: string | null
+          id: string
+          kpi_category: string | null
+          notes: string | null
+          session_date: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          focus: string
+          focus_other?: string | null
+          id?: string
+          kpi_category?: string | null
+          notes?: string | null
+          session_date: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          focus?: string
+          focus_other?: string | null
+          id?: string
+          kpi_category?: string | null
+          notes?: string | null
+          session_date?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       member_notices: {
         Row: {
           author_id: string | null
@@ -735,7 +813,12 @@ export type Database = {
       is_active_member: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
-      app_role: "member" | "admin" | "secretary" | "worshipful_master"
+      app_role:
+        | "member"
+        | "admin"
+        | "secretary"
+        | "worshipful_master"
+        | "director_of_ceremonies"
       candidate_stage:
         | "enquiry"
         | "face_to_face"
@@ -893,7 +976,13 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["member", "admin", "secretary", "worshipful_master"],
+      app_role: [
+        "member",
+        "admin",
+        "secretary",
+        "worshipful_master",
+        "director_of_ceremonies",
+      ],
       candidate_stage: [
         "enquiry",
         "face_to_face",

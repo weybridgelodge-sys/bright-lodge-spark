@@ -1,6 +1,6 @@
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { LayoutDashboard, Users, FileText, User as UserIcon, ShieldCheck, LogOut, Shield, CalendarDays, CreditCard, BookOpen, Crown, CalendarPlus, BarChart3 } from "lucide-react";
+import { LayoutDashboard, Users, FileText, User as UserIcon, ShieldCheck, LogOut, Shield, CalendarDays, CreditCard, BookOpen, Crown, CalendarPlus, BarChart3, GraduationCap } from "lucide-react";
 import logo from "@/assets/weybridge-logo.svg";
 
 const navCls = ({ isActive }: { isActive: boolean }) =>
@@ -59,6 +59,9 @@ export default function MembersLayout({ children }: { children: React.ReactNode 
             </NavLink>
             <NavLink to="/members/ritual" className={navCls}>
               <BookOpen className="w-4 h-4" /> Ritual
+            </NavLink>
+            <NavLink to="/members/loi-register" className={navCls}>
+              <GraduationCap className="w-4 h-4" /> LOI Register
             </NavLink>
             <NavLink to="/members/profile" className={navCls}>
               <UserIcon className="w-4 h-4" /> My Profile
