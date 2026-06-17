@@ -88,6 +88,12 @@ const EMPTY_FORM = {
   passing_date: "",
   raising_date: "",
   joined_lodge_date: "",
+  address_line1: "",
+  address_line2: "",
+  address_line3: "",
+  town: "",
+  county: "",
+  postcode: "",
 };
 
 export default function MembersAdmin() {
