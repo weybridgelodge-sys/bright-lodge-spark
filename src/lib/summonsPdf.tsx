@@ -152,7 +152,7 @@ const s = StyleSheet.create({
   centered: { textAlign: "center" },
 
   // Cover
-  crest: { width: 300, height: 300, alignSelf: "center", marginBottom: 4 },
+  crest: { width: 100, height: 100, alignSelf: "center", marginBottom: 4 },
   contactsRow: { flexDirection: "row", marginTop: 10, marginBottom: 6 },
   contactBlock: { flex: 1 },
   invitation: { marginTop: 8 },
