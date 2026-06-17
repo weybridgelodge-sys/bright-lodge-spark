@@ -36,7 +36,7 @@ function useLiveLoi(): LiveLoi | null {
       const [s, a, m] = await Promise.all([
         supabase.from("loi_sessions").select("id,session_date,kpi_category"),
         supabase.from("loi_attendance").select("session_id"),
-        supabase.from("profiles").select("id", { count: "exact", head: true }).eq("status", "active"),
+        supabase.from("profiles").select("id", { count: "exact", head: true }).eq("status", "active").eq("is_honorary_member", false),
       ]);
       const sessions = (s.data as { id: string; session_date: string; kpi_category: string | null }[]) ?? [];
       const attendance = (a.data as { session_id: string }[]) ?? [];
