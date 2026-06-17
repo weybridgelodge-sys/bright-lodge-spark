@@ -253,6 +253,12 @@ export default function MembersAdmin() {
       passing_date: form.passing_date || null,
       raising_date: form.raising_date || null,
       joined_lodge_date: joinedLodge,
+      address_line1: form.address_line1.trim() || null,
+      address_line2: form.address_line2.trim() || null,
+      address_line3: form.address_line3.trim() || null,
+      town: form.town.trim() || null,
+      county: form.county.trim() || null,
+      postcode: form.postcode.trim() || null,
     };
     if (form.id) payload.id = form.id;
 
