@@ -341,8 +341,12 @@ export function officersHealth(bundle: KpiBundle) {
 }
 
 // ───── Section 7: Pipeline
-export function pipeline(members: KpiMember[]) {
-  const candidates = members.filter((m) => m.status === "pending" && !m.initiation_date);
+export function pipeline(bundle: KpiBundle) {
+  const { members, candidates: allCandidates } = bundle;
+  // Active candidates = anyone not yet initiated and not withdrawn
+  const candidates = allCandidates.filter(
+    (c) => c.stage !== "initiated" && c.stage !== "withdrawn"
+  );
   const ea = members.filter(
     (m) => m.status === "active" && m.degree === "entered_apprentice" && !m.passing_date
   );
@@ -356,3 +360,24 @@ export function pipeline(members: KpiMember[]) {
   );
   return { candidates, ea, fc, mm };
 }
+
+export const CANDIDATE_STAGE_LABELS: Record<CandidateStage, string> = {
+  enquiry: "Enquiry",
+  face_to_face: "Face to Face",
+  form_p: "Form P",
+  interviewed: "Interviewed",
+  read_in_lodge: "Read in Lodge",
+  initiated: "Initiated",
+  withdrawn: "Withdrawn",
+};
+
+export const CANDIDATE_STAGE_ORDER: CandidateStage[] = [
+  "enquiry",
+  "face_to_face",
+  "form_p",
+  "interviewed",
+  "read_in_lodge",
+  "initiated",
+  "withdrawn",
+];
+
