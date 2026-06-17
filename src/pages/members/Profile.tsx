@@ -151,16 +151,48 @@ export default function MembersProfile() {
               className={inputCls}
             />
           </div>
+          <div className="grid grid-cols-[110px_1fr] gap-2">
+            <div>
+              <label className={labelCls}>Type</label>
+              <select
+                value={entryType}
+                onChange={(e) => {
+                  const t = e.target.value as "initiate" | "joiner";
+                  setEntryType(t);
+                  if (t === "initiate") setJoinedLodgeDate("");
+                  else if (!joinedLodgeDate) setJoinedLodgeDate(initiationDate);
+                }}
+                className={inputCls}
+              >
+                <option value="initiate">Initiate (I)</option>
+                <option value="joiner">Joiner (J)</option>
+              </select>
+            </div>
+            <div>
+              <label className={labelCls}>
+                {entryType === "joiner" ? "Original initiation date" : "Initiation date"}
+              </label>
+              <input
+                type="date"
+                value={initiationDate}
+                onChange={(e) => setInitiationDate(e.target.value)}
+                className={inputCls}
+              />
+            </div>
+          </div>
+        </div>
+
+        {entryType === "joiner" && (
           <div>
-            <label className={labelCls}>Initiation / joining date</label>
+            <label className={labelCls}>Joined this Lodge</label>
             <input
               type="date"
-              value={initiationDate}
-              onChange={(e) => setInitiationDate(e.target.value)}
+              value={joinedLodgeDate}
+              onChange={(e) => setJoinedLodgeDate(e.target.value)}
               className={inputCls}
             />
           </div>
-        </div>
+        )}
 
         <div>
           <label className={labelCls}>Phone (optional)</label>
