@@ -47,7 +47,7 @@ const EMPTY_TEMPLATE: LodgeTemplate = {
   lodge_number: "6787",
   province: "Surrey",
   consecration_date: null,
-  logo_url: null,
+  logo_url: "/__l5e/assets-v1/4dd5ec34-660c-4275-94c8-0e885912f437/weybridge-logo-blue.png",
   venue_address: null,
   regular_meeting_pattern: null,
   loi_details: null,
@@ -154,7 +154,9 @@ function TemplateTab() {
     (async () => {
       const { data } = await supabase.from("lodge_template").select("*").eq("id", "default").maybeSingle();
       if (data) {
-        setT({ ...EMPTY_TEMPLATE, ...(data as any), lodge_representatives: (data as any).lodge_representatives ?? [] });
+        const merged = { ...EMPTY_TEMPLATE, ...(data as any), lodge_representatives: (data as any).lodge_representatives ?? [] };
+        if (!merged.logo_url) merged.logo_url = EMPTY_TEMPLATE.logo_url;
+        setT(merged);
         setReps(((data as any).lodge_representatives ?? []) as Rep[]);
       }
     })();
