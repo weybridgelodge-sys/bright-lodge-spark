@@ -185,6 +185,21 @@ export function formatMemberLine(m: MemberRow): string {
   return `${title} ${display}${bracketPart}${postPart}`;
 }
 
+// Formal display without preferred-name bracket — used on summons front cover.
+export function formatMemberLineFormal(m: MemberRow): string {
+  const { first, middles, surname } = nameParts(m);
+  const initials = [first, ...middles].map(initialOf).join("");
+  const title = rankTitle(m);
+  const display = surname
+    ? initials ? `${initials} ${surname}` : surname
+    : initials || "—";
+
+  const post = (m.post_nominals || m.grand_rank || m.provincial_rank || m.rank || "").trim();
+  const postPart = post ? ` ${post}` : "";
+
+  return `${title} ${display}${postPart}`;
+}
+
 // Same format without rank/post-nominals — useful for compact lists.
 export function formatMemberShort(m: NameSource & { preferred_name?: string | null }): string {
   const { first, middles, surname } = nameParts(m);

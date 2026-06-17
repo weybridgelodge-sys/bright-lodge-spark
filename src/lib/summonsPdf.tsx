@@ -56,7 +56,7 @@ export type LodgeTemplate = {
   lodge_representatives: { role: string; name: string }[];
 };
 
-export type OfficerRollRow = { label: string; member: string };
+export type OfficerRollRow = { label: string; member: string; member_formal?: string };
 
 export type SummonsData = {
   meeting_number: number;
@@ -193,8 +193,8 @@ const FrontCoverPanel: React.FC<{
   summons: SummonsData;
   officers: OfficerRollRow[];
 }> = ({ template, summons, officers }) => {
-  const wmFromRoll = officers.find((o) => o.label === "Worshipful Master")?.member;
-  const secFromRoll = officers.find((o) => o.label === "Secretary")?.member;
+  const wmFromRoll = officers.find((o) => o.label === "Worshipful Master")?.member_formal || officers.find((o) => o.label === "Worshipful Master")?.member;
+  const secFromRoll = officers.find((o) => o.label === "Secretary")?.member_formal || officers.find((o) => o.label === "Secretary")?.member;
   const wmLines = (wmFromRoll || template.wm_contact || "").split("\n").filter(Boolean);
   const secLines = (secFromRoll || template.secretary_contact || "").split("\n").filter(Boolean);
   const wmName = wmLines[0] || "—";
