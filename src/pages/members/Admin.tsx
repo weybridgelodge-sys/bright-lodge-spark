@@ -357,7 +357,9 @@ export default function MembersAdmin() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gold/10">
-              {profiles.map((p) => (
+              {[...profiles].sort((a, b) =>
+                (a.first_name || "").localeCompare(b.first_name || "", undefined, { sensitivity: "base" })
+              ).map((p) => (
                 <tr key={p.id}>
                   <td className="p-3">
                     <p className="font-medium">{p.full_name || "(No name)"}</p>
