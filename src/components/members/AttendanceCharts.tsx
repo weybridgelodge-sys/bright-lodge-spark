@@ -2,9 +2,10 @@ import { useEffect, useMemo, useState } from "react";
 import { Users, BarChart3, TrendingUp, Calendar } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { LOI_KPI_CATEGORIES, autoKpiCategory } from "@/lib/loi";
+import { computeHeadcount, shortMonthLabel } from "@/lib/festiveBoard";
 
-// Mock data — to be wired to bookings/lodge_events later
-const regularMeetingsData = [
+// Fallback mock data — used only when no live records exist yet
+const regularMeetingsFallback = [
   { month: "Oct 23 (Inst.)", subscribing: 18, visitors: 14, total: 32 },
   { month: "Dec 23", subscribing: 15, visitors: 6, total: 21 },
   { month: "Feb 24", subscribing: 16, visitors: 8, total: 24 },
