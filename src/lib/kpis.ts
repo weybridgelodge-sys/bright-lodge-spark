@@ -145,7 +145,10 @@ export function movement(members: KpiMember[]) {
   const inRange = (iso: string | null) => !!iso && new Date(iso) >= cutoff && new Date(iso) <= now;
 
   const initiated = members.filter((m) => inRange(m.initiation_date));
-  const joined = members.filter((m) => inRange(m.joined_lodge_date));
+  // Joiners only — exclude initiates whose joined_lodge_date mirrors their initiation_date.
+  const joined = members.filter(
+    (m) => inRange(m.joined_lodge_date) && m.joined_lodge_date !== m.initiation_date
+  );
   // Status-based outs — approximated by updated_at + current terminal status.
   const resigned = members.filter((m) => m.status === "resigned" && inRange(m.updated_at));
   const excluded = members.filter((m) => m.status === "excluded" && inRange(m.updated_at));
