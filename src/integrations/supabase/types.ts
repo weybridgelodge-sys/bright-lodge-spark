@@ -452,7 +452,11 @@ export type Database = {
       }
       profiles: {
         Row: {
+          address_line1: string | null
+          address_line2: string | null
+          address_line3: string | null
           avatar_url: string | null
+          county: string | null
           created_at: string
           date_of_birth: string | null
           degree: Database["public"]["Enums"]["masonic_degree"]
@@ -473,16 +477,22 @@ export type Database = {
           office: string | null
           passing_date: string | null
           phone: string | null
+          postcode: string | null
           provincial_rank: string | null
           raising_date: string | null
           rank: string | null
           status: Database["public"]["Enums"]["member_status"]
           title: string | null
+          town: string | null
           ugle_reg_number: string | null
           updated_at: string
         }
         Insert: {
+          address_line1?: string | null
+          address_line2?: string | null
+          address_line3?: string | null
           avatar_url?: string | null
+          county?: string | null
           created_at?: string
           date_of_birth?: string | null
           degree?: Database["public"]["Enums"]["masonic_degree"]
@@ -503,16 +513,22 @@ export type Database = {
           office?: string | null
           passing_date?: string | null
           phone?: string | null
+          postcode?: string | null
           provincial_rank?: string | null
           raising_date?: string | null
           rank?: string | null
           status?: Database["public"]["Enums"]["member_status"]
           title?: string | null
+          town?: string | null
           ugle_reg_number?: string | null
           updated_at?: string
         }
         Update: {
+          address_line1?: string | null
+          address_line2?: string | null
+          address_line3?: string | null
           avatar_url?: string | null
+          county?: string | null
           created_at?: string
           date_of_birth?: string | null
           degree?: Database["public"]["Enums"]["masonic_degree"]
@@ -533,11 +549,13 @@ export type Database = {
           office?: string | null
           passing_date?: string | null
           phone?: string | null
+          postcode?: string | null
           provincial_rank?: string | null
           raising_date?: string | null
           rank?: string | null
           status?: Database["public"]["Enums"]["member_status"]
           title?: string | null
+          town?: string | null
           ugle_reg_number?: string | null
           updated_at?: string
         }
