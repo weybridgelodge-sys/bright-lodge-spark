@@ -188,10 +188,18 @@ const s = StyleSheet.create({
 
 // ---------- panel-level renderers ----------
 
-const FrontCoverPanel: React.FC<{ template: LodgeTemplate; summons: SummonsData }> = ({
-  template,
-  summons,
-}) => (
+const FrontCoverPanel: React.FC<{
+  template: LodgeTemplate;
+  summons: SummonsData;
+  officers: OfficerRollRow[];
+}> = ({ template, summons, officers }) => {
+  const wmFromRoll = officers.find((o) => o.label === "Worshipful Master")?.member;
+  const secFromRoll = officers.find((o) => o.label === "Secretary")?.member;
+  const wmLines = (wmFromRoll || template.wm_contact || "").split("\n").filter(Boolean);
+  const secLines = (secFromRoll || template.secretary_contact || "").split("\n").filter(Boolean);
+  const wmName = wmLines[0] || "—";
+  const secName = secLines[0] || "—";
+  return (
   <View style={[s.panel]}>
     {template.logo_url ? <Image src={template.logo_url} style={s.crest} /> : null}
     <Text style={s.lodgeName}>{template.lodge_name}</Text>
@@ -201,24 +209,21 @@ const FrontCoverPanel: React.FC<{ template: LodgeTemplate; summons: SummonsData 
 
     <View style={s.contactsRow}>
       <View style={s.contactBlock}>
-        <Text style={[s.bodyText, s.bold]}>
-          {template.wm_contact?.split("\n")[0] || "Worshipful Master"}
-        </Text>
         <Text style={[s.smallText, s.italic]}>Worshipful Master</Text>
-        {template.wm_contact?.split("\n").slice(1).map((line, i) => (
+        <Text style={[s.bodyText, s.bold]}>{wmName}</Text>
+        {wmLines.slice(1).map((line, i) => (
           <Text key={i} style={s.smallText}>{line}</Text>
         ))}
       </View>
       <View style={s.contactBlock}>
-        <Text style={[s.bodyText, s.bold]}>
-          {template.secretary_contact?.split("\n")[0] || "Secretary"}
-        </Text>
         <Text style={[s.smallText, s.italic]}>Secretary</Text>
-        {template.secretary_contact?.split("\n").slice(1).map((line, i) => (
+        <Text style={[s.bodyText, s.bold]}>{secName}</Text>
+        {secLines.slice(1).map((line, i) => (
           <Text key={i} style={s.smallText}>{line}</Text>
         ))}
       </View>
     </View>
+
 
     <View style={s.invitation}>
       <Text style={s.bodyText}>Dear Sir and Brother,</Text>
@@ -243,7 +248,7 @@ const FrontCoverPanel: React.FC<{ template: LodgeTemplate; summons: SummonsData 
       </Text>
       <Text style={s.bodyText}>Yours sincerely and fraternally,</Text>
       <Text style={[s.bodyText, s.bold, { marginTop: 4 }]}>
-        {template.secretary_contact?.split("\n")[0] || "Secretary"}
+        {secName}
       </Text>
     </View>
 
@@ -254,7 +259,9 @@ const FrontCoverPanel: React.FC<{ template: LodgeTemplate; summons: SummonsData 
       </View>
     )}
   </View>
-);
+  );
+};
+
 
 const BackCoverPanel: React.FC<{
   template: LodgeTemplate;
@@ -547,7 +554,7 @@ const SummonsDocument: React.FC<{
           />
         </View>
         <View style={{ flex: 1, padding: 0 }}>
-          <FrontCoverPanel template={template} summons={summons} />
+          <FrontCoverPanel template={template} summons={summons} officers={officers} />
         </View>
       </Page>
 
