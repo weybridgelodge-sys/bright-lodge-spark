@@ -80,7 +80,7 @@ export default function OfficersTracker() {
     const [{ data: m, error: e1 }, { data: s, error: e2 }, { data: a, error: e3 }] = await Promise.all([
       supabase
         .from("profiles")
-        .select("id,full_name,email,rank,office,joined_year,status,initiation_date")
+        .select("id,full_name,email,rank,office,joined_year,status,initiation_date,is_past_master")
         .eq("status", "active")
         .order("full_name", { ascending: true }),
       supabase.from("member_progression_status").select("*"),
