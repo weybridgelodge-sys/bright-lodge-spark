@@ -536,8 +536,22 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
 
   return (
     <div className="space-y-4">
+      {editingId && (
+        <div className="flex items-center justify-between bg-gold/15 border border-gold/40 text-gold rounded p-3 text-sm">
+          <span>Editing summons #{summons.meeting_number}. Saving will update this record.</span>
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={() => { onDoneEditing(); setSummons(EMPTY_SUMMONS); setCurrentId(null); setSelectedEvent(""); setManualHidden([]); }}
+          >
+            Start new instead
+          </Button>
+        </div>
+      )}
       {/* Meeting basics */}
       <Section title="Meeting">
+
         <div className="grid sm:grid-cols-3 gap-3">
           <div>
             <Label>Meeting number</Label>
