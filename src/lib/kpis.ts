@@ -1,5 +1,4 @@
 import { supabase } from "@/integrations/supabase/client";
-import { firstWmYearByName } from "@/data/worshipfulMasters";
 
 export type MemberStatus =
   | "pending"
@@ -297,7 +296,7 @@ export function milestones(members: KpiMember[], wmTerms: WmTerm[]): Milestone[]
   for (const m of members) {
     const first = firstWmByMember.get(m.id);
     if (!first) continue;
-    for (const target of [10, 25, 30, 40, 50]) {
+    for (const target of [25, 30, 40, 50]) {
       const anniv = new Date(first + target, 9, 1); // installation typically Oct
       if (anniv >= yearStart && anniv <= yearEnd) {
         out.push({
@@ -305,40 +304,11 @@ export function milestones(members: KpiMember[], wmTerms: WmTerm[]): Milestone[]
           kind: "wm",
           years: target,
           date: anniv.toISOString().slice(0, 10),
-          label: `${target} years since first installed as WM`,
+          label: `${target} years since first installed`,
         });
       }
     }
   }
-
-  // Also fall back to the historical Worshipful Masters roll (static data on
-  // the Worshipful Masters page) — matches members whose first installation
-  // predates the DB-tracked wm_terms records.
-  const seen = new Set(out.filter((x) => x.kind === "wm").map((x) => `${x.member.id}-${x.years}`));
-  for (const m of members) {
-    if (["deceased", "resigned", "excluded"].includes(m.status)) continue;
-    const rollFirst = firstWmYearByName(m.first_name, m.last_name);
-    if (!rollFirst) continue;
-    // Prefer the earliest of DB record vs roll
-    const dbFirst = firstWmByMember.get(m.id);
-    const first = dbFirst != null ? Math.min(dbFirst, rollFirst) : rollFirst;
-    for (const target of [10, 25, 30, 40, 50]) {
-      const key = `${m.id}-${target}`;
-      if (seen.has(key)) continue;
-      const anniv = new Date(first + target, 9, 1);
-      if (anniv >= yearStart && anniv <= yearEnd) {
-        seen.add(key);
-        out.push({
-          member: m,
-          kind: "wm",
-          years: target,
-          date: anniv.toISOString().slice(0, 10),
-          label: `${target} years since first installed as WM`,
-        });
-      }
-    }
-  }
-
 
   return out.sort((a, b) => (a.date < b.date ? -1 : 1));
 }
