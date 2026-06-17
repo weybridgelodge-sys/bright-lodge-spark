@@ -106,7 +106,7 @@ export default function Kpis() {
   const conv = raConversion(bundle.members);
   const ms = milestones(bundle.members, bundle.wmTerms);
   const oh = officersHealth(bundle);
-  const pl = pipeline(bundle.members);
+  const pl = pipeline(bundle);
   const my = currentMasonicYear();
   const maxBand = Math.max(1, ...s.ageBands.map((b) => b.count));
   const funnelMax = Math.max(1, pl.candidates.length, pl.ea.length, pl.fc.length, pl.mm.length);
