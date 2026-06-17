@@ -505,8 +505,19 @@ export default function MembersAdmin() {
                 className={`mt-1 ${inputCls} normal-case tracking-normal text-primary-foreground`}
               />
             </label>
-            <label className={`${labelCls} sm:col-span-3`}>
-              Initiation / Joining date
+            <label className={`${labelCls} sm:col-span-2`}>
+              Entry type
+              <select
+                value={entryType}
+                onChange={(e) => setEntryType(e.target.value as "initiate" | "joiner")}
+                className={`mt-1 ${inputCls} normal-case tracking-normal text-primary-foreground`}
+              >
+                <option value="initiate">Initiate (I)</option>
+                <option value="joiner">Joiner (J)</option>
+              </select>
+            </label>
+            <label className={`${labelCls} sm:col-span-1`}>
+              {entryType === "joiner" ? "Original initiation date" : "Initiation date"}
               <input
                 type="date"
                 value={form.initiation_date}
