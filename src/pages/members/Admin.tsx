@@ -33,6 +33,7 @@ type Profile = {
   title: Title | null;
   first_name: string | null;
   last_name: string | null;
+  preferred_name: string | null;
   provincial_rank: string | null;
   grand_rank: string | null;
   date_of_birth: string | null;
