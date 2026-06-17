@@ -248,7 +248,7 @@ const FrontCoverPanel: React.FC<{
       </Text>
       <Text style={s.bodyText}>Yours sincerely and fraternally,</Text>
       <Text style={[s.bodyText, s.bold, { marginTop: 4 }]}>
-        {template.secretary_contact?.split("\n")[0] || "Secretary"}
+        {secName}
       </Text>
     </View>
 
@@ -259,7 +259,9 @@ const FrontCoverPanel: React.FC<{
       </View>
     )}
   </View>
-);
+  );
+};
+
 
 const BackCoverPanel: React.FC<{
   template: LodgeTemplate;
