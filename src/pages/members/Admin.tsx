@@ -565,15 +565,17 @@ export default function MembersAdmin() {
                 className={`mt-1 ${inputCls} normal-case tracking-normal text-primary-foreground`}
               />
             </label>
-            <label className={`${labelCls} sm:col-span-2`}>
-              Joined this Lodge
-              <input
-                type="date"
-                value={form.joined_lodge_date}
-                onChange={(e) => setForm({ ...form, joined_lodge_date: e.target.value })}
-                className={`mt-1 ${inputCls} normal-case tracking-normal text-primary-foreground`}
-              />
-            </label>
+            {entryType === "joiner" && (
+              <label className={`${labelCls} sm:col-span-2`}>
+                Joined this Lodge
+                <input
+                  type="date"
+                  value={form.joined_lodge_date}
+                  onChange={(e) => setForm({ ...form, joined_lodge_date: e.target.value })}
+                  className={`mt-1 ${inputCls} normal-case tracking-normal text-primary-foreground`}
+                />
+              </label>
+            )}
 
             <label className={`${labelCls} sm:col-span-3`}>
               Member status
