@@ -89,21 +89,24 @@ export default function AttendanceCharts() {
                 const subPct = (data.subscribing / maxAttendance) * 100;
                 const visPct = (data.visitors / maxAttendance) * 100;
                 return (
-                  <div key={idx} className="flex-1 flex flex-col items-center h-full justify-end group relative">
-                    <div className="absolute bottom-full mb-2 bg-navy-dark text-primary-foreground text-[10px] p-2 rounded-sm opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-30 shadow-md min-w-[110px] text-center border border-gold/20">
-                      <p className="font-bold border-b border-gold/15 pb-1 mb-1 text-gold">{data.month}</p>
-                      <p>Members: {data.subscribing}</p>
-                      <p>Visitors: {data.visitors}</p>
-                      <p className="text-gold mt-1 font-bold">Total: {data.total}</p>
-                    </div>
-                    <div className="w-full max-w-[28px] flex flex-col justify-end h-full rounded-t-sm overflow-hidden">
-                      <div style={{ height: `${visPct}%` }} className="bg-gold/40 group-hover:bg-gold/60 transition-colors w-full" />
-                      <div style={{ height: `${subPct}%` }} className="bg-gold group-hover:bg-gold/90 transition-colors w-full border-t border-navy/40" />
-                    </div>
-                    <span className="text-[9px] text-primary-foreground/60 mt-2 text-center whitespace-nowrap">
-                      {data.month.split(" ")[0]} {data.month.split(" ")[1]}
-                    </span>
+                <div key={idx} className="flex-1 flex flex-col items-center h-full justify-end group relative">
+                  {/* 🔥 Fixed floating tooltip box */}
+                  <div className="absolute bottom-full mb-2 bg-navy-dark text-primary-foreground text-[11px] p-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50 shadow-xl min-w-[130px] text-left border border-gold/15 left-1/2 -translate-x-1/2">
+                    <p className="font-bold border-b border-gold/15 pb-1 mb-1 text-gold whitespace-nowrap">{data.month}</p>
+                    <p className="flex justify-between gap-4"><span>Members</span><span>{data.subscribing}</span></p>
+                    <p className="flex justify-between gap-4"><span>Visitors</span><span>{data.visitors}</span></p>
+                    <p className="flex justify-between gap-4 text-gold mt-1 font-bold"><span>Total</span><span>{data.total}</span></p>
                   </div>
+
+                  {/* Visual data column stack */}
+                  <div className="w-full sm:w-8 flex flex-col justify-end h-full rounded-t-sm overflow-hidden">
+                    <div style={{ height: `${visPct}%` }} className="bg-gold/40 group-hover:bg-gold/60 transition-colors w-full" />
+                    <div style={{ height: `${subPct}%` }} className="bg-gold group-hover:bg-gold/90 transition-colors w-full border-t border-background/20" />
+                  </div>
+                  <span className="text-[9px] text-primary-foreground/60 mt-2 text-center whitespace-nowrap">
+                    {data.month.split(" ")[0]} {data.month.split(" ")[1]}
+                  </span>
+                </div>
                 );
               })}
             </div>
