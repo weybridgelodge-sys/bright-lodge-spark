@@ -131,6 +131,16 @@ export default function MembersDirectory() {
                       <Phone className="w-3 h-3" /> {m.phone}
                     </a>
                   )}
+                  {(() => {
+                    const parts = [m.address_line1, m.address_line2, m.address_line3, m.town, m.county, m.postcode].filter(Boolean) as string[];
+                    if (parts.length === 0) return null;
+                    return (
+                      <div className="flex items-start gap-2 text-primary-foreground/70">
+                        <MapPin className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                        <span>{parts.join(", ")}</span>
+                      </div>
+                    );
+                  })()}
                 </div>
               </div>
             );
