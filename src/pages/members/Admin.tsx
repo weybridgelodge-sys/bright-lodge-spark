@@ -33,6 +33,7 @@ type Profile = {
   title: Title | null;
   first_name: string | null;
   last_name: string | null;
+  preferred_name: string | null;
   provincial_rank: string | null;
   grand_rank: string | null;
   date_of_birth: string | null;
@@ -74,6 +75,7 @@ const EMPTY_FORM = {
   title: "" as "" | Title,
   first_name: "",
   last_name: "",
+  preferred_name: "",
   provincial_rank: "",
   grand_rank: "",
   date_of_birth: "",
@@ -117,7 +119,7 @@ export default function MembersAdmin() {
       supabase
         .from("profiles")
         .select(
-          "id,email,full_name,title,first_name,last_name,provincial_rank,grand_rank,date_of_birth,initiation_date,rank,ugle_reg_number,mother_lodge,status,degree,is_past_master,is_royal_arch,is_honorary_member,is_ugle_portal_registered,passing_date,raising_date,joined_lodge_date,address_line1,address_line2,address_line3,town,county,postcode,created_at"
+          "id,email,full_name,title,first_name,last_name,preferred_name,provincial_rank,grand_rank,date_of_birth,initiation_date,rank,ugle_reg_number,mother_lodge,status,degree,is_past_master,is_royal_arch,is_honorary_member,is_ugle_portal_registered,passing_date,raising_date,joined_lodge_date,address_line1,address_line2,address_line3,town,county,postcode,created_at"
         )
         .order("created_at", { ascending: false }),
       supabase.from("user_roles").select("user_id,role"),
@@ -201,6 +203,7 @@ export default function MembersAdmin() {
       title: (p.title as Title) ?? "",
       first_name: p.first_name ?? "",
       last_name: p.last_name ?? "",
+      preferred_name: p.preferred_name ?? "",
       provincial_rank: p.provincial_rank ?? "",
       grand_rank: p.grand_rank ?? "",
       date_of_birth: p.date_of_birth ?? "",
@@ -255,6 +258,7 @@ export default function MembersAdmin() {
       title: form.title || null,
       first_name: form.first_name.trim(),
       last_name: form.last_name.trim(),
+      preferred_name: form.preferred_name.trim() || null,
       provincial_rank: form.provincial_rank.trim() || null,
       grand_rank: form.grand_rank.trim() || null,
       date_of_birth: form.date_of_birth || null,
@@ -514,6 +518,16 @@ export default function MembersAdmin() {
                 required
                 value={form.last_name}
                 onChange={(e) => setForm({ ...form, last_name: e.target.value })}
+                className={`mt-1 ${inputCls} normal-case tracking-normal text-primary-foreground`}
+              />
+            </label>
+
+            <label className={`${labelCls} sm:col-span-6`}>
+              Preferred name
+              <input
+                value={form.preferred_name}
+                onChange={(e) => setForm({ ...form, preferred_name: e.target.value })}
+                placeholder="e.g. Mike (if different from first name)"
                 className={`mt-1 ${inputCls} normal-case tracking-normal text-primary-foreground`}
               />
             </label>
