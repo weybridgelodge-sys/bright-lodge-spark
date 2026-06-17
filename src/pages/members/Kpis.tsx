@@ -19,6 +19,7 @@ import {
 } from "@/lib/kpis";
 import { exportVoReport, exportFullKpi } from "@/lib/kpiExports";
 import AttendanceCharts from "@/components/members/AttendanceCharts";
+import CandidatesManager from "@/components/members/CandidatesManager";
 
 function Section({ title, children, defaultOpen = true }: { title: string; children: React.ReactNode; defaultOpen?: boolean }) {
   return (
