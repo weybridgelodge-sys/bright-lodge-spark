@@ -35,6 +35,7 @@ type ProfileRow = {
   joined_year: number | null;
   status: string;
   initiation_date: string | null;
+  is_past_master: boolean | null;
 };
 
 type StatusRow = {
