@@ -310,7 +310,7 @@ function formatPersonLine(p: any): string {
 }
 
 // ===================== New Summons Tab =====================
-function NewSummonsTab() {
+function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null; onDoneEditing: () => void }) {
   const [summons, setSummons] = useState<SummonsData>(EMPTY_SUMMONS);
   const [template, setTemplate] = useState<LodgeTemplate>(EMPTY_TEMPLATE);
   const [members, setMembers] = useState<MemberRow[]>([]);
@@ -321,6 +321,7 @@ function NewSummonsTab() {
   const [busy, setBusy] = useState(false);
   const [presetIndex, setPresetIndex] = useState<string>("");
   const [manualHidden, setManualHidden] = useState<string[]>([]);
+  const [currentId, setCurrentId] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -338,11 +339,44 @@ function NewSummonsTab() {
       if (mem.data) setMembers(mem.data as any);
       if (evs.data) setEvents(evs.data);
       if (fb.data) setFestive(fb.data);
-      const nextNo = ((last.data?.[0] as any)?.meeting_number ?? 0) + 1;
-      setSummons((s) => ({ ...s, meeting_number: nextNo }));
+      if (!editingId) {
+        const nextNo = ((last.data?.[0] as any)?.meeting_number ?? 0) + 1;
+        setSummons((s) => ({ ...s, meeting_number: nextNo }));
+      }
       loadOfficers(setOfficers, () => {});
     })();
-  }, []);
+  }, [editingId]);
+
+  useEffect(() => {
+    if (!editingId) { setCurrentId(null); return; }
+    (async () => {
+      const { data, error } = await supabase.from("summonses").select("*").eq("id", editingId).maybeSingle();
+      if (error || !data) { toast.error(error?.message ?? "Summons not found"); return; }
+      const r: any = data;
+      setCurrentId(r.id);
+      setSelectedEvent(r.lodge_event_id ?? "");
+      setManualHidden(((r.notice_overrides as any)?.manualHidden ?? []) as string[]);
+      setSummons({
+        meeting_number: r.meeting_number,
+        meeting_date: r.meeting_date,
+        meeting_time: r.meeting_time,
+        meeting_type: r.meeting_type,
+        dress_code: r.dress_code,
+        minutes_confirmation_date: r.minutes_confirmation_date,
+        next_meeting_date: r.next_meeting_date,
+        officer_night_date: r.officer_night_date,
+        agenda: (r.agenda as any) ?? defaultAgenda(),
+        candidates: (r.candidates as any) ?? [],
+        dining_enquiry_name: r.dining_enquiry_name,
+        dining_enquiry_email: r.dining_enquiry_email,
+        dining_menu: r.dining_menu ?? null,
+        dining_price: r.dining_price ?? null,
+        dining_deadline: r.dining_deadline ?? null,
+      });
+    })();
+  }, [editingId]);
+
+
 
   const sortedMembers = useMemo(() => sortMembersBySeniority(members), [members]);
   const overflow = planOverflow(sortedMembers.length);
