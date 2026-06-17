@@ -18,6 +18,7 @@ import {
   type KpiBundle,
 } from "@/lib/kpis";
 import { exportVoReport, exportFullKpi } from "@/lib/kpiExports";
+import AttendanceCharts from "@/components/members/AttendanceCharts";
 
 function Section({ title, children, defaultOpen = true }: { title: string; children: React.ReactNode; defaultOpen?: boolean }) {
   return (
