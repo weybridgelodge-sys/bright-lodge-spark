@@ -199,6 +199,12 @@ export default function MembersAdmin() {
       passing_date: p.passing_date ?? "",
       raising_date: p.raising_date ?? "",
       joined_lodge_date: p.joined_lodge_date ?? "",
+      address_line1: p.address_line1 ?? "",
+      address_line2: p.address_line2 ?? "",
+      address_line3: p.address_line3 ?? "",
+      town: p.town ?? "",
+      county: p.county ?? "",
+      postcode: p.postcode ?? "",
     });
     setTab("add");
   };
