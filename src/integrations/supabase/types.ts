@@ -142,6 +142,112 @@ export type Database = {
           },
         ]
       }
+      festive_board_attendance: {
+        Row: {
+          amount_pence: number
+          attendance_status: Database["public"]["Enums"]["festive_attendance_status"]
+          booking_id: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          meeting_id: string
+          member_id: string | null
+          notes: string | null
+          payment_method: Database["public"]["Enums"]["festive_payment_method"]
+          updated_at: string
+          visitor_lodge_name: string | null
+          visitor_lodge_number: string | null
+          visitor_name: string | null
+        }
+        Insert: {
+          amount_pence?: number
+          attendance_status?: Database["public"]["Enums"]["festive_attendance_status"]
+          booking_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          meeting_id: string
+          member_id?: string | null
+          notes?: string | null
+          payment_method?: Database["public"]["Enums"]["festive_payment_method"]
+          updated_at?: string
+          visitor_lodge_name?: string | null
+          visitor_lodge_number?: string | null
+          visitor_name?: string | null
+        }
+        Update: {
+          amount_pence?: number
+          attendance_status?: Database["public"]["Enums"]["festive_attendance_status"]
+          booking_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          meeting_id?: string
+          member_id?: string | null
+          notes?: string | null
+          payment_method?: Database["public"]["Enums"]["festive_payment_method"]
+          updated_at?: string
+          visitor_lodge_name?: string | null
+          visitor_lodge_number?: string | null
+          visitor_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "festive_board_attendance_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "festive_board_attendance_meeting_id_fkey"
+            columns: ["meeting_id"]
+            isOneToOne: false
+            referencedRelation: "festive_board_meetings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "festive_board_attendance_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      festive_board_meetings: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          headcount_override: number | null
+          id: string
+          meeting_date: string
+          meeting_type: Database["public"]["Enums"]["festive_meeting_type"]
+          notes: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          headcount_override?: number | null
+          id?: string
+          meeting_date: string
+          meeting_type?: Database["public"]["Enums"]["festive_meeting_type"]
+          notes?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          headcount_override?: number | null
+          id?: string
+          meeting_date?: string
+          meeting_type?: Database["public"]["Enums"]["festive_meeting_type"]
+          notes?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       lodge_documents: {
         Row: {
           category: Database["public"]["Enums"]["doc_category"]
@@ -835,6 +941,18 @@ export type Database = {
         | "media_files"
         | "ritual"
         | "other"
+      festive_attendance_status:
+        | "booked"
+        | "attended"
+        | "no_show"
+        | "cancelled_refunded"
+      festive_meeting_type: "regular" | "installation" | "emergency"
+      festive_payment_method:
+        | "stripe"
+        | "paid_on_night_cash"
+        | "paid_on_night_card"
+        | "complimentary"
+        | "unknown"
       masonic_degree:
         | "entered_apprentice"
         | "fellow_craft"
@@ -1000,6 +1118,20 @@ export const Constants = {
         "media_files",
         "ritual",
         "other",
+      ],
+      festive_attendance_status: [
+        "booked",
+        "attended",
+        "no_show",
+        "cancelled_refunded",
+      ],
+      festive_meeting_type: ["regular", "installation", "emergency"],
+      festive_payment_method: [
+        "stripe",
+        "paid_on_night_cash",
+        "paid_on_night_card",
+        "complimentary",
+        "unknown",
       ],
       masonic_degree: [
         "entered_apprentice",

@@ -1,88 +1,82 @@
-## LOI Register — Build Plan
+# Festive Board Attendance Register
 
-A new feature inside the members portal (Trestle section) to record Lodge of Instruction sessions, attendance, and parts taken — feeding the existing LOI KPI chart with real data.
+A new Trestle section module mirroring the LOI Register pattern, replacing the mock Festive Board KPI data with live records.
 
----
+## Scope
 
-### 1. Database (Supabase migration)
+In: manual + historical entry, member multi-select, visitor repeater (name + lodge + number), auto/override headcount, attendance status per booking, late "paid on night" entries, KPI wiring to Attendance Analytics.
 
-Three new tables in `public`:
+Out (this iteration): Stripe live booking auto-population (placeholder hook only — table schema supports it so the future Stripe webhook can insert rows directly), Treasurer/Accounts view (data is there, dedicated screen later).
 
-**`loi_sessions`**
-- `id` uuid PK
-- `session_date` date (not null)
-- `focus` text (not null) — one of: `first_degree`, `second_degree`, `third_degree`, `installation`, `general`, `other`
-- `focus_other` text (nullable, used when focus = other)
-- `kpi_category` text (nullable) — manual override tag: `oct_inst_prep`, `dec_degree_prep`, etc. Auto-derived if null.
-- `notes` text (nullable)
-- `created_by` uuid → auth.users
-- `created_at`, `updated_at`
+## Database (one migration)
 
-**`loi_attendance`**
-- `id` uuid PK
-- `session_id` uuid → `loi_sessions(id)` on delete cascade
-- `member_id` uuid → `profiles(id)`
-- `part` text (not null) — enum-like: `candidate`, `inner_guard`, `junior_deacon`, `senior_deacon`, `junior_warden`, `senior_warden`, `worshipful_master`, `director_of_ceremonies`, `ipm`, `chaplain`, `observing`, `other`
-- `part_other` text (nullable, used when part = other)
-- `created_at`
-- UNIQUE (session_id, member_id) — one row per member per session
-- UNIQUE (session_id, part) WHERE part NOT IN ('observing','other','candidate') — prevents two members assigned the same office (candidate/observing/other can repeat)
+**`festive_board_meetings`** — one row per Festive Board occurrence
+- `meeting_date` (date)
+- `meeting_type` enum: `regular` | `installation` | `emergency`
+- `notes` (text, nullable)
+- `headcount_override` (int, nullable) — when set, supersedes computed total
+- `created_by`, timestamps
+
+**`festive_board_attendance`** — one row per attendee (member or visitor)
+- `meeting_id` → cascade
+- `member_id` (nullable, → profiles) — set for member rows
+- `visitor_name`, `visitor_lodge_name`, `visitor_lodge_number` (nullable) — set for visitor rows
+- `attendance_status` enum: `booked` | `attended` | `no_show` | `cancelled_refunded` (default `booked`)
+- `payment_method` enum: `stripe` | `paid_on_night_cash` | `paid_on_night_card` | `complimentary` | `unknown`
+- `booking_id` (nullable, → bookings) — links Stripe-originated rows
+- `amount_pence` (int, default 0) — for Treasurer totals
+- `created_by`, timestamps
+- CHECK: exactly one of `member_id` OR `visitor_name` set
+- UNIQUE (meeting_id, member_id) where member_id not null
 
 **RLS / GRANTs**
-- `loi_sessions`: all active members can SELECT; INSERT/UPDATE/DELETE restricted to admins, secretaries, worshipful_masters, plus a new `director_of_ceremonies` role.
-- `loi_attendance`: members can SELECT their own rows + any row if active member (we'll allow all active members to see attendance, matching directory transparency); write access matches sessions.
-- GRANT statements for `authenticated` and `service_role`.
+- All active members can SELECT both tables (matches LOI transparency).
+- INSERT/UPDATE/DELETE restricted via `has_role` to `admin`, `secretary`, `worshipful_master`, `director_of_ceremonies` (same `canManageLOI` set; rename the flag to `canManageRegisters` or add a parallel `canManageFestiveBoard` mirror — leaning toward reusing `canManageLOI` since the role set is identical).
+- `service_role` full access (future Stripe webhook).
 
-**New role**: add `director_of_ceremonies` to the `app_role` enum so DC can manage the register without being a full admin.
+## Frontend
 
----
+**New route** `/members/festive-register` (`src/pages/members/FestiveBoardRegister.tsx`)
+- Personal "My Festive Board attendance" panel (matches LOI page style)
+- Meetings list, collapsible, with headcount + attended count
+- Manager-only "New Meeting" dialog:
+  - Date picker, meeting type select, notes
+  - Members grid (active, non-honorary) with attendance status dropdown per checked row
+  - Visitors repeater (name / lodge / number / status / payment method / amount)
+  - Headcount override input (placeholder = computed)
+- Per-meeting "Mark attendance" mode for post-meeting reconciliation: bulk-toggle Booked → Attended / No Show
+- Late booking entry: "Add walk-in" button inside meeting detail → adds member or visitor row with payment_method = paid_on_night_*
 
-### 2. Auth hook update
+**Navigation**
+- Add "Festive Board" sidebar link in `MembersLayout.tsx` under LOI Register.
 
-Add `isDC` / extend `canManageProgression`-style flag `canManageLOI = isAdmin || isSecretary || isWorshipfulMaster || isDC` in `useAuth.tsx`.
+**Auth**
+- Reuse existing `canManageLOI` (same role set). No new role.
 
----
+## KPI wiring
 
-### 3. New routes (under `/members/trestle/loi-register`)
+Update `src/components/members/AttendanceCharts.tsx` — `festive` tab:
+- New `useLiveFestive()` hook fetching `festive_board_meetings` + `festive_board_attendance`
+- For each meeting compute: subscribing = COUNT(member_id where attended), visitors = COUNT(visitor rows where attended), total = headcount_override ?? (subscribing + visitors)
+- Label format: existing `Mon YY (Inst.)` derived from `meeting_date` + `meeting_type`
+- Last 6 meetings shown (consistent with current chart)
+- Fall back to `regularMeetingsData` mock only when zero rows exist
+- Stat banners (Avg member dining, Total guest diners, Peak covers) recompute from live rows
+- Drop the "Mock data — visual placeholder" caption when live data is present
 
-- `LoiRegister.tsx` — list of past sessions (date, focus, attendance count). "New Session" button for managers.
-- `LoiSessionForm.tsx` — create/edit form: date picker, focus dropdown (+ "Other" text), optional KPI category dropdown, notes, then a table of active members with attendance checkbox + part dropdown. Validates one-part-per-member and one-member-per-office.
-- `LoiSessionDetail.tsx` — read-only detail view showing all attendees and parts; "Edit" button for managers.
+## Files
 
-Plus a "My LOI Attendance" panel on the member Dashboard / Profile showing the logged-in member's sessions attended this Masonic year (Oct–Sep) with parts taken and a running total.
+Created
+- `supabase/migrations/<ts>_festive_board_register.sql`
+- `src/pages/members/FestiveBoardRegister.tsx`
+- `src/lib/festiveBoard.ts` (enums, label helpers, computeHeadcount)
 
-Register route added to the Trestle nav inside `MembersLayout`.
+Edited
+- `src/App.tsx` — route
+- `src/components/members/MembersLayout.tsx` — sidebar link
+- `src/components/members/AttendanceCharts.tsx` — live festive hook + render
+- `src/integrations/supabase/types.ts` — regenerated after migration
 
----
+## Open question
 
-### 4. KPI wiring
-
-Update `src/lib/kpis.ts` to derive LOI attendance from `loi_sessions` + `loi_attendance` instead of estimated figures:
-- Auto-categorise sessions: if `kpi_category` set, use it; otherwise bucket by month proximity to nearest scheduled degree/installation meeting from `lodge_events`.
-- Compute attendance % per session and per category.
-- Per-member breakdown rolls up parts taken.
-
-`AttendanceCharts.tsx` (or the LOI-specific chart) consumes the new query.
-
----
-
-### 5. Style
-
-Match existing members portal: navy/gold tokens, shadcn `Card`, `Table`, `Checkbox`, `Select`, `Calendar` (with `pointer-events-auto`). No new colors.
-
----
-
-### Technical notes
-- Default KPI auto-grouping uses `lodge_events` (already in DB) — find nearest meeting within ±21 days and tag accordingly.
-- Edit access shown only to users with manage permission; everyone else sees read-only.
-- Form uses react-hook-form + zod for validation.
-- Migration is a single call; code that reads new tables is written after the migration runs and types regenerate.
-
----
-
-### Out of scope for this pass
-- Bulk import of historical LOI sessions (can add a CSV import later).
-- Email reminders / push notifications for upcoming LOI.
-- Exporting attendance to PDF.
-
-Shall I proceed?
+Confirm: reuse `canManageLOI` (admin / secretary / WM / DC) for Festive Board management, or restrict to admin + secretary + WM only (excluding DC, since the brief names "Secretary or DC" for attendance marking but doesn't mention DC for record creation)? Default plan: **reuse `canManageLOI`** for simplicity.

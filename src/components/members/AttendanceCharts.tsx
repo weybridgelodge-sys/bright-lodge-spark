@@ -2,9 +2,10 @@ import { useEffect, useMemo, useState } from "react";
 import { Users, BarChart3, TrendingUp, Calendar } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { LOI_KPI_CATEGORIES, autoKpiCategory } from "@/lib/loi";
+import { computeHeadcount, shortMonthLabel } from "@/lib/festiveBoard";
 
-// Mock data — to be wired to bookings/lodge_events later
-const regularMeetingsData = [
+// Fallback mock data — used only when no live records exist yet
+const regularMeetingsFallback = [
   { month: "Oct 23 (Inst.)", subscribing: 18, visitors: 14, total: 32 },
   { month: "Dec 23", subscribing: 15, visitors: 6, total: 21 },
   { month: "Feb 24", subscribing: 16, visitors: 8, total: 24 },
@@ -76,27 +77,80 @@ function useLiveLoi(): LiveLoi | null {
   return state;
 }
 
+type LiveFestive = {
+  data: { month: string; subscribing: number; visitors: number; total: number }[];
+  recordCount: number;
+};
+
+function useLiveFestive(): LiveFestive | null {
+  const [state, setState] = useState<LiveFestive | null>(null);
+  useEffect(() => {
+    (async () => {
+      const [mt, at] = await Promise.all([
+        supabase
+          .from("festive_board_meetings")
+          .select("id,meeting_date,meeting_type,headcount_override")
+          .order("meeting_date", { ascending: true }),
+        supabase
+          .from("festive_board_attendance")
+          .select("meeting_id,member_id,attendance_status"),
+      ]);
+      const meetings =
+        (mt.data as {
+          id: string;
+          meeting_date: string;
+          meeting_type: string;
+          headcount_override: number | null;
+        }[]) ?? [];
+      const att = (at.data as { meeting_id: string; member_id: string | null; attendance_status: string }[]) ?? [];
+      if (meetings.length === 0) {
+        setState(null);
+        return;
+      }
+      const byMeeting: Record<string, typeof att> = {};
+      for (const r of att) (byMeeting[r.meeting_id] ??= []).push(r);
+      const data = meetings.map((m) => {
+        const hc = computeHeadcount(byMeeting[m.id] ?? [], m.headcount_override);
+        return {
+          month: shortMonthLabel(m.meeting_date, m.meeting_type),
+          subscribing: hc.members,
+          visitors: hc.visitors,
+          total: hc.total,
+        };
+      });
+      setState({ data, recordCount: meetings.length });
+    })();
+  }, []);
+  return state;
+}
+
 export default function AttendanceCharts() {
   const [activeTab, setActiveTab] = useState<"festive" | "loi">("festive");
   const liveLoi = useLiveLoi();
+  const liveFestive = useLiveFestive();
   const loiRehearsalData = liveLoi?.data.length ? liveLoi.data : loiRehearsalFallback;
   const loiAvgTurnout = liveLoi ? `${liveLoi.avgTurnout} / night` : "12 / night";
   const loiEngagementLabel = liveLoi ? `${liveLoi.overallEngagement}% overall` : "81.7% overall";
 
-  const visibleMeetings = regularMeetingsData.slice(-6);
+  const festiveSource = liveFestive?.data.length ? liveFestive.data : regularMeetingsFallback;
+  const visibleMeetings = festiveSource.slice(-6);
 
-  const maxAttendance = Math.max(...visibleMeetings.map((d) => d.total));
+  const maxAttendance = Math.max(1, ...visibleMeetings.map((d) => d.total));
   const totalVisitors = visibleMeetings.reduce((a, c) => a + c.visitors, 0);
-  const averageSubscribing = Math.round(
-    visibleMeetings.reduce((a, c) => a + c.subscribing, 0) / visibleMeetings.length
-  );
+  const averageSubscribing = visibleMeetings.length
+    ? Math.round(visibleMeetings.reduce((a, c) => a + c.subscribing, 0) / visibleMeetings.length)
+    : 0;
 
   return (
     <div className="space-y-5">
       {/* Tab toggle */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-xs text-primary-foreground/60">
-          Mock data — visual placeholder pending live booking aggregation.
+          {liveFestive && activeTab === "festive"
+            ? `Live from the Festive Board Register — ${liveFestive.recordCount} meeting${liveFestive.recordCount === 1 ? "" : "s"} recorded.`
+            : !liveFestive && activeTab === "festive"
+            ? "Mock data — add Festive Board records to replace this placeholder."
+            : "Attendance analytics — toggle between Festive Board and LOI views."}
         </p>
         <div className="flex bg-navy p-1 rounded-sm border border-gold/15">
           <button
