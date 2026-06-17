@@ -601,6 +601,59 @@ export default function MembersAdmin() {
               </label>
             )}
 
+            <div className="sm:col-span-6 pt-2 mt-2 border-t border-gold/10">
+              <p className="text-xs uppercase tracking-wider text-gold/70 mb-2">Address</p>
+            </div>
+            <label className={`${labelCls} sm:col-span-3`}>
+              Address line 1
+              <input
+                value={form.address_line1}
+                onChange={(e) => setForm({ ...form, address_line1: e.target.value })}
+                className={`mt-1 ${inputCls} normal-case tracking-normal text-primary-foreground`}
+              />
+            </label>
+            <label className={`${labelCls} sm:col-span-3`}>
+              Address line 2
+              <input
+                value={form.address_line2}
+                onChange={(e) => setForm({ ...form, address_line2: e.target.value })}
+                className={`mt-1 ${inputCls} normal-case tracking-normal text-primary-foreground`}
+              />
+            </label>
+            <label className={`${labelCls} sm:col-span-3`}>
+              Address line 3
+              <input
+                value={form.address_line3}
+                onChange={(e) => setForm({ ...form, address_line3: e.target.value })}
+                className={`mt-1 ${inputCls} normal-case tracking-normal text-primary-foreground`}
+              />
+            </label>
+            <label className={`${labelCls} sm:col-span-3`}>
+              Town
+              <input
+                value={form.town}
+                onChange={(e) => setForm({ ...form, town: e.target.value })}
+                className={`mt-1 ${inputCls} normal-case tracking-normal text-primary-foreground`}
+              />
+            </label>
+            <label className={`${labelCls} sm:col-span-3`}>
+              County
+              <input
+                value={form.county}
+                onChange={(e) => setForm({ ...form, county: e.target.value })}
+                className={`mt-1 ${inputCls} normal-case tracking-normal text-primary-foreground`}
+              />
+            </label>
+            <label className={`${labelCls} sm:col-span-3`}>
+              Post code
+              <input
+                value={form.postcode}
+                onChange={(e) => setForm({ ...form, postcode: e.target.value })}
+                className={`mt-1 ${inputCls} normal-case tracking-normal text-primary-foreground uppercase`}
+              />
+            </label>
+
+
             <label className={`${labelCls} sm:col-span-3`}>
               Member status
               <select
