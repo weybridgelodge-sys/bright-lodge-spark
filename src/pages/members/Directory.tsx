@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import MembersLayout from "@/components/members/MembersLayout";
 import { supabase } from "@/integrations/supabase/client";
-import { Search, Mail, Phone } from "lucide-react";
+import { Search, Mail, Phone, MapPin } from "lucide-react";
 
 type Member = {
   id: string;
@@ -12,6 +12,12 @@ type Member = {
   email: string | null;
   phone: string | null;
   avatar_url: string | null;
+  address_line1: string | null;
+  address_line2: string | null;
+  address_line3: string | null;
+  town: string | null;
+  county: string | null;
+  postcode: string | null;
 };
 
 // Lodge year rolls over in October (installation season)
