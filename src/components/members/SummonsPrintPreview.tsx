@@ -212,16 +212,21 @@ function Sheet1({
             <div>
               <p className="text-slate-500 uppercase text-[9px] tracking-wider mb-0.5">Worshipful Master</p>
               <p className="text-[11px] font-bold whitespace-pre-line">
-                {template.wm_contact?.split("\n")[0] || "—"}
+                {officers.find((o) => o.label === "Worshipful Master")?.member
+                  || template.wm_contact?.split("\n")[0]
+                  || "—"}
               </p>
             </div>
             <div>
               <p className="text-slate-500 uppercase text-[9px] tracking-wider mb-0.5">Secretary</p>
               <p className="text-[11px] font-bold whitespace-pre-line">
-                {template.secretary_contact?.split("\n")[0] || "—"}
+                {officers.find((o) => o.label === "Secretary")?.member
+                  || template.secretary_contact?.split("\n")[0]
+                  || "—"}
               </p>
             </div>
           </div>
+
 
           <div className="space-y-3">
             <p className="font-bold">Dear Sir and Brother,</p>
