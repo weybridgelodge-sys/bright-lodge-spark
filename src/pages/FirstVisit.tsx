@@ -10,7 +10,7 @@ const FirstVisit = () => {
   return (
     <div className="min-h-screen">
       <SEO
-        title="Your First Visit | Weybridge Lodge, Guildford Masonic Centre"
+        title="Your First Visit"
         description="A welcoming, practical guide to your first visit to Weybridge Lodge at the Guildford Masonic Centre — what to wear, when to arrive, and who will meet you."
         canonical="/first-visit"
         schema={breadcrumbSchema([

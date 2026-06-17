@@ -101,7 +101,7 @@ const Quiz = () => {
   return (
     <div className="min-h-screen">
       <SEO
-        title="Is Freemasonry For Me? Personalised Quiz | Weybridge Lodge"
+        title="Is Freemasonry For Me? Quiz"
         description="Take our short personalised quiz to discover whether Freemasonry at Weybridge Lodge in Guildford might be right for you."
         canonical="/quiz"
         schema={breadcrumbSchema([

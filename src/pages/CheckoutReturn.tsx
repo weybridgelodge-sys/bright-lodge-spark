@@ -52,7 +52,7 @@ const CheckoutReturn = () => {
 
   return (
     <div className="min-h-screen">
-      <SEO title="Booking Confirmation | Weybridge Lodge" description="Booking confirmation page" canonical="/checkout/return" />
+      <SEO title="Booking Confirmation" description="Confirmation of your Weybridge Lodge dining or event booking — view your reference and next steps." canonical="/checkout/return" />
       <Header />
       <main className="bg-navy-gradient py-24 min-h-[60vh]">
         <div className="container mx-auto px-4 max-w-2xl">

@@ -12,7 +12,7 @@ const History = () => {
   return (
     <div className="min-h-screen">
       <SEO
-        title="Masonic History of Weybridge Lodge | Founded 1949"
+        title="Our History — Founded 1949"
         description="Explore the history of Weybridge Lodge No. 6787, from its roots at the Vickers-Armstrong factory in Brooklands to becoming a thriving Freemasons Lodge in Guildford, Surrey."
         canonical="/history"
         schema={breadcrumbSchema([

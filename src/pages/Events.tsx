@@ -80,7 +80,7 @@ const Events = () => {
   return (
     <div className="min-h-screen">
       <SEO
-        title="Events – Masonic Meetings, Ladies Festival & Lodge of Instruction Guildford"
+        title="Events & Meetings"
         description="View upcoming Freemasons meetings, the 2026 Ladies Festival black tie gala, and weekly Lodge of Instruction evenings at Weybridge Lodge No. 6787, Guildford, Surrey."
         canonical="/events"
         schema={schemas}

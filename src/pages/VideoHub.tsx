@@ -27,7 +27,7 @@ const VideoHub = () => {
   return (
     <div className="min-h-screen">
       <SEO
-        title="Freemasonry Videos | Learn About Becoming a Freemason"
+        title="Freemasonry Videos"
         description="Watch videos about Freemasonry from the United Grand Lodge of England. Learn what it means to be a Freemason and discover the values of the Craft."
         canonical="/video-hub"
         schema={breadcrumbSchema([

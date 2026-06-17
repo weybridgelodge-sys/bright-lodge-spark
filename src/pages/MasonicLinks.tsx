@@ -70,7 +70,7 @@ const MasonicLinks = () => {
   return (
     <div className="min-h-screen">
       <SEO
-        title="Masonic Links | UGLE, Provincial Grand Lodge of Surrey"
+        title="Masonic Links"
         description="Useful Masonic links including the United Grand Lodge of England (UGLE), Provincial Grand Lodge of Surrey, and the Masonic Charitable Foundation."
         canonical="/masonic-links"
         schema={breadcrumbSchema([

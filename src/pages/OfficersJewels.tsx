@@ -180,7 +180,7 @@ const OfficersJewels = () => {
   return (
     <div className="min-h-screen">
       <SEO
-        title="Masonic Officers Roles & Jewels Explained"
+        title="Officers Roles & Jewels"
         description="Learn about the roles and jewels of Masonic Lodge officers — from the Worshipful Master to the Tyler. Discover what each officer does and the meaning behind their jewels."
         canonical="/officers-jewels"
         schema={breadcrumbSchema([

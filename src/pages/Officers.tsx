@@ -33,7 +33,7 @@ const Officers = () => {
   return (
     <div className="min-h-screen">
       <SEO
-        title="Officers of the Lodge | Weybridge Lodge Guildford"
+        title="Officers of the Lodge"
         description="Meet the current officers of Weybridge Lodge No. 6787 — Freemasons in Guildford, Surrey. View the full list of lodge officers for the 2025–2026 Masonic year."
         canonical="/officers"
         schema={breadcrumbSchema([

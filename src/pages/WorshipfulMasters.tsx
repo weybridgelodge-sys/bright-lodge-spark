@@ -11,7 +11,7 @@ const WorshipfulMasters = () => {
   return (
     <div className="min-h-screen">
       <SEO
-        title="Worshipful Masters Since 1949 | Weybridge Lodge History"
+        title="Worshipful Masters Since 1949"
         description="Complete roll of honour of all Worshipful Masters of Weybridge Lodge No. 6787 from 1949 to present day. A proud Masonic history in Guildford, Surrey."
         canonical="/worshipful-masters"
         schema={breadcrumbSchema([

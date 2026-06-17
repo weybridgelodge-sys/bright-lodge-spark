@@ -61,7 +61,7 @@ const WhatIsFreemasonry = () => {
   return (
     <div className="min-h-screen">
       <SEO
-        title="What is Freemasonry? | Principles, Values & Traditions"
+        title="What is Freemasonry?"
         description="Discover what Freemasonry is — its principles of integrity, friendship, respect and service. Learn about Masonic meetings, the three degrees, and how to join in Guildford, Surrey."
         canonical="/what-is-freemasonry"
         schema={breadcrumbSchema([
