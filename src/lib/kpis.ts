@@ -98,7 +98,7 @@ export function monthsBetween(fromIso: string, to: Date = new Date()): number {
 }
 
 export async function fetchKpiBundle(): Promise<KpiBundle> {
-  const [m, w, r, a, p] = await Promise.all([
+  const [m, w, r, a, p, c] = await Promise.all([
     supabase
       .from("profiles")
       .select(
@@ -108,6 +108,7 @@ export async function fetchKpiBundle(): Promise<KpiBundle> {
     (supabase.from as any)("succession_risks").select("id,role_key,note"),
     supabase.from("officer_appointments").select("position_key,member_id,lodge_year"),
     supabase.from("officer_positions").select("key,label,is_progressive,order_index"),
+    (supabase.from as any)("candidates").select("*"),
   ]);
   return {
     members: ((m.data as unknown) as KpiMember[]) ?? [],
@@ -115,8 +116,10 @@ export async function fetchKpiBundle(): Promise<KpiBundle> {
     risks: (r.data as SuccessionRisk[]) ?? [],
     appointments: (a.data as Appointment[]) ?? [],
     positions: (p.data as KpiBundle["positions"]) ?? [],
+    candidates: ((c?.data as Candidate[]) ?? []),
   };
 }
+
 
 // ───── Section 1: Snapshot
 export function snapshot(members: KpiMember[]) {
