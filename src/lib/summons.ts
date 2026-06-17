@@ -122,13 +122,26 @@ export function sortMembersBySeniority(members: MemberRow[]): MemberRow[] {
   );
 }
 
+// Strip any masonic rank prefix that may have been saved into the name field
+// itself, so we never render "W Bro. W Bro Julien Tidmarsh".
+const RANK_PREFIX_RE =
+  /^(RW Bro\.?|W Bro\.?|V\.?W\.? Bro\.?|Bro\.?|RW|VW|W)\s+/i;
+
+export function stripRankPrefix(name: string): string {
+  let out = name.trim();
+  // Loop in case multiple prefixes were concatenated.
+  while (RANK_PREFIX_RE.test(out)) out = out.replace(RANK_PREFIX_RE, "").trim();
+  return out;
+}
+
 export function formatMemberLine(m: MemberRow): string {
   const rank = (m.grand_rank || m.provincial_rank || m.rank || "").trim();
   const title = m.is_past_master ? "W Bro." : m.title ? `${m.title}.` : "Bro.";
-  const name =
+  const rawName =
     m.full_name?.trim() ||
     [m.first_name, m.last_name].filter(Boolean).join(" ").trim() ||
     "—";
+  const name = stripRankPrefix(rawName);
   return rank ? `${title} ${name}, ${rank}` : `${title} ${name}`;
 }
 
