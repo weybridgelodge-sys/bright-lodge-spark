@@ -27,7 +27,7 @@ const Anniversary75th = () => {
   return (
     <div className="min-h-screen">
       <SEO
-        title="75th Anniversary Masonic Meeting | Weybridge Lodge"
+        title="75th Anniversary Meeting"
         description="Weybridge Lodge No. 6787 celebrated its 75th anniversary at a special Masonic meeting in February 2024 at the South West Surrey Masonic Centre, Guildford."
         canonical="/news/75th-anniversary"
         type="article"

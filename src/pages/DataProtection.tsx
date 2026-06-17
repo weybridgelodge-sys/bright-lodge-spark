@@ -8,7 +8,7 @@ const DataProtection = () => {
   return (
     <div className="min-h-screen">
       <SEO
-        title="Data Protection Policy | Weybridge Lodge"
+        title="Data Protection Policy"
         description="Data protection and privacy policy for Weybridge Lodge No. 6787 website."
         canonical="/data-protection"
       />

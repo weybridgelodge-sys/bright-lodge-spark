@@ -154,7 +154,7 @@ const YourJourney = () => {
   return (
     <div className="min-h-screen">
       <SEO
-        title="Your Masonic Journey | Degrees, Royal Arch & Joining Steps"
+        title="Your Masonic Journey"
         description="Discover the journey through Freemasonry at Weybridge Lodge — the three Degrees (Initiation, Passing, Raising), the Royal Arch, the Lodge room layout, and the three steps to joining."
         canonical="/your-journey"
         schema={breadcrumbSchema([

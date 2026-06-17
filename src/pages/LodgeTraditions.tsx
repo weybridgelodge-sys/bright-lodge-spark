@@ -43,7 +43,7 @@ const LodgeTraditions = () => {
   return (
     <div className="min-h-screen">
       <SEO
-        title="Lodge Traditions | Weybridge Lodge No. 6787 Guildford"
+        title="Lodge Traditions"
         description="The traditions of Weybridge Lodge No. 6787 — the Entered Apprentice Song, full Masonic toasts, the Initiates' Chain, visiting other Lodges, and the customs that make our evenings special."
         canonical="/lodge-traditions"
         schema={breadcrumbSchema([

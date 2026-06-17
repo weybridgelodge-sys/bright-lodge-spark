@@ -24,7 +24,7 @@ const SandsCharity = () => {
   return (
     <div className="min-h-screen">
       <SEO
-        title="Weybridge Lodge Raise £31,000 for SANDS Charity"
+        title="£31,000 Raised for SANDS Charity"
         description="Weybridge Lodge No. 6787 raised £31,331 for Sands charity supporting bereaved parents. A record-breaking Freemasons charity donation in Guildford, Surrey."
         canonical="/news/sands-charity"
         type="article"

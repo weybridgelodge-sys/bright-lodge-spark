@@ -43,11 +43,7 @@ const News = () => {
   return (
     <div className="min-h-screen">
       <SEO
-        title={
-          categoryFromSlug
-            ? `${categoryFromSlug} News | Weybridge Lodge`
-            : "News | Weybridge Lodge Freemasons Guildford"
-        }
+        title={categoryFromSlug ? `${categoryFromSlug} News` : "News"}
         description={
           categoryFromSlug
             ? `${categoryFromSlug} news and updates from Weybridge Lodge No. 6787 in Guildford, Surrey.`

@@ -24,7 +24,7 @@ const Surrey2030Gold = () => {
   return (
     <div className="min-h-screen">
       <SEO
-        title="Surrey 2030 Festival Gold Award | Weybridge Lodge"
+        title="Surrey 2030 Festival Gold Award"
         description="Weybridge Lodge No. 6787 secures the prestigious Gold Festival Award for the Surrey 2030 Festival, raising over £15,800 for the Masonic Charitable Foundation."
         canonical="/news/surrey-2030-festival-gold"
         type="article"

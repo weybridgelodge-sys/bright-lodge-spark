@@ -25,7 +25,7 @@ const ApgmVisit = () => {
   return (
     <div className="min-h-screen">
       <SEO
-        title="PGM Official Visit to Weybridge Lodge February 2026 | Guildford"
+        title="PGM Visit February 2026"
         description="The Provincial Grand Master visited Weybridge Lodge No. 6787 for a First Degree Initiation ceremony at the South West Surrey Masonic Centre, Guildford."
         canonical="/news/pgm-visit-february-2026"
         type="article"

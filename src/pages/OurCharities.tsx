@@ -39,7 +39,7 @@ const OurCharities = () => {
   return (
     <div className="min-h-screen">
       <SEO
-        title="Our Charities | Weybridge Lodge Charitable Work"
+        title="Our Charities"
         description="Weybridge Lodge No. 6787 supports charities including SANDS and TLC Appeal Surrey. See how Freemasons in Guildford give back to their community."
         canonical="/our-charities"
         schema={breadcrumbSchema([

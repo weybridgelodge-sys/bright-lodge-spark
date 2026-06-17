@@ -17,7 +17,7 @@ const FreemasonryCharity = () => {
   return (
     <div className="min-h-screen">
       <SEO
-        title="Freemasons Charity Guildford | Masonic Charitable Giving"
+        title="Freemasonry & Charity"
         description="Freemasons raise nearly £1 million a week for charity. Discover how Weybridge Lodge and the Masonic Charitable Foundation support local and national causes in Surrey."
         canonical="/freemasonry-and-charity"
         schema={breadcrumbSchema([

@@ -10,7 +10,7 @@ const Contact = () => {
   return (
     <div className="min-h-screen">
       <SEO
-        title="Contact Weybridge Lodge | Freemasons Guildford"
+        title="Contact Us"
         description="Contact Weybridge Lodge No. 6787 — Freemasons in Guildford, Surrey. Call, email or visit us at the South West Surrey Masonic Centre, Hitherbury Close, GU2 4DR."
         canonical="/contact"
         schema={breadcrumbSchema([

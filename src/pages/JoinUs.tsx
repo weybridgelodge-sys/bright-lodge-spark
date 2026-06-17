@@ -19,7 +19,7 @@ const JoinUs = () => {
   return (
     <div className="min-h-screen">
       <SEO
-        title="Join Freemasons in Guildford | Become a Freemason in Surrey"
+        title="Join Freemasons in Guildford"
         description="Interested in becoming a Freemason in Guildford or Surrey? Join Weybridge Lodge No. 6787 — contact our Membership Secretary to start your Masonic journey today."
         canonical="/join-us"
         schema={breadcrumbSchema([

@@ -18,7 +18,7 @@ const LodgeProfile = () => {
   return (
     <div className="min-h-screen">
       <SEO
-        title="Lodge Profile | Freemasons Lodge in Guildford, Surrey"
+        title="Lodge Profile"
         description="Weybridge Lodge No. 6787 meets at the South West Surrey Masonic Centre in Guildford. A diverse, friendly Lodge with members of all ages — learn about our meetings, social events and values."
         canonical="/lodge-profile"
         schema={breadcrumbSchema([
