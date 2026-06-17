@@ -96,6 +96,12 @@ Deno.serve(async (req) => {
       raising_date: b.raising_date ?? null,
       joined_lodge_date: b.joined_lodge_date ?? null,
       is_ugle_portal_registered: b.is_ugle_portal_registered ?? false,
+      address_line1: b.address_line1 ?? null,
+      address_line2: b.address_line2 ?? null,
+      address_line3: b.address_line3 ?? null,
+      town: b.town ?? null,
+      county: b.county ?? null,
+      postcode: b.postcode ?? null,
     };
 
     let userId = b.id;
