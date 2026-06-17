@@ -301,7 +301,13 @@ export default function Kpis() {
             <BarRow label="MM" value={pl.mm.length} max={funnelMax} />
           </div>
         </Section>
+
+        {/* Section 8 */}
+        <Section title="8 · Attendance Analytics" defaultOpen={false}>
+          <AttendanceCharts />
+        </Section>
       </div>
+
     </MembersLayout>
   );
 }
