@@ -523,6 +523,16 @@ export default function MembersAdmin() {
             </label>
 
             <label className={`${labelCls} sm:col-span-6`}>
+              Preferred name
+              <input
+                value={form.preferred_name}
+                onChange={(e) => setForm({ ...form, preferred_name: e.target.value })}
+                placeholder="e.g. Mike (if different from first name)"
+                className={`mt-1 ${inputCls} normal-case tracking-normal text-primary-foreground`}
+              />
+            </label>
+
+            <label className={`${labelCls} sm:col-span-6`}>
               Email address
               <input
                 required
