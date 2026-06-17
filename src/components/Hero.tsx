@@ -1,4 +1,3 @@
-import { motion } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 import { Link } from "react-router-dom";
 import heroAvif from "@/assets/hero-lodge.avif.asset.json";
@@ -25,13 +24,7 @@ const Hero = () => {
       <div className="absolute inset-0 hero-overlay" />
 
       <div className="relative z-10 container mx-auto px-4 sm:px-6 pt-20">
-        {/* Mobile logo - centered at top */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 1, delay: 0.5 }}
-          className="flex md:hidden justify-center mb-8"
-        >
+        <div className="flex md:hidden justify-center mb-8 hero-fade-in" style={{ animationDelay: "0.5s" }}>
           <img
             src={logo}
             alt="Weybridge Lodge No. 6787 crest — Freemasons Lodge in Guildford, Surrey"
@@ -40,21 +33,11 @@ const Hero = () => {
             decoding="async"
             className="w-[150px] h-[150px] object-contain brightness-0 invert"
           />
-        </motion.div>
+        </div>
 
         <div className="flex items-center justify-between gap-8">
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, ease: "easeOut" }}
-            className="max-w-2xl"
-          >
-            <motion.div
-              initial={{ width: 0 }}
-              animate={{ width: "80px" }}
-              transition={{ duration: 0.8, delay: 0.3 }}
-              className="h-0.5 bg-gold mb-8"
-            />
+          <div className="max-w-2xl hero-rise-in">
+            <div className="h-0.5 w-20 bg-gold mb-8 hero-rule" />
             <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-serif text-primary-foreground leading-tight mb-6">
               Looking for something
               <span className="block text-gradient-gold text-3xl sm:text-4xl md:text-5xl mt-3">
@@ -78,32 +61,28 @@ const Hero = () => {
                 Your Initiation Night
               </Link>
             </div>
-          </motion.div>
+          </div>
 
-          <motion.img
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 1, delay: 0.5 }}
+          <img
             src={logo}
             alt="Weybridge Lodge No. 6787 crest — Freemasons Lodge in Guildford, Surrey"
             width={250}
             height={250}
             decoding="async"
-            className="hidden md:block w-[250px] h-[250px] object-contain shrink-0 brightness-0 invert"
+            className="hidden md:block w-[250px] h-[250px] object-contain shrink-0 brightness-0 invert hero-fade-in"
+            style={{ animationDelay: "0.5s" }}
           />
         </div>
       </div>
 
-      <motion.a
+      <a
         href="#about"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.5 }}
-        className="absolute bottom-10 left-1/2 -translate-x-1/2 text-primary-foreground/60 hover:text-gold transition-colors"
+        className="absolute bottom-10 left-1/2 -translate-x-1/2 text-primary-foreground/60 hover:text-gold transition-colors hero-fade-in"
+        style={{ animationDelay: "1.5s" }}
         aria-label="Scroll to About section"
       >
         <ChevronDown className="w-8 h-8 animate-bounce" aria-hidden="true" />
-      </motion.a>
+      </a>
     </section>
   );
 };
