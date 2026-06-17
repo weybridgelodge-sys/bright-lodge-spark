@@ -153,6 +153,22 @@ export default function MembersAdmin() {
     load();
   };
 
+  const deleteMember = async (p: Profile) => {
+    if (user && p.id === user.id) {
+      toast.error("You cannot delete your own account");
+      return;
+    }
+    const name = p.full_name || p.email || "this member";
+    if (!window.confirm(`Permanently delete ${name}? This removes their profile and all related records. This cannot be undone.`)) return;
+    await supabase.from("user_roles").delete().eq("user_id", p.id);
+    const { error } = await supabase.from("profiles").delete().eq("id", p.id);
+    if (error) toast.error(error.message);
+    else {
+      toast.success("Member deleted");
+      load();
+    }
+  };
+
   const addNotice = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
