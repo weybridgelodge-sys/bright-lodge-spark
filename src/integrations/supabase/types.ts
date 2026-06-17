@@ -735,7 +735,12 @@ export type Database = {
       is_active_member: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
-      app_role: "member" | "admin" | "secretary" | "worshipful_master"
+      app_role:
+        | "member"
+        | "admin"
+        | "secretary"
+        | "worshipful_master"
+        | "director_of_ceremonies"
       candidate_stage:
         | "enquiry"
         | "face_to_face"
@@ -893,7 +898,13 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["member", "admin", "secretary", "worshipful_master"],
+      app_role: [
+        "member",
+        "admin",
+        "secretary",
+        "worshipful_master",
+        "director_of_ceremonies",
+      ],
       candidate_stage: [
         "enquiry",
         "face_to_face",
