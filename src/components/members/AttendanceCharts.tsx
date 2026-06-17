@@ -127,24 +127,30 @@ function useLiveFestive(): LiveFestive | null {
 export default function AttendanceCharts() {
   const [activeTab, setActiveTab] = useState<"festive" | "loi">("festive");
   const liveLoi = useLiveLoi();
+  const liveFestive = useLiveFestive();
   const loiRehearsalData = liveLoi?.data.length ? liveLoi.data : loiRehearsalFallback;
   const loiAvgTurnout = liveLoi ? `${liveLoi.avgTurnout} / night` : "12 / night";
   const loiEngagementLabel = liveLoi ? `${liveLoi.overallEngagement}% overall` : "81.7% overall";
 
-  const visibleMeetings = regularMeetingsData.slice(-6);
+  const festiveSource = liveFestive?.data.length ? liveFestive.data : regularMeetingsFallback;
+  const visibleMeetings = festiveSource.slice(-6);
 
-  const maxAttendance = Math.max(...visibleMeetings.map((d) => d.total));
+  const maxAttendance = Math.max(1, ...visibleMeetings.map((d) => d.total));
   const totalVisitors = visibleMeetings.reduce((a, c) => a + c.visitors, 0);
-  const averageSubscribing = Math.round(
-    visibleMeetings.reduce((a, c) => a + c.subscribing, 0) / visibleMeetings.length
-  );
+  const averageSubscribing = visibleMeetings.length
+    ? Math.round(visibleMeetings.reduce((a, c) => a + c.subscribing, 0) / visibleMeetings.length)
+    : 0;
 
   return (
     <div className="space-y-5">
       {/* Tab toggle */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-xs text-primary-foreground/60">
-          Mock data — visual placeholder pending live booking aggregation.
+          {liveFestive && activeTab === "festive"
+            ? `Live from the Festive Board Register — ${liveFestive.recordCount} meeting${liveFestive.recordCount === 1 ? "" : "s"} recorded.`
+            : !liveFestive && activeTab === "festive"
+            ? "Mock data — add Festive Board records to replace this placeholder."
+            : "Attendance analytics — toggle between Festive Board and LOI views."}
         </p>
         <div className="flex bg-navy p-1 rounded-sm border border-gold/15">
           <button
