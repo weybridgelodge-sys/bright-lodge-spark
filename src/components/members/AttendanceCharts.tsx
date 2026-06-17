@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Users, BarChart3, TrendingUp, Calendar } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { LOI_KPI_CATEGORIES, autoKpiCategory, kpiCategoryLabel } from "@/lib/loi";
+import { LOI_KPI_CATEGORIES, autoKpiCategory } from "@/lib/loi";
 
 // Mock data — to be wired to bookings/lodge_events later
 const regularMeetingsData = [
