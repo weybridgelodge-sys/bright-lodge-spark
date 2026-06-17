@@ -87,7 +87,7 @@ export default function AttendanceCharts() {
         {activeTab === "festive" ? (
           <div className="space-y-4">
             <div className="h-56 flex items-end gap-2 pt-4 border-b border-gold/10 px-1">
-              {regularMeetingsData.map((data, idx) => {
+              {visibleMeetings.map((data, idx) => {
                 const subPct = (data.subscribing / maxAttendance) * 100;
                 const visPct = (data.visitors / maxAttendance) * 100;
                 return (
