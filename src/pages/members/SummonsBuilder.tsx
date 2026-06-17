@@ -479,11 +479,11 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
         URL.revokeObjectURL(url);
         return null;
       }
-      // Save → upload + insert
+      // Save → upload + insert/update
       const path = `summonses/${summons.meeting_number}-${Date.now()}.pdf`;
       const up = await supabase.storage.from("lodge-docs").upload(path, blob, { contentType: "application/pdf", upsert: true });
       if (up.error) throw up.error;
-      const { data: ins, error } = await supabase.from("summonses").insert({
+      const payload: any = {
         meeting_number: summons.meeting_number,
         lodge_event_id: selectedEvent || null,
         meeting_date: summons.meeting_date,
@@ -500,10 +500,19 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
         notice_overrides: { manualHidden } as any,
         pdf_storage_path: path,
         status: action === "email" ? "sent" : "finalised",
-      }).select("id").single();
-      if (error) throw error;
-      toast.success(`Summons #${summons.meeting_number} saved`);
-      return ins.id;
+      };
+      let resultId = currentId;
+      if (currentId) {
+        const { error } = await supabase.from("summonses").update(payload).eq("id", currentId);
+        if (error) throw error;
+      } else {
+        const { data: ins, error } = await supabase.from("summonses").insert(payload).select("id").single();
+        if (error) throw error;
+        resultId = ins.id;
+        setCurrentId(ins.id);
+      }
+      toast.success(`Summons #${summons.meeting_number} ${currentId ? "updated" : "saved"}`);
+      return resultId;
     } catch (e: any) {
       toast.error(e.message ?? "Failed to generate PDF");
       return null;
