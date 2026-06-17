@@ -432,6 +432,16 @@ export default function MembersAdmin() {
                           <ShieldPlus className="w-4 h-4" />
                         )}
                       </button>
+                      {user?.id !== p.id && (
+                        <button
+                          onClick={() => deleteMember(p)}
+                          className="p-1.5 text-red-400 hover:bg-red-500/10 rounded-sm"
+                          aria-label="Delete member"
+                          title="Delete member"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>
