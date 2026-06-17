@@ -516,7 +516,7 @@ export default function MembersAdmin() {
                 <option value="joiner">Joiner (J)</option>
               </select>
             </label>
-            <label className={`${labelCls} sm:col-span-1`}>
+            <label className={`${labelCls} sm:col-span-4`}>
               {entryType === "joiner" ? "Original initiation date" : "Initiation date"}
               <input
                 type="date"
