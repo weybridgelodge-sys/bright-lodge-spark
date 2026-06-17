@@ -77,6 +77,53 @@ function useLiveLoi(): LiveLoi | null {
   return state;
 }
 
+type LiveFestive = {
+  data: { month: string; subscribing: number; visitors: number; total: number }[];
+  recordCount: number;
+};
+
+function useLiveFestive(): LiveFestive | null {
+  const [state, setState] = useState<LiveFestive | null>(null);
+  useEffect(() => {
+    (async () => {
+      const [mt, at] = await Promise.all([
+        supabase
+          .from("festive_board_meetings")
+          .select("id,meeting_date,meeting_type,headcount_override")
+          .order("meeting_date", { ascending: true }),
+        supabase
+          .from("festive_board_attendance")
+          .select("meeting_id,member_id,attendance_status"),
+      ]);
+      const meetings =
+        (mt.data as {
+          id: string;
+          meeting_date: string;
+          meeting_type: string;
+          headcount_override: number | null;
+        }[]) ?? [];
+      const att = (at.data as { meeting_id: string; member_id: string | null; attendance_status: string }[]) ?? [];
+      if (meetings.length === 0) {
+        setState(null);
+        return;
+      }
+      const byMeeting: Record<string, typeof att> = {};
+      for (const r of att) (byMeeting[r.meeting_id] ??= []).push(r);
+      const data = meetings.map((m) => {
+        const hc = computeHeadcount(byMeeting[m.id] ?? [], m.headcount_override);
+        return {
+          month: shortMonthLabel(m.meeting_date, m.meeting_type),
+          subscribing: hc.members,
+          visitors: hc.visitors,
+          total: hc.total,
+        };
+      });
+      setState({ data, recordCount: meetings.length });
+    })();
+  }, []);
+  return state;
+}
+
 export default function AttendanceCharts() {
   const [activeTab, setActiveTab] = useState<"festive" | "loi">("festive");
   const liveLoi = useLiveLoi();
