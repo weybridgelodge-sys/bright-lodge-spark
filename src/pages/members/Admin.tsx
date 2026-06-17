@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Check, X, ShieldPlus, ShieldMinus, Plus, Trash2, Pencil } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { formatMemberLine } from "@/lib/summons";
 
 type Degree = "entered_apprentice" | "fellow_craft" | "master_mason";
 type Title = "Bro" | "W Bro" | "VW Bro" | "RW Bro";
@@ -32,8 +33,10 @@ type Profile = {
   full_name: string | null;
   title: Title | null;
   first_name: string | null;
+  middle_name: string | null;
   last_name: string | null;
   preferred_name: string | null;
+  post_nominals: string | null;
   provincial_rank: string | null;
   grand_rank: string | null;
   date_of_birth: string | null;
@@ -74,8 +77,10 @@ const EMPTY_FORM = {
   email: "",
   title: "" as "" | Title,
   first_name: "",
+  middle_name: "",
   last_name: "",
   preferred_name: "",
+  post_nominals: "",
   provincial_rank: "",
   grand_rank: "",
   date_of_birth: "",
@@ -119,7 +124,7 @@ export default function MembersAdmin() {
       supabase
         .from("profiles")
         .select(
-          "id,email,full_name,title,first_name,last_name,preferred_name,provincial_rank,grand_rank,date_of_birth,initiation_date,rank,ugle_reg_number,mother_lodge,status,degree,is_past_master,is_royal_arch,is_honorary_member,is_ugle_portal_registered,passing_date,raising_date,joined_lodge_date,address_line1,address_line2,address_line3,town,county,postcode,created_at"
+          "id,email,full_name,title,first_name,middle_name,last_name,preferred_name,post_nominals,provincial_rank,grand_rank,date_of_birth,initiation_date,rank,ugle_reg_number,mother_lodge,status,degree,is_past_master,is_royal_arch,is_honorary_member,is_ugle_portal_registered,passing_date,raising_date,joined_lodge_date,address_line1,address_line2,address_line3,town,county,postcode,created_at"
         )
         .order("created_at", { ascending: false }),
       supabase.from("user_roles").select("user_id,role"),
@@ -202,8 +207,10 @@ export default function MembersAdmin() {
       email: p.email ?? "",
       title: (p.title as Title) ?? "",
       first_name: p.first_name ?? "",
+      middle_name: p.middle_name ?? "",
       last_name: p.last_name ?? "",
       preferred_name: p.preferred_name ?? "",
+      post_nominals: p.post_nominals ?? "",
       provincial_rank: p.provincial_rank ?? "",
       grand_rank: p.grand_rank ?? "",
       date_of_birth: p.date_of_birth ?? "",
@@ -257,8 +264,10 @@ export default function MembersAdmin() {
       email: form.email.trim(),
       title: form.title || null,
       first_name: form.first_name.trim(),
+      middle_name: form.middle_name.trim() || null,
       last_name: form.last_name.trim(),
       preferred_name: form.preferred_name.trim() || null,
+      post_nominals: form.post_nominals.trim() || null,
       provincial_rank: form.provincial_rank.trim() || null,
       grand_rank: form.grand_rank.trim() || null,
       date_of_birth: form.date_of_birth || null,
@@ -366,7 +375,7 @@ export default function MembersAdmin() {
               ).map((p) => (
                 <tr key={p.id}>
                   <td className="p-3">
-                    <p className="font-medium">{p.full_name || "(No name)"}</p>
+                    <p className="font-medium">{formatMemberLine(p as any) || "(No name)"}</p>
                     <p className="text-xs text-primary-foreground/50">{p.email}</p>
                     {(p.provincial_rank || p.grand_rank) && (
                       <p className="text-[11px] text-primary-foreground/60 mt-1">
@@ -513,6 +522,15 @@ export default function MembersAdmin() {
               />
             </label>
             <label className={`${labelCls} sm:col-span-2`}>
+              Middle name(s)
+              <input
+                value={form.middle_name}
+                onChange={(e) => setForm({ ...form, middle_name: e.target.value })}
+                placeholder="e.g. Philip Gower"
+                className={`mt-1 ${inputCls} normal-case tracking-normal text-primary-foreground`}
+              />
+            </label>
+            <label className={`${labelCls} sm:col-span-2`}>
               Last name
               <input
                 required
@@ -522,15 +540,26 @@ export default function MembersAdmin() {
               />
             </label>
 
-            <label className={`${labelCls} sm:col-span-6`}>
+            <label className={`${labelCls} sm:col-span-3`}>
               Preferred name
               <input
                 value={form.preferred_name}
                 onChange={(e) => setForm({ ...form, preferred_name: e.target.value })}
-                placeholder="e.g. Mike (if different from first name)"
+                placeholder="e.g. Jules (defaults to first name)"
                 className={`mt-1 ${inputCls} normal-case tracking-normal text-primary-foreground`}
               />
             </label>
+
+            <label className={`${labelCls} sm:col-span-3`}>
+              Post-nominals
+              <input
+                value={form.post_nominals}
+                onChange={(e) => setForm({ ...form, post_nominals: e.target.value })}
+                placeholder="e.g. PProvJGW, MBE"
+                className={`mt-1 ${inputCls} normal-case tracking-normal text-primary-foreground`}
+              />
+            </label>
+
 
             <label className={`${labelCls} sm:col-span-6`}>
               Email address

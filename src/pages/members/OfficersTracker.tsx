@@ -3,6 +3,7 @@ import MembersLayout from "@/components/members/MembersLayout";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { formatMemberLine } from "@/lib/summons";
 import {
   POSITION_ORDER,
   POSITION_LABELS,
@@ -29,13 +30,29 @@ type Readiness = "ready" | "needs_experience" | "non_progressive";
 type ProfileRow = {
   id: string;
   full_name: string | null;
+  first_name: string | null;
+  middle_name: string | null;
+  last_name: string | null;
+  preferred_name: string | null;
+  post_nominals: string | null;
+  title: string | null;
   email: string | null;
   rank: string | null;
+  grand_rank: string | null;
+  provincial_rank: string | null;
   office: string | null;
   joined_year: number | null;
   status: string;
   initiation_date: string | null;
   is_past_master: boolean | null;
+};
+
+const memberLabel = (m: Pick<ProfileRow, "full_name" | "first_name" | "middle_name" | "last_name" | "preferred_name" | "post_nominals" | "title" | "is_past_master" | "rank" | "grand_rank" | "provincial_rank" | "email">) => {
+  const line = formatMemberLine(m as any).trim();
+  // formatMemberLine always prepends a rank — fall back to email only if there's no name at all.
+  return line && !/^(W |RW |VW |Bro\.)\s*—\s*$/.test(line) && !line.endsWith(" —")
+    ? line
+    : m.email ?? "—";
 };
 
 type StatusRow = {
@@ -80,7 +97,7 @@ export default function OfficersTracker() {
     const [{ data: m, error: e1 }, { data: s, error: e2 }, { data: a, error: e3 }] = await Promise.all([
       supabase
         .from("profiles")
-        .select("id,full_name,email,rank,office,joined_year,status,initiation_date,is_past_master")
+        .select("id,full_name,first_name,middle_name,last_name,preferred_name,post_nominals,title,email,rank,grand_rank,provincial_rank,office,joined_year,status,initiation_date,is_past_master")
         .eq("status", "active")
         .order("full_name", { ascending: true }),
       supabase.from("member_progression_status").select("*"),
@@ -107,7 +124,7 @@ export default function OfficersTracker() {
       const st = statusMap.get(m.id);
       map[m.id] = {
         id: m.id,
-        full_name: m.full_name,
+        full_name: memberLabel(m),
         effective_initiation_date: st?.seniority_initiation_date ?? m.initiation_date,
         tiebreaker: st?.seniority_tiebreaker ?? null,
       };
@@ -116,7 +133,7 @@ export default function OfficersTracker() {
   }, [members, statuses]);
 
   const overrideByName = useMemo(() => {
-    const map = new Map(members.map((m) => [m.id, m.full_name ?? m.email ?? "—"]));
+    const map = new Map(members.map((m) => [m.id, memberLabel(m)]));
     return (id: string | null) => (id ? map.get(id) ?? "—" : "—");
   }, [members]);
 
@@ -568,7 +585,7 @@ function BoardView({
                 <option value="">— select member —</option>
                 {members.map((m) => (
                   <option key={m.id} value={m.id}>
-                    {m.full_name ?? m.email}
+                    {memberLabel(m)}
                   </option>
                 ))}
               </select>
@@ -716,7 +733,7 @@ function LadderView({
                 <option value="">— vacant —</option>
                 {members.map((m) => (
                   <option key={m.id} value={m.id}>
-                    {m.full_name ?? m.email}
+                    {memberLabel(m)}
                   </option>
                 ))}
               </select>
@@ -834,7 +851,7 @@ function ReadinessView({
               return (
                 <tr key={m.id} className="hover:bg-navy-light/20">
                   <td className="px-3 py-2 border-b border-gold/10 text-primary-foreground">
-                    {m.full_name ?? m.email}
+                    {memberLabel(m)}
                   </td>
                   <td className="px-3 py-2 border-b border-gold/10">
                     <input
@@ -974,7 +991,7 @@ function NonProgressiveBoard({
           const appt = holderFor(pos);
           const memberId = appt?.member_id ?? "";
           const memberName = memberId
-            ? members.find((m) => m.id === memberId)?.full_name ?? "—"
+            ? (() => { const m = members.find((m) => m.id === memberId); return m ? memberLabel(m) : "—"; })()
             : "— vacant —";
           const since = memberId ? firstHeld(pos, memberId) ?? appt?.appointed_on ?? null : null;
           const vacant = !memberId;
@@ -1029,7 +1046,7 @@ function NonProgressiveBoard({
                   <option value="">— select member —</option>
                   {members.map((m) => (
                     <option key={m.id} value={m.id}>
-                      {m.full_name ?? m.email}
+                      {memberLabel(m)}
                     </option>
                   ))}
                 </select>

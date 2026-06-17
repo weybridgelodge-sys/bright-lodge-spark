@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { firstWmYearForMember } from "@/data/worshipfulMasters";
+import { formatMemberLine } from "@/lib/summons";
 
 export type MemberStatus =
   | "pending"
@@ -16,7 +17,10 @@ export type KpiMember = {
   id: string;
   full_name: string | null;
   first_name: string | null;
+  middle_name: string | null;
   last_name: string | null;
+  preferred_name: string | null;
+  post_nominals: string | null;
   title: string | null;
   status: MemberStatus;
   degree: Degree;
@@ -29,6 +33,8 @@ export type KpiMember = {
   raising_date: string | null;
   joined_lodge_date: string | null;
   is_ugle_portal_registered: boolean;
+  rank: string | null;
+  grand_rank: string | null;
   provincial_rank: string | null;
   updated_at: string;
 };
@@ -77,9 +83,7 @@ export function currentMasonicYear(d = new Date()): number {
 }
 
 export function fullName(m: KpiMember): string {
-  const t = m.title ? `${m.title}. ` : "";
-  const n = [m.first_name, m.last_name].filter(Boolean).join(" ") || m.full_name || "(no name)";
-  return `${t}${n}`.trim();
+  return formatMemberLine(m as any) || "(no name)";
 }
 
 export function ageOn(dobIso: string | null, ref: Date = new Date()): number | null {

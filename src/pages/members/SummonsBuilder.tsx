@@ -19,6 +19,8 @@ import {
   candidateAgendaLabel,
   defaultAgenda,
   formatDateShort,
+  formatMemberLine,
+  formatMemberShort,
   MemberRow,
   newAgendaItem,
   newCandidate,
@@ -277,7 +279,7 @@ async function loadOfficers(setRows: (rows: OfficerRollRow[]) => void, setLoadin
     .eq("lodge_year", lodgeYear);
   const memberIds = Array.from(new Set((appts ?? []).map((a) => a.member_id).filter(Boolean)));
   const { data: profs } = memberIds.length
-    ? await supabase.from("profiles").select("id,title,first_name,last_name,full_name,rank,grand_rank,provincial_rank,is_past_master").in("id", memberIds)
+    ? await supabase.from("profiles").select("id,title,first_name,middle_name,last_name,full_name,preferred_name,post_nominals,rank,grand_rank,provincial_rank,is_past_master,is_royal_arch,initiation_date,joined_lodge_date,joined_year,status").in("id", memberIds)
     : { data: [] as any[] };
   const byId = new Map((profs ?? []).map((p: any) => [p.id, p]));
   const allKeys: string[] = [
@@ -296,19 +298,13 @@ async function loadOfficers(setRows: (rows: OfficerRollRow[]) => void, setLoadin
     const p = a?.member_id ? byId.get(a.member_id) : null;
     return {
       label: labelFor(k),
-      member: p ? formatPersonLine(p) : "",
+      member: p ? formatMemberLine(p as MemberRow) : "",
     };
   });
   setRows(rows);
   setLoading(false);
 }
 
-function formatPersonLine(p: any): string {
-  const rank = (p.grand_rank || p.provincial_rank || p.rank || "").trim();
-  const title = p.is_past_master ? "W Bro." : p.title ? `${p.title}.` : "Bro.";
-  const name = p.full_name?.trim() || [p.first_name, p.last_name].filter(Boolean).join(" ");
-  return rank ? `${title} ${name}, ${rank}` : `${title} ${name}`;
-}
 
 // ===================== New Summons Tab =====================
 function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null; onDoneEditing: () => void }) {
@@ -330,7 +326,7 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
         supabase.from("lodge_template").select("*").eq("id", "default").maybeSingle(),
         supabase
           .from("profiles")
-          .select("id,title,first_name,last_name,full_name,rank,grand_rank,provincial_rank,initiation_date,joined_lodge_date,joined_year,is_past_master,is_royal_arch,status")
+          .select("id,title,first_name,middle_name,last_name,full_name,preferred_name,post_nominals,rank,grand_rank,provincial_rank,initiation_date,joined_lodge_date,joined_year,is_past_master,is_royal_arch,status")
           .eq("status", "active"),
         supabase.from("lodge_events").select("id,title,event_date,tyling_time,dress_code,location").order("event_date", { ascending: true }),
         supabase.from("festive_board_meetings").select("id,meeting_date,notes").order("meeting_date", { ascending: true }),
@@ -719,7 +715,7 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
             <div key={m.id} className="text-primary-foreground/80">
               {(m.is_past_master ? "+ " : "  ")}
               {(m.is_royal_arch ? "✠ " : "")}
-              {formatDateShort(m.initiation_date || m.joined_lodge_date)} — {m.full_name || `${m.first_name ?? ""} ${m.last_name ?? ""}`}
+              {formatDateShort(m.initiation_date || m.joined_lodge_date)} — {formatMemberLine(m)}
             </div>
           );
           return (
