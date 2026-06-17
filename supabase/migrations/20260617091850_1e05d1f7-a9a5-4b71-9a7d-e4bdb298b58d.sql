@@ -1,0 +1,2 @@
+CREATE POLICY "Admins delete any profile" ON public.profiles FOR DELETE USING (public.has_role(auth.uid(), 'admin'));
+CREATE POLICY "Admins delete any user role" ON public.user_roles FOR DELETE USING (public.has_role(auth.uid(), 'admin'));
