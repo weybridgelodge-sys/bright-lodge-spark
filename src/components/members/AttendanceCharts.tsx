@@ -23,10 +23,12 @@ const loiRehearsalData = [
 export default function AttendanceCharts() {
   const [activeTab, setActiveTab] = useState<"festive" | "loi">("festive");
 
-  const maxAttendance = Math.max(...regularMeetingsData.map((d) => d.total));
-  const totalVisitors = regularMeetingsData.reduce((a, c) => a + c.visitors, 0);
+  const visibleMeetings = regularMeetingsData.slice(-6);
+
+  const maxAttendance = Math.max(...visibleMeetings.map((d) => d.total));
+  const totalVisitors = visibleMeetings.reduce((a, c) => a + c.visitors, 0);
   const averageSubscribing = Math.round(
-    regularMeetingsData.reduce((a, c) => a + c.subscribing, 0) / regularMeetingsData.length
+    visibleMeetings.reduce((a, c) => a + c.subscribing, 0) / visibleMeetings.length
   );
 
   return (
@@ -85,7 +87,7 @@ export default function AttendanceCharts() {
         {activeTab === "festive" ? (
           <div className="space-y-4">
             <div className="h-56 flex items-end gap-2 pt-4 border-b border-gold/10 px-1">
-              {regularMeetingsData.map((data, idx) => {
+              {visibleMeetings.map((data, idx) => {
                 const subPct = (data.subscribing / maxAttendance) * 100;
                 const visPct = (data.visitors / maxAttendance) * 100;
                 return (
