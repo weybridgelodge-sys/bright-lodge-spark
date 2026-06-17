@@ -20,6 +20,7 @@ import {
   defaultAgenda,
   formatDateShort,
   formatMemberLine,
+  formatMemberLineFormal,
   MemberRow,
   newAgendaItem,
   newCandidate,
