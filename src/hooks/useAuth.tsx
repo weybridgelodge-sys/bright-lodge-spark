@@ -25,7 +25,7 @@ type Profile = {
   initiation_date?: string | null;
 };
 
-type Role = "member" | "admin" | "secretary" | "worshipful_master";
+type Role = "member" | "admin" | "secretary" | "worshipful_master" | "director_of_ceremonies";
 
 type AuthCtx = {
   session: Session | null;
@@ -34,7 +34,9 @@ type AuthCtx = {
   isAdmin: boolean;
   isSecretary: boolean;
   isWorshipfulMaster: boolean;
+  isDirectorOfCeremonies: boolean;
   canManageProgression: boolean;
+  canManageLOI: boolean;
   loading: boolean;
   refreshProfile: () => Promise<void>;
   signOut: () => Promise<void>;
