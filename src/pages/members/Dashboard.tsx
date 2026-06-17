@@ -32,7 +32,7 @@ export default function MembersDashboard() {
     <MembersLayout>
       <div className="mb-8">
         <h1 className="font-serif text-3xl text-gold mb-2">
-          Welcome, {profile?.full_name?.split(" ")[0] || "Brother"}
+          Welcome, {(profile as { preferred_name?: string | null } | null)?.preferred_name?.trim() || profile?.first_name?.trim() || "Brother"}
         </h1>
         <p className="text-primary-foreground/60 text-sm">
           The private area for brethren of Weybridge Lodge No. 6787.
