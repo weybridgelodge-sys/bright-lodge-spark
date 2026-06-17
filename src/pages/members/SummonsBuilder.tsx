@@ -329,6 +329,7 @@ async function loadOfficers(setRows: (rows: OfficerRollRow[]) => void, setLoadin
     return {
       label: labelFor(k),
       member: p ? formatMemberLine(p as MemberRow) : "",
+      member_formal: p ? formatMemberLineFormal(p as MemberRow) : "",
     };
   });
   setRows(rows);
