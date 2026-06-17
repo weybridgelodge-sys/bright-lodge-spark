@@ -99,6 +99,7 @@ export default function LoiRegister() {
         .from("profiles")
         .select("id,full_name,first_name,last_name,title")
         .eq("status", "active")
+        .eq("is_honorary_member", false)
         .order("last_name", { ascending: true }),
     ]);
     setSessions((s.data as Session[]) ?? []);
