@@ -119,7 +119,7 @@ export default function MembersAdmin() {
       supabase
         .from("profiles")
         .select(
-          "id,email,full_name,title,first_name,last_name,provincial_rank,grand_rank,date_of_birth,initiation_date,rank,ugle_reg_number,mother_lodge,status,degree,is_past_master,is_royal_arch,is_honorary_member,is_ugle_portal_registered,passing_date,raising_date,joined_lodge_date,address_line1,address_line2,address_line3,town,county,postcode,created_at"
+          "id,email,full_name,title,first_name,last_name,preferred_name,provincial_rank,grand_rank,date_of_birth,initiation_date,rank,ugle_reg_number,mother_lodge,status,degree,is_past_master,is_royal_arch,is_honorary_member,is_ugle_portal_registered,passing_date,raising_date,joined_lodge_date,address_line1,address_line2,address_line3,town,county,postcode,created_at"
         )
         .order("created_at", { ascending: false }),
       supabase.from("user_roles").select("user_id,role"),
@@ -203,6 +203,7 @@ export default function MembersAdmin() {
       title: (p.title as Title) ?? "",
       first_name: p.first_name ?? "",
       last_name: p.last_name ?? "",
+      preferred_name: p.preferred_name ?? "",
       provincial_rank: p.provincial_rank ?? "",
       grand_rank: p.grand_rank ?? "",
       date_of_birth: p.date_of_birth ?? "",
@@ -257,6 +258,7 @@ export default function MembersAdmin() {
       title: form.title || null,
       first_name: form.first_name.trim(),
       last_name: form.last_name.trim(),
+      preferred_name: form.preferred_name.trim() || null,
       provincial_rank: form.provincial_rank.trim() || null,
       grand_rank: form.grand_rank.trim() || null,
       date_of_birth: form.date_of_birth || null,
