@@ -78,6 +78,10 @@ function useLiveLoi(): LiveLoi | null {
 
 export default function AttendanceCharts() {
   const [activeTab, setActiveTab] = useState<"festive" | "loi">("festive");
+  const liveLoi = useLiveLoi();
+  const loiRehearsalData = liveLoi?.data.length ? liveLoi.data : loiRehearsalFallback;
+  const loiAvgTurnout = liveLoi ? `${liveLoi.avgTurnout} / night` : "12 / night";
+  const loiEngagementLabel = liveLoi ? `${liveLoi.overallEngagement}% overall` : "81.7% overall";
 
   const visibleMeetings = regularMeetingsData.slice(-6);
 
@@ -127,8 +131,8 @@ export default function AttendanceCharts() {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <StatBanner icon={<Calendar className="w-4 h-4" />} label="Avg. LOI turnout" value="12 / night" />
-          <StatBanner icon={<TrendingUp className="w-4 h-4" />} label="Floorwork engagement" value="81.7% overall" />
+          <StatBanner icon={<Calendar className="w-4 h-4" />} label="Avg. LOI turnout" value={loiAvgTurnout} />
+          <StatBanner icon={<TrendingUp className="w-4 h-4" />} label="Floorwork engagement" value={loiEngagementLabel} />
         </div>
       )}
 
@@ -195,7 +199,9 @@ export default function AttendanceCharts() {
               </div>
             ))}
             <p className="text-[11px] text-primary-foreground/60 pt-2 italic">
-              Insight: rehearsal turnout dips mid-season. Targeted reminders to Junior Officers help maintain ritual accuracy ahead of degree workings.
+              {liveLoi
+                ? `Live from the LOI Register — ${liveLoi.totalSessions} session${liveLoi.totalSessions === 1 ? "" : "s"} recorded.`
+                : "Insight: rehearsal turnout dips mid-season. Targeted reminders to Junior Officers help maintain ritual accuracy ahead of degree workings."}
             </p>
           </div>
         )}
