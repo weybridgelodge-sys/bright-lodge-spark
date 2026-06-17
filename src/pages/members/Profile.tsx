@@ -59,7 +59,7 @@ export default function MembersProfile() {
     e.preventDefault();
     if (!user) return;
     setBusy(true);
-    const composedName = [title, firstName.trim(), lastName.trim()].filter(Boolean).join(" ").trim();
+    const composedName = [firstName.trim(), lastName.trim()].filter(Boolean).join(" ").trim();
     const joinedLodge = entryType === "initiate" ? (initiationDate || null) : (joinedLodgeDate || null);
     const { error } = await supabase
       .from("profiles")

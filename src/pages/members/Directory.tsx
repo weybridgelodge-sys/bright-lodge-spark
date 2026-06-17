@@ -2,11 +2,21 @@ import { useEffect, useState } from "react";
 import MembersLayout from "@/components/members/MembersLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { Search, Mail, Phone, MapPin } from "lucide-react";
+import { formatMemberLine } from "@/lib/summons";
 
 type Member = {
   id: string;
   full_name: string | null;
+  first_name: string | null;
+  middle_name: string | null;
+  last_name: string | null;
+  preferred_name: string | null;
+  post_nominals: string | null;
+  title: string | null;
+  is_past_master: boolean | null;
   rank: string | null;
+  grand_rank: string | null;
+  provincial_rank: string | null;
   office: string | null;
   joined_year: number | null;
   email: string | null;
@@ -34,7 +44,7 @@ export default function MembersDirectory() {
     (async () => {
       const { data: m } = await supabase
         .from("profiles")
-        .select("id,full_name,rank,office,joined_year,email,phone,avatar_url,address_line1,address_line2,address_line3,town,county,postcode")
+        .select("id,full_name,first_name,middle_name,last_name,preferred_name,post_nominals,title,is_past_master,rank,grand_rank,provincial_rank,office,joined_year,email,phone,avatar_url,address_line1,address_line2,address_line3,town,county,postcode")
         .eq("status", "active")
         .order("full_name");
       setMembers((m as Member[]) ?? []);
@@ -112,7 +122,7 @@ export default function MembersDirectory() {
                     {(m.full_name ?? "?").charAt(0)}
                   </div>
                   <div className="min-w-0">
-                    <p className="font-serif text-base truncate">{m.full_name || "(No name)"}</p>
+                    <p className="font-serif text-base truncate">{formatMemberLine(m as any) || "(No name)"}</p>
                     {m.rank && <p className="text-[11px] text-gold uppercase tracking-wider">{m.rank}</p>}
                   </div>
                 </div>

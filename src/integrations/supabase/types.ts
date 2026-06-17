@@ -797,10 +797,12 @@ export type Database = {
           joined_lodge_date: string | null
           joined_year: number | null
           last_name: string | null
+          middle_name: string | null
           mother_lodge: string | null
           office: string | null
           passing_date: string | null
           phone: string | null
+          post_nominals: string | null
           postcode: string | null
           preferred_name: string | null
           provincial_rank: string | null
@@ -834,10 +836,12 @@ export type Database = {
           joined_lodge_date?: string | null
           joined_year?: number | null
           last_name?: string | null
+          middle_name?: string | null
           mother_lodge?: string | null
           office?: string | null
           passing_date?: string | null
           phone?: string | null
+          post_nominals?: string | null
           postcode?: string | null
           preferred_name?: string | null
           provincial_rank?: string | null
@@ -871,10 +875,12 @@ export type Database = {
           joined_lodge_date?: string | null
           joined_year?: number | null
           last_name?: string | null
+          middle_name?: string | null
           mother_lodge?: string | null
           office?: string | null
           passing_date?: string | null
           phone?: string | null
+          post_nominals?: string | null
           postcode?: string | null
           preferred_name?: string | null
           provincial_rank?: string | null

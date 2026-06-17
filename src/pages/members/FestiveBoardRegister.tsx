@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import MembersLayout from "@/components/members/MembersLayout";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { formatMemberLine } from "@/lib/summons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -60,17 +61,21 @@ type Member = {
   id: string;
   full_name: string | null;
   first_name: string | null;
+  middle_name: string | null;
   last_name: string | null;
+  preferred_name: string | null;
+  post_nominals: string | null;
   title: string | null;
+  is_past_master: boolean | null;
+  rank: string | null;
+  grand_rank: string | null;
+  provincial_rank: string | null;
 };
 
 function memberDisplay(m: Member) {
-  return (
-    m.full_name?.trim() ||
-    `${m.first_name ?? ""} ${m.last_name ?? ""}`.trim() ||
-    "Unnamed brother"
-  );
+  return formatMemberLine(m as any) || "Unnamed brother";
 }
+
 
 const fmtDate = (s: string) =>
   new Date(s).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
@@ -96,7 +101,7 @@ export default function FestiveBoardRegister() {
       supabase.from("festive_board_attendance").select("*"),
       supabase
         .from("profiles")
-        .select("id,full_name,first_name,last_name,title")
+        .select("id,full_name,first_name,middle_name,last_name,preferred_name,post_nominals,title,is_past_master,rank,grand_rank,provincial_rank")
         .eq("status", "active")
         .eq("is_honorary_member", false)
         .order("last_name", { ascending: true }),

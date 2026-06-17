@@ -95,8 +95,11 @@ export type MemberRow = {
   id: string;
   title: string | null;
   first_name: string | null;
+  middle_name: string | null;
   last_name: string | null;
   full_name: string | null;
+  preferred_name: string | null;
+  post_nominals: string | null;
   rank: string | null;
   grand_rank: string | null;
   provincial_rank: string | null;
@@ -128,21 +131,67 @@ const RANK_PREFIX_RE =
   /^(RW Bro\.?|W Bro\.?|V\.?W\.? Bro\.?|Bro\.?|RW|VW|W)\s+/i;
 
 export function stripRankPrefix(name: string): string {
-  let out = name.trim();
-  // Loop in case multiple prefixes were concatenated.
+  let out = (name ?? "").trim();
   while (RANK_PREFIX_RE.test(out)) out = out.replace(RANK_PREFIX_RE, "").trim();
   return out;
 }
 
+// Derive given/middle/surname from whatever the record has, tolerating legacy
+// `full_name` rows where rank or given names were concatenated.
+type NameSource = Partial<Pick<MemberRow, "first_name" | "middle_name" | "last_name" | "full_name">>;
+function nameParts(m: NameSource): { first: string; middles: string[]; surname: string } {
+  let first = (m.first_name ?? "").trim();
+  const middles = (m.middle_name ?? "").trim().split(/\s+/).filter(Boolean);
+  let surname = (m.last_name ?? "").trim();
+
+  if ((!first || !surname) && m.full_name) {
+    const cleaned = stripRankPrefix(m.full_name);
+    const parts = cleaned.split(/\s+/).filter(Boolean);
+    if (parts.length === 1 && !surname) surname = parts[0];
+    else if (parts.length >= 2) {
+      if (!first) first = parts[0];
+      if (!surname) surname = parts[parts.length - 1];
+      if (middles.length === 0) {
+        for (let i = 1; i < parts.length - 1; i++) middles.push(parts[i]);
+      }
+    }
+  }
+  return { first, middles, surname };
+}
+
+const initialOf = (n: string) => (n.trim().charAt(0) || "").toUpperCase();
+
+function rankTitle(m: Pick<MemberRow, "is_past_master" | "title">): string {
+  if (m.is_past_master) return "W Bro.";
+  if (m.title && m.title.trim()) return `${m.title.trim().replace(/\.$/, "")}.`;
+  return "Bro.";
+}
+
+// Standard masonic display: "W Bro. JP Tidmarsh (Jules) PProvJGW"
 export function formatMemberLine(m: MemberRow): string {
-  const rank = (m.grand_rank || m.provincial_rank || m.rank || "").trim();
-  const title = m.is_past_master ? "W Bro." : m.title ? `${m.title}.` : "Bro.";
-  const rawName =
-    m.full_name?.trim() ||
-    [m.first_name, m.last_name].filter(Boolean).join(" ").trim() ||
-    "—";
-  const name = stripRankPrefix(rawName);
-  return rank ? `${title} ${name}, ${rank}` : `${title} ${name}`;
+  const { first, middles, surname } = nameParts(m);
+  const initials = [first, ...middles].map(initialOf).join("");
+  const title = rankTitle(m);
+  const display = surname
+    ? initials ? `${initials} ${surname}` : surname
+    : initials || "—";
+
+  const bracket = (m.preferred_name && m.preferred_name.trim()) || first || "";
+  const bracketPart = bracket ? ` (${bracket})` : "";
+
+  const post = (m.post_nominals || m.grand_rank || m.provincial_rank || m.rank || "").trim();
+  const postPart = post ? ` ${post}` : "";
+
+  return `${title} ${display}${bracketPart}${postPart}`;
+}
+
+// Same format without rank/post-nominals — useful for compact lists.
+export function formatMemberShort(m: NameSource & { preferred_name?: string | null }): string {
+  const { first, middles, surname } = nameParts(m);
+  const initials = [first, ...middles].map(initialOf).join("");
+  const bracket = (m.preferred_name && m.preferred_name.trim()) || first || "";
+  const display = surname ? (initials ? `${initials} ${surname}` : surname) : initials;
+  return bracket ? `${display} (${bracket})` : display;
 }
 
 export function memberSymbols(m: MemberRow): {
