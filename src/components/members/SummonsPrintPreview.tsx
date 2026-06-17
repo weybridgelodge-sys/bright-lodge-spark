@@ -385,11 +385,11 @@ function Sheet2({
 function MemberLine({ m }: { m: MemberRow }) {
   const date = formatDateShort(m.initiation_date || m.joined_lodge_date);
   const tag = m.initiation_date ? "(I)" : m.joined_lodge_date ? "(J)" : "";
-  const mark = m.is_past_master ? "+" : m.is_royal_arch ? "✠" : "";
+  const mark = `${m.is_past_master ? "+" : ""}${m.is_royal_arch ? "✠" : ""}`;
   return (
     <div className="flex gap-1">
       <span className="w-[60px] shrink-0">{date} {tag}</span>
-      <span className="w-[8px] text-center shrink-0">{mark}</span>
+      <span className="w-[16px] text-center shrink-0">{mark}</span>
       <span className="flex-1">{formatMemberLine(m)}</span>
     </div>
   );
