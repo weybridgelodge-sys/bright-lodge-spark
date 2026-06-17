@@ -277,7 +277,7 @@ const BackCoverPanel: React.FC<{
     const sym = memberSymbols(m);
     const date = formatDateShort(m.initiation_date || m.joined_lodge_date);
     const tag = m.initiation_date ? "(I)" : m.joined_lodge_date ? "(J)" : "";
-    const mark = `${sym.pastMaster ? "+" : ""}${sym.royalArch ? "✠" : ""}`;
+    const mark = `${sym.pastMaster ? "+" : ""}${sym.royalArch ? "†" : ""}`;
     return (
       <View key={m.id} style={s.memberRow}>
         <Text style={s.memberDate}>{date} {tag}</Text>
@@ -295,7 +295,7 @@ const BackCoverPanel: React.FC<{
         <View style={s.memberCol}>{right.map(memberLine)}</View>
       </View>
       <Text style={[s.micro, { marginTop: 4 }]}>
-        + Past Master of the Lodge   # Past Master in the Lodge   ✠ HRA Chapter
+        + Past Master of the Lodge   # Past Master in the Lodge   † HRA Chapter
       </Text>
 
       {template.honorary_members && (
