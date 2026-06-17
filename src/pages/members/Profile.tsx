@@ -11,6 +11,7 @@ export default function MembersProfile() {
   const { profile, user, refreshProfile } = useAuth();
   const [title, setTitle] = useState("");
   const [firstName, setFirstName] = useState("");
+  const [preferredName, setPreferredName] = useState("");
   const [lastName, setLastName] = useState("");
   const [provincialRank, setProvincialRank] = useState("");
   const [grandRank, setGrandRank] = useState("");
