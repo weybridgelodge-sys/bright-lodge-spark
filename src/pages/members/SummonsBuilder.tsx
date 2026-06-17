@@ -105,6 +105,14 @@ export default function SummonsBuilder() {
     );
   }
 
+  const [tab, setTab] = useState("new");
+  const [editingId, setEditingId] = useState<string | null>(null);
+
+  const startEdit = (id: string) => {
+    setEditingId(id);
+    setTab("new");
+  };
+
   return (
     <MembersLayout>
       <div className="space-y-4">
@@ -115,23 +123,24 @@ export default function SummonsBuilder() {
           </p>
         </header>
 
-        <Tabs defaultValue="new" className="space-y-4">
+        <Tabs value={tab} onValueChange={setTab} className="space-y-4">
           <TabsList className="bg-navy-light/60 border border-gold/20">
-            <TabsTrigger value="new">New Summons</TabsTrigger>
+            <TabsTrigger value="new">{editingId ? "Edit Summons" : "New Summons"}</TabsTrigger>
             <TabsTrigger value="template">Lodge Template</TabsTrigger>
             <TabsTrigger value="officers">Officer Roll</TabsTrigger>
             <TabsTrigger value="history">History</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="new"><NewSummonsTab /></TabsContent>
+          <TabsContent value="new"><NewSummonsTab editingId={editingId} onDoneEditing={() => setEditingId(null)} /></TabsContent>
           <TabsContent value="template"><TemplateTab /></TabsContent>
           <TabsContent value="officers"><OfficerRollTab /></TabsContent>
-          <TabsContent value="history"><HistoryTab /></TabsContent>
+          <TabsContent value="history"><HistoryTab onEdit={startEdit} /></TabsContent>
         </Tabs>
       </div>
     </MembersLayout>
   );
 }
+
 
 // ===================== Template Tab =====================
 function TemplateTab() {
@@ -301,7 +310,7 @@ function formatPersonLine(p: any): string {
 }
 
 // ===================== New Summons Tab =====================
-function NewSummonsTab() {
+function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null; onDoneEditing: () => void }) {
   const [summons, setSummons] = useState<SummonsData>(EMPTY_SUMMONS);
   const [template, setTemplate] = useState<LodgeTemplate>(EMPTY_TEMPLATE);
   const [members, setMembers] = useState<MemberRow[]>([]);
@@ -312,6 +321,7 @@ function NewSummonsTab() {
   const [busy, setBusy] = useState(false);
   const [presetIndex, setPresetIndex] = useState<string>("");
   const [manualHidden, setManualHidden] = useState<string[]>([]);
+  const [currentId, setCurrentId] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -329,11 +339,44 @@ function NewSummonsTab() {
       if (mem.data) setMembers(mem.data as any);
       if (evs.data) setEvents(evs.data);
       if (fb.data) setFestive(fb.data);
-      const nextNo = ((last.data?.[0] as any)?.meeting_number ?? 0) + 1;
-      setSummons((s) => ({ ...s, meeting_number: nextNo }));
+      if (!editingId) {
+        const nextNo = ((last.data?.[0] as any)?.meeting_number ?? 0) + 1;
+        setSummons((s) => ({ ...s, meeting_number: nextNo }));
+      }
       loadOfficers(setOfficers, () => {});
     })();
-  }, []);
+  }, [editingId]);
+
+  useEffect(() => {
+    if (!editingId) { setCurrentId(null); return; }
+    (async () => {
+      const { data, error } = await supabase.from("summonses").select("*").eq("id", editingId).maybeSingle();
+      if (error || !data) { toast.error(error?.message ?? "Summons not found"); return; }
+      const r: any = data;
+      setCurrentId(r.id);
+      setSelectedEvent(r.lodge_event_id ?? "");
+      setManualHidden(((r.notice_overrides as any)?.manualHidden ?? []) as string[]);
+      setSummons({
+        meeting_number: r.meeting_number,
+        meeting_date: r.meeting_date,
+        meeting_time: r.meeting_time,
+        meeting_type: r.meeting_type,
+        dress_code: r.dress_code,
+        minutes_confirmation_date: r.minutes_confirmation_date,
+        next_meeting_date: r.next_meeting_date,
+        officer_night_date: r.officer_night_date,
+        agenda: (r.agenda as any) ?? defaultAgenda(),
+        candidates: (r.candidates as any) ?? [],
+        dining_enquiry_name: r.dining_enquiry_name,
+        dining_enquiry_email: r.dining_enquiry_email,
+        dining_menu: r.dining_menu ?? null,
+        dining_price: r.dining_price ?? null,
+        dining_deadline: r.dining_deadline ?? null,
+      });
+    })();
+  }, [editingId]);
+
+
 
   const sortedMembers = useMemo(() => sortMembersBySeniority(members), [members]);
   const overflow = planOverflow(sortedMembers.length);
@@ -436,11 +479,11 @@ function NewSummonsTab() {
         URL.revokeObjectURL(url);
         return null;
       }
-      // Save → upload + insert
+      // Save → upload + insert/update
       const path = `summonses/${summons.meeting_number}-${Date.now()}.pdf`;
       const up = await supabase.storage.from("lodge-docs").upload(path, blob, { contentType: "application/pdf", upsert: true });
       if (up.error) throw up.error;
-      const { data: ins, error } = await supabase.from("summonses").insert({
+      const payload: any = {
         meeting_number: summons.meeting_number,
         lodge_event_id: selectedEvent || null,
         meeting_date: summons.meeting_date,
@@ -457,10 +500,19 @@ function NewSummonsTab() {
         notice_overrides: { manualHidden } as any,
         pdf_storage_path: path,
         status: action === "email" ? "sent" : "finalised",
-      }).select("id").single();
-      if (error) throw error;
-      toast.success(`Summons #${summons.meeting_number} saved`);
-      return ins.id;
+      };
+      let resultId = currentId;
+      if (currentId) {
+        const { error } = await supabase.from("summonses").update(payload).eq("id", currentId);
+        if (error) throw error;
+      } else {
+        const { data: ins, error } = await supabase.from("summonses").insert(payload).select("id").single();
+        if (error) throw error;
+        resultId = ins.id;
+        setCurrentId(ins.id);
+      }
+      toast.success(`Summons #${summons.meeting_number} ${currentId ? "updated" : "saved"}`);
+      return resultId;
     } catch (e: any) {
       toast.error(e.message ?? "Failed to generate PDF");
       return null;
@@ -484,8 +536,22 @@ function NewSummonsTab() {
 
   return (
     <div className="space-y-4">
+      {editingId && (
+        <div className="flex items-center justify-between bg-gold/15 border border-gold/40 text-gold rounded p-3 text-sm">
+          <span>Editing summons #{summons.meeting_number}. Saving will update this record.</span>
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={() => { onDoneEditing(); setSummons(EMPTY_SUMMONS); setCurrentId(null); setSelectedEvent(""); setManualHidden([]); }}
+          >
+            Start new instead
+          </Button>
+        </div>
+      )}
       {/* Meeting basics */}
       <Section title="Meeting">
+
         <div className="grid sm:grid-cols-3 gap-3">
           <div>
             <Label>Meeting number</Label>
@@ -677,7 +743,7 @@ function Section({ title, subtitle, children }: { title: string; subtitle?: stri
 }
 
 // ===================== History Tab =====================
-function HistoryTab() {
+function HistoryTab({ onEdit }: { onEdit: (id: string) => void }) {
   const [rows, setRows] = useState<any[]>([]);
   useEffect(() => {
     (async () => {
@@ -692,6 +758,13 @@ function HistoryTab() {
     const { data, error } = await supabase.storage.from("lodge-docs").createSignedUrl(path, 60 * 5);
     if (error) { toast.error(error.message); return; }
     window.open(data.signedUrl, "_blank");
+  };
+  const remove = async (id: string) => {
+    if (!confirm("Delete this summons from history? The PDF will remain in storage.")) return;
+    const { error } = await supabase.from("summonses").delete().eq("id", id);
+    if (error) { toast.error(error.message); return; }
+    setRows((rs) => rs.filter((r) => r.id !== id));
+    toast.success("Summons deleted");
   };
   return (
     <div className="bg-navy-light/40 border border-gold/20 rounded p-4">
@@ -708,11 +781,19 @@ function HistoryTab() {
                 <td>{r.meeting_type}</td>
                 <td><Badge variant="outline">{r.status}</Badge></td>
                 <td>{r.sent_to_count ?? "—"}</td>
-                <td>{r.pdf_storage_path && (
-                  <Button size="sm" variant="outline" onClick={() => open(r.pdf_storage_path)}>
-                    <FileText className="w-3.5 h-3.5 mr-1" /> Open
-                  </Button>
-                )}</td>
+                <td>
+                  <div className="flex gap-2 justify-end py-1.5">
+                    <Button size="sm" variant="outline" onClick={() => onEdit(r.id)}>Edit</Button>
+                    {r.pdf_storage_path && (
+                      <Button size="sm" variant="outline" onClick={() => open(r.pdf_storage_path)}>
+                        <FileText className="w-3.5 h-3.5 mr-1" /> Open
+                      </Button>
+                    )}
+                    <Button size="sm" variant="destructive" onClick={() => remove(r.id)}>
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </Button>
+                  </div>
+                </td>
               </tr>
             ))}
           </tbody>
@@ -721,3 +802,4 @@ function HistoryTab() {
     </div>
   );
 }
+
