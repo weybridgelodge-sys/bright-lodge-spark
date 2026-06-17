@@ -147,6 +147,31 @@ export default function SummonsBuilder() {
 }
 
 
+
+// ===================== Print Preview Tab =====================
+function PrintPreviewTab() {
+  const [template, setTemplate] = useState<LodgeTemplate>(EMPTY_TEMPLATE);
+  const [members, setMembers] = useState<MemberRow[]>([]);
+  const [officers, setOfficers] = useState<OfficerRollRow[]>([]);
+
+  useEffect(() => {
+    (async () => {
+      const [tpl, mem] = await Promise.all([
+        supabase.from("lodge_template").select("*").eq("id", "default").maybeSingle(),
+        supabase
+          .from("profiles")
+          .select("id,title,first_name,middle_name,last_name,full_name,preferred_name,post_nominals,rank,grand_rank,provincial_rank,initiation_date,joined_lodge_date,joined_year,is_past_master,is_royal_arch,status")
+          .eq("status", "active"),
+      ]);
+      if (tpl.data) setTemplate({ ...EMPTY_TEMPLATE, ...(tpl.data as any), lodge_representatives: (tpl.data as any).lodge_representatives ?? [] });
+      if (mem.data) setMembers(mem.data as any);
+      loadOfficers(setOfficers, () => {});
+    })();
+  }, []);
+
+  return <SummonsPrintPreview template={template} officers={officers} members={members} />;
+}
+
 // ===================== Template Tab =====================
 function TemplateTab() {
   const [t, setT] = useState<LodgeTemplate>(EMPTY_TEMPLATE);
