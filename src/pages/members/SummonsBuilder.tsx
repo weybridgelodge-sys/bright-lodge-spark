@@ -105,6 +105,14 @@ export default function SummonsBuilder() {
     );
   }
 
+  const [tab, setTab] = useState("new");
+  const [editingId, setEditingId] = useState<string | null>(null);
+
+  const startEdit = (id: string) => {
+    setEditingId(id);
+    setTab("new");
+  };
+
   return (
     <MembersLayout>
       <div className="space-y-4">
@@ -115,23 +123,24 @@ export default function SummonsBuilder() {
           </p>
         </header>
 
-        <Tabs defaultValue="new" className="space-y-4">
+        <Tabs value={tab} onValueChange={setTab} className="space-y-4">
           <TabsList className="bg-navy-light/60 border border-gold/20">
-            <TabsTrigger value="new">New Summons</TabsTrigger>
+            <TabsTrigger value="new">{editingId ? "Edit Summons" : "New Summons"}</TabsTrigger>
             <TabsTrigger value="template">Lodge Template</TabsTrigger>
             <TabsTrigger value="officers">Officer Roll</TabsTrigger>
             <TabsTrigger value="history">History</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="new"><NewSummonsTab /></TabsContent>
+          <TabsContent value="new"><NewSummonsTab editingId={editingId} onDoneEditing={() => setEditingId(null)} /></TabsContent>
           <TabsContent value="template"><TemplateTab /></TabsContent>
           <TabsContent value="officers"><OfficerRollTab /></TabsContent>
-          <TabsContent value="history"><HistoryTab /></TabsContent>
+          <TabsContent value="history"><HistoryTab onEdit={startEdit} /></TabsContent>
         </Tabs>
       </div>
     </MembersLayout>
   );
 }
+
 
 // ===================== Template Tab =====================
 function TemplateTab() {
