@@ -24,6 +24,7 @@ import {
   newCandidate,
   planOverflow,
   sortMembersBySeniority,
+  splitTwoColumns,
 } from "@/lib/summons";
 import {
   generateSummonsBlob,
@@ -712,15 +713,22 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
             </div>
           </div>
         )}
-        <div className="grid sm:grid-cols-2 gap-x-6 gap-y-1 text-xs">
-          {sortedMembers.map((m) => (
+        {(() => {
+          const { left, right } = splitTwoColumns(sortedMembers);
+          const cell = (m: MemberRow) => (
             <div key={m.id} className="text-primary-foreground/80">
               {(m.is_past_master ? "+ " : "  ")}
               {(m.is_royal_arch ? "✠ " : "")}
               {formatDateShort(m.initiation_date || m.joined_lodge_date)} — {m.full_name || `${m.first_name ?? ""} ${m.last_name ?? ""}`}
             </div>
-          ))}
-        </div>
+          );
+          return (
+            <div className="flex gap-6 text-xs">
+              <div className="flex-1 space-y-1">{left.map(cell)}</div>
+              <div className="flex-1 space-y-1">{right.map(cell)}</div>
+            </div>
+          );
+        })()}
       </Section>
 
       <div className="flex flex-wrap gap-2">
