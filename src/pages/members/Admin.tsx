@@ -244,10 +244,32 @@ export default function MembersAdmin() {
 
   return (
     <MembersLayout>
-      <div className="mb-6">
-        <h1 className="font-serif text-3xl text-gold mb-2">Admin</h1>
-        <p className="text-sm text-primary-foreground/60">Manage members, roles, and notices.</p>
+      <div className="mb-6 flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <h1 className="font-serif text-3xl text-gold mb-2">Admin</h1>
+          <p className="text-sm text-primary-foreground/60">Manage members, roles, and notices.</p>
+        </div>
+        <button
+          onClick={async () => {
+            if (!confirm("Import the 2026 Lodge roster? New members will be created; existing profiles will have blank fields filled in (no data overwritten).")) return;
+            const t = toast.loading("Importing 2026 roster…");
+            const { data, error } = await supabase.functions.invoke("admin-bulk-import-2026", { body: {} });
+            toast.dismiss(t);
+            if (error || (data as { error?: string })?.error) {
+              toast.error((data as { error?: string })?.error ?? error?.message ?? "Import failed");
+              return;
+            }
+            const s = (data as { summary?: { created: number; updated: number; no_change: number; errors: number } }).summary;
+            toast.success(`Roster imported — created ${s?.created ?? 0}, updated ${s?.updated ?? 0}, unchanged ${s?.no_change ?? 0}, errors ${s?.errors ?? 0}`);
+            load();
+          }}
+          className="text-xs uppercase tracking-wider border border-gold/40 text-gold px-3 py-2 rounded-sm hover:bg-gold/10"
+          title="One-shot import of the Lodge Members List 2026 — safe to re-run"
+        >
+          Import 2026 Roster
+        </button>
       </div>
+
 
       <div className="flex gap-2 border-b border-gold/15 mb-6">
         {(["users", "add", "notices"] as const).map((t) => (
