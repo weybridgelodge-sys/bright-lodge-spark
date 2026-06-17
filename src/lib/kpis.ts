@@ -36,13 +36,40 @@ export type WmTerm = { id: string; member_id: string; year_started: number; year
 export type SuccessionRisk = { id: string; role_key: string; note: string | null };
 export type Appointment = { position_key: string; member_id: string; lodge_year: number };
 
+export type CandidateStage =
+  | "enquiry"
+  | "face_to_face"
+  | "form_p"
+  | "interviewed"
+  | "read_in_lodge"
+  | "initiated"
+  | "withdrawn";
+
+export type Candidate = {
+  id: string;
+  first_name: string;
+  last_name: string;
+  email: string | null;
+  phone: string | null;
+  proposer: string | null;
+  seconder: string | null;
+  stage: CandidateStage;
+  notes: string | null;
+  date_of_enquiry: string | null;
+  converted_member_id: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
 export type KpiBundle = {
   members: KpiMember[];
   wmTerms: WmTerm[];
   risks: SuccessionRisk[];
   appointments: Appointment[];
   positions: { key: string; label: string; is_progressive: boolean; order_index: number }[];
+  candidates: Candidate[];
 };
+
 
 export function currentMasonicYear(d = new Date()): number {
   return d.getMonth() + 1 >= 10 ? d.getFullYear() : d.getFullYear() - 1;
@@ -71,7 +98,7 @@ export function monthsBetween(fromIso: string, to: Date = new Date()): number {
 }
 
 export async function fetchKpiBundle(): Promise<KpiBundle> {
-  const [m, w, r, a, p] = await Promise.all([
+  const [m, w, r, a, p, c] = await Promise.all([
     supabase
       .from("profiles")
       .select(
@@ -81,6 +108,7 @@ export async function fetchKpiBundle(): Promise<KpiBundle> {
     (supabase.from as any)("succession_risks").select("id,role_key,note"),
     supabase.from("officer_appointments").select("position_key,member_id,lodge_year"),
     supabase.from("officer_positions").select("key,label,is_progressive,order_index"),
+    (supabase.from as any)("candidates").select("*"),
   ]);
   return {
     members: ((m.data as unknown) as KpiMember[]) ?? [],
@@ -88,8 +116,10 @@ export async function fetchKpiBundle(): Promise<KpiBundle> {
     risks: (r.data as SuccessionRisk[]) ?? [],
     appointments: (a.data as Appointment[]) ?? [],
     positions: (p.data as KpiBundle["positions"]) ?? [],
+    candidates: ((c?.data as Candidate[]) ?? []),
   };
 }
+
 
 // ───── Section 1: Snapshot
 export function snapshot(members: KpiMember[]) {
@@ -311,8 +341,12 @@ export function officersHealth(bundle: KpiBundle) {
 }
 
 // ───── Section 7: Pipeline
-export function pipeline(members: KpiMember[]) {
-  const candidates = members.filter((m) => m.status === "pending" && !m.initiation_date);
+export function pipeline(bundle: KpiBundle) {
+  const { members, candidates: allCandidates } = bundle;
+  // Active candidates = anyone not yet initiated and not withdrawn
+  const candidates = allCandidates.filter(
+    (c) => c.stage !== "initiated" && c.stage !== "withdrawn"
+  );
   const ea = members.filter(
     (m) => m.status === "active" && m.degree === "entered_apprentice" && !m.passing_date
   );
@@ -326,3 +360,24 @@ export function pipeline(members: KpiMember[]) {
   );
   return { candidates, ea, fc, mm };
 }
+
+export const CANDIDATE_STAGE_LABELS: Record<CandidateStage, string> = {
+  enquiry: "Enquiry",
+  face_to_face: "Face to Face",
+  form_p: "Form P",
+  interviewed: "Interviewed",
+  read_in_lodge: "Read in Lodge",
+  initiated: "Initiated",
+  withdrawn: "Withdrawn",
+};
+
+export const CANDIDATE_STAGE_ORDER: CandidateStage[] = [
+  "enquiry",
+  "face_to_face",
+  "form_p",
+  "interviewed",
+  "read_in_lodge",
+  "initiated",
+  "withdrawn",
+];
+

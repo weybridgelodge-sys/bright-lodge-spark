@@ -19,6 +19,7 @@ import {
 } from "@/lib/kpis";
 import { exportVoReport, exportFullKpi } from "@/lib/kpiExports";
 import AttendanceCharts from "@/components/members/AttendanceCharts";
+import CandidatesManager from "@/components/members/CandidatesManager";
 
 function Section({ title, children, defaultOpen = true }: { title: string; children: React.ReactNode; defaultOpen?: boolean }) {
   return (
@@ -106,7 +107,7 @@ export default function Kpis() {
   const conv = raConversion(bundle.members);
   const ms = milestones(bundle.members, bundle.wmTerms);
   const oh = officersHealth(bundle);
-  const pl = pipeline(bundle.members);
+  const pl = pipeline(bundle);
   const my = currentMasonicYear();
   const maxBand = Math.max(1, ...s.ageBands.map((b) => b.count));
   const funnelMax = Math.max(1, pl.candidates.length, pl.ea.length, pl.fc.length, pl.mm.length);
@@ -299,6 +300,10 @@ export default function Kpis() {
             <BarRow label="EA" value={pl.ea.length} max={funnelMax} />
             <BarRow label="FC" value={pl.fc.length} max={funnelMax} />
             <BarRow label="MM" value={pl.mm.length} max={funnelMax} />
+          </div>
+          <div className="mt-6 pt-5 border-t border-gold/10">
+            <h3 className="font-serif text-base text-gold mb-3">Prospective candidates</h3>
+            <CandidatesManager onChange={load} />
           </div>
         </Section>
 

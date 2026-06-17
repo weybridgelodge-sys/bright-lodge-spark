@@ -83,6 +83,65 @@ export type Database = {
         }
         Relationships: []
       }
+      candidates: {
+        Row: {
+          converted_member_id: string | null
+          created_at: string
+          created_by: string | null
+          date_of_enquiry: string | null
+          email: string | null
+          first_name: string
+          id: string
+          last_name: string
+          notes: string | null
+          phone: string | null
+          proposer: string | null
+          seconder: string | null
+          stage: Database["public"]["Enums"]["candidate_stage"]
+          updated_at: string
+        }
+        Insert: {
+          converted_member_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          date_of_enquiry?: string | null
+          email?: string | null
+          first_name: string
+          id?: string
+          last_name: string
+          notes?: string | null
+          phone?: string | null
+          proposer?: string | null
+          seconder?: string | null
+          stage?: Database["public"]["Enums"]["candidate_stage"]
+          updated_at?: string
+        }
+        Update: {
+          converted_member_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          date_of_enquiry?: string | null
+          email?: string | null
+          first_name?: string
+          id?: string
+          last_name?: string
+          notes?: string | null
+          phone?: string | null
+          proposer?: string | null
+          seconder?: string | null
+          stage?: Database["public"]["Enums"]["candidate_stage"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "candidates_converted_member_id_fkey"
+            columns: ["converted_member_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lodge_documents: {
         Row: {
           category: Database["public"]["Enums"]["doc_category"]
@@ -674,6 +733,14 @@ export type Database = {
     }
     Enums: {
       app_role: "member" | "admin" | "secretary" | "worshipful_master"
+      candidate_stage:
+        | "enquiry"
+        | "face_to_face"
+        | "form_p"
+        | "interviewed"
+        | "read_in_lodge"
+        | "initiated"
+        | "withdrawn"
       doc_category:
         | "summons"
         | "meeting_minutes"
@@ -824,6 +891,15 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["member", "admin", "secretary", "worshipful_master"],
+      candidate_stage: [
+        "enquiry",
+        "face_to_face",
+        "form_p",
+        "interviewed",
+        "read_in_lodge",
+        "initiated",
+        "withdrawn",
+      ],
       doc_category: [
         "summons",
         "meeting_minutes",

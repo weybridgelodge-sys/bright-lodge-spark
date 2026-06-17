@@ -93,7 +93,7 @@ export function exportFullKpi(bundle: KpiBundle) {
   const conv = raConversion(bundle.members);
   const ms = milestones(bundle.members, bundle.wmTerms);
   const oh = officersHealth(bundle);
-  const pl = pipeline(bundle.members);
+  const pl = pipeline(bundle);
 
   header(doc, `Full KPI Summary — Masonic Year ${currentMasonicYear()}/${currentMasonicYear() + 1}`);
 
