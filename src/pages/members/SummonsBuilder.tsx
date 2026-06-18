@@ -574,6 +574,7 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
             type="button"
             size="sm"
             variant="outline"
+            className="text-navy"
             onClick={() => { onDoneEditing(); setSummons(EMPTY_SUMMONS); setCurrentId(null); setSelectedEvent(""); setManualHidden([]); }}
           >
             Start new instead
