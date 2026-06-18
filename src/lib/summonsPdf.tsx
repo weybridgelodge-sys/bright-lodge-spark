@@ -864,11 +864,10 @@ export async function generateSummonsBlob(args: {
       diningQrDataUrl = null;
     }
   }
-  const logoDataUrl = args.template.logo_url
-    ? await fetchImageAsDataUrl(args.template.logo_url)
-    : null;
-  const coverLeftUrl = args.template.cover_left_image_url || DEFAULT_COVER_LEFT_URL;
-  const coverRightUrl = args.template.cover_right_image_url || DEFAULT_COVER_RIGHT_URL;
+  const logoUrl = resolveAssetUrl(args.template.logo_url, DEFAULT_LOGO_URL);
+  const coverLeftUrl = resolveAssetUrl(args.template.cover_left_image_url, DEFAULT_COVER_LEFT_URL);
+  const coverRightUrl = resolveAssetUrl(args.template.cover_right_image_url, DEFAULT_COVER_RIGHT_URL);
+  const logoDataUrl = logoUrl ? await fetchImageAsDataUrl(logoUrl) : null;
   const coverLeftDataUrl = coverLeftUrl ? await fetchImageAsDataUrl(coverLeftUrl) : null;
   const coverRightDataUrl = coverRightUrl ? await fetchImageAsDataUrl(coverRightUrl) : null;
   const overflow = planOverflow(args.members.length);
