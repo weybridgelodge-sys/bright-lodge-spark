@@ -63,7 +63,15 @@ export type LodgeTemplate = {
   lodge_representatives: { role: string; name: string }[];
 };
 
-export type OfficerRollRow = { label: string; member: string; member_formal?: string };
+export type OfficerRollRow = {
+  label: string;
+  member: string;
+  member_formal?: string;
+  post_nominals?: string | null;
+  grand_rank?: string | null;
+  provincial_rank?: string | null;
+  rank?: string | null;
+};
 
 export type SummonsData = {
   meeting_number: number;
@@ -227,6 +235,55 @@ const s = StyleSheet.create({
 // naturally in narrow A5 columns instead of breaking at every embedded \n.
 const flow = (t: string) => t.replace(/\s+/g, " ").trim();
 
+// Render a pre-formatted member/officer name so that post-nominals and
+// Grand Rank appear in Times-Bold, while Provincial Rank and plain rank stay
+// in regular weight.  All four fields follow the base name in the order:
+// post-nominals → grand_rank → provincial_rank → rank.
+function BoldNameText({
+  fullName,
+  post_nominals,
+  grand_rank,
+  provincial_rank,
+  rank,
+  style,
+}: {
+  fullName: string;
+  post_nominals?: string | null;
+  grand_rank?: string | null;
+  provincial_rank?: string | null;
+  rank?: string | null;
+  style?: any;
+}) {
+  const posts = [
+    { text: post_nominals?.trim(), bold: true },
+    { text: grand_rank?.trim(), bold: true },
+    { text: provincial_rank?.trim(), bold: false },
+    { text: rank?.trim(), bold: false },
+  ].filter((d) => d.text) as { text: string; bold: boolean }[];
+
+  if (posts.length === 0) {
+    return <Text style={style}>{fullName}</Text>;
+  }
+
+  const firstPost = posts[0].text;
+  const idx = fullName.indexOf(` ${firstPost}`);
+  if (idx === -1) {
+    return <Text style={style}>{fullName}</Text>;
+  }
+
+  const base = fullName.slice(0, idx);
+  return (
+    <Text style={style}>
+      <Text>{base}</Text>
+      {posts.map((p, i) => (
+        <Text key={i} style={p.bold ? s.bold : undefined}>
+          {" "}{p.text}
+        </Text>
+      ))}
+    </Text>
+  );
+}
+
 // ---------- panel-level renderers ----------
 
 
@@ -330,7 +387,14 @@ const BackCoverPanel: React.FC<{
       <View key={m.id} style={s.memberRow}>
         <Text style={s.memberDate}>{date} {tag}</Text>
         <Text style={s.memberMark}>{mark}</Text>
-        <Text style={s.memberName}>{formatMemberLine(m)}</Text>
+        <BoldNameText
+          style={s.memberName}
+          fullName={formatMemberLine(m)}
+          post_nominals={m.post_nominals}
+          grand_rank={m.grand_rank}
+          provincial_rank={m.provincial_rank}
+          rank={m.rank}
+        />
       </View>
     );
   };
@@ -419,7 +483,14 @@ const OfficersDiningPanel: React.FC<{
     <Text style={s.panelHeading}>OFFICERS {officerSeason()}</Text>
     {officers.filter((o) => o.member).map((o, i) => (
       <View key={i} style={s.officerRow}>
-        <Text style={s.officerName}>{o.member}</Text>
+        <BoldNameText
+          style={s.officerName}
+          fullName={o.member}
+          post_nominals={o.post_nominals}
+          grand_rank={o.grand_rank}
+          provincial_rank={o.provincial_rank}
+          rank={o.rank}
+        />
         <Text style={s.officerRole}>{shortRole(o.label)}</Text>
       </View>
     ))}

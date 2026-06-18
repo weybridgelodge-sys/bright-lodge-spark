@@ -150,7 +150,7 @@ export function stripRankPrefix(name: string): string {
 // Derive given/middle/surname from whatever the record has, tolerating legacy
 // `full_name` rows where rank or given names were concatenated.
 type NameSource = Partial<Pick<MemberRow, "first_name" | "middle_name" | "last_name" | "full_name">>;
-function nameParts(m: NameSource): { first: string; middles: string[]; surname: string } {
+export function nameParts(m: NameSource): { first: string; middles: string[]; surname: string } {
   let first = (m.first_name ?? "").trim();
   const middles = (m.middle_name ?? "").trim().split(/\s+/).filter(Boolean);
   let surname = (m.last_name ?? "").trim();
@@ -170,9 +170,9 @@ function nameParts(m: NameSource): { first: string; middles: string[]; surname: 
   return { first, middles, surname };
 }
 
-const initialOf = (n: string) => (n.trim().charAt(0) || "").toUpperCase();
+export const initialOf = (n: string) => (n.trim().charAt(0) || "").toUpperCase();
 
-function rankTitle(m: Pick<MemberRow, "is_past_master" | "title">): string {
+export function rankTitle(m: Pick<MemberRow, "is_past_master" | "title">): string {
   if (m.is_past_master) return "W Bro.";
   if (m.title && m.title.trim()) return `${m.title.trim().replace(/\.$/, "")}.`;
   return "Bro.";
@@ -190,8 +190,12 @@ export function formatMemberLine(m: MemberRow): string {
   const bracket = (m.preferred_name && m.preferred_name.trim()) || first || "";
   const bracketPart = bracket ? ` (${bracket})` : "";
 
-  const post = (m.post_nominals || m.grand_rank || m.provincial_rank || m.rank || "").trim();
-  const postPart = post ? ` ${post}` : "";
+  const postParts: string[] = [];
+  if (m.post_nominals?.trim()) postParts.push(m.post_nominals.trim());
+  if (m.grand_rank?.trim()) postParts.push(m.grand_rank.trim());
+  if (m.provincial_rank?.trim()) postParts.push(m.provincial_rank.trim());
+  if (m.rank?.trim()) postParts.push(m.rank.trim());
+  const postPart = postParts.length ? ` ${postParts.join(" ")}` : "";
 
   return `${title} ${display}${bracketPart}${postPart}`;
 }
@@ -205,8 +209,12 @@ export function formatMemberLineFormal(m: MemberRow): string {
     ? initials ? `${initials} ${surname}` : surname
     : initials || "—";
 
-  const post = (m.post_nominals || m.grand_rank || m.provincial_rank || m.rank || "").trim();
-  const postPart = post ? ` ${post}` : "";
+  const postParts: string[] = [];
+  if (m.post_nominals?.trim()) postParts.push(m.post_nominals.trim());
+  if (m.grand_rank?.trim()) postParts.push(m.grand_rank.trim());
+  if (m.provincial_rank?.trim()) postParts.push(m.provincial_rank.trim());
+  if (m.rank?.trim()) postParts.push(m.rank.trim());
+  const postPart = postParts.length ? ` ${postParts.join(" ")}` : "";
 
   return `${title} ${display}${postPart}`;
 }
