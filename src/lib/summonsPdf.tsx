@@ -349,14 +349,14 @@ const BackCoverPanel: React.FC<{
         {!hidden.has("regular_meetings") && template.regular_meeting_pattern && (
           <>
             <Text style={s.sectionHeadingLarge}>Regular Meetings</Text>
-            <Text style={s.smallTextLarge}>{template.regular_meeting_pattern}</Text>
+            <Text style={s.smallTextLarge}>{flow(template.regular_meeting_pattern)}</Text>
           </>
         )}
         {!hidden.has("loi") && template.loi_details && (
           <>
             <Text style={s.sectionHeadingLarge}>Lodge of Instruction</Text>
             <Text style={s.smallTextLarge}>
-              {`${template.loi_details}${template.progression_notice_text ? ` ${template.progression_notice_text}` : ""}`.replace(/\s+/g, " ").trim()}
+              {flow(`${template.loi_details}${template.progression_notice_text ? ` ${template.progression_notice_text}` : ""}`)}
             </Text>
           </>
         )}
@@ -365,16 +365,16 @@ const BackCoverPanel: React.FC<{
             <Text style={s.sectionHeadingLarge}>Data Protection Act</Text>
             <Text style={s.microLarge}>
               {shortened.has("data_protection")
-                ? (template.data_protection_text_short ||
+                ? flow(template.data_protection_text_short ||
                     "See lodge data protection notice — copies available from the Secretary.")
-                : template.data_protection_text}
+                : flow(template.data_protection_text)}
             </Text>
           </>
         )}
         {!hidden.has("overseas") && template.overseas_attendance_text && (
           <>
             <Text style={s.sectionHeadingLarge}>Attendance at Lodges Overseas</Text>
-            <Text style={s.microLarge}>{template.overseas_attendance_text}</Text>
+            <Text style={s.microLarge}>{flow(template.overseas_attendance_text)}</Text>
           </>
         )}
         {(template.royal_arch_rep || template.mcf_contact || template.provincial_website) && (
