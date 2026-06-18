@@ -297,8 +297,9 @@ function BoldNameText({
 // ---------- panel-level renderers ----------
 
 
-const DEFAULT_COVER_LEFT_URL = "/__l5e/assets-v1/3b24e36a-0ae2-48a6-beff-3f3a71f15e85/TLC-Patron-Pin.jpg";
-const DEFAULT_COVER_RIGHT_URL = "/__l5e/assets-v1/7435bffd-65eb-49e7-9086-2c349fdb427f/Festival_Gold_Award_no_background.png";
+export const DEFAULT_LOGO_URL = "/__l5e/assets-v1/045b91d4-9b41-490d-baa9-8486eca7cb05/weybridge-logo-no-bg.png";
+export const DEFAULT_COVER_LEFT_URL = "/__l5e/assets-v1/3b24e36a-0ae2-48a6-beff-3f3a71f15e85/TLC-Patron-Pin.jpg";
+export const DEFAULT_COVER_RIGHT_URL = "/__l5e/assets-v1/7435bffd-65eb-49e7-9086-2c349fdb427f/Festival_Gold_Award_no_background.png";
 
 const FrontCoverPanel: React.FC<{
   template: LodgeTemplate;
@@ -313,10 +314,14 @@ const FrontCoverPanel: React.FC<{
   const secFromRoll = secOfficer?.member_formal || secOfficer?.member;
   const secEmail = secOfficer?.email || null;
   const secPhone = secOfficer?.phone || null;
-  // Address lines from the template — drop the first line if it duplicates the
-  // current Secretary's name (the template historically stored name + address).
+  // Address lines from the template. The first line historically stored the
+  // Secretary's short name (e.g. "RD Smith") which now duplicates the officer
+  // roll entry above — strip any leading line that looks like a person's name
+  // (no digits, no commas, ≤ 4 words) so only the address remains.
   const rawSecLines = (template.secretary_contact || "").split("\n").map((l) => l.trim()).filter(Boolean);
-  const secAddressLines = rawSecLines.length && secFromRoll && rawSecLines[0] === secFromRoll
+  const looksLikeName = (l: string) =>
+    !!l && !/\d/.test(l) && !l.includes(",") && l.split(/\s+/).length <= 4;
+  const secAddressLines = rawSecLines.length && looksLikeName(rawSecLines[0])
     ? rawSecLines.slice(1)
     : rawSecLines;
   const secName = secFromRoll || rawSecLines[0] || "—";
@@ -347,8 +352,8 @@ const FrontCoverPanel: React.FC<{
 
     <View style={{ marginTop: 10, marginBottom: 6, alignItems: "flex-start" }}>
       <Text style={s.bodyText}>{`${secName} (Secretary)`}</Text>
-      {secEmail && <Text style={s.bodyText}>{secEmail}</Text>}
-      {secPhone && <Text style={s.bodyText}>{secPhone}</Text>}
+      {secEmail && <Text style={s.bodyText}>Email: {secEmail}</Text>}
+      {secPhone && <Text style={s.bodyText}>Mobile: {secPhone}</Text>}
       {secAddressLines.map((line, i) => (
         <Text key={i} style={s.bodyText}>{line}</Text>
       ))}
@@ -662,26 +667,18 @@ const AgendaPanel: React.FC<{
     )}
 
     <View style={s.thinDivider} />
-    <View style={{ flexDirection: "row", flexWrap: "wrap", marginTop: 8, marginBottom: 4 }}>
-      <Text style={s.sectionHeading}>Dining Arrangements </Text>
-      <Text style={{ fontFamily: "Times-Roman", fontSize: 9, color: "#222", marginTop: 1 }}>
-        Book your place online via this{" "}
-      </Text>
+    <Text style={s.sectionHeading}>Dining Arrangements</Text>
+    <Text style={{ fontFamily: "Times-Roman", fontSize: 9, color: "#222", marginBottom: 4 }}>
+      Book your place online via this{" "}
       {template.dining_booking_url ? (
         <Link src={template.dining_booking_url}>
-          <Text style={{ fontFamily: "Times-Roman", fontSize: 9, color: NAVY, textDecoration: "underline", marginTop: 1 }}>
-            LINK
-          </Text>
+          <Text style={{ color: NAVY, textDecoration: "underline" }}>LINK</Text>
         </Link>
       ) : (
-        <Text style={{ fontFamily: "Times-Roman", fontSize: 9, color: NAVY, textDecoration: "underline", marginTop: 1 }}>
-          LINK
-        </Text>
+        <Text style={{ color: NAVY, textDecoration: "underline" }}>LINK</Text>
       )}
-      <Text style={{ fontFamily: "Times-Roman", fontSize: 9, color: "#222", marginTop: 1 }}>
-        {" "}or scan the QR code below
-      </Text>
-    </View>
+      {" "}or scan the QR code below
+    </Text>
     <View style={s.diningRow}>
       <View style={s.diningBody}>
         {summons.dining_price && (

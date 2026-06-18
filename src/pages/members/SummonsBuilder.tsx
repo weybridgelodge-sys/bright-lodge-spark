@@ -34,6 +34,9 @@ import {
   LodgeTemplate,
   OfficerRollRow,
   SummonsData,
+  DEFAULT_LOGO_URL,
+  DEFAULT_COVER_LEFT_URL,
+  DEFAULT_COVER_RIGHT_URL,
 } from "@/lib/summonsPdf";
 import SummonsPrintPreview from "@/components/members/SummonsPrintPreview";
 import {
@@ -50,9 +53,9 @@ const EMPTY_TEMPLATE: LodgeTemplate = {
   lodge_number: "6787",
   province: "Surrey",
   consecration_date: null,
-  logo_url: "/__l5e/assets-v1/57c18f79-500d-485c-bb45-3cef1b3bc800/weybridge-logo-navy.png",
-  cover_left_image_url: null,
-  cover_right_image_url: null,
+  logo_url: DEFAULT_LOGO_URL,
+  cover_left_image_url: DEFAULT_COVER_LEFT_URL,
+  cover_right_image_url: DEFAULT_COVER_RIGHT_URL,
   venue_address: null,
   regular_meeting_pattern: null,
   loi_details: null,
@@ -195,12 +198,17 @@ function TemplateTab() {
       const { data } = await supabase.from("lodge_template").select("*").eq("id", "default").maybeSingle();
       if (data) {
         const merged = { ...EMPTY_TEMPLATE, ...(data as any), lodge_representatives: (data as any).lodge_representatives ?? [] };
-        if (!merged.logo_url) merged.logo_url = EMPTY_TEMPLATE.logo_url;
+        if (!merged.logo_url) merged.logo_url = DEFAULT_LOGO_URL;
+        if (!merged.cover_left_image_url) merged.cover_left_image_url = DEFAULT_COVER_LEFT_URL;
+        if (!merged.cover_right_image_url) merged.cover_right_image_url = DEFAULT_COVER_RIGHT_URL;
         // Strip any absolute origin from previously-saved asset URLs so they
         // resolve correctly on the current domain (preview / published / custom).
-        if (typeof merged.logo_url === "string") {
-          const idx = merged.logo_url.indexOf("/__l5e/");
-          if (idx > 0) merged.logo_url = merged.logo_url.slice(idx);
+        for (const k of ["logo_url", "cover_left_image_url", "cover_right_image_url"] as const) {
+          const v = (merged as any)[k];
+          if (typeof v === "string") {
+            const idx = v.indexOf("/__l5e/");
+            if (idx > 0) (merged as any)[k] = v.slice(idx);
+          }
         }
         setT(merged);
         setReps(((data as any).lodge_representatives ?? []) as Rep[]);
