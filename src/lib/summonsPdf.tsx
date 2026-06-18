@@ -290,6 +290,10 @@ const FrontCoverPanel: React.FC<{
         {secName}
       </Text>
     </View>
+// Collapse whitespace/newlines in CMS-edited notice text so paragraphs flow
+// naturally in the narrow A5 columns instead of breaking at every \n.
+const flow = (t: string) => t.replace(/\s+/g, " ").trim();
+
 
     {summons.dress_code && (
       <View style={s.dressBlock}>
