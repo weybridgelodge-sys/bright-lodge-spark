@@ -298,8 +298,8 @@ function BoldNameText({
 
 
 export const DEFAULT_LOGO_URL = "/__l5e/assets-v1/045b91d4-9b41-490d-baa9-8486eca7cb05/weybridge-logo-no-bg.png";
-export const DEFAULT_COVER_LEFT_URL = "/__l5e/assets-v1/3b24e36a-0ae2-48a6-beff-3f3a71f15e85/TLC-Patron-Pin.jpg";
-export const DEFAULT_COVER_RIGHT_URL = "/__l5e/assets-v1/7435bffd-65eb-49e7-9086-2c349fdb427f/Festival_Gold_Award_no_background.png";
+export const DEFAULT_COVER_LEFT_URL = "/__l5e/assets-v1/f22695d7-afc6-46a8-9daf-9564690178fc/TLC-Patron-Pin.jpg";
+export const DEFAULT_COVER_RIGHT_URL = "/__l5e/assets-v1/be3d0b35-5888-4ffa-b6b4-c7dfe04cc8f3/Festival_Gold_Award.png";
 
 const FrontCoverPanel: React.FC<{
   template: LodgeTemplate;
