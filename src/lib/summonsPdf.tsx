@@ -599,7 +599,13 @@ const SummonsDocument: React.FC<{
 
 async function fetchImageAsDataUrl(url: string): Promise<string | null> {
   try {
-    const res = await fetch(url);
+    // Resolve relative asset paths (e.g. "/__l5e/assets-v1/...") against the
+    // current origin so react-pdf can fetch them in the browser.
+    const abs =
+      typeof window !== "undefined" && url.startsWith("/")
+        ? `${window.location.origin}${url}`
+        : url;
+    const res = await fetch(abs);
     if (!res.ok) return null;
     const blob = await res.blob();
     return await new Promise<string | null>((resolve) => {
