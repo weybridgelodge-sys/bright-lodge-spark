@@ -202,7 +202,7 @@ const s = StyleSheet.create({
   centered: { textAlign: "center" },
 
   // Cover
-  crest: { width: 100, height: 100, alignSelf: "center", marginBottom: 4 },
+  crest: { width: 115, height: 115, alignSelf: "center", marginBottom: 4 },
   contactsRow: { flexDirection: "row", marginTop: 10, marginBottom: 6 },
   contactBlock: { flex: 1 },
   contactBlockRight: { flex: 1, alignItems: "flex-end" },
