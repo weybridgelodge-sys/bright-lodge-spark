@@ -662,26 +662,18 @@ const AgendaPanel: React.FC<{
     )}
 
     <View style={s.thinDivider} />
-    <View style={{ flexDirection: "row", flexWrap: "wrap", marginTop: 8, marginBottom: 4 }}>
-      <Text style={s.sectionHeading}>Dining Arrangements </Text>
-      <Text style={{ fontFamily: "Times-Roman", fontSize: 9, color: "#222", marginTop: 1 }}>
-        Book your place online via this{" "}
-      </Text>
+    <Text style={s.sectionHeading}>Dining Arrangements</Text>
+    <Text style={{ fontFamily: "Times-Roman", fontSize: 9, color: "#222", marginBottom: 4 }}>
+      Book your place online via this{" "}
       {template.dining_booking_url ? (
         <Link src={template.dining_booking_url}>
-          <Text style={{ fontFamily: "Times-Roman", fontSize: 9, color: NAVY, textDecoration: "underline", marginTop: 1 }}>
-            LINK
-          </Text>
+          <Text style={{ color: NAVY, textDecoration: "underline" }}>LINK</Text>
         </Link>
       ) : (
-        <Text style={{ fontFamily: "Times-Roman", fontSize: 9, color: NAVY, textDecoration: "underline", marginTop: 1 }}>
-          LINK
-        </Text>
+        <Text style={{ color: NAVY, textDecoration: "underline" }}>LINK</Text>
       )}
-      <Text style={{ fontFamily: "Times-Roman", fontSize: 9, color: "#222", marginTop: 1 }}>
-        {" "}or scan the QR code below
-      </Text>
-    </View>
+      {" "}or scan the QR code below
+    </Text>
     <View style={s.diningRow}>
       <View style={s.diningBody}>
         {summons.dining_price && (
