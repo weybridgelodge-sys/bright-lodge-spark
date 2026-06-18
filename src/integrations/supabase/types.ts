@@ -420,6 +420,8 @@ export type Database = {
       lodge_template: {
         Row: {
           consecration_date: string | null
+          cover_left_image_url: string | null
+          cover_right_image_url: string | null
           created_at: string
           data_protection_text: string | null
           data_protection_text_short: string | null
@@ -446,6 +448,8 @@ export type Database = {
         }
         Insert: {
           consecration_date?: string | null
+          cover_left_image_url?: string | null
+          cover_right_image_url?: string | null
           created_at?: string
           data_protection_text?: string | null
           data_protection_text_short?: string | null
@@ -472,6 +476,8 @@ export type Database = {
         }
         Update: {
           consecration_date?: string | null
+          cover_left_image_url?: string | null
+          cover_right_image_url?: string | null
           created_at?: string
           data_protection_text?: string | null
           data_protection_text_short?: string | null

@@ -1,0 +1,1 @@
+ALTER TABLE public.lodge_template ADD COLUMN IF NOT EXISTS cover_left_image_url text, ADD COLUMN IF NOT EXISTS cover_right_image_url text;
