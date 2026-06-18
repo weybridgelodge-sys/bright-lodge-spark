@@ -202,7 +202,7 @@ const s = StyleSheet.create({
   centered: { textAlign: "center" },
 
   // Cover
-  crest: { width: 115, height: 115, alignSelf: "center", marginBottom: 4 },
+  crest: { width: 100, height: 100, alignSelf: "center", marginBottom: 4 },
   contactsRow: { flexDirection: "row", marginTop: 10, marginBottom: 6 },
   contactBlock: { flex: 1 },
   contactBlockRight: { flex: 1, alignItems: "flex-end" },
@@ -351,13 +351,13 @@ const FrontCoverPanel: React.FC<{
 
      <View style={{ flexDirection: "row", alignItems: "center", marginTop: 6, marginBottom: 4 }}>
        <View style={{ flex: 1, alignItems: "flex-start" }}>
-         {leftSrc ? <Image src={leftSrc} style={{ width: 85, height: 85 }} /> : null}
+         {leftSrc ? <Image src={leftSrc} style={{ height: 85 }} /> : null}
        </View>
        <View style={{ flex: 1, alignItems: "center" }}>
          {logoSrc ? <Image src={logoSrc} style={s.crest} /> : null}
        </View>
        <View style={{ flex: 1, alignItems: "flex-end" }}>
-         {rightSrc ? <Image src={rightSrc} style={{ width: 85, height: 85 }} /> : null}
+         {rightSrc ? <Image src={rightSrc} style={{ height: 85 }} /> : null}
        </View>
      </View>
 
