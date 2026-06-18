@@ -15,8 +15,14 @@ import {
   View,
   StyleSheet,
   Image,
+  Font,
   pdf,
 } from "@react-pdf/renderer";
+
+// Disable automatic hyphenation across the document — react-pdf otherwise
+// breaks long words like "Foundation"/"Provincial" mid-word in narrow A5
+// columns. Returning the whole word forces natural word wrapping instead.
+Font.registerHyphenationCallback((word) => [word]);
 import QRCode from "qrcode";
 import {
   AgendaItem,
