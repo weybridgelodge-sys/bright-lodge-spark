@@ -148,8 +148,9 @@ function Sheet1({
         <h2 className="text-center text-sm font-bold tracking-widest uppercase text-[#1B2A4A] mb-2">
           List of Members
         </h2>
-        <div className="text-[9.5px] leading-tight">
-          <div className="space-y-[2px]">{[...left, ...right].map((m) => <MemberLine key={m.id} m={m} />)}</div>
+        <div className="grid grid-cols-2 gap-3 text-[8.5px] leading-tight">
+          <div className="space-y-[2px]">{left.map((m) => <MemberLine key={m.id} m={m} />)}</div>
+          <div className="space-y-[2px]">{right.map((m) => <MemberLine key={m.id} m={m} />)}</div>
         </div>
         <p className="text-[7px] text-slate-600 mt-2">
           + Past Master of the Lodge &nbsp; # Past Master in the Lodge &nbsp; † HRA Chapter
