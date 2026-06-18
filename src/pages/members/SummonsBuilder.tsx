@@ -344,6 +344,10 @@ async function loadOfficers(setRows: (rows: OfficerRollRow[]) => void, setLoadin
       label: labelFor(k),
       member: p ? formatMemberLine(p as MemberRow) : "",
       member_formal: p ? formatMemberLineFormal(p as MemberRow) : "",
+      post_nominals: p?.post_nominals ?? null,
+      grand_rank: p?.grand_rank ?? null,
+      provincial_rank: p?.provincial_rank ?? null,
+      rank: p?.rank ?? null,
     };
   });
   setRows(rows);
