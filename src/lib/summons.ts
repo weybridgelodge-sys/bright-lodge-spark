@@ -119,6 +119,7 @@ export type MemberRow = {
   joined_year: number | null;
   is_past_master: boolean | null;
   is_royal_arch: boolean | null;
+  is_honorary_member?: boolean | null;
   status: string;
 };
 
