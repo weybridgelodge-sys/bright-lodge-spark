@@ -644,7 +644,19 @@ const AgendaPanel: React.FC<{
     )}
 
     <View style={s.thinDivider} />
-    <Text style={s.sectionHeading}>Dining Arrangements</Text>
+    <Text style={s.sectionHeading}>
+      Dining Arrangements{" "}
+      <Text style={{ textTransform: "none", fontFamily: "Times-Roman", fontSize: 9, color: "#222" }}>
+        Book your place online via this{" "}
+        <Text
+          link={template.dining_booking_url || undefined}
+          style={{ color: NAVY, textDecoration: "underline" }}
+        >
+          LINK
+        </Text>
+        {" "}or scan the QR code below
+      </Text>
+    </Text>
     <View style={s.diningRow}>
       <View style={s.diningBody}>
         {summons.dining_price && (
