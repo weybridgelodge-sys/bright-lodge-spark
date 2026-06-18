@@ -198,9 +198,16 @@ function TemplateTab() {
       const { data } = await supabase.from("lodge_template").select("*").eq("id", "default").maybeSingle();
       if (data) {
         const merged = { ...EMPTY_TEMPLATE, ...(data as any), lodge_representatives: (data as any).lodge_representatives ?? [] };
-        if (!merged.logo_url) merged.logo_url = DEFAULT_LOGO_URL;
-        if (!merged.cover_left_image_url) merged.cover_left_image_url = DEFAULT_COVER_LEFT_URL;
-        if (!merged.cover_right_image_url) merged.cover_right_image_url = DEFAULT_COVER_RIGHT_URL;
+        // Replace any previously-saved URLs that point to since-superseded
+        // (truncated/broken) asset uploads with the current defaults.
+        const STALE_URLS = new Set<string>([
+          "/__l5e/assets-v1/3b24e36a-0ae2-48a6-beff-3f3a71f15e85/TLC-Patron-Pin.jpg",
+          "/__l5e/assets-v1/7435bffd-65eb-49e7-9086-2c349fdb427f/Festival_Gold_Award_no_background.png",
+          "/__l5e/assets-v1/57c18f79-500d-485c-bb45-3cef1b3bc800/weybridge-logo-navy.png",
+        ]);
+        if (!merged.logo_url || STALE_URLS.has(merged.logo_url)) merged.logo_url = DEFAULT_LOGO_URL;
+        if (!merged.cover_left_image_url || STALE_URLS.has(merged.cover_left_image_url)) merged.cover_left_image_url = DEFAULT_COVER_LEFT_URL;
+        if (!merged.cover_right_image_url || STALE_URLS.has(merged.cover_right_image_url)) merged.cover_right_image_url = DEFAULT_COVER_RIGHT_URL;
         // Strip any absolute origin from previously-saved asset URLs so they
         // resolve correctly on the current domain (preview / published / custom).
         for (const k of ["logo_url", "cover_left_image_url", "cover_right_image_url"] as const) {
