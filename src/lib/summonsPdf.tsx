@@ -321,7 +321,9 @@ const FrontCoverPanel: React.FC<{
        <View style={{ flex: 1, alignItems: "center" }}>
          {logoSrc ? <Image src={logoSrc} style={s.crest} /> : null}
        </View>
-       <View style={{ flex: 1, alignItems: "flex-end" }} />
+       <View style={{ flex: 1, alignItems: "flex-end" }}>
+         <Image src={"/__l5e/assets-v1/7435bffd-65eb-49e7-9086-2c349fdb427f/Festival_Gold_Award_no_background.png"} style={{ height: 85 }} />
+       </View>
      </View>
 
     <View style={{ marginTop: 10, marginBottom: 6, alignItems: "flex-start" }}>
