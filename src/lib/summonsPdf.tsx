@@ -314,10 +314,14 @@ const FrontCoverPanel: React.FC<{
   const secFromRoll = secOfficer?.member_formal || secOfficer?.member;
   const secEmail = secOfficer?.email || null;
   const secPhone = secOfficer?.phone || null;
-  // Address lines from the template — drop the first line if it duplicates the
-  // current Secretary's name (the template historically stored name + address).
+  // Address lines from the template. The first line historically stored the
+  // Secretary's short name (e.g. "RD Smith") which now duplicates the officer
+  // roll entry above — strip any leading line that looks like a person's name
+  // (no digits, no commas, ≤ 4 words) so only the address remains.
   const rawSecLines = (template.secretary_contact || "").split("\n").map((l) => l.trim()).filter(Boolean);
-  const secAddressLines = rawSecLines.length && secFromRoll && rawSecLines[0] === secFromRoll
+  const looksLikeName = (l: string) =>
+    !!l && !/\d/.test(l) && !l.includes(",") && l.split(/\s+/).length <= 4;
+  const secAddressLines = rawSecLines.length && looksLikeName(rawSecLines[0])
     ? rawSecLines.slice(1)
     : rawSecLines;
   const secName = secFromRoll || rawSecLines[0] || "—";
