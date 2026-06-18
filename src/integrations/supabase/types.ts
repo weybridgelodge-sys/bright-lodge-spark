@@ -1004,8 +1004,11 @@ export type Database = {
           candidates: Json
           created_at: string
           created_by: string | null
+          dining_deadline: string | null
           dining_enquiry_email: string | null
           dining_enquiry_name: string | null
+          dining_menu: string | null
+          dining_price: string | null
           dress_code: string | null
           id: string
           lodge_event_id: string | null
@@ -1028,8 +1031,11 @@ export type Database = {
           candidates?: Json
           created_at?: string
           created_by?: string | null
+          dining_deadline?: string | null
           dining_enquiry_email?: string | null
           dining_enquiry_name?: string | null
+          dining_menu?: string | null
+          dining_price?: string | null
           dress_code?: string | null
           id?: string
           lodge_event_id?: string | null
@@ -1052,8 +1058,11 @@ export type Database = {
           candidates?: Json
           created_at?: string
           created_by?: string | null
+          dining_deadline?: string | null
           dining_enquiry_email?: string | null
           dining_enquiry_name?: string | null
+          dining_menu?: string | null
+          dining_price?: string | null
           dress_code?: string | null
           id?: string
           lodge_event_id?: string | null
