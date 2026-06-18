@@ -49,7 +49,7 @@ const EMPTY_TEMPLATE: LodgeTemplate = {
   lodge_number: "6787",
   province: "Surrey",
   consecration_date: null,
-  logo_url: (typeof window !== "undefined" ? window.location.origin : "") + "/__l5e/assets-v1/57c18f79-500d-485c-bb45-3cef1b3bc800/weybridge-logo-navy.png",
+  logo_url: "/__l5e/assets-v1/57c18f79-500d-485c-bb45-3cef1b3bc800/weybridge-logo-navy.png",
   venue_address: null,
   regular_meeting_pattern: null,
   loi_details: null,
