@@ -209,8 +209,7 @@ function TemplateTab() {
     setSaving(true);
     const { error } = await supabase
       .from("lodge_template")
-      .update({ ...t, lodge_representatives: reps } as any)
-      .eq("id", "default");
+      .upsert({ ...t, id: "default", lodge_representatives: reps } as any);
     setSaving(false);
     if (error) toast.error(error.message);
     else toast.success("Template saved");
