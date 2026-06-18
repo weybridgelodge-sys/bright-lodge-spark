@@ -33,6 +33,8 @@ import {
   formatDateLong,
   formatDateShort,
   formatMemberLine,
+  formatMemberShort,
+  rankTitle,
   memberSymbols,
   planOverflow,
   sortMembersBySeniority,
@@ -206,13 +208,16 @@ const s = StyleSheet.create({
     borderTop: `0.5pt solid ${GOLD}`,
   },
 
-  // Members
+  // Members — every entry occupies a fixed double-height row for visual
+  // symmetry. Line 1: date + symbols + name. Line 2: post-nominals or blank.
   memberTable: { flexDirection: "row", marginTop: 4 },
   memberCol: { flex: 1, paddingHorizontal: 2 },
-  memberRow: { flexDirection: "row", marginBottom: 1.5 },
+  memberRow: { flexDirection: "column", marginBottom: 2, minHeight: 24 },
+  memberLine1: { flexDirection: "row" },
   memberDate: { width: 62, fontSize: 8.5 },
   memberMark: { width: 18, fontSize: 8.5, textAlign: "center" },
   memberName: { flex: 1, fontSize: 8.5 },
+  memberPost: { fontSize: 8.5, paddingLeft: 80, minHeight: 11 },
 
   // Officers
   officerRow: { flexDirection: "row", marginBottom: 1.5 },
@@ -375,7 +380,10 @@ const BackCoverPanel: React.FC<{
   hidden: Set<NoticeKey>;
   shortened: Set<NoticeKey>;
 }> = ({ template, members, overflow, hidden, shortened }) => {
-  const sorted = sortMembersBySeniority(members);
+  // Honorary members are listed separately in the dedicated HONORARY MEMBER
+  // line below — exclude them from the main subscribing-members list.
+  const subscribing = members.filter((m) => !m.is_honorary_member);
+  const sorted = sortMembersBySeniority(subscribing);
   const { left, right } = splitTwoColumns(sorted);
 
   const memberLine = (m: MemberRow) => {
@@ -383,18 +391,27 @@ const BackCoverPanel: React.FC<{
     const date = formatDateShort(m.initiation_date || m.joined_lodge_date);
     const tag = m.initiation_date ? "(I)" : m.joined_lodge_date ? "(J)" : "";
     const mark = `${sym.pastMaster ? "+" : ""}${sym.royalArch ? "†" : ""}`;
+    const nameLine = `${rankTitle(m)} ${formatMemberShort(m)}`;
+    const postParts = [
+      { text: m.post_nominals?.trim(), bold: true },
+      { text: m.grand_rank?.trim(), bold: true },
+      { text: m.provincial_rank?.trim(), bold: false },
+      { text: m.rank?.trim(), bold: false },
+    ].filter((p) => p.text) as { text: string; bold: boolean }[];
     return (
       <View key={m.id} style={s.memberRow}>
-        <Text style={s.memberDate}>{date} {tag}</Text>
-        <Text style={s.memberMark}>{mark}</Text>
-        <BoldNameText
-          style={s.memberName}
-          fullName={formatMemberLine(m)}
-          post_nominals={m.post_nominals}
-          grand_rank={m.grand_rank}
-          provincial_rank={m.provincial_rank}
-          rank={m.rank}
-        />
+        <View style={s.memberLine1}>
+          <Text style={s.memberDate}>{date} {tag}</Text>
+          <Text style={s.memberMark}>{mark}</Text>
+          <Text style={s.memberName}>{nameLine}</Text>
+        </View>
+        <Text style={s.memberPost}>
+          {postParts.length === 0 ? "\u00A0" : postParts.map((p, i) => (
+            <Text key={i} style={p.bold ? s.bold : undefined}>
+              {i > 0 ? " " : ""}{p.text}
+            </Text>
+          ))}
+        </Text>
       </View>
     );
   };
@@ -409,6 +426,7 @@ const BackCoverPanel: React.FC<{
       <Text style={[s.micro, { marginTop: 4 }]}>
         + Past Master of the Lodge   # Past Master in the Lodge   † HRA Chapter
       </Text>
+
 
       {template.honorary_members && (
         <Text style={[s.smallText, s.bold, { marginTop: 4 }]}>
