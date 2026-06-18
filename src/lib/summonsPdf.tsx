@@ -89,6 +89,7 @@ const s = StyleSheet.create({
     flexDirection: "row",
     fontFamily: "Times-Roman",
     fontSize: 9,
+    lineHeight: 1.3,
     color: "#111",
     backgroundColor: "#FFFFFF",
   },
@@ -99,16 +100,16 @@ const s = StyleSheet.create({
   panelLeft: {
     borderRight: `0.5pt dashed ${FOLD_LINE_COLOR}`,
   },
-  // Typography
+  // Typography — cover
   lodgeName: {
     fontFamily: "Times-Bold",
-    fontSize: 20,
+    fontSize: 23,
     color: NAVY,
     textAlign: "center",
   },
   lodgeNameSmall: {
     fontFamily: "Times-Bold",
-    fontSize: 13,
+    fontSize: 14,
     color: NAVY,
     textAlign: "center",
   },
@@ -126,42 +127,51 @@ const s = StyleSheet.create({
   },
   thinDivider: {
     borderBottom: `0.5pt solid ${GOLD}`,
-    marginVertical: 4,
+    marginVertical: 6,
   },
   bottomSection: {
     marginTop: 2,
   },
+  // Unified section heading: 11pt bold uppercase with consistent margins.
   panelHeading: {
     fontFamily: "Times-Bold",
-    fontSize: 12,
+    fontSize: 11,
     color: NAVY,
     textAlign: "center",
-    marginBottom: 6,
-    letterSpacing: 0.5,
+    marginTop: 4,
+    marginBottom: 8,
+    textTransform: "uppercase",
+    letterSpacing: 1,
   },
   sectionHeading: {
     fontFamily: "Times-Bold",
-    fontSize: 9,
+    fontSize: 11,
     color: NAVY,
-    marginTop: 6,
-    marginBottom: 2,
+    marginTop: 8,
+    marginBottom: 4,
     textTransform: "uppercase",
-    letterSpacing: 0.5,
+    letterSpacing: 0.75,
   },
   sectionHeadingLarge: {
     fontFamily: "Times-Bold",
-    fontSize: 10,
+    fontSize: 11,
     color: NAVY,
-    marginTop: 6,
-    marginBottom: 2,
+    marginTop: 8,
+    marginBottom: 4,
     textTransform: "uppercase",
-    letterSpacing: 0.5,
+    letterSpacing: 0.75,
   },
-  bodyText: { fontSize: 9, lineHeight: 1.35 },
-  smallText: { fontSize: 7.5, lineHeight: 1.3, color: "#333" },
-  smallTextLarge: { fontSize: 8.5, lineHeight: 1.3, color: "#333" },
-  micro: { fontSize: 6.5, lineHeight: 1.25, color: "#555" },
-  microLarge: { fontSize: 7.5, lineHeight: 1.25, color: "#555" },
+  // Body sizes — minimum 8.5pt anywhere.
+  bodyText: { fontSize: 9, lineHeight: 1.3 },
+  coverBody: { fontSize: 11, lineHeight: 1.35 },
+  coverEmphasis: { fontSize: 12, lineHeight: 1.35, fontFamily: "Times-Bold" },
+  smallText: { fontSize: 9, lineHeight: 1.3, color: "#222" },
+  smallTextLarge: { fontSize: 9, lineHeight: 1.3, color: "#222" },
+  // Static notices (data protection, overseas, etc.) — slightly tighter to
+  // avoid mid-word breaks in narrow A5 columns, but never below 8.5pt.
+  notice: { fontSize: 8.5, lineHeight: 1.3, color: "#222" },
+  micro: { fontSize: 8.5, lineHeight: 1.25, color: "#444" },
+  microLarge: { fontSize: 8.5, lineHeight: 1.25, color: "#444" },
   bold: { fontFamily: "Times-Bold" },
   italic: { fontFamily: "Times-Italic" },
   centered: { textAlign: "center" },
@@ -180,20 +190,20 @@ const s = StyleSheet.create({
   // Members
   memberTable: { flexDirection: "row", marginTop: 4 },
   memberCol: { flex: 1, paddingHorizontal: 2 },
-  memberRow: { flexDirection: "row", marginBottom: 1 },
-  memberDate: { width: 60, fontSize: 6.8 },
-  memberMark: { width: 16, fontSize: 6.8, textAlign: "center" },
-  memberName: { flex: 1, fontSize: 6.8 },
+  memberRow: { flexDirection: "row", marginBottom: 1.5 },
+  memberDate: { width: 62, fontSize: 8.5 },
+  memberMark: { width: 18, fontSize: 8.5, textAlign: "center" },
+  memberName: { flex: 1, fontSize: 8.5 },
 
   // Officers
-  officerRow: { flexDirection: "row", marginBottom: 1 },
-  officerName: { flex: 1, fontSize: 7.5, paddingRight: 4 },
-  officerRole: { width: 78, fontSize: 7.5, fontFamily: "Times-Bold", textAlign: "right" },
+  officerRow: { flexDirection: "row", marginBottom: 1.5 },
+  officerName: { flex: 1, fontSize: 9, paddingRight: 4 },
+  officerRole: { width: 82, fontSize: 9, fontFamily: "Times-Bold", textAlign: "right" },
 
   // Agenda
   agendaRow: { flexDirection: "row", marginBottom: 3 },
   agendaNum: { width: 16, fontSize: 9, fontFamily: "Times-Bold" },
-  agendaText: { flex: 1, fontSize: 9, lineHeight: 1.35 },
+  agendaText: { flex: 1, fontSize: 9, lineHeight: 1.3 },
 
   // Dining
   diningRow: { flexDirection: "row", marginTop: 4 },
