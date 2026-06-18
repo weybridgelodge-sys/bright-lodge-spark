@@ -259,11 +259,11 @@ function TemplateTab() {
               <Button type="button" variant="destructive" size="sm" onClick={() => setReps(reps.filter((_, j) => j !== i))}><Trash2 className="w-4 h-4" /></Button>
             </div>
           ))}
-          <Button type="button" variant="outline" size="sm" onClick={() => setReps([...reps, { role: "", name: "" }])}><Plus className="w-4 h-4 mr-1" /> Add</Button>
+          <Button type="button" variant="outline" size="sm" className="text-navy" onClick={() => setReps([...reps, { role: "", name: "" }])}><Plus className="w-4 h-4 mr-1" /> Add</Button>
         </div>
       </div>
 
-      <Button onClick={save} disabled={saving}><Save className="w-4 h-4 mr-2" /> {saving ? "Saving…" : "Save template"}</Button>
+      <Button onClick={save} disabled={saving} className="bg-gold text-navy hover:bg-gold/90"><Save className="w-4 h-4 mr-2" /> {saving ? "Saving…" : "Save template"}</Button>
     </div>
   );
 }
@@ -525,6 +525,9 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
         candidates: summons.candidates as any,
         dining_enquiry_name: summons.dining_enquiry_name,
         dining_enquiry_email: summons.dining_enquiry_email,
+        dining_menu: summons.dining_menu,
+        dining_price: summons.dining_price,
+        dining_deadline: summons.dining_deadline,
         notice_overrides: { manualHidden } as any,
         pdf_storage_path: path,
         status: action === "email" ? "sent" : "finalised",
@@ -571,6 +574,7 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
             type="button"
             size="sm"
             variant="outline"
+            className="text-navy"
             onClick={() => { onDoneEditing(); setSummons(EMPTY_SUMMONS); setCurrentId(null); setSelectedEvent(""); setManualHidden([]); }}
           >
             Start new instead
@@ -647,7 +651,7 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
             </Select>
           </div>
           <Button type="button" onClick={addPreset}><Plus className="w-4 h-4 mr-1" /> Add</Button>
-          <Button type="button" variant="outline" onClick={addCustomAgenda}>Custom</Button>
+          <Button type="button" variant="outline" className="text-navy" onClick={addCustomAgenda}>Custom</Button>
         </div>
         <ol className="space-y-1">
           {summons.agenda.map((a, i) => (
@@ -657,8 +661,8 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
               {a.kind !== "standing" && (
                 <Badge variant="outline" className="text-[10px]">{a.kind}</Badge>
               )}
-              <Button type="button" size="sm" variant="ghost" onClick={() => moveAgenda(i, -1)}><ArrowUp className="w-4 h-4" /></Button>
-              <Button type="button" size="sm" variant="ghost" onClick={() => moveAgenda(i, 1)}><ArrowDown className="w-4 h-4" /></Button>
+              <Button type="button" size="sm" variant="ghost" className="text-gold hover:text-gold hover:bg-gold/10" onClick={() => moveAgenda(i, -1)}><ArrowUp className="w-4 h-4" /></Button>
+              <Button type="button" size="sm" variant="ghost" className="text-gold hover:text-gold hover:bg-gold/10" onClick={() => moveAgenda(i, 1)}><ArrowDown className="w-4 h-4" /></Button>
               <Button type="button" size="sm" variant="destructive" onClick={() => removeAgenda(a.id)}><Trash2 className="w-4 h-4" /></Button>
             </li>
           ))}
@@ -690,7 +694,7 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
             </div>
           ))}
         </div>
-        <Button type="button" variant="outline" size="sm" onClick={addCandidate} className="mt-2">
+        <Button type="button" variant="outline" size="sm" onClick={addCandidate} className="mt-2 text-navy">
           <Plus className="w-4 h-4 mr-1" /> Add candidate
         </Button>
       </Section>
@@ -760,7 +764,7 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
 
       <div className="flex flex-wrap gap-2">
         <Button onClick={() => generatePdf("download")} disabled={busy}><Download className="w-4 h-4 mr-2" /> Download PDF</Button>
-        <Button variant="outline" onClick={() => generatePdf("save")} disabled={busy}><Save className="w-4 h-4 mr-2" /> Save to history</Button>
+        <Button variant="outline" className="text-navy" onClick={() => generatePdf("save")} disabled={busy}><Save className="w-4 h-4 mr-2" /> Save to history</Button>
         <Button onClick={emailAll} disabled={busy} className="bg-gold text-navy hover:bg-gold/90"><Mail className="w-4 h-4 mr-2" /> Email to all members</Button>
       </div>
     </div>
