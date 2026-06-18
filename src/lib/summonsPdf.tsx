@@ -192,16 +192,18 @@ const FrontCoverPanel: React.FC<{
   template: LodgeTemplate;
   summons: SummonsData;
   officers: OfficerRollRow[];
-}> = ({ template, summons, officers }) => {
+  logoDataUrl?: string | null;
+}> = ({ template, summons, officers, logoDataUrl }) => {
   const wmFromRoll = officers.find((o) => o.label === "Worshipful Master")?.member_formal || officers.find((o) => o.label === "Worshipful Master")?.member;
   const secFromRoll = officers.find((o) => o.label === "Secretary")?.member_formal || officers.find((o) => o.label === "Secretary")?.member;
   const wmLines = (wmFromRoll || template.wm_contact || "").split("\n").filter(Boolean);
   const secLines = (secFromRoll || template.secretary_contact || "").split("\n").filter(Boolean);
   const wmName = wmLines[0] || "—";
   const secName = secLines[0] || "—";
+  const logoSrc = logoDataUrl || template.logo_url;
   return (
   <View style={[s.panel]}>
-    {template.logo_url ? <Image src={template.logo_url} style={s.crest} /> : null}
+    {logoSrc ? <Image src={logoSrc} style={s.crest} /> : null}
     <Text style={s.lodgeName}>{template.lodge_name}</Text>
     <Text style={s.lodgeNameSmall}>No. {template.lodge_number}</Text>
     <Text style={s.province}>PROVINCE OF {(template.province || "").toUpperCase()}</Text>
