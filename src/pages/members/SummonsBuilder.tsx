@@ -327,7 +327,7 @@ async function loadOfficers(setRows: (rows: OfficerRollRow[]) => void, setLoadin
     .eq("lodge_year", lodgeYear);
   const memberIds = Array.from(new Set((appts ?? []).map((a) => a.member_id).filter(Boolean)));
   const { data: profs } = memberIds.length
-    ? await supabase.from("profiles").select("id,title,first_name,middle_name,last_name,full_name,preferred_name,post_nominals,rank,grand_rank,provincial_rank,is_past_master,is_royal_arch,is_honorary_member,initiation_date,joined_lodge_date,joined_year,status").in("id", memberIds)
+    ? await supabase.from("profiles").select("id,title,first_name,middle_name,last_name,full_name,preferred_name,post_nominals,rank,grand_rank,provincial_rank,is_past_master,is_royal_arch,is_honorary_member,initiation_date,joined_lodge_date,joined_year,status,email,phone").in("id", memberIds)
     : { data: [] as any[] };
   const byId = new Map((profs ?? []).map((p: any) => [p.id, p]));
   const allKeys: string[] = [
@@ -352,6 +352,8 @@ async function loadOfficers(setRows: (rows: OfficerRollRow[]) => void, setLoadin
       grand_rank: p?.grand_rank ?? null,
       provincial_rank: p?.provincial_rank ?? null,
       rank: p?.rank ?? null,
+      email: p?.email ?? null,
+      phone: p?.phone ?? null,
     };
   });
   setRows(rows);
