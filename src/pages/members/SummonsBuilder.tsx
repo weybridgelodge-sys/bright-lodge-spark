@@ -51,6 +51,8 @@ const EMPTY_TEMPLATE: LodgeTemplate = {
   province: "Surrey",
   consecration_date: null,
   logo_url: "/__l5e/assets-v1/57c18f79-500d-485c-bb45-3cef1b3bc800/weybridge-logo-navy.png",
+  cover_left_image_url: null,
+  cover_right_image_url: null,
   venue_address: null,
   regular_meeting_pattern: null,
   loi_details: null,
@@ -242,8 +244,10 @@ function TemplateTab() {
         {F("lodge_number", "Lodge number")}
         {F("province", "Province")}
         {F("consecration_date", "Consecration date", "date")}
-        {F("logo_url", "Logo URL")}
+        {F("logo_url", "Logo URL (centre crest)")}
         {F("dining_booking_url", "Dining booking URL")}
+        {F("cover_left_image_url", "Cover left image URL")}
+        {F("cover_right_image_url", "Cover right image URL")}
       </div>
       {F("venue_address", "Venue full address", "textarea")}
       {F("regular_meeting_pattern", "Regular meeting pattern", "textarea")}
