@@ -164,7 +164,15 @@ function PrintPreviewTab() {
           .select("id,title,first_name,middle_name,last_name,full_name,preferred_name,post_nominals,rank,grand_rank,provincial_rank,initiation_date,joined_lodge_date,joined_year,is_past_master,is_royal_arch,status")
           .eq("status", "active"),
       ]);
-      if (tpl.data) setTemplate({ ...EMPTY_TEMPLATE, ...(tpl.data as any), lodge_representatives: (tpl.data as any).lodge_representatives ?? [] });
+      if (tpl.data) {
+        const merged = { ...EMPTY_TEMPLATE, ...(tpl.data as any), lodge_representatives: (tpl.data as any).lodge_representatives ?? [] };
+        if (typeof merged.logo_url === "string") {
+          const idx = merged.logo_url.indexOf("/__l5e/");
+          if (idx > 0) merged.logo_url = merged.logo_url.slice(idx);
+        }
+        if (!merged.logo_url) merged.logo_url = EMPTY_TEMPLATE.logo_url;
+        setTemplate(merged);
+      }
       if (mem.data) setMembers(mem.data as any);
       loadOfficers(setOfficers, () => {});
     })();
@@ -185,6 +193,12 @@ function TemplateTab() {
       if (data) {
         const merged = { ...EMPTY_TEMPLATE, ...(data as any), lodge_representatives: (data as any).lodge_representatives ?? [] };
         if (!merged.logo_url) merged.logo_url = EMPTY_TEMPLATE.logo_url;
+        // Strip any absolute origin from previously-saved asset URLs so they
+        // resolve correctly on the current domain (preview / published / custom).
+        if (typeof merged.logo_url === "string") {
+          const idx = merged.logo_url.indexOf("/__l5e/");
+          if (idx > 0) merged.logo_url = merged.logo_url.slice(idx);
+        }
         setT(merged);
         setReps(((data as any).lodge_representatives ?? []) as Rep[]);
       }
