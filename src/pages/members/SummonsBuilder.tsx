@@ -185,6 +185,12 @@ function TemplateTab() {
       if (data) {
         const merged = { ...EMPTY_TEMPLATE, ...(data as any), lodge_representatives: (data as any).lodge_representatives ?? [] };
         if (!merged.logo_url) merged.logo_url = EMPTY_TEMPLATE.logo_url;
+        // Strip any absolute origin from previously-saved asset URLs so they
+        // resolve correctly on the current domain (preview / published / custom).
+        if (typeof merged.logo_url === "string") {
+          const idx = merged.logo_url.indexOf("/__l5e/");
+          if (idx > 0) merged.logo_url = merged.logo_url.slice(idx);
+        }
         setT(merged);
         setReps(((data as any).lodge_representatives ?? []) as Rep[]);
       }
