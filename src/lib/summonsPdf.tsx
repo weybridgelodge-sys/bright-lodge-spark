@@ -721,9 +721,11 @@ const SummonsDocument: React.FC<{
   summons: SummonsData;
   diningQrDataUrl: string | null;
   logoDataUrl: string | null;
+  coverLeftDataUrl: string | null;
+  coverRightDataUrl: string | null;
   overflow: OverflowPlan;
   manualHidden?: NoticeKey[];
-}> = ({ template, officers, members, summons, diningQrDataUrl, logoDataUrl, overflow, manualHidden = [] }) => {
+}> = ({ template, officers, members, summons, diningQrDataUrl, logoDataUrl, coverLeftDataUrl, coverRightDataUrl, overflow, manualHidden = [] }) => {
   const hidden = new Set<NoticeKey>([...overflow.hidden, ...manualHidden]);
   const shortened = new Set<NoticeKey>(overflow.shortened);
 
@@ -741,9 +743,10 @@ const SummonsDocument: React.FC<{
           />
         </View>
         <View style={{ flex: 1, padding: 0 }}>
-          <FrontCoverPanel template={template} summons={summons} officers={officers} logoDataUrl={logoDataUrl} />
+          <FrontCoverPanel template={template} summons={summons} officers={officers} logoDataUrl={logoDataUrl} coverLeftDataUrl={coverLeftDataUrl} coverRightDataUrl={coverRightDataUrl} />
         </View>
       </Page>
+
 
       {/* INSIDE of folded sheet: officers + dining (left) | agenda (right) */}
       <Page size="A4" orientation="landscape" style={s.page}>
