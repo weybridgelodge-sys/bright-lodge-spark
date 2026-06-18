@@ -387,7 +387,14 @@ const BackCoverPanel: React.FC<{
       <View key={m.id} style={s.memberRow}>
         <Text style={s.memberDate}>{date} {tag}</Text>
         <Text style={s.memberMark}>{mark}</Text>
-        <Text style={s.memberName}>{formatMemberLine(m)}</Text>
+        <BoldNameText
+          style={s.memberName}
+          fullName={formatMemberLine(m)}
+          post_nominals={m.post_nominals}
+          grand_rank={m.grand_rank}
+          provincial_rank={m.provincial_rank}
+          rank={m.rank}
+        />
       </View>
     );
   };
