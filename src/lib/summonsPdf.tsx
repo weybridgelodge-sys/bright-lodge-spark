@@ -409,12 +409,29 @@ const BackCoverPanel: React.FC<{
   const sorted = sortMembersBySeniority(subscribing);
   const { left, right } = splitTwoColumns(sorted);
 
+  // Available width (pt) for the name text within a member row.
+  // A4 landscape page = 842pt → each A5 panel = 421pt. Panel inner width
+  // = 421 - 2*PANEL_PAD(22) = 377pt, split into 2 columns ≈ 188pt each,
+  // minus 2*2 paddingHorizontal = 184pt. Date col 62 + mark col 18 leaves
+  // ~104pt for the name. Keep a small safety margin.
+  const NAME_AVAIL_PT = 100;
+  const BASE_NAME_SIZE = 8.5;
+  const MIN_NAME_SIZE = 8;
+  // Times-Roman average glyph width ≈ 0.5 * fontSize.
+  const fitNameFontSize = (text: string) => {
+    if (!text) return BASE_NAME_SIZE;
+    const needed = NAME_AVAIL_PT / (text.length * 0.5);
+    if (needed >= BASE_NAME_SIZE) return BASE_NAME_SIZE;
+    return Math.max(MIN_NAME_SIZE, Math.floor(needed * 10) / 10);
+  };
+
   const memberLine = (m: MemberRow) => {
     const sym = memberSymbols(m);
     const date = formatDateShort(m.initiation_date || m.joined_lodge_date);
     const tag = m.initiation_date ? "(I)" : m.joined_lodge_date ? "(J)" : "";
     const mark = `${sym.pastMaster ? "+" : ""}${sym.royalArch ? "†" : ""}`;
     const nameLine = `${rankTitle(m)} ${formatMemberShort(m)}`;
+    const nameSize = fitNameFontSize(nameLine);
     const postParts = [
       { text: m.post_nominals?.trim(), bold: true },
       { text: m.grand_rank?.trim(), bold: true },
@@ -426,9 +443,9 @@ const BackCoverPanel: React.FC<{
         <View style={s.memberLine1}>
           <Text style={s.memberDate}>{date} {tag}</Text>
           <Text style={s.memberMark}>{mark}</Text>
-          <Text style={s.memberName}>{nameLine}</Text>
+          <Text style={[s.memberName, { fontSize: nameSize }]} wrap={false}>{nameLine}</Text>
         </View>
-        <Text style={s.memberPost}>
+        <Text style={s.memberPost} wrap={false}>
           {postParts.length === 0 ? "\u00A0" : postParts.map((p, i) => (
             <Text key={i} style={p.bold ? s.bold : undefined}>
               {i > 0 ? " " : ""}{p.text}
