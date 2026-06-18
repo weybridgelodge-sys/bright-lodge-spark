@@ -499,11 +499,16 @@ const OfficersDiningPanel: React.FC<{
       <>
         <View style={s.thinDivider} />
         <View>
-          {template.lodge_representatives.map((r, i) => (
-            <Text key={i} style={s.smallText}>
-              <Text>{r.name}</Text> — Lodge representative to {r.role}
-            </Text>
-          ))}
+          {template.lodge_representatives.map((r, i) => {
+            const cleanedRole = (r.role ?? "")
+              .replace(/^\s*lodge\s+representative\s+to\s+/i, "")
+              .trim();
+            return (
+              <Text key={i} style={s.smallText}>
+                <Text>{r.name}</Text> — Lodge representative to {cleanedRole}
+              </Text>
+            );
+          })}
         </View>
         <View style={s.thinDivider} />
       </>
