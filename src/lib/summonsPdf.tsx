@@ -421,7 +421,7 @@ const OfficersDiningPanel: React.FC<{
   officers: OfficerRollRow[];
   summons: SummonsData;
   diningQrDataUrl: string | null;
-}> = ({ template, officers, summons, diningQrDataUrl }) => (
+}> = ({ template, officers }) => (
   <View style={s.panel}>
     <Text style={s.panelHeading}>OFFICERS {officerSeason()}</Text>
     {officers.filter((o) => o.member).map((o, i) => (
@@ -432,59 +432,25 @@ const OfficersDiningPanel: React.FC<{
     ))}
 
     {template.lodge_representatives?.length > 0 && (
-      <View style={{ marginTop: 6 }}>
-        {template.lodge_representatives.map((r, i) => (
-          <Text key={i} style={s.smallText}>
-            <Text>{r.name}</Text> — Lodge representative to {r.role}
-          </Text>
-        ))}
-      </View>
-    )}
-
-    <View style={s.thinDivider} />
-
-    <Text style={s.sectionHeading}>Dining Arrangements</Text>
-    <View style={s.diningRow}>
-      <View style={s.diningBody}>
-        {summons.dining_price && (
-          <Text style={[s.smallText, s.bold]}>{summons.dining_price}</Text>
-        )}
-        {summons.dining_menu && (
-          <Text style={[s.smallText, { marginTop: 2 }]}>{summons.dining_menu}</Text>
-        )}
-        {template.dining_booking_url && (
-          <Text style={[s.smallText, s.bold, { marginTop: 4 }]}>
-            Please book online at: {template.dining_booking_url}
-          </Text>
-        )}
-        {summons.dining_deadline && (
-          <Text style={[s.smallText, { marginTop: 2 }]}>
-            All bookings by{" "}
-            <Text style={s.bold}>{formatDateLong(summons.dining_deadline)}</Text>
-            {" "}or you will not be fed.
-          </Text>
-        )}
-        {(summons.dining_enquiry_name || summons.dining_enquiry_email) && (
-          <Text style={[s.smallText, { marginTop: 4 }]}>
-            Dining enquiries: {summons.dining_enquiry_name}
-            {summons.dining_enquiry_email ? ` — ${summons.dining_enquiry_email}` : ""}
-          </Text>
-        )}
-      </View>
-      {diningQrDataUrl && (
-        <View style={{ alignItems: "center" }}>
-          <Image src={diningQrDataUrl} style={s.diningQr} />
-          <Text style={[s.micro, { marginTop: 2 }]}>Scan to book</Text>
+      <>
+        <View style={s.thinDivider} />
+        <View>
+          {template.lodge_representatives.map((r, i) => (
+            <Text key={i} style={s.smallText}>
+              <Text>{r.name}</Text> — Lodge representative to {r.role}
+            </Text>
+          ))}
         </View>
-      )}
-    </View>
+      </>
+    )}
   </View>
 );
 
 const AgendaPanel: React.FC<{
   template: LodgeTemplate;
   summons: SummonsData;
-}> = ({ template, summons }) => (
+  diningQrDataUrl: string | null;
+}> = ({ template, summons, diningQrDataUrl }) => (
   <View style={s.panel}>
     <Text style={s.panelHeading}>AGENDA</Text>
     {summons.agenda.length === 0 ? (
@@ -530,10 +496,11 @@ const AgendaPanel: React.FC<{
       </View>
     )}
 
-    <View style={s.thinDivider} />
-
+    {(summons.next_meeting_date || summons.officer_night_date) && (
+      <View style={s.thinDivider} />
+    )}
     {summons.next_meeting_date && (
-      <Text style={[s.smallText, { marginTop: 4 }]}>
+      <Text style={s.smallText}>
         The date of the next regular meeting is{" "}
         <Text style={s.bold}>{formatDateLong(summons.next_meeting_date)}</Text>.
       </Text>
@@ -543,8 +510,46 @@ const AgendaPanel: React.FC<{
         Officer Night will be held on {formatDateLong(summons.officer_night_date)}.
       </Text>
     )}
+
+    <View style={s.thinDivider} />
+    <Text style={s.sectionHeading}>Dining Arrangements</Text>
+    <View style={s.diningRow}>
+      <View style={s.diningBody}>
+        {summons.dining_price && (
+          <Text style={[s.smallText, s.bold]}>{summons.dining_price}</Text>
+        )}
+        {summons.dining_menu && (
+          <Text style={[s.smallText, { marginTop: 2 }]}>{summons.dining_menu}</Text>
+        )}
+        {template.dining_booking_url && (
+          <Text style={[s.smallText, s.bold, { marginTop: 4 }]}>
+            Please book online at: {template.dining_booking_url}
+          </Text>
+        )}
+        {summons.dining_deadline && (
+          <Text style={[s.smallText, { marginTop: 2 }]}>
+            All bookings by{" "}
+            <Text style={s.bold}>{formatDateLong(summons.dining_deadline)}</Text>
+            {" "}or you will not be fed.
+          </Text>
+        )}
+        {(summons.dining_enquiry_name || summons.dining_enquiry_email) && (
+          <Text style={[s.smallText, { marginTop: 4 }]}>
+            Dining enquiries: {summons.dining_enquiry_name}
+            {summons.dining_enquiry_email ? ` — ${summons.dining_enquiry_email}` : ""}
+          </Text>
+        )}
+      </View>
+      {diningQrDataUrl && (
+        <View style={{ alignItems: "center" }}>
+          <Image src={diningQrDataUrl} style={s.diningQr} />
+          <Text style={[s.micro, { marginTop: 2 }]}>Scan to book</Text>
+        </View>
+      )}
+    </View>
   </View>
 );
+
 
 // ---------- helpers ----------
 
