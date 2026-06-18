@@ -15,6 +15,7 @@ import {
   MemberRow,
   sortMembersBySeniority,
   splitTwoColumns,
+  subLetter,
 } from "@/lib/summons";
 import { LodgeTemplate, OfficerRollRow, SummonsData } from "@/lib/summonsPdf";
 
