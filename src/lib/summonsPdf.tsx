@@ -294,12 +294,17 @@ function BoldNameText({
 // ---------- panel-level renderers ----------
 
 
+const DEFAULT_COVER_LEFT_URL = "/__l5e/assets-v1/3b24e36a-0ae2-48a6-beff-3f3a71f15e85/TLC-Patron-Pin.jpg";
+const DEFAULT_COVER_RIGHT_URL = "/__l5e/assets-v1/7435bffd-65eb-49e7-9086-2c349fdb427f/Festival_Gold_Award_no_background.png";
+
 const FrontCoverPanel: React.FC<{
   template: LodgeTemplate;
   summons: SummonsData;
   officers: OfficerRollRow[];
   logoDataUrl?: string | null;
-}> = ({ template, summons, officers, logoDataUrl }) => {
+  coverLeftDataUrl?: string | null;
+  coverRightDataUrl?: string | null;
+}> = ({ template, summons, officers, logoDataUrl, coverLeftDataUrl, coverRightDataUrl }) => {
   const wmFromRoll = officers.find((o) => o.label === "Worshipful Master")?.member_formal || officers.find((o) => o.label === "Worshipful Master")?.member;
   const secFromRoll = officers.find((o) => o.label === "Secretary")?.member_formal || officers.find((o) => o.label === "Secretary")?.member;
   // Prefer the template contact block (name + address lines) and fall back to
@@ -307,6 +312,8 @@ const FrontCoverPanel: React.FC<{
   const secLines = (template.secretary_contact || secFromRoll || "").split("\n").map((l) => l.trim()).filter(Boolean);
   const secName = secLines[0] || "—";
   const logoSrc = logoDataUrl || template.logo_url;
+  const leftSrc = coverLeftDataUrl || template.cover_left_image_url || DEFAULT_COVER_LEFT_URL;
+  const rightSrc = coverRightDataUrl || template.cover_right_image_url || DEFAULT_COVER_RIGHT_URL;
   return (
   <View style={[s.panel]}>
     <Text style={s.lodgeName}>{template.lodge_name} No. {template.lodge_number}</Text>
@@ -318,15 +325,16 @@ const FrontCoverPanel: React.FC<{
 
      <View style={{ flexDirection: "row", alignItems: "center", marginTop: 6, marginBottom: 4 }}>
        <View style={{ flex: 1, alignItems: "flex-start" }}>
-         <Image src={"/__l5e/assets-v1/3b24e36a-0ae2-48a6-beff-3f3a71f15e85/TLC-Patron-Pin.jpg"} style={{ height: 85 }} />
+         {leftSrc ? <Image src={leftSrc} style={{ height: 85 }} /> : null}
        </View>
        <View style={{ flex: 1, alignItems: "center" }}>
          {logoSrc ? <Image src={logoSrc} style={s.crest} /> : null}
        </View>
        <View style={{ flex: 1, alignItems: "flex-end" }}>
-         <Image src={"/__l5e/assets-v1/7435bffd-65eb-49e7-9086-2c349fdb427f/Festival_Gold_Award_no_background.png"} style={{ height: 85 }} />
+         {rightSrc ? <Image src={rightSrc} style={{ height: 85 }} /> : null}
        </View>
      </View>
+
 
     <View style={{ marginTop: 10, marginBottom: 6, alignItems: "flex-start" }}>
       <Text style={s.bodyText}>{secFromRoll ? `${secFromRoll} (Secretary)` : secName}</Text>
