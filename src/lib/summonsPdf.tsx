@@ -314,13 +314,15 @@ const FrontCoverPanel: React.FC<{
       <Text style={s.province}>{wmFromRoll} - Worshipful Master</Text>
     )}
 
-    <View style={{ flexDirection: "row", alignItems: "center", marginTop: 6, marginBottom: 4 }}>
-      <View style={{ flex: 1, alignItems: "flex-start" }} />
-      <View style={{ flex: 1, alignItems: "center" }}>
-        {logoSrc ? <Image src={logoSrc} style={s.crest} /> : null}
-      </View>
-      <View style={{ flex: 1, alignItems: "flex-end" }} />
-    </View>
+     <View style={{ flexDirection: "row", alignItems: "center", marginTop: 6, marginBottom: 4 }}>
+       <View style={{ flex: 1, alignItems: "flex-start" }}>
+         <Image src={"/__l5e/assets-v1/3b24e36a-0ae2-48a6-beff-3f3a71f15e85/TLC-Patron-Pin.jpg"} style={{ height: 85 }} />
+       </View>
+       <View style={{ flex: 1, alignItems: "center" }}>
+         {logoSrc ? <Image src={logoSrc} style={s.crest} /> : null}
+       </View>
+       <View style={{ flex: 1, alignItems: "flex-end" }} />
+     </View>
 
     <View style={{ marginTop: 10, marginBottom: 6, alignItems: "flex-start" }}>
       <Text style={s.bodyText}>{secFromRoll ? `${secFromRoll} (Secretary)` : secName}</Text>
