@@ -63,7 +63,15 @@ export type LodgeTemplate = {
   lodge_representatives: { role: string; name: string }[];
 };
 
-export type OfficerRollRow = { label: string; member: string; member_formal?: string };
+export type OfficerRollRow = {
+  label: string;
+  member: string;
+  member_formal?: string;
+  post_nominals?: string | null;
+  grand_rank?: string | null;
+  provincial_rank?: string | null;
+  rank?: string | null;
+};
 
 export type SummonsData = {
   meeting_number: number;
