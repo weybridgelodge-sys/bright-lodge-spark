@@ -301,6 +301,18 @@ export const DEFAULT_LOGO_URL = "/__l5e/assets-v1/045b91d4-9b41-490d-baa9-8486ec
 export const DEFAULT_COVER_LEFT_URL = "/__l5e/assets-v1/f22695d7-afc6-46a8-9daf-9564690178fc/TLC-Patron-Pin.jpg";
 export const DEFAULT_COVER_RIGHT_URL = "/__l5e/assets-v1/be3d0b35-5888-4ffa-b6b4-c7dfe04cc8f3/Festival_Gold_Award.png";
 
+// URLs of earlier uploads that turned out to be truncated/broken. Any saved
+// template still pointing at them is silently rewritten to the current default
+// so the cover always renders.
+const STALE_ASSET_URLS = new Set<string>([
+  "/__l5e/assets-v1/3b24e36a-0ae2-48a6-beff-3f3a71f15e85/TLC-Patron-Pin.jpg",
+  "/__l5e/assets-v1/7435bffd-65eb-49e7-9086-2c349fdb427f/Festival_Gold_Award_no_background.png",
+  "/__l5e/assets-v1/57c18f79-500d-485c-bb45-3cef1b3bc800/weybridge-logo-navy.png",
+]);
+const resolveAssetUrl = (url: string | null | undefined, fallback: string) =>
+  !url || STALE_ASSET_URLS.has(url) ? fallback : url;
+
+
 const FrontCoverPanel: React.FC<{
   template: LodgeTemplate;
   summons: SummonsData;
