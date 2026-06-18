@@ -412,7 +412,9 @@ const OfficersDiningPanel: React.FC<{
   officers: OfficerRollRow[];
   summons: SummonsData;
   diningQrDataUrl: string | null;
-}> = ({ template, officers }) => (
+  hidden: Set<NoticeKey>;
+  shortened: Set<NoticeKey>;
+}> = ({ template, officers, hidden, shortened }) => (
   <View style={s.panel}>
     <Text style={s.panelHeading}>OFFICERS {officerSeason()}</Text>
     {officers.filter((o) => o.member).map((o, i) => (
@@ -432,6 +434,25 @@ const OfficersDiningPanel: React.FC<{
             </Text>
           ))}
         </View>
+        <View style={s.thinDivider} />
+      </>
+    )}
+
+    {!hidden.has("data_protection") && template.data_protection_text && (
+      <>
+        <Text style={s.sectionHeadingLarge}>Data Protection Act</Text>
+        <Text style={s.microLarge}>
+          {shortened.has("data_protection")
+            ? flow(template.data_protection_text_short ||
+                "See lodge data protection notice — copies available from the Secretary.")
+            : flow(template.data_protection_text)}
+        </Text>
+      </>
+    )}
+    {!hidden.has("overseas") && template.overseas_attendance_text && (
+      <>
+        <Text style={s.sectionHeadingLarge}>Attendance at Lodges Overseas</Text>
+        <Text style={s.microLarge}>{flow(template.overseas_attendance_text)}</Text>
       </>
     )}
   </View>
