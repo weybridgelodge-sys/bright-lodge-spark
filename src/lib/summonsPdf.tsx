@@ -248,8 +248,7 @@ const FrontCoverPanel: React.FC<{
   return (
   <View style={[s.panel]}>
     {logoSrc ? <Image src={logoSrc} style={s.crest} /> : null}
-    <Text style={s.lodgeName}>{template.lodge_name}</Text>
-    <Text style={s.lodgeNameSmall}>No. {template.lodge_number}</Text>
+    <Text style={s.lodgeName}>{template.lodge_name} No. {template.lodge_number}</Text>
     <Text style={s.province}>PROVINCE OF {(template.province || "").toUpperCase()}</Text>
     <View style={s.divider} />
 
