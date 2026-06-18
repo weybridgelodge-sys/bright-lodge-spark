@@ -298,8 +298,20 @@ function BoldNameText({
 
 
 export const DEFAULT_LOGO_URL = "/__l5e/assets-v1/045b91d4-9b41-490d-baa9-8486eca7cb05/weybridge-logo-no-bg.png";
-export const DEFAULT_COVER_LEFT_URL = "/__l5e/assets-v1/3b24e36a-0ae2-48a6-beff-3f3a71f15e85/TLC-Patron-Pin.jpg";
-export const DEFAULT_COVER_RIGHT_URL = "/__l5e/assets-v1/7435bffd-65eb-49e7-9086-2c349fdb427f/Festival_Gold_Award_no_background.png";
+export const DEFAULT_COVER_LEFT_URL = "/__l5e/assets-v1/f22695d7-afc6-46a8-9daf-9564690178fc/TLC-Patron-Pin.jpg";
+export const DEFAULT_COVER_RIGHT_URL = "/__l5e/assets-v1/be3d0b35-5888-4ffa-b6b4-c7dfe04cc8f3/Festival_Gold_Award.png";
+
+// URLs of earlier uploads that turned out to be truncated/broken. Any saved
+// template still pointing at them is silently rewritten to the current default
+// so the cover always renders.
+const STALE_ASSET_URLS = new Set<string>([
+  "/__l5e/assets-v1/3b24e36a-0ae2-48a6-beff-3f3a71f15e85/TLC-Patron-Pin.jpg",
+  "/__l5e/assets-v1/7435bffd-65eb-49e7-9086-2c349fdb427f/Festival_Gold_Award_no_background.png",
+  "/__l5e/assets-v1/57c18f79-500d-485c-bb45-3cef1b3bc800/weybridge-logo-navy.png",
+]);
+const resolveAssetUrl = (url: string | null | undefined, fallback: string) =>
+  !url || STALE_ASSET_URLS.has(url) ? fallback : url;
+
 
 const FrontCoverPanel: React.FC<{
   template: LodgeTemplate;
@@ -325,9 +337,9 @@ const FrontCoverPanel: React.FC<{
     ? rawSecLines.slice(1)
     : rawSecLines;
   const secName = secFromRoll || rawSecLines[0] || "—";
-  const logoSrc = logoDataUrl || template.logo_url;
-  const leftSrc = coverLeftDataUrl || template.cover_left_image_url || DEFAULT_COVER_LEFT_URL;
-  const rightSrc = coverRightDataUrl || template.cover_right_image_url || DEFAULT_COVER_RIGHT_URL;
+  const logoSrc = logoDataUrl || resolveAssetUrl(template.logo_url, DEFAULT_LOGO_URL);
+  const leftSrc = coverLeftDataUrl || resolveAssetUrl(template.cover_left_image_url, DEFAULT_COVER_LEFT_URL);
+  const rightSrc = coverRightDataUrl || resolveAssetUrl(template.cover_right_image_url, DEFAULT_COVER_RIGHT_URL);
   return (
   <View style={[s.panel]}>
     <Text style={s.lodgeName}>{template.lodge_name} No. {template.lodge_number}</Text>
@@ -852,11 +864,10 @@ export async function generateSummonsBlob(args: {
       diningQrDataUrl = null;
     }
   }
-  const logoDataUrl = args.template.logo_url
-    ? await fetchImageAsDataUrl(args.template.logo_url)
-    : null;
-  const coverLeftUrl = args.template.cover_left_image_url || DEFAULT_COVER_LEFT_URL;
-  const coverRightUrl = args.template.cover_right_image_url || DEFAULT_COVER_RIGHT_URL;
+  const logoUrl = resolveAssetUrl(args.template.logo_url, DEFAULT_LOGO_URL);
+  const coverLeftUrl = resolveAssetUrl(args.template.cover_left_image_url, DEFAULT_COVER_LEFT_URL);
+  const coverRightUrl = resolveAssetUrl(args.template.cover_right_image_url, DEFAULT_COVER_RIGHT_URL);
+  const logoDataUrl = logoUrl ? await fetchImageAsDataUrl(logoUrl) : null;
   const coverLeftDataUrl = coverLeftUrl ? await fetchImageAsDataUrl(coverLeftUrl) : null;
   const coverRightDataUrl = coverRightUrl ? await fetchImageAsDataUrl(coverRightUrl) : null;
   const overflow = planOverflow(args.members.length);
