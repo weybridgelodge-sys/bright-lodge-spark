@@ -109,15 +109,19 @@ const s = StyleSheet.create({
   // Typography — cover
   lodgeName: {
     fontFamily: "Times-Bold",
-    fontSize: 23,
+    fontSize: 22,
+    lineHeight: 1.15,
     color: NAVY,
     textAlign: "center",
+    marginBottom: 4,
   },
   lodgeNameSmall: {
     fontFamily: "Times-Bold",
     fontSize: 14,
+    lineHeight: 1.2,
     color: NAVY,
     textAlign: "center",
+    marginTop: 2,
   },
   province: {
     fontFamily: "Times-Bold",
