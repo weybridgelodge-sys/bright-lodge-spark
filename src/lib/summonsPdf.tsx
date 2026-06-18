@@ -75,6 +75,8 @@ export type OfficerRollRow = {
   grand_rank?: string | null;
   provincial_rank?: string | null;
   rank?: string | null;
+  email?: string | null;
+  phone?: string | null;
 };
 
 export type SummonsData = {
