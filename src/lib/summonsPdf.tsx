@@ -192,16 +192,18 @@ const FrontCoverPanel: React.FC<{
   template: LodgeTemplate;
   summons: SummonsData;
   officers: OfficerRollRow[];
-}> = ({ template, summons, officers }) => {
+  logoDataUrl?: string | null;
+}> = ({ template, summons, officers, logoDataUrl }) => {
   const wmFromRoll = officers.find((o) => o.label === "Worshipful Master")?.member_formal || officers.find((o) => o.label === "Worshipful Master")?.member;
   const secFromRoll = officers.find((o) => o.label === "Secretary")?.member_formal || officers.find((o) => o.label === "Secretary")?.member;
   const wmLines = (wmFromRoll || template.wm_contact || "").split("\n").filter(Boolean);
   const secLines = (secFromRoll || template.secretary_contact || "").split("\n").filter(Boolean);
   const wmName = wmLines[0] || "—";
   const secName = secLines[0] || "—";
+  const logoSrc = logoDataUrl || template.logo_url;
   return (
   <View style={[s.panel]}>
-    {template.logo_url ? <Image src={template.logo_url} style={s.crest} /> : null}
+    {logoSrc ? <Image src={logoSrc} style={s.crest} /> : null}
     <Text style={s.lodgeName}>{template.lodge_name}</Text>
     <Text style={s.lodgeNameSmall}>No. {template.lodge_number}</Text>
     <Text style={s.province}>PROVINCE OF {(template.province || "").toUpperCase()}</Text>
@@ -534,9 +536,10 @@ const SummonsDocument: React.FC<{
   members: MemberRow[];
   summons: SummonsData;
   diningQrDataUrl: string | null;
+  logoDataUrl: string | null;
   overflow: OverflowPlan;
   manualHidden?: NoticeKey[];
-}> = ({ template, officers, members, summons, diningQrDataUrl, overflow, manualHidden = [] }) => {
+}> = ({ template, officers, members, summons, diningQrDataUrl, logoDataUrl, overflow, manualHidden = [] }) => {
   const hidden = new Set<NoticeKey>([...overflow.hidden, ...manualHidden]);
   const shortened = new Set<NoticeKey>(overflow.shortened);
 
@@ -554,7 +557,7 @@ const SummonsDocument: React.FC<{
           />
         </View>
         <View style={{ flex: 1, padding: 0 }}>
-          <FrontCoverPanel template={template} summons={summons} officers={officers} />
+          <FrontCoverPanel template={template} summons={summons} officers={officers} logoDataUrl={logoDataUrl} />
         </View>
       </Page>
 
@@ -576,6 +579,22 @@ const SummonsDocument: React.FC<{
   );
 };
 
+async function fetchImageAsDataUrl(url: string): Promise<string | null> {
+  try {
+    const res = await fetch(url);
+    if (!res.ok) return null;
+    const blob = await res.blob();
+    return await new Promise<string | null>((resolve) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(typeof reader.result === "string" ? reader.result : null);
+      reader.onerror = () => resolve(null);
+      reader.readAsDataURL(blob);
+    });
+  } catch {
+    return null;
+  }
+}
+
 export async function generateSummonsBlob(args: {
   template: LodgeTemplate;
   officers: OfficerRollRow[];
@@ -594,6 +613,9 @@ export async function generateSummonsBlob(args: {
       diningQrDataUrl = null;
     }
   }
+  const logoDataUrl = args.template.logo_url
+    ? await fetchImageAsDataUrl(args.template.logo_url)
+    : null;
   const overflow = planOverflow(args.members.length);
   const doc = (
     <SummonsDocument
@@ -602,6 +624,7 @@ export async function generateSummonsBlob(args: {
       members={args.members}
       summons={args.summons}
       diningQrDataUrl={diningQrDataUrl}
+      logoDataUrl={logoDataUrl}
       overflow={overflow}
       manualHidden={args.manualHidden}
     />
