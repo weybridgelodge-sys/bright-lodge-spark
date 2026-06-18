@@ -17,6 +17,7 @@ import {
   Image,
   Font,
   pdf,
+  Link,
 } from "@react-pdf/renderer";
 
 // Disable automatic hyphenation across the document — react-pdf otherwise
