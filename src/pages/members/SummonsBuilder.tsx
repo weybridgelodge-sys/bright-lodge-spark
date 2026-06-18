@@ -244,8 +244,10 @@ function TemplateTab() {
         {F("lodge_number", "Lodge number")}
         {F("province", "Province")}
         {F("consecration_date", "Consecration date", "date")}
-        {F("logo_url", "Logo URL")}
+        {F("logo_url", "Logo URL (centre crest)")}
         {F("dining_booking_url", "Dining booking URL")}
+        {F("cover_left_image_url", "Cover left image URL")}
+        {F("cover_right_image_url", "Cover right image URL")}
       </div>
       {F("venue_address", "Venue full address", "textarea")}
       {F("regular_meeting_pattern", "Regular meeting pattern", "textarea")}
