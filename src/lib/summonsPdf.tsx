@@ -210,8 +210,10 @@ const FrontCoverPanel: React.FC<{
 }> = ({ template, summons, officers, logoDataUrl }) => {
   const wmFromRoll = officers.find((o) => o.label === "Worshipful Master")?.member_formal || officers.find((o) => o.label === "Worshipful Master")?.member;
   const secFromRoll = officers.find((o) => o.label === "Secretary")?.member_formal || officers.find((o) => o.label === "Secretary")?.member;
-  const wmLines = (wmFromRoll || template.wm_contact || "").split("\n").filter(Boolean);
-  const secLines = (secFromRoll || template.secretary_contact || "").split("\n").filter(Boolean);
+  // Prefer the template contact block (name + address lines) and fall back to
+  // the officer roll (name only) when no template entry exists.
+  const wmLines = (template.wm_contact || wmFromRoll || "").split("\n").map((l) => l.trim()).filter(Boolean);
+  const secLines = (template.secretary_contact || secFromRoll || "").split("\n").map((l) => l.trim()).filter(Boolean);
   const wmName = wmLines[0] || "—";
   const secName = secLines[0] || "—";
   const logoSrc = logoDataUrl || template.logo_url;
@@ -597,7 +599,13 @@ const SummonsDocument: React.FC<{
 
 async function fetchImageAsDataUrl(url: string): Promise<string | null> {
   try {
-    const res = await fetch(url);
+    // Resolve relative asset paths (e.g. "/__l5e/assets-v1/...") against the
+    // current origin so react-pdf can fetch them in the browser.
+    const abs =
+      typeof window !== "undefined" && url.startsWith("/")
+        ? `${window.location.origin}${url}`
+        : url;
+    const res = await fetch(abs);
     if (!res.ok) return null;
     const blob = await res.blob();
     return await new Promise<string | null>((resolve) => {
