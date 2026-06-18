@@ -221,7 +221,13 @@ const s = StyleSheet.create({
   diningQr: { width: 70, height: 70 },
 });
 
+
+// Collapse whitespace/newlines in CMS-edited notice text so paragraphs flow
+// naturally in narrow A5 columns instead of breaking at every embedded \n.
+const flow = (t: string) => t.replace(/\s+/g, " ").trim();
+
 // ---------- panel-level renderers ----------
+
 
 const FrontCoverPanel: React.FC<{
   template: LodgeTemplate;
