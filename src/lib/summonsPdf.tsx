@@ -647,6 +647,8 @@ const SummonsDocument: React.FC<{
             officers={officers}
             summons={summons}
             diningQrDataUrl={diningQrDataUrl}
+            hidden={hidden}
+            shortened={shortened}
           />
         </View>
         <View style={{ flex: 1, padding: 0 }}>
