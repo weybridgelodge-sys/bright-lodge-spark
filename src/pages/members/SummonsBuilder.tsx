@@ -708,15 +708,31 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
         </div>
         <ol className="space-y-1">
           {summons.agenda.map((a, i) => (
-            <li key={a.id} className="flex items-center gap-2">
-              <span className="w-6 text-xs text-primary-foreground/60">{i + 1}.</span>
-              <Input value={a.label} onChange={(e) => updateAgenda(a.id, e.target.value)} />
-              {a.kind !== "standing" && (
-                <Badge variant="outline" className="text-[10px]">{a.kind}</Badge>
+            <li key={a.id} className="space-y-1">
+              <div className="flex items-center gap-2">
+                <span className="w-6 text-xs text-primary-foreground/60">{i + 1}.</span>
+                <Input value={a.label} onChange={(e) => updateAgenda(a.id, e.target.value)} />
+                {a.kind !== "standing" && (
+                  <Badge variant="outline" className="text-[10px]">{a.kind}</Badge>
+                )}
+                <Button type="button" size="sm" variant="ghost" className="text-gold hover:text-gold hover:bg-gold/10" onClick={() => addSubItem(a.id)} title="Add sub-item"><CornerDownRight className="w-4 h-4" /></Button>
+                <Button type="button" size="sm" variant="ghost" className="text-gold hover:text-gold hover:bg-gold/10" onClick={() => moveAgenda(i, -1)}><ArrowUp className="w-4 h-4" /></Button>
+                <Button type="button" size="sm" variant="ghost" className="text-gold hover:text-gold hover:bg-gold/10" onClick={() => moveAgenda(i, 1)}><ArrowDown className="w-4 h-4" /></Button>
+                <Button type="button" size="sm" variant="destructive" onClick={() => removeAgenda(a.id)}><Trash2 className="w-4 h-4" /></Button>
+              </div>
+              {a.children && a.children.length > 0 && (
+                <ol className="space-y-1 pl-8">
+                  {a.children.map((c, ci) => (
+                    <li key={c.id} className="flex items-center gap-2">
+                      <span className="w-6 text-xs text-primary-foreground/60">{subLetter(ci)}.</span>
+                      <Input value={c.label} onChange={(e) => updateAgenda(c.id, e.target.value)} />
+                      <Button type="button" size="sm" variant="ghost" className="text-gold hover:text-gold hover:bg-gold/10" onClick={() => moveSubItem(a.id, ci, -1)}><ArrowUp className="w-4 h-4" /></Button>
+                      <Button type="button" size="sm" variant="ghost" className="text-gold hover:text-gold hover:bg-gold/10" onClick={() => moveSubItem(a.id, ci, 1)}><ArrowDown className="w-4 h-4" /></Button>
+                      <Button type="button" size="sm" variant="destructive" onClick={() => removeAgenda(c.id)}><Trash2 className="w-4 h-4" /></Button>
+                    </li>
+                  ))}
+                </ol>
               )}
-              <Button type="button" size="sm" variant="ghost" className="text-gold hover:text-gold hover:bg-gold/10" onClick={() => moveAgenda(i, -1)}><ArrowUp className="w-4 h-4" /></Button>
-              <Button type="button" size="sm" variant="ghost" className="text-gold hover:text-gold hover:bg-gold/10" onClick={() => moveAgenda(i, 1)}><ArrowDown className="w-4 h-4" /></Button>
-              <Button type="button" size="sm" variant="destructive" onClick={() => removeAgenda(a.id)}><Trash2 className="w-4 h-4" /></Button>
             </li>
           ))}
         </ol>
