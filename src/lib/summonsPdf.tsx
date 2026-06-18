@@ -324,8 +324,8 @@ const FrontCoverPanel: React.FC<{
 
 
     <View style={s.invitation}>
-      <Text style={s.coverBody}>Dear Sir and Brother,</Text>
-      <Text style={[s.coverBody, { marginTop: 4 }]}>
+      <Text style={[s.coverBody, s.centered]}>Dear Sir and Brother,</Text>
+      <Text style={[s.coverBody, s.centered, { marginTop: 4 }]}>
         You are requested to attend the{" "}
         <Text style={s.bold}>
           {ordinal(summons.meeting_number)} {(summons.meeting_type || "Regular")} Meeting
@@ -341,12 +341,12 @@ const FrontCoverPanel: React.FC<{
           at {template.venue_address}
         </Text>
       )}
-      <Text style={[s.coverBody, { marginTop: 8 }]}>
+      <Text style={[s.coverBody, s.centered, { marginTop: 8 }]}>
         By command of the Worshipful Master.
       </Text>
-      <Text style={s.coverBody}>Yours sincerely and fraternally,</Text>
-      <Text style={[s.coverBody, s.bold, { marginTop: 4 }]}>
-        {secName}
+      <Text style={[s.coverBody, s.centered]}>Yours sincerely and fraternally,</Text>
+      <Text style={[s.coverBody, s.centered, s.bold, { marginTop: 4 }]}>
+        {secFromRoll ? `${secFromRoll} (Secretary)` : secName}
       </Text>
     </View>
 
