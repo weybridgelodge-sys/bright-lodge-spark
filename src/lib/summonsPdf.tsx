@@ -190,6 +190,7 @@ const s = StyleSheet.create({
   crest: { width: 100, height: 100, alignSelf: "center", marginBottom: 4 },
   contactsRow: { flexDirection: "row", marginTop: 10, marginBottom: 6 },
   contactBlock: { flex: 1 },
+  contactBlockRight: { flex: 1, alignItems: "flex-end" },
   invitation: { marginTop: 8 },
   dressBlock: {
     marginTop: 10,
@@ -260,11 +261,11 @@ const FrontCoverPanel: React.FC<{
           <Text key={i} style={s.smallText}>{line}</Text>
         ))}
       </View>
-      <View style={s.contactBlock}>
-        <Text style={[s.smallText, s.italic]}>Secretary</Text>
-        <Text style={[s.bodyText, s.bold]}>{secName}</Text>
+      <View style={s.contactBlockRight}>
+        <Text style={[s.smallText, s.italic, { textAlign: "right" }]}>Secretary</Text>
+        <Text style={[s.bodyText, s.bold, { textAlign: "right" }]}>{secName}</Text>
         {secLines.slice(1).map((line, i) => (
-          <Text key={i} style={s.smallText}>{line}</Text>
+          <Text key={i} style={[s.smallText, { textAlign: "right" }]}>{line}</Text>
         ))}
       </View>
     </View>
