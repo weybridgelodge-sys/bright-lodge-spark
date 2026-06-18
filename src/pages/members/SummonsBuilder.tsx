@@ -694,7 +694,7 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
             </div>
           ))}
         </div>
-        <Button type="button" variant="outline" size="sm" onClick={addCandidate} className="mt-2">
+        <Button type="button" variant="outline" size="sm" onClick={addCandidate} className="mt-2 text-navy">
           <Plus className="w-4 h-4 mr-1" /> Add candidate
         </Button>
       </Section>
