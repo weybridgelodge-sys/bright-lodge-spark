@@ -345,8 +345,10 @@ const FrontCoverPanel: React.FC<{
 
 
     <View style={{ marginTop: 10, marginBottom: 6, alignItems: "flex-start" }}>
-      <Text style={s.bodyText}>{secFromRoll ? `${secFromRoll} (Secretary)` : secName}</Text>
-      {secLines.slice(1).map((line, i) => (
+      <Text style={s.bodyText}>{`${secName} (Secretary)`}</Text>
+      {secEmail && <Text style={s.bodyText}>{secEmail}</Text>}
+      {secPhone && <Text style={s.bodyText}>{secPhone}</Text>}
+      {secAddressLines.map((line, i) => (
         <Text key={i} style={s.bodyText}>{line}</Text>
       ))}
     </View>
