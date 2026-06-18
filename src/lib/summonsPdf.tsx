@@ -48,6 +48,8 @@ export type LodgeTemplate = {
   province: string;
   consecration_date: string | null;
   logo_url: string | null;
+  cover_left_image_url: string | null;
+  cover_right_image_url: string | null;
   venue_address: string | null;
   regular_meeting_pattern: string | null;
   loi_details: string | null;
