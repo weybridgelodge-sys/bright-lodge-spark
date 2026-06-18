@@ -109,15 +109,19 @@ const s = StyleSheet.create({
   // Typography — cover
   lodgeName: {
     fontFamily: "Times-Bold",
-    fontSize: 23,
+    fontSize: 22,
+    lineHeight: 1.15,
     color: NAVY,
     textAlign: "center",
+    marginBottom: 4,
   },
   lodgeNameSmall: {
     fontFamily: "Times-Bold",
     fontSize: 14,
+    lineHeight: 1.2,
     color: NAVY,
     textAlign: "center",
+    marginTop: 2,
   },
   province: {
     fontFamily: "Times-Bold",
@@ -351,7 +355,10 @@ const BackCoverPanel: React.FC<{
         {!hidden.has("loi") && template.loi_details && (
           <>
             <Text style={s.sectionHeadingLarge}>Lodge of Instruction</Text>
-            <Text style={s.smallTextLarge}>{template.loi_details}</Text>
+            <Text style={s.smallTextLarge}>
+              {template.loi_details}
+              {template.progression_notice_text ? ` ${template.progression_notice_text}` : ""}
+            </Text>
           </>
         )}
         {!hidden.has("data_protection") && template.data_protection_text && (
@@ -371,29 +378,32 @@ const BackCoverPanel: React.FC<{
             <Text style={s.microLarge}>{template.overseas_attendance_text}</Text>
           </>
         )}
-        {template.progression_notice_text && (
-          <Text style={[s.smallTextLarge, s.bold, { marginTop: 4 }]}>
-            {template.progression_notice_text}
-          </Text>
-        )}
-        {template.royal_arch_rep && (
-          <Text style={[s.smallTextLarge, { marginTop: 4 }]}>
-            <Text style={s.bold}>Royal Arch Representative: </Text>
-            {template.royal_arch_rep}
-          </Text>
-        )}
-        {template.mcf_contact && (
-          <Text style={[s.smallTextLarge, { marginTop: 4 }]}>
-            <Text style={s.bold}>Masonic Charitable Foundation: </Text>
-            {template.mcf_contact}
-          </Text>
-        )}
-        {template.provincial_website && (
-          <Text style={[s.smallTextLarge, s.bold, { marginTop: 4 }]}>
-            Provincial website: {template.provincial_website}
+        {(template.royal_arch_rep || template.mcf_contact || template.provincial_website) && (
+          <Text style={[s.microLarge, { marginTop: 6 }]}>
+            {template.royal_arch_rep && (
+              <>
+                <Text style={s.bold}>Royal Arch Representative: </Text>
+                {template.royal_arch_rep}
+              </>
+            )}
+            {template.royal_arch_rep && (template.mcf_contact || template.provincial_website) ? "  |  " : ""}
+            {template.mcf_contact && (
+              <>
+                <Text style={s.bold}>MCF: </Text>
+                {template.mcf_contact}
+              </>
+            )}
+            {template.mcf_contact && template.provincial_website ? "  |  " : ""}
+            {template.provincial_website && (
+              <>
+                <Text style={s.bold}>Province: </Text>
+                {template.provincial_website}
+              </>
+            )}
           </Text>
         )}
       </View>
+
 
       {/* overflow.fontSize is currently informational only — members already
           render at a fixed compact size that fits the A5 panel. */}
@@ -411,7 +421,7 @@ const OfficersDiningPanel: React.FC<{
   officers: OfficerRollRow[];
   summons: SummonsData;
   diningQrDataUrl: string | null;
-}> = ({ template, officers, summons, diningQrDataUrl }) => (
+}> = ({ template, officers }) => (
   <View style={s.panel}>
     <Text style={s.panelHeading}>OFFICERS {officerSeason()}</Text>
     {officers.filter((o) => o.member).map((o, i) => (
@@ -422,59 +432,25 @@ const OfficersDiningPanel: React.FC<{
     ))}
 
     {template.lodge_representatives?.length > 0 && (
-      <View style={{ marginTop: 6 }}>
-        {template.lodge_representatives.map((r, i) => (
-          <Text key={i} style={s.smallText}>
-            <Text>{r.name}</Text> — Lodge representative to {r.role}
-          </Text>
-        ))}
-      </View>
-    )}
-
-    <View style={s.thinDivider} />
-
-    <Text style={s.sectionHeading}>Dining Arrangements</Text>
-    <View style={s.diningRow}>
-      <View style={s.diningBody}>
-        {summons.dining_price && (
-          <Text style={[s.smallText, s.bold]}>{summons.dining_price}</Text>
-        )}
-        {summons.dining_menu && (
-          <Text style={[s.smallText, { marginTop: 2 }]}>{summons.dining_menu}</Text>
-        )}
-        {template.dining_booking_url && (
-          <Text style={[s.smallText, s.bold, { marginTop: 4 }]}>
-            Please book online at: {template.dining_booking_url}
-          </Text>
-        )}
-        {summons.dining_deadline && (
-          <Text style={[s.smallText, { marginTop: 2 }]}>
-            All bookings by{" "}
-            <Text style={s.bold}>{formatDateLong(summons.dining_deadline)}</Text>
-            {" "}or you will not be fed.
-          </Text>
-        )}
-        {(summons.dining_enquiry_name || summons.dining_enquiry_email) && (
-          <Text style={[s.smallText, { marginTop: 4 }]}>
-            Dining enquiries: {summons.dining_enquiry_name}
-            {summons.dining_enquiry_email ? ` — ${summons.dining_enquiry_email}` : ""}
-          </Text>
-        )}
-      </View>
-      {diningQrDataUrl && (
-        <View style={{ alignItems: "center" }}>
-          <Image src={diningQrDataUrl} style={s.diningQr} />
-          <Text style={[s.micro, { marginTop: 2 }]}>Scan to book</Text>
+      <>
+        <View style={s.thinDivider} />
+        <View>
+          {template.lodge_representatives.map((r, i) => (
+            <Text key={i} style={s.smallText}>
+              <Text>{r.name}</Text> — Lodge representative to {r.role}
+            </Text>
+          ))}
         </View>
-      )}
-    </View>
+      </>
+    )}
   </View>
 );
 
 const AgendaPanel: React.FC<{
   template: LodgeTemplate;
   summons: SummonsData;
-}> = ({ template, summons }) => (
+  diningQrDataUrl: string | null;
+}> = ({ template, summons, diningQrDataUrl }) => (
   <View style={s.panel}>
     <Text style={s.panelHeading}>AGENDA</Text>
     {summons.agenda.length === 0 ? (
@@ -520,10 +496,11 @@ const AgendaPanel: React.FC<{
       </View>
     )}
 
-    <View style={s.thinDivider} />
-
+    {(summons.next_meeting_date || summons.officer_night_date) && (
+      <View style={s.thinDivider} />
+    )}
     {summons.next_meeting_date && (
-      <Text style={[s.smallText, { marginTop: 4 }]}>
+      <Text style={s.smallText}>
         The date of the next regular meeting is{" "}
         <Text style={s.bold}>{formatDateLong(summons.next_meeting_date)}</Text>.
       </Text>
@@ -533,8 +510,46 @@ const AgendaPanel: React.FC<{
         Officer Night will be held on {formatDateLong(summons.officer_night_date)}.
       </Text>
     )}
+
+    <View style={s.thinDivider} />
+    <Text style={s.sectionHeading}>Dining Arrangements</Text>
+    <View style={s.diningRow}>
+      <View style={s.diningBody}>
+        {summons.dining_price && (
+          <Text style={[s.smallText, s.bold]}>{summons.dining_price}</Text>
+        )}
+        {summons.dining_menu && (
+          <Text style={[s.smallText, { marginTop: 2 }]}>{summons.dining_menu}</Text>
+        )}
+        {template.dining_booking_url && (
+          <Text style={[s.smallText, s.bold, { marginTop: 4 }]}>
+            Please book online at: {template.dining_booking_url}
+          </Text>
+        )}
+        {summons.dining_deadline && (
+          <Text style={[s.smallText, { marginTop: 2 }]}>
+            All bookings by{" "}
+            <Text style={s.bold}>{formatDateLong(summons.dining_deadline)}</Text>
+            {" "}or you will not be fed.
+          </Text>
+        )}
+        {(summons.dining_enquiry_name || summons.dining_enquiry_email) && (
+          <Text style={[s.smallText, { marginTop: 4 }]}>
+            Dining enquiries: {summons.dining_enquiry_name}
+            {summons.dining_enquiry_email ? ` — ${summons.dining_enquiry_email}` : ""}
+          </Text>
+        )}
+      </View>
+      {diningQrDataUrl && (
+        <View style={{ alignItems: "center" }}>
+          <Image src={diningQrDataUrl} style={s.diningQr} />
+          <Text style={[s.micro, { marginTop: 2 }]}>Scan to book</Text>
+        </View>
+      )}
+    </View>
   </View>
 );
+
 
 // ---------- helpers ----------
 
@@ -619,7 +634,7 @@ const SummonsDocument: React.FC<{
           />
         </View>
         <View style={{ flex: 1, padding: 0 }}>
-          <AgendaPanel template={template} summons={summons} />
+          <AgendaPanel template={template} summons={summons} diningQrDataUrl={diningQrDataUrl} />
         </View>
       </Page>
     </Document>
