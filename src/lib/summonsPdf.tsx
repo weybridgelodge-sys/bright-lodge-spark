@@ -17,6 +17,7 @@ import {
   Image,
   Font,
   pdf,
+  Link,
 } from "@react-pdf/renderer";
 
 // Disable automatic hyphenation across the document — react-pdf otherwise
@@ -644,7 +645,26 @@ const AgendaPanel: React.FC<{
     )}
 
     <View style={s.thinDivider} />
-    <Text style={s.sectionHeading}>Dining Arrangements</Text>
+    <View style={{ flexDirection: "row", flexWrap: "wrap", marginTop: 8, marginBottom: 4 }}>
+      <Text style={s.sectionHeading}>Dining Arrangements </Text>
+      <Text style={{ fontFamily: "Times-Roman", fontSize: 9, color: "#222", marginTop: 1 }}>
+        Book your place online via this{" "}
+      </Text>
+      {template.dining_booking_url ? (
+        <Link src={template.dining_booking_url}>
+          <Text style={{ fontFamily: "Times-Roman", fontSize: 9, color: NAVY, textDecoration: "underline", marginTop: 1 }}>
+            LINK
+          </Text>
+        </Link>
+      ) : (
+        <Text style={{ fontFamily: "Times-Roman", fontSize: 9, color: NAVY, textDecoration: "underline", marginTop: 1 }}>
+          LINK
+        </Text>
+      )}
+      <Text style={{ fontFamily: "Times-Roman", fontSize: 9, color: "#222", marginTop: 1 }}>
+        {" "}or scan the QR code below
+      </Text>
+    </View>
     <View style={s.diningRow}>
       <View style={s.diningBody}>
         {summons.dining_price && (
