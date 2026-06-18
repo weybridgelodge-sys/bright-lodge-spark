@@ -484,6 +484,10 @@ const AgendaPanel: React.FC<{
       ))
     )}
 
+    {Array.from({ length: 7 }).map((_, i) => (
+      <Text key={`agenda-spacer-${i}`} style={{ fontSize: 9, lineHeight: 1.3 }}> </Text>
+    ))}
+
     {summons.candidates.length > 0 && (
       <View style={{ marginTop: 6 }}>
         <Text style={s.sectionHeading}>Candidate Details</Text>
