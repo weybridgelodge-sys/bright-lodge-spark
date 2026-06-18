@@ -293,8 +293,7 @@ const BackCoverPanel: React.FC<{
     <View style={s.panel}>
       <Text style={s.panelHeading}>LIST OF MEMBERS</Text>
       <View style={s.memberTable}>
-        <View style={s.memberCol}>{left.map(memberLine)}</View>
-        <View style={s.memberCol}>{right.map(memberLine)}</View>
+        <View style={s.memberCol}>{[...left, ...right].map(memberLine)}</View>
       </View>
       <Text style={[s.micro, { marginTop: 4 }]}>
         + Past Master of the Lodge   # Past Master in the Lodge   † HRA Chapter
