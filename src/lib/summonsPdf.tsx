@@ -127,6 +127,18 @@ const s = StyleSheet.create({
     borderBottom: `0.5pt solid ${GOLD}`,
     marginVertical: 4,
   },
+  bottomSection: {
+    flexDirection: "row",
+    marginTop: 2,
+  },
+  bottomLeft: {
+    flex: 3,
+    paddingRight: 8,
+  },
+  bottomRight: {
+    flex: 1,
+    paddingLeft: 4,
+  },
   panelHeading: {
     fontFamily: "Times-Bold",
     fontSize: 12,
