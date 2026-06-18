@@ -483,7 +483,14 @@ const OfficersDiningPanel: React.FC<{
     <Text style={s.panelHeading}>OFFICERS {officerSeason()}</Text>
     {officers.filter((o) => o.member).map((o, i) => (
       <View key={i} style={s.officerRow}>
-        <Text style={s.officerName}>{o.member}</Text>
+        <BoldNameText
+          style={s.officerName}
+          fullName={o.member}
+          post_nominals={o.post_nominals}
+          grand_rank={o.grand_rank}
+          provincial_rank={o.provincial_rank}
+          rank={o.rank}
+        />
         <Text style={s.officerRole}>{shortRole(o.label)}</Text>
       </View>
     ))}
