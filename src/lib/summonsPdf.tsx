@@ -337,9 +337,9 @@ const FrontCoverPanel: React.FC<{
     ? rawSecLines.slice(1)
     : rawSecLines;
   const secName = secFromRoll || rawSecLines[0] || "—";
-  const logoSrc = logoDataUrl || template.logo_url;
-  const leftSrc = coverLeftDataUrl || template.cover_left_image_url || DEFAULT_COVER_LEFT_URL;
-  const rightSrc = coverRightDataUrl || template.cover_right_image_url || DEFAULT_COVER_RIGHT_URL;
+  const logoSrc = logoDataUrl || resolveAssetUrl(template.logo_url, DEFAULT_LOGO_URL);
+  const leftSrc = coverLeftDataUrl || resolveAssetUrl(template.cover_left_image_url, DEFAULT_COVER_LEFT_URL);
+  const rightSrc = coverRightDataUrl || resolveAssetUrl(template.cover_right_image_url, DEFAULT_COVER_RIGHT_URL);
   return (
   <View style={[s.panel]}>
     <Text style={s.lodgeName}>{template.lodge_name} No. {template.lodge_number}</Text>
