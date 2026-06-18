@@ -198,12 +198,17 @@ function TemplateTab() {
       const { data } = await supabase.from("lodge_template").select("*").eq("id", "default").maybeSingle();
       if (data) {
         const merged = { ...EMPTY_TEMPLATE, ...(data as any), lodge_representatives: (data as any).lodge_representatives ?? [] };
-        if (!merged.logo_url) merged.logo_url = EMPTY_TEMPLATE.logo_url;
+        if (!merged.logo_url) merged.logo_url = DEFAULT_LOGO_URL;
+        if (!merged.cover_left_image_url) merged.cover_left_image_url = DEFAULT_COVER_LEFT_URL;
+        if (!merged.cover_right_image_url) merged.cover_right_image_url = DEFAULT_COVER_RIGHT_URL;
         // Strip any absolute origin from previously-saved asset URLs so they
         // resolve correctly on the current domain (preview / published / custom).
-        if (typeof merged.logo_url === "string") {
-          const idx = merged.logo_url.indexOf("/__l5e/");
-          if (idx > 0) merged.logo_url = merged.logo_url.slice(idx);
+        for (const k of ["logo_url", "cover_left_image_url", "cover_right_image_url"] as const) {
+          const v = (merged as any)[k];
+          if (typeof v === "string") {
+            const idx = v.indexOf("/__l5e/");
+            if (idx > 0) (merged as any)[k] = v.slice(idx);
+          }
         }
         setT(merged);
         setReps(((data as any).lodge_representatives ?? []) as Rep[]);
