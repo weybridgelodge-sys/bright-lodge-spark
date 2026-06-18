@@ -127,6 +127,18 @@ const s = StyleSheet.create({
     borderBottom: `0.5pt solid ${GOLD}`,
     marginVertical: 4,
   },
+  bottomSection: {
+    flexDirection: "row",
+    marginTop: 2,
+  },
+  bottomLeft: {
+    flex: 3,
+    paddingRight: 8,
+  },
+  bottomRight: {
+    flex: 1,
+    paddingLeft: 4,
+  },
   panelHeading: {
     fontFamily: "Times-Bold",
     fontSize: 12,
@@ -144,9 +156,20 @@ const s = StyleSheet.create({
     textTransform: "uppercase",
     letterSpacing: 0.5,
   },
+  sectionHeadingLarge: {
+    fontFamily: "Times-Bold",
+    fontSize: 10,
+    color: NAVY,
+    marginTop: 6,
+    marginBottom: 2,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
   bodyText: { fontSize: 9, lineHeight: 1.35 },
   smallText: { fontSize: 7.5, lineHeight: 1.3, color: "#333" },
+  smallTextLarge: { fontSize: 8.5, lineHeight: 1.3, color: "#333" },
   micro: { fontSize: 6.5, lineHeight: 1.25, color: "#555" },
+  microLarge: { fontSize: 7.5, lineHeight: 1.25, color: "#555" },
   bold: { fontFamily: "Times-Bold" },
   italic: { fontFamily: "Times-Italic" },
   centered: { textAlign: "center" },
@@ -308,57 +331,63 @@ const BackCoverPanel: React.FC<{
 
       <View style={s.thinDivider} />
 
-      {!hidden.has("regular_meetings") && template.regular_meeting_pattern && (
-        <>
-          <Text style={s.sectionHeading}>Regular Meetings</Text>
-          <Text style={s.smallText}>{template.regular_meeting_pattern}</Text>
-        </>
-      )}
-      {!hidden.has("loi") && template.loi_details && (
-        <>
-          <Text style={s.sectionHeading}>Lodge of Instruction</Text>
-          <Text style={s.smallText}>{template.loi_details}</Text>
-        </>
-      )}
-      {!hidden.has("data_protection") && template.data_protection_text && (
-        <>
-          <Text style={s.sectionHeading}>Data Protection Act</Text>
-          <Text style={s.micro}>
-            {shortened.has("data_protection")
-              ? (template.data_protection_text_short ||
-                  "See lodge data protection notice — copies available from the Secretary.")
-              : template.data_protection_text}
-          </Text>
-        </>
-      )}
-      {!hidden.has("overseas") && template.overseas_attendance_text && (
-        <>
-          <Text style={s.sectionHeading}>Attendance at Lodges Overseas</Text>
-          <Text style={s.micro}>{template.overseas_attendance_text}</Text>
-        </>
-      )}
-      {template.progression_notice_text && (
-        <Text style={[s.smallText, s.bold, { marginTop: 3 }]}>
-          {template.progression_notice_text}
-        </Text>
-      )}
-      {template.royal_arch_rep && (
-        <Text style={[s.smallText, { marginTop: 4 }]}>
-          <Text style={s.bold}>Royal Arch Representative: </Text>
-          {template.royal_arch_rep}
-        </Text>
-      )}
-      {template.mcf_contact && (
-        <Text style={s.smallText}>
-          <Text style={s.bold}>Masonic Charitable Foundation: </Text>
-          {template.mcf_contact}
-        </Text>
-      )}
-      {template.provincial_website && (
-        <Text style={[s.smallText, s.bold]}>
-          Provincial website: {template.provincial_website}
-        </Text>
-      )}
+      <View style={s.bottomSection}>
+        <View style={s.bottomLeft}>
+          {!hidden.has("regular_meetings") && template.regular_meeting_pattern && (
+            <>
+              <Text style={s.sectionHeadingLarge}>Regular Meetings</Text>
+              <Text style={s.smallTextLarge}>{template.regular_meeting_pattern}</Text>
+            </>
+          )}
+          {!hidden.has("loi") && template.loi_details && (
+            <>
+              <Text style={s.sectionHeadingLarge}>Lodge of Instruction</Text>
+              <Text style={s.smallTextLarge}>{template.loi_details}</Text>
+            </>
+          )}
+          {!hidden.has("data_protection") && template.data_protection_text && (
+            <>
+              <Text style={s.sectionHeadingLarge}>Data Protection Act</Text>
+              <Text style={s.microLarge}>
+                {shortened.has("data_protection")
+                  ? (template.data_protection_text_short ||
+                      "See lodge data protection notice — copies available from the Secretary.")
+                  : template.data_protection_text}
+              </Text>
+            </>
+          )}
+          {!hidden.has("overseas") && template.overseas_attendance_text && (
+            <>
+              <Text style={s.sectionHeadingLarge}>Attendance at Lodges Overseas</Text>
+              <Text style={s.microLarge}>{template.overseas_attendance_text}</Text>
+            </>
+          )}
+        </View>
+        <View style={s.bottomRight}>
+          {template.progression_notice_text && (
+            <Text style={[s.smallTextLarge, s.bold, { marginTop: 3 }]}>
+              {template.progression_notice_text}
+            </Text>
+          )}
+          {template.royal_arch_rep && (
+            <Text style={[s.smallTextLarge, { marginTop: 4 }]}>
+              <Text style={s.bold}>Royal Arch Representative: </Text>
+              {template.royal_arch_rep}
+            </Text>
+          )}
+          {template.mcf_contact && (
+            <Text style={s.smallTextLarge}>
+              <Text style={s.bold}>Masonic Charitable Foundation: </Text>
+              {template.mcf_contact}
+            </Text>
+          )}
+          {template.provincial_website && (
+            <Text style={[s.smallTextLarge, s.bold]}>
+              Provincial website: {template.provincial_website}
+            </Text>
+          )}
+        </View>
+      </View>
 
       {/* overflow.fontSize is currently informational only — members already
           render at a fixed compact size that fits the A5 panel. */}
