@@ -190,8 +190,12 @@ export function formatMemberLine(m: MemberRow): string {
   const bracket = (m.preferred_name && m.preferred_name.trim()) || first || "";
   const bracketPart = bracket ? ` (${bracket})` : "";
 
-  const post = (m.post_nominals || m.grand_rank || m.provincial_rank || m.rank || "").trim();
-  const postPart = post ? ` ${post}` : "";
+  const postParts: string[] = [];
+  if (m.post_nominals?.trim()) postParts.push(m.post_nominals.trim());
+  if (m.grand_rank?.trim()) postParts.push(m.grand_rank.trim());
+  if (m.provincial_rank?.trim()) postParts.push(m.provincial_rank.trim());
+  if (m.rank?.trim()) postParts.push(m.rank.trim());
+  const postPart = postParts.length ? ` ${postParts.join(" ")}` : "";
 
   return `${title} ${display}${bracketPart}${postPart}`;
 }
@@ -205,8 +209,12 @@ export function formatMemberLineFormal(m: MemberRow): string {
     ? initials ? `${initials} ${surname}` : surname
     : initials || "—";
 
-  const post = (m.post_nominals || m.grand_rank || m.provincial_rank || m.rank || "").trim();
-  const postPart = post ? ` ${post}` : "";
+  const postParts: string[] = [];
+  if (m.post_nominals?.trim()) postParts.push(m.post_nominals.trim());
+  if (m.grand_rank?.trim()) postParts.push(m.grand_rank.trim());
+  if (m.provincial_rank?.trim()) postParts.push(m.provincial_rank.trim());
+  if (m.rank?.trim()) postParts.push(m.rank.trim());
+  const postPart = postParts.length ? ` ${postParts.join(" ")}` : "";
 
   return `${title} ${display}${postPart}`;
 }
