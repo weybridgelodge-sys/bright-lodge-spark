@@ -2,7 +2,18 @@
 // member-list balancing, overflow priority logic.
 
 export type AgendaKind = "standing" | "variable" | "candidate";
-export type AgendaItem = { id: string; label: string; kind: AgendaKind };
+export type AgendaItem = { id: string; label: string; kind: AgendaKind; children?: AgendaItem[] };
+
+// a, b, c ... z, aa, ab ...
+export function subLetter(i: number): string {
+  let n = i;
+  let out = "";
+  do {
+    out = String.fromCharCode(97 + (n % 26)) + out;
+    n = Math.floor(n / 26) - 1;
+  } while (n >= 0);
+  return out;
+}
 
 export type Candidate = {
   id: string;

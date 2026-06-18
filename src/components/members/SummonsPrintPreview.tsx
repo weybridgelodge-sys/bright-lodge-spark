@@ -15,6 +15,7 @@ import {
   MemberRow,
   sortMembersBySeniority,
   splitTwoColumns,
+  subLetter,
 } from "@/lib/summons";
 import { LodgeTemplate, OfficerRollRow, SummonsData } from "@/lib/summonsPdf";
 
@@ -338,9 +339,21 @@ function Sheet2({
         ) : (
           <ol className="text-[10px] space-y-1">
             {summons.agenda.map((a, i) => (
-              <li key={a.id} className="flex gap-2">
-                <span className="font-bold w-5">{i + 1}.</span>
-                <span className="flex-1">{a.label}</span>
+              <li key={a.id}>
+                <div className="flex gap-2">
+                  <span className="font-bold w-5">{i + 1}.</span>
+                  <span className="flex-1">{a.label}</span>
+                </div>
+                {a.children && a.children.length > 0 && (
+                  <ol className="pl-6 mt-0.5 space-y-0.5">
+                    {a.children.map((c, ci) => (
+                      <li key={c.id} className="flex gap-2">
+                        <span className="font-bold w-4">{subLetter(ci)}.</span>
+                        <span className="flex-1">{c.label}</span>
+                      </li>
+                    ))}
+                  </ol>
+                )}
               </li>
             ))}
           </ol>

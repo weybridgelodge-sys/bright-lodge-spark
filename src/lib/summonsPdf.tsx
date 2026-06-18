@@ -31,6 +31,7 @@ import {
   planOverflow,
   sortMembersBySeniority,
   splitTwoColumns,
+  subLetter,
 } from "./summons";
 
 export type LodgeTemplate = {
@@ -464,9 +465,21 @@ const AgendaPanel: React.FC<{
       <Text style={s.smallText}>No agenda items.</Text>
     ) : (
       summons.agenda.map((item, i) => (
-        <View key={item.id} style={s.agendaRow}>
-          <Text style={s.agendaNum}>{i + 1}.</Text>
-          <Text style={s.agendaText}>{item.label}</Text>
+        <View key={item.id} wrap={false}>
+          <View style={s.agendaRow}>
+            <Text style={s.agendaNum}>{i + 1}.</Text>
+            <Text style={s.agendaText}>{item.label}</Text>
+          </View>
+          {item.children && item.children.length > 0 && (
+            <View style={{ marginLeft: 16, marginBottom: 2 }}>
+              {item.children.map((c, ci) => (
+                <View key={c.id} style={s.agendaRow}>
+                  <Text style={s.agendaNum}>{subLetter(ci)}.</Text>
+                  <Text style={s.agendaText}>{c.label}</Text>
+                </View>
+              ))}
+            </View>
+          )}
         </View>
       ))
     )}
