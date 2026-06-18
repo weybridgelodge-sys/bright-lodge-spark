@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { ArrowDown, ArrowUp, Download, FileText, Mail, Plus, Save, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowUp, CornerDownRight, Download, FileText, Mail, Plus, Save, Trash2 } from "lucide-react";
 import {
   AGENDA_PRESETS,
   AgendaItem,
