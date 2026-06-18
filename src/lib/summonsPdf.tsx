@@ -352,8 +352,8 @@ const FrontCoverPanel: React.FC<{
 
     <View style={{ marginTop: 10, marginBottom: 6, alignItems: "flex-start" }}>
       <Text style={s.bodyText}>{`${secName} (Secretary)`}</Text>
-      {secEmail && <Text style={s.bodyText}>{secEmail}</Text>}
-      {secPhone && <Text style={s.bodyText}>{secPhone}</Text>}
+      {secEmail && <Text style={s.bodyText}>Email: {secEmail}</Text>}
+      {secPhone && <Text style={s.bodyText}>Mobile: {secPhone}</Text>}
       {secAddressLines.map((line, i) => (
         <Text key={i} style={s.bodyText}>{line}</Text>
       ))}
