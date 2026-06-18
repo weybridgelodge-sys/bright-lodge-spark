@@ -261,11 +261,11 @@ const FrontCoverPanel: React.FC<{
           <Text key={i} style={s.smallText}>{line}</Text>
         ))}
       </View>
-      <View style={s.contactBlock}>
-        <Text style={[s.smallText, s.italic]}>Secretary</Text>
-        <Text style={[s.bodyText, s.bold]}>{secName}</Text>
+      <View style={s.contactBlockRight}>
+        <Text style={[s.smallText, s.italic, { textAlign: "right" }]}>Secretary</Text>
+        <Text style={[s.bodyText, s.bold, { textAlign: "right" }]}>{secName}</Text>
         {secLines.slice(1).map((line, i) => (
-          <Text key={i} style={s.smallText}>{line}</Text>
+          <Text key={i} style={[s.smallText, { textAlign: "right" }]}>{line}</Text>
         ))}
       </View>
     </View>
