@@ -820,7 +820,7 @@ function HistoryTab({ onEdit }: { onEdit: (id: string) => void }) {
                   <div className="flex gap-2 justify-end py-1.5">
                     <Button size="sm" variant="outline" className="text-navy" onClick={() => onEdit(r.id)}>Edit</Button>
                     {r.pdf_storage_path && (
-                      <Button size="sm" variant="outline" onClick={() => open(r.pdf_storage_path)}>
+                      <Button size="sm" variant="outline" className="text-navy" onClick={() => open(r.pdf_storage_path)}>
                         <FileText className="w-3.5 h-3.5 mr-1" /> Open
                       </Button>
                     )}
