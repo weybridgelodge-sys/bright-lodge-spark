@@ -162,7 +162,7 @@ function PrintPreviewTab() {
         supabase.from("lodge_template").select("*").eq("id", "default").maybeSingle(),
         supabase
           .from("profiles")
-          .select("id,title,first_name,middle_name,last_name,full_name,preferred_name,post_nominals,rank,grand_rank,provincial_rank,initiation_date,joined_lodge_date,joined_year,is_past_master,is_royal_arch,status")
+          .select("id,title,first_name,middle_name,last_name,full_name,preferred_name,post_nominals,rank,grand_rank,provincial_rank,initiation_date,joined_lodge_date,joined_year,is_past_master,is_royal_arch,is_honorary_member,status")
           .eq("status", "active"),
       ]);
       if (tpl.data) {
@@ -323,7 +323,7 @@ async function loadOfficers(setRows: (rows: OfficerRollRow[]) => void, setLoadin
     .eq("lodge_year", lodgeYear);
   const memberIds = Array.from(new Set((appts ?? []).map((a) => a.member_id).filter(Boolean)));
   const { data: profs } = memberIds.length
-    ? await supabase.from("profiles").select("id,title,first_name,middle_name,last_name,full_name,preferred_name,post_nominals,rank,grand_rank,provincial_rank,is_past_master,is_royal_arch,initiation_date,joined_lodge_date,joined_year,status").in("id", memberIds)
+    ? await supabase.from("profiles").select("id,title,first_name,middle_name,last_name,full_name,preferred_name,post_nominals,rank,grand_rank,provincial_rank,is_past_master,is_royal_arch,is_honorary_member,initiation_date,joined_lodge_date,joined_year,status").in("id", memberIds)
     : { data: [] as any[] };
   const byId = new Map((profs ?? []).map((p: any) => [p.id, p]));
   const allKeys: string[] = [
@@ -375,7 +375,7 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
         supabase.from("lodge_template").select("*").eq("id", "default").maybeSingle(),
         supabase
           .from("profiles")
-          .select("id,title,first_name,middle_name,last_name,full_name,preferred_name,post_nominals,rank,grand_rank,provincial_rank,initiation_date,joined_lodge_date,joined_year,is_past_master,is_royal_arch,status")
+          .select("id,title,first_name,middle_name,last_name,full_name,preferred_name,post_nominals,rank,grand_rank,provincial_rank,initiation_date,joined_lodge_date,joined_year,is_past_master,is_royal_arch,is_honorary_member,status")
           .eq("status", "active"),
         supabase.from("lodge_events").select("id,title,event_date,tyling_time,dress_code,location").order("event_date", { ascending: true }),
         supabase.from("festive_board_meetings").select("id,meeting_date,notes").order("meeting_date", { ascending: true }),
