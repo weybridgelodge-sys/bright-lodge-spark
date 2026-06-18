@@ -651,7 +651,7 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
             </Select>
           </div>
           <Button type="button" onClick={addPreset}><Plus className="w-4 h-4 mr-1" /> Add</Button>
-          <Button type="button" variant="outline" onClick={addCustomAgenda}>Custom</Button>
+          <Button type="button" variant="outline" className="text-navy" onClick={addCustomAgenda}>Custom</Button>
         </div>
         <ol className="space-y-1">
           {summons.agenda.map((a, i) => (
@@ -661,8 +661,8 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
               {a.kind !== "standing" && (
                 <Badge variant="outline" className="text-[10px]">{a.kind}</Badge>
               )}
-              <Button type="button" size="sm" variant="ghost" onClick={() => moveAgenda(i, -1)}><ArrowUp className="w-4 h-4" /></Button>
-              <Button type="button" size="sm" variant="ghost" onClick={() => moveAgenda(i, 1)}><ArrowDown className="w-4 h-4" /></Button>
+              <Button type="button" size="sm" variant="ghost" className="text-gold hover:text-gold hover:bg-gold/10" onClick={() => moveAgenda(i, -1)}><ArrowUp className="w-4 h-4" /></Button>
+              <Button type="button" size="sm" variant="ghost" className="text-gold hover:text-gold hover:bg-gold/10" onClick={() => moveAgenda(i, 1)}><ArrowDown className="w-4 h-4" /></Button>
               <Button type="button" size="sm" variant="destructive" onClick={() => removeAgenda(a.id)}><Trash2 className="w-4 h-4" /></Button>
             </li>
           ))}
