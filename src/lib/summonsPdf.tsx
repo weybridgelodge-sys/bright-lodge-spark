@@ -307,13 +307,20 @@ const FrontCoverPanel: React.FC<{
   const logoSrc = logoDataUrl || template.logo_url;
   return (
   <View style={[s.panel]}>
-    {logoSrc ? <Image src={logoSrc} style={s.crest} /> : null}
     <Text style={s.lodgeName}>{template.lodge_name} No. {template.lodge_number}</Text>
     <Text style={s.province}>PROVINCE OF {(template.province || "").toUpperCase()}</Text>
     <View style={s.divider} />
     {wmFromRoll && (
       <Text style={s.province}>{wmFromRoll} - Worshipful Master</Text>
     )}
+
+    <View style={{ flexDirection: "row", alignItems: "center", marginTop: 6, marginBottom: 4 }}>
+      <View style={{ flex: 1, alignItems: "flex-start" }} />
+      <View style={{ flex: 1, alignItems: "center" }}>
+        {logoSrc ? <Image src={logoSrc} style={s.crest} /> : null}
+      </View>
+      <View style={{ flex: 1, alignItems: "flex-end" }} />
+    </View>
 
     <View style={{ marginTop: 10, marginBottom: 6, alignItems: "flex-start" }}>
       <Text style={s.bodyText}>{secFromRoll ? `${secFromRoll} (Secretary)` : secName}</Text>
