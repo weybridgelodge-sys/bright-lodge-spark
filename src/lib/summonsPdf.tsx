@@ -163,12 +163,12 @@ const s = StyleSheet.create({
   },
 
   // Members
-  memberTable: { flexDirection: "row", marginTop: 4 },
+  memberTable: { flexDirection: "column", marginTop: 4 },
   memberCol: { flex: 1, paddingHorizontal: 2 },
   memberRow: { flexDirection: "row", marginBottom: 1 },
-  memberDate: { width: 60, fontSize: 6.8 },
-  memberMark: { width: 16, fontSize: 6.8, textAlign: "center" },
-  memberName: { flex: 1, fontSize: 6.8 },
+  memberDate: { width: 65, fontSize: 7.8 },
+  memberMark: { width: 18, fontSize: 7.8, textAlign: "center" },
+  memberName: { flex: 1, fontSize: 7.8 },
 
   // Officers
   officerRow: { flexDirection: "row", marginBottom: 1 },
