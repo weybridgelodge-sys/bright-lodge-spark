@@ -355,7 +355,10 @@ const BackCoverPanel: React.FC<{
         {!hidden.has("loi") && template.loi_details && (
           <>
             <Text style={s.sectionHeadingLarge}>Lodge of Instruction</Text>
-            <Text style={s.smallTextLarge}>{template.loi_details}</Text>
+            <Text style={s.smallTextLarge}>
+              {template.loi_details}
+              {template.progression_notice_text ? ` ${template.progression_notice_text}` : ""}
+            </Text>
           </>
         )}
         {!hidden.has("data_protection") && template.data_protection_text && (
@@ -375,29 +378,32 @@ const BackCoverPanel: React.FC<{
             <Text style={s.microLarge}>{template.overseas_attendance_text}</Text>
           </>
         )}
-        {template.progression_notice_text && (
-          <Text style={[s.smallTextLarge, s.bold, { marginTop: 4 }]}>
-            {template.progression_notice_text}
-          </Text>
-        )}
-        {template.royal_arch_rep && (
-          <Text style={[s.smallTextLarge, { marginTop: 4 }]}>
-            <Text style={s.bold}>Royal Arch Representative: </Text>
-            {template.royal_arch_rep}
-          </Text>
-        )}
-        {template.mcf_contact && (
-          <Text style={[s.smallTextLarge, { marginTop: 4 }]}>
-            <Text style={s.bold}>Masonic Charitable Foundation: </Text>
-            {template.mcf_contact}
-          </Text>
-        )}
-        {template.provincial_website && (
-          <Text style={[s.smallTextLarge, s.bold, { marginTop: 4 }]}>
-            Provincial website: {template.provincial_website}
+        {(template.royal_arch_rep || template.mcf_contact || template.provincial_website) && (
+          <Text style={[s.microLarge, { marginTop: 6 }]}>
+            {template.royal_arch_rep && (
+              <>
+                <Text style={s.bold}>Royal Arch Representative: </Text>
+                {template.royal_arch_rep}
+              </>
+            )}
+            {template.royal_arch_rep && (template.mcf_contact || template.provincial_website) ? "  |  " : ""}
+            {template.mcf_contact && (
+              <>
+                <Text style={s.bold}>MCF: </Text>
+                {template.mcf_contact}
+              </>
+            )}
+            {template.mcf_contact && template.provincial_website ? "  |  " : ""}
+            {template.provincial_website && (
+              <>
+                <Text style={s.bold}>Province: </Text>
+                {template.provincial_website}
+              </>
+            )}
           </Text>
         )}
       </View>
+
 
       {/* overflow.fontSize is currently informational only — members already
           render at a fixed compact size that fits the A5 panel. */}
