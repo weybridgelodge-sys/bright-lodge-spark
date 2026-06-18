@@ -235,6 +235,55 @@ const s = StyleSheet.create({
 // naturally in narrow A5 columns instead of breaking at every embedded \n.
 const flow = (t: string) => t.replace(/\s+/g, " ").trim();
 
+// Render a pre-formatted member/officer name so that post-nominals and
+// Grand Rank appear in Times-Bold, while Provincial Rank and plain rank stay
+// in regular weight.  All four fields follow the base name in the order:
+// post-nominals → grand_rank → provincial_rank → rank.
+function BoldNameText({
+  fullName,
+  post_nominals,
+  grand_rank,
+  provincial_rank,
+  rank,
+  style,
+}: {
+  fullName: string;
+  post_nominals?: string | null;
+  grand_rank?: string | null;
+  provincial_rank?: string | null;
+  rank?: string | null;
+  style?: any;
+}) {
+  const posts = [
+    { text: post_nominals?.trim(), bold: true },
+    { text: grand_rank?.trim(), bold: true },
+    { text: provincial_rank?.trim(), bold: false },
+    { text: rank?.trim(), bold: false },
+  ].filter((d) => d.text) as { text: string; bold: boolean }[];
+
+  if (posts.length === 0) {
+    return <Text style={style}>{fullName}</Text>;
+  }
+
+  const firstPost = posts[0].text;
+  const idx = fullName.indexOf(` ${firstPost}`);
+  if (idx === -1) {
+    return <Text style={style}>{fullName}</Text>;
+  }
+
+  const base = fullName.slice(0, idx);
+  return (
+    <Text style={style}>
+      <Text>{base}</Text>
+      {posts.map((p, i) => (
+        <Text key={i} style={p.bold ? s.bold : undefined}>
+          {" "}{p.text}
+        </Text>
+      ))}
+    </Text>
+  );
+}
+
 // ---------- panel-level renderers ----------
 
 
