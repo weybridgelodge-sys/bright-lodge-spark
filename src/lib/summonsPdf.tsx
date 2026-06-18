@@ -355,8 +355,8 @@ const FrontCoverPanel: React.FC<{
 
     {summons.dress_code && (
       <View style={s.dressBlock}>
-        <Text style={[s.smallText, s.bold]}>Dress Code</Text>
-        <Text style={s.smallText}>{summons.dress_code}</Text>
+        <Text style={[s.smallText, s.bold, s.centered]}>Dress Code</Text>
+        <Text style={[s.smallText, s.centered]}>{summons.dress_code}</Text>
       </View>
     )}
   </View>
