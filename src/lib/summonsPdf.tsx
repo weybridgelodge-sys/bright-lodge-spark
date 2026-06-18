@@ -308,11 +308,17 @@ const FrontCoverPanel: React.FC<{
   coverRightDataUrl?: string | null;
 }> = ({ template, summons, officers, logoDataUrl, coverLeftDataUrl, coverRightDataUrl }) => {
   const wmFromRoll = officers.find((o) => o.label === "Worshipful Master")?.member_formal || officers.find((o) => o.label === "Worshipful Master")?.member;
-  const secFromRoll = officers.find((o) => o.label === "Secretary")?.member_formal || officers.find((o) => o.label === "Secretary")?.member;
-  // Prefer the template contact block (name + address lines) and fall back to
-  // the officer roll (name only) when no template entry exists.
-  const secLines = (template.secretary_contact || secFromRoll || "").split("\n").map((l) => l.trim()).filter(Boolean);
-  const secName = secLines[0] || "—";
+  const secOfficer = officers.find((o) => o.label === "Secretary");
+  const secFromRoll = secOfficer?.member_formal || secOfficer?.member;
+  const secEmail = secOfficer?.email || null;
+  const secPhone = secOfficer?.phone || null;
+  // Address lines from the template — drop the first line if it duplicates the
+  // current Secretary's name (the template historically stored name + address).
+  const rawSecLines = (template.secretary_contact || "").split("\n").map((l) => l.trim()).filter(Boolean);
+  const secAddressLines = rawSecLines.length && secFromRoll && rawSecLines[0] === secFromRoll
+    ? rawSecLines.slice(1)
+    : rawSecLines;
+  const secName = secFromRoll || rawSecLines[0] || "—";
   const logoSrc = logoDataUrl || template.logo_url;
   const leftSrc = coverLeftDataUrl || template.cover_left_image_url || DEFAULT_COVER_LEFT_URL;
   const rightSrc = coverRightDataUrl || template.cover_right_image_url || DEFAULT_COVER_RIGHT_URL;
