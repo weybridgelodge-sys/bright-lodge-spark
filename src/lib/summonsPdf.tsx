@@ -356,8 +356,7 @@ const BackCoverPanel: React.FC<{
           <>
             <Text style={s.sectionHeadingLarge}>Lodge of Instruction</Text>
             <Text style={s.smallTextLarge}>
-              {template.loi_details}
-              {template.progression_notice_text ? ` ${template.progression_notice_text}` : ""}
+              {`${template.loi_details}${template.progression_notice_text ? ` ${template.progression_notice_text}` : ""}`.replace(/\s+/g, " ").trim()}
             </Text>
           </>
         )}
