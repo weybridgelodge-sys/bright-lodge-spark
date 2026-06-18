@@ -302,9 +302,7 @@ const FrontCoverPanel: React.FC<{
   const secFromRoll = officers.find((o) => o.label === "Secretary")?.member_formal || officers.find((o) => o.label === "Secretary")?.member;
   // Prefer the template contact block (name + address lines) and fall back to
   // the officer roll (name only) when no template entry exists.
-  const wmLines = (template.wm_contact || wmFromRoll || "").split("\n").map((l) => l.trim()).filter(Boolean);
   const secLines = (template.secretary_contact || secFromRoll || "").split("\n").map((l) => l.trim()).filter(Boolean);
-  const wmName = wmLines[0] || "—";
   const secName = secLines[0] || "—";
   const logoSrc = logoDataUrl || template.logo_url;
   return (
@@ -313,28 +311,21 @@ const FrontCoverPanel: React.FC<{
     <Text style={s.lodgeName}>{template.lodge_name} No. {template.lodge_number}</Text>
     <Text style={s.province}>PROVINCE OF {(template.province || "").toUpperCase()}</Text>
     <View style={s.divider} />
+    {wmFromRoll && (
+      <Text style={s.province}>{wmFromRoll} - Worshipful Master</Text>
+    )}
 
-    <View style={s.contactsRow}>
-      <View style={s.contactBlock}>
-        <Text style={[s.smallText, s.italic]}>Worshipful Master</Text>
-        <Text style={[s.bodyText, s.bold]}>{wmName}</Text>
-        {wmLines.slice(1).map((line, i) => (
-          <Text key={i} style={s.smallText}>{line}</Text>
-        ))}
-      </View>
-      <View style={s.contactBlockRight}>
-        <Text style={[s.smallText, s.italic, { textAlign: "right" }]}>Secretary</Text>
-        <Text style={[s.bodyText, s.bold, { textAlign: "right" }]}>{secName}</Text>
-        {secLines.slice(1).map((line, i) => (
-          <Text key={i} style={[s.smallText, { textAlign: "right" }]}>{line}</Text>
-        ))}
-      </View>
+    <View style={{ marginTop: 10, marginBottom: 6, alignItems: "flex-start" }}>
+      <Text style={s.bodyText}>{secFromRoll ? `${secFromRoll} (Secretary)` : secName}</Text>
+      {secLines.slice(1).map((line, i) => (
+        <Text key={i} style={s.bodyText}>{line}</Text>
+      ))}
     </View>
 
 
     <View style={s.invitation}>
-      <Text style={s.coverBody}>Dear Sir and Brother,</Text>
-      <Text style={[s.coverBody, { marginTop: 4 }]}>
+      <Text style={[s.coverBody, s.centered]}>Dear Sir and Brother,</Text>
+      <Text style={[s.coverBody, s.centered, { marginTop: 4 }]}>
         You are requested to attend the{" "}
         <Text style={s.bold}>
           {ordinal(summons.meeting_number)} {(summons.meeting_type || "Regular")} Meeting
@@ -350,12 +341,12 @@ const FrontCoverPanel: React.FC<{
           at {template.venue_address}
         </Text>
       )}
-      <Text style={[s.coverBody, { marginTop: 8 }]}>
+      <Text style={[s.coverBody, s.centered, { marginTop: 8 }]}>
         By command of the Worshipful Master.
       </Text>
-      <Text style={s.coverBody}>Yours sincerely and fraternally,</Text>
-      <Text style={[s.coverBody, s.bold, { marginTop: 4 }]}>
-        {secName}
+      <Text style={[s.coverBody, s.centered]}>Yours sincerely and fraternally,</Text>
+      <Text style={[s.coverBody, s.centered, s.bold, { marginTop: 4 }]}>
+        {secFromRoll ? `${secFromRoll} (Secretary)` : secName}
       </Text>
     </View>
 
@@ -364,8 +355,8 @@ const FrontCoverPanel: React.FC<{
 
     {summons.dress_code && (
       <View style={s.dressBlock}>
-        <Text style={[s.smallText, s.bold]}>Dress Code</Text>
-        <Text style={s.smallText}>{summons.dress_code}</Text>
+        <Text style={[s.smallText, s.bold, s.centered]}>Dress Code</Text>
+        <Text style={[s.smallText, s.centered]}>{summons.dress_code}</Text>
       </View>
     )}
   </View>
