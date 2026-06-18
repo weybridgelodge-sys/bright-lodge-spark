@@ -259,11 +259,11 @@ function TemplateTab() {
               <Button type="button" variant="destructive" size="sm" onClick={() => setReps(reps.filter((_, j) => j !== i))}><Trash2 className="w-4 h-4" /></Button>
             </div>
           ))}
-          <Button type="button" variant="outline" size="sm" onClick={() => setReps([...reps, { role: "", name: "" }])}><Plus className="w-4 h-4 mr-1" /> Add</Button>
+          <Button type="button" variant="outline" size="sm" className="text-navy" onClick={() => setReps([...reps, { role: "", name: "" }])}><Plus className="w-4 h-4 mr-1" /> Add</Button>
         </div>
       </div>
 
-      <Button onClick={save} disabled={saving}><Save className="w-4 h-4 mr-2" /> {saving ? "Saving…" : "Save template"}</Button>
+      <Button onClick={save} disabled={saving} className="bg-gold text-navy hover:bg-gold/90"><Save className="w-4 h-4 mr-2" /> {saving ? "Saving…" : "Save template"}</Button>
     </div>
   );
 }
