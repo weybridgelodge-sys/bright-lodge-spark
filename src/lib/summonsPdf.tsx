@@ -261,28 +261,28 @@ const FrontCoverPanel: React.FC<{
 
 
     <View style={s.invitation}>
-      <Text style={s.bodyText}>Dear Sir and Brother,</Text>
-      <Text style={[s.bodyText, { marginTop: 4 }]}>
+      <Text style={s.coverBody}>Dear Sir and Brother,</Text>
+      <Text style={[s.coverBody, { marginTop: 4 }]}>
         You are requested to attend the{" "}
         <Text style={s.bold}>
           {ordinal(summons.meeting_number)} {(summons.meeting_type || "Regular")} Meeting
         </Text>{" "}
         of the Lodge on
       </Text>
-      <Text style={[s.bodyText, s.bold, s.centered, { marginTop: 6 }]}>
+      <Text style={[s.coverEmphasis, s.centered, { marginTop: 6 }]}>
         {formatDateLong(summons.meeting_date)}
         {summons.meeting_time ? ` commencing ${summons.meeting_time}` : ""}
       </Text>
       {template.venue_address && (
-        <Text style={[s.bodyText, s.centered, { marginTop: 4 }]}>
+        <Text style={[s.coverBody, s.centered, { marginTop: 4 }]}>
           at {template.venue_address}
         </Text>
       )}
-      <Text style={[s.bodyText, { marginTop: 8 }]}>
+      <Text style={[s.coverBody, { marginTop: 8 }]}>
         By command of the Worshipful Master.
       </Text>
-      <Text style={s.bodyText}>Yours sincerely and fraternally,</Text>
-      <Text style={[s.bodyText, s.bold, { marginTop: 4 }]}>
+      <Text style={s.coverBody}>Yours sincerely and fraternally,</Text>
+      <Text style={[s.coverBody, s.bold, { marginTop: 4 }]}>
         {secName}
       </Text>
     </View>
