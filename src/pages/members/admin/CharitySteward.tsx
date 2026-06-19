@@ -23,6 +23,7 @@ import {
   isFestivalDonation,
 } from "@/lib/charity/queries";
 import { buildCharityAnnualReportPdf } from "@/lib/charity/annualReportPdf";
+import { highestAwardAchieved } from "@/lib/charity/festivalAwards";
 
 function Card({ title, action, children }: { title: string; action?: React.ReactNode; children: React.ReactNode }) {
   return (
@@ -663,7 +664,11 @@ function FestivalTab({ donations, charities, festival, canEdit, onChange }: {
   const festivalDonations = donations.filter((d) => isFestivalDonation(d, charities, festival)).sort((a, b) => b.donation_date.localeCompare(a.donation_date));
   const cumulative = festivalDonations.reduce((a, d) => a + Number(d.amount), 0);
   const targetN = Number(target) || 0;
-  const pct = targetN > 0 ? Math.min(100, (cumulative / targetN) * 100) : 0;
+  const rawPct = targetN > 0 ? (cumulative / targetN) * 100 : 0;
+  const barPct = Math.min(100, rawPct);
+  const targetReached = targetN > 0 && cumulative >= targetN;
+  const excess = targetReached ? cumulative - targetN : 0;
+  const award = highestAwardAchieved(cumulative, targetN);
 
   // Projected: based on rate per day since first contribution
   const projected = (() => {
@@ -694,12 +699,23 @@ function FestivalTab({ donations, charities, festival, canEdit, onChange }: {
         <div className="grid sm:grid-cols-3 gap-3">
           <Stat label="Target" value={gbp(targetN)} />
           <Stat label="Contributed to date" value={<span className="text-gold">{gbp(cumulative)}</span>} />
-          <Stat label="% of target" value={`${pct.toFixed(1)}%`} />
+          <Stat label="% of target" value={`${rawPct.toFixed(1)}%`} />
         </div>
-        <div className="h-3 bg-navy-dark rounded-sm overflow-hidden border border-gold/20 mt-2">
-          <div className="h-full bg-gold-shimmer transition-all" style={{ width: `${pct}%` }} />
+        <div className={`h-3 bg-navy-dark rounded-sm overflow-hidden border mt-2 ${targetReached ? "border-gold shadow-[0_0_12px_rgba(201,164,50,0.4)]" : "border-gold/20"}`}>
+          <div className="h-full bg-gold-shimmer transition-all" style={{ width: `${barPct}%` }} />
         </div>
-        <Stat label="Projected final (at current rate)" value={gbp(projected)} />
+        {targetReached ? (
+          <div className="mt-3 p-3 rounded-sm border border-gold/40 bg-gold/10">
+            <p className="text-sm text-gold font-semibold">
+              Target exceeded — {award ? `${award.name} Award achieved` : "target met"}
+            </p>
+            {excess > 0 && (
+              <p className="text-xs text-primary-foreground/70 mt-1">{gbp(excess)} above target.</p>
+            )}
+          </div>
+        ) : (
+          <Stat label="Projected final (at current rate)" value={gbp(projected)} />
+        )}
       </Card>
 
       {canEdit && (
