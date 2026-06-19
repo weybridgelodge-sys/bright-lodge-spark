@@ -345,9 +345,6 @@ const FrontCoverPanel: React.FC<{
     <Text style={s.lodgeName}>{template.lodge_name} No. {template.lodge_number}</Text>
     <Text style={s.province}>PROVINCE OF {(template.province || "").toUpperCase()}</Text>
     <View style={s.divider} />
-    {wmFromRoll && (
-      <Text style={s.province}>{wmFromRoll} - Worshipful Master</Text>
-    )}
 
      <View style={{ flexDirection: "row", alignItems: "center", marginTop: 6, marginBottom: 4 }}>
        <View style={{ flex: 1, alignItems: "flex-start" }}>
@@ -360,6 +357,10 @@ const FrontCoverPanel: React.FC<{
          {rightSrc ? <Image src={rightSrc} style={{ height: 75 }} /> : null}
        </View>
      </View>
+
+    {wmFromRoll && (
+      <Text style={s.province}>{wmFromRoll} - Worshipful Master</Text>
+    )}
 
 
     <View style={{ marginTop: 10, marginBottom: 6, alignItems: "flex-start" }}>
@@ -462,13 +463,17 @@ const BackCoverPanel: React.FC<{
           <Text style={s.memberMark}>{mark}</Text>
           <Text style={[s.memberName, { fontSize: nameSize }]} wrap={false}>{nameLine}</Text>
         </View>
-        <Text style={s.memberPost} wrap={false}>
-          {postParts.length === 0 ? "\u00A0" : postParts.map((p, i) => (
-            <Text key={i} style={p.bold ? s.bold : undefined}>
-              {i > 0 ? " " : ""}{p.text}
-            </Text>
-          ))}
-        </Text>
+        {postParts.length === 0 ? (
+          <View style={{ height: 11 }} />
+        ) : (
+          <Text style={s.memberPost} wrap={false}>
+            {postParts.map((p, i) => (
+              <Text key={i} style={p.bold ? s.bold : undefined}>
+                {i > 0 ? " " : ""}{p.text}
+              </Text>
+            ))}
+          </Text>
+        )}
       </View>
     );
   };
@@ -680,17 +685,6 @@ const AgendaPanel: React.FC<{
 
     <View style={s.thinDivider} />
     <Text style={s.sectionHeading}>Dining Arrangements</Text>
-    <Text style={{ fontFamily: "Times-Roman", fontSize: 9, color: "#222", marginBottom: 4 }}>
-      Book your place online via this{" "}
-      {template.dining_booking_url ? (
-        <Link src={template.dining_booking_url}>
-          <Text style={{ color: NAVY, textDecoration: "underline" }}>LINK</Text>
-        </Link>
-      ) : (
-        <Text style={{ color: NAVY, textDecoration: "underline" }}>LINK</Text>
-      )}
-      {" "}or scan the QR code below
-    </Text>
     <View style={s.diningRow}>
       <View style={s.diningBody}>
         {summons.dining_price && (
