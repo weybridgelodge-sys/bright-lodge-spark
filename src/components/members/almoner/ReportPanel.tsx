@@ -28,6 +28,13 @@ const fmt = (s: string | null | undefined) =>
 
 const MILESTONE_YEARS = [10, 15, 20, 25, 30, 35, 40];
 
+// Strip characters outside the WinAnsi range that jsPDF's built-in fonts can render.
+// This removes emoji and other pictographs that would otherwise show as "Ø=Üª" mojibake.
+const stripEmoji = (s: string) =>
+  s
+    .replace(/[\u{1F000}-\u{1FFFF}\u{2600}-\u{27BF}\u{2300}-\u{23FF}\u{2B00}-\u{2BFF}\u{1F1E6}-\u{1F1FF}\u{FE0F}\u{200D}]/gu, "")
+    .replace(/[^\x00-\xFF]/g, "");
+
 // Brand colours (sRGB)
 const NAVY: [number, number, number] = [27, 42, 74];   // #1B2A4A
 const GOLD: [number, number, number] = [201, 164, 50]; // #C9A432
@@ -357,14 +364,16 @@ export default function ReportPanel({ members }: { members: Member[] }) {
     else table([["Date", "Member", "Event", "Detail"]], lifeRows);
 
     // 7 Advice
-    if (advice.trim()) {
+    const cleanAdvice = stripEmoji(advice).trim();
+    if (cleanAdvice) {
       section("7. Almoner's Advice & Notes");
       doc.setTextColor(...INK);
       doc.setFont("helvetica", "normal");
       doc.setFontSize(10);
-      const text = doc.splitTextToSize(advice.trim(), pageW - margin * 2 - 8);
+      const text = doc.splitTextToSize(cleanAdvice, pageW - margin * 2 - 8);
       for (const line of text) {
         if (y > pageH - margin - 40) { doc.addPage(); y = margin; }
+        doc.setFont("helvetica", "normal");
         doc.text(line, margin + 4, y);
         y += 14;
       }
@@ -422,7 +431,7 @@ export default function ReportPanel({ members }: { members: Member[] }) {
           placeholder="Add any advice, recommendations or commentary for the Worshipful Master…"
           className="bg-navy text-primary-foreground border-gold/30"
         />
-        <p className="text-[11px] text-primary-foreground/50">Regenerate after editing to refresh the preview.</p>
+        <p className="text-[11px] text-primary-foreground/50">Regenerate after editing to refresh the preview. Note: emoji will be removed from the printed PDF.</p>
       </div>
 
       {report && (
