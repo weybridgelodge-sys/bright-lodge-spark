@@ -320,6 +320,8 @@ export default function MembersAdmin() {
   };
 
   const isAdminUser = (uid: string) => roles.some((r) => r.user_id === uid && r.role === "admin");
+  const isAlmonerUser = (uid: string) => roles.some((r) => r.user_id === uid && r.role === "almoner");
+
 
   const inputCls =
     "w-full bg-navy border border-gold/20 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-gold";
