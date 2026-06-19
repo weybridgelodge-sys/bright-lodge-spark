@@ -75,7 +75,7 @@ const fixedEvents: LodgeEvent[] = [
     highlight: true,
     link: "/ladies-festival",
   },
-];
+
 
   {
     title: "Super Saturday",
