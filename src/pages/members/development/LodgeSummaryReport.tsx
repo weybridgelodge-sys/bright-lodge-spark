@@ -181,13 +181,13 @@ function Inner() {
           </p>
         </div>
         <div className="flex gap-2 flex-wrap">
-          <Button variant="outline" size="sm" onClick={() => setShowHistory((v) => !v)}>
+          <Button variant="outline" size="sm" className="border-gold/40 bg-navy-dark text-gold hover:bg-gold/10 hover:text-gold" onClick={() => setShowHistory((v) => !v)}>
             <History className="w-4 h-4 mr-2" /> History ({history.length})
           </Button>
-          <Button variant="outline" size="sm" onClick={copyText} disabled={!data}>
+          <Button variant="outline" size="sm" className="border-gold/40 bg-navy-dark text-gold hover:bg-gold/10 hover:text-gold" onClick={copyText} disabled={!data}>
             <ClipboardCopy className="w-4 h-4 mr-2" /> Copy text
           </Button>
-          <Button variant="outline" size="sm" onClick={saveSnapshot} disabled={!data}>
+          <Button variant="outline" size="sm" className="border-gold/40 bg-navy-dark text-gold hover:bg-gold/10 hover:text-gold" onClick={saveSnapshot} disabled={!data}>
             <Save className="w-4 h-4 mr-2" /> Save snapshot
           </Button>
           <Button size="sm" onClick={downloadPdf} disabled={!data} className="bg-gold text-navy hover:bg-gold/90">
@@ -205,7 +205,7 @@ function Inner() {
           <label className="text-xs text-primary-foreground/60 block mb-1">Period end</label>
           <Input type="date" value={end} onChange={(e) => setEnd(e.target.value)} className="bg-navy-dark text-primary-foreground" />
         </div>
-        <Button size="sm" variant="outline" onClick={generate} disabled={loading}>
+        <Button size="sm" variant="outline" className="border-gold/40 bg-navy-dark text-gold hover:bg-gold/10 hover:text-gold" onClick={generate} disabled={loading}>
           {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <RefreshCw className="w-4 h-4 mr-2" />}
           Regenerate
         </Button>
