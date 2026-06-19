@@ -899,6 +899,37 @@ function HistoryTab({ onEdit }: { onEdit: (id: string) => void }) {
     setRows((rs) => rs.filter((r) => r.id !== id));
     toast.success("Summons deleted");
   };
+  const changeStatus = async (r: any, next: "in_progress" | "finalised") => {
+    // Map "in_progress" -> stored "draft"; "finalised" -> "finalised"
+    const stored = next === "in_progress" ? "draft" : "finalised";
+    const { error } = await supabase.from("summonses").update({ status: stored }).eq("id", r.id);
+    if (error) { toast.error(error.message); return; }
+    setRows((rs) => rs.map((x) => x.id === r.id ? { ...x, status: stored } : x));
+
+    if (next === "finalised" && r.pdf_storage_path) {
+      // Avoid duplicate library entry
+      const { data: existing } = await supabase
+        .from("lodge_documents")
+        .select("id")
+        .eq("file_path", r.pdf_storage_path)
+        .maybeSingle();
+      if (!existing) {
+        const title = `Summons #${r.meeting_number} — ${formatDateShort(r.meeting_date)}`;
+        const { error: dErr } = await supabase.from("lodge_documents").insert({
+          title,
+          description: r.meeting_type ?? null,
+          category: "summons",
+          file_path: r.pdf_storage_path,
+        });
+        if (dErr) { toast.error(`Saved status, but library add failed: ${dErr.message}`); return; }
+        toast.success("Finalised and added to Document Library");
+        return;
+      }
+    }
+    toast.success("Status updated");
+  };
+  const displayStatus = (s: string): "in_progress" | "finalised" =>
+    s === "finalised" || s === "sent" ? "finalised" : "in_progress";
   return (
     <div className="bg-navy-light/40 border border-gold/20 rounded p-4">
       {rows.length === 0 ? <p className="text-sm text-primary-foreground/60">No summonses saved yet.</p> : (
@@ -912,7 +943,20 @@ function HistoryTab({ onEdit }: { onEdit: (id: string) => void }) {
                 <td className="py-1.5">{r.meeting_number}</td>
                 <td>{formatDateShort(r.meeting_date)}</td>
                 <td>{r.meeting_type}</td>
-                <td><Badge variant="outline">{r.status}</Badge></td>
+                <td>
+                  <Select
+                    value={displayStatus(r.status)}
+                    onValueChange={(v) => changeStatus(r, v as "in_progress" | "finalised")}
+                  >
+                    <SelectTrigger className="h-8 w-[140px] bg-navy text-primary-foreground border-gold/30">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="in_progress">In Progress</SelectItem>
+                      <SelectItem value="finalised">Finalised</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </td>
                 <td>{r.sent_to_count ?? "—"}</td>
                 <td>
                   <div className="flex gap-2 justify-end py-1.5">
@@ -935,4 +979,5 @@ function HistoryTab({ onEdit }: { onEdit: (id: string) => void }) {
     </div>
   );
 }
+
 
