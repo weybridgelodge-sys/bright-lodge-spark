@@ -293,6 +293,39 @@ export type Database = {
         }
         Relationships: []
       }
+      lodge_development_reports: {
+        Row: {
+          exec_summary: string | null
+          generated_at: string
+          generated_by: string | null
+          id: string
+          mentor_statement: string | null
+          period_end: string
+          period_start: string
+          snapshot: Json
+        }
+        Insert: {
+          exec_summary?: string | null
+          generated_at?: string
+          generated_by?: string | null
+          id?: string
+          mentor_statement?: string | null
+          period_end: string
+          period_start: string
+          snapshot: Json
+        }
+        Update: {
+          exec_summary?: string | null
+          generated_at?: string
+          generated_by?: string | null
+          id?: string
+          mentor_statement?: string | null
+          period_end?: string
+          period_start?: string
+          snapshot?: Json
+        }
+        Relationships: []
+      }
       lodge_documents: {
         Row: {
           category: Database["public"]["Enums"]["doc_category"]

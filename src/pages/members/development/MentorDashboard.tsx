@@ -84,11 +84,19 @@ function Inner() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="font-serif text-2xl text-primary-foreground">Member Development</h1>
-        <p className="text-xs text-primary-foreground/60 mt-1">
-          {seesAll ? "All members with development records." : "Members assigned to you as Mentor."}
-        </p>
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <h1 className="font-serif text-2xl text-primary-foreground">Member Development</h1>
+          <p className="text-xs text-primary-foreground/60 mt-1">
+            {seesAll ? "All members with development records." : "Members assigned to you as Mentor."}
+          </p>
+        </div>
+        <Link
+          to="/members/development/summary-report"
+          className="inline-flex items-center gap-2 rounded-sm border border-gold/40 bg-gold/10 px-3 py-2 text-xs text-gold hover:bg-gold/20"
+        >
+          Lodge Development Summary Report <ChevronRight className="w-3 h-3" />
+        </Link>
       </div>
       <Input placeholder="Filter by name" value={filter} onChange={(e) => setFilter(e.target.value)} className="max-w-sm bg-navy-dark text-primary-foreground" />
       {loading ? (
