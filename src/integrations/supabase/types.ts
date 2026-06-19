@@ -1437,6 +1437,81 @@ export type Database = {
           },
         ]
       }
+      newsletter_broadcasts: {
+        Row: {
+          content: Json
+          created_at: string
+          error: string | null
+          id: string
+          recipient_count: number
+          resend_audience_id: string | null
+          resend_broadcast_id: string | null
+          sent_by: string | null
+          status: string
+          subject: string
+          target_list: string
+        }
+        Insert: {
+          content: Json
+          created_at?: string
+          error?: string | null
+          id?: string
+          recipient_count?: number
+          resend_audience_id?: string | null
+          resend_broadcast_id?: string | null
+          sent_by?: string | null
+          status?: string
+          subject: string
+          target_list: string
+        }
+        Update: {
+          content?: Json
+          created_at?: string
+          error?: string | null
+          id?: string
+          recipient_count?: number
+          resend_audience_id?: string | null
+          resend_broadcast_id?: string | null
+          sent_by?: string | null
+          status?: string
+          subject?: string
+          target_list?: string
+        }
+        Relationships: []
+      }
+      newsletter_subscribers: {
+        Row: {
+          confirmed: boolean
+          created_at: string
+          email: string
+          id: string
+          source: string
+          unsubscribe_token: string
+          unsubscribed_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          confirmed?: boolean
+          created_at?: string
+          email: string
+          id?: string
+          source?: string
+          unsubscribe_token?: string
+          unsubscribed_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          confirmed?: boolean
+          created_at?: string
+          email?: string
+          id?: string
+          source?: string
+          unsubscribe_token?: string
+          unsubscribed_at?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       officer_appointments: {
         Row: {
           appointed_on: string | null
@@ -2328,6 +2403,7 @@ export type Database = {
         Args: { _editor: string; _member: string }
         Returns: boolean
       }
+      can_edit_newsletter: { Args: { _user: string }; Returns: boolean }
       can_view_charity: { Args: { _user: string }; Returns: boolean }
       can_view_skills_matrix: { Args: { _user: string }; Returns: boolean }
       current_lodge_year: { Args: never; Returns: number }
