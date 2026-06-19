@@ -14,6 +14,51 @@ export type Database = {
   }
   public: {
     Tables: {
+      almoner_reports: {
+        Row: {
+          advice: string
+          created_at: string
+          created_by: string | null
+          finalised_at: string | null
+          id: string
+          markdown: string
+          period_from: string
+          period_to: string
+          snapshot: Json
+          status: Database["public"]["Enums"]["almoner_report_status"]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          advice?: string
+          created_at?: string
+          created_by?: string | null
+          finalised_at?: string | null
+          id?: string
+          markdown?: string
+          period_from: string
+          period_to: string
+          snapshot?: Json
+          status?: Database["public"]["Enums"]["almoner_report_status"]
+          title?: string
+          updated_at?: string
+        }
+        Update: {
+          advice?: string
+          created_at?: string
+          created_by?: string | null
+          finalised_at?: string | null
+          id?: string
+          markdown?: string
+          period_from?: string
+          period_to?: string
+          snapshot?: Json
+          status?: Database["public"]["Enums"]["almoner_report_status"]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       bookings: {
         Row: {
           contact_email: string
@@ -1433,6 +1478,7 @@ export type Database = {
       is_current_wm_or_ipm: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
+      almoner_report_status: "draft" | "final"
       app_role:
         | "member"
         | "admin"
@@ -1627,6 +1673,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      almoner_report_status: ["draft", "final"],
       app_role: [
         "member",
         "admin",
