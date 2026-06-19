@@ -126,6 +126,17 @@ function Inner() {
                     </td>
                     <td className="p-3 text-primary-foreground/80">{fmt(r.lastCheckIn)}</td>
                     <td className="p-3">
+                      {r.lastTouchpoint ? (
+                        <span className={`text-xs inline-flex items-center gap-1 ${stale ? "text-amber-400" : "text-primary-foreground/80"}`}>
+                          {stale && <AlertTriangle className="w-3 h-3" />}
+                          {fmt(r.lastTouchpoint)}
+                          {days !== null && <span className="text-primary-foreground/50">· {days}d</span>}
+                        </span>
+                      ) : (
+                        <span className="text-primary-foreground/40 text-xs">—</span>
+                      )}
+                    </td>
+                    <td className="p-3">
                       {r.overdue > 0 ? (
                         <span className="inline-flex items-center gap-1 text-amber-400 text-xs"><AlertTriangle className="w-3 h-3" /> {r.overdue}</span>
                       ) : (
@@ -141,7 +152,7 @@ function Inner() {
                 );
               })}
               {filtered.length === 0 && (
-                <tr><td colSpan={6} className="p-6 text-center text-primary-foreground/60 italic">No members to show.</td></tr>
+                <tr><td colSpan={7} className="p-6 text-center text-primary-foreground/60 italic">No members to show.</td></tr>
               )}
             </tbody>
           </table>
