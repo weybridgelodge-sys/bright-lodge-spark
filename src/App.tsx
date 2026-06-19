@@ -130,6 +130,8 @@ const App = () => (
             <Route path="/members/almoner" element={<ProtectedRoute><AlmonerPortal /></ProtectedRoute>} />
             <Route path="/members/development" element={<MyDevelopment />} />
             <Route path="/members/admin/development" element={<MentorDashboard />} />
+            <Route path="/members/admin/skills-matrix" element={<SkillsMatrix />} />
+            <Route path="/members/admin/loi-helper" element={<LoiAssignmentHelper />} />
             <Route path="/members/development/:memberId" element={<MemberDevelopment />} />
 
 
