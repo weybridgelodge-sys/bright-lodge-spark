@@ -11,8 +11,14 @@ import { Badge } from "@/components/ui/badge";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { AlertTriangle, ArrowLeft, CalendarClock, HeartHandshake, Plus, ShieldAlert, X } from "lucide-react";
+import LifeEventsPanel from "@/components/members/almoner/LifeEventsPanel";
+import CorrespondencePanel from "@/components/members/almoner/CorrespondencePanel";
+import ReferralsPanel from "@/components/members/almoner/ReferralsPanel";
+import AbsencesPanel from "@/components/members/almoner/AbsencesPanel";
+import ReportPanel from "@/components/members/almoner/ReportPanel";
 
 // ============ Types ============
 type WelfareStatus = "green" | "amber" | "red";
