@@ -23,9 +23,15 @@ const About = () => {
             <p className="text-muted-foreground font-sans leading-relaxed mb-6">
               We hope that through this website, you learn a little about Freemasonry, our Lodge in particular, and how this worldwide organisation can make a difference to you and your community.
             </p>
-            <p className="text-muted-foreground font-sans leading-relaxed">
+            <p className="text-muted-foreground font-sans leading-relaxed mb-6">
               If you have any questions or are interested in taking your first step into Freemasonry, please feel free to contact us. We warmly welcome prospective candidates from all walks of life.
             </p>
+            <blockquote className="border-l-4 border-gold pl-5 py-2 bg-warm-white">
+              <p className="font-serif italic text-gold-dark text-base md:text-lg leading-relaxed">
+                “Weybridge Lodge operates on the principle of the beehive. Every brother, from the newest Entered Apprentice to the most senior Past Master, contributes to the life of the lodge. Working groups exist so that every member has a role, a purpose, and a home in the lodge beyond the progressive offices.”
+              </p>
+              <footer className="mt-2 text-xs text-muted-foreground not-italic">— Lodge philosophy, adopted 2026</footer>
+            </blockquote>
           </div>
 
           <div ref={rightRef} className="reveal-on-scroll flex flex-col items-center gap-8">

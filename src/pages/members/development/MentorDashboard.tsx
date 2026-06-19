@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, ChevronRight, AlertTriangle } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { lastTouchpoint, daysSince } from "@/lib/development/engagement";
 
 type Row = {
   id: string;
@@ -19,6 +20,7 @@ type Row = {
   completed: number;
   overdue: number;
   lastCheckIn: string | null;
+  lastTouchpoint: string | null;
 };
 
 const displayName = (p: { first_name?: string | null; last_name?: string | null; full_name?: string | null; preferred_name?: string | null }) => {
@@ -62,11 +64,14 @@ function Inner() {
         byMember.set(it.member_id, cur);
       }
       const recordMap = new Map((records ?? []).map((r) => [r.member_id, r.assigned_mentor_id]));
+      const touchpoints = await Promise.all((profs ?? []).map(async (p: any) => [p.id, await lastTouchpoint(p.id)] as const));
+      const tMap = new Map(touchpoints);
       const next: Row[] = (profs ?? []).map((p: any) => ({
         id: p.id,
         full_name: p.full_name, first_name: p.first_name, last_name: p.last_name, preferred_name: p.preferred_name,
         degree: p.degree,
         assigned_mentor_id: recordMap.get(p.id) ?? null,
+        lastTouchpoint: tMap.get(p.id) ?? null,
         ...(byMember.get(p.id) ?? { total: 0, completed: 0, overdue: 0, lastCheckIn: null }),
       }));
       next.sort((a, b) => displayName(a).localeCompare(displayName(b)));
@@ -97,6 +102,7 @@ function Inner() {
                 <th className="text-left p-3">Degree</th>
                 <th className="text-left p-3 w-44">Checklist</th>
                 <th className="text-left p-3">Last check-in</th>
+                <th className="text-left p-3">Last touchpoint</th>
                 <th className="text-left p-3">Overdue</th>
                 <th />
               </tr>
@@ -104,6 +110,8 @@ function Inner() {
             <tbody>
               {filtered.map((r) => {
                 const pct = Math.round((r.completed / Math.max(r.total, 1)) * 100);
+                const days = daysSince(r.lastTouchpoint);
+                const stale = days !== null && days > 42;
                 return (
                   <tr key={r.id} className="border-t border-gold/10 hover:bg-navy-light/20">
                     <td className="p-3 text-primary-foreground">{displayName(r)}</td>
@@ -117,6 +125,17 @@ function Inner() {
                       </div>
                     </td>
                     <td className="p-3 text-primary-foreground/80">{fmt(r.lastCheckIn)}</td>
+                    <td className="p-3">
+                      {r.lastTouchpoint ? (
+                        <span className={`text-xs inline-flex items-center gap-1 ${stale ? "text-amber-400" : "text-primary-foreground/80"}`}>
+                          {stale && <AlertTriangle className="w-3 h-3" />}
+                          {fmt(r.lastTouchpoint)}
+                          {days !== null && <span className="text-primary-foreground/50">· {days}d</span>}
+                        </span>
+                      ) : (
+                        <span className="text-primary-foreground/40 text-xs">—</span>
+                      )}
+                    </td>
                     <td className="p-3">
                       {r.overdue > 0 ? (
                         <span className="inline-flex items-center gap-1 text-amber-400 text-xs"><AlertTriangle className="w-3 h-3" /> {r.overdue}</span>
@@ -133,7 +152,7 @@ function Inner() {
                 );
               })}
               {filtered.length === 0 && (
-                <tr><td colSpan={6} className="p-6 text-center text-primary-foreground/60 italic">No members to show.</td></tr>
+                <tr><td colSpan={7} className="p-6 text-center text-primary-foreground/60 italic">No members to show.</td></tr>
               )}
             </tbody>
           </table>

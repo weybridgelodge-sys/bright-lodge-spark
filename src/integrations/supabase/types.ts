@@ -793,6 +793,54 @@ export type Database = {
           },
         ]
       }
+      member_engagement_log: {
+        Row: {
+          category: string
+          created_at: string
+          id: string
+          logged_by: string | null
+          member_id: string
+          occurred_on: string
+          summary: string
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          id?: string
+          logged_by?: string | null
+          member_id: string
+          occurred_on: string
+          summary: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          id?: string
+          logged_by?: string | null
+          member_id?: string
+          occurred_on?: string
+          summary?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "member_engagement_log_logged_by_fkey"
+            columns: ["logged_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "member_engagement_log_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       member_external_appointments: {
         Row: {
           created_at: string
@@ -1809,6 +1857,143 @@ export type Database = {
           },
         ]
       }
+      working_group_activities: {
+        Row: {
+          activity_date: string
+          created_at: string
+          id: string
+          kind: string
+          logged_by: string | null
+          notes: string | null
+          title: string
+          updated_at: string
+          working_group_id: string
+        }
+        Insert: {
+          activity_date: string
+          created_at?: string
+          id?: string
+          kind: string
+          logged_by?: string | null
+          notes?: string | null
+          title: string
+          updated_at?: string
+          working_group_id: string
+        }
+        Update: {
+          activity_date?: string
+          created_at?: string
+          id?: string
+          kind?: string
+          logged_by?: string | null
+          notes?: string | null
+          title?: string
+          updated_at?: string
+          working_group_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "working_group_activities_logged_by_fkey"
+            columns: ["logged_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "working_group_activities_working_group_id_fkey"
+            columns: ["working_group_id"]
+            isOneToOne: false
+            referencedRelation: "working_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      working_group_members: {
+        Row: {
+          created_at: string
+          id: string
+          joined_on: string | null
+          member_id: string
+          role: string
+          working_group_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          joined_on?: string | null
+          member_id: string
+          role?: string
+          working_group_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          joined_on?: string | null
+          member_id?: string
+          role?: string
+          working_group_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "working_group_members_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "working_group_members_working_group_id_fkey"
+            columns: ["working_group_id"]
+            isOneToOne: false
+            referencedRelation: "working_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      working_groups: {
+        Row: {
+          created_at: string
+          founding_statement: string | null
+          id: string
+          is_active: boolean
+          lead_member_id: string | null
+          name: string
+          remit: string
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          founding_statement?: string | null
+          id?: string
+          is_active?: boolean
+          lead_member_id?: string | null
+          name: string
+          remit: string
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          founding_statement?: string | null
+          id?: string
+          is_active?: boolean
+          lead_member_id?: string | null
+          name?: string
+          remit?: string
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "working_groups_lead_member_id_fkey"
+            columns: ["lead_member_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -1844,6 +2029,15 @@ export type Database = {
       }
       is_active_member: { Args: { _user_id: string }; Returns: boolean }
       is_current_wm_or_ipm: { Args: { _user_id: string }; Returns: boolean }
+      is_working_group_lead: {
+        Args: { _group: string; _user: string }
+        Returns: boolean
+      }
+      is_working_group_member: {
+        Args: { _group: string; _user: string }
+        Returns: boolean
+      }
+      last_engagement_date: { Args: { _member: string }; Returns: string }
       lodge_skills_matrix: {
         Args: never
         Returns: {
