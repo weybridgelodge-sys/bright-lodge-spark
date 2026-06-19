@@ -10,7 +10,8 @@ const navCls = ({ isActive }: { isActive: boolean }) =>
   }`;
 
 export default function MembersLayout({ children }: { children: React.ReactNode }) {
-  const { profile, isAdmin, isSecretary, canManageProgression, canManageSummons, canAccessAlmoner, signOut } = useAuth();
+  const { profile, isAdmin, isSecretary, isWorshipfulMaster, isDirectorOfCeremonies, canManageProgression, canManageSummons, canAccessAlmoner, signOut } = useAuth();
+  const canSeeMatrix = isAdmin || isWorshipfulMaster || isDirectorOfCeremonies;
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
@@ -87,6 +88,11 @@ export default function MembersLayout({ children }: { children: React.ReactNode 
             {(isAdmin || canManageProgression) && (
               <NavLink to="/members/admin/development" className={navCls}>
                 <GraduationCap className="w-4 h-4" /> Member Development
+              </NavLink>
+            )}
+            {canSeeMatrix && (
+              <NavLink to="/members/admin/skills-matrix" className={navCls}>
+                <BarChart3 className="w-4 h-4" /> Skills Matrix
               </NavLink>
             )}
             {canManageProgression && (

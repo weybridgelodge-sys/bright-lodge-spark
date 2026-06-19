@@ -61,6 +61,8 @@ const AlmonerPortal = lazy(() => import("./pages/members/AlmonerPortal"));
 const MyDevelopment = lazy(() => import("./pages/members/development/MemberDevelopment").then((m) => ({ default: m.MyDevelopmentPage })));
 const MemberDevelopment = lazy(() => import("./pages/members/development/MemberDevelopment").then((m) => ({ default: m.MemberDevelopmentPage })));
 const MentorDashboard = lazy(() => import("./pages/members/development/MentorDashboard"));
+const SkillsMatrix = lazy(() => import("./pages/members/development/SkillsMatrix"));
+const LoiAssignmentHelper = lazy(() => import("./pages/members/development/LoiAssignmentHelper"));
 
 
 const queryClient = new QueryClient();
@@ -128,6 +130,8 @@ const App = () => (
             <Route path="/members/almoner" element={<ProtectedRoute><AlmonerPortal /></ProtectedRoute>} />
             <Route path="/members/development" element={<MyDevelopment />} />
             <Route path="/members/admin/development" element={<MentorDashboard />} />
+            <Route path="/members/admin/skills-matrix" element={<SkillsMatrix />} />
+            <Route path="/members/admin/loi-helper" element={<LoiAssignmentHelper />} />
             <Route path="/members/development/:memberId" element={<MemberDevelopment />} />
 
 

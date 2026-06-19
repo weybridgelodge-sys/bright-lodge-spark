@@ -1,17 +1,22 @@
-import { useMemo, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { RITUAL_GROUPS } from "@/lib/development/catalogues";
 import type { RitualRow } from "@/lib/development/queries";
+import PreceptorNotesField from "./PreceptorNotesField";
 
 export default function RitualRecord({
   rows,
   canEdit,
+  memberId,
+  showPreceptorNotes,
   onChange,
 }: {
   rows: RitualRow[];
   canEdit: boolean;
+  memberId: string;
+  showPreceptorNotes: boolean;
   onChange: (next: RitualRow[]) => void;
 }) {
   const [savingId, setSavingId] = useState<string | null>(null);
@@ -56,7 +61,8 @@ export default function RitualRecord({
                 </thead>
                 <tbody>
                   {list.map((r) => (
-                    <tr key={r.id} className="border-t border-gold/10 align-top">
+                    <Fragment key={r.id}>
+                    <tr className="border-t border-gold/10 align-top">
                       <td className="p-2 text-primary-foreground">{r.piece}</td>
                       <td className="p-2"><Input type="date" disabled={!canEdit} value={r.date_first_learned ?? ""}
                         onChange={(e) => patch(r.id, { date_first_learned: e.target.value || null })}
@@ -74,6 +80,14 @@ export default function RitualRecord({
                         onChange={(e) => patch(r.id, { notes: e.target.value })}
                         className="h-7 bg-navy-dark text-primary-foreground text-xs" /></td>
                     </tr>
+                    {showPreceptorNotes && (
+                      <tr className="border-t border-gold/5">
+                        <td colSpan={6} className="px-2 pb-2">
+                          <PreceptorNotesField memberId={memberId} ritualGroup={r.ritual_group} piece={r.piece} />
+                        </td>
+                      </tr>
+                    )}
+                    </Fragment>
                   ))}
                 </tbody>
               </table>

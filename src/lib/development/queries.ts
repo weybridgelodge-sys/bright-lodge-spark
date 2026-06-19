@@ -48,6 +48,10 @@ export type DevelopmentRecord = {
   member_id: string;
   assigned_mentor_id: string | null;
   previous_masonic_experience: string | null;
+  mentoring_exempt?: boolean;
+  exemption_reason?: string | null;
+  exemption_note?: string | null;
+  last_checkin_date?: string | null;
 };
 
 const stageIndex = (s: string) => CHECKLIST_STAGES.indexOf(s as any);

@@ -591,6 +591,64 @@ export type Database = {
           },
         ]
       }
+      loi_part_assignments: {
+        Row: {
+          assigned_by: string | null
+          created_at: string
+          id: string
+          loi_session_id: string
+          member_id: string | null
+          notes: string | null
+          piece: string
+          ritual_group: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_by?: string | null
+          created_at?: string
+          id?: string
+          loi_session_id: string
+          member_id?: string | null
+          notes?: string | null
+          piece: string
+          ritual_group: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_by?: string | null
+          created_at?: string
+          id?: string
+          loi_session_id?: string
+          member_id?: string | null
+          notes?: string | null
+          piece?: string
+          ritual_group?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "loi_part_assignments_assigned_by_fkey"
+            columns: ["assigned_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "loi_part_assignments_loi_session_id_fkey"
+            columns: ["loi_session_id"]
+            isOneToOne: false
+            referencedRelation: "loi_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "loi_part_assignments_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       loi_sessions: {
         Row: {
           created_at: string
@@ -688,21 +746,33 @@ export type Database = {
         Row: {
           assigned_mentor_id: string | null
           created_at: string
+          exemption_note: string | null
+          exemption_reason: string | null
+          last_checkin_date: string | null
           member_id: string
+          mentoring_exempt: boolean
           previous_masonic_experience: string | null
           updated_at: string
         }
         Insert: {
           assigned_mentor_id?: string | null
           created_at?: string
+          exemption_note?: string | null
+          exemption_reason?: string | null
+          last_checkin_date?: string | null
           member_id: string
+          mentoring_exempt?: boolean
           previous_masonic_experience?: string | null
           updated_at?: string
         }
         Update: {
           assigned_mentor_id?: string | null
           created_at?: string
+          exemption_note?: string | null
+          exemption_reason?: string | null
+          last_checkin_date?: string | null
           member_id?: string
+          mentoring_exempt?: boolean
           previous_masonic_experience?: string | null
           updated_at?: string
         }
@@ -799,6 +869,54 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      member_preceptor_notes: {
+        Row: {
+          created_at: string
+          id: string
+          member_id: string
+          notes: string | null
+          piece: string
+          ritual_group: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          member_id: string
+          notes?: string | null
+          piece: string
+          ritual_group: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          member_id?: string
+          notes?: string | null
+          piece?: string
+          ritual_group?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "member_preceptor_notes_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "member_preceptor_notes_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       member_progression_status: {
         Row: {
@@ -943,6 +1061,35 @@ export type Database = {
           {
             foreignKeyName: "member_wm_terms_member_id_fkey"
             columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      module_settings: {
+        Row: {
+          key: string
+          updated_at: string
+          updated_by: string | null
+          value: Json
+        }
+        Insert: {
+          key: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: Json
+        }
+        Update: {
+          key?: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "module_settings_updated_by_fkey"
+            columns: ["updated_by"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -1676,6 +1823,7 @@ export type Database = {
         Args: { _editor: string; _member: string }
         Returns: boolean
       }
+      can_view_skills_matrix: { Args: { _user: string }; Returns: boolean }
       current_lodge_year: { Args: never; Returns: number }
       current_office_label: { Args: { _user_id: string }; Returns: string }
       current_user_degree_level: { Args: { _user_id: string }; Returns: number }
@@ -1696,6 +1844,20 @@ export type Database = {
       }
       is_active_member: { Args: { _user_id: string }; Returns: boolean }
       is_current_wm_or_ipm: { Args: { _user_id: string }; Returns: boolean }
+      lodge_skills_matrix: {
+        Args: never
+        Returns: {
+          degree: string
+          first_name: string
+          full_name: string
+          last_name: string
+          level: string
+          member_id: string
+          piece: string
+          preferred_name: string
+          ritual_group: string
+        }[]
+      }
     }
     Enums: {
       almoner_report_status: "draft" | "final"

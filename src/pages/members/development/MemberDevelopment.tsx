@@ -9,6 +9,7 @@ import MentoringChecklist from "@/components/members/development/MentoringCheckl
 import RitualRecord from "@/components/members/development/RitualRecord";
 import OfficesRecord, { LodgeAppointmentRow } from "@/components/members/development/OfficesRecord";
 import ExportPdfButton from "@/components/members/development/ExportPdfButton";
+import ExemptionPanel from "@/components/members/development/ExemptionPanel";
 import {
   ensureSeeded,
   loadChecklist,
@@ -33,7 +34,8 @@ const displayName = (p?: MentorOption | null) => {
 
 export default function MemberDevelopmentInner({ memberIdOverride }: { memberIdOverride?: string }) {
   const params = useParams<{ memberId?: string }>();
-  const { user, isAdmin, isWorshipfulMaster } = useAuth();
+  const { user, isAdmin, isWorshipfulMaster, isDirectorOfCeremonies } = useAuth();
+  const showPreceptorNotes = isAdmin || isWorshipfulMaster || isDirectorOfCeremonies;
   const navigate = useNavigate();
   const memberId = memberIdOverride || params.memberId || user?.id || "";
 
@@ -126,14 +128,23 @@ export default function MemberDevelopmentInner({ memberIdOverride }: { memberIdO
         />
       </section>
 
-      <section className="rounded-sm border border-gold/20 bg-navy-dark/40 p-5">
-        <h2 className="font-serif text-gold text-lg mb-4">2. Mentoring Checklist</h2>
-        <MentoringChecklist items={checklist} canEdit={canEdit} onChange={setChecklist} />
+      <section className="rounded-sm border border-gold/20 bg-navy-dark/40 p-5 space-y-3">
+        <h2 className="font-serif text-gold text-lg">2. Mentoring Checklist</h2>
+        <ExemptionPanel memberId={memberId} record={record} canEdit={canEdit} onSaved={setRecord} />
+        {record?.mentoring_exempt ? (
+          <p className="text-xs text-primary-foreground/70 italic">
+            This member is exempt from the structured mentoring checklist
+            {record.exemption_reason === "senior_member" ? " (Senior Member)" : record.exemption_reason === "joining_member" ? " (Joining Member)" : ""}.
+            {record.exemption_note ? ` Note: ${record.exemption_note}` : ""}
+          </p>
+        ) : (
+          <MentoringChecklist items={checklist} canEdit={canEdit} onChange={setChecklist} />
+        )}
       </section>
 
       <section className="rounded-sm border border-gold/20 bg-navy-dark/40 p-5">
         <h2 className="font-serif text-gold text-lg mb-4">3. Ritual Learning &amp; Delivery</h2>
-        <RitualRecord rows={ritual} canEdit={canEditRitual} onChange={setRitual} />
+        <RitualRecord rows={ritual} canEdit={canEditRitual} memberId={memberId} showPreceptorNotes={showPreceptorNotes} onChange={setRitual} />
       </section>
 
       <section className="rounded-sm border border-gold/20 bg-navy-dark/40 p-5">
