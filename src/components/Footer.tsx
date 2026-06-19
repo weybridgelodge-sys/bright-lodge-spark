@@ -24,7 +24,7 @@ const footerColumns: FooterColumn[] = [
       { label: "Worshipful Masters", href: "/worshipful-masters" },
       { label: "Officers of the Lodge", href: "/officers" },
       { label: "Lodge Traditions", href: "/lodge-traditions" },
-      { label: "Officers' Jewels", href: "/officers-jewels" },
+      { label: "Officers' Roles & Jewels", href: "/officers-jewels" },
     ],
   },
   {
@@ -39,12 +39,17 @@ const footerColumns: FooterColumn[] = [
     ],
   },
   {
+    heading: "Meetings & Events",
+    links: [
+      { label: "Book Into Our Next Meeting", href: "/bookings" },
+      { label: "Events Calendar", href: "/events" },
+      { label: "Ladies Festival August 2026", href: "/ladies-festival" },
+    ],
+  },
+  {
     heading: "News & Media",
     links: [
       { label: "News Hub", href: "/news" },
-      { label: "Events Calendar", href: "/events" },
-      { label: "Bookings", href: "/bookings" },
-      { label: "Ladies Festival 2026", href: "/ladies-festival" },
       { label: "Video Hub", href: "/video-hub" },
     ],
   },
