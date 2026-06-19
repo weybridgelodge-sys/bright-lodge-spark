@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import logoAsset from "@/assets/weybridge-logo-300.webp.asset.json";
 const logo = logoAsset.url;
 import charterMark from "@/assets/charter-mark.png";
+import NewsletterSignup from "@/components/NewsletterSignup";
 
 interface FooterLink {
   label: string;
@@ -113,6 +114,15 @@ const Footer = () => {
             </div>
           </div>
         </div>
+
+        {/* Newsletter signup */}
+        <div className="border-t border-gold/10 pt-10 grid md:grid-cols-3 gap-8">
+          <div className="md:col-span-2 max-w-md">
+            <NewsletterSignup />
+          </div>
+        </div>
+
+
 
         {/* Sitemap columns */}
         <nav aria-label="Footer sitemap" className="border-t border-gold/10 pt-10 pb-10">

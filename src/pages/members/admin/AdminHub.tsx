@@ -4,20 +4,25 @@ import ProtectedRoute from "@/components/members/ProtectedRoute";
 import { useAuth } from "@/hooks/useAuth";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Users, HeartHandshake, GraduationCap, BarChart3, ShieldCheck, Banknote, ArrowRight } from "lucide-react";
+import { Users, HeartHandshake, GraduationCap, BarChart3, ShieldCheck, Banknote, Mail, ArrowRight } from "lucide-react";
 
 type Tile = { to: string; title: string; description: string; icon: React.ComponentType<{ className?: string }>; visible: boolean };
 
 function Inner() {
   const { isAdmin, isSecretary, isWorshipfulMaster, canAccessAlmoner, canManageProgression } = useAuth();
   const [isCharitySteward, setIsCharitySteward] = useState(false);
+  const [canEditNewsletter, setCanEditNewsletter] = useState(false);
 
   useEffect(() => {
     (async () => {
       const { data: u } = await supabase.auth.getUser();
       if (!u.user) return;
-      const { data } = await supabase.rpc("can_edit_charity" as any, { _user: u.user.id });
-      if (typeof data === "boolean") setIsCharitySteward(data);
+      const [{ data: charity }, { data: newsletter }] = await Promise.all([
+        supabase.rpc("can_edit_charity" as any, { _user: u.user.id }),
+        supabase.rpc("can_edit_newsletter" as any, { _user: u.user.id } as any),
+      ]);
+      if (typeof charity === "boolean") setIsCharitySteward(charity);
+      if (typeof newsletter === "boolean") setCanEditNewsletter(newsletter);
     })();
   }, []);
 
@@ -27,6 +32,7 @@ function Inner() {
     { to: "/members/admin/development", title: "Mentor Portal", description: "Mentor dashboard, development records, summary report.", icon: GraduationCap, visible: isAdmin || canManageProgression },
     { to: "/members/admin/charity", title: "Charity Steward", description: "Collections, donations, Charity Ledger, Festival tracker.", icon: Banknote, visible: isAdmin || isWorshipfulMaster || isCharitySteward || isSecretary },
     { to: "/members/kpis", title: "KPI Dashboard", description: "Membership, LOI, Festive Board, Royal Arch conversion.", icon: BarChart3, visible: canManageProgression },
+    { to: "/members/admin/newsletter", title: "Newsletter Hub", description: "Compose and broadcast the Monthly Chronicle.", icon: Mail, visible: canEditNewsletter },
     { to: "/members/admin", title: "Admin Settings", description: "Module settings and member administration.", icon: ShieldCheck, visible: isAdmin },
   ];
 
