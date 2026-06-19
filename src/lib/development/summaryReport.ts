@@ -455,12 +455,13 @@ export async function buildSummaryReport(period: SummaryPeriod): Promise<Summary
 
 export function buildExecSummary(d: SummaryReportData): string {
   const bits: string[] = [];
+  const noviceN = d.membership.novice;
   bits.push(
-    `Weybridge Lodge currently has ${d.membership.novice} member${d.membership.novice === 1 ? "" : "s"} in formal mentoring, with an average checklist completion of ${d.mentoring.avgCompletionPct}%.`
+    `Weybridge Lodge currently has ${noviceN} member${noviceN === 1 ? "" : "s"} in formal mentoring, with an average checklist completion of ${d.mentoring.avgCompletionPct}%.`
   );
-  bits.push(
-    `${d.ritual.red} of ${d.ritual.totalPieces} ritual pieces are unrecorded, ${d.ritual.amber} are amber single-point-of-failure risk${d.ritual.amber === 1 ? "" : "s"}.`
-  );
+  const redV = `${d.ritual.red} ${d.ritual.red === 1 ? "is" : "are"} unrecorded`;
+  const amberV = `${d.ritual.amber} ${d.ritual.amber === 1 ? "is" : "are"} amber single-point-of-failure risk${d.ritual.amber === 1 ? "" : "s"}`;
+  bits.push(`Of ${d.ritual.totalPieces} ritual pieces, ${redV}, ${amberV}.`);
   if (d.loi.sessions > 0) {
     bits.push(
       `LoI attendance averaged ${d.loi.avgAttendancePct}% across ${d.loi.sessions} session${d.loi.sessions === 1 ? "" : "s"}${d.loi.trend !== "n/a" ? ` (${d.loi.trend} vs previous period)` : ""}.`
