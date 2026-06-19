@@ -1,101 +1,96 @@
 ## Goal
 
-Extend the existing Member Development Module to deliver a lodge-wide Ritual Skills Matrix (DC/WM view), Preceptor's Notes, mentoring exemptions, an LoI Part Assignment Helper, and the two specified PDF exports — while reusing existing tables (`profiles`, `officer_appointments`, `loi_sessions`, `member_*`) rather than duplicating data.
+Most of the brief is already built (Skills Matrix, individual Development Record with profile / checklist / ritual / offices, Mentor Dashboard, LoI Helper, Preceptor's Notes, exemptions, Dev Record PDF, Gap Report PDF). This iteration adds the missing pieces:
 
-## What already exists (keep & reuse)
+1. **Engagement Tracker** (Section 2e)
+2. **Working Groups** module (Section 5)
+3. **Working Groups Activity Report PDF** (Section 6)
+4. **Beehive philosophy quote** on the public About page
+5. Small gaps: Secretary edit access on checklist/profile, threshold-date UI in module settings, member dashboard surfacing of working group assignments.
 
-- `member_development_records`, `member_checklist_items`, `member_ritual_records`, `member_external_appointments` tables + RLS
-- `ProfileSection`, `MentoringChecklist`, `RitualRecord`, `OfficesRecord`, `ExportPdfButton` components
-- `MemberDevelopmentPage` (individual record) and stub `MentorDashboard`
-- Catalogues in `src/lib/development/catalogues.ts`
-- `can_edit_member_development` and `can_edit_member_ritual` SQL helpers
+## 1. Database migration
 
-## What changes
+New tables (all with GRANT + RLS + policies):
 
-### 1. Database (one migration)
+- `member_engagement_log`
+  - `member_id` (FK profiles), `occurred_on` date, `category` text (`social` | `blog` | `charity` | `working_group` | `mentor_contact` | `visit` | `provincial` | `other`), `summary` text, `logged_by` uuid, timestamps.
+  - RLS: member sees own; Mentor of member, Admin, WM, Secretary edit; DC read.
 
-- Add column `member_ritual_records.preceptor_notes text` (visible only to DC/WM/Admin — enforced in app + via a SECURITY DEFINER read function).
-- Add columns to `member_development_records`:
-  - `mentoring_exempt boolean default false`
-  - `exemption_reason text` (`joining_member` | `senior_member` | null)
-  - `exemption_note text`
-  - `last_checkin_date date`
-- New table `module_settings` (single-row key/value): stores `mentoring_threshold_date` (default `2025-10-01`). Editable by Secretary/Admin only.
-- New table `loi_part_assignments`:
-  - `loi_session_id` (FK `loi_sessions`), `ritual_group`, `piece`, `member_id` (FK profiles), `assigned_by`, `notes`
-  - RLS: read = active members; write = DC/WM/Admin/Secretary
-- RPC `lodge_skills_matrix()` returns one row per `(ritual_group, piece, member_id)` with highest achieved level (`learned`/`assessed`/`loi`/`lodge`) computed from `member_ritual_records`, restricted to active members. SECURITY DEFINER.
-- RPC `update_preceptor_notes(_row_id uuid, _notes text)` — restricted to DC/WM/Admin.
-- All new tables get the standard GRANT + RLS + policies block.
+- `working_groups`
+  - `slug` text unique, `name`, `remit` text, `founding_statement` text, `lead_member_id` uuid, `is_active` bool, timestamps.
+  - RLS: read = active members; write = Admin / WM / Secretary.
 
-### 2. Catalogue updates (`src/lib/development/catalogues.ts`)
+- `working_group_members`
+  - `working_group_id`, `member_id`, `role` text (`lead` | `member`), `joined_on` date.
+  - RLS: read = active members; write = Admin / WM / Secretary / group lead.
 
-- Replace ritual catalogue with the exact list from the brief (Opening/Closing, Initiation, Passing, Raising, Installation, LoI Roles, Lodge Traditions) — pieces tagged with degree (`1`, `2`, `3`, `installation`, `loi`, `tradition`).
-- Replace checklist catalogue with the exact stages/items in the brief.
-- A safe re-seed: `ensureSeeded` already inserts only missing `(stage, topic)` / `(ritual_group, piece)` pairs, so existing rows stay intact and new ones are added.
+- `working_group_activities`
+  - `working_group_id`, `activity_date` date, `kind` text (`meeting` | `event` | `outcome`), `title` text, `notes` text, `logged_by` uuid.
+  - RLS: read = active members; write = Admin / WM / Secretary / group lead / group members.
 
-### 3. New pages & components
+Helper functions:
+- `is_working_group_lead(_user uuid, _group uuid) returns boolean` (SECURITY DEFINER).
+- `last_engagement_date(_member uuid) returns date` (used by Mentor Dashboard).
+- Update `can_edit_member_development` to include Secretary.
 
-```
-src/pages/members/development/
-  SkillsMatrix.tsx          (DC Dashboard — default for DC/WM)
-  LoiAssignmentHelper.tsx   (Section 4)
+Seed five working groups (Social Committee, Charity & Fundraising, Community & Volunteering, Lodge Visits & Experiences, Communications & Heritage) with the briefed remits and the founding statement on each group row (also stored as `module_settings.working_groups_philosophy`).
 
-src/components/members/development/
-  SkillsMatrixGrid.tsx      (members × pieces grid, R/A/G highlighting, filters)
-  PiecePeopleDrawer.tsx     (per-piece breakdown: delivered / candidates / not started)
-  PreceptorNotesField.tsx   (DC/WM only, inline editor inside RitualRecord)
-  ExemptionPanel.tsx        (Secretary/Mentor toggles in ProfileSection)
-  LoiAssignmentTable.tsx    (suggestions per piece with override dropdown)
-  GapReportPdfButton.tsx
-```
+Add `module_settings.mentoring_threshold_date` editable surface (already exists in table — just expose UI).
 
-### 4. Routing & nav (`App.tsx`, `MembersLayout.tsx`)
+## 2. Code changes
 
-- `/members/admin/skills-matrix` → `SkillsMatrix` (DC/WM/Admin)
-- `/members/admin/loi-helper` → `LoiAssignmentHelper`
-- Existing `/members/admin/development` stays as the mentor/admin member list, with a tab switcher: **Skills Matrix · Members · LoI Helper**.
-- Sidebar: rename "Member Development" group; DC/WM see Skills Matrix link, Mentors see Mentor Dashboard, all members see "My Development".
+### New library
+- `src/lib/workingGroups.ts` — CRUD + types for groups, members, activities.
+- `src/lib/development/engagement.ts` — CRUD + types for engagement log, `daysSinceLastTouchpoint(memberId)`.
+- `src/lib/development/activityReportPdf.ts` — `buildWorkingGroupsActivityPdf(masonicYear)`.
 
-### 5. Component behaviour
+### New components
+- `src/components/members/development/EngagementTracker.tsx` — table + add-entry form, used inside Member Development Record (sub-section 2e).
+- `src/components/members/workinggroups/`
+  - `WorkingGroupsList.tsx` — landing grid with gold-serif pull-quote at top.
+  - `WorkingGroupCard.tsx`
+  - `WorkingGroupDetail.tsx` — remit, lead, members chips, activity log.
+  - `ActivityLogTable.tsx` + `AddActivityDialog.tsx`
+  - `ManageGroupDialog.tsx` (Admin / WM / Secretary) — name, remit, lead, members.
+  - `ActivityReportPdfButton.tsx`
+- `src/components/members/development/ModuleSettingsCard.tsx` — Secretary/Admin form for `mentoring_threshold_date`.
 
-- **SkillsMatrixGrid**: fetches `lodge_skills_matrix()` once, pivots client-side. Renders sticky first column (piece) and sticky header (member initials). Cell shows highest level letter; per-piece row aggregate drives Red/Amber/Green tint of the piece label. Filters: degree multi-select, gap-type radio.
-- **PiecePeopleDrawer**: opens via row click; three lists with member chips → click chip jumps to that member's Development Record.
-- **Member column header click** → `/members/development/:memberId`.
-- **PreceptorNotesField**: only rendered if `isDC || isWM || isAdmin`; PDF for member excludes it.
-- **ExemptionPanel**: when set, MentoringChecklist component is hidden and replaced by a labelled badge.
-- **LoiAssignmentHelper**: pick LoI session → pick pieces → for each piece show suggested member (highest priority = `learned`/`assessed` and not yet delivered) plus override; save to `loi_part_assignments`.
+### New pages
+- `src/pages/members/working-groups/Index.tsx` (list, with quote)
+- `src/pages/members/working-groups/Detail.tsx` (`/members/working-groups/:slug`)
+- `src/pages/members/working-groups/Admin.tsx` (Secretary/WM/Admin manage groups + run Activity Report PDF)
 
-### 6. PDFs (`src/lib/development/pdf.ts` + new `gapReportPdf.ts`)
+### Routing & nav
+- Add routes in `App.tsx`.
+- `MembersLayout.tsx` sidebar: new "Working Groups" group with **Working Groups** (all members), **Manage Groups** (Admin/WM/Secretary), **Activity Report** action.
+- Member dashboard widget (`src/pages/members/Dashboard.tsx`): show "My Working Groups" chips + "Open commitments" count, alongside existing mentoring/ritual cards.
 
-- Extend existing `buildDevelopmentPdf` to:
-  - Skip mentoring checklist section when exempt (show exemption note instead).
-  - Never include Preceptor's Notes.
-- New `buildGapReportPdf(matrix)`: lodge crest header, gold section headings, two tables (Red pieces, Amber pieces) sorted by risk; footer "Confidential — DC / WM only".
+### Mentor Dashboard
+- Extend existing `MentorDashboard.tsx` row with: `last_touchpoint`, `weeks_since_touchpoint`, amber flag when > 6 weeks AND member is in mentoring period (not exempt).
 
-### 7. Access control summary
+### Development Record page
+- Add **Engagement** tab/section between Ritual and Offices.
+- PDF (`pdf.ts`) gains an "Engagement Log" section (member-facing OK; still excludes Preceptor's Notes).
 
-| Capability | Admin | WM | DC | Secretary | Mentor | Member |
-|---|---|---|---|---|---|---|
-| Skills Matrix / Gap Report | ✓ | ✓ | ✓ | – | – | – |
-| Edit Preceptor's Notes | ✓ | ✓ | ✓ | – | – | – |
-| Edit any member's checklist/ritual | ✓ | ✓ | – (ritual ✓) | – (ritual ✓) | own mentees | – |
-| Set exemption / threshold | ✓ | ✓ | – | ✓ | – | – |
-| Save LoI assignments | ✓ | ✓ | ✓ | ✓ | – | – |
-| View own record | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+## 3. Public website — beehive quote
 
-### 8. Out of scope
+- Edit `src/components/About.tsx` to add a gold serif pull-quote block under the lead paragraphs:
+  > "Weybridge Lodge operates on the principle of the beehive…"
+- Same quote also added to `src/pages/LodgeProfile.tsx` near the top.
+- Use existing `font-serif text-gold` tokens; quote rendered inside a left gold border, italic, with attribution "— Lodge philosophy, adopted 2026".
 
-- No edits to existing Almoner or Officers Tracker modules (Officers Tracker is read-only source).
-- No email / notification triggers.
-- No mobile-specific redesign beyond responsive grid.
+## 4. Out of scope (already done or explicitly skipped)
 
-### Deliverable order
+- Skills Matrix, Gap Report PDF, Preceptor's Notes, exemptions, LoI Helper, individual Development Record PDF — already shipped.
+- No edits to Officers Tracker or Almoner modules.
+- No email/notification triggers.
+- Formal committee minute change is a real-world action, not a code change.
 
-1. Migration (DB + RPCs + grants + policies)
-2. Catalogue rewrite + small `queries.ts` additions
-3. SkillsMatrix page + grid + drawer
-4. Preceptor's Notes + Exemption + threshold setting
-5. LoI Assignment Helper
-6. PDF updates + Gap Report PDF
-7. Routes, sidebar, role gating
+## Deliverable order
+
+1. Migration (engagement + working groups + helpers + seed).
+2. Working Groups library + pages + sidebar.
+3. Engagement Tracker component + Mentor Dashboard flag.
+4. Module settings UI (threshold date).
+5. Activity Report PDF + dashboard surfacing.
+6. Public About / LodgeProfile pull-quote.
