@@ -8,26 +8,30 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Cake, Calendar, Plus, Trash2, X } from "lucide-react";
+import { firstWmYearForMember } from "@/data/worshipfulMasters";
 
 type Member = {
   id: string; first_name: string | null; last_name: string | null;
   preferred_name: string | null; full_name: string | null;
   date_of_birth?: string | null; initiation_date?: string | null;
 };
-type EventType = "birthday" | "initiation_anniversary" | "wedding_anniversary" | "bereavement" | "other";
+type EventType = "birthday" | "initiation_anniversary" | "wm_anniversary" | "wedding_anniversary" | "bereavement" | "other";
 type LifeEvent = {
   id: string; member_id: string; event_type: EventType; event_date: string;
   recurring: boolean; notes: string | null; created_at: string;
 };
-type ManualEventType = Exclude<EventType, "birthday" | "initiation_anniversary">;
+type ManualEventType = Exclude<EventType, "birthday" | "initiation_anniversary" | "wm_anniversary">;
 
 const TYPE_LABEL: Record<EventType, string> = {
   birthday: "Birthday",
   initiation_anniversary: "Initiation anniversary",
+  wm_anniversary: "Worshipful Master anniversary",
   wedding_anniversary: "Wedding anniversary",
   bereavement: "Bereavement",
   other: "Other",
 };
+
+const MILESTONE_YEARS = [10, 15, 20, 25, 30, 35, 40];
 const MANUAL_TYPES: ManualEventType[] = ["wedding_anniversary", "bereavement", "other"];
 
 const memberName = (m?: Member) => {
