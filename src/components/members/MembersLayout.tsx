@@ -9,7 +9,7 @@ const navCls = ({ isActive }: { isActive: boolean }) =>
   }`;
 
 export default function MembersLayout({ children }: { children: React.ReactNode }) {
-  const { profile, isAdmin, isSecretary, canManageProgression, canManageSummons, signOut } = useAuth();
+  const { profile, isAdmin, isSecretary, canManageProgression, canManageSummons, canAccessAlmoner, signOut } = useAuth();
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
