@@ -222,7 +222,7 @@ const s = StyleSheet.create({
   memberDate: { width: 62, fontSize: 8.5 },
   memberMark: { width: 18, fontSize: 8.5, textAlign: "center" },
   memberName: { flex: 1, fontSize: 8.5 },
-  memberPost: { fontSize: 8.5, paddingLeft: 80, minHeight: 11 },
+  memberPost: { fontSize: 8.5, paddingLeft: 80, height: 11 },
 
   // Officers
   officerRow: { flexDirection: "row", marginBottom: 1.5 },
