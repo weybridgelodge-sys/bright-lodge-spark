@@ -71,6 +71,12 @@ export default function MembersLayout({ children }: { children: React.ReactNode 
                 <Mail className="w-4 h-4" /> Summons Builder
               </NavLink>
             )}
+            {canAccessAlmoner && (
+              <NavLink to="/members/almoner" className={navCls}>
+                <HeartHandshake className="w-4 h-4" /> Almoner Portal
+              </NavLink>
+            )}
+
             <NavLink to="/members/profile" className={navCls}>
               <UserIcon className="w-4 h-4" /> My Profile
             </NavLink>
