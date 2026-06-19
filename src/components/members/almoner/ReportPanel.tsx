@@ -84,7 +84,7 @@ export default function ReportPanel({ members }: { members: Member[] }) {
 
       // 4. Active referrals
       const activeRefs = (refs.data ?? []).filter((r: any) => !["closed", "declined"].includes(r.status));
-      lines.push(`## 4. Active RMTGB / MCF Referrals (${activeRefs.length})`);
+      lines.push(`## 4. Active MCF / Provincial Referrals (${activeRefs.length})`);
       if (activeRefs.length === 0) {
         lines.push(`No active referrals.`);
       } else {

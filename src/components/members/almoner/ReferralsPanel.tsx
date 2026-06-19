@@ -76,7 +76,7 @@ export default function ReferralsPanel({ members, userId }: { members: Member[];
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="font-serif text-lg text-primary-foreground">RMTGB / MCF Referrals</h3>
+          <h3 className="font-serif text-lg text-primary-foreground">MCF / Provincial Referrals</h3>
           <p className="text-xs text-primary-foreground/60">Tracked welfare and charitable referrals</p>
         </div>
         <Button size="sm" className="bg-gold text-navy hover:bg-gold/90" onClick={() => setShowForm((v) => !v)}>
