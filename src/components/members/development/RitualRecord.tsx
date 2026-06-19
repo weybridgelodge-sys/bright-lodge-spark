@@ -61,8 +61,8 @@ export default function RitualRecord({
                 </thead>
                 <tbody>
                   {list.map((r) => (
-                    <>
-                    <tr key={r.id} className="border-t border-gold/10 align-top">
+                    <Fragment key={r.id}>
+                    <tr className="border-t border-gold/10 align-top">
                       <td className="p-2 text-primary-foreground">{r.piece}</td>
                       <td className="p-2"><Input type="date" disabled={!canEdit} value={r.date_first_learned ?? ""}
                         onChange={(e) => patch(r.id, { date_first_learned: e.target.value || null })}
@@ -81,13 +81,13 @@ export default function RitualRecord({
                         className="h-7 bg-navy-dark text-primary-foreground text-xs" /></td>
                     </tr>
                     {showPreceptorNotes && (
-                      <tr key={`${r.id}-pn`} className="border-t border-gold/5">
+                      <tr className="border-t border-gold/5">
                         <td colSpan={6} className="px-2 pb-2">
                           <PreceptorNotesField memberId={memberId} ritualGroup={r.ritual_group} piece={r.piece} />
                         </td>
                       </tr>
                     )}
-                    </>
+                    </Fragment>
                   ))}
                 </tbody>
               </table>
