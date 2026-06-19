@@ -10,6 +10,7 @@ import RitualRecord from "@/components/members/development/RitualRecord";
 import OfficesRecord, { LodgeAppointmentRow } from "@/components/members/development/OfficesRecord";
 import ExportPdfButton from "@/components/members/development/ExportPdfButton";
 import ExemptionPanel from "@/components/members/development/ExemptionPanel";
+import EngagementTracker from "@/components/members/development/EngagementTracker";
 import {
   ensureSeeded,
   loadChecklist,
@@ -156,6 +157,14 @@ export default function MemberDevelopmentInner({ memberIdOverride }: { memberIdO
           canEdit={canEdit}
           onChange={setExternal}
         />
+      </section>
+
+      <section className="rounded-sm border border-gold/20 bg-navy-dark/40 p-5">
+        <h2 className="font-serif text-gold text-lg mb-1">5. Engagement Tracker</h2>
+        <p className="text-xs text-primary-foreground/60 mb-4">
+          Non-ceremonial touchpoints: socials, blog contributions, charitable activity, working groups, and mentor conversations.
+        </p>
+        <EngagementTracker memberId={memberId} canEdit={canEdit || isOwn} loggedBy={user?.id ?? null} />
       </section>
     </div>
   );
