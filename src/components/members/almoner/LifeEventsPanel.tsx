@@ -274,7 +274,7 @@ function NewEventForm({ members, userId, onSaved }: { members: Member[]; userId:
   return (
     <form onSubmit={submit} className="bg-navy-light/60 border border-gold/30 rounded p-4 space-y-3">
       <p className="text-[11px] text-primary-foreground/60">
-        Birthdays and initiation anniversaries are pulled automatically from member records — use this form for weddings, bereavements and other milestones only.
+        Birthdays, initiation and Worshipful Master milestone anniversaries are pulled automatically from member records — use this form for weddings, bereavements and other milestones only.
       </p>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
