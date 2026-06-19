@@ -4,7 +4,9 @@ import heroAvif from "@/assets/hero-lodge.avif.asset.json";
 import heroWebp from "@/assets/hero-lodge.webp.asset.json";
 import heroJpg from "@/assets/hero-lodge.optimized.jpg.asset.json";
 import logoAsset from "@/assets/weybridge-logo-500.webp.asset.json";
+import logoSmallAsset from "@/assets/weybridge-logo-300.webp.asset.json";
 const logo = logoAsset.url;
+const logoSmall = logoSmallAsset.url;
 
 const Hero = () => {
   return (
@@ -27,7 +29,7 @@ const Hero = () => {
       <div className="relative z-10 container mx-auto px-4 sm:px-6 pt-20">
         <div className="flex md:hidden justify-center mb-8 hero-fade-in" style={{ animationDelay: "0.5s" }}>
           <img
-            src={logo}
+            src={logoSmall}
             alt="Weybridge Lodge No. 6787 crest — Freemasons Lodge in Guildford, Surrey"
             width={150}
             height={150}
