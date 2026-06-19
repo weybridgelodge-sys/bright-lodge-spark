@@ -81,10 +81,17 @@ export default function OurCharitiesLiveFeed() {
               <h3 className="font-serif text-lg text-primary-foreground">{festival.festival_name}</h3>
               <span className="text-sm text-gold tabular-nums">{gbp(festivalCumulative)} of {gbp(festival.target_amount)}</span>
             </div>
-            <div className="h-3 bg-navy-dark rounded-sm overflow-hidden border border-gold/20">
-              <div className="h-full bg-gold-shimmer" style={{ width: `${pct}%` }} aria-label={`${Math.round(pct)} percent of target`} />
+            <div className={`h-3 bg-navy-dark rounded-sm overflow-hidden border ${targetReached ? "border-gold shadow-[0_0_12px_rgba(201,164,50,0.4)]" : "border-gold/20"}`}>
+              <div className="h-full bg-gold-shimmer" style={{ width: `${barPct}%` }} aria-label={`${Math.round(rawPct)} percent of target`} />
             </div>
-            <p className="text-xs text-primary-foreground/60 mt-2">{Math.round(pct)}% of the lodge's Festival target reached.</p>
+            {targetReached ? (
+              <p className="text-xs text-gold mt-2 font-semibold">
+                {Math.round(rawPct)}% of target reached — {award ? `${award.name} Award achieved` : "Target exceeded"}
+                {excess > 0 ? ` · ${gbp(excess)} above target` : ""}.
+              </p>
+            ) : (
+              <p className="text-xs text-primary-foreground/60 mt-2">{Math.round(rawPct)}% of the lodge's Festival target reached.</p>
+            )}
           </div>
         )}
 
