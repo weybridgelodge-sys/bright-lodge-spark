@@ -1117,6 +1117,150 @@ export type Database = {
         }
         Relationships: []
       }
+      welfare_absences: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          id: string
+          member_id: string
+          notes: string | null
+          period_end: string | null
+          period_start: string
+          reason: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          id?: string
+          member_id: string
+          notes?: string | null
+          period_end?: string | null
+          period_start: string
+          reason: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          id?: string
+          member_id?: string
+          notes?: string | null
+          period_end?: string | null
+          period_start?: string
+          reason?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "welfare_absences_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      welfare_correspondence: {
+        Row: {
+          body: string | null
+          correspondence_date: string
+          created_at: string
+          deleted_at: string | null
+          direction: string
+          id: string
+          logged_by: string | null
+          member_id: string | null
+          method: string
+          subject: string
+          updated_at: string
+        }
+        Insert: {
+          body?: string | null
+          correspondence_date?: string
+          created_at?: string
+          deleted_at?: string | null
+          direction: string
+          id?: string
+          logged_by?: string | null
+          member_id?: string | null
+          method: string
+          subject: string
+          updated_at?: string
+        }
+        Update: {
+          body?: string | null
+          correspondence_date?: string
+          created_at?: string
+          deleted_at?: string | null
+          direction?: string
+          id?: string
+          logged_by?: string | null
+          member_id?: string | null
+          method?: string
+          subject?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "welfare_correspondence_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      welfare_life_events: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          event_date: string
+          event_type: string
+          id: string
+          member_id: string
+          notes: string | null
+          recurring: boolean
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          event_date: string
+          event_type: string
+          id?: string
+          member_id: string
+          notes?: string | null
+          recurring?: boolean
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          event_date?: string
+          event_type?: string
+          id?: string
+          member_id?: string
+          notes?: string | null
+          recurring?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "welfare_life_events_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       welfare_log_entries: {
         Row: {
           action_taken: string | null
@@ -1203,6 +1347,59 @@ export type Database = {
             foreignKeyName: "welfare_member_status_member_id_fkey"
             columns: ["member_id"]
             isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      welfare_rmtgb_referrals: {
+        Row: {
+          closed_date: string | null
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          id: string
+          member_id: string
+          outcome: string | null
+          referral_date: string
+          referral_type: string
+          status: string
+          summary: string
+          updated_at: string
+        }
+        Insert: {
+          closed_date?: string | null
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          id?: string
+          member_id: string
+          outcome?: string | null
+          referral_date?: string
+          referral_type: string
+          status?: string
+          summary: string
+          updated_at?: string
+        }
+        Update: {
+          closed_date?: string | null
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          id?: string
+          member_id?: string
+          outcome?: string | null
+          referral_date?: string
+          referral_type?: string
+          status?: string
+          summary?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "welfare_rmtgb_referrals_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
