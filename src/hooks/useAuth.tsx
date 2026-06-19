@@ -64,6 +64,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     ]);
     setProfile((p as Profile) ?? null);
     setRoles(((r as { role: Role }[]) ?? []).map((x) => x.role));
+    // WM/IPM detection for current lodge year (auto-rotates on installation)
+    try {
+      const { data: wm } = await supabase.rpc("is_current_wm_or_ipm", { _user_id: uid });
+      setIsCurrentWmOrIpm(!!wm);
+    } catch {
+      setIsCurrentWmOrIpm(false);
+    }
   };
 
   useEffect(() => {
@@ -74,6 +81,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } else {
         setProfile(null);
         setRoles([]);
+        setIsCurrentWmOrIpm(false);
       }
     });
 
@@ -94,6 +102,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await supabase.auth.signOut();
     setProfile(null);
     setRoles([]);
+    setIsCurrentWmOrIpm(false);
   };
 
   const isAdmin = roles.includes("admin");
@@ -101,16 +110,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const isAssistantSecretary = roles.includes("assistant_secretary");
   const isWorshipfulMaster = roles.includes("worshipful_master");
   const isDirectorOfCeremonies = roles.includes("director_of_ceremonies");
+  const isAlmoner = roles.includes("almoner");
   const canManageProgression = isAdmin || isSecretary || isWorshipfulMaster;
   const canManageLOI = isAdmin || isSecretary || isWorshipfulMaster || isDirectorOfCeremonies;
   const canManageSummons = isAdmin || isSecretary || isAssistantSecretary;
+  const canAccessAlmoner = isAdmin || isAlmoner || isCurrentWmOrIpm;
 
   return (
-    <Ctx.Provider value={{ session, user: session?.user ?? null, profile, isAdmin, isSecretary, isAssistantSecretary, isWorshipfulMaster, isDirectorOfCeremonies, canManageProgression, canManageLOI, canManageSummons, loading, refreshProfile, signOut }}>
+    <Ctx.Provider value={{ session, user: session?.user ?? null, profile, isAdmin, isSecretary, isAssistantSecretary, isWorshipfulMaster, isDirectorOfCeremonies, isAlmoner, isCurrentWmOrIpm, canManageProgression, canManageLOI, canManageSummons, canAccessAlmoner, loading, refreshProfile, signOut }}>
       {children}
     </Ctx.Provider>
   );
 }
+
 
 export function useAuth() {
   const ctx = useContext(Ctx);
