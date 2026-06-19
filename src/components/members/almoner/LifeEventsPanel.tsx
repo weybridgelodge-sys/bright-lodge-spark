@@ -204,7 +204,7 @@ export default function LifeEventsPanel({ members, userId }: { members: Member[]
                 <div className="flex-1 min-w-0">
                   <p className="text-sm text-primary-foreground">
                     <span className="font-semibold">{memberName(memberMap.get(x.memberId))}</span>
-                    <span className="text-primary-foreground/60"> — {TYPE_LABEL[x.type]}{x.milestone != null && x.milestone > 0 ? ` · ${x.milestone}${x.type === "initiation_anniversary" ? " years" : ""}` : ""}</span>
+                    <span className="text-primary-foreground/60"> — {TYPE_LABEL[x.type]}{x.milestone != null && x.milestone > 0 ? ` · ${x.milestone}${x.type === "initiation_anniversary" || x.type === "wm_anniversary" ? " years" : ""}` : ""}</span>
                   </p>
                   <p className="text-[11px] text-primary-foreground/60">
                     {fmt(x.when)} · {x.days === 0 ? "today" : x.days === 1 ? "tomorrow" : `in ${x.days} days`}
