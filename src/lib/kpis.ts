@@ -330,7 +330,7 @@ export function milestones(members: KpiMember[], wmTerms: WmTerm[]): Milestone[]
           member: m,
           kind: "wm",
           years: target,
-          date: anniv.toISOString().slice(0, 10),
+          date: fmtLocal(anniv),
           label: `${target} years since first installed as WM`,
         });
       }
