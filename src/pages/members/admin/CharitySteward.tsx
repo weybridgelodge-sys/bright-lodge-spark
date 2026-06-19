@@ -951,7 +951,7 @@ function Inner() {
         <TabsContent value="collections"><CollectionsTab collections={collections} donations={donations} canEdit={canEdit} onChange={reload} /></TabsContent>
         <TabsContent value="donations"><DonationsTab donations={donations} charities={charities} canEdit={canEdit} onChange={reload} /></TabsContent>
         <TabsContent value="ledger"><LedgerTab charities={charities} donations={donations} canEdit={canEdit} onChange={reload} /></TabsContent>
-        <TabsContent value="festival"><FestivalTab donations={donations} festival={festival} canEdit={canEdit} onChange={reload} /></TabsContent>
+        <TabsContent value="festival"><FestivalTab donations={donations} charities={charities} festival={festival} canEdit={canEdit} onChange={reload} /></TabsContent>
         <TabsContent value="report"><ReportTab charities={charities} collections={collections} donations={donations} festival={festival} canEdit={canEdit} /></TabsContent>
         <TabsContent value="feed"><FeedTab festival={festival} canEdit={canEdit} onChange={reload} /></TabsContent>
       </Tabs>
