@@ -11,8 +11,14 @@ import { Badge } from "@/components/ui/badge";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { AlertTriangle, ArrowLeft, CalendarClock, HeartHandshake, Plus, ShieldAlert, X } from "lucide-react";
+import LifeEventsPanel from "@/components/members/almoner/LifeEventsPanel";
+import CorrespondencePanel from "@/components/members/almoner/CorrespondencePanel";
+import ReferralsPanel from "@/components/members/almoner/ReferralsPanel";
+import AbsencesPanel from "@/components/members/almoner/AbsencesPanel";
+import ReportPanel from "@/components/members/almoner/ReportPanel";
 
 // ============ Types ============
 type WelfareStatus = "green" | "amber" | "red";
@@ -266,61 +272,80 @@ function PortalBody() {
     );
   }
 
+  const { user } = useAuth();
+
   return (
-    <div>
-      <div className="mb-4 flex items-center justify-between flex-wrap gap-2">
-        <h2 className="font-serif text-xl text-primary-foreground">Member Welfare Board</h2>
-        <p className="text-xs text-primary-foreground/50">{sorted.length} active members</p>
-      </div>
-      {sorted.length === 0 ? (
-        <p className="text-sm text-primary-foreground/60">No active members.</p>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          {sorted.map((m) => {
-            const s: WelfareStatus = statuses[m.id]?.status ?? "green";
-            const last = lastContactByMember[m.id] ?? null;
-            const lastDays = daysAgo(last);
-            return (
-              <button
-                key={m.id}
-                onClick={() => setSelectedId(m.id)}
-                className="text-left bg-navy-light/40 border border-gold/20 hover:border-gold/50 rounded p-4 transition-colors"
-              >
-                <div className="flex items-start justify-between gap-2 mb-2">
-                  <div>
-                    <p className="font-serif text-base text-primary-foreground leading-tight">{displayName(m)}</p>
-                    <p className="text-[11px] text-primary-foreground/50 mt-0.5">
-                      {ageFrom(m.date_of_birth) != null ? `Age ${ageFrom(m.date_of_birth)}` : "Age —"}
-                      {" · "}
-                      {yearsMember(m) != null ? `${yearsMember(m)} yrs member` : "—"}
-                    </p>
-                  </div>
-                  <span className={`w-3 h-3 rounded-full ${STATUS_DOT[s]} shrink-0 mt-1`} title={STATUS_LABEL[s]} />
-                </div>
-                <div className="text-[11px] text-primary-foreground/70 space-y-1">
-                  <div>
-                    Last contact: <span className="text-primary-foreground">{last ? fmtDate(last) : "Never"}</span>
-                    {lastDays != null && <span className="text-primary-foreground/40"> · {lastDays}d ago</span>}
-                  </div>
-                  <div className="flex gap-1.5 flex-wrap pt-1">
-                    {absentFlags[m.id] && (
-                      <Badge variant="outline" className="border-amber-400/50 text-amber-400 text-[10px] px-1.5 py-0">
-                        <AlertTriangle className="w-3 h-3 mr-1" /> Missed 2 meetings
-                      </Badge>
-                    )}
-                    {openFollowUps[m.id] && (
-                      <Badge variant="outline" className="border-red-500/50 text-red-400 text-[10px] px-1.5 py-0">
-                        <CalendarClock className="w-3 h-3 mr-1" /> Follow-up overdue
-                      </Badge>
-                    )}
-                  </div>
-                </div>
-              </button>
-            );
-          })}
+    <Tabs defaultValue="board" className="w-full">
+      <TabsList className="bg-navy-light/40 border border-gold/20 mb-4 flex-wrap h-auto">
+        <TabsTrigger value="board">Welfare Board</TabsTrigger>
+        <TabsTrigger value="events">Life Events</TabsTrigger>
+        <TabsTrigger value="correspondence">Correspondence</TabsTrigger>
+        <TabsTrigger value="referrals">Referrals</TabsTrigger>
+        <TabsTrigger value="absences">Absences</TabsTrigger>
+        <TabsTrigger value="report">Report</TabsTrigger>
+      </TabsList>
+
+      <TabsContent value="board">
+        <div className="mb-4 flex items-center justify-between flex-wrap gap-2">
+          <h2 className="font-serif text-xl text-primary-foreground">Member Welfare Board</h2>
+          <p className="text-xs text-primary-foreground/50">{sorted.length} active members</p>
         </div>
-      )}
-    </div>
+        {sorted.length === 0 ? (
+          <p className="text-sm text-primary-foreground/60">No active members.</p>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {sorted.map((m) => {
+              const s: WelfareStatus = statuses[m.id]?.status ?? "green";
+              const last = lastContactByMember[m.id] ?? null;
+              const lastDays = daysAgo(last);
+              return (
+                <button
+                  key={m.id}
+                  onClick={() => setSelectedId(m.id)}
+                  className="text-left bg-navy-light/40 border border-gold/20 hover:border-gold/50 rounded p-4 transition-colors"
+                >
+                  <div className="flex items-start justify-between gap-2 mb-2">
+                    <div>
+                      <p className="font-serif text-base text-primary-foreground leading-tight">{displayName(m)}</p>
+                      <p className="text-[11px] text-primary-foreground/50 mt-0.5">
+                        {ageFrom(m.date_of_birth) != null ? `Age ${ageFrom(m.date_of_birth)}` : "Age —"}
+                        {" · "}
+                        {yearsMember(m) != null ? `${yearsMember(m)} yrs member` : "—"}
+                      </p>
+                    </div>
+                    <span className={`w-3 h-3 rounded-full ${STATUS_DOT[s]} shrink-0 mt-1`} title={STATUS_LABEL[s]} />
+                  </div>
+                  <div className="text-[11px] text-primary-foreground/70 space-y-1">
+                    <div>
+                      Last contact: <span className="text-primary-foreground">{last ? fmtDate(last) : "Never"}</span>
+                      {lastDays != null && <span className="text-primary-foreground/40"> · {lastDays}d ago</span>}
+                    </div>
+                    <div className="flex gap-1.5 flex-wrap pt-1">
+                      {absentFlags[m.id] && (
+                        <Badge variant="outline" className="border-amber-400/50 text-amber-400 text-[10px] px-1.5 py-0">
+                          <AlertTriangle className="w-3 h-3 mr-1" /> Missed 2 meetings
+                        </Badge>
+                      )}
+                      {openFollowUps[m.id] && (
+                        <Badge variant="outline" className="border-red-500/50 text-red-400 text-[10px] px-1.5 py-0">
+                          <CalendarClock className="w-3 h-3 mr-1" /> Follow-up overdue
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </TabsContent>
+
+      <TabsContent value="events"><LifeEventsPanel members={members} userId={user?.id ?? null} /></TabsContent>
+      <TabsContent value="correspondence"><CorrespondencePanel members={members} userId={user?.id ?? null} /></TabsContent>
+      <TabsContent value="referrals"><ReferralsPanel members={members} userId={user?.id ?? null} /></TabsContent>
+      <TabsContent value="absences"><AbsencesPanel members={members} userId={user?.id ?? null} /></TabsContent>
+      <TabsContent value="report"><ReportPanel members={members} /></TabsContent>
+    </Tabs>
   );
 }
 
