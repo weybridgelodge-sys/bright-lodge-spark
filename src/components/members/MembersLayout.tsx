@@ -1,7 +1,8 @@
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { LayoutDashboard, Users, FileText, User as UserIcon, ShieldCheck, LogOut, Shield, CalendarDays, CreditCard, BookOpen, Crown, CalendarPlus, BarChart3, GraduationCap, Utensils, Mail, HeartHandshake } from "lucide-react";
-import logo from "@/assets/weybridge-logo.svg";
+import logoAsset from "@/assets/weybridge-logo-no-bg.png.asset.json";
+const logo = logoAsset.url;
 
 const navCls = ({ isActive }: { isActive: boolean }) =>
   `flex items-center gap-2 px-3 py-2 rounded-sm text-sm font-sans transition-colors ${

@@ -1,6 +1,7 @@
 import { Instagram, Facebook, Twitter } from "lucide-react";
 import { Link } from "react-router-dom";
-import logo from "@/assets/weybridge-logo.svg";
+import logoAsset from "@/assets/weybridge-logo-no-bg.png.asset.json";
+const logo = logoAsset.url;
 import charterMark from "@/assets/charter-mark.png";
 
 interface FooterLink {

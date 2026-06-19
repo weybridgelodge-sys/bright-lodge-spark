@@ -7,7 +7,8 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { useAuth } from "@/hooks/useAuth";
-import logo from "@/assets/weybridge-logo.svg";
+import logoAsset from "@/assets/weybridge-logo-no-bg.png.asset.json";
+const logo = logoAsset.url;
 
 type View = "login" | "register" | "request-sent";
 

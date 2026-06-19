@@ -3,7 +3,8 @@ import { Link } from "react-router-dom";
 import heroAvif from "@/assets/hero-lodge.avif.asset.json";
 import heroWebp from "@/assets/hero-lodge.webp.asset.json";
 import heroJpg from "@/assets/hero-lodge.optimized.jpg.asset.json";
-import logo from "@/assets/weybridge-logo.svg";
+import logoAsset from "@/assets/weybridge-logo-no-bg.png.asset.json";
+const logo = logoAsset.url;
 
 const Hero = () => {
   return (
