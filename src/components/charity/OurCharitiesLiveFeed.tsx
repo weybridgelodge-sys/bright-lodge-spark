@@ -6,6 +6,14 @@ const gbp = (n: number) => new Intl.NumberFormat("en-GB", { style: "currency", c
 type YearRow = { charity_id: string; name: string; website: string | null; year_total: number };
 type Totals = { total_raised: number; public_feed_start_date: string | null };
 type Festival = { festival_name: string; target_amount: number };
+type FeedMetrics = {
+  total_raised: number;
+  current_year_total: number;
+  festival_name: string;
+  festival_target_amount: number;
+  festival_total: number;
+  public_feed_start_date: string | null;
+};
 
 export default function OurCharitiesLiveFeed() {
   const [totals, setTotals] = useState<Totals | null>(null);
@@ -15,18 +23,28 @@ export default function OurCharitiesLiveFeed() {
 
   useEffect(() => {
     (async () => {
-      const [{ data: t }, { data: r }, { data: f }] = await Promise.all([
+      const [{ data: m }, { data: t }, { data: r }, { data: f }] = await Promise.all([
+        (supabase as any).from("charity_public_feed_metrics").select("total_raised,current_year_total,festival_name,festival_target_amount,festival_total,public_feed_start_date").maybeSingle(),
         (supabase as any).from("public_charity_totals").select("total_raised,public_feed_start_date").maybeSingle(),
         (supabase as any).from("public_charity_year_breakdown").select("charity_id,name,website,year_total"),
         supabase.from("charity_festival_settings").select("festival_name,target_amount").maybeSingle(),
       ]);
-      if (t) setTotals({ total_raised: Number((t as any).total_raised), public_feed_start_date: (t as any).public_feed_start_date });
+      if (m) {
+        const metrics = m as FeedMetrics;
+        setTotals({ total_raised: Number(metrics.total_raised), public_feed_start_date: metrics.public_feed_start_date });
+        setFestival({ festival_name: metrics.festival_name, target_amount: Number(metrics.festival_target_amount) });
+        setFestivalCumulative(Number(metrics.festival_total));
+      } else if (t) {
+        setTotals({ total_raised: Number((t as any).total_raised), public_feed_start_date: (t as any).public_feed_start_date });
+      }
       if (r) {
         const mappedRows = (r as any[]).map((x) => ({ ...x, year_total: Number(x.year_total) }));
         setRows(mappedRows);
-        setFestivalCumulative(mappedRows.filter((x) => x.name.toLowerCase().includes("surrey 2030") || x.name.toLowerCase().includes("2030 festival")).reduce((a, x) => a + x.year_total, 0));
+        if (!m) {
+          setFestivalCumulative(mappedRows.filter((x) => x.name.toLowerCase().includes("surrey 2030") || x.name.toLowerCase().includes("2030 festival")).reduce((a, x) => a + x.year_total, 0));
+        }
       }
-      if (f) setFestival({ festival_name: (f as any).festival_name, target_amount: Number((f as any).target_amount) });
+      if (!m && f) setFestival({ festival_name: (f as any).festival_name, target_amount: Number((f as any).target_amount) });
     })();
   }, []);
 
