@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import logoAsset from "@/assets/weybridge-logo-300.webp.asset.json";
 const logo = logoAsset.url;
 import charterMark from "@/assets/charter-mark.png";
+import NewsletterSignup from "@/components/NewsletterSignup";
 
 interface FooterLink {
   label: string;
