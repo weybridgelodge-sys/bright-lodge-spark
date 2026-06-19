@@ -357,14 +357,16 @@ export default function ReportPanel({ members }: { members: Member[] }) {
     else table([["Date", "Member", "Event", "Detail"]], lifeRows);
 
     // 7 Advice
-    if (advice.trim()) {
+    const cleanAdvice = stripEmoji(advice).trim();
+    if (cleanAdvice) {
       section("7. Almoner's Advice & Notes");
       doc.setTextColor(...INK);
       doc.setFont("helvetica", "normal");
       doc.setFontSize(10);
-      const text = doc.splitTextToSize(advice.trim(), pageW - margin * 2 - 8);
+      const text = doc.splitTextToSize(cleanAdvice, pageW - margin * 2 - 8);
       for (const line of text) {
         if (y > pageH - margin - 40) { doc.addPage(); y = margin; }
+        doc.setFont("helvetica", "normal");
         doc.text(line, margin + 4, y);
         y += 14;
       }
