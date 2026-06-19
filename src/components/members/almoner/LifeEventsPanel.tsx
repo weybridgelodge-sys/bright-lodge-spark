@@ -68,27 +68,53 @@ type UpcomingItem = {
 
 export default function LifeEventsPanel({ members, userId }: { members: Member[]; userId: string | null }) {
   const [events, setEvents] = useState<LifeEvent[]>([]);
+  const [wmTerms, setWmTerms] = useState<{ member_id: string; year_started: number }[]>([]);
   const [showForm, setShowForm] = useState(false);
   const memberMap = useMemo(() => new Map(members.map((m) => [m.id, m])), [members]);
 
   const load = async () => {
-    const { data, error } = await (supabase as any).from("welfare_life_events")
-      .select("*").is("deleted_at", null).order("event_date", { ascending: true });
-    if (error) { toast.error(error.message); return; }
-    setEvents(data ?? []);
+    const [{ data: ev, error: evErr }, { data: wm, error: wmErr }] = await Promise.all([
+      (supabase as any).from("welfare_life_events")
+        .select("*").is("deleted_at", null).order("event_date", { ascending: true }),
+      (supabase as any).from("member_wm_terms").select("member_id,year_started"),
+    ]);
+    if (evErr) { toast.error(evErr.message); return; }
+    if (wmErr) { toast.error(wmErr.message); return; }
+    setEvents(ev ?? []);
+    setWmTerms(wm ?? []);
   };
   useEffect(() => { load(); }, []);
 
-  // Manual stored events only (birthdays + initiation anniversaries are derived from profiles)
+  // Manual stored events only (birthdays, initiation + WM anniversaries are derived)
   const manualEvents = useMemo(
-    () => events.filter((e) => e.event_type !== "birthday" && e.event_type !== "initiation_anniversary"),
+    () => events.filter((e) => e.event_type !== "birthday"
+      && e.event_type !== "initiation_anniversary"
+      && e.event_type !== "wm_anniversary"),
     [events],
   );
+
+  // Earliest WM year per member: from member_wm_terms + historical roll by name match
+  const firstWmByMember = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const t of wmTerms) {
+      const cur = map.get(t.member_id);
+      if (cur == null || t.year_started < cur) map.set(t.member_id, t.year_started);
+    }
+    for (const m of members) {
+      const fromRoll = firstWmYearForMember(m.first_name, m.last_name);
+      if (fromRoll != null) {
+        const cur = map.get(m.id);
+        if (cur == null || fromRoll < cur) map.set(m.id, fromRoll);
+      }
+    }
+    return map;
+  }, [wmTerms, members]);
 
   const upcoming = useMemo<UpcomingItem[]>(() => {
     const items: UpcomingItem[] = [];
 
     for (const m of members) {
+      // Birthdays — annual, every year
       if (m.date_of_birth) {
         const when = nextOccurrence(m.date_of_birth, true);
         items.push({
@@ -96,14 +122,33 @@ export default function LifeEventsPanel({ members, userId }: { members: Member[]
           milestone: yearsBetween(m.date_of_birth, when), derived: true,
         });
       }
+      // Initiation anniversaries — milestone years only
       if (m.initiation_date) {
-        const when = nextOccurrence(m.initiation_date, true);
-        const years = yearsBetween(m.initiation_date, when);
-        if (years >= 1) {
-          items.push({
-            key: `init-${m.id}`, memberId: m.id, type: "initiation_anniversary", when, days: daysUntil(when),
-            milestone: years, derived: true,
-          });
+        const initDate = new Date(m.initiation_date);
+        for (const years of MILESTONE_YEARS) {
+          const when = new Date(initDate.getFullYear() + years, initDate.getMonth(), initDate.getDate());
+          const days = daysUntil(when);
+          if (days >= -1 && days <= HORIZON_DAYS) {
+            items.push({
+              key: `init-${m.id}-${years}`, memberId: m.id, type: "initiation_anniversary",
+              when, days, milestone: years, derived: true,
+            });
+          }
+        }
+      }
+      // Worshipful Master anniversaries — milestone years only, installation in October
+      const firstWm = firstWmByMember.get(m.id);
+      if (firstWm) {
+        for (const years of MILESTONE_YEARS) {
+          // Installation night is the first Thursday of October by convention; use 1 Oct as proxy
+          const when = new Date(firstWm + years, 9, 1);
+          const days = daysUntil(when);
+          if (days >= -1 && days <= HORIZON_DAYS) {
+            items.push({
+              key: `wm-${m.id}-${years}`, memberId: m.id, type: "wm_anniversary",
+              when, days, milestone: years, derived: true,
+            });
+          }
         }
       }
     }
@@ -119,7 +164,8 @@ export default function LifeEventsPanel({ members, userId }: { members: Member[]
     return items
       .filter((x) => x.days <= HORIZON_DAYS && x.days >= -1)
       .sort((a, b) => a.days - b.days);
-  }, [members, manualEvents]);
+  }, [members, manualEvents, firstWmByMember]);
+
 
   const archive = async (id: string) => {
     if (!confirm("Archive this entry?")) return;
