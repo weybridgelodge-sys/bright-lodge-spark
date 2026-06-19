@@ -61,19 +61,25 @@ export async function buildSummaryReportPdf(args: {
 
   let y = 130;
 
-  // Executive summary block
+  // Executive summary block — wrap text first using the active font so the
+  // measurement matches the rendered glyphs (prevents the last word being clipped).
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(10);
+  const execInnerPad = 14;
+  const execTextWidth = pageW - margin * 2 - execInnerPad * 2;
+  const execLines = doc.splitTextToSize(data.execSummary, execTextWidth);
+  const execLineH = 13;
+  const execH = 26 + execLines.length * execLineH + 10;
   doc.setFillColor(250, 247, 238);
-  const execLines = doc.splitTextToSize(data.execSummary, pageW - margin * 2 - 20);
-  const execH = 30 + execLines.length * 12;
   doc.rect(margin, y, pageW - margin * 2, execH, "F");
   doc.setTextColor(...NAVY);
   doc.setFont("times", "bold");
   doc.setFontSize(10);
-  doc.text("EXECUTIVE SUMMARY", margin + 10, y + 16);
+  doc.text("EXECUTIVE SUMMARY", margin + execInnerPad, y + 16);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
   doc.setTextColor(...INK);
-  doc.text(execLines, margin + 10, y + 32);
+  doc.text(execLines, margin + execInnerPad, y + 32, { lineHeightFactor: 1.3, maxWidth: execTextWidth });
   y += execH + 16;
 
   const section = (title: string) => {
