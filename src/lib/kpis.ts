@@ -255,11 +255,24 @@ export function milestones(members: KpiMember[], wmTerms: WmTerm[]): Milestone[]
   const yearEnd = new Date(my + 1, 8, 30); // 30 Sep
   const out: Milestone[] = [];
 
+  // Format a Date as YYYY-MM-DD using local components — avoids the
+  // toISOString() UTC shift that pushes BST dates back by one day.
+  const fmtLocal = (d: Date) =>
+    `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+
+  // Parse a YYYY-MM-DD date string as a local date (not UTC), so getDate()
+  // returns the intended day regardless of the viewer's timezone.
+  const parseLocalDate = (s: string) => {
+    const iso = s.slice(0, 10).match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (iso) return new Date(+iso[1], +iso[2] - 1, +iso[3]);
+    return new Date(s);
+  };
+
   for (const m of members) {
     if (["deceased", "resigned", "excluded"].includes(m.status)) continue;
     // initiation anniversaries
     if (m.initiation_date) {
-      const d = new Date(m.initiation_date);
+      const d = parseLocalDate(m.initiation_date);
       for (const target of [10, 25, 30, 40, 50, 60]) {
         const anniv = new Date(d.getFullYear() + target, d.getMonth(), d.getDate());
         if (anniv >= yearStart && anniv <= yearEnd) {
@@ -267,7 +280,7 @@ export function milestones(members: KpiMember[], wmTerms: WmTerm[]): Milestone[]
             member: m,
             kind: "initiation",
             years: target,
-            date: anniv.toISOString().slice(0, 10),
+            date: fmtLocal(anniv),
             label: `${target} years since Initiation`,
           });
         }
@@ -275,7 +288,7 @@ export function milestones(members: KpiMember[], wmTerms: WmTerm[]): Milestone[]
     }
     // birthdays in next 30 days
     if (m.date_of_birth) {
-      const dob = new Date(m.date_of_birth);
+      const dob = parseLocalDate(m.date_of_birth);
       const next = new Date(today.getFullYear(), dob.getMonth(), dob.getDate());
       if (next < today) next.setFullYear(today.getFullYear() + 1);
       const diff = (next.getTime() - today.getTime()) / (1000 * 60 * 60 * 24);
@@ -285,7 +298,7 @@ export function milestones(members: KpiMember[], wmTerms: WmTerm[]): Milestone[]
           member: m,
           kind: "birthday",
           years: age,
-          date: next.toISOString().slice(0, 10),
+          date: fmtLocal(next),
           label: `${age}th birthday`,
         });
       }
@@ -317,7 +330,7 @@ export function milestones(members: KpiMember[], wmTerms: WmTerm[]): Milestone[]
           member: m,
           kind: "wm",
           years: target,
-          date: anniv.toISOString().slice(0, 10),
+          date: fmtLocal(anniv),
           label: `${target} years since first installed as WM`,
         });
       }
