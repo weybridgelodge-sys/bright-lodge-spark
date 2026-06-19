@@ -34,7 +34,8 @@ const displayName = (p?: MentorOption | null) => {
 
 export default function MemberDevelopmentInner({ memberIdOverride }: { memberIdOverride?: string }) {
   const params = useParams<{ memberId?: string }>();
-  const { user, isAdmin, isWorshipfulMaster } = useAuth();
+  const { user, isAdmin, isWorshipfulMaster, isDirectorOfCeremonies } = useAuth();
+  const showPreceptorNotes = isAdmin || isWorshipfulMaster || isDirectorOfCeremonies;
   const navigate = useNavigate();
   const memberId = memberIdOverride || params.memberId || user?.id || "";
 
