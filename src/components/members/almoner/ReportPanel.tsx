@@ -9,7 +9,8 @@ import { Copy, FileText, FileDown } from "lucide-react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { firstWmYearForMember } from "@/data/worshipfulMasters";
-import logoUrl from "@/assets/weybridge-logo-navy.png";
+import logoAsset from "@/assets/weybridge-logo-navy.png.asset.json";
+const logoUrl = logoAsset.url;
 
 type Member = {
   id: string; first_name: string | null; last_name: string | null;
