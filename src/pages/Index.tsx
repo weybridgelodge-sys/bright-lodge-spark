@@ -14,6 +14,7 @@ const Testimonials = lazy(() => import("@/components/Testimonials"));
 const LiveEventsFeed = lazy(() => import("@/components/LiveEventsFeed"));
 const NextMeeting = lazy(() => import("@/components/NextMeeting"));
 const JoinCTA = lazy(() => import("@/components/JoinCTA"));
+const HomepageCharityCTA = lazy(() => import("@/components/charity/HomepageCharityCTA"));
 
 const Index = () => {
   return (
@@ -55,6 +56,7 @@ const Index = () => {
           </section>
 
           <Testimonials />
+          <HomepageCharityCTA />
           <LiveEventsFeed />
           <NextMeeting />
           <JoinCTA />

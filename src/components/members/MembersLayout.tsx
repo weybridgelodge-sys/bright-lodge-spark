@@ -1,6 +1,6 @@
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { LayoutDashboard, Users, FileText, User as UserIcon, ShieldCheck, LogOut, Shield, CalendarDays, CreditCard, BookOpen, Crown, CalendarPlus, BarChart3, GraduationCap, Utensils, Mail, HeartHandshake, Sprout, Hexagon } from "lucide-react";
+import { LayoutDashboard, Users, FileText, User as UserIcon, ShieldCheck, LogOut, Shield, CalendarDays, CreditCard, BookOpen, Crown, CalendarPlus, BarChart3, GraduationCap, Utensils, Mail, HeartHandshake, Sprout, Hexagon, Banknote } from "lucide-react";
 import logoAsset from "@/assets/weybridge-logo-no-bg.png.asset.json";
 const logo = logoAsset.url;
 
@@ -10,7 +10,7 @@ const navCls = ({ isActive }: { isActive: boolean }) =>
   }`;
 
 export default function MembersLayout({ children }: { children: React.ReactNode }) {
-  const { profile, isAdmin, isSecretary, isWorshipfulMaster, isDirectorOfCeremonies, canManageProgression, canManageSummons, canAccessAlmoner, signOut } = useAuth();
+  const { profile, isAdmin, isSecretary, isWorshipfulMaster, isDirectorOfCeremonies, canManageProgression, canManageSummons, canAccessAlmoner, canAccessCharity, canAccessAdminArea, signOut } = useAuth();
   const canSeeMatrix = isAdmin || isWorshipfulMaster || isDirectorOfCeremonies;
   const navigate = useNavigate();
 
@@ -76,6 +76,16 @@ export default function MembersLayout({ children }: { children: React.ReactNode 
             {canAccessAlmoner && (
               <NavLink to="/members/almoner" className={navCls}>
                 <HeartHandshake className="w-4 h-4" /> Almoner Portal
+              </NavLink>
+            )}
+            {canAccessCharity && (
+              <NavLink to="/members/admin/charity" className={navCls}>
+                <Banknote className="w-4 h-4" /> Charity Steward
+              </NavLink>
+            )}
+            {canAccessAdminArea && (
+              <NavLink to="/members/admin-hub" className={navCls}>
+                <ShieldCheck className="w-4 h-4" /> Admin Hub
               </NavLink>
             )}
 

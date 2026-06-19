@@ -2,6 +2,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
 import SEO, { breadcrumbSchema } from "@/components/SEO";
+import OurCharitiesLiveFeed from "@/components/charity/OurCharitiesLiveFeed";
 import { motion } from "framer-motion";
 import { ExternalLink, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -78,6 +79,8 @@ const OurCharities = () => {
             </motion.p>
           </div>
         </section>
+
+        <OurCharitiesLiveFeed />
 
         <section className="py-20 md:py-28 bg-navy-gradient">
           <div className="container mx-auto px-6 max-w-4xl space-y-12">
