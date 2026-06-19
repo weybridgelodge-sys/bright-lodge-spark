@@ -4,14 +4,19 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { RITUAL_GROUPS } from "@/lib/development/catalogues";
 import type { RitualRow } from "@/lib/development/queries";
+import PreceptorNotesField from "./PreceptorNotesField";
 
 export default function RitualRecord({
   rows,
   canEdit,
+  memberId,
+  showPreceptorNotes,
   onChange,
 }: {
   rows: RitualRow[];
   canEdit: boolean;
+  memberId: string;
+  showPreceptorNotes: boolean;
   onChange: (next: RitualRow[]) => void;
 }) {
   const [savingId, setSavingId] = useState<string | null>(null);
