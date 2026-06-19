@@ -31,9 +31,6 @@ const Index = () => {
         <Hero />
         <About />
         <Suspense fallback={null}>
-          <LodgeTimeline />
-          <Principles />
-
           <HomepageCharityCTA />
 
           {/* Quiz invitation banner */}
@@ -57,11 +54,14 @@ const Index = () => {
             </div>
           </section>
 
+          <LodgeTimeline />
+          <Principles />
           <Testimonials />
           <LiveEventsFeed />
           <NextMeeting />
           <JoinCTA />
         </Suspense>
+
       </main>
       <Footer />
     </div>
