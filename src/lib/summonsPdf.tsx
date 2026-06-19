@@ -463,17 +463,13 @@ const BackCoverPanel: React.FC<{
           <Text style={s.memberMark}>{mark}</Text>
           <Text style={[s.memberName, { fontSize: nameSize }]} wrap={false}>{nameLine}</Text>
         </View>
-        {postParts.length === 0 ? (
-          <View style={{ height: 11 }} />
-        ) : (
-          <Text style={s.memberPost} wrap={false}>
-            {postParts.map((p, i) => (
-              <Text key={i} style={p.bold ? s.bold : undefined}>
-                {i > 0 ? " " : ""}{p.text}
-              </Text>
-            ))}
-          </Text>
-        )}
+        <Text style={s.memberPost} wrap={false}>
+          {postParts.length === 0 ? " " : postParts.map((p, i) => (
+            <Text key={i} style={p.bold ? s.bold : undefined}>
+              {i > 0 ? " " : ""}{p.text}
+            </Text>
+          ))}
+        </Text>
       </View>
     );
   };
