@@ -180,7 +180,7 @@ export async function buildSummaryReport(period: SummaryPeriod): Promise<Summary
         ? { id: m.id, name: fullName(m), detail: `${c.overdue} overdue` }
         : null;
     })
-    .filter((x): x is FlaggedMember => !!x);
+    .filter((x): x is { id: string; name: string; detail: string } => !!x);
   const overdueTotal = overdueByMember.reduce((a, x) => a + Number(x.detail?.split(" ")[0] ?? 0), 0);
 
   // "completed formal mentoring" = "Formal mentoring concluded" checklist item completed in period
@@ -300,7 +300,7 @@ export async function buildSummaryReport(period: SummaryPeriod): Promise<Summary
       const pct = sessions.length ? Math.round((c / sessions.length) * 100) : 0;
       return pct < 50 ? { id: m.id, name: fullName(m), detail: `${pct}% (${c}/${sessions.length})` } : null;
     })
-    .filter((x): x is FlaggedMember => !!x && sessions.length > 0);
+    .filter((x): x is { id: string; name: string; detail: string } => !!x && sessions.length > 0);
 
   // trend vs previous period
   const { data: prevSessions } = await supabase
