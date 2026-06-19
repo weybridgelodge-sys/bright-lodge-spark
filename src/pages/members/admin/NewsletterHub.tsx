@@ -36,7 +36,7 @@ function NewsletterHubInner() {
         setAccessChecked(true);
         return;
       }
-      const { data } = await supabase.rpc("can_edit_newsletter" as never, { _user: u.user.id });
+      const { data } = await supabase.rpc("can_edit_newsletter" as any, { _user: u.user.id } as any);
       setHasAccess(data === true);
       setAccessChecked(true);
     })();
