@@ -192,7 +192,7 @@ export async function buildSummaryReportPdf(args: {
   if (data.workingGroups.activityCountByGroup.length) {
     table([["Group", "Activities in period"]], data.workingGroups.activityCountByGroup.map((g) => [g.group, String(g.count)]));
   }
-  if (data.workingGroups.unassigned.length) para("Unassigned members", flagged(data.workingGroups.unassigned));
+  if (data.workingGroups.unassigned.length) para("Unassigned members", flagged(data.workingGroups.unassigned, data.workingGroups.unassigned.length));
 
   // 6. Engagement
   section("6. Engagement Summary");
