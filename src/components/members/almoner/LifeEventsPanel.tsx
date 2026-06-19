@@ -9,12 +9,17 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Cake, Calendar, Plus, Trash2, X } from "lucide-react";
 
-type Member = { id: string; first_name: string | null; last_name: string | null; preferred_name: string | null; full_name: string | null };
+type Member = {
+  id: string; first_name: string | null; last_name: string | null;
+  preferred_name: string | null; full_name: string | null;
+  date_of_birth?: string | null; initiation_date?: string | null;
+};
 type EventType = "birthday" | "initiation_anniversary" | "wedding_anniversary" | "bereavement" | "other";
 type LifeEvent = {
   id: string; member_id: string; event_type: EventType; event_date: string;
   recurring: boolean; notes: string | null; created_at: string;
 };
+type ManualEventType = Exclude<EventType, "birthday" | "initiation_anniversary">;
 
 const TYPE_LABEL: Record<EventType, string> = {
   birthday: "Birthday",
@@ -23,6 +28,7 @@ const TYPE_LABEL: Record<EventType, string> = {
   bereavement: "Bereavement",
   other: "Other",
 };
+const MANUAL_TYPES: ManualEventType[] = ["wedding_anniversary", "bereavement", "other"];
 
 const memberName = (m?: Member) => {
   if (!m) return "—";
@@ -30,10 +36,9 @@ const memberName = (m?: Member) => {
   return [f, m.last_name?.trim() || ""].filter(Boolean).join(" ") || m.full_name || "Unnamed";
 };
 
-// "next occurrence" for a recurring annual event, else the actual date
-const nextOccurrence = (e: LifeEvent): Date => {
-  const d = new Date(e.event_date);
-  if (!e.recurring) return d;
+const nextOccurrence = (iso: string, recurring: boolean): Date => {
+  const d = new Date(iso);
+  if (!recurring) return d;
   const now = new Date();
   const next = new Date(now.getFullYear(), d.getMonth(), d.getDate());
   if (next < new Date(now.getFullYear(), now.getMonth(), now.getDate())) {
@@ -43,6 +48,19 @@ const nextOccurrence = (e: LifeEvent): Date => {
 };
 const daysUntil = (d: Date) => Math.ceil((d.getTime() - Date.now()) / 86_400_000);
 const fmt = (d: Date) => d.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+const yearsBetween = (fromIso: string, on: Date) => {
+  const f = new Date(fromIso);
+  let y = on.getFullYear() - f.getFullYear();
+  if (on.getMonth() < f.getMonth() || (on.getMonth() === f.getMonth() && on.getDate() < f.getDate())) y--;
+  return y;
+};
+
+const HORIZON_DAYS = 92; // ~3 months
+
+type UpcomingItem = {
+  key: string; memberId: string; type: EventType; when: Date; days: number;
+  notes?: string | null; milestone?: number | null; derived: boolean; eventId?: string;
+};
 
 export default function LifeEventsPanel({ members, userId }: { members: Member[]; userId: string | null }) {
   const [events, setEvents] = useState<LifeEvent[]>([]);
@@ -57,12 +75,47 @@ export default function LifeEventsPanel({ members, userId }: { members: Member[]
   };
   useEffect(() => { load(); }, []);
 
-  const upcoming = useMemo(() => {
-    return [...events]
-      .map((e) => ({ e, when: nextOccurrence(e), days: daysUntil(nextOccurrence(e)) }))
-      .filter((x) => x.days <= 60 && x.days >= -1)
+  // Manual stored events only (birthdays + initiation anniversaries are derived from profiles)
+  const manualEvents = useMemo(
+    () => events.filter((e) => e.event_type !== "birthday" && e.event_type !== "initiation_anniversary"),
+    [events],
+  );
+
+  const upcoming = useMemo<UpcomingItem[]>(() => {
+    const items: UpcomingItem[] = [];
+
+    for (const m of members) {
+      if (m.date_of_birth) {
+        const when = nextOccurrence(m.date_of_birth, true);
+        items.push({
+          key: `dob-${m.id}`, memberId: m.id, type: "birthday", when, days: daysUntil(when),
+          milestone: yearsBetween(m.date_of_birth, when), derived: true,
+        });
+      }
+      if (m.initiation_date) {
+        const when = nextOccurrence(m.initiation_date, true);
+        const years = yearsBetween(m.initiation_date, when);
+        if (years >= 1) {
+          items.push({
+            key: `init-${m.id}`, memberId: m.id, type: "initiation_anniversary", when, days: daysUntil(when),
+            milestone: years, derived: true,
+          });
+        }
+      }
+    }
+
+    for (const e of manualEvents) {
+      const when = nextOccurrence(e.event_date, e.recurring);
+      items.push({
+        key: `ev-${e.id}`, memberId: e.member_id, type: e.event_type, when, days: daysUntil(when),
+        notes: e.notes, derived: false, eventId: e.id,
+      });
+    }
+
+    return items
+      .filter((x) => x.days <= HORIZON_DAYS && x.days >= -1)
       .sort((a, b) => a.days - b.days);
-  }, [events]);
+  }, [members, manualEvents]);
 
   const archive = async (id: string) => {
     if (!confirm("Archive this entry?")) return;
@@ -78,7 +131,9 @@ export default function LifeEventsPanel({ members, userId }: { members: Member[]
       <div className="flex items-center justify-between">
         <div>
           <h3 className="font-serif text-lg text-primary-foreground">Life Events</h3>
-          <p className="text-xs text-primary-foreground/60">Birthdays, anniversaries and personal milestones</p>
+          <p className="text-xs text-primary-foreground/60">
+            Birthdays &amp; initiation anniversaries pulled from member records · add weddings, bereavements and other milestones below
+          </p>
         </div>
         <Button size="sm" className="bg-gold text-navy hover:bg-gold/90" onClick={() => setShowForm((v) => !v)}>
           {showForm ? <><X className="w-4 h-4 mr-1" /> Cancel</> : <><Plus className="w-4 h-4 mr-1" /> Add event</>}
@@ -87,38 +142,40 @@ export default function LifeEventsPanel({ members, userId }: { members: Member[]
 
       {showForm && <NewEventForm members={members} userId={userId} onSaved={() => { setShowForm(false); load(); }} />}
 
-      {/* Upcoming (next 60 days) */}
       <section>
-        <p className="text-[11px] uppercase tracking-wider text-gold mb-2">Upcoming · next 60 days</p>
+        <p className="text-[11px] uppercase tracking-wider text-gold mb-2">Upcoming · next 3 months</p>
         {upcoming.length === 0 ? (
-          <p className="text-sm text-primary-foreground/60 italic">Nothing in the next 60 days.</p>
+          <p className="text-sm text-primary-foreground/60 italic">Nothing in the next 3 months.</p>
         ) : (
           <div className="space-y-1.5">
-            {upcoming.map(({ e, when, days }) => (
-              <div key={e.id} className="flex items-center gap-3 bg-navy-light/40 border border-gold/15 rounded p-3">
+            {upcoming.map((x) => (
+              <div key={x.key} className="flex items-center gap-3 bg-navy-light/40 border border-gold/15 rounded p-3">
                 <Cake className="w-4 h-4 text-gold shrink-0" />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm text-primary-foreground">
-                    <span className="font-semibold">{memberName(memberMap.get(e.member_id))}</span>
-                    <span className="text-primary-foreground/60"> — {TYPE_LABEL[e.event_type]}</span>
+                    <span className="font-semibold">{memberName(memberMap.get(x.memberId))}</span>
+                    <span className="text-primary-foreground/60"> — {TYPE_LABEL[x.type]}{x.milestone != null && x.milestone > 0 ? ` · ${x.milestone}${x.type === "initiation_anniversary" ? " years" : ""}` : ""}</span>
                   </p>
-                  <p className="text-[11px] text-primary-foreground/60">{fmt(when)} · {days === 0 ? "today" : days === 1 ? "tomorrow" : `in ${days} days`}{e.notes ? ` · ${e.notes}` : ""}</p>
+                  <p className="text-[11px] text-primary-foreground/60">
+                    {fmt(x.when)} · {x.days === 0 ? "today" : x.days === 1 ? "tomorrow" : `in ${x.days} days`}
+                    {x.notes ? ` · ${x.notes}` : ""}
+                    {x.derived ? " · from member record" : ""}
+                  </p>
                 </div>
-                <Badge variant="outline" className="border-gold/40 text-gold text-[10px]">{days}d</Badge>
+                <Badge variant="outline" className="border-gold/40 text-gold text-[10px]">{x.days}d</Badge>
               </div>
             ))}
           </div>
         )}
       </section>
 
-      {/* All events */}
       <section>
-        <p className="text-[11px] uppercase tracking-wider text-gold mb-2 mt-4">All events</p>
-        {events.length === 0 ? (
-          <p className="text-sm text-primary-foreground/60 italic">No events recorded yet.</p>
+        <p className="text-[11px] uppercase tracking-wider text-gold mb-2 mt-4">Manually added events</p>
+        {manualEvents.length === 0 ? (
+          <p className="text-sm text-primary-foreground/60 italic">No manual events recorded yet.</p>
         ) : (
           <div className="space-y-1.5">
-            {events.map((e) => (
+            {manualEvents.map((e) => (
               <div key={e.id} className="flex items-center gap-3 bg-navy-light/30 border border-gold/10 rounded p-2.5">
                 <Calendar className="w-4 h-4 text-primary-foreground/50 shrink-0" />
                 <div className="flex-1 min-w-0">
@@ -141,7 +198,7 @@ export default function LifeEventsPanel({ members, userId }: { members: Member[]
 
 function NewEventForm({ members, userId, onSaved }: { members: Member[]; userId: string | null; onSaved: () => void }) {
   const [memberId, setMemberId] = useState<string>("");
-  const [eventType, setEventType] = useState<EventType>("birthday");
+  const [eventType, setEventType] = useState<ManualEventType>("wedding_anniversary");
   const [eventDate, setEventDate] = useState("");
   const [recurring, setRecurring] = useState(true);
   const [notes, setNotes] = useState("");
@@ -166,6 +223,9 @@ function NewEventForm({ members, userId, onSaved }: { members: Member[]; userId:
 
   return (
     <form onSubmit={submit} className="bg-navy-light/60 border border-gold/30 rounded p-4 space-y-3">
+      <p className="text-[11px] text-primary-foreground/60">
+        Birthdays and initiation anniversaries are pulled automatically from member records — use this form for weddings, bereavements and other milestones only.
+      </p>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
           <Label className="text-xs">Member</Label>
@@ -176,9 +236,9 @@ function NewEventForm({ members, userId, onSaved }: { members: Member[]; userId:
         </div>
         <div>
           <Label className="text-xs">Type</Label>
-          <Select value={eventType} onValueChange={(v) => setEventType(v as EventType)}>
+          <Select value={eventType} onValueChange={(v) => setEventType(v as ManualEventType)}>
             <SelectTrigger className={inputCls}><SelectValue /></SelectTrigger>
-            <SelectContent>{(Object.keys(TYPE_LABEL) as EventType[]).map((k) => <SelectItem key={k} value={k}>{TYPE_LABEL[k]}</SelectItem>)}</SelectContent>
+            <SelectContent>{MANUAL_TYPES.map((k) => <SelectItem key={k} value={k}>{TYPE_LABEL[k]}</SelectItem>)}</SelectContent>
           </Select>
         </div>
         <div>
