@@ -68,20 +68,31 @@ const navItems: NavItem[] = [
     ],
   },
   {
+    label: "Meetings & Events",
+    href: "/bookings",
+    sections: [
+      {
+        items: [
+          { label: "Book Into Our Next Meeting", href: "/bookings", accent: true },
+          { label: "Events Calendar", href: "/events" },
+          { label: "Ladies Festival August 2026", href: "/ladies-festival", accent: true },
+        ],
+      },
+    ],
+  },
+  {
     label: "News & Media",
     href: "/news",
     sections: [
       {
         items: [
           { label: "News Hub", href: "/news" },
-          { label: "Events Calendar", href: "/events" },
-          { label: "Bookings", href: "/bookings" },
-          { label: "Ladies Festival 2026", href: "/ladies-festival" },
           { label: "Video Hub", href: "/video-hub" },
         ],
       },
     ],
   },
+
   {
     label: "Charity",
     href: "/freemasonry-and-charity",
