@@ -1,96 +1,67 @@
-## Goal
+## Lodge Development Summary Report
 
-Most of the brief is already built (Skills Matrix, individual Development Record with profile / checklist / ritual / offices, Mentor Dashboard, LoI Helper, Preceptor's Notes, exemptions, Dev Record PDF, Gap Report PDF). This iteration adds the missing pieces:
+A new consolidated report inside the Member Development module, gated to WM / Secretary / Mentor roles. One screen → 8 sections of live KPIs → PDF, plain-text, or saved snapshot.
 
-1. **Engagement Tracker** (Section 2e)
-2. **Working Groups** module (Section 5)
-3. **Working Groups Activity Report PDF** (Section 6)
-4. **Beehive philosophy quote** on the public About page
-5. Small gaps: Secretary edit access on checklist/profile, threshold-date UI in module settings, member dashboard surfacing of working group assignments.
+### Where it lives
+- New route: `/members/development/summary-report`
+- Entry point: button on Mentor Dashboard ("Lodge Development Summary Report")
+- Access: `has_role(admin|worshipful_master|secretary)` OR user is an assigned mentor (reuse existing `can_edit_member_development` pattern)
 
-## 1. Database migration
+### UI
+- Date range picker (default: current Masonic year, 1 Oct → 30 Sep)
+- "Regenerate" button
+- Tabs/anchor links for the 8 sections, each rendered as a card with figures, lists of flagged members, and small trend chips
+- Mentor's Statement: large textarea at the bottom (Section 8)
+- Action bar (sticky): **Download PDF · Copy as text · Save snapshot · View history**
 
-New tables (all with GRANT + RLS + policies):
+### Sections (data sources already in the codebase)
+1. **Membership Overview** — `profiles`, `candidates`, plus `movement()` / `snapshot()` from `src/lib/kpis.ts`
+2. **Mentoring Progress** — `member_checklist_items`, `member_development_records`, `member_engagement_log` (6-week gap via `last_engagement_date` RPC), degree dates from `profiles`
+3. **Ritual Development** — `member_ritual_records` + `lodge_skills_matrix` RPC; red/amber/green derived per piece
+4. **Lodge of Instruction** — `loi_sessions`, `loi_attendance`; trend vs previous equal-length window
+5. **Working Groups** — `working_groups`, `working_group_members`, `working_group_activities`
+6. **Engagement Summary** — `member_engagement_log` grouped by `category`
+7. **Royal Arch Conversion** — `profiles` (raising_date, is_royal_arch); period-over-period delta
+8. **Mentor's Summary Statement** — free text, persisted with the snapshot
 
-- `member_engagement_log`
-  - `member_id` (FK profiles), `occurred_on` date, `category` text (`social` | `blog` | `charity` | `working_group` | `mentor_contact` | `visit` | `provincial` | `other`), `summary` text, `logged_by` uuid, timestamps.
-  - RLS: member sees own; Mentor of member, Admin, WM, Secretary edit; DC read.
+Executive summary paragraph is auto-composed from sections 1–5 figures and rendered at the top of the PDF.
 
-- `working_groups`
-  - `slug` text unique, `name`, `remit` text, `founding_statement` text, `lead_member_id` uuid, `is_active` bool, timestamps.
-  - RLS: read = active members; write = Admin / WM / Secretary.
+### Outputs
+- **PDF** — new `src/lib/development/summaryReportPdf.ts` reusing the navy/gold styling, white logo, autoTable layout, and confidentiality footer from `pdf.ts`
+- **Copy as text** — plain-text builder shared with the PDF so wording matches
+- **Save to history** — new `lodge_development_reports` table storing the date range, snapshot JSON, mentor's statement, generated-by user; History drawer lists prior snapshots and re-opens them read-only
 
-- `working_group_members`
-  - `working_group_id`, `member_id`, `role` text (`lead` | `member`), `joined_on` date.
-  - RLS: read = active members; write = Admin / WM / Secretary / group lead.
+### Technical pieces
 
-- `working_group_activities`
-  - `working_group_id`, `activity_date` date, `kind` text (`meeting` | `event` | `outcome`), `title` text, `notes` text, `logged_by` uuid.
-  - RLS: read = active members; write = Admin / WM / Secretary / group lead / group members.
+```text
+src/lib/development/
+  summaryReport.ts          # pure aggregator: bundle → SummaryReportData
+  summaryReportText.ts      # SummaryReportData → plain text + exec summary
+  summaryReportPdf.ts       # SummaryReportData → jsPDF
 
-Helper functions:
-- `is_working_group_lead(_user uuid, _group uuid) returns boolean` (SECURITY DEFINER).
-- `last_engagement_date(_member uuid) returns date` (used by Mentor Dashboard).
-- Update `can_edit_member_development` to include Secretary.
+src/components/members/development/
+  LodgeSummaryReport.tsx    # page shell, date picker, sections, action bar
+  SummaryReportHistory.tsx  # drawer listing saved snapshots
 
-Seed five working groups (Social Committee, Charity & Fundraising, Community & Volunteering, Lodge Visits & Experiences, Communications & Heritage) with the briefed remits and the founding statement on each group row (also stored as `module_settings.working_groups_philosophy`).
+src/pages/members/development/
+  LodgeSummaryReport.tsx    # route page
 
-Add `module_settings.mentoring_threshold_date` editable surface (already exists in table — just expose UI).
+Route wired in src/App.tsx behind ProtectedRoute with role check.
+```
 
-## 2. Code changes
+New migration:
 
-### New library
-- `src/lib/workingGroups.ts` — CRUD + types for groups, members, activities.
-- `src/lib/development/engagement.ts` — CRUD + types for engagement log, `daysSinceLastTouchpoint(memberId)`.
-- `src/lib/development/activityReportPdf.ts` — `buildWorkingGroupsActivityPdf(masonicYear)`.
+```text
+lodge_development_reports
+  id, period_start, period_end, snapshot jsonb,
+  mentor_statement text, generated_by uuid, generated_at
+  + RLS: select/insert for admin|WM|secretary|mentor roles
+  + GRANTs to authenticated + service_role
+```
 
-### New components
-- `src/components/members/development/EngagementTracker.tsx` — table + add-entry form, used inside Member Development Record (sub-section 2e).
-- `src/components/members/workinggroups/`
-  - `WorkingGroupsList.tsx` — landing grid with gold-serif pull-quote at top.
-  - `WorkingGroupCard.tsx`
-  - `WorkingGroupDetail.tsx` — remit, lead, members chips, activity log.
-  - `ActivityLogTable.tsx` + `AddActivityDialog.tsx`
-  - `ManageGroupDialog.tsx` (Admin / WM / Secretary) — name, remit, lead, members.
-  - `ActivityReportPdfButton.tsx`
-- `src/components/members/development/ModuleSettingsCard.tsx` — Secretary/Admin form for `mentoring_threshold_date`.
+No changes to existing tables. All aggregation runs client-side from existing queries; the snapshot row stores the rendered figures for historical fidelity.
 
-### New pages
-- `src/pages/members/working-groups/Index.tsx` (list, with quote)
-- `src/pages/members/working-groups/Detail.tsx` (`/members/working-groups/:slug`)
-- `src/pages/members/working-groups/Admin.tsx` (Secretary/WM/Admin manage groups + run Activity Report PDF)
-
-### Routing & nav
-- Add routes in `App.tsx`.
-- `MembersLayout.tsx` sidebar: new "Working Groups" group with **Working Groups** (all members), **Manage Groups** (Admin/WM/Secretary), **Activity Report** action.
-- Member dashboard widget (`src/pages/members/Dashboard.tsx`): show "My Working Groups" chips + "Open commitments" count, alongside existing mentoring/ritual cards.
-
-### Mentor Dashboard
-- Extend existing `MentorDashboard.tsx` row with: `last_touchpoint`, `weeks_since_touchpoint`, amber flag when > 6 weeks AND member is in mentoring period (not exempt).
-
-### Development Record page
-- Add **Engagement** tab/section between Ritual and Offices.
-- PDF (`pdf.ts`) gains an "Engagement Log" section (member-facing OK; still excludes Preceptor's Notes).
-
-## 3. Public website — beehive quote
-
-- Edit `src/components/About.tsx` to add a gold serif pull-quote block under the lead paragraphs:
-  > "Weybridge Lodge operates on the principle of the beehive…"
-- Same quote also added to `src/pages/LodgeProfile.tsx` near the top.
-- Use existing `font-serif text-gold` tokens; quote rendered inside a left gold border, italic, with attribution "— Lodge philosophy, adopted 2026".
-
-## 4. Out of scope (already done or explicitly skipped)
-
-- Skills Matrix, Gap Report PDF, Preceptor's Notes, exemptions, LoI Helper, individual Development Record PDF — already shipped.
-- No edits to Officers Tracker or Almoner modules.
-- No email/notification triggers.
-- Formal committee minute change is a real-world action, not a code change.
-
-## Deliverable order
-
-1. Migration (engagement + working groups + helpers + seed).
-2. Working Groups library + pages + sidebar.
-3. Engagement Tracker component + Mentor Dashboard flag.
-4. Module settings UI (threshold date).
-5. Activity Report PDF + dashboard surfacing.
-6. Public About / LodgeProfile pull-quote.
+### Out of scope (call out before building if you want them)
+- Emailing the PDF to the VO
+- Year-on-year charts beyond a single previous-period delta
+- Editing a saved snapshot after the fact (snapshots are immutable; re-run to refresh)
