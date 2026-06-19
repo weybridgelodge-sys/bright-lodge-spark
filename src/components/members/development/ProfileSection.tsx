@@ -80,12 +80,11 @@ export default function ProfileSection({
       .single();
     if (error) { toast.error(error.message); setSaving(false); return; }
     // Profile fields (admin/WM/mentor may not have RLS on profiles UPDATE; ignore failures silently except for messaging)
-    const profileUpdate: Record<string, string | null> = {
+    const { error: pErr } = await supabase.from("profiles").update({
       royal_arch_date: royalArchDate || null,
       proposer: proposer || null,
       ugle_reg_number: grandLodgeNo || null,
-    };
-    const { error: pErr } = await supabase.from("profiles").update(profileUpdate).eq("id", profile.id);
+    }).eq("id", profile.id);
     if (pErr) toast.message("Record saved. Profile fields require admin permission to update.");
     else toast.success("Profile section saved.");
     onSaved(data as DevelopmentRecord);
