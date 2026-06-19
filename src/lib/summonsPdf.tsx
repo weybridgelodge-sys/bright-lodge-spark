@@ -668,13 +668,13 @@ const AgendaPanel: React.FC<{
       <View style={s.thinDivider} />
     )}
     {summons.next_meeting_date && (
-      <Text style={s.smallText}>
+      <Text style={[s.smallText, s.centered]}>
         The date of the next regular meeting is{" "}
         <Text style={s.bold}>{formatDateLong(summons.next_meeting_date)}</Text>.
       </Text>
     )}
     {summons.officer_night_date && (
-      <Text style={[s.smallText, s.bold, { marginTop: 3, textDecoration: "underline" }]}>
+      <Text style={[s.smallText, s.bold, s.centered, { marginTop: 3, textDecoration: "underline" }]}>
         Officer Night will be held on {formatDateLong(summons.officer_night_date)}.
       </Text>
     )}
