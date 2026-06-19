@@ -187,6 +187,233 @@ export type Database = {
           },
         ]
       }
+      charity_annual_reports: {
+        Row: {
+          created_at: string
+          finalised_at: string
+          finalised_by: string | null
+          id: string
+          masonic_year: number
+          notes: string | null
+          payload: Json
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          finalised_at?: string
+          finalised_by?: string | null
+          id?: string
+          masonic_year: number
+          notes?: string | null
+          payload: Json
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          finalised_at?: string
+          finalised_by?: string | null
+          id?: string
+          masonic_year?: number
+          notes?: string | null
+          payload?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      charity_collections: {
+        Row: {
+          collection_date: string
+          collection_type: Database["public"]["Enums"]["charity_collection_type"]
+          costs: number
+          created_at: string
+          created_by: string | null
+          gross_amount: number
+          id: string
+          lodge_event_id: string | null
+          net_amount: number | null
+          notes: string | null
+          updated_at: string
+        }
+        Insert: {
+          collection_date: string
+          collection_type: Database["public"]["Enums"]["charity_collection_type"]
+          costs?: number
+          created_at?: string
+          created_by?: string | null
+          gross_amount?: number
+          id?: string
+          lodge_event_id?: string | null
+          net_amount?: number | null
+          notes?: string | null
+          updated_at?: string
+        }
+        Update: {
+          collection_date?: string
+          collection_type?: Database["public"]["Enums"]["charity_collection_type"]
+          costs?: number
+          created_at?: string
+          created_by?: string | null
+          gross_amount?: number
+          id?: string
+          lodge_event_id?: string | null
+          net_amount?: number | null
+          notes?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "charity_collections_lodge_event_id_fkey"
+            columns: ["lodge_event_id"]
+            isOneToOne: false
+            referencedRelation: "lodge_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      charity_donations: {
+        Row: {
+          amount: number
+          authorised_by: Database["public"]["Enums"]["charity_authorised_by"]
+          charity_id: string
+          confirmation_received: boolean
+          created_at: string
+          created_by: string | null
+          donation_date: string
+          from_relief_chest: boolean
+          id: string
+          is_festival_contribution: boolean
+          payment_method: Database["public"]["Enums"]["charity_payment_method"]
+          payment_reference: string | null
+          purpose: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          authorised_by?: Database["public"]["Enums"]["charity_authorised_by"]
+          charity_id: string
+          confirmation_received?: boolean
+          created_at?: string
+          created_by?: string | null
+          donation_date: string
+          from_relief_chest?: boolean
+          id?: string
+          is_festival_contribution?: boolean
+          payment_method: Database["public"]["Enums"]["charity_payment_method"]
+          payment_reference?: string | null
+          purpose?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          authorised_by?: Database["public"]["Enums"]["charity_authorised_by"]
+          charity_id?: string
+          confirmation_received?: boolean
+          created_at?: string
+          created_by?: string | null
+          donation_date?: string
+          from_relief_chest?: boolean
+          id?: string
+          is_festival_contribution?: boolean
+          payment_method?: Database["public"]["Enums"]["charity_payment_method"]
+          payment_reference?: string | null
+          purpose?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "charity_donations_charity_id_fkey"
+            columns: ["charity_id"]
+            isOneToOne: false
+            referencedRelation: "charity_ledger"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "charity_donations_charity_id_fkey"
+            columns: ["charity_id"]
+            isOneToOne: false
+            referencedRelation: "public_charity_year_breakdown"
+            referencedColumns: ["charity_id"]
+          },
+        ]
+      }
+      charity_festival_settings: {
+        Row: {
+          created_at: string
+          festival_name: string
+          festival_notes: string | null
+          id: string
+          public_feed_start_amount: number
+          public_feed_start_date: string | null
+          singleton: boolean
+          target_amount: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          festival_name?: string
+          festival_notes?: string | null
+          id?: string
+          public_feed_start_amount?: number
+          public_feed_start_date?: string | null
+          singleton?: boolean
+          target_amount?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          festival_name?: string
+          festival_notes?: string | null
+          id?: string
+          public_feed_start_amount?: number
+          public_feed_start_date?: string | null
+          singleton?: boolean
+          target_amount?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      charity_ledger: {
+        Row: {
+          charity_number: string | null
+          contact_name: string | null
+          created_at: string
+          description: string | null
+          email: string | null
+          id: string
+          name: string
+          phone: string | null
+          status: string
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          charity_number?: string | null
+          contact_name?: string | null
+          created_at?: string
+          description?: string | null
+          email?: string | null
+          id?: string
+          name: string
+          phone?: string | null
+          status?: string
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          charity_number?: string | null
+          contact_name?: string | null
+          created_at?: string
+          description?: string | null
+          email?: string | null
+          id?: string
+          name?: string
+          phone?: string | null
+          status?: string
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
       festive_board_attendance: {
         Row: {
           amount_pence: number
@@ -2029,10 +2256,37 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      public_charity_totals: {
+        Row: {
+          public_feed_start_amount: number | null
+          public_feed_start_date: string | null
+          total_raised: number | null
+        }
+        Insert: {
+          public_feed_start_amount?: number | null
+          public_feed_start_date?: string | null
+          total_raised?: never
+        }
+        Update: {
+          public_feed_start_amount?: number | null
+          public_feed_start_date?: string | null
+          total_raised?: never
+        }
+        Relationships: []
+      }
+      public_charity_year_breakdown: {
+        Row: {
+          charity_id: string | null
+          name: string | null
+          website: string | null
+          year_total: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       can_access_almoner: { Args: { _user_id: string }; Returns: boolean }
+      can_edit_charity: { Args: { _user: string }; Returns: boolean }
       can_edit_member_development: {
         Args: { _editor: string; _member: string }
         Returns: boolean
@@ -2041,6 +2295,7 @@ export type Database = {
         Args: { _editor: string; _member: string }
         Returns: boolean
       }
+      can_view_charity: { Args: { _user: string }; Returns: boolean }
       can_view_skills_matrix: { Args: { _user: string }; Returns: boolean }
       current_lodge_year: { Args: never; Returns: number }
       current_office_label: { Args: { _user_id: string }; Returns: string }
@@ -2096,6 +2351,7 @@ export type Database = {
         | "director_of_ceremonies"
         | "assistant_secretary"
         | "almoner"
+        | "charity_steward"
       candidate_stage:
         | "enquiry"
         | "face_to_face"
@@ -2104,6 +2360,14 @@ export type Database = {
         | "read_in_lodge"
         | "initiated"
         | "withdrawn"
+      charity_authorised_by: "wm" | "treasurer" | "both"
+      charity_collection_type:
+        | "charity_column"
+        | "raffle"
+        | "ad_hoc"
+        | "relief_chest"
+        | "other"
+      charity_payment_method: "cheque" | "bacs" | "cash" | "online"
       doc_category:
         | "summons"
         | "meeting_minutes"
@@ -2291,6 +2555,7 @@ export const Constants = {
         "director_of_ceremonies",
         "assistant_secretary",
         "almoner",
+        "charity_steward",
       ],
       candidate_stage: [
         "enquiry",
@@ -2301,6 +2566,15 @@ export const Constants = {
         "initiated",
         "withdrawn",
       ],
+      charity_authorised_by: ["wm", "treasurer", "both"],
+      charity_collection_type: [
+        "charity_column",
+        "raffle",
+        "ad_hoc",
+        "relief_chest",
+        "other",
+      ],
+      charity_payment_method: ["cheque", "bacs", "cash", "online"],
       doc_category: [
         "summons",
         "meeting_minutes",

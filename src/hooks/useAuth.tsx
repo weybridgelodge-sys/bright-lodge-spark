@@ -25,7 +25,7 @@ type Profile = {
   initiation_date?: string | null;
 };
 
-type Role = "member" | "admin" | "secretary" | "assistant_secretary" | "worshipful_master" | "director_of_ceremonies" | "almoner";
+type Role = "member" | "admin" | "secretary" | "assistant_secretary" | "worshipful_master" | "director_of_ceremonies" | "almoner" | "charity_steward";
 
 type AuthCtx = {
   session: Session | null;
@@ -37,11 +37,14 @@ type AuthCtx = {
   isWorshipfulMaster: boolean;
   isDirectorOfCeremonies: boolean;
   isAlmoner: boolean;
+  isCharitySteward: boolean;
   isCurrentWmOrIpm: boolean;
   canManageProgression: boolean;
   canManageLOI: boolean;
   canManageSummons: boolean;
   canAccessAlmoner: boolean;
+  canAccessCharity: boolean;
+  canAccessAdminArea: boolean;
   loading: boolean;
   refreshProfile: () => Promise<void>;
   signOut: () => Promise<void>;
@@ -111,13 +114,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const isWorshipfulMaster = roles.includes("worshipful_master");
   const isDirectorOfCeremonies = roles.includes("director_of_ceremonies");
   const isAlmoner = roles.includes("almoner");
+  const isCharitySteward = roles.includes("charity_steward");
   const canManageProgression = isAdmin || isSecretary || isWorshipfulMaster;
   const canManageLOI = isAdmin || isSecretary || isWorshipfulMaster || isDirectorOfCeremonies;
   const canManageSummons = isAdmin || isSecretary || isAssistantSecretary;
   const canAccessAlmoner = isAdmin || isAlmoner || isCurrentWmOrIpm;
+  const canAccessCharity = isAdmin || isWorshipfulMaster || isCharitySteward || isSecretary;
+  const canAccessAdminArea = isAdmin || isSecretary || isWorshipfulMaster || isDirectorOfCeremonies || isAlmoner || isCharitySteward || isAssistantSecretary;
 
   return (
-    <Ctx.Provider value={{ session, user: session?.user ?? null, profile, isAdmin, isSecretary, isAssistantSecretary, isWorshipfulMaster, isDirectorOfCeremonies, isAlmoner, isCurrentWmOrIpm, canManageProgression, canManageLOI, canManageSummons, canAccessAlmoner, loading, refreshProfile, signOut }}>
+    <Ctx.Provider value={{ session, user: session?.user ?? null, profile, isAdmin, isSecretary, isAssistantSecretary, isWorshipfulMaster, isDirectorOfCeremonies, isAlmoner, isCharitySteward, isCurrentWmOrIpm, canManageProgression, canManageLOI, canManageSummons, canAccessAlmoner, canAccessCharity, canAccessAdminArea, loading, refreshProfile, signOut }}>
       {children}
     </Ctx.Provider>
   );

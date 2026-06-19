@@ -67,6 +67,8 @@ const LodgeSummaryReport = lazy(() => import("./pages/members/development/LodgeS
 const WorkingGroupsIndex = lazy(() => import("./pages/members/working-groups/Index"));
 const WorkingGroupDetail = lazy(() => import("./pages/members/working-groups/Detail"));
 const WorkingGroupsAdmin = lazy(() => import("./pages/members/working-groups/Admin"));
+const CharityStewardPage = lazy(() => import("./pages/members/admin/CharitySteward"));
+const AdminHub = lazy(() => import("./pages/members/admin/AdminHub"));
 
 
 const queryClient = new QueryClient();
@@ -138,6 +140,8 @@ const App = () => (
             <Route path="/members/admin/loi-helper" element={<LoiAssignmentHelper />} />
             <Route path="/members/development/summary-report" element={<LodgeSummaryReport />} />
             <Route path="/members/development/:memberId" element={<MemberDevelopment />} />
+            <Route path="/members/admin/charity" element={<CharityStewardPage />} />
+            <Route path="/members/admin-hub" element={<AdminHub />} />
             <Route path="/members/working-groups" element={<WorkingGroupsIndex />} />
             <Route path="/members/working-groups/admin" element={<WorkingGroupsAdmin />} />
             <Route path="/members/working-groups/:slug" element={<WorkingGroupDetail />} />
