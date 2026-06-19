@@ -345,9 +345,6 @@ const FrontCoverPanel: React.FC<{
     <Text style={s.lodgeName}>{template.lodge_name} No. {template.lodge_number}</Text>
     <Text style={s.province}>PROVINCE OF {(template.province || "").toUpperCase()}</Text>
     <View style={s.divider} />
-    {wmFromRoll && (
-      <Text style={s.province}>{wmFromRoll} - Worshipful Master</Text>
-    )}
 
      <View style={{ flexDirection: "row", alignItems: "center", marginTop: 6, marginBottom: 4 }}>
        <View style={{ flex: 1, alignItems: "flex-start" }}>
@@ -360,6 +357,10 @@ const FrontCoverPanel: React.FC<{
          {rightSrc ? <Image src={rightSrc} style={{ height: 75 }} /> : null}
        </View>
      </View>
+
+    {wmFromRoll && (
+      <Text style={s.province}>{wmFromRoll} - Worshipful Master</Text>
+    )}
 
 
     <View style={{ marginTop: 10, marginBottom: 6, alignItems: "flex-start" }}>
