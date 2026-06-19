@@ -1,6 +1,6 @@
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { LayoutDashboard, Users, FileText, User as UserIcon, ShieldCheck, LogOut, Shield, CalendarDays, CreditCard, BookOpen, Crown, CalendarPlus, BarChart3, GraduationCap, Utensils, Mail } from "lucide-react";
+import { LayoutDashboard, Users, FileText, User as UserIcon, ShieldCheck, LogOut, Shield, CalendarDays, CreditCard, BookOpen, Crown, CalendarPlus, BarChart3, GraduationCap, Utensils, Mail, HeartHandshake } from "lucide-react";
 import logo from "@/assets/weybridge-logo.svg";
 
 const navCls = ({ isActive }: { isActive: boolean }) =>
@@ -9,7 +9,7 @@ const navCls = ({ isActive }: { isActive: boolean }) =>
   }`;
 
 export default function MembersLayout({ children }: { children: React.ReactNode }) {
-  const { profile, isAdmin, isSecretary, canManageProgression, canManageSummons, signOut } = useAuth();
+  const { profile, isAdmin, isSecretary, canManageProgression, canManageSummons, canAccessAlmoner, signOut } = useAuth();
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
@@ -71,6 +71,12 @@ export default function MembersLayout({ children }: { children: React.ReactNode 
                 <Mail className="w-4 h-4" /> Summons Builder
               </NavLink>
             )}
+            {canAccessAlmoner && (
+              <NavLink to="/members/almoner" className={navCls}>
+                <HeartHandshake className="w-4 h-4" /> Almoner Portal
+              </NavLink>
+            )}
+
             <NavLink to="/members/profile" className={navCls}>
               <UserIcon className="w-4 h-4" /> My Profile
             </NavLink>

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import MembersLayout from "@/components/members/MembersLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Check, X, ShieldPlus, ShieldMinus, Plus, Trash2, Pencil } from "lucide-react";
+import { Check, X, ShieldPlus, ShieldMinus, Plus, Trash2, Pencil, HeartHandshake } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { formatMemberLine } from "@/lib/summons";
 
@@ -62,7 +62,7 @@ type Profile = {
   created_at: string;
 };
 
-type Role = { user_id: string; role: "member" | "admin" };
+type Role = { user_id: string; role: "member" | "admin" | "almoner" | "secretary" | "assistant_secretary" | "worshipful_master" | "director_of_ceremonies" };
 
 type Notice = {
   id: string;
@@ -159,6 +159,20 @@ export default function MembersAdmin() {
     }
     load();
   };
+
+  const toggleAlmoner = async (uid: string, makeAlmoner: boolean) => {
+    if (makeAlmoner) {
+      const { error } = await supabase.from("user_roles").insert({ user_id: uid, role: "almoner" });
+      if (error) toast.error(error.message);
+      else toast.success("Assigned Almoner role");
+    } else {
+      const { error } = await supabase.from("user_roles").delete().eq("user_id", uid).eq("role", "almoner");
+      if (error) toast.error(error.message);
+      else toast.success("Almoner role removed");
+    }
+    load();
+  };
+
 
   const deleteMember = async (p: Profile) => {
     if (user && p.id === user.id) {
@@ -306,6 +320,8 @@ export default function MembersAdmin() {
   };
 
   const isAdminUser = (uid: string) => roles.some((r) => r.user_id === uid && r.role === "admin");
+  const isAlmonerUser = (uid: string) => roles.some((r) => r.user_id === uid && r.role === "almoner");
+
 
   const inputCls =
     "w-full bg-navy border border-gold/20 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-gold";
@@ -398,7 +414,9 @@ export default function MembersAdmin() {
                   </td>
                   <td className="p-3 text-xs uppercase tracking-wider">
                     {isAdminUser(p.id) ? "Admin" : "Member"}
+                    {isAlmonerUser(p.id) && <div className="text-gold normal-case tracking-normal text-[10px]">Almoner</div>}
                   </td>
+
                   <td className="p-3 text-[11px] text-primary-foreground/70 space-y-0.5">
                     <div>{DEGREE_LABEL[p.degree]}</div>
                     {p.is_past_master && <div className="text-gold">PM</div>}
@@ -447,6 +465,15 @@ export default function MembersAdmin() {
                           <ShieldPlus className="w-4 h-4" />
                         )}
                       </button>
+                      <button
+                        onClick={() => toggleAlmoner(p.id, !isAlmonerUser(p.id))}
+                        className={`p-1.5 rounded-sm ${isAlmonerUser(p.id) ? "text-gold bg-gold/10" : "text-primary-foreground/70 hover:text-gold hover:bg-gold/10"}`}
+                        aria-label={isAlmonerUser(p.id) ? "Remove Almoner role" : "Assign Almoner role"}
+                        title={isAlmonerUser(p.id) ? "Remove Almoner role" : "Assign Almoner role"}
+                      >
+                        <HeartHandshake className="w-4 h-4" />
+                      </button>
+
                       {user?.id !== p.id && (
                         <button
                           onClick={() => deleteMember(p)}

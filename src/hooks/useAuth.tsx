@@ -25,7 +25,7 @@ type Profile = {
   initiation_date?: string | null;
 };
 
-type Role = "member" | "admin" | "secretary" | "assistant_secretary" | "worshipful_master" | "director_of_ceremonies";
+type Role = "member" | "admin" | "secretary" | "assistant_secretary" | "worshipful_master" | "director_of_ceremonies" | "almoner";
 
 type AuthCtx = {
   session: Session | null;
@@ -36,9 +36,12 @@ type AuthCtx = {
   isAssistantSecretary: boolean;
   isWorshipfulMaster: boolean;
   isDirectorOfCeremonies: boolean;
+  isAlmoner: boolean;
+  isCurrentWmOrIpm: boolean;
   canManageProgression: boolean;
   canManageLOI: boolean;
   canManageSummons: boolean;
+  canAccessAlmoner: boolean;
   loading: boolean;
   refreshProfile: () => Promise<void>;
   signOut: () => Promise<void>;
@@ -50,7 +53,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [roles, setRoles] = useState<Role[]>([]);
+  const [isCurrentWmOrIpm, setIsCurrentWmOrIpm] = useState(false);
   const [loading, setLoading] = useState(true);
+
 
   const loadProfileAndRole = async (uid: string) => {
     const [{ data: p }, { data: r }] = await Promise.all([
@@ -59,6 +64,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     ]);
     setProfile((p as Profile) ?? null);
     setRoles(((r as { role: Role }[]) ?? []).map((x) => x.role));
+    // WM/IPM detection for current lodge year (auto-rotates on installation)
+    try {
+      const { data: wm } = await supabase.rpc("is_current_wm_or_ipm", { _user_id: uid });
+      setIsCurrentWmOrIpm(!!wm);
+    } catch {
+      setIsCurrentWmOrIpm(false);
+    }
   };
 
   useEffect(() => {
@@ -69,6 +81,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } else {
         setProfile(null);
         setRoles([]);
+        setIsCurrentWmOrIpm(false);
       }
     });
 
@@ -89,6 +102,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await supabase.auth.signOut();
     setProfile(null);
     setRoles([]);
+    setIsCurrentWmOrIpm(false);
   };
 
   const isAdmin = roles.includes("admin");
@@ -96,16 +110,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const isAssistantSecretary = roles.includes("assistant_secretary");
   const isWorshipfulMaster = roles.includes("worshipful_master");
   const isDirectorOfCeremonies = roles.includes("director_of_ceremonies");
+  const isAlmoner = roles.includes("almoner");
   const canManageProgression = isAdmin || isSecretary || isWorshipfulMaster;
   const canManageLOI = isAdmin || isSecretary || isWorshipfulMaster || isDirectorOfCeremonies;
   const canManageSummons = isAdmin || isSecretary || isAssistantSecretary;
+  const canAccessAlmoner = isAdmin || isAlmoner || isCurrentWmOrIpm;
 
   return (
-    <Ctx.Provider value={{ session, user: session?.user ?? null, profile, isAdmin, isSecretary, isAssistantSecretary, isWorshipfulMaster, isDirectorOfCeremonies, canManageProgression, canManageLOI, canManageSummons, loading, refreshProfile, signOut }}>
+    <Ctx.Provider value={{ session, user: session?.user ?? null, profile, isAdmin, isSecretary, isAssistantSecretary, isWorshipfulMaster, isDirectorOfCeremonies, isAlmoner, isCurrentWmOrIpm, canManageProgression, canManageLOI, canManageSummons, canAccessAlmoner, loading, refreshProfile, signOut }}>
       {children}
     </Ctx.Provider>
   );
 }
+
 
 export function useAuth() {
   const ctx = useContext(Ctx);
