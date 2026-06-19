@@ -414,7 +414,9 @@ export default function MembersAdmin() {
                   </td>
                   <td className="p-3 text-xs uppercase tracking-wider">
                     {isAdminUser(p.id) ? "Admin" : "Member"}
+                    {isAlmonerUser(p.id) && <div className="text-gold normal-case tracking-normal text-[10px]">Almoner</div>}
                   </td>
+
                   <td className="p-3 text-[11px] text-primary-foreground/70 space-y-0.5">
                     <div>{DEGREE_LABEL[p.degree]}</div>
                     {p.is_past_master && <div className="text-gold">PM</div>}
