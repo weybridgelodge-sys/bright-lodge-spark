@@ -1,6 +1,6 @@
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { LayoutDashboard, Users, FileText, User as UserIcon, ShieldCheck, LogOut, Shield, CalendarDays, CreditCard, BookOpen, Crown, CalendarPlus, BarChart3, GraduationCap, Utensils, Mail, HeartHandshake } from "lucide-react";
+import { LayoutDashboard, Users, FileText, User as UserIcon, ShieldCheck, LogOut, Shield, CalendarDays, CreditCard, BookOpen, Crown, CalendarPlus, BarChart3, GraduationCap, Utensils, Mail, HeartHandshake, Sprout } from "lucide-react";
 import logoAsset from "@/assets/weybridge-logo-no-bg.png.asset.json";
 const logo = logoAsset.url;
 
@@ -81,6 +81,14 @@ export default function MembersLayout({ children }: { children: React.ReactNode 
             <NavLink to="/members/profile" className={navCls}>
               <UserIcon className="w-4 h-4" /> My Profile
             </NavLink>
+            <NavLink to="/members/development" className={navCls}>
+              <Sprout className="w-4 h-4" /> My Development
+            </NavLink>
+            {(isAdmin || canManageProgression) && (
+              <NavLink to="/members/admin/development" className={navCls}>
+                <GraduationCap className="w-4 h-4" /> Member Development
+              </NavLink>
+            )}
             {canManageProgression && (
               <NavLink to="/members/officers-tracker" className={navCls}>
                 <Crown className="w-4 h-4" /> Officers Tracker

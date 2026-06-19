@@ -627,6 +627,149 @@ export type Database = {
         }
         Relationships: []
       }
+      member_checklist_items: {
+        Row: {
+          completed_date: string | null
+          id: string
+          member_id: string
+          mentor_notes: string | null
+          order_index: number
+          stage: string
+          status: string
+          target_date: string | null
+          topic: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          completed_date?: string | null
+          id?: string
+          member_id: string
+          mentor_notes?: string | null
+          order_index?: number
+          stage: string
+          status?: string
+          target_date?: string | null
+          topic: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          completed_date?: string | null
+          id?: string
+          member_id?: string
+          mentor_notes?: string | null
+          order_index?: number
+          stage?: string
+          status?: string
+          target_date?: string | null
+          topic?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "member_checklist_items_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "member_checklist_items_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      member_development_records: {
+        Row: {
+          assigned_mentor_id: string | null
+          created_at: string
+          member_id: string
+          previous_masonic_experience: string | null
+          updated_at: string
+        }
+        Insert: {
+          assigned_mentor_id?: string | null
+          created_at?: string
+          member_id: string
+          previous_masonic_experience?: string | null
+          updated_at?: string
+        }
+        Update: {
+          assigned_mentor_id?: string | null
+          created_at?: string
+          member_id?: string
+          previous_masonic_experience?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "member_development_records_assigned_mentor_id_fkey"
+            columns: ["assigned_mentor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "member_development_records_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      member_external_appointments: {
+        Row: {
+          created_at: string
+          date_appointed: string | null
+          date_installed: string | null
+          id: string
+          level: string
+          masonic_year: string | null
+          member_id: string
+          notes: string | null
+          office: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          date_appointed?: string | null
+          date_installed?: string | null
+          id?: string
+          level?: string
+          masonic_year?: string | null
+          member_id: string
+          notes?: string | null
+          office: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          date_appointed?: string | null
+          date_installed?: string | null
+          id?: string
+          level?: string
+          masonic_year?: string | null
+          member_id?: string
+          notes?: string | null
+          office?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "member_external_appointments_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       member_notices: {
         Row: {
           author_id: string | null
@@ -698,6 +841,69 @@ export type Database = {
           },
           {
             foreignKeyName: "member_progression_status_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      member_ritual_records: {
+        Row: {
+          date_assessed: string | null
+          date_delivered_lodge: string | null
+          date_delivered_loi: string | null
+          date_first_learned: string | null
+          degree: string | null
+          id: string
+          member_id: string
+          notes: string | null
+          order_index: number
+          piece: string
+          ritual_group: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          date_assessed?: string | null
+          date_delivered_lodge?: string | null
+          date_delivered_loi?: string | null
+          date_first_learned?: string | null
+          degree?: string | null
+          id?: string
+          member_id: string
+          notes?: string | null
+          order_index?: number
+          piece: string
+          ritual_group: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          date_assessed?: string | null
+          date_delivered_lodge?: string | null
+          date_delivered_loi?: string | null
+          date_first_learned?: string | null
+          degree?: string | null
+          id?: string
+          member_id?: string
+          notes?: string | null
+          order_index?: number
+          piece?: string
+          ritual_group?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "member_ritual_records_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "member_ritual_records_updated_by_fkey"
             columns: ["updated_by"]
             isOneToOne: false
             referencedRelation: "profiles"
@@ -856,9 +1062,11 @@ export type Database = {
           post_nominals: string | null
           postcode: string | null
           preferred_name: string | null
+          proposer: string | null
           provincial_rank: string | null
           raising_date: string | null
           rank: string | null
+          royal_arch_date: string | null
           status: Database["public"]["Enums"]["member_status"]
           title: string | null
           town: string | null
@@ -895,9 +1103,11 @@ export type Database = {
           post_nominals?: string | null
           postcode?: string | null
           preferred_name?: string | null
+          proposer?: string | null
           provincial_rank?: string | null
           raising_date?: string | null
           rank?: string | null
+          royal_arch_date?: string | null
           status?: Database["public"]["Enums"]["member_status"]
           title?: string | null
           town?: string | null
@@ -934,9 +1144,11 @@ export type Database = {
           post_nominals?: string | null
           postcode?: string | null
           preferred_name?: string | null
+          proposer?: string | null
           provincial_rank?: string | null
           raising_date?: string | null
           rank?: string | null
+          royal_arch_date?: string | null
           status?: Database["public"]["Enums"]["member_status"]
           title?: string | null
           town?: string | null
@@ -1456,6 +1668,14 @@ export type Database = {
     }
     Functions: {
       can_access_almoner: { Args: { _user_id: string }; Returns: boolean }
+      can_edit_member_development: {
+        Args: { _editor: string; _member: string }
+        Returns: boolean
+      }
+      can_edit_member_ritual: {
+        Args: { _editor: string; _member: string }
+        Returns: boolean
+      }
       current_lodge_year: { Args: never; Returns: number }
       current_office_label: { Args: { _user_id: string }; Returns: string }
       current_user_degree_level: { Args: { _user_id: string }; Returns: number }

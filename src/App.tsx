@@ -58,6 +58,9 @@ const LoiRegister = lazy(() => import("./pages/members/LoiRegister"));
 const FestiveBoardRegister = lazy(() => import("./pages/members/FestiveBoardRegister"));
 const SummonsBuilder = lazy(() => import("./pages/members/SummonsBuilder"));
 const AlmonerPortal = lazy(() => import("./pages/members/AlmonerPortal"));
+const MyDevelopment = lazy(() => import("./pages/members/development/MemberDevelopment").then((m) => ({ default: m.MyDevelopmentPage })));
+const MemberDevelopment = lazy(() => import("./pages/members/development/MemberDevelopment").then((m) => ({ default: m.MemberDevelopmentPage })));
+const MentorDashboard = lazy(() => import("./pages/members/development/MentorDashboard"));
 
 
 const queryClient = new QueryClient();
@@ -123,6 +126,9 @@ const App = () => (
             <Route path="/members/festive-register" element={<ProtectedRoute><FestiveBoardRegister /></ProtectedRoute>} />
             <Route path="/members/summons" element={<ProtectedRoute><SummonsBuilder /></ProtectedRoute>} />
             <Route path="/members/almoner" element={<ProtectedRoute><AlmonerPortal /></ProtectedRoute>} />
+            <Route path="/members/development" element={<MyDevelopment />} />
+            <Route path="/members/admin/development" element={<MentorDashboard />} />
+            <Route path="/members/development/:memberId" element={<MemberDevelopment />} />
 
 
 
