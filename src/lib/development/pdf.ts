@@ -1,6 +1,6 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import logoAsset from "@/assets/weybridge-logo-navy.png.asset.json";
+import logoAsset from "@/assets/weybridge-logo-no-bg.png.asset.json";
 import { CHECKLIST_STAGES, RITUAL_GROUPS, STATUS_LABELS } from "./catalogues";
 import type {
   ChecklistItem,
