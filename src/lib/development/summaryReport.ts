@@ -358,11 +358,17 @@ export async function buildSummaryReport(period: SummaryPeriod): Promise<Summary
   // ---- 7. Royal Arch ----
   const ra = raConversion(bundle.members);
   const eligible = ra.length;
-  const exaltedInPeriod = bundle.members.filter(
-    (m) => m.is_royal_arch && inPeriod(m.updated_at)
+  // Use the dedicated royal_arch_date field — updated_at reflects any profile
+  // edit and would over-count exaltations dramatically.
+  const { data: raDates } = await supabase
+    .from("profiles")
+    .select("id, is_royal_arch, royal_arch_date");
+  const raRows = ((raDates ?? []) as Array<{ id: string; is_royal_arch: boolean; royal_arch_date: string | null }>);
+  const exaltedInPeriod = raRows.filter(
+    (r) => r.is_royal_arch && inPeriod(r.royal_arch_date)
   ).length;
-  const exaltedPrevious = bundle.members.filter(
-    (m) => m.is_royal_arch && inRange(m.updated_at, previousPeriod)
+  const exaltedPrevious = raRows.filter(
+    (r) => r.is_royal_arch && inRange(r.royal_arch_date, previousPeriod)
   ).length;
   // "recommended for Exaltation" — checklist topic
   const { data: raRec } = await supabase

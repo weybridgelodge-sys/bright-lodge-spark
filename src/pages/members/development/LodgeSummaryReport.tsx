@@ -239,9 +239,11 @@ function Inner() {
         <div className="flex items-center justify-center py-20"><Loader2 className="w-6 h-6 text-gold animate-spin" /></div>
       ) : (
         <>
-          <div className="rounded-sm border border-gold/30 bg-gold/5 p-4">
+          <div className="rounded-sm border border-gold/30 bg-gold/5 p-4 overflow-hidden">
             <h3 className="font-serif text-gold text-sm tracking-wider uppercase mb-2">Executive Summary</h3>
-            <p className="text-primary-foreground leading-relaxed">{data.execSummary}</p>
+            <p className="text-primary-foreground leading-relaxed whitespace-normal break-words [hyphens:auto]">
+              {data.execSummary}
+            </p>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
