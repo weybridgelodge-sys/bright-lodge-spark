@@ -131,19 +131,27 @@ export async function buildDevelopmentPdf(args: {
 
   // 2. Mentoring Checklist
   section("2. Mentoring Checklist");
-  for (const stage of CHECKLIST_STAGES) {
-    const rows = checklist.filter((c) => c.stage === stage);
-    if (rows.length === 0) continue;
-    if (y > pageH - 120) { doc.addPage(); y = margin; }
-    doc.setFont("times", "bold");
-    doc.setFontSize(10);
-    doc.setTextColor(...NAVY);
-    doc.text(stage, margin, y);
-    y += 10;
-    table(
-      [["Topic", "Target", "Completed", "Status", "Notes"]],
-      rows.map((r) => [r.topic, fmt(r.target_date), fmt(r.completed_date), STATUS_LABELS[r.status] ?? r.status, r.mentor_notes || ""]),
-    );
+  if (record?.mentoring_exempt) {
+    doc.setFont("helvetica", "italic"); doc.setFontSize(9); doc.setTextColor(...MUTED);
+    const reason = record.exemption_reason === "senior_member" ? "Senior Member"
+                 : record.exemption_reason === "joining_member" ? "Joining Member" : "Exempt";
+    doc.text(`${reason} — structured checklist not applicable.${record.exemption_note ? " " + record.exemption_note : ""}`, margin + 4, y);
+    y += 18;
+  } else {
+    for (const stage of CHECKLIST_STAGES) {
+      const rows = checklist.filter((c) => c.stage === stage);
+      if (rows.length === 0) continue;
+      if (y > pageH - 120) { doc.addPage(); y = margin; }
+      doc.setFont("times", "bold");
+      doc.setFontSize(10);
+      doc.setTextColor(...NAVY);
+      doc.text(stage, margin, y);
+      y += 10;
+      table(
+        [["Topic", "Target", "Completed", "Status", "Notes"]],
+        rows.map((r) => [r.topic, fmt(r.target_date), fmt(r.completed_date), STATUS_LABELS[r.status] ?? r.status, r.mentor_notes || ""]),
+      );
+    }
   }
 
   // 3. Ritual
