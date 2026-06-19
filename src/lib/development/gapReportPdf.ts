@@ -45,14 +45,14 @@ export async function buildGapReportPdf(matrix: SkillsMatrix) {
     y += 32;
   };
 
-  const red: { group: string; piece: string }[] = [];
-  const amber: { group: string; piece: string; holder: string }[] = [];
+  const red: { ritual_group: string; piece: string }[] = [];
+  const amber: { ritual_group: string; piece: string; holder: string }[] = [];
   for (const p of matrix.pieces) {
     const r = pieceRisk(matrix, p.ritual_group, p.piece);
-    if (r === "red") red.push(p);
+    if (r === "red") red.push({ ritual_group: p.ritual_group, piece: p.piece });
     else if (r === "amber") {
       const { delivered } = piecePeople(matrix, p.ritual_group, p.piece);
-      amber.push({ ...p, holder: delivered[0] ? displayMember(delivered[0]) : "—" });
+      amber.push({ ritual_group: p.ritual_group, piece: p.piece, holder: delivered[0] ? displayMember(delivered[0]) : "—" });
     }
   }
 
