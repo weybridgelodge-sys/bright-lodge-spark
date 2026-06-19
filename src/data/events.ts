@@ -85,7 +85,7 @@ const fixedEvents: LodgeEvent[] = [
     address: "Hitherbury Close, Guildford GU2 4DR",
     type: "loi",
     description:
-      "Special all-day Lodge of Instruction rehearsal kicking off the new Masonic season — open to all Brethren.",
+      "A triple double-passing ceremony — three candidates advanced to the Fellow Craft degree — kicking off the new Masonic season. Open to all Brethren.",
     highlight: true,
     link: "/events",
   },
