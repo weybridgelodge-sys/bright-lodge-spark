@@ -240,8 +240,8 @@ function CollectionDialog({ open, onOpenChange, editing, onSaved }: {
 // ─────────────────────────────────────────────────────────────────────────────
 // Donations tab
 // ─────────────────────────────────────────────────────────────────────────────
-function DonationsTab({ donations, charities, canEdit, onChange }: {
-  donations: Donation[]; charities: Charity[]; canEdit: boolean; onChange: () => void;
+function DonationsTab({ donations, charities, festival, canEdit, onChange }: {
+  donations: Donation[]; charities: Charity[]; festival: FestivalSettings | null; canEdit: boolean; onChange: () => void;
 }) {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Donation | null>(null);
@@ -298,7 +298,7 @@ function DonationsTab({ donations, charities, canEdit, onChange }: {
                   <td className="px-4 py-2 text-xs text-primary-foreground/70 max-w-[200px] truncate" title={d.purpose ?? ""}>{d.purpose}</td>
                   <td className="px-4 py-2">{PAYMENT_METHOD_LABEL[d.payment_method]}</td>
                   <td className="px-4 py-2 space-x-1">
-                    {d.is_festival_contribution && <Badge variant="outline" className="border-gold/40 text-gold text-[10px]">Festival</Badge>}
+                    {isFestivalDonation(d, charities, festival) && <Badge variant="outline" className="border-gold/40 text-gold text-[10px]">Festival</Badge>}
                     {d.from_relief_chest && <Badge variant="outline" className="border-blue-400/40 text-blue-300 text-[10px]">Relief Chest</Badge>}
                     {d.confirmation_received && <Badge variant="outline" className="border-emerald-400/40 text-emerald-300 text-[10px]">✓</Badge>}
                   </td>
@@ -949,7 +949,7 @@ function Inner() {
           <TabsTrigger value="feed">Website Feed</TabsTrigger>
         </TabsList>
         <TabsContent value="collections"><CollectionsTab collections={collections} donations={donations} canEdit={canEdit} onChange={reload} /></TabsContent>
-        <TabsContent value="donations"><DonationsTab donations={donations} charities={charities} canEdit={canEdit} onChange={reload} /></TabsContent>
+        <TabsContent value="donations"><DonationsTab donations={donations} charities={charities} festival={festival} canEdit={canEdit} onChange={reload} /></TabsContent>
         <TabsContent value="ledger"><LedgerTab charities={charities} donations={donations} canEdit={canEdit} onChange={reload} /></TabsContent>
         <TabsContent value="festival"><FestivalTab donations={donations} charities={charities} festival={festival} canEdit={canEdit} onChange={reload} /></TabsContent>
         <TabsContent value="report"><ReportTab charities={charities} collections={collections} donations={donations} festival={festival} canEdit={canEdit} /></TabsContent>
