@@ -25,7 +25,7 @@ const traditions = [
   {
     icon: Users2,
     title: "Visiting Other Lodges",
-    body: "Weybridge Lodge has an active tradition of visiting other Lodges across Surrey, London and further afield — and of warmly welcoming visitors of our own. As a Master Mason, the whole of the Craft becomes open to you, and friendships made here often travel far beyond the Masonic Centre.",
+    body: "Weybridge Lodge has an active tradition of visiting other Lodges across Surrey, London and further afield — and of warmly welcoming visitors of our own. As a newly initiated Mason, the whole of the Craft becomes open to you, and friendships made here often travel far beyond the Masonic Centre.",
   },
   {
     icon: Heart,
