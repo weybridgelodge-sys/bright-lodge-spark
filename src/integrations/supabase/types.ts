@@ -1117,11 +1117,104 @@ export type Database = {
         }
         Relationships: []
       }
+      welfare_log_entries: {
+        Row: {
+          action_taken: string | null
+          contact_date: string
+          contact_nature: Database["public"]["Enums"]["welfare_contact_nature"]
+          contact_type: Database["public"]["Enums"]["welfare_contact_type"]
+          created_at: string
+          deleted_at: string | null
+          follow_up_date: string | null
+          id: string
+          logged_by: string | null
+          member_id: string
+          nature_detail: string | null
+          notes: string | null
+          updated_at: string
+        }
+        Insert: {
+          action_taken?: string | null
+          contact_date?: string
+          contact_nature: Database["public"]["Enums"]["welfare_contact_nature"]
+          contact_type: Database["public"]["Enums"]["welfare_contact_type"]
+          created_at?: string
+          deleted_at?: string | null
+          follow_up_date?: string | null
+          id?: string
+          logged_by?: string | null
+          member_id: string
+          nature_detail?: string | null
+          notes?: string | null
+          updated_at?: string
+        }
+        Update: {
+          action_taken?: string | null
+          contact_date?: string
+          contact_nature?: Database["public"]["Enums"]["welfare_contact_nature"]
+          contact_type?: Database["public"]["Enums"]["welfare_contact_type"]
+          created_at?: string
+          deleted_at?: string | null
+          follow_up_date?: string | null
+          id?: string
+          logged_by?: string | null
+          member_id?: string
+          nature_detail?: string | null
+          notes?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "welfare_log_entries_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      welfare_member_status: {
+        Row: {
+          created_at: string
+          member_id: string
+          notes: string | null
+          status: Database["public"]["Enums"]["welfare_status_level"]
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          member_id: string
+          notes?: string | null
+          status?: Database["public"]["Enums"]["welfare_status_level"]
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          member_id?: string
+          notes?: string | null
+          status?: Database["public"]["Enums"]["welfare_status_level"]
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "welfare_member_status_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      can_access_almoner: { Args: { _user_id: string }; Returns: boolean }
+      current_lodge_year: { Args: never; Returns: number }
       current_office_label: { Args: { _user_id: string }; Returns: string }
       current_user_degree_level: { Args: { _user_id: string }; Returns: number }
       degree_level: {
@@ -1140,6 +1233,7 @@ export type Database = {
         Returns: boolean
       }
       is_active_member: { Args: { _user_id: string }; Returns: boolean }
+      is_current_wm_or_ipm: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
       app_role:
@@ -1149,6 +1243,7 @@ export type Database = {
         | "worshipful_master"
         | "director_of_ceremonies"
         | "assistant_secretary"
+        | "almoner"
       candidate_stage:
         | "enquiry"
         | "face_to_face"
@@ -1192,6 +1287,22 @@ export type Database = {
         | "deceased"
       progression_readiness: "ready" | "needs_experience" | "non_progressive"
       summons_status: "draft" | "finalised" | "sent"
+      welfare_contact_nature:
+        | "routine"
+        | "illness"
+        | "bereavement"
+        | "financial"
+        | "mental_health"
+        | "hospitalisation"
+        | "other"
+      welfare_contact_type:
+        | "in_person"
+        | "phone"
+        | "card"
+        | "email"
+        | "lodge_visit"
+        | "none"
+      welfare_status_level: "green" | "amber" | "red"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1326,6 +1437,7 @@ export const Constants = {
         "worshipful_master",
         "director_of_ceremonies",
         "assistant_secretary",
+        "almoner",
       ],
       candidate_stage: [
         "enquiry",
@@ -1376,6 +1488,24 @@ export const Constants = {
       ],
       progression_readiness: ["ready", "needs_experience", "non_progressive"],
       summons_status: ["draft", "finalised", "sent"],
+      welfare_contact_nature: [
+        "routine",
+        "illness",
+        "bereavement",
+        "financial",
+        "mental_health",
+        "hospitalisation",
+        "other",
+      ],
+      welfare_contact_type: [
+        "in_person",
+        "phone",
+        "card",
+        "email",
+        "lodge_visit",
+        "none",
+      ],
+      welfare_status_level: ["green", "amber", "red"],
     },
   },
 } as const
