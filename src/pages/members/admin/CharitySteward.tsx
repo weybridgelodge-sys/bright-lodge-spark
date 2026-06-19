@@ -23,6 +23,7 @@ import {
   isFestivalDonation,
 } from "@/lib/charity/queries";
 import { buildCharityAnnualReportPdf } from "@/lib/charity/annualReportPdf";
+import { highestAwardAchieved } from "@/lib/charity/festivalAwards";
 
 function Card({ title, action, children }: { title: string; action?: React.ReactNode; children: React.ReactNode }) {
   return (
