@@ -272,7 +272,7 @@ export function milestones(members: KpiMember[], wmTerms: WmTerm[]): Milestone[]
     if (["deceased", "resigned", "excluded"].includes(m.status)) continue;
     // initiation anniversaries
     if (m.initiation_date) {
-      const d = new Date(m.initiation_date);
+      const d = parseLocalDate(m.initiation_date);
       for (const target of [10, 25, 30, 40, 50, 60]) {
         const anniv = new Date(d.getFullYear() + target, d.getMonth(), d.getDate());
         if (anniv >= yearStart && anniv <= yearEnd) {
@@ -280,7 +280,7 @@ export function milestones(members: KpiMember[], wmTerms: WmTerm[]): Milestone[]
             member: m,
             kind: "initiation",
             years: target,
-            date: anniv.toISOString().slice(0, 10),
+            date: fmtLocal(anniv),
             label: `${target} years since Initiation`,
           });
         }
@@ -288,7 +288,7 @@ export function milestones(members: KpiMember[], wmTerms: WmTerm[]): Milestone[]
     }
     // birthdays in next 30 days
     if (m.date_of_birth) {
-      const dob = new Date(m.date_of_birth);
+      const dob = parseLocalDate(m.date_of_birth);
       const next = new Date(today.getFullYear(), dob.getMonth(), dob.getDate());
       if (next < today) next.setFullYear(today.getFullYear() + 1);
       const diff = (next.getTime() - today.getTime()) / (1000 * 60 * 60 * 24);
@@ -298,7 +298,7 @@ export function milestones(members: KpiMember[], wmTerms: WmTerm[]): Milestone[]
           member: m,
           kind: "birthday",
           years: age,
-          date: next.toISOString().slice(0, 10),
+          date: fmtLocal(next),
           label: `${age}th birthday`,
         });
       }
