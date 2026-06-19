@@ -79,11 +79,14 @@ type LogRow = {
 };
 
 // ============ Helpers ============
-const displayName = (m: MemberRow) =>
-  m.preferred_name?.trim() ||
-  m.full_name?.trim() ||
-  [m.title, m.first_name, m.last_name].filter(Boolean).join(" ").trim() ||
-  "Unnamed member";
+// Welfare records use first name + last name only — avoids ambiguity when
+// two members share a first name (e.g. "John") and keeps records uniquely identifiable.
+const displayName = (m: MemberRow) => {
+  const first = (m.preferred_name?.trim() || m.first_name?.trim() || "").trim();
+  const last = (m.last_name?.trim() || "").trim();
+  const composed = [first, last].filter(Boolean).join(" ").trim();
+  return composed || m.full_name?.trim() || "Unnamed member";
+};
 
 const ageFrom = (dob: string | null) => {
   if (!dob) return null;
