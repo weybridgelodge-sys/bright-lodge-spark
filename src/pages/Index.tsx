@@ -34,6 +34,8 @@ const Index = () => {
           <LodgeTimeline />
           <Principles />
 
+          <HomepageCharityCTA />
+
           {/* Quiz invitation banner */}
           <section className="py-12 sm:py-14 bg-card border-y border-border">
             <div className="container mx-auto px-4 sm:px-6 max-w-4xl flex flex-col md:flex-row items-center justify-between gap-5 md:gap-6 text-center md:text-left">
@@ -56,7 +58,6 @@ const Index = () => {
           </section>
 
           <Testimonials />
-          <HomepageCharityCTA />
           <LiveEventsFeed />
           <NextMeeting />
           <JoinCTA />
