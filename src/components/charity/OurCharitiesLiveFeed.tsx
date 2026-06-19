@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { highestAwardAchieved } from "@/lib/charity/festivalAwards";
 
 const gbp = (n: number) => new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP", maximumFractionDigits: 0 }).format(n);
 
@@ -51,7 +52,11 @@ export default function OurCharitiesLiveFeed() {
   if (!totals && rows.length === 0) return null;
 
   const yearTotal = rows.reduce((a, r) => a + r.year_total, 0);
-  const pct = festival && festival.target_amount > 0 ? Math.min(100, (festivalCumulative / festival.target_amount) * 100) : 0;
+  const rawPct = festival && festival.target_amount > 0 ? (festivalCumulative / festival.target_amount) * 100 : 0;
+  const barPct = Math.min(100, rawPct);
+  const targetReached = festival ? festivalCumulative >= festival.target_amount && festival.target_amount > 0 : false;
+  const excess = festival && targetReached ? festivalCumulative - festival.target_amount : 0;
+  const award = festival ? highestAwardAchieved(festivalCumulative, festival.target_amount) : null;
 
   return (
     <section className="py-12 md:py-16 bg-navy-gradient border-y border-gold/15">
