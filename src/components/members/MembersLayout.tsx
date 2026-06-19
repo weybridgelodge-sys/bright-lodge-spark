@@ -90,6 +90,11 @@ export default function MembersLayout({ children }: { children: React.ReactNode 
                 <GraduationCap className="w-4 h-4" /> Member Development
               </NavLink>
             )}
+            {canSeeMatrix && (
+              <NavLink to="/members/admin/skills-matrix" className={navCls}>
+                <BarChart3 className="w-4 h-4" /> Skills Matrix
+              </NavLink>
+            )}
             {canManageProgression && (
               <NavLink to="/members/officers-tracker" className={navCls}>
                 <Crown className="w-4 h-4" /> Officers Tracker
