@@ -1,90 +1,136 @@
-# Summons Builder
+## Member Development Module
 
-A new Trestle module for Secretary / Assistant Secretary to assemble, preview, PDF-export and email the lodge's monthly summons. Pulls Members, Officers Tracker, Meeting Events, and Festive Board records so only genuinely new content is entered each month.
+A complete development record per member, viewable by the member (read-only) and editable by Mentors / Worshipful Master / Admin. Styled to match the existing members portal (navy/gold, Playfair headings, semi-transparent cards).
 
-## Roles & access
+### Roles & access
 
-- Add new role `assistant_secretary` to the `app_role` enum.
-- New `canManageSummons = isAdmin || isSecretary || isAssistantSecretary`.
-- Route `/members/summons` + sidebar entry (gated). Admin user-role assignment already supports new roles via Admin page.
+- Add new role `mentor` to the existing `app_role` enum.
+- Editing: `admin`, `worshipful_master`, `mentor` (only for members assigned to them).
+- Viewing: each member can view their own record only.
+- Admin / WM see all records.
 
-## Database (one migration)
+### Section 1 — Member Profile
 
-**`lodge_template`** — singleton, one row keyed `id = 'default'`
-- Lodge identity: name, number, province, consecration_date
-- Logo URL (stored in existing `lodge-docs` bucket)
-- Venue address, regular meeting pattern text, LOI day/time/venue text
-- Provincial website URL, MCF contact text, dining booking URL
-- Static notices: data_protection_text, overseas_attendance_text, progression_notice_text (+ short variants for overflow)
-- WM home address/contact, Secretary contact block, Royal Arch Rep name+rank
-- Honorary members (text), lodge_representatives (jsonb array of {role, name})
+Pulled live from `profiles` (no duplication): name, initiation_date, passed_date (new), raised_date (new), royal_arch_date (new), grand_lodge_number (mapped from existing `ugle_reg_number` if present; otherwise added), proposer (new).
 
-**`summonses`** — one per meeting
-- `meeting_number` (int, auto-increment from MAX+1, editable)
-- `lodge_event_id` → `lodge_events` (date/time/type pulled from here)
-- `dress_code`, `minutes_confirmation_date`, `next_meeting_date`, `officer_night_date`
-- `agenda` jsonb: ordered `[{ id, label, kind: 'standing'|'variable'|'candidate' }]`
-- `candidates` jsonb: ordered `[{ name, dob, occupation, address, proposer, seconder, date_proposed, ceremony_type }]`
-- `dining_enquiry_name`, `dining_enquiry_email`
-- `notice_overrides` jsonb (which static blocks were auto/manually trimmed)
-- `pdf_storage_path` (set after generation), `sent_at`, `sent_to_count`
-- `status`: draft | finalised | sent
-- `created_by`, timestamps
+Two new editable fields stored on the development record itself:
 
-**`summons_email_log`** — per-recipient send rows for the archive
-- `summons_id`, `recipient_email`, `status`, `error`, `sent_at`
+- `assigned_mentor_id` — dropdown of active members.
+- `previous_masonic_experience` — free text.
 
-GRANTs + RLS:
-- `lodge_template`: SELECT for `authenticated`; ALL via `canManageSummons` roles. `service_role` ALL.
-- `summonses` + `summons_email_log`: same pattern. Active members may SELECT finalised/sent rows so future "View past summonses" is possible.
+Where dates already exist on `profiles` they are reused; missing ones are added as nullable columns so the existing Members admin page can populate them.
 
-## Frontend
+### Section 2 — Mentoring Checklist
 
-**New files**
-- `src/pages/members/SummonsBuilder.tsx` — tabs: **Template**, **Officer Roll**, **New Summons**, **History**
-- `src/components/members/summons/TemplateForm.tsx`
-- `src/components/members/summons/SummonsEditor.tsx` — agenda DnD, candidate repeater, dining auto-fill, overflow warning
-- `src/components/members/summons/SummonsPreview.tsx` — on-screen A4 booklet preview (the same React tree used by the PDF)
-- `src/components/members/summons/MembersListPanel.tsx` — two-column auto-balanced list with symbols (+ # ✚ Triple-Tau)
-- `src/lib/summons.ts` — standing agenda template, preset variable items, overflow priority logic, member-list balancing
-- `src/lib/summonsPdf.ts` — `@react-pdf/renderer` document (A4 landscape, 4 pages = folded booklet)
+One row per checklist item per member. Items are seeded from a fixed catalogue (stage + topic, ordered), so every member auto-gets the full list on first open. Each row stores: target_date, completed_date, status (`not_started` | `in_progress` | `complete`), mentor_notes.
 
-**Edited**
-- `src/components/members/MembersLayout.tsx` — Summons sidebar link
-- `src/hooks/useAuth.tsx` — `isAssistantSecretary`, `canManageSummons`
-- `src/App.tsx` — route
-- `src/pages/members/Admin.tsx` — show new role in user-role selector
+Stages and items use the exact wording from the brief (Pre-Initiation, EA, FC, MM, Royal Arch, Lodge Knowledge, General Masonic Development). Rendered as an accordion of stages with a progress bar per stage and overall %.
 
-## Edge function
+### Section 3 — Ritual Learning & Delivery Record
 
-`supabase/functions/send-summons-email/` (verify_jwt enforced; role-checked)
-- Input: `{ summons_id }`
-- Fetches PDF from storage, lists `profiles.email WHERE status='active'`, sends via existing Brevo/Lovable email path (single template `summons-distribution`), writes `summons_email_log`, updates `summonses.sent_at` + `sent_to_count`.
+One row per ritual piece per member, seeded from a fixed catalogue (group + piece). Columns: date_first_learned, date_assessed, date_delivered_loi, date_delivered_lodge, notes.
 
-## Per-meeting flow
+Groups: Opening & Closing, Initiation, Passing, Raising, Installation, LoI Roles, Lodge Traditions — exact pieces from brief.
 
-1. Pick a `lodge_events` row (date/time/type pre-fill).
-2. Standing agenda pre-loads: Open → Welcome visitors → **[variable slot]** → Officer reports → Charity Column → Risings → Close.
-3. Add variable items from presets (`Confirm minutes`, `Ballot/Initiate`, `Pass`, `Raise`, `Declare nominations`, `Elect Auditors`, custom) — DnD reorderable, numbering auto from index.
-4. Candidate blocks: each appended block auto-inserts a matching agenda line; remove cascades.
-5. Dining auto-pulls menu/price/deadline from the linked Festive Board record; QR code generated client-side from template `dining_booking_url` (using `qrcode` lib).
-6. Members list renders from `profiles` ordered by `COALESCE(initiation_date, joined_year-01-01)` ASC, with symbols (`+` past master, `#` past master in lodge, Triple Tau Unicode `☥`/SVG for `is_royal_arch`), post-nominals from `rank`/`grand_rank`.
-7. Overflow engine measures rendered height of members panel; if over budget, step-down: font-size 9→8.5→8pt, then trim notices in the spec'd order, surfacing a yellow banner with a "Choose what to trim" override.
-8. Preview → **Generate PDF** (writes to `lodge-docs/summonses/<id>.pdf`) → **Email to all members**.
+Editable only by `mentor` / `director_of_ceremonies` / `admin` / `worshipful_master`. Member sees read-only table.
 
-## Technical notes
+### Section 4 — Offices & Appointments
 
-- PDF via `@react-pdf/renderer` (only new dep besides `qrcode`); A4 portrait single sheet, 4 page faces arranged for fold (Page 1 = front cover/officers, Page 2 = members list + notices, Page 3 = agenda/candidates, Page 4 = dining + next meeting).
-- Auto-balance algorithm: ceil(n/2) left, floor(n/2) right (odd → left gets extra), recomputed on render.
-- Meeting number auto-increment: `SELECT COALESCE(MAX(meeting_number),0)+1 FROM summonses` when opening a new draft.
-- Triple Tau: rendered as inline SVG (no font dependency risk in PDF).
+Two sources, merged in the UI:
 
-## Out of scope (this iteration)
+1. Live read from `officer_appointments` joined with `officer_positions` for the member — shown as auto rows (not editable here; managed via the existing Officers Tracker).
+2. A new `member_external_appointments` table for Provincial / UGLE / other appointments added manually: office, masonic_year, date_appointed, date_installed, level (`lodge` | `province` | `ugle`), notes.
 
-- Per-member opt-out from summons emails (use existing `status='active'` filter).
-- Editing past archived summonses after send (read-only history).
-- WYSIWYG rich-text on static notices (plain textarea with line breaks).
+### Mentor Dashboard
 
-## Open question
+New tab inside Admin → Member Development for users with `mentor` role (or admin/WM seeing all). Table of assigned members: name, current degree, checklist % complete, last check-in date (most recent `completed_date` across checklist), overdue items count (target_date < today and not complete) highlighted amber. Row click → full record.
 
-Confirm Assistant Secretary should be a **new role** (`assistant_secretary`) rather than just granting `secretary`. Default plan: **new role** so audit trail and Officers Tracker can distinguish the two appointments.
+### PDF Export
+
+"Export PDF" button on each record. Uses the same layout primitives as the Almoner Report (`SummonsPrintPreview` / `summonsPdf` patterns): lodge crest header, gold section headers, confidentiality footer. Sections: Profile, Mentoring Checklist (grouped by stage with status icons), Ritual Record table, Offices table.
+
+### Routes & navigation
+
+- `/members/development` — for the current member, shows their own record.
+- `/members/development/:memberId` — admin/WM/mentor view of a specific member.
+- `/members/admin/development` — mentor dashboard + member picker.
+- Links added to `MembersLayout` sidebar (member sees "My Development", staff see "Member Development").
+
+### Files to create
+
+```
+src/pages/members/development/MyDevelopment.tsx
+src/pages/members/development/MemberDevelopment.tsx      // by :memberId
+src/pages/members/development/MentorDashboard.tsx
+src/components/members/development/ProfileSection.tsx
+src/components/members/development/MentoringChecklist.tsx
+src/components/members/development/RitualRecord.tsx
+src/components/members/development/OfficesRecord.tsx
+src/components/members/development/ExportPdfButton.tsx
+src/lib/development/catalogues.ts                        // checklist + ritual seed lists
+src/lib/development/queries.ts                           // typed Supabase reads/writes
+src/lib/development/pdf.tsx                              // react-pdf document
+```
+
+### Database (single migration, with GRANTs + RLS)
+
+```text
+ALTER TYPE app_role ADD VALUE 'mentor';
+
+ALTER TABLE profiles
+  ADD COLUMN passed_date date,
+  ADD COLUMN raised_date date,
+  ADD COLUMN royal_arch_date date,
+  ADD COLUMN proposer text;
+
+CREATE TABLE member_development_records (
+  member_id uuid PK -> profiles.id,
+  assigned_mentor_id uuid -> profiles.id,
+  previous_masonic_experience text,
+  created_at, updated_at
+);
+
+CREATE TABLE member_checklist_items (
+  id uuid PK, member_id uuid, stage text, topic text, order_index int,
+  target_date date, completed_date date,
+  status text check in (not_started,in_progress,complete),
+  mentor_notes text, updated_at, updated_by uuid,
+  UNIQUE(member_id, stage, topic)
+);
+
+CREATE TABLE member_ritual_records (
+  id uuid PK, member_id uuid, ritual_group text, piece text, degree text, order_index int,
+  date_first_learned date, date_assessed date,
+  date_delivered_loi date, date_delivered_lodge date,
+  notes text, updated_at, updated_by uuid,
+  UNIQUE(member_id, ritual_group, piece)
+);
+
+CREATE TABLE member_external_appointments (
+  id uuid PK, member_id uuid, office text, masonic_year text,
+  date_appointed date, date_installed date,
+  level text check in (lodge,province,ugle), notes text,
+  created_at, updated_at
+);
+
+-- helper: can_edit_development(_editor, _member)
+--   admin OR worshipful_master OR (mentor AND assigned_mentor_id = _editor)
+```
+
+RLS:
+
+- SELECT: own record OR `can_edit_development(auth.uid(), member_id)`.
+- INSERT/UPDATE/DELETE: `can_edit_development(...)` only.
+- Ritual record UPDATE also allows `director_of_ceremonies`.
+
+GRANTs: `SELECT, INSERT, UPDATE, DELETE` to `authenticated`; `ALL` to `service_role` on all new tables.
+
+Seeding on first access is done client-side via upsert of the catalogue (idempotent thanks to UNIQUE constraints) so we never duplicate rows.
+
+### Out of scope
+
+- No new email infra or auth changes.
+- No edits to existing Officers Tracker behaviour — only read from it.
+- No changes to Almoner module; only its PDF style is reused.
+
+Ready to build on approval.
