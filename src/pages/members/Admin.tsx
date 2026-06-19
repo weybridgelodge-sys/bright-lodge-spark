@@ -62,7 +62,7 @@ type Profile = {
   created_at: string;
 };
 
-type Role = { user_id: string; role: "member" | "admin" };
+type Role = { user_id: string; role: "member" | "admin" | "almoner" | "secretary" | "assistant_secretary" | "worshipful_master" | "director_of_ceremonies" };
 
 type Notice = {
   id: string;
