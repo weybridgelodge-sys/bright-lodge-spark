@@ -133,6 +133,13 @@ export function reliefChestBalance(collections: Collection[], donations: Donatio
   return in_ - out;
 }
 
+export function isFestivalDonation(donation: Donation, charities: Charity[], festival?: FestivalSettings | null): boolean {
+  if (donation.is_festival_contribution) return true;
+  const charityName = charities.find((c) => c.id === donation.charity_id)?.name.toLowerCase().trim() ?? "";
+  const festivalName = (festival?.festival_name ?? "Surrey 2030 Festival").toLowerCase().trim();
+  return charityName.length > 0 && (charityName === festivalName || charityName.includes("2030 festival") || charityName.includes("surrey 2030"));
+}
+
 export function gbp(n: number): string {
   return new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP", maximumFractionDigits: 2 }).format(n);
 }

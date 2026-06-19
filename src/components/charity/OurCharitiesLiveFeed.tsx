@@ -15,16 +15,18 @@ export default function OurCharitiesLiveFeed() {
 
   useEffect(() => {
     (async () => {
-      const [{ data: t }, { data: r }, { data: f }, { data: dons }] = await Promise.all([
+      const [{ data: t }, { data: r }, { data: f }] = await Promise.all([
         (supabase as any).from("public_charity_totals").select("total_raised,public_feed_start_date").maybeSingle(),
         (supabase as any).from("public_charity_year_breakdown").select("charity_id,name,website,year_total"),
         supabase.from("charity_festival_settings").select("festival_name,target_amount").maybeSingle(),
-        supabase.from("charity_donations").select("amount").eq("is_festival_contribution", true),
       ]);
       if (t) setTotals({ total_raised: Number((t as any).total_raised), public_feed_start_date: (t as any).public_feed_start_date });
-      if (r) setRows((r as any[]).map((x) => ({ ...x, year_total: Number(x.year_total) })));
+      if (r) {
+        const mappedRows = (r as any[]).map((x) => ({ ...x, year_total: Number(x.year_total) }));
+        setRows(mappedRows);
+        setFestivalCumulative(mappedRows.filter((x) => x.name.toLowerCase().includes("surrey 2030") || x.name.toLowerCase().includes("2030 festival")).reduce((a, x) => a + x.year_total, 0));
+      }
       if (f) setFestival({ festival_name: (f as any).festival_name, target_amount: Number((f as any).target_amount) });
-      if (dons) setFestivalCumulative((dons as any[]).reduce((a, d) => a + Number(d.amount), 0));
     })();
   }, []);
 

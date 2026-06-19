@@ -20,6 +20,7 @@ import {
   type Charity, type Collection, type Donation, type FestivalSettings,
   type CollectionType, type PaymentMethod, type AuthorisedBy,
   currentMasonicYear, masonicYearBounds, inYear, reliefChestBalance, gbp,
+  isFestivalDonation,
 } from "@/lib/charity/queries";
 import { buildCharityAnnualReportPdf } from "@/lib/charity/annualReportPdf";
 
@@ -239,8 +240,8 @@ function CollectionDialog({ open, onOpenChange, editing, onSaved }: {
 // ─────────────────────────────────────────────────────────────────────────────
 // Donations tab
 // ─────────────────────────────────────────────────────────────────────────────
-function DonationsTab({ donations, charities, canEdit, onChange }: {
-  donations: Donation[]; charities: Charity[]; canEdit: boolean; onChange: () => void;
+function DonationsTab({ donations, charities, festival, canEdit, onChange }: {
+  donations: Donation[]; charities: Charity[]; festival: FestivalSettings | null; canEdit: boolean; onChange: () => void;
 }) {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Donation | null>(null);
@@ -297,7 +298,7 @@ function DonationsTab({ donations, charities, canEdit, onChange }: {
                   <td className="px-4 py-2 text-xs text-primary-foreground/70 max-w-[200px] truncate" title={d.purpose ?? ""}>{d.purpose}</td>
                   <td className="px-4 py-2">{PAYMENT_METHOD_LABEL[d.payment_method]}</td>
                   <td className="px-4 py-2 space-x-1">
-                    {d.is_festival_contribution && <Badge variant="outline" className="border-gold/40 text-gold text-[10px]">Festival</Badge>}
+                    {isFestivalDonation(d, charities, festival) && <Badge variant="outline" className="border-gold/40 text-gold text-[10px]">Festival</Badge>}
                     {d.from_relief_chest && <Badge variant="outline" className="border-blue-400/40 text-blue-300 text-[10px]">Relief Chest</Badge>}
                     {d.confirmation_received && <Badge variant="outline" className="border-emerald-400/40 text-emerald-300 text-[10px]">✓</Badge>}
                   </td>
@@ -645,8 +646,8 @@ function CharityDialog({ open, onOpenChange, editing, onSaved }: {
 // ─────────────────────────────────────────────────────────────────────────────
 // Festival Tracker tab
 // ─────────────────────────────────────────────────────────────────────────────
-function FestivalTab({ donations, festival, canEdit, onChange }: {
-  donations: Donation[]; festival: FestivalSettings | null; canEdit: boolean; onChange: () => void;
+function FestivalTab({ donations, charities, festival, canEdit, onChange }: {
+  donations: Donation[]; charities: Charity[]; festival: FestivalSettings | null; canEdit: boolean; onChange: () => void;
 }) {
   const [target, setTarget] = useState(festival?.target_amount ? String(festival.target_amount) : "0");
   const [name, setName] = useState(festival?.festival_name ?? "Surrey 2030 Festival");
@@ -659,7 +660,7 @@ function FestivalTab({ donations, festival, canEdit, onChange }: {
     setNotes(festival?.festival_notes ?? "");
   }, [festival]);
 
-  const festivalDonations = donations.filter((d) => d.is_festival_contribution).sort((a, b) => b.donation_date.localeCompare(a.donation_date));
+  const festivalDonations = donations.filter((d) => isFestivalDonation(d, charities, festival)).sort((a, b) => b.donation_date.localeCompare(a.donation_date));
   const cumulative = festivalDonations.reduce((a, d) => a + Number(d.amount), 0);
   const targetN = Number(target) || 0;
   const pct = targetN > 0 ? Math.min(100, (cumulative / targetN) * 100) : 0;
@@ -751,7 +752,7 @@ function ReportTab({ charities, collections, donations, festival, canEdit }: {
   const reliefBal = reliefChestBalance(collections, donations);
   const charitiesSupported = new Set(yearDon.map((d) => d.charity_id)).size;
   const largest = yearDon.reduce((m, d) => (Number(d.amount) > (m ? Number(m.amount) : 0) ? d : m), null as Donation | null);
-  const festivalYear = yearDon.filter((d) => d.is_festival_contribution).reduce((a, d) => a + Number(d.amount), 0);
+  const festivalYear = yearDon.filter((d) => isFestivalDonation(d, charities, festival)).reduce((a, d) => a + Number(d.amount), 0);
   const charityById = new Map(charities.map((c) => [c.id, c]));
 
   const yearsAvailable = useMemo(() => {
@@ -948,9 +949,9 @@ function Inner() {
           <TabsTrigger value="feed">Website Feed</TabsTrigger>
         </TabsList>
         <TabsContent value="collections"><CollectionsTab collections={collections} donations={donations} canEdit={canEdit} onChange={reload} /></TabsContent>
-        <TabsContent value="donations"><DonationsTab donations={donations} charities={charities} canEdit={canEdit} onChange={reload} /></TabsContent>
+        <TabsContent value="donations"><DonationsTab donations={donations} charities={charities} festival={festival} canEdit={canEdit} onChange={reload} /></TabsContent>
         <TabsContent value="ledger"><LedgerTab charities={charities} donations={donations} canEdit={canEdit} onChange={reload} /></TabsContent>
-        <TabsContent value="festival"><FestivalTab donations={donations} festival={festival} canEdit={canEdit} onChange={reload} /></TabsContent>
+        <TabsContent value="festival"><FestivalTab donations={donations} charities={charities} festival={festival} canEdit={canEdit} onChange={reload} /></TabsContent>
         <TabsContent value="report"><ReportTab charities={charities} collections={collections} donations={donations} festival={festival} canEdit={canEdit} /></TabsContent>
         <TabsContent value="feed"><FeedTab festival={festival} canEdit={canEdit} onChange={reload} /></TabsContent>
       </Tabs>
