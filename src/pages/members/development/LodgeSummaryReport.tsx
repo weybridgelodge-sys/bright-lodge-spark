@@ -318,7 +318,7 @@ function Inner() {
               )}
               <div>
                 <p className="text-xs text-primary-foreground/60 mb-1">Unassigned members</p>
-                <NameChips items={data.workingGroups.unassigned} />
+                <NameChips items={data.workingGroups.unassigned} max={data.workingGroups.unassigned.length} />
               </div>
             </Card>
 

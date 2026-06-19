@@ -141,12 +141,15 @@ export async function buildSummaryReport(period: SummaryPeriod): Promise<Summary
     .select("member_id, assigned_mentor_id, mentoring_exempt, last_checkin_date");
   type DevRow = { member_id: string; assigned_mentor_id: string | null; mentoring_exempt: boolean | null; last_checkin_date: string | null };
   const recs = (devRecords ?? []) as DevRow[];
-  const exemptCount = recs.filter((r) => r.mentoring_exempt).length;
+  const exemptIds = new Set(recs.filter((r) => r.mentoring_exempt).map((r) => r.member_id));
 
   const activeSubscribing = snap.subscribing;
+  // Novice = in formal mentoring: active, novice degree, NOT a Past Master,
+  // and NOT marked exempt in module settings.
   const noviceMembers = activeSubscribing.filter(
-    (m) => noviceDegrees.has(m.degree) && !recs.find((r) => r.member_id === m.id && r.mentoring_exempt)
+    (m) => noviceDegrees.has(m.degree) && !m.is_past_master && !exemptIds.has(m.id)
   );
+  const exemptCount = activeSubscribing.filter((m) => exemptIds.has(m.id)).length;
 
   // ---- 2. Mentoring Progress ----
   const noviceIds = noviceMembers.map((m) => m.id);
@@ -452,12 +455,13 @@ export async function buildSummaryReport(period: SummaryPeriod): Promise<Summary
 
 export function buildExecSummary(d: SummaryReportData): string {
   const bits: string[] = [];
+  const noviceN = d.membership.novice;
   bits.push(
-    `Weybridge Lodge currently has ${d.membership.novice} member${d.membership.novice === 1 ? "" : "s"} in formal mentoring, with an average checklist completion of ${d.mentoring.avgCompletionPct}%.`
+    `Weybridge Lodge currently has ${noviceN} member${noviceN === 1 ? "" : "s"} in formal mentoring, with an average checklist completion of ${d.mentoring.avgCompletionPct}%.`
   );
-  bits.push(
-    `${d.ritual.red} of ${d.ritual.totalPieces} ritual pieces are unrecorded, ${d.ritual.amber} are amber single-point-of-failure risk${d.ritual.amber === 1 ? "" : "s"}.`
-  );
+  const redV = `${d.ritual.red} ${d.ritual.red === 1 ? "is" : "are"} unrecorded`;
+  const amberV = `${d.ritual.amber} ${d.ritual.amber === 1 ? "is" : "are"} amber single-point-of-failure risk${d.ritual.amber === 1 ? "" : "s"}`;
+  bits.push(`Of ${d.ritual.totalPieces} ritual pieces, ${redV}, ${amberV}.`);
   if (d.loi.sessions > 0) {
     bits.push(
       `LoI attendance averaged ${d.loi.avgAttendancePct}% across ${d.loi.sessions} session${d.loi.sessions === 1 ? "" : "s"}${d.loi.trend !== "n/a" ? ` (${d.loi.trend} vs previous period)` : ""}.`
