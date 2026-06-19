@@ -351,7 +351,7 @@ const FrontCoverPanel: React.FC<{
 
      <View style={{ flexDirection: "row", alignItems: "center", marginTop: 6, marginBottom: 4 }}>
        <View style={{ flex: 1, alignItems: "flex-start" }}>
-         {leftSrc ? <Image src={leftSrc} style={{ height: 85 }} /> : null}
+         {leftSrc ? <Image src={leftSrc} style={{ height: 75 }} /> : null}
        </View>
        <View style={{ flex: 1, alignItems: "center" }}>
          {logoSrc ? <Image src={logoSrc} style={s.crest} /> : null}
