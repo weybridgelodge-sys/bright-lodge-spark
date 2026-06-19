@@ -25,7 +25,7 @@ type Profile = {
   initiation_date?: string | null;
 };
 
-type Role = "member" | "admin" | "secretary" | "assistant_secretary" | "worshipful_master" | "director_of_ceremonies";
+type Role = "member" | "admin" | "secretary" | "assistant_secretary" | "worshipful_master" | "director_of_ceremonies" | "almoner";
 
 type AuthCtx = {
   session: Session | null;
@@ -36,9 +36,12 @@ type AuthCtx = {
   isAssistantSecretary: boolean;
   isWorshipfulMaster: boolean;
   isDirectorOfCeremonies: boolean;
+  isAlmoner: boolean;
+  isCurrentWmOrIpm: boolean;
   canManageProgression: boolean;
   canManageLOI: boolean;
   canManageSummons: boolean;
+  canAccessAlmoner: boolean;
   loading: boolean;
   refreshProfile: () => Promise<void>;
   signOut: () => Promise<void>;
@@ -50,7 +53,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [roles, setRoles] = useState<Role[]>([]);
+  const [isCurrentWmOrIpm, setIsCurrentWmOrIpm] = useState(false);
   const [loading, setLoading] = useState(true);
+
 
   const loadProfileAndRole = async (uid: string) => {
     const [{ data: p }, { data: r }] = await Promise.all([
