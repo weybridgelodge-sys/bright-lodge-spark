@@ -414,6 +414,39 @@ export type Database = {
         }
         Relationships: []
       }
+      charity_public_feed_metrics: {
+        Row: {
+          current_year_total: number
+          festival_name: string
+          festival_target_amount: number
+          festival_total: number
+          public_feed_start_date: string | null
+          singleton: boolean
+          total_raised: number
+          updated_at: string
+        }
+        Insert: {
+          current_year_total?: number
+          festival_name?: string
+          festival_target_amount?: number
+          festival_total?: number
+          public_feed_start_date?: string | null
+          singleton?: boolean
+          total_raised?: number
+          updated_at?: string
+        }
+        Update: {
+          current_year_total?: number
+          festival_name?: string
+          festival_target_amount?: number
+          festival_total?: number
+          public_feed_start_date?: string | null
+          singleton?: boolean
+          total_raised?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       festive_board_attendance: {
         Row: {
           amount_pence: number
@@ -2340,6 +2373,7 @@ export type Database = {
           ritual_group: string
         }[]
       }
+      refresh_charity_public_feed_metrics: { Args: never; Returns: undefined }
     }
     Enums: {
       almoner_report_status: "draft" | "final"
