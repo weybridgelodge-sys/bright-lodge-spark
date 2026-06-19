@@ -160,6 +160,20 @@ export default function MembersAdmin() {
     load();
   };
 
+  const toggleAlmoner = async (uid: string, makeAlmoner: boolean) => {
+    if (makeAlmoner) {
+      const { error } = await supabase.from("user_roles").insert({ user_id: uid, role: "almoner" });
+      if (error) toast.error(error.message);
+      else toast.success("Assigned Almoner role");
+    } else {
+      const { error } = await supabase.from("user_roles").delete().eq("user_id", uid).eq("role", "almoner");
+      if (error) toast.error(error.message);
+      else toast.success("Almoner role removed");
+    }
+    load();
+  };
+
+
   const deleteMember = async (p: Profile) => {
     if (user && p.id === user.id) {
       toast.error("You cannot delete your own account");
