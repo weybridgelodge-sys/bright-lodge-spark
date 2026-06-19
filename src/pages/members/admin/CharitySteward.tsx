@@ -20,6 +20,7 @@ import {
   type Charity, type Collection, type Donation, type FestivalSettings,
   type CollectionType, type PaymentMethod, type AuthorisedBy,
   currentMasonicYear, masonicYearBounds, inYear, reliefChestBalance, gbp,
+  isFestivalDonation,
 } from "@/lib/charity/queries";
 import { buildCharityAnnualReportPdf } from "@/lib/charity/annualReportPdf";
 
@@ -645,8 +646,8 @@ function CharityDialog({ open, onOpenChange, editing, onSaved }: {
 // ─────────────────────────────────────────────────────────────────────────────
 // Festival Tracker tab
 // ─────────────────────────────────────────────────────────────────────────────
-function FestivalTab({ donations, festival, canEdit, onChange }: {
-  donations: Donation[]; festival: FestivalSettings | null; canEdit: boolean; onChange: () => void;
+function FestivalTab({ donations, charities, festival, canEdit, onChange }: {
+  donations: Donation[]; charities: Charity[]; festival: FestivalSettings | null; canEdit: boolean; onChange: () => void;
 }) {
   const [target, setTarget] = useState(festival?.target_amount ? String(festival.target_amount) : "0");
   const [name, setName] = useState(festival?.festival_name ?? "Surrey 2030 Festival");
@@ -659,7 +660,7 @@ function FestivalTab({ donations, festival, canEdit, onChange }: {
     setNotes(festival?.festival_notes ?? "");
   }, [festival]);
 
-  const festivalDonations = donations.filter((d) => d.is_festival_contribution).sort((a, b) => b.donation_date.localeCompare(a.donation_date));
+  const festivalDonations = donations.filter((d) => isFestivalDonation(d, charities, festival)).sort((a, b) => b.donation_date.localeCompare(a.donation_date));
   const cumulative = festivalDonations.reduce((a, d) => a + Number(d.amount), 0);
   const targetN = Number(target) || 0;
   const pct = targetN > 0 ? Math.min(100, (cumulative / targetN) * 100) : 0;
@@ -751,7 +752,7 @@ function ReportTab({ charities, collections, donations, festival, canEdit }: {
   const reliefBal = reliefChestBalance(collections, donations);
   const charitiesSupported = new Set(yearDon.map((d) => d.charity_id)).size;
   const largest = yearDon.reduce((m, d) => (Number(d.amount) > (m ? Number(m.amount) : 0) ? d : m), null as Donation | null);
-  const festivalYear = yearDon.filter((d) => d.is_festival_contribution).reduce((a, d) => a + Number(d.amount), 0);
+  const festivalYear = yearDon.filter((d) => isFestivalDonation(d, charities, festival)).reduce((a, d) => a + Number(d.amount), 0);
   const charityById = new Map(charities.map((c) => [c.id, c]));
 
   const yearsAvailable = useMemo(() => {
