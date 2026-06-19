@@ -217,8 +217,8 @@ const s = StyleSheet.create({
   // symmetry. Line 1: date + symbols + name. Line 2: post-nominals or blank.
   memberTable: { flexDirection: "row", marginTop: 4 },
   memberCol: { flex: 1, paddingHorizontal: 2 },
-  memberRow: { flexDirection: "column", marginBottom: 2, minHeight: 24 },
-  memberLine1: { flexDirection: "row" },
+ memberRow: { flexDirection: "column", marginBottom: 2, height: 24 },
+ memberLine1: { flexDirection: "row", height: 11 },
   memberDate: { width: 62, fontSize: 8.5 },
   memberMark: { width: 18, fontSize: 8.5, textAlign: "center" },
   memberName: { flex: 1, fontSize: 8.5 },
