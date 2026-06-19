@@ -254,9 +254,12 @@ function PortalBody() {
       const sa = statuses[a.id]?.status ?? "green";
       const sb = statuses[b.id]?.status ?? "green";
       if (STATUS_RANK[sa] !== STATUS_RANK[sb]) return STATUS_RANK[sa] - STATUS_RANK[sb];
-      const ca = lastContactByMember[a.id] ?? "0000-00-00";
-      const cb = lastContactByMember[b.id] ?? "0000-00-00";
-      return ca.localeCompare(cb); // oldest first
+      const fa = (a.preferred_name?.trim() || a.first_name?.trim() || "").toLowerCase();
+      const fb = (b.preferred_name?.trim() || b.first_name?.trim() || "").toLowerCase();
+      if (fa !== fb) return fa.localeCompare(fb);
+      const la = (a.last_name?.trim() || "").toLowerCase();
+      const lb = (b.last_name?.trim() || "").toLowerCase();
+      return la.localeCompare(lb);
     });
   }, [members, statuses, lastContactByMember]);
 
