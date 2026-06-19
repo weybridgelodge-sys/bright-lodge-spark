@@ -182,7 +182,7 @@ export default function LifeEventsPanel({ members, userId }: { members: Member[]
         <div>
           <h3 className="font-serif text-lg text-primary-foreground">Life Events</h3>
           <p className="text-xs text-primary-foreground/60">
-            Birthdays &amp; initiation anniversaries pulled from member records · add weddings, bereavements and other milestones below
+            Birthdays, initiation &amp; Worshipful Master milestone anniversaries pulled from member records · add weddings, bereavements and other milestones below
           </p>
         </div>
         <Button size="sm" className="bg-gold text-navy hover:bg-gold/90" onClick={() => setShowForm((v) => !v)}>
