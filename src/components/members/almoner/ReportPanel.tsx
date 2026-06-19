@@ -431,7 +431,7 @@ export default function ReportPanel({ members }: { members: Member[] }) {
           placeholder="Add any advice, recommendations or commentary for the Worshipful Master…"
           className="bg-navy text-primary-foreground border-gold/30"
         />
-        <p className="text-[11px] text-primary-foreground/50">Regenerate after editing to refresh the preview.</p>
+        <p className="text-[11px] text-primary-foreground/50">Regenerate after editing to refresh the preview. Note: emoji will be removed from the printed PDF.</p>
       </div>
 
       {report && (
