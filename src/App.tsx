@@ -63,6 +63,7 @@ const MemberDevelopment = lazy(() => import("./pages/members/development/MemberD
 const MentorDashboard = lazy(() => import("./pages/members/development/MentorDashboard"));
 const SkillsMatrix = lazy(() => import("./pages/members/development/SkillsMatrix"));
 const LoiAssignmentHelper = lazy(() => import("./pages/members/development/LoiAssignmentHelper"));
+const LodgeSummaryReport = lazy(() => import("./pages/members/development/LodgeSummaryReport"));
 const WorkingGroupsIndex = lazy(() => import("./pages/members/working-groups/Index"));
 const WorkingGroupDetail = lazy(() => import("./pages/members/working-groups/Detail"));
 const WorkingGroupsAdmin = lazy(() => import("./pages/members/working-groups/Admin"));
@@ -135,6 +136,7 @@ const App = () => (
             <Route path="/members/admin/development" element={<MentorDashboard />} />
             <Route path="/members/admin/skills-matrix" element={<SkillsMatrix />} />
             <Route path="/members/admin/loi-helper" element={<LoiAssignmentHelper />} />
+            <Route path="/members/development/summary-report" element={<LodgeSummaryReport />} />
             <Route path="/members/development/:memberId" element={<MemberDevelopment />} />
             <Route path="/members/working-groups" element={<WorkingGroupsIndex />} />
             <Route path="/members/working-groups/admin" element={<WorkingGroupsAdmin />} />
