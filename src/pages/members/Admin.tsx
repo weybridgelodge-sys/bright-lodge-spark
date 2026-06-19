@@ -465,6 +465,15 @@ export default function MembersAdmin() {
                           <ShieldPlus className="w-4 h-4" />
                         )}
                       </button>
+                      <button
+                        onClick={() => toggleAlmoner(p.id, !isAlmonerUser(p.id))}
+                        className={`p-1.5 rounded-sm ${isAlmonerUser(p.id) ? "text-gold bg-gold/10" : "text-primary-foreground/70 hover:text-gold hover:bg-gold/10"}`}
+                        aria-label={isAlmonerUser(p.id) ? "Remove Almoner role" : "Assign Almoner role"}
+                        title={isAlmonerUser(p.id) ? "Remove Almoner role" : "Assign Almoner role"}
+                      >
+                        <HeartHandshake className="w-4 h-4" />
+                      </button>
+
                       {user?.id !== p.id && (
                         <button
                           onClick={() => deleteMember(p)}
