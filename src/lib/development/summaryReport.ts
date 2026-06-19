@@ -149,7 +149,7 @@ export async function buildSummaryReport(period: SummaryPeriod): Promise<Summary
   const noviceMembers = activeSubscribing.filter(
     (m) => noviceDegrees.has(m.degree) && !m.is_past_master && !exemptIds.has(m.id)
   );
-  const exemptCount = activeSubscribing.filter((m) => exemptIds.has(m.id)).length;
+  const exemptCount = activeSubscribing.length - noviceMembers.length;
 
   // ---- 2. Mentoring Progress ----
   const noviceIds = noviceMembers.map((m) => m.id);
