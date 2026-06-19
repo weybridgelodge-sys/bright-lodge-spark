@@ -61,6 +61,8 @@ const AlmonerPortal = lazy(() => import("./pages/members/AlmonerPortal"));
 const MyDevelopment = lazy(() => import("./pages/members/development/MemberDevelopment").then((m) => ({ default: m.MyDevelopmentPage })));
 const MemberDevelopment = lazy(() => import("./pages/members/development/MemberDevelopment").then((m) => ({ default: m.MemberDevelopmentPage })));
 const MentorDashboard = lazy(() => import("./pages/members/development/MentorDashboard"));
+const SkillsMatrix = lazy(() => import("./pages/members/development/SkillsMatrix"));
+const LoiAssignmentHelper = lazy(() => import("./pages/members/development/LoiAssignmentHelper"));
 
 
 const queryClient = new QueryClient();
