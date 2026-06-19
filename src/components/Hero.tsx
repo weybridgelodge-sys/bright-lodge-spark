@@ -1,6 +1,7 @@
 import { ChevronDown } from "lucide-react";
 import { Link } from "react-router-dom";
 import heroAvif from "@/assets/hero-lodge.avif.asset.json";
+import heroAvifMobile from "@/assets/hero-lodge-640.avif.asset.json";
 import heroWebp from "@/assets/hero-lodge.webp.asset.json";
 import heroJpg from "@/assets/hero-lodge.optimized.jpg.asset.json";
 import logoAsset from "@/assets/weybridge-logo-500.webp.asset.json";
@@ -12,6 +13,7 @@ const Hero = () => {
   return (
     <section className="relative min-h-screen flex items-center justify-start overflow-hidden">
       <picture>
+        <source media="(max-width: 768px)" srcSet={heroAvifMobile.url} type="image/avif" />
         <source srcSet={heroAvif.url} type="image/avif" />
         <source srcSet={heroWebp.url} type="image/webp" />
         <img
