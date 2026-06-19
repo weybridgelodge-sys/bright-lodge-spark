@@ -255,6 +255,19 @@ export function milestones(members: KpiMember[], wmTerms: WmTerm[]): Milestone[]
   const yearEnd = new Date(my + 1, 8, 30); // 30 Sep
   const out: Milestone[] = [];
 
+  // Format a Date as YYYY-MM-DD using local components — avoids the
+  // toISOString() UTC shift that pushes BST dates back by one day.
+  const fmtLocal = (d: Date) =>
+    `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+
+  // Parse a YYYY-MM-DD date string as a local date (not UTC), so getDate()
+  // returns the intended day regardless of the viewer's timezone.
+  const parseLocalDate = (s: string) => {
+    const iso = s.slice(0, 10).match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (iso) return new Date(+iso[1], +iso[2] - 1, +iso[3]);
+    return new Date(s);
+  };
+
   for (const m of members) {
     if (["deceased", "resigned", "excluded"].includes(m.status)) continue;
     // initiation anniversaries
