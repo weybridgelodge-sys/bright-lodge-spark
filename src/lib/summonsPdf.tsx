@@ -709,8 +709,8 @@ const AgendaPanel: React.FC<{
         )}
       </View>
       {diningQrDataUrl && (
-        <View style={{ alignItems: "center" }}>
-          <Image src={diningQrDataUrl} style={s.diningQr} />
+        <View style={{ alignItems: "center", width: 80 }}>
+          <Image src={{ uri: diningQrDataUrl }} style={s.diningQr} />
           <Text style={[s.micro, { marginTop: 2 }]}>Scan to book</Text>
         </View>
       )}
