@@ -1,6 +1,6 @@
 import { Instagram, Facebook, Twitter } from "lucide-react";
 import { Link } from "react-router-dom";
-import logoAsset from "@/assets/weybridge-logo-no-bg.png.asset.json";
+import logoAsset from "@/assets/weybridge-logo-300.webp.asset.json";
 const logo = logoAsset.url;
 import charterMark from "@/assets/charter-mark.png";
 
