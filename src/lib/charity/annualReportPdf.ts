@@ -1,7 +1,7 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import logoAsset from "@/assets/weybridge-logo-white.png.asset.json";
-import { gbp, COLLECTION_TYPE_LABEL, type Collection, type Donation, type Charity, type FestivalSettings, masonicYearBounds, inYear, reliefChestBalance } from "./queries";
+import { gbp, COLLECTION_TYPE_LABEL, type Collection, type Donation, type Charity, type FestivalSettings, masonicYearBounds, inYear, reliefChestBalance, isFestivalDonation } from "./queries";
 
 const NAVY: [number, number, number] = [27, 42, 74];
 const GOLD: [number, number, number] = [201, 164, 50];
@@ -45,8 +45,8 @@ export async function buildCharityAnnualReportPdf(args: {
     .sort((a, b) => b.total - a.total);
 
   const largest = yearDon.reduce((max, d) => (Number(d.amount) > (max ? Number(max.amount) : 0) ? d : max), null as Donation | null);
-  const festivalYear = yearDon.filter((d) => d.is_festival_contribution).reduce((a, d) => a + Number(d.amount), 0);
-  const festivalCumulative = donations.filter((d) => d.is_festival_contribution).reduce((a, d) => a + Number(d.amount), 0);
+  const festivalYear = yearDon.filter((d) => isFestivalDonation(d, charities, festival)).reduce((a, d) => a + Number(d.amount), 0);
+  const festivalCumulative = donations.filter((d) => isFestivalDonation(d, charities, festival)).reduce((a, d) => a + Number(d.amount), 0);
 
   const doc = new jsPDF({ unit: "pt", format: "a4" });
   const pageW = doc.internal.pageSize.getWidth();
