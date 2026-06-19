@@ -57,6 +57,8 @@ const Kpis = lazy(() => import("./pages/members/Kpis"));
 const LoiRegister = lazy(() => import("./pages/members/LoiRegister"));
 const FestiveBoardRegister = lazy(() => import("./pages/members/FestiveBoardRegister"));
 const SummonsBuilder = lazy(() => import("./pages/members/SummonsBuilder"));
+const AlmonerPortal = lazy(() => import("./pages/members/AlmonerPortal"));
+
 
 const queryClient = new QueryClient();
 
