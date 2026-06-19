@@ -9,6 +9,7 @@ import MentoringChecklist from "@/components/members/development/MentoringCheckl
 import RitualRecord from "@/components/members/development/RitualRecord";
 import OfficesRecord, { LodgeAppointmentRow } from "@/components/members/development/OfficesRecord";
 import ExportPdfButton from "@/components/members/development/ExportPdfButton";
+import ExemptionPanel from "@/components/members/development/ExemptionPanel";
 import {
   ensureSeeded,
   loadChecklist,
