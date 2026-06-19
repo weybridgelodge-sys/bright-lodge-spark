@@ -3,15 +3,18 @@ import { Link } from "react-router-dom";
 import MembersLayout from "@/components/members/MembersLayout";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { FileText, Megaphone, CalendarDays } from "lucide-react";
+import { FileText, Megaphone, CalendarDays, Hexagon } from "lucide-react";
+import { listMyGroups } from "@/lib/workingGroups";
 
 type Notice = { id: string; title: string; body: string; event_date: string | null; created_at: string };
 type Doc = { id: string; title: string; category: string; created_at: string };
+type MyGroup = { role: "lead" | "member"; group: { id: string; slug: string; name: string; remit: string } | null };
 
 export default function MembersDashboard() {
-  const { profile } = useAuth();
+  const { profile, user } = useAuth();
   const [notices, setNotices] = useState<Notice[]>([]);
   const [docs, setDocs] = useState<Doc[]>([]);
+  const [myGroups, setMyGroups] = useState<MyGroup[]>([]);
 
   useEffect(() => {
     supabase
@@ -26,7 +29,8 @@ export default function MembersDashboard() {
       .order("created_at", { ascending: false })
       .limit(5)
       .then(({ data }) => setDocs((data as Doc[]) ?? []));
-  }, []);
+    if (user?.id) listMyGroups(user.id).then((g) => setMyGroups(g as MyGroup[]));
+  }, [user?.id]);
 
   return (
     <MembersLayout>
@@ -89,6 +93,28 @@ export default function MembersDashboard() {
           )}
         </section>
       </div>
+
+      <section className="mt-6 bg-navy-dark/60 border border-gold/15 rounded-sm p-6">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <Hexagon className="w-4 h-4 text-gold" />
+            <h2 className="font-serif text-lg text-gold">My Working Groups</h2>
+          </div>
+          <Link to="/members/working-groups" className="text-xs text-gold hover:underline">All groups →</Link>
+        </div>
+        {myGroups.length === 0 ? (
+          <p className="text-xs text-primary-foreground/50">You are not yet assigned to a working group. Every brother has a role — speak with the Secretary.</p>
+        ) : (
+          <div className="flex flex-wrap gap-2">
+            {myGroups.filter((g) => g.group).map((g) => (
+              <Link key={g.group!.id} to={`/members/working-groups/${g.group!.slug}`}
+                className={`text-xs px-3 py-1.5 rounded-sm border hover:bg-gold/10 ${g.role === "lead" ? "border-gold text-gold" : "border-gold/30 text-primary-foreground/85"}`}>
+                {g.group!.name}{g.role === "lead" ? " · Lead" : ""}
+              </Link>
+            ))}
+          </div>
+        )}
+      </section>
     </MembersLayout>
   );
 }
