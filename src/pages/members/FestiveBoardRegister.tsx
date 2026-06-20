@@ -931,29 +931,24 @@ function VisitorNameInput({
       .slice(0, 6);
   }, [q, suggestions]);
 
+  const showList = open && matches.length > 0;
   return (
-    <Popover open={open && matches.length > 0} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Input
-          value={value}
-          placeholder="Visitor name (start typing to find past visitors)"
-          onChange={(e) => { onChange(e.target.value); setOpen(true); }}
-          onFocus={() => setOpen(true)}
-          className="bg-navy border-gold/20 h-8 text-xs text-primary-foreground placeholder:text-primary-foreground/40"
-        />
-      </PopoverTrigger>
-      <PopoverContent
-        align="start"
-        sideOffset={4}
-        className="w-[320px] p-1 bg-navy-dark border-gold/30"
-        onOpenAutoFocus={(e) => e.preventDefault()}
-      >
-        <ul className="text-xs">
+    <div className="relative">
+      <Input
+        value={value}
+        placeholder="Visitor name (start typing to find past visitors)"
+        onChange={(e) => { onChange(e.target.value); setOpen(true); }}
+        onFocus={() => setOpen(true)}
+        onBlur={() => { setTimeout(() => setOpen(false), 150); }}
+        className="bg-navy border-gold/20 h-8 text-xs text-primary-foreground placeholder:text-primary-foreground/40"
+      />
+      {showList && (
+        <ul className="absolute z-50 left-0 top-full mt-1 w-[320px] max-w-[90vw] p-1 bg-navy-dark border border-gold/30 rounded-sm text-xs shadow-lg">
           {matches.map((s) => (
             <li key={s.id}>
               <button
                 type="button"
-                onClick={() => { onPick(s); setOpen(false); }}
+                onMouseDown={(e) => { e.preventDefault(); onPick(s); setOpen(false); }}
                 className="w-full text-left px-2 py-1.5 rounded hover:bg-gold/10"
               >
                 <div className="text-primary-foreground">{s.name || s.email}</div>
@@ -965,8 +960,8 @@ function VisitorNameInput({
             </li>
           ))}
         </ul>
-      </PopoverContent>
-    </Popover>
+      )}
+    </div>
   );
 }
 
