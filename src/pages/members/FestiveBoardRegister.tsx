@@ -926,7 +926,12 @@ function MeetingDialog({
                       checked={d.present}
                       onCheckedChange={(v) => setMember(m.id, { present: !!v })}
                     />
-                    <span className="truncate">{memberDisplay(m)}</span>
+                    <span className="truncate flex items-center gap-1.5">
+                      {memberDisplay(m)}
+                      {d.synced && (
+                        <span className="text-[9px] uppercase tracking-wider text-gold border border-gold/40 rounded px-1 py-0.5">Synced</span>
+                      )}
+                    </span>
                     {d.present && (
                       <>
                         <Select
