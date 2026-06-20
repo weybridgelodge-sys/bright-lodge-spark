@@ -51,11 +51,13 @@ type Attendance = {
   visitor_name: string | null;
   visitor_lodge_name: string | null;
   visitor_lodge_number: string | null;
+  email: string | null;
   attendance_status: FbAttendanceStatus;
   payment_method: FbPaymentMethod;
   amount_pence: number;
   booking_id: string | null;
 };
+
 
 type Member = {
   id: string;
@@ -382,10 +384,12 @@ type VisitorDraft = {
   name: string;
   lodgeName: string;
   lodgeNumber: string;
+  email: string;
   status: FbAttendanceStatus;
   paymentMethod: FbPaymentMethod;
   amountPounds: string;
 };
+
 
 function tempId() {
   return `tmp_${Math.random().toString(36).slice(2)}`;
@@ -441,11 +445,13 @@ function MeetingDialog({
         name: a.visitor_name ?? "",
         lodgeName: a.visitor_lodge_name ?? "",
         lodgeNumber: a.visitor_lodge_number ?? "",
+        email: a.email ?? "",
         status: a.attendance_status as FbAttendanceStatus,
         paymentMethod: a.payment_method as FbPaymentMethod,
         amountPounds: (a.amount_pence / 100).toFixed(2),
       }))
   );
+
 
   const setMember = (id: string, patch: Partial<MemberDraft>) =>
     setMemberDrafts((p) => ({ ...p, [id]: { ...p[id], ...patch } }));
@@ -461,11 +467,13 @@ function MeetingDialog({
         name: "",
         lodgeName: "",
         lodgeNumber: "",
+        email: "",
         status: "attended",
         paymentMethod: "unknown",
         amountPounds: "",
       },
     ]);
+
 
   const removeVisitor = (id: string) =>
     setVisitorDrafts((p) => p.filter((v) => v.id !== id));
