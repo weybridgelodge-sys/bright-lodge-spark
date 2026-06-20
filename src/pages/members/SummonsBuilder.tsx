@@ -420,6 +420,10 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
       const { data, error } = await supabase.from("summonses").select("*").eq("id", editingId).maybeSingle();
       if (error || !data) { toast.error(error?.message ?? "Summons not found"); return; }
       const r: any = data;
+      // dining_enquiry_email is column-restricted; fetch via secure RPC (secretary/admin/WM)
+      let diningEmail: string | null = null;
+      const { data: dc } = await (supabase as any).rpc("get_summons_dining_contacts", { _ids: [editingId] });
+      if (Array.isArray(dc) && dc.length) diningEmail = dc[0].dining_enquiry_email ?? null;
       setCurrentId(r.id);
       setSelectedEvent(r.lodge_event_id ?? "");
       setManualHidden(((r.notice_overrides as any)?.manualHidden ?? []) as string[]);
@@ -435,7 +439,7 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
         agenda: (r.agenda as any) ?? defaultAgenda(),
         candidates: (r.candidates as any) ?? [],
         dining_enquiry_name: r.dining_enquiry_name,
-        dining_enquiry_email: r.dining_enquiry_email,
+        dining_enquiry_email: diningEmail,
         dining_menu: r.dining_menu ?? null,
         dining_price: r.dining_price ?? null,
         dining_deadline: r.dining_deadline ?? null,
