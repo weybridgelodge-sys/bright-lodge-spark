@@ -620,7 +620,7 @@ function MeetingDialog({
                 type="date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
-                className="bg-navy border-gold/20"
+                className="bg-navy border-gold/20 text-primary-foreground placeholder:text-primary-foreground/40 [color-scheme:dark]"
               />
             </div>
             <div>
@@ -628,7 +628,7 @@ function MeetingDialog({
                 Meeting type
               </label>
               <Select value={type} onValueChange={(v) => setType(v as FbMeetingType)}>
-                <SelectTrigger className="bg-navy border-gold/20">
+                <SelectTrigger className="bg-navy border-gold/20 text-primary-foreground">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -650,7 +650,7 @@ function MeetingDialog({
                 placeholder={`auto: ${computedAttended.total}`}
                 value={override}
                 onChange={(e) => setOverride(e.target.value)}
-                className="bg-navy border-gold/20"
+                className="bg-navy border-gold/20 text-primary-foreground placeholder:text-primary-foreground/40"
               />
             </div>
           </div>
@@ -663,7 +663,7 @@ function MeetingDialog({
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               rows={2}
-              className="bg-navy border-gold/20"
+              className="bg-navy border-gold/20 text-primary-foreground placeholder:text-primary-foreground/40"
               placeholder="Optional context, menu, special guests, etc."
             />
           </div>
