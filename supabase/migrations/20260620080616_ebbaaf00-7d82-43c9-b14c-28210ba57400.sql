@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.tg_visitor_contact_upsert() FROM PUBLIC, anon, authenticated;
