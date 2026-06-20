@@ -37,8 +37,10 @@ interface DraftRow {
   content_visitors: any;
   status: string;
   audience: string | null;
+  unified_content: boolean | null;
   created_at: string;
 }
+
 
 const DEFAULT_SUBJECT = "Weybridge Lodge No. 6787 — Monthly News & Labours";
 const SITE_ORIGIN = "https://bright-lodge-spark.lovable.app";
@@ -175,6 +177,7 @@ function NewsletterHubInner() {
 
   const [broadcastId, setBroadcastId] = useState<string | null>(null);
   const [audience, setAudience] = useState<Audience>("members");
+  const [unifiedContent, setUnifiedContent] = useState<boolean>(false);
   const [subject, setSubject] = useState(DEFAULT_SUBJECT);
   const [membersSections, setMembersSections] = useState<Section[]>(DEFAULT_SECTIONS());
   const [visitorsSections, setVisitorsSections] = useState<Section[]>(() =>
@@ -186,15 +189,19 @@ function NewsletterHubInner() {
   const [drafts, setDrafts] = useState<DraftRow[]>([]);
   const [saving, setSaving] = useState(false);
   const [sending, setSending] = useState(false);
-  const [sentSummary, setSentSummary] = useState<Array<{ audience: Audience; sent: number; error?: string | null }> | null>(null);
+  const [sentSummary, setSentSummary] = useState<Array<{ audience: string; sent: number; error?: string | null }> | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const sections = audience === "members" ? membersSections : visitorsSections;
+
+  // In unified mode, the visitor variant editor is hidden and the members
+  // content acts as the canonical single version. Keep the variant in sync
+  // so any later untick pre-fills visitors (rather than starting blank).
+  const effectiveAudience: Audience = unifiedContent ? "members" : audience;
+  const sections = effectiveAudience === "members" ? membersSections : visitorsSections;
   const setSections = (next: Section[] | ((prev: Section[]) => Section[])) => {
-    if (audience === "members") {
+    if (effectiveAudience === "members") {
       setMembersSections((prev) => {
         const updated = typeof next === "function" ? next(prev) : next;
-        // Mirror structure (ids/headings/layout) into visitor variant.
         setVisitorsSections((vPrev) => syncStructure(updated, vPrev));
         return updated;
       });
@@ -202,6 +209,28 @@ function NewsletterHubInner() {
       setVisitorsSections((prev) => (typeof next === "function" ? next(prev) : next));
     }
   };
+
+  // When unified-content is toggled OFF, pre-fill the visitor variant with
+  // a clone of the current members content rather than leaving it blank, so
+  // the editor can diverge from a sensible starting point instead of losing
+  // the just-written copy.
+  const setUnifiedContentSafe = (next: boolean) => {
+    setUnifiedContent((prev) => {
+      if (prev && !next) {
+        // ticked → unticked: clone members into visitors
+        setVisitorsSections(membersSections.map((s) => ({
+          ...s,
+          blocks: s.blocks.map((b) =>
+            b.type === "text"
+              ? { id: b.id, type: "text", text: b.text }
+              : { id: b.id, type: "image", url: b.url, alt: b.alt, caption: b.caption },
+          ),
+        })));
+      }
+      return next;
+    });
+  };
+
 
   useEffect(() => {
     (async () => {
