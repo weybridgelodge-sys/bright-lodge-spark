@@ -73,6 +73,7 @@ export type Database = {
           fee_pence: number
           id: string
           line_items: Json
+          meeting_id: string | null
           paid_at: string | null
           payment_status: string
           stripe_payment_intent_id: string | null
@@ -95,6 +96,7 @@ export type Database = {
           fee_pence?: number
           id?: string
           line_items?: Json
+          meeting_id?: string | null
           paid_at?: string | null
           payment_status?: string
           stripe_payment_intent_id?: string | null
@@ -117,6 +119,7 @@ export type Database = {
           fee_pence?: number
           id?: string
           line_items?: Json
+          meeting_id?: string | null
           paid_at?: string | null
           payment_status?: string
           stripe_payment_intent_id?: string | null
@@ -126,7 +129,15 @@ export type Database = {
           updated_at?: string
           user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "bookings_meeting_id_fkey"
+            columns: ["meeting_id"]
+            isOneToOne: false
+            referencedRelation: "festive_board_meetings"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       candidates: {
         Row: {
@@ -460,6 +471,8 @@ export type Database = {
           member_id: string | null
           notes: string | null
           payment_method: Database["public"]["Enums"]["festive_payment_method"]
+          source: Database["public"]["Enums"]["attendance_source"]
+          source_booking_id: string | null
           updated_at: string
           visitor_lodge_name: string | null
           visitor_lodge_number: string | null
@@ -477,6 +490,8 @@ export type Database = {
           member_id?: string | null
           notes?: string | null
           payment_method?: Database["public"]["Enums"]["festive_payment_method"]
+          source?: Database["public"]["Enums"]["attendance_source"]
+          source_booking_id?: string | null
           updated_at?: string
           visitor_lodge_name?: string | null
           visitor_lodge_number?: string | null
@@ -494,6 +509,8 @@ export type Database = {
           member_id?: string | null
           notes?: string | null
           payment_method?: Database["public"]["Enums"]["festive_payment_method"]
+          source?: Database["public"]["Enums"]["attendance_source"]
+          source_booking_id?: string | null
           updated_at?: string
           visitor_lodge_name?: string | null
           visitor_lodge_number?: string | null
@@ -521,37 +538,56 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "festive_board_attendance_source_booking_id_fkey"
+            columns: ["source_booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
         ]
       }
       festive_board_meetings: {
         Row: {
           created_at: string
           created_by: string | null
+          dining_price_pence: number
+          event_key: string
           headcount_override: number | null
           id: string
+          is_white_table: boolean
           meeting_date: string
           meeting_type: Database["public"]["Enums"]["festive_meeting_type"]
           notes: string | null
+          status: Database["public"]["Enums"]["meeting_status"]
           updated_at: string
         }
         Insert: {
           created_at?: string
           created_by?: string | null
+          dining_price_pence?: number
+          event_key: string
           headcount_override?: number | null
           id?: string
+          is_white_table?: boolean
           meeting_date: string
           meeting_type?: Database["public"]["Enums"]["festive_meeting_type"]
           notes?: string | null
+          status?: Database["public"]["Enums"]["meeting_status"]
           updated_at?: string
         }
         Update: {
           created_at?: string
           created_by?: string | null
+          dining_price_pence?: number
+          event_key?: string
           headcount_override?: number | null
           id?: string
+          is_white_table?: boolean
           meeting_date?: string
           meeting_type?: Database["public"]["Enums"]["festive_meeting_type"]
           notes?: string | null
+          status?: Database["public"]["Enums"]["meeting_status"]
           updated_at?: string
         }
         Relationships: []
@@ -2584,6 +2620,7 @@ export type Database = {
         | "assistant_secretary"
         | "almoner"
         | "charity_steward"
+      attendance_source: "manual" | "booking"
       candidate_stage:
         | "enquiry"
         | "face_to_face"
@@ -2627,6 +2664,7 @@ export type Database = {
         | "fellow_craft"
         | "master_mason"
         | "installed_master"
+      meeting_status: "draft" | "published" | "completed"
       member_status:
         | "pending"
         | "active"
@@ -2791,6 +2829,7 @@ export const Constants = {
         "almoner",
         "charity_steward",
       ],
+      attendance_source: ["manual", "booking"],
       candidate_stage: [
         "enquiry",
         "face_to_face",
@@ -2840,6 +2879,7 @@ export const Constants = {
         "master_mason",
         "installed_master",
       ],
+      meeting_status: ["draft", "published", "completed"],
       member_status: [
         "pending",
         "active",

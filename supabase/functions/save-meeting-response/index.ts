@@ -23,6 +23,7 @@ Deno.serve(async (req) => {
     const {
       event_key,
       event_label,
+      meeting_id,
       contact_name,
       contact_email,
       contact_phone,
@@ -38,11 +39,23 @@ Deno.serve(async (req) => {
       );
     }
 
+    // Validate meeting_id, if provided, points to a published meeting
+    let resolvedMeetingId: string | null = null;
+    if (meeting_id) {
+      const { data: m } = await supabase
+        .from("festive_board_meetings")
+        .select("id,status")
+        .eq("id", meeting_id)
+        .maybeSingle();
+      if (m && m.status === "published") resolvedMeetingId = m.id;
+    }
+
     const { data: booking, error } = await supabase
       .from("bookings")
       .insert({
         event_key,
         event_label,
+        meeting_id: resolvedMeetingId,
         contact_name,
         contact_email,
         contact_phone: contact_phone ?? null,

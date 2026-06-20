@@ -61,3 +61,12 @@ export function shortMonthLabel(dateStr: string, type: string): string {
   const suffix = type === "installation" ? " (Inst.)" : type === "emergency" ? " (Emerg.)" : "";
   return `${m} ${y}${suffix}`;
 }
+
+// Detect a Weybridge Lodge No. 6787 reference in a free-text Lodge field.
+export function isWeybridgeLodge(lodgeText: string | null | undefined): boolean {
+  if (!lodgeText) return false;
+  const t = lodgeText.toLowerCase();
+  if (/\bweybridge\b/.test(t)) return true;
+  if (/\b6787\b/.test(t)) return true;
+  return false;
+}

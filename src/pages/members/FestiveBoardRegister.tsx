@@ -35,6 +35,7 @@ import {
   attendanceStatusLabel,
   paymentMethodLabel,
   computeHeadcount,
+  isWeybridgeLodge,
 } from "@/lib/festiveBoard";
 
 type Meeting = {
@@ -43,7 +44,12 @@ type Meeting = {
   meeting_type: FbMeetingType;
   notes: string | null;
   headcount_override: number | null;
+  event_key: string;
+  status: "draft" | "published" | "completed";
+  is_white_table: boolean;
+  dining_price_pence: number;
 };
+
 
 type Attendance = {
   id: string;
@@ -57,7 +63,10 @@ type Attendance = {
   payment_method: FbPaymentMethod;
   amount_pence: number;
   booking_id: string | null;
+  source?: "manual" | "booking" | null;
+  source_booking_id?: string | null;
 };
+
 
 
 type Member = {
@@ -377,6 +386,8 @@ type MemberDraft = {
   status: FbAttendanceStatus;
   paymentMethod: FbPaymentMethod;
   amountPounds: string;
+  synced?: boolean;
+  sourceBookingId?: string | null;
 };
 
 type VisitorDraft = {
@@ -389,6 +400,8 @@ type VisitorDraft = {
   status: FbAttendanceStatus;
   paymentMethod: FbPaymentMethod;
   amountPounds: string;
+  synced?: boolean;
+  sourceBookingId?: string | null;
 };
 
 
@@ -430,6 +443,12 @@ function MeetingDialog({
   const [override, setOverride] = useState<string>(
     existing?.headcount_override != null ? String(existing.headcount_override) : ""
   );
+  const [status, setStatus] = useState<"draft" | "published" | "completed">(existing?.status ?? "draft");
+  const [isWhiteTable, setIsWhiteTable] = useState<boolean>(existing?.is_white_table ?? false);
+  const [diningPricePounds, setDiningPricePounds] = useState<string>(
+    existing ? ((existing.dining_price_pence ?? 3500) / 100).toFixed(2) : "35.00"
+  );
+  const [eventKey, setEventKey] = useState<string>(existing?.event_key ?? `festive-board-${date}`);
   const [saving, setSaving] = useState(false);
 
   const [memberDrafts, setMemberDrafts] = useState<Record<string, MemberDraft>>(() => {
@@ -441,6 +460,8 @@ function MeetingDialog({
         status: (row?.attendance_status as FbAttendanceStatus) ?? "booked",
         paymentMethod: (row?.payment_method as FbPaymentMethod) ?? "unknown",
         amountPounds: row ? (row.amount_pence / 100).toFixed(2) : "",
+        synced: row?.source === "booking",
+        sourceBookingId: row?.source_booking_id ?? null,
       };
     }
     return initial;
@@ -459,6 +480,8 @@ function MeetingDialog({
         status: a.attendance_status as FbAttendanceStatus,
         paymentMethod: a.payment_method as FbPaymentMethod,
         amountPounds: (a.amount_pence / 100).toFixed(2),
+        synced: a.source === "booking",
+        sourceBookingId: a.source_booking_id ?? null,
       }))
   );
 
@@ -475,6 +498,146 @@ function MeetingDialog({
     })();
     return () => { cancelled = true; };
   }, []);
+
+  // Auto-sync bookings → draft attendance rows (additive only, non-white-table meetings)
+  useEffect(() => {
+    if (!existing || isWhiteTable) return;
+    let cancelled = false;
+    (async () => {
+      const { data: bookings } = await supabase
+        .from("bookings")
+        .select("id,contact_name,contact_email,details,payment_status")
+        .eq("meeting_id", existing.id);
+      if (cancelled || !bookings?.length) return;
+
+      const alreadySynced = new Set(
+        existingAttendance.map((a) => a.source_booking_id).filter(Boolean) as string[]
+      );
+
+      const diningPence = existing.dining_price_pence ?? 3500;
+      const newVisitorDrafts: VisitorDraft[] = [];
+      const memberPatches: { id: string; patch: Partial<MemberDraft> }[] = [];
+
+      for (const b of bookings) {
+        if (alreadySynced.has(b.id)) continue;
+        const d = (b.details ?? {}) as Record<string, unknown>;
+        const opt = String(d.meetingOption ?? "");
+        if (opt === "apologies" || b.payment_status === "apologies") continue;
+        const amount = opt === "meeting-and-festive-board" ? (diningPence / 100).toFixed(2) : "0.00";
+
+        // Respondent
+        const respLodge = String(d.lodge ?? "");
+        const respondentIsMember = isWeybridgeLodge(respLodge);
+        if (respondentIsMember) {
+          // Try to match by email or full name
+          const targetEmail = (b.contact_email ?? "").toLowerCase().trim();
+          const targetName = (b.contact_name ?? "").toLowerCase().trim();
+          const match = members.find((m) => {
+            const profileFull = [m.first_name, m.last_name].filter(Boolean).join(" ").toLowerCase();
+            return (m.full_name?.toLowerCase() === targetName) || (profileFull === targetName);
+          });
+          if (match) {
+            memberPatches.push({
+              id: match.id,
+              patch: {
+                present: true,
+                status: "booked",
+                paymentMethod: "unknown",
+                amountPounds: amount,
+                synced: true,
+                sourceBookingId: b.id,
+              },
+            });
+          } else {
+            // Unmatched Weybridge respondent — fall through as a visitor row so the Secretary can reconcile
+            newVisitorDrafts.push({
+              id: tempId(),
+              name: String(b.contact_name ?? ""),
+              lodgeName: respLodge,
+              lodgeNumber: "",
+              email: String(b.contact_email ?? ""),
+              status: "booked",
+              paymentMethod: "unknown",
+              amountPounds: amount,
+              synced: true,
+              sourceBookingId: b.id,
+            });
+          }
+        } else {
+          newVisitorDrafts.push({
+            id: tempId(),
+            name: String(b.contact_name ?? ""),
+            lodgeName: respLodge,
+            lodgeNumber: "",
+            email: String(b.contact_email ?? ""),
+            status: "booked",
+            paymentMethod: "unknown",
+            amountPounds: amount,
+            synced: true,
+            sourceBookingId: b.id,
+          });
+        }
+
+        // Guests
+        const guests = Array.isArray(d.guests) ? (d.guests as Array<{ name?: string; lodge?: string }>) : [];
+        for (const [gi, g] of guests.entries()) {
+          const gLodge = String(g.lodge ?? "");
+          const guestBookingId = `${b.id}::g${gi}`;
+          if (alreadySynced.has(guestBookingId)) continue;
+          const guestIsMember = isWeybridgeLodge(gLodge);
+          if (guestIsMember) {
+            const targetName = (g.name ?? "").toLowerCase().trim();
+            const match = members.find((m) => {
+              const profileFull = [m.first_name, m.last_name].filter(Boolean).join(" ").toLowerCase();
+              return (m.full_name?.toLowerCase() === targetName) || (profileFull === targetName);
+            });
+            if (match) {
+              memberPatches.push({
+                id: match.id,
+                patch: {
+                  present: true,
+                  status: "booked",
+                  paymentMethod: "unknown",
+                  amountPounds: amount,
+                  synced: true,
+                  sourceBookingId: b.id,
+                },
+              });
+              continue;
+            }
+          }
+          newVisitorDrafts.push({
+            id: tempId(),
+            name: String(g.name ?? ""),
+            lodgeName: gLodge,
+            lodgeNumber: "",
+            email: "",
+            status: "booked",
+            paymentMethod: "unknown",
+            amountPounds: amount,
+            synced: true,
+            sourceBookingId: b.id,
+          });
+        }
+      }
+
+      if (memberPatches.length) {
+        setMemberDrafts((prev) => {
+          const next = { ...prev };
+          for (const { id, patch } of memberPatches) {
+            if (next[id] && !next[id].present) next[id] = { ...next[id], ...patch };
+          }
+          return next;
+        });
+      }
+      if (newVisitorDrafts.length) {
+        setVisitorDrafts((prev) => [...prev, ...newVisitorDrafts]);
+      }
+    })();
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [existing?.id, isWhiteTable]);
+
 
 
 
@@ -534,7 +697,20 @@ function MeetingDialog({
         notes: notes.trim() || null,
         headcount_override: override.trim() === "" ? null : Number(override),
         created_by: user?.id ?? null,
+        event_key: eventKey.trim() || `festive-board-${date}`,
+        status,
+        is_white_table: isWhiteTable,
+        dining_price_pence: parsePounds(diningPricePounds) || 3500,
       };
+
+      // If publishing this meeting, demote any other currently-published meeting to draft
+      if (status === "published") {
+        await supabase
+          .from("festive_board_meetings")
+          .update({ status: "draft" })
+          .eq("status", "published")
+          .neq("id", existing?.id ?? "00000000-0000-0000-0000-000000000000");
+      }
 
       let meetingId = existing?.id;
       if (existing) {
@@ -565,6 +741,8 @@ function MeetingDialog({
           payment_method: d.paymentMethod,
           amount_pence: parsePounds(d.amountPounds),
           created_by: user?.id ?? null,
+          source: (d.synced ? "booking" : "manual") as "booking" | "manual",
+          source_booking_id: d.sourceBookingId ?? null,
         }));
 
       const visitorRows = visitorDrafts
@@ -579,7 +757,10 @@ function MeetingDialog({
           payment_method: v.paymentMethod,
           amount_pence: parsePounds(v.amountPounds),
           created_by: user?.id ?? null,
+          source: (v.synced ? "booking" : "manual") as "booking" | "manual",
+          source_booking_id: v.sourceBookingId ?? null,
         }));
+
 
 
       const all = [...memberRows, ...visitorRows];
@@ -655,6 +836,55 @@ function MeetingDialog({
             </div>
           </div>
 
+          {/* Booking sync controls */}
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 p-3 rounded-sm border border-gold/15 bg-navy/40">
+            <div>
+              <label className="text-xs uppercase tracking-wider text-primary-foreground/60 mb-1 block">
+                Bookings status
+              </label>
+              <Select value={status} onValueChange={(v) => setStatus(v as typeof status)}>
+                <SelectTrigger className="bg-navy border-gold/20 h-9 text-primary-foreground"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="draft">Draft (not yet open)</SelectItem>
+                  <SelectItem value="published">Published (live on /bookings)</SelectItem>
+                  <SelectItem value="completed">Completed</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <label className="text-xs uppercase tracking-wider text-primary-foreground/60 mb-1 block">
+                Dining price (£)
+              </label>
+              <Input
+                type="number" step="0.01" min={0}
+                value={diningPricePounds}
+                onChange={(e) => setDiningPricePounds(e.target.value)}
+                className="bg-navy border-gold/20 h-9 text-primary-foreground placeholder:text-primary-foreground/40"
+              />
+            </div>
+            <div>
+              <label className="text-xs uppercase tracking-wider text-primary-foreground/60 mb-1 block">
+                Public booking slug
+              </label>
+              <Input
+                value={eventKey}
+                onChange={(e) => setEventKey(e.target.value)}
+                placeholder={`festive-board-${date}`}
+                className="bg-navy border-gold/20 h-9 text-primary-foreground placeholder:text-primary-foreground/40"
+              />
+            </div>
+            <label className="flex items-center gap-2 text-xs text-primary-foreground/80 mt-5">
+              <input
+                type="checkbox"
+                checked={isWhiteTable}
+                onChange={(e) => setIsWhiteTable(e.target.checked)}
+                className="accent-gold w-4 h-4"
+              />
+              Open to non-Masons (white table) — disables auto-sync from bookings
+            </label>
+          </div>
+
+
           <div>
             <label className="text-xs uppercase tracking-wider text-primary-foreground/60 mb-1 block">
               Notes
@@ -696,7 +926,12 @@ function MeetingDialog({
                       checked={d.present}
                       onCheckedChange={(v) => setMember(m.id, { present: !!v })}
                     />
-                    <span className="truncate">{memberDisplay(m)}</span>
+                    <span className="truncate flex items-center gap-1.5">
+                      {memberDisplay(m)}
+                      {d.synced && (
+                        <span className="text-[9px] uppercase tracking-wider text-gold border border-gold/40 rounded px-1 py-0.5">Synced</span>
+                      )}
+                    </span>
                     {d.present && (
                       <>
                         <Select
@@ -790,19 +1025,26 @@ function MeetingDialog({
                 {visitorDrafts.map((v) => (
                   <div
                     key={v.id}
-                    className="border border-gold/15 rounded-sm p-2 grid grid-cols-1 sm:grid-cols-[1fr_1fr_90px_1fr_140px_180px_100px_auto] gap-2 items-center"
+                    className={`border rounded-sm p-2 grid grid-cols-1 sm:grid-cols-[1fr_1fr_90px_1fr_140px_180px_100px_auto] gap-2 items-center ${v.synced ? "border-gold/40 bg-gold/5" : "border-gold/15"}`}
                   >
-                    <VisitorNameInput
-                      value={v.name}
-                      suggestions={visitorSuggestions}
-                      onChange={(name) => setVisitor(v.id, { name })}
-                      onPick={(s) => setVisitor(v.id, {
-                        name: s.name ?? "",
-                        lodgeName: s.lodge_name ?? "",
-                        lodgeNumber: s.lodge_number ?? "",
-                        email: s.email ?? "",
-                      })}
-                    />
+                    <div className="flex items-center gap-1.5">
+                      {v.synced && (
+                        <span className="text-[9px] uppercase tracking-wider text-gold border border-gold/40 rounded px-1 py-0.5 shrink-0" title="Synced from public booking">Synced</span>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <VisitorNameInput
+                          value={v.name}
+                          suggestions={visitorSuggestions}
+                          onChange={(name) => setVisitor(v.id, { name })}
+                          onPick={(s) => setVisitor(v.id, {
+                            name: s.name ?? "",
+                            lodgeName: s.lodge_name ?? "",
+                            lodgeNumber: s.lodge_number ?? "",
+                            email: s.email ?? "",
+                          })}
+                        />
+                      </div>
+                    </div>
                     <Input
                       value={v.lodgeName}
                       placeholder="Lodge name"
