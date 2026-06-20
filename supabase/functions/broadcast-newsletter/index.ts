@@ -109,7 +109,16 @@ function renderSection(s: Section): string {
 function renderHtml(body: Omit<BroadcastBody, "broadcastId">, unsubscribeUrl: string): string {
   const { content, subject } = body;
   const sectionsHtml = (content.sections || []).map(renderSection).join("");
-  return `<!doctype html><html><head><meta charset="utf-8"><title>${escapeHtml(subject)}</title></head>
+  return `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escapeHtml(subject)}</title>
+<style>
+  /* Mobile: collapse the masonry table to a single stacked column. */
+  @media only screen and (max-width: 480px) {
+    table.nl-masonry, table.nl-masonry tbody, table.nl-masonry tr { display:block !important; width:100% !important; }
+    td.nl-col { display:block !important; width:100% !important; max-width:100% !important; padding:6px 0 !important; box-sizing:border-box !important; }
+    td.nl-col img { width:100% !important; height:auto !important; }
+  }
+</style>
+</head>
 <body style="margin:0;background:#f4f1ea;font-family:Georgia,'Times New Roman',serif">
 <div style="max-width:640px;margin:0 auto;background:#ffffff">
   <div style="background:#1B2A4A;padding:20px 24px;border-bottom:4px solid #C9A432">
