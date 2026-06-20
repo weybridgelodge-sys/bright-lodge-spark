@@ -698,7 +698,7 @@ function MeetingDialog({
                             setMember(m.id, { status: v as FbAttendanceStatus })
                           }
                         >
-                          <SelectTrigger className="bg-navy border-gold/20 h-8 text-xs">
+                          <SelectTrigger className="bg-navy border-gold/20 h-8 text-xs text-primary-foreground placeholder:text-primary-foreground/40">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -715,7 +715,7 @@ function MeetingDialog({
                             setMember(m.id, { paymentMethod: v as FbPaymentMethod })
                           }
                         >
-                          <SelectTrigger className="bg-navy border-gold/20 h-8 text-xs">
+                          <SelectTrigger className="bg-navy border-gold/20 h-8 text-xs text-primary-foreground placeholder:text-primary-foreground/40">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -735,7 +735,7 @@ function MeetingDialog({
                           onChange={(e) =>
                             setMember(m.id, { amountPounds: e.target.value })
                           }
-                          className="bg-navy border-gold/20 h-8 text-xs"
+                          className="bg-navy border-gold/20 h-8 text-xs text-primary-foreground placeholder:text-primary-foreground/40"
                         />
                       </>
                     )}
@@ -790,20 +790,20 @@ function MeetingDialog({
                       value={v.lodgeName}
                       placeholder="Lodge name"
                       onChange={(e) => setVisitor(v.id, { lodgeName: e.target.value })}
-                      className="bg-navy border-gold/20 h-8 text-xs"
+                      className="bg-navy border-gold/20 h-8 text-xs text-primary-foreground placeholder:text-primary-foreground/40"
                     />
                     <Input
                       value={v.lodgeNumber}
                       placeholder="No."
                       onChange={(e) => setVisitor(v.id, { lodgeNumber: e.target.value })}
-                      className="bg-navy border-gold/20 h-8 text-xs"
+                      className="bg-navy border-gold/20 h-8 text-xs text-primary-foreground placeholder:text-primary-foreground/40"
                     />
                     <Input
                       type="email"
                       value={v.email}
                       placeholder="Email (optional, for newsletter)"
                       onChange={(e) => setVisitor(v.id, { email: e.target.value })}
-                      className="bg-navy border-gold/20 h-8 text-xs"
+                      className="bg-navy border-gold/20 h-8 text-xs text-primary-foreground placeholder:text-primary-foreground/40"
                     />
 
                     <Select
@@ -812,7 +812,7 @@ function MeetingDialog({
                         setVisitor(v.id, { status: val as FbAttendanceStatus })
                       }
                     >
-                      <SelectTrigger className="bg-navy border-gold/20 h-8 text-xs">
+                      <SelectTrigger className="bg-navy border-gold/20 h-8 text-xs text-primary-foreground placeholder:text-primary-foreground/40">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -829,7 +829,7 @@ function MeetingDialog({
                         setVisitor(v.id, { paymentMethod: val as FbPaymentMethod })
                       }
                     >
-                      <SelectTrigger className="bg-navy border-gold/20 h-8 text-xs">
+                      <SelectTrigger className="bg-navy border-gold/20 h-8 text-xs text-primary-foreground placeholder:text-primary-foreground/40">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -847,7 +847,7 @@ function MeetingDialog({
                       placeholder="£"
                       value={v.amountPounds}
                       onChange={(e) => setVisitor(v.id, { amountPounds: e.target.value })}
-                      className="bg-navy border-gold/20 h-8 text-xs"
+                      className="bg-navy border-gold/20 h-8 text-xs text-primary-foreground placeholder:text-primary-foreground/40"
                     />
                     <Button
                       type="button"
@@ -922,7 +922,7 @@ function VisitorNameInput({
           placeholder="Visitor name (start typing to find past visitors)"
           onChange={(e) => { onChange(e.target.value); setOpen(true); }}
           onFocus={() => setOpen(true)}
-          className="bg-navy border-gold/20 h-8 text-xs"
+          className="bg-navy border-gold/20 h-8 text-xs text-primary-foreground placeholder:text-primary-foreground/40"
         />
       </PopoverTrigger>
       <PopoverContent
