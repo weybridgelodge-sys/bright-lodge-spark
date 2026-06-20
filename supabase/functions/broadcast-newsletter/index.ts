@@ -20,17 +20,29 @@ const REPLY_TO = "communications@weybridgelodge.org.uk";
 
 const admin = createClient(SUPABASE_URL, SERVICE_KEY);
 
+type Block =
+  | { id?: string; type: "text"; text: string }
+  | { id?: string; type: "image"; url: string; alt?: string; caption?: string };
+
+interface Section {
+  id?: string;
+  heading: string;
+  layout?: "single" | "masonry";
+  blocks: Block[];
+}
+
+interface NewsletterContent {
+  sections: Section[];
+}
+
 interface BroadcastBody {
-  broadcastId: string; // required: row must be saved as 'ready_to_send' first
+  broadcastId: string;
   subject: string;
   targetList: "members_pipeline" | "public_visitors";
-  content: {
-    wmDesk: string;
-    meetingRecap: string;
-    charitySpotlight: string;
-    masonicHistory: string;
-  };
+  content: NewsletterContent;
 }
+
+const LOGO_URL = "https://bright-lodge-spark.lovable.app/__l5e/assets-v1/c8d69345-d84c-4619-a96a-e59f04aa0481/weybridge-logo-white.png";
 
 function escapeHtml(s: string): string {
   return s
@@ -44,36 +56,85 @@ function escapeHtml(s: string): string {
 function paragraphs(text: string): string {
   return text
     .split(/\n{2,}/)
-    .map((p) => `<p style="margin:0 0 14px;line-height:1.7;color:#1f2937">${escapeHtml(p).replace(/\n/g, "<br>")}</p>`)
+    .map((p) => `<p style="margin:0 0 12px;line-height:1.7;color:#1f2937;font-size:15px">${escapeHtml(p).replace(/\n/g, "<br>")}</p>`)
     .join("");
+}
+
+function migrateContent(raw: any): NewsletterContent {
+  if (raw && Array.isArray(raw.sections)) return raw as NewsletterContent;
+  if (raw && (raw.wmDesk || raw.meetingRecap || raw.charitySpotlight || raw.masonicHistory)) {
+    return {
+      sections: [
+        { heading: "From the WM's Desk",          layout: "single", blocks: [{ type: "text", text: raw.wmDesk || "" }] },
+        { heading: "Last Meeting Labours",        layout: "single", blocks: [{ type: "text", text: raw.meetingRecap || "" }] },
+        { heading: "Charity Spotlight",           layout: "single", blocks: [{ type: "text", text: raw.charitySpotlight || "" }] },
+        { heading: "Masonic History & Education", layout: "single", blocks: [{ type: "text", text: raw.masonicHistory || "" }] },
+      ],
+    };
+  }
+  return { sections: [] };
+}
+
+function renderBlock(b: Block): string {
+  if (b.type === "image") {
+    if (!b.url) return "";
+    const cap = b.caption ? `<div style="font-size:12px;color:#6b7280;margin-top:4px">${escapeHtml(b.caption)}</div>` : "";
+    return `<img src="${escapeHtml(b.url)}" alt="${escapeHtml(b.alt || "")}" style="display:block;width:100%;max-width:100%;border:0;border-radius:4px">${cap}`;
+  }
+  return paragraphs(b.text || "");
+}
+
+function renderSection(s: Section): string {
+  const heading = `<h2 style="font-family:'Playfair Display',Georgia,serif;color:#1B2A4A;font-size:22px;margin:28px 0 12px;border-bottom:1px solid #e5dccd;padding-bottom:8px">${escapeHtml(s.heading || "")}</h2>`;
+  const blocks = s.blocks || [];
+  if (s.layout === "masonry" && blocks.length > 1) {
+    // 2-column table (email-safe approximation of masonry)
+    const cells = blocks
+      .map((b) => `<td valign="top" width="50%" style="padding:6px;vertical-align:top">${renderBlock(b)}</td>`)
+      .join("");
+    // Wrap pairs into rows
+    const rows: string[] = [];
+    const cellArr = blocks.map((b) => `<td valign="top" width="50%" style="padding:6px;vertical-align:top">${renderBlock(b)}</td>`);
+    for (let i = 0; i < cellArr.length; i += 2) {
+      const pair = cellArr.slice(i, i + 2);
+      if (pair.length === 1) pair.push('<td width="50%"></td>');
+      rows.push(`<tr>${pair.join("")}</tr>`);
+    }
+    return `${heading}<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="border-collapse:collapse"><tbody>${rows.join("")}</tbody></table>`;
+  }
+  return `${heading}<div>${blocks.map(renderBlock).join("")}</div>`;
 }
 
 function renderHtml(body: Omit<BroadcastBody, "broadcastId">, unsubscribeUrl: string): string {
   const { content, subject } = body;
+  const sectionsHtml = (content.sections || []).map(renderSection).join("");
   return `<!doctype html><html><head><meta charset="utf-8"><title>${escapeHtml(subject)}</title></head>
 <body style="margin:0;background:#f4f1ea;font-family:Georgia,'Times New Roman',serif">
 <div style="max-width:640px;margin:0 auto;background:#ffffff">
-  <div style="background:#1B2A4A;padding:32px 28px;text-align:center;border-bottom:4px solid #C9A432">
-    <div style="font-family:'Playfair Display',Georgia,serif;color:#C9A432;font-size:28px;letter-spacing:0.5px">Weybridge Lodge No. 6787</div>
-    <div style="color:rgba(246,241,226,0.85);font-size:13px;margin-top:6px;letter-spacing:2px;text-transform:uppercase;font-family:Arial,sans-serif">Monthly Chronicle &amp; Labours</div>
+  <div style="background:#1B2A4A;padding:20px 24px;border-bottom:4px solid #C9A432">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0"><tr>
+      <td width="72" valign="middle" style="padding-right:14px">
+        <img src="${LOGO_URL}" alt="Weybridge Lodge crest" width="64" height="64" style="display:block;width:64px;height:64px;border:0">
+      </td>
+      <td valign="middle" align="left">
+        <div style="font-family:'Playfair Display',Georgia,serif;color:#C9A432;font-size:24px;letter-spacing:0.5px;line-height:1.1">Weybridge Lodge No. 6787</div>
+        <div style="color:rgba(246,241,226,0.85);font-size:12px;margin-top:4px;letter-spacing:2px;text-transform:uppercase;font-family:Arial,sans-serif">Monthly Chronicle &amp; Labours</div>
+      </td>
+    </tr></table>
   </div>
-  <div style="padding:32px 28px">
-    <h2 style="font-family:'Playfair Display',Georgia,serif;color:#1B2A4A;font-size:22px;margin:0 0 10px;border-bottom:1px solid #e5dccd;padding-bottom:8px">From the WM's Desk</h2>
-    ${paragraphs(content.wmDesk)}
-
-    <h2 style="font-family:'Playfair Display',Georgia,serif;color:#1B2A4A;font-size:22px;margin:28px 0 10px;border-bottom:1px solid #e5dccd;padding-bottom:8px">Last Meeting Labours</h2>
-    ${paragraphs(content.meetingRecap)}
-
-    <h2 style="font-family:'Playfair Display',Georgia,serif;color:#1B2A4A;font-size:22px;margin:28px 0 10px;border-bottom:1px solid #e5dccd;padding-bottom:8px">Charity Spotlight</h2>
-    ${paragraphs(content.charitySpotlight)}
-
-    <h2 style="font-family:'Playfair Display',Georgia,serif;color:#1B2A4A;font-size:22px;margin:28px 0 10px;border-bottom:1px solid #e5dccd;padding-bottom:8px">Masonic History &amp; Education</h2>
-    ${paragraphs(content.masonicHistory)}
-  </div>
-  <div style="background:#1B2A4A;color:rgba(246,241,226,0.85);font-family:Arial,sans-serif;font-size:12px;padding:20px 28px;text-align:center;line-height:1.6">
-    &copy; ${new Date().getFullYear()} Weybridge Lodge No. 6787 &middot; Guildford Masonic Centre, GU2 4DR<br>
-    You received this because you are an active member, candidate, or requested updates.<br>
-    <a href="${unsubscribeUrl}" style="color:#C9A432;text-decoration:underline">Unsubscribe from this list</a>
+  <div style="padding:24px 28px">${sectionsHtml}</div>
+  <div style="background:#1B2A4A;padding:18px 28px 8px;text-align:center">
+    <table role="presentation" align="center" cellspacing="0" cellpadding="0" border="0" style="margin:0 auto 10px"><tr>
+      <td style="padding:0 6px"><a href="https://instagram.com/weybridgelodge/" style="display:inline-block;background:#C9A432;color:#1B2A4A;font-family:Arial,sans-serif;font-size:11px;font-weight:bold;text-decoration:none;width:28px;height:28px;line-height:28px;border-radius:14px;text-align:center">IG</a></td>
+      <td style="padding:0 6px"><a href="https://facebook.com/people/Weybridge-Lodge-No-6787/61551808420513/" style="display:inline-block;background:#C9A432;color:#1B2A4A;font-family:Arial,sans-serif;font-size:13px;font-weight:bold;text-decoration:none;width:28px;height:28px;line-height:28px;border-radius:14px;text-align:center">f</a></td>
+      <td style="padding:0 6px"><a href="https://twitter.com/weybridgelodge" style="display:inline-block;background:#C9A432;color:#1B2A4A;font-family:Arial,sans-serif;font-size:12px;font-weight:bold;text-decoration:none;width:28px;height:28px;line-height:28px;border-radius:14px;text-align:center">X</a></td>
+      <td style="padding:0 6px"><a href="https://weybridgelodge.org.uk" style="display:inline-block;background:#C9A432;color:#1B2A4A;font-family:Arial,sans-serif;font-size:10px;font-weight:bold;text-decoration:none;width:28px;height:28px;line-height:28px;border-radius:14px;text-align:center">Web</a></td>
+    </tr></table>
+    <div style="color:rgba(246,241,226,0.85);font-family:Arial,sans-serif;font-size:12px;padding:6px 0 14px;line-height:1.6">
+      &copy; ${new Date().getFullYear()} Weybridge Lodge No. 6787 &middot; Guildford Masonic Centre, GU2 4DR<br>
+      You received this because you are an active member, candidate, or requested updates.<br>
+      <a href="${unsubscribeUrl}" style="color:#C9A432;text-decoration:underline">Unsubscribe from this list</a>
+    </div>
   </div>
 </div>
 </body></html>`;
@@ -227,18 +288,21 @@ Deno.serve(async (req) => {
       );
     }
 
-    const content = row.content as BroadcastBody["content"];
+    const content = migrateContent(row.content);
     const subject = (row.subject ?? "").trim();
     const targetList = row.target_list as BroadcastBody["targetList"];
+    const hasMeaningfulBlock = content.sections.some((s) =>
+      (s.blocks || []).some((b) =>
+        (b.type === "text" && b.text?.trim()) || (b.type === "image" && b.url?.trim()),
+      ),
+    );
     if (
       !subject ||
       !["members_pipeline", "public_visitors"].includes(targetList) ||
-      !content?.wmDesk?.trim() ||
-      !content?.meetingRecap?.trim() ||
-      !content?.charitySpotlight?.trim() ||
-      !content?.masonicHistory?.trim()
+      content.sections.length === 0 ||
+      !hasMeaningfulBlock
     ) {
-      return new Response(JSON.stringify({ error: "All fields are required." }), {
+      return new Response(JSON.stringify({ error: "Add a subject and at least one section with content." }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
