@@ -61,12 +61,19 @@ const Bookings = () => {
   const { toast } = useToast();
   const [bundle, setBundle] = useState<EventBundle>(FALLBACK);
   const [loadingEvent, setLoadingEvent] = useState(true);
+  const [publishedMeeting, setPublishedMeeting] = useState<{ id: string; event_key: string } | null>(null);
 
   useEffect(() => {
     fetchNextEvent().then((b) => {
       if (b) setBundle(b);
       setLoadingEvent(false);
     });
+    supabase
+      .from("festive_board_meetings")
+      .select("id,event_key")
+      .eq("status", "published")
+      .maybeSingle()
+      .then(({ data }) => setPublishedMeeting(data ?? null));
   }, []);
 
   const { event, courses, diningOptions } = bundle;
@@ -174,8 +181,9 @@ const Bookings = () => {
     try {
       const { data, error } = await supabase.functions.invoke("save-meeting-response", {
         body: {
-          event_key: event.slug,
+          event_key: publishedMeeting?.event_key ?? event.slug,
           event_label: eventLabel,
+          meeting_id: publishedMeeting?.id ?? null,
           contact_name: `${title} ${firstName} ${lastName}`.trim(),
           contact_email: email,
           contact_phone: phone,
