@@ -891,3 +891,65 @@ function MeetingDialog({
     </Dialog>
   );
 }
+
+// ---------- Visitor name autocomplete ----------
+
+function VisitorNameInput({
+  value,
+  suggestions,
+  onChange,
+  onPick,
+}: {
+  value: string;
+  suggestions: VisitorSuggestion[];
+  onChange: (v: string) => void;
+  onPick: (s: VisitorSuggestion) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const q = value.trim().toLowerCase();
+  const matches = useMemo(() => {
+    if (q.length < 2) return [];
+    return suggestions
+      .filter((s) => (s.name ?? "").toLowerCase().includes(q))
+      .slice(0, 6);
+  }, [q, suggestions]);
+
+  return (
+    <Popover open={open && matches.length > 0} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Input
+          value={value}
+          placeholder="Visitor name (start typing to find past visitors)"
+          onChange={(e) => { onChange(e.target.value); setOpen(true); }}
+          onFocus={() => setOpen(true)}
+          className="bg-navy border-gold/20 h-8 text-xs"
+        />
+      </PopoverTrigger>
+      <PopoverContent
+        align="start"
+        sideOffset={4}
+        className="w-[320px] p-1 bg-navy-dark border-gold/30"
+        onOpenAutoFocus={(e) => e.preventDefault()}
+      >
+        <ul className="text-xs">
+          {matches.map((s) => (
+            <li key={s.id}>
+              <button
+                type="button"
+                onClick={() => { onPick(s); setOpen(false); }}
+                className="w-full text-left px-2 py-1.5 rounded hover:bg-gold/10"
+              >
+                <div className="text-primary-foreground">{s.name || s.email}</div>
+                <div className="text-[10px] text-primary-foreground/60">
+                  {s.lodge_name ? `${s.lodge_name}${s.lodge_number ? ` No. ${s.lodge_number}` : ""}` : "Lodge unknown"}
+                  {s.last_seen_at ? ` · last seen ${new Date(s.last_seen_at).toLocaleDateString("en-GB", { month: "short", year: "numeric" })}` : ""}
+                </div>
+              </button>
+            </li>
+          ))}
+        </ul>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
