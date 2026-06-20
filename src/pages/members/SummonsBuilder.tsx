@@ -342,9 +342,15 @@ async function loadOfficers(setRows: (rows: OfficerRollRow[]) => void, setLoadin
     .eq("lodge_year", lodgeYear);
   const memberIds = Array.from(new Set((appts ?? []).map((a) => a.member_id).filter(Boolean)));
   const { data: profs } = memberIds.length
-    ? await supabase.from("profiles").select("id,title,first_name,middle_name,last_name,full_name,preferred_name,post_nominals,rank,grand_rank,provincial_rank,is_past_master,is_royal_arch,is_honorary_member,initiation_date,joined_lodge_date,joined_year,status,email,phone").in("id", memberIds)
+    ? await supabase.from("profiles").select("id,title,first_name,middle_name,last_name,full_name,preferred_name,post_nominals,rank,grand_rank,provincial_rank,is_past_master,is_royal_arch,is_honorary_member,initiation_date,joined_lodge_date,joined_year,status,email").in("id", memberIds)
     : { data: [] as any[] };
-  const byId = new Map((profs ?? []).map((p: any) => [p.id, p]));
+  // Merge phone (PII) via secure RPC for secretary/admin/WM
+  let phoneById: Record<string, string | null> = {};
+  if (memberIds.length) {
+    const { data: pii } = await (supabase as any).rpc("get_profiles_pii", { _ids: memberIds });
+    for (const row of (pii as { id: string; phone: string | null }[]) ?? []) phoneById[row.id] = row.phone ?? null;
+  }
+  const byId = new Map((profs ?? []).map((p: any) => [p.id, { ...p, phone: phoneById[p.id] ?? null }]));
   const allKeys: string[] = [
     "worshipful_master","senior_warden","junior_warden",
     "immediate_past_master","chaplain","treasurer","secretary","assistant_secretary",
