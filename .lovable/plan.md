@@ -1,52 +1,63 @@
-## Newsletter system — what I'll build
+## Phase 2 — Visitor Contacts & Dedup
 
-### 1. Backend (Lovable Cloud)
+### 1. Database migration
 
-**New table `newsletter_subscribers`** (single opt-in)
-- email (unique, lowercase), source ('public_signup' | 'imported' | 'manual'), confirmed (default true), unsubscribed_at, unsubscribe_token (uuid), created_at
-- RLS: anyone can INSERT (public signup); only admins can SELECT/UPDATE/DELETE; service_role full access for the edge function
+New tables and trigger to extract unique visiting Freemasons from `festive_board_attendance`.
 
-**New table `newsletter_broadcasts`** (audit log of every send)
-- subject, target_list, content (jsonb of the four sections), sent_by (uuid), recipient_count, resend_broadcast_id, status ('sending'|'sent'|'failed'), error, created_at
-- RLS: only newsletter editors can read; service_role writes
+**`visitor_contacts`**
+- `id`, `email` (unique, normalized lowercase/trimmed), `name`, `lodge_name`, `lodge_number`
+- `opted_out_at` (nullable), `unsubscribe_token` (unique, default `gen_random_uuid()::text`)
+- `first_seen_at`, `last_seen_at`, `created_at`
+- Trigger: lowercase/trim email on write
+- RLS: members can read (for name-search UI); only admins/secretary/WM can update/delete; service role full
+- GRANTs: `SELECT` to authenticated; `ALL` to service_role
 
-**New SQL function `can_edit_newsletter(_user uuid)`** returns true if user is:
-- `admin`, OR
-- `worshipful_master` role, OR
-- `secretary` role, OR
-- a member of the "Communications & Heritage Group" working group
+**`visitor_attendances`** (link table, one row per visit)
+- `id`, `visitor_contact_id` → `visitor_contacts(id)` on delete cascade
+- `festive_board_attendance_id` → `festive_board_attendance(id)` on delete cascade (unique)
+- `created_at`
+- RLS: members read; service role full; GRANTs accordingly
 
-### 2. Resend connector
+**Find-or-create trigger on `festive_board_attendance`**
+- AFTER INSERT OR UPDATE OF `email` on `festive_board_attendance`
+- If `NEW.email` is null/blank → return
+- Skip if the attendee is a registered member (i.e. `user_id` matches an active profile)
+- Normalize email; UPSERT into `visitor_contacts` (insert if missing with token; on existing only fill `name`/`lodge_name`/`lodge_number` where currently blank; always bump `last_seen_at`)
+- Insert link row into `visitor_attendances` (ignore on conflict so re-saves don't duplicate)
 
-I'll prompt you to link the **Resend** App connector (you'll paste your Resend API key once). Your sending domain `notify.weybridgelodge.org.uk` is already DNS-verified inside Lovable, so I'll set the From address to `Weybridge Lodge <chronicle@notify.weybridgelodge.org.uk>`. If you prefer a different sending domain you've verified inside Resend itself, tell me and I'll swap it.
+**Backfill**: one-time pass over existing `festive_board_attendance` rows where `email IS NOT NULL` to seed `visitor_contacts` + link rows.
 
-### 3. Edge function `broadcast-newsletter`
-- Validates caller's JWT, checks `can_edit_newsletter(auth.uid())`
-- Compiles recipient list from selected target:
-  - **Portal & Candidates**: profiles (status active+pending) ∪ candidates.email
-  - **Visitors & Public**: newsletter_subscribers where unsubscribed_at is null
-- Renders branded HTML (navy/gold, Playfair heading) from the four content blocks + unsubscribe link
-- Creates a Resend Broadcast via gateway (`POST /broadcasts` then `POST /broadcasts/:id/send`) — uses a Resend Audience kept in sync per send so we don't loop sends ourselves
-- Inserts a `newsletter_broadcasts` row, returns the count
+### 2. `broadcast-newsletter` edge function
 
-### 4. Edge function `newsletter-unsubscribe`
-- Public GET endpoint; marks `unsubscribed_at = now()` by token. Returns a small branded HTML confirmation page.
+In the `"members"` (Lodge Members & Visitors) recipient query:
+- Continue fetching active/pending members minus `member_newsletter_opt_outs`
+- Additionally fetch `visitor_contacts` where `opted_out_at IS NULL`
+- Merge and dedup by normalized email; member tokens take precedence over visitor tokens when the same email appears in both
+- Each visitor recipient gets its `unsubscribe_token` injected into the footer URL the same way member tokens are today
+- "all" merged send extends the same way (visitors union into the members-side of the union before the final dedup with public subscribers)
 
-### 5. UI — Admin Hub (`/members/admin/newsletter`)
-- Route protected by `can_edit_newsletter` (client check + RLS enforces server-side)
-- Composer form matching your design: target-list tabs, subject, 4 textareas (WM's Desk, Meeting Recap, Charity Spotlight, Masonic History)
-- Live email preview pane (navy header, gold accents, your brand fonts)
-- "Broadcast" button → calls edge function → success state with recipient count
-- Adds link card on `AdminHub.tsx` (visible only to authorised users)
+### 3. `newsletter-unsubscribe` edge function
 
-### 6. UI — Public signup widget (`NewsletterSignup.tsx`)
-- Mounted in `Footer.tsx`
-- Honeypot field, email validation (zod), POSTs to a tiny `newsletter-subscribe` edge function (no auth) which inserts into `newsletter_subscribers` (idempotent on email)
-- Success confirmation state
+Extend token lookup order: member token → public subscriber token → **visitor_contacts token**. For visitor matches, set `opted_out_at = now()`. Same confirmation response shape; copy clarifies "newsletter only — summonses and booking confirmations unaffected."
 
-### Notes
-- Templates use your existing brand tokens (navy `#1B2A4A`, gold `#C9A432`, Playfair/Inter) — no hardcoded colors in components.
-- This is marketing email; it does NOT go through Lovable's transactional email queue — only through Resend Broadcasts, which is the correct tool for list sends.
-- "Communications & Heritage Group" membership is read live each broadcast, so adding/removing members in the working group automatically grants/revokes Newsletter Hub access.
+### 4. Festive Board UI — name-search-first suggestions
 
-Approve and I'll build it end-to-end.
+In `src/pages/members/FestiveBoardRegister.tsx`, on the visitor row name input:
+- Debounced query (250ms) against `visitor_contacts` using `ilike` on `name` once ≥2 chars typed
+- Render a small suggestion popover (existing `Command`/`Popover` shadcn primitives) showing up to 6 matches as *"J. Smith — Lodge of Friendship No. 1234 — last attended Mar 2023"*
+- Selecting a suggestion pre-fills `name`, `lodge_name`, `lodge_number`, `email`; the trigger then handles linking on save
+- Secretary can ignore suggestions and type freely; email-based dedup remains authoritative
+
+### 5. Types
+
+Run after migration approval — regenerated `src/integrations/supabase/types.ts` will pick up the two new tables; only consumer files (`FestiveBoardRegister.tsx`, the two edge functions) need code changes.
+
+### Out of scope (per brief)
+- Historical paper visitors-book backfill
+- Fuzzy email matching for typos
+
+### Files touched
+- `supabase/migrations/<new>.sql` (tables, GRANTs, RLS, trigger, backfill)
+- `supabase/functions/broadcast-newsletter/index.ts`
+- `supabase/functions/newsletter-unsubscribe/index.ts`
+- `src/pages/members/FestiveBoardRegister.tsx`
