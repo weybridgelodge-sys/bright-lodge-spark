@@ -502,7 +502,7 @@ function NewsletterHubInner() {
         <h1 className="font-serif text-2xl md:text-3xl text-gold mt-1">Newsletter Dispatch Hub</h1>
         <p className="text-primary-foreground/70 text-sm mt-1">
           Compose one issue, then choose your audience. <strong className="text-gold">Lodge Members &amp; Visitors</strong> covers
-          active members plus visiting Freemasons (deferred until the visitor contacts list ships); <strong className="text-gold">Public</strong> goes
+          active members plus visiting Freemasons captured through Festive Board bookings; <strong className="text-gold">Public</strong> goes
           to website newsletter sign-ups. Tick <strong className="text-gold">Unified content</strong> when one shared write-up suits everyone
           (e.g. a social-event poster) — the merged "Send to Both" then dedups by email and files a single combined PDF.
         </p>
