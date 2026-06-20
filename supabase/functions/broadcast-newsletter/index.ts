@@ -519,13 +519,12 @@ Deno.serve(async (req) => {
       .eq("id", body.broadcastId);
 
     if (!firstError) {
-      // Archive a copy into the Documents library under "Newsletters".
-      const archiveHtml = renderHtml({ subject, targetList, content }, "https://weybridgelodge.org.uk/contact");
+      // Archive a PDF copy into the Documents library under "Newsletters".
       await archiveToDocuments({
         broadcastId: body.broadcastId,
         subject,
         targetList,
-        html: archiveHtml,
+        content,
         userId,
         recipientCount: sentCount,
       });
