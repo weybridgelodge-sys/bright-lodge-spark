@@ -506,11 +506,6 @@ function NewsletterHubInner() {
           to website newsletter sign-ups. Tick <strong className="text-gold">Unified content</strong> when one shared write-up suits everyone
           (e.g. a social-event poster) — the merged "Send to Both" then dedups by email and files a single combined PDF.
         </p>
-        <p className="text-[11px] text-primary-foreground/50 mt-2">
-          <strong>Note:</strong> Mailchimp was considered for the Public list and dropped — its free tier caps at 250 contacts /
-          500 sends per month and forces a "Sent with Mailchimp" footer below the paid Essentials plan. Both audiences go via
-          the portal's existing Resend integration so branding, unsubscribe handling, and contact storage stay consistent.
-        </p>
 
       </header>
 
