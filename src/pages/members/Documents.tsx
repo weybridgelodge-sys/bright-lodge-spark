@@ -9,7 +9,7 @@ type Doc = {
   id: string;
   title: string;
   description: string | null;
-  category: "summons" | "meeting_minutes" | "committee_minutes" | "committee_agendas" | "media_files" | "ritual" | "other";
+  category: "summons" | "meeting_minutes" | "committee_minutes" | "committee_agendas" | "media_files" | "ritual" | "newsletter" | "other";
   file_path: string;
   file_size_bytes: number | null;
   created_at: string;
@@ -21,6 +21,7 @@ const CATEGORIES = [
   "committee_minutes",
   "committee_agendas",
   "media_files",
+  "newsletter",
   "other",
 ] as const;
 
@@ -30,6 +31,7 @@ const CATEGORY_LABELS: Record<typeof CATEGORIES[number] | "ritual", string> = {
   committee_minutes: "Committee minutes",
   committee_agendas: "Committee agendas",
   media_files: "Media files",
+  newsletter: "Newsletters",
   other: "Other",
   ritual: "Ritual",
 };

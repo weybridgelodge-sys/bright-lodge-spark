@@ -13,7 +13,6 @@ const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY")!;
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY")!;
 
 const GATEWAY_URL = "https://connector-gateway.lovable.dev/resend";
-// Until a custom Resend domain is verified, sends use Resend's onboarding sender.
 const FROM_ADDRESS =
   Deno.env.get("NEWSLETTER_FROM_EMAIL") ??
   "Weybridge Lodge No. 6787 <onboarding@resend.dev>";
@@ -22,6 +21,7 @@ const REPLY_TO = "communications@weybridgelodge.org.uk";
 const admin = createClient(SUPABASE_URL, SERVICE_KEY);
 
 interface BroadcastBody {
+  broadcastId: string; // required: row must be saved as 'ready_to_send' first
   subject: string;
   targetList: "members_pipeline" | "public_visitors";
   content: {
@@ -48,7 +48,7 @@ function paragraphs(text: string): string {
     .join("");
 }
 
-function renderHtml(body: BroadcastBody, unsubscribeUrl: string): string {
+function renderHtml(body: Omit<BroadcastBody, "broadcastId">, unsubscribeUrl: string): string {
   const { content, subject } = body;
   return `<!doctype html><html><head><meta charset="utf-8"><title>${escapeHtml(subject)}</title></head>
 <body style="margin:0;background:#f4f1ea;font-family:Georgia,'Times New Roman',serif">
@@ -100,7 +100,6 @@ async function getRecipients(target: BroadcastBody["targetList"]): Promise<Array
       if (e) map.set(e, null);
     }
   }
-  // Always include public newsletter subscribers — they explicitly opted in.
   const { data: subs } = await admin
     .from("newsletter_subscribers")
     .select("email,unsubscribe_token")
@@ -113,7 +112,6 @@ async function getRecipients(target: BroadcastBody["targetList"]): Promise<Array
 }
 
 async function sendBatch(emails: Array<{ to: string; html: string; subject: string }>): Promise<{ ok: boolean; error?: string }> {
-  // Resend batch endpoint: up to 100 per call.
   const payload = emails.map((e) => ({
     from: FROM_ADDRESS,
     to: [e.to],
@@ -138,6 +136,35 @@ async function sendBatch(emails: Array<{ to: string; html: string; subject: stri
   return { ok: true };
 }
 
+async function archiveToDocuments(opts: {
+  broadcastId: string;
+  subject: string;
+  targetList: string;
+  html: string;
+  userId: string;
+  recipientCount: number;
+}) {
+  const safeSubject = opts.subject.replace(/[^a-zA-Z0-9._-]/g, "_").slice(0, 80);
+  const path = `newsletter/${Date.now()}-${opts.broadcastId}-${safeSubject}.html`;
+  const blob = new Blob([opts.html], { type: "text/html; charset=utf-8" });
+  const { error: upErr } = await admin.storage.from("lodge-docs").upload(path, blob, {
+    contentType: "text/html; charset=utf-8",
+    upsert: false,
+  });
+  if (upErr) {
+    console.error("archiveToDocuments upload error:", upErr);
+    return;
+  }
+  await admin.from("lodge_documents").insert({
+    title: opts.subject,
+    description: `Sent to ${opts.recipientCount} recipient${opts.recipientCount === 1 ? "" : "s"} (${opts.targetList === "members_pipeline" ? "Members & Candidates" : "Public Subscribers"})`,
+    category: "newsletter",
+    file_path: path,
+    file_size_bytes: opts.html.length,
+    uploaded_by: opts.userId,
+  });
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   if (req.method !== "POST") {
@@ -145,7 +172,6 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // Authn: derive user from JWT in Authorization header
     const authHeader = req.headers.get("Authorization") ?? "";
     const token = authHeader.replace(/^Bearer\s+/i, "");
     if (!token) {
@@ -166,7 +192,6 @@ Deno.serve(async (req) => {
     }
     const userId = userResult.user.id;
 
-    // Authz
     const { data: canEdit, error: rpcErr } = await admin.rpc("can_edit_newsletter", { _user: userId });
     if (rpcErr || canEdit !== true) {
       return new Response(JSON.stringify({ error: "Not authorised to send the newsletter" }), {
@@ -176,13 +201,42 @@ Deno.serve(async (req) => {
     }
 
     const body = (await req.json()) as BroadcastBody;
+    if (!body?.broadcastId) {
+      return new Response(JSON.stringify({ error: "Save the newsletter first." }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Load row from DB — DB is the source of truth, must be 'ready_to_send'
+    const { data: row, error: rowErr } = await admin
+      .from("newsletter_broadcasts")
+      .select("id,status,subject,target_list,content")
+      .eq("id", body.broadcastId)
+      .single();
+    if (rowErr || !row) {
+      return new Response(JSON.stringify({ error: "Newsletter not found." }), {
+        status: 404,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    if (row.status !== "ready_to_send") {
+      return new Response(
+        JSON.stringify({ error: `Status must be "Ready to send" before broadcasting (current: ${row.status}).` }),
+        { status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
+    const content = row.content as BroadcastBody["content"];
+    const subject = (row.subject ?? "").trim();
+    const targetList = row.target_list as BroadcastBody["targetList"];
     if (
-      !body?.subject?.trim() ||
-      !["members_pipeline", "public_visitors"].includes(body.targetList) ||
-      !body.content?.wmDesk?.trim() ||
-      !body.content?.meetingRecap?.trim() ||
-      !body.content?.charitySpotlight?.trim() ||
-      !body.content?.masonicHistory?.trim()
+      !subject ||
+      !["members_pipeline", "public_visitors"].includes(targetList) ||
+      !content?.wmDesk?.trim() ||
+      !content?.meetingRecap?.trim() ||
+      !content?.charitySpotlight?.trim() ||
+      !content?.masonicHistory?.trim()
     ) {
       return new Response(JSON.stringify({ error: "All fields are required." }), {
         status: 400,
@@ -190,7 +244,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    const recipients = await getRecipients(body.targetList);
+    const recipients = await getRecipients(targetList);
     if (recipients.length === 0) {
       return new Response(JSON.stringify({ error: "No recipients found for the selected list." }), {
         status: 400,
@@ -198,27 +252,18 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { data: logRow } = await admin
+    await admin
       .from("newsletter_broadcasts")
-      .insert({
-        subject: body.subject.trim(),
-        target_list: body.targetList,
-        content: body.content,
-        sent_by: userId,
-        recipient_count: recipients.length,
-        status: "sending",
-      })
-      .select("id")
-      .single();
+      .update({ status: "sending", sent_by: userId, recipient_count: recipients.length })
+      .eq("id", body.broadcastId);
 
-    // Build per-recipient emails with personalised unsubscribe URLs
     const fnBase = `${SUPABASE_URL}/functions/v1/newsletter-unsubscribe`;
     const generalUnsub = "https://weybridgelodge.org.uk/contact";
 
     const allEmails = recipients.map((r) => ({
       to: r.email,
-      subject: body.subject.trim(),
-      html: renderHtml(body, r.token ? `${fnBase}?token=${r.token}` : generalUnsub),
+      subject,
+      html: renderHtml({ subject, targetList, content }, r.token ? `${fnBase}?token=${r.token}` : generalUnsub),
     }));
 
     let sentCount = 0;
@@ -241,7 +286,20 @@ Deno.serve(async (req) => {
         error: firstError ?? null,
         recipient_count: sentCount,
       })
-      .eq("id", logRow!.id);
+      .eq("id", body.broadcastId);
+
+    if (!firstError) {
+      // Archive a copy into the Documents library under "Newsletters".
+      const archiveHtml = renderHtml({ subject, targetList, content }, "https://weybridgelodge.org.uk/contact");
+      await archiveToDocuments({
+        broadcastId: body.broadcastId,
+        subject,
+        targetList,
+        html: archiveHtml,
+        userId,
+        recipientCount: sentCount,
+      });
+    }
 
     if (firstError) {
       return new Response(JSON.stringify({ error: firstError, sent: sentCount }), {
