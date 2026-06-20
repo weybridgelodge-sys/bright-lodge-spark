@@ -43,7 +43,17 @@ export default function SummonsPrintPreview({ template, officers, members }: Pro
         .order("meeting_number", { ascending: false })
         .limit(20);
       const rows = (data ?? []) as any[];
-      setList(rows.map(rowToSummons));
+      // dining_enquiry_email is restricted; fetch via secure RPC and merge
+      let emailById: Record<string, string | null> = {};
+      if (rows.length) {
+        const ids = rows.map((r) => r.id);
+        const { data: dc } = await (supabase as any).rpc("get_summons_dining_contacts", { _ids: ids });
+        for (const row of (dc as { id: string; dining_enquiry_email: string | null }[]) ?? []) {
+          emailById[row.id] = row.dining_enquiry_email ?? null;
+        }
+      }
+      const enriched = rows.map((r) => ({ ...r, dining_enquiry_email: emailById[r.id] ?? null }));
+      setList(enriched.map(rowToSummons));
       if (rows.length) setPickedId(rows[0].id);
     })();
   }, []);
