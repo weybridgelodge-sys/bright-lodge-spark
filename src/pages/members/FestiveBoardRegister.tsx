@@ -442,6 +442,12 @@ function MeetingDialog({
   const [override, setOverride] = useState<string>(
     existing?.headcount_override != null ? String(existing.headcount_override) : ""
   );
+  const [status, setStatus] = useState<"draft" | "published" | "completed">(existing?.status ?? "draft");
+  const [isWhiteTable, setIsWhiteTable] = useState<boolean>(existing?.is_white_table ?? false);
+  const [diningPricePounds, setDiningPricePounds] = useState<string>(
+    existing ? ((existing.dining_price_pence ?? 3500) / 100).toFixed(2) : "35.00"
+  );
+  const [eventKey, setEventKey] = useState<string>(existing?.event_key ?? `festive-board-${date}`);
   const [saving, setSaving] = useState(false);
 
   const [memberDrafts, setMemberDrafts] = useState<Record<string, MemberDraft>>(() => {
@@ -453,6 +459,8 @@ function MeetingDialog({
         status: (row?.attendance_status as FbAttendanceStatus) ?? "booked",
         paymentMethod: (row?.payment_method as FbPaymentMethod) ?? "unknown",
         amountPounds: row ? (row.amount_pence / 100).toFixed(2) : "",
+        synced: row?.source === "booking",
+        sourceBookingId: row?.source_booking_id ?? null,
       };
     }
     return initial;
@@ -471,6 +479,8 @@ function MeetingDialog({
         status: a.attendance_status as FbAttendanceStatus,
         paymentMethod: a.payment_method as FbPaymentMethod,
         amountPounds: (a.amount_pence / 100).toFixed(2),
+        synced: a.source === "booking",
+        sourceBookingId: a.source_booking_id ?? null,
       }))
   );
 
@@ -487,6 +497,146 @@ function MeetingDialog({
     })();
     return () => { cancelled = true; };
   }, []);
+
+  // Auto-sync bookings → draft attendance rows (additive only, non-white-table meetings)
+  useEffect(() => {
+    if (!existing || isWhiteTable) return;
+    let cancelled = false;
+    (async () => {
+      const { data: bookings } = await supabase
+        .from("bookings")
+        .select("id,contact_name,contact_email,details,payment_status")
+        .eq("meeting_id", existing.id);
+      if (cancelled || !bookings?.length) return;
+
+      const alreadySynced = new Set(
+        existingAttendance.map((a) => a.source_booking_id).filter(Boolean) as string[]
+      );
+
+      const diningPence = existing.dining_price_pence ?? 3500;
+      const newVisitorDrafts: VisitorDraft[] = [];
+      const memberPatches: { id: string; patch: Partial<MemberDraft> }[] = [];
+
+      for (const b of bookings) {
+        if (alreadySynced.has(b.id)) continue;
+        const d = (b.details ?? {}) as Record<string, unknown>;
+        const opt = String(d.meetingOption ?? "");
+        if (opt === "apologies" || b.payment_status === "apologies") continue;
+        const amount = opt === "meeting-and-festive-board" ? (diningPence / 100).toFixed(2) : "0.00";
+
+        // Respondent
+        const respLodge = String(d.lodge ?? "");
+        const respondentIsMember = isWeybridgeLodge(respLodge);
+        if (respondentIsMember) {
+          // Try to match by email or full name
+          const targetEmail = (b.contact_email ?? "").toLowerCase().trim();
+          const targetName = (b.contact_name ?? "").toLowerCase().trim();
+          const match = members.find((m) => {
+            const profileFull = [m.first_name, m.last_name].filter(Boolean).join(" ").toLowerCase();
+            return (m.full_name?.toLowerCase() === targetName) || (profileFull === targetName);
+          });
+          if (match) {
+            memberPatches.push({
+              id: match.id,
+              patch: {
+                present: true,
+                status: "booked",
+                paymentMethod: "unknown",
+                amountPounds: amount,
+                synced: true,
+                sourceBookingId: b.id,
+              },
+            });
+          } else {
+            // Unmatched Weybridge respondent — fall through as a visitor row so the Secretary can reconcile
+            newVisitorDrafts.push({
+              id: tempId(),
+              name: String(b.contact_name ?? ""),
+              lodgeName: respLodge,
+              lodgeNumber: "",
+              email: String(b.contact_email ?? ""),
+              status: "booked",
+              paymentMethod: "unknown",
+              amountPounds: amount,
+              synced: true,
+              sourceBookingId: b.id,
+            });
+          }
+        } else {
+          newVisitorDrafts.push({
+            id: tempId(),
+            name: String(b.contact_name ?? ""),
+            lodgeName: respLodge,
+            lodgeNumber: "",
+            email: String(b.contact_email ?? ""),
+            status: "booked",
+            paymentMethod: "unknown",
+            amountPounds: amount,
+            synced: true,
+            sourceBookingId: b.id,
+          });
+        }
+
+        // Guests
+        const guests = Array.isArray(d.guests) ? (d.guests as Array<{ name?: string; lodge?: string }>) : [];
+        for (const [gi, g] of guests.entries()) {
+          const gLodge = String(g.lodge ?? "");
+          const guestBookingId = `${b.id}::g${gi}`;
+          if (alreadySynced.has(guestBookingId)) continue;
+          const guestIsMember = isWeybridgeLodge(gLodge);
+          if (guestIsMember) {
+            const targetName = (g.name ?? "").toLowerCase().trim();
+            const match = members.find((m) => {
+              const profileFull = [m.first_name, m.last_name].filter(Boolean).join(" ").toLowerCase();
+              return (m.full_name?.toLowerCase() === targetName) || (profileFull === targetName);
+            });
+            if (match) {
+              memberPatches.push({
+                id: match.id,
+                patch: {
+                  present: true,
+                  status: "booked",
+                  paymentMethod: "unknown",
+                  amountPounds: amount,
+                  synced: true,
+                  sourceBookingId: b.id,
+                },
+              });
+              continue;
+            }
+          }
+          newVisitorDrafts.push({
+            id: tempId(),
+            name: String(g.name ?? ""),
+            lodgeName: gLodge,
+            lodgeNumber: "",
+            email: "",
+            status: "booked",
+            paymentMethod: "unknown",
+            amountPounds: amount,
+            synced: true,
+            sourceBookingId: b.id,
+          });
+        }
+      }
+
+      if (memberPatches.length) {
+        setMemberDrafts((prev) => {
+          const next = { ...prev };
+          for (const { id, patch } of memberPatches) {
+            if (next[id] && !next[id].present) next[id] = { ...next[id], ...patch };
+          }
+          return next;
+        });
+      }
+      if (newVisitorDrafts.length) {
+        setVisitorDrafts((prev) => [...prev, ...newVisitorDrafts]);
+      }
+    })();
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [existing?.id, isWhiteTable]);
+
 
 
 
