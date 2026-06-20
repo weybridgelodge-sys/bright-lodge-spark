@@ -745,19 +745,25 @@ function NewsletterHubInner() {
           <div className="grid sm:grid-cols-3 gap-2 pt-2">
             <Button type="button" onClick={() => send(["members"])} disabled={sending || status !== "ready_to_send" || !broadcastId}
               className="bg-gold hover:bg-gold/90 text-navy font-semibold disabled:opacity-40"
-              title={!broadcastId ? "Save first" : status !== "ready_to_send" ? 'Mark "Ready to send"' : "Send Members edition"}>
-              {sending ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : <Send className="h-4 w-4 mr-1.5" />} Send to Members
+              title={!broadcastId ? "Save first" : status !== "ready_to_send" ? 'Mark "Ready to send"' : "Send to active members"}>
+              {sending ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : <Send className="h-4 w-4 mr-1.5" />} Send to Members &amp; Visitors
             </Button>
             <Button type="button" onClick={() => send(["visitors"])} disabled={sending || status !== "ready_to_send" || !broadcastId}
               className="bg-gold hover:bg-gold/90 text-navy font-semibold disabled:opacity-40"
-              title={!broadcastId ? "Save first" : status !== "ready_to_send" ? 'Mark "Ready to send"' : "Send Visitors edition"}>
-              {sending ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : <Send className="h-4 w-4 mr-1.5" />} Send to Visitors
+              title={!broadcastId ? "Save first" : status !== "ready_to_send" ? 'Mark "Ready to send"' : "Send to public newsletter sign-ups"}>
+              {sending ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : <Send className="h-4 w-4 mr-1.5" />} Send to Public
             </Button>
-            <Button type="button" onClick={() => send(["members", "visitors"])} disabled={sending || status !== "ready_to_send" || !broadcastId}
-              className="bg-navy border border-gold text-gold hover:bg-gold/10 font-semibold disabled:opacity-40">
-              {sending ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : <Send className="h-4 w-4 mr-1.5" />} Send to Both
+            <Button
+              type="button"
+              onClick={() => send(unifiedContent ? ["all"] : ["members", "visitors"])}
+              disabled={sending || status !== "ready_to_send" || !broadcastId}
+              className="bg-navy border border-gold text-gold hover:bg-gold/10 font-semibold disabled:opacity-40"
+              title={unifiedContent ? "One merged dedup'd send · single combined PDF" : "Two separate sends · two PDFs"}>
+              {sending ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : <Send className="h-4 w-4 mr-1.5" />}
+              Send to Both {unifiedContent ? "(merged)" : "(two sends)"}
             </Button>
           </div>
+
         </div>
 
         {/* Preview (active audience) */}
@@ -765,7 +771,7 @@ function NewsletterHubInner() {
           <div className="rounded-2xl overflow-hidden border border-gold/20 shadow-inner bg-white text-black">
             <div className="px-5 py-3 border-b border-slate-200 text-[11px] text-slate-500 space-y-0.5">
               <p><strong>From:</strong> Weybridge Lodge No. 6787 &lt;chronicle@weybridgelodge.org.uk&gt;</p>
-              <p><strong>To:</strong> {audience === "members" ? "Members & Candidates" : "Public Subscribers"}</p>
+              <p><strong>To:</strong> {unifiedContent ? "Members & Visitors + Public (deduplicated)" : effectiveAudience === "members" ? "Members & Visitors" : "Public Subscribers"}</p>
               <p><strong>Subject:</strong> {subject || "…"}</p>
             </div>
 
