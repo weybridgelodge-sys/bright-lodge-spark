@@ -288,18 +288,21 @@ Deno.serve(async (req) => {
       );
     }
 
-    const content = row.content as BroadcastBody["content"];
+    const content = migrateContent(row.content);
     const subject = (row.subject ?? "").trim();
     const targetList = row.target_list as BroadcastBody["targetList"];
+    const hasMeaningfulBlock = content.sections.some((s) =>
+      (s.blocks || []).some((b) =>
+        (b.type === "text" && b.text?.trim()) || (b.type === "image" && b.url?.trim()),
+      ),
+    );
     if (
       !subject ||
       !["members_pipeline", "public_visitors"].includes(targetList) ||
-      !content?.wmDesk?.trim() ||
-      !content?.meetingRecap?.trim() ||
-      !content?.charitySpotlight?.trim() ||
-      !content?.masonicHistory?.trim()
+      content.sections.length === 0 ||
+      !hasMeaningfulBlock
     ) {
-      return new Response(JSON.stringify({ error: "All fields are required." }), {
+      return new Response(JSON.stringify({ error: "Add a subject and at least one section with content." }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
