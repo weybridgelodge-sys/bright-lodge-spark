@@ -697,9 +697,20 @@ function MeetingDialog({
         notes: notes.trim() || null,
         headcount_override: override.trim() === "" ? null : Number(override),
         created_by: user?.id ?? null,
-        event_key: existing?.event_key ?? `festive-board-${date}`,
+        event_key: eventKey.trim() || `festive-board-${date}`,
+        status,
+        is_white_table: isWhiteTable,
+        dining_price_pence: parsePounds(diningPricePounds) || 3500,
       };
 
+      // If publishing this meeting, demote any other currently-published meeting to draft
+      if (status === "published") {
+        await supabase
+          .from("festive_board_meetings")
+          .update({ status: "draft" })
+          .eq("status", "published")
+          .neq("id", existing?.id ?? "00000000-0000-0000-0000-000000000000");
+      }
 
       let meetingId = existing?.id;
       if (existing) {
@@ -730,6 +741,8 @@ function MeetingDialog({
           payment_method: d.paymentMethod,
           amount_pence: parsePounds(d.amountPounds),
           created_by: user?.id ?? null,
+          source: (d.synced ? "booking" : "manual") as "booking" | "manual",
+          source_booking_id: d.sourceBookingId ?? null,
         }));
 
       const visitorRows = visitorDrafts
@@ -744,7 +757,10 @@ function MeetingDialog({
           payment_method: v.paymentMethod,
           amount_pence: parsePounds(v.amountPounds),
           created_by: user?.id ?? null,
+          source: (v.synced ? "booking" : "manual") as "booking" | "manual",
+          source_booking_id: v.sourceBookingId ?? null,
         }));
+
 
 
       const all = [...memberRows, ...visitorRows];
