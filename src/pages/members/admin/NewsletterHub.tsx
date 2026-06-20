@@ -585,8 +585,11 @@ function NewsletterHubInner() {
               <FileEdit className="h-4 w-4" />
               {broadcastId ? "Editing draft" : "New newsletter"}
               <span className="text-[10px] uppercase tracking-wider text-primary-foreground/60 ml-2">
-                {audience === "members" ? "Members variant" : "Visitors variant"}
+                {unifiedContent
+                  ? "Unified content (all audiences)"
+                  : effectiveAudience === "members" ? "Members & Visitors variant" : "Public variant"}
               </span>
+
             </h2>
             {broadcastId && (
               <button type="button" onClick={resetEditor} className="text-[11px] uppercase tracking-wider text-primary-foreground/60 hover:text-gold">
@@ -648,13 +651,16 @@ function NewsletterHubInner() {
                   </button>
                 </div>
 
-                <div className="flex justify-end">
-                  <button type="button" onClick={() => copyFromOther(s.id)}
-                    className="text-[10px] inline-flex items-center gap-1 px-2 py-0.5 rounded border border-gold/30 text-gold/80 hover:bg-gold/10"
-                    title={`Copy this section's body from the ${audience === "members" ? "Visitors" : "Members"} variant`}>
-                    <Copy className="h-3 w-3" /> Copy from {audience === "members" ? "Visitors" : "Members"}
-                  </button>
-                </div>
+                {!unifiedContent && (
+                  <div className="flex justify-end">
+                    <button type="button" onClick={() => copyFromOther(s.id)}
+                      className="text-[10px] inline-flex items-center gap-1 px-2 py-0.5 rounded border border-gold/30 text-gold/80 hover:bg-gold/10"
+                      title={`Copy this section's body from the ${effectiveAudience === "members" ? "Public" : "Members & Visitors"} variant`}>
+                      <Copy className="h-3 w-3" /> Copy from {effectiveAudience === "members" ? "Public" : "Members & Visitors"}
+                    </button>
+                  </div>
+                )}
+
 
                 <div className="space-y-2 pl-1">
                   {s.blocks.map((b) => (
@@ -674,7 +680,7 @@ function NewsletterHubInner() {
                           rows={3}
                           value={b.text}
                           onChange={(e) => updateBlock(s.id, b.id, { text: e.target.value })}
-                          placeholder={`Write ${audience === "members" ? "Members" : "Visitors"} paragraph text…`}
+                          placeholder={`Write ${unifiedContent ? "shared" : effectiveAudience === "members" ? "Members & Visitors" : "Public"} paragraph text…`}
                           className="w-full bg-navy-dark border border-gold/20 rounded px-2 py-1.5 text-sm text-primary-foreground placeholder:text-primary-foreground/40 focus:outline-none focus:border-gold/60 leading-relaxed resize-y"
                         />
                       ) : (
