@@ -55,7 +55,7 @@ function renderParagraph(text: string) {
   );
 }
 
-type Guest = { name: string };
+type Guest = { name: string; lodge: string };
 
 const Bookings = () => {
   const { toast } = useToast();
@@ -116,7 +116,7 @@ const Bookings = () => {
   const updateGuestCount = (n: number) => {
     setGuestCount(n);
     setGuests((prev) => {
-      if (n > prev.length) return [...prev, ...Array.from({ length: n - prev.length }, () => ({ name: "" }))];
+      if (n > prev.length) return [...prev, ...Array.from({ length: n - prev.length }, () => ({ name: "", lodge: "" }))];
       return prev.slice(0, n);
     });
   };
@@ -152,8 +152,8 @@ const Bookings = () => {
         toast({ title: "Choose a dining option", variant: "destructive" });
         return false;
       }
-      if (guests.some((g) => !g.name.trim())) {
-        toast({ title: "Guest names required", description: "Please name each guest.", variant: "destructive" });
+      if (guests.some((g) => !g.name.trim() || !g.lodge.trim())) {
+        toast({ title: "Guest details required", description: "Please enter each guest's name and Lodge name & no.", variant: "destructive" });
         return false;
       }
     }
@@ -501,9 +501,15 @@ const Bookings = () => {
                             </select>
                           </div>
                           {guests.map((g, i) => (
-                            <div key={i} className="border-t border-border pt-4">
-                              <label htmlFor={`g${i}`} className={labelClass}>Guest {i + 1} Name <span className="text-destructive">*</span></label>
-                              <input id={`g${i}`} type="text" value={g.name} onChange={(e) => setGuests((prev) => prev.map((x, j) => j === i ? { name: e.target.value } : x))} required className={inputClass} placeholder={`Guest ${i + 1} full name`} />
+                            <div key={i} className="border-t border-border pt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                              <div>
+                                <label htmlFor={`g${i}`} className={labelClass}>Guest {i + 1} Name <span className="text-destructive">*</span></label>
+                                <input id={`g${i}`} type="text" value={g.name} onChange={(e) => setGuests((prev) => prev.map((x, j) => j === i ? { ...x, name: e.target.value } : x))} required className={inputClass} placeholder={`Guest ${i + 1} full name`} />
+                              </div>
+                              <div>
+                                <label htmlFor={`gl${i}`} className={labelClass}>Guest {i + 1} Lodge Name &amp; No. <span className="text-destructive">*</span></label>
+                                <input id={`gl${i}`} type="text" value={g.lodge} onChange={(e) => setGuests((prev) => prev.map((x, j) => j === i ? { ...x, lodge: e.target.value } : x))} required className={inputClass} placeholder="e.g. Weybridge Lodge No. 6787" />
+                              </div>
                             </div>
                           ))}
                           <div className="border-t border-border pt-4">
