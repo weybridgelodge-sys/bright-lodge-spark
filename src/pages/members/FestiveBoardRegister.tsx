@@ -549,11 +549,13 @@ function MeetingDialog({
           visitor_name: v.name.trim(),
           visitor_lodge_name: v.lodgeName.trim() || null,
           visitor_lodge_number: v.lodgeNumber.trim() || null,
+          email: v.email.trim().toLowerCase() || null,
           attendance_status: v.status,
           payment_method: v.paymentMethod,
           amount_pence: parsePounds(v.amountPounds),
           created_by: user?.id ?? null,
         }));
+
 
       const all = [...memberRows, ...visitorRows];
       if (all.length) {
