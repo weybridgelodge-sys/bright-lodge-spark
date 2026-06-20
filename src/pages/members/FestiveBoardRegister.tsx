@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import MembersLayout from "@/components/members/MembersLayout";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { formatMemberLine } from "@/lib/summons";
+import { formatMemberLine, type MemberRow } from "@/lib/summons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -85,7 +85,15 @@ type Member = {
 };
 
 function memberDisplay(m: Member) {
-  return formatMemberLine(m as any) || "Unnamed brother";
+  const row: MemberRow = {
+    ...m,
+    initiation_date: null,
+    joined_lodge_date: null,
+    joined_year: null,
+    is_royal_arch: null,
+    status: "active",
+  };
+  return formatMemberLine(row) || "Unnamed brother";
 }
 
 

@@ -210,9 +210,9 @@ const Bookings = () => {
         throw new Error(error?.message || "Failed to save response");
       }
       setSubmissionStatus(finalStatus);
-    } catch (err: any) {
+    } catch (err: unknown) {
       setSubmissionStatus("error");
-      toast({ title: "Error", description: err?.message || "Could not save your response. Please try again.", variant: "destructive" });
+      toast({ title: "Error", description: err instanceof Error ? err.message : "Could not save your response. Please try again.", variant: "destructive" });
     }
   };
 
