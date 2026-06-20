@@ -1025,19 +1025,26 @@ function MeetingDialog({
                 {visitorDrafts.map((v) => (
                   <div
                     key={v.id}
-                    className="border border-gold/15 rounded-sm p-2 grid grid-cols-1 sm:grid-cols-[1fr_1fr_90px_1fr_140px_180px_100px_auto] gap-2 items-center"
+                    className={`border rounded-sm p-2 grid grid-cols-1 sm:grid-cols-[1fr_1fr_90px_1fr_140px_180px_100px_auto] gap-2 items-center ${v.synced ? "border-gold/40 bg-gold/5" : "border-gold/15"}`}
                   >
-                    <VisitorNameInput
-                      value={v.name}
-                      suggestions={visitorSuggestions}
-                      onChange={(name) => setVisitor(v.id, { name })}
-                      onPick={(s) => setVisitor(v.id, {
-                        name: s.name ?? "",
-                        lodgeName: s.lodge_name ?? "",
-                        lodgeNumber: s.lodge_number ?? "",
-                        email: s.email ?? "",
-                      })}
-                    />
+                    <div className="flex items-center gap-1.5">
+                      {v.synced && (
+                        <span className="text-[9px] uppercase tracking-wider text-gold border border-gold/40 rounded px-1 py-0.5 shrink-0" title="Synced from public booking">Synced</span>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <VisitorNameInput
+                          value={v.name}
+                          suggestions={visitorSuggestions}
+                          onChange={(name) => setVisitor(v.id, { name })}
+                          onPick={(s) => setVisitor(v.id, {
+                            name: s.name ?? "",
+                            lodgeName: s.lodge_name ?? "",
+                            lodgeNumber: s.lodge_number ?? "",
+                            email: s.email ?? "",
+                          })}
+                        />
+                      </div>
+                    </div>
                     <Input
                       value={v.lodgeName}
                       placeholder="Lodge name"
