@@ -607,8 +607,18 @@ const OfficersDiningPanel: React.FC<{
         <Text style={s.microLarge}>{flow(template.overseas_attendance_text)}</Text>
       </>
     )}
+    {/* Newsletter consent — establishes lawful basis for adding visiting
+        Freemasons captured via summons / Festive Board portal to the
+        Weybridge Chronicle list. Existing members are covered by separate
+        membership data-handling terms (see Data Protection notice above). */}
+    <Text style={[s.microLarge, { marginTop: 6 }]}>
+      <Text style={s.bold}>Newsletter consent: </Text>
+      As part of receiving this summons, Weybridge Lodge will send you newsletters or other Masonic-related information.
+      You can unsubscribe at any time using the link in the footer of each newsletter.
+    </Text>
   </View>
 );
+
 
 const AgendaPanel: React.FC<{
   template: LodgeTemplate;

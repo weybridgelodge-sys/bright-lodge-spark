@@ -51,11 +51,13 @@ type Attendance = {
   visitor_name: string | null;
   visitor_lodge_name: string | null;
   visitor_lodge_number: string | null;
+  email: string | null;
   attendance_status: FbAttendanceStatus;
   payment_method: FbPaymentMethod;
   amount_pence: number;
   booking_id: string | null;
 };
+
 
 type Member = {
   id: string;
@@ -382,10 +384,12 @@ type VisitorDraft = {
   name: string;
   lodgeName: string;
   lodgeNumber: string;
+  email: string;
   status: FbAttendanceStatus;
   paymentMethod: FbPaymentMethod;
   amountPounds: string;
 };
+
 
 function tempId() {
   return `tmp_${Math.random().toString(36).slice(2)}`;
@@ -441,11 +445,13 @@ function MeetingDialog({
         name: a.visitor_name ?? "",
         lodgeName: a.visitor_lodge_name ?? "",
         lodgeNumber: a.visitor_lodge_number ?? "",
+        email: a.email ?? "",
         status: a.attendance_status as FbAttendanceStatus,
         paymentMethod: a.payment_method as FbPaymentMethod,
         amountPounds: (a.amount_pence / 100).toFixed(2),
       }))
   );
+
 
   const setMember = (id: string, patch: Partial<MemberDraft>) =>
     setMemberDrafts((p) => ({ ...p, [id]: { ...p[id], ...patch } }));
@@ -461,11 +467,13 @@ function MeetingDialog({
         name: "",
         lodgeName: "",
         lodgeNumber: "",
+        email: "",
         status: "attended",
         paymentMethod: "unknown",
         amountPounds: "",
       },
     ]);
+
 
   const removeVisitor = (id: string) =>
     setVisitorDrafts((p) => p.filter((v) => v.id !== id));
@@ -541,11 +549,13 @@ function MeetingDialog({
           visitor_name: v.name.trim(),
           visitor_lodge_name: v.lodgeName.trim() || null,
           visitor_lodge_number: v.lodgeNumber.trim() || null,
+          email: v.email.trim().toLowerCase() || null,
           attendance_status: v.status,
           payment_method: v.paymentMethod,
           amount_pence: parsePounds(v.amountPounds),
           created_by: user?.id ?? null,
         }));
+
 
       const all = [...memberRows, ...visitorRows];
       if (all.length) {
@@ -738,7 +748,7 @@ function MeetingDialog({
                 {visitorDrafts.map((v) => (
                   <div
                     key={v.id}
-                    className="border border-gold/15 rounded-sm p-2 grid grid-cols-1 sm:grid-cols-[1fr_1fr_90px_140px_180px_100px_auto] gap-2 items-center"
+                    className="border border-gold/15 rounded-sm p-2 grid grid-cols-1 sm:grid-cols-[1fr_1fr_90px_1fr_140px_180px_100px_auto] gap-2 items-center"
                   >
                     <Input
                       value={v.name}
@@ -758,6 +768,14 @@ function MeetingDialog({
                       onChange={(e) => setVisitor(v.id, { lodgeNumber: e.target.value })}
                       className="bg-navy border-gold/20 h-8 text-xs"
                     />
+                    <Input
+                      type="email"
+                      value={v.email}
+                      placeholder="Email (optional, for newsletter)"
+                      onChange={(e) => setVisitor(v.id, { email: e.target.value })}
+                      className="bg-navy border-gold/20 h-8 text-xs"
+                    />
+
                     <Select
                       value={v.status}
                       onValueChange={(val) =>

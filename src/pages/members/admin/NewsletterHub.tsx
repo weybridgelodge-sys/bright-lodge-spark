@@ -37,8 +37,10 @@ interface DraftRow {
   content_visitors: any;
   status: string;
   audience: string | null;
+  unified_content: boolean | null;
   created_at: string;
 }
+
 
 const DEFAULT_SUBJECT = "Weybridge Lodge No. 6787 — Monthly News & Labours";
 const SITE_ORIGIN = "https://bright-lodge-spark.lovable.app";
@@ -175,6 +177,7 @@ function NewsletterHubInner() {
 
   const [broadcastId, setBroadcastId] = useState<string | null>(null);
   const [audience, setAudience] = useState<Audience>("members");
+  const [unifiedContent, setUnifiedContent] = useState<boolean>(false);
   const [subject, setSubject] = useState(DEFAULT_SUBJECT);
   const [membersSections, setMembersSections] = useState<Section[]>(DEFAULT_SECTIONS());
   const [visitorsSections, setVisitorsSections] = useState<Section[]>(() =>
@@ -186,15 +189,19 @@ function NewsletterHubInner() {
   const [drafts, setDrafts] = useState<DraftRow[]>([]);
   const [saving, setSaving] = useState(false);
   const [sending, setSending] = useState(false);
-  const [sentSummary, setSentSummary] = useState<Array<{ audience: Audience; sent: number; error?: string | null }> | null>(null);
+  const [sentSummary, setSentSummary] = useState<Array<{ audience: string; sent: number; error?: string | null }> | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const sections = audience === "members" ? membersSections : visitorsSections;
+
+  // In unified mode, the visitor variant editor is hidden and the members
+  // content acts as the canonical single version. Keep the variant in sync
+  // so any later untick pre-fills visitors (rather than starting blank).
+  const effectiveAudience: Audience = unifiedContent ? "members" : audience;
+  const sections = effectiveAudience === "members" ? membersSections : visitorsSections;
   const setSections = (next: Section[] | ((prev: Section[]) => Section[])) => {
-    if (audience === "members") {
+    if (effectiveAudience === "members") {
       setMembersSections((prev) => {
         const updated = typeof next === "function" ? next(prev) : next;
-        // Mirror structure (ids/headings/layout) into visitor variant.
         setVisitorsSections((vPrev) => syncStructure(updated, vPrev));
         return updated;
       });
@@ -202,6 +209,28 @@ function NewsletterHubInner() {
       setVisitorsSections((prev) => (typeof next === "function" ? next(prev) : next));
     }
   };
+
+  // When unified-content is toggled OFF, pre-fill the visitor variant with
+  // a clone of the current members content rather than leaving it blank, so
+  // the editor can diverge from a sensible starting point instead of losing
+  // the just-written copy.
+  const setUnifiedContentSafe = (next: boolean) => {
+    setUnifiedContent((prev) => {
+      if (prev && !next) {
+        // ticked → unticked: clone members into visitors
+        setVisitorsSections(membersSections.map((s) => ({
+          ...s,
+          blocks: s.blocks.map((b) =>
+            b.type === "text"
+              ? { id: b.id, type: "text", text: b.text }
+              : { id: b.id, type: "image", url: b.url, alt: b.alt, caption: b.caption },
+          ),
+        })));
+      }
+      return next;
+    });
+  };
+
 
   useEffect(() => {
     (async () => {
@@ -217,7 +246,7 @@ function NewsletterHubInner() {
   const loadDrafts = async () => {
     const { data } = await supabase
       .from("newsletter_broadcasts" as any)
-      .select("id,subject,target_list,content,content_visitors,status,audience,created_at")
+      .select("id,subject,target_list,content,content_visitors,status,audience,unified_content,created_at")
       .in("status", ["draft", "ready_to_send"])
       .is("audience", null) // exclude per-audience sent rows
       .order("created_at", { ascending: false });
@@ -232,6 +261,7 @@ function NewsletterHubInner() {
     setVisitorsSections(syncStructure(fresh, []));
     setStatus("draft");
     setAudience("members");
+    setUnifiedContent(false);
     setError(null);
   };
 
@@ -243,6 +273,7 @@ function NewsletterHubInner() {
     setMembersSections(m);
     setVisitorsSections(syncStructure(m, v));
     setStatus((d.status as Status) === "ready_to_send" ? "ready_to_send" : "draft");
+    setUnifiedContent(!!d.unified_content);
     setSentSummary(null);
     setError(null);
   };
@@ -251,16 +282,16 @@ function NewsletterHubInner() {
     setError(null);
     setSaving(true);
     try {
-      // Ensure structure is mirrored before persisting.
       const v = syncStructure(membersSections, visitorsSections);
       setVisitorsSections(v);
       const payload = {
         subject: subject.trim() || DEFAULT_SUBJECT,
-        target_list: "members_pipeline", // legacy column, kept for compat
+        target_list: "members_pipeline",
         content: { sections: membersSections } satisfies NewsletterContent,
         content_visitors: { sections: v } satisfies NewsletterContent,
         status,
         audience: null,
+        unified_content: unifiedContent,
       };
       if (broadcastId) {
         const { error: err } = await supabase.from("newsletter_broadcasts" as any).update(payload).eq("id", broadcastId);
@@ -295,15 +326,26 @@ function NewsletterHubInner() {
       (s.blocks || []).some((b) => (b.type === "text" && b.text.trim()) || (b.type === "image" && b.url.trim())),
     );
 
-  const send = async (audiences: Audience[]) => {
+  /**
+   * audiences semantics (server-aligned):
+   *   ["members"]           → send Members & Visitors edition
+   *   ["visitors"]          → send Public edition
+   *   ["members","visitors"]→ two separate sends (dual-variant mode)
+   *   ["all"]               → single merged dedup send (unified-content mode only)
+   */
+  const send = async (audiences: Array<"members" | "visitors" | "all">) => {
     if (!broadcastId) { setError("Save the newsletter first."); return; }
     if (status !== "ready_to_send") { setError('Set status to "Ready to send" before broadcasting.'); return; }
 
-    // Client-side guard ("block send and warn"). Server re-validates.
+    const labelFor = (a: string) =>
+      a === "members" ? "Members & Visitors" : a === "visitors" ? "Public" : "Combined (all lists)";
+
+    // Client-side content guard. In unified mode every requested audience
+    // shares the members variant; otherwise check the matching variant.
     for (const a of audiences) {
-      const list = a === "members" ? membersSections : visitorsSections;
+      const list = unifiedContent || a !== "visitors" ? membersSections : visitorsSections;
       if (!sectionsHaveContent(list)) {
-        setError(`The ${a === "members" ? "Members" : "Visitors"} edition has empty sections. Fill or remove them before sending.`);
+        setError(`The ${labelFor(a)} edition has empty sections. Fill or remove them before sending.`);
         return;
       }
     }
@@ -311,11 +353,13 @@ function NewsletterHubInner() {
     if (audiences.length > 1 && !confirm(`Broadcast both editions now? Two separate sends will be logged and two PDFs archived.`)) {
       return;
     }
+    if (audiences.includes("all") && !confirm(`Send one merged broadcast to Members & Visitors AND Public, deduplicated by email? One combined PDF will be archived.`)) {
+      return;
+    }
 
     setError(null);
     setSending(true);
     try {
-      // Persist latest edits first.
       const v = syncStructure(membersSections, visitorsSections);
       await supabase
         .from("newsletter_broadcasts" as any)
@@ -324,6 +368,7 @@ function NewsletterHubInner() {
           content: { sections: membersSections },
           content_visitors: { sections: v },
           status: "ready_to_send",
+          unified_content: unifiedContent,
         })
         .eq("id", broadcastId);
 
@@ -333,7 +378,7 @@ function NewsletterHubInner() {
       if (invokeError || (data && (data as { error?: string }).error)) {
         throw new Error((data as { error?: string })?.error || invokeError?.message || "Send failed");
       }
-      setSentSummary((data as { results?: Array<{ audience: Audience; sent: number; error?: string | null }> }).results ?? []);
+      setSentSummary((data as { results?: Array<{ audience: string; sent: number; error?: string | null }> }).results ?? []);
       loadDrafts();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unable to send");
@@ -341,6 +386,8 @@ function NewsletterHubInner() {
       setSending(false);
     }
   };
+
+
 
   // ---- Section/block mutators (operate on the active audience) ----
   const updateSection = (id: string, patch: Partial<Section>) =>
@@ -384,10 +431,10 @@ function NewsletterHubInner() {
 
   /** Copy the body of this section from the OTHER audience variant into the current one. */
   const copyFromOther = (sectionId: string) => {
-    const sourceList = audience === "members" ? visitorsSections : membersSections;
+    const sourceList = effectiveAudience === "members" ? visitorsSections : membersSections;
     const src = sourceList.find((s) => s.id === sectionId);
     if (!src) { toast.error("Nothing to copy — the other audience has no matching section."); return; }
-    if (audience === "members") {
+    if (effectiveAudience === "members") {
       setMembersSections((prev) => prev.map((s) => s.id === sectionId ? { ...s, blocks: cloneBlocks(src.blocks) } : s));
     } else {
       setVisitorsSections((prev) => prev.map((s) => s.id === sectionId ? { ...s, blocks: cloneBlocks(src.blocks) } : s));
@@ -400,6 +447,7 @@ function NewsletterHubInner() {
         ? { id: b.id, type: "text", text: b.text }
         : { id: b.id, type: "image", url: b.url, alt: b.alt, caption: b.caption },
     );
+
 
   if (!accessChecked) {
     return <MembersLayout><div className="text-primary-foreground/60 text-sm">Checking access…</div></MembersLayout>;
@@ -430,12 +478,15 @@ function NewsletterHubInner() {
           <ul className="text-sm text-primary-foreground/80 mb-6 space-y-1">
             {sentSummary.map((r) => (
               <li key={r.audience}>
-                <strong className="text-gold">{r.audience === "members" ? "Members" : "Visitors"}:</strong>{" "}
+                <strong className="text-gold">
+                  {r.audience === "members" ? "Members & Visitors" : r.audience === "visitors" ? "Public" : "Combined (all lists)"}:
+                </strong>{" "}
                 {r.error ? <span className="text-red-300">failed — {r.error}</span> : `${r.sent} sent · PDF archived`}
               </li>
             ))}
           </ul>
-          <p className="text-[11px] text-primary-foreground/50 mb-6">PDFs are filed under <strong className="text-gold">Documents → Newsletters</strong>, one per audience.</p>
+          <p className="text-[11px] text-primary-foreground/50 mb-6">PDFs are filed under <strong className="text-gold">Documents → Newsletters</strong>, one per audience sent.</p>
+
           <Button onClick={() => { setSentSummary(null); resetEditor(); }} variant="outline" className="border-gold/40 text-gold hover:bg-gold/10">
             Compose next issue
           </Button>
@@ -450,10 +501,17 @@ function NewsletterHubInner() {
         <p className="text-xs uppercase tracking-wider text-gold/80">Communications Engine</p>
         <h1 className="font-serif text-2xl md:text-3xl text-gold mt-1">Newsletter Dispatch Hub</h1>
         <p className="text-primary-foreground/70 text-sm mt-1">
-          Compose one issue with parallel <strong className="text-gold">Members</strong> and <strong className="text-gold">Visitors</strong> editions.
-          Switch the audience toggle to edit each variant; sections stay in sync, body text is independent.
-          Each successful send is archived as its own PDF under Documents → Newsletters.
+          Compose one issue, then choose your audience. <strong className="text-gold">Lodge Members &amp; Visitors</strong> covers
+          active members plus visiting Freemasons (deferred until the visitor contacts list ships); <strong className="text-gold">Public</strong> goes
+          to website newsletter sign-ups. Tick <strong className="text-gold">Unified content</strong> when one shared write-up suits everyone
+          (e.g. a social-event poster) — the merged "Send to Both" then dedups by email and files a single combined PDF.
         </p>
+        <p className="text-[11px] text-primary-foreground/50 mt-2">
+          <strong>Note:</strong> Mailchimp was considered for the Public list and dropped — its free tier caps at 250 contacts /
+          500 sends per month and forces a "Sent with Mailchimp" footer below the paid Essentials plan. Both audiences go via
+          the portal's existing Resend integration so branding, unsubscribe handling, and contact storage stay consistent.
+        </p>
+
       </header>
 
       {drafts.length > 0 && (
@@ -482,20 +540,42 @@ function NewsletterHubInner() {
         </div>
       )}
 
-      {/* Audience editing toggle */}
-      <div className="mb-2 text-[11px] uppercase tracking-wider text-primary-foreground/60">Editing audience variant</div>
-      <div className="inline-flex bg-navy-light/40 border border-gold/20 rounded-lg p-1 mb-6">
-        <button type="button" onClick={() => setAudience("members")}
-          className={`px-4 py-2 text-xs font-semibold rounded-md transition-all flex items-center gap-1.5 ${
-            audience === "members" ? "bg-gold text-navy shadow" : "text-primary-foreground/70 hover:text-primary-foreground"}`}>
-          <Users className="h-3.5 w-3.5" /> Lodge Members
-        </button>
-        <button type="button" onClick={() => setAudience("visitors")}
-          className={`px-4 py-2 text-xs font-semibold rounded-md transition-all flex items-center gap-1.5 ${
-            audience === "visitors" ? "bg-gold text-navy shadow" : "text-primary-foreground/70 hover:text-primary-foreground"}`}>
-          <Mail className="h-3.5 w-3.5" /> Visitors / Public
-        </button>
-      </div>
+      {/* Unified content toggle */}
+      <label className="flex items-start gap-2 mb-4 cursor-pointer">
+        <input
+          type="checkbox"
+          checked={unifiedContent}
+          onChange={(e) => setUnifiedContentSafe(e.target.checked)}
+          className="mt-0.5 accent-gold"
+        />
+        <span>
+          <span className="text-sm font-semibold text-gold">Unified content</span>
+          <span className="block text-[11px] text-primary-foreground/60 leading-relaxed">
+            One shared write-up for everyone. Hides the Public variant editor; "Send to Both" becomes a single dedup'd merged
+            send with one combined PDF archived.
+          </span>
+        </span>
+      </label>
+
+      {/* Audience editing toggle — hidden in unified mode */}
+      {!unifiedContent && (
+        <>
+          <div className="mb-2 text-[11px] uppercase tracking-wider text-primary-foreground/60">Editing audience variant</div>
+          <div className="inline-flex bg-navy-light/40 border border-gold/20 rounded-lg p-1 mb-6">
+            <button type="button" onClick={() => setAudience("members")}
+              className={`px-4 py-2 text-xs font-semibold rounded-md transition-all flex items-center gap-1.5 ${
+                audience === "members" ? "bg-gold text-navy shadow" : "text-primary-foreground/70 hover:text-primary-foreground"}`}>
+              <Users className="h-3.5 w-3.5" /> Lodge Members &amp; Visitors
+            </button>
+            <button type="button" onClick={() => setAudience("visitors")}
+              className={`px-4 py-2 text-xs font-semibold rounded-md transition-all flex items-center gap-1.5 ${
+                audience === "visitors" ? "bg-gold text-navy shadow" : "text-primary-foreground/70 hover:text-primary-foreground"}`}>
+              <Mail className="h-3.5 w-3.5" /> Public
+            </button>
+          </div>
+        </>
+      )}
+
 
       <div className="grid lg:grid-cols-2 gap-6">
         {/* Composer */}
@@ -505,8 +585,11 @@ function NewsletterHubInner() {
               <FileEdit className="h-4 w-4" />
               {broadcastId ? "Editing draft" : "New newsletter"}
               <span className="text-[10px] uppercase tracking-wider text-primary-foreground/60 ml-2">
-                {audience === "members" ? "Members variant" : "Visitors variant"}
+                {unifiedContent
+                  ? "Unified content (all audiences)"
+                  : effectiveAudience === "members" ? "Members & Visitors variant" : "Public variant"}
               </span>
+
             </h2>
             {broadcastId && (
               <button type="button" onClick={resetEditor} className="text-[11px] uppercase tracking-wider text-primary-foreground/60 hover:text-gold">
@@ -568,13 +651,16 @@ function NewsletterHubInner() {
                   </button>
                 </div>
 
-                <div className="flex justify-end">
-                  <button type="button" onClick={() => copyFromOther(s.id)}
-                    className="text-[10px] inline-flex items-center gap-1 px-2 py-0.5 rounded border border-gold/30 text-gold/80 hover:bg-gold/10"
-                    title={`Copy this section's body from the ${audience === "members" ? "Visitors" : "Members"} variant`}>
-                    <Copy className="h-3 w-3" /> Copy from {audience === "members" ? "Visitors" : "Members"}
-                  </button>
-                </div>
+                {!unifiedContent && (
+                  <div className="flex justify-end">
+                    <button type="button" onClick={() => copyFromOther(s.id)}
+                      className="text-[10px] inline-flex items-center gap-1 px-2 py-0.5 rounded border border-gold/30 text-gold/80 hover:bg-gold/10"
+                      title={`Copy this section's body from the ${effectiveAudience === "members" ? "Public" : "Members & Visitors"} variant`}>
+                      <Copy className="h-3 w-3" /> Copy from {effectiveAudience === "members" ? "Public" : "Members & Visitors"}
+                    </button>
+                  </div>
+                )}
+
 
                 <div className="space-y-2 pl-1">
                   {s.blocks.map((b) => (
@@ -594,7 +680,7 @@ function NewsletterHubInner() {
                           rows={3}
                           value={b.text}
                           onChange={(e) => updateBlock(s.id, b.id, { text: e.target.value })}
-                          placeholder={`Write ${audience === "members" ? "Members" : "Visitors"} paragraph text…`}
+                          placeholder={`Write ${unifiedContent ? "shared" : effectiveAudience === "members" ? "Members & Visitors" : "Public"} paragraph text…`}
                           className="w-full bg-navy-dark border border-gold/20 rounded px-2 py-1.5 text-sm text-primary-foreground placeholder:text-primary-foreground/40 focus:outline-none focus:border-gold/60 leading-relaxed resize-y"
                         />
                       ) : (
@@ -659,19 +745,25 @@ function NewsletterHubInner() {
           <div className="grid sm:grid-cols-3 gap-2 pt-2">
             <Button type="button" onClick={() => send(["members"])} disabled={sending || status !== "ready_to_send" || !broadcastId}
               className="bg-gold hover:bg-gold/90 text-navy font-semibold disabled:opacity-40"
-              title={!broadcastId ? "Save first" : status !== "ready_to_send" ? 'Mark "Ready to send"' : "Send Members edition"}>
-              {sending ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : <Send className="h-4 w-4 mr-1.5" />} Send to Members
+              title={!broadcastId ? "Save first" : status !== "ready_to_send" ? 'Mark "Ready to send"' : "Send to active members"}>
+              {sending ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : <Send className="h-4 w-4 mr-1.5" />} Send to Members &amp; Visitors
             </Button>
             <Button type="button" onClick={() => send(["visitors"])} disabled={sending || status !== "ready_to_send" || !broadcastId}
               className="bg-gold hover:bg-gold/90 text-navy font-semibold disabled:opacity-40"
-              title={!broadcastId ? "Save first" : status !== "ready_to_send" ? 'Mark "Ready to send"' : "Send Visitors edition"}>
-              {sending ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : <Send className="h-4 w-4 mr-1.5" />} Send to Visitors
+              title={!broadcastId ? "Save first" : status !== "ready_to_send" ? 'Mark "Ready to send"' : "Send to public newsletter sign-ups"}>
+              {sending ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : <Send className="h-4 w-4 mr-1.5" />} Send to Public
             </Button>
-            <Button type="button" onClick={() => send(["members", "visitors"])} disabled={sending || status !== "ready_to_send" || !broadcastId}
-              className="bg-navy border border-gold text-gold hover:bg-gold/10 font-semibold disabled:opacity-40">
-              {sending ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : <Send className="h-4 w-4 mr-1.5" />} Send to Both
+            <Button
+              type="button"
+              onClick={() => send(unifiedContent ? ["all"] : ["members", "visitors"])}
+              disabled={sending || status !== "ready_to_send" || !broadcastId}
+              className="bg-navy border border-gold text-gold hover:bg-gold/10 font-semibold disabled:opacity-40"
+              title={unifiedContent ? "One merged dedup'd send · single combined PDF" : "Two separate sends · two PDFs"}>
+              {sending ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : <Send className="h-4 w-4 mr-1.5" />}
+              Send to Both {unifiedContent ? "(merged)" : "(two sends)"}
             </Button>
           </div>
+
         </div>
 
         {/* Preview (active audience) */}
@@ -679,7 +771,7 @@ function NewsletterHubInner() {
           <div className="rounded-2xl overflow-hidden border border-gold/20 shadow-inner bg-white text-black">
             <div className="px-5 py-3 border-b border-slate-200 text-[11px] text-slate-500 space-y-0.5">
               <p><strong>From:</strong> Weybridge Lodge No. 6787 &lt;chronicle@weybridgelodge.org.uk&gt;</p>
-              <p><strong>To:</strong> {audience === "members" ? "Members & Candidates" : "Public Subscribers"}</p>
+              <p><strong>To:</strong> {unifiedContent ? "Members & Visitors + Public (deduplicated)" : effectiveAudience === "members" ? "Members & Visitors" : "Public Subscribers"}</p>
               <p><strong>Subject:</strong> {subject || "…"}</p>
             </div>
 

@@ -18,7 +18,8 @@ body{margin:0;font-family:Inter,system-ui,sans-serif;background:#0c1730;color:#f
 h1{font-family:'Playfair Display',Georgia,serif;color:#C9A432;margin:0 0 12px;font-size:28px}
 p{line-height:1.6;color:rgba(246,241,226,.85);margin:0 0 8px}
 a{color:#C9A432;text-decoration:none;font-weight:600}
-</style></head><body><div class="card"><h1>${title}</h1><p>${message}</p><p style="margin-top:24px"><a href="https://weybridgelodge.org.uk">Return to Weybridge Lodge</a></p></div></body></html>`;
+.note{font-size:12px;color:rgba(246,241,226,.6);margin-top:18px}
+</style></head><body><div class="card"><h1>${title}</h1><p>${message}</p><p class="note">Unsubscribing only affects the Weybridge Chronicle newsletter. Official lodge communications (summonses, booking confirmations and portal notifications) are unaffected.</p><p style="margin-top:18px"><a href="https://weybridgelodge.org.uk">Return to Weybridge Lodge</a></p></div></body></html>`;
 }
 
 Deno.serve(async (req) => {
@@ -27,24 +28,44 @@ Deno.serve(async (req) => {
   const token = url.searchParams.get("token");
   if (!token) {
     return new Response(page("Invalid link", "This unsubscribe link is missing a token."), {
-      status: 400,
-      headers: { ...corsHeaders, "Content-Type": "text/html; charset=utf-8" },
+      status: 400, headers: { ...corsHeaders, "Content-Type": "text/html; charset=utf-8" },
     });
   }
-  const { data, error } = await supabase
+
+  // 1. Try the member opt-out table first (per-recipient tokens minted at send time).
+  const { data: member } = await supabase
+    .from("member_newsletter_opt_outs")
+    .update({ opted_out_at: new Date().toISOString() })
+    .eq("token", token)
+    .select("user_id")
+    .maybeSingle();
+  if (member) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("email")
+      .eq("id", member.user_id)
+      .maybeSingle();
+    return new Response(page(
+      "You're unsubscribed",
+      `<strong>${profile?.email ?? "Your account"}</strong> has been removed from the Weybridge Chronicle newsletter.`,
+    ), { headers: { ...corsHeaders, "Content-Type": "text/html; charset=utf-8" } });
+  }
+
+  // 2. Fall back to the public subscriber list.
+  const { data: sub } = await supabase
     .from("newsletter_subscribers")
     .update({ unsubscribed_at: new Date().toISOString() })
     .eq("unsubscribe_token", token)
     .select("email")
     .maybeSingle();
-
-  if (error || !data) {
-    return new Response(page("Link not recognised", "We couldn't find a matching subscription. It may have already been removed."), {
-      status: 404,
-      headers: { ...corsHeaders, "Content-Type": "text/html; charset=utf-8" },
-    });
+  if (sub) {
+    return new Response(page(
+      "You're unsubscribed",
+      `<strong>${sub.email}</strong> has been removed from the Weybridge Chronicle newsletter. We're sorry to see you go.`,
+    ), { headers: { ...corsHeaders, "Content-Type": "text/html; charset=utf-8" } });
   }
-  return new Response(page("You're unsubscribed", `<strong>${data.email}</strong> has been removed from the Weybridge Lodge Monthly Chronicle. We're sorry to see you go.`), {
-    headers: { ...corsHeaders, "Content-Type": "text/html; charset=utf-8" },
+
+  return new Response(page("Link not recognised", "We couldn't find a matching subscription. It may have already been removed."), {
+    status: 404, headers: { ...corsHeaders, "Content-Type": "text/html; charset=utf-8" },
   });
 });

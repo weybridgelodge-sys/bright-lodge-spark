@@ -454,6 +454,7 @@ export type Database = {
           booking_id: string | null
           created_at: string
           created_by: string | null
+          email: string | null
           id: string
           meeting_id: string
           member_id: string | null
@@ -470,6 +471,7 @@ export type Database = {
           booking_id?: string | null
           created_at?: string
           created_by?: string | null
+          email?: string | null
           id?: string
           meeting_id: string
           member_id?: string | null
@@ -486,6 +488,7 @@ export type Database = {
           booking_id?: string | null
           created_at?: string
           created_by?: string | null
+          email?: string | null
           id?: string
           meeting_id?: string
           member_id?: string | null
@@ -1181,6 +1184,38 @@ export type Database = {
           },
         ]
       }
+      member_newsletter_opt_outs: {
+        Row: {
+          created_at: string
+          opted_out_at: string | null
+          token: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          opted_out_at?: string | null
+          token?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          opted_out_at?: string | null
+          token?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "member_newsletter_opt_outs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       member_notices: {
         Row: {
           author_id: string | null
@@ -1452,6 +1487,7 @@ export type Database = {
           status: string
           subject: string
           target_list: string
+          unified_content: boolean
         }
         Insert: {
           audience?: string | null
@@ -1467,6 +1503,7 @@ export type Database = {
           status?: string
           subject: string
           target_list: string
+          unified_content?: boolean
         }
         Update: {
           audience?: string | null
@@ -1482,6 +1519,7 @@ export type Database = {
           status?: string
           subject?: string
           target_list?: string
+          unified_content?: boolean
         }
         Relationships: []
       }
