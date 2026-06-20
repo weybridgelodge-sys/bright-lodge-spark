@@ -35,6 +35,7 @@ import {
   attendanceStatusLabel,
   paymentMethodLabel,
   computeHeadcount,
+  isWeybridgeLodge,
 } from "@/lib/festiveBoard";
 
 type Meeting = {
