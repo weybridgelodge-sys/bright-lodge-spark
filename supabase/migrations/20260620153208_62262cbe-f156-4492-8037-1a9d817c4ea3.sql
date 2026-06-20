@@ -1,0 +1,1 @@
+ALTER TYPE public.festive_payment_method ADD VALUE IF NOT EXISTS 'bank_transfer';

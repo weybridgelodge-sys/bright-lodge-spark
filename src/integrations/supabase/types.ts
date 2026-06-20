@@ -2621,6 +2621,7 @@ export type Database = {
         | "paid_on_night_card"
         | "complimentary"
         | "unknown"
+        | "bank_transfer"
       masonic_degree:
         | "entered_apprentice"
         | "fellow_craft"
@@ -2831,6 +2832,7 @@ export const Constants = {
         "paid_on_night_card",
         "complimentary",
         "unknown",
+        "bank_transfer",
       ],
       masonic_degree: [
         "entered_apprentice",
