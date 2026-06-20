@@ -110,7 +110,7 @@ function NewsletterHubInner() {
           .select("id")
           .single();
         if (err) throw err;
-        setBroadcastId((data as { id: string }).id);
+        setBroadcastId((data as unknown as { id: string }).id);
       }
       toast.success(status === "ready_to_send" ? "Saved — marked Ready to send" : "Draft saved");
       loadDrafts();
