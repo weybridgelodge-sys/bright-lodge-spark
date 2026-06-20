@@ -107,7 +107,7 @@ export async function fetchKpiBundle(): Promise<KpiBundle> {
     supabase
       .from("profiles")
       .select(
-        "id,full_name,first_name,middle_name,last_name,preferred_name,post_nominals,title,status,degree,is_past_master,is_royal_arch,is_honorary_member,date_of_birth,initiation_date,passing_date,raising_date,joined_lodge_date,is_ugle_portal_registered,rank,grand_rank,provincial_rank,updated_at"
+        "id,full_name,first_name,middle_name,last_name,preferred_name,post_nominals,title,status,degree,is_past_master,is_royal_arch,is_honorary_member,initiation_date,passing_date,raising_date,joined_lodge_date,is_ugle_portal_registered,rank,grand_rank,provincial_rank,updated_at"
       ),
     (supabase.from as any)("member_wm_terms").select("id,member_id,year_started,year_ended"),
     (supabase.from as any)("succession_risks").select("id,role_key,note"),
@@ -115,8 +115,18 @@ export async function fetchKpiBundle(): Promise<KpiBundle> {
     supabase.from("officer_positions").select("key,label,is_progressive,order_index"),
     (supabase.from as any)("candidates").select("*"),
   ]);
+  const baseMembers = ((m.data as unknown) as KpiMember[]) ?? [];
+  // Merge DOB (PII) via secure RPC; caller must have admin/secretary/WM/almoner/IPM role
+  let members: KpiMember[] = baseMembers;
+  if (baseMembers.length) {
+    const ids = baseMembers.map((x) => x.id);
+    const { data: pii } = await (supabase as any).rpc("get_profiles_pii", { _ids: ids });
+    const idx: Record<string, string | null> = {};
+    for (const row of (pii as { id: string; date_of_birth: string | null }[]) ?? []) idx[row.id] = row.date_of_birth;
+    members = baseMembers.map((b) => ({ ...b, date_of_birth: idx[b.id] ?? null }));
+  }
   return {
-    members: ((m.data as unknown) as KpiMember[]) ?? [],
+    members,
     wmTerms: (w.data as WmTerm[]) ?? [],
     risks: (r.data as SuccessionRisk[]) ?? [],
     appointments: (a.data as Appointment[]) ?? [],
