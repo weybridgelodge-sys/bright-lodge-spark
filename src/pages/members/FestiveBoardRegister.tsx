@@ -534,7 +534,9 @@ function MeetingDialog({
         notes: notes.trim() || null,
         headcount_override: override.trim() === "" ? null : Number(override),
         created_by: user?.id ?? null,
+        event_key: existing?.event_key ?? `festive-board-${date}`,
       };
+
 
       let meetingId = existing?.id;
       if (existing) {
