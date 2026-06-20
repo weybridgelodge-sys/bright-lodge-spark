@@ -2575,6 +2575,28 @@ export type Database = {
         Args: { _member_id: string }
         Returns: string
       }
+      get_profiles_pii: {
+        Args: { _ids: string[] }
+        Returns: {
+          address_line1: string
+          address_line2: string
+          address_line3: string
+          county: string
+          date_of_birth: string
+          id: string
+          phone: string
+          postcode: string
+          town: string
+          ugle_reg_number: string
+        }[]
+      }
+      get_summons_dining_contacts: {
+        Args: { _ids: string[] }
+        Returns: {
+          dining_enquiry_email: string
+          id: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
