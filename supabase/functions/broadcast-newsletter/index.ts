@@ -88,19 +88,20 @@ function renderSection(s: Section): string {
   const heading = `<h2 style="font-family:'Playfair Display',Georgia,serif;color:#1B2A4A;font-size:22px;margin:28px 0 12px;border-bottom:1px solid #e5dccd;padding-bottom:8px">${escapeHtml(s.heading || "")}</h2>`;
   const blocks = s.blocks || [];
   if (s.layout === "masonry" && blocks.length > 1) {
-    // 2-column table (email-safe approximation of masonry)
-    const cells = blocks
-      .map((b) => `<td valign="top" width="50%" style="padding:6px;vertical-align:top">${renderBlock(b)}</td>`)
-      .join("");
-    // Wrap pairs into rows
+    // Email-safe two-column grid: table cells render in Outlook,
+    // and the `.nl-col` class collapses to 100% width on phones via
+    // the @media rule injected into the document <head>.
+    const cellArr = blocks.map(
+      (b) =>
+        `<td class="nl-col" valign="top" width="48%" style="width:48%;padding:6px;vertical-align:top">${renderBlock(b)}</td>`,
+    );
     const rows: string[] = [];
-    const cellArr = blocks.map((b) => `<td valign="top" width="50%" style="padding:6px;vertical-align:top">${renderBlock(b)}</td>`);
     for (let i = 0; i < cellArr.length; i += 2) {
       const pair = cellArr.slice(i, i + 2);
-      if (pair.length === 1) pair.push('<td width="50%"></td>');
+      if (pair.length === 1) pair.push('<td class="nl-col" width="48%" style="width:48%"></td>');
       rows.push(`<tr>${pair.join("")}</tr>`);
     }
-    return `${heading}<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="border-collapse:collapse"><tbody>${rows.join("")}</tbody></table>`;
+    return `${heading}<table class="nl-masonry" role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="border-collapse:collapse;width:100%"><tbody>${rows.join("")}</tbody></table>`;
   }
   return `${heading}<div>${blocks.map(renderBlock).join("")}</div>`;
 }
