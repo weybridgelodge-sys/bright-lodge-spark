@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import {
   Mail, Send, Eye, Users, FileEdit, CheckCircle2, Loader2, AlertCircle, Save, Trash2,
-  FileClock, Plus, Type, Image as ImageIcon, ArrowUp, ArrowDown, Columns, Rows,
+  FileClock, Plus, Type, Image as ImageIcon, ArrowUp, ArrowDown, Columns, Rows, Copy,
 } from "lucide-react";
 import MembersLayout from "@/components/members/MembersLayout";
 import ProtectedRoute from "@/components/members/ProtectedRoute";
@@ -10,7 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import logoAsset from "@/assets/weybridge-logo-white.png.asset.json";
 
-type TargetList = "members_pipeline" | "public_visitors";
+type Audience = "members" | "visitors";
 type Status = "draft" | "ready_to_send";
 type Layout = "single" | "masonry";
 
@@ -32,9 +32,11 @@ interface NewsletterContent {
 interface DraftRow {
   id: string;
   subject: string;
-  target_list: TargetList;
+  target_list: string;
   content: any;
+  content_visitors: any;
   status: string;
+  audience: string | null;
   created_at: string;
 }
 
@@ -51,7 +53,7 @@ const DEFAULT_SECTIONS = (): Section[] => [
   { id: uid(), heading: "Masonic History & Education", layout: "single", blocks: [{ id: uid(), type: "text", text: "" }] },
 ];
 
-function migrateContent(raw: any): NewsletterContent {
+function migrateContent(raw: any, fallback?: () => Section[]): NewsletterContent {
   if (raw && Array.isArray(raw.sections)) {
     return {
       sections: raw.sections.map((s: any) => ({
@@ -67,18 +69,52 @@ function migrateContent(raw: any): NewsletterContent {
       })),
     };
   }
-  // Legacy 4-key shape
   if (raw && (raw.wmDesk || raw.meetingRecap || raw.charitySpotlight || raw.masonicHistory)) {
     return {
       sections: [
-        { id: uid(), heading: "From the WM's Desk",        layout: "single", blocks: [{ id: uid(), type: "text", text: raw.wmDesk || "" }] },
-        { id: uid(), heading: "Last Meeting Labours",      layout: "single", blocks: [{ id: uid(), type: "text", text: raw.meetingRecap || "" }] },
-        { id: uid(), heading: "Charity Spotlight",         layout: "single", blocks: [{ id: uid(), type: "text", text: raw.charitySpotlight || "" }] },
+        { id: uid(), heading: "From the WM's Desk",          layout: "single", blocks: [{ id: uid(), type: "text", text: raw.wmDesk || "" }] },
+        { id: uid(), heading: "Last Meeting Labours",        layout: "single", blocks: [{ id: uid(), type: "text", text: raw.meetingRecap || "" }] },
+        { id: uid(), heading: "Charity Spotlight",           layout: "single", blocks: [{ id: uid(), type: "text", text: raw.charitySpotlight || "" }] },
         { id: uid(), heading: "Masonic History & Education", layout: "single", blocks: [{ id: uid(), type: "text", text: raw.masonicHistory || "" }] },
       ],
     };
   }
-  return { sections: DEFAULT_SECTIONS() };
+  return { sections: fallback ? fallback() : [] };
+}
+
+/** Reshape the visitor variant so its section list mirrors the members list
+ *  (same ids/headings/layout). Block-level body text is preserved where the
+ *  block ids match; sections present only on one side are kept on that side. */
+function syncStructure(members: Section[], visitors: Section[]): Section[] {
+  const visitorById = new Map(visitors.map((s) => [s.id, s]));
+  return members.map((m) => {
+    const v = visitorById.get(m.id);
+    if (!v) {
+      // New section — visitor starts with empty parallel blocks of same shape.
+      return {
+        ...m,
+        blocks: m.blocks.map((b) =>
+          b.type === "text"
+            ? { id: b.id, type: "text", text: "" }
+            : { id: b.id, type: "image", url: b.url, alt: b.alt, caption: b.caption },
+        ),
+      };
+    }
+    const vBlockById = new Map(v.blocks.map((b) => [b.id, b]));
+    return {
+      id: m.id,
+      heading: m.heading,
+      layout: m.layout,
+      blocks: m.blocks.map((mb) => {
+        const vb = vBlockById.get(mb.id);
+        if (mb.type === "text") {
+          return { id: mb.id, type: "text", text: vb && vb.type === "text" ? vb.text : "" };
+        }
+        // images share src across variants by default
+        return { id: mb.id, type: "image", url: mb.url, alt: mb.alt, caption: mb.caption };
+      }),
+    };
+  });
 }
 
 function escapeHtml(s: string): string {
@@ -138,17 +174,34 @@ function NewsletterHubInner() {
   const [hasAccess, setHasAccess] = useState(false);
 
   const [broadcastId, setBroadcastId] = useState<string | null>(null);
-  const [targetList, setTargetList] = useState<TargetList>("members_pipeline");
+  const [audience, setAudience] = useState<Audience>("members");
   const [subject, setSubject] = useState(DEFAULT_SUBJECT);
-  const [sections, setSections] = useState<Section[]>(DEFAULT_SECTIONS());
+  const [membersSections, setMembersSections] = useState<Section[]>(DEFAULT_SECTIONS());
+  const [visitorsSections, setVisitorsSections] = useState<Section[]>(() =>
+    DEFAULT_SECTIONS().map((s) => ({ ...s, blocks: s.blocks.map((b) => b.type === "text" ? { ...b, text: "" } : b) })),
+  );
   const [status, setStatus] = useState<Status>("draft");
   const [previewOpen, setPreviewOpen] = useState(true);
 
   const [drafts, setDrafts] = useState<DraftRow[]>([]);
   const [saving, setSaving] = useState(false);
   const [sending, setSending] = useState(false);
-  const [sentCount, setSentCount] = useState<number | null>(null);
+  const [sentSummary, setSentSummary] = useState<Array<{ audience: Audience; sent: number; error?: string | null }> | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const sections = audience === "members" ? membersSections : visitorsSections;
+  const setSections = (next: Section[] | ((prev: Section[]) => Section[])) => {
+    if (audience === "members") {
+      setMembersSections((prev) => {
+        const updated = typeof next === "function" ? next(prev) : next;
+        // Mirror structure (ids/headings/layout) into visitor variant.
+        setVisitorsSections((vPrev) => syncStructure(updated, vPrev));
+        return updated;
+      });
+    } else {
+      setVisitorsSections((prev) => (typeof next === "function" ? next(prev) : next));
+    }
+  };
 
   useEffect(() => {
     (async () => {
@@ -164,8 +217,9 @@ function NewsletterHubInner() {
   const loadDrafts = async () => {
     const { data } = await supabase
       .from("newsletter_broadcasts" as any)
-      .select("id,subject,target_list,content,status,created_at")
+      .select("id,subject,target_list,content,content_visitors,status,audience,created_at")
       .in("status", ["draft", "ready_to_send"])
+      .is("audience", null) // exclude per-audience sent rows
       .order("created_at", { ascending: false });
     setDrafts((data as unknown as DraftRow[]) ?? []);
   };
@@ -173,19 +227,23 @@ function NewsletterHubInner() {
   const resetEditor = () => {
     setBroadcastId(null);
     setSubject(DEFAULT_SUBJECT);
-    setSections(DEFAULT_SECTIONS());
+    const fresh = DEFAULT_SECTIONS();
+    setMembersSections(fresh);
+    setVisitorsSections(syncStructure(fresh, []));
     setStatus("draft");
-    setTargetList("members_pipeline");
+    setAudience("members");
     setError(null);
   };
 
   const loadDraft = (d: DraftRow) => {
     setBroadcastId(d.id);
     setSubject(d.subject);
-    setTargetList(d.target_list);
-    setSections(migrateContent(d.content).sections);
+    const m = migrateContent(d.content, DEFAULT_SECTIONS).sections;
+    const v = migrateContent(d.content_visitors).sections;
+    setMembersSections(m);
+    setVisitorsSections(syncStructure(m, v));
     setStatus((d.status as Status) === "ready_to_send" ? "ready_to_send" : "draft");
-    setSentCount(null);
+    setSentSummary(null);
     setError(null);
   };
 
@@ -193,11 +251,16 @@ function NewsletterHubInner() {
     setError(null);
     setSaving(true);
     try {
+      // Ensure structure is mirrored before persisting.
+      const v = syncStructure(membersSections, visitorsSections);
+      setVisitorsSections(v);
       const payload = {
         subject: subject.trim() || DEFAULT_SUBJECT,
-        target_list: targetList,
-        content: { sections } satisfies NewsletterContent,
+        target_list: "members_pipeline", // legacy column, kept for compat
+        content: { sections: membersSections } satisfies NewsletterContent,
+        content_visitors: { sections: v } satisfies NewsletterContent,
         status,
+        audience: null,
       };
       if (broadcastId) {
         const { error: err } = await supabase.from("newsletter_broadcasts" as any).update(payload).eq("id", broadcastId);
@@ -227,24 +290,50 @@ function NewsletterHubInner() {
     loadDrafts();
   };
 
-  const send = async () => {
+  const sectionsHaveContent = (list: Section[]): boolean =>
+    list.length > 0 && list.every((s) =>
+      (s.blocks || []).some((b) => (b.type === "text" && b.text.trim()) || (b.type === "image" && b.url.trim())),
+    );
+
+  const send = async (audiences: Audience[]) => {
     if (!broadcastId) { setError("Save the newsletter first."); return; }
     if (status !== "ready_to_send") { setError('Set status to "Ready to send" before broadcasting.'); return; }
+
+    // Client-side guard ("block send and warn"). Server re-validates.
+    for (const a of audiences) {
+      const list = a === "members" ? membersSections : visitorsSections;
+      if (!sectionsHaveContent(list)) {
+        setError(`The ${a === "members" ? "Members" : "Visitors"} edition has empty sections. Fill or remove them before sending.`);
+        return;
+      }
+    }
+
+    if (audiences.length > 1 && !confirm(`Broadcast both editions now? Two separate sends will be logged and two PDFs archived.`)) {
+      return;
+    }
+
     setError(null);
     setSending(true);
     try {
+      // Persist latest edits first.
+      const v = syncStructure(membersSections, visitorsSections);
       await supabase
         .from("newsletter_broadcasts" as any)
-        .update({ subject: subject.trim(), target_list: targetList, content: { sections }, status: "ready_to_send" })
+        .update({
+          subject: subject.trim(),
+          content: { sections: membersSections },
+          content_visitors: { sections: v },
+          status: "ready_to_send",
+        })
         .eq("id", broadcastId);
 
       const { data, error: invokeError } = await supabase.functions.invoke("broadcast-newsletter", {
-        body: { broadcastId },
+        body: { broadcastId, audiences },
       });
       if (invokeError || (data && (data as { error?: string }).error)) {
         throw new Error((data as { error?: string })?.error || invokeError?.message || "Send failed");
       }
-      setSentCount((data as { recipientCount?: number }).recipientCount ?? 0);
+      setSentSummary((data as { results?: Array<{ audience: Audience; sent: number; error?: string | null }> }).results ?? []);
       loadDrafts();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unable to send");
@@ -253,7 +342,7 @@ function NewsletterHubInner() {
     }
   };
 
-  // ---- Section/block mutators ----
+  // ---- Section/block mutators (operate on the active audience) ----
   const updateSection = (id: string, patch: Partial<Section>) =>
     setSections((prev) => prev.map((s) => (s.id === id ? { ...s, ...patch } : s)));
   const moveSection = (id: string, dir: -1 | 1) =>
@@ -293,6 +382,25 @@ function NewsletterHubInner() {
     updateSection(sectionId, { blocks: s.blocks.filter((b) => b.id !== blockId) });
   };
 
+  /** Copy the body of this section from the OTHER audience variant into the current one. */
+  const copyFromOther = (sectionId: string) => {
+    const sourceList = audience === "members" ? visitorsSections : membersSections;
+    const src = sourceList.find((s) => s.id === sectionId);
+    if (!src) { toast.error("Nothing to copy — the other audience has no matching section."); return; }
+    if (audience === "members") {
+      setMembersSections((prev) => prev.map((s) => s.id === sectionId ? { ...s, blocks: cloneBlocks(src.blocks) } : s));
+    } else {
+      setVisitorsSections((prev) => prev.map((s) => s.id === sectionId ? { ...s, blocks: cloneBlocks(src.blocks) } : s));
+    }
+    toast.success("Copied from the other audience.");
+  };
+  const cloneBlocks = (blocks: Block[]): Block[] =>
+    blocks.map((b) =>
+      b.type === "text"
+        ? { id: b.id, type: "text", text: b.text }
+        : { id: b.id, type: "image", url: b.url, alt: b.alt, caption: b.caption },
+    );
+
   if (!accessChecked) {
     return <MembersLayout><div className="text-primary-foreground/60 text-sm">Checking access…</div></MembersLayout>;
   }
@@ -308,17 +416,27 @@ function NewsletterHubInner() {
     );
   }
 
-  if (sentCount !== null) {
+  if (sentSummary !== null) {
+    const totalSent = sentSummary.reduce((s, r) => s + r.sent, 0);
     return (
       <MembersLayout>
         <div className="max-w-2xl mx-auto rounded-2xl border border-gold/30 bg-navy-light/40 p-8 text-center">
           <CheckCircle2 className="h-12 w-12 text-gold mx-auto mb-4" />
           <h1 className="font-serif text-2xl text-gold mb-2">Broadcast dispatched</h1>
-          <p className="text-primary-foreground/80 text-sm mb-6">
-            Your Monthly Chronicle has been queued to <strong className="text-gold">{sentCount}</strong>{" "}
-            {sentCount === 1 ? "recipient" : "recipients"}. A copy has been archived in <strong className="text-gold">Documents → Newsletters</strong>.
+          <p className="text-primary-foreground/80 text-sm mb-4">
+            Your Monthly Chronicle has been queued to <strong className="text-gold">{totalSent}</strong>{" "}
+            {totalSent === 1 ? "recipient" : "recipients"} across {sentSummary.length} edition{sentSummary.length === 1 ? "" : "s"}.
           </p>
-          <Button onClick={() => { setSentCount(null); resetEditor(); }} variant="outline" className="border-gold/40 text-gold hover:bg-gold/10">
+          <ul className="text-sm text-primary-foreground/80 mb-6 space-y-1">
+            {sentSummary.map((r) => (
+              <li key={r.audience}>
+                <strong className="text-gold">{r.audience === "members" ? "Members" : "Visitors"}:</strong>{" "}
+                {r.error ? <span className="text-red-300">failed — {r.error}</span> : `${r.sent} sent · PDF archived`}
+              </li>
+            ))}
+          </ul>
+          <p className="text-[11px] text-primary-foreground/50 mb-6">PDFs are filed under <strong className="text-gold">Documents → Newsletters</strong>, one per audience.</p>
+          <Button onClick={() => { setSentSummary(null); resetEditor(); }} variant="outline" className="border-gold/40 text-gold hover:bg-gold/10">
             Compose next issue
           </Button>
         </div>
@@ -332,8 +450,9 @@ function NewsletterHubInner() {
         <p className="text-xs uppercase tracking-wider text-gold/80">Communications Engine</p>
         <h1 className="font-serif text-2xl md:text-3xl text-gold mt-1">Newsletter Dispatch Hub</h1>
         <p className="text-primary-foreground/70 text-sm mt-1">
-          Compose flexible sections of text or images, save drafts, and broadcast the Monthly Chronicle.
-          Sent issues are archived under Documents → Newsletters.
+          Compose one issue with parallel <strong className="text-gold">Members</strong> and <strong className="text-gold">Visitors</strong> editions.
+          Switch the audience toggle to edit each variant; sections stay in sync, body text is independent.
+          Each successful send is archived as its own PDF under Documents → Newsletters.
         </p>
       </header>
 
@@ -350,8 +469,7 @@ function NewsletterHubInner() {
                   <p className="text-sm text-primary-foreground truncate">{d.subject}</p>
                   <p className="text-[11px] text-primary-foreground/50">
                     {d.status === "ready_to_send" ? <span className="text-gold">Ready to send</span> : <span>Draft</span>}
-                    {" "}· {new Date(d.created_at).toLocaleDateString("en-GB")} ·{" "}
-                    {d.target_list === "members_pipeline" ? "Members & Candidates" : "Public Subscribers"}
+                    {" "}· {new Date(d.created_at).toLocaleDateString("en-GB")}
                     {broadcastId === d.id && <span className="text-gold"> · loaded</span>}
                   </p>
                 </button>
@@ -364,16 +482,18 @@ function NewsletterHubInner() {
         </div>
       )}
 
+      {/* Audience editing toggle */}
+      <div className="mb-2 text-[11px] uppercase tracking-wider text-primary-foreground/60">Editing audience variant</div>
       <div className="inline-flex bg-navy-light/40 border border-gold/20 rounded-lg p-1 mb-6">
-        <button type="button" onClick={() => setTargetList("members_pipeline")}
+        <button type="button" onClick={() => setAudience("members")}
           className={`px-4 py-2 text-xs font-semibold rounded-md transition-all flex items-center gap-1.5 ${
-            targetList === "members_pipeline" ? "bg-gold text-navy shadow" : "text-primary-foreground/70 hover:text-primary-foreground"}`}>
-          <Users className="h-3.5 w-3.5" /> Portal &amp; Candidates
+            audience === "members" ? "bg-gold text-navy shadow" : "text-primary-foreground/70 hover:text-primary-foreground"}`}>
+          <Users className="h-3.5 w-3.5" /> Lodge Members
         </button>
-        <button type="button" onClick={() => setTargetList("public_visitors")}
+        <button type="button" onClick={() => setAudience("visitors")}
           className={`px-4 py-2 text-xs font-semibold rounded-md transition-all flex items-center gap-1.5 ${
-            targetList === "public_visitors" ? "bg-gold text-navy shadow" : "text-primary-foreground/70 hover:text-primary-foreground"}`}>
-          <Mail className="h-3.5 w-3.5" /> Public Subscribers
+            audience === "visitors" ? "bg-gold text-navy shadow" : "text-primary-foreground/70 hover:text-primary-foreground"}`}>
+          <Mail className="h-3.5 w-3.5" /> Visitors / Public
         </button>
       </div>
 
@@ -384,6 +504,9 @@ function NewsletterHubInner() {
             <h2 className="font-serif text-lg text-gold flex items-center gap-2">
               <FileEdit className="h-4 w-4" />
               {broadcastId ? "Editing draft" : "New newsletter"}
+              <span className="text-[10px] uppercase tracking-wider text-primary-foreground/60 ml-2">
+                {audience === "members" ? "Members variant" : "Visitors variant"}
+              </span>
             </h2>
             {broadcastId && (
               <button type="button" onClick={resetEditor} className="text-[11px] uppercase tracking-wider text-primary-foreground/60 hover:text-gold">
@@ -393,7 +516,7 @@ function NewsletterHubInner() {
           </div>
 
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-primary-foreground/70 mb-1.5">Subject line</label>
+            <label className="block text-xs font-semibold uppercase tracking-wider text-primary-foreground/70 mb-1.5">Subject line (shared)</label>
             <input type="text" value={subject} onChange={(e) => setSubject(e.target.value)} required
               className="w-full bg-navy-dark border border-gold/20 rounded-md px-3 py-2 text-sm text-primary-foreground focus:outline-none focus:border-gold/60" />
           </div>
@@ -406,7 +529,7 @@ function NewsletterHubInner() {
               <option value="ready_to_send">Ready to send</option>
             </select>
             <p className="text-[11px] text-primary-foreground/50 mt-1">
-              The Broadcast button is enabled only when status is <em>Ready to send</em>.
+              Broadcast buttons are enabled only when status is <em>Ready to send</em>.
             </p>
           </div>
 
@@ -445,6 +568,14 @@ function NewsletterHubInner() {
                   </button>
                 </div>
 
+                <div className="flex justify-end">
+                  <button type="button" onClick={() => copyFromOther(s.id)}
+                    className="text-[10px] inline-flex items-center gap-1 px-2 py-0.5 rounded border border-gold/30 text-gold/80 hover:bg-gold/10"
+                    title={`Copy this section's body from the ${audience === "members" ? "Visitors" : "Members"} variant`}>
+                    <Copy className="h-3 w-3" /> Copy from {audience === "members" ? "Visitors" : "Members"}
+                  </button>
+                </div>
+
                 <div className="space-y-2 pl-1">
                   {s.blocks.map((b) => (
                     <div key={b.id} className="rounded border border-gold/10 bg-navy-dark/60 p-2">
@@ -463,7 +594,7 @@ function NewsletterHubInner() {
                           rows={3}
                           value={b.text}
                           onChange={(e) => updateBlock(s.id, b.id, { text: e.target.value })}
-                          placeholder="Write paragraph text…"
+                          placeholder={`Write ${audience === "members" ? "Members" : "Visitors"} paragraph text…`}
                           className="w-full bg-navy-dark border border-gold/20 rounded px-2 py-1.5 text-sm text-primary-foreground placeholder:text-primary-foreground/40 focus:outline-none focus:border-gold/60 leading-relaxed resize-y"
                         />
                       ) : (
@@ -484,7 +615,7 @@ function NewsletterHubInner() {
                       )}
                     </div>
                   ))}
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 flex-wrap">
                     <button type="button" onClick={() => addBlock(s.id, "text")}
                       className="text-[11px] inline-flex items-center gap-1 px-2 py-1 rounded border border-gold/30 text-gold hover:bg-gold/10">
                       <Plus className="h-3 w-3" /> <Type className="h-3 w-3" /> Text
@@ -523,24 +654,35 @@ function NewsletterHubInner() {
               {saving ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : <Save className="h-4 w-4 mr-1.5" />}
               Save
             </Button>
-            <Button type="button" onClick={send} disabled={sending || status !== "ready_to_send" || !broadcastId}
+          </div>
+
+          <div className="grid sm:grid-cols-3 gap-2 pt-2">
+            <Button type="button" onClick={() => send(["members"])} disabled={sending || status !== "ready_to_send" || !broadcastId}
               className="bg-gold hover:bg-gold/90 text-navy font-semibold disabled:opacity-40"
-              title={!broadcastId ? "Save the newsletter first" : status !== "ready_to_send" ? 'Set status to "Ready to send"' : "Broadcast now"}>
-              {sending ? <><Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> Sending…</> : <><Send className="h-4 w-4 mr-1.5" /> Broadcast Newsletter</>}
+              title={!broadcastId ? "Save first" : status !== "ready_to_send" ? 'Mark "Ready to send"' : "Send Members edition"}>
+              {sending ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : <Send className="h-4 w-4 mr-1.5" />} Send to Members
+            </Button>
+            <Button type="button" onClick={() => send(["visitors"])} disabled={sending || status !== "ready_to_send" || !broadcastId}
+              className="bg-gold hover:bg-gold/90 text-navy font-semibold disabled:opacity-40"
+              title={!broadcastId ? "Save first" : status !== "ready_to_send" ? 'Mark "Ready to send"' : "Send Visitors edition"}>
+              {sending ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : <Send className="h-4 w-4 mr-1.5" />} Send to Visitors
+            </Button>
+            <Button type="button" onClick={() => send(["members", "visitors"])} disabled={sending || status !== "ready_to_send" || !broadcastId}
+              className="bg-navy border border-gold text-gold hover:bg-gold/10 font-semibold disabled:opacity-40">
+              {sending ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : <Send className="h-4 w-4 mr-1.5" />} Send to Both
             </Button>
           </div>
         </div>
 
-        {/* Preview */}
+        {/* Preview (active audience) */}
         <div className={`${previewOpen ? "block" : "hidden lg:block"}`}>
           <div className="rounded-2xl overflow-hidden border border-gold/20 shadow-inner bg-white text-black">
             <div className="px-5 py-3 border-b border-slate-200 text-[11px] text-slate-500 space-y-0.5">
               <p><strong>From:</strong> Weybridge Lodge No. 6787 &lt;chronicle@weybridgelodge.org.uk&gt;</p>
-              <p><strong>To:</strong> {targetList === "members_pipeline" ? "Members & Candidates" : "Public Subscribers"}</p>
+              <p><strong>To:</strong> {audience === "members" ? "Members & Candidates" : "Public Subscribers"}</p>
               <p><strong>Subject:</strong> {subject || "…"}</p>
             </div>
 
-            {/* Email header with left-aligned logo */}
             <div className="bg-[#1B2A4A] px-5 py-4 border-b-4 border-[#C9A432] flex items-center gap-4">
               <img src={LOGO_URL} alt="Weybridge Lodge crest" className="h-14 w-14 object-contain shrink-0" />
               <div className="text-left">
@@ -560,7 +702,6 @@ function NewsletterHubInner() {
               ))}
             </div>
 
-            {/* Social row + copyright */}
             <div className="bg-[#1B2A4A] px-5 pt-4 pb-3 text-center">
               <div className="flex justify-center gap-3 mb-3">
                 <a href="https://instagram.com/weybridgelodge/" className="inline-block">

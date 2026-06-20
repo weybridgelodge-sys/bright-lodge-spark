@@ -35,12 +35,25 @@ interface NewsletterContent {
   sections: Section[];
 }
 
+type Audience = "members" | "visitors";
+
 interface BroadcastBody {
   broadcastId: string;
-  subject: string;
-  targetList: "members_pipeline" | "public_visitors";
-  content: NewsletterContent;
+  audiences?: Audience[]; // which variants to actually dispatch
+  // Legacy clients may still send these; ignored — DB is source of truth.
+  subject?: string;
+  targetList?: "members_pipeline" | "public_visitors";
+  content?: NewsletterContent;
 }
+
+const AUDIENCE_LABEL: Record<Audience, string> = {
+  members: "Members & Candidates",
+  visitors: "Public Subscribers",
+};
+const AUDIENCE_TARGET_LIST: Record<Audience, "members_pipeline" | "public_visitors"> = {
+  members: "members_pipeline",
+  visitors: "public_visitors",
+};
 
 const LOGO_URL = "https://bright-lodge-spark.lovable.app/__l5e/assets-v1/c8d69345-d84c-4619-a96a-e59f04aa0481/weybridge-logo-white.png";
 
@@ -361,21 +374,27 @@ async function renderNewsletterPdf(opts: {
   return await pdf.save();
 }
 
+function issuePrefix(d = new Date()): string {
+  return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}`;
+}
+
 async function archiveToDocuments(opts: {
   broadcastId: string;
   subject: string;
-  targetList: string;
+  audience: Audience;
   content: NewsletterContent;
   userId: string;
   recipientCount: number;
 }) {
-  const safeSubject = opts.subject.replace(/[^a-zA-Z0-9._-]/g, "_").slice(0, 80);
-  const path = `newsletter/${Date.now()}-${opts.broadcastId}-${safeSubject}.pdf`;
+  const audienceLabel = opts.audience === "members" ? "Members" : "Visitors";
+  const safeSubject = opts.subject.replace(/[^a-zA-Z0-9._-]/g, "_").slice(0, 60);
+  const fileName = `${issuePrefix()}_WeybridgeChronicle_${audienceLabel}_${safeSubject || "Issue"}.pdf`;
+  const path = `newsletter/${Date.now()}-${opts.broadcastId}-${audienceLabel}-${safeSubject}.pdf`;
   let pdfBytes: Uint8Array;
   try {
     pdfBytes = await renderNewsletterPdf({
       subject: opts.subject,
-      targetList: opts.targetList,
+      targetList: AUDIENCE_TARGET_LIST[opts.audience],
       recipientCount: opts.recipientCount,
       content: opts.content,
     });
@@ -393,13 +412,101 @@ async function archiveToDocuments(opts: {
     return;
   }
   await admin.from("lodge_documents").insert({
-    title: opts.subject,
-    description: `Sent to ${opts.recipientCount} recipient${opts.recipientCount === 1 ? "" : "s"} (${opts.targetList === "members_pipeline" ? "Members & Candidates" : "Public Subscribers"})`,
+    title: `${fileName.replace(/\.pdf$/, "")}`,
+    description: `${audienceLabel} edition — sent to ${opts.recipientCount} recipient${opts.recipientCount === 1 ? "" : "s"} on ${new Date().toLocaleDateString("en-GB")}. Subject: "${opts.subject}".`,
     category: "newsletter",
     file_path: path,
     file_size_bytes: pdfBytes.byteLength,
     uploaded_by: opts.userId,
   });
+}
+
+function sectionsHaveContent(content: NewsletterContent | null | undefined): boolean {
+  if (!content || !Array.isArray(content.sections) || content.sections.length === 0) return false;
+  return content.sections.every((s) =>
+    (s.blocks || []).some((b) =>
+      (b.type === "text" && b.text?.trim()) || (b.type === "image" && b.url?.trim()),
+    ),
+  );
+}
+
+async function dispatchOneAudience(opts: {
+  broadcastId: string;
+  audience: Audience;
+  subject: string;
+  content: NewsletterContent;
+  userId: string;
+}): Promise<{ audience: Audience; sent: number; error?: string; archivedId?: string }> {
+  const { audience, subject, content, userId, broadcastId } = opts;
+  const targetList = AUDIENCE_TARGET_LIST[audience];
+
+  const recipients = await getRecipients(targetList);
+  if (recipients.length === 0) {
+    return { audience, sent: 0, error: `No recipients found for ${AUDIENCE_LABEL[audience]}.` };
+  }
+
+  // Insert a dedicated sent-row per audience so the archive is split.
+  const { data: archived, error: insErr } = await admin
+    .from("newsletter_broadcasts")
+    .insert({
+      subject,
+      target_list: targetList,
+      content,
+      content_visitors: {},
+      status: "sending",
+      sent_by: userId,
+      recipient_count: recipients.length,
+      audience,
+    })
+    .select("id")
+    .single();
+  if (insErr || !archived) {
+    return { audience, sent: 0, error: `Failed to log ${audience} send: ${insErr?.message || "unknown"}` };
+  }
+
+  const fnBase = `${SUPABASE_URL}/functions/v1/newsletter-unsubscribe`;
+  const generalUnsub = "https://weybridgelodge.org.uk/contact";
+
+  const allEmails = recipients.map((r) => ({
+    to: r.email,
+    subject,
+    html: renderHtml({ subject, targetList, content }, r.token ? `${fnBase}?token=${r.token}` : generalUnsub),
+  }));
+
+  let sentCount = 0;
+  let firstError: string | undefined;
+  for (let i = 0; i < allEmails.length; i += 100) {
+    const chunk = allEmails.slice(i, i + 100);
+    const result = await sendBatch(chunk);
+    if (result.ok) {
+      sentCount += chunk.length;
+    } else {
+      firstError = result.error;
+      break;
+    }
+  }
+
+  await admin
+    .from("newsletter_broadcasts")
+    .update({
+      status: firstError ? "failed" : "sent",
+      error: firstError ?? null,
+      recipient_count: sentCount,
+    })
+    .eq("id", archived.id);
+
+  if (!firstError) {
+    await archiveToDocuments({
+      broadcastId: archived.id,
+      subject,
+      audience,
+      content,
+      userId,
+      recipientCount: sentCount,
+    });
+  }
+
+  return { audience, sent: sentCount, error: firstError, archivedId: archived.id };
 }
 
 Deno.serve(async (req) => {
@@ -445,10 +552,10 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Load row from DB — DB is the source of truth, must be 'ready_to_send'
+    // DB is source of truth.
     const { data: row, error: rowErr } = await admin
       .from("newsletter_broadcasts")
-      .select("id,status,subject,target_list,content")
+      .select("id,status,subject,content,content_visitors,audience")
       .eq("id", body.broadcastId)
       .single();
     if (rowErr || !row) {
@@ -464,90 +571,74 @@ Deno.serve(async (req) => {
       );
     }
 
-    const content = migrateContent(row.content);
     const subject = (row.subject ?? "").trim();
-    const targetList = row.target_list as BroadcastBody["targetList"];
-    const hasMeaningfulBlock = content.sections.some((s) =>
-      (s.blocks || []).some((b) =>
-        (b.type === "text" && b.text?.trim()) || (b.type === "image" && b.url?.trim()),
-      ),
-    );
-    if (
-      !subject ||
-      !["members_pipeline", "public_visitors"].includes(targetList) ||
-      content.sections.length === 0 ||
-      !hasMeaningfulBlock
-    ) {
-      return new Response(JSON.stringify({ error: "Add a subject and at least one section with content." }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+    if (!subject) {
+      return new Response(JSON.stringify({ error: "Add a subject line before broadcasting." }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const recipients = await getRecipients(targetList);
-    if (recipients.length === 0) {
-      return new Response(JSON.stringify({ error: "No recipients found for the selected list." }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
+    const requested: Audience[] = Array.isArray(body.audiences) && body.audiences.length > 0
+      ? Array.from(new Set(body.audiences.filter((a): a is Audience => a === "members" || a === "visitors")))
+      : ["members"];
 
-    await admin
-      .from("newsletter_broadcasts")
-      .update({ status: "sending", sent_by: userId, recipient_count: recipients.length })
-      .eq("id", body.broadcastId);
+    const variants: Record<Audience, NewsletterContent> = {
+      members: migrateContent(row.content),
+      visitors: migrateContent(row.content_visitors),
+    };
 
-    const fnBase = `${SUPABASE_URL}/functions/v1/newsletter-unsubscribe`;
-    const generalUnsub = "https://weybridgelodge.org.uk/contact";
-
-    const allEmails = recipients.map((r) => ({
-      to: r.email,
-      subject,
-      html: renderHtml({ subject, targetList, content }, r.token ? `${fnBase}?token=${r.token}` : generalUnsub),
-    }));
-
-    let sentCount = 0;
-    let firstError: string | undefined;
-    for (let i = 0; i < allEmails.length; i += 100) {
-      const chunk = allEmails.slice(i, i + 100);
-      const result = await sendBatch(chunk);
-      if (result.ok) {
-        sentCount += chunk.length;
-      } else if (!firstError) {
-        firstError = result.error;
-        break;
+    // "Block send and warn": every requested variant must have non-empty sections.
+    for (const aud of requested) {
+      if (!sectionsHaveContent(variants[aud])) {
+        return new Response(
+          JSON.stringify({
+            error: `The ${AUDIENCE_LABEL[aud]} edition has one or more empty sections. Fill every section or remove it before sending.`,
+          }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
       }
     }
 
-    await admin
-      .from("newsletter_broadcasts")
+    // Mark draft as sending so the UI reflects in-flight state.
+    await admin.from("newsletter_broadcasts")
+      .update({ status: "sending", sent_by: userId })
+      .eq("id", body.broadcastId);
+
+    const results: Array<{ audience: Audience; sent: number; error?: string; archivedId?: string }> = [];
+    for (const aud of requested) {
+      const r = await dispatchOneAudience({
+        broadcastId: body.broadcastId,
+        audience: aud,
+        subject,
+        content: variants[aud],
+        userId,
+      });
+      results.push(r);
+    }
+
+    const totalSent = results.reduce((s, r) => s + r.sent, 0);
+    const errors = results.filter((r) => r.error);
+
+    // Mark original draft row as sent (or failed) — it is the editor's working copy.
+    await admin.from("newsletter_broadcasts")
       .update({
-        status: firstError ? "failed" : "sent",
-        error: firstError ?? null,
-        recipient_count: sentCount,
+        status: errors.length === results.length ? "failed" : "sent",
+        error: errors.length ? errors.map((e) => `${e.audience}: ${e.error}`).join("; ") : null,
+        recipient_count: totalSent,
       })
       .eq("id", body.broadcastId);
 
-    if (!firstError) {
-      // Archive a PDF copy into the Documents library under "Newsletters".
-      await archiveToDocuments({
-        broadcastId: body.broadcastId,
-        subject,
-        targetList,
-        content,
-        userId,
-        recipientCount: sentCount,
+    if (errors.length === results.length) {
+      return new Response(JSON.stringify({ error: errors[0].error, results }), {
+        status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    if (firstError) {
-      return new Response(JSON.stringify({ error: firstError, sent: sentCount }), {
-        status: 502,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    return new Response(JSON.stringify({ ok: true, recipientCount: sentCount }), {
+    return new Response(JSON.stringify({
+      ok: true,
+      recipientCount: totalSent,
+      results: results.map((r) => ({ audience: r.audience, sent: r.sent, error: r.error ?? null })),
+    }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
@@ -558,3 +649,4 @@ Deno.serve(async (req) => {
     });
   }
 });
+

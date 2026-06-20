@@ -1439,7 +1439,9 @@ export type Database = {
       }
       newsletter_broadcasts: {
         Row: {
+          audience: string | null
           content: Json
+          content_visitors: Json
           created_at: string
           error: string | null
           id: string
@@ -1452,7 +1454,9 @@ export type Database = {
           target_list: string
         }
         Insert: {
+          audience?: string | null
           content: Json
+          content_visitors?: Json
           created_at?: string
           error?: string | null
           id?: string
@@ -1465,7 +1469,9 @@ export type Database = {
           target_list: string
         }
         Update: {
+          audience?: string | null
           content?: Json
+          content_visitors?: Json
           created_at?: string
           error?: string | null
           id?: string
