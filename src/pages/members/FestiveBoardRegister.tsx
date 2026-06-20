@@ -392,6 +392,15 @@ type VisitorDraft = {
 };
 
 
+type VisitorSuggestion = {
+  id: string;
+  email: string;
+  name: string | null;
+  lodge_name: string | null;
+  lodge_number: string | null;
+  last_seen_at: string | null;
+};
+
 function tempId() {
   return `tmp_${Math.random().toString(36).slice(2)}`;
 }
