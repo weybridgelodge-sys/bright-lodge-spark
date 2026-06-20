@@ -246,7 +246,7 @@ function NewsletterHubInner() {
   const loadDrafts = async () => {
     const { data } = await supabase
       .from("newsletter_broadcasts" as any)
-      .select("id,subject,target_list,content,content_visitors,status,audience,created_at")
+      .select("id,subject,target_list,content,content_visitors,status,audience,unified_content,created_at")
       .in("status", ["draft", "ready_to_send"])
       .is("audience", null) // exclude per-audience sent rows
       .order("created_at", { ascending: false });
@@ -261,6 +261,7 @@ function NewsletterHubInner() {
     setVisitorsSections(syncStructure(fresh, []));
     setStatus("draft");
     setAudience("members");
+    setUnifiedContent(false);
     setError(null);
   };
 
@@ -272,6 +273,7 @@ function NewsletterHubInner() {
     setMembersSections(m);
     setVisitorsSections(syncStructure(m, v));
     setStatus((d.status as Status) === "ready_to_send" ? "ready_to_send" : "draft");
+    setUnifiedContent(!!d.unified_content);
     setSentSummary(null);
     setError(null);
   };
@@ -280,16 +282,16 @@ function NewsletterHubInner() {
     setError(null);
     setSaving(true);
     try {
-      // Ensure structure is mirrored before persisting.
       const v = syncStructure(membersSections, visitorsSections);
       setVisitorsSections(v);
       const payload = {
         subject: subject.trim() || DEFAULT_SUBJECT,
-        target_list: "members_pipeline", // legacy column, kept for compat
+        target_list: "members_pipeline",
         content: { sections: membersSections } satisfies NewsletterContent,
         content_visitors: { sections: v } satisfies NewsletterContent,
         status,
         audience: null,
+        unified_content: unifiedContent,
       };
       if (broadcastId) {
         const { error: err } = await supabase.from("newsletter_broadcasts" as any).update(payload).eq("id", broadcastId);
@@ -324,15 +326,26 @@ function NewsletterHubInner() {
       (s.blocks || []).some((b) => (b.type === "text" && b.text.trim()) || (b.type === "image" && b.url.trim())),
     );
 
-  const send = async (audiences: Audience[]) => {
+  /**
+   * audiences semantics (server-aligned):
+   *   ["members"]           → send Members & Visitors edition
+   *   ["visitors"]          → send Public edition
+   *   ["members","visitors"]→ two separate sends (dual-variant mode)
+   *   ["all"]               → single merged dedup send (unified-content mode only)
+   */
+  const send = async (audiences: Array<"members" | "visitors" | "all">) => {
     if (!broadcastId) { setError("Save the newsletter first."); return; }
     if (status !== "ready_to_send") { setError('Set status to "Ready to send" before broadcasting.'); return; }
 
-    // Client-side guard ("block send and warn"). Server re-validates.
+    const labelFor = (a: string) =>
+      a === "members" ? "Members & Visitors" : a === "visitors" ? "Public" : "Combined (all lists)";
+
+    // Client-side content guard. In unified mode every requested audience
+    // shares the members variant; otherwise check the matching variant.
     for (const a of audiences) {
-      const list = a === "members" ? membersSections : visitorsSections;
+      const list = unifiedContent || a !== "visitors" ? membersSections : visitorsSections;
       if (!sectionsHaveContent(list)) {
-        setError(`The ${a === "members" ? "Members" : "Visitors"} edition has empty sections. Fill or remove them before sending.`);
+        setError(`The ${labelFor(a)} edition has empty sections. Fill or remove them before sending.`);
         return;
       }
     }
@@ -340,11 +353,13 @@ function NewsletterHubInner() {
     if (audiences.length > 1 && !confirm(`Broadcast both editions now? Two separate sends will be logged and two PDFs archived.`)) {
       return;
     }
+    if (audiences.includes("all") && !confirm(`Send one merged broadcast to Members & Visitors AND Public, deduplicated by email? One combined PDF will be archived.`)) {
+      return;
+    }
 
     setError(null);
     setSending(true);
     try {
-      // Persist latest edits first.
       const v = syncStructure(membersSections, visitorsSections);
       await supabase
         .from("newsletter_broadcasts" as any)
@@ -353,6 +368,7 @@ function NewsletterHubInner() {
           content: { sections: membersSections },
           content_visitors: { sections: v },
           status: "ready_to_send",
+          unified_content: unifiedContent,
         })
         .eq("id", broadcastId);
 
@@ -362,7 +378,7 @@ function NewsletterHubInner() {
       if (invokeError || (data && (data as { error?: string }).error)) {
         throw new Error((data as { error?: string })?.error || invokeError?.message || "Send failed");
       }
-      setSentSummary((data as { results?: Array<{ audience: Audience; sent: number; error?: string | null }> }).results ?? []);
+      setSentSummary((data as { results?: Array<{ audience: string; sent: number; error?: string | null }> }).results ?? []);
       loadDrafts();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unable to send");
@@ -370,6 +386,8 @@ function NewsletterHubInner() {
       setSending(false);
     }
   };
+
+
 
   // ---- Section/block mutators (operate on the active audience) ----
   const updateSection = (id: string, patch: Partial<Section>) =>
