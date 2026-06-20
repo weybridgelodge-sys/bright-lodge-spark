@@ -15,7 +15,8 @@ const LineItemSchema = z.object({
 });
 
 const BodySchema = z.object({
-  event_key: z.enum(["festive_board_april_2026", "ladies_festival_2026"]),
+  event_key: z.string().min(1).max(120),
+  meeting_id: z.string().uuid().nullable().optional(),
   event_label: z.string().min(1).max(200),
   contact_name: z.string().min(1).max(200),
   contact_email: z.string().email().max(255),
@@ -54,6 +55,24 @@ Deno.serve(async (req) => {
     const input = parsed.data;
     const env: StripeEnv = input.environment;
 
+    let resolvedMeetingId: string | null = null;
+    if (input.meeting_id) {
+      const { data: meeting } = await supabase
+        .from("festive_board_meetings")
+        .select("id,status")
+        .eq("id", input.meeting_id)
+        .maybeSingle();
+      if (meeting?.status === "published") resolvedMeetingId = meeting.id;
+    }
+    if (!resolvedMeetingId) {
+      const { data: meeting } = await supabase
+        .from("festive_board_meetings")
+        .select("id,status")
+        .eq("event_key", input.event_key)
+        .maybeSingle();
+      if (meeting?.status === "published") resolvedMeetingId = meeting.id;
+    }
+
     // Optional: link booking to user if Authorization is provided
     const authHeader = req.headers.get("Authorization");
     let userId: string | null = null;
@@ -82,6 +101,7 @@ Deno.serve(async (req) => {
       .insert({
         user_id: userId,
         event_key: input.event_key,
+        meeting_id: resolvedMeetingId,
         event_label: input.event_label,
         contact_name: input.contact_name,
         contact_email: input.contact_email,

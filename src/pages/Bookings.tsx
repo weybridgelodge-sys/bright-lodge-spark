@@ -64,16 +64,24 @@ const Bookings = () => {
   const [publishedMeeting, setPublishedMeeting] = useState<{ id: string; event_key: string } | null>(null);
 
   useEffect(() => {
-    fetchNextEvent().then((b) => {
-      if (b) setBundle(b);
+    let cancelled = false;
+    fetchNextEvent().then(async (b) => {
+      if (cancelled) return;
+      if (b) {
+        setBundle(b);
+        const { data } = await supabase
+          .from("festive_board_meetings")
+          .select("id,event_key")
+          .eq("event_key", b.event.slug)
+          .eq("status", "published")
+          .maybeSingle();
+        if (!cancelled) setPublishedMeeting(data ?? null);
+      } else {
+        setPublishedMeeting(null);
+      }
       setLoadingEvent(false);
     });
-    supabase
-      .from("festive_board_meetings")
-      .select("id,event_key")
-      .eq("status", "published")
-      .maybeSingle()
-      .then(({ data }) => setPublishedMeeting(data ?? null));
+    return () => { cancelled = true; };
   }, []);
 
   const { event, courses, diningOptions } = bundle;
@@ -391,7 +399,8 @@ const Bookings = () => {
                   {feePence > 0 && <> (includes {fmtGbp(feePence)} card fee)</>}
                 </p>
                 <StripeEmbeddedCheckoutPanel
-                  event_key={event.slug}
+                  event_key={publishedMeeting?.event_key ?? event.slug}
+                  meeting_id={publishedMeeting?.id ?? null}
                   event_label={eventLabel}
                   contact_name={`${title} ${firstName} ${lastName}`.trim()}
                   contact_email={email}
