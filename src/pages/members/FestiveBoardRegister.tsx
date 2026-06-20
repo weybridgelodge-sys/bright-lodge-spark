@@ -462,6 +462,21 @@ function MeetingDialog({
       }))
   );
 
+  const [visitorSuggestions, setVisitorSuggestions] = useState<VisitorSuggestion[]>([]);
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from("visitor_contacts")
+        .select("id,email,name,lodge_name,lodge_number,last_seen_at")
+        .order("last_seen_at", { ascending: false })
+        .limit(500);
+      if (!cancelled) setVisitorSuggestions((data as VisitorSuggestion[]) ?? []);
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+
 
   const setMember = (id: string, patch: Partial<MemberDraft>) =>
     setMemberDrafts((p) => ({ ...p, [id]: { ...p[id], ...patch } }));
