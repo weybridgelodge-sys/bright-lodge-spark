@@ -62,7 +62,10 @@ type Attendance = {
   payment_method: FbPaymentMethod;
   amount_pence: number;
   booking_id: string | null;
+  source?: "manual" | "booking" | null;
+  source_booking_id?: string | null;
 };
+
 
 
 type Member = {
@@ -382,6 +385,8 @@ type MemberDraft = {
   status: FbAttendanceStatus;
   paymentMethod: FbPaymentMethod;
   amountPounds: string;
+  synced?: boolean;
+  sourceBookingId?: string | null;
 };
 
 type VisitorDraft = {
@@ -394,6 +399,8 @@ type VisitorDraft = {
   status: FbAttendanceStatus;
   paymentMethod: FbPaymentMethod;
   amountPounds: string;
+  synced?: boolean;
+  sourceBookingId?: string | null;
 };
 
 
