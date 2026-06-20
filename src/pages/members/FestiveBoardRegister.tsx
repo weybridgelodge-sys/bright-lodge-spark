@@ -777,6 +777,16 @@ function MeetingDialog({
               </p>
             ) : (
               <div className="space-y-2">
+                <div className="hidden sm:grid grid-cols-[1fr_1fr_90px_1fr_140px_180px_100px_auto] gap-2 px-2 text-[10px] uppercase tracking-wide text-gold/70">
+                  <span>Visitor name</span>
+                  <span>Lodge name</span>
+                  <span>Lodge no.</span>
+                  <span>Email</span>
+                  <span>Status</span>
+                  <span>Payment method</span>
+                  <span>Amount</span>
+                  <span aria-hidden />
+                </div>
                 {visitorDrafts.map((v) => (
                   <div
                     key={v.id}
