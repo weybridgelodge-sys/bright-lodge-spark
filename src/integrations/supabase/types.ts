@@ -2486,6 +2486,7 @@ export type Database = {
         | "media_files"
         | "ritual"
         | "other"
+        | "newsletter"
       festive_attendance_status:
         | "booked"
         | "attended"
@@ -2693,6 +2694,7 @@ export const Constants = {
         "media_files",
         "ritual",
         "other",
+        "newsletter",
       ],
       festive_attendance_status: [
         "booked",
