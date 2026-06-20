@@ -676,6 +676,13 @@ function MeetingDialog({
                 {computedAttended.members} attending
               </span>
             </div>
+            <div className="hidden sm:grid grid-cols-[auto_1fr_140px_180px_100px] gap-2 px-2 pb-1 text-[10px] uppercase tracking-wide text-gold/70">
+              <span className="w-4" aria-hidden />
+              <span>Member</span>
+              <span>Status</span>
+              <span>Payment method</span>
+              <span>Amount</span>
+            </div>
             <div className="border border-gold/15 rounded-sm divide-y divide-gold/10">
               {members.map((m) => {
                 const d = memberDrafts[m.id];
