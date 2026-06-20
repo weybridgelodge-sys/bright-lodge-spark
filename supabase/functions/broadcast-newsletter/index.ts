@@ -35,12 +35,25 @@ interface NewsletterContent {
   sections: Section[];
 }
 
+type Audience = "members" | "visitors";
+
 interface BroadcastBody {
   broadcastId: string;
-  subject: string;
-  targetList: "members_pipeline" | "public_visitors";
-  content: NewsletterContent;
+  audiences?: Audience[]; // which variants to actually dispatch
+  // Legacy clients may still send these; ignored — DB is source of truth.
+  subject?: string;
+  targetList?: "members_pipeline" | "public_visitors";
+  content?: NewsletterContent;
 }
+
+const AUDIENCE_LABEL: Record<Audience, string> = {
+  members: "Members & Candidates",
+  visitors: "Public Subscribers",
+};
+const AUDIENCE_TARGET_LIST: Record<Audience, "members_pipeline" | "public_visitors"> = {
+  members: "members_pipeline",
+  visitors: "public_visitors",
+};
 
 const LOGO_URL = "https://bright-lodge-spark.lovable.app/__l5e/assets-v1/c8d69345-d84c-4619-a96a-e59f04aa0481/weybridge-logo-white.png";
 
