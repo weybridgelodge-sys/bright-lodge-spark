@@ -197,19 +197,185 @@ async function sendBatch(emails: Array<{ to: string; html: string; subject: stri
   return { ok: true };
 }
 
+async function renderNewsletterPdf(opts: {
+  subject: string;
+  targetList: string;
+  recipientCount: number;
+  content: NewsletterContent;
+}): Promise<Uint8Array> {
+  const { PDFDocument, StandardFonts, rgb } = await import("npm:pdf-lib@1.17.1");
+  const pdf = await PDFDocument.create();
+  const helv = await pdf.embedFont(StandardFonts.Helvetica);
+  const helvBold = await pdf.embedFont(StandardFonts.HelveticaBold);
+  const helvOblique = await pdf.embedFont(StandardFonts.HelveticaOblique);
+
+  const A4 = { w: 595.28, h: 841.89 };
+  const navy = rgb(0x1B / 255, 0x2A / 255, 0x4A / 255);
+  const gold = rgb(0xC9 / 255, 0xA4 / 255, 0x32 / 255);
+  const ink = rgb(0.12, 0.13, 0.16);
+  const muted = rgb(0.45, 0.47, 0.5);
+
+  const marginX = 50;
+  const contentWidth = A4.w - marginX * 2;
+  let page = pdf.addPage([A4.w, A4.h]);
+  let y = A4.h;
+
+  const drawHeader = () => {
+    page.drawRectangle({ x: 0, y: A4.h - 96, width: A4.w, height: 96, color: navy });
+    page.drawRectangle({ x: 0, y: A4.h - 100, width: A4.w, height: 4, color: gold });
+    page.drawText("Weybridge Lodge No. 6787", {
+      x: marginX, y: A4.h - 50, size: 20, font: helvBold, color: gold,
+    });
+    page.drawText("MONTHLY CHRONICLE & LABOURS", {
+      x: marginX, y: A4.h - 72, size: 9, font: helv, color: rgb(1, 1, 1),
+    });
+    y = A4.h - 120;
+  };
+  drawHeader();
+
+  const newPageIfNeeded = (need: number) => {
+    if (y - need < 60) {
+      page = pdf.addPage([A4.w, A4.h]);
+      drawHeader();
+    }
+  };
+
+  const wrapText = (text: string, font: any, size: number, maxWidth: number): string[] => {
+    const lines: string[] = [];
+    for (const rawPara of text.split(/\n/)) {
+      const words = rawPara.split(/\s+/).filter(Boolean);
+      if (words.length === 0) { lines.push(""); continue; }
+      let line = "";
+      for (const w of words) {
+        const candidate = line ? `${line} ${w}` : w;
+        if (font.widthOfTextAtSize(candidate, size) > maxWidth) {
+          if (line) lines.push(line);
+          line = w;
+        } else {
+          line = candidate;
+        }
+      }
+      if (line) lines.push(line);
+    }
+    return lines;
+  };
+
+  const drawWrapped = (text: string, opts: { font: any; size: number; color: any; lineHeight?: number }) => {
+    const lh = opts.lineHeight ?? opts.size * 1.45;
+    const lines = wrapText(text, opts.font, opts.size, contentWidth);
+    for (const line of lines) {
+      newPageIfNeeded(lh);
+      // Sanitise to WinAnsi-friendly characters (replace smart quotes / em dash)
+      const safe = line
+        .replace(/[\u2018\u2019]/g, "'")
+        .replace(/[\u201C\u201D]/g, '"')
+        .replace(/\u2014/g, "—")
+        .replace(/[^\x00-\xFF]/g, "?");
+      page.drawText(safe, { x: marginX, y: y - opts.size, size: opts.size, font: opts.font, color: opts.color });
+      y -= lh;
+    }
+  };
+
+  // Title (subject)
+  drawWrapped(opts.subject, { font: helvBold, size: 16, color: navy, lineHeight: 20 });
+  y -= 6;
+  drawWrapped(
+    `Issued ${new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "long", year: "numeric" })} · ${opts.targetList === "members_pipeline" ? "Members & Candidates" : "Public Subscribers"} · ${opts.recipientCount} recipient${opts.recipientCount === 1 ? "" : "s"}`,
+    { font: helvOblique, size: 9, color: muted, lineHeight: 12 },
+  );
+  y -= 10;
+
+  for (const section of opts.content.sections) {
+    newPageIfNeeded(40);
+    // Heading
+    drawWrapped(section.heading || "Untitled section", { font: helvBold, size: 13, color: navy, lineHeight: 18 });
+    // Underline rule
+    newPageIfNeeded(8);
+    page.drawLine({
+      start: { x: marginX, y: y - 2 },
+      end: { x: marginX + contentWidth, y: y - 2 },
+      thickness: 0.5, color: gold,
+    });
+    y -= 10;
+
+    for (const block of section.blocks || []) {
+      if (block.type === "text") {
+        const txt = (block.text || "").trim();
+        if (!txt) continue;
+        for (const para of txt.split(/\n{2,}/)) {
+          drawWrapped(para, { font: helv, size: 10.5, color: ink, lineHeight: 14 });
+          y -= 6;
+        }
+      } else if (block.type === "image" && block.url) {
+        try {
+          const res = await fetch(block.url);
+          if (!res.ok) throw new Error(`fetch ${res.status}`);
+          const ct = (res.headers.get("content-type") || "").toLowerCase();
+          const bytes = new Uint8Array(await res.arrayBuffer());
+          const img = ct.includes("png")
+            ? await pdf.embedPng(bytes)
+            : await pdf.embedJpg(bytes);
+          const maxW = contentWidth;
+          const maxH = 260;
+          const scale = Math.min(maxW / img.width, maxH / img.height, 1);
+          const w = img.width * scale;
+          const h = img.height * scale;
+          newPageIfNeeded(h + (block.caption ? 18 : 6));
+          page.drawImage(img, { x: marginX, y: y - h, width: w, height: h });
+          y -= h + 4;
+          if (block.caption) {
+            drawWrapped(block.caption, { font: helvOblique, size: 9, color: muted, lineHeight: 12 });
+          }
+          y -= 6;
+        } catch (e) {
+          console.warn("PDF image embed failed:", block.url, e);
+          drawWrapped(`[Image unavailable: ${block.url}]`, { font: helvOblique, size: 9, color: muted, lineHeight: 12 });
+        }
+      }
+    }
+    y -= 10;
+  }
+
+  // Footer line on last page
+  newPageIfNeeded(30);
+  y = Math.max(y, 50);
+  page.drawLine({
+    start: { x: marginX, y: 50 }, end: { x: A4.w - marginX, y: 50 },
+    thickness: 0.5, color: rgb(0.85, 0.83, 0.8),
+  });
+  page.drawText(
+    `© ${new Date().getFullYear()} Weybridge Lodge No. 6787 · Guildford Masonic Centre, GU2 4DR`,
+    { x: marginX, y: 36, size: 8, font: helv, color: muted },
+  );
+
+  return await pdf.save();
+}
+
 async function archiveToDocuments(opts: {
   broadcastId: string;
   subject: string;
   targetList: string;
-  html: string;
+  content: NewsletterContent;
   userId: string;
   recipientCount: number;
 }) {
   const safeSubject = opts.subject.replace(/[^a-zA-Z0-9._-]/g, "_").slice(0, 80);
-  const path = `newsletter/${Date.now()}-${opts.broadcastId}-${safeSubject}.html`;
-  const blob = new Blob([opts.html], { type: "text/html; charset=utf-8" });
+  const path = `newsletter/${Date.now()}-${opts.broadcastId}-${safeSubject}.pdf`;
+  let pdfBytes: Uint8Array;
+  try {
+    pdfBytes = await renderNewsletterPdf({
+      subject: opts.subject,
+      targetList: opts.targetList,
+      recipientCount: opts.recipientCount,
+      content: opts.content,
+    });
+  } catch (e) {
+    console.error("archiveToDocuments PDF render error:", e);
+    return;
+  }
+  const blob = new Blob([pdfBytes], { type: "application/pdf" });
   const { error: upErr } = await admin.storage.from("lodge-docs").upload(path, blob, {
-    contentType: "text/html; charset=utf-8",
+    contentType: "application/pdf",
     upsert: false,
   });
   if (upErr) {
@@ -221,7 +387,7 @@ async function archiveToDocuments(opts: {
     description: `Sent to ${opts.recipientCount} recipient${opts.recipientCount === 1 ? "" : "s"} (${opts.targetList === "members_pipeline" ? "Members & Candidates" : "Public Subscribers"})`,
     category: "newsletter",
     file_path: path,
-    file_size_bytes: opts.html.length,
+    file_size_bytes: pdfBytes.byteLength,
     uploaded_by: opts.userId,
   });
 }
@@ -353,13 +519,12 @@ Deno.serve(async (req) => {
       .eq("id", body.broadcastId);
 
     if (!firstError) {
-      // Archive a copy into the Documents library under "Newsletters".
-      const archiveHtml = renderHtml({ subject, targetList, content }, "https://weybridgelodge.org.uk/contact");
+      // Archive a PDF copy into the Documents library under "Newsletters".
       await archiveToDocuments({
         broadcastId: body.broadcastId,
         subject,
         targetList,
-        html: archiveHtml,
+        content,
         userId,
         recipientCount: sentCount,
       });
