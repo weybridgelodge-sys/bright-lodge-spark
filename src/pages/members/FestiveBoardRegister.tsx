@@ -748,7 +748,7 @@ function MeetingDialog({
                 {visitorDrafts.map((v) => (
                   <div
                     key={v.id}
-                    className="border border-gold/15 rounded-sm p-2 grid grid-cols-1 sm:grid-cols-[1fr_1fr_90px_140px_180px_100px_auto] gap-2 items-center"
+                    className="border border-gold/15 rounded-sm p-2 grid grid-cols-1 sm:grid-cols-[1fr_1fr_90px_1fr_140px_180px_100px_auto] gap-2 items-center"
                   >
                     <Input
                       value={v.name}
@@ -768,6 +768,14 @@ function MeetingDialog({
                       onChange={(e) => setVisitor(v.id, { lodgeNumber: e.target.value })}
                       className="bg-navy border-gold/20 h-8 text-xs"
                     />
+                    <Input
+                      type="email"
+                      value={v.email}
+                      placeholder="Email (optional, for newsletter)"
+                      onChange={(e) => setVisitor(v.id, { email: e.target.value })}
+                      className="bg-navy border-gold/20 h-8 text-xs"
+                    />
+
                     <Select
                       value={v.status}
                       onValueChange={(val) =>
