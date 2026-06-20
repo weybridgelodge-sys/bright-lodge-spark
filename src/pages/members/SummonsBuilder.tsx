@@ -342,9 +342,15 @@ async function loadOfficers(setRows: (rows: OfficerRollRow[]) => void, setLoadin
     .eq("lodge_year", lodgeYear);
   const memberIds = Array.from(new Set((appts ?? []).map((a) => a.member_id).filter(Boolean)));
   const { data: profs } = memberIds.length
-    ? await supabase.from("profiles").select("id,title,first_name,middle_name,last_name,full_name,preferred_name,post_nominals,rank,grand_rank,provincial_rank,is_past_master,is_royal_arch,is_honorary_member,initiation_date,joined_lodge_date,joined_year,status,email,phone").in("id", memberIds)
+    ? await supabase.from("profiles").select("id,title,first_name,middle_name,last_name,full_name,preferred_name,post_nominals,rank,grand_rank,provincial_rank,is_past_master,is_royal_arch,is_honorary_member,initiation_date,joined_lodge_date,joined_year,status,email").in("id", memberIds)
     : { data: [] as any[] };
-  const byId = new Map((profs ?? []).map((p: any) => [p.id, p]));
+  // Merge phone (PII) via secure RPC for secretary/admin/WM
+  let phoneById: Record<string, string | null> = {};
+  if (memberIds.length) {
+    const { data: pii } = await (supabase as any).rpc("get_profiles_pii", { _ids: memberIds });
+    for (const row of (pii as { id: string; phone: string | null }[]) ?? []) phoneById[row.id] = row.phone ?? null;
+  }
+  const byId = new Map((profs ?? []).map((p: any) => [p.id, { ...p, phone: phoneById[p.id] ?? null }]));
   const allKeys: string[] = [
     "worshipful_master","senior_warden","junior_warden",
     "immediate_past_master","chaplain","treasurer","secretary","assistant_secretary",
@@ -420,6 +426,10 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
       const { data, error } = await supabase.from("summonses").select("*").eq("id", editingId).maybeSingle();
       if (error || !data) { toast.error(error?.message ?? "Summons not found"); return; }
       const r: any = data;
+      // dining_enquiry_email is column-restricted; fetch via secure RPC (secretary/admin/WM)
+      let diningEmail: string | null = null;
+      const { data: dc } = await (supabase as any).rpc("get_summons_dining_contacts", { _ids: [editingId] });
+      if (Array.isArray(dc) && dc.length) diningEmail = dc[0].dining_enquiry_email ?? null;
       setCurrentId(r.id);
       setSelectedEvent(r.lodge_event_id ?? "");
       setManualHidden(((r.notice_overrides as any)?.manualHidden ?? []) as string[]);
@@ -435,7 +445,7 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
         agenda: (r.agenda as any) ?? defaultAgenda(),
         candidates: (r.candidates as any) ?? [],
         dining_enquiry_name: r.dining_enquiry_name,
-        dining_enquiry_email: r.dining_enquiry_email,
+        dining_enquiry_email: diningEmail,
         dining_menu: r.dining_menu ?? null,
         dining_price: r.dining_price ?? null,
         dining_deadline: r.dining_deadline ?? null,

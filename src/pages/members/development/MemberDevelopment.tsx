@@ -61,7 +61,7 @@ export default function MemberDevelopmentInner({ memberIdOverride }: { memberIdO
       try {
         await ensureSeeded(memberId);
         const [{ data: prof }, rec, ch, ri, ex, la, ms] = await Promise.all([
-          supabase.from("profiles").select("id, full_name, first_name, last_name, preferred_name, title, initiation_date, passing_date, raising_date, royal_arch_date, ugle_reg_number, proposer").eq("id", memberId).maybeSingle(),
+          supabase.from("profiles").select("id, full_name, first_name, last_name, preferred_name, title, initiation_date, passing_date, raising_date, royal_arch_date, proposer").eq("id", memberId).maybeSingle(),
           loadDevelopmentRecord(memberId),
           loadChecklist(memberId),
           loadRitualRows(memberId),
@@ -69,7 +69,13 @@ export default function MemberDevelopmentInner({ memberIdOverride }: { memberIdO
           loadLodgeAppointmentsForMember(memberId),
           supabase.from("profiles").select("id, full_name, first_name, last_name, preferred_name").eq("status", "active").order("last_name", { ascending: true }),
         ]);
-        setProfile(prof as MemberProfile | null);
+        let merged = prof as MemberProfile | null;
+        if (merged) {
+          const { data: pii } = await (supabase as any).rpc("get_profiles_pii", { _ids: [memberId] });
+          const row = Array.isArray(pii) && pii.length ? pii[0] : null;
+          if (row) merged = { ...merged, ugle_reg_number: row.ugle_reg_number ?? null } as MemberProfile;
+        }
+        setProfile(merged);
         setRecord(rec);
         setChecklist(ch);
         setRitual(ri);

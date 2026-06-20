@@ -124,13 +124,23 @@ export default function MembersAdmin() {
       supabase
         .from("profiles")
         .select(
-          "id,email,full_name,title,first_name,middle_name,last_name,preferred_name,post_nominals,provincial_rank,grand_rank,date_of_birth,initiation_date,rank,ugle_reg_number,mother_lodge,status,degree,is_past_master,is_royal_arch,is_honorary_member,is_ugle_portal_registered,passing_date,raising_date,joined_lodge_date,address_line1,address_line2,address_line3,town,county,postcode,created_at"
+          "id,email,full_name,title,first_name,middle_name,last_name,preferred_name,post_nominals,provincial_rank,grand_rank,initiation_date,rank,mother_lodge,status,degree,is_past_master,is_royal_arch,is_honorary_member,is_ugle_portal_registered,passing_date,raising_date,joined_lodge_date,created_at"
         )
         .order("created_at", { ascending: false }),
       supabase.from("user_roles").select("user_id,role"),
       supabase.from("member_notices").select("*").order("created_at", { ascending: false }),
     ]);
-    setProfiles((p as Profile[]) ?? []);
+    const baseProfiles = (p as Profile[]) ?? [];
+    // Merge sensitive fields (DOB, address, phone, UGLE no.) via secure RPC
+    const ids = baseProfiles.map((x) => x.id);
+    let merged: Profile[] = baseProfiles;
+    if (ids.length) {
+      const { data: pii } = await (supabase as any).rpc("get_profiles_pii", { _ids: ids });
+      const idx: Record<string, Partial<Profile>> = {};
+      for (const row of (pii as Partial<Profile>[]) ?? []) if (row.id) idx[row.id] = row;
+      merged = baseProfiles.map((b) => ({ ...b, ...(idx[b.id] ?? {}) }));
+    }
+    setProfiles(merged);
     setRoles((r as Role[]) ?? []);
     setNotices((n as Notice[]) ?? []);
   };

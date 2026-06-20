@@ -65,7 +65,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       supabase.from("profiles").select("*").eq("id", uid).maybeSingle(),
       supabase.from("user_roles").select("role").eq("user_id", uid),
     ]);
-    setProfile((p as Profile) ?? null);
+    // Merge own PII (DOB, phone, address, UGLE no.) from the security-definer RPC
+    let merged: Profile | null = (p as Profile) ?? null;
+    if (merged) {
+      const { data: pii } = await (supabase as any).rpc("get_profiles_pii", { _ids: [uid] });
+      const row = Array.isArray(pii) && pii.length ? pii[0] : null;
+      if (row) merged = { ...merged, ...row };
+    }
+    setProfile(merged);
     setRoles(((r as { role: Role }[]) ?? []).map((x) => x.role));
     // WM/IPM detection for current lodge year (auto-rotates on installation)
     try {

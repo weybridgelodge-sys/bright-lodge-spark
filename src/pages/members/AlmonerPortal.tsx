@@ -182,7 +182,7 @@ function PortalBody() {
   const loadAll = async () => {
     const [{ data: ms }, { data: st }, { data: lgs }, { data: meetings }] = await Promise.all([
       supabase.from("profiles")
-        .select("id,full_name,preferred_name,first_name,last_name,title,date_of_birth,initiation_date,joined_lodge_date,joined_year,status")
+        .select("id,full_name,preferred_name,first_name,last_name,title,initiation_date,joined_lodge_date,joined_year,status")
         .eq("status", "active"),
       supabase.from("welfare_member_status").select("member_id,status,updated_at"),
       supabase.from("welfare_log_entries")
@@ -196,7 +196,17 @@ function PortalBody() {
         .limit(2),
     ]);
 
-    setMembers((ms as MemberRow[]) ?? []);
+    const baseMembers = ((ms as Omit<MemberRow, "date_of_birth">[]) ?? []).map((m) => ({ ...m, date_of_birth: null as string | null })) as MemberRow[];
+    // Merge DOB (PII) via secure RPC for Almoner-permitted callers
+    let withPii: MemberRow[] = baseMembers;
+    if (baseMembers.length) {
+      const ids = baseMembers.map((m) => m.id);
+      const { data: pii } = await (supabase as any).rpc("get_profiles_pii", { _ids: ids });
+      const idx: Record<string, { date_of_birth: string | null }> = {};
+      for (const row of (pii as { id: string; date_of_birth: string | null }[]) ?? []) idx[row.id] = row;
+      withPii = baseMembers.map((m) => ({ ...m, date_of_birth: idx[m.id]?.date_of_birth ?? null }));
+    }
+    setMembers(withPii);
     const sMap: Record<string, StatusRow> = {};
     (st as StatusRow[] ?? []).forEach((r) => { sMap[r.member_id] = r; });
     setStatuses(sMap);
