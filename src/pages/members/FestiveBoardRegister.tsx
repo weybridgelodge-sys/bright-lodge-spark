@@ -43,7 +43,12 @@ type Meeting = {
   meeting_type: FbMeetingType;
   notes: string | null;
   headcount_override: number | null;
+  event_key: string;
+  status: "draft" | "published" | "completed";
+  is_white_table: boolean;
+  dining_price_pence: number;
 };
+
 
 type Attendance = {
   id: string;
