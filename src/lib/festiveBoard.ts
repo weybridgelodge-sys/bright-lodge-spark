@@ -15,6 +15,7 @@ export const FB_ATTENDANCE_STATUSES = [
 
 export const FB_PAYMENT_METHODS = [
   { value: "stripe", label: "Stripe (online)" },
+  { value: "bank_transfer", label: "Bank transfer" },
   { value: "paid_on_night_cash", label: "Paid on night — Cash" },
   { value: "paid_on_night_card", label: "Paid on night — Card" },
   { value: "complimentary", label: "Complimentary" },
