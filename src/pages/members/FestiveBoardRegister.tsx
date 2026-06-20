@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { Utensils, Plus, Pencil, ChevronRight, Trash2, UserPlus } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   FB_MEETING_TYPES,
   FB_ATTENDANCE_STATUSES,
