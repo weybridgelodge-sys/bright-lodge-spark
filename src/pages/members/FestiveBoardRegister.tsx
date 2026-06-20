@@ -415,7 +415,6 @@ type VisitorDraft = {
 
 type VisitorSuggestion = {
   id: string;
-  email: string;
   name: string | null;
   lodge_name: string | null;
   lodge_number: string | null;
