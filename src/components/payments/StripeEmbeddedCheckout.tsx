@@ -10,6 +10,7 @@ export type BookingLineItem = {
 
 export interface CheckoutRequest {
   event_key: string;
+  meeting_id?: string | null;
   event_label: string;
   contact_name: string;
   contact_email: string;
@@ -29,6 +30,7 @@ export function StripeEmbeddedCheckoutPanel(props: Props) {
     const { data, error } = await supabase.functions.invoke("create-checkout", {
       body: {
         event_key: props.event_key,
+        meeting_id: props.meeting_id ?? null,
         event_label: props.event_label,
         contact_name: props.contact_name,
         contact_email: props.contact_email,

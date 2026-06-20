@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import MembersLayout from "@/components/members/MembersLayout";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { formatMemberLine } from "@/lib/summons";
+import { formatMemberLine, type MemberRow } from "@/lib/summons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -85,7 +85,15 @@ type Member = {
 };
 
 function memberDisplay(m: Member) {
-  return formatMemberLine(m as any) || "Unnamed brother";
+  const row: MemberRow = {
+    ...m,
+    initiation_date: null,
+    joined_lodge_date: null,
+    joined_year: null,
+    is_royal_arch: null,
+    status: "active",
+  };
+  return formatMemberLine(row) || "Unnamed brother";
 }
 
 
@@ -414,6 +422,14 @@ type VisitorSuggestion = {
   last_seen_at: string | null;
 };
 
+type LodgeEventLink = {
+  id: string;
+  slug: string;
+  title: string;
+  event_date: string;
+  published: boolean;
+};
+
 function tempId() {
   return `tmp_${Math.random().toString(36).slice(2)}`;
 }
@@ -450,6 +466,32 @@ function MeetingDialog({
   );
   const [eventKey, setEventKey] = useState<string>(existing?.event_key ?? `festive-board-${date}`);
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (existing || !date) return;
+    let cancelled = false;
+    const start = `${date}T00:00:00`;
+    const endDate = new Date(`${date}T00:00:00`);
+    endDate.setDate(endDate.getDate() + 1);
+    const end = endDate.toISOString().slice(0, 19);
+    supabase
+      .from("lodge_events")
+      .select("id,slug,title,event_date,published")
+      .gte("event_date", start)
+      .lt("event_date", end)
+      .order("published", { ascending: false })
+      .order("event_date", { ascending: true })
+      .limit(1)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (cancelled || !data) return;
+        const event = data as LodgeEventLink;
+        setEventKey(event.slug);
+        if (event.published) setStatus("published");
+        setNotes((current) => current || event.title);
+      });
+    return () => { cancelled = true; };
+  }, [date, existing]);
 
   const [memberDrafts, setMemberDrafts] = useState<Record<string, MemberDraft>>(() => {
     const initial: Record<string, MemberDraft> = {};
@@ -507,7 +549,7 @@ function MeetingDialog({
       const { data: bookings } = await supabase
         .from("bookings")
         .select("id,contact_name,contact_email,details,payment_status")
-        .eq("meeting_id", existing.id);
+        .or(`meeting_id.eq.${existing.id},event_key.eq.${existing.event_key}`);
       if (cancelled || !bookings?.length) return;
 
       const alreadySynced = new Set(
