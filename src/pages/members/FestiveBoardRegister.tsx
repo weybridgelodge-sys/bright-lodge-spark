@@ -775,11 +775,16 @@ function MeetingDialog({
                     key={v.id}
                     className="border border-gold/15 rounded-sm p-2 grid grid-cols-1 sm:grid-cols-[1fr_1fr_90px_1fr_140px_180px_100px_auto] gap-2 items-center"
                   >
-                    <Input
+                    <VisitorNameInput
                       value={v.name}
-                      placeholder="Visitor name"
-                      onChange={(e) => setVisitor(v.id, { name: e.target.value })}
-                      className="bg-navy border-gold/20 h-8 text-xs"
+                      suggestions={visitorSuggestions}
+                      onChange={(name) => setVisitor(v.id, { name })}
+                      onPick={(s) => setVisitor(v.id, {
+                        name: s.name ?? "",
+                        lodgeName: s.lodge_name ?? "",
+                        lodgeNumber: s.lodge_number ?? "",
+                        email: s.email ?? "",
+                      })}
                     />
                     <Input
                       value={v.lodgeName}
