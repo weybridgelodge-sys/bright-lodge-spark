@@ -1,0 +1,2 @@
+REVOKE ALL ON FUNCTION public.sync_festive_board_from_lodge_event() FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.sync_lodge_event_from_festive_board() FROM PUBLIC, anon, authenticated;
