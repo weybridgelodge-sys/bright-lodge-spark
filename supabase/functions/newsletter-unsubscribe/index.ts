@@ -51,7 +51,21 @@ Deno.serve(async (req) => {
     ), { headers: { ...corsHeaders, "Content-Type": "text/html; charset=utf-8" } });
   }
 
-  // 2. Fall back to the public subscriber list.
+  // 2. Visiting Freemasons (festive board contacts).
+  const { data: visitor } = await supabase
+    .from("visitor_contacts")
+    .update({ opted_out_at: new Date().toISOString() })
+    .eq("unsubscribe_token", token)
+    .select("email")
+    .maybeSingle();
+  if (visitor) {
+    return new Response(page(
+      "You're unsubscribed",
+      `<strong>${visitor.email}</strong> has been removed from the Weybridge Chronicle newsletter. We're sorry to see you go.`,
+    ), { headers: { ...corsHeaders, "Content-Type": "text/html; charset=utf-8" } });
+  }
+
+  // 3. Fall back to the public subscriber list.
   const { data: sub } = await supabase
     .from("newsletter_subscribers")
     .update({ unsubscribed_at: new Date().toISOString() })

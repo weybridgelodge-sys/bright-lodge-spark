@@ -1981,6 +1981,84 @@ export type Database = {
         }
         Relationships: []
       }
+      visitor_attendances: {
+        Row: {
+          created_at: string
+          festive_board_attendance_id: string
+          id: string
+          visitor_contact_id: string
+        }
+        Insert: {
+          created_at?: string
+          festive_board_attendance_id: string
+          id?: string
+          visitor_contact_id: string
+        }
+        Update: {
+          created_at?: string
+          festive_board_attendance_id?: string
+          id?: string
+          visitor_contact_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "visitor_attendances_festive_board_attendance_id_fkey"
+            columns: ["festive_board_attendance_id"]
+            isOneToOne: true
+            referencedRelation: "festive_board_attendance"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "visitor_attendances_visitor_contact_id_fkey"
+            columns: ["visitor_contact_id"]
+            isOneToOne: false
+            referencedRelation: "visitor_contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      visitor_contacts: {
+        Row: {
+          created_at: string
+          email: string
+          first_seen_at: string
+          id: string
+          last_seen_at: string
+          lodge_name: string | null
+          lodge_number: string | null
+          name: string | null
+          opted_out_at: string | null
+          unsubscribe_token: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          first_seen_at?: string
+          id?: string
+          last_seen_at?: string
+          lodge_name?: string | null
+          lodge_number?: string | null
+          name?: string | null
+          opted_out_at?: string | null
+          unsubscribe_token?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          first_seen_at?: string
+          id?: string
+          last_seen_at?: string
+          lodge_name?: string | null
+          lodge_number?: string | null
+          name?: string | null
+          opted_out_at?: string | null
+          unsubscribe_token?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       welfare_absences: {
         Row: {
           created_at: string

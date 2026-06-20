@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { Utensils, Plus, Pencil, ChevronRight, Trash2, UserPlus } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   FB_MEETING_TYPES,
   FB_ATTENDANCE_STATUSES,
@@ -391,6 +392,15 @@ type VisitorDraft = {
 };
 
 
+type VisitorSuggestion = {
+  id: string;
+  email: string;
+  name: string | null;
+  lodge_name: string | null;
+  lodge_number: string | null;
+  last_seen_at: string | null;
+};
+
 function tempId() {
   return `tmp_${Math.random().toString(36).slice(2)}`;
 }
@@ -451,6 +461,21 @@ function MeetingDialog({
         amountPounds: (a.amount_pence / 100).toFixed(2),
       }))
   );
+
+  const [visitorSuggestions, setVisitorSuggestions] = useState<VisitorSuggestion[]>([]);
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from("visitor_contacts")
+        .select("id,email,name,lodge_name,lodge_number,last_seen_at")
+        .order("last_seen_at", { ascending: false })
+        .limit(500);
+      if (!cancelled) setVisitorSuggestions((data as VisitorSuggestion[]) ?? []);
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
 
 
   const setMember = (id: string, patch: Partial<MemberDraft>) =>
@@ -750,11 +775,16 @@ function MeetingDialog({
                     key={v.id}
                     className="border border-gold/15 rounded-sm p-2 grid grid-cols-1 sm:grid-cols-[1fr_1fr_90px_1fr_140px_180px_100px_auto] gap-2 items-center"
                   >
-                    <Input
+                    <VisitorNameInput
                       value={v.name}
-                      placeholder="Visitor name"
-                      onChange={(e) => setVisitor(v.id, { name: e.target.value })}
-                      className="bg-navy border-gold/20 h-8 text-xs"
+                      suggestions={visitorSuggestions}
+                      onChange={(name) => setVisitor(v.id, { name })}
+                      onPick={(s) => setVisitor(v.id, {
+                        name: s.name ?? "",
+                        lodgeName: s.lodge_name ?? "",
+                        lodgeNumber: s.lodge_number ?? "",
+                        email: s.email ?? "",
+                      })}
                     />
                     <Input
                       value={v.lodgeName}
@@ -861,3 +891,65 @@ function MeetingDialog({
     </Dialog>
   );
 }
+
+// ---------- Visitor name autocomplete ----------
+
+function VisitorNameInput({
+  value,
+  suggestions,
+  onChange,
+  onPick,
+}: {
+  value: string;
+  suggestions: VisitorSuggestion[];
+  onChange: (v: string) => void;
+  onPick: (s: VisitorSuggestion) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const q = value.trim().toLowerCase();
+  const matches = useMemo(() => {
+    if (q.length < 2) return [];
+    return suggestions
+      .filter((s) => (s.name ?? "").toLowerCase().includes(q))
+      .slice(0, 6);
+  }, [q, suggestions]);
+
+  return (
+    <Popover open={open && matches.length > 0} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Input
+          value={value}
+          placeholder="Visitor name (start typing to find past visitors)"
+          onChange={(e) => { onChange(e.target.value); setOpen(true); }}
+          onFocus={() => setOpen(true)}
+          className="bg-navy border-gold/20 h-8 text-xs"
+        />
+      </PopoverTrigger>
+      <PopoverContent
+        align="start"
+        sideOffset={4}
+        className="w-[320px] p-1 bg-navy-dark border-gold/30"
+        onOpenAutoFocus={(e) => e.preventDefault()}
+      >
+        <ul className="text-xs">
+          {matches.map((s) => (
+            <li key={s.id}>
+              <button
+                type="button"
+                onClick={() => { onPick(s); setOpen(false); }}
+                className="w-full text-left px-2 py-1.5 rounded hover:bg-gold/10"
+              >
+                <div className="text-primary-foreground">{s.name || s.email}</div>
+                <div className="text-[10px] text-primary-foreground/60">
+                  {s.lodge_name ? `${s.lodge_name}${s.lodge_number ? ` No. ${s.lodge_number}` : ""}` : "Lodge unknown"}
+                  {s.last_seen_at ? ` · last seen ${new Date(s.last_seen_at).toLocaleDateString("en-GB", { month: "short", year: "numeric" })}` : ""}
+                </div>
+              </button>
+            </li>
+          ))}
+        </ul>
+      </PopoverContent>
+    </Popover>
+  );
+}
+

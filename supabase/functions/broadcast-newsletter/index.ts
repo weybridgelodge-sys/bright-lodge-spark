@@ -127,22 +127,24 @@ function renderHtml(opts: { subject: string; content: NewsletterContent; unsubsc
 </body></html>`;
 }
 
-type Recipient = { email: string; token: string; kind: "member" | "public" };
+type Recipient = { email: string; token: string; kind: "member" | "visitor" | "public" };
 
 /**
  * Build the deduplicated recipient list for a requested audience.
- * - "members" = active/pending members (visitor list deferred until visitor_contacts ships)
+ * - "members"  = active/pending members  +  visitor_contacts (visiting Freemasons)
  * - "visitors" = public newsletter_subscribers
- * - "all"     = union of both, deduped on lowercased email. Member tokens win.
+ * - "all"      = union of both, deduped on lowercased email.
+ *                Precedence: member > visitor > public.
  *
  * Members are excluded if they have an active member_newsletter_opt_outs row.
+ * Visitor contacts are excluded if opted_out_at is set.
  * Each member is ensured to have a stable per-recipient token in that table.
  */
 async function getRecipients(audience: Audience): Promise<Recipient[]> {
   const map = new Map<string, Recipient>();
 
   if (audience === "members" || audience === "all") {
-    // 1. Active/pending members with an email.
+    // 1a. Active/pending members with an email.
     const { data: profiles } = await admin
       .from("profiles")
       .select("id,email,status")
@@ -151,7 +153,6 @@ async function getRecipients(audience: Audience): Promise<Recipient[]> {
     const rows = (profiles ?? []).filter((p) => (p.email ?? "").trim());
     const userIds = rows.map((p) => p.id as string);
 
-    // 2. Existing opt-out tokens.
     const { data: existing } = userIds.length
       ? await admin
           .from("member_newsletter_opt_outs")
@@ -163,8 +164,6 @@ async function getRecipients(audience: Audience): Promise<Recipient[]> {
       tokenByUser.set(r.user_id as string, { token: r.token as string, opted: !!r.opted_out_at });
     }
 
-    // 3. Mint token rows for members that don't have one yet (token-only,
-    //    opted_out_at stays null so they remain subscribed).
     const missing = userIds.filter((id) => !tokenByUser.has(id));
     if (missing.length) {
       const { data: inserted } = await admin
@@ -178,10 +177,23 @@ async function getRecipients(audience: Audience): Promise<Recipient[]> {
 
     for (const p of rows) {
       const entry = tokenByUser.get(p.id as string);
-      if (!entry || entry.opted) continue; // skip opted-out
+      if (!entry || entry.opted) continue;
       const email = (p.email as string).trim().toLowerCase();
       if (!email) continue;
       map.set(email, { email, token: entry.token, kind: "member" });
+    }
+
+    // 1b. Visiting Freemasons captured via Festive Board.
+    const { data: visitors } = await admin
+      .from("visitor_contacts")
+      .select("email,unsubscribe_token")
+      .is("opted_out_at", null);
+    for (const v of visitors ?? []) {
+      const email = (v.email ?? "").trim().toLowerCase();
+      if (!email) continue;
+      if (!map.has(email)) {
+        map.set(email, { email, token: v.unsubscribe_token as string, kind: "visitor" });
+      }
     }
   }
 
@@ -193,7 +205,6 @@ async function getRecipients(audience: Audience): Promise<Recipient[]> {
     for (const r of subs ?? []) {
       const email = (r.email ?? "").trim().toLowerCase();
       if (!email) continue;
-      // Member token wins if the same email is on both lists.
       if (!map.has(email)) {
         map.set(email, { email, token: r.unsubscribe_token as string, kind: "public" });
       }
