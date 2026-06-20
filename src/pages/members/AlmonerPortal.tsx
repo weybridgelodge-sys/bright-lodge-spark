@@ -196,7 +196,7 @@ function PortalBody() {
         .limit(2),
     ]);
 
-    const baseMembers = (ms as MemberRow[]) ?? [];
+    const baseMembers = ((ms as Omit<MemberRow, "date_of_birth">[]) ?? []).map((m) => ({ ...m, date_of_birth: null as string | null })) as MemberRow[];
     // Merge DOB (PII) via secure RPC for Almoner-permitted callers
     let withPii: MemberRow[] = baseMembers;
     if (baseMembers.length) {
