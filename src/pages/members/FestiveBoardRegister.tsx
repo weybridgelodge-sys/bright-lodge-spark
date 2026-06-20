@@ -836,6 +836,55 @@ function MeetingDialog({
             </div>
           </div>
 
+          {/* Booking sync controls */}
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 p-3 rounded-sm border border-gold/15 bg-navy/40">
+            <div>
+              <label className="text-xs uppercase tracking-wider text-primary-foreground/60 mb-1 block">
+                Bookings status
+              </label>
+              <Select value={status} onValueChange={(v) => setStatus(v as typeof status)}>
+                <SelectTrigger className="bg-navy border-gold/20 h-9 text-primary-foreground"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="draft">Draft (not yet open)</SelectItem>
+                  <SelectItem value="published">Published (live on /bookings)</SelectItem>
+                  <SelectItem value="completed">Completed</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <label className="text-xs uppercase tracking-wider text-primary-foreground/60 mb-1 block">
+                Dining price (£)
+              </label>
+              <Input
+                type="number" step="0.01" min={0}
+                value={diningPricePounds}
+                onChange={(e) => setDiningPricePounds(e.target.value)}
+                className="bg-navy border-gold/20 h-9 text-primary-foreground placeholder:text-primary-foreground/40"
+              />
+            </div>
+            <div>
+              <label className="text-xs uppercase tracking-wider text-primary-foreground/60 mb-1 block">
+                Public booking slug
+              </label>
+              <Input
+                value={eventKey}
+                onChange={(e) => setEventKey(e.target.value)}
+                placeholder={`festive-board-${date}`}
+                className="bg-navy border-gold/20 h-9 text-primary-foreground placeholder:text-primary-foreground/40"
+              />
+            </div>
+            <label className="flex items-center gap-2 text-xs text-primary-foreground/80 mt-5">
+              <input
+                type="checkbox"
+                checked={isWhiteTable}
+                onChange={(e) => setIsWhiteTable(e.target.checked)}
+                className="accent-gold w-4 h-4"
+              />
+              Open to non-Masons (white table) — disables auto-sync from bookings
+            </label>
+          </div>
+
+
           <div>
             <label className="text-xs uppercase tracking-wider text-primary-foreground/60 mb-1 block">
               Notes
