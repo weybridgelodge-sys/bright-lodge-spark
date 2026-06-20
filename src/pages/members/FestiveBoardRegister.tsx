@@ -1233,7 +1233,7 @@ function VisitorNameInput({
                 onMouseDown={(e) => { e.preventDefault(); onPick(s); setOpen(false); }}
                 className="w-full text-left px-2 py-1.5 rounded hover:bg-gold/10"
               >
-                <div className="text-primary-foreground">{s.name || s.email}</div>
+                <div className="text-primary-foreground">{s.name || "Unnamed visitor"}</div>
                 <div className="text-[10px] text-primary-foreground/60">
                   {s.lodge_name ? `${s.lodge_name}${s.lodge_number ? ` No. ${s.lodge_number}` : ""}` : "Lodge unknown"}
                   {s.last_seen_at ? ` · last seen ${new Date(s.last_seen_at).toLocaleDateString("en-GB", { month: "short", year: "numeric" })}` : ""}
