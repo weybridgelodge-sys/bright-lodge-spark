@@ -431,10 +431,10 @@ function NewsletterHubInner() {
 
   /** Copy the body of this section from the OTHER audience variant into the current one. */
   const copyFromOther = (sectionId: string) => {
-    const sourceList = audience === "members" ? visitorsSections : membersSections;
+    const sourceList = effectiveAudience === "members" ? visitorsSections : membersSections;
     const src = sourceList.find((s) => s.id === sectionId);
     if (!src) { toast.error("Nothing to copy — the other audience has no matching section."); return; }
-    if (audience === "members") {
+    if (effectiveAudience === "members") {
       setMembersSections((prev) => prev.map((s) => s.id === sectionId ? { ...s, blocks: cloneBlocks(src.blocks) } : s));
     } else {
       setVisitorsSections((prev) => prev.map((s) => s.id === sectionId ? { ...s, blocks: cloneBlocks(src.blocks) } : s));
@@ -447,6 +447,7 @@ function NewsletterHubInner() {
         ? { id: b.id, type: "text", text: b.text }
         : { id: b.id, type: "image", url: b.url, alt: b.alt, caption: b.caption },
     );
+
 
   if (!accessChecked) {
     return <MembersLayout><div className="text-primary-foreground/60 text-sm">Checking access…</div></MembersLayout>;
@@ -477,12 +478,15 @@ function NewsletterHubInner() {
           <ul className="text-sm text-primary-foreground/80 mb-6 space-y-1">
             {sentSummary.map((r) => (
               <li key={r.audience}>
-                <strong className="text-gold">{r.audience === "members" ? "Members" : "Visitors"}:</strong>{" "}
+                <strong className="text-gold">
+                  {r.audience === "members" ? "Members & Visitors" : r.audience === "visitors" ? "Public" : "Combined (all lists)"}:
+                </strong>{" "}
                 {r.error ? <span className="text-red-300">failed — {r.error}</span> : `${r.sent} sent · PDF archived`}
               </li>
             ))}
           </ul>
-          <p className="text-[11px] text-primary-foreground/50 mb-6">PDFs are filed under <strong className="text-gold">Documents → Newsletters</strong>, one per audience.</p>
+          <p className="text-[11px] text-primary-foreground/50 mb-6">PDFs are filed under <strong className="text-gold">Documents → Newsletters</strong>, one per audience sent.</p>
+
           <Button onClick={() => { setSentSummary(null); resetEditor(); }} variant="outline" className="border-gold/40 text-gold hover:bg-gold/10">
             Compose next issue
           </Button>
@@ -497,10 +501,17 @@ function NewsletterHubInner() {
         <p className="text-xs uppercase tracking-wider text-gold/80">Communications Engine</p>
         <h1 className="font-serif text-2xl md:text-3xl text-gold mt-1">Newsletter Dispatch Hub</h1>
         <p className="text-primary-foreground/70 text-sm mt-1">
-          Compose one issue with parallel <strong className="text-gold">Members</strong> and <strong className="text-gold">Visitors</strong> editions.
-          Switch the audience toggle to edit each variant; sections stay in sync, body text is independent.
-          Each successful send is archived as its own PDF under Documents → Newsletters.
+          Compose one issue, then choose your audience. <strong className="text-gold">Lodge Members &amp; Visitors</strong> covers
+          active members plus visiting Freemasons (deferred until the visitor contacts list ships); <strong className="text-gold">Public</strong> goes
+          to website newsletter sign-ups. Tick <strong className="text-gold">Unified content</strong> when one shared write-up suits everyone
+          (e.g. a social-event poster) — the merged "Send to Both" then dedups by email and files a single combined PDF.
         </p>
+        <p className="text-[11px] text-primary-foreground/50 mt-2">
+          <strong>Note:</strong> Mailchimp was considered for the Public list and dropped — its free tier caps at 250 contacts /
+          500 sends per month and forces a "Sent with Mailchimp" footer below the paid Essentials plan. Both audiences go via
+          the portal's existing Resend integration so branding, unsubscribe handling, and contact storage stay consistent.
+        </p>
+
       </header>
 
       {drafts.length > 0 && (
@@ -529,20 +540,42 @@ function NewsletterHubInner() {
         </div>
       )}
 
-      {/* Audience editing toggle */}
-      <div className="mb-2 text-[11px] uppercase tracking-wider text-primary-foreground/60">Editing audience variant</div>
-      <div className="inline-flex bg-navy-light/40 border border-gold/20 rounded-lg p-1 mb-6">
-        <button type="button" onClick={() => setAudience("members")}
-          className={`px-4 py-2 text-xs font-semibold rounded-md transition-all flex items-center gap-1.5 ${
-            audience === "members" ? "bg-gold text-navy shadow" : "text-primary-foreground/70 hover:text-primary-foreground"}`}>
-          <Users className="h-3.5 w-3.5" /> Lodge Members
-        </button>
-        <button type="button" onClick={() => setAudience("visitors")}
-          className={`px-4 py-2 text-xs font-semibold rounded-md transition-all flex items-center gap-1.5 ${
-            audience === "visitors" ? "bg-gold text-navy shadow" : "text-primary-foreground/70 hover:text-primary-foreground"}`}>
-          <Mail className="h-3.5 w-3.5" /> Visitors / Public
-        </button>
-      </div>
+      {/* Unified content toggle */}
+      <label className="flex items-start gap-2 mb-4 cursor-pointer">
+        <input
+          type="checkbox"
+          checked={unifiedContent}
+          onChange={(e) => setUnifiedContentSafe(e.target.checked)}
+          className="mt-0.5 accent-gold"
+        />
+        <span>
+          <span className="text-sm font-semibold text-gold">Unified content</span>
+          <span className="block text-[11px] text-primary-foreground/60 leading-relaxed">
+            One shared write-up for everyone. Hides the Public variant editor; "Send to Both" becomes a single dedup'd merged
+            send with one combined PDF archived.
+          </span>
+        </span>
+      </label>
+
+      {/* Audience editing toggle — hidden in unified mode */}
+      {!unifiedContent && (
+        <>
+          <div className="mb-2 text-[11px] uppercase tracking-wider text-primary-foreground/60">Editing audience variant</div>
+          <div className="inline-flex bg-navy-light/40 border border-gold/20 rounded-lg p-1 mb-6">
+            <button type="button" onClick={() => setAudience("members")}
+              className={`px-4 py-2 text-xs font-semibold rounded-md transition-all flex items-center gap-1.5 ${
+                audience === "members" ? "bg-gold text-navy shadow" : "text-primary-foreground/70 hover:text-primary-foreground"}`}>
+              <Users className="h-3.5 w-3.5" /> Lodge Members &amp; Visitors
+            </button>
+            <button type="button" onClick={() => setAudience("visitors")}
+              className={`px-4 py-2 text-xs font-semibold rounded-md transition-all flex items-center gap-1.5 ${
+                audience === "visitors" ? "bg-gold text-navy shadow" : "text-primary-foreground/70 hover:text-primary-foreground"}`}>
+              <Mail className="h-3.5 w-3.5" /> Public
+            </button>
+          </div>
+        </>
+      )}
+
 
       <div className="grid lg:grid-cols-2 gap-6">
         {/* Composer */}
