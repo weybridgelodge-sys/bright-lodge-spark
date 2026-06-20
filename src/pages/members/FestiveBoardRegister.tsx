@@ -415,7 +415,6 @@ type VisitorDraft = {
 
 type VisitorSuggestion = {
   id: string;
-  email: string;
   name: string | null;
   lodge_name: string | null;
   lodge_number: string | null;
@@ -533,7 +532,7 @@ function MeetingDialog({
     (async () => {
       const { data } = await supabase
         .from("visitor_contacts")
-        .select("id,email,name,lodge_name,lodge_number,last_seen_at")
+        .select("id,name,lodge_name,lodge_number,last_seen_at")
         .order("last_seen_at", { ascending: false })
         .limit(500);
       if (!cancelled) setVisitorSuggestions((data as VisitorSuggestion[]) ?? []);
@@ -1082,7 +1081,6 @@ function MeetingDialog({
                             name: s.name ?? "",
                             lodgeName: s.lodge_name ?? "",
                             lodgeNumber: s.lodge_number ?? "",
-                            email: s.email ?? "",
                           })}
                         />
                       </div>
@@ -1235,7 +1233,7 @@ function VisitorNameInput({
                 onMouseDown={(e) => { e.preventDefault(); onPick(s); setOpen(false); }}
                 className="w-full text-left px-2 py-1.5 rounded hover:bg-gold/10"
               >
-                <div className="text-primary-foreground">{s.name || s.email}</div>
+                <div className="text-primary-foreground">{s.name || "Unnamed visitor"}</div>
                 <div className="text-[10px] text-primary-foreground/60">
                   {s.lodge_name ? `${s.lodge_name}${s.lodge_number ? ` No. ${s.lodge_number}` : ""}` : "Lodge unknown"}
                   {s.last_seen_at ? ` · last seen ${new Date(s.last_seen_at).toLocaleDateString("en-GB", { month: "short", year: "numeric" })}` : ""}

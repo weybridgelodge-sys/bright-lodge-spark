@@ -24,11 +24,10 @@ export default function OurCharitiesLiveFeed() {
 
   useEffect(() => {
     (async () => {
-      const [{ data: m }, { data: t }, { data: r }, { data: f }] = await Promise.all([
+      const [{ data: m }, { data: t }, { data: r }] = await Promise.all([
         (supabase as any).from("charity_public_feed_metrics").select("total_raised,current_year_total,festival_name,festival_target_amount,festival_total,public_feed_start_date").maybeSingle(),
         (supabase as any).from("public_charity_totals").select("total_raised,public_feed_start_date").maybeSingle(),
         (supabase as any).from("public_charity_year_breakdown").select("charity_id,name,website,year_total"),
-        supabase.from("charity_festival_settings").select("festival_name,target_amount").maybeSingle(),
       ]);
       if (m) {
         const metrics = m as FeedMetrics;
@@ -45,7 +44,6 @@ export default function OurCharitiesLiveFeed() {
           setFestivalCumulative(mappedRows.filter((x) => x.name.toLowerCase().includes("surrey 2030") || x.name.toLowerCase().includes("2030 festival")).reduce((a, x) => a + x.year_total, 0));
         }
       }
-      if (!m && f) setFestival({ festival_name: (f as any).festival_name, target_amount: Number((f as any).target_amount) });
     })();
   }, []);
 
