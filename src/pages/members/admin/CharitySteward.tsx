@@ -929,9 +929,237 @@ function FestivalTab({ donations, charities, festival, canEdit, onChange }: {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Periodic Report section (sits above the Annual / Masonic year report)
+// ─────────────────────────────────────────────────────────────────────────────
+type PeriodicReportRow = {
+  id: string;
+  title: string;
+  start_date: string;
+  end_date: string;
+  notes: string | null;
+  finalised_at: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+function PeriodicReportsSection({ charities, collections, donations, festival, canEdit }: {
+  charities: Charity[]; collections: Collection[]; donations: Donation[]; festival: FestivalSettings | null; canEdit: boolean;
+}) {
+  const [rows, setRows] = useState<PeriodicReportRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [editing, setEditing] = useState<PeriodicReportRow | null>(null);
+  const [title, setTitle] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [notes, setNotes] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  const load = async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from("charity_periodic_reports")
+      .select("id,title,start_date,end_date,notes,finalised_at,created_at,updated_at")
+      .order("start_date", { ascending: false });
+    setLoading(false);
+    if (error) { toast({ title: "Load failed", description: error.message, variant: "destructive" }); return; }
+    setRows((data ?? []) as PeriodicReportRow[]);
+  };
+
+  useEffect(() => { load(); }, []);
+
+  const resetForm = () => {
+    setEditing(null); setTitle(""); setStartDate(""); setEndDate(""); setNotes("");
+  };
+
+  const loadIntoForm = (r: PeriodicReportRow) => {
+    setEditing(r);
+    setTitle(r.title);
+    setStartDate(r.start_date);
+    setEndDate(r.end_date);
+    setNotes(r.notes ?? "");
+  };
+
+  const buildPayload = (s: string, e: string) => {
+    const periodColl = collections.filter((c) => c.collection_date >= s && c.collection_date <= e);
+    const periodDon = donations.filter((d) => d.donation_date >= s && d.donation_date <= e);
+    const combined = (d: Donation) => Number(d.amount) + Number(d.match_funding_amount ?? 0);
+    const totalCollected = periodColl.reduce((a, c) => a + Number(c.net_amount), 0);
+    const totalLodge = periodDon.reduce((a, d) => a + Number(d.amount), 0);
+    const totalMatch = periodDon.reduce((a, d) => a + Number(d.match_funding_amount ?? 0), 0);
+    const festivalPeriod = periodDon.filter((d) => isFestivalDonation(d, charities, festival)).reduce((a, d) => a + combined(d), 0);
+    return { totalCollected, totalLodge, totalMatch, totalDonated: totalLodge + totalMatch, festivalPeriod, count: { collections: periodColl.length, donations: periodDon.length } };
+  };
+
+  const save = async (finalise: boolean) => {
+    if (!title.trim() || !startDate || !endDate) {
+      toast({ title: "Missing details", description: "Title, start date and end date are required.", variant: "destructive" });
+      return;
+    }
+    if (endDate < startDate) {
+      toast({ title: "Invalid range", description: "End date must be on or after start date.", variant: "destructive" });
+      return;
+    }
+    setBusy(true);
+    const payload = buildPayload(startDate, endDate);
+    const base: any = {
+      title: title.trim(), start_date: startDate, end_date: endDate,
+      notes: notes || null, payload,
+    };
+    if (finalise) base.finalised_at = new Date().toISOString();
+    let error;
+    if (editing) {
+      ({ error } = await supabase.from("charity_periodic_reports").update(base).eq("id", editing.id));
+    } else {
+      ({ error } = await supabase.from("charity_periodic_reports").insert(base));
+    }
+    setBusy(false);
+    if (error) { toast({ title: "Save failed", description: error.message, variant: "destructive" }); return; }
+    toast({ title: finalise ? "Finalised" : (editing ? "Updated" : "Saved") });
+    resetForm();
+    load();
+  };
+
+  const remove = async (r: PeriodicReportRow) => {
+    if (!confirm(`Delete report "${r.title}"?`)) return;
+    const { error } = await supabase.from("charity_periodic_reports").delete().eq("id", r.id);
+    if (error) { toast({ title: "Delete failed", description: error.message, variant: "destructive" }); return; }
+    toast({ title: "Deleted" });
+    if (editing?.id === r.id) resetForm();
+    load();
+  };
+
+  const downloadFor = async (r: PeriodicReportRow) => {
+    const doc = await buildCharityPeriodicReportPdf({
+      title: r.title, startDate: r.start_date, endDate: r.end_date,
+      collections, donations, charities, festival,
+      stewardNotes: r.notes ?? "", finalised: !!r.finalised_at,
+    });
+    const safe = r.title.replace(/[^a-z0-9_-]+/gi, "-").replace(/^-+|-+$/g, "");
+    doc.save(`Charity-Periodic-Report-${safe || "report"}-${r.start_date}_to_${r.end_date}.pdf`);
+  };
+
+  const downloadCurrent = async () => {
+    if (!title.trim() || !startDate || !endDate) {
+      toast({ title: "Missing details", description: "Title, start date and end date are required.", variant: "destructive" });
+      return;
+    }
+    const doc = await buildCharityPeriodicReportPdf({
+      title: title.trim(), startDate, endDate,
+      collections, donations, charities, festival,
+      stewardNotes: notes, finalised: !!editing?.finalised_at,
+    });
+    const safe = title.trim().replace(/[^a-z0-9_-]+/gi, "-").replace(/^-+|-+$/g, "");
+    doc.save(`Charity-Periodic-Report-${safe || "report"}-${startDate}_to_${endDate}.pdf`);
+  };
+
+  const fmtDate = (s: string) => new Date(s).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+  const isEditingFinalised = !!editing?.finalised_at;
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-baseline justify-between gap-2 flex-wrap">
+        <h3 className="font-serif text-gold text-lg">Charity Steward's Periodic Report</h3>
+        <p className="text-xs text-primary-foreground/60">Custom date-range reports with save / edit / finalise. Finalised reports cannot be changed.</p>
+      </div>
+
+      <Card title={editing ? `Editing: ${editing.title}${isEditingFinalised ? " (finalised — read-only)" : ""}` : "Create a new periodic report"}>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <div className="lg:col-span-2">
+            <Label>Report title</Label>
+            <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Q1 2026 Charity Review" disabled={!canEdit || isEditingFinalised} />
+          </div>
+          <div>
+            <Label>From</Label>
+            <Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} disabled={!canEdit || isEditingFinalised} />
+          </div>
+          <div>
+            <Label>To</Label>
+            <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} disabled={!canEdit || isEditingFinalised} />
+          </div>
+        </div>
+        <div>
+          <Label>Report summary (shown at start of PDF)</Label>
+          <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={5} placeholder="Verbal-report notes from the Charity Steward…" disabled={!canEdit || isEditingFinalised} />
+        </div>
+        <div className="flex flex-wrap gap-2 pt-1">
+          <Button onClick={downloadCurrent} className="bg-gold text-navy hover:bg-gold/90">
+            <Download className="w-4 h-4 mr-1" /> Preview PDF
+          </Button>
+          {canEdit && !isEditingFinalised && (
+            <>
+              <Button variant="outline" onClick={() => save(false)} disabled={busy} className="border-gold/40 text-gold">
+                {busy ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Save className="w-4 h-4 mr-1" />} {editing ? "Update" : "Save draft"}
+              </Button>
+              <Button variant="outline" onClick={() => save(true)} disabled={busy} className="border-gold/40 text-gold">
+                {busy ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Save className="w-4 h-4 mr-1" />} Save &amp; Finalise
+              </Button>
+            </>
+          )}
+          {editing && (
+            <Button variant="ghost" onClick={resetForm} className="text-primary-foreground/70">Cancel</Button>
+          )}
+        </div>
+      </Card>
+
+      <Card title="History">
+        {loading ? (
+          <p className="text-xs text-primary-foreground/50 italic">Loading…</p>
+        ) : rows.length === 0 ? (
+          <p className="text-xs text-primary-foreground/50 italic">No periodic reports yet.</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="text-left text-xs uppercase tracking-wider text-primary-foreground/60 border-b border-gold/15">
+                  <th className="px-2 py-2">Title</th>
+                  <th className="px-2 py-2">Period</th>
+                  <th className="px-2 py-2">Status</th>
+                  <th className="px-2 py-2">Updated</th>
+                  <th className="px-2 py-2 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((r) => (
+                  <tr key={r.id} className="border-b border-gold/10">
+                    <td className="px-2 py-2 text-primary-foreground">{r.title}</td>
+                    <td className="px-2 py-2 text-primary-foreground/80">{fmtDate(r.start_date)} – {fmtDate(r.end_date)}</td>
+                    <td className="px-2 py-2">
+                      {r.finalised_at
+                        ? <Badge className="bg-emerald-700/60 text-emerald-50">Finalised</Badge>
+                        : <Badge variant="outline" className="border-gold/40 text-gold">Draft</Badge>}
+                    </td>
+                    <td className="px-2 py-2 text-primary-foreground/70 text-xs">{fmtDate(r.updated_at)}</td>
+                    <td className="px-2 py-2 text-right space-x-1">
+                      <Button size="sm" variant="ghost" onClick={() => downloadFor(r)} className="text-gold hover:text-gold/80">
+                        <Download className="w-4 h-4" />
+                      </Button>
+                      {canEdit && (
+                        <Button size="sm" variant="ghost" onClick={() => loadIntoForm(r)} className="text-primary-foreground/80">
+                          <Pencil className="w-4 h-4" />
+                        </Button>
+                      )}
+                      {canEdit && !r.finalised_at && (
+                        <Button size="sm" variant="ghost" onClick={() => remove(r)} className="text-red-400 hover:text-red-300">
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </Card>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Annual Report tab
 // ─────────────────────────────────────────────────────────────────────────────
 function ReportTab({ charities, collections, donations, festival, canEdit }: {
+
   charities: Charity[]; collections: Collection[]; donations: Donation[]; festival: FestivalSettings | null; canEdit: boolean;
 }) {
   const [year, setYear] = useState(currentMasonicYear());
