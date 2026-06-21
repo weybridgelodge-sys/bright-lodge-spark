@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.sync_attendance_from_booking() FROM PUBLIC, anon, authenticated;
