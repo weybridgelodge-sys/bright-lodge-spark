@@ -157,7 +157,7 @@ export default function FestiveBoardRegister() {
   ).length;
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Delete this Festive Board record and all attendance?")) return;
+    if (!confirm("Delete this Lodge Meeting record and all attendance?")) return;
     const { error } = await supabase.from("festive_board_meetings").delete().eq("id", id);
     if (error) {
       toast({ title: "Delete failed", description: error.message, variant: "destructive" });
@@ -172,7 +172,7 @@ export default function FestiveBoardRegister() {
       <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1 className="font-serif text-3xl text-gold mb-1 flex items-center gap-2">
-            <Utensils className="w-6 h-6" /> Festive Board Register
+            <Utensils className="w-6 h-6" /> Lodge Meetings Register
           </h1>
           <p className="text-primary-foreground/60 text-sm">
             Meeting attendance, visitors, walk-ins and payment records.
@@ -190,14 +190,14 @@ export default function FestiveBoardRegister() {
 
       {/* My attendance */}
       <section className="bg-navy-dark/60 border border-gold/15 rounded-sm p-5 mb-6">
-        <h2 className="font-serif text-lg text-gold mb-3">My Festive Board attendance</h2>
+        <h2 className="font-serif text-lg text-gold mb-3">My Lodge Meeting attendance</h2>
         <p className="text-xs text-primary-foreground/60 mb-3">
           <span className="text-gold font-semibold">{myAttendedCount}</span> meeting
           {myAttendedCount === 1 ? "" : "s"} attended
         </p>
         {myAttendance.length === 0 ? (
           <p className="text-xs text-primary-foreground/50 italic">
-            No Festive Board attendance recorded for you yet.
+            No Lodge Meeting attendance recorded for you yet.
           </p>
         ) : (
           <ul className="space-y-1.5 text-sm">
@@ -228,7 +228,7 @@ export default function FestiveBoardRegister() {
           <p className="text-xs text-primary-foreground/50">Loading…</p>
         ) : meetings.length === 0 ? (
           <p className="text-xs text-primary-foreground/50 italic">
-            No Festive Board meetings recorded yet.
+            No Lodge Meetings recorded yet.
           </p>
         ) : (
           <ul className="divide-y divide-gold/10">
@@ -828,7 +828,7 @@ function MeetingDialog({
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto bg-navy-dark text-primary-foreground border-gold/30">
         <DialogHeader>
           <DialogTitle className="font-serif text-gold">
-            {existing ? "Edit Festive Board record" : "New Festive Board record"}
+            {existing ? "Edit Lodge Meeting record" : "New Lodge Meeting record"}
           </DialogTitle>
         </DialogHeader>
 

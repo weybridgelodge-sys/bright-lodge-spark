@@ -66,7 +66,7 @@ export default function MembersLayout({ children }: { children: React.ReactNode 
               <GraduationCap className="w-4 h-4" /> LOI Register
             </NavLink>
             <NavLink to="/members/festive-register" className={navCls}>
-              <Utensils className="w-4 h-4" /> Festive Board
+              <Utensils className="w-4 h-4" /> Lodge Meetings
             </NavLink>
             {canManageSummons && (
               <NavLink to="/members/summons" className={navCls}>
