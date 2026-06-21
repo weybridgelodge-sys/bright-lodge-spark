@@ -300,7 +300,7 @@ export default function FestiveBoardRegister() {
                                         }`
                                       : ""
                                   }`;
-                              return { r, name, isMember: !!m };
+                              return { r, name, isMember: !!m || isWeybridgeLodge(r.visitor_lodge_name) };
                             })
                             .sort((a, b) => a.name.localeCompare(b.name))
                             .map(({ r, name, isMember }) => (
