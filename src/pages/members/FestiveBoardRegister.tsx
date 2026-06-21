@@ -309,7 +309,7 @@ export default function FestiveBoardRegister() {
                                 key={r.id}
                                 className="flex flex-wrap justify-between gap-3 border-b border-gold/5 pb-1"
                               >
-                                <span>
+                                <span className="flex items-center gap-1.5 flex-wrap">
                                   <span
                                     className={
                                       isMember
@@ -319,7 +319,15 @@ export default function FestiveBoardRegister() {
                                   >
                                     {name}
                                   </span>
-                                  <span className="text-primary-foreground/40 ml-2">
+                                  {r.is_meeting_only && (
+                                    <span
+                                      className="text-[9px] uppercase tracking-wider text-primary-foreground/70 border border-primary-foreground/30 rounded px-1 py-0.5"
+                                      title="Attending meeting only — not dining"
+                                    >
+                                      Meeting only
+                                    </span>
+                                  )}
+                                  <span className="text-primary-foreground/40 ml-1">
                                     · {paymentMethodLabel(r.payment_method)}
                                   </span>
                                 </span>
@@ -720,9 +728,25 @@ function MeetingDialog({
     setVisitorDrafts((p) => p.filter((v) => v.id !== id));
 
   const computedAttended = useMemo(() => {
-    const m = Object.values(memberDrafts).filter((d) => d.present && d.status === "attended").length;
-    const v = visitorDrafts.filter((d) => d.name.trim() && d.status === "attended").length;
-    return { members: m, visitors: v, total: m + v };
+    const presentMembers = Object.values(memberDrafts).filter(
+      (d) => d.present && (d.status === "attended" || d.status === "booked")
+    );
+    const presentVisitors = visitorDrafts.filter(
+      (d) => d.name.trim() && (d.status === "attended" || d.status === "booked")
+    );
+    const members = presentMembers.length;
+    const visitors = presentVisitors.length;
+    const diningMembers = presentMembers.filter((d) => !d.isMeetingOnly).length;
+    const diningVisitors = presentVisitors.filter((d) => !d.isMeetingOnly).length;
+    return {
+      members,
+      visitors,
+      total: members + visitors,
+      diningMembers,
+      diningVisitors,
+      diningTotal: diningMembers + diningVisitors,
+      meetingOnly: (members - diningMembers) + (visitors - diningVisitors),
+    };
   }, [memberDrafts, visitorDrafts]);
 
   const parsePounds = (s: string): number => {
@@ -793,6 +817,7 @@ function MeetingDialog({
           attendance_status: d.status,
           payment_method: d.paymentMethod,
           amount_pence: parsePounds(d.amountPounds),
+          is_meeting_only: d.isMeetingOnly,
           created_by: user?.id ?? null,
           source: (d.synced ? "booking" : "manual") as "booking" | "manual",
           source_booking_id: d.sourceBookingId ?? null,
@@ -809,6 +834,7 @@ function MeetingDialog({
           attendance_status: v.status,
           payment_method: v.paymentMethod,
           amount_pence: parsePounds(v.amountPounds),
+          is_meeting_only: v.isMeetingOnly,
           created_by: user?.id ?? null,
           source: (v.synced ? "booking" : "manual") as "booking" | "manual",
           source_booking_id: v.sourceBookingId ?? null,
@@ -979,10 +1005,13 @@ function MeetingDialog({
                       checked={d.present}
                       onCheckedChange={(v) => setMember(m.id, { present: !!v })}
                     />
-                    <span className="truncate flex items-center gap-1.5">
+                    <span className="truncate flex items-center gap-1.5 flex-wrap">
                       {memberDisplay(m)}
                       {d.synced && (
                         <span className="text-[9px] uppercase tracking-wider text-gold border border-gold/40 rounded px-1 py-0.5">Synced</span>
+                      )}
+                      {d.isMeetingOnly && (
+                        <span className="text-[9px] uppercase tracking-wider text-primary-foreground/70 border border-primary-foreground/30 rounded px-1 py-0.5">Meeting only</span>
                       )}
                     </span>
                     {d.present && (
