@@ -171,15 +171,15 @@ export async function buildCharityAnnualReportPdf(args: {
     doc.setPage(i);
     doc.setDrawColor(...GOLD);
     doc.setLineWidth(0.6);
-    doc.line(margin, pageH - 36, pageW - margin, pageH - 36);
-    doc.setFont("times", "italic");
-    doc.setFontSize(8);
-    doc.setTextColor(...MUTED);
-    doc.text("Confidential — Annual Charity Steward's Report. For Charity Steward, WM, Treasurer, and Secretary.", margin, pageH - 22);
-    doc.text(`Page ${i} of ${pageCount}`, pageW - margin, pageH - 22, { align: "right" });
+    doc.line(margin, pageH - 40, pageW - margin, pageH - 40);
     doc.setTextColor(...NAVY);
     doc.setFont("times", "bold");
-    doc.text("Weybridge Lodge No. 6787", pageW / 2, pageH - 22, { align: "center" });
+    doc.setFontSize(8);
+    doc.text("Weybridge Lodge No. 6787", pageW / 2, pageH - 28, { align: "center" });
+    doc.setFont("times", "italic");
+    doc.setTextColor(...MUTED);
+    doc.text("Confidential — Annual Charity Steward's Report. For Charity Steward, WM, Treasurer, and Secretary.", margin, pageH - 16);
+    doc.text(`Page ${i} of ${pageCount}`, pageW - margin, pageH - 16, { align: "right" });
   }
   return doc;
 }
