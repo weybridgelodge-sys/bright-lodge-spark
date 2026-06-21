@@ -738,11 +738,14 @@ function FestivalTab({ donations, charities, festival, canEdit, onChange }: {
   const nextTier = nextTierAhead(cumulative, targets);
   const highestTier = tiers.length ? tiers[tiers.length - 1] : null;
   const platinumReached = !!award && award.name === "Platinum";
+  const goldReached = goldN > 0 && cumulative >= goldN;
   // Primary progress bar tracks toward the next un-met tier, or the highest tier once all reached.
   const progressTarget = nextTier ? nextTier.threshold : (highestTier ? highestTier.threshold : 0);
   const rawPct = progressTarget > 0 ? (cumulative / progressTarget) * 100 : 0;
   const barPct = Math.min(100, rawPct);
   const excess = highestTier && cumulative > highestTier.threshold ? cumulative - highestTier.threshold : 0;
+  const goldExcess = goldReached ? cumulative - goldN : 0;
+  const goldPct = goldN > 0 ? (cumulative / goldN) * 100 : 0;
 
   // Projected: based on rate per day since first contribution
   const projected = (() => {
@@ -824,11 +827,18 @@ function FestivalTab({ donations, charities, festival, canEdit, onChange }: {
           </div>
         )}
 
-        {platinumReached ? (
+        {goldReached ? (
           <div className="mt-3 p-3 rounded-sm border border-gold/40 bg-gold/10">
-            <p className="text-sm text-gold font-semibold">Target exceeded — Platinum Award achieved</p>
-            {excess > 0 && (
-              <p className="text-xs text-primary-foreground/70 mt-1">{gbp(excess)} above Platinum target.</p>
+            <p className="text-sm text-gold font-semibold">
+              {goldPct.toFixed(1)}% · Target exceeded — {award ? award.name : "Gold"} Award achieved
+            </p>
+            {goldExcess > 0 && (
+              <p className="text-xs text-primary-foreground/70 mt-1">{gbp(goldExcess)} above target.</p>
+            )}
+            {!platinumReached && nextTier && (
+              <p className="text-xs text-primary-foreground/70 mt-1">
+                {gbp(Math.max(0, nextTier.threshold - cumulative))} to {nextTier.name}.
+              </p>
             )}
           </div>
         ) : award ? (
@@ -846,7 +856,7 @@ function FestivalTab({ donations, charities, festival, canEdit, onChange }: {
           </div>
         ) : null}
 
-        {!platinumReached && <Stat label="Projected final (at current rate)" value={gbp(projected)} />}
+        {!goldReached && <Stat label="Projected final (at current rate)" value={gbp(projected)} />}
       </Card>
 
       {canEdit && (
