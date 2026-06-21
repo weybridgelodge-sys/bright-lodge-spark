@@ -1063,18 +1063,20 @@ function PeriodicReportsSection({ charities, collections, donations, festival, c
       </div>
 
       <Card title={editing ? `Editing: ${editing.title}${isEditingFinalised ? " (finalised — read-only)" : ""}` : "Create a new periodic report"}>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          <div className="lg:col-span-2">
+        <div className="space-y-3">
+          <div>
             <Label>Report title</Label>
             <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Q1 2026 Charity Review" disabled={!canEdit || isEditingFinalised} />
           </div>
-          <div>
-            <Label>From</Label>
-            <Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} disabled={!canEdit || isEditingFinalised} />
-          </div>
-          <div>
-            <Label>To</Label>
-            <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} disabled={!canEdit || isEditingFinalised} />
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label>From</Label>
+              <Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} disabled={!canEdit || isEditingFinalised} />
+            </div>
+            <div>
+              <Label>To</Label>
+              <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} disabled={!canEdit || isEditingFinalised} />
+            </div>
           </div>
         </div>
         <div>
