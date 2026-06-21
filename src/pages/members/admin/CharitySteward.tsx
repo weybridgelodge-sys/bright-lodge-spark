@@ -264,10 +264,23 @@ function DonationsTab({ donations, charities, festival, canEdit, onChange }: {
   return (
     <div className="space-y-4">
       <div className="grid md:grid-cols-3 gap-4">
-        <Card title="Year to date"><Stat label="Total donated" value={<span className="text-gold">{gbp(ytdTotal)}</span>} /></Card>
-        <Card title="All time"><Stat label="Grand total" value={<span className="text-gold">{gbp(grandTotal)}</span>} /></Card>
+        <Card title="Year to date">
+          <div className="space-y-1 text-sm">
+            <div className="flex justify-between"><span className="text-primary-foreground/60">Lodge donations</span><span className="tabular-nums">{gbp(ytdLodge)}</span></div>
+            <div className="flex justify-between"><span className="text-primary-foreground/60">Match funded</span><span className="tabular-nums">{gbp(ytdMatch)}</span></div>
+            <div className="flex justify-between border-t border-gold/15 pt-1 mt-1"><span className="text-gold">Total</span><span className="tabular-nums text-gold">{gbp(ytdTotal)}</span></div>
+          </div>
+        </Card>
+        <Card title="All time">
+          <div className="space-y-1 text-sm">
+            <div className="flex justify-between"><span className="text-primary-foreground/60">Lodge donations</span><span className="tabular-nums">{gbp(grandLodge)}</span></div>
+            <div className="flex justify-between"><span className="text-primary-foreground/60">Match funded</span><span className="tabular-nums">{gbp(grandMatch)}</span></div>
+            <div className="flex justify-between border-t border-gold/15 pt-1 mt-1"><span className="text-gold">Grand total</span><span className="tabular-nums text-gold">{gbp(grandTotal)}</span></div>
+          </div>
+        </Card>
         <Card title="Relief Chest disbursements (year)"><Stat label="Drawn from chest" value={gbp(reliefOut)} /></Card>
       </div>
+
 
       <div className="rounded-sm border border-gold/20 bg-navy-light/30">
         <div className="flex items-center justify-between px-4 py-3 border-b border-gold/15">
