@@ -186,6 +186,7 @@ export async function buildCharityPeriodicReportPdf(args: {
         4: { cellWidth: 60 },
         5: { cellWidth: 155 },
       },
+      false,
     );
   }
 
