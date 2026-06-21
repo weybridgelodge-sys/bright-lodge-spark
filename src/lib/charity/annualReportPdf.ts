@@ -90,6 +90,10 @@ export async function buildCharityAnnualReportPdf(args: {
   let y = 130;
 
   const section = (title: string) => {
+    void title;
+  };
+  // proper section helper
+  const _section = (title: string) => {
     if (y > pageH - 100) { doc.addPage(); y = margin; }
     doc.setFillColor(...NAVY);
     doc.rect(margin, y, pageW - margin * 2, 22, "F");
