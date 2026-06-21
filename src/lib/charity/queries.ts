@@ -108,8 +108,9 @@ export async function fetchDonations(): Promise<Donation[]> {
   const { data, error } = await supabase
     .from("charity_donations")
     .select(
-      "id,donation_date,charity_id,amount,purpose,payment_method,payment_reference,authorised_by,confirmation_received,is_festival_contribution,from_relief_chest",
+      "id,donation_date,charity_id,amount,match_funding_amount,purpose,payment_method,payment_reference,authorised_by,confirmation_received,is_festival_contribution,from_relief_chest",
     )
+
     .order("donation_date", { ascending: false });
   if (error) throw error;
   return (data ?? []) as Donation[];
