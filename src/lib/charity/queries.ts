@@ -68,6 +68,7 @@ export type FestivalSettings = {
   id: string;
   festival_name: string;
   target_amount: number;
+  platinum_target_amount: number | null;
   festival_notes: string | null;
   public_feed_start_date: string | null;
   public_feed_start_amount: number;
