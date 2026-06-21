@@ -300,7 +300,9 @@ function DonationsTab({ donations, charities, festival, canEdit, onChange }: {
               <tr className="text-left text-xs uppercase tracking-wider text-primary-foreground/60 border-b border-gold/15">
                 <th className="px-4 py-2">Date</th>
                 <th className="px-4 py-2">Charity</th>
-                <th className="px-4 py-2 text-right">Amount</th>
+                <th className="px-4 py-2 text-right">Lodge donation</th>
+                <th className="px-4 py-2 text-right">Match funded</th>
+                <th className="px-4 py-2 text-right">Total donation</th>
                 <th className="px-4 py-2">Purpose</th>
                 <th className="px-4 py-2">Method</th>
                 <th className="px-4 py-2">Flags</th>
@@ -309,17 +311,23 @@ function DonationsTab({ donations, charities, festival, canEdit, onChange }: {
             </thead>
             <tbody>
               {donations.length === 0 && (
-                <tr><td colSpan={canEdit ? 7 : 6} className="px-4 py-6 text-center text-primary-foreground/50">No donations recorded.</td></tr>
+                <tr><td colSpan={canEdit ? 9 : 8} className="px-4 py-6 text-center text-primary-foreground/50">No donations recorded.</td></tr>
               )}
-              {donations.map((d) => (
+              {donations.map((d) => {
+                const lodge = Number(d.amount);
+                const match = Number(d.match_funding_amount ?? 0);
+                return (
                 <tr key={d.id} className="border-b border-gold/10 hover:bg-navy-light/30">
                   <td className="px-4 py-2 tabular-nums">{new Date(d.donation_date).toLocaleDateString("en-GB")}</td>
                   <td className="px-4 py-2">{charityById.get(d.charity_id)?.name ?? "—"}</td>
-                  <td className="px-4 py-2 text-right tabular-nums text-gold">{gbp(Number(d.amount))}</td>
+                  <td className="px-4 py-2 text-right tabular-nums">{gbp(lodge)}</td>
+                  <td className="px-4 py-2 text-right tabular-nums text-primary-foreground/70">{match > 0 ? gbp(match) : "—"}</td>
+                  <td className="px-4 py-2 text-right tabular-nums text-gold">{gbp(lodge + match)}</td>
                   <td className="px-4 py-2 text-xs text-primary-foreground/70 max-w-[200px] truncate" title={d.purpose ?? ""}>{d.purpose}</td>
                   <td className="px-4 py-2">{PAYMENT_METHOD_LABEL[d.payment_method]}</td>
                   <td className="px-4 py-2 space-x-1">
                     {isFestivalDonation(d, charities, festival) && <Badge variant="outline" className="border-gold/40 text-gold text-[10px]">Festival</Badge>}
+                    {match > 0 && <Badge variant="outline" className="border-emerald-400/40 text-emerald-300 text-[10px]">Match</Badge>}
                     {d.from_relief_chest && <Badge variant="outline" className="border-blue-400/40 text-blue-300 text-[10px]">Relief Chest</Badge>}
                     {d.confirmation_received && <Badge variant="outline" className="border-emerald-400/40 text-emerald-300 text-[10px]">✓</Badge>}
                   </td>
@@ -331,7 +339,18 @@ function DonationsTab({ donations, charities, festival, canEdit, onChange }: {
                     </td>
                   )}
                 </tr>
-              ))}
+                );
+              })}
+              {donations.length > 0 && (
+                <tr className="border-t-2 border-gold/30 bg-navy-light/40 font-semibold">
+                  <td className="px-4 py-2" colSpan={2}>Totals</td>
+                  <td className="px-4 py-2 text-right tabular-nums">{gbp(grandLodge)}</td>
+                  <td className="px-4 py-2 text-right tabular-nums">{gbp(grandMatch)}</td>
+                  <td className="px-4 py-2 text-right tabular-nums text-gold">{gbp(grandTotal)}</td>
+                  <td colSpan={canEdit ? 4 : 3}></td>
+                </tr>
+              )}
+
             </tbody>
           </table>
         </div>
