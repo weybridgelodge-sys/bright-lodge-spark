@@ -709,12 +709,14 @@ function FestivalTab({ donations, charities, festival, canEdit, onChange }: {
   donations: Donation[]; charities: Charity[]; festival: FestivalSettings | null; canEdit: boolean; onChange: () => void;
 }) {
   const [target, setTarget] = useState(festival?.target_amount ? String(festival.target_amount) : "0");
+  const [platinumTarget, setPlatinumTarget] = useState(festival?.platinum_target_amount ? String(festival.platinum_target_amount) : "");
   const [name, setName] = useState(festival?.festival_name ?? "Surrey 2030 Festival");
   const [notes, setNotes] = useState(festival?.festival_notes ?? "");
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     setTarget(festival?.target_amount ? String(festival.target_amount) : "0");
+    setPlatinumTarget(festival?.platinum_target_amount ? String(festival.platinum_target_amount) : "");
     setName(festival?.festival_name ?? "Surrey 2030 Festival");
     setNotes(festival?.festival_notes ?? "");
   }, [festival]);
@@ -722,11 +724,14 @@ function FestivalTab({ donations, charities, festival, canEdit, onChange }: {
   const festivalDonations = donations.filter((d) => isFestivalDonation(d, charities, festival)).sort((a, b) => b.donation_date.localeCompare(a.donation_date));
   const cumulative = festivalDonations.reduce((a, d) => a + Number(d.amount), 0);
   const targetN = Number(target) || 0;
+  const platinumN = Number(platinumTarget) || 0;
   const rawPct = targetN > 0 ? (cumulative / targetN) * 100 : 0;
   const barPct = Math.min(100, rawPct);
   const targetReached = targetN > 0 && cumulative >= targetN;
-  const excess = targetReached ? cumulative - targetN : 0;
-  const award = highestAwardAchieved(cumulative, targetN);
+  const platinumReached = platinumN > 0 && cumulative >= platinumN;
+  const activeTarget = platinumReached ? platinumN : targetN;
+  const excess = targetReached ? cumulative - activeTarget : 0;
+  const award = highestAwardAchieved(cumulative, targetN, platinumN || null);
 
   // Projected: based on rate per day since first contribution
   const projected = (() => {
@@ -744,7 +749,9 @@ function FestivalTab({ donations, charities, festival, canEdit, onChange }: {
     if (!festival) return;
     setSaving(true);
     const { error } = await supabase.from("charity_festival_settings").update({
-      festival_name: name, target_amount: targetN, festival_notes: notes || null,
+      festival_name: name, target_amount: targetN,
+      platinum_target_amount: platinumN > 0 ? platinumN : null,
+      festival_notes: notes || null,
     }).eq("id", festival.id);
     setSaving(false);
     if (error) { toast({ title: "Save failed", description: error.message, variant: "destructive" }); return; }
@@ -754,21 +761,40 @@ function FestivalTab({ donations, charities, festival, canEdit, onChange }: {
   return (
     <div className="space-y-4">
       <Card title={name}>
-        <div className="grid sm:grid-cols-3 gap-3">
-          <Stat label="Target" value={gbp(targetN)} />
+        <div className="grid sm:grid-cols-4 gap-3">
+          <Stat label="Gold target" value={gbp(targetN)} />
+          <Stat label="Platinum target" value={platinumN > 0 ? gbp(platinumN) : "—"} />
           <Stat label="Contributed to date" value={<span className="text-gold">{gbp(cumulative)}</span>} />
-          <Stat label="% of target" value={`${rawPct.toFixed(1)}%`} />
+          <Stat label="% of gold target" value={`${rawPct.toFixed(1)}%`} />
         </div>
         <div className={`h-3 bg-navy-dark rounded-sm overflow-hidden border mt-2 ${targetReached ? "border-gold shadow-[0_0_12px_rgba(201,164,50,0.4)]" : "border-gold/20"}`}>
           <div className="h-full bg-gold-shimmer transition-all" style={{ width: `${barPct}%` }} />
         </div>
+        {platinumN > 0 && targetReached && (
+          <div className="mt-2">
+            <div className="flex items-center justify-between text-xs text-primary-foreground/70 mb-1">
+              <span>Progress to Platinum</span>
+              <span className="tabular-nums">{((cumulative / platinumN) * 100).toFixed(1)}%</span>
+            </div>
+            <div className={`h-2 bg-navy-dark rounded-sm overflow-hidden border ${platinumReached ? "border-gold shadow-[0_0_12px_rgba(201,164,50,0.5)]" : "border-gold/20"}`}>
+              <div className="h-full bg-gold-shimmer transition-all" style={{ width: `${Math.min(100, (cumulative / platinumN) * 100)}%` }} />
+            </div>
+          </div>
+        )}
         {targetReached ? (
           <div className="mt-3 p-3 rounded-sm border border-gold/40 bg-gold/10">
             <p className="text-sm text-gold font-semibold">
               Target exceeded — {award ? `${award.name} Award achieved` : "target met"}
             </p>
             {excess > 0 && (
-              <p className="text-xs text-primary-foreground/70 mt-1">{gbp(excess)} above target.</p>
+              <p className="text-xs text-primary-foreground/70 mt-1">
+                {gbp(excess)} above {platinumReached ? "Platinum" : "Gold"} target.
+              </p>
+            )}
+            {targetReached && !platinumReached && platinumN > 0 && (
+              <p className="text-xs text-primary-foreground/70 mt-1">
+                {gbp(Math.max(0, platinumN - cumulative))} to Platinum.
+              </p>
             )}
           </div>
         ) : (
@@ -778,9 +804,13 @@ function FestivalTab({ donations, charities, festival, canEdit, onChange }: {
 
       {canEdit && (
         <Card title="Festival settings">
-          <div className="grid sm:grid-cols-2 gap-3">
+          <div className="grid sm:grid-cols-3 gap-3">
             <div><Label>Festival name</Label><Input value={name} onChange={(e) => setName(e.target.value)} /></div>
-            <div><Label>Target (£)</Label><Input type="number" step="0.01" value={target} onChange={(e) => setTarget(e.target.value)} /></div>
+            <div><Label>Gold target (£)</Label><Input type="number" step="0.01" value={target} onChange={(e) => setTarget(e.target.value)} /></div>
+            <div>
+              <Label>Platinum target (£)</Label>
+              <Input type="number" step="0.01" value={platinumTarget} placeholder="Not set" onChange={(e) => setPlatinumTarget(e.target.value)} />
+            </div>
           </div>
           <div><Label>Provincial Festival communications / notes</Label><Textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} /></div>
           <Button onClick={save} disabled={saving} className="bg-gold text-navy hover:bg-gold/90">

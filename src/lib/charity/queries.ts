@@ -68,6 +68,7 @@ export type FestivalSettings = {
   id: string;
   festival_name: string;
   target_amount: number;
+  platinum_target_amount: number | null;
   festival_notes: string | null;
   public_feed_start_date: string | null;
   public_feed_start_amount: number;
@@ -132,7 +133,7 @@ export async function fetchDonations(): Promise<Donation[]> {
 export async function fetchFestivalSettings(): Promise<FestivalSettings | null> {
   const { data, error } = await supabase
     .from("charity_festival_settings")
-    .select("id,festival_name,target_amount,festival_notes,public_feed_start_date,public_feed_start_amount")
+    .select("id,festival_name,target_amount,platinum_target_amount,festival_notes,public_feed_start_date,public_feed_start_amount")
     .maybeSingle();
   if (error) throw error;
   return data as FestivalSettings | null;
