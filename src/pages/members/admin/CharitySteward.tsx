@@ -918,12 +918,15 @@ function ReportTab({ charities, collections, donations, festival, canEdit }: {
 
   const yearColl = collections.filter((c) => inYear(c.collection_date, year));
   const yearDon = donations.filter((d) => inYear(d.donation_date, year));
+  const donationCombined = (d: Donation) => Number(d.amount) + Number(d.match_funding_amount ?? 0);
   const totalCollected = yearColl.reduce((a, c) => a + Number(c.net_amount), 0);
-  const totalDonated = yearDon.reduce((a, d) => a + Number(d.amount), 0);
+  const totalLodgeDonated = yearDon.reduce((a, d) => a + Number(d.amount), 0);
+  const totalMatchFunded = yearDon.reduce((a, d) => a + Number(d.match_funding_amount ?? 0), 0);
+  const totalDonated = totalLodgeDonated + totalMatchFunded;
   const reliefBal = reliefChestBalance(collections, donations);
   const charitiesSupported = new Set(yearDon.map((d) => d.charity_id)).size;
-  const largest = yearDon.reduce((m, d) => (Number(d.amount) > (m ? Number(m.amount) : 0) ? d : m), null as Donation | null);
-  const festivalYear = yearDon.filter((d) => isFestivalDonation(d, charities, festival)).reduce((a, d) => a + Number(d.amount), 0);
+  const largest = yearDon.reduce((m, d) => (donationCombined(d) > (m ? donationCombined(m) : 0) ? d : m), null as Donation | null);
+  const festivalYear = yearDon.filter((d) => isFestivalDonation(d, charities, festival)).reduce((a, d) => a + donationCombined(d), 0);
   const charityById = new Map(charities.map((c) => [c.id, c]));
 
   const yearsAvailable = useMemo(() => {
