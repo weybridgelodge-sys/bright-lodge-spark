@@ -827,11 +827,18 @@ function FestivalTab({ donations, charities, festival, canEdit, onChange }: {
           </div>
         )}
 
-        {platinumReached ? (
+        {goldReached ? (
           <div className="mt-3 p-3 rounded-sm border border-gold/40 bg-gold/10">
-            <p className="text-sm text-gold font-semibold">Target exceeded — Platinum Award achieved</p>
-            {excess > 0 && (
-              <p className="text-xs text-primary-foreground/70 mt-1">{gbp(excess)} above Platinum target.</p>
+            <p className="text-sm text-gold font-semibold">
+              {goldPct.toFixed(1)}% · Target exceeded — {award ? award.name : "Gold"} Award achieved
+            </p>
+            {goldExcess > 0 && (
+              <p className="text-xs text-primary-foreground/70 mt-1">{gbp(goldExcess)} above target.</p>
+            )}
+            {!platinumReached && nextTier && (
+              <p className="text-xs text-primary-foreground/70 mt-1">
+                {gbp(Math.max(0, nextTier.threshold - cumulative))} to {nextTier.name}.
+              </p>
             )}
           </div>
         ) : award ? (
@@ -849,7 +856,7 @@ function FestivalTab({ donations, charities, festival, canEdit, onChange }: {
           </div>
         ) : null}
 
-        {!platinumReached && <Stat label="Projected final (at current rate)" value={gbp(projected)} />}
+        {!goldReached && <Stat label="Projected final (at current rate)" value={gbp(projected)} />}
       </Card>
 
       {canEdit && (
