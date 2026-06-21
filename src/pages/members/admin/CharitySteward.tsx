@@ -892,12 +892,24 @@ function FestivalTab({ donations, charities, festival, canEdit, onChange }: {
           <p className="text-xs text-primary-foreground/50 italic">No Festival-tagged donations yet.</p>
         ) : (
           <ul className="divide-y divide-gold/10">
-            {festivalDonations.map((d) => (
-              <li key={d.id} className="flex items-center justify-between py-2 text-sm">
-                <span className="text-primary-foreground/80">{new Date(d.donation_date).toLocaleDateString("en-GB")} · {d.purpose ?? "—"}</span>
-                <span className="tabular-nums text-gold">{gbp(Number(d.amount))}</span>
-              </li>
-            ))}
+            {festivalDonations.map((d) => {
+              const cash = Number(d.amount);
+              const match = Number(d.match_funding_amount ?? 0);
+              const total = cash + match;
+              return (
+                <li key={d.id} className="flex items-center justify-between py-2 text-sm gap-3">
+                  <span className="text-primary-foreground/80 flex-1">
+                    {new Date(d.donation_date).toLocaleDateString("en-GB")} · {d.purpose ?? "—"}
+                    {match > 0 && (
+                      <span className="block text-[11px] text-primary-foreground/60">
+                        Lodge {gbp(cash)} + match {gbp(match)}
+                      </span>
+                    )}
+                  </span>
+                  <span className="tabular-nums text-gold whitespace-nowrap">{gbp(total)}</span>
+                </li>
+              );
+            })}
           </ul>
         )}
       </Card>
