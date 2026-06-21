@@ -147,10 +147,10 @@ export default function AttendanceCharts() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-xs text-primary-foreground/60">
           {liveFestive && activeTab === "festive"
-            ? `Live from the Festive Board Register — ${liveFestive.recordCount} meeting${liveFestive.recordCount === 1 ? "" : "s"} recorded.`
+            ? `Live from the Lodge Meetings Register — ${liveFestive.recordCount} meeting${liveFestive.recordCount === 1 ? "" : "s"} recorded.`
             : !liveFestive && activeTab === "festive"
-            ? "Mock data — add Festive Board records to replace this placeholder."
-            : "Attendance analytics — toggle between Festive Board and LOI views."}
+            ? "Mock data — add Lodge Meeting records to replace this placeholder."
+            : "Attendance analytics — toggle between Lodge Meetings and LOI views."}
         </p>
         <div className="flex bg-navy p-1 rounded-sm border border-gold/15">
           <button
@@ -161,7 +161,7 @@ export default function AttendanceCharts() {
                 : "text-primary-foreground/70 hover:text-gold"
             }`}
           >
-            Festive Board
+            Lodge Meetings
           </button>
           <button
             onClick={() => setActiveTab("loi")}
@@ -179,10 +179,11 @@ export default function AttendanceCharts() {
       {/* Stat banners */}
       {activeTab === "festive" ? (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <StatBanner icon={<Users className="w-4 h-4" />} label="Avg. member dining" value={`${averageSubscribing} Brethren`} />
-          <StatBanner icon={<TrendingUp className="w-4 h-4" />} label="Total guest diners" value={`${totalVisitors} Visitors`} />
+          <StatBanner icon={<Users className="w-4 h-4" />} label="Avg. member attendance" value={`${averageSubscribing} Brethren`} />
+          <StatBanner icon={<TrendingUp className="w-4 h-4" />} label="Total guests attended" value={`${totalVisitors} Visitors`} />
           <StatBanner icon={<BarChart3 className="w-4 h-4" />} label="Peak seat booking" value={`${maxAttendance} Covers`} />
         </div>
+
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <StatBanner icon={<Calendar className="w-4 h-4" />} label="Avg. LOI turnout" value={loiAvgTurnout} />
