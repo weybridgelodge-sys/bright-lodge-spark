@@ -959,9 +959,9 @@ function PeriodicReportsSection({ charities, collections, donations, festival, c
     const { data, error } = await supabase
       .from("charity_periodic_reports")
       .select("id,title,start_date,end_date,notes,finalised_at,created_at,updated_at")
-      .order("start_date", { ascending: false });
+      .order("created_at", { ascending: false });
     setLoading(false);
-    if (error) { toast({ title: "Load failed", description: error.message, variant: "destructive" }); return; }
+    if (error) { console.error("[periodic-reports] load failed", error); toast({ title: "Load failed", description: error.message, variant: "destructive" }); return; }
     setRows((data ?? []) as PeriodicReportRow[]);
   };
 
