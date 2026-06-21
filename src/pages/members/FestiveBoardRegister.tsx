@@ -62,6 +62,7 @@ type Attendance = {
   attendance_status: FbAttendanceStatus;
   payment_method: FbPaymentMethod;
   amount_pence: number;
+  is_meeting_only: boolean;
   booking_id: string | null;
   source?: "manual" | "booking" | null;
   source_booking_id?: string | null;
@@ -394,6 +395,7 @@ type MemberDraft = {
   status: FbAttendanceStatus;
   paymentMethod: FbPaymentMethod;
   amountPounds: string;
+  isMeetingOnly: boolean;
   synced?: boolean;
   sourceBookingId?: string | null;
 };
@@ -408,6 +410,7 @@ type VisitorDraft = {
   status: FbAttendanceStatus;
   paymentMethod: FbPaymentMethod;
   amountPounds: string;
+  isMeetingOnly: boolean;
   synced?: boolean;
   sourceBookingId?: string | null;
 };
