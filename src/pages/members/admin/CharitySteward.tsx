@@ -950,7 +950,7 @@ function ReportTab({ charities, collections, donations, festival, canEdit }: {
   const finalise = async () => {
     setSaving(true);
     const payload = {
-      bounds, totalCollected, totalDonated, reliefBal, charitiesSupported,
+      bounds, totalCollected, totalLodgeDonated, totalMatchFunded, totalDonated, reliefBal, charitiesSupported,
       largest, festivalYear,
       byType: {
         charity_column: yearColl.filter((c) => c.collection_type === "charity_column").reduce((a, c) => a + Number(c.net_amount), 0),
