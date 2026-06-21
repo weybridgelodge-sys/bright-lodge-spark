@@ -101,15 +101,15 @@ export async function buildCharityPeriodicReportPdf(args: {
     doc.text(t, margin + 10, y + 15);
     y += 32;
   };
-  const table = (head: string[][], body: any[][]) => {
+  const table = (head: string[][], body: any[][], colStyles?: Record<number, any>) => {
     autoTable(doc, {
       head, body, startY: y,
       margin: { left: margin, right: margin },
-      styles: { font: "helvetica", fontSize: 9, cellPadding: 5, textColor: INK, lineColor: [220, 215, 200], lineWidth: 0.4 },
+      styles: { font: "helvetica", fontSize: 9, cellPadding: 5, textColor: INK, lineColor: [220, 215, 200], lineWidth: 0.4, overflow: "linebreak" },
       headStyles: { fillColor: GOLD, textColor: NAVY, fontStyle: "bold" },
       alternateRowStyles: { fillColor: [250, 247, 238] },
       theme: "grid",
-      columnStyles: { 0: { cellWidth: 220 } },
+      columnStyles: colStyles ?? { 0: { cellWidth: 320 }, 1: { cellWidth: 195, halign: "right" } },
     });
     y = (doc as any).lastAutoTable.finalY + 16;
   };
@@ -153,7 +153,8 @@ export async function buildCharityPeriodicReportPdf(args: {
 
   if (charityRows.length) {
     section("3. Breakdown by Recipient Charity");
-    table([["Charity", "Total"]], charityRows.map((r) => [r.name, gbp(r.total)]));
+    table([["Charity", "Total"]], charityRows.map((r) => [r.name, gbp(r.total)]),
+      { 0: { cellWidth: 380 }, 1: { cellWidth: 135, halign: "right" } });
   }
 
   if (periodDon.length) {
@@ -171,6 +172,14 @@ export async function buildCharityPeriodicReportPdf(args: {
           PAYMENT_METHOD_LABEL[d.payment_method] ?? d.payment_method,
           d.purpose ?? "—",
         ]),
+      {
+        0: { cellWidth: 70 },
+        1: { cellWidth: 110 },
+        2: { cellWidth: 60, halign: "right" },
+        3: { cellWidth: 60, halign: "right" },
+        4: { cellWidth: 60 },
+        5: { cellWidth: 155 },
+      },
     );
   }
 

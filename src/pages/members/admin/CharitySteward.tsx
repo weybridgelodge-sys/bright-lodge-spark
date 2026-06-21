@@ -959,9 +959,9 @@ function PeriodicReportsSection({ charities, collections, donations, festival, c
     const { data, error } = await supabase
       .from("charity_periodic_reports")
       .select("id,title,start_date,end_date,notes,finalised_at,created_at,updated_at")
-      .order("start_date", { ascending: false });
+      .order("created_at", { ascending: false });
     setLoading(false);
-    if (error) { toast({ title: "Load failed", description: error.message, variant: "destructive" }); return; }
+    if (error) { console.error("[periodic-reports] load failed", error); toast({ title: "Load failed", description: error.message, variant: "destructive" }); return; }
     setRows((data ?? []) as PeriodicReportRow[]);
   };
 
@@ -1013,10 +1013,10 @@ function PeriodicReportsSection({ charities, collections, donations, festival, c
       ({ error } = await supabase.from("charity_periodic_reports").insert(base));
     }
     setBusy(false);
-    if (error) { toast({ title: "Save failed", description: error.message, variant: "destructive" }); return; }
+    if (error) { console.error("[periodic-reports] save failed", error, base); toast({ title: "Save failed", description: error.message, variant: "destructive" }); return; }
     toast({ title: finalise ? "Finalised" : (editing ? "Updated" : "Saved") });
     resetForm();
-    load();
+    await load();
   };
 
   const remove = async (r: PeriodicReportRow) => {
@@ -1129,20 +1129,22 @@ function PeriodicReportsSection({ charities, collections, donations, festival, c
                         : <Badge variant="outline" className="border-gold/40 text-gold">Draft</Badge>}
                     </td>
                     <td className="px-2 py-2 text-primary-foreground/70 text-xs">{fmtDate(r.updated_at)}</td>
-                    <td className="px-2 py-2 text-right space-x-1">
-                      <Button size="sm" variant="ghost" onClick={() => downloadFor(r)} className="text-gold hover:text-gold/80">
-                        <Download className="w-4 h-4" />
-                      </Button>
-                      {canEdit && (
-                        <Button size="sm" variant="ghost" onClick={() => loadIntoForm(r)} className="text-primary-foreground/80">
-                          <Pencil className="w-4 h-4" />
+                    <td className="px-2 py-2 text-right">
+                      <div className="inline-flex flex-wrap gap-1 justify-end">
+                        <Button size="sm" variant="outline" onClick={() => downloadFor(r)} className="h-8 border-gold/40 text-gold hover:bg-gold/10" title="Download PDF">
+                          <Download className="w-4 h-4" />
                         </Button>
-                      )}
-                      {canEdit && !r.finalised_at && (
-                        <Button size="sm" variant="ghost" onClick={() => remove(r)} className="text-red-400 hover:text-red-300">
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      )}
+                        {canEdit && !r.finalised_at && (
+                          <Button size="sm" variant="outline" onClick={() => loadIntoForm(r)} className="h-8 border-gold/40 text-gold hover:bg-gold/10" title="Edit">
+                            <Pencil className="w-4 h-4" />
+                          </Button>
+                        )}
+                        {canEdit && !r.finalised_at && (
+                          <Button size="sm" variant="outline" onClick={() => remove(r)} className="h-8 border-red-500/40 text-red-300 hover:bg-red-500/10" title="Delete">
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}
