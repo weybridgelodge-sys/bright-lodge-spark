@@ -33,17 +33,37 @@ export const attendanceStatusLabel = (v: string) =>
 export const paymentMethodLabel = (v: string) =>
   FB_PAYMENT_METHODS.find((o) => o.value === v)?.label ?? v;
 
-/** Computed headcount = expected covers (booked or attended). Override wins when set. */
+/** Computed headcount = expected covers (booked or attended). Override wins for total. */
 export function computeHeadcount(
-  rows: { attendance_status: string; member_id: string | null; visitor_lodge_name?: string | null }[],
+  rows: { attendance_status: string; member_id: string | null; visitor_lodge_name?: string | null; is_meeting_only?: boolean | null }[],
   override: number | null
-): { members: number; visitors: number; total: number; isOverride: boolean } {
+): {
+  members: number;
+  visitors: number;
+  total: number;
+  isOverride: boolean;
+  diningMembers: number;
+  diningVisitors: number;
+  diningTotal: number;
+  meetingOnlyCount: number;
+} {
   let members = 0;
   let visitors = 0;
+  let diningMembers = 0;
+  let diningVisitors = 0;
+  let meetingOnlyCount = 0;
   for (const r of rows) {
     if (r.attendance_status !== "attended" && r.attendance_status !== "booked") continue;
-    if (r.member_id || isWeybridgeLodge(r.visitor_lodge_name)) members += 1;
+    const isMember = !!r.member_id || isWeybridgeLodge(r.visitor_lodge_name);
+    if (isMember) members += 1;
     else visitors += 1;
+    if (r.is_meeting_only) {
+      meetingOnlyCount += 1;
+    } else if (isMember) {
+      diningMembers += 1;
+    } else {
+      diningVisitors += 1;
+    }
   }
   const computed = members + visitors;
   return {
@@ -51,6 +71,10 @@ export function computeHeadcount(
     visitors,
     total: override ?? computed,
     isOverride: override !== null && override !== undefined,
+    diningMembers,
+    diningVisitors,
+    diningTotal: diningMembers + diningVisitors,
+    meetingOnlyCount,
   };
 }
 
