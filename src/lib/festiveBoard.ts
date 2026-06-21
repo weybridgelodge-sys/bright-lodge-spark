@@ -35,14 +35,14 @@ export const paymentMethodLabel = (v: string) =>
 
 /** Computed headcount = expected covers (booked or attended). Override wins when set. */
 export function computeHeadcount(
-  rows: { attendance_status: string; member_id: string | null }[],
+  rows: { attendance_status: string; member_id: string | null; visitor_lodge_name?: string | null }[],
   override: number | null
 ): { members: number; visitors: number; total: number; isOverride: boolean } {
   let members = 0;
   let visitors = 0;
   for (const r of rows) {
     if (r.attendance_status !== "attended" && r.attendance_status !== "booked") continue;
-    if (r.member_id) members += 1;
+    if (r.member_id || isWeybridgeLodge(r.visitor_lodge_name)) members += 1;
     else visitors += 1;
   }
   const computed = members + visitors;
