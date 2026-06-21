@@ -352,6 +352,7 @@ export type Database = {
       }
       charity_festival_settings: {
         Row: {
+          bronze_target_amount: number | null
           created_at: string
           festival_name: string
           festival_notes: string | null
@@ -359,11 +360,13 @@ export type Database = {
           platinum_target_amount: number | null
           public_feed_start_amount: number
           public_feed_start_date: string | null
+          silver_target_amount: number | null
           singleton: boolean
           target_amount: number
           updated_at: string
         }
         Insert: {
+          bronze_target_amount?: number | null
           created_at?: string
           festival_name?: string
           festival_notes?: string | null
@@ -371,11 +374,13 @@ export type Database = {
           platinum_target_amount?: number | null
           public_feed_start_amount?: number
           public_feed_start_date?: string | null
+          silver_target_amount?: number | null
           singleton?: boolean
           target_amount?: number
           updated_at?: string
         }
         Update: {
+          bronze_target_amount?: number | null
           created_at?: string
           festival_name?: string
           festival_notes?: string | null
@@ -383,6 +388,7 @@ export type Database = {
           platinum_target_amount?: number | null
           public_feed_start_amount?: number
           public_feed_start_date?: string | null
+          silver_target_amount?: number | null
           singleton?: boolean
           target_amount?: number
           updated_at?: string

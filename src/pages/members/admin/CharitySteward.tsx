@@ -23,7 +23,7 @@ import {
   isFestivalDonation,
 } from "@/lib/charity/queries";
 import { buildCharityAnnualReportPdf } from "@/lib/charity/annualReportPdf";
-import { highestAwardAchieved } from "@/lib/charity/festivalAwards";
+import { highestAwardAchieved, festivalTiers, nextTierAhead } from "@/lib/charity/festivalAwards";
 
 function Card({ title, action, children }: { title: string; action?: React.ReactNode; children: React.ReactNode }) {
   return (
@@ -709,6 +709,8 @@ function FestivalTab({ donations, charities, festival, canEdit, onChange }: {
   donations: Donation[]; charities: Charity[]; festival: FestivalSettings | null; canEdit: boolean; onChange: () => void;
 }) {
   const [target, setTarget] = useState(festival?.target_amount ? String(festival.target_amount) : "0");
+  const [bronzeTarget, setBronzeTarget] = useState(festival?.bronze_target_amount ? String(festival.bronze_target_amount) : "");
+  const [silverTarget, setSilverTarget] = useState(festival?.silver_target_amount ? String(festival.silver_target_amount) : "");
   const [platinumTarget, setPlatinumTarget] = useState(festival?.platinum_target_amount ? String(festival.platinum_target_amount) : "");
   const [name, setName] = useState(festival?.festival_name ?? "Surrey 2030 Festival");
   const [notes, setNotes] = useState(festival?.festival_notes ?? "");
@@ -716,6 +718,8 @@ function FestivalTab({ donations, charities, festival, canEdit, onChange }: {
 
   useEffect(() => {
     setTarget(festival?.target_amount ? String(festival.target_amount) : "0");
+    setBronzeTarget(festival?.bronze_target_amount ? String(festival.bronze_target_amount) : "");
+    setSilverTarget(festival?.silver_target_amount ? String(festival.silver_target_amount) : "");
     setPlatinumTarget(festival?.platinum_target_amount ? String(festival.platinum_target_amount) : "");
     setName(festival?.festival_name ?? "Surrey 2030 Festival");
     setNotes(festival?.festival_notes ?? "");
@@ -723,15 +727,21 @@ function FestivalTab({ donations, charities, festival, canEdit, onChange }: {
 
   const festivalDonations = donations.filter((d) => isFestivalDonation(d, charities, festival)).sort((a, b) => b.donation_date.localeCompare(a.donation_date));
   const cumulative = festivalDonations.reduce((a, d) => a + Number(d.amount), 0);
-  const targetN = Number(target) || 0;
+  const bronzeN = Number(bronzeTarget) || 0;
+  const silverN = Number(silverTarget) || 0;
+  const goldN = Number(target) || 0;
   const platinumN = Number(platinumTarget) || 0;
-  const rawPct = targetN > 0 ? (cumulative / targetN) * 100 : 0;
+  const targets = { bronze: bronzeN, silver: silverN, gold: goldN, platinum: platinumN };
+  const tiers = festivalTiers(targets);
+  const award = highestAwardAchieved(cumulative, targets);
+  const nextTier = nextTierAhead(cumulative, targets);
+  const highestTier = tiers.length ? tiers[tiers.length - 1] : null;
+  const platinumReached = !!award && award.name === "Platinum";
+  // Primary progress bar tracks toward the next un-met tier, or the highest tier once all reached.
+  const progressTarget = nextTier ? nextTier.threshold : (highestTier ? highestTier.threshold : 0);
+  const rawPct = progressTarget > 0 ? (cumulative / progressTarget) * 100 : 0;
   const barPct = Math.min(100, rawPct);
-  const targetReached = targetN > 0 && cumulative >= targetN;
-  const platinumReached = platinumN > 0 && cumulative >= platinumN;
-  const activeTarget = platinumReached ? platinumN : targetN;
-  const excess = targetReached ? cumulative - activeTarget : 0;
-  const award = highestAwardAchieved(cumulative, targetN, platinumN || null);
+  const excess = highestTier && cumulative > highestTier.threshold ? cumulative - highestTier.threshold : 0;
 
   // Projected: based on rate per day since first contribution
   const projected = (() => {
@@ -739,7 +749,6 @@ function FestivalTab({ donations, charities, festival, canEdit, onChange }: {
     const first = festivalDonations[festivalDonations.length - 1].donation_date;
     const daysElapsed = Math.max(1, (Date.now() - new Date(first).getTime()) / (1000 * 60 * 60 * 24));
     const ratePerDay = cumulative / daysElapsed;
-    // Project to Sept 2030 (Surrey 2030 Festival)
     const targetDate = new Date("2030-09-30").getTime();
     const daysRemaining = Math.max(0, (targetDate - Date.now()) / (1000 * 60 * 60 * 24));
     return cumulative + ratePerDay * daysRemaining;
@@ -749,63 +758,108 @@ function FestivalTab({ donations, charities, festival, canEdit, onChange }: {
     if (!festival) return;
     setSaving(true);
     const { error } = await supabase.from("charity_festival_settings").update({
-      festival_name: name, target_amount: targetN,
+      festival_name: name,
+      target_amount: goldN,
+      bronze_target_amount: bronzeN > 0 ? bronzeN : null,
+      silver_target_amount: silverN > 0 ? silverN : null,
       platinum_target_amount: platinumN > 0 ? platinumN : null,
       festival_notes: notes || null,
-    }).eq("id", festival.id);
+    } as any).eq("id", festival.id);
     setSaving(false);
     if (error) { toast({ title: "Save failed", description: error.message, variant: "destructive" }); return; }
     toast({ title: "Saved" }); onChange();
   };
 
+  const tierColor = (tierName: string, achieved: boolean) => {
+    if (!achieved) return "border-gold/15 bg-navy-dark/40 text-primary-foreground/50";
+    switch (tierName) {
+      case "Bronze": return "border-amber-700/60 bg-amber-900/20 text-amber-200";
+      case "Silver": return "border-slate-300/60 bg-slate-400/10 text-slate-100";
+      case "Gold": return "border-gold/60 bg-gold/10 text-gold";
+      case "Platinum": return "border-cyan-300/60 bg-cyan-300/10 text-cyan-100";
+      default: return "";
+    }
+  };
+
   return (
     <div className="space-y-4">
       <Card title={name}>
-        <div className="grid sm:grid-cols-4 gap-3">
-          <Stat label="Gold target" value={gbp(targetN)} />
+        <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-3">
+          <Stat label="Bronze target" value={bronzeN > 0 ? gbp(bronzeN) : "—"} />
+          <Stat label="Silver target" value={silverN > 0 ? gbp(silverN) : "—"} />
+          <Stat label="Gold target" value={goldN > 0 ? gbp(goldN) : "—"} />
           <Stat label="Platinum target" value={platinumN > 0 ? gbp(platinumN) : "—"} />
           <Stat label="Contributed to date" value={<span className="text-gold">{gbp(cumulative)}</span>} />
-          <Stat label="% of gold target" value={`${rawPct.toFixed(1)}%`} />
         </div>
-        <div className={`h-3 bg-navy-dark rounded-sm overflow-hidden border mt-2 ${targetReached ? "border-gold shadow-[0_0_12px_rgba(201,164,50,0.4)]" : "border-gold/20"}`}>
-          <div className="h-full bg-gold-shimmer transition-all" style={{ width: `${barPct}%` }} />
-        </div>
-        {platinumN > 0 && targetReached && (
-          <div className="mt-2">
+
+        {tiers.length > 0 && (
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-3">
+            {(["Bronze", "Silver", "Gold", "Platinum"] as const).map((tName) => {
+              const tier = tiers.find((t) => t.name === tName);
+              if (!tier) return null;
+              const reached = cumulative >= tier.threshold;
+              return (
+                <div key={tName} className={`px-2 py-1.5 rounded-sm border text-xs text-center ${tierColor(tName, reached)}`}>
+                  <div className="font-semibold uppercase tracking-wider">{tName}</div>
+                  <div className="tabular-nums">{gbp(tier.threshold)}</div>
+                  <div className="text-[10px] opacity-80">{reached ? "Achieved" : `${Math.min(100, (cumulative / tier.threshold) * 100).toFixed(0)}%`}</div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {progressTarget > 0 && (
+          <div className="mt-3">
             <div className="flex items-center justify-between text-xs text-primary-foreground/70 mb-1">
-              <span>Progress to Platinum</span>
-              <span className="tabular-nums">{((cumulative / platinumN) * 100).toFixed(1)}%</span>
+              <span>
+                {nextTier ? `Progress to ${nextTier.name}` : `Progress to ${highestTier?.name}`}
+              </span>
+              <span className="tabular-nums">{rawPct.toFixed(1)}%</span>
             </div>
-            <div className={`h-2 bg-navy-dark rounded-sm overflow-hidden border ${platinumReached ? "border-gold shadow-[0_0_12px_rgba(201,164,50,0.5)]" : "border-gold/20"}`}>
-              <div className="h-full bg-gold-shimmer transition-all" style={{ width: `${Math.min(100, (cumulative / platinumN) * 100)}%` }} />
+            <div className={`h-3 bg-navy-dark rounded-sm overflow-hidden border ${!nextTier ? "border-gold shadow-[0_0_12px_rgba(201,164,50,0.4)]" : "border-gold/20"}`}>
+              <div className="h-full bg-gold-shimmer transition-all" style={{ width: `${barPct}%` }} />
             </div>
           </div>
         )}
-        {targetReached ? (
+
+        {platinumReached ? (
           <div className="mt-3 p-3 rounded-sm border border-gold/40 bg-gold/10">
-            <p className="text-sm text-gold font-semibold">
-              Target exceeded — {award ? `${award.name} Award achieved` : "target met"}
-            </p>
+            <p className="text-sm text-gold font-semibold">Target exceeded — Platinum Award achieved</p>
             {excess > 0 && (
-              <p className="text-xs text-primary-foreground/70 mt-1">
-                {gbp(excess)} above {platinumReached ? "Platinum" : "Gold"} target.
-              </p>
+              <p className="text-xs text-primary-foreground/70 mt-1">{gbp(excess)} above Platinum target.</p>
             )}
-            {targetReached && !platinumReached && platinumN > 0 && (
+          </div>
+        ) : award ? (
+          <div className="mt-3 p-3 rounded-sm border border-gold/30 bg-navy-dark/50">
+            <p className="text-sm text-gold font-semibold">{award.name} Award achieved</p>
+            {nextTier && (
               <p className="text-xs text-primary-foreground/70 mt-1">
-                {gbp(Math.max(0, platinumN - cumulative))} to Platinum.
+                {gbp(Math.max(0, nextTier.threshold - cumulative))} to {nextTier.name}.
               </p>
             )}
           </div>
-        ) : (
-          <Stat label="Projected final (at current rate)" value={gbp(projected)} />
-        )}
+        ) : nextTier ? (
+          <div className="mt-3 text-xs text-primary-foreground/70">
+            {gbp(Math.max(0, nextTier.threshold - cumulative))} to first ({nextTier.name}) award.
+          </div>
+        ) : null}
+
+        {!platinumReached && <Stat label="Projected final (at current rate)" value={gbp(projected)} />}
       </Card>
 
       {canEdit && (
         <Card title="Festival settings">
-          <div className="grid sm:grid-cols-3 gap-3">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
             <div><Label>Festival name</Label><Input value={name} onChange={(e) => setName(e.target.value)} /></div>
+            <div>
+              <Label>Bronze target (£)</Label>
+              <Input type="number" step="0.01" value={bronzeTarget} placeholder="Not set" onChange={(e) => setBronzeTarget(e.target.value)} />
+            </div>
+            <div>
+              <Label>Silver target (£)</Label>
+              <Input type="number" step="0.01" value={silverTarget} placeholder="Not set" onChange={(e) => setSilverTarget(e.target.value)} />
+            </div>
             <div><Label>Gold target (£)</Label><Input type="number" step="0.01" value={target} onChange={(e) => setTarget(e.target.value)} /></div>
             <div>
               <Label>Platinum target (£)</Label>
