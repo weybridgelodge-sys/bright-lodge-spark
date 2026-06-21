@@ -356,6 +356,7 @@ export type Database = {
           festival_name: string
           festival_notes: string | null
           id: string
+          platinum_target_amount: number | null
           public_feed_start_amount: number
           public_feed_start_date: string | null
           singleton: boolean
@@ -367,6 +368,7 @@ export type Database = {
           festival_name?: string
           festival_notes?: string | null
           id?: string
+          platinum_target_amount?: number | null
           public_feed_start_amount?: number
           public_feed_start_date?: string | null
           singleton?: boolean
@@ -378,6 +380,7 @@ export type Database = {
           festival_name?: string
           festival_notes?: string | null
           id?: string
+          platinum_target_amount?: number | null
           public_feed_start_amount?: number
           public_feed_start_date?: string | null
           singleton?: boolean

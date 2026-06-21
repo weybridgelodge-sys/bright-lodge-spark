@@ -1,0 +1,1 @@
+ALTER TABLE public.charity_festival_settings ADD COLUMN IF NOT EXISTS platinum_target_amount numeric;
