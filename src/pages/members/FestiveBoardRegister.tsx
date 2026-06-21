@@ -257,14 +257,19 @@ export default function FestiveBoardRegister() {
                         </p>
                       )}
                     </div>
-                    <div className="flex items-center gap-3">
+                    <div className="flex flex-col items-end gap-0.5">
                       <span className="text-xs text-gold">
-                        {hc.total} cover{hc.total === 1 ? "" : "s"}{" "}
+                        {hc.total} attending{" "}
                         <span className="text-primary-foreground/50">
                           ({hc.members} M / {hc.visitors} V
                           {hc.isOverride ? " · override" : ""})
                         </span>
                       </span>
+                      <span className="text-[10px] text-primary-foreground/60">
+                        {hc.diningTotal} dining
+                        {hc.meetingOnlyCount > 0 && ` · ${hc.meetingOnlyCount} meeting-only`}
+                      </span>
+                    </div>
                       <ChevronRight
                         className={`w-4 h-4 text-primary-foreground/40 transition-transform ${
                           isOpen ? "rotate-90" : ""
