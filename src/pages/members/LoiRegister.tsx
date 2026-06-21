@@ -637,7 +637,12 @@ function SessionDialog({
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={onClose} disabled={saving}>
+          <Button
+            variant="outline"
+            onClick={onClose}
+            disabled={saving}
+            className="border-gold/40 text-gold hover:bg-gold/10 hover:text-gold bg-transparent"
+          >
             Cancel
           </Button>
           <Button
