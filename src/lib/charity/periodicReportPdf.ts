@@ -1,7 +1,7 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import logoAsset from "@/assets/weybridge-logo-white.png.asset.json";
-import { gbp, COLLECTION_TYPE_LABEL, type Collection, type Donation, type Charity, type FestivalSettings, masonicYearBounds, inYear, reliefChestBalance, isFestivalDonation } from "./queries";
+import { gbp, COLLECTION_TYPE_LABEL, type Collection, type Donation, type Charity, type FestivalSettings, reliefChestBalance, isFestivalDonation, PAYMENT_METHOD_LABEL } from "./queries";
 
 const NAVY: [number, number, number] = [27, 42, 74];
 const GOLD: [number, number, number] = [201, 164, 50];
@@ -11,22 +11,26 @@ const MUTED: [number, number, number] = [110, 110, 120];
 const fmt = (iso: string) =>
   new Date(iso).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
 
-export async function buildCharityAnnualReportPdf(args: {
-  year: number;
+const inRange = (dateIso: string, start: string, end: string) => dateIso >= start && dateIso <= end;
+
+export async function buildCharityPeriodicReportPdf(args: {
+  title: string;
+  startDate: string;
+  endDate: string;
   collections: Collection[];
   donations: Donation[];
   charities: Charity[];
   festival: FestivalSettings | null;
   stewardNotes: string;
+  finalised?: boolean;
 }) {
-  const { year, collections, donations, charities, festival, stewardNotes } = args;
-  const bounds = masonicYearBounds(year);
+  const { title, startDate, endDate, collections, donations, charities, festival, stewardNotes, finalised } = args;
   const charityById = new Map(charities.map((c) => [c.id, c]));
 
-  const yearColl = collections.filter((c) => inYear(c.collection_date, year));
-  const yearDon = donations.filter((d) => inYear(d.donation_date, year));
+  const periodColl = collections.filter((c) => inRange(c.collection_date, startDate, endDate));
+  const periodDon = donations.filter((d) => inRange(d.donation_date, startDate, endDate));
 
-  const byType = (t: string) => yearColl.filter((c) => c.collection_type === t).reduce((a, c) => a + Number(c.net_amount), 0);
+  const byType = (t: string) => periodColl.filter((c) => c.collection_type === t).reduce((a, c) => a + Number(c.net_amount), 0);
   const totals = {
     charity_column: byType("charity_column"),
     raffle: byType("raffle"),
@@ -37,18 +41,18 @@ export async function buildCharityAnnualReportPdf(args: {
   const totalCollected = Object.values(totals).reduce((a, b) => a + b, 0);
   const reliefBalance = reliefChestBalance(collections, donations);
   const combined = (d: Donation) => Number(d.amount) + Number(d.match_funding_amount ?? 0);
-  const totalLodgeDonated = yearDon.reduce((a, d) => a + Number(d.amount), 0);
-  const totalMatchFunded = yearDon.reduce((a, d) => a + Number(d.match_funding_amount ?? 0), 0);
+  const totalLodgeDonated = periodDon.reduce((a, d) => a + Number(d.amount), 0);
+  const totalMatchFunded = periodDon.reduce((a, d) => a + Number(d.match_funding_amount ?? 0), 0);
   const totalDonated = totalLodgeDonated + totalMatchFunded;
 
   const donByCharity = new Map<string, number>();
-  yearDon.forEach((d) => donByCharity.set(d.charity_id, (donByCharity.get(d.charity_id) ?? 0) + combined(d)));
+  periodDon.forEach((d) => donByCharity.set(d.charity_id, (donByCharity.get(d.charity_id) ?? 0) + combined(d)));
   const charityRows = Array.from(donByCharity.entries())
     .map(([id, total]) => ({ name: charityById.get(id)?.name ?? "(unknown)", total }))
     .sort((a, b) => b.total - a.total);
 
-  const largest = yearDon.reduce((max, d) => (combined(d) > (max ? combined(max) : 0) ? d : max), null as Donation | null);
-  const festivalYear = yearDon.filter((d) => isFestivalDonation(d, charities, festival)).reduce((a, d) => a + combined(d), 0);
+  const largest = periodDon.reduce((max, d) => (combined(d) > (max ? combined(max) : 0) ? d : max), null as Donation | null);
+  const festivalPeriod = periodDon.filter((d) => isFestivalDonation(d, charities, festival)).reduce((a, d) => a + combined(d), 0);
   const festivalCumulative = donations.filter((d) => isFestivalDonation(d, charities, festival)).reduce((a, d) => a + combined(d), 0);
 
   const doc = new jsPDF({ unit: "pt", format: "a4" });
@@ -67,7 +71,6 @@ export async function buildCharityAnnualReportPdf(args: {
     });
   } catch { /* ignore */ }
 
-  // Header
   doc.setFillColor(...NAVY);
   doc.rect(0, 0, pageW, 110, "F");
   doc.setFillColor(...GOLD);
@@ -80,23 +83,22 @@ export async function buildCharityAnnualReportPdf(args: {
   doc.setFont("times", "italic");
   doc.setFontSize(13);
   doc.setTextColor(...GOLD);
-  doc.text("Annual Charity Steward's Report", margin + 80, 72);
+  doc.text(`Charity Steward's Periodic Report${finalised ? " (Finalised)" : ""}`, margin + 80, 72);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
   doc.setTextColor(230, 230, 235);
-  doc.text(`Masonic year ${bounds.label} · ${fmt(bounds.start)} – ${fmt(bounds.end)}`, margin + 80, 90);
+  doc.text(`${title} · ${fmt(startDate)} – ${fmt(endDate)}`, margin + 80, 90);
   doc.text(`Generated: ${fmt(new Date().toISOString())}`, pageW - margin, 90, { align: "right" });
 
   let y = 130;
-
-  const section = (title: string) => {
+  const section = (t: string) => {
     if (y > pageH - 100) { doc.addPage(); y = margin; }
     doc.setFillColor(...NAVY);
     doc.rect(margin, y, pageW - margin * 2, 22, "F");
     doc.setTextColor(...GOLD);
     doc.setFont("times", "bold");
     doc.setFontSize(11);
-    doc.text(title, margin + 10, y + 15);
+    doc.text(t, margin + 10, y + 15);
     y += 32;
   };
   const table = (head: string[][], body: any[][]) => {
@@ -107,12 +109,11 @@ export async function buildCharityAnnualReportPdf(args: {
       headStyles: { fillColor: GOLD, textColor: NAVY, fontStyle: "bold" },
       alternateRowStyles: { fillColor: [250, 247, 238] },
       theme: "grid",
-      columnStyles: { 0: { cellWidth: 260 } },
+      columnStyles: { 0: { cellWidth: 220 } },
     });
     y = (doc as any).lastAutoTable.finalY + 16;
   };
 
-  // Report summary (notes shown first)
   if (stewardNotes?.trim()) {
     section("Report Summary");
     doc.setFont("times", "italic");
@@ -124,7 +125,7 @@ export async function buildCharityAnnualReportPdf(args: {
     y += lines.length * 12 + 16;
   }
 
-  section("1. Collections in the Year");
+  section("1. Collections in the Period");
   table(
     [["Type", "Amount"]],
     [
@@ -134,11 +135,11 @@ export async function buildCharityAnnualReportPdf(args: {
       [COLLECTION_TYPE_LABEL.relief_chest, gbp(totals.relief_chest)],
       [COLLECTION_TYPE_LABEL.other, gbp(totals.other)],
       ["Total collected", gbp(totalCollected)],
-      ["Relief Chest balance at year end", gbp(reliefBalance)],
+      ["Relief Chest balance (all-time)", gbp(reliefBalance)],
     ],
   );
 
-  section("2. Donations in the Year");
+  section("2. Donations in the Period");
   table(
     [["Metric", "Value"]],
     [
@@ -155,21 +156,35 @@ export async function buildCharityAnnualReportPdf(args: {
     table([["Charity", "Total"]], charityRows.map((r) => [r.name, gbp(r.total)]));
   }
 
-  section(`${charityRows.length ? "4" : "3"}. ${festival?.festival_name ?? "Festival"} Contribution`);
+  if (periodDon.length) {
+    section(`${charityRows.length ? "4" : "3"}. Donation Detail`);
+    table(
+      [["Date", "Charity", "Amount", "Match", "Method", "Purpose"]],
+      periodDon
+        .slice()
+        .sort((a, b) => a.donation_date.localeCompare(b.donation_date))
+        .map((d) => [
+          fmt(d.donation_date),
+          charityById.get(d.charity_id)?.name ?? "—",
+          gbp(Number(d.amount)),
+          Number(d.match_funding_amount ?? 0) > 0 ? gbp(Number(d.match_funding_amount)) : "—",
+          PAYMENT_METHOD_LABEL[d.payment_method] ?? d.payment_method,
+          d.purpose ?? "—",
+        ]),
+    );
+  }
+
+  section(`${charityRows.length ? (periodDon.length ? "5" : "4") : (periodDon.length ? "4" : "3")}. ${festival?.festival_name ?? "Festival"} Contribution`);
   table(
     [["Metric", "Value"]],
     [
-      ["Contributed in year", gbp(festivalYear)],
-      ["Cumulative total", gbp(festivalCumulative)],
+      ["Contributed in period", gbp(festivalPeriod)],
+      ["Cumulative total (all-time)", gbp(festivalCumulative)],
       ["Target", festival ? gbp(Number(festival.target_amount)) : "—"],
       ["% of target", festival && Number(festival.target_amount) > 0 ? `${Math.round((festivalCumulative / Number(festival.target_amount)) * 100)}%` : "—"],
     ],
   );
 
-
-
-
-  // Footer
   const pageCount = (doc as any).internal.getNumberOfPages();
   for (let i = 1; i <= pageCount; i++) {
     doc.setPage(i);
@@ -182,7 +197,7 @@ export async function buildCharityAnnualReportPdf(args: {
     doc.text("Weybridge Lodge No. 6787", pageW / 2, pageH - 28, { align: "center" });
     doc.setFont("times", "italic");
     doc.setTextColor(...MUTED);
-    doc.text("Confidential — Annual Charity Steward's Report. For Charity Steward, WM, Treasurer, and Secretary.", margin, pageH - 16);
+    doc.text("Confidential — Charity Steward's Periodic Report. For Charity Steward, WM, Treasurer, and Secretary.", margin, pageH - 16);
     doc.text(`Page ${i} of ${pageCount}`, pageW - margin, pageH - 16, { align: "right" });
   }
   return doc;

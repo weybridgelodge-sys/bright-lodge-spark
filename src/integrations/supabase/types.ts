@@ -437,6 +437,48 @@ export type Database = {
         }
         Relationships: []
       }
+      charity_periodic_reports: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          end_date: string
+          finalised_at: string | null
+          finalised_by: string | null
+          id: string
+          notes: string | null
+          payload: Json
+          start_date: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          end_date: string
+          finalised_at?: string | null
+          finalised_by?: string | null
+          id?: string
+          notes?: string | null
+          payload?: Json
+          start_date: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          end_date?: string
+          finalised_at?: string | null
+          finalised_by?: string | null
+          id?: string
+          notes?: string | null
+          payload?: Json
+          start_date?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       charity_public_feed_metrics: {
         Row: {
           current_year_total: number
