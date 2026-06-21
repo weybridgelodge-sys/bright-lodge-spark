@@ -1129,20 +1129,22 @@ function PeriodicReportsSection({ charities, collections, donations, festival, c
                         : <Badge variant="outline" className="border-gold/40 text-gold">Draft</Badge>}
                     </td>
                     <td className="px-2 py-2 text-primary-foreground/70 text-xs">{fmtDate(r.updated_at)}</td>
-                    <td className="px-2 py-2 text-right space-x-1">
-                      <Button size="sm" variant="ghost" onClick={() => downloadFor(r)} className="text-gold hover:text-gold/80">
-                        <Download className="w-4 h-4" />
-                      </Button>
-                      {canEdit && (
-                        <Button size="sm" variant="ghost" onClick={() => loadIntoForm(r)} className="text-primary-foreground/80">
-                          <Pencil className="w-4 h-4" />
+                    <td className="px-2 py-2 text-right">
+                      <div className="inline-flex flex-wrap gap-1 justify-end">
+                        <Button size="sm" variant="outline" onClick={() => downloadFor(r)} className="h-8 border-gold/40 text-gold hover:bg-gold/10" title="Download PDF">
+                          <Download className="w-4 h-4" />
                         </Button>
-                      )}
-                      {canEdit && !r.finalised_at && (
-                        <Button size="sm" variant="ghost" onClick={() => remove(r)} className="text-red-400 hover:text-red-300">
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      )}
+                        {canEdit && !r.finalised_at && (
+                          <Button size="sm" variant="outline" onClick={() => loadIntoForm(r)} className="h-8 border-gold/40 text-gold hover:bg-gold/10" title="Edit">
+                            <Pencil className="w-4 h-4" />
+                          </Button>
+                        )}
+                        {canEdit && !r.finalised_at && (
+                          <Button size="sm" variant="outline" onClick={() => remove(r)} className="h-8 border-red-500/40 text-red-300 hover:bg-red-500/10" title="Delete">
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}
