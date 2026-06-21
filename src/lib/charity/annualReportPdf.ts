@@ -130,9 +130,11 @@ export async function buildCharityAnnualReportPdf(args: {
   table(
     [["Metric", "Value"]],
     [
-      ["Total donated", gbp(totalDonated)],
+      ["Lodge donations", gbp(totalLodgeDonated)],
+      ["Match funding received", gbp(totalMatchFunded)],
+      ["Total donated (incl. match)", gbp(totalDonated)],
       ["Number of charities supported", String(charityRows.length)],
-      ["Largest single donation", largest ? `${gbp(Number(largest.amount))} — ${charityById.get(largest.charity_id)?.name ?? ""}` : "—"],
+      ["Largest single donation", largest ? `${gbp(combined(largest))} — ${charityById.get(largest.charity_id)?.name ?? ""}` : "—"],
     ],
   );
 
