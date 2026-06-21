@@ -73,15 +73,28 @@ export type FestivalSettings = {
   public_feed_start_amount: number;
 };
 
+function thirdWednesdayInOctober(year: number): Date {
+  const d = new Date(year, 9, 15); // Oct 15 (month 0-indexed)
+  while (d.getDay() !== 3) {
+    d.setDate(d.getDate() + 1);
+  }
+  // Return at midnight UTC to avoid timezone drift on string comparison
+  return new Date(Date.UTC(year, 9, d.getDate()));
+}
+
 export function currentMasonicYear(): number {
   const d = new Date();
-  return d.getMonth() >= 9 ? d.getFullYear() : d.getFullYear() - 1;
+  const start = thirdWednesdayInOctober(d.getFullYear());
+  return d >= start ? d.getFullYear() : d.getFullYear() - 1;
 }
 
 export function masonicYearBounds(year: number): { start: string; end: string; label: string } {
+  const start = thirdWednesdayInOctober(year);
+  const end = thirdWednesdayInOctober(year + 1);
+  end.setDate(end.getDate() - 1); // run up to day before next year's 3rd Wednesday
   return {
-    start: `${year}-10-01`,
-    end: `${year + 1}-09-30`,
+    start: start.toISOString().slice(0, 10),
+    end: end.toISOString().slice(0, 10),
     label: `${year}/${year + 1}`,
   };
 }
