@@ -501,7 +501,7 @@ function SessionDialog({
                 type="date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
-                className="bg-navy border-gold/20"
+                className="bg-navy border-gold/30 text-primary-foreground placeholder:text-primary-foreground/40"
               />
             </div>
             <div>
@@ -509,7 +509,7 @@ function SessionDialog({
                 Focus
               </label>
               <Select value={focus} onValueChange={setFocus}>
-                <SelectTrigger className="bg-navy border-gold/20">
+                <SelectTrigger className="bg-navy border-gold/30 text-primary-foreground placeholder:text-primary-foreground/40">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -528,7 +528,7 @@ function SessionDialog({
               placeholder="Specify focus"
               value={focusOther}
               onChange={(e) => setFocusOther(e.target.value)}
-              className="bg-navy border-gold/20"
+              className="bg-navy border-gold/30 text-primary-foreground placeholder:text-primary-foreground/40"
             />
           )}
 
@@ -537,7 +537,7 @@ function SessionDialog({
               KPI block (optional override — auto-grouped by date if blank)
             </label>
             <Select value={kpiCategory || "auto"} onValueChange={(v) => setKpiCategory(v === "auto" ? "" : v)}>
-              <SelectTrigger className="bg-navy border-gold/20">
+              <SelectTrigger className="bg-navy border-gold/30 text-primary-foreground placeholder:text-primary-foreground/40">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -559,7 +559,7 @@ function SessionDialog({
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               rows={2}
-              className="bg-navy border-gold/20"
+              className="bg-navy border-gold/30 text-primary-foreground placeholder:text-primary-foreground/40"
               placeholder="e.g. focus on Working Tools"
             />
           </div>
@@ -601,7 +601,7 @@ function SessionDialog({
                             setDraft(m.id, { part: v as LoiPart })
                           }
                         >
-                          <SelectTrigger className="h-8 w-[180px] bg-navy border-gold/20 text-xs">
+                          <SelectTrigger className="h-8 w-[180px] bg-navy border-gold/30 text-primary-foreground placeholder:text-primary-foreground/40 text-xs">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -619,7 +619,7 @@ function SessionDialog({
                               setDraft(m.id, { partOther: e.target.value })
                             }
                             placeholder="Specify"
-                            className="h-8 w-32 bg-navy border-gold/20 text-xs"
+                            className="h-8 w-32 bg-navy border-gold/30 text-primary-foreground placeholder:text-primary-foreground/40 text-xs"
                           />
                         )}
                       </div>
