@@ -36,17 +36,20 @@ export async function buildCharityAnnualReportPdf(args: {
   };
   const totalCollected = Object.values(totals).reduce((a, b) => a + b, 0);
   const reliefBalance = reliefChestBalance(collections, donations);
-  const totalDonated = yearDon.reduce((a, d) => a + Number(d.amount), 0);
+  const combined = (d: Donation) => Number(d.amount) + Number(d.match_funding_amount ?? 0);
+  const totalLodgeDonated = yearDon.reduce((a, d) => a + Number(d.amount), 0);
+  const totalMatchFunded = yearDon.reduce((a, d) => a + Number(d.match_funding_amount ?? 0), 0);
+  const totalDonated = totalLodgeDonated + totalMatchFunded;
 
   const donByCharity = new Map<string, number>();
-  yearDon.forEach((d) => donByCharity.set(d.charity_id, (donByCharity.get(d.charity_id) ?? 0) + Number(d.amount)));
+  yearDon.forEach((d) => donByCharity.set(d.charity_id, (donByCharity.get(d.charity_id) ?? 0) + combined(d)));
   const charityRows = Array.from(donByCharity.entries())
     .map(([id, total]) => ({ name: charityById.get(id)?.name ?? "(unknown)", total }))
     .sort((a, b) => b.total - a.total);
 
-  const largest = yearDon.reduce((max, d) => (Number(d.amount) > (max ? Number(max.amount) : 0) ? d : max), null as Donation | null);
-  const festivalYear = yearDon.filter((d) => isFestivalDonation(d, charities, festival)).reduce((a, d) => a + Number(d.amount), 0);
-  const festivalCumulative = donations.filter((d) => isFestivalDonation(d, charities, festival)).reduce((a, d) => a + Number(d.amount), 0);
+  const largest = yearDon.reduce((max, d) => (combined(d) > (max ? combined(max) : 0) ? d : max), null as Donation | null);
+  const festivalYear = yearDon.filter((d) => isFestivalDonation(d, charities, festival)).reduce((a, d) => a + combined(d), 0);
+  const festivalCumulative = donations.filter((d) => isFestivalDonation(d, charities, festival)).reduce((a, d) => a + combined(d), 0);
 
   const doc = new jsPDF({ unit: "pt", format: "a4" });
   const pageW = doc.internal.pageSize.getWidth();
@@ -127,9 +130,11 @@ export async function buildCharityAnnualReportPdf(args: {
   table(
     [["Metric", "Value"]],
     [
-      ["Total donated", gbp(totalDonated)],
+      ["Lodge donations", gbp(totalLodgeDonated)],
+      ["Match funding received", gbp(totalMatchFunded)],
+      ["Total donated (incl. match)", gbp(totalDonated)],
       ["Number of charities supported", String(charityRows.length)],
-      ["Largest single donation", largest ? `${gbp(Number(largest.amount))} — ${charityById.get(largest.charity_id)?.name ?? ""}` : "—"],
+      ["Largest single donation", largest ? `${gbp(combined(largest))} — ${charityById.get(largest.charity_id)?.name ?? ""}` : "—"],
     ],
   );
 

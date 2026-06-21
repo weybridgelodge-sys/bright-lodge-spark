@@ -918,12 +918,15 @@ function ReportTab({ charities, collections, donations, festival, canEdit }: {
 
   const yearColl = collections.filter((c) => inYear(c.collection_date, year));
   const yearDon = donations.filter((d) => inYear(d.donation_date, year));
+  const donationCombined = (d: Donation) => Number(d.amount) + Number(d.match_funding_amount ?? 0);
   const totalCollected = yearColl.reduce((a, c) => a + Number(c.net_amount), 0);
-  const totalDonated = yearDon.reduce((a, d) => a + Number(d.amount), 0);
+  const totalLodgeDonated = yearDon.reduce((a, d) => a + Number(d.amount), 0);
+  const totalMatchFunded = yearDon.reduce((a, d) => a + Number(d.match_funding_amount ?? 0), 0);
+  const totalDonated = totalLodgeDonated + totalMatchFunded;
   const reliefBal = reliefChestBalance(collections, donations);
   const charitiesSupported = new Set(yearDon.map((d) => d.charity_id)).size;
-  const largest = yearDon.reduce((m, d) => (Number(d.amount) > (m ? Number(m.amount) : 0) ? d : m), null as Donation | null);
-  const festivalYear = yearDon.filter((d) => isFestivalDonation(d, charities, festival)).reduce((a, d) => a + Number(d.amount), 0);
+  const largest = yearDon.reduce((m, d) => (donationCombined(d) > (m ? donationCombined(m) : 0) ? d : m), null as Donation | null);
+  const festivalYear = yearDon.filter((d) => isFestivalDonation(d, charities, festival)).reduce((a, d) => a + donationCombined(d), 0);
   const charityById = new Map(charities.map((c) => [c.id, c]));
 
   const yearsAvailable = useMemo(() => {
@@ -947,7 +950,7 @@ function ReportTab({ charities, collections, donations, festival, canEdit }: {
   const finalise = async () => {
     setSaving(true);
     const payload = {
-      bounds, totalCollected, totalDonated, reliefBal, charitiesSupported,
+      bounds, totalCollected, totalLodgeDonated, totalMatchFunded, totalDonated, reliefBal, charitiesSupported,
       largest, festivalYear,
       byType: {
         charity_column: yearColl.filter((c) => c.collection_type === "charity_column").reduce((a, c) => a + Number(c.net_amount), 0),
@@ -987,9 +990,11 @@ function ReportTab({ charities, collections, donations, festival, canEdit }: {
       <div className="grid md:grid-cols-2 gap-4">
         <Card title="Headline figures">
           <Stat label="Total collected" value={gbp(totalCollected)} />
-          <Stat label="Total donated" value={<span className="text-gold">{gbp(totalDonated)}</span>} />
+          <Stat label="Lodge donations" value={gbp(totalLodgeDonated)} />
+          <Stat label="Match funding received" value={<span className="text-emerald-300">{gbp(totalMatchFunded)}</span>} />
+          <Stat label="Total donated (incl. match)" value={<span className="text-gold">{gbp(totalDonated)}</span>} />
           <Stat label="Charities supported" value={charitiesSupported} />
-          <Stat label="Largest single donation" value={largest ? `${gbp(Number(largest.amount))} (${charityById.get(largest.charity_id)?.name ?? ""})` : "—"} />
+          <Stat label="Largest single donation" value={largest ? `${gbp(donationCombined(largest))} (${charityById.get(largest.charity_id)?.name ?? ""})` : "—"} />
           <Stat label="Relief Chest balance at year end" value={gbp(reliefBal)} />
           <Stat label={`${festival?.festival_name ?? "Festival"} (this year)`} value={gbp(festivalYear)} />
         </Card>
