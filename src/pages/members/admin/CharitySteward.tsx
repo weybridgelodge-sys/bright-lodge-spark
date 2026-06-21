@@ -738,11 +738,14 @@ function FestivalTab({ donations, charities, festival, canEdit, onChange }: {
   const nextTier = nextTierAhead(cumulative, targets);
   const highestTier = tiers.length ? tiers[tiers.length - 1] : null;
   const platinumReached = !!award && award.name === "Platinum";
+  const goldReached = goldN > 0 && cumulative >= goldN;
   // Primary progress bar tracks toward the next un-met tier, or the highest tier once all reached.
   const progressTarget = nextTier ? nextTier.threshold : (highestTier ? highestTier.threshold : 0);
   const rawPct = progressTarget > 0 ? (cumulative / progressTarget) * 100 : 0;
   const barPct = Math.min(100, rawPct);
   const excess = highestTier && cumulative > highestTier.threshold ? cumulative - highestTier.threshold : 0;
+  const goldExcess = goldReached ? cumulative - goldN : 0;
+  const goldPct = goldN > 0 ? (cumulative / goldN) * 100 : 0;
 
   // Projected: based on rate per day since first contribution
   const projected = (() => {
