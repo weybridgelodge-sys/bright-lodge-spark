@@ -992,8 +992,19 @@ function ReportTab({ charities, collections, donations, festival, canEdit }: {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
+      <PeriodicReportsSection
+        charities={charities}
+        collections={collections}
+        donations={donations}
+        festival={festival}
+        canEdit={canEdit}
+      />
+
+      <div className="border-t border-gold/15 pt-4">
+        <h3 className="font-serif text-gold text-lg mb-3">Annual (Masonic Year) Report</h3>
       <div className="flex flex-wrap items-end gap-3">
+
         <div>
           <Label>Masonic year</Label>
           <Select value={String(year)} onValueChange={(v) => setYear(Number(v))}>
