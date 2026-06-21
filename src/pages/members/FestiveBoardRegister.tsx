@@ -1194,23 +1194,29 @@ function MeetingDialog({
                         ))}
                       </SelectContent>
                     </Select>
-                    <Select
-                      value={v.paymentMethod}
-                      onValueChange={(val) =>
-                        setVisitor(v.id, { paymentMethod: val as FbPaymentMethod })
-                      }
-                    >
-                      <SelectTrigger className="bg-navy border-gold/20 h-8 text-xs text-primary-foreground placeholder:text-primary-foreground/40">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {FB_PAYMENT_METHODS.map((o) => (
-                          <SelectItem key={o.value} value={o.value}>
-                            {o.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    {v.isMeetingOnly ? (
+                      <div className="bg-navy border border-gold/20 h-8 rounded px-3 flex items-center text-xs text-primary-foreground/40">
+                        —
+                      </div>
+                    ) : (
+                      <Select
+                        value={v.paymentMethod}
+                        onValueChange={(val) =>
+                          setVisitor(v.id, { paymentMethod: val as FbPaymentMethod })
+                        }
+                      >
+                        <SelectTrigger className="bg-navy border-gold/20 h-8 text-xs text-primary-foreground placeholder:text-primary-foreground/40">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {FB_PAYMENT_METHODS.map((o) => (
+                            <SelectItem key={o.value} value={o.value}>
+                              {o.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
                     <Input
                       type="number"
                       step="0.01"
