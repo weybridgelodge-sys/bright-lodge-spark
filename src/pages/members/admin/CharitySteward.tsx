@@ -850,26 +850,39 @@ function FestivalTab({ donations, charities, festival, canEdit, onChange }: {
 
       {canEdit && (
         <Card title="Festival settings">
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            <div><Label>Festival name</Label><Input value={name} onChange={(e) => setName(e.target.value)} /></div>
+          <div className="space-y-3">
             <div>
-              <Label>Bronze target (£)</Label>
-              <Input type="number" step="0.01" value={bronzeTarget} placeholder="Not set" onChange={(e) => setBronzeTarget(e.target.value)} />
+              <Label>Festival name</Label>
+              <Input value={name} onChange={(e) => setName(e.target.value)} />
+            </div>
+            <div className="grid sm:grid-cols-2 gap-3">
+              <div>
+                <Label>Bronze target (£)</Label>
+                <Input type="number" step="0.01" value={bronzeTarget} placeholder="Not set" onChange={(e) => setBronzeTarget(e.target.value)} />
+              </div>
+              <div>
+                <Label>Silver target (£)</Label>
+                <Input type="number" step="0.01" value={silverTarget} placeholder="Not set" onChange={(e) => setSilverTarget(e.target.value)} />
+              </div>
+            </div>
+            <div className="grid sm:grid-cols-2 gap-3">
+              <div>
+                <Label>Gold target (£)</Label>
+                <Input type="number" step="0.01" value={target} onChange={(e) => setTarget(e.target.value)} />
+              </div>
+              <div>
+                <Label>Platinum target (£)</Label>
+                <Input type="number" step="0.01" value={platinumTarget} placeholder="Not set" onChange={(e) => setPlatinumTarget(e.target.value)} />
+              </div>
             </div>
             <div>
-              <Label>Silver target (£)</Label>
-              <Input type="number" step="0.01" value={silverTarget} placeholder="Not set" onChange={(e) => setSilverTarget(e.target.value)} />
+              <Label>Provincial Festival communications / notes</Label>
+              <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} />
             </div>
-            <div><Label>Gold target (£)</Label><Input type="number" step="0.01" value={target} onChange={(e) => setTarget(e.target.value)} /></div>
-            <div>
-              <Label>Platinum target (£)</Label>
-              <Input type="number" step="0.01" value={platinumTarget} placeholder="Not set" onChange={(e) => setPlatinumTarget(e.target.value)} />
-            </div>
+            <Button onClick={save} disabled={saving} className="bg-gold text-navy hover:bg-gold/90">
+              {saving ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Save className="w-4 h-4 mr-1" />} Save settings
+            </Button>
           </div>
-          <div><Label>Provincial Festival communications / notes</Label><Textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} /></div>
-          <Button onClick={save} disabled={saving} className="bg-gold text-navy hover:bg-gold/90">
-            {saving ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Save className="w-4 h-4 mr-1" />} Save settings
-          </Button>
         </Card>
       )}
 
