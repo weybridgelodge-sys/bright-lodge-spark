@@ -1,24 +1,21 @@
 // Award tiers for Provincial Festivals.
-// Future-proofed: add new tiers here as Province announces them
-// (e.g. Platinum at 150% of target). Highest achieved tier wins.
-export type FestivalAwardTier = { name: string; ratio: number };
-
-export const FESTIVAL_AWARD_TIERS: FestivalAwardTier[] = [
-  { name: "Gold", ratio: 1.0 },
-  // Placeholder — Platinum threshold to be confirmed by Province.
-  { name: "Platinum", ratio: 1.5 },
-];
+// Gold is reached at the standard target.
+// Platinum is reached at a separately-set higher absolute target (set by Province).
+export type FestivalAwardTier = { name: string; threshold: number };
 
 export function highestAwardAchieved(
   cumulative: number,
-  target: number,
-  tiers: FestivalAwardTier[] = FESTIVAL_AWARD_TIERS,
+  goldTarget: number,
+  platinumTarget: number | null | undefined,
 ): FestivalAwardTier | null {
-  if (target <= 0 || cumulative <= 0) return null;
-  const ratio = cumulative / target;
+  if (cumulative <= 0) return null;
+  const tiers: FestivalAwardTier[] = [];
+  if (goldTarget > 0) tiers.push({ name: "Gold", threshold: goldTarget });
+  if (platinumTarget && platinumTarget > 0) tiers.push({ name: "Platinum", threshold: platinumTarget });
+  tiers.sort((a, b) => a.threshold - b.threshold);
   let achieved: FestivalAwardTier | null = null;
   for (const t of tiers) {
-    if (ratio >= t.ratio) achieved = t;
+    if (cumulative >= t.threshold) achieved = t;
   }
   return achieved;
 }
