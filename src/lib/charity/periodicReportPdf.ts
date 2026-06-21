@@ -1,7 +1,7 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import logoAsset from "@/assets/weybridge-logo-white.png.asset.json";
-import { gbp, COLLECTION_TYPE_LABEL, type Collection, type Donation, type Charity, type FestivalSettings, reliefChestBalance, isFestivalDonation, PAYMENT_METHOD_LABEL } from "./queries";
+import { gbp, COLLECTION_TYPE_LABEL, type Collection, type Donation, type Charity, type FestivalSettings, reliefChestBalance, isFestivalDonation } from "./queries";
 
 const NAVY: [number, number, number] = [27, 42, 74];
 const GOLD: [number, number, number] = [201, 164, 50];
