@@ -85,12 +85,21 @@ export type SummaryReportData = {
   execSummary: string;
 };
 
+function thirdWednesdayInOctober(year: number): Date {
+  const dt = new Date(year, 9, 15);
+  while (dt.getDay() !== 3) dt.setDate(dt.getDate() + 1);
+  return new Date(Date.UTC(year, 9, dt.getDate()));
+}
+
 export function currentMasonicYearPeriod(): SummaryPeriod {
   const now = new Date();
-  const startYear = now.getMonth() >= 9 ? now.getFullYear() : now.getFullYear() - 1;
+  const startYear = now >= thirdWednesdayInOctober(now.getFullYear()) ? now.getFullYear() : now.getFullYear() - 1;
+  const start = thirdWednesdayInOctober(startYear);
+  const end = thirdWednesdayInOctober(startYear + 1);
+  end.setDate(end.getDate() - 1);
   return {
-    start: `${startYear}-10-01`,
-    end: `${startYear + 1}-09-30`,
+    start: start.toISOString().slice(0, 10),
+    end: end.toISOString().slice(0, 10),
     label: `${startYear}/${startYear + 1} Masonic Year`,
   };
 }

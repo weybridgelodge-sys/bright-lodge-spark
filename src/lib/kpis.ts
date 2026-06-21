@@ -78,8 +78,15 @@ export type KpiBundle = {
 };
 
 
+function thirdWednesdayInOctober(year: number): Date {
+  const dt = new Date(year, 9, 15);
+  while (dt.getDay() !== 3) dt.setDate(dt.getDate() + 1);
+  return new Date(Date.UTC(year, 9, dt.getDate()));
+}
+
 export function currentMasonicYear(d = new Date()): number {
-  return d.getMonth() + 1 >= 10 ? d.getFullYear() : d.getFullYear() - 1;
+  const start = thirdWednesdayInOctober(d.getFullYear());
+  return d >= start ? d.getFullYear() : d.getFullYear() - 1;
 }
 
 export function fullName(m: KpiMember): string {
