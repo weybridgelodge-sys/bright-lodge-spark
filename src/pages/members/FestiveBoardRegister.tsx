@@ -607,6 +607,7 @@ function MeetingDialog({
               status: "booked",
               paymentMethod: "unknown",
               amountPounds: amount,
+              isMeetingOnly: meetingOnly,
               synced: true,
               sourceBookingId: b.id,
             });
@@ -621,6 +622,7 @@ function MeetingDialog({
             status: "booked",
             paymentMethod: "unknown",
             amountPounds: amount,
+            isMeetingOnly: meetingOnly,
             synced: true,
             sourceBookingId: b.id,
           });
