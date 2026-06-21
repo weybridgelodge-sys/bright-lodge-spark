@@ -90,10 +90,6 @@ export async function buildCharityAnnualReportPdf(args: {
   let y = 130;
 
   const section = (title: string) => {
-    void title;
-  };
-  // proper section helper
-  const _section = (title: string) => {
     if (y > pageH - 100) { doc.addPage(); y = margin; }
     doc.setFillColor(...NAVY);
     doc.rect(margin, y, pageW - margin * 2, 22, "F");
@@ -115,6 +111,18 @@ export async function buildCharityAnnualReportPdf(args: {
     });
     y = (doc as any).lastAutoTable.finalY + 16;
   };
+
+  // Report summary (notes shown first)
+  if (stewardNotes?.trim()) {
+    section("Report Summary");
+    doc.setFont("times", "italic");
+    doc.setFontSize(10);
+    doc.setTextColor(...INK);
+    const lines = doc.splitTextToSize(stewardNotes.trim(), pageW - margin * 2);
+    if (y + lines.length * 12 > pageH - 60) { doc.addPage(); y = margin; }
+    doc.text(lines, margin, y);
+    y += lines.length * 12 + 16;
+  }
 
   section("1. Collections in the Year");
   table(
