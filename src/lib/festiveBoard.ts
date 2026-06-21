@@ -56,10 +56,10 @@ export function computeHeadcount(
 
 export function shortMonthLabel(dateStr: string, type: string): string {
   const d = new Date(dateStr);
+  const day = d.getDate();
   const m = d.toLocaleDateString("en-GB", { month: "short" });
-  const y = String(d.getFullYear()).slice(-2);
   const suffix = type === "installation" ? " (Inst.)" : type === "emergency" ? " (Emerg.)" : "";
-  return `${m} ${y}${suffix}`;
+  return `${day} ${m}${suffix}`;
 }
 
 // Detect a Weybridge Lodge No. 6787 reference in a free-text Lodge field.
