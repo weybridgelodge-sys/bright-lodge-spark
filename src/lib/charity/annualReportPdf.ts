@@ -152,7 +152,8 @@ export async function buildCharityAnnualReportPdf(args: {
 
   if (charityRows.length) {
     section("3. Breakdown by Recipient Charity");
-    table([["Charity", "Total"]], charityRows.map((r) => [r.name, gbp(r.total)]));
+    table([["Charity", "Total"]], charityRows.map((r) => [r.name, gbp(r.total)]),
+      { 0: { cellWidth: 380 }, 1: { cellWidth: 135, halign: "right" } });
   }
 
   section(`${charityRows.length ? "4" : "3"}. ${festival?.festival_name ?? "Festival"} Contribution`);
