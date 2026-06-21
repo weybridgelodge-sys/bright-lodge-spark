@@ -990,9 +990,11 @@ function ReportTab({ charities, collections, donations, festival, canEdit }: {
       <div className="grid md:grid-cols-2 gap-4">
         <Card title="Headline figures">
           <Stat label="Total collected" value={gbp(totalCollected)} />
-          <Stat label="Total donated" value={<span className="text-gold">{gbp(totalDonated)}</span>} />
+          <Stat label="Lodge donations" value={gbp(totalLodgeDonated)} />
+          <Stat label="Match funding received" value={<span className="text-emerald-300">{gbp(totalMatchFunded)}</span>} />
+          <Stat label="Total donated (incl. match)" value={<span className="text-gold">{gbp(totalDonated)}</span>} />
           <Stat label="Charities supported" value={charitiesSupported} />
-          <Stat label="Largest single donation" value={largest ? `${gbp(Number(largest.amount))} (${charityById.get(largest.charity_id)?.name ?? ""})` : "—"} />
+          <Stat label="Largest single donation" value={largest ? `${gbp(donationCombined(largest))} (${charityById.get(largest.charity_id)?.name ?? ""})` : "—"} />
           <Stat label="Relief Chest balance at year end" value={gbp(reliefBal)} />
           <Stat label={`${festival?.festival_name ?? "Festival"} (this year)`} value={gbp(festivalYear)} />
         </Card>
