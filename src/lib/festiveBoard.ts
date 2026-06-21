@@ -33,7 +33,7 @@ export const attendanceStatusLabel = (v: string) =>
 export const paymentMethodLabel = (v: string) =>
   FB_PAYMENT_METHODS.find((o) => o.value === v)?.label ?? v;
 
-/** Computed headcount = attended members + attended visitors. Override wins when set. */
+/** Computed headcount = expected covers (booked or attended). Override wins when set. */
 export function computeHeadcount(
   rows: { attendance_status: string; member_id: string | null }[],
   override: number | null
@@ -41,7 +41,7 @@ export function computeHeadcount(
   let members = 0;
   let visitors = 0;
   for (const r of rows) {
-    if (r.attendance_status !== "attended") continue;
+    if (r.attendance_status !== "attended" && r.attendance_status !== "booked") continue;
     if (r.member_id) members += 1;
     else visitors += 1;
   }
