@@ -248,9 +248,16 @@ function DonationsTab({ donations, charities, festival, canEdit, onChange }: {
   const [editing, setEditing] = useState<Donation | null>(null);
   const year = currentMasonicYear();
   const ytd = donations.filter((d) => inYear(d.donation_date, year));
-  const ytdTotal = ytd.reduce((a, d) => a + Number(d.amount), 0);
-  const grandTotal = donations.reduce((a, d) => a + Number(d.amount), 0);
+  const sumLodge = (xs: Donation[]) => xs.reduce((a, d) => a + Number(d.amount), 0);
+  const sumMatch = (xs: Donation[]) => xs.reduce((a, d) => a + Number(d.match_funding_amount ?? 0), 0);
+  const ytdLodge = sumLodge(ytd);
+  const ytdMatch = sumMatch(ytd);
+  const ytdTotal = ytdLodge + ytdMatch;
+  const grandLodge = sumLodge(donations);
+  const grandMatch = sumMatch(donations);
+  const grandTotal = grandLodge + grandMatch;
   const reliefOut = ytd.filter((d) => d.from_relief_chest).reduce((a, d) => a + Number(d.amount), 0);
+
 
   const charityById = new Map(charities.map((c) => [c.id, c]));
 
