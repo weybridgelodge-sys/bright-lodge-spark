@@ -1390,7 +1390,7 @@ function Inner() {
           <TabsTrigger value="donations">Donations</TabsTrigger>
           <TabsTrigger value="ledger">Charity Ledger</TabsTrigger>
           <TabsTrigger value="festival">Festival Tracker</TabsTrigger>
-          <TabsTrigger value="report">Annual Report</TabsTrigger>
+          <TabsTrigger value="report">Reports</TabsTrigger>
           <TabsTrigger value="feed">Website Feed</TabsTrigger>
         </TabsList>
         <TabsContent value="collections"><CollectionsTab collections={collections} donations={donations} canEdit={canEdit} onChange={reload} /></TabsContent>
