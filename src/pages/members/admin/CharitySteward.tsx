@@ -1034,13 +1034,15 @@ function ReportTab({ charities, collections, donations, festival, canEdit }: {
           <Stat label={`${festival?.festival_name ?? "Festival"} (this year)`} value={gbp(festivalYear)} />
         </Card>
 
-        <Card title="Notes (included in PDF)">
+        <Card title="Report summary (shown at start of PDF)">
           <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={10} placeholder="Optional verbal-report notes from the Charity Steward…" />
         </Card>
+      </div>
       </div>
     </div>
   );
 }
+
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Website Feed tab
