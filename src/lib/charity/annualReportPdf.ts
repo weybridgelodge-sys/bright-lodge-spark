@@ -166,16 +166,8 @@ export async function buildCharityAnnualReportPdf(args: {
     ],
   );
 
-  if (stewardNotes?.trim()) {
-    section("Charity Steward's Notes");
-    doc.setFont("times", "italic");
-    doc.setFontSize(10);
-    doc.setTextColor(...INK);
-    const lines = doc.splitTextToSize(stewardNotes.trim(), pageW - margin * 2);
-    if (y + lines.length * 12 > pageH - 60) { doc.addPage(); y = margin; }
-    doc.text(lines, margin, y);
-    y += lines.length * 12 + 8;
-  }
+
+
 
   // Footer
   const pageCount = (doc as any).internal.getNumberOfPages();
