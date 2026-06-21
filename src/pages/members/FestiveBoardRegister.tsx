@@ -290,9 +290,9 @@ export default function FestiveBoardRegister() {
                           No attendees recorded.
                         </p>
                       ) : (
-                        <ul className="text-xs space-y-1">
-                          {rows
-                            .map((r) => {
+                        <div className="text-xs space-y-3">
+                          {(() => {
+                            const enriched = rows.map((r) => {
                               const m = r.member_id
                                 ? members.find((x) => x.id === r.member_id)
                                 : null;
@@ -308,49 +308,59 @@ export default function FestiveBoardRegister() {
                                       : ""
                                   }`;
                               return { r, name, isMember: !!m || isWeybridgeLodge(r.visitor_lodge_name) };
-                            })
-                            .sort((a, b) => a.name.localeCompare(b.name))
-                            .map(({ r, name, isMember }) => (
-                              <li
-                                key={r.id}
-                                className="flex flex-wrap justify-between gap-3 border-b border-gold/5 pb-1"
-                              >
-                                <span className="flex items-center gap-1.5 flex-wrap">
-                                  <span
-                                    className={
-                                      isMember
-                                        ? "text-primary-foreground"
-                                        : "text-primary-foreground/80 italic"
-                                    }
-                                  >
-                                    {name}
-                                  </span>
-                                  {r.is_meeting_only && (
-                                    <span
-                                      className="text-[9px] uppercase tracking-wider text-primary-foreground/70 border border-primary-foreground/30 rounded px-1 py-0.5"
-                                      title="Attending meeting only — not dining"
-                                    >
-                                      Meeting only
-                                    </span>
-                                  )}
-                                  <span className="text-primary-foreground/40 ml-1">
-                                    · {paymentMethodLabel(r.payment_method)}
-                                  </span>
-                                </span>
-                                <span
-                                  className={
-                                    r.attendance_status === "attended"
-                                      ? "text-gold"
-                                      : r.attendance_status === "no_show"
-                                      ? "text-destructive"
-                                      : "text-primary-foreground/60"
-                                  }
-                                >
-                                  {attendanceStatusLabel(r.attendance_status)}
-                                </span>
-                              </li>
-                            ))}
-                        </ul>
+                            });
+                            const membersList = enriched.filter((x) => x.isMember).sort((a, b) => a.name.localeCompare(b.name));
+                            const visitorsList = enriched.filter((x) => !x.isMember).sort((a, b) => a.name.localeCompare(b.name));
+                            return (
+                              <>
+                                <div>
+                                  <h4 className="text-[10px] uppercase tracking-wider text-gold/80 mb-1.5">Members ({membersList.length})</h4>
+                                  <ul className="space-y-1">
+                                    {membersList.map(({ r, name }) => (
+                                      <li key={r.id} className="flex flex-wrap justify-between gap-3 border-b border-gold/5 pb-1">
+                                        <span className="flex items-center gap-1.5 flex-wrap">
+                                          <span className="text-primary-foreground">{name}</span>
+                                          {r.is_meeting_only && (
+                                            <span className="text-[9px] uppercase tracking-wider text-primary-foreground/70 border border-primary-foreground/30 rounded px-1 py-0.5" title="Attending meeting only — not dining">Meeting only</span>
+                                          )}
+                                          {!r.is_meeting_only && (
+                                            <span className="text-primary-foreground/40 ml-1">· {paymentMethodLabel(r.payment_method)}</span>
+                                          )}
+                                        </span>
+                                        <span className={r.attendance_status === "attended" ? "text-gold" : r.attendance_status === "no_show" ? "text-destructive" : "text-primary-foreground/60"}>
+                                          {attendanceStatusLabel(r.attendance_status)}
+                                        </span>
+                                      </li>
+                                    ))}
+                                    {membersList.length === 0 && <li className="text-primary-foreground/50 italic">No members.</li>}
+                                  </ul>
+                                </div>
+                                <div>
+                                  <h4 className="text-[10px] uppercase tracking-wider text-gold/80 mb-1.5">Visitors ({visitorsList.length})</h4>
+                                  <ul className="space-y-1">
+                                    {visitorsList.map(({ r, name }) => (
+                                      <li key={r.id} className="flex flex-wrap justify-between gap-3 border-b border-gold/5 pb-1">
+                                        <span className="flex items-center gap-1.5 flex-wrap">
+                                          <span className="text-primary-foreground/80 italic">{name}</span>
+                                          {r.is_meeting_only && (
+                                            <span className="text-[9px] uppercase tracking-wider text-primary-foreground/70 border border-primary-foreground/30 rounded px-1 py-0.5" title="Attending meeting only — not dining">Meeting only</span>
+                                          )}
+                                          {!r.is_meeting_only && (
+                                            <span className="text-primary-foreground/40 ml-1">· {paymentMethodLabel(r.payment_method)}</span>
+                                          )}
+                                        </span>
+                                        <span className={r.attendance_status === "attended" ? "text-gold" : r.attendance_status === "no_show" ? "text-destructive" : "text-primary-foreground/60"}>
+                                          {attendanceStatusLabel(r.attendance_status)}
+                                        </span>
+                                      </li>
+                                    ))}
+                                    {visitorsList.length === 0 && <li className="text-primary-foreground/50 italic">No visitors.</li>}
+                                  </ul>
+                                </div>
+                              </>
+                            );
+                          })()}
+                        </div>
                       )}
                       {canManageLOI && (
                         <div className="flex gap-2 pt-2">
@@ -1039,23 +1049,29 @@ function MeetingDialog({
                             ))}
                           </SelectContent>
                         </Select>
-                        <Select
-                          value={d.paymentMethod}
-                          onValueChange={(v) =>
-                            setMember(m.id, { paymentMethod: v as FbPaymentMethod })
-                          }
-                        >
-                          <SelectTrigger className="bg-navy border-gold/20 h-8 text-xs text-primary-foreground placeholder:text-primary-foreground/40">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {FB_PAYMENT_METHODS.map((o) => (
-                              <SelectItem key={o.value} value={o.value}>
-                                {o.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        {d.isMeetingOnly ? (
+                          <div className="bg-navy border border-gold/20 h-8 rounded px-3 flex items-center text-xs text-primary-foreground/40">
+                            —
+                          </div>
+                        ) : (
+                          <Select
+                            value={d.paymentMethod}
+                            onValueChange={(v) =>
+                              setMember(m.id, { paymentMethod: v as FbPaymentMethod })
+                            }
+                          >
+                            <SelectTrigger className="bg-navy border-gold/20 h-8 text-xs text-primary-foreground placeholder:text-primary-foreground/40">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {FB_PAYMENT_METHODS.map((o) => (
+                                <SelectItem key={o.value} value={o.value}>
+                                  {o.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        )}
                         <Input
                           type="number"
                           step="0.01"
@@ -1178,23 +1194,29 @@ function MeetingDialog({
                         ))}
                       </SelectContent>
                     </Select>
-                    <Select
-                      value={v.paymentMethod}
-                      onValueChange={(val) =>
-                        setVisitor(v.id, { paymentMethod: val as FbPaymentMethod })
-                      }
-                    >
-                      <SelectTrigger className="bg-navy border-gold/20 h-8 text-xs text-primary-foreground placeholder:text-primary-foreground/40">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {FB_PAYMENT_METHODS.map((o) => (
-                          <SelectItem key={o.value} value={o.value}>
-                            {o.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    {v.isMeetingOnly ? (
+                      <div className="bg-navy border border-gold/20 h-8 rounded px-3 flex items-center text-xs text-primary-foreground/40">
+                        —
+                      </div>
+                    ) : (
+                      <Select
+                        value={v.paymentMethod}
+                        onValueChange={(val) =>
+                          setVisitor(v.id, { paymentMethod: val as FbPaymentMethod })
+                        }
+                      >
+                        <SelectTrigger className="bg-navy border-gold/20 h-8 text-xs text-primary-foreground placeholder:text-primary-foreground/40">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {FB_PAYMENT_METHODS.map((o) => (
+                            <SelectItem key={o.value} value={o.value}>
+                              {o.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
                     <Input
                       type="number"
                       step="0.01"
