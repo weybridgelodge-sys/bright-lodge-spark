@@ -89,8 +89,12 @@ export async function buildCharityAnnualReportPdf(args: {
 
   let y = 130;
 
-  const section = (title: string) => {
-    if (y > pageH - 100) { doc.addPage(); y = margin; }
+  const FOOTER_RESERVE = 60;
+  const ensureSpace = (needed: number) => {
+    if (y + needed > pageH - FOOTER_RESERVE) { doc.addPage(); y = margin; }
+  };
+  const section = (title: string, followingHeight = 80) => {
+    ensureSpace(32 + followingHeight);
     doc.setFillColor(...NAVY);
     doc.rect(margin, y, pageW - margin * 2, 22, "F");
     doc.setTextColor(...GOLD);
@@ -99,15 +103,17 @@ export async function buildCharityAnnualReportPdf(args: {
     doc.text(title, margin + 10, y + 15);
     y += 32;
   };
-  const table = (head: string[][], body: any[][], colStyles?: Record<number, any>) => {
+  const table = (head: string[][], body: any[][], colStyles?: Record<number, any>, keepTogether = true) => {
     autoTable(doc, {
       head, body, startY: y,
-      margin: { left: margin, right: margin },
+      margin: { left: margin, right: margin, bottom: FOOTER_RESERVE },
       styles: { font: "helvetica", fontSize: 9, cellPadding: 5, textColor: INK, lineColor: [220, 215, 200], lineWidth: 0.4, overflow: "linebreak" },
       headStyles: { fillColor: GOLD, textColor: NAVY, fontStyle: "bold" },
       alternateRowStyles: { fillColor: [250, 247, 238] },
       theme: "grid",
       columnStyles: colStyles ?? { 0: { cellWidth: 320 }, 1: { cellWidth: 195, halign: "right" } },
+      rowPageBreak: "avoid",
+      pageBreak: keepTogether ? "avoid" : "auto",
     });
     y = (doc as any).lastAutoTable.finalY + 16;
   };
