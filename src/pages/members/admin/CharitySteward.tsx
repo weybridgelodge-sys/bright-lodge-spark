@@ -726,7 +726,8 @@ function FestivalTab({ donations, charities, festival, canEdit, onChange }: {
   }, [festival]);
 
   const festivalDonations = donations.filter((d) => isFestivalDonation(d, charities, festival)).sort((a, b) => b.donation_date.localeCompare(a.donation_date));
-  const cumulative = festivalDonations.reduce((a, d) => a + Number(d.amount), 0);
+  const donationCombined = (d: Donation) => Number(d.amount) + Number(d.match_funding_amount ?? 0);
+  const cumulative = festivalDonations.reduce((a, d) => a + donationCombined(d), 0);
   const bronzeN = Number(bronzeTarget) || 0;
   const silverN = Number(silverTarget) || 0;
   const goldN = Number(target) || 0;
