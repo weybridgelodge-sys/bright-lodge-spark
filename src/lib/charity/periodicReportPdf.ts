@@ -1,7 +1,7 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import logoAsset from "@/assets/weybridge-logo-white.png.asset.json";
-import { gbp, COLLECTION_TYPE_LABEL, type Collection, type Donation, type Charity, type FestivalSettings, reliefChestBalance, isFestivalDonation, PAYMENT_METHOD_LABEL } from "./queries";
+import { gbp, COLLECTION_TYPE_LABEL, type Collection, type Donation, type Charity, type FestivalSettings, reliefChestBalance, isFestivalDonation } from "./queries";
 
 const NAVY: [number, number, number] = [27, 42, 74];
 const GOLD: [number, number, number] = [201, 164, 50];
@@ -166,7 +166,7 @@ export async function buildCharityPeriodicReportPdf(args: {
   if (periodDon.length) {
     section(`${charityRows.length ? "4" : "3"}. Donation Detail`);
     table(
-      [["Date", "Charity", "Amount", "Match", "Method", "Purpose"]],
+      [["Date", "Charity", "Amount", "Match", "Total", "Purpose"]],
       periodDon
         .slice()
         .sort((a, b) => a.donation_date.localeCompare(b.donation_date))
@@ -175,7 +175,7 @@ export async function buildCharityPeriodicReportPdf(args: {
           charityById.get(d.charity_id)?.name ?? "—",
           gbp(Number(d.amount)),
           Number(d.match_funding_amount ?? 0) > 0 ? gbp(Number(d.match_funding_amount)) : "—",
-          PAYMENT_METHOD_LABEL[d.payment_method] ?? d.payment_method,
+          gbp(Number(d.amount) + Number(d.match_funding_amount ?? 0)),
           d.purpose ?? "—",
         ]),
       {
@@ -183,8 +183,8 @@ export async function buildCharityPeriodicReportPdf(args: {
         1: { cellWidth: 110 },
         2: { cellWidth: 60, halign: "right" },
         3: { cellWidth: 60, halign: "right" },
-        4: { cellWidth: 60 },
-        5: { cellWidth: 155 },
+        4: { cellWidth: 70, halign: "right" },
+        5: { cellWidth: 135 },
       },
       false,
     );
