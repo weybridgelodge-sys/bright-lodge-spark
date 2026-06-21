@@ -367,6 +367,8 @@ function DonationDialog({ open, onOpenChange, editing, charities, onSaved }: {
   const [date, setDate] = useState("");
   const [charityId, setCharityId] = useState("");
   const [amount, setAmount] = useState("0");
+  const [hasMatch, setHasMatch] = useState(false);
+  const [matchAmount, setMatchAmount] = useState("0");
   const [purpose, setPurpose] = useState("");
   const [method, setMethod] = useState<PaymentMethod>("bacs");
   const [reference, setReference] = useState("");
@@ -380,12 +382,15 @@ function DonationDialog({ open, onOpenChange, editing, charities, onSaved }: {
     if (!open) return;
     if (editing) {
       setDate(editing.donation_date); setCharityId(editing.charity_id); setAmount(String(editing.amount));
+      const m = Number(editing.match_funding_amount ?? 0);
+      setHasMatch(m > 0); setMatchAmount(String(m));
       setPurpose(editing.purpose ?? ""); setMethod(editing.payment_method); setReference(editing.payment_reference ?? "");
       setAuthBy(editing.authorised_by); setConfirmed(editing.confirmation_received);
       setIsFestival(editing.is_festival_contribution); setFromChest(editing.from_relief_chest);
     } else {
       setDate(new Date().toISOString().slice(0, 10));
-      setCharityId(charities[0]?.id ?? ""); setAmount("0"); setPurpose(""); setMethod("bacs");
+      setCharityId(charities[0]?.id ?? ""); setAmount("0"); setHasMatch(false); setMatchAmount("0");
+      setPurpose(""); setMethod("bacs");
       setReference(""); setAuthBy("wm"); setConfirmed(false); setIsFestival(false); setFromChest(false);
     }
   }, [open, editing, charities]);
@@ -397,6 +402,7 @@ function DonationDialog({ open, onOpenChange, editing, charities, onSaved }: {
       donation_date: date,
       charity_id: charityId,
       amount: Number(amount) || 0,
+      match_funding_amount: hasMatch ? (Number(matchAmount) || 0) : 0,
       purpose: purpose || null,
       payment_method: method,
       payment_reference: reference || null,
@@ -430,6 +436,19 @@ function DonationDialog({ open, onOpenChange, editing, charities, onSaved }: {
             <div><Label>Date</Label><Input type="date" value={date} onChange={(e) => setDate(e.target.value)} /></div>
             <div><Label>Amount (£)</Label><Input type="number" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} /></div>
           </div>
+          <div className="space-y-2 rounded-sm border border-gold/15 bg-navy-light/30 p-3">
+            <label className="flex items-center gap-2 text-sm">
+              <Checkbox checked={hasMatch} onCheckedChange={(v) => setHasMatch(!!v)} /> Match funding applicable
+            </label>
+            {hasMatch && (
+              <div>
+                <Label>Match funding received (£)</Label>
+                <Input type="number" step="0.01" value={matchAmount} onChange={(e) => setMatchAmount(e.target.value)} />
+                <p className="text-xs text-primary-foreground/60 mt-1">Total donation to charity: <span className="text-gold tabular-nums">{gbp((Number(amount) || 0) + (Number(matchAmount) || 0))}</span></p>
+              </div>
+            )}
+          </div>
+
           <div>
             <Label>Charity</Label>
             <Select value={charityId} onValueChange={setCharityId}>
