@@ -248,19 +248,39 @@ function DonationsTab({ donations, charities, festival, canEdit, onChange }: {
   const [editing, setEditing] = useState<Donation | null>(null);
   const year = currentMasonicYear();
   const ytd = donations.filter((d) => inYear(d.donation_date, year));
-  const ytdTotal = ytd.reduce((a, d) => a + Number(d.amount), 0);
-  const grandTotal = donations.reduce((a, d) => a + Number(d.amount), 0);
+  const sumLodge = (xs: Donation[]) => xs.reduce((a, d) => a + Number(d.amount), 0);
+  const sumMatch = (xs: Donation[]) => xs.reduce((a, d) => a + Number(d.match_funding_amount ?? 0), 0);
+  const ytdLodge = sumLodge(ytd);
+  const ytdMatch = sumMatch(ytd);
+  const ytdTotal = ytdLodge + ytdMatch;
+  const grandLodge = sumLodge(donations);
+  const grandMatch = sumMatch(donations);
+  const grandTotal = grandLodge + grandMatch;
   const reliefOut = ytd.filter((d) => d.from_relief_chest).reduce((a, d) => a + Number(d.amount), 0);
+
 
   const charityById = new Map(charities.map((c) => [c.id, c]));
 
   return (
     <div className="space-y-4">
       <div className="grid md:grid-cols-3 gap-4">
-        <Card title="Year to date"><Stat label="Total donated" value={<span className="text-gold">{gbp(ytdTotal)}</span>} /></Card>
-        <Card title="All time"><Stat label="Grand total" value={<span className="text-gold">{gbp(grandTotal)}</span>} /></Card>
+        <Card title="Year to date">
+          <div className="space-y-1 text-sm">
+            <div className="flex justify-between"><span className="text-primary-foreground/60">Lodge donations</span><span className="tabular-nums">{gbp(ytdLodge)}</span></div>
+            <div className="flex justify-between"><span className="text-primary-foreground/60">Match funded</span><span className="tabular-nums">{gbp(ytdMatch)}</span></div>
+            <div className="flex justify-between border-t border-gold/15 pt-1 mt-1"><span className="text-gold">Total</span><span className="tabular-nums text-gold">{gbp(ytdTotal)}</span></div>
+          </div>
+        </Card>
+        <Card title="All time">
+          <div className="space-y-1 text-sm">
+            <div className="flex justify-between"><span className="text-primary-foreground/60">Lodge donations</span><span className="tabular-nums">{gbp(grandLodge)}</span></div>
+            <div className="flex justify-between"><span className="text-primary-foreground/60">Match funded</span><span className="tabular-nums">{gbp(grandMatch)}</span></div>
+            <div className="flex justify-between border-t border-gold/15 pt-1 mt-1"><span className="text-gold">Grand total</span><span className="tabular-nums text-gold">{gbp(grandTotal)}</span></div>
+          </div>
+        </Card>
         <Card title="Relief Chest disbursements (year)"><Stat label="Drawn from chest" value={gbp(reliefOut)} /></Card>
       </div>
+
 
       <div className="rounded-sm border border-gold/20 bg-navy-light/30">
         <div className="flex items-center justify-between px-4 py-3 border-b border-gold/15">
@@ -280,7 +300,9 @@ function DonationsTab({ donations, charities, festival, canEdit, onChange }: {
               <tr className="text-left text-xs uppercase tracking-wider text-primary-foreground/60 border-b border-gold/15">
                 <th className="px-4 py-2">Date</th>
                 <th className="px-4 py-2">Charity</th>
-                <th className="px-4 py-2 text-right">Amount</th>
+                <th className="px-4 py-2 text-right">Lodge donation</th>
+                <th className="px-4 py-2 text-right">Match funded</th>
+                <th className="px-4 py-2 text-right">Total donation</th>
                 <th className="px-4 py-2">Purpose</th>
                 <th className="px-4 py-2">Method</th>
                 <th className="px-4 py-2">Flags</th>
@@ -289,17 +311,23 @@ function DonationsTab({ donations, charities, festival, canEdit, onChange }: {
             </thead>
             <tbody>
               {donations.length === 0 && (
-                <tr><td colSpan={canEdit ? 7 : 6} className="px-4 py-6 text-center text-primary-foreground/50">No donations recorded.</td></tr>
+                <tr><td colSpan={canEdit ? 9 : 8} className="px-4 py-6 text-center text-primary-foreground/50">No donations recorded.</td></tr>
               )}
-              {donations.map((d) => (
+              {donations.map((d) => {
+                const lodge = Number(d.amount);
+                const match = Number(d.match_funding_amount ?? 0);
+                return (
                 <tr key={d.id} className="border-b border-gold/10 hover:bg-navy-light/30">
                   <td className="px-4 py-2 tabular-nums">{new Date(d.donation_date).toLocaleDateString("en-GB")}</td>
                   <td className="px-4 py-2">{charityById.get(d.charity_id)?.name ?? "—"}</td>
-                  <td className="px-4 py-2 text-right tabular-nums text-gold">{gbp(Number(d.amount))}</td>
+                  <td className="px-4 py-2 text-right tabular-nums">{gbp(lodge)}</td>
+                  <td className="px-4 py-2 text-right tabular-nums text-primary-foreground/70">{match > 0 ? gbp(match) : "—"}</td>
+                  <td className="px-4 py-2 text-right tabular-nums text-gold">{gbp(lodge + match)}</td>
                   <td className="px-4 py-2 text-xs text-primary-foreground/70 max-w-[200px] truncate" title={d.purpose ?? ""}>{d.purpose}</td>
                   <td className="px-4 py-2">{PAYMENT_METHOD_LABEL[d.payment_method]}</td>
                   <td className="px-4 py-2 space-x-1">
                     {isFestivalDonation(d, charities, festival) && <Badge variant="outline" className="border-gold/40 text-gold text-[10px]">Festival</Badge>}
+                    {match > 0 && <Badge variant="outline" className="border-emerald-400/40 text-emerald-300 text-[10px]">Match</Badge>}
                     {d.from_relief_chest && <Badge variant="outline" className="border-blue-400/40 text-blue-300 text-[10px]">Relief Chest</Badge>}
                     {d.confirmation_received && <Badge variant="outline" className="border-emerald-400/40 text-emerald-300 text-[10px]">✓</Badge>}
                   </td>
@@ -311,7 +339,18 @@ function DonationsTab({ donations, charities, festival, canEdit, onChange }: {
                     </td>
                   )}
                 </tr>
-              ))}
+                );
+              })}
+              {donations.length > 0 && (
+                <tr className="border-t-2 border-gold/30 bg-navy-light/40 font-semibold">
+                  <td className="px-4 py-2" colSpan={2}>Totals</td>
+                  <td className="px-4 py-2 text-right tabular-nums">{gbp(grandLodge)}</td>
+                  <td className="px-4 py-2 text-right tabular-nums">{gbp(grandMatch)}</td>
+                  <td className="px-4 py-2 text-right tabular-nums text-gold">{gbp(grandTotal)}</td>
+                  <td colSpan={canEdit ? 4 : 3}></td>
+                </tr>
+              )}
+
             </tbody>
           </table>
         </div>
@@ -328,6 +367,8 @@ function DonationDialog({ open, onOpenChange, editing, charities, onSaved }: {
   const [date, setDate] = useState("");
   const [charityId, setCharityId] = useState("");
   const [amount, setAmount] = useState("0");
+  const [hasMatch, setHasMatch] = useState(false);
+  const [matchAmount, setMatchAmount] = useState("0");
   const [purpose, setPurpose] = useState("");
   const [method, setMethod] = useState<PaymentMethod>("bacs");
   const [reference, setReference] = useState("");
@@ -341,12 +382,15 @@ function DonationDialog({ open, onOpenChange, editing, charities, onSaved }: {
     if (!open) return;
     if (editing) {
       setDate(editing.donation_date); setCharityId(editing.charity_id); setAmount(String(editing.amount));
+      const m = Number(editing.match_funding_amount ?? 0);
+      setHasMatch(m > 0); setMatchAmount(String(m));
       setPurpose(editing.purpose ?? ""); setMethod(editing.payment_method); setReference(editing.payment_reference ?? "");
       setAuthBy(editing.authorised_by); setConfirmed(editing.confirmation_received);
       setIsFestival(editing.is_festival_contribution); setFromChest(editing.from_relief_chest);
     } else {
       setDate(new Date().toISOString().slice(0, 10));
-      setCharityId(charities[0]?.id ?? ""); setAmount("0"); setPurpose(""); setMethod("bacs");
+      setCharityId(charities[0]?.id ?? ""); setAmount("0"); setHasMatch(false); setMatchAmount("0");
+      setPurpose(""); setMethod("bacs");
       setReference(""); setAuthBy("wm"); setConfirmed(false); setIsFestival(false); setFromChest(false);
     }
   }, [open, editing, charities]);
@@ -358,6 +402,7 @@ function DonationDialog({ open, onOpenChange, editing, charities, onSaved }: {
       donation_date: date,
       charity_id: charityId,
       amount: Number(amount) || 0,
+      match_funding_amount: hasMatch ? (Number(matchAmount) || 0) : 0,
       purpose: purpose || null,
       payment_method: method,
       payment_reference: reference || null,
@@ -391,6 +436,19 @@ function DonationDialog({ open, onOpenChange, editing, charities, onSaved }: {
             <div><Label>Date</Label><Input type="date" value={date} onChange={(e) => setDate(e.target.value)} /></div>
             <div><Label>Amount (£)</Label><Input type="number" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} /></div>
           </div>
+          <div className="space-y-2 rounded-sm border border-gold/15 bg-navy-light/30 p-3">
+            <label className="flex items-center gap-2 text-sm">
+              <Checkbox checked={hasMatch} onCheckedChange={(v) => setHasMatch(!!v)} /> Match funding applicable
+            </label>
+            {hasMatch && (
+              <div>
+                <Label>Match funding received (£)</Label>
+                <Input type="number" step="0.01" value={matchAmount} onChange={(e) => setMatchAmount(e.target.value)} />
+                <p className="text-xs text-primary-foreground/60 mt-1">Total donation to charity: <span className="text-gold tabular-nums">{gbp((Number(amount) || 0) + (Number(matchAmount) || 0))}</span></p>
+              </div>
+            )}
+          </div>
+
           <div>
             <Label>Charity</Label>
             <Select value={charityId} onValueChange={setCharityId}>

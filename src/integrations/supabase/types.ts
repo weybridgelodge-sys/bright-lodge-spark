@@ -293,6 +293,7 @@ export type Database = {
           from_relief_chest: boolean
           id: string
           is_festival_contribution: boolean
+          match_funding_amount: number
           payment_method: Database["public"]["Enums"]["charity_payment_method"]
           payment_reference: string | null
           purpose: string | null
@@ -309,6 +310,7 @@ export type Database = {
           from_relief_chest?: boolean
           id?: string
           is_festival_contribution?: boolean
+          match_funding_amount?: number
           payment_method: Database["public"]["Enums"]["charity_payment_method"]
           payment_reference?: string | null
           purpose?: string | null
@@ -325,6 +327,7 @@ export type Database = {
           from_relief_chest?: boolean
           id?: string
           is_festival_contribution?: boolean
+          match_funding_amount?: number
           payment_method?: Database["public"]["Enums"]["charity_payment_method"]
           payment_reference?: string | null
           purpose?: string | null
