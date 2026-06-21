@@ -153,7 +153,8 @@ export async function buildCharityPeriodicReportPdf(args: {
 
   if (charityRows.length) {
     section("3. Breakdown by Recipient Charity");
-    table([["Charity", "Total"]], charityRows.map((r) => [r.name, gbp(r.total)]));
+    table([["Charity", "Total"]], charityRows.map((r) => [r.name, gbp(r.total)]),
+      { 0: { cellWidth: 380 }, 1: { cellWidth: 135, halign: "right" } });
   }
 
   if (periodDon.length) {
@@ -171,6 +172,14 @@ export async function buildCharityPeriodicReportPdf(args: {
           PAYMENT_METHOD_LABEL[d.payment_method] ?? d.payment_method,
           d.purpose ?? "—",
         ]),
+      {
+        0: { cellWidth: 70 },
+        1: { cellWidth: 110 },
+        2: { cellWidth: 60, halign: "right" },
+        3: { cellWidth: 60, halign: "right" },
+        4: { cellWidth: 60 },
+        5: { cellWidth: 155 },
+      },
     );
   }
 
