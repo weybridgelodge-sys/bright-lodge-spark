@@ -54,7 +54,7 @@ export default function OurCharitiesLiveFeed() {
   const barPct = Math.min(100, rawPct);
   const targetReached = festival ? festivalCumulative >= festival.target_amount && festival.target_amount > 0 : false;
   const excess = festival && targetReached ? festivalCumulative - festival.target_amount : 0;
-  const award = festival ? highestAwardAchieved(festivalCumulative, festival.target_amount, festival.platinum_target_amount) : null;
+  const award = festival ? highestAwardAchieved(festivalCumulative, festival.target_amount, null) : null;
 
   return (
     <section className="py-12 md:py-16 bg-navy-gradient border-y border-gold/15">
