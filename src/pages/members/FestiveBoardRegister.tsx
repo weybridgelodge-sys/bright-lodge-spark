@@ -1223,13 +1223,26 @@ function MeetingDialog({
             )}
           </div>
 
-          <div className="text-xs text-primary-foreground/60 border-t border-gold/10 pt-3">
-            Computed headcount:{" "}
-            <span className="text-gold font-semibold">{computedAttended.total}</span>{" "}
-            ({computedAttended.members} members, {computedAttended.visitors} visitors).{" "}
-            {override.trim() !== "" && (
-              <span className="text-gold">Override active: {override}.</span>
-            )}
+          <div className="text-xs text-primary-foreground/60 border-t border-gold/10 pt-3 space-y-1">
+            <div>
+              Attendance headcount:{" "}
+              <span className="text-gold font-semibold">{computedAttended.total}</span>{" "}
+              ({computedAttended.members} members, {computedAttended.visitors} visitors).{" "}
+              {override.trim() !== "" && (
+                <span className="text-gold">Override active: {override}.</span>
+              )}
+            </div>
+            <div>
+              Dining covers:{" "}
+              <span className="text-gold font-semibold">{computedAttended.diningTotal}</span>{" "}
+              ({computedAttended.diningMembers} members, {computedAttended.diningVisitors} visitors)
+              {computedAttended.meetingOnly > 0 && (
+                <span className="text-primary-foreground/60">
+                  {" "}— {computedAttended.meetingOnly} meeting-only excluded
+                </span>
+              )}
+              .
+            </div>
           </div>
         </div>
 
