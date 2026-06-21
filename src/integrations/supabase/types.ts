@@ -538,13 +538,6 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "festive_board_attendance_source_booking_id_fkey"
-            columns: ["source_booking_id"]
-            isOneToOne: false
-            referencedRelation: "bookings"
-            referencedColumns: ["id"]
-          },
         ]
       }
       festive_board_meetings: {
