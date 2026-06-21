@@ -1013,10 +1013,10 @@ function PeriodicReportsSection({ charities, collections, donations, festival, c
       ({ error } = await supabase.from("charity_periodic_reports").insert(base));
     }
     setBusy(false);
-    if (error) { toast({ title: "Save failed", description: error.message, variant: "destructive" }); return; }
+    if (error) { console.error("[periodic-reports] save failed", error, base); toast({ title: "Save failed", description: error.message, variant: "destructive" }); return; }
     toast({ title: finalise ? "Finalised" : (editing ? "Updated" : "Saved") });
     resetForm();
-    load();
+    await load();
   };
 
   const remove = async (r: PeriodicReportRow) => {
