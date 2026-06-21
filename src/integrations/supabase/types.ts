@@ -467,6 +467,7 @@ export type Database = {
           created_by: string | null
           email: string | null
           id: string
+          is_meeting_only: boolean
           meeting_id: string
           member_id: string | null
           notes: string | null
@@ -486,6 +487,7 @@ export type Database = {
           created_by?: string | null
           email?: string | null
           id?: string
+          is_meeting_only?: boolean
           meeting_id: string
           member_id?: string | null
           notes?: string | null
@@ -505,6 +507,7 @@ export type Database = {
           created_by?: string | null
           email?: string | null
           id?: string
+          is_meeting_only?: boolean
           meeting_id?: string
           member_id?: string | null
           notes?: string | null
