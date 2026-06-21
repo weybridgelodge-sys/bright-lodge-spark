@@ -504,6 +504,7 @@ function MeetingDialog({
         status: (row?.attendance_status as FbAttendanceStatus) ?? "booked",
         paymentMethod: (row?.payment_method as FbPaymentMethod) ?? "unknown",
         amountPounds: row ? (row.amount_pence / 100).toFixed(2) : "",
+        isMeetingOnly: !!row?.is_meeting_only,
         synced: row?.source === "booking",
         sourceBookingId: row?.source_booking_id ?? null,
       };
@@ -524,6 +525,7 @@ function MeetingDialog({
         status: a.attendance_status as FbAttendanceStatus,
         paymentMethod: a.payment_method as FbPaymentMethod,
         amountPounds: (a.amount_pence / 100).toFixed(2),
+        isMeetingOnly: !!a.is_meeting_only,
         synced: a.source === "booking",
         sourceBookingId: a.source_booking_id ?? null,
       }))
@@ -568,6 +570,7 @@ function MeetingDialog({
         const opt = String(d.meetingOption ?? "");
         if (opt === "apologies" || b.payment_status === "apologies") continue;
         const amount = opt === "meeting-and-festive-board" ? (diningPence / 100).toFixed(2) : "0.00";
+        const meetingOnly = opt === "meeting-only";
 
         // Respondent
         const respLodge = String(d.lodge ?? "");
@@ -588,6 +591,7 @@ function MeetingDialog({
                 status: "booked",
                 paymentMethod: "unknown",
                 amountPounds: amount,
+                isMeetingOnly: meetingOnly,
                 synced: true,
                 sourceBookingId: b.id,
               },
@@ -643,6 +647,7 @@ function MeetingDialog({
                   status: "booked",
                   paymentMethod: "unknown",
                   amountPounds: amount,
+                  isMeetingOnly: meetingOnly,
                   synced: true,
                   sourceBookingId: b.id,
                 },
@@ -659,6 +664,7 @@ function MeetingDialog({
             status: "booked",
             paymentMethod: "unknown",
             amountPounds: amount,
+            isMeetingOnly: meetingOnly,
             synced: true,
             sourceBookingId: b.id,
           });
@@ -703,6 +709,7 @@ function MeetingDialog({
         status: "attended",
         paymentMethod: "unknown",
         amountPounds: "",
+        isMeetingOnly: false,
       },
     ]);
 
