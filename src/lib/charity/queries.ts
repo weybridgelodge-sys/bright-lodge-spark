@@ -53,6 +53,7 @@ export type Donation = {
   donation_date: string;
   charity_id: string;
   amount: number;
+  match_funding_amount: number;
   purpose: string | null;
   payment_method: PaymentMethod;
   payment_reference: string | null;
@@ -61,6 +62,7 @@ export type Donation = {
   is_festival_contribution: boolean;
   from_relief_chest: boolean;
 };
+
 
 export type FestivalSettings = {
   id: string;
