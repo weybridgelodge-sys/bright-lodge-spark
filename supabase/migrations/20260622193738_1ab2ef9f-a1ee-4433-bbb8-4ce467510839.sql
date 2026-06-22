@@ -1,0 +1,1 @@
+ALTER VIEW public.public_charity_totals SET (security_invoker = false);
