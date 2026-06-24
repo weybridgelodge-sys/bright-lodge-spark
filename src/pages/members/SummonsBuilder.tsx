@@ -494,11 +494,15 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
 
   const addPreset = () => {
     if (!presetIndex) return;
-    const label = AGENDA_PRESETS[parseInt(presetIndex, 10)];
+    const preset = AGENDA_PRESETS[parseInt(presetIndex, 10)];
     // Insert before the "Receive reports" standing item (index of that label) so variable business sits in the gap.
     const insertAt = summons.agenda.findIndex((x) => /Receive reports/i.test(x.label));
     const a = [...summons.agenda];
-    a.splice(insertAt === -1 ? Math.max(a.length - 1, 0) : insertAt, 0, newAgendaItem(label));
+    const item = newAgendaItem(preset.label);
+    if (preset.children?.length) {
+      item.children = preset.children.map((c) => newAgendaItem(c));
+    }
+    a.splice(insertAt === -1 ? Math.max(a.length - 1, 0) : insertAt, 0, item);
     setSummons({ ...summons, agenda: a });
     setPresetIndex("");
   };
