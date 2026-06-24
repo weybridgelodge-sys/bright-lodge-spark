@@ -348,7 +348,7 @@ const LadiesFestival = () => {
               <div className="h-0.5 w-16 bg-gold mx-auto mb-6" />
               <h2 className="text-3xl md:text-4xl font-serif text-foreground">An Evening to Remember</h2>
               <p className="text-muted-foreground font-sans mt-3 max-w-xl mx-auto">
-                The Worshipful Masters of Weybridge and Astolat Lodges warmly invite you to a spectacular evening in aid of <span className="text-gold-dark font-semibold">"Guildford Young Carers"</span>.
+                The Worshipful Masters of Weybridge and Astolat Lodges warmly invite you to a spectacular evening in aid of <span className="text-gold-dark font-semibold">"Action for Carers Surrey"</span>.
               </p>
               <p className="text-muted-foreground font-sans mt-3 max-w-xl mx-auto">
                 Join us for an unforgettable black‑tie celebration with friends, family and fellow Freemasons — an evening of fine dining, dancing and entertainment you won't want to miss.
