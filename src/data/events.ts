@@ -71,7 +71,7 @@ const fixedEvents: LodgeEvent[] = [
     venue: "Macdonald Frimley Hall Hotel",
     type: "social",
     description:
-      "Black Tie evening in aid of Guildford Young Carers featuring three-course dinner, DJ, Grand Raffle, and more.",
+      "Black Tie evening in aid of Action for Carers Surrey featuring three-course dinner, DJ, Grand Raffle, and more.",
     highlight: true,
     link: "/ladies-festival",
   },
