@@ -629,9 +629,10 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
         pdf_storage_path: path,
         status: action === "email" ? "sent" : "finalised",
       };
-      let resultId = currentId;
-      if (currentId) {
-        const { error } = await supabase.from("summonses").update(payload).eq("id", currentId);
+      const targetId = currentId ?? editingId;
+      let resultId = targetId;
+      if (targetId) {
+        const { error } = await supabase.from("summonses").update(payload).eq("id", targetId);
         if (error) throw error;
       } else {
         const { data: ins, error } = await supabase.from("summonses").insert(payload).select("id").single();
@@ -639,7 +640,7 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
         resultId = ins.id;
         setCurrentId(ins.id);
       }
-      toast.success(`Summons #${summons.meeting_number} ${currentId ? "updated" : "saved"}`);
+      toast.success(`Summons #${summons.meeting_number} ${targetId ? "updated" : "saved"}`);
       return resultId;
     } catch (e: any) {
       toast.error(e.message ?? "Failed to generate PDF");
