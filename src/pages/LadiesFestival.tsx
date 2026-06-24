@@ -375,7 +375,7 @@ const LadiesFestival = () => {
                 { icon: Dice5, title: "Fun Casino", desc: "Try your luck at Roulette or Blackjack with our professional croupiers — it's Vegas, but posher" },
                 { icon: Camera, title: "Photo Memories", desc: "Capture the magic of the evening with our professional photographer — stunning portrait photos to treasure forever" },
                 { icon: Gift, title: "Gift for Each Lady", desc: "As a special thank you for joining us, every lady will receive a beautiful keepsake gift to remember the evening" },
-                { icon: Heart, title: "Charity Grand Raffle & More", desc: "Fantastic prizes in aid of Guildford Young Carers" },
+                { icon: Heart, title: "Charity Grand Raffle & More", desc: "Fantastic prizes in aid of Action for Carers Surrey" },
               ].map((item, i) => (
                 <motion.div
                   key={item.title}
