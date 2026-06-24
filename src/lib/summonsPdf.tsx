@@ -650,9 +650,18 @@ const AgendaPanel: React.FC<{
       ))
     )}
 
-    {Array.from({ length: 7 }).map((_, i) => (
-      <Text key={`agenda-spacer-${i}`} style={{ fontSize: 9, lineHeight: 1.3 }}> </Text>
-    ))}
+    {(() => {
+      const agendaLineCount = summons.agenda.reduce(
+        (acc, it) => acc + 1 + (it.children?.length ?? 0),
+        0,
+      );
+      // Reduce trailing spacers when the agenda is long, so the dining
+      // section doesn't overflow the panel.
+      const spacerCount = agendaLineCount >= 15 ? 3 : agendaLineCount >= 12 ? 5 : 7;
+      return Array.from({ length: spacerCount }).map((_, i) => (
+        <Text key={`agenda-spacer-${i}`} style={{ fontSize: 9, lineHeight: 1.3 }}> </Text>
+      ));
+    })()}
 
     {summons.candidates.length > 0 && (
       <View style={{ marginTop: 6 }}>
