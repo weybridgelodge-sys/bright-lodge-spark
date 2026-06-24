@@ -52,17 +52,32 @@ export const STANDING_AGENDA: AgendaItem[] = [
 export const defaultAgenda = (): AgendaItem[] =>
   STANDING_AGENDA.map((s) => ({ ...s, id: uid() }));
 
-export const AGENDA_PRESETS: string[] = [
-  "Confirm Minutes of [date]",
-  "Ballot for and Initiate [name]",
-  "Pass to the Second Degree",
-  "Raise to the Third Degree",
-  "Declare nominations for Worshipful Master",
-  "Declare nominations for Treasurer",
-  "Declare nominations for Tyler",
-  "Elect Auditors",
-  "Read correspondence",
-  "Present Grand Lodge / Provincial certificates",
+export type AgendaPreset = { label: string; children?: string[] };
+
+export const AGENDA_PRESETS: AgendaPreset[] = [
+  { label: "Confirm Minutes of [date]" },
+  { label: "Ballot for and Initiate [name]" },
+  { label: "Pass to the Second Degree" },
+  { label: "Raise to the Third Degree" },
+  { label: "Declare nominations for Worshipful Master" },
+  { label: "Declare nominations for Treasurer" },
+  { label: "Declare nominations for Tyler" },
+  { label: "To install [name] as Master" },
+  { label: "To appoint and invest Officers for the ensuing year" },
+  { label: "To elect two Brethren to the Lodge Committee for the ensuing year" },
+  { label: "To elect two Brethren to the audit committee for the ensuing year" },
+  {
+    label: "To elect Lodge Representatives for the ensuing year",
+    children: [
+      "Surrey Sports Hall Representative",
+      "Surrey Masonic Halls Fund",
+      "Provincial Petitions Committee",
+      "Royal Arch Representative",
+    ],
+  },
+  { label: "To receive the auditors' report on the Lodge Accounts and Charity Accounts" },
+  { label: "To report the proceedings of Grand Lodge" },
+  { label: "Present Grand Lodge / Provincial certificates" },
 ];
 
 export const newAgendaItem = (label: string, kind: AgendaKind = "variable"): AgendaItem => ({
