@@ -75,7 +75,7 @@ const ladiesFestivalSchema = {
   startDate: "2026-08-22T18:30:00+01:00",
   endDate: "2026-08-23T01:00:00+01:00",
   description:
-    "Black tie charity gala dinner in aid of Guildford Young Carers. Three-course dinner, DJ, Grand Raffle and more at the Macdonald Frimley Hall Hotel.",
+    "Black tie charity gala dinner in aid of Action for Carers Surrey. Three-course dinner, DJ, Grand Raffle and more at the Macdonald Frimley Hall Hotel.",
   image: "https://www.weybridgelodge.org.uk/og-image.png",
   eventStatus: "https://schema.org/EventScheduled",
   eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
@@ -256,7 +256,7 @@ const LadiesFestival = () => {
     <div className="min-h-screen">
       <SEO
         title="Ladies Festival 2026"
-        description="Join Weybridge & Astolat Lodges for a black tie charity gala on 22 August 2026 at Macdonald Frimley Hall Hotel. Three-course dinner, DJ, raffle — in aid of Guildford Young Carers. Tickets £75."
+        description="Join Weybridge & Astolat Lodges for a black tie charity gala on 22 August 2026 at Macdonald Frimley Hall Hotel. Three-course dinner, DJ, raffle — in aid of Action for Carers Surrey. Tickets £75."
         canonical="/ladies-festival"
         schema={[
           breadcrumbSchema([
@@ -348,7 +348,7 @@ const LadiesFestival = () => {
               <div className="h-0.5 w-16 bg-gold mx-auto mb-6" />
               <h2 className="text-3xl md:text-4xl font-serif text-foreground">An Evening to Remember</h2>
               <p className="text-muted-foreground font-sans mt-3 max-w-xl mx-auto">
-                The Worshipful Masters of Weybridge and Astolat Lodges warmly invite you to a spectacular evening in aid of <span className="text-gold-dark font-semibold">"Guildford Young Carers"</span>.
+                The Worshipful Masters of Weybridge and Astolat Lodges warmly invite you to a spectacular evening in aid of <span className="text-gold-dark font-semibold">"Action for Carers Surrey"</span>.
               </p>
               <p className="text-muted-foreground font-sans mt-3 max-w-xl mx-auto">
                 Join us for an unforgettable black‑tie celebration with friends, family and fellow Freemasons — an evening of fine dining, dancing and entertainment you won't want to miss.
@@ -375,7 +375,7 @@ const LadiesFestival = () => {
                 { icon: Dice5, title: "Fun Casino", desc: "Try your luck at Roulette or Blackjack with our professional croupiers — it's Vegas, but posher" },
                 { icon: Camera, title: "Photo Memories", desc: "Capture the magic of the evening with our professional photographer — stunning portrait photos to treasure forever" },
                 { icon: Gift, title: "Gift for Each Lady", desc: "As a special thank you for joining us, every lady will receive a beautiful keepsake gift to remember the evening" },
-                { icon: Heart, title: "Charity Grand Raffle & More", desc: "Fantastic prizes in aid of Guildford Young Carers" },
+                { icon: Heart, title: "Charity Grand Raffle & More", desc: "Fantastic prizes in aid of Action for Carers Surrey" },
               ].map((item, i) => (
                 <motion.div
                   key={item.title}
@@ -547,28 +547,26 @@ const LadiesFestival = () => {
             <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }}>
               <div className="text-center mb-10">
                 <div className="h-0.5 w-16 bg-gold mx-auto mb-6" />
-                <h2 className="text-3xl md:text-4xl font-serif text-foreground">In Aid of Guildford Young Carers</h2>
+                <h2 className="text-3xl md:text-4xl font-serif text-foreground">In Aid of Action for Carers Surrey</h2>
               </div>
 
               <div className="bg-warm-white border border-border rounded-sm p-8 md:p-10 shadow-sm">
                 <div className="flex items-center gap-3 mb-6">
                   <Heart className="w-6 h-6 text-gold-dark" aria-hidden="true" />
-                  <h3 className="font-serif text-foreground text-xl">Making a Difference Locally</h3>
+                  <h3 className="font-serif text-foreground text-xl">Supporting Surrey's Unpaid Carers</h3>
                 </div>
                 <p className="text-muted-foreground font-sans leading-relaxed mb-4">
-                  The Guildford Young Carers Fund is a dedicated initiative supporting young carers aged 5–18 in the Borough of Guildford.
-                  These young people take on significant caring responsibilities for family members and the fund provides grants to support
-                  their educational, emotional, and social needs — helping them thrive despite the challenges they face.
+                  Action for Carers Surrey is the county's leading charity supporting unpaid carers of all ages — from young carers as young as five through to adults caring for family members, friends or neighbours.
+                  Their services provide vital information, advice, advocacy and respite, helping carers across Surrey maintain their own health, wellbeing and independence.
                 </p>
                 <p className="text-muted-foreground font-sans leading-relaxed mb-4">
-                  By attending the Ladies Festival, you'll be directly contributing to improving the lives of these remarkable young people
-                  in our local community. Every ticket, raffle entry, and donation on the night goes towards this vital cause.
+                  By attending the Ladies Festival, you'll be directly contributing to the work of this remarkable charity, supporting carers right here in our local community. Every ticket, raffle entry, and donation on the night goes towards this vital cause.
                 </p>
 
                 <div className="grid sm:grid-cols-3 gap-4 my-8">
                   {[
-                    { stat: "5–18", label: "Age range supported" },
-                    { stat: "100%", label: "Funds stay local" },
+                    { stat: "All ages", label: "Carers supported" },
+                    { stat: "100%", label: "Funds stay in Surrey" },
                     { stat: "£75", label: "Your ticket helps" },
                   ].map((item) => (
                     <div key={item.label} className="text-center p-4 bg-muted/30 border border-border rounded-sm">
@@ -579,12 +577,12 @@ const LadiesFestival = () => {
                 </div>
 
                 <a
-                  href="https://www.cfsurrey.org.uk/fund/guildfordyoungcarers"
+                  href="https://www.actionforcarers.org.uk/"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 text-sm font-sans font-medium text-gold-dark hover:opacity-80 transition-opacity"
                 >
-                  Learn more about Guildford Young Carers <ExternalLink className="w-4 h-4" />
+                  Learn more about Action for Carers Surrey <ExternalLink className="w-4 h-4" />
                 </a>
               </div>
             </motion.div>

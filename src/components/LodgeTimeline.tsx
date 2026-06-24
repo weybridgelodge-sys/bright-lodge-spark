@@ -42,7 +42,7 @@ const milestones: TimelineEntry[] = [
     year: "2026",
     title: "Ladies Festival Gala",
     description:
-      "Joint Ladies Festival with Astolat Lodge at Macdonald Frimley Hall in aid of Guildford Young Carers.",
+      "Joint Ladies Festival with Astolat Lodge at Macdonald Frimley Hall in aid of Action for Carers Surrey.",
   },
 ];
 
