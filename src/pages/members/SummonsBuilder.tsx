@@ -422,15 +422,20 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
 
   useEffect(() => {
     if (!editingId) { setCurrentId(null); return; }
+    // Bind currentId immediately so a save while data is still loading
+    // (or if the dining-contacts RPC errors) still updates this row instead
+    // of inserting a duplicate.
+    setCurrentId(editingId);
     (async () => {
       const { data, error } = await supabase.from("summonses").select("*").eq("id", editingId).maybeSingle();
       if (error || !data) { toast.error(error?.message ?? "Summons not found"); return; }
       const r: any = data;
       // dining_enquiry_email is column-restricted; fetch via secure RPC (secretary/admin/WM)
       let diningEmail: string | null = null;
-      const { data: dc } = await (supabase as any).rpc("get_summons_dining_contacts", { _ids: [editingId] });
-      if (Array.isArray(dc) && dc.length) diningEmail = dc[0].dining_enquiry_email ?? null;
-      setCurrentId(r.id);
+      try {
+        const { data: dc } = await (supabase as any).rpc("get_summons_dining_contacts", { _ids: [editingId] });
+        if (Array.isArray(dc) && dc.length) diningEmail = dc[0].dining_enquiry_email ?? null;
+      } catch { /* non-fatal */ }
       setSelectedEvent(r.lodge_event_id ?? "");
       setManualHidden(((r.notice_overrides as any)?.manualHidden ?? []) as string[]);
       setSummons({
@@ -624,9 +629,10 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
         pdf_storage_path: path,
         status: action === "email" ? "sent" : "finalised",
       };
-      let resultId = currentId;
-      if (currentId) {
-        const { error } = await supabase.from("summonses").update(payload).eq("id", currentId);
+      const targetId = currentId ?? editingId;
+      let resultId = targetId;
+      if (targetId) {
+        const { error } = await supabase.from("summonses").update(payload).eq("id", targetId);
         if (error) throw error;
       } else {
         const { data: ins, error } = await supabase.from("summonses").insert(payload).select("id").single();
@@ -634,7 +640,7 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
         resultId = ins.id;
         setCurrentId(ins.id);
       }
-      toast.success(`Summons #${summons.meeting_number} ${currentId ? "updated" : "saved"}`);
+      toast.success(`Summons #${summons.meeting_number} ${targetId ? "updated" : "saved"}`);
       return resultId;
     } catch (e: any) {
       toast.error(e.message ?? "Failed to generate PDF");
