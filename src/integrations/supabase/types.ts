@@ -2690,14 +2690,14 @@ export type Database = {
           total_raised: number | null
         }
         Insert: {
-          public_feed_start_amount?: number | null
+          public_feed_start_amount?: never
           public_feed_start_date?: string | null
-          total_raised?: never
+          total_raised?: number | null
         }
         Update: {
-          public_feed_start_amount?: number | null
+          public_feed_start_amount?: never
           public_feed_start_date?: string | null
-          total_raised?: never
+          total_raised?: number | null
         }
         Relationships: []
       }
