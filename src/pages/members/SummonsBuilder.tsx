@@ -734,7 +734,7 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
             <Select value={presetIndex} onValueChange={setPresetIndex}>
               <SelectTrigger><SelectValue placeholder="Pick a preset…" /></SelectTrigger>
               <SelectContent>
-                {AGENDA_PRESETS.map((p, i) => <SelectItem key={i} value={String(i)}>{p}</SelectItem>)}
+                {AGENDA_PRESETS.map((p, i) => <SelectItem key={i} value={String(i)}>{p.label}</SelectItem>)}
               </SelectContent>
             </Select>
           </div>
