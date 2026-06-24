@@ -290,21 +290,22 @@ const Events = () => {
 
                 {/* Charity info */}
                 <div className="mt-6 bg-muted/30 border border-border rounded-sm p-6">
-                  <h3 className="text-lg font-serif text-foreground mb-3">In Aid of Guildford Young Carers</h3>
+                  <h3 className="text-lg font-serif text-foreground mb-3">In Aid of Action for Carers Surrey</h3>
                   <p className="text-sm font-sans text-muted-foreground leading-relaxed mb-3">
-                    The Guildford Young Carers Fund is a dedicated initiative supporting young carers aged 5–18 in the Borough of Guildford. These young people take on significant caring responsibilities for family members and the fund provides grants to support their educational, emotional, and social needs — helping them thrive despite the challenges they face.
+                    Action for Carers Surrey is the county's leading charity supporting unpaid carers of all ages — from young carers as young as five through to adults looking after family members, friends or neighbours. Their services provide vital information, advice, advocacy and respite, helping carers across Surrey to maintain their own health, wellbeing and independence.
                   </p>
                   <p className="text-sm font-sans text-muted-foreground leading-relaxed mb-4">
-                    By attending the Ladies Festival, you'll be directly contributing to improving the lives of these remarkable young people in our local community.
+                    By attending the Ladies Festival, you'll be directly contributing to the work of this remarkable charity, supporting carers right here in our local community.
                   </p>
                   <a
-                    href="https://www.cfsurrey.org.uk/fund/guildfordyoungcarers"
+                    href="https://www.actionforcarers.org.uk/"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 text-sm font-sans font-medium text-gold-dark hover:opacity-80 transition-opacity"
                   >
-                    Learn more about Guildford Young Carers
+                    Learn more about Action for Carers Surrey
                     <ExternalLink className="w-4 h-4" />
+                  </a>
                   </a>
                 </div>
 
