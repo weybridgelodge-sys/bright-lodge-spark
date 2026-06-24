@@ -256,7 +256,7 @@ const LadiesFestival = () => {
     <div className="min-h-screen">
       <SEO
         title="Ladies Festival 2026"
-        description="Join Weybridge & Astolat Lodges for a black tie charity gala on 22 August 2026 at Macdonald Frimley Hall Hotel. Three-course dinner, DJ, raffle — in aid of Guildford Young Carers. Tickets £75."
+        description="Join Weybridge & Astolat Lodges for a black tie charity gala on 22 August 2026 at Macdonald Frimley Hall Hotel. Three-course dinner, DJ, raffle — in aid of Action for Carers Surrey. Tickets £75."
         canonical="/ladies-festival"
         schema={[
           breadcrumbSchema([
