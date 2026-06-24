@@ -75,7 +75,7 @@ const ladiesFestivalSchema = {
   startDate: "2026-08-22T18:30:00+01:00",
   endDate: "2026-08-23T01:00:00+01:00",
   description:
-    "Black tie charity gala dinner in aid of Guildford Young Carers. Three-course dinner, DJ, Grand Raffle and more at the Macdonald Frimley Hall Hotel.",
+    "Black tie charity gala dinner in aid of Action for Carers Surrey. Three-course dinner, DJ, Grand Raffle and more at the Macdonald Frimley Hall Hotel.",
   image: "https://www.weybridgelodge.org.uk/og-image.png",
   eventStatus: "https://schema.org/EventScheduled",
   eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
