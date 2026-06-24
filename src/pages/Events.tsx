@@ -306,7 +306,6 @@ const Events = () => {
                     Learn more about Action for Carers Surrey
                     <ExternalLink className="w-4 h-4" />
                   </a>
-                  </a>
                 </div>
 
                 <a
