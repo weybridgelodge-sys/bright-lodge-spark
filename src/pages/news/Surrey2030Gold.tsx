@@ -3,6 +3,7 @@ import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
 import SEO, { articleSchema, breadcrumbSchema } from "@/components/SEO";
 import PostNavigation from "@/components/PostNavigation";
+import RelatedPosts from "@/components/RelatedPosts";
 import SocialShare from "@/components/SocialShare";
 import CommentsSection, { commentCount } from "@/components/CommentsSection";
 import { motion } from "framer-motion";
@@ -254,6 +255,7 @@ const Surrey2030Gold = () => {
 
             <CommentsSection />
 
+            <RelatedPosts currentSlug="surrey-2030-festival-gold" category="Charity" />
             <PostNavigation currentSlug="surrey-2030-festival-gold" />
           </div>
         </section>

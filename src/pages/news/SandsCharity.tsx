@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Calendar, User, ArrowLeft } from "lucide-react";
 import PostNavigation from "@/components/PostNavigation";
+import RelatedPosts from "@/components/RelatedPosts";
 import SocialShare from "@/components/SocialShare";
 import CommentsSection, { commentCount } from "@/components/CommentsSection";
 
@@ -173,6 +174,7 @@ const SandsCharity = () => {
             <CommentsSection />
 
             {/* Post Navigation */}
+            <RelatedPosts currentSlug="sands-charity" category="Charity" />
             <PostNavigation currentSlug="sands-charity" />
           </div>
         </section>
