@@ -150,7 +150,7 @@ const DoubleInitiationDecember2025 = () => {
             <div className="mt-12 pt-8 border-t border-border">
               <p className="text-sm font-serif text-foreground font-semibold">W Bro. Julien Tidmarsh</p>
               <p className="text-xs text-muted-foreground font-sans mt-1">
-                Julien is the Mentor and Communications lead for Weybridge Lodge and has been a member since 2019.
+                W Bro. Julien Tidmarsh is the Worshipful Master of Weybridge Lodge No. 6787 and leads the lodge's communications. He has been a Freemason since 2019.
               </p>
             </div>
 
