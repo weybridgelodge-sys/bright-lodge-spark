@@ -142,6 +142,7 @@ const ThreeMasonicDegrees = () => {
                 <p className="text-muted-foreground font-sans leading-relaxed mt-4">
                   By this stage, most new members feel comfortable in the Lodge, know the other Brethren by name, and have begun to find their own way of contributing.
                 </p>
+                <img src={fellowCraftImg} alt="Fellow Craft apron — white with two pale-blue rosettes" loading="lazy" className={apronImgClass} />
               </section>
 
               <section id="third-degree">
