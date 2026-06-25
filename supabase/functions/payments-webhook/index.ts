@@ -1,5 +1,6 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { type StripeEnv, verifyWebhook } from "../_shared/stripe.ts";
+import { sendBookingEmails } from "../_shared/send-booking-emails.ts";
 
 let _supabase: ReturnType<typeof createClient> | null = null;
 function getSupabase() {
@@ -27,7 +28,15 @@ async function handleCheckoutCompleted(session: any, env: StripeEnv) {
     })
     .eq("id", bookingId)
     .eq("environment", env);
-  if (error) console.error("Failed to mark booking paid:", error);
+  if (error) {
+    console.error("Failed to mark booking paid:", error);
+    return;
+  }
+  try {
+    await sendBookingEmails(bookingId, { stage: "paid" });
+  } catch (e) {
+    console.error("sendBookingEmails (paid) failed:", e);
+  }
 }
 
 async function handlePaymentFailed(intent: any, env: StripeEnv) {

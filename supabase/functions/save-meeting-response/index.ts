@@ -1,4 +1,5 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { sendBookingEmails } from "../_shared/send-booking-emails.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -85,6 +86,13 @@ Deno.serve(async (req) => {
         JSON.stringify({ error: error?.message || "Could not save response." }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
+    }
+
+    // Fire-and-forget booking emails (confirmation + assistant secretary notification)
+    try {
+      await sendBookingEmails(booking.id, { stage: "submitted" });
+    } catch (e) {
+      console.error("sendBookingEmails (submitted) failed:", e);
     }
 
     return new Response(
