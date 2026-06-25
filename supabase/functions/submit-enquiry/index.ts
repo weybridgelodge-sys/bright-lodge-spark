@@ -79,6 +79,7 @@ Deno.serve(async (req) => {
       templateName: 'enquiry-notification',
       recipientEmail: notifyTo,
       idempotencyKey: `enquiry-notify-${row.id}`,
+      replyTo: email || undefined,
       templateData: {
         name: full_name,
         email,
