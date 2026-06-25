@@ -148,6 +148,12 @@ const LadiesFestival = () => {
   const [leadGuest, setLeadGuest] = useState<GuestInfo>({ name: "", starter: "", main: "", dessert: "" });
   const [guests, setGuests] = useState<GuestInfo[]>([]);
   const [formStep, setFormStep] = useState(1);
+  const formRef = useRef<HTMLFormElement>(null);
+  useEffect(() => {
+    if (formRef.current) {
+      formRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [formStep]);
   const [showCheckout, setShowCheckout] = useState(false);
   const [coverFee, setCoverFee] = useState(false);
   const [paymentOption, setPaymentOption] = useState<"full" | "deposit">("full");
