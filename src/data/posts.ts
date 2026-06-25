@@ -3,6 +3,7 @@ import sandsImg from "@/assets/news/sands-cheque.webp";
 import anniversaryImg from "@/assets/news/75th-anniversary-group.png";
 import installationImg from "@/assets/news/installation-meeting-group.jpg";
 import surrey2030Img from "@/assets/news/surrey-2030-gold-award.jpg";
+import doubleInitiationImg from "@/assets/news/double-initiation-december-2025.jpg";
 
 export interface BlogPost {
   slug: string;
@@ -32,6 +33,15 @@ export const posts: BlogPost[] = [
     excerpt:
       "Weybridge Lodge was honoured to welcome the Provincial Grand Master of Surrey for an official visit and First Degree Initiation ceremony at the South West Surrey Masonic Centre.",
     image: apgmVisitImg,
+  },
+  {
+    slug: "double-initiation-december-2025",
+    title: "Double Initiation at Weybridge Lodge — December 2025",
+    date: "2025-12-10",
+    category: "Lodge Meetings",
+    excerpt:
+      "Weybridge Lodge welcomed two new Brethren — Bro. Jesse and Bro. Josh Bishop — at a memorable double First Degree Initiation on 10 December 2025.",
+    image: doubleInitiationImg,
   },
   {
     slug: "sands-charity",
