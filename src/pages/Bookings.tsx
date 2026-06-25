@@ -623,8 +623,8 @@ const Bookings = () => {
                       <button type="button" onClick={() => setStep(2)} className="border border-border text-foreground px-6 py-3 rounded-sm text-sm font-sans uppercase tracking-widest hover:border-gold hover:text-gold transition-colors">
                         Back
                       </button>
-                      <button type="submit" className="bg-gold-shimmer text-accent-foreground px-8 py-3 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity">
-                        {paymentMethod === "card" && seatsToCharge > 0 ? "Continue to Payment" : "Submit Booking"}
+                      <button type="submit" disabled={submissionStatus === "submitting"} className="bg-gold-shimmer text-accent-foreground px-8 py-3 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity disabled:opacity-60 disabled:cursor-not-allowed">
+                        {submissionStatus === "submitting" ? "Submitting…" : (paymentMethod === "card" && seatsToCharge > 0 ? "Continue to Payment" : "Submit Booking")}
                       </button>
                     </div>
                   </fieldset>
