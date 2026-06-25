@@ -16,9 +16,11 @@ import { LOGO_HEIGHT, LOGO_URL, LOGO_WIDTH } from './_brand.ts'
 
 interface Props {
   name?: string
+  secretaryName?: string
+  secretaryOffice?: string
 }
 
-const Email = ({ name }: Props) => (
+const Email = ({ name, secretaryName, secretaryOffice }: Props) => (
   <Html lang="en" dir="ltr">
     <Head />
     <Preview>Thank you for your enquiry to Weybridge Lodge No. 6787</Preview>
@@ -49,6 +51,10 @@ const Email = ({ name }: Props) => (
             website.
           </Text>
           <Hr style={hr} />
+          <Text style={signOff}>Yours sincerely,</Text>
+          <Text style={signName}>{secretaryName || 'The Secretary'}</Text>
+          <Text style={signOffice}>{secretaryOffice || 'Lodge Secretary'}</Text>
+          <Hr style={hr} />
           <Text style={small}>
             If you did not submit this enquiry, please ignore this email — no
             further action will be taken.
@@ -69,7 +75,7 @@ export const template = {
   component: Email,
   subject: 'Thank you for your enquiry — Weybridge Lodge',
   displayName: 'Enquiry confirmation',
-  previewData: { name: 'Jane' },
+  previewData: { name: 'Jane', secretaryName: 'W Bro. Richard Smith', secretaryOffice: 'Lodge Secretary' },
 } satisfies TemplateEntry
 
 const main = { backgroundColor: '#ffffff', fontFamily: 'Georgia, "Times New Roman", serif', margin: 0, padding: 0 }
@@ -85,3 +91,6 @@ const hr = { borderColor: '#e8e3d3', margin: '18px 0' }
 const small = { color: '#666', fontSize: '12px', lineHeight: '1.5', margin: 0, fontFamily: 'Arial, sans-serif' }
 const footer = { textAlign: 'center' as const, padding: '20px 0' }
 const footerText = { color: '#888', fontSize: '11px', margin: 0, fontFamily: 'Arial, sans-serif' }
+const signOff = { color: '#2a2a2a', fontSize: '15px', lineHeight: '1.5', margin: '0 0 8px', fontFamily: 'Arial, sans-serif' }
+const signName = { color: '#1B2A4A', fontSize: '15px', fontWeight: 600, lineHeight: '1.4', margin: 0, fontFamily: 'Arial, sans-serif' }
+const signOffice = { color: '#1B2A4A', fontSize: '14px', lineHeight: '1.4', margin: 0, fontFamily: 'Arial, sans-serif', fontStyle: 'italic' as const }
