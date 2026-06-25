@@ -51,6 +51,7 @@ const Email = ({
   dietary,
   message,
   lineItems = [],
+  drinks = [],
   totalAmount,
   paymentStatusLabel,
   bookingRef,
