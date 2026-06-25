@@ -72,7 +72,7 @@ const DoubleInitiationDecember2025 = () => {
               animate={{ opacity: 1 }}
               transition={{ duration: 0.6 }}
               src={heroImg}
-              alt="Bro. Jesse and Bro. Josh Bishop with the brethren of Weybridge Lodge No. 6787 after their double initiation ceremony, December 2025"
+              alt="Weybridge Lodge No. 6787 brethren at the December 2025 double initiation ceremony, South West Surrey Masonic Centre, Guildford"
               className="w-full rounded-sm mb-10"
             />
 
