@@ -91,13 +91,40 @@ Deno.serve(async (req) => {
   })
   if (notifRes.error) console.error('Notification email failed', notifRes.error)
 
+  // Look up current Lodge Secretary for signature
+  let secretaryName = ''
+  let secretaryOffice = 'Lodge Secretary'
+  try {
+    const { data: yearRow } = await supabase.rpc('current_lodge_year')
+    const lodgeYear = typeof yearRow === 'number' ? yearRow : yearRow
+    const { data: secRows } = await supabase
+      .from('officer_appointments')
+      .select('member_id, position_key, lodge_year, officer_positions!inner(label, key), profiles!inner(full_name, first_name, last_name, is_past_master)')
+      .eq('position_key', 'secretary')
+      .eq('lodge_year', lodgeYear)
+      .limit(1)
+    const sec: any = secRows?.[0]
+    if (sec) {
+      const p = sec.profiles
+      secretaryName = (p?.full_name && p.full_name.trim()) ||
+        `${p?.is_past_master ? 'W Bro. ' : 'Bro. '}${[p?.first_name, p?.last_name].filter(Boolean).join(' ')}`.trim()
+      secretaryOffice = `Lodge ${sec.officer_positions?.label || 'Secretary'}`
+    }
+  } catch (e) {
+    console.error('Secretary lookup failed', e)
+  }
+
   // 2) Confirmation to the enquirer
   const confRes = await supabase.functions.invoke('send-transactional-email', {
     body: {
       templateName: 'enquiry-confirmation',
       recipientEmail: email,
       idempotencyKey: `enquiry-confirm-${row.id}`,
-      templateData: { name: full_name.split(' ')[0] || full_name },
+      templateData: {
+        name: full_name.split(' ')[0] || full_name,
+        secretaryName,
+        secretaryOffice,
+      },
     },
   })
   if (confRes.error) console.error('Confirmation email failed', confRes.error)
