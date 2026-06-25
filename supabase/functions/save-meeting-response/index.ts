@@ -1,4 +1,5 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { sendBookingEmails } from "../_shared/send-booking-emails.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
