@@ -54,7 +54,13 @@ const Email = ({ name, email, phone, reason, submittedAt, source }: Props) => (
         </Section>
 
         <Text style={footerText}>
-          Reply directly to {email || 'the enquirer'} to make contact.
+          Reply directly to{' '}
+          {email ? (
+            <Link href={`mailto:${email}`} style={emailLink}>{email}</Link>
+          ) : (
+            'the enquirer'
+          )}{' '}
+          to make contact.
         </Text>
       </Container>
     </Body>
