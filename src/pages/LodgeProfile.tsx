@@ -8,8 +8,7 @@ import pastMastersJewel from "@/assets/news/past-masters-jewel.png";
 
 const meetingDates = [
   "3rd Wednesday in February",
-  "2nd Wednesday in March",
-  "2nd Wednesday in May (LoI Festival)",
+  "2nd Wednesday in May",
   "3rd Wednesday in October (Installation)",
   "2nd Wednesday in December",
 ];
@@ -27,13 +26,12 @@ const LodgeProfile = () => {
           { name: "Lodge Profile", url: "/lodge-profile" },
         ])}
       />
-      <a href="#main-content" className="skip-to-content">Skip to main content</a>
+      <a href="#main-content" className="skip-to-content">
+        Skip to main content
+      </a>
       <Header />
       <main id="main-content">
-        <PageHeader
-          title="Lodge Profile"
-          subtitle="Introducing Weybridge Lodge No. 6787"
-        />
+        <PageHeader title="Lodge Profile" subtitle="Introducing Weybridge Lodge No. 6787" />
 
         <section className="py-20 md:py-28 bg-warm-white">
           <div className="container mx-auto px-6 max-w-3xl">
@@ -46,10 +44,14 @@ const LodgeProfile = () => {
               <div className="h-0.5 w-16 bg-gold mb-6" />
               <h2 className="text-2xl md:text-3xl font-serif text-foreground mb-6">A Brief Overview</h2>
               <p className="text-muted-foreground font-sans leading-relaxed mb-4">
-                Weybridge Lodge No. 6787 is a Lodge of Freemasons in Guildford, Surrey. Founded by members of Noel Money Lodge and workers from the Vickers Armstrong factory in Weybridge, it was Consecrated on January 29th, 1949.
+                Weybridge Lodge No. 6787 is a Lodge of Freemasons in Guildford, Surrey. Founded by members of Noel Money
+                Lodge and workers from the Vickers Armstrong factory in Weybridge, it was Consecrated on January 29th,
+                1949.
               </p>
               <p className="text-muted-foreground font-sans leading-relaxed mb-6">
-                Early membership was heavily influenced by Vickers factory workers and local shopkeepers of Weybridge town. However, since then membership has changed substantially. Today the Lodge has members in a wide spectrum of occupations and ages.
+                Early membership was heavily influenced by Vickers factory workers and local shopkeepers of Weybridge
+                town. However, since then membership has changed substantially. Today the Lodge has members in a wide
+                spectrum of occupations and ages.
               </p>
               <figure className="my-8">
                 <img
@@ -77,7 +79,8 @@ const LodgeProfile = () => {
               <p className="text-gold text-sm font-sans uppercase tracking-wide mb-2">Meeting Schedule</p>
               <h2 className="text-2xl md:text-3xl font-serif text-primary-foreground mb-6">When Do We Meet?</h2>
               <p className="text-primary-foreground/70 font-sans leading-relaxed mb-8">
-                Our Lodge meets at the South West Surrey Masonic Centre for Freemasons in Guildford, Surrey. We hold five meetings each year which usually start at 5pm.
+                Our Lodge meets at the South West Surrey Masonic Centre for Freemasons in Guildford, Surrey. We hold
+                five meetings each year which usually start at 5pm.
               </p>
               <ul className="space-y-3">
                 {meetingDates.map((date) => (
@@ -102,13 +105,20 @@ const LodgeProfile = () => {
               <div className="h-0.5 w-16 bg-gold mb-6" />
               <h2 className="text-2xl md:text-3xl font-serif text-foreground mb-6">A Lodge Built on Quality</h2>
               <p className="text-muted-foreground font-sans leading-relaxed mb-4">
-                We currently have 22 members (including 1 honorary) whose ages range from 32 to 80. We welcome men of all ages and backgrounds — whether you are a young professional in your twenties looking for personal development and new friendships, or more established in your career. Weybridge Lodge prides itself on its friendliness to new members and visitors.
+                We currently have 22 members (including 1 honorary) whose ages range from 32 to 80. We welcome men of
+                all ages and backgrounds — whether you are a young professional in your twenties looking for personal
+                development and new friendships, or more established in your career. Weybridge Lodge prides itself on
+                its friendliness to new members and visitors.
               </p>
               <p className="text-muted-foreground font-sans leading-relaxed mb-4">
-                The Lodge has a long-established reputation for the quality of its ceremonies. This is due in no small part to the very active Class (or Lodge) of Instruction (LoI). Being strongly supported by all, especially the more senior brethren, enables us to guide, mentor and entertain our newer members.
+                The Lodge has a long-established reputation for the quality of its ceremonies. This is due in no small
+                part to the very active Class (or Lodge) of Instruction (LoI). Being strongly supported by all,
+                especially the more senior brethren, enables us to guide, mentor and entertain our newer members.
               </p>
               <p className="text-muted-foreground font-sans leading-relaxed mb-4">
-                The Class of Instruction meets every Thursday at 7.30pm in the South West Surrey Masonic Centre, Guildford. These weekly learning sessions culminate in an annual LoI Festival where the lodge meeting is handed over to and run entirely by our newer members.
+                The Class of Instruction meets every Thursday at 7.30pm in the South West Surrey Masonic Centre,
+                Guildford. These weekly learning sessions culminate in an annual LoI Festival where the lodge meeting is
+                handed over to and run entirely by our newer members.
               </p>
             </motion.div>
 
@@ -121,10 +131,14 @@ const LodgeProfile = () => {
             >
               <h2 className="text-2xl md:text-3xl font-serif text-foreground mb-6">The Social Side</h2>
               <p className="text-muted-foreground font-sans leading-relaxed mb-4">
-                As a Lodge we enjoy many activities together both charitable and social. Our main fundraiser is an annual charity gala. The money raised is donated to a charity close to the heart of the Master of the Lodge.
+                As a Lodge we enjoy many activities together both charitable and social. Our main fundraiser is an
+                annual charity gala. The money raised is donated to a charity close to the heart of the Master of the
+                Lodge.
               </p>
               <p className="text-muted-foreground font-sans leading-relaxed">
-                More relaxed activities include darts nights, Topgolf, clay pigeon shoots and our Annual Charity Golf Day. We keep our December meeting specifically for initiating new members, complete with Christmas hats and festive carols at the dinner.
+                More relaxed activities include darts nights, Topgolf, clay pigeon shoots and our Annual Charity Golf
+                Day. We keep our December meeting specifically for initiating new members, complete with Christmas hats
+                and festive carols at the dinner.
               </p>
             </motion.div>
 
