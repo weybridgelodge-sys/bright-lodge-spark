@@ -13,6 +13,7 @@ import ProgressionRoute from "./components/members/ProgressionRoute";
 
 // Lazy-load everything except the landing page to keep the initial bundle tiny.
 const NotFound = lazy(() => import("./pages/NotFound"));
+const Unsubscribe = lazy(() => import("./pages/Unsubscribe"));
 const WhatIsFreemasonry = lazy(() => import("./pages/WhatIsFreemasonry"));
 const FreemasonryCharity = lazy(() => import("./pages/FreemasonryCharity"));
 const OurCharities = lazy(() => import("./pages/OurCharities"));
@@ -95,6 +96,7 @@ const App = () => (
             <Route path="/your-journey" element={<YourJourney />} />
             <Route path="/lodge-traditions" element={<LodgeTraditions />} />
             <Route path="/data-protection" element={<DataProtection />} />
+            <Route path="/unsubscribe" element={<Unsubscribe />} />
             <Route path="/lodge-profile" element={<LodgeProfile />} />
             <Route path="/history" element={<History />} />
             <Route path="/worshipful-masters" element={<WorshipfulMasters />} />
