@@ -3,6 +3,7 @@ import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
 import SEO, { articleSchema, breadcrumbSchema } from "@/components/SEO";
 import PostNavigation from "@/components/PostNavigation";
+import RelatedPosts from "@/components/RelatedPosts";
 import SocialShare from "@/components/SocialShare";
 import CommentsSection, { commentCount } from "@/components/CommentsSection";
 import { motion } from "framer-motion";
@@ -196,6 +197,7 @@ const InstallationMeeting = () => {
             <CommentsSection />
 
             {/* Post Navigation */}
+            <RelatedPosts currentSlug="installation-meeting-october-2023" category="Lodge Meetings" />
             <PostNavigation currentSlug="installation-meeting-october-2023" />
           </div>
         </section>

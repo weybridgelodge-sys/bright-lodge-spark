@@ -3,6 +3,7 @@ import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
 import SEO, { articleSchema, breadcrumbSchema } from "@/components/SEO";
 import PostNavigation from "@/components/PostNavigation";
+import RelatedPosts from "@/components/RelatedPosts";
 import SocialShare from "@/components/SocialShare";
 import CommentsSection, { commentCount } from "@/components/CommentsSection";
 import { motion } from "framer-motion";
@@ -213,6 +214,7 @@ const ApgmVisit = () => {
             <CommentsSection />
 
             {/* Post Navigation */}
+            <RelatedPosts currentSlug="pgm-visit-february-2026" category="Lodge Meetings" />
             <PostNavigation currentSlug="pgm-visit-february-2026" />
           </div>
         </section>
