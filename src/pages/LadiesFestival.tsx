@@ -1085,14 +1085,17 @@ const LadiesFestival = () => {
                           <span className="text-foreground font-medium">{form.getValues("email")}</span>
                         </div>
                         <div className="flex justify-between text-sm font-sans">
-                          <span className="text-muted-foreground">Guests</span>
-                          <span className="text-foreground font-medium">{guestCount}</span>
+                          <span className="text-muted-foreground">Total places</span>
+                          <span className="text-foreground font-medium">{totalAttendees} (you + {guestCount} guest{guestCount === 1 ? "" : "s"})</span>
                         </div>
 
                         <div className="border-t border-border pt-4 space-y-2">
-                          {guests.map((g, i) => (
+                          {allAttendees.map((g, i) => (
                             <div key={i} className="text-sm font-sans">
-                              <p className="text-foreground font-medium">{g.name || `Guest ${i + 1}`}</p>
+                              <p className="text-foreground font-medium">
+                                {g.name || (i === 0 ? "You" : `Guest ${i}`)}
+                                {i === 0 && <span className="text-xs text-gold-dark uppercase tracking-wider ml-2">Lead booker</span>}
+                              </p>
                               <p className="text-muted-foreground text-xs">
                                 {menuChoices.starter.find((c) => c.value === g.starter)?.label || "No starter"} ·{" "}
                                 {menuChoices.main.find((c) => c.value === g.main)?.label || "No main"} ·{" "}
@@ -1119,7 +1122,7 @@ const LadiesFestival = () => {
                         {/* Cost breakdown */}
                         <div className="border-t border-border pt-4 space-y-2">
                           <div className="flex justify-between text-sm font-sans">
-                            <span className="text-muted-foreground">Tickets ({guestCount} × £{TICKET_PRICE})</span>
+                            <span className="text-muted-foreground">Tickets ({totalAttendees} × £{TICKET_PRICE})</span>
                             <span className="text-foreground">£{ticketSubtotal}</span>
                           </div>
                           {drinksTotal > 0 && (
@@ -1129,10 +1132,44 @@ const LadiesFestival = () => {
                             </div>
                           )}
                           <div className="flex justify-between text-sm font-sans font-semibold border-t border-border pt-2">
-                            <span className="text-foreground">Total</span>
+                            <span className="text-foreground">Booking total</span>
                             <span className="text-gold-dark text-lg">£{grandTotal}</span>
                           </div>
                         </div>
+                      </div>
+
+                      {/* Payment option */}
+                      <div className="bg-card border border-border rounded-sm p-5 space-y-3">
+                        <p className="font-sans font-medium text-foreground text-sm">Payment option</p>
+                        <label className="flex items-start gap-3 cursor-pointer">
+                          <input
+                            type="radio"
+                            name="paymentOption"
+                            value="full"
+                            checked={paymentOption === "full"}
+                            onChange={() => setPaymentOption("full")}
+                            className="mt-1 accent-[hsl(var(--gold))]"
+                          />
+                          <span className="text-sm font-sans text-foreground">
+                            <span className="font-semibold">Pay in full now</span> — £{grandTotal.toFixed(2)}
+                          </span>
+                        </label>
+                        <label className="flex items-start gap-3 cursor-pointer">
+                          <input
+                            type="radio"
+                            name="paymentOption"
+                            value="deposit"
+                            checked={paymentOption === "deposit"}
+                            onChange={() => setPaymentOption("deposit")}
+                            className="mt-1 accent-[hsl(var(--gold))]"
+                          />
+                          <span className="text-sm font-sans text-foreground">
+                            <span className="font-semibold">Pay 33% deposit now</span> — £{(depositPence / 100).toFixed(2)}
+                            <span className="block text-xs text-muted-foreground mt-0.5">
+                              Balance of £{(balanceDuePence / 100).toFixed(2)} due by 31 July 2026 — a secure payment link will be emailed nearer the date.
+                            </span>
+                          </span>
+                        </label>
                       </div>
 
                       {/* Additional message */}
@@ -1171,11 +1208,12 @@ const LadiesFestival = () => {
                         <label className="flex items-start gap-3 cursor-pointer">
                           <input type="checkbox" checked={coverFee} onChange={(e) => setCoverFee(e.target.checked)} className="mt-1 accent-[hsl(var(--gold))]" />
                           <span className="text-sm font-sans text-foreground">
-                            Add ~2% (£{(Math.ceil(grandTotal * 100 * 0.02) / 100).toFixed(2)}) to cover card processing fees
+                            Add ~2% (£{(Math.ceil(subtotalPence * 0.02) / 100).toFixed(2)}) to cover card processing fees
                           </span>
                         </label>
                         <p className="text-xs text-muted-foreground font-sans text-center">
-                          You'll pay £{(totalPence / 100).toFixed(2)} securely by debit / credit card on the next step.
+                          You'll pay £{(totalPence / 100).toFixed(2)} securely by debit / credit card on the next step
+                          {paymentOption === "deposit" && <> (deposit only — balance billed end July 2026)</>}.
                         </p>
                       </div>
                     </div>
