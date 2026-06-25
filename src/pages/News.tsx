@@ -126,7 +126,7 @@ const News = () => {
 
                 <div className="grid gap-8 sm:grid-cols-2">
                   {filteredPosts.map((post, i) => {
-                    const thumb = getPostThumbnail(post);
+                    const thumb = resolveThumb(post);
                     const href = getPostHref(post);
                     return (
                       <motion.article
@@ -186,7 +186,7 @@ const News = () => {
                   <h3 className="text-base font-serif text-foreground mb-4">Recent Posts</h3>
                   <ul className="space-y-3">
                     {posts.slice(0, 5).map((post) => {
-                      const thumb = getPostThumbnail(post, 120, 120);
+                      const thumb = resolveThumb(post, 120, 120);
                       const href = getPostHref(post);
                       return (
                         <li key={post._id}>
