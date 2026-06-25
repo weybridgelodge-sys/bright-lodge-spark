@@ -1231,25 +1231,36 @@ const LadiesFestival = () => {
                     </button>
                   </div>
                   <p className="text-sm text-muted-foreground font-sans">
-                    Total: <strong className="text-foreground">£{(totalPence / 100).toFixed(2)}</strong>
+                    {paymentOption === "deposit" ? "Deposit due now" : "Total"}: <strong className="text-foreground">£{(totalPence / 100).toFixed(2)}</strong>
                     {feePence > 0 && <> (includes £{(feePence / 100).toFixed(2)} card fee)</>}
+                    {paymentOption === "deposit" && (
+                      <> · Balance £{(balanceDuePence / 100).toFixed(2)} payable by 31 July 2026.</>
+                    )}
                   </p>
                   <StripeEmbeddedCheckoutPanel
                     event_key="ladies_festival_2026"
-                    event_label="Ladies Festival 2026 — 22 Aug"
+                    event_label={paymentOption === "deposit" ? "Ladies Festival 2026 — 22 Aug (deposit)" : "Ladies Festival 2026 — 22 Aug"}
                     contact_name={submitted.name}
                     contact_email={submitted.email}
                     contact_phone={submitted.phone}
                     cover_fee={coverFee}
                     line_items={buildLineItems()}
                     details={{
-                      guestCount,
-                      guests,
+                      guestCount: totalAttendees,
+                      additionalGuestCount: guestCount,
+                      // Full attendee list (lead booker first) so emails show all meal choices
+                      guests: allAttendees,
+                      leadGuest,
                       seatingPreference: submitted.seatingPreference,
                       dietary: submitted.dietary,
                       message: submitted.message,
                       wineOrders,
                       beerOrders,
+                      paymentOption,
+                      bookingTotalPence: grandTotalPence,
+                      depositPence: paymentOption === "deposit" ? depositPence : null,
+                      balanceDuePence: paymentOption === "deposit" ? balanceDuePence : 0,
+                      balanceDueBy: paymentOption === "deposit" ? "2026-07-31" : null,
                     }}
                     return_url={`${window.location.origin}/checkout/return?session_id={CHECKOUT_SESSION_ID}`}
                     onError={(msg) => toast({ title: "Checkout error", description: msg, variant: "destructive" })}
