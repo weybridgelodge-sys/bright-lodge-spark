@@ -16,9 +16,11 @@ import { LOGO_HEIGHT, LOGO_URL, LOGO_WIDTH } from './_brand.ts'
 
 interface Props {
   name?: string
+  secretaryName?: string
+  secretaryOffice?: string
 }
 
-const Email = ({ name }: Props) => (
+const Email = ({ name, secretaryName, secretaryOffice }: Props) => (
   <Html lang="en" dir="ltr">
     <Head />
     <Preview>Thank you for your enquiry to Weybridge Lodge No. 6787</Preview>
