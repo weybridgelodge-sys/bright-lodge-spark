@@ -708,52 +708,56 @@ const LadiesFestival = () => {
                         />
                       </div>
 
-                      {/* Number of Guests */}
+                      {/* Number of Additional Guests */}
                       <FormField
                         control={form.control}
                         name="guests"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="font-sans text-foreground">Number of Guests *</FormLabel>
+                            <FormLabel className="font-sans text-foreground">Number of Additional Guests *</FormLabel>
                             <FormControl>
                               <Input
                                 type="number"
-                                min="1"
-                                max="20"
-                                placeholder="2"
+                                min="0"
+                                max="19"
+                                placeholder="0"
                                 {...field}
                                 onChange={(e) => {
                                   field.onChange(e);
                                   const val = parseInt(e.target.value);
-                                  if (!isNaN(val) && val > 0) updateGuestCount(val);
+                                  if (!isNaN(val) && val >= 0) updateGuestCount(val);
                                 }}
                               />
                             </FormControl>
+                            <p className="text-xs text-muted-foreground font-sans mt-1">
+                              In addition to yourself. Total places: <span className="font-semibold text-foreground">{totalAttendees}</span> (you + {guestCount} guest{guestCount === 1 ? "" : "s"}).
+                            </p>
                             <FormMessage />
                           </FormItem>
                         )}
                       />
 
-                      {/* Guest Names */}
-                      <div className="border-t border-border pt-6">
-                        <div className="flex items-center gap-2 mb-4">
-                          <Users className="w-5 h-5 text-gold-dark" aria-hidden="true" />
-                          <h3 className="font-serif text-foreground text-lg">Guest Names</h3>
+                      {/* Additional Guest Names */}
+                      {guestCount > 0 && (
+                        <div className="border-t border-border pt-6">
+                          <div className="flex items-center gap-2 mb-4">
+                            <Users className="w-5 h-5 text-gold-dark" aria-hidden="true" />
+                            <h3 className="font-serif text-foreground text-lg">Additional Guest Names</h3>
+                          </div>
+                          <div className="space-y-3">
+                            {guests.map((guest, i) => (
+                              <div key={i}>
+                                <label className="text-sm font-sans text-foreground font-medium mb-1.5 block">Guest {i + 1}</label>
+                                <Input
+                                  placeholder={`Guest ${i + 1} full name`}
+                                  value={guest.name}
+                                  onChange={(e) => updateGuest(i, "name", e.target.value)}
+                                />
+                              </div>
+                            ))}
+                          </div>
                         </div>
-                        <div className="space-y-3">
-                          {guests.map((guest, i) => (
-                            <div key={i}>
-                              <label className="text-sm font-sans text-foreground font-medium mb-1.5 block">Guest {i + 1}</label>
-                              <Input
-                                placeholder={`Guest ${i + 1} full name`}
-                                value={guest.name}
-                                onChange={(e) => updateGuest(i, "name", e.target.value)}
-                                disabled={i === 0 && guestCount === 1}
-                              />
-                            </div>
-                          ))}
-                        </div>
-                      </div>
+                      )}
 
                       {/* Table Seating Preference */}
                       <FormField
@@ -770,16 +774,64 @@ const LadiesFestival = () => {
                         )}
                       />
 
-                      {/* Menu Choices */}
+                      {/* Menu Choices — lead booker first, then guests */}
                       <div className="border-t border-border pt-6">
                         <div className="flex items-center gap-2 mb-4">
                           <UtensilsCrossed className="w-5 h-5 text-gold-dark" aria-hidden="true" />
                           <h3 className="font-serif text-foreground text-lg">Menu Choices</h3>
                         </div>
                         <p className="text-sm text-muted-foreground font-sans mb-5">
-                          Please select a starter, main and dessert for each guest.
+                          Please select a starter, main and dessert for each attendee, including yourself.
                         </p>
                         <div className="space-y-6">
+                          {/* Lead booker */}
+                          <div className="bg-warm-white border border-gold/40 rounded-sm p-4 space-y-3">
+                            <p className="font-sans font-medium text-foreground text-sm">
+                              {leadGuest.name || "You"}{" "}
+                              <span className="text-xs text-gold-dark uppercase tracking-wider ml-1">Lead booker</span>
+                            </p>
+                            <div>
+                              <label className="text-xs font-sans text-muted-foreground uppercase tracking-wider mb-1 block">Starter</label>
+                              <select aria-label="Starter for lead booker"
+                                value={leadGuest.starter}
+                                onChange={(e) => updateLeadGuest("starter", e.target.value)}
+                                className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm font-sans text-foreground ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                              >
+                                <option value="">Select starter…</option>
+                                {menuChoices.starter.map((c) => (
+                                  <option key={c.value} value={c.value}>{c.label}</option>
+                                ))}
+                              </select>
+                            </div>
+                            <div>
+                              <label className="text-xs font-sans text-muted-foreground uppercase tracking-wider mb-1 block">Main</label>
+                              <select aria-label="Main for lead booker"
+                                value={leadGuest.main}
+                                onChange={(e) => updateLeadGuest("main", e.target.value)}
+                                className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm font-sans text-foreground ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                              >
+                                <option value="">Select main…</option>
+                                {menuChoices.main.map((c) => (
+                                  <option key={c.value} value={c.value}>{c.label}</option>
+                                ))}
+                              </select>
+                            </div>
+                            <div>
+                              <label className="text-xs font-sans text-muted-foreground uppercase tracking-wider mb-1 block">Dessert</label>
+                              <select aria-label="Dessert for lead booker"
+                                value={leadGuest.dessert}
+                                onChange={(e) => updateLeadGuest("dessert", e.target.value)}
+                                className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm font-sans text-foreground ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                              >
+                                <option value="">Select dessert…</option>
+                                {menuChoices.dessert.map((c) => (
+                                  <option key={c.value} value={c.value}>{c.label}</option>
+                                ))}
+                              </select>
+                            </div>
+                          </div>
+
+                          {/* Additional guests */}
                           {guests.map((guest, i) => (
                             <div key={i} className="bg-warm-white border border-border rounded-sm p-4 space-y-3">
                               <p className="font-sans font-medium text-foreground text-sm">{guest.name || `Guest ${i + 1}`}</p>
@@ -826,6 +878,7 @@ const LadiesFestival = () => {
                           ))}
                         </div>
                       </div>
+
 
                       {/* Dietary Requirements */}
                       <FormField
