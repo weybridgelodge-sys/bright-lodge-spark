@@ -51,6 +51,10 @@ const Email = ({ name, secretaryName, secretaryOffice }: Props) => (
             website.
           </Text>
           <Hr style={hr} />
+          <Text style={signOff}>Yours sincerely,</Text>
+          <Text style={signName}>{secretaryName || 'The Secretary'}</Text>
+          <Text style={signOffice}>{secretaryOffice || 'Lodge Secretary'}</Text>
+          <Hr style={hr} />
           <Text style={small}>
             If you did not submit this enquiry, please ignore this email — no
             further action will be taken.
