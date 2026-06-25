@@ -670,7 +670,19 @@ const LadiesFestival = () => {
 
             <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.2 }}>
               <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 bg-card border border-border rounded-sm p-8 shadow-sm">
+                <form
+                  onSubmit={form.handleSubmit(onSubmit, (errors) => {
+                    console.error("Ladies Festival form validation failed", errors);
+                    const firstErr = Object.values(errors)[0] as { message?: string } | undefined;
+                    toast({
+                      title: "Please complete the required booking details",
+                      description: firstErr?.message || "Some required fields are missing — scroll back to Step 1.",
+                      variant: "destructive",
+                    });
+                    setFormStep(1);
+                  })}
+                  className="space-y-6 bg-card border border-border rounded-sm p-8 shadow-sm"
+                >
 
                   {/* ═══ STEP 1: Booking Details ═══ */}
                   {formStep === 1 && (
