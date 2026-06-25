@@ -25,16 +25,17 @@ const DoubleInitiationDecember2025 = () => {
   return (
     <div className="min-h-screen">
       <SEO
-        title="Double Initiation December 2025"
-        description="Weybridge Lodge No. 6787 welcomed two new Brethren — Bro. Jesse and Bro. Josh Bishop — at a memorable double initiation ceremony on 10 December 2025."
+        title="Double Initiation at Weybridge Lodge — December 2025"
+        description="Weybridge Lodge No. 6787 welcomed two new Brethren in a double First Degree Initiation ceremony in December 2025 at the South West Surrey Masonic Centre, Guildford."
         canonical={URL}
         type="article"
+        
         schema={[
           articleSchema({
             title: TITLE,
             date: "2025-12-10",
             description:
-              "A father-and-son moment as Bro. Jesse and Bro. Josh Bishop were initiated into Weybridge Lodge No. 6787 on 10 December 2025.",
+              "Weybridge Lodge No. 6787 welcomed two new Brethren in a double First Degree Initiation ceremony in December 2025 at the South West Surrey Masonic Centre, Guildford.",
             url: URL,
           }),
           breadcrumbSchema([
@@ -44,6 +45,7 @@ const DoubleInitiationDecember2025 = () => {
           ]),
         ]}
       />
+
       <a href="#main-content" className="skip-to-content">Skip to main content</a>
       <Header />
       <main id="main-content">
@@ -70,7 +72,7 @@ const DoubleInitiationDecember2025 = () => {
               animate={{ opacity: 1 }}
               transition={{ duration: 0.6 }}
               src={heroImg}
-              alt="Bro. Jesse and Bro. Josh Bishop with the brethren of Weybridge Lodge No. 6787 after their double initiation ceremony, December 2025"
+              alt="Weybridge Lodge No. 6787 brethren at the December 2025 double initiation ceremony, South West Surrey Masonic Centre, Guildford"
               className="w-full rounded-sm mb-10"
             />
 
@@ -133,18 +135,22 @@ const DoubleInitiationDecember2025 = () => {
                 <p className="text-muted-foreground font-sans leading-relaxed">
                   Weybridge Lodge continues to grow steadily, and evenings like this remind us why. If you have ever wondered about Freemasonry — what we do, what we stand for, and what membership might mean for you — we would be very pleased to hear from you.
                 </p>
-                <p className="text-muted-foreground font-sans leading-relaxed mt-4">
-                  <Link to="/join-us" className="text-primary hover:underline font-semibold">
+                <p className="mt-6">
+                  <Link
+                    to="/join-us"
+                    className="inline-flex items-center gap-2 bg-gold-shimmer text-accent-foreground px-5 py-2.5 rounded-sm text-sm font-semibold font-sans hover:opacity-90 transition-opacity"
+                  >
                     Find out about joining Weybridge Lodge →
                   </Link>
                 </p>
+
               </section>
             </article>
 
             <div className="mt-12 pt-8 border-t border-border">
               <p className="text-sm font-serif text-foreground font-semibold">W Bro. Julien Tidmarsh</p>
               <p className="text-xs text-muted-foreground font-sans mt-1">
-                Julien is the Mentor and Communications lead for Weybridge Lodge and has been a member since 2019.
+                W Bro. Julien Tidmarsh is the Worshipful Master of Weybridge Lodge No. 6787 and leads the lodge's communications. He has been a Freemason since 2019.
               </p>
             </div>
 
