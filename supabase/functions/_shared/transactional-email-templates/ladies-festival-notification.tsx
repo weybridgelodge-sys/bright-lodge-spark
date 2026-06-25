@@ -17,6 +17,7 @@ import { LOGO_HEIGHT, LOGO_URL, LOGO_WIDTH } from './_brand.ts'
 
 interface MenuGuest { name?: string; starter?: string; main?: string; dessert?: string }
 interface LineItem { label?: string; qty?: number; unit_price_pence?: number }
+interface DrinkItem { name?: string; category?: string; qty?: number; unit_price_pence?: number }
 
 interface Props {
   bookerName?: string
@@ -30,6 +31,7 @@ interface Props {
   dietary?: string
   message?: string
   lineItems?: LineItem[]
+  drinks?: DrinkItem[]
   totalAmount?: string
   paymentStatusLabel?: string
   bookingRef?: string
@@ -53,6 +55,7 @@ const Email = ({
   dietary,
   message,
   lineItems = [],
+  drinks = [],
   totalAmount,
   paymentStatusLabel,
   bookingRef,
@@ -123,6 +126,21 @@ const Email = ({
                   <span>{li.qty || 1} × {li.label || ''}</span>
                   <span style={{ float: 'right' }}>
                     {formatPence((li.unit_price_pence || 0) * (li.qty || 1))}
+                  </span>
+                </Text>
+              ))}
+            </>
+          )}
+
+          {drinks.length > 0 && (
+            <>
+              <Hr style={hr} />
+              <Text style={labelStyle}>Drinks pre-order ({drinks.length})</Text>
+              {drinks.map((d, i) => (
+                <Text key={i} style={lineRow}>
+                  <span>{d.qty || 1} × {d.name || ''}{d.category ? ` (${d.category})` : ''}</span>
+                  <span style={{ float: 'right' }}>
+                    {formatPence((d.unit_price_pence || 0) * (d.qty || 1))}
                   </span>
                 </Text>
               ))}

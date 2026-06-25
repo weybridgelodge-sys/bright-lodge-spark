@@ -16,6 +16,7 @@ import { LOGO_HEIGHT, LOGO_URL, LOGO_WIDTH } from './_brand.ts'
 
 interface MenuGuest { name?: string; starter?: string; main?: string; dessert?: string }
 interface LineItem { label?: string; qty?: number; unit_price_pence?: number }
+interface DrinkItem { name?: string; category?: string; qty?: number; unit_price_pence?: number }
 
 interface Props {
   firstName?: string
@@ -27,6 +28,7 @@ interface Props {
   dietary?: string
   message?: string
   lineItems?: LineItem[]
+  drinks?: DrinkItem[]
   totalAmount?: string
   paymentStatusLabel?: string
   bookingRef?: string
@@ -49,6 +51,7 @@ const Email = ({
   dietary,
   message,
   lineItems = [],
+  drinks = [],
   totalAmount,
   paymentStatusLabel,
   bookingRef,
@@ -104,6 +107,24 @@ const Email = ({
               {seatingPreference && <Row label="Seating preference" value={seatingPreference} />}
               {dietary && <Row label="Dietary requirements" value={dietary} />}
               {message && <Row label="Notes" value={message} />}
+            </>
+          )}
+
+          {drinks.length > 0 && (
+            <>
+              <Hr style={hr} />
+              <Text style={labelStyle}>Drinks pre-order</Text>
+              {drinks.map((d, i) => (
+                <Text key={i} style={lineRow}>
+                  <span>{d.qty || 1} × {d.name || ''}{d.category ? ` (${d.category})` : ''}</span>
+                  <span style={{ float: 'right' }}>
+                    {formatPence((d.unit_price_pence || 0) * (d.qty || 1))}
+                  </span>
+                </Text>
+              ))}
+              <Text style={{ ...lineRow, color: '#666', fontSize: '12px', marginTop: '6px' }}>
+                Drinks are payable with the balance by 31 July 2026.
+              </Text>
             </>
           )}
 

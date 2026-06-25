@@ -160,6 +160,7 @@ export async function sendBookingEmails(bookingId: string, opts: SendOpts) {
   // ── Ladies Festival branch (dedicated templates) ──────────────────────────
   if (isLadiesFestival) {
     const lineItems = Array.isArray(b.line_items) ? b.line_items : []
+    const drinks = Array.isArray(details.drinkItems) ? details.drinkItems : []
     const guestCount = typeof details.guestCount === 'number' ? details.guestCount : guests.length
     const seatingPreference = details.seatingPreference || ''
     const message = details.message || ''
@@ -181,6 +182,7 @@ export async function sendBookingEmails(bookingId: string, opts: SendOpts) {
             dietary,
             message,
             lineItems,
+            drinks,
             totalAmount,
             paymentStatusLabel: psLabel,
             bookingRef,
@@ -211,6 +213,7 @@ export async function sendBookingEmails(bookingId: string, opts: SendOpts) {
           dietary,
           message,
           lineItems,
+          drinks,
           totalAmount,
           paymentStatusLabel: psLabel,
           bookingRef,

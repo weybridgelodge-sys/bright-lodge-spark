@@ -1292,6 +1292,22 @@ const LadiesFestival = () => {
                       message: submitted.message,
                       wineOrders,
                       beerOrders,
+                      drinkItems: [
+                        ...Object.entries(wineOrders)
+                          .filter(([, qty]) => qty > 0)
+                          .map(([id, qty]) => {
+                            const w = wineOptions.find((x) => x.id === id);
+                            return w ? { name: w.name, category: w.category, qty, unit_price_pence: w.price * 100 } : null;
+                          })
+                          .filter(Boolean),
+                        ...Object.entries(beerOrders)
+                          .filter(([, qty]) => qty > 0)
+                          .map(([id, qty]) => {
+                            const b = beerOptions.find((x) => x.id === id);
+                            return b ? { name: b.name, category: "Beer & Vouchers", qty, unit_price_pence: b.price * 100 } : null;
+                          })
+                          .filter(Boolean),
+                      ],
                       paymentOption,
                       bookingTotalPence: grandTotalPence,
                       depositPence: paymentOption === "deposit" ? depositPence : null,
