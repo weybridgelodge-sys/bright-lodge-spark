@@ -37,6 +37,8 @@ const Email = ({ name, email, phone, reason, submittedAt, source }: Props) => (
             alt="Weybridge Lodge crest"
             style={{ margin: '0 auto', display: 'block' }}
           />
+          <Heading style={brand}>Weybridge Lodge</Heading>
+          <Text style={brandSub}>No. 6787 — Province of Surrey</Text>
         </Section>
         <Heading style={h1}>New Membership Enquiry</Heading>
         <Text style={meta}>Source: {source || 'join-us'} · {submittedAt || ''}</Text>
