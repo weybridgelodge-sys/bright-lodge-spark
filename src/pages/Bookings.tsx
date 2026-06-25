@@ -426,7 +426,7 @@ const Bookings = () => {
               </div>
             ) : (
               <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.1 }}>
-                <form onSubmit={handleSubmit} className="bg-card rounded-sm border border-border shadow-lg p-5 sm:p-8">
+                <form ref={formRef} onSubmit={handleSubmit} className="bg-card rounded-sm border border-border shadow-lg p-5 sm:p-8 scroll-mt-24">
                   <div className="flex items-center justify-center gap-2 mb-8" role="tablist" aria-label="Form steps">
                     {[1, 2, 3].map((s) => {
                       const hidePayment = s === 3 && meetingOption !== "meeting-and-festive-board";
