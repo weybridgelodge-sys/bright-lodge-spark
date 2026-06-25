@@ -904,7 +904,7 @@ const LadiesFestival = () => {
                           </div>
                           <div className="text-right">
                             <p className="font-sans text-foreground font-semibold text-lg">£{ticketSubtotal}</p>
-                            <p className="text-xs text-muted-foreground font-sans">{guestCount} × £{TICKET_PRICE}</p>
+                            <p className="text-xs text-muted-foreground font-sans">{totalAttendees} × £{TICKET_PRICE}</p>
                           </div>
                         </div>
                       </div>
