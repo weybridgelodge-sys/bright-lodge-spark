@@ -7,7 +7,7 @@ import { StripeEmbeddedCheckoutPanel, type BookingLineItem } from "@/components/
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Calendar, Clock, MapPin, Shirt, CalendarClock, UtensilsCrossed, CheckCircle, Loader2 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { getStripeEnvironment } from "@/lib/stripe";
