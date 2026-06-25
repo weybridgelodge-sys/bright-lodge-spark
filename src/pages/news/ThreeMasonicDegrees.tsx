@@ -130,6 +130,7 @@ const ThreeMasonicDegrees = () => {
                 <p className="text-muted-foreground font-sans leading-relaxed mt-4">
                   After Initiation, the new Brother begins to attend our weekly Lodge of Instruction, meet the other members of the Lodge informally, and prepare quietly for the next step.
                 </p>
+                <img src={enteredApprenticeImg} alt="Entered Apprentice apron — plain white lambskin" loading="lazy" className={apronImgClass} />
               </section>
 
               <section id="second-degree">
