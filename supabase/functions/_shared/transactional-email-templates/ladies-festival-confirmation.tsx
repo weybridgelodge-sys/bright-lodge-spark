@@ -16,6 +16,7 @@ import { LOGO_HEIGHT, LOGO_URL, LOGO_WIDTH } from './_brand.ts'
 
 interface MenuGuest { name?: string; starter?: string; main?: string; dessert?: string }
 interface LineItem { label?: string; qty?: number; unit_price_pence?: number }
+interface DrinkItem { name?: string; category?: string; qty?: number; unit_price_pence?: number }
 
 interface Props {
   firstName?: string
@@ -27,6 +28,7 @@ interface Props {
   dietary?: string
   message?: string
   lineItems?: LineItem[]
+  drinks?: DrinkItem[]
   totalAmount?: string
   paymentStatusLabel?: string
   bookingRef?: string
