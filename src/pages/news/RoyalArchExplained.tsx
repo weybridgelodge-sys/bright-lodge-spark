@@ -12,6 +12,7 @@ import { Calendar, User, ArrowLeft } from "lucide-react";
 
 import heroImg from "@/assets/news/royal-arch-explained.jpg";
 import royalArchApronImg from "@/assets/news/aprons/royal-arch.png";
+import royalArchRobesAsset from "@/assets/news/royal-arch-robes.png.asset.json";
 
 const tocItems = [
   { id: "introduction", label: "Introduction" },
@@ -205,6 +206,17 @@ const RoyalArchExplained = () => {
                 <p className="text-muted-foreground font-sans leading-relaxed mt-4">
                   The principal officers of a Chapter are the Three Principals — the First, Second, and Third Principal — who preside jointly over the Chapter in a way that has no direct parallel in Craft Masonry. The ceremony of Exaltation, by which a new Companion is received into the Chapter, is widely regarded as the most dramatic and thought-provoking of all Masonic ceremonies.
                 </p>
+                <figure className="mt-6">
+                  <img
+                    src={royalArchRobesAsset.url}
+                    alt="Robes of the Three Principals — scarlet, blue, and purple with gold trim and white panels"
+                    className="w-full rounded-lg border border-gold/20"
+                    loading="lazy"
+                  />
+                  <figcaption className="text-sm text-muted-foreground font-sans mt-2 italic text-center">
+                    The robes of the Three Principals — scarlet, blue, and purple — worn during Chapter ceremonies.
+                  </figcaption>
+                </figure>
               </section>
 
               <section id="surrey">
