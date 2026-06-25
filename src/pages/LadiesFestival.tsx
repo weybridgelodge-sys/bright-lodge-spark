@@ -212,16 +212,30 @@ const LadiesFestival = () => {
     return sum + (beer ? beer.price * qty : 0);
   }, 0);
 
-  const ticketSubtotal = guestCount * TICKET_PRICE;
+  const ticketSubtotal = totalAttendees * TICKET_PRICE;
   const drinksTotal = wineTotal + beerTotal;
   const grandTotal = ticketSubtotal + drinksTotal;
-  const subtotalPence = grandTotal * 100;
+  // Apply the chosen payment option (full or 33.33% deposit) to the amount due now
+  const grandTotalPence = grandTotal * 100;
+  const depositPence = Math.round(grandTotalPence / 3);
+  const balanceDuePence = paymentOption === "deposit" ? grandTotalPence - depositPence : 0;
+  const subtotalPence = paymentOption === "deposit" ? depositPence : grandTotalPence;
   const feePence = coverFee ? Math.ceil(subtotalPence * 0.02) : 0;
   const totalPence = subtotalPence + feePence;
 
   const buildLineItems = (): BookingLineItem[] => {
+    if (paymentOption === "deposit") {
+      // Single line item for the deposit; full breakdown is preserved in `details`
+      return [
+        {
+          label: `Ladies Festival 2026 — 33% deposit (${totalAttendees} place${totalAttendees === 1 ? "" : "s"})`,
+          qty: 1,
+          unit_price_pence: depositPence,
+        },
+      ];
+    }
     const items: BookingLineItem[] = [
-      { label: `Ladies Festival 2026 — ticket`, qty: guestCount, unit_price_pence: TICKET_PRICE * 100 },
+      { label: `Ladies Festival 2026 — ticket`, qty: totalAttendees, unit_price_pence: TICKET_PRICE * 100 },
     ];
     for (const [id, qty] of Object.entries(wineOrders)) {
       if (qty > 0) {
