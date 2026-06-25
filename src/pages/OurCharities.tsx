@@ -9,6 +9,7 @@ import { Link } from "react-router-dom";
 import sandsLogo from "@/assets/links/sands-logo.jpg";
 import tlcLogo from "@/assets/links/tlc-logo.ico";
 import surrey2030Logo from "@/assets/surrey-2030-gold.png";
+import thamesChallengeImg from "@/assets/thames-challenge/tc-source-stone.jpg.asset.json";
 
 const charities = [
   {
@@ -99,8 +100,8 @@ const OurCharities = () => {
                 </Link>
               </div>
               <img
-                src="/placeholder.svg"
-                alt="Thames Towpath Challenge feature preview"
+                src={thamesChallengeImg.url}
+                alt="Walker at the Thames source stone during the Weybridge Lodge challenge"
                 className="hidden md:block w-full rounded-sm border border-border bg-muted object-cover aspect-[4/3]"
               />
             </div>
