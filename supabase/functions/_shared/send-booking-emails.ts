@@ -197,6 +197,7 @@ export async function sendBookingEmails(bookingId: string, opts: SendOpts) {
         templateName: 'ladies-festival-notification',
         recipientEmail: notifyTo,
         idempotencyKey: `lf-notify-${b.id}-${opts.stage}`,
+        replyTo: b.contact_email || undefined,
         templateData: {
           bookerName: b.contact_name,
           bookerEmail: b.contact_email,
@@ -255,6 +256,7 @@ export async function sendBookingEmails(bookingId: string, opts: SendOpts) {
       templateName: 'booking-notification',
       recipientEmail: notifyTo,
       idempotencyKey: `booking-notify-${b.id}-${opts.stage}`,
+      replyTo: b.contact_email || undefined,
       templateData: {
         bookerName: b.contact_name,
         bookerEmail: b.contact_email,

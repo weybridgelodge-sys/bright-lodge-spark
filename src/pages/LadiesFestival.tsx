@@ -60,7 +60,7 @@ const bookingSchema = z.object({
   name: z.string().trim().min(2, "Please enter your name").max(100, "Name must be under 100 characters"),
   email: z.string().trim().email("Please enter a valid email").max(255, "Email must be under 255 characters"),
   phone: z.string().trim().min(5, "Please enter a valid phone number").max(20, "Phone number must be under 20 characters"),
-  guests: z.string().min(1, "Please enter number of guests"),
+  guests: z.string().min(1, "Please enter number of additional guests"),
   seatingPreference: z.string().max(500, "Please keep seating notes under 500 characters").optional(),
   dietary: z.string().max(500, "Please keep dietary notes under 500 characters").optional(),
   message: z.string().max(1000, "Please keep your message under 1000 characters").optional(),
@@ -133,29 +133,30 @@ const LadiesFestival = () => {
   const { toast } = useToast();
   const [wineOrders, setWineOrders] = useState<Record<string, number>>({});
   const [beerOrders, setBeerOrders] = useState<Record<string, number>>({});
-  const [guestCount, setGuestCount] = useState(1);
-  const [guests, setGuests] = useState<GuestInfo[]>([{ name: "", starter: "", main: "", dessert: "" }]);
+  // guestCount = number of ADDITIONAL guests beyond the lead booker
+  const [guestCount, setGuestCount] = useState(0);
+  const [leadGuest, setLeadGuest] = useState<GuestInfo>({ name: "", starter: "", main: "", dessert: "" });
+  const [guests, setGuests] = useState<GuestInfo[]>([]);
   const [formStep, setFormStep] = useState(1);
   const [showCheckout, setShowCheckout] = useState(false);
   const [coverFee, setCoverFee] = useState(false);
+  const [paymentOption, setPaymentOption] = useState<"full" | "deposit">("full");
   const [submitted, setSubmitted] = useState<BookingValues | null>(null);
 
   const form = useForm<BookingValues>({
     resolver: zodResolver(bookingSchema),
-    defaultValues: { name: "", email: "", phone: "", guests: "1", seatingPreference: "", dietary: "", message: "" },
+    defaultValues: { name: "", email: "", phone: "", guests: "0", seatingPreference: "", dietary: "", message: "" },
   });
 
   const contactName = form.watch("name");
 
-  // Prefill guest 1 name with contact name when only 1 guest
+  // Keep lead booker's name in sync with the contact name field
   useEffect(() => {
-    if (guestCount === 1 && contactName) {
-      setGuests((prev) => [{ ...prev[0], name: contactName }]);
-    }
-  }, [contactName, guestCount]);
+    setLeadGuest((prev) => ({ ...prev, name: contactName || "" }));
+  }, [contactName]);
 
   const updateGuestCount = (count: number) => {
-    const clamped = Math.max(1, Math.min(20, count));
+    const clamped = Math.max(0, Math.min(19, count));
     setGuestCount(clamped);
     setGuests((prev) => {
       if (clamped > prev.length) {
@@ -168,6 +169,14 @@ const LadiesFestival = () => {
   const updateGuest = (index: number, field: keyof GuestInfo, value: string) => {
     setGuests((prev) => prev.map((g, i) => (i === index ? { ...g, [field]: value } : g)));
   };
+
+  const updateLeadGuest = (field: keyof GuestInfo, value: string) => {
+    setLeadGuest((prev) => ({ ...prev, [field]: value }));
+  };
+
+  // Combined list of all attendees (lead booker + additional guests) for summaries & emails
+  const allAttendees: GuestInfo[] = [leadGuest, ...guests];
+  const totalAttendees = 1 + guestCount;
 
   const updateWine = (id: string, delta: number) => {
     setWineOrders((prev) => {
@@ -203,16 +212,30 @@ const LadiesFestival = () => {
     return sum + (beer ? beer.price * qty : 0);
   }, 0);
 
-  const ticketSubtotal = guestCount * TICKET_PRICE;
+  const ticketSubtotal = totalAttendees * TICKET_PRICE;
   const drinksTotal = wineTotal + beerTotal;
   const grandTotal = ticketSubtotal + drinksTotal;
-  const subtotalPence = grandTotal * 100;
+  // Apply the chosen payment option (full or 33.33% deposit) to the amount due now
+  const grandTotalPence = grandTotal * 100;
+  const depositPence = Math.round(grandTotalPence / 3);
+  const balanceDuePence = paymentOption === "deposit" ? grandTotalPence - depositPence : 0;
+  const subtotalPence = paymentOption === "deposit" ? depositPence : grandTotalPence;
   const feePence = coverFee ? Math.ceil(subtotalPence * 0.02) : 0;
   const totalPence = subtotalPence + feePence;
 
   const buildLineItems = (): BookingLineItem[] => {
+    if (paymentOption === "deposit") {
+      // Single line item for the deposit; full breakdown is preserved in `details`
+      return [
+        {
+          label: `Ladies Festival 2026 — 33% deposit (${totalAttendees} place${totalAttendees === 1 ? "" : "s"})`,
+          qty: 1,
+          unit_price_pence: depositPence,
+        },
+      ];
+    }
     const items: BookingLineItem[] = [
-      { label: `Ladies Festival 2026 — ticket`, qty: guestCount, unit_price_pence: TICKET_PRICE * 100 },
+      { label: `Ladies Festival 2026 — ticket`, qty: totalAttendees, unit_price_pence: TICKET_PRICE * 100 },
     ];
     for (const [id, qty] of Object.entries(wineOrders)) {
       if (qty > 0) {
@@ -685,52 +708,56 @@ const LadiesFestival = () => {
                         />
                       </div>
 
-                      {/* Number of Guests */}
+                      {/* Number of Additional Guests */}
                       <FormField
                         control={form.control}
                         name="guests"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="font-sans text-foreground">Number of Guests *</FormLabel>
+                            <FormLabel className="font-sans text-foreground">Number of Additional Guests *</FormLabel>
                             <FormControl>
                               <Input
                                 type="number"
-                                min="1"
-                                max="20"
-                                placeholder="2"
+                                min="0"
+                                max="19"
+                                placeholder="0"
                                 {...field}
                                 onChange={(e) => {
                                   field.onChange(e);
                                   const val = parseInt(e.target.value);
-                                  if (!isNaN(val) && val > 0) updateGuestCount(val);
+                                  if (!isNaN(val) && val >= 0) updateGuestCount(val);
                                 }}
                               />
                             </FormControl>
+                            <p className="text-xs text-muted-foreground font-sans mt-1">
+                              In addition to yourself. Total places: <span className="font-semibold text-foreground">{totalAttendees}</span> (you + {guestCount} guest{guestCount === 1 ? "" : "s"}).
+                            </p>
                             <FormMessage />
                           </FormItem>
                         )}
                       />
 
-                      {/* Guest Names */}
-                      <div className="border-t border-border pt-6">
-                        <div className="flex items-center gap-2 mb-4">
-                          <Users className="w-5 h-5 text-gold-dark" aria-hidden="true" />
-                          <h3 className="font-serif text-foreground text-lg">Guest Names</h3>
+                      {/* Additional Guest Names */}
+                      {guestCount > 0 && (
+                        <div className="border-t border-border pt-6">
+                          <div className="flex items-center gap-2 mb-4">
+                            <Users className="w-5 h-5 text-gold-dark" aria-hidden="true" />
+                            <h3 className="font-serif text-foreground text-lg">Additional Guest Names</h3>
+                          </div>
+                          <div className="space-y-3">
+                            {guests.map((guest, i) => (
+                              <div key={i}>
+                                <label className="text-sm font-sans text-foreground font-medium mb-1.5 block">Guest {i + 1}</label>
+                                <Input
+                                  placeholder={`Guest ${i + 1} full name`}
+                                  value={guest.name}
+                                  onChange={(e) => updateGuest(i, "name", e.target.value)}
+                                />
+                              </div>
+                            ))}
+                          </div>
                         </div>
-                        <div className="space-y-3">
-                          {guests.map((guest, i) => (
-                            <div key={i}>
-                              <label className="text-sm font-sans text-foreground font-medium mb-1.5 block">Guest {i + 1}</label>
-                              <Input
-                                placeholder={`Guest ${i + 1} full name`}
-                                value={guest.name}
-                                onChange={(e) => updateGuest(i, "name", e.target.value)}
-                                disabled={i === 0 && guestCount === 1}
-                              />
-                            </div>
-                          ))}
-                        </div>
-                      </div>
+                      )}
 
                       {/* Table Seating Preference */}
                       <FormField
@@ -747,16 +774,64 @@ const LadiesFestival = () => {
                         )}
                       />
 
-                      {/* Menu Choices */}
+                      {/* Menu Choices — lead booker first, then guests */}
                       <div className="border-t border-border pt-6">
                         <div className="flex items-center gap-2 mb-4">
                           <UtensilsCrossed className="w-5 h-5 text-gold-dark" aria-hidden="true" />
                           <h3 className="font-serif text-foreground text-lg">Menu Choices</h3>
                         </div>
                         <p className="text-sm text-muted-foreground font-sans mb-5">
-                          Please select a starter, main and dessert for each guest.
+                          Please select a starter, main and dessert for each attendee, including yourself.
                         </p>
                         <div className="space-y-6">
+                          {/* Lead booker */}
+                          <div className="bg-warm-white border border-gold/40 rounded-sm p-4 space-y-3">
+                            <p className="font-sans font-medium text-foreground text-sm">
+                              {leadGuest.name || "You"}{" "}
+                              <span className="text-xs text-gold-dark uppercase tracking-wider ml-1">Lead booker</span>
+                            </p>
+                            <div>
+                              <label className="text-xs font-sans text-muted-foreground uppercase tracking-wider mb-1 block">Starter</label>
+                              <select aria-label="Starter for lead booker"
+                                value={leadGuest.starter}
+                                onChange={(e) => updateLeadGuest("starter", e.target.value)}
+                                className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm font-sans text-foreground ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                              >
+                                <option value="">Select starter…</option>
+                                {menuChoices.starter.map((c) => (
+                                  <option key={c.value} value={c.value}>{c.label}</option>
+                                ))}
+                              </select>
+                            </div>
+                            <div>
+                              <label className="text-xs font-sans text-muted-foreground uppercase tracking-wider mb-1 block">Main</label>
+                              <select aria-label="Main for lead booker"
+                                value={leadGuest.main}
+                                onChange={(e) => updateLeadGuest("main", e.target.value)}
+                                className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm font-sans text-foreground ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                              >
+                                <option value="">Select main…</option>
+                                {menuChoices.main.map((c) => (
+                                  <option key={c.value} value={c.value}>{c.label}</option>
+                                ))}
+                              </select>
+                            </div>
+                            <div>
+                              <label className="text-xs font-sans text-muted-foreground uppercase tracking-wider mb-1 block">Dessert</label>
+                              <select aria-label="Dessert for lead booker"
+                                value={leadGuest.dessert}
+                                onChange={(e) => updateLeadGuest("dessert", e.target.value)}
+                                className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm font-sans text-foreground ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                              >
+                                <option value="">Select dessert…</option>
+                                {menuChoices.dessert.map((c) => (
+                                  <option key={c.value} value={c.value}>{c.label}</option>
+                                ))}
+                              </select>
+                            </div>
+                          </div>
+
+                          {/* Additional guests */}
                           {guests.map((guest, i) => (
                             <div key={i} className="bg-warm-white border border-border rounded-sm p-4 space-y-3">
                               <p className="font-sans font-medium text-foreground text-sm">{guest.name || `Guest ${i + 1}`}</p>
@@ -804,6 +879,7 @@ const LadiesFestival = () => {
                         </div>
                       </div>
 
+
                       {/* Dietary Requirements */}
                       <FormField
                         control={form.control}
@@ -828,7 +904,7 @@ const LadiesFestival = () => {
                           </div>
                           <div className="text-right">
                             <p className="font-sans text-foreground font-semibold text-lg">£{ticketSubtotal}</p>
-                            <p className="text-xs text-muted-foreground font-sans">{guestCount} × £{TICKET_PRICE}</p>
+                            <p className="text-xs text-muted-foreground font-sans">{totalAttendees} × £{TICKET_PRICE}</p>
                           </div>
                         </div>
                       </div>
@@ -1009,14 +1085,17 @@ const LadiesFestival = () => {
                           <span className="text-foreground font-medium">{form.getValues("email")}</span>
                         </div>
                         <div className="flex justify-between text-sm font-sans">
-                          <span className="text-muted-foreground">Guests</span>
-                          <span className="text-foreground font-medium">{guestCount}</span>
+                          <span className="text-muted-foreground">Total places</span>
+                          <span className="text-foreground font-medium">{totalAttendees} (you + {guestCount} guest{guestCount === 1 ? "" : "s"})</span>
                         </div>
 
                         <div className="border-t border-border pt-4 space-y-2">
-                          {guests.map((g, i) => (
+                          {allAttendees.map((g, i) => (
                             <div key={i} className="text-sm font-sans">
-                              <p className="text-foreground font-medium">{g.name || `Guest ${i + 1}`}</p>
+                              <p className="text-foreground font-medium">
+                                {g.name || (i === 0 ? "You" : `Guest ${i}`)}
+                                {i === 0 && <span className="text-xs text-gold-dark uppercase tracking-wider ml-2">Lead booker</span>}
+                              </p>
                               <p className="text-muted-foreground text-xs">
                                 {menuChoices.starter.find((c) => c.value === g.starter)?.label || "No starter"} ·{" "}
                                 {menuChoices.main.find((c) => c.value === g.main)?.label || "No main"} ·{" "}
@@ -1043,7 +1122,7 @@ const LadiesFestival = () => {
                         {/* Cost breakdown */}
                         <div className="border-t border-border pt-4 space-y-2">
                           <div className="flex justify-between text-sm font-sans">
-                            <span className="text-muted-foreground">Tickets ({guestCount} × £{TICKET_PRICE})</span>
+                            <span className="text-muted-foreground">Tickets ({totalAttendees} × £{TICKET_PRICE})</span>
                             <span className="text-foreground">£{ticketSubtotal}</span>
                           </div>
                           {drinksTotal > 0 && (
@@ -1053,10 +1132,44 @@ const LadiesFestival = () => {
                             </div>
                           )}
                           <div className="flex justify-between text-sm font-sans font-semibold border-t border-border pt-2">
-                            <span className="text-foreground">Total</span>
+                            <span className="text-foreground">Booking total</span>
                             <span className="text-gold-dark text-lg">£{grandTotal}</span>
                           </div>
                         </div>
+                      </div>
+
+                      {/* Payment option */}
+                      <div className="bg-card border border-border rounded-sm p-5 space-y-3">
+                        <p className="font-sans font-medium text-foreground text-sm">Payment option</p>
+                        <label className="flex items-start gap-3 cursor-pointer">
+                          <input
+                            type="radio"
+                            name="paymentOption"
+                            value="full"
+                            checked={paymentOption === "full"}
+                            onChange={() => setPaymentOption("full")}
+                            className="mt-1 accent-[hsl(var(--gold))]"
+                          />
+                          <span className="text-sm font-sans text-foreground">
+                            <span className="font-semibold">Pay in full now</span> — £{grandTotal.toFixed(2)}
+                          </span>
+                        </label>
+                        <label className="flex items-start gap-3 cursor-pointer">
+                          <input
+                            type="radio"
+                            name="paymentOption"
+                            value="deposit"
+                            checked={paymentOption === "deposit"}
+                            onChange={() => setPaymentOption("deposit")}
+                            className="mt-1 accent-[hsl(var(--gold))]"
+                          />
+                          <span className="text-sm font-sans text-foreground">
+                            <span className="font-semibold">Pay 33% deposit now</span> — £{(depositPence / 100).toFixed(2)}
+                            <span className="block text-xs text-muted-foreground mt-0.5">
+                              Balance of £{(balanceDuePence / 100).toFixed(2)} due by 31 July 2026 — a secure payment link will be emailed nearer the date.
+                            </span>
+                          </span>
+                        </label>
                       </div>
 
                       {/* Additional message */}
@@ -1095,11 +1208,12 @@ const LadiesFestival = () => {
                         <label className="flex items-start gap-3 cursor-pointer">
                           <input type="checkbox" checked={coverFee} onChange={(e) => setCoverFee(e.target.checked)} className="mt-1 accent-[hsl(var(--gold))]" />
                           <span className="text-sm font-sans text-foreground">
-                            Add ~2% (£{(Math.ceil(grandTotal * 100 * 0.02) / 100).toFixed(2)}) to cover card processing fees
+                            Add ~2% (£{(Math.ceil(subtotalPence * 0.02) / 100).toFixed(2)}) to cover card processing fees
                           </span>
                         </label>
                         <p className="text-xs text-muted-foreground font-sans text-center">
-                          You'll pay £{(totalPence / 100).toFixed(2)} securely by debit / credit card on the next step.
+                          You'll pay £{(totalPence / 100).toFixed(2)} securely by debit / credit card on the next step
+                          {paymentOption === "deposit" && <> (deposit only — balance billed end July 2026)</>}.
                         </p>
                       </div>
                     </div>
@@ -1117,25 +1231,36 @@ const LadiesFestival = () => {
                     </button>
                   </div>
                   <p className="text-sm text-muted-foreground font-sans">
-                    Total: <strong className="text-foreground">£{(totalPence / 100).toFixed(2)}</strong>
+                    {paymentOption === "deposit" ? "Deposit due now" : "Total"}: <strong className="text-foreground">£{(totalPence / 100).toFixed(2)}</strong>
                     {feePence > 0 && <> (includes £{(feePence / 100).toFixed(2)} card fee)</>}
+                    {paymentOption === "deposit" && (
+                      <> · Balance £{(balanceDuePence / 100).toFixed(2)} payable by 31 July 2026.</>
+                    )}
                   </p>
                   <StripeEmbeddedCheckoutPanel
                     event_key="ladies_festival_2026"
-                    event_label="Ladies Festival 2026 — 22 Aug"
+                    event_label={paymentOption === "deposit" ? "Ladies Festival 2026 — 22 Aug (deposit)" : "Ladies Festival 2026 — 22 Aug"}
                     contact_name={submitted.name}
                     contact_email={submitted.email}
                     contact_phone={submitted.phone}
                     cover_fee={coverFee}
                     line_items={buildLineItems()}
                     details={{
-                      guestCount,
-                      guests,
+                      guestCount: totalAttendees,
+                      additionalGuestCount: guestCount,
+                      // Full attendee list (lead booker first) so emails show all meal choices
+                      guests: allAttendees,
+                      leadGuest,
                       seatingPreference: submitted.seatingPreference,
                       dietary: submitted.dietary,
                       message: submitted.message,
                       wineOrders,
                       beerOrders,
+                      paymentOption,
+                      bookingTotalPence: grandTotalPence,
+                      depositPence: paymentOption === "deposit" ? depositPence : null,
+                      balanceDuePence: paymentOption === "deposit" ? balanceDuePence : 0,
+                      balanceDueBy: paymentOption === "deposit" ? "2026-07-31" : null,
                     }}
                     return_url={`${window.location.origin}/checkout/return?session_id={CHECKOUT_SESSION_ID}`}
                     onError={(msg) => toast({ title: "Checkout error", description: msg, variant: "destructive" })}
