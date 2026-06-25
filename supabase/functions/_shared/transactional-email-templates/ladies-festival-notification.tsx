@@ -131,6 +131,21 @@ const Email = ({
               ))}
             </>
           )}
+
+          {drinks.length > 0 && (
+            <>
+              <Hr style={hr} />
+              <Text style={labelStyle}>Drinks pre-order ({drinks.length})</Text>
+              {drinks.map((d, i) => (
+                <Text key={i} style={lineRow}>
+                  <span>{d.qty || 1} × {d.name || ''}{d.category ? ` (${d.category})` : ''}</span>
+                  <span style={{ float: 'right' }}>
+                    {formatPence((d.unit_price_pence || 0) * (d.qty || 1))}
+                  </span>
+                </Text>
+              ))}
+            </>
+          )}
         </Section>
 
         <Text style={footerText}>
