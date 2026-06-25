@@ -120,6 +120,7 @@ export async function sendBookingEmails(bookingId: string, opts: SendOpts) {
   const details: any = b.details || {}
   const meetingOpt: string = details.meetingOption || ''
   const isApologies = meetingOpt === 'apologies' || b.payment_status === 'apologies'
+  const isLadiesFestival = typeof b.event_key === 'string' && b.event_key.startsWith('ladies_festival')
 
   // Resolve event date from linked festive board meeting (if any)
   let eventDate = ''
@@ -131,11 +132,17 @@ export async function sendBookingEmails(bookingId: string, opts: SendOpts) {
       .maybeSingle()
     eventDate = formatDate((m as any)?.meeting_date)
   }
+  if (!eventDate && isLadiesFestival) {
+    eventDate = 'Saturday 22 August 2026'
+  }
 
   const guests = Array.isArray(details.guests) ? details.guests.map((g: any) => ({
     name: g?.name || '',
     lodge: g?.lodge || '',
     dietary: g?.dietary || g?.dietaryRequirements || '',
+    starter: g?.starter || '',
+    main: g?.main || '',
+    dessert: g?.dessert || '',
   })) : []
 
   const totalAmount = formatGBP(b.total_pence)
@@ -149,6 +156,69 @@ export async function sendBookingEmails(bookingId: string, opts: SendOpts) {
   const submittedAt = new Date(b.created_at).toLocaleString('en-GB', { timeZone: 'Europe/London' })
 
   const { secretaryName, secretaryOffice } = await lookupSecretarySignature(supabase)
+
+  // ── Ladies Festival branch (dedicated templates) ──────────────────────────
+  if (isLadiesFestival) {
+    const lineItems = Array.isArray(b.line_items) ? b.line_items : []
+    const guestCount = typeof details.guestCount === 'number' ? details.guestCount : guests.length
+    const seatingPreference = details.seatingPreference || ''
+    const message = details.message || ''
+
+    if (b.contact_email) {
+      const confRes = await supabase.functions.invoke('send-transactional-email', {
+        body: {
+          templateName: 'ladies-festival-confirmation',
+          recipientEmail: b.contact_email,
+          idempotencyKey: `lf-confirm-${b.id}-${opts.stage}`,
+          templateData: {
+            firstName,
+            eventLabel: eventLabel || 'Ladies Festival 2026',
+            eventDate,
+            guestCount,
+            guests,
+            seatingPreference,
+            dietary,
+            message,
+            lineItems,
+            totalAmount,
+            paymentStatusLabel: psLabel,
+            bookingRef,
+            secretaryName,
+            secretaryOffice,
+          },
+        },
+      })
+      if (confRes.error) console.error('Ladies Festival confirmation email failed', confRes.error)
+    }
+
+    const notifyTo = opts.overrideNotifyEmail || ASSISTANT_SECRETARY_EMAIL
+    const notifRes = await supabase.functions.invoke('send-transactional-email', {
+      body: {
+        templateName: 'ladies-festival-notification',
+        recipientEmail: notifyTo,
+        idempotencyKey: `lf-notify-${b.id}-${opts.stage}`,
+        templateData: {
+          bookerName: b.contact_name,
+          bookerEmail: b.contact_email,
+          bookerPhone: b.contact_phone,
+          eventLabel: eventLabel || 'Ladies Festival 2026',
+          eventDate,
+          guestCount,
+          guests,
+          seatingPreference,
+          dietary,
+          message,
+          lineItems,
+          totalAmount,
+          paymentStatusLabel: psLabel,
+          bookingRef,
+          submittedAt,
+        },
+      },
+    })
+    if (notifRes.error) console.error('Ladies Festival notification email failed', notifRes.error)
+    return
+  }
 
   // 1) Booker confirmation
   if (b.contact_email) {
