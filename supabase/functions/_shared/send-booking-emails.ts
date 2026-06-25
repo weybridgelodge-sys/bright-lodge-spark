@@ -170,6 +170,7 @@ export async function sendBookingEmails(bookingId: string, opts: SendOpts) {
           templateName: 'ladies-festival-confirmation',
           recipientEmail: b.contact_email,
           idempotencyKey: `lf-confirm-${b.id}-${opts.stage}`,
+          replyTo: ASSISTANT_SECRETARY_EMAIL,
           templateData: {
             firstName,
             eventLabel: eventLabel || 'Ladies Festival 2026',
