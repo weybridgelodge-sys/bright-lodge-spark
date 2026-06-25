@@ -75,7 +75,7 @@ export const template = {
   component: Email,
   subject: 'Thank you for your enquiry — Weybridge Lodge',
   displayName: 'Enquiry confirmation',
-  previewData: { name: 'Jane' },
+  previewData: { name: 'Jane', secretaryName: 'W Bro. Richard Smith', secretaryOffice: 'Lodge Secretary' },
 } satisfies TemplateEntry
 
 const main = { backgroundColor: '#ffffff', fontFamily: 'Georgia, "Times New Roman", serif', margin: 0, padding: 0 }
