@@ -50,7 +50,7 @@ const Hero = () => {
               </span>
             </h1>
             <p className="text-lg md:text-xl text-primary-foreground/80 font-sans font-light leading-relaxed mb-10 max-w-xl">
-              Weybridge Lodge No. 6787 is a friendly group of men in Guildford — aged 32 to 80 — who meet to make genuine friendships, support local charities, and grow as people. New members are always welcome.
+              Weybridge Lodge No. 6787 is a friendly group of men in Guildford — aged 18 to 80 — who meet to make genuine friendships, support local charities, and grow as people. New members are always welcome.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <Link
