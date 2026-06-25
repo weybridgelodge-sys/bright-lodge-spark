@@ -7,7 +7,7 @@ import { StripeEmbeddedCheckoutPanel, type BookingLineItem } from "@/components/
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Calendar, Clock, MapPin, Shirt, CalendarClock, UtensilsCrossed, CheckCircle, Loader2 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { getStripeEnvironment } from "@/lib/stripe";
@@ -97,6 +97,12 @@ const Bookings = () => {
 
   // Form state
   const [step, setStep] = useState(1);
+  const formRef = useRef<HTMLFormElement>(null);
+  useEffect(() => {
+    if (formRef.current) {
+      formRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [step]);
   const [showCheckout, setShowCheckout] = useState(false);
   const [submissionStatus, setSubmissionStatus] = useState<"idle" | "submitting" | "meeting-only" | "apologies" | "bank-transfer" | "cash-cheque" | "error">("idle");
   const [title, setTitle] = useState("");
@@ -420,7 +426,7 @@ const Bookings = () => {
               </div>
             ) : (
               <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.1 }}>
-                <form onSubmit={handleSubmit} className="bg-card rounded-sm border border-border shadow-lg p-5 sm:p-8">
+                <form ref={formRef} onSubmit={handleSubmit} className="bg-card rounded-sm border border-border shadow-lg p-5 sm:p-8 scroll-mt-24">
                   <div className="flex items-center justify-center gap-2 mb-8" role="tablist" aria-label="Form steps">
                     {[1, 2, 3].map((s) => {
                       const hidePayment = s === 3 && meetingOption !== "meeting-and-festive-board";

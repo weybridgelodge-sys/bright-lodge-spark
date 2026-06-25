@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEO, { breadcrumbSchema } from "@/components/SEO";
@@ -148,6 +148,12 @@ const LadiesFestival = () => {
   const [leadGuest, setLeadGuest] = useState<GuestInfo>({ name: "", starter: "", main: "", dessert: "" });
   const [guests, setGuests] = useState<GuestInfo[]>([]);
   const [formStep, setFormStep] = useState(1);
+  const formRef = useRef<HTMLFormElement>(null);
+  useEffect(() => {
+    if (formRef.current) {
+      formRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [formStep]);
   const [showCheckout, setShowCheckout] = useState(false);
   const [coverFee, setCoverFee] = useState(false);
   const [paymentOption, setPaymentOption] = useState<"full" | "deposit">("full");
@@ -671,6 +677,7 @@ const LadiesFestival = () => {
             <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.2 }}>
               <Form {...form}>
                 <form
+                  ref={formRef}
                   onSubmit={form.handleSubmit(onSubmit, (errors) => {
                     console.error("Ladies Festival form validation failed", errors);
                     const firstErr = Object.values(errors)[0] as { message?: string } | undefined;
@@ -681,7 +688,7 @@ const LadiesFestival = () => {
                     });
                     setFormStep(1);
                   })}
-                  className="space-y-6 bg-card border border-border rounded-sm p-8 shadow-sm"
+                  className="space-y-6 bg-card border border-border rounded-sm p-8 shadow-sm scroll-mt-24"
                 >
 
                   {/* ═══ STEP 1: Booking Details ═══ */}
