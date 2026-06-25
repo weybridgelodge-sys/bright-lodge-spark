@@ -25,7 +25,7 @@ const RelatedPosts = ({ currentSlug, category, limit = 3 }: Props) => {
         {related.map((p) => (
           <Link
             key={p.slug}
-            to={`/news/${p.slug}`}
+            to={p.href ?? `/news/${p.slug}`}
             className="group block bg-card border border-border rounded-sm overflow-hidden hover:border-primary transition-colors"
           >
             <div className="aspect-[16/10] overflow-hidden bg-muted">
