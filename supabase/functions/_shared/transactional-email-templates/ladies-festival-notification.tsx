@@ -31,6 +31,7 @@ interface Props {
   dietary?: string
   message?: string
   lineItems?: LineItem[]
+  drinks?: DrinkItem[]
   totalAmount?: string
   paymentStatusLabel?: string
   bookingRef?: string
