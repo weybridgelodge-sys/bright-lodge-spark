@@ -5,6 +5,7 @@ import SEO, { breadcrumbSchema } from "@/components/SEO";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Phone, Mail, MapPin, CheckCircle, PoundSterling, CalendarDays, Utensils, Ticket } from "lucide-react";
+import EnquiryForm from "@/components/EnquiryForm";
 
 const reasons = [
   "Make lifelong friendships with like-minded men",
