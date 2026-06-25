@@ -11,14 +11,21 @@ import { Link } from "react-router-dom";
 import { Calendar, User, ArrowLeft } from "lucide-react";
 
 import heroImg from "@/assets/news/three-masonic-degrees.jpg";
+import enteredApprenticeImg from "@/assets/news/aprons/entered-apprentice.png";
+import fellowCraftImg from "@/assets/news/aprons/fellow-craft.png";
+import masterMasonImg from "@/assets/news/aprons/master-mason.png";
+import royalArchImg from "@/assets/news/aprons/royal-arch.png";
 
 const tocItems = [
   { id: "overview", label: "An Overview of the Three Degrees" },
   { id: "first-degree", label: "The First Degree — Entered Apprentice" },
   { id: "second-degree", label: "The Second Degree — Fellow Craft" },
   { id: "third-degree", label: "The Third Degree — Master Mason" },
+  { id: "royal-arch", label: "The Royal Arch — Completing the Journey" },
   { id: "journey", label: "A Lifelong Journey" },
 ];
+
+const apronImgClass = "mt-6 mx-auto block w-full max-w-xs rounded-sm border border-border bg-card";
 
 const URL = "/news/three-masonic-degrees-explained";
 const TITLE = "The Three Masonic Degrees Explained";
