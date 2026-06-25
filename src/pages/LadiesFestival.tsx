@@ -60,7 +60,7 @@ const bookingSchema = z.object({
   name: z.string().trim().min(2, "Please enter your name").max(100, "Name must be under 100 characters"),
   email: z.string().trim().email("Please enter a valid email").max(255, "Email must be under 255 characters"),
   phone: z.string().trim().min(5, "Please enter a valid phone number").max(20, "Phone number must be under 20 characters"),
-  guests: z.string().min(1, "Please enter number of guests"),
+  guests: z.string().min(1, "Please enter number of additional guests"),
   seatingPreference: z.string().max(500, "Please keep seating notes under 500 characters").optional(),
   dietary: z.string().max(500, "Please keep dietary notes under 500 characters").optional(),
   message: z.string().max(1000, "Please keep your message under 1000 characters").optional(),
@@ -133,29 +133,30 @@ const LadiesFestival = () => {
   const { toast } = useToast();
   const [wineOrders, setWineOrders] = useState<Record<string, number>>({});
   const [beerOrders, setBeerOrders] = useState<Record<string, number>>({});
-  const [guestCount, setGuestCount] = useState(1);
-  const [guests, setGuests] = useState<GuestInfo[]>([{ name: "", starter: "", main: "", dessert: "" }]);
+  // guestCount = number of ADDITIONAL guests beyond the lead booker
+  const [guestCount, setGuestCount] = useState(0);
+  const [leadGuest, setLeadGuest] = useState<GuestInfo>({ name: "", starter: "", main: "", dessert: "" });
+  const [guests, setGuests] = useState<GuestInfo[]>([]);
   const [formStep, setFormStep] = useState(1);
   const [showCheckout, setShowCheckout] = useState(false);
   const [coverFee, setCoverFee] = useState(false);
+  const [paymentOption, setPaymentOption] = useState<"full" | "deposit">("full");
   const [submitted, setSubmitted] = useState<BookingValues | null>(null);
 
   const form = useForm<BookingValues>({
     resolver: zodResolver(bookingSchema),
-    defaultValues: { name: "", email: "", phone: "", guests: "1", seatingPreference: "", dietary: "", message: "" },
+    defaultValues: { name: "", email: "", phone: "", guests: "0", seatingPreference: "", dietary: "", message: "" },
   });
 
   const contactName = form.watch("name");
 
-  // Prefill guest 1 name with contact name when only 1 guest
+  // Keep lead booker's name in sync with the contact name field
   useEffect(() => {
-    if (guestCount === 1 && contactName) {
-      setGuests((prev) => [{ ...prev[0], name: contactName }]);
-    }
-  }, [contactName, guestCount]);
+    setLeadGuest((prev) => ({ ...prev, name: contactName || "" }));
+  }, [contactName]);
 
   const updateGuestCount = (count: number) => {
-    const clamped = Math.max(1, Math.min(20, count));
+    const clamped = Math.max(0, Math.min(19, count));
     setGuestCount(clamped);
     setGuests((prev) => {
       if (clamped > prev.length) {
@@ -168,6 +169,14 @@ const LadiesFestival = () => {
   const updateGuest = (index: number, field: keyof GuestInfo, value: string) => {
     setGuests((prev) => prev.map((g, i) => (i === index ? { ...g, [field]: value } : g)));
   };
+
+  const updateLeadGuest = (field: keyof GuestInfo, value: string) => {
+    setLeadGuest((prev) => ({ ...prev, [field]: value }));
+  };
+
+  // Combined list of all attendees (lead booker + additional guests) for summaries & emails
+  const allAttendees: GuestInfo[] = [leadGuest, ...guests];
+  const totalAttendees = 1 + guestCount;
 
   const updateWine = (id: string, delta: number) => {
     setWineOrders((prev) => {
