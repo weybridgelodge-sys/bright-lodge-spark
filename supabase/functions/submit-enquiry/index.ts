@@ -95,24 +95,40 @@ Deno.serve(async (req) => {
   let secretaryName = ''
   let secretaryOffice = 'Lodge Secretary'
   try {
-    const { data: yearRow } = await supabase.rpc('current_lodge_year')
-    const lodgeYear = typeof yearRow === 'number' ? yearRow : yearRow
-    const { data: secRows } = await supabase
+    const now = new Date()
+    const lodgeYear = now.getUTCMonth() + 1 >= 10 ? now.getUTCFullYear() : now.getUTCFullYear() - 1
+    const { data: appts, error: apptErr } = await supabase
       .from('officer_appointments')
-      .select('member_id, position_key, lodge_year, officer_positions!inner(label, key), profiles!inner(full_name, first_name, last_name, is_past_master)')
+      .select('member_id, position_key, lodge_year')
       .eq('position_key', 'secretary')
       .eq('lodge_year', lodgeYear)
       .limit(1)
-    const sec: any = secRows?.[0]
-    if (sec) {
-      const p = sec.profiles
-      secretaryName = (p?.full_name && p.full_name.trim()) ||
-        `${p?.is_past_master ? 'W Bro. ' : 'Bro. '}${[p?.first_name, p?.last_name].filter(Boolean).join(' ')}`.trim()
-      secretaryOffice = `Lodge ${sec.officer_positions?.label || 'Secretary'}`
+    if (apptErr) console.error('Secretary appt lookup error', apptErr)
+    const memberId = appts?.[0]?.member_id
+    if (memberId) {
+      const { data: prof, error: profErr } = await supabase
+        .from('profiles')
+        .select('full_name, first_name, last_name, is_past_master')
+        .eq('id', memberId)
+        .maybeSingle()
+      if (profErr) console.error('Secretary profile lookup error', profErr)
+      if (prof) {
+        const fallback = `${prof.is_past_master ? 'W Bro. ' : 'Bro. '}${[prof.first_name, prof.last_name].filter(Boolean).join(' ')}`.trim()
+        secretaryName = (prof.full_name && prof.full_name.trim()) || fallback
+      }
+      const { data: posRow } = await supabase
+        .from('officer_positions')
+        .select('label')
+        .eq('key', 'secretary')
+        .maybeSingle()
+      secretaryOffice = `Lodge ${posRow?.label || 'Secretary'}`
+    } else {
+      console.warn('No secretary appointment found for lodge year', lodgeYear)
     }
   } catch (e) {
     console.error('Secretary lookup failed', e)
   }
+  console.log('Secretary signature:', { secretaryName, secretaryOffice })
 
   // 2) Confirmation to the enquirer
   const confRes = await supabase.functions.invoke('send-transactional-email', {
