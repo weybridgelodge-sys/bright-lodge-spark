@@ -6,11 +6,13 @@ import {
   Heading,
   Hr,
   Html,
+  Img,
   Preview,
   Section,
   Text,
 } from 'npm:@react-email/components@0.0.22'
 import type { TemplateEntry } from './registry.ts'
+import { LOGO_HEIGHT, LOGO_URL, LOGO_WIDTH } from './_brand.ts'
 
 interface Props {
   name?: string
@@ -27,6 +29,15 @@ const Email = ({ name, email, phone, reason, submittedAt, source }: Props) => (
     <Preview>New membership enquiry from {name || 'website visitor'}</Preview>
     <Body style={main}>
       <Container style={container}>
+        <Section style={{ textAlign: 'center', padding: '8px 0 16px' }}>
+          <Img
+            src={LOGO_URL}
+            width={LOGO_WIDTH}
+            height={LOGO_HEIGHT}
+            alt="Weybridge Lodge crest"
+            style={{ margin: '0 auto', display: 'block' }}
+          />
+        </Section>
         <Heading style={h1}>New Membership Enquiry</Heading>
         <Text style={meta}>Source: {source || 'join-us'} · {submittedAt || ''}</Text>
 

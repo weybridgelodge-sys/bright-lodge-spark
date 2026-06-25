@@ -6,11 +6,13 @@ import {
   Heading,
   Hr,
   Html,
+  Img,
   Preview,
   Section,
   Text,
 } from 'npm:@react-email/components@0.0.22'
 import type { TemplateEntry } from './registry.ts'
+import { LOGO_HEIGHT, LOGO_URL, LOGO_WIDTH } from './_brand.ts'
 
 interface Props {
   name?: string
@@ -23,6 +25,13 @@ const Email = ({ name }: Props) => (
     <Body style={main}>
       <Container style={container}>
         <Section style={header}>
+          <Img
+            src={LOGO_URL}
+            width={LOGO_WIDTH}
+            height={LOGO_HEIGHT}
+            alt="Weybridge Lodge crest"
+            style={logo}
+          />
           <Heading style={brand}>Weybridge Lodge</Heading>
           <Text style={brandSub}>No. 6787 — Province of Surrey</Text>
         </Section>
@@ -66,6 +75,7 @@ export const template = {
 const main = { backgroundColor: '#ffffff', fontFamily: 'Georgia, "Times New Roman", serif', margin: 0, padding: 0 }
 const container = { maxWidth: '600px', margin: '0 auto', padding: '24px' }
 const header = { textAlign: 'center' as const, padding: '16px 0 24px' }
+const logo = { margin: '0 auto 12px', display: 'block' }
 const brand = { color: '#1B2A4A', fontSize: '28px', margin: 0, letterSpacing: '0.5px' }
 const brandSub = { color: '#C9A432', fontSize: '13px', letterSpacing: '2px', textTransform: 'uppercase' as const, margin: '4px 0 0' }
 const card = { backgroundColor: '#fafaf7', border: '1px solid #e8e3d3', borderRadius: '4px', padding: '28px 28px 22px' }
