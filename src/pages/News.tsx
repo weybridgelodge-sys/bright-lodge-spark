@@ -40,7 +40,7 @@ const News = () => {
       publishedAt: p.date,
       category: p.category,
       excerpt: p.excerpt,
-      legacyRoute: `/news/${p.slug}`,
+      legacyRoute: p.href ?? `/news/${p.slug}`,
       // attach a non-Sanity thumbnail via legacy map lookup fallback handled below
       mainImage: undefined,
     }));

@@ -383,7 +383,7 @@ const ThamesChallengePage = () => {
 
         <section className="bg-warm-white py-16 md:py-20">
           <div className="container mx-auto max-w-5xl px-4 sm:px-6">
-            <CommentsSection pageSlug="thames-challenge" title={TITLE} />
+            <CommentsSection />
             <RelatedPosts currentSlug="walking-for-the-source" category="Charity" />
           </div>
         </section>
