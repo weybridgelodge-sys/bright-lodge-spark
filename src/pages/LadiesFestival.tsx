@@ -1000,12 +1000,17 @@ const LadiesFestival = () => {
                       </div>
 
 
-                      {/* Beer Pre-Order */}
+                      {/* Beer buckets and vouchers */}
                       <div className="border-t border-border pt-6">
-                        <div className="flex items-center gap-2 mb-4">
+                        <div className="flex items-center gap-2 mb-3">
                           <Beer className="w-5 h-5 text-gold-dark" aria-hidden="true" />
-                          <h3 className="font-serif text-foreground text-lg">Pre-Order Beer</h3>
+                          <h3 className="font-serif text-foreground text-lg">Beer buckets &amp; prepaid drinks vouchers</h3>
                         </div>
+                        <p className="text-xs text-muted-foreground font-sans bg-warm-white border border-border rounded-sm p-3 mb-4 leading-relaxed">
+                          The hotel is offering prepaid drinks vouchers that you can order in advance for use on the evening. Vouchers are redeemable against any soft drink, beer, single house spirit with a mixer, glass of bubbles or 175ml house wine. Cash and cards are also accepted at the venue.
+                        </p>
+
+
 
                         <div className="space-y-4">
                           {beerOptions.map((beer) => {
