@@ -942,54 +942,72 @@ const LadiesFestival = () => {
                           Save time on the night — pre-order bottles for your party and they'll be waiting at your table.
                         </p>
 
-                        <div className="space-y-4">
-                          {wineOptions.map((wine) => {
-                            const qty = wineOrders[wine.id] || 0;
-                            return (
-                              <div
-                                key={wine.id}
-                                className="flex items-center justify-between gap-4 bg-warm-white border border-border rounded-sm p-4"
-                              >
-                                <div className="min-w-0">
-                                  <p className="font-sans font-medium text-foreground text-sm">{wine.name}</p>
-                                  <p className="text-xs text-muted-foreground font-sans">
-                                    £{wine.price} {wine.note}
-                                  </p>
-                                </div>
-                                <div className="flex items-center gap-2 shrink-0">
-                                  <button
-                                    type="button"
-                                    onClick={() => updateWine(wine.id, -1)}
-                                    disabled={qty === 0}
-                                    className="w-8 h-8 rounded-sm border border-border flex items-center justify-center text-muted-foreground hover:bg-muted/50 disabled:opacity-30 transition-colors"
-                                    aria-label={`Remove one ${wine.name}`}
-                                  >
-                                    <Minus className="w-4 h-4" />
-                                  </button>
-                                  <span className="w-8 text-center font-sans text-sm font-medium text-foreground tabular-nums">
-                                    {qty}
-                                  </span>
-                                  <button
-                                    type="button"
-                                    onClick={() => updateWine(wine.id, 1)}
-                                    className="w-8 h-8 rounded-sm border border-border flex items-center justify-center text-muted-foreground hover:bg-muted/50 transition-colors"
-                                    aria-label={`Add one ${wine.name}`}
-                                  >
-                                    <Plus className="w-4 h-4" />
-                                  </button>
-                                </div>
-                              </div>
-                            );
-                          })}
+                      {/* Wine Pre-Order */}
+                      <div>
+                        <div className="flex items-center gap-2 mb-4">
+                          <Wine className="w-5 h-5 text-gold-dark" aria-hidden="true" />
+                          <h3 className="font-serif text-foreground text-lg">Pre-Order Wine for Your Table</h3>
                         </div>
+                        <p className="text-sm text-muted-foreground font-sans mb-5">
+                          Save time on the night — pre-order bottles for your party and they'll be waiting at your table.
+                        </p>
+
+                        {(["White", "Red", "Sparkling & Champagne"] as const).map((cat) => (
+                          <div key={cat} className="mb-6 last:mb-0">
+                            <p className="font-sans font-semibold text-foreground text-sm uppercase tracking-wider mb-3">
+                              {cat} wine{cat === "Sparkling & Champagne" ? " selection" : " selection"}
+                            </p>
+                            <div className="space-y-3">
+                              {wineOptions.filter((w) => w.category === cat).map((wine) => {
+                                const qty = wineOrders[wine.id] || 0;
+                                return (
+                                  <div
+                                    key={wine.id}
+                                    className="flex items-center justify-between gap-4 bg-warm-white border border-border rounded-sm p-4"
+                                  >
+                                    <div className="min-w-0">
+                                      <p className="font-sans font-medium text-foreground text-sm">{wine.name}</p>
+                                      <p className="text-xs text-muted-foreground font-sans">
+                                        £{wine.price} {wine.note}
+                                      </p>
+                                    </div>
+                                    <div className="flex items-center gap-2 shrink-0">
+                                      <button
+                                        type="button"
+                                        onClick={() => updateWine(wine.id, -1)}
+                                        disabled={qty === 0}
+                                        className="w-8 h-8 rounded-sm border border-border flex items-center justify-center text-muted-foreground hover:bg-muted/50 disabled:opacity-30 transition-colors"
+                                        aria-label={`Remove one ${wine.name}`}
+                                      >
+                                        <Minus className="w-4 h-4" />
+                                      </button>
+                                      <span className="w-8 text-center font-sans text-sm font-medium text-foreground tabular-nums">
+                                        {qty}
+                                      </span>
+                                      <button
+                                        type="button"
+                                        onClick={() => updateWine(wine.id, 1)}
+                                        className="w-8 h-8 rounded-sm border border-border flex items-center justify-center text-muted-foreground hover:bg-muted/50 transition-colors"
+                                        aria-label={`Add one ${wine.name}`}
+                                      >
+                                        <Plus className="w-4 h-4" />
+                                      </button>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        ))}
 
                         {wineTotal > 0 && (
-                          <p className="mt-4 text-right font-sans text-sm">
+                          <p className="mt-2 text-right font-sans text-sm">
                             <span className="text-muted-foreground">Wine total: </span>
                             <span className="font-semibold text-foreground">£{wineTotal}</span>
                           </p>
                         )}
                       </div>
+
 
                       {/* Beer Pre-Order */}
                       <div className="border-t border-border pt-6">
