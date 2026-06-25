@@ -135,11 +135,15 @@ const DoubleInitiationDecember2025 = () => {
                 <p className="text-muted-foreground font-sans leading-relaxed">
                   Weybridge Lodge continues to grow steadily, and evenings like this remind us why. If you have ever wondered about Freemasonry — what we do, what we stand for, and what membership might mean for you — we would be very pleased to hear from you.
                 </p>
-                <p className="text-muted-foreground font-sans leading-relaxed mt-4">
-                  <Link to="/join-us" className="text-primary hover:underline font-semibold">
+                <p className="mt-6">
+                  <Link
+                    to="/join-us"
+                    className="inline-flex items-center gap-2 bg-gold-shimmer text-accent-foreground px-5 py-2.5 rounded-sm text-sm font-semibold font-sans hover:opacity-90 transition-opacity"
+                  >
                     Find out about joining Weybridge Lodge →
                   </Link>
                 </p>
+
               </section>
             </article>
 
