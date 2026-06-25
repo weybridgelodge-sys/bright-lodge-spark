@@ -80,7 +80,7 @@ const LodgeProfile = () => {
               <h2 className="text-2xl md:text-3xl font-serif text-primary-foreground mb-6">When Do We Meet?</h2>
               <p className="text-primary-foreground/70 font-sans leading-relaxed mb-8">
                 Our Lodge meets at the South West Surrey Masonic Centre for Freemasons in Guildford, Surrey. We hold
-                four meetings each year which usually start at 5pm.
+                four meetings each year, which usually start at 5.30 pm - 6.00 pm.
               </p>
               <ul className="space-y-3">
                 {meetingDates.map((date) => (
