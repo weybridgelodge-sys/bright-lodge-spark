@@ -7,6 +7,8 @@ import doubleInitiationImg from "@/assets/news/double-initiation-december-2025.j
 import threeDegreesImg from "@/assets/news/three-masonic-degrees.jpg";
 import royalArchImg from "@/assets/news/royal-arch-explained.jpg";
 
+import thamesChallengeImg from "@/assets/thames-challenge/tc-source-stone.jpg.asset.json";
+
 export interface BlogPost {
   slug: string;
   title: string;
@@ -14,10 +16,21 @@ export interface BlogPost {
   excerpt: string;
   image: string;
   category: string;
+  href?: string;
 }
 
 // Ordered newest first
 export const posts: BlogPost[] = [
+  {
+    slug: "walking-for-the-source",
+    title: "Walking for the Source — Thames Towpath Challenge",
+    date: "2026-06-25",
+    category: "Charity",
+    excerpt:
+      "A long-distance Thames journey undertaken by Weybridge Lodge supporters — following the river back towards its source through fellowship, resilience and charitable purpose.",
+    image: thamesChallengeImg.url,
+    href: "/thames-challenge",
+  },
   {
     slug: "royal-arch-explained",
     title: "The Royal Arch Explained — One Journey, One Organisation",

@@ -82,6 +82,31 @@ const OurCharities = () => {
 
         <OurCharitiesLiveFeed />
 
+        <section className="py-16 bg-warm-white border-y border-border">
+          <div className="container mx-auto px-6 max-w-5xl">
+            <div className="grid gap-8 rounded-sm border border-border bg-card p-8 md:grid-cols-[1.1fr_0.9fr] md:items-center md:p-10">
+              <div>
+                <p className="text-gold text-sm font-sans uppercase tracking-wide mb-3">Featured charity story</p>
+                <h2 className="text-3xl font-serif text-foreground mb-4">Walking for the Source — Thames Towpath Challenge</h2>
+                <p className="text-muted-foreground font-sans leading-relaxed mb-6">
+                  Follow Weybridge Lodge's Thames challenge from London back towards the source — a long-distance story of endurance, support, friendship and charitable purpose.
+                </p>
+                <Link
+                  to="/thames-challenge"
+                  className="inline-flex items-center gap-2 bg-gold-shimmer text-accent-foreground px-6 py-3 rounded-sm text-sm font-semibold font-sans hover:opacity-90 transition-opacity"
+                >
+                  Read the feature <ArrowRight className="w-4 h-4" />
+                </Link>
+              </div>
+              <img
+                src="/placeholder.svg"
+                alt="Thames Towpath Challenge feature preview"
+                className="hidden md:block w-full rounded-sm border border-border bg-muted object-cover aspect-[4/3]"
+              />
+            </div>
+          </div>
+        </section>
+
         <section className="py-20 md:py-28 bg-navy-gradient">
           <div className="container mx-auto px-6 max-w-4xl space-y-12">
             {charities.map((charity, i) => (
