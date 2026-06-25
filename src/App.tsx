@@ -96,6 +96,7 @@ const App = () => (
             <Route path="/your-journey" element={<YourJourney />} />
             <Route path="/lodge-traditions" element={<LodgeTraditions />} />
             <Route path="/data-protection" element={<DataProtection />} />
+            <Route path="/unsubscribe" element={<Unsubscribe />} />
             <Route path="/lodge-profile" element={<LodgeProfile />} />
             <Route path="/history" element={<History />} />
             <Route path="/worshipful-masters" element={<WorshipfulMasters />} />
