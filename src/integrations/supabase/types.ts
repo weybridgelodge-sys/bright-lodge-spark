@@ -1616,6 +1616,51 @@ export type Database = {
           },
         ]
       }
+      membership_enquiries: {
+        Row: {
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          ip_address: string | null
+          notes: string | null
+          phone: string | null
+          reason: string
+          source: string
+          status: string
+          updated_at: string
+          user_agent: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          full_name: string
+          id?: string
+          ip_address?: string | null
+          notes?: string | null
+          phone?: string | null
+          reason: string
+          source?: string
+          status?: string
+          updated_at?: string
+          user_agent?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          ip_address?: string | null
+          notes?: string | null
+          phone?: string | null
+          reason?: string
+          source?: string
+          status?: string
+          updated_at?: string
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       module_settings: {
         Row: {
           key: string
