@@ -91,3 +91,5 @@ const labelStyle = { color: '#1B2A4A', fontWeight: 'bold' as const, fontSize: '1
 const reasonStyle = { color: '#2a2a2a', fontSize: '14px', lineHeight: '1.6', margin: 0, whiteSpace: 'pre-wrap' as const }
 const hr = { borderColor: '#e8e3d3', margin: '14px 0' }
 const footerText = { color: '#666', fontSize: '12px', margin: '18px 0 0' }
+const brand = { color: '#1B2A4A', fontSize: '24px', margin: '12px 0 0', letterSpacing: '0.5px' }
+const brandSub = { color: '#C9A432', fontSize: '12px', letterSpacing: '2px', textTransform: 'uppercase' as const, margin: '4px 0 12px' }
