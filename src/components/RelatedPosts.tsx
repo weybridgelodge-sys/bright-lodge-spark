@@ -8,9 +8,11 @@ interface Props {
 }
 
 const RelatedPosts = ({ currentSlug, category, limit = 3 }: Props) => {
-  const related = posts
-    .filter((p) => p.category === category && p.slug !== currentSlug)
-    .slice(0, limit);
+  const byDate = (a: typeof posts[number], b: typeof posts[number]) =>
+    new Date(b.date).getTime() - new Date(a.date).getTime();
+  const sameCategory = posts.filter((p) => p.category === category && p.slug !== currentSlug).sort(byDate);
+  const others = posts.filter((p) => p.category !== category && p.slug !== currentSlug).sort(byDate);
+  const related = [...sameCategory, ...others].slice(0, limit);
 
   if (related.length === 0) return null;
 
