@@ -25,16 +25,17 @@ const DoubleInitiationDecember2025 = () => {
   return (
     <div className="min-h-screen">
       <SEO
-        title="Double Initiation December 2025"
-        description="Weybridge Lodge No. 6787 welcomed two new Brethren — Bro. Jesse and Bro. Josh Bishop — at a memorable double initiation ceremony on 10 December 2025."
+        title="Double Initiation at Weybridge Lodge — December 2025"
+        description="Weybridge Lodge No. 6787 welcomed two new Brethren in a double First Degree Initiation ceremony in December 2025 at the South West Surrey Masonic Centre, Guildford."
         canonical={URL}
         type="article"
+        keywords="Weybridge Lodge initiation ceremony Guildford"
         schema={[
           articleSchema({
             title: TITLE,
             date: "2025-12-10",
             description:
-              "A father-and-son moment as Bro. Jesse and Bro. Josh Bishop were initiated into Weybridge Lodge No. 6787 on 10 December 2025.",
+              "Weybridge Lodge No. 6787 welcomed two new Brethren in a double First Degree Initiation ceremony in December 2025 at the South West Surrey Masonic Centre, Guildford.",
             url: URL,
           }),
           breadcrumbSchema([
@@ -44,6 +45,7 @@ const DoubleInitiationDecember2025 = () => {
           ]),
         ]}
       />
+
       <a href="#main-content" className="skip-to-content">Skip to main content</a>
       <Header />
       <main id="main-content">
