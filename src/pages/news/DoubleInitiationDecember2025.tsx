@@ -29,7 +29,7 @@ const DoubleInitiationDecember2025 = () => {
         description="Weybridge Lodge No. 6787 welcomed two new Brethren in a double First Degree Initiation ceremony in December 2025 at the South West Surrey Masonic Centre, Guildford."
         canonical={URL}
         type="article"
-        keywords="Weybridge Lodge initiation ceremony Guildford"
+        
         schema={[
           articleSchema({
             title: TITLE,
