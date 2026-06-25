@@ -3,6 +3,7 @@ import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
 import SEO, { articleSchema, breadcrumbSchema } from "@/components/SEO";
 import PostNavigation from "@/components/PostNavigation";
+import RelatedPosts from "@/components/RelatedPosts";
 import SocialShare from "@/components/SocialShare";
 import CommentsSection, { commentCount } from "@/components/CommentsSection";
 import { motion } from "framer-motion";
@@ -156,6 +157,7 @@ const DoubleInitiationDecember2025 = () => {
 
             <CommentsSection />
 
+            <RelatedPosts currentSlug="double-initiation-december-2025" category="Lodge Meetings" />
             <PostNavigation currentSlug="double-initiation-december-2025" />
           </div>
         </section>
