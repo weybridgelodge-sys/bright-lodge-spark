@@ -932,15 +932,6 @@ const LadiesFestival = () => {
                   {/* ═══ STEP 2: Drinks Pre-Order ═══ */}
                   {formStep === 2 && (
                     <div className="space-y-6">
-                      {/* Wine Pre-Order */}
-                      <div>
-                        <div className="flex items-center gap-2 mb-4">
-                          <Wine className="w-5 h-5 text-gold-dark" aria-hidden="true" />
-                          <h3 className="font-serif text-foreground text-lg">Pre-Order Wine for Your Table</h3>
-                        </div>
-                        <p className="text-sm text-muted-foreground font-sans mb-5">
-                          Save time on the night — pre-order bottles for your party and they'll be waiting at your table.
-                        </p>
 
                       {/* Wine Pre-Order */}
                       <div>
