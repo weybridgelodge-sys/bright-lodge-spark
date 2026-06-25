@@ -677,6 +677,7 @@ const LadiesFestival = () => {
             <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.2 }}>
               <Form {...form}>
                 <form
+                  ref={formRef}
                   onSubmit={form.handleSubmit(onSubmit, (errors) => {
                     console.error("Ladies Festival form validation failed", errors);
                     const firstErr = Object.values(errors)[0] as { message?: string } | undefined;
