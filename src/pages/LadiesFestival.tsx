@@ -688,7 +688,7 @@ const LadiesFestival = () => {
                     });
                     setFormStep(1);
                   })}
-                  className="space-y-6 bg-card border border-border rounded-sm p-8 shadow-sm"
+                  className="space-y-6 bg-card border border-border rounded-sm p-8 shadow-sm scroll-mt-24"
                 >
 
                   {/* ═══ STEP 1: Booking Details ═══ */}
