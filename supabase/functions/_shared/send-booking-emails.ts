@@ -229,6 +229,7 @@ export async function sendBookingEmails(bookingId: string, opts: SendOpts) {
         templateName: 'booking-confirmation',
         recipientEmail: b.contact_email,
         idempotencyKey: `booking-confirm-${b.id}-${opts.stage}`,
+        replyTo: ASSISTANT_SECRETARY_EMAIL,
         templateData: {
           firstName,
           eventLabel,
