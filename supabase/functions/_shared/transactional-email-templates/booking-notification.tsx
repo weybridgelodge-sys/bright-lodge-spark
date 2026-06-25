@@ -8,6 +8,7 @@ import {
   Html,
   Img,
   Preview,
+  Link,
   Section,
   Text,
 } from 'npm:@react-email/components@0.0.22'
@@ -67,6 +68,8 @@ const Email = ({
             alt="Weybridge Lodge crest"
             style={{ margin: '0 auto', display: 'block' }}
           />
+          <Heading style={brand}>Weybridge Lodge</Heading>
+          <Text style={brandSub}>No. 6787 — Province of Surrey</Text>
         </Section>
         <Heading style={h1}>
           {isApologies ? 'Apologies received' : 'New booking received'}
@@ -105,7 +108,13 @@ const Email = ({
         </Section>
 
         <Text style={footerText}>
-          Reply directly to {bookerEmail || 'the booker'} to make contact.
+          Reply directly to{' '}
+          {bookerEmail ? (
+            <Link href={`mailto:${bookerEmail}`} style={emailLink}>{bookerEmail}</Link>
+          ) : (
+            'the booker'
+          )}{' '}
+          to make contact.
         </Text>
       </Container>
     </Body>
@@ -152,3 +161,6 @@ const labelStyle = { color: '#1B2A4A', fontWeight: 'bold' as const, fontSize: '1
 const guestLine = { color: '#2a2a2a', fontSize: '14px', lineHeight: '1.5', margin: '2px 0' }
 const hr = { borderColor: '#e8e3d3', margin: '14px 0' }
 const footerText = { color: '#666', fontSize: '12px', margin: '18px 0 0' }
+const emailLink = { color: '#1B2A4A', textDecoration: 'underline', fontWeight: 600 as const }
+const brand = { color: '#1B2A4A', fontSize: '24px', margin: '12px 0 0', letterSpacing: '0.5px' }
+const brandSub = { color: '#C9A432', fontSize: '12px', letterSpacing: '2px', textTransform: 'uppercase' as const, margin: '4px 0 12px' }
