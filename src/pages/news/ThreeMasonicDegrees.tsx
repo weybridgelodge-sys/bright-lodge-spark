@@ -154,6 +154,22 @@ const ThreeMasonicDegrees = () => {
                 <p className="text-muted-foreground font-sans leading-relaxed mt-4">
                   On completion of the Third Degree, the new Master Mason is a full member of the Lodge with every right and responsibility that membership brings.
                 </p>
+                <img src={masterMasonImg} alt="Master Mason apron — pale blue with three rosettes and tassels" loading="lazy" className={apronImgClass} />
+              </section>
+
+              <section id="royal-arch">
+                <div className="h-0.5 w-16 bg-gold mb-6" />
+                <h2 className="text-2xl font-serif text-foreground mb-4">The Royal Arch — Completing the Journey</h2>
+                <p className="text-muted-foreground font-sans leading-relaxed">
+                  In English Freemasonry, the three degrees are not quite the end of the story. The United Grand Lodge of England teaches that pure Ancient Masonry consists of the three degrees including the Supreme Order of the Holy Royal Arch — often described as the fourth degree, though officially regarded as the natural completion of the Third.
+                </p>
+                <p className="text-muted-foreground font-sans leading-relaxed mt-4">
+                  Joining a Royal Arch Chapter is something most Master Masons are encouraged to consider, and many describe it as among the most significant steps of their Masonic journey. Members of Weybridge Lodge are eligible to join one month after being raised to the degree of Master Mason.
+                </p>
+                <p className="text-muted-foreground font-sans leading-relaxed mt-4">
+                  We will be publishing a dedicated article on the Royal Arch shortly — watch this space.
+                </p>
+                <img src={royalArchImg} alt="Royal Arch Companion apron — crimson and blue with the Triple Tau emblem" loading="lazy" className={apronImgClass} />
               </section>
 
               <section id="journey">
