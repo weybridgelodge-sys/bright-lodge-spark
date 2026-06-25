@@ -11,14 +11,21 @@ import { Link } from "react-router-dom";
 import { Calendar, User, ArrowLeft } from "lucide-react";
 
 import heroImg from "@/assets/news/three-masonic-degrees.jpg";
+import enteredApprenticeImg from "@/assets/news/aprons/entered-apprentice.png";
+import fellowCraftImg from "@/assets/news/aprons/fellow-craft.png";
+import masterMasonImg from "@/assets/news/aprons/master-mason.png";
+import royalArchImg from "@/assets/news/aprons/royal-arch.png";
 
 const tocItems = [
   { id: "overview", label: "An Overview of the Three Degrees" },
   { id: "first-degree", label: "The First Degree — Entered Apprentice" },
   { id: "second-degree", label: "The Second Degree — Fellow Craft" },
   { id: "third-degree", label: "The Third Degree — Master Mason" },
+  { id: "royal-arch", label: "The Royal Arch — Completing the Journey" },
   { id: "journey", label: "A Lifelong Journey" },
 ];
+
+const apronImgClass = "mt-6 mx-auto block w-full max-w-xs rounded-sm border border-border bg-card";
 
 const URL = "/news/three-masonic-degrees-explained";
 const TITLE = "The Three Masonic Degrees Explained";
@@ -123,6 +130,7 @@ const ThreeMasonicDegrees = () => {
                 <p className="text-muted-foreground font-sans leading-relaxed mt-4">
                   After Initiation, the new Brother begins to attend our weekly Lodge of Instruction, meet the other members of the Lodge informally, and prepare quietly for the next step.
                 </p>
+                <img src={enteredApprenticeImg} alt="Entered Apprentice apron — plain white lambskin" loading="lazy" className={apronImgClass} />
               </section>
 
               <section id="second-degree">
@@ -134,6 +142,7 @@ const ThreeMasonicDegrees = () => {
                 <p className="text-muted-foreground font-sans leading-relaxed mt-4">
                   By this stage, most new members feel comfortable in the Lodge, know the other Brethren by name, and have begun to find their own way of contributing.
                 </p>
+                <img src={fellowCraftImg} alt="Fellow Craft apron — white with two pale-blue rosettes" loading="lazy" className={apronImgClass} />
               </section>
 
               <section id="third-degree">
@@ -145,6 +154,22 @@ const ThreeMasonicDegrees = () => {
                 <p className="text-muted-foreground font-sans leading-relaxed mt-4">
                   On completion of the Third Degree, the new Master Mason is a full member of the Lodge with every right and responsibility that membership brings.
                 </p>
+                <img src={masterMasonImg} alt="Master Mason apron — pale blue with three rosettes and tassels" loading="lazy" className={apronImgClass} />
+              </section>
+
+              <section id="royal-arch">
+                <div className="h-0.5 w-16 bg-gold mb-6" />
+                <h2 className="text-2xl font-serif text-foreground mb-4">The Royal Arch — Completing the Journey</h2>
+                <p className="text-muted-foreground font-sans leading-relaxed">
+                  In English Freemasonry, the three degrees are not quite the end of the story. The United Grand Lodge of England teaches that pure Ancient Masonry consists of the three degrees including the Supreme Order of the Holy Royal Arch — often described as the fourth degree, though officially regarded as the natural completion of the Third.
+                </p>
+                <p className="text-muted-foreground font-sans leading-relaxed mt-4">
+                  Joining a Royal Arch Chapter is something most Master Masons are encouraged to consider, and many describe it as among the most significant steps of their Masonic journey. Members of Weybridge Lodge are eligible to join one month after being raised to the degree of Master Mason.
+                </p>
+                <p className="text-muted-foreground font-sans leading-relaxed mt-4">
+                  We will be publishing a dedicated article on the Royal Arch shortly — watch this space.
+                </p>
+                <img src={royalArchImg} alt="Royal Arch Companion apron — crimson and blue with the Triple Tau emblem" loading="lazy" className={apronImgClass} />
               </section>
 
               <section id="journey">
