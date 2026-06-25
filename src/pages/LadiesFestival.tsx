@@ -38,19 +38,29 @@ function useCountdown() {
   return { days, hours, minutes, seconds };
 }
 
-/* ── Wine list ── */
-const wineOptions = [
-  { id: "prosecco", name: "Prosecco", price: 28, note: "per bottle" },
-  { id: "house-white", name: "House White Wine", price: 24, note: "per bottle" },
-  { id: "house-red", name: "House Red Wine", price: 24, note: "per bottle" },
-  { id: "champagne", name: "Champagne", price: 48, note: "per bottle" },
+/* ── Wine list (grouped by category) ── */
+type WineCategory = "White" | "Red" | "Sparkling & Champagne";
+const wineOptions: { id: string; name: string; price: number; note: string; category: WineCategory }[] = [
+  // White
+  { id: "vina-carrasco-sauv-blanc", name: "Vina Carrasco Sauvignon Blanc", price: 32, note: "per bottle", category: "White" },
+  { id: "san-giorgio-pinot-grigio", name: "San Giorgio Pinot Grigio", price: 35, note: "per bottle", category: "White" },
+  { id: "boschetto-gavi", name: "Boschetto Gavi di Gavi", price: 46, note: "per bottle", category: "White" },
+  { id: "ritual-chardonnay", name: "Ritual Organic Chardonnay", price: 60, note: "per bottle", category: "White" },
+  // Red
+  { id: "vina-carrasco-merlot", name: "Vina Carrasco Merlot", price: 32, note: "per bottle", category: "Red" },
+  { id: "oliver-maurice-cotes-du-rhone", name: "Oliver Maurice Côtes du Rhône", price: 36, note: "per bottle", category: "Red" },
+  { id: "esprit-de-lussac", name: "Esprit de Lussac, St-Émilion", price: 40, note: "per bottle", category: "Red" },
+  { id: "ghost-malbec-viognier", name: "Ghost in the Machine Malbec-Viognier", price: 50, note: "per bottle", category: "Red" },
+  // Sparkling & Champagne
+  { id: "prosecco-movendo", name: "Prosecco Movendo", price: 36, note: "per bottle", category: "Sparkling & Champagne" },
+  { id: "taittinger-brut", name: "Taittinger Brut Reserve NV", price: 87, note: "per bottle", category: "Sparkling & Champagne" },
+  { id: "taittinger-rose", name: "Taittinger Rosé", price: 103, note: "per bottle", category: "Sparkling & Champagne" },
 ];
 
-/* ── Beer list ── */
+/* ── Beer & vouchers ── */
 const beerOptions = [
-  { id: "lager", name: "Lager (Pint)", price: 6, note: "per pint" },
-  { id: "ale", name: "Ale (Pint)", price: 6, note: "per pint" },
-  { id: "beer-bucket", name: "Beer Bucket (5 bottles)", price: 25, note: "per bucket" },
+  { id: "beer-bucket", name: "Mix of 10 Bottled Beers", price: 43, note: "per bucket" },
+  { id: "drinks-voucher", name: "Prepaid Drinks Voucher", price: 10, note: "each — redeemable at the venue against soft drinks, beer, single house spirit with mixer, glass of bubbles or 175ml house wine" },
 ];
 
 const TICKET_PRICE = 75;
