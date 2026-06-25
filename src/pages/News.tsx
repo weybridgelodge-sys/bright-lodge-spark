@@ -16,15 +16,42 @@ import {
   getPostThumbnail,
   getPostHref,
 } from "@/lib/sanity";
+import { posts as staticPosts } from "@/data/posts";
 
 const News = () => {
   const [searchParams] = useSearchParams();
   const { category: categorySlug } = useParams<{ category?: string }>();
 
-  const { data: posts = [], isLoading } = useQuery<SanityPost[]>({
+  const { data: sanityPosts = [], isLoading } = useQuery<SanityPost[]>({
     queryKey: ["posts"],
     queryFn: () => sanityClient.fetch(POSTS_QUERY),
   });
+
+  // Merge in hand-coded static posts whose slugs aren't already in Sanity,
+  // so newly added static articles appear on the listing.
+  const sanitySlugs = new Set(sanityPosts.map((p) => p.slug));
+  const staticAsSanity: SanityPost[] = staticPosts
+    .filter((p) => !sanitySlugs.has(p.slug))
+    .map((p) => ({
+      _id: `static-${p.slug}`,
+      _updatedAt: p.date,
+      title: p.title,
+      slug: p.slug,
+      publishedAt: p.date,
+      category: p.category,
+      excerpt: p.excerpt,
+      legacyRoute: `/news/${p.slug}`,
+      // attach a non-Sanity thumbnail via legacy map lookup fallback handled below
+      mainImage: undefined,
+    }));
+  // Provide image fallback for static slugs via a local map
+  const staticImageBySlug: Record<string, string> = Object.fromEntries(
+    staticPosts.map((p) => [p.slug, p.image]),
+  );
+
+  const posts = [...sanityPosts, ...staticAsSanity].sort(
+    (a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime(),
+  );
 
   const categories = Array.from(new Set(posts.map((p) => p.category)));
 
@@ -35,6 +62,9 @@ const News = () => {
   const filteredPosts = activeCategory
     ? posts.filter((p) => p.category === activeCategory)
     : posts;
+
+  const resolveThumb = (post: SanityPost, w = 800, h = 450) =>
+    getPostThumbnail(post, w, h) ?? staticImageBySlug[post.slug] ?? null;
 
   useEffect(() => {
     window.scrollTo(0, 0);
