@@ -38,19 +38,29 @@ function useCountdown() {
   return { days, hours, minutes, seconds };
 }
 
-/* ── Wine list ── */
-const wineOptions = [
-  { id: "prosecco", name: "Prosecco", price: 28, note: "per bottle" },
-  { id: "house-white", name: "House White Wine", price: 24, note: "per bottle" },
-  { id: "house-red", name: "House Red Wine", price: 24, note: "per bottle" },
-  { id: "champagne", name: "Champagne", price: 48, note: "per bottle" },
+/* ── Wine list (grouped by category) ── */
+type WineCategory = "White" | "Red" | "Sparkling & Champagne";
+const wineOptions: { id: string; name: string; price: number; note: string; category: WineCategory }[] = [
+  // White
+  { id: "vina-carrasco-sauv-blanc", name: "Vina Carrasco Sauvignon Blanc", price: 32, note: "per bottle", category: "White" },
+  { id: "san-giorgio-pinot-grigio", name: "San Giorgio Pinot Grigio", price: 35, note: "per bottle", category: "White" },
+  { id: "boschetto-gavi", name: "Boschetto Gavi di Gavi", price: 46, note: "per bottle", category: "White" },
+  { id: "ritual-chardonnay", name: "Ritual Organic Chardonnay", price: 60, note: "per bottle", category: "White" },
+  // Red
+  { id: "vina-carrasco-merlot", name: "Vina Carrasco Merlot", price: 32, note: "per bottle", category: "Red" },
+  { id: "oliver-maurice-cotes-du-rhone", name: "Oliver Maurice Côtes du Rhône", price: 36, note: "per bottle", category: "Red" },
+  { id: "esprit-de-lussac", name: "Esprit de Lussac, St-Émilion", price: 40, note: "per bottle", category: "Red" },
+  { id: "ghost-malbec-viognier", name: "Ghost in the Machine Malbec-Viognier", price: 50, note: "per bottle", category: "Red" },
+  // Sparkling & Champagne
+  { id: "prosecco-movendo", name: "Prosecco Movendo", price: 36, note: "per bottle", category: "Sparkling & Champagne" },
+  { id: "taittinger-brut", name: "Taittinger Brut Reserve NV", price: 87, note: "per bottle", category: "Sparkling & Champagne" },
+  { id: "taittinger-rose", name: "Taittinger Rosé", price: 103, note: "per bottle", category: "Sparkling & Champagne" },
 ];
 
-/* ── Beer list ── */
+/* ── Beer & vouchers ── */
 const beerOptions = [
-  { id: "lager", name: "Lager (Pint)", price: 6, note: "per pint" },
-  { id: "ale", name: "Ale (Pint)", price: 6, note: "per pint" },
-  { id: "beer-bucket", name: "Beer Bucket (5 bottles)", price: 25, note: "per bucket" },
+  { id: "beer-bucket", name: "Mix of 10 Bottled Beers", price: 43, note: "per bucket" },
+  { id: "drinks-voucher", name: "Prepaid Drinks Voucher", price: 10, note: "each — redeemable at the venue against soft drinks, beer, single house spirit with mixer, glass of bubbles or 175ml house wine" },
 ];
 
 const TICKET_PRICE = 75;
@@ -660,7 +670,19 @@ const LadiesFestival = () => {
 
             <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.2 }}>
               <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 bg-card border border-border rounded-sm p-8 shadow-sm">
+                <form
+                  onSubmit={form.handleSubmit(onSubmit, (errors) => {
+                    console.error("Ladies Festival form validation failed", errors);
+                    const firstErr = Object.values(errors)[0] as { message?: string } | undefined;
+                    toast({
+                      title: "Please complete the required booking details",
+                      description: firstErr?.message || "Some required fields are missing — scroll back to Step 1.",
+                      variant: "destructive",
+                    });
+                    setFormStep(1);
+                  })}
+                  className="space-y-6 bg-card border border-border rounded-sm p-8 shadow-sm"
+                >
 
                   {/* ═══ STEP 1: Booking Details ═══ */}
                   {formStep === 1 && (
@@ -922,6 +944,7 @@ const LadiesFestival = () => {
                   {/* ═══ STEP 2: Drinks Pre-Order ═══ */}
                   {formStep === 2 && (
                     <div className="space-y-6">
+
                       {/* Wine Pre-Order */}
                       <div>
                         <div className="flex items-center gap-2 mb-4">
@@ -932,61 +955,74 @@ const LadiesFestival = () => {
                           Save time on the night — pre-order bottles for your party and they'll be waiting at your table.
                         </p>
 
-                        <div className="space-y-4">
-                          {wineOptions.map((wine) => {
-                            const qty = wineOrders[wine.id] || 0;
-                            return (
-                              <div
-                                key={wine.id}
-                                className="flex items-center justify-between gap-4 bg-warm-white border border-border rounded-sm p-4"
-                              >
-                                <div className="min-w-0">
-                                  <p className="font-sans font-medium text-foreground text-sm">{wine.name}</p>
-                                  <p className="text-xs text-muted-foreground font-sans">
-                                    £{wine.price} {wine.note}
-                                  </p>
-                                </div>
-                                <div className="flex items-center gap-2 shrink-0">
-                                  <button
-                                    type="button"
-                                    onClick={() => updateWine(wine.id, -1)}
-                                    disabled={qty === 0}
-                                    className="w-8 h-8 rounded-sm border border-border flex items-center justify-center text-muted-foreground hover:bg-muted/50 disabled:opacity-30 transition-colors"
-                                    aria-label={`Remove one ${wine.name}`}
+                        {(["White", "Red", "Sparkling & Champagne"] as const).map((cat) => (
+                          <div key={cat} className="mb-6 last:mb-0">
+                            <p className="font-sans font-semibold text-foreground text-sm uppercase tracking-wider mb-3">
+                              {cat} wine{cat === "Sparkling & Champagne" ? " selection" : " selection"}
+                            </p>
+                            <div className="space-y-3">
+                              {wineOptions.filter((w) => w.category === cat).map((wine) => {
+                                const qty = wineOrders[wine.id] || 0;
+                                return (
+                                  <div
+                                    key={wine.id}
+                                    className="flex items-center justify-between gap-4 bg-warm-white border border-border rounded-sm p-4"
                                   >
-                                    <Minus className="w-4 h-4" />
-                                  </button>
-                                  <span className="w-8 text-center font-sans text-sm font-medium text-foreground tabular-nums">
-                                    {qty}
-                                  </span>
-                                  <button
-                                    type="button"
-                                    onClick={() => updateWine(wine.id, 1)}
-                                    className="w-8 h-8 rounded-sm border border-border flex items-center justify-center text-muted-foreground hover:bg-muted/50 transition-colors"
-                                    aria-label={`Add one ${wine.name}`}
-                                  >
-                                    <Plus className="w-4 h-4" />
-                                  </button>
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
+                                    <div className="min-w-0">
+                                      <p className="font-sans font-medium text-foreground text-sm">{wine.name}</p>
+                                      <p className="text-xs text-muted-foreground font-sans">
+                                        £{wine.price} {wine.note}
+                                      </p>
+                                    </div>
+                                    <div className="flex items-center gap-2 shrink-0">
+                                      <button
+                                        type="button"
+                                        onClick={() => updateWine(wine.id, -1)}
+                                        disabled={qty === 0}
+                                        className="w-8 h-8 rounded-sm border border-border flex items-center justify-center text-muted-foreground hover:bg-muted/50 disabled:opacity-30 transition-colors"
+                                        aria-label={`Remove one ${wine.name}`}
+                                      >
+                                        <Minus className="w-4 h-4" />
+                                      </button>
+                                      <span className="w-8 text-center font-sans text-sm font-medium text-foreground tabular-nums">
+                                        {qty}
+                                      </span>
+                                      <button
+                                        type="button"
+                                        onClick={() => updateWine(wine.id, 1)}
+                                        className="w-8 h-8 rounded-sm border border-border flex items-center justify-center text-muted-foreground hover:bg-muted/50 transition-colors"
+                                        aria-label={`Add one ${wine.name}`}
+                                      >
+                                        <Plus className="w-4 h-4" />
+                                      </button>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        ))}
 
                         {wineTotal > 0 && (
-                          <p className="mt-4 text-right font-sans text-sm">
+                          <p className="mt-2 text-right font-sans text-sm">
                             <span className="text-muted-foreground">Wine total: </span>
                             <span className="font-semibold text-foreground">£{wineTotal}</span>
                           </p>
                         )}
                       </div>
 
-                      {/* Beer Pre-Order */}
+
+                      {/* Beer buckets and vouchers */}
                       <div className="border-t border-border pt-6">
-                        <div className="flex items-center gap-2 mb-4">
+                        <div className="flex items-center gap-2 mb-3">
                           <Beer className="w-5 h-5 text-gold-dark" aria-hidden="true" />
-                          <h3 className="font-serif text-foreground text-lg">Pre-Order Beer</h3>
+                          <h3 className="font-serif text-foreground text-lg">Beer buckets &amp; prepaid drinks vouchers</h3>
                         </div>
+                        <p className="text-xs text-muted-foreground font-sans bg-warm-white border border-border rounded-sm p-3 mb-4 leading-relaxed">
+                          The hotel is offering prepaid drinks vouchers that you can order in advance for use on the evening. Vouchers are redeemable against any soft drink, beer, single house spirit with a mixer, glass of bubbles or 175ml house wine. Cash and cards are also accepted at the venue.
+                        </p>
+
+
 
                         <div className="space-y-4">
                           {beerOptions.map((beer) => {
