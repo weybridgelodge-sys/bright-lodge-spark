@@ -110,6 +110,24 @@ const Email = ({
             </>
           )}
 
+          {drinks.length > 0 && (
+            <>
+              <Hr style={hr} />
+              <Text style={labelStyle}>Drinks pre-order</Text>
+              {drinks.map((d, i) => (
+                <Text key={i} style={lineRow}>
+                  <span>{d.qty || 1} × {d.name || ''}{d.category ? ` (${d.category})` : ''}</span>
+                  <span style={{ float: 'right' }}>
+                    {formatPence((d.unit_price_pence || 0) * (d.qty || 1))}
+                  </span>
+                </Text>
+              ))}
+              <Text style={{ ...lineRow, color: '#666', fontSize: '12px', marginTop: '6px' }}>
+                Drinks are payable with the balance by 31 July 2026.
+              </Text>
+            </>
+          )}
+
           {lineItems.length > 0 && (
             <>
               <Hr style={hr} />
