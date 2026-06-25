@@ -7,6 +7,7 @@ import {
   Hr,
   Html,
   Img,
+  Link,
   Preview,
   Section,
   Text,
@@ -37,6 +38,8 @@ const Email = ({ name, email, phone, reason, submittedAt, source }: Props) => (
             alt="Weybridge Lodge crest"
             style={{ margin: '0 auto', display: 'block' }}
           />
+          <Heading style={brand}>Weybridge Lodge</Heading>
+          <Text style={brandSub}>No. 6787 — Province of Surrey</Text>
         </Section>
         <Heading style={h1}>New Membership Enquiry</Heading>
         <Text style={meta}>Source: {source || 'join-us'} · {submittedAt || ''}</Text>
@@ -51,7 +54,13 @@ const Email = ({ name, email, phone, reason, submittedAt, source }: Props) => (
         </Section>
 
         <Text style={footerText}>
-          Reply directly to {email || 'the enquirer'} to make contact.
+          Reply directly to{' '}
+          {email ? (
+            <Link href={`mailto:${email}`} style={emailLink}>{email}</Link>
+          ) : (
+            'the enquirer'
+          )}{' '}
+          to make contact.
         </Text>
       </Container>
     </Body>
@@ -89,3 +98,6 @@ const labelStyle = { color: '#1B2A4A', fontWeight: 'bold' as const, fontSize: '1
 const reasonStyle = { color: '#2a2a2a', fontSize: '14px', lineHeight: '1.6', margin: 0, whiteSpace: 'pre-wrap' as const }
 const hr = { borderColor: '#e8e3d3', margin: '14px 0' }
 const footerText = { color: '#666', fontSize: '12px', margin: '18px 0 0' }
+const emailLink = { color: '#1B2A4A', textDecoration: 'underline', fontWeight: 600 as const }
+const brand = { color: '#1B2A4A', fontSize: '24px', margin: '12px 0 0', letterSpacing: '0.5px' }
+const brandSub = { color: '#C9A432', fontSize: '12px', letterSpacing: '2px', textTransform: 'uppercase' as const, margin: '4px 0 12px' }
