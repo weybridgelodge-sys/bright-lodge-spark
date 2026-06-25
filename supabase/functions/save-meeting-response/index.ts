@@ -88,6 +88,13 @@ Deno.serve(async (req) => {
       );
     }
 
+    // Fire-and-forget booking emails (confirmation + assistant secretary notification)
+    try {
+      await sendBookingEmails(booking.id, { stage: "submitted" });
+    } catch (e) {
+      console.error("sendBookingEmails (submitted) failed:", e);
+    }
+
     return new Response(
       JSON.stringify({ bookingId: booking.id }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
