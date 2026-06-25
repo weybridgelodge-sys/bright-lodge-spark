@@ -213,6 +213,7 @@ export async function sendBookingEmails(bookingId: string, opts: SendOpts) {
           dietary,
           message,
           lineItems,
+          drinks,
           totalAmount,
           paymentStatusLabel: psLabel,
           bookingRef,
