@@ -97,6 +97,12 @@ const Bookings = () => {
 
   // Form state
   const [step, setStep] = useState(1);
+  const formRef = useRef<HTMLFormElement>(null);
+  useEffect(() => {
+    if (formRef.current) {
+      formRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [step]);
   const [showCheckout, setShowCheckout] = useState(false);
   const [submissionStatus, setSubmissionStatus] = useState<"idle" | "submitting" | "meeting-only" | "apologies" | "bank-transfer" | "cash-cheque" | "error">("idle");
   const [title, setTitle] = useState("");
