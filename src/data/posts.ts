@@ -4,6 +4,7 @@ import anniversaryImg from "@/assets/news/75th-anniversary-group.png";
 import installationImg from "@/assets/news/installation-meeting-group.jpg";
 import surrey2030Img from "@/assets/news/surrey-2030-gold-award.jpg";
 import doubleInitiationImg from "@/assets/news/double-initiation-december-2025.jpg";
+import threeDegreesImg from "@/assets/news/three-masonic-degrees.jpg";
 
 export interface BlogPost {
   slug: string;
@@ -16,6 +17,15 @@ export interface BlogPost {
 
 // Ordered newest first
 export const posts: BlogPost[] = [
+  {
+    slug: "three-masonic-degrees-explained",
+    title: "The Three Masonic Degrees Explained",
+    date: "2026-06-25",
+    category: "Discover Freemasonry",
+    excerpt:
+      "A clear, modern guide to the three degrees of Freemasonry — Entered Apprentice, Fellow Craft and Master Mason — and what each one means for a new member of Weybridge Lodge.",
+    image: threeDegreesImg,
+  },
   {
     slug: "surrey-2030-festival-gold",
     title: "Weybridge Lodge Strikes Gold: Surrey 2030 Festival Success",
