@@ -272,24 +272,90 @@ const ThamesChallengePage = () => {
           </div>
         </section>
 
-        <section className="bg-navy-gradient py-16 md:py-24">
-          <div className="container mx-auto max-w-6xl px-4 sm:px-6">
-            <div className="mb-10 text-center">
-              <p className="font-mono text-xs uppercase tracking-[0.25em] text-gold">Stats section</p>
-              <h2 className="mt-3 font-serif text-3xl text-primary-foreground md:text-4xl">What this challenge represented</h2>
+        {/* SECTION A — The Cause */}
+        <section className="bg-[#1C294B] py-20 text-primary-foreground">
+          <div className="mx-auto max-w-[820px] px-6">
+            <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-gold">Why We Walked</p>
+            <h2 className="mt-3 font-serif font-bold text-white" style={{ fontSize: "clamp(1.7rem, 4vw, 2.5rem)" }}>
+              Raising £10,000 for the Surrey 2030 Festival
+            </h2>
+
+            <div className="mt-8 space-y-5 font-sans text-white/80 leading-7" style={{ fontSize: "1.02rem" }}>
+              <p>
+                The Thames Towpath Challenge was not just a physical feat — it was a fundraising mission. Every mile walked, every blister endured, and every early morning departure from Cowey Sale car park was in service of one goal: raising money for the <strong className="text-white">Masonic Charitable Foundation's Surrey 2030 Festival</strong>.
+              </p>
+              <p>
+                The Surrey 2030 Festival is the Province of Surrey's ten-year charitable campaign, running from 2020 to 2030, with a target of raising <strong className="text-white">£3 million</strong> for the Masonic Charitable Foundation. That Foundation supports thousands of people across the United Kingdom — Freemasons and non-Masons alike — through grants covering healthcare, education, financial hardship, and elder care.
+              </p>
+              <p>
+                The walkers were sponsored individually by members of the lodges that took part in the challenge — brothers from across Surrey who backed the team with personal donations, turning every step of the route into a direct act of Masonic giving. That collective individual sponsorship raised <strong className="text-white">£7,500</strong>.
+              </p>
+              <p>
+                Weybridge Lodge No. 6787 then stepped in as a lodge to top up that total, contributing a further <strong className="text-white">£2,500</strong> — bringing the overall sum to a round and remarkable <strong className="text-white">£10,000</strong> for the Surrey 2030 Festival.
+              </p>
             </div>
-            <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
-              {stats.map((stat) => {
-                const Icon = stat.icon;
-                return (
-                  <div key={stat.label} className="rounded-sm border border-gold/15 bg-navy-light/30 p-6">
-                    <Icon className="h-8 w-8 text-gold" />
-                    <p className="mt-4 text-xs font-mono uppercase tracking-[0.18em] text-gold/80">{stat.label}</p>
-                    <h3 className="mt-2 font-serif text-2xl text-primary-foreground">{stat.value}</h3>
-                    <p className="mt-3 text-sm font-sans leading-relaxed text-primary-foreground/70">{stat.detail}</p>
-                  </div>
-                );
-              })}
+
+            <blockquote className="my-10 border-l-[3px] border-gold pl-7 font-serif italic text-[#e8c97a]" style={{ fontSize: "1.3rem" }}>
+              "If we all do our bit and enjoy the process, I am certain that as a Province, we will smash our £3 million target by 2030."
+            </blockquote>
+
+            <div className="space-y-5 font-sans text-white/80 leading-7" style={{ fontSize: "1.02rem" }}>
+              <p>
+                The Masonic Charitable Foundation is one of the largest grant-making charities in the UK. It distributes millions each year in grants and support — to individuals facing crisis, to hospices, to schools, and to community organisations that might never know a Freemason was behind the gift.
+              </p>
+              <p>This is what the walk was for. This is what the blisters were for.</p>
+            </div>
+
+            <div className="mt-12 flex flex-col gap-8 border-t border-gold/20 pt-10 sm:flex-row">
+              <div className="flex flex-col gap-1 sm:flex-1 sm:border-r sm:border-gold/20 sm:pr-8">
+                <span className="font-serif font-black text-4xl leading-none text-[#e8c97a]">£7,500</span>
+                <span className="font-mono text-[10px] uppercase tracking-widest text-white/50">Individual sponsorship from participating lodges</span>
+              </div>
+              <div className="flex flex-col gap-1 sm:flex-1 sm:border-r sm:border-gold/20 sm:pr-8">
+                <span className="font-serif font-black text-4xl leading-none text-[#e8c97a]">£2,500</span>
+                <span className="font-mono text-[10px] uppercase tracking-widest text-white/50">Top-up contribution from Weybridge Lodge No. 6787</span>
+              </div>
+              <div className="flex flex-col gap-1 sm:flex-1 sm:border-r sm:border-gold/20 sm:pr-8">
+                <span className="font-serif font-black text-4xl leading-none text-[#e8c97a]">£10,000</span>
+                <span className="font-mono text-[10px] uppercase tracking-widest text-white/50">Total raised for the Surrey 2030 Festival</span>
+              </div>
+              <div className="flex flex-col gap-1 sm:flex-1 sm:pl-4">
+                <span className="font-serif font-black text-4xl leading-none text-[#e8c97a]">£3 Million</span>
+                <span className="font-mono text-[10px] uppercase tracking-widest text-white/50">Surrey 2030 Festival target by 2030</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* SECTION B — The Stats */}
+        <section className="bg-[#f9f6f0] py-20">
+          <div className="mx-auto max-w-[820px] px-6">
+            <p className="font-mono text-[10px] uppercase tracking-widest text-gold">By the Numbers</p>
+            <h2 className="mt-3 font-serif font-bold text-[#1C294B]" style={{ fontSize: "clamp(1.7rem, 4vw, 2.5rem)" }}>
+              The Grand Totals
+            </h2>
+
+            <div className="mt-10 grid grid-cols-2 gap-px border border-[#d4c9b0] sm:grid-cols-3 lg:grid-cols-4">
+              {[
+                { num: "183.7", label: "Official miles walked", note: "Plus approx. 20 extra from route diversions" },
+                { num: "10", label: "Days on the towpath", note: "Thames Barrier to the Source" },
+                { num: "410,000", label: "Steps taken", note: "Approximately 2,200 per mile" },
+                { num: "£10,000+", label: "Raised for the Surrey 2030 Festival", note: "Against a personal target of £2,000" },
+                { num: "24,000", label: "Calories burned", note: "The equivalent of 45 Sunday roasts" },
+                { num: "45", label: "Non-tidal locks navigated", note: "From Teddington to St John's Lock" },
+                { num: "138", label: "Bridges crossed", note: "" },
+                { num: "180", label: "WWII pillboxes passed", note: "Along the GHQ defensive line" },
+                { num: "45 litres", label: "Water consumed", note: "Plus riverside pub \"rehydration\"" },
+                { num: "80", label: "Electrolyte tablets", note: "To manage blood pressure on the route" },
+                { num: "≈ Ben Nevis", label: "Total elevation climbed", note: "Cumulative ascent across 10 days" },
+                { num: "10", label: "Days of Adrenal Insufficiency management", note: "Zero crises" },
+              ].map((s) => (
+                <div key={s.label} className="border border-[#d4c9b0] bg-white p-7">
+                  <div className="font-serif font-black text-4xl leading-none text-[#1C294B] mb-1.5">{s.num}</div>
+                  <div className="font-mono text-[10px] uppercase tracking-widest leading-snug text-[#6b6b6b]">{s.label}</div>
+                  {s.note && <div className="mt-1 font-sans text-xs italic text-[#6b6b6b]/70">{s.note}</div>}
+                </div>
+              ))}
             </div>
           </div>
         </section>
