@@ -1,5 +1,7 @@
 import { template as enquiryConfirmation } from './enquiry-confirmation.tsx'
 import { template as enquiryNotification } from './enquiry-notification.tsx'
+import { template as bookingConfirmation } from './booking-confirmation.tsx'
+import { template as bookingNotification } from './booking-notification.tsx'
 
 export interface TemplateEntry {
   component: any
@@ -12,4 +14,6 @@ export interface TemplateEntry {
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'enquiry-confirmation': enquiryConfirmation,
   'enquiry-notification': enquiryNotification,
+  'booking-confirmation': bookingConfirmation,
+  'booking-notification': bookingNotification,
 }
