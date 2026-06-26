@@ -66,8 +66,20 @@ const joinSteps: JoinStep[] = [
   {
     n: "5",
     icon: CheckSquare,
-    title: "Ballot & Initiation Date",
-    body: "Your application is put to a formal ballot in open Lodge. Once accepted unanimously, we will confirm your initiation date — your first evening as a member of our Freemasons Lodge in Guildford.",
+    title: "Interview & Confirmation",
+    body: "If the committee interview goes well, we will confirm your initiation date at that point. There is no waiting in the dark — a successful interview means you have a date in the diary.",
+  },
+  {
+    n: "6",
+    icon: FileText,
+    title: "Read in Open Lodge",
+    body: "At the meeting before your initiation, your name and details are formally read aloud in open Lodge. This is a procedural step required by the United Grand Lodge of England — the brethren are formally notified of your candidature ahead of the ceremony.",
+  },
+  {
+    n: "7",
+    icon: Shield,
+    title: "The Ballot & Your Initiation",
+    body: "On the night of your initiation, a formal ballot is taken in the Lodge room before you are admitted. Once the ballot confirms unanimous acceptance, the ceremony proceeds and your journey as a Freemason begins.",
   },
 ];
 
