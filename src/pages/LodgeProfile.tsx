@@ -396,12 +396,12 @@ const LodgeProfile = () => {
               <p className="text-muted-foreground font-sans leading-relaxed mb-4">
                 Our principal charity event is the Annual Ladies Festival — a black tie charity gala
                 held each year in aid of a cause chosen by the Worshipful Master. Past events have
-                been held at venues including Macdonald Frimley Hall, raising funds for local
-                charities such as Guildford Young Carers.
+                been held at various venues across Guildford and the surrounding areas, raising funds for local
+                charities such as Guildford Young Carers & SANDS.
               </p>
               <p className="text-muted-foreground font-sans leading-relaxed mb-4">
                 More relaxed social activities include darts nights, Topgolf, clay pigeon shoots and
-                our Annual Charity Golf Day. We also actively participate in inter-lodge and
+                bowling. We also actively participate in inter-lodge and
                 Provincial events, with members having recently completed the{" "}
                 <Link to="/thames-challenge" className="text-gold hover:underline">
                   Thames Towpath Challenge
