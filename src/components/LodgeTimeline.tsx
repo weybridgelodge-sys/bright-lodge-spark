@@ -24,7 +24,7 @@ const milestones: TimelineEntry[] = [
     year: "1960s",
     title: "Move to Guildford",
     description:
-      "The Lodge settles into the South West Surrey Masonic Centre in Guildford, where it still meets today.",
+      "The Lodge settles into the Guildford Masonic Centre in Guildford, where it still meets today.",
   },
   {
     year: "2023",

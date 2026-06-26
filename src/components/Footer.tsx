@@ -85,7 +85,7 @@ const Footer = () => {
           <div>
             <h2 className="font-serif text-primary-foreground mb-4 text-sm">Meeting Location</h2>
             <p className="text-primary-foreground/80 text-sm font-sans leading-relaxed">
-              South West Surrey Masonic Centre, Weybourne House,<br />
+              Guildford Masonic Centre, Weybourne House,<br />
               Hitherbury Close, Portsmouth Road,<br />
               Guildford, Surrey GU2 4DR
             </p>

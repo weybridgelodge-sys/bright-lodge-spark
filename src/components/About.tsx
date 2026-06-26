@@ -38,7 +38,7 @@ const About = () => {
             <div className="relative w-full overflow-hidden rounded-sm shadow-lg">
               <img
                 src={anniversaryPhoto}
-                alt="Brethren of Weybridge Lodge No. 6787 gathered in the temple at the South West Surrey Masonic Centre to celebrate the Lodge's 75th anniversary in February 2024"
+                alt="Brethren of Weybridge Lodge No. 6787 gathered in the temple at the Guildford Masonic Centre to celebrate the Lodge's 75th anniversary in February 2024"
                 width={1200}
                 height={800}
                 loading="lazy"

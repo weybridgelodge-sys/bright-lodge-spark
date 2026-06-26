@@ -27,7 +27,7 @@ const ApgmVisit = () => {
     <div className="min-h-screen">
       <SEO
         title="PGM Visit February 2026"
-        description="The Provincial Grand Master visited Weybridge Lodge No. 6787 for a First Degree Initiation ceremony at the South West Surrey Masonic Centre, Guildford."
+        description="The Provincial Grand Master visited Weybridge Lodge No. 6787 for a First Degree Initiation ceremony at the Guildford Masonic Centre, Guildford."
         canonical="/news/pgm-visit-february-2026"
         type="article"
         schema={[
@@ -105,7 +105,7 @@ const ApgmVisit = () => {
             {/* Article body */}
             <article className="prose-custom space-y-10">
               <p className="text-muted-foreground font-sans leading-relaxed">
-                Weybridge Lodge No. 6787 was honoured to welcome the Provincial Grand Master (PGM) of the Province of Surrey, RW Bro Nicholas Burger for an official visit on Wednesday 18th February 2026. Held at the South West Surrey Masonic Centre in Guildford, the evening was a truly memorable occasion that combined an excellent First Degree Initiation ceremony, charitable endeavour and warm fraternal fellowship.
+                Weybridge Lodge No. 6787 was honoured to welcome the Provincial Grand Master (PGM) of the Province of Surrey, RW Bro Nicholas Burger for an official visit on Wednesday 18th February 2026. Held at the Guildford Masonic Centre in Guildford, the evening was a truly memorable occasion that combined an excellent First Degree Initiation ceremony, charitable endeavour and warm fraternal fellowship.
               </p>
 
               {/* The PGM's Official Visit */}
@@ -207,7 +207,7 @@ const ApgmVisit = () => {
             <div className="mt-12 pt-8 border-t border-border">
               <p className="text-sm font-serif text-foreground font-semibold">Weybridge Lodge No. 6787</p>
               <p className="text-xs text-muted-foreground font-sans mt-1">
-                Weybridge Lodge meets at the South West Surrey Masonic Centre in Guildford and has been going strong since 1949.
+                Weybridge Lodge meets at the Guildford Masonic Centre in Guildford and has been going strong since 1949.
               </p>
             </div>
 

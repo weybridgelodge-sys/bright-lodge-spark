@@ -27,7 +27,7 @@ const InstallationMeeting = () => {
     <div className="min-h-screen">
       <SEO
         title="Installation Meeting Oct 2023"
-        description="Weybridge Lodge's Masonic installation meeting in October 2023, welcoming W Bro. Murray Grubb Jnr as the new Master at the South West Surrey Masonic Centre."
+        description="Weybridge Lodge's Masonic installation meeting in October 2023, welcoming W Bro. Murray Grubb Jnr as the new Master at the Guildford Masonic Centre."
         canonical="/news/installation-meeting-october-2023"
         type="article"
         schema={[

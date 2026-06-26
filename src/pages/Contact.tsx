@@ -11,7 +11,7 @@ const Contact = () => {
     <div className="min-h-screen">
       <SEO
         title="Contact Us"
-        description="Contact Weybridge Lodge No. 6787 — Freemasons in Guildford, Surrey. Call, email or visit us at the South West Surrey Masonic Centre, Hitherbury Close, GU2 4DR."
+        description="Contact Weybridge Lodge No. 6787 — Freemasons in Guildford, Surrey. Call, email or visit us at the Guildford Masonic Centre, Hitherbury Close, GU2 4DR."
         canonical="/contact"
         schema={breadcrumbSchema([
           { name: "Home", url: "/" },
@@ -67,7 +67,7 @@ const Contact = () => {
                     <div>
                       <p className="font-sans font-medium text-foreground text-sm">We Meet At</p>
                       <p className="text-muted-foreground font-sans text-sm">
-                        South West Surrey Masonic Centre<br />
+                        Guildford Masonic Centre<br />
                         Hitherbury Close, Guildford GU2 4DR
                       </p>
                     </div>
@@ -99,7 +99,7 @@ const Contact = () => {
                   allowFullScreen
                   loading="lazy"
                   referrerPolicy="no-referrer-when-downgrade"
-                  title="South West Surrey Masonic Centre location"
+                  title="Guildford Masonic Centre location"
                 />
               </motion.div>
             </div>

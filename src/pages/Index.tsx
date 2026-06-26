@@ -21,7 +21,7 @@ const Index = () => {
     <div className="min-h-screen">
       <SEO
         title="Weybridge Lodge No. 6787"
-        description="Weybridge Lodge No. 6787 — an open, friendly Freemasons Lodge in Guildford, Surrey. Join our welcoming community at the South West Surrey Masonic Centre."
+        description="Weybridge Lodge No. 6787 — an open, friendly Freemasons Lodge in Guildford, Surrey. Join our welcoming community at the Guildford Masonic Centre."
         canonical="/"
         schema={organizationSchema}
       />

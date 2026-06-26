@@ -13,7 +13,7 @@ const PageHeader = ({ title, subtitle }: PageHeaderProps) => {
         className="absolute inset-0 bg-cover bg-center"
         style={{ backgroundImage: `url(${heroJpg.url})` }}
         role="img"
-        aria-label="South West Surrey Masonic Centre, Guildford — meeting place of Weybridge Lodge"
+        aria-label="Guildford Masonic Centre, Guildford — meeting place of Weybridge Lodge"
       />
       <div className="absolute inset-0 bg-navy-gradient opacity-90" />
 
