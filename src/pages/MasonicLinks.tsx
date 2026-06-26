@@ -214,7 +214,7 @@ const MasonicLinks = () => {
                         <h3 className="font-serif text-foreground group-hover:text-gold transition-colors mb-1">
                           {/* Stretch link: ::after overlay covers full card.
                               Heading is NOT inside the anchor — a11y compliant. */}
-                          
+                          <a
                             href={link.url}
                             target="_blank"
                             rel="noopener noreferrer"
