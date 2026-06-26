@@ -28,9 +28,9 @@ export const testimonials: Testimonial[] = [
   },
   {
     quote:
-      "I joined later in life thinking I'd missed the boat. The Lodge welcomed me like I'd always been part of it. The charity work alone has made it worthwhile.",
-    name: "[Member Name]",
-    role: "Joined aged 58",
-    joined: "Member since 2019",
+      "I have been a Freemason and a member of Weybridge Lodge 6787 for nearly 50 years. During this time, freemasonry has changed to meet the needs of the time. It has always remained relevant, and it maintains appropriate threads of tradition whilst seeking to embrace the needs of its members and those who seek to join. Weybridge Lodge is based in Guildford at the Guildford Masonic Centre, and the meetings and dinners afterwards are always memorable. I highly recommend this Lodge to anyone curious about Freemasonry in Surrey.",
+    name: "Tony M",
+    role: "Joined aged 31",
+    joined: "Member since 2008",
   },
 ];
