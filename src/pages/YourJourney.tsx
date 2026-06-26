@@ -235,30 +235,46 @@ const YourJourney = () => {
               </p>
             </motion.div>
 
-            <ul className="grid sm:grid-cols-2 lg:grid-cols-5 gap-5 list-none p-0">
-              {joinSteps.map((s, i) => {
-                const Icon = s.icon;
-                return (
-                  <motion.li
-                    key={s.n}
-                    {...motionProps(i * 0.08)}
-                    className="bg-card border border-border rounded-sm p-6 relative"
-                  >
-                    <span
-                      aria-hidden="true"
-                      className="absolute top-4 right-4 text-5xl font-serif text-gold/10 leading-none"
+            <div className="flex flex-col items-center gap-0">
+              <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 list-none p-0 m-0 w-full">
+                {joinSteps.slice(0, 4).map((s, i) => {
+                  const Icon = s.icon;
+                  return (
+                    <motion.li
+                      key={s.n}
+                      {...motionProps(i * 0.08)}
+                      className="bg-background border border-border rounded-sm p-6 relative"
                     >
-                      {s.n}
-                    </span>
-                    <Icon className="w-6 h-6 text-gold mb-3" aria-hidden="true" />
-                    <h3 className="font-serif text-foreground text-lg mb-2">{s.title}</h3>
-                    <p className="text-muted-foreground font-sans text-sm leading-relaxed">
-                      {s.body}
-                    </p>
-                  </motion.li>
-                );
-              })}
-            </ul>
+                      <p className="absolute top-4 right-4 text-5xl font-serif text-gold/10 leading-none" aria-hidden="true">{s.n}</p>
+                      <div className="w-10 h-10 rounded-full bg-navy text-gold flex items-center justify-center border border-gold/30 mb-4" aria-hidden="true">
+                        <Icon className="w-5 h-5" />
+                      </div>
+                      <h3 className="font-serif text-foreground text-lg mb-2">{s.title}</h3>
+                      <p className="text-muted-foreground font-sans text-sm leading-relaxed">{s.body}</p>
+                    </motion.li>
+                  );
+                })}
+              </ul>
+              <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 list-none p-0 m-0 w-full lg:w-3/4 xl:w-2/3 mt-5">
+                {joinSteps.slice(4).map((s, i) => {
+                  const Icon = s.icon;
+                  return (
+                    <motion.li
+                      key={s.n}
+                      {...motionProps((i + 4) * 0.08)}
+                      className="bg-background border border-border rounded-sm p-6 relative"
+                    >
+                      <p className="absolute top-4 right-4 text-5xl font-serif text-gold/10 leading-none" aria-hidden="true">{s.n}</p>
+                      <div className="w-10 h-10 rounded-full bg-navy text-gold flex items-center justify-center border border-gold/30 mb-4" aria-hidden="true">
+                        <Icon className="w-5 h-5" />
+                      </div>
+                      <h3 className="font-serif text-foreground text-lg mb-2">{s.title}</h3>
+                      <p className="text-muted-foreground font-sans text-sm leading-relaxed">{s.body}</p>
+                    </motion.li>
+                  );
+                })}
+              </ul>
+            </div>
 
             <p className="text-center text-muted-foreground font-sans italic mt-10 max-w-2xl mx-auto">
               "The journey of a thousand miles begins with a single step. Ours begins with a conversation."
