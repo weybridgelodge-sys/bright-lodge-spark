@@ -140,7 +140,7 @@ const Bookings = () => {
   }, [step]);
 
   const [showCheckout, setShowCheckout] = useState(false);
-  const [submissionStatus, setSubmissionStatus] = useState
+  const [submissionStatus, setSubmissionStatus] = useState<
     "idle" | "submitting" | "meeting-only" | "apologies" | "bank-transfer" | "cash-cheque" | "error"
   >("idle");
 
@@ -152,7 +152,7 @@ const Bookings = () => {
   const [phone, setPhone] = useState("");
   // Honeypot — must remain empty on legitimate submissions
   const [honeypot, setHoneypot] = useState("");
-  const [meetingOption, setMeetingOption] = useState
+  const [meetingOption, setMeetingOption] = useState<
     "meeting-and-festive-board" | "meeting-only" | "apologies" | ""
   >("");
   const [guestCount, setGuestCount] = useState<number>(0);
