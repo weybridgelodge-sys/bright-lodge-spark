@@ -287,7 +287,7 @@ const OurCharities = () => {
                         <ArrowRight className="w-4 h-4" aria-hidden="true" />
                       </Link>
                     )}
-                    <
+                    <a
                       href={charity.url}
                       target="_blank"
                       rel="noopener noreferrer"
