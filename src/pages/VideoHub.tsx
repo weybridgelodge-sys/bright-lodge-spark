@@ -29,7 +29,7 @@ const videos: Video[] = [
   },
   {
     title: "The Origins of Freemasonry",
-    embedId: "<iframe width="560" height="315" src="https://www.youtube.com/embed/v_DSCoqrqdA?si=VtN5ym9722hq28uN" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>",
+    embedId: "v_DSCoqrqdA",
     channel: "United Grand Lodge of England",
     description:
       "Freemasonry consists of fraternal groups that trace their origins to medieval guilds of stonemasons. Freemasonry is considered the oldest existing secular fraternal organisation, with documents and traditions dating back to the 14th century.",
