@@ -86,7 +86,7 @@ const navItems: NavItem[] = [
     sections: [
       {
         items: [
-          { label: "News Hub", href: "/news" },
+          { label: "Latest News", href: "/news" },
           { label: "Video Hub", href: "/video-hub" },
         ],
       },
