@@ -102,15 +102,15 @@ const Officers = () => {
                             ? "Leads the Lodge's candidate attraction and member retention programme"
                             : null;
                         return (
-                          <>
+                          <React.Fragment key={i}>
                             {showDivider && (
-                              <tr key="progressive-divider" className="border-t-2 border-gold/40">
+                              <tr className="border-t-2 border-gold/40">
                                 <td colSpan={3} className="text-gold text-[10px] font-sans uppercase tracking-[0.2em] py-3">
                                   Progressive Offices ★
                                 </td>
                               </tr>
                             )}
-                            <tr key={i} className="border-b border-primary-foreground/10 hover:bg-primary-foreground/5 transition-colors">
+                            <tr className="border-b border-primary-foreground/10 hover:bg-primary-foreground/5 transition-colors">
                               <td className="text-primary-foreground font-sans text-sm py-3 pr-6">
                                 <div>
                                   {o.office} {o.progressive && <span className="text-gold">★</span>}
@@ -124,7 +124,8 @@ const Officers = () => {
                               <td className="text-primary-foreground/80 font-sans text-sm py-3 pr-6">{o.name}</td>
                               <td className="text-primary-foreground/60 font-sans text-xs py-3">{o.honours}</td>
                             </tr>
-                          </>
+                          </React.Fragment>
+
                         );
                       });
                     })()}
