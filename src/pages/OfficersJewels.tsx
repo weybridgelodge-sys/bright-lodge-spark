@@ -4,6 +4,7 @@ import PageHeader from "@/components/PageHeader";
 import SEO, { breadcrumbSchema } from "@/components/SEO";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
+import type { ReactNode } from "react";
 
 import stewardImg from "@/assets/jewels/steward.webp";
 import igImg from "@/assets/jewels/ig.webp";
@@ -17,6 +18,7 @@ import treasurerImg from "@/assets/jewels/treasurer.webp";
 import secretaryImg from "@/assets/jewels/secretary.webp";
 import dcImg from "@/assets/jewels/dc.webp";
 import mentorImg from "@/assets/jewels/mentor.webp";
+import membershipOfficerImg from "@/assets/jewels/membership_officer.png";
 import almonerImg from "@/assets/jewels/almoner.webp";
 import charityImg from "@/assets/jewels/charity.webp";
 import asstSecretaryImg from "@/assets/jewels/asst_secretary.webp";
@@ -25,9 +27,10 @@ import organistImg from "@/assets/jewels/organist.webp";
 import tylerImg from "@/assets/jewels/tyler.webp";
 
 interface OfficerJewel {
+  id?: string;
   image: string;
   title: string;
-  description: string;
+  description: ReactNode;
   alt: string;
 }
 
@@ -72,7 +75,16 @@ const progressiveOfficers: OfficerJewel[] = [
     image: masterImg,
     title: "Worshipful Master",
     alt: "Masonic Lodge Officers Jewel - Worshipful Masters Jewel",
-    description: "The Master is elected by the Lodge members every year and is then installed in to his office. He sits at the East end of the Lodge and is usually Master for one year. He is in charge of the Lodge during his tenure of office and acts as its chairman. He also normally conducts the ceremonies in the Lodge. Being elected and installed as Master is the highest honour a Lodge can bestow on any of its members.",
+    description: (
+      <>
+        The Master is elected by the Lodge members every year and is then installed in to his office. He sits at the East end of the Lodge and is usually Master for one year. He is in charge of the Lodge during his tenure of office and acts as its chairman. He also normally conducts the ceremonies in the Lodge. Being elected and installed as Master is the highest honour a Lodge can bestow on any of its members.
+        <br /><br />
+        To see every brother who has served as Worshipful Master of Weybridge Lodge since our consecration in 1949, visit our{" "}
+        <Link to="/worshipful-masters" className="text-gold hover:underline font-medium">
+          Roll of Honour →
+        </Link>.
+      </>
+    ),
   },
 ];
 
@@ -81,7 +93,7 @@ const nonProgressiveOfficers: OfficerJewel[] = [
     image: ipmImg,
     title: "Immediate Past Master (IPM)",
     alt: "Masonic Lodge Officers Jewel - Immediate Past Masters Jewel",
-    description: "After his year as Master of the Lodge, a Mason Becomes the Immediate Past Master (IPM). Strictly speaking, the IPM is not an Officer of the Lodge, but his position is an important one as it is his responsibility to sit beside the Master; both in the Lodge Room and the Festive Board, and give him support and guidance when required.",
+    description: "After his year as Master of the Lodge, a Mason becomes the Immediate Past Master (IPM). Strictly speaking, the IPM is not an Officer of the Lodge, but his position is an important one as it is his responsibility to sit beside the Master; both in the Lodge Room and the Festive Board, and give him support and guidance when required.",
   },
   {
     image: chaplainImg,
@@ -105,13 +117,24 @@ const nonProgressiveOfficers: OfficerJewel[] = [
     image: dcImg,
     title: "Director of Ceremonies (DC)",
     alt: "Masonic Lodge Officers Jewel - Director of Ceremonies Jewel",
-    description: "The DC should have a love of ritual; as his title implies, his function is to direct the ceremonial aspects of our meetings. As in public life when ceremonial is required, such as State Funeral or Royal Wedding, the important events call for meticulous planning, rehearsal and organising for the requirements of the occasion. The DC's role is to make certain that ceremonies are efficiently conducted with dignity and decorum and that all concerned are aware in advance of what they have to do. The Assistant DC helps the DC and acts as his understudy.",
+    description: (
+      <>
+        The DC should have a love of ritual; as his title implies, his function is to direct the ceremonial aspects of our meetings. As in public life when ceremonial is required, such as State Funeral or Royal Wedding, the important events call for meticulous planning, rehearsal and organising for the requirements of the occasion. The DC's role is to make certain that ceremonies are efficiently conducted with dignity and decorum and that all concerned are aware in advance of what they have to do. The Assistant Director of Ceremonies helps the DC and acts as his understudy — see the{" "}
+        <a href="#adc" className="text-gold hover:underline font-medium">ADC role below</a>.
+      </>
+    ),
   },
   {
     image: mentorImg,
     title: "Mentor",
     alt: "Masonic Lodge Officers Jewel - Mentors Jewel",
     description: "It is the responsibility of every Lodge to look after its members. The Lodge Mentor has a vital role to play, as it is his responsibility to ensure that the Mentoring process is not only implemented, but that it also works effectively in his Lodge. The Lodge Mentor needs to ensure that a Mentor is appointed for every Candidate.",
+  },
+  {
+    image: membershipOfficerImg,
+    title: "Lodge Membership Officer",
+    alt: "Masonic Lodge Officers Jewel - Lodge Membership Officers Jewel",
+    description: "The Lodge Membership Officer leads the Lodge's approach to attracting, welcoming and retaining members. He works to ensure that candidates are identified and supported through the joining process, that new members feel welcomed from their first steps, and that the Lodge remains an active and growing community. This is a relatively modern office that reflects the importance Weybridge Lodge places on its future — ensuring that the fellowship, traditions and values of the Lodge are passed on to each new generation of Freemasons.",
   },
   {
     image: almonerImg,
@@ -132,6 +155,7 @@ const nonProgressiveOfficers: OfficerJewel[] = [
     description: "The role of the Assistant Secretary is to assist the Secretary in his duty and in most Lodges, also serves as the Dining Steward. This part of the role is responsible for managing and organising the dining including looking after the Stewards.",
   },
   {
+    id: "adc",
     image: asstdcImg,
     title: "Assistant Director of Ceremonies (ADC)",
     alt: "Masonic Lodge Officers Jewel - Assistant Director of Ceremonies Jewel",
@@ -141,7 +165,13 @@ const nonProgressiveOfficers: OfficerJewel[] = [
     image: organistImg,
     title: "Organist",
     alt: "Masonic Lodge Officers Jewel - Organists Jewel",
-    description: "Many Lodges have within their membership a brother adequately skilled to play the organ at meetings, some rely on professional organists. Having an organist adds to the overall decorum of the meeting.",
+    description: (
+      <>
+        The Organist provides the musical accompaniment that sets the tone and dignity of Lodge proceedings — from the opening of the meeting to the processional moments within ceremonies. Many Lodges are fortunate to have a skilled musician among their members; others rely on professional organists or recorded music.
+        <br /><br />
+        Weybridge Lodge has a proud organist tradition. Our early historian records Haydn Noakes — who lived at Ripley and ran one of the most powerful amateur radio transmitters in Britain — as a long-serving Lodge Organist, succeeded by Stan Whitfield. That tradition of musical service remains part of the Lodge's character today.
+      </>
+    ),
   },
   {
     image: tylerImg,
@@ -153,11 +183,12 @@ const nonProgressiveOfficers: OfficerJewel[] = [
 
 const JewelCard = ({ officer, index }: { officer: OfficerJewel; index: number }) => (
   <motion.div
+    id={officer.id}
     initial={{ opacity: 0, y: 20 }}
     whileInView={{ opacity: 1, y: 0 }}
     viewport={{ once: true }}
     transition={{ duration: 0.5, delay: index * 0.05 }}
-    className="flex flex-col sm:flex-row items-start gap-5 sm:gap-6 py-6 border-b border-border last:border-b-0"
+    className="flex flex-col sm:flex-row items-start gap-5 sm:gap-6 py-6 border-b border-border last:border-b-0 scroll-mt-24"
   >
     <div className="w-20 h-20 sm:w-24 sm:h-24 shrink-0 flex items-center justify-center">
       <img
@@ -170,7 +201,7 @@ const JewelCard = ({ officer, index }: { officer: OfficerJewel; index: number })
     <div className="flex-1">
       <h3 className="text-lg font-serif text-foreground mb-2">{officer.title}</h3>
       {officer.description && (
-        <p className="text-muted-foreground font-sans text-sm leading-relaxed">{officer.description}</p>
+        <div className="text-foreground/80 font-sans text-sm leading-relaxed">{officer.description}</div>
       )}
     </div>
   </motion.div>
@@ -180,21 +211,21 @@ const OfficersJewels = () => {
   return (
     <div className="min-h-screen">
       <SEO
-        title="Officers Roles & Jewels"
-        description="Learn about the roles and jewels of Masonic Lodge officers — from the Worshipful Master to the Tyler. Discover what each officer does and the meaning behind their jewels."
+        title="Officers' Roles and Jewels | Weybridge Lodge No. 6787 | Freemasons in Guildford"
+        description="Discover the roles, responsibilities and jewels of every officer of a Masonic Lodge — explained by Weybridge Lodge No. 6787, meeting in Guildford, Surrey."
         canonical="/officers-jewels"
         schema={breadcrumbSchema([
           { name: "Home", url: "/" },
           { name: "Discover Freemasonry", url: "/what-is-freemasonry" },
-          { name: "Officers Roles & Jewels", url: "/officers-jewels" },
+          { name: "Officers' Roles and Jewels", url: "/officers-jewels" },
         ])}
       />
       <a href="#main-content" className="skip-to-content">Skip to main content</a>
       <Header />
       <main id="main-content">
         <PageHeader
-          title="Officers Roles & Jewels"
-          subtitle="The roles and regalia of a Masonic Lodge"
+          title="Officers' Roles and Jewels"
+          subtitle="The officers, roles and regalia of Weybridge Lodge No. 6787, Guildford"
         />
 
         {/* Introduction */}
@@ -208,16 +239,19 @@ const OfficersJewels = () => {
             >
               <div className="h-0.5 w-16 bg-gold mb-6" />
               <h2 className="text-2xl md:text-3xl font-serif text-foreground mb-4">
-                The Officers Roles within the Masonic Lodge
+                The Officers' Roles within the Masonic Lodge
               </h2>
-              <p className="text-muted-foreground font-sans leading-relaxed mb-4">
-                In Masonic Lodges, there are Non-Progressive and Progressive Officers – all of which are appointed each year at the Installation of the new Master.
+              <p className="text-foreground/80 font-sans leading-relaxed mb-4">
+                In every Masonic Lodge, officers are appointed each year at the Installation of the new Master. At Weybridge Lodge, these fall into two categories: Progressive and Non-Progressive.
               </p>
-              <p className="text-muted-foreground font-sans leading-relaxed mb-4">
-                Each year, a Brother normally moves through the Progressive Offices on a journey from Steward, to Inner Guard, via the Deacons and Wardens, to the highest honour within a Lodge – the Master.
+              <p className="text-foreground/80 font-sans leading-relaxed mb-4">
+                Progressive offices form the ladder that a brother climbs from his earliest years in the Lodge — beginning as Steward, moving through Inner Guard and the Deacons, then to Junior and Senior Warden, and finally to the Chair of the Master itself. Each step brings new responsibilities, new ritual to learn, and a deeper understanding of the craft.
               </p>
-              <p className="text-muted-foreground font-sans leading-relaxed">
-                Non-Progressive offices are usually occupied by members who are Past Masters of the Lodge and are typically held by the same person for a number of years (normally a maximum of 5), to provide continuity and experience e.g. Almoner and Secretary. The offices of Treasurer and Tyler are the exception to this as these officers are elected by the members of the Lodge.
+              <p className="text-foreground/80 font-sans leading-relaxed mb-4">
+                Non-Progressive offices are typically held by experienced Past Masters, often for several years, providing continuity and institutional knowledge for successive Worshipful Masters. The offices of Treasurer and Tyler are elected by the members of the Lodge rather than appointed by the Master.
+              </p>
+              <p className="text-foreground/80 font-sans leading-relaxed">
+                Below you will find each officer role explained, together with the jewel worn on the turquoise blue collar as a badge of office.
               </p>
             </motion.div>
           </div>
