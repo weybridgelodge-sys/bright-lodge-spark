@@ -532,7 +532,7 @@ const Events = () => {
                 </p>
 
                 {/* bg-gold text-navy replaces unapproved bg-gold-shimmer text-accent-foreground */}
-                
+                <a
                   href="mailto:mentor@weybridgelodge.org.uk?subject=Lodge%20of%20Instruction"
                   aria-label="Email to find out more about the Lodge of Instruction at Weybridge Lodge"
                   className="flex w-full items-center justify-center bg-gold text-navy py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity mt-4 min-h-[48px]"
