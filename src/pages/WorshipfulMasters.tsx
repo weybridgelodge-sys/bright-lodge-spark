@@ -11,8 +11,8 @@ const WorshipfulMasters = () => {
   return (
     <div className="min-h-screen">
       <SEO
-        title="Worshipful Masters Since 1949"
-        description="Complete roll of honour of all Worshipful Masters of Weybridge Lodge No. 6787 from 1949 to present day. A proud Masonic history in Guildford, Surrey."
+        title="Worshipful Masters | Roll of Honour 1949–Present"
+        description="The complete Roll of Honour of every Worshipful Master of Weybridge Lodge No. 6787, Guildford, from our founding in 1949 to the present day."
         canonical="/worshipful-masters"
         schema={breadcrumbSchema([
           { name: "Home", url: "/" },
@@ -35,9 +35,16 @@ const WorshipfulMasters = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
+              className="space-y-6"
             >
-              <p className="text-muted-foreground font-sans leading-relaxed mb-8">
-                There is no greater honour as a Freemason than being chosen to be the Worshipful Master. This position has not come lightly — you would have spent at least six years performing other roles in order to take on the Chair. The Worshipful Master instructs and leads the Brethren through their Masonic journey, conducts ceremonies, and is the face of the Lodge.
+              <p className="text-muted-foreground font-sans leading-relaxed">
+                There is no greater honour in a Freemason's lodge journey than being chosen as Worshipful Master. The position is earned over years of service — conducting ceremonies, supporting fellow members, and learning the craft from the inside. In a lodge of Weybridge's tradition, a brother would typically spend six or more years progressing through the offices before taking the Chair.
+              </p>
+              <p className="text-muted-foreground font-sans leading-relaxed">
+                The Worshipful Master presides over every meeting, leads the Brethren through their Masonic degrees, and is — for that year — the face of the Lodge. Roy Edmonds, our founding Worshipful Master in 1949, set the standard: a stickler for Masonic etiquette and good ritual, but always approachable and generous with his guidance. His son Freddie, the Lodge's first Initiate, waited eight years before following him into the Chair in 1957. That continuity of purpose — of earning the honour — remains the hallmark of Weybridge Lodge today.
+              </p>
+              <p className="text-foreground font-sans leading-relaxed pt-2">
+                The complete Roll of Honour of every Worshipful Master who has served Weybridge Lodge since our consecration in 1949 is recorded below.
               </p>
             </motion.div>
           </div>
@@ -74,6 +81,18 @@ const WorshipfulMasters = () => {
               </div>
             </motion.div>
 
+            <p className="text-primary-foreground/60 font-sans text-xs italic leading-relaxed mt-6 max-w-3xl mx-auto text-center">
+              Provincial and Grand honours are shown where held at time of service or subsequently attained. If you believe an entry requires correction or addition, please contact the Lodge Secretary.
+            </p>
+
+            <p className="text-primary-foreground/85 font-sans leading-relaxed mt-12 max-w-2xl mx-auto text-center">
+              The role of Worshipful Master is one of the defining privileges of a Freemason's life. If you are curious about what that journey looks like — from first steps as an Entered Apprentice to the Chair of the Lodge — we would be delighted to{" "}
+              <Link to="/join-us" className="text-gold underline underline-offset-4 hover:text-gold/80 transition-colors">
+                tell you more
+              </Link>
+              .
+            </p>
+
             <div className="text-center mt-12">
               <Link
                 to="/officers"
@@ -89,5 +108,6 @@ const WorshipfulMasters = () => {
     </div>
   );
 };
+
 
 export default WorshipfulMasters;
