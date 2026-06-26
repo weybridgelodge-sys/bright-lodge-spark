@@ -66,7 +66,7 @@ export const organizationSchema = {
   url: "https://www.weybridgelodge.org.uk",
   logo: "https://www.weybridgelodge.org.uk/weybridge-logo.svg",
   description:
-    "An open, friendly and sociable Freemasons Lodge within the Province of Surrey, based at the South West Surrey Masonic Centre in Guildford.",
+    "An open, friendly and sociable Freemasons Lodge within the Province of Surrey, based at the Guildford Masonic Centre in Guildford.",
   foundingDate: "1949-01-29",
   address: {
     "@type": "PostalAddress",
@@ -176,7 +176,7 @@ export const eventSchema = ({
   description,
   location: {
     "@type": "Place",
-    name: "South West Surrey Masonic Centre",
+    name: "Guildford Masonic Centre",
     address: {
       "@type": "PostalAddress",
       streetAddress: "Hitherbury Close",

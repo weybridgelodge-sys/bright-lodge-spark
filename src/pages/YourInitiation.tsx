@@ -17,7 +17,7 @@ const timeline = [
     time: "4:30 pm",
     icon: DoorOpen,
     title: "Arrival & greeting",
-    body: "You'll arrive at the South West Surrey Masonic Centre, Hitherbury Close, Guildford GU2 4DR, and be greeted warmly by your sponsor and the Director of Ceremonies. There'll be time to settle in, meet a few familiar faces, and calm any nerves. Free parking is available on site.",
+    body: "You'll arrive at the Guildford Masonic Centre, Hitherbury Close, Guildford GU2 4DR, and be greeted warmly by your sponsor and the Director of Ceremonies. There'll be time to settle in, meet a few familiar faces, and calm any nerves. Free parking is available on site.",
   },
   {
     time: "5:30 pm",

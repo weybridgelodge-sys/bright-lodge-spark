@@ -249,7 +249,7 @@ const Surrey2030Gold = () => {
             <div className="mt-12 pt-8 border-t border-border">
               <p className="text-sm font-serif text-foreground font-semibold">Weybridge Lodge No. 6787</p>
               <p className="text-xs text-muted-foreground font-sans mt-1">
-                Weybridge Lodge meets at the South West Surrey Masonic Centre in Guildford and has been going strong since 1949.
+                Weybridge Lodge meets at the Guildford Masonic Centre in Guildford and has been going strong since 1949.
               </p>
             </div>
 

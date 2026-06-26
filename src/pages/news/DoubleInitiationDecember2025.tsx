@@ -27,7 +27,7 @@ const DoubleInitiationDecember2025 = () => {
     <div className="min-h-screen">
       <SEO
         title="Double Initiation at Weybridge Lodge — December 2025"
-        description="Weybridge Lodge No. 6787 welcomed two new Brethren in a double First Degree Initiation ceremony in December 2025 at the South West Surrey Masonic Centre, Guildford."
+        description="Weybridge Lodge No. 6787 welcomed two new Brethren in a double First Degree Initiation ceremony in December 2025 at the Guildford Masonic Centre, Guildford."
         canonical={URL}
         type="article"
         
@@ -36,7 +36,7 @@ const DoubleInitiationDecember2025 = () => {
             title: TITLE,
             date: "2025-12-10",
             description:
-              "Weybridge Lodge No. 6787 welcomed two new Brethren in a double First Degree Initiation ceremony in December 2025 at the South West Surrey Masonic Centre, Guildford.",
+              "Weybridge Lodge No. 6787 welcomed two new Brethren in a double First Degree Initiation ceremony in December 2025 at the Guildford Masonic Centre, Guildford.",
             url: URL,
           }),
           breadcrumbSchema([
@@ -73,7 +73,7 @@ const DoubleInitiationDecember2025 = () => {
               animate={{ opacity: 1 }}
               transition={{ duration: 0.6 }}
               src={heroImg}
-              alt="Weybridge Lodge No. 6787 brethren at the December 2025 double initiation ceremony, South West Surrey Masonic Centre, Guildford"
+              alt="Weybridge Lodge No. 6787 brethren at the December 2025 double initiation ceremony, Guildford Masonic Centre, Guildford"
               className="w-full rounded-sm mb-10"
             />
 
@@ -100,7 +100,7 @@ const DoubleInitiationDecember2025 = () => {
 
             <article className="prose-custom space-y-10">
               <p className="text-muted-foreground font-sans leading-relaxed">
-                On the evening of Wednesday 10 December 2025, the brethren of Weybridge Lodge No. 6787 gathered at the South West Surrey Masonic Centre for one of the most uplifting meetings in our recent calendar — a double First Degree Initiation welcoming two new Brethren into our Lodge and into Freemasonry.
+                On the evening of Wednesday 10 December 2025, the brethren of Weybridge Lodge No. 6787 gathered at the Guildford Masonic Centre for one of the most uplifting meetings in our recent calendar — a double First Degree Initiation welcoming two new Brethren into our Lodge and into Freemasonry.
               </p>
 
               <section id="ceremony">

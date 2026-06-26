@@ -18,7 +18,7 @@ const Hero = () => {
         <source srcSet={heroWebp.url} type="image/webp" />
         <img
           src={heroJpg.url}
-          alt="South West Surrey Masonic Centre exterior in Guildford, home of Weybridge Lodge No. 6787"
+          alt="Guildford Masonic Centre exterior in Guildford, home of Weybridge Lodge No. 6787"
           className="absolute inset-0 w-full h-full object-cover"
           width={1920}
           height={1080}

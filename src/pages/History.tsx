@@ -172,16 +172,16 @@ const History = () => {
           <figure className="my-8">
             <img
               src={masonicCentreAsset.url}
-              alt="The entrance gates of the South West Surrey Masonic Centre, Guildford"
+              alt="The entrance gates of the Guildford Masonic Centre, Guildford"
               className="w-full rounded-sm"
               loading="lazy"
             />
             <figcaption className="text-xs text-primary-foreground/50 text-center mt-2 italic">
-              The South West Surrey Masonic Centre, Guildford — the Lodge's home since 1986.
+              The Guildford Masonic Centre, Guildford — the Lodge's home since 1986.
             </figcaption>
           </figure>
           <p className="text-primary-foreground/70 font-sans leading-relaxed">
-            The Lodge moved next to Surbiton Masonic Centre — warmer, better equipped, with an in-house bar and catering — before making its final move to its present home at the South West Surrey Masonic Centre, Guildford in 1986; a move which, as the Lodge's own historian noted, "virtually severed the last links with the town of Weybridge," but opened a new chapter in a new community.
+            The Lodge moved next to Surbiton Masonic Centre — warmer, better equipped, with an in-house bar and catering — before making its final move to its present home at the Guildford Masonic Centre, Guildford in 1986; a move which, as the Lodge's own historian noted, "virtually severed the last links with the town of Weybridge," but opened a new chapter in a new community.
           </p>
         </Section>
 
@@ -221,7 +221,7 @@ const History = () => {
             In recent years the Lodge has taken an active role in the <Link to="/our-charities" className="text-gold hover:underline">Province of Surrey's 2030 Festival</Link>, raising funds for good causes across the county. That commitment to charity — the same impulse that sent £50 to a local hospice in 1988 — remains at the heart of everything we do.
           </p>
           <p className="text-primary-foreground/70 font-sans leading-relaxed">
-            The Lodge meets regularly at the South West Surrey Masonic Centre, Guildford. <Link to="/join-us" className="text-gold hover:underline">New members are always welcome.</Link>
+            The Lodge meets regularly at the Guildford Masonic Centre, Guildford. <Link to="/join-us" className="text-gold hover:underline">New members are always welcome.</Link>
           </p>
         </Section>
 

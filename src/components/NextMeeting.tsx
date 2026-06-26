@@ -42,7 +42,7 @@ const NextMeeting = () => {
             <div className="flex items-start gap-4">
               <MapPin className="w-5 h-5 text-gold mt-0.5 shrink-0" aria-hidden="true" />
               <div>
-                <p className="font-sans font-medium text-foreground">South West Surrey Masonic Centre</p>
+                <p className="font-sans font-medium text-foreground">Guildford Masonic Centre</p>
                 <p className="text-sm text-muted-foreground font-sans">Hitherbury Close, Guildford GU2 4DR</p>
               </div>
             </div>

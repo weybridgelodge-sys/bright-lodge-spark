@@ -244,7 +244,7 @@ const Bookings = () => {
     <div className="min-h-screen">
       <SEO
         title="Dining & Bookings"
-        description="Book your place at the next Weybridge Lodge meeting at the South West Surrey Masonic Centre, Guildford. View the festive board menu and reserve your seat."
+        description="Book your place at the next Weybridge Lodge meeting at the Guildford Masonic Centre, Guildford. View the festive board menu and reserve your seat."
         canonical="/bookings"
         schema={[
           eventSchema({

@@ -164,7 +164,7 @@ const LodgeProfile = () => {
               <p className="text-gold text-sm font-sans uppercase tracking-wide mb-2">Meeting Schedule</p>
               <h2 className="text-2xl md:text-3xl font-serif text-primary-foreground mb-6">When Do We Meet?</h2>
               <p className="text-primary-foreground/70 font-sans leading-relaxed mb-8">
-                Our Lodge meets at the South West Surrey Masonic Centre, Weybourne House, Hitherbury Close, Portsmouth
+                Our Lodge meets at the Guildford Masonic Centre, Weybourne House, Hitherbury Close, Portsmouth
                 Road, Guildford, Surrey GU2 4DR. We hold four meetings each year, which usually start between 5.30 pm
                 and 6.00 pm.
               </p>

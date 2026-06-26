@@ -64,7 +64,7 @@ export const posts: BlogPost[] = [
     date: "2026-02-19",
     category: "Lodge Meetings",
     excerpt:
-      "Weybridge Lodge was honoured to welcome the Provincial Grand Master of Surrey for an official visit and First Degree Initiation ceremony at the South West Surrey Masonic Centre.",
+      "Weybridge Lodge was honoured to welcome the Provincial Grand Master of Surrey for an official visit and First Degree Initiation ceremony at the Guildford Masonic Centre.",
     image: apgmVisitImg,
   },
   {
