@@ -21,10 +21,10 @@ export const testimonials: Testimonial[] = [
   },
   {
     quote:
-      "What surprised me most was how normal everyone was. No secret handshakes on day one, no pressure — just a good meal and good company. I felt at home from the first visit.",
-    name: "[Member Name]",
-    role: "Joined aged 41",
-    joined: "Member since 2020",
+      "I was interested in joining freemasonry for years, but a fear of the unknown prevented me. When I eventually reached out with my interest, I was invited to come along for an informal chat. Straight away, I met a bunch of amazing, warm and friendly gents who I immediately I knew I wanted to connect with! Becoming newly initiated, I kicked myself for not having done it sooner! This journey has taught me self enlightenment, and a strive for community betterment, and I have seen introverted people learn amazing attributes such as confident public speaking and presentation delivery. For anyone unsure, or thinking about it, do it now!!!",
+    name: "Steve B",
+    role: "Joined aged 39",
+    joined: "Member since 2026",
   },
   {
     quote:
