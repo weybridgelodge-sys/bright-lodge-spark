@@ -165,22 +165,24 @@ const LodgeTraditions = () => {
               "We meet upon the level and part upon the square."
             </p>
             <h2 className="text-2xl md:text-3xl font-serif text-primary-foreground mb-6">
-              See these traditions in person at our Guildford Masonic Centre
+              Curious about what an evening at our Guildford Masonic Lodge looks like?
             </h2>
             <div className="space-y-4 text-primary-foreground/70 font-sans mb-8">
               <p>
-                Weybridge Lodge meets at the Guildford Masonic Centre, Weybourne House, Hitherbury Close, Guildford, GU2 4DR.
+                Weybridge Lodge No. 6787 meets at the Guildford Masonic Centre, Weybourne House, Hitherbury Close, Guildford, GU2 4DR. Our evenings are not open drop-ins — attendance follows the application and interview process.
               </p>
               <p>
-                The best way to understand what visiting a Freemasons Lodge in Surrey is actually like is to come along. Our First Visit guide walks you through exactly what to expect.
+                If you are at the start of that journey, our application guide explains every step from your initial enquiry through to your interview and the confirmation of your initiation date.
               </p>
             </div>
             <Link
-              to="/first-visit"
+              to="/join-us"
+              aria-label="Begin your Freemasons application for Weybridge Lodge No. 6787 in Guildford"
               className="inline-flex items-center justify-center bg-gold-shimmer text-accent-foreground px-8 py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity"
             >
-              Plan Your First Visit
+              Start Your Application
             </Link>
+
           </div>
         </section>
       </main>
