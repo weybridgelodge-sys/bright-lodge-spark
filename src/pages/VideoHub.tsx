@@ -28,7 +28,7 @@ const videos: Video[] = [
     uploadDate: "2020-01-01",
   },
   {
-    title: "The Origins of Freemasonry",
+    title: "The Origins Of Freemasonry",
     embedId: "v_DSCoqrqdA",
     channel: "United Grand Lodge of England",
     description:
@@ -36,11 +36,27 @@ const videos: Video[] = [
     uploadDate: "2020-01-01",
   },
   {
-    title: "Life of a Freemason",
+    title: "Life Of A Freemason",
     embedId: "nk1kcofy6Dw",
     channel: "United Grand Lodge of England",
     description:
       "A personal perspective on what being a Freemason looks and feels like in practice.",
+    uploadDate: "2020-01-01",
+  },
+  {
+    title: "What's It All About?",
+    embedId: "da0FZyLktLg",
+    channel: "United Grand Lodge of England",
+    description:
+      "A short film outlining the fundamental values of what it means to be a Freemason.",
+    uploadDate: "2020-01-01",
+  },
+   {
+    title: "Guided Tour Of Freemasons Hall",
+    embedId: "ooIm3mNX02E",
+    channel: "United Grand Lodge of England",
+    description:
+      "Find out more about Freemasons' Hall here: https://www.ugle.org.uk/freemasons-hall",
     uploadDate: "2020-01-01",
   },
 ];
