@@ -14,10 +14,10 @@ export interface Testimonial {
 export const testimonials: Testimonial[] = [
   {
     quote:
-      "I'd always been curious but assumed it wasn't for someone like me. Three years in, it's the best decision I've made — proper friendships and a genuine sense of purpose.",
-    name: "[Member Name]",
-    role: "Joined aged 34",
-    joined: "Member since 2022",
+      "I joined Weybridge Lodge 6787 in December with no prior connection to Freemasonry, and from the first time meeting everyone I felt genuinely welcomed. The lodge meets at the Guildford Masonic Centre, and the brethren have been consistently supportive. I’m glad I joined.",
+    name: "Jesse B",
+    role: "Joined aged 32",
+    joined: "Member since 2025",
   },
   {
     quote:
