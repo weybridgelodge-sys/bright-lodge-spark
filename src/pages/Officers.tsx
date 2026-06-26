@@ -96,12 +96,6 @@ const Officers = () => {
                       const firstProgressiveIdx = officers.findIndex((o) => o.progressive);
                       return officers.map((o, i) => {
                         const showDivider = i === firstProgressiveIdx;
-                        const description =
-                          o.office === "Lodge Mentor"
-                            ? "Supports new members through their early Masonic journey"
-                            : o.office === "Lodge Membership Officer"
-                            ? "Leads the Lodge's candidate attraction and member retention programme"
-                            : null;
                         return (
                           <React.Fragment key={i}>
                             {showDivider && (
@@ -113,15 +107,9 @@ const Officers = () => {
                             )}
                             <tr className="border-b border-primary-foreground/10 hover:bg-primary-foreground/5 transition-colors">
                               <td className="text-primary-foreground font-sans text-sm py-3 pr-6">
-                                <div>
-                                  {o.office} {o.progressive && <span className="text-gold">★</span>}
-                                </div>
-                                {description && (
-                                  <div className="text-primary-foreground/50 font-sans text-xs italic mt-1">
-                                    {description}
-                                  </div>
-                                )}
+                                {o.office} {o.progressive && <span className="text-gold">★</span>}
                               </td>
+
                               <td className="text-primary-foreground/80 font-sans text-sm py-3 pr-6">{o.name}</td>
                               <td className="text-primary-foreground/60 font-sans text-xs py-3">{o.honours}</td>
                             </tr>
