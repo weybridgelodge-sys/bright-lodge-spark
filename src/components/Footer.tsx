@@ -32,7 +32,7 @@ const footerColumns: FooterColumn[] = [
     heading: "Becoming a Mason",
     links: [
       { label: "What is Freemasonry?", href: "/what-is-freemasonry" },
-      { label: "Your First Visit", href: "/first-visit" },
+      { label: "Your Initiation Night", href: "/first-visit" },
       { label: "Your Masonic Journey", href: "/your-journey" },
       { label: "FAQ", href: "/faq" },
       { label: "Take the Quiz", href: "/quiz" },
