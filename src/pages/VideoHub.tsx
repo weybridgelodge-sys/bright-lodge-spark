@@ -36,11 +36,11 @@ const videos: Video[] = [
     uploadDate: "2020-01-01",
   },
   {
-    title: "A Day in the Life of a Freemason",
-    embedId: "https://youtu.be/nk1kcofy6Dw?si=Ck1Nab5CK94uCQ9O",
+    title: "Life of a Freemason",
+    embedId: "nk1kcofy6Dw",
     channel: "United Grand Lodge of England",
     description:
-      "A personal perspective on what being a Freemason looks and feels like in practice — the meetings, the fellowship, and the charitable work.",
+      "A personal perspective on what being a Freemason looks and feels like in practice.",
     uploadDate: "2020-01-01",
   },
 ];
