@@ -1,19 +1,28 @@
-import { useState } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { ArrowRight, RotateCcw, CheckCircle2, HelpCircle } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
 import SEO, { breadcrumbSchema } from "@/components/SEO";
-import { Button } from "@/components/ui/button";
+
+// ─── Interfaces ───────────────────────────────────────────────────────────────
+interface QuizOption {
+  text: string;
+  score: "high" | "neutral" | "low";
+}
 
 interface Question {
   id: number;
   text: string;
-  options: { text: string; score: "high" | "neutral" | "low" }[];
+  options: QuizOption[];
 }
 
+type ScoreMap = { high: number; neutral: number; low: number };
+type Outcome = "high-fit" | "neutral-fit" | "not-fit";
+
+// ─── Quiz Data ────────────────────────────────────────────────────────────────
 const quizQuestions: Question[] = [
   {
     id: 1,
@@ -27,57 +36,70 @@ const quizQuestions: Question[] = [
   },
   {
     id: 2,
-    text: "Freemasonry requires a belief in a Supreme Being (regardless of your specific religion or faith). Does this align with your personal worldview?",
+    text: "Freemasonry requires a belief in a Supreme Being, regardless of your specific religion or faith. Does this align with your personal worldview?",
     options: [
-      { text: "Yes, I hold a belief in a Supreme Being / higher power.", score: "high" },
-      { text: "I am open to spiritual concepts, but unsure.", score: "neutral" },
-      { text: "No, I am strictly an atheist or do not hold any spiritual beliefs.", score: "low" },
+      { text: "Yes, I hold a belief in a Supreme Being or higher power.", score: "high" },
+      { text: "I am open to spiritual concepts, but remain unsure.", score: "neutral" },
+      { text: "No — I am strictly an atheist and hold no spiritual beliefs.", score: "low" },
     ],
   },
   {
     id: 3,
-    text: "Lodge attendance requires a regular commitment (usually one evening a month for meetings, plus occasional practices). Can you comfortably balance this with your family and work responsibilities?",
+    text: "Lodge attendance involves a regular commitment — usually one evening a month for meetings, plus occasional practices. Can you balance this with your family and work life?",
     options: [
       { text: "Yes, I can comfortably commit to a regular evening each month.", score: "high" },
-      { text: "I have a busy schedule, but I can make time for something important.", score: "neutral" },
+      { text: "My schedule is busy, but I can prioritise something that matters to me.", score: "neutral" },
       { text: "My schedule is completely unpredictable and leaves very little free time.", score: "low" },
     ],
   },
   {
     id: 4,
-    text: "Our fraternity is heavily focused on community support and charitable giving. How do you view charitable involvement?",
+    text: "Freemasonry places charitable giving at its core. How important is community support and charity to you personally?",
     options: [
-      { text: "It is deeply important to me, and I want to actively support local causes.", score: "high" },
-      { text: "I am happy to contribute financially when my budget allows.", score: "neutral" },
+      { text: "It is deeply important — I want to actively support local causes in Guildford and Surrey.", score: "high" },
+      { text: "I am happy to contribute when my budget allows.", score: "neutral" },
       { text: "I rarely think about or participate in charitable activities.", score: "low" },
     ],
   },
   {
     id: 5,
-    text: "How do you feel about participating in traditional, historic ceremonies and dramatic ritual plays?",
+    text: "How do you feel about participating in traditional ceremonies, historic ritual, and dramatic plays that convey moral lessons?",
     options: [
-      { text: "I appreciate tradition and would enjoy learning and taking part in rituals.", score: "high" },
-      { text: "I am comfortable watching ceremonies, though public speaking makes me a bit nervous.", score: "neutral" },
+      { text: "I appreciate tradition and would enjoy learning and taking part in Lodge ritual.", score: "high" },
+      { text: "I am comfortable observing ceremonies, though formal settings can make me nervous.", score: "neutral" },
       { text: "I strongly dislike formal traditions, rituals, or symbolic ceremonies.", score: "low" },
     ],
   },
 ];
 
+// ─── Animation Variants ───────────────────────────────────────────────────────
+const questionVariants = (reduce: boolean) => ({
+  initial: { opacity: 0, x: reduce ? 0 : 20 },
+  animate: { opacity: 1, x: 0 },
+  exit: { opacity: 0, x: reduce ? 0 : -20 },
+});
+
+// ─── Component ────────────────────────────────────────────────────────────────
 const Quiz = () => {
+  const shouldReduceMotion = useReducedMotion();
+
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [scores, setScores] = useState<{ high: number; neutral: number; low: number }>({
-    high: 0,
-    neutral: 0,
-    low: 0,
-  });
+  const [scores, setScores] = useState<ScoreMap>({ high: 0, neutral: 0, low: 0 });
   const [quizComplete, setQuizComplete] = useState(false);
 
+  const questionHeadingRef = useRef<HTMLHeadingElement>(null);
+
+  useEffect(() => {
+    if (!quizComplete && questionHeadingRef.current) {
+      questionHeadingRef.current.focus();
+    }
+  }, [currentQuestionIndex, quizComplete]);
+
   const handleOptionClick = (scoreType: "high" | "neutral" | "low") => {
-    const updatedScores = { ...scores, [scoreType]: scores[scoreType] + 1 };
-    setScores(updatedScores);
+    setScores((prev) => ({ ...prev, [scoreType]: prev[scoreType] + 1 }));
 
     if (currentQuestionIndex < quizQuestions.length - 1) {
-      setCurrentQuestionIndex(currentQuestionIndex + 1);
+      setCurrentQuestionIndex((prev) => prev + 1);
     } else {
       setQuizComplete(true);
     }
@@ -89,80 +111,130 @@ const Quiz = () => {
     setQuizComplete(false);
   };
 
-  const getOutcome = () => {
+  const outcome = useMemo<Outcome>(() => {
+    if (!quizComplete) return "neutral-fit";
     if (scores.low >= 2) return "not-fit";
     if (scores.high >= 3) return "high-fit";
     return "neutral-fit";
-  };
+  }, [scores, quizComplete]);
 
-  const outcome = getOutcome();
-  const progress = ((currentQuestionIndex + (quizComplete ? 1 : 0)) / quizQuestions.length) * 100;
+  const progress =
+    ((currentQuestionIndex + (quizComplete ? 1 : 0)) / quizQuestions.length) * 100;
+
+  const pageSchema = useMemo(() => {
+    const breadcrumb = breadcrumbSchema([
+      { name: "Home", url: "/" },
+      { name: "Is Freemasonry Right for You?", url: "/quiz" },
+    ]);
+
+    return [
+      {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "@id": "https://www.weybridgelodge.org.uk/quiz#webpage",
+        url: "https://www.weybridgelodge.org.uk/quiz",
+        name: "Is Freemasonry Right for You? | Weybridge Lodge No. 6787 — Freemasons in Guildford, Surrey",
+        description:
+          "Take our short personalised quiz to discover whether Freemasonry at Weybridge Lodge No. 6787 in Guildford, Surrey might be right for you.",
+        inLanguage: "en-GB",
+        isPartOf: {
+          "@id": "https://www.weybridgelodge.org.uk/#website",
+        },
+      },
+      breadcrumb,
+    ];
+  }, []);
+
+  const qVariants = questionVariants(!!shouldReduceMotion);
 
   return (
     <div className="min-h-screen">
       <SEO
-        title="Is Freemasonry For Me? Quiz"
-        description="Take our short personalised quiz to discover whether Freemasonry at Weybridge Lodge in Guildford might be right for you."
+        title="Is Freemasonry Right for You?"
+        description="Take our short personalised quiz to discover whether Freemasonry at Weybridge Lodge No. 6787 in Guildford, Surrey might be right for you."
         canonical="/quiz"
-        schema={breadcrumbSchema([
-          { name: "Home", url: "/" },
-          { name: "Is Freemasonry For Me?", url: "/quiz" },
-        ])}
+        schema={pageSchema}
       />
-      <a href="#main-content" className="skip-to-content">Skip to main content</a>
+      <a href="#main-content" className="skip-to-content">
+        Skip to main content
+      </a>
       <Header />
       <main id="main-content">
         <PageHeader
-          title="Is Freemasonry For Me?"
-          subtitle="A short personalised guide to whether our Lodge might be your kind of place"
+          title="Is Freemasonry Right for You?"
+          subtitle="A short, honest assessment to help you decide"
         />
 
-        <section className="py-16 md:py-24 bg-warm-white">
+        <section className="py-20 md:py-28 bg-warm-white">
           <div className="container mx-auto px-6 max-w-2xl">
-            <div className="mb-6">
-              <div className="w-full bg-border h-1.5 rounded-full overflow-hidden">
-                <div
-                  className="bg-gold h-1.5 transition-all duration-300"
-                  style={{ width: `${progress}%` }}
+            <h2 className="sr-only">
+              Freemasonry suitability quiz for Weybridge Lodge in Guildford, Surrey
+            </h2>
+
+            {/* ── Progress Bar ── */}
+            <div className="mb-8">
+              <div
+                role="progressbar"
+                aria-valuenow={Math.round(progress)}
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-label="Quiz progress"
+                className="h-1 bg-border rounded-full overflow-hidden"
+              >
+                <motion.div
+                  className="h-full bg-gold"
+                  initial={{ width: 0 }}
+                  animate={{ width: `${progress}%` }}
+                  transition={{ duration: shouldReduceMotion ? 0 : 0.4 }}
                 />
               </div>
-              <p className="text-xs font-sans text-muted-foreground mt-2 text-right uppercase tracking-wider">
+              <p className="text-xs uppercase tracking-widest text-muted-foreground font-sans mt-3">
                 {quizComplete
                   ? "Assessment Complete"
                   : `Question ${currentQuestionIndex + 1} of ${quizQuestions.length}`}
               </p>
             </div>
 
-            <div className="bg-card border border-border rounded-sm shadow-sm p-6 md:p-8">
+            {/* ── Quiz Card ── */}
+            <div
+              aria-live="polite"
+              className="bg-card border border-border rounded-sm p-6 sm:p-10 shadow-sm"
+            >
               <AnimatePresence mode="wait">
                 {!quizComplete ? (
                   <motion.div
                     key={currentQuestionIndex}
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -20 }}
-                    transition={{ duration: 0.3 }}
+                    variants={qVariants}
+                    initial="initial"
+                    animate="animate"
+                    exit="exit"
+                    transition={{ duration: shouldReduceMotion ? 0 : 0.3 }}
                   >
-                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground uppercase tracking-wider mb-6">
-                      <HelpCircle className="h-3.5 w-3.5 text-gold" />
-                      <span>Suitability Assessment</span>
+                    <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-gold font-sans mb-4">
+                      <HelpCircle className="h-4 w-4" />
+                      Suitability Assessment
                     </div>
 
-                    <h2 className="font-serif text-xl md:text-2xl text-card-foreground mb-6 leading-tight">
+                    <h3
+                      ref={questionHeadingRef}
+                      tabIndex={-1}
+                      className="font-serif text-xl sm:text-2xl text-foreground mb-8 leading-snug outline-none"
+                    >
                       {quizQuestions[currentQuestionIndex].text}
-                    </h2>
+                    </h3>
 
                     <div className="space-y-3">
                       {quizQuestions[currentQuestionIndex].options.map((option, index) => (
                         <button
-                          key={index}
+                          key={option.text}
                           onClick={() => handleOptionClick(option.score)}
-                          className="w-full text-left p-4 rounded-sm border border-border bg-background hover:border-gold hover:bg-gold/5 transition-all duration-200 text-foreground text-sm sm:text-base leading-relaxed flex items-start gap-3 group"
+                          aria-label={`Option ${String.fromCharCode(65 + index)}: ${option.text}`}
+                          className="w-full text-left p-4 rounded-sm border border-border bg-background hover:border-gold hover:bg-card transition-all duration-200 text-foreground font-sans text-sm sm:text-base leading-relaxed flex items-start gap-3 group min-h-[48px]"
                         >
-                          <span className="inline-flex items-center justify-center border border-border group-hover:border-gold h-5 w-5 rounded-full text-xs font-bold text-muted-foreground group-hover:text-gold shrink-0 mt-0.5">
+                          <span className="flex-shrink-0 w-7 h-7 rounded-full bg-muted text-muted-foreground group-hover:bg-gold group-hover:text-accent-foreground flex items-center justify-center text-xs font-semibold transition-colors">
                             {String.fromCharCode(65 + index)}
                           </span>
-                          {option.text}
+                          <span>{option.text}</span>
                         </button>
                       ))}
                     </div>
@@ -172,72 +244,104 @@ const Quiz = () => {
                     key="result"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5 }}
-                    className="text-center py-4"
+                    transition={{ duration: shouldReduceMotion ? 0 : 0.4 }}
                   >
-                    <div className="inline-flex items-center justify-center p-3 bg-gold/10 rounded-full mb-6">
-                      <CheckCircle2 className="h-10 w-10 text-gold" />
+                    <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-navy text-gold mb-6">
+                      <CheckCircle2 className="h-7 w-7" />
                     </div>
 
                     {outcome === "high-fit" && (
-                      <div>
-                        <h2 className="font-serif text-2xl md:text-3xl font-bold text-card-foreground mb-4">
+                      <>
+                        <h3 className="font-serif text-2xl sm:text-3xl text-foreground mb-4">
                           Strong Alignment Found
-                        </h2>
-                        <p className="text-muted-foreground text-sm sm:text-base mb-8 max-w-md mx-auto leading-relaxed">
-                          Your values, personal commitments, and community mindset align perfectly with the foundational tenets of Freemasonry. We welcome you to take the next step in your journey with Weybridge Lodge.
+                        </h3>
+                        <p className="text-muted-foreground font-sans leading-relaxed mb-8">
+                          Your values, personal commitments, and community mindset align closely
+                          with the foundational principles of Freemasonry. We would be delighted to
+                          hear from you at Weybridge Lodge No. 6787 — our Masonic Lodge in
+                          Guildford, Surrey.
                         </p>
-                        <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                          <Button asChild className="bg-gold hover:bg-gold/90 text-navy font-semibold px-6 py-5 rounded-sm">
-                            <Link to="/join-us" className="flex items-center justify-center gap-2">
-                              Apply to Join <ArrowRight className="h-4 w-4" />
-                            </Link>
-                          </Button>
-                          <Button asChild variant="outline" className="border-border text-foreground px-6 py-5 rounded-sm">
-                            <Link to="/first-visit">Read First Visit Guide</Link>
-                          </Button>
+                        <div className="flex flex-wrap gap-4 mb-8">
+                          <Link
+                            to="/join-us"
+                            className="inline-flex items-center justify-center gap-2 bg-gold-shimmer text-accent-foreground px-6 py-3 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity"
+                          >
+                            Begin Your Application
+                            <ArrowRight className="h-4 w-4" />
+                          </Link>
+                          <Link
+                            to="/first-visit"
+                            className="inline-flex items-center justify-center border border-border text-foreground px-6 py-3 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:border-gold hover:text-gold transition-colors"
+                          >
+                            Your Initiation Night
+                          </Link>
                         </div>
-                      </div>
+                      </>
                     )}
 
                     {outcome === "neutral-fit" && (
-                      <div>
-                        <h2 className="font-serif text-2xl md:text-3xl font-bold text-card-foreground mb-4">
-                          Curious & Exploring
-                        </h2>
-                        <p className="text-muted-foreground text-sm sm:text-base mb-8 max-w-md mx-auto leading-relaxed">
-                          You demonstrate a solid interest in community and personal reflection, but you might still have lingering questions about how the fraternity fits into your lifestyle. We recommend exploring our comprehensive FAQ page.
+                      <>
+                        <h3 className="font-serif text-2xl sm:text-3xl text-foreground mb-4">
+                          Curious and Exploring
+                        </h3>
+                        <p className="text-muted-foreground font-sans leading-relaxed mb-8">
+                          You show a genuine interest in community and personal reflection, but may
+                          still have questions about how Freemasonry fits into your life. Our FAQ
+                          page covers the questions most people have at this stage — and our
+                          Membership Secretary is always happy to talk.
                         </p>
-                        <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                          <Button asChild className="bg-gold hover:bg-gold/90 text-navy font-semibold px-6 py-5 rounded-sm">
-                            <Link to="/faq">Browse Our FAQs</Link>
-                          </Button>
-                          <Button asChild variant="outline" className="border-border text-foreground px-6 py-5 rounded-sm">
-                            <Link to="/contact">Ask a Question</Link>
-                          </Button>
+                        <div className="flex flex-wrap gap-4 mb-8">
+                          <Link
+                            to="/faq"
+                            className="inline-flex items-center justify-center gap-2 bg-gold-shimmer text-accent-foreground px-6 py-3 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity"
+                          >
+                            Browse Our FAQs
+                            <ArrowRight className="h-4 w-4" />
+                          </Link>
+                          <Link
+                            to="/contact"
+                            className="inline-flex items-center justify-center border border-border text-foreground px-6 py-3 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:border-gold hover:text-gold transition-colors"
+                          >
+                            Ask a Question
+                          </Link>
                         </div>
-                      </div>
+                      </>
                     )}
 
                     {outcome === "not-fit" && (
-                      <div>
-                        <h2 className="font-serif text-2xl md:text-3xl font-bold text-card-foreground mb-4">
-                          Thank You for Your Interest
-                        </h2>
-                        <p className="text-muted-foreground text-sm sm:text-base mb-8 max-w-md mx-auto leading-relaxed">
-                          Based on your responses regarding time commitments, worldview, or core goals, Freemasonry might not be the ideal fit for you at this exact moment in your life. We appreciate your curiosity and time spent learning about our history.
+                      <>
+                        <h3 className="font-serif text-2xl sm:text-3xl text-foreground mb-4">
+                          Perhaps Not Right Now
+                        </h3>
+                        <p className="text-muted-foreground font-sans leading-relaxed mb-8">
+                          Based on your responses, Freemasonry may not be the right fit for you at
+                          this moment in your life — and that is perfectly fine. Circumstances
+                          change, and curiosity is always welcome. If you have questions or simply
+                          want to learn more, our FAQ page and Membership Secretary are both here.
                         </p>
-                        <Button asChild variant="outline" className="border-border text-foreground px-6 py-5 rounded-sm">
-                          <Link to="/">Return Home</Link>
-                        </Button>
-                      </div>
+                        <div className="flex flex-wrap gap-4 mb-8">
+                          <Link
+                            to="/faq"
+                            className="inline-flex items-center justify-center border border-border text-foreground px-6 py-3 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:border-gold hover:text-gold transition-colors"
+                          >
+                            Read Our FAQs
+                          </Link>
+                          <Link
+                            to="/contact"
+                            className="inline-flex items-center justify-center border border-border text-foreground px-6 py-3 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:border-gold hover:text-gold transition-colors"
+                          >
+                            Get in Touch
+                          </Link>
+                        </div>
+                      </>
                     )}
 
                     <button
                       onClick={resetQuiz}
-                      className="mt-12 inline-flex items-center gap-2 text-xs font-semibold text-muted-foreground hover:text-gold tracking-wide uppercase transition-colors"
+                      className="inline-flex items-center gap-2 text-sm font-sans text-muted-foreground hover:text-gold transition-colors"
                     >
-                      <RotateCcw className="h-3.5 w-3.5" /> Restart Assessment
+                      <RotateCcw className="h-4 w-4" />
+                      Restart Assessment
                     </button>
                   </motion.div>
                 )}
