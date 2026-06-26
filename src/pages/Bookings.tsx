@@ -512,7 +512,7 @@ const Bookings = () => {
               {/* text-gold/60 replaces unapproved text-primary-foreground/60 */}
               <p className="text-gold/60 font-sans text-xs mt-2">
                 Queries? Email{" "}
-                
+                <a
                   href="mailto:assistantsecretary@weybridgelodge.org.uk"
                   // hover:text-gold/80 replaces unapproved hover:text-gold-light
                   className="text-gold hover:text-gold/80 transition-colors"
