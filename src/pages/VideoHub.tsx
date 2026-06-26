@@ -28,16 +28,16 @@ const videos: Video[] = [
     uploadDate: "2020-01-01",
   },
   {
-    title: "Becoming a Freemason",
-    embedId: "pJnYjJFGOog",
+    title: "The Origins of Freemasonry",
+    embedId: "<iframe width="560" height="315" src="https://www.youtube.com/embed/v_DSCoqrqdA?si=VtN5ym9722hq28uN" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>",
     channel: "United Grand Lodge of England",
     description:
-      "A guide to the process of becoming a Freemason in England — from first enquiry through to initiation, covering what to expect at each stage.",
+      "Freemasonry consists of fraternal groups that trace their origins to medieval guilds of stonemasons. Freemasonry is considered the oldest existing secular fraternal organisation, with documents and traditions dating back to the 14th century.",
     uploadDate: "2020-01-01",
   },
   {
     title: "A Day in the Life of a Freemason",
-    embedId: "x8VBjhGnEiQ",
+    embedId: "https://youtu.be/nk1kcofy6Dw?si=Ck1Nab5CK94uCQ9O",
     channel: "United Grand Lodge of England",
     description:
       "A personal perspective on what being a Freemason looks and feels like in practice — the meetings, the fellowship, and the charitable work.",
