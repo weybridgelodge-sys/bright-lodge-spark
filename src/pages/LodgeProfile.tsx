@@ -201,7 +201,7 @@ const LodgeProfile = () => {
               <div className="h-0.5 w-16 bg-gold mb-6" />
               <h2 className="text-2xl md:text-3xl font-serif text-foreground mb-6">A Lodge Built on Quality</h2>
               <p className="text-muted-foreground font-sans leading-relaxed mb-4">
-                We currently have 22 members whose ages range from 32 to 80. We welcome men of all ages and backgrounds
+                We currently have 22 members whose ages range from 18 to 80. We welcome men of all ages and backgrounds
                 — whether you are a young professional looking for personal development and new friendships, or more
                 established in your career. Weybridge Lodge prides itself on its friendliness to new members and
                 visitors.
