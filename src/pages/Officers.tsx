@@ -1,3 +1,4 @@
+import React from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
@@ -33,8 +34,8 @@ const Officers = () => {
   return (
     <div className="min-h-screen">
       <SEO
-        title="Officers of the Lodge"
-        description="Meet the current officers of Weybridge Lodge No. 6787 — Freemasons in Guildford, Surrey. View the full list of lodge officers for the 2025–2026 Masonic year."
+        title="Officers of the Lodge | Masonic Year 2025–2026"
+        description="Meet the officers of Weybridge Lodge No. 6787, Guildford, for the Masonic Year 2025–2026 — from Worshipful Master to Stewards, with Provincial and Grand honours shown."
         canonical="/officers"
         schema={breadcrumbSchema([
           { name: "Home", url: "/" },
@@ -57,12 +58,16 @@ const Officers = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
+              className="space-y-6"
             >
-              <p className="text-muted-foreground font-sans leading-relaxed mb-4">
-                All lodges have Officers to fill the necessary positions required to run Lodge business, the same as any organisation or committee. Some of these positions are rotated annually, while others are to do with Lodge administration or the ceremonial aspect and people tend to remain in place for a while.
+              <p className="text-muted-foreground font-sans leading-relaxed">
+                Weybridge Lodge is served by a full complement of officers for the Masonic Year 2025–2026, appointed at the Installation Meeting in October 2025. Like all Masonic Lodges, our officers fill the roles necessary to conduct ceremonies, administer the Lodge, and look after the welfare of our members.
               </p>
               <p className="text-muted-foreground font-sans leading-relaxed">
-                Progressive offices (marked with ★) are normally taken in progression by the newer members of the Lodge, starting with Steward and then Inner Guard, Deacons, Wardens and then to Master.
+                Progressive offices (marked ★) are taken in sequence by newer members of the Lodge, beginning as Steward and progressing through Inner Guard, the Deacons, and the Wardens toward the Chair of the Master. Non-progressive offices — such as Secretary, Treasurer, Director of Ceremonies, and Almoner — are typically held by experienced Past Masters, often for several years, to provide continuity and institutional knowledge.
+              </p>
+              <p className="text-muted-foreground font-sans leading-relaxed">
+                A brother may hold more than one office in a given year, reflecting the Lodge's size and the breadth of experience among its members.
               </p>
             </motion.div>
           </div>
@@ -87,19 +92,56 @@ const Officers = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {officers.map((o, i) => (
-                      <tr key={i} className="border-b border-primary-foreground/10 hover:bg-primary-foreground/5 transition-colors">
-                        <td className="text-primary-foreground font-sans text-sm py-3 pr-6">
-                          {o.office} {o.progressive && <span className="text-gold">★</span>}
-                        </td>
-                        <td className="text-primary-foreground/80 font-sans text-sm py-3 pr-6">{o.name}</td>
-                        <td className="text-primary-foreground/60 font-sans text-xs py-3">{o.honours}</td>
-                      </tr>
-                    ))}
+                    {(() => {
+                      const firstProgressiveIdx = officers.findIndex((o) => o.progressive);
+                      return officers.map((o, i) => {
+                        const showDivider = i === firstProgressiveIdx;
+                        const description =
+                          o.office === "Lodge Mentor"
+                            ? "Supports new members through their early Masonic journey"
+                            : o.office === "Lodge Membership Officer"
+                            ? "Leads the Lodge's candidate attraction and member retention programme"
+                            : null;
+                        return (
+                          <React.Fragment key={i}>
+                            {showDivider && (
+                              <tr className="border-t-2 border-gold/40">
+                                <td colSpan={3} className="text-gold text-[10px] font-sans uppercase tracking-[0.2em] py-3">
+                                  Progressive Offices ★
+                                </td>
+                              </tr>
+                            )}
+                            <tr className="border-b border-primary-foreground/10 hover:bg-primary-foreground/5 transition-colors">
+                              <td className="text-primary-foreground font-sans text-sm py-3 pr-6">
+                                <div>
+                                  {o.office} {o.progressive && <span className="text-gold">★</span>}
+                                </div>
+                                {description && (
+                                  <div className="text-primary-foreground/50 font-sans text-xs italic mt-1">
+                                    {description}
+                                  </div>
+                                )}
+                              </td>
+                              <td className="text-primary-foreground/80 font-sans text-sm py-3 pr-6">{o.name}</td>
+                              <td className="text-primary-foreground/60 font-sans text-xs py-3">{o.honours}</td>
+                            </tr>
+                          </React.Fragment>
+
+                        );
+                      });
+                    })()}
                   </tbody>
                 </table>
               </div>
             </motion.div>
+
+            <p className="text-primary-foreground/85 font-sans leading-relaxed mt-12 max-w-2xl mx-auto text-center">
+              The officers listed here give their time freely in service to the Lodge and to Freemasonry. If you would like to know more about what each role involves — including the journey from Steward to Worshipful Master — visit our{" "}
+              <Link to="/officers-jewels" className="text-gold underline underline-offset-4 hover:text-gold/80 transition-colors">
+                Officers Roles & Jewels
+              </Link>
+              {" "}page.
+            </p>
 
             <div className="text-center mt-12">
               <Link
@@ -118,3 +160,4 @@ const Officers = () => {
 };
 
 export default Officers;
+
