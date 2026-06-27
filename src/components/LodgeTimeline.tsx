@@ -21,7 +21,7 @@ const milestones: TimelineEntry[] = [
       "Weybridge Lodge No. 6787 is officially consecrated, becoming a new home for Freemasonry in Surrey.",
   },
   {
-    year: "1960s",
+    year: "1980s",
     title: "Move to Guildford",
     description:
       "The Lodge settles into the Guildford Masonic Centre in Guildford, where it still meets today.",
