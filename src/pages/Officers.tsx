@@ -19,7 +19,7 @@ interface Officer {
 const officers: Officer[] = [
   { office: "Worshipful Master", name: "W. Bro. J.P. Tidmarsh", honours: "", progressive: false },
   { office: "Immediate Past Master", name: "W. Bro. M. Grubb Jnr", honours: "", progressive: false },
-  { office: "Senior Warden", name: "W. Bro. B.C. Connolly", honours: "PProvGStwd", progressive: true },
+  { office: "Senior Warden", name: "W. Bro. B.C. Connolly", honours: "ProvAGDC", progressive: true },
   { office: "Junior Warden", name: "W. Bro. K.N. Holdsworth", honours: "", progressive: true },
   { office: "Chaplain", name: "W. Bro. A.J.S. Mallard", honours: "M.B.E. / PPAGDC", progressive: false },
   { office: "Treasurer", name: "W. Bro. J.G. Scott", honours: "PPAGDC", progressive: false },
@@ -27,7 +27,7 @@ const officers: Officer[] = [
   { office: "Director of Ceremonies", name: "W. Bro. K.P. Brennan", honours: "PPGSuptWks", progressive: false },
   { office: "Almoner", name: "Bro. S. Stamper", honours: "", progressive: false },
   { office: "Charity Steward", name: "W. Bro. K.N. Holdsworth", honours: "", progressive: false },
-  { office: "Lodge Membership Officer", name: "W. Bro. B.C. Connolly", honours: "PProvGStwd", progressive: false },
+  { office: "Lodge Membership Officer", name: "W. Bro. B.C. Connolly", honours: "ProvAGDC", progressive: false },
   { office: "Lodge Mentor", name: "W. Bro. J. Tidmarsh", honours: "", progressive: false },
   { office: "Senior Deacon", name: "Bro. R.J. Cooper", honours: "", progressive: true },
   { office: "Junior Deacon", name: "Bro. W. Burrell", honours: "", progressive: true },
