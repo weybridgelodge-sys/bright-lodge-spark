@@ -7,9 +7,6 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import ScrollToTop from "./components/ScrollToTop";
 import ScrollToTopButton from "./components/ScrollToTopButton";
 import Index from "./pages/Index";
-import { AuthProvider } from "./hooks/useAuth";
-import ProtectedRoute from "./components/members/ProtectedRoute";
-import ProgressionRoute from "./components/members/ProgressionRoute";
 
 // Lazy-load everything except the landing page to keep the initial bundle tiny.
 const NotFound = lazy(() => import("./pages/NotFound"));
@@ -48,34 +45,10 @@ const YourInitiation = lazy(() => import("./pages/YourInitiation"));
 const YourJourney = lazy(() => import("./pages/YourJourney"));
 const LodgeTraditions = lazy(() => import("./pages/LodgeTraditions"));
 const Quiz = lazy(() => import("./pages/Quiz"));
-const MembersLogin = lazy(() => import("./pages/members/Login"));
-const MembersPending = lazy(() => import("./pages/members/Pending"));
-const MembersDashboard = lazy(() => import("./pages/members/Dashboard"));
-const MembersDirectory = lazy(() => import("./pages/members/Directory"));
-const MembersDocuments = lazy(() => import("./pages/members/Documents"));
-const MembersProfile = lazy(() => import("./pages/members/Profile"));
-const MembersAdmin = lazy(() => import("./pages/members/Admin"));
-const EventsAdmin = lazy(() => import("./pages/members/EventsAdmin"));
-const MembersRitual = lazy(() => import("./pages/members/Ritual"));
-const OfficersTracker = lazy(() => import("./pages/members/OfficersTracker"));
-const Kpis = lazy(() => import("./pages/members/Kpis"));
-const LoiRegister = lazy(() => import("./pages/members/LoiRegister"));
-const FestiveBoardRegister = lazy(() => import("./pages/members/FestiveBoardRegister"));
-const SummonsBuilder = lazy(() => import("./pages/members/SummonsBuilder"));
-const AlmonerPortal = lazy(() => import("./pages/members/AlmonerPortal"));
-const MyDevelopment = lazy(() => import("./pages/members/development/MemberDevelopment").then((m) => ({ default: m.MyDevelopmentPage })));
-const MemberDevelopment = lazy(() => import("./pages/members/development/MemberDevelopment").then((m) => ({ default: m.MemberDevelopmentPage })));
-const MentorDashboard = lazy(() => import("./pages/members/development/MentorDashboard"));
-const SkillsMatrix = lazy(() => import("./pages/members/development/SkillsMatrix"));
-const LoiAssignmentHelper = lazy(() => import("./pages/members/development/LoiAssignmentHelper"));
-const LodgeSummaryReport = lazy(() => import("./pages/members/development/LodgeSummaryReport"));
-const WorkingGroupsIndex = lazy(() => import("./pages/members/working-groups/Index"));
-const WorkingGroupDetail = lazy(() => import("./pages/members/working-groups/Detail"));
-const WorkingGroupsAdmin = lazy(() => import("./pages/members/working-groups/Admin"));
-const CharityStewardPage = lazy(() => import("./pages/members/admin/CharitySteward"));
-const AdminHub = lazy(() => import("./pages/members/admin/AdminHub"));
-const NewsletterHub = lazy(() => import("./pages/members/admin/NewsletterHub"));
 
+// Entire members portal (including AuthProvider + Supabase client) is loaded
+// only when a visitor navigates into /members/*.
+const MembersRoutes = lazy(() => import("./MembersRoutes"));
 
 const queryClient = new QueryClient();
 
@@ -85,10 +58,9 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <AuthProvider>
-          <ScrollToTop />
-          <ScrollToTopButton />
-          <Suspense fallback={null}>
+        <ScrollToTop />
+        <ScrollToTopButton />
+        <Suspense fallback={null}>
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/what-is-freemasonry" element={<WhatIsFreemasonry />} />
@@ -129,42 +101,13 @@ const App = () => (
             <Route path="/thames-challenge" element={<ThamesChallengePage />} />
             <Route path="/news/:slug" element={<SanityPost />} />
 
-            {/* Members Portal */}
-            <Route path="/members/login" element={<MembersLogin />} />
-            <Route path="/members/pending" element={<MembersPending />} />
-            <Route path="/members" element={<ProtectedRoute><MembersDashboard /></ProtectedRoute>} />
-            <Route path="/members/directory" element={<ProtectedRoute><MembersDirectory /></ProtectedRoute>} />
-            <Route path="/members/documents" element={<ProtectedRoute><MembersDocuments /></ProtectedRoute>} />
-            <Route path="/members/ritual" element={<ProtectedRoute><MembersRitual /></ProtectedRoute>} />
-            <Route path="/members/profile" element={<ProtectedRoute><MembersProfile /></ProtectedRoute>} />
-            <Route path="/members/admin" element={<ProtectedRoute adminOnly><MembersAdmin /></ProtectedRoute>} />
-            <Route path="/members/events" element={<ProtectedRoute><EventsAdmin /></ProtectedRoute>} />
-            <Route path="/members/officers-tracker" element={<ProgressionRoute><OfficersTracker /></ProgressionRoute>} />
-            <Route path="/members/kpis" element={<ProgressionRoute><Kpis /></ProgressionRoute>} />
-            <Route path="/members/loi-register" element={<ProtectedRoute><LoiRegister /></ProtectedRoute>} />
-            <Route path="/members/festive-register" element={<ProtectedRoute><FestiveBoardRegister /></ProtectedRoute>} />
-            <Route path="/members/summons" element={<ProtectedRoute><SummonsBuilder /></ProtectedRoute>} />
-            <Route path="/members/almoner" element={<ProtectedRoute><AlmonerPortal /></ProtectedRoute>} />
-            <Route path="/members/development" element={<MyDevelopment />} />
-            <Route path="/members/admin/development" element={<MentorDashboard />} />
-            <Route path="/members/admin/skills-matrix" element={<SkillsMatrix />} />
-            <Route path="/members/admin/loi-helper" element={<LoiAssignmentHelper />} />
-            <Route path="/members/development/summary-report" element={<LodgeSummaryReport />} />
-            <Route path="/members/development/:memberId" element={<MemberDevelopment />} />
-            <Route path="/members/admin/charity" element={<CharityStewardPage />} />
-            <Route path="/members/admin-hub" element={<AdminHub />} />
-            <Route path="/members/admin/newsletter" element={<NewsletterHub />} />
-            <Route path="/members/working-groups" element={<WorkingGroupsIndex />} />
-            <Route path="/members/working-groups/admin" element={<WorkingGroupsAdmin />} />
-            <Route path="/members/working-groups/:slug" element={<WorkingGroupDetail />} />
-
-
+            {/* Members Portal — entirely lazy-loaded (incl. AuthProvider + Supabase) */}
+            <Route path="/members/*" element={<MembersRoutes />} />
 
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
-          </Suspense>
-        </AuthProvider>
+        </Suspense>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
