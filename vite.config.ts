@@ -18,4 +18,20 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: (id) => {
+          if (!id.includes("node_modules")) return;
+          if (id.includes("@supabase")) return "supabase";
+          if (id.includes("@tanstack")) return "react-query";
+          if (id.includes("react-helmet")) return "helmet";
+          if (id.includes("@radix-ui")) return "radix";
+          if (id.includes("framer-motion")) return "framer";
+          if (id.includes("recharts") || id.includes("d3-")) return "charts";
+          if (id.includes("react-router")) return "router";
+        },
+      },
+    },
+  },
 }));
