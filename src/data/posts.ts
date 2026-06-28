@@ -56,7 +56,7 @@ export const posts: BlogPost[] = [
     category: "Charity",
     excerpt:
       "Weybridge Lodge has officially secured the prestigious Gold Festival Award for the Surrey 2030 Festival, raising over £15,800 for the Masonic Charitable Foundation in just five months.",
-    image: surrey2030Img,
+    image: surrey2030Img.url,
   },
   {
     slug: "pgm-visit-february-2026",
