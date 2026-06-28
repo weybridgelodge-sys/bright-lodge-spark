@@ -380,7 +380,7 @@ const OfficersJewels = () => {
               <p className="text-gold/70 font-sans text-sm leading-relaxed">
                 Below is a guide to all of the Masonic Lodge officers' jewels used at Weybridge
                 Lodge, together with a description of each office. The jewels are worn around the
-                neck on a turquoise blue collar decorated with silver braid.
+                neck on a turquoise blue collar decorated with silver braid and a silver beehive skep - the beehive being a long-standing Masonic emblem of industry, cooperation and the strength of working together.
               </p>
             </motion.div>
           </div>
