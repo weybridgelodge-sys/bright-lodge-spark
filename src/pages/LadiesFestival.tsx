@@ -290,7 +290,9 @@ const LadiesFestival = () => {
     { label: "Minutes", value: countdown.minutes },
     { label: "Seconds", value: countdown.seconds },
   ];
-
+useEffect(() => {
+  window.scrollTo(0, 0);
+}, []);
   return (
     <div className="min-h-screen">
       <SEO
