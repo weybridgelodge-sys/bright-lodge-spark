@@ -83,7 +83,7 @@ const fixedEvents: LodgeEvent[] = [
     time: "10.00 am",
     venue: "Guildford Masonic Centre",
     address: "Hitherbury Close, Guildford GU2 4DR",
-    type: "loi",
+    type: "meeting",
     description:
       "A triple double-passing ceremony — three candidates advanced to the Fellow Craft degree — kicking off the new Masonic season. Open to all Brethren.",
     highlight: true,
