@@ -458,6 +458,7 @@ const Events = () => {
         </section>
 
         {/* ── Lodge of Instruction ── */}
+        <section id="loi" ...>
         <section
           className="py-16 md:py-24 bg-background border-t border-border"
           aria-labelledby="loi-heading"
