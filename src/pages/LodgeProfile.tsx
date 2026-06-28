@@ -117,7 +117,7 @@ const LodgeProfile = () => {
                 From those wartime roots — aircraft engineers, local tradesmen, shopkeepers and
                 professionals bound together by a shared Wednesday afternoon — Weybridge Lodge has
                 grown into the diverse, active community it is today. Our 22 members range in age
-                from 32 to 80 and bring with them a wide spectrum of backgrounds, professions and
+                from 18 to 80 and bring with them a wide spectrum of backgrounds, professions and
                 interests. We are proud of our friendliness to new members and visitors alike —
                 those who come to our meetings consistently remark on the warmth of the welcome and
                 the quality of the ceremony, and many return.
