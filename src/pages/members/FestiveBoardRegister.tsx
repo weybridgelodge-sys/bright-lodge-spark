@@ -858,7 +858,15 @@ function MeetingDialog({
 
 
 
-      const all = [...memberRows, ...visitorRows];
+      // Dedupe member rows by member_id (auto-sync from multiple bookings can produce duplicates)
+      const seen = new Set<string>();
+      const dedupedMemberRows = memberRows.filter((r) => {
+        if (seen.has(r.member_id)) return false;
+        seen.add(r.member_id);
+        return true;
+      });
+
+      const all = [...dedupedMemberRows, ...visitorRows];
       if (all.length) {
         const { error } = await supabase.from("festive_board_attendance").insert(all);
         if (error) throw error;
