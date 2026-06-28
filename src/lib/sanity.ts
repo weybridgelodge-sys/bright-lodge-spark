@@ -34,7 +34,7 @@ export function urlFor(source: SanityImageSource) {
 }
 
 export const LEGACY_IMAGES: Record<string, string> = {
-  "surrey-2030-festival-gold": surrey2030Img,
+  "surrey-2030-festival-gold": surrey2030Img.url,
   "pgm-visit-february-2026": apgmVisitImg,
   "sands-charity": sandsImg,
   "75th-anniversary": anniversaryImg,
