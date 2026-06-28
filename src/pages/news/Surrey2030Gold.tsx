@@ -76,7 +76,7 @@ const Surrey2030Gold = () => {
               animate={{ opacity: 1 }}
               transition={{ duration: 0.6 }}
               src={heroImg}
-              alt="Members of Weybridge Lodge proudly displaying the Gold Festival Award certificate at Freemasons' Hall"
+              alt="Surrey 2030 Festival Gold Award trophy presented to Weybridge Lodge No. 6787"
               className="w-full rounded-sm mb-10"
             />
 
