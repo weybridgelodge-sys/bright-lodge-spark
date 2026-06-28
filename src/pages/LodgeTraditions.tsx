@@ -31,13 +31,13 @@ const traditions = [
     icon: Heart,
     title: "Charitable Giving",
     body: "Charity is woven through every aspect of Lodge life. A collection is taken at each meeting, and members vote together on the causes we support — from the Surrey 2030 Festival and SANDS to local charities in Guildford. We have earned the Surrey 2030 Festival Gold Award for our sustained giving.",
-    link: { label: "Learn about our charity work", to: "/charity" },
+    link: { label: "Learn about our charity work", to: "/OurCharities" },
   },
   {
     icon: Users2,
     title: "Visiting Other Lodges",
     body: "Weybridge Lodge has an active tradition of visiting other Lodges across Surrey, London and further afield — and of warmly welcoming visitors of our own. As a Master Mason, the whole of the Craft becomes open to you, and friendships made here often travel far beyond the Masonic Centre.",
-    link: { label: "View our upcoming meetings", to: "/meetings-events" },
+    link: { label: "View our upcoming meetings", to: "/Events" },
   },
   {
     icon: Shirt,
