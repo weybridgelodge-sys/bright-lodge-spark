@@ -36,7 +36,7 @@ const charities: Charity[] = [
     highlight: "Gold Festival Award achieved",
     description:
       "Weybridge Lodge has officially secured the prestigious Gold Festival Award for the Surrey 2030 Festival, raising over £15,800 for the Masonic Charitable Foundation in just five months. The Festival supports life-changing grants for individuals and families in times of need, funding medical treatment, education, and daily living assistance.",
-    url: "https://surreymason.org.uk/surrey-2030-festival/",
+    url: "https://surreyfestival.org.uk/",
     postUrl: "/news/surrey-2030-festival-gold",
     logo: surrey2030Logo,
   },
