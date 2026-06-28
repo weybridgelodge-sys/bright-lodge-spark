@@ -10,9 +10,13 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Calendar, User, ArrowLeft } from "lucide-react";
 
-import heroImg from "@/assets/news/royal-arch-explained.jpg";
+import heroAsset from "@/assets/news/royal-arch-meeting-room.jpg.asset.json";
+import chapterJewelsAsset from "@/assets/news/chapter-jewels-a.png.asset.json";
 import royalArchApronImg from "@/assets/news/aprons/royal-arch.png";
 import royalArchRobesAsset from "@/assets/news/royal-arch-robes.png.asset.json";
+
+const heroImg = heroAsset.url;
+const whatIsImg = chapterJewelsAsset.url;
 
 const tocItems = [
   { id: "introduction", label: "Introduction" },
