@@ -43,7 +43,7 @@ const fixedEvents: LodgeEvent[] = [
     description:
       "Initiation ceremony welcoming a new candidate into Freemasonry — our fifth of the year.",
     highlight: true,
-    link: "/events",
+    link: "/bookings",
   },
   {
     title: "Installation Meeting",
@@ -53,7 +53,7 @@ const fixedEvents: LodgeEvent[] = [
     address: "Hitherbury Close, Guildford GU2 4DR",
     type: "meeting",
     description: "Installation of the new Worshipful Master for the ensuing year.",
-    link: "/events",
+    link: "/bookings",
   },
   {
     title: "Initiation Ceremony",
@@ -62,7 +62,7 @@ const fixedEvents: LodgeEvent[] = [
     venue: "Guildford Masonic Centre",
     address: "Hitherbury Close, Guildford GU2 4DR",
     type: "meeting",
-    link: "/events",
+    link: "/bookings",
   },
   {
     title: "Weybridge & Astolat Lodges Ladies Festival",
@@ -87,7 +87,7 @@ const fixedEvents: LodgeEvent[] = [
     description:
       "A triple double-passing ceremony — three candidates advanced to the Fellow Craft degree — kicking off the new Masonic season. Open to all Brethren.",
     highlight: true,
-    link: "/events",
+    link: "/bookings",
   },
 ];
 
@@ -119,7 +119,7 @@ export function getRollingLOIs(count = 6): LodgeEvent[] {
       address: "Hitherbury Close, Guildford GU2 4DR",
       type: "loi",
       description: "Weekly rehearsal and ritual practice — visitors welcome by arrangement.",
-      link: "/events",
+      link: "/#loi",
     });
   }
   return result;
