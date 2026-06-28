@@ -1,12 +1,22 @@
+import { useEffect } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
 import SEO, { breadcrumbSchema } from "@/components/SEO";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { Wine, Link2, Users2, Heart, Shirt, Flame, Music, PartyPopper } from "lucide-react";
+import { Wine, Link2, Users2, Heart, Shirt, Flame, Music, PartyPopper, ArrowRight } from "lucide-react";
 
-const traditions = [
+// ─── Types ────────────────────────────────────────────────────────────────────
+type Tradition = {
+  icon: React.ElementType;
+  title: string;
+  body: string;
+  link?: { label: string; to: string };
+};
+
+// ─── Data ─────────────────────────────────────────────────────────────────────
+const traditions: Tradition[] = [
   {
     icon: Flame,
     title: "Silent Fire",
@@ -31,13 +41,13 @@ const traditions = [
     icon: Heart,
     title: "Charitable Giving",
     body: "Charity is woven through every aspect of Lodge life. A collection is taken at each meeting, and members vote together on the causes we support — from the Surrey 2030 Festival and SANDS to local charities in Guildford. We have earned the Surrey 2030 Festival Gold Award for our sustained giving.",
-    link: { label: "Learn about our charity work", to: "/Our-Charities" },
+    link: { label: "Learn about our charity work", to: "/our-charities" },
   },
   {
     icon: Users2,
     title: "Visiting Other Lodges",
     body: "Weybridge Lodge has an active tradition of visiting other Lodges across Surrey, London and further afield — and of warmly welcoming visitors of our own. As a Master Mason, the whole of the Craft becomes open to you, and friendships made here often travel far beyond the Masonic Centre.",
-    link: { label: "View our upcoming meetings", to: "/Events" },
+    link: { label: "View our upcoming meetings", to: "/events" },
   },
   {
     icon: Shirt,
@@ -51,26 +61,64 @@ const traditions = [
   },
 ];
 
-type Tradition = {
-  icon: React.ElementType;
-  title: string;
-  body: string;
-  link?: { label: string; to: string };
-};
+// ─── JSON-LD schema ───────────────────────────────────────────────────────────
+const pageSchema = [
+  breadcrumbSchema([
+    { name: "Home", url: "/" },
+    { name: "Lodge Traditions", url: "/lodge-traditions" },
+  ]),
+  {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: "Lodge Traditions of Weybridge Lodge No. 6787, Guildford",
+    description:
+      "The customs and traditions observed at Weybridge Lodge No. 6787 — a Freemasons Lodge meeting in Guildford, Surrey GU2 4DR.",
+    itemListElement: traditions.map((t, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      name: t.title,
+      description: t.body,
+    })),
+  },
+];
 
+// ─── Component ────────────────────────────────────────────────────────────────
 const LodgeTraditions = () => {
+  const shouldReduceMotion = useReducedMotion();
+
+  // Scroll to top on mount
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  const motionProps = (delay = 0) =>
+    shouldReduceMotion
+      ? { initial: false, animate: { opacity: 1, y: 0 } }
+      : {
+          initial: { opacity: 0, y: 20 },
+          whileInView: { opacity: 1, y: 0 },
+          viewport: { once: true },
+          transition: { duration: 0.5, delay },
+        };
+
   return (
     <div className="min-h-screen">
       <SEO
         title="Lodge Traditions | Weybridge Lodge No. 6787 | Freemasons in Guildford"
-        description="The traditions of Weybridge Lodge No. 6787 — Silent Fire, the Entered Apprentice Song, full Masonic toasts, the Initiates' Chain, and the customs that make our evenings special."
+        description="Discover the traditions of Weybridge Lodge No. 6787 — Silent Fire, the Entered Apprentice Song, the Initiates' Chain, and the customs that make our Masonic Lodge in Guildford, Surrey unique."
         canonical="/lodge-traditions"
-        schema={breadcrumbSchema([
-          { name: "Home", url: "/" },
-          { name: "Lodge Traditions", url: "/lodge-traditions" },
-        ])}
+        schema={pageSchema}
+        openGraph={{
+          title: "Lodge Traditions | Weybridge Lodge No. 6787 | Freemasons in Guildford",
+          description:
+            "From Silent Fire to the December Weybridge Experience — discover the traditions that give our Masonic Lodge in Guildford, Surrey its unique character.",
+          url: "https://www.weybridgelodge.org.uk/lodge-traditions",
+          type: "website",
+        }}
       />
-      <a href="#main-content" className="skip-to-content">Skip to main content</a>
+      <a href="#main-content" className="skip-to-content">
+        Skip to main content
+      </a>
       <Header />
       <main id="main-content">
         <PageHeader
@@ -78,71 +126,111 @@ const LodgeTraditions = () => {
           subtitle="The customs and rituals that give Weybridge Lodge its character"
         />
 
-        <section className="py-12 sm:py-20 bg-warm-white">
+        {/* ── Intro ── */}
+        <section
+          className="py-12 sm:py-20 bg-warm-white"
+          aria-labelledby="traditions-intro-heading"
+        >
           <div className="container mx-auto px-4 sm:px-6 max-w-3xl text-center">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-            >
-              <div className="h-0.5 w-16 bg-gold mx-auto mb-6" />
+            <motion.div {...motionProps()}>
+              <div className="h-0.5 w-16 bg-gold mx-auto mb-6" aria-hidden="true" />
+              <h2
+                id="traditions-intro-heading"
+                className="text-2xl md:text-3xl font-serif text-foreground mb-6"
+              >
+                What makes an evening at Weybridge Lodge special
+              </h2>
               <p className="text-muted-foreground font-sans leading-relaxed text-lg">
-                Every Lodge develops its own customs over time. At Weybridge Lodge No. 6787, these are the traditions of which we are particularly proud — small rituals and shared moments that turn an evening of ceremony into something genuinely memorable.
+                Every Lodge develops its own customs over time. At Weybridge Lodge No. 6787 —
+                our Masonic Lodge in Guildford, Surrey — these are the traditions of which we are
+                particularly proud: small rituals and shared moments that turn an evening of
+                ceremony into something genuinely memorable.
               </p>
             </motion.div>
           </div>
         </section>
 
-        <section className="py-12 sm:py-20 bg-background">
+        {/* ── Tradition Cards ── */}
+        <section
+          className="py-12 sm:py-20 bg-background"
+          aria-labelledby="traditions-cards-heading"
+        >
           <div className="container mx-auto px-4 sm:px-6 max-w-5xl">
+            <motion.div {...motionProps()} className="text-center mb-12">
+              <div className="h-0.5 w-16 bg-gold mx-auto mb-6" aria-hidden="true" />
+              <h2
+                id="traditions-cards-heading"
+                className="text-2xl md:text-3xl font-serif text-foreground"
+              >
+                Eight traditions that set us apart
+              </h2>
+            </motion.div>
+
             <div className="grid sm:grid-cols-2 gap-6">
               {traditions.map((t: Tradition, i: number) => {
                 const Icon = t.icon;
                 return (
-                  <motion.div
+                  <motion.article
                     key={t.title}
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.5, delay: i * 0.06 }}
+                    {...motionProps(i * 0.06)}
                     className="bg-card border border-border rounded-sm p-6 sm:p-7 flex flex-col"
                   >
-                    <div className="w-12 h-12 rounded-full bg-navy text-gold flex items-center justify-center border border-gold/30 mb-4 shrink-0">
+                    <div
+                      className="w-12 h-12 rounded-full bg-navy text-gold flex items-center justify-center border border-gold/30 mb-4 shrink-0"
+                      aria-hidden="true"
+                    >
                       <Icon className="w-5 h-5" aria-hidden="true" />
                     </div>
-                    <h2 className="font-serif text-foreground text-xl mb-2">{t.title}</h2>
-                    <p className="text-muted-foreground font-sans text-sm leading-relaxed flex-1">{t.body}</p>
+                    <h3 className="font-serif text-foreground text-xl mb-2">{t.title}</h3>
+                    <p className="text-muted-foreground font-sans text-sm leading-relaxed flex-1">
+                      {t.body}
+                    </p>
                     {t.link && (
                       <Link
                         to={t.link.to}
-                        className="text-gold text-sm font-sans mt-4 inline-block hover:underline"
+                        className="text-gold text-sm font-sans mt-4 inline-flex items-center gap-1 hover:underline min-h-[44px] items-center"
                       >
-                        {t.link.label} →
+                        {t.link.label}
+                        <ArrowRight className="w-3 h-3" aria-hidden="true" />
                       </Link>
                     )}
-                  </motion.div>
+                  </motion.article>
                 );
               })}
             </div>
           </div>
         </section>
 
-        <section className="py-16 bg-navy">
+        {/* ── Closing CTA ── */}
+        <section className="py-16 bg-navy" aria-labelledby="traditions-cta-heading">
           <div className="container mx-auto px-4 sm:px-6 max-w-2xl text-center">
-            <p className="text-gold font-sans italic mb-6">"We meet upon the level and part upon the square."</p>
-            <h2 className="text-2xl md:text-3xl font-serif text-primary-foreground mb-4">
+            <p className="text-gold font-sans italic mb-6">
+              "We meet upon the level and part upon the square."
+            </p>
+            <h2
+              id="traditions-cta-heading"
+              className="text-2xl md:text-3xl font-serif text-primary-foreground mb-4"
+            >
               Come and experience it for yourself
             </h2>
             <p className="text-primary-foreground/70 font-sans mb-8">
-              The best way to understand our traditions is to see them in person at a Festive Board.
+              The best way to understand our traditions is to see them in person at a Festive
+              Board at our Lodge in Guildford, Surrey.
             </p>
-            <Link
-              to="/first-visit"
-              className="inline-flex items-center justify-center bg-gold-shimmer text-accent-foreground px-8 py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity"
-            >
-              What to Expect on Your First Visit
-            </Link>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link
+                to="/first-visit"
+                className="inline-flex items-center justify-center bg-gold-shimmer text-accent-foreground px-8 py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity"
+              >
+                What to Expect on Your First Visit
+              </Link>
+              <Link
+                to="/join-us"
+                className="inline-flex items-center justify-center border border-gold/50 text-primary-foreground px-8 py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:bg-navy-light transition-colors"
+              >
+                Begin Your Application
+              </Link>
+            </div>
           </div>
         </section>
       </main>
