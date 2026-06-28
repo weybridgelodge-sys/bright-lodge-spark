@@ -10,7 +10,8 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Calendar, User, ArrowLeft } from "lucide-react";
 
-import heroImg from "@/assets/news/surrey-2030-gold-award.jpg";
+import heroAsset from "@/assets/news/surrey-2030-gold-trophy.jpg.asset.json";
+const heroImg = heroAsset.url;
 import festivalLogo from "@/assets/surrey-2030-gold.png";
 
 const tocItems = [
