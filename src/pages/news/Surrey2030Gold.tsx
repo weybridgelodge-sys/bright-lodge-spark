@@ -10,7 +10,8 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Calendar, User, ArrowLeft } from "lucide-react";
 
-import heroImg from "@/assets/news/surrey-2030-gold-award.jpg";
+import heroAsset from "@/assets/news/surrey-2030-gold-trophy.jpg.asset.json";
+const heroImg = heroAsset.url;
 import festivalLogo from "@/assets/surrey-2030-gold.png";
 
 const tocItems = [
@@ -75,7 +76,7 @@ const Surrey2030Gold = () => {
               animate={{ opacity: 1 }}
               transition={{ duration: 0.6 }}
               src={heroImg}
-              alt="Members of Weybridge Lodge proudly displaying the Gold Festival Award certificate at Freemasons' Hall"
+              alt="Surrey 2030 Festival Gold Award trophy presented to Weybridge Lodge No. 6787"
               className="w-full rounded-sm mb-10"
             />
 

@@ -2,7 +2,7 @@ import apgmVisitImg from "@/assets/news/apgm-visit-full.jpg";
 import sandsImg from "@/assets/news/sands-cheque.webp";
 import anniversaryImg from "@/assets/news/75th-anniversary-group.png";
 import installationImg from "@/assets/news/installation-meeting-group.jpg";
-import surrey2030Img from "@/assets/news/surrey-2030-gold-award.jpg";
+import surrey2030Img from "@/assets/news/surrey-2030-gold-trophy.jpg.asset.json";
 import doubleInitiationImg from "@/assets/news/double-initiation-december-2025.jpg";
 import threeDegreesImg from "@/assets/news/three-masonic-degrees.jpg";
 import royalArchAsset from "@/assets/news/royal-arch-meeting-room.jpg.asset.json";
@@ -56,7 +56,7 @@ export const posts: BlogPost[] = [
     category: "Charity",
     excerpt:
       "Weybridge Lodge has officially secured the prestigious Gold Festival Award for the Surrey 2030 Festival, raising over £15,800 for the Masonic Charitable Foundation in just five months.",
-    image: surrey2030Img,
+    image: surrey2030Img.url,
   },
   {
     slug: "pgm-visit-february-2026",
