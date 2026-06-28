@@ -5,7 +5,7 @@ import installationImg from "@/assets/news/installation-meeting-group.jpg";
 import surrey2030Img from "@/assets/news/surrey-2030-gold-award.jpg";
 import doubleInitiationImg from "@/assets/news/double-initiation-december-2025.jpg";
 import threeDegreesImg from "@/assets/news/three-masonic-degrees.jpg";
-import royalArchImg from "@/assets/news/royal-arch-explained.jpg";
+import royalArchAsset from "@/assets/news/royal-arch-meeting-room.jpg.asset.json";
 
 import thamesChallengeImg from "@/assets/thames-challenge/tc-source-stone.jpg.asset.json";
 
@@ -38,7 +38,7 @@ export const posts: BlogPost[] = [
     category: "Discover Freemasonry",
     excerpt:
       "Discover the Royal Arch — the natural completion of Freemasonry's three degrees. Why UGLE calls it 'one journey, one organisation' and why every Master Mason is encouraged to consider it.",
-    image: royalArchImg,
+    image: royalArchAsset.url,
   },
   {
     slug: "three-masonic-degrees-explained",
