@@ -12,7 +12,7 @@ import apgmVisitImg from "@/assets/news/apgm-visit-full.jpg";
 import sandsImg from "@/assets/news/sands-cheque.webp";
 import anniversaryImg from "@/assets/news/75th-anniversary-group.png";
 import installationImg from "@/assets/news/installation-meeting-group.jpg";
-import surrey2030Img from "@/assets/news/surrey-2030-gold-award.jpg";
+import surrey2030Img from "@/assets/news/surrey-2030-gold-trophy.jpg.asset.json";
 
 export const SANITY_PROJECT_ID = "sjz7d6eb";
 export const SANITY_DATASET = "production";
