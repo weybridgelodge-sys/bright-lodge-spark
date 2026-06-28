@@ -155,15 +155,13 @@ const RoyalArchExplained = () => {
                   Yet the Royal Arch is not a departure from what has gone before — it is its completion. Where the three Craft degrees use the symbolism of the building of King Solomon's Temple, the Royal Arch ceremony takes the candidate to what was discovered beneath its foundations: a moment of profound revelation that many Companions describe as the most moving experience of their Masonic journey.
                 </p>
                 <img
-                  src={heroImg}
-                  alt="Royal Arch Chapter regalia — the setting and dress are deliberately different from a Craft Lodge"
+                  src={whatIsImg}
+                  alt="Royal Arch Chapter Principals' jewels — white, crimson, and light blue/royal blue ribbons with gold Triple Tau emblems"
                   loading="lazy"
-                  width={1280}
-                  height={768}
-                  className="mt-6 w-full rounded-sm"
+                  className="mt-6 w-full rounded-sm bg-white p-4"
                 />
                 <p className="text-xs text-muted-foreground font-sans italic mt-2 text-center">
-                  Royal Arch regalia — deliberately distinct from Craft Masonry, reflecting the connected but separate nature of the two orders.
+                  The jewels of the Three Principals — distinctive regalia of the Royal Arch Chapter.
                 </p>
               </section>
 
