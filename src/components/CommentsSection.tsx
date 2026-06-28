@@ -16,45 +16,7 @@ interface Comment {
   replies: Comment[];
 }
 
-const sampleComments: Comment[] = [
-  {
-    id: "1",
-    name: "James H.",
-    date: "2 days ago",
-    text: "What a wonderful article. It's great to see the Lodge thriving and making such a positive impact in the community.",
-    likes: 4,
-    liked: false,
-    replies: [
-      {
-        id: "1-1",
-        name: "Robert C.",
-        date: "1 day ago",
-        text: "Couldn't agree more, James. A truly memorable evening for all involved.",
-        likes: 2,
-        liked: false,
-        replies: [],
-      },
-    ],
-  },
-  {
-    id: "2",
-    name: "David P.",
-    date: "3 days ago",
-    text: "Proud to be a member of Weybridge Lodge. Looking forward to many more events like this in the future.",
-    likes: 6,
-    liked: false,
-    replies: [],
-  },
-  {
-    id: "3",
-    name: "Tony M.",
-    date: "5 days ago",
-    text: "An excellent write-up that really captures the spirit of the evening. Well done to all involved in organising such a successful event.",
-    likes: 3,
-    liked: false,
-    replies: [],
-  },
-];
+const sampleComments: Comment[] = [];
 
 const CommentItem = ({ comment, isReply = false }: { comment: Comment; isReply?: boolean }) => {
   const [liked, setLiked] = useState(comment.liked);
@@ -158,9 +120,13 @@ const CommentsSection = () => {
 
       {/* Comments List */}
       <div className="space-y-6">
-        {sampleComments.map(comment => (
-          <CommentItem key={comment.id} comment={comment} />
-        ))}
+        {sampleComments.length === 0 ? (
+          <p className="text-sm font-sans text-muted-foreground italic">Be the first to leave a comment.</p>
+        ) : (
+          sampleComments.map(comment => (
+            <CommentItem key={comment.id} comment={comment} />
+          ))
+        )}
       </div>
     </motion.section>
   );
