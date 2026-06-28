@@ -380,13 +380,17 @@ const Events = () => {
                     <div className="mt-2 bg-background border border-border rounded-sm p-4 text-sm text-muted-foreground font-sans space-y-2">
                       <p className="font-medium text-foreground">Menu</p>
                       <p>
-                        <span className="text-gold font-medium">Starter:</span> To be confirmed
+                        <span className="text-gold font-medium">Starter:</span> Roasted Butternut Squash Soup (V) Curried oil or Ham Hock & Pea Terrine Plum chutney, balsamic glaze, seasonal greens and herb croutons
                       </p>
                       <p>
-                        <span className="text-gold font-medium">Main:</span> To be confirmed
+                        <span className="text-gold font-medium">Main:</span> Corn Fed Chicken Breast Red wine jus, thyme roasted potato, glazed carrots and fine beans (GF) or Mediterranean Roasted Vegetable Strudel (V) Thyme roasted potato and broccoli basil tomato sauce
+
                       </p>
                       <p>
-                        <span className="text-gold font-medium">Dessert:</span> To be confirmed
+                        <span className="text-gold font-medium">Dessert:</span> Sticky Toffee Pudding Toffee sauce, clotted cream ice cream or Frimley Mess (V)
+                      </p>
+                         <p>
+                        <span className="text-gold font-medium">To Finish:</span> Tea & Coffee
                       </p>
                       <p className="text-xs italic mt-2">
                         Full menu details coming soon. Dietary requirements will be catered for —
