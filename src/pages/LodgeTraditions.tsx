@@ -31,7 +31,7 @@ const traditions = [
     icon: Heart,
     title: "Charitable Giving",
     body: "Charity is woven through every aspect of Lodge life. A collection is taken at each meeting, and members vote together on the causes we support — from the Surrey 2030 Festival and SANDS to local charities in Guildford. We have earned the Surrey 2030 Festival Gold Award for our sustained giving.",
-    link: { label: "Learn about our charity work", to: "/OurCharities" },
+    link: { label: "Learn about our charity work", to: "/Our-Charities" },
   },
   {
     icon: Users2,
