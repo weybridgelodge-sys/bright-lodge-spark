@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
@@ -46,7 +46,7 @@ const principles: Principle[] = [
     subtitle: "Building good people",
     id: "principle-integrity",
     description:
-      "Honesty, trustworthiness and conscientiousness form the bedrock of a Freemason's character. Members are encouraged to act with honour in every aspect of their lives — at home, at work and in their communities. Freemasonry provides a framework of moral teachings that helps each individual hold themselves to the highest standards of conduct, fostering trust and strong principles that extend well beyond the Lodge room.",
+      "Honesty, trustworthiness and conscientiousness form the bedrock of a Freemason's character. Members of our Guildford Lodge are encouraged to act with honour in every aspect of their lives — at home, at work and in their communities. Freemasonry provides a framework of moral teachings that helps each individual hold themselves to the highest standards of conduct, fostering trust and strong principles that extend well beyond the Lodge room.",
   },
   {
     icon: Users,
@@ -54,7 +54,7 @@ const principles: Principle[] = [
     subtitle: "Building together",
     id: "principle-friendship",
     description:
-      "Freemasonry opens the door to a remarkably wide circle of friends who share common values and interests. From the moment a new member joins our Masonic Lodge in Guildford, they discover a genuine sense of belonging and togetherness that often lasts a lifetime. These bonds cross social, professional and cultural boundaries, creating a supportive network where members celebrate each other's successes and stand alongside one another through life's challenges.",
+      "Freemasonry opens the door to a remarkably wide circle of friends who share common values and interests. From the moment a new member joins Weybridge Lodge No. 6787 in Guildford, Surrey, they discover a genuine sense of belonging and togetherness that often lasts a lifetime. These bonds cross social, professional and cultural boundaries, creating a supportive network where members celebrate each other's successes and stand alongside one another through life's challenges.",
   },
   {
     icon: Heart,
@@ -62,7 +62,7 @@ const principles: Principle[] = [
     subtitle: "Building unity",
     id: "principle-respect",
     description:
-      "Since its earliest days, Freemasonry has championed an environment where diversity is genuinely valued. Members come from every walk of life, faith and background, and the organisation actively promotes inclusivity, tolerance and open dialogue. Freemasons in Guildford and across Surrey are encouraged to look beyond perceived differences, creating a space where mutual respect is not simply expected but practised in every interaction.",
+      "Since its earliest days, Freemasonry has championed an environment where diversity is genuinely valued. Members come from every walk of life, faith and background, and the organisation actively promotes inclusivity, tolerance and open dialogue. Freemasons at our Lodge in Guildford and across Surrey are encouraged to look beyond perceived differences, creating a space where mutual respect is not simply expected but practised in every interaction.",
   },
   {
     icon: HandHelping,
@@ -79,19 +79,19 @@ const meetingParts: MeetingPart[] = [
     icon: Landmark,
     title: "The Lodge",
     description:
-      "Freemasonry is organised into smaller units called Lodges, each with its own unique character and history. Weybridge Lodge No. 6787 sits within the Province of Surrey and meets at the Guildford Masonic Centre, Weybourne House, Hitherbury Close, Guildford, GU2 4DR. Every member is free to choose the Lodge they wish to join, and as they progress they are warmly welcomed to visit other Lodges across Surrey and beyond.",
+      "Freemasonry is organised into smaller units called Lodges, each with its own unique character and history. Weybridge Lodge No. 6787 sits within the Province of Surrey and meets at the South West Surrey Masonic Centre, Weybourne House, Hitherbury Close, Guildford, GU2 4DR. Every member is free to choose the Lodge they wish to join, and as they progress they are warmly welcomed to visit other Lodges across Surrey and beyond.",
   },
   {
     icon: GraduationCap,
     title: "The Meeting",
     description:
-      "Lodge meetings typically unfold in two parts. The first covers administrative business such as proposing new members, balloting and receiving updates on charitable activities. The second part is ceremonial — this might involve the admittance of a new member, the advancement of an existing one through the degrees, or the installation of the Master of the Lodge and his officers for the coming year.",
+      "Lodge meetings at our Guildford Masonic centre typically unfold in two parts. The first covers administrative business such as proposing new members, balloting and receiving updates on charitable activities. The second part is ceremonial — this might involve the admittance of a new member, the advancement of an existing one through the degrees, or the installation of the Master of the Lodge and his officers for the coming year.",
   },
   {
     icon: UtensilsCrossed,
     title: "The Festive Board",
     description:
-      "True to the spirit of friendship and togetherness, every meeting concludes with a social gathering. At Weybridge Lodge, members retire from the Temple to enjoy drinks before sitting down to a three-course meal — the Festive Board. Toasts are raised, speeches are given, and the evening provides a relaxed setting to strengthen bonds and reflect on shared experiences at our Masonic Lodge in Surrey.",
+      "True to the spirit of friendship and togetherness, every meeting concludes with a social gathering. At Weybridge Lodge, members retire from the Temple to enjoy drinks before sitting down to a three-course meal — the Festive Board. Toasts are raised, speeches are given, and the evening provides a relaxed setting to strengthen bonds and reflect on shared experiences at our Masonic Lodge in Guildford, Surrey.",
   },
 ];
 
@@ -116,9 +116,43 @@ const degrees: Degree[] = [
   },
 ];
 
+// ─── FAQ data for JSON-LD schema ──────────────────────────────────────────────
+const faqItems = [
+  {
+    question: "What is Freemasonry?",
+    answer:
+      "Freemasonry is one of the world's oldest social and charitable organisations, with roots in the traditions of medieval stonemasons. It brings together men of good character who are committed to integrity, friendship, respect and service.",
+  },
+  {
+    question: "How do I join the Freemasons in Guildford, Surrey?",
+    answer:
+      "You can begin your application to Weybridge Lodge No. 6787 — our Masonic Lodge in Guildford, GU2 4DR — via the Join Us page on this website. We welcome enquiries from men of all backgrounds and ages.",
+  },
+  {
+    question: "What happens at a Masonic Lodge meeting?",
+    answer:
+      "Meetings have two parts: a formal Lodge meeting covering ceremony and business, followed by the Festive Board — a three-course dinner with toasts and fellowship.",
+  },
+  {
+    question: "What are the three degrees of Freemasonry?",
+    answer:
+      "The three degrees are Entered Apprentice (First Degree), Fellow Craft (Second Degree), and Master Mason (Third Degree). Each is a ceremony rich in symbolism and moral teaching.",
+  },
+  {
+    question: "Is Freemasonry a secret society?",
+    answer:
+      "No. Freemasonry is a society with some private ceremonies, but it is not a secret society. Weybridge Lodge No. 6787 publishes its meeting details, officers and charitable activities openly on this website.",
+  },
+];
+
 // ─── Component ────────────────────────────────────────────────────────────────
 const WhatIsFreemasonry = () => {
   const shouldReduceMotion = useReducedMotion();
+
+  // Scroll to top on mount
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const pageSchema = useMemo(() => {
     const breadcrumb = breadcrumbSchema([
@@ -126,22 +160,34 @@ const WhatIsFreemasonry = () => {
       { name: "What is Freemasonry", url: "/what-is-freemasonry" },
     ]);
 
-    return [
-      {
-        "@context": "https://schema.org",
-        "@type": "WebPage",
-        "@id": "https://www.weybridgelodge.org.uk/what-is-freemasonry#webpage",
-        url: "https://www.weybridgelodge.org.uk/what-is-freemasonry",
-        name: "What is Freemasonry? | Freemasons in Guildford, Surrey — Weybridge Lodge No. 6787",
-        description:
-          "Discover what Freemasonry is — its principles of integrity, friendship, respect and service. Learn about Masonic meetings, the three degrees, and how to join our Freemasons Lodge in Guildford, Surrey at GU2 4DR.",
-        inLanguage: "en-GB",
-        isPartOf: {
-          "@id": "https://www.weybridgelodge.org.uk/#website",
+    const faqSchema = {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      mainEntity: faqItems.map((f) => ({
+        "@type": "Question",
+        name: f.question,
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: f.answer,
         },
+      })),
+    };
+
+    const webPageSchema = {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      "@id": "https://www.weybridgelodge.org.uk/what-is-freemasonry#webpage",
+      url: "https://www.weybridgelodge.org.uk/what-is-freemasonry",
+      name: "What is Freemasonry? | Freemasons in Guildford, Surrey — Weybridge Lodge No. 6787",
+      description:
+        "Discover what Freemasonry is — its principles of integrity, friendship, respect and service. Learn about Masonic meetings, the three degrees, and how to join our Freemasons Lodge in Guildford, Surrey at GU2 4DR.",
+      inLanguage: "en-GB",
+      isPartOf: {
+        "@id": "https://www.weybridgelodge.org.uk/#website",
       },
-      breadcrumb,
-    ];
+    };
+
+    return [webPageSchema, faqSchema, breadcrumb];
   }, []);
 
   const motionProps = (delay = 0) =>
@@ -167,10 +213,17 @@ const WhatIsFreemasonry = () => {
   return (
     <div className="min-h-screen">
       <SEO
-        title="What is Freemasonry? Freemasons in Guildford, Surrey"
+        title="What is Freemasonry? | Freemasons in Guildford, Surrey — Weybridge Lodge No. 6787"
         description="Discover what Freemasonry is — its principles of integrity, friendship, respect and service. Learn about Masonic meetings, the three degrees, and how to join our Freemasons Lodge in Guildford, Surrey at GU2 4DR."
         canonical="/what-is-freemasonry"
         schema={pageSchema}
+        openGraph={{
+          title: "What is Freemasonry? | Weybridge Lodge No. 6787, Guildford",
+          description:
+            "Learn about Freemasonry's four guiding principles, what happens at a Lodge meeting, and how to join our Masonic Lodge in Guildford, Surrey — GU2 4DR.",
+          url: "https://www.weybridgelodge.org.uk/what-is-freemasonry",
+          type: "website",
+        }}
       />
       <a href="#main-content" className="skip-to-content">
         Skip to main content
@@ -183,11 +236,14 @@ const WhatIsFreemasonry = () => {
         />
 
         {/* ── Intro ── */}
-        <section className="py-20 md:py-28 bg-warm-white">
+        <section className="py-20 md:py-28 bg-warm-white" aria-labelledby="intro-heading">
           <div className="container mx-auto px-6 max-w-3xl">
             <motion.div {...motionProps()}>
-              <div className="h-0.5 w-16 bg-gold mb-6" />
-              <h2 className="text-2xl md:text-3xl font-serif text-foreground mb-6">
+              <div className="h-0.5 w-16 bg-gold mb-6" aria-hidden="true" />
+              <h2
+                id="intro-heading"
+                className="text-2xl md:text-3xl font-serif text-foreground mb-6"
+              >
                 A tradition built on brotherhood, charity, and self-improvement
               </h2>
               <p className="text-muted-foreground font-sans leading-relaxed text-lg mb-6">
@@ -195,8 +251,8 @@ const WhatIsFreemasonry = () => {
                 roots stretching back to the traditions of the medieval stonemasons who built our
                 great cathedrals and castles. In that era, travelling craftsmen used special grips,
                 words and signs to prove their qualifications to fellow workers — a practice that
-                lives on symbolically in Masonic ceremonies today, including at our Lodge here in
-                Guildford, Surrey.
+                lives on symbolically in Masonic ceremonies today, including at Weybridge Lodge
+                No. 6787, our Freemasons Lodge here in Guildford, Surrey.
               </p>
               <p className="text-muted-foreground font-sans leading-relaxed text-lg mb-6">
                 Modern Freemasonry uses these building analogies to teach its members how to lead
@@ -217,11 +273,17 @@ const WhatIsFreemasonry = () => {
         </section>
 
         {/* ── Four Guiding Principles ── */}
-        <section className="py-20 md:py-28 bg-navy-gradient">
+        <section
+          className="py-20 md:py-28 bg-navy-gradient"
+          aria-labelledby="principles-heading"
+        >
           <div className="container mx-auto px-6">
             <motion.div {...motionProps()} className="text-center mb-16">
-              <div className="h-0.5 w-16 bg-gold mx-auto mb-6" />
-              <h2 className="text-3xl md:text-4xl font-serif text-gold">
+              <div className="h-0.5 w-16 bg-gold mx-auto mb-6" aria-hidden="true" />
+              <h2
+                id="principles-heading"
+                className="text-3xl md:text-4xl font-serif text-gold"
+              >
                 The Four Guiding Principles of Freemasonry
               </h2>
             </motion.div>
@@ -236,7 +298,10 @@ const WhatIsFreemasonry = () => {
                     {...motionProps(i * 0.1)}
                     className="p-8 rounded-sm border border-gold/10 bg-navy-light/30 scroll-mt-24"
                   >
-                    <div className="inline-flex items-center justify-center w-14 h-14 rounded-full border border-gold/30 mb-5">
+                    <div
+                      className="inline-flex items-center justify-center w-14 h-14 rounded-full border border-gold/30 mb-5"
+                      aria-hidden="true"
+                    >
                       <Icon className="w-6 h-6 text-gold" aria-hidden="true" />
                     </div>
                     <h3 className="text-xl font-serif text-primary-foreground mb-1">
@@ -254,11 +319,17 @@ const WhatIsFreemasonry = () => {
         </section>
 
         {/* ── What Happens at a Meeting ── */}
-        <section className="py-20 md:py-28 bg-warm-white">
+        <section
+          className="py-20 md:py-28 bg-warm-white"
+          aria-labelledby="meeting-heading"
+        >
           <div className="container mx-auto px-6">
             <motion.div {...motionProps()} className="text-center mb-16">
-              <div className="h-0.5 w-16 bg-gold mx-auto mb-6" />
-              <h2 className="text-3xl md:text-4xl font-serif text-foreground">
+              <div className="h-0.5 w-16 bg-gold mx-auto mb-6" aria-hidden="true" />
+              <h2
+                id="meeting-heading"
+                className="text-3xl md:text-4xl font-serif text-foreground"
+              >
                 What Happens at a Masonic Lodge Meeting in Guildford?
               </h2>
             </motion.div>
@@ -272,7 +343,10 @@ const WhatIsFreemasonry = () => {
                     {...motionProps(i * 0.15)}
                     className="text-center"
                   >
-                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-navy border border-gold/30 mb-6">
+                    <div
+                      className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-navy border border-gold/30 mb-6"
+                      aria-hidden="true"
+                    >
                       <Icon className="w-7 h-7 text-gold" aria-hidden="true" />
                     </div>
                     <h3 className="text-xl font-serif text-foreground mb-3">{part.title}</h3>
@@ -283,15 +357,32 @@ const WhatIsFreemasonry = () => {
                 );
               })}
             </ul>
+
+            {/* Mid-funnel soft CTA */}
+            <motion.div {...motionProps(0.3)} className="text-center mt-14">
+              <Link
+                to="/lodge-traditions"
+                className="inline-flex items-center gap-2 text-sm font-sans font-semibold text-gold uppercase tracking-widest hover:underline"
+              >
+                Discover our Lodge traditions
+                <ArrowRight className="w-4 h-4" aria-hidden="true" />
+              </Link>
+            </motion.div>
           </div>
         </section>
 
         {/* ── The Three Degrees ── */}
-        <section className="py-20 md:py-28 bg-navy-gradient">
+        <section
+          className="py-20 md:py-28 bg-navy-gradient"
+          aria-labelledby="degrees-heading"
+        >
           <div className="container mx-auto px-6">
             <motion.div {...motionProps()} className="text-center mb-16">
-              <div className="h-0.5 w-16 bg-gold mx-auto mb-6" />
-              <h2 className="text-3xl md:text-4xl font-serif text-gold">
+              <div className="h-0.5 w-16 bg-gold mx-auto mb-6" aria-hidden="true" />
+              <h2
+                id="degrees-heading"
+                className="text-3xl md:text-4xl font-serif text-gold"
+              >
                 The Three Degrees of Freemasonry
               </h2>
               <p className="text-primary-foreground/70 font-sans mt-4 max-w-2xl mx-auto">
@@ -307,7 +398,10 @@ const WhatIsFreemasonry = () => {
                   {...motionSlideProps(i * 0.15)}
                   className="flex gap-6 items-start"
                 >
-                  <div className="flex-shrink-0 w-12 h-12 rounded-full bg-navy border border-gold/30 flex items-center justify-center">
+                  <div
+                    className="flex-shrink-0 w-12 h-12 rounded-full bg-navy border border-gold/30 flex items-center justify-center"
+                    aria-hidden="true"
+                  >
                     <span className="text-gold font-serif text-lg">{i + 1}</span>
                   </div>
                   <div>
@@ -326,17 +420,23 @@ const WhatIsFreemasonry = () => {
         </section>
 
         {/* ── Final CTA ── */}
-        <section className="py-20 md:py-28 bg-warm-white">
+        <section
+          className="py-20 md:py-28 bg-warm-white"
+          aria-labelledby="cta-heading"
+        >
           <div className="container mx-auto px-6 max-w-3xl text-center">
             <motion.div {...motionProps()}>
-              <div className="h-0.5 w-16 bg-gold mx-auto mb-6" />
-              <h2 className="text-3xl md:text-4xl font-serif text-foreground mb-6">
+              <div className="h-0.5 w-16 bg-gold mx-auto mb-6" aria-hidden="true" />
+              <h2
+                id="cta-heading"
+                className="text-3xl md:text-4xl font-serif text-foreground mb-6"
+              >
                 Ready to find out if Freemasonry is right for you?
               </h2>
               <p className="text-muted-foreground font-sans leading-relaxed text-lg mb-8">
-                Take our two-minute quiz for an honest picture of whether life at our Freemasons
-                Lodge in Guildford fits who you are — or go straight to beginning your application
-                to Weybridge Lodge No. 6787.
+                Take our two-minute quiz for an honest picture of whether life at Weybridge Lodge
+                No. 6787 — our Freemasons Lodge in Guildford, Surrey GU2 4DR — fits who you are.
+                Or go straight to beginning your application.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link
@@ -345,6 +445,12 @@ const WhatIsFreemasonry = () => {
                 >
                   Take the 2-Min Quiz
                   <ArrowRight className="w-4 h-4" aria-hidden="true" />
+                </Link>
+                <Link
+                  to="/first-visit"
+                  className="inline-flex items-center justify-center bg-navy text-primary-foreground border border-gold/30 px-8 py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:bg-navy-light transition-colors"
+                >
+                  What to Expect on Your First Visit
                 </Link>
                 <Link
                   to="/join-us"
