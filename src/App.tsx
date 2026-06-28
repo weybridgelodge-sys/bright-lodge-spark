@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import ScrollToTop from "./components/ScrollToTop";
 import ScrollToTopButton from "./components/ScrollToTopButton";
 import Index from "./pages/Index";
@@ -103,6 +103,41 @@ const App = () => (
 
             {/* Members Portal — entirely lazy-loaded (incl. AuthProvider + Supabase) */}
             <Route path="/members/*" element={<MembersRoutes />} />
+
+            {/* ── WordPress → Lovable 301 Redirects ── */}
+            {/* Core pages */}
+            <Route path="/guildford-freemasons-what-is-freemasonry" element={<Navigate to="/what-is-freemasonry" replace />} />
+            <Route path="/frequently-asked-questions-about-freemasonry" element={<Navigate to="/what-is-freemasonry" replace />} />
+            <Route path="/masonic-lodge-officers-jewels" element={<Navigate to="/officers-jewels" replace />} />
+            <Route path="/lodge-profile-freemasons-in-guildford-surrey" element={<Navigate to="/lodge-profile" replace />} />
+            <Route path="/history-of-weybridge-lodge-a-freemasons-lodge-in-guildford-surrey" element={<Navigate to="/history" replace />} />
+            <Route path="/weybridge-lodge-worshipful-master" element={<Navigate to="/worshipful-masters" replace />} />
+            <Route path="/officers-of-the-lodge-2025-weybridge-lodge" element={<Navigate to="/officers" replace />} />
+            <Route path="/officers-of-the-lodge-weybridge-lodge-2024" element={<Navigate to="/officers" replace />} />
+            <Route path="/officers-of-the-lodge-2023-weybridge-lodge" element={<Navigate to="/officers" replace />} />
+            {/* Meetings & events */}
+            <Route path="/weybridge-lodge-masonic-meetings-and-social-events" element={<Navigate to="/events" replace />} />
+            <Route path="/weybridge-lodge-masonic-meetings-social-events" element={<Navigate to="/events" replace />} />
+            <Route path="/new-years-eve-2025-party" element={<Navigate to="/events" replace />} />
+            <Route path="/christmas-party-2025" element={<Navigate to="/events" replace />} />
+            <Route path="/document/summons-373rd-regular-meeting-13122023" element={<Navigate to="/events" replace />} />
+            <Route path="/document/374th-regular-m" element={<Navigate to="/events" replace />} />
+            <Route path="/document/committee-meeting-agenda-04012024" element={<Navigate to="/events" replace />} />
+            {/* Join & contact */}
+            <Route path="/surrey-freemasons-join-us" element={<Navigate to="/join-us" replace />} />
+            <Route path="/contact-weybridge-lodge-freemasons" element={<Navigate to="/contact" replace />} />
+            {/* Charity */}
+            <Route path="/guildford-freemasons-charity-surrey" element={<Navigate to="/our-charities" replace />} />
+            <Route path="/freemasonry-and-charity" element={<Navigate to="/our-charities" replace />} />
+            <Route path="/freemasons-charity-weybridge-lodge-raise-31000-for-sands-charity" element={<Navigate to="/our-charities" replace />} />
+            {/* News */}
+            <Route path="/post-summary-page" element={<Navigate to="/news" replace />} />
+            <Route path="/surrey-freemasons-video-hub" element={<Navigate to="/news" replace />} />
+            <Route path="/75th-anniversary-meeting-february-2024" element={<Navigate to="/news/75th-anniversary" replace />} />
+            {/* Legal & misc */}
+            <Route path="/data-protection-policy" element={<Navigate to="/data-protection" replace />} />
+            <Route path="/accessibility-statement" element={<Navigate to="/" replace />} />
+            <Route path="/masonic-website-links" element={<Navigate to="/masonic-links" replace />} />
 
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
