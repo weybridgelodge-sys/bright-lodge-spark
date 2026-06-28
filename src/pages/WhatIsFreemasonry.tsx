@@ -217,13 +217,6 @@ const WhatIsFreemasonry = () => {
         description="Discover what Freemasonry is — its principles of integrity, friendship, respect and service. Learn about Masonic meetings, the three degrees, and how to join our Freemasons Lodge in Guildford, Surrey at GU2 4DR."
         canonical="/what-is-freemasonry"
         schema={pageSchema}
-        openGraph={{
-          title: "What is Freemasonry? | Weybridge Lodge No. 6787, Guildford",
-          description:
-            "Learn about Freemasonry's four guiding principles, what happens at a Lodge meeting, and how to join our Masonic Lodge in Guildford, Surrey — GU2 4DR.",
-          url: "https://www.weybridgelodge.org.uk/what-is-freemasonry",
-          type: "website",
-        }}
       />
       <a href="#main-content" className="skip-to-content">
         Skip to main content
