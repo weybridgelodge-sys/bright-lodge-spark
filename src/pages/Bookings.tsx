@@ -296,7 +296,9 @@ const Bookings = () => {
     submissionStatus === "apologies" ||
     submissionStatus === "bank-transfer" ||
     submissionStatus === "cash-cheque";
-
+useEffect(() => {
+  window.scrollTo(0, 0);
+}, []);
   return (
     <div className="min-h-screen overflow-x-hidden">
       <SEO
