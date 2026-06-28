@@ -458,11 +458,11 @@ const Events = () => {
         </section>
 
         {/* ── Lodge of Instruction ── */}
-        <section id="loi" ...>
         <section
-          className="py-16 md:py-24 bg-background border-t border-border"
-          aria-labelledby="loi-heading"
-        >
+  id="loi"
+  className="py-16 md:py-24 bg-background border-t border-border"
+  aria-labelledby="loi-heading"
+>
           <div className="container mx-auto px-4 sm:px-6 max-w-4xl">
             <motion.div
               variants={fadeUp}
