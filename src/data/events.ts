@@ -119,7 +119,7 @@ export function getRollingLOIs(count = 6): LodgeEvent[] {
       address: "Hitherbury Close, Guildford GU2 4DR",
       type: "loi",
       description: "Weekly rehearsal and ritual practice — visitors welcome by arrangement.",
-      link: "/#loi",
+      link: "/events#loi",
     });
   }
   return result;
