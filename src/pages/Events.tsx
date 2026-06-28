@@ -442,7 +442,7 @@ const Events = () => {
 
                 {/* bg-gold text-navy replaces unapproved bg-gold-shimmer text-accent-foreground */}
                 <a
-                  href="mailto:secretary@astolat.org?subject=Ladies%20Festival%202026"
+                  href="/ladies-festival"
                   aria-label="Enquire about tickets for the Ladies Festival 2026"
                   className="flex w-full items-center justify-center bg-gold text-navy py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity mt-4 min-h-[48px]"
                 >
