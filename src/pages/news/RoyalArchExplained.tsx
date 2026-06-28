@@ -84,7 +84,7 @@ const RoyalArchExplained = () => {
               animate={{ opacity: 1 }}
               transition={{ duration: 0.6 }}
               src={heroImg}
-              alt="Royal Arch Companion's regalia — crimson and royal blue apron and sash displayed formally, with the Triple Tau emblem"
+              alt="A Royal Arch Chapter room set out for a meeting — banners, pedestals, and the chequered floor"
               width={1280}
               height={768}
               className="w-full rounded-sm mb-10"
