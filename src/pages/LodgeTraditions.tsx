@@ -108,13 +108,6 @@ const LodgeTraditions = () => {
         description="Discover the traditions of Weybridge Lodge No. 6787 — Silent Fire, the Entered Apprentice Song, the Initiates' Chain, and the customs that make our Masonic Lodge in Guildford, Surrey unique."
         canonical="/lodge-traditions"
         schema={pageSchema}
-        openGraph={{
-          title: "Lodge Traditions | Weybridge Lodge No. 6787 | Freemasons in Guildford",
-          description:
-            "From Silent Fire to the December Weybridge Experience — discover the traditions that give our Masonic Lodge in Guildford, Surrey its unique character.",
-          url: "https://www.weybridgelodge.org.uk/lodge-traditions",
-          type: "website",
-        }}
       />
       <a href="#main-content" className="skip-to-content">
         Skip to main content

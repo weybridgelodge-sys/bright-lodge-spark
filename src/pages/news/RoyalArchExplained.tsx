@@ -10,9 +10,13 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Calendar, User, ArrowLeft } from "lucide-react";
 
-import heroImg from "@/assets/news/royal-arch-explained.jpg";
+import heroAsset from "@/assets/news/royal-arch-meeting-room.jpg.asset.json";
+import chapterJewelsAsset from "@/assets/news/chapter-jewels-a.png.asset.json";
 import royalArchApronImg from "@/assets/news/aprons/royal-arch.png";
 import royalArchRobesAsset from "@/assets/news/royal-arch-robes.png.asset.json";
+
+const heroImg = heroAsset.url;
+const whatIsImg = chapterJewelsAsset.url;
 
 const tocItems = [
   { id: "introduction", label: "Introduction" },
@@ -80,7 +84,7 @@ const RoyalArchExplained = () => {
               animate={{ opacity: 1 }}
               transition={{ duration: 0.6 }}
               src={heroImg}
-              alt="Royal Arch Companion's regalia — crimson and royal blue apron and sash displayed formally, with the Triple Tau emblem"
+              alt="A Royal Arch Chapter room set out for a meeting — banners, pedestals, and the chequered floor"
               width={1280}
               height={768}
               className="w-full rounded-sm mb-10"
@@ -151,15 +155,13 @@ const RoyalArchExplained = () => {
                   Yet the Royal Arch is not a departure from what has gone before — it is its completion. Where the three Craft degrees use the symbolism of the building of King Solomon's Temple, the Royal Arch ceremony takes the candidate to what was discovered beneath its foundations: a moment of profound revelation that many Companions describe as the most moving experience of their Masonic journey.
                 </p>
                 <img
-                  src={heroImg}
-                  alt="Royal Arch Chapter regalia — the setting and dress are deliberately different from a Craft Lodge"
+                  src={whatIsImg}
+                  alt="Royal Arch Chapter Principals' jewels — white, crimson, and light blue/royal blue ribbons with gold Triple Tau emblems"
                   loading="lazy"
-                  width={1280}
-                  height={768}
-                  className="mt-6 w-full rounded-sm"
+                  className="mt-6 w-full rounded-sm bg-white p-4"
                 />
                 <p className="text-xs text-muted-foreground font-sans italic mt-2 text-center">
-                  Royal Arch regalia — deliberately distinct from Craft Masonry, reflecting the connected but separate nature of the two orders.
+                  The jewels of the Three Principals — distinctive regalia of the Royal Arch Chapter.
                 </p>
               </section>
 
