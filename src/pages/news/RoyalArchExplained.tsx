@@ -161,7 +161,7 @@ const RoyalArchExplained = () => {
                   className="mt-6 w-full rounded-sm bg-white p-4"
                 />
                 <p className="text-xs text-muted-foreground font-sans italic mt-2 text-center">
-                  The jewels of the Three Principals — distinctive regalia of the Royal Arch Chapter.
+                  The Companions, Principals and Tri-Colour breast jewels of the Royal Arch.
                 </p>
               </section>
 
