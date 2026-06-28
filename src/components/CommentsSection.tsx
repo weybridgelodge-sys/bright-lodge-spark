@@ -120,9 +120,13 @@ const CommentsSection = () => {
 
       {/* Comments List */}
       <div className="space-y-6">
-        {sampleComments.map(comment => (
-          <CommentItem key={comment.id} comment={comment} />
-        ))}
+        {sampleComments.length === 0 ? (
+          <p className="text-sm font-sans text-muted-foreground italic">Be the first to leave a comment.</p>
+        ) : (
+          sampleComments.map(comment => (
+            <CommentItem key={comment.id} comment={comment} />
+          ))
+        )}
       </div>
     </motion.section>
   );
