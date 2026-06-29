@@ -1,0 +1,38 @@
+{
+  "ci": {
+    "collect": {
+      "url": [
+        "https://www.weybridgelodge.org.uk/",
+        "https://www.weybridgelodge.org.uk/what-is-freemasonry",
+        "https://www.weybridgelodge.org.uk/news",
+        "https://www.weybridgelodge.org.uk/bookings"
+      ],
+      "numberOfRuns": 3,
+      "settings": {
+        "preset": "perf",
+        "formFactor": "mobile",
+        "screenEmulation": {
+          "mobile": true,
+          "width": 360,
+          "height": 640,
+          "deviceScaleFactor": 2,
+          "disabled": false
+        },
+        "throttling": {
+          "rttMs": 150,
+          "throughputKbps": 1638.4,
+          "cpuSlowdownMultiplier": 4
+        },
+        "onlyCategories": ["performance"]
+      }
+    },
+    "assert": {
+      "assertions": {
+        "categories:performance": ["error", { "minScore": 0.95, "aggregationMethod": "median-run" }]
+      }
+    },
+    "upload": {
+      "target": "temporary-public-storage"
+    }
+  }
+}

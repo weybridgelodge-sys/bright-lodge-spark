@@ -1,0 +1,59 @@
+name: Lighthouse CI
+
+# Runs after every push to main (Lovable auto-syncs deploys to main) and on a
+# 10-minute delay schedule so we catch CDN-cached regressions, plus manual dispatch.
+# Enforces a 95+ mobile performance score against the live production site.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+  schedule:
+    # Daily smoke run at 06:00 UTC
+    - cron: "0 6 * * *"
+
+jobs:
+  lhci-mobile:
+    name: Mobile performance (must be 95+)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install Lighthouse CI
+        run: npm install -g @lhci/cli@0.14.x
+
+      - name: Wait for Lovable deploy to propagate
+        if: github.event_name == 'push'
+        run: sleep 90
+
+      - name: Run Lighthouse CI (mobile, throttled)
+        run: lhci autorun --config=./lighthouserc.mobile.json
+        env:
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+
+  lhci-desktop:
+    name: Desktop audit (informational)
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install Lighthouse CI
+        run: npm install -g @lhci/cli@0.14.x
+
+      - name: Wait for Lovable deploy to propagate
+        if: github.event_name == 'push'
+        run: sleep 90
+
+      - name: Run Lighthouse CI (desktop)
+        run: lhci autorun --config=./lighthouserc.json
+        env:
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
