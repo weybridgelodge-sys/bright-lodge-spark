@@ -1,4 +1,5 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { z } from "npm:zod@3.23.8";
 import { sendBookingEmails } from "../_shared/send-booking-emails.ts";
 
 const corsHeaders = {
@@ -12,6 +13,23 @@ const supabase = createClient(
   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
 );
 
+const BodySchema = z.object({
+  event_key: z.string().trim().min(1).max(120),
+  event_label: z.string().trim().min(1).max(200),
+  meeting_id: z.string().uuid().optional().nullable(),
+  contact_name: z.string().trim().min(1).max(200),
+  contact_email: z.string().trim().email().max(255),
+  contact_phone: z.string().trim().max(40).optional().nullable(),
+  meeting_option: z.enum([
+    "attending",
+    "meeting-only",
+    "meeting-and-festive-board",
+    "apologies",
+  ]),
+  details: z.record(z.unknown()).optional(),
+  environment: z.enum(["sandbox", "live"]).optional(),
+});
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   if (req.method !== "POST") {
@@ -19,7 +37,21 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const body = await req.json();
+    let parsed;
+    try {
+      parsed = BodySchema.safeParse(await req.json());
+    } catch {
+      return new Response(JSON.stringify({ error: "Invalid JSON" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    if (!parsed.success) {
+      return new Response(
+        JSON.stringify({ error: "Validation failed", issues: parsed.error.flatten().fieldErrors }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
 
     const {
       event_key,
@@ -31,14 +63,8 @@ Deno.serve(async (req) => {
       meeting_option,
       details,
       environment,
-    } = body;
+    } = parsed.data;
 
-    if (!event_key || !event_label || !contact_name || !contact_email || !meeting_option) {
-      return new Response(
-        JSON.stringify({ error: "Missing required fields" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-      );
-    }
 
     // Link to the published Festive Board record by direct id when available,
     // otherwise by the public Meeting Event slug stored in event_key.
