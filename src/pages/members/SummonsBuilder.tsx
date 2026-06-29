@@ -651,6 +651,10 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
   };
 
   const emailAll = async () => {
+    const ok = window.confirm(
+      `This will email Summons #${summons.meeting_number} to ALL active members. Continue?`,
+    );
+    if (!ok) return;
     const id = await generatePdf("email");
     if (!id) return;
     const { data, error } = await supabase.functions.invoke("send-summons-email", {
@@ -660,8 +664,33 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
       toast.error(error.message ?? "Email send failed");
       return;
     }
-    toast.success(`Summons emailed to ${(data as any)?.sent ?? 0} members`);
+    const d = data as any;
+    toast.success(`Summons emailed to ${d?.sent ?? 0} of ${d?.recipients ?? 0} members`);
+    if (d?.failures?.length) {
+      toast.error(`${d.failures.length} delivery(ies) failed — see history log`);
+    }
   };
+
+  const emailTest = async () => {
+    const addr = window.prompt(
+      "Send a test summons email to which address?",
+      "julientidmarsh@pm.me",
+    );
+    if (!addr) return;
+    const id = await generatePdf("save");
+    if (!id) return;
+    const { data, error } = await supabase.functions.invoke("send-summons-email", {
+      body: { summons_id: id, test_recipient: addr.trim() },
+    });
+    if (error) {
+      toast.error(error.message ?? "Test email failed");
+      return;
+    }
+    const d = data as any;
+    if (d?.sent) toast.success(`Test summons sent to ${addr}`);
+    else toast.error(d?.failures?.[0]?.error ?? "Test email failed");
+  };
+
 
   return (
     <div className="space-y-4">
@@ -879,6 +908,7 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
       <div className="flex flex-wrap gap-2">
         <Button onClick={() => generatePdf("download")} disabled={busy}><Download className="w-4 h-4 mr-2" /> Download PDF</Button>
         <Button variant="outline" className="text-navy" onClick={() => generatePdf("save")} disabled={busy}><Save className="w-4 h-4 mr-2" /> Save to history</Button>
+        <Button variant="outline" className="text-navy" onClick={emailTest} disabled={busy}><Mail className="w-4 h-4 mr-2" /> Send test email…</Button>
         <Button onClick={emailAll} disabled={busy} className="bg-gold text-navy hover:bg-gold/90"><Mail className="w-4 h-4 mr-2" /> Email to all members</Button>
       </div>
     </div>
