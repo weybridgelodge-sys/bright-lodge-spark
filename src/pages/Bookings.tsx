@@ -154,6 +154,8 @@ const Bookings = () => {
   const [phone, setPhone] = useState("");
   // Honeypot — must remain empty on legitimate submissions
   const [honeypot, setHoneypot] = useState("");
+  const [turnstileToken, setTurnstileToken] = useState<string>("");
+
   const [meetingOption, setMeetingOption] = useState<
     "meeting-and-festive-board" | "meeting-only" | "apologies" | ""
   >("");
