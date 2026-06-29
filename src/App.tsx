@@ -16,6 +16,7 @@ const FreemasonryCharity = lazy(() => import("./pages/FreemasonryCharity"));
 const OurCharities = lazy(() => import("./pages/OurCharities"));
 const JoinUs = lazy(() => import("./pages/JoinUs"));
 const DataProtection = lazy(() => import("./pages/DataProtection"));
+const AccessibilityStatement = lazy(() => import("./pages/AccessibilityStatement"));
 const LodgeProfile = lazy(() => import("./pages/LodgeProfile"));
 const History = lazy(() => import("./pages/History"));
 const WorshipfulMasters = lazy(() => import("./pages/WorshipfulMasters"));
