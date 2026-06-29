@@ -1,6 +1,8 @@
 import { useState, FormEvent } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import TurnstileWidget from "@/components/TurnstileWidget";
+
 
 interface FieldErrors {
   full_name?: string[];
