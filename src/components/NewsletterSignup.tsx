@@ -12,6 +12,7 @@ const NewsletterSignup = () => {
   const [honeypot, setHoneypot] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "done" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
+  const [turnstileToken, setTurnstileToken] = useState<string>("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,11 +23,16 @@ const NewsletterSignup = () => {
       setError("Please enter a valid email address.");
       return;
     }
+    if (!turnstileToken) {
+      setError("Please complete the verification below.");
+      return;
+    }
     setStatus("loading");
     try {
       const { data, error } = await supabase.functions.invoke("newsletter-subscribe", {
-        body: { email: clean, honeypot },
+        body: { email: clean, honeypot, turnstileToken },
       });
+
       if (error || (data && (data as { error?: string }).error)) {
         throw new Error((data as { error?: string })?.error || error?.message || "Subscription failed");
       }
