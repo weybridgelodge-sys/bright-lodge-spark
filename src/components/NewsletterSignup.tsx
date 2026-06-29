@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { Mail, CheckCircle2, ArrowRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import TurnstileWidget from "@/components/TurnstileWidget";
+
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
