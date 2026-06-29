@@ -116,18 +116,33 @@ Deno.serve(async (req) => {
       return json({ error: "No recipients" }, 400);
     }
 
-    // Resolve secretary display name (best-effort)
-    let secretaryName = secretary_name_override || "The Secretary";
+    // Resolve secretary display name from current officers
+    let secretaryName = secretary_name_override || "";
+    let secretaryTitle = "";
     if (!secretary_name_override) {
-      // Try officers table
-      const { data: sec } = await admin
-        .from("officers" as any)
-        .select("member_formal,member,label")
-        .eq("label", "Secretary")
+      const { data: yearRow } = await admin.rpc("current_lodge_year");
+      const lodgeYear = (yearRow as unknown as number) ?? new Date().getFullYear();
+      const { data: appt } = await admin
+        .from("officer_appointments")
+        .select("member_id")
+        .eq("lodge_year", lodgeYear)
+        .eq("position_key", "secretary")
         .maybeSingle();
-      if (sec && (sec as any).member_formal) secretaryName = (sec as any).member_formal;
-      else if (sec && (sec as any).member) secretaryName = (sec as any).member;
+      if (appt?.member_id) {
+        const { data: prof } = await admin
+          .from("profiles")
+          .select("title,first_name,last_name,full_name")
+          .eq("id", appt.member_id)
+          .maybeSingle();
+        if (prof) {
+          const p: any = prof;
+          secretaryTitle = p.title ? (p.title.endsWith(".") ? p.title : `${p.title}.`) : "";
+          const fname = [p.first_name, p.last_name].filter(Boolean).join(" ").trim();
+          secretaryName = fname || (p.full_name || "").replace(/^(W\s*Bro\.?|Bro\.?|RW\s*Bro\.?)\s*/i, "").trim();
+        }
+      }
     }
+    if (!secretaryName) secretaryName = "The Secretary";
 
     const meetingDateLabel = formatMeetingDate(summons.meeting_date);
 
