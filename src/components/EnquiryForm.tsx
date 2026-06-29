@@ -22,6 +22,10 @@ export const EnquiryForm = () => {
   const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setErrors({});
+    if (!turnstileToken) {
+      toast({ title: "Please complete the verification", description: "Tick the box to confirm you're human.", variant: "destructive" });
+      return;
+    }
     const fd = new FormData(e.currentTarget);
     const payload = {
       full_name: String(fd.get("full_name") || "").trim(),
@@ -30,7 +34,9 @@ export const EnquiryForm = () => {
       reason: String(fd.get("reason") || "").trim(),
       website: String(fd.get("website") || ""), // honeypot
       source: "join-us",
+      turnstileToken,
     };
+
 
     setSubmitting(true);
     try {
