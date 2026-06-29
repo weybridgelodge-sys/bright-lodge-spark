@@ -36,6 +36,7 @@ const Email = ({
   meetingNumber,
   pdfUrl,
   secretaryName,
+  secretaryTitle,
   secretaryOffice,
   isTest,
 }: Props) => (
