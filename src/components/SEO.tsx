@@ -10,7 +10,7 @@ interface SEOProps {
 }
 
 const SITE_NAME = "Weybridge Lodge No. 6787";
-const BASE_URL = "https://www.weybridgelodge.org.uk";
+const BASE_URL = "https://weybridgelodge.org.uk";
 
 const DEFAULT_OG_IMAGE = `${BASE_URL}/og-image.png`;
 
@@ -63,8 +63,8 @@ export const organizationSchema = {
   "@type": "FraternalOrganization",
   name: "Weybridge Lodge No. 6787",
   alternateName: "Weybridge Masonic Lodge",
-  url: "https://www.weybridgelodge.org.uk",
-  logo: "https://www.weybridgelodge.org.uk/weybridge-logo.svg",
+  url: "https://weybridgelodge.org.uk",
+  logo: "https://weybridgelodge.org.uk/weybridge-logo.svg",
   description:
     "An open, friendly and sociable Freemasons Lodge within the Province of Surrey, based at the Guildford Masonic Centre in Guildford.",
   foundingDate: "1949-01-29",
@@ -111,7 +111,7 @@ export const breadcrumbSchema = (
     "@type": "ListItem",
     position: i + 1,
     name: item.name,
-    item: `https://www.weybridgelodge.org.uk${item.url}`,
+    item: `https://weybridgelodge.org.uk${item.url}`,
   })),
 });
 
@@ -148,7 +148,7 @@ export const articleSchema = ({
   headline: title,
   datePublished: date,
   description,
-  url: `https://www.weybridgelodge.org.uk${url}`,
+  url: `https://weybridgelodge.org.uk${url}`,
   ...(image && { image }),
   author: {
     "@type": "Organization",
