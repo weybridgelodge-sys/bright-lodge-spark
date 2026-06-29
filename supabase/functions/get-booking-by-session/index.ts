@@ -11,11 +11,24 @@ const supabase = createClient(
   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
 );
 
+function maskEmail(email: string | null | undefined): string | null {
+  if (!email) return null;
+  const [user, domain] = email.split("@");
+  if (!domain) return null;
+  const visible = user.slice(0, 1);
+  return `${visible}${"*".repeat(Math.max(1, user.length - 1))}@${domain}`;
+}
+
+function firstNameOnly(name: string | null | undefined): string | null {
+  if (!name) return null;
+  return name.trim().split(/\s+/)[0] || null;
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   try {
     const { session_id } = await req.json();
-    if (!session_id || typeof session_id !== "string") {
+    if (!session_id || typeof session_id !== "string" || session_id.length < 20 || session_id.length > 200) {
       return new Response(JSON.stringify({ error: "session_id required" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -32,7 +45,23 @@ Deno.serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-    return new Response(JSON.stringify({ booking: data }), {
+
+    // Anonymous callers (Stripe return page) receive a sanitised view: first name
+    // only and masked email. Full PII remains in the bookings table and is only
+    // accessible to the authenticated booker via the members portal RLS policies.
+    const sanitised = data
+      ? {
+          id: data.id,
+          contact_name: firstNameOnly(data.contact_name),
+          contact_email: maskEmail(data.contact_email),
+          event_label: data.event_label,
+          total_pence: data.total_pence,
+          payment_status: data.payment_status,
+          paid_at: data.paid_at,
+        }
+      : null;
+
+    return new Response(JSON.stringify({ booking: sanitised }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

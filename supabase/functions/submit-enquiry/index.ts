@@ -12,8 +12,6 @@ const BodySchema = z.object({
   source: z.string().trim().max(40).optional(),
   // Honeypot — must be empty
   website: z.string().max(0).optional().or(z.literal('')),
-  // Optional override (used for testing)
-  notify_email: z.string().email().optional(),
 })
 
 Deno.serve(async (req) => {
@@ -40,7 +38,7 @@ Deno.serve(async (req) => {
     return json({ error: 'Validation failed', issues: parsed.error.flatten().fieldErrors }, 400)
   }
 
-  const { full_name, email, phone, reason, source, website, notify_email } = parsed.data
+  const { full_name, email, phone, reason, source, website } = parsed.data
   if (website && website.length > 0) {
     // Honeypot tripped — pretend success.
     return json({ success: true }, 200)
@@ -72,8 +70,8 @@ Deno.serve(async (req) => {
 
   const submittedAt = new Date(row.created_at).toLocaleString('en-GB', { timeZone: 'Europe/London' })
 
-  // 1) Notification to secretary (or override for testing)
-  const notifyTo = notify_email || SECRETARY_EMAIL
+  // 1) Notification to secretary (recipient is hard-coded — no caller override)
+  const notifyTo = SECRETARY_EMAIL
   const notifRes = await supabase.functions.invoke('send-transactional-email', {
     body: {
       templateName: 'enquiry-notification',
