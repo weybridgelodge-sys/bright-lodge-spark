@@ -98,7 +98,9 @@ const NewsletterSignup = () => {
           {status === "loading" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <>Join <ArrowRight className="ml-1 h-3 w-3" /></>}
         </Button>
       </div>
+      <div className="mt-3 flex justify-start"><TurnstileWidget theme="dark" onToken={setTurnstileToken} onExpire={() => setTurnstileToken("")} /></div>
       {error && <p className="text-xs text-red-300 mt-2">{error}</p>}
+
       <p className="text-[10px] text-primary-foreground/60 mt-3 leading-relaxed">
         No spam. Unsubscribe with one click. Handled in line with our Data Protection Policy.
       </p>
