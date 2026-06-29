@@ -20,8 +20,15 @@ interface Props {
   meetingNumber?: number | string
   pdfUrl?: string
   secretaryName?: string
+  secretaryTitle?: string
   secretaryOffice?: string
   isTest?: boolean
+}
+
+function ordinalSuffix(n: number): string {
+  const s = ['th', 'st', 'nd', 'rd']
+  const v = n % 100
+  return s[(v - 20) % 10] || s[v] || s[0]
 }
 
 const Email = ({
