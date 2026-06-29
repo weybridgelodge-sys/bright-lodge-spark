@@ -427,7 +427,7 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
     // of inserting a duplicate.
     setCurrentId(editingId);
     (async () => {
-      const { data, error } = await supabase.from("summonses").select("*").eq("id", editingId).maybeSingle();
+      const { data, error } = await supabase.from("summonses").select("id,meeting_number,lodge_event_id,meeting_date,meeting_time,meeting_type,dress_code,minutes_confirmation_date,next_meeting_date,officer_night_date,agenda,candidates,dining_enquiry_name,notice_overrides,pdf_storage_path,status,sent_at,sent_to_count,created_by,created_at,updated_at,dining_menu,dining_price,dining_deadline").eq("id", editingId).maybeSingle();
       if (error || !data) { toast.error(error?.message ?? "Summons not found"); return; }
       const r: any = data;
       // dining_enquiry_email is column-restricted; fetch via secure RPC (secretary/admin/WM)
