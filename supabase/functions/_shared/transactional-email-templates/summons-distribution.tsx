@@ -20,8 +20,15 @@ interface Props {
   meetingNumber?: number | string
   pdfUrl?: string
   secretaryName?: string
+  secretaryTitle?: string
   secretaryOffice?: string
   isTest?: boolean
+}
+
+function ordinalSuffix(n: number): string {
+  const s = ['th', 'st', 'nd', 'rd']
+  const v = n % 100
+  return s[(v - 20) % 10] || s[v] || s[0]
 }
 
 const Email = ({
@@ -29,6 +36,7 @@ const Email = ({
   meetingNumber,
   pdfUrl,
   secretaryName,
+  secretaryTitle,
   secretaryOffice,
   isTest,
 }: Props) => (
@@ -58,7 +66,9 @@ const Email = ({
             </Text>
           )}
           <Heading as="h2" style={h2}>
-            Summons{meetingNumber ? ` No. ${meetingNumber}` : ''}
+            {meetingNumber
+              ? `Summons for our ${meetingNumber}${ordinalSuffix(Number(meetingNumber))} Meeting`
+              : 'Summons for our next Meeting'}
           </Heading>
           <Text style={p}>Brethren,</Text>
           <Text style={p}>
@@ -84,9 +94,13 @@ const Email = ({
           )}
 
           <Hr style={hr} />
-          <Text style={signOff}>Best wishes,</Text>
-          <Text style={signName}>S&F {secretaryName || 'The Secretary'}</Text>
-          <Text style={signOffice}>{secretaryOffice || 'Lodge Secretary'}</Text>
+          <Text style={signOff}>Best wishes</Text>
+          <Text style={signOff}>S&amp;F</Text>
+          <Text style={signName}>
+            {[secretaryTitle, secretaryName].filter(Boolean).join(' ') || 'The Secretary'}
+          </Text>
+          <Text style={signOffice}>{secretaryOffice || 'Secretary'}</Text>
+          <Text style={signOffice}>Weybridge Lodge No. 6787</Text>
         </Section>
 
         <Section style={footer}>
@@ -110,8 +124,9 @@ export const template = {
     meetingDateLabel: 'Saturday 12 September 2026',
     meetingNumber: 385,
     pdfUrl: 'https://example.com/summons.pdf',
-    secretaryName: 'W Bro. Richard Smith',
-    secretaryOffice: 'Lodge Secretary',
+    secretaryTitle: 'W Bro.',
+    secretaryName: 'Richard Smith',
+    secretaryOffice: 'Secretary',
     isTest: true,
   },
 } satisfies TemplateEntry
