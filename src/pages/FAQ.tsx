@@ -156,8 +156,8 @@ const FAQ = () => {
   return (
     <div className="min-h-screen">
       <SEO
-        title="Freemasonry FAQ"
-        description="Common questions about becoming a Freemason in Guildford and Surrey — fees, initiation, meetings, values and more. Answered by Weybridge Lodge No. 6787 at the Guildford Masonic Centre, GU2 4DR."
+       title="Freemasonry FAQ"
+       description="Common questions about becoming a Freemason in Guildford — fees, initiation, meetings and values. Answered by Weybridge Lodge No. 6787."
         canonical="/faq"
         schema={pageSchema}
       />
