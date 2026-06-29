@@ -24,15 +24,43 @@ function generateToken(): string {
     .map((b) => b.toString(16).padStart(2, '0'))
     .join('')
 }
-
-// Auth note: this function uses verify_jwt = true in config.toml, so Supabase's
-// gateway validates the caller's JWT (anon or service_role) before the request
-// reaches this code. No in-function auth check is needed.
+// Auth: this function is restricted to service_role callers only. It must only
+// be invoked from other edge functions (which use the service role key); the
+// public anon key is rejected so the lodge email domain can't be used as a
+// relay by anyone who has the (publicly embedded) anon JWT.
+function decodeJwtRole(authHeader: string | null): string | null {
+  if (!authHeader || !authHeader.startsWith('Bearer ')) return null
+  const token = authHeader.slice(7)
+  const parts = token.split('.')
+  if (parts.length !== 3) return null
+  try {
+    const payload = JSON.parse(
+      atob(parts[1].replace(/-/g, '+').replace(/_/g, '/'))
+    )
+    return typeof payload.role === 'string' ? payload.role : null
+  } catch {
+    return null
+  }
+}
 
 Deno.serve(async (req) => {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
+  }
+
+  // Reject anything that isn't a service_role call (e.g. anon JWTs from the
+  // public frontend bundle). All legitimate callers are server-side edge
+  // functions invoking this with the service role key.
+  const callerRole = decodeJwtRole(req.headers.get('Authorization'))
+  if (callerRole !== 'service_role') {
+    return new Response(
+      JSON.stringify({ error: 'Forbidden' }),
+      {
+        status: 403,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      }
+    )
   }
 
   const supabaseUrl = Deno.env.get('SUPABASE_URL')
@@ -48,6 +76,7 @@ Deno.serve(async (req) => {
       }
     )
   }
+
 
   // Parse request body
   let templateName: string
