@@ -76,7 +76,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       supabase.from("user_roles").select("role").eq("user_id", uid),
     ]);
     // Merge own PII (DOB, phone, address, UGLE no.) from the security-definer RPC
-    let merged: Profile | null = (p as Profile) ?? null;
+    let merged: Profile | null = (p as unknown as Profile) ?? null;
     if (merged) {
       const { data: pii } = await (supabase as any).rpc("get_profiles_pii", { _ids: [uid] });
       const row = Array.isArray(pii) && pii.length ? pii[0] : null;
