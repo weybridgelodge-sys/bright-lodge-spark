@@ -30,7 +30,9 @@ const BodySchema = z.object({
   ]),
   details: z.record(z.unknown()).optional(),
   environment: z.enum(["sandbox", "live"]).optional(),
+  turnstileToken: z.string().trim().max(4096).optional(),
 });
+
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
