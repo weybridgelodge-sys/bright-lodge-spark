@@ -15,6 +15,8 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { getStripeEnvironment } from "@/lib/stripe";
 import { fetchNextEvent, type EventBundle } from "@/lib/lodgeEvents";
+import TurnstileWidget from "@/components/TurnstileWidget";
+
 
 // ─── Fallback event ───────────────────────────────────────────────────────────
 // Location corrected: Portsmouth Road removed.
