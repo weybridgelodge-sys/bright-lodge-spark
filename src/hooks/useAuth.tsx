@@ -61,12 +61,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 
   const loadProfileAndRole = async (uid: string) => {
+    // NOTE: sensitive PII columns (date_of_birth, phone, address_line*, town,
+    // county, postcode, ugle_reg_number) are NOT readable via direct table
+    // SELECT — they're column-level revoked. They're merged below via the
+    // security-definer `get_profiles_pii` RPC.
     const [{ data: p }, { data: r }] = await Promise.all([
-      supabase.from("profiles").select("*").eq("id", uid).maybeSingle(),
+      supabase
+        .from("profiles")
+        .select(
+          "id,email,full_name,title,first_name,middle_name,last_name,preferred_name,post_nominals,rank,office,provincial_rank,grand_rank,joined_year,avatar_url,status,degree,is_past_master,is_royal_arch,is_honorary_member,is_ugle_portal_registered,initiation_date,passing_date,raising_date,joined_lodge_date,royal_arch_date,proposer,mother_lodge,created_at,updated_at"
+        )
+        .eq("id", uid)
+        .maybeSingle(),
       supabase.from("user_roles").select("role").eq("user_id", uid),
     ]);
     // Merge own PII (DOB, phone, address, UGLE no.) from the security-definer RPC
-    let merged: Profile | null = (p as Profile) ?? null;
+    let merged: Profile | null = (p as unknown as Profile) ?? null;
     if (merged) {
       const { data: pii } = await (supabase as any).rpc("get_profiles_pii", { _ids: [uid] });
       const row = Array.isArray(pii) && pii.length ? pii[0] : null;

@@ -39,7 +39,7 @@ export default function SummonsPrintPreview({ template, officers, members }: Pro
     (async () => {
       const { data } = await supabase
         .from("summonses")
-        .select("*")
+        .select("id,meeting_number,lodge_event_id,meeting_date,meeting_time,meeting_type,dress_code,minutes_confirmation_date,next_meeting_date,officer_night_date,agenda,candidates,dining_enquiry_name,notice_overrides,pdf_storage_path,status,sent_at,sent_to_count,created_by,created_at,updated_at,dining_menu,dining_price,dining_deadline")
         .order("meeting_number", { ascending: false })
         .limit(20);
       const rows = (data ?? []) as any[];
