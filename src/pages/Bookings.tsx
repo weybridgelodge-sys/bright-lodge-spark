@@ -924,7 +924,11 @@ useEffect(() => {
                         </>
                       )}
                     </div>
+                    <div className="mt-6 flex justify-center">
+                      <TurnstileWidget onToken={setTurnstileToken} onExpire={() => setTurnstileToken("")} />
+                    </div>
                     <div className="mt-8 flex justify-between">
+
                       <button
                         type="button"
                         onClick={() => setStep(1)}
