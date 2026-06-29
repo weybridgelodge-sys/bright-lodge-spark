@@ -61,6 +61,17 @@ const staticEntries: SitemapEntry[] = [
   { path: "/quiz", priority: "0.5", changefreq: "monthly" },
   { path: "/accessibility-statement", priority: "0.3", changefreq: "yearly" },
   { path: "/data-protection", priority: "0.3", changefreq: "yearly" },
+  // Bespoke news article pages (also backed by Sanity legacyRoute, listed here as a safety net).
+  { path: "/news/75th-anniversary", priority: "0.6", changefreq: "yearly" },
+  { path: "/news/sands-charity", priority: "0.6", changefreq: "yearly" },
+  { path: "/news/installation-meeting-october-2023", priority: "0.6", changefreq: "yearly" },
+  { path: "/news/pgm-visit-february-2026", priority: "0.6", changefreq: "yearly" },
+  { path: "/news/surrey-2030-festival-gold", priority: "0.6", changefreq: "yearly" },
+  { path: "/news/double-initiation-december-2025", priority: "0.6", changefreq: "yearly" },
+  { path: "/news/three-masonic-degrees-explained", priority: "0.6", changefreq: "yearly" },
+  { path: "/news/royal-arch-explained", priority: "0.6", changefreq: "yearly" },
+  { path: "/thames-challenge", priority: "0.6", changefreq: "yearly" },
+  // Intentionally excluded: /unsubscribe and /checkout/return (transactional, should not be indexed).
 ];
 
 const slugifyCategory = (s: string) => s.toLowerCase().replace(/\s+/g, "-");
