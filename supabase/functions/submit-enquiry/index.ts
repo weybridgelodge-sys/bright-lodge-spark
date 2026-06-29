@@ -41,15 +41,19 @@ Deno.serve(async (req) => {
     return json({ error: 'Validation failed', issues: parsed.error.flatten().fieldErrors }, 400)
   }
 
-  const { full_name, email, phone, reason, source, website } = parsed.data
+  const { full_name, email, phone, reason, source, website, turnstileToken } = parsed.data
   if (website && website.length > 0) {
     // Honeypot tripped — pretend success.
     return json({ success: true }, 200)
   }
 
+  const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || null
+  const ok = await verifyTurnstile(turnstileToken, ip)
+  if (!ok) return json({ error: 'Verification failed. Please tick the verification box and try again.' }, 400)
+
   const supabase = createClient(supabaseUrl, serviceKey)
 
-  const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || null
+
   const ua = req.headers.get('user-agent') || null
 
   const { data: row, error: insertErr } = await supabase
