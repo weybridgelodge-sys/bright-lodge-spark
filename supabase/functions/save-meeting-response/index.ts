@@ -1,6 +1,8 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { z } from "npm:zod@3.23.8";
 import { sendBookingEmails } from "../_shared/send-booking-emails.ts";
+import { verifyTurnstile } from "../_shared/verify-turnstile.ts";
+
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
