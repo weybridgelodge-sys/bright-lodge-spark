@@ -241,8 +241,10 @@ const Bookings = () => {
   const saveBooking = async (finalStatus: "meeting-only" | "apologies" | "bank-transfer" | "cash-cheque") => {
     // Honeypot guard — silently discard bot submissions
     if (honeypot) { setSubmissionStatus(finalStatus); return; }
-    // TODO: also check honeypot server-side in save-meeting-response edge function
-    // by rejecting any body where details.honeypot is non-empty.
+    if (!turnstileToken) {
+      toast({ title: "Please complete the verification", description: "Tick the box at the bottom to confirm you're human.", variant: "destructive" });
+      return;
+    }
     setSubmissionStatus("submitting");
     try {
       const { data, error } = await supabase.functions.invoke("save-meeting-response", {
@@ -262,8 +264,10 @@ const Bookings = () => {
             paymentMethod, totalPence,
           },
           environment: getStripeEnvironment(),
+          turnstileToken,
         },
       });
+
       if (error || !data?.bookingId) throw new Error(error?.message || "Failed to save response");
       setSubmissionStatus(finalStatus);
     } catch (err: unknown) {
