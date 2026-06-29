@@ -1,4 +1,6 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { verifyTurnstile } from "../_shared/verify-turnstile.ts";
+
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
