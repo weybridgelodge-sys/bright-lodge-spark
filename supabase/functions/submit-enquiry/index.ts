@@ -1,6 +1,7 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors'
 import { z } from 'npm:zod@3.23.8'
+import { verifyTurnstile } from '../_shared/verify-turnstile.ts'
 
 const SECRETARY_EMAIL = 'secretary@weybridgelodge.org.uk'
 
@@ -12,7 +13,9 @@ const BodySchema = z.object({
   source: z.string().trim().max(40).optional(),
   // Honeypot — must be empty
   website: z.string().max(0).optional().or(z.literal('')),
+  turnstileToken: z.string().trim().max(4096).optional(),
 })
+
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
