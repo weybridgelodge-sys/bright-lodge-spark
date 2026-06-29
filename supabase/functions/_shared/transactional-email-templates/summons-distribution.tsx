@@ -124,8 +124,9 @@ export const template = {
     meetingDateLabel: 'Saturday 12 September 2026',
     meetingNumber: 385,
     pdfUrl: 'https://example.com/summons.pdf',
-    secretaryName: 'W Bro. Richard Smith',
-    secretaryOffice: 'Lodge Secretary',
+    secretaryTitle: 'W Bro.',
+    secretaryName: 'Richard Smith',
+    secretaryOffice: 'Secretary',
     isTest: true,
   },
 } satisfies TemplateEntry
