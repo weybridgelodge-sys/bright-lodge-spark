@@ -62,8 +62,8 @@ const Email = ({
           </Heading>
           <Text style={p}>Brethren,</Text>
           <Text style={p}>
-            Please find attached the Summons for our next meeting
-            {meetingDateLabel ? ` on ${meetingDateLabel}` : ''}.
+            The Summons for our next meeting
+            {meetingDateLabel ? ` on ${meetingDateLabel}` : ''} is available to download below.
           </Text>
           <Text style={p}>
             Remember to forward it to any guests that you wish to invite.
