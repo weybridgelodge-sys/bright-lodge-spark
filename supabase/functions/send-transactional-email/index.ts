@@ -51,9 +51,18 @@ Deno.serve(async (req) => {
 
   // Reject anything that isn't a service_role call (e.g. anon JWTs from the
   // public frontend bundle). All legitimate callers are server-side edge
-  // functions invoking this with the service role key.
-  const callerRole = decodeJwtRole(req.headers.get('Authorization'))
-  if (callerRole !== 'service_role') {
+  // functions invoking this with the service role key. We accept either:
+  //   (a) a JWT whose role claim is 'service_role' (legacy JWT keys), OR
+  //   (b) an Authorization bearer that matches SUPABASE_SERVICE_ROLE_KEY
+  //       exactly (new opaque secret keys, which aren't JWTs).
+  const authHeader = req.headers.get('Authorization') || ''
+  const bearer = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : ''
+  const serviceKeyEnv = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
+  const callerRole = decodeJwtRole(authHeader)
+  const isServiceRole =
+    callerRole === 'service_role' ||
+    (bearer.length > 0 && serviceKeyEnv.length > 0 && bearer === serviceKeyEnv)
+  if (!isServiceRole) {
     return new Response(
       JSON.stringify({ error: 'Forbidden' }),
       {
@@ -62,6 +71,7 @@ Deno.serve(async (req) => {
       }
     )
   }
+
 
   const supabaseUrl = Deno.env.get('SUPABASE_URL')
   const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
