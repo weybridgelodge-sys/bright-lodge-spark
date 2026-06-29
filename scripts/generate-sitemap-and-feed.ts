@@ -6,7 +6,7 @@ import { writeFileSync } from "fs";
 import { resolve } from "path";
 import { createClient } from "@sanity/client";
 
-const BASE_URL = "https://www.weybridgelodge.org.uk";
+const BASE_URL = "https://weybridgelodge.org.uk";
 
 const sanity = createClient({
   projectId: "sjz7d6eb",
@@ -57,6 +57,9 @@ const staticEntries: SitemapEntry[] = [
   { path: "/your-initiation", priority: "0.6", changefreq: "yearly" },
   { path: "/your-journey", priority: "0.6", changefreq: "yearly" },
   { path: "/ladies-festival", priority: "0.7", changefreq: "monthly" },
+  { path: "/ladies-night", priority: "0.6", changefreq: "monthly" },
+  { path: "/quiz", priority: "0.5", changefreq: "monthly" },
+  { path: "/accessibility-statement", priority: "0.3", changefreq: "yearly" },
   { path: "/data-protection", priority: "0.3", changefreq: "yearly" },
 ];
 
