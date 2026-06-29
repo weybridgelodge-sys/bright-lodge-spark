@@ -19,6 +19,7 @@ export default defineConfig(({ mode }) => ({
     },
   },
   build: {
+    cssCodeSplit: true,
     rollupOptions: {
       output: {
         manualChunks: (id) => {
@@ -26,10 +27,17 @@ export default defineConfig(({ mode }) => ({
           if (id.includes("@supabase")) return "supabase";
           if (id.includes("@tanstack")) return "react-query";
           if (id.includes("react-helmet")) return "helmet";
-          if (id.includes("@radix-ui")) return "radix";
+          // Split each Radix primitive into its own chunk so unused ones aren't
+          // pulled into pages that don't use them.
+          const radixMatch = id.match(/@radix-ui[\\/]([^\\/]+)/);
+          if (radixMatch) return `radix-${radixMatch[1]}`;
           if (id.includes("framer-motion")) return "framer";
           if (id.includes("recharts") || id.includes("d3-")) return "charts";
           if (id.includes("react-router")) return "router";
+          if (id.includes("date-fns")) return "date-fns";
+          if (id.includes("lucide-react")) return "lucide";
+          if (id.includes("@react-pdf") || id.includes("jspdf")) return "pdf";
+          if (id.includes("dompurify") || id.includes("marked")) return "markdown";
         },
       },
     },
