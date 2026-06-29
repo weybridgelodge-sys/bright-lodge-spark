@@ -16,6 +16,7 @@ const FreemasonryCharity = lazy(() => import("./pages/FreemasonryCharity"));
 const OurCharities = lazy(() => import("./pages/OurCharities"));
 const JoinUs = lazy(() => import("./pages/JoinUs"));
 const DataProtection = lazy(() => import("./pages/DataProtection"));
+const AccessibilityStatement = lazy(() => import("./pages/AccessibilityStatement"));
 const LodgeProfile = lazy(() => import("./pages/LodgeProfile"));
 const History = lazy(() => import("./pages/History"));
 const WorshipfulMasters = lazy(() => import("./pages/WorshipfulMasters"));
@@ -72,6 +73,7 @@ const App = () => (
             <Route path="/your-journey" element={<YourJourney />} />
             <Route path="/lodge-traditions" element={<LodgeTraditions />} />
             <Route path="/data-protection" element={<DataProtection />} />
+            <Route path="/accessibility-statement" element={<AccessibilityStatement />} />
             <Route path="/unsubscribe" element={<Unsubscribe />} />
             <Route path="/lodge-profile" element={<LodgeProfile />} />
             <Route path="/history" element={<History />} />
@@ -136,7 +138,7 @@ const App = () => (
             <Route path="/75th-anniversary-meeting-february-2024" element={<Navigate to="/news/75th-anniversary" replace />} />
             {/* Legal & misc */}
             <Route path="/data-protection-policy" element={<Navigate to="/data-protection" replace />} />
-            <Route path="/accessibility-statement" element={<Navigate to="/" replace />} />
+            
             <Route path="/masonic-website-links" element={<Navigate to="/masonic-links" replace />} />
 
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
