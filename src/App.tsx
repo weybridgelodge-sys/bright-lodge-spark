@@ -138,7 +138,7 @@ const App = () => (
             <Route path="/75th-anniversary-meeting-february-2024" element={<Navigate to="/news/75th-anniversary" replace />} />
             {/* Legal & misc */}
             <Route path="/data-protection-policy" element={<Navigate to="/data-protection" replace />} />
-            <Route path="/accessibility-statement" element={<Navigate to="/" replace />} />
+            
             <Route path="/masonic-website-links" element={<Navigate to="/masonic-links" replace />} />
 
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
