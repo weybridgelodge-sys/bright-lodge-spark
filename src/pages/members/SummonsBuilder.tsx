@@ -908,6 +908,7 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
       <div className="flex flex-wrap gap-2">
         <Button onClick={() => generatePdf("download")} disabled={busy}><Download className="w-4 h-4 mr-2" /> Download PDF</Button>
         <Button variant="outline" className="text-navy" onClick={() => generatePdf("save")} disabled={busy}><Save className="w-4 h-4 mr-2" /> Save to history</Button>
+        <Button variant="outline" className="text-navy" onClick={emailTest} disabled={busy}><Mail className="w-4 h-4 mr-2" /> Send test email…</Button>
         <Button onClick={emailAll} disabled={busy} className="bg-gold text-navy hover:bg-gold/90"><Mail className="w-4 h-4 mr-2" /> Email to all members</Button>
       </div>
     </div>
