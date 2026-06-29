@@ -1,6 +1,7 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors'
 import { z } from 'npm:zod@3.23.8'
+import { verifyTurnstile } from '../_shared/verify-turnstile.ts'
 
 const SECRETARY_EMAIL = 'secretary@weybridgelodge.org.uk'
 
@@ -12,7 +13,9 @@ const BodySchema = z.object({
   source: z.string().trim().max(40).optional(),
   // Honeypot — must be empty
   website: z.string().max(0).optional().or(z.literal('')),
+  turnstileToken: z.string().trim().max(4096).optional(),
 })
+
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -38,15 +41,19 @@ Deno.serve(async (req) => {
     return json({ error: 'Validation failed', issues: parsed.error.flatten().fieldErrors }, 400)
   }
 
-  const { full_name, email, phone, reason, source, website } = parsed.data
+  const { full_name, email, phone, reason, source, website, turnstileToken } = parsed.data
   if (website && website.length > 0) {
     // Honeypot tripped — pretend success.
     return json({ success: true }, 200)
   }
 
+  const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || null
+  const ok = await verifyTurnstile(turnstileToken, ip)
+  if (!ok) return json({ error: 'Verification failed. Please tick the verification box and try again.' }, 400)
+
   const supabase = createClient(supabaseUrl, serviceKey)
 
-  const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || null
+
   const ua = req.headers.get('user-agent') || null
 
   const { data: row, error: insertErr } = await supabase

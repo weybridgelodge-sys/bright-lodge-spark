@@ -1,6 +1,8 @@
 import { useState, FormEvent } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import TurnstileWidget from "@/components/TurnstileWidget";
+
 
 interface FieldErrors {
   full_name?: string[];
@@ -14,10 +16,16 @@ export const EnquiryForm = () => {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [errors, setErrors] = useState<FieldErrors>({});
+  const [turnstileToken, setTurnstileToken] = useState<string>("");
+
 
   const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setErrors({});
+    if (!turnstileToken) {
+      toast({ title: "Please complete the verification", description: "Tick the box to confirm you're human.", variant: "destructive" });
+      return;
+    }
     const fd = new FormData(e.currentTarget);
     const payload = {
       full_name: String(fd.get("full_name") || "").trim(),
@@ -26,7 +34,9 @@ export const EnquiryForm = () => {
       reason: String(fd.get("reason") || "").trim(),
       website: String(fd.get("website") || ""), // honeypot
       source: "join-us",
+      turnstileToken,
     };
+
 
     setSubmitting(true);
     try {
@@ -149,13 +159,16 @@ export const EnquiryForm = () => {
         {errors.reason && <p className="text-xs text-destructive mt-1">{errors.reason[0]}</p>}
       </div>
 
+      <TurnstileWidget onToken={setTurnstileToken} onExpire={() => setTurnstileToken("")} />
+
       <button
         type="submit"
-        disabled={submitting}
+        disabled={submitting || !turnstileToken}
         className="block w-full text-center bg-gold-shimmer text-accent-foreground py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity disabled:opacity-60"
       >
         {submitting ? "Sending…" : "Start Your Journey"}
       </button>
+
 
       <p className="text-xs text-muted-foreground font-sans">
         Your details are sent securely to the Lodge Secretary and stored only for the purpose of replying to your enquiry. See our privacy notice for details.

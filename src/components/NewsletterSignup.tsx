@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { Mail, CheckCircle2, ArrowRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import TurnstileWidget from "@/components/TurnstileWidget";
+
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -10,6 +12,7 @@ const NewsletterSignup = () => {
   const [honeypot, setHoneypot] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "done" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
+  const [turnstileToken, setTurnstileToken] = useState<string>("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,11 +23,16 @@ const NewsletterSignup = () => {
       setError("Please enter a valid email address.");
       return;
     }
+    if (!turnstileToken) {
+      setError("Please complete the verification below.");
+      return;
+    }
     setStatus("loading");
     try {
       const { data, error } = await supabase.functions.invoke("newsletter-subscribe", {
-        body: { email: clean, honeypot },
+        body: { email: clean, honeypot, turnstileToken },
       });
+
       if (error || (data && (data as { error?: string }).error)) {
         throw new Error((data as { error?: string })?.error || error?.message || "Subscription failed");
       }
@@ -90,7 +98,9 @@ const NewsletterSignup = () => {
           {status === "loading" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <>Join <ArrowRight className="ml-1 h-3 w-3" /></>}
         </Button>
       </div>
+      <div className="mt-3 flex justify-start"><TurnstileWidget theme="dark" onToken={setTurnstileToken} onExpire={() => setTurnstileToken("")} /></div>
       {error && <p className="text-xs text-red-300 mt-2">{error}</p>}
+
       <p className="text-[10px] text-primary-foreground/60 mt-3 leading-relaxed">
         No spam. Unsubscribe with one click. Handled in line with our Data Protection Policy.
       </p>

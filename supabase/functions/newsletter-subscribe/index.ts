@@ -1,4 +1,6 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { verifyTurnstile } from "../_shared/verify-turnstile.ts";
+
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -19,7 +21,7 @@ Deno.serve(async (req) => {
     return new Response("Method not allowed", { status: 405, headers: corsHeaders });
   }
   try {
-    const { email, honeypot } = await req.json();
+    const { email, honeypot, turnstileToken } = await req.json();
     if (typeof honeypot === "string" && honeypot.length > 0) {
       // Silent success for bots
       return new Response(JSON.stringify({ ok: true }), {
@@ -32,7 +34,16 @@ Deno.serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+    const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || null;
+    const ok = await verifyTurnstile(turnstileToken, ip);
+    if (!ok) {
+      return new Response(JSON.stringify({ error: "Verification failed. Please tick the verification box and try again." }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
     const cleanEmail = email.trim().toLowerCase();
+
 
     // Upsert idempotently
     const { error } = await supabase

@@ -1,6 +1,8 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { z } from "npm:zod@3.23.8";
 import { sendBookingEmails } from "../_shared/send-booking-emails.ts";
+import { verifyTurnstile } from "../_shared/verify-turnstile.ts";
+
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -28,7 +30,9 @@ const BodySchema = z.object({
   ]),
   details: z.record(z.unknown()).optional(),
   environment: z.enum(["sandbox", "live"]).optional(),
+  turnstileToken: z.string().trim().max(4096).optional(),
 });
+
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
@@ -63,7 +67,19 @@ Deno.serve(async (req) => {
       meeting_option,
       details,
       environment,
+      turnstileToken,
     } = parsed.data;
+
+    const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || null;
+    const captchaOk = await verifyTurnstile(turnstileToken, ip);
+    if (!captchaOk) {
+      return new Response(
+        JSON.stringify({ error: "Verification failed. Please tick the verification box and try again." }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
+
 
 
     // Link to the published Festive Board record by direct id when available,
