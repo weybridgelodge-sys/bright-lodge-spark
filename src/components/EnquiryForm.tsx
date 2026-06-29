@@ -54,12 +54,17 @@ export const EnquiryForm = () => {
           /* ignore */
         }
         if (parsed?.issues) setErrors(parsed.issues);
+        // Surface the first specific field error rather than the generic "Validation failed"
+        const firstIssue = parsed?.issues
+          ? Object.values(parsed.issues).flat().find((v) => typeof v === "string")
+          : null;
         toast({
           title: "Could not send enquiry",
-          description: parsed?.error || error.message || "Please try again or email the secretary directly.",
+          description: (firstIssue as string) || parsed?.error || error.message || "Please try again or email the secretary directly.",
           variant: "destructive",
         });
         return;
+
       }
 
       if (data?.success) {
