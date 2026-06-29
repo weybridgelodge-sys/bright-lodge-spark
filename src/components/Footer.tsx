@@ -155,6 +155,9 @@ const Footer = () => {
             <Link to="/data-protection" className="text-xs text-primary-foreground/75 hover:text-gold transition-colors font-sans">
               Data Protection Policy
             </Link>
+            <Link to="/accessibility-statement" className="text-xs text-primary-foreground/75 hover:text-gold transition-colors font-sans">
+              Accessibility Statement
+            </Link>
             <Link to="/what-is-freemasonry" className="text-xs text-primary-foreground/75 hover:text-gold transition-colors font-sans">
               What is Freemasonry
             </Link>
