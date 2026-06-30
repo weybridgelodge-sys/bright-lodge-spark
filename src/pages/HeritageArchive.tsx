@@ -608,12 +608,11 @@ export default function HeritageArchive() {
   return (
     <div className="flex min-h-screen flex-col overflow-x-hidden">
       <SEO
-        title="The Heritage Archive — Weybridge Lodge No. 6787, Freemasons in Surrey"
-        description="Six original lodge summonses and a 1969 Ladies' Festival programme from Weybridge Lodge No. 6787 — a Masonic Lodge meeting in Surrey since 1949. Explore the original documents and the brethren who served."
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(archiveSchema) }}
+        title="Heritage Archive"
+        description="Archival summons, historic records and founding heritage of Weybridge Lodge No. 6787, Freemasons meeting at Guildford Masonic Centre since 1949."
+        canonical="/heritage"
+        type="article"
+        schema={archiveSchema}
       />
       <Header />
 
