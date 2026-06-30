@@ -903,8 +903,8 @@ export default function HeritageArchive() {
           Weybridge Lodge No. 6787 · Province of Surrey · Consecrated 19th January 1949
         </div>
       </div>
-      </div>
       </main>
+
       <Footer />
     </div>
   );
