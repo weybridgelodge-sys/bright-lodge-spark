@@ -1,4 +1,9 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+import SEO from "@/components/SEO";
 
 const PALETTE = {
   vellum: "#F5F0E8",
@@ -655,12 +660,21 @@ export default function HeritageArchive() {
   };
 
   return (
-    <div style={{
-      background: PALETTE.vellum,
-      minHeight: "100vh",
-      fontFamily: "'Helvetica Neue', Arial, sans-serif",
-      color: PALETTE.ink,
-    }}>
+    <div className="min-h-screen overflow-x-hidden flex flex-col">
+      <SEO
+        title="The Archive — Weybridge Lodge No. 6787"
+        description="A record in seven documents, 1954–1969: summonses and a Ladies' Festival programme from the early years of Weybridge Lodge No. 6787."
+      />
+      <Header />
+      <main style={{
+        background: PALETTE.vellum,
+        fontFamily: "'Helvetica Neue', Arial, sans-serif",
+        color: PALETTE.ink,
+        flex: 1,
+      }}>
+
+
+
       <div style={{
         background: PALETTE.navy,
         padding: "4rem 2rem 3rem",
@@ -864,10 +878,34 @@ export default function HeritageArchive() {
           </div>
         </div>
 
-        <div style={{ textAlign: "center", padding: "2rem 0 1rem", color: PALETTE.sepiaLight, fontSize: "0.75rem", letterSpacing: "0.1em" }}>
+        <div style={{ textAlign: "center", padding: "2.5rem 0 1rem" }}>
+          <Link
+            to="/history"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "0.5rem",
+              fontFamily: "Georgia, 'Times New Roman', serif",
+              background: PALETTE.navy,
+              color: PALETTE.cream,
+              fontSize: "0.95rem",
+              textDecoration: "none",
+              border: `1px solid ${PALETTE.gold}`,
+              padding: "0.75rem 1.5rem",
+              letterSpacing: "0.05em",
+            }}
+          >
+            <ArrowLeft size={16} /> Back to Our History
+          </Link>
+        </div>
+
+        <div style={{ textAlign: "center", padding: "1rem 0 2rem", color: PALETTE.sepiaLight, fontSize: "0.75rem", letterSpacing: "0.1em" }}>
           Weybridge Lodge No. 6787 · Province of Surrey · Consecrated 19th January 1949
         </div>
       </div>
+      </main>
+
+      <Footer />
     </div>
   );
 }
