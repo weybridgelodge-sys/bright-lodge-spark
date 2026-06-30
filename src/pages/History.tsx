@@ -560,6 +560,46 @@ const History = () => {
           </div>
         </section>
 
+        <section className="container mx-auto px-4 sm:px-6 pb-12">
+          <div style={{
+            borderTop: "1px solid #C4A882",
+            padding: "2rem 0 0",
+            marginTop: "2.5rem",
+            textAlign: "center",
+          }}>
+            <div style={{
+              fontFamily: "Georgia, 'Times New Roman', serif",
+              color: "#C9A432",
+              fontSize: "0.7rem",
+              letterSpacing: "0.25em",
+              textTransform: "uppercase",
+              marginBottom: "0.75rem",
+            }}>
+              Primary Sources
+            </div>
+            <Link to="/heritage" style={{
+              display: "inline-block",
+              fontFamily: "Georgia, 'Times New Roman', serif",
+              color: "#F5F0E8",
+              fontSize: "1rem",
+              textDecoration: "none",
+              border: "1px solid #B8962E",
+              padding: "0.75rem 1.75rem",
+              letterSpacing: "0.05em",
+            }}>
+              The Archive — A Record in Seven Documents, 1954–1969 →
+            </Link>
+            <div style={{
+              marginTop: "0.6rem",
+              fontSize: "0.78rem",
+              color: "#C4A882",
+              fontStyle: "italic",
+            }}>
+              Six summonses and a Ladies' Festival programme from the Lodge's first two decades
+            </div>
+          </div>
+        </section>
+
       </main>
       <Footer />
     </div>
