@@ -32,6 +32,7 @@ const navItems: NavItem[] = [
         items: [
           { label: "Lodge Profile", href: "/lodge-profile" },
           { label: "Our History", href: "/history" },
+          { label: "Heritage Archive", href: "/heritage" },
           { label: "Worshipful Masters", href: "/worshipful-masters" },
           { label: "Officers of the Lodge", href: "/officers" },
         ],
