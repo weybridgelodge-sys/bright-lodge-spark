@@ -1246,15 +1246,17 @@ function MeetingDialog({
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </Button>
-                    <label className="sm:col-span-8 flex items-center gap-2 text-[11px] text-primary-foreground/70">
-                      <input
-                        type="checkbox"
-                        checked={v.isMeetingOnly}
-                        onChange={(e) => setVisitor(v.id, { isMeetingOnly: e.target.checked })}
-                        className="accent-gold w-3.5 h-3.5"
-                      />
-                      Meeting only (not dining)
-                    </label>
+                    {!((parseFloat(v.amountPounds || "0") || 0) > 0 && !v.isMeetingOnly) && (
+                      <label className="sm:col-span-8 flex items-center gap-2 text-[11px] text-primary-foreground/70">
+                        <input
+                          type="checkbox"
+                          checked={v.isMeetingOnly}
+                          onChange={(e) => setVisitor(v.id, { isMeetingOnly: e.target.checked })}
+                          className="accent-gold w-3.5 h-3.5"
+                        />
+                        Meeting only (not dining)
+                      </label>
+                    )}
                   </div>
                 ))}
               </div>
