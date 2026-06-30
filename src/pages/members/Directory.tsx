@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import MembersLayout from "@/components/members/MembersLayout";
 import { supabase } from "@/integrations/supabase/client";
-import { Search, Mail } from "lucide-react";
+import { Search, Mail, Phone, MapPin } from "lucide-react";
 import { formatMemberLine } from "@/lib/summons";
+import { enrichWithPii, type ProfilePii } from "@/lib/profilePii";
 
 type Member = {
   id: string;
