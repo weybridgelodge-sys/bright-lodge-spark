@@ -22,6 +22,13 @@ type Member = {
   joined_year: number | null;
   email: string | null;
   avatar_url: string | null;
+  phone?: string | null;
+  address_line1?: string | null;
+  address_line2?: string | null;
+  address_line3?: string | null;
+  town?: string | null;
+  county?: string | null;
+  postcode?: string | null;
 };
 
 // Lodge year rolls over in October (installation season)
