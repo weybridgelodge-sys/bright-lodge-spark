@@ -41,7 +41,9 @@ export default function MembersDirectory() {
         .select("id,full_name,first_name,middle_name,last_name,preferred_name,post_nominals,title,is_past_master,rank,grand_rank,provincial_rank,office,joined_year,email,avatar_url")
         .eq("status", "active")
         .order("full_name");
-      setMembers((m as Member[]) ?? []);
+      const base = (m as Member[]) ?? [];
+      const enriched = await enrichWithPii(base);
+      setMembers(enriched as (Member & Partial<ProfilePii>)[]);
 
       const { data: a } = await supabase
         .from("officer_appointments")
