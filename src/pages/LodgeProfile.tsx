@@ -65,6 +65,7 @@ const LodgeProfile = () => {
         },
       },
       breadcrumb,
+      localBusinessSchema,
     ];
   }, []);
 
