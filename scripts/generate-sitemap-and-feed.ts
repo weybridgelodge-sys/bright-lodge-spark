@@ -72,7 +72,12 @@ const staticEntries: SitemapEntry[] = [
   { path: "/news/three-masonic-degrees-explained", priority: "0.6", changefreq: "yearly" },
   { path: "/news/royal-arch-explained", priority: "0.6", changefreq: "yearly" },
   { path: "/thames-challenge", priority: "0.6", changefreq: "yearly" },
-  // Intentionally excluded: /unsubscribe and /checkout/return (transactional, should not be indexed).
+  // Intentionally excluded from the sitemap:
+  //   /unsubscribe, /checkout/return — transactional, must not be indexed.
+  //   /history/archive — duplicate route that renders HeritageArchive; canonical is /heritage.
+  //   /guildford-freemasons-what-is-freemasonry — legacy redirect → /what-is-freemasonry.
+  //   /frequently-asked-questions-about-freemasonry — legacy redirect → /what-is-freemasonry.
+  //   /guildford-freemasons-charity-surrey — legacy redirect → /our-charities.
 ];
 
 const slugifyCategory = (s: string) => s.toLowerCase().replace(/\s+/g, "-");
