@@ -214,9 +214,18 @@ export default function MembersDocuments() {
               </div>
               <div className="flex items-center gap-1 shrink-0">
                 <button
+                  onClick={() => handleView(d)}
+                  className="p-2 text-gold hover:bg-gold/10 rounded-sm"
+                  aria-label="Open in new tab"
+                  title="Open in new tab"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                </button>
+                <button
                   onClick={() => handleDownload(d)}
                   className="p-2 text-gold hover:bg-gold/10 rounded-sm"
                   aria-label="Download"
+                  title="Download"
                 >
                   <Download className="w-4 h-4" />
                 </button>
@@ -225,6 +234,7 @@ export default function MembersDocuments() {
                     onClick={() => handleDelete(d)}
                     className="p-2 text-red-400 hover:bg-red-500/10 rounded-sm"
                     aria-label="Delete"
+                    title="Delete"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
