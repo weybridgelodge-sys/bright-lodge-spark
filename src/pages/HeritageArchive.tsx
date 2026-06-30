@@ -672,10 +672,8 @@ export default function HeritageArchive() {
         color: PALETTE.ink,
         flex: 1,
       }}>
-      <div style={{ display: "none" }}>
-        {/* preserved palette wrapper styling moved to main */}
-      </div>
-      <div style={{ display: "contents" }}>
+
+
 
       <div style={{
         background: PALETTE.navy,
