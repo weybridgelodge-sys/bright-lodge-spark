@@ -40,6 +40,7 @@ const staticEntries: SitemapEntry[] = [
   { path: "/what-is-freemasonry", priority: "0.9", changefreq: "monthly" },
   { path: "/lodge-profile", priority: "0.8", changefreq: "monthly" },
   { path: "/history", priority: "0.8", changefreq: "yearly" },
+  { path: "/heritage", priority: "0.6", changefreq: "yearly" },
   { path: "/freemasonry-and-charity", priority: "0.8", changefreq: "monthly" },
   { path: "/our-charities", priority: "0.7", changefreq: "monthly" },
   { path: "/officers", priority: "0.7", changefreq: "yearly" },
