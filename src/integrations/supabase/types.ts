@@ -2350,6 +2350,9 @@ export type Database = {
       }
       welfare_correspondence: {
         Row: {
+          attachment_name: string | null
+          attachment_path: string | null
+          attachment_size: number | null
           body: string | null
           correspondence_date: string
           created_at: string
@@ -2363,6 +2366,9 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          attachment_name?: string | null
+          attachment_path?: string | null
+          attachment_size?: number | null
           body?: string | null
           correspondence_date?: string
           created_at?: string
@@ -2376,6 +2382,9 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          attachment_name?: string | null
+          attachment_path?: string | null
+          attachment_size?: number | null
           body?: string | null
           correspondence_date?: string
           created_at?: string
