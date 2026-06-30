@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { ArrowDown, ArrowUp, Plus, Trash2, X } from "lucide-react";
+import { ArrowDown, ArrowUp, Paperclip, Plus, Trash2, X } from "lucide-react";
 
 type Member = { id: string; first_name: string | null; last_name: string | null; preferred_name: string | null; full_name: string | null };
 type Direction = "outgoing" | "incoming";
@@ -14,6 +14,7 @@ type Method = "card" | "letter" | "email" | "phone" | "flowers" | "gift" | "othe
 type Row = {
   id: string; member_id: string | null; correspondence_date: string;
   direction: Direction; method: Method; subject: string; body: string | null; created_at: string;
+  attachment_path: string | null; attachment_name: string | null; attachment_size: number | null;
 };
 
 const METHOD_LABEL: Record<Method, string> = {
@@ -47,6 +48,12 @@ export default function CorrespondencePanel({ members, userId }: { members: Memb
       .update({ deleted_at: new Date().toISOString() }).eq("id", id);
     if (error) { toast.error(error.message); return; }
     toast.success("Archived"); load();
+  };
+
+  const openAttachment = async (path: string) => {
+    const { data, error } = await supabase.storage.from("welfare-attachments").createSignedUrl(path, 60);
+    if (error || !data) { toast.error("Couldn't open attachment"); return; }
+    window.open(data.signedUrl, "_blank", "noopener");
   };
 
   return (
@@ -83,7 +90,17 @@ export default function CorrespondencePanel({ members, userId }: { members: Memb
                   </p>
                   {r.body && <p className="text-sm text-primary-foreground/80 mt-2 whitespace-pre-wrap">{r.body}</p>}
                 </div>
-                <button onClick={() => archive(r.id)} className="text-primary-foreground/40 hover:text-red-400" aria-label="Archive">
+                {r.attachment_path && (
+                  <button
+                    onClick={() => openAttachment(r.attachment_path!)}
+                    className="text-gold/80 hover:text-gold"
+                    aria-label="Open attachment"
+                    title={r.attachment_name || "Open attachment"}
+                  >
+                    <Paperclip className="w-4 h-4" />
+                  </button>
+                )}
+                <button onClick={() => archive(r.id)} className="text-primary-foreground/40 hover:text-red-400" aria-label="Archive" title="Archive">
                   <Trash2 className="w-4 h-4" />
                 </button>
               </div>
@@ -103,6 +120,7 @@ function NewForm({ members, userId, onSaved }: { members: Member[]; userId: stri
   const [method, setMethod] = useState<Method>("card");
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
+  const [file, setFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
   const inputCls = "bg-navy text-primary-foreground border-gold/30";
 
@@ -110,10 +128,28 @@ function NewForm({ members, userId, onSaved }: { members: Member[]; userId: stri
     e.preventDefault();
     if (!subject.trim()) { toast.error("Subject is required"); return; }
     setBusy(true);
+    let attachment_path: string | null = null;
+    let attachment_name: string | null = null;
+    let attachment_size: number | null = null;
+    if (file) {
+      if (file.size > 15 * 1024 * 1024) {
+        setBusy(false);
+        toast.error("Attachment must be 15 MB or smaller");
+        return;
+      }
+      const safe = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+      const path = `${userId ?? "anon"}/${Date.now()}-${safe}`;
+      const { error: upErr } = await supabase.storage.from("welfare-attachments").upload(path, file);
+      if (upErr) { setBusy(false); toast.error(upErr.message); return; }
+      attachment_path = path;
+      attachment_name = file.name;
+      attachment_size = file.size;
+    }
     const { error } = await (supabase as any).from("welfare_correspondence").insert({
       member_id: memberId === "__none" ? null : memberId,
       correspondence_date: date, direction, method,
       subject: subject.trim(), body: body.trim() || null, logged_by: userId,
+      attachment_path, attachment_name, attachment_size,
     });
     setBusy(false);
     if (error) { toast.error(error.message); return; }
@@ -164,6 +200,14 @@ function NewForm({ members, userId, onSaved }: { members: Member[]; userId: stri
       <div>
         <Label className="text-xs">Body / notes</Label>
         <Textarea value={body} onChange={(e) => setBody(e.target.value)} className={inputCls} rows={3} maxLength={2000} />
+      </div>
+      <div>
+        <Label className="text-xs flex items-center gap-1.5"><Paperclip className="w-3 h-3" /> Attachment (optional, max 15 MB)</Label>
+        <input
+          type="file"
+          onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+          className="mt-1 text-sm text-primary-foreground/70 file:mr-3 file:border-0 file:bg-gold/15 file:text-gold file:px-3 file:py-1.5 file:rounded-sm file:text-xs"
+        />
       </div>
       <Button type="submit" disabled={busy} className="bg-gold text-navy hover:bg-gold/90">Save entry</Button>
     </form>
