@@ -1091,15 +1091,17 @@ function MeetingDialog({
                           }
                           className="bg-navy border-gold/20 h-8 text-xs text-primary-foreground placeholder:text-primary-foreground/40"
                         />
-                        <label className="col-span-full sm:col-start-2 sm:col-end-6 flex items-center gap-2 text-[11px] text-primary-foreground/70 -mt-1">
-                          <input
-                            type="checkbox"
-                            checked={d.isMeetingOnly}
-                            onChange={(e) => setMember(m.id, { isMeetingOnly: e.target.checked })}
-                            className="accent-gold w-3.5 h-3.5"
-                          />
-                          Meeting only (not dining)
-                        </label>
+                        {!((parseFloat(d.amountPounds || "0") || 0) > 0 && !d.isMeetingOnly) && (
+                          <label className="col-span-full sm:col-start-2 sm:col-end-6 flex items-center gap-2 text-[11px] text-primary-foreground/70 -mt-1">
+                            <input
+                              type="checkbox"
+                              checked={d.isMeetingOnly}
+                              onChange={(e) => setMember(m.id, { isMeetingOnly: e.target.checked })}
+                              className="accent-gold w-3.5 h-3.5"
+                            />
+                            Meeting only (not dining)
+                          </label>
+                        )}
                       </>
                     )}
                   </div>
