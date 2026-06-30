@@ -23,7 +23,7 @@ const Index = () => {
         title="Weybridge Lodge No. 6787 | Freemasons in Guildford, Surrey"
         description="Weybridge Lodge No. 6787 — an open, friendly Freemasons Lodge in Guildford, Surrey. Join our welcoming community at the Guildford Masonic Centre."
         canonical="/"
-        schema={organizationSchema}
+        schema={[organizationSchema, localBusinessSchema]}
       />
       <a href="#main-content" className="skip-to-content">Skip to main content</a>
       <Header />
