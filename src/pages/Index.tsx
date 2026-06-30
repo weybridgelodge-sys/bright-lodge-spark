@@ -3,7 +3,7 @@ import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import About from "@/components/About";
 import Footer from "@/components/Footer";
-import SEO, { organizationSchema } from "@/components/SEO";
+import SEO, { organizationSchema, localBusinessSchema } from "@/components/SEO";
 import { Link } from "react-router-dom";
 import { Sparkles, ArrowRight } from "lucide-react";
 
