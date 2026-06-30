@@ -1,22 +1,9 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
-
-const PALETTE = {
-  vellum: "#F5F0E8",
-  vellumDark: "#EDE6D6",
-  navy: "#1C294B",
-  navyLight: "#2A3D6E",
-  gold: "#B8962E",
-  goldLight: "#D4AF6A",
-  sepia: "#8B6F47",
-  sepiaLight: "#C4A882",
-  ink: "#2C2416",
-  cream: "#FDFAF4",
-};
 
 type Officer = { name: string; role: string };
 
@@ -35,7 +22,6 @@ type SummonsDoc = {
   officers: Officer[];
   charityRep?: string;
   notes?: string;
-  colour: string;
 };
 
 type FestivalDoc = {
@@ -53,7 +39,6 @@ type FestivalDoc = {
   entertainment: string[];
   officers: Officer[];
   notes?: string;
-  colour: string;
 };
 
 type Doc = SummonsDoc | FestivalDoc;
@@ -99,7 +84,6 @@ const documents: Doc[] = [
     ],
     charityRep: "W. Bro. R. Edmonds, M.B.E., P.P.G.W.",
     notes: "The memorial notice for W. Bro. Lewis appears as a bordered panel on the agenda page — a deliberate typographic act of mourning within an otherwise administrative document.",
-    colour: PALETTE.navy,
   },
   {
     id: "summons-33",
@@ -142,7 +126,6 @@ const documents: Doc[] = [
     ],
     charityRep: "W. Bro. R. Edmonds, M.B.E., P.P.G.W.",
     notes: "This is the Installation meeting for the 1955 year. The Officers Night was announced for Monday 21st March at St. Alban's Hall, Weybridge — two days before the lodge meeting itself.",
-    colour: PALETTE.navy,
   },
   {
     id: "summons-55",
@@ -183,7 +166,6 @@ const documents: Doc[] = [
     ],
     charityRep: "W. Bro. R. Edmonds, M.B.E., P.G.St.B., P.P.G.W.",
     notes: "Harry E. Gibbs — passed here to the Second Degree in November 1959, raised to the Third in early 1960, and President of the Lodge's Ladies' Festival just nine years later. His progression through these pages is one of the quiet narrative threads running through the archive.",
-    colour: PALETTE.navy,
   },
   {
     id: "summons-57",
@@ -223,7 +205,6 @@ const documents: Doc[] = [
     ],
     charityRep: "W. Bro. R. Edmonds, M.B.E., P.G.St.B., P.P.G.W.",
     notes: "The Officers' Night that season was announced for Monday 1st February 1960 at the Conservative Club, Church Street, Weybridge — the evening before this meeting. The Lodge of Instruction (the Noel Money Lodge) met Monday evenings at the same venue, with W. Bro. H. E. H. Boyle as Secretary.",
-    colour: PALETTE.navy,
   },
   {
     id: "summons-65",
@@ -261,7 +242,6 @@ const documents: Doc[] = [
     ],
     charityRep: "W. Bro. R. Edmonds, M.B.E., P.G.St.B., P.P.G.W.",
     notes: "The Members of the Lodge register in this summons runs back to the nine Founders of 1949 — a complete membership roll with addresses and dates (addresses redacted for privacy in this presentation). Note R. G. Batten, previously Secretary under W. J. Green: as with several Secretaries in this period, his home address also served as the Lodge's correspondence address — a reminder that the Lodge had no permanent premises of its own at this stage.",
-    colour: PALETTE.navy,
   },
   {
     id: "summons-66",
@@ -300,7 +280,6 @@ const documents: Doc[] = [
     ],
     charityRep: "W. Bro. R. Edmonds, M.B.E., P.G.St.B., P.P.G.W.",
     notes: "The most consecutive pair in the archive: Summons No. 65 and No. 66 are just two months apart. Aldridge — balloted and initiated in November — is already being passed to the Second Degree here in January. The next regular meeting was announced for Tuesday 6th February 1962.",
-    colour: PALETTE.navy,
   },
   {
     id: "festival-1969",
@@ -354,555 +333,445 @@ const documents: Doc[] = [
       { name: "W. Bro. T. W. J. Regan, P.P.G.W.", role: "Steward" },
       { name: "Bro. N. E. Taylor", role: "Tyler" },
       { name: "Bro. S. S. Whitfield", role: "Charity Representative" },
-      { name: "", role: "Organist" },
     ],
     notes: "By 1969, Harry Gibbs — passed to the Second Degree in November 1959 and raised here in February 1960 — presides as President over the Lodge's Ladies' Festival. His response toast is proposed by Harold Holyer, who appears in these pages as a Steward in 1961 and would become Immediate Past Master by this same evening.",
-    colour: "#7B3F3F",
   },
 ];
 
 const masters = [
-  { years: "1949", name: "W. Bro. Roy Edmonds, M.B.E., P.G.St.B.", note: "Founder & First Master" },
-  { years: "1950/51", name: "W. Bro. E. G. Stacey" },
-  { years: "1951/52", name: "W. Bro. L. Lake, P.P.A.G.D.C." },
-  { years: "1952/53", name: "W. Bro. F. T. Butt, P.P.A.G.D.C." },
-  { years: "1953/54", name: "W. Bro. L. T. Anstead" },
-  { years: "1954/55", name: "W. Bro. H. E. H. Boyle" },
-  { years: "1955/56", name: "W. Bro. G. H. Knevett" },
-  { years: "1956/57", name: "W. Bro. F. A. Edmonds" },
-  { years: "1957/58", name: "W. Bro. A. J. Huntingford" },
-  { years: "1958/59", name: "W. Bro. R. G. Batten, F.R.I.C.S." },
-  { years: "1959/60", name: "W. Bro. W. J. Green, P.P.G.D." },
-  { years: "1960/61", name: "W. Bro. H. Cohen, B.Sc." },
-  { years: "1961/62", name: "W. Bro. J. Humphries" },
+  { years: "1949", name: "Roy Edmonds, M.B.E., P.G.St.B.", note: "Founder & First Master" },
+  { years: "1950/51", name: "E. G. Stacey" },
+  { years: "1951/52", name: "L. Lake, P.P.A.G.D.C." },
+  { years: "1952/53", name: "F. T. Butt, P.P.A.G.D.C." },
+  { years: "1953/54", name: "L. T. Anstead" },
+  { years: "1954/55", name: "H. E. H. Boyle" },
+  { years: "1955/56", name: "G. H. Knevett" },
+  { years: "1956/57", name: "F. A. Edmonds" },
+  { years: "1957/58", name: "A. J. Huntingford" },
+  { years: "1958/59", name: "R. G. Batten, F.R.I.C.S." },
+  { years: "1959/60", name: "W. J. Green, P.P.G.D." },
+  { years: "1960/61", name: "H. Cohen, B.Sc." },
+  { years: "1961/62", name: "J. Humphries" },
 ];
 
-function SummonsCard({ doc, isOpen, onToggle }: { doc: SummonsDoc; isOpen: boolean; onToggle: () => void }) {
+/* JSON-LD reflects what this page actually is: a CreativeWork describing
+   the lodge's historical archive. No address/geo claims are made here —
+   that schema belongs on the contact/profile page where it's accurate. */
+const archiveSchema = {
+  "@context": "https://schema.org",
+  "@type": "CreativeWork",
+  name: "Weybridge Lodge No. 6787 — A Record in Seven Documents, 1954–1969",
+  description:
+    "A digitised archive of six lodge summonses and a Ladies' Festival programme from Weybridge Lodge No. 6787, Province of Surrey, spanning 1954 to 1969.",
+  about: {
+    "@type": "Organization",
+    name: "Weybridge Lodge No. 6787",
+    foundingDate: "1949-01-19",
+  },
+  temporalCoverage: "1954/1969",
+};
+
+function FieldRow({ label, value }: { label: string; value: string }) {
   return (
-    <div style={{
-      marginBottom: "2rem",
-      background: PALETTE.cream,
-      border: `1px solid ${PALETTE.sepiaLight}`,
-      borderLeft: `4px solid ${PALETTE.navy}`,
-      boxShadow: "2px 4px 16px rgba(28,41,75,0.07)",
-      position: "relative",
-    }}>
-      <div style={{
-        background: PALETTE.navy,
-        padding: "1.25rem 1.5rem",
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "flex-start",
-        cursor: "pointer",
-      }} onClick={onToggle}>
-        <div>
-          <div style={{
-            fontFamily: "Georgia, 'Times New Roman', serif",
-            color: PALETTE.goldLight,
-            fontSize: "0.7rem",
-            letterSpacing: "0.2em",
-            textTransform: "uppercase",
-            marginBottom: "0.35rem",
-          }}>
-            Province of Surrey — Weybridge Lodge No. 6787
-          </div>
-          <div style={{
-            fontFamily: "Georgia, 'Times New Roman', serif",
-            color: PALETTE.cream,
-            fontSize: "1.1rem",
-            fontWeight: "normal",
-            letterSpacing: "0.02em",
-          }}>
-            Summons No. {doc.number} &nbsp;·&nbsp; {doc.date}
-          </div>
-          <div style={{
-            color: PALETTE.sepiaLight,
-            fontSize: "0.8rem",
-            marginTop: "0.3rem",
-            fontStyle: "italic",
-          }}>
-            Meeting: {doc.meetingDate} &nbsp;·&nbsp; {doc.venue}
-          </div>
-        </div>
-        <div style={{
-          color: PALETTE.goldLight,
-          fontSize: "1.2rem",
-          marginTop: "0.25rem",
-          userSelect: "none",
-          minWidth: "1.5rem",
-          textAlign: "right",
-        }}>
-          {isOpen ? "−" : "+"}
-        </div>
-      </div>
-
-      <div style={{ padding: "1rem 1.5rem 0.75rem" }}>
-        <div style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap: "0.5rem 2rem",
-          fontSize: "0.82rem",
-          color: PALETTE.ink,
-        }}>
-          <div><span style={{ color: PALETTE.sepia, fontVariant: "small-caps" }}>Worshipful Master</span><br />{doc.wm}</div>
-          {doc.ipm && <div><span style={{ color: PALETTE.sepia, fontVariant: "small-caps" }}>Immediate Past Master</span><br />{doc.ipm}</div>}
-          {doc.masterElect && <div><span style={{ color: PALETTE.sepia, fontVariant: "small-caps" }}>Master Elect</span><br />{doc.masterElect}</div>}
-          <div><span style={{ color: PALETTE.sepia, fontVariant: "small-caps" }}>Secretary</span><br />{doc.secretary}</div>
-        </div>
-      </div>
-
-      {isOpen && (
-        <div style={{ padding: "0 1.5rem 1.5rem" }}>
-          <div style={{ borderTop: `1px solid ${PALETTE.vellumDark}`, paddingTop: "1rem", marginTop: "0.5rem" }}>
-            <div style={{ marginBottom: "1.25rem" }}>
-              <div style={{
-                fontFamily: "Georgia, 'Times New Roman', serif",
-                color: PALETTE.navy,
-                fontSize: "0.75rem",
-                letterSpacing: "0.15em",
-                textTransform: "uppercase",
-                marginBottom: "0.6rem",
-              }}>Agenda — Principal Business</div>
-              {doc.keyBusiness.map((item, i) => (
-                <div key={i} style={{
-                  display: "flex",
-                  gap: "0.75rem",
-                  marginBottom: "0.4rem",
-                  fontSize: "0.82rem",
-                  color: PALETTE.ink,
-                  lineHeight: "1.5",
-                }}>
-                  <span style={{ color: PALETTE.gold, flexShrink: 0, fontFamily: "monospace", marginTop: "0.05rem" }}>{i + 1}.</span>
-                  <span>{item}</span>
-                </div>
-              ))}
-            </div>
-
-            <div style={{ marginBottom: "1.25rem" }}>
-              <div style={{
-                fontFamily: "Georgia, 'Times New Roman', serif",
-                color: PALETTE.navy,
-                fontSize: "0.75rem",
-                letterSpacing: "0.15em",
-                textTransform: "uppercase",
-                marginBottom: "0.6rem",
-              }}>Officers of the Lodge</div>
-              <div style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
-                gap: "0.25rem 1rem",
-              }}>
-                {doc.officers.map((o, i) => (
-                  <div key={i} style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    fontSize: "0.78rem",
-                    color: PALETTE.ink,
-                    padding: "0.2rem 0",
-                    borderBottom: `1px solid ${PALETTE.vellumDark}`,
-                  }}>
-                    <span>{o.name}</span>
-                    <span style={{ color: PALETTE.sepia, flexShrink: 0, marginLeft: "0.5rem", fontStyle: "italic" }}>{o.role}</span>
-                  </div>
-                ))}
-              </div>
-              {doc.charityRep && (
-                <div style={{ marginTop: "0.5rem", fontSize: "0.78rem", color: PALETTE.sepia, fontStyle: "italic" }}>
-                  Charity Representative: {doc.charityRep}
-                </div>
-              )}
-            </div>
-
-            {doc.notes && (
-              <div style={{
-                background: PALETTE.vellum,
-                borderLeft: `3px solid ${PALETTE.gold}`,
-                padding: "0.75rem 1rem",
-                fontSize: "0.8rem",
-                color: PALETTE.sepia,
-                fontStyle: "italic",
-                lineHeight: "1.6",
-              }}>
-                {doc.notes}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+    <div>
+      <span className="font-sans text-xs uppercase tracking-wide text-muted-foreground">
+        {label}
+      </span>
+      <br />
+      <span className="font-sans text-sm text-foreground">{value}</span>
     </div>
   );
 }
 
-function FestivalCard({ doc, isOpen, onToggle }: { doc: FestivalDoc; isOpen: boolean; onToggle: () => void }) {
+function SummonsCard({
+  doc,
+  isOpen,
+  onToggle,
+}: {
+  doc: SummonsDoc;
+  isOpen: boolean;
+  onToggle: () => void;
+}) {
+  const headingId = `${doc.id}-heading`;
   return (
-    <div style={{
-      marginBottom: "2rem",
-      background: "#FDF8F5",
-      border: `1px solid #C4A882`,
-      borderLeft: `4px solid #7B3F3F`,
-      boxShadow: "2px 4px 20px rgba(123,63,63,0.10)",
-    }}>
-      <div style={{
-        background: "#7B3F3F",
-        padding: "1.25rem 1.5rem",
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "flex-start",
-        cursor: "pointer",
-      }} onClick={onToggle}>
+    <article className="mb-8 border border-border border-l-4 border-l-navy bg-card shadow-sm">
+      <button
+        type="button"
+        onClick={onToggle}
+        aria-expanded={isOpen}
+        aria-controls={`${doc.id}-panel`}
+        className="flex w-full items-start justify-between gap-4 bg-navy px-6 py-5 text-left"
+      >
         <div>
-          <div style={{
-            fontFamily: "Georgia, 'Times New Roman', serif",
-            color: "#D4AF6A",
-            fontSize: "0.7rem",
-            letterSpacing: "0.2em",
-            textTransform: "uppercase",
-            marginBottom: "0.35rem",
-          }}>
-            Weybridge Lodge No. 6787
-          </div>
-          <div style={{
-            fontFamily: "Georgia, 'Times New Roman', serif",
-            color: PALETTE.cream,
-            fontSize: "1.2rem",
-            fontStyle: "italic",
-          }}>
-            Ladies' Festival
-          </div>
-          <div style={{
-            color: "#C4A882",
-            fontSize: "0.8rem",
-            marginTop: "0.3rem",
-          }}>
-            {doc.date}
-          </div>
+          <p className="font-serif text-[0.7rem] uppercase tracking-[0.2em] text-gold">
+            Province of Surrey — Weybridge Lodge No. 6787
+          </p>
+          <h3 id={headingId} className="font-serif text-lg text-background">
+            Summons No. {doc.number} · {doc.date}
+          </h3>
+          <p className="font-sans text-sm italic text-gold/80">
+            Meeting: {doc.meetingDate} · {doc.venue}
+          </p>
         </div>
-        <div style={{ color: "#D4AF6A", fontSize: "1.2rem", marginTop: "0.25rem", userSelect: "none" }}>
+        <span aria-hidden="true" className="mt-1 min-w-[1.5rem] text-right text-lg text-gold">
           {isOpen ? "−" : "+"}
-        </div>
-      </div>
+        </span>
+      </button>
 
-      <div style={{ padding: "1rem 1.5rem 0.75rem" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.5rem 2rem", fontSize: "0.82rem", color: PALETTE.ink }}>
-          <div><span style={{ color: PALETTE.sepia, fontVariant: "small-caps" }}>President</span><br />{doc.president}</div>
-          <div><span style={{ color: PALETTE.sepia, fontVariant: "small-caps" }}>Worshipful Master</span><br />{doc.wm}</div>
-          <div><span style={{ color: PALETTE.sepia, fontVariant: "small-caps" }}>Toastmaster</span><br />{doc.toastmaster}</div>
-          <div><span style={{ color: PALETTE.sepia, fontVariant: "small-caps" }}>Immediate Past Master</span><br />{doc.ipm}</div>
-        </div>
+      <div className="grid grid-cols-1 gap-2 px-6 pt-4 sm:grid-cols-2 sm:gap-x-8">
+        <FieldRow label="Worshipful Master" value={doc.wm} />
+        {doc.ipm && <FieldRow label="Immediate Past Master" value={doc.ipm} />}
+        {doc.masterElect && <FieldRow label="Master Elect" value={doc.masterElect} />}
+        <FieldRow label="Secretary" value={doc.secretary} />
       </div>
 
       {isOpen && (
-        <div style={{ padding: "0 1.5rem 1.5rem" }}>
-          <div style={{ borderTop: `1px solid #E8D5B7`, paddingTop: "1rem", marginTop: "0.5rem" }}>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem", marginBottom: "1.25rem" }}>
-              <div>
-                <div style={{ fontFamily: "Georgia, 'Times New Roman', serif", color: "#7B3F3F", fontSize: "0.75rem", letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: "0.6rem" }}>Menu</div>
-                <div style={{ fontSize: "0.78rem", color: PALETTE.ink, fontStyle: "italic", lineHeight: "1.8" }}>
-                  <div style={{ color: PALETTE.sepia, marginBottom: "0.25rem", fontSize: "0.7rem" }}>"Eat, drink and be merry…"</div>
-                  {doc.menu.map((item, i) => (
-                    <div key={i} style={{ marginBottom: "0.25rem" }}>{item}</div>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <div style={{ fontFamily: "Georgia, 'Times New Roman', serif", color: "#7B3F3F", fontSize: "0.75rem", letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: "0.6rem" }}>Toasts</div>
-                {doc.toasts.map((t, i) => (
-                  <div key={i} style={{ marginBottom: "0.6rem", fontSize: "0.78rem" }}>
-                    <div style={{ fontStyle: "italic", color: PALETTE.ink }}>{t.toast}</div>
-                    <div style={{ color: PALETTE.sepia }}>Proposed: {t.proposedBy}{t.response ? ` · Response: ${t.response}` : ""}</div>
-                  </div>
+        <div id={`${doc.id}-panel`} role="region" aria-labelledby={headingId} className="px-6 pb-6">
+          <div className="mt-4 border-t border-border pt-4">
+            <section className="mb-5">
+              <h4 className="mb-2 font-serif text-xs uppercase tracking-[0.15em] text-navy">
+                Agenda — Principal Business
+              </h4>
+              <ol className="space-y-1">
+                {doc.keyBusiness.map((item, i) => (
+                  <li key={i} className="flex gap-3 font-sans text-sm leading-relaxed text-foreground">
+                    <span className="shrink-0 font-mono text-gold">{i + 1}.</span>
+                    <span>{item}</span>
+                  </li>
                 ))}
+              </ol>
+            </section>
 
-                <div style={{ marginTop: "1rem", fontFamily: "Georgia, 'Times New Roman', serif", color: "#7B3F3F", fontSize: "0.75rem", letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: "0.6rem" }}>Evening</div>
-                {doc.entertainment.map((e, i) => (
-                  <div key={i} style={{ fontSize: "0.78rem", color: PALETTE.ink, marginBottom: "0.25rem", fontStyle: "italic" }}>{e}</div>
-                ))}
-              </div>
-            </div>
-
-            <div style={{ marginBottom: "1.25rem" }}>
-              <div style={{ fontFamily: "Georgia, 'Times New Roman', serif", color: "#7B3F3F", fontSize: "0.75rem", letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: "0.6rem" }}>Officers of the Lodge 1969–70</div>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: "0.25rem 1rem" }}>
-                {doc.officers.filter(o => o.name).map((o, i) => (
-                  <div key={i} style={{ display: "flex", justifyContent: "space-between", fontSize: "0.78rem", color: PALETTE.ink, padding: "0.2rem 0", borderBottom: `1px solid #E8D5B7` }}>
+            <section className="mb-5">
+              <h4 className="mb-2 font-serif text-xs uppercase tracking-[0.15em] text-navy">
+                Officers of the Lodge
+              </h4>
+              <ul className="grid grid-cols-1 gap-x-4 sm:grid-cols-2">
+                {doc.officers.map((o, i) => (
+                  <li
+                    key={i}
+                    className="flex justify-between border-b border-border py-1 font-sans text-sm text-foreground"
+                  >
                     <span>{o.name}</span>
-                    <span style={{ color: PALETTE.sepia, flexShrink: 0, marginLeft: "0.5rem", fontStyle: "italic" }}>{o.role}</span>
-                  </div>
+                    <span className="ml-2 shrink-0 italic text-muted-foreground">{o.role}</span>
+                  </li>
                 ))}
-              </div>
-            </div>
-
-            <div style={{ marginBottom: "1.25rem" }}>
-              <div style={{ fontFamily: "Georgia, 'Times New Roman', serif", color: "#7B3F3F", fontSize: "0.75rem", letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: "0.6rem" }}>Festival Committee</div>
-              {doc.committee.map((m, i) => (
-                <div key={i} style={{ fontSize: "0.82rem", color: PALETTE.ink, marginBottom: "0.2rem" }}>{m}</div>
-              ))}
-            </div>
+              </ul>
+              {doc.charityRep && (
+                <p className="mt-2 font-sans text-sm italic text-muted-foreground">
+                  Charity Representative: {doc.charityRep}
+                </p>
+              )}
+            </section>
 
             {doc.notes && (
-              <div style={{ background: "#F5EDE3", borderLeft: "3px solid #B8962E", padding: "0.75rem 1rem", fontSize: "0.8rem", color: PALETTE.sepia, fontStyle: "italic", lineHeight: "1.6" }}>
+              <aside className="border-l-2 border-gold bg-background px-4 py-3 font-sans text-sm italic leading-relaxed text-muted-foreground">
                 {doc.notes}
-              </div>
+              </aside>
             )}
           </div>
         </div>
       )}
-    </div>
+    </article>
+  );
+}
+
+function FestivalCard({
+  doc,
+  isOpen,
+  onToggle,
+}: {
+  doc: FestivalDoc;
+  isOpen: boolean;
+  onToggle: () => void;
+}) {
+  const headingId = `${doc.id}-heading`;
+  return (
+    <article className="mb-8 border border-gold/40 border-l-4 border-l-navy bg-card shadow-sm">
+      <button
+        type="button"
+        onClick={onToggle}
+        aria-expanded={isOpen}
+        aria-controls={`${doc.id}-panel`}
+        className="flex w-full items-start justify-between gap-4 bg-navy px-6 py-5 text-left"
+      >
+        <div>
+          <p className="font-serif text-[0.7rem] uppercase tracking-[0.2em] text-gold">
+            Weybridge Lodge No. 6787
+          </p>
+          <h3 id={headingId} className="font-serif text-lg italic text-background">
+            Ladies' Festival
+          </h3>
+          <p className="font-sans text-sm text-gold/80">{doc.date}</p>
+        </div>
+        <span aria-hidden="true" className="mt-1 text-lg text-gold">
+          {isOpen ? "−" : "+"}
+        </span>
+      </button>
+
+      <div className="grid grid-cols-1 gap-2 px-6 pt-4 sm:grid-cols-2 sm:gap-x-8">
+        <FieldRow label="President" value={doc.president} />
+        <FieldRow label="Worshipful Master" value={doc.wm} />
+        <FieldRow label="Toastmaster" value={doc.toastmaster} />
+        <FieldRow label="Immediate Past Master" value={doc.ipm} />
+      </div>
+
+      {isOpen && (
+        <div id={`${doc.id}-panel`} role="region" aria-labelledby={headingId} className="px-6 pb-6">
+          <div className="mt-4 border-t border-border pt-4">
+            <div className="mb-5 grid grid-cols-1 gap-6 sm:grid-cols-2">
+              <section>
+                <h4 className="mb-2 font-serif text-xs uppercase tracking-[0.15em] text-navy">
+                  Menu
+                </h4>
+                <p className="mb-1 font-sans text-xs italic text-muted-foreground">
+                  "Eat, drink and be merry…"
+                </p>
+                <ul className="space-y-1 font-sans text-sm italic text-foreground">
+                  {doc.menu.map((item, i) => (
+                    <li key={i}>{item}</li>
+                  ))}
+                </ul>
+              </section>
+
+              <section>
+                <h4 className="mb-2 font-serif text-xs uppercase tracking-[0.15em] text-navy">
+                  Toasts
+                </h4>
+                <ul className="space-y-2">
+                  {doc.toasts.map((t, i) => (
+                    <li key={i} className="font-sans text-sm">
+                      <p className="italic text-foreground">{t.toast}</p>
+                      <p className="text-muted-foreground">
+                        Proposed: {t.proposedBy}
+                        {t.response ? ` · Response: ${t.response}` : ""}
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+
+                <h4 className="mb-2 mt-4 font-serif text-xs uppercase tracking-[0.15em] text-navy">
+                  Evening
+                </h4>
+                <ul className="space-y-1 font-sans text-sm italic text-foreground">
+                  {doc.entertainment.map((e, i) => (
+                    <li key={i}>{e}</li>
+                  ))}
+                </ul>
+              </section>
+            </div>
+
+            <section className="mb-5">
+              <h4 className="mb-2 font-serif text-xs uppercase tracking-[0.15em] text-navy">
+                Officers of the Lodge, 1969
+              </h4>
+              <ul className="grid grid-cols-1 gap-x-4 sm:grid-cols-2">
+                {doc.officers.map((o, i) => (
+                  <li
+                    key={`${o.name || "organist"}-${i}`}
+                    className="flex justify-between border-b border-border py-1 font-sans text-sm text-foreground"
+                  >
+                    <span>{o.name || "—"}</span>
+                    <span className="ml-2 shrink-0 italic text-muted-foreground">{o.role}</span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+
+            <section className="mb-5">
+              <h4 className="mb-2 font-serif text-xs uppercase tracking-[0.15em] text-navy">
+                Festival Committee
+              </h4>
+              <ul className="font-sans text-sm text-foreground">
+                {doc.committee.map((m, i) => (
+                  <li key={i}>{m}</li>
+                ))}
+              </ul>
+            </section>
+
+            {doc.notes && (
+              <aside className="border-l-2 border-gold bg-background px-4 py-3 font-sans text-sm italic leading-relaxed text-muted-foreground">
+                {doc.notes}
+              </aside>
+            )}
+          </div>
+        </div>
+      )}
+    </article>
   );
 }
 
 export default function HeritageArchive() {
   const [openDoc, setOpenDoc] = useState<string | null>(null);
-
-  const handleToggle = (id: string) => {
-    setOpenDoc(prev => prev === id ? null : id);
-  };
+  const handleToggle = (id: string) => setOpenDoc((prev) => (prev === id ? null : id));
 
   return (
-    <div className="min-h-screen overflow-x-hidden flex flex-col">
+    <div className="flex min-h-screen flex-col overflow-x-hidden">
       <SEO
-        title="The Archive — Weybridge Lodge No. 6787"
-        description="A record in seven documents, 1954–1969: summonses and a Ladies' Festival programme from the early years of Weybridge Lodge No. 6787."
+        title="The Heritage Archive — Weybridge Lodge No. 6787, Freemasons in Surrey"
+        description="Six original lodge summonses and a 1969 Ladies' Festival programme from Weybridge Lodge No. 6787 — a Masonic Lodge meeting in Surrey since 1949. Explore the original documents and the brethren who served."
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(archiveSchema) }}
       />
       <Header />
-      <main style={{
-        background: PALETTE.vellum,
-        fontFamily: "'Helvetica Neue', Arial, sans-serif",
-        color: PALETTE.ink,
-        flex: 1,
-      }}>
 
-
-
-      <div style={{
-        background: PALETTE.navy,
-        padding: "4rem 2rem 3rem",
-        textAlign: "center",
-        position: "relative",
-        overflow: "hidden",
-      }}>
-        <div style={{ color: PALETTE.gold, fontSize: "1.1rem", letterSpacing: "0.6em", marginBottom: "1.5rem" }}>
-          ✦ &nbsp; ✦ &nbsp; ✦
-        </div>
-        <div style={{
-          fontFamily: "Georgia, 'Times New Roman', serif",
-          color: PALETTE.goldLight,
-          fontSize: "0.75rem",
-          letterSpacing: "0.3em",
-          textTransform: "uppercase",
-          marginBottom: "0.75rem",
-        }}>
-          Province of Surrey · Consecrated 19th January 1949
-        </div>
-        <h1 style={{
-          fontFamily: "Georgia, 'Times New Roman', serif",
-          color: PALETTE.cream,
-          fontSize: "clamp(1.8rem, 4vw, 2.8rem)",
-          fontWeight: "normal",
-          margin: "0 0 0.5rem",
-          lineHeight: "1.2",
-        }}>
-          Weybridge Lodge No. 6787
-        </h1>
-        <div style={{
-          fontFamily: "Georgia, 'Times New Roman', serif",
-          color: PALETTE.goldLight,
-          fontSize: "clamp(1rem, 2.5vw, 1.4rem)",
-          fontStyle: "italic",
-          marginBottom: "2rem",
-        }}>
-          A Record in Seven Documents, 1954–1969
-        </div>
-        <div style={{ color: PALETTE.gold, fontSize: "1.1rem", letterSpacing: "0.6em" }}>
-          ✦ &nbsp; ✦ &nbsp; ✦
-        </div>
-      </div>
-
-      <div style={{
-        maxWidth: "780px",
-        margin: "0 auto",
-        padding: "3rem 2rem",
-      }}>
-        <div style={{
-          borderTop: `1px solid ${PALETTE.sepiaLight}`,
-          borderBottom: `1px solid ${PALETTE.sepiaLight}`,
-          padding: "2rem 0",
-          marginBottom: "3rem",
-        }}>
-          <div style={{
-            fontFamily: "Georgia, 'Times New Roman', serif",
-            color: PALETTE.navy,
-            fontSize: "0.7rem",
-            letterSpacing: "0.25em",
-            textTransform: "uppercase",
-            marginBottom: "1.25rem",
-          }}>
-            Curator's Introduction
-          </div>
-          <p style={{
-            fontFamily: "Georgia, 'Times New Roman', serif",
-            fontSize: "clamp(1rem, 2vw, 1.15rem)",
-            lineHeight: "1.8",
-            color: PALETTE.ink,
-            margin: "0 0 1rem",
-          }}>
-            Seven documents, the earliest from 1954 and the latest from 1969, trace fifteen years in the life of Weybridge Lodge No. 6787. They were never intended as archive pieces.
+      <main className="flex-1 bg-background text-foreground">
+        <section className="bg-navy px-6 py-16 text-center sm:py-20">
+          <p aria-hidden="true" className="mb-6 text-lg tracking-[0.6em] text-gold">
+            ✦ ✦ ✦
           </p>
-          <p style={{
-            fontSize: "0.9rem",
-            lineHeight: "1.8",
-            color: PALETTE.sepia,
-            margin: "0 0 1rem",
-          }}>
-            A summons was a working paper — sent out, read, folded into a pocket, and very often discarded once the meeting had passed. That so many survive, in such legible condition, is itself worth noting: someone thought them worth keeping. We continue that act of care here.
+          <p className="mb-3 font-serif text-xs uppercase tracking-[0.3em] text-gold">
+            Province of Surrey · Consecrated 19th January 1949
           </p>
-          <p style={{
-            fontSize: "0.9rem",
-            lineHeight: "1.8",
-            color: PALETTE.sepia,
-            margin: "0",
-          }}>
-            Together these papers form something more valuable than any single artefact: a continuous thread. The same hands appear again and again under different titles — Secretary becomes Worshipful Master, Steward becomes Treasurer, candidate becomes Past Master. Read in sequence, they show a Lodge governing itself, year on year, exactly as it was consecrated to do.
+          <h1 className="mb-2 font-serif text-3xl text-background sm:text-4xl">
+            Weybridge Lodge No. 6787
+          </h1>
+          <p className="mb-8 font-serif text-lg italic text-gold sm:text-xl">
+            A Record in Seven Documents, 1954–1969
           </p>
-        </div>
+          <p aria-hidden="true" className="text-lg tracking-[0.6em] text-gold">
+            ✦ ✦ ✦
+          </p>
+        </section>
 
-        <div style={{ marginBottom: "3rem" }}>
-          <div style={{
-            fontFamily: "Georgia, 'Times New Roman', serif",
-            color: PALETTE.navy,
-            fontSize: "0.7rem",
-            letterSpacing: "0.25em",
-            textTransform: "uppercase",
-            marginBottom: "1.25rem",
-            display: "flex",
-            alignItems: "center",
-            gap: "1rem",
-          }}>
-            <span>Worshipful Masters 1949–1962</span>
-            <div style={{ flex: 1, height: "1px", background: PALETTE.sepiaLight }} />
-          </div>
-          <div style={{ overflowX: "auto" }}>
-            <div style={{ display: "flex", gap: 0, minWidth: "600px" }}>
-              {masters.map((m, i) => (
-                <div key={i} style={{
-                  flex: 1,
-                  borderLeft: i === 0 ? `2px solid ${PALETTE.gold}` : "none",
-                  borderTop: `2px solid ${PALETTE.gold}`,
-                  borderRight: `2px solid ${PALETTE.gold}`,
-                  padding: "0.6rem 0.5rem 0.5rem",
-                  background: i % 2 === 0 ? PALETTE.cream : PALETTE.vellum,
-                  position: "relative",
-                }}>
-                  <div style={{
-                    fontFamily: "monospace",
-                    fontSize: "0.6rem",
-                    color: PALETTE.gold,
-                    marginBottom: "0.3rem",
-                    letterSpacing: "0.05em",
-                  }}>{m.years}</div>
-                  <div style={{
-                    fontSize: "0.65rem",
-                    color: PALETTE.navy,
-                    lineHeight: "1.3",
-                    fontFamily: "Georgia, 'Times New Roman', serif",
-                  }}>{m.name.replace("W. Bro. ", "")}</div>
-                  {m.note && (
-                    <div style={{ fontSize: "0.58rem", color: PALETTE.sepia, fontStyle: "italic", marginTop: "0.2rem" }}>{m.note}</div>
-                  )}
-                </div>
-              ))}
+        <div className="mx-auto max-w-3xl px-6 py-12">
+          <section className="mb-12 border-y border-border py-8">
+            <h2 className="mb-5 font-serif text-xs uppercase tracking-[0.25em] text-navy">
+              Curator's Introduction
+            </h2>
+            <p className="mb-4 font-serif text-lg leading-relaxed text-foreground">
+              Seven documents, the earliest from 1954 and the latest from 1969, trace fifteen
+              years in the life of Weybridge Lodge No. 6787. They were never intended as
+              archive pieces.
+            </p>
+            <p className="mb-4 font-sans text-sm leading-relaxed text-muted-foreground">
+              A summons was a working paper — sent out, read, folded into a pocket, and very
+              often discarded once the meeting had passed. That so many survive, in such
+              legible condition, is itself worth noting: someone thought them worth keeping.
+              We continue that act of care here.
+            </p>
+            <p className="font-sans text-sm leading-relaxed text-muted-foreground">
+              Together these papers form something more valuable than any single artefact: a
+              continuous thread. The same hands appear again and again under different titles
+              — Secretary becomes Worshipful Master, Steward becomes Treasurer, candidate
+              becomes Past Master. Read in sequence, they show a Lodge of Freemasons in Surrey
+              governing itself, year on year, exactly as it was consecrated to do.
+            </p>
+          </section>
+
+          <section className="mb-12">
+            <h2 className="mb-5 flex items-center gap-4 font-serif text-xs uppercase tracking-[0.25em] text-navy">
+              <span>Worshipful Masters, 1949–1962</span>
+              <span className="h-px flex-1 bg-border" aria-hidden="true" />
+            </h2>
+            <div className="overflow-x-auto pb-2">
+              <ol className="flex min-w-[600px] gap-0">
+                {masters.map((m, i) => (
+                  <li
+                    key={i}
+                    className={`flex-1 border-t-2 border-r-2 border-gold px-2 py-2.5 ${
+                      i === 0 ? "border-l-2" : ""
+                    } ${i % 2 === 0 ? "bg-card" : "bg-background"}`}
+                  >
+                    <p className="mb-1 font-mono text-[0.6rem] tracking-wide text-gold">
+                      {m.years}
+                    </p>
+                    <p className="font-serif text-[0.65rem] leading-tight text-navy">
+                      {m.name}
+                    </p>
+                    {m.note && (
+                      <p className="mt-1 font-sans text-[0.58rem] italic text-muted-foreground">
+                        {m.note}
+                      </p>
+                    )}
+                  </li>
+                ))}
+              </ol>
             </div>
-          </div>
-          <div style={{ fontSize: "0.72rem", color: PALETTE.sepia, fontStyle: "italic", marginTop: "0.6rem" }}>
-            Reconstructed from the Members of the Lodge registers contained in the summonses below.
-          </div>
-        </div>
-
-        <div>
-          <div style={{
-            fontFamily: "Georgia, 'Times New Roman', serif",
-            color: PALETTE.navy,
-            fontSize: "0.7rem",
-            letterSpacing: "0.25em",
-            textTransform: "uppercase",
-            marginBottom: "1.5rem",
-            display: "flex",
-            alignItems: "center",
-            gap: "1rem",
-          }}>
-            <span>The Documents</span>
-            <div style={{ flex: 1, height: "1px", background: PALETTE.sepiaLight }} />
-            <span style={{ color: PALETTE.sepia, fontSize: "0.65rem", fontFamily: "monospace" }}>Select any to expand</span>
-          </div>
-
-          {documents.map(doc => doc.type === "summons" ? (
-            <SummonsCard
-              key={doc.id}
-              doc={doc}
-              isOpen={openDoc === doc.id}
-              onToggle={() => handleToggle(doc.id)}
-            />
-          ) : (
-            <FestivalCard
-              key={doc.id}
-              doc={doc}
-              isOpen={openDoc === doc.id}
-              onToggle={() => handleToggle(doc.id)}
-            />
-          ))}
-        </div>
-
-        <div style={{
-          borderTop: `1px solid ${PALETTE.sepiaLight}`,
-          paddingTop: "2rem",
-          marginTop: "1rem",
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap: "2rem",
-          fontSize: "0.78rem",
-          color: PALETTE.sepia,
-          lineHeight: "1.7",
-        }}>
-          <div>
-            <div style={{ fontFamily: "Georgia, serif", color: PALETTE.navy, fontSize: "0.7rem", letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: "0.5rem" }}>A Note on These Records</div>
-            <p style={{ margin: 0 }}>
-              These pages are reproduced as a record for the Lodge and its members. Personal addresses and telephone numbers from the original summonses have been omitted in this presentation, as some named individuals may have living family connections. The original documents remain in private keeping.
+            <p className="mt-2 font-sans text-xs italic text-muted-foreground">
+              Reconstructed from the Members of the Lodge registers contained in the summonses
+              below.
             </p>
-          </div>
-          <div>
-            <div style={{ fontFamily: "Georgia, serif", color: PALETTE.navy, fontSize: "0.7rem", letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: "0.5rem" }}>Can You Add to This Archive?</div>
-            <p style={{ margin: 0 }}>
-              The summonses held here are No. 29, 33, 55, 57, 65, and 66 — a discontinuous run across thirteen years. If any member holds further summonses, festival programmes, photographs, or correspondence from the Lodge's history, we would be glad to hear from you.
-            </p>
-          </div>
-        </div>
+          </section>
 
-        <div style={{ textAlign: "center", padding: "2.5rem 0 1rem" }}>
-          <Link
-            to="/history"
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "0.5rem",
-              fontFamily: "Georgia, 'Times New Roman', serif",
-              background: PALETTE.navy,
-              color: PALETTE.cream,
-              fontSize: "0.95rem",
-              textDecoration: "none",
-              border: `1px solid ${PALETTE.gold}`,
-              padding: "0.75rem 1.5rem",
-              letterSpacing: "0.05em",
-            }}
-          >
-            <ArrowLeft size={16} /> Back to Our History
-          </Link>
-        </div>
+          <section>
+            <h2 className="mb-6 flex items-center gap-4 font-serif text-xs uppercase tracking-[0.25em] text-navy">
+              <span>The Documents</span>
+              <span className="h-px flex-1 bg-border" aria-hidden="true" />
+              <span className="font-mono text-[0.65rem] normal-case tracking-normal text-muted-foreground">
+                Select any to expand
+              </span>
+            </h2>
 
-        <div style={{ textAlign: "center", padding: "1rem 0 2rem", color: PALETTE.sepiaLight, fontSize: "0.75rem", letterSpacing: "0.1em" }}>
-          Weybridge Lodge No. 6787 · Province of Surrey · Consecrated 19th January 1949
+            {documents.map((doc) =>
+              doc.type === "summons" ? (
+                <SummonsCard
+                  key={doc.id}
+                  doc={doc}
+                  isOpen={openDoc === doc.id}
+                  onToggle={() => handleToggle(doc.id)}
+                />
+              ) : (
+                <FestivalCard
+                  key={doc.id}
+                  doc={doc}
+                  isOpen={openDoc === doc.id}
+                  onToggle={() => handleToggle(doc.id)}
+                />
+              )
+            )}
+          </section>
+
+          <section className="mt-2 grid grid-cols-1 gap-8 border-t border-border pt-8 sm:grid-cols-2">
+            <div>
+              <h3 className="mb-2 font-serif text-xs uppercase tracking-[0.15em] text-navy">
+                A Note on These Records
+              </h3>
+              <p className="font-sans text-sm leading-relaxed text-muted-foreground">
+                These pages are reproduced as a record for the Lodge and its members. Personal
+                addresses and telephone numbers from the original summonses have been omitted
+                in this presentation, as some named individuals may have living family
+                connections. The original documents remain in private keeping.
+              </p>
+            </div>
+            <div>
+              <h3 className="mb-2 font-serif text-xs uppercase tracking-[0.15em] text-navy">
+                Can You Add to This Archive?
+              </h3>
+              <p className="font-sans text-sm leading-relaxed text-muted-foreground">
+                The summonses held here are No. 29, 33, 55, 57, 65, and 66 — a discontinuous
+                run across thirteen years. If any member holds further summonses, festival
+                programmes, photographs, or correspondence from the Lodge's history, we would
+                be glad to hear from you.
+              </p>
+            </div>
+          </section>
+
+          {/* Two quiet, appropriately-scoped next steps rather than a sales CTA.
+              Both route to existing pages — no destination is invented. */}
+          <nav aria-label="Continue exploring" className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
+            <Link
+              to="/history"
+              className="flex w-full items-center justify-center gap-2 border border-gold bg-navy px-6 py-3 font-serif text-sm tracking-wide text-background transition-opacity hover:opacity-90 sm:w-auto"
+            >
+              <ArrowLeft size={16} aria-hidden="true" />
+              Back to Our History
+            </Link>
+            <Link
+              to="/about/lodge-profile"
+              className="flex w-full items-center justify-center gap-2 border border-border bg-card px-6 py-3 font-serif text-sm tracking-wide text-navy transition-opacity hover:opacity-90 sm:w-auto"
+            >
+              Meet the Lodge Today
+              <ArrowRight size={16} aria-hidden="true" />
+            </Link>
+          </nav>
+
+          <p className="px-0 pb-2 pt-8 text-center font-sans text-xs tracking-wide text-muted-foreground">
+            Weybridge Lodge No. 6787 · Province of Surrey · Consecrated 19th January 1949
+          </p>
         </div>
-      </div>
       </main>
 
       <Footer />
