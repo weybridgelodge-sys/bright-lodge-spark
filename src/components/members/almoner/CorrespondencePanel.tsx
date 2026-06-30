@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { ArrowDown, ArrowUp, Paperclip, Plus, Trash2, X } from "lucide-react";
+import { ArrowDown, ArrowUp, Paperclip, Pencil, Plus, Trash2, X } from "lucide-react";
 
 type Member = { id: string; first_name: string | null; last_name: string | null; preferred_name: string | null; full_name: string | null };
 type Direction = "outgoing" | "incoming";
@@ -32,6 +32,7 @@ const fmt = (s: string) => new Date(s).toLocaleDateString("en-GB", { day: "2-dig
 export default function CorrespondencePanel({ members, userId }: { members: Member[]; userId: string | null }) {
   const [rows, setRows] = useState<Row[]>([]);
   const [showForm, setShowForm] = useState(false);
+  const [editing, setEditing] = useState<Row | null>(null);
   const memberMap = useMemo(() => new Map(members.map((m) => [m.id, m])), [members]);
 
   const load = async () => {
@@ -63,12 +64,21 @@ export default function CorrespondencePanel({ members, userId }: { members: Memb
           <h3 className="font-serif text-lg text-primary-foreground">Correspondence Log</h3>
           <p className="text-xs text-primary-foreground/60">Cards, letters, calls and flowers sent or received</p>
         </div>
-        <Button size="sm" className="bg-gold text-navy hover:bg-gold/90" onClick={() => setShowForm((v) => !v)}>
-          {showForm ? <><X className="w-4 h-4 mr-1" /> Cancel</> : <><Plus className="w-4 h-4 mr-1" /> New entry</>}
+        <Button size="sm" className="bg-gold text-navy hover:bg-gold/90" onClick={() => { setEditing(null); setShowForm((v) => !v); }}>
+          {showForm && !editing ? <><X className="w-4 h-4 mr-1" /> Cancel</> : <><Plus className="w-4 h-4 mr-1" /> New entry</>}
         </Button>
       </div>
 
-      {showForm && <NewForm members={members} userId={userId} onSaved={() => { setShowForm(false); load(); }} />}
+      {(showForm || editing) && (
+        <EntryForm
+          key={editing?.id ?? "new"}
+          members={members}
+          userId={userId}
+          existing={editing}
+          onCancel={() => { setShowForm(false); setEditing(null); }}
+          onSaved={() => { setShowForm(false); setEditing(null); load(); }}
+        />
+      )}
 
       {rows.length === 0 ? (
         <p className="text-sm text-primary-foreground/60 italic">No correspondence logged yet.</p>
@@ -90,6 +100,14 @@ export default function CorrespondencePanel({ members, userId }: { members: Memb
                   </p>
                   {r.body && <p className="text-sm text-primary-foreground/80 mt-2 whitespace-pre-wrap">{r.body}</p>}
                 </div>
+                <button
+                  onClick={() => { setShowForm(false); setEditing(r); }}
+                  className="text-primary-foreground/40 hover:text-gold"
+                  aria-label="Edit"
+                  title="Edit"
+                >
+                  <Pencil className="w-4 h-4" />
+                </button>
                 {r.attachment_path && (
                   <button
                     onClick={() => openAttachment(r.attachment_path!)}
@@ -112,15 +130,19 @@ export default function CorrespondencePanel({ members, userId }: { members: Memb
   );
 }
 
-function NewForm({ members, userId, onSaved }: { members: Member[]; userId: string | null; onSaved: () => void }) {
+function EntryForm({ members, userId, existing, onSaved, onCancel }: {
+  members: Member[]; userId: string | null; existing: Row | null;
+  onSaved: () => void; onCancel: () => void;
+}) {
   const today = new Date().toISOString().slice(0, 10);
-  const [memberId, setMemberId] = useState<string>("__none");
-  const [date, setDate] = useState(today);
-  const [direction, setDirection] = useState<Direction>("outgoing");
-  const [method, setMethod] = useState<Method>("card");
-  const [subject, setSubject] = useState("");
-  const [body, setBody] = useState("");
+  const [memberId, setMemberId] = useState<string>(existing?.member_id ?? "__none");
+  const [date, setDate] = useState(existing?.correspondence_date ?? today);
+  const [direction, setDirection] = useState<Direction>(existing?.direction ?? "outgoing");
+  const [method, setMethod] = useState<Method>(existing?.method ?? "card");
+  const [subject, setSubject] = useState(existing?.subject ?? "");
+  const [body, setBody] = useState(existing?.body ?? "");
   const [file, setFile] = useState<File | null>(null);
+  const [removeAttachment, setRemoveAttachment] = useState(false);
   const [busy, setBusy] = useState(false);
   const inputCls = "bg-navy text-primary-foreground border-gold/30";
 
@@ -128,38 +150,58 @@ function NewForm({ members, userId, onSaved }: { members: Member[]; userId: stri
     e.preventDefault();
     if (!subject.trim()) { toast.error("Subject is required"); return; }
     setBusy(true);
-    let attachment_path: string | null = null;
-    let attachment_name: string | null = null;
-    let attachment_size: number | null = null;
+
+    let attachment_path = existing?.attachment_path ?? null;
+    let attachment_name = existing?.attachment_name ?? null;
+    let attachment_size = existing?.attachment_size ?? null;
+
+    if (removeAttachment && existing?.attachment_path) {
+      await supabase.storage.from("welfare-attachments").remove([existing.attachment_path]);
+      attachment_path = null; attachment_name = null; attachment_size = null;
+    }
+
     if (file) {
       if (file.size > 15 * 1024 * 1024) {
-        setBusy(false);
-        toast.error("Attachment must be 15 MB or smaller");
-        return;
+        setBusy(false); toast.error("Attachment must be 15 MB or smaller"); return;
+      }
+      if (existing?.attachment_path && !removeAttachment) {
+        await supabase.storage.from("welfare-attachments").remove([existing.attachment_path]);
       }
       const safe = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
       const path = `${userId ?? "anon"}/${Date.now()}-${safe}`;
       const { error: upErr } = await supabase.storage.from("welfare-attachments").upload(path, file);
       if (upErr) { setBusy(false); toast.error(upErr.message); return; }
-      attachment_path = path;
-      attachment_name = file.name;
-      attachment_size = file.size;
+      attachment_path = path; attachment_name = file.name; attachment_size = file.size;
     }
-    const { error } = await (supabase as any).from("welfare_correspondence").insert({
+
+    const payload = {
       member_id: memberId === "__none" ? null : memberId,
       correspondence_date: date, direction, method,
-      subject: subject.trim(), body: body.trim() || null, logged_by: userId,
+      subject: subject.trim(), body: body.trim() || null,
       attachment_path, attachment_name, attachment_size,
-    });
+    };
+
+    const { error } = existing
+      ? await (supabase as any).from("welfare_correspondence").update(payload).eq("id", existing.id)
+      : await (supabase as any).from("welfare_correspondence").insert({ ...payload, logged_by: userId });
+
     setBusy(false);
     if (error) { toast.error(error.message); return; }
-    toast.success("Entry saved"); onSaved();
+    toast.success(existing ? "Entry updated" : "Entry saved"); onSaved();
   };
 
   const sortedMembers = useMemo(() => [...members].sort((a, b) => memberName(a).localeCompare(memberName(b))), [members]);
 
   return (
     <form onSubmit={submit} className="bg-navy-light/60 border border-gold/30 rounded p-4 space-y-3">
+      <div className="flex items-center justify-between">
+        <p className="text-xs font-semibold text-gold uppercase tracking-wide">
+          {existing ? "Edit entry" : "New entry"}
+        </p>
+        <button type="button" onClick={onCancel} className="text-primary-foreground/60 hover:text-primary-foreground" aria-label="Cancel">
+          <X className="w-4 h-4" />
+        </button>
+      </div>
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
         <div>
           <Label className="text-xs">Date</Label>
@@ -203,13 +245,28 @@ function NewForm({ members, userId, onSaved }: { members: Member[]; userId: stri
       </div>
       <div>
         <Label className="text-xs flex items-center gap-1.5"><Paperclip className="w-3 h-3" /> Attachment (optional, max 15 MB)</Label>
+        {existing?.attachment_path && !removeAttachment && (
+          <div className="mt-1 flex items-center gap-2 text-xs text-primary-foreground/70">
+            <Paperclip className="w-3 h-3 text-gold" />
+            <span>Current: {existing.attachment_name}</span>
+            <button type="button" onClick={() => setRemoveAttachment(true)} className="text-red-400 hover:text-red-300 underline">
+              Remove
+            </button>
+          </div>
+        )}
         <input
           type="file"
           onChange={(e) => setFile(e.target.files?.[0] ?? null)}
           className="mt-1 text-sm text-primary-foreground/70 file:mr-3 file:border-0 file:bg-gold/15 file:text-gold file:px-3 file:py-1.5 file:rounded-sm file:text-xs"
         />
+        {file && <p className="mt-1 text-[11px] text-primary-foreground/60">Will {existing?.attachment_path ? "replace existing" : "upload"}: {file.name}</p>}
       </div>
-      <Button type="submit" disabled={busy} className="bg-gold text-navy hover:bg-gold/90">Save entry</Button>
+      <div className="flex gap-2">
+        <Button type="submit" disabled={busy} className="bg-gold text-navy hover:bg-gold/90">
+          {existing ? "Update entry" : "Save entry"}
+        </Button>
+        <Button type="button" variant="outline" onClick={onCancel}>Cancel</Button>
+      </div>
     </form>
   );
 }
