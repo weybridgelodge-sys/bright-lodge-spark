@@ -102,6 +102,65 @@ export const organizationSchema = {
   ],
 };
 
+export const localBusinessSchema = {
+  "@context": "https://schema.org",
+  "@type": ["FraternalOrganization", "LocalBusiness"],
+  name: "Weybridge Lodge No. 6787",
+  legalName: "Weybridge Lodge No. 6787, United Grand Lodge of England",
+  alternateName: "Weybridge Masonic Lodge",
+  description:
+    "Weybridge Lodge No. 6787 is a Freemasons Lodge within the Province of Surrey, meeting at the Guildford Masonic Centre, Guildford. Despite its historic name reflecting its 1949 founding in Weybridge, the Lodge has met in Guildford since 1986.",
+  url: "https://weybridgelodge.org.uk",
+  logo: "https://weybridgelodge.org.uk/weybridge-logo.svg",
+  image: "https://weybridgelodge.org.uk/og-image.png",
+  telephone: "+447921589039",
+  email: "secretary@weybridgelodge.org.uk",
+  address: {
+    "@type": "PostalAddress",
+    name: "Guildford Masonic Centre, Weybourne House",
+    streetAddress: "Hitherbury Close, Portsmouth Road",
+    addressLocality: "Guildford",
+    addressRegion: "Surrey",
+    postalCode: "GU2 4DR",
+    addressCountry: "GB",
+  },
+  geo: {
+    "@type": "GeoCoordinates",
+    latitude: 51.2362,
+    longitude: -0.5745,
+  },
+  hasMap: "https://www.google.com/maps?cid=16367882607439388236",
+  areaServed: [
+    { "@type": "City", "name": "Guildford" },
+    { "@type": "City", "name": "Woking" },
+    { "@type": "City", "name": "Godalming" },
+    { "@type": "City", "name": "Farnham" },
+    { "@type": "AdministrativeArea", "name": "Surrey" },
+  ],
+  foundingDate: "1949-01-29",
+  foundingLocation: {
+    "@type": "Place",
+    name: "Weybridge, Surrey",
+  },
+  sameAs: [
+    "https://instagram.com/weybridgelodge/",
+    "https://facebook.com/people/Weybridge-Lodge-No-6787/61551808420513/",
+    "https://twitter.com/weybridgelodge",
+  ],
+  memberOf: [
+    {
+      "@type": "Organization",
+      name: "United Grand Lodge of England",
+      url: "https://www.ugle.org.uk/",
+    },
+    {
+      "@type": "Organization",
+      name: "Provincial Grand Lodge of Surrey",
+      url: "https://surreyfreemasons.org.uk/",
+    },
+  ],
+};
+
 export const breadcrumbSchema = (
   items: { name: string; url: string }[]
 ) => ({

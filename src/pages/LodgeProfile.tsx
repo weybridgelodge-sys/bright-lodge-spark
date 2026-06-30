@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
-import SEO, { breadcrumbSchema } from "@/components/SEO";
+import SEO, { breadcrumbSchema, localBusinessSchema } from "@/components/SEO";
 import { motion, useReducedMotion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
@@ -65,6 +65,7 @@ const LodgeProfile = () => {
         },
       },
       breadcrumb,
+      localBusinessSchema,
     ];
   }, []);
 

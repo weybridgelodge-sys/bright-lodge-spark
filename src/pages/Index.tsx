@@ -3,7 +3,7 @@ import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import About from "@/components/About";
 import Footer from "@/components/Footer";
-import SEO, { organizationSchema } from "@/components/SEO";
+import SEO, { organizationSchema, localBusinessSchema } from "@/components/SEO";
 import { Link } from "react-router-dom";
 import { Sparkles, ArrowRight } from "lucide-react";
 
@@ -23,7 +23,7 @@ const Index = () => {
         title="Weybridge Lodge No. 6787 | Freemasons in Guildford, Surrey"
         description="Weybridge Lodge No. 6787 — an open, friendly Freemasons Lodge in Guildford, Surrey. Join our welcoming community at the Guildford Masonic Centre."
         canonical="/"
-        schema={organizationSchema}
+        schema={[organizationSchema, localBusinessSchema]}
       />
       <a href="#main-content" className="skip-to-content">Skip to main content</a>
       <Header />
