@@ -760,7 +760,7 @@ export default function HeritageArchive() {
               Back to Our History
             </Link>
             <Link
-              to="/about/lodge-profile"
+              to="/lodge-profile"
               className="flex w-full items-center justify-center gap-2 border border-border bg-card px-6 py-3 font-serif text-sm tracking-wide text-navy transition-opacity hover:opacity-90 sm:w-auto"
             >
               Meet the Lodge Today
