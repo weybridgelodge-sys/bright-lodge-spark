@@ -13,7 +13,47 @@ const PALETTE = {
   cream: "#FDFAF4",
 };
 
-const documents = [
+type Officer = { name: string; role: string };
+
+type SummonsDoc = {
+  id: string;
+  type: "summons";
+  number: number;
+  date: string;
+  meetingDate: string;
+  venue: string;
+  wm: string;
+  ipm?: string;
+  masterElect?: string;
+  secretary: string;
+  keyBusiness: string[];
+  officers: Officer[];
+  charityRep?: string;
+  notes?: string;
+  colour: string;
+};
+
+type FestivalDoc = {
+  id: string;
+  type: "festival";
+  number: null;
+  date: string;
+  wm: string;
+  ipm: string;
+  president: string;
+  committee: string[];
+  toastmaster: string;
+  menu: string[];
+  toasts: { toast: string; proposedBy: string; response?: string }[];
+  entertainment: string[];
+  officers: Officer[];
+  notes?: string;
+  colour: string;
+};
+
+type Doc = SummonsDoc | FestivalDoc;
+
+const documents: Doc[] = [
   {
     id: "summons-29",
     type: "summons",
@@ -24,8 +64,6 @@ const documents = [
     wm: "W. Bro. L. T. Anstead",
     masterElect: "Bro. H. E. Boyle",
     secretary: "N. E. Mills",
-    address: "31, Monument Hill, Weybridge",
-    telephone: "Weybridge 927",
     keyBusiness: [
       "In memory of W. Bro. W. L. Lewis, P.P.G.St.B., who passed away 30th August 1954",
       "Installation of Bro. H. E. Boyle as Master for the ensuing year",
@@ -68,8 +106,6 @@ const documents = [
     wm: "W. Bro. H. E. Boyle",
     ipm: "W. Bro. L. T. Anstead",
     secretary: "N. E. Mills",
-    address: "31, Monument Hill, Weybridge",
-    telephone: "Weybridge 927",
     keyBusiness: [
       "Ballot to initiate Mr George Kenyon, Chartered Mechanical Engineer, Ministry of Supply — born 28th September 1918",
       "Election by ballot of Master for the ensuing year",
@@ -113,8 +149,6 @@ const documents = [
     wm: "W. Bro. Walter Joseph Green, P.P.G.D.",
     ipm: "W. Bro. R. G. Batten",
     secretary: "G. N. Mills",
-    address: "31, Monument Hill, Weybridge",
-    telephone: "Weybridge 2927",
     keyBusiness: [
       "Investment of W. Bro. A. H. Ley, P.A.G.S.Wks. as Almoner",
       "Passing of Bro. H. E. Gibbs to the Second Degree",
@@ -156,8 +190,6 @@ const documents = [
     wm: "W. Bro. Walter Joseph Green, P.P.G.D.",
     ipm: "W. Bro. R. G. Batten",
     secretary: "G. N. Mills",
-    address: "31, Monument Hill, Weybridge",
-    telephone: "Weybridge 2927",
     keyBusiness: [
       "Ballot to initiate Mr Graham Stuart Turner, Sales Representative, George Newnes & Son Ltd — born 13th October 1935",
       "Raising of Bro. H. E. Gibbs to the Third Degree",
@@ -198,10 +230,8 @@ const documents = [
     wm: "W. Bro. John Humphries",
     ipm: "W. Bro. H. Cohen, B.Sc.",
     secretary: "R. G. Batten",
-    address: "\"Elgin Lodge\", Elgin Road, Weybridge",
-    telephone: "Weybridge 2802",
     keyBusiness: [
-      "Ballot to initiate Mr Eric Walter John Aldridge, Civil Servant, E.M.I. Electronics Ltd., Victoria Road, Feltham — born 9th July 1914, proposed by Bro. S. L. Mullins, seconded by W. Bro. A. J. Huntingford",
+      "Ballot to initiate Mr Eric Walter John Aldridge, Civil Servant, E.M.I. Electronics Ltd. (address redacted for privacy) — born 9th July 1914, proposed by Bro. S. L. Mullins, seconded by W. Bro. A. J. Huntingford",
       "Report on Grand Lodge Communications",
       "Circulation of the Charity Box",
     ],
@@ -225,7 +255,7 @@ const documents = [
       { name: "Bro. W. H. Butler", role: "Tyler" },
     ],
     charityRep: "W. Bro. R. Edmonds, M.B.E., P.G.St.B., P.P.G.W.",
-    notes: "The Members of the Lodge register in this summons runs back to the nine Founders of 1949 — a complete membership roll with addresses and dates. Note R. G. Batten, previously Secretary under W. J. Green, now at 'Elgin Lodge' on Elgin Road: the Secretary's address was also the Lodge's correspondence address.",
+    notes: "The Members of the Lodge register in this summons runs back to the nine Founders of 1949 — a complete membership roll with addresses and dates (addresses redacted for privacy in this presentation). Note R. G. Batten, previously Secretary under W. J. Green: as with several Secretaries in this period, his home address also served as the Lodge's correspondence address — a reminder that the Lodge had no permanent premises of its own at this stage.",
     colour: PALETTE.navy,
   },
   {
@@ -238,10 +268,8 @@ const documents = [
     wm: "W. Bro. John Humphries",
     ipm: "W. Bro. H. Cohen, B.Sc.",
     secretary: "R. G. Batten",
-    address: "\"Elgin Lodge\", Elgin Road, Weybridge",
-    telephone: "Weybridge 2802",
     keyBusiness: [
-      "Ballot to initiate Mr John Albert Ladd, Schoolmaster, Finnart House School, Oatlands Drive, Weybridge — born 2nd September 1917, proposed by W. Bro. H. Cohen, seconded by Bro. S. S. Whitfield",
+      "Ballot to initiate Mr John Albert Ladd, Schoolmaster, Finnart House School (address redacted for privacy) — born 2nd September 1917, proposed by W. Bro. H. Cohen, seconded by Bro. S. S. Whitfield",
       "Passing of Bro. E. W. J. Aldridge to the Second Degree",
       "Reading of the Lodge Bye-Laws",
       "Report on Grand Lodge Communications",
@@ -344,7 +372,7 @@ const masters = [
   { years: "1961/62", name: "W. Bro. J. Humphries" },
 ];
 
-function SummonsCard({ doc, isOpen, onToggle }) {
+function SummonsCard({ doc, isOpen, onToggle }: { doc: SummonsDoc; isOpen: boolean; onToggle: () => void }) {
   return (
     <div style={{
       marginBottom: "2rem",
@@ -354,7 +382,6 @@ function SummonsCard({ doc, isOpen, onToggle }) {
       boxShadow: "2px 4px 16px rgba(28,41,75,0.07)",
       position: "relative",
     }}>
-      {/* Fold-line texture header */}
       <div style={{
         background: PALETTE.navy,
         padding: "1.25rem 1.5rem",
@@ -404,7 +431,6 @@ function SummonsCard({ doc, isOpen, onToggle }) {
         </div>
       </div>
 
-      {/* Summary always visible */}
       <div style={{ padding: "1rem 1.5rem 0.75rem" }}>
         <div style={{
           display: "grid",
@@ -420,11 +446,9 @@ function SummonsCard({ doc, isOpen, onToggle }) {
         </div>
       </div>
 
-      {/* Expanded content */}
       {isOpen && (
         <div style={{ padding: "0 1.5rem 1.5rem" }}>
           <div style={{ borderTop: `1px solid ${PALETTE.vellumDark}`, paddingTop: "1rem", marginTop: "0.5rem" }}>
-            {/* Key Business */}
             <div style={{ marginBottom: "1.25rem" }}>
               <div style={{
                 fontFamily: "Georgia, 'Times New Roman', serif",
@@ -449,7 +473,6 @@ function SummonsCard({ doc, isOpen, onToggle }) {
               ))}
             </div>
 
-            {/* Officers */}
             <div style={{ marginBottom: "1.25rem" }}>
               <div style={{
                 fontFamily: "Georgia, 'Times New Roman', serif",
@@ -485,7 +508,6 @@ function SummonsCard({ doc, isOpen, onToggle }) {
               )}
             </div>
 
-            {/* Curator note */}
             {doc.notes && (
               <div style={{
                 background: PALETTE.vellum,
@@ -506,7 +528,7 @@ function SummonsCard({ doc, isOpen, onToggle }) {
   );
 }
 
-function FestivalCard({ doc, isOpen, onToggle }) {
+function FestivalCard({ doc, isOpen, onToggle }: { doc: FestivalDoc; isOpen: boolean; onToggle: () => void }) {
   return (
     <div style={{
       marginBottom: "2rem",
@@ -567,9 +589,7 @@ function FestivalCard({ doc, isOpen, onToggle }) {
       {isOpen && (
         <div style={{ padding: "0 1.5rem 1.5rem" }}>
           <div style={{ borderTop: `1px solid #E8D5B7`, paddingTop: "1rem", marginTop: "0.5rem" }}>
-
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem", marginBottom: "1.25rem" }}>
-              {/* Menu */}
               <div>
                 <div style={{ fontFamily: "Georgia, 'Times New Roman', serif", color: "#7B3F3F", fontSize: "0.75rem", letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: "0.6rem" }}>Menu</div>
                 <div style={{ fontSize: "0.78rem", color: PALETTE.ink, fontStyle: "italic", lineHeight: "1.8" }}>
@@ -580,7 +600,6 @@ function FestivalCard({ doc, isOpen, onToggle }) {
                 </div>
               </div>
 
-              {/* Toasts & Entertainment */}
               <div>
                 <div style={{ fontFamily: "Georgia, 'Times New Roman', serif", color: "#7B3F3F", fontSize: "0.75rem", letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: "0.6rem" }}>Toasts</div>
                 {doc.toasts.map((t, i) => (
@@ -589,6 +608,7 @@ function FestivalCard({ doc, isOpen, onToggle }) {
                     <div style={{ color: PALETTE.sepia }}>Proposed: {t.proposedBy}{t.response ? ` · Response: ${t.response}` : ""}</div>
                   </div>
                 ))}
+
                 <div style={{ marginTop: "1rem", fontFamily: "Georgia, 'Times New Roman', serif", color: "#7B3F3F", fontSize: "0.75rem", letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: "0.6rem" }}>Evening</div>
                 {doc.entertainment.map((e, i) => (
                   <div key={i} style={{ fontSize: "0.78rem", color: PALETTE.ink, marginBottom: "0.25rem", fontStyle: "italic" }}>{e}</div>
@@ -596,7 +616,6 @@ function FestivalCard({ doc, isOpen, onToggle }) {
               </div>
             </div>
 
-            {/* Officers 1969 */}
             <div style={{ marginBottom: "1.25rem" }}>
               <div style={{ fontFamily: "Georgia, 'Times New Roman', serif", color: "#7B3F3F", fontSize: "0.75rem", letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: "0.6rem" }}>Officers of the Lodge 1969–70</div>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: "0.25rem 1rem" }}>
@@ -609,7 +628,6 @@ function FestivalCard({ doc, isOpen, onToggle }) {
               </div>
             </div>
 
-            {/* Festival Committee */}
             <div style={{ marginBottom: "1.25rem" }}>
               <div style={{ fontFamily: "Georgia, 'Times New Roman', serif", color: "#7B3F3F", fontSize: "0.75rem", letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: "0.6rem" }}>Festival Committee</div>
               {doc.committee.map((m, i) => (
@@ -630,9 +648,9 @@ function FestivalCard({ doc, isOpen, onToggle }) {
 }
 
 export default function HeritageArchive() {
-  const [openDoc, setOpenDoc] = useState(null);
+  const [openDoc, setOpenDoc] = useState<string | null>(null);
 
-  const handleToggle = (id) => {
+  const handleToggle = (id: string) => {
     setOpenDoc(prev => prev === id ? null : id);
   };
 
@@ -643,8 +661,6 @@ export default function HeritageArchive() {
       fontFamily: "'Helvetica Neue', Arial, sans-serif",
       color: PALETTE.ink,
     }}>
-
-      {/* Hero */}
       <div style={{
         background: PALETTE.navy,
         padding: "4rem 2rem 3rem",
@@ -652,7 +668,6 @@ export default function HeritageArchive() {
         position: "relative",
         overflow: "hidden",
       }}>
-        {/* Decorative rule */}
         <div style={{ color: PALETTE.gold, fontSize: "1.1rem", letterSpacing: "0.6em", marginBottom: "1.5rem" }}>
           ✦ &nbsp; ✦ &nbsp; ✦
         </div>
@@ -690,7 +705,6 @@ export default function HeritageArchive() {
         </div>
       </div>
 
-      {/* Curator's Introduction */}
       <div style={{
         maxWidth: "780px",
         margin: "0 auto",
@@ -739,7 +753,6 @@ export default function HeritageArchive() {
           </p>
         </div>
 
-        {/* Timeline of Masters */}
         <div style={{ marginBottom: "3rem" }}>
           <div style={{
             fontFamily: "Georgia, 'Times New Roman', serif",
@@ -792,7 +805,6 @@ export default function HeritageArchive() {
           </div>
         </div>
 
-        {/* Documents */}
         <div>
           <div style={{
             fontFamily: "Georgia, 'Times New Roman', serif",
@@ -827,7 +839,6 @@ export default function HeritageArchive() {
           ))}
         </div>
 
-        {/* Colophon */}
         <div style={{
           borderTop: `1px solid ${PALETTE.sepiaLight}`,
           paddingTop: "2rem",
