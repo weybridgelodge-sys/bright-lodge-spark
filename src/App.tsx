@@ -78,6 +78,8 @@ const App = () => (
             <Route path="/unsubscribe" element={<Unsubscribe />} />
             <Route path="/lodge-profile" element={<LodgeProfile />} />
             <Route path="/history" element={<History />} />
+            <Route path="/history/archive" element={<HeritageArchive />} />
+            <Route path="/heritage" element={<HeritageArchive />} />
             <Route path="/worshipful-masters" element={<WorshipfulMasters />} />
             <Route path="/officers" element={<Officers />} />
             <Route path="/faq" element={<FAQ />} />
