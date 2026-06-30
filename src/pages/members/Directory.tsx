@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import MembersLayout from "@/components/members/MembersLayout";
 import { supabase } from "@/integrations/supabase/client";
-import { Search, Mail } from "lucide-react";
+import { Search, Mail, Phone, MapPin } from "lucide-react";
 import { formatMemberLine } from "@/lib/summons";
+import { enrichWithPii, type ProfilePii } from "@/lib/profilePii";
 
 type Member = {
   id: string;
@@ -21,6 +22,13 @@ type Member = {
   joined_year: number | null;
   email: string | null;
   avatar_url: string | null;
+  phone?: string | null;
+  address_line1?: string | null;
+  address_line2?: string | null;
+  address_line3?: string | null;
+  town?: string | null;
+  county?: string | null;
+  postcode?: string | null;
 };
 
 // Lodge year rolls over in October (installation season)
@@ -40,7 +48,9 @@ export default function MembersDirectory() {
         .select("id,full_name,first_name,middle_name,last_name,preferred_name,post_nominals,title,is_past_master,rank,grand_rank,provincial_rank,office,joined_year,email,avatar_url")
         .eq("status", "active")
         .order("full_name");
-      setMembers((m as Member[]) ?? []);
+      const base = (m as Member[]) ?? [];
+      const enriched = await enrichWithPii(base);
+      setMembers(enriched as (Member & Partial<ProfilePii>)[]);
 
       const { data: a } = await supabase
         .from("officer_appointments")
@@ -125,9 +135,24 @@ export default function MembersDirectory() {
                 )}
                 <div className="space-y-1 text-xs">
                   {m.email && (
-                    <a href={`mailto:${m.email}`} className="flex items-center gap-2 text-primary-foreground/70 hover:text-gold">
-                      <Mail className="w-3 h-3" /> {m.email}
+                    <a href={`mailto:${m.email}`} className="flex items-center gap-2 text-primary-foreground/70 hover:text-gold break-all">
+                      <Mail className="w-3 h-3 shrink-0" /> {m.email}
                     </a>
+                  )}
+                  {m.phone && (
+                    <a href={`tel:${m.phone}`} className="flex items-center gap-2 text-primary-foreground/70 hover:text-gold">
+                      <Phone className="w-3 h-3 shrink-0" /> {m.phone}
+                    </a>
+                  )}
+                  {(m.address_line1 || m.town || m.postcode) && (
+                    <div className="flex items-start gap-2 text-primary-foreground/70">
+                      <MapPin className="w-3 h-3 shrink-0 mt-0.5" />
+                      <span className="leading-snug">
+                        {[m.address_line1, m.address_line2, m.address_line3, m.town, m.county, m.postcode]
+                          .filter(Boolean)
+                          .join(", ")}
+                      </span>
+                    </div>
                   )}
                 </div>
               </div>

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import MembersLayout from "@/components/members/MembersLayout";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { FileText, Upload, Trash2, Download, Loader2 } from "lucide-react";
+import { FileText, Upload, Trash2, Download, Loader2, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 
 type Doc = {
@@ -91,8 +91,20 @@ export default function MembersDocuments() {
     }
   };
 
-  const handleDownload = async (d: Doc) => {
+  const handleView = async (d: Doc) => {
     const { data, error } = await supabase.storage.from("lodge-docs").createSignedUrl(d.file_path, 60);
+    if (error || !data) {
+      toast.error("Couldn't open document");
+      return;
+    }
+    window.open(data.signedUrl, "_blank", "noopener");
+  };
+
+  const handleDownload = async (d: Doc) => {
+    const filename = d.file_path.split("/").pop() || d.title;
+    const { data, error } = await supabase.storage
+      .from("lodge-docs")
+      .createSignedUrl(d.file_path, 60, { download: filename });
     if (error || !data) {
       toast.error("Couldn't generate download link");
       return;
@@ -202,9 +214,18 @@ export default function MembersDocuments() {
               </div>
               <div className="flex items-center gap-1 shrink-0">
                 <button
+                  onClick={() => handleView(d)}
+                  className="p-2 text-gold hover:bg-gold/10 rounded-sm"
+                  aria-label="Open in new tab"
+                  title="Open in new tab"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                </button>
+                <button
                   onClick={() => handleDownload(d)}
                   className="p-2 text-gold hover:bg-gold/10 rounded-sm"
                   aria-label="Download"
+                  title="Download"
                 >
                   <Download className="w-4 h-4" />
                 </button>
@@ -213,6 +234,7 @@ export default function MembersDocuments() {
                     onClick={() => handleDelete(d)}
                     className="p-2 text-red-400 hover:bg-red-500/10 rounded-sm"
                     aria-label="Delete"
+                    title="Delete"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
