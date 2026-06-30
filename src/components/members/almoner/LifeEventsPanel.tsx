@@ -220,27 +220,40 @@ export default function LifeEventsPanel({ members, userId }: { members: Member[]
       </section>
 
       <section>
-        <p className="text-[11px] uppercase tracking-wider text-gold mb-2 mt-4">Manually added events</p>
-        {manualEvents.length === 0 ? (
-          <p className="text-sm text-primary-foreground/60 italic">No manual events recorded yet.</p>
-        ) : (
-          <div className="space-y-1.5">
-            {manualEvents.map((e) => (
-              <div key={e.id} className="flex items-center gap-3 bg-navy-light/30 border border-gold/10 rounded p-2.5">
-                <Calendar className="w-4 h-4 text-primary-foreground/50 shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm text-primary-foreground truncate">
-                    {memberName(memberMap.get(e.member_id))} <span className="text-primary-foreground/60">— {TYPE_LABEL[e.event_type]}</span>
-                  </p>
-                  <p className="text-[11px] text-primary-foreground/60">{fmt(new Date(e.event_date))}{e.recurring ? " · annual" : ""}{e.notes ? ` · ${e.notes}` : ""}</p>
-                </div>
-                <button onClick={() => archive(e.id)} className="text-primary-foreground/40 hover:text-red-400" aria-label="Archive">
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
+        <p className="text-[11px] uppercase tracking-wider text-gold mb-2 mt-4">Manually added events · next 3 months</p>
+        {(() => {
+          const visibleManual = manualEvents.filter((e) => {
+            const when = nextOccurrence(e.event_date, e.recurring);
+            const days = daysUntil(when);
+            return days >= -1 && days <= HORIZON_DAYS;
+          });
+          if (visibleManual.length === 0) {
+            return <p className="text-sm text-primary-foreground/60 italic">No manual events due in the next 3 months.</p>;
+          }
+          return (
+            <div className="space-y-1.5">
+              {visibleManual.map((e) => {
+                const when = nextOccurrence(e.event_date, e.recurring);
+                return (
+                  <div key={e.id} className="flex items-center gap-3 bg-navy-light/30 border border-gold/10 rounded p-2.5">
+                    <Calendar className="w-4 h-4 text-primary-foreground/50 shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm text-primary-foreground truncate">
+                        {memberName(memberMap.get(e.member_id))} <span className="text-primary-foreground/60">— {TYPE_LABEL[e.event_type]}</span>
+                      </p>
+                      <p className="text-[11px] text-primary-foreground/60">
+                        {fmt(when)}{e.recurring ? " · annual" : ""}{e.notes ? ` · ${e.notes}` : ""}
+                      </p>
+                    </div>
+                    <button onClick={() => archive(e.id)} className="text-primary-foreground/40 hover:text-red-400" aria-label="Archive">
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          );
+        })()}
       </section>
     </div>
   );
