@@ -46,6 +46,7 @@ const YourInitiation = lazy(() => import("./pages/YourInitiation"));
 const YourJourney = lazy(() => import("./pages/YourJourney"));
 const LodgeTraditions = lazy(() => import("./pages/LodgeTraditions"));
 const Quiz = lazy(() => import("./pages/Quiz"));
+const HeritageArchive = lazy(() => import("./pages/HeritageArchive"));
 
 // Entire members portal (including AuthProvider + Supabase client) is loaded
 // only when a visitor navigates into /members/*.
