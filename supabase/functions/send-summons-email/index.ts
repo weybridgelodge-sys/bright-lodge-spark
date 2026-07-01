@@ -149,8 +149,12 @@ Deno.serve(async (req) => {
     let sent = 0;
     const failures: { email: string; error: string }[] = [];
 
+    const testRunId = isTest ? crypto.randomUUID() : "";
+
     for (const r of recipients) {
-      const idempotencyKey = `summons-${summons.id}-${isTest ? "test-" : ""}${r.email}`;
+      const idempotencyKey = isTest
+        ? `summons-${summons.id}-test-${testRunId}-${r.email}`
+        : `summons-${summons.id}-${r.email}`;
       try {
         const res = await fetch(`${SUPABASE_URL}/functions/v1/send-transactional-email`, {
           method: "POST",
