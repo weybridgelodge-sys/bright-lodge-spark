@@ -16,6 +16,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { getStripeEnvironment } from "@/lib/stripe";
 import { fetchNextEvent, type EventBundle } from "@/lib/lodgeEvents";
 import TurnstileWidget from "@/components/TurnstileWidget";
+import sixFellowcraftsAprons from "@/assets/six-fellowcrafts-aprons.png.asset.json";
+
 
 
 // ─── Fallback event ───────────────────────────────────────────────────────────
