@@ -18,7 +18,6 @@ import {
 } from "@/lib/lodgeSocials";
 import { sendEventInvite, formatEventEmailHtml } from "@/lib/sendEventInvite";
 import { listMyGroups } from "@/lib/workingGroups";
-import { supabase } from "@/integrations/supabase/client";
 
 const SOCIAL_SLUGS = ["socials", "social-committee", "social"];
 
