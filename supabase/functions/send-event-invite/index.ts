@@ -11,7 +11,9 @@ const corsHeaders = {
 };
 
 const GATEWAY_URL = "https://connector-gateway.lovable.dev/resend";
-const FROM_ADDRESS = "Weybridge Lodge <notify@email.weybridgelodge.org.uk>";
+// Resend-verified sender domain. Kept separate from email.weybridgelodge.org.uk
+// (which is delegated to Lovable Emails) so both providers can coexist.
+const FROM_ADDRESS = "Weybridge Lodge <notify@events.weybridgelodge.org.uk>";
 
 type Recipient = { email: string; user_id?: string | null };
 type Attachment = { filename: string; content: string; content_type?: string };
