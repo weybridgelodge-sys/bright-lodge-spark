@@ -144,6 +144,12 @@ export default function MembersAdmin() {
     setProfiles(merged);
     setRoles((r as Role[]) ?? []);
     setNotices((n as Notice[]) ?? []);
+    const { data: ls } = await (supabase as any).rpc("get_members_last_sign_in");
+    const lmap: Record<string, string | null> = {};
+    for (const row of (ls as { user_id: string; last_sign_in_at: string | null }[]) ?? []) {
+      lmap[row.user_id] = row.last_sign_in_at;
+    }
+    setLastSignIn(lmap);
   };
   useEffect(() => {
     load();
