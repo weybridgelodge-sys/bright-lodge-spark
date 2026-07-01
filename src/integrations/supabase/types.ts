@@ -931,6 +931,51 @@ export type Database = {
         }
         Relationships: []
       }
+      lodge_socials: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          ends_at: string | null
+          guest_emails: string[]
+          id: string
+          notified_at: string | null
+          notified_member_count: number
+          starts_at: string
+          title: string
+          updated_at: string
+          venue: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          ends_at?: string | null
+          guest_emails?: string[]
+          id?: string
+          notified_at?: string | null
+          notified_member_count?: number
+          starts_at: string
+          title: string
+          updated_at?: string
+          venue: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          ends_at?: string | null
+          guest_emails?: string[]
+          id?: string
+          notified_at?: string | null
+          notified_member_count?: number
+          starts_at?: string
+          title?: string
+          updated_at?: string
+          venue?: string
+        }
+        Relationships: []
+      }
       lodge_template: {
         Row: {
           consecration_date: string | null
@@ -1015,6 +1060,72 @@ export type Database = {
           updated_by?: string | null
           venue_address?: string | null
           wm_contact?: string | null
+        }
+        Relationships: []
+      }
+      lodge_visits: {
+        Row: {
+          cost: string
+          created_at: string
+          created_by: string | null
+          ends_at: string | null
+          host_lodge_name: string
+          host_lodge_number: string | null
+          host_secretary_email: string
+          host_secretary_name: string | null
+          id: string
+          notes: string | null
+          notified_at: string | null
+          notified_member_count: number
+          notify_scope: string
+          payment_details: string
+          starts_at: string
+          summons_filename: string | null
+          summons_storage_path: string
+          updated_at: string
+          venue: string
+        }
+        Insert: {
+          cost: string
+          created_at?: string
+          created_by?: string | null
+          ends_at?: string | null
+          host_lodge_name: string
+          host_lodge_number?: string | null
+          host_secretary_email: string
+          host_secretary_name?: string | null
+          id?: string
+          notes?: string | null
+          notified_at?: string | null
+          notified_member_count?: number
+          notify_scope?: string
+          payment_details: string
+          starts_at: string
+          summons_filename?: string | null
+          summons_storage_path: string
+          updated_at?: string
+          venue: string
+        }
+        Update: {
+          cost?: string
+          created_at?: string
+          created_by?: string | null
+          ends_at?: string | null
+          host_lodge_name?: string
+          host_lodge_number?: string | null
+          host_secretary_email?: string
+          host_secretary_name?: string | null
+          id?: string
+          notes?: string | null
+          notified_at?: string | null
+          notified_member_count?: number
+          notify_scope?: string
+          payment_details?: string
+          starts_at?: string
+          summons_filename?: string | null
+          summons_storage_path?: string
+          updated_at?: string
+          venue?: string
         }
         Relationships: []
       }
@@ -2108,6 +2219,8 @@ export type Database = {
           next_meeting_date: string | null
           notice_overrides: Json
           officer_night_date: string | null
+          officer_night_notified_at: string | null
+          officer_night_venue: string | null
           pdf_storage_path: string | null
           sent_at: string | null
           sent_to_count: number | null
@@ -2135,6 +2248,8 @@ export type Database = {
           next_meeting_date?: string | null
           notice_overrides?: Json
           officer_night_date?: string | null
+          officer_night_notified_at?: string | null
+          officer_night_venue?: string | null
           pdf_storage_path?: string | null
           sent_at?: string | null
           sent_to_count?: number | null
@@ -2162,6 +2277,8 @@ export type Database = {
           next_meeting_date?: string | null
           notice_overrides?: Json
           officer_night_date?: string | null
+          officer_night_notified_at?: string | null
+          officer_night_venue?: string | null
           pdf_storage_path?: string | null
           sent_at?: string | null
           sent_to_count?: number | null
@@ -2777,6 +2894,8 @@ export type Database = {
         Returns: boolean
       }
       can_edit_newsletter: { Args: { _user: string }; Returns: boolean }
+      can_manage_socials: { Args: { _user: string }; Returns: boolean }
+      can_manage_visits: { Args: { _user: string }; Returns: boolean }
       can_view_charity: { Args: { _user: string }; Returns: boolean }
       can_view_skills_matrix: { Args: { _user: string }; Returns: boolean }
       current_lodge_year: { Args: never; Returns: number }
@@ -2836,6 +2955,10 @@ export type Database = {
       }
       is_working_group_member: {
         Args: { _group: string; _user: string }
+        Returns: boolean
+      }
+      is_working_group_member_by_slug: {
+        Args: { _slug: string; _user: string }
         Returns: boolean
       }
       last_engagement_date: { Args: { _member: string }; Returns: string }
