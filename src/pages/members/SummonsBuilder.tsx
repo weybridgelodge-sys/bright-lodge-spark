@@ -725,7 +725,7 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
     try {
       const { data: row } = await supabase
         .from("summonses")
-        .select("id, meeting_number, meeting_date, officer_night_date, officer_night_venue, officer_night_notified_at" as any)
+        .select("id, meeting_number, meeting_date, meeting_type, officer_night_date, officer_night_venue, officer_night_notified_at" as any)
         .eq("id", summonsId)
         .maybeSingle();
       const r: any = row;
@@ -739,15 +739,17 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
       const meetingLabel = r.meeting_date
         ? new Date(r.meeting_date).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })
         : `Summons #${r.meeting_number}`;
+      const meetingType = (r.meeting_type as string | null)?.trim() || "Regular";
       const title = `Officers Night - ${nightLabel}`;
       const footer = await resolveSecretaryFooter(false);
       const html = formatEventEmailHtml({
         heading: title,
-        intro: "Brethren, please find calendar details for the Officers Night preceding our next Regular meeting.",
+        intro: `Brethren, please find calendar details for the Officers Night preceding our next ${meetingType} meeting.`,
         fields: [
           { label: "When", value: start.toLocaleString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" }) },
           { label: "Where", value: venue },
-          { label: "Ahead of", value: `Regular meeting on ${meetingLabel}` },
+          { label: "Ahead of", value: `${meetingType} meeting on ${meetingLabel}` },
+
         ],
         footer,
       });
@@ -791,7 +793,7 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
     try {
       const { data: row } = await supabase
         .from("summonses")
-        .select("id, meeting_number, meeting_date, officer_night_date, officer_night_venue" as any)
+        .select("id, meeting_number, meeting_date, meeting_type, officer_night_date, officer_night_venue" as any)
         .eq("id", summonsId)
         .maybeSingle();
       const r: any = row;
@@ -808,16 +810,18 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
       const meetingLabel = r.meeting_date
         ? new Date(r.meeting_date).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })
         : `Summons #${r.meeting_number}`;
+      const meetingType = (r.meeting_type as string | null)?.trim() || "Regular";
       const title = `Officers Night - ${nightLabel}`;
       const footer = await resolveSecretaryFooter(true);
       const html = formatEventEmailHtml({
         heading: title,
-        intro: "Brethren, please find calendar details for the Officers Night preceding our next Regular meeting.",
+        intro: `Brethren, please find calendar details for the Officers Night preceding our next ${meetingType} meeting.`,
         fields: [
           { label: "When", value: start.toLocaleString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" }) },
           { label: "Where", value: venue },
-          { label: "Ahead of", value: `Regular meeting on ${meetingLabel}` },
+          { label: "Ahead of", value: `${meetingType} meeting on ${meetingLabel}` },
         ],
+
         footer,
       });
       const result = await sendEventInvite({
