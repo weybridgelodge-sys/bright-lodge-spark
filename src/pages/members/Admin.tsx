@@ -430,6 +430,11 @@ export default function MembersAdmin() {
                       {p.status}
                     </span>
                   </td>
+                  <td className="p-3 text-xs text-primary-foreground/70 whitespace-nowrap">
+                    {lastSignIn[p.id]
+                      ? new Date(lastSignIn[p.id] as string).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })
+                      : <span className="text-primary-foreground/40">Never</span>}
+                  </td>
                   <td className="p-3 text-xs uppercase tracking-wider">
                     {isAdminUser(p.id) ? "Admin" : "Member"}
                     {isAlmonerUser(p.id) && <div className="text-gold normal-case tracking-normal text-[10px]">Almoner</div>}
