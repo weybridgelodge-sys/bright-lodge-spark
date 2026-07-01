@@ -677,6 +677,50 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
     await maybeSendOfficersNight(id);
   };
 
+  const resolveSecretaryFooter = async (isTest: boolean): Promise<string> => {
+    let title = "";
+    let name = "";
+    try {
+      const { data: yearRow } = await (supabase as any).rpc("current_lodge_year");
+      const lodgeYear = (yearRow as number) ?? new Date().getFullYear();
+      const { data: appt } = await supabase
+        .from("officer_appointments")
+        .select("member_id")
+        .eq("lodge_year", lodgeYear)
+        .eq("position_key", "secretary")
+        .maybeSingle();
+      if (appt?.member_id) {
+        const { data: prof } = await supabase
+          .from("profiles")
+          .select("title,first_name,last_name,full_name")
+          .eq("id", appt.member_id)
+          .maybeSingle();
+        const p: any = prof;
+        if (p) {
+          title = p.title ? (p.title.endsWith(".") ? p.title : `${p.title}.`) : "";
+          const fname = [p.first_name, p.last_name].filter(Boolean).join(" ").trim();
+          name = fname || (p.full_name || "").replace(/^(W\s*Bro\.?|Bro\.?|RW\s*Bro\.?)\s*/i, "").trim();
+        }
+      }
+    } catch { /* fall through to defaults */ }
+    const who = [title, name].filter(Boolean).join(" ") || "The Secretary";
+    const testTag = isTest ? " — TEST" : "";
+    return `Best wishes<br/>S&amp;F<br/>${who}, Lodge Secretary${testTag}`;
+  };
+
+  const ordinalSfx = (n: number) => {
+    const s = ["th", "st", "nd", "rd"];
+    const v = n % 100;
+    return s[(v - 20) % 10] || s[v] || s[0];
+  };
+  const formatNightDate = (iso: string): string => {
+    const d = new Date(`${iso}T00:00:00`);
+    const day = d.getDate();
+    const month = d.toLocaleDateString("en-GB", { month: "long" });
+    const year = d.getFullYear();
+    return `${day}${ordinalSfx(day)} ${month} ${year}`;
+  };
+
   const maybeSendOfficersNight = async (summonsId: string) => {
     try {
       const { data: row } = await supabase
@@ -691,10 +735,12 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
       const venue = (r.officer_night_venue as string | null) || "Masonic Centre, Guildford";
       const start = new Date(`${nightDate}T19:00:00`);
       const end = new Date(start.getTime() + 2 * 60 * 60 * 1000);
+      const nightLabel = formatNightDate(nightDate);
       const meetingLabel = r.meeting_date
         ? new Date(r.meeting_date).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })
         : `Summons #${r.meeting_number}`;
-      const title = `Officers Night — ${meetingLabel}`;
+      const title = `Officers Night - ${nightLabel}`;
+      const footer = await resolveSecretaryFooter(false);
       const html = formatEventEmailHtml({
         heading: title,
         intro: "Brethren, please find calendar details for the Officers Night preceding our next Regular meeting.",
@@ -703,11 +749,11 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
           { label: "Where", value: venue },
           { label: "Ahead of", value: `Regular meeting on ${meetingLabel}` },
         ],
-        footer: "S&F, Weybridge Lodge Secretary",
+        footer,
       });
       const result = await sendEventInvite({
         event: { title, location: venue, startTime: start.toISOString(), endTime: end.toISOString() },
-        subject: `Officers Night — ${meetingLabel}`,
+        subject: title,
         html,
         memberScope: { kind: "all_active" },
         idempotencyPrefix: `officers-night-${summonsId}`,
@@ -731,12 +777,12 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
       body: { summons_id: id, test_recipient: addr.trim() },
     });
     if (error) {
-      toast.error(error.message ?? "Test email failed");
-      return;
+      toast.error(error.message ?? "Test summons email failed");
+    } else {
+      const d = data as any;
+      if (d?.sent) toast.success(`Test summons sent to ${addr}`);
+      else toast.error(d?.failures?.[0]?.error ?? d?.error ?? "Test summons email failed");
     }
-    const d = data as any;
-    if (d?.sent) toast.success(`Test summons sent to ${addr}`);
-    else toast.error(d?.failures?.[0]?.error ?? "Test email failed");
     // Also send a test Officers Night invite (if a night date is set), only to the test address.
     await maybeSendOfficersNightTest(id, addr.trim());
   };
@@ -758,10 +804,12 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
       const venue = (r.officer_night_venue as string | null) || "Masonic Centre, Guildford";
       const start = new Date(`${nightDate}T19:00:00`);
       const end = new Date(start.getTime() + 2 * 60 * 60 * 1000);
+      const nightLabel = formatNightDate(nightDate);
       const meetingLabel = r.meeting_date
         ? new Date(r.meeting_date).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })
         : `Summons #${r.meeting_number}`;
-      const title = `Officers Night — ${meetingLabel}`;
+      const title = `Officers Night - ${nightLabel}`;
+      const footer = await resolveSecretaryFooter(true);
       const html = formatEventEmailHtml({
         heading: title,
         intro: "Brethren, please find calendar details for the Officers Night preceding our next Regular meeting.",
@@ -770,11 +818,11 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
           { label: "Where", value: venue },
           { label: "Ahead of", value: `Regular meeting on ${meetingLabel}` },
         ],
-        footer: "S&F, Weybridge Lodge Secretary — TEST",
+        footer,
       });
       const result = await sendEventInvite({
         event: { title: `[TEST] ${title}`, location: venue, startTime: start.toISOString(), endTime: end.toISOString() },
-        subject: `[TEST] Officers Night — ${meetingLabel}`,
+        subject: `[TEST] ${title}`,
         html,
         memberScope: { kind: "none" },
         guestEmails: [testEmail],
