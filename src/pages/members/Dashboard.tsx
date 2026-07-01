@@ -17,6 +17,8 @@ export default function MembersDashboard() {
   const [notices, setNotices] = useState<Notice[]>([]);
   const [docs, setDocs] = useState<Doc[]>([]);
   const [myGroups, setMyGroups] = useState<MyGroup[]>([]);
+  const [activeNotice, setActiveNotice] = useState<Notice | null>(null);
+
 
   useEffect(() => {
     supabase
