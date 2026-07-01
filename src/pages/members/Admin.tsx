@@ -397,6 +397,7 @@ export default function MembersAdmin() {
               <tr>
                 <th className="text-left p-3">Member</th>
                 <th className="text-left p-3">Status</th>
+                <th className="text-left p-3">Last logged on</th>
                 <th className="text-left p-3">Role</th>
                 <th className="text-left p-3">Flags</th>
                 <th className="text-right p-3">Actions</th>
