@@ -107,6 +107,7 @@ export default function MembersAdmin() {
   const { user } = useAuth();
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [roles, setRoles] = useState<Role[]>([]);
+  const [lastSignIn, setLastSignIn] = useState<Record<string, string | null>>({});
   const [notices, setNotices] = useState<Notice[]>([]);
   const [tab, setTab] = useState<"users" | "add" | "notices">("users");
 
@@ -143,6 +144,12 @@ export default function MembersAdmin() {
     setProfiles(merged);
     setRoles((r as Role[]) ?? []);
     setNotices((n as Notice[]) ?? []);
+    const { data: ls } = await (supabase as any).rpc("get_members_last_sign_in");
+    const lmap: Record<string, string | null> = {};
+    for (const row of (ls as { user_id: string; last_sign_in_at: string | null }[]) ?? []) {
+      lmap[row.user_id] = row.last_sign_in_at;
+    }
+    setLastSignIn(lmap);
   };
   useEffect(() => {
     load();
@@ -390,6 +397,7 @@ export default function MembersAdmin() {
               <tr>
                 <th className="text-left p-3">Member</th>
                 <th className="text-left p-3">Status</th>
+                <th className="text-left p-3">Last logged on</th>
                 <th className="text-left p-3">Role</th>
                 <th className="text-left p-3">Flags</th>
                 <th className="text-right p-3">Actions</th>
@@ -421,6 +429,11 @@ export default function MembersAdmin() {
                     >
                       {p.status}
                     </span>
+                  </td>
+                  <td className="p-3 text-xs text-primary-foreground/70 whitespace-nowrap">
+                    {lastSignIn[p.id]
+                      ? new Date(lastSignIn[p.id] as string).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })
+                      : <span className="text-primary-foreground/40">Never</span>}
                   </td>
                   <td className="p-3 text-xs uppercase tracking-wider">
                     {isAdminUser(p.id) ? "Admin" : "Member"}

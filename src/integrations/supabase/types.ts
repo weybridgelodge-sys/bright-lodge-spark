@@ -2918,6 +2918,13 @@ export type Database = {
         Args: { payload: Json; queue_name: string }
         Returns: number
       }
+      get_members_last_sign_in: {
+        Args: never
+        Returns: {
+          last_sign_in_at: string
+          user_id: string
+        }[]
+      }
       get_profiles_pii: {
         Args: { _ids: string[] }
         Returns: {
