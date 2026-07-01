@@ -332,7 +332,7 @@ function Inner() {
             </div>
           </div>
           <div className="flex gap-2 justify-end">
-            <Button variant="outline" onClick={resetForm} disabled={saving}>
+            <Button variant="outline" onClick={resetForm} disabled={saving} className="border-gold/40 bg-transparent text-primary-foreground hover:bg-navy-dark hover:text-gold">
               Cancel
             </Button>
             <Button onClick={onSave} disabled={saving} className="bg-gold text-navy hover:bg-gold/90">
