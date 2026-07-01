@@ -5,6 +5,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { FileText, Megaphone, CalendarDays, Hexagon } from "lucide-react";
 import { listMyGroups } from "@/lib/workingGroups";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+
 
 type Notice = { id: string; title: string; body: string; event_date: string | null; created_at: string };
 type Doc = { id: string; title: string; category: string; created_at: string };
@@ -15,6 +17,8 @@ export default function MembersDashboard() {
   const [notices, setNotices] = useState<Notice[]>([]);
   const [docs, setDocs] = useState<Doc[]>([]);
   const [myGroups, setMyGroups] = useState<MyGroup[]>([]);
+  const [activeNotice, setActiveNotice] = useState<Notice | null>(null);
+
 
   useEffect(() => {
     supabase
@@ -54,20 +58,28 @@ export default function MembersDashboard() {
           ) : (
             <ul className="space-y-3">
               {notices.map((n) => (
-                <li key={n.id} className="border-l-2 border-gold/40 pl-3">
-                  <p className="text-sm font-semibold">{n.title}</p>
-                  {n.event_date && (
-                    <p className="text-[11px] text-gold flex items-center gap-1 mt-0.5">
-                      <CalendarDays className="w-3 h-3" />
-                      {new Date(n.event_date).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" })}
-                    </p>
-                  )}
-                  <p className="text-xs text-primary-foreground/60 mt-1 line-clamp-3 whitespace-pre-wrap">{n.body}</p>
+                <li key={n.id}>
+                  <button
+                    type="button"
+                    onClick={() => setActiveNotice(n)}
+                    className="w-full text-left border-l-2 border-gold/40 pl-3 py-1 hover:border-gold hover:bg-gold/5 rounded-sm transition-colors cursor-pointer"
+                  >
+                    <p className="text-sm font-semibold">{n.title}</p>
+                    {n.event_date && (
+                      <p className="text-[11px] text-gold flex items-center gap-1 mt-0.5">
+                        <CalendarDays className="w-3 h-3" />
+                        {new Date(n.event_date).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" })}
+                      </p>
+                    )}
+                    <p className="text-xs text-primary-foreground/60 mt-1 line-clamp-3 whitespace-pre-wrap">{n.body}</p>
+                    <p className="text-[10px] text-gold/70 mt-1 uppercase tracking-wider">Click to read more</p>
+                  </button>
                 </li>
               ))}
             </ul>
           )}
         </section>
+
 
         <section className="bg-navy-dark/60 border border-gold/15 rounded-sm p-6">
           <div className="flex items-center justify-between mb-4">
@@ -115,6 +127,26 @@ export default function MembersDashboard() {
           </div>
         )}
       </section>
+
+      <Dialog open={!!activeNotice} onOpenChange={(o) => !o && setActiveNotice(null)}>
+        <DialogContent className="max-w-2xl bg-navy-dark border-gold/30 text-primary-foreground">
+          <DialogHeader>
+            <DialogTitle className="font-serif text-xl text-gold pr-6">
+              {activeNotice?.title}
+            </DialogTitle>
+          </DialogHeader>
+          {activeNotice?.event_date && (
+            <p className="text-xs text-gold flex items-center gap-1">
+              <CalendarDays className="w-3 h-3" />
+              {new Date(activeNotice.event_date).toLocaleString("en-GB", { dateStyle: "full", timeStyle: "short" })}
+            </p>
+          )}
+          <div className="text-sm text-primary-foreground/85 whitespace-pre-wrap max-h-[60vh] overflow-y-auto">
+            {activeNotice?.body}
+          </div>
+        </DialogContent>
+      </Dialog>
     </MembersLayout>
   );
 }
+
