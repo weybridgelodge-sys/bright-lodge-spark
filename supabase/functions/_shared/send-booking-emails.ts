@@ -259,31 +259,33 @@ export async function sendBookingEmails(bookingId: string, opts: SendOpts) {
   }
 
   // 2) Assistant Secretary notification
-  const notifyTo = opts.overrideNotifyEmail || ASSISTANT_SECRETARY_EMAIL
-  const notifRes = await supabase.functions.invoke('send-transactional-email', {
-    body: {
-      templateName: 'booking-notification',
-      recipientEmail: notifyTo,
-      idempotencyKey: `booking-notify-${b.id}-${opts.stage}`,
-      replyTo: b.contact_email || undefined,
-      templateData: {
-        bookerName: b.contact_name,
-        bookerEmail: b.contact_email,
-        bookerPhone: b.contact_phone,
-        eventLabel,
-        eventDate,
-        meetingOptionLabel: meetingOptionLabel(meetingOpt),
-        lodgeName,
-        guests,
-        dietary,
-        totalAmount,
-        paymentMethodLabel: pmLabel,
-        paymentStatusLabel: psLabel,
-        isApologies,
-        bookingRef,
-        submittedAt,
+  const notifyRecipients = opts.overrideNotifyEmail ? [opts.overrideNotifyEmail] : NOTIFY_RECIPIENTS
+  await Promise.all(notifyRecipients.map(async (notifyTo) => {
+    const notifRes = await supabase.functions.invoke('send-transactional-email', {
+      body: {
+        templateName: 'booking-notification',
+        recipientEmail: notifyTo,
+        idempotencyKey: `booking-notify-${b.id}-${opts.stage}-${notifyTo}`,
+        replyTo: b.contact_email || undefined,
+        templateData: {
+          bookerName: b.contact_name,
+          bookerEmail: b.contact_email,
+          bookerPhone: b.contact_phone,
+          eventLabel,
+          eventDate,
+          meetingOptionLabel: meetingOptionLabel(meetingOpt),
+          lodgeName,
+          guests,
+          dietary,
+          totalAmount,
+          paymentMethodLabel: pmLabel,
+          paymentStatusLabel: psLabel,
+          isApologies,
+          bookingRef,
+          submittedAt,
+        },
       },
-    },
-  })
-  if (notifRes.error) console.error('Booking notification email failed', notifRes.error)
+    })
+    if (notifRes.error) console.error('Booking notification email failed', notifyTo, notifRes.error)
+  }))
 }
