@@ -138,10 +138,11 @@ Deno.serve(async (req) => {
     const blocked = new Set((suppressed ?? []).map((r: any) => r.email));
 
     // Build attachments
+    const calendarContent = body.ics.replace(/METHOD:REQUEST/g, "METHOD:PUBLISH");
     const attachments: Attachment[] = [
       {
         filename: body.icsFilename,
-        content: toBase64(body.ics),
+        content: toBase64(calendarContent),
         // Keep the calendar file as a normal attachment so mail apps show the
         // written message first, rather than inserting their own invite card
         // above the email body.
