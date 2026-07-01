@@ -142,7 +142,10 @@ Deno.serve(async (req) => {
       {
         filename: body.icsFilename,
         content: toBase64(body.ics),
-        content_type: "text/calendar; method=REQUEST; charset=UTF-8",
+        // Keep the calendar file as a normal attachment so mail apps show the
+        // written message first, rather than inserting their own invite card
+        // above the email body.
+        content_type: "text/calendar; charset=UTF-8",
       },
     ];
     if (body.pdf) {

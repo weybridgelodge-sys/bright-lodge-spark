@@ -88,7 +88,10 @@ export function generateICS(event: ICSEventInput): string {
     "VERSION:2.0",
     "PRODID:-//Weybridge Lodge No 6787//Lodge Portal//EN",
     "CALSCALE:GREGORIAN",
-    "METHOD:REQUEST",
+    // PUBLISH keeps this as an add-to-calendar file rather than a meeting
+    // request, which prevents some mail clients from rendering an invite panel
+    // above the actual message body.
+    "METHOD:PUBLISH",
     "BEGIN:VEVENT",
     `UID:${uid}`,
     `DTSTAMP:${toUtcICS(new Date().toISOString())}`,
