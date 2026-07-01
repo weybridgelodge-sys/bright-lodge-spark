@@ -82,6 +82,7 @@ const EMPTY_SUMMONS: SummonsData = {
   minutes_confirmation_date: null,
   next_meeting_date: null,
   officer_night_date: null,
+  officer_night_venue: null,
   agenda: defaultAgenda(),
   candidates: [],
   dining_enquiry_name: null,
@@ -427,7 +428,7 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
     // of inserting a duplicate.
     setCurrentId(editingId);
     (async () => {
-      const { data, error } = await supabase.from("summonses").select("id,meeting_number,lodge_event_id,meeting_date,meeting_time,meeting_type,dress_code,minutes_confirmation_date,next_meeting_date,officer_night_date,agenda,candidates,dining_enquiry_name,notice_overrides,pdf_storage_path,status,sent_at,sent_to_count,created_by,created_at,updated_at,dining_menu,dining_price,dining_deadline").eq("id", editingId).maybeSingle();
+      const { data, error } = await supabase.from("summonses").select("id,meeting_number,lodge_event_id,meeting_date,meeting_time,meeting_type,dress_code,minutes_confirmation_date,next_meeting_date,officer_night_date,officer_night_venue,agenda,candidates,dining_enquiry_name,notice_overrides,pdf_storage_path,status,sent_at,sent_to_count,created_by,created_at,updated_at,dining_menu,dining_price,dining_deadline").eq("id", editingId).maybeSingle();
       if (error || !data) { toast.error(error?.message ?? "Summons not found"); return; }
       const r: any = data;
       // dining_enquiry_email is column-restricted; fetch via secure RPC (secretary/admin/WM)
@@ -447,6 +448,7 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
         minutes_confirmation_date: r.minutes_confirmation_date,
         next_meeting_date: r.next_meeting_date,
         officer_night_date: r.officer_night_date,
+        officer_night_venue: (r as any).officer_night_venue ?? null,
         agenda: (r.agenda as any) ?? defaultAgenda(),
         candidates: (r.candidates as any) ?? [],
         dining_enquiry_name: r.dining_enquiry_name,
@@ -618,6 +620,7 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
         minutes_confirmation_date: summons.minutes_confirmation_date,
         next_meeting_date: summons.next_meeting_date,
         officer_night_date: summons.officer_night_date,
+        officer_night_venue: summons.officer_night_venue ?? null,
         agenda: summons.agenda as any,
         candidates: summons.candidates as any,
         dining_enquiry_name: summons.dining_enquiry_name,
@@ -761,6 +764,10 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
           <div>
             <Label>Officer Night</Label>
             <Input type="date" value={summons.officer_night_date ?? ""} onChange={(e) => setSummons({ ...summons, officer_night_date: e.target.value || null })} />
+          </div>
+          <div>
+            <Label>Officer Night venue (optional override)</Label>
+            <Input placeholder="Masonic Centre" value={summons.officer_night_venue ?? ""} onChange={(e) => setSummons({ ...summons, officer_night_venue: e.target.value || null })} />
           </div>
         </div>
       </Section>
