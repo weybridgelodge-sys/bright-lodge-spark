@@ -5,6 +5,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { FileText, Megaphone, CalendarDays, Hexagon } from "lucide-react";
 import { listMyGroups } from "@/lib/workingGroups";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+
 
 type Notice = { id: string; title: string; body: string; event_date: string | null; created_at: string };
 type Doc = { id: string; title: string; category: string; created_at: string };
