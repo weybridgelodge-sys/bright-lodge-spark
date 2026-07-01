@@ -28,6 +28,8 @@ const LodgeSummaryReport = lazy(() => import("./pages/members/development/LodgeS
 const WorkingGroupsIndex = lazy(() => import("./pages/members/working-groups/Index"));
 const WorkingGroupDetail = lazy(() => import("./pages/members/working-groups/Detail"));
 const WorkingGroupsAdmin = lazy(() => import("./pages/members/working-groups/Admin"));
+const AdHocSocials = lazy(() => import("./pages/members/working-groups/Socials"));
+const LodgeVisits = lazy(() => import("./pages/members/working-groups/Visits"));
 const CharityStewardPage = lazy(() => import("./pages/members/admin/CharitySteward"));
 const AdminHub = lazy(() => import("./pages/members/admin/AdminHub"));
 const NewsletterHub = lazy(() => import("./pages/members/admin/NewsletterHub"));
@@ -62,6 +64,8 @@ const MembersRoutes = () => (
         <Route path="admin/newsletter" element={<NewsletterHub />} />
         <Route path="working-groups" element={<WorkingGroupsIndex />} />
         <Route path="working-groups/admin" element={<WorkingGroupsAdmin />} />
+        <Route path="working-groups/socials" element={<AdHocSocials />} />
+        <Route path="working-groups/visits" element={<LodgeVisits />} />
         <Route path="working-groups/:slug" element={<WorkingGroupDetail />} />
       </Routes>
     </Suspense>
