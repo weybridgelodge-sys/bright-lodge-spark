@@ -5,6 +5,8 @@
 import { createClient, SupabaseClient } from 'npm:@supabase/supabase-js@2'
 
 export const ASSISTANT_SECRETARY_EMAIL = 'assistantsecretary@weybridgelodge.org.uk'
+export const WEBMASTER_EMAIL = 'webmaster@weybridgelodge.org.uk'
+const NOTIFY_RECIPIENTS = [ASSISTANT_SECRETARY_EMAIL, WEBMASTER_EMAIL]
 
 interface SendOpts {
   stage: 'submitted' | 'paid'
