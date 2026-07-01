@@ -58,20 +58,28 @@ export default function MembersDashboard() {
           ) : (
             <ul className="space-y-3">
               {notices.map((n) => (
-                <li key={n.id} className="border-l-2 border-gold/40 pl-3">
-                  <p className="text-sm font-semibold">{n.title}</p>
-                  {n.event_date && (
-                    <p className="text-[11px] text-gold flex items-center gap-1 mt-0.5">
-                      <CalendarDays className="w-3 h-3" />
-                      {new Date(n.event_date).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" })}
-                    </p>
-                  )}
-                  <p className="text-xs text-primary-foreground/60 mt-1 line-clamp-3 whitespace-pre-wrap">{n.body}</p>
+                <li key={n.id}>
+                  <button
+                    type="button"
+                    onClick={() => setActiveNotice(n)}
+                    className="w-full text-left border-l-2 border-gold/40 pl-3 py-1 hover:border-gold hover:bg-gold/5 rounded-sm transition-colors cursor-pointer"
+                  >
+                    <p className="text-sm font-semibold">{n.title}</p>
+                    {n.event_date && (
+                      <p className="text-[11px] text-gold flex items-center gap-1 mt-0.5">
+                        <CalendarDays className="w-3 h-3" />
+                        {new Date(n.event_date).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" })}
+                      </p>
+                    )}
+                    <p className="text-xs text-primary-foreground/60 mt-1 line-clamp-3 whitespace-pre-wrap">{n.body}</p>
+                    <p className="text-[10px] text-gold/70 mt-1 uppercase tracking-wider">Click to read more</p>
+                  </button>
                 </li>
               ))}
             </ul>
           )}
         </section>
+
 
         <section className="bg-navy-dark/60 border border-gold/15 rounded-sm p-6">
           <div className="flex items-center justify-between mb-4">
