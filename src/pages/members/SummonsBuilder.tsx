@@ -673,6 +673,50 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
     if (d?.failures?.length) {
       toast.error(`${d.failures.length} delivery(ies) failed — see history log`);
     }
+    // Officers Night auto-invite: fire once per summons, if a date is set.
+    await maybeSendOfficersNight(id);
+  };
+
+  const maybeSendOfficersNight = async (summonsId: string) => {
+    try {
+      const { data: row } = await supabase
+        .from("summonses")
+        .select("id, meeting_number, meeting_date, officer_night_date, officer_night_venue, officer_night_notified_at" as any)
+        .eq("id", summonsId)
+        .maybeSingle();
+      const r: any = row;
+      if (!r || r.officer_night_notified_at) return;
+      const nightDate: string | null = r.officer_night_date;
+      if (!nightDate) return;
+      const venue = (r.officer_night_venue as string | null) || "Masonic Centre, Guildford";
+      const start = new Date(`${nightDate}T19:00:00`);
+      const end = new Date(start.getTime() + 2 * 60 * 60 * 1000);
+      const meetingLabel = r.meeting_date
+        ? new Date(r.meeting_date).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })
+        : `Summons #${r.meeting_number}`;
+      const title = `Officers Night — ${meetingLabel}`;
+      const html = formatEventEmailHtml({
+        heading: title,
+        intro: "Brethren, please find calendar details for the Officers Night preceding our next Regular meeting.",
+        fields: [
+          { label: "When", value: start.toLocaleString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" }) },
+          { label: "Where", value: venue },
+          { label: "Ahead of", value: `Regular meeting on ${meetingLabel}` },
+        ],
+        footer: "S&F, Weybridge Lodge Secretary",
+      });
+      const result = await sendEventInvite({
+        event: { title, location: venue, startTime: start.toISOString(), endTime: end.toISOString() },
+        subject: `Officers Night — ${meetingLabel}`,
+        html,
+        memberScope: { kind: "all_active" },
+        idempotencyPrefix: `officers-night-${summonsId}`,
+      });
+      await supabase.from("summonses").update({ officer_night_notified_at: new Date().toISOString() } as any).eq("id", summonsId);
+      toast.success(`Officers Night invite sent to ${result.sent} member${result.sent === 1 ? "" : "s"}`);
+    } catch (e: any) {
+      toast.error(`Officers Night invite failed: ${e?.message ?? "unknown"}`);
+    }
   };
 
   const emailTest = async () => {
