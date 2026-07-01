@@ -127,6 +127,26 @@ export default function MembersDashboard() {
           </div>
         )}
       </section>
+
+      <Dialog open={!!activeNotice} onOpenChange={(o) => !o && setActiveNotice(null)}>
+        <DialogContent className="max-w-2xl bg-navy-dark border-gold/30 text-primary-foreground">
+          <DialogHeader>
+            <DialogTitle className="font-serif text-xl text-gold pr-6">
+              {activeNotice?.title}
+            </DialogTitle>
+          </DialogHeader>
+          {activeNotice?.event_date && (
+            <p className="text-xs text-gold flex items-center gap-1">
+              <CalendarDays className="w-3 h-3" />
+              {new Date(activeNotice.event_date).toLocaleString("en-GB", { dateStyle: "full", timeStyle: "short" })}
+            </p>
+          )}
+          <div className="text-sm text-primary-foreground/85 whitespace-pre-wrap max-h-[60vh] overflow-y-auto">
+            {activeNotice?.body}
+          </div>
+        </DialogContent>
+      </Dialog>
     </MembersLayout>
   );
 }
+
