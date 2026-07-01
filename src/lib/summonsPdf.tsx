@@ -89,6 +89,7 @@ export type SummonsData = {
   minutes_confirmation_date: string | null;
   next_meeting_date: string | null;
   officer_night_date: string | null;
+  officer_night_venue?: string | null;
   agenda: AgendaItem[];
   candidates: Candidate[];
   dining_enquiry_name: string | null;

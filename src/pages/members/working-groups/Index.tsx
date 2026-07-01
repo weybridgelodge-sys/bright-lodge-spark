@@ -4,7 +4,7 @@ import MembersLayout from "@/components/members/MembersLayout";
 import ProtectedRoute from "@/components/members/ProtectedRoute";
 import { useAuth } from "@/hooks/useAuth";
 import { listGroups, type WorkingGroup } from "@/lib/workingGroups";
-import { Loader2, FileDown, Settings2 } from "lucide-react";
+import { Loader2, FileDown, Settings2, Calendar, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { buildWorkingGroupsActivityPdf } from "@/lib/development/activityReportPdf";
 import { toast } from "sonner";
@@ -64,6 +64,29 @@ function Inner() {
           — Lodge philosophy, adopted 2026
         </footer>
       </blockquote>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Link to="/members/working-groups/socials"
+          className="block rounded-sm border border-gold/40 bg-navy-dark/60 p-5 hover:border-gold transition-colors">
+          <div className="flex items-center gap-2 text-gold">
+            <Calendar className="w-4 h-4" />
+            <h3 className="font-serif text-lg">Ad-hoc Socials</h3>
+          </div>
+          <p className="text-sm text-primary-foreground/80 mt-2 leading-relaxed">
+            Casual events outside the summons — quiz nights, family days, informal dinners. Invites include a calendar attachment.
+          </p>
+        </Link>
+        <Link to="/members/working-groups/visits"
+          className="block rounded-sm border border-gold/40 bg-navy-dark/60 p-5 hover:border-gold transition-colors">
+          <div className="flex items-center gap-2 text-gold">
+            <MapPin className="w-4 h-4" />
+            <h3 className="font-serif text-lg">Lodge Visits</h3>
+          </div>
+          <p className="text-sm text-primary-foreground/80 mt-2 leading-relaxed">
+            Plan visits to other lodges, attach the host summons PDF, and build up a searchable directory of host lodges.
+          </p>
+        </Link>
+      </div>
 
       {loading ? (
         <div className="flex items-center justify-center py-20"><Loader2 className="w-6 h-6 text-gold animate-spin" /></div>

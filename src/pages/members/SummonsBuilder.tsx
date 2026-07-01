@@ -38,6 +38,7 @@ import {
   DEFAULT_COVER_LEFT_URL,
   DEFAULT_COVER_RIGHT_URL,
 } from "@/lib/summonsPdf";
+import { sendEventInvite, formatEventEmailHtml } from "@/lib/sendEventInvite";
 import SummonsPrintPreview from "@/components/members/SummonsPrintPreview";
 import {
   NON_PROGRESSIVE_LABELS,
@@ -82,6 +83,7 @@ const EMPTY_SUMMONS: SummonsData = {
   minutes_confirmation_date: null,
   next_meeting_date: null,
   officer_night_date: null,
+  officer_night_venue: null,
   agenda: defaultAgenda(),
   candidates: [],
   dining_enquiry_name: null,
@@ -427,7 +429,7 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
     // of inserting a duplicate.
     setCurrentId(editingId);
     (async () => {
-      const { data, error } = await supabase.from("summonses").select("id,meeting_number,lodge_event_id,meeting_date,meeting_time,meeting_type,dress_code,minutes_confirmation_date,next_meeting_date,officer_night_date,agenda,candidates,dining_enquiry_name,notice_overrides,pdf_storage_path,status,sent_at,sent_to_count,created_by,created_at,updated_at,dining_menu,dining_price,dining_deadline").eq("id", editingId).maybeSingle();
+      const { data, error } = await supabase.from("summonses").select("id,meeting_number,lodge_event_id,meeting_date,meeting_time,meeting_type,dress_code,minutes_confirmation_date,next_meeting_date,officer_night_date,officer_night_venue,agenda,candidates,dining_enquiry_name,notice_overrides,pdf_storage_path,status,sent_at,sent_to_count,created_by,created_at,updated_at,dining_menu,dining_price,dining_deadline").eq("id", editingId).maybeSingle();
       if (error || !data) { toast.error(error?.message ?? "Summons not found"); return; }
       const r: any = data;
       // dining_enquiry_email is column-restricted; fetch via secure RPC (secretary/admin/WM)
@@ -447,6 +449,7 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
         minutes_confirmation_date: r.minutes_confirmation_date,
         next_meeting_date: r.next_meeting_date,
         officer_night_date: r.officer_night_date,
+        officer_night_venue: (r as any).officer_night_venue ?? null,
         agenda: (r.agenda as any) ?? defaultAgenda(),
         candidates: (r.candidates as any) ?? [],
         dining_enquiry_name: r.dining_enquiry_name,
@@ -618,6 +621,7 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
         minutes_confirmation_date: summons.minutes_confirmation_date,
         next_meeting_date: summons.next_meeting_date,
         officer_night_date: summons.officer_night_date,
+        officer_night_venue: summons.officer_night_venue ?? null,
         agenda: summons.agenda as any,
         candidates: summons.candidates as any,
         dining_enquiry_name: summons.dining_enquiry_name,
@@ -668,6 +672,50 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
     toast.success(`Summons emailed to ${d?.sent ?? 0} of ${d?.recipients ?? 0} members`);
     if (d?.failures?.length) {
       toast.error(`${d.failures.length} delivery(ies) failed — see history log`);
+    }
+    // Officers Night auto-invite: fire once per summons, if a date is set.
+    await maybeSendOfficersNight(id);
+  };
+
+  const maybeSendOfficersNight = async (summonsId: string) => {
+    try {
+      const { data: row } = await supabase
+        .from("summonses")
+        .select("id, meeting_number, meeting_date, officer_night_date, officer_night_venue, officer_night_notified_at" as any)
+        .eq("id", summonsId)
+        .maybeSingle();
+      const r: any = row;
+      if (!r || r.officer_night_notified_at) return;
+      const nightDate: string | null = r.officer_night_date;
+      if (!nightDate) return;
+      const venue = (r.officer_night_venue as string | null) || "Masonic Centre, Guildford";
+      const start = new Date(`${nightDate}T19:00:00`);
+      const end = new Date(start.getTime() + 2 * 60 * 60 * 1000);
+      const meetingLabel = r.meeting_date
+        ? new Date(r.meeting_date).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })
+        : `Summons #${r.meeting_number}`;
+      const title = `Officers Night — ${meetingLabel}`;
+      const html = formatEventEmailHtml({
+        heading: title,
+        intro: "Brethren, please find calendar details for the Officers Night preceding our next Regular meeting.",
+        fields: [
+          { label: "When", value: start.toLocaleString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" }) },
+          { label: "Where", value: venue },
+          { label: "Ahead of", value: `Regular meeting on ${meetingLabel}` },
+        ],
+        footer: "S&F, Weybridge Lodge Secretary",
+      });
+      const result = await sendEventInvite({
+        event: { title, location: venue, startTime: start.toISOString(), endTime: end.toISOString() },
+        subject: `Officers Night — ${meetingLabel}`,
+        html,
+        memberScope: { kind: "all_active" },
+        idempotencyPrefix: `officers-night-${summonsId}`,
+      });
+      await supabase.from("summonses").update({ officer_night_notified_at: new Date().toISOString() } as any).eq("id", summonsId);
+      toast.success(`Officers Night invite sent to ${result.sent} member${result.sent === 1 ? "" : "s"}`);
+    } catch (e: any) {
+      toast.error(`Officers Night invite failed: ${e?.message ?? "unknown"}`);
     }
   };
 
@@ -761,6 +809,10 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
           <div>
             <Label>Officer Night</Label>
             <Input type="date" value={summons.officer_night_date ?? ""} onChange={(e) => setSummons({ ...summons, officer_night_date: e.target.value || null })} />
+          </div>
+          <div>
+            <Label>Officer Night venue (optional override)</Label>
+            <Input placeholder="Masonic Centre" value={summons.officer_night_venue ?? ""} onChange={(e) => setSummons({ ...summons, officer_night_venue: e.target.value || null })} />
           </div>
         </div>
       </Section>
