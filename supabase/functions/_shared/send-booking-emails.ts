@@ -224,7 +224,7 @@ export async function sendBookingEmails(bookingId: string, opts: SendOpts) {
           },
         },
       })
-      if (notifRes.error) console.error('Ladies Festival notification email failed', notifTo, notifRes.error)
+      if (notifRes.error) console.error('Ladies Festival notification email failed', notifyTo, notifRes.error)
     }))
     return
   }
