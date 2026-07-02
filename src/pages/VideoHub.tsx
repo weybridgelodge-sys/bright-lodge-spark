@@ -6,60 +6,29 @@ import SEO, { breadcrumbSchema } from "@/components/SEO";
 import { motion, useReducedMotion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
+import { staticVideos } from "@/data/videos";
 
-// ─── Interface ────────────────────────────────────────────────────────────────
+// The Video Hub renders the shared catalogue from `src/data/videos.ts`
+// so that additions here are automatically picked up by the video sitemap
+// generator. Adapt the shared shape to the local `Video` interface.
 interface Video {
   title: string;
   embedId: string;
   channel: string;
   description: string;
-  // ISO 8601 upload date — required for VideoObject structured data
   uploadDate: string;
 }
 
-// ─── Data ─────────────────────────────────────────────────────────────────────
-const videos: Video[] = [
-  {
-    title: "What Is Freemasonry?",
-    embedId: "WAcj4WVLxt0",
-    channel: "United Grand Lodge of England",
-    description:
-      "An introduction to Freemasonry from the United Grand Lodge of England — what the organisation is, what members do, and what the Craft stands for.",
-    uploadDate: "2020-01-01",
-  },
-  {
-    title: "The Origins Of Freemasonry",
-    embedId: "v_DSCoqrqdA",
-    channel: "United Grand Lodge of England",
-    description:
-      "Freemasonry consists of fraternal groups that trace their origins to medieval guilds of stonemasons. Freemasonry is considered the oldest existing secular fraternal organisation, with documents and traditions dating back to the 14th century.",
-    uploadDate: "2020-01-01",
-  },
-  {
-    title: "Life Of A Freemason",
-    embedId: "nk1kcofy6Dw",
-    channel: "United Grand Lodge of England",
-    description:
-      "A personal perspective on what being a Freemason looks and feels like in practice.",
-    uploadDate: "2020-01-01",
-  },
-  {
-    title: "What's It All About?",
-    embedId: "da0FZyLktLg",
-    channel: "United Grand Lodge of England",
-    description:
-      "A short film outlining the fundamental values of what it means to be a Freemason.",
-    uploadDate: "2020-01-01",
-  },
-   {
-    title: "Guided Tour Of Freemasons Hall",
-    embedId: "ooIm3mNX02E",
-    channel: "United Grand Lodge of England",
-    description:
-      "Find out more about Freemasons' Hall here: https://www.ugle.org.uk/freemasons-hall",
-    uploadDate: "2020-01-01",
-  },
-];
+const videos: Video[] = staticVideos
+  .filter((v) => v.page === "/video-hub")
+  .map((v) => ({
+    title: v.title,
+    embedId: v.youtubeId,
+    channel: v.channel,
+    description: v.description,
+    uploadDate: v.uploadDate,
+  }));
+
 
 // ─── Animation Variants ───────────────────────────────────────────────────────
 const fadeUp = {
