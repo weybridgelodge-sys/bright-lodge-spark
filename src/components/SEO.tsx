@@ -114,6 +114,7 @@ export const localBusinessSchema = {
   // url intentionally omitted — declared once in index.html JSON-LD @graph to avoid duplicate url properties in the merged LocalBusiness entity.
   logo: "https://weybridgelodge.org.uk/weybridge-logo.svg",
   image: "https://weybridgelodge.org.uk/og-image.png",
+  priceRange: "Membership by invitation — free to enquire",
   telephone: "+447921589039",
   email: "secretary@weybridgelodge.org.uk",
   address: {
