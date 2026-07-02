@@ -24,6 +24,15 @@ export interface PageImageGroup {
 // URL (Sanity, external hosts) are eligible.
 export const staticPageImages: PageImageGroup[] = [
   {
+    page: "/",
+    images: [
+      {
+        loc: "/og-image.png",
+        title: "Weybridge Lodge No. 6787 — Freemasons in Guildford, Surrey",
+      },
+    ],
+  },
+  {
     page: "/heritage",
     images: [
       // The Heritage Archive currently presents transcribed documents
