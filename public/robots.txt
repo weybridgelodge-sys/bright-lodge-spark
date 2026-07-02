@@ -4,3 +4,4 @@ Disallow: /members
 Disallow: /portal
 
 Sitemap: https://weybridgelodge.org.uk/sitemap.xml
+Sitemap: https://weybridgelodge.org.uk/video-sitemap.xml
