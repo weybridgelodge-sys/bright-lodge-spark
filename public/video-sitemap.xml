@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
+  <url>
+    <loc>https://weybridgelodge.org.uk/video-hub</loc>
+    <video:video>
+      <video:thumbnail_loc>https://i.ytimg.com/vi/WAcj4WVLxt0/hqdefault.jpg</video:thumbnail_loc>
+      <video:title>What Is Freemasonry?</video:title>
+      <video:description>An introduction to Freemasonry from the United Grand Lodge of England — what the organisation is, what members do, and what the Craft stands for.</video:description>
+      <video:player_loc allow_embed="yes">https://www.youtube.com/embed/WAcj4WVLxt0</video:player_loc>
+      <video:publication_date>2020-01-01</video:publication_date>
+      <video:family_friendly>yes</video:family_friendly>
+      <video:live>no</video:live>
+    </video:video>
+    <video:video>
+      <video:thumbnail_loc>https://i.ytimg.com/vi/v_DSCoqrqdA/hqdefault.jpg</video:thumbnail_loc>
+      <video:title>The Origins Of Freemasonry</video:title>
+      <video:description>Freemasonry consists of fraternal groups that trace their origins to medieval guilds of stonemasons. Freemasonry is considered the oldest existing secular fraternal organisation, with documents and traditions dating back to the 14th century.</video:description>
+      <video:player_loc allow_embed="yes">https://www.youtube.com/embed/v_DSCoqrqdA</video:player_loc>
+      <video:publication_date>2020-01-01</video:publication_date>
+      <video:family_friendly>yes</video:family_friendly>
+      <video:live>no</video:live>
+    </video:video>
+    <video:video>
+      <video:thumbnail_loc>https://i.ytimg.com/vi/nk1kcofy6Dw/hqdefault.jpg</video:thumbnail_loc>
+      <video:title>Life Of A Freemason</video:title>
+      <video:description>A personal perspective on what being a Freemason looks and feels like in practice.</video:description>
+      <video:player_loc allow_embed="yes">https://www.youtube.com/embed/nk1kcofy6Dw</video:player_loc>
+      <video:publication_date>2020-01-01</video:publication_date>
+      <video:family_friendly>yes</video:family_friendly>
+      <video:live>no</video:live>
+    </video:video>
+    <video:video>
+      <video:thumbnail_loc>https://i.ytimg.com/vi/da0FZyLktLg/hqdefault.jpg</video:thumbnail_loc>
+      <video:title>What&apos;s It All About?</video:title>
+      <video:description>A short film outlining the fundamental values of what it means to be a Freemason.</video:description>
+      <video:player_loc allow_embed="yes">https://www.youtube.com/embed/da0FZyLktLg</video:player_loc>
+      <video:publication_date>2020-01-01</video:publication_date>
+      <video:family_friendly>yes</video:family_friendly>
+      <video:live>no</video:live>
+    </video:video>
+    <video:video>
+      <video:thumbnail_loc>https://i.ytimg.com/vi/ooIm3mNX02E/hqdefault.jpg</video:thumbnail_loc>
+      <video:title>Guided Tour Of Freemasons Hall</video:title>
+      <video:description>A guided tour of Freemasons&apos; Hall in London — the home of the United Grand Lodge of England.</video:description>
+      <video:player_loc allow_embed="yes">https://www.youtube.com/embed/ooIm3mNX02E</video:player_loc>
+      <video:publication_date>2020-01-01</video:publication_date>
+      <video:family_friendly>yes</video:family_friendly>
+      <video:live>no</video:live>
+    </video:video>
+  </url>
+</urlset>
