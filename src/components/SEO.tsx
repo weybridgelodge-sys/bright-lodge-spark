@@ -63,7 +63,8 @@ export const organizationSchema = {
   "@type": "FraternalOrganization",
   name: "Weybridge Lodge No. 6787",
   alternateName: "Weybridge Masonic Lodge",
-  url: "https://weybridgelodge.org.uk",
+  // url intentionally omitted — declared once in index.html JSON-LD @graph to avoid duplicate url properties in the merged Organization entity.
+
   logo: "https://weybridgelodge.org.uk/weybridge-logo.svg",
   description:
     "An open, friendly and sociable Freemasons Lodge within the Province of Surrey, based at the Guildford Masonic Centre in Guildford.",
@@ -110,7 +111,7 @@ export const localBusinessSchema = {
   alternateName: "Weybridge Masonic Lodge",
   description:
     "Weybridge Lodge No. 6787 is a Freemasons Lodge within the Province of Surrey, meeting at the Guildford Masonic Centre, Guildford. Despite its historic name reflecting its 1949 founding in Weybridge, the Lodge has met in Guildford since 1986.",
-  url: "https://weybridgelodge.org.uk",
+  // url intentionally omitted — declared once in index.html JSON-LD @graph to avoid duplicate url properties in the merged LocalBusiness entity.
   logo: "https://weybridgelodge.org.uk/weybridge-logo.svg",
   image: "https://weybridgelodge.org.uk/og-image.png",
   telephone: "+447921589039",
