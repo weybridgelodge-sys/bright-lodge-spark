@@ -152,9 +152,17 @@ const Email = ({
           )}
 
           <Hr style={hr} />
+          <Text style={labelStyle}>Hotel room required?</Text>
           <Text style={p}>
-            A 20% discount on overnight rooms at Frimley Hall has been secured. The discount code
-            and direct booking link will follow in a separate email closer to the event.
+            If you would like to stay overnight, the hotel is holding 20 rooms or more as required
+            for our event. Please call the Macdonald Hotel central reservations office on{' '}
+            <strong>0344 879 9000</strong> and quote block code <strong>863804</strong> to book at
+            the discounted rate of <strong>£170 for single occupancy</strong> and{' '}
+            <strong>£180 for double occupancy</strong>, inclusive of breakfast.
+          </Text>
+          <Text style={p}>
+            Guests staying at the hotel can enjoy access to the spa, swimming pool, and wellness
+            centre, making it a perfect weekend retreat.
           </Text>
 
           <Hr style={hr} />
