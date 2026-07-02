@@ -338,8 +338,134 @@ function buildVideoSitemap(videos: VideoEntry[]) {
   ].join("\n");
 }
 
+// ─────────────────────────────────────────────────────────────────────
+// Image sitemap helpers
+// ─────────────────────────────────────────────────────────────────────
+
+interface ImageGroup {
+  page: string;
+  images: PageImage[];
+}
+
+// Parse a Sanity image asset ref like
+// "image-abc123-1024x768-jpg" into a public cdn.sanity.io URL.
+function sanityAssetRefToUrl(ref: string | undefined): string | null {
+  if (!ref || !ref.startsWith("image-")) return null;
+  const rest = ref.slice("image-".length);
+  const lastDash = rest.lastIndexOf("-");
+  if (lastDash < 0) return null;
+  const ext = rest.slice(lastDash + 1);
+  const idAndDims = rest.slice(0, lastDash);
+  return `https://cdn.sanity.io/images/sjz7d6eb/production/${idAndDims}.${ext}`;
+}
+
+interface SanityHeritageRow {
+  title?: string;
+  slug?: { current?: string };
+  page?: string;
+  images?: Array<{
+    asset?: { _ref?: string };
+    alt?: string;
+    caption?: string;
+  }>;
+}
+
+async function collectImages(posts: PostRow[]): Promise<ImageGroup[]> {
+  const groups: ImageGroup[] = staticPageImages
+    .filter((g) => g.images.length > 0)
+    .map((g) => ({ page: g.page, images: [...g.images] }));
+
+  const upsert = (page: string, images: PageImage[]) => {
+    if (images.length === 0) return;
+    const existing = groups.find((g) => g.page === page);
+    if (existing) existing.images.push(...images);
+    else groups.push({ page, images });
+  };
+
+  // Sanity news post main images (auto-picked-up as posts are published).
+  try {
+    const rows = await sanity.fetch<Array<PostRow & { mainImage?: { asset?: { _ref?: string }; alt?: string } }>>(
+      `*[_type == "post" && defined(slug.current) && defined(mainImage)] {
+        "slug": slug.current, title, publishedAt, category, excerpt, legacyRoute, _updatedAt,
+        mainImage { asset, alt }
+      }`,
+    );
+    for (const p of rows) {
+      const url = sanityAssetRefToUrl(p.mainImage?.asset?._ref);
+      if (!url) continue;
+      const page = p.legacyRoute?.trim() || `/news/${p.slug}`;
+      upsert(page, [{ loc: url, title: p.mainImage?.alt || p.title }]);
+    }
+    console.log(`Fetched ${rows.length} post mainImages from Sanity`);
+  } catch (err) {
+    console.warn("Could not fetch post images from Sanity", err);
+  }
+
+  // Optional: heritage archive entries. If a `heritageEntry` schema
+  // is later added in Sanity with an `images` array and a `page`
+  // path, they get picked up automatically — no code change needed.
+  try {
+    const rows = await sanity.fetch<SanityHeritageRow[]>(
+      `*[_type == "heritageEntry" && defined(images)] {
+        title, slug, page, images[] { asset, alt, caption }
+      }`,
+    );
+    for (const r of rows) {
+      const page = r.page?.trim() || (r.slug?.current ? `/heritage/${r.slug.current}` : "/heritage");
+      const images: PageImage[] = (r.images || [])
+        .map((img) => {
+          const url = sanityAssetRefToUrl(img.asset?._ref);
+          if (!url) return null;
+          return {
+            loc: url,
+            title: img.alt || r.title || "Heritage Archive image",
+            caption: img.caption,
+          } as PageImage;
+        })
+        .filter((x): x is PageImage => x !== null);
+      upsert(page, images);
+    }
+    if (rows.length) console.log(`Fetched ${rows.length} heritage entries from Sanity`);
+  } catch {
+    // Schema type may not exist yet — silently skip.
+  }
+
+  return groups;
+}
+
+function buildImageSitemap(groups: ImageGroup[]): string {
+  const urls = groups.map((g) => {
+    const blocks = g.images.map((img) => {
+      const locFull = img.loc.startsWith("http") ? img.loc : `${BASE_URL}${img.loc}`;
+      const parts = [
+        `    <image:image>`,
+        `      <image:loc>${escapeXml(locFull)}</image:loc>`,
+        `      <image:title>${escapeXml(img.title)}</image:title>`,
+        img.caption ? `      <image:caption>${escapeXml(img.caption)}</image:caption>` : null,
+        `    </image:image>`,
+      ].filter(Boolean);
+      return parts.join("\n");
+    });
+    return [
+      `  <url>`,
+      `    <loc>${BASE_URL}${g.page}</loc>`,
+      ...blocks,
+      `  </url>`,
+    ].join("\n");
+  });
+
+  return [
+    `<?xml version="1.0" encoding="UTF-8"?>`,
+    `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"`,
+    `        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">`,
+    ...urls,
+    `</urlset>`,
+  ].join("\n");
+}
+
 main().catch((err) => {
   console.error(err);
   process.exit(0); // Don't break dev/build if Sanity is temporarily unreachable.
 });
+
 
