@@ -2,9 +2,17 @@
 // live post list from Sanity and rewrites public/sitemap.xml and
 // public/feed.xml so search engines and RSS readers always see what the
 // Lodge Secretary just published.
+//
+// It also builds public/video-sitemap.xml — a Google video sitemap
+// covering every embedded YouTube video on the site (merging the shared
+// catalogue in src/data/videos.ts with any `video` documents published
+// in Sanity). Missing titles/thumbnails are enriched via YouTube's
+// public oEmbed endpoint.
 import { writeFileSync } from "fs";
 import { resolve } from "path";
 import { createClient } from "@sanity/client";
+import { staticVideos, type VideoEntry } from "../src/data/videos";
+
 
 const BASE_URL = "https://weybridgelodge.org.uk";
 
@@ -184,9 +192,143 @@ async function main() {
 
   writeFileSync(resolve("public/feed.xml"), buildFeed(posts));
   console.log(`feed.xml written (${posts.length} items)`);
+
+  // ── Video sitemap ────────────────────────────────────────────────
+  try {
+    const videos = await collectVideos();
+    const enriched = await enrichVideos(videos);
+    writeFileSync(resolve("public/video-sitemap.xml"), buildVideoSitemap(enriched));
+    console.log(`video-sitemap.xml written (${enriched.length} videos)`);
+  } catch (err) {
+    console.warn("Could not write video-sitemap.xml", err);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// Video sitemap helpers
+// ─────────────────────────────────────────────────────────────────────
+
+interface SanityVideoRow {
+  title?: string;
+  youtubeId?: string;
+  channel?: string;
+  description?: string;
+  uploadDate?: string;
+  durationSeconds?: number;
+  page?: string;
+  order?: number;
+  published?: boolean;
+}
+
+async function collectVideos(): Promise<VideoEntry[]> {
+  let sanityVideos: VideoEntry[] = [];
+  try {
+    const rows = await sanity.fetch<SanityVideoRow[]>(
+      `*[_type == "video" && published != false && defined(youtubeId)] | order(coalesce(order, 999), title asc) {
+        title, youtubeId, channel, description, uploadDate, durationSeconds, page, order, published
+      }`,
+    );
+    sanityVideos = rows.map((r) => ({
+      title: r.title ?? "",
+      youtubeId: r.youtubeId!.trim(),
+      channel: r.channel ?? "",
+      description: r.description ?? "",
+      uploadDate: r.uploadDate ?? "",
+      durationSeconds: r.durationSeconds,
+      page: r.page?.trim() || "/video-hub",
+    }));
+    console.log(`Fetched ${sanityVideos.length} videos from Sanity`);
+  } catch (err) {
+    console.warn("Could not fetch videos from Sanity — falling back to static list only.", err);
+  }
+
+  // Dedupe by youtubeId, preferring Sanity entries (they come first).
+  const byId = new Map<string, VideoEntry>();
+  for (const v of [...sanityVideos, ...staticVideos]) {
+    if (!v.youtubeId) continue;
+    if (!byId.has(v.youtubeId)) byId.set(v.youtubeId, v);
+  }
+  return Array.from(byId.values());
+}
+
+async function fetchOEmbed(videoId: string): Promise<{ title?: string; author?: string } | null> {
+  try {
+    const res = await fetch(
+      `https://www.youtube.com/oembed?url=${encodeURIComponent(
+        `https://www.youtube.com/watch?v=${videoId}`,
+      )}&format=json`,
+    );
+    if (!res.ok) return null;
+    const data = (await res.json()) as { title?: string; author_name?: string };
+    return { title: data.title, author: data.author_name };
+  } catch {
+    return null;
+  }
+}
+
+async function enrichVideos(videos: VideoEntry[]): Promise<VideoEntry[]> {
+  return Promise.all(
+    videos.map(async (v) => {
+      if (v.title && v.description) return v;
+      const meta = await fetchOEmbed(v.youtubeId);
+      return {
+        ...v,
+        title: v.title || meta?.title || v.youtubeId,
+        channel: v.channel || meta?.author || v.channel,
+        description: v.description || meta?.title || v.title || v.youtubeId,
+      };
+    }),
+  );
+}
+
+function buildVideoSitemap(videos: VideoEntry[]) {
+  const groups = new Map<string, VideoEntry[]>();
+  for (const v of videos) {
+    const page = v.page || "/video-hub";
+    if (!groups.has(page)) groups.set(page, []);
+    groups.get(page)!.push(v);
+  }
+
+  const urls: string[] = [];
+  for (const [page, list] of groups) {
+    const videoBlocks = list.map((v) => {
+      const desc = (v.description || v.title).slice(0, 2048);
+      const parts = [
+        `    <video:video>`,
+        `      <video:thumbnail_loc>https://i.ytimg.com/vi/${v.youtubeId}/hqdefault.jpg</video:thumbnail_loc>`,
+        `      <video:title>${escapeXml(v.title)}</video:title>`,
+        `      <video:description>${escapeXml(desc)}</video:description>`,
+        `      <video:player_loc allow_embed="yes">https://www.youtube.com/embed/${v.youtubeId}</video:player_loc>`,
+        v.durationSeconds ? `      <video:duration>${v.durationSeconds}</video:duration>` : null,
+        v.uploadDate ? `      <video:publication_date>${v.uploadDate}</video:publication_date>` : null,
+        `      <video:family_friendly>yes</video:family_friendly>`,
+        `      <video:live>no</video:live>`,
+        `    </video:video>`,
+      ].filter(Boolean);
+      return parts.join("\n");
+    });
+
+    urls.push(
+      [
+        `  <url>`,
+        `    <loc>${BASE_URL}${page}</loc>`,
+        ...videoBlocks,
+        `  </url>`,
+      ].join("\n"),
+    );
+  }
+
+  return [
+    `<?xml version="1.0" encoding="UTF-8"?>`,
+    `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"`,
+    `        xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">`,
+    ...urls,
+    `</urlset>`,
+  ].join("\n");
 }
 
 main().catch((err) => {
   console.error(err);
   process.exit(0); // Don't break dev/build if Sanity is temporarily unreachable.
 });
+
