@@ -2,9 +2,17 @@
 // live post list from Sanity and rewrites public/sitemap.xml and
 // public/feed.xml so search engines and RSS readers always see what the
 // Lodge Secretary just published.
+//
+// It also builds public/video-sitemap.xml — a Google video sitemap
+// covering every embedded YouTube video on the site (merging the shared
+// catalogue in src/data/videos.ts with any `video` documents published
+// in Sanity). Missing titles/thumbnails are enriched via YouTube's
+// public oEmbed endpoint.
 import { writeFileSync } from "fs";
 import { resolve } from "path";
 import { createClient } from "@sanity/client";
+import { staticVideos, type VideoEntry } from "../src/data/videos";
+
 
 const BASE_URL = "https://weybridgelodge.org.uk";
 
