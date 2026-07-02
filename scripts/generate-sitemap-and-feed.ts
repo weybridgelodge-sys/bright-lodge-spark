@@ -12,6 +12,7 @@ import { writeFileSync } from "fs";
 import { resolve } from "path";
 import { createClient } from "@sanity/client";
 import { staticVideos, type VideoEntry } from "../src/data/videos";
+import { staticPageImages, type PageImage } from "../src/data/siteImages";
 
 
 const BASE_URL = "https://weybridgelodge.org.uk";
@@ -201,6 +202,16 @@ async function main() {
     console.log(`video-sitemap.xml written (${enriched.length} videos)`);
   } catch (err) {
     console.warn("Could not write video-sitemap.xml", err);
+  }
+
+  // ── Image sitemap ────────────────────────────────────────────────
+  try {
+    const groups = await collectImages(posts);
+    writeFileSync(resolve("public/image-sitemap.xml"), buildImageSitemap(groups));
+    const total = groups.reduce((n, g) => n + g.images.length, 0);
+    console.log(`image-sitemap.xml written (${total} images across ${groups.length} pages)`);
+  } catch (err) {
+    console.warn("Could not write image-sitemap.xml", err);
   }
 }
 
