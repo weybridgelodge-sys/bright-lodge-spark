@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
@@ -7,10 +8,11 @@ import { motion, useReducedMotion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { staticVideos } from "@/data/videos";
+import { sanityClient } from "@/lib/sanity";
 
-// The Video Hub renders the shared catalogue from `src/data/videos.ts`
-// so that additions here are automatically picked up by the video sitemap
-// generator. Adapt the shared shape to the local `Video` interface.
+// The Video Hub prefers the Sanity `video` collection and falls back to the
+// shared static catalogue in `src/data/videos.ts` when Sanity is empty or
+// unreachable. The sitemap generator merges both sources identically.
 interface Video {
   title: string;
   embedId: string;
@@ -19,7 +21,21 @@ interface Video {
   uploadDate: string;
 }
 
-const videos: Video[] = staticVideos
+interface SanityVideo {
+  _id: string;
+  title: string;
+  youtubeId: string;
+  channel?: string;
+  description?: string;
+  uploadDate?: string;
+  page?: string;
+}
+
+const VIDEOS_QUERY = `*[_type == "video" && published != false && defined(youtubeId) && (page == "/video-hub" || !defined(page))] | order(coalesce(order, 999), title asc) {
+  _id, title, youtubeId, channel, description, uploadDate, page
+}`;
+
+const fallbackVideos: Video[] = staticVideos
   .filter((v) => v.page === "/video-hub")
   .map((v) => ({
     title: v.title,
@@ -28,7 +44,6 @@ const videos: Video[] = staticVideos
     description: v.description,
     uploadDate: v.uploadDate,
   }));
-
 
 // ─── Animation Variants ───────────────────────────────────────────────────────
 const fadeUp = {
@@ -44,6 +59,25 @@ const fadeUp = {
 // ─── Component ────────────────────────────────────────────────────────────────
 const VideoHub = () => {
   const shouldReduceMotion = useReducedMotion();
+
+  const { data: sanityVideos } = useQuery({
+    queryKey: ["video-hub-videos"],
+    queryFn: () => sanityClient.fetch<SanityVideo[]>(VIDEOS_QUERY),
+    staleTime: 1000 * 60 * 5,
+  });
+
+  const videos: Video[] = useMemo(() => {
+    if (sanityVideos && sanityVideos.length > 0) {
+      return sanityVideos.map((v) => ({
+        title: v.title,
+        embedId: v.youtubeId,
+        channel: v.channel ?? "United Grand Lodge of England",
+        description: v.description ?? "",
+        uploadDate: v.uploadDate ?? "2020-01-01",
+      }));
+    }
+    return fallbackVideos;
+  }, [sanityVideos]);
 
   const pageSchema = useMemo(() => {
     const breadcrumb = breadcrumbSchema([
@@ -84,7 +118,7 @@ const VideoHub = () => {
       ...videoSchemas,
       breadcrumb,
     ];
-  }, []);
+  }, [videos]);
 
   return (
     <div className="min-h-screen">
