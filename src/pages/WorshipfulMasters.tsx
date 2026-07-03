@@ -6,16 +6,27 @@ import SEO, { breadcrumbSchema } from "@/components/SEO";
 import { motion, useReducedMotion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
-import { masters } from "@/data/worshipfulMasters";
+import { useQuery } from "@tanstack/react-query";
+import { sanityClient } from "@/lib/sanity";
+import { masters as fallbackMasters } from "@/data/worshipfulMasters";
 
-// ─── Interface ────────────────────────────────────────────────────────────────
-// Component-level type guard — protects against data shape changes
-// in @/data/worshipfulMasters without surfacing a runtime error.
 interface Master {
   year: string | number;
   name: string;
   honours?: string;
 }
+
+interface SanityMaster {
+  _id: string;
+  name: string;
+  masonicYear: string;
+  honours?: string;
+  order?: number;
+}
+
+const MASTERS_QUERY = `*[_type == "worshipfulMaster"] | order(order asc, masonicYear asc) {
+  _id, name, masonicYear, honours, order
+}`;
 
 // ─── Animation Variants ───────────────────────────────────────────────────────
 const fadeUp = {
