@@ -6,16 +6,27 @@ import SEO, { breadcrumbSchema } from "@/components/SEO";
 import { motion, useReducedMotion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
-import { masters } from "@/data/worshipfulMasters";
+import { useQuery } from "@tanstack/react-query";
+import { sanityClient } from "@/lib/sanity";
+import { masters as fallbackMasters } from "@/data/worshipfulMasters";
 
-// ─── Interface ────────────────────────────────────────────────────────────────
-// Component-level type guard — protects against data shape changes
-// in @/data/worshipfulMasters without surfacing a runtime error.
 interface Master {
   year: string | number;
   name: string;
   honours?: string;
 }
+
+interface SanityMaster {
+  _id: string;
+  name: string;
+  masonicYear: string;
+  honours?: string;
+  order?: number;
+}
+
+const MASTERS_QUERY = `*[_type == "worshipfulMaster"] | order(order asc, masonicYear asc) {
+  _id, name, masonicYear, honours, order
+}`;
 
 // ─── Animation Variants ───────────────────────────────────────────────────────
 const fadeUp = {
@@ -27,6 +38,24 @@ const fadeUp = {
 // ─── Component ────────────────────────────────────────────────────────────────
 const WorshipfulMasters = () => {
   const shouldReduceMotion = useReducedMotion();
+
+  const { data: sanityMasters, isLoading } = useQuery({
+    queryKey: ["worshipfulMasters"],
+    queryFn: () => sanityClient.fetch<SanityMaster[]>(MASTERS_QUERY),
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const masters: Master[] = useMemo(() => {
+    if (sanityMasters && sanityMasters.length > 0) {
+      return sanityMasters.map((m) => ({
+        year: m.masonicYear,
+        name: m.name,
+        honours: m.honours ?? "",
+      }));
+    }
+    return fallbackMasters as Master[];
+  }, [sanityMasters]);
+
 
   const pageSchema = useMemo(() => {
     // Fragment URL (/#about) removed from breadcrumb.
@@ -180,7 +209,13 @@ const WorshipfulMasters = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {(masters as Master[]).map((m) => (
+                      {isLoading && masters.length === 0 ? (
+                        <tr>
+                          <td colSpan={3} className="text-gold/60 font-sans text-sm py-6 text-center">
+                            Loading Roll of Honour…
+                          </td>
+                        </tr>
+                      ) : masters.map((m) => (
                         // Composite key: stable identity even if year order changes.
                         // key={i} was fragile — index shifts on array reorder.
                         <tr
