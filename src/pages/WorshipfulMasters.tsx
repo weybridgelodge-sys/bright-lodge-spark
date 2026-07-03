@@ -39,6 +39,24 @@ const fadeUp = {
 const WorshipfulMasters = () => {
   const shouldReduceMotion = useReducedMotion();
 
+  const { data: sanityMasters, isLoading } = useQuery({
+    queryKey: ["worshipfulMasters"],
+    queryFn: () => sanityClient.fetch<SanityMaster[]>(MASTERS_QUERY),
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const masters: Master[] = useMemo(() => {
+    if (sanityMasters && sanityMasters.length > 0) {
+      return sanityMasters.map((m) => ({
+        year: m.masonicYear,
+        name: m.name,
+        honours: m.honours ?? "",
+      }));
+    }
+    return fallbackMasters as Master[];
+  }, [sanityMasters]);
+
+
   const pageSchema = useMemo(() => {
     // Fragment URL (/#about) removed from breadcrumb.
     const breadcrumb = breadcrumbSchema([
