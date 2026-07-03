@@ -2925,6 +2925,20 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_officers_public: {
+        Args: { _year?: number }
+        Returns: {
+          first_name: string
+          grand_rank: string
+          is_past_master: boolean
+          last_name: string
+          middle_name: string
+          position_key: string
+          post_nominals: string
+          provincial_rank: string
+          title: string
+        }[]
+      }
       get_profiles_pii: {
         Args: { _ids: string[] }
         Returns: {
