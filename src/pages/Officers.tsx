@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
@@ -6,53 +6,155 @@ import SEO, { breadcrumbSchema } from "@/components/SEO";
 import { motion, useReducedMotion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
-// ─── Interface ────────────────────────────────────────────────────────────────
-interface Officer {
+// ─── Types ────────────────────────────────────────────────────────────────────
+interface OfficerRow {
   office: string;
   name: string;
   honours: string;
   progressive: boolean;
+  isVacantSteward?: boolean;
 }
 
-// ─── Data ─────────────────────────────────────────────────────────────────────
-const officers: Officer[] = [
-  { office: "Worshipful Master", name: "W. Bro. J.P. Tidmarsh", honours: "", progressive: false },
-  { office: "Immediate Past Master", name: "W. Bro. M. Grubb Jnr", honours: "", progressive: false },
-  { office: "Senior Warden", name: "W. Bro. B.C. Connolly", honours: "ProvAGDC", progressive: true },
-  { office: "Junior Warden", name: "W. Bro. K.N. Holdsworth", honours: "", progressive: true },
-  { office: "Chaplain", name: "W. Bro. A.J.S. Mallard", honours: "M.B.E. / PPAGDC", progressive: false },
-  { office: "Treasurer", name: "W. Bro. J.G. Scott", honours: "PPAGDC", progressive: false },
-  { office: "Secretary", name: "W. Bro. R.D. Smith", honours: "PPAGSwdB", progressive: false },
-  { office: "Director of Ceremonies", name: "W. Bro. K.P. Brennan", honours: "PPGSuptWks", progressive: false },
-  { office: "Almoner", name: "Bro. S. Stamper", honours: "", progressive: false },
-  { office: "Charity Steward", name: "W. Bro. K.N. Holdsworth", honours: "", progressive: false },
-  { office: "Lodge Membership Officer", name: "W. Bro. B.C. Connolly", honours: "ProvAGDC", progressive: false },
-  { office: "Lodge Mentor", name: "W. Bro. J. Tidmarsh", honours: "", progressive: false },
-  { office: "Senior Deacon", name: "Bro. R.J. Cooper", honours: "", progressive: true },
-  { office: "Junior Deacon", name: "Bro. W. Burrell", honours: "", progressive: true },
-  { office: "Asst. Director of Ceremonies", name: "W. Bro. J.T. Coleman", honours: "PAGSwdB / PProvGAlm", progressive: false },
-  { office: "Inner Guard", name: "Bro. C. Gower", honours: "", progressive: true },
-  { office: "Asst. Secretary", name: "Bro. R.J. Cooper", honours: "", progressive: false },
-  { office: "Tyler", name: "W. Bro. D.J. Poole", honours: "PPSGD", progressive: false },
-  { office: "Steward", name: "Bro. W. Smyth", honours: "", progressive: true },
-  { office: "Steward", name: "Bro. P. Vrtak", honours: "", progressive: true },
-  { office: "Steward", name: "Bro. D. Blackburn", honours: "", progressive: true },
+type OfficerRpcRow = {
+  position_key: string;
+  title: string | null;
+  first_name: string | null;
+  middle_name: string | null;
+  last_name: string | null;
+  post_nominals: string | null;
+  provincial_rank: string | null;
+  grand_rank: string | null;
+  is_past_master: boolean | null;
+};
+
+// ─── Display order & metadata ────────────────────────────────────────────────
+// Preserves the layout of the previous static list: WM/IPM at the top, then
+// the "Progressive Offices ★" divider before Senior Warden, then everything
+// else. Steward positions are always at the end.
+const DISPLAY: {
+  key: string;
+  office: string;
+  progressive: boolean;
+  isSteward?: boolean;
+}[] = [
+  { key: "worshipful_master",                office: "Worshipful Master",                progressive: false },
+  { key: "immediate_past_master",            office: "Immediate Past Master",            progressive: false },
+  { key: "senior_warden",                    office: "Senior Warden",                    progressive: true  },
+  { key: "junior_warden",                    office: "Junior Warden",                    progressive: true  },
+  { key: "chaplain",                         office: "Chaplain",                         progressive: false },
+  { key: "treasurer",                        office: "Treasurer",                        progressive: false },
+  { key: "secretary",                        office: "Secretary",                        progressive: false },
+  { key: "director_of_ceremonies",           office: "Director of Ceremonies",           progressive: false },
+  { key: "almoner",                          office: "Almoner",                          progressive: false },
+  { key: "charity_steward",                  office: "Charity Steward",                  progressive: false },
+  { key: "membership_officer",               office: "Lodge Membership Officer",         progressive: false },
+  { key: "mentor",                           office: "Lodge Mentor",                     progressive: false },
+  { key: "senior_deacon",                    office: "Senior Deacon",                    progressive: true  },
+  { key: "junior_deacon",                    office: "Junior Deacon",                    progressive: true  },
+  { key: "assistant_director_of_ceremonies", office: "Asst. Director of Ceremonies",     progressive: false },
+  { key: "inner_guard",                      office: "Inner Guard",                      progressive: true  },
+  { key: "assistant_secretary",              office: "Asst. Secretary",                  progressive: false },
+  { key: "tyler",                            office: "Tyler",                            progressive: false },
+  { key: "assistant_tyler",                  office: "Asst. Tyler",                      progressive: false },
+  { key: "senior_steward",                   office: "Senior Steward",                   progressive: true, isSteward: true },
+  { key: "steward_1",                        office: "Steward",                          progressive: true, isSteward: true },
+  { key: "steward_2",                        office: "Steward",                          progressive: true, isSteward: true },
+  { key: "steward_3",                        office: "Steward",                          progressive: true, isSteward: true },
+  { key: "steward_4",                        office: "Steward",                          progressive: true, isSteward: true },
+  { key: "steward_5",                        office: "Steward",                          progressive: true, isSteward: true },
 ];
 
-// ─── Animation Variants ───────────────────────────────────────────────────────
+// ─── Formatters ──────────────────────────────────────────────────────────────
+function formatTitle(title: string | null): string {
+  if (!title) return "Bro.";
+  const t = title.trim();
+  // Ensure trailing period on the title (DB stores "Bro" / "W Bro" / …).
+  return t.endsWith(".") ? t : `${t}.`;
+}
+
+function formatInitials(first: string | null, middle: string | null): string {
+  const parts = [first, middle]
+    .filter(Boolean)
+    .flatMap((s) => (s as string).trim().split(/\s+/))
+    .filter(Boolean);
+  if (parts.length === 0) return "";
+  return parts.map((p) => `${p[0].toUpperCase()}.`).join("");
+}
+
+function formatName(row: OfficerRpcRow): string {
+  const title = formatTitle(row.title);
+  const initials = formatInitials(row.first_name, row.middle_name);
+  const surname = (row.last_name ?? "").trim();
+  return [title, initials, surname].filter(Boolean).join(" ");
+}
+
+function formatHonours(row: OfficerRpcRow): string {
+  return [row.post_nominals, row.provincial_rank, row.grand_rank]
+    .map((s) => (s ?? "").trim())
+    .filter(Boolean)
+    .join(" / ");
+}
+
+// ─── Animation variants ──────────────────────────────────────────────────────
 const fadeUp = {
   hidden: { opacity: 0, y: 20 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.6 } },
   static: { opacity: 1, y: 0 },
 };
 
-// ─── Component ────────────────────────────────────────────────────────────────
+// ─── Component ───────────────────────────────────────────────────────────────
 const Officers = () => {
   const shouldReduceMotion = useReducedMotion();
+  const [rpcRows, setRpcRows] = useState<OfficerRpcRow[] | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data, error } = await supabase.rpc("get_officers_public", { _year: null });
+      if (cancelled) return;
+      if (error) {
+        console.error("get_officers_public failed:", error);
+        setRpcRows([]);
+        return;
+      }
+      setRpcRows((data ?? []) as OfficerRpcRow[]);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const officers: OfficerRow[] = useMemo(() => {
+    const byKey = new Map<string, OfficerRpcRow>();
+    for (const r of rpcRows ?? []) byKey.set(r.position_key, r);
+
+    const rows: OfficerRow[] = [];
+    for (const d of DISPLAY) {
+      const filled = byKey.get(d.key);
+      if (filled) {
+        rows.push({
+          office: d.office,
+          name: formatName(filled),
+          honours: formatHonours(filled),
+          progressive: d.progressive,
+        });
+      } else if (!d.isSteward) {
+        // Non-Steward vacancies: show the role with "Vacant".
+        rows.push({
+          office: d.office,
+          name: "Vacant",
+          honours: "",
+          progressive: d.progressive,
+        });
+      }
+      // Stewards: omit the row entirely when no appointment exists.
+    }
+    return rows;
+  }, [rpcRows]);
 
   const pageSchema = useMemo(() => {
-    // Fragment URL (/#about) removed from breadcrumb.
     const breadcrumb = breadcrumbSchema([
       { name: "Home", url: "/" },
       { name: "Officers", url: "/officers" },
@@ -76,20 +178,14 @@ const Officers = () => {
     ];
   }, []);
 
-  // ── Table rows ──────────────────────────────────────────────────────────────
-  // Extracted from IIFE inside JSX — improves readability and React DevTools
-  // component tree clarity. IIFE in JSX is an anti-pattern in React 17+.
   const firstProgressiveIdx = officers.findIndex((o) => o.progressive);
 
   const renderedRows = officers.map((o, i) => {
     const showDivider = i === firstProgressiveIdx;
-    // Composite key: stable identity if officer order changes.
-    // key={i} was fragile — index shifts on any array reorder.
-    const rowKey = `${o.office}-${o.name}`;
+    const rowKey = `${o.office}-${o.name}-${i}`;
 
     return (
-      // React.Fragment shorthand — React import no longer needed in React 17+
-      <> 
+      <>
         {showDivider && (
           <tr key={`divider-${rowKey}`} className="border-t-2 border-gold/40">
             <td
@@ -102,11 +198,8 @@ const Officers = () => {
         )}
         <tr
           key={rowKey}
-          // border-gold/10 replaces unapproved border-primary-foreground/10
-          // hover:bg-gold/5 replaces unapproved hover:bg-primary-foreground/5
           className="border-b border-gold/10 hover:bg-gold/5 transition-colors"
         >
-          {/* text-gold replaces unapproved text-primary-foreground */}
           <td className="text-gold font-sans text-sm py-3 pr-6">
             {o.office}{" "}
             {o.progressive && (
@@ -115,9 +208,7 @@ const Officers = () => {
               </span>
             )}
           </td>
-          {/* text-gold/80 replaces unapproved text-primary-foreground/80 */}
           <td className="text-gold/80 font-sans text-sm py-3 pr-6">{o.name}</td>
-          {/* text-gold/60 replaces unapproved text-primary-foreground/60 */}
           <td className="text-gold/60 font-sans text-xs py-3">{o.honours}</td>
         </tr>
       </>
@@ -142,13 +233,11 @@ const Officers = () => {
 
       <main id="main-content">
 
-        {/* ── H1 — geo-anchored ── */}
         <PageHeader
           title="Officers of Weybridge Lodge — Masonic Year 2025–2026"
           subtitle="The serving officers of our Freemasons Lodge in Guildford, Surrey"
         />
 
-        {/* ── Intro Section ── */}
         <section
           className="py-20 md:py-28 bg-background"
           aria-labelledby="officers-intro-heading"
@@ -192,8 +281,6 @@ const Officers = () => {
           </div>
         </section>
 
-        {/* ── Officers Table ── */}
-        {/* bg-navy flat: bg-navy-gradient is not a project token */}
         <section
           className="py-20 md:py-28 bg-navy"
           aria-labelledby="officers-table-heading"
@@ -215,13 +302,9 @@ const Officers = () => {
                 Officers of the Lodge
               </h2>
 
-              {/* Dedicated scroll wrapper — isolates table overflow from motion block */}
               <div className="overflow-x-auto -mx-6 px-6 md:mx-0 md:px-0">
-                {/* bg-card replaces unapproved bg-primary-foreground/5 backdrop-blur-sm
-                    border-gold/30 replaces unapproved border-gold/20 */}
                 <div className="bg-card border border-gold/30 rounded-sm p-4 sm:p-6 md:p-8 min-w-[480px] md:min-w-0">
                   <table className="w-full text-left">
-                    {/* <caption>: essential for screen reader table navigation */}
                     <caption className="sr-only">
                       Officers of Weybridge Lodge No. 6787, Guildford, Surrey — Masonic Year
                       2025–2026. Progressive offices are marked with a star.
@@ -248,12 +331,21 @@ const Officers = () => {
                         </th>
                       </tr>
                     </thead>
-                    <tbody>{renderedRows}</tbody>
+                    <tbody>
+                      {rpcRows === null ? (
+                        <tr>
+                          <td colSpan={3} className="text-gold/60 font-sans text-sm py-6 text-center">
+                            Loading officers…
+                          </td>
+                        </tr>
+                      ) : (
+                        renderedRows
+                      )}
+                    </tbody>
                   </table>
                 </div>
               </div>
 
-              {/* text-gold/70 replaces unapproved text-primary-foreground/85 */}
               <p className="text-gold/70 font-sans leading-relaxed mt-12 max-w-2xl mx-auto text-center">
                 The officers listed here give their time freely in service to the Lodge and to
                 Freemasonry. If you would like to know more about what each role involves — including
@@ -270,9 +362,6 @@ const Officers = () => {
           </div>
         </section>
 
-        {/* ── Final CTA ── */}
-        {/* Previous version: single bare button — dead end for a prospect.
-            Now: proper section with heading, copy, and two next-step options. */}
         <section
           className="py-16 bg-background border-t border-border"
           aria-labelledby="officers-cta-heading"
