@@ -209,7 +209,13 @@ const WorshipfulMasters = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {(masters as Master[]).map((m) => (
+                      {isLoading && masters.length === 0 ? (
+                        <tr>
+                          <td colSpan={3} className="text-gold/60 font-sans text-sm py-6 text-center">
+                            Loading Roll of Honour…
+                          </td>
+                        </tr>
+                      ) : masters.map((m) => (
                         // Composite key: stable identity even if year order changes.
                         // key={i} was fragile — index shifts on array reorder.
                         <tr
