@@ -1,342 +1,48 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { PortableText, type PortableTextBlock } from "@portabletext/react";
+import { ArrowLeft, ArrowRight, FileText } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
+import { sanityClient, urlFor } from "@/lib/sanity";
 
-type Officer = { name: string; role: string };
+// ─────────────────────────────────────────────────────────────────────
+// Sanity types + query
+// ─────────────────────────────────────────────────────────────────────
 
-type SummonsDoc = {
-  id: string;
-  type: "summons";
-  number: number;
-  date: string;
-  meetingDate: string;
-  venue: string;
-  wm: string;
-  ipm?: string;
-  masterElect?: string;
-  secretary: string;
-  keyBusiness: string[];
-  officers: Officer[];
-  charityRep?: string;
-  notes?: string;
+type SanityImageRef = { asset?: { _ref?: string; url?: string } };
+
+type HeritageDoc = {
+  _id: string;
+  title: string;
+  date?: string;
+  category: "summons" | "programme" | "photograph" | "other";
+  description?: string;
+  transcription?: PortableTextBlock[];
+  thumbnailImage?: SanityImageRef;
+  documentFile?: { asset?: { url?: string } };
+  documentPages?: SanityImageRef[];
+  displayOrder?: number;
 };
 
-type FestivalDoc = {
-  id: string;
-  type: "festival";
-  number: null;
-  date: string;
-  wm: string;
-  ipm: string;
-  president: string;
-  committee: string[];
-  toastmaster: string;
-  menu: string[];
-  toasts: { toast: string; proposedBy: string; response?: string }[];
-  entertainment: string[];
-  officers: Officer[];
-  notes?: string;
-};
+const HERITAGE_QUERY = `*[_type == "heritageDocument"] | order(displayOrder asc, date asc) {
+  _id,
+  title,
+  date,
+  category,
+  description,
+  transcription,
+  thumbnailImage,
+  documentFile { asset->{url} },
+  documentPages[]{ asset->{url} },
+  displayOrder
+}`;
 
-type Doc = SummonsDoc | FestivalDoc;
-
-const documents: Doc[] = [
-  {
-    id: "summons-29",
-    type: "summons",
-    number: 29,
-    date: "15th October 1954",
-    meetingDate: "Wednesday 27th October 1954",
-    venue: "Masonic Hall, Chertsey",
-    wm: "W. Bro. L. T. Anstead",
-    masterElect: "Bro. H. E. Boyle",
-    secretary: "N. E. Mills",
-    keyBusiness: [
-      "In memory of W. Bro. W. L. Lewis, P.P.G.St.B., who passed away 30th August 1954",
-      "Installation of Bro. H. E. Boyle as Master for the ensuing year",
-      "Motion to place £21 from the Benevolent Fund on the W. Master's list for R.M. Benevolent Institution",
-      "Presentation of Past Master's Jewel to W. Bro. L. T. Anstead",
-      "Election of Lodge Representative to Provincial Charity Committee",
-    ],
-    officers: [
-      { name: "Bro. H. E. Boyle", role: "S.W." },
-      { name: "Bro. G. H. Knevett", role: "J.W." },
-      { name: "W. Bro. T. F. Kirkham, P.P.G.D.", role: "Chaplain" },
-      { name: "W. Bro. H. C. Felmingham, P.P.A.G.D.C.", role: "Treasurer" },
-      { name: "W. Bro. N. E. Mills, F.A.C.C.A., P.P.G.Treas.", role: "Secretary" },
-      { name: "W. Bro. W. J. Green, F.C.A.", role: "Acting D.C." },
-      { name: "Bro. A. J. Huntingford", role: "S.D." },
-      { name: "Bro. F. Edmonds", role: "J.D." },
-      { name: "W. Bro. R. B. Seaman, P.P.G.St.B.", role: "A.D.C." },
-      { name: "W. Bro. A. H. Ley, F.R.I.B.A., P.A.G.S.Wks.", role: "Almoner" },
-      { name: "W. Bro. C. Haydn Nokes, P.P.G.D.", role: "Organist" },
-      { name: "W. Bro. F. L. Cook", role: "Asst. Secretary" },
-      { name: "Bro. R. G. Batten, F.R.I.C.S.", role: "I.G." },
-      { name: "W. Bro. W. J. Green, F.C.A.", role: "Steward" },
-      { name: "Bro. W. Boyle", role: "Steward" },
-      { name: "Bro. A. W. Green", role: "Steward" },
-      { name: "Bro. H. Cohen, B.Sc.", role: "Steward" },
-      { name: "Bro. C. S. Crook", role: "Steward" },
-      { name: "Bro. W. H. Butler", role: "Tyler" },
-    ],
-    charityRep: "W. Bro. R. Edmonds, M.B.E., P.P.G.W.",
-    notes: "The memorial notice for W. Bro. Lewis appears as a bordered panel on the agenda page — a deliberate typographic act of mourning within an otherwise administrative document.",
-  },
-  {
-    id: "summons-33",
-    type: "summons",
-    number: 33,
-    date: "14th March 1955",
-    meetingDate: "Wednesday 23rd March 1955",
-    venue: "Masonic Hall, Chertsey",
-    wm: "W. Bro. H. E. Boyle",
-    ipm: "W. Bro. L. T. Anstead",
-    secretary: "N. E. Mills",
-    keyBusiness: [
-      "Ballot to initiate Mr George Kenyon, Chartered Mechanical Engineer, Ministry of Supply — born 28th September 1918",
-      "Election by ballot of Master for the ensuing year",
-      "Election of Treasurer and Tyler",
-      "Election of two Brethren for Standing Committee and Audit Committee",
-      "Reception of Almoner's Report",
-      "Presentation of Past Master's Jewel to W. Bro. H. E. Boyle",
-      "Motion to donate £21 to Royal Masonic Hospital 1955",
-    ],
-    officers: [
-      { name: "Bro. G. H. Knevett", role: "S.W." },
-      { name: "W. Bro. A. J. Huntingford", role: "J.W." },
-      { name: "W. Bro. T. F. Kirkham, P.P.G.D.", role: "Chaplain" },
-      { name: "W. Bro. H. C. Felmingham, P.P.A.G.D.C.", role: "Treasurer" },
-      { name: "W. Bro. N. E. Mills, F.A.C.C.A., P.P.G.Treas.", role: "Secretary" },
-      { name: "W. Bro. W. J. Green, F.C.A.", role: "D.C." },
-      { name: "Bro. F. Edmonds", role: "S.D." },
-      { name: "Bro. R. G. Batten, F.R.I.C.S.", role: "J.D." },
-      { name: "W. Bro. R. B. Seaman, P.P.G.St.B.", role: "A.D.C." },
-      { name: "W. Bro. A. H. Ley, F.R.I.B.A., P.A.G.S.Wks.", role: "Almoner" },
-      { name: "W. Bro. F. L. Cook", role: "Asst. Secretary" },
-      { name: "Bro. W. Boyle", role: "I.G." },
-      { name: "Bro. A. W. Green", role: "Steward" },
-      { name: "Bro. H. Cohen, B.Sc.", role: "Steward" },
-      { name: "Bro. C. S. Crook", role: "Steward" },
-      { name: "Bro. J. Humphries", role: "Steward" },
-      { name: "Bro. W. C. Askew", role: "Steward" },
-      { name: "Bro. W. H. Butler", role: "Tyler" },
-    ],
-    charityRep: "W. Bro. R. Edmonds, M.B.E., P.P.G.W.",
-    notes: "This is the Installation meeting for the 1955 year. The Officers Night was announced for Monday 21st March at St. Alban's Hall, Weybridge — two days before the lodge meeting itself.",
-  },
-  {
-    id: "summons-55",
-    type: "summons",
-    number: 55,
-    date: "22nd October 1959",
-    meetingDate: "Tuesday 3rd November 1959",
-    venue: "Masonic Hall, Surbiton",
-    wm: "W. Bro. Walter Joseph Green, P.P.G.D.",
-    ipm: "W. Bro. R. G. Batten",
-    secretary: "G. N. Mills",
-    keyBusiness: [
-      "Investment of W. Bro. A. H. Ley, P.A.G.S.Wks. as Almoner",
-      "Passing of Bro. H. E. Gibbs to the Second Degree",
-      "Reading of the Lodge Bye-Laws",
-      "Receipt of Almoner's Report",
-      "Report on Grand Lodge Communications",
-    ],
-    officers: [
-      { name: "Bro. H. Cohen, B.Sc.", role: "S.W." },
-      { name: "Bro. J. Humphries", role: "J.W." },
-      { name: "W. Bro. A. J. Huntingford", role: "Chaplain" },
-      { name: "W. Bro. H. C. Felmingham, P.P.G.D.", role: "Treasurer" },
-      { name: "Bro. G. N. Mills, A.A.C.C.A.", role: "Secretary" },
-      { name: "W. Bro. R. B. Seaman, P.P.G.St.B.", role: "D.C." },
-      { name: "Bro. S. J. H. C. Harrison", role: "S.D." },
-      { name: "Bro. V. E. Wick", role: "J.D." },
-      { name: "W. Bro. F. T. Butt", role: "A.D.C." },
-      { name: "W. Bro. A. H. Ley, F.R.I.B.A., P.A.G.S.Wks.", role: "Almoner" },
-      { name: "W. Bro. F. H. Green", role: "Asst. Secretary" },
-      { name: "Bro. E. F. G. Hills", role: "I.G." },
-      { name: "Bro. R. H. Kidman", role: "Steward" },
-      { name: "Bro. K. C. Thayne", role: "Steward" },
-      { name: "Bro. S. C. Turner", role: "Steward" },
-      { name: "Bro. G. Kenyon", role: "Steward" },
-      { name: "Bro. S. L. Mullins", role: "Steward" },
-      { name: "Bro. W. H. Butler", role: "Tyler" },
-    ],
-    charityRep: "W. Bro. R. Edmonds, M.B.E., P.G.St.B., P.P.G.W.",
-    notes: "Harry E. Gibbs — passed here to the Second Degree in November 1959, raised to the Third in early 1960, and President of the Lodge's Ladies' Festival just nine years later. His progression through these pages is one of the quiet narrative threads running through the archive.",
-  },
-  {
-    id: "summons-57",
-    type: "summons",
-    number: 57,
-    date: "18th January 1960",
-    meetingDate: "Tuesday 2nd February 1960",
-    venue: "Masonic Hall, Surbiton",
-    wm: "W. Bro. Walter Joseph Green, P.P.G.D.",
-    ipm: "W. Bro. R. G. Batten",
-    secretary: "G. N. Mills",
-    keyBusiness: [
-      "Ballot to initiate Mr Graham Stuart Turner, Sales Representative, George Newnes & Son Ltd — born 13th October 1935",
-      "Raising of Bro. H. E. Gibbs to the Third Degree",
-      "Report on Grand Lodge Communications",
-      "Circulation of the Charity Box",
-    ],
-    officers: [
-      { name: "Bro. H. Cohen, B.Sc.", role: "S.W." },
-      { name: "Bro. J. Humphries", role: "J.W." },
-      { name: "W. Bro. A. J. Huntingford", role: "Chaplain" },
-      { name: "W. Bro. H. C. Felmingham, P.P.G.D.", role: "Treasurer" },
-      { name: "Bro. G. N. Mills, A.A.C.C.A.", role: "Secretary" },
-      { name: "W. Bro. R. B. Seaman, P.P.G.St.B.", role: "D.C." },
-      { name: "Bro. S. J. H. C. Harrison", role: "S.D." },
-      { name: "Bro. V. E. Wick", role: "J.D." },
-      { name: "W. Bro. F. T. Butt", role: "A.D.C." },
-      { name: "W. Bro. A. H. Ley, F.R.I.B.A., P.A.G.S.Wks.", role: "Almoner" },
-      { name: "W. Bro. F. H. Green", role: "Asst. Secretary" },
-      { name: "Bro. E. F. G. Hills", role: "I.G." },
-      { name: "Bro. R. H. Kidman", role: "Steward" },
-      { name: "Bro. K. C. Thayne", role: "Steward" },
-      { name: "Bro. S. C. Turner", role: "Steward" },
-      { name: "Bro. G. Kenyon", role: "Steward" },
-      { name: "Bro. S. L. Mullins", role: "Steward" },
-      { name: "Bro. W. H. Butler", role: "Tyler" },
-    ],
-    charityRep: "W. Bro. R. Edmonds, M.B.E., P.G.St.B., P.P.G.W.",
-    notes: "The Officers' Night that season was announced for Monday 1st February 1960 at the Conservative Club, Church Street, Weybridge — the evening before this meeting. The Lodge of Instruction (the Noel Money Lodge) met Monday evenings at the same venue, with W. Bro. H. E. H. Boyle as Secretary.",
-  },
-  {
-    id: "summons-65",
-    type: "summons",
-    number: 65,
-    date: "26th October 1961",
-    meetingDate: "Tuesday 7th November 1961",
-    venue: "Masonic Hall, Surbiton",
-    wm: "W. Bro. John Humphries",
-    ipm: "W. Bro. H. Cohen, B.Sc.",
-    secretary: "R. G. Batten",
-    keyBusiness: [
-      "Ballot to initiate Mr Eric Walter John Aldridge, Civil Servant, E.M.I. Electronics Ltd. (address redacted for privacy) — born 9th July 1914, proposed by Bro. S. L. Mullins, seconded by W. Bro. A. J. Huntingford",
-      "Report on Grand Lodge Communications",
-      "Circulation of the Charity Box",
-    ],
-    officers: [
-      { name: "Bro. G. N. Mills, F.A.C.C.A., P.P.G.Stwd.", role: "S.W." },
-      { name: "Bro. S. J. H. C. Harrison", role: "J.W." },
-      { name: "W. Bro. A. J. Huntingford", role: "Chaplain" },
-      { name: "W. Bro. H. C. Felmingham, P.P.G.D.", role: "Treasurer" },
-      { name: "W. Bro. R. G. Batten, F.R.I.C.S.", role: "Secretary" },
-      { name: "W. Bro. F. T. Butt, P.P.A.G.D.C.", role: "D.C." },
-      { name: "Bro. V. E. Wick", role: "S.D." },
-      { name: "Bro. E. F. G. Hills", role: "J.D." },
-      { name: "W. Bro. F. A. Edmonds", role: "A.D.C." },
-      { name: "W. Bro. A. H. Ley, F.R.I.B.A., P.A.G.S.Wks.", role: "Almoner" },
-      { name: "W. Bro. F. H. Green, P.P.A.G.D.C. (Middx.)", role: "Asst. Secretary" },
-      { name: "Bro. S. C. Turner", role: "I.G." },
-      { name: "Bro. R. H. Kidman", role: "Steward" },
-      { name: "Bro. G. K. Kenyon", role: "Steward" },
-      { name: "Bro. S. L. Mullins", role: "Steward" },
-      { name: "Bro. H. R. Holyer", role: "Steward" },
-      { name: "Bro. W. H. Butler", role: "Tyler" },
-    ],
-    charityRep: "W. Bro. R. Edmonds, M.B.E., P.G.St.B., P.P.G.W.",
-    notes: "The Members of the Lodge register in this summons runs back to the nine Founders of 1949 — a complete membership roll with addresses and dates (addresses redacted for privacy in this presentation). Note R. G. Batten, previously Secretary under W. J. Green: as with several Secretaries in this period, his home address also served as the Lodge's correspondence address — a reminder that the Lodge had no permanent premises of its own at this stage.",
-  },
-  {
-    id: "summons-66",
-    type: "summons",
-    number: 66,
-    date: "21st December 1961",
-    meetingDate: "Tuesday 2nd January 1962",
-    venue: "Masonic Hall, Surbiton",
-    wm: "W. Bro. John Humphries",
-    ipm: "W. Bro. H. Cohen, B.Sc.",
-    secretary: "R. G. Batten",
-    keyBusiness: [
-      "Ballot to initiate Mr John Albert Ladd, Schoolmaster, Finnart House School (address redacted for privacy) — born 2nd September 1917, proposed by W. Bro. H. Cohen, seconded by Bro. S. S. Whitfield",
-      "Passing of Bro. E. W. J. Aldridge to the Second Degree",
-      "Reading of the Lodge Bye-Laws",
-      "Report on Grand Lodge Communications",
-    ],
-    officers: [
-      { name: "Bro. G. N. Mills, F.A.C.C.A., P.P.G.Stwd.", role: "S.W." },
-      { name: "Bro. S. J. H. C. Harrison", role: "J.W." },
-      { name: "W. Bro. A. J. Huntingford", role: "Chaplain" },
-      { name: "W. Bro. H. C. Felmingham, P.P.G.D.", role: "Treasurer" },
-      { name: "W. Bro. R. G. Batten, F.R.I.C.S.", role: "Secretary" },
-      { name: "W. Bro. F. T. Butt, P.P.A.G.D.C.", role: "D.C." },
-      { name: "Bro. V. E. Wick", role: "S.D." },
-      { name: "Bro. E. F. G. Hills", role: "J.D." },
-      { name: "W. Bro. F. A. Edmonds", role: "A.D.C." },
-      { name: "W. Bro. A. H. Ley, F.R.I.B.A., P.A.G.S.Wks.", role: "Almoner" },
-      { name: "W. Bro. F. H. Green, P.P.A.G.D.C. (Middx.)", role: "Asst. Secretary" },
-      { name: "Bro. S. C. Turner", role: "I.G." },
-      { name: "Bro. R. H. Kidman", role: "Steward" },
-      { name: "Bro. G. K. Kenyon", role: "Steward" },
-      { name: "Bro. S. L. Mullins", role: "Steward" },
-      { name: "Bro. H. R. Holyer", role: "Steward" },
-      { name: "Bro. W. H. Butler", role: "Tyler" },
-    ],
-    charityRep: "W. Bro. R. Edmonds, M.B.E., P.G.St.B., P.P.G.W.",
-    notes: "The most consecutive pair in the archive: Summons No. 65 and No. 66 are just two months apart. Aldridge — balloted and initiated in November — is already being passed to the Second Degree here in January. The next regular meeting was announced for Tuesday 6th February 1962.",
-  },
-  {
-    id: "festival-1969",
-    type: "festival",
-    number: null,
-    date: "Friday 21st November 1969",
-    wm: "W. Bro. Harry E. Gibbs",
-    ipm: "W. Bro. Harold R. Holyer",
-    president: "W. Bro. H. E. Gibbs",
-    committee: [
-      "W. Bro. G. N. Mills",
-      "W. Bro. E. F. G. Hills",
-      "Bro. C. Crook (Festival Secretary)",
-    ],
-    toastmaster: "Bro. Norman Caley",
-    menu: [
-      "Prawn Cocktail",
-      "Cream of Asparagus",
-      "Roast Aylesbury Duckling — Orange and Brandy Sauce, Chateau and Parsley Potatoes, Garden Peas",
-      "Meringue Glacé",
-      "Coffee",
-    ],
-    toasts: [
-      { toast: "Her Majesty The Queen", proposedBy: "The President" },
-      { toast: "The Ladies", proposedBy: "Bro. R. H. Kidman", response: "Mrs. Jessie Gibbs" },
-      { toast: "The President", proposedBy: "W. Bro. Harold Holyer", response: "W. Bro. Harry Gibbs" },
-    ],
-    entertainment: [
-      "Dancing to Bert Giddings and his Music — M.C.: Bro. Bert Giddings",
-      "Cabaret: Norman Caley, Bridie Devon, Margaret White — presented by Mrs. Margery L. White Jr.",
-      "Auld Lang Syne — 1 a.m.",
-      "National Anthem",
-    ],
-    officers: [
-      { name: "Bro. G. S. Turner", role: "S.W." },
-      { name: "Bro. E. W. J. Aldridge", role: "J.W." },
-      { name: "W. Bro. E. F. G. Hills", role: "Chaplain" },
-      { name: "Bro. R. H. Kidman", role: "Treasurer" },
-      { name: "W. Bro. S. C. Turner", role: "Secretary" },
-      { name: "W. Bro. F. A. Edmonds, P.P.A.G.D.C.", role: "D.C." },
-      { name: "Bro. J. A. Yates", role: "S.D." },
-      { name: "Bro. C. Crook", role: "J.D." },
-      { name: "W. Bro. V. E. T. Wick", role: "A.D.C." },
-      { name: "W. Bro. H. Cohen, O.B.E., B.Sc., P.P.G.D.", role: "Almoner" },
-      { name: "Bro. N. E. Taylor", role: "I.G." },
-      { name: "Bro. H. R. Roach", role: "Steward" },
-      { name: "Bro. J. A. Ladd", role: "Steward" },
-      { name: "Bro. R. A. Gardner", role: "Steward" },
-      { name: "Bro. E. C. Walker", role: "Steward" },
-      { name: "Bro. T. W. Laffey", role: "Steward" },
-      { name: "W. Bro. T. W. J. Regan, P.P.G.W.", role: "Steward" },
-      { name: "Bro. N. E. Taylor", role: "Tyler" },
-      { name: "Bro. S. S. Whitfield", role: "Charity Representative" },
-    ],
-    notes: "By 1969, Harry Gibbs — passed to the Second Degree in November 1959 and raised here in February 1960 — presides as President over the Lodge's Ladies' Festival. His response toast is proposed by Harold Holyer, who appears in these pages as a Steward in 1961 and would become Immediate Past Master by this same evening.",
-  },
-];
+// ─────────────────────────────────────────────────────────────────────
+// Static Worshipful Masters strip (unchanged — sourced from the summons registers)
+// ─────────────────────────────────────────────────────────────────────
 
 const masters = [
   { years: "1949", name: "Roy Edmonds, M.B.E., P.G.St.B.", note: "Founder & First Master" },
@@ -354,9 +60,6 @@ const masters = [
   { years: "1961/62", name: "J. Humphries" },
 ];
 
-/* JSON-LD reflects what this page actually is: a CreativeWork describing
-   the lodge's historical archive. No address/geo claims are made here —
-   that schema belongs on the contact/profile page where it's accurate. */
 const archiveSchema = {
   "@context": "https://schema.org",
   "@type": "CreativeWork",
@@ -371,103 +74,142 @@ const archiveSchema = {
   temporalCoverage: "1954/1969",
 };
 
-function FieldRow({ label, value }: { label: string; value: string }) {
-  return (
-    <div>
-      <span className="font-sans text-xs uppercase tracking-wide text-muted-foreground">
-        {label}
-      </span>
-      <br />
-      <span className="font-sans text-sm text-foreground">{value}</span>
-    </div>
-  );
+// ─────────────────────────────────────────────────────────────────────
+// Card
+// ─────────────────────────────────────────────────────────────────────
+
+const CATEGORY_LABEL: Record<HeritageDoc["category"], string> = {
+  summons: "Summons",
+  programme: "Programme",
+  photograph: "Photograph",
+  other: "Document",
+};
+
+function formatDate(iso?: string) {
+  if (!iso) return "";
+  try {
+    return new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+  } catch {
+    return iso;
+  }
 }
 
-function SummonsCard({
+function DocumentCard({
   doc,
   isOpen,
   onToggle,
 }: {
-  doc: SummonsDoc;
+  doc: HeritageDoc;
   isOpen: boolean;
   onToggle: () => void;
 }) {
-  const headingId = `${doc.id}-heading`;
+  const headingId = `${doc._id}-heading`;
+  const thumbUrl = doc.thumbnailImage
+    ? (() => {
+        try {
+          return urlFor(doc.thumbnailImage).width(320).height(320).fit("crop").auto("format").url();
+        } catch {
+          return null;
+        }
+      })()
+    : null;
+  const pdfUrl = doc.documentFile?.asset?.url;
+  const pages = (doc.documentPages || [])
+    .map((p) => {
+      try {
+        return urlFor(p).width(1400).auto("format").url();
+      } catch {
+        return null;
+      }
+    })
+    .filter((u): u is string => Boolean(u));
+
   return (
     <article className="mb-8 border border-border border-l-4 border-l-navy bg-card shadow-sm">
       <button
         type="button"
         onClick={onToggle}
         aria-expanded={isOpen}
-        aria-controls={`${doc.id}-panel`}
+        aria-controls={`${doc._id}-panel`}
         className="flex w-full items-start justify-between gap-4 bg-navy px-6 py-5 text-left"
       >
-        <div>
-          <p className="font-serif text-[0.7rem] uppercase tracking-[0.2em] text-gold">
-            Province of Surrey — Weybridge Lodge No. 6787
-          </p>
-          <h3 id={headingId} className="font-serif text-lg text-background">
-            Summons No. {doc.number} · {doc.date}
-          </h3>
-          <p className="font-sans text-sm italic text-gold/80">
-            Meeting: {doc.meetingDate} · {doc.venue}
-          </p>
+        <div className="flex gap-4">
+          {thumbUrl && (
+            <img
+              src={thumbUrl}
+              alt=""
+              className="hidden h-16 w-16 flex-shrink-0 rounded-sm border border-gold/40 object-cover sm:block"
+              loading="lazy"
+            />
+          )}
+          <div>
+            <p className="font-serif text-[0.7rem] uppercase tracking-[0.2em] text-gold">
+              Province of Surrey — {CATEGORY_LABEL[doc.category]}
+            </p>
+            <h3 id={headingId} className="font-serif text-lg text-background">
+              {doc.title}
+            </h3>
+            {doc.date && (
+              <p className="font-sans text-sm italic text-gold/80">{formatDate(doc.date)}</p>
+            )}
+          </div>
         </div>
         <span aria-hidden="true" className="mt-1 min-w-[1.5rem] text-right text-lg text-gold">
           {isOpen ? "−" : "+"}
         </span>
       </button>
 
-      <div className="grid grid-cols-1 gap-2 px-6 pt-4 sm:grid-cols-2 sm:gap-x-8">
-        <FieldRow label="Worshipful Master" value={doc.wm} />
-        {doc.ipm && <FieldRow label="Immediate Past Master" value={doc.ipm} />}
-        {doc.masterElect && <FieldRow label="Master Elect" value={doc.masterElect} />}
-        <FieldRow label="Secretary" value={doc.secretary} />
-      </div>
+      {doc.description && (
+        <div className="px-6 pt-4">
+          <p className="font-sans text-sm leading-relaxed text-foreground">{doc.description}</p>
+        </div>
+      )}
 
       {isOpen && (
-        <div id={`${doc.id}-panel`} role="region" aria-labelledby={headingId} className="px-6 pb-6">
-          <div className="mt-4 border-t border-border pt-4">
-            <section className="mb-5">
-              <h4 className="mb-2 font-serif text-xs uppercase tracking-[0.15em] text-navy">
-                Agenda — Principal Business
-              </h4>
-              <ol className="space-y-1">
-                {doc.keyBusiness.map((item, i) => (
-                  <li key={i} className="flex gap-3 font-sans text-sm leading-relaxed text-foreground">
-                    <span className="shrink-0 font-mono text-gold">{i + 1}.</span>
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ol>
-            </section>
+        <div id={`${doc._id}-panel`} role="region" aria-labelledby={headingId} className="px-6 pb-6">
+          <div className="mt-4 border-t border-border pt-4 space-y-6">
+            {doc.transcription && doc.transcription.length > 0 && (
+              <section className="font-sans text-sm leading-relaxed text-foreground [&_p]:mb-3 [&_h2]:mb-2 [&_h2]:mt-4 [&_h2]:font-serif [&_h2]:text-xs [&_h2]:uppercase [&_h2]:tracking-[0.15em] [&_h2]:text-navy [&_h3]:mb-2 [&_h3]:mt-3 [&_h3]:font-serif [&_h3]:text-sm [&_h3]:text-navy [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5">
+                <PortableText value={doc.transcription} />
+              </section>
+            )}
 
-            <section className="mb-5">
-              <h4 className="mb-2 font-serif text-xs uppercase tracking-[0.15em] text-navy">
-                Officers of the Lodge
-              </h4>
-              <ul className="grid grid-cols-1 gap-x-4 sm:grid-cols-2">
-                {doc.officers.map((o, i) => (
-                  <li
-                    key={i}
-                    className="flex justify-between border-b border-border py-1 font-sans text-sm text-foreground"
-                  >
-                    <span>{o.name}</span>
-                    <span className="ml-2 shrink-0 italic text-muted-foreground">{o.role}</span>
-                  </li>
-                ))}
-              </ul>
-              {doc.charityRep && (
-                <p className="mt-2 font-sans text-sm italic text-muted-foreground">
-                  Charity Representative: {doc.charityRep}
-                </p>
-              )}
-            </section>
+            {pdfUrl && (
+              <section>
+                <h4 className="mb-2 font-serif text-xs uppercase tracking-[0.15em] text-navy">
+                  Scanned Document
+                </h4>
+                <a
+                  href={pdfUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-2 border border-gold bg-navy px-4 py-2 font-sans text-sm text-background transition-opacity hover:opacity-90"
+                >
+                  <FileText size={16} aria-hidden="true" />
+                  View PDF
+                </a>
+              </section>
+            )}
 
-            {doc.notes && (
-              <aside className="border-l-2 border-gold bg-background px-4 py-3 font-sans text-sm italic leading-relaxed text-muted-foreground">
-                {doc.notes}
-              </aside>
+            {!pdfUrl && pages.length > 0 && (
+              <section>
+                <h4 className="mb-2 font-serif text-xs uppercase tracking-[0.15em] text-navy">
+                  Scanned Pages
+                </h4>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  {pages.map((u, i) => (
+                    <a
+                      key={i}
+                      href={u}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="block border border-border bg-background"
+                    >
+                      <img src={u} alt={`${doc.title} — page ${i + 1}`} className="w-full" loading="lazy" />
+                    </a>
+                  ))}
+                </div>
+              </section>
             )}
           </div>
         </div>
@@ -476,134 +218,21 @@ function SummonsCard({
   );
 }
 
-function FestivalCard({
-  doc,
-  isOpen,
-  onToggle,
-}: {
-  doc: FestivalDoc;
-  isOpen: boolean;
-  onToggle: () => void;
-}) {
-  const headingId = `${doc.id}-heading`;
-  return (
-    <article className="mb-8 border border-gold/40 border-l-4 border-l-navy bg-card shadow-sm">
-      <button
-        type="button"
-        onClick={onToggle}
-        aria-expanded={isOpen}
-        aria-controls={`${doc.id}-panel`}
-        className="flex w-full items-start justify-between gap-4 bg-navy px-6 py-5 text-left"
-      >
-        <div>
-          <p className="font-serif text-[0.7rem] uppercase tracking-[0.2em] text-gold">
-            Weybridge Lodge No. 6787
-          </p>
-          <h3 id={headingId} className="font-serif text-lg italic text-background">
-            Ladies' Festival
-          </h3>
-          <p className="font-sans text-sm text-gold/80">{doc.date}</p>
-        </div>
-        <span aria-hidden="true" className="mt-1 text-lg text-gold">
-          {isOpen ? "−" : "+"}
-        </span>
-      </button>
-
-      <div className="grid grid-cols-1 gap-2 px-6 pt-4 sm:grid-cols-2 sm:gap-x-8">
-        <FieldRow label="President" value={doc.president} />
-        <FieldRow label="Worshipful Master" value={doc.wm} />
-        <FieldRow label="Toastmaster" value={doc.toastmaster} />
-        <FieldRow label="Immediate Past Master" value={doc.ipm} />
-      </div>
-
-      {isOpen && (
-        <div id={`${doc.id}-panel`} role="region" aria-labelledby={headingId} className="px-6 pb-6">
-          <div className="mt-4 border-t border-border pt-4">
-            <div className="mb-5 grid grid-cols-1 gap-6 sm:grid-cols-2">
-              <section>
-                <h4 className="mb-2 font-serif text-xs uppercase tracking-[0.15em] text-navy">
-                  Menu
-                </h4>
-                <p className="mb-1 font-sans text-xs italic text-muted-foreground">
-                  "Eat, drink and be merry…"
-                </p>
-                <ul className="space-y-1 font-sans text-sm italic text-foreground">
-                  {doc.menu.map((item, i) => (
-                    <li key={i}>{item}</li>
-                  ))}
-                </ul>
-              </section>
-
-              <section>
-                <h4 className="mb-2 font-serif text-xs uppercase tracking-[0.15em] text-navy">
-                  Toasts
-                </h4>
-                <ul className="space-y-2">
-                  {doc.toasts.map((t, i) => (
-                    <li key={i} className="font-sans text-sm">
-                      <p className="italic text-foreground">{t.toast}</p>
-                      <p className="text-muted-foreground">
-                        Proposed: {t.proposedBy}
-                        {t.response ? ` · Response: ${t.response}` : ""}
-                      </p>
-                    </li>
-                  ))}
-                </ul>
-
-                <h4 className="mb-2 mt-4 font-serif text-xs uppercase tracking-[0.15em] text-navy">
-                  Evening
-                </h4>
-                <ul className="space-y-1 font-sans text-sm italic text-foreground">
-                  {doc.entertainment.map((e, i) => (
-                    <li key={i}>{e}</li>
-                  ))}
-                </ul>
-              </section>
-            </div>
-
-            <section className="mb-5">
-              <h4 className="mb-2 font-serif text-xs uppercase tracking-[0.15em] text-navy">
-                Officers of the Lodge, 1969
-              </h4>
-              <ul className="grid grid-cols-1 gap-x-4 sm:grid-cols-2">
-                {doc.officers.map((o, i) => (
-                  <li
-                    key={`${o.name || "organist"}-${i}`}
-                    className="flex justify-between border-b border-border py-1 font-sans text-sm text-foreground"
-                  >
-                    <span>{o.name || "—"}</span>
-                    <span className="ml-2 shrink-0 italic text-muted-foreground">{o.role}</span>
-                  </li>
-                ))}
-              </ul>
-            </section>
-
-            <section className="mb-5">
-              <h4 className="mb-2 font-serif text-xs uppercase tracking-[0.15em] text-navy">
-                Festival Committee
-              </h4>
-              <ul className="font-sans text-sm text-foreground">
-                {doc.committee.map((m, i) => (
-                  <li key={i}>{m}</li>
-                ))}
-              </ul>
-            </section>
-
-            {doc.notes && (
-              <aside className="border-l-2 border-gold bg-background px-4 py-3 font-sans text-sm italic leading-relaxed text-muted-foreground">
-                {doc.notes}
-              </aside>
-            )}
-          </div>
-        </div>
-      )}
-    </article>
-  );
-}
+// ─────────────────────────────────────────────────────────────────────
+// Page
+// ─────────────────────────────────────────────────────────────────────
 
 export default function HeritageArchive() {
   const [openDoc, setOpenDoc] = useState<string | null>(null);
   const handleToggle = (id: string) => setOpenDoc((prev) => (prev === id ? null : id));
+
+  const { data: documents, isLoading, isError } = useQuery({
+    queryKey: ["heritage-documents"],
+    queryFn: () => sanityClient.fetch<HeritageDoc[]>(HERITAGE_QUERY),
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const docs = documents ?? [];
 
   return (
     <div className="flex min-h-screen flex-col overflow-x-hidden">
@@ -704,23 +333,30 @@ export default function HeritageArchive() {
               </span>
             </h2>
 
-            {documents.map((doc) =>
-              doc.type === "summons" ? (
-                <SummonsCard
-                  key={doc.id}
-                  doc={doc}
-                  isOpen={openDoc === doc.id}
-                  onToggle={() => handleToggle(doc.id)}
-                />
-              ) : (
-                <FestivalCard
-                  key={doc.id}
-                  doc={doc}
-                  isOpen={openDoc === doc.id}
-                  onToggle={() => handleToggle(doc.id)}
-                />
-              )
+            {isLoading && (
+              <p className="py-8 text-center font-sans text-sm italic text-muted-foreground">
+                Loading archive…
+              </p>
             )}
+            {isError && (
+              <p className="py-8 text-center font-sans text-sm italic text-muted-foreground">
+                Unable to load archive documents. Please try again shortly.
+              </p>
+            )}
+            {!isLoading && !isError && docs.length === 0 && (
+              <p className="py-8 text-center font-sans text-sm italic text-muted-foreground">
+                No archive documents have been published yet.
+              </p>
+            )}
+
+            {docs.map((doc) => (
+              <DocumentCard
+                key={doc._id}
+                doc={doc}
+                isOpen={openDoc === doc._id}
+                onToggle={() => handleToggle(doc._id)}
+              />
+            ))}
           </section>
 
           <section className="mt-2 grid grid-cols-1 gap-8 border-t border-border pt-8 sm:grid-cols-2">
@@ -748,8 +384,6 @@ export default function HeritageArchive() {
             </div>
           </section>
 
-          {/* Two quiet, appropriately-scoped next steps rather than a sales CTA.
-              Both route to existing pages — no destination is invented. */}
           <nav aria-label="Continue exploring" className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
             <Link
               to="/history"
