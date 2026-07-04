@@ -18,6 +18,7 @@ const JoinUs = lazy(() => import("./pages/JoinUs"));
 const DataProtection = lazy(() => import("./pages/DataProtection"));
 const AccessibilityStatement = lazy(() => import("./pages/AccessibilityStatement"));
 const LodgeProfile = lazy(() => import("./pages/LodgeProfile"));
+const LodgeProfilePreview = lazy(() => import("./pages/LodgeProfilePreview"));
 const History = lazy(() => import("./pages/History"));
 const WorshipfulMasters = lazy(() => import("./pages/WorshipfulMasters"));
 const Officers = lazy(() => import("./pages/Officers"));
