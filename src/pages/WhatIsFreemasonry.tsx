@@ -158,7 +158,7 @@ const faqItems: FaqItem[] = [
   },
 ];
 
-const WhatIsFreemasonryPreview = () => {
+const WhatIsFreemasonry = () => {
   const shouldReduceMotion = useReducedMotion();
 
   useEffect(() => {
