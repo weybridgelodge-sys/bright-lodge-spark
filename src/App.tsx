@@ -68,6 +68,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/what-is-freemasonry" element={<WhatIsFreemasonry />} />
+            <Route path="/what-is-freemasonry-preview" element={<WhatIsFreemasonryPreview />} />
             <Route path="/freemasonry-and-charity" element={<FreemasonryCharity />} />
             <Route path="/our-charities" element={<OurCharities />} />
             <Route path="/join-us" element={<JoinUs />} />
