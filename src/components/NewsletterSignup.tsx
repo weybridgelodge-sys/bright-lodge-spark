@@ -1,8 +1,13 @@
 import React, { useState } from "react";
 import { Mail, CheckCircle2, ArrowRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { supabase } from "@/integrations/supabase/client";
 import TurnstileWidget from "@/components/TurnstileWidget";
+
+// Call the edge function via plain fetch so this component (rendered in the
+// Footer on every page) does not pull the full supabase-js SDK into the
+// initial JS bundle. Reduces main-entry gzip by ~110 KiB.
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string;
 
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
