@@ -53,11 +53,6 @@ const NewsletterSignup = () => {
       setStatus("error");
     }
   };
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Subscription failed");
-      setStatus("error");
-    }
-  };
 
   if (status === "done") {
     return (
