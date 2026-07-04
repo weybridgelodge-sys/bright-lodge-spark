@@ -12,6 +12,7 @@ import Index from "./pages/Index";
 const NotFound = lazy(() => import("./pages/NotFound"));
 const Unsubscribe = lazy(() => import("./pages/Unsubscribe"));
 const WhatIsFreemasonry = lazy(() => import("./pages/WhatIsFreemasonry"));
+const WhatIsFreemasonryPreview = lazy(() => import("./pages/WhatIsFreemasonryPreview"));
 const FreemasonryCharity = lazy(() => import("./pages/FreemasonryCharity"));
 const OurCharities = lazy(() => import("./pages/OurCharities"));
 const JoinUs = lazy(() => import("./pages/JoinUs"));
@@ -67,6 +68,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/what-is-freemasonry" element={<WhatIsFreemasonry />} />
+            <Route path="/what-is-freemasonry-preview" element={<WhatIsFreemasonryPreview />} />
             <Route path="/freemasonry-and-charity" element={<FreemasonryCharity />} />
             <Route path="/our-charities" element={<OurCharities />} />
             <Route path="/join-us" element={<JoinUs />} />
