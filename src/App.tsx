@@ -77,6 +77,7 @@ const App = () => (
             <Route path="/accessibility-statement" element={<AccessibilityStatement />} />
             <Route path="/unsubscribe" element={<Unsubscribe />} />
             <Route path="/lodge-profile" element={<LodgeProfile />} />
+            <Route path="/lodge-profile-preview" element={<LodgeProfilePreview />} />
             <Route path="/history" element={<History />} />
             <Route path="/history/archive" element={<HeritageArchive />} />
             <Route path="/heritage" element={<HeritageArchive />} />
