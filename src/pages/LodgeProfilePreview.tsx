@@ -30,7 +30,7 @@ const values: { name: string; description: string }[] = [
   { name: "Integrity", description: "Members hold themselves to a standard of honesty and moral consistency, on and off the temple floor." },
   { name: "Friendship", description: "Bonds formed at the Lodge are built to last a lifetime, rooted in unity and equity among Brethren." },
   { name: "Respect", description: "For tradition, for each other, and for people of all backgrounds and beliefs who meet the Lodge's criteria for membership." },
-  { name: "Service", description: "To fellow members, to Guildford and Surrey, and to national causes such as the Freemasons' Fund for Surgical Research." },
+  { name: "Service", description: "To fellow members, to Guildford and Surrey, and to national causes such as the Masonic Charitable Foundation." },
 ];
 
 const fadeUp = {
