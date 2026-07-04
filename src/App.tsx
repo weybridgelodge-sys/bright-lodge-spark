@@ -18,7 +18,7 @@ const JoinUs = lazy(() => import("./pages/JoinUs"));
 const DataProtection = lazy(() => import("./pages/DataProtection"));
 const AccessibilityStatement = lazy(() => import("./pages/AccessibilityStatement"));
 const LodgeProfile = lazy(() => import("./pages/LodgeProfile"));
-const LodgeProfilePreview = lazy(() => import("./pages/LodgeProfilePreview"));
+
 const History = lazy(() => import("./pages/History"));
 const WorshipfulMasters = lazy(() => import("./pages/WorshipfulMasters"));
 const Officers = lazy(() => import("./pages/Officers"));
@@ -78,7 +78,7 @@ const App = () => (
             <Route path="/accessibility-statement" element={<AccessibilityStatement />} />
             <Route path="/unsubscribe" element={<Unsubscribe />} />
             <Route path="/lodge-profile" element={<LodgeProfile />} />
-            <Route path="/lodge-profile-preview" element={<LodgeProfilePreview />} />
+            
             <Route path="/history" element={<History />} />
             <Route path="/history/archive" element={<HeritageArchive />} />
             <Route path="/heritage" element={<HeritageArchive />} />
