@@ -212,7 +212,6 @@ const WhatIsFreemasonryPreview = () => {
         canonical="/what-is-freemasonry-preview"
         type="website"
         schema={pageSchema}
-        noindex
       />
       <a href="#main-content" className="skip-to-content">
         Skip to main content
