@@ -34,14 +34,25 @@ const NewsletterSignup = () => {
     }
     setStatus("loading");
     try {
-      const { data, error } = await supabase.functions.invoke("newsletter-subscribe", {
-        body: { email: clean, honeypot, turnstileToken },
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/newsletter-subscribe`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          apikey: SUPABASE_ANON_KEY,
+          Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+        },
+        body: JSON.stringify({ email: clean, honeypot, turnstileToken }),
       });
-
-      if (error || (data && (data as { error?: string }).error)) {
-        throw new Error((data as { error?: string })?.error || error?.message || "Subscription failed");
+      const data = (await res.json().catch(() => ({}))) as { error?: string };
+      if (!res.ok || data?.error) {
+        throw new Error(data?.error || "Subscription failed");
       }
       setStatus("done");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Subscription failed");
+      setStatus("error");
+    }
+  };
     } catch (err) {
       setError(err instanceof Error ? err.message : "Subscription failed");
       setStatus("error");
