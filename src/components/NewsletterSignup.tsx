@@ -1,8 +1,13 @@
 import React, { useState } from "react";
 import { Mail, CheckCircle2, ArrowRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { supabase } from "@/integrations/supabase/client";
 import TurnstileWidget from "@/components/TurnstileWidget";
+
+// Call the edge function via plain fetch so this component (rendered in the
+// Footer on every page) does not pull the full supabase-js SDK into the
+// initial JS bundle. Reduces main-entry gzip by ~110 KiB.
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string;
 
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -29,12 +34,18 @@ const NewsletterSignup = () => {
     }
     setStatus("loading");
     try {
-      const { data, error } = await supabase.functions.invoke("newsletter-subscribe", {
-        body: { email: clean, honeypot, turnstileToken },
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/newsletter-subscribe`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          apikey: SUPABASE_ANON_KEY,
+          Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+        },
+        body: JSON.stringify({ email: clean, honeypot, turnstileToken }),
       });
-
-      if (error || (data && (data as { error?: string }).error)) {
-        throw new Error((data as { error?: string })?.error || error?.message || "Subscription failed");
+      const data = (await res.json().catch(() => ({}))) as { error?: string };
+      if (!res.ok || data?.error) {
+        throw new Error(data?.error || "Subscription failed");
       }
       setStatus("done");
     } catch (err) {
