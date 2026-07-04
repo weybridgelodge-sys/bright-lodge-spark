@@ -12,6 +12,7 @@ import Index from "./pages/Index";
 const NotFound = lazy(() => import("./pages/NotFound"));
 const Unsubscribe = lazy(() => import("./pages/Unsubscribe"));
 const WhatIsFreemasonry = lazy(() => import("./pages/WhatIsFreemasonry"));
+const WhatIsFreemasonryPreview = lazy(() => import("./pages/WhatIsFreemasonryPreview"));
 const FreemasonryCharity = lazy(() => import("./pages/FreemasonryCharity"));
 const OurCharities = lazy(() => import("./pages/OurCharities"));
 const JoinUs = lazy(() => import("./pages/JoinUs"));
