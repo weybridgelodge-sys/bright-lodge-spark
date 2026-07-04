@@ -419,4 +419,4 @@ const WhatIsFreemasonry = () => {
   );
 };
 
-export default WhatIsFreemasonryPreview;
+export default WhatIsFreemasonry;
