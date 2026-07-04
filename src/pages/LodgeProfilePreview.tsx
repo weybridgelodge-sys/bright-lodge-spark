@@ -39,7 +39,7 @@ const fadeUp = {
   static: { opacity: 1, y: 0 },
 };
 
-const LodgeProfilePreview = () => {
+const LodgeProfile = () => {
   const shouldReduceMotion = useReducedMotion();
   const pageSchema = useMemo(() => {
     const breadcrumb = breadcrumbSchema([
@@ -47,7 +47,17 @@ const LodgeProfilePreview = () => {
       { name: "Lodge Profile", url: "/lodge-profile" },
     ]);
     return [
-      { "@context": "https://schema.org", "@type": "WebPage", "@id": "https://www.weybridgelodge.org.uk/lodge-profile#webpage", url: "https://www.weybridgelodge.org.uk/lodge-profile", name: "Lodge Profile", description: "Preview", inLanguage: "en-GB" },
+      {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "@id": "https://www.weybridgelodge.org.uk/lodge-profile#webpage",
+        url: "https://www.weybridgelodge.org.uk/lodge-profile",
+        name: "Lodge Profile | Freemasons in Guildford, Surrey — Weybridge Lodge No. 6787",
+        description:
+          "Weybridge Lodge No. 6787 is a welcoming Lodge of Freemasons meeting in Guildford, Surrey. Founded in 1949, we have 22 members, meet four times a year, and are active in charity and Provincial life.",
+        inLanguage: "en-GB",
+        isPartOf: { "@id": "https://www.weybridgelodge.org.uk/#website" },
+      },
       breadcrumb,
       localBusinessSchema,
     ];
@@ -55,10 +65,18 @@ const LodgeProfilePreview = () => {
 
   return (
     <div className="min-h-screen overflow-x-hidden">
-      <SEO title="Lodge Profile Preview" description="Preview" canonical="/lodge-profile-preview" type="website" schema={pageSchema} />
+      <SEO
+        title="Lodge Profile — Weybridge Lodge No. 6787, Guildford"
+        description="Weybridge Lodge No. 6787 — a welcoming Freemasons Lodge in Guildford, Surrey. Founded 1949, 22 members, four meetings a year, active in charity."
+        canonical="/lodge-profile"
+        type="website"
+        schema={pageSchema}
+      />
+      <a href="#main-content" className="skip-to-content">Skip to main content</a>
       <Header />
       <main id="main-content">
         <PageHeader title="Lodge Profile" subtitle="Introducing Weybridge Lodge No. 6787 — Freemasons in Guildford, Surrey" />
+
 
         <section className="pt-16 pb-4 md:pt-20 md:pb-6 bg-background" aria-labelledby="vision-heading">
           <div className="container mx-auto px-6 max-w-3xl text-center">
