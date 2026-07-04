@@ -13,6 +13,17 @@
       <video:live>no</video:live>
     </video:video>
     <video:video>
+      <video:thumbnail_loc>https://i.ytimg.com/vi/X12bN9WNPdQ/hqdefault.jpg</video:thumbnail_loc>
+      <video:title>Freemasonry and the Armed Forces (Subtitled)</video:title>
+      <video:description>Freemasonry and the Armed Forces - United By Service.
+
+Built on shared values of loyalty, honour, and camaraderie, Freemasonry offers a home for those who have served — a place where structure, fellowship, and purpose continue long after leaving the uniform behind.</video:description>
+      <video:player_loc allow_embed="yes">https://www.youtube.com/embed/X12bN9WNPdQ</video:player_loc>
+      <video:duration>590</video:duration>
+      <video:family_friendly>yes</video:family_friendly>
+      <video:live>no</video:live>
+    </video:video>
+    <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/v_DSCoqrqdA/hqdefault.jpg</video:thumbnail_loc>
       <video:title>The Origins Of Freemasonry</video:title>
       <video:description>Freemasonry consists of fraternal groups that trace their origins to medieval guilds of stonemasons. Freemasonry is considered the oldest existing secular fraternal organisation, with documents and traditions dating back to the 14th century.</video:description>
