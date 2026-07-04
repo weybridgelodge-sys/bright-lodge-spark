@@ -1,7 +1,11 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, HeartHandshake } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+
+// Plain fetch to PostgREST — avoids pulling the supabase-js SDK into the
+// initial homepage bundle (this component renders below the fold on /).
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string;
 
 const gbp = (n: number) => new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP", maximumFractionDigits: 0 }).format(n);
 
@@ -11,16 +15,30 @@ export default function HomepageCharityCTA() {
 
   useEffect(() => {
     (async () => {
-      const { data } = await (supabase as any)
-        .from("public_charity_totals")
-        .select("total_raised, public_feed_start_date")
-        .maybeSingle();
-      if (data) {
-        setTotal(Number(data.total_raised));
-        setStartDate(data.public_feed_start_date);
+      try {
+        const res = await fetch(
+          `${SUPABASE_URL}/rest/v1/public_charity_totals?select=total_raised,public_feed_start_date`,
+          {
+            headers: {
+              apikey: SUPABASE_ANON_KEY,
+              Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+              Accept: "application/json",
+            },
+          },
+        );
+        if (!res.ok) return;
+        const rows = (await res.json()) as Array<{ total_raised: number | string; public_feed_start_date: string | null }>;
+        const row = rows?.[0];
+        if (row) {
+          setTotal(Number(row.total_raised));
+          setStartDate(row.public_feed_start_date);
+        }
+      } catch {
+        // silent — CTA simply doesn't render
       }
     })();
   }, []);
+
 
   if (total === null || total <= 0) return null;
   const sinceYear = startDate ? new Date(startDate).getFullYear() : null;
