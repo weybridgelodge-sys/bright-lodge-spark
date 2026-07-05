@@ -140,7 +140,6 @@ const History = () => {
         </section>
 
         {/* ── SECTION 2 — IN THE BEGINNING ── */}
-        {/* bg-navy flat: bg-navy-gradient is not a project token */}
         <section
           className="py-20 md:py-28 bg-navy"
           aria-labelledby="beginning-heading"
@@ -155,14 +154,12 @@ const History = () => {
               <p className="text-gold text-sm font-sans uppercase tracking-wide mb-2">
                 Warranted 29th January 1949
               </p>
-              {/* text-gold replaces unapproved text-primary-foreground */}
               <h2
                 id="beginning-heading"
                 className="text-2xl md:text-3xl font-serif text-gold mb-6"
               >
                 In the Beginning
               </h2>
-              {/* text-gold/70 replaces unapproved text-primary-foreground/70 */}
               <p className="text-gold/70 font-sans leading-relaxed mb-4">
                 Wednesday had been early-closing day in Weybridge since time immemorial. It was
                 this simple fact — a Wednesday afternoon free from the counter and the workshop —
@@ -175,7 +172,6 @@ const History = () => {
                 Masonic interests, but the community itself — helping to bind together a town that
                 risked losing its sense of place.
               </p>
-              {/* Date clarified: petition 1948, Warrant issued 29th January 1949 */}
               <p className="text-gold/70 font-sans leading-relaxed mb-4">
                 The petition for Weybridge Lodge No. 6787 was submitted in 1948 under the
                 sponsorship of our Mother Lodge, Noel Money No. 2521, from whom the Lodge also drew
@@ -366,7 +362,6 @@ const History = () => {
                     loading="lazy"
                   />
                 )}
-                {/* text-gold/50 replaces unapproved text-primary-foreground/50 */}
                 <figcaption
                   id="masonic-centre-caption"
                   className="text-xs text-gold/50 text-center mt-2 italic"
@@ -507,8 +502,6 @@ const History = () => {
         </section>
 
         {/* ── FINAL CTA ── */}
-        {/* Previous version: bare div, three unstyled buttons, no heading or copy.
-            Now: proper section with context heading, descriptive copy, min-h touch targets. */}
         <section
           className="py-16 bg-background border-t border-border"
           aria-labelledby="history-cta-heading"
@@ -560,46 +553,22 @@ const History = () => {
           </div>
         </section>
 
+        {/* ── PRIMARY SOURCES ── */}
         <section className="container mx-auto px-4 sm:px-6 pb-12">
-          <div style={{
-            borderTop: "1px solid #C4A882",
-            padding: "2rem 0 0",
-            marginTop: "2.5rem",
-            textAlign: "center",
-          }}>
-            <div style={{
-              fontFamily: "Georgia, 'Times New Roman', serif",
-              color: "#C9A432",
-              fontSize: "0.7rem",
-              letterSpacing: "0.25em",
-              textTransform: "uppercase",
-              marginBottom: "0.75rem",
-            }}>
+          <div className="border-t border-gold/40 pt-8 mt-10 text-center">
+            <p className="font-serif text-gold text-xs uppercase tracking-[0.25em] mb-3">
               Primary Sources
-            </div>
-            <Link to="/heritage" style={{
-              display: "inline-block",
-              fontFamily: "Georgia, 'Times New Roman', serif",
-              color: "#FFFFFF",
-              backgroundColor: "#1B2A4A",
-              fontSize: "1rem",
-              fontWeight: 600,
-              textDecoration: "none",
-              border: "1px solid #C9A432",
-              padding: "0.85rem 1.75rem",
-              letterSpacing: "0.05em",
-            }}>
+            </p>
+            <Link
+              to="/heritage"
+              aria-label="View the Heritage Archive — a record in seven documents, 1954 to 1969"
+              className="inline-flex items-center justify-center bg-navy text-primary-foreground border border-gold font-serif text-base font-semibold tracking-wide px-7 py-3 min-h-[48px] hover:bg-navy-light transition-colors"
+            >
               The Archive — A Record in Seven Documents, 1954–1969 →
             </Link>
-            <div style={{
-              marginTop: "0.6rem",
-              fontSize: "0.85rem",
-              color: "#5A4A2E",
-              fontStyle: "italic",
-            }}>
+            <p className="mt-2 text-sm text-muted-foreground font-sans italic">
               Six summonses and a Ladies' Festival programme from the Lodge's first two decades
-            </div>
-
+            </p>
           </div>
         </section>
 
