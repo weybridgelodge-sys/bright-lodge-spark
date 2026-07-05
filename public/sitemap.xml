@@ -21,6 +21,11 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://weybridgelodge.org.uk/south-surrey-freemasons</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://weybridgelodge.org.uk/history</loc>
     <changefreq>yearly</changefreq>
     <priority>0.8</priority>
