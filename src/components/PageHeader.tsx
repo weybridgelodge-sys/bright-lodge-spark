@@ -24,11 +24,11 @@ const PageHeader = ({ title, subtitle }: PageHeaderProps) => {
           transition={{ duration: 0.7 }}
         >
           <div className="h-0.5 w-16 bg-gold mx-auto mb-6" />
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif text-primary-foreground leading-tight">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif text-primary-foreground leading-tight break-words">
             {title}
           </h1>
           {subtitle && (
-            <p className="text-primary-foreground/70 font-sans mt-4 max-w-xl mx-auto text-lg">
+            <p className="text-primary-foreground/70 font-sans mt-4 max-w-xl mx-auto text-lg break-words">
               {subtitle}
             </p>
           )}

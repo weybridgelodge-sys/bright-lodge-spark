@@ -139,23 +139,23 @@ const JoinUs = () => {
           aria-labelledby="why-join-heading"
         >
           <div className="container mx-auto px-4 sm:px-6 max-w-4xl">
-            <div className="grid md:grid-cols-2 gap-8 sm:gap-12 md:gap-16 items-start">
+            <div className="grid md:grid-cols-2 gap-8 sm:gap-12 md:gap-16 items-start min-w-0">
               {/* Why Join Column */}
-              <motion.div {...slideProps("left")}>
+              <motion.div {...slideProps("left")} className="min-w-0">
                 <div className="h-0.5 w-16 bg-gold mb-6" aria-hidden="true" />
-                <h2 id="why-join-heading" className="text-3xl md:text-4xl font-serif text-foreground mb-6">
+                <h2 id="why-join-heading" className="text-3xl md:text-4xl font-serif text-foreground mb-6 break-words">
                   Why join Freemasonry?
                 </h2>
-                <p className="text-muted-foreground font-sans leading-relaxed mb-8">
+                <p className="text-muted-foreground font-sans leading-relaxed mb-8 break-words">
                   Freemasonry offers a unique experience that enriches lives. Whether you are looking
                   for fellowship, personal growth, or the chance to give back to your community in
                   Guildford and across Surrey, membership opens doors to extraordinary opportunities.
                 </p>
                 <ul className="space-y-4 list-none p-0 m-0">
                   {reasons.map((reason) => (
-                    <li key={reason} className="flex items-start gap-3">
+                    <li key={reason} className="flex items-start gap-3 min-w-0">
                       <CheckCircle className="w-5 h-5 text-gold mt-0.5 flex-shrink-0" aria-hidden="true" />
-                      <span className="text-foreground font-sans text-sm">{reason}</span>
+                      <span className="text-foreground font-sans text-sm break-words min-w-0">{reason}</span>
                     </li>
                   ))}
                 </ul>
@@ -164,7 +164,7 @@ const JoinUs = () => {
               {/* Contact Card Column */}
               <motion.div
                 {...slideProps("right", 0.2)}
-                className="bg-card rounded-sm border border-border shadow-lg p-5 sm:p-8"
+                className="bg-card rounded-sm border border-border shadow-lg p-5 sm:p-8 min-w-0"
               >
                 <h2 className="text-xl font-serif text-foreground mb-6">Get in touch</h2>
 
