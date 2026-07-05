@@ -84,7 +84,7 @@ const SouthSurreyFreemasons = () => {
   const pageSchema = useMemo(() => {
     const breadcrumb = breadcrumbSchema([
       { name: "Home", url: "/" },
-      { name: "Freemasonry for South Surrey Commuters", url: "/south-surrey-freemasons" },
+      { name: "South Surrey Freemasons", url: "/south-surrey-freemasons" },
     ]);
 
     const webPageSchema = {
@@ -248,7 +248,7 @@ const SouthSurreyFreemasons = () => {
                     value={`item-${i}`}
                     className="border border-border rounded-sm px-6 bg-card"
                   >
-                    <AccordionTrigger className="text-left font-serif text-foreground hover:text-gold transition-colors">
+                    <AccordionTrigger className="text-left font-serif text-foreground hover:text-gold transition-colors min-h-[48px]">
                       {faq.question}
                     </AccordionTrigger>
                     <AccordionContent className="text-muted-foreground font-sans leading-relaxed">
