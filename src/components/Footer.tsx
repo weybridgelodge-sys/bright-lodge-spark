@@ -26,6 +26,8 @@ const footerColumns: FooterColumn[] = [
       { label: "Officers of the Lodge", href: "/officers" },
       { label: "Lodge Traditions", href: "/lodge-traditions" },
       { label: "Officers' Roles & Jewels", href: "/officers-jewels" },
+      // NEW — mirrors the header's "Local Area" addition
+      { label: "South Surrey Freemasons", href: "/south-surrey-freemasons" },
     ],
   },
   {
@@ -86,29 +88,47 @@ const Footer = () => {
             <h2 className="font-serif text-primary-foreground mb-4 text-sm">Meeting Location</h2>
             <p className="text-primary-foreground/80 text-sm font-sans leading-relaxed">
               Guildford Masonic Centre, Weybourne House,<br />
-              Hitherbury Close, Portsmouth Road,<br />
+              Hitherbury Close,<br />
               Guildford, Surrey GU2 4DR
             </p>
           </div>
 
           <div>
             <h2 className="font-serif text-primary-foreground mb-4 text-sm">Follow Us</h2>
-            <div className="flex gap-4">
-              <a href="https://instagram.com/weybridgelodge/" target="_blank" rel="noopener noreferrer" className="text-primary-foreground/80 hover:text-gold transition-colors" aria-label="Instagram">
+            <div className="flex gap-2">
+              <a
+                href="https://instagram.com/weybridgelodge/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary-foreground/80 hover:text-gold transition-colors min-h-[48px] min-w-[48px] flex items-center justify-center"
+                aria-label="Instagram"
+              >
                 <Instagram className="w-5 h-5" />
               </a>
-              <a href="https://facebook.com/people/Weybridge-Lodge-No-6787/61551808420513/" target="_blank" rel="noopener noreferrer" className="text-primary-foreground/80 hover:text-gold transition-colors" aria-label="Facebook">
+              <a
+                href="https://facebook.com/people/Weybridge-Lodge-No-6787/61551808420513/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary-foreground/80 hover:text-gold transition-colors min-h-[48px] min-w-[48px] flex items-center justify-center"
+                aria-label="Facebook"
+              >
                 <Facebook className="w-5 h-5" />
               </a>
-              <a href="https://twitter.com/weybridgelodge" target="_blank" rel="noopener noreferrer" className="text-primary-foreground/80 hover:text-gold transition-colors" aria-label="X/Twitter">
+              <a
+                href="https://twitter.com/weybridgelodge"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary-foreground/80 hover:text-gold transition-colors min-h-[48px] min-w-[48px] flex items-center justify-center"
+                aria-label="X/Twitter"
+              >
                 <Twitter className="w-5 h-5" />
               </a>
             </div>
-            <div className="mt-6 flex flex-col gap-2">
-              <a href="https://surreyfreemasons.org.uk/" target="_blank" rel="noopener noreferrer" className="text-xs text-primary-foreground/75 hover:text-gold transition-colors font-sans">
+            <div className="mt-2 flex flex-col gap-1">
+              <a href="https://surreyfreemasons.org.uk/" target="_blank" rel="noopener noreferrer" className="text-xs text-primary-foreground/75 hover:text-gold transition-colors font-sans min-h-[48px] inline-flex items-center">
                 Provincial Grand Lodge of Surrey
               </a>
-              <a href="https://www.ugle.org.uk/" target="_blank" rel="noopener noreferrer" className="text-xs text-primary-foreground/75 hover:text-gold transition-colors font-sans">
+              <a href="https://www.ugle.org.uk/" target="_blank" rel="noopener noreferrer" className="text-xs text-primary-foreground/75 hover:text-gold transition-colors font-sans min-h-[48px] inline-flex items-center">
                 United Grand Lodge of England
               </a>
             </div>
@@ -152,13 +172,13 @@ const Footer = () => {
             © {new Date().getFullYear()} Weybridge Lodge No. 6787. All rights reserved.
           </p>
           <div className="flex gap-6">
-            <Link to="/data-protection" className="text-xs text-primary-foreground/75 hover:text-gold transition-colors font-sans">
+            <Link to="/data-protection" className="text-xs text-primary-foreground/75 hover:text-gold transition-colors font-sans min-h-[48px] inline-flex items-center">
               Data Protection Policy
             </Link>
-            <Link to="/accessibility-statement" className="text-xs text-primary-foreground/75 hover:text-gold transition-colors font-sans">
+            <Link to="/accessibility-statement" className="text-xs text-primary-foreground/75 hover:text-gold transition-colors font-sans min-h-[48px] inline-flex items-center">
               Accessibility Statement
             </Link>
-            <Link to="/what-is-freemasonry" className="text-xs text-primary-foreground/75 hover:text-gold transition-colors font-sans">
+            <Link to="/what-is-freemasonry" className="text-xs text-primary-foreground/75 hover:text-gold transition-colors font-sans min-h-[48px] inline-flex items-center">
               What is Freemasonry
             </Link>
           </div>
