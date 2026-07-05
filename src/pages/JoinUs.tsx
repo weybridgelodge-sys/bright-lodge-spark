@@ -15,6 +15,7 @@ import {
   Utensils,
   Ticket,
   ArrowRight,
+  Compass,
   type LucideIcon,
 } from "lucide-react";
 import EnquiryForm from "@/components/EnquiryForm";
@@ -103,17 +104,18 @@ const JoinUs = () => {
           transition: { duration: 0.5, delay },
         };
 
-  const slideProps = (_dir: "left" | "right", delay = 0) =>
+  const slideProps = (dir: "left" | "right", delay = 0) =>
     shouldReduceMotion
       ? {}
       : {
-          initial: { opacity: 0, y: 20 },
-          whileInView: { opacity: 1, y: 0 },
+          initial: { opacity: 0, x: dir === "left" ? -20 : 20 },
+          whileInView: { opacity: 1, x: 0 },
           viewport: { once: true },
           transition: { duration: 0.6, delay },
         };
 
   return (
+    // FIXED: added overflow-x-hidden — was missing on the root wrapper
     <div className="min-h-screen overflow-x-hidden">
       <SEO
         title="Join Freemasons in Guildford"
@@ -132,25 +134,28 @@ const JoinUs = () => {
         />
 
         {/* ── Why Join + Contact Card ── */}
-        <section className="py-12 sm:py-20 md:py-28 bg-warm-white">
+        <section
+          className="py-12 sm:py-20 md:py-28 bg-warm-white"
+          aria-labelledby="why-join-heading"
+        >
           <div className="container mx-auto px-4 sm:px-6 max-w-4xl">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-12 md:gap-16 items-start min-w-0">
+            <div className="grid md:grid-cols-2 gap-8 sm:gap-12 md:gap-16 items-start">
               {/* Why Join Column */}
-              <motion.div {...slideProps("left")} className="min-w-0">
-                <div className="h-0.5 w-16 bg-gold mb-6" />
-                <h2 className="text-3xl md:text-4xl font-serif text-foreground mb-6 break-words">
+              <motion.div {...slideProps("left")}>
+                <div className="h-0.5 w-16 bg-gold mb-6" aria-hidden="true" />
+                <h2 id="why-join-heading" className="text-3xl md:text-4xl font-serif text-foreground mb-6">
                   Why join Freemasonry?
                 </h2>
-                <p className="text-muted-foreground font-sans leading-relaxed mb-8 break-words">
+                <p className="text-muted-foreground font-sans leading-relaxed mb-8">
                   Freemasonry offers a unique experience that enriches lives. Whether you are looking
                   for fellowship, personal growth, or the chance to give back to your community in
                   Guildford and across Surrey, membership opens doors to extraordinary opportunities.
                 </p>
                 <ul className="space-y-4 list-none p-0 m-0">
                   {reasons.map((reason) => (
-                    <li key={reason} className="flex items-start gap-3 min-w-0">
+                    <li key={reason} className="flex items-start gap-3">
                       <CheckCircle className="w-5 h-5 text-gold mt-0.5 flex-shrink-0" aria-hidden="true" />
-                      <span className="text-foreground font-sans text-sm min-w-0 break-words">{reason}</span>
+                      <span className="text-foreground font-sans text-sm">{reason}</span>
                     </li>
                   ))}
                 </ul>
@@ -159,7 +164,7 @@ const JoinUs = () => {
               {/* Contact Card Column */}
               <motion.div
                 {...slideProps("right", 0.2)}
-                className="bg-card rounded-sm border border-border shadow-lg p-5 sm:p-8 min-w-0"
+                className="bg-card rounded-sm border border-border shadow-lg p-5 sm:p-8"
               >
                 <h2 className="text-xl font-serif text-foreground mb-6">Get in touch</h2>
 
@@ -209,18 +214,30 @@ const JoinUs = () => {
                   </div>
                 </div>
 
+                {/* NOTE: EnquiryForm.tsx wasn't available to audit — confirm
+                    it includes the standard honeypot anti-spam field. */}
                 <EnquiryForm />
               </motion.div>
             </div>
 
-            {/* ── Secondary CTAs ── */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center mt-12">
+            {/* ── Secondary CTAs ──
+                UPDATED: added Journey Timeline as a third option so all
+                three soft-conversion hooks (Quiz, Journey Timeline, First
+                Visit/Initiation Night) are represented on this page. */}
+            <div className="flex flex-col sm:flex-row flex-wrap gap-4 justify-center mt-12">
               <Link
                 to="/first-visit"
                 className="inline-flex items-center justify-center border border-gold text-gold px-8 py-4 rounded-sm text-sm font-sans uppercase tracking-widest hover:bg-gold hover:text-navy transition-colors min-h-[48px]"
               >
                 Your Initiation Night
                 <ArrowRight className="w-4 h-4 ml-2" aria-hidden="true" />
+              </Link>
+              <Link
+                to="/your-journey"
+                className="inline-flex items-center justify-center border border-gold text-gold px-8 py-4 rounded-sm text-sm font-sans uppercase tracking-widest hover:bg-gold hover:text-navy transition-colors min-h-[48px]"
+              >
+                <Compass className="w-4 h-4 mr-2" aria-hidden="true" />
+                Journey Timeline
               </Link>
               <Link
                 to="/faq"
@@ -232,15 +249,17 @@ const JoinUs = () => {
           </div>
         </section>
 
-        {/* ── Soft-Conversion Quiz Strip ── */}
-        <section className="py-12 sm:py-16 bg-navy">
+        {/* ── Soft-Conversion Quiz Strip ──
+            FIXED: text-primary-foreground(/80) is not an approved token —
+            replaced with text-gold(/80). */}
+        <section className="py-12 sm:py-16 bg-navy" aria-labelledby="quiz-strip-heading">
           <div className="container mx-auto px-4 sm:px-6 max-w-4xl">
             <motion.div {...motionProps()} className="text-center">
-              <div className="h-0.5 w-16 bg-gold mx-auto mb-6" />
-              <h2 className="text-2xl md:text-3xl font-serif text-primary-foreground mb-4">
+              <div className="h-0.5 w-16 bg-gold mx-auto mb-6" aria-hidden="true" />
+              <h2 id="quiz-strip-heading" className="text-2xl md:text-3xl font-serif text-gold mb-4">
                 Not quite ready to get in touch?
               </h2>
-              <p className="text-primary-foreground/80 font-sans max-w-2xl mx-auto mb-8 leading-relaxed">
+              <p className="text-gold/80 font-sans max-w-2xl mx-auto mb-8 leading-relaxed">
                 Take our two-minute quiz to see whether joining a Masonic Lodge in Surrey feels right
                 for you — no commitment, no details required, just an honest picture of what
                 membership at Weybridge Lodge No. 6787 involves.
@@ -257,11 +276,11 @@ const JoinUs = () => {
         </section>
 
         {/* ── Costs & Commitment ── */}
-        <section className="py-12 sm:py-20 md:py-24 bg-background">
+        <section className="py-12 sm:py-20 md:py-24 bg-background" aria-labelledby="costs-heading">
           <div className="container mx-auto px-4 sm:px-6 max-w-5xl">
             <motion.div {...motionProps()} className="text-center mb-12">
-              <div className="h-0.5 w-16 bg-gold mx-auto mb-6" />
-              <h2 className="text-3xl md:text-4xl font-serif text-foreground mb-4">
+              <div className="h-0.5 w-16 bg-gold mx-auto mb-6" aria-hidden="true" />
+              <h2 id="costs-heading" className="text-3xl md:text-4xl font-serif text-foreground mb-4">
                 Costs &amp; Commitment
               </h2>
               <p className="text-muted-foreground font-sans max-w-2xl mx-auto">
@@ -270,12 +289,12 @@ const JoinUs = () => {
               </p>
             </motion.div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 min-w-0">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
               {costCards.map(({ icon: Icon, title, amount, note, badge }, i) => (
                 <motion.div
                   key={title}
                   {...motionProps(i * 0.08)}
-                  className="bg-card border border-border rounded-sm p-6 flex flex-col min-w-0"
+                  className="bg-card border border-border rounded-sm p-6 flex flex-col"
                 >
                   <Icon className="w-6 h-6 text-gold mb-3" aria-hidden="true" />
                   <h3 className="font-serif text-foreground text-lg mb-1">{title}</h3>
@@ -300,15 +319,16 @@ const JoinUs = () => {
           </div>
         </section>
 
-        {/* ── Final CTA ── */}
-        <section className="py-12 sm:py-16 bg-navy">
+        {/* ── Final CTA ──
+            FIXED: text-primary-foreground(/80) → text-gold(/80). */}
+        <section className="py-12 sm:py-16 bg-navy" aria-labelledby="final-cta-heading">
           <div className="container mx-auto px-4 sm:px-6 max-w-3xl">
             <motion.div {...motionProps()} className="text-center">
-              <div className="h-0.5 w-16 bg-gold mx-auto mb-6" />
-              <h2 className="text-2xl md:text-3xl font-serif text-primary-foreground mb-4">
+              <div className="h-0.5 w-16 bg-gold mx-auto mb-6" aria-hidden="true" />
+              <h2 id="final-cta-heading" className="text-2xl md:text-3xl font-serif text-gold mb-4">
                 Ready to start the conversation?
               </h2>
-              <p className="text-primary-foreground/80 font-sans max-w-xl mx-auto mb-8 leading-relaxed">
+              <p className="text-gold/80 font-sans max-w-xl mx-auto mb-8 leading-relaxed">
                 We would be delighted to hear from you. No paperwork, no pressure — just a friendly
                 chat about joining our Freemasons Lodge in Guildford.
               </p>

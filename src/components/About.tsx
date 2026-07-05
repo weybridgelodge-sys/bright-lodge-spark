@@ -8,12 +8,21 @@ const About = () => {
   const rightRef = useScrollReveal<HTMLDivElement>();
 
   return (
-    <section id="about" className="py-24 md:py-32 bg-warm-white">
+    // FIXED: added aria-labelledby paired with the new h2 id, alongside the
+    // existing anchor-scroll id="about".
+    <section id="about" className="py-24 md:py-32 bg-warm-white" aria-labelledby="about-heading">
       <div className="container mx-auto px-6">
         <div className="grid md:grid-cols-2 gap-16 items-center">
           <div ref={leftRef} className="reveal-on-scroll">
-            <div className="h-0.5 w-16 bg-gold mb-6" />
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif text-foreground mb-6 leading-tight">
+            <div className="h-0.5 w-16 bg-gold mb-6" aria-hidden="true" />
+            {/* NEW — geo-keyword eyebrow. The stylised heading below carries
+                no local SEO signal, so a small kicker line above it covers
+                "Freemasons in Guildford, Surrey" without touching the
+                existing brand typography. */}
+            <p className="text-gold text-sm font-sans uppercase tracking-wide mb-3">
+              Freemasons in Guildford, Surrey
+            </p>
+            <h2 id="about-heading" className="text-3xl md:text-4xl lg:text-5xl font-serif text-foreground mb-6 leading-tight">
               Welcome to <br />
               <span className="text-gold-dark">Weybridge Lodge</span>
             </h2>
@@ -21,14 +30,14 @@ const About = () => {
               Freemasonry helps men become better people through friendship, harmony and community involvement. Weybridge Lodge No. 6787 has been proudly serving the Guildford community since 1949.
             </p>
             <p className="text-muted-foreground font-sans leading-relaxed mb-6">
-              We hope that through this website, you learn a little about Freemasonry, our Lodge in particular, and how this worldwide organisation can make a difference to you and your community.
+              We hope that through this website, you learn a little about Freemasonry, our Lodge in particular, and how this worldwide organisation can make a difference to you and your community across Guildford and Surrey.
             </p>
             <p className="text-muted-foreground font-sans leading-relaxed mb-6">
               If you have any questions or are interested in taking your first step into Freemasonry, please feel free to contact us. We warmly welcome prospective candidates from all walks of life.
             </p>
             <blockquote className="border-l-4 border-gold pl-5 py-2 bg-warm-white">
               <p className="font-serif italic text-gold-dark text-base md:text-lg leading-relaxed">
-                “Weybridge Lodge operates on the principle of the beehive. Every brother, from the newest Entered Apprentice to the most senior Past Master, contributes to the life of the lodge. Working groups exist so that every member has a role, a purpose, and a home in the lodge beyond the progressive offices.”
+                "Weybridge Lodge operates on the principle of the beehive. Every brother, from the newest Entered Apprentice to the most senior Past Master, contributes to the life of the lodge. Working groups exist so that every member has a role, a purpose, and a home in the lodge beyond the progressive offices."
               </p>
               <footer className="mt-2 text-xs text-muted-foreground not-italic">— Lodge philosophy, adopted 2026</footer>
             </blockquote>
@@ -45,8 +54,10 @@ const About = () => {
                 decoding="async"
                 className="w-full h-auto object-cover"
               />
+              {/* FIXED: text-primary-foreground/90 is not an approved
+                  project token — replaced with text-warm-white/90. */}
               <div className="absolute bottom-0 left-0 right-0 bg-navy/80 backdrop-blur-sm px-4 py-3">
-                <p className="text-primary-foreground/90 text-xs font-sans">
+                <p className="text-warm-white/90 text-xs font-sans">
                   Celebrating our 75th Anniversary — February 2024
                 </p>
               </div>
