@@ -213,20 +213,23 @@ const JoinUs = () => {
                   </div>
                 </div>
 
-                {/* NOTE: EnquiryForm.tsx wasn't available to audit — confirm
-                    it includes the standard honeypot anti-spam field:
-                    a hidden input with an innocuous name (e.g. "website"),
-                    tabIndex={-1}, autoComplete="off", inside a visually
-                    hidden wrapper — before treating this form as production-ready. */}
                 <EnquiryForm />
               </motion.div>
             </div>
 
-            {/* ── Secondary CTAs ──
-                Three soft-conversion hooks represented: Quiz, Journey
-                Timeline, First Visit/Initiation Night.
-                CONFIRM: /your-journey route exists in App.tsx — first
-                appearance of this route in the files audited so far. */}
+            {/* ── Commuter cross-link ── */}
+            <p className="text-center font-sans text-sm text-muted-foreground mt-8">
+              Commuting from Godalming, Farnham or Woking?{" "}
+              <Link
+                to="/south-surrey-freemasons"
+                aria-label="See how the commute to Guildford works for South Surrey members"
+                className="text-gold hover:underline font-medium min-h-[48px] inline-flex items-center"
+              >
+                See how the journey works
+              </Link>
+            </p>
+
+            {/* ── Secondary CTAs ── */}
             <div className="flex flex-col sm:flex-row flex-wrap gap-4 justify-center mt-12">
               <Link
                 to="/first-visit"
@@ -255,9 +258,7 @@ const JoinUs = () => {
           </div>
         </section>
 
-        {/* ── Soft-Conversion Quiz Strip ──
-            Uses the project's gold-shimmer gradient CTA treatment
-            (confirmed correct site-wide, per live screenshot). */}
+        {/* ── Soft-Conversion Quiz Strip ── */}
         <section className="py-12 sm:py-16 bg-navy" aria-labelledby="quiz-strip-heading">
           <div className="container mx-auto px-4 sm:px-6 max-w-4xl">
             <motion.div {...motionProps()} className="text-center">
@@ -282,10 +283,7 @@ const JoinUs = () => {
           </div>
         </section>
 
-        {/* ── Costs & Commitment ──
-            FIXED (this pass): cost cards were a div grid, not a semantic
-            list, despite being card-style repeating content — converted
-            to ul/li per Brand Identity Reference §4. */}
+        {/* ── Costs & Commitment ── */}
         <section className="py-12 sm:py-20 md:py-24 bg-background" aria-labelledby="costs-heading">
           <div className="container mx-auto px-4 sm:px-6 max-w-5xl">
             <motion.div {...motionProps()} className="text-center mb-12">
@@ -329,10 +327,7 @@ const JoinUs = () => {
           </div>
         </section>
 
-        {/* ── Final CTA ──
-            "Call" button uses the project's gold-shimmer gradient CTA
-            treatment (confirmed correct site-wide, per live screenshot),
-            matching the quiz strip CTA above. */}
+        {/* ── Final CTA ── */}
         <section className="py-12 sm:py-16 bg-navy" aria-labelledby="final-cta-heading">
           <div className="container mx-auto px-4 sm:px-6 max-w-3xl">
             <motion.div {...motionProps()} className="text-center">
