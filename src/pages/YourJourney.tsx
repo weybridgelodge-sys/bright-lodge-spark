@@ -428,7 +428,7 @@ const YourJourney = () => {
                 <Link
                   to="/join-us"
                   aria-label="Begin your application to join Weybridge Lodge No. 6787 in Guildford"
-                  className="inline-flex items-center justify-center bg-gold text-navy px-8 py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity"
+                  className="inline-flex items-center justify-center bg-gold-shimmer text-accent-foreground px-8 py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity"
                 >
                   Begin Your Application
                   <ArrowRight className="w-4 h-4 ml-2" aria-hidden="true" />

@@ -404,7 +404,7 @@ const WhatIsFreemasonry = () => {
               <div className="flex flex-col sm:flex-row flex-wrap gap-4 justify-center">
                 <Link
                   to="/quiz"
-                  className="inline-flex items-center justify-center gap-2 bg-gold text-navy px-8 py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity min-h-[48px] w-full sm:w-auto"
+                  className="inline-flex items-center justify-center gap-2 bg-gold-shimmer text-accent-foreground px-8 py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity min-h-[48px] w-full sm:w-auto"
                 >
                   Take the 2-Min Quiz
                   <ArrowRight className="w-4 h-4" aria-hidden="true" />

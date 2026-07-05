@@ -577,7 +577,7 @@ const Events = () => {
                 <Link
                   to="/bookings"
                   aria-label="Book a dining place at the next Weybridge Lodge Festive Board"
-                  className="inline-flex items-center justify-center gap-2 bg-gold text-navy px-8 py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity min-h-[48px] w-full sm:w-auto"
+                  className="inline-flex items-center justify-center gap-2 bg-gold-shimmer text-accent-foreground px-8 py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity min-h-[48px] w-full sm:w-auto"
                 >
                   Book a Dining Place
                   <ArrowRight className="h-4 w-4" aria-hidden="true" />

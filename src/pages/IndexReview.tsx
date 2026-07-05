@@ -110,7 +110,7 @@ const Index = () => {
               </div>
               <Link
                 to="/quiz"
-                className="inline-flex items-center justify-center gap-2 bg-gold text-navy px-5 sm:px-6 py-3 rounded-sm text-xs sm:text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity shrink-0 w-full md:w-auto min-h-[48px]"
+                className="inline-flex items-center justify-center gap-2 bg-gold-shimmer text-accent-foreground px-5 sm:px-6 py-3 rounded-sm text-xs sm:text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity shrink-0 w-full md:w-auto min-h-[48px]"
               >
                 Start the Quiz <ArrowRight className="w-4 h-4" aria-hidden="true" />
               </Link>

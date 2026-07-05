@@ -266,7 +266,7 @@ const JoinUs = () => {
               </p>
               <Link
                 to="/quiz"
-                className="inline-flex items-center justify-center gap-2 bg-gold text-navy px-8 py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity min-h-[48px]"
+                className="inline-flex items-center justify-center gap-2 bg-gold-shimmer text-accent-foreground px-8 py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity min-h-[48px]"
               >
                 Take the 2-Min Quiz
                 <ArrowRight className="w-4 h-4" aria-hidden="true" />
@@ -336,7 +336,7 @@ const JoinUs = () => {
                 <a
                   href="tel:07921589039"
                   aria-label="Call Weybridge Lodge Membership Secretary to begin your application"
-                  className="inline-flex items-center justify-center gap-2 bg-gold text-navy px-8 py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity min-h-[48px] w-full sm:w-auto"
+                  className="inline-flex items-center justify-center gap-2 bg-gold-shimmer text-accent-foreground px-8 py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity min-h-[48px] w-full sm:w-auto"
                 >
                   <Phone className="w-4 h-4" aria-hidden="true" />
                   Call 07921 589 039
