@@ -186,7 +186,7 @@ export const EnquiryForm = () => {
       <button
         type="submit"
         disabled={submitting || !turnstileToken}
-        className="block w-full text-center bg-gold text-navy py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity disabled:opacity-60 min-h-[48px]"
+        className="block w-full text-center bg-gold-shimmer text-accent-foreground py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity disabled:opacity-60 min-h-[48px]"
       >
         {submitting ? "Sending…" : "Start Your Journey"}
       </button>
