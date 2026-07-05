@@ -960,7 +960,7 @@ useEffect(() => {
                             saveBooking(meetingOption as "meeting-only" | "apologies");
                           }
                         }}
-                        className="bg-gold text-navy px-8 py-3 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity disabled:opacity-60 disabled:cursor-not-allowed min-h-[48px]"
+                        className="bg-gold-shimmer text-accent-foreground px-8 py-3 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity disabled:opacity-60 disabled:cursor-not-allowed min-h-[48px]"
                       >
                         {submissionStatus === "submitting" ? "Submitting…" : "Next"}
                       </button>
@@ -1084,7 +1084,7 @@ useEffect(() => {
                       <button
                         type="submit"
                         disabled={submissionStatus === "submitting"}
-                        className="bg-gold text-navy px-8 py-3 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity disabled:opacity-60 disabled:cursor-not-allowed min-h-[48px]"
+                        className="bg-gold-shimmer text-accent-foreground px-8 py-3 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity disabled:opacity-60 disabled:cursor-not-allowed min-h-[48px]"
                       >
                         {submissionStatus === "submitting"
                           ? "Submitting…"
