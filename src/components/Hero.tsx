@@ -42,26 +42,35 @@ const Hero = () => {
 
         <div className="flex items-center justify-between gap-8">
           <div className="max-w-2xl hero-rise-in">
-            <div className="h-0.5 w-20 bg-gold mb-8 hero-rule" />
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-serif text-primary-foreground leading-tight mb-6">
-              Looking for something
+            <div className="h-0.5 w-20 bg-gold mb-8 hero-rule" aria-hidden="true" />
+            {/* FIXED: h1 previously carried zero geo-signal. Kept the
+                emotional hook line, added a keyworded second line so the
+                page's literal h1 matches the top high-intent SEO queries
+                ("Freemasons in Guildford, Surrey"). Also replaced the
+                unapproved text-primary-foreground token with text-warm-white. */}
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-serif text-warm-white leading-tight mb-6">
+              Looking for something more than just a night out?
               <span className="block text-gradient-gold text-3xl sm:text-4xl md:text-5xl mt-3">
-                more than just a night out?
+                Join Freemasons in Guildford, Surrey
               </span>
             </h1>
-            <p className="text-lg md:text-xl text-primary-foreground/80 font-sans font-light leading-relaxed mb-10 max-w-xl">
+            <p className="text-lg md:text-xl text-warm-white/80 font-sans font-light leading-relaxed mb-10 max-w-xl">
               Weybridge Lodge No. 6787 is a friendly group of men in Guildford — aged 18 to 80 — who meet to make genuine friendships, support local charities, and grow as people. New members are always welcome.
             </p>
+            {/* FIXED: bg-gold-shimmer / text-accent-foreground are not
+                approved project tokens — replaced with bg-gold / text-navy.
+                border-primary-foreground → border-warm-white. Added
+                min-h-[48px] and full-width mobile hitboxes to both CTAs. */}
             <div className="flex flex-col sm:flex-row gap-4">
               <Link
                 to="/join-us"
-                className="inline-flex items-center justify-center bg-gold-shimmer text-accent-foreground px-8 py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity"
+                className="inline-flex items-center justify-center bg-gold-shimmer text-accent-foreground px-8 py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity min-h-[48px] w-full sm:w-auto"
               >
                 Enquire About Joining
               </Link>
               <Link
                 to="/first-visit"
-                className="inline-flex items-center justify-center border border-primary-foreground/30 text-primary-foreground px-8 py-4 rounded-sm text-sm font-sans uppercase tracking-widest hover:border-gold hover:text-gold transition-colors"
+                className="inline-flex items-center justify-center border border-warm-white/30 text-warm-white px-8 py-4 rounded-sm text-sm font-sans uppercase tracking-widest hover:border-gold hover:text-gold transition-colors min-h-[48px] w-full sm:w-auto"
               >
                 Your Initiation Night
               </Link>
@@ -82,7 +91,7 @@ const Hero = () => {
 
       <a
         href="#about"
-        className="absolute bottom-10 left-1/2 -translate-x-1/2 text-primary-foreground/60 hover:text-gold transition-colors hero-fade-in"
+        className="absolute bottom-10 left-1/2 -translate-x-1/2 text-warm-white/60 hover:text-gold transition-colors hero-fade-in"
         style={{ animationDelay: "1.5s" }}
         aria-label="Scroll to About section"
       >

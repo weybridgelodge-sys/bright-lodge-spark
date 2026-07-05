@@ -31,25 +31,38 @@ const faqs: FAQItem[] = [
       "Freemasonry is one of the world's oldest and largest fraternal organisations, built around the principles of friendship, charity, and moral development. It offers a structured setting — through ceremony, tradition, and fellowship — in which men reflect on their values and support one another and their wider communities. Weybridge Lodge No. 6787 is a warm, sociable expression of that tradition, based at the Guildford Masonic Centre in Surrey.",
   },
   {
+    // FIXED (critical): this answer previously named "Brotherly Love, Relief,
+    // and Truth" as the Lodge's core values — directly contradicting the
+    // locked, canonical four values (Integrity, Friendship, Respect, Service)
+    // established in the Vision/Mission/Values doc and used consistently on
+    // /lodge-profile and /what-is-freemasonry. Corrected to match.
     question: "What are the core values of Freemasonry?",
     answer:
-      "The three core principles of Freemasonry are Brotherly Love, Relief, and Truth. In practice, this means treating others with respect and kindness, giving generously to those in need, and striving to live with honesty and integrity. These are not abstract ideals — they shape how members conduct themselves both inside and outside the Lodge.",
+      "At Weybridge Lodge No. 6787, our four core values are Integrity, Friendship, Respect, and Service. In practice, this means holding ourselves to a standard of honesty and moral consistency, building bonds meant to last a lifetime, treating tradition and each other with respect, and giving generously — to fellow members, to Guildford and Surrey, and to national causes. These are not abstract ideals — they shape how members conduct themselves both inside and outside the Lodge.",
   },
   {
+    // FIXED: previously implied an open, casual "informal visit" happens
+    // before the application form and interview. Reworded so the sequence
+    // stays consistent with the established fact base elsewhere on the site:
+    // enquiry → interview → application → initiation. A first visit is never
+    // an open drop-in.
     question: "How do I join the Freemasons in Guildford?",
     answer:
-      "The simplest route is to contact our Membership Secretary by phone or email. We will arrange an informal visit to the Guildford Masonic Centre, Weybourne House, Hitherbury Close, Guildford, GU2 4DR, so you can meet a few members and see where we meet. If you decide to proceed, you complete a straightforward application form and attend a relaxed informal interview. If that goes well, we confirm your initiation date. There is no pressure at any stage.",
+      "The simplest route is to contact our Membership Secretary by phone or email. We will arrange an informal interview at the Guildford Masonic Centre, Weybourne House, Hitherbury Close, Guildford, GU2 4DR, so you can meet a few members, see where we meet, and ask any questions. If that goes well, you complete a straightforward application form and we confirm your initiation date. There is no pressure at any stage.",
     renderAnswer: (
       <>
         The simplest route is to contact our Membership Secretary by phone or email via our{" "}
         <Link to="/join-us" className="text-gold underline hover:opacity-80 transition-opacity">
           Join Us
         </Link>{" "}
-        page. We will arrange an informal visit to the Guildford Masonic Centre, Weybourne House,
-        Hitherbury Close, Guildford, GU2 4DR, so you can meet a few members and see where we meet.
-        If you decide to proceed, you complete a straightforward application form and attend a
-        relaxed informal interview. If that goes well, we confirm your initiation date. There is no
-        pressure at any stage.
+        page. We will arrange an informal interview at the Guildford Masonic Centre, Weybourne House,
+        Hitherbury Close, Guildford, GU2 4DR, so you can meet a few members, see where we meet, and
+        ask any questions. If that goes well, you complete a straightforward application form and we
+        confirm your initiation date — you can see the full{" "}
+        <Link to="/your-journey" className="text-gold underline hover:opacity-80 transition-opacity">
+          Journey Timeline
+        </Link>{" "}
+        for what happens at each step. There is no pressure at any stage.
       </>
     ),
   },
@@ -77,6 +90,22 @@ const faqs: FAQItem[] = [
     question: "What is the initiation process?",
     answer:
       "The process begins with an informal interview. If successful, your initiation date is confirmed. At the Lodge meeting before your initiation, your name and details are formally read in open Lodge — a procedural requirement of the United Grand Lodge of England. On your initiation night, a formal ballot is taken in the Lodge room before you are admitted. Once accepted unanimously, the ceremony of Initiation begins. It is conducted with dignity and care, guided by the ritual of the First Degree, and focuses on the principles of integrity, charity, and self-reflection. You leave as an Entered Apprentice — a Freemason.",
+    renderAnswer: (
+      <>
+        The process begins with an informal interview. If successful, your initiation date is
+        confirmed. At the Lodge meeting before your initiation, your name and details are formally
+        read in open Lodge — a procedural requirement of the United Grand Lodge of England. On your
+        initiation night, a formal ballot is taken in the Lodge room before you are admitted. Once
+        accepted unanimously, the ceremony of Initiation begins. It is conducted with dignity and
+        care, guided by the ritual of the First Degree, and focuses on the principles of integrity,
+        charity, and self-reflection. You leave as an Entered Apprentice — a Freemason. Read a full,
+        candid walkthrough on our{" "}
+        <Link to="/first-visit" className="text-gold underline hover:opacity-80 transition-opacity">
+          Your Initiation Night
+        </Link>{" "}
+        page.
+      </>
+    ),
   },
   {
     question: "What happens at a Lodge meeting?",
@@ -154,10 +183,13 @@ const FAQ = () => {
       };
 
   return (
-    <div className="min-h-screen">
+    // FIXED: added overflow-x-hidden — was missing on the root wrapper
+    <div className="min-h-screen overflow-x-hidden">
       <SEO
-       title="Freemasonry FAQ"
-       description="Common questions about becoming a Freemason in Guildford — fees, initiation, meetings and values. Answered by Weybridge Lodge No. 6787."
+        // FIXED: title was thinner than the JSON-LD name, losing keyword
+        // weight — aligned to the fuller geo-anchored title used elsewhere.
+        title="Freemasonry FAQ | Freemasons in Guildford, Surrey — Weybridge Lodge No. 6787"
+        description="Common questions about becoming a Freemason in Guildford and Surrey — fees, initiation, meetings and values. Answered by Weybridge Lodge No. 6787 at the Guildford Masonic Centre, GU2 4DR."
         canonical="/faq"
         schema={pageSchema}
       />
@@ -171,11 +203,11 @@ const FAQ = () => {
           subtitle="Common questions about Freemasonry answered"
         />
 
-        <section className="py-20 md:py-28 bg-warm-white">
+        <section className="py-20 md:py-28 bg-warm-white" aria-labelledby="faq-intro-heading">
           <div className="container mx-auto px-6 max-w-3xl">
             {/* ── Intro ── */}
             <motion.div {...motionProps} className="mb-12">
-              <h2 className="font-serif text-2xl md:text-3xl text-foreground mb-4">
+              <h2 id="faq-intro-heading" className="font-serif text-2xl md:text-3xl text-foreground mb-4">
                 Everything you wanted to know about Freemasonry in Surrey
               </h2>
               <p className="text-muted-foreground font-sans leading-relaxed text-lg">
@@ -200,7 +232,7 @@ const FAQ = () => {
                     value={`item-${i}`}
                     className="border border-border rounded-sm px-6 bg-card"
                   >
-                    <AccordionTrigger className="text-left font-serif text-foreground hover:text-gold transition-colors">
+                    <AccordionTrigger className="text-left font-serif text-foreground hover:text-gold transition-colors min-h-[48px]">
                       {faq.question}
                     </AccordionTrigger>
                     <AccordionContent className="text-muted-foreground font-sans leading-relaxed">
@@ -213,32 +245,38 @@ const FAQ = () => {
           </div>
         </section>
 
-        {/* ── Final CTA — three next steps, no dead end ── */}
-        <section className="py-20 md:py-28 bg-primary text-primary-foreground">
+        {/* ── Final CTA — three next steps, no dead end ──
+            FIXED: bg-primary/text-primary-foreground, bg-gold-shimmer/
+            text-accent-foreground, and border-primary-foreground/40 are not
+            approved project tokens — all replaced with navy/gold. Added
+            min-h-[48px] to every CTA. */}
+        <section className="py-20 md:py-28 bg-navy" aria-labelledby="faq-cta-heading">
           <div className="container mx-auto px-6 max-w-3xl text-center">
             <motion.div {...motionProps}>
-              <h2 className="font-serif text-3xl md:text-4xl mb-4">Still have questions?</h2>
-              <p className="font-sans leading-relaxed text-lg mb-10 opacity-90">
+              <h2 id="faq-cta-heading" className="font-serif text-3xl md:text-4xl text-gold mb-4">
+                Still have questions?
+              </h2>
+              <p className="font-sans leading-relaxed text-lg mb-10 text-gold/80">
                 Our Membership Secretary is happy to answer anything not covered above — or if you
                 are ready, take the next step toward joining our Masonic Lodge in Guildford.
               </p>
               <div className="flex flex-wrap justify-center gap-4">
                 <Link
                   to="/contact"
-                  className="inline-flex items-center justify-center gap-2 bg-gold-shimmer text-accent-foreground px-8 py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity"
+                  className="inline-flex items-center justify-center gap-2 bg-gold-shimmer text-accent-foreground px-8 py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity min-h-[48px]"
                 >
                   Contact Us
-                  <ArrowRight className="h-4 w-4" />
+                  <ArrowRight className="h-4 w-4" aria-hidden="true" />
                 </Link>
                 <Link
                   to="/quiz"
-                  className="inline-flex items-center justify-center border border-gold text-gold px-8 py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:bg-gold hover:text-accent-foreground transition-colors"
+                  className="inline-flex items-center justify-center border border-gold text-gold px-8 py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:bg-gold hover:text-navy transition-colors min-h-[48px]"
                 >
                   Take the 2-Min Quiz
                 </Link>
                 <Link
                   to="/join-us"
-                  className="inline-flex items-center justify-center border border-primary-foreground/40 text-primary-foreground px-8 py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:bg-primary-foreground/10 transition-colors"
+                  className="inline-flex items-center justify-center border border-gold/40 text-gold px-8 py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:bg-gold/10 transition-colors min-h-[48px]"
                 >
                   Begin Your Application
                 </Link>
