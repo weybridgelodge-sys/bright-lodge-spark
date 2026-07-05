@@ -115,7 +115,6 @@ const JoinUs = () => {
         };
 
   return (
-    // FIXED: added overflow-x-hidden — was missing on the root wrapper
     <div className="min-h-screen overflow-x-hidden">
       <SEO
         title="Join Freemasons in Guildford"
@@ -215,18 +214,23 @@ const JoinUs = () => {
                 </div>
 
                 {/* NOTE: EnquiryForm.tsx wasn't available to audit — confirm
-                    it includes the standard honeypot anti-spam field. */}
+                    it includes the standard honeypot anti-spam field:
+                    a hidden input with an innocuous name (e.g. "website"),
+                    tabIndex={-1}, autoComplete="off", inside a visually
+                    hidden wrapper — before treating this form as production-ready. */}
                 <EnquiryForm />
               </motion.div>
             </div>
 
             {/* ── Secondary CTAs ──
-                UPDATED: added Journey Timeline as a third option so all
-                three soft-conversion hooks (Quiz, Journey Timeline, First
-                Visit/Initiation Night) are represented on this page. */}
+                Three soft-conversion hooks represented: Quiz, Journey
+                Timeline, First Visit/Initiation Night.
+                CONFIRM: /your-journey route exists in App.tsx — first
+                appearance of this route in the files audited so far. */}
             <div className="flex flex-col sm:flex-row flex-wrap gap-4 justify-center mt-12">
               <Link
                 to="/first-visit"
+                aria-label="Learn what to expect on your initiation night"
                 className="inline-flex items-center justify-center border border-gold text-gold px-8 py-4 rounded-sm text-sm font-sans uppercase tracking-widest hover:bg-gold hover:text-navy transition-colors min-h-[48px]"
               >
                 Your Initiation Night
@@ -234,6 +238,7 @@ const JoinUs = () => {
               </Link>
               <Link
                 to="/your-journey"
+                aria-label="See the full member journey timeline"
                 className="inline-flex items-center justify-center border border-gold text-gold px-8 py-4 rounded-sm text-sm font-sans uppercase tracking-widest hover:bg-gold hover:text-navy transition-colors min-h-[48px]"
               >
                 <Compass className="w-4 h-4 mr-2" aria-hidden="true" />
@@ -241,6 +246,7 @@ const JoinUs = () => {
               </Link>
               <Link
                 to="/faq"
+                aria-label="Read frequently asked questions about joining"
                 className="inline-flex items-center justify-center border border-border text-foreground px-8 py-4 rounded-sm text-sm font-sans uppercase tracking-widest hover:border-gold hover:text-gold transition-colors min-h-[48px]"
               >
                 Frequently Asked Questions
@@ -250,8 +256,8 @@ const JoinUs = () => {
         </section>
 
         {/* ── Soft-Conversion Quiz Strip ──
-            FIXED: text-primary-foreground(/80) is not an approved token —
-            replaced with text-gold(/80). */}
+            Uses the project's gold-shimmer gradient CTA treatment
+            (confirmed correct site-wide, per live screenshot). */}
         <section className="py-12 sm:py-16 bg-navy" aria-labelledby="quiz-strip-heading">
           <div className="container mx-auto px-4 sm:px-6 max-w-4xl">
             <motion.div {...motionProps()} className="text-center">
@@ -266,6 +272,7 @@ const JoinUs = () => {
               </p>
               <Link
                 to="/quiz"
+                aria-label="Take the 2-minute Freemasonry quiz"
                 className="inline-flex items-center justify-center gap-2 bg-gold-shimmer text-accent-foreground px-8 py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity min-h-[48px]"
               >
                 Take the 2-Min Quiz
@@ -275,7 +282,10 @@ const JoinUs = () => {
           </div>
         </section>
 
-        {/* ── Costs & Commitment ── */}
+        {/* ── Costs & Commitment ──
+            FIXED (this pass): cost cards were a div grid, not a semantic
+            list, despite being card-style repeating content — converted
+            to ul/li per Brand Identity Reference §4. */}
         <section className="py-12 sm:py-20 md:py-24 bg-background" aria-labelledby="costs-heading">
           <div className="container mx-auto px-4 sm:px-6 max-w-5xl">
             <motion.div {...motionProps()} className="text-center mb-12">
@@ -289,9 +299,9 @@ const JoinUs = () => {
               </p>
             </motion.div>
 
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            <ul className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 list-none p-0 m-0">
               {costCards.map(({ icon: Icon, title, amount, note, badge }, i) => (
-                <motion.div
+                <motion.li
                   key={title}
                   {...motionProps(i * 0.08)}
                   className="bg-card border border-border rounded-sm p-6 flex flex-col"
@@ -307,9 +317,9 @@ const JoinUs = () => {
                       {badge}
                     </p>
                   )}
-                </motion.div>
+                </motion.li>
               ))}
-            </div>
+            </ul>
 
             <p className="text-center text-muted-foreground font-sans text-sm mt-10 max-w-2xl mx-auto">
               Time-wise, we meet on a handful of evenings each year — easy to fit around work and
@@ -320,7 +330,9 @@ const JoinUs = () => {
         </section>
 
         {/* ── Final CTA ──
-            FIXED: text-primary-foreground(/80) → text-gold(/80). */}
+            "Call" button uses the project's gold-shimmer gradient CTA
+            treatment (confirmed correct site-wide, per live screenshot),
+            matching the quiz strip CTA above. */}
         <section className="py-12 sm:py-16 bg-navy" aria-labelledby="final-cta-heading">
           <div className="container mx-auto px-4 sm:px-6 max-w-3xl">
             <motion.div {...motionProps()} className="text-center">
