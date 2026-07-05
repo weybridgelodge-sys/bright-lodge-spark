@@ -164,7 +164,7 @@ const JoinUs = () => {
               {/* Contact Card Column */}
               <motion.div
                 {...slideProps("right", 0.2)}
-                className="bg-card rounded-sm border border-border shadow-lg p-5 sm:p-8"
+                className="bg-card rounded-sm border border-border shadow-lg p-5 sm:p-8 min-w-0"
               >
                 <h2 className="text-xl font-serif text-foreground mb-6">Get in touch</h2>
 
