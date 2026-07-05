@@ -594,10 +594,9 @@ useEffect(() => {
                     )}
                   </div>
                 </div>
-                {/* bg-gold text-navy replaces unapproved bg-gold-shimmer text-accent-foreground */}
                 <Link
                   to="/"
-                  className="inline-flex items-center justify-center gap-2 bg-gold text-navy px-8 py-3 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity min-h-[48px]"
+                  className="inline-flex items-center justify-center gap-2 bg-gold-shimmer text-accent-foreground px-8 py-3 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity min-h-[48px]"
                 >
                   Back to Home
                   <ArrowRight className="h-4 w-4" aria-hidden="true" />
@@ -808,11 +807,10 @@ useEffect(() => {
                       </div>
                     </div>
                     <div className="mt-8 flex justify-end">
-                      {/* bg-gold text-navy replaces unapproved bg-gold-shimmer text-accent-foreground */}
                       <button
                         type="button"
                         onClick={() => { if (validateStep1()) setStep(2); }}
-                        className="bg-gold text-navy px-8 py-3 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity min-h-[48px]"
+                        className="bg-gold-shimmer text-accent-foreground px-8 py-3 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity min-h-[48px]"
                       >
                         Next
                       </button>
