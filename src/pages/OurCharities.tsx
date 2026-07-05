@@ -185,11 +185,10 @@ const OurCharities = () => {
                   long-distance story of endurance, support, friendship and charitable purpose from
                   members of our Masonic Lodge in Surrey.
                 </p>
-                {/* bg-gold text-navy replaces unapproved bg-gold-shimmer text-accent-foreground */}
                 <Link
                   to="/thames-challenge"
                   aria-label="Read the Thames Towpath Challenge charity story from Weybridge Lodge"
-                  className="inline-flex items-center gap-2 bg-gold text-navy px-6 py-3 rounded-sm text-sm font-semibold font-sans hover:opacity-90 transition-opacity min-h-[48px]"
+                  className="inline-flex items-center gap-2 bg-gold-shimmer text-accent-foreground px-6 py-3 rounded-sm text-sm font-semibold font-sans hover:opacity-90 transition-opacity min-h-[48px]"
                 >
                   Read the feature
                   <ArrowRight className="w-4 h-4" aria-hidden="true" />

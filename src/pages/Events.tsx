@@ -231,8 +231,7 @@ const Events = () => {
                       }`}
                     >
                       {ev.highlight && (
-                        // bg-gold text-navy replaces unapproved bg-gold-shimmer text-accent-foreground
-                        <div className="bg-gold text-navy px-4 py-1 text-xs font-sans font-semibold uppercase tracking-widest">
+                        <div className="bg-gold-shimmer text-accent-foreground px-4 py-1 text-xs font-sans font-semibold uppercase tracking-widest">
                           Featured Event
                         </div>
                       )}
@@ -444,11 +443,10 @@ const Events = () => {
                   </a>
                 </div>
 
-                {/* bg-gold text-navy replaces unapproved bg-gold-shimmer text-accent-foreground */}
                 <a
                   href="/ladies-festival"
                   aria-label="Enquire about tickets for the Ladies Festival 2026"
-                  className="flex w-full items-center justify-center bg-gold text-navy py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity mt-4 min-h-[48px]"
+                  className="flex w-full items-center justify-center bg-gold-shimmer text-accent-foreground py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity mt-4 min-h-[48px]"
                 >
                   Enquire About Tickets
                 </a>
@@ -536,11 +534,10 @@ const Events = () => {
                   </strong>
                 </p>
 
-                {/* bg-gold text-navy replaces unapproved bg-gold-shimmer text-accent-foreground */}
                 <a
                   href="mailto:secretary@weybridgelodge.org.uk?subject=Lodge%20of%20Instruction"
                   aria-label="Email to find out more about the Lodge of Instruction at Weybridge Lodge"
-                  className="flex w-full items-center justify-center bg-gold text-navy py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity mt-4 min-h-[48px]"
+                  className="flex w-full items-center justify-center bg-gold-shimmer text-accent-foreground py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity mt-4 min-h-[48px]"
                 >
                   Email for Details
                 </a>
