@@ -134,23 +134,23 @@ const JoinUs = () => {
         {/* ── Why Join + Contact Card ── */}
         <section className="py-12 sm:py-20 md:py-28 bg-warm-white">
           <div className="container mx-auto px-4 sm:px-6 max-w-4xl">
-            <div className="grid md:grid-cols-2 gap-8 sm:gap-12 md:gap-16 items-start">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-12 md:gap-16 items-start min-w-0">
               {/* Why Join Column */}
-              <motion.div {...slideProps("left")}>
+              <motion.div {...slideProps("left")} className="min-w-0">
                 <div className="h-0.5 w-16 bg-gold mb-6" />
-                <h2 className="text-3xl md:text-4xl font-serif text-foreground mb-6">
+                <h2 className="text-3xl md:text-4xl font-serif text-foreground mb-6 break-words">
                   Why join Freemasonry?
                 </h2>
-                <p className="text-muted-foreground font-sans leading-relaxed mb-8">
+                <p className="text-muted-foreground font-sans leading-relaxed mb-8 break-words">
                   Freemasonry offers a unique experience that enriches lives. Whether you are looking
                   for fellowship, personal growth, or the chance to give back to your community in
                   Guildford and across Surrey, membership opens doors to extraordinary opportunities.
                 </p>
                 <ul className="space-y-4 list-none p-0 m-0">
                   {reasons.map((reason) => (
-                    <li key={reason} className="flex items-start gap-3">
+                    <li key={reason} className="flex items-start gap-3 min-w-0">
                       <CheckCircle className="w-5 h-5 text-gold mt-0.5 flex-shrink-0" aria-hidden="true" />
-                      <span className="text-foreground font-sans text-sm">{reason}</span>
+                      <span className="text-foreground font-sans text-sm min-w-0 break-words">{reason}</span>
                     </li>
                   ))}
                 </ul>
@@ -159,7 +159,7 @@ const JoinUs = () => {
               {/* Contact Card Column */}
               <motion.div
                 {...slideProps("right", 0.2)}
-                className="bg-card rounded-sm border border-border shadow-lg p-5 sm:p-8"
+                className="bg-card rounded-sm border border-border shadow-lg p-5 sm:p-8 min-w-0"
               >
                 <h2 className="text-xl font-serif text-foreground mb-6">Get in touch</h2>
 
@@ -270,12 +270,12 @@ const JoinUs = () => {
               </p>
             </motion.div>
 
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 min-w-0">
               {costCards.map(({ icon: Icon, title, amount, note, badge }, i) => (
                 <motion.div
                   key={title}
                   {...motionProps(i * 0.08)}
-                  className="bg-card border border-border rounded-sm p-6 flex flex-col"
+                  className="bg-card border border-border rounded-sm p-6 flex flex-col min-w-0"
                 >
                   <Icon className="w-6 h-6 text-gold mb-3" aria-hidden="true" />
                   <h3 className="font-serif text-foreground text-lg mb-1">{title}</h3>
