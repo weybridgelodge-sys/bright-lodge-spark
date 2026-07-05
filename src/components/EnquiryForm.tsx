@@ -164,7 +164,7 @@ export const EnquiryForm = () => {
         {errors.reason && <p className="text-xs text-destructive mt-1">{errors.reason[0]}</p>}
       </div>
 
-      <TurnstileWidget onToken={setTurnstileToken} onExpire={() => setTurnstileToken("")} />
+      <TurnstileWidget size="compact" onToken={setTurnstileToken} onExpire={() => setTurnstileToken("")} />
 
       <button
         type="submit"

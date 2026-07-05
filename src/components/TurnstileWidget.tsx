@@ -41,10 +41,11 @@ interface Props {
   onToken: (token: string) => void;
   onExpire?: () => void;
   theme?: "light" | "dark" | "auto";
+  size?: "normal" | "compact" | "flexible";
   className?: string;
 }
 
-export const TurnstileWidget = ({ onToken, onExpire, theme = "auto", className }: Props) => {
+export const TurnstileWidget = ({ onToken, onExpire, theme = "auto", size = "normal", className }: Props) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const widgetIdRef = useRef<string | null>(null);
 
@@ -56,6 +57,7 @@ export const TurnstileWidget = ({ onToken, onExpire, theme = "auto", className }
         widgetIdRef.current = window.turnstile.render(containerRef.current, {
           sitekey: TURNSTILE_SITE_KEY,
           theme,
+          size,
           callback: (token: string) => onToken(token),
           "expired-callback": () => {
             onExpire?.();
