@@ -17,7 +17,7 @@ const NextMeeting = lazy(() => import("@/components/NextMeeting"));
 const JoinCTA = lazy(() => import("@/components/JoinCTA"));
 const HomepageCharityCTA = lazy(() => import("@/components/charity/HomepageCharityCTA"));
 
-// NEW — WebPage JSON-LD node. Every other audited page carries one; Home was
+// WebPage JSON-LD node. Every other audited page carries one; Home was
 // previously relying on Organization + LocalBusiness alone.
 const webPageSchema = {
   "@context": "https://schema.org",
@@ -46,7 +46,6 @@ const Index = () => {
       };
 
   return (
-    // FIXED: added overflow-x-hidden — was missing on the root wrapper
     <div className="min-h-screen overflow-x-hidden">
       <SEO
         title="Weybridge Lodge No. 6787 | Freemasons in Guildford, Surrey"
@@ -59,7 +58,7 @@ const Index = () => {
       <main id="main-content">
         <Hero />
 
-        {/* ── VISION HOOK (NEW) ──
+        {/* ── VISION HOOK ──
             Per Vision/Mission/Values doc: Home (alongside Lodge Profile) is
             named as a page that should lead with the Vision statement as a
             strong opening hook. Placed directly after Hero, before About. */}
@@ -88,10 +87,8 @@ const Index = () => {
         <Suspense fallback={null}>
           <HomepageCharityCTA />
 
-          {/* Quiz invitation banner
-              FIXED: bg-gold-shimmer / text-accent-foreground are not
-              approved project tokens — replaced with bg-gold / text-navy.
-              Added min-h-[48px] and an id/aria-labelledby pairing. */}
+          {/* Quiz invitation banner — uses the project's gold-shimmer gradient
+              CTA treatment (confirmed correct site-wide, per live screenshot). */}
           <section
             className="py-12 sm:py-14 bg-card border-y border-border"
             aria-labelledby="quiz-banner-heading"
@@ -110,6 +107,7 @@ const Index = () => {
               </div>
               <Link
                 to="/quiz"
+                aria-label="Start the 2-minute Freemasonry quiz"
                 className="inline-flex items-center justify-center gap-2 bg-gold-shimmer text-accent-foreground px-5 sm:px-6 py-3 rounded-sm text-xs sm:text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity shrink-0 w-full md:w-auto min-h-[48px]"
               >
                 Start the Quiz <ArrowRight className="w-4 h-4" aria-hidden="true" />
