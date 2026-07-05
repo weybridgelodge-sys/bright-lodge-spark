@@ -67,9 +67,6 @@ const App = () => (
         <Suspense fallback={null}>
           <Routes>
             <Route path="/" element={<Index />} />
-            <Route path="/index-review" element={<IndexReview />} />
-            <Route path="/join-us-review" element={<JoinUsReview />} />
-            <Route path="/faq-review" element={<FAQReview />} />
             <Route path="/what-is-freemasonry" element={<WhatIsFreemasonry />} />
             <Route path="/freemasonry-and-charity" element={<FreemasonryCharity />} />
             <Route path="/our-charities" element={<OurCharities />} />
