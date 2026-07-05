@@ -2,6 +2,8 @@ User-agent: *
 Allow: /
 Disallow: /members
 Disallow: /portal
+Disallow: /post-summary-page
+
 
 Sitemap: https://weybridgelodge.org.uk/sitemap.xml
 Sitemap: https://weybridgelodge.org.uk/video-sitemap.xml
