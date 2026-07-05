@@ -141,31 +141,6 @@
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://weybridgelodge.org.uk/news/75th-anniversary</loc>
-    <changefreq>yearly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://weybridgelodge.org.uk/news/sands-charity</loc>
-    <changefreq>yearly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://weybridgelodge.org.uk/news/installation-meeting-october-2023</loc>
-    <changefreq>yearly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://weybridgelodge.org.uk/news/pgm-visit-february-2026</loc>
-    <changefreq>yearly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://weybridgelodge.org.uk/news/surrey-2030-festival-gold</loc>
-    <changefreq>yearly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://weybridgelodge.org.uk/news/double-initiation-december-2025</loc>
     <changefreq>yearly</changefreq>
     <priority>0.6</priority>
