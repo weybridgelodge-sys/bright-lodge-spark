@@ -48,6 +48,7 @@ const staticEntries: SitemapEntry[] = [
   { path: "/join-us", priority: "0.9", changefreq: "monthly" },
   { path: "/what-is-freemasonry", priority: "0.9", changefreq: "monthly" },
   { path: "/lodge-profile", priority: "0.8", changefreq: "monthly" },
+  { path: "/south-surrey-freemasons", priority: "0.7", changefreq: "monthly" },
   { path: "/history", priority: "0.8", changefreq: "yearly" },
   { path: "/heritage", priority: "0.6", changefreq: "yearly" },
   { path: "/freemasonry-and-charity", priority: "0.8", changefreq: "monthly" },
