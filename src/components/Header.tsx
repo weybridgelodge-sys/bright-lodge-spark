@@ -44,6 +44,15 @@ const navItems: NavItem[] = [
           { label: "Officers' Roles & Jewels", href: "/officers-jewels" },
         ],
       },
+      {
+        // NEW — Local Area section, agreed placement for geo/commuter
+        // landing pages (sits alongside Deep Dive, leaves room for future
+        // sibling pages e.g. Woking, Godalming-specific).
+        heading: "Local Area",
+        items: [
+          { label: "South Surrey Freemasons", href: "/south-surrey-freemasons" },
+        ],
+      },
     ],
   },
   {
@@ -141,7 +150,7 @@ const DropdownMenu = ({ item }: { item: NavItem }) => {
         }}
         aria-expanded={open}
         aria-haspopup="true"
-        className="flex items-center gap-1 text-sm font-sans text-primary-foreground/80 hover:text-gold transition-colors duration-300 tracking-wide uppercase"
+        className="flex items-center gap-1 text-sm font-sans text-primary-foreground/80 hover:text-gold transition-colors duration-300 tracking-wide uppercase min-h-[48px]"
       >
         {item.label}
         <ChevronDown className={`w-3 h-3 transition-transform ${open ? "rotate-180" : ""}`} aria-hidden="true" />
@@ -166,7 +175,7 @@ const DropdownMenu = ({ item }: { item: NavItem }) => {
                     to={child.href}
                     role="menuitem"
                     onClick={() => setOpen(false)}
-                    className={`flex items-center justify-between gap-2 px-5 py-2.5 text-sm font-sans font-light tracking-wide transition-colors ${
+                    className={`flex items-center justify-between gap-2 px-5 py-2.5 text-sm font-sans font-light tracking-wide transition-colors min-h-[48px] ${
                       child.accent
                         ? "text-gold hover:bg-gold/10"
                         : "text-primary-foreground/70 hover:text-gold hover:bg-navy-light/30"
@@ -218,7 +227,7 @@ const Header = () => {
           <button
             onClick={() => setMobileExpanded(isExpanded ? null : item.label)}
             aria-expanded={isExpanded}
-            className="flex items-center justify-between w-full text-sm font-sans text-primary-foreground/80 hover:text-gold transition-colors uppercase tracking-wide py-2"
+            className="flex items-center justify-between w-full text-sm font-sans text-primary-foreground/80 hover:text-gold transition-colors uppercase tracking-wide py-2 min-h-[48px]"
           >
             {item.label}
             <ChevronDown className={`w-4 h-4 transition-transform ${isExpanded ? "rotate-180" : ""}`} aria-hidden="true" />
@@ -237,7 +246,7 @@ const Header = () => {
                       key={child.label}
                       to={child.href}
                       onClick={() => setMobileOpen(false)}
-                      className={`flex items-center justify-between gap-2 text-sm font-sans py-2 transition-colors ${
+                      className={`flex items-center justify-between gap-2 text-sm font-sans py-2 transition-colors min-h-[48px] ${
                         child.accent ? "text-gold" : "text-primary-foreground/60 hover:text-gold"
                       }`}
                     >
@@ -268,14 +277,14 @@ const Header = () => {
               e.preventDefault();
               handleNavClick(item.href);
             }}
-            className="text-sm font-sans text-primary-foreground/80 hover:text-gold transition-colors uppercase tracking-wide py-2 block"
+            className="text-sm font-sans text-primary-foreground/80 hover:text-gold transition-colors uppercase tracking-wide py-2 block min-h-[48px] flex items-center"
           >
             {item.label}
           </a>
         );
       }
       return (
-        <Link key={item.label} to={item.href} onClick={() => setMobileOpen(false)} className="text-sm font-sans text-primary-foreground/80 hover:text-gold transition-colors uppercase tracking-wide py-2 block">
+        <Link key={item.label} to={item.href} onClick={() => setMobileOpen(false)} className="text-sm font-sans text-primary-foreground/80 hover:text-gold transition-colors uppercase tracking-wide py-2 block min-h-[48px] flex items-center">
           {item.label}
         </Link>
       );
@@ -286,7 +295,7 @@ const Header = () => {
         key={item.label}
         to={item.href}
         onClick={() => setMobileOpen(false)}
-        className="text-sm font-sans text-primary-foreground/80 hover:text-gold transition-colors uppercase tracking-wide py-2 block"
+        className="text-sm font-sans text-primary-foreground/80 hover:text-gold transition-colors uppercase tracking-wide py-2 block min-h-[48px] flex items-center"
       >
         {item.label}
       </Link>
@@ -350,7 +359,7 @@ const Header = () => {
         <div className="flex items-center gap-2 md:gap-4">
           <Link
             to="/members"
-            className="hidden md:inline-flex items-center gap-1.5 text-xs text-primary-foreground/70 hover:text-gold transition-colors uppercase tracking-wide"
+            className="hidden md:inline-flex items-center gap-1.5 text-xs text-primary-foreground/70 hover:text-gold transition-colors uppercase tracking-wide min-h-[48px]"
             title="Members Portal"
           >
             <Lock className="w-3.5 h-3.5" />
@@ -358,21 +367,21 @@ const Header = () => {
           </Link>
           <Link
             to="/contact"
-            className="hidden md:inline-flex items-center gap-2 border border-gold/50 text-gold px-4 py-2 rounded-sm text-sm font-semibold font-sans hover:bg-gold/10 transition-colors"
+            className="hidden md:inline-flex items-center gap-2 border border-gold/50 text-gold px-4 py-2 rounded-sm text-sm font-semibold font-sans hover:bg-gold/10 transition-colors min-h-[48px]"
           >
             <Mail className="w-4 h-4" />
             Contact
           </Link>
           <Link
             to="/join-us"
-            className="hidden md:flex items-center gap-2 bg-gold-shimmer text-accent-foreground px-5 py-2.5 rounded-sm text-sm font-semibold font-sans hover:opacity-90 transition-opacity"
+            className="hidden md:flex items-center gap-2 bg-gold-shimmer text-accent-foreground px-5 py-2.5 rounded-sm text-sm font-semibold font-sans hover:opacity-90 transition-opacity min-h-[48px]"
           >
             <Phone className="w-4 h-4" />
             Join Us
           </Link>
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
-            className="lg:hidden text-primary-foreground"
+            className="lg:hidden text-primary-foreground min-h-[48px] min-w-[48px] flex items-center justify-center"
             aria-label="Toggle menu"
           >
             {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -387,7 +396,7 @@ const Header = () => {
             <Link
               to="/contact"
               onClick={() => setMobileOpen(false)}
-              className="flex items-center justify-center gap-2 border border-gold/50 text-gold px-5 py-3 rounded-sm text-sm font-semibold font-sans mt-2"
+              className="flex items-center justify-center gap-2 border border-gold/50 text-gold px-5 py-3 rounded-sm text-sm font-semibold font-sans mt-2 min-h-[48px]"
             >
               <Mail className="w-4 h-4" />
               Contact Us
@@ -395,7 +404,7 @@ const Header = () => {
             <Link
               to="/join-us"
               onClick={() => setMobileOpen(false)}
-              className="flex items-center justify-center gap-2 bg-gold-shimmer text-accent-foreground px-5 py-3 rounded-sm text-sm font-semibold font-sans"
+              className="flex items-center justify-center gap-2 bg-gold-shimmer text-accent-foreground px-5 py-3 rounded-sm text-sm font-semibold font-sans min-h-[48px]"
             >
               <Phone className="w-4 h-4" />
               Interested in Joining?
@@ -403,7 +412,7 @@ const Header = () => {
             <Link
               to="/members"
               onClick={() => setMobileOpen(false)}
-              className="flex items-center justify-center gap-2 text-xs text-primary-foreground/70 hover:text-gold uppercase tracking-wider py-2"
+              className="flex items-center justify-center gap-2 text-xs text-primary-foreground/70 hover:text-gold uppercase tracking-wider py-2 min-h-[48px]"
             >
               <Lock className="w-3.5 h-3.5" /> Members Portal
             </Link>
