@@ -33,6 +33,10 @@ interface FAQItem {
 }
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
+// Genuine, distinct local detail per cluster — not a swapped-name template.
+// Godalming rail/road figures and the Guildford station walk/taxi time, plus
+// on-site parking, are confirmed directly by the Lodge. Farnham/Woking/Cranleigh
+// notes remain intentionally general pending the same level of confirmation.
 const commuterAreas: CommuterArea[] = [
   {
     towns: "Godalming, Milford & Haslemere",
@@ -154,6 +158,17 @@ const SouthSurreyFreemasons = () => {
                 already searching for a Masonic Lodge in Surrey closer to home than London, this
                 page sets out exactly what the journey and the evening look like.
               </p>
+              <p className="text-muted-foreground font-sans leading-relaxed text-lg mt-4">
+                Members who travel in from across Surrey are part of the same Lodge that raised
+                over £31,000 for Farnborough SANDS —{" "}
+                <a
+                  href="https://weybridgelodge.org.uk/news/sands-charity"
+                  className="text-gold hover:underline"
+                >
+                  read the full story
+                </a>
+                . Fellowship at Weybridge Lodge extends well beyond the meeting room.
+              </p>
             </motion.div>
           </div>
         </section>
@@ -261,7 +276,7 @@ const SouthSurreyFreemasons = () => {
           </div>
         </section>
 
-        {/* ── Final CTA ── */}
+        {/* ── Final CTA — Hub 1 rule: primary link goes to Join Us ── */}
         <section className="py-16 md:py-20 bg-navy" aria-labelledby="commuter-cta-heading">
           <div className="container mx-auto px-6 max-w-2xl text-center">
             <motion.div {...motionProps()}>
