@@ -49,6 +49,11 @@ const LodgeTraditions = lazy(() => import("./pages/LodgeTraditions"));
 const Quiz = lazy(() => import("./pages/Quiz"));
 const HeritageArchive = lazy(() => import("./pages/HeritageArchive"));
 
+// Review preview pages
+const IndexReview = lazy(() => import("./pages/IndexReview"));
+const JoinUsReview = lazy(() => import("./pages/JoinUsReview"));
+const FAQReview = lazy(() => import("./pages/FAQReview"));
+
 // Entire members portal (including AuthProvider + Supabase client) is loaded
 // only when a visitor navigates into /members/*.
 const MembersRoutes = lazy(() => import("./MembersRoutes"));
@@ -66,6 +71,9 @@ const App = () => (
         <Suspense fallback={null}>
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/index-review" element={<IndexReview />} />
+            <Route path="/join-us-review" element={<JoinUsReview />} />
+            <Route path="/faq-review" element={<FAQReview />} />
             <Route path="/what-is-freemasonry" element={<WhatIsFreemasonry />} />
             <Route path="/freemasonry-and-charity" element={<FreemasonryCharity />} />
             <Route path="/our-charities" element={<OurCharities />} />
