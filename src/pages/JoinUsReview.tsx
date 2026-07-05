@@ -18,7 +18,7 @@ import {
   Compass,
   type LucideIcon,
 } from "lucide-react";
-import EnquiryForm from "@/components/EnquiryForm";
+import EnquiryForm from "@/components/EnquiryFormReview";
 
 // ─── Interfaces ───────────────────────────────────────────────────────────────
 interface CostCard {

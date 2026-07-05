@@ -1,7 +1,7 @@
 import { lazy, Suspense } from "react";
 import Header from "@/components/Header";
-import Hero from "@/components/Hero";
-import About from "@/components/About";
+import Hero from "@/components/HeroReview";
+import About from "@/components/AboutReview";
 import Footer from "@/components/Footer";
 import SEO, { organizationSchema, localBusinessSchema } from "@/components/SEO";
 import { motion, useReducedMotion } from "framer-motion";
