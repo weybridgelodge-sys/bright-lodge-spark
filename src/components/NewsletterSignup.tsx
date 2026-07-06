@@ -115,7 +115,13 @@ const NewsletterSignup = () => {
           {status === "loading" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <>Join <ArrowRight className="ml-1 h-3 w-3" /></>}
         </Button>
       </div>
-      <div className="mt-3 flex justify-start"><TurnstileWidget theme="dark" onToken={setTurnstileToken} onExpire={() => setTurnstileToken("")} /></div>
+      {showTurnstile && (
+        <div className="mt-3 flex justify-start min-h-[65px]">
+          <Suspense fallback={<div className="text-xs text-primary-foreground/50">Loading verification…</div>}>
+            <TurnstileWidget theme="dark" onToken={setTurnstileToken} onExpire={() => setTurnstileToken("")} />
+          </Suspense>
+        </div>
+      )}
       {error && <p className="text-xs text-red-300 mt-2">{error}</p>}
 
       <p className="text-[10px] text-primary-foreground/60 mt-3 leading-relaxed">
