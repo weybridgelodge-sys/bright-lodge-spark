@@ -1,7 +1,11 @@
-import React, { useState } from "react";
+import React, { lazy, Suspense, useState } from "react";
 import { Mail, CheckCircle2, ArrowRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import TurnstileWidget from "@/components/TurnstileWidget";
+
+// Defer Turnstile widget (and the ~40KB Cloudflare Turnstile script) until the
+// user actually interacts with the newsletter form. The Footer renders on every
+// page, so eager-loading Turnstile costs FCP/LCP sitewide for no user benefit.
+const TurnstileWidget = lazy(() => import("@/components/TurnstileWidget"));
 
 // Call the edge function via plain fetch so this component (rendered in the
 // Footer on every page) does not pull the full supabase-js SDK into the
