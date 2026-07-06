@@ -22,6 +22,7 @@ const NewsletterSignup = () => {
   const [status, setStatus] = useState<"idle" | "loading" | "done" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
   const [turnstileToken, setTurnstileToken] = useState<string>("");
+  const [showTurnstile, setShowTurnstile] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
