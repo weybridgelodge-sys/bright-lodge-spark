@@ -1,7 +1,11 @@
-import React, { useState } from "react";
+import React, { lazy, Suspense, useState } from "react";
 import { Mail, CheckCircle2, ArrowRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import TurnstileWidget from "@/components/TurnstileWidget";
+
+// Defer Turnstile widget (and the ~40KB Cloudflare Turnstile script) until the
+// user actually interacts with the newsletter form. The Footer renders on every
+// page, so eager-loading Turnstile costs FCP/LCP sitewide for no user benefit.
+const TurnstileWidget = lazy(() => import("@/components/TurnstileWidget"));
 
 // Call the edge function via plain fetch so this component (rendered in the
 // Footer on every page) does not pull the full supabase-js SDK into the
@@ -18,6 +22,7 @@ const NewsletterSignup = () => {
   const [status, setStatus] = useState<"idle" | "loading" | "done" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
   const [turnstileToken, setTurnstileToken] = useState<string>("");
+  const [showTurnstile, setShowTurnstile] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,6 +34,7 @@ const NewsletterSignup = () => {
       return;
     }
     if (!turnstileToken) {
+      setShowTurnstile(true);
       setError("Please complete the verification below.");
       return;
     }
@@ -96,6 +102,7 @@ const NewsletterSignup = () => {
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            onFocus={() => setShowTurnstile(true)}
             placeholder="your@email.com"
             aria-label="Email address"
             className="w-full bg-navy-dark border border-gold/20 rounded-md pl-8 pr-2 py-2 text-xs text-primary-foreground placeholder:text-primary-foreground/40 focus:outline-none focus:border-gold/60"
@@ -109,7 +116,13 @@ const NewsletterSignup = () => {
           {status === "loading" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <>Join <ArrowRight className="ml-1 h-3 w-3" /></>}
         </Button>
       </div>
-      <div className="mt-3 flex justify-start"><TurnstileWidget theme="dark" onToken={setTurnstileToken} onExpire={() => setTurnstileToken("")} /></div>
+      {showTurnstile && (
+        <div className="mt-3 flex justify-start min-h-[65px]">
+          <Suspense fallback={<div className="text-xs text-primary-foreground/50">Loading verification…</div>}>
+            <TurnstileWidget theme="dark" onToken={setTurnstileToken} onExpire={() => setTurnstileToken("")} />
+          </Suspense>
+        </div>
+      )}
       {error && <p className="text-xs text-red-300 mt-2">{error}</p>}
 
       <p className="text-[10px] text-primary-foreground/60 mt-3 leading-relaxed">

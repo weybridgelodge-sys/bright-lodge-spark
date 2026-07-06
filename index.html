@@ -28,6 +28,9 @@
     <link rel="preconnect" href="https://kntcjlztmcgmagwgheyx.supabase.co" crossorigin />
     <link rel="dns-prefetch" href="https://kntcjlztmcgmagwgheyx.supabase.co" />
 
+    <!-- Turnstile is deferred until newsletter interaction; dns-prefetch keeps it cheap when it does load -->
+    <link rel="dns-prefetch" href="https://challenges.cloudflare.com" />
+
     <!-- LCP target = skeleton title (text). No image preloads compete on the critical path. -->
     <!-- Hero photo + crest are loaded by React after FCP — they are not the LCP element. -->
     <link rel="preload" as="font" type="font/woff2" href="/__l5e/assets-v1/d428ee50-7784-4630-bb3f-23a21a2525ca/playfair-700-latin.woff2" crossorigin />
