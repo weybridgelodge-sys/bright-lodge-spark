@@ -12,7 +12,7 @@ import { Calendar, User, ArrowLeft } from "lucide-react";
 
 import heroAsset from "@/assets/news/surrey-2030-gold-trophy.jpg.asset.json";
 const heroImg = heroAsset.url;
-import festivalLogo from "@/assets/surrey-2030-gold.png";
+import festivalLogo from "@/assets/surrey-2030-gold.webp";
 
 const tocItems = [
   { id: "grand-launch", label: "A Grand Launch at Old Thorns" },

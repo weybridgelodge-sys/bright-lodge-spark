@@ -1,4 +1,4 @@
-import surreyGold from "@/assets/surrey-2030-gold.png";
+import surreyGold from "@/assets/surrey-2030-gold.webp";
 import tlcPatron from "@/assets/tlc-patron.jpg";
 import anniversaryPhoto from "@/assets/75th-anniversary.webp";
 import { useScrollReveal } from "@/hooks/useScrollReveal";

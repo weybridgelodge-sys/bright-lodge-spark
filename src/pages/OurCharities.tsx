@@ -9,7 +9,7 @@ import { ExternalLink, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import sandsLogo from "@/assets/links/sands-logo.jpg";
 import tlcLogo from "@/assets/links/tlc-logo.ico";
-import surrey2030Logo from "@/assets/surrey-2030-gold.png";
+import surrey2030Logo from "@/assets/surrey-2030-gold.webp";
 import thamesChallengeImgRaw from "@/assets/thames-challenge/tc-source-stone.jpg.asset.json";
 
 // ─── Type-safe asset fallback ─────────────────────────────────────────────────
