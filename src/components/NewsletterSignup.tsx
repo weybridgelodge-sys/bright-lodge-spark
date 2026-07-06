@@ -101,6 +101,7 @@ const NewsletterSignup = () => {
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            onFocus={() => setShowTurnstile(true)}
             placeholder="your@email.com"
             aria-label="Email address"
             className="w-full bg-navy-dark border border-gold/20 rounded-md pl-8 pr-2 py-2 text-xs text-primary-foreground placeholder:text-primary-foreground/40 focus:outline-none focus:border-gold/60"
