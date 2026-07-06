@@ -34,6 +34,7 @@ const NewsletterSignup = () => {
       return;
     }
     if (!turnstileToken) {
+      setShowTurnstile(true);
       setError("Please complete the verification below.");
       return;
     }
