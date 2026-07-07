@@ -97,15 +97,17 @@ export default function MembersDocuments() {
   };
 
   const handleView = async (d: Doc) => {
-    // Open a real (about:blank) tab synchronously so mobile browsers keep the popup and don't treat it as a raw file.
-    const win = window.open("", "_blank", "noopener,noreferrer");
+    const safeTitle = d.title.replace(/[<>&]/g, "");
+    // Keep this window script-accessible: adding noopener/noreferrer leaves Samsung Browser on a blank about:blank tab.
+    const win = window.open("about:blank", "_blank");
     if (!win) {
       toast.error("Please allow pop-ups to open documents");
       return;
     }
-    win.document.write(
-      `<!doctype html><title>${d.title.replace(/[<>&]/g, "")}</title><style>html,body{margin:0;height:100%;background:#0b1220;color:#eee;font-family:system-ui,sans-serif}.msg{padding:2rem;text-align:center}</style><div class="msg">Loading document…</div>`
-    );
+    win.opener = null;
+    win.document.open();
+    win.document.write(`<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${safeTitle}</title><style>html,body{margin:0;height:100%;background:#0b1220;color:#eee;font-family:system-ui,sans-serif}.msg{min-height:100%;display:grid;place-items:center;padding:2rem;text-align:center;box-sizing:border-box}</style></head><body><div class="msg">Opening document…</div></body></html>`);
+    win.document.close();
 
     const { data, error } = await supabase.storage.from("lodge-docs").createSignedUrl(d.file_path, 300);
     if (error || !data) {
@@ -118,24 +120,16 @@ export default function MembersDocuments() {
     const isImage = ["png", "jpg", "jpeg", "gif", "webp", "svg"].includes(ext);
     const isPdf = ext === "pdf";
     const safeUrl = data.signedUrl.replace(/"/g, "&quot;");
-    const safeTitle = d.title.replace(/[<>&]/g, "");
 
     let bodyHtml: string;
     if (isImage) {
       bodyHtml = `<img src="${safeUrl}" alt="${safeTitle}" style="max-width:100%;height:auto;display:block;margin:auto"/>`;
     } else if (isPdf) {
-      // Native <embed> works on desktop; use Google's viewer as a mobile-friendly fallback overlay.
+      const googleViewer = `https://docs.google.com/gview?embedded=true&url=${encodeURIComponent(data.signedUrl)}`.replace(/"/g, "&quot;");
+      // Samsung Browser often downloads raw PDFs; load a viewer page instead of navigating to the file URL.
       bodyHtml = `
-        <embed src="${safeUrl}" type="application/pdf" style="width:100%;height:100%;border:0"/>
-        <noscript><a href="${safeUrl}">Open document</a></noscript>
-        <script>
-          setTimeout(function(){
-            var e=document.querySelector('embed');
-            if(!e||e.offsetHeight<80){
-              document.body.innerHTML='<iframe src="https://docs.google.com/gview?embedded=true&url='+encodeURIComponent(${JSON.stringify(data.signedUrl)})+'" style="width:100%;height:100%;border:0"></iframe>';
-            }
-          },800);
-        <\/script>`;
+        <iframe src="${googleViewer}" title="${safeTitle}" style="width:100%;height:100%;border:0;background:#fff"></iframe>
+        <a href="${safeUrl}" target="_blank" rel="noopener" style="position:fixed;right:12px;bottom:12px;background:#c9a432;color:#1b2a4a;padding:10px 14px;border-radius:2px;text-decoration:none;font:600 13px system-ui,sans-serif">Open original</a>`;
     } else {
       bodyHtml = `<iframe src="${safeUrl}" style="width:100%;height:100%;border:0"></iframe>`;
     }
