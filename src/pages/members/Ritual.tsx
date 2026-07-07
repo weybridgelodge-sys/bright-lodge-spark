@@ -119,7 +119,34 @@ export default function MembersRitual() {
       toast.error("Couldn't open document");
       return;
     }
-    window.open(data.signedUrl, "_blank", "noopener");
+    try {
+      const res = await fetch(data.signedUrl);
+      if (!res.ok) throw new Error("fetch failed");
+      const ext = (d.file_path.split(".").pop() || "").toLowerCase();
+      const mimeByExt: Record<string, string> = {
+        pdf: "application/pdf",
+        png: "image/png",
+        jpg: "image/jpeg",
+        jpeg: "image/jpeg",
+        gif: "image/gif",
+        webp: "image/webp",
+        svg: "image/svg+xml",
+        mp4: "video/mp4",
+        mp3: "audio/mpeg",
+        txt: "text/plain",
+        html: "text/html",
+      };
+      const original = res.headers.get("content-type") || "";
+      const type =
+        original && !original.includes("octet-stream") ? original : mimeByExt[ext] || original || "application/octet-stream";
+      const blob = await res.blob();
+      const inlineBlob = blob.type === type ? blob : new Blob([blob], { type });
+      const url = URL.createObjectURL(inlineBlob);
+      window.open(url, "_blank", "noopener");
+      setTimeout(() => URL.revokeObjectURL(url), 60_000);
+    } catch {
+      window.open(data.signedUrl, "_blank", "noopener");
+    }
   };
 
   const handleDownload = async (d: Doc) => {
