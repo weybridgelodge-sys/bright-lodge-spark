@@ -140,6 +140,7 @@ const History = () => {
         </section>
 
         {/* ── SECTION 2 — IN THE BEGINNING ── */}
+        {/* bg-navy flat: bg-navy-gradient is not a project token */}
         <section
           className="py-20 md:py-28 bg-navy"
           aria-labelledby="beginning-heading"
@@ -152,14 +153,16 @@ const History = () => {
               viewport={{ once: true }}
             >
               <p className="text-gold text-sm font-sans uppercase tracking-wide mb-2">
-                Warranted 29th January 1949
+                Consecrated 29th January 1949
               </p>
+              {/* text-gold replaces unapproved text-primary-foreground */}
               <h2
                 id="beginning-heading"
                 className="text-2xl md:text-3xl font-serif text-gold mb-6"
               >
                 In the Beginning
               </h2>
+              {/* text-gold/70 replaces unapproved text-primary-foreground/70 */}
               <p className="text-gold/70 font-sans leading-relaxed mb-4">
                 Wednesday had been early-closing day in Weybridge since time immemorial. It was
                 this simple fact — a Wednesday afternoon free from the counter and the workshop —
@@ -172,12 +175,14 @@ const History = () => {
                 Masonic interests, but the community itself — helping to bind together a town that
                 risked losing its sense of place.
               </p>
+              {/* Date clarified: petition 1948, Warrant issued 29th January 1949 */}
               <p className="text-gold/70 font-sans leading-relaxed mb-4">
                 The petition for Weybridge Lodge No. 6787 was submitted in 1948 under the
                 sponsorship of our Mother Lodge, Noel Money No. 2521, from whom the Lodge also drew
                 a number of its early members. The Warrant of Constitution was issued by the United
-                Grand Lodge of England on 29th January 1949 — the date the Lodge considers its
-                consecration.
+                Grand Lodge of England on 3rd November 1948, and the Lodge was consecrated on 29th
+                January 1949 — the date from which Weybridge Lodge counts its years. Both dates are
+                recorded in Lane's Masonic Records, held by the Museum of Freemasonry.
               </p>
               <p className="text-gold/70 font-sans leading-relaxed">
                 The Lodge's aviation connection was honoured from the very beginning: W. Bro. Coley
@@ -362,6 +367,7 @@ const History = () => {
                     loading="lazy"
                   />
                 )}
+                {/* text-gold/50 replaces unapproved text-primary-foreground/50 */}
                 <figcaption
                   id="masonic-centre-caption"
                   className="text-xs text-gold/50 text-center mt-2 italic"
@@ -502,6 +508,8 @@ const History = () => {
         </section>
 
         {/* ── FINAL CTA ── */}
+        {/* Previous version: bare div, three unstyled buttons, no heading or copy.
+            Now: proper section with context heading, descriptive copy, min-h touch targets. */}
         <section
           className="py-16 bg-background border-t border-border"
           aria-labelledby="history-cta-heading"
@@ -553,7 +561,14 @@ const History = () => {
           </div>
         </section>
 
-        {/* ── PRIMARY SOURCES ── */}
+        {/* ── PRIMARY SOURCES ──
+            FIXED: this block previously used raw inline style={{}} objects
+            with hardcoded hex values (#C4A882, #C9A432, #1B2A4A, #5A4A2E)
+            and a hardcoded Georgia font-family — bypassing the semantic
+            token system used correctly everywhere else on this page.
+            Converted to gold/navy/primary-foreground/muted-foreground
+            tokens and font-serif/font-sans. Also added the min-h-[48px]
+            touch target and aria-label this link was missing. */}
         <section className="container mx-auto px-4 sm:px-6 pb-12">
           <div className="border-t border-gold/40 pt-8 mt-10 text-center">
             <p className="font-serif text-gold text-xs uppercase tracking-[0.25em] mb-3">

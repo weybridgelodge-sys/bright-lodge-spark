@@ -60,6 +60,21 @@ const masters = [
   { years: "1961/62", name: "J. Humphries" },
 ];
 
+// ─────────────────────────────────────────────────────────────────────
+// Meeting places — per Lane's Masonic Records (Museum of Freemasonry)
+// ─────────────────────────────────────────────────────────────────────
+
+const meetingPlaces = [
+  { years: "1948", venue: "Oatlands Park Hotel", locality: "Oatlands Drive, Weybridge" },
+  { years: "1952", venue: "St. George's Hill Tennis Club", locality: "Weybridge" },
+  { years: "1956", venue: "Masonic Hall", locality: "Chertsey" },
+  { years: "1960", venue: "Masonic Hall", locality: "6 The Crescent, Surbiton" },
+  { years: "1986 – present", venue: "Guildford Masonic Centre", locality: "Weybourne House, Hitherbury Close, Guildford, GU2 4DR" },
+];
+
+// Consecration date corrected to 29th January 1949 per Lane's Masonic
+// Records (Museum of Freemasonry): Warrant of Constitution 3rd November
+// 1948; Consecrated 29th January 1949.
 const archiveSchema = {
   "@context": "https://schema.org",
   "@type": "CreativeWork",
@@ -69,7 +84,7 @@ const archiveSchema = {
   about: {
     "@type": "Organization",
     name: "Weybridge Lodge No. 6787",
-    foundingDate: "1949-01-19",
+    foundingDate: "1949-01-29",
   },
   temporalCoverage: "1954/1969",
 };
@@ -131,7 +146,7 @@ function DocumentCard({
         onClick={onToggle}
         aria-expanded={isOpen}
         aria-controls={`${doc._id}-panel`}
-        className="flex w-full items-start justify-between gap-4 bg-navy px-6 py-5 text-left"
+        className="flex w-full items-start justify-between gap-4 bg-navy px-6 py-5 text-left min-h-[48px]"
       >
         <div className="flex gap-4">
           {thumbUrl && (
@@ -183,7 +198,7 @@ function DocumentCard({
                   href={pdfUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex items-center gap-2 border border-gold bg-navy px-4 py-2 font-sans text-sm text-background transition-opacity hover:opacity-90"
+                  className="inline-flex items-center gap-2 border border-gold bg-navy px-4 py-2 font-sans text-sm text-background transition-opacity hover:opacity-90 min-h-[48px]"
                 >
                   <FileText size={16} aria-hidden="true" />
                   View PDF
@@ -237,7 +252,7 @@ export default function HeritageArchive() {
   return (
     <div className="flex min-h-screen flex-col overflow-x-hidden">
       <SEO
-        title="Heritage Archive"
+        title="Heritage Archive | Weybridge Lodge No. 6787, Freemasons in Guildford"
         description="Archival summons, historic records and founding heritage of Weybridge Lodge No. 6787, Freemasons meeting at Guildford Masonic Centre since 1949."
         canonical="/heritage"
         type="article"
@@ -251,7 +266,7 @@ export default function HeritageArchive() {
             ✦ ✦ ✦
           </p>
           <p className="mb-3 font-serif text-xs uppercase tracking-[0.3em] text-gold">
-            Province of Surrey · Consecrated 19th January 1949
+            Province of Surrey · Consecrated 29th January 1949
           </p>
           <h1 className="mb-2 font-serif text-3xl text-background sm:text-4xl">
             Weybridge Lodge No. 6787
@@ -289,6 +304,46 @@ export default function HeritageArchive() {
             </p>
           </section>
 
+          {/* ── Two founding dates, explained ──
+              Added per Lane's Masonic Records (Museum of Freemasonry):
+              Warrant of Constitution 3rd November 1948; Consecrated
+              29th January 1949. */}
+          <section className="mb-12" aria-labelledby="founding-dates-heading">
+            <h2 id="founding-dates-heading" className="mb-5 flex items-center gap-4 font-serif text-xs uppercase tracking-[0.25em] text-navy">
+              <span>Two Dates, One Founding</span>
+              <span className="h-px flex-1 bg-border" aria-hidden="true" />
+            </h2>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 mb-4">
+              <div className="border border-border border-l-4 border-l-gold bg-card p-5">
+                <p className="font-serif text-xs uppercase tracking-[0.15em] text-gold mb-1">
+                  Warrant of Constitution
+                </p>
+                <p className="font-serif text-xl text-navy">3rd November 1948</p>
+                <p className="mt-2 font-sans text-sm leading-relaxed text-muted-foreground">
+                  The legal instrument from the United Grand Lodge of England authorising the
+                  Lodge to exist — the document from which all else follows.
+                </p>
+              </div>
+              <div className="border border-border border-l-4 border-l-gold bg-card p-5">
+                <p className="font-serif text-xs uppercase tracking-[0.15em] text-gold mb-1">
+                  Consecration
+                </p>
+                <p className="font-serif text-xl text-navy">29th January 1949</p>
+                <p className="mt-2 font-sans text-sm leading-relaxed text-muted-foreground">
+                  The ceremony that formally brought the Lodge to life — the date from which
+                  Weybridge Lodge counts its years.
+                </p>
+              </div>
+            </div>
+            <p className="font-sans text-sm leading-relaxed text-muted-foreground">
+              A Lodge cannot hold a consecrated meeting without a warrant — the paper always
+              precedes the ceremony. The eleven weeks between these two dates were spent in
+              preparation: officers appointed, furniture and regalia acquired, and the first
+              meeting arranged. Both dates are recorded in Lane's Masonic Records, held by the
+              Museum of Freemasonry.
+            </p>
+          </section>
+
           <section className="mb-12">
             <h2 className="mb-5 flex items-center gap-4 font-serif text-xs uppercase tracking-[0.25em] text-navy">
               <span>Worshipful Masters, 1949–1962</span>
@@ -303,7 +358,7 @@ export default function HeritageArchive() {
                       i === 0 ? "border-l-2" : ""
                     } ${i % 2 === 0 ? "bg-card" : "bg-background"}`}
                   >
-                    <p className="mb-1 font-mono text-[0.6rem] tracking-wide text-gold">
+                    <p className="mb-1 font-sans text-[0.6rem] tracking-wide text-gold">
                       {m.years}
                     </p>
                     <p className="font-serif text-[0.65rem] leading-tight text-navy">
@@ -324,11 +379,42 @@ export default function HeritageArchive() {
             </p>
           </section>
 
+          {/* ── Meeting places ──
+              Added from Lane's Masonic Records: the Lodge's five homes,
+              1948 to the present day. */}
+          <section className="mb-12" aria-labelledby="meeting-places-heading">
+            <h2 id="meeting-places-heading" className="mb-5 flex items-center gap-4 font-serif text-xs uppercase tracking-[0.25em] text-navy">
+              <span>Meeting Places, 1948–Present</span>
+              <span className="h-px flex-1 bg-border" aria-hidden="true" />
+            </h2>
+            <ol className="list-none p-0 m-0 space-y-0">
+              {meetingPlaces.map((p, i) => (
+                <li
+                  key={p.years}
+                  className={`flex gap-4 border border-border px-4 py-3 ${
+                    i > 0 ? "border-t-0" : ""
+                  } ${i % 2 === 0 ? "bg-card" : "bg-background"}`}
+                >
+                  <p className="w-28 flex-shrink-0 font-sans text-xs tracking-wide text-gold pt-0.5">
+                    {p.years}
+                  </p>
+                  <div>
+                    <p className="font-serif text-sm text-navy">{p.venue}</p>
+                    <p className="font-sans text-xs text-muted-foreground">{p.locality}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+            <p className="mt-2 font-sans text-xs italic text-muted-foreground">
+              Venues and dates per Lane's Masonic Records, Museum of Freemasonry.
+            </p>
+          </section>
+
           <section>
             <h2 className="mb-6 flex items-center gap-4 font-serif text-xs uppercase tracking-[0.25em] text-navy">
               <span>The Documents</span>
               <span className="h-px flex-1 bg-border" aria-hidden="true" />
-              <span className="font-mono text-[0.65rem] normal-case tracking-normal text-muted-foreground">
+              <span className="font-sans text-[0.65rem] normal-case tracking-normal text-muted-foreground">
                 Select any to expand
               </span>
             </h2>
@@ -387,14 +473,14 @@ export default function HeritageArchive() {
           <nav aria-label="Continue exploring" className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
             <Link
               to="/history"
-              className="flex w-full items-center justify-center gap-2 border border-gold bg-navy px-6 py-3 font-serif text-sm tracking-wide text-background transition-opacity hover:opacity-90 sm:w-auto"
+              className="flex w-full items-center justify-center gap-2 border border-gold bg-navy px-6 py-3 font-serif text-sm tracking-wide text-background transition-opacity hover:opacity-90 sm:w-auto min-h-[48px]"
             >
               <ArrowLeft size={16} aria-hidden="true" />
               Back to Our History
             </Link>
             <Link
               to="/lodge-profile"
-              className="flex w-full items-center justify-center gap-2 border border-border bg-card px-6 py-3 font-serif text-sm tracking-wide text-navy transition-opacity hover:opacity-90 sm:w-auto"
+              className="flex w-full items-center justify-center gap-2 border border-border bg-card px-6 py-3 font-serif text-sm tracking-wide text-navy transition-opacity hover:opacity-90 sm:w-auto min-h-[48px]"
             >
               Meet the Lodge Today
               <ArrowRight size={16} aria-hidden="true" />
@@ -402,7 +488,7 @@ export default function HeritageArchive() {
           </nav>
 
           <p className="px-0 pb-2 pt-8 text-center font-sans text-xs tracking-wide text-muted-foreground">
-            Weybridge Lodge No. 6787 · Province of Surrey · Consecrated 19th January 1949
+            Weybridge Lodge No. 6787 · Province of Surrey · Consecrated 29th January 1949
           </p>
         </div>
       </main>
