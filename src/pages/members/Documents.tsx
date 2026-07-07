@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import MembersLayout from "@/components/members/MembersLayout";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { FileText, Upload, Trash2, Download, Loader2, ExternalLink, Link2 } from "lucide-react";
+import { FileText, Upload, Trash2, Download, Loader2, ExternalLink, Link2, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 
 type Doc = {
