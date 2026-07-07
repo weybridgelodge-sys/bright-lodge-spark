@@ -97,40 +97,56 @@ export default function MembersDocuments() {
   };
 
   const handleView = async (d: Doc) => {
-    const { data, error } = await supabase.storage.from("lodge-docs").createSignedUrl(d.file_path, 60);
+    // Open a real (about:blank) tab synchronously so mobile browsers keep the popup and don't treat it as a raw file.
+    const win = window.open("", "_blank", "noopener,noreferrer");
+    if (!win) {
+      toast.error("Please allow pop-ups to open documents");
+      return;
+    }
+    win.document.write(
+      `<!doctype html><title>${d.title.replace(/[<>&]/g, "")}</title><style>html,body{margin:0;height:100%;background:#0b1220;color:#eee;font-family:system-ui,sans-serif}.msg{padding:2rem;text-align:center}</style><div class="msg">Loading document…</div>`
+    );
+
+    const { data, error } = await supabase.storage.from("lodge-docs").createSignedUrl(d.file_path, 300);
     if (error || !data) {
+      win.document.body.innerHTML = `<div class="msg">Couldn't open document.</div>`;
       toast.error("Couldn't open document");
       return;
     }
-    try {
-      const res = await fetch(data.signedUrl);
-      if (!res.ok) throw new Error("fetch failed");
-      const ext = (d.file_path.split(".").pop() || "").toLowerCase();
-      const mimeByExt: Record<string, string> = {
-        pdf: "application/pdf",
-        png: "image/png",
-        jpg: "image/jpeg",
-        jpeg: "image/jpeg",
-        gif: "image/gif",
-        webp: "image/webp",
-        svg: "image/svg+xml",
-        mp4: "video/mp4",
-        mp3: "audio/mpeg",
-        txt: "text/plain",
-        html: "text/html",
-      };
-      const original = res.headers.get("content-type") || "";
-      const type =
-        original && !original.includes("octet-stream") ? original : mimeByExt[ext] || original || "application/octet-stream";
-      const blob = await res.blob();
-      const inlineBlob = blob.type === type ? blob : new Blob([blob], { type });
-      const url = URL.createObjectURL(inlineBlob);
-      window.open(url, "_blank", "noopener");
-      setTimeout(() => URL.revokeObjectURL(url), 60_000);
-    } catch {
-      window.open(data.signedUrl, "_blank", "noopener");
+
+    const ext = (d.file_path.split(".").pop() || "").toLowerCase();
+    const isImage = ["png", "jpg", "jpeg", "gif", "webp", "svg"].includes(ext);
+    const isPdf = ext === "pdf";
+    const safeUrl = data.signedUrl.replace(/"/g, "&quot;");
+    const safeTitle = d.title.replace(/[<>&]/g, "");
+
+    let bodyHtml: string;
+    if (isImage) {
+      bodyHtml = `<img src="${safeUrl}" alt="${safeTitle}" style="max-width:100%;height:auto;display:block;margin:auto"/>`;
+    } else if (isPdf) {
+      // Native <embed> works on desktop; use Google's viewer as a mobile-friendly fallback overlay.
+      bodyHtml = `
+        <embed src="${safeUrl}" type="application/pdf" style="width:100%;height:100%;border:0"/>
+        <noscript><a href="${safeUrl}">Open document</a></noscript>
+        <script>
+          setTimeout(function(){
+            var e=document.querySelector('embed');
+            if(!e||e.offsetHeight<80){
+              document.body.innerHTML='<iframe src="https://docs.google.com/gview?embedded=true&url='+encodeURIComponent(${JSON.stringify(data.signedUrl)})+'" style="width:100%;height:100%;border:0"></iframe>';
+            }
+          },800);
+        <\/script>`;
+    } else {
+      bodyHtml = `<iframe src="${safeUrl}" style="width:100%;height:100%;border:0"></iframe>`;
     }
+
+    win.document.open();
+    win.document.write(
+      `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${safeTitle}</title><style>html,body{margin:0;height:100%;background:#0b1220}</style></head><body>${bodyHtml}</body></html>`
+    );
+    win.document.close();
   };
+
 
   const handleDownload = async (d: Doc) => {
     const filename = d.file_path.split("/").pop() || d.title;
