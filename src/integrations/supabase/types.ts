@@ -3053,6 +3053,7 @@ export type Database = {
         | "ritual"
         | "other"
         | "newsletter"
+        | "learning_development"
       festive_attendance_status:
         | "booked"
         | "attended"
@@ -3265,6 +3266,7 @@ export const Constants = {
         "ritual",
         "other",
         "newsletter",
+        "learning_development",
       ],
       festive_attendance_status: [
         "booked",

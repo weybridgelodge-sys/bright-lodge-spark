@@ -22,6 +22,7 @@ const CATEGORIES = [
   "committee_agendas",
   "media_files",
   "newsletter",
+  "learning_development",
   "other",
 ] as const;
 
@@ -32,6 +33,7 @@ const CATEGORY_LABELS: Record<typeof CATEGORIES[number] | "ritual", string> = {
   committee_agendas: "Committee agendas",
   media_files: "Media files",
   newsletter: "Newsletters",
+  learning_development: "Learning & Development",
   other: "Other",
   ritual: "Ritual",
 };
