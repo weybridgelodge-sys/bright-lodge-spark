@@ -153,6 +153,25 @@ export default function MembersDocuments() {
     }
     window.open(data.signedUrl, "_blank", "noopener");
   };
+  const handleCopyLongLivedLink = async (d: Doc) => {
+    // 20 years in seconds — for printed QR codes / booklets. Bucket stays private; link is unguessable.
+    const TWENTY_YEARS = 60 * 60 * 24 * 365 * 20;
+    const { data, error } = await supabase.storage
+      .from("lodge-docs")
+      .createSignedUrl(d.file_path, TWENTY_YEARS);
+    if (error || !data) {
+      toast.error("Couldn't generate shareable link");
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(data.signedUrl);
+      toast.success("20-year link copied to clipboard");
+    } catch {
+      // Clipboard may be blocked (e.g. iOS in-app). Fall back to prompt so admin can copy manually.
+      window.prompt("Copy this 20-year signed link:", data.signedUrl);
+    }
+  };
+
 
   const handleDelete = async (d: Doc) => {
     if (!confirm(`Delete "${d.title}"?`)) return;
