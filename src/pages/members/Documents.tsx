@@ -68,7 +68,10 @@ export default function MembersDocuments() {
     try {
       const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
       const path = `${category}/${Date.now()}-${safeName}`;
-      const { error: upErr } = await supabase.storage.from("lodge-docs").upload(path, file);
+      const { error: upErr } = await supabase.storage.from("lodge-docs").upload(path, file, {
+        contentType: file.type || "application/octet-stream",
+        upsert: false,
+      });
       if (upErr) throw upErr;
       const { error: dbErr } = await supabase.from("lodge_documents").insert({
         title: title.trim(),
