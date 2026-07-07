@@ -18,13 +18,13 @@ const milestones: TimelineEntry[] = [
     year: "1949",
     title: "Lodge Consecrated",
     description:
-      "Weybridge Lodge No. 6787 is officially consecrated, becoming a new home for Freemasonry in Surrey.",
+      "Weybridge Lodge No. 6787 is consecrated on 29th January 1949, its Warrant of Constitution having been granted the previous November — becoming a new home for Freemasonry in Surrey.",
   },
   {
-    year: "1980s",
+    year: "1986",
     title: "Move to Guildford",
     description:
-      "The Lodge settles into the Guildford Masonic Centre in Guildford, where it still meets today.",
+      "After earlier homes in Weybridge, Chertsey and Surbiton, the Lodge settles at the Guildford Masonic Centre — where it still meets today.",
   },
   {
     year: "2023",
@@ -75,7 +75,7 @@ const LodgeTimeline = () => {
                 key={m.year}
                 onClick={() => setActive(i)}
                 onMouseEnter={() => setActive(i)}
-                className="flex flex-col items-center text-center group focus:outline-none"
+                className="flex flex-col items-center text-center group focus:outline-none min-h-[48px] px-2"
                 aria-label={`View milestone: ${m.year} ${m.title}`}
               >
                 <span
