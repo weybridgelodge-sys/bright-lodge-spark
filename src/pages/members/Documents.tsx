@@ -291,14 +291,24 @@ export default function MembersDocuments() {
                   <Download className="w-4 h-4" />
                 </button>
                 {isAdmin && (
-                  <button
-                    onClick={() => handleDelete(d)}
-                    className="p-2 text-red-400 hover:bg-red-500/10 rounded-sm"
-                    aria-label="Delete"
-                    title="Delete"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                  <>
+                    <button
+                      onClick={() => handleCopyLongLivedLink(d)}
+                      className="p-2 text-gold hover:bg-gold/10 rounded-sm"
+                      aria-label="Copy 20-year shareable link"
+                      title="Copy 20-year shareable link (for printed QR codes)"
+                    >
+                      <Link2 className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(d)}
+                      className="p-2 text-red-400 hover:bg-red-500/10 rounded-sm"
+                      aria-label="Delete"
+                      title="Delete"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </>
                 )}
               </div>
             </li>
