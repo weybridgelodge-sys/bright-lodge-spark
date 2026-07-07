@@ -82,7 +82,10 @@ export default function MembersRitual() {
       const isGeneral = degree === "general";
       const folder = isGeneral ? "general" : degree;
       const path = `${folder}/${Date.now()}-${safeName}`;
-      const { error: upErr } = await supabase.storage.from("ritual-docs").upload(path, file);
+      const { error: upErr } = await supabase.storage.from("ritual-docs").upload(path, file, {
+        contentType: file.type || "application/octet-stream",
+        upsert: false,
+      });
       if (upErr) throw upErr;
       const { error: dbErr } = await supabase.from("ritual_documents").insert({
         title: title.trim(),
