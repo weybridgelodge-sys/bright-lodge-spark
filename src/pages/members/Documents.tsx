@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import MembersLayout from "@/components/members/MembersLayout";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { FileText, Upload, Trash2, Download, Loader2, ExternalLink } from "lucide-react";
+import { FileText, Upload, Trash2, Download, Loader2, ExternalLink, Link2 } from "lucide-react";
 import { toast } from "sonner";
 
 type Doc = {
@@ -153,6 +153,25 @@ export default function MembersDocuments() {
     }
     window.open(data.signedUrl, "_blank", "noopener");
   };
+  const handleCopyLongLivedLink = async (d: Doc) => {
+    // 20 years in seconds — for printed QR codes / booklets. Bucket stays private; link is unguessable.
+    const TWENTY_YEARS = 60 * 60 * 24 * 365 * 20;
+    const { data, error } = await supabase.storage
+      .from("lodge-docs")
+      .createSignedUrl(d.file_path, TWENTY_YEARS);
+    if (error || !data) {
+      toast.error("Couldn't generate shareable link");
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(data.signedUrl);
+      toast.success("20-year link copied to clipboard");
+    } catch {
+      // Clipboard may be blocked (e.g. iOS in-app). Fall back to prompt so admin can copy manually.
+      window.prompt("Copy this 20-year signed link:", data.signedUrl);
+    }
+  };
+
 
   const handleDelete = async (d: Doc) => {
     if (!confirm(`Delete "${d.title}"?`)) return;
@@ -272,14 +291,24 @@ export default function MembersDocuments() {
                   <Download className="w-4 h-4" />
                 </button>
                 {isAdmin && (
-                  <button
-                    onClick={() => handleDelete(d)}
-                    className="p-2 text-red-400 hover:bg-red-500/10 rounded-sm"
-                    aria-label="Delete"
-                    title="Delete"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                  <>
+                    <button
+                      onClick={() => handleCopyLongLivedLink(d)}
+                      className="p-2 text-gold hover:bg-gold/10 rounded-sm"
+                      aria-label="Copy 20-year shareable link"
+                      title="Copy 20-year shareable link (for printed QR codes)"
+                    >
+                      <Link2 className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(d)}
+                      className="p-2 text-red-400 hover:bg-red-500/10 rounded-sm"
+                      aria-label="Delete"
+                      title="Delete"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </>
                 )}
               </div>
             </li>
