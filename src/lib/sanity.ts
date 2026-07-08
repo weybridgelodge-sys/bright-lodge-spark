@@ -71,6 +71,41 @@ export const POSTS_QUERY = `*[_type == "post" && defined(slug.current)] | order(
 export const POST_BY_SLUG_QUERY = `*[_type == "post" && slug.current == $slug][0] ${postProjection}`;
 export const CATEGORIES_QUERY = `array::unique(*[_type == "post" && defined(category)].category)`;
 
+// ── Video ────────────────────────────────────────────────────────────
+export interface SanityVideo {
+  _id: string;
+  title: string;
+  slug: string;
+  youtubeId: string;
+  channel?: string;
+  description?: string;
+  uploadDate?: string;
+  durationSeconds?: number;
+  page?: string;
+  published?: boolean;
+}
+
+const videoProjection = `{
+  _id,
+  title,
+  "slug": slug.current,
+  youtubeId,
+  channel,
+  description,
+  uploadDate,
+  "durationSeconds": coalesce(durationSeconds, duration),
+  page,
+  published
+}`;
+
+export const VIDEOS_WITH_SLUG_QUERY = `*[_type == "video" && published != false && defined(slug.current) && defined(youtubeId)] | order(coalesce(order, 999), title asc) ${videoProjection}`;
+export const VIDEO_BY_SLUG_QUERY = `*[_type == "video" && slug.current == $slug && published != false][0] ${videoProjection}`;
+
+export async function getVideoBySlug(slug: string): Promise<SanityVideo | null> {
+  const doc = await sanityClient.fetch<SanityVideo | null>(VIDEO_BY_SLUG_QUERY, { slug });
+  return doc ?? null;
+}
+
 export const formatDate = (iso: string) =>
   new Date(iso).toLocaleDateString("en-GB", {
     day: "numeric",
