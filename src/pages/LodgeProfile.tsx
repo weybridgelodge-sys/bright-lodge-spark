@@ -221,7 +221,7 @@ const LodgeProfile = () => {
               <div className="h-px w-16 bg-gold mb-6" aria-hidden="true" />
               <h2 id="mission-heading" className="text-2xl md:text-3xl font-serif text-foreground mb-6">Why Weybridge Lodge?</h2>
               <p className="text-muted-foreground font-sans leading-relaxed mb-6">Weybridge Lodge No. 6787 brings together men of good character from Guildford and the surrounding Surrey area to build lifelong friendships, support one another's personal development, and give practical, generous service to local and national charitable causes — all within the structure and ceremony of English Freemasonry.</p>
-              <p className="text-muted-foreground font-sans leading-relaxed">If that sounds like the kind of friendship, structure and purpose you're looking for, the best next step is our <Link to="/first-visit" className="text-gold hover:underline">First Visit Guide</Link> — it walks through exactly what to expect, from enquiry to your first evening at Guildford Masonic Centre.</p>
+              <p className="text-muted-foreground font-sans leading-relaxed">If that sounds like the kind of friendship, structure and purpose you're looking for, the best next step is <Link to="/first-visit" className="text-gold hover:underline">Your Initiation Night</Link> — it walks through exactly what to expect, from enquiry to your first evening at Guildford Masonic Centre.</p>
             </motion.div>
           </div>
         </section>
@@ -235,7 +235,7 @@ const LodgeProfile = () => {
               <div className="flex flex-col sm:flex-row flex-wrap justify-center items-center gap-4">
                 <Link to="/join-us" className="inline-flex items-center justify-center gap-2 bg-gold-shimmer text-accent-foreground px-8 py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity min-h-[48px] w-full sm:w-auto">Begin Your Application<ArrowRight className="h-4 w-4" aria-hidden="true" /></Link>
                 <Link to="/quiz" className="inline-flex items-center justify-center bg-transparent text-gold border border-gold/40 px-8 py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity min-h-[48px] w-full sm:w-auto">Take the 2-Min Quiz</Link>
-                <Link to="/first-visit" className="inline-flex items-center justify-center bg-transparent text-gold border border-gold/40 px-8 py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity min-h-[48px] w-full sm:w-auto">First Visit Guide</Link>
+                <Link to="/first-visit" className="inline-flex items-center justify-center bg-transparent text-gold border border-gold/40 px-8 py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity min-h-[48px] w-full sm:w-auto">Your Initiation Night</Link>
               </div>
             </motion.div>
           </div>
