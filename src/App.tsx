@@ -143,7 +143,7 @@ const App = () => (
             <Route path="/charity-golf-day-june-2025" element={<Navigate to="/our-charities" replace />} />
             {/* News */}
             <Route path="/post-summary-page" element={<Navigate to="/news" replace />} />
-            <Route path="/surrey-freemasons-video-hub" element={<Navigate to="/news" replace />} />
+            <Route path="/surrey-freemasons-video-hub" element={<Navigate to="/video-hub" replace />} />
             <Route path="/75th-anniversary-meeting-february-2024" element={<Navigate to="/news/75th-anniversary" replace />} />
             {/* Legal & misc */}
             <Route path="/data-protection-policy" element={<Navigate to="/data-protection" replace />} />
