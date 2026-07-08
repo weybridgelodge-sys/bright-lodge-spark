@@ -225,4 +225,40 @@
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
+  <url>
+    <loc>https://weybridgelodge.org.uk/video-hub/what-is-freemasonry</loc>
+    <lastmod>2026-07-08</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://weybridgelodge.org.uk/video-hub/freemasonry-armed-forces</loc>
+    <lastmod>2026-07-08</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://weybridgelodge.org.uk/video-hub/guided-tour-freemasons-hall</loc>
+    <lastmod>2026-07-08</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://weybridgelodge.org.uk/video-hub/origins-of-freemasonry</loc>
+    <lastmod>2026-07-08</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://weybridgelodge.org.uk/video-hub/life-of-a-freemason</loc>
+    <lastmod>2026-07-08</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://weybridgelodge.org.uk/video-hub/freemasonry-whats-it-all-about</loc>
+    <lastmod>2026-07-08</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.5</priority>
+  </url>
 </urlset>
