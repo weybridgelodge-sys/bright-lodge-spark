@@ -17,7 +17,7 @@ import surrey2030Img from "@/assets/news/surrey-2030-gold-trophy.jpg.asset.json"
 export const SANITY_PROJECT_ID = "sjz7d6eb";
 export const SANITY_DATASET = "production";
 export const SANITY_API_VERSION = "2024-01-01";
-export const SANITY_STUDIO_URL = "https://weybridge-lodge.sanity.studio/";
+export const SANITY_STUDIO_URL = "https://weybridge-lodge-mcp.sanity.studio/";
 
 export const sanityClient: SanityClient = createClient({
   projectId: SANITY_PROJECT_ID,
