@@ -152,7 +152,7 @@ const VideoDetailPage = () => {
                 {video.uploadDate && (
                   <>
                     {" · "}
-                    {new Date(uploadDate).toLocaleDateString("en-GB", {
+                    {new Date(video.uploadDate).toLocaleDateString("en-GB", {
                       year: "numeric",
                       month: "long",
                       day: "numeric",
