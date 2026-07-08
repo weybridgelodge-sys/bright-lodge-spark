@@ -247,11 +247,13 @@ async function main() {
 
 interface SanityVideoRow {
   title?: string;
+  slug?: { current?: string };
   youtubeId?: string;
   channel?: string;
   description?: string;
   uploadDate?: string;
   durationSeconds?: number;
+  duration?: number;
   page?: string;
   order?: number;
   published?: boolean;
@@ -262,7 +264,9 @@ async function collectVideos(): Promise<VideoEntry[]> {
   try {
     const rows = await sanity.fetch<SanityVideoRow[]>(
       `*[_type == "video" && published != false && defined(youtubeId)] | order(coalesce(order, 999), title asc) {
-        title, youtubeId, channel, description, uploadDate, durationSeconds, page, order, published
+        title, slug, youtubeId, channel, description, uploadDate,
+        "durationSeconds": coalesce(durationSeconds, duration),
+        page, order, published
       }`,
     );
     sanityVideos = rows.map((r) => ({
@@ -273,6 +277,7 @@ async function collectVideos(): Promise<VideoEntry[]> {
       uploadDate: r.uploadDate ?? "",
       durationSeconds: r.durationSeconds,
       page: r.page?.trim() || "/video-hub",
+      slug: r.slug?.current,
     }));
     console.log(`Fetched ${sanityVideos.length} videos from Sanity`);
   } catch (err) {
