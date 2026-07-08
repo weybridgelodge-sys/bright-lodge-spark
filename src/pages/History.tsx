@@ -42,14 +42,14 @@ const History = () => {
       {
         "@context": "https://schema.org",
         "@type": "WebPage",
-        "@id": "https://www.weybridgelodge.org.uk/history#webpage",
-        url: "https://www.weybridgelodge.org.uk/history",
+        "@id": "https://weybridgelodge.org.uk/history#webpage",
+        url: "https://weybridgelodge.org.uk/history",
         name: "Lodge History | Freemasons in Guildford, Surrey — Weybridge Lodge No. 6787",
         description:
           "Discover the history of Weybridge Lodge No. 6787 — from wartime Brooklands and the aircraft pioneers of Vickers and Hawker, to our consecration in 1949 and life in Guildford today.",
         inLanguage: "en-GB",
         isPartOf: {
-          "@id": "https://www.weybridgelodge.org.uk/#website",
+          "@id": "https://weybridgelodge.org.uk/#website",
         },
       },
       breadcrumb,

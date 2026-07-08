@@ -29,7 +29,7 @@ const ladiesFestivalSchema = {
   endDate: "2026-08-23T01:00:00+01:00",
   description:
     "Black tie charity gala dinner in aid of Action for Carers Surrey. Three-course dinner, DJ, Grand Raffle and more at the Macdonald Frimley Hall Hotel.",
-  image: "https://www.weybridgelodge.org.uk/og-image.png",
+  image: "https://weybridgelodge.org.uk/og-image.png",
   eventStatus: "https://schema.org/EventScheduled",
   eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
   location: {
@@ -47,14 +47,14 @@ const ladiesFestivalSchema = {
   organizer: {
     "@type": "Organization",
     name: "Weybridge Lodge No. 6787",
-    url: "https://www.weybridgelodge.org.uk",
+    url: "https://weybridgelodge.org.uk",
   },
   offers: {
     "@type": "Offer",
     price: "75",
     priceCurrency: "GBP",
     availability: "https://schema.org/InStock",
-    url: "https://www.weybridgelodge.org.uk/events",
+    url: "https://weybridgelodge.org.uk/events",
   },
 };
 
@@ -91,13 +91,13 @@ const Events = () => {
       {
         "@context": "https://schema.org",
         "@type": "WebPage",
-        "@id": "https://www.weybridgelodge.org.uk/events#webpage",
-        url: "https://www.weybridgelodge.org.uk/events",
+        "@id": "https://weybridgelodge.org.uk/events#webpage",
+        url: "https://weybridgelodge.org.uk/events",
         name: "Events & Meetings | Freemasons in Guildford, Surrey — Weybridge Lodge No. 6787",
         description:
           "View upcoming Freemasons meetings, the 2026 Ladies Festival black tie gala, and weekly Lodge of Instruction evenings at Weybridge Lodge No. 6787, Guildford Masonic Centre, GU2 4DR.",
         inLanguage: "en-GB",
-        isPartOf: { "@id": "https://www.weybridgelodge.org.uk/#website" },
+        isPartOf: { "@id": "https://weybridgelodge.org.uk/#website" },
       },
       breadcrumbSchema([
         { name: "Home", url: "/" },

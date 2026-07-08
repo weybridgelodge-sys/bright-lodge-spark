@@ -43,14 +43,14 @@ const FreemasonryCharity = () => {
       {
         "@context": "https://schema.org",
         "@type": "WebPage",
-        "@id": "https://www.weybridgelodge.org.uk/freemasonry-and-charity#webpage",
-        url: "https://www.weybridgelodge.org.uk/freemasonry-and-charity",
+        "@id": "https://weybridgelodge.org.uk/freemasonry-and-charity#webpage",
+        url: "https://weybridgelodge.org.uk/freemasonry-and-charity",
         name: "Freemasonry & Charity | Freemasons in Guildford, Surrey — Weybridge Lodge No. 6787",
         description:
           "Freemasons raise nearly £1 million a week for charity. Discover how Weybridge Lodge No. 6787 and the Masonic Charitable Foundation support local and national causes across Guildford and Surrey from the Guildford Masonic Centre, GU2 4DR.",
         inLanguage: "en-GB",
         isPartOf: {
-          "@id": "https://www.weybridgelodge.org.uk/#website",
+          "@id": "https://weybridgelodge.org.uk/#website",
         },
       },
       breadcrumb,

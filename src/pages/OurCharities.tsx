@@ -85,14 +85,14 @@ const OurCharities = () => {
       {
         "@context": "https://schema.org",
         "@type": "WebPage",
-        "@id": "https://www.weybridgelodge.org.uk/our-charities#webpage",
-        url: "https://www.weybridgelodge.org.uk/our-charities",
+        "@id": "https://weybridgelodge.org.uk/our-charities#webpage",
+        url: "https://weybridgelodge.org.uk/our-charities",
         name: "Our Charities | Freemasons in Guildford, Surrey — Weybridge Lodge No. 6787",
         description:
           "Weybridge Lodge No. 6787 supports SANDS, TLC Appeal Surrey, and the Surrey 2030 Festival. See how Freemasons in Guildford give back to their community from the Guildford Masonic Centre, GU2 4DR.",
         inLanguage: "en-GB",
         isPartOf: {
-          "@id": "https://www.weybridgelodge.org.uk/#website",
+          "@id": "https://weybridgelodge.org.uk/#website",
         },
       },
       breadcrumb,

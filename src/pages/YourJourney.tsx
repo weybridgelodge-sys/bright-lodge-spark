@@ -157,14 +157,14 @@ const YourJourney = () => {
       {
         "@context": "https://schema.org",
         "@type": "WebPage",
-        "@id": "https://www.weybridgelodge.org.uk/your-journey#webpage",
-        url: "https://www.weybridgelodge.org.uk/your-journey",
+        "@id": "https://weybridgelodge.org.uk/your-journey#webpage",
+        url: "https://weybridgelodge.org.uk/your-journey",
         name: "How to Join the Freemasons in Guildford, Surrey — Weybridge Lodge No. 6787",
         description:
           "The complete application process for joining Weybridge Lodge No. 6787 — a Freemasons Lodge in Guildford, Surrey. From your first enquiry to your initiation night at the Guildford Masonic Centre, GU2 4DR.",
         inLanguage: "en-GB",
         isPartOf: {
-          "@id": "https://www.weybridgelodge.org.uk/#website",
+          "@id": "https://weybridgelodge.org.uk/#website",
         },
       },
       breadcrumb,

@@ -46,14 +46,14 @@ const FirstVisit = () => {
       {
         "@context": "https://schema.org",
         "@type": "WebPage",
-        "@id": "https://www.weybridgelodge.org.uk/first-visit#webpage",
-        url: "https://www.weybridgelodge.org.uk/first-visit",
+        "@id": "https://weybridgelodge.org.uk/first-visit#webpage",
+        url: "https://weybridgelodge.org.uk/first-visit",
         name: "Your Initiation Night | Freemasons in Guildford, Surrey — Weybridge Lodge No. 6787",
         description:
           "A candid, reassuring guide to your Masonic initiation night at Weybridge Lodge No. 6787 — what happens, what to wear, and what to expect at the Guildford Masonic Centre, GU2 4DR.",
         inLanguage: "en-GB",
         isPartOf: {
-          "@id": "https://www.weybridgelodge.org.uk/#website",
+          "@id": "https://weybridgelodge.org.uk/#website",
         },
       },
       breadcrumb,

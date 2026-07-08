@@ -117,8 +117,8 @@ const News = () => {
       {
         "@context": "https://schema.org",
         "@type": "WebPage",
-        "@id": `https://www.weybridgelodge.org.uk${path}#webpage`,
-        url: `https://www.weybridgelodge.org.uk${path}`,
+        "@id": `https://weybridgelodge.org.uk${path}#webpage`,
+        url: `https://weybridgelodge.org.uk${path}`,
         name: categoryFromSlug
           ? `${categoryFromSlug} News | Freemasons in Guildford, Surrey — Weybridge Lodge No. 6787`
           : "News & Updates | Freemasons in Guildford, Surrey — Weybridge Lodge No. 6787",
@@ -127,7 +127,7 @@ const News = () => {
           : "Latest news and updates from Weybridge Lodge No. 6787 — Masonic meetings, charity events and social gatherings at the Guildford Masonic Centre, GU2 4DR.",
         inLanguage: "en-GB",
         isPartOf: {
-          "@id": "https://www.weybridgelodge.org.uk/#website",
+          "@id": "https://weybridgelodge.org.uk/#website",
         },
       },
       breadcrumb,

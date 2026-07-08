@@ -203,7 +203,7 @@ const SanityPostPage = () => {
 
             <div className="mt-12 pt-8 border-t border-border">
               <SocialShare
-                url={`https://www.weybridgelodge.org.uk/news/${data.slug}`}
+                url={`https://weybridgelodge.org.uk/news/${data.slug}`}
                 title={data.title}
               />
             </div>

@@ -22,14 +22,14 @@ const HomepageCharityCTA = lazy(() => import("@/components/charity/HomepageChari
 const webPageSchema = {
   "@context": "https://schema.org",
   "@type": "WebPage",
-  "@id": "https://www.weybridgelodge.org.uk/#webpage",
-  url: "https://www.weybridgelodge.org.uk/",
+  "@id": "https://weybridgelodge.org.uk/#webpage",
+  url: "https://weybridgelodge.org.uk/",
   name: "Weybridge Lodge No. 6787 | Freemasons in Guildford, Surrey",
   description:
     "Weybridge Lodge No. 6787 — an open, friendly Freemasons Lodge in Guildford, Surrey. Join our welcoming community at the Guildford Masonic Centre, GU2 4DR.",
   inLanguage: "en-GB",
   isPartOf: {
-    "@id": "https://www.weybridgelodge.org.uk/#website",
+    "@id": "https://weybridgelodge.org.uk/#website",
   },
 };
 

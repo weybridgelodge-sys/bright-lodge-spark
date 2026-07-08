@@ -184,13 +184,13 @@ const WhatIsFreemasonry = () => {
     const webPageSchema = {
       "@context": "https://schema.org",
       "@type": "WebPage",
-      "@id": "https://www.weybridgelodge.org.uk/what-is-freemasonry#webpage",
-      url: "https://www.weybridgelodge.org.uk/what-is-freemasonry",
+      "@id": "https://weybridgelodge.org.uk/what-is-freemasonry#webpage",
+      url: "https://weybridgelodge.org.uk/what-is-freemasonry",
       name: "What is Freemasonry? | Freemasons in Guildford, Surrey — Weybridge Lodge No. 6787",
       description:
         "Discover what Freemasonry is — its principles of integrity, friendship, respect and service. Learn about Masonic meetings, the three degrees, and how to join our Freemasons Lodge in Guildford, Surrey at GU2 4DR.",
       inLanguage: "en-GB",
-      isPartOf: { "@id": "https://www.weybridgelodge.org.uk/#website" },
+      isPartOf: { "@id": "https://weybridgelodge.org.uk/#website" },
     };
 
     return [webPageSchema, faqSchema, breadcrumb];
