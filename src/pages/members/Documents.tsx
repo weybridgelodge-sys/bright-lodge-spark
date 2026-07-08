@@ -2,17 +2,48 @@ import { useEffect, useState } from "react";
 import MembersLayout from "@/components/members/MembersLayout";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { FileText, Upload, Trash2, Download, Loader2, ExternalLink, Link2, RefreshCw } from "lucide-react";
+import { FileText, Upload, Trash2, Download, Loader2, ExternalLink, Link2, RefreshCw, Eye, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
+
+type Degree = "entered_apprentice" | "fellow_craft" | "master_mason" | "installed_master";
+type DegreeOrGeneral = Degree | "general";
+
+const DEGREES: Degree[] = ["entered_apprentice", "fellow_craft", "master_mason", "installed_master"];
+const DEGREE_LEVEL: Record<Degree, number> = {
+  entered_apprentice: 1,
+  fellow_craft: 2,
+  master_mason: 3,
+  installed_master: 4,
+};
+const DEGREE_LABEL: Record<Degree, string> = {
+  entered_apprentice: "Entered Apprentice",
+  fellow_craft: "Fellow Craft",
+  master_mason: "Master Mason",
+  installed_master: "Installed Masters",
+};
+const GENERAL_LABEL = "General (all members)";
+
+type Category =
+  | "summons"
+  | "meeting_minutes"
+  | "committee_minutes"
+  | "committee_agendas"
+  | "media_files"
+  | "ritual"
+  | "newsletter"
+  | "learning_development"
+  | "other";
 
 type Doc = {
   id: string;
   title: string;
   description: string | null;
-  category: "summons" | "meeting_minutes" | "committee_minutes" | "committee_agendas" | "media_files" | "ritual" | "newsletter" | "other";
+  category: Category;
   file_path: string;
   file_size_bytes: number | null;
   created_at: string;
+  required_degree: Degree | null;
+  is_general: boolean;
 };
 
 const CATEGORIES = [
@@ -39,15 +70,19 @@ const CATEGORY_LABELS: Record<typeof CATEGORIES[number] | "ritual", string> = {
 };
 
 export default function MembersDocuments() {
-  const { isAdmin, user } = useAuth();
+  const { isAdmin, user, profile } = useAuth();
   const [docs, setDocs] = useState<Doc[]>([]);
   const [filter, setFilter] = useState<"all" | typeof CATEGORIES[number]>("all");
   const [busy, setBusy] = useState(false);
+
+  // admin "preview as member" — only affects the Learning & Development gate.
+  const [previewDegree, setPreviewDegree] = useState<Degree | null>(null);
 
   // upload form
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState<typeof CATEGORIES[number]>("summons");
+  const [degree, setDegree] = useState<DegreeOrGeneral>("general");
   const [file, setFile] = useState<File | null>(null);
 
   const load = async () => {
@@ -66,8 +101,6 @@ export default function MembersDocuments() {
     if (!file || !title.trim() || !user) return;
     setBusy(true);
     try {
-      // Stable path: <category>/<uuid>.<ext> — never changes, so a 20-year signed URL
-      // stays valid across future revisions when the file is replaced in place.
       const ext = (file.name.split(".").pop() || "bin").toLowerCase().replace(/[^a-z0-9]/g, "");
       const docId = crypto.randomUUID();
       const path = `${category}/${docId}.${ext}`;
@@ -76,6 +109,12 @@ export default function MembersDocuments() {
         upsert: false,
       });
       if (upErr) throw upErr;
+
+      // Degree gating only applies to Learning & Development documents.
+      const gated = category === "learning_development";
+      const isGeneral = gated ? degree === "general" : true;
+      const requiredDegree: Degree | null = gated && !isGeneral ? (degree as Degree) : null;
+
       const { error: dbErr } = await supabase.from("lodge_documents").insert({
         title: title.trim(),
         description: description.trim() || null,
@@ -83,14 +122,17 @@ export default function MembersDocuments() {
         file_path: path,
         file_size_bytes: file.size,
         uploaded_by: user.id,
+        is_general: isGeneral,
+        required_degree: requiredDegree,
       });
       if (dbErr) throw dbErr;
       toast.success("Document uploaded");
       setTitle("");
       setDescription("");
       setFile(null);
-      (document.getElementById("doc-file") as HTMLInputElement | null)?.value &&
-        ((document.getElementById("doc-file") as HTMLInputElement).value = "");
+      setDegree("general");
+      const el = document.getElementById("doc-file") as HTMLInputElement | null;
+      if (el) el.value = "";
       load();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Upload failed");
@@ -100,9 +142,6 @@ export default function MembersDocuments() {
   };
 
   const handleReplace = async (d: Doc) => {
-    // Replaces the file at the SAME storage path so any previously generated
-    // (long-lived) signed URLs continue to resolve — now to the new file.
-    // Note: CDN/browser caches may serve the old file for a few minutes.
     const input = document.createElement("input");
     input.type = "file";
     input.onchange = async () => {
@@ -139,7 +178,6 @@ export default function MembersDocuments() {
 
   const handleView = async (d: Doc) => {
     const safeTitle = d.title.replace(/[<>&]/g, "");
-    // Keep this window script-accessible: adding noopener/noreferrer leaves Samsung Browser on a blank about:blank tab.
     const win = window.open("about:blank", "_blank");
     if (!win) {
       toast.error("Please allow pop-ups to open documents");
@@ -167,7 +205,6 @@ export default function MembersDocuments() {
       bodyHtml = `<img src="${safeUrl}" alt="${safeTitle}" style="max-width:100%;height:auto;display:block;margin:auto"/>`;
     } else if (isPdf) {
       const googleViewer = `https://docs.google.com/gview?embedded=true&url=${encodeURIComponent(data.signedUrl)}`.replace(/"/g, "&quot;");
-      // Samsung Browser often downloads raw PDFs; load a viewer page instead of navigating to the file URL.
       bodyHtml = `
         <iframe src="${googleViewer}" title="${safeTitle}" style="width:100%;height:100%;border:0;background:#fff"></iframe>
         <a href="${safeUrl}" target="_blank" rel="noopener" style="position:fixed;right:12px;bottom:12px;background:#c9a432;color:#1b2a4a;padding:10px 14px;border-radius:2px;text-decoration:none;font:600 13px system-ui,sans-serif">Open original</a>`;
@@ -195,7 +232,6 @@ export default function MembersDocuments() {
     window.open(data.signedUrl, "_blank", "noopener");
   };
   const handleCopyLongLivedLink = async (d: Doc) => {
-    // 20 years in seconds — for printed QR codes / booklets. Bucket stays private; link is unguessable.
     const TWENTY_YEARS = 60 * 60 * 24 * 365 * 20;
     const { data, error } = await supabase.storage
       .from("lodge-docs")
@@ -208,7 +244,6 @@ export default function MembersDocuments() {
       await navigator.clipboard.writeText(data.signedUrl);
       toast.success("20-year link copied to clipboard");
     } catch {
-      // Clipboard may be blocked (e.g. iOS in-app). Fall back to prompt so admin can copy manually.
       window.prompt("Copy this 20-year signed link:", data.signedUrl);
     }
   };
@@ -222,16 +257,72 @@ export default function MembersDocuments() {
     load();
   };
 
+  const myDegree = (profile as { degree?: Degree } | null)?.degree ?? "entered_apprentice";
+  const isPastMaster = (profile as { is_past_master?: boolean } | null)?.is_past_master ?? false;
+  // Past Masters get Installed Masters level access on L&D material.
+  const effectiveDegree: Degree = isPastMaster ? "installed_master" : myDegree;
+
+  // Degree gate applies ONLY to Learning & Development documents.
+  // Admins see everything unless "Preview as member" is selected.
+  const canSeeLD = (d: Doc): boolean => {
+    if (d.category !== "learning_development") return true;
+    if (d.is_general) return true;
+    if (isAdmin && !previewDegree) return true;
+    const viewer: Degree = isAdmin && previewDegree ? previewDegree : effectiveDegree;
+    const need = d.required_degree ?? "entered_apprentice";
+    return DEGREE_LEVEL[viewer] >= DEGREE_LEVEL[need];
+  };
+
   const filtered = docs
     .filter((d) => d.category !== "ritual")
-    .filter((d) => filter === "all" || d.category === filter);
+    .filter((d) => filter === "all" || d.category === filter)
+    .filter(canSeeLD);
+
+  const showLDGateBanner = filter === "learning_development" || filter === "all";
 
   return (
     <MembersLayout>
-      <div className="mb-6">
-        <h1 className="font-serif text-3xl text-gold mb-2">Documents</h1>
-        <p className="text-sm text-primary-foreground/60">Summons, meeting minutes, committee minutes, agendas, media files, ritual notes, and Lodge papers.</p>
+      <div className="mb-6 flex items-start justify-between gap-3">
+        <div>
+          <h1 className="font-serif text-3xl text-gold mb-2">Documents</h1>
+          <p className="text-sm text-primary-foreground/60">Summons, meeting minutes, committee minutes, agendas, media files, ritual notes, and Lodge papers.</p>
+          {showLDGateBanner && profile && (
+            <p className="text-[11px] text-primary-foreground/55 mt-2">
+              Learning &amp; Development material is displayed according to your verified Masonic degree — currently{" "}
+              <span className="text-gold font-medium">{DEGREE_LABEL[myDegree]}</span>
+              {isPastMaster && <span className="text-gold/80"> · Past Master (Installed Masters access)</span>}.
+            </p>
+          )}
+        </div>
+        <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gold/10 text-gold text-[11px] font-semibold uppercase tracking-wider border border-gold/20 shrink-0">
+          <ShieldCheck className="h-3.5 w-3.5" /> Secure Archive
+        </div>
       </div>
+
+      {isAdmin && (
+        <div className="mb-4 bg-gold/5 border border-gold/20 rounded-sm p-3 flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-2 text-gold text-[11px] font-semibold uppercase tracking-wider">
+            <Eye className="w-3.5 h-3.5" /> Preview L&amp;D as member
+          </div>
+          <select
+            value={previewDegree ?? ""}
+            onChange={(e) => setPreviewDegree((e.target.value || null) as Degree | null)}
+            className="bg-navy border border-gold/20 rounded-sm px-3 py-1.5 text-xs focus:outline-none focus:border-gold text-primary-foreground"
+          >
+            <option value="">Full admin view (all degrees)</option>
+            {DEGREES.map((d) => (
+              <option key={d} value={d}>
+                {DEGREE_LABEL[d]}
+              </option>
+            ))}
+          </select>
+          {previewDegree && (
+            <span className="text-[11px] text-primary-foreground/60">
+              Showing Learning &amp; Development as a <span className="text-gold">{DEGREE_LABEL[previewDegree]}</span> would see it.
+            </span>
+          )}
+        </div>
+      )}
 
       {isAdmin && (
         <form
@@ -260,6 +351,24 @@ export default function MembersDocuments() {
               </option>
             ))}
           </select>
+          {category === "learning_development" && (
+            <label className="md:col-span-2 flex flex-col gap-1">
+              <span className="text-[11px] uppercase tracking-wider text-gold/70 font-semibold">Minimum degree to view</span>
+              <select
+                value={degree}
+                onChange={(e) => setDegree(e.target.value as DegreeOrGeneral)}
+                className="bg-navy border border-gold/20 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-gold"
+              >
+                <option value="general">{GENERAL_LABEL}</option>
+                {DEGREES.map((d) => (
+                  <option key={d} value={d}>{DEGREE_LABEL[d]}</option>
+                ))}
+              </select>
+              <span className="text-[10px] text-primary-foreground/50">
+                Members at or above this degree will see the document. Past Masters always see Installed Masters material.
+              </span>
+            </label>
+          )}
           <input
             value={description}
             onChange={(e) => setDescription(e.target.value)}
@@ -311,6 +420,14 @@ export default function MembersDocuments() {
                   <p className="text-sm truncate">{d.title}</p>
                   <p className="text-[11px] text-primary-foreground/50">
                     {CATEGORY_LABELS[d.category]} · {new Date(d.created_at).toLocaleDateString("en-GB")}
+                    {d.category === "learning_development" && (
+                      <>
+                        {" · "}
+                        <span className="text-gold">
+                          {d.is_general ? GENERAL_LABEL : DEGREE_LABEL[d.required_degree ?? "entered_apprentice"]}
+                        </span>
+                      </>
+                    )}
                   </p>
                 </div>
               </div>
