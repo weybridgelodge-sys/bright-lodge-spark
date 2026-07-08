@@ -323,38 +323,55 @@ async function enrichVideos(videos: VideoEntry[]): Promise<VideoEntry[]> {
   );
 }
 
+function buildVideoBlock(v: VideoEntry): string {
+  const desc = (v.description || v.title).slice(0, 2048);
+  const parts = [
+    `    <video:video>`,
+    `      <video:thumbnail_loc>https://i.ytimg.com/vi/${v.youtubeId}/hqdefault.jpg</video:thumbnail_loc>`,
+    `      <video:title>${escapeXml(v.title)}</video:title>`,
+    `      <video:description>${escapeXml(desc)}</video:description>`,
+    `      <video:player_loc allow_embed="yes">https://www.youtube.com/embed/${v.youtubeId}</video:player_loc>`,
+    v.durationSeconds ? `      <video:duration>${v.durationSeconds}</video:duration>` : null,
+    v.uploadDate ? `      <video:publication_date>${v.uploadDate}</video:publication_date>` : null,
+    `      <video:family_friendly>yes</video:family_friendly>`,
+    `      <video:live>no</video:live>`,
+    `    </video:video>`,
+  ].filter(Boolean);
+  return parts.join("\n");
+}
+
 function buildVideoSitemap(videos: VideoEntry[]) {
+  const urls: string[] = [];
+
+  // Videos with a Sanity slug get their own detail-page <url> entry
+  // (one <url> per video pointing at /video-hub/{slug}).
+  const withSlug = videos.filter((v) => v.slug);
+  for (const v of withSlug) {
+    urls.push(
+      [
+        `  <url>`,
+        `    <loc>${BASE_URL}/video-hub/${v.slug}</loc>`,
+        buildVideoBlock(v),
+        `  </url>`,
+      ].join("\n"),
+    );
+  }
+
+  // Any remaining videos without a slug (e.g. static fallback entries)
+  // group under their embed page as before, so nothing is silently dropped.
+  const withoutSlug = videos.filter((v) => !v.slug);
   const groups = new Map<string, VideoEntry[]>();
-  for (const v of videos) {
+  for (const v of withoutSlug) {
     const page = v.page || "/video-hub";
     if (!groups.has(page)) groups.set(page, []);
     groups.get(page)!.push(v);
   }
-
-  const urls: string[] = [];
   for (const [page, list] of groups) {
-    const videoBlocks = list.map((v) => {
-      const desc = (v.description || v.title).slice(0, 2048);
-      const parts = [
-        `    <video:video>`,
-        `      <video:thumbnail_loc>https://i.ytimg.com/vi/${v.youtubeId}/hqdefault.jpg</video:thumbnail_loc>`,
-        `      <video:title>${escapeXml(v.title)}</video:title>`,
-        `      <video:description>${escapeXml(desc)}</video:description>`,
-        `      <video:player_loc allow_embed="yes">https://www.youtube.com/embed/${v.youtubeId}</video:player_loc>`,
-        v.durationSeconds ? `      <video:duration>${v.durationSeconds}</video:duration>` : null,
-        v.uploadDate ? `      <video:publication_date>${v.uploadDate}</video:publication_date>` : null,
-        `      <video:family_friendly>yes</video:family_friendly>`,
-        `      <video:live>no</video:live>`,
-        `    </video:video>`,
-      ].filter(Boolean);
-      return parts.join("\n");
-    });
-
     urls.push(
       [
         `  <url>`,
         `    <loc>${BASE_URL}${page}</loc>`,
-        ...videoBlocks,
+        ...list.map(buildVideoBlock),
         `  </url>`,
       ].join("\n"),
     );
