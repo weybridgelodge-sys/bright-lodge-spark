@@ -196,14 +196,39 @@ async function main() {
   console.log(`feed.xml written (${posts.length} items)`);
 
   // ── Video sitemap ────────────────────────────────────────────────
+  let videoSlugs: string[] = [];
   try {
     const videos = await collectVideos();
     const enriched = await enrichVideos(videos);
     writeFileSync(resolve("public/video-sitemap.xml"), buildVideoSitemap(enriched));
     console.log(`video-sitemap.xml written (${enriched.length} videos)`);
+
+    // Per-video detail pages served by /video-hub/:slug — pulled from Sanity.
+    try {
+      const rows = await sanity.fetch<Array<{ slug: string; _updatedAt: string }>>(
+        `*[_type == "video" && published != false && defined(slug.current)] {
+          "slug": slug.current, _updatedAt
+        }`,
+      );
+      videoSlugs = rows.map((r) => r.slug);
+      const videoDetailEntries: SitemapEntry[] = rows.map((r) => ({
+        path: `/video-hub/${r.slug}`,
+        lastmod: r._updatedAt?.slice(0, 10),
+        changefreq: "yearly",
+        priority: "0.5",
+      }));
+      if (videoDetailEntries.length > 0) {
+        const withVideoDetails = [...allEntries, ...videoDetailEntries];
+        writeFileSync(resolve("public/sitemap.xml"), buildSitemap(withVideoDetails));
+        console.log(`sitemap.xml re-written with ${videoDetailEntries.length} video detail pages`);
+      }
+    } catch (err) {
+      console.warn("Could not fetch video slugs for sitemap", err);
+    }
   } catch (err) {
     console.warn("Could not write video-sitemap.xml", err);
   }
+  void videoSlugs;
 
   // ── Image sitemap ────────────────────────────────────────────────
   try {

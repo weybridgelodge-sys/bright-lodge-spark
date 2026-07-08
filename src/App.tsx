@@ -25,6 +25,7 @@ const Officers = lazy(() => import("./pages/Officers"));
 const FAQ = lazy(() => import("./pages/FAQ"));
 const Contact = lazy(() => import("./pages/Contact"));
 const VideoHub = lazy(() => import("./pages/VideoHub"));
+const VideoDetailPage = lazy(() => import("./pages/VideoDetailPage"));
 const MasonicLinks = lazy(() => import("./pages/MasonicLinks"));
 const Bookings = lazy(() => import("./pages/Bookings"));
 const OfficersJewels = lazy(() => import("./pages/OfficersJewels"));
@@ -89,6 +90,7 @@ const App = () => (
             <Route path="/faq" element={<FAQ />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/video-hub" element={<VideoHub />} />
+            <Route path="/video-hub/:slug" element={<VideoDetailPage />} />
             <Route path="/masonic-links" element={<MasonicLinks />} />
             <Route path="/bookings" element={<Bookings />} />
             <Route path="/officers-jewels" element={<OfficersJewels />} />
