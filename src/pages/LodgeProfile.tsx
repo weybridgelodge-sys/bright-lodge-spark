@@ -50,13 +50,13 @@ const LodgeProfile = () => {
       {
         "@context": "https://schema.org",
         "@type": "WebPage",
-        "@id": "https://www.weybridgelodge.org.uk/lodge-profile#webpage",
-        url: "https://www.weybridgelodge.org.uk/lodge-profile",
+        "@id": "https://weybridgelodge.org.uk/lodge-profile#webpage",
+        url: "https://weybridgelodge.org.uk/lodge-profile",
         name: "Lodge Profile | Freemasons in Guildford, Surrey — Weybridge Lodge No. 6787",
         description:
           "Weybridge Lodge No. 6787 is a welcoming Lodge of Freemasons meeting in Guildford, Surrey. Founded in 1949, we have 22 members, meet four times a year, and are active in charity and Provincial life.",
         inLanguage: "en-GB",
-        isPartOf: { "@id": "https://www.weybridgelodge.org.uk/#website" },
+        isPartOf: { "@id": "https://weybridgelodge.org.uk/#website" },
       },
       breadcrumb,
       localBusinessSchema,

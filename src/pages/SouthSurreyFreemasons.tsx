@@ -94,13 +94,13 @@ const SouthSurreyFreemasons = () => {
     const webPageSchema = {
       "@context": "https://schema.org",
       "@type": "WebPage",
-      "@id": "https://www.weybridgelodge.org.uk/south-surrey-freemasons#webpage",
-      url: "https://www.weybridgelodge.org.uk/south-surrey-freemasons",
+      "@id": "https://weybridgelodge.org.uk/south-surrey-freemasons#webpage",
+      url: "https://weybridgelodge.org.uk/south-surrey-freemasons",
       name: "Surrey Commuter Freemasons Hub | Weybridge Lodge 6787",
       description:
         "Live in Woking, Farnham or Godalming but travel via Guildford? Discover how Weybridge Lodge fits your Surrey commute and lifestyle.",
       inLanguage: "en-GB",
-      isPartOf: { "@id": "https://www.weybridgelodge.org.uk/#website" },
+      isPartOf: { "@id": "https://weybridgelodge.org.uk/#website" },
     };
 
     const faqStructuredData = faqSchema(faqItems);

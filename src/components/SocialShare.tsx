@@ -25,7 +25,7 @@ const InstagramIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
-const BASE_URL = "https://www.weybridgelodge.org.uk";
+const BASE_URL = "https://weybridgelodge.org.uk";
 
 const SocialShare = ({ url, title, commentCount }: SocialShareProps) => {
   const fullUrl = `${BASE_URL}${url}`;

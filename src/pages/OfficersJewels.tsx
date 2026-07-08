@@ -271,14 +271,14 @@ const OfficersJewels = () => {
       {
         "@context": "https://schema.org",
         "@type": "WebPage",
-        "@id": "https://www.weybridgelodge.org.uk/officers-jewels#webpage",
-        url: "https://www.weybridgelodge.org.uk/officers-jewels",
+        "@id": "https://weybridgelodge.org.uk/officers-jewels#webpage",
+        url: "https://weybridgelodge.org.uk/officers-jewels",
         name: "Officers' Roles and Jewels | Freemasons in Guildford, Surrey — Weybridge Lodge No. 6787",
         description:
           "Discover the roles, responsibilities and jewels of every officer of a Masonic Lodge — explained by Weybridge Lodge No. 6787, meeting in Guildford, Surrey at GU2 4DR.",
         inLanguage: "en-GB",
         isPartOf: {
-          "@id": "https://www.weybridgelodge.org.uk/#website",
+          "@id": "https://weybridgelodge.org.uk/#website",
         },
       },
       breadcrumb,

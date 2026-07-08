@@ -131,14 +131,14 @@ const Quiz = () => {
       {
         "@context": "https://schema.org",
         "@type": "WebPage",
-        "@id": "https://www.weybridgelodge.org.uk/quiz#webpage",
-        url: "https://www.weybridgelodge.org.uk/quiz",
+        "@id": "https://weybridgelodge.org.uk/quiz#webpage",
+        url: "https://weybridgelodge.org.uk/quiz",
         name: "Is Freemasonry Right for You? | Weybridge Lodge No. 6787 — Freemasons in Guildford, Surrey",
         description:
           "Take our short personalised quiz to discover whether Freemasonry at Weybridge Lodge No. 6787 in Guildford, Surrey might be right for you.",
         inLanguage: "en-GB",
         isPartOf: {
-          "@id": "https://www.weybridgelodge.org.uk/#website",
+          "@id": "https://weybridgelodge.org.uk/#website",
         },
       },
       breadcrumb,

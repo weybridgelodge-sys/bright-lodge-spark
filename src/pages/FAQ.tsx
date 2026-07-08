@@ -158,14 +158,14 @@ const FAQ = () => {
       {
         "@context": "https://schema.org",
         "@type": "WebPage",
-        "@id": "https://www.weybridgelodge.org.uk/faq#webpage",
-        url: "https://www.weybridgelodge.org.uk/faq",
+        "@id": "https://weybridgelodge.org.uk/faq#webpage",
+        url: "https://weybridgelodge.org.uk/faq",
         name: "Freemasonry FAQ | Freemasons in Guildford, Surrey — Weybridge Lodge No. 6787",
         description:
           "Common questions about becoming a Freemason in Guildford and Surrey — fees, initiation, meetings, values and more. Answered by Weybridge Lodge No. 6787 at the Guildford Masonic Centre, GU2 4DR.",
         inLanguage: "en-GB",
         isPartOf: {
-          "@id": "https://www.weybridgelodge.org.uk/#website",
+          "@id": "https://weybridgelodge.org.uk/#website",
         },
       },
       faqStructuredData,

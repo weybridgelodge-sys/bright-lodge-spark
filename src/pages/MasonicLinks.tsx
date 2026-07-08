@@ -111,14 +111,14 @@ const MasonicLinks = () => {
       {
         "@context": "https://schema.org",
         "@type": "WebPage",
-        "@id": "https://www.weybridgelodge.org.uk/masonic-links#webpage",
-        url: "https://www.weybridgelodge.org.uk/masonic-links",
+        "@id": "https://weybridgelodge.org.uk/masonic-links#webpage",
+        url: "https://weybridgelodge.org.uk/masonic-links",
         name: "Masonic Links & Resources | Freemasons in Guildford, Surrey — Weybridge Lodge No. 6787",
         description:
           "Useful Masonic links and resources including UGLE, the Provincial Grand Lodge of Surrey, and the Masonic Charitable Foundation — curated by Weybridge Lodge No. 6787, Guildford, GU2 4DR.",
         inLanguage: "en-GB",
         isPartOf: {
-          "@id": "https://www.weybridgelodge.org.uk/#website",
+          "@id": "https://weybridgelodge.org.uk/#website",
         },
       },
       breadcrumb,

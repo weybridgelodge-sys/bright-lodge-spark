@@ -68,14 +68,14 @@ const WorshipfulMasters = () => {
       {
         "@context": "https://schema.org",
         "@type": "WebPage",
-        "@id": "https://www.weybridgelodge.org.uk/worshipful-masters#webpage",
-        url: "https://www.weybridgelodge.org.uk/worshipful-masters",
+        "@id": "https://weybridgelodge.org.uk/worshipful-masters#webpage",
+        url: "https://weybridgelodge.org.uk/worshipful-masters",
         name: "Worshipful Masters — Roll of Honour | Freemasons in Guildford, Surrey — Weybridge Lodge No. 6787",
         description:
           "The complete Roll of Honour of every Worshipful Master of Weybridge Lodge No. 6787, Guildford, Surrey, from our founding in 1949 to the present day.",
         inLanguage: "en-GB",
         isPartOf: {
-          "@id": "https://www.weybridgelodge.org.uk/#website",
+          "@id": "https://weybridgelodge.org.uk/#website",
         },
       },
       breadcrumb,

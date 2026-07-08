@@ -164,14 +164,14 @@ const Officers = () => {
       {
         "@context": "https://schema.org",
         "@type": "WebPage",
-        "@id": "https://www.weybridgelodge.org.uk/officers#webpage",
-        url: "https://www.weybridgelodge.org.uk/officers",
+        "@id": "https://weybridgelodge.org.uk/officers#webpage",
+        url: "https://weybridgelodge.org.uk/officers",
         name: "Officers of the Lodge | Freemasons in Guildford, Surrey — Weybridge Lodge No. 6787",
         description:
           "Meet the officers of Weybridge Lodge No. 6787, Guildford, Surrey, for the Masonic Year 2025–2026 — from Worshipful Master to Stewards, with Provincial and Grand honours shown.",
         inLanguage: "en-GB",
         isPartOf: {
-          "@id": "https://www.weybridgelodge.org.uk/#website",
+          "@id": "https://weybridgelodge.org.uk/#website",
         },
       },
       breadcrumb,
