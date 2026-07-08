@@ -135,6 +135,7 @@ const App = () => (
             <Route path="/document/summons-373rd-regular-meeting-13122023" element={<Navigate to="/events" replace />} />
             <Route path="/document/374th-regular-m" element={<Navigate to="/events" replace />} />
             <Route path="/document/committee-meeting-agenda-04012024" element={<Navigate to="/events" replace />} />
+            <Route path="/dining" element={<Navigate to="/bookings" replace />} />
             {/* Join & contact */}
             <Route path="/surrey-freemasons-join-us" element={<Navigate to="/join-us" replace />} />
             <Route path="/contact-weybridge-lodge-freemasons" element={<Navigate to="/contact" replace />} />
