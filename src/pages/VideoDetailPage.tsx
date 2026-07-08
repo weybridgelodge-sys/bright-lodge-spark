@@ -68,7 +68,6 @@ const VideoDetailPage = () => {
     video.description ?? `Watch “${video.title}” — a video from the Weybridge Lodge Video Hub.`;
   const metaDescription = toMetaDescription(description);
   const channel = video.channel ?? "United Grand Lodge of England";
-  const uploadDate = video.uploadDate ?? "2020-01-01";
 
   const videoObject: Record<string, unknown> = {
     "@context": "https://schema.org",
@@ -76,13 +75,15 @@ const VideoDetailPage = () => {
     name: video.title,
     description,
     thumbnailUrl: [thumbnailUrl],
-    uploadDate,
     embedUrl,
     publisher: {
       "@type": "Organization",
       name: "Weybridge Lodge No. 6787",
     },
   };
+  if (video.uploadDate) {
+    videoObject.uploadDate = video.uploadDate;
+  }
   if (video.durationSeconds) {
     videoObject.duration = toIso8601Duration(video.durationSeconds);
   }
@@ -151,7 +152,7 @@ const VideoDetailPage = () => {
                 {video.uploadDate && (
                   <>
                     {" · "}
-                    {new Date(uploadDate).toLocaleDateString("en-GB", {
+                    {new Date(video.uploadDate).toLocaleDateString("en-GB", {
                       year: "numeric",
                       month: "long",
                       day: "numeric",
