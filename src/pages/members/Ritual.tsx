@@ -114,6 +114,63 @@ export default function MembersRitual() {
     }
   };
 
+  const handleReplace = async (d: Doc) => {
+    // Replaces the file at the SAME storage path so any previously generated
+    // (long-lived) signed URLs continue to resolve — now to the new file.
+    // Note: CDN/browser caches may serve the old file for a few minutes.
+    const input = document.createElement("input");
+    input.type = "file";
+    input.onchange = async () => {
+      const newFile = input.files?.[0];
+      if (!newFile) return;
+      const oldExt = (d.file_path.split(".").pop() || "").toLowerCase();
+      const newExt = (newFile.name.split(".").pop() || "").toLowerCase();
+      if (oldExt && newExt && oldExt !== newExt) {
+        if (!confirm(`The existing file is .${oldExt} but the new file is .${newExt}. Replacing with a different file type is not recommended — printed links may open the wrong viewer. Continue anyway?`)) return;
+      }
+      if (!confirm(`Replace "${d.title}" with "${newFile.name}"? The shareable link stays the same.`)) return;
+      setBusy(true);
+      try {
+        const { error: upErr } = await supabase.storage.from("ritual-docs").upload(d.file_path, newFile, {
+          contentType: newFile.type || "application/octet-stream",
+          upsert: true,
+        });
+        if (upErr) throw upErr;
+        const { error: dbErr } = await supabase
+          .from("ritual_documents")
+          .update({ file_size_bytes: newFile.size })
+          .eq("id", d.id);
+        if (dbErr) throw dbErr;
+        toast.success("File replaced — existing links now point to the new version");
+        load();
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : "Replace failed");
+      } finally {
+        setBusy(false);
+      }
+    };
+    input.click();
+  };
+
+  const handleCopyLongLivedLink = async (d: Doc) => {
+    // 20 years in seconds — for printed QR codes / booklets. Bucket stays private; link is unguessable.
+    const TWENTY_YEARS = 60 * 60 * 24 * 365 * 20;
+    const { data, error } = await supabase.storage
+      .from("ritual-docs")
+      .createSignedUrl(d.file_path, TWENTY_YEARS);
+    if (error || !data) {
+      toast.error("Couldn't generate shareable link");
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(data.signedUrl);
+      toast.success("20-year link copied to clipboard");
+    } catch {
+      window.prompt("Copy this 20-year signed link:", data.signedUrl);
+    }
+  };
+
+
   const handleView = async (d: Doc) => {
     const { data, error } = await supabase.storage
       .from("ritual-docs")
