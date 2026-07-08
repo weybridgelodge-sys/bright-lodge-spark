@@ -16,6 +16,8 @@ export interface VideoEntry {
   durationSeconds?: number;
   /** Site page where the video is embedded */
   page: string;
+  /** Sanity slug — when present, the video has its own /video-hub/{slug} detail page */
+  slug?: string;
 }
 
 export const staticVideos: VideoEntry[] = [

@@ -2,7 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
   <url>
-    <loc>https://weybridgelodge.org.uk/video-hub</loc>
+    <loc>https://weybridgelodge.org.uk/video-hub/what-is-freemasonry</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/WAcj4WVLxt0/hqdefault.jpg</video:thumbnail_loc>
       <video:title>What Is Freemasonry?</video:title>
@@ -12,6 +12,9 @@
       <video:family_friendly>yes</video:family_friendly>
       <video:live>no</video:live>
     </video:video>
+  </url>
+  <url>
+    <loc>https://weybridgelodge.org.uk/video-hub/freemasonry-armed-forces</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/X12bN9WNPdQ/hqdefault.jpg</video:thumbnail_loc>
       <video:title>Freemasonry and the Armed Forces (Subtitled)</video:title>
@@ -23,6 +26,9 @@ Built on shared values of loyalty, honour, and camaraderie, Freemasonry offers a
       <video:family_friendly>yes</video:family_friendly>
       <video:live>no</video:live>
     </video:video>
+  </url>
+  <url>
+    <loc>https://weybridgelodge.org.uk/video-hub/origins-of-freemasonry</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/v_DSCoqrqdA/hqdefault.jpg</video:thumbnail_loc>
       <video:title>The Origins Of Freemasonry</video:title>
@@ -32,6 +38,9 @@ Built on shared values of loyalty, honour, and camaraderie, Freemasonry offers a
       <video:family_friendly>yes</video:family_friendly>
       <video:live>no</video:live>
     </video:video>
+  </url>
+  <url>
+    <loc>https://weybridgelodge.org.uk/video-hub/life-of-a-freemason</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/nk1kcofy6Dw/hqdefault.jpg</video:thumbnail_loc>
       <video:title>Life Of A Freemason</video:title>
@@ -41,6 +50,9 @@ Built on shared values of loyalty, honour, and camaraderie, Freemasonry offers a
       <video:family_friendly>yes</video:family_friendly>
       <video:live>no</video:live>
     </video:video>
+  </url>
+  <url>
+    <loc>https://weybridgelodge.org.uk/video-hub/freemasonry-whats-it-all-about</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/da0FZyLktLg/hqdefault.jpg</video:thumbnail_loc>
       <video:title>Freemasonry What&apos;s It All About?</video:title>
@@ -50,6 +62,9 @@ Built on shared values of loyalty, honour, and camaraderie, Freemasonry offers a
       <video:family_friendly>yes</video:family_friendly>
       <video:live>no</video:live>
     </video:video>
+  </url>
+  <url>
+    <loc>https://weybridgelodge.org.uk/video-hub/guided-tour-freemasons-hall</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/ooIm3mNX02E/hqdefault.jpg</video:thumbnail_loc>
       <video:title>Guided Tour Of Freemasons Hall</video:title>
