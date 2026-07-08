@@ -106,6 +106,10 @@ export async function getVideoBySlug(slug: string): Promise<SanityVideo | null> 
   return doc ?? null;
 }
 
+export async function getAllPublishedVideos(): Promise<SanityVideo[]> {
+  return sanityClient.fetch<SanityVideo[]>(VIDEOS_WITH_SLUG_QUERY);
+}
+
 export const formatDate = (iso: string) =>
   new Date(iso).toLocaleDateString("en-GB", {
     day: "numeric",
