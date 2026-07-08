@@ -78,10 +78,13 @@ export default function MembersRitual() {
     if (!file || !title.trim() || !user) return;
     setBusy(true);
     try {
-      const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+      const ext = (file.name.split(".").pop() || "bin").toLowerCase().replace(/[^a-z0-9]/g, "");
       const isGeneral = degree === "general";
       const folder = isGeneral ? "general" : degree;
-      const path = `${folder}/${Date.now()}-${safeName}`;
+      // Stable path: <folder>/<uuid>.<ext> — never changes, so a 20-year signed URL
+      // stays valid across future revisions when the file is replaced in place.
+      const docId = crypto.randomUUID();
+      const path = `${folder}/${docId}.${ext}`;
       const { error: upErr } = await supabase.storage.from("ritual-docs").upload(path, file, {
         contentType: file.type || "application/octet-stream",
         upsert: false,
