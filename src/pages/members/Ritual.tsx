@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import MembersLayout from "@/components/members/MembersLayout";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { BookOpen, Upload, Trash2, Download, Loader2, ShieldCheck, Clock, Eye, ExternalLink } from "lucide-react";
+import { BookOpen, Upload, Trash2, Download, Loader2, ShieldCheck, Clock, Eye, ExternalLink, Link2, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 
 type Degree = "entered_apprentice" | "fellow_craft" | "master_mason" | "installed_master";
@@ -78,10 +78,13 @@ export default function MembersRitual() {
     if (!file || !title.trim() || !user) return;
     setBusy(true);
     try {
-      const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+      const ext = (file.name.split(".").pop() || "bin").toLowerCase().replace(/[^a-z0-9]/g, "");
       const isGeneral = degree === "general";
       const folder = isGeneral ? "general" : degree;
-      const path = `${folder}/${Date.now()}-${safeName}`;
+      // Stable path: <folder>/<uuid>.<ext> — never changes, so a 20-year signed URL
+      // stays valid across future revisions when the file is replaced in place.
+      const docId = crypto.randomUUID();
+      const path = `${folder}/${docId}.${ext}`;
       const { error: upErr } = await supabase.storage.from("ritual-docs").upload(path, file, {
         contentType: file.type || "application/octet-stream",
         upsert: false,
@@ -110,6 +113,63 @@ export default function MembersRitual() {
       setBusy(false);
     }
   };
+
+  const handleReplace = async (d: Doc) => {
+    // Replaces the file at the SAME storage path so any previously generated
+    // (long-lived) signed URLs continue to resolve — now to the new file.
+    // Note: CDN/browser caches may serve the old file for a few minutes.
+    const input = document.createElement("input");
+    input.type = "file";
+    input.onchange = async () => {
+      const newFile = input.files?.[0];
+      if (!newFile) return;
+      const oldExt = (d.file_path.split(".").pop() || "").toLowerCase();
+      const newExt = (newFile.name.split(".").pop() || "").toLowerCase();
+      if (oldExt && newExt && oldExt !== newExt) {
+        if (!confirm(`The existing file is .${oldExt} but the new file is .${newExt}. Replacing with a different file type is not recommended — printed links may open the wrong viewer. Continue anyway?`)) return;
+      }
+      if (!confirm(`Replace "${d.title}" with "${newFile.name}"? The shareable link stays the same.`)) return;
+      setBusy(true);
+      try {
+        const { error: upErr } = await supabase.storage.from("ritual-docs").upload(d.file_path, newFile, {
+          contentType: newFile.type || "application/octet-stream",
+          upsert: true,
+        });
+        if (upErr) throw upErr;
+        const { error: dbErr } = await supabase
+          .from("ritual_documents")
+          .update({ file_size_bytes: newFile.size })
+          .eq("id", d.id);
+        if (dbErr) throw dbErr;
+        toast.success("File replaced — existing links now point to the new version");
+        load();
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : "Replace failed");
+      } finally {
+        setBusy(false);
+      }
+    };
+    input.click();
+  };
+
+  const handleCopyLongLivedLink = async (d: Doc) => {
+    // 20 years in seconds — for printed QR codes / booklets. Bucket stays private; link is unguessable.
+    const TWENTY_YEARS = 60 * 60 * 24 * 365 * 20;
+    const { data, error } = await supabase.storage
+      .from("ritual-docs")
+      .createSignedUrl(d.file_path, TWENTY_YEARS);
+    if (error || !data) {
+      toast.error("Couldn't generate shareable link");
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(data.signedUrl);
+      toast.success("20-year link copied to clipboard");
+    } catch {
+      window.prompt("Copy this 20-year signed link:", data.signedUrl);
+    }
+  };
+
 
   const handleView = async (d: Doc) => {
     const { data, error } = await supabase.storage
@@ -345,13 +405,32 @@ export default function MembersRitual() {
                   <Download className="w-4 h-4" />
                 </button>
                 {isAdmin && (
-                  <button
-                    onClick={() => handleDelete(d)}
-                    className="p-2 text-red-400 hover:bg-red-500/10 rounded-sm"
-                    aria-label="Delete"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                  <>
+                    <button
+                      onClick={() => handleCopyLongLivedLink(d)}
+                      className="p-2 text-gold hover:bg-gold/10 rounded-sm"
+                      aria-label="Copy 20-year shareable link"
+                      title="Copy 20-year shareable link (for printed QR codes)"
+                    >
+                      <Link2 className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => handleReplace(d)}
+                      className="p-2 text-gold hover:bg-gold/10 rounded-sm"
+                      aria-label="Replace file (keep same link)"
+                      title="Replace file — keeps the same shareable link"
+                    >
+                      <RefreshCw className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(d)}
+                      className="p-2 text-red-400 hover:bg-red-500/10 rounded-sm"
+                      aria-label="Delete"
+                      title="Delete"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </>
                 )}
               </div>
             </li>
