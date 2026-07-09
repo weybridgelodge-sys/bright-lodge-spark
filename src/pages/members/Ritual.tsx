@@ -73,9 +73,26 @@ export default function MembersRitual() {
     load();
   }, []);
 
+  const MAX_FILE_SIZE_BYTES = 500 * 1024 * 1024; // 500 MB
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+    return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GB`;
+  };
+
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!file || !title.trim() || !user) return;
+    if (file.size > MAX_FILE_SIZE_BYTES) {
+      toast.error(
+        `File too large (${formatFileSize(file.size)}). Maximum upload size is ${formatFileSize(
+          MAX_FILE_SIZE_BYTES
+        )}. Try compressing the video or uploading from a Wi-Fi connection.`
+      );
+      return;
+    }
     setBusy(true);
     try {
       const ext = (file.name.split(".").pop() || "bin").toLowerCase().replace(/[^a-z0-9]/g, "");
