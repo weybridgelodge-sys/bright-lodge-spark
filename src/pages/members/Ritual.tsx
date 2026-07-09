@@ -125,7 +125,14 @@ export default function MembersRitual() {
       if (el) el.value = "";
       load();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Upload failed");
+      const msg = err instanceof Error ? err.message : "Upload failed";
+      if (msg === "Failed to fetch" || (err instanceof TypeError && msg === "Failed to fetch")) {
+        toast.error(
+          "Upload failed: network error or file too large. Try a smaller file, use Wi-Fi, or reduce video quality."
+        );
+      } else {
+        toast.error(msg);
+      }
     } finally {
       setBusy(false);
     }
