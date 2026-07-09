@@ -73,9 +73,26 @@ export default function MembersRitual() {
     load();
   }, []);
 
+  const MAX_FILE_SIZE_BYTES = 500 * 1024 * 1024; // 500 MB
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+    return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GB`;
+  };
+
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!file || !title.trim() || !user) return;
+    if (file.size > MAX_FILE_SIZE_BYTES) {
+      toast.error(
+        `File too large (${formatFileSize(file.size)}). Maximum upload size is ${formatFileSize(
+          MAX_FILE_SIZE_BYTES
+        )}. Try compressing the video or uploading from a Wi-Fi connection.`
+      );
+      return;
+    }
     setBusy(true);
     try {
       const ext = (file.name.split(".").pop() || "bin").toLowerCase().replace(/[^a-z0-9]/g, "");
@@ -108,7 +125,14 @@ export default function MembersRitual() {
       if (el) el.value = "";
       load();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Upload failed");
+      const msg = err instanceof Error ? err.message : "Upload failed";
+      if (msg === "Failed to fetch" || (err instanceof TypeError && msg === "Failed to fetch")) {
+        toast.error(
+          "Upload failed: network error or file too large. Try a smaller file, use Wi-Fi, or reduce video quality."
+        );
+      } else {
+        toast.error(msg);
+      }
     } finally {
       setBusy(false);
     }
@@ -339,6 +363,9 @@ export default function MembersRitual() {
               onChange={(e) => setFile(e.target.files?.[0] ?? null)}
               className="text-sm text-primary-foreground/70 file:mr-3 file:border-0 file:bg-gold/15 file:text-gold file:px-3 file:py-1.5 file:rounded-sm file:text-xs"
             />
+            <span className="text-[11px] text-primary-foreground/50">
+              Videos (MP4), PDFs, images and other documents are allowed. Maximum file size: {formatFileSize(MAX_FILE_SIZE_BYTES)}.
+            </span>
           </label>
           <button
             disabled={busy}
