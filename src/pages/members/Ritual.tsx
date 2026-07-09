@@ -363,6 +363,9 @@ export default function MembersRitual() {
               onChange={(e) => setFile(e.target.files?.[0] ?? null)}
               className="text-sm text-primary-foreground/70 file:mr-3 file:border-0 file:bg-gold/15 file:text-gold file:px-3 file:py-1.5 file:rounded-sm file:text-xs"
             />
+            <span className="text-[11px] text-primary-foreground/50">
+              Videos (MP4), PDFs, images and other documents are allowed. Maximum file size: {formatFileSize(MAX_FILE_SIZE_BYTES)}.
+            </span>
           </label>
           <button
             disabled={busy}
