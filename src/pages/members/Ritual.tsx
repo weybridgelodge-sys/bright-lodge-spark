@@ -446,9 +446,9 @@ export default function MembersRitual() {
             return (
             <li
               key={d.id}
-              className="bg-navy-dark/60 border border-gold/15 rounded-sm p-4 flex items-start justify-between gap-3 hover:border-gold/30 transition-colors"
+              className="bg-navy-dark/60 border border-gold/15 rounded-sm p-4 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 hover:border-gold/30 transition-colors"
             >
-              <div className="flex items-start gap-3 min-w-0">
+              <div className="flex items-start gap-3 min-w-0 flex-1">
                 <div className="p-2.5 bg-gold/10 rounded-sm text-gold shrink-0">
                   <BookOpen className="w-5 h-5" />
                 </div>
