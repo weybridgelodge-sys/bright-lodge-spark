@@ -446,9 +446,9 @@ export default function MembersRitual() {
             return (
             <li
               key={d.id}
-              className="bg-navy-dark/60 border border-gold/15 rounded-sm p-4 flex items-start justify-between gap-3 hover:border-gold/30 transition-colors"
+              className="bg-navy-dark/60 border border-gold/15 rounded-sm p-4 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 hover:border-gold/30 transition-colors"
             >
-              <div className="flex items-start gap-3 min-w-0">
+              <div className="flex items-start gap-3 min-w-0 flex-1">
                 <div className="p-2.5 bg-gold/10 rounded-sm text-gold shrink-0">
                   <BookOpen className="w-5 h-5" />
                 </div>
@@ -472,7 +472,7 @@ export default function MembersRitual() {
                   </div>
                 </div>
               </div>
-              <div className="flex items-center gap-1 shrink-0">
+              <div className="flex items-center gap-1 shrink-0 flex-wrap justify-end border-t border-gold/10 pt-2 sm:border-t-0 sm:pt-0">
                 <button
                   onClick={() => handleView(d)}
                   className="p-2 text-gold hover:bg-gold/10 rounded-sm"
