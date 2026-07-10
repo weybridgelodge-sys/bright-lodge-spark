@@ -423,6 +423,15 @@ export default function MembersRitual() {
           </button>
         </form>
       )}
+      <div className="mb-3 relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary-foreground/40" />
+        <input
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="Search by title or description…"
+          className="w-full bg-navy border border-gold/20 rounded-sm pl-9 pr-3 py-2 text-sm focus:outline-none focus:border-gold"
+        />
+      </div>
 
       <div className="mb-4 flex flex-wrap items-center gap-2">
         <span className="text-[11px] uppercase tracking-wider text-gold/70 font-semibold mr-1">Filter by type</span>
