@@ -1,12 +1,13 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import MembersLayout from "@/components/members/MembersLayout";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { BookOpen, Upload, Trash2, Download, Loader2, ShieldCheck, Clock, Eye, ExternalLink, Link2, RefreshCw } from "lucide-react";
+import { BookOpen, Upload, Trash2, Download, Loader2, ShieldCheck, Clock, Eye, ExternalLink, Link2, RefreshCw, FileText, Video, Music } from "lucide-react";
 import { toast } from "sonner";
 
 type Degree = "entered_apprentice" | "fellow_craft" | "master_mason" | "installed_master";
 type DegreeOrGeneral = Degree | "general";
+type DocType = "text" | "audio" | "video";
 
 const DEGREES: Degree[] = ["entered_apprentice", "fellow_craft", "master_mason", "installed_master"];
 
@@ -31,12 +32,25 @@ const UPLOAD_OPTIONS: { value: DegreeOrGeneral; label: string }[] = [
   ...DEGREES.map((d) => ({ value: d, label: DEGREE_LABEL[d] })),
 ];
 
+const DOC_TYPE_LABEL: Record<DocType, string> = {
+  text: "Text",
+  audio: "Audio",
+  video: "Video",
+};
+
+const DOC_TYPE_ICON: Record<DocType, typeof FileText> = {
+  text: FileText,
+  audio: Music,
+  video: Video,
+};
+
 type Doc = {
   id: string;
   title: string;
   description: string | null;
   required_degree: Degree;
   is_general: boolean;
+  doc_type: DocType;
   file_path: string;
   file_size_bytes: number | null;
   created_at: string;
@@ -51,10 +65,14 @@ export default function MembersRitual() {
   // admin "preview as member" toggle — null = full admin view
   const [previewDegree, setPreviewDegree] = useState<Degree | null>(null);
 
+  // document type filter for the listing
+  const [typeFilter, setTypeFilter] = useState<DocType | "all">("all");
+
   // upload form
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [degree, setDegree] = useState<DegreeOrGeneral>("general");
+  const [docType, setDocType] = useState<DocType>("text");
   const [file, setFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -63,8 +81,7 @@ export default function MembersRitual() {
     const { data, error } = await supabase
       .from("ritual_documents")
       .select("*")
-      .order("required_degree", { ascending: true })
-      .order("created_at", { ascending: false });
+      .order("title", { ascending: true });
     if (error) toast.error(error.message);
     setDocs((data as Doc[]) ?? []);
     setLoading(false);
@@ -98,8 +115,6 @@ export default function MembersRitual() {
       const ext = (file.name.split(".").pop() || "bin").toLowerCase().replace(/[^a-z0-9]/g, "");
       const isGeneral = degree === "general";
       const folder = isGeneral ? "general" : degree;
-      // Stable path: <folder>/<uuid>.<ext> — never changes, so a 20-year signed URL
-      // stays valid across future revisions when the file is replaced in place.
       const docId = crypto.randomUUID();
       const path = `${folder}/${docId}.${ext}`;
       const { error: upErr } = await supabase.storage.from("ritual-docs").upload(path, file, {
@@ -112,6 +127,7 @@ export default function MembersRitual() {
         description: description.trim() || null,
         required_degree: isGeneral ? "entered_apprentice" : (degree as Degree),
         is_general: isGeneral,
+        doc_type: docType,
         file_path: path,
         file_size_bytes: file.size,
         uploaded_by: user.id,
@@ -121,6 +137,7 @@ export default function MembersRitual() {
       setTitle("");
       setDescription("");
       setFile(null);
+      setDocType("text");
       const el = document.getElementById("ritual-file") as HTMLInputElement | null;
       if (el) el.value = "";
       load();
@@ -139,9 +156,6 @@ export default function MembersRitual() {
   };
 
   const handleReplace = async (d: Doc) => {
-    // Replaces the file at the SAME storage path so any previously generated
-    // (long-lived) signed URLs continue to resolve — now to the new file.
-    // Note: CDN/browser caches may serve the old file for a few minutes.
     const input = document.createElement("input");
     input.type = "file";
     input.onchange = async () => {
@@ -177,7 +191,6 @@ export default function MembersRitual() {
   };
 
   const handleCopyLongLivedLink = async (d: Doc) => {
-    // 20 years in seconds — for printed QR codes / booklets. Bucket stays private; link is unguessable.
     const TWENTY_YEARS = 60 * 60 * 24 * 365 * 20;
     const { data, error } = await supabase.storage
       .from("ritual-docs")
@@ -193,7 +206,6 @@ export default function MembersRitual() {
       window.prompt("Copy this 20-year signed link:", data.signedUrl);
     }
   };
-
 
   const handleView = async (d: Doc) => {
     const { data, error } = await supabase.storage
@@ -259,12 +271,23 @@ export default function MembersRitual() {
   const myDegree = (profile as { degree?: Degree } | null)?.degree ?? "entered_apprentice";
   const isPastMaster = (profile as { is_past_master?: boolean } | null)?.is_past_master ?? false;
 
-  const visibleDocs =
-    isAdmin && previewDegree
-      ? docs.filter(
-          (d) => d.is_general || DEGREE_LEVEL[d.required_degree] <= DEGREE_LEVEL[previewDegree]
-        )
-      : docs;
+  const visibleDocs = useMemo(() => {
+    let list =
+      isAdmin && previewDegree
+        ? docs.filter(
+            (d) => d.is_general || DEGREE_LEVEL[d.required_degree] <= DEGREE_LEVEL[previewDegree]
+          )
+        : docs;
+    if (typeFilter !== "all") list = list.filter((d) => (d.doc_type ?? "text") === typeFilter);
+    return [...list].sort((a, b) => a.title.localeCompare(b.title, "en", { sensitivity: "base" }));
+  }, [docs, isAdmin, previewDegree, typeFilter]);
+
+  const TYPE_FILTERS: { value: DocType | "all"; label: string }[] = [
+    { value: "all", label: "All" },
+    { value: "text", label: "Text" },
+    { value: "audio", label: "Audio" },
+    { value: "video", label: "Video" },
+  ];
 
   return (
     <MembersLayout>
@@ -345,7 +368,19 @@ export default function MembersRitual() {
               ))}
             </select>
           </label>
-          <label className="md:col-span-2 flex flex-col gap-1">
+          <label className="flex flex-col gap-1">
+            <span className="text-[11px] uppercase tracking-wider text-gold/70 font-semibold">Document type</span>
+            <select
+              value={docType}
+              onChange={(e) => setDocType(e.target.value as DocType)}
+              className="bg-navy border border-gold/20 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-gold"
+            >
+              <option value="text">Text (PDF, doc, image)</option>
+              <option value="audio">Audio (MP3)</option>
+              <option value="video">Video (MP4)</option>
+            </select>
+          </label>
+          <label className="flex flex-col gap-1">
             <span className="text-[11px] uppercase tracking-wider text-gold/70 font-semibold">Description (optional)</span>
             <input
               value={description}
@@ -364,7 +399,7 @@ export default function MembersRitual() {
               className="text-sm text-primary-foreground/70 file:mr-3 file:border-0 file:bg-gold/15 file:text-gold file:px-3 file:py-1.5 file:rounded-sm file:text-xs"
             />
             <span className="text-[11px] text-primary-foreground/50">
-              Videos (MP4), PDFs, images and other documents are allowed. Maximum file size: {formatFileSize(MAX_FILE_SIZE_BYTES)}.
+              Videos (MP4), audio (MP3), PDFs, images and other documents are allowed. Maximum file size: {formatFileSize(MAX_FILE_SIZE_BYTES)}.
             </span>
           </label>
           <button
@@ -376,6 +411,23 @@ export default function MembersRitual() {
           </button>
         </form>
       )}
+
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <span className="text-[11px] uppercase tracking-wider text-gold/70 font-semibold mr-1">Filter by type</span>
+        {TYPE_FILTERS.map((f) => (
+          <button
+            key={f.value}
+            onClick={() => setTypeFilter(f.value)}
+            className={`px-3 py-1.5 rounded-sm text-xs border transition-colors ${
+              typeFilter === f.value
+                ? "bg-gold/20 text-gold border-gold/40"
+                : "bg-navy border-gold/15 text-primary-foreground/70 hover:border-gold/30"
+            }`}
+          >
+            {f.label}
+          </button>
+        ))}
+      </div>
 
       {loading ? (
         <div className="text-center py-12 text-primary-foreground/60 text-sm flex items-center justify-center gap-2">
@@ -389,7 +441,9 @@ export default function MembersRitual() {
         </p>
       ) : (
         <ul className="space-y-3">
-          {visibleDocs.map((d) => (
+          {visibleDocs.map((d) => {
+            const TypeIcon = DOC_TYPE_ICON[d.doc_type ?? "text"];
+            return (
             <li
               key={d.id}
               className="bg-navy-dark/60 border border-gold/15 rounded-sm p-4 flex items-start justify-between gap-3 hover:border-gold/30 transition-colors"
@@ -406,6 +460,10 @@ export default function MembersRitual() {
                   <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-[11px] text-primary-foreground/55">
                     <span className="text-gold bg-gold/5 px-2 py-0.5 rounded-sm border border-gold/15">
                       {d.is_general ? GENERAL_LABEL : DEGREE_LABEL[d.required_degree]}
+                    </span>
+                    <span className="flex items-center gap-1 text-gold bg-gold/5 px-2 py-0.5 rounded-sm border border-gold/15">
+                      <TypeIcon className="w-3 h-3" />
+                      {DOC_TYPE_LABEL[d.doc_type ?? "text"]}
                     </span>
                     <span className="flex items-center gap-1">
                       <Clock className="w-3 h-3" />
@@ -461,7 +519,8 @@ export default function MembersRitual() {
                 )}
               </div>
             </li>
-          ))}
+            );
+          })}
         </ul>
       )}
     </MembersLayout>
