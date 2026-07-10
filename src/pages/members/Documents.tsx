@@ -413,25 +413,25 @@ export default function MembersDocuments() {
       ) : (
         <ul className="divide-y divide-gold/10 border border-gold/15 rounded-sm bg-navy-dark/40">
           {filtered.map((d) => (
-            <li key={d.id} className="flex items-center justify-between gap-3 px-4 py-3">
-              <div className="flex items-center gap-3 min-w-0">
-                <FileText className="w-4 h-4 text-gold shrink-0" />
+            <li key={d.id} className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 px-4 py-3 hover:bg-gold/5 transition-colors">
+              <div className="flex items-start gap-3 min-w-0 flex-1">
+                <FileText className="w-4 h-4 text-gold shrink-0 mt-1" />
                 <div className="min-w-0">
-                  <p className="text-sm truncate">{d.title}</p>
-                  <p className="text-[11px] text-primary-foreground/50">
-                    {CATEGORY_LABELS[d.category]} · {new Date(d.created_at).toLocaleDateString("en-GB")}
+                  <p className="text-sm font-semibold leading-tight line-clamp-2" title={d.title}>{d.title}</p>
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-[11px] text-primary-foreground/50">
+                    <span className="text-gold bg-gold/5 px-2 py-0.5 rounded-sm border border-gold/15">
+                      {CATEGORY_LABELS[d.category]}
+                    </span>
+                    <span>{new Date(d.created_at).toLocaleDateString("en-GB")}</span>
                     {d.category === "learning_development" && (
-                      <>
-                        {" · "}
-                        <span className="text-gold">
-                          {d.is_general ? GENERAL_LABEL : DEGREE_LABEL[d.required_degree ?? "entered_apprentice"]}
-                        </span>
-                      </>
+                      <span className="text-gold">
+                        {d.is_general ? GENERAL_LABEL : DEGREE_LABEL[d.required_degree ?? "entered_apprentice"]}
+                      </span>
                     )}
-                  </p>
+                  </div>
                 </div>
               </div>
-              <div className="flex items-center gap-1 shrink-0">
+              <div className="flex items-center gap-1 shrink-0 flex-wrap justify-end border-t border-gold/10 pt-2 sm:border-t-0 sm:pt-0">
                 <button
                   onClick={() => handleView(d)}
                   className="p-2 text-gold hover:bg-gold/10 rounded-sm"
