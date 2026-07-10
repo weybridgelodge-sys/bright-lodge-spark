@@ -272,15 +272,16 @@ export default function MembersRitual() {
   const isPastMaster = (profile as { is_past_master?: boolean } | null)?.is_past_master ?? false;
 
   const visibleDocs = useMemo(() => {
+    const effectiveDegree = previewDegree ?? myDegree;
     let list =
-      isAdmin && previewDegree
-        ? docs.filter(
-            (d) => d.is_general || DEGREE_LEVEL[d.required_degree] <= DEGREE_LEVEL[previewDegree]
-          )
-        : docs;
+      isAdmin && !previewDegree
+        ? docs // full admin view — no filter
+        : docs.filter(
+            (d) => d.is_general || DEGREE_LEVEL[d.required_degree] <= DEGREE_LEVEL[effectiveDegree]
+          );
     if (typeFilter !== "all") list = list.filter((d) => (d.doc_type ?? "text") === typeFilter);
     return [...list].sort((a, b) => a.title.localeCompare(b.title, "en", { sensitivity: "base" }));
-  }, [docs, isAdmin, previewDegree, typeFilter]);
+  }, [docs, isAdmin, previewDegree, myDegree, typeFilter]);
 
   const TYPE_FILTERS: { value: DocType | "all"; label: string }[] = [
     { value: "all", label: "All" },
