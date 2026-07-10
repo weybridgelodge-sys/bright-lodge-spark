@@ -472,7 +472,7 @@ export default function MembersRitual() {
                   </div>
                 </div>
               </div>
-              <div className="flex items-center gap-1 shrink-0">
+              <div className="flex items-center gap-1 shrink-0 flex-wrap justify-end border-t border-gold/10 pt-2 sm:border-t-0 sm:pt-0">
                 <button
                   onClick={() => handleView(d)}
                   className="p-2 text-gold hover:bg-gold/10 rounded-sm"
