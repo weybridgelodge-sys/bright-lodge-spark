@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import MembersLayout from "@/components/members/MembersLayout";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { BookOpen, Upload, Trash2, Download, Loader2, ShieldCheck, Clock, Eye, ExternalLink, Link2, RefreshCw, FileText, Video, Music } from "lucide-react";
+import { BookOpen, Upload, Trash2, Download, Loader2, ShieldCheck, Clock, Eye, ExternalLink, Link2, RefreshCw, FileText, Video, Music, Search } from "lucide-react";
 import { toast } from "sonner";
 
 type Degree = "entered_apprentice" | "fellow_craft" | "master_mason" | "installed_master";
@@ -67,6 +67,9 @@ export default function MembersRitual() {
 
   // document type filter for the listing
   const [typeFilter, setTypeFilter] = useState<DocType | "all">("all");
+
+  // search query filter for the listing
+  const [searchQuery, setSearchQuery] = useState("");
 
   // upload form
   const [title, setTitle] = useState("");
@@ -279,9 +282,17 @@ export default function MembersRitual() {
         : docs.filter(
             (d) => d.is_general || DEGREE_LEVEL[d.required_degree] <= DEGREE_LEVEL[effectiveDegree]
           );
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      list = list.filter(
+        (d) =>
+          d.title.toLowerCase().includes(q) ||
+          (d.description ?? "").toLowerCase().includes(q)
+      );
+    }
     if (typeFilter !== "all") list = list.filter((d) => (d.doc_type ?? "text") === typeFilter);
     return [...list].sort((a, b) => a.title.localeCompare(b.title, "en", { sensitivity: "base" }));
-  }, [docs, isAdmin, previewDegree, myDegree, typeFilter]);
+  }, [docs, isAdmin, previewDegree, myDegree, searchQuery, typeFilter]);
 
   const TYPE_FILTERS: { value: DocType | "all"; label: string }[] = [
     { value: "all", label: "All" },
