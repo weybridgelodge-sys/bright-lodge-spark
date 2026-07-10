@@ -453,7 +453,7 @@ export default function MembersRitual() {
                   <BookOpen className="w-5 h-5" />
                 </div>
                 <div className="min-w-0">
-                  <h3 className="text-sm font-semibold leading-tight">{d.title}</h3>
+                  <h3 className="text-sm font-semibold leading-tight truncate" title={d.title}>{d.title}</h3>
                   {d.description && (
                     <p className="text-xs text-primary-foreground/60 mt-1">{d.description}</p>
                   )}
