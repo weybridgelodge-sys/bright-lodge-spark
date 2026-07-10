@@ -2103,6 +2103,7 @@ export type Database = {
         Row: {
           created_at: string
           description: string | null
+          doc_type: Database["public"]["Enums"]["ritual_doc_type"]
           file_path: string
           file_size_bytes: number | null
           id: string
@@ -2115,6 +2116,7 @@ export type Database = {
         Insert: {
           created_at?: string
           description?: string | null
+          doc_type?: Database["public"]["Enums"]["ritual_doc_type"]
           file_path: string
           file_size_bytes?: number | null
           id?: string
@@ -2127,6 +2129,7 @@ export type Database = {
         Update: {
           created_at?: string
           description?: string | null
+          doc_type?: Database["public"]["Enums"]["ritual_doc_type"]
           file_path?: string
           file_size_bytes?: number | null
           id?: string
@@ -3089,6 +3092,7 @@ export type Database = {
         | "excluded"
         | "deceased"
       progression_readiness: "ready" | "needs_experience" | "non_progressive"
+      ritual_doc_type: "text" | "audio" | "video"
       summons_status: "draft" | "finalised" | "sent"
       welfare_contact_nature:
         | "routine"
@@ -3307,6 +3311,7 @@ export const Constants = {
         "deceased",
       ],
       progression_readiness: ["ready", "needs_experience", "non_progressive"],
+      ritual_doc_type: ["text", "audio", "video"],
       summons_status: ["draft", "finalised", "sent"],
       welfare_contact_nature: [
         "routine",
