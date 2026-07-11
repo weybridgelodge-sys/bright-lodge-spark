@@ -29,6 +29,7 @@ const DataProtection = () => {
             <h2>What data we collect and why</h2>
             <p>Weybridge Lodge No. 6787 processes member names, addresses, phone numbers, and email addresses by computer. This data is used solely to distribute information, print address labels, and update membership lists for the Provincial Grand Secretary's office.</p>
             <p>If you make an enquiry through our website's contact or enquiry forms, we collect the name, email address, and any message content you provide, solely to respond to your enquiry.</p>
+            <p>When you make a booking or send an enquiry through this website, we may send you confirmation, reply, and follow-up emails relating to that booking or enquiry.</p>
 
             <h2>Who we share your data with</h2>
             <p>We will not share your information with third parties or use it for any other automated processing beyond what is described on this page.</p>
