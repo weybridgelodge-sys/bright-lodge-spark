@@ -168,9 +168,14 @@ const Footer = () => {
         </nav>
 
         <div className="border-t border-gold/10 pt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
-          <p className="text-xs text-primary-foreground/75 font-sans">
-            © {new Date().getFullYear()} Weybridge Lodge No. 6787. All rights reserved.
-          </p>
+          <div className="text-center sm:text-left">
+            <p className="text-xs text-primary-foreground/75 font-sans">
+              © {new Date().getFullYear()} Weybridge Lodge No. 6787. All rights reserved.
+            </p>
+            <p className="text-xs text-primary-foreground/75 font-sans mt-1">
+              ICO Registration: ZC194126
+            </p>
+          </div>
           <div className="flex gap-6">
             <Link to="/data-protection" className="text-xs text-primary-foreground/75 hover:text-gold transition-colors font-sans min-h-[48px] inline-flex items-center">
               Data Protection Policy
