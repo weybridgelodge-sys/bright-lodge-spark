@@ -72,15 +72,7 @@ const staticEntries: SitemapEntry[] = [
   { path: "/quiz", priority: "0.5", changefreq: "monthly" },
   { path: "/accessibility-statement", priority: "0.3", changefreq: "yearly" },
   { path: "/data-protection", priority: "0.3", changefreq: "yearly" },
-  // Bespoke news article pages (also backed by Sanity legacyRoute, listed here as a safety net).
-  { path: "/news/75th-anniversary", priority: "0.6", changefreq: "yearly" },
-  { path: "/news/sands-charity", priority: "0.6", changefreq: "yearly" },
-  { path: "/news/installation-meeting-october-2023", priority: "0.6", changefreq: "yearly" },
-  { path: "/news/pgm-visit-february-2026", priority: "0.6", changefreq: "yearly" },
-  { path: "/news/surrey-2030-festival-gold", priority: "0.6", changefreq: "yearly" },
-  { path: "/news/double-initiation-december-2025", priority: "0.6", changefreq: "yearly" },
-  { path: "/news/three-masonic-degrees-explained", priority: "0.6", changefreq: "yearly" },
-  { path: "/news/royal-arch-explained", priority: "0.6", changefreq: "yearly" },
+  // Bespoke news article pages are supplied by postEntries from Sanity (legacyRoute).
   { path: "/thames-challenge", priority: "0.6", changefreq: "yearly" },
   // Intentionally excluded from the sitemap:
   //   /unsubscribe, /checkout/return — transactional, must not be indexed.
