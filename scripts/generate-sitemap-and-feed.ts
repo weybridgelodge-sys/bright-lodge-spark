@@ -210,7 +210,7 @@ async function main() {
         priority: "0.5",
       }));
       if (videoDetailEntries.length > 0) {
-        const withVideoDetails = [...allEntries, ...videoDetailEntries];
+        const withVideoDetails = dedupeEntries([...allEntries, ...videoDetailEntries]);
         writeFileSync(resolve("public/sitemap.xml"), buildSitemap(withVideoDetails));
         console.log(`sitemap.xml re-written with ${videoDetailEntries.length} video detail pages`);
       }
