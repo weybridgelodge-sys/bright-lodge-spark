@@ -179,7 +179,7 @@ async function main() {
     priority: "0.5",
   }));
 
-  const allEntries = [...staticEntries, ...postEntries, ...categoryEntries];
+  const allEntries = dedupeEntries([...staticEntries, ...postEntries, ...categoryEntries]);
 
   writeFileSync(resolve("public/sitemap.xml"), buildSitemap(allEntries));
   console.log(`sitemap.xml written (${allEntries.length} entries)`);
