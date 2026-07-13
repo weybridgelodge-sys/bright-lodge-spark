@@ -129,6 +129,8 @@ const App = () => (
             <Route path="/officers-of-the-lodge-2025-weybridge-lodge" element={<Navigate to="/officers" replace />} />
             <Route path="/officers-of-the-lodge-weybridge-lodge-2024" element={<Navigate to="/officers" replace />} />
             <Route path="/officers-of-the-lodge-2023-weybridge-lodge" element={<Navigate to="/officers" replace />} />
+            <Route path="/officers-of-the-lodge-weybridge-lodge" element={<Navigate to="/officers" replace />} />
+            <Route path="/officers-of-the-lodge-weybridge-lodge-2023-2024" element={<Navigate to="/officers" replace />} />
             {/* Meetings & events */}
             <Route path="/weybridge-lodge-masonic-meetings-and-social-events" element={<Navigate to="/events" replace />} />
             <Route path="/weybridge-lodge-masonic-meetings-social-events" element={<Navigate to="/events" replace />} />
