@@ -72,15 +72,7 @@ const staticEntries: SitemapEntry[] = [
   { path: "/quiz", priority: "0.5", changefreq: "monthly" },
   { path: "/accessibility-statement", priority: "0.3", changefreq: "yearly" },
   { path: "/data-protection", priority: "0.3", changefreq: "yearly" },
-  // Bespoke news article pages (also backed by Sanity legacyRoute, listed here as a safety net).
-  { path: "/news/75th-anniversary", priority: "0.6", changefreq: "yearly" },
-  { path: "/news/sands-charity", priority: "0.6", changefreq: "yearly" },
-  { path: "/news/installation-meeting-october-2023", priority: "0.6", changefreq: "yearly" },
-  { path: "/news/pgm-visit-february-2026", priority: "0.6", changefreq: "yearly" },
-  { path: "/news/surrey-2030-festival-gold", priority: "0.6", changefreq: "yearly" },
-  { path: "/news/double-initiation-december-2025", priority: "0.6", changefreq: "yearly" },
-  { path: "/news/three-masonic-degrees-explained", priority: "0.6", changefreq: "yearly" },
-  { path: "/news/royal-arch-explained", priority: "0.6", changefreq: "yearly" },
+  // Bespoke news article pages are supplied by postEntries from Sanity (legacyRoute).
   { path: "/thames-challenge", priority: "0.6", changefreq: "yearly" },
   // Intentionally excluded from the sitemap:
   //   /unsubscribe, /checkout/return — transactional, must not be indexed.
@@ -120,6 +112,28 @@ function buildSitemap(entries: SitemapEntry[]) {
     `</urlset>`,
   ].join("\n");
 }
+
+// Dedupe sitemap entries by path. When duplicates exist, prefer the entry
+// that carries a lastmod value; otherwise keep the last one encountered.
+function dedupeEntries(entries: SitemapEntry[]): SitemapEntry[] {
+  const byPath = new Map<string, SitemapEntry>();
+  for (const e of entries) {
+    const existing = byPath.get(e.path);
+    if (!existing) {
+      byPath.set(e.path, e);
+      continue;
+    }
+    if (e.lastmod && !existing.lastmod) {
+      byPath.set(e.path, e);
+    } else if (!e.lastmod && existing.lastmod) {
+      // keep existing
+    } else {
+      byPath.set(e.path, e);
+    }
+  }
+  return Array.from(byPath.values());
+}
+
 
 function buildFeed(posts: PostRow[]) {
   const items = posts.map((p) => {
@@ -187,7 +201,7 @@ async function main() {
     priority: "0.5",
   }));
 
-  const allEntries = [...staticEntries, ...postEntries, ...categoryEntries];
+  const allEntries = dedupeEntries([...staticEntries, ...postEntries, ...categoryEntries]);
 
   writeFileSync(resolve("public/sitemap.xml"), buildSitemap(allEntries));
   console.log(`sitemap.xml written (${allEntries.length} entries)`);
@@ -218,7 +232,7 @@ async function main() {
         priority: "0.5",
       }));
       if (videoDetailEntries.length > 0) {
-        const withVideoDetails = [...allEntries, ...videoDetailEntries];
+        const withVideoDetails = dedupeEntries([...allEntries, ...videoDetailEntries]);
         writeFileSync(resolve("public/sitemap.xml"), buildSitemap(withVideoDetails));
         console.log(`sitemap.xml re-written with ${videoDetailEntries.length} video detail pages`);
       }
