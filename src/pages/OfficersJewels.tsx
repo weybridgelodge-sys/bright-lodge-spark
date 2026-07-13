@@ -273,9 +273,9 @@ const OfficersJewels = () => {
         "@type": "WebPage",
         "@id": "https://weybridgelodge.org.uk/officers-jewels#webpage",
         url: "https://weybridgelodge.org.uk/officers-jewels",
-        name: "Officers' Roles and Jewels | Freemasons in Guildford, Surrey — Weybridge Lodge No. 6787",
+        name: "Masonic Officer Jewels Explained | Weybridge Lodge No. 6787",
         description:
-          "Discover the roles, responsibilities and jewels of every officer of a Masonic Lodge — explained by Weybridge Lodge No. 6787, meeting in Guildford, Surrey at GU2 4DR.",
+          "What does each Masonic Lodge officer's jewel mean? A clear guide to every office and jewel, from Steward to Worshipful Master — Weybridge Lodge, Guildford.",
         inLanguage: "en-GB",
         isPartOf: {
           "@id": "https://weybridgelodge.org.uk/#website",
@@ -288,8 +288,8 @@ const OfficersJewels = () => {
   return (
     <div className="min-h-screen overflow-x-hidden">
       <SEO
-        title="Officers' Roles and Jewels | Freemasons in Guildford, Surrey — Weybridge Lodge No. 6787"
-        description="Discover the roles, responsibilities and jewels of every officer of a Masonic Lodge — explained by Weybridge Lodge No. 6787, meeting in Guildford, Surrey."
+        title="Masonic Officer Jewels Explained | Weybridge Lodge No. 6787"
+        description="What does each Masonic Lodge officer's jewel mean? A clear guide to every office and jewel, from Steward to Worshipful Master — Weybridge Lodge, Guildford."
         canonical="/officers-jewels"
         type="website"
         schema={pageSchema}
@@ -322,6 +322,11 @@ const OfficersJewels = () => {
               viewport={{ once: true }}
             >
               <div className="h-px w-16 bg-gold mb-6" aria-hidden="true" />
+              <p className="text-muted-foreground font-sans leading-relaxed mb-6">
+                Every Masonic Lodge officer wears a jewel on his collar — a small emblem signifying
+                his office and duties. Below, we explain what each jewel means and the responsibilities
+                that come with it, from the newest Steward to the Worshipful Master himself.
+              </p>
               <h2
                 id="jewels-intro-heading"
                 className="text-2xl md:text-3xl font-serif text-foreground mb-4"
