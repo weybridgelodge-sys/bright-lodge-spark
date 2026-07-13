@@ -113,6 +113,28 @@ function buildSitemap(entries: SitemapEntry[]) {
   ].join("\n");
 }
 
+// Dedupe sitemap entries by path. When duplicates exist, prefer the entry
+// that carries a lastmod value; otherwise keep the last one encountered.
+function dedupeEntries(entries: SitemapEntry[]): SitemapEntry[] {
+  const byPath = new Map<string, SitemapEntry>();
+  for (const e of entries) {
+    const existing = byPath.get(e.path);
+    if (!existing) {
+      byPath.set(e.path, e);
+      continue;
+    }
+    if (e.lastmod && !existing.lastmod) {
+      byPath.set(e.path, e);
+    } else if (!e.lastmod && existing.lastmod) {
+      // keep existing
+    } else {
+      byPath.set(e.path, e);
+    }
+  }
+  return Array.from(byPath.values());
+}
+
+
 function buildFeed(posts: PostRow[]) {
   const items = posts.map((p) => {
     const link = p.legacyRoute?.trim() || `/news/${p.slug}`;
