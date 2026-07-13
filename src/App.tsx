@@ -138,7 +138,11 @@ const App = () => (
             <Route path="/christmas-party-2025" element={<Navigate to="/events" replace />} />
             <Route path="/document/summons-373rd-regular-meeting-13122023" element={<Navigate to="/events" replace />} />
             <Route path="/document/374th-regular-m" element={<Navigate to="/events" replace />} />
+            <Route path="/document/374th-regular-meeting" element={<Navigate to="/events" replace />} />
             <Route path="/document/committee-meeting-agenda-04012024" element={<Navigate to="/events" replace />} />
+            <Route path="/document/newsletter-may-2024" element={<Navigate to="/heritage" replace />} />
+            <Route path="/document/minutes-372nd-regular-meeting-18102023" element={<Navigate to="/heritage" replace />} />
+            <Route path="/document/committiee-meeting-minutes-sep-2023" element={<Navigate to="/heritage" replace />} />
             <Route path="/dining" element={<Navigate to="/bookings" replace />} />
             {/* Join & contact */}
             <Route path="/surrey-freemasons-join-us" element={<Navigate to="/join-us" replace />} />
