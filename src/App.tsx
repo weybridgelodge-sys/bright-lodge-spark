@@ -122,11 +122,15 @@ const App = () => (
             <Route path="/frequently-asked-questions-about-freemasonry" element={<Navigate to="/what-is-freemasonry" replace />} />
             <Route path="/masonic-lodge-officers-jewels" element={<Navigate to="/officers-jewels" replace />} />
             <Route path="/lodge-profile-freemasons-in-guildford-surrey" element={<Navigate to="/lodge-profile" replace />} />
+            <Route path="/lodge-profile-freemasons-guildford-surrey" element={<Navigate to="/lodge-profile" replace />} />
+            <Route path="/weybridge-lodge-freemasons-guildford-surrey-lodge-profile" element={<Navigate to="/lodge-profile" replace />} />
             <Route path="/history-of-weybridge-lodge-a-freemasons-lodge-in-guildford-surrey" element={<Navigate to="/history" replace />} />
             <Route path="/weybridge-lodge-worshipful-master" element={<Navigate to="/worshipful-masters" replace />} />
             <Route path="/officers-of-the-lodge-2025-weybridge-lodge" element={<Navigate to="/officers" replace />} />
             <Route path="/officers-of-the-lodge-weybridge-lodge-2024" element={<Navigate to="/officers" replace />} />
             <Route path="/officers-of-the-lodge-2023-weybridge-lodge" element={<Navigate to="/officers" replace />} />
+            <Route path="/officers-of-the-lodge-weybridge-lodge" element={<Navigate to="/officers" replace />} />
+            <Route path="/officers-of-the-lodge-weybridge-lodge-2023-2024" element={<Navigate to="/officers" replace />} />
             {/* Meetings & events */}
             <Route path="/weybridge-lodge-masonic-meetings-and-social-events" element={<Navigate to="/events" replace />} />
             <Route path="/weybridge-lodge-masonic-meetings-social-events" element={<Navigate to="/events" replace />} />
@@ -134,7 +138,11 @@ const App = () => (
             <Route path="/christmas-party-2025" element={<Navigate to="/events" replace />} />
             <Route path="/document/summons-373rd-regular-meeting-13122023" element={<Navigate to="/events" replace />} />
             <Route path="/document/374th-regular-m" element={<Navigate to="/events" replace />} />
+            <Route path="/document/374th-regular-meeting" element={<Navigate to="/events" replace />} />
             <Route path="/document/committee-meeting-agenda-04012024" element={<Navigate to="/events" replace />} />
+            <Route path="/document/newsletter-may-2024" element={<Navigate to="/heritage" replace />} />
+            <Route path="/document/minutes-372nd-regular-meeting-18102023" element={<Navigate to="/heritage" replace />} />
+            <Route path="/document/committiee-meeting-minutes-sep-2023" element={<Navigate to="/heritage" replace />} />
             <Route path="/dining" element={<Navigate to="/bookings" replace />} />
             {/* Join & contact */}
             <Route path="/surrey-freemasons-join-us" element={<Navigate to="/join-us" replace />} />

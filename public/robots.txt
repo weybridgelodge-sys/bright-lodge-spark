@@ -3,6 +3,10 @@ Allow: /
 Disallow: /members
 Disallow: /portal
 Disallow: /post-summary-page
+Disallow: /wp-json/
+Disallow: /wp-includes/
+Disallow: /wp-admin/
+Disallow: /*wpr_templates=
 
 
 Sitemap: https://weybridgelodge.org.uk/sitemap.xml
