@@ -11,7 +11,7 @@
 import { writeFileSync } from "fs";
 import { resolve } from "path";
 import { createClient } from "@sanity/client";
-import { staticVideos, type VideoEntry } from "../src/data/videos";
+import type { VideoEntry } from "../src/data/videos";
 import { staticPageImages, type PageImage } from "../src/data/siteImages";
 
 
