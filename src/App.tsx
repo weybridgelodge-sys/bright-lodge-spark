@@ -122,6 +122,8 @@ const App = () => (
             <Route path="/frequently-asked-questions-about-freemasonry" element={<Navigate to="/what-is-freemasonry" replace />} />
             <Route path="/masonic-lodge-officers-jewels" element={<Navigate to="/officers-jewels" replace />} />
             <Route path="/lodge-profile-freemasons-in-guildford-surrey" element={<Navigate to="/lodge-profile" replace />} />
+            <Route path="/lodge-profile-freemasons-guildford-surrey" element={<Navigate to="/lodge-profile" replace />} />
+            <Route path="/weybridge-lodge-freemasons-guildford-surrey-lodge-profile" element={<Navigate to="/lodge-profile" replace />} />
             <Route path="/history-of-weybridge-lodge-a-freemasons-lodge-in-guildford-surrey" element={<Navigate to="/history" replace />} />
             <Route path="/weybridge-lodge-worshipful-master" element={<Navigate to="/worshipful-masters" replace />} />
             <Route path="/officers-of-the-lodge-2025-weybridge-lodge" element={<Navigate to="/officers" replace />} />
