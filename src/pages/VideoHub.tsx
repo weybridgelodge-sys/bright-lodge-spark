@@ -32,20 +32,6 @@ const VideoHub = () => {
       { name: "Video Hub", url: "/video-hub" },
     ]);
 
-    const videoSchemas = (videos as SanityVideo[]).map((v) => ({
-      "@context": "https://schema.org",
-      "@type": "VideoObject",
-      name: v.title,
-      description: v.description || v.title,
-      embedUrl: `https://www.youtube.com/embed/${v.youtubeId}`,
-      uploadDate: v.uploadDate || "2020-01-01",
-      thumbnailUrl: `https://i.ytimg.com/vi/${v.youtubeId}/hqdefault.jpg`,
-      publisher: {
-        "@type": "Organization",
-        name: v.channel || "United Grand Lodge of England",
-      },
-    }));
-
     return [
       {
         "@context": "https://schema.org",
@@ -58,10 +44,10 @@ const VideoHub = () => {
         inLanguage: "en-GB",
         isPartOf: { "@id": "https://weybridgelodge.org.uk/#website" },
       },
-      ...videoSchemas,
       breadcrumb,
     ];
-  }, [videos]);
+  }, []);
+
 
   return (
     <div className="min-h-screen overflow-x-hidden">
