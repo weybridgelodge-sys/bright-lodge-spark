@@ -186,8 +186,26 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://weybridgelodge.org.uk/news/royal-arch-explained</loc>
+    <lastmod>2026-07-13</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://weybridgelodge.org.uk/news/three-masonic-degrees-explained</loc>
+    <lastmod>2026-07-13</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://weybridgelodge.org.uk/news/pgm-visit-february-2026</loc>
     <lastmod>2026-06-15</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://weybridgelodge.org.uk/news/double-initiation-december-2025</loc>
+    <lastmod>2026-07-13</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -214,6 +232,11 @@
     <lastmod>2026-06-15</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://weybridgelodge.org.uk/news/category/discover-freemasonry</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
   </url>
   <url>
     <loc>https://weybridgelodge.org.uk/news/category/lodge-meetings</loc>
