@@ -11,7 +11,7 @@
 import { writeFileSync } from "fs";
 import { resolve } from "path";
 import { createClient } from "@sanity/client";
-import { staticVideos, type VideoEntry } from "../src/data/videos";
+import type { VideoEntry } from "../src/data/videos";
 import { staticPageImages, type PageImage } from "../src/data/siteImages";
 
 
@@ -295,17 +295,18 @@ async function collectVideos(): Promise<VideoEntry[]> {
     }));
     console.log(`Fetched ${sanityVideos.length} videos from Sanity`);
   } catch (err) {
-    console.warn("Could not fetch videos from Sanity — falling back to static list only.", err);
+    console.warn("Could not fetch videos from Sanity.", err);
   }
 
-  // Dedupe by youtubeId, preferring Sanity entries (they come first).
+  // Dedupe by youtubeId.
   const byId = new Map<string, VideoEntry>();
-  for (const v of [...sanityVideos, ...staticVideos]) {
+  for (const v of sanityVideos) {
     if (!v.youtubeId) continue;
     if (!byId.has(v.youtubeId)) byId.set(v.youtubeId, v);
   }
   return Array.from(byId.values());
 }
+
 
 async function fetchOEmbed(videoId: string): Promise<{ title?: string; author?: string } | null> {
   try {
