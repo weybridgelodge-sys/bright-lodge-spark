@@ -234,7 +234,10 @@ export const eventSchema = ({
   "@type": "Event",
   name,
   startDate: date,
+  endDate: new Date(new Date(date).getTime() + 4 * 60 * 60 * 1000).toISOString(),
   description,
+  image: DEFAULT_OG_IMAGE,
+  eventStatus: "https://schema.org/EventScheduled",
   location: {
     "@type": "Place",
     name: "Guildford Masonic Centre",
@@ -250,5 +253,17 @@ export const eventSchema = ({
   organizer: {
     "@type": "Organization",
     name: "Weybridge Lodge No. 6787",
+    url: "https://weybridgelodge.org.uk",
+  },
+  performer: {
+    "@type": "PerformingGroup",
+    name: "Weybridge Lodge No. 6787",
+  },
+  offers: {
+    "@type": "Offer",
+    price: "0",
+    priceCurrency: "GBP",
+    availability: "https://schema.org/InStock",
+    url: "https://weybridgelodge.org.uk/bookings",
   },
 });
