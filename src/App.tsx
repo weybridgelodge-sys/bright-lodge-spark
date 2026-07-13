@@ -149,7 +149,6 @@ const App = () => (
             <Route path="/contact-weybridge-lodge-freemasons" element={<Navigate to="/contact" replace />} />
             {/* Charity */}
             <Route path="/guildford-freemasons-charity-surrey" element={<Navigate to="/our-charities" replace />} />
-            <Route path="/freemasonry-and-charity" element={<Navigate to="/our-charities" replace />} />
             <Route path="/freemasons-charity-weybridge-lodge-raise-31000-for-sands-charity" element={<Navigate to="/our-charities" replace />} />
             <Route path="/charity-golf-day-june-2025" element={<Navigate to="/our-charities" replace />} />
             {/* News */}
