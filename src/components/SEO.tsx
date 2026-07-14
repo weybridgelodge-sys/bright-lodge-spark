@@ -255,15 +255,18 @@ export const eventSchema = ({
     name: "Weybridge Lodge No. 6787",
     url: "https://weybridgelodge.org.uk",
   },
-  performer: {
-    "@type": "PerformingGroup",
-    name: "Weybridge Lodge No. 6787",
-  },
+  performer: [
+    {
+      "@type": "PerformingGroup",
+      name: "Weybridge Lodge No. 6787",
+    },
+  ],
   offers: {
     "@type": "Offer",
     price: "0",
     priceCurrency: "GBP",
     availability: "https://schema.org/InStock",
     url: "https://weybridgelodge.org.uk/bookings",
+    validFrom: date,
   },
 });
