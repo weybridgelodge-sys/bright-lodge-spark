@@ -49,12 +49,19 @@ const ladiesFestivalSchema = {
     name: "Weybridge Lodge No. 6787",
     url: "https://weybridgelodge.org.uk",
   },
+  performer: [
+    {
+      "@type": "PerformingGroup",
+      name: "Weybridge & Astolat Lodges",
+    },
+  ],
   offers: {
     "@type": "Offer",
     price: "75",
     priceCurrency: "GBP",
     availability: "https://schema.org/InStock",
     url: "https://weybridgelodge.org.uk/events",
+    validFrom: "2026-08-22T18:30:00+01:00",
   },
 };
 
