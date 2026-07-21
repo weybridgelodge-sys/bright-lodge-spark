@@ -418,6 +418,9 @@ export default function MembersDocuments() {
                 <FileText className="w-4 h-4 text-gold shrink-0 mt-1" />
                 <div className="min-w-0">
                   <p className="text-sm font-semibold leading-tight line-clamp-2" title={d.title}>{d.title}</p>
+                  {d.description && (
+                    <p className="text-xs text-primary-foreground/70 mt-1 whitespace-pre-wrap">{d.description}</p>
+                  )}
                   <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-[11px] text-primary-foreground/50">
                     <span className="text-gold bg-gold/5 px-2 py-0.5 rounded-sm border border-gold/15">
                       {CATEGORY_LABELS[d.category]}
@@ -429,6 +432,7 @@ export default function MembersDocuments() {
                       </span>
                     )}
                   </div>
+
                 </div>
               </div>
               <div className="flex items-center gap-1 shrink-0 flex-wrap justify-end border-t border-gold/10 pt-2 sm:border-t-0 sm:pt-0">
