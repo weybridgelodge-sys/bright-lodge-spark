@@ -273,10 +273,19 @@ export default function MembersDocuments() {
     return DEGREE_LEVEL[viewer] >= DEGREE_LEVEL[need];
   };
 
+  const CATEGORY_ORDER: Record<string, number> = CATEGORIES.reduce(
+    (acc, c, i) => ({ ...acc, [c]: i }),
+    {} as Record<string, number>
+  );
   const filtered = docs
     .filter((d) => d.category !== "ritual")
     .filter((d) => filter === "all" || d.category === filter)
-    .filter(canSeeLD);
+    .filter(canSeeLD)
+    .sort((a, b) => {
+      const catDiff = (CATEGORY_ORDER[a.category] ?? 999) - (CATEGORY_ORDER[b.category] ?? 999);
+      if (catDiff !== 0) return catDiff;
+      return a.title.localeCompare(b.title, "en", { sensitivity: "base" });
+    });
 
   const showLDGateBanner = filter === "learning_development" || filter === "all";
 
