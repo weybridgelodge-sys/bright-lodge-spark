@@ -1,11 +1,14 @@
 // send-summons-to-visitors — email a finalised summons to visitor contacts.
-// Personalised salutation per recipient, branded HTML (navy/gold + crest),
-// summons PDF + .ics calendar file attached.
+// Personalised salutation per recipient, branded HTML matching the shared
+// Weybridge Lodge transactional email style (centered crest, "Weybridge
+// Lodge" heading, gold "No. 6787 — Province of Surrey" subtitle, white body),
+// with the summons PDF + .ics calendar file attached.
 //
 // Role-gated to admin / secretary / worshipful_master and logged into
 // summons_email_log so history clearly shows which visitors were invited.
 
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { BRAND, LOGO_URL } from "../_shared/transactional-email-templates/_brand.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -15,8 +18,6 @@ const corsHeaders = {
 
 const GATEWAY_URL = "https://connector-gateway.lovable.dev/resend";
 const FROM_ADDRESS = "Weybridge Lodge <notify@events.weybridgelodge.org.uk>";
-const LOGO_URL =
-  "https://bright-lodge-spark.lovable.app/__l5e/assets-v1/7caf0014-2e5c-4614-8622-ee60d204fdcc/weybridge-logo-navy-transparent.png";
 
 type Recipient = { email: string; salutation: string; visitor_contact_id?: string | null };
 
@@ -27,7 +28,8 @@ interface Body {
   meeting_time_label?: string;    // e.g. "6:15 pm for 6:45 pm"
   meeting_type_label?: string;    // e.g. "Regular Meeting"
   venue: string;                  // e.g. "Masonic Centre, Guildford"
-  wm_display_name: string;        // resolved from officer_appointments client-side
+  secretary_display_name?: string; // preferred — resolved from officer_appointments client-side
+  wm_display_name?: string;        // legacy — accepted for back-compat but no longer displayed
   ics: string;
   ics_filename: string;
   event_start_iso: string;
@@ -57,44 +59,52 @@ function renderHtml(o: {
   meetingTimeLabel?: string;
   meetingTypeLabel?: string;
   venue: string;
-  wmName: string;
+  secretaryName: string;
 }): string {
-  const timeLine = o.meetingTimeLabel
-    ? `<tr><td style="padding:4px 12px 4px 0;color:#5b5b5b;font-size:14px;">Time</td><td style="padding:4px 0;color:#111;font-size:14px;"><strong>${esc(o.meetingTimeLabel)}</strong></td></tr>`
-    : "";
-  const typeLine = o.meetingTypeLabel
-    ? `<tr><td style="padding:4px 12px 4px 0;color:#5b5b5b;font-size:14px;">Meeting</td><td style="padding:4px 0;color:#111;font-size:14px;"><strong>${esc(o.meetingTypeLabel)}</strong></td></tr>`
-    : "";
-  return `<!doctype html><html><body style="margin:0;padding:0;background:#f7f4ee;font-family:Georgia,serif;">
-  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="padding:24px 12px;">
+  // Style matches the shared brand (see supabase/functions/_shared/transactional-email-templates/_brand.ts
+  // and almoner-overdue-digest.tsx): white body, centered crest, navy "Weybridge Lodge" title
+  // with a gold "No. 6787 — Province of Surrey" subtitle, then Arial body copy.
+  const detailRow = (label: string, value: string) => `
+    <tr>
+      <td style="padding:4px 12px 4px 0;color:${BRAND.muted};font-size:14px;vertical-align:top;">${esc(label)}</td>
+      <td style="padding:4px 0;color:#111;font-size:14px;"><strong>${esc(value)}</strong></td>
+    </tr>`;
+  const typeLine = o.meetingTypeLabel ? detailRow("Meeting", o.meetingTypeLabel) : "";
+  const timeLine = o.meetingTimeLabel ? detailRow("Time", o.meetingTimeLabel) : "";
+
+  return `<!doctype html><html><body style="margin:0;padding:0;background:${BRAND.bg};font-family:${BRAND.fontStack};">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:${BRAND.bg};">
     <tr><td align="center">
-      <table role="presentation" width="600" cellspacing="0" cellpadding="0" style="background:#fff;border:1px solid #e5e0d3;border-radius:4px;">
-        <tr><td align="center" style="padding:24px 28px 8px;background:#1B2A4A;">
-          <img src="${LOGO_URL}" width="90" height="90" alt="Weybridge Lodge crest" style="display:block;margin:0 auto 8px;" />
-          <div style="font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#C9A432;">Weybridge Lodge No. 6787</div>
-          <h1 style="margin:6px 0 0 0;font-size:22px;color:#fff;font-family:Georgia,serif;">Invitation to our next Meeting</h1>
+      <table role="presentation" width="${parseInt(BRAND.containerMaxWidth, 10)}" cellspacing="0" cellpadding="0" style="max-width:${BRAND.containerMaxWidth};margin:0 auto;padding:24px;">
+        <tr><td align="center" style="padding:8px 0 16px;">
+          <img src="${LOGO_URL}" width="120" height="120" alt="Weybridge Lodge crest" style="display:block;margin:0 auto;" />
+          <h1 style="color:${BRAND.navy};font-size:24px;margin:12px 0 0;letter-spacing:0.5px;font-family:${BRAND.fontStack};">Weybridge Lodge</h1>
+          <div style="color:${BRAND.gold};font-size:12px;letter-spacing:2px;text-transform:uppercase;margin:4px 0 12px;">No. 6787 — Province of Surrey</div>
         </td></tr>
-        <tr><td style="padding:24px 28px;color:#222;font-size:15px;line-height:1.6;font-family:Arial,sans-serif;">
-          <p style="margin:0 0 14px 0;">Dear ${esc(o.salutation)},</p>
-          <p style="margin:0 0 14px 0;">
-            It is my pleasure, on behalf of the Worshipful Master and the Brethren of
-            Weybridge Lodge No. 6787, to invite you to our next meeting. The Summons
-            is attached along with a calendar file so you can add the event to your diary.
+        <tr><td style="padding:0;">
+          <h2 style="color:${BRAND.navy};font-size:22px;margin:0 0 6px;font-family:${BRAND.fontStack};">Invitation to our next Meeting</h2>
+          <p style="color:${BRAND.body};font-size:14px;line-height:1.55;margin:14px 0;">Dear ${esc(o.salutation)},</p>
+          <p style="color:${BRAND.body};font-size:14px;line-height:1.55;margin:0 0 14px;">
+            On behalf of the Worshipful Master and the Brethren of Weybridge Lodge No. 6787,
+            I am pleased to invite you to our next meeting. The Summons is attached along
+            with a calendar file so you can add the event to your diary.
           </p>
-          <table role="presentation" cellspacing="0" cellpadding="0" style="margin:12px 0 16px 0;">
+          <table role="presentation" cellspacing="0" cellpadding="0" style="margin:12px 0 16px 0;background:${BRAND.panel};border:1px solid ${BRAND.hairline};border-radius:4px;padding:8px 16px;">
             ${typeLine}
-            <tr><td style="padding:4px 12px 4px 0;color:#5b5b5b;font-size:14px;">Date</td><td style="padding:4px 0;color:#111;font-size:14px;"><strong>${esc(o.meetingDateLabel)}</strong></td></tr>
+            ${detailRow("Date", o.meetingDateLabel)}
             ${timeLine}
-            <tr><td style="padding:4px 12px 4px 0;color:#5b5b5b;font-size:14px;vertical-align:top;">Where</td><td style="padding:4px 0;color:#111;font-size:14px;"><strong>${esc(o.venue)}</strong></td></tr>
+            ${detailRow("Where", o.venue)}
           </table>
-          <p style="margin:16px 0 8px 0;">We very much look forward to seeing you at the meeting.</p>
-          <p style="margin:0 0 4px 0;">Kind regards</p>
-          <p style="margin:0 0 14px 0;">S&amp;F</p>
-          <p style="margin:0;color:#1B2A4A;"><strong>${esc(o.wmName)}</strong>, Worshipful Master</p>
-          <p style="margin:0;color:#1B2A4A;">Weybridge Lodge No. 6787</p>
-        </td></tr>
-        <tr><td style="padding:16px 28px;background:#faf7f1;color:#5b5b5b;font-size:12px;border-top:1px solid #e5e0d3;font-family:Arial,sans-serif;">
-          If you would prefer not to receive further invitations, please reply to this email and we will remove you from our visitor list.
+          <p style="color:${BRAND.body};font-size:14px;line-height:1.55;margin:16px 0 8px;">We very much look forward to seeing you at the meeting.</p>
+          <p style="color:${BRAND.body};font-size:14px;line-height:1.55;margin:0 0 4px;">Kind regards</p>
+          <p style="color:${BRAND.body};font-size:14px;line-height:1.55;margin:0 0 14px;">S&amp;F</p>
+          <p style="margin:0;color:${BRAND.navy};font-size:14px;"><strong>${esc(o.secretaryName)}</strong>, Secretary</p>
+          <p style="margin:0;color:${BRAND.navy};font-size:14px;">Weybridge Lodge No. 6787</p>
+          <hr style="border:none;border-top:1px solid ${BRAND.hairline};margin:20px 0 10px;" />
+          <p style="color:${BRAND.muted};font-size:12px;margin:0;">
+            If you would prefer not to receive further invitations, please reply to this email
+            and we will remove you from our visitor list.
+          </p>
         </td></tr>
       </table>
     </td></tr>
@@ -130,7 +140,8 @@ Deno.serve(async (req) => {
       return json({ error: "summons_id and recipients required" }, 400);
     }
     if (body.recipients.length > 500) return json({ error: "Too many recipients" }, 400);
-    if (!body.ics || !body.ics_filename || !body.meeting_date_label || !body.venue || !body.wm_display_name) {
+    const secretaryName = (body.secretary_display_name || "").trim() || "The Secretary";
+    if (!body.ics || !body.ics_filename || !body.meeting_date_label || !body.venue) {
       return json({ error: "Missing meeting/ics fields" }, 400);
     }
 
@@ -176,7 +187,7 @@ Deno.serve(async (req) => {
         meetingTimeLabel: body.meeting_time_label,
         meetingTypeLabel: body.meeting_type_label,
         venue: body.venue,
-        wmName: body.wm_display_name,
+        secretaryName,
       });
       try {
         const res = await fetch(`${GATEWAY_URL}/emails`, {
