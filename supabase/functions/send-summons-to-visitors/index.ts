@@ -240,7 +240,7 @@ Deno.serve(async (req) => {
             "Content-Type": "application/json",
             "Authorization": `Bearer ${LOVABLE_API_KEY}`,
             "X-Connection-Api-Key": RESEND_API_KEY,
-            "Idempotency-Key": `summons-visitors-${summons.id}-${email}-${contentHash}`,
+            "Idempotency-Key": `summons-visitors-${summons.id}-${email}-${contentHash}${r.force ? `-force-${Date.now()}-${crypto.randomUUID().slice(0, 8)}` : ""}`,
           },
           body: JSON.stringify({
             from: FROM_ADDRESS,
