@@ -60,6 +60,7 @@ function renderHtml(o: {
   meetingTypeLabel?: string;
   venue: string;
   secretaryName: string;
+  unsubscribeUrl?: string;
 }): string {
   // Style matches the shared brand (see supabase/functions/_shared/transactional-email-templates/_brand.ts
   // and almoner-overdue-digest.tsx): white body, centered crest, navy "Weybridge Lodge" title
