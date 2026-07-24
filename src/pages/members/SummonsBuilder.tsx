@@ -1315,12 +1315,36 @@ function VisitorEmailDialog(props: {
     try {
       const wmName = (await resolveOfficerDisplayName("worshipful_master")) || "The Worshipful Master";
       const meetingDate = summons.meeting_date!;
-      const meetingDateLabel = new Date(meetingDate + "T00:00:00").toLocaleDateString("en-GB", {
+      // Validate the date (YYYY-MM-DD) parses cleanly before we build any ISO strings.
+      const dateProbe = new Date(`${meetingDate}T00:00:00`);
+      if (Number.isNaN(dateProbe.getTime())) {
+        toast.error("Meeting date is invalid — please re-select it and save the summons");
+        setSending(false);
+        return;
+      }
+      const meetingDateLabel = dateProbe.toLocaleDateString("en-GB", {
         weekday: "long", day: "numeric", month: "long", year: "numeric",
       });
-      const timeStr = (summons.meeting_time || "18:15").slice(0, 5);
-      const startIso = new Date(`${meetingDate}T${timeStr}:00`).toISOString();
-      const endIso = new Date(new Date(startIso).getTime() + 3 * 60 * 60 * 1000).toISOString();
+      // meeting_time is free-text (e.g. "6:15 pm for 6:45 pm"); extract first HH:mm we can find,
+      // otherwise fall back to the lodge default so ICS never gets NaN.
+      const rawTime = (summons.meeting_time || "").toString();
+      const parsed24 = rawTime.match(/\b([01]?\d|2[0-3]):([0-5]\d)\b/);
+      const parsed12 = rawTime.match(/\b(1[0-2]|0?[1-9])(?::([0-5]\d))?\s*(am|pm)\b/i);
+      let hh = 18, mm = 15;
+      if (parsed24) { hh = parseInt(parsed24[1], 10); mm = parseInt(parsed24[2], 10); }
+      else if (parsed12) {
+        hh = parseInt(parsed12[1], 10) % 12;
+        if (/pm/i.test(parsed12[3])) hh += 12;
+        mm = parsed12[2] ? parseInt(parsed12[2], 10) : 0;
+      }
+      const startDate = new Date(`${meetingDate}T${String(hh).padStart(2, "0")}:${String(mm).padStart(2, "0")}:00`);
+      if (Number.isNaN(startDate.getTime())) {
+        toast.error("Could not build a valid event time — please check meeting date/time");
+        setSending(false);
+        return;
+      }
+      const startIso = startDate.toISOString();
+      const endIso = new Date(startDate.getTime() + 3 * 60 * 60 * 1000).toISOString();
       const venue = template.venue_address || "Masonic Centre, Guildford";
       const title = `Weybridge Lodge No. 6787 — ${summons.meeting_type || "Meeting"} — ${meetingDateLabel}`;
       const ics = generateICS({
@@ -1328,6 +1352,7 @@ function VisitorEmailDialog(props: {
         description: "Summons for the meeting is attached.",
       });
       const ics_filename = icsFilename(title);
+
 
       const id = await generatePdf("email");
       if (!id) { setSending(false); return; }
