@@ -163,22 +163,28 @@ function classifyEventTitle(raw: string): string {
 
 /** Static VTIMEZONE for Europe/London. Post-1996 rules; sufficient for any date
  *  a lodge calendar will contain. */
+// Property order and parts matter for strict parsers (notably Proton Calendar):
+// - LAST-MODIFIED as a validity anchor (RFC 5545 §3.6.5 recommended).
+// - RRULE parts in canonical order: FREQ, BYMONTH, BYDAY.
+// - Sub-component property order: DTSTART, TZOFFSETFROM, TZOFFSETTO, RRULE, TZNAME.
+// - DTSTART inside STANDARD/DAYLIGHT must be *floating* local time (no Z).
 const LONDON_VTIMEZONE = [
   "BEGIN:VTIMEZONE",
   "TZID:Europe/London",
+  "LAST-MODIFIED:20240101T000000Z",
   "X-LIC-LOCATION:Europe/London",
   "BEGIN:STANDARD",
   "DTSTART:19961027T020000",
-  "RRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10",
   "TZOFFSETFROM:+0100",
   "TZOFFSETTO:+0000",
+  "RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU",
   "TZNAME:GMT",
   "END:STANDARD",
   "BEGIN:DAYLIGHT",
   "DTSTART:19960331T010000",
-  "RRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=3",
   "TZOFFSETFROM:+0000",
   "TZOFFSETTO:+0100",
+  "RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU",
   "TZNAME:BST",
   "END:DAYLIGHT",
   "END:VTIMEZONE",
