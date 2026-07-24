@@ -9,6 +9,7 @@ import { template as almonerOverdueDigest } from './almoner-overdue-digest.tsx'
 import { template as waitlistPromoted } from './waitlist-promoted.tsx'
 import { template as waitlistRefunded } from './waitlist-refunded.tsx'
 import { template as pollOpened } from './poll-opened.tsx'
+import { template as duesPriceChangeNotice } from './dues-price-change-notice.tsx'
 
 export interface TemplateEntry {
   component: any
@@ -30,4 +31,5 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'waitlist-promoted': waitlistPromoted,
   'waitlist-refunded': waitlistRefunded,
   'poll-opened': pollOpened,
+  'dues-price-change-notice': duesPriceChangeNotice,
 }

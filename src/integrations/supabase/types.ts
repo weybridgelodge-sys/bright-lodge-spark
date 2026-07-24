@@ -527,6 +527,170 @@ export type Database = {
         }
         Relationships: []
       }
+      dues_payments: {
+        Row: {
+          amount_pence: number
+          created_at: string
+          id: string
+          member_id: string
+          method: string | null
+          note: string | null
+          occurred_at: string
+          status: string
+          stripe_charge_id: string | null
+          stripe_invoice_id: string | null
+          stripe_payment_intent_id: string | null
+          stripe_refund_id: string | null
+          subscription_id: string
+          type: string
+        }
+        Insert: {
+          amount_pence: number
+          created_at?: string
+          id?: string
+          member_id: string
+          method?: string | null
+          note?: string | null
+          occurred_at?: string
+          status?: string
+          stripe_charge_id?: string | null
+          stripe_invoice_id?: string | null
+          stripe_payment_intent_id?: string | null
+          stripe_refund_id?: string | null
+          subscription_id: string
+          type: string
+        }
+        Update: {
+          amount_pence?: number
+          created_at?: string
+          id?: string
+          member_id?: string
+          method?: string | null
+          note?: string | null
+          occurred_at?: string
+          status?: string
+          stripe_charge_id?: string | null
+          stripe_invoice_id?: string | null
+          stripe_payment_intent_id?: string | null
+          stripe_refund_id?: string | null
+          subscription_id?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dues_payments_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dues_payments_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "dues_subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      dues_settings: {
+        Row: {
+          annual_amount_pence: number
+          applied_at: string | null
+          created_at: string
+          created_by: string | null
+          effective_lodge_year: number
+          id: string
+          notice_required: boolean
+          notice_sent_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          annual_amount_pence: number
+          applied_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          effective_lodge_year: number
+          id?: string
+          notice_required?: boolean
+          notice_sent_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          annual_amount_pence?: number
+          applied_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          effective_lodge_year?: number
+          id?: string
+          notice_required?: boolean
+          notice_sent_at?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      dues_subscriptions: {
+        Row: {
+          amount_pence: number
+          created_at: string
+          credit_balance_pence: number
+          id: string
+          lodge_year: number
+          member_id: string
+          method: string
+          plan: string
+          status: string
+          stripe_checkout_session_id: string | null
+          stripe_customer_id: string | null
+          stripe_payment_intent_id: string | null
+          stripe_price_id: string | null
+          stripe_subscription_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount_pence: number
+          created_at?: string
+          credit_balance_pence?: number
+          id?: string
+          lodge_year: number
+          member_id: string
+          method: string
+          plan: string
+          status?: string
+          stripe_checkout_session_id?: string | null
+          stripe_customer_id?: string | null
+          stripe_payment_intent_id?: string | null
+          stripe_price_id?: string | null
+          stripe_subscription_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount_pence?: number
+          created_at?: string
+          credit_balance_pence?: number
+          id?: string
+          lodge_year?: number
+          member_id?: string
+          method?: string
+          plan?: string
+          status?: string
+          stripe_checkout_session_id?: string | null
+          stripe_customer_id?: string | null
+          stripe_payment_intent_id?: string | null
+          stripe_price_id?: string | null
+          stripe_subscription_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dues_subscriptions_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       email_send_log: {
         Row: {
           created_at: string
