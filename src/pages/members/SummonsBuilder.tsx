@@ -1117,7 +1117,23 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
         <Button variant="outline" className="text-navy" onClick={() => generatePdf("save")} disabled={busy}><Save className="w-4 h-4 mr-2" /> Save to history</Button>
         <Button variant="outline" className="text-navy" onClick={emailTest} disabled={busy}><Mail className="w-4 h-4 mr-2" /> Send test email…</Button>
         <Button onClick={emailAll} disabled={busy} className="bg-gold text-navy hover:bg-gold/90"><Mail className="w-4 h-4 mr-2" /> Email to all members</Button>
+        <Button
+          onClick={() => setVisitorDialogOpen(true)}
+          disabled={busy}
+          className="bg-gold text-navy hover:bg-gold/90"
+        >
+          <Mail className="w-4 h-4 mr-2" /> Email to Visitors…
+        </Button>
       </div>
+
+      <VisitorEmailDialog
+        open={visitorDialogOpen}
+        onOpenChange={setVisitorDialogOpen}
+        summons={summons}
+        template={template}
+        generatePdf={generatePdf}
+        resolveOfficerDisplayName={resolveOfficerDisplayName}
+      />
     </div>
   );
 }
