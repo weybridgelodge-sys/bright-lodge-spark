@@ -13,7 +13,7 @@ import {
   Text,
 } from 'npm:@react-email/components@0.0.22'
 import type { TemplateEntry } from './registry.ts'
-import { LOGO_HEIGHT, LOGO_URL, LOGO_WIDTH } from './_brand.ts'
+import { BRAND, LOGO_HEIGHT, LOGO_URL, LOGO_WIDTH, brandStyles } from './_brand.ts'
 
 interface FlaggedMember {
   name: string
