@@ -43,6 +43,22 @@ export async function sendEventInvite(args: SendEventInviteArgs): Promise<{
   return data as any;
 }
 
+// Shared brand palette — mirrors supabase/functions/_shared/transactional-email-templates/_brand.ts
+// so member-triggered event invite emails (Visits, Socials, Summons) match the
+// React Email templates (almoner digest, poll opened, visitor invitation).
+const BRAND = {
+  navy: "#1B2A4A",
+  gold: "#C9A432",
+  body: "#2a2a2a",
+  muted: "#666",
+  hairline: "#e8e3d3",
+  panel: "#fafaf7",
+  bg: "#ffffff",
+  fontStack: "Arial, sans-serif",
+} as const;
+const LOGO_URL =
+  "https://bright-lodge-spark.lovable.app/__l5e/assets-v1/7caf0014-2e5c-4614-8622-ee60d204fdcc/weybridge-logo-navy-transparent.png";
+
 export function formatEventEmailHtml(opts: {
   heading: string;
   intro: string;
@@ -53,26 +69,31 @@ export function formatEventEmailHtml(opts: {
   const rows = opts.fields
     .map(
       (f) =>
-        `<tr><td style="padding:4px 12px 4px 0;color:#5b5b5b;font-size:14px;vertical-align:top;">${f.label}</td>` +
-        `<td style="padding:4px 0;color:#111;font-size:14px;"><strong>${f.value}</strong></td></tr>`,
+        `<tr><td style="padding:6px 14px 6px 0;color:${BRAND.muted};font-size:14px;vertical-align:top;">${f.label}</td>` +
+        `<td style="padding:6px 0;color:${BRAND.body};font-size:14px;"><strong style="color:${BRAND.navy};">${f.value}</strong></td></tr>`,
     )
     .join("");
-  return `<!doctype html><html><body style="margin:0;padding:0;background:#f7f4ee;font-family:Georgia,serif;">
-  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="padding:24px 12px;">
-    <tr><td align="center">
-      <table role="presentation" width="600" cellspacing="0" cellpadding="0" style="background:#fff;border:1px solid #e5e0d3;border-radius:4px;">
-        <tr><td style="padding:24px 28px;background:#0b1d3a;color:#d4b26a;">
-          <div style="font-size:12px;letter-spacing:2px;text-transform:uppercase;">Weybridge Lodge No. 6787</div>
-          <h1 style="margin:6px 0 0 0;font-size:22px;color:#fff;">${opts.heading}</h1>
+  return `<!doctype html><html lang="en" dir="ltr"><body style="margin:0;padding:0;background:${BRAND.bg};font-family:${BRAND.fontStack};">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:${BRAND.bg};">
+    <tr><td align="center" style="padding:24px 12px;">
+      <table role="presentation" width="600" cellspacing="0" cellpadding="0" style="max-width:600px;width:100%;">
+        <tr><td align="center" style="padding:8px 0 16px;">
+          <img src="${LOGO_URL}" width="120" height="120" alt="Weybridge Lodge crest" style="display:block;margin:0 auto;" />
+          <h1 style="color:${BRAND.navy};font-size:24px;margin:12px 0 0;letter-spacing:0.5px;font-family:${BRAND.fontStack};">Weybridge Lodge</h1>
+          <div style="color:${BRAND.gold};font-size:12px;letter-spacing:2px;text-transform:uppercase;margin:4px 0 12px;">No. 6787 — Province of Surrey</div>
         </td></tr>
-        <tr><td style="padding:24px 28px;color:#222;font-size:15px;line-height:1.55;">
-          <p style="margin:0 0 16px 0;">${opts.intro}</p>
-          <table role="presentation" cellspacing="0" cellpadding="0" style="margin:8px 0 16px 0;">${rows}</table>
+        <tr><td style="padding:0 24px;">
+          <h2 style="color:${BRAND.navy};font-size:22px;margin:0 0 12px;font-family:${BRAND.fontStack};">${opts.heading}</h2>
+          <p style="color:${BRAND.body};font-size:14px;line-height:1.55;margin:0 0 14px;">${opts.intro}</p>
+          <table role="presentation" cellspacing="0" cellpadding="0" style="background:${BRAND.panel};border:1px solid ${BRAND.hairline};border-radius:4px;padding:8px 16px;margin:8px 0 16px;width:100%;">
+            <tr><td style="padding:8px 4px;">
+              <table role="presentation" cellspacing="0" cellpadding="0">${rows}</table>
+            </td></tr>
+          </table>
           ${opts.bodyHtml ?? ""}
-          <p style="margin:20px 0 0 0;color:#5b5b5b;font-size:13px;">A calendar invitation is attached — open it to add this event to your calendar.</p>
-        </td></tr>
-        <tr><td style="padding:16px 28px;background:#faf7f1;color:#5b5b5b;font-size:12px;border-top:1px solid #e5e0d3;">
-          ${opts.footer ?? "S&F, Weybridge Lodge No. 6787"}
+          <p style="color:${BRAND.muted};font-size:13px;margin:20px 0 0;">A calendar invitation is attached — open it to add this event to your calendar.</p>
+          <hr style="border:none;border-top:1px solid ${BRAND.hairline};margin:20px 0 10px;" />
+          <p style="color:${BRAND.muted};font-size:13px;margin:18px 0 24px;">${opts.footer ?? "S&F, Weybridge Lodge No. 6787"}</p>
         </td></tr>
       </table>
     </td></tr>
