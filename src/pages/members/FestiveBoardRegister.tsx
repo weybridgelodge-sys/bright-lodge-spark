@@ -1296,6 +1296,7 @@ function MeetingDialog({
                             name: s.name ?? "",
                             lodgeName: s.lodge_name ?? "",
                             lodgeNumber: s.lodge_number ?? "",
+                            ...(s.email ? { email: s.email } : {}),
                           })}
                         />
                       </div>
