@@ -230,7 +230,7 @@ Deno.serve(async (req) => {
     const fromIso = new Date(Date.now() - 365 * 86400_000).toISOString();
     const toIso = new Date(Date.now() + 2 * 365 * 86400_000).toISOString();
 
-    const [eventsRes, meetingsRes, socialsRes] = await Promise.all([
+    const [eventsRes, meetingsRes, socialsRes, officersRes] = await Promise.all([
       admin.from("lodge_events")
         .select("id,slug,title,event_date,tyling_time,location,intro")
         .eq("published", true)
@@ -243,6 +243,10 @@ Deno.serve(async (req) => {
       admin.from("lodge_socials")
         .select("id,title,starts_at,ends_at,venue,description")
         .gte("starts_at", fromIso),
+      admin.from("summonses")
+        .select("id,officer_night_date,officer_night_venue,meeting_date")
+        .not("officer_night_date", "is", null)
+        .gte("officer_night_date", fromIso.slice(0, 10)),
     ]);
 
     const cal: CalEvent[] = [];
@@ -300,6 +304,21 @@ Deno.serve(async (req) => {
         title: `Social: ${so.title}`,
         location: so.venue ?? "",
         description: so.description ?? "",
+        start, end,
+      });
+    }
+
+    // Officers Night — fixed 19:00–21:30 London wall-clock, independent of the linked meeting time.
+    for (const s of (officersRes.data ?? [])) {
+      const so = s as any;
+      const ymd = londonYMD(so.officer_night_date as string);
+      const start = wall(ymd.y, ymd.m1, ymd.d, 19, 0);
+      const end = wall(ymd.y, ymd.m1, ymd.d, 21, 30);
+      cal.push({
+        uid: `officers-night-${so.id}@${LODGE_DOMAIN}`,
+        title: "Officers Night",
+        location: so.officer_night_venue ?? "Masonic Centre, Guildford",
+        description: "Officers rehearsal ahead of the next regular meeting.",
         start, end,
       });
     }
