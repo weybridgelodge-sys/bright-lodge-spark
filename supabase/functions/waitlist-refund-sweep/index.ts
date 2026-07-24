@@ -28,6 +28,34 @@ Deno.serve(async (req) => {
     } catch { /* no body */ }
   }
 
+  if (manualMeetingId) {
+    // Require authenticated Secretary/WM/Admin for on-demand refunds.
+    const authHeader = req.headers.get('Authorization') ?? ''
+    const token = authHeader.replace(/^Bearer\s+/i, '')
+    if (!token) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+    const { data: userData, error: uErr } = await supabase.auth.getUser(token)
+    if (uErr || !userData?.user) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+    const uid = userData.user.id
+    const { data: roles } = await supabase
+      .from('user_roles').select('role').eq('user_id', uid)
+    const allowed = (roles ?? []).some((r: any) =>
+      ['admin', 'secretary', 'worshipful_master'].includes(r.role))
+    if (!allowed) {
+      return new Response(JSON.stringify({ error: 'Forbidden' }), {
+        status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+  }
+
+
   let meetings: any[] = []
   if (manualMeetingId) {
     const { data, error } = await supabase
