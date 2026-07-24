@@ -12,7 +12,9 @@ import {
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { AlertTriangle, RefreshCw, Send, PlayCircle, Loader2, ExternalLink } from "lucide-react";
+import { AlertTriangle, RefreshCw, Send, PlayCircle, Loader2, ExternalLink, Info } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import type { DuesCalc } from "@/lib/dues";
 
 // ---------- Types ----------
 type Profile = { id: string; full_name: string | null; email: string | null; first_name: string | null; last_name: string | null; status: string };
@@ -54,8 +56,8 @@ function TestModeBanner() {
 }
 
 // ---------- Members tab ----------
-function MembersTab({ members, subs, payments, onRefresh }: {
-  members: Profile[]; subs: DuesSub[]; payments: DuesPayment[]; onRefresh: () => void;
+function MembersTab({ members, subs, payments, calcs, onRefresh }: {
+  members: Profile[]; subs: DuesSub[]; payments: DuesPayment[]; calcs: Map<string, DuesCalc>; onRefresh: () => void;
 }) {
   const [historyMember, setHistoryMember] = useState<Profile | null>(null);
   const [refundTarget, setRefundTarget] = useState<DuesPayment | null>(null);
@@ -76,6 +78,7 @@ function MembersTab({ members, subs, payments, onRefresh }: {
           <thead className="bg-navy-light/60 text-left text-xs uppercase tracking-wide text-gold">
             <tr>
               <th className="px-3 py-2">Member</th>
+              <th className="px-3 py-2 text-right">Amount</th>
               <th className="px-3 py-2">Plan</th>
               <th className="px-3 py-2">Method</th>
               <th className="px-3 py-2">Status</th>
