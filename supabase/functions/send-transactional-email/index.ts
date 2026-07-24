@@ -206,9 +206,13 @@ Deno.serve(async (req) => {
     )
   }
 
-  // 3. Get or create unsubscribe token (one token per email address)
+  // 3. Get or create unsubscribe token (one token per email address).
+  // Internal officer templates skip this entirely so no unsubscribe footer is appended.
   const normalizedEmail = effectiveRecipient.toLowerCase()
-  let unsubscribeToken: string
+  const isInternalTemplate = INTERNAL_TEMPLATES.has(templateName)
+  let unsubscribeToken: string | undefined
+
+  if (!isInternalTemplate) {
 
   // Check for existing token for this email
   const { data: existingToken, error: tokenLookupError } = await supabase
