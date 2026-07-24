@@ -194,19 +194,21 @@ export default function MembersRitual() {
   };
 
   const handleCopyLongLivedLink = async (d: Doc) => {
-    const TWENTY_YEARS = 60 * 60 * 24 * 365 * 20;
+    // Short-lived shareable link (7 days) — long-lived links bypassed role/degree
+    // changes and were a data-exfiltration risk. Regenerate as needed.
+    const SEVEN_DAYS = 60 * 60 * 24 * 7;
     const { data, error } = await supabase.storage
       .from("ritual-docs")
-      .createSignedUrl(d.file_path, TWENTY_YEARS);
+      .createSignedUrl(d.file_path, SEVEN_DAYS);
     if (error || !data) {
       toast.error("Couldn't generate shareable link");
       return;
     }
     try {
       await navigator.clipboard.writeText(data.signedUrl);
-      toast.success("20-year link copied to clipboard");
+      toast.success("7-day link copied to clipboard");
     } catch {
-      window.prompt("Copy this 20-year signed link:", data.signedUrl);
+      window.prompt("Copy this 7-day signed link:", data.signedUrl);
     }
   };
 
