@@ -19,6 +19,24 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: corsHeaders })
   }
 
+  // Only proceed at 06:00 Europe/London wall-clock time. The cron fires hourly
+  // in UTC; the DST-aware guard below keeps the send at 6am local year-round.
+  const londonHour = parseInt(
+    new Intl.DateTimeFormat('en-GB', {
+      timeZone: 'Europe/London',
+      hour: '2-digit',
+      hour12: false,
+    }).format(new Date()),
+    10,
+  )
+  if (londonHour !== 6) {
+    return new Response(
+      JSON.stringify({ ok: true, skipped: true, londonHour }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+    )
+  }
+
+
   const supabaseUrl = Deno.env.get('SUPABASE_URL')!
   const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
   const supabase = createClient(supabaseUrl, serviceKey)
