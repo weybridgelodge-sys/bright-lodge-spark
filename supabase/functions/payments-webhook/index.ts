@@ -19,10 +19,20 @@ async function handleCheckoutCompleted(session: any, env: StripeEnv) {
     console.warn("checkout.session.completed without booking_id metadata", session.id);
     return;
   }
+  // Preserve 'waitlisted' status — we still capture the payment but the seat
+  // isn't guaranteed. Store the payment intent so we can refund later if the
+  // booker is never promoted.
+  const { data: existing } = await getSupabase()
+    .from("bookings")
+    .select("payment_status")
+    .eq("id", bookingId)
+    .eq("environment", env)
+    .maybeSingle();
+  const isWaitlisted = existing?.payment_status === "waitlisted";
   const { error } = await getSupabase()
     .from("bookings")
     .update({
-      payment_status: "paid",
+      payment_status: isWaitlisted ? "waitlisted" : "paid",
       stripe_payment_intent_id: session.payment_intent ?? null,
       paid_at: new Date().toISOString(),
     })
