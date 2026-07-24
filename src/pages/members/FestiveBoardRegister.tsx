@@ -130,7 +130,7 @@ export default function FestiveBoardRegister() {
       supabase
         .from("bookings")
         .select("id, contact_name, contact_email, event_label, event_key, meeting_id, payment_status, total_pence, details, created_at")
-        .in("payment_status", ["waitlisted", "waitlisted_refunded"])
+        .in("payment_status", ["waitlisted", "waitlisted_refunded"] as any)
         .order("created_at", { ascending: true }),
     ]);
     setMeetings((mt.data as Meeting[]) ?? []);
