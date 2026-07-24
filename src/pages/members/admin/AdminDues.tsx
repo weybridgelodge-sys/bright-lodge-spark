@@ -445,6 +445,7 @@ function Inner() {
   const [subs, setSubs] = useState<DuesSub[]>([]);
   const [payments, setPayments] = useState<DuesPayment[]>([]);
   const [settings, setSettings] = useState<DuesSetting[]>([]);
+  const [calcs, setCalcs] = useState<Map<string, DuesCalc>>(new Map());
   const [loading, setLoading] = useState(true);
 
   const load = async () => {
@@ -455,10 +456,24 @@ function Inner() {
       supabase.from("dues_payments").select("*").order("occurred_at", { ascending: false }),
       supabase.from("dues_settings").select("*"),
     ]);
-    setMembers((m as any) ?? []);
+    const memberList = (m as Profile[]) ?? [];
+    setMembers(memberList);
     setSubs((s as any) ?? []);
     setPayments((p as any) ?? []);
     setSettings((cfg as any) ?? []);
+
+    // Fetch prorated calculations in parallel
+    const ly = currentLodgeYear();
+    const results = await Promise.all(
+      memberList.map((mem) =>
+        (supabase as any).rpc("dues_calculate_amount", { _member_id: mem.id, _lodge_year: ly })
+          .then((r: any) => [mem.id, r.data as DuesCalc | null] as const)
+      )
+    );
+    const map = new Map<string, DuesCalc>();
+    for (const [id, c] of results) if (c) map.set(id, c);
+    setCalcs(map);
+
     setLoading(false);
   };
   useEffect(() => { load(); }, []);
@@ -489,7 +504,7 @@ function Inner() {
         </button>
       </div>
 
-      {tab === "members" && <MembersTab members={members} subs={subs} payments={payments} onRefresh={load} />}
+      {tab === "members" && <MembersTab members={members} subs={subs} payments={payments} calcs={calcs} onRefresh={load} />}
       {tab === "settings" && <SettingsTab settings={settings} onRefresh={load} />}
       {tab === "demo" && <DemoTab members={members} />}
     </MembersLayout>
