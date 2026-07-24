@@ -4,13 +4,24 @@ import {
   addMonths, endOfMonth, endOfWeek, format, isSameDay, isSameMonth, isToday,
   startOfMonth, startOfWeek,
 } from "date-fns";
-import { ChevronLeft, ChevronRight, Copy, ExternalLink, Loader2 } from "lucide-react";
+import {
+  Calendar, ChevronDown, ChevronLeft, ChevronRight, Copy, ExternalLink,
+  Info, Loader2, Monitor, Smartphone,
+} from "lucide-react";
 import MembersLayout from "@/components/members/MembersLayout";
 import ProtectedRoute from "@/components/members/ProtectedRoute";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+
+function getPlatformHint(): "apple" | "android" | "desktop" {
+  if (typeof navigator === "undefined") return "desktop";
+  const ua = navigator.userAgent;
+  if (/iPhone|iPad|iPod|Macintosh|Mac OS X/i.test(ua)) return "apple";
+  if (/Android/i.test(ua)) return "android";
+  return "desktop";
+}
 
 type CalEvent = {
   id: string;
