@@ -3238,6 +3238,10 @@ export type Database = {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
       }
+      dues_calculate_amount: {
+        Args: { _lodge_year: number; _member_id: string }
+        Returns: Json
+      }
       effective_initiation_date: {
         Args: { _member_id: string }
         Returns: string

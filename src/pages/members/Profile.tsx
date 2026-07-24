@@ -4,11 +4,12 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import DuesStatusCard from "@/components/members/DuesStatusCard";
 
 const TITLES = ["Bro", "W Bro", "VW Bro", "RW Bro"];
 
 export default function MembersProfile() {
-  const { profile, user, refreshProfile } = useAuth();
+  const { profile, user, refreshProfile, isAdmin } = useAuth();
   const [title, setTitle] = useState("");
   const [firstName, setFirstName] = useState("");
   const [preferredName, setPreferredName] = useState("");
@@ -115,6 +116,12 @@ export default function MembersProfile() {
           )}
         </p>
       </div>
+
+      {isAdmin && user?.id && (
+        <div className="max-w-2xl mb-6">
+          <DuesStatusCard memberId={user.id} />
+        </div>
+      )}
 
       <form
         onSubmit={save}

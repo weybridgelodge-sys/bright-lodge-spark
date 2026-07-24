@@ -12,7 +12,9 @@ import {
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { AlertTriangle, RefreshCw, Send, PlayCircle, Loader2, ExternalLink } from "lucide-react";
+import { AlertTriangle, RefreshCw, Send, PlayCircle, Loader2, ExternalLink, Info } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import type { DuesCalc } from "@/lib/dues";
 
 // ---------- Types ----------
 type Profile = { id: string; full_name: string | null; email: string | null; first_name: string | null; last_name: string | null; status: string };
@@ -54,8 +56,8 @@ function TestModeBanner() {
 }
 
 // ---------- Members tab ----------
-function MembersTab({ members, subs, payments, onRefresh }: {
-  members: Profile[]; subs: DuesSub[]; payments: DuesPayment[]; onRefresh: () => void;
+function MembersTab({ members, subs, payments, calcs, onRefresh }: {
+  members: Profile[]; subs: DuesSub[]; payments: DuesPayment[]; calcs: Map<string, DuesCalc>; onRefresh: () => void;
 }) {
   const [historyMember, setHistoryMember] = useState<Profile | null>(null);
   const [refundTarget, setRefundTarget] = useState<DuesPayment | null>(null);
@@ -76,6 +78,7 @@ function MembersTab({ members, subs, payments, onRefresh }: {
           <thead className="bg-navy-light/60 text-left text-xs uppercase tracking-wide text-gold">
             <tr>
               <th className="px-3 py-2">Member</th>
+              <th className="px-3 py-2 text-right">Amount</th>
               <th className="px-3 py-2">Plan</th>
               <th className="px-3 py-2">Method</th>
               <th className="px-3 py-2">Status</th>
@@ -91,13 +94,41 @@ function MembersTab({ members, subs, payments, onRefresh }: {
               const paid = paidByMember.get(m.id) ?? 0;
               const owed = sub ? sub.amount_pence - paid : 0;
               const credit = creditByMember.get(m.id) ?? 0;
+              const calc = calcs.get(m.id);
               return (
                 <tr key={m.id} className="border-t border-gold/10">
                   <td className="px-3 py-2">{m.full_name || m.email}</td>
+                  <td className="px-3 py-2 text-right">
+                    {calc ? (
+                      <div className="inline-flex items-center gap-1 justify-end">
+                        <span className={calc.is_exempt ? "text-emerald-300" : ""}>
+                          {calc.is_exempt ? `£0 — exempt (${calc.exempt_reason})` : gbp(calc.final_pence)}
+                        </span>
+                        <TooltipProvider delayDuration={100}>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <button type="button" className="text-gold/70 hover:text-gold"><Info className="w-3.5 h-3.5" /></button>
+                            </TooltipTrigger>
+                            <TooltipContent className="max-w-xs text-xs">
+                              <p className="font-semibold mb-1">Annual rate {gbp(calc.annual_pence)}</p>
+                              {calc.breakdown.map((b, i) => <p key={i}>• {b}</p>)}
+                              {calc.is_first_year && (
+                                <p className="mt-1 text-primary-foreground/70">
+                                  First lodge year — {calc.meetings_remaining}/{calc.meetings_total} meetings ({calc.proration_pct}%).
+                                </p>
+                              )}
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </div>
+                    ) : <span className="text-primary-foreground/40">—</span>}
+                  </td>
                   <td className="px-3 py-2">{sub ? (sub.plan === "monthly" ? "Monthly" : "Lump sum") : <span className="text-primary-foreground/40">—</span>}</td>
                   <td className="px-3 py-2">{sub ? (sub.method === "bacs" ? "Bacs DD" : "Card") : <span className="text-primary-foreground/40">—</span>}</td>
                   <td className="px-3 py-2">
-                    {sub ? (
+                    {calc?.is_exempt ? (
+                      <span className="px-2 py-0.5 rounded text-xs bg-emerald-500/20 text-emerald-300">exempt</span>
+                    ) : sub ? (
                       <span className={`px-2 py-0.5 rounded text-xs ${
                         sub.status === "active" || sub.status === "completed"
                           ? "bg-emerald-500/20 text-emerald-300"
@@ -117,7 +148,7 @@ function MembersTab({ members, subs, payments, onRefresh }: {
               );
             })}
             {members.length === 0 && (
-              <tr><td colSpan={8} className="px-3 py-6 text-center text-primary-foreground/60">No active members.</td></tr>
+              <tr><td colSpan={9} className="px-3 py-6 text-center text-primary-foreground/60">No active members.</td></tr>
             )}
           </tbody>
         </table>
@@ -414,6 +445,7 @@ function Inner() {
   const [subs, setSubs] = useState<DuesSub[]>([]);
   const [payments, setPayments] = useState<DuesPayment[]>([]);
   const [settings, setSettings] = useState<DuesSetting[]>([]);
+  const [calcs, setCalcs] = useState<Map<string, DuesCalc>>(new Map());
   const [loading, setLoading] = useState(true);
 
   const load = async () => {
@@ -424,10 +456,24 @@ function Inner() {
       supabase.from("dues_payments").select("*").order("occurred_at", { ascending: false }),
       supabase.from("dues_settings").select("*"),
     ]);
-    setMembers((m as any) ?? []);
+    const memberList = (m as Profile[]) ?? [];
+    setMembers(memberList);
     setSubs((s as any) ?? []);
     setPayments((p as any) ?? []);
     setSettings((cfg as any) ?? []);
+
+    // Fetch prorated calculations in parallel
+    const ly = currentLodgeYear();
+    const results = await Promise.all(
+      memberList.map((mem) =>
+        (supabase as any).rpc("dues_calculate_amount", { _member_id: mem.id, _lodge_year: ly })
+          .then((r: any) => [mem.id, r.data as DuesCalc | null] as const)
+      )
+    );
+    const map = new Map<string, DuesCalc>();
+    for (const [id, c] of results) if (c) map.set(id, c);
+    setCalcs(map);
+
     setLoading(false);
   };
   useEffect(() => { load(); }, []);
@@ -458,7 +504,7 @@ function Inner() {
         </button>
       </div>
 
-      {tab === "members" && <MembersTab members={members} subs={subs} payments={payments} onRefresh={load} />}
+      {tab === "members" && <MembersTab members={members} subs={subs} payments={payments} calcs={calcs} onRefresh={load} />}
       {tab === "settings" && <SettingsTab settings={settings} onRefresh={load} />}
       {tab === "demo" && <DemoTab members={members} />}
     </MembersLayout>
