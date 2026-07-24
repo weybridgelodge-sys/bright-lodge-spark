@@ -1,0 +1,1 @@
+ALTER FUNCTION public.booking_seat_count(jsonb, jsonb) SET search_path = public;
