@@ -7,6 +7,7 @@ import { FileText, Megaphone, CalendarDays, Hexagon } from "lucide-react";
 import { listMyGroups } from "@/lib/workingGroups";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import ActivePoll from "@/components/members/ActivePoll";
+import { DuesAttentionBanner } from "@/components/members/DuesStatusCard";
 
 
 type Notice = { id: string; title: string; body: string; event_date: string | null; created_at: string };
@@ -14,7 +15,7 @@ type Doc = { id: string; title: string; category: string; created_at: string };
 type MyGroup = { role: "lead" | "member"; group: { id: string; slug: string; name: string; remit: string } | null };
 
 export default function MembersDashboard() {
-  const { profile, user } = useAuth();
+  const { profile, user, isAdmin } = useAuth();
   const [notices, setNotices] = useState<Notice[]>([]);
   const [docs, setDocs] = useState<Doc[]>([]);
   const [myGroups, setMyGroups] = useState<MyGroup[]>([]);
@@ -47,6 +48,8 @@ export default function MembersDashboard() {
           The private area for brethren of Weybridge Lodge No. 6787.
         </p>
       </div>
+
+      {isAdmin && user?.id && <DuesAttentionBanner memberId={user.id} />}
 
       <ActivePoll />
 
