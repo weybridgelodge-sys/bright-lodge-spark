@@ -175,6 +175,25 @@ export default function FestiveBoardRegister() {
     loadAll();
   };
 
+  const promoteWaitlistBooking = async (b: any) => {
+    if (!confirm(`Promote ${b.contact_name} from the waitlist to a confirmed seat?`)) return;
+    const { error: updErr } = await supabase
+      .from("bookings")
+      .update({ payment_status: "confirmed", promoted_from_waitlist: true, promoted_at: new Date().toISOString() })
+      .eq("id", b.id);
+    if (updErr) {
+      toast({ title: "Promote failed", description: updErr.message, variant: "destructive" });
+      return;
+    }
+    try {
+      await supabase.functions.invoke("notify-waitlist-promoted", { body: { booking_id: b.id } });
+    } catch (e) {
+      console.error("notify-waitlist-promoted failed", e);
+    }
+    toast({ title: "Promoted", description: `${b.contact_name} has been confirmed and notified.` });
+    loadAll();
+  };
+
   return (
     <MembersLayout>
       <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
