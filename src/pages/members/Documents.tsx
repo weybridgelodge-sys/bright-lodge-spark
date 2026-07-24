@@ -468,8 +468,8 @@ export default function MembersDocuments() {
                     <button
                       onClick={() => handleCopyLongLivedLink(d)}
                       className="p-2 text-gold hover:bg-gold/10 rounded-sm"
-                      aria-label="Copy 20-year shareable link"
-                      title="Copy 20-year shareable link (for printed QR codes)"
+                      aria-label="Copy 7-day shareable link"
+                      title="Copy 7-day shareable link (for printed QR codes)"
                     >
                       <Link2 className="w-4 h-4" />
                     </button>
