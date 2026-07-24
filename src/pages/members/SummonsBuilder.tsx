@@ -1313,7 +1313,7 @@ function VisitorEmailDialog(props: {
     if (!window.confirm(`Send Summons #${summons.meeting_number} to ${pickedCount} visitor${pickedCount === 1 ? "" : "s"}?`)) return;
     setSending(true);
     try {
-      const wmName = (await resolveOfficerDisplayName("worshipful_master")) || "The Worshipful Master";
+      const secretaryName = (await resolveOfficerDisplayName("secretary")) || "The Secretary";
       const meetingDate = summons.meeting_date!;
       // Validate the date (YYYY-MM-DD) parses cleanly before we build any ISO strings.
       const dateProbe = new Date(`${meetingDate}T00:00:00`);
