@@ -694,7 +694,7 @@ function MeetingDialog({
     (async () => {
       const { data } = await supabase
         .from("visitor_contacts")
-        .select("id,name,lodge_name,lodge_number,last_seen_at")
+        .select("id,name,lodge_name,lodge_number,email,last_seen_at")
         .order("last_seen_at", { ascending: false })
         .limit(500);
       if (!cancelled) setVisitorSuggestions((data as VisitorSuggestion[]) ?? []);
