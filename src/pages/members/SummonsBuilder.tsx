@@ -1503,6 +1503,25 @@ function VisitorEmailDialog(props: {
                         <div className="text-[11px] text-primary-foreground/60 mt-0.5">
                           Preview: <em>Dear {(salutations[r.id] || "Brother").trim()},</em>
                         </div>
+                        {failures[r.email.toLowerCase()] && (
+                          <div className="mt-1 flex items-start gap-2 rounded border border-red-400/40 bg-red-500/10 p-1.5">
+                            <div className="text-[11px] text-red-200 flex-1 break-words">
+                              {failures[r.email.toLowerCase()]}
+                            </div>
+                            {isIdempotencyClash(failures[r.email.toLowerCase()]) && (
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="outline"
+                                className="h-6 px-2 text-[11px] text-navy"
+                                onClick={() => resendOne(r)}
+                                disabled={resendingEmail === r.email.toLowerCase()}
+                              >
+                                {resendingEmail === r.email.toLowerCase() ? "Resending…" : "Resend anyway"}
+                              </Button>
+                            )}
+                          </div>
+                        )}
                       </td>
                     </tr>
                   );
