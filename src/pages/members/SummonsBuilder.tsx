@@ -39,6 +39,9 @@ import {
   DEFAULT_COVER_RIGHT_URL,
 } from "@/lib/summonsPdf";
 import { sendEventInvite, formatEventEmailHtml } from "@/lib/sendEventInvite";
+import { generateICS, icsFilename } from "@/lib/generateICS";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
+import { Checkbox } from "@/components/ui/checkbox";
 import SummonsPrintPreview from "@/components/members/SummonsPrintPreview";
 import {
   NON_PROGRESSIVE_LABELS,
@@ -46,6 +49,35 @@ import {
   POSITION_LABELS,
   PositionKey,
 } from "@/lib/officersProgression";
+
+// ----- Visitor salutation parsing -----
+// Turns a free-text visitor name like "W Bro. RD Smith (Richard)" into
+// "W Bro Smith" for use in "Dear W Bro Smith,".
+export function parseSalutation(raw: string | null | undefined): string {
+  if (!raw) return "Brother";
+  let s = String(raw).replace(/\([^)]*\)/g, " ").replace(/\s+/g, " ").trim();
+  if (!s) return "Brother";
+  // Match a leading title (RW Bro, VW Bro, W Bro, Rt Wor Bro, Bro, Mr, Mrs, Ms, Miss, Dr, Rev).
+  const titleRe = /^((?:R\.?\s*W\.?|V\.?\s*W\.?|W\.?|Rt\.?\s*Wor\.?)\s*Bro\.?|Bro\.?|Mr\.?|Mrs\.?|Ms\.?|Miss|Dr\.?|Rev\.?)\s+(.+)$/i;
+  const m = s.match(titleRe);
+  let title = "";
+  let rest = s;
+  if (m) {
+    title = m[1].replace(/\./g, "").replace(/\s+/g, " ").trim();
+    // Normalise capitalisation for masonic titles
+    title = title.replace(/w\s*bro/i, (x) => x.toUpperCase().replace(/BRO/, "Bro"))
+                 .replace(/\bBRO\b/g, "Bro")
+                 .replace(/\bWORO?\b/gi, "Wor");
+    rest = m[2].trim();
+  }
+  const parts = rest.split(" ").filter(Boolean);
+  // Drop leading initials like "RD" or "R.D." or "R"
+  while (parts.length > 1 && /^[A-Z]\.?([A-Z]\.?){0,3}$/.test(parts[0])) parts.shift();
+  // Ignore trailing post-nominals in brackets already removed; take last token as surname
+  const surname = (parts[parts.length - 1] ?? "").replace(/[^A-Za-z'\-]/g, "");
+  const finalTitle = title || "Bro";
+  return `${finalTitle} ${surname}`.trim();
+}
 
 type Rep = { role: string; name: string };
 
