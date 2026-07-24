@@ -6,14 +6,16 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "GET, OPTIONS",
 };
 
-const htmlHeaders = {
-  ...corsHeaders,
-  "content-type": "text/html; charset=utf-8",
+function buildHtmlHeaders() {
+  const headers = new Headers();
+  for (const [key, value] of Object.entries(corsHeaders)) headers.set(key, value);
+  headers.set("Content-Type", "text/html; charset=utf-8");
   // Prevent mobile browsers (notably Samsung Internet / in-app WebViews) from
   // MIME-sniffing short responses as text/plain and rendering the source.
-  "X-Content-Type-Options": "nosniff",
-  "Cache-Control": "no-store",
-};
+  headers.set("X-Content-Type-Options", "nosniff");
+  headers.set("Cache-Control", "no-store");
+  return headers;
+}
 
 // Supabase's Edge gateway currently preserves our other headers on non-2xx
 // responses but coerces Content-Type to text/plain. These links are opened by
@@ -22,7 +24,7 @@ const htmlHeaders = {
 function htmlResponse(title: string, message: string) {
   return new Response(new TextEncoder().encode(page(title, message)), {
     status: 200,
-    headers: new Headers(htmlHeaders),
+    headers: buildHtmlHeaders(),
   });
 }
 
