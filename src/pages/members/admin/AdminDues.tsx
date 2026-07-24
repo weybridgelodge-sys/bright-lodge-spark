@@ -94,13 +94,41 @@ function MembersTab({ members, subs, payments, calcs, onRefresh }: {
               const paid = paidByMember.get(m.id) ?? 0;
               const owed = sub ? sub.amount_pence - paid : 0;
               const credit = creditByMember.get(m.id) ?? 0;
+              const calc = calcs.get(m.id);
               return (
                 <tr key={m.id} className="border-t border-gold/10">
                   <td className="px-3 py-2">{m.full_name || m.email}</td>
+                  <td className="px-3 py-2 text-right">
+                    {calc ? (
+                      <div className="inline-flex items-center gap-1 justify-end">
+                        <span className={calc.is_exempt ? "text-emerald-300" : ""}>
+                          {calc.is_exempt ? `£0 — exempt (${calc.exempt_reason})` : gbp(calc.final_pence)}
+                        </span>
+                        <TooltipProvider delayDuration={100}>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <button type="button" className="text-gold/70 hover:text-gold"><Info className="w-3.5 h-3.5" /></button>
+                            </TooltipTrigger>
+                            <TooltipContent className="max-w-xs text-xs">
+                              <p className="font-semibold mb-1">Annual rate {gbp(calc.annual_pence)}</p>
+                              {calc.breakdown.map((b, i) => <p key={i}>• {b}</p>)}
+                              {calc.is_first_year && (
+                                <p className="mt-1 text-primary-foreground/70">
+                                  First lodge year — {calc.meetings_remaining}/{calc.meetings_total} meetings ({calc.proration_pct}%).
+                                </p>
+                              )}
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </div>
+                    ) : <span className="text-primary-foreground/40">—</span>}
+                  </td>
                   <td className="px-3 py-2">{sub ? (sub.plan === "monthly" ? "Monthly" : "Lump sum") : <span className="text-primary-foreground/40">—</span>}</td>
                   <td className="px-3 py-2">{sub ? (sub.method === "bacs" ? "Bacs DD" : "Card") : <span className="text-primary-foreground/40">—</span>}</td>
                   <td className="px-3 py-2">
-                    {sub ? (
+                    {calc?.is_exempt ? (
+                      <span className="px-2 py-0.5 rounded text-xs bg-emerald-500/20 text-emerald-300">exempt</span>
+                    ) : sub ? (
                       <span className={`px-2 py-0.5 rounded text-xs ${
                         sub.status === "active" || sub.status === "completed"
                           ? "bg-emerald-500/20 text-emerald-300"
@@ -120,7 +148,7 @@ function MembersTab({ members, subs, payments, calcs, onRefresh }: {
               );
             })}
             {members.length === 0 && (
-              <tr><td colSpan={8} className="px-3 py-6 text-center text-primary-foreground/60">No active members.</td></tr>
+              <tr><td colSpan={9} className="px-3 py-6 text-center text-primary-foreground/60">No active members.</td></tr>
             )}
           </tbody>
         </table>
