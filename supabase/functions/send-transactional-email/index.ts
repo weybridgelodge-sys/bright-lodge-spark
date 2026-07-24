@@ -16,6 +16,11 @@ const SENDER_DOMAIN = "notify.email.weybridgelodge.org.uk"
 // even though actual sending uses the subdomain above.
 const FROM_DOMAIN = "email.weybridgelodge.org.uk"
 
+// Internal officer-only templates: skip the unsubscribe footer entirely.
+// These are confidential operational alerts (e.g. Almoner welfare digest) —
+// recipients are officers acting in role, not marketing subscribers.
+const INTERNAL_TEMPLATES = new Set<string>(['almoner-overdue-digest'])
+
 // Generate a cryptographically random 32-byte hex token
 function generateToken(): string {
   const bytes = new Uint8Array(32)
@@ -201,9 +206,13 @@ Deno.serve(async (req) => {
     )
   }
 
-  // 3. Get or create unsubscribe token (one token per email address)
+  // 3. Get or create unsubscribe token (one token per email address).
+  // Internal officer templates skip this entirely so no unsubscribe footer is appended.
   const normalizedEmail = effectiveRecipient.toLowerCase()
-  let unsubscribeToken: string
+  const isInternalTemplate = INTERNAL_TEMPLATES.has(templateName)
+  let unsubscribeToken: string | undefined
+
+  if (!isInternalTemplate) {
 
   // Check for existing token for this email
   const { data: existingToken, error: tokenLookupError } = await supabase
@@ -317,6 +326,9 @@ Deno.serve(async (req) => {
       }
     )
   }
+  } // end if (!isInternalTemplate)
+
+
 
   // 4. Render React Email template to HTML and plain text
   const html = await renderAsync(
