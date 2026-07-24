@@ -26,3 +26,6 @@ verify_jwt = false
 
 [functions.submit-enquiry]
 verify_jwt = false
+
+[functions.almoner-overdue-check]
+verify_jwt = false
