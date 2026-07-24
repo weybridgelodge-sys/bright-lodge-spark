@@ -169,6 +169,30 @@ Deno.serve(async (req) => {
     const { data: suppressed } = await admin.from("suppressed_emails").select("email").in("email", emails);
     const blocked = new Set((suppressed ?? []).map((r: any) => r.email));
 
+    // Load unsubscribe tokens for each recipient — by visitor_contact_id when
+    // provided, otherwise by lowercased email. `unsubscribe_token` is non-null
+    // in the schema so every visitor_contacts row has one.
+    const ids = body.recipients.map((r) => r.visitor_contact_id).filter(Boolean) as string[];
+    const tokenByEmail = new Map<string, string>();
+    const tokenById = new Map<string, string>();
+    if (ids.length) {
+      const { data } = await admin.from("visitor_contacts").select("id,email,unsubscribe_token").in("id", ids);
+      for (const row of data ?? []) {
+        if (row.unsubscribe_token) {
+          tokenById.set(row.id, row.unsubscribe_token);
+          if (row.email) tokenByEmail.set(String(row.email).toLowerCase(), row.unsubscribe_token);
+        }
+      }
+    }
+    if (emails.length) {
+      const { data } = await admin.from("visitor_contacts").select("email,unsubscribe_token").in("email", emails);
+      for (const row of data ?? []) {
+        if (row.unsubscribe_token && row.email && !tokenByEmail.has(String(row.email).toLowerCase())) {
+          tokenByEmail.set(String(row.email).toLowerCase(), row.unsubscribe_token);
+        }
+      }
+    }
+
     const subject = `Invitation — Weybridge Lodge No. 6787 — ${body.meeting_date_label}`;
     let sent = 0;
     const failures: { email: string; error: string }[] = [];
@@ -184,6 +208,12 @@ Deno.serve(async (req) => {
         continue;
       }
       const salutation = (r.salutation || "").trim() || "Brother";
+      const token = (r.visitor_contact_id && tokenById.get(r.visitor_contact_id))
+        || tokenByEmail.get(email.toLowerCase())
+        || "";
+      const unsubscribeUrl = token
+        ? `${SUPABASE_URL}/functions/v1/newsletter-unsubscribe?token=${encodeURIComponent(token)}`
+        : undefined;
       const html = renderHtml({
         salutation,
         meetingDateLabel: body.meeting_date_label,
@@ -191,6 +221,7 @@ Deno.serve(async (req) => {
         meetingTypeLabel: body.meeting_type_label,
         venue: body.venue,
         secretaryName,
+        unsubscribeUrl,
       });
       try {
         const contentDigest = await crypto.subtle.digest(
