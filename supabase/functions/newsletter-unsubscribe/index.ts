@@ -8,7 +8,7 @@ const corsHeaders = {
 
 const htmlHeaders = {
   ...corsHeaders,
-  "Content-Type": "text/html; charset=utf-8",
+  "content-type": "text/html; charset=utf-8",
   // Prevent mobile browsers (notably Samsung Internet / in-app WebViews) from
   // MIME-sniffing short responses as text/plain and rendering the source.
   "X-Content-Type-Options": "nosniff",
@@ -20,7 +20,10 @@ const htmlHeaders = {
 // people in mobile browsers, so even error states must be 200 HTML pages rather
 // than 4xx HTML responses or Samsung Internet renders the markup as source.
 function htmlResponse(title: string, message: string) {
-  return new Response(page(title, message), { status: 200, headers: htmlHeaders });
+  return new Response(new TextEncoder().encode(page(title, message)), {
+    status: 200,
+    headers: new Headers(htmlHeaders),
+  });
 }
 
 const supabase = createClient(
@@ -77,10 +80,10 @@ Deno.serve(async (req) => {
       .select("email")
       .eq("id", member.user_id)
       .maybeSingle();
-    return new Response(page(
+    return htmlResponse(
       "You&rsquo;re unsubscribed",
       `<strong>${profile?.email ?? "Your account"}</strong> has been removed from future Weybridge Lodge emails (newsletter and meeting invitations).`,
-    ), { headers: htmlHeaders });
+    );
   }
 
   // 2. Visiting Freemasons (festive board contacts).
@@ -91,10 +94,10 @@ Deno.serve(async (req) => {
     .select("email")
     .maybeSingle();
   if (visitor) {
-    return new Response(page(
+    return htmlResponse(
       "You&rsquo;re unsubscribed",
       `<strong>${visitor.email}</strong> has been removed from future Weybridge Lodge emails (newsletter and meeting invitations). We&rsquo;re sorry to see you go.`,
-    ), { headers: htmlHeaders });
+    );
   }
 
   // 3. Fall back to the public subscriber list.
@@ -105,10 +108,10 @@ Deno.serve(async (req) => {
     .select("email")
     .maybeSingle();
   if (sub) {
-    return new Response(page(
+    return htmlResponse(
       "You&rsquo;re unsubscribed",
       `<strong>${sub.email}</strong> has been removed from future Weybridge Lodge emails (newsletter and meeting invitations). We&rsquo;re sorry to see you go.`,
-    ), { headers: htmlHeaders });
+    );
   }
 
   return htmlResponse("Link not recognised", "We couldn&rsquo;t find a matching subscription. It may have already been removed.");
