@@ -19,7 +19,7 @@ const corsHeaders = {
 const GATEWAY_URL = "https://connector-gateway.lovable.dev/resend";
 const FROM_ADDRESS = "Weybridge Lodge <notify@events.weybridgelodge.org.uk>";
 
-type Recipient = { email: string; salutation: string; visitor_contact_id?: string | null };
+type Recipient = { email: string; salutation: string; visitor_contact_id?: string | null; force?: boolean };
 
 interface Body {
   summons_id: string;
