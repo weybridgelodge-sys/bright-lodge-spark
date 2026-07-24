@@ -171,3 +171,17 @@
 @media (prefers-reduced-motion: reduce) {
   .hero-fade-in, .hero-rise-in, .hero-rule, .reveal-on-scroll { animation: none; opacity: 1; transform: none; transition: none; }
 }
+
+/* Neutralise browser autofill styling so <Input> keeps its own bg/text colours
+   (fixes dark-on-grey autofill state on visitor rows and other portal inputs). */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active,
+textarea:-webkit-autofill,
+select:-webkit-autofill {
+  -webkit-text-fill-color: currentColor !important;
+  -webkit-box-shadow: 0 0 0 1000px transparent inset !important;
+  transition: background-color 9999s ease-in-out 0s;
+  caret-color: currentColor;
+}
