@@ -76,6 +76,7 @@ export type Database = {
           meeting_id: string | null
           paid_at: string | null
           payment_status: string
+          promoted_at: string | null
           promoted_from_waitlist: boolean
           promotion_notified_at: string | null
           stripe_payment_intent_id: string | null
@@ -103,6 +104,7 @@ export type Database = {
           meeting_id?: string | null
           paid_at?: string | null
           payment_status?: string
+          promoted_at?: string | null
           promoted_from_waitlist?: boolean
           promotion_notified_at?: string | null
           stripe_payment_intent_id?: string | null
@@ -130,6 +132,7 @@ export type Database = {
           meeting_id?: string | null
           paid_at?: string | null
           payment_status?: string
+          promoted_at?: string | null
           promoted_from_waitlist?: boolean
           promotion_notified_at?: string | null
           stripe_payment_intent_id?: string | null
