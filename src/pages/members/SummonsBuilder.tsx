@@ -1277,6 +1277,12 @@ function VisitorEmailDialog(props: {
   const [salutations, setSalutations] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
+  // Per-recipient failure state (keyed by lowercased email) — populated after a send
+  // returns failures. When the failure looks like an idempotency clash, we show a
+  // "Resend anyway" button that re-sends just that recipient with force=true so the
+  // Edge Function appends a unique suffix to the idempotency key.
+  const [failures, setFailures] = useState<Record<string, string>>({});
+  const [resendingEmail, setResendingEmail] = useState<string | null>(null);
 
   useEffect(() => {
     if (!open) return;
