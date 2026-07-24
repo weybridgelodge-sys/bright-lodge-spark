@@ -248,6 +248,60 @@ export default function FestiveBoardRegister() {
         )}
       </section>
 
+      {/* Waitlist (venue capacity overflow) */}
+      {waitlist.length > 0 && (
+        <section className="bg-navy-dark/60 border border-gold/15 rounded-sm p-5 mb-6">
+          <h2 className="font-serif text-lg text-gold mb-1">Dining waitlist</h2>
+          <p className="text-xs text-primary-foreground/60 mb-3">
+            Bookings held on the waitlist because the venue's dining room was at capacity when they booked.
+            Payment has been captured — they'll be promoted automatically as seats free up, or refunded in full after the event if not seated.
+          </p>
+          <ul className="divide-y divide-gold/10 text-sm">
+            {waitlist.map((b) => {
+              const m = meetings.find((x) => x.id === b.meeting_id);
+              const seats = (Number(b.details?.guestCount) || 0) + 1;
+              const isRefunded = b.payment_status === "waitlisted_refunded";
+              return (
+                <li key={b.id} className="py-2 flex flex-wrap items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-primary-foreground truncate">
+                      <span className="font-semibold">{b.contact_name}</span>
+                      <span className="text-primary-foreground/50"> · {seats} seat{seats === 1 ? "" : "s"}</span>
+                      {b.total_pence != null && (
+                        <span className="text-primary-foreground/50"> · £{(b.total_pence / 100).toFixed(2)}</span>
+                      )}
+                    </p>
+                    <p className="text-[11px] text-primary-foreground/50">
+                      {m ? `${fmtDate(m.meeting_date)} · ` : ""}{b.event_label}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {isRefunded ? (
+                      <span className="text-[10px] uppercase tracking-wider text-primary-foreground/60 border border-primary-foreground/30 rounded px-1.5 py-0.5">
+                        Refunded
+                      </span>
+                    ) : canManageLOI ? (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => promoteWaitlistBooking(b)}
+                        className="border-gold/40 text-gold hover:bg-gold/10"
+                      >
+                        Promote now
+                      </Button>
+                    ) : (
+                      <span className="text-[10px] uppercase tracking-wider text-gold border border-gold/40 rounded px-1.5 py-0.5">
+                        Waitlisted
+                      </span>
+                    )}
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      )}
+
       {/* Past meetings */}
       <section className="bg-navy-dark/60 border border-gold/15 rounded-sm p-5">
         <h2 className="font-serif text-lg text-gold mb-3">Meeting records</h2>
