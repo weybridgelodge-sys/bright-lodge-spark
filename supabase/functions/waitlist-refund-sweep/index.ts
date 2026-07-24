@@ -18,18 +18,70 @@ Deno.serve(async (req) => {
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
   )
 
-  // Meetings that have passed or are marked completed
-  const today = new Date().toISOString().slice(0, 10)
-  const { data: meetings, error: mErr } = await supabase
-    .from('festive_board_meetings')
-    .select('id, meeting_date, status, event_key')
-    .or(`status.eq.completed,meeting_date.lt.${today}`)
-  if (mErr) {
-    return new Response(JSON.stringify({ error: mErr.message }), {
-      status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    })
+  // Optional manual trigger: { meeting_id } refunds a single meeting immediately,
+  // bypassing the date-passed filter. Used by the Secretary "Close waitlist & refund now" action.
+  let manualMeetingId: string | null = null
+  if (req.method === 'POST') {
+    try {
+      const body = await req.json()
+      if (body && typeof body.meeting_id === 'string') manualMeetingId = body.meeting_id
+    } catch { /* no body */ }
   }
-  const meetingIds = (meetings ?? []).map((m: any) => m.id)
+
+  if (manualMeetingId) {
+    // Require authenticated Secretary/WM/Admin for on-demand refunds.
+    const authHeader = req.headers.get('Authorization') ?? ''
+    const token = authHeader.replace(/^Bearer\s+/i, '')
+    if (!token) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+    const { data: userData, error: uErr } = await supabase.auth.getUser(token)
+    if (uErr || !userData?.user) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+    const uid = userData.user.id
+    const { data: roles } = await supabase
+      .from('user_roles').select('role').eq('user_id', uid)
+    const allowed = (roles ?? []).some((r: any) =>
+      ['admin', 'secretary', 'worshipful_master'].includes(r.role))
+    if (!allowed) {
+      return new Response(JSON.stringify({ error: 'Forbidden' }), {
+        status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+  }
+
+
+  let meetings: any[] = []
+  if (manualMeetingId) {
+    const { data, error } = await supabase
+      .from('festive_board_meetings')
+      .select('id, meeting_date, status, event_key')
+      .eq('id', manualMeetingId)
+    if (error) {
+      return new Response(JSON.stringify({ error: error.message }), {
+        status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+    meetings = data ?? []
+  } else {
+    const today = new Date().toISOString().slice(0, 10)
+    const { data, error } = await supabase
+      .from('festive_board_meetings')
+      .select('id, meeting_date, status, event_key')
+      .or(`status.eq.completed,meeting_date.lt.${today}`)
+    if (error) {
+      return new Response(JSON.stringify({ error: error.message }), {
+        status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+    meetings = data ?? []
+  }
+  const meetingIds = meetings.map((m: any) => m.id)
   if (meetingIds.length === 0) {
     return new Response(JSON.stringify({ ok: true, refunded: 0 }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
