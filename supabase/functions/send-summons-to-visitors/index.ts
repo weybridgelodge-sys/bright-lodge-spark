@@ -19,7 +19,7 @@ const corsHeaders = {
 const GATEWAY_URL = "https://connector-gateway.lovable.dev/resend";
 const FROM_ADDRESS = "Weybridge Lodge <notify@events.weybridgelodge.org.uk>";
 
-type Recipient = { email: string; salutation: string; visitor_contact_id?: string | null };
+type Recipient = { email: string; salutation: string; visitor_contact_id?: string | null; force?: boolean };
 
 interface Body {
   summons_id: string;
@@ -240,7 +240,7 @@ Deno.serve(async (req) => {
             "Content-Type": "application/json",
             "Authorization": `Bearer ${LOVABLE_API_KEY}`,
             "X-Connection-Api-Key": RESEND_API_KEY,
-            "Idempotency-Key": `summons-visitors-${summons.id}-${email}-${contentHash}`,
+            "Idempotency-Key": `summons-visitors-${summons.id}-${email}-${contentHash}${r.force ? `-force-${Date.now()}-${crypto.randomUUID().slice(0, 8)}` : ""}`,
           },
           body: JSON.stringify({
             from: FROM_ADDRESS,
