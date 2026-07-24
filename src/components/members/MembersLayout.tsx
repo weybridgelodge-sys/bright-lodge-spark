@@ -53,6 +53,9 @@ export default function MembersLayout({ children }: { children: React.ReactNode 
             <NavLink to="/members" end className={navCls}>
               <LayoutDashboard className="w-4 h-4" /> Dashboard
             </NavLink>
+            <NavLink to="/members/calendar" className={navCls}>
+              <CalendarDays className="w-4 h-4" /> Calendar
+            </NavLink>
             <NavLink to="/members/directory" className={navCls}>
               <Users className="w-4 h-4" /> Directory
             </NavLink>
@@ -61,9 +64,6 @@ export default function MembersLayout({ children }: { children: React.ReactNode 
             </NavLink>
             <NavLink to="/members/ritual" className={navCls}>
               <BookOpen className="w-4 h-4" /> Ritual
-            </NavLink>
-            <NavLink to="/members/calendar" className={navCls}>
-              <CalendarDays className="w-4 h-4" /> Calendar
             </NavLink>
             <NavLink to="/members/loi-register" className={navCls}>
               <GraduationCap className="w-4 h-4" /> LOI Register
