@@ -129,18 +129,19 @@ export const template = {
   },
 } satisfies TemplateEntry
 
-const main = { backgroundColor: '#ffffff', fontFamily: 'Arial, sans-serif', margin: 0, padding: 0 }
-const container = { maxWidth: '600px', margin: '0 auto', padding: '24px' }
-const h1 = { color: '#1B2A4A', fontSize: '22px', margin: '0 0 6px' }
-const meta = { color: '#888', fontSize: '12px', margin: '0 0 18px' }
-const intro = { color: '#2a2a2a', fontSize: '14px', lineHeight: '1.55', margin: '0 0 14px' }
-const card = { backgroundColor: '#fafaf7', border: '1px solid #e8e3d3', borderRadius: '4px', padding: '8px 16px' }
-const memberName = { color: '#1B2A4A', fontSize: '15px', fontWeight: 'bold' as const, margin: '4px 0' }
+const main = brandStyles.main
+const container = brandStyles.container
+const h1 = brandStyles.h1
+const meta = brandStyles.meta
+const intro = brandStyles.body
+const card = brandStyles.card
+const memberName = { color: BRAND.navy, fontSize: '15px', fontWeight: 'bold' as const, margin: '4px 0' }
 const flagRed = { color: '#b91c1c', fontSize: '13px', margin: '2px 0' }
 const flagAmber = { color: '#b45309', fontSize: '13px', margin: '2px 0' }
-const linkStyle = { color: '#C9A432', textDecoration: 'underline', fontWeight: 600 as const }
-const footerText = { color: '#666', fontSize: '13px', margin: '18px 0 0' }
-const hr = { borderColor: '#e8e3d3', margin: '20px 0 10px' }
+const linkStyle = brandStyles.link
+const footerText = brandStyles.footerText
+const hr = brandStyles.hr
 const confidential = { color: '#888', fontSize: '11px', fontStyle: 'italic' as const, textAlign: 'center' as const, margin: 0 }
-const brand = { color: '#1B2A4A', fontSize: '24px', margin: '12px 0 0', letterSpacing: '0.5px' }
-const brandSub = { color: '#C9A432', fontSize: '12px', letterSpacing: '2px', textTransform: 'uppercase' as const, margin: '4px 0 12px' }
+const brand = brandStyles.brand
+const brandSub = brandStyles.brandSub
+
