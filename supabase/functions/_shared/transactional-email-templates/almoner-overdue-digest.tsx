@@ -45,7 +45,7 @@ const Email = ({ members = [], reportDate, portalUrl }: Props) => (
     </Preview>
     <Body style={main}>
       <Container style={container}>
-        <Section style={{ textAlign: 'center', padding: '8px 0 16px' }}>
+        <Section style={brandStyles.crestWrap}>
           <Img
             src={LOGO_URL}
             width={LOGO_WIDTH}
@@ -56,6 +56,7 @@ const Email = ({ members = [], reportDate, portalUrl }: Props) => (
           <Heading style={brand}>Weybridge Lodge</Heading>
           <Text style={brandSub}>No. 6787 — Province of Surrey</Text>
         </Section>
+
 
         <Heading style={h1}>Almoner — daily welfare digest</Heading>
         <Text style={meta}>
