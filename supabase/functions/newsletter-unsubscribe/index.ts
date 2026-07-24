@@ -19,7 +19,7 @@ h1{font-family:'Playfair Display',Georgia,serif;color:#C9A432;margin:0 0 12px;fo
 p{line-height:1.6;color:rgba(246,241,226,.85);margin:0 0 8px}
 a{color:#C9A432;text-decoration:none;font-weight:600}
 .note{font-size:12px;color:rgba(246,241,226,.6);margin-top:18px}
-</style></head><body><div class="card"><h1>${title}</h1><p>${message}</p><p class="note">Unsubscribing only affects the Weybridge Chronicle newsletter. Official lodge communications (summonses, booking confirmations and portal notifications) are unaffected.</p><p style="margin-top:18px"><a href="https://weybridgelodge.org.uk">Return to Weybridge Lodge</a></p></div></body></html>`;
+</style></head><body><div class="card"><h1>${title}</h1><p>${message}</p><p class="note">This covers newsletter mailings and meeting invitations sent to visiting Freemasons. Official lodge communications (summonses to members, booking confirmations and portal notifications) are unaffected.</p><p style="margin-top:18px"><a href="https://weybridgelodge.org.uk">Return to Weybridge Lodge</a></p></div></body></html>`;
 }
 
 Deno.serve(async (req) => {
