@@ -1,110 +1,69 @@
-# Festive Board — Booking-to-Register Auto-Sync
 
-## Goals
+## 1. Schema (single migration)
 
-- One canonical meeting record per Lodge meeting, with explicit status (Draft / Published / Completed) driving what's visible on `/bookings` and what auto-syncs into `/members/festive-board`.
-- Bookings made on the public form appear automatically as draft attendance rows in the Register, classified as Members or Visitors using the Lodge Name & No. field — without overwriting any manual edits the Secretary has made.
-- A per-meeting **white table** override that disables sync for the rare non-Masonic event.
-- Apologies stay out of the Register entirely.
+- New `public.venues` (id, name, dining_capacity int, address text nullable, timestamps). RLS: public read; admin/secretary write. GRANTs to anon/authenticated/service_role.
+- `lodge_events`: add `venue_id uuid null references venues(id)`.
+- `bookings`: extend `payment_status` allowed values to include `waitlisted` and `waitlisted_refunded` (no CHECK constraint — enforced in app + trigger).
+  - Drop/recreate the partial unique index on `(meeting_id, lower(email), payment_status)` to also cover `waitlisted` / `waitlisted_refunded` so a person can't accidentally hold multiple waitlist rows for the same meeting.
+- Seed one venue "Guildford Masonic Centre", capacity 120, and set `lodge_events.venue_id` for all existing rows.
+- New SQL function `public.check_and_book_seats(_event_key text, _meeting_id uuid, _seats int) returns text` — takes an advisory lock keyed on `hashtext(event_key||meeting_id)`, counts occupied seats (sum of `seatsToCharge` across bookings with `payment_status in ('confirmed','paid')` for that event/meeting), compares to `venues.dining_capacity` via the event's venue, and returns `'confirmed'` if the requested seats fit or `'waitlisted'` if not. Returns `'confirmed'` unconditionally when the event has no venue_id (unlimited). SECURITY DEFINER, called from both edge functions inside the same transaction as the insert.
+- New SQL function `public.promote_next_waitlisted(_meeting_id uuid, _freed_seats int) returns uuid` — under advisory lock, finds the earliest-created still-`waitlisted` booking whose `seatsToCharge <= _freed_seats`, flips it to `confirmed`, returns its id (or null). Called by trigger + admin action + refund job.
+- New trigger on `bookings AFTER UPDATE OF payment_status`: when a row moves from `confirmed`/`paid` → `apologies`/`cancelled` (or is deleted), call `promote_next_waitlisted` and record the promoted id in `pg_notify` payload so the edge function can send an email (see §4).
 
-## Answer to §1 (single meeting entity?)
+## 2. Server-side capacity enforcement
 
-Today there is no single meeting entity. `festive_board_meetings` exists for the Register, but bookings are attributed only by a free-text `event_key`/`event_label`, and the Summons Builder / calendar use their own data. Unifying all three is a much bigger refactor than this brief warrants.
+- `supabase/functions/save-meeting-response/index.ts`: before insert, resolve `seatsToCharge` from details (1 + guestCount when option = meeting-and-festive-board, else 0). If `seatsToCharge > 0`, call `check_and_book_seats` RPC; use its result as `payment_status` (either `confirmed` or `waitlisted`). Apologies/meeting-only still go straight to `confirmed`/`apologies` as today.
+- `supabase/functions/create-checkout/index.ts`: same pattern — compute seats from line_items / details, call the RPC, and stamp the booking row with `confirmed` (will become `paid` on webhook) or `waitlisted`. Payment flow is unchanged: Stripe embedded checkout still runs and captures full amount.
+- `payments-webhook`: when `checkout.session.completed` fires, keep the existing "mark paid" behaviour but preserve `waitlisted` status — i.e. if row is `waitlisted`, set a new `waitlisted_paid_at` timestamp (reuse `paid_at` + keep status `waitlisted`) and store `stripe_payment_intent_id` so we can refund later.
 
-Recommendation: **keep `festive_board_meetings` as the canonical record for this loop**, extend it with the status + booking-window fields below, and have the public Bookings page read from it. Summons / calendar unification can come later without changing the contract this brief establishes.
+## 3. Auto-promotion
 
-## Answers to §8 open questions
+- The DB trigger handles the common path (Secretary edits a row to apologies, or public form resubmission cancels). Trigger uses `pg_net` to POST to a new lightweight edge function `notify-waitlist-promoted` with the promoted booking id, which sends the reused `booking-confirmation` email with a short "a place has opened up" preface (new `promoted: true` prop on the existing template, gated so no other callers change).
+- Admin "Promote now" button in `FestiveBoardRegister.tsx` calls a new RPC `promote_waitlisted_by_id(_booking_id uuid)` that flips status + returns the row, then the client invokes `notify-waitlist-promoted` for the email.
 
-1. **Completed auto-closes Bookings page** — yes, the public Bookings page will only show the meeting whose status is `published`. Setting `completed` removes it immediately, no extra step.
-2. **Manual transition to Completed** — manual, by the Secretary, matching Summons "Finalised". No date-based auto-flip.
+## 4. Auto-refund if never promoted
 
----
+- New edge function `waitlist-refund-sweep` (verify_jwt = false, service role): finds meetings whose `meeting_date < today` OR `status = 'completed'` that still have `waitlisted` bookings with a `stripe_payment_intent_id`. For each, `stripe.refunds.create({ payment_intent })`, update status → `waitlisted_refunded`, invoke `send-transactional-email` with a new template `waitlist-refunded` explaining the seat didn't open and the full refund is issued.
+- Scheduled via `pg_cron` daily at 07:00 UK (same hourly-guard pattern used in `almoner-overdue-check`).
 
-## Build steps
+## 5. Admin UI (`FestiveBoardRegister.tsx`)
 
-### 1. Schema changes (one migration)
+- New "Waitlist" collapsible section per meeting: lists `bookings` where `payment_status = 'waitlisted'` for that meeting, ordered by `created_at` ASC, showing name/email/seats/created date/paid status. Each row has a "Promote now" button (calls new RPC + email invoke) and shows a badge if already `waitlisted_refunded`.
+- Small capacity indicator at the top of each meeting card: `X / capacity seats booked`.
 
-`festive_board_meetings` — add:
-- `status` enum `meeting_status` ∈ `draft | published | completed`, default `draft`.
-- `is_white_table` boolean, default `false`.
-- `dining_price_pence` integer, default `3500` (editable per meeting; used to fill the synced Amount).
-- `event_key` text — stable slug the public Bookings page submits with each booking (e.g. `festive-board-2026-11-13`). Unique.
-- Partial unique index ensuring at most one row has `status = 'published'` at any time.
+## 6. Email templates
 
-`bookings` — add:
-- `meeting_id uuid REFERENCES festive_board_meetings(id) ON DELETE SET NULL`, nullable (pre-existing rows have no meeting).
-- Index on `(meeting_id)`.
+- New `waitlist-refunded` template (internal-style single-purpose apology + refund confirmation). Registered in `_shared/transactional-email-templates/registry.ts`.
+- Extend `booking-confirmation` to accept an optional `promoted?: boolean` prop that adds a one-line "Good news — a place has opened up and you've been moved from the waitlist to confirmed." at the top. All existing invocations continue to work (prop is optional).
 
-`festive_board_attendance` — add:
-- `source` enum `attendance_source` ∈ `manual | booking`, default `manual`.
-- `source_booking_id uuid REFERENCES bookings(id) ON DELETE SET NULL`, unique when present (partial unique index `WHERE source_booking_id IS NOT NULL`) so the same booking can't sync twice.
+## 7. Frontend booking form messaging
 
-GRANT/RLS unchanged for existing tables; new columns inherit. Migration also backfills `event_key` for any existing `festive_board_meetings` rows.
+- No change during checkout per spec — user pays the same way. Only the post-payment confirmation screen (`CheckoutReturn.tsx`) checks the resulting booking's `payment_status`: if `waitlisted`, shows "You're on the waitlist — your payment is held and will be automatically refunded in full if a place doesn't open up before the event." Otherwise unchanged.
 
-### 2. Public Bookings page (`src/pages/Bookings.tsx`)
+## 8. Rollout / what you need to confirm
 
-- Load the single `published` meeting from `festive_board_meetings` instead of the current hardcoded/inferred date. If none is published, show "No meeting currently open for booking — check back soon."
-- Add a per-guest **Lodge Name & No.** field to the "Are You Bringing Any Guests?" step, mandatory, matching the respondent's field styling.
-- Submit the meeting's `id` and `event_key` to `save-meeting-response`.
-
-### 3. Edge function (`supabase/functions/save-meeting-response/index.ts`)
-
-- Accept `meeting_id` in the payload, validate it points to a `published` row, and store it on the booking via the new `meeting_id` column.
-- Continue to write `event_key` / `event_label` for backward compatibility.
-
-### 4. Register sync (`src/pages/members/FestiveBoardRegister.tsx`)
-
-On opening a meeting:
-
-1. If `is_white_table` is true → no sync (current behaviour).
-2. Otherwise, fetch all `bookings` for `meeting_id` where `payment_status != 'apologies'` AND meeting_option != `apologies` AND no `festive_board_attendance` row exists with that `source_booking_id`.
-3. For each missing booking, build a draft row in local state (not yet persisted) tagged `source = 'booking'`:
-   - **Classification** — match the respondent's `details.lodgeName`/`lodgeNumber` against `/weybridge/i` or `/\b6787\b/`. If matched, search `profiles` by name/email and pre-select the member; otherwise create a Visitor row pre-filled with name, email, lodge name/number.
-   - For each guest, repeat the same classification using the new per-guest Lodge field.
-   - **Amount**: `meeting-and-festive-board` → `dining_price_pence / 100`; `meeting-only` → `0.00`.
-   - **Status**: `booked` (the existing pre-meeting default).
-   - **Payment method**: copy from booking if confirmed online, else leave blank for Secretary to set.
-4. Synced rows render with a small "Synced from booking" badge (gold outline) next to the name.
-5. Sync is **additive only** — once a `festive_board_attendance` row exists for a `source_booking_id`, the booking is skipped on subsequent opens regardless of what changed in the booking.
-
-Manual "Add member" / "Add visitor" remain untouched.
-
-### 5. Meeting management UI
-
-In the existing meeting editor (top of `FestiveBoardRegister.tsx`):
-- Status dropdown: Draft / Published / Completed (with a guard: switching to Published will move any other Published meeting to Draft via a confirmation toast).
-- "Open to non-Masons (white table)" checkbox.
-- "Dining price (£)" number input.
-- "Public booking slug" text input (`event_key`), auto-suggested from the date.
-
-### 6. Out of scope
-
-- Apologies handling (separate Masonic Secretary Assistant project).
-- Attendance Analytics — automatically benefits once data flows; no code change.
-- Unifying Summons / calendar onto the same meeting entity.
+- Stripe refund permissions: the existing `STRIPE_LIVE_API_KEY` / `STRIPE_SANDBOX_API_KEY` gateway keys already permit refunds via `stripe.refunds.create` on the same payment intent — nothing extra to configure.
+- Confirm capacity of 120 for Guildford Masonic Centre (spec says 120).
+- Confirm the "cancelled" path — I'll treat both `payment_status = 'apologies'` and hard-deleted rows as freeing seats.
 
 ## Technical notes
 
-- New enums: `meeting_status`, `attendance_source`. Created via `CREATE TYPE` in the migration.
-- Partial unique index for the single-published rule:
-  ```sql
-  CREATE UNIQUE INDEX one_published_meeting
-    ON public.festive_board_meetings ((status))
-    WHERE status = 'published';
-  ```
-- Partial unique index preventing duplicate sync:
-  ```sql
-  CREATE UNIQUE INDEX uniq_attendance_per_booking
-    ON public.festive_board_attendance (source_booking_id)
-    WHERE source_booking_id IS NOT NULL;
-  ```
-- Weybridge classification is a single helper in `src/lib/festiveBoard.ts` (`isWeybridgeLodge(lodgeName, lodgeNumber)`) reused for respondent and each guest.
-- No changes to existing RLS — the Register page already requires active member; bookings table already allows authenticated SELECT.
+```text
+bookings row lifecycle
+  create → check_and_book_seats → 'confirmed' | 'waitlisted'
+  stripe pays → webhook keeps 'waitlisted' or promotes to 'paid'
+  confirmed→apologies (trigger) → promote_next_waitlisted
+  sweep(after event) → refund + 'waitlisted_refunded'
+```
 
-## Order of work
-
-1. Migration (schema + enums + indexes + backfill).
-2. Edge function update.
-3. Public Bookings page (published-meeting load + per-guest Lodge field).
-4. Register: meeting editor controls (status, white table, dining price, slug).
-5. Register: sync-on-open with classification + synced-row badge.
+Files touched:
+- migration (new)
+- `supabase/functions/save-meeting-response/index.ts`
+- `supabase/functions/create-checkout/index.ts`
+- `supabase/functions/payments-webhook/index.ts`
+- new `supabase/functions/notify-waitlist-promoted/index.ts`
+- new `supabase/functions/waitlist-refund-sweep/index.ts`
+- new `waitlist-refunded.tsx` template + updated `booking-confirmation.tsx` + registry
+- `src/pages/members/FestiveBoardRegister.tsx` (waitlist section + capacity indicator)
+- `src/pages/CheckoutReturn.tsx` (waitlist messaging)
+- `pg_cron` schedule for the sweep (via supabase--insert, not migration, per project rules)

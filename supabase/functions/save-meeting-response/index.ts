@@ -102,6 +102,29 @@ Deno.serve(async (req) => {
       if (m && m.status === "published") resolvedMeetingId = m.id;
     }
 
+    // Capacity check: for festive-board bookings, ask the DB whether the seats
+    // fit. Returns 'confirmed' if seats available (or event has no venue), or
+    // 'waitlisted' if the venue is at capacity.
+    let initialStatus: string;
+    if (meeting_option === "apologies") {
+      initialStatus = "apologies";
+    } else if (meeting_option === "meeting-and-festive-board") {
+      const guestCount = Number((details as any)?.guestCount) || 0;
+      const seats = 1 + guestCount;
+      const { data: statusResult, error: capErr } = await supabase.rpc(
+        "check_and_book_seats",
+        { _event_key: event_key, _meeting_id: resolvedMeetingId, _seats: seats },
+      );
+      if (capErr) {
+        console.error("check_and_book_seats failed:", capErr);
+        initialStatus = "confirmed";
+      } else {
+        initialStatus = (statusResult as string) || "confirmed";
+      }
+    } else {
+      initialStatus = "confirmed";
+    }
+
     const { data: booking, error } = await supabase
       .from("bookings")
       .insert({
@@ -116,7 +139,7 @@ Deno.serve(async (req) => {
         subtotal_pence: 0,
         fee_pence: 0,
         total_pence: 0,
-        payment_status: meeting_option === "apologies" ? "apologies" : "confirmed",
+        payment_status: initialStatus,
         environment: environment ?? "sandbox",
       })
       .select()

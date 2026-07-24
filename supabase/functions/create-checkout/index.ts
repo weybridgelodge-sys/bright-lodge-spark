@@ -95,6 +95,23 @@ Deno.serve(async (req) => {
     const feePence = calcFeePence(subtotalPence, input.cover_fee);
     const totalPence = subtotalPence + feePence;
 
+    // Capacity check — decide up front whether this booking is confirmed or
+    // waitlisted. Waitlisted rows still go through Stripe and pay in full;
+    // they get auto-refunded later if never promoted.
+    const seatsRequested = input.line_items.reduce((s, li) => s + li.qty, 0);
+    let initialStatus = "pending";
+    try {
+      const { data: statusResult } = await supabase.rpc("check_and_book_seats", {
+        _event_key: input.event_key,
+        _meeting_id: resolvedMeetingId,
+        _seats: seatsRequested,
+      });
+      const decided = (statusResult as string) || "confirmed";
+      initialStatus = decided === "waitlisted" ? "waitlisted" : "pending";
+    } catch (e) {
+      console.error("check_and_book_seats failed, defaulting to pending:", e);
+    }
+
     // Persist booking BEFORE checkout so webhook has a row to update.
     const { data: booking, error: insErr } = await supabase
       .from("bookings")
@@ -112,7 +129,7 @@ Deno.serve(async (req) => {
         fee_pence: feePence,
         total_pence: totalPence,
         currency: "gbp",
-        payment_status: "pending",
+        payment_status: initialStatus,
         environment: env,
       })
       .select()

@@ -6,7 +6,7 @@ import SEO from "@/components/SEO";
 import { supabase } from "@/integrations/supabase/client";
 import { CheckCircle2, Clock, AlertCircle } from "lucide-react";
 
-type Status = "loading" | "paid" | "pending" | "error";
+type Status = "loading" | "paid" | "pending" | "waitlisted" | "error";
 
 const CheckoutReturn = () => {
   const [params] = useSearchParams();
@@ -28,6 +28,11 @@ const CheckoutReturn = () => {
       });
       const data = resp?.booking ?? null;
       if (cancelled) return;
+      if (data?.payment_status === "waitlisted") {
+        setBooking(data);
+        setStatus("waitlisted");
+        return;
+      }
       if (data?.payment_status === "paid") {
         setBooking(data);
         setStatus("paid");
@@ -96,6 +101,30 @@ const CheckoutReturn = () => {
                   We've received your details and Stripe is processing the payment. You'll receive a card receipt by email shortly. You may close this page.
                 </p>
                 <Link to="/" className="text-gold hover:underline">Back to Home</Link>
+              </>
+            )}
+            {status === "waitlisted" && (
+              <>
+                <Clock className="w-12 h-12 text-gold mx-auto mb-4" />
+                <h1 className="text-2xl font-serif text-foreground mb-2">You're on the waitlist</h1>
+                <p className="text-muted-foreground mb-4">
+                  Thank you, <strong>{booking?.contact_name}</strong>. The dining room for{" "}
+                  <strong>{booking?.event_label}</strong> is currently full, so your booking is being held on the waitlist.
+                </p>
+                <p className="text-muted-foreground text-sm mb-4">
+                  Your card has been charged in full to hold your place in the queue. If a seat opens up before the event, you'll be promoted automatically and confirmed by email — no further action needed. If no seat opens up by the day of the event, your payment will be refunded in full automatically.
+                </p>
+                {booking?.total_pence != null && (
+                  <p className="text-foreground font-sans font-semibold mb-6">
+                    Held on waitlist: £{(booking.total_pence / 100).toFixed(2)}
+                  </p>
+                )}
+                <Link
+                  to="/"
+                  className="inline-flex items-center justify-center bg-gold-shimmer text-accent-foreground px-8 py-3 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity"
+                >
+                  Back to Home
+                </Link>
               </>
             )}
             {status === "error" && (

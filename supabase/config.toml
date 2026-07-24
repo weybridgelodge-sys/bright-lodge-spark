@@ -29,3 +29,9 @@ verify_jwt = false
 
 [functions.almoner-overdue-check]
 verify_jwt = false
+
+[functions.notify-waitlist-promoted]
+verify_jwt = false
+
+[functions.waitlist-refund-sweep]
+verify_jwt = false

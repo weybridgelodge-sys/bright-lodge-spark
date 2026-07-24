@@ -107,6 +107,7 @@ export default function FestiveBoardRegister() {
   const [meetings, setMeetings] = useState<Meeting[]>([]);
   const [attendance, setAttendance] = useState<Attendance[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
+  const [waitlist, setWaitlist] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<Meeting | null>(null);
   const [creating, setCreating] = useState(false);
@@ -114,7 +115,7 @@ export default function FestiveBoardRegister() {
 
   const loadAll = async () => {
     setLoading(true);
-    const [mt, at, mb] = await Promise.all([
+    const [mt, at, mb, wl] = await Promise.all([
       supabase
         .from("festive_board_meetings")
         .select("*")
@@ -126,10 +127,16 @@ export default function FestiveBoardRegister() {
         .eq("status", "active")
         .eq("is_honorary_member", false)
         .order("last_name", { ascending: true }),
+      supabase
+        .from("bookings")
+        .select("id, contact_name, contact_email, event_label, event_key, meeting_id, payment_status, total_pence, details, created_at")
+        .in("payment_status", ["waitlisted", "waitlisted_refunded"] as any)
+        .order("created_at", { ascending: true }),
     ]);
     setMeetings((mt.data as Meeting[]) ?? []);
     setAttendance((at.data as Attendance[]) ?? []);
     setMembers((mb.data as Member[]) ?? []);
+    setWaitlist((wl.data as any[]) ?? []);
     setLoading(false);
   };
 
@@ -165,6 +172,25 @@ export default function FestiveBoardRegister() {
       return;
     }
     toast({ title: "Record deleted" });
+    loadAll();
+  };
+
+  const promoteWaitlistBooking = async (b: any) => {
+    if (!confirm(`Promote ${b.contact_name} from the waitlist to a confirmed seat?`)) return;
+    const { error: updErr } = await supabase
+      .from("bookings")
+      .update({ payment_status: "confirmed", promoted_from_waitlist: true, promoted_at: new Date().toISOString() })
+      .eq("id", b.id);
+    if (updErr) {
+      toast({ title: "Promote failed", description: updErr.message, variant: "destructive" });
+      return;
+    }
+    try {
+      await supabase.functions.invoke("notify-waitlist-promoted", { body: { booking_id: b.id } });
+    } catch (e) {
+      console.error("notify-waitlist-promoted failed", e);
+    }
+    toast({ title: "Promoted", description: `${b.contact_name} has been confirmed and notified.` });
     loadAll();
   };
 
@@ -221,6 +247,60 @@ export default function FestiveBoardRegister() {
           </ul>
         )}
       </section>
+
+      {/* Waitlist (venue capacity overflow) */}
+      {waitlist.length > 0 && (
+        <section className="bg-navy-dark/60 border border-gold/15 rounded-sm p-5 mb-6">
+          <h2 className="font-serif text-lg text-gold mb-1">Dining waitlist</h2>
+          <p className="text-xs text-primary-foreground/60 mb-3">
+            Bookings held on the waitlist because the venue's dining room was at capacity when they booked.
+            Payment has been captured — they'll be promoted automatically as seats free up, or refunded in full after the event if not seated.
+          </p>
+          <ul className="divide-y divide-gold/10 text-sm">
+            {waitlist.map((b) => {
+              const m = meetings.find((x) => x.id === b.meeting_id);
+              const seats = (Number(b.details?.guestCount) || 0) + 1;
+              const isRefunded = b.payment_status === "waitlisted_refunded";
+              return (
+                <li key={b.id} className="py-2 flex flex-wrap items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-primary-foreground truncate">
+                      <span className="font-semibold">{b.contact_name}</span>
+                      <span className="text-primary-foreground/50"> · {seats} seat{seats === 1 ? "" : "s"}</span>
+                      {b.total_pence != null && (
+                        <span className="text-primary-foreground/50"> · £{(b.total_pence / 100).toFixed(2)}</span>
+                      )}
+                    </p>
+                    <p className="text-[11px] text-primary-foreground/50">
+                      {m ? `${fmtDate(m.meeting_date)} · ` : ""}{b.event_label}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {isRefunded ? (
+                      <span className="text-[10px] uppercase tracking-wider text-primary-foreground/60 border border-primary-foreground/30 rounded px-1.5 py-0.5">
+                        Refunded
+                      </span>
+                    ) : canManageLOI ? (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => promoteWaitlistBooking(b)}
+                        className="border-gold/40 text-gold hover:bg-gold/10"
+                      >
+                        Promote now
+                      </Button>
+                    ) : (
+                      <span className="text-[10px] uppercase tracking-wider text-gold border border-gold/40 rounded px-1.5 py-0.5">
+                        Waitlisted
+                      </span>
+                    )}
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      )}
 
       {/* Past meetings */}
       <section className="bg-navy-dark/60 border border-gold/15 rounded-sm p-5">

@@ -46,9 +46,6 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Anonymous callers (Stripe return page) receive a sanitised view: first name
-    // only and masked email. Full PII remains in the bookings table and is only
-    // accessible to the authenticated booker via the members portal RLS policies.
     const sanitised = data
       ? {
           id: data.id,
