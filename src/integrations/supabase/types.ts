@@ -76,12 +76,16 @@ export type Database = {
           meeting_id: string | null
           paid_at: string | null
           payment_status: string
+          promoted_from_waitlist: boolean
+          promotion_notified_at: string | null
           stripe_payment_intent_id: string | null
+          stripe_refund_id: string | null
           stripe_session_id: string | null
           subtotal_pence: number
           total_pence: number
           updated_at: string
           user_id: string | null
+          waitlist_refunded_at: string | null
         }
         Insert: {
           contact_email: string
@@ -99,12 +103,16 @@ export type Database = {
           meeting_id?: string | null
           paid_at?: string | null
           payment_status?: string
+          promoted_from_waitlist?: boolean
+          promotion_notified_at?: string | null
           stripe_payment_intent_id?: string | null
+          stripe_refund_id?: string | null
           stripe_session_id?: string | null
           subtotal_pence?: number
           total_pence?: number
           updated_at?: string
           user_id?: string | null
+          waitlist_refunded_at?: string | null
         }
         Update: {
           contact_email?: string
@@ -122,12 +130,16 @@ export type Database = {
           meeting_id?: string | null
           paid_at?: string | null
           payment_status?: string
+          promoted_from_waitlist?: boolean
+          promotion_notified_at?: string | null
           stripe_payment_intent_id?: string | null
+          stripe_refund_id?: string | null
           stripe_session_id?: string | null
           subtotal_pence?: number
           total_pence?: number
           updated_at?: string
           user_id?: string | null
+          waitlist_refunded_at?: string | null
         }
         Relationships: [
           {
@@ -900,6 +912,7 @@ export type Database = {
           title: string
           tyling_time: string
           updated_at: string
+          venue_id: string | null
         }
         Insert: {
           booking_deadline?: string | null
@@ -917,6 +930,7 @@ export type Database = {
           title: string
           tyling_time?: string
           updated_at?: string
+          venue_id?: string | null
         }
         Update: {
           booking_deadline?: string | null
@@ -934,8 +948,17 @@ export type Database = {
           title?: string
           tyling_time?: string
           updated_at?: string
+          venue_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "lodge_events_venue_id_fkey"
+            columns: ["venue_id"]
+            isOneToOne: false
+            referencedRelation: "venues"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       lodge_socials: {
         Row: {
@@ -2349,6 +2372,33 @@ export type Database = {
         }
         Relationships: []
       }
+      venues: {
+        Row: {
+          address: string | null
+          created_at: string
+          dining_capacity: number
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string
+          dining_capacity: number
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          created_at?: string
+          dining_capacity?: number
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       visitor_attendances: {
         Row: {
           created_at: string
@@ -2892,6 +2942,10 @@ export type Database = {
       }
     }
     Functions: {
+      booking_seat_count: {
+        Args: { _details: Json; _line_items: Json }
+        Returns: number
+      }
       can_access_almoner: { Args: { _user_id: string }; Returns: boolean }
       can_edit_charity: { Args: { _user: string }; Returns: boolean }
       can_edit_member_development: {
@@ -2907,6 +2961,10 @@ export type Database = {
       can_manage_visits: { Args: { _user: string }; Returns: boolean }
       can_view_charity: { Args: { _user: string }; Returns: boolean }
       can_view_skills_matrix: { Args: { _user: string }; Returns: boolean }
+      check_and_book_seats: {
+        Args: { _event_key: string; _meeting_id: string; _seats: number }
+        Returns: string
+      }
       current_lodge_year: { Args: never; Returns: number }
       current_office_label: { Args: { _user_id: string }; Returns: string }
       current_user_degree_level: { Args: { _user_id: string }; Returns: number }
@@ -2926,6 +2984,14 @@ export type Database = {
       enqueue_email: {
         Args: { payload: Json; queue_name: string }
         Returns: number
+      }
+      event_capacity_summary: {
+        Args: { _meeting_id: string }
+        Returns: {
+          capacity: number
+          taken: number
+          waitlisted_seats: number
+        }[]
       }
       get_members_last_sign_in: {
         Args: never
@@ -3014,6 +3080,14 @@ export type Database = {
           source_queue: string
         }
         Returns: number
+      }
+      promote_next_waitlisted: {
+        Args: { _event_key: string; _freed_seats: number; _meeting_id: string }
+        Returns: string
+      }
+      promote_waitlisted_by_id: {
+        Args: { _booking_id: string }
+        Returns: boolean
       }
       read_email_batch: {
         Args: { batch_size: number; queue_name: string; vt: number }
