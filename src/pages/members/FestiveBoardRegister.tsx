@@ -577,6 +577,7 @@ type VisitorSuggestion = {
   name: string | null;
   lodge_name: string | null;
   lodge_number: string | null;
+  email: string | null;
   last_seen_at: string | null;
 };
 
