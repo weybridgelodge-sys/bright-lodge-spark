@@ -65,6 +65,7 @@ const MembersRoutes = () => (
         <Route path="admin/charity" element={<CharityStewardPage />} />
         <Route path="admin-hub" element={<AdminHub />} />
         <Route path="admin/newsletter" element={<NewsletterHub />} />
+        <Route path="admin/polls" element={<PollsAdmin />} />
         <Route path="working-groups" element={<WorkingGroupsIndex />} />
         <Route path="working-groups/admin" element={<WorkingGroupsAdmin />} />
         <Route path="working-groups/socials" element={<AdHocSocials />} />

@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { FileText, Megaphone, CalendarDays, Hexagon } from "lucide-react";
 import { listMyGroups } from "@/lib/workingGroups";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import ActivePoll from "@/components/members/ActivePoll";
 
 
 type Notice = { id: string; title: string; body: string; event_date: string | null; created_at: string };
@@ -46,6 +47,8 @@ export default function MembersDashboard() {
           The private area for brethren of Weybridge Lodge No. 6787.
         </p>
       </div>
+
+      <ActivePoll />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <section className="bg-navy-dark/60 border border-gold/15 rounded-sm p-6">
