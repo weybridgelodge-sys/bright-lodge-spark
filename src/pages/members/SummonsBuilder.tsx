@@ -1373,7 +1373,7 @@ function VisitorEmailDialog(props: {
           meeting_time_label: summons.meeting_time || null,
           meeting_type_label: summons.meeting_type || null,
           venue,
-          wm_display_name: wmName,
+          secretary_display_name: secretaryName,
           ics,
           ics_filename,
           event_start_iso: startIso,
