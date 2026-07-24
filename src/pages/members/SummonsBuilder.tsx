@@ -1311,56 +1311,73 @@ function VisitorEmailDialog(props: {
 
   const pickedCount = Object.values(selected).filter(Boolean).length;
 
+  // Build the shared request payload (meeting/ics/pdf) once per send button click.
+  // Returns null on validation failure (already toasts).
+  const buildPayloadBase = async () => {
+    if (!summons.meeting_date) { toast.error("Set the meeting date first"); return null; }
+    const secretaryName = (await resolveOfficerDisplayName("secretary")) || "The Secretary";
+    const meetingDate = summons.meeting_date!;
+    const dateProbe = new Date(`${meetingDate}T00:00:00`);
+    if (Number.isNaN(dateProbe.getTime())) {
+      toast.error("Meeting date is invalid — please re-select it and save the summons");
+      return null;
+    }
+    const meetingDateLabel = dateProbe.toLocaleDateString("en-GB", {
+      weekday: "long", day: "numeric", month: "long", year: "numeric",
+    });
+    const rawTime = (summons.meeting_time || "").toString();
+    const parsed24 = rawTime.match(/\b([01]?\d|2[0-3]):([0-5]\d)\b/);
+    const parsed12 = rawTime.match(/\b(1[0-2]|0?[1-9])(?::([0-5]\d))?\s*(am|pm)\b/i);
+    let hh = 18, mm = 15;
+    if (parsed24) { hh = parseInt(parsed24[1], 10); mm = parseInt(parsed24[2], 10); }
+    else if (parsed12) {
+      hh = parseInt(parsed12[1], 10) % 12;
+      if (/pm/i.test(parsed12[3])) hh += 12;
+      mm = parsed12[2] ? parseInt(parsed12[2], 10) : 0;
+    }
+    const startDate = new Date(`${meetingDate}T${String(hh).padStart(2, "0")}:${String(mm).padStart(2, "0")}:00`);
+    if (Number.isNaN(startDate.getTime())) {
+      toast.error("Could not build a valid event time — please check meeting date/time");
+      return null;
+    }
+    const startIso = startDate.toISOString();
+    const endIso = new Date(startDate.getTime() + 3 * 60 * 60 * 1000).toISOString();
+    const venue = template.venue_address || "Masonic Centre, Guildford";
+    const title = `Weybridge Lodge No. 6787 — ${summons.meeting_type || "Meeting"} — ${meetingDateLabel}`;
+    const ics = generateICS({
+      title, location: venue, startTime: startIso, endTime: endIso,
+      description: "Summons for the meeting is attached.",
+    });
+    const ics_filename = icsFilename(title);
+    const id = await generatePdf("email");
+    if (!id) return null;
+    return {
+      summons_id: id,
+      meeting_date_label: meetingDateLabel,
+      meeting_time_label: summons.meeting_time || null,
+      meeting_type_label: summons.meeting_type || null,
+      venue,
+      secretary_display_name: secretaryName,
+      ics,
+      ics_filename,
+      event_start_iso: startIso,
+      event_end_iso: endIso,
+    };
+  };
+
+  // Detect Resend's duplicate-idempotency error so we surface a "Resend anyway"
+  // action rather than a generic delivery failure.
+  const isIdempotencyClash = (msg: string) =>
+    /idempotency/i.test(msg) && /(match|conflict|dup|exist)/i.test(msg);
+
   const send = async () => {
     if (pickedCount === 0) { toast.error("Select at least one visitor"); return; }
-    if (!summons.meeting_date) { toast.error("Set the meeting date first"); return; }
     if (!window.confirm(`Send Summons #${summons.meeting_number} to ${pickedCount} visitor${pickedCount === 1 ? "" : "s"}?`)) return;
     setSending(true);
+    setFailures({});
     try {
-      const secretaryName = (await resolveOfficerDisplayName("secretary")) || "The Secretary";
-      const meetingDate = summons.meeting_date!;
-      // Validate the date (YYYY-MM-DD) parses cleanly before we build any ISO strings.
-      const dateProbe = new Date(`${meetingDate}T00:00:00`);
-      if (Number.isNaN(dateProbe.getTime())) {
-        toast.error("Meeting date is invalid — please re-select it and save the summons");
-        setSending(false);
-        return;
-      }
-      const meetingDateLabel = dateProbe.toLocaleDateString("en-GB", {
-        weekday: "long", day: "numeric", month: "long", year: "numeric",
-      });
-      // meeting_time is free-text (e.g. "6:15 pm for 6:45 pm"); extract first HH:mm we can find,
-      // otherwise fall back to the lodge default so ICS never gets NaN.
-      const rawTime = (summons.meeting_time || "").toString();
-      const parsed24 = rawTime.match(/\b([01]?\d|2[0-3]):([0-5]\d)\b/);
-      const parsed12 = rawTime.match(/\b(1[0-2]|0?[1-9])(?::([0-5]\d))?\s*(am|pm)\b/i);
-      let hh = 18, mm = 15;
-      if (parsed24) { hh = parseInt(parsed24[1], 10); mm = parseInt(parsed24[2], 10); }
-      else if (parsed12) {
-        hh = parseInt(parsed12[1], 10) % 12;
-        if (/pm/i.test(parsed12[3])) hh += 12;
-        mm = parsed12[2] ? parseInt(parsed12[2], 10) : 0;
-      }
-      const startDate = new Date(`${meetingDate}T${String(hh).padStart(2, "0")}:${String(mm).padStart(2, "0")}:00`);
-      if (Number.isNaN(startDate.getTime())) {
-        toast.error("Could not build a valid event time — please check meeting date/time");
-        setSending(false);
-        return;
-      }
-      const startIso = startDate.toISOString();
-      const endIso = new Date(startDate.getTime() + 3 * 60 * 60 * 1000).toISOString();
-      const venue = template.venue_address || "Masonic Centre, Guildford";
-      const title = `Weybridge Lodge No. 6787 — ${summons.meeting_type || "Meeting"} — ${meetingDateLabel}`;
-      const ics = generateICS({
-        title, location: venue, startTime: startIso, endTime: endIso,
-        description: "Summons for the meeting is attached.",
-      });
-      const ics_filename = icsFilename(title);
-
-
-      const id = await generatePdf("email");
-      if (!id) { setSending(false); return; }
-
+      const base = await buildPayloadBase();
+      if (!base) { setSending(false); return; }
       const recipients = rows
         .filter((r) => selected[r.id])
         .map((r) => ({
@@ -1368,33 +1385,64 @@ function VisitorEmailDialog(props: {
           salutation: (salutations[r.id] || parseSalutation(r.name)).trim(),
           visitor_contact_id: r.id,
         }));
-
       const { data, error } = await supabase.functions.invoke("send-summons-to-visitors", {
-        body: {
-          summons_id: id,
-          recipients,
-          meeting_date_label: meetingDateLabel,
-          meeting_time_label: summons.meeting_time || null,
-          meeting_type_label: summons.meeting_type || null,
-          venue,
-          secretary_display_name: secretaryName,
-          ics,
-          ics_filename,
-          event_start_iso: startIso,
-          event_end_iso: endIso,
-        },
+        body: { ...base, recipients },
       });
       if (error) throw error;
       const d = data as any;
       toast.success(`Sent to ${d?.sent ?? 0} of ${d?.recipients ?? 0} visitor(s)`);
-      if (d?.failures?.length) toast.error(`${d.failures.length} delivery(ies) failed — see history log`);
-      onOpenChange(false);
+      const fails: { email: string; error: string }[] = d?.failures ?? [];
+      if (fails.length) {
+        const map: Record<string, string> = {};
+        for (const f of fails) map[(f.email || "").toLowerCase()] = f.error || "failed";
+        setFailures(map);
+        toast.error(`${fails.length} delivery(ies) failed — review below`);
+      } else {
+        onOpenChange(false);
+      }
     } catch (e: any) {
       toast.error(e?.message ?? "Failed to send");
     } finally {
       setSending(false);
     }
   };
+
+  const resendOne = async (row: VisitorRow) => {
+    setResendingEmail(row.email.toLowerCase());
+    try {
+      const base = await buildPayloadBase();
+      if (!base) return;
+      const { data, error } = await supabase.functions.invoke("send-summons-to-visitors", {
+        body: {
+          ...base,
+          recipients: [{
+            email: row.email,
+            salutation: (salutations[row.id] || parseSalutation(row.name)).trim(),
+            visitor_contact_id: row.id,
+            force: true,
+          }],
+        },
+      });
+      if (error) throw error;
+      const d = data as any;
+      const fails: { email: string; error: string }[] = d?.failures ?? [];
+      if ((d?.sent ?? 0) > 0) {
+        toast.success(`Resent to ${row.email}`);
+        setFailures((prev) => {
+          const next = { ...prev };
+          delete next[row.email.toLowerCase()];
+          return next;
+        });
+      } else {
+        toast.error(fails[0]?.error || "Resend failed");
+      }
+    } catch (e: any) {
+      toast.error(e?.message ?? "Resend failed");
+    } finally {
+      setResendingEmail(null);
+    }
+  };
+
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
