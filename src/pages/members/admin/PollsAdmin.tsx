@@ -64,24 +64,41 @@ function Inner() {
     }
     setSaving(true);
     const { data: u } = await supabase.auth.getUser();
-    const { error } = await supabase.from("polls" as any).insert({
-      question: q,
-      options: opts,
-      results_visibility: liveResults ? "live" : "on_close",
-      status: "open",
-      closes_at: closesAt ? new Date(closesAt).toISOString() : null,
-      created_by: u.user?.id,
-    } as any);
-    setSaving(false);
+    const { data: inserted, error } = await supabase
+      .from("polls" as any)
+      .insert({
+        question: q,
+        options: opts,
+        results_visibility: liveResults ? "live" : "on_close",
+        status: "open",
+        closes_at: closesAt ? new Date(closesAt).toISOString() : null,
+        created_by: u.user?.id,
+      } as any)
+      .select("id")
+      .single();
     if (error) {
+      setSaving(false);
       toast.error(error.message);
       return;
     }
+    // Fire-and-await email notification to all active members.
+    try {
+      const { data: notifyRes, error: notifyErr } = await supabase.functions.invoke(
+        "notify-poll-opened",
+        { body: { poll_id: (inserted as any).id } },
+      );
+      if (notifyErr) throw notifyErr;
+      const sent = (notifyRes as any)?.sent ?? 0;
+      toast.success(`Poll created — notified ${sent} member${sent === 1 ? "" : "s"}`);
+    } catch (e: any) {
+      toast.success("Poll created");
+      toast.error(`Notification email failed: ${e?.message ?? "unknown error"}`);
+    }
+    setSaving(false);
     setQuestion("");
     setOptions(["", ""]);
     setClosesAt("");
     setLiveResults(true);
-    toast.success("Poll created");
     load();
   };
 
