@@ -6,7 +6,7 @@ import SEO from "@/components/SEO";
 import { supabase } from "@/integrations/supabase/client";
 import { CheckCircle2, Clock, AlertCircle } from "lucide-react";
 
-type Status = "loading" | "paid" | "pending" | "error";
+type Status = "loading" | "paid" | "pending" | "waitlisted" | "error";
 
 const CheckoutReturn = () => {
   const [params] = useSearchParams();
@@ -28,6 +28,11 @@ const CheckoutReturn = () => {
       });
       const data = resp?.booking ?? null;
       if (cancelled) return;
+      if (data?.payment_status === "waitlisted") {
+        setBooking(data);
+        setStatus("waitlisted");
+        return;
+      }
       if (data?.payment_status === "paid") {
         setBooking(data);
         setStatus("paid");
