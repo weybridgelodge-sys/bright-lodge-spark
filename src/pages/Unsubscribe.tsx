@@ -4,6 +4,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
 import SEO from "@/components/SEO";
+import { Button } from "@/components/ui/button";
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string;
@@ -13,11 +14,25 @@ type State = "loading" | "valid" | "invalid" | "used" | "confirming" | "success"
 const Unsubscribe = () => {
   const [params] = useSearchParams();
   const token = params.get("token") || "";
+  const status = params.get("status") || "";
   const [state, setState] = useState<State>("loading");
   const [message, setMessage] = useState<string>("");
   const [email, setEmail] = useState<string>("");
 
   useEffect(() => {
+    if (status === "success") {
+      setState("success");
+      return;
+    }
+    if (status === "invalid" || status === "not-found") {
+      setState("invalid");
+      setMessage(
+        status === "invalid"
+          ? "This unsubscribe link is missing its token."
+          : "We couldn't find a matching subscription. It may have already been removed.",
+      );
+      return;
+    }
     if (!token) {
       setState("invalid");
       setMessage("This unsubscribe link is missing its token.");
@@ -47,7 +62,7 @@ const Unsubscribe = () => {
         setMessage("We could not verify your unsubscribe link. Please try again later.");
       }
     })();
-  }, [token]);
+  }, [status, token]);
 
   const confirm = async () => {
     setState("confirming");
@@ -92,12 +107,12 @@ const Unsubscribe = () => {
                       ? <>We will stop sending email to <strong className="text-foreground">{email}</strong>.</>
                       : "We will stop sending email to this address."}
                   </p>
-                  <button
+                  <Button
                     onClick={confirm}
                     className="bg-gold-shimmer text-accent-foreground px-8 py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity"
                   >
                     Confirm Unsubscribe
-                  </button>
+                  </Button>
                 </>
               )}
 
@@ -107,7 +122,10 @@ const Unsubscribe = () => {
                 <>
                   <h2 className="text-2xl font-serif text-foreground mb-3">You're unsubscribed</h2>
                   <p className="font-sans text-muted-foreground">
-                    {email ? <>We won't send any more email to <strong className="text-foreground">{email}</strong>.</> : "We won't send any more email to this address."}
+                    {email ? <>We won't send any more email to <strong className="text-foreground">{email}</strong>.</> : "We won't send any more newsletter or visitor invitation email to this address."}
+                  </p>
+                  <p className="font-sans text-muted-foreground text-sm mt-4">
+                    Official lodge communications, booking confirmations and portal notifications are unaffected.
                   </p>
                 </>
               )}
