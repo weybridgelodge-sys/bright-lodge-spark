@@ -21,6 +21,10 @@ Deno.serve(async (req) => {
 
   // Only proceed at 06:00 Europe/London wall-clock time. The cron fires hourly
   // in UTC; the DST-aware guard below keeps the send at 6am local year-round.
+  // Manual re-triggers can bypass the guard via ?force=1 (used by ops when a
+  // scheduled run failed and the digest still needs to go out today).
+  const url = new URL(req.url)
+  const force = url.searchParams.get('force') === '1'
   const londonHour = parseInt(
     new Intl.DateTimeFormat('en-GB', {
       timeZone: 'Europe/London',
@@ -29,7 +33,7 @@ Deno.serve(async (req) => {
     }).format(new Date()),
     10,
   )
-  if (londonHour !== 6) {
+  if (!force && londonHour !== 6) {
     return new Response(
       JSON.stringify({ ok: true, skipped: true, londonHour }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
@@ -37,38 +41,48 @@ Deno.serve(async (req) => {
   }
 
 
+
   const supabaseUrl = Deno.env.get('SUPABASE_URL')!
   const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
   const supabase = createClient(supabaseUrl, serviceKey)
 
   try {
-    // ---- Load active members ----
-    const { data: ms, error: msErr } = await supabase
-      .from('profiles')
-      .select('id,full_name,preferred_name,first_name,last_name,title,status')
-      .eq('status', 'active')
-    if (msErr) throw msErr
-    const members = ms ?? []
-    const memberById = new Map<string, any>(members.map((m: any) => [m.id, m]))
+    const today = new Date().toISOString().slice(0, 10)
 
-    // ---- Welfare logs → last contact + earliest open follow-up ----
-    const { data: lgs, error: lgErr } = await supabase
-      .from('welfare_log_entries')
-      .select('member_id,contact_date,follow_up_date')
-      .is('deleted_at', null)
-      .order('contact_date', { ascending: false })
-    if (lgErr) throw lgErr
+    // ---- Run independent reads in parallel ----
+    // 1) active members, 2) open welfare logs, 3) last two past meetings.
+    const [membersRes, logsRes, meetingsRes] = await Promise.all([
+      supabase
+        .from('profiles')
+        .select('id,full_name,preferred_name,first_name,last_name,title,status')
+        .eq('status', 'active'),
+      supabase
+        .from('welfare_log_entries')
+        .select('member_id,contact_date,follow_up_date')
+        .is('deleted_at', null)
+        .order('contact_date', { ascending: false }),
+      supabase
+        .from('festive_board_meetings')
+        .select('id,meeting_date')
+        .lte('meeting_date', today)
+        .order('meeting_date', { ascending: false })
+        .limit(2),
+    ])
+    if (membersRes.error) throw membersRes.error
+    if (logsRes.error) throw logsRes.error
+
+    const members = membersRes.data ?? []
+    const memberById = new Map<string, any>(members.map((m: any) => [m.id, m]))
 
     const last: Record<string, string> = {}
     const followUp: Record<string, string> = {}
-    for (const l of (lgs ?? []) as any[]) {
+    for (const l of (logsRes.data ?? []) as any[]) {
       if (!last[l.member_id]) last[l.member_id] = l.contact_date
       if (l.follow_up_date) {
         const existing = followUp[l.member_id]
         if (!existing || l.follow_up_date < existing) followUp[l.member_id] = l.follow_up_date
       }
     }
-    const today = new Date().toISOString().slice(0, 10)
     const overdue: Record<string, string> = {}
     for (const [mid, dt] of Object.entries(followUp)) {
       if (dt < today) {
@@ -78,13 +92,7 @@ Deno.serve(async (req) => {
     }
 
     // ---- Missed last 2 meetings ----
-    const { data: meetings } = await supabase
-      .from('festive_board_meetings')
-      .select('id,meeting_date')
-      .lte('meeting_date', today)
-      .order('meeting_date', { ascending: false })
-      .limit(2)
-    const meetingIds = ((meetings as any[]) ?? []).map((m) => m.id)
+    const meetingIds = ((meetingsRes.data as any[]) ?? []).map((m) => m.id)
     const absentFlags: Record<string, boolean> = {}
     if (meetingIds.length >= 2) {
       const { data: att } = await supabase
