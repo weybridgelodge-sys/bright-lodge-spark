@@ -62,6 +62,9 @@ export default function MembersLayout({ children }: { children: React.ReactNode 
             <NavLink to="/members/ritual" className={navCls}>
               <BookOpen className="w-4 h-4" /> Ritual
             </NavLink>
+            <NavLink to="/members/calendar" className={navCls}>
+              <CalendarDays className="w-4 h-4" /> Calendar
+            </NavLink>
             <NavLink to="/members/loi-register" className={navCls}>
               <GraduationCap className="w-4 h-4" /> LOI Register
             </NavLink>
