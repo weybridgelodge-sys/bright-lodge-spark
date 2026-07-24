@@ -29,4 +29,5 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'almoner-overdue-digest': almonerOverdueDigest,
   'waitlist-promoted': waitlistPromoted,
   'waitlist-refunded': waitlistRefunded,
+  'poll-opened': pollOpened,
 }
