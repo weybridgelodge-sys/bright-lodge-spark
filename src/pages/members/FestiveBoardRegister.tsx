@@ -194,6 +194,27 @@ export default function FestiveBoardRegister() {
     loadAll();
   };
 
+  const closeWaitlistForMeeting = async (meetingId: string, count: number) => {
+    if (!confirm(
+      `Close the waitlist for this meeting and refund ${count} booking${count === 1 ? "" : "s"} now?\n\n` +
+      `This will immediately issue full Stripe refunds and send the "waitlist refunded" email to each booker. This cannot be undone.`
+    )) return;
+    toast({ title: "Refunding waitlist…", description: "Please wait." });
+    const { data, error } = await supabase.functions.invoke("waitlist-refund-sweep", {
+      body: { meeting_id: meetingId },
+    });
+    if (error) {
+      toast({ title: "Refund failed", description: error.message, variant: "destructive" });
+      return;
+    }
+    toast({
+      title: "Waitlist closed",
+      description: `Refunded ${(data as any)?.refunded ?? 0} booking(s).`,
+    });
+    loadAll();
+  };
+
+
   return (
     <MembersLayout>
       <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
