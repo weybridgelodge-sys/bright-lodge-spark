@@ -52,6 +52,7 @@ const MembersRoutes = () => (
         <Route path="kpis" element={<ProgressionRoute><Kpis /></ProgressionRoute>} />
         <Route path="loi-register" element={<ProtectedRoute><LoiRegister /></ProtectedRoute>} />
         <Route path="festive-register" element={<ProtectedRoute><FestiveBoardRegister /></ProtectedRoute>} />
+        <Route path="calendar" element={<MemberCalendar />} />
         <Route path="summons" element={<ProtectedRoute><SummonsBuilder /></ProtectedRoute>} />
         <Route path="almoner" element={<ProtectedRoute><AlmonerPortal /></ProtectedRoute>} />
         <Route path="development" element={<MyDevelopment />} />
