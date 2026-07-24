@@ -125,11 +125,12 @@ function Inner() {
     }
 
     setSaving(true);
+    let step: "upload" | "insert" | "invite" = "upload";
     try {
       const startIso = new Date(startsAt).toISOString();
       const endIso = endsAt ? new Date(endsAt).toISOString() : null;
 
-      // Upload PDF
+      // 1) Upload PDF
       const stamp = Date.now();
       const safeName = pdf.name.replace(/[^A-Za-z0-9._-]/g, "_");
       const path = `${user?.id ?? "unknown"}/${stamp}-${safeName}`;
@@ -137,8 +138,11 @@ function Inner() {
         contentType: "application/pdf",
         upsert: false,
       });
-      if (upErr) throw new Error(upErr.message);
+      if (upErr) throw new Error(`Upload: ${upErr.message}`);
 
+      // 2) Insert visit row — persist BEFORE attempting the email so the row
+      // survives a downstream email failure and can be handled manually.
+      step = "insert";
       const created = await createVisit({
         host_lodge_name: lodgeName.trim(),
         host_lodge_number: lodgeNumber.trim() || null,
@@ -155,6 +159,11 @@ function Inner() {
         notify_scope: notifyAll ? "all_members" : "group",
       });
 
+      setVisits(await listVisits());
+      toast.success("Visit saved — sending invitations…");
+
+      // 3) Send invitation email (separate step; failure does not undo the save)
+      step = "invite";
       const displayName = lodgeName.trim() + (lodgeNumber.trim() ? ` No. ${lodgeNumber.trim()}` : "");
       const html = formatEventEmailHtml({
         heading: `Visit to ${displayName}`,
@@ -187,7 +196,6 @@ function Inner() {
           : { kind: "working_group", slug: VISITS_GROUP_SLUG },
         pdf: { bucket: BUCKET, path, filename: pdf.name },
         idempotencyPrefix: `visit-${created.id}`,
-        requireRole: ["admin", "secretary", "worshipful_master", "member"],
       });
 
       await markVisitNotified(created.id, result.sent);
@@ -195,7 +203,20 @@ function Inner() {
       setVisits(await listVisits());
       resetForm();
     } catch (e: any) {
-      toast.error(e?.message ?? "Failed to save visit");
+      // Surface the actual failing step + underlying message so the real cause
+      // is visible (previously a bare "Failed to fetch" hid which stage broke).
+      const raw = e?.message || String(e);
+      console.error(`[visits] save failed at step="${step}":`, e);
+      const stepLabel = step === "upload"
+        ? "Uploading the summons PDF"
+        : step === "insert"
+        ? "Saving the visit record"
+        : "Sending the invitation email";
+      if (step === "invite") {
+        toast.error(`Visit saved, but sending invites failed: ${raw}`);
+      } else {
+        toast.error(`${stepLabel} failed: ${raw}`);
+      }
     } finally {
       setSaving(false);
     }

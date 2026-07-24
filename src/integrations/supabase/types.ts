@@ -1297,6 +1297,27 @@ export type Database = {
         }
         Relationships: []
       }
+      member_calendar_tokens: {
+        Row: {
+          created_at: string
+          last_fetched_at: string | null
+          member_id: string
+          token: string
+        }
+        Insert: {
+          created_at?: string
+          last_fetched_at?: string | null
+          member_id: string
+          token?: string
+        }
+        Update: {
+          created_at?: string
+          last_fetched_at?: string | null
+          member_id?: string
+          token?: string
+        }
+        Relationships: []
+      }
       member_checklist_items: {
         Row: {
           completed_date: string | null

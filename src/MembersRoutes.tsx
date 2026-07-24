@@ -17,6 +17,7 @@ const OfficersTracker = lazy(() => import("./pages/members/OfficersTracker"));
 const Kpis = lazy(() => import("./pages/members/Kpis"));
 const LoiRegister = lazy(() => import("./pages/members/LoiRegister"));
 const FestiveBoardRegister = lazy(() => import("./pages/members/FestiveBoardRegister"));
+const MemberCalendar = lazy(() => import("./pages/members/Calendar"));
 const SummonsBuilder = lazy(() => import("./pages/members/SummonsBuilder"));
 const AlmonerPortal = lazy(() => import("./pages/members/AlmonerPortal"));
 const MyDevelopment = lazy(() => import("./pages/members/development/MemberDevelopment").then((m) => ({ default: m.MyDevelopmentPage })));
@@ -51,6 +52,7 @@ const MembersRoutes = () => (
         <Route path="kpis" element={<ProgressionRoute><Kpis /></ProgressionRoute>} />
         <Route path="loi-register" element={<ProtectedRoute><LoiRegister /></ProtectedRoute>} />
         <Route path="festive-register" element={<ProtectedRoute><FestiveBoardRegister /></ProtectedRoute>} />
+        <Route path="calendar" element={<MemberCalendar />} />
         <Route path="summons" element={<ProtectedRoute><SummonsBuilder /></ProtectedRoute>} />
         <Route path="almoner" element={<ProtectedRoute><AlmonerPortal /></ProtectedRoute>} />
         <Route path="development" element={<MyDevelopment />} />
