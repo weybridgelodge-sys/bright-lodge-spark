@@ -47,7 +47,7 @@ Deno.serve(async (req) => {
       .maybeSingle();
     return new Response(page(
       "You're unsubscribed",
-      `<strong>${profile?.email ?? "Your account"}</strong> has been removed from the Weybridge Chronicle newsletter.`,
+      `<strong>${profile?.email ?? "Your account"}</strong> has been removed from future Weybridge Lodge emails (newsletter and meeting invitations).`,
     ), { headers: { ...corsHeaders, "Content-Type": "text/html; charset=utf-8" } });
   }
 
@@ -61,7 +61,7 @@ Deno.serve(async (req) => {
   if (visitor) {
     return new Response(page(
       "You're unsubscribed",
-      `<strong>${visitor.email}</strong> has been removed from the Weybridge Chronicle newsletter. We're sorry to see you go.`,
+      `<strong>${visitor.email}</strong> has been removed from future Weybridge Lodge emails (newsletter and meeting invitations). We're sorry to see you go.`,
     ), { headers: { ...corsHeaders, "Content-Type": "text/html; charset=utf-8" } });
   }
 
@@ -75,7 +75,7 @@ Deno.serve(async (req) => {
   if (sub) {
     return new Response(page(
       "You're unsubscribed",
-      `<strong>${sub.email}</strong> has been removed from the Weybridge Chronicle newsletter. We're sorry to see you go.`,
+      `<strong>${sub.email}</strong> has been removed from future Weybridge Lodge emails (newsletter and meeting invitations). We're sorry to see you go.`,
     ), { headers: { ...corsHeaders, "Content-Type": "text/html; charset=utf-8" } });
   }
 
