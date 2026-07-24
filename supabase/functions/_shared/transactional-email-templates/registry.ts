@@ -6,6 +6,8 @@ import { template as ladiesFestivalConfirmation } from './ladies-festival-confir
 import { template as ladiesFestivalNotification } from './ladies-festival-notification.tsx'
 import { template as summonsDistribution } from './summons-distribution.tsx'
 import { template as almonerOverdueDigest } from './almoner-overdue-digest.tsx'
+import { template as waitlistPromoted } from './waitlist-promoted.tsx'
+import { template as waitlistRefunded } from './waitlist-refunded.tsx'
 
 export interface TemplateEntry {
   component: any
@@ -24,4 +26,6 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'ladies-festival-notification': ladiesFestivalNotification,
   'summons-distribution': summonsDistribution,
   'almoner-overdue-digest': almonerOverdueDigest,
+  'waitlist-promoted': waitlistPromoted,
+  'waitlist-refunded': waitlistRefunded,
 }
