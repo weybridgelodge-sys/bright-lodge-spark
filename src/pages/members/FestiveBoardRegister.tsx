@@ -1419,7 +1419,7 @@ function MeetingDialog({
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={onClose} className="border-gold/30">
+          <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>
           <Button
