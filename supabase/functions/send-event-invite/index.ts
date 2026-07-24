@@ -87,13 +87,16 @@ Deno.serve(async (req) => {
       return json({ error: "Missing required fields" }, 400);
     }
 
-    // Role gate
-    const requireRole = body.requireRole ?? ["admin", "secretary", "worshipful_master"];
-    if (requireRole.length > 0) {
-      const { data: roles } = await admin.from("user_roles").select("role").eq("user_id", user.id);
-      const has = (roles ?? []).some((r: { role: string }) => requireRole.includes(r.role));
-      if (!has) return json({ error: "Forbidden" }, 403);
-    }
+    // Role gate — always enforced server-side. Client-supplied requireRole is
+    // intersected with a fixed allowlist so it can only narrow, never widen.
+    const ALLOWED_ROLES = ["admin", "secretary", "worshipful_master"] as const;
+    const requested = Array.isArray(body.requireRole) && body.requireRole.length > 0
+      ? body.requireRole.filter((r) => (ALLOWED_ROLES as readonly string[]).includes(r))
+      : [...ALLOWED_ROLES];
+    const requireRole = requested.length > 0 ? requested : [...ALLOWED_ROLES];
+    const { data: roles } = await admin.from("user_roles").select("role").eq("user_id", user.id);
+    const has = (roles ?? []).some((r: { role: string }) => requireRole.includes(r.role));
+    if (!has) return json({ error: "Forbidden" }, 403);
 
     // Resolve recipients
     const map = new Map<string, Recipient>();
