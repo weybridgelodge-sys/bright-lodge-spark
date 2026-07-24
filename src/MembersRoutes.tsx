@@ -17,6 +17,7 @@ const OfficersTracker = lazy(() => import("./pages/members/OfficersTracker"));
 const Kpis = lazy(() => import("./pages/members/Kpis"));
 const LoiRegister = lazy(() => import("./pages/members/LoiRegister"));
 const FestiveBoardRegister = lazy(() => import("./pages/members/FestiveBoardRegister"));
+const MemberCalendar = lazy(() => import("./pages/members/Calendar"));
 const SummonsBuilder = lazy(() => import("./pages/members/SummonsBuilder"));
 const AlmonerPortal = lazy(() => import("./pages/members/AlmonerPortal"));
 const MyDevelopment = lazy(() => import("./pages/members/development/MemberDevelopment").then((m) => ({ default: m.MyDevelopmentPage })));
