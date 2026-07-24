@@ -107,6 +107,7 @@ export default function FestiveBoardRegister() {
   const [meetings, setMeetings] = useState<Meeting[]>([]);
   const [attendance, setAttendance] = useState<Attendance[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
+  const [waitlist, setWaitlist] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<Meeting | null>(null);
   const [creating, setCreating] = useState(false);
@@ -114,7 +115,7 @@ export default function FestiveBoardRegister() {
 
   const loadAll = async () => {
     setLoading(true);
-    const [mt, at, mb] = await Promise.all([
+    const [mt, at, mb, wl] = await Promise.all([
       supabase
         .from("festive_board_meetings")
         .select("*")
@@ -126,10 +127,16 @@ export default function FestiveBoardRegister() {
         .eq("status", "active")
         .eq("is_honorary_member", false)
         .order("last_name", { ascending: true }),
+      supabase
+        .from("bookings")
+        .select("id, contact_name, contact_email, event_label, event_key, meeting_id, payment_status, total_pence, details, created_at")
+        .in("payment_status", ["waitlisted", "waitlisted_refunded"])
+        .order("created_at", { ascending: true }),
     ]);
     setMeetings((mt.data as Meeting[]) ?? []);
     setAttendance((at.data as Attendance[]) ?? []);
     setMembers((mb.data as Member[]) ?? []);
+    setWaitlist((wl.data as any[]) ?? []);
     setLoading(false);
   };
 
