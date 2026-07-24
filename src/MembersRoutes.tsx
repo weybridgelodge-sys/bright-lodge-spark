@@ -34,6 +34,7 @@ const LodgeVisits = lazy(() => import("./pages/members/working-groups/Visits"));
 const CharityStewardPage = lazy(() => import("./pages/members/admin/CharitySteward"));
 const AdminHub = lazy(() => import("./pages/members/admin/AdminHub"));
 const NewsletterHub = lazy(() => import("./pages/members/admin/NewsletterHub"));
+const PollsAdmin = lazy(() => import("./pages/members/admin/PollsAdmin"));
 
 const MembersRoutes = () => (
   <AuthProvider>
