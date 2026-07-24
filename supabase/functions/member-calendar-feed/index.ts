@@ -308,6 +308,21 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Officers Night — fixed 19:00–21:30 London wall-clock, independent of the linked meeting time.
+    for (const s of (officersRes.data ?? [])) {
+      const so = s as any;
+      const ymd = londonYMD(so.officer_night_date as string);
+      const start = wall(ymd.y, ymd.m1, ymd.d, 19, 0);
+      const end = wall(ymd.y, ymd.m1, ymd.d, 21, 30);
+      cal.push({
+        uid: `officers-night-${so.id}@${LODGE_DOMAIN}`,
+        title: "Officers Night",
+        location: so.officer_night_venue ?? "Masonic Centre, Guildford",
+        description: "Officers rehearsal ahead of the next regular meeting.",
+        start, end,
+      });
+    }
+
     for (const l of rollingLOIs(26)) cal.push(l);
 
     const lines: string[] = [
