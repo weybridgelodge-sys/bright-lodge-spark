@@ -1254,3 +1254,200 @@ function HistoryTab({ onEdit }: { onEdit: (id: string) => void }) {
 }
 
 
+
+// ===================== Visitor Email Dialog =====================
+type VisitorRow = {
+  id: string;
+  email: string;
+  name: string | null;
+  lodge_name: string | null;
+  lodge_number: string | null;
+  last_seen_at: string;
+};
+
+function VisitorEmailDialog(props: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  summons: SummonsData;
+  template: LodgeTemplate;
+  generatePdf: (action: "download" | "save" | "email") => Promise<string | null>;
+  resolveOfficerDisplayName: (positionKey: string) => Promise<string>;
+}) {
+  const { open, onOpenChange, summons, template, generatePdf, resolveOfficerDisplayName } = props;
+  const [rows, setRows] = useState<VisitorRow[]>([]);
+  const [selected, setSelected] = useState<Record<string, boolean>>({});
+  const [salutations, setSalutations] = useState<Record<string, string>>({});
+  const [loading, setLoading] = useState(false);
+  const [sending, setSending] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+    (async () => {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from("visitor_contacts")
+        .select("id,email,name,lodge_name,lodge_number,last_seen_at,opted_out_at")
+        .is("opted_out_at", null)
+        .order("last_seen_at", { ascending: false });
+      if (error) { toast.error(error.message); setLoading(false); return; }
+      const list = (data ?? []) as VisitorRow[];
+      setRows(list);
+      const twoYearsAgo = Date.now() - 2 * 365 * 24 * 60 * 60 * 1000;
+      const sel: Record<string, boolean> = {};
+      const sal: Record<string, string> = {};
+      for (const r of list) {
+        sel[r.id] = new Date(r.last_seen_at).getTime() >= twoYearsAgo;
+        sal[r.id] = parseSalutation(r.name);
+      }
+      setSelected(sel);
+      setSalutations(sal);
+      setLoading(false);
+    })();
+  }, [open]);
+
+  const pickedCount = Object.values(selected).filter(Boolean).length;
+
+  const send = async () => {
+    if (pickedCount === 0) { toast.error("Select at least one visitor"); return; }
+    if (!summons.meeting_date) { toast.error("Set the meeting date first"); return; }
+    if (!window.confirm(`Send Summons #${summons.meeting_number} to ${pickedCount} visitor${pickedCount === 1 ? "" : "s"}?`)) return;
+    setSending(true);
+    try {
+      const wmName = (await resolveOfficerDisplayName("worshipful_master")) || "The Worshipful Master";
+      const meetingDate = summons.meeting_date!;
+      const meetingDateLabel = new Date(meetingDate + "T00:00:00").toLocaleDateString("en-GB", {
+        weekday: "long", day: "numeric", month: "long", year: "numeric",
+      });
+      const timeStr = (summons.meeting_time || "18:15").slice(0, 5);
+      const startIso = new Date(`${meetingDate}T${timeStr}:00`).toISOString();
+      const endIso = new Date(new Date(startIso).getTime() + 3 * 60 * 60 * 1000).toISOString();
+      const venue = template.venue_address || "Masonic Centre, Guildford";
+      const title = `Weybridge Lodge No. 6787 — ${summons.meeting_type || "Meeting"} — ${meetingDateLabel}`;
+      const ics = generateICS({
+        title, location: venue, startTime: startIso, endTime: endIso,
+        description: "Summons for the meeting is attached.",
+      });
+      const ics_filename = icsFilename(title);
+
+      const id = await generatePdf("email");
+      if (!id) { setSending(false); return; }
+
+      const recipients = rows
+        .filter((r) => selected[r.id])
+        .map((r) => ({
+          email: r.email,
+          salutation: (salutations[r.id] || parseSalutation(r.name)).trim(),
+          visitor_contact_id: r.id,
+        }));
+
+      const { data, error } = await supabase.functions.invoke("send-summons-to-visitors", {
+        body: {
+          summons_id: id,
+          recipients,
+          meeting_date_label: meetingDateLabel,
+          meeting_time_label: summons.meeting_time || null,
+          meeting_type_label: summons.meeting_type || null,
+          venue,
+          wm_display_name: wmName,
+          ics,
+          ics_filename,
+          event_start_iso: startIso,
+          event_end_iso: endIso,
+        },
+      });
+      if (error) throw error;
+      const d = data as any;
+      toast.success(`Sent to ${d?.sent ?? 0} of ${d?.recipients ?? 0} visitor(s)`);
+      if (d?.failures?.length) toast.error(`${d.failures.length} delivery(ies) failed — see history log`);
+      onOpenChange(false);
+    } catch (e: any) {
+      toast.error(e?.message ?? "Failed to send");
+    } finally {
+      setSending(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-3xl bg-navy text-primary-foreground border-gold/30">
+        <DialogHeader>
+          <DialogTitle className="text-gold">Email Summons to Visitors</DialogTitle>
+          <DialogDescription className="text-primary-foreground/70">
+            Visitors seen in the last 2 years are pre-selected. Untick anyone you'd like to skip, and
+            edit the salutation if the auto-parse is unusual.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="max-h-[55vh] overflow-y-auto border border-gold/20 rounded">
+          {loading ? (
+            <p className="p-4 text-sm text-primary-foreground/70">Loading visitors…</p>
+          ) : rows.length === 0 ? (
+            <p className="p-4 text-sm text-primary-foreground/70">No visitor contacts on file.</p>
+          ) : (
+            <table className="w-full text-sm">
+              <thead className="text-xs text-primary-foreground/60 bg-navy-light/40 sticky top-0">
+                <tr>
+                  <th className="text-left p-2 w-8"></th>
+                  <th className="text-left p-2">Visitor</th>
+                  <th className="text-left p-2">Lodge</th>
+                  <th className="text-left p-2">Last seen</th>
+                  <th className="text-left p-2">Salutation</th>
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((r) => {
+                  const stale = Date.now() - new Date(r.last_seen_at).getTime() > 2 * 365 * 24 * 60 * 60 * 1000;
+                  return (
+                    <tr key={r.id} className="border-t border-gold/10">
+                      <td className="p-2 align-top">
+                        <Checkbox
+                          checked={!!selected[r.id]}
+                          onCheckedChange={(v) => setSelected((s) => ({ ...s, [r.id]: !!v }))}
+                        />
+                      </td>
+                      <td className="p-2 align-top">
+                        <div>{r.name || <span className="italic text-primary-foreground/60">no name</span>}</div>
+                        <div className="text-xs text-primary-foreground/60">{r.email}</div>
+                      </td>
+                      <td className="p-2 align-top">
+                        {[r.lodge_name, r.lodge_number].filter(Boolean).join(" · ") || "—"}
+                      </td>
+                      <td className="p-2 align-top text-xs">
+                        {new Date(r.last_seen_at).toLocaleDateString("en-GB")}
+                        {stale && <span className="ml-1 text-primary-foreground/50">(&gt;2y)</span>}
+                      </td>
+                      <td className="p-2 align-top">
+                        <Input
+                          value={salutations[r.id] ?? ""}
+                          onChange={(e) => setSalutations((s) => ({ ...s, [r.id]: e.target.value }))}
+                          className="h-8 min-w-[140px]"
+                          placeholder="e.g. W Bro Smith"
+                        />
+                        <div className="text-[11px] text-primary-foreground/60 mt-0.5">
+                          Preview: <em>Dear {(salutations[r.id] || "Brother").trim()},</em>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          )}
+        </div>
+
+        <DialogFooter className="flex items-center justify-between w-full">
+          <span className="text-xs text-primary-foreground/70 mr-auto">
+            {pickedCount} of {rows.length} selected
+          </span>
+          <Button variant="outline" className="text-navy" onClick={() => onOpenChange(false)} disabled={sending}>
+            Cancel
+          </Button>
+          <Button onClick={send} disabled={sending || pickedCount === 0} className="bg-gold text-navy hover:bg-gold/90">
+            <Mail className="w-4 h-4 mr-2" />
+            {sending ? "Sending…" : `Send to ${pickedCount} visitor${pickedCount === 1 ? "" : "s"}`}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
