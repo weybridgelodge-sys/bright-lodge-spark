@@ -2261,6 +2261,8 @@ export type Database = {
           sent_to_count: number | null
           status: Database["public"]["Enums"]["summons_status"]
           updated_at: string
+          visitors_notified_at: string | null
+          visitors_notified_count: number | null
         }
         Insert: {
           agenda?: Json
@@ -2290,6 +2292,8 @@ export type Database = {
           sent_to_count?: number | null
           status?: Database["public"]["Enums"]["summons_status"]
           updated_at?: string
+          visitors_notified_at?: string | null
+          visitors_notified_count?: number | null
         }
         Update: {
           agenda?: Json
@@ -2319,6 +2323,8 @@ export type Database = {
           sent_to_count?: number | null
           status?: Database["public"]["Enums"]["summons_status"]
           updated_at?: string
+          visitors_notified_at?: string | null
+          visitors_notified_count?: number | null
         }
         Relationships: [
           {
