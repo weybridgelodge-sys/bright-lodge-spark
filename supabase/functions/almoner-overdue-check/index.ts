@@ -21,6 +21,10 @@ Deno.serve(async (req) => {
 
   // Only proceed at 06:00 Europe/London wall-clock time. The cron fires hourly
   // in UTC; the DST-aware guard below keeps the send at 6am local year-round.
+  // Manual re-triggers can bypass the guard via ?force=1 (used by ops when a
+  // scheduled run failed and the digest still needs to go out today).
+  const url = new URL(req.url)
+  const force = url.searchParams.get('force') === '1'
   const londonHour = parseInt(
     new Intl.DateTimeFormat('en-GB', {
       timeZone: 'Europe/London',
@@ -29,12 +33,13 @@ Deno.serve(async (req) => {
     }).format(new Date()),
     10,
   )
-  if (londonHour !== 6) {
+  if (!force && londonHour !== 6) {
     return new Response(
       JSON.stringify({ ok: true, skipped: true, londonHour }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
     )
   }
+
 
 
   const supabaseUrl = Deno.env.get('SUPABASE_URL')!
