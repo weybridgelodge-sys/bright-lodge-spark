@@ -190,13 +190,23 @@ Deno.serve(async (req) => {
         secretaryName,
       });
       try {
+        const contentDigest = await crypto.subtle.digest(
+          "SHA-256",
+          new TextEncoder().encode(
+            `${subject}|${salutation}|${body.meeting_date_label}|${body.meeting_time_label ?? ""}|${body.meeting_type_label ?? ""}|${body.venue}|${secretaryName}|${html.length}|${pdfB64.length}|${icsB64.length}`
+          ),
+        );
+        const contentHash = Array.from(new Uint8Array(contentDigest))
+          .slice(0, 8)
+          .map((b) => b.toString(16).padStart(2, "0"))
+          .join("");
         const res = await fetch(`${GATEWAY_URL}/emails`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             "Authorization": `Bearer ${LOVABLE_API_KEY}`,
             "X-Connection-Api-Key": RESEND_API_KEY,
-            "Idempotency-Key": `summons-visitors-${summons.id}-${email}`,
+            "Idempotency-Key": `summons-visitors-${summons.id}-${email}-${contentHash}`,
           },
           body: JSON.stringify({
             from: FROM_ADDRESS,
