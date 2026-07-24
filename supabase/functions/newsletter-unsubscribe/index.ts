@@ -15,6 +15,14 @@ const htmlHeaders = {
   "Cache-Control": "no-store",
 };
 
+// Supabase's Edge gateway currently preserves our other headers on non-2xx
+// responses but coerces Content-Type to text/plain. These links are opened by
+// people in mobile browsers, so even error states must be 200 HTML pages rather
+// than 4xx HTML responses or Samsung Internet renders the markup as source.
+function htmlResponse(title: string, message: string) {
+  return new Response(page(title, message), { status: 200, headers: htmlHeaders });
+}
+
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL")!,
   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
@@ -53,9 +61,7 @@ Deno.serve(async (req) => {
   const url = new URL(req.url);
   const token = url.searchParams.get("token");
   if (!token) {
-    return new Response(page("Invalid link", "This unsubscribe link is missing a token."), {
-      status: 400, headers: htmlHeaders,
-    });
+    return htmlResponse("Invalid link", "This unsubscribe link is missing a token.");
   }
 
   // 1. Try the member opt-out table first (per-recipient tokens minted at send time).
@@ -105,7 +111,5 @@ Deno.serve(async (req) => {
     ), { headers: htmlHeaders });
   }
 
-  return new Response(page("Link not recognised", "We couldn&rsquo;t find a matching subscription. It may have already been removed."), {
-    status: 404, headers: htmlHeaders,
-  });
+  return htmlResponse("Link not recognised", "We couldn&rsquo;t find a matching subscription. It may have already been removed.");
 });
