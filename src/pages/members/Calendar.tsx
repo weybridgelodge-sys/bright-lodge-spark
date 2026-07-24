@@ -1,16 +1,27 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   addMonths, endOfMonth, endOfWeek, format, isSameDay, isSameMonth, isToday,
   startOfMonth, startOfWeek,
 } from "date-fns";
-import { ChevronLeft, ChevronRight, Copy, ExternalLink, Loader2 } from "lucide-react";
+import {
+  Calendar, ChevronDown, ChevronLeft, ChevronRight, Copy, ExternalLink,
+  Info, Loader2, Monitor, Smartphone,
+} from "lucide-react";
 import MembersLayout from "@/components/members/MembersLayout";
 import ProtectedRoute from "@/components/members/ProtectedRoute";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+
+function getPlatformHint(): "apple" | "android" | "desktop" {
+  if (typeof navigator === "undefined") return "desktop";
+  const ua = navigator.userAgent;
+  if (/iPhone|iPad|iPod|Macintosh|Mac OS X/i.test(ua)) return "apple";
+  if (/Android/i.test(ua)) return "android";
+  return "desktop";
+}
 
 type CalEvent = {
   id: string;
@@ -309,35 +320,91 @@ function SubscribePanel({
   webcalUrl: string | null; feedUrl: string | null;
   onCopy: (v: string) => void; loading: boolean;
 }) {
+  const [showHelp, setShowHelp] = useState(false);
+  const platform = useMemo(getPlatformHint, []);
+
   if (loading) {
     return <div className="text-xs text-primary-foreground/50"><Loader2 className="w-3 h-3 animate-spin inline mr-1"/>Preparing your subscription…</div>;
   }
   if (!webcalUrl || !feedUrl) return null;
+
+  const googleUrl = `https://calendar.google.com/calendar/r?cid=${encodeURIComponent(feedUrl)}`;
+  const isApple = platform === "apple";
+
   return (
     <div className="rounded-sm border border-gold/30 bg-navy-dark/60 p-3 max-w-md w-full">
-      <p className="text-xs text-primary-foreground/80 mb-2">
-        <strong className="text-gold">Subscribe once</strong> — the feed will keep itself up to date.
+      <p className="text-xs text-primary-foreground/80 mb-3">
+        <strong className="text-gold">Subscribe once</strong> — the feed will keep itself up to date on every device.
       </p>
-      <div className="flex gap-2 flex-wrap">
-        <Button asChild size="sm" className="bg-gold text-navy hover:bg-gold/90">
-          <a href={webcalUrl}>
-            <ExternalLink className="w-3.5 h-3.5 mr-1.5" /> Add to my calendar
-          </a>
-        </Button>
+
+      <div className="flex flex-col gap-2">
+        {isApple ? (
+          <>
+            <Button asChild size="sm" className="bg-gold text-navy hover:bg-gold/90 justify-start">
+              <a href={webcalUrl}>
+                <Calendar className="w-3.5 h-3.5 mr-2" /> Open in Apple Calendar / Outlook
+              </a>
+            </Button>
+            <Button asChild size="sm" variant="outline" className="border-gold/40 bg-transparent text-primary-foreground hover:bg-navy hover:text-gold justify-start">
+              <a href={googleUrl} target="_blank" rel="noopener noreferrer">
+                <Smartphone className="w-3.5 h-3.5 mr-2" /> Add to Google Calendar
+              </a>
+            </Button>
+          </>
+        ) : (
+          <>
+            <Button asChild size="sm" className="bg-gold text-navy hover:bg-gold/90 justify-start">
+              <a href={googleUrl} target="_blank" rel="noopener noreferrer">
+                <Smartphone className="w-3.5 h-3.5 mr-2" /> Add to Google Calendar
+              </a>
+            </Button>
+            <Button asChild size="sm" variant="outline" className="border-gold/40 bg-transparent text-primary-foreground hover:bg-navy hover:text-gold justify-start">
+              <a href={webcalUrl}>
+                <Monitor className="w-3.5 h-3.5 mr-2" /> Apple Calendar / Outlook desktop
+              </a>
+            </Button>
+          </>
+        )}
+
         <Button
           size="sm" variant="outline"
-          className="border-gold/40 bg-transparent text-primary-foreground hover:bg-navy hover:text-gold"
-          onClick={() => onCopy(webcalUrl)}
+          className="border-gold/40 bg-transparent text-primary-foreground hover:bg-navy hover:text-gold justify-start"
+          onClick={() => onCopy(feedUrl)}
         >
-          <Copy className="w-3.5 h-3.5 mr-1.5" /> Copy webcal:// link
+          <Copy className="w-3.5 h-3.5 mr-2" /> Copy subscription URL
         </Button>
       </div>
-      <p className="text-[11px] text-primary-foreground/50 mt-2 break-all">
-        Direct link: <code className="text-primary-foreground/70">{feedUrl}</code>
-      </p>
-      <p className="text-[11px] text-primary-foreground/50 mt-1">
-        Keep this link private — it's unique to you.
-      </p>
+
+      <button
+        type="button"
+        onClick={() => setShowHelp((s) => !s)}
+        className="mt-3 flex items-center text-[11px] text-gold hover:text-gold/80 transition-colors"
+        aria-expanded={showHelp}
+      >
+        <Info className="w-3 h-3 mr-1" />
+        How to subscribe manually
+        <ChevronDown className={`w-3 h-3 ml-1 transition-transform ${showHelp ? "rotate-180" : ""}`} />
+      </button>
+
+      {showHelp && (
+        <div className="mt-2 rounded-sm border border-gold/20 bg-navy/50 p-3 space-y-3 text-[11px] text-primary-foreground/80">
+          <div>
+            <p className="font-semibold text-gold mb-1 flex items-center gap-1"><Calendar className="w-3 h-3" /> Apple (iPhone / iPad / Mac)</p>
+            <p>Copy the link, then open the Calendar app → Calendars → Add Calendar → Add Subscription Calendar, and paste the URL.</p>
+          </div>
+          <div>
+            <p className="font-semibold text-gold mb-1 flex items-center gap-1"><Smartphone className="w-3 h-3" /> Google Calendar (Android / web)</p>
+            <p>Tap "Add to Google Calendar" above, or open Google Calendar in a browser → Other calendars → Add by URL, and paste the link.</p>
+          </div>
+          <div>
+            <p className="font-semibold text-gold mb-1 flex items-center gap-1"><Monitor className="w-3 h-3" /> Outlook (web / desktop)</p>
+            <p>Add calendar → Subscribe from web → paste the URL. The "Apple Calendar / Outlook desktop" button may also open Outlook directly on Windows.</p>
+          </div>
+          <p className="text-primary-foreground/50 italic">
+            Keep this link private — it's unique to you.
+          </p>
+        </div>
+      )}
     </div>
   );
 }
