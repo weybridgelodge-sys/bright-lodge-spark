@@ -230,7 +230,7 @@ Deno.serve(async (req) => {
     const fromIso = new Date(Date.now() - 365 * 86400_000).toISOString();
     const toIso = new Date(Date.now() + 2 * 365 * 86400_000).toISOString();
 
-    const [eventsRes, meetingsRes, socialsRes] = await Promise.all([
+    const [eventsRes, meetingsRes, socialsRes, officersRes] = await Promise.all([
       admin.from("lodge_events")
         .select("id,slug,title,event_date,tyling_time,location,intro")
         .eq("published", true)
@@ -243,6 +243,10 @@ Deno.serve(async (req) => {
       admin.from("lodge_socials")
         .select("id,title,starts_at,ends_at,venue,description")
         .gte("starts_at", fromIso),
+      admin.from("summonses")
+        .select("id,officer_night_date,officer_night_venue,meeting_date")
+        .not("officer_night_date", "is", null)
+        .gte("officer_night_date", fromIso.slice(0, 10)),
     ]);
 
     const cal: CalEvent[] = [];
