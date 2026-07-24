@@ -34,6 +34,7 @@ const LodgeVisits = lazy(() => import("./pages/members/working-groups/Visits"));
 const CharityStewardPage = lazy(() => import("./pages/members/admin/CharitySteward"));
 const AdminHub = lazy(() => import("./pages/members/admin/AdminHub"));
 const NewsletterHub = lazy(() => import("./pages/members/admin/NewsletterHub"));
+const PollsAdmin = lazy(() => import("./pages/members/admin/PollsAdmin"));
 
 const MembersRoutes = () => (
   <AuthProvider>
@@ -64,6 +65,7 @@ const MembersRoutes = () => (
         <Route path="admin/charity" element={<CharityStewardPage />} />
         <Route path="admin-hub" element={<AdminHub />} />
         <Route path="admin/newsletter" element={<NewsletterHub />} />
+        <Route path="admin/polls" element={<PollsAdmin />} />
         <Route path="working-groups" element={<WorkingGroupsIndex />} />
         <Route path="working-groups/admin" element={<WorkingGroupsAdmin />} />
         <Route path="working-groups/socials" element={<AdHocSocials />} />

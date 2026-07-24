@@ -2020,6 +2020,74 @@ export type Database = {
         }
         Relationships: []
       }
+      poll_votes: {
+        Row: {
+          id: string
+          member_id: string
+          option_index: number
+          poll_id: string
+          voted_at: string
+        }
+        Insert: {
+          id?: string
+          member_id: string
+          option_index: number
+          poll_id: string
+          voted_at?: string
+        }
+        Update: {
+          id?: string
+          member_id?: string
+          option_index?: number
+          poll_id?: string
+          voted_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "poll_votes_poll_id_fkey"
+            columns: ["poll_id"]
+            isOneToOne: false
+            referencedRelation: "polls"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      polls: {
+        Row: {
+          closes_at: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          options: Json
+          question: string
+          results_visibility: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          closes_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          options: Json
+          question: string
+          results_visibility?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          closes_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          options?: Json
+          question?: string
+          results_visibility?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           address_line1: string | null

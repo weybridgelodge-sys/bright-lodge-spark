@@ -4,7 +4,7 @@ import ProtectedRoute from "@/components/members/ProtectedRoute";
 import { useAuth } from "@/hooks/useAuth";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Users, HeartHandshake, GraduationCap, BarChart3, ShieldCheck, Banknote, Mail, ArrowRight } from "lucide-react";
+import { Users, HeartHandshake, GraduationCap, BarChart3, ShieldCheck, Banknote, Mail, Vote, ArrowRight } from "lucide-react";
 
 type Tile = { to: string; title: string; description: string; icon: React.ComponentType<{ className?: string }>; visible: boolean };
 
@@ -33,6 +33,7 @@ function Inner() {
     { to: "/members/admin/charity", title: "Charity Steward", description: "Collections, donations, Charity Ledger, Festival tracker.", icon: Banknote, visible: isAdmin || isWorshipfulMaster || isCharitySteward || isSecretary },
     { to: "/members/kpis", title: "KPI Dashboard", description: "Membership, LOI, Festive Board, Royal Arch conversion.", icon: BarChart3, visible: canManageProgression },
     { to: "/members/admin/newsletter", title: "Newsletter Hub", description: "Compose and broadcast the Monthly Chronicle.", icon: Mail, visible: canEditNewsletter },
+    { to: "/members/admin/polls", title: "Polls & Voting", description: "Ask the brethren a question; live results on the Dashboard.", icon: Vote, visible: isAdmin || isSecretary || isWorshipfulMaster },
     { to: "/members/admin", title: "Admin Settings", description: "Module settings and member administration.", icon: ShieldCheck, visible: isAdmin },
   ];
 
