@@ -709,6 +709,29 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
     await maybeSendOfficersNight(id);
   };
 
+  const [visitorDialogOpen, setVisitorDialogOpen] = useState(false);
+
+  const resolveOfficerDisplayName = async (positionKey: string): Promise<string> => {
+    try {
+      const { data: yearRow } = await (supabase as any).rpc("current_lodge_year");
+      const lodgeYear = (yearRow as number) ?? new Date().getFullYear();
+      const { data: appt } = await supabase
+        .from("officer_appointments").select("member_id")
+        .eq("lodge_year", lodgeYear).eq("position_key", positionKey).maybeSingle();
+      if (!appt?.member_id) return "";
+      const { data: prof } = await supabase
+        .from("profiles").select("title,first_name,last_name,full_name")
+        .eq("id", appt.member_id).maybeSingle();
+      const p: any = prof;
+      if (!p) return "";
+      const title = p.title ? (p.title.endsWith(".") ? p.title : `${p.title}.`) : "";
+      const fname = [p.first_name, p.last_name].filter(Boolean).join(" ").trim();
+      const name = fname || (p.full_name || "").replace(/^(W\s*Bro\.?|Bro\.?|RW\s*Bro\.?)\s*/i, "").trim();
+      return [title, name].filter(Boolean).join(" ").trim();
+    } catch { return ""; }
+  };
+
+
   const resolveSecretaryFooter = async (isTest: boolean): Promise<string> => {
     let title = "";
     let name = "";
