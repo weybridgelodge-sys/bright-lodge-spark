@@ -57,15 +57,21 @@ Deno.serve(async (req) => {
     const { data: yearRow } = await admin.rpc("current_lodge_year" as any);
     const lodgeYear = Number(yearRow);
 
-    const { data: settings } = await admin
-      .from("dues_settings")
-      .select("annual_amount_pence,effective_lodge_year")
-      .lte("effective_lodge_year", lodgeYear)
-      .order("effective_lodge_year", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-    if (!settings) return json({ error: "No dues_settings configured" }, 400);
-    const annual = (settings as any).annual_amount_pence as number;
+    // Compute prorated / exempt amount via shared DB function
+    const { data: calc, error: calcErr } = await admin.rpc("dues_calculate_amount" as any, {
+      _member_id: memberId,
+      _lodge_year: lodgeYear,
+    });
+    if (calcErr) return json({ error: `Calc failed: ${calcErr.message}` }, 400);
+    const c = calc as any;
+    const annual = c?.final_pence as number;
+    if (annual === undefined || annual === null) return json({ error: "No dues_settings configured" }, 400);
+    if (c?.is_exempt) {
+      return json({ error: `Member is exempt (${c.exempt_reason}) — no checkout required.` }, 400);
+    }
+    if (annual <= 0) {
+      return json({ error: "Calculated amount is £0 — no checkout required." }, 400);
+    }
 
     // ALWAYS SANDBOX for this demo
     const stripe = createStripeClient("sandbox");
