@@ -130,15 +130,46 @@ function Inner() {
       const startIso = new Date(startsAt).toISOString();
       const endIso = endsAt ? new Date(endsAt).toISOString() : null;
 
-      // 1) Upload PDF
+      // 1) Upload PDF — use an explicit fetch instead of supabase.storage.upload()
+      // so we get real HTTP status codes and response bodies on failure. The
+      // JS client wraps network errors into an opaque "Failed to fetch" string
+      // and hides which layer (auth, CORS, storage, RLS) actually rejected.
       const stamp = Date.now();
       const safeName = pdf.name.replace(/[^A-Za-z0-9._-]/g, "_");
       const path = `${user?.id ?? "unknown"}/${stamp}-${safeName}`;
-      const { error: upErr } = await supabase.storage.from(BUCKET).upload(path, pdf, {
-        contentType: "application/pdf",
-        upsert: false,
-      });
-      if (upErr) throw new Error(`Upload: ${upErr.message}`);
+
+      const { data: sessionData } = await supabase.auth.getSession();
+      const accessToken = sessionData.session?.access_token;
+      if (!accessToken) throw new Error("Upload: not signed in (no access token). Please sign out and in again.");
+
+      const uploadUrl = `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/${BUCKET}/${path}`;
+      let upRes: Response;
+      try {
+        upRes = await fetch(uploadUrl, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+            "Content-Type": "application/pdf",
+            "x-upsert": "false",
+            "cache-control": "3600",
+          },
+          body: pdf,
+        });
+      } catch (netErr: any) {
+        // Transport-layer failure (DNS, TLS, extension block, offline, etc.)
+        console.error("[visits] upload network failure", netErr);
+        throw new Error(
+          `Upload: network request to storage failed (${netErr?.name ?? "Error"}: ${netErr?.message ?? String(netErr)}). ` +
+            `Check your internet connection or a browser extension may be blocking supabase.co.`,
+        );
+      }
+      if (!upRes.ok) {
+        const bodyText = await upRes.text().catch(() => "");
+        console.error("[visits] upload HTTP error", upRes.status, bodyText);
+        throw new Error(`Upload: HTTP ${upRes.status} — ${bodyText.slice(0, 240) || upRes.statusText}`);
+      }
+
 
       // 2) Insert visit row — persist BEFORE attempting the email so the row
       // survives a downstream email failure and can be handled manually.
