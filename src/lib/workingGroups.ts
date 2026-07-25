@@ -92,7 +92,7 @@ export async function listAllReportItemsInYear(start: string, end: string): Prom
     .gte("item_date", start)
     .lte("item_date", end)
     .order("item_date", { ascending: true });
-  return (data ?? []) as WorkingGroupReportItem[];
+  return ((data ?? []) as unknown) as WorkingGroupReportItem[];
 }
 
 export async function upsertGroup(input: Partial<WorkingGroup> & { name: string; slug: string; remit: string }) {
