@@ -101,19 +101,20 @@ export async function buildWorkingGroupsActivityPdf() {
     doc.text(remitLines, margin + 4, y);
     y += remitLines.length * 11 + 6;
 
-    const rows = activities.filter((a) => a.working_group_id === g.id);
+    const rows = items.filter((a) => a.working_group_id === g.id);
     if (rows.length === 0) {
       doc.setFont("helvetica", "italic"); doc.setFontSize(9); doc.setTextColor(...MUTED);
       doc.text("No activity recorded for this Masonic year.", margin + 4, y); y += 18;
     } else {
       autoTable(doc, {
         startY: y,
-        head: [["Date", "Type", "Title", "Notes"]],
-        body: rows.map((r) => [fmt(r.activity_date), r.kind, r.title, r.notes ?? ""]),
+        head: [["Date", "Type", "Title", "Detail"]],
+        body: rows.map((r) => [fmt(r.item_date), r.item_type.toUpperCase(), r.title, r.detail ?? ""]),
         margin: { left: margin, right: margin },
         styles: { font: "helvetica", fontSize: 9, cellPadding: 5, textColor: INK, lineColor: HAIRLINE, lineWidth: 0.4 },
         headStyles: { fillColor: GOLD, textColor: NAVY, fontStyle: "bold" },
         alternateRowStyles: { fillColor: PANEL },
+        columnStyles: { 1: { fontStyle: "bold", textColor: NAVY, cellWidth: 60 } },
         theme: "grid",
       });
       y = (doc as any).lastAutoTable.finalY + 18;
