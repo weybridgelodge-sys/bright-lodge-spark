@@ -1,7 +1,7 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import logoAsset from "@/assets/weybridge-logo-navy-transparent.png.asset.json";
-import { listAllActivitiesInYear, listGroups } from "@/lib/workingGroups";
+import { listAllReportItemsInYear, listGroups } from "@/lib/workingGroups";
 
 // Mirrors supabase/functions/_shared/transactional-email-templates/_brand.ts
 // so branded PDFs stay visually consistent with the transactional emails
