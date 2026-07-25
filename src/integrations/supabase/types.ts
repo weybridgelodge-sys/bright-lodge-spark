@@ -208,6 +208,13 @@ export type Database = {
             foreignKeyName: "candidates_converted_member_id_fkey"
             columns: ["converted_member_id"]
             isOneToOne: false
+            referencedRelation: "calendar_subscription_status"
+            referencedColumns: ["member_id"]
+          },
+          {
+            foreignKeyName: "candidates_converted_member_id_fkey"
+            columns: ["converted_member_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -581,6 +588,13 @@ export type Database = {
             foreignKeyName: "dues_payments_member_id_fkey"
             columns: ["member_id"]
             isOneToOne: false
+            referencedRelation: "calendar_subscription_status"
+            referencedColumns: ["member_id"]
+          },
+          {
+            foreignKeyName: "dues_payments_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -682,6 +696,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "dues_subscriptions_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "calendar_subscription_status"
+            referencedColumns: ["member_id"]
+          },
           {
             foreignKeyName: "dues_subscriptions_member_id_fkey"
             columns: ["member_id"]
@@ -853,6 +874,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "festive_board_meetings"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "festive_board_attendance_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "calendar_subscription_status"
+            referencedColumns: ["member_id"]
           },
           {
             foreignKeyName: "festive_board_attendance_member_id_fkey"
@@ -1141,6 +1169,7 @@ export type Database = {
           title: string
           updated_at: string
           venue: string
+          working_group_id: string | null
         }
         Insert: {
           created_at?: string
@@ -1155,6 +1184,7 @@ export type Database = {
           title: string
           updated_at?: string
           venue: string
+          working_group_id?: string | null
         }
         Update: {
           created_at?: string
@@ -1169,8 +1199,17 @@ export type Database = {
           title?: string
           updated_at?: string
           venue?: string
+          working_group_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "lodge_socials_working_group_id_fkey"
+            columns: ["working_group_id"]
+            isOneToOne: false
+            referencedRelation: "working_groups"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       lodge_template: {
         Row: {
@@ -1280,6 +1319,7 @@ export type Database = {
           summons_storage_path: string
           updated_at: string
           venue: string
+          working_group_id: string | null
         }
         Insert: {
           cost: string
@@ -1301,6 +1341,7 @@ export type Database = {
           summons_storage_path: string
           updated_at?: string
           venue: string
+          working_group_id?: string | null
         }
         Update: {
           cost?: string
@@ -1322,8 +1363,17 @@ export type Database = {
           summons_storage_path?: string
           updated_at?: string
           venue?: string
+          working_group_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "lodge_visits_working_group_id_fkey"
+            columns: ["working_group_id"]
+            isOneToOne: false
+            referencedRelation: "working_groups"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       loi_attendance: {
         Row: {
@@ -1351,6 +1401,13 @@ export type Database = {
           session_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "loi_attendance_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "calendar_subscription_status"
+            referencedColumns: ["member_id"]
+          },
           {
             foreignKeyName: "loi_attendance_member_id_fkey"
             columns: ["member_id"]
@@ -1406,6 +1463,13 @@ export type Database = {
             foreignKeyName: "loi_part_assignments_assigned_by_fkey"
             columns: ["assigned_by"]
             isOneToOne: false
+            referencedRelation: "calendar_subscription_status"
+            referencedColumns: ["member_id"]
+          },
+          {
+            foreignKeyName: "loi_part_assignments_assigned_by_fkey"
+            columns: ["assigned_by"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -1415,6 +1479,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "loi_sessions"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "loi_part_assignments_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "calendar_subscription_status"
+            referencedColumns: ["member_id"]
           },
           {
             foreignKeyName: "loi_part_assignments_member_id_fkey"
@@ -1464,18 +1535,21 @@ export type Database = {
       member_calendar_tokens: {
         Row: {
           created_at: string
+          fetch_count: number
           last_fetched_at: string | null
           member_id: string
           token: string
         }
         Insert: {
           created_at?: string
+          fetch_count?: number
           last_fetched_at?: string | null
           member_id: string
           token?: string
         }
         Update: {
           created_at?: string
+          fetch_count?: number
           last_fetched_at?: string | null
           member_id?: string
           token?: string
@@ -1527,8 +1601,22 @@ export type Database = {
             foreignKeyName: "member_checklist_items_member_id_fkey"
             columns: ["member_id"]
             isOneToOne: false
+            referencedRelation: "calendar_subscription_status"
+            referencedColumns: ["member_id"]
+          },
+          {
+            foreignKeyName: "member_checklist_items_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "member_checklist_items_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "calendar_subscription_status"
+            referencedColumns: ["member_id"]
           },
           {
             foreignKeyName: "member_checklist_items_updated_by_fkey"
@@ -1578,8 +1666,22 @@ export type Database = {
             foreignKeyName: "member_development_records_assigned_mentor_id_fkey"
             columns: ["assigned_mentor_id"]
             isOneToOne: false
+            referencedRelation: "calendar_subscription_status"
+            referencedColumns: ["member_id"]
+          },
+          {
+            foreignKeyName: "member_development_records_assigned_mentor_id_fkey"
+            columns: ["assigned_mentor_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "member_development_records_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: true
+            referencedRelation: "calendar_subscription_status"
+            referencedColumns: ["member_id"]
           },
           {
             foreignKeyName: "member_development_records_member_id_fkey"
@@ -1626,8 +1728,22 @@ export type Database = {
             foreignKeyName: "member_engagement_log_logged_by_fkey"
             columns: ["logged_by"]
             isOneToOne: false
+            referencedRelation: "calendar_subscription_status"
+            referencedColumns: ["member_id"]
+          },
+          {
+            foreignKeyName: "member_engagement_log_logged_by_fkey"
+            columns: ["logged_by"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "member_engagement_log_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "calendar_subscription_status"
+            referencedColumns: ["member_id"]
           },
           {
             foreignKeyName: "member_engagement_log_member_id_fkey"
@@ -1680,6 +1796,13 @@ export type Database = {
             foreignKeyName: "member_external_appointments_member_id_fkey"
             columns: ["member_id"]
             isOneToOne: false
+            referencedRelation: "calendar_subscription_status"
+            referencedColumns: ["member_id"]
+          },
+          {
+            foreignKeyName: "member_external_appointments_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -1708,6 +1831,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "member_newsletter_opt_outs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "calendar_subscription_status"
+            referencedColumns: ["member_id"]
+          },
           {
             foreignKeyName: "member_newsletter_opt_outs_user_id_fkey"
             columns: ["user_id"]
@@ -1783,8 +1913,22 @@ export type Database = {
             foreignKeyName: "member_preceptor_notes_member_id_fkey"
             columns: ["member_id"]
             isOneToOne: false
+            referencedRelation: "calendar_subscription_status"
+            referencedColumns: ["member_id"]
+          },
+          {
+            foreignKeyName: "member_preceptor_notes_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "member_preceptor_notes_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "calendar_subscription_status"
+            referencedColumns: ["member_id"]
           },
           {
             foreignKeyName: "member_preceptor_notes_updated_by_fkey"
@@ -1831,8 +1975,22 @@ export type Database = {
             foreignKeyName: "member_progression_status_member_id_fkey"
             columns: ["member_id"]
             isOneToOne: true
+            referencedRelation: "calendar_subscription_status"
+            referencedColumns: ["member_id"]
+          },
+          {
+            foreignKeyName: "member_progression_status_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: true
             referencedRelation: "profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "member_progression_status_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "calendar_subscription_status"
+            referencedColumns: ["member_id"]
           },
           {
             foreignKeyName: "member_progression_status_updated_by_fkey"
@@ -1894,8 +2052,22 @@ export type Database = {
             foreignKeyName: "member_ritual_records_member_id_fkey"
             columns: ["member_id"]
             isOneToOne: false
+            referencedRelation: "calendar_subscription_status"
+            referencedColumns: ["member_id"]
+          },
+          {
+            foreignKeyName: "member_ritual_records_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "member_ritual_records_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "calendar_subscription_status"
+            referencedColumns: ["member_id"]
           },
           {
             foreignKeyName: "member_ritual_records_updated_by_fkey"
@@ -1935,6 +2107,13 @@ export type Database = {
           year_started?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "member_wm_terms_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "calendar_subscription_status"
+            referencedColumns: ["member_id"]
+          },
           {
             foreignKeyName: "member_wm_terms_member_id_fkey"
             columns: ["member_id"]
@@ -2009,6 +2188,13 @@ export type Database = {
           value?: Json
         }
         Relationships: [
+          {
+            foreignKeyName: "module_settings_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "calendar_subscription_status"
+            referencedColumns: ["member_id"]
+          },
           {
             foreignKeyName: "module_settings_updated_by_fkey"
             columns: ["updated_by"]
@@ -2144,8 +2330,22 @@ export type Database = {
             foreignKeyName: "officer_appointments_member_id_fkey"
             columns: ["member_id"]
             isOneToOne: false
+            referencedRelation: "calendar_subscription_status"
+            referencedColumns: ["member_id"]
+          },
+          {
+            foreignKeyName: "officer_appointments_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "officer_appointments_override_by_fkey"
+            columns: ["override_by"]
+            isOneToOne: false
+            referencedRelation: "calendar_subscription_status"
+            referencedColumns: ["member_id"]
           },
           {
             foreignKeyName: "officer_appointments_override_by_fkey"
@@ -2781,6 +2981,13 @@ export type Database = {
             foreignKeyName: "welfare_absences_member_id_fkey"
             columns: ["member_id"]
             isOneToOne: false
+            referencedRelation: "calendar_subscription_status"
+            referencedColumns: ["member_id"]
+          },
+          {
+            foreignKeyName: "welfare_absences_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -2840,6 +3047,13 @@ export type Database = {
             foreignKeyName: "welfare_correspondence_member_id_fkey"
             columns: ["member_id"]
             isOneToOne: false
+            referencedRelation: "calendar_subscription_status"
+            referencedColumns: ["member_id"]
+          },
+          {
+            foreignKeyName: "welfare_correspondence_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -2883,6 +3097,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "welfare_life_events_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "calendar_subscription_status"
+            referencedColumns: ["member_id"]
+          },
           {
             foreignKeyName: "welfare_life_events_member_id_fkey"
             columns: ["member_id"]
@@ -2943,6 +3164,13 @@ export type Database = {
             foreignKeyName: "welfare_log_entries_member_id_fkey"
             columns: ["member_id"]
             isOneToOne: false
+            referencedRelation: "calendar_subscription_status"
+            referencedColumns: ["member_id"]
+          },
+          {
+            foreignKeyName: "welfare_log_entries_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -2974,6 +3202,13 @@ export type Database = {
           updated_by?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "welfare_member_status_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: true
+            referencedRelation: "calendar_subscription_status"
+            referencedColumns: ["member_id"]
+          },
           {
             foreignKeyName: "welfare_member_status_member_id_fkey"
             columns: ["member_id"]
@@ -3031,6 +3266,13 @@ export type Database = {
             foreignKeyName: "welfare_rmtgb_referrals_member_id_fkey"
             columns: ["member_id"]
             isOneToOne: false
+            referencedRelation: "calendar_subscription_status"
+            referencedColumns: ["member_id"]
+          },
+          {
+            foreignKeyName: "welfare_rmtgb_referrals_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -3075,6 +3317,13 @@ export type Database = {
             foreignKeyName: "working_group_activities_logged_by_fkey"
             columns: ["logged_by"]
             isOneToOne: false
+            referencedRelation: "calendar_subscription_status"
+            referencedColumns: ["member_id"]
+          },
+          {
+            foreignKeyName: "working_group_activities_logged_by_fkey"
+            columns: ["logged_by"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -3113,6 +3362,13 @@ export type Database = {
           working_group_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "working_group_members_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "calendar_subscription_status"
+            referencedColumns: ["member_id"]
+          },
           {
             foreignKeyName: "working_group_members_member_id_fkey"
             columns: ["member_id"]
@@ -3168,6 +3424,13 @@ export type Database = {
             foreignKeyName: "working_groups_lead_member_id_fkey"
             columns: ["lead_member_id"]
             isOneToOne: false
+            referencedRelation: "calendar_subscription_status"
+            referencedColumns: ["member_id"]
+          },
+          {
+            foreignKeyName: "working_groups_lead_member_id_fkey"
+            columns: ["lead_member_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -3175,6 +3438,18 @@ export type Database = {
       }
     }
     Views: {
+      calendar_subscription_status: {
+        Row: {
+          fetch_count: number | null
+          full_name: string | null
+          is_subscribed: boolean | null
+          last_fetched_at: string | null
+          member_id: string | null
+          status: Database["public"]["Enums"]["member_status"] | null
+          token_created_at: string | null
+        }
+        Relationships: []
+      }
       public_charity_totals: {
         Row: {
           public_feed_start_amount: number | null
@@ -3199,6 +3474,17 @@ export type Database = {
           name: string | null
           website: string | null
           year_total: number | null
+        }
+        Relationships: []
+      }
+      working_group_report_items: {
+        Row: {
+          detail: string | null
+          item_date: string | null
+          item_type: string | null
+          title: string | null
+          working_group_id: string | null
+          working_group_name: string | null
         }
         Relationships: []
       }

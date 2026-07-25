@@ -76,6 +76,25 @@ export async function listAllActivitiesInYear(start: string, end: string) {
   }>;
 }
 
+export type WorkingGroupReportItem = {
+  working_group_id: string;
+  working_group_name: string;
+  item_type: string;
+  item_date: string;
+  title: string;
+  detail: string | null;
+};
+
+export async function listAllReportItemsInYear(start: string, end: string): Promise<WorkingGroupReportItem[]> {
+  const { data } = await supabase
+    .from("working_group_report_items" as any)
+    .select("working_group_id, working_group_name, item_type, item_date, title, detail")
+    .gte("item_date", start)
+    .lte("item_date", end)
+    .order("item_date", { ascending: true });
+  return ((data ?? []) as unknown) as WorkingGroupReportItem[];
+}
+
 export async function upsertGroup(input: Partial<WorkingGroup> & { name: string; slug: string; remit: string }) {
   const { data, error } = await supabase
     .from("working_groups")
