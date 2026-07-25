@@ -33,7 +33,7 @@ export function masonicYearWindow(now = new Date()) {
 
 export async function buildWorkingGroupsActivityPdf() {
   const { start, end, label } = masonicYearWindow();
-  const [activities, groups] = await Promise.all([listAllActivitiesInYear(start, end), listGroups()]);
+  const [items, groups] = await Promise.all([listAllReportItemsInYear(start, end), listGroups()]);
 
   const doc = new jsPDF({ unit: "pt", format: "a4" });
   const pageW = doc.internal.pageSize.getWidth();
