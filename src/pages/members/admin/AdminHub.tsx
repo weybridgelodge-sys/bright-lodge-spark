@@ -4,7 +4,7 @@ import ProtectedRoute from "@/components/members/ProtectedRoute";
 import { useAuth } from "@/hooks/useAuth";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Users, HeartHandshake, GraduationCap, BarChart3, ShieldCheck, Banknote, Mail, Vote, ArrowRight, CreditCard, BookOpen, FileText } from "lucide-react";
+import { Users, HeartHandshake, GraduationCap, BarChart3, Banknote, Mail, Vote, ArrowRight, CreditCard, BookOpen, FileText } from "lucide-react";
 
 type Tile = { to: string; title: string; description: string; icon: React.ComponentType<{ className?: string }>; visible: boolean };
 
