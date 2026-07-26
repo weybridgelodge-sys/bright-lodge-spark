@@ -740,6 +740,7 @@ function MeetingDialog({
         paymentMethod: (row?.payment_method as FbPaymentMethod) ?? "unknown",
         amountPounds: row ? (row.amount_pence / 100).toFixed(2) : "",
         isMeetingOnly: !!row?.is_meeting_only,
+        dietary: row?.dietary ?? "",
         synced: row?.source === "booking",
         sourceBookingId: row?.source_booking_id ?? null,
       };
