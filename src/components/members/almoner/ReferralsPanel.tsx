@@ -74,7 +74,7 @@ export default function ReferralsPanel({ members, userId }: { members: Member[];
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
           <h3 className="font-serif text-lg text-primary-foreground">MCF / Provincial Referrals</h3>
           <p className="text-xs text-primary-foreground/60">Tracked welfare and charitable referrals</p>
@@ -92,21 +92,25 @@ export default function ReferralsPanel({ members, userId }: { members: Member[];
         <div className="space-y-2">
           {rows.map((r) => (
             <article key={r.id} className="bg-navy-light/40 border border-gold/15 rounded p-4">
-              <div className="flex items-start gap-3 mb-2">
-                <LifeBuoy className="w-4 h-4 text-gold mt-0.5 shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-primary-foreground">{memberName(memberMap.get(r.member_id))}</p>
-                  <p className="text-[11px] text-primary-foreground/60">{TYPE_LABEL[r.referral_type]} · referred {fmt(r.referral_date)}{r.closed_date ? ` · closed ${fmt(r.closed_date)}` : ""}</p>
+              <div className="flex flex-col sm:flex-row items-start gap-3 mb-2">
+                <div className="flex items-start gap-3 flex-1 min-w-0">
+                  <LifeBuoy className="w-4 h-4 text-gold mt-0.5 shrink-0" />
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-primary-foreground">{memberName(memberMap.get(r.member_id))}</p>
+                    <p className="text-[11px] text-primary-foreground/60">{TYPE_LABEL[r.referral_type]} · referred {fmt(r.referral_date)}{r.closed_date ? ` · closed ${fmt(r.closed_date)}` : ""}</p>
+                  </div>
                 </div>
-                <Select value={r.status} onValueChange={(v) => changeStatus(r.id, v as Status)}>
-                  <SelectTrigger className="w-[140px] h-7 text-[11px] bg-navy border-gold/30 text-primary-foreground">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>{(Object.keys(STATUS_LABEL) as Status[]).map((k) => <SelectItem key={k} value={k}>{STATUS_LABEL[k]}</SelectItem>)}</SelectContent>
-                </Select>
-                <button onClick={() => archive(r.id)} className="text-primary-foreground/40 hover:text-red-400" aria-label="Archive">
-                  <Trash2 className="w-4 h-4" />
-                </button>
+                <div className="flex items-center gap-2 w-full sm:w-auto">
+                  <Select value={r.status} onValueChange={(v) => changeStatus(r.id, v as Status)}>
+                    <SelectTrigger className="w-[140px] h-7 text-[11px] bg-navy border-gold/30 text-primary-foreground">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>{(Object.keys(STATUS_LABEL) as Status[]).map((k) => <SelectItem key={k} value={k}>{STATUS_LABEL[k]}</SelectItem>)}</SelectContent>
+                  </Select>
+                  <button onClick={() => archive(r.id)} className="p-1.5 text-primary-foreground/40 hover:text-red-400" aria-label="Archive">
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
               <Badge variant="outline" className={`${STATUS_COLOR[r.status]} text-[10px] mb-2`}>{STATUS_LABEL[r.status]}</Badge>
               <p className="text-sm text-primary-foreground/85 whitespace-pre-wrap">{r.summary}</p>

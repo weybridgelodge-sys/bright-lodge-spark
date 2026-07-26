@@ -59,7 +59,7 @@ export default function CorrespondencePanel({ members, userId }: { members: Memb
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
           <h3 className="font-serif text-lg text-primary-foreground">Correspondence Log</h3>
           <p className="text-xs text-primary-foreground/60">Cards, letters, calls and flowers sent or received</p>
@@ -100,27 +100,29 @@ export default function CorrespondencePanel({ members, userId }: { members: Memb
                   </p>
                   {r.body && <p className="text-sm text-primary-foreground/80 mt-2 whitespace-pre-wrap">{r.body}</p>}
                 </div>
-                <button
-                  onClick={() => { setShowForm(false); setEditing(r); }}
-                  className="text-primary-foreground/40 hover:text-gold"
-                  aria-label="Edit"
-                  title="Edit"
-                >
-                  <Pencil className="w-4 h-4" />
-                </button>
-                {r.attachment_path && (
+                <div className="flex items-center gap-1.5">
                   <button
-                    onClick={() => openAttachment(r.attachment_path!)}
-                    className="text-gold/80 hover:text-gold"
-                    aria-label="Open attachment"
-                    title={r.attachment_name || "Open attachment"}
+                    onClick={() => { setShowForm(false); setEditing(r); }}
+                    className="p-1.5 text-primary-foreground/40 hover:text-gold"
+                    aria-label="Edit"
+                    title="Edit"
                   >
-                    <Paperclip className="w-4 h-4" />
+                    <Pencil className="w-4 h-4" />
                   </button>
-                )}
-                <button onClick={() => archive(r.id)} className="text-primary-foreground/40 hover:text-red-400" aria-label="Archive" title="Archive">
-                  <Trash2 className="w-4 h-4" />
-                </button>
+                  {r.attachment_path && (
+                    <button
+                      onClick={() => openAttachment(r.attachment_path!)}
+                      className="p-1.5 text-gold/80 hover:text-gold"
+                      aria-label="Open attachment"
+                      title={r.attachment_name || "Open attachment"}
+                    >
+                      <Paperclip className="w-4 h-4" />
+                    </button>
+                  )}
+                  <button onClick={() => archive(r.id)} className="p-1.5 text-primary-foreground/40 hover:text-red-400" aria-label="Archive" title="Archive">
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
             </article>
           ))}
