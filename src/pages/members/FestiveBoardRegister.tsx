@@ -1333,57 +1333,63 @@ function MeetingDialog({
                     </span>
                     {d.present && (
                       <>
-                        <Select
-                          value={d.status}
-                          onValueChange={(v) =>
-                            setMember(m.id, { status: v as FbAttendanceStatus })
-                          }
-                        >
-                          <SelectTrigger className="bg-navy border-gold/20 h-8 text-xs text-primary-foreground placeholder:text-primary-foreground/40">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {FB_ATTENDANCE_STATUSES.map((o) => (
-                              <SelectItem key={o.value} value={o.value}>
-                                {o.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        {d.isMeetingOnly ? (
-                          <div className="bg-navy border border-gold/20 h-8 rounded px-3 flex items-center text-xs text-primary-foreground/40">
-                            —
-                          </div>
-                        ) : (
+                        <div className="col-span-full sm:col-span-1">
                           <Select
-                            value={d.paymentMethod}
+                            value={d.status}
                             onValueChange={(v) =>
-                              setMember(m.id, { paymentMethod: v as FbPaymentMethod })
+                              setMember(m.id, { status: v as FbAttendanceStatus })
                             }
                           >
                             <SelectTrigger className="bg-navy border-gold/20 h-8 text-xs text-primary-foreground placeholder:text-primary-foreground/40">
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                              {FB_PAYMENT_METHODS.map((o) => (
+                              {FB_ATTENDANCE_STATUSES.map((o) => (
                                 <SelectItem key={o.value} value={o.value}>
                                   {o.label}
                                 </SelectItem>
                               ))}
                             </SelectContent>
                           </Select>
+                        </div>
+                        {d.isMeetingOnly ? (
+                          <div className="col-span-full sm:col-span-1 bg-navy border border-gold/20 h-8 rounded px-3 flex items-center text-xs text-primary-foreground/40">
+                            —
+                          </div>
+                        ) : (
+                          <div className="col-span-full sm:col-span-1">
+                            <Select
+                              value={d.paymentMethod}
+                              onValueChange={(v) =>
+                                setMember(m.id, { paymentMethod: v as FbPaymentMethod })
+                              }
+                            >
+                              <SelectTrigger className="bg-navy border-gold/20 h-8 text-xs text-primary-foreground placeholder:text-primary-foreground/40">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {FB_PAYMENT_METHODS.map((o) => (
+                                  <SelectItem key={o.value} value={o.value}>
+                                    {o.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
                         )}
-                        <Input
-                          type="number"
-                          step="0.01"
-                          min={0}
-                          placeholder="£"
-                          value={d.amountPounds}
-                          onChange={(e) =>
-                            setMember(m.id, { amountPounds: e.target.value })
-                          }
-                          className="bg-navy border-gold/20 h-8 text-xs text-primary-foreground placeholder:text-primary-foreground/40"
-                        />
+                        <div className="col-span-full sm:col-span-1">
+                          <Input
+                            type="number"
+                            step="0.01"
+                            min={0}
+                            placeholder="£"
+                            value={d.amountPounds}
+                            onChange={(e) =>
+                              setMember(m.id, { amountPounds: e.target.value })
+                            }
+                            className="bg-navy border-gold/20 h-8 text-xs text-primary-foreground placeholder:text-primary-foreground/40"
+                          />
+                        </div>
                         <Input
                           value={d.dietary ?? ""}
                           onChange={(e) => setMember(m.id, { dietary: e.target.value })}
