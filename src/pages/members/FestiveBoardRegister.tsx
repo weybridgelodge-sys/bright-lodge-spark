@@ -446,7 +446,7 @@ export default function FestiveBoardRegister() {
                         size="sm"
                         variant="outline"
                         onClick={() => closeWaitlistForMeeting(meetingId, activeCount)}
-                        className="border-destructive/50 text-destructive hover:bg-destructive/10"
+                        className="border-destructive/50 text-destructive hover:bg-destructive/10 min-h-11 sm:min-h-0"
                       >
                         Close waitlist & refund now
                       </Button>
@@ -478,7 +478,7 @@ export default function FestiveBoardRegister() {
                                 size="sm"
                                 variant="outline"
                                 onClick={() => promoteWaitlistBooking(b)}
-                                className="border-gold/40 text-gold hover:bg-gold/10"
+                                className="border-gold/40 text-gold hover:bg-gold/10 min-h-11 sm:min-h-0"
                               >
                                 Promote now
                               </Button>
@@ -646,7 +646,7 @@ export default function FestiveBoardRegister() {
                             variant="outline"
                             size="sm"
                             onClick={() => setEditing(mtg)}
-                            className="border-gold/40 text-gold hover:bg-gold/10"
+                            className="border-gold/40 text-gold hover:bg-gold/10 min-h-11 sm:min-h-0"
                           >
                             <Pencil className="w-3 h-3 mr-1" /> Edit / mark attendance
                           </Button>
@@ -654,7 +654,7 @@ export default function FestiveBoardRegister() {
                             variant="outline"
                             size="sm"
                             onClick={() => exportPerfectTablePlan(mtg)}
-                            className="border-gold/40 text-gold hover:bg-gold/10"
+                            className="border-gold/40 text-gold hover:bg-gold/10 min-h-11 sm:min-h-0"
                           >
                             <Download className="w-3 h-3 mr-1" /> Export for PerfectTablePlan
                           </Button>
@@ -662,7 +662,7 @@ export default function FestiveBoardRegister() {
                             variant="outline"
                             size="sm"
                             onClick={() => handleDelete(mtg.id)}
-                            className="border-destructive/40 text-destructive hover:bg-destructive/10"
+                            className="border-destructive/40 text-destructive hover:bg-destructive/10 min-h-11 sm:min-h-0"
                           >
                             <Trash2 className="w-3 h-3 mr-1" /> Delete
                           </Button>
