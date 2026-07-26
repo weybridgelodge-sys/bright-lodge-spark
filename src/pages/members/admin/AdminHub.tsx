@@ -4,7 +4,7 @@ import ProtectedRoute from "@/components/members/ProtectedRoute";
 import { useAuth } from "@/hooks/useAuth";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Users, HeartHandshake, GraduationCap, BarChart3, ShieldCheck, Banknote, Mail, Vote, ArrowRight, CreditCard } from "lucide-react";
+import { Users, HeartHandshake, GraduationCap, BarChart3, ShieldCheck, Banknote, Mail, Vote, ArrowRight, CreditCard, BookOpen, FileText } from "lucide-react";
 
 type Tile = { to: string; title: string; description: string; icon: React.ComponentType<{ className?: string }>; visible: boolean };
 
@@ -35,6 +35,8 @@ function Inner() {
     { to: "/members/admin/newsletter", title: "Newsletter Hub", description: "Compose and broadcast the Monthly Chronicle.", icon: Mail, visible: canEditNewsletter },
     { to: "/members/admin/polls", title: "Polls & Voting", description: "Ask the brethren a question; live results on the Dashboard.", icon: Vote, visible: isAdmin || isSecretary || isWorshipfulMaster },
     { to: "/members/admin/dues", title: "Dues & Subscriptions (TEST)", description: "Annual subscription collection, refunds, and price changes. Sandbox only.", icon: CreditCard, visible: isAdmin },
+    { to: "/members/admin/ritual", title: "Ritual Library", description: "Upload, replace, and manage ritual rehearsal material.", icon: BookOpen, visible: isAdmin },
+    { to: "/members/admin/documents", title: "Document Archive", description: "Upload, replace, and manage Lodge documents.", icon: FileText, visible: isAdmin },
     { to: "/members/admin", title: "Admin Settings", description: "Module settings and member administration.", icon: ShieldCheck, visible: isAdmin },
   ];
 
