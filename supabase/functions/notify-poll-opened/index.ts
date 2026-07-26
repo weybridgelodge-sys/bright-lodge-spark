@@ -120,6 +120,27 @@ Deno.serve(async (req) => {
       }
     }
 
+    // Fire-and-forget push notification. A push failure must never fail or
+    // block the email flow above.
+    if (!isTest) {
+      try {
+        const pushRes = await fetch(`${SUPABASE_URL}/functions/v1/send-push-notification`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${SERVICE_ROLE}` },
+          body: JSON.stringify({
+            all_active: true,
+            title: "New poll",
+            body: question,
+            data: { type: "poll", poll_id: poll.id },
+          }),
+        });
+        const pushResult = await pushRes.json().catch(() => ({}));
+        console.log("notify-poll-opened push result", pushResult);
+      } catch (e) {
+        console.error("notify-poll-opened push failed (email flow unaffected)", (e as Error).message);
+      }
+    }
+
     return json({ ok: true, test: isTest, sent, recipients: recipients.length, failures });
   } catch (e) {
     console.error(e);
