@@ -380,6 +380,25 @@ function TxDialog({
             <Checkbox id="rec" checked={reconciled} onCheckedChange={(v) => setReconciled(!!v)} />
             <Label htmlFor="rec" className="cursor-pointer">Reconciled</Label>
           </div>
+          <div className="sm:col-span-2">
+            <Label className="flex items-center gap-1.5"><Paperclip className="w-3 h-3" /> Receipt / attachment (optional, max 15 MB)</Label>
+            {editing?.attachment_path && !removeAttachment && (
+              <div className="mt-1 flex items-center gap-2 text-xs text-primary-foreground/70">
+                <Paperclip className="w-3 h-3 text-gold" />
+                <span>Current: {editing.attachment_name}</span>
+                <button type="button" onClick={() => setRemoveAttachment(true)} className="text-red-400 hover:text-red-300 underline">
+                  Remove
+                </button>
+              </div>
+            )}
+            <input
+              type="file"
+              accept="image/*,application/pdf"
+              onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+              className="mt-1 text-sm text-primary-foreground/70 file:mr-3 file:border-0 file:bg-gold/15 file:text-gold file:px-3 file:py-1.5 file:rounded-sm file:text-xs"
+            />
+            {file && <p className="mt-1 text-[11px] text-primary-foreground/60">Will {editing?.attachment_path ? "replace existing" : "upload"}: {file.name}</p>}
+          </div>
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
