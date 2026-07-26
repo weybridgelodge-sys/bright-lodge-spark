@@ -346,7 +346,7 @@ const Header = () => {
       <div className="container mx-auto px-4 sm:px-6 flex items-center justify-between h-16 md:h-20">
         <Link to="/" className="flex items-center gap-3">
           <img src={logo} alt="Weybridge Lodge No. 6787 crest — Freemasons Lodge in Guildford, Surrey" width={48} height={48} fetchPriority="high" decoding="async" className="h-10 w-10 md:h-12 md:w-12 bg-primary-foreground/80 rounded-full p-0.5" />
-          <div className="hidden sm:block">
+          <div>
             <p className="font-serif text-primary-foreground text-sm md:text-base font-semibold leading-tight">Weybridge Lodge</p>
             <p className="text-gold text-xs">No. 6787</p>
           </div>
