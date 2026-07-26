@@ -73,7 +73,7 @@ export function formatEventEmailHtml(opts: {
         `<td style="padding:6px 0;color:${BRAND.body};font-size:14px;"><strong style="color:${BRAND.navy};">${f.value}</strong></td></tr>`,
     )
     .join("");
-  return `<!doctype html><html lang="en" dir="ltr"><body style="margin:0;padding:0;background:${BRAND.bg};font-family:${BRAND.fontStack};">
+  return `<!doctype html><html lang="en" dir="ltr"><head><meta charset="utf-8"><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body style="margin:0;padding:0;background:${BRAND.bg};font-family:${BRAND.fontStack};">
   <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:${BRAND.bg};">
     <tr><td align="center" style="padding:24px 12px;">
       <table role="presentation" width="600" cellspacing="0" cellpadding="0" style="max-width:600px;width:100%;">
