@@ -53,6 +53,8 @@ export const NON_PROGRESSIVE_ORDER = [
   "membership_officer",
   "tyler",
   "assistant_tyler",
+  "auditor_1",
+  "auditor_2",
 ] as const;
 
 export type NonProgressiveKey = (typeof NON_PROGRESSIVE_ORDER)[number];
