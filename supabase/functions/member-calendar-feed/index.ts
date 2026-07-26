@@ -316,7 +316,7 @@ Deno.serve(async (req) => {
       const end = wall(ymd.y, ymd.m1, ymd.d, 21, 30);
       cal.push({
         uid: `officers-night-${so.id}@${LODGE_DOMAIN}`,
-        title: "Officers Night",
+        title: "Officers Night: Rehearsal",
         location: so.officer_night_venue ?? "Masonic Centre, Guildford",
         description: "Officers rehearsal ahead of the next regular meeting.",
         start, end,
