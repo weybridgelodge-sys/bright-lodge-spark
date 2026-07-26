@@ -3600,6 +3600,10 @@ export type Database = {
       }
       is_active_member: { Args: { _user_id: string }; Returns: boolean }
       is_current_wm_or_ipm: { Args: { _user_id: string }; Returns: boolean }
+      is_event_meeting_published: {
+        Args: { _event_key: string }
+        Returns: boolean
+      }
       is_working_group_lead: {
         Args: { _group: string; _user: string }
         Returns: boolean
