@@ -38,7 +38,6 @@ import {
   DEFAULT_COVER_LEFT_URL,
   DEFAULT_COVER_RIGHT_URL,
 } from "@/lib/summonsPdf";
-import { sendEventInvite, formatEventEmailHtml } from "@/lib/sendEventInvite";
 import { generateICS, icsFilename } from "@/lib/generateICS";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
