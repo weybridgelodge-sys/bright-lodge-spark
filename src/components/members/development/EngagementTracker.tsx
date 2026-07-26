@@ -99,35 +99,37 @@ export default function EngagementTracker({
       )}
 
       <div className="rounded-sm border border-gold/20 overflow-hidden">
-        <table className="w-full text-sm">
-          <thead className="bg-navy-light/40 text-gold/80 uppercase text-[10px] tracking-wider">
-            <tr>
-              <th className="text-left p-2 w-32">Date</th>
-              <th className="text-left p-2 w-40">Category</th>
-              <th className="text-left p-2">Summary</th>
-              {canEdit && <th />}
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((r) => (
-              <tr key={r.id} className="border-t border-gold/10">
-                <td className="p-2 text-primary-foreground/80">{fmt(r.occurred_on)}</td>
-                <td className="p-2 text-primary-foreground/80">{ENGAGEMENT_CATEGORY_LABEL[r.category]}</td>
-                <td className="p-2 text-primary-foreground">{r.summary}</td>
-                {canEdit && (
-                  <td className="p-2 text-right">
-                    <button onClick={() => onDelete(r.id)} className="text-primary-foreground/50 hover:text-red-400">
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </td>
-                )}
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead className="bg-navy-light/40 text-gold/80 uppercase text-[10px] tracking-wider">
+              <tr>
+                <th className="text-left p-2 w-32">Date</th>
+                <th className="text-left p-2 w-40">Category</th>
+                <th className="text-left p-2">Summary</th>
+                {canEdit && <th />}
               </tr>
-            ))}
-            {rows.length === 0 && (
-              <tr><td colSpan={canEdit ? 4 : 3} className="p-4 text-center text-primary-foreground/60 italic">No engagement logged yet.</td></tr>
-            )}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {rows.map((r) => (
+                <tr key={r.id} className="border-t border-gold/10">
+                  <td className="p-2 text-primary-foreground/80">{fmt(r.occurred_on)}</td>
+                  <td className="p-2 text-primary-foreground/80">{ENGAGEMENT_CATEGORY_LABEL[r.category]}</td>
+                  <td className="p-2 text-primary-foreground">{r.summary}</td>
+                  {canEdit && (
+                    <td className="p-2 text-right">
+                      <button onClick={() => onDelete(r.id)} className="text-primary-foreground/50 hover:text-red-400">
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </td>
+                  )}
+                </tr>
+              ))}
+              {rows.length === 0 && (
+                <tr><td colSpan={canEdit ? 4 : 3} className="p-4 text-center text-primary-foreground/60 italic">No engagement logged yet.</td></tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
