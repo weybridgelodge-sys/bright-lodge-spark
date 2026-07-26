@@ -15,6 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { getStripeEnvironment } from "@/lib/stripe";
 import { fetchNextEvent, type EventBundle } from "@/lib/lodgeEvents";
+import { normaliseName, normaliseTitle } from "@/lib/nameCase";
 import TurnstileWidget from "@/components/TurnstileWidget";
 import sixFellowcraftsAprons from "@/assets/six-fellowcrafts-aprons.png.asset.json";
 
