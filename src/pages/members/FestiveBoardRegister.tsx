@@ -22,7 +22,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Utensils, Plus, Pencil, ChevronRight, Trash2, UserPlus } from "lucide-react";
+import { Utensils, Plus, Pencil, ChevronRight, Trash2, UserPlus, Download } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   FB_MEETING_TYPES,
@@ -173,6 +173,73 @@ export default function FestiveBoardRegister() {
     }
     toast({ title: "Record deleted" });
     loadAll();
+  };
+
+  const exportPerfectTablePlan = async (mtg: Meeting) => {
+    const { data, error } = await supabase
+      .from("bookings")
+      .select("details, payment_status")
+      .eq("meeting_id", mtg.id)
+      .in("payment_status", ["paid", "confirmed"]);
+    if (error) {
+      toast({ title: "Export failed", description: error.message, variant: "destructive" });
+      return;
+    }
+    const rows: Array<Record<string, string>> = [];
+    for (const b of (data ?? []) as any[]) {
+      const d = b.details ?? {};
+      const primaryLodge = String(d.lodge ?? "").trim();
+      const meal = String(d.diningOption ?? "").trim();
+      const dietary = String(d.dietary ?? "").trim();
+      rows.push({
+        Title: String(d.title ?? "").trim(),
+        "First Name": String(d.firstName ?? "").trim(),
+        "Last Name": String(d.lastName ?? "").trim(),
+        Group: primaryLodge,
+        Meal: meal,
+        "Special requirements": /^none$/i.test(dietary) ? "" : dietary,
+        "RSVP status": "Attending",
+      });
+      const guests = Array.isArray(d.guests) ? d.guests : [];
+      for (const g of guests) {
+        const name = String(g?.name ?? "").trim();
+        const parts = name.split(/\s+/);
+        const gTitle = String(g?.title ?? "").trim();
+        const gFirst = String(g?.firstName ?? parts[0] ?? "").trim();
+        const gLast = String(g?.lastName ?? parts.slice(1).join(" ") ?? "").trim();
+        const gLodge = String(g?.lodge ?? "").trim() || primaryLodge;
+        const gMeal = String(g?.diningOption ?? g?.meal ?? "").trim() || meal;
+        const gDiet = String(g?.dietary ?? "").trim();
+        rows.push({
+          Title: gTitle,
+          "First Name": gFirst,
+          "Last Name": gLast,
+          Group: gLodge,
+          Meal: gMeal,
+          "Special requirements": /^none$/i.test(gDiet) ? "" : gDiet,
+          "RSVP status": "Attending",
+        });
+      }
+    }
+    const headers = ["Title", "First Name", "Last Name", "Group", "Meal", "Special requirements", "RSVP status"];
+    const esc = (v: string) => {
+      const s = v ?? "";
+      return /[",\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+    };
+    const csv =
+      headers.join(",") +
+      "\r\n" +
+      rows.map((r) => headers.map((h) => esc(r[h] ?? "")).join(",")).join("\r\n");
+    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `perfecttableplan-${mtg.meeting_date}-${mtg.id.slice(0, 8)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast({ title: "Exported", description: `${rows.length} attendee row${rows.length === 1 ? "" : "s"}.` });
   };
 
   const promoteWaitlistBooking = async (b: any) => {
@@ -495,7 +562,7 @@ export default function FestiveBoardRegister() {
                         </div>
                       )}
                       {canManageLOI && (
-                        <div className="flex gap-2 pt-2">
+                        <div className="flex gap-2 pt-2 flex-wrap">
                           <Button
                             variant="outline"
                             size="sm"
@@ -503,6 +570,14 @@ export default function FestiveBoardRegister() {
                             className="border-gold/40 text-gold hover:bg-gold/10"
                           >
                             <Pencil className="w-3 h-3 mr-1" /> Edit / mark attendance
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => exportPerfectTablePlan(mtg)}
+                            className="border-gold/40 text-gold hover:bg-gold/10"
+                          >
+                            <Download className="w-3 h-3 mr-1" /> Export for PerfectTablePlan
                           </Button>
                           <Button
                             variant="outline"
