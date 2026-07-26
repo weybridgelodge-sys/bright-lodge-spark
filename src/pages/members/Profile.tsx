@@ -125,7 +125,7 @@ export default function MembersProfile() {
 
       <form
         onSubmit={save}
-        className="max-w-2xl space-y-4 bg-navy-dark/60 border border-gold/15 rounded-sm p-6"
+        className="max-w-2xl space-y-4 bg-navy-dark/60 border border-gold/15 rounded-sm p-4 sm:p-6"
       >
         <div className="grid grid-cols-1 sm:grid-cols-[120px_1fr_1fr] gap-4">
           <div>
