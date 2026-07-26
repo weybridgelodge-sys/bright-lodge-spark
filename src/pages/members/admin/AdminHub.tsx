@@ -9,7 +9,7 @@ import { Users, HeartHandshake, GraduationCap, BarChart3, Banknote, Mail, Vote, 
 type Tile = { to: string; title: string; description: string; icon: React.ComponentType<{ className?: string }>; visible: boolean };
 
 function Inner() {
-  const { isAdmin, isSecretary, isWorshipfulMaster, canAccessAlmoner, canManageProgression } = useAuth();
+  const { isAdmin, isSecretary, isWorshipfulMaster, canAccessAlmoner, canManageProgression, canAccessTreasurer } = useAuth();
   const [isCharitySteward, setIsCharitySteward] = useState(false);
   const [canEditNewsletter, setCanEditNewsletter] = useState(false);
 
