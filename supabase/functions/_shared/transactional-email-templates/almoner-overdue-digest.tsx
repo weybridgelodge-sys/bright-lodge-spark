@@ -95,7 +95,10 @@ const Email = ({ members = [], reportDate, portalUrl }: Props) => (
 
         <Hr style={hr} />
         <Text style={confidential}>
-          Confidential — for the Almoner and Worshipful Master only.
+          STOP: Read before clicking below
+        </Text>
+        <Text style={confidential}>
+          This is an automated lodge notification, not a personal subscription. Clicking unsubscribe below removes you from all future lodge emails entirely, not just this one. If you are unsure why you received this email, please contact the Lodge Secretary.
         </Text>
       </Container>
     </Body>
@@ -141,7 +144,7 @@ const flagAmber = { color: '#b45309', fontSize: '13px', margin: '2px 0' }
 const linkStyle = brandStyles.link
 const footerText = brandStyles.footerText
 const hr = brandStyles.hr
-const confidential = { color: '#888', fontSize: '11px', fontStyle: 'italic' as const, textAlign: 'center' as const, margin: 0 }
+const confidential = { color: '#888', fontSize: '11px', fontStyle: 'italic' as const, textAlign: 'center' as const, margin: '4px 0' }
 const brand = brandStyles.brand
 const brandSub = brandStyles.brandSub
 
