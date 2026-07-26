@@ -39,11 +39,15 @@ type AuthCtx = {
   isAlmoner: boolean;
   isCharitySteward: boolean;
   isCurrentWmOrIpm: boolean;
+  isCurrentTreasurer: boolean;
+  isCurrentAuditor1: boolean;
+  isCurrentAuditor2: boolean;
   canManageProgression: boolean;
   canManageLOI: boolean;
   canManageSummons: boolean;
   canAccessAlmoner: boolean;
   canAccessCharity: boolean;
+  canAccessTreasurer: boolean;
   canAccessAdminArea: boolean;
   loading: boolean;
   refreshProfile: () => Promise<void>;
