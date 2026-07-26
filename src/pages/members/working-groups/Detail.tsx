@@ -142,22 +142,24 @@ function Inner() {
         )}
 
         <div className="rounded-sm border border-gold/20 overflow-hidden">
-          <table className="w-full text-sm">
-            <thead className="bg-navy-light/40 text-gold/80 uppercase text-[10px] tracking-wider">
-              <tr><th className="text-left p-2 w-32">Date</th><th className="text-left p-2 w-28">Type</th><th className="text-left p-2">Title</th><th className="text-left p-2">Notes</th></tr>
-            </thead>
-            <tbody>
-              {activities.map((a) => (
-                <tr key={a.id} className="border-t border-gold/10">
-                  <td className="p-2 text-primary-foreground/80">{fmt(a.activity_date)}</td>
-                  <td className="p-2 text-primary-foreground/70 capitalize">{a.kind}</td>
-                  <td className="p-2 text-primary-foreground">{a.title}</td>
-                  <td className="p-2 text-primary-foreground/70">{a.notes ?? ""}</td>
-                </tr>
-              ))}
-              {activities.length === 0 && <tr><td colSpan={4} className="p-4 text-center text-primary-foreground/60 italic">No activity recorded yet.</td></tr>}
-            </tbody>
-          </table>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-navy-light/40 text-gold/80 uppercase text-[10px] tracking-wider">
+                <tr><th className="text-left p-2 w-32">Date</th><th className="text-left p-2 w-28">Type</th><th className="text-left p-2">Title</th><th className="text-left p-2">Notes</th></tr>
+              </thead>
+              <tbody>
+                {activities.map((a) => (
+                  <tr key={a.id} className="border-t border-gold/10">
+                    <td className="p-2 text-primary-foreground/80">{fmt(a.activity_date)}</td>
+                    <td className="p-2 text-primary-foreground/70 capitalize">{a.kind}</td>
+                    <td className="p-2 text-primary-foreground">{a.title}</td>
+                    <td className="p-2 text-primary-foreground/70">{a.notes ?? ""}</td>
+                  </tr>
+                ))}
+                {activities.length === 0 && <tr><td colSpan={4} className="p-4 text-center text-primary-foreground/60 italic">No activity recorded yet.</td></tr>}
+              </tbody>
+            </table>
+          </div>
         </div>
       </section>
     </div>
