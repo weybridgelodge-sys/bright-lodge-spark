@@ -91,12 +91,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     setProfile(merged);
     setRoles(((r as { role: Role }[]) ?? []).map((x) => x.role));
-    // WM/IPM detection for current lodge year (auto-rotates on installation)
+    // WM/IPM + Treasurer/Auditor detection for current lodge year (auto-rotates on installation)
     try {
-      const { data: wm } = await supabase.rpc("is_current_wm_or_ipm", { _user_id: uid });
+      const [{ data: wm }, { data: tr }, { data: a1 }, { data: a2 }] = await Promise.all([
+        supabase.rpc("is_current_wm_or_ipm", { _user_id: uid }),
+        supabase.rpc("is_current_officer" as any, { _user_id: uid, _position_key: "treasurer" } as any),
+        supabase.rpc("is_current_officer" as any, { _user_id: uid, _position_key: "auditor_1" } as any),
+        supabase.rpc("is_current_officer" as any, { _user_id: uid, _position_key: "auditor_2" } as any),
+      ]);
       setIsCurrentWmOrIpm(!!wm);
+      setIsCurrentTreasurer(!!tr);
+      setIsCurrentAuditor1(!!a1);
+      setIsCurrentAuditor2(!!a2);
     } catch {
       setIsCurrentWmOrIpm(false);
+      setIsCurrentTreasurer(false);
+      setIsCurrentAuditor1(false);
+      setIsCurrentAuditor2(false);
     }
   };
 
