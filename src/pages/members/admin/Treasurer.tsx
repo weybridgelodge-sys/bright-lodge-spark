@@ -45,6 +45,9 @@ type Tx = {
   amount_pence: number;
   description: string | null;
   reconciled: boolean;
+  attachment_path: string | null;
+  attachment_name: string | null;
+  attachment_size: number | null;
 };
 
 const PAYMENT_METHODS: { value: PaymentMethod; label: string }[] = [
