@@ -408,7 +408,7 @@ export default function MembersDocuments() {
           <button
             key={c}
             onClick={() => setFilter(c)}
-            className={`px-3 py-1 text-xs uppercase tracking-wider rounded-sm border ${
+            className={`px-3 py-1.5 sm:py-1 text-xs uppercase tracking-wider rounded-sm border ${
               filter === c
                 ? "border-gold text-gold bg-gold/10"
                 : "border-gold/20 text-primary-foreground/60 hover:text-gold"
