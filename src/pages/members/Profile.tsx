@@ -190,7 +190,7 @@ export default function MembersProfile() {
               className={inputCls}
             />
           </div>
-          <div className="grid grid-cols-[110px_1fr] gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-[120px_1fr] gap-4">
             <div>
               <label className={labelCls}>Type</label>
               <select
