@@ -172,7 +172,22 @@ function TransactionsTab({
                     <td className="px-4 py-2 capitalize">{t.payment_method.replace("_", " ")}</td>
                     <td className="px-4 py-2">{t.category}</td>
                     <td className="px-4 py-2 text-right tabular-nums text-gold">{gbp(t.amount_pence)}</td>
-                    <td className="px-4 py-2 text-xs text-primary-foreground/70 max-w-[220px] truncate" title={t.description ?? ""}>{t.description}</td>
+                    <td className="px-4 py-2 text-xs text-primary-foreground/70 max-w-[220px]" title={t.description ?? ""}>
+                      <div className="flex items-center gap-1.5">
+                        <span className="truncate">{t.description}</span>
+                        {t.attachment_path && (
+                          <button
+                            type="button"
+                            onClick={() => openAttachment(t.attachment_path!)}
+                            className="shrink-0 p-1 text-gold/80 hover:text-gold"
+                            title={t.attachment_name || "Open attachment"}
+                            aria-label="Open attachment"
+                          >
+                            <Paperclip className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+                      </div>
+                    </td>
                     <td className="px-4 py-2 text-xs">
                       {p ? <span className="inline-flex items-center gap-1">{locked && <Lock className="w-3 h-3 text-gold" />}{p.label}</span> : <span className="text-primary-foreground/40">—</span>}
                     </td>
