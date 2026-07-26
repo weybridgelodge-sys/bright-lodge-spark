@@ -3584,6 +3584,13 @@ export type Database = {
           ugle_reg_number: string
         }[]
       }
+      get_published_meeting_for_event: {
+        Args: { _event_key: string }
+        Returns: {
+          event_key: string
+          id: string
+        }[]
+      }
       get_summons_dining_contacts: {
         Args: { _ids: string[] }
         Returns: {
@@ -3600,10 +3607,6 @@ export type Database = {
       }
       is_active_member: { Args: { _user_id: string }; Returns: boolean }
       is_current_wm_or_ipm: { Args: { _user_id: string }; Returns: boolean }
-      is_event_meeting_published: {
-        Args: { _event_key: string }
-        Returns: boolean
-      }
       is_working_group_lead: {
         Args: { _group: string; _user: string }
         Returns: boolean
