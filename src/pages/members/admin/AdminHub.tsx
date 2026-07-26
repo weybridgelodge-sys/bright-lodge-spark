@@ -31,6 +31,7 @@ function Inner() {
     { to: "/members/almoner", title: "Almoner Portal", description: "Welfare board, life events, correspondence, referrals.", icon: HeartHandshake, visible: canAccessAlmoner },
     { to: "/members/admin/development", title: "Mentor Portal", description: "Mentor dashboard, development records, summary report.", icon: GraduationCap, visible: isAdmin || canManageProgression },
     { to: "/members/admin/charity", title: "Charity Steward", description: "Collections, donations, Charity Ledger, Festival tracker.", icon: Banknote, visible: isAdmin || isWorshipfulMaster || isCharitySteward || isSecretary },
+    { to: "/members/admin/treasurer", title: "Treasurer", description: "Transaction register and reconciliation-period locking.", icon: Wallet, visible: canAccessTreasurer },
     { to: "/members/kpis", title: "KPI Dashboard", description: "Membership, LOI, Festive Board, Royal Arch conversion.", icon: BarChart3, visible: canManageProgression },
     { to: "/members/admin/newsletter", title: "Newsletter Hub", description: "Compose and broadcast the Monthly Chronicle.", icon: Mail, visible: canEditNewsletter },
     { to: "/members/admin/polls", title: "Polls & Voting", description: "Ask the brethren a question; live results on the Dashboard.", icon: Vote, visible: isAdmin || isSecretary || isWorshipfulMaster },
