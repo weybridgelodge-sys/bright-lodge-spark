@@ -495,7 +495,7 @@ export default function FestiveBoardRegister() {
                         </div>
                       )}
                       {canManageLOI && (
-                        <div className="flex gap-2 pt-2">
+                        <div className="flex gap-2 pt-2 flex-wrap">
                           <Button
                             variant="outline"
                             size="sm"
@@ -503,6 +503,14 @@ export default function FestiveBoardRegister() {
                             className="border-gold/40 text-gold hover:bg-gold/10"
                           >
                             <Pencil className="w-3 h-3 mr-1" /> Edit / mark attendance
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => exportPerfectTablePlan(mtg)}
+                            className="border-gold/40 text-gold hover:bg-gold/10"
+                          >
+                            <Download className="w-3 h-3 mr-1" /> Export for PerfectTablePlan
                           </Button>
                           <Button
                             variant="outline"
