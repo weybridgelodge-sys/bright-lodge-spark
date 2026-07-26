@@ -296,7 +296,7 @@ export default function MembersProfile() {
 
         <button
           disabled={busy}
-          className="bg-gold-shimmer text-accent-foreground px-5 py-2 rounded-sm text-sm font-semibold flex items-center gap-2 disabled:opacity-50"
+          className="bg-gold-shimmer text-accent-foreground px-5 py-2.5 sm:py-2 rounded-sm text-sm font-semibold flex items-center gap-2 min-h-11 sm:min-h-10 disabled:opacity-50"
         >
           {busy && <Loader2 className="w-4 h-4 animate-spin" />}
           Save changes
