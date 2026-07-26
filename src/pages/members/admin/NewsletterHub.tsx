@@ -615,13 +615,13 @@ function NewsletterHubInner() {
           <div className="space-y-4">
             {sections.map((s, idx) => (
               <div key={s.id} className="rounded-md border border-gold/15 bg-navy-dark/40 p-3 space-y-2">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <input
                     type="text"
                     value={s.heading}
                     onChange={(e) => updateSection(s.id, { heading: e.target.value })}
                     placeholder="Section heading"
-                    className="flex-1 bg-navy-dark border border-gold/20 rounded px-2 py-1.5 text-sm text-primary-foreground focus:outline-none focus:border-gold/60"
+                    className="min-w-[140px] flex-1 bg-navy-dark border border-gold/20 rounded px-2 py-1.5 text-sm text-primary-foreground focus:outline-none focus:border-gold/60"
                   />
                   <select
                     value={s.layout}
