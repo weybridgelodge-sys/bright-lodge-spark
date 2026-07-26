@@ -1,0 +1,1 @@
+ALTER FUNCTION public.increment_calendar_fetch_count() SET search_path = public;
