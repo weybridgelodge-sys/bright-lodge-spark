@@ -167,7 +167,7 @@ export default function SummonsBuilder() {
         </header>
 
         <Tabs value={tab} onValueChange={setTab} className="space-y-4">
-          <TabsList className="bg-navy-light/60 border border-gold/20">
+          <TabsList className="bg-navy-light/60 border border-gold/20 h-auto flex-wrap justify-start sm:flex-nowrap">
             <TabsTrigger value="new">{editingId ? "Edit Summons" : "New Summons"}</TabsTrigger>
             <TabsTrigger value="preview">Print Preview</TabsTrigger>
             <TabsTrigger value="template">Lodge Template</TabsTrigger>
