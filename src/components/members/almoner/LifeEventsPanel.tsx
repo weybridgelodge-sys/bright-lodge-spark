@@ -178,7 +178,7 @@ export default function LifeEventsPanel({ members, userId }: { members: Member[]
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
           <h3 className="font-serif text-lg text-primary-foreground">Life Events</h3>
           <p className="text-xs text-primary-foreground/60">

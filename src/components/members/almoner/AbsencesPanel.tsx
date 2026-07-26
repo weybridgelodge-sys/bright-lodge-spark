@@ -59,7 +59,7 @@ export default function AbsencesPanel({ members, userId }: { members: Member[]; 
         </p>
         <p className="text-[11px] text-primary-foreground/60">{fmt(r.period_start)} → {fmt(r.period_end)}{r.notes ? ` · ${r.notes}` : ""}</p>
       </div>
-      <button onClick={() => archive(r.id)} className="text-primary-foreground/40 hover:text-red-400" aria-label="Archive">
+      <button onClick={() => archive(r.id)} className="p-1.5 text-primary-foreground/40 hover:text-red-400" aria-label="Archive">
         <Trash2 className="w-4 h-4" />
       </button>
     </div>
@@ -67,7 +67,7 @@ export default function AbsencesPanel({ members, userId }: { members: Member[]; 
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
           <h3 className="font-serif text-lg text-primary-foreground">Member Absences</h3>
           <p className="text-xs text-primary-foreground/60">Known reasons members are away — illness, travel, work</p>
