@@ -214,13 +214,14 @@ Deno.serve(async (req) => {
   }
 
   // 3. Get or create unsubscribe token (one token per email address).
-  // Skipped entirely for internal officer templates — no token means the
-  // downstream email API won't append its unsubscribe footer.
+  // Every transactional send MUST include this — the Lovable email API rejects
+  // sends without it (400 missing_unsubscribe). The visible footer cannot be
+  // suppressed via any known parameter.
   const normalizedEmail = effectiveRecipient.toLowerCase()
-  const isInternalTemplate = INTERNAL_NO_UNSUBSCRIBE_TEMPLATES.has(templateName)
   let unsubscribeToken: string | undefined
 
-  if (!isInternalTemplate) {
+  {
+
 
 
 
