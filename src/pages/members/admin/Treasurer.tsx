@@ -267,13 +267,45 @@ function TxDialog({
       setSaving(false);
       return;
     }
+    if (file && file.size > 15 * 1024 * 1024) {
+      toast({ title: "Attachment must be 15 MB or smaller", variant: "destructive" });
+      setSaving(false);
+      return;
+    }
+
     const { data: u } = await supabase.auth.getUser();
+
+    let attachment_path: string | null = editing?.attachment_path ?? null;
+    let attachment_name: string | null = editing?.attachment_name ?? null;
+    let attachment_size: number | null = editing?.attachment_size ?? null;
+
+    if (removeAttachment && editing?.attachment_path) {
+      await supabase.storage.from("treasurer-attachments").remove([editing.attachment_path]);
+      attachment_path = null; attachment_name = null; attachment_size = null;
+    }
+
+    if (file) {
+      if (editing?.attachment_path && !removeAttachment) {
+        await supabase.storage.from("treasurer-attachments").remove([editing.attachment_path]);
+      }
+      const safe = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+      const path = `${u.user?.id ?? "anon"}/${Date.now()}-${safe}`;
+      const { error: upErr } = await supabase.storage.from("treasurer-attachments").upload(path, file);
+      if (upErr) {
+        setSaving(false);
+        toast({ title: "Attachment upload failed", description: upErr.message, variant: "destructive" });
+        return;
+      }
+      attachment_path = path; attachment_name = file.name; attachment_size = file.size;
+    }
+
     const payload = {
       transaction_date: date,
       direction, payment_method: method, category: category.trim(),
       amount_pence: pence, description: description.trim() || null,
       period_id: periodId === "none" ? null : periodId,
       reconciled,
+      attachment_path, attachment_name, attachment_size,
       created_by: u.user?.id ?? null,
     };
     const res = editing
