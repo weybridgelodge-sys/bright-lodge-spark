@@ -1468,6 +1468,12 @@ function MeetingDialog({
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </Button>
+                    <Input
+                      value={v.dietary ?? ""}
+                      onChange={(e) => setVisitor(v.id, { dietary: e.target.value })}
+                      placeholder="Dietary / allergies (optional)"
+                      className="sm:col-span-8 bg-navy border-gold/20 h-8 text-xs text-primary-foreground placeholder:text-primary-foreground/40"
+                    />
                     {!((parseFloat(v.amountPounds || "0") || 0) > 0 && !v.isMeetingOnly) && (
                       <label className="sm:col-span-8 flex items-center gap-2 text-[11px] text-primary-foreground/70">
                         <input
