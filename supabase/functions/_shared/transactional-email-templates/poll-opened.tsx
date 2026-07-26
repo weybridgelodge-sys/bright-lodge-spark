@@ -139,3 +139,10 @@ const ctaLink = {
   border: `1px solid ${BRAND.gold}`,
   borderRadius: '4px',
 }
+const confidential = {
+  color: '#888',
+  fontSize: '11px',
+  fontStyle: 'italic' as const,
+  textAlign: 'center' as const,
+  margin: '4px 0',
+}
