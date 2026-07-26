@@ -211,9 +211,17 @@ export default function AttendanceCharts() {
                 const subPct = (data.subscribing / maxAttendance) * 100;
                 const visPct = (data.visitors / maxAttendance) * 100;
                 return (
-                <div key={idx} className="flex-1 flex flex-col items-center h-full justify-end group relative">
+                <div
+                  key={idx}
+                  onClick={() => handleBarClick(idx)}
+                  className="flex-1 flex flex-col items-center h-full justify-end group relative cursor-pointer"
+                >
                   {/* 🔥 Fixed floating tooltip box */}
-                  <div className="absolute bottom-full mb-2 bg-navy-dark text-primary-foreground text-[11px] p-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50 shadow-xl min-w-[130px] text-left border border-gold/15 left-1/2 -translate-x-1/2">
+                  <div
+                    className={`absolute bottom-full mb-2 bg-navy-dark text-primary-foreground text-[11px] p-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50 shadow-xl min-w-[130px] text-left border border-gold/15 left-1/2 -translate-x-1/2 ${
+                      activeBar === idx ? "opacity-100" : ""
+                    }`}
+                  >
                     <p className="font-bold border-b border-gold/15 pb-1 mb-1 text-gold whitespace-nowrap">{data.month}</p>
                     <p className="flex justify-between gap-4"><span>Members</span><span>{data.subscribing}</span></p>
                     <p className="flex justify-between gap-4"><span>Visitors</span><span>{data.visitors}</span></p>
