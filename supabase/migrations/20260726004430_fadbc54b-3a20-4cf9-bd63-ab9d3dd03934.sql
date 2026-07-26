@@ -1,0 +1,1 @@
+INSERT INTO public.officer_positions (key, label, order_index, is_progressive) VALUES ('auditor_1', 'Auditor 1', 210, false), ('auditor_2', 'Auditor 2', 220, false) ON CONFLICT (key) DO NOTHING;

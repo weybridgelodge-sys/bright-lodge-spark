@@ -53,6 +53,8 @@ export const NON_PROGRESSIVE_ORDER = [
   "membership_officer",
   "tyler",
   "assistant_tyler",
+  "auditor_1",
+  "auditor_2",
 ] as const;
 
 export type NonProgressiveKey = (typeof NON_PROGRESSIVE_ORDER)[number];
@@ -71,6 +73,8 @@ export const NON_PROGRESSIVE_LABELS: Record<NonProgressiveKey, string> = {
   membership_officer: "Membership Officer",
   tyler: "Tyler",
   assistant_tyler: "Assistant Tyler",
+  auditor_1: "Auditor 1",
+  auditor_2: "Auditor 2",
 };
 
 export function tenureSince(isoDate: string | null | undefined): string {
