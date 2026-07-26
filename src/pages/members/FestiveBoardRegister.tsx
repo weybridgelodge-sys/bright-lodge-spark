@@ -3,6 +3,7 @@ import MembersLayout from "@/components/members/MembersLayout";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { formatMemberLine, type MemberRow } from "@/lib/summons";
+import { normaliseName } from "@/lib/nameCase";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -1134,8 +1135,8 @@ function MeetingDialog({
         .filter((v) => v.name.trim())
         .map((v) => ({
           meeting_id: meetingId!,
-          visitor_name: v.name.trim(),
-          visitor_lodge_name: v.lodgeName.trim() || null,
+          visitor_name: normaliseName(v.name),
+          visitor_lodge_name: v.lodgeName.trim() ? normaliseName(v.lodgeName) : null,
           visitor_lodge_number: v.lodgeNumber.trim() || null,
           email: v.email.trim().toLowerCase() || null,
           attendance_status: v.status,
