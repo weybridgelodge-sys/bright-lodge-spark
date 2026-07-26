@@ -319,7 +319,7 @@ function SocialsList({
                 {canManage && (
                   <button
                     onClick={() => onDelete(s.id)}
-                    className="text-red-400 hover:text-red-300"
+                    className="text-red-400 hover:text-red-300 p-1.5"
                     title="Delete"
                   >
                     <Trash2 className="w-4 h-4" />
