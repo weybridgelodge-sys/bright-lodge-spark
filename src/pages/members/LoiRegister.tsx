@@ -284,10 +284,10 @@ export default function LoiRegister() {
                             .map(({ r, name }) => (
                               <li
                                 key={r.id}
-                                className="flex justify-between gap-3 border-b border-gold/5 pb-1"
+                                className="flex flex-wrap justify-between gap-x-3 gap-y-0.5 border-b border-gold/5 pb-1"
                               >
-                                <span>{name}</span>
-                                <span className="text-gold">
+                                <span className="min-w-0 truncate flex-1">{name}</span>
+                                <span className="text-gold shrink-0">
                                   {partLabel(r.part, r.part_other)}
                                 </span>
                               </li>
@@ -300,7 +300,7 @@ export default function LoiRegister() {
                             variant="outline"
                             size="sm"
                             onClick={() => setEditing(s)}
-                            className="border-gold/40 text-gold hover:bg-gold/10"
+                            className="border-gold/40 text-gold hover:bg-gold/10 min-h-11 sm:min-h-0"
                           >
                             <Pencil className="w-3 h-3 mr-1" /> Edit
                           </Button>
@@ -308,7 +308,7 @@ export default function LoiRegister() {
                             variant="outline"
                             size="sm"
                             onClick={() => handleDelete(s.id)}
-                            className="border-destructive/40 text-destructive hover:bg-destructive/10"
+                            className="border-destructive/40 text-destructive hover:bg-destructive/10 min-h-11 sm:min-h-0"
                           >
                             <Trash2 className="w-3 h-3 mr-1" /> Delete
                           </Button>
@@ -594,14 +594,14 @@ function SessionDialog({
                     />
                     <span className="flex-1 min-w-[140px]">{memberDisplay(m)}</span>
                     {d.present && (
-                      <div className="flex items-center gap-2">
+                      <div className="w-full sm:w-auto flex gap-2">
                         <Select
                           value={d.part}
                           onValueChange={(v) =>
                             setDraft(m.id, { part: v as LoiPart })
                           }
                         >
-                          <SelectTrigger className="h-8 w-[180px] bg-navy border-gold/30 text-primary-foreground placeholder:text-primary-foreground/40 text-xs">
+                          <SelectTrigger className="h-8 flex-1 sm:flex-none sm:w-[180px] bg-navy border-gold/30 text-primary-foreground placeholder:text-primary-foreground/40 text-xs">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -619,7 +619,7 @@ function SessionDialog({
                               setDraft(m.id, { partOther: e.target.value })
                             }
                             placeholder="Specify"
-                            className="h-8 w-32 bg-navy border-gold/30 text-primary-foreground placeholder:text-primary-foreground/40 text-xs"
+                            className="h-8 flex-1 sm:flex-none sm:w-32 bg-navy border-gold/30 text-primary-foreground placeholder:text-primary-foreground/40 text-xs"
                           />
                         )}
                       </div>
