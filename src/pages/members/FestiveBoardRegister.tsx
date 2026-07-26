@@ -66,6 +66,7 @@ type Attendance = {
   booking_id: string | null;
   source?: "manual" | "booking" | null;
   source_booking_id?: string | null;
+  dietary?: string | null;
 };
 
 
