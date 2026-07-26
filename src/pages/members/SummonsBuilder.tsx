@@ -350,16 +350,18 @@ function OfficerRollTab() {
       {loading ? (
         <p className="text-sm text-primary-foreground/70">Loading…</p>
       ) : (
-        <table className="w-full text-sm">
-          <tbody>
-            {rows.map((r, i) => (
-              <tr key={i} className="border-b border-gold/10">
-                <td className="py-1.5 pr-2 font-medium text-primary-foreground/80">{r.label}</td>
-                <td className="py-1.5">{r.member || <span className="text-primary-foreground/40">—</span>}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <tbody>
+              {rows.map((r, i) => (
+                <tr key={i} className="border-b border-gold/10">
+                  <td className="py-1.5 pr-2 font-medium text-primary-foreground/80">{r.label}</td>
+                  <td className="py-1.5">{r.member || <span className="text-primary-foreground/40">—</span>}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );
@@ -961,7 +963,7 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
             </div>
           );
           return (
-            <div className="flex gap-6 text-xs">
+            <div className="flex flex-col sm:flex-row gap-6 text-xs">
               <div className="flex-1 space-y-1">{left.map(cell)}</div>
               <div className="flex-1 space-y-1">{right.map(cell)}</div>
             </div>
@@ -1062,49 +1064,51 @@ function HistoryTab({ onEdit }: { onEdit: (id: string) => void }) {
     s === "finalised" || s === "sent" ? "finalised" : "in_progress";
   return (
     <div className="bg-navy-light/40 border border-gold/20 rounded p-4">
-      {rows.length === 0 ? <p className="text-sm text-primary-foreground/60">No summonses saved yet.</p> : (
-        <table className="w-full text-sm">
-          <thead className="text-xs text-primary-foreground/60">
-            <tr><th className="text-left py-1">#</th><th className="text-left">Date</th><th className="text-left">Type</th><th className="text-left">Status</th><th className="text-left">Sent to</th><th></th></tr>
-          </thead>
-          <tbody>
-            {rows.map((r) => (
-              <tr key={r.id} className="border-t border-gold/10">
-                <td className="py-1.5">{r.meeting_number}</td>
-                <td>{formatDateShort(r.meeting_date)}</td>
-                <td>{r.meeting_type}</td>
-                <td>
-                  <Select
-                    value={displayStatus(r.status)}
-                    onValueChange={(v) => changeStatus(r, v as "in_progress" | "finalised")}
-                  >
-                    <SelectTrigger className="h-8 w-[140px] bg-navy text-primary-foreground border-gold/30">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="in_progress">In Progress</SelectItem>
-                      <SelectItem value="finalised">Finalised</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </td>
-                <td>{r.sent_to_count ?? "—"}</td>
-                <td>
-                  <div className="flex gap-2 justify-end py-1.5">
-                    <Button size="sm" variant="outline" className="text-navy" onClick={() => onEdit(r.id)}>Edit</Button>
-                    {r.pdf_storage_path && (
-                      <Button size="sm" variant="outline" className="text-navy" onClick={() => open(r.pdf_storage_path)}>
-                        <FileText className="w-3.5 h-3.5 mr-1" /> Open
+        {rows.length === 0 ? <p className="text-sm text-primary-foreground/60">No summonses saved yet.</p> : (
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead className="text-xs text-primary-foreground/60">
+              <tr><th className="text-left py-1">#</th><th className="text-left">Date</th><th className="text-left">Type</th><th className="text-left">Status</th><th className="text-left">Sent to</th><th></th></tr>
+            </thead>
+            <tbody>
+              {rows.map((r) => (
+                <tr key={r.id} className="border-t border-gold/10">
+                  <td className="py-1.5">{r.meeting_number}</td>
+                  <td>{formatDateShort(r.meeting_date)}</td>
+                  <td>{r.meeting_type}</td>
+                  <td>
+                    <Select
+                      value={displayStatus(r.status)}
+                      onValueChange={(v) => changeStatus(r, v as "in_progress" | "finalised")}
+                    >
+                      <SelectTrigger className="h-8 w-[140px] bg-navy text-primary-foreground border-gold/30">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="in_progress">In Progress</SelectItem>
+                        <SelectItem value="finalised">Finalised</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </td>
+                  <td>{r.sent_to_count ?? "—"}</td>
+                  <td>
+                    <div className="flex gap-2 justify-end py-1.5">
+                      <Button size="sm" variant="outline" className="text-navy" onClick={() => onEdit(r.id)}>Edit</Button>
+                      {r.pdf_storage_path && (
+                        <Button size="sm" variant="outline" className="text-navy" onClick={() => open(r.pdf_storage_path)}>
+                          <FileText className="w-3.5 h-3.5 mr-1" /> Open
+                        </Button>
+                      )}
+                      <Button size="sm" variant="destructive" onClick={() => remove(r.id)}>
+                        <Trash2 className="w-3.5 h-3.5" />
                       </Button>
-                    )}
-                    <Button size="sm" variant="destructive" onClick={() => remove(r.id)}>
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </Button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );
@@ -1314,7 +1318,7 @@ function VisitorEmailDialog(props: {
           </DialogDescription>
         </DialogHeader>
 
-        <div className="max-h-[55vh] overflow-y-auto border border-gold/20 rounded">
+        <div className="max-h-[55vh] overflow-y-auto overflow-x-auto border border-gold/20 rounded">
           {loading ? (
             <p className="p-4 text-sm text-primary-foreground/70">Loading visitors…</p>
           ) : rows.length === 0 ? (
