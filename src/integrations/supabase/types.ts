@@ -894,6 +894,46 @@ export type Database = {
           },
         ]
       }
+      festive_board_deadline_reminders_sent: {
+        Row: {
+          meeting_id: string
+          member_id: string
+          sent_at: string
+        }
+        Insert: {
+          meeting_id: string
+          member_id: string
+          sent_at?: string
+        }
+        Update: {
+          meeting_id?: string
+          member_id?: string
+          sent_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "festive_board_deadline_reminders_sent_meeting_id_fkey"
+            columns: ["meeting_id"]
+            isOneToOne: false
+            referencedRelation: "festive_board_meetings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "festive_board_deadline_reminders_sent_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "calendar_subscription_status"
+            referencedColumns: ["member_id"]
+          },
+          {
+            foreignKeyName: "festive_board_deadline_reminders_sent_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       festive_board_meetings: {
         Row: {
           created_at: string
@@ -2580,6 +2620,48 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      push_device_tokens: {
+        Row: {
+          created_at: string
+          id: string
+          last_seen_at: string
+          member_id: string
+          platform: string
+          token: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_seen_at?: string
+          member_id: string
+          platform: string
+          token: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_seen_at?: string
+          member_id?: string
+          platform?: string
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "push_device_tokens_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "calendar_subscription_status"
+            referencedColumns: ["member_id"]
+          },
+          {
+            foreignKeyName: "push_device_tokens_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       ritual_documents: {
         Row: {
