@@ -31,6 +31,18 @@ const DataProtection = () => {
             <p>If you make an enquiry through our website's contact or enquiry forms, we collect the name, email address, and any message content you provide, solely to respond to your enquiry.</p>
             <p>When you make a booking or send an enquiry through this website, we may send you confirmation, reply, and follow-up emails relating to that booking or enquiry.</p>
 
+            <h2>The Members Portal and mobile app</h2>
+            <p>Members of Weybridge Lodge No. 6787 who register for the Members Portal and its companion mobile app provide us with additional information beyond what is described above, in order to run the Lodge and support its members. This includes:</p>
+            <ul>
+              <li><strong>Membership record details:</strong> rank, office, initiation and progression dates, and attendance at meetings, Lodge of Instruction sessions, and social events.</li>
+              <li><strong>Mentoring and development records:</strong> a member's progress through the Lodge's mentoring checklist, ritual learning record, and related notes made by their assigned Mentor or the Director of Ceremonies.</li>
+              <li><strong>Welfare records:</strong> where a member is supported by the Lodge's Almoner, records of contact, welfare status, and any referrals to Masonic charitable bodies such as the Masonic Charitable Foundation are kept. These records are strictly confidential and are visible only to the Almoner and the current Worshipful Master — access is revoked automatically once a new Master is installed. Welfare records are never shared with other members, and are held separately from general membership records.</li>
+              <li><strong>Financial records:</strong> dues subscription and payment records, where a member pays Lodge subscriptions through the Portal.</li>
+              <li><strong>Device and notification data:</strong> if you enable push notifications in the mobile app, we store a device token to deliver reminders (such as meeting and booking deadlines) to your device. This token is not linked to any advertising identifier and is not shared with third parties for marketing.</li>
+            </ul>
+            <p>This information is used solely for the internal administration of the Lodge, its charitable and welfare activities, and its statutory and Masonic reporting obligations (including to the Provincial Grand Secretary's office). It is not used for any commercial purpose and is not sold or shared outside the Lodge's officers acting in their official capacity, except where welfare records are shared with Masonic charitable bodies (such as the Masonic Charitable Foundation) as part of a referral you or the Almoner have agreed to.</p>
+            <p>Access to different categories of this data is restricted by role — for example, welfare records are visible only to the Almoner and current Worshipful Master, and financial records only to the Treasurer and relevant auditing officers — rather than being available to all Portal administrators.</p>
+
             <h2>Who we share your data with</h2>
             <p>We will not share your information with third parties or use it for any other automated processing beyond what is described on this page.</p>
 
