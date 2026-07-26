@@ -51,6 +51,7 @@ const DataProtection = () => {
 
             <h2>How long we retain your data</h2>
             <p>Membership data is retained for as long as you remain a member of the Lodge, and for a reasonable period afterwards for administrative and historical record purposes consistent with the Lodge's obligations to the Provincial Grand Secretary's office.</p>
+            <p>General welfare and Almoner contact records are retained for active members throughout their membership, and for 7 years after a member leaves the Lodge or the welfare support in question ends. Financial and charitable transaction records are retained for 6 years, in line with standard record-keeping requirements. Any sensitive health-related notes recorded by the Almoner are kept only for as long as operationally necessary to support the member, and are reviewed and removed once no longer needed for that purpose.</p>
 
             <h2>What rights you have over your data</h2>
             <p>You have the right to request a copy of the personal data we hold about you, and to request that it be corrected or erased. Please notify the Data Protection Officer in writing if your details are inaccurate or if you object to your data being stored electronically.</p>
