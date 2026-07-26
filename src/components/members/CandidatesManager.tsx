@@ -168,7 +168,7 @@ export default function CandidatesManager({ onChange }: { onChange?: () => void 
               />
               <button
                 onClick={() => remove(c.id)}
-                className="text-primary-foreground/50 hover:text-red-400 p-1"
+                className="text-primary-foreground/50 hover:text-red-400 p-2"
                 aria-label="Delete candidate"
               >
                 <Trash2 className="w-3.5 h-3.5" />

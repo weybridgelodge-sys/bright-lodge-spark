@@ -126,6 +126,7 @@ function useLiveFestive(): LiveFestive | null {
 
 export default function AttendanceCharts() {
   const [activeTab, setActiveTab] = useState<"festive" | "loi">("festive");
+  const [activeBar, setActiveBar] = useState<number | null>(null);
   const liveLoi = useLiveLoi();
   const liveFestive = useLiveFestive();
   const loiRehearsalData = liveLoi?.data.length ? liveLoi.data : loiRehearsalFallback;
@@ -140,6 +141,10 @@ export default function AttendanceCharts() {
   const averageSubscribing = visibleMeetings.length
     ? Math.round(visibleMeetings.reduce((a, c) => a + c.subscribing, 0) / visibleMeetings.length)
     : 0;
+
+  const handleBarClick = (idx: number) => {
+    setActiveBar((current) => (current === idx ? null : idx));
+  };
 
   return (
     <div className="space-y-5">
