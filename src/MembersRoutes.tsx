@@ -38,6 +38,7 @@ const PollsAdmin = lazy(() => import("./pages/members/admin/PollsAdmin"));
 const AdminDues = lazy(() => import("./pages/members/admin/AdminDues"));
 const RitualAdmin = lazy(() => import("./pages/members/admin/RitualAdmin"));
 const DocumentsAdmin = lazy(() => import("./pages/members/admin/DocumentsAdmin"));
+const Treasurer = lazy(() => import("./pages/members/admin/Treasurer"));
 
 const MembersRoutes = () => (
   <AuthProvider>
