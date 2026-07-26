@@ -125,7 +125,7 @@ export default function MembersProfile() {
 
       <form
         onSubmit={save}
-        className="max-w-2xl space-y-4 bg-navy-dark/60 border border-gold/15 rounded-sm p-6"
+        className="max-w-2xl space-y-4 bg-navy-dark/60 border border-gold/15 rounded-sm p-4 sm:p-6"
       >
         <div className="grid grid-cols-1 sm:grid-cols-[120px_1fr_1fr] gap-4">
           <div>
@@ -190,7 +190,7 @@ export default function MembersProfile() {
               className={inputCls}
             />
           </div>
-          <div className="grid grid-cols-[110px_1fr] gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-[120px_1fr] gap-4">
             <div>
               <label className={labelCls}>Type</label>
               <select
@@ -296,7 +296,7 @@ export default function MembersProfile() {
 
         <button
           disabled={busy}
-          className="bg-gold-shimmer text-accent-foreground px-5 py-2 rounded-sm text-sm font-semibold flex items-center gap-2 disabled:opacity-50"
+          className="bg-gold-shimmer text-accent-foreground px-5 py-2.5 sm:py-2 rounded-sm text-sm font-semibold flex items-center gap-2 min-h-11 sm:min-h-10 disabled:opacity-50"
         >
           {busy && <Loader2 className="w-4 h-4 animate-spin" />}
           Save changes
