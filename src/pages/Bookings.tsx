@@ -250,18 +250,27 @@ const Bookings = () => {
     }
     setSubmissionStatus("submitting");
     try {
+      // Normalise capitalisation at point of entry so records are stored clean.
+      const nTitle = normaliseTitle(title);
+      const nFirst = normaliseName(firstName);
+      const nLast = normaliseName(lastName);
+      const nLodge = normaliseName(lodge);
+      const nGuests = guests.map((g) => ({
+        name: normaliseName(g.name),
+        lodge: normaliseName(g.lodge),
+      }));
       const { data, error } = await supabase.functions.invoke("save-meeting-response", {
         body: {
           event_key: publishedMeeting?.event_key ?? event.slug,
           event_label: eventLabel,
           meeting_id: publishedMeeting?.id ?? null,
-          contact_name: `${title} ${firstName} ${lastName}`.trim(),
+          contact_name: `${nTitle} ${nFirst} ${nLast}`.trim(),
           contact_email: email,
           contact_phone: phone,
           meeting_option: meetingOption,
           details: {
-            title, firstName, lastName, lodge,
-            meetingOption, guestCount, guests, dietary,
+            title: nTitle, firstName: nFirst, lastName: nLast, lodge: nLodge,
+            meetingOption, guestCount, guests: nGuests, dietary,
             diningOption: selectedOption?.label,
             unitPricePence: seatPricePence,
             paymentMethod, totalPence,
