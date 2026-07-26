@@ -705,8 +705,9 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
     if (d?.failures?.length) {
       toast.error(`${d.failures.length} delivery(ies) failed — see history log`);
     }
-    // Officers Night auto-invite: fire once per summons, if a date is set.
-    await maybeSendOfficersNight(id);
+    // Officers Night one-off .ics invite removed for members — dates are already
+    // in the Member Calendar subscription feed. Visitor flow (send-summons-to-visitors)
+    // still sends a one-off .ics since visitors don't have calendar subscriptions.
   };
 
   const [visitorDialogOpen, setVisitorDialogOpen] = useState(false);
