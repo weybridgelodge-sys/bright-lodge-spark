@@ -162,41 +162,43 @@ function MembersTab({ members, subs, payments, calcs, onRefresh }: {
             <DialogDescription>All Stripe payment and refund events for this member (test mode).</DialogDescription>
           </DialogHeader>
           <div className="max-h-96 overflow-y-auto">
-            <table className="w-full text-sm">
-              <thead className="text-left text-xs uppercase text-muted-foreground">
-                <tr>
-                  <th className="px-2 py-1">Date</th>
-                  <th className="px-2 py-1">Type</th>
-                  <th className="px-2 py-1 text-right">Amount</th>
-                  <th className="px-2 py-1">Method</th>
-                  <th className="px-2 py-1">Status</th>
-                  <th className="px-2 py-1">Note</th>
-                  <th className="px-2 py-1"></th>
-                </tr>
-              </thead>
-              <tbody>
-                {payments.filter(p => p.member_id === historyMember?.id).map((p) => (
-                  <tr key={p.id} className="border-t">
-                    <td className="px-2 py-1">{new Date(p.occurred_at).toLocaleDateString("en-GB")}</td>
-                    <td className="px-2 py-1">{p.type}</td>
-                    <td className={`px-2 py-1 text-right ${p.type === "refund" ? "text-red-600" : ""}`}>
-                      {p.type === "refund" ? "−" : ""}{gbp(p.amount_pence)}
-                    </td>
-                    <td className="px-2 py-1">{p.method}</td>
-                    <td className="px-2 py-1">{p.status}</td>
-                    <td className="px-2 py-1">{p.note}</td>
-                    <td className="px-2 py-1">
-                      {p.type === "payment" && p.status === "succeeded" && (
-                        <Button size="sm" variant="destructive" onClick={() => setRefundTarget(p)}>Refund</Button>
-                      )}
-                    </td>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="text-left text-xs uppercase text-muted-foreground">
+                  <tr>
+                    <th className="px-2 py-1">Date</th>
+                    <th className="px-2 py-1">Type</th>
+                    <th className="px-2 py-1 text-right">Amount</th>
+                    <th className="px-2 py-1">Method</th>
+                    <th className="px-2 py-1">Status</th>
+                    <th className="px-2 py-1">Note</th>
+                    <th className="px-2 py-1"></th>
                   </tr>
-                ))}
-                {payments.filter(p => p.member_id === historyMember?.id).length === 0 && (
-                  <tr><td colSpan={7} className="px-2 py-4 text-center text-muted-foreground">No payments yet.</td></tr>
-                )}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {payments.filter(p => p.member_id === historyMember?.id).map((p) => (
+                    <tr key={p.id} className="border-t">
+                      <td className="px-2 py-1">{new Date(p.occurred_at).toLocaleDateString("en-GB")}</td>
+                      <td className="px-2 py-1">{p.type}</td>
+                      <td className={`px-2 py-1 text-right ${p.type === "refund" ? "text-red-600" : ""}`}>
+                        {p.type === "refund" ? "−" : ""}{gbp(p.amount_pence)}
+                      </td>
+                      <td className="px-2 py-1">{p.method}</td>
+                      <td className="px-2 py-1">{p.status}</td>
+                      <td className="px-2 py-1">{p.note}</td>
+                      <td className="px-2 py-1">
+                        {p.type === "payment" && p.status === "succeeded" && (
+                          <Button size="sm" variant="destructive" onClick={() => setRefundTarget(p)}>Refund</Button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                  {payments.filter(p => p.member_id === historyMember?.id).length === 0 && (
+                    <tr><td colSpan={7} className="px-2 py-4 text-center text-muted-foreground">No payments yet.</td></tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
