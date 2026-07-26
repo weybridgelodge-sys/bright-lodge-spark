@@ -155,10 +155,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const canManageSummons = isAdmin || isSecretary || isAssistantSecretary;
   const canAccessAlmoner = isAdmin || isAlmoner || isCurrentWmOrIpm;
   const canAccessCharity = isAdmin || isWorshipfulMaster || isCharitySteward || isSecretary;
-  const canAccessAdminArea = isAdmin || isSecretary || isWorshipfulMaster || isDirectorOfCeremonies || isAlmoner || isCharitySteward || isAssistantSecretary;
+  const canAccessTreasurer = isAdmin || isCurrentTreasurer || isCurrentAuditor1 || isCurrentAuditor2 || isWorshipfulMaster || isCurrentWmOrIpm || isSecretary;
+  const canAccessAdminArea = isAdmin || isSecretary || isWorshipfulMaster || isDirectorOfCeremonies || isAlmoner || isCharitySteward || isAssistantSecretary || isCurrentTreasurer || isCurrentAuditor1 || isCurrentAuditor2;
 
   return (
-    <Ctx.Provider value={{ session, user: session?.user ?? null, profile, isAdmin, isSecretary, isAssistantSecretary, isWorshipfulMaster, isDirectorOfCeremonies, isAlmoner, isCharitySteward, isCurrentWmOrIpm, canManageProgression, canManageLOI, canManageSummons, canAccessAlmoner, canAccessCharity, canAccessAdminArea, loading, refreshProfile, signOut }}>
+    <Ctx.Provider value={{ session, user: session?.user ?? null, profile, isAdmin, isSecretary, isAssistantSecretary, isWorshipfulMaster, isDirectorOfCeremonies, isAlmoner, isCharitySteward, isCurrentWmOrIpm, isCurrentTreasurer, isCurrentAuditor1, isCurrentAuditor2, canManageProgression, canManageLOI, canManageSummons, canAccessAlmoner, canAccessCharity, canAccessTreasurer, canAccessAdminArea, loading, refreshProfile, signOut }}>
       {children}
     </Ctx.Provider>
   );
