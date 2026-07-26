@@ -61,6 +61,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [roles, setRoles] = useState<Role[]>([]);
   const [isCurrentWmOrIpm, setIsCurrentWmOrIpm] = useState(false);
+  const [isCurrentTreasurer, setIsCurrentTreasurer] = useState(false);
+  const [isCurrentAuditor1, setIsCurrentAuditor1] = useState(false);
+  const [isCurrentAuditor2, setIsCurrentAuditor2] = useState(false);
   const [loading, setLoading] = useState(true);
 
 
