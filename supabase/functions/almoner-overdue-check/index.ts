@@ -195,7 +195,10 @@ Deno.serve(async (req) => {
     const reportDate = new Date().toLocaleDateString('en-GB', {
       day: '2-digit', month: 'short', year: 'numeric',
     })
-    const idempotencyKey = `almoner-overdue-${today}`
+    const idempotencyKey = force
+      ? `almoner-overdue-${today}-force-${Date.now()}`
+      : `almoner-overdue-${today}`
+
 
     const resp = await fetch(`${supabaseUrl}/functions/v1/send-transactional-email`, {
       method: 'POST',
