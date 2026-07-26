@@ -3584,6 +3584,13 @@ export type Database = {
           ugle_reg_number: string
         }[]
       }
+      get_published_meeting_for_event: {
+        Args: { _event_key: string }
+        Returns: {
+          event_key: string
+          id: string
+        }[]
+      }
       get_summons_dining_contacts: {
         Args: { _ids: string[] }
         Returns: {

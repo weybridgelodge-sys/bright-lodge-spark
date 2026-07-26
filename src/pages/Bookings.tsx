@@ -104,13 +104,11 @@ const Bookings = () => {
       if (cancelled) return;
       if (b) {
         setBundle(b);
-        const { data } = await supabase
-          .from("festive_board_meetings")
-          .select("id,event_key")
-          .eq("event_key", b.event.slug)
-          .eq("status", "published")
-          .maybeSingle();
-        if (!cancelled) setPublishedMeeting(data ?? null);
+        const { data } = await (supabase.rpc as any)("get_published_meeting_for_event", {
+          _event_key: b.event.slug,
+        });
+        const row = Array.isArray(data) ? data[0] : null;
+        if (!cancelled) setPublishedMeeting(row ? { id: row.id, event_key: row.event_key } : null);
       } else {
         setPublishedMeeting(null);
       }
