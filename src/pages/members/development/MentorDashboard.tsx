@@ -103,67 +103,69 @@ function Inner() {
         <div className="flex items-center justify-center py-20"><Loader2 className="w-6 h-6 text-gold animate-spin" /></div>
       ) : (
         <div className="rounded-sm border border-gold/20 overflow-hidden">
-          <table className="w-full text-sm">
-            <thead className="bg-navy-light/40 text-gold/80 uppercase text-[10px] tracking-wider">
-              <tr>
-                <th className="text-left p-3">Member</th>
-                <th className="text-left p-3">Degree</th>
-                <th className="text-left p-3 w-44">Checklist</th>
-                <th className="text-left p-3">Last check-in</th>
-                <th className="text-left p-3">Last touchpoint</th>
-                <th className="text-left p-3">Overdue</th>
-                <th />
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((r) => {
-                const pct = Math.round((r.completed / Math.max(r.total, 1)) * 100);
-                const days = daysSince(r.lastTouchpoint);
-                const stale = days !== null && days > 42;
-                return (
-                  <tr key={r.id} className="border-t border-gold/10 hover:bg-navy-light/20">
-                    <td className="p-3 text-primary-foreground">{displayName(r)}</td>
-                    <td className="p-3 text-primary-foreground/80">{DEGREE_LABEL[r.degree] ?? r.degree}</td>
-                    <td className="p-3">
-                      <div className="flex items-center gap-2">
-                        <div className="flex-1 h-1.5 bg-navy-light rounded-full overflow-hidden">
-                          <div className="h-full bg-gold" style={{ width: `${pct}%` }} />
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-navy-light/40 text-gold/80 uppercase text-[10px] tracking-wider">
+                <tr>
+                  <th className="text-left p-3">Member</th>
+                  <th className="text-left p-3">Degree</th>
+                  <th className="text-left p-3 w-44">Checklist</th>
+                  <th className="text-left p-3">Last check-in</th>
+                  <th className="text-left p-3">Last touchpoint</th>
+                  <th className="text-left p-3">Overdue</th>
+                  <th />
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.map((r) => {
+                  const pct = Math.round((r.completed / Math.max(r.total, 1)) * 100);
+                  const days = daysSince(r.lastTouchpoint);
+                  const stale = days !== null && days > 42;
+                  return (
+                    <tr key={r.id} className="border-t border-gold/10 hover:bg-navy-light/20">
+                      <td className="p-3 text-primary-foreground">{displayName(r)}</td>
+                      <td className="p-3 text-primary-foreground/80">{DEGREE_LABEL[r.degree] ?? r.degree}</td>
+                      <td className="p-3">
+                        <div className="flex items-center gap-2">
+                          <div className="flex-1 h-1.5 bg-navy-light rounded-full overflow-hidden">
+                            <div className="h-full bg-gold" style={{ width: `${pct}%` }} />
+                          </div>
+                          <span className="text-[10px] tabular-nums text-primary-foreground/70">{pct}%</span>
                         </div>
-                        <span className="text-[10px] tabular-nums text-primary-foreground/70">{pct}%</span>
-                      </div>
-                    </td>
-                    <td className="p-3 text-primary-foreground/80">{fmt(r.lastCheckIn)}</td>
-                    <td className="p-3">
-                      {r.lastTouchpoint ? (
-                        <span className={`text-xs inline-flex items-center gap-1 ${stale ? "text-amber-400" : "text-primary-foreground/80"}`}>
-                          {stale && <AlertTriangle className="w-3 h-3" />}
-                          {fmt(r.lastTouchpoint)}
-                          {days !== null && <span className="text-primary-foreground/50">· {days}d</span>}
-                        </span>
-                      ) : (
-                        <span className="text-primary-foreground/40 text-xs">—</span>
-                      )}
-                    </td>
-                    <td className="p-3">
-                      {r.overdue > 0 ? (
-                        <span className="inline-flex items-center gap-1 text-amber-400 text-xs"><AlertTriangle className="w-3 h-3" /> {r.overdue}</span>
-                      ) : (
-                        <span className="text-primary-foreground/40 text-xs">—</span>
-                      )}
-                    </td>
-                    <td className="p-3 text-right">
-                      <Link to={`/members/development/${r.id}`} className="inline-flex items-center text-gold text-xs hover:underline">
-                        Open <ChevronRight className="w-3 h-3" />
-                      </Link>
-                    </td>
-                  </tr>
-                );
-              })}
-              {filtered.length === 0 && (
-                <tr><td colSpan={7} className="p-6 text-center text-primary-foreground/60 italic">No members to show.</td></tr>
-              )}
-            </tbody>
-          </table>
+                      </td>
+                      <td className="p-3 text-primary-foreground/80">{fmt(r.lastCheckIn)}</td>
+                      <td className="p-3">
+                        {r.lastTouchpoint ? (
+                          <span className={`text-xs inline-flex items-center gap-1 ${stale ? "text-amber-400" : "text-primary-foreground/80"}`}>
+                            {stale && <AlertTriangle className="w-3 h-3" />}
+                            {fmt(r.lastTouchpoint)}
+                            {days !== null && <span className="text-primary-foreground/50">· {days}d</span>}
+                          </span>
+                        ) : (
+                          <span className="text-primary-foreground/40 text-xs">—</span>
+                        )}
+                      </td>
+                      <td className="p-3">
+                        {r.overdue > 0 ? (
+                          <span className="inline-flex items-center gap-1 text-amber-400 text-xs"><AlertTriangle className="w-3 h-3" /> {r.overdue}</span>
+                        ) : (
+                          <span className="text-primary-foreground/40 text-xs">—</span>
+                        )}
+                      </td>
+                      <td className="p-3 text-right">
+                        <Link to={`/members/development/${r.id}`} className="inline-flex items-center text-gold text-xs hover:underline">
+                          Open <ChevronRight className="w-3 h-3" />
+                        </Link>
+                      </td>
+                    </tr>
+                  );
+                })}
+                {filtered.length === 0 && (
+                  <tr><td colSpan={7} className="p-6 text-center text-primary-foreground/60 italic">No members to show.</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>
