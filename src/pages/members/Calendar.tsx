@@ -188,12 +188,12 @@ function Inner() {
       </div>
 
       <div className="rounded-sm border border-gold/30 bg-navy-dark/60 p-4">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-3">
+          <div className="flex items-center gap-2 flex-wrap">
             <Button
               variant="outline"
               size="sm"
-              className="border-gold/40 bg-transparent text-primary-foreground hover:bg-navy hover:text-gold"
+              className="border-gold/40 bg-transparent text-primary-foreground hover:bg-navy hover:text-gold min-h-11 sm:min-h-0"
               onClick={() => setCursor((c) => addMonths(c, -1))}
               aria-label="Previous month"
             >
@@ -202,7 +202,7 @@ function Inner() {
             <Button
               variant="outline"
               size="sm"
-              className="border-gold/40 bg-transparent text-primary-foreground hover:bg-navy hover:text-gold"
+              className="border-gold/40 bg-transparent text-primary-foreground hover:bg-navy hover:text-gold min-h-11 sm:min-h-0"
               onClick={() => { const t = new Date(); setCursor(startOfMonth(t)); setSelected(t); }}
             >
               Today
@@ -210,15 +210,15 @@ function Inner() {
             <Button
               variant="outline"
               size="sm"
-              className="border-gold/40 bg-transparent text-primary-foreground hover:bg-navy hover:text-gold"
+              className="border-gold/40 bg-transparent text-primary-foreground hover:bg-navy hover:text-gold min-h-11 sm:min-h-0"
               onClick={() => setCursor((c) => addMonths(c, 1))}
               aria-label="Next month"
             >
               <ChevronRight className="w-4 h-4" />
             </Button>
+            <h2 className="font-serif text-gold text-lg ml-1">{format(cursor, "MMMM yyyy")}</h2>
           </div>
-          <h2 className="font-serif text-gold text-lg">{format(cursor, "MMMM yyyy")}</h2>
-          <div className="flex items-center gap-3 text-[11px] text-primary-foreground/60">
+          <div className="flex items-center gap-3 text-[11px] text-primary-foreground/60 flex-wrap">
             {(["meeting", "social", "officers", "loi"] as const).map((k) => (
               <span key={k} className="inline-flex items-center gap-1">
                 <span className={`w-2 h-2 rounded-full ${KIND_STYLES[k].dot}`} />
@@ -253,7 +253,7 @@ function Inner() {
                     {format(day, "d")}
                   </span>
                 </div>
-                <div className="mt-1 space-y-0.5">
+                <div className="mt-1 space-y-0.5 hidden sm:block">
                   {dayEvents.slice(0, 3).map((ev) => (
                     <div
                       key={ev.id}
@@ -265,6 +265,18 @@ function Inner() {
                   ))}
                   {dayEvents.length > 3 && (
                     <div className="text-[10px] text-primary-foreground/50">+{dayEvents.length - 3} more</div>
+                  )}
+                </div>
+                <div className="mt-1 flex flex-wrap items-center gap-1 sm:hidden">
+                  {dayEvents.slice(0, 4).map((ev) => (
+                    <span
+                      key={ev.id}
+                      className={`w-2 h-2 rounded-full ${KIND_STYLES[ev.kind].dot}`}
+                      title={ev.title}
+                    />
+                  ))}
+                  {dayEvents.length > 4 && (
+                    <span className="text-[10px] text-primary-foreground/50">+{dayEvents.length - 4}</span>
                   )}
                 </div>
               </button>
