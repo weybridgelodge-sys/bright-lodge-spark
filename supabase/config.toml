@@ -38,3 +38,7 @@ verify_jwt = false
 
 [functions.member-calendar-feed]
 verify_jwt = false
+
+[functions.festive-board-deadline-reminder]
+verify_jwt = false
+
