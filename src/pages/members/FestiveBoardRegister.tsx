@@ -1065,6 +1065,7 @@ function MeetingDialog({
           payment_method: v.paymentMethod,
           amount_pence: parsePounds(v.amountPounds),
           is_meeting_only: v.isMeetingOnly,
+          dietary: v.dietary?.trim() || null,
           created_by: user?.id ?? null,
           source: (v.synced ? "booking" : "manual") as "booking" | "manual",
           source_booking_id: v.sourceBookingId ?? null,
