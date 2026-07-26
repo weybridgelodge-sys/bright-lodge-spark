@@ -66,6 +66,7 @@ type Attendance = {
   booking_id: string | null;
   source?: "manual" | "booking" | null;
   source_booking_id?: string | null;
+  dietary?: string | null;
 };
 
 
@@ -176,51 +177,128 @@ export default function FestiveBoardRegister() {
   };
 
   const exportPerfectTablePlan = async (mtg: Meeting) => {
-    const { data, error } = await supabase
-      .from("bookings")
-      .select("details, payment_status")
+    // Source of truth = festive_board_attendance (covers online bookings + manual walk-ins)
+    const { data: att, error } = await supabase
+      .from("festive_board_attendance")
+      .select("id, member_id, visitor_name, visitor_lodge_name, visitor_lodge_number, attendance_status, is_meeting_only, source, source_booking_id, dietary")
       .eq("meeting_id", mtg.id)
-      .in("payment_status", ["paid", "confirmed"]);
+      .in("attendance_status", ["attended", "booked"]);
     if (error) {
       toast({ title: "Export failed", description: error.message, variant: "destructive" });
       return;
     }
+    const rowsRaw = (att ?? []) as Array<{
+      id: string;
+      member_id: string | null;
+      visitor_name: string | null;
+      visitor_lodge_name: string | null;
+      visitor_lodge_number: string | null;
+      attendance_status: string;
+      is_meeting_only: boolean | null;
+      source: string | null;
+      source_booking_id: string | null;
+      dietary: string | null;
+    }>;
+
+    // Fetch linked profiles (for member names/titles)
+    const memberIds = Array.from(new Set(rowsRaw.map((r) => r.member_id).filter(Boolean) as string[]));
+    const profilesMap = new Map<string, Member>();
+    if (memberIds.length) {
+      const { data: profs } = await supabase
+        .from("profiles")
+        .select("id,full_name,first_name,middle_name,last_name,preferred_name,post_nominals,title,is_past_master,rank,grand_rank,provincial_rank")
+        .in("id", memberIds);
+      for (const p of (profs ?? []) as Member[]) profilesMap.set(p.id, p);
+    }
+
+    // Fetch linked bookings for Meal / dietary fallback. source_booking_id can be `<uuid>` or `<uuid>::gN`.
+    const bookingIds = Array.from(
+      new Set(
+        rowsRaw
+          .map((r) => (r.source_booking_id ? r.source_booking_id.split("::")[0] : null))
+          .filter(Boolean) as string[],
+      ),
+    );
+    const bookingsMap = new Map<string, any>();
+    if (bookingIds.length) {
+      const { data: bks } = await supabase
+        .from("bookings")
+        .select("id, details")
+        .in("id", bookingIds);
+      for (const b of (bks ?? []) as any[]) bookingsMap.set(b.id, b);
+    }
+
+    const cleanDiet = (s: string) => (/^none$/i.test(s.trim()) ? "" : s.trim());
+
     const rows: Array<Record<string, string>> = [];
-    for (const b of (data ?? []) as any[]) {
-      const d = b.details ?? {};
-      const primaryLodge = String(d.lodge ?? "").trim();
-      const meal = String(d.diningOption ?? "").trim();
-      const dietary = String(d.dietary ?? "").trim();
+    for (const r of rowsRaw) {
+      const parentBookingId = r.source_booking_id ? r.source_booking_id.split("::")[0] : null;
+      const guestIdx = r.source_booking_id && r.source_booking_id.includes("::g")
+        ? parseInt(r.source_booking_id.split("::g")[1] ?? "", 10)
+        : null;
+      const booking = parentBookingId ? bookingsMap.get(parentBookingId) : null;
+      const bDetails: any = booking?.details ?? {};
+      const guest: any = guestIdx != null && Array.isArray(bDetails.guests) ? bDetails.guests[guestIdx] ?? {} : null;
+
+      let title = "";
+      let first = "";
+      let last = "";
+      let group = "";
+
+      if (r.member_id) {
+        const p = profilesMap.get(r.member_id);
+        title = (p?.title ?? "").trim();
+        first = (p?.preferred_name ?? p?.first_name ?? "").trim();
+        last = (p?.last_name ?? "").trim();
+        group = "Weybridge 6787";
+      } else if (guest) {
+        const name = String(guest?.name ?? r.visitor_name ?? "").trim();
+        const parts = name.split(/\s+/);
+        title = String(guest?.title ?? "").trim();
+        first = String(guest?.firstName ?? parts[0] ?? "").trim();
+        last = String(guest?.lastName ?? parts.slice(1).join(" ") ?? "").trim();
+        group = String(guest?.lodge ?? r.visitor_lodge_name ?? bDetails.lodge ?? "").trim();
+      } else if (booking) {
+        // Primary respondent from a booking
+        title = String(bDetails.title ?? "").trim();
+        first = String(bDetails.firstName ?? "").trim();
+        last = String(bDetails.lastName ?? "").trim();
+        group = String(bDetails.lodge ?? r.visitor_lodge_name ?? "").trim();
+      } else {
+        // Manual visitor entry — no linked booking
+        const name = String(r.visitor_name ?? "").trim();
+        const parts = name.split(/\s+/);
+        first = parts[0] ?? "";
+        last = parts.slice(1).join(" ") ?? "";
+        group = String(r.visitor_lodge_name ?? "").trim();
+      }
+
+      // Meal: from linked booking's diningOption (or guest.diningOption/meal); blank when meeting-only or manual
+      let meal = "";
+      if (!r.is_meeting_only) {
+        if (guest) meal = String(guest?.diningOption ?? guest?.meal ?? bDetails.diningOption ?? "").trim();
+        else if (booking) meal = String(bDetails.diningOption ?? "").trim();
+      }
+
+      // Dietary: manual field on attendance row wins; else fallback to booking's dietary
+      const manualDiet = (r.dietary ?? "").trim();
+      let dietary = manualDiet;
+      if (!dietary) {
+        if (guest) dietary = String(guest?.dietary ?? "").trim();
+        else if (booking) dietary = String(bDetails.dietary ?? "").trim();
+      }
+
       rows.push({
-        Title: String(d.title ?? "").trim(),
-        "First Name": String(d.firstName ?? "").trim(),
-        "Last Name": String(d.lastName ?? "").trim(),
-        Group: primaryLodge,
+        Title: title,
+        "First Name": first,
+        "Last Name": last,
+        Group: group,
         Meal: meal,
-        "Special requirements": /^none$/i.test(dietary) ? "" : dietary,
+        "Special requirements": cleanDiet(dietary),
         "RSVP status": "Attending",
       });
-      const guests = Array.isArray(d.guests) ? d.guests : [];
-      for (const g of guests) {
-        const name = String(g?.name ?? "").trim();
-        const parts = name.split(/\s+/);
-        const gTitle = String(g?.title ?? "").trim();
-        const gFirst = String(g?.firstName ?? parts[0] ?? "").trim();
-        const gLast = String(g?.lastName ?? parts.slice(1).join(" ") ?? "").trim();
-        const gLodge = String(g?.lodge ?? "").trim() || primaryLodge;
-        const gMeal = String(g?.diningOption ?? g?.meal ?? "").trim() || meal;
-        const gDiet = String(g?.dietary ?? "").trim();
-        rows.push({
-          Title: gTitle,
-          "First Name": gFirst,
-          "Last Name": gLast,
-          Group: gLodge,
-          Meal: gMeal,
-          "Special requirements": /^none$/i.test(gDiet) ? "" : gDiet,
-          "RSVP status": "Attending",
-        });
-      }
     }
+
     const headers = ["Title", "First Name", "Last Name", "Group", "Meal", "Special requirements", "RSVP status"];
     const esc = (v: string) => {
       const s = v ?? "";
@@ -627,6 +705,7 @@ type MemberDraft = {
   paymentMethod: FbPaymentMethod;
   amountPounds: string;
   isMeetingOnly: boolean;
+  dietary?: string;
   synced?: boolean;
   sourceBookingId?: string | null;
 };
@@ -642,6 +721,7 @@ type VisitorDraft = {
   paymentMethod: FbPaymentMethod;
   amountPounds: string;
   isMeetingOnly: boolean;
+  dietary?: string;
   synced?: boolean;
   sourceBookingId?: string | null;
 };
@@ -737,6 +817,7 @@ function MeetingDialog({
         paymentMethod: (row?.payment_method as FbPaymentMethod) ?? "unknown",
         amountPounds: row ? (row.amount_pence / 100).toFixed(2) : "",
         isMeetingOnly: !!row?.is_meeting_only,
+        dietary: row?.dietary ?? "",
         synced: row?.source === "booking",
         sourceBookingId: row?.source_booking_id ?? null,
       };
@@ -758,6 +839,7 @@ function MeetingDialog({
         paymentMethod: a.payment_method as FbPaymentMethod,
         amountPounds: (a.amount_pence / 100).toFixed(2),
         isMeetingOnly: !!a.is_meeting_only,
+        dietary: a.dietary ?? "",
         synced: a.source === "booking",
         sourceBookingId: a.source_booking_id ?? null,
       }))
@@ -1042,6 +1124,7 @@ function MeetingDialog({
           payment_method: d.paymentMethod,
           amount_pence: parsePounds(d.amountPounds),
           is_meeting_only: d.isMeetingOnly,
+          dietary: d.dietary?.trim() || null,
           created_by: user?.id ?? null,
           source: (d.synced ? "booking" : "manual") as "booking" | "manual",
           source_booking_id: d.sourceBookingId ?? null,
@@ -1059,6 +1142,7 @@ function MeetingDialog({
           payment_method: v.paymentMethod,
           amount_pence: parsePounds(v.amountPounds),
           is_meeting_only: v.isMeetingOnly,
+          dietary: v.dietary?.trim() || null,
           created_by: user?.id ?? null,
           source: (v.synced ? "booking" : "manual") as "booking" | "manual",
           source_booking_id: v.sourceBookingId ?? null,
@@ -1299,6 +1383,12 @@ function MeetingDialog({
                           }
                           className="bg-navy border-gold/20 h-8 text-xs text-primary-foreground placeholder:text-primary-foreground/40"
                         />
+                        <Input
+                          value={d.dietary ?? ""}
+                          onChange={(e) => setMember(m.id, { dietary: e.target.value })}
+                          placeholder="Dietary / allergies (optional)"
+                          className="col-span-full sm:col-start-2 sm:col-end-6 bg-navy border-gold/20 h-8 text-xs text-primary-foreground placeholder:text-primary-foreground/40"
+                        />
                         {!((parseFloat(d.amountPounds || "0") || 0) > 0 && !d.isMeetingOnly) && (
                           <label className="col-span-full sm:col-start-2 sm:col-end-6 flex items-center gap-2 text-[11px] text-primary-foreground/70 -mt-1">
                             <input
@@ -1455,6 +1545,12 @@ function MeetingDialog({
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </Button>
+                    <Input
+                      value={v.dietary ?? ""}
+                      onChange={(e) => setVisitor(v.id, { dietary: e.target.value })}
+                      placeholder="Dietary / allergies (optional)"
+                      className="sm:col-span-8 bg-navy border-gold/20 h-8 text-xs text-primary-foreground placeholder:text-primary-foreground/40"
+                    />
                     {!((parseFloat(v.amountPounds || "0") || 0) > 0 && !v.isMeetingOnly) && (
                       <label className="sm:col-span-8 flex items-center gap-2 text-[11px] text-primary-foreground/70">
                         <input
