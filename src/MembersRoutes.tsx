@@ -73,6 +73,7 @@ const MembersRoutes = () => (
         <Route path="admin/dues" element={<AdminDues />} />
         <Route path="admin/ritual" element={<ProtectedRoute adminOnly><RitualAdmin /></ProtectedRoute>} />
         <Route path="admin/documents" element={<ProtectedRoute adminOnly><DocumentsAdmin /></ProtectedRoute>} />
+        <Route path="admin/treasurer" element={<Treasurer />} />
         <Route path="working-groups" element={<WorkingGroupsIndex />} />
         <Route path="working-groups/admin" element={<WorkingGroupsAdmin />} />
         <Route path="working-groups/socials" element={<AdHocSocials />} />
