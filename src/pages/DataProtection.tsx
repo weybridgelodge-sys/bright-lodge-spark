@@ -55,6 +55,7 @@ const DataProtection = () => {
 
             <h2>What rights you have over your data</h2>
             <p>You have the right to request a copy of the personal data we hold about you, and to request that it be corrected or erased. Please notify the Data Protection Officer in writing if your details are inaccurate or if you object to your data being stored electronically.</p>
+            <p>If you ask us to erase your personal data, we will delete it from the Portal's live database and connected storage, and from routine system backups as those backups naturally cycle. Where a record has been shared with another Lodge officer or a Masonic charitable body as part of a welfare referral, we will ask that party to delete their copy too. Some information may need to be retained beyond an erasure request where we have a legal or regulatory obligation to keep it (for example, financial records within their statutory retention period) — where this applies, we will tell you what is being retained and why.</p>
 
             <h2>Cookies</h2>
             <p>This website does not use comment or login systems, and does not set tracking cookies for these purposes. Any cookies used are limited to essential website functionality.</p>
