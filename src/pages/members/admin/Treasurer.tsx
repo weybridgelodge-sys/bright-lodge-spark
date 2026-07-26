@@ -255,6 +255,8 @@ function TxDialog({
       setPeriodId("none");
       setReconciled(false);
     }
+    setFile(null);
+    setRemoveAttachment(false);
   }, [open, editing]);
 
   const save = async () => {
