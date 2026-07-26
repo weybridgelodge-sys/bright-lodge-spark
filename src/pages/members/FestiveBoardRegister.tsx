@@ -628,6 +628,7 @@ type MemberDraft = {
   paymentMethod: FbPaymentMethod;
   amountPounds: string;
   isMeetingOnly: boolean;
+  dietary: string;
   synced?: boolean;
   sourceBookingId?: string | null;
 };
@@ -643,6 +644,7 @@ type VisitorDraft = {
   paymentMethod: FbPaymentMethod;
   amountPounds: string;
   isMeetingOnly: boolean;
+  dietary: string;
   synced?: boolean;
   sourceBookingId?: string | null;
 };
