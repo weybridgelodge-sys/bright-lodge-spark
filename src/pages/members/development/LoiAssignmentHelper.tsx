@@ -151,50 +151,52 @@ function Inner() {
       </div>
 
       <div className="rounded-sm border border-gold/20 overflow-hidden">
-        <table className="w-full text-xs">
-          <thead className="bg-navy-light/40 text-gold/80 uppercase text-[10px] tracking-wider">
-            <tr>
-              <th className="p-2 text-left w-10"></th>
-              <th className="p-2 text-left">Piece</th>
-              <th className="p-2 text-left w-72">Assigned member</th>
-              <th className="p-2 text-left">Candidates · Delivered</th>
-            </tr>
-          </thead>
-          <tbody>
-            {groupedPieces.map((p) => {
-              const k = pieceKey(p.ritual_group, p.piece);
-              const { delivered, candidates } = piecePeople(matrix, p.ritual_group, p.piece);
-              const all = [...candidates, ...delivered];
-              const checked = selectedPieces.has(k);
-              return (
-                <tr key={k} className="border-t border-gold/10">
-                  <td className="p-2">
-                    <Checkbox checked={checked} onCheckedChange={() => togglePiece(k, p.ritual_group, p.piece)} />
-                  </td>
-                  <td className="p-2 text-primary-foreground">{p.piece}</td>
-                  <td className="p-2">
-                    <Select
-                      value={assignments[k] ?? "none"}
-                      onValueChange={(v) => setAssignments((a) => ({ ...a, [k]: v === "none" ? "" : v }))}
-                      disabled={!checked}
-                    >
-                      <SelectTrigger className="bg-navy-dark text-primary-foreground h-8 text-xs"><SelectValue placeholder="Unassigned" /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="none">— Unassigned —</SelectItem>
-                        {all.map((m) => (
-                          <SelectItem key={m.id} value={m.id}>{displayMember(m)}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </td>
-                  <td className="p-2 text-[11px] text-primary-foreground/70">
-                    {candidates.length} candidate{candidates.length === 1 ? "" : "s"} · {delivered.length} delivered
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+        <div className="overflow-x-auto">
+          <table className="w-full text-xs">
+            <thead className="bg-navy-light/40 text-gold/80 uppercase text-[10px] tracking-wider">
+              <tr>
+                <th className="p-2 text-left w-10"></th>
+                <th className="p-2 text-left">Piece</th>
+                <th className="p-2 text-left w-72">Assigned member</th>
+                <th className="p-2 text-left">Candidates · Delivered</th>
+              </tr>
+            </thead>
+            <tbody>
+              {groupedPieces.map((p) => {
+                const k = pieceKey(p.ritual_group, p.piece);
+                const { delivered, candidates } = piecePeople(matrix, p.ritual_group, p.piece);
+                const all = [...candidates, ...delivered];
+                const checked = selectedPieces.has(k);
+                return (
+                  <tr key={k} className="border-t border-gold/10">
+                    <td className="p-2">
+                      <Checkbox checked={checked} onCheckedChange={() => togglePiece(k, p.ritual_group, p.piece)} />
+                    </td>
+                    <td className="p-2 text-primary-foreground">{p.piece}</td>
+                    <td className="p-2">
+                      <Select
+                        value={assignments[k] ?? "none"}
+                        onValueChange={(v) => setAssignments((a) => ({ ...a, [k]: v === "none" ? "" : v }))}
+                        disabled={!checked}
+                      >
+                        <SelectTrigger className="bg-navy-dark text-primary-foreground h-8 text-xs"><SelectValue placeholder="Unassigned" /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">— Unassigned —</SelectItem>
+                          {all.map((m) => (
+                            <SelectItem key={m.id} value={m.id}>{displayMember(m)}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </td>
+                    <td className="p-2 text-[11px] text-primary-foreground/70">
+                      {candidates.length} candidate{candidates.length === 1 ? "" : "s"} · {delivered.length} delivered
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
