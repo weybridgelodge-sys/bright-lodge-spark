@@ -27,7 +27,7 @@ function Inner() {
   }, []);
 
   const tiles: Tile[] = [
-    { to: "/members/admin", title: "Members", description: "Directory, member records, roles and progression.", icon: Users, visible: isAdmin || isSecretary || isWorshipfulMaster },
+    { to: "/members/admin", title: "Members", description: "Directory, member records, roles, and notices.", icon: Users, visible: isAdmin || isSecretary || isWorshipfulMaster },
     { to: "/members/almoner", title: "Almoner Portal", description: "Welfare board, life events, correspondence, referrals.", icon: HeartHandshake, visible: canAccessAlmoner },
     { to: "/members/admin/development", title: "Mentor Portal", description: "Mentor dashboard, development records, summary report.", icon: GraduationCap, visible: isAdmin || canManageProgression },
     { to: "/members/admin/charity", title: "Charity Steward", description: "Collections, donations, Charity Ledger, Festival tracker.", icon: Banknote, visible: isAdmin || isWorshipfulMaster || isCharitySteward || isSecretary },
@@ -37,7 +37,6 @@ function Inner() {
     { to: "/members/admin/dues", title: "Dues & Subscriptions (TEST)", description: "Annual subscription collection, refunds, and price changes. Sandbox only.", icon: CreditCard, visible: isAdmin },
     { to: "/members/admin/ritual", title: "Ritual Library", description: "Upload, replace, and manage ritual rehearsal material.", icon: BookOpen, visible: isAdmin },
     { to: "/members/admin/documents", title: "Document Archive", description: "Upload, replace, and manage Lodge documents.", icon: FileText, visible: isAdmin },
-    { to: "/members/admin", title: "Admin Settings", description: "Module settings and member administration.", icon: ShieldCheck, visible: isAdmin },
   ];
 
   const visible = tiles.filter((t) => t.visible);
