@@ -2991,6 +2991,9 @@ export type Database = {
       treasurer_transactions: {
         Row: {
           amount_pence: number
+          attachment_name: string | null
+          attachment_path: string | null
+          attachment_size: number | null
           category: string
           created_at: string
           created_by: string | null
@@ -3005,6 +3008,9 @@ export type Database = {
         }
         Insert: {
           amount_pence: number
+          attachment_name?: string | null
+          attachment_path?: string | null
+          attachment_size?: number | null
           category: string
           created_at?: string
           created_by?: string | null
@@ -3019,6 +3025,9 @@ export type Database = {
         }
         Update: {
           amount_pence?: number
+          attachment_name?: string | null
+          attachment_path?: string | null
+          attachment_size?: number | null
           category?: string
           created_at?: string
           created_by?: string | null
