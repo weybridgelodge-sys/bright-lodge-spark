@@ -253,7 +253,7 @@ function Inner() {
                     {format(day, "d")}
                   </span>
                 </div>
-                <div className="mt-1 space-y-0.5">
+                <div className="mt-1 space-y-0.5 hidden sm:block">
                   {dayEvents.slice(0, 3).map((ev) => (
                     <div
                       key={ev.id}
@@ -265,6 +265,18 @@ function Inner() {
                   ))}
                   {dayEvents.length > 3 && (
                     <div className="text-[10px] text-primary-foreground/50">+{dayEvents.length - 3} more</div>
+                  )}
+                </div>
+                <div className="mt-1 flex flex-wrap items-center gap-1 sm:hidden">
+                  {dayEvents.slice(0, 4).map((ev) => (
+                    <span
+                      key={ev.id}
+                      className={`w-2 h-2 rounded-full ${KIND_STYLES[ev.kind].dot}`}
+                      title={ev.title}
+                    />
+                  ))}
+                  {dayEvents.length > 4 && (
+                    <span className="text-[10px] text-primary-foreground/50">+{dayEvents.length - 4}</span>
                   )}
                 </div>
               </button>
