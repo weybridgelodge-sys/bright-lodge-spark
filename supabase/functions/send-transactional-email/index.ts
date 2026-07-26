@@ -16,10 +16,17 @@ const SENDER_DOMAIN = "notify.email.weybridgelodge.org.uk"
 // even though actual sending uses the subdomain above.
 const FROM_DOMAIN = "email.weybridgelodge.org.uk"
 
-// Note: the Almoner welfare digest template is an internal officer-only email
-// and intentionally does not render an unsubscribe footer. We still generate a
-// per-recipient unsubscribe token so the downstream email API accepts the
-// payload — the token just isn't surfaced in the visible email body.
+// Internal officer-only templates: recipients are lodge officers acting in role
+// (Almoner, Secretary, etc.), not general subscribers. These MUST NOT include
+// an unsubscribe footer — that footer is injected downstream by the Lovable
+// email API whenever `unsubscribe_token` is present in the send payload, so
+// we suppress token generation AND omit it from the enqueued payload for
+// these templates. Add a template name here to opt it out of the footer.
+const INTERNAL_NO_UNSUBSCRIBE_TEMPLATES = new Set<string>([
+  'almoner-overdue-digest',
+  'poll-opened',
+])
+
 
 // Generate a cryptographically random 32-byte hex token
 function generateToken(): string {
