@@ -93,8 +93,11 @@ const Email = ({
         </Text>
 
         <Hr style={brandStyles.hr} />
-        <Text style={brandStyles.footerText}>
-          You are receiving this because you are an active member of Weybridge Lodge No. 6787.
+        <Text style={confidential}>
+          STOP: Read before clicking below
+        </Text>
+        <Text style={confidential}>
+          This is an automated lodge notification, not a personal subscription. Clicking unsubscribe below removes you from all future lodge emails entirely, not just this one. If you are unsure why you received this email, please contact the Lodge Secretary.
         </Text>
       </Container>
     </Body>
