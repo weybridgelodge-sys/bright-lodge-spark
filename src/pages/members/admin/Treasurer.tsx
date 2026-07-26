@@ -13,7 +13,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
-import { Loader2, Plus, Pencil, Trash2, Lock, Unlock, ShieldCheck } from "lucide-react";
+import { Loader2, Plus, Pencil, Trash2, Lock, Unlock, ShieldCheck, Paperclip } from "lucide-react";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 type Period = {
@@ -45,6 +45,9 @@ type Tx = {
   amount_pence: number;
   description: string | null;
   reconciled: boolean;
+  attachment_path: string | null;
+  attachment_name: string | null;
+  attachment_size: number | null;
 };
 
 const PAYMENT_METHODS: { value: PaymentMethod; label: string }[] = [
@@ -105,7 +108,18 @@ function TransactionsTab({
     if (!confirm("Delete this transaction?")) return;
     const { error } = await supabase.from("treasurer_transactions" as any).delete().eq("id", t.id);
     if (error) toast({ title: isTxLocked(t) ? "This period is locked" : "Delete failed", description: error.message, variant: "destructive" });
-    else { toast({ title: "Deleted" }); onChange(); }
+    else {
+      if (t.attachment_path) {
+        await supabase.storage.from("treasurer-attachments").remove([t.attachment_path]);
+      }
+      toast({ title: "Deleted" }); onChange();
+    }
+  };
+
+  const openAttachment = async (path: string) => {
+    const { data, error } = await supabase.storage.from("treasurer-attachments").createSignedUrl(path, 60);
+    if (error || !data) { toast({ title: "Couldn't open attachment", variant: "destructive" }); return; }
+    window.open(data.signedUrl, "_blank", "noopener");
   };
 
   return (
@@ -158,7 +172,22 @@ function TransactionsTab({
                     <td className="px-4 py-2 capitalize">{t.payment_method.replace("_", " ")}</td>
                     <td className="px-4 py-2">{t.category}</td>
                     <td className="px-4 py-2 text-right tabular-nums text-gold">{gbp(t.amount_pence)}</td>
-                    <td className="px-4 py-2 text-xs text-primary-foreground/70 max-w-[220px] truncate" title={t.description ?? ""}>{t.description}</td>
+                    <td className="px-4 py-2 text-xs text-primary-foreground/70 max-w-[220px]" title={t.description ?? ""}>
+                      <div className="flex items-center gap-1.5">
+                        <span className="truncate">{t.description}</span>
+                        {t.attachment_path && (
+                          <button
+                            type="button"
+                            onClick={() => openAttachment(t.attachment_path!)}
+                            className="shrink-0 p-1 text-gold/80 hover:text-gold"
+                            title={t.attachment_name || "Open attachment"}
+                            aria-label="Open attachment"
+                          >
+                            <Paperclip className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+                      </div>
+                    </td>
                     <td className="px-4 py-2 text-xs">
                       {p ? <span className="inline-flex items-center gap-1">{locked && <Lock className="w-3 h-3 text-gold" />}{p.label}</span> : <span className="text-primary-foreground/40">—</span>}
                     </td>
@@ -201,6 +230,8 @@ function TxDialog({
   const [description, setDescription] = useState("");
   const [periodId, setPeriodId] = useState<string>("none");
   const [reconciled, setReconciled] = useState(false);
+  const [file, setFile] = useState<File | null>(null);
+  const [removeAttachment, setRemoveAttachment] = useState(false);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -224,6 +255,8 @@ function TxDialog({
       setPeriodId("none");
       setReconciled(false);
     }
+    setFile(null);
+    setRemoveAttachment(false);
   }, [open, editing]);
 
   const save = async () => {
@@ -234,13 +267,45 @@ function TxDialog({
       setSaving(false);
       return;
     }
+    if (file && file.size > 15 * 1024 * 1024) {
+      toast({ title: "Attachment must be 15 MB or smaller", variant: "destructive" });
+      setSaving(false);
+      return;
+    }
+
     const { data: u } = await supabase.auth.getUser();
+
+    let attachment_path: string | null = editing?.attachment_path ?? null;
+    let attachment_name: string | null = editing?.attachment_name ?? null;
+    let attachment_size: number | null = editing?.attachment_size ?? null;
+
+    if (removeAttachment && editing?.attachment_path) {
+      await supabase.storage.from("treasurer-attachments").remove([editing.attachment_path]);
+      attachment_path = null; attachment_name = null; attachment_size = null;
+    }
+
+    if (file) {
+      if (editing?.attachment_path && !removeAttachment) {
+        await supabase.storage.from("treasurer-attachments").remove([editing.attachment_path]);
+      }
+      const safe = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+      const path = `${u.user?.id ?? "anon"}/${Date.now()}-${safe}`;
+      const { error: upErr } = await supabase.storage.from("treasurer-attachments").upload(path, file);
+      if (upErr) {
+        setSaving(false);
+        toast({ title: "Attachment upload failed", description: upErr.message, variant: "destructive" });
+        return;
+      }
+      attachment_path = path; attachment_name = file.name; attachment_size = file.size;
+    }
+
     const payload = {
       transaction_date: date,
       direction, payment_method: method, category: category.trim(),
       amount_pence: pence, description: description.trim() || null,
       period_id: periodId === "none" ? null : periodId,
       reconciled,
+      attachment_path, attachment_name, attachment_size,
       created_by: u.user?.id ?? null,
     };
     const res = editing
@@ -260,7 +325,7 @@ function TxDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-navy-light border-gold/30">
+      <DialogContent className="bg-navy-light text-primary-foreground border-gold/30">
         <DialogHeader><DialogTitle className="font-serif text-gold">{editing ? "Edit transaction" : "New transaction"}</DialogTitle></DialogHeader>
         <div className="grid sm:grid-cols-2 gap-3">
           <div>
@@ -314,6 +379,25 @@ function TxDialog({
           <div className="sm:col-span-2 flex items-center gap-2">
             <Checkbox id="rec" checked={reconciled} onCheckedChange={(v) => setReconciled(!!v)} />
             <Label htmlFor="rec" className="cursor-pointer">Reconciled</Label>
+          </div>
+          <div className="sm:col-span-2">
+            <Label className="flex items-center gap-1.5"><Paperclip className="w-3 h-3" /> Receipt / attachment (optional, max 15 MB)</Label>
+            {editing?.attachment_path && !removeAttachment && (
+              <div className="mt-1 flex items-center gap-2 text-xs text-primary-foreground/70">
+                <Paperclip className="w-3 h-3 text-gold" />
+                <span>Current: {editing.attachment_name}</span>
+                <button type="button" onClick={() => setRemoveAttachment(true)} className="text-red-400 hover:text-red-300 underline">
+                  Remove
+                </button>
+              </div>
+            )}
+            <input
+              type="file"
+              accept="image/*,application/pdf"
+              onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+              className="mt-1 text-sm text-primary-foreground/70 file:mr-3 file:border-0 file:bg-gold/15 file:text-gold file:px-3 file:py-1.5 file:rounded-sm file:text-xs"
+            />
+            {file && <p className="mt-1 text-[11px] text-primary-foreground/60">Will {editing?.attachment_path ? "replace existing" : "upload"}: {file.name}</p>}
           </div>
         </div>
         <DialogFooter>
@@ -462,7 +546,7 @@ function ReconciliationTab({
       <PeriodDialog open={open} onOpenChange={setOpen} editing={editing} onSaved={() => { setOpen(false); onChange(); }} />
 
       <Dialog open={!!unlockFor} onOpenChange={(v) => { if (!v) setUnlockFor(null); }}>
-        <DialogContent className="bg-navy-light border-gold/30">
+        <DialogContent className="bg-navy-light text-primary-foreground border-gold/30">
           <DialogHeader><DialogTitle className="font-serif text-gold">Request unlock</DialogTitle></DialogHeader>
           <p className="text-sm text-primary-foreground/70">Both Treasurer and Secretary must approve before the period reopens.</p>
           <Label>Reason</Label>
@@ -507,7 +591,7 @@ function PeriodDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-navy-light border-gold/30">
+      <DialogContent className="bg-navy-light text-primary-foreground border-gold/30">
         <DialogHeader><DialogTitle className="font-serif text-gold">{editing ? "Edit period" : "New period"}</DialogTitle></DialogHeader>
         <div className="space-y-3">
           <div>
