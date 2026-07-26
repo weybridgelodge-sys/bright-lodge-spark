@@ -749,58 +749,6 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
       if (d?.sent) toast.success(`Test summons sent to ${addr}`);
       else toast.error(d?.failures?.[0]?.error ?? d?.error ?? "Test summons email failed");
     }
-    // Also send a test Officers Night invite (if a night date is set), only to the test address.
-    await maybeSendOfficersNightTest(id, addr.trim());
-  };
-
-  const maybeSendOfficersNightTest = async (summonsId: string, testEmail: string) => {
-    try {
-      const { data: row } = await supabase
-        .from("summonses")
-        .select("id, meeting_number, meeting_date, meeting_type, officer_night_date, officer_night_venue" as any)
-        .eq("id", summonsId)
-        .maybeSingle();
-      const r: any = row;
-      if (!r) return;
-      const nightDate: string | null = r.officer_night_date;
-      if (!nightDate) {
-        toast.info("No Officer Night date set — skipping Officers Night test invite");
-        return;
-      }
-      const venue = (r.officer_night_venue as string | null) || "Masonic Centre, Guildford";
-      const start = new Date(`${nightDate}T19:00:00`);
-      const end = new Date(start.getTime() + 2 * 60 * 60 * 1000);
-      const nightLabel = formatNightDate(nightDate);
-      const meetingLabel = r.meeting_date
-        ? new Date(r.meeting_date).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })
-        : `Summons #${r.meeting_number}`;
-      const meetingType = (r.meeting_type as string | null)?.trim() || "Regular";
-      const title = `Officers Night - ${nightLabel}`;
-      const footer = await resolveSecretaryFooter(true);
-      const html = formatEventEmailHtml({
-        heading: title,
-        intro: `Brethren, please find calendar details for the Officers Night preceding our next ${meetingType} meeting.`,
-        fields: [
-          { label: "When", value: start.toLocaleString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" }) },
-          { label: "Where", value: venue },
-          { label: "Ahead of", value: `${meetingType} meeting on ${meetingLabel}` },
-        ],
-
-        footer,
-      });
-      const result = await sendEventInvite({
-        event: { title: `[TEST] ${title}`, location: venue, startTime: start.toISOString(), endTime: end.toISOString() },
-        subject: `[TEST] ${title}`,
-        html,
-        memberScope: { kind: "none" },
-        guestEmails: [testEmail],
-        idempotencyPrefix: `officers-night-test-${summonsId}-${Date.now()}`,
-      });
-      if (result.sent) toast.success(`Test Officers Night invite sent to ${testEmail}`);
-      else toast.error(result.failures?.[0]?.error ?? "Test Officers Night invite failed");
-    } catch (e: any) {
-      toast.error(`Officers Night test failed: ${e?.message ?? "unknown"}`);
-    }
   };
 
 
