@@ -1,0 +1,1 @@
+ALTER TABLE public.festive_board_attendance ADD COLUMN IF NOT EXISTS dietary text;

@@ -806,6 +806,7 @@ export type Database = {
           booking_id: string | null
           created_at: string
           created_by: string | null
+          dietary: string | null
           email: string | null
           id: string
           is_meeting_only: boolean
@@ -826,6 +827,7 @@ export type Database = {
           booking_id?: string | null
           created_at?: string
           created_by?: string | null
+          dietary?: string | null
           email?: string | null
           id?: string
           is_meeting_only?: boolean
@@ -846,6 +848,7 @@ export type Database = {
           booking_id?: string | null
           created_at?: string
           created_by?: string | null
+          dietary?: string | null
           email?: string | null
           id?: string
           is_meeting_only?: boolean
