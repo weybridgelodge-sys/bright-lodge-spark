@@ -144,7 +144,7 @@ const flagAmber = { color: '#b45309', fontSize: '13px', margin: '2px 0' }
 const linkStyle = brandStyles.link
 const footerText = brandStyles.footerText
 const hr = brandStyles.hr
-const confidential = { color: '#888', fontSize: '11px', fontStyle: 'italic' as const, textAlign: 'center' as const, margin: 0 }
+const confidential = { color: '#888', fontSize: '11px', fontStyle: 'italic' as const, textAlign: 'center' as const, margin: '4px 0' }
 const brand = brandStyles.brand
 const brandSub = brandStyles.brandSub
 
