@@ -446,7 +446,7 @@ export default function FestiveBoardRegister() {
                         size="sm"
                         variant="outline"
                         onClick={() => closeWaitlistForMeeting(meetingId, activeCount)}
-                        className="border-destructive/50 text-destructive hover:bg-destructive/10"
+                        className="border-destructive/50 text-destructive hover:bg-destructive/10 min-h-11 sm:min-h-0"
                       >
                         Close waitlist & refund now
                       </Button>
@@ -478,7 +478,7 @@ export default function FestiveBoardRegister() {
                                 size="sm"
                                 variant="outline"
                                 onClick={() => promoteWaitlistBooking(b)}
-                                className="border-gold/40 text-gold hover:bg-gold/10"
+                                className="border-gold/40 text-gold hover:bg-gold/10 min-h-11 sm:min-h-0"
                               >
                                 Promote now
                               </Button>
@@ -646,7 +646,7 @@ export default function FestiveBoardRegister() {
                             variant="outline"
                             size="sm"
                             onClick={() => setEditing(mtg)}
-                            className="border-gold/40 text-gold hover:bg-gold/10"
+                            className="border-gold/40 text-gold hover:bg-gold/10 min-h-11 sm:min-h-0"
                           >
                             <Pencil className="w-3 h-3 mr-1" /> Edit / mark attendance
                           </Button>
@@ -654,7 +654,7 @@ export default function FestiveBoardRegister() {
                             variant="outline"
                             size="sm"
                             onClick={() => exportPerfectTablePlan(mtg)}
-                            className="border-gold/40 text-gold hover:bg-gold/10"
+                            className="border-gold/40 text-gold hover:bg-gold/10 min-h-11 sm:min-h-0"
                           >
                             <Download className="w-3 h-3 mr-1" /> Export for PerfectTablePlan
                           </Button>
@@ -662,7 +662,7 @@ export default function FestiveBoardRegister() {
                             variant="outline"
                             size="sm"
                             onClick={() => handleDelete(mtg.id)}
-                            className="border-destructive/40 text-destructive hover:bg-destructive/10"
+                            className="border-destructive/40 text-destructive hover:bg-destructive/10 min-h-11 sm:min-h-0"
                           >
                             <Trash2 className="w-3 h-3 mr-1" /> Delete
                           </Button>
@@ -1333,57 +1333,63 @@ function MeetingDialog({
                     </span>
                     {d.present && (
                       <>
-                        <Select
-                          value={d.status}
-                          onValueChange={(v) =>
-                            setMember(m.id, { status: v as FbAttendanceStatus })
-                          }
-                        >
-                          <SelectTrigger className="bg-navy border-gold/20 h-8 text-xs text-primary-foreground placeholder:text-primary-foreground/40">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {FB_ATTENDANCE_STATUSES.map((o) => (
-                              <SelectItem key={o.value} value={o.value}>
-                                {o.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        {d.isMeetingOnly ? (
-                          <div className="bg-navy border border-gold/20 h-8 rounded px-3 flex items-center text-xs text-primary-foreground/40">
-                            —
-                          </div>
-                        ) : (
+                        <div className="col-span-full sm:col-span-1">
                           <Select
-                            value={d.paymentMethod}
+                            value={d.status}
                             onValueChange={(v) =>
-                              setMember(m.id, { paymentMethod: v as FbPaymentMethod })
+                              setMember(m.id, { status: v as FbAttendanceStatus })
                             }
                           >
                             <SelectTrigger className="bg-navy border-gold/20 h-8 text-xs text-primary-foreground placeholder:text-primary-foreground/40">
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                              {FB_PAYMENT_METHODS.map((o) => (
+                              {FB_ATTENDANCE_STATUSES.map((o) => (
                                 <SelectItem key={o.value} value={o.value}>
                                   {o.label}
                                 </SelectItem>
                               ))}
                             </SelectContent>
                           </Select>
+                        </div>
+                        {d.isMeetingOnly ? (
+                          <div className="col-span-full sm:col-span-1 bg-navy border border-gold/20 h-8 rounded px-3 flex items-center text-xs text-primary-foreground/40">
+                            —
+                          </div>
+                        ) : (
+                          <div className="col-span-full sm:col-span-1">
+                            <Select
+                              value={d.paymentMethod}
+                              onValueChange={(v) =>
+                                setMember(m.id, { paymentMethod: v as FbPaymentMethod })
+                              }
+                            >
+                              <SelectTrigger className="bg-navy border-gold/20 h-8 text-xs text-primary-foreground placeholder:text-primary-foreground/40">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {FB_PAYMENT_METHODS.map((o) => (
+                                  <SelectItem key={o.value} value={o.value}>
+                                    {o.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
                         )}
-                        <Input
-                          type="number"
-                          step="0.01"
-                          min={0}
-                          placeholder="£"
-                          value={d.amountPounds}
-                          onChange={(e) =>
-                            setMember(m.id, { amountPounds: e.target.value })
-                          }
-                          className="bg-navy border-gold/20 h-8 text-xs text-primary-foreground placeholder:text-primary-foreground/40"
-                        />
+                        <div className="col-span-full sm:col-span-1">
+                          <Input
+                            type="number"
+                            step="0.01"
+                            min={0}
+                            placeholder="£"
+                            value={d.amountPounds}
+                            onChange={(e) =>
+                              setMember(m.id, { amountPounds: e.target.value })
+                            }
+                            className="bg-navy border-gold/20 h-8 text-xs text-primary-foreground placeholder:text-primary-foreground/40"
+                          />
+                        </div>
                         <Input
                           value={d.dietary ?? ""}
                           onChange={(e) => setMember(m.id, { dietary: e.target.value })}
