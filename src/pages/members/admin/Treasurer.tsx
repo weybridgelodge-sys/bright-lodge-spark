@@ -230,6 +230,8 @@ function TxDialog({
   const [description, setDescription] = useState("");
   const [periodId, setPeriodId] = useState<string>("none");
   const [reconciled, setReconciled] = useState(false);
+  const [file, setFile] = useState<File | null>(null);
+  const [removeAttachment, setRemoveAttachment] = useState(false);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
