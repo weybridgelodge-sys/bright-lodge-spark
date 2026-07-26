@@ -16,16 +16,16 @@ const SENDER_DOMAIN = "notify.email.weybridgelodge.org.uk"
 // even though actual sending uses the subdomain above.
 const FROM_DOMAIN = "email.weybridgelodge.org.uk"
 
-// Internal officer-only templates: recipients are lodge officers acting in role
-// (Almoner, Secretary, etc.), not general subscribers. These MUST NOT include
-// an unsubscribe footer — that footer is injected downstream by the Lovable
-// email API whenever `unsubscribe_token` is present in the send payload, so
-// we suppress token generation AND omit it from the enqueued payload for
-// these templates. Add a template name here to opt it out of the footer.
-const INTERNAL_NO_UNSUBSCRIBE_TEMPLATES = new Set<string>([
-  'almoner-overdue-digest',
-  'poll-opened',
-])
+// NOTE on unsubscribe footer for internal officer templates:
+// A previous attempt tried to suppress the injected unsubscribe footer for
+// `almoner-overdue-digest` and `poll-opened` by omitting `unsubscribe_token`
+// from the payload. That caused the Lovable email API to reject every send
+// with `400 missing_unsubscribe — "Transactional emails must include an
+// unsubscribe_token"`. Inspection of @lovable.dev/email-js@0.1.2 EmailSendRequest
+// confirmed there is NO separate parameter to suppress just the visible footer
+// — the token is mandatory for all transactional sends and the footer is
+// always appended. All templates now generate and include a real token.
+
 
 
 // Generate a cryptographically random 32-byte hex token
