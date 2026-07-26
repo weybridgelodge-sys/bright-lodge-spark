@@ -762,6 +762,7 @@ function MeetingDialog({
         paymentMethod: a.payment_method as FbPaymentMethod,
         amountPounds: (a.amount_pence / 100).toFixed(2),
         isMeetingOnly: !!a.is_meeting_only,
+        dietary: a.dietary ?? "",
         synced: a.source === "booking",
         sourceBookingId: a.source_booking_id ?? null,
       }))
