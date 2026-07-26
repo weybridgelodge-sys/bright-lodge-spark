@@ -1306,6 +1306,12 @@ function MeetingDialog({
                           }
                           className="bg-navy border-gold/20 h-8 text-xs text-primary-foreground placeholder:text-primary-foreground/40"
                         />
+                        <Input
+                          value={d.dietary ?? ""}
+                          onChange={(e) => setMember(m.id, { dietary: e.target.value })}
+                          placeholder="Dietary / allergies (optional)"
+                          className="col-span-full sm:col-start-2 sm:col-end-6 bg-navy border-gold/20 h-8 text-xs text-primary-foreground placeholder:text-primary-foreground/40"
+                        />
                         {!((parseFloat(d.amountPounds || "0") || 0) > 0 && !d.isMeetingOnly) && (
                           <label className="col-span-full sm:col-start-2 sm:col-end-6 flex items-center gap-2 text-[11px] text-primary-foreground/70 -mt-1">
                             <input
