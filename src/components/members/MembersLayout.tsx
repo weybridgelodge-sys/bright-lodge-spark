@@ -21,7 +21,7 @@ export default function MembersLayout({ children }: { children: React.ReactNode 
 
   return (
     <div className="min-h-screen bg-navy text-primary-foreground">
-      <header className="border-b border-gold/20 bg-navy-dark/80 backdrop-blur sticky top-0 z-40">
+      <header className="border-b border-gold/20 bg-navy-dark/80 backdrop-blur sticky top-0 z-40 pt-[max(0px,env(safe-area-inset-top))]">
         <div className="container mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <Link to="/members" className="flex items-center gap-3">
             <img src={logo} alt="Weybridge Lodge crest" width={36} height={36} decoding="async" className="h-9 w-9 bg-primary-foreground/80 rounded-full p-0.5" />
@@ -133,22 +133,26 @@ export default function MembersLayout({ children }: { children: React.ReactNode 
             )}
           </nav>
         </aside>
-        <main className="pb-20 lg:pb-0">{children}</main>
+        <main className="pb-[calc(5rem+env(safe-area-inset-bottom))] lg:pb-0">{children}</main>
       </div>
 
       {/* Mobile Bottom Sticky Navigation Strip — Visible below 1024px */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 h-16 bg-card border-t border-border flex items-center justify-around z-50">
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 h-16 bg-card border-t border-border flex items-center justify-around z-50 pb-[env(safe-area-inset-bottom)]">
         <NavLink to="/members" end className={({ isActive }) => `flex flex-col items-center justify-center text-[10px] font-bold ${isActive ? "text-gold" : "text-muted-foreground"}`}>
           <Shield className="h-5 w-5" />
           Hub
         </NavLink>
-        <NavLink to="/members/directory" className={({ isActive }) => `flex flex-col items-center justify-center text-[10px] font-bold ${isActive ? "text-gold" : "text-muted-foreground"}`}>
+        <NavLink to="/members/calendar" className={({ isActive }) => `flex flex-col items-center justify-center text-[10px] font-bold ${isActive ? "text-gold" : "text-muted-foreground"}`}>
           <CalendarDays className="h-5 w-5" />
-          Trestle
+          Calendar
+        </NavLink>
+        <NavLink to="/members/directory" className={({ isActive }) => `flex flex-col items-center justify-center text-[10px] font-bold ${isActive ? "text-gold" : "text-muted-foreground"}`}>
+          <Users className="h-5 w-5" />
+          Directory
         </NavLink>
         <NavLink to="/members/profile" className={({ isActive }) => `flex flex-col items-center justify-center text-[10px] font-bold ${isActive ? "text-gold" : "text-muted-foreground"}`}>
-          <CreditCard className="h-5 w-5" />
-          Accounts
+          <UserIcon className="h-5 w-5" />
+          Profile
         </NavLink>
         <NavLink to="/members/ritual" className={({ isActive }) => `flex flex-col items-center justify-center text-[10px] font-bold ${isActive ? "text-gold" : "text-muted-foreground"}`}>
           <BookOpen className="h-5 w-5" />
