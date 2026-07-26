@@ -108,7 +108,18 @@ function TransactionsTab({
     if (!confirm("Delete this transaction?")) return;
     const { error } = await supabase.from("treasurer_transactions" as any).delete().eq("id", t.id);
     if (error) toast({ title: isTxLocked(t) ? "This period is locked" : "Delete failed", description: error.message, variant: "destructive" });
-    else { toast({ title: "Deleted" }); onChange(); }
+    else {
+      if (t.attachment_path) {
+        await supabase.storage.from("treasurer-attachments").remove([t.attachment_path]);
+      }
+      toast({ title: "Deleted" }); onChange();
+    }
+  };
+
+  const openAttachment = async (path: string) => {
+    const { data, error } = await supabase.storage.from("treasurer-attachments").createSignedUrl(path, 60);
+    if (error || !data) { toast({ title: "Couldn't open attachment", variant: "destructive" }); return; }
+    window.open(data.signedUrl, "_blank", "noopener");
   };
 
   return (
