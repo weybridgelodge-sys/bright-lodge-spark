@@ -325,7 +325,7 @@ function TxDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-navy-light border-gold/30">
+      <DialogContent className="bg-navy-light text-primary-foreground border-gold/30">
         <DialogHeader><DialogTitle className="font-serif text-gold">{editing ? "Edit transaction" : "New transaction"}</DialogTitle></DialogHeader>
         <div className="grid sm:grid-cols-2 gap-3">
           <div>
