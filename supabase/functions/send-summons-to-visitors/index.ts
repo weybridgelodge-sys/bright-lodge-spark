@@ -73,7 +73,7 @@ function renderHtml(o: {
   const typeLine = o.meetingTypeLabel ? detailRow("Meeting", o.meetingTypeLabel) : "";
   const timeLine = o.meetingTimeLabel ? detailRow("Time", o.meetingTimeLabel) : "";
 
-  return `<!doctype html><html><body style="margin:0;padding:0;background:${BRAND.bg};font-family:${BRAND.fontStack};">
+  return `<!doctype html><html lang="en" dir="ltr"><head><meta charset="utf-8"><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body style="margin:0;padding:0;background:${BRAND.bg};font-family:${BRAND.fontStack};">
   <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:${BRAND.bg};">
     <tr><td align="center">
       <table role="presentation" width="${parseInt(BRAND.containerMaxWidth, 10)}" cellspacing="0" cellpadding="0" style="max-width:${BRAND.containerMaxWidth};margin:0 auto;padding:24px;">
