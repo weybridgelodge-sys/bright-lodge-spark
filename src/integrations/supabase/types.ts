@@ -2898,6 +2898,163 @@ export type Database = {
         }
         Relationships: []
       }
+      treasurer_periods: {
+        Row: {
+          created_at: string
+          id: string
+          label: string
+          locked_at: string | null
+          locked_by: string | null
+          meeting_id: string | null
+          period_end: string | null
+          period_start: string | null
+          status: string
+          unlock_approved_by_secretary: boolean
+          unlock_approved_by_treasurer: boolean
+          unlock_reason: string | null
+          unlock_requested_at: string | null
+          unlock_requested_by: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          label: string
+          locked_at?: string | null
+          locked_by?: string | null
+          meeting_id?: string | null
+          period_end?: string | null
+          period_start?: string | null
+          status?: string
+          unlock_approved_by_secretary?: boolean
+          unlock_approved_by_treasurer?: boolean
+          unlock_reason?: string | null
+          unlock_requested_at?: string | null
+          unlock_requested_by?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          label?: string
+          locked_at?: string | null
+          locked_by?: string | null
+          meeting_id?: string | null
+          period_end?: string | null
+          period_start?: string | null
+          status?: string
+          unlock_approved_by_secretary?: boolean
+          unlock_approved_by_treasurer?: boolean
+          unlock_reason?: string | null
+          unlock_requested_at?: string | null
+          unlock_requested_by?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "treasurer_periods_locked_by_fkey"
+            columns: ["locked_by"]
+            isOneToOne: false
+            referencedRelation: "calendar_subscription_status"
+            referencedColumns: ["member_id"]
+          },
+          {
+            foreignKeyName: "treasurer_periods_locked_by_fkey"
+            columns: ["locked_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "treasurer_periods_meeting_id_fkey"
+            columns: ["meeting_id"]
+            isOneToOne: false
+            referencedRelation: "festive_board_meetings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "treasurer_periods_unlock_requested_by_fkey"
+            columns: ["unlock_requested_by"]
+            isOneToOne: false
+            referencedRelation: "calendar_subscription_status"
+            referencedColumns: ["member_id"]
+          },
+          {
+            foreignKeyName: "treasurer_periods_unlock_requested_by_fkey"
+            columns: ["unlock_requested_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      treasurer_transactions: {
+        Row: {
+          amount_pence: number
+          category: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          direction: string
+          id: string
+          payment_method: string
+          period_id: string | null
+          reconciled: boolean
+          transaction_date: string
+          updated_at: string
+        }
+        Insert: {
+          amount_pence: number
+          category: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          direction: string
+          id?: string
+          payment_method: string
+          period_id?: string | null
+          reconciled?: boolean
+          transaction_date: string
+          updated_at?: string
+        }
+        Update: {
+          amount_pence?: number
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          direction?: string
+          id?: string
+          payment_method?: string
+          period_id?: string | null
+          reconciled?: boolean
+          transaction_date?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "treasurer_transactions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "calendar_subscription_status"
+            referencedColumns: ["member_id"]
+          },
+          {
+            foreignKeyName: "treasurer_transactions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "treasurer_transactions_period_id_fkey"
+            columns: ["period_id"]
+            isOneToOne: false
+            referencedRelation: "treasurer_periods"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -3575,6 +3732,10 @@ export type Database = {
       }
     }
     Functions: {
+      approve_unlock_treasurer_period: {
+        Args: { _period_id: string }
+        Returns: undefined
+      }
       booking_seat_count: {
         Args: { _details: Json; _line_items: Json }
         Returns: number
@@ -3688,6 +3849,10 @@ export type Database = {
         Returns: boolean
       }
       is_active_member: { Args: { _user_id: string }; Returns: boolean }
+      is_current_officer: {
+        Args: { _position_key: string; _user_id: string }
+        Returns: boolean
+      }
       is_current_wm_or_ipm: { Args: { _user_id: string }; Returns: boolean }
       is_working_group_lead: {
         Args: { _group: string; _user: string }
@@ -3702,6 +3867,10 @@ export type Database = {
         Returns: boolean
       }
       last_engagement_date: { Args: { _member: string }; Returns: string }
+      lock_treasurer_period: {
+        Args: { _period_id: string }
+        Returns: undefined
+      }
       lodge_skills_matrix: {
         Args: never
         Returns: {
@@ -3742,6 +3911,10 @@ export type Database = {
         }[]
       }
       refresh_charity_public_feed_metrics: { Args: never; Returns: undefined }
+      request_unlock_treasurer_period: {
+        Args: { _period_id: string; _reason: string }
+        Returns: undefined
+      }
     }
     Enums: {
       almoner_report_status: "draft" | "final"

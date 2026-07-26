@@ -39,11 +39,15 @@ type AuthCtx = {
   isAlmoner: boolean;
   isCharitySteward: boolean;
   isCurrentWmOrIpm: boolean;
+  isCurrentTreasurer: boolean;
+  isCurrentAuditor1: boolean;
+  isCurrentAuditor2: boolean;
   canManageProgression: boolean;
   canManageLOI: boolean;
   canManageSummons: boolean;
   canAccessAlmoner: boolean;
   canAccessCharity: boolean;
+  canAccessTreasurer: boolean;
   canAccessAdminArea: boolean;
   loading: boolean;
   refreshProfile: () => Promise<void>;
@@ -57,6 +61,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [roles, setRoles] = useState<Role[]>([]);
   const [isCurrentWmOrIpm, setIsCurrentWmOrIpm] = useState(false);
+  const [isCurrentTreasurer, setIsCurrentTreasurer] = useState(false);
+  const [isCurrentAuditor1, setIsCurrentAuditor1] = useState(false);
+  const [isCurrentAuditor2, setIsCurrentAuditor2] = useState(false);
   const [loading, setLoading] = useState(true);
 
 
@@ -84,12 +91,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     setProfile(merged);
     setRoles(((r as { role: Role }[]) ?? []).map((x) => x.role));
-    // WM/IPM detection for current lodge year (auto-rotates on installation)
+    // WM/IPM + Treasurer/Auditor detection for current lodge year (auto-rotates on installation)
     try {
-      const { data: wm } = await supabase.rpc("is_current_wm_or_ipm", { _user_id: uid });
+      const [{ data: wm }, { data: tr }, { data: a1 }, { data: a2 }] = await Promise.all([
+        supabase.rpc("is_current_wm_or_ipm", { _user_id: uid }),
+        supabase.rpc("is_current_officer" as any, { _user_id: uid, _position_key: "treasurer" } as any),
+        supabase.rpc("is_current_officer" as any, { _user_id: uid, _position_key: "auditor_1" } as any),
+        supabase.rpc("is_current_officer" as any, { _user_id: uid, _position_key: "auditor_2" } as any),
+      ]);
       setIsCurrentWmOrIpm(!!wm);
+      setIsCurrentTreasurer(!!tr);
+      setIsCurrentAuditor1(!!a1);
+      setIsCurrentAuditor2(!!a2);
     } catch {
       setIsCurrentWmOrIpm(false);
+      setIsCurrentTreasurer(false);
+      setIsCurrentAuditor1(false);
+      setIsCurrentAuditor2(false);
     }
   };
 
@@ -137,10 +155,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const canManageSummons = isAdmin || isSecretary || isAssistantSecretary;
   const canAccessAlmoner = isAdmin || isAlmoner || isCurrentWmOrIpm;
   const canAccessCharity = isAdmin || isWorshipfulMaster || isCharitySteward || isSecretary;
-  const canAccessAdminArea = isAdmin || isSecretary || isWorshipfulMaster || isDirectorOfCeremonies || isAlmoner || isCharitySteward || isAssistantSecretary;
+  const canAccessTreasurer = isAdmin || isCurrentTreasurer || isCurrentAuditor1 || isCurrentAuditor2 || isWorshipfulMaster || isCurrentWmOrIpm || isSecretary;
+  const canAccessAdminArea = isAdmin || isSecretary || isWorshipfulMaster || isDirectorOfCeremonies || isAlmoner || isCharitySteward || isAssistantSecretary || isCurrentTreasurer || isCurrentAuditor1 || isCurrentAuditor2;
 
   return (
-    <Ctx.Provider value={{ session, user: session?.user ?? null, profile, isAdmin, isSecretary, isAssistantSecretary, isWorshipfulMaster, isDirectorOfCeremonies, isAlmoner, isCharitySteward, isCurrentWmOrIpm, canManageProgression, canManageLOI, canManageSummons, canAccessAlmoner, canAccessCharity, canAccessAdminArea, loading, refreshProfile, signOut }}>
+    <Ctx.Provider value={{ session, user: session?.user ?? null, profile, isAdmin, isSecretary, isAssistantSecretary, isWorshipfulMaster, isDirectorOfCeremonies, isAlmoner, isCharitySteward, isCurrentWmOrIpm, isCurrentTreasurer, isCurrentAuditor1, isCurrentAuditor2, canManageProgression, canManageLOI, canManageSummons, canAccessAlmoner, canAccessCharity, canAccessTreasurer, canAccessAdminArea, loading, refreshProfile, signOut }}>
       {children}
     </Ctx.Provider>
   );
