@@ -72,7 +72,6 @@ export const NON_PROGRESSIVE_LABELS: Record<NonProgressiveKey, string> = {
   mentor: "Mentor",
   membership_officer: "Membership Officer",
   tyler: "Tyler",
-  tyler: "Tyler",
   assistant_tyler: "Assistant Tyler",
   auditor_1: "Auditor 1",
   auditor_2: "Auditor 2",
