@@ -546,7 +546,7 @@ function ReconciliationTab({
       <PeriodDialog open={open} onOpenChange={setOpen} editing={editing} onSaved={() => { setOpen(false); onChange(); }} />
 
       <Dialog open={!!unlockFor} onOpenChange={(v) => { if (!v) setUnlockFor(null); }}>
-        <DialogContent className="bg-navy-light border-gold/30">
+        <DialogContent className="bg-navy-light text-primary-foreground border-gold/30">
           <DialogHeader><DialogTitle className="font-serif text-gold">Request unlock</DialogTitle></DialogHeader>
           <p className="text-sm text-primary-foreground/70">Both Treasurer and Secretary must approve before the period reopens.</p>
           <Label>Reason</Label>
@@ -591,7 +591,7 @@ function PeriodDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-navy-light border-gold/30">
+      <DialogContent className="bg-navy-light text-primary-foreground border-gold/30">
         <DialogHeader><DialogTitle className="font-serif text-gold">{editing ? "Edit period" : "New period"}</DialogTitle></DialogHeader>
         <div className="space-y-3">
           <div>
