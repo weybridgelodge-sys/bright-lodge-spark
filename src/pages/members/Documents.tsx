@@ -408,7 +408,7 @@ export default function MembersDocuments() {
           <button
             key={c}
             onClick={() => setFilter(c)}
-            className={`px-3 py-1 text-xs uppercase tracking-wider rounded-sm border ${
+            className={`px-3 py-1.5 sm:py-1 text-xs uppercase tracking-wider rounded-sm border ${
               filter === c
                 ? "border-gold text-gold bg-gold/10"
                 : "border-gold/20 text-primary-foreground/60 hover:text-gold"
@@ -446,10 +446,10 @@ export default function MembersDocuments() {
 
                 </div>
               </div>
-              <div className="flex items-center gap-1 shrink-0 flex-wrap justify-end border-t border-gold/10 pt-2 sm:border-t-0 sm:pt-0">
+              <div className="flex items-center gap-2 sm:gap-1 shrink-0 flex-wrap justify-end border-t border-gold/10 pt-2 sm:border-t-0 sm:pt-0">
                 <button
                   onClick={() => handleView(d)}
-                  className="p-2 text-gold hover:bg-gold/10 rounded-sm"
+                  className="p-2.5 sm:p-2 text-gold hover:bg-gold/10 rounded-sm"
                   aria-label="Open in new tab"
                   title="Open in new tab"
                 >
@@ -457,7 +457,7 @@ export default function MembersDocuments() {
                 </button>
                 <button
                   onClick={() => handleDownload(d)}
-                  className="p-2 text-gold hover:bg-gold/10 rounded-sm"
+                  className="p-2.5 sm:p-2 text-gold hover:bg-gold/10 rounded-sm"
                   aria-label="Download"
                   title="Download"
                 >
@@ -467,7 +467,7 @@ export default function MembersDocuments() {
                   <>
                     <button
                       onClick={() => handleCopyLongLivedLink(d)}
-                      className="p-2 text-gold hover:bg-gold/10 rounded-sm"
+                      className="p-2.5 sm:p-2 text-gold hover:bg-gold/10 rounded-sm"
                       aria-label="Copy 7-day shareable link"
                       title="Copy 7-day shareable link (for printed QR codes)"
                     >
@@ -475,15 +475,16 @@ export default function MembersDocuments() {
                     </button>
                     <button
                       onClick={() => handleReplace(d)}
-                      className="p-2 text-gold hover:bg-gold/10 rounded-sm"
+                      className="p-2.5 sm:p-2 text-gold hover:bg-gold/10 rounded-sm"
                       aria-label="Replace file (keep same link)"
                       title="Replace file — keeps the same shareable link"
                     >
                       <RefreshCw className="w-4 h-4" />
                     </button>
+                    <span className="hidden sm:block w-px h-4 bg-gold/20 mx-0.5" aria-hidden="true" />
                     <button
                       onClick={() => handleDelete(d)}
-                      className="p-2 text-red-400 hover:bg-red-500/10 rounded-sm"
+                      className="p-2.5 sm:p-2 text-red-400 hover:bg-red-500/10 rounded-sm ml-1 sm:ml-0"
                       aria-label="Delete"
                       title="Delete"
                     >
