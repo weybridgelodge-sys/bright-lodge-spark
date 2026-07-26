@@ -6,22 +6,9 @@ import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import DuesStatusCard from "@/components/members/DuesStatusCard";
 
-const TITLES = ["Bro", "W Bro", "VW Bro", "RW Bro"];
-
 export default function MembersProfile() {
   const { profile, user, refreshProfile, isAdmin } = useAuth();
-  const [title, setTitle] = useState("");
-  const [firstName, setFirstName] = useState("");
   const [preferredName, setPreferredName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [provincialRank, setProvincialRank] = useState("");
-  const [grandRank, setGrandRank] = useState("");
-  const [dateOfBirth, setDateOfBirth] = useState("");
-  const [initiationDate, setInitiationDate] = useState("");
-  const [joinedLodgeDate, setJoinedLodgeDate] = useState("");
-  const [entryType, setEntryType] = useState<"initiate" | "joiner">("initiate");
-  const [isRoyalArch, setIsRoyalArch] = useState(false);
-  const [isHonoraryMember, setIsHonoraryMember] = useState(false);
   const [phone, setPhone] = useState("");
   const [addressLine1, setAddressLine1] = useState("");
   const [addressLine2, setAddressLine2] = useState("");
@@ -33,19 +20,7 @@ export default function MembersProfile() {
 
   useEffect(() => {
     if (!profile) return;
-    setTitle(profile.title ?? "");
-    setFirstName(profile.first_name ?? "");
     setPreferredName((profile as { preferred_name?: string | null }).preferred_name ?? "");
-    setLastName(profile.last_name ?? "");
-    setProvincialRank(profile.provincial_rank ?? "");
-    setGrandRank(profile.grand_rank ?? "");
-    setDateOfBirth(profile.date_of_birth ?? "");
-    setInitiationDate(profile.initiation_date ?? "");
-    const jld = (profile as { joined_lodge_date?: string | null }).joined_lodge_date ?? "";
-    setJoinedLodgeDate(jld);
-    setEntryType(jld && jld !== (profile.initiation_date ?? "") ? "joiner" : "initiate");
-    setIsRoyalArch(!!profile.is_royal_arch);
-    setIsHonoraryMember(!!profile.is_honorary_member);
     setPhone(profile.phone ?? "");
     const p = profile as unknown as Record<string, string | null>;
     setAddressLine1(p.address_line1 ?? "");
@@ -60,23 +35,10 @@ export default function MembersProfile() {
     e.preventDefault();
     if (!user) return;
     setBusy(true);
-    const composedName = [firstName.trim(), lastName.trim()].filter(Boolean).join(" ").trim();
-    const joinedLodge = entryType === "initiate" ? (initiationDate || null) : (joinedLodgeDate || null);
     const { error } = await supabase
       .from("profiles")
       .update({
-        title: title || null,
-        first_name: firstName.trim() || null,
         preferred_name: preferredName.trim() || null,
-        last_name: lastName.trim() || null,
-        full_name: composedName || null,
-        provincial_rank: provincialRank.trim() || null,
-        grand_rank: grandRank.trim() || null,
-        date_of_birth: dateOfBirth || null,
-        initiation_date: initiationDate || null,
-        joined_lodge_date: joinedLodge,
-        is_royal_arch: isRoyalArch,
-        is_honorary_member: isHonoraryMember,
         phone: phone.trim() || null,
         address_line1: addressLine1.trim() || null,
         address_line2: addressLine2.trim() || null,
@@ -98,6 +60,25 @@ export default function MembersProfile() {
   const inputCls =
     "w-full bg-navy border border-gold/20 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-gold";
   const labelCls = "block text-xs uppercase tracking-wider text-primary-foreground/60 mb-1";
+
+  const fmtDate = (d?: string | null) => {
+    if (!d) return "—";
+    try {
+      return new Date(d).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+    } catch { return d; }
+  };
+
+  const p = profile as unknown as Record<string, string | null | boolean | undefined> | null;
+  const joinedLodgeDate = (p?.joined_lodge_date as string | null | undefined) ?? null;
+  const initiationDate = (p?.initiation_date as string | null | undefined) ?? null;
+  const isJoiner = !!(joinedLodgeDate && joinedLodgeDate !== initiationDate);
+
+  const ReadOnly = ({ label, value }: { label: string; value: React.ReactNode }) => (
+    <div>
+      <div className={labelCls}>{label}</div>
+      <div className="text-sm text-primary-foreground/90 py-2">{value || <span className="text-primary-foreground/40">—</span>}</div>
+    </div>
+  );
 
   return (
     <MembersLayout>
@@ -123,31 +104,44 @@ export default function MembersProfile() {
         </div>
       )}
 
+      {/* Read-only official details */}
+      <div className="max-w-2xl mb-6 bg-navy-dark/60 border border-gold/15 rounded-sm p-4 sm:p-6 space-y-4">
+        <div className="flex items-start justify-between gap-4 flex-wrap">
+          <h2 className="font-serif text-xl text-gold">Official details</h2>
+          <span className="text-[10px] uppercase tracking-wider text-gold/60 border border-gold/30 rounded-sm px-2 py-0.5">Read only</span>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-[120px_1fr_1fr] gap-4">
+          <ReadOnly label="Title" value={profile?.title} />
+          <ReadOnly label="First name" value={profile?.first_name} />
+          <ReadOnly label="Last name" value={profile?.last_name} />
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <ReadOnly label="Provincial rank" value={profile?.provincial_rank} />
+          <ReadOnly label="Grand rank" value={profile?.grand_rank} />
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <ReadOnly label="Date of birth" value={fmtDate(profile?.date_of_birth)} />
+          <ReadOnly label="Type" value={isJoiner ? "Joiner (J)" : "Initiate (I)"} />
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <ReadOnly label={isJoiner ? "Original initiation date" : "Initiation date"} value={fmtDate(initiationDate)} />
+          {isJoiner && <ReadOnly label="Joined this Lodge" value={fmtDate(joinedLodgeDate)} />}
+        </div>
+        <div className="flex flex-wrap gap-6 pt-2">
+          <ReadOnly label="Royal Arch" value={profile?.is_royal_arch ? "Yes" : "No"} />
+          <ReadOnly label="Honorary member" value={profile?.is_honorary_member ? "Yes" : "No"} />
+        </div>
+        <p className="text-xs text-primary-foreground/60 pt-3 border-t border-gold/10">
+          These details are maintained by the Lodge. Contact the Secretary to update them.
+        </p>
+      </div>
+
+      {/* Editable member-controlled fields */}
       <form
         onSubmit={save}
         className="max-w-2xl space-y-4 bg-navy-dark/60 border border-gold/15 rounded-sm p-4 sm:p-6"
       >
-        <div className="grid grid-cols-1 sm:grid-cols-[120px_1fr_1fr] gap-4">
-          <div>
-            <label className={labelCls}>Title</label>
-            <select value={title} onChange={(e) => setTitle(e.target.value)} className={inputCls}>
-              <option value="">—</option>
-              {TITLES.map((t) => (
-                <option key={t} value={t}>
-                  {t}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className={labelCls}>First name</label>
-            <input value={firstName} onChange={(e) => setFirstName(e.target.value)} className={inputCls} />
-          </div>
-          <div>
-            <label className={labelCls}>Last name</label>
-            <input value={lastName} onChange={(e) => setLastName(e.target.value)} className={inputCls} />
-          </div>
-        </div>
+        <h2 className="font-serif text-xl text-gold">Your contact details</h2>
 
         <div>
           <label className={labelCls}>Preferred name (optional)</label>
@@ -158,80 +152,6 @@ export default function MembersProfile() {
             className={inputCls}
           />
         </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label className={labelCls}>Provincial rank</label>
-            <input
-              value={provincialRank}
-              onChange={(e) => setProvincialRank(e.target.value)}
-              placeholder="e.g. PPrJGW"
-              className={inputCls}
-            />
-          </div>
-          <div>
-            <label className={labelCls}>Grand rank</label>
-            <input
-              value={grandRank}
-              onChange={(e) => setGrandRank(e.target.value)}
-              placeholder="e.g. PAGDC"
-              className={inputCls}
-            />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label className={labelCls}>Date of birth</label>
-            <input
-              type="date"
-              value={dateOfBirth}
-              onChange={(e) => setDateOfBirth(e.target.value)}
-              className={inputCls}
-            />
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-[120px_1fr] gap-4">
-            <div>
-              <label className={labelCls}>Type</label>
-              <select
-                value={entryType}
-                onChange={(e) => {
-                  const t = e.target.value as "initiate" | "joiner";
-                  setEntryType(t);
-                  if (t === "initiate") setJoinedLodgeDate("");
-                  else if (!joinedLodgeDate) setJoinedLodgeDate(initiationDate);
-                }}
-                className={inputCls}
-              >
-                <option value="initiate">Initiate (I)</option>
-                <option value="joiner">Joiner (J)</option>
-              </select>
-            </div>
-            <div>
-              <label className={labelCls}>
-                {entryType === "joiner" ? "Original initiation date" : "Initiation date"}
-              </label>
-              <input
-                type="date"
-                value={initiationDate}
-                onChange={(e) => setInitiationDate(e.target.value)}
-                className={inputCls}
-              />
-            </div>
-          </div>
-        </div>
-
-        {entryType === "joiner" && (
-          <div>
-            <label className={labelCls}>Joined this Lodge</label>
-            <input
-              type="date"
-              value={joinedLodgeDate}
-              onChange={(e) => setJoinedLodgeDate(e.target.value)}
-              className={inputCls}
-            />
-          </div>
-        )}
 
         <div>
           <label className={labelCls}>Phone (optional)</label>
@@ -266,28 +186,6 @@ export default function MembersProfile() {
               <input value={postcode} onChange={(e) => setPostcode(e.target.value)} className={`${inputCls} uppercase`} />
             </div>
           </div>
-        </div>
-
-
-        <div className="flex flex-wrap gap-6 pt-2">
-          <label className="flex items-center gap-2 text-sm text-primary-foreground/80">
-            <input
-              type="checkbox"
-              checked={isRoyalArch}
-              onChange={(e) => setIsRoyalArch(e.target.checked)}
-              className="accent-gold w-4 h-4"
-            />
-            Royal Arch
-          </label>
-          <label className="flex items-center gap-2 text-sm text-primary-foreground/80">
-            <input
-              type="checkbox"
-              checked={isHonoraryMember}
-              onChange={(e) => setIsHonoraryMember(e.target.checked)}
-              className="accent-gold w-4 h-4"
-            />
-            Honorary member
-          </label>
         </div>
 
         <p className="text-xs text-primary-foreground/50 pt-2 border-t border-gold/10">
