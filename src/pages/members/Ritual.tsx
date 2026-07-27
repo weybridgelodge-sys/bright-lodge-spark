@@ -63,7 +63,7 @@ export default function MembersRitual() {
 
     if (Capacitor.isNativePlatform()) {
       const ext = (d.file_path.split(".").pop() || "").toLowerCase();
-      const nativeRenderable = ["pdf", "png", "jpg", "jpeg", "gif", "webp", "svg"];
+      const nativeRenderable = ["png", "jpg", "jpeg", "gif", "webp", "svg"];
       const url = nativeRenderable.includes(ext)
         ? data.signedUrl
         : `https://docs.google.com/gview?embedded=true&url=${encodeURIComponent(data.signedUrl)}`;
