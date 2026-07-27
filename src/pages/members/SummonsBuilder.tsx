@@ -634,10 +634,7 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
         manualHidden: manualHidden as any,
       });
       if (action === "download") {
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url; a.download = `summons-${summons.meeting_number}.pdf`; a.click();
-        URL.revokeObjectURL(url);
+        await saveBlob(blob, `summons-${summons.meeting_number}.pdf`);
         return null;
       }
       // Save → upload + insert/update
