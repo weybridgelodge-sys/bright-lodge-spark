@@ -61,7 +61,7 @@ export default function MembersLogin() {
     setBusy(true);
     const { error } = await supabase.auth.signInWithOtp({
       email: loginEmail.trim(),
-      options: { emailRedirectTo: `${window.location.origin}/members` },
+      options: { emailRedirectTo: membersRedirectUrl },
     });
     setBusy(false);
     if (error) {
@@ -95,7 +95,7 @@ export default function MembersLogin() {
       email: parsed.data.email,
       password: tempPassword,
       options: {
-        emailRedirectTo: `${window.location.origin}/members`,
+        emailRedirectTo: membersRedirectUrl,
         data: {
           full_name: parsed.data.fullName,
           ugle_reg_number: parsed.data.ugleRegNumber,
@@ -117,7 +117,7 @@ export default function MembersLogin() {
     setBusy(true);
     try {
       const result = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: `${window.location.origin}/members`,
+        redirect_uri: membersRedirectUrl,
       });
       if (result.error) {
         toast.error("Google sign-in failed");
