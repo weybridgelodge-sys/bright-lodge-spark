@@ -27,7 +27,7 @@ function header(doc: jsPDF, title: string) {
   doc.text(`Generated ${new Date().toLocaleDateString("en-GB")}`, 14, 25);
 }
 
-export function exportVoReport(bundle: KpiBundle) {
+export async function exportVoReport(bundle: KpiBundle) {
   const doc = new jsPDF();
   const s = snapshot(bundle.members);
   const mv = movement(bundle.members);
