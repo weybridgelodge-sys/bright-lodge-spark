@@ -56,6 +56,21 @@ const SouthSurreyFreemasons = lazy(() => import("./pages/SouthSurreyFreemasons")
 // only when a visitor navigates into /members/*.
 const MembersRoutes = lazy(() => import("./MembersRoutes"));
 
+// Catch-all safety net: Supabase auth email links that can only use the bare
+// Site URL land on "/" with tokens in the hash. If we see an access_token in
+// the fragment on the homepage, send it to /members where the portal's Supabase
+// client is loaded and can consume it. This applies to web and native.
+const HomeRoute = () => {
+  const { pathname, hash } = useLocation();
+  if (pathname === "/" && hash.includes("access_token=")) {
+    return <Navigate to={{ pathname: "/members", hash }} replace />;
+  }
+  if (Capacitor.isNativePlatform()) {
+    return <Navigate to="/members" replace />;
+  }
+  return <Index />;
+};
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -67,16 +82,7 @@ const App = () => (
         <ScrollToTopButton />
         <Suspense fallback={null}>
           <Routes>
-            <Route
-              path="/"
-              element={
-                Capacitor.isNativePlatform() ? (
-                  <Navigate to="/members" replace />
-                ) : (
-                  <Index />
-                )
-              }
-            />
+            <Route path="/" element={<HomeRoute />} />
             <Route path="/what-is-freemasonry" element={<WhatIsFreemasonry />} />
             <Route path="/freemasonry-and-charity" element={<FreemasonryCharity />} />
             <Route path="/our-charities" element={<OurCharities />} />
