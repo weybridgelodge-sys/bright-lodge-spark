@@ -259,19 +259,50 @@ export default function MembersLogin() {
                     </div>
                   </>
                 ) : (
-                  <div className="text-center py-4">
+                  <div className="text-center py-2">
                     <div className="w-14 h-14 rounded-full bg-gold/15 flex items-center justify-center mx-auto mb-4">
                       <CheckCircle2 className="w-7 h-7 text-gold" />
                     </div>
                     <h2 className="font-serif text-xl text-gold mb-2">Check Your Inbox</h2>
                     <p className="text-sm text-primary-foreground/70 leading-relaxed max-w-xs mx-auto">
-                      We have emailed a secure authentication link to{" "}
-                      <span className="text-gold">{loginEmail}</span>. Click the link inside that message to instantly
-                      unlock the portal.
+                      We have emailed a secure sign-in link to{" "}
+                      <span className="text-gold">{loginEmail}</span>. Click the link inside that message to unlock the portal.
                     </p>
+
+                    <div className="my-6 flex items-center gap-3 text-[10px] text-primary-foreground/40 uppercase tracking-wider">
+                      <div className="flex-1 h-px bg-gold/10" /> or enter code <div className="flex-1 h-px bg-gold/10" />
+                    </div>
+
+                    <p className="text-xs text-primary-foreground/70 mb-3 leading-relaxed max-w-xs mx-auto">
+                      Enter the <span className="text-gold font-semibold">6-digit code</span> from the email below — useful in the mobile app or if the link won't open.
+                    </p>
+
+                    <form onSubmit={handleVerifyOtp} className="space-y-3">
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        autoComplete="one-time-code"
+                        maxLength={6}
+                        value={otpCode}
+                        onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                        placeholder="123456"
+                        aria-label="6-digit verification code"
+                        className="w-full max-w-[240px] mx-auto block bg-navy border border-gold/30 rounded-sm px-3 py-3 text-center text-2xl font-mono tracking-[0.6em] pl-[0.6em] text-primary-foreground focus:outline-none focus:border-gold transition-colors"
+                      />
+                      <button
+                        type="submit"
+                        disabled={verifying || otpCode.length !== 6}
+                        className="w-full max-w-[240px] mx-auto bg-gold-shimmer text-accent-foreground px-4 py-2.5 rounded-sm text-sm font-semibold font-sans hover:opacity-90 disabled:opacity-40 flex items-center justify-center gap-2 transition-opacity"
+                      >
+                        {verifying ? "Verifying…" : "Verify Code"} <ArrowRight className="w-4 h-4" />
+                      </button>
+                    </form>
+
                     <button
                       onClick={() => {
                         setEmailSent(false);
+                        setOtpCode("");
                       }}
                       className="text-[11px] font-semibold text-primary-foreground/60 hover:text-gold uppercase tracking-wider mt-6 inline-flex items-center gap-1"
                     >
