@@ -61,6 +61,9 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
+      <div style={{position: 'fixed', top: 0, left: 0, right: 0, zIndex: 99999, background: 'red', color: 'white', padding: '8px', fontSize: '14px', fontFamily: 'monospace'}}>
+        DEBUG: native={String(Capacitor.isNativePlatform())} platform={Capacitor.getPlatform()}
+      </div>
       <DeferredToasters />
       <BrowserRouter>
         <ScrollToTop />
