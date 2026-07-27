@@ -4,6 +4,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { BookOpen, Download, Loader2, ShieldCheck, Clock, ExternalLink, FileText, Video, Music, Search } from "lucide-react";
 import { toast } from "sonner";
+import { Capacitor } from "@capacitor/core";
+import { Browser } from "@capacitor/browser";
 
 type Degree = "entered_apprentice" | "fellow_craft" | "master_mason" | "installed_master";
 type DocType = "text" | "audio" | "video";
@@ -58,6 +60,12 @@ export default function MembersRitual() {
   const handleView = async (d: Doc) => {
     const { data, error } = await supabase.storage.from("ritual-docs").createSignedUrl(d.file_path, 60);
     if (error || !data) { toast.error("Couldn't open document"); return; }
+
+    if (Capacitor.isNativePlatform()) {
+      await Browser.open({ url: data.signedUrl, presentationStyle: "popover" });
+      return;
+    }
+
     try {
       const res = await fetch(data.signedUrl);
       if (!res.ok) throw new Error("fetch failed");
@@ -83,7 +91,11 @@ export default function MembersRitual() {
     const filename = d.file_path.split("/").pop() || d.title;
     const { data, error } = await supabase.storage.from("ritual-docs").createSignedUrl(d.file_path, 60, { download: filename });
     if (error || !data) { toast.error("Couldn't generate download link"); return; }
-    window.open(data.signedUrl, "_blank", "noopener");
+    if (Capacitor.isNativePlatform()) {
+      await Browser.open({ url: data.signedUrl });
+    } else {
+      window.open(data.signedUrl, "_blank", "noopener");
+    }
   };
 
   const myDegree = (profile as { degree?: Degree } | null)?.degree ?? "entered_apprentice";
