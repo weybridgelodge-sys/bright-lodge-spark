@@ -181,5 +181,5 @@ export async function exportFullKpi(bundle: KpiBundle) {
     headStyles: { fillColor: [27, 42, 74], textColor: [201, 164, 50] },
   });
 
-  doc.save(`kpi-summary-${new Date().toISOString().slice(0, 10)}.pdf`);
+  await saveJsPdf(doc, `kpi-summary-${new Date().toISOString().slice(0, 10)}.pdf`);
 }
