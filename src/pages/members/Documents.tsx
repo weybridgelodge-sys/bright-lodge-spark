@@ -69,6 +69,18 @@ export default function MembersDocuments() {
   }, []);
 
   const handleView = async (d: Doc) => {
+    const isNative = Capacitor.isNativePlatform();
+
+    if (isNative) {
+      const { data, error } = await supabase.storage.from("lodge-docs").createSignedUrl(d.file_path, 300);
+      if (error || !data) {
+        toast.error("Couldn't open document");
+        return;
+      }
+      await Browser.open({ url: data.signedUrl, presentationStyle: "popover" });
+      return;
+    }
+
     const safeTitle = d.title.replace(/[<>&]/g, "");
     const win = window.open("about:blank", "_blank");
     if (!win) {
@@ -120,7 +132,11 @@ export default function MembersDocuments() {
       toast.error("Couldn't generate download link");
       return;
     }
-    window.open(data.signedUrl, "_blank", "noopener");
+    if (Capacitor.isNativePlatform()) {
+      await Browser.open({ url: data.signedUrl });
+    } else {
+      window.open(data.signedUrl, "_blank", "noopener");
+    }
   };
 
   const myDegree = (profile as { degree?: Degree } | null)?.degree ?? "entered_apprentice";
