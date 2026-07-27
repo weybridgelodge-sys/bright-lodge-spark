@@ -271,7 +271,7 @@ export default function OfficersTracker() {
 
   // ---------- PDF Export ----------
 
-  const exportPdf = () => {
+  const exportPdf = async () => {
     const doc = new jsPDF({ orientation: "landscape", unit: "pt", format: "a4" });
     doc.setFont("times", "bold");
     doc.setTextColor(27, 42, 74);
