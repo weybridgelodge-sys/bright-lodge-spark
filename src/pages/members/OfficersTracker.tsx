@@ -372,7 +372,7 @@ export default function OfficersTracker() {
       }
     }
 
-    doc.save(`weybridge-officers-projection-${formatMasonicYear(currentYear)}.pdf`);
+    await saveJsPdf(doc, `weybridge-officers-projection-${formatMasonicYear(currentYear)}.pdf`);
   };
 
   // ---------- UI ----------
