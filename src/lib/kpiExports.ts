@@ -1,5 +1,6 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { saveJsPdf } from "./nativeDownload";
 import {
   type KpiBundle,
   snapshot,
