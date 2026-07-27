@@ -10,8 +10,9 @@ import { Copy, FileText, FileDown, Save, CheckCircle2, Trash2, FolderOpen, Print
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { firstWmYearForMember } from "@/data/worshipfulMasters";
+import { assetUrl } from "@/lib/assetUrl";
 import logoAsset from "@/assets/weybridge-logo-navy.png.asset.json";
-const logoUrl = logoAsset.url;
+const logoUrl = assetUrl(logoAsset);
 
 type Member = {
   id: string; first_name: string | null; last_name: string | null;

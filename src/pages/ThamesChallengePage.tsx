@@ -8,6 +8,7 @@ import { motion } from "framer-motion";
 import { Calendar, Footprints, HeartPulse, MapPinned, Users, ArrowRight, ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 
+import { assetUrl } from "@/lib/assetUrl";
 import barrierDawn from "@/assets/thames-challenge/tc-barrier-dawn.jpg.asset.json";
 import barrierGantry from "@/assets/thames-challenge/tc-barrier-gantry.jpg.asset.json";
 import sourceStone from "@/assets/thames-challenge/tc-source-stone.jpg.asset.json";
@@ -64,7 +65,7 @@ const timeline = [
     title: "London — the challenge takes shape",
     text:
       "The story begins in the capital, where the early miles were framed by the familiar landmarks of the working Thames — barrier structures, embankments and bridges. It was an urban start, but it set the tone: this would be a serious undertaking, taken one section at a time and shared by a determined team.",
-    image: barrierDawn.url,
+    image: assetUrl(barrierDawn),
     alt: "Challenge team gathered by the river near an old stone bridge at dawn during the London section of the Thames walk",
     caption: "Early on the route — tired legs still fresh enough for smiles.",
   },
@@ -72,7 +73,7 @@ const timeline = [
     title: "Middle reaches — rhythm, weather and river life",
     text:
       "As the route unfolded upstream, the walk settled into a rhythm of bridges, towpaths, changing weather and steady companionship. Some stretches were open and expansive, others muddy, exposed or unexpectedly testing. The river kept changing character, and the team had to change with it.",
-    image: maidenheadBridge.url,
+    image: assetUrl(maidenheadBridge),
     alt: "Walking group by the Thames near Maidenhead Bridge during an overcast stage of the challenge",
     caption: "The Thames in transition — broader water, greyer skies and steady progress.",
   },
@@ -80,7 +81,7 @@ const timeline = [
     title: "Upper Thames — quieter miles, stronger resolve",
     text:
       "Further upstream the scenery softened. Villages, willow-lined banks and quieter waters brought a different kind of challenge: long, honest mileage without much fuss or spectacle. These were the stretches where resolve mattered most and where the companionship of the group carried real weight.",
-    image: newbridgeWillows.url,
+    image: assetUrl(newbridgeWillows),
     alt: "Weybridge Lodge walkers posed under willow trees beside the Thames near Newbridge",
     caption: "Newbridge — one of the calmer, greener moments on the route.",
   },
@@ -88,7 +89,7 @@ const timeline = [
     title: "The source — a simple, memorable finish",
     text:
       "Eventually the walk reaches the symbolic end point: the source stone. There is nothing grand or theatrical about it — and perhaps that is exactly the point. After all the miles, fellowship and effort, the finish is quiet, human and deeply satisfying. The achievement belongs not to one person, but to everyone who took part and helped get the team there.",
-    image: sourceStone.url,
+    image: assetUrl(sourceStone),
     alt: "Walker beside the Thames source stone and signpost marking the end of the route",
     caption: "At the source stone — where the river begins and the story resolves.",
   },
@@ -99,37 +100,37 @@ const people = [
     title: "The walkers",
     text:
       "The challenge was carried by people willing to put one foot in front of the other over and over again — not for applause, but because shared effort matters. Some stages were tougher than expected, but the group kept showing up.",
-    image: barrierGantry.url,
+    image: assetUrl(barrierGantry),
     alt: "Small team selfie on a gantry above the river during the Thames challenge",
   },
   {
     title: "The support network",
     text:
       "Every endurance effort depends on more than the walkers themselves. Encouragement, lifts, planning, check-ins, refreshments and morale all played a part. That wider circle is visible throughout the story of the challenge.",
-    image: leboatGroup.url,
+    image: assetUrl(leboatGroup),
     alt: "Supporters and walkers together on a river boat during the Thames challenge",
   },
   {
     title: "The moments between the miles",
     text:
       "Not every memory came from the hardest sections. Some came from the pauses — riverside photos, regrouping points, a pint at the end of a long day, or simply laughing when the weather or terrain had other ideas.",
-    image: pubPints.url,
+    image: assetUrl(pubPints),
     alt: "Group enjoying celebratory drinks after a walking stage of the Thames challenge",
   },
 ];
 
 const gallery = [
-  { src: thamesPathSign.url, alt: "Thames Path sign marking the route of the walking challenge", caption: "The path itself — a route with its own character from start to finish." },
-  { src: oxfordBridge.url, alt: "Historic Oxford bridge and river scene on the Thames Towpath Challenge", caption: "Oxford — architecture, river traffic and another chapter in the walk." },
-  { src: cricklade.url, alt: "Cricklade section of the Thames Towpath Challenge", caption: "Cricklade — where the river begins to feel markedly different." },
-  { src: abingdonSelfie.url, alt: "Group selfie beside the river in Abingdon during the challenge", caption: "Abingdon — a bright stage, strong spirits and another milestone." },
-  { src: roseRevived.url, alt: "Walking team outside The Rose Revived during the challenge", caption: "A proper regrouping point on the route." },
-  { src: putneyGroup.url, alt: "Team group photo in Putney during the Thames challenge", caption: "Urban river miles at the London end of the journey." },
-  { src: henleyGroup.url, alt: "Group of walkers together in Henley during the challenge", caption: "Henley — one more stretch, one more set of memories." },
-  { src: fieldsSelfie.url, alt: "Selfie in open fields during a rural stage of the Thames walk", caption: "Away from the towns, the path opened out into quieter country." },
-  { src: threeAmigosRiver.url, alt: "Three walkers beside the river during the Thames challenge", caption: "Smaller groups, same purpose." },
-  { src: stormDog.url, alt: "Dog photographed during stormy conditions on the Thames challenge", caption: "Even the difficult conditions produced unforgettable images." },
-  { src: leboat.url, alt: "Boat on the Thames used as part of the support story around the challenge", caption: "The river was not just backdrop — it shaped the whole feel of the challenge." },
+  { src: assetUrl(thamesPathSign), alt: "Thames Path sign marking the route of the walking challenge", caption: "The path itself — a route with its own character from start to finish." },
+  { src: assetUrl(oxfordBridge), alt: "Historic Oxford bridge and river scene on the Thames Towpath Challenge", caption: "Oxford — architecture, river traffic and another chapter in the walk." },
+  { src: assetUrl(cricklade), alt: "Cricklade section of the Thames Towpath Challenge", caption: "Cricklade — where the river begins to feel markedly different." },
+  { src: assetUrl(abingdonSelfie), alt: "Group selfie beside the river in Abingdon during the challenge", caption: "Abingdon — a bright stage, strong spirits and another milestone." },
+  { src: assetUrl(roseRevived), alt: "Walking team outside The Rose Revived during the challenge", caption: "A proper regrouping point on the route." },
+  { src: assetUrl(putneyGroup), alt: "Team group photo in Putney during the Thames challenge", caption: "Urban river miles at the London end of the journey." },
+  { src: assetUrl(henleyGroup), alt: "Group of walkers together in Henley during the challenge", caption: "Henley — one more stretch, one more set of memories." },
+  { src: assetUrl(fieldsSelfie), alt: "Selfie in open fields during a rural stage of the Thames walk", caption: "Away from the towns, the path opened out into quieter country." },
+  { src: assetUrl(threeAmigosRiver), alt: "Three walkers beside the river during the Thames challenge", caption: "Smaller groups, same purpose." },
+  { src: assetUrl(stormDog), alt: "Dog photographed during stormy conditions on the Thames challenge", caption: "Even the difficult conditions produced unforgettable images." },
+  { src: assetUrl(leboat), alt: "Boat on the Thames used as part of the support story around the challenge", caption: "The river was not just backdrop — it shaped the whole feel of the challenge." },
 ];
 
 const ThamesChallengePage = () => {
@@ -161,7 +162,7 @@ const ThamesChallengePage = () => {
         <section className="relative overflow-hidden bg-navy-dark pt-32 pb-20 md:pt-40 md:pb-28">
           <div
             className="absolute inset-0 bg-cover bg-center"
-            style={{ backgroundImage: `url(${sourceStone.url})` }}
+            style={{ backgroundImage: `url(${assetUrl(sourceStone)})` }}
             role="img"
             aria-label="Walker at the Thames source stone completing the challenge"
           />
@@ -208,7 +209,7 @@ const ThamesChallengePage = () => {
                     That reversal gives the walk its emotional force. Every stage strips something back. The crowds thin, the water narrows, the route quietens, and what remains is effort, companionship and purpose. By the time the source stone is reached, the achievement feels earned in a very human way.
                   </p>
                   <figure className="mt-8">
-                    <img src={barrierDawn.url} alt="Challenge team gathered by the river in the early stages of the Thames walk" className="w-full rounded-sm border border-border object-cover" />
+                    <img src={assetUrl(barrierDawn)} alt="Challenge team gathered by the river in the early stages of the Thames walk" className="w-full rounded-sm border border-border object-cover" />
                     <figcaption className="mt-2 text-center font-mono text-xs uppercase tracking-[0.18em] text-muted-foreground">
                       Early section — the walk begins in the city but never stays there.
                     </figcaption>
@@ -262,7 +263,7 @@ const ThamesChallengePage = () => {
                   </ul>
                 </div>
                 <div className="overflow-hidden rounded-sm border border-border bg-card">
-                  <img src={thamesPathSign.url} alt="Thames Path sign showing route directions" className="w-full object-cover" loading="lazy" />
+                  <img src={assetUrl(thamesPathSign)} alt="Thames Path sign showing route directions" className="w-full object-cover" loading="lazy" />
                   <div className="p-4 text-sm font-sans text-muted-foreground">
                     The route itself became part of the narrative — changing in mood, terrain and difficulty as the team worked upstream.
                   </div>

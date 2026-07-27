@@ -2,7 +2,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Clock, LogOut } from "lucide-react";
 import logoAsset from "@/assets/weybridge-logo-no-bg.png.asset.json";
-const logo = logoAsset.url;
+import { assetUrl } from "@/lib/assetUrl";
+const logo = assetUrl(logoAsset);
 
 export default function MembersPending() {
   const { profile, signOut } = useAuth();

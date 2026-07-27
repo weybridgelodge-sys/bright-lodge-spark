@@ -1,5 +1,6 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { assetUrl } from "@/lib/assetUrl";
 import logoAsset from "@/assets/weybridge-logo-white.png.asset.json";
 import { pieceRisk, type SkillsMatrix, displayMember, piecePeople } from "./skillsMatrix";
 
@@ -16,7 +17,7 @@ export async function buildGapReportPdf(matrix: SkillsMatrix) {
 
   let logoData: string | null = null;
   try {
-    const res = await fetch(logoAsset.url);
+    const res = await fetch(assetUrl(logoAsset));
     const blob = await res.blob();
     logoData = await new Promise<string>((resolve) => {
       const r = new FileReader();

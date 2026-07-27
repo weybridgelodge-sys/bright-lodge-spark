@@ -1,5 +1,6 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { assetUrl } from "@/lib/assetUrl";
 import logoAsset from "@/assets/weybridge-logo-white.png.asset.json";
 import type { SummaryReportData, FlaggedMember } from "./summaryReport";
 
@@ -30,7 +31,7 @@ export async function buildSummaryReportPdf(args: {
 
   let logoData: string | null = null;
   try {
-    const res = await fetch(logoAsset.url);
+    const res = await fetch(assetUrl(logoAsset));
     const blob = await res.blob();
     logoData = await new Promise<string>((resolve) => {
       const r = new FileReader();

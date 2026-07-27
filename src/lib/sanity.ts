@@ -12,6 +12,7 @@ import apgmVisitImg from "@/assets/news/apgm-visit-full.jpg";
 import sandsImg from "@/assets/news/sands-cheque.webp";
 import anniversaryImg from "@/assets/news/75th-anniversary-group.png";
 import installationImg from "@/assets/news/installation-meeting-group.jpg";
+import { assetUrl } from "@/lib/assetUrl";
 import surrey2030Img from "@/assets/news/surrey-2030-gold-trophy.jpg.asset.json";
 
 export const SANITY_PROJECT_ID = "sjz7d6eb";
@@ -34,7 +35,7 @@ export function urlFor(source: SanityImageSource) {
 }
 
 export const LEGACY_IMAGES: Record<string, string> = {
-  "surrey-2030-festival-gold": surrey2030Img.url,
+  "surrey-2030-festival-gold": assetUrl(surrey2030Img),
   "pgm-visit-february-2026": apgmVisitImg,
   "sands-charity": sandsImg,
   "75th-anniversary": anniversaryImg,

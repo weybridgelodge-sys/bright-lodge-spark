@@ -1,5 +1,6 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { assetUrl } from "@/lib/assetUrl";
 import logoAsset from "@/assets/weybridge-logo-white.png.asset.json";
 import { gbp, COLLECTION_TYPE_LABEL, type Collection, type Donation, type Charity, type FestivalSettings, masonicYearBounds, inYear, reliefChestBalance, isFestivalDonation } from "./queries";
 
@@ -58,7 +59,7 @@ export async function buildCharityAnnualReportPdf(args: {
 
   let logoData: string | null = null;
   try {
-    const res = await fetch(logoAsset.url);
+    const res = await fetch(assetUrl(logoAsset));
     const blob = await res.blob();
     logoData = await new Promise<string>((r) => {
       const fr = new FileReader();
