@@ -26,6 +26,12 @@ function toMetaDescription(text: string, max = 155): string {
   return text.slice(0, max - 1).replace(/\s+\S*$/, "") + "…";
 }
 
+// ─── Helper: normalize Sanity uploadDate to ISO 8601 datetime with timezone ──
+function normalizeUploadDate(date: string): string {
+  if (date.includes("T")) return date;
+  return `${date}T00:00:00Z`;
+}
+
 const VideoDetailPage = () => {
   const { slug } = useParams<{ slug: string }>();
   const shouldReduceMotion = useReducedMotion();
