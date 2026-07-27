@@ -73,6 +73,27 @@ export default function MembersLogin() {
     setEmailSent(true);
   };
 
+  const handleVerifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const code = otpCode.trim();
+    if (!/^\d{6}$/.test(code)) {
+      toast.error("Enter the 6-digit code from the email");
+      return;
+    }
+    setVerifying(true);
+    const { error } = await supabase.auth.verifyOtp({
+      email: loginEmail.trim(),
+      token: code,
+      type: "email",
+    });
+    setVerifying(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    // Session updates via onAuthStateChange -> useEffect redirects to /members
+  };
+
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     if (honeypot) return;
