@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { ArrowDown, ArrowUp, Paperclip, Pencil, Plus, Trash2, X } from "lucide-react";
+import { toUploadBody } from "@/lib/nativeUpload";
 
 type Member = { id: string; first_name: string | null; last_name: string | null; preferred_name: string | null; full_name: string | null };
 type Direction = "outgoing" | "incoming";
