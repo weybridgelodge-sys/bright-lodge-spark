@@ -5,6 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { FileText, Upload, Trash2, Download, Loader2, ExternalLink, Link2, RefreshCw, Eye } from "lucide-react";
 import { toast } from "sonner";
+import { toUploadBody } from "@/lib/nativeUpload";
 
 type Degree = "entered_apprentice" | "fellow_craft" | "master_mason" | "installed_master";
 type DegreeOrGeneral = Degree | "general";
