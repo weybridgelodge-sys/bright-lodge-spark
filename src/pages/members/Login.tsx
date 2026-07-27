@@ -80,23 +80,49 @@ export default function MembersLogin() {
   const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     const code = otpCode.trim();
+    const email = loginEmail.trim();
     if (!/^\d{6}$/.test(code)) {
       toast.error("Enter the 6-digit code from the email");
       return;
     }
     setVerifying(true);
     const { error } = await supabase.auth.verifyOtp({
-      email: loginEmail.trim(),
+      email,
       token: code,
       type: "email",
     });
-    setVerifying(false);
-    if (error) {
-      toast.error(error.message);
-      return;
+    if (!error) {
+      setVerifying(false);
+      return; // onAuthStateChange -> redirect
     }
-    // Session updates via onAuthStateChange -> useEffect redirects to /members
+
+    // Play Store reviewer bypass — temporary, server-scoped to a single
+    // whitelisted email. Real members will always fail this call (401).
+    // The bypass code + email live only in edge-function env vars.
+    try {
+      const { data, error: fnErr } = await supabase.functions.invoke("reviewer-signin", {
+        body: { email, code },
+      });
+      if (!fnErr && data?.access_token && data?.refresh_token) {
+        const { error: setErr } = await supabase.auth.setSession({
+          access_token: data.access_token,
+          refresh_token: data.refresh_token,
+        });
+        setVerifying(false);
+        if (setErr) {
+          toast.error(setErr.message);
+          return;
+        }
+        return;
+      }
+    } catch {
+      /* fall through to original error */
+    }
+
+    setVerifying(false);
+    toast.error(error.message);
   };
+
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();

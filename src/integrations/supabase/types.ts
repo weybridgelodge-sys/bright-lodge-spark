@@ -2514,6 +2514,7 @@ export type Database = {
           is_honorary_member: boolean
           is_past_master: boolean
           is_royal_arch: boolean
+          is_test_account: boolean
           is_ugle_portal_registered: boolean
           joined_lodge_date: string | null
           joined_year: number | null
@@ -2555,6 +2556,7 @@ export type Database = {
           is_honorary_member?: boolean
           is_past_master?: boolean
           is_royal_arch?: boolean
+          is_test_account?: boolean
           is_ugle_portal_registered?: boolean
           joined_lodge_date?: string | null
           joined_year?: number | null
@@ -2596,6 +2598,7 @@ export type Database = {
           is_honorary_member?: boolean
           is_past_master?: boolean
           is_royal_arch?: boolean
+          is_test_account?: boolean
           is_ugle_portal_registered?: boolean
           joined_lodge_date?: string | null
           joined_year?: number | null
