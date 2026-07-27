@@ -23,6 +23,7 @@ import {
 import { Loader2, AlertTriangle, Crown, Download, UserPlus, Lock, ShieldAlert, X } from "lucide-react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { saveJsPdf } from "@/lib/nativeDownload";
 
 type Tab = "board" | "ladder" | "readiness";
 type Readiness = "ready" | "needs_experience" | "non_progressive";
