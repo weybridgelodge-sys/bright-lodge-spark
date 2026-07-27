@@ -285,17 +285,21 @@ export default function MembersLogin() {
                       </button>
                     </form>
 
-                    <div className="my-5 flex items-center gap-3 text-[10px] text-primary-foreground/40 uppercase tracking-wider">
-                      <div className="flex-1 h-px bg-gold/10" /> or <div className="flex-1 h-px bg-gold/10" />
-                    </div>
+                    {!isNativeApp && (
+                      <>
+                        <div className="my-5 flex items-center gap-3 text-[10px] text-primary-foreground/40 uppercase tracking-wider">
+                          <div className="flex-1 h-px bg-gold/10" /> or <div className="flex-1 h-px bg-gold/10" />
+                        </div>
 
-                    <button
-                      onClick={handleGoogle}
-                      disabled={busy}
-                      className="w-full border border-gold/30 text-primary-foreground px-4 py-2.5 rounded-sm text-sm font-sans hover:bg-gold/5 disabled:opacity-50"
-                    >
-                      Continue with Google
-                    </button>
+                        <button
+                          onClick={handleGoogle}
+                          disabled={busy}
+                          className="w-full border border-gold/30 text-primary-foreground px-4 py-2.5 rounded-sm text-sm font-sans hover:bg-gold/5 disabled:opacity-50"
+                        >
+                          Continue with Google
+                        </button>
+                      </>
+                    )}
 
                     <div className="mt-6 pt-5 border-t border-gold/10 text-center">
                       <button
