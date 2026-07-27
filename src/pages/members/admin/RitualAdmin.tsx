@@ -136,7 +136,8 @@ function Inner() {
       if (!confirm(`Replace "${d.title}" with "${newFile.name}"? The shareable link stays the same.`)) return;
       setBusy(true);
       try {
-        const { error: upErr } = await supabase.storage.from("ritual-docs").upload(d.file_path, newFile, {
+        const body = await toUploadBody(newFile);
+        const { error: upErr } = await supabase.storage.from("ritual-docs").upload(d.file_path, body, {
           contentType: newFile.type || "application/octet-stream",
           upsert: true,
         });
