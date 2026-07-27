@@ -132,7 +132,7 @@ export default function MembersLayout({ children }: { children: React.ReactNode 
               </SheetContent>
             </Sheet>
             <Link to="/members" className="flex items-center gap-3">
-              <img src={logo} alt="Weybridge Lodge crest" width={44} height={44} decoding="async" className="h-11 w-11 shrink-0" />
+              <img src={logo} alt="Weybridge Lodge crest" width={44} height={44} decoding="async" className="h-11 w-11 shrink-0 bg-primary-foreground/90 rounded-full p-0.5" />
               <div className="min-w-0">
                 <p className="font-serif text-sm font-semibold leading-tight truncate">Members Portal</p>
                 <p className="text-gold text-[10px] uppercase tracking-wider truncate">Weybridge Lodge 6787</p>
