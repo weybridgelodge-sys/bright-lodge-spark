@@ -172,7 +172,8 @@ function EntryForm({ members, userId, existing, onSaved, onCancel }: {
       }
       const safe = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
       const path = `${userId ?? "anon"}/${Date.now()}-${safe}`;
-      const { error: upErr } = await supabase.storage.from("welfare-attachments").upload(path, file);
+      const body = await toUploadBody(file);
+      const { error: upErr } = await supabase.storage.from("welfare-attachments").upload(path, body, { contentType: file.type || "application/octet-stream" });
       if (upErr) { setBusy(false); toast.error(upErr.message); return; }
       attachment_path = path; attachment_name = file.name; attachment_size = file.size;
     }
