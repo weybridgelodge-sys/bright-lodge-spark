@@ -31,7 +31,7 @@ function Inner() {
     setExporting(true);
     try {
       const doc = await buildWorkingGroupsActivityPdf();
-      doc.save(`working-groups-activity-${new Date().toISOString().slice(0, 10)}.pdf`);
+      await saveJsPdf(doc, `working-groups-activity-${new Date().toISOString().slice(0, 10)}.pdf`);
     } catch (e: any) { toast.error(e?.message ?? "Export failed"); }
     finally { setExporting(false); }
   };
