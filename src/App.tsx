@@ -1,4 +1,5 @@
 import { lazy, Suspense } from "react";
+import { Capacitor } from "@capacitor/core";
 import DeferredToasters from "@/components/DeferredToasters";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -66,7 +67,16 @@ const App = () => (
         <ScrollToTopButton />
         <Suspense fallback={null}>
           <Routes>
-            <Route path="/" element={<Index />} />
+            <Route
+              path="/"
+              element={
+                Capacitor.isNativePlatform() ? (
+                  <Navigate to="/members" replace />
+                ) : (
+                  <Index />
+                )
+              }
+            />
             <Route path="/what-is-freemasonry" element={<WhatIsFreemasonry />} />
             <Route path="/freemasonry-and-charity" element={<FreemasonryCharity />} />
             <Route path="/our-charities" element={<OurCharities />} />
