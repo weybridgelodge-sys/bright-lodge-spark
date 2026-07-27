@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, Download, ClipboardCopy, Save, History, RefreshCw, AlertTriangle, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { saveJsPdf } from "@/lib/nativeDownload";
 import {
   buildSummaryReport,
   currentMasonicYearPeriod,
