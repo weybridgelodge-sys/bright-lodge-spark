@@ -47,6 +47,8 @@ export default function MembersDirectory() {
         .from("profiles")
         .select("id,full_name,first_name,middle_name,last_name,preferred_name,post_nominals,title,is_past_master,rank,grand_rank,provincial_rank,office,joined_year,email,avatar_url")
         .eq("status", "active")
+        // Exclude Play Store reviewer / test-only accounts from directory
+        .eq("is_test_account", false)
         .order("last_name", { ascending: true, nullsFirst: false })
         .order("first_name", { ascending: true, nullsFirst: false });
       const base = (m as Member[]) ?? [];
