@@ -11,9 +11,10 @@ import { useAuth } from "@/hooks/useAuth";
 import logoAsset from "@/assets/weybridge-logo-no-bg.png.asset.json";
 const logo = logoAsset.url;
 
-const membersRedirectUrl = Capacitor.isNativePlatform()
-  ? "https://weybridgelodge.org.uk/members"
-  : `${window.location.origin}/members`;
+const isNativeApp = Capacitor.isNativePlatform();
+const membersRedirectUrl = isNativeApp
+  ? "https://weybridgelodge.org.uk/members?client=app"
+  : `${window.location.origin}/members?client=web`;
 
 type View = "login" | "register" | "request-sent";
 

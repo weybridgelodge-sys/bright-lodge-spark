@@ -219,6 +219,24 @@ async function handleWebhook(req: Request): Promise<Response> {
     )
   }
 
+  // Extract `client` hint (app|web) from the confirmation URL's redirect_to,
+  // so the magic-link template can render app-only or web-only content.
+  let clientHint: string | undefined
+  try {
+    const confirmUrl = new URL(payload.data.url)
+    const redirectTo = confirmUrl.searchParams.get('redirect_to')
+    if (redirectTo) {
+      const c = new URL(redirectTo).searchParams.get('client')
+      if (c) clientHint = c
+    }
+    if (!clientHint) {
+      const c = confirmUrl.searchParams.get('client')
+      if (c) clientHint = c
+    }
+  } catch (_) {
+    // fall through — leave clientHint undefined so template falls back to both
+  }
+
   // Build template props from payload.data (HookData structure)
   const templateProps = {
     siteName: SITE_NAME,
@@ -229,6 +247,7 @@ async function handleWebhook(req: Request): Promise<Response> {
     email: payload.data.email,
     oldEmail: payload.data.old_email,
     newEmail: payload.data.new_email,
+    client: clientHint,
   }
 
   // Render React Email to HTML and plain text
