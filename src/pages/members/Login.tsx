@@ -4,11 +4,16 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Shield, Mail, ArrowRight, CheckCircle2, UserPlus, Clock, ArrowLeft } from "lucide-react";
 import { z } from "zod";
 import { toast } from "sonner";
+import { Capacitor } from "@capacitor/core";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { useAuth } from "@/hooks/useAuth";
 import logoAsset from "@/assets/weybridge-logo-no-bg.png.asset.json";
 const logo = logoAsset.url;
+
+const membersRedirectUrl = Capacitor.isNativePlatform()
+  ? "https://weybridgelodge.org.uk/members"
+  : `${window.location.origin}/members`;
 
 type View = "login" | "register" | "request-sent";
 
