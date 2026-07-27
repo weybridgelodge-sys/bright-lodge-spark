@@ -5,6 +5,8 @@ import { Shield, Mail, ArrowRight, CheckCircle2, UserPlus, Clock, ArrowLeft } fr
 import { z } from "zod";
 import { toast } from "sonner";
 import { Capacitor } from "@capacitor/core";
+import { Browser } from "@capacitor/browser";
+import { App as CapacitorApp } from "@capacitor/app";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { useAuth } from "@/hooks/useAuth";
@@ -139,6 +141,50 @@ export default function MembersLogin() {
 
   const handleGoogle = async () => {
     setBusy(true);
+
+    if (isNativeApp) {
+      // Native: launch OAuth in a Chrome Custom Tab via the production broker.
+      // The broker redirects to the App-Links-verified /members URL with hash tokens,
+      // which reopens the app; supabase-js (detectSessionInUrl) then picks up the session.
+      try {
+        const state =
+          typeof crypto !== "undefined" && crypto.getRandomValues
+            ? [...crypto.getRandomValues(new Uint8Array(16))]
+                .map((b) => b.toString(16).padStart(2, "0"))
+                .join("")
+            : Math.random().toString(36).slice(2) + Date.now().toString(36);
+
+        const params = new URLSearchParams({
+          provider: "google",
+          redirect_uri: "https://weybridgelodge.org.uk/members",
+          state,
+        });
+        const url = `https://weybridgelodge.org.uk/~oauth/initiate?${params.toString()}`;
+
+        // Clear busy + close the custom tab when the app is re-foregrounded
+        // (either via the App Link handoff or user closing the tab manually).
+        const appListener = await CapacitorApp.addListener("appStateChange", (s) => {
+          if (s.isActive) {
+            Browser.close().catch(() => {});
+            setBusy(false);
+            appListener.remove();
+            browserListener.remove();
+          }
+        });
+        const browserListener = await Browser.addListener("browserFinished", () => {
+          setBusy(false);
+          appListener.remove();
+          browserListener.remove();
+        });
+
+        await Browser.open({ url, presentationStyle: "popover" });
+      } catch (err) {
+        toast.error("Google sign-in failed");
+        setBusy(false);
+      }
+      return;
+    }
+
     try {
       const result = await lovable.auth.signInWithOAuth("google", {
         redirect_uri: membersRedirectUrl,
