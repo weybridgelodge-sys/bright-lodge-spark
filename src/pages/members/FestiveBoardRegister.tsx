@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { formatMemberLine, type MemberRow } from "@/lib/summons";
 import { normaliseName } from "@/lib/nameCase";
+import { saveBlob } from "@/lib/nativeDownload";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
