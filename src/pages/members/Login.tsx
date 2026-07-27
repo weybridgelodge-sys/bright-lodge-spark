@@ -5,6 +5,8 @@ import { Shield, Mail, ArrowRight, CheckCircle2, UserPlus, Clock, ArrowLeft } fr
 import { z } from "zod";
 import { toast } from "sonner";
 import { Capacitor } from "@capacitor/core";
+import { Browser } from "@capacitor/browser";
+import { App as CapacitorApp } from "@capacitor/app";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { useAuth } from "@/hooks/useAuth";
