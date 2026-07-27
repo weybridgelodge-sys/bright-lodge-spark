@@ -291,7 +291,8 @@ function TxDialog({
       }
       const safe = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
       const path = `${u.user?.id ?? "anon"}/${Date.now()}-${safe}`;
-      const { error: upErr } = await supabase.storage.from("treasurer-attachments").upload(path, file);
+      const body = await toUploadBody(file);
+      const { error: upErr } = await supabase.storage.from("treasurer-attachments").upload(path, body, { contentType: file.type || "application/octet-stream" });
       if (upErr) {
         setSaving(false);
         toast({ title: "Attachment upload failed", description: upErr.message, variant: "destructive" });
