@@ -24,6 +24,7 @@ import {
 } from "@/lib/charity/queries";
 import { buildCharityAnnualReportPdf } from "@/lib/charity/annualReportPdf";
 import { buildCharityPeriodicReportPdf } from "@/lib/charity/periodicReportPdf";
+import { saveJsPdf } from "@/lib/nativeDownload";
 import { highestAwardAchieved, festivalTiers, nextTierAhead } from "@/lib/charity/festivalAwards";
 
 function Card({ title, action, children }: { title: string; action?: React.ReactNode; children: React.ReactNode }) {
