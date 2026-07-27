@@ -60,6 +60,12 @@ export default function MembersRitual() {
   const handleView = async (d: Doc) => {
     const { data, error } = await supabase.storage.from("ritual-docs").createSignedUrl(d.file_path, 60);
     if (error || !data) { toast.error("Couldn't open document"); return; }
+
+    if (Capacitor.isNativePlatform()) {
+      await Browser.open({ url: data.signedUrl, presentationStyle: "popover" });
+      return;
+    }
+
     try {
       const res = await fetch(data.signedUrl);
       if (!res.ok) throw new Error("fetch failed");
@@ -85,7 +91,11 @@ export default function MembersRitual() {
     const filename = d.file_path.split("/").pop() || d.title;
     const { data, error } = await supabase.storage.from("ritual-docs").createSignedUrl(d.file_path, 60, { download: filename });
     if (error || !data) { toast.error("Couldn't generate download link"); return; }
-    window.open(data.signedUrl, "_blank", "noopener");
+    if (Capacitor.isNativePlatform()) {
+      await Browser.open({ url: data.signedUrl });
+    } else {
+      window.open(data.signedUrl, "_blank", "noopener");
+    }
   };
 
   const myDegree = (profile as { degree?: Degree } | null)?.degree ?? "entered_apprentice";
