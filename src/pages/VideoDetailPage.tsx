@@ -88,7 +88,7 @@ const VideoDetailPage = () => {
     },
   };
   if (video.uploadDate) {
-    videoObject.uploadDate = video.uploadDate;
+    videoObject.uploadDate = normalizeUploadDate(video.uploadDate);
   }
   if (video.durationSeconds) {
     videoObject.duration = toIso8601Duration(video.durationSeconds);
