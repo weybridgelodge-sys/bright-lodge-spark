@@ -1200,7 +1200,7 @@ function ReportTab({ charities, collections, donations, festival, canEdit }: {
     setDownloading(true);
     try {
       const doc = await buildCharityAnnualReportPdf({ year, collections, donations, charities, festival, stewardNotes: notes });
-      doc.save(`Charity-Annual-Report-${bounds.label}.pdf`);
+      await saveJsPdf(doc, `Charity-Annual-Report-${bounds.label}.pdf`);
     } finally { setDownloading(false); }
   };
 
