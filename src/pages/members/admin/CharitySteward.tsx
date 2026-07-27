@@ -1036,7 +1036,7 @@ function PeriodicReportsSection({ charities, collections, donations, festival, c
       stewardNotes: r.notes ?? "", finalised: !!r.finalised_at,
     });
     const safe = r.title.replace(/[^a-z0-9_-]+/gi, "-").replace(/^-+|-+$/g, "");
-    doc.save(`Charity-Periodic-Report-${safe || "report"}-${r.start_date}_to_${r.end_date}.pdf`);
+    await saveJsPdf(doc, `Charity-Periodic-Report-${safe || "report"}-${r.start_date}_to_${r.end_date}.pdf`);
   };
 
   const downloadCurrent = async () => {
