@@ -92,7 +92,8 @@ function Inner() {
       const folder = isGeneral ? "general" : degree;
       const docId = crypto.randomUUID();
       const path = `${folder}/${docId}.${ext}`;
-      const { error: upErr } = await supabase.storage.from("ritual-docs").upload(path, file, {
+      const body = await toUploadBody(file);
+      const { error: upErr } = await supabase.storage.from("ritual-docs").upload(path, body, {
         contentType: file.type || "application/octet-stream",
         upsert: false,
       });
