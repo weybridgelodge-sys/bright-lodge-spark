@@ -83,10 +83,10 @@ export async function exportVoReport(bundle: KpiBundle) {
     headStyles: { fillColor: [27, 42, 74], textColor: [201, 164, 50] },
   });
 
-  doc.save(`vo-report-${new Date().toISOString().slice(0, 10)}.pdf`);
+  await saveJsPdf(doc, `vo-report-${new Date().toISOString().slice(0, 10)}.pdf`);
 }
 
-export function exportFullKpi(bundle: KpiBundle) {
+export async function exportFullKpi(bundle: KpiBundle) {
   const doc = new jsPDF();
   const s = snapshot(bundle.members);
   const mv = movement(bundle.members);
