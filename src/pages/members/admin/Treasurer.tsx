@@ -13,6 +13,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
+import { toUploadBody } from "@/lib/nativeUpload";
 import { Loader2, Plus, Pencil, Trash2, Lock, Unlock, ShieldCheck, Paperclip } from "lucide-react";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
