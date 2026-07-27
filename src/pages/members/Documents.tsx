@@ -77,7 +77,12 @@ export default function MembersDocuments() {
         toast.error("Couldn't open document");
         return;
       }
-      await Browser.open({ url: data.signedUrl, presentationStyle: "popover" });
+      const ext = (d.file_path.split(".").pop() || "").toLowerCase();
+      const nativeRenderable = ["pdf", "png", "jpg", "jpeg", "gif", "webp", "svg"];
+      const url = nativeRenderable.includes(ext)
+        ? data.signedUrl
+        : `https://docs.google.com/gview?embedded=true&url=${encodeURIComponent(data.signedUrl)}`;
+      await Browser.open({ url, presentationStyle: "popover" });
       return;
     }
 
