@@ -158,8 +158,9 @@ export default function MembersLogin() {
           provider: "google",
           redirect_uri: "https://weybridgelodge.org.uk/members",
           state,
+          project_id: "af7769c0-3910-4ce1-9c23-387cf7643cdb",
         });
-        const url = `https://weybridgelodge.org.uk/~oauth/initiate?${params.toString()}`;
+        const url = `https://oauth.lovable.app/initiate?${params.toString()}`;
 
         // Clear busy + close the custom tab when the app is re-foregrounded
         // (either via the App Link handoff or user closing the tab manually).
