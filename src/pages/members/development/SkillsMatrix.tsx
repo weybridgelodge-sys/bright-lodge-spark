@@ -7,6 +7,7 @@ import { loadSkillsMatrix, type SkillsMatrix } from "@/lib/development/skillsMat
 import SkillsMatrixGrid from "@/components/members/development/SkillsMatrixGrid";
 import { Button } from "@/components/ui/button";
 import { buildGapReportPdf } from "@/lib/development/gapReportPdf";
+import { saveJsPdf } from "@/lib/nativeDownload";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
 
