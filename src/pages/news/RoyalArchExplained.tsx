@@ -10,13 +10,14 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Calendar, User, ArrowLeft } from "lucide-react";
 
+import { assetUrl } from "@/lib/assetUrl";
 import heroAsset from "@/assets/news/royal-arch-meeting-room.jpg.asset.json";
 import chapterJewelsAsset from "@/assets/news/chapter-jewels-a.png.asset.json";
 import royalArchApronImg from "@/assets/news/aprons/royal-arch.png";
 import royalArchRobesAsset from "@/assets/news/royal-arch-robes.png.asset.json";
 
-const heroImg = heroAsset.url;
-const whatIsImg = chapterJewelsAsset.url;
+const heroImg = assetUrl(heroAsset);
+const whatIsImg = assetUrl(chapterJewelsAsset);
 
 const tocItems = [
   { id: "introduction", label: "Introduction" },
@@ -210,7 +211,7 @@ const RoyalArchExplained = () => {
                 </p>
                 <figure className="mt-6">
                   <img
-                    src={royalArchRobesAsset.url}
+                    src={assetUrl(royalArchRobesAsset)}
                     alt="Robes of the Three Principals — scarlet, blue, and purple with gold trim and white panels"
                     className="w-full rounded-lg border border-gold/20"
                     loading="lazy"

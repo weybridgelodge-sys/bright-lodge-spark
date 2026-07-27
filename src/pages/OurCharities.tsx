@@ -10,6 +10,7 @@ import { Link } from "react-router-dom";
 import sandsLogo from "@/assets/links/sands-logo.jpg";
 import tlcLogo from "@/assets/links/tlc-logo.ico";
 import surrey2030Logo from "@/assets/surrey-2030-gold.webp";
+import { assetUrl } from "@/lib/assetUrl";
 import thamesChallengeImgRaw from "@/assets/thames-challenge/tc-source-stone.jpg.asset.json";
 
 // ─── Type-safe asset fallback ─────────────────────────────────────────────────
@@ -17,7 +18,7 @@ import thamesChallengeImgRaw from "@/assets/thames-challenge/tc-source-stone.jpg
 // asset pipeline hasn't resolved it. The fallback string prevents a broken
 // <img> src silently rendering a broken image on the page.
 const thamesChallengeImg =
-  (thamesChallengeImgRaw as { url?: string })?.url ?? "";
+  assetUrl(thamesChallengeImgRaw as { url?: string });
 
 // ─── Interface ────────────────────────────────────────────────────────────────
 interface Charity {

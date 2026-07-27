@@ -4,7 +4,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { LayoutDashboard, Users, FileText, User as UserIcon, ShieldCheck, LogOut, Shield, CalendarDays, BookOpen, Crown, CalendarPlus, BarChart3, GraduationCap, Utensils, Mail, HeartHandshake, Sprout, Hexagon, Banknote, Menu } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import logoAsset from "@/assets/weybridge-logo-no-bg.png.asset.json";
-const logo = logoAsset.url;
+import { assetUrl } from "@/lib/assetUrl";
+const logo = assetUrl(logoAsset);
 
 const navCls = ({ isActive }: { isActive: boolean }) =>
   `flex items-center gap-2 px-3 py-2 rounded-sm text-sm font-sans transition-colors ${

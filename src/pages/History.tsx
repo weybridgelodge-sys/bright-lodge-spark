@@ -9,6 +9,7 @@ import { ArrowRight } from "lucide-react";
 import vickersImg from "@/assets/history/vickers-factory.png";
 import honoraryImg from "@/assets/history/honorary-members.jpg";
 import foundersImg from "@/assets/history/lodge-founders.jpg";
+import { assetUrl } from "@/lib/assetUrl";
 import highStreetAssetRaw from "@/assets/history/weybridge-high-street-1950s.png.asset.json";
 import masonicCentreAssetRaw from "@/assets/history/sw-surrey-masonic-centre.png.asset.json";
 
@@ -16,9 +17,9 @@ import masonicCentreAssetRaw from "@/assets/history/sw-surrey-masonic-centre.png
 // .asset.json imports may not have a .url property if the asset pipeline
 // hasn't resolved them — fallback prevents silent broken <img> src.
 const highStreetImg =
-  (highStreetAssetRaw as { url?: string })?.url ?? "";
+  assetUrl(highStreetAssetRaw as { url?: string });
 const masonicCentreImg =
-  (masonicCentreAssetRaw as { url?: string })?.url ?? "";
+  assetUrl(masonicCentreAssetRaw as { url?: string });
 
 // ─── Animation Variants ───────────────────────────────────────────────────────
 const fadeUp = {

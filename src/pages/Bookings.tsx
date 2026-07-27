@@ -17,6 +17,7 @@ import { getStripeEnvironment } from "@/lib/stripe";
 import { fetchNextEvent, type EventBundle } from "@/lib/lodgeEvents";
 import { normaliseName, normaliseTitle } from "@/lib/nameCase";
 import TurnstileWidget from "@/components/TurnstileWidget";
+import { assetUrl } from "@/lib/assetUrl";
 import sixFellowcraftsAprons from "@/assets/six-fellowcrafts-aprons.png.asset.json";
 
 
@@ -380,7 +381,7 @@ useEffect(() => {
               )}
             </motion.div>
             <motion.img
-              src={sixFellowcraftsAprons.url}
+              src={assetUrl(sixFellowcraftsAprons)}
               alt="Six Fellow Craft Masons in white aprons with blue rosettes, standing in a lodge room"
               loading="lazy"
               className="w-full h-auto rounded-sm mt-6"

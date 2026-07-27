@@ -2,6 +2,7 @@ import apgmVisitImg from "@/assets/news/apgm-visit-full.jpg";
 import sandsImg from "@/assets/news/sands-cheque.webp";
 import anniversaryImg from "@/assets/news/75th-anniversary-group.png";
 import installationImg from "@/assets/news/installation-meeting-group.jpg";
+import { assetUrl } from "@/lib/assetUrl";
 import surrey2030Img from "@/assets/news/surrey-2030-gold-trophy.jpg.asset.json";
 import doubleInitiationImg from "@/assets/news/double-initiation-december-2025.jpg";
 import threeDegreesImg from "@/assets/news/three-masonic-degrees.jpg";
@@ -28,7 +29,7 @@ export const posts: BlogPost[] = [
     category: "Charity",
     excerpt:
       "A long-distance Thames journey undertaken by Weybridge Lodge supporters — following the river back towards its source through fellowship, resilience and charitable purpose.",
-    image: thamesChallengeImg.url,
+    image: assetUrl(thamesChallengeImg),
     href: "/thames-challenge",
   },
   {
@@ -38,7 +39,7 @@ export const posts: BlogPost[] = [
     category: "Discover Freemasonry",
     excerpt:
       "Discover the Royal Arch — the natural completion of Freemasonry's three degrees. Why UGLE calls it 'one journey, one organisation' and why every Master Mason is encouraged to consider it.",
-    image: royalArchAsset.url,
+    image: assetUrl(royalArchAsset),
   },
   {
     slug: "three-masonic-degrees-explained",
@@ -56,7 +57,7 @@ export const posts: BlogPost[] = [
     category: "Charity",
     excerpt:
       "Weybridge Lodge has officially secured the prestigious Gold Festival Award for the Surrey 2030 Festival, raising over £15,800 for the Masonic Charitable Foundation in just five months.",
-    image: surrey2030Img.url,
+    image: assetUrl(surrey2030Img),
   },
   {
     slug: "pgm-visit-february-2026",

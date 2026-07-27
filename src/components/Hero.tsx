@@ -6,18 +6,19 @@ import heroWebp from "@/assets/hero-lodge.webp.asset.json";
 import heroJpg from "@/assets/hero-lodge.optimized.jpg.asset.json";
 import logoAsset from "@/assets/weybridge-logo-500.webp.asset.json";
 import logoSmallAsset from "@/assets/weybridge-logo-300.webp.asset.json";
-const logo = logoAsset.url;
-const logoSmall = logoSmallAsset.url;
+import { assetUrl } from "@/lib/assetUrl";
+const logo = assetUrl(logoAsset);
+const logoSmall = assetUrl(logoSmallAsset);
 
 const Hero = () => {
   return (
     <section className="relative min-h-screen flex items-center justify-start overflow-hidden">
       <picture>
-        <source media="(max-width: 768px)" srcSet={heroAvifMobile.url} type="image/avif" />
-        <source srcSet={heroAvif.url} type="image/avif" />
-        <source srcSet={heroWebp.url} type="image/webp" />
+        <source media="(max-width: 768px)" srcSet={assetUrl(heroAvifMobile)} type="image/avif" />
+        <source srcSet={assetUrl(heroAvif)} type="image/avif" />
+        <source srcSet={assetUrl(heroWebp)} type="image/webp" />
         <img
-          src={heroJpg.url}
+          src={assetUrl(heroJpg)}
           alt="Guildford Masonic Centre exterior in Guildford, home of Weybridge Lodge No. 6787"
           className="absolute inset-0 w-full h-full object-cover"
           width={1920}

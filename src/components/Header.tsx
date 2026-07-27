@@ -2,7 +2,8 @@ import { useState, useRef, useEffect } from "react";
 import { Menu, X, Phone, ChevronDown, Mail, Lock } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import logoAsset from "@/assets/weybridge-logo-96.webp.asset.json";
-const logo = logoAsset.url;
+import { assetUrl } from "@/lib/assetUrl";
+const logo = assetUrl(logoAsset);
 
 
 interface NavChild {

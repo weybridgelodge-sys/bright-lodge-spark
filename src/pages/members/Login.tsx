@@ -11,7 +11,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { useAuth } from "@/hooks/useAuth";
 import logoAsset from "@/assets/weybridge-logo-no-bg.png.asset.json";
-const logo = logoAsset.url;
+import { assetUrl } from "@/lib/assetUrl";
+const logo = assetUrl(logoAsset);
 
 const isNativeApp = Capacitor.isNativePlatform();
 const membersRedirectUrl = isNativeApp
