@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { Copy, FileText, FileDown, Save, CheckCircle2, Trash2, FolderOpen, Printer, Plus } from "lucide-react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { saveBlob, saveJsPdf } from "@/lib/nativeDownload";
 import { firstWmYearForMember } from "@/data/worshipfulMasters";
 import { assetUrl } from "@/lib/assetUrl";
 import logoAsset from "@/assets/weybridge-logo-navy.png.asset.json";
