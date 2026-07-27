@@ -13,6 +13,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
+import { toUploadBody } from "@/lib/nativeUpload";
 import { Loader2, Plus, Pencil, Trash2, Lock, Unlock, ShieldCheck, Paperclip } from "lucide-react";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
@@ -290,7 +291,8 @@ function TxDialog({
       }
       const safe = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
       const path = `${u.user?.id ?? "anon"}/${Date.now()}-${safe}`;
-      const { error: upErr } = await supabase.storage.from("treasurer-attachments").upload(path, file);
+      const body = await toUploadBody(file);
+      const { error: upErr } = await supabase.storage.from("treasurer-attachments").upload(path, body, { contentType: file.type || "application/octet-stream" });
       if (upErr) {
         setSaving(false);
         toast({ title: "Attachment upload failed", description: upErr.message, variant: "destructive" });

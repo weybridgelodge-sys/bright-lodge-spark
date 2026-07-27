@@ -5,6 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { BookOpen, Upload, Trash2, Download, Loader2, Clock, Eye, ExternalLink, Link2, RefreshCw, FileText, Video, Music, Search } from "lucide-react";
 import { toast } from "sonner";
+import { toUploadBody } from "@/lib/nativeUpload";
 
 type Degree = "entered_apprentice" | "fellow_craft" | "master_mason" | "installed_master";
 type DegreeOrGeneral = Degree | "general";
@@ -91,7 +92,8 @@ function Inner() {
       const folder = isGeneral ? "general" : degree;
       const docId = crypto.randomUUID();
       const path = `${folder}/${docId}.${ext}`;
-      const { error: upErr } = await supabase.storage.from("ritual-docs").upload(path, file, {
+      const body = await toUploadBody(file);
+      const { error: upErr } = await supabase.storage.from("ritual-docs").upload(path, body, {
         contentType: file.type || "application/octet-stream",
         upsert: false,
       });
@@ -134,7 +136,8 @@ function Inner() {
       if (!confirm(`Replace "${d.title}" with "${newFile.name}"? The shareable link stays the same.`)) return;
       setBusy(true);
       try {
-        const { error: upErr } = await supabase.storage.from("ritual-docs").upload(d.file_path, newFile, {
+        const body = await toUploadBody(newFile);
+        const { error: upErr } = await supabase.storage.from("ritual-docs").upload(d.file_path, body, {
           contentType: newFile.type || "application/octet-stream",
           upsert: true,
         });
