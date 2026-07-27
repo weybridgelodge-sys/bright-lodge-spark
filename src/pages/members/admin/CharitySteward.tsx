@@ -1050,7 +1050,7 @@ function PeriodicReportsSection({ charities, collections, donations, festival, c
       stewardNotes: notes, finalised: !!editing?.finalised_at,
     });
     const safe = title.trim().replace(/[^a-z0-9_-]+/gi, "-").replace(/^-+|-+$/g, "");
-    doc.save(`Charity-Periodic-Report-${safe || "report"}-${startDate}_to_${endDate}.pdf`);
+    await saveJsPdf(doc, `Charity-Periodic-Report-${safe || "report"}-${startDate}_to_${endDate}.pdf`);
   };
 
   const fmtDate = (s: string) => new Date(s).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
