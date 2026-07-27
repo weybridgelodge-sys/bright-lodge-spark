@@ -111,8 +111,8 @@ export default function MembersLayout({ children }: { children: React.ReactNode 
   return (
     <div className="min-h-screen bg-navy text-primary-foreground">
       <header className="border-b border-gold/20 bg-navy-dark/80 backdrop-blur sticky top-0 z-40 pt-[max(0px,env(safe-area-inset-top))]">
-        <div className="container mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
+        <div className="container mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
             <Sheet open={drawerOpen} onOpenChange={setDrawerOpen}>
               <SheetTrigger asChild>
                 <button
@@ -132,13 +132,14 @@ export default function MembersLayout({ children }: { children: React.ReactNode 
               </SheetContent>
             </Sheet>
             <Link to="/members" className="flex items-center gap-3">
-              <img src={logo} alt="Weybridge Lodge crest" width={36} height={36} decoding="async" className="h-9 w-9 bg-primary-foreground/80 rounded-full p-0.5" />
-              <div>
-                <p className="font-serif text-sm font-semibold leading-tight">Members Portal</p>
-                <p className="text-gold text-[10px] uppercase tracking-wider">Weybridge Lodge 6787</p>
+              <img src={logo} alt="Weybridge Lodge crest" width={44} height={44} decoding="async" className="h-11 w-11 shrink-0" />
+              <div className="min-w-0">
+                <p className="font-serif text-sm font-semibold leading-tight truncate">Members Portal</p>
+                <p className="text-gold text-[10px] uppercase tracking-wider truncate">Weybridge Lodge 6787</p>
               </div>
             </Link>
           </div>
+
           <div className="flex items-center gap-3">
             <Link to="/" className="text-xs text-primary-foreground/60 hover:text-gold hidden sm:inline">
               ← Public site
