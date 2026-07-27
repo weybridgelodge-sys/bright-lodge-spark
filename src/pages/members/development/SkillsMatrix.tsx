@@ -39,7 +39,7 @@ function Inner() {
     setExporting(true);
     try {
       const doc = await buildGapReportPdf(matrix);
-      doc.save(`lodge-skills-gap-${new Date().toISOString().slice(0, 10)}.pdf`);
+      await saveJsPdf(doc, `lodge-skills-gap-${new Date().toISOString().slice(0, 10)}.pdf`);
     } catch (e: any) {
       toast.error(e?.message ?? "Export failed");
     } finally { setExporting(false); }
