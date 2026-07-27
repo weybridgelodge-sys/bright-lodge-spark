@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { ArrowDown, ArrowUp, CornerDownRight, Download, FileText, Mail, Plus, Save, Trash2 } from "lucide-react";
+import { saveBlob } from "@/lib/nativeDownload";
 import {
   AGENDA_PRESETS,
   AgendaItem,
