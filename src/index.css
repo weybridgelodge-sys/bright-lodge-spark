@@ -172,10 +172,15 @@
   .hero-fade-in, .hero-rise-in, .hero-rule, .reveal-on-scroll { animation: none; opacity: 1; transform: none; transition: none; }
 }
 
-/* Override browser autofill styling app-wide so it matches the dark navy theme
-   used throughout the public site and members portal (bg-navy-dark /
-   text-primary-foreground). Without this, Chrome/Safari inject a light grey
-   background and dark text that is unreadable on dark inputs. */
+/* Override browser autofill styling app-wide so it matches the dark navy theme.
+   Chrome/Safari inject a light background + dark text into autofilled fields
+   which is unreadable on our dark inputs. The -webkit-box-shadow / text-fill
+   overrides work in most cases, but some Chrome versions ignore them once
+   autofill has resolved. We pair them with an animation-name trick so JS can
+   detect autofill and re-apply the styles inline as a hard override. */
+@keyframes onAutoFillStart { from { /**/ } to { /**/ } }
+@keyframes onAutoFillCancel { from { /**/ } to { /**/ } }
+
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
@@ -189,8 +194,30 @@ select:-webkit-autofill:hover,
 select:-webkit-autofill:focus,
 select:-webkit-autofill:active {
   -webkit-text-fill-color: hsl(var(--primary-foreground)) !important;
-  -webkit-box-shadow: 0 0 0px 1000px hsl(var(--navy-dark)) inset !important;
-  box-shadow: 0 0 0px 1000px hsl(var(--navy-dark)) inset !important;
+  -webkit-box-shadow: 0 0 0 1000px hsl(var(--navy-dark)) inset !important;
+  box-shadow: 0 0 0 1000px hsl(var(--navy-dark)) inset !important;
   transition: background-color 5000s ease-in-out 0s;
   caret-color: hsl(var(--primary-foreground));
+  animation-name: onAutoFillStart;
+  animation-duration: 1ms;
+}
+input:not(:-webkit-autofill),
+textarea:not(:-webkit-autofill),
+select:not(:-webkit-autofill) {
+  animation-name: onAutoFillCancel;
+  animation-duration: 1ms;
+}
+
+/* Class applied by the autofill JS detector (main.tsx) as a hard-override
+   fallback for Chrome versions that ignore the pseudo-class styling above. */
+.autofilled-dark,
+input.autofilled-dark,
+textarea.autofilled-dark,
+select.autofilled-dark {
+  -webkit-text-fill-color: hsl(var(--primary-foreground)) !important;
+  color: hsl(var(--primary-foreground)) !important;
+  -webkit-box-shadow: 0 0 0 1000px hsl(var(--navy-dark)) inset !important;
+  box-shadow: 0 0 0 1000px hsl(var(--navy-dark)) inset !important;
+  background-color: hsl(var(--navy-dark)) !important;
+  caret-color: hsl(var(--primary-foreground)) !important;
 }

@@ -26,6 +26,23 @@ window.addEventListener("unhandledrejection", (e) =>
 );
 
 
+// Detect Chrome/Safari autofill via the CSS animation-name trick in index.css
+// and apply a hard-override class so autofilled inputs stay readable on our
+// dark theme even on Chrome builds that ignore -webkit-autofill styling.
+document.addEventListener(
+  "animationstart",
+  (e) => {
+    const target = e.target as HTMLElement | null;
+    if (!(target instanceof HTMLElement)) return;
+    if (e.animationName === "onAutoFillStart") {
+      target.classList.add("autofilled-dark");
+    } else if (e.animationName === "onAutoFillCancel") {
+      target.classList.remove("autofilled-dark");
+    }
+  },
+  true,
+);
+
 createRoot(document.getElementById("root")!).render(
   <HelmetProvider>
     <App />
