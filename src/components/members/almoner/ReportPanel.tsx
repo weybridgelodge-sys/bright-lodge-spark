@@ -442,12 +442,12 @@ export default function ReportPanel({ members }: { members: Member[] }) {
   const downloadPdf = async () => {
     if (!data) return;
     const doc = await buildPdf(from, to, advice, data);
-    doc.save(`almoner-report-${to}.pdf`);
+    await saveJsPdf(doc, `almoner-report-${to}.pdf`);
   };
 
   const reprint = async (r: SavedReport) => {
     const doc = await buildPdf(r.period_from, r.period_to, r.advice, r.snapshot);
-    doc.save(`almoner-report-${r.period_to}.pdf`);
+    await saveJsPdf(doc, `almoner-report-${r.period_to}.pdf`);
   };
 
   return (
