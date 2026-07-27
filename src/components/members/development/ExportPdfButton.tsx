@@ -23,7 +23,7 @@ export default function ExportPdfButton(props: {
     try {
       const doc = await buildDevelopmentPdf(props);
       const slug = (props.profile.full_name || "member").toLowerCase().replace(/[^a-z0-9]+/g, "-");
-      doc.save(`development-record-${slug}.pdf`);
+      await saveJsPdf(doc, `development-record-${slug}.pdf`);
     } catch (e: any) {
       toast.error(e?.message ?? "Failed to generate PDF");
     } finally {
