@@ -1,4 +1,5 @@
 import { lazy, Suspense } from "react";
+import { Capacitor } from "@capacitor/core";
 import DeferredToasters from "@/components/DeferredToasters";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
