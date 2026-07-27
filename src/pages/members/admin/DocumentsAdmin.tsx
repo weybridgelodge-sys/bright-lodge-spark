@@ -79,7 +79,8 @@ function Inner() {
       const ext = (file.name.split(".").pop() || "bin").toLowerCase().replace(/[^a-z0-9]/g, "");
       const docId = crypto.randomUUID();
       const path = `${category}/${docId}.${ext}`;
-      const { error: upErr } = await supabase.storage.from("lodge-docs").upload(path, file, {
+      const body = await toUploadBody(file);
+      const { error: upErr } = await supabase.storage.from("lodge-docs").upload(path, body, {
         contentType: file.type || "application/octet-stream", upsert: false,
       });
       if (upErr) throw upErr;
