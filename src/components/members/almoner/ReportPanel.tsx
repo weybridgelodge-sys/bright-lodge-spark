@@ -293,12 +293,9 @@ export default function ReportPanel({ members }: { members: Member[] }) {
     toast.success("Report copied to clipboard");
   };
 
-  const downloadMd = () => {
+  const downloadMd = async () => {
     const blob = new Blob([report], { type: "text/markdown;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url; a.download = `almoner-report-${to}.md`;
-    a.click(); URL.revokeObjectURL(url);
+    await saveBlob(blob, `almoner-report-${to}.md`);
   };
 
   const buildPdf = async (fromD: string, toD: string, adviceText: string, d: SnapshotData) => {
