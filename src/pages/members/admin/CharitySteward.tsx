@@ -24,6 +24,7 @@ import {
 } from "@/lib/charity/queries";
 import { buildCharityAnnualReportPdf } from "@/lib/charity/annualReportPdf";
 import { buildCharityPeriodicReportPdf } from "@/lib/charity/periodicReportPdf";
+import { saveJsPdf } from "@/lib/nativeDownload";
 import { highestAwardAchieved, festivalTiers, nextTierAhead } from "@/lib/charity/festivalAwards";
 
 function Card({ title, action, children }: { title: string; action?: React.ReactNode; children: React.ReactNode }) {
@@ -1035,7 +1036,7 @@ function PeriodicReportsSection({ charities, collections, donations, festival, c
       stewardNotes: r.notes ?? "", finalised: !!r.finalised_at,
     });
     const safe = r.title.replace(/[^a-z0-9_-]+/gi, "-").replace(/^-+|-+$/g, "");
-    doc.save(`Charity-Periodic-Report-${safe || "report"}-${r.start_date}_to_${r.end_date}.pdf`);
+    await saveJsPdf(doc, `Charity-Periodic-Report-${safe || "report"}-${r.start_date}_to_${r.end_date}.pdf`);
   };
 
   const downloadCurrent = async () => {
@@ -1049,7 +1050,7 @@ function PeriodicReportsSection({ charities, collections, donations, festival, c
       stewardNotes: notes, finalised: !!editing?.finalised_at,
     });
     const safe = title.trim().replace(/[^a-z0-9_-]+/gi, "-").replace(/^-+|-+$/g, "");
-    doc.save(`Charity-Periodic-Report-${safe || "report"}-${startDate}_to_${endDate}.pdf`);
+    await saveJsPdf(doc, `Charity-Periodic-Report-${safe || "report"}-${startDate}_to_${endDate}.pdf`);
   };
 
   const fmtDate = (s: string) => new Date(s).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
@@ -1199,7 +1200,7 @@ function ReportTab({ charities, collections, donations, festival, canEdit }: {
     setDownloading(true);
     try {
       const doc = await buildCharityAnnualReportPdf({ year, collections, donations, charities, festival, stewardNotes: notes });
-      doc.save(`Charity-Annual-Report-${bounds.label}.pdf`);
+      await saveJsPdf(doc, `Charity-Annual-Report-${bounds.label}.pdf`);
     } finally { setDownloading(false); }
   };
 

@@ -23,6 +23,7 @@ import {
 import { Loader2, AlertTriangle, Crown, Download, UserPlus, Lock, ShieldAlert, X } from "lucide-react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { saveJsPdf } from "@/lib/nativeDownload";
 
 type Tab = "board" | "ladder" | "readiness";
 type Readiness = "ready" | "needs_experience" | "non_progressive";
@@ -270,7 +271,7 @@ export default function OfficersTracker() {
 
   // ---------- PDF Export ----------
 
-  const exportPdf = () => {
+  const exportPdf = async () => {
     const doc = new jsPDF({ orientation: "landscape", unit: "pt", format: "a4" });
     doc.setFont("times", "bold");
     doc.setTextColor(27, 42, 74);
@@ -371,7 +372,7 @@ export default function OfficersTracker() {
       }
     }
 
-    doc.save(`weybridge-officers-projection-${formatMasonicYear(currentYear)}.pdf`);
+    await saveJsPdf(doc, `weybridge-officers-projection-${formatMasonicYear(currentYear)}.pdf`);
   };
 
   // ---------- UI ----------

@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, Download, ClipboardCopy, Save, History, RefreshCw, AlertTriangle, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { saveJsPdf } from "@/lib/nativeDownload";
 import {
   buildSummaryReport,
   currentMasonicYearPeriod,
@@ -135,7 +136,7 @@ function Inner() {
   const downloadPdf = async () => {
     if (!data) return;
     const doc = await buildSummaryReportPdf({ data, mentorStatement: statement });
-    doc.save(`weybridge-development-summary-${data.period.start}.pdf`);
+    await saveJsPdf(doc, `weybridge-development-summary-${data.period.start}.pdf`);
   };
 
   const copyText = async () => {

@@ -7,6 +7,7 @@ import { loadSkillsMatrix, type SkillsMatrix } from "@/lib/development/skillsMat
 import SkillsMatrixGrid from "@/components/members/development/SkillsMatrixGrid";
 import { Button } from "@/components/ui/button";
 import { buildGapReportPdf } from "@/lib/development/gapReportPdf";
+import { saveJsPdf } from "@/lib/nativeDownload";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
 
@@ -38,7 +39,7 @@ function Inner() {
     setExporting(true);
     try {
       const doc = await buildGapReportPdf(matrix);
-      doc.save(`lodge-skills-gap-${new Date().toISOString().slice(0, 10)}.pdf`);
+      await saveJsPdf(doc, `lodge-skills-gap-${new Date().toISOString().slice(0, 10)}.pdf`);
     } catch (e: any) {
       toast.error(e?.message ?? "Export failed");
     } finally { setExporting(false); }

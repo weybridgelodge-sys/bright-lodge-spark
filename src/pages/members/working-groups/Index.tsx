@@ -7,6 +7,7 @@ import { listGroups, type WorkingGroup } from "@/lib/workingGroups";
 import { Loader2, FileDown, Settings2, Calendar, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { buildWorkingGroupsActivityPdf } from "@/lib/development/activityReportPdf";
+import { saveJsPdf } from "@/lib/nativeDownload";
 import { toast } from "sonner";
 
 const PHILOSOPHY = `Weybridge Lodge operates on the principle of the beehive. Every brother, from the newest Entered Apprentice to the most senior Past Master, contributes to the life of the lodge. Working groups exist so that every member has a role, a purpose, and a home in the lodge beyond the progressive offices.`;
@@ -30,7 +31,7 @@ function Inner() {
     setExporting(true);
     try {
       const doc = await buildWorkingGroupsActivityPdf();
-      doc.save(`working-groups-activity-${new Date().toISOString().slice(0, 10)}.pdf`);
+      await saveJsPdf(doc, `working-groups-activity-${new Date().toISOString().slice(0, 10)}.pdf`);
     } catch (e: any) { toast.error(e?.message ?? "Export failed"); }
     finally { setExporting(false); }
   };

@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { Copy, FileText, FileDown, Save, CheckCircle2, Trash2, FolderOpen, Printer, Plus } from "lucide-react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { saveBlob, saveJsPdf } from "@/lib/nativeDownload";
 import { firstWmYearForMember } from "@/data/worshipfulMasters";
 import { assetUrl } from "@/lib/assetUrl";
 import logoAsset from "@/assets/weybridge-logo-navy.png.asset.json";
@@ -292,12 +293,9 @@ export default function ReportPanel({ members }: { members: Member[] }) {
     toast.success("Report copied to clipboard");
   };
 
-  const downloadMd = () => {
+  const downloadMd = async () => {
     const blob = new Blob([report], { type: "text/markdown;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url; a.download = `almoner-report-${to}.md`;
-    a.click(); URL.revokeObjectURL(url);
+    await saveBlob(blob, `almoner-report-${to}.md`);
   };
 
   const buildPdf = async (fromD: string, toD: string, adviceText: string, d: SnapshotData) => {
@@ -444,12 +442,12 @@ export default function ReportPanel({ members }: { members: Member[] }) {
   const downloadPdf = async () => {
     if (!data) return;
     const doc = await buildPdf(from, to, advice, data);
-    doc.save(`almoner-report-${to}.pdf`);
+    await saveJsPdf(doc, `almoner-report-${to}.pdf`);
   };
 
   const reprint = async (r: SavedReport) => {
     const doc = await buildPdf(r.period_from, r.period_to, r.advice, r.snapshot);
-    doc.save(`almoner-report-${r.period_to}.pdf`);
+    await saveJsPdf(doc, `almoner-report-${r.period_to}.pdf`);
   };
 
   return (

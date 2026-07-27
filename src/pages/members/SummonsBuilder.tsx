@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { ArrowDown, ArrowUp, CornerDownRight, Download, FileText, Mail, Plus, Save, Trash2 } from "lucide-react";
+import { saveBlob } from "@/lib/nativeDownload";
 import {
   AGENDA_PRESETS,
   AgendaItem,
@@ -634,10 +635,7 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
         manualHidden: manualHidden as any,
       });
       if (action === "download") {
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url; a.download = `summons-${summons.meeting_number}.pdf`; a.click();
-        URL.revokeObjectURL(url);
+        await saveBlob(blob, `summons-${summons.meeting_number}.pdf`);
         return null;
       }
       // Save → upload + insert/update
