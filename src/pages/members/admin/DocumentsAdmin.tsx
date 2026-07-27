@@ -117,7 +117,8 @@ function Inner() {
       if (!confirm(`Replace "${d.title}" with "${newFile.name}"?`)) return;
       setBusy(true);
       try {
-        const { error: upErr } = await supabase.storage.from("lodge-docs").upload(d.file_path, newFile, {
+        const body = await toUploadBody(newFile);
+        const { error: upErr } = await supabase.storage.from("lodge-docs").upload(d.file_path, body, {
           contentType: newFile.type || "application/octet-stream", upsert: true,
         });
         if (upErr) throw upErr;
