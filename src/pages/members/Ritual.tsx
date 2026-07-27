@@ -4,6 +4,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { BookOpen, Download, Loader2, ShieldCheck, Clock, ExternalLink, FileText, Video, Music, Search } from "lucide-react";
 import { toast } from "sonner";
+import { Capacitor } from "@capacitor/core";
+import { Browser } from "@capacitor/browser";
 
 type Degree = "entered_apprentice" | "fellow_craft" | "master_mason" | "installed_master";
 type DocType = "text" | "audio" | "video";
