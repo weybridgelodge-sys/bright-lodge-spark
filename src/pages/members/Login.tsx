@@ -4,11 +4,16 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Shield, Mail, ArrowRight, CheckCircle2, UserPlus, Clock, ArrowLeft } from "lucide-react";
 import { z } from "zod";
 import { toast } from "sonner";
+import { Capacitor } from "@capacitor/core";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { useAuth } from "@/hooks/useAuth";
 import logoAsset from "@/assets/weybridge-logo-no-bg.png.asset.json";
 const logo = logoAsset.url;
+
+const membersRedirectUrl = Capacitor.isNativePlatform()
+  ? "https://weybridgelodge.org.uk/members"
+  : `${window.location.origin}/members`;
 
 type View = "login" | "register" | "request-sent";
 
@@ -56,7 +61,7 @@ export default function MembersLogin() {
     setBusy(true);
     const { error } = await supabase.auth.signInWithOtp({
       email: loginEmail.trim(),
-      options: { emailRedirectTo: `${window.location.origin}/members` },
+      options: { emailRedirectTo: membersRedirectUrl },
     });
     setBusy(false);
     if (error) {
@@ -90,7 +95,7 @@ export default function MembersLogin() {
       email: parsed.data.email,
       password: tempPassword,
       options: {
-        emailRedirectTo: `${window.location.origin}/members`,
+        emailRedirectTo: membersRedirectUrl,
         data: {
           full_name: parsed.data.fullName,
           ugle_reg_number: parsed.data.ugleRegNumber,
@@ -112,7 +117,7 @@ export default function MembersLogin() {
     setBusy(true);
     try {
       const result = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: `${window.location.origin}/members`,
+        redirect_uri: membersRedirectUrl,
       });
       if (result.error) {
         toast.error("Google sign-in failed");
