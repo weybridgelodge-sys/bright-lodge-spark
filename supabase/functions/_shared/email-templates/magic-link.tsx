@@ -28,7 +28,7 @@ export const MagicLinkEmail = ({
 }: MagicLinkEmailProps) => (
   <Html lang="en" dir="ltr">
     <Head />
-    <Preview>Your Weybridge Lodge sign-in link and 6-digit code</Preview>
+    <Preview>Your Weybridge Lodge sign-in link and code</Preview>
     <Body style={main}>
       <Container style={container}>
         <Section style={header}>
@@ -51,8 +51,8 @@ export const MagicLinkEmail = ({
           <>
             <Hr style={hr} />
             <Text style={codeIntro}>
-              <strong>Using the mobile app?</strong> Enter this 6-digit code on
-              the "Check your inbox" screen instead of tapping the link above:
+              <strong>Using the mobile app?</strong> Enter this code on the
+              "Check your inbox" screen instead of tapping the link above:
             </Text>
             <Section style={codeWrap}>
               <Text style={codeStyle}>{token}</Text>
