@@ -35,6 +35,8 @@ export default function MembersLogin() {
 
   // login
   const [loginEmail, setLoginEmail] = useState("");
+  const [otpCode, setOtpCode] = useState("");
+  const [verifying, setVerifying] = useState(false);
 
   // register
   const [fullName, setFullName] = useState("");
