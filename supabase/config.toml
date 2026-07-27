@@ -1,44 +1,33 @@
 project_id = "kntcjlztmcgmagwgheyx"
 
-[functions.create-checkout]
-verify_jwt = false
-
-[functions.payments-webhook]
-verify_jwt = false
-
-[functions.get-booking-by-session]
-verify_jwt = false
-
-[functions.process-email-queue]
-verify_jwt = true
-
-[functions.send-transactional-email]
-verify_jwt = true
-
-[functions.preview-transactional-email]
-verify_jwt = false
-
-[functions.handle-email-unsubscribe]
-verify_jwt = false
-
-[functions.handle-email-suppression]
-verify_jwt = false
-
-[functions.submit-enquiry]
-verify_jwt = false
-
-[functions.almoner-overdue-check]
-verify_jwt = false
-
-[functions.notify-waitlist-promoted]
-verify_jwt = false
-
-[functions.waitlist-refund-sweep]
-verify_jwt = false
-
-[functions.member-calendar-feed]
-verify_jwt = false
-
-[functions.festive-board-deadline-reminder]
-verify_jwt = false
-
+[functions]
+  [functions.almoner-overdue-check]
+    verify_jwt = false
+  [functions.auth-email-hook]
+    verify_jwt = false
+  [functions.create-checkout]
+    verify_jwt = false
+  [functions.festive-board-deadline-reminder]
+    verify_jwt = false
+  [functions.get-booking-by-session]
+    verify_jwt = false
+  [functions.handle-email-suppression]
+    verify_jwt = false
+  [functions.handle-email-unsubscribe]
+    verify_jwt = false
+  [functions.member-calendar-feed]
+    verify_jwt = false
+  [functions.notify-waitlist-promoted]
+    verify_jwt = false
+  [functions.payments-webhook]
+    verify_jwt = false
+  [functions.preview-transactional-email]
+    verify_jwt = false
+  [functions.process-email-queue]
+    verify_jwt = true
+  [functions.send-transactional-email]
+    verify_jwt = true
+  [functions.submit-enquiry]
+    verify_jwt = false
+  [functions.waitlist-refund-sweep]
+    verify_jwt = false
