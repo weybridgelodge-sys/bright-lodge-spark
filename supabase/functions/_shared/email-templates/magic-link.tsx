@@ -19,16 +19,21 @@ interface MagicLinkEmailProps {
   siteName: string
   confirmationUrl: string
   token?: string
+  client?: 'app' | 'web' | string
 }
 
 export const MagicLinkEmail = ({
   siteName,
   confirmationUrl,
   token,
-}: MagicLinkEmailProps) => (
+  client,
+}: MagicLinkEmailProps) => {
+  const showLink = client !== 'app'
+  const showCode = !!token && client !== 'web'
+  return (
   <Html lang="en" dir="ltr">
     <Head />
-    <Preview>Your Weybridge Lodge sign-in link and code</Preview>
+    <Preview>Your Weybridge Lodge sign-in {showCode && !showLink ? 'code' : 'link'}</Preview>
     <Body style={main}>
       <Container style={container}>
         <Section style={header}>
@@ -36,30 +41,41 @@ export const MagicLinkEmail = ({
           <Heading style={h1}>Members Portal Sign-In</Heading>
         </Section>
 
-        <Text style={text}>
-          Use the button below to sign in to the {siteName} Members Portal.
-          This link will expire shortly and can only be used once.
-        </Text>
-
-        <Section style={{ textAlign: 'center' as const, margin: '24px 0 32px' }}>
-          <Button style={button} href={confirmationUrl}>
-            Sign In to the Portal
-          </Button>
-        </Section>
-
-        {token ? (
+        {showLink ? (
           <>
-            <Hr style={hr} />
-            <Text style={codeIntro}>
-              <strong>Using the mobile app?</strong> Enter this code on the
-              "Check your inbox" screen instead of tapping the link above:
+            <Text style={text}>
+              Use the button below to sign in to the {siteName} Members Portal.
+              This link will expire shortly and can only be used once.
             </Text>
+            <Section style={{ textAlign: 'center' as const, margin: '24px 0 32px' }}>
+              <Button style={button} href={confirmationUrl}>
+                Sign In to the Portal
+              </Button>
+            </Section>
+          </>
+        ) : (
+          <Text style={text}>
+            You requested a sign-in from the {siteName} mobile app. Enter the
+            code below on the "Check your inbox" screen in the app to complete
+            sign-in. This code expires shortly and can only be used once.
+          </Text>
+        )}
+
+        {showCode ? (
+          <>
+            {showLink ? <Hr style={hr} /> : null}
+            {showLink ? (
+              <Text style={codeIntro}>
+                <strong>Using the mobile app?</strong> Enter this code on the
+                "Check your inbox" screen instead of tapping the link above:
+              </Text>
+            ) : null}
             <Section style={codeWrap}>
               <Text style={codeStyle}>{token}</Text>
             </Section>
             <Text style={codeHint}>
-              This code expires with the link above. Do not share it with
-              anyone — Lodge officers will never ask for it.
+              Do not share this code with anyone — Lodge officers will never
+              ask for it.
             </Text>
           </>
         ) : null}
@@ -75,7 +91,8 @@ export const MagicLinkEmail = ({
       </Container>
     </Body>
   </Html>
-)
+  )
+}
 
 export default MagicLinkEmail
 
