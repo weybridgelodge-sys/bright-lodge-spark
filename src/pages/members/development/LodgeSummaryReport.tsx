@@ -135,7 +135,7 @@ function Inner() {
   const downloadPdf = async () => {
     if (!data) return;
     const doc = await buildSummaryReportPdf({ data, mentorStatement: statement });
-    doc.save(`weybridge-development-summary-${data.period.start}.pdf`);
+    await saveJsPdf(doc, `weybridge-development-summary-${data.period.start}.pdf`);
   };
 
   const copyText = async () => {
