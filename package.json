@@ -15,7 +15,8 @@
     "test:watch": "vitest",
     "cap:sync": "npm run build && npx cap sync",
     "cap:open:ios": "npx cap open ios",
-    "cap:open:android": "npx cap open android"
+    "cap:open:android": "npx cap open android",
+    "assets:generate": "capacitor-assets generate"
   },
   "dependencies": {
     "@capacitor/android": "^8.4.2",
