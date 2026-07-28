@@ -208,7 +208,31 @@ Deno.serve(async (req) => {
   try {
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
     const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const ANON = Deno.env.get("SUPABASE_ANON_KEY")!;
     const admin = createClient(SUPABASE_URL, SERVICE_ROLE);
+
+    // Auth gate: allow service-role callers (internal server-to-server) or
+    // an authenticated user holding an admin/officer role. Reject all others.
+    const authHeader = req.headers.get("Authorization") ?? "";
+    const bearer = authHeader.replace(/^Bearer\s+/i, "").trim();
+    if (!bearer) return json({ error: "Unauthorized" }, 401);
+
+    let authorized = false;
+    if (bearer === SERVICE_ROLE) {
+      authorized = true;
+    } else {
+      const userClient = createClient(SUPABASE_URL, ANON, {
+        global: { headers: { Authorization: `Bearer ${bearer}` } },
+      });
+      const { data: { user } } = await userClient.auth.getUser();
+      if (user) {
+        const { data: roles } = await admin.from("user_roles").select("role").eq("user_id", user.id);
+        const allowed = ["admin", "secretary", "worshipful_master", "assistant_secretary", "director_of_ceremonies"];
+        authorized = (roles ?? []).some((r: { role: string }) => allowed.includes(r.role));
+      }
+    }
+    if (!authorized) return json({ error: "Forbidden" }, 403);
+
 
     const body = await req.json().catch(() => ({}));
     const title = (body.title ?? "").toString();
