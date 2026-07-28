@@ -3,6 +3,8 @@ workflows:
     name: Weybridge Lodge Portal - iOS
     max_build_duration: 60
     instance_type: mac_mini_m2
+    integrations:
+      app_store_connect: weybridge_lodge_asc
     environment:
       groups:
         - app_store_credentials
