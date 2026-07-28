@@ -21,8 +21,12 @@ workflows:
         - pattern: main
           include: true
     scripts:
+     - name: Install Bun
+        script: |
+          curl -fsSL https://bun.sh/install | bash
       - name: Install dependencies
-        script: npm ci
+        script: |
+          $HOME/.bun/bin/bun install --frozen-lockfile
       - name: Build web assets
         script: npm run build
       - name: Sync Capacitor iOS
