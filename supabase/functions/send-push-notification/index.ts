@@ -242,6 +242,9 @@ Deno.serve(async (req) => {
 
 
     const body = await req.json().catch(() => ({}));
+    if (isDiag && body.dry_run !== true) return json({ error: "Forbidden" }, 403);
+
+
 
     // Diagnostics-only path: validates that credentials are present and parse
     // correctly (APNs ES256 key import + JWT sign, FCM service-account JSON
