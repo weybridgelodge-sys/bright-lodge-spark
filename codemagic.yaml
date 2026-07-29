@@ -54,20 +54,3 @@ workflows:
       app_store_connect:
         auth: integration
         submit_to_testflight: true
-<<<<<<< HEAD
-          echo 'export PATH="$HOME/.bun/bin:$PATH"' >> $CM_ENV
-      - name: Install dependencies
-        script: |
-          bun install --frozen-lockfile
-      - name: Build web assets
-        script: |
-          bun run build
-=======
-      - name: Install dependencies
-        script: |
-          $HOME/.bun/bin/bun install --frozen-lockfile
-      - name: Build web assets
-        script: |
-          $HOME/.bun/bin/bun run build
->>>>>>> 0fbea0c8b58a535857c4aa8608d9af58a71fb901
-      
