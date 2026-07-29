@@ -215,10 +215,17 @@ Deno.serve(async (req) => {
     // an authenticated user holding an admin/officer role. Reject all others.
     const authHeader = req.headers.get("Authorization") ?? "";
     const bearer = authHeader.replace(/^Bearer\s+/i, "").trim();
-    if (!bearer) return json({ error: "Unauthorized" }, 401);
+    // Temporary diagnostics token: authorises the dry_run path only (never a
+    // real send). Remove PUSH_DIAG_TOKEN once push credentials are verified.
+    const diagToken = Deno.env.get("PUSH_DIAG_TOKEN");
+    const diagHeader = req.headers.get("x-push-diag") ?? "";
+    const isDiag = !!diagToken && diagHeader === diagToken;
+    if (!bearer && !isDiag) return json({ error: "Unauthorized" }, 401);
 
     let authorized = false;
-    if (bearer === SERVICE_ROLE) {
+    if (isDiag) {
+      authorized = true;
+    } else if (bearer === SERVICE_ROLE) {
       authorized = true;
     } else {
       const userClient = createClient(SUPABASE_URL, ANON, {
@@ -235,6 +242,73 @@ Deno.serve(async (req) => {
 
 
     const body = await req.json().catch(() => ({}));
+    if (isDiag && body.dry_run !== true) return json({ error: "Forbidden" }, 403);
+
+
+
+    // Diagnostics-only path: validates that credentials are present and parse
+    // correctly (APNs ES256 key import + JWT sign, FCM service-account JSON
+    // parse + OAuth token exchange). Never sends a push. No secret values are
+    // returned — only booleans and error codes.
+    if (body.dry_run === true) {
+      const apnsKey = Deno.env.get("APNS_AUTH_KEY");
+      const apnsKeyId = Deno.env.get("APNS_KEY_ID");
+      const apnsTeamId = Deno.env.get("APNS_TEAM_ID");
+      const apnsBundleId = Deno.env.get("APNS_BUNDLE_ID");
+      const fcmRaw = Deno.env.get("FCM_SERVICE_ACCOUNT_JSON");
+
+      const present = {
+        APNS_AUTH_KEY: !!apnsKey,
+        APNS_KEY_ID: !!apnsKeyId,
+        APNS_TEAM_ID: !!apnsTeamId,
+        APNS_BUNDLE_ID: !!apnsBundleId,
+        FCM_SERVICE_ACCOUNT_JSON: !!fcmRaw,
+      };
+
+      let apnsJwt: { ok: boolean; error?: string } = { ok: false, error: "missing_credentials" };
+      if (apnsKey && apnsKeyId && apnsTeamId && apnsBundleId) {
+        try {
+          await makeApnsJwt(apnsKey, apnsKeyId, apnsTeamId);
+          apnsJwt = { ok: true };
+        } catch (e) {
+          apnsJwt = { ok: false, error: (e as Error).message };
+        }
+      }
+
+      let fcmParse: { ok: boolean; error?: string; has_project_id?: boolean } = { ok: false, error: "missing_credentials" };
+      let fcmToken: { ok: boolean; error?: string } = { ok: false, error: "not_attempted" };
+      if (fcmRaw) {
+        try {
+          const sa = JSON.parse(fcmRaw);
+          fcmParse = { ok: true, has_project_id: !!sa.project_id };
+          try {
+            await makeFcmAccessToken(sa);
+            fcmToken = { ok: true };
+          } catch (e) {
+            fcmToken = { ok: false, error: (e as Error).message.slice(0, 300) };
+          }
+        } catch (e) {
+          fcmParse = { ok: false, error: "invalid_json" };
+        }
+      }
+
+      const { count: iosTokens } = await admin
+        .from("push_device_tokens").select("id", { count: "exact", head: true }).eq("platform", "ios");
+      const { count: androidTokens } = await admin
+        .from("push_device_tokens").select("id", { count: "exact", head: true }).eq("platform", "android");
+
+      return json({
+        ok: true,
+        dry_run: true,
+        secrets_present: present,
+        apns_jwt_sign: apnsJwt,
+        fcm_service_account_parse: fcmParse,
+        fcm_access_token: fcmToken,
+        registered_tokens: { ios: iosTokens ?? 0, android: androidTokens ?? 0 },
+      });
+    }
+
+
     const title = (body.title ?? "").toString();
     const bodyText = (body.body ?? "").toString();
     const data = (body.data ?? {}) as Record<string, unknown>;
