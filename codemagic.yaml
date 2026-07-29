@@ -38,8 +38,9 @@
       - name: TEMP - Generate certificate private key
         script: |
           openssl genrsa -out /tmp/ios_distribution_private_key.pem 2048
-          echo "===COPY EVERYTHING BETWEEN THE LINES BELOW==="
-          cat /tmp/ios_distribution_private_key.pem
+          echo "===COPY THE SINGLE LONG LINE BELOW==="
+          base64 -i /tmp/ios_distribution_private_key.pem | tr -d '\n'
+          echo ""
           echo "===END COPY==="
       - name: Fetch signing files
         script: |
