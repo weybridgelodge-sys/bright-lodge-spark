@@ -234,9 +234,6 @@ Deno.serve(async (req) => {
     if (!authorized) return json({ error: "Forbidden" }, 403);
 
     const body = await req.json().catch(() => ({}));
-
-
-
     const title = (body.title ?? "").toString();
     const bodyText = (body.body ?? "").toString();
     const data = (body.data ?? {}) as Record<string, unknown>;
