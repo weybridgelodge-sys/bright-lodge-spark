@@ -24,7 +24,9 @@ workflows:
       - name: Install Bun
         script: |
           curl -fsSL https://bun.sh/install | bash
-          echo 'export PATH="$HOME/.bun/bin:$PATH"' >> $CM_ENV
+          ls -la $HOME/.bun/bin/
+          sudo ln -sf $HOME/.bun/bin/bun /usr/local/bin/bun
+          bun --version
       - name: Install dependencies
         script: |
           bun install --frozen-lockfile
