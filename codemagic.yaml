@@ -1,4 +1,4 @@
-﻿workflows:
+workflows:
   ios-workflow:
     name: Weybridge Lodge Portal - iOS
     max_build_duration: 60
@@ -44,8 +44,10 @@
           echo "===END COPY==="
       - name: Fetch signing files
         script: |
+          echo "$CERTIFICATE_PRIVATE_KEY_B64" | base64 --decode > /tmp/certificate_key.pem
           app-store-connect fetch-signing-files "$BUNDLE_ID" \
             --type IOS_APP_STORE \
+            --certificate-key "@file:/tmp/certificate_key.pem" \
             --create
       - name: Set up keychain
         script: |
@@ -71,4 +73,3 @@
     publishing:
       app_store_connect:
         auth: integration
-        submit_to_testflight: true
