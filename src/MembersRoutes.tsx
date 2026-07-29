@@ -3,6 +3,8 @@ import { Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./hooks/useAuth";
 import ProtectedRoute from "./components/members/ProtectedRoute";
 import ProgressionRoute from "./components/members/ProgressionRoute";
+import PushRegistrar from "./components/members/PushRegistrar";
+
 
 const MembersLogin = lazy(() => import("./pages/members/Login"));
 const MembersPending = lazy(() => import("./pages/members/Pending"));
