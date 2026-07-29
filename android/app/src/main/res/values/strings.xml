@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Weybridge Lodge Portal</string>
+    <string name="title_activity_main">Weybridge Lodge Portal</string>
+    <string name="package_name">uk.org.weybridgelodge.portal</string>
+    <string name="custom_url_scheme">uk.org.weybridgelodge.portal</string>
+</resources>
