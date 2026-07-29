@@ -1,4 +1,4 @@
-﻿workflows:
+workflows:
   ios-workflow:
     name: Weybridge Lodge Portal - iOS
     max_build_duration: 60
@@ -35,14 +35,14 @@
           bun run build
       - name: Sync Capacitor iOS
         script: npx cap sync ios
-        - name: TEMP - Generate certificate private key
+      - name: TEMP - Generate certificate private key
         script: |
           openssl genrsa -out /tmp/ios_distribution_private_key.pem 2048
           echo "===COPY THE SINGLE LONG LINE BELOW==="
           base64 -i /tmp/ios_distribution_private_key.pem | tr -d '\n'
           echo ""
           echo "===END COPY==="
-            - name: Fetch signing files
+      - name: Fetch signing files
         script: |
           app-store-connect fetch-signing-files "$BUNDLE_ID" \
             --type IOS_APP_STORE \
