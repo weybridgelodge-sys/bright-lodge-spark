@@ -11,7 +11,7 @@ workflows:
       vars:
         BUNDLE_ID: "uk.org.weybridgelodge.portal"
         XCODE_SCHEME: "App"
-        XCODE_WORKSPACE: "ios/App/App.xcworkspace"
+        XCODE_PROJECT: "ios/App/App.xcodeproj"
       node: 22
       xcode: latest
     triggering:
@@ -47,7 +47,7 @@ workflows:
       - name: Build ipa for distribution
         script: |
           xcode-project build-ipa \
-            --workspace "$XCODE_WORKSPACE" \
+            --project "$XCODE_PROJECT" \
             --scheme "$XCODE_SCHEME"
     artifacts:
       - build/ios/ipa/*.ipa
