@@ -21,6 +21,12 @@ workflows:
         - pattern: main
           include: true
     scripts:
+ - name: TEMP - Generate certificate private key
+        script: |
+          openssl genrsa -out /tmp/ios_distribution_private_key.pem 2048
+          echo "===COPY EVERYTHING BETWEEN THE LINES BELOW==="
+          cat /tmp/ios_distribution_private_key.pem
+          echo "===END COPY==="
       - name: Install Bun
         script: |
           curl -fsSL https://bun.sh/install | bash
