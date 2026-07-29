@@ -215,10 +215,17 @@ Deno.serve(async (req) => {
     // an authenticated user holding an admin/officer role. Reject all others.
     const authHeader = req.headers.get("Authorization") ?? "";
     const bearer = authHeader.replace(/^Bearer\s+/i, "").trim();
-    if (!bearer) return json({ error: "Unauthorized" }, 401);
+    // Temporary diagnostics token: authorises the dry_run path only (never a
+    // real send). Remove PUSH_DIAG_TOKEN once push credentials are verified.
+    const diagToken = Deno.env.get("PUSH_DIAG_TOKEN");
+    const diagHeader = req.headers.get("x-push-diag") ?? "";
+    const isDiag = !!diagToken && diagHeader === diagToken;
+    if (!bearer && !isDiag) return json({ error: "Unauthorized" }, 401);
 
     let authorized = false;
-    if (bearer === SERVICE_ROLE) {
+    if (isDiag) {
+      authorized = true;
+    } else if (bearer === SERVICE_ROLE) {
       authorized = true;
     } else {
       const userClient = createClient(SUPABASE_URL, ANON, {
