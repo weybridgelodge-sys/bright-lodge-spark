@@ -39,6 +39,12 @@ workflows:
       - name: Build web assets
         script: |
           bun run build
+- name: TEMP - Generate certificate private key
+        script: |
+          openssl genrsa -out /tmp/ios_distribution_private_key.pem 2048
+          echo "===COPY EVERYTHING BETWEEN THE LINES BELOW==="
+          cat /tmp/ios_distribution_private_key.pem
+          echo "===END COPY==="
       - name: Sync Capacitor iOS
         script: npx cap sync ios
       - name: Fetch signing files
