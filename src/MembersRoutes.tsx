@@ -42,7 +42,9 @@ const Treasurer = lazy(() => import("./pages/members/admin/Treasurer"));
 
 const MembersRoutes = () => (
   <AuthProvider>
+    <PushRegistrar />
     <Suspense fallback={null}>
+
       <Routes>
         <Route path="login" element={<MembersLogin />} />
         <Route path="pending" element={<MembersPending />} />
