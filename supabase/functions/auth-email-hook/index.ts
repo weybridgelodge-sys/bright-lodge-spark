@@ -36,7 +36,8 @@ const EMAIL_TEMPLATES: Record<string, React.ComponentType<any>> = {
 }
 
 // Configuration
-const SITE_NAME = "bright-lodge-spark"
+const SITE_NAME = "Weybridge Lodge Portal"
+const SITE_URL = "https://weybridgelodge.org.uk"
 const SENDER_DOMAIN = "notify.email.weybridgelodge.org.uk"
 const ROOT_DOMAIN = "email.weybridgelodge.org.uk"
 const FROM_DOMAIN = "email.weybridgelodge.org.uk" // Domain shown in From address (may be root or sender subdomain)
