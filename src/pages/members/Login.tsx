@@ -521,9 +521,23 @@ export default function MembersLogin() {
           </AnimatePresence>
         </div>
 
-        <Link to="/" className="block text-center mt-6 text-xs text-primary-foreground/50 hover:text-gold">
-          ← Back to public site
-        </Link>
+        {isNativeApp ? (
+          // Native shell has no public marketing site inside it — open the real
+          // website in the system browser instead of routing to "/".
+          <button
+            type="button"
+            onClick={() => {
+              Browser.open({ url: "https://weybridgelodge.org.uk" }).catch(() => {});
+            }}
+            className="block w-full text-center mt-6 text-xs text-primary-foreground/50 hover:text-gold"
+          >
+            Visit weybridgelodge.org.uk ↗
+          </button>
+        ) : (
+          <Link to="/" className="block text-center mt-6 text-xs text-primary-foreground/50 hover:text-gold">
+            ← Back to public site
+          </Link>
+        )}
       </div>
     </div>
   );
