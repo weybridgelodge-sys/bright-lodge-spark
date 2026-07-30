@@ -52,7 +52,7 @@ export async function registerPushNotifications(memberId: string): Promise<void>
 
     await PushNotifications.addListener("registration", async (token) => {
       try {
-        await supabase.from("push_device_tokens").upsert(
+        const { error } = await supabase.from("push_device_tokens").upsert(
           {
             member_id: memberId,
             platform: "android",
@@ -61,6 +61,11 @@ export async function registerPushNotifications(memberId: string): Promise<void>
           },
           { onConflict: "member_id,token" }
         );
+        if (error) {
+          console.warn("[push] failed to store device token", error.message, error.details);
+        } else {
+          console.log("[push] device token stored");
+        }
       } catch (err) {
         console.warn("[push] failed to store device token", err);
       }
