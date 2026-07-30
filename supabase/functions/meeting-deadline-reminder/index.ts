@@ -67,9 +67,10 @@ Deno.serve(async (req) => {
   try {
     // Today in Europe/London (YYYY-MM-DD)
     const todayStr = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/London" }).format(new Date());
-    // Deadline is meeting_date - 7 days, so today's targets meet on today + 7.
+    // Fire 10 days before the meeting (3 days' lead time before the
+    // meeting_date - 7 booking deadline shown in the message).
     const targetMeetingDate = new Date(`${todayStr}T00:00:00Z`);
-    targetMeetingDate.setUTCDate(targetMeetingDate.getUTCDate() + 7);
+    targetMeetingDate.setUTCDate(targetMeetingDate.getUTCDate() + 10);
     const targetStr = targetMeetingDate.toISOString().slice(0, 10);
 
     let q = admin
