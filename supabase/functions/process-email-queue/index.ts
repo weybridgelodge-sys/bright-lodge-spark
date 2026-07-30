@@ -248,6 +248,18 @@ Deno.serve(async (req) => {
         }
       }
 
+      // Mint a fresh idempotency key for every retry attempt. The email API
+      // rejects a re-send under a previously-failed key with
+      // "409 This email send already failed. Send again with a new idempotency key",
+      // which would burn all MAX_RETRIES instantly. The first attempt keeps the
+      // original key so genuine duplicate enqueues are still de-duplicated;
+      // subsequent attempts get an `-r<n>` suffix so they can actually retry.
+      const baseIdempotencyKey = payload.idempotency_key ?? payload.message_id
+      const attemptIdempotencyKey =
+        failedAttempts > 0 && baseIdempotencyKey
+          ? `${baseIdempotencyKey}-r${failedAttempts}`
+          : baseIdempotencyKey
+
       try {
         await sendLovableEmail(
           {
@@ -261,7 +273,7 @@ Deno.serve(async (req) => {
             text: payload.text,
             purpose: payload.purpose,
             label: payload.label,
-            idempotency_key: payload.idempotency_key,
+            idempotency_key: attemptIdempotencyKey,
             unsubscribe_token: payload.unsubscribe_token,
             message_id: payload.message_id,
           },
