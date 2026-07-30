@@ -7,22 +7,31 @@ const PROD_ORIGIN = "https://weybridgelodge.org.uk";
 
 /**
  * Resolve a Lovable `.asset.json` pointer (or a raw URL string) to a URL that
- * works both on the web and inside the native Capacitor app.
+ * works on every host the app runs on.
  *
- * On the web: returns the raw relative URL (unchanged behaviour).
- * On native:  prefixes relative `/...` paths with the production origin so
- *             the image loads from the real CDN rather than Capacitor's
- *             internal `capacitor://localhost` / `https://localhost` scheme.
+ * Lovable CDN pointers are root-relative paths (`/__l5e/assets-v1/...`) that
+ * are only served by Lovable's hosting layer. On the canonical production
+ * domain we keep them relative (same-origin, best caching). Everywhere else —
+ * the native Capacitor shell (`capacitor://localhost`), the dev server and the
+ * preview sandbox, which return `index.html` for unknown paths instead of the
+ * binary — we point at the production origin so the real file is fetched.
  */
 export function assetUrl(input: { url?: string } | string | null | undefined): string {
   const raw = typeof input === "string" ? input : input?.url ?? "";
   if (!raw) return "";
+  if (!raw.startsWith("/")) return raw;
+
   try {
-    if (Capacitor.isNativePlatform() && raw.startsWith("/")) {
-      return PROD_ORIGIN + raw;
+    if (!Capacitor.isNativePlatform() && typeof window !== "undefined") {
+      const host = window.location.hostname;
+      // Canonical production host serves the CDN paths itself.
+      if (host === "weybridgelodge.org.uk" || host.endsWith(".weybridgelodge.org.uk")) {
+        return raw;
+      }
     }
   } catch {
-    // Capacitor not available (SSR/tests) — fall through.
+    // Capacitor/window not available (SSR/tests) — fall through to absolute.
   }
-  return raw;
+  return PROD_ORIGIN + raw;
 }
+
