@@ -2,11 +2,10 @@ import { Capacitor } from "@capacitor/core";
 import { supabase } from "@/integrations/supabase/client";
 
 /**
- * Native push-notification registration (Android for now; iOS uses the same
- * plugin API and can be enabled later once APNs entitlements are wired up).
+ * Native push-notification registration (Android via FCM, iOS via APNs).
  *
  * Behaviour:
- *  - No-op on web and on non-Android native platforms.
+ *  - No-op on web; runs on Android and iOS native platforms.
  *  - Asks for permission at most once per install; if the member denies it we
  *    remember that locally and never nag again (they can re-enable it from the
  *    OS settings, and a fresh install resets the flag).
@@ -22,7 +21,8 @@ const LEGACY_DENIED_KEY = "push_permission_denied_v1";
 let registrationStarted = false;
 
 export function isPushSupported() {
-  return Capacitor.isNativePlatform() && Capacitor.getPlatform() === "android";
+  const platform = Capacitor.getPlatform();
+  return Capacitor.isNativePlatform() && (platform === "android" || platform === "ios");
 }
 
 export async function registerPushNotifications(memberId: string): Promise<void> {
@@ -36,12 +36,14 @@ export async function registerPushNotifications(memberId: string): Promise<void>
     // Dynamic import so the plugin is never pulled into the web bundle path.
     const { PushNotifications } = await import("@capacitor/push-notifications");
 
+    const platform = Capacitor.getPlatform() === "ios" ? "ios" : "android";
+
     let perm = await PushNotifications.checkPermissions();
     console.log("[push] permission state", perm.receive);
 
     if (perm.receive === "prompt" || perm.receive === "prompt-with-rationale") {
-      // Android itself stops showing the dialog after repeated refusals, so we
-      // don't need our own suppression flag — no nagging, no permanent lockout.
+      // Both Android and iOS suppress their own dialog after the member has
+      // answered once, so we don't need our own flag — no nagging, no lockout.
       perm = await PushNotifications.requestPermissions();
       console.log("[push] permission after request", perm.receive);
     }
@@ -60,7 +62,7 @@ export async function registerPushNotifications(memberId: string): Promise<void>
         const { error } = await supabase.from("push_device_tokens").upsert(
           {
             member_id: memberId,
-            platform: "android",
+            platform,
             token: token.value,
             last_seen_at: new Date().toISOString(),
           },
