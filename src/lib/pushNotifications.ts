@@ -15,7 +15,9 @@ import { supabase } from "@/integrations/supabase/client";
  *    reinstalls refresh the same row rather than creating duplicates.
  */
 
-const DENIED_KEY = "push_permission_denied_v1";
+// Legacy suppression flag — no longer used as a gate (it could persist across
+// app updates and silently block registration forever). Cleared on sight.
+const LEGACY_DENIED_KEY = "push_permission_denied_v1";
 
 let registrationStarted = false;
 
@@ -29,24 +31,27 @@ export async function registerPushNotifications(memberId: string): Promise<void>
   registrationStarted = true;
 
   try {
+    localStorage.removeItem(LEGACY_DENIED_KEY);
+
     // Dynamic import so the plugin is never pulled into the web bundle path.
     const { PushNotifications } = await import("@capacitor/push-notifications");
 
     let perm = await PushNotifications.checkPermissions();
+    console.log("[push] permission state", perm.receive);
 
     if (perm.receive === "prompt" || perm.receive === "prompt-with-rationale") {
-      // Only prompt if we've not already been turned down on this device.
-      if (localStorage.getItem(DENIED_KEY) === "1") return;
+      // Android itself stops showing the dialog after repeated refusals, so we
+      // don't need our own suppression flag — no nagging, no permanent lockout.
       perm = await PushNotifications.requestPermissions();
+      console.log("[push] permission after request", perm.receive);
     }
 
     if (perm.receive !== "granted") {
-      // Graceful decline: remember it, don't prompt again, don't throw.
-      localStorage.setItem(DENIED_KEY, "1");
+      // Graceful decline: don't throw, don't retry this session.
+      console.log("[push] notifications not granted — skipping registration");
       return;
     }
 
-    localStorage.removeItem(DENIED_KEY);
 
     await PushNotifications.removeAllListeners();
 
