@@ -2666,6 +2666,32 @@ export type Database = {
           },
         ]
       }
+      regular_meeting_reminders_sent: {
+        Row: {
+          meeting_id: string
+          member_id: string
+          sent_at: string
+        }
+        Insert: {
+          meeting_id: string
+          member_id: string
+          sent_at?: string
+        }
+        Update: {
+          meeting_id?: string
+          member_id?: string
+          sent_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "regular_meeting_reminders_sent_meeting_id_fkey"
+            columns: ["meeting_id"]
+            isOneToOne: false
+            referencedRelation: "festive_board_meetings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ritual_documents: {
         Row: {
           created_at: string
