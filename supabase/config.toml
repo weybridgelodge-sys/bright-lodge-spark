@@ -7,6 +7,8 @@ project_id = "kntcjlztmcgmagwgheyx"
     verify_jwt = false
   [functions.create-checkout]
     verify_jwt = false
+  [functions.db-backup]
+    verify_jwt = true
   [functions.get-booking-by-session]
     verify_jwt = false
   [functions.handle-email-suppression]
