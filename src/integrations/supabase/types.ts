@@ -59,6 +59,48 @@ export type Database = {
         }
         Relationships: []
       }
+      backup_log: {
+        Row: {
+          created_at: string
+          deleted_files: string[]
+          duration_ms: number | null
+          error_message: string | null
+          file_name: string | null
+          id: string
+          row_count: number
+          size_bytes: number
+          status: string
+          table_count: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          deleted_files?: string[]
+          duration_ms?: number | null
+          error_message?: string | null
+          file_name?: string | null
+          id?: string
+          row_count?: number
+          size_bytes?: number
+          status: string
+          table_count?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          deleted_files?: string[]
+          duration_ms?: number | null
+          error_message?: string | null
+          file_name?: string | null
+          id?: string
+          row_count?: number
+          size_bytes?: number
+          status?: string
+          table_count?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       bookings: {
         Row: {
           contact_email: string
