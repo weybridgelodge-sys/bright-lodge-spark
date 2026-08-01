@@ -305,9 +305,9 @@ function SocialsList({
                       {s.description}
                     </p>
                   )}
-                  {s.guest_emails.length > 0 && (
+                  {s.guest_count > 0 && (
                     <p className="text-xs text-primary-foreground/50 mt-2">
-                      + {s.guest_emails.length} guest{s.guest_emails.length === 1 ? "" : "s"} invited
+                      + {s.guest_count} guest{s.guest_count === 1 ? "" : "s"} invited
                     </p>
                   )}
                   {s.notified_at && (
