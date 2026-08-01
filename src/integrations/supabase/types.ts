@@ -1206,6 +1206,7 @@ export type Database = {
           created_by: string | null
           description: string | null
           ends_at: string | null
+          guest_count: number | null
           guest_emails: string[]
           id: string
           notified_at: string | null
@@ -1221,6 +1222,7 @@ export type Database = {
           created_by?: string | null
           description?: string | null
           ends_at?: string | null
+          guest_count?: number | null
           guest_emails?: string[]
           id?: string
           notified_at?: string | null
@@ -1236,6 +1238,7 @@ export type Database = {
           created_by?: string | null
           description?: string | null
           ends_at?: string | null
+          guest_count?: number | null
           guest_emails?: string[]
           id?: string
           notified_at?: string | null
@@ -3924,6 +3927,10 @@ export type Database = {
           preferred_name: string
           ritual_group: string
         }[]
+      }
+      lodge_social_guest_emails: {
+        Args: { _social_id: string }
+        Returns: string[]
       }
       move_to_dlq: {
         Args: {
