@@ -19,6 +19,7 @@ interface FlaggedMember {
   name: string
   overdueFollowUp?: string | null // ISO date
   missedMeetings?: boolean
+  checkIn?: string | null
   portalUrl: string
 }
 
@@ -79,6 +80,7 @@ const Email = ({ members = [], reportDate, portalUrl }: Props) => (
               {m.missedMeetings && (
                 <Text style={flagAmber}>• Missed the last 2 meetings</Text>
               )}
+              {m.checkIn && <Text style={flagSoft}>• {m.checkIn}</Text>}
               <Text style={{ margin: '6px 0 0' }}>
                 <Link href={m.portalUrl} style={linkStyle}>Open record →</Link>
               </Text>
@@ -126,6 +128,7 @@ export const template = {
         name: 'Bro. Peter Jones',
         overdueFollowUp: null,
         missedMeetings: true,
+        checkIn: 'Not at the last 2 meetings — worth a call?',
         portalUrl: 'https://weybridgelodge.org.uk/members/almoner',
       },
     ],
@@ -141,6 +144,7 @@ const card = brandStyles.card
 const memberName = { color: BRAND.navy, fontSize: '15px', fontWeight: 'bold' as const, margin: '4px 0' }
 const flagRed = { color: '#b91c1c', fontSize: '13px', margin: '2px 0' }
 const flagAmber = { color: '#b45309', fontSize: '13px', margin: '2px 0' }
+const flagSoft = { color: BRAND.navy, fontSize: '13px', margin: '2px 0' }
 const linkStyle = brandStyles.link
 const footerText = brandStyles.footerText
 const hr = brandStyles.hr

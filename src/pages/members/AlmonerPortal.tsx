@@ -13,7 +13,8 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { AlertTriangle, ArrowLeft, CalendarClock, HeartHandshake, Plus, ShieldAlert, X } from "lucide-react";
+import { ArrowLeft, CalendarClock, HeartHandshake, PhoneCall, Plus, ShieldAlert, X } from "lucide-react";
+import { computeCheckInFlags, type CheckInFlag } from "@/lib/almonerAbsencePattern";
 import LifeEventsPanel from "@/components/members/almoner/LifeEventsPanel";
 import CorrespondencePanel from "@/components/members/almoner/CorrespondencePanel";
 import ReferralsPanel from "@/components/members/almoner/ReferralsPanel";
@@ -176,7 +177,7 @@ function PortalBody() {
   const [statuses, setStatuses] = useState<Record<string, StatusRow>>({});
   const [lastContactByMember, setLastContactByMember] = useState<Record<string, string>>({});
   const [openFollowUps, setOpenFollowUps] = useState<Record<string, string>>({});
-  const [absentFlags, setAbsentFlags] = useState<Record<string, boolean>>({});
+  const [checkInFlags, setCheckInFlags] = useState<Record<string, CheckInFlag>>({});
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const loadAll = async () => {
@@ -190,11 +191,12 @@ function PortalBody() {
         .is("deleted_at", null)
         .order("contact_date", { ascending: false }),
       supabase.from("festive_board_meetings")
-        .select("id,meeting_date")
+        .select("id,meeting_date,meeting_type")
         .lte("meeting_date", new Date().toISOString().slice(0, 10))
         .order("meeting_date", { ascending: false })
-        .limit(2),
+        .limit(24),
     ]);
+
 
     const baseMembers = ((ms as Omit<MemberRow, "date_of_birth">[]) ?? []).map((m) => ({ ...m, date_of_birth: null as string | null })) as MemberRow[];
     // Merge DOB (PII) via secure RPC for Almoner-permitted callers
@@ -234,28 +236,23 @@ function PortalBody() {
     });
     setOpenFollowUps(overdue);
 
-    // Absence: missed last 2 meetings (no attending row)
-    const meetingIds = ((meetings as any[]) ?? []).map((m) => m.id);
-    if (meetingIds.length >= 2) {
+    // Soft check-in nudge: pattern of non-attendance at Regular meetings
+    const allMeetings = ((meetings as any[]) ?? []) as { id: string; meeting_date: string; meeting_type: string }[];
+    const meetingIds = allMeetings.map((m) => m.id);
+    if (meetingIds.length > 0) {
       const { data: att } = await supabase.from("festive_board_attendance")
         .select("member_id,meeting_id,attendance_status")
         .in("meeting_id", meetingIds);
-      const present = new Map<string, Set<string>>();
-      ((att as any[]) ?? []).forEach((a) => {
-        if (a.attendance_status === "attending" && a.member_id) {
-          if (!present.has(a.member_id)) present.set(a.member_id, new Set());
-          present.get(a.member_id)!.add(a.meeting_id);
-        }
-      });
-      const flags: Record<string, boolean> = {};
-      (ms as any[] ?? []).forEach((m) => {
-        const s = present.get(m.id) ?? new Set();
-        // Absent from both = missed two consecutive
-        if (!s.has(meetingIds[0]) && !s.has(meetingIds[1])) flags[m.id] = true;
-      });
-      setAbsentFlags(flags);
+      setCheckInFlags(
+        computeCheckInFlags(
+          allMeetings,
+          ((att as any[]) ?? []) as any,
+          ((ms as any[]) ?? []).map((m) => m.id)
+        )
+      );
     }
   };
+
 
   useEffect(() => { loadAll(); }, []);
 
@@ -334,9 +331,9 @@ function PortalBody() {
                       {lastDays != null && <span className="text-primary-foreground/40"> · {lastDays}d ago</span>}
                     </div>
                     <div className="flex gap-1.5 flex-wrap pt-1">
-                      {absentFlags[m.id] && (
-                        <Badge variant="outline" className="border-amber-400/50 text-amber-400 text-[10px] px-1.5 py-0">
-                          <AlertTriangle className="w-3 h-3 mr-1" /> Missed 2 meetings
+                      {checkInFlags[m.id] && (
+                        <Badge variant="outline" className="border-gold/50 text-gold text-[10px] px-1.5 py-0" title="Gentle check-in prompt — not a concern flag">
+                          <PhoneCall className="w-3 h-3 mr-1" /> {checkInFlags[m.id].label}
                         </Badge>
                       )}
                       {openFollowUps[m.id] && (
