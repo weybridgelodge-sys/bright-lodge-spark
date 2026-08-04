@@ -63,10 +63,10 @@ Deno.serve(async (req) => {
         .order('contact_date', { ascending: false }),
       supabase
         .from('festive_board_meetings')
-        .select('id,meeting_date')
+        .select('id,meeting_date,meeting_type')
         .lte('meeting_date', today)
         .order('meeting_date', { ascending: false })
-        .limit(2),
+        .limit(24),
     ])
     if (membersRes.error) throw membersRes.error
     if (logsRes.error) throw logsRes.error
@@ -91,18 +91,22 @@ Deno.serve(async (req) => {
       }
     }
 
-    // ---- Missed last 2 meetings ----
-    const meetingIds = ((meetingsRes.data as any[]) ?? []).map((m) => m.id)
+    // ---- Absence patterns ----
+    const allMeetings = ((meetingsRes.data as any[]) ?? []) as Array<{ id: string; meeting_date: string; meeting_type: string }>
+    const meetingIds = allMeetings.map((m) => m.id)
     const absentFlags: Record<string, boolean> = {}
-    if (meetingIds.length >= 2) {
+    const checkInFlags: Record<string, string> = {}
+    if (meetingIds.length > 0) {
       const { data: att } = await supabase
         .from('festive_board_attendance')
         .select('member_id,meeting_id,attendance_status')
         .in('meeting_id', meetingIds)
+      const rows = ((att as any[]) ?? [])
+
+      // (a) Hard flag: unexplained absence from the last two meetings.
+      // "booked"/"attended" count as present, "apologies" as explained.
       const present = new Map<string, Set<string>>()
-      for (const a of ((att as any[]) ?? [])) {
-        // Count "booked"/"attended" as present, and "apologies" as explained
-        // absence — neither counts as an unexplained missed meeting.
+      for (const a of rows) {
         if (
           (a.attendance_status === 'attended' ||
             a.attendance_status === 'booked' ||
@@ -113,14 +117,58 @@ Deno.serve(async (req) => {
           present.get(a.member_id)!.add(a.meeting_id)
         }
       }
+      if (meetingIds.length >= 2) {
+        for (const m of members as any[]) {
+          const s = present.get(m.id) ?? new Set()
+          if (!s.has(meetingIds[0]) && !s.has(meetingIds[1])) absentFlags[m.id] = true
+        }
+      }
+
+      // (b) Soft flag: pattern of not being around at Regular meetings.
+      // Any non-"Attended" status counts equally; only "attended" (and
+      // "booked" for future meetings) breaks a streak.
+      const recorded = new Set(rows.map((a: any) => a.meeting_id))
+      const regular = allMeetings
+        .filter((m) => m.meeting_type === 'regular' && recorded.has(m.id))
+        .sort((a, b) => b.meeting_date.localeCompare(a.meeting_date))
+      const statusBy = new Map<string, Map<string, string>>()
+      for (const a of rows) {
+        if (!a.member_id) continue
+        if (!statusBy.has(a.member_id)) statusBy.set(a.member_id, new Map())
+        statusBy.get(a.member_id)!.set(a.meeting_id, a.attendance_status)
+      }
+      const lyStart = new Date().getMonth() + 1 >= 10 ? new Date().getFullYear() : new Date().getFullYear() - 1
+      const yStart = `${lyStart}-10-01`
+      const yEnd = `${lyStart + 1}-09-30`
+      const breaks = new Set(['attended', 'booked'])
       for (const m of members as any[]) {
-        const s = present.get(m.id) ?? new Set()
-        if (!s.has(meetingIds[0]) && !s.has(meetingIds[1])) absentFlags[m.id] = true
+        const own = statusBy.get(m.id) ?? new Map<string, string>()
+        let consecutive = 0
+        for (const mt of regular) {
+          const st = own.get(mt.id)
+          if (st && breaks.has(st)) break
+          consecutive += 1
+        }
+        let yearMissed = 0
+        for (const mt of regular) {
+          if (mt.meeting_date < yStart || mt.meeting_date > yEnd) continue
+          const st = own.get(mt.id)
+          if (!st || !breaks.has(st)) yearMissed += 1
+        }
+        if (consecutive >= 2) {
+          checkInFlags[m.id] = `Not at the last ${consecutive} meetings — worth a call?`
+        } else if (yearMissed >= 3) {
+          checkInFlags[m.id] = `Missed ${yearMissed} meetings this lodge year — worth a call?`
+        }
       }
     }
 
     // ---- Build flagged list ----
-    const flaggedIds = new Set<string>([...Object.keys(overdue), ...Object.keys(absentFlags)])
+    const flaggedIds = new Set<string>([
+      ...Object.keys(overdue),
+      ...Object.keys(absentFlags),
+      ...Object.keys(checkInFlags),
+    ])
     const flagged = Array.from(flaggedIds)
       .map((id) => {
         const m = memberById.get(id)
@@ -129,10 +177,11 @@ Deno.serve(async (req) => {
           name: displayName(m),
           overdueFollowUp: overdue[id] ?? null,
           missedMeetings: !!absentFlags[id],
+          checkIn: checkInFlags[id] ?? null,
           portalUrl: PORTAL_URL,
         }
       })
-      .filter(Boolean) as Array<{ name: string; overdueFollowUp: string | null; missedMeetings: boolean; portalUrl: string }>
+      .filter(Boolean) as Array<{ name: string; overdueFollowUp: string | null; missedMeetings: boolean; checkIn: string | null; portalUrl: string }>
 
     if (flagged.length === 0) {
       console.log('almoner-overdue-check: nothing to report')
