@@ -163,7 +163,7 @@ function TransactionsTab({
                 const p = t.period_id ? periodMap.get(t.period_id) : null;
                 const locked = p?.status === "locked";
                 return (
-                  <tr key={t.id} className="border-b border-gold/10 hover:bg-navy-light/30">
+                  <tr key={t.id} className={`border-b border-gold/10 hover:bg-navy-light/30 ${highlightTxId === t.id ? "bg-gold/10 ring-1 ring-gold/50" : ""}`}>
                     <td className="px-4 py-2 tabular-nums">{new Date(t.transaction_date).toLocaleDateString("en-GB")}</td>
                     <td className="px-4 py-2">
                       <Badge variant="outline" className={t.direction === "income" ? "border-emerald-500/60 text-emerald-300" : "border-red-500/60 text-red-300"}>
