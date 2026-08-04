@@ -2937,7 +2937,9 @@ export type Database = {
           created_at: string
           created_by: string | null
           id: string
+          invoice_date: string | null
           invoice_headcount: number | null
+          invoice_number: string | null
           meeting_id: string
           notes: string | null
           override_total_pence: number | null
@@ -2949,7 +2951,9 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           id?: string
+          invoice_date?: string | null
           invoice_headcount?: number | null
+          invoice_number?: string | null
           meeting_id: string
           notes?: string | null
           override_total_pence?: number | null
@@ -2961,7 +2965,9 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           id?: string
+          invoice_date?: string | null
           invoice_headcount?: number | null
+          invoice_number?: string | null
           meeting_id?: string
           notes?: string | null
           override_total_pence?: number | null

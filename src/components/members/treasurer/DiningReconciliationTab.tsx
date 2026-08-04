@@ -36,6 +36,8 @@ type Invoice = {
   override_total_pence: number | null;
   notes: string | null;
   transaction_id: string | null;
+  invoice_number: string | null;
+  invoice_date: string | null;
 };
 
 const gbp = (pence: number) =>
@@ -71,6 +73,8 @@ function MeetingPanel({
   const [perHead, setPerHead] = useState("");
   const [override, setOverride] = useState("");
   const [notes, setNotes] = useState("");
+  const [invoiceNumber, setInvoiceNumber] = useState("");
+  const [invoiceDate, setInvoiceDate] = useState("");
   const [saving, setSaving] = useState(false);
   const [creating, setCreating] = useState(false);
 
@@ -79,6 +83,8 @@ function MeetingPanel({
     setPerHead(invoice?.per_head_pence != null ? (invoice.per_head_pence / 100).toFixed(2) : "");
     setOverride(invoice?.override_total_pence != null ? (invoice.override_total_pence / 100).toFixed(2) : "");
     setNotes(invoice?.notes ?? "");
+    setInvoiceNumber(invoice?.invoice_number ?? "");
+    setInvoiceDate(invoice?.invoice_date ?? "");
   }, [invoice]);
 
   // ── Portal-side dining figures (dining only, excludes meeting-only) ──
@@ -134,6 +140,8 @@ function MeetingPanel({
       per_head_pence: perHead.trim() ? Math.round(parseFloat(perHead) * 100) : null,
       override_total_pence: override.trim() ? Math.round(parseFloat(override) * 100) : null,
       notes: notes.trim() || null,
+      invoice_number: invoiceNumber.trim() || null,
+      invoice_date: invoiceDate || null,
       created_by: u.user?.id ?? null,
     };
     const { error } = await supabase
@@ -158,14 +166,14 @@ function MeetingPanel({
     const { data: tx, error } = await supabase
       .from("treasurer_transactions" as any)
       .insert({
-        transaction_date: meeting.meeting_date,
+        transaction_date: invoiceDate || meeting.meeting_date,
         direction: "expense",
         payment_method: "bank_transfer",
         category: "gmc_dining",
         amount_pence: draftTotal,
-        description: `GMC dining invoice — ${new Date(meeting.meeting_date).toLocaleDateString("en-GB")} ${meetingTypeLabel(meeting.meeting_type)}${
+        description: `GMC dining invoice${invoiceNumber.trim() ? ` ${invoiceNumber.trim()}` : ""} — ${new Date(meeting.meeting_date).toLocaleDateString("en-GB")} ${meetingTypeLabel(meeting.meeting_type)}${
           invHc != null ? ` (${invHc} diners)` : ""
-        }`,
+        }${invoiceDate ? ` — invoiced ${new Date(invoiceDate).toLocaleDateString("en-GB")}` : ""}`,
         reconciled: false,
         created_by: u.user?.id ?? null,
       })
@@ -185,6 +193,8 @@ function MeetingPanel({
           per_head_pence: perHead.trim() ? Math.round(parseFloat(perHead) * 100) : null,
           override_total_pence: override.trim() ? Math.round(parseFloat(override) * 100) : null,
           notes: notes.trim() || null,
+          invoice_number: invoiceNumber.trim() || null,
+          invoice_date: invoiceDate || null,
           transaction_id: (tx as any).id,
           created_by: u.user?.id ?? null,
         } as any,
@@ -262,6 +272,14 @@ function MeetingPanel({
         <div className="space-y-3">
           <h4 className="text-sm uppercase tracking-wider text-primary-foreground/60">GMC invoice</h4>
           <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label>Invoice number — optional</Label>
+              <Input value={invoiceNumber} disabled={!canEdit} onChange={(e) => setInvoiceNumber(e.target.value)} placeholder="e.g. GMC-2026-014" />
+            </div>
+            <div>
+              <Label>Invoice date — optional</Label>
+              <Input type="date" value={invoiceDate} disabled={!canEdit} onChange={(e) => setInvoiceDate(e.target.value)} />
+            </div>
             <div>
               <Label>Invoice headcount</Label>
               <Input inputMode="numeric" value={headcount} disabled={!canEdit} onChange={(e) => setHeadcount(e.target.value)} placeholder="34" />
