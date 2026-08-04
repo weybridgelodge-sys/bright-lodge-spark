@@ -190,11 +190,12 @@ function PortalBody() {
         .is("deleted_at", null)
         .order("contact_date", { ascending: false }),
       supabase.from("festive_board_meetings")
-        .select("id,meeting_date")
+        .select("id,meeting_date,meeting_type")
         .lte("meeting_date", new Date().toISOString().slice(0, 10))
         .order("meeting_date", { ascending: false })
-        .limit(2),
+        .limit(24),
     ]);
+
 
     const baseMembers = ((ms as Omit<MemberRow, "date_of_birth">[]) ?? []).map((m) => ({ ...m, date_of_birth: null as string | null })) as MemberRow[];
     // Merge DOB (PII) via secure RPC for Almoner-permitted callers
