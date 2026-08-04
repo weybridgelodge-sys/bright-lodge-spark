@@ -235,28 +235,23 @@ function PortalBody() {
     });
     setOpenFollowUps(overdue);
 
-    // Absence: missed last 2 meetings (no attending row)
-    const meetingIds = ((meetings as any[]) ?? []).map((m) => m.id);
-    if (meetingIds.length >= 2) {
+    // Soft check-in nudge: pattern of non-attendance at Regular meetings
+    const allMeetings = ((meetings as any[]) ?? []) as { id: string; meeting_date: string; meeting_type: string }[];
+    const meetingIds = allMeetings.map((m) => m.id);
+    if (meetingIds.length > 0) {
       const { data: att } = await supabase.from("festive_board_attendance")
         .select("member_id,meeting_id,attendance_status")
         .in("meeting_id", meetingIds);
-      const present = new Map<string, Set<string>>();
-      ((att as any[]) ?? []).forEach((a) => {
-        if (a.attendance_status === "attending" && a.member_id) {
-          if (!present.has(a.member_id)) present.set(a.member_id, new Set());
-          present.get(a.member_id)!.add(a.meeting_id);
-        }
-      });
-      const flags: Record<string, boolean> = {};
-      (ms as any[] ?? []).forEach((m) => {
-        const s = present.get(m.id) ?? new Set();
-        // Absent from both = missed two consecutive
-        if (!s.has(meetingIds[0]) && !s.has(meetingIds[1])) flags[m.id] = true;
-      });
-      setAbsentFlags(flags);
+      setCheckInFlags(
+        computeCheckInFlags(
+          allMeetings,
+          ((att as any[]) ?? []) as any,
+          ((ms as any[]) ?? []).map((m) => m.id)
+        )
+      );
     }
   };
+
 
   useEffect(() => { loadAll(); }, []);
 
