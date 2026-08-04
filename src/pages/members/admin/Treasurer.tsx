@@ -628,6 +628,9 @@ function Inner() {
   const [transactions, setTransactions] = useState<Tx[]>([]);
   const [periods, setPeriods] = useState<Period[]>([]);
   const [loading, setLoading] = useState(true);
+  const [tab, setTab] = useState("transactions");
+  const [highlightTxId, setHighlightTxId] = useState<string | null>(null);
+
 
   const load = useCallback(async () => {
     setLoading(true);
