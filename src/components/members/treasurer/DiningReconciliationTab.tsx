@@ -166,14 +166,14 @@ function MeetingPanel({
     const { data: tx, error } = await supabase
       .from("treasurer_transactions" as any)
       .insert({
-        transaction_date: meeting.meeting_date,
+        transaction_date: invoiceDate || meeting.meeting_date,
         direction: "expense",
         payment_method: "bank_transfer",
         category: "gmc_dining",
         amount_pence: draftTotal,
-        description: `GMC dining invoice — ${new Date(meeting.meeting_date).toLocaleDateString("en-GB")} ${meetingTypeLabel(meeting.meeting_type)}${
+        description: `GMC dining invoice${invoiceNumber.trim() ? ` ${invoiceNumber.trim()}` : ""} — ${new Date(meeting.meeting_date).toLocaleDateString("en-GB")} ${meetingTypeLabel(meeting.meeting_type)}${
           invHc != null ? ` (${invHc} diners)` : ""
-        }`,
+        }${invoiceDate ? ` — invoiced ${new Date(invoiceDate).toLocaleDateString("en-GB")}` : ""}`,
         reconciled: false,
         created_by: u.user?.id ?? null,
       })
