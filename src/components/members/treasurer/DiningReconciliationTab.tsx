@@ -140,6 +140,8 @@ function MeetingPanel({
       per_head_pence: perHead.trim() ? Math.round(parseFloat(perHead) * 100) : null,
       override_total_pence: override.trim() ? Math.round(parseFloat(override) * 100) : null,
       notes: notes.trim() || null,
+      invoice_number: invoiceNumber.trim() || null,
+      invoice_date: invoiceDate || null,
       created_by: u.user?.id ?? null,
     };
     const { error } = await supabase
