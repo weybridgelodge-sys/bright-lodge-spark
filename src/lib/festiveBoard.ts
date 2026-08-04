@@ -10,6 +10,7 @@ export const FB_ATTENDANCE_STATUSES = [
   { value: "booked", label: "Booked" },
   { value: "attended", label: "Attended" },
   { value: "no_show", label: "No Show" },
+  { value: "apologies", label: "Apologies Given" },
   { value: "cancelled_refunded", label: "Cancelled — Refunded" },
 ] as const;
 
