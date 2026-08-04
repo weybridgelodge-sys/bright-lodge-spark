@@ -73,6 +73,8 @@ function MeetingPanel({
   const [perHead, setPerHead] = useState("");
   const [override, setOverride] = useState("");
   const [notes, setNotes] = useState("");
+  const [invoiceNumber, setInvoiceNumber] = useState("");
+  const [invoiceDate, setInvoiceDate] = useState("");
   const [saving, setSaving] = useState(false);
   const [creating, setCreating] = useState(false);
 
@@ -81,6 +83,8 @@ function MeetingPanel({
     setPerHead(invoice?.per_head_pence != null ? (invoice.per_head_pence / 100).toFixed(2) : "");
     setOverride(invoice?.override_total_pence != null ? (invoice.override_total_pence / 100).toFixed(2) : "");
     setNotes(invoice?.notes ?? "");
+    setInvoiceNumber(invoice?.invoice_number ?? "");
+    setInvoiceDate(invoice?.invoice_date ?? "");
   }, [invoice]);
 
   // ── Portal-side dining figures (dining only, excludes meeting-only) ──
