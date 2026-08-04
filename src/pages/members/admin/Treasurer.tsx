@@ -92,9 +92,9 @@ function Stat({ label, value }: { label: string; value: React.ReactNode }) {
 
 // ─── Transaction Register ───────────────────────────────────────────────────
 function TransactionsTab({
-  transactions, periods, canEdit, onChange,
+  transactions, periods, canEdit, onChange, highlightTxId,
 }: {
-  transactions: Tx[]; periods: Period[]; canEdit: boolean; onChange: () => void;
+  transactions: Tx[]; periods: Period[]; canEdit: boolean; onChange: () => void; highlightTxId?: string | null;
 }) {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Tx | null>(null);
