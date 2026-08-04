@@ -2932,6 +2932,60 @@ export type Database = {
         }
         Relationships: []
       }
+      treasurer_dining_invoices: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          invoice_headcount: number | null
+          meeting_id: string
+          notes: string | null
+          override_total_pence: number | null
+          per_head_pence: number | null
+          transaction_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          invoice_headcount?: number | null
+          meeting_id: string
+          notes?: string | null
+          override_total_pence?: number | null
+          per_head_pence?: number | null
+          transaction_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          invoice_headcount?: number | null
+          meeting_id?: string
+          notes?: string | null
+          override_total_pence?: number | null
+          per_head_pence?: number | null
+          transaction_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "treasurer_dining_invoices_meeting_id_fkey"
+            columns: ["meeting_id"]
+            isOneToOne: true
+            referencedRelation: "festive_board_meetings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "treasurer_dining_invoices_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "treasurer_transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       treasurer_periods: {
         Row: {
           created_at: string
