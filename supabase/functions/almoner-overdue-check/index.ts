@@ -101,8 +101,14 @@ Deno.serve(async (req) => {
         .in('meeting_id', meetingIds)
       const present = new Map<string, Set<string>>()
       for (const a of ((att as any[]) ?? [])) {
-        // Count both "booked" and "attended" as present (mirrors headcount logic).
-        if ((a.attendance_status === 'attended' || a.attendance_status === 'booked') && a.member_id) {
+        // Count "booked"/"attended" as present, and "apologies" as explained
+        // absence — neither counts as an unexplained missed meeting.
+        if (
+          (a.attendance_status === 'attended' ||
+            a.attendance_status === 'booked' ||
+            a.attendance_status === 'apologies') &&
+          a.member_id
+        ) {
           if (!present.has(a.member_id)) present.set(a.member_id, new Set())
           present.get(a.member_id)!.add(a.meeting_id)
         }
