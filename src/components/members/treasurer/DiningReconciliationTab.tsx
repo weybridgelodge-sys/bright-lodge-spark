@@ -273,6 +273,14 @@ function MeetingPanel({
           <h4 className="text-sm uppercase tracking-wider text-primary-foreground/60">GMC invoice</h4>
           <div className="grid grid-cols-2 gap-3">
             <div>
+              <Label>Invoice number — optional</Label>
+              <Input value={invoiceNumber} disabled={!canEdit} onChange={(e) => setInvoiceNumber(e.target.value)} placeholder="e.g. GMC-2026-014" />
+            </div>
+            <div>
+              <Label>Invoice date — optional</Label>
+              <Input type="date" value={invoiceDate} disabled={!canEdit} onChange={(e) => setInvoiceDate(e.target.value)} />
+            </div>
+            <div>
               <Label>Invoice headcount</Label>
               <Input inputMode="numeric" value={headcount} disabled={!canEdit} onChange={(e) => setHeadcount(e.target.value)} placeholder="34" />
             </div>
