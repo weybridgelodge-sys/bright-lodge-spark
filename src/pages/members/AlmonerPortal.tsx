@@ -13,7 +13,8 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { AlertTriangle, ArrowLeft, CalendarClock, HeartHandshake, Plus, ShieldAlert, X } from "lucide-react";
+import { AlertTriangle, ArrowLeft, CalendarClock, HeartHandshake, PhoneCall, Plus, ShieldAlert, X } from "lucide-react";
+import { computeCheckInFlags, type CheckInFlag } from "@/lib/almonerAbsencePattern";
 import LifeEventsPanel from "@/components/members/almoner/LifeEventsPanel";
 import CorrespondencePanel from "@/components/members/almoner/CorrespondencePanel";
 import ReferralsPanel from "@/components/members/almoner/ReferralsPanel";
@@ -176,7 +177,7 @@ function PortalBody() {
   const [statuses, setStatuses] = useState<Record<string, StatusRow>>({});
   const [lastContactByMember, setLastContactByMember] = useState<Record<string, string>>({});
   const [openFollowUps, setOpenFollowUps] = useState<Record<string, string>>({});
-  const [absentFlags, setAbsentFlags] = useState<Record<string, boolean>>({});
+  const [checkInFlags, setCheckInFlags] = useState<Record<string, CheckInFlag>>({});
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const loadAll = async () => {
@@ -330,9 +331,9 @@ function PortalBody() {
                       {lastDays != null && <span className="text-primary-foreground/40"> · {lastDays}d ago</span>}
                     </div>
                     <div className="flex gap-1.5 flex-wrap pt-1">
-                      {absentFlags[m.id] && (
-                        <Badge variant="outline" className="border-amber-400/50 text-amber-400 text-[10px] px-1.5 py-0">
-                          <AlertTriangle className="w-3 h-3 mr-1" /> Missed 2 meetings
+                      {checkInFlags[m.id] && (
+                        <Badge variant="outline" className="border-gold/50 text-gold text-[10px] px-1.5 py-0" title="Gentle check-in prompt — not a concern flag">
+                          <PhoneCall className="w-3 h-3 mr-1" /> {checkInFlags[m.id].label}
                         </Badge>
                       )}
                       {openFollowUps[m.id] && (
