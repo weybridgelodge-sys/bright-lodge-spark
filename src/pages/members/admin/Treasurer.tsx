@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import MembersLayout from "@/components/members/MembersLayout";
 import ProtectedRoute from "@/components/members/ProtectedRoute";
+import DiningReconciliationTab from "@/components/members/treasurer/DiningReconciliationTab";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -92,9 +93,9 @@ function Stat({ label, value }: { label: string; value: React.ReactNode }) {
 
 // ─── Transaction Register ───────────────────────────────────────────────────
 function TransactionsTab({
-  transactions, periods, canEdit, onChange,
+  transactions, periods, canEdit, onChange, highlightTxId,
 }: {
-  transactions: Tx[]; periods: Period[]; canEdit: boolean; onChange: () => void;
+  transactions: Tx[]; periods: Period[]; canEdit: boolean; onChange: () => void; highlightTxId?: string | null;
 }) {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Tx | null>(null);
@@ -163,7 +164,7 @@ function TransactionsTab({
                 const p = t.period_id ? periodMap.get(t.period_id) : null;
                 const locked = p?.status === "locked";
                 return (
-                  <tr key={t.id} className="border-b border-gold/10 hover:bg-navy-light/30">
+                  <tr key={t.id} className={`border-b border-gold/10 hover:bg-navy-light/30 ${highlightTxId === t.id ? "bg-gold/10 ring-1 ring-gold/50" : ""}`}>
                     <td className="px-4 py-2 tabular-nums">{new Date(t.transaction_date).toLocaleDateString("en-GB")}</td>
                     <td className="px-4 py-2">
                       <Badge variant="outline" className={t.direction === "income" ? "border-emerald-500/60 text-emerald-300" : "border-red-500/60 text-red-300"}>
@@ -628,6 +629,9 @@ function Inner() {
   const [transactions, setTransactions] = useState<Tx[]>([]);
   const [periods, setPeriods] = useState<Period[]>([]);
   const [loading, setLoading] = useState(true);
+  const [tab, setTab] = useState("transactions");
+  const [highlightTxId, setHighlightTxId] = useState<string | null>(null);
+
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -664,18 +668,26 @@ function Inner() {
       {loading ? (
         <p className="text-primary-foreground/60"><Loader2 className="w-4 h-4 mr-1 inline animate-spin" /> Loading…</p>
       ) : (
-        <Tabs defaultValue="transactions">
+        <Tabs value={tab} onValueChange={setTab}>
           <TabsList className="h-auto flex-wrap justify-start sm:flex-nowrap">
             <TabsTrigger value="transactions">Transaction Register</TabsTrigger>
+            <TabsTrigger value="dining">Dining Reconciliation</TabsTrigger>
             <TabsTrigger value="reconciliation">Reconciliation</TabsTrigger>
           </TabsList>
           <TabsContent value="transactions" className="mt-4">
-            <TransactionsTab transactions={transactions} periods={periods} canEdit={canEditTx} onChange={load} />
+            <TransactionsTab transactions={transactions} periods={periods} canEdit={canEditTx} onChange={load} highlightTxId={highlightTxId} />
+          </TabsContent>
+          <TabsContent value="dining" className="mt-4">
+            <DiningReconciliationTab
+              canEdit={canEditTx}
+              onGoToTransaction={(id) => { setHighlightTxId(id); setTab("transactions"); load(); }}
+            />
           </TabsContent>
           <TabsContent value="reconciliation" className="mt-4">
             <ReconciliationTab periods={periods} isTreasurer={isCurrentTreasurer} isSecretary={isSecretary} isAdmin={isAdmin} onChange={load} />
           </TabsContent>
         </Tabs>
+
       )}
     </MembersLayout>
   );
