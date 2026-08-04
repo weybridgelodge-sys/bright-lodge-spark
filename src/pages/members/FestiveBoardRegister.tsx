@@ -581,12 +581,21 @@ export default function FestiveBoardRegister() {
                                   }`;
                               return { r, name, isMember: !!m || isWeybridgeLodge(r.visitor_lodge_name) };
                             });
-                            const membersList = enriched.filter((x) => x.isMember).sort((a, b) => a.name.localeCompare(b.name));
-                            const visitorsList = enriched.filter((x) => !x.isMember).sort((a, b) => a.name.localeCompare(b.name));
+                            const byStatusThenName = (a: typeof enriched[number], b: typeof enriched[number]) => {
+                              const d = statusRank(a.r.attendance_status) - statusRank(b.r.attendance_status);
+                              return d !== 0 ? d : surnameKey(a.name).localeCompare(surnameKey(b.name));
+                            };
+                            const membersList = enriched.filter((x) => x.isMember).sort(byStatusThenName);
+                            const visitorsList = enriched.filter((x) => !x.isMember).sort(byStatusThenName);
+                            const membersBreakdown = statusBreakdown(membersList.map((x) => x.r));
+                            const visitorsBreakdown = statusBreakdown(visitorsList.map((x) => x.r));
                             return (
                               <>
                                 <div>
                                   <h4 className="text-[10px] uppercase tracking-wider text-gold/80 mb-1.5">Members ({membersList.length})</h4>
+                                  {membersBreakdown && (
+                                    <p className="text-[10px] text-primary-foreground/60 mb-1.5">{membersBreakdown}</p>
+                                  )}
                                   <ul className="space-y-1">
                                     {membersList.map(({ r, name }) => (
                                       <li key={r.id} className="flex flex-wrap justify-between gap-3 border-b border-gold/5 pb-1">
@@ -609,6 +618,9 @@ export default function FestiveBoardRegister() {
                                 </div>
                                 <div>
                                   <h4 className="text-[10px] uppercase tracking-wider text-gold/80 mb-1.5">Visitors ({visitorsList.length})</h4>
+                                  {visitorsBreakdown && (
+                                    <p className="text-[10px] text-primary-foreground/60 mb-1.5">{visitorsBreakdown}</p>
+                                  )}
                                   <ul className="space-y-1">
                                     {visitorsList.map(({ r, name }) => (
                                       <li key={r.id} className="flex flex-wrap justify-between gap-3 border-b border-gold/5 pb-1">

@@ -95,3 +95,33 @@ export function isWeybridgeLodge(lodgeText: string | null | undefined): boolean 
   if (/\b6787\b/.test(t)) return true;
   return false;
 }
+
+/** Display/grouping order for attendee lists. */
+export const FB_STATUS_ORDER: FbAttendanceStatus[] = [
+  "attended",
+  "booked",
+  "apologies",
+  "no_show",
+  "cancelled_refunded",
+];
+
+export const statusRank = (v: string) => {
+  const i = FB_STATUS_ORDER.indexOf(v as FbAttendanceStatus);
+  return i === -1 ? FB_STATUS_ORDER.length : i;
+};
+
+/** Surname-last key for alphabetical sorting within a status group. */
+export const surnameKey = (name: string) => {
+  const clean = name.split("—")[0].trim();
+  const parts = clean.split(/\s+/);
+  return (parts[parts.length - 1] || clean).toLowerCase() + " " + clean.toLowerCase();
+};
+
+/** "5 attending, 2 apologies given" style summary of a set of rows. */
+export function statusBreakdown(rows: { attendance_status: string }[]): string {
+  const counts = new Map<string, number>();
+  for (const r of rows) counts.set(r.attendance_status, (counts.get(r.attendance_status) ?? 0) + 1);
+  return FB_STATUS_ORDER.filter((s) => counts.get(s))
+    .map((s) => `${counts.get(s)} ${attendanceStatusLabel(s).toLowerCase()}`)
+    .join(", ");
+}
