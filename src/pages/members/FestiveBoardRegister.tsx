@@ -546,6 +546,11 @@ export default function FestiveBoardRegister() {
                           {hc.diningTotal} dining
                           {hc.meetingOnlyCount > 0 && ` · ${hc.meetingOnlyCount} meeting-only`}
                         </span>
+                        {statusBreakdown(rows) && (
+                          <span className="text-[10px] text-primary-foreground/50 text-right">
+                            {statusBreakdown(rows)}
+                          </span>
+                        )}
                       </div>
                       <ChevronRight
                         className={`w-4 h-4 text-primary-foreground/40 transition-transform ${
