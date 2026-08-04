@@ -664,18 +664,26 @@ function Inner() {
       {loading ? (
         <p className="text-primary-foreground/60"><Loader2 className="w-4 h-4 mr-1 inline animate-spin" /> Loading…</p>
       ) : (
-        <Tabs defaultValue="transactions">
+        <Tabs value={tab} onValueChange={setTab}>
           <TabsList className="h-auto flex-wrap justify-start sm:flex-nowrap">
             <TabsTrigger value="transactions">Transaction Register</TabsTrigger>
+            <TabsTrigger value="dining">Dining Reconciliation</TabsTrigger>
             <TabsTrigger value="reconciliation">Reconciliation</TabsTrigger>
           </TabsList>
           <TabsContent value="transactions" className="mt-4">
-            <TransactionsTab transactions={transactions} periods={periods} canEdit={canEditTx} onChange={load} />
+            <TransactionsTab transactions={transactions} periods={periods} canEdit={canEditTx} onChange={load} highlightTxId={highlightTxId} />
+          </TabsContent>
+          <TabsContent value="dining" className="mt-4">
+            <DiningReconciliationTab
+              canEdit={canEditTx}
+              onGoToTransaction={(id) => { setHighlightTxId(id); setTab("transactions"); load(); }}
+            />
           </TabsContent>
           <TabsContent value="reconciliation" className="mt-4">
             <ReconciliationTab periods={periods} isTreasurer={isCurrentTreasurer} isSecretary={isSecretary} isAdmin={isAdmin} onChange={load} />
           </TabsContent>
         </Tabs>
+
       )}
     </MembersLayout>
   );
