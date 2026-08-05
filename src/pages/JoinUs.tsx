@@ -105,6 +105,15 @@ const JoinUs = () => {
       { name: "Home", url: "/" },
       { name: "Join Us", url: "/join-us" },
     ]);
+    const faqSchema = {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      mainEntity: faqItems.map((f) => ({
+        "@type": "Question",
+        name: f.question,
+        acceptedAnswer: { "@type": "Answer", text: f.answer },
+      })),
+    };
 
     return [
       {
@@ -118,6 +127,7 @@ const JoinUs = () => {
         inLanguage: "en-GB",
         isPartOf: { "@id": "https://weybridgelodge.org.uk/#website" },
       },
+      faqSchema,
       breadcrumb,
     ];
   }, []);
