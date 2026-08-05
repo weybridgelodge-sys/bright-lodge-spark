@@ -191,7 +191,6 @@ export async function sendBookingEmails(bookingId: string, opts: SendOpts) {
             secretaryName,
             secretaryOffice,
           },
-        },
       })
       if (confRes.error) console.error('Ladies Festival confirmation email failed', confRes.error)
     }
@@ -221,7 +220,6 @@ export async function sendBookingEmails(bookingId: string, opts: SendOpts) {
             bookingRef,
             submittedAt,
           },
-        },
       })
       if (notifRes.error) console.error('Ladies Festival notification email failed', notifyTo, notifRes.error)
     }))
@@ -251,7 +249,6 @@ export async function sendBookingEmails(bookingId: string, opts: SendOpts) {
           secretaryName,
           secretaryOffice,
         },
-      },
     })
     if (confRes.error) console.error('Booking confirmation email failed', confRes.error)
   }
@@ -281,7 +278,6 @@ export async function sendBookingEmails(bookingId: string, opts: SendOpts) {
           bookingRef,
           submittedAt,
         },
-      },
     })
     if (notifRes.error) console.error('Booking notification email failed', notifyTo, notifRes.error)
   }))
