@@ -17,7 +17,9 @@ Deno.serve(async (req) => {
   const bearer = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : ''
   const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
   const supabaseUrl = Deno.env.get('SUPABASE_URL')!
-  let allowed = bearer.length > 0 && bearer === serviceKey
+  const oneOff = Deno.env.get('BACKFILL_ONEOFF_TOKEN') || ''
+  let allowed = (bearer.length > 0 && bearer === serviceKey) ||
+    (oneOff.length > 0 && req.headers.get('x-backfill-token') === oneOff)
   if (!allowed && bearer) {
     // Allow a signed-in admin to run the backfill from the portal/tooling.
     const admin = createClient(supabaseUrl, serviceKey)
