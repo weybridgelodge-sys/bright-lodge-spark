@@ -326,34 +326,33 @@ const JoinUs = () => {
           </div>
         </section>
 
-        {/* ── FAQ ── */}
+        {/* ── FAQ callout — /faq is the canonical FAQ resource ── */}
         <section
-          className="py-20 md:py-28 bg-warm-white border-t border-border"
-          aria-labelledby="join-faq-heading"
+          className="py-14 md:py-16 bg-warm-white border-t border-border"
+          aria-labelledby="join-faq-callout-heading"
         >
-          <div className="container mx-auto px-6 max-w-3xl">
-            <motion.div {...motionProps()}>
-              <div className="h-0.5 w-16 bg-gold mb-6" aria-hidden="true" />
-              <h2 id="join-faq-heading" className="text-2xl md:text-3xl font-serif text-foreground mb-8">
-                Frequently Asked Questions
+          <div className="container mx-auto px-6 max-w-2xl">
+            <motion.div
+              {...motionProps()}
+              className="border border-border rounded-sm bg-card px-6 py-8 text-center"
+            >
+              <h2
+                id="join-faq-callout-heading"
+                className="text-xl md:text-2xl font-serif text-foreground mb-3"
+              >
+                Have more questions?
               </h2>
-              <ul className="list-none p-0 m-0 divide-y divide-border">
-                {faqItems.map((f) => (
-                  <li key={f.question} className="py-2">
-                    <details className="group">
-                      <summary className="flex items-center justify-between gap-4 cursor-pointer py-3 min-h-[48px] list-none font-serif text-lg text-foreground">
-                        {f.question}
-                        <span className="text-gold text-xl leading-none flex-shrink-0 transition-transform group-open:rotate-45" aria-hidden="true">
-                          +
-                        </span>
-                      </summary>
-                      <p className="text-muted-foreground font-sans leading-relaxed pb-4 pr-8">
-                        {f.answer}
-                      </p>
-                    </details>
-                  </li>
-                ))}
-              </ul>
+              <p className="text-muted-foreground font-sans leading-relaxed mb-6">
+                Costs, who can join, what happens after your enquiry, how long the process takes —
+                all answered in one place.
+              </p>
+              <Link
+                to="/faq"
+                className="inline-flex items-center justify-center gap-2 border border-gold text-gold px-6 py-3 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:bg-gold hover:text-navy transition-colors min-h-[48px]"
+              >
+                See the Full FAQ
+                <ArrowRight className="w-4 h-4" aria-hidden="true" />
+              </Link>
             </motion.div>
           </div>
         </section>
