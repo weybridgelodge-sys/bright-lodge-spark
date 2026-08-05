@@ -120,44 +120,6 @@ const degrees: Degree[] = [
   },
 ];
 
-const faqItems: FaqItem[] = [
-  {
-    question: "What is Freemasonry?",
-    answer:
-      "Freemasonry is one of the world's oldest social and charitable organisations, with roots in the traditions of medieval stonemasons. It brings together men of good character who are committed to integrity, friendship, respect and service.",
-  },
-  {
-    question: "How do I join the Freemasons in Guildford, Surrey?",
-    answer:
-      "You can begin your application to Weybridge Lodge No. 6787 — our Masonic Lodge in Guildford, GU2 4DR — via the Join Us page on this website. We welcome enquiries from men of all backgrounds and ages.",
-  },
-  {
-    question: "Can anyone join a Masonic Lodge in Surrey?",
-    answer:
-      "Men of good character and reputation who believe in a Supreme Being, of any faith, are welcome to enquire. Joining involves completing an enquiry form and attending an informal interview at Guildford Masonic Centre — attending a first visit requires completing this application and interview process, it is not an open drop-in.",
-  },
-  {
-    question: "Do I need to know someone already to join?",
-    answer:
-      "No. Weybridge Lodge explicitly welcomes enquiries from men with no prior connection to Freemasonry — curiosity matters far more than knowing an existing member or having a family history in the Craft.",
-  },
-  {
-    question: "What happens at a Masonic Lodge meeting?",
-    answer:
-      "Meetings have two parts: a formal Lodge meeting covering ceremony and business, followed by the Festive Board — a three-course dinner with toasts and fellowship.",
-  },
-  {
-    question: "What are the three degrees of Freemasonry?",
-    answer:
-      "The three degrees are Entered Apprentice (First Degree), Fellow Craft (Second Degree), and Master Mason (Third Degree). Each is a ceremony rich in symbolism and moral teaching.",
-  },
-  {
-    question: "Is Freemasonry a secret society?",
-    answer:
-      "No. Freemasonry is a society with some private ceremonies, but it is not a secret society. Weybridge Lodge No. 6787 publishes its meeting details, officers and charitable activities openly on this website.",
-  },
-];
-
 const WhatIsFreemasonry = () => {
   const shouldReduceMotion = useReducedMotion();
 
@@ -171,16 +133,6 @@ const WhatIsFreemasonry = () => {
       { name: "What is Freemasonry", url: "/what-is-freemasonry" },
     ]);
 
-    const faqSchema = {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      mainEntity: faqItems.map((f) => ({
-        "@type": "Question",
-        name: f.question,
-        acceptedAnswer: { "@type": "Answer", text: f.answer },
-      })),
-    };
-
     const webPageSchema = {
       "@context": "https://schema.org",
       "@type": "WebPage",
@@ -193,7 +145,7 @@ const WhatIsFreemasonry = () => {
       isPartOf: { "@id": "https://weybridgelodge.org.uk/#website" },
     };
 
-    return [webPageSchema, faqSchema, breadcrumb];
+    return [webPageSchema, breadcrumb];
   }, []);
 
   const motionProps = (delay = 0) =>
