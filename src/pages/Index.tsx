@@ -24,9 +24,9 @@ const webPageSchema = {
   "@type": "WebPage",
   "@id": "https://weybridgelodge.org.uk/#webpage",
   url: "https://weybridgelodge.org.uk/",
-  name: "Weybridge Lodge No. 6787 | Freemasons in Guildford, Surrey",
+  name: "Freemasons in Guildford, Surrey | Weybridge Lodge No. 6787",
   description:
-    "Weybridge Lodge No. 6787 — an open, friendly Freemasons Lodge in Guildford, Surrey. Join our welcoming community at the Guildford Masonic Centre, GU2 4DR.",
+    "Join the Freemasons in Guildford, Surrey. Weybridge Lodge No. 6787 is a friendly, open lodge at Guildford Masonic Centre — find out how to join, our charity work, and our history.",
   inLanguage: "en-GB",
   isPartOf: {
     "@id": "https://weybridgelodge.org.uk/#website",
