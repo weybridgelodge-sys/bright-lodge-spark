@@ -68,6 +68,34 @@ const costCards: CostCard[] = [
   },
 ];
 
+const faqItems: { question: string; answer: string }[] = [
+  {
+    question: "How do I apply to join Weybridge Lodge?",
+    answer:
+      "Start by getting in touch — call our Membership Secretary on 07921 589 039, email secretary@weybridgelodge.org.uk, or complete the enquiry form on this page. There is no paperwork at this stage; it begins with a friendly, no-pressure conversation about whether our Freemasons Lodge in Guildford is right for you.",
+  },
+  {
+    question: "Is there a cost to join?",
+    answer:
+      "Yes, and we are upfront about it. There is a one-off UGLE registration fee of £132 when you are initiated, an annual subscription of £250 (pro-rated depending on when you join in the Lodge year), and around £32 per meeting for the three-course dinner at the Festive Board. Under-21s pay half the registration fee and subscription. Beyond that there are only small optional extras such as raffle tickets or drinks at the bar.",
+  },
+  {
+    question: "Do I need to know a Freemason already?",
+    answer:
+      "No. Many of our members arrived knowing nobody in Freemasonry at all. We welcome enquiries from men of all backgrounds and ages across Guildford and Surrey — curiosity matters far more than having an existing connection or a family history in the Craft.",
+  },
+  {
+    question: "What happens after I submit an enquiry?",
+    answer:
+      "One of our members will get back to you for an informal chat about what membership involves and what you are hoping to get from it. If you would like to take it further, we arrange an informal interview at the Guildford Masonic Centre so you can meet a few of the brethren and ask anything you like before deciding.",
+  },
+  {
+    question: "How long does the joining process take?",
+    answer:
+      "It varies, and we deliberately never rush it. After your first conversation and interview there are usually a few months of getting to know one another before your initiation is scheduled, which is timed around the Lodge's meeting calendar. You are free to take as long as you need — there is no obligation at any point.",
+  },
+];
+
 // ─── Component ────────────────────────────────────────────────────────────────
 const JoinUs = () => {
   const shouldReduceMotion = useReducedMotion();
@@ -77,6 +105,15 @@ const JoinUs = () => {
       { name: "Home", url: "/" },
       { name: "Join Us", url: "/join-us" },
     ]);
+    const faqSchema = {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      mainEntity: faqItems.map((f) => ({
+        "@type": "Question",
+        name: f.question,
+        acceptedAnswer: { "@type": "Answer", text: f.answer },
+      })),
+    };
 
     return [
       {
@@ -90,6 +127,7 @@ const JoinUs = () => {
         inLanguage: "en-GB",
         isPartOf: { "@id": "https://weybridgelodge.org.uk/#website" },
       },
+      faqSchema,
       breadcrumb,
     ];
   }, []);
@@ -324,6 +362,38 @@ const JoinUs = () => {
               family life. There is no expectation to attend every social event, though most members
               of our Masonic Lodge in Surrey find they want to.
             </p>
+          </div>
+        </section>
+
+        {/* ── FAQ ── */}
+        <section
+          className="py-20 md:py-28 bg-warm-white border-t border-border"
+          aria-labelledby="join-faq-heading"
+        >
+          <div className="container mx-auto px-6 max-w-3xl">
+            <motion.div {...motionProps()}>
+              <div className="h-0.5 w-16 bg-gold mb-6" aria-hidden="true" />
+              <h2 id="join-faq-heading" className="text-2xl md:text-3xl font-serif text-foreground mb-8">
+                Frequently Asked Questions
+              </h2>
+              <ul className="list-none p-0 m-0 divide-y divide-border">
+                {faqItems.map((f) => (
+                  <li key={f.question} className="py-2">
+                    <details className="group">
+                      <summary className="flex items-center justify-between gap-4 cursor-pointer py-3 min-h-[48px] list-none font-serif text-lg text-foreground">
+                        {f.question}
+                        <span className="text-gold text-xl leading-none flex-shrink-0 transition-transform group-open:rotate-45" aria-hidden="true">
+                          +
+                        </span>
+                      </summary>
+                      <p className="text-muted-foreground font-sans leading-relaxed pb-4 pr-8">
+                        {f.answer}
+                      </p>
+                    </details>
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
           </div>
         </section>
 
