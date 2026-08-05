@@ -93,7 +93,6 @@ Deno.serve(async (req) => {
         submittedAt,
         source: source || 'join-us',
       },
-    },
   })
   if (notifRes.error) console.error('Notification email failed', notifRes.error)
 
@@ -146,7 +145,6 @@ Deno.serve(async (req) => {
         secretaryName,
         secretaryOffice,
       },
-    },
   })
   if (confRes.error) console.error('Confirmation email failed', confRes.error)
 

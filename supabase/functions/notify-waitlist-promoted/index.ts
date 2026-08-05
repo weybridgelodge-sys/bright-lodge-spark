@@ -73,7 +73,6 @@ Deno.serve(async (req) => {
             eventDate,
             bookingRef: b.id.slice(0, 8),
           },
-        },
       })
       if (res.error) { console.error('promoted email failed', b.id, res.error); continue }
       await supabase.from('bookings')

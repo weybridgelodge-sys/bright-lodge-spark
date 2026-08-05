@@ -135,7 +135,6 @@ Deno.serve(async (req) => {
             firstName, eventLabel: b.event_label, eventDate, totalAmount,
             bookingRef: b.id.slice(0, 8),
           },
-        },
       })
       refunded++
     } catch (e) {
