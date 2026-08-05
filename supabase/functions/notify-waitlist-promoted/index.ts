@@ -4,6 +4,7 @@
 // and by a scheduled cron every 15 minutes as a backstop for
 // trigger-driven promotions (Secretary marks a booking as apologies).
 import { createClient } from 'npm:@supabase/supabase-js@2'
+import { sendTransactionalEmail } from '../_shared/send-email.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -62,8 +63,7 @@ Deno.serve(async (req) => {
 
     const firstName = (b.contact_name || '').trim().split(/\s+/)[0] || undefined
     try {
-      const res = await supabase.functions.invoke('send-transactional-email', {
-        body: {
+      const res = await sendTransactionalEmail({
           templateName: 'waitlist-promoted',
           recipientEmail: b.contact_email,
           idempotencyKey: `waitlist-promoted-${b.id}`,
@@ -73,7 +73,6 @@ Deno.serve(async (req) => {
             eventDate,
             bookingRef: b.id.slice(0, 8),
           },
-        },
       })
       if (res.error) { console.error('promoted email failed', b.id, res.error); continue }
       await supabase.from('bookings')

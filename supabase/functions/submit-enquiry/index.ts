@@ -2,6 +2,7 @@ import { createClient } from 'npm:@supabase/supabase-js@2'
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors'
 import { z } from 'npm:zod@3.23.8'
 import { verifyTurnstile } from '../_shared/verify-turnstile.ts'
+import { sendTransactionalEmail } from '../_shared/send-email.ts'
 
 const SECRETARY_EMAIL = 'secretary@weybridgelodge.org.uk'
 
@@ -79,8 +80,7 @@ Deno.serve(async (req) => {
 
   // 1) Notification to secretary (recipient is hard-coded — no caller override)
   const notifyTo = SECRETARY_EMAIL
-  const notifRes = await supabase.functions.invoke('send-transactional-email', {
-    body: {
+  const notifRes = await sendTransactionalEmail({
       templateName: 'enquiry-notification',
       recipientEmail: notifyTo,
       idempotencyKey: `enquiry-notify-${row.id}`,
@@ -93,7 +93,6 @@ Deno.serve(async (req) => {
         submittedAt,
         source: source || 'join-us',
       },
-    },
   })
   if (notifRes.error) console.error('Notification email failed', notifRes.error)
 
@@ -137,8 +136,7 @@ Deno.serve(async (req) => {
   console.log('Secretary signature:', { secretaryName, secretaryOffice })
 
   // 2) Confirmation to the enquirer
-  const confRes = await supabase.functions.invoke('send-transactional-email', {
-    body: {
+  const confRes = await sendTransactionalEmail({
       templateName: 'enquiry-confirmation',
       recipientEmail: email,
       idempotencyKey: `enquiry-confirm-${row.id}`,
@@ -147,7 +145,6 @@ Deno.serve(async (req) => {
         secretaryName,
         secretaryOffice,
       },
-    },
   })
   if (confRes.error) console.error('Confirmation email failed', confRes.error)
 

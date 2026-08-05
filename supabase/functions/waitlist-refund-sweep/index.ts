@@ -3,6 +3,7 @@
 // mark it as waitlisted_refunded, and email the booker.
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { createStripeClient, type StripeEnv } from '../_shared/stripe.ts'
+import { sendTransactionalEmail } from '../_shared/send-email.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -126,8 +127,7 @@ Deno.serve(async (req) => {
             weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Europe/London',
           })
         : ''
-      await supabase.functions.invoke('send-transactional-email', {
-        body: {
+      await sendTransactionalEmail({
           templateName: 'waitlist-refunded',
           recipientEmail: b.contact_email,
           idempotencyKey: `waitlist-refund-${b.id}`,
@@ -135,7 +135,6 @@ Deno.serve(async (req) => {
             firstName, eventLabel: b.event_label, eventDate, totalAmount,
             bookingRef: b.id.slice(0, 8),
           },
-        },
       })
       refunded++
     } catch (e) {
