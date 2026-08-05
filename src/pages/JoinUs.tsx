@@ -365,6 +365,38 @@ const JoinUs = () => {
           </div>
         </section>
 
+        {/* ── FAQ ── */}
+        <section
+          className="py-20 md:py-28 bg-warm-white border-t border-border"
+          aria-labelledby="join-faq-heading"
+        >
+          <div className="container mx-auto px-6 max-w-3xl">
+            <motion.div {...motionProps()}>
+              <div className="h-0.5 w-16 bg-gold mb-6" aria-hidden="true" />
+              <h2 id="join-faq-heading" className="text-2xl md:text-3xl font-serif text-foreground mb-8">
+                Frequently Asked Questions
+              </h2>
+              <ul className="list-none p-0 m-0 divide-y divide-border">
+                {faqItems.map((f) => (
+                  <li key={f.question} className="py-2">
+                    <details className="group">
+                      <summary className="flex items-center justify-between gap-4 cursor-pointer py-3 min-h-[48px] list-none font-serif text-lg text-foreground">
+                        {f.question}
+                        <span className="text-gold text-xl leading-none flex-shrink-0 transition-transform group-open:rotate-45" aria-hidden="true">
+                          +
+                        </span>
+                      </summary>
+                      <p className="text-muted-foreground font-sans leading-relaxed pb-4 pr-8">
+                        {f.answer}
+                      </p>
+                    </details>
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
+          </div>
+        </section>
+
         {/* ── Final CTA ── */}
         <section className="py-12 sm:py-16 bg-navy" aria-labelledby="final-cta-heading">
           <div className="container mx-auto px-4 sm:px-6 max-w-3xl">
