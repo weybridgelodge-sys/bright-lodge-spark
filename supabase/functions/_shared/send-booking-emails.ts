@@ -10,8 +10,10 @@ export const WEBMASTER_EMAIL = 'webmaster@weybridgelodge.org.uk'
 const NOTIFY_RECIPIENTS = [ASSISTANT_SECRETARY_EMAIL, WEBMASTER_EMAIL]
 
 interface SendOpts {
-  stage: 'submitted' | 'paid'
+  stage: 'submitted' | 'paid' | 'backfill'
   overrideNotifyEmail?: string
+  /** Skip the booker-facing confirmation; send only the internal notifications. */
+  notifyOnly?: boolean
 }
 
 function formatGBP(pence?: number | null): string {
@@ -168,7 +170,7 @@ export async function sendBookingEmails(bookingId: string, opts: SendOpts) {
     const seatingPreference = details.seatingPreference || ''
     const message = details.message || ''
 
-    if (b.contact_email) {
+    if (b.contact_email && !opts.notifyOnly) {
       const confRes = await sendTransactionalEmail({
           templateName: 'ladies-festival-confirmation',
           recipientEmail: b.contact_email,
@@ -227,7 +229,7 @@ export async function sendBookingEmails(bookingId: string, opts: SendOpts) {
   }
 
   // 1) Booker confirmation
-  if (b.contact_email) {
+  if (b.contact_email && !opts.notifyOnly) {
     const confRes = await sendTransactionalEmail({
         templateName: 'booking-confirmation',
         recipientEmail: b.contact_email,
