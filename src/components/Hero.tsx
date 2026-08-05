@@ -44,17 +44,19 @@ const Hero = () => {
         <div className="flex items-center justify-between gap-8">
           <div className="max-w-2xl hero-rise-in">
             <div className="h-0.5 w-20 bg-gold mb-8 hero-rule" aria-hidden="true" />
-            {/* FIXED: h1 previously carried zero geo-signal. Kept the
-                emotional hook line, added a keyworded second line so the
-                page's literal h1 matches the top high-intent SEO queries
-                ("Freemasons in Guildford, Surrey"). Also replaced the
-                unapproved text-primary-foreground token with text-warm-white. */}
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-serif text-warm-white leading-tight mb-6">
-              Looking for something more than just a night out?
+            {/* SEO: the h1 now leads with the primary target phrase
+                ("Freemasons in Guildford"), with the original warm hook line
+                demoted to a subheading/tagline beneath it. */}
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-serif text-warm-white leading-tight mb-4">
+              Freemasons in Guildford
               <span className="block text-gradient-gold text-3xl sm:text-4xl md:text-5xl mt-3">
-                Join Freemasons in Guildford, Surrey
+                Weybridge Lodge No. 6787
               </span>
             </h1>
+            <p className="text-xl sm:text-2xl md:text-3xl font-serif text-warm-white/90 leading-snug mb-6">
+              Looking for something more than just a night out?
+            </p>
+
             <p className="text-lg md:text-xl text-warm-white/80 font-sans font-light leading-relaxed mb-10 max-w-xl">
               Weybridge Lodge No. 6787 is a friendly group of men in Guildford — aged 18 to 80 — who meet to make genuine friendships, support local charities, and grow as people. New members are always welcome.
             </p>
