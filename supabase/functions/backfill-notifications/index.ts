@@ -8,7 +8,7 @@ import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors'
 import { sendBookingEmails } from '../_shared/send-booking-emails.ts'
 import { sendTransactionalEmail } from '../_shared/send-email.ts'
 
-const SECRETARY_EMAIL = 'membership@weybridgelodge.org.uk'
+const SECRETARY_EMAIL = 'secretary@weybridgelodge.org.uk'
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
@@ -16,7 +16,19 @@ Deno.serve(async (req) => {
   const authHeader = req.headers.get('Authorization') || ''
   const bearer = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : ''
   const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
-  if (!bearer || bearer !== serviceKey) {
+  const supabaseUrl = Deno.env.get('SUPABASE_URL')!
+  let allowed = bearer.length > 0 && bearer === serviceKey
+  if (!allowed && bearer) {
+    // Allow a signed-in admin to run the backfill from the portal/tooling.
+    const admin = createClient(supabaseUrl, serviceKey)
+    const { data: userData } = await admin.auth.getUser(bearer)
+    const uid = userData?.user?.id
+    if (uid) {
+      const { data: isAdmin } = await admin.rpc('has_role', { _user_id: uid, _role: 'admin' })
+      allowed = isAdmin === true
+    }
+  }
+  if (!allowed) {
     return new Response(JSON.stringify({ error: 'Forbidden' }), {
       status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
@@ -38,7 +50,7 @@ Deno.serve(async (req) => {
   }
 
   if (enquiryIds.length) {
-    const supabase = createClient(Deno.env.get('SUPABASE_URL')!, serviceKey)
+    const supabase = createClient(supabaseUrl, serviceKey)
     for (const id of enquiryIds) {
       const { data: row } = await supabase
         .from('membership_enquiries')
