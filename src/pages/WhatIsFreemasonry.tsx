@@ -38,11 +38,6 @@ interface Degree {
   description: string;
 }
 
-interface FaqItem {
-  question: string;
-  answer: string;
-}
-
 const principles: Principle[] = [
   {
     icon: Shield,
@@ -120,44 +115,6 @@ const degrees: Degree[] = [
   },
 ];
 
-const faqItems: FaqItem[] = [
-  {
-    question: "What is Freemasonry?",
-    answer:
-      "Freemasonry is one of the world's oldest social and charitable organisations, with roots in the traditions of medieval stonemasons. It brings together men of good character who are committed to integrity, friendship, respect and service.",
-  },
-  {
-    question: "How do I join the Freemasons in Guildford, Surrey?",
-    answer:
-      "You can begin your application to Weybridge Lodge No. 6787 — our Masonic Lodge in Guildford, GU2 4DR — via the Join Us page on this website. We welcome enquiries from men of all backgrounds and ages.",
-  },
-  {
-    question: "Can anyone join a Masonic Lodge in Surrey?",
-    answer:
-      "Men of good character and reputation who believe in a Supreme Being, of any faith, are welcome to enquire. Joining involves completing an enquiry form and attending an informal interview at Guildford Masonic Centre — attending a first visit requires completing this application and interview process, it is not an open drop-in.",
-  },
-  {
-    question: "Do I need to know someone already to join?",
-    answer:
-      "No. Weybridge Lodge explicitly welcomes enquiries from men with no prior connection to Freemasonry — curiosity matters far more than knowing an existing member or having a family history in the Craft.",
-  },
-  {
-    question: "What happens at a Masonic Lodge meeting?",
-    answer:
-      "Meetings have two parts: a formal Lodge meeting covering ceremony and business, followed by the Festive Board — a three-course dinner with toasts and fellowship.",
-  },
-  {
-    question: "What are the three degrees of Freemasonry?",
-    answer:
-      "The three degrees are Entered Apprentice (First Degree), Fellow Craft (Second Degree), and Master Mason (Third Degree). Each is a ceremony rich in symbolism and moral teaching.",
-  },
-  {
-    question: "Is Freemasonry a secret society?",
-    answer:
-      "No. Freemasonry is a society with some private ceremonies, but it is not a secret society. Weybridge Lodge No. 6787 publishes its meeting details, officers and charitable activities openly on this website.",
-  },
-];
-
 const WhatIsFreemasonry = () => {
   const shouldReduceMotion = useReducedMotion();
 
@@ -171,16 +128,6 @@ const WhatIsFreemasonry = () => {
       { name: "What is Freemasonry", url: "/what-is-freemasonry" },
     ]);
 
-    const faqSchema = {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      mainEntity: faqItems.map((f) => ({
-        "@type": "Question",
-        name: f.question,
-        acceptedAnswer: { "@type": "Answer", text: f.answer },
-      })),
-    };
-
     const webPageSchema = {
       "@context": "https://schema.org",
       "@type": "WebPage",
@@ -193,7 +140,7 @@ const WhatIsFreemasonry = () => {
       isPartOf: { "@id": "https://weybridgelodge.org.uk/#website" },
     };
 
-    return [webPageSchema, faqSchema, breadcrumb];
+    return [webPageSchema, breadcrumb];
   }, []);
 
   const motionProps = (delay = 0) =>
@@ -363,30 +310,27 @@ const WhatIsFreemasonry = () => {
           </div>
         </section>
 
-        <section className="py-20 md:py-28 bg-warm-white border-t border-border" aria-labelledby="faq-heading">
-          <div className="container mx-auto px-6 max-w-3xl">
-            <motion.div {...motionProps()}>
-              <div className="h-0.5 w-16 bg-gold mb-6" aria-hidden="true" />
-              <h2 id="faq-heading" className="text-2xl md:text-3xl font-serif text-foreground mb-8">
-                Frequently Asked Questions
+        {/* ── FAQ callout — /faq is the canonical FAQ resource ── */}
+        <section className="py-14 md:py-16 bg-warm-white border-t border-border" aria-labelledby="faq-callout-heading">
+          <div className="container mx-auto px-6 max-w-2xl">
+            <motion.div
+              {...motionProps()}
+              className="border border-border rounded-sm bg-card px-6 py-8 text-center"
+            >
+              <h2 id="faq-callout-heading" className="text-xl md:text-2xl font-serif text-foreground mb-3">
+                Have more questions?
               </h2>
-              <ul className="list-none p-0 m-0 divide-y divide-border">
-                {faqItems.map((f) => (
-                  <li key={f.question} className="py-2">
-                    <details className="group">
-                      <summary className="flex items-center justify-between gap-4 cursor-pointer py-3 min-h-[48px] list-none font-serif text-lg text-foreground">
-                        {f.question}
-                        <span className="text-gold text-xl leading-none flex-shrink-0 transition-transform group-open:rotate-45" aria-hidden="true">
-                          +
-                        </span>
-                      </summary>
-                      <p className="text-muted-foreground font-sans leading-relaxed pb-4 pr-8">
-                        {f.answer}
-                      </p>
-                    </details>
-                  </li>
-                ))}
-              </ul>
+              <p className="text-muted-foreground font-sans leading-relaxed mb-6">
+                We have answered the questions we are asked most often — on costs, joining, meetings,
+                ceremonies and beliefs — in one place.
+              </p>
+              <Link
+                to="/faq"
+                className="inline-flex items-center justify-center gap-2 border border-gold text-gold px-6 py-3 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:bg-gold hover:text-navy transition-colors min-h-[48px]"
+              >
+                See the Full FAQ
+                <ArrowRight className="w-4 h-4" aria-hidden="true" />
+              </Link>
             </motion.div>
           </div>
         </section>
