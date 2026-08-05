@@ -38,11 +38,6 @@ interface Degree {
   description: string;
 }
 
-interface FaqItem {
-  question: string;
-  answer: string;
-}
-
 const principles: Principle[] = [
   {
     icon: Shield,
