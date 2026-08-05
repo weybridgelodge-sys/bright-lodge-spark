@@ -3,6 +3,7 @@
 // idempotency keys tied to booking id + stage).
 
 import { createClient, SupabaseClient } from 'npm:@supabase/supabase-js@2'
+import { sendTransactionalEmail } from './send-email.ts'
 
 export const ASSISTANT_SECRETARY_EMAIL = 'assistantsecretary@weybridgelodge.org.uk'
 export const WEBMASTER_EMAIL = 'webmaster@weybridgelodge.org.uk'
@@ -168,8 +169,7 @@ export async function sendBookingEmails(bookingId: string, opts: SendOpts) {
     const message = details.message || ''
 
     if (b.contact_email) {
-      const confRes = await supabase.functions.invoke('send-transactional-email', {
-        body: {
+      const confRes = await sendTransactionalEmail({
           templateName: 'ladies-festival-confirmation',
           recipientEmail: b.contact_email,
           idempotencyKey: `lf-confirm-${b.id}-${opts.stage}`,
@@ -198,8 +198,7 @@ export async function sendBookingEmails(bookingId: string, opts: SendOpts) {
 
     const notifyRecipients = opts.overrideNotifyEmail ? [opts.overrideNotifyEmail] : NOTIFY_RECIPIENTS
     await Promise.all(notifyRecipients.map(async (notifyTo) => {
-      const notifRes = await supabase.functions.invoke('send-transactional-email', {
-        body: {
+      const notifRes = await sendTransactionalEmail({
           templateName: 'ladies-festival-notification',
           recipientEmail: notifyTo,
           idempotencyKey: `lf-notify-${b.id}-${opts.stage}-${notifyTo}`,
@@ -231,8 +230,7 @@ export async function sendBookingEmails(bookingId: string, opts: SendOpts) {
 
   // 1) Booker confirmation
   if (b.contact_email) {
-    const confRes = await supabase.functions.invoke('send-transactional-email', {
-      body: {
+    const confRes = await sendTransactionalEmail({
         templateName: 'booking-confirmation',
         recipientEmail: b.contact_email,
         idempotencyKey: `booking-confirm-${b.id}-${opts.stage}`,
@@ -261,8 +259,7 @@ export async function sendBookingEmails(bookingId: string, opts: SendOpts) {
   // 2) Assistant Secretary notification
   const notifyRecipients = opts.overrideNotifyEmail ? [opts.overrideNotifyEmail] : NOTIFY_RECIPIENTS
   await Promise.all(notifyRecipients.map(async (notifyTo) => {
-    const notifRes = await supabase.functions.invoke('send-transactional-email', {
-      body: {
+    const notifRes = await sendTransactionalEmail({
         templateName: 'booking-notification',
         recipientEmail: notifyTo,
         idempotencyKey: `booking-notify-${b.id}-${opts.stage}-${notifyTo}`,
