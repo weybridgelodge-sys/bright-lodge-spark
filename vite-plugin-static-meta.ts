@@ -343,7 +343,9 @@ async function videoRoutes(): Promise<RouteMeta[]> {
 }
 
 const escape = (s: string) =>
-  s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  s
+    .replace(/\s+/g, " ")
+    .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
 const replaceTag = (html: string, pattern: RegExp, replacement: string) => {
   if (!pattern.test(html)) {
