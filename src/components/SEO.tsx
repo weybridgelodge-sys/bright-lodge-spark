@@ -15,7 +15,7 @@ const BASE_URL = "https://weybridgelodge.org.uk";
 const DEFAULT_OG_IMAGE = `${BASE_URL}/og-image.png`;
 
 const SEO = ({ title, description, canonical, type = "website", image, schema }: SEOProps) => {
-  const fullTitle = title === SITE_NAME ? title : `${title} | ${SITE_NAME}`;
+  const fullTitle = title.endsWith(SITE_NAME) ? title : `${title} | ${SITE_NAME}`;
   const url = canonical ? `${BASE_URL}${canonical}` : undefined;
   const ogImage = image || DEFAULT_OG_IMAGE;
 

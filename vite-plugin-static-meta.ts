@@ -32,7 +32,7 @@ interface RouteMeta {
 }
 
 const buildTitle = (title: string) =>
-  title === SITE_NAME ? title : `${title} | ${SITE_NAME}`;
+  title.endsWith(SITE_NAME) ? title : `${title} | ${SITE_NAME}`;
 
 // ── Static pages — props copied verbatim from each page component ──
 const staticRoutes: RouteMeta[] = [
