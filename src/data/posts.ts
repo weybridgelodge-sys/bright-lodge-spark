@@ -7,6 +7,7 @@ import surrey2030Img from "@/assets/news/surrey-2030-gold-trophy.jpg.asset.json"
 import doubleInitiationImg from "@/assets/news/double-initiation-december-2025.jpg";
 import threeDegreesImg from "@/assets/news/three-masonic-degrees.jpg";
 import royalArchAsset from "@/assets/news/royal-arch-meeting-room.jpg.asset.json";
+import recruitmentImg from "@/assets/news/modern-freemasonry-recruitment.jpg";
 
 import thamesChallengeImg from "@/assets/thames-challenge/tc-source-stone.jpg.asset.json";
 
