@@ -127,6 +127,7 @@ const App = () => (
             <Route path="/news/double-initiation-december-2025" element={<DoubleInitiationDecember2025 />} />
             <Route path="/news/three-masonic-degrees-explained" element={<ThreeMasonicDegrees />} />
             <Route path="/news/royal-arch-explained" element={<RoyalArchExplained />} />
+            <Route path="/news/modern-freemasonry-recruitment" element={<ModernFreemasonryRecruitment />} />
             <Route path="/thames-challenge" element={<ThamesChallengePage />} />
             <Route path="/news/:slug" element={<SanityPost />} />
 
