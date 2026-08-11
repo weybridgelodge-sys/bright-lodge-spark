@@ -10,8 +10,8 @@ const Contact = () => {
   return (
     <div className="min-h-screen">
       <SEO
-        title="Contact Us"
-        description="Contact Weybridge Lodge No. 6787 — Freemasons in Guildford, Surrey. Call, email or visit us at the Guildford Masonic Centre, Hitherbury Close, GU2 4DR."
+        title="Contact Us — Guildford Masonic Centre, GU2 4DR"
+        description="Contact Weybridge Lodge No. 6787 and find the Guildford Masonic Centre — Weybourne House, Hitherbury Close, Guildford GU2 4DR. Directions, parking, phone and email."
         canonical="/contact"
         schema={breadcrumbSchema([
           { name: "Home", url: "/" },
@@ -22,8 +22,8 @@ const Contact = () => {
       <Header />
       <main id="main-content">
         <PageHeader
-          title="Contact Us"
-          subtitle="Get in touch with Weybridge Lodge Freemasons in Guildford"
+          title="Contact Us at Guildford Masonic Centre"
+          subtitle="Weybourne House, Hitherbury Close, Guildford GU2 4DR — home of Weybridge Lodge No. 6787"
         />
 
         <section className="py-20 md:py-28 bg-warm-white">
