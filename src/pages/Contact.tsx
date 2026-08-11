@@ -105,6 +105,22 @@ const Contact = () => {
             </div>
           </div>
         </section>
+
+        <section className="py-16 md:py-20 bg-background border-t border-border" aria-labelledby="venue-heading">
+          <div className="container mx-auto px-4 sm:px-6 max-w-3xl">
+            <div className="h-0.5 w-16 bg-gold mb-6" />
+            <h2 id="venue-heading" className="text-2xl md:text-3xl font-serif text-foreground mb-6">About Guildford Masonic Centre</h2>
+            <p className="text-muted-foreground font-sans leading-relaxed mb-4">
+              Guildford Masonic Centre (also known as the South West Surrey Masonic Centre) sits at Weybourne House, Hitherbury Close, just off Portsmouth Road on the southern edge of Guildford town centre, GU2 4DR. It is the meeting place for Weybridge Lodge No. 6787 and a number of other Surrey Lodges and Chapters.
+            </p>
+            <p className="text-muted-foreground font-sans leading-relaxed mb-4">
+              The Centre has free on-site parking, step-free access to the main entrance, a licensed bar and a dining room where the Festive Board is held after each meeting. Guildford railway station is roughly a ten-minute walk away, and the A3 is a few minutes by car.
+            </p>
+            <p className="text-muted-foreground font-sans leading-relaxed">
+              Visitors are always welcome. If you are coming for the first time, <Link to="/first-visit" className="text-gold hover:underline">Your Initiation Night</Link> explains what to expect on the evening, and our <Link to="/events" className="text-gold hover:underline">events page</Link> lists upcoming meetings at the Centre.
+            </p>
+          </div>
+        </section>
       </main>
       <Footer />
     </div>
