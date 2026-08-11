@@ -160,7 +160,22 @@
       .skeleton-brand img{width:40px;height:40px;display:block}
       @media(min-width:768px){.skeleton-wrap{padding:6rem 2rem 3rem}.skeleton-rule{margin-left:0}.skeleton-title{text-align:left}}
     </style>
+
+    <!-- Non-production hostnames (preview / *.lovable.app) get noindex.
+         The real domain (weybridgelodge.org.uk, www.) is never affected. -->
+    <script>
+      (function () {
+        var h = location.hostname.toLowerCase();
+        if (h === "weybridgelodge.org.uk" || h === "www.weybridgelodge.org.uk") return;
+        var m = document.createElement("meta");
+        m.setAttribute("name", "robots");
+        m.setAttribute("content", "noindex, nofollow");
+        m.setAttribute("data-noindex-guard", "true");
+        document.head.appendChild(m);
+      })();
+    </script>
   </head>
+
 
   <body>
     <div id="root">
