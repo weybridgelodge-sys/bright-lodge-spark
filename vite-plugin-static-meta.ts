@@ -403,7 +403,19 @@ export function staticMeta(): Plugin {
       if (!fs.existsSync(indexPath)) return;
 
       const baseHtml = fs.readFileSync(indexPath, "utf8");
-      const routes = [...staticRoutes, ...newsRoutes, ...(await videoRoutes())];
+      // Sanity posts win over nothing, but an explicit hand-coded entry always
+      // wins over a generated one; dedupe by output route, first occurrence kept.
+      const allRoutes = [
+        ...staticRoutes,
+        ...newsRoutes,
+        ...(await postRoutes()),
+        ...(await videoRoutes()),
+      ];
+      const seen = new Set<string>();
+      const routes = allRoutes.filter((r) =>
+        seen.has(r.route) ? false : (seen.add(r.route), true),
+      );
+
 
       for (const meta of routes) {
         const routeDir = path.join(outDir, ...meta.route.split("/"));
