@@ -157,9 +157,9 @@ const staticRoutes: RouteMeta[] = [
   },
   {
     route: "contact",
-    title: "Contact Us",
+    title: "Contact Us — Guildford Masonic Centre, GU2 4DR",
     description:
-      "Contact Weybridge Lodge No. 6787 — Freemasons in Guildford, Surrey. Call, email or visit us at the Guildford Masonic Centre, Hitherbury Close, GU2 4DR.",
+      "Contact Weybridge Lodge No. 6787 and find the Guildford Masonic Centre — Weybourne House, Hitherbury Close, Guildford GU2 4DR. Directions, parking, phone and email.",
     canonical: "/contact",
   },
   {
