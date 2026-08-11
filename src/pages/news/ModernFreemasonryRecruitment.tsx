@@ -238,6 +238,23 @@ const ModernFreemasonryRecruitment = () => {
               </p>
             </div>
 
+            {/* FAQ box */}
+            <div className="mt-10 p-6 border border-border rounded-sm bg-card">
+              <h2 className="text-lg font-serif text-foreground mb-3">
+                Still Have Questions?
+              </h2>
+              <p className="text-sm text-muted-foreground font-sans leading-relaxed mb-4">
+                Our FAQ covers the questions people usually ask first — what Freemasonry is,
+                who can join, what it costs, and what happens at meetings.
+              </p>
+              <Link
+                to="/faq"
+                className="inline-flex items-center gap-2 text-primary font-sans font-medium hover:underline"
+              >
+                Read the FAQ <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+
             {/* CTA */}
             <div className="mt-10 text-center">
               <Link
