@@ -296,6 +296,13 @@ const newsRoutes: RouteMeta[] = [
       "Discover the Royal Arch — the natural completion of Freemasonry's three degrees. Weybridge Lodge No. 6787 in Guildford explains what it means and why UGLE calls it 'one journey, one organisation.'",
     canonical: "/news/royal-arch-explained",
   },
+  {
+    route: "news/modern-freemasonry-recruitment",
+    title: "How Freemasonry Recruits Today",
+    description:
+      "English Freemasonry is changing how it recruits — some Provinces are even trying paid Facebook ads. Here's what's actually worked at Weybridge Lodge in Guildford, and why we follow up every enquiry personally.",
+    canonical: "/news/modern-freemasonry-recruitment",
+  },
 ];
 
 // ── Sanity videos (same client config as scripts/generate-sitemap-and-feed.ts) ──

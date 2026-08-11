@@ -23,6 +23,16 @@ export interface BlogPost {
 // Ordered newest first
 export const posts: BlogPost[] = [
   {
+    slug: "modern-freemasonry-recruitment",
+    title:
+      "Freemasonry Is Changing How It Recruits — Here's What Actually Worked at Weybridge",
+    date: "2026-08-11",
+    category: "Discover Freemasonry",
+    excerpt:
+      "English Freemasonry is changing how it recruits — some Provinces are even trying paid Facebook ads. Here's what's actually worked at Weybridge Lodge in Guildford, and why we follow up every enquiry personally.",
+    image: recruitmentImg,
+  },
+  {
     slug: "walking-for-the-source",
     title: "Walking for the Source — Thames Towpath Challenge",
     date: "2026-06-25",
