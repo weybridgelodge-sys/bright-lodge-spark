@@ -4,6 +4,7 @@ import DeferredToasters from "@/components/DeferredToasters";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import NoindexGuard from "./components/NoindexGuard";
 import ScrollToTop from "./components/ScrollToTop";
 import ScrollToTopButton from "./components/ScrollToTopButton";
 import Index from "./pages/Index";
@@ -77,6 +78,7 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <DeferredToasters />
+      <NoindexGuard />
       <BrowserRouter>
         <ScrollToTop />
         <ScrollToTopButton />
