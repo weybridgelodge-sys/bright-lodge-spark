@@ -157,9 +157,9 @@ const staticRoutes: RouteMeta[] = [
   },
   {
     route: "contact",
-    title: "Contact Us",
+    title: "Contact Us — Guildford Masonic Centre, GU2 4DR",
     description:
-      "Contact Weybridge Lodge No. 6787 — Freemasons in Guildford, Surrey. Call, email or visit us at the Guildford Masonic Centre, Hitherbury Close, GU2 4DR.",
+      "Contact Weybridge Lodge No. 6787 and find the Guildford Masonic Centre — Weybourne House, Hitherbury Close, Guildford GU2 4DR. Directions, parking, phone and email.",
     canonical: "/contact",
   },
   {
@@ -224,9 +224,9 @@ const staticRoutes: RouteMeta[] = [
   },
   {
     route: "south-surrey-freemasons",
-    title: "Surrey Commuter Freemasons Hub | Weybridge Lodge 6787",
+    title: "Surrey Masons: Join a Guildford Lodge That Fits Your Commute",
     description:
-      "Live in Woking, Farnham or Godalming but travel via Guildford? Discover how Weybridge Lodge fits your Surrey commute and lifestyle.",
+      "Thinking of joining the Surrey masons? Weybridge Lodge meets four times a year in Guildford (GU2 4DR), 5 minutes from the station — easy from Woking, Godalming, Farnham and Haslemere. See what a meeting involves and how to visit.",
     canonical: "/south-surrey-freemasons",
   },
   {
