@@ -178,8 +178,8 @@ const WhatIsFreemasonry = () => {
       <Header />
       <main id="main-content">
         <PageHeader
-          title="What is Freemasonry?"
-          subtitle="One of the oldest social and charitable organisations in the world"
+          title="What is Freemasonry? A Guide for Men in Guildford"
+          subtitle="One of the world's oldest social and charitable organisations — explained by a Lodge that meets in Guildford, Surrey"
         />
 
         <section className="py-20 md:py-28 bg-warm-white" aria-labelledby="intro-heading">

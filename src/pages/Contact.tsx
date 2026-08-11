@@ -10,8 +10,8 @@ const Contact = () => {
   return (
     <div className="min-h-screen">
       <SEO
-        title="Contact Us"
-        description="Contact Weybridge Lodge No. 6787 — Freemasons in Guildford, Surrey. Call, email or visit us at the Guildford Masonic Centre, Hitherbury Close, GU2 4DR."
+        title="Contact Us — Guildford Masonic Centre, GU2 4DR"
+        description="Contact Weybridge Lodge No. 6787 and find the Guildford Masonic Centre — Weybourne House, Hitherbury Close, Guildford GU2 4DR. Directions, parking, phone and email."
         canonical="/contact"
         schema={breadcrumbSchema([
           { name: "Home", url: "/" },
@@ -22,8 +22,8 @@ const Contact = () => {
       <Header />
       <main id="main-content">
         <PageHeader
-          title="Contact Us"
-          subtitle="Get in touch with Weybridge Lodge Freemasons in Guildford"
+          title="Contact Us at Guildford Masonic Centre"
+          subtitle="Weybourne House, Hitherbury Close, Guildford GU2 4DR — home of Weybridge Lodge No. 6787"
         />
 
         <section className="py-20 md:py-28 bg-warm-white">
@@ -103,6 +103,22 @@ const Contact = () => {
                 />
               </motion.div>
             </div>
+          </div>
+        </section>
+
+        <section className="py-16 md:py-20 bg-background border-t border-border" aria-labelledby="venue-heading">
+          <div className="container mx-auto px-4 sm:px-6 max-w-3xl">
+            <div className="h-0.5 w-16 bg-gold mb-6" />
+            <h2 id="venue-heading" className="text-2xl md:text-3xl font-serif text-foreground mb-6">About Guildford Masonic Centre</h2>
+            <p className="text-muted-foreground font-sans leading-relaxed mb-4">
+              Guildford Masonic Centre (also known as the South West Surrey Masonic Centre) sits at Weybourne House, Hitherbury Close, just off Portsmouth Road on the southern edge of Guildford town centre, GU2 4DR. It is the meeting place for Weybridge Lodge No. 6787 and a number of other Surrey Lodges and Chapters.
+            </p>
+            <p className="text-muted-foreground font-sans leading-relaxed mb-4">
+              The Centre has free on-site parking, step-free access to the main entrance, a licensed bar and a dining room where the Festive Board is held after each meeting. Guildford railway station is roughly a ten-minute walk away, and the A3 is a few minutes by car.
+            </p>
+            <p className="text-muted-foreground font-sans leading-relaxed">
+              Visitors are always welcome. If you are coming for the first time, <Link to="/first-visit" className="text-gold hover:underline">Your Initiation Night</Link> explains what to expect on the evening, and our <Link to="/events" className="text-gold hover:underline">events page</Link> lists upcoming meetings at the Centre.
+            </p>
           </div>
         </section>
       </main>
