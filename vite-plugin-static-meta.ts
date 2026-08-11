@@ -224,9 +224,9 @@ const staticRoutes: RouteMeta[] = [
   },
   {
     route: "south-surrey-freemasons",
-    title: "Surrey Commuter Freemasons Hub | Weybridge Lodge 6787",
+    title: "Surrey Masons: Join a Guildford Lodge That Fits Your Commute",
     description:
-      "Live in Woking, Farnham or Godalming but travel via Guildford? Discover how Weybridge Lodge fits your Surrey commute and lifestyle.",
+      "Thinking of joining the Surrey masons? Weybridge Lodge meets four times a year in Guildford (GU2 4DR), 5 minutes from the station — easy from Woking, Godalming, Farnham and Haslemere. See what a meeting involves and how to visit.",
     canonical: "/south-surrey-freemasons",
   },
   {
