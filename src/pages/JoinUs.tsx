@@ -212,6 +212,21 @@ const JoinUs = () => {
                   </div>
                 </div>
 
+                {/* FAQ prompt placed directly before the enquiry form */}
+                <div className="mt-8 p-5 rounded-sm border border-gold/20 bg-gold/5">
+                  <p className="font-sans text-sm text-foreground mb-2">
+                    <span className="font-medium">Not sure yet?</span> See answers to common questions about joining, costs, and what happens next.
+                  </p>
+                  <Link
+                    to="/faq"
+                    aria-label="Read frequently asked questions before starting your enquiry"
+                    className="inline-flex items-center gap-2 text-sm font-semibold font-sans text-gold hover:text-gold/80 uppercase tracking-widest min-h-[48px]"
+                  >
+                    Read the FAQ
+                    <ArrowRight className="w-4 h-4" aria-hidden="true" />
+                  </Link>
+                </div>
+
                 <EnquiryForm />
               </motion.div>
             </div>
