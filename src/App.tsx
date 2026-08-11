@@ -41,6 +41,7 @@ const Surrey2030Gold = lazy(() => import("./pages/news/Surrey2030Gold"));
 const DoubleInitiationDecember2025 = lazy(() => import("./pages/news/DoubleInitiationDecember2025"));
 const ThreeMasonicDegrees = lazy(() => import("./pages/news/ThreeMasonicDegrees"));
 const RoyalArchExplained = lazy(() => import("./pages/news/RoyalArchExplained"));
+const ModernFreemasonryRecruitment = lazy(() => import("./pages/news/ModernFreemasonryRecruitment"));
 const ThamesChallengePage = lazy(() => import("./pages/ThamesChallengePage"));
 const Events = lazy(() => import("./pages/Events"));
 const LadiesFestival = lazy(() => import("./pages/LadiesFestival"));
@@ -126,6 +127,7 @@ const App = () => (
             <Route path="/news/double-initiation-december-2025" element={<DoubleInitiationDecember2025 />} />
             <Route path="/news/three-masonic-degrees-explained" element={<ThreeMasonicDegrees />} />
             <Route path="/news/royal-arch-explained" element={<RoyalArchExplained />} />
+            <Route path="/news/modern-freemasonry-recruitment" element={<ModernFreemasonryRecruitment />} />
             <Route path="/thames-challenge" element={<ThamesChallengePage />} />
             <Route path="/news/:slug" element={<SanityPost />} />
 
