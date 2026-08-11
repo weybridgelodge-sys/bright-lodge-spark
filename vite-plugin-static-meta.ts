@@ -238,64 +238,11 @@ const staticRoutes: RouteMeta[] = [
   },
 ];
 
-// ── Hand-built news article pages ──
+// ── Hand-built news article pages that are NOT authored in Sanity ──
+// Every Sanity-authored post is generated automatically by postRoutes() below;
+// do not add entries here for posts that exist in Sanity Studio.
 const newsRoutes: RouteMeta[] = [
-  {
-    route: "news/75th-anniversary",
-    title: "75th Anniversary Meeting",
-    description:
-      "Weybridge Lodge No. 6787 celebrated its 75th anniversary at a special Masonic meeting in February 2024 at the Guildford Masonic Centre, Guildford.",
-    canonical: "/news/75th-anniversary",
-  },
-  {
-    route: "news/sands-charity",
-    title: "£31,000 Raised for SANDS Charity",
-    description:
-      "Weybridge Lodge No. 6787 raised £31,331 for Sands charity supporting bereaved parents. A record-breaking Freemasons charity donation in Guildford, Surrey.",
-    canonical: "/news/sands-charity",
-  },
-  {
-    route: "news/installation-meeting-october-2023",
-    title: "Installation Meeting Oct 2023",
-    description:
-      "Weybridge Lodge's Masonic installation meeting in October 2023, welcoming W Bro. Murray Grubb Jnr as the new Master at the Guildford Masonic Centre.",
-    canonical: "/news/installation-meeting-october-2023",
-  },
-  {
-    route: "news/pgm-visit-february-2026",
-    title: "PGM Visit February 2026",
-    description:
-      "The Provincial Grand Master visited Weybridge Lodge No. 6787 for a First Degree Initiation ceremony at the Guildford Masonic Centre, Guildford.",
-    canonical: "/news/pgm-visit-february-2026",
-  },
-  {
-    route: "news/surrey-2030-festival-gold",
-    title: "Surrey 2030 Festival Gold Award",
-    description:
-      "Weybridge Lodge No. 6787 secures the prestigious Gold Festival Award for the Surrey 2030 Festival, raising over £15,800 for the Masonic Charitable Foundation.",
-    canonical: "/news/surrey-2030-festival-gold",
-  },
-  {
-    route: "news/double-initiation-december-2025",
-    title: "Double Initiation at Weybridge Lodge — December 2025",
-    description:
-      "Weybridge Lodge No. 6787 welcomed two new Brethren in a double First Degree Initiation ceremony in December 2025 at the Guildford Masonic Centre, Guildford.",
-    canonical: "/news/double-initiation-december-2025",
-  },
-  {
-    route: "news/three-masonic-degrees-explained",
-    title: "The Three Masonic Degrees Explained",
-    description:
-      "A clear, modern guide to the three degrees of Freemasonry — Entered Apprentice, Fellow Craft and Master Mason — and what each one means for a new member of Weybridge Lodge No. 6787 in Guildford.",
-    canonical: "/news/three-masonic-degrees-explained",
-  },
-  {
-    route: "news/royal-arch-explained",
-    title: "The Royal Arch Explained — One Journey, One Organisation",
-    description:
-      "Discover the Royal Arch — the natural completion of Freemasonry's three degrees. Weybridge Lodge No. 6787 in Guildford explains what it means and why UGLE calls it 'one journey, one organisation.'",
-    canonical: "/news/royal-arch-explained",
-  },
+
   {
     route: "news/modern-freemasonry-recruitment",
     title: "How Freemasonry Recruits Today",
@@ -320,7 +267,47 @@ function toMetaDescription(text: string, max = 155): string {
   return text.slice(0, max - 1).replace(/\s+\S*$/, "") + "…";
 }
 
+/**
+ * Every post authored in Sanity Studio, generated at build time.
+ * Mirrors the <SEO> props in src/pages/news/SanityPost.tsx (title + excerpt),
+ * and honours legacyRoute so hand-coded article URLs keep their path.
+ * Canonical always self-references the post's own URL — never the homepage.
+ */
+async function postRoutes(): Promise<RouteMeta[]> {
+  try {
+    const rows = await sanity.fetch<
+      {
+        title?: string;
+        slug?: { current?: string };
+        excerpt?: string;
+        legacyRoute?: string;
+      }[]
+    >(
+      `*[_type == "post" && defined(slug.current)] | order(publishedAt desc) {
+        title, slug, excerpt, legacyRoute
+      }`,
+    );
+    return rows
+      .filter((r) => r.slug?.current && r.title)
+      .map((r) => {
+        const slug = r.slug!.current!;
+        const route = (r.legacyRoute?.trim() || `/news/${slug}`).replace(/^\/+/, "");
+        const excerpt = r.excerpt?.trim();
+        const description = excerpt
+          ? toMetaDescription(excerpt)
+          : toMetaDescription(
+              `${r.title} — news from Weybridge Lodge No. 6787, Freemasons at the Guildford Masonic Centre in Surrey.`,
+            );
+        return { route, title: r.title!, description, canonical: `/${route}` };
+      });
+  } catch (err) {
+    console.warn("static-meta: could not fetch posts from Sanity.", err);
+    return [];
+  }
+}
+
 async function videoRoutes(): Promise<RouteMeta[]> {
+
   try {
     const rows = await sanity.fetch<
       { title?: string; slug?: { current?: string }; description?: string }[]
@@ -416,7 +403,19 @@ export function staticMeta(): Plugin {
       if (!fs.existsSync(indexPath)) return;
 
       const baseHtml = fs.readFileSync(indexPath, "utf8");
-      const routes = [...staticRoutes, ...newsRoutes, ...(await videoRoutes())];
+      // Sanity posts win over nothing, but an explicit hand-coded entry always
+      // wins over a generated one; dedupe by output route, first occurrence kept.
+      const allRoutes = [
+        ...staticRoutes,
+        ...newsRoutes,
+        ...(await postRoutes()),
+        ...(await videoRoutes()),
+      ];
+      const seen = new Set<string>();
+      const routes = allRoutes.filter((r) =>
+        seen.has(r.route) ? false : (seen.add(r.route), true),
+      );
+
 
       for (const meta of routes) {
         const routeDir = path.join(outDir, ...meta.route.split("/"));
