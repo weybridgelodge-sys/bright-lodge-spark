@@ -267,7 +267,47 @@ function toMetaDescription(text: string, max = 155): string {
   return text.slice(0, max - 1).replace(/\s+\S*$/, "") + "…";
 }
 
+/**
+ * Every post authored in Sanity Studio, generated at build time.
+ * Mirrors the <SEO> props in src/pages/news/SanityPost.tsx (title + excerpt),
+ * and honours legacyRoute so hand-coded article URLs keep their path.
+ * Canonical always self-references the post's own URL — never the homepage.
+ */
+async function postRoutes(): Promise<RouteMeta[]> {
+  try {
+    const rows = await sanity.fetch<
+      {
+        title?: string;
+        slug?: { current?: string };
+        excerpt?: string;
+        legacyRoute?: string;
+      }[]
+    >(
+      `*[_type == "post" && defined(slug.current)] | order(publishedAt desc) {
+        title, slug, excerpt, legacyRoute
+      }`,
+    );
+    return rows
+      .filter((r) => r.slug?.current && r.title)
+      .map((r) => {
+        const slug = r.slug!.current!;
+        const route = (r.legacyRoute?.trim() || `/news/${slug}`).replace(/^\/+/, "");
+        const excerpt = r.excerpt?.trim();
+        const description = excerpt
+          ? toMetaDescription(excerpt)
+          : toMetaDescription(
+              `${r.title} — news from Weybridge Lodge No. 6787, Freemasons at the Guildford Masonic Centre in Surrey.`,
+            );
+        return { route, title: r.title!, description, canonical: `/${route}` };
+      });
+  } catch (err) {
+    console.warn("static-meta: could not fetch posts from Sanity.", err);
+    return [];
+  }
+}
+
 async function videoRoutes(): Promise<RouteMeta[]> {
+
   try {
     const rows = await sanity.fetch<
       { title?: string; slug?: { current?: string }; description?: string }[]
