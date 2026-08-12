@@ -219,11 +219,12 @@ Deno.serve(async (req) => {
     })
 
 
-    // ---- Resolve Almoner email ----
+    // ---- Resolve Almoner (email + member id for push) ----
     const lodgeYear =
       new Date().getMonth() + 1 >= 10 ? new Date().getFullYear() : new Date().getFullYear() - 1
 
     let almonerEmail: string | null = null
+    let almonerId: string | null = null
     const { data: appt } = await supabase
       .from('officer_appointments')
       .select('member_id')
@@ -239,6 +240,7 @@ Deno.serve(async (req) => {
         .eq('id', appt.member_id)
         .maybeSingle()
       almonerEmail = prof?.email ?? null
+      if (almonerEmail) almonerId = appt.member_id
     }
 
     if (!almonerEmail) {
@@ -256,16 +258,56 @@ Deno.serve(async (req) => {
           .eq('id', rr.user_id)
           .maybeSingle()
         almonerEmail = prof?.email ?? null
+        if (almonerEmail) almonerId = rr.user_id
       }
+    }
+
+    // ---- Push notifications: one per celebration, tap opens WhatsApp ----
+    // Deliberately separate notifications so multiple matches on the same day
+    // stay individually shareable rather than squashed into one message.
+    let pushSent = 0
+    const pushErrors: string[] = []
+    if (almonerId && celebrations.length > 0) {
+      for (const c of celebrations) {
+        try {
+          const pr = await fetch(`${supabaseUrl}/functions/v1/send-push-notification`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${serviceKey}`,
+            },
+            body: JSON.stringify({
+              title: c.type === 'birthday' ? '🎉 Birthday today' : '🎓 Masonic anniversary today',
+              body: c.message,
+              member_ids: [almonerId],
+              data: {
+                kind: 'almoner_celebration',
+                celebration_type: c.type,
+                member_id: c.memberId,
+                message: c.message,
+                // The native tap handler opens this URL.
+                url: c.whatsappUrl,
+              },
+            }),
+          })
+          const pj = await pr.json().catch(() => ({}))
+          if (!pr.ok) pushErrors.push(`${c.name}: HTTP ${pr.status}`)
+          else pushSent += Number(pj.android_sent ?? 0) + Number(pj.ios_sent ?? 0)
+        } catch (e) {
+          pushErrors.push(`${c.name}: ${(e as Error).message}`)
+        }
+      }
+      if (pushErrors.length) console.warn('celebration push failures', pushErrors)
     }
 
     if (!almonerEmail) {
       console.warn('almoner-overdue-check: no almoner appointment or role holder found; flagged=', flagged.length)
       return new Response(
-        JSON.stringify({ ok: false, error: 'no_almoner_recipient', flagged: flagged.length }),
+        JSON.stringify({ ok: false, error: 'no_almoner_recipient', flagged: flagged.length, celebrations: celebrations.length }),
         { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
       )
     }
+
 
     // ---- Invoke send-transactional-email ----
     const reportDate = new Date().toLocaleDateString('en-GB', {
