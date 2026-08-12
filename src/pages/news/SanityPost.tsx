@@ -3,13 +3,15 @@ import { useParams, Link, Navigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { PortableText, type PortableTextComponents } from "@portabletext/react";
 import { motion } from "framer-motion";
-import { Calendar, Tag, ArrowLeft, ArrowRight } from "lucide-react";
+import { Calendar, Tag, User, ArrowLeft, ArrowRight } from "lucide-react";
 
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
 import SEO, { breadcrumbSchema } from "@/components/SEO";
 import SocialShare from "@/components/SocialShare";
+import CommentsSection, { commentCount } from "@/components/CommentsSection";
+import SanityPostFooterNav from "@/components/SanityPostFooterNav";
 import NotFound from "@/pages/NotFound";
 import {
   sanityClient,
@@ -21,11 +23,50 @@ import {
   slugifyCategory,
 } from "@/lib/sanity";
 
+type PortableBlock = {
+  _type?: string;
+  _key?: string;
+  style?: string;
+  children?: { text?: string }[];
+};
+
+const slugifyHeading = (text: string) =>
+  text
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .trim()
+    .replace(/\s+/g, "-")
+    .slice(0, 60) || "section";
+
+const blockText = (block: PortableBlock) =>
+  (block.children ?? []).map((c) => c.text ?? "").join("");
+
+/** Auto-generate a table of contents from the post's h2 headings. */
+const extractToc = (body: unknown[] | undefined) => {
+  const seen = new Map<string, number>();
+  return ((body ?? []) as PortableBlock[])
+    .filter((b) => b._type === "block" && b.style === "h2" && blockText(b).trim())
+    .map((b) => {
+      const label = blockText(b).trim();
+      const base = slugifyHeading(label);
+      const n = (seen.get(base) ?? 0) + 1;
+      seen.set(base, n);
+      return { id: n > 1 ? `${base}-${n}` : base, label };
+    });
+};
+
 const portableComponents: PortableTextComponents = {
   block: {
-    h2: ({ children }) => (
-      <h2 className="text-2xl font-serif text-foreground mt-10 mb-4">{children}</h2>
-    ),
+    h2: ({ children, value }) => {
+      const label = blockText(value as PortableBlock).trim();
+      const id = slugifyHeading(label);
+      return (
+        <section id={id} className="scroll-mt-28 mt-10">
+          <div className="h-0.5 w-16 bg-gold mb-6" />
+          <h2 className="text-2xl font-serif text-foreground mb-4">{children}</h2>
+        </section>
+      );
+    },
     h3: ({ children }) => (
       <h3 className="text-xl font-serif text-foreground mt-8 mb-3">{children}</h3>
     ),
