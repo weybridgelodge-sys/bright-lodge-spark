@@ -200,7 +200,10 @@ Deno.serve(async (req) => {
       })
       .filter(Boolean) as Array<{ name: string; overdueFollowUp: string | null; missedMeetings: boolean; checkIn: string | null; portalUrl: string }>
 
-    if (flagged.length === 0) {
+    // ---- Memorable dates (birthdays / years as a Freemason) ----
+    const celebrations = detectCelebrations(members as any[], celebrationDay)
+
+    if (flagged.length === 0 && celebrations.length === 0) {
       console.log('almoner-overdue-check: nothing to report')
       return new Response(JSON.stringify({ ok: true, sent: false, reason: 'nothing_flagged' }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -214,6 +217,7 @@ Deno.serve(async (req) => {
       if (ao !== bo) return ao - bo
       return a.name.localeCompare(b.name)
     })
+
 
     // ---- Resolve Almoner email ----
     const lodgeYear =
