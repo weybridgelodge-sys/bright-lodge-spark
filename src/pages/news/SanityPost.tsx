@@ -3,7 +3,7 @@ import { useParams, Link, Navigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { PortableText, type PortableTextComponents } from "@portabletext/react";
 import { motion } from "framer-motion";
-import { Calendar, Tag, ArrowLeft } from "lucide-react";
+import { Calendar, Tag, ArrowLeft, ArrowRight } from "lucide-react";
 
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -16,6 +16,7 @@ import {
   POST_BY_SLUG_QUERY,
   type SanityPost,
   urlFor,
+  LEGACY_IMAGES,
   formatDate,
   slugifyCategory,
 } from "@/lib/sanity";
@@ -51,6 +52,18 @@ const portableComponents: PortableTextComponents = {
         </a>
       );
     },
+  },
+  list: {
+    bullet: ({ children }) => (
+      <ul className="list-disc list-inside text-foreground/90 space-y-2 mb-5">{children}</ul>
+    ),
+    number: ({ children }) => (
+      <ol className="list-decimal list-inside text-foreground/90 space-y-2 mb-5">{children}</ol>
+    ),
+  },
+  listItem: {
+    bullet: ({ children }) => <li className="leading-relaxed">{children}</li>,
+    number: ({ children }) => <li className="leading-relaxed">{children}</li>,
   },
   types: {
     image: ({ value }) => {
@@ -112,7 +125,7 @@ const SanityPostPage = () => {
 
   const heroImage = data.mainImage
     ? urlFor(data.mainImage).width(1600).height(800).fit("crop").auto("format").url()
-    : null;
+    : (LEGACY_IMAGES[data.slug] ?? null);
 
   const articleSchema = {
     "@context": "https://schema.org",
@@ -200,6 +213,26 @@ const SanityPostPage = () => {
                 </p>
               )}
             </article>
+
+            {data.author && (
+              <div className="mt-12 pt-8 border-t border-border">
+                <p className="text-sm font-serif text-foreground font-semibold">{data.author}</p>
+              </div>
+            )}
+
+            <div className="mt-10 p-6 border border-border rounded-sm bg-card">
+              <h2 className="text-lg font-serif text-foreground mb-3">Still Have Questions?</h2>
+              <p className="text-sm text-muted-foreground font-sans leading-relaxed mb-4">
+                Our FAQ covers the questions people usually ask first — what Freemasonry is,
+                who can join, what it costs, and what happens at meetings.
+              </p>
+              <Link
+                to="/faq"
+                className="inline-flex items-center gap-2 text-primary font-sans font-medium hover:underline"
+              >
+                Read the FAQ <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
 
             <div className="mt-12 pt-8 border-t border-border">
               <SocialShare
