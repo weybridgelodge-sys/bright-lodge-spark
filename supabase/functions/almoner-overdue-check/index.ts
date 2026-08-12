@@ -1,11 +1,19 @@
 // Daily scheduled edge function: computes overdue Almoner follow-ups and
 // members who missed their last two meetings, then emails a digest to the
 // current Almoner via send-transactional-email.
+//
+// It also detects "memorable dates" (birthdays and years-as-a-Freemason
+// anniversaries) for the day and, when there are any, sends the Almoner a push
+// notification per celebration whose tap target is a pre-filled WhatsApp
+// deep link. The same celebrations are repeated in the digest email as a
+// backup in case the push is missed.
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors'
+import { detectCelebrations, londonToday } from './celebrations.ts'
 
 const SITE_URL = 'https://weybridgelodge.org.uk'
 const PORTAL_URL = `${SITE_URL}/members/almoner`
+
 
 const displayName = (m: any): string => {
   const first = (m.preferred_name?.trim() || m.first_name?.trim() || '').trim()
@@ -48,14 +56,23 @@ Deno.serve(async (req) => {
 
   try {
     const today = new Date().toISOString().slice(0, 10)
+    // Celebrations use Europe/London wall-clock so a birthday never lands a
+    // day early/late. `?test_date=YYYY-MM-DD` lets us rehearse a future date.
+    const testDate = url.searchParams.get('test_date')
+    const celebrationDay = /^\d{4}-\d{2}-\d{2}$/.test(testDate ?? '')
+      ? (testDate as string)
+      : londonToday()
 
     // ---- Run independent reads in parallel ----
     // 1) active members, 2) open welfare logs, 3) last two past meetings.
     const [membersRes, logsRes, meetingsRes] = await Promise.all([
       supabase
         .from('profiles')
-        .select('id,full_name,preferred_name,first_name,last_name,title,status')
+        .select(
+          'id,full_name,preferred_name,first_name,last_name,title,status,date_of_birth,initiation_date',
+        )
         .eq('status', 'active'),
+
       supabase
         .from('welfare_log_entries')
         .select('member_id,contact_date,follow_up_date')
@@ -183,7 +200,10 @@ Deno.serve(async (req) => {
       })
       .filter(Boolean) as Array<{ name: string; overdueFollowUp: string | null; missedMeetings: boolean; checkIn: string | null; portalUrl: string }>
 
-    if (flagged.length === 0) {
+    // ---- Memorable dates (birthdays / years as a Freemason) ----
+    const celebrations = detectCelebrations(members as any[], celebrationDay)
+
+    if (flagged.length === 0 && celebrations.length === 0) {
       console.log('almoner-overdue-check: nothing to report')
       return new Response(JSON.stringify({ ok: true, sent: false, reason: 'nothing_flagged' }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -198,11 +218,13 @@ Deno.serve(async (req) => {
       return a.name.localeCompare(b.name)
     })
 
-    // ---- Resolve Almoner email ----
+
+    // ---- Resolve Almoner (email + member id for push) ----
     const lodgeYear =
       new Date().getMonth() + 1 >= 10 ? new Date().getFullYear() : new Date().getFullYear() - 1
 
     let almonerEmail: string | null = null
+    let almonerId: string | null = null
     const { data: appt } = await supabase
       .from('officer_appointments')
       .select('member_id')
@@ -218,6 +240,7 @@ Deno.serve(async (req) => {
         .eq('id', appt.member_id)
         .maybeSingle()
       almonerEmail = prof?.email ?? null
+      if (almonerEmail) almonerId = appt.member_id
     }
 
     if (!almonerEmail) {
@@ -235,24 +258,66 @@ Deno.serve(async (req) => {
           .eq('id', rr.user_id)
           .maybeSingle()
         almonerEmail = prof?.email ?? null
+        if (almonerEmail) almonerId = rr.user_id
       }
+    }
+
+    // ---- Push notifications: one per celebration, tap opens WhatsApp ----
+    // Deliberately separate notifications so multiple matches on the same day
+    // stay individually shareable rather than squashed into one message.
+    let pushSent = 0
+    const pushErrors: string[] = []
+    if (almonerId && celebrations.length > 0) {
+      for (const c of celebrations) {
+        try {
+          const pr = await fetch(`${supabaseUrl}/functions/v1/send-push-notification`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${serviceKey}`,
+            },
+            body: JSON.stringify({
+              title: c.type === 'birthday' ? '🎉 Birthday today' : '🎓 Masonic anniversary today',
+              body: c.message,
+              member_ids: [almonerId],
+              data: {
+                kind: 'almoner_celebration',
+                celebration_type: c.type,
+                member_id: c.memberId,
+                message: c.message,
+                // The native tap handler opens this URL.
+                url: c.whatsappUrl,
+              },
+            }),
+          })
+          const pj = await pr.json().catch(() => ({}))
+          if (!pr.ok) pushErrors.push(`${c.name}: HTTP ${pr.status}`)
+          else pushSent += Number(pj.android_sent ?? 0) + Number(pj.ios_sent ?? 0)
+        } catch (e) {
+          pushErrors.push(`${c.name}: ${(e as Error).message}`)
+        }
+      }
+      if (pushErrors.length) console.warn('celebration push failures', pushErrors)
     }
 
     if (!almonerEmail) {
       console.warn('almoner-overdue-check: no almoner appointment or role holder found; flagged=', flagged.length)
       return new Response(
-        JSON.stringify({ ok: false, error: 'no_almoner_recipient', flagged: flagged.length }),
+        JSON.stringify({ ok: false, error: 'no_almoner_recipient', flagged: flagged.length, celebrations: celebrations.length }),
         { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
       )
     }
+
 
     // ---- Invoke send-transactional-email ----
     const reportDate = new Date().toLocaleDateString('en-GB', {
       day: '2-digit', month: 'short', year: 'numeric',
     })
-    const idempotencyKey = force
+    // Celebrations are part of the digest's identity: a day with a new
+    // birthday must not be de-duplicated against an earlier flagged-only send.
+    const idempotencyKey = force || testDate
       ? `almoner-overdue-${today}-force-${Date.now()}`
-      : `almoner-overdue-${today}`
+      : `almoner-overdue-${today}-c${celebrations.length}`
 
 
     const resp = await fetch(`${supabaseUrl}/functions/v1/send-transactional-email`, {
@@ -267,6 +332,13 @@ Deno.serve(async (req) => {
         idempotencyKey,
         templateData: {
           members: flagged,
+          celebrations: celebrations.map((c) => ({
+            name: c.name,
+            type: c.type,
+            years: c.years,
+            message: c.message,
+            whatsappUrl: c.whatsappUrl,
+          })),
           reportDate,
           portalUrl: PORTAL_URL,
         },
@@ -281,11 +353,25 @@ Deno.serve(async (req) => {
       )
     }
 
-    console.log('almoner-overdue-check: enqueued digest', { recipient: almonerEmail, flagged: flagged.length })
+    console.log('almoner-overdue-check: enqueued digest', {
+      recipient: almonerEmail,
+      flagged: flagged.length,
+      celebrations: celebrations.length,
+      pushSent,
+    })
     return new Response(
-      JSON.stringify({ ok: true, sent: true, recipient: almonerEmail, flagged: flagged.length }),
+      JSON.stringify({
+        ok: true,
+        sent: true,
+        recipient: almonerEmail,
+        flagged: flagged.length,
+        celebrations,
+        push_sent: pushSent,
+        push_errors: pushErrors,
+      }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
     )
+
   } catch (err) {
     console.error('almoner-overdue-check error', err)
     return new Response(JSON.stringify({ ok: false, error: String(err) }), {

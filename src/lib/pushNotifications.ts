@@ -57,6 +57,21 @@ export async function registerPushNotifications(memberId: string): Promise<void>
 
     await PushNotifications.removeAllListeners();
 
+    // Tapping a notification that carries a `url` (e.g. the Almoner's
+    // memorable-date alerts, which carry a wa.me deep link pre-filled with the
+    // celebration message) opens that link so it can be sent in one more tap.
+    await PushNotifications.addListener("pushNotificationActionPerformed", async (action) => {
+      try {
+        const url = (action?.notification?.data as Record<string, unknown> | undefined)?.url;
+        if (typeof url !== "string" || !/^https?:\/\//i.test(url)) return;
+        const { Browser } = await import("@capacitor/browser");
+        await Browser.open({ url });
+      } catch (err) {
+        console.warn("[push] failed to open notification link", err);
+      }
+    });
+
+
     await PushNotifications.addListener("registration", async (token) => {
       try {
         const { error } = await supabase.from("push_device_tokens").upsert(
