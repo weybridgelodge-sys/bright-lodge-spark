@@ -23,11 +23,21 @@ interface FlaggedMember {
   portalUrl: string
 }
 
+interface Celebration {
+  name: string
+  type: 'birthday' | 'anniversary'
+  years?: number
+  message: string
+  whatsappUrl: string
+}
+
 interface Props {
   members?: FlaggedMember[]
+  celebrations?: Celebration[]
   reportDate?: string
   portalUrl?: string
 }
+
 
 const fmt = (s?: string | null) => {
   if (!s) return ''
