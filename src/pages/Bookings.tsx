@@ -372,18 +372,12 @@ useEffect(() => {
               >
                 {event.intro_heading || event.title}
               </h2>
-              {loadingEvent && event.id === "fallback" ? (
-                <div className="flex items-center gap-2 text-muted-foreground font-sans text-sm">
-                  <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
-                  Loading meeting…
-                </div>
-              ) : (
-                introParagraphs.map((p, i) => (
-                  <p key={i} className="text-muted-foreground font-sans leading-relaxed mb-4 last:mb-0">
-                    {renderParagraph(p)}
-                  </p>
-                ))
-              )}
+              {introParagraphs.map((p, i) => (
+                <p key={i} className="text-muted-foreground font-sans leading-relaxed mb-4 last:mb-0">
+                  {renderParagraph(p)}
+                </p>
+              ))}
+
             </motion.div>
             <motion.img
               src={assetUrl(sixFellowcraftsAprons)}
