@@ -48,11 +48,13 @@ const fmt = (s?: string | null) => {
   }
 }
 
-const Email = ({ members = [], reportDate, portalUrl }: Props) => (
+const Email = ({ members = [], celebrations = [], reportDate, portalUrl }: Props) => (
   <Html lang="en" dir="ltr">
     <Head />
     <Preview>
-      {members.length} member{members.length === 1 ? '' : 's'} need Almoner follow-up
+      {celebrations.length > 0
+        ? `${celebrations.length} to celebrate today · ${members.length} needing follow-up`
+        : `${members.length} member${members.length === 1 ? '' : 's'} need Almoner follow-up`}
     </Preview>
     <Body style={main}>
       <Container style={container}>
@@ -73,30 +75,76 @@ const Email = ({ members = [], reportDate, portalUrl }: Props) => (
         <Text style={meta}>
           {reportDate ? `Report for ${reportDate}` : ''} · {members.length} member
           {members.length === 1 ? '' : 's'} flagged
+          {celebrations.length > 0
+            ? ` · ${celebrations.length} to celebrate`
+            : ''}
         </Text>
 
-        <Text style={intro}>
-          The following members require your attention. Please review each record in the Almoner
-          Portal and log a contact where appropriate.
-        </Text>
+        {celebrations.length > 0 && (
+          <>
+            <Heading style={h2}>Today's celebrations</Heading>
+            <Text style={intro}>
+              Tap the link under each one to open WhatsApp with the message ready to send —
+              just pick the Lodge group.
+            </Text>
+            <Section style={celebrationCard}>
+              {celebrations.map((c, i) => (
+                <div
+                  key={i}
+                  style={{
+                    padding: '10px 0',
+                    borderBottom: i === celebrations.length - 1 ? 'none' : '1px solid #e8e3d3',
+                  }}
+                >
+                  <Text style={memberName}>
+                    {c.type === 'birthday' ? '🎉 ' : '🎓 '}
+                    {c.name}
+                    {typeof c.years === 'number'
+                      ? c.type === 'birthday'
+                        ? ` — ${c.years} today`
+                        : ` — ${c.years} year${c.years === 1 ? '' : 's'} a Freemason`
+                      : ''}
+                  </Text>
+                  <Text style={celebrationMessage}>{c.message}</Text>
+                  <Text style={{ margin: '6px 0 0' }}>
+                    <Link href={c.whatsappUrl} style={linkStyle}>
+                      Send on WhatsApp →
+                    </Link>
+                  </Text>
+                </div>
+              ))}
+            </Section>
+          </>
+        )}
 
-        <Section style={card}>
-          {members.map((m, i) => (
-            <div key={i} style={{ padding: '10px 0', borderBottom: i === members.length - 1 ? 'none' : '1px solid #e8e3d3' }}>
-              <Text style={memberName}>{m.name}</Text>
-              {m.overdueFollowUp && (
-                <Text style={flagRed}>• Follow-up overdue since {fmt(m.overdueFollowUp)}</Text>
-              )}
-              {m.missedMeetings && (
-                <Text style={flagAmber}>• Missed the last 2 meetings</Text>
-              )}
-              {m.checkIn && <Text style={flagSoft}>• {m.checkIn}</Text>}
-              <Text style={{ margin: '6px 0 0' }}>
-                <Link href={m.portalUrl} style={linkStyle}>Open record →</Link>
-              </Text>
-            </div>
-          ))}
-        </Section>
+        {members.length > 0 && (
+          <>
+            {celebrations.length > 0 && <Heading style={h2}>Needing follow-up</Heading>}
+            <Text style={intro}>
+              The following members require your attention. Please review each record in the Almoner
+              Portal and log a contact where appropriate.
+            </Text>
+
+            <Section style={card}>
+              {members.map((m, i) => (
+                <div key={i} style={{ padding: '10px 0', borderBottom: i === members.length - 1 ? 'none' : '1px solid #e8e3d3' }}>
+                  <Text style={memberName}>{m.name}</Text>
+                  {m.overdueFollowUp && (
+                    <Text style={flagRed}>• Follow-up overdue since {fmt(m.overdueFollowUp)}</Text>
+                  )}
+                  {m.missedMeetings && (
+                    <Text style={flagAmber}>• Missed the last 2 meetings</Text>
+                  )}
+                  {m.checkIn && <Text style={flagSoft}>• {m.checkIn}</Text>}
+                  <Text style={{ margin: '6px 0 0' }}>
+                    <Link href={m.portalUrl} style={linkStyle}>Open record →</Link>
+                  </Text>
+                </div>
+              ))}
+            </Section>
+          </>
+        )}
+
 
         {portalUrl && (
           <Text style={footerText}>
