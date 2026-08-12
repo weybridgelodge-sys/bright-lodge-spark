@@ -22,35 +22,9 @@ import sixFellowcraftsAprons from "@/assets/six-fellowcrafts-aprons.png.asset.js
 
 
 
-// ─── Fallback event ───────────────────────────────────────────────────────────
-// Location corrected: Portsmouth Road removed.
-// Correct address: Weybourne House, Hitherbury Close, Guildford GU2 4DR.
-const FALLBACK: EventBundle = {
-  event: {
-    id: "fallback",
-    slug: "festive_board_april_2026",
-    title: "Initiation Ceremony — April Meeting",
-    intro_heading: "Initiation Ceremony — April Meeting",
-    intro:
-      "W Bro. Julien Tidmarsh, Worshipful Master of Weybridge Lodge No. 6787, cordially invites you to attend an Initiation Meeting on **Wednesday, 15th April 2026, commencing at 6.00 pm**.\n\nFollowing the ceremony, we'll gather for a festive board filled with cheer, good food, and heartfelt fellowship.",
-    event_date: "2026-04-15T18:00:00+01:00",
-    tyling_time: "Tyling at 6.00 pm prompt",
-    dining_time: "Festive Board Dining at 7:45 pm",
-    location: "Guildford Masonic Centre, Weybourne House, Hitherbury Close, Guildford GU2 4DR",
-    dress_code: "Normal Masonic attire — Provincial, Black or Craft Tie, Dark Suit and White Gloves",
-    booking_deadline: "2026-04-08",
-    published: true,
-    sort_order: 0,
-  },
-  courses: [
-    { id: "c1", event_id: "fallback", course_label: "Entrée", dish: "Halloumi, Carrot, Orange & Watercress Salad", description: "With honey & mustard dressing.", position: 1 },
-    { id: "c2", event_id: "fallback", course_label: "Main", dish: "Irish Stew with Soda Bread", description: "Lamb, smoked bacon, root vegetables, potatoes & pearl barley, slowly cooked.", position: 2 },
-    { id: "c3", event_id: "fallback", course_label: "Dessert", dish: "Warm Chocolate Brownie (Gluten-Free)", description: "Served with sauce & ice cream.", position: 3 },
-  ],
-  diningOptions: [
-    { id: "o1", event_id: "fallback", label: "Festive Board (3-course dinner)", price_pence: 3200, position: 1, is_default: true },
-  ],
-};
+import SaveTheDate from "@/components/bookings/SaveTheDate";
+import { fetchNextRegisterMeeting, type RegisterMeeting } from "@/lib/lodgeEvents";
+
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 const fmtFullDate = (iso: string) =>
