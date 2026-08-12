@@ -23,7 +23,7 @@ import sixFellowcraftsAprons from "@/assets/six-fellowcrafts-aprons.png.asset.js
 
 
 import SaveTheDate from "@/components/bookings/SaveTheDate";
-import { fetchNextRegisterMeeting, type RegisterMeeting } from "@/lib/lodgeEvents";
+import { fetchUpcomingRegisterMeetings, type RegisterMeeting } from "@/lib/lodgeEvents";
 
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -69,7 +69,7 @@ const Bookings = () => {
   const [state, setState] = useState<
     | { kind: "loading" }
     | { kind: "bookable"; bundle: EventBundle; publishedMeeting: { id: string; event_key: string } | null }
-    | { kind: "save-the-date"; meeting: RegisterMeeting | null }
+    | { kind: "save-the-date"; meetings: RegisterMeeting[] }
   >({ kind: "loading" });
 
   useEffect(() => {
@@ -91,8 +91,8 @@ const Bookings = () => {
         }
         return;
       }
-      const meeting = await fetchNextRegisterMeeting();
-      if (!cancelled) setState({ kind: "save-the-date", meeting });
+      const meetings = await fetchUpcomingRegisterMeetings();
+      if (!cancelled) setState({ kind: "save-the-date", meetings });
     })();
     return () => { cancelled = true; };
   }, []);
@@ -106,7 +106,7 @@ const Bookings = () => {
     );
   }
 
-  if (state.kind === "save-the-date") return <SaveTheDate meeting={state.meeting} />;
+  if (state.kind === "save-the-date") return <SaveTheDate meetings={state.meetings} />;
 
   return <BookingsEvent bundle={state.bundle} publishedMeeting={state.publishedMeeting} />;
 };

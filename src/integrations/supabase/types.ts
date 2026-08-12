@@ -3951,6 +3951,13 @@ export type Database = {
           id: string
         }[]
       }
+      get_upcoming_public_meetings: {
+        Args: never
+        Returns: {
+          ceremony: string
+          meeting_date: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
