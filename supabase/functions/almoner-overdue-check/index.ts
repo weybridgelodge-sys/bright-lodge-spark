@@ -313,9 +313,11 @@ Deno.serve(async (req) => {
     const reportDate = new Date().toLocaleDateString('en-GB', {
       day: '2-digit', month: 'short', year: 'numeric',
     })
-    const idempotencyKey = force
+    // Celebrations are part of the digest's identity: a day with a new
+    // birthday must not be de-duplicated against an earlier flagged-only send.
+    const idempotencyKey = force || testDate
       ? `almoner-overdue-${today}-force-${Date.now()}`
-      : `almoner-overdue-${today}`
+      : `almoner-overdue-${today}-c${celebrations.length}`
 
 
     const resp = await fetch(`${supabaseUrl}/functions/v1/send-transactional-email`, {
@@ -330,6 +332,13 @@ Deno.serve(async (req) => {
         idempotencyKey,
         templateData: {
           members: flagged,
+          celebrations: celebrations.map((c) => ({
+            name: c.name,
+            type: c.type,
+            years: c.years,
+            message: c.message,
+            whatsappUrl: c.whatsappUrl,
+          })),
           reportDate,
           portalUrl: PORTAL_URL,
         },
@@ -344,11 +353,25 @@ Deno.serve(async (req) => {
       )
     }
 
-    console.log('almoner-overdue-check: enqueued digest', { recipient: almonerEmail, flagged: flagged.length })
+    console.log('almoner-overdue-check: enqueued digest', {
+      recipient: almonerEmail,
+      flagged: flagged.length,
+      celebrations: celebrations.length,
+      pushSent,
+    })
     return new Response(
-      JSON.stringify({ ok: true, sent: true, recipient: almonerEmail, flagged: flagged.length }),
+      JSON.stringify({
+        ok: true,
+        sent: true,
+        recipient: almonerEmail,
+        flagged: flagged.length,
+        celebrations,
+        push_sent: pushSent,
+        push_errors: pushErrors,
+      }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
     )
+
   } catch (err) {
     console.error('almoner-overdue-check error', err)
     return new Response(JSON.stringify({ ok: false, error: String(err) }), {
