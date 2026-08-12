@@ -41,6 +41,12 @@ export function celebrationName(m: CelebrationMember): string {
   return [title, person].filter(Boolean).join(' ').trim() || 'Our brother'
 }
 
+/** Warm, informal first-name-only form for the message body ("our dear Brother [FirstName]"). */
+export function warmName(m: CelebrationMember): string {
+  const first = (m.preferred_name?.trim() || m.first_name?.trim() || '').trim()
+  return first || 'our Brother'
+}
+
 export function ordinal(n: number): string {
   const rem100 = n % 100
   if (rem100 >= 11 && rem100 <= 13) return `${n}th`
@@ -101,12 +107,13 @@ export function detectCelebrations(
 
   for (const m of members) {
     const name = celebrationName(m)
+    const warm = warmName(m)
 
     const dob = m.date_of_birth ?? null
     if (dob && matchesToday(dob, today)) {
       const years = yearsSince(dob, today)
       if (years > 0) {
-        const message = `Wishing ${name} a very happy ${ordinal(years)} birthday today! 🎉`
+        const message = `Wishing our dear Brother ${warm} a very happy ${ordinal(years)} birthday today! 🎉`
         out.push({
           memberId: m.id,
           name,
@@ -122,7 +129,7 @@ export function detectCelebrations(
     if (init && matchesToday(init, today)) {
       const years = yearsSince(init, today)
       if (years > 0) {
-        const message = `Let's all congratulate ${name} on ${years} year${years === 1 ? '' : 's'} as a Freemason today!`
+        const message = `Let's all congratulate our dear Brother ${warm} on ${years} year${years === 1 ? '' : 's'} as a Freemason today!`
         out.push({
           memberId: m.id,
           name,

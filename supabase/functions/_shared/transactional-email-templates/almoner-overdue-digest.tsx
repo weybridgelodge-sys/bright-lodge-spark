@@ -187,17 +187,17 @@ export const template = {
         name: 'W Bro. Kevin Brennan',
         type: 'birthday',
         years: 70,
-        message: 'Wishing W Bro. Kevin Brennan a very happy 70th birthday today! 🎉',
+        message: 'Wishing our dear Brother Kevin a very happy 70th birthday today! 🎉',
         whatsappUrl:
-          'https://wa.me/?text=Wishing%20W%20Bro.%20Kevin%20Brennan%20a%20very%20happy%2070th%20birthday%20today!%20%F0%9F%8E%89',
+          'https://wa.me/?text=Wishing%20our%20dear%20Brother%20Kevin%20a%20very%20happy%2070th%20birthday%20today!%20%F0%9F%8E%89',
       },
       {
         name: 'W Bro. Kenneth Holdsworth',
         type: 'anniversary',
         years: 14,
-        message: "Let's all congratulate W Bro. Kenneth Holdsworth on 14 years as a Freemason today!",
+        message: "Let's all congratulate our dear Brother Kenneth on 14 years as a Freemason today!",
         whatsappUrl:
-          "https://wa.me/?text=Let's%20all%20congratulate%20W%20Bro.%20Kenneth%20Holdsworth%20on%2014%20years%20as%20a%20Freemason%20today!",
+          "https://wa.me/?text=Let's%20all%20congratulate%20our%20dear%20Brother%20Kenneth%20on%2014%20years%20as%20a%20Freemason%20today!",
       },
     ],
     members: [
