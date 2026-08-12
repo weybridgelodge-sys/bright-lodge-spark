@@ -147,7 +147,7 @@ export function getPostThumbnail(post: SanityPost, width = 800, height = 450): s
       // fall through
     }
   }
-  return LEGACY_IMAGES[post.slug] ?? null;
+  return LEGACY_IMAGES[post.slug] ?? FALLBACK_POST_IMAGE;
 }
 
 /**
