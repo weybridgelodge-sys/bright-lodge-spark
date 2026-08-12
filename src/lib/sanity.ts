@@ -15,6 +15,10 @@ import installationImg from "@/assets/news/installation-meeting-group.jpg";
 import { assetUrl } from "@/lib/assetUrl";
 import surrey2030Img from "@/assets/news/surrey-2030-gold-trophy.jpg.asset.json";
 import recruitmentImg from "@/assets/news/modern-freemasonry-recruitment.jpg";
+import royalArchImg from "@/assets/news/royal-arch-meeting-room.jpg.asset.json";
+import threeDegreesImg from "@/assets/news/three-masonic-degrees.jpg";
+import doubleInitiationImg from "@/assets/news/double-initiation-december-2025.jpg";
+import crestFallbackImg from "@/assets/weybridge-crest-500.webp.asset.json";
 
 export const SANITY_PROJECT_ID = "sjz7d6eb";
 export const SANITY_DATASET = "production";
