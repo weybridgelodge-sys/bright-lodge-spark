@@ -191,6 +191,7 @@ const SanityPostPage = () => {
         title={data.title}
         description={data.excerpt}
         canonical={`/news/${data.slug}`}
+        type="article"
         image={heroImage ?? undefined}
         schema={[
           breadcrumbSchema([
