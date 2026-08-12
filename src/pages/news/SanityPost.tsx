@@ -42,18 +42,14 @@ const blockText = (block: PortableBlock) =>
   (block.children ?? []).map((c) => c.text ?? "").join("");
 
 /** Auto-generate a table of contents from the post's h2 headings. */
-const extractToc = (body: unknown[] | undefined) => {
-  const seen = new Map<string, number>();
-  return ((body ?? []) as PortableBlock[])
+const extractToc = (body: unknown[] | undefined) =>
+  ((body ?? []) as PortableBlock[])
     .filter((b) => b._type === "block" && b.style === "h2" && blockText(b).trim())
     .map((b) => {
       const label = blockText(b).trim();
-      const base = slugifyHeading(label);
-      const n = (seen.get(base) ?? 0) + 1;
-      seen.set(base, n);
-      return { id: n > 1 ? `${base}-${n}` : base, label };
+      return { id: slugifyHeading(label), label };
     });
-};
+
 
 const portableComponents: PortableTextComponents = {
   block: {
