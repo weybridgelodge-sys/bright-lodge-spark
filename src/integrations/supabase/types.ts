@@ -3901,6 +3901,13 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_next_public_meeting: {
+        Args: never
+        Returns: {
+          ceremony: string
+          meeting_date: string
+        }[]
+      }
       get_officers_public: {
         Args: { _year?: number }
         Returns: {
