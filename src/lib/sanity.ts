@@ -15,6 +15,10 @@ import installationImg from "@/assets/news/installation-meeting-group.jpg";
 import { assetUrl } from "@/lib/assetUrl";
 import surrey2030Img from "@/assets/news/surrey-2030-gold-trophy.jpg.asset.json";
 import recruitmentImg from "@/assets/news/modern-freemasonry-recruitment.jpg";
+import royalArchImg from "@/assets/news/royal-arch-meeting-room.jpg.asset.json";
+import threeDegreesImg from "@/assets/news/three-masonic-degrees.jpg";
+import doubleInitiationImg from "@/assets/news/double-initiation-december-2025.jpg";
+import crestFallbackImg from "@/assets/weybridge-crest-500.webp.asset.json";
 
 export const SANITY_PROJECT_ID = "sjz7d6eb";
 export const SANITY_DATASET = "production";
@@ -42,7 +46,13 @@ export const LEGACY_IMAGES: Record<string, string> = {
   "75th-anniversary": anniversaryImg,
   "installation-meeting-october-2023": installationImg,
   "modern-freemasonry-recruitment": recruitmentImg,
+  "royal-arch-explained": assetUrl(royalArchImg),
+  "three-masonic-degrees-explained": threeDegreesImg,
+  "double-initiation-december-2025": doubleInitiationImg,
 };
+
+/** Last-resort thumbnail so listings never render an empty grey box. */
+export const FALLBACK_POST_IMAGE = assetUrl(crestFallbackImg);
 
 export interface SanityPost {
   _id: string;
@@ -137,7 +147,7 @@ export function getPostThumbnail(post: SanityPost, width = 800, height = 450): s
       // fall through
     }
   }
-  return LEGACY_IMAGES[post.slug] ?? null;
+  return LEGACY_IMAGES[post.slug] ?? FALLBACK_POST_IMAGE;
 }
 
 /**
