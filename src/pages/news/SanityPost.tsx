@@ -234,23 +234,21 @@ const SanityPostPage = () => {
               </Link>
             </div>
 
+            <div className="mt-10 text-center">
+              <Link
+                to="/join-us"
+                className="inline-flex items-center justify-center gap-2 bg-gold-shimmer text-accent-foreground px-8 py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity"
+              >
+                Start Your Enquiry <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+
             <div className="mt-12 pt-8 border-t border-border">
               <SocialShare
                 url={`https://weybridgelodge.org.uk/news/${data.slug}`}
                 title={data.title}
               />
             </div>
-          </div>
-        </section>
-
-        <section className="py-16 bg-navy-gradient">
-          <div className="container mx-auto px-4 sm:px-6 text-center">
-            <Link
-              to="/join-us"
-              className="inline-flex items-center justify-center bg-gold-shimmer text-accent-foreground px-8 py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity"
-            >
-              Join Weybridge Lodge
-            </Link>
           </div>
         </section>
       </main>
