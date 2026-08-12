@@ -64,33 +64,64 @@ const inputClass = "flex h-10 w-full rounded-md border border-input bg-backgroun
 const selectClass = "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 min-h-[48px]";
 const labelClass = "block text-sm font-sans font-medium text-foreground mb-1";
 
-// ─── Component ────────────────────────────────────────────────────────────────
+// ─── Loader: decides between bookable page and Save the Date ─────────────────
 const Bookings = () => {
-  const { toast } = useToast();
-  const shouldReduceMotion = useReducedMotion();
-
-  const [bundle, setBundle] = useState<EventBundle>(FALLBACK);
-  const [loadingEvent, setLoadingEvent] = useState(true);
-  const [publishedMeeting, setPublishedMeeting] = useState<{ id: string; event_key: string } | null>(null);
+  const [state, setState] = useState<
+    | { kind: "loading" }
+    | { kind: "bookable"; bundle: EventBundle; publishedMeeting: { id: string; event_key: string } | null }
+    | { kind: "save-the-date"; meeting: RegisterMeeting | null }
+  >({ kind: "loading" });
 
   useEffect(() => {
     let cancelled = false;
-    fetchNextEvent().then(async (b) => {
+    (async () => {
+      const b = await fetchNextEvent();
       if (cancelled) return;
       if (b) {
-        setBundle(b);
         const { data } = await (supabase.rpc as any)("get_published_meeting_for_event", {
           _event_key: b.event.slug,
         });
         const row = Array.isArray(data) ? data[0] : null;
-        if (!cancelled) setPublishedMeeting(row ? { id: row.id, event_key: row.event_key } : null);
-      } else {
-        setPublishedMeeting(null);
+        if (!cancelled) {
+          setState({
+            kind: "bookable",
+            bundle: b,
+            publishedMeeting: row ? { id: row.id, event_key: row.event_key } : null,
+          });
+        }
+        return;
       }
-      setLoadingEvent(false);
-    });
+      const meeting = await fetchNextRegisterMeeting();
+      if (!cancelled) setState({ kind: "save-the-date", meeting });
+    })();
     return () => { cancelled = true; };
   }, []);
+
+  if (state.kind === "loading") {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="w-6 h-6 text-gold animate-spin" aria-hidden="true" />
+        <span className="sr-only">Loading meeting details…</span>
+      </div>
+    );
+  }
+
+  if (state.kind === "save-the-date") return <SaveTheDate meeting={state.meeting} />;
+
+  return <BookingsEvent bundle={state.bundle} publishedMeeting={state.publishedMeeting} />;
+};
+
+// ─── Bookable meeting page ───────────────────────────────────────────────────
+const BookingsEvent = ({
+  bundle,
+  publishedMeeting,
+}: {
+  bundle: EventBundle;
+  publishedMeeting: { id: string; event_key: string } | null;
+}) => {
+  const { toast } = useToast();
+  const shouldReduceMotion = useReducedMotion();
+
 
   const { event, courses, diningOptions } = bundle;
   const introParagraphs = useMemo(
