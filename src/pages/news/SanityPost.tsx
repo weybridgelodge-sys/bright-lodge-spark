@@ -217,6 +217,11 @@ const SanityPostPage = () => {
                 <Calendar className="h-3.5 w-3.5" />
                 <time dateTime={data.publishedAt}>{formatDate(data.publishedAt)}</time>
               </span>
+              {data.author && (
+                <span className="inline-flex items-center gap-1">
+                  <User className="h-3.5 w-3.5" /> {data.author}
+                </span>
+              )}
               <Link
                 to={`/news/category/${slugifyCategory(data.category)}`}
                 className="inline-flex items-center gap-1 text-primary font-medium hover:underline"
@@ -235,6 +240,29 @@ const SanityPostPage = () => {
                 alt={(data.mainImage as { alt?: string })?.alt ?? data.title}
                 className="w-full aspect-video object-cover rounded-sm border border-border mb-8"
               />
+            )}
+
+            <SocialShare url={shareUrl} title={data.title} commentCount={commentCount} />
+
+            {toc.length > 0 && (
+              <motion.nav
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.1 }}
+                aria-label="Table of contents"
+                className="mb-12 p-6 border border-border rounded-sm bg-card"
+              >
+                <h2 className="text-lg font-serif text-foreground mb-3">Table of Contents</h2>
+                <ol className="list-decimal list-inside space-y-1.5">
+                  {toc.map((item) => (
+                    <li key={item.id}>
+                      <a href={`#${item.id}`} className="text-sm font-sans text-primary hover:underline">
+                        {item.label}
+                      </a>
+                    </li>
+                  ))}
+                </ol>
+              </motion.nav>
             )}
 
             <p className="text-lg text-foreground/85 font-serif italic leading-relaxed mb-8">
@@ -281,11 +309,13 @@ const SanityPostPage = () => {
             </div>
 
             <div className="mt-12 pt-8 border-t border-border">
-              <SocialShare
-                url={`https://weybridgelodge.org.uk/news/${data.slug}`}
-                title={data.title}
-              />
+              <SocialShare url={shareUrl} title={data.title} />
             </div>
+
+            <CommentsSection />
+
+            <SanityPostFooterNav currentSlug={data.slug} category={data.category} />
+
           </div>
         </section>
       </main>
