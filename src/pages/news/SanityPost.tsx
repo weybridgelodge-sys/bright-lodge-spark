@@ -180,6 +180,11 @@ const SanityPostPage = () => {
     },
   };
 
+  const shareUrl = `/news/${data.slug}`;
+  const toc = extractToc(data.body);
+
+
+
   return (
     <div className="min-h-screen">
       <SEO
