@@ -3,13 +3,15 @@ import { useParams, Link, Navigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { PortableText, type PortableTextComponents } from "@portabletext/react";
 import { motion } from "framer-motion";
-import { Calendar, Tag, ArrowLeft, ArrowRight } from "lucide-react";
+import { Calendar, Tag, User, ArrowLeft, ArrowRight } from "lucide-react";
 
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
 import SEO, { breadcrumbSchema } from "@/components/SEO";
 import SocialShare from "@/components/SocialShare";
+import CommentsSection, { commentCount } from "@/components/CommentsSection";
+import SanityPostFooterNav from "@/components/SanityPostFooterNav";
 import NotFound from "@/pages/NotFound";
 import {
   sanityClient,
@@ -21,11 +23,46 @@ import {
   slugifyCategory,
 } from "@/lib/sanity";
 
+type PortableBlock = {
+  _type?: string;
+  _key?: string;
+  style?: string;
+  children?: { text?: string }[];
+};
+
+const slugifyHeading = (text: string) =>
+  text
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .trim()
+    .replace(/\s+/g, "-")
+    .slice(0, 60) || "section";
+
+const blockText = (block: PortableBlock) =>
+  (block.children ?? []).map((c) => c.text ?? "").join("");
+
+/** Auto-generate a table of contents from the post's h2 headings. */
+const extractToc = (body: unknown[] | undefined) =>
+  ((body ?? []) as PortableBlock[])
+    .filter((b) => b._type === "block" && b.style === "h2" && blockText(b).trim())
+    .map((b) => {
+      const label = blockText(b).trim();
+      return { id: slugifyHeading(label), label };
+    });
+
+
 const portableComponents: PortableTextComponents = {
   block: {
-    h2: ({ children }) => (
-      <h2 className="text-2xl font-serif text-foreground mt-10 mb-4">{children}</h2>
-    ),
+    h2: ({ children, value }) => {
+      const label = blockText(value as PortableBlock).trim();
+      const id = slugifyHeading(label);
+      return (
+        <section id={id} className="scroll-mt-28 mt-10">
+          <div className="h-0.5 w-16 bg-gold mb-6" />
+          <h2 className="text-2xl font-serif text-foreground mb-4">{children}</h2>
+        </section>
+      );
+    },
     h3: ({ children }) => (
       <h3 className="text-xl font-serif text-foreground mt-8 mb-3">{children}</h3>
     ),
@@ -143,12 +180,18 @@ const SanityPostPage = () => {
     },
   };
 
+  const shareUrl = `/news/${data.slug}`;
+  const toc = extractToc(data.body);
+
+
+
   return (
     <div className="min-h-screen">
       <SEO
         title={data.title}
         description={data.excerpt}
         canonical={`/news/${data.slug}`}
+        type="article"
         image={heroImage ?? undefined}
         schema={[
           breadcrumbSchema([
@@ -180,6 +223,11 @@ const SanityPostPage = () => {
                 <Calendar className="h-3.5 w-3.5" />
                 <time dateTime={data.publishedAt}>{formatDate(data.publishedAt)}</time>
               </span>
+              {data.author && (
+                <span className="inline-flex items-center gap-1">
+                  <User className="h-3.5 w-3.5" /> {data.author}
+                </span>
+              )}
               <Link
                 to={`/news/category/${slugifyCategory(data.category)}`}
                 className="inline-flex items-center gap-1 text-primary font-medium hover:underline"
@@ -198,6 +246,29 @@ const SanityPostPage = () => {
                 alt={(data.mainImage as { alt?: string })?.alt ?? data.title}
                 className="w-full aspect-video object-cover rounded-sm border border-border mb-8"
               />
+            )}
+
+            <SocialShare url={shareUrl} title={data.title} commentCount={commentCount} />
+
+            {toc.length > 0 && (
+              <motion.nav
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.1 }}
+                aria-label="Table of contents"
+                className="mb-12 p-6 border border-border rounded-sm bg-card"
+              >
+                <h2 className="text-lg font-serif text-foreground mb-3">Table of Contents</h2>
+                <ol className="list-decimal list-inside space-y-1.5">
+                  {toc.map((item) => (
+                    <li key={item.id}>
+                      <a href={`#${item.id}`} className="text-sm font-sans text-primary hover:underline">
+                        {item.label}
+                      </a>
+                    </li>
+                  ))}
+                </ol>
+              </motion.nav>
             )}
 
             <p className="text-lg text-foreground/85 font-serif italic leading-relaxed mb-8">
@@ -244,11 +315,13 @@ const SanityPostPage = () => {
             </div>
 
             <div className="mt-12 pt-8 border-t border-border">
-              <SocialShare
-                url={`https://weybridgelodge.org.uk/news/${data.slug}`}
-                title={data.title}
-              />
+              <SocialShare url={shareUrl} title={data.title} />
             </div>
+
+            <CommentsSection />
+
+            <SanityPostFooterNav currentSlug={data.slug} category={data.category} />
+
           </div>
         </section>
       </main>
