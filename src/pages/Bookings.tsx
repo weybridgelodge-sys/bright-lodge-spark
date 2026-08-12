@@ -22,35 +22,9 @@ import sixFellowcraftsAprons from "@/assets/six-fellowcrafts-aprons.png.asset.js
 
 
 
-// ─── Fallback event ───────────────────────────────────────────────────────────
-// Location corrected: Portsmouth Road removed.
-// Correct address: Weybourne House, Hitherbury Close, Guildford GU2 4DR.
-const FALLBACK: EventBundle = {
-  event: {
-    id: "fallback",
-    slug: "festive_board_april_2026",
-    title: "Initiation Ceremony — April Meeting",
-    intro_heading: "Initiation Ceremony — April Meeting",
-    intro:
-      "W Bro. Julien Tidmarsh, Worshipful Master of Weybridge Lodge No. 6787, cordially invites you to attend an Initiation Meeting on **Wednesday, 15th April 2026, commencing at 6.00 pm**.\n\nFollowing the ceremony, we'll gather for a festive board filled with cheer, good food, and heartfelt fellowship.",
-    event_date: "2026-04-15T18:00:00+01:00",
-    tyling_time: "Tyling at 6.00 pm prompt",
-    dining_time: "Festive Board Dining at 7:45 pm",
-    location: "Guildford Masonic Centre, Weybourne House, Hitherbury Close, Guildford GU2 4DR",
-    dress_code: "Normal Masonic attire — Provincial, Black or Craft Tie, Dark Suit and White Gloves",
-    booking_deadline: "2026-04-08",
-    published: true,
-    sort_order: 0,
-  },
-  courses: [
-    { id: "c1", event_id: "fallback", course_label: "Entrée", dish: "Halloumi, Carrot, Orange & Watercress Salad", description: "With honey & mustard dressing.", position: 1 },
-    { id: "c2", event_id: "fallback", course_label: "Main", dish: "Irish Stew with Soda Bread", description: "Lamb, smoked bacon, root vegetables, potatoes & pearl barley, slowly cooked.", position: 2 },
-    { id: "c3", event_id: "fallback", course_label: "Dessert", dish: "Warm Chocolate Brownie (Gluten-Free)", description: "Served with sauce & ice cream.", position: 3 },
-  ],
-  diningOptions: [
-    { id: "o1", event_id: "fallback", label: "Festive Board (3-course dinner)", price_pence: 3200, position: 1, is_default: true },
-  ],
-};
+import SaveTheDate from "@/components/bookings/SaveTheDate";
+import { fetchNextRegisterMeeting, type RegisterMeeting } from "@/lib/lodgeEvents";
+
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 const fmtFullDate = (iso: string) =>
@@ -90,33 +64,64 @@ const inputClass = "flex h-10 w-full rounded-md border border-input bg-backgroun
 const selectClass = "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 min-h-[48px]";
 const labelClass = "block text-sm font-sans font-medium text-foreground mb-1";
 
-// ─── Component ────────────────────────────────────────────────────────────────
+// ─── Loader: decides between bookable page and Save the Date ─────────────────
 const Bookings = () => {
-  const { toast } = useToast();
-  const shouldReduceMotion = useReducedMotion();
-
-  const [bundle, setBundle] = useState<EventBundle>(FALLBACK);
-  const [loadingEvent, setLoadingEvent] = useState(true);
-  const [publishedMeeting, setPublishedMeeting] = useState<{ id: string; event_key: string } | null>(null);
+  const [state, setState] = useState<
+    | { kind: "loading" }
+    | { kind: "bookable"; bundle: EventBundle; publishedMeeting: { id: string; event_key: string } | null }
+    | { kind: "save-the-date"; meeting: RegisterMeeting | null }
+  >({ kind: "loading" });
 
   useEffect(() => {
     let cancelled = false;
-    fetchNextEvent().then(async (b) => {
+    (async () => {
+      const b = await fetchNextEvent();
       if (cancelled) return;
       if (b) {
-        setBundle(b);
         const { data } = await (supabase.rpc as any)("get_published_meeting_for_event", {
           _event_key: b.event.slug,
         });
         const row = Array.isArray(data) ? data[0] : null;
-        if (!cancelled) setPublishedMeeting(row ? { id: row.id, event_key: row.event_key } : null);
-      } else {
-        setPublishedMeeting(null);
+        if (!cancelled) {
+          setState({
+            kind: "bookable",
+            bundle: b,
+            publishedMeeting: row ? { id: row.id, event_key: row.event_key } : null,
+          });
+        }
+        return;
       }
-      setLoadingEvent(false);
-    });
+      const meeting = await fetchNextRegisterMeeting();
+      if (!cancelled) setState({ kind: "save-the-date", meeting });
+    })();
     return () => { cancelled = true; };
   }, []);
+
+  if (state.kind === "loading") {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="w-6 h-6 text-gold animate-spin" aria-hidden="true" />
+        <span className="sr-only">Loading meeting details…</span>
+      </div>
+    );
+  }
+
+  if (state.kind === "save-the-date") return <SaveTheDate meeting={state.meeting} />;
+
+  return <BookingsEvent bundle={state.bundle} publishedMeeting={state.publishedMeeting} />;
+};
+
+// ─── Bookable meeting page ───────────────────────────────────────────────────
+const BookingsEvent = ({
+  bundle,
+  publishedMeeting,
+}: {
+  bundle: EventBundle;
+  publishedMeeting: { id: string; event_key: string } | null;
+}) => {
+  const { toast } = useToast();
+  const shouldReduceMotion = useReducedMotion();
+
 
   const { event, courses, diningOptions } = bundle;
   const introParagraphs = useMemo(
@@ -367,18 +372,12 @@ useEffect(() => {
               >
                 {event.intro_heading || event.title}
               </h2>
-              {loadingEvent && event.id === "fallback" ? (
-                <div className="flex items-center gap-2 text-muted-foreground font-sans text-sm">
-                  <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
-                  Loading meeting…
-                </div>
-              ) : (
-                introParagraphs.map((p, i) => (
-                  <p key={i} className="text-muted-foreground font-sans leading-relaxed mb-4 last:mb-0">
-                    {renderParagraph(p)}
-                  </p>
-                ))
-              )}
+              {introParagraphs.map((p, i) => (
+                <p key={i} className="text-muted-foreground font-sans leading-relaxed mb-4 last:mb-0">
+                  {renderParagraph(p)}
+                </p>
+              ))}
+
             </motion.div>
             <motion.img
               src={assetUrl(sixFellowcraftsAprons)}
