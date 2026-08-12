@@ -59,27 +59,35 @@ export async function fetchNextRegisterMeeting(): Promise<RegisterMeeting | null
   return { meeting_date: row.meeting_date, ceremony: row.ceremony ?? null };
 }
 
-/** Fetches the next upcoming published event, or the most recent if none upcoming. */
+/**
+ * All future-dated meetings from the Meetings Register (any status except
+ * completed, so drafts are included) — date + sanitised ceremony label only.
+ */
+export async function fetchUpcomingRegisterMeetings(): Promise<RegisterMeeting[]> {
+  const { data, error } = await (supabase.rpc as any)("get_upcoming_public_meetings");
+  if (error || !Array.isArray(data)) return [];
+  return (data as any[])
+    .filter((r) => r?.meeting_date)
+    .map((r) => ({ meeting_date: r.meeting_date as string, ceremony: (r.ceremony ?? null) as string | null }));
+}
+
+/**
+ * Fetches the next published event dated today or later.
+ * Returns null when the only published events are in the past — a passed
+ * meeting must never be presented as bookable.
+ */
 export async function fetchNextEvent(): Promise<EventBundle | null> {
-  const nowIso = new Date().toISOString();
-  let { data: events } = await supabase
+  const startOfToday = new Date();
+  startOfToday.setHours(0, 0, 0, 0);
+  const { data: events } = await supabase
     .from("lodge_events")
     .select("*")
     .eq("published", true)
-    .gte("event_date", nowIso)
+    .gte("event_date", startOfToday.toISOString())
     .order("event_date", { ascending: true })
     .limit(1);
 
-  if (!events || events.length === 0) {
-    const fallback = await supabase
-      .from("lodge_events")
-      .select("*")
-      .eq("published", true)
-      .order("event_date", { ascending: false })
-      .limit(1);
-    events = fallback.data ?? [];
-  }
-  if (!events.length) return null;
+  if (!events || events.length === 0) return null;
 
   const event = events[0] as LodgeEvent;
   const [coursesRes, optsRes] = await Promise.all([
