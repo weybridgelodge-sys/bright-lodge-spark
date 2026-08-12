@@ -146,7 +146,7 @@ const SanityPostPage = () => {
   return (
     <div className="min-h-screen">
       <SEO
-        title={`${data.title} | Weybridge Lodge News`}
+        title={data.title}
         description={data.excerpt}
         canonical={`/news/${data.slug}`}
         image={heroImage ?? undefined}
