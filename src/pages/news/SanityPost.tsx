@@ -18,7 +18,7 @@ import {
   POST_BY_SLUG_QUERY,
   type SanityPost,
   urlFor,
-  LEGACY_IMAGES,
+  FALLBACK_POST_IMAGE,
   formatDate,
   slugifyCategory,
 } from "@/lib/sanity";
@@ -162,7 +162,7 @@ const SanityPostPage = () => {
 
   const heroImage = data.mainImage
     ? urlFor(data.mainImage).width(1600).height(800).fit("crop").auto("format").url()
-    : (LEGACY_IMAGES[data.slug] ?? null);
+    : FALLBACK_POST_IMAGE;
 
   const articleSchema = {
     "@context": "https://schema.org",

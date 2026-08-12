@@ -4,20 +4,9 @@ import imageUrlBuilder from "@sanity/image-url";
 // Loose type for any Sanity image reference accepted by imageUrlBuilder.
 type SanityImageSource = Parameters<ReturnType<typeof imageUrlBuilder>["image"]>[0];
 
-// Bundled fallback images for the 5 originally hand-coded posts so the
-// listing keeps its existing thumbnails even though the Sanity documents
-// were seeded without binary uploads. New posts created in Studio use
-// their own mainImage and don't appear in this map.
-import apgmVisitImg from "@/assets/news/apgm-visit-full.jpg";
-import sandsImg from "@/assets/news/sands-cheque.webp";
-import anniversaryImg from "@/assets/news/75th-anniversary-group.png";
-import installationImg from "@/assets/news/installation-meeting-group.jpg";
+// Last-resort thumbnail (lodge crest) for any post published without a
+// mainImage. All current posts carry their own image from Sanity.
 import { assetUrl } from "@/lib/assetUrl";
-import surrey2030Img from "@/assets/news/surrey-2030-gold-trophy.jpg.asset.json";
-import recruitmentImg from "@/assets/news/modern-freemasonry-recruitment.jpg";
-import royalArchImg from "@/assets/news/royal-arch-meeting-room.jpg.asset.json";
-import threeDegreesImg from "@/assets/news/three-masonic-degrees.jpg";
-import doubleInitiationImg from "@/assets/news/double-initiation-december-2025.jpg";
 import crestFallbackImg from "@/assets/weybridge-crest-500.webp.asset.json";
 
 export const SANITY_PROJECT_ID = "sjz7d6eb";
@@ -39,17 +28,6 @@ export function urlFor(source: SanityImageSource) {
   return builder.image(source);
 }
 
-export const LEGACY_IMAGES: Record<string, string> = {
-  "surrey-2030-festival-gold": assetUrl(surrey2030Img),
-  "pgm-visit-february-2026": apgmVisitImg,
-  "sands-charity": sandsImg,
-  "75th-anniversary": anniversaryImg,
-  "installation-meeting-october-2023": installationImg,
-  "modern-freemasonry-recruitment": recruitmentImg,
-  "royal-arch-explained": assetUrl(royalArchImg),
-  "three-masonic-degrees-explained": threeDegreesImg,
-  "double-initiation-december-2025": doubleInitiationImg,
-};
 
 /** Last-resort thumbnail so listings never render an empty grey box. */
 export const FALLBACK_POST_IMAGE = assetUrl(crestFallbackImg);
@@ -137,7 +115,7 @@ export const slugifyCategory = (s: string) =>
 
 /**
  * Resolve the listing thumbnail for a post: prefer Sanity's mainImage,
- * else fall back to a bundled legacy image, else null.
+ * else fall back to the lodge crest.
  */
 export function getPostThumbnail(post: SanityPost, width = 800, height = 450): string | null {
   if (post.mainImage) {
@@ -147,7 +125,7 @@ export function getPostThumbnail(post: SanityPost, width = 800, height = 450): s
       // fall through
     }
   }
-  return LEGACY_IMAGES[post.slug] ?? FALLBACK_POST_IMAGE;
+  return FALLBACK_POST_IMAGE;
 }
 
 /**
