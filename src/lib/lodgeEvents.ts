@@ -40,6 +40,25 @@ export type EventBundle = {
   diningOptions: DiningOption[];
 };
 
+/** Public-safe slice of the Meetings Register: date + proposed ceremony only. */
+export type RegisterMeeting = {
+  meeting_date: string;
+  ceremony: string | null;
+};
+
+/**
+ * Next upcoming meeting from the Meetings Register (festive_board_meetings),
+ * via a security-definer RPC that exposes only the date and a sanitised
+ * ceremony label — never internal notes, pricing, headcount or draft status.
+ */
+export async function fetchNextRegisterMeeting(): Promise<RegisterMeeting | null> {
+  const { data, error } = await (supabase.rpc as any)("get_next_public_meeting");
+  if (error) return null;
+  const row = Array.isArray(data) ? data[0] : null;
+  if (!row?.meeting_date) return null;
+  return { meeting_date: row.meeting_date, ceremony: row.ceremony ?? null };
+}
+
 /** Fetches the next upcoming published event, or the most recent if none upcoming. */
 export async function fetchNextEvent(): Promise<EventBundle | null> {
   const nowIso = new Date().toISOString();
