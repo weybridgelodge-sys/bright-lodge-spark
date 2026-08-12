@@ -41,6 +41,12 @@ export function celebrationName(m: CelebrationMember): string {
   return [title, person].filter(Boolean).join(' ').trim() || 'Our brother'
 }
 
+/** Warm, informal first-name-only form for the message body ("our dear Brother [FirstName]"). */
+export function warmName(m: CelebrationMember): string {
+  const first = (m.preferred_name?.trim() || m.first_name?.trim() || '').trim()
+  return first || 'our Brother'
+}
+
 export function ordinal(n: number): string {
   const rem100 = n % 100
   if (rem100 >= 11 && rem100 <= 13) return `${n}th`
