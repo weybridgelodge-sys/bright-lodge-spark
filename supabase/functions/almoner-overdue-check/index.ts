@@ -1,11 +1,19 @@
 // Daily scheduled edge function: computes overdue Almoner follow-ups and
 // members who missed their last two meetings, then emails a digest to the
 // current Almoner via send-transactional-email.
+//
+// It also detects "memorable dates" (birthdays and years-as-a-Freemason
+// anniversaries) for the day and, when there are any, sends the Almoner a push
+// notification per celebration whose tap target is a pre-filled WhatsApp
+// deep link. The same celebrations are repeated in the digest email as a
+// backup in case the push is missed.
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors'
+import { detectCelebrations, londonToday } from './celebrations.ts'
 
 const SITE_URL = 'https://weybridgelodge.org.uk'
 const PORTAL_URL = `${SITE_URL}/members/almoner`
+
 
 const displayName = (m: any): string => {
   const first = (m.preferred_name?.trim() || m.first_name?.trim() || '').trim()
