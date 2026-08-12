@@ -241,16 +241,7 @@ const staticRoutes: RouteMeta[] = [
 // ── Hand-built news article pages that are NOT authored in Sanity ──
 // Every Sanity-authored post is generated automatically by postRoutes() below;
 // do not add entries here for posts that exist in Sanity Studio.
-const newsRoutes: RouteMeta[] = [
-
-  {
-    route: "news/modern-freemasonry-recruitment",
-    title: "How Freemasonry Recruits Today",
-    description:
-      "English Freemasonry is changing how it recruits — some Provinces are even trying paid Facebook ads. Here's what's actually worked at Weybridge Lodge in Guildford, and why we follow up every enquiry personally.",
-    canonical: "/news/modern-freemasonry-recruitment",
-  },
-];
+const newsRoutes: RouteMeta[] = [];
 
 // ── Sanity videos (same client config as scripts/generate-sitemap-and-feed.ts) ──
 const sanity = createClient({

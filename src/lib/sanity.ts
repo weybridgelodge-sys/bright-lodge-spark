@@ -14,6 +14,7 @@ import anniversaryImg from "@/assets/news/75th-anniversary-group.png";
 import installationImg from "@/assets/news/installation-meeting-group.jpg";
 import { assetUrl } from "@/lib/assetUrl";
 import surrey2030Img from "@/assets/news/surrey-2030-gold-trophy.jpg.asset.json";
+import recruitmentImg from "@/assets/news/modern-freemasonry-recruitment.jpg";
 
 export const SANITY_PROJECT_ID = "sjz7d6eb";
 export const SANITY_DATASET = "production";
@@ -40,6 +41,7 @@ export const LEGACY_IMAGES: Record<string, string> = {
   "sands-charity": sandsImg,
   "75th-anniversary": anniversaryImg,
   "installation-meeting-october-2023": installationImg,
+  "modern-freemasonry-recruitment": recruitmentImg,
 };
 
 export interface SanityPost {
