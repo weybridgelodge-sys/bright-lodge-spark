@@ -46,7 +46,13 @@ export const LEGACY_IMAGES: Record<string, string> = {
   "75th-anniversary": anniversaryImg,
   "installation-meeting-october-2023": installationImg,
   "modern-freemasonry-recruitment": recruitmentImg,
+  "royal-arch-explained": assetUrl(royalArchImg),
+  "three-masonic-degrees-explained": threeDegreesImg,
+  "double-initiation-december-2025": doubleInitiationImg,
 };
+
+/** Last-resort thumbnail so listings never render an empty grey box. */
+export const FALLBACK_POST_IMAGE = assetUrl(crestFallbackImg);
 
 export interface SanityPost {
   _id: string;
