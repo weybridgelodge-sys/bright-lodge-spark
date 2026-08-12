@@ -56,14 +56,23 @@ Deno.serve(async (req) => {
 
   try {
     const today = new Date().toISOString().slice(0, 10)
+    // Celebrations use Europe/London wall-clock so a birthday never lands a
+    // day early/late. `?test_date=YYYY-MM-DD` lets us rehearse a future date.
+    const testDate = url.searchParams.get('test_date')
+    const celebrationDay = /^\d{4}-\d{2}-\d{2}$/.test(testDate ?? '')
+      ? (testDate as string)
+      : londonToday()
 
     // ---- Run independent reads in parallel ----
     // 1) active members, 2) open welfare logs, 3) last two past meetings.
     const [membersRes, logsRes, meetingsRes] = await Promise.all([
       supabase
         .from('profiles')
-        .select('id,full_name,preferred_name,first_name,last_name,title,status')
+        .select(
+          'id,full_name,preferred_name,first_name,last_name,title,status,date_of_birth,initiation_date',
+        )
         .eq('status', 'active'),
+
       supabase
         .from('welfare_log_entries')
         .select('member_id,contact_date,follow_up_date')
