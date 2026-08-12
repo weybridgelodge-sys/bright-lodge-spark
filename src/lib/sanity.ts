@@ -50,6 +50,7 @@ export interface SanityPost {
   title: string;
   slug: string;
   publishedAt: string;
+  author?: string;
   category: string;
   excerpt: string;
   mainImage?: SanityImageSource & { alt?: string };
@@ -63,6 +64,7 @@ const postProjection = `{
   title,
   "slug": slug.current,
   publishedAt,
+  author,
   category,
   excerpt,
   mainImage,
