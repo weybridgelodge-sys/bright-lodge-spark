@@ -207,7 +207,7 @@ function renderSectionPreview(s: Section): JSX.Element {
           <div key={b.id} className="break-inside-avoid">
             {b.type === "text" ? (
               <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">
-                {b.text || <span className="text-slate-400 italic">[text…]</span>}
+                {b.text ? renderInline(b.text) : <span className="text-slate-400 italic">[text…]</span>}
               </p>
             ) : (
               <figure>
@@ -226,7 +226,7 @@ function renderSectionPreview(s: Section): JSX.Element {
         <div key={b.id}>
           {b.type === "text" ? (
             <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">
-              {b.text || <span className="text-slate-400 italic">[Pending text entry…]</span>}
+              {b.text ? renderInline(b.text) : <span className="text-slate-400 italic">[Pending text entry…]</span>}
             </p>
           ) : (
             <figure>
