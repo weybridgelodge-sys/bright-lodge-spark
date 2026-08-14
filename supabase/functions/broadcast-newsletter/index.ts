@@ -184,8 +184,14 @@ function renderHtml(opts: { subject: string; content: NewsletterContent; unsubsc
     <div style="color:rgba(246,241,226,0.85);font-family:Arial,sans-serif;font-size:12px;padding:6px 0 14px;line-height:1.6">
       &copy; ${new Date().getFullYear()} Weybridge Lodge No. 6787 &middot; Guildford Masonic Centre, GU2 4DR<br>
       You're receiving this because Weybridge Lodge No. 6787 sends newsletters to members and visitors.
-      <a href="${unsubscribeUrl}" style="color:#C9A432;text-decoration:underline">Unsubscribe here</a> to stop receiving these. Unsubscribing only affects newsletters &mdash; official lodge communications (summonses, booking confirmations) are unaffected.
+      <!-- The email API always appends its own mandatory unsubscribe footer (it cannot
+           be suppressed), which opts the address out of ALL mail from this domain.
+           This link is the newsletter-only alternative, deliberately NOT worded as a
+           second "unsubscribe" so there is only one unsubscribe link in the email. -->
+      To receive lodge summonses and booking confirmations but no further newsletters,
+      <a href="${unsubscribeUrl}" style="color:#C9A432;text-decoration:underline">change your newsletter preferences here</a>.
     </div>
+
   </div>
 </div>
 </body></html>`;
