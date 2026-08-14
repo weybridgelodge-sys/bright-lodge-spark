@@ -119,15 +119,84 @@ function syncStructure(members: Section[], visitors: Section[]): Section[] {
   });
 }
 
-function escapeHtml(s: string): string {
-  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+/**
+ * Preview-side mirror of the edge function's inlineFormat():
+ *   [label](url)   -> link
+ *   [[label]](url) -> gold button
+ *   bare https://… / www.… / email -> auto-linked
+ * Keep both implementations in sync.
+ */
+function normaliseHref(raw: string): string | null {
+  const u = raw.trim();
+  if (/^https?:\/\//i.test(u) || /^mailto:/i.test(u)) return u;
+  if (/^www\./i.test(u)) return "https://" + u;
+  if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(u)) return "mailto:" + u;
+  return null;
 }
-function paragraphs(text: string): string {
-  return text
-    .split(/\n{2,}/)
-    .map((p) => `<p style="margin:0 0 12px;line-height:1.7;color:#1f2937;font-size:15px">${escapeHtml(p).replace(/\n/g, "<br>")}</p>`)
-    .join("");
+
+const INLINE_RE =
+  /\[\[([^\]]+)\]\]\(([^)\s]+)\)|\[([^\]]+)\]\(([^)\s]+)\)|((?:https?:\/\/|www\.)[^\s<)]+[^\s<).,;:!?])|([^\s<>()@]+@[^\s<>()@]+\.[a-z]{2,})/gi;
+
+function renderInline(text: string): React.ReactNode[] {
+  const out: React.ReactNode[] = [];
+  let last = 0;
+  let m: RegExpExecArray | null;
+  INLINE_RE.lastIndex = 0;
+  while ((m = INLINE_RE.exec(text))) {
+    if (m.index > last) out.push(text.slice(last, m.index));
+    const isButton = !!m[1];
+    const label = m[1] || m[3] || m[5] || m[6];
+    const href = normaliseHref(m[2] || m[4] || m[5] || m[6] || "");
+    if (href) {
+      out.push(
+        <a
+          key={`${m.index}-${label}`}
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={isButton
+            ? "inline-block bg-gold text-navy font-semibold text-xs px-3 py-1.5 rounded no-underline"
+            : "text-navy underline font-semibold"}
+        >
+          {label}
+        </a>,
+      );
+    } else {
+      out.push(m[0]);
+    }
+    last = m.index + m[0].length;
+  }
+  if (last < text.length) out.push(text.slice(last));
+  return out;
 }
+
+/** Wraps the current textarea selection in link/button markdown. */
+function applyLinkMarkup(blockId: string, kind: "link" | "button", current: string,
+                         commit: (next: string) => void) {
+  const ta = document.getElementById(`nl-ta-${blockId}`) as HTMLTextAreaElement | null;
+  const start = ta?.selectionStart ?? current.length;
+  const end = ta?.selectionEnd ?? current.length;
+  const selected = current.slice(start, end).trim();
+  const label = selected || window.prompt("Link text (what the reader sees):", "")?.trim() || "";
+  if (!label) return;
+  const url = window.prompt("Link URL (https://… or an email address):", "https://")?.trim();
+  if (!url || !normaliseHref(url)) {
+    if (url) window.alert("That doesn't look like a valid URL or email address.");
+    return;
+  }
+  const markup = kind === "button" ? `[[${label}]](${url})` : `[${label}](${url})`;
+  const next = selected
+    ? current.slice(0, start) + markup + current.slice(end)
+    : current.slice(0, start) + markup + current.slice(start);
+  commit(next);
+  requestAnimationFrame(() => {
+    ta?.focus();
+    const pos = start + markup.length;
+    ta?.setSelectionRange(pos, pos);
+  });
+}
+
+
 
 function renderSectionPreview(s: Section): JSX.Element {
   const blocks = s.blocks;
