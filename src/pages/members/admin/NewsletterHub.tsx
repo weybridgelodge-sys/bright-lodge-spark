@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import {
   Mail, Send, Eye, Users, FileEdit, CheckCircle2, Loader2, AlertCircle, Save, Trash2,
   FileClock, Plus, Type, Image as ImageIcon, ArrowUp, ArrowDown, Columns, Rows, Copy,
+  Link2 as LinkIcon, MousePointerClick,
 } from "lucide-react";
 import MembersLayout from "@/components/members/MembersLayout";
 import ProtectedRoute from "@/components/members/ProtectedRoute";
