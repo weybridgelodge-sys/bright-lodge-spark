@@ -539,38 +539,30 @@ Deno.serve(async (req) => {
   if (req.method !== "POST") return new Response("Method not allowed", { status: 405, headers: corsHeaders });
 
   try {
-    // TEMP diagnostic path: allows a server-side operator holding
-    // NEWSLETTER_DEBUG_KEY to exercise the test-send path without a browser
-    // session. Remove once the test-send pipeline is confirmed working.
-    const debugKey = Deno.env.get("NEWSLETTER_DEBUG_KEY") ?? "";
-    const isDebugCaller = debugKey.length > 0 && req.headers.get("x-debug-key") === debugKey;
-
     const authHeader = req.headers.get("Authorization") ?? "";
     const token = authHeader.replace(/^Bearer\s+/i, "");
-    if (!token && !isDebugCaller) {
+    if (!token) {
       return new Response(JSON.stringify({ error: "Sign-in required" }), {
         status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-    let userId = "00000000-0000-0000-0000-000000000000";
-    if (!isDebugCaller) {
-      const userClient = createClient(SUPABASE_URL, ANON_KEY, { global: { headers: { Authorization: `Bearer ${token}` } } });
-      const { data: userResult, error: userErr } = await userClient.auth.getUser();
-      if (userErr || !userResult?.user) {
-        return new Response(JSON.stringify({ error: "Invalid session" }), {
-          status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      userId = userResult.user.id;
-
-      const { data: canEdit, error: rpcErr } = await admin.rpc("can_edit_newsletter", { _user: userId });
-      if (rpcErr || canEdit !== true) {
-        console.error("can_edit_newsletter denied", { userId, rpcErr });
-        return new Response(JSON.stringify({ error: "Not authorised to send the newsletter" }), {
-          status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
+    const userClient = createClient(SUPABASE_URL, ANON_KEY, { global: { headers: { Authorization: `Bearer ${token}` } } });
+    const { data: userResult, error: userErr } = await userClient.auth.getUser();
+    if (userErr || !userResult?.user) {
+      return new Response(JSON.stringify({ error: "Invalid session" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
+    const userId = userResult.user.id;
+
+    const { data: canEdit, error: rpcErr } = await admin.rpc("can_edit_newsletter", { _user: userId });
+    if (rpcErr || canEdit !== true) {
+      console.error("can_edit_newsletter denied", { userId, rpcErr });
+      return new Response(JSON.stringify({ error: "Not authorised to send the newsletter" }), {
+        status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
 
 
     const body = (await req.json()) as BroadcastBody;
