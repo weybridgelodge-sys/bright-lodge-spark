@@ -575,10 +575,13 @@ Deno.serve(async (req) => {
         { to: testEmail, subject: `[TEST] ${subject}`, html },
       ]);
       if (!result.ok) {
+        console.error("Test send failed", { testEmail, from: FROM_ADDRESS, error: result.error });
         return new Response(JSON.stringify({ error: result.error || "Test send failed" }), {
           status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
+      console.log("Test send OK", { testEmail, audience: testAudience });
+
       return new Response(JSON.stringify({ ok: true, test: true, sentTo: testEmail, audience: testAudience }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
