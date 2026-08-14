@@ -110,6 +110,17 @@ function inlineFormat(text: string): string {
     const href = safeUrl(addr);
     return href ? pre + stash(`<a href="${href}" style="${LINK_STYLE}">${addr}</a>`) : pre + addr;
   });
+  // Bare domains without a scheme, e.g. "weybridgelodge.org.uk/bookings".
+  s = s.replace(
+    /(^|[\s(])((?:[a-z0-9-]+\.)+(?:co\.uk|org\.uk|ac\.uk|com|org|net|uk|io|dev)(?:\/[^\s<)]*)?)/gi,
+    (_m, pre, url) => {
+      const clean = String(url).replace(/[.,;:!?]+$/, "");
+      const trail = String(url).slice(clean.length);
+      return pre + stash(`<a href="${escapeHtml("https://" + clean)}" style="${LINK_STYLE}">${clean}</a>`) + trail;
+    },
+  );
+
+
 
   return s.replace(/\u0000(\d+)\u0000/g, (_m, i) => slots[Number(i)]);
 }
