@@ -1,8 +1,9 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { sendLovableEmail } from "npm:@lovable.dev/email-js";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-debug-key",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
@@ -10,15 +11,18 @@ const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
 const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY")!;
-const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY")!;
 
-const GATEWAY_URL = "https://connector-gateway.lovable.dev/resend";
+// Verified sender subdomain delegated to Lovable's nameservers — must match the
+// value used by send-transactional-email, or the email API rejects the send.
+const SENDER_DOMAIN = "notify.email.weybridgelodge.org.uk";
+const FROM_DOMAIN = "email.weybridgelodge.org.uk";
 const FROM_ADDRESS =
   Deno.env.get("NEWSLETTER_FROM_EMAIL") ??
-  "Weybridge Lodge No. 6787 <onboarding@resend.dev>";
+  `Weybridge Lodge No. 6787 <noreply@${FROM_DOMAIN}>`;
 const REPLY_TO = "communications@weybridgelodge.org.uk";
 
 const admin = createClient(SUPABASE_URL, SERVICE_KEY);
+
 
 type Block =
   | { id?: string; type: "text"; text: string }
@@ -223,26 +227,87 @@ async function getRecipients(audience: Audience): Promise<Recipient[]> {
   return Array.from(map.values());
 }
 
+// Every transactional/marketing send through the Lovable email API requires an
+// unsubscribe token. One token per email address, reused across sends.
+function generateToken(): string {
+  const bytes = new Uint8Array(32);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes).map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+async function getUnsubscribeToken(email: string): Promise<string> {
+  const normalized = email.trim().toLowerCase();
+  const { data: existing } = await admin
+    .from("email_unsubscribe_tokens")
+    .select("token")
+    .eq("email", normalized)
+    .maybeSingle();
+  if (existing?.token) return existing.token as string;
+
+  const token = generateToken();
+  await admin
+    .from("email_unsubscribe_tokens")
+    .upsert({ token, email: normalized }, { onConflict: "email", ignoreDuplicates: true });
+  const { data: stored } = await admin
+    .from("email_unsubscribe_tokens")
+    .select("token")
+    .eq("email", normalized)
+    .maybeSingle();
+  return (stored?.token as string) ?? token;
+}
+
+// Sends through the Lovable email API on the lodge's verified sender domain —
+// the same pipeline every other email in the portal uses. The previous Resend
+// connector route sent from the unverified `onboarding@resend.dev` sandbox
+// address, which Resend rejects with a 422 for any real recipient.
+function htmlToText(html: string): string {
+  return html
+    .replace(/<style[\s\S]*?<\/style>/gi, "")
+    .replace(/<head[\s\S]*?<\/head>/gi, "")
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/(p|div|tr|h1|h2|h3|li)>/gi, "\n")
+    .replace(/<[^>]+>/g, "")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
 async function sendBatch(emails: Array<{ to: string; html: string; subject: string }>): Promise<{ ok: boolean; error?: string }> {
-  const payload = emails.map((e) => ({
-    from: FROM_ADDRESS, to: [e.to], subject: e.subject, html: e.html, reply_to: REPLY_TO,
-  }));
-  const res = await fetch(`${GATEWAY_URL}/emails/batch`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${LOVABLE_API_KEY}`,
-      "X-Connection-Api-Key": RESEND_API_KEY,
-    },
-    body: JSON.stringify(payload),
-  });
-  if (!res.ok) {
-    const text = await res.text();
-    return { ok: false, error: `Resend ${res.status}: ${text}` };
+  for (const e of emails) {
+    try {
+      const unsubscribeToken = await getUnsubscribeToken(e.to);
+      await sendLovableEmail(
+        {
+          to: e.to,
+          from: FROM_ADDRESS,
+          reply_to: REPLY_TO,
+          sender_domain: SENDER_DOMAIN,
+          subject: e.subject,
+          html: e.html,
+          text: htmlToText(e.html),
+
+          purpose: "transactional",
+          label: "newsletter",
+          idempotency_key: crypto.randomUUID(),
+          unsubscribe_token: unsubscribeToken,
+        },
+        { apiKey: LOVABLE_API_KEY, sendUrl: Deno.env.get("LOVABLE_SEND_URL") },
+      );
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error("Newsletter send failed", { to: e.to, error: msg });
+      return { ok: false, error: `Email API: ${msg}` };
+    }
+    await new Promise((r) => setTimeout(r, 200));
   }
-  await res.text();
   return { ok: true };
 }
+
 
 async function renderNewsletterPdf(opts: {
   subject: string;
@@ -492,10 +557,13 @@ Deno.serve(async (req) => {
 
     const { data: canEdit, error: rpcErr } = await admin.rpc("can_edit_newsletter", { _user: userId });
     if (rpcErr || canEdit !== true) {
+      console.error("can_edit_newsletter denied", { userId, rpcErr });
       return new Response(JSON.stringify({ error: "Not authorised to send the newsletter" }), {
         status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+
 
     const body = (await req.json()) as BroadcastBody;
     if (!body?.broadcastId) {
@@ -564,10 +632,13 @@ Deno.serve(async (req) => {
         { to: testEmail, subject: `[TEST] ${subject}`, html },
       ]);
       if (!result.ok) {
+        console.error("Test send failed", { testEmail, from: FROM_ADDRESS, error: result.error });
         return new Response(JSON.stringify({ error: result.error || "Test send failed" }), {
           status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
+      console.log("Test send OK", { testEmail, audience: testAudience });
+
       return new Response(JSON.stringify({ ok: true, test: true, sentTo: testEmail, audience: testAudience }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
