@@ -333,12 +333,14 @@ function NewsletterHubInner() {
    *   ["members","visitors"]→ two separate sends (dual-variant mode)
    *   ["all"]               → single merged dedup send (unified-content mode only)
    */
-  const send = async (audiences: Array<"members" | "visitors" | "all">) => {
+  const send = async (audiences: Array<"members" | "members_only" | "visitors" | "all">) => {
     if (!broadcastId) { setError("Save the newsletter first."); return; }
     if (status !== "ready_to_send") { setError('Set status to "Ready to send" before broadcasting.'); return; }
 
     const labelFor = (a: string) =>
-      a === "members" ? "Members & Visitors" : a === "visitors" ? "Public" : "Combined (all lists)";
+      a === "members" ? "Members & Visiting Brethren"
+        : a === "members_only" ? "Members Only"
+        : a === "visitors" ? "Public" : "Combined (all lists)";
 
     // Client-side content guard. In unified mode every requested audience
     // shares the members variant; otherwise check the matching variant.
@@ -351,6 +353,11 @@ function NewsletterHubInner() {
     }
 
     if (audiences.length > 1 && !confirm(`Broadcast both editions now? Two separate sends will be logged and two PDFs archived.`)) {
+      return;
+    }
+    if (audiences.includes("members_only") && !confirm(
+      "Send this INTERNAL-ONLY newsletter to lodge members only?\n\nVisiting Freemasons (visitor_contacts) and public sign-ups will NOT receive it."
+    )) {
       return;
     }
     if (audiences.includes("all") && !confirm(`Send one merged broadcast to Members & Visitors AND Public, deduplicated by email? One combined PDF will be archived.`)) {
@@ -388,6 +395,41 @@ function NewsletterHubInner() {
   };
 
 
+
+  // ---- Test send -------------------------------------------------------
+  const sendTest = async () => {
+    if (!broadcastId) { setError("Save the newsletter first."); return; }
+    const addr = testEmail.trim();
+    if (!addr) { setError("Enter an email address for the test send."); return; }
+    setError(null);
+    setTesting(true);
+    try {
+      const v = syncStructure(membersSections, visitorsSections);
+      await supabase
+        .from("newsletter_broadcasts" as any)
+        .update({
+          subject: subject.trim(),
+          content: { sections: membersSections },
+          content_visitors: { sections: v },
+          unified_content: unifiedContent,
+        })
+        .eq("id", broadcastId);
+
+      const { data, error: invokeError } = await supabase.functions.invoke("broadcast-newsletter", {
+        body: { broadcastId, testEmail: addr, testAudience: unifiedContent ? "members" : effectiveAudience },
+      });
+      if (invokeError || (data && (data as { error?: string }).error)) {
+        throw new Error((data as { error?: string })?.error || invokeError?.message || "Test send failed");
+      }
+      toast.success(`Test newsletter sent to ${addr}`);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Test send failed";
+      setError(msg);
+      toast.error(msg);
+    } finally {
+      setTesting(false);
+    }
+  };
 
   // ---- Section/block mutators (operate on the active audience) ----
   const updateSection = (id: string, patch: Partial<Section>) =>
