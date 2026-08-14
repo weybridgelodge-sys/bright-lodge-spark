@@ -189,8 +189,18 @@ function NewsletterHubInner() {
   const [drafts, setDrafts] = useState<DraftRow[]>([]);
   const [saving, setSaving] = useState(false);
   const [sending, setSending] = useState(false);
+  const [testing, setTesting] = useState(false);
+  const [testEmail, setTestEmail] = useState("");
   const [sentSummary, setSentSummary] = useState<Array<{ audience: string; sent: number; error?: string | null }> | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  // Default the test address to the signed-in sender's own email.
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      const email = data?.user?.email;
+      if (email) setTestEmail((prev) => prev || email);
+    });
+  }, []);
 
 
   // In unified mode, the visitor variant editor is hidden and the members
@@ -333,12 +343,14 @@ function NewsletterHubInner() {
    *   ["members","visitors"]→ two separate sends (dual-variant mode)
    *   ["all"]               → single merged dedup send (unified-content mode only)
    */
-  const send = async (audiences: Array<"members" | "visitors" | "all">) => {
+  const send = async (audiences: Array<"members" | "members_only" | "visitors" | "all">) => {
     if (!broadcastId) { setError("Save the newsletter first."); return; }
     if (status !== "ready_to_send") { setError('Set status to "Ready to send" before broadcasting.'); return; }
 
     const labelFor = (a: string) =>
-      a === "members" ? "Members & Visitors" : a === "visitors" ? "Public" : "Combined (all lists)";
+      a === "members" ? "Members & Visiting Brethren"
+        : a === "members_only" ? "Members Only"
+        : a === "visitors" ? "Public" : "Combined (all lists)";
 
     // Client-side content guard. In unified mode every requested audience
     // shares the members variant; otherwise check the matching variant.
@@ -351,6 +363,11 @@ function NewsletterHubInner() {
     }
 
     if (audiences.length > 1 && !confirm(`Broadcast both editions now? Two separate sends will be logged and two PDFs archived.`)) {
+      return;
+    }
+    if (audiences.includes("members_only") && !confirm(
+      "Send this INTERNAL-ONLY newsletter to lodge members only?\n\nVisiting Freemasons (visitor_contacts) and public sign-ups will NOT receive it."
+    )) {
       return;
     }
     if (audiences.includes("all") && !confirm(`Send one merged broadcast to Members & Visitors AND Public, deduplicated by email? One combined PDF will be archived.`)) {
@@ -388,6 +405,41 @@ function NewsletterHubInner() {
   };
 
 
+
+  // ---- Test send -------------------------------------------------------
+  const sendTest = async () => {
+    if (!broadcastId) { setError("Save the newsletter first."); return; }
+    const addr = testEmail.trim();
+    if (!addr) { setError("Enter an email address for the test send."); return; }
+    setError(null);
+    setTesting(true);
+    try {
+      const v = syncStructure(membersSections, visitorsSections);
+      await supabase
+        .from("newsletter_broadcasts" as any)
+        .update({
+          subject: subject.trim(),
+          content: { sections: membersSections },
+          content_visitors: { sections: v },
+          unified_content: unifiedContent,
+        })
+        .eq("id", broadcastId);
+
+      const { data, error: invokeError } = await supabase.functions.invoke("broadcast-newsletter", {
+        body: { broadcastId, testEmail: addr, testAudience: unifiedContent ? "members" : effectiveAudience },
+      });
+      if (invokeError || (data && (data as { error?: string }).error)) {
+        throw new Error((data as { error?: string })?.error || invokeError?.message || "Test send failed");
+      }
+      toast.success(`Test newsletter sent to ${addr}`);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Test send failed";
+      setError(msg);
+      toast.error(msg);
+    } finally {
+      setTesting(false);
+    }
+  };
 
   // ---- Section/block mutators (operate on the active audience) ----
   const updateSection = (id: string, patch: Partial<Section>) =>
@@ -737,11 +789,44 @@ function NewsletterHubInner() {
             </Button>
           </div>
 
-          <div className="grid sm:grid-cols-3 gap-2 pt-2">
+          {/* Test send */}
+          <div className="rounded-lg border border-gold/25 bg-navy/40 p-3 space-y-2">
+            <div className="flex items-center gap-2 text-xs font-semibold text-gold">
+              <Eye className="h-4 w-4" /> Send a test copy first
+            </div>
+            <p className="text-[11px] text-primary-foreground/60">
+              Mails one copy of the exact final newsletter (same renderer used for the real broadcast) to the
+              address below. Nothing is logged as a broadcast and no PDF is archived. Subject is prefixed
+              <span className="font-mono"> [TEST]</span>.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-2">
+              <input
+                type="email"
+                value={testEmail}
+                onChange={(e) => setTestEmail(e.target.value)}
+                placeholder="you@example.com"
+                className="flex-1 rounded-md bg-navy border border-gold/30 px-3 py-2 text-sm text-primary-foreground placeholder:text-primary-foreground/30"
+              />
+              <Button type="button" variant="outline" onClick={sendTest} disabled={testing || !broadcastId}
+                className="border-gold/40 text-gold hover:bg-gold/10"
+                title={!broadcastId ? "Save first" : "Send a test copy to this address"}>
+                {testing ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : <Send className="h-4 w-4 mr-1.5" />}
+                Send test
+              </Button>
+            </div>
+          </div>
+
+          <div className="grid sm:grid-cols-2 gap-2 pt-2">
+            <Button type="button" onClick={() => send(["members_only"])} disabled={sending || status !== "ready_to_send" || !broadcastId}
+              className="bg-navy border-2 border-red-400/70 text-red-200 hover:bg-red-500/10 font-semibold disabled:opacity-40"
+              title={!broadcastId ? "Save first" : status !== "ready_to_send" ? 'Mark "Ready to send"' : "Internal circulation — lodge members only, no visiting brethren, no public sign-ups"}>
+              {sending ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : <Send className="h-4 w-4 mr-1.5" />}
+              Send to Members Only (internal)
+            </Button>
             <Button type="button" onClick={() => send(["members"])} disabled={sending || status !== "ready_to_send" || !broadcastId}
               className="bg-gold hover:bg-gold/90 text-navy font-semibold disabled:opacity-40"
-              title={!broadcastId ? "Save first" : status !== "ready_to_send" ? 'Mark "Ready to send"' : "Send to active members"}>
-              {sending ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : <Send className="h-4 w-4 mr-1.5" />} Send to Members &amp; Visitors
+              title={!broadcastId ? "Save first" : status !== "ready_to_send" ? 'Mark "Ready to send"' : "Members + visiting Freemasons captured at the Festive Board"}>
+              {sending ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : <Send className="h-4 w-4 mr-1.5" />} Send to Members &amp; Visiting Brethren
             </Button>
             <Button type="button" onClick={() => send(["visitors"])} disabled={sending || status !== "ready_to_send" || !broadcastId}
               className="bg-gold hover:bg-gold/90 text-navy font-semibold disabled:opacity-40"
