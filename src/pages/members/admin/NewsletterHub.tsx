@@ -43,7 +43,7 @@ interface DraftRow {
 }
 
 
-const DEFAULT_SUBJECT = "Weybridge Lodge No. 6787 — Monthly News & Labours";
+const DEFAULT_SUBJECT = "Weybridge Lodge No. 6787 — Monthly Chronicle & Labours";
 const SITE_ORIGIN = "https://bright-lodge-spark.lovable.app";
 const LOGO_URL = `${SITE_ORIGIN}${logoAsset.url}`;
 
