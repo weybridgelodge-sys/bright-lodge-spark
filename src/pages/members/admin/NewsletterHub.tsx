@@ -429,8 +429,19 @@ function NewsletterHubInner() {
         body: { broadcastId, testEmail: addr, testAudience: unifiedContent ? "members" : effectiveAudience },
       });
       if (invokeError || (data && (data as { error?: string }).error)) {
-        throw new Error((data as { error?: string })?.error || invokeError?.message || "Test send failed");
+        // functions.invoke doesn't parse the body on a non-2xx response, so the
+        // real reason lives on the FunctionsHttpError context. Read it out.
+        let detail = (data as { error?: string })?.error || "";
+        const ctx = (invokeError as unknown as { context?: Response })?.context;
+        if (!detail && ctx && typeof ctx.text === "function") {
+          try {
+            const body = await ctx.clone().text();
+            detail = (JSON.parse(body) as { error?: string })?.error || body;
+          } catch { /* keep generic message */ }
+        }
+        throw new Error(detail || invokeError?.message || "Test send failed");
       }
+
       toast.success(`Test newsletter sent to ${addr}`);
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Test send failed";
