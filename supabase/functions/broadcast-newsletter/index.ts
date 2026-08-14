@@ -272,7 +272,7 @@ async function sendBatch(emails: Array<{ to: string; html: string; subject: stri
           sender_domain: SENDER_DOMAIN,
           subject: e.subject,
           html: e.html,
-          purpose: "marketing",
+          purpose: "transactional",
           label: "newsletter",
           idempotency_key: crypto.randomUUID(),
           unsubscribe_token: unsubscribeToken,
