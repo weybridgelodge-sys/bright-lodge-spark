@@ -1,8 +1,9 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { sendLovableEmail } from "npm:@lovable.dev/email-js";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-debug-key",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
@@ -10,15 +11,18 @@ const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
 const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY")!;
-const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY")!;
 
-const GATEWAY_URL = "https://connector-gateway.lovable.dev/resend";
+// Verified sender subdomain delegated to Lovable's nameservers — must match the
+// value used by send-transactional-email, or the email API rejects the send.
+const SENDER_DOMAIN = "notify.email.weybridgelodge.org.uk";
+const FROM_DOMAIN = "email.weybridgelodge.org.uk";
 const FROM_ADDRESS =
   Deno.env.get("NEWSLETTER_FROM_EMAIL") ??
-  "Weybridge Lodge No. 6787 <onboarding@resend.dev>";
+  `Weybridge Lodge No. 6787 <noreply@${FROM_DOMAIN}>`;
 const REPLY_TO = "communications@weybridgelodge.org.uk";
 
 const admin = createClient(SUPABASE_URL, SERVICE_KEY);
+
 
 type Block =
   | { id?: string; type: "text"; text: string }
