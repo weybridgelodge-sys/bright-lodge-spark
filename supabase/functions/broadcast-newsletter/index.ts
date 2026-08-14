@@ -56,16 +56,81 @@ const AUDIENCE_FILENAME: Record<Audience, string> = {
   all: "All",
 };
 
-const LOGO_URL = "https://bright-lodge-spark.lovable.app/__l5e/assets-v1/c8d69345-d84c-4619-a96a-e59f04aa0481/weybridge-logo-white.png";
+const LOGO_URL = "https://weybridgelodge.org.uk/__l5e/assets-v1/c8d69345-d84c-4619-a96a-e59f04aa0481/weybridge-logo-white.png";
 
 function escapeHtml(s: string): string {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
 }
+
+const LINK_STYLE = "color:#1B2A4A;text-decoration:underline;font-weight:bold";
+const BUTTON_STYLE =
+  "display:inline-block;background:#C9A432;color:#1B2A4A;font-family:Arial,sans-serif;font-size:14px;font-weight:bold;text-decoration:none;padding:10px 18px;border-radius:4px;margin:4px 0";
+
+function safeUrl(raw: string): string | null {
+  const u = raw.trim().replace(/&amp;/g, "&");
+  if (/^https?:\/\//i.test(u) || /^mailto:/i.test(u)) return escapeHtml(u);
+  if (/^www\./i.test(u)) return escapeHtml("https://" + u);
+  if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(u)) return escapeHtml("mailto:" + u);
+  return null;
+}
+
+/**
+ * Inline formatting for newsletter body text.
+ * Supported (authored by the editor's "Insert link" / "Insert button" tools):
+ *   [label](https://url)   -> inline anchor
+ *   [[label]](https://url) -> gold button anchor
+ *   bare https://… , www.… and email addresses -> auto-linked
+ * Input is escaped first; only our own generated markup is raw HTML.
+ */
+function inlineFormat(text: string): string {
+  const slots: string[] = [];
+  const stash = (html: string) => {
+    slots.push(html);
+    return `\u0000${slots.length - 1}\u0000`;
+  };
+
+  let s = escapeHtml(text);
+
+  // Button syntax first ([[label]](url)), then plain links.
+  s = s.replace(/\[\[([^\]]+)\]\]\(([^)\s]+)\)/g, (m, label, url) => {
+    const href = safeUrl(url);
+    return href ? stash(`<a href="${href}" style="${BUTTON_STYLE}">${label}</a>`) : m;
+  });
+  s = s.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (m, label, url) => {
+    const href = safeUrl(url);
+    return href ? stash(`<a href="${href}" style="${LINK_STYLE}">${label}</a>`) : m;
+  });
+
+  // Bare URLs / emails that weren't already wrapped above.
+  s = s.replace(/(^|[\s(])((?:https?:\/\/|www\.)[^\s<)]+[^\s<).,;:!?])/gi, (_m, pre, url) => {
+    const href = safeUrl(url);
+    return href ? pre + stash(`<a href="${href}" style="${LINK_STYLE}">${url}</a>`) : pre + url;
+  });
+  s = s.replace(/(^|[\s(])([^\s<>()@]+@[^\s<>()@]+\.[a-z]{2,})/gi, (_m, pre, addr) => {
+    const href = safeUrl(addr);
+    return href ? pre + stash(`<a href="${href}" style="${LINK_STYLE}">${addr}</a>`) : pre + addr;
+  });
+  // Bare domains without a scheme, e.g. "weybridgelodge.org.uk/bookings".
+  s = s.replace(
+    /(^|[\s(])((?:[a-z0-9-]+\.)+(?:co\.uk|org\.uk|ac\.uk|com|org|net|uk|io|dev)(?:\/[^\s<)]*)?)/gi,
+    (_m, pre, url) => {
+      const clean = String(url).replace(/[.,;:!?]+$/, "");
+      const trail = String(url).slice(clean.length);
+      return pre + stash(`<a href="${escapeHtml("https://" + clean)}" style="${LINK_STYLE}">${clean}</a>`) + trail;
+    },
+  );
+
+
+
+  return s.replace(/\u0000(\d+)\u0000/g, (_m, i) => slots[Number(i)]);
+}
+
 function paragraphs(text: string): string {
   return text.split(/\n{2,}/)
-    .map((p) => `<p style="margin:0 0 12px;line-height:1.7;color:#1f2937;font-size:15px">${escapeHtml(p).replace(/\n/g, "<br>")}</p>`)
+    .map((p) => `<p style="margin:0 0 12px;line-height:1.7;color:#1f2937;font-size:15px">${inlineFormat(p).replace(/\n/g, "<br>")}</p>`)
     .join("");
 }
+
 function migrateContent(raw: any): NewsletterContent {
   if (raw && Array.isArray(raw.sections)) return raw as NewsletterContent;
   return { sections: [] };
@@ -130,8 +195,14 @@ function renderHtml(opts: { subject: string; content: NewsletterContent; unsubsc
     <div style="color:rgba(246,241,226,0.85);font-family:Arial,sans-serif;font-size:12px;padding:6px 0 14px;line-height:1.6">
       &copy; ${new Date().getFullYear()} Weybridge Lodge No. 6787 &middot; Guildford Masonic Centre, GU2 4DR<br>
       You're receiving this because Weybridge Lodge No. 6787 sends newsletters to members and visitors.
-      <a href="${unsubscribeUrl}" style="color:#C9A432;text-decoration:underline">Unsubscribe here</a> to stop receiving these. Unsubscribing only affects newsletters &mdash; official lodge communications (summonses, booking confirmations) are unaffected.
+      <!-- The email API always appends its own mandatory unsubscribe footer (it cannot
+           be suppressed), which opts the address out of ALL mail from this domain.
+           This link is the newsletter-only alternative, deliberately NOT worded as a
+           second "unsubscribe" so there is only one unsubscribe link in the email. -->
+      To receive lodge summonses and booking confirmations but no further newsletters,
+      <a href="${unsubscribeUrl}" style="color:#C9A432;text-decoration:underline">change your newsletter preferences here</a>.
     </div>
+
   </div>
 </div>
 </body></html>`;

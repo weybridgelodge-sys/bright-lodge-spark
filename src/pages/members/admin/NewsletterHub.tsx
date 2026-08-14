@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import {
   Mail, Send, Eye, Users, FileEdit, CheckCircle2, Loader2, AlertCircle, Save, Trash2,
   FileClock, Plus, Type, Image as ImageIcon, ArrowUp, ArrowDown, Columns, Rows, Copy,
+  Link2 as LinkIcon, MousePointerClick,
 } from "lucide-react";
 import MembersLayout from "@/components/members/MembersLayout";
 import ProtectedRoute from "@/components/members/ProtectedRoute";
@@ -119,15 +120,84 @@ function syncStructure(members: Section[], visitors: Section[]): Section[] {
   });
 }
 
-function escapeHtml(s: string): string {
-  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+/**
+ * Preview-side mirror of the edge function's inlineFormat():
+ *   [label](url)   -> link
+ *   [[label]](url) -> gold button
+ *   bare https://… / www.… / email -> auto-linked
+ * Keep both implementations in sync.
+ */
+function normaliseHref(raw: string): string | null {
+  const u = raw.trim();
+  if (/^https?:\/\//i.test(u) || /^mailto:/i.test(u)) return u;
+  if (/^www\./i.test(u)) return "https://" + u;
+  if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(u)) return "mailto:" + u;
+  return null;
 }
-function paragraphs(text: string): string {
-  return text
-    .split(/\n{2,}/)
-    .map((p) => `<p style="margin:0 0 12px;line-height:1.7;color:#1f2937;font-size:15px">${escapeHtml(p).replace(/\n/g, "<br>")}</p>`)
-    .join("");
+
+const INLINE_RE =
+  /\[\[([^\]]+)\]\]\(([^)\s]+)\)|\[([^\]]+)\]\(([^)\s]+)\)|((?:https?:\/\/|www\.)[^\s<)]+[^\s<).,;:!?])|([^\s<>()@]+@[^\s<>()@]+\.[a-z]{2,})/gi;
+
+function renderInline(text: string): React.ReactNode[] {
+  const out: React.ReactNode[] = [];
+  let last = 0;
+  let m: RegExpExecArray | null;
+  INLINE_RE.lastIndex = 0;
+  while ((m = INLINE_RE.exec(text))) {
+    if (m.index > last) out.push(text.slice(last, m.index));
+    const isButton = !!m[1];
+    const label = m[1] || m[3] || m[5] || m[6];
+    const href = normaliseHref(m[2] || m[4] || m[5] || m[6] || "");
+    if (href) {
+      out.push(
+        <a
+          key={`${m.index}-${label}`}
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={isButton
+            ? "inline-block bg-gold text-navy font-semibold text-xs px-3 py-1.5 rounded no-underline"
+            : "text-navy underline font-semibold"}
+        >
+          {label}
+        </a>,
+      );
+    } else {
+      out.push(m[0]);
+    }
+    last = m.index + m[0].length;
+  }
+  if (last < text.length) out.push(text.slice(last));
+  return out;
 }
+
+/** Wraps the current textarea selection in link/button markdown. */
+function applyLinkMarkup(blockId: string, kind: "link" | "button", current: string,
+                         commit: (next: string) => void) {
+  const ta = document.getElementById(`nl-ta-${blockId}`) as HTMLTextAreaElement | null;
+  const start = ta?.selectionStart ?? current.length;
+  const end = ta?.selectionEnd ?? current.length;
+  const selected = current.slice(start, end).trim();
+  const label = selected || window.prompt("Link text (what the reader sees):", "")?.trim() || "";
+  if (!label) return;
+  const url = window.prompt("Link URL (https://… or an email address):", "https://")?.trim();
+  if (!url || !normaliseHref(url)) {
+    if (url) window.alert("That doesn't look like a valid URL or email address.");
+    return;
+  }
+  const markup = kind === "button" ? `[[${label}]](${url})` : `[${label}](${url})`;
+  const next = selected
+    ? current.slice(0, start) + markup + current.slice(end)
+    : current.slice(0, start) + markup + current.slice(start);
+  commit(next);
+  requestAnimationFrame(() => {
+    ta?.focus();
+    const pos = start + markup.length;
+    ta?.setSelectionRange(pos, pos);
+  });
+}
+
+
 
 function renderSectionPreview(s: Section): JSX.Element {
   const blocks = s.blocks;
@@ -138,7 +208,7 @@ function renderSectionPreview(s: Section): JSX.Element {
           <div key={b.id} className="break-inside-avoid">
             {b.type === "text" ? (
               <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">
-                {b.text || <span className="text-slate-400 italic">[text…]</span>}
+                {b.text ? renderInline(b.text) : <span className="text-slate-400 italic">[text…]</span>}
               </p>
             ) : (
               <figure>
@@ -157,7 +227,7 @@ function renderSectionPreview(s: Section): JSX.Element {
         <div key={b.id}>
           {b.type === "text" ? (
             <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">
-              {b.text || <span className="text-slate-400 italic">[Pending text entry…]</span>}
+              {b.text ? renderInline(b.text) : <span className="text-slate-400 italic">[Pending text entry…]</span>}
             </p>
           ) : (
             <figure>
@@ -734,13 +804,35 @@ function NewsletterHubInner() {
                         </button>
                       </div>
                       {b.type === "text" ? (
-                        <textarea
-                          rows={3}
-                          value={b.text}
-                          onChange={(e) => updateBlock(s.id, b.id, { text: e.target.value })}
-                          placeholder={`Write ${unifiedContent ? "shared" : effectiveAudience === "members" ? "Members & Visitors" : "Public"} paragraph text…`}
-                          className="w-full bg-navy-dark border border-gold/20 rounded px-2 py-1.5 text-sm text-primary-foreground placeholder:text-primary-foreground/40 focus:outline-none focus:border-gold/60 leading-relaxed resize-y"
-                        />
+                        <div className="space-y-1.5">
+                          <textarea
+                            id={`nl-ta-${b.id}`}
+                            rows={3}
+                            value={b.text}
+                            onChange={(e) => updateBlock(s.id, b.id, { text: e.target.value })}
+                            placeholder={`Write ${unifiedContent ? "shared" : effectiveAudience === "members" ? "Members & Visitors" : "Public"} paragraph text…`}
+                            className="w-full bg-navy-dark border border-gold/20 rounded px-2 py-1.5 text-sm text-primary-foreground placeholder:text-primary-foreground/40 focus:outline-none focus:border-gold/60 leading-relaxed resize-y"
+                          />
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <button
+                              type="button"
+                              onClick={() => applyLinkMarkup(b.id, "link", b.text, (next) => updateBlock(s.id, b.id, { text: next }))}
+                              className="text-[11px] inline-flex items-center gap-1 px-2 py-1 rounded border border-gold/30 text-gold hover:bg-gold/10"
+                            >
+                              <LinkIcon className="h-3 w-3" /> Insert link
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => applyLinkMarkup(b.id, "button", b.text, (next) => updateBlock(s.id, b.id, { text: next }))}
+                              className="text-[11px] inline-flex items-center gap-1 px-2 py-1 rounded border border-gold/30 text-gold hover:bg-gold/10"
+                            >
+                              <MousePointerClick className="h-3 w-3" /> Insert button
+                            </button>
+                            <span className="text-[10px] text-primary-foreground/40">
+                              Select text first, or leave unselected to be prompted. Pasted URLs and email addresses link automatically.
+                            </span>
+                          </div>
+                        </div>
                       ) : (
                         <div className="space-y-1.5">
                           <input type="url" value={b.url}
