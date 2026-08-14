@@ -514,10 +514,12 @@ Deno.serve(async (req) => {
         status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-    if (row.status !== "ready_to_send") {
+    const isTestSend = typeof body.testEmail === "string" && !!body.testEmail.trim();
+    if (!isTestSend && row.status !== "ready_to_send") {
       return new Response(JSON.stringify({ error: `Status must be "Ready to send" before broadcasting (current: ${row.status}).` }),
         { status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
+
     const subject = (row.subject ?? "").trim();
     if (!subject) {
       return new Response(JSON.stringify({ error: "Add a subject line before broadcasting." }), {
