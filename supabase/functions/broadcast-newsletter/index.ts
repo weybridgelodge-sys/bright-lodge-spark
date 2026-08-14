@@ -260,6 +260,23 @@ async function getUnsubscribeToken(email: string): Promise<string> {
 // the same pipeline every other email in the portal uses. The previous Resend
 // connector route sent from the unverified `onboarding@resend.dev` sandbox
 // address, which Resend rejects with a 422 for any real recipient.
+function htmlToText(html: string): string {
+  return html
+    .replace(/<style[\s\S]*?<\/style>/gi, "")
+    .replace(/<head[\s\S]*?<\/head>/gi, "")
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/(p|div|tr|h1|h2|h3|li)>/gi, "\n")
+    .replace(/<[^>]+>/g, "")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
 async function sendBatch(emails: Array<{ to: string; html: string; subject: string }>): Promise<{ ok: boolean; error?: string }> {
   for (const e of emails) {
     try {
@@ -272,6 +289,8 @@ async function sendBatch(emails: Array<{ to: string; html: string; subject: stri
           sender_domain: SENDER_DOMAIN,
           subject: e.subject,
           html: e.html,
+          text: htmlToText(e.html),
+
           purpose: "transactional",
           label: "newsletter",
           idempotency_key: crypto.randomUUID(),
