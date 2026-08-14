@@ -1,0 +1,1 @@
+UPDATE public.member_newsletter_opt_outs SET opted_out_at = NULL, updated_at = now() WHERE user_id = 'de693c92-6f3d-49b6-afc3-406fc4c0acd9';
