@@ -28,20 +28,26 @@ interface NewsletterContent { sections: Section[] }
 
 // Audience the user requests. "all" is only valid with unified_content = true,
 // and triggers a single merged send to the deduplicated combined list.
-type Audience = "members" | "visitors" | "all";
+type Audience = "members" | "members_only" | "visitors" | "all";
 
 interface BroadcastBody {
   broadcastId: string;
   audiences?: Audience[];
+  /** When set, nothing is broadcast: one test copy goes to this address only. */
+  testEmail?: string;
+  /** Which content variant the test copy should render. Defaults to "members". */
+  testAudience?: Audience;
 }
 
 const AUDIENCE_LABEL: Record<Audience, string> = {
   members: "Members & Visitors",
+  members_only: "Members Only",
   visitors: "Public",
   all: "Members & Visitors and Public",
 };
 const AUDIENCE_FILENAME: Record<Audience, string> = {
   members: "MembersVisitors",
+  members_only: "MembersOnly",
   visitors: "Public",
   all: "All",
 };
@@ -143,7 +149,7 @@ type Recipient = { email: string; token: string; kind: "member" | "visitor" | "p
 async function getRecipients(audience: Audience): Promise<Recipient[]> {
   const map = new Map<string, Recipient>();
 
-  if (audience === "members" || audience === "all") {
+  if (audience === "members" || audience === "members_only" || audience === "all") {
     // 1a. Active/pending members with an email.
     const { data: profiles } = await admin
       .from("profiles")
@@ -184,7 +190,10 @@ async function getRecipients(audience: Audience): Promise<Recipient[]> {
     }
 
     // 1b. Visiting Freemasons captured via Festive Board.
-    const { data: visitors } = await admin
+    //     Skipped entirely for "members_only" (internal circulation).
+    const { data: visitors } = audience === "members_only"
+      ? { data: [] as any[] }
+      : await admin
       .from("visitor_contacts")
       .select("email,unsubscribe_token")
       .is("opted_out_at", null);
@@ -518,7 +527,7 @@ Deno.serve(async (req) => {
 
     const unified = !!row.unified_content;
     const requested: Audience[] = Array.isArray(body.audiences) && body.audiences.length > 0
-      ? Array.from(new Set(body.audiences.filter((a): a is Audience => a === "members" || a === "visitors" || a === "all")))
+      ? Array.from(new Set(body.audiences.filter((a): a is Audience => a === "members" || a === "members_only" || a === "visitors" || a === "all")))
       : ["members"];
 
     // Resolve content variants. In unified mode the canonical content is the
@@ -528,6 +537,39 @@ Deno.serve(async (req) => {
 
     const variantFor = (a: Audience): NewsletterContent =>
       a === "visitors" ? visitorsContent : membersContent;
+
+    // ---- TEST SEND -------------------------------------------------------
+    // Renders through the exact same pipeline as a real broadcast and mails a
+    // single copy. Nothing is logged as a broadcast and nothing is archived.
+    if (typeof body.testEmail === "string" && body.testEmail.trim()) {
+      const testEmail = body.testEmail.trim();
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(testEmail)) {
+        return new Response(JSON.stringify({ error: "Enter a valid test email address." }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const testAudience: Audience =
+        body.testAudience === "visitors" || body.testAudience === "members_only" || body.testAudience === "all"
+          ? body.testAudience
+          : "members";
+      const testContent = variantFor(testAudience);
+      const html = renderHtml({
+        subject,
+        content: testContent,
+        unsubscribeUrl: `${SUPABASE_URL}/functions/v1/newsletter-unsubscribe?token=test-preview`,
+      });
+      const result = await sendBatch([
+        { to: testEmail, subject: `[TEST] ${subject}`, html },
+      ]);
+      if (!result.ok) {
+        return new Response(JSON.stringify({ error: result.error || "Test send failed" }), {
+          status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      return new Response(JSON.stringify({ ok: true, test: true, sentTo: testEmail, audience: testAudience }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     // Validate every requested audience has content.
     for (const aud of requested) {
