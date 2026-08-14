@@ -56,16 +56,70 @@ const AUDIENCE_FILENAME: Record<Audience, string> = {
   all: "All",
 };
 
-const LOGO_URL = "https://bright-lodge-spark.lovable.app/__l5e/assets-v1/c8d69345-d84c-4619-a96a-e59f04aa0481/weybridge-logo-white.png";
+const LOGO_URL = "https://weybridgelodge.org.uk/__l5e/assets-v1/c8d69345-d84c-4619-a96a-e59f04aa0481/weybridge-logo-white.png";
 
 function escapeHtml(s: string): string {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
 }
+
+const LINK_STYLE = "color:#1B2A4A;text-decoration:underline;font-weight:bold";
+const BUTTON_STYLE =
+  "display:inline-block;background:#C9A432;color:#1B2A4A;font-family:Arial,sans-serif;font-size:14px;font-weight:bold;text-decoration:none;padding:10px 18px;border-radius:4px;margin:4px 0";
+
+function safeUrl(raw: string): string | null {
+  const u = raw.trim().replace(/&amp;/g, "&");
+  if (/^https?:\/\//i.test(u) || /^mailto:/i.test(u)) return escapeHtml(u);
+  if (/^www\./i.test(u)) return escapeHtml("https://" + u);
+  if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(u)) return escapeHtml("mailto:" + u);
+  return null;
+}
+
+/**
+ * Inline formatting for newsletter body text.
+ * Supported (authored by the editor's "Insert link" / "Insert button" tools):
+ *   [label](https://url)   -> inline anchor
+ *   [[label]](https://url) -> gold button anchor
+ *   bare https://… , www.… and email addresses -> auto-linked
+ * Input is escaped first; only our own generated markup is raw HTML.
+ */
+function inlineFormat(text: string): string {
+  const slots: string[] = [];
+  const stash = (html: string) => {
+    slots.push(html);
+    return `\u0000${slots.length - 1}\u0000`;
+  };
+
+  let s = escapeHtml(text);
+
+  // Button syntax first ([[label]](url)), then plain links.
+  s = s.replace(/\[\[([^\]]+)\]\]\(([^)\s]+)\)/g, (m, label, url) => {
+    const href = safeUrl(url);
+    return href ? stash(`<a href="${href}" style="${BUTTON_STYLE}">${label}</a>`) : m;
+  });
+  s = s.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (m, label, url) => {
+    const href = safeUrl(url);
+    return href ? stash(`<a href="${href}" style="${LINK_STYLE}">${label}</a>`) : m;
+  });
+
+  // Bare URLs / emails that weren't already wrapped above.
+  s = s.replace(/(^|[\s(])((?:https?:\/\/|www\.)[^\s<)]+[^\s<).,;:!?])/gi, (_m, pre, url) => {
+    const href = safeUrl(url);
+    return href ? pre + stash(`<a href="${href}" style="${LINK_STYLE}">${url}</a>`) : pre + url;
+  });
+  s = s.replace(/(^|[\s(])([^\s<>()@]+@[^\s<>()@]+\.[a-z]{2,})/gi, (_m, pre, addr) => {
+    const href = safeUrl(addr);
+    return href ? pre + stash(`<a href="${href}" style="${LINK_STYLE}">${addr}</a>`) : pre + addr;
+  });
+
+  return s.replace(/\u0000(\d+)\u0000/g, (_m, i) => slots[Number(i)]);
+}
+
 function paragraphs(text: string): string {
   return text.split(/\n{2,}/)
-    .map((p) => `<p style="margin:0 0 12px;line-height:1.7;color:#1f2937;font-size:15px">${escapeHtml(p).replace(/\n/g, "<br>")}</p>`)
+    .map((p) => `<p style="margin:0 0 12px;line-height:1.7;color:#1f2937;font-size:15px">${inlineFormat(p).replace(/\n/g, "<br>")}</p>`)
     .join("");
 }
+
 function migrateContent(raw: any): NewsletterContent {
   if (raw && Array.isArray(raw.sections)) return raw as NewsletterContent;
   return { sections: [] };
