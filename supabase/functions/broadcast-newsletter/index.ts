@@ -223,26 +223,68 @@ async function getRecipients(audience: Audience): Promise<Recipient[]> {
   return Array.from(map.values());
 }
 
+// Every transactional/marketing send through the Lovable email API requires an
+// unsubscribe token. One token per email address, reused across sends.
+function generateToken(): string {
+  const bytes = new Uint8Array(32);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes).map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+async function getUnsubscribeToken(email: string): Promise<string> {
+  const normalized = email.trim().toLowerCase();
+  const { data: existing } = await admin
+    .from("email_unsubscribe_tokens")
+    .select("token")
+    .eq("email", normalized)
+    .maybeSingle();
+  if (existing?.token) return existing.token as string;
+
+  const token = generateToken();
+  await admin
+    .from("email_unsubscribe_tokens")
+    .upsert({ token, email: normalized }, { onConflict: "email", ignoreDuplicates: true });
+  const { data: stored } = await admin
+    .from("email_unsubscribe_tokens")
+    .select("token")
+    .eq("email", normalized)
+    .maybeSingle();
+  return (stored?.token as string) ?? token;
+}
+
+// Sends through the Lovable email API on the lodge's verified sender domain —
+// the same pipeline every other email in the portal uses. The previous Resend
+// connector route sent from the unverified `onboarding@resend.dev` sandbox
+// address, which Resend rejects with a 422 for any real recipient.
 async function sendBatch(emails: Array<{ to: string; html: string; subject: string }>): Promise<{ ok: boolean; error?: string }> {
-  const payload = emails.map((e) => ({
-    from: FROM_ADDRESS, to: [e.to], subject: e.subject, html: e.html, reply_to: REPLY_TO,
-  }));
-  const res = await fetch(`${GATEWAY_URL}/emails/batch`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${LOVABLE_API_KEY}`,
-      "X-Connection-Api-Key": RESEND_API_KEY,
-    },
-    body: JSON.stringify(payload),
-  });
-  if (!res.ok) {
-    const text = await res.text();
-    return { ok: false, error: `Resend ${res.status}: ${text}` };
+  for (const e of emails) {
+    try {
+      const unsubscribeToken = await getUnsubscribeToken(e.to);
+      await sendLovableEmail(
+        {
+          to: e.to,
+          from: FROM_ADDRESS,
+          reply_to: REPLY_TO,
+          sender_domain: SENDER_DOMAIN,
+          subject: e.subject,
+          html: e.html,
+          purpose: "marketing",
+          label: "newsletter",
+          idempotency_key: crypto.randomUUID(),
+          unsubscribe_token: unsubscribeToken,
+        },
+        { apiKey: LOVABLE_API_KEY, sendUrl: Deno.env.get("LOVABLE_SEND_URL") },
+      );
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error("Newsletter send failed", { to: e.to, error: msg });
+      return { ok: false, error: `Email API: ${msg}` };
+    }
+    await new Promise((r) => setTimeout(r, 200));
   }
-  await res.text();
   return { ok: true };
 }
+
 
 async function renderNewsletterPdf(opts: {
   subject: string;
