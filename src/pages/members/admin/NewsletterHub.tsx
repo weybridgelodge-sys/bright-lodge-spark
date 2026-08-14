@@ -803,13 +803,35 @@ function NewsletterHubInner() {
                         </button>
                       </div>
                       {b.type === "text" ? (
-                        <textarea
-                          rows={3}
-                          value={b.text}
-                          onChange={(e) => updateBlock(s.id, b.id, { text: e.target.value })}
-                          placeholder={`Write ${unifiedContent ? "shared" : effectiveAudience === "members" ? "Members & Visitors" : "Public"} paragraph text…`}
-                          className="w-full bg-navy-dark border border-gold/20 rounded px-2 py-1.5 text-sm text-primary-foreground placeholder:text-primary-foreground/40 focus:outline-none focus:border-gold/60 leading-relaxed resize-y"
-                        />
+                        <div className="space-y-1.5">
+                          <textarea
+                            id={`nl-ta-${b.id}`}
+                            rows={3}
+                            value={b.text}
+                            onChange={(e) => updateBlock(s.id, b.id, { text: e.target.value })}
+                            placeholder={`Write ${unifiedContent ? "shared" : effectiveAudience === "members" ? "Members & Visitors" : "Public"} paragraph text…`}
+                            className="w-full bg-navy-dark border border-gold/20 rounded px-2 py-1.5 text-sm text-primary-foreground placeholder:text-primary-foreground/40 focus:outline-none focus:border-gold/60 leading-relaxed resize-y"
+                          />
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <button
+                              type="button"
+                              onClick={() => applyLinkMarkup(b.id, "link", b.text, (next) => updateBlock(s.id, b.id, { text: next }))}
+                              className="text-[11px] inline-flex items-center gap-1 px-2 py-1 rounded border border-gold/30 text-gold hover:bg-gold/10"
+                            >
+                              <LinkIcon className="h-3 w-3" /> Insert link
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => applyLinkMarkup(b.id, "button", b.text, (next) => updateBlock(s.id, b.id, { text: next }))}
+                              className="text-[11px] inline-flex items-center gap-1 px-2 py-1 rounded border border-gold/30 text-gold hover:bg-gold/10"
+                            >
+                              <MousePointerClick className="h-3 w-3" /> Insert button
+                            </button>
+                            <span className="text-[10px] text-primary-foreground/40">
+                              Select text first, or leave unselected to be prompted. Pasted URLs and email addresses link automatically.
+                            </span>
+                          </div>
+                        </div>
                       ) : (
                         <div className="space-y-1.5">
                           <input type="url" value={b.url}
