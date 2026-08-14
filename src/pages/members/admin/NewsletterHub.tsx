@@ -189,8 +189,18 @@ function NewsletterHubInner() {
   const [drafts, setDrafts] = useState<DraftRow[]>([]);
   const [saving, setSaving] = useState(false);
   const [sending, setSending] = useState(false);
+  const [testing, setTesting] = useState(false);
+  const [testEmail, setTestEmail] = useState("");
   const [sentSummary, setSentSummary] = useState<Array<{ audience: string; sent: number; error?: string | null }> | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  // Default the test address to the signed-in sender's own email.
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      const email = data?.user?.email;
+      if (email) setTestEmail((prev) => prev || email);
+    });
+  }, []);
 
 
   // In unified mode, the visitor variant editor is hidden and the members
@@ -779,11 +789,44 @@ function NewsletterHubInner() {
             </Button>
           </div>
 
-          <div className="grid sm:grid-cols-3 gap-2 pt-2">
+          {/* Test send */}
+          <div className="rounded-lg border border-gold/25 bg-navy/40 p-3 space-y-2">
+            <div className="flex items-center gap-2 text-xs font-semibold text-gold">
+              <Eye className="h-4 w-4" /> Send a test copy first
+            </div>
+            <p className="text-[11px] text-primary-foreground/60">
+              Mails one copy of the exact final newsletter (same renderer used for the real broadcast) to the
+              address below. Nothing is logged as a broadcast and no PDF is archived. Subject is prefixed
+              <span className="font-mono"> [TEST]</span>.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-2">
+              <input
+                type="email"
+                value={testEmail}
+                onChange={(e) => setTestEmail(e.target.value)}
+                placeholder="you@example.com"
+                className="flex-1 rounded-md bg-navy border border-gold/30 px-3 py-2 text-sm text-primary-foreground placeholder:text-primary-foreground/30"
+              />
+              <Button type="button" variant="outline" onClick={sendTest} disabled={testing || !broadcastId}
+                className="border-gold/40 text-gold hover:bg-gold/10"
+                title={!broadcastId ? "Save first" : "Send a test copy to this address"}>
+                {testing ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : <Send className="h-4 w-4 mr-1.5" />}
+                Send test
+              </Button>
+            </div>
+          </div>
+
+          <div className="grid sm:grid-cols-2 gap-2 pt-2">
+            <Button type="button" onClick={() => send(["members_only"])} disabled={sending || status !== "ready_to_send" || !broadcastId}
+              className="bg-navy border-2 border-red-400/70 text-red-200 hover:bg-red-500/10 font-semibold disabled:opacity-40"
+              title={!broadcastId ? "Save first" : status !== "ready_to_send" ? 'Mark "Ready to send"' : "Internal circulation — lodge members only, no visiting brethren, no public sign-ups"}>
+              {sending ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : <Send className="h-4 w-4 mr-1.5" />}
+              Send to Members Only (internal)
+            </Button>
             <Button type="button" onClick={() => send(["members"])} disabled={sending || status !== "ready_to_send" || !broadcastId}
               className="bg-gold hover:bg-gold/90 text-navy font-semibold disabled:opacity-40"
-              title={!broadcastId ? "Save first" : status !== "ready_to_send" ? 'Mark "Ready to send"' : "Send to active members"}>
-              {sending ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : <Send className="h-4 w-4 mr-1.5" />} Send to Members &amp; Visitors
+              title={!broadcastId ? "Save first" : status !== "ready_to_send" ? 'Mark "Ready to send"' : "Members + visiting Freemasons captured at the Festive Board"}>
+              {sending ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : <Send className="h-4 w-4 mr-1.5" />} Send to Members &amp; Visiting Brethren
             </Button>
             <Button type="button" onClick={() => send(["visitors"])} disabled={sending || status !== "ready_to_send" || !broadcastId}
               className="bg-gold hover:bg-gold/90 text-navy font-semibold disabled:opacity-40"
