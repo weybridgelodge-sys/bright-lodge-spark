@@ -1040,7 +1040,7 @@ useEffect(() => {
 
                       {paymentMethod === "card" && seatsToCharge > 0 && (
                         <div className="border-t border-border pt-4 space-y-3">
-                          <p className={labelClass}>Cover the card processing fee (2% + 20p)?</p>
+                          <p className={labelClass}>Cover the Stripe card processing fee?</p>
                           <div className="space-y-2 mt-1" role="radiogroup" aria-label="Card fee preference">
                             <label className="flex items-center gap-3 cursor-pointer min-h-[48px]">
                               <input
