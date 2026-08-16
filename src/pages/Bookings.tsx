@@ -177,7 +177,7 @@ const BookingsEvent = ({
   const [dietary, setDietary] = useState("");
   const [diningOptionId, setDiningOptionId] = useState<string>("");
   const [paymentMethod, setPaymentMethod] = useState<"card" | "bank-transfer" | "cash-cheque" | "">("");
-  const [coverFee, setCoverFee] = useState(false);
+  const [coverFee, setCoverFee] = useState(true);
 
   useEffect(() => {
     if (!diningOptionId && diningOptions.length) {
