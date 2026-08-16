@@ -140,9 +140,9 @@
 .turnstile-shell {
   max-width: 100%;
 }
-@media (max-width: 359px) {
+@media (max-width: 389px) {
   .turnstile-shell {
-    transform: scale(0.85);
+    transform: scale(0.8);
     transform-origin: top center;
   }
 }
