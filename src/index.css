@@ -126,6 +126,25 @@
       scroll-behavior: auto !important;
     }
   }
+
+  /* Fieldsets default to min-inline-size: min-content, which lets wide
+     children (e.g. the 300px Turnstile iframe) stretch the form past the
+     viewport on mobile. Reset so fieldsets honour their container width. */
+  fieldset {
+    min-inline-size: 0;
+  }
+}
+
+/* Turnstile renders a fixed 300px-wide iframe. Scale it down on very narrow
+   screens so its branding text stays fully visible without overflowing. */
+.turnstile-shell {
+  max-width: 100%;
+}
+@media (max-width: 389px) {
+  .turnstile-shell {
+    transform: scale(0.8);
+    transform-origin: top center;
+  }
 }
 
 @layer utilities {

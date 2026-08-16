@@ -28,11 +28,13 @@ const BodySchema = z.object({
   environment: z.enum(["sandbox", "live"]),
 });
 
-// UK card surcharge if user opted in to cover Stripe fees (~1.5% + 25p).
-// We charge a flat ~2% to comfortably cover it.
+// Card surcharge when the payer opts in to cover processing costs:
+// 2% of the subtotal plus a flat 20p. Deliberately above Stripe's raw
+// 1.5% + 20p so the margin also covers the Lodge environmental levy.
 function calcFeePence(subtotalPence: number, coverFee: boolean): number {
   if (!coverFee) return 0;
-  return Math.ceil(subtotalPence * 0.02);
+  if (subtotalPence <= 0) return 0;
+  return Math.ceil(subtotalPence * 0.02) + 20;
 }
 
 Deno.serve(async (req) => {
