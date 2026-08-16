@@ -62,6 +62,12 @@ const fadeUp = {
 // since they control focus rings. TODO: verify these are defined in global CSS.
 const inputClass = "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 min-h-[48px]";
 const selectClass = "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 min-h-[48px]";
+// Card processing fee charged to the payer when they opt in: 2% of the
+// subtotal plus a flat 20p (covers Stripe fees and the Lodge environmental levy).
+export function calcCardFeePence(subtotalPence: number): number {
+  return subtotalPence > 0 ? Math.ceil(subtotalPence * 0.02) + 20 : 0;
+}
+
 const labelClass = "block text-sm font-sans font-medium text-foreground mb-1";
 
 // ─── Loader: decides between bookable page and Save the Date ─────────────────
@@ -194,7 +200,7 @@ const BookingsEvent = ({
 
   const seatsToCharge = meetingOption === "meeting-and-festive-board" ? 1 + guestCount : 0;
   const subtotalPence = seatsToCharge * seatPricePence;
-  const feePence = paymentMethod === "card" && coverFee ? Math.ceil(subtotalPence * 0.02) : 0;
+  const feePence = paymentMethod === "card" && coverFee ? calcCardFeePence(subtotalPence) : 0;
   const totalPence = subtotalPence + feePence;
   const fmtGbp = (p: number) => `£${(p / 100).toFixed(2)}`;
 
@@ -690,7 +696,7 @@ useEffect(() => {
                   </div>
 
                   {/* ── Step 1 — Your Details ── */}
-                  <fieldset className={step === 1 ? "block" : "hidden"}>
+                  <fieldset className={`min-w-0 w-full ${step === 1 ? "block" : "hidden"}`}>
                     <legend className="text-lg font-serif text-foreground mb-6">Your Details</legend>
                     <div className="space-y-4">
 
@@ -826,7 +832,7 @@ useEffect(() => {
                   </fieldset>
 
                   {/* ── Step 2 — Meeting Options ── */}
-                  <fieldset className={step === 2 ? "block" : "hidden"}>
+                  <fieldset className={`min-w-0 w-full ${step === 2 ? "block" : "hidden"}`}>
                     <legend className="text-lg font-serif text-foreground mb-6">Meeting Options</legend>
                     <div className="space-y-4">
                       <div>
@@ -944,8 +950,10 @@ useEffect(() => {
                         </>
                       )}
                     </div>
-                    <div className="mt-6 flex justify-center">
-                      <TurnstileWidget onToken={setTurnstileToken} onExpire={() => setTurnstileToken("")} />
+                    <div className="mt-6 flex justify-center w-full min-w-0">
+                      <div className="turnstile-shell">
+                        <TurnstileWidget onToken={setTurnstileToken} onExpire={() => setTurnstileToken("")} />
+                      </div>
                     </div>
                     <div className="mt-8 flex justify-between">
 
@@ -976,7 +984,7 @@ useEffect(() => {
                   </fieldset>
 
                   {/* ── Step 3 — Payment ── */}
-                  <fieldset className={step === 3 ? "block" : "hidden"}>
+                  <fieldset className={`min-w-0 w-full ${step === 3 ? "block" : "hidden"}`}>
                     <legend className="text-lg font-serif text-foreground mb-6">Payment</legend>
                     <div className="space-y-4">
                       <div>
@@ -1032,7 +1040,7 @@ useEffect(() => {
 
                       {paymentMethod === "card" && seatsToCharge > 0 && (
                         <div className="border-t border-border pt-4 space-y-3">
-                          <p className={labelClass}>Cover the card processing fee (~2%)?</p>
+                          <p className={labelClass}>Cover the card processing fee (2% + 20p)?</p>
                           <div className="space-y-2 mt-1" role="radiogroup" aria-label="Card fee preference">
                             <label className="flex items-center gap-3 cursor-pointer min-h-[48px]">
                               <input
@@ -1043,7 +1051,7 @@ useEffect(() => {
                                 className="accent-[hsl(var(--gold))]"
                               />
                               <span className="text-sm font-sans text-foreground">
-                                Yes — add {fmtGbp(Math.ceil(subtotalPence * 0.02))} to my total
+                                Yes — add {fmtGbp(calcCardFeePence(subtotalPence))} to my total
                               </span>
                             </label>
                             <label className="flex items-center gap-3 cursor-pointer min-h-[48px]">
