@@ -14,6 +14,18 @@ const url = process.env.SUPABASE_URL!;
 const key = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 const sb = createClient(url, key, { auth: { persistSession: false } });
 
+// Node/Bun lacks FileReader, which fetchImageAsDataUrl uses.
+(globalThis as any).FileReader = class {
+  result: string | null = null;
+  onloadend: (() => void) | null = null;
+  onerror: (() => void) | null = null;
+  async readAsDataURL(blob: Blob) {
+    const buf = Buffer.from(await blob.arrayBuffer());
+    this.result = `data:${blob.type};base64,${buf.toString("base64")}`;
+    this.onloadend?.();
+  }
+};
+
 const LODGE_YEAR = 2025;
 
 const allKeys = [
