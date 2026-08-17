@@ -494,7 +494,9 @@ export default function DiningReconciliationTab({
           key={m.id}
           meeting={m}
           rows={byMeeting.get(m.id) ?? []}
+          bookings={bookingsByMeeting.get(m.id) ?? []}
           invoice={invMap.get(m.id) ?? null}
+
           canEdit={canEdit}
           onChanged={load}
           onGoToTransaction={onGoToTransaction}
