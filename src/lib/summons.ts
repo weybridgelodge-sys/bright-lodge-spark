@@ -323,3 +323,51 @@ export function planOverflow(memberCount: number): OverflowPlan {
     warn: true,
   };
 }
+
+// ---------------------------------------------------------------------------
+// Lodge template cover assets — single source of truth
+// ---------------------------------------------------------------------------
+
+export const DEFAULT_LOGO_URL =
+  "/__l5e/assets-v1/045b91d4-9b41-490d-baa9-8486eca7cb05/weybridge-logo-no-bg.png";
+export const DEFAULT_COVER_LEFT_URL =
+  "/__l5e/assets-v1/f22695d7-afc6-46a8-9daf-9564690178fc/TLC-Patron-Pin.jpg";
+export const DEFAULT_COVER_RIGHT_URL =
+  "/__l5e/assets-v1/be3d0b35-5888-4ffa-b6b4-c7dfe04cc8f3/Festival_Gold_Award.png";
+
+// Earlier uploads that turned out to be truncated/superseded. Any saved
+// template still pointing at them is rewritten to the current default.
+export const STALE_ASSET_URLS = new Set<string>([
+  "/__l5e/assets-v1/3b24e36a-0ae2-48a6-beff-3f3a71f15e85/TLC-Patron-Pin.jpg",
+  "/__l5e/assets-v1/7435bffd-65eb-49e7-9086-2c349fdb427f/Festival_Gold_Award_no_background.png",
+  "/__l5e/assets-v1/57c18f79-500d-485c-bb45-3cef1b3bc800/weybridge-logo-navy.png",
+]);
+
+export const resolveAssetUrl = (url: string | null | undefined, fallback: string) =>
+  !url || STALE_ASSET_URLS.has(url) ? fallback : url;
+
+/**
+ * Normalise a loaded `lodge_template` row's cover assets:
+ *  - strip any absolute origin so paths resolve on the current host
+ *  - replace missing/stale URLs with the current defaults
+ * Used by every place that loads `lodge_template` (Template tab, Print
+ * Preview, and the real generation path in New Summons).
+ */
+export function normaliseTemplateAssets<T extends {
+  logo_url?: string | null;
+  cover_left_image_url?: string | null;
+  cover_right_image_url?: string | null;
+}>(tpl: T): T {
+  const out: any = { ...tpl };
+  for (const k of ["logo_url", "cover_left_image_url", "cover_right_image_url"] as const) {
+    const v = out[k];
+    if (typeof v === "string") {
+      const idx = v.indexOf("/__l5e/");
+      if (idx > 0) out[k] = v.slice(idx);
+    }
+  }
+  out.logo_url = resolveAssetUrl(out.logo_url, DEFAULT_LOGO_URL);
+  out.cover_left_image_url = resolveAssetUrl(out.cover_left_image_url, DEFAULT_COVER_LEFT_URL);
+  out.cover_right_image_url = resolveAssetUrl(out.cover_right_image_url, DEFAULT_COVER_RIGHT_URL);
+  return out as T;
+}
