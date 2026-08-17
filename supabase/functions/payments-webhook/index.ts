@@ -46,12 +46,49 @@ async function handleCheckoutCompleted(session: any, env: StripeEnv) {
     console.error("Failed to mark booking paid:", error);
     return;
   }
+  // Record the ACTUAL Stripe processing fee from the balance transaction so
+  // Treasurer dining reconciliation is automatic for future meetings.
+  await recordActualStripeFee(bookingId, session.payment_intent, env);
   try {
     await sendBookingEmails(bookingId, { stage: "paid" });
   } catch (e) {
     console.error("sendBookingEmails (paid) failed:", e);
   }
 }
+
+async function recordActualStripeFee(
+  bookingId: string,
+  paymentIntentId: string | null | undefined,
+  env: StripeEnv,
+) {
+  if (!paymentIntentId) return;
+  try {
+    const stripe = createStripeClient(env);
+    const pi = await stripe.paymentIntents.retrieve(paymentIntentId, {
+      expand: ["latest_charge.balance_transaction"],
+    });
+    const charge: any = (pi as any).latest_charge;
+    const bt: any = charge?.balance_transaction;
+    if (!bt || typeof bt === "string") {
+      console.warn("No expanded balance_transaction for", paymentIntentId);
+      return;
+    }
+    const { error } = await getSupabase()
+      .from("bookings")
+      .update({
+        stripe_fee_pence: bt.fee ?? null,
+        stripe_net_pence: bt.net ?? null,
+        stripe_balance_transaction_id: bt.id ?? null,
+      })
+      .eq("id", bookingId)
+      .eq("environment", env);
+    if (error) console.error("Failed to store Stripe fee:", error);
+  } catch (e) {
+    // Never fail the webhook over fee capture — reconciliation can be manual.
+    console.error("recordActualStripeFee failed:", e);
+  }
+}
+
 
 async function handlePaymentFailed(intent: any, env: StripeEnv) {
   const { error } = await getSupabase()
