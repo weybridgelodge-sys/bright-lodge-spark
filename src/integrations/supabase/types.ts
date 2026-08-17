@@ -121,6 +121,9 @@ export type Database = {
           promoted_at: string | null
           promoted_from_waitlist: boolean
           promotion_notified_at: string | null
+          stripe_balance_transaction_id: string | null
+          stripe_fee_pence: number | null
+          stripe_net_pence: number | null
           stripe_payment_intent_id: string | null
           stripe_refund_id: string | null
           stripe_session_id: string | null
@@ -149,6 +152,9 @@ export type Database = {
           promoted_at?: string | null
           promoted_from_waitlist?: boolean
           promotion_notified_at?: string | null
+          stripe_balance_transaction_id?: string | null
+          stripe_fee_pence?: number | null
+          stripe_net_pence?: number | null
           stripe_payment_intent_id?: string | null
           stripe_refund_id?: string | null
           stripe_session_id?: string | null
@@ -177,6 +183,9 @@ export type Database = {
           promoted_at?: string | null
           promoted_from_waitlist?: boolean
           promotion_notified_at?: string | null
+          stripe_balance_transaction_id?: string | null
+          stripe_fee_pence?: number | null
+          stripe_net_pence?: number | null
           stripe_payment_intent_id?: string | null
           stripe_refund_id?: string | null
           stripe_session_id?: string | null

@@ -28,6 +28,15 @@ type AttRow = {
   is_meeting_only: boolean | null;
 };
 
+type BookingRow = {
+  meeting_id: string | null;
+  payment_status: string;
+  total_pence: number | null;
+  stripe_fee_pence: number | null;
+  stripe_net_pence: number | null;
+  stripe_payment_intent_id: string | null;
+};
+
 type Invoice = {
   id: string;
   meeting_id: string;
@@ -39,6 +48,7 @@ type Invoice = {
   invoice_number: string | null;
   invoice_date: string | null;
 };
+
 
 const gbp = (pence: number) =>
   new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP" }).format(pence / 100);
@@ -57,6 +67,7 @@ function invoiceTotalPence(inv: {
 function MeetingPanel({
   meeting,
   rows,
+  bookings,
   invoice,
   canEdit,
   onChanged,
@@ -64,11 +75,13 @@ function MeetingPanel({
 }: {
   meeting: Meeting;
   rows: AttRow[];
+  bookings: BookingRow[];
   invoice: Invoice | null;
   canEdit: boolean;
   onChanged: () => void;
   onGoToTransaction: (txId: string) => void;
 }) {
+
   const [headcount, setHeadcount] = useState("");
   const [perHead, setPerHead] = useState("");
   const [override, setOverride] = useState("");
@@ -116,6 +129,38 @@ function MeetingPanel({
       byMethod: [...byMethod.entries()].sort((a, b) => b[1].count - a[1].count),
     };
   }, [rows]);
+
+  // ── Stripe side: actual charged / fees / net from the bookings ledger ──
+  const stripeSummary = useMemo(() => {
+    const paid = bookings.filter((b) => b.payment_status === "paid" && b.stripe_payment_intent_id);
+    let charged = 0;
+    let fees = 0;
+    let known = 0;
+    for (const b of paid) {
+      charged += b.total_pence ?? 0;
+      if (b.stripe_fee_pence != null) {
+        fees += b.stripe_fee_pence;
+        known += 1;
+      }
+    }
+    return {
+      count: paid.length,
+      charged,
+      fees,
+      net: charged - fees,
+      complete: paid.length > 0 && known === paid.length,
+      known,
+    };
+  }, [bookings]);
+
+  const nonStripeCollected = useMemo(
+    () => summary.byMethod.filter(([m]) => m !== "stripe").reduce((s, [, v]) => s + v.pence, 0),
+    [summary]
+  );
+
+  const netIncome = stripeSummary.net + nonStripeCollected;
+
+
 
   const draftTotal = useMemo(() => {
     const ov = override.trim() ? Math.round(parseFloat(override) * 100) : null;
@@ -301,12 +346,61 @@ function MeetingPanel({
             <span className="text-primary-foreground/70">Invoice total</span>
             <span className="text-gold font-medium tabular-nums">{draftTotal != null ? gbp(draftTotal) : "—"}</span>
           </div>
-          <div className="flex items-baseline justify-between text-sm">
-            <span className="text-primary-foreground/70">Net vs fees collected</span>
-            <span className="tabular-nums text-primary-foreground">
-              {draftTotal != null ? gbp(summary.collected - draftTotal) : "—"}
-            </span>
+
+          <div className="mt-3 rounded-sm border border-gold/15 p-3 space-y-1">
+            <h5 className="text-xs uppercase tracking-wider text-primary-foreground/60 mb-1">
+              Stripe fee reconciliation
+            </h5>
+            <div className="flex items-baseline justify-between text-sm">
+              <span className="text-primary-foreground/70">
+                Card payments charged ({stripeSummary.count})
+              </span>
+              <span className="tabular-nums text-primary-foreground">{gbp(stripeSummary.charged)}</span>
+            </div>
+            <div className="flex items-baseline justify-between text-sm">
+              <span className="text-primary-foreground/70">
+                Less actual Stripe fees
+                {stripeSummary.count > 0 && !stripeSummary.complete && (
+                  <span className="text-amber-300"> ({stripeSummary.known}/{stripeSummary.count} recorded)</span>
+                )}
+              </span>
+              <span className="tabular-nums text-red-300">−{gbp(stripeSummary.fees)}</span>
+            </div>
+            <div className="flex items-baseline justify-between text-sm">
+              <span className="text-primary-foreground/70">Net received from card</span>
+              <span className="tabular-nums text-primary-foreground">{gbp(stripeSummary.net)}</span>
+            </div>
+            <div className="flex items-baseline justify-between text-sm">
+              <span className="text-primary-foreground/70">Other methods collected</span>
+              <span className="tabular-nums text-primary-foreground">{gbp(nonStripeCollected)}</span>
+            </div>
+            <div className="flex items-baseline justify-between text-sm border-t border-gold/15 pt-1">
+              <span className="text-primary-foreground/70">Total dining income, net of fees</span>
+              <span className="tabular-nums text-gold font-medium">{gbp(netIncome)}</span>
+            </div>
+            <div className="flex items-baseline justify-between text-sm">
+              <span className="text-primary-foreground/70">GMC invoice obligation</span>
+              <span className="tabular-nums text-primary-foreground">{draftTotal != null ? gbp(draftTotal) : "—"}</span>
+            </div>
+            <div className="flex items-baseline justify-between text-sm">
+              <span className="text-primary-foreground/70">Residual</span>
+              <span
+                className={`tabular-nums font-medium ${
+                  draftTotal == null
+                    ? "text-primary-foreground"
+                    : netIncome - draftTotal >= 0
+                      ? "text-emerald-300"
+                      : "text-red-300"
+                }`}
+              >
+                {draftTotal != null
+                  ? `${netIncome - draftTotal >= 0 ? "+" : "−"}${gbp(Math.abs(netIncome - draftTotal))}`
+                  : "—"}
+              </span>
+            </div>
           </div>
+
+
 
           {canEdit && (
             <div className="flex flex-wrap gap-2 pt-1">
@@ -339,19 +433,22 @@ export default function DiningReconciliationTab({
 }) {
   const [meetings, setMeetings] = useState<Meeting[]>([]);
   const [rows, setRows] = useState<AttRow[]>([]);
+  const [bookings, setBookings] = useState<BookingRow[]>([]);
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(true);
 
   const load = async () => {
     setLoading(true);
-    const [m, a, i] = await Promise.all([
+    const [m, a, i, b] = await Promise.all([
       supabase.from("festive_board_meetings" as any).select("id,meeting_date,meeting_type").order("meeting_date", { ascending: false }),
       supabase.from("festive_board_attendance" as any).select("meeting_id,member_id,visitor_lodge_name,attendance_status,payment_method,amount_pence,is_meeting_only"),
       supabase.from("treasurer_dining_invoices" as any).select("*"),
+      supabase.from("bookings" as any).select("meeting_id,payment_status,total_pence,stripe_fee_pence,stripe_net_pence,stripe_payment_intent_id"),
     ]);
     if (!m.error) setMeetings((m.data as unknown as Meeting[]) ?? []);
     if (!a.error) setRows((a.data as unknown as AttRow[]) ?? []);
     if (!i.error) setInvoices((i.data as unknown as Invoice[]) ?? []);
+    if (!b.error) setBookings((b.data as unknown as BookingRow[]) ?? []);
     setLoading(false);
   };
 
@@ -366,6 +463,18 @@ export default function DiningReconciliationTab({
     }
     return map;
   }, [rows]);
+
+  const bookingsByMeeting = useMemo(() => {
+    const map = new Map<string, BookingRow[]>();
+    for (const b of bookings) {
+      if (!b.meeting_id) continue;
+      const arr = map.get(b.meeting_id) ?? [];
+      arr.push(b);
+      map.set(b.meeting_id, arr);
+    }
+    return map;
+  }, [bookings]);
+
 
   const invMap = useMemo(() => new Map(invoices.map((i) => [i.meeting_id, i])), [invoices]);
 
@@ -385,7 +494,9 @@ export default function DiningReconciliationTab({
           key={m.id}
           meeting={m}
           rows={byMeeting.get(m.id) ?? []}
+          bookings={bookingsByMeeting.get(m.id) ?? []}
           invoice={invMap.get(m.id) ?? null}
+
           canEdit={canEdit}
           onChanged={load}
           onGoToTransaction={onGoToTransaction}
