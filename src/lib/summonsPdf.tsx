@@ -46,6 +46,7 @@ import {
   DEFAULT_COVER_LEFT_URL,
   DEFAULT_COVER_RIGHT_URL,
 } from "./summons";
+import { POSITION_LABELS, PositionKey } from "./officersProgression";
 import { assetUrl } from "./assetUrl";
 
 export type LodgeTemplate = {
