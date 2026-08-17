@@ -627,6 +627,7 @@ const OfficersDiningPanel: React.FC<{
     </Text>
   </View>
 );
+};
 
 
 const AgendaPanel: React.FC<{
