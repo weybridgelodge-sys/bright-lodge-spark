@@ -433,19 +433,22 @@ export default function DiningReconciliationTab({
 }) {
   const [meetings, setMeetings] = useState<Meeting[]>([]);
   const [rows, setRows] = useState<AttRow[]>([]);
+  const [bookings, setBookings] = useState<BookingRow[]>([]);
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(true);
 
   const load = async () => {
     setLoading(true);
-    const [m, a, i] = await Promise.all([
+    const [m, a, i, b] = await Promise.all([
       supabase.from("festive_board_meetings" as any).select("id,meeting_date,meeting_type").order("meeting_date", { ascending: false }),
       supabase.from("festive_board_attendance" as any).select("meeting_id,member_id,visitor_lodge_name,attendance_status,payment_method,amount_pence,is_meeting_only"),
       supabase.from("treasurer_dining_invoices" as any).select("*"),
+      supabase.from("bookings" as any).select("meeting_id,payment_status,total_pence,stripe_fee_pence,stripe_net_pence,stripe_payment_intent_id"),
     ]);
     if (!m.error) setMeetings((m.data as unknown as Meeting[]) ?? []);
     if (!a.error) setRows((a.data as unknown as AttRow[]) ?? []);
     if (!i.error) setInvoices((i.data as unknown as Invoice[]) ?? []);
+    if (!b.error) setBookings((b.data as unknown as BookingRow[]) ?? []);
     setLoading(false);
   };
 
@@ -460,6 +463,18 @@ export default function DiningReconciliationTab({
     }
     return map;
   }, [rows]);
+
+  const bookingsByMeeting = useMemo(() => {
+    const map = new Map<string, BookingRow[]>();
+    for (const b of bookings) {
+      if (!b.meeting_id) continue;
+      const arr = map.get(b.meeting_id) ?? [];
+      arr.push(b);
+      map.set(b.meeting_id, arr);
+    }
+    return map;
+  }, [bookings]);
+
 
   const invMap = useMemo(() => new Map(invoices.map((i) => [i.meeting_id, i])), [invoices]);
 
