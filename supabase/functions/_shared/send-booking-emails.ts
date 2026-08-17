@@ -310,6 +310,8 @@ export async function sendBookingEmails(bookingId: string, opts: SendOpts) {
           bookingRef,
           secretaryName,
           secretaryOffice,
+          summonsPdfUrl,
+          summonsMeetingNumber,
         },
     })
     if (confRes.error) console.error('Booking confirmation email failed', confRes.error)
