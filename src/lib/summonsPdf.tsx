@@ -46,6 +46,7 @@ import {
   DEFAULT_COVER_LEFT_URL,
   DEFAULT_COVER_RIGHT_URL,
 } from "./summons";
+import { POSITION_LABELS, PositionKey } from "./officersProgression";
 import { assetUrl } from "./assetUrl";
 
 export type LodgeTemplate = {
@@ -551,24 +552,35 @@ const OfficersDiningPanel: React.FC<{
   diningQrDataUrl: string | null;
   hidden: Set<NoticeKey>;
   shortened: Set<NoticeKey>;
-}> = ({ template, officers, hidden, shortened }) => (
-  <View style={s.panel}>
-    <Text style={s.panelHeading}>OFFICERS {officerSeason()}</Text>
-    {officers.filter((o) => o.member).map((o, i) => (
-      <View key={i} style={s.officerRow}>
-        <BoldNameText
-          style={s.officerName}
-          fullName={o.member}
-          post_nominals={o.post_nominals}
-          grand_rank={o.grand_rank}
-          provincial_rank={o.provincial_rank}
-          rank={o.rank}
-        />
-        <Text style={s.officerRole}>{shortRole(o.label)}</Text>
-      </View>
-    ))}
+}> = ({ template, officers, hidden, shortened }) => {
+  // Steward positions are only printed when filled; all other offices are
+  // always shown, even if vacant, to preserve the full office structure.
+  const VACANT_STEWARD_LABELS = new Set(
+    ["senior_steward", "steward_1", "steward_2", "steward_3", "steward_4", "steward_5"].map(
+      (k) => POSITION_LABELS[k as PositionKey]
+    )
+  );
+  const printableOfficers = officers.filter(
+    (o) => o.member || !VACANT_STEWARD_LABELS.has(o.label)
+  );
+  return (
+    <View style={s.panel}>
+      <Text style={s.panelHeading}>OFFICERS {officerSeason()}</Text>
+      {printableOfficers.map((o, i) => (
+        <View key={i} style={s.officerRow}>
+          <BoldNameText
+            style={s.officerName}
+            fullName={o.member}
+            post_nominals={o.post_nominals}
+            grand_rank={o.grand_rank}
+            provincial_rank={o.provincial_rank}
+            rank={o.rank}
+          />
+          <Text style={s.officerRole}>{shortRole(o.label)}</Text>
+        </View>
+      ))}
 
-    {template.lodge_representatives?.length > 0 && (
+      {template.lodge_representatives?.length > 0 && (
       <>
         <View style={s.thinDivider} />
         <View>
@@ -615,6 +627,7 @@ const OfficersDiningPanel: React.FC<{
     </Text>
   </View>
 );
+};
 
 
 const AgendaPanel: React.FC<{
