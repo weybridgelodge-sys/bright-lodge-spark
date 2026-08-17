@@ -57,6 +57,7 @@ const template = normaliseTemplateAssets({ ...(tplRow as any), lodge_representat
 const summons: any = { ...sRow, dining_enquiry_email: (sRow as any).dining_enquiry_email ?? "" };
 const members = sortMembersBySeniority((mem ?? []) as any);
 
+console.log("data loaded", officers.length, members.length);
 const blob = await generateSummonsBlob({
   template: template as any,
   officers: officers as any,
