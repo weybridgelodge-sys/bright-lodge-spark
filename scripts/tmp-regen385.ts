@@ -1,6 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import { generateSummonsBlob } from "@/lib/summonsPdf";
-import { normaliseTemplateAssets, sortMembersBySeniority, formatMemberLine, formatMemberLineFormal, POSITION_LABELS, NON_PROGRESSIVE_LABELS } from "@/lib/summons";
+import { normaliseTemplateAssets, sortMembersBySeniority, formatMemberLine, formatMemberLineFormal} from "@/lib/summons";
+import { POSITION_LABELS, NON_PROGRESSIVE_LABELS } from "@/lib/officersProgression";
 import { writeFileSync } from "node:fs";
 
 // FileReader polyfill for Bun/Node
