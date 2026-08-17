@@ -566,19 +566,27 @@ const OfficersDiningPanel: React.FC<{
   return (
     <View style={s.panel}>
       <Text style={s.panelHeading}>OFFICERS {officerSeason()}</Text>
-      {printableOfficers.map((o, i) => (
-        <View key={i} style={s.officerRow}>
-          <BoldNameText
-            style={s.officerName}
-            fullName={o.member}
-            post_nominals={o.post_nominals}
-            grand_rank={o.grand_rank}
-            provincial_rank={o.provincial_rank}
-            rank={o.rank}
-          />
-          <Text style={s.officerRole}>{shortRole(o.label)}</Text>
-        </View>
-      ))}
+      {printableOfficers.map((o, i) =>
+        o.member ? (
+          <View key={i} style={s.officerRow}>
+            <BoldNameText
+              style={s.officerName}
+              fullName={o.member}
+              post_nominals={o.post_nominals}
+              grand_rank={o.grand_rank}
+              provincial_rank={o.provincial_rank}
+              rank={o.rank}
+            />
+            <Text style={s.officerRole}>{shortRole(o.label)}</Text>
+          </View>
+        ) : (
+          <View key={i} style={s.officerRow}>
+            <Text style={s.officerName}>Vacant</Text>
+            <Text style={s.officerRole}>{shortRole(o.label)}</Text>
+          </View>
+        )
+      )}
+
 
       {template.lodge_representatives?.length > 0 && (
       <>
