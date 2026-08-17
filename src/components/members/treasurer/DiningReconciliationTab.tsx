@@ -130,6 +130,38 @@ function MeetingPanel({
     };
   }, [rows]);
 
+  // ── Stripe side: actual charged / fees / net from the bookings ledger ──
+  const stripeSummary = useMemo(() => {
+    const paid = bookings.filter((b) => b.payment_status === "paid" && b.stripe_payment_intent_id);
+    let charged = 0;
+    let fees = 0;
+    let known = 0;
+    for (const b of paid) {
+      charged += b.total_pence ?? 0;
+      if (b.stripe_fee_pence != null) {
+        fees += b.stripe_fee_pence;
+        known += 1;
+      }
+    }
+    return {
+      count: paid.length,
+      charged,
+      fees,
+      net: charged - fees,
+      complete: paid.length > 0 && known === paid.length,
+      known,
+    };
+  }, [bookings]);
+
+  const nonStripeCollected = useMemo(
+    () => summary.byMethod.filter(([m]) => m !== "stripe").reduce((s, [, v]) => s + v.pence, 0),
+    [summary]
+  );
+
+  const netIncome = stripeSummary.net + nonStripeCollected;
+
+
+
   const draftTotal = useMemo(() => {
     const ov = override.trim() ? Math.round(parseFloat(override) * 100) : null;
     const hc = headcount.trim() ? parseInt(headcount, 10) : null;
