@@ -14,6 +14,10 @@ interface SendOpts {
   overrideNotifyEmail?: string
   /** Skip the booker-facing confirmation; send only the internal notifications. */
   notifyOnly?: boolean
+  /** Testing only: send the booker confirmation to this address instead of the real booker. */
+  overrideBookerEmail?: string
+  /** Testing only: skip the internal notification emails entirely. */
+  skipNotify?: boolean
 }
 
 function formatGBP(pence?: number | null): string {
@@ -292,8 +296,8 @@ export async function sendBookingEmails(bookingId: string, opts: SendOpts) {
   if (b.contact_email && !opts.notifyOnly) {
     const confRes = await sendTransactionalEmail({
         templateName: 'booking-confirmation',
-        recipientEmail: b.contact_email,
-        idempotencyKey: `booking-confirm-${b.id}-${opts.stage}`,
+        recipientEmail: opts.overrideBookerEmail || b.contact_email,
+        idempotencyKey: `booking-confirm-${b.id}-${opts.stage}${opts.overrideBookerEmail ? `-test-${crypto.randomUUID()}` : ''}`,
         replyTo: ASSISTANT_SECRETARY_EMAIL,
         templateData: {
           firstName,
@@ -318,6 +322,7 @@ export async function sendBookingEmails(bookingId: string, opts: SendOpts) {
   }
 
   // 2) Assistant Secretary notification
+  if (opts.skipNotify) return
   const notifyRecipients = opts.overrideNotifyEmail ? [opts.overrideNotifyEmail] : NOTIFY_RECIPIENTS
   await Promise.all(notifyRecipients.map(async (notifyTo) => {
     const notifRes = await sendTransactionalEmail({
