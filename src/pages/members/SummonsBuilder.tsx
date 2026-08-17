@@ -29,6 +29,7 @@ import {
   sortMembersBySeniority,
   splitTwoColumns,
   subLetter,
+  normaliseTemplateAssets,
 } from "@/lib/summons";
 import {
   generateSummonsBlob,
@@ -205,12 +206,7 @@ function PrintPreviewTab() {
           .eq("status", "active"),
       ]);
       if (tpl.data) {
-        const merged = { ...EMPTY_TEMPLATE, ...(tpl.data as any), lodge_representatives: (tpl.data as any).lodge_representatives ?? [] };
-        if (typeof merged.logo_url === "string") {
-          const idx = merged.logo_url.indexOf("/__l5e/");
-          if (idx > 0) merged.logo_url = merged.logo_url.slice(idx);
-        }
-        if (!merged.logo_url) merged.logo_url = EMPTY_TEMPLATE.logo_url;
+        const merged = normaliseTemplateAssets({ ...EMPTY_TEMPLATE, ...(tpl.data as any), lodge_representatives: (tpl.data as any).lodge_representatives ?? [] });
         setTemplate(merged);
       }
       if (mem.data) setMembers(mem.data as any);
@@ -231,26 +227,7 @@ function TemplateTab() {
     (async () => {
       const { data } = await supabase.from("lodge_template").select("*").eq("id", "default").maybeSingle();
       if (data) {
-        const merged = { ...EMPTY_TEMPLATE, ...(data as any), lodge_representatives: (data as any).lodge_representatives ?? [] };
-        // Replace any previously-saved URLs that point to since-superseded
-        // (truncated/broken) asset uploads with the current defaults.
-        const STALE_URLS = new Set<string>([
-          "/__l5e/assets-v1/3b24e36a-0ae2-48a6-beff-3f3a71f15e85/TLC-Patron-Pin.jpg",
-          "/__l5e/assets-v1/7435bffd-65eb-49e7-9086-2c349fdb427f/Festival_Gold_Award_no_background.png",
-          "/__l5e/assets-v1/57c18f79-500d-485c-bb45-3cef1b3bc800/weybridge-logo-navy.png",
-        ]);
-        if (!merged.logo_url || STALE_URLS.has(merged.logo_url)) merged.logo_url = DEFAULT_LOGO_URL;
-        if (!merged.cover_left_image_url || STALE_URLS.has(merged.cover_left_image_url)) merged.cover_left_image_url = DEFAULT_COVER_LEFT_URL;
-        if (!merged.cover_right_image_url || STALE_URLS.has(merged.cover_right_image_url)) merged.cover_right_image_url = DEFAULT_COVER_RIGHT_URL;
-        // Strip any absolute origin from previously-saved asset URLs so they
-        // resolve correctly on the current domain (preview / published / custom).
-        for (const k of ["logo_url", "cover_left_image_url", "cover_right_image_url"] as const) {
-          const v = (merged as any)[k];
-          if (typeof v === "string") {
-            const idx = v.indexOf("/__l5e/");
-            if (idx > 0) (merged as any)[k] = v.slice(idx);
-          }
-        }
+        const merged = normaliseTemplateAssets({ ...EMPTY_TEMPLATE, ...(data as any), lodge_representatives: (data as any).lodge_representatives ?? [] });
         setT(merged);
         setReps(((data as any).lodge_representatives ?? []) as Rep[]);
       }
@@ -444,7 +421,7 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
         supabase.from("festive_board_meetings").select("id,meeting_date,notes").order("meeting_date", { ascending: true }),
         supabase.from("summonses").select("meeting_number").order("meeting_number", { ascending: false }).limit(1),
       ]);
-      if (tpl.data) setTemplate({ ...EMPTY_TEMPLATE, ...(tpl.data as any), lodge_representatives: (tpl.data as any).lodge_representatives ?? [] });
+      if (tpl.data) setTemplate(normaliseTemplateAssets({ ...EMPTY_TEMPLATE, ...(tpl.data as any), lodge_representatives: (tpl.data as any).lodge_representatives ?? [] }));
       if (mem.data) setMembers(mem.data as any);
       if (evs.data) setEvents(evs.data);
       if (fb.data) setFestive(fb.data);
