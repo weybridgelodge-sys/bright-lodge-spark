@@ -13,7 +13,9 @@ Deno.serve(async (req) => {
   const url = Deno.env.get('SUPABASE_URL')!
   const service = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
   const auth = req.headers.get('Authorization') ?? ''
-  if (auth !== `Bearer ${service}`) {
+  const devToken = Deno.env.get('DEV_TEST_EMAIL_TOKEN')
+  const provided = req.headers.get('x-dev-token')
+  if (auth !== `Bearer ${service}` && !(devToken && provided === devToken)) {
     return new Response(JSON.stringify({ error: 'Forbidden' }), { status: 403, headers: { ...cors, 'Content-Type': 'application/json' } })
   }
   const { bookingId, testEmail } = await req.json()
