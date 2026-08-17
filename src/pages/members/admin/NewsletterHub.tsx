@@ -620,7 +620,7 @@ function NewsletterHubInner() {
           </ul>
           <p className="text-[11px] text-primary-foreground/50 mb-6">PDFs are filed under <strong className="text-gold">Documents → Newsletters</strong>, one per audience sent.</p>
 
-          <Button onClick={() => { setSentSummary(null); resetEditor(); }} variant="outline" className="border-gold/40 text-gold hover:bg-gold/10">
+          <Button onClick={() => { setSentSummary(null); resetEditor(); }} variant="outline" className="border-gold/40 text-gold hover:bg-gold/10 h-auto min-h-10 whitespace-normal text-center leading-snug py-2">
             Compose next issue
           </Button>
         </div>
@@ -883,11 +883,11 @@ function NewsletterHubInner() {
           )}
 
           <div className="flex flex-wrap items-center justify-end gap-3 pt-3 border-t border-gold/15">
-            <Button type="button" variant="outline" onClick={() => setPreviewOpen((v) => !v)} className="border-gold/40 text-gold hover:bg-gold/10">
-              <Eye className="h-4 w-4 mr-1.5" /> {previewOpen ? "Hide preview" : "Show preview"}
+            <Button type="button" variant="outline" onClick={() => setPreviewOpen((v) => !v)} className="border-gold/40 text-gold hover:bg-gold/10 h-auto min-h-10 whitespace-normal text-center leading-snug py-2">
+              <Eye className="h-4 w-4 mr-1.5 shrink-0" /> {previewOpen ? "Hide preview" : "Show preview"}
             </Button>
-            <Button type="button" variant="outline" onClick={saveDraft} disabled={saving} className="border-gold/40 text-gold hover:bg-gold/10">
-              {saving ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : <Save className="h-4 w-4 mr-1.5" />}
+            <Button type="button" variant="outline" onClick={saveDraft} disabled={saving} className="border-gold/40 text-gold hover:bg-gold/10 h-auto min-h-10 whitespace-normal text-center leading-snug py-2">
+              {saving ? <Loader2 className="h-4 w-4 mr-1.5 shrink-0 animate-spin" /> : <Save className="h-4 w-4 mr-1.5 shrink-0" />}
               Save
             </Button>
           </div>
@@ -911,9 +911,9 @@ function NewsletterHubInner() {
                 className="flex-1 rounded-md bg-navy border border-gold/30 px-3 py-2 text-sm text-primary-foreground placeholder:text-primary-foreground/30"
               />
               <Button type="button" variant="outline" onClick={sendTest} disabled={testing || !broadcastId}
-                className="border-gold/40 text-gold hover:bg-gold/10"
+                className="border-gold/40 text-gold hover:bg-gold/10 h-auto min-h-10 whitespace-normal text-center leading-snug py-2"
                 title={!broadcastId ? "Save first" : "Send a test copy to this address"}>
-                {testing ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : <Send className="h-4 w-4 mr-1.5" />}
+                {testing ? <Loader2 className="h-4 w-4 mr-1.5 shrink-0 animate-spin" /> : <Send className="h-4 w-4 mr-1.5 shrink-0" />}
                 Send test
               </Button>
             </div>
@@ -921,28 +921,28 @@ function NewsletterHubInner() {
 
           <div className="grid sm:grid-cols-2 gap-2 pt-2">
             <Button type="button" onClick={() => send(["members_only"])} disabled={sending || status !== "ready_to_send" || !broadcastId}
-              className="bg-navy border-2 border-red-400/70 text-red-200 hover:bg-red-500/10 font-semibold disabled:opacity-40"
+              className="bg-navy border-2 border-red-400/70 text-red-200 hover:bg-red-500/10 font-semibold disabled:opacity-40 h-auto min-h-10 whitespace-normal text-center leading-snug py-2"
               title={!broadcastId ? "Save first" : status !== "ready_to_send" ? 'Mark "Ready to send"' : "Internal circulation — lodge members only, no visiting brethren, no public sign-ups"}>
-              {sending ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : <Send className="h-4 w-4 mr-1.5" />}
+              {sending ? <Loader2 className="h-4 w-4 mr-1.5 shrink-0 animate-spin" /> : <Send className="h-4 w-4 mr-1.5 shrink-0" />}
               Send to Members Only (internal)
             </Button>
             <Button type="button" onClick={() => send(["members"])} disabled={sending || status !== "ready_to_send" || !broadcastId}
-              className="bg-gold hover:bg-gold/90 text-navy font-semibold disabled:opacity-40"
+              className="bg-gold hover:bg-gold/90 text-navy font-semibold disabled:opacity-40 h-auto min-h-10 whitespace-normal text-center leading-snug py-2"
               title={!broadcastId ? "Save first" : status !== "ready_to_send" ? 'Mark "Ready to send"' : "Members + visiting Freemasons captured at the Festive Board"}>
-              {sending ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : <Send className="h-4 w-4 mr-1.5" />} Send to Members &amp; Visiting Brethren
+              {sending ? <Loader2 className="h-4 w-4 mr-1.5 shrink-0 animate-spin" /> : <Send className="h-4 w-4 mr-1.5 shrink-0" />} Send to Members &amp; Visiting Brethren
             </Button>
             <Button type="button" onClick={() => send(["visitors"])} disabled={sending || status !== "ready_to_send" || !broadcastId}
-              className="bg-gold hover:bg-gold/90 text-navy font-semibold disabled:opacity-40"
+              className="bg-gold hover:bg-gold/90 text-navy font-semibold disabled:opacity-40 h-auto min-h-10 whitespace-normal text-center leading-snug py-2"
               title={!broadcastId ? "Save first" : status !== "ready_to_send" ? 'Mark "Ready to send"' : "Send to public newsletter sign-ups"}>
-              {sending ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : <Send className="h-4 w-4 mr-1.5" />} Send to Public
+              {sending ? <Loader2 className="h-4 w-4 mr-1.5 shrink-0 animate-spin" /> : <Send className="h-4 w-4 mr-1.5 shrink-0" />} Send to Public
             </Button>
             <Button
               type="button"
               onClick={() => send(unifiedContent ? ["all"] : ["members", "visitors"])}
               disabled={sending || status !== "ready_to_send" || !broadcastId}
-              className="bg-navy border border-gold text-gold hover:bg-gold/10 font-semibold disabled:opacity-40"
+              className="bg-navy border border-gold text-gold hover:bg-gold/10 font-semibold disabled:opacity-40 h-auto min-h-10 whitespace-normal text-center leading-snug py-2"
               title={unifiedContent ? "One merged dedup'd send · single combined PDF" : "Two separate sends · two PDFs"}>
-              {sending ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : <Send className="h-4 w-4 mr-1.5" />}
+              {sending ? <Loader2 className="h-4 w-4 mr-1.5 shrink-0 animate-spin" /> : <Send className="h-4 w-4 mr-1.5 shrink-0" />}
               Send to Both {unifiedContent ? "(merged)" : "(two sends)"}
             </Button>
           </div>
