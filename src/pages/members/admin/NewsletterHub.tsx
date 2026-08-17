@@ -620,7 +620,7 @@ function NewsletterHubInner() {
           </ul>
           <p className="text-[11px] text-primary-foreground/50 mb-6">PDFs are filed under <strong className="text-gold">Documents → Newsletters</strong>, one per audience sent.</p>
 
-          <Button onClick={() => { setSentSummary(null); resetEditor(); }} variant="outline" className="border-gold/40 text-gold hover:bg-gold/10 h-auto min-h-10 whitespace-normal text-center leading-snug py-2">
+          <Button onClick={() => { setSentSummary(null); resetEditor(); }} variant="outline" className="border-gold/40 text-gold hover:bg-gold/10">
             Compose next issue
           </Button>
         </div>
