@@ -7,6 +7,7 @@ import {
   Hr,
   Html,
   Img,
+  Link,
   Preview,
   Section,
   Text,
@@ -30,6 +31,8 @@ interface Props {
   bookingRef?: string
   secretaryName?: string
   secretaryOffice?: string
+  summonsPdfUrl?: string
+  summonsMeetingNumber?: number
 }
 
 const Email = ({
@@ -47,6 +50,8 @@ const Email = ({
   bookingRef,
   secretaryName,
   secretaryOffice,
+  summonsPdfUrl,
+  summonsMeetingNumber,
 }: Props) => (
   <Html lang="en" dir="ltr">
     <Head />
@@ -82,6 +87,21 @@ const Email = ({
           {!isApologies && <Row label="Attending" value={meetingOptionLabel} />}
           {lodgeName && <Row label="Lodge" value={lodgeName} />}
           {bookingRef && <Row label="Reference" value={bookingRef} />}
+
+          {summonsPdfUrl && (
+            <>
+              <Hr style={hr} />
+              <Text style={labelStyle}>Meeting Summons</Text>
+              <Text style={small}>
+                The finalised summons for this meeting is available to download below.
+              </Text>
+              <Link href={summonsPdfUrl} style={buttonStyle}>
+                {summonsMeetingNumber
+                  ? `Download Summons #${summonsMeetingNumber}`
+                  : 'Download the Meeting Summons'}
+              </Link>
+            </>
+          )}
 
           {!isApologies && guests.length > 0 && (
             <>
@@ -177,6 +197,7 @@ const hr = { borderColor: '#e8e3d3', margin: '18px 0' }
 const rowStyle = { fontSize: '14px', lineHeight: '1.6', margin: '4px 0', fontFamily: 'Arial, sans-serif' }
 const labelStyle = { color: '#1B2A4A', fontWeight: 'bold' as const, fontSize: '14px', margin: '8px 0 4px', fontFamily: 'Arial, sans-serif' }
 const guestLine = { color: '#2a2a2a', fontSize: '14px', lineHeight: '1.5', margin: '2px 0', fontFamily: 'Arial, sans-serif' }
+const buttonStyle = { display: 'inline-block', backgroundColor: '#1B2A4A', color: '#ffffff', fontFamily: 'Arial, sans-serif', fontSize: '14px', fontWeight: 'bold' as const, textDecoration: 'none', padding: '12px 22px', borderRadius: '3px', border: '1px solid #C9A432', margin: '10px 0 4px' }
 const small = { color: '#666', fontSize: '12px', lineHeight: '1.5', margin: 0, fontFamily: 'Arial, sans-serif' }
 const footer = { textAlign: 'center' as const, padding: '20px 0' }
 const footerText = { color: '#888', fontSize: '11px', margin: 0, fontFamily: 'Arial, sans-serif' }

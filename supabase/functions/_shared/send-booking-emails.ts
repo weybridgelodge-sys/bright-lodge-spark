@@ -14,6 +14,10 @@ interface SendOpts {
   overrideNotifyEmail?: string
   /** Skip the booker-facing confirmation; send only the internal notifications. */
   notifyOnly?: boolean
+  /** Testing only: send the booker confirmation to this address instead of the real booker. */
+  overrideBookerEmail?: string
+  /** Testing only: skip the internal notification emails entirely. */
+  skipNotify?: boolean
 }
 
 function formatGBP(pence?: number | null): string {
@@ -129,13 +133,73 @@ export async function sendBookingEmails(bookingId: string, opts: SendOpts) {
 
   // Resolve event date from linked festive board meeting (if any)
   let eventDate = ''
+  let meetingDateISO: string | null = null
+  let meetingEventKey: string | null = null
   if (b.meeting_id) {
     const { data: m } = await supabase
       .from('festive_board_meetings')
-      .select('meeting_date')
+      .select('meeting_date, event_key')
       .eq('id', b.meeting_id)
       .maybeSingle()
-    eventDate = formatDate((m as any)?.meeting_date)
+    meetingDateISO = (m as any)?.meeting_date ?? null
+    meetingEventKey = (m as any)?.event_key ?? null
+    eventDate = formatDate(meetingDateISO)
+  }
+
+  // Resolve a finalised summons PDF for this meeting (signed URL, never attached).
+  // Chain: bookings.meeting_id → festive_board_meetings → lodge_events
+  // (event_key = lodge_events.slug, falling back to matching date) → summonses.lodge_event_id
+  let summonsPdfUrl: string | undefined
+  let summonsMeetingNumber: number | undefined
+  if (!isLadiesFestival && (meetingEventKey || meetingDateISO)) {
+    try {
+      let lodgeEventId: string | null = null
+      if (meetingEventKey) {
+        const { data: le } = await supabase
+          .from('lodge_events')
+          .select('id')
+          .eq('slug', meetingEventKey)
+          .maybeSingle()
+        lodgeEventId = (le as any)?.id ?? null
+      }
+      if (!lodgeEventId && meetingDateISO) {
+        const { data: le2 } = await supabase
+          .from('lodge_events')
+          .select('id')
+          .gte('event_date', `${meetingDateISO}T00:00:00`)
+          .lt('event_date', `${meetingDateISO}T23:59:59`)
+          .order('created_at', { ascending: false })
+          .limit(1)
+        lodgeEventId = (le2 as any)?.[0]?.id ?? null
+      }
+
+      if (lodgeEventId) {
+        const { data: summons } = await supabase
+          .from('summonses')
+          .select('id, meeting_number, pdf_storage_path, status')
+          .eq('lodge_event_id', lodgeEventId)
+          .in('status', ['finalised', 'sent'])
+          .not('pdf_storage_path', 'is', null)
+          .order('updated_at', { ascending: false })
+          .limit(1)
+        const s: any = summons?.[0]
+        if (s?.pdf_storage_path) {
+          const { data: signed, error: signErr } = await supabase.storage
+            .from('lodge-docs')
+            .createSignedUrl(s.pdf_storage_path, 60 * 60 * 24 * 30, {
+              download: `summons-${s.meeting_number}.pdf`,
+            })
+          if (signErr) {
+            console.error('Summons signed URL failed', signErr)
+          } else if (signed?.signedUrl) {
+            summonsPdfUrl = signed.signedUrl
+            summonsMeetingNumber = s.meeting_number ?? undefined
+          }
+        }
+      }
+    } catch (e) {
+      console.error('Summons lookup failed', e)
+    }
   }
   if (!eventDate && isLadiesFestival) {
     eventDate = 'Saturday 22 August 2026'
@@ -232,8 +296,8 @@ export async function sendBookingEmails(bookingId: string, opts: SendOpts) {
   if (b.contact_email && !opts.notifyOnly) {
     const confRes = await sendTransactionalEmail({
         templateName: 'booking-confirmation',
-        recipientEmail: b.contact_email,
-        idempotencyKey: `booking-confirm-${b.id}-${opts.stage}`,
+        recipientEmail: opts.overrideBookerEmail || b.contact_email,
+        idempotencyKey: `booking-confirm-${b.id}-${opts.stage}${opts.overrideBookerEmail ? `-test-${crypto.randomUUID()}` : ''}`,
         replyTo: ASSISTANT_SECRETARY_EMAIL,
         templateData: {
           firstName,
@@ -250,12 +314,15 @@ export async function sendBookingEmails(bookingId: string, opts: SendOpts) {
           bookingRef,
           secretaryName,
           secretaryOffice,
+          summonsPdfUrl,
+          summonsMeetingNumber,
         },
     })
     if (confRes.error) console.error('Booking confirmation email failed', confRes.error)
   }
 
   // 2) Assistant Secretary notification
+  if (opts.skipNotify) return
   const notifyRecipients = opts.overrideNotifyEmail ? [opts.overrideNotifyEmail] : NOTIFY_RECIPIENTS
   await Promise.all(notifyRecipients.map(async (notifyTo) => {
     const notifRes = await sendTransactionalEmail({
