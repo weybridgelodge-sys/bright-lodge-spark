@@ -346,12 +346,61 @@ function MeetingPanel({
             <span className="text-primary-foreground/70">Invoice total</span>
             <span className="text-gold font-medium tabular-nums">{draftTotal != null ? gbp(draftTotal) : "—"}</span>
           </div>
-          <div className="flex items-baseline justify-between text-sm">
-            <span className="text-primary-foreground/70">Net vs fees collected</span>
-            <span className="tabular-nums text-primary-foreground">
-              {draftTotal != null ? gbp(summary.collected - draftTotal) : "—"}
-            </span>
+
+          <div className="mt-3 rounded-sm border border-gold/15 p-3 space-y-1">
+            <h5 className="text-xs uppercase tracking-wider text-primary-foreground/60 mb-1">
+              Stripe fee reconciliation
+            </h5>
+            <div className="flex items-baseline justify-between text-sm">
+              <span className="text-primary-foreground/70">
+                Card payments charged ({stripeSummary.count})
+              </span>
+              <span className="tabular-nums text-primary-foreground">{gbp(stripeSummary.charged)}</span>
+            </div>
+            <div className="flex items-baseline justify-between text-sm">
+              <span className="text-primary-foreground/70">
+                Less actual Stripe fees
+                {stripeSummary.count > 0 && !stripeSummary.complete && (
+                  <span className="text-amber-300"> ({stripeSummary.known}/{stripeSummary.count} recorded)</span>
+                )}
+              </span>
+              <span className="tabular-nums text-red-300">−{gbp(stripeSummary.fees)}</span>
+            </div>
+            <div className="flex items-baseline justify-between text-sm">
+              <span className="text-primary-foreground/70">Net received from card</span>
+              <span className="tabular-nums text-primary-foreground">{gbp(stripeSummary.net)}</span>
+            </div>
+            <div className="flex items-baseline justify-between text-sm">
+              <span className="text-primary-foreground/70">Other methods collected</span>
+              <span className="tabular-nums text-primary-foreground">{gbp(nonStripeCollected)}</span>
+            </div>
+            <div className="flex items-baseline justify-between text-sm border-t border-gold/15 pt-1">
+              <span className="text-primary-foreground/70">Total dining income, net of fees</span>
+              <span className="tabular-nums text-gold font-medium">{gbp(netIncome)}</span>
+            </div>
+            <div className="flex items-baseline justify-between text-sm">
+              <span className="text-primary-foreground/70">GMC invoice obligation</span>
+              <span className="tabular-nums text-primary-foreground">{draftTotal != null ? gbp(draftTotal) : "—"}</span>
+            </div>
+            <div className="flex items-baseline justify-between text-sm">
+              <span className="text-primary-foreground/70">Residual</span>
+              <span
+                className={`tabular-nums font-medium ${
+                  draftTotal == null
+                    ? "text-primary-foreground"
+                    : netIncome - draftTotal >= 0
+                      ? "text-emerald-300"
+                      : "text-red-300"
+                }`}
+              >
+                {draftTotal != null
+                  ? `${netIncome - draftTotal >= 0 ? "+" : "−"}${gbp(Math.abs(netIncome - draftTotal))}`
+                  : "—"}
+              </span>
+            </div>
           </div>
+
+
 
           {canEdit && (
             <div className="flex flex-wrap gap-2 pt-1">
