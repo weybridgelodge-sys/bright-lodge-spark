@@ -29,6 +29,7 @@ import {
   sortMembersBySeniority,
   splitTwoColumns,
   subLetter,
+  normaliseTemplateAssets,
 } from "@/lib/summons";
 import {
   generateSummonsBlob,
