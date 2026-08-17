@@ -67,6 +67,7 @@ function invoiceTotalPence(inv: {
 function MeetingPanel({
   meeting,
   rows,
+  bookings,
   invoice,
   canEdit,
   onChanged,
@@ -74,11 +75,13 @@ function MeetingPanel({
 }: {
   meeting: Meeting;
   rows: AttRow[];
+  bookings: BookingRow[];
   invoice: Invoice | null;
   canEdit: boolean;
   onChanged: () => void;
   onGoToTransaction: (txId: string) => void;
 }) {
+
   const [headcount, setHeadcount] = useState("");
   const [perHead, setPerHead] = useState("");
   const [override, setOverride] = useState("");
