@@ -28,6 +28,15 @@ type AttRow = {
   is_meeting_only: boolean | null;
 };
 
+type BookingRow = {
+  meeting_id: string | null;
+  payment_status: string;
+  total_pence: number | null;
+  stripe_fee_pence: number | null;
+  stripe_net_pence: number | null;
+  stripe_payment_intent_id: string | null;
+};
+
 type Invoice = {
   id: string;
   meeting_id: string;
@@ -39,6 +48,7 @@ type Invoice = {
   invoice_number: string | null;
   invoice_date: string | null;
 };
+
 
 const gbp = (pence: number) =>
   new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP" }).format(pence / 100);
