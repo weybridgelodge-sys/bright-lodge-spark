@@ -175,7 +175,10 @@ export default function MembersLayout({ children }: { children: React.ReactNode 
       </div>
 
       {/* Mobile Bottom Sticky Navigation Strip — Visible below 1024px */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 h-16 bg-card border-t border-border flex items-center justify-around z-50 pb-[env(safe-area-inset-bottom)]">
+      <div
+        className="lg:hidden fixed bottom-0 left-0 right-0 min-h-16 bg-card border-t border-border flex items-stretch justify-around z-50"
+        style={{ paddingTop: "0.5rem", paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
+      >
         <NavLink to="/members" end className={({ isActive }) => `flex flex-col items-center justify-center text-[10px] font-bold ${isActive ? "text-gold" : "text-muted-foreground"}`}>
           <Shield className="h-5 w-5" />
           Hub
