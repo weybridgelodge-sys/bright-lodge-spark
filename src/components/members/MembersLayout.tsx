@@ -171,7 +171,7 @@ export default function MembersLayout({ children }: { children: React.ReactNode 
             {navItems}
           </nav>
         </aside>
-        <main className="lg:pb-0" style={{ paddingBottom: "max(7rem, calc(5rem + env(safe-area-inset-bottom)))" }}>{children}</main>
+        <main className="pb-[max(7rem,calc(5rem+env(safe-area-inset-bottom)))] lg:pb-0">{children}</main>
       </div>
 
       {/* Mobile Bottom Sticky Navigation Strip — Visible below 1024px */}
