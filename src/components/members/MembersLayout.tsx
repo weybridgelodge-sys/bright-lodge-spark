@@ -123,18 +123,19 @@ export default function MembersLayout({ children }: { children: React.ReactNode 
                   <Menu className="w-5 h-5" />
                 </button>
               </SheetTrigger>
-              <SheetContent side="left" className="w-72 bg-navy border-gold/20 text-primary-foreground overflow-y-auto overscroll-contain p-0 flex flex-col">
+              <SheetContent side="left" className="w-72 bg-navy border-gold/20 text-primary-foreground p-0 flex flex-col overflow-hidden">
                 <SheetHeader className="px-4 py-4 border-b border-gold/20 text-left shrink-0 pt-[max(1rem,env(safe-area-inset-top))]">
                   <SheetTitle className="font-serif text-primary-foreground text-base">Members Portal</SheetTitle>
                 </SheetHeader>
                 <nav
                   aria-label="Members navigation"
-                  className="flex flex-col gap-1 p-3"
-                  style={{ paddingBottom: "calc(2rem + env(safe-area-inset-bottom))" }}
+                  className="flex flex-col gap-1 p-3 pb-28 flex-1 min-h-0 overflow-y-auto overscroll-contain [-webkit-overflow-scrolling:touch]"
+                  style={{ paddingBottom: "max(7rem, calc(2rem + env(safe-area-inset-bottom)))" }}
                   onClick={() => setDrawerOpen(false)}
                 >
                   {navItems}
                 </nav>
+
               </SheetContent>
 
             </Sheet>
