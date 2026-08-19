@@ -151,7 +151,16 @@ function buildFeed(posts: PostRow[]) {
     ].join("\n");
   });
 
-  const lastBuild = new Date().toUTCString();
+  // Deterministic: derive from the newest post, NOT the build clock. Using
+  // `new Date()` here made every local `npm run build` produce a one-line diff
+  // against the committed feed.xml (which is the file actually served), causing
+  // repeated git pull conflicts. Content-derived means identical input =>
+  // identical output.
+  const newest = posts
+    .map((p) => new Date(p.publishedAt).getTime())
+    .filter((t) => !Number.isNaN(t))
+    .sort((a, b) => b - a)[0];
+  const lastBuild = new Date(newest ?? 0).toUTCString();
   return [
     `<?xml version="1.0" encoding="UTF-8"?>`,
     `<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">`,
