@@ -176,26 +176,26 @@ export default function MembersLayout({ children }: { children: React.ReactNode 
 
       {/* Mobile Bottom Sticky Navigation Strip — Visible below 1024px */}
       <div
-        className="lg:hidden fixed bottom-0 left-0 right-0 min-h-16 bg-card border-t border-border flex items-stretch justify-around z-50"
-        style={{ paddingTop: "0.5rem", paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
+        className="lg:hidden fixed bottom-0 left-0 right-0 min-h-[6.5rem] bg-card border-t border-border flex items-stretch justify-around z-50"
+        style={{ paddingTop: "0.75rem", paddingBottom: "max(3.5rem, env(safe-area-inset-bottom))" }}
       >
-        <NavLink to="/members" end className={({ isActive }) => `flex flex-col items-center justify-center text-[10px] font-bold ${isActive ? "text-gold" : "text-muted-foreground"}`}>
+        <NavLink to="/members" end className={({ isActive }) => `flex flex-col items-center justify-center gap-1 leading-none text-[10px] font-bold ${isActive ? "text-gold" : "text-muted-foreground"}`}>
           <Shield className="h-5 w-5" />
           Hub
         </NavLink>
-        <NavLink to="/members/calendar" className={({ isActive }) => `flex flex-col items-center justify-center text-[10px] font-bold ${isActive ? "text-gold" : "text-muted-foreground"}`}>
+        <NavLink to="/members/calendar" className={({ isActive }) => `flex flex-col items-center justify-center gap-1 leading-none text-[10px] font-bold ${isActive ? "text-gold" : "text-muted-foreground"}`}>
           <CalendarDays className="h-5 w-5" />
           Calendar
         </NavLink>
-        <NavLink to="/members/directory" className={({ isActive }) => `flex flex-col items-center justify-center text-[10px] font-bold ${isActive ? "text-gold" : "text-muted-foreground"}`}>
+        <NavLink to="/members/directory" className={({ isActive }) => `flex flex-col items-center justify-center gap-1 leading-none text-[10px] font-bold ${isActive ? "text-gold" : "text-muted-foreground"}`}>
           <Users className="h-5 w-5" />
           Directory
         </NavLink>
-        <NavLink to="/members/profile" className={({ isActive }) => `flex flex-col items-center justify-center text-[10px] font-bold ${isActive ? "text-gold" : "text-muted-foreground"}`}>
+        <NavLink to="/members/profile" className={({ isActive }) => `flex flex-col items-center justify-center gap-1 leading-none text-[10px] font-bold ${isActive ? "text-gold" : "text-muted-foreground"}`}>
           <UserIcon className="h-5 w-5" />
           Profile
         </NavLink>
-        <NavLink to="/members/ritual" className={({ isActive }) => `flex flex-col items-center justify-center text-[10px] font-bold ${isActive ? "text-gold" : "text-muted-foreground"}`}>
+        <NavLink to="/members/ritual" className={({ isActive }) => `flex flex-col items-center justify-center gap-1 leading-none text-[10px] font-bold ${isActive ? "text-gold" : "text-muted-foreground"}`}>
           <BookOpen className="h-5 w-5" />
           Ritual
         </NavLink>
