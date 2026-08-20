@@ -97,6 +97,7 @@ const App = () => (
             <Route path="/data-protection" element={<DataProtection />} />
             <Route path="/accessibility-statement" element={<AccessibilityStatement />} />
             <Route path="/unsubscribe" element={<Unsubscribe />} />
+            <Route path="/summons/:meetingNumber" element={<SummonsRedirect />} />
             <Route path="/lodge-profile" element={<LodgeProfile />} />
             
             <Route path="/history" element={<History />} />
