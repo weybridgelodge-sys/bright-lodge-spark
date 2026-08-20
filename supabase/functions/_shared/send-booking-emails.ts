@@ -184,17 +184,10 @@ export async function sendBookingEmails(bookingId: string, opts: SendOpts) {
           .limit(1)
         const s: any = summons?.[0]
         if (s?.pdf_storage_path) {
-          const { data: signed, error: signErr } = await supabase.storage
-            .from('lodge-docs')
-            .createSignedUrl(s.pdf_storage_path, 60 * 60 * 24 * 30, {
-              download: `summons-${s.meeting_number}.pdf`,
-            })
-          if (signErr) {
-            console.error('Summons signed URL failed', signErr)
-          } else if (signed?.signedUrl) {
-            summonsPdfUrl = signed.signedUrl
-            summonsMeetingNumber = s.meeting_number ?? undefined
-          }
+          // Branded redirect on the Lodge's own domain (resolves to a signed URL
+          // on click). Same trust model: possession of the link is the credential.
+          summonsPdfUrl = `https://weybridgelodge.org.uk/summons/${s.meeting_number}?k=${s.id}`
+          summonsMeetingNumber = s.meeting_number ?? undefined
         }
       }
     } catch (e) {
