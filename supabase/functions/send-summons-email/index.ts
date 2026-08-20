@@ -48,28 +48,48 @@ Deno.serve(async (req) => {
     const authHeader = req.headers.get("Authorization") ?? "";
     if (!authHeader) return json({ error: "Missing auth" }, 401);
 
-    const userClient = createClient(SUPABASE_URL, ANON, {
-      global: { headers: { Authorization: authHeader } },
-    });
-    const { data: { user } } = await userClient.auth.getUser();
-    if (!user) return json({ error: "Unauthorized" }, 401);
-
     const admin = createClient(SUPABASE_URL, SERVICE_ROLE);
 
-    // Role check
-    const { data: roles } = await admin
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", user.id);
-    const allowed = (roles ?? []).some((r: { role: string }) =>
-      ["admin", "secretary", "assistant_secretary"].includes(r.role)
-    );
-    if (!allowed) return json({ error: "Forbidden" }, 403);
+    // Service-role callers (other edge functions / operational tooling) are trusted.
+    const isServiceRole = (() => {
+      if (authHeader === `Bearer ${SERVICE_ROLE}`) return true;
+      try {
+        const t = authHeader.replace(/^Bearer\s+/i, "");
+        const parts = t.split(".");
+        if (parts.length !== 3) return false;
+        const payload = JSON.parse(atob(parts[1].replace(/-/g, "+").replace(/_/g, "/")));
+        return payload?.role === "service_role";
+      } catch {
+        return false;
+      }
+    })();
+    if (!isServiceRole) {
+      const userClient = createClient(SUPABASE_URL, ANON, {
+        global: { headers: { Authorization: authHeader } },
+      });
+      const { data: { user } } = await userClient.auth.getUser();
+      if (!user) return json({ error: "Unauthorized" }, 401);
+
+      // Role check
+      const { data: roles } = await admin
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id);
+      const allowed = (roles ?? []).some((r: { role: string }) =>
+        ["admin", "secretary", "assistant_secretary"].includes(r.role)
+      );
+      if (!allowed) return json({ error: "Forbidden" }, 403);
+    }
 
     const body = await req.json().catch(() => ({}));
     const summons_id: string | undefined = body.summons_id;
     const test_recipient: string | undefined = body.test_recipient?.trim();
     const secretary_name_override: string | undefined = body.secretary_name;
+    // Real (non-test) resend to a specific subset of addresses, e.g. members whose
+    // address was corrected after the bulk send.
+    const resendRecipients: string[] = Array.isArray(body.resend_recipients)
+      ? body.resend_recipients.map((e: string) => String(e).trim()).filter(Boolean)
+      : [];
     if (!summons_id) return json({ error: "summons_id required" }, 400);
 
     const isTest = !!test_recipient;
@@ -102,6 +122,16 @@ Deno.serve(async (req) => {
     let recipients: { email: string; user_id: string | null }[] = [];
     if (isTest) {
       recipients = [{ email: test_recipient!, user_id: null }];
+    } else if (resendRecipients.length > 0) {
+      const { data: matched } = await admin
+        .from("profiles")
+        .select("id,email")
+        .in("email", resendRecipients);
+      const byEmail = new Map((matched ?? []).map((p: any) => [String(p.email).toLowerCase(), p.id]));
+      recipients = resendRecipients.map((email) => ({
+        email,
+        user_id: byEmail.get(email.toLowerCase()) ?? null,
+      }));
     } else {
       const { data: actives } = await admin
         .from("profiles")
@@ -154,7 +184,9 @@ Deno.serve(async (req) => {
     for (const r of recipients) {
       const idempotencyKey = isTest
         ? `summons-${summons.id}-test-${testRunId}-${r.email}`
-        : `summons-${summons.id}-${r.email}`;
+        : resendRecipients.length > 0
+          ? `summons-${summons.id}-resend-${r.email}`
+          : `summons-${summons.id}-${r.email}`;
       try {
         const res = await fetch(`${SUPABASE_URL}/functions/v1/send-transactional-email`, {
           method: "POST",
@@ -200,7 +232,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    if (!isTest && sent > 0) {
+    if (!isTest && resendRecipients.length === 0 && sent > 0) {
       await admin
         .from("summonses")
         .update({
