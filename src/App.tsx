@@ -12,6 +12,7 @@ import Index from "./pages/Index";
 // Lazy-load everything except the landing page to keep the initial bundle tiny.
 const NotFound = lazy(() => import("./pages/NotFound"));
 const Unsubscribe = lazy(() => import("./pages/Unsubscribe"));
+const SummonsRedirect = lazy(() => import("./pages/SummonsRedirect"));
 const WhatIsFreemasonry = lazy(() => import("./pages/WhatIsFreemasonry"));
 const FreemasonryCharity = lazy(() => import("./pages/FreemasonryCharity"));
 const OurCharities = lazy(() => import("./pages/OurCharities"));
@@ -96,6 +97,7 @@ const App = () => (
             <Route path="/data-protection" element={<DataProtection />} />
             <Route path="/accessibility-statement" element={<AccessibilityStatement />} />
             <Route path="/unsubscribe" element={<Unsubscribe />} />
+            <Route path="/summons/:meetingNumber" element={<SummonsRedirect />} />
             <Route path="/lodge-profile" element={<LodgeProfile />} />
             
             <Route path="/history" element={<History />} />

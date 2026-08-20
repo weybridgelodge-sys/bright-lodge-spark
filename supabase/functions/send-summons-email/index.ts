@@ -14,7 +14,6 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-const SIGNED_URL_TTL = 60 * 60 * 24 * 30; // 30 days
 
 function json(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
@@ -107,16 +106,18 @@ Deno.serve(async (req) => {
       return json({ error: "Summons has no PDF — save it first" }, 400);
     }
 
-    // Signed URL for the PDF
-    const { data: signed, error: signErr } = await admin.storage
+    // Sanity-check the stored PDF can be signed before we email anyone…
+    const { error: signErr } = await admin.storage
       .from("lodge-docs")
-      .createSignedUrl(summons.pdf_storage_path, SIGNED_URL_TTL, {
+      .createSignedUrl(summons.pdf_storage_path, 60, {
         download: `summons-${summons.meeting_number}.pdf`,
       });
-    if (signErr || !signed?.signedUrl) {
-      return json({ error: signErr?.message ?? "Failed to sign PDF URL" }, 500);
+    if (signErr) {
+      return json({ error: signErr.message ?? "Failed to sign PDF URL" }, 500);
     }
-    const pdfUrl = signed.signedUrl;
+    // …but the link we send is branded on the Lodge's own domain. It resolves
+    // to a freshly signed storage URL on click (summons-link function).
+    const pdfUrl = `https://weybridgelodge.org.uk/summons/${summons.meeting_number}?k=${summons.id}`;
 
     // Resolve recipients
     let recipients: { email: string; user_id: string | null }[] = [];
