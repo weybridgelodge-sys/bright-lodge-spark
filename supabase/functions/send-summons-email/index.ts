@@ -14,7 +14,6 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-const SIGNED_URL_TTL = 60 * 60 * 24 * 30; // 30 days
 
 function json(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
