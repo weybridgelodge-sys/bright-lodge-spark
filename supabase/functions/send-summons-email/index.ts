@@ -51,7 +51,18 @@ Deno.serve(async (req) => {
     const admin = createClient(SUPABASE_URL, SERVICE_ROLE);
 
     // Service-role callers (other edge functions / operational tooling) are trusted.
-    const isServiceRole = authHeader === `Bearer ${SERVICE_ROLE}`;
+    const isServiceRole = (() => {
+      if (authHeader === `Bearer ${SERVICE_ROLE}`) return true;
+      try {
+        const t = authHeader.replace(/^Bearer\s+/i, "");
+        const parts = t.split(".");
+        if (parts.length !== 3) return false;
+        const payload = JSON.parse(atob(parts[1].replace(/-/g, "+").replace(/_/g, "/")));
+        return payload?.role === "service_role";
+      } catch {
+        return false;
+      }
+    })();
     if (!isServiceRole) {
       const userClient = createClient(SUPABASE_URL, ANON, {
         global: { headers: { Authorization: authHeader } },
