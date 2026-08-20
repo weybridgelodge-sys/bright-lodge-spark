@@ -42,9 +42,8 @@ export default function SummonsRedirect() {
   return (
     <div className="min-h-screen bg-navy text-primary-foreground flex items-center justify-center px-6">
       <SEO
-        title={`Summons ${meetingNumber ?? ""} | Weybridge Lodge No. 6787`}
+        title={`Summons ${meetingNumber ?? ""}`}
         description="Download your lodge summons."
-        noindex
       />
       <div className="max-w-md w-full text-center space-y-4">
         {error ? (
