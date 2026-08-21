@@ -18,6 +18,7 @@ import { fetchNextEvent, type EventBundle } from "@/lib/lodgeEvents";
 import { normaliseName, normaliseTitle } from "@/lib/nameCase";
 import TurnstileWidget from "@/components/TurnstileWidget";
 import { assetUrl } from "@/lib/assetUrl";
+import { readFunctionError } from "@/lib/functionError";
 import sixFellowcraftsAprons from "@/assets/six-fellowcrafts-aprons.png.asset.json";
 
 
