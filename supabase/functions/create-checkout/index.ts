@@ -2,6 +2,7 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { z } from "https://esm.sh/zod@3.23.8";
 import { type StripeEnv, createStripeClient } from "../_shared/stripe.ts";
+import { DUPLICATE_BOOKING_MESSAGE, findExistingBooking } from "../_shared/duplicate-booking.ts";
 
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL")!,
