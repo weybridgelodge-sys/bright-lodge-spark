@@ -43,9 +43,13 @@ export function StripeEmbeddedCheckoutPanel(props: Props) {
       },
     });
     if (error || !data?.clientSecret) {
-      const msg = error?.message || data?.error || "Failed to create checkout session";
-      props.onError?.(typeof msg === "string" ? msg : "Failed to create checkout session");
-      throw new Error(typeof msg === "string" ? msg : "Failed to create checkout session");
+      const msg = await readFunctionError(
+        error,
+        data,
+        "Failed to create checkout session",
+      );
+      props.onError?.(msg);
+      throw new Error(msg);
     }
     return data.clientSecret;
   };
