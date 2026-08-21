@@ -139,11 +139,20 @@ Deno.serve(async (req) => {
 
     if (insErr || !booking) {
       console.error("Booking insert failed:", insErr);
+      const duplicate = (insErr as { code?: string } | null)?.code === "23505";
       return new Response(
-        JSON.stringify({ error: "Could not create booking record." }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        JSON.stringify({
+          error: duplicate
+            ? "You already have a booking for this event. If you need to change it, please contact the Assistant Secretary."
+            : "Could not create booking record.",
+        }),
+        {
+          status: duplicate ? 409 : 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
       );
     }
+
 
     const stripe = createStripeClient(env);
 
