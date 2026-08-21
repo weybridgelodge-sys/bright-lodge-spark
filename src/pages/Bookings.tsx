@@ -290,7 +290,9 @@ const BookingsEvent = ({
         },
       });
 
-      if (error || !data?.bookingId) throw new Error(error?.message || "Failed to save response");
+      if (error || !data?.bookingId) {
+        throw new Error(await readFunctionError(error, data, "Failed to save response"));
+      }
       setSubmissionStatus(finalStatus);
     } catch (err: unknown) {
       setSubmissionStatus("error");
