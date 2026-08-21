@@ -103,8 +103,33 @@ Deno.serve(async (req) => {
       if (m && m.status === "published") resolvedMeetingId = m.id;
     }
 
+    // HARD DUPLICATE GUARD — same rule as paid checkout: one live response per
+    // person per meeting.
+    const existingBooking = await findExistingBooking({
+      supabase,
+      meetingId: resolvedMeetingId,
+      eventKey: event_key,
+      email: contact_email,
+    });
+    if (existingBooking) {
+      console.warn("Blocked duplicate meeting response", {
+        event_key,
+        meeting_id: resolvedMeetingId,
+        existing_booking_id: existingBooking.id,
+        status: existingBooking.payment_status,
+      });
+      return new Response(
+        JSON.stringify({
+          error: DUPLICATE_BOOKING_MESSAGE,
+          existingBookingId: existingBooking.id,
+        }),
+        { status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
     // Capacity check: for festive-board bookings, ask the DB whether the seats
     // fit. Returns 'confirmed' if seats available (or event has no venue), or
+
     // 'waitlisted' if the venue is at capacity.
     let initialStatus: string;
     if (meeting_option === "apologies") {
