@@ -85,6 +85,32 @@ Deno.serve(async (req) => {
       userId = data?.user?.id ?? null;
     }
 
+    // HARD DUPLICATE GUARD — runs BEFORE any Stripe session is created so a
+    // genuine duplicate can never be charged.
+    const existingBooking = await findExistingBooking({
+      supabase,
+      meetingId: resolvedMeetingId,
+      eventKey: input.event_key,
+      email: input.contact_email,
+      userId,
+    });
+    if (existingBooking) {
+      console.warn("Blocked duplicate booking attempt", {
+        event_key: input.event_key,
+        meeting_id: resolvedMeetingId,
+        existing_booking_id: existingBooking.id,
+        status: existingBooking.payment_status,
+      });
+      return new Response(
+        JSON.stringify({
+          error: DUPLICATE_BOOKING_MESSAGE,
+          existingBookingId: existingBooking.id,
+        }),
+        { status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
+
     const subtotalPence = input.line_items.reduce(
       (sum, li) => sum + li.unit_price_pence * li.qty,
       0,
