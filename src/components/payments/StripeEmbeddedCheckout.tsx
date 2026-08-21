@@ -1,6 +1,7 @@
 import { EmbeddedCheckoutProvider, EmbeddedCheckout } from "@stripe/react-stripe-js";
 import { getStripe, getStripeEnvironment } from "@/lib/stripe";
 import { supabase } from "@/integrations/supabase/client";
+import { readFunctionError } from "@/lib/functionError";
 
 export type BookingLineItem = {
   label: string;
@@ -43,9 +44,13 @@ export function StripeEmbeddedCheckoutPanel(props: Props) {
       },
     });
     if (error || !data?.clientSecret) {
-      const msg = error?.message || data?.error || "Failed to create checkout session";
-      props.onError?.(typeof msg === "string" ? msg : "Failed to create checkout session");
-      throw new Error(typeof msg === "string" ? msg : "Failed to create checkout session");
+      const msg = await readFunctionError(
+        error,
+        data,
+        "Failed to create checkout session",
+      );
+      props.onError?.(msg);
+      throw new Error(msg);
     }
     return data.clientSecret;
   };

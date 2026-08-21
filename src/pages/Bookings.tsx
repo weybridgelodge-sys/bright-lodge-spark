@@ -18,6 +18,7 @@ import { fetchNextEvent, type EventBundle } from "@/lib/lodgeEvents";
 import { normaliseName, normaliseTitle } from "@/lib/nameCase";
 import TurnstileWidget from "@/components/TurnstileWidget";
 import { assetUrl } from "@/lib/assetUrl";
+import { readFunctionError } from "@/lib/functionError";
 import sixFellowcraftsAprons from "@/assets/six-fellowcrafts-aprons.png.asset.json";
 
 
@@ -290,7 +291,9 @@ const BookingsEvent = ({
         },
       });
 
-      if (error || !data?.bookingId) throw new Error(error?.message || "Failed to save response");
+      if (error || !data?.bookingId) {
+        throw new Error(await readFunctionError(error, data, "Failed to save response"));
+      }
       setSubmissionStatus(finalStatus);
     } catch (err: unknown) {
       setSubmissionStatus("error");

@@ -2,6 +2,7 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { z } from "https://esm.sh/zod@3.23.8";
 import { type StripeEnv, createStripeClient } from "../_shared/stripe.ts";
+import { DUPLICATE_BOOKING_MESSAGE, findExistingBooking } from "../_shared/duplicate-booking.ts";
 
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL")!,
@@ -83,6 +84,32 @@ Deno.serve(async (req) => {
       const { data } = await supabase.auth.getUser(token);
       userId = data?.user?.id ?? null;
     }
+
+    // HARD DUPLICATE GUARD — runs BEFORE any Stripe session is created so a
+    // genuine duplicate can never be charged.
+    const existingBooking = await findExistingBooking({
+      supabase,
+      meetingId: resolvedMeetingId,
+      eventKey: input.event_key,
+      email: input.contact_email,
+      userId,
+    });
+    if (existingBooking) {
+      console.warn("Blocked duplicate booking attempt", {
+        event_key: input.event_key,
+        meeting_id: resolvedMeetingId,
+        existing_booking_id: existingBooking.id,
+        status: existingBooking.payment_status,
+      });
+      return new Response(
+        JSON.stringify({
+          error: DUPLICATE_BOOKING_MESSAGE,
+          existingBookingId: existingBooking.id,
+        }),
+        { status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
 
     const subtotalPence = input.line_items.reduce(
       (sum, li) => sum + li.unit_price_pence * li.qty,
