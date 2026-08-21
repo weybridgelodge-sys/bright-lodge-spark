@@ -147,11 +147,20 @@ Deno.serve(async (req) => {
 
     if (error || !booking) {
       console.error("Booking insert failed:", error);
+      const duplicate = (error as { code?: string } | null)?.code === "23505";
       return new Response(
-        JSON.stringify({ error: error?.message || "Could not save response." }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        JSON.stringify({
+          error: duplicate
+            ? "You have already recorded a response for this meeting. Please contact the Assistant Secretary to change it."
+            : error?.message || "Could not save response.",
+        }),
+        {
+          status: duplicate ? 409 : 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
       );
     }
+
 
     // Fire-and-forget booking emails (confirmation + assistant secretary notification)
     try {
