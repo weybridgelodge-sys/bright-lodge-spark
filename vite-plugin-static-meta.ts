@@ -67,11 +67,11 @@ const staticRoutes: RouteMeta[] = [
     canonical: "/join-us",
   },
   {
-    route: "first-visit",
+    route: "freemason-initiation-night",
     title: "Your Initiation Night",
     description:
       "A candid, reassuring guide to your Masonic initiation night at Weybridge Lodge No. 6787 — what happens, what to wear, and what to expect at the Guildford Masonic Centre, GU2 4DR.",
-    canonical: "/first-visit",
+    canonical: "/freemason-initiation-night",
   },
   {
     route: "your-journey",

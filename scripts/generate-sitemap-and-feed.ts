@@ -64,7 +64,7 @@ const staticEntries: SitemapEntry[] = [
   { path: "/video-hub", priority: "0.6", changefreq: "monthly" },
   { path: "/masonic-links", priority: "0.5", changefreq: "yearly" },
   { path: "/lodge-traditions", priority: "0.6", changefreq: "yearly" },
-  { path: "/first-visit", priority: "0.7", changefreq: "monthly" },
+  { path: "/freemason-initiation-night", priority: "0.7", changefreq: "monthly" },
   { path: "/your-journey", priority: "0.6", changefreq: "yearly" },
   { path: "/ladies-festival", priority: "0.7", changefreq: "monthly" },
   { path: "/ladies-night", priority: "0.6", changefreq: "monthly" },

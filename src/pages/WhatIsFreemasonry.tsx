@@ -354,7 +354,7 @@ const WhatIsFreemasonry = () => {
                   <ArrowRight className="w-4 h-4" aria-hidden="true" />
                 </Link>
                 <Link
-                  to="/first-visit"
+                  to="/freemason-initiation-night"
                   className="inline-flex items-center justify-center bg-navy text-gold border border-gold/30 px-8 py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:bg-navy-light transition-colors min-h-[48px] w-full sm:w-auto"
                 >
                   Your Initiation Night

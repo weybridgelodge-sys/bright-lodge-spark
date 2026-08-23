@@ -72,7 +72,7 @@ const Hero = () => {
                 Enquire About Joining
               </Link>
               <Link
-                to="/first-visit"
+                to="/freemason-initiation-night"
                 className="inline-flex items-center justify-center border border-warm-white/30 text-warm-white px-8 py-4 rounded-sm text-sm font-sans uppercase tracking-widest hover:border-gold hover:text-gold transition-colors min-h-[48px] w-full sm:w-auto"
               >
                 Your Initiation Night

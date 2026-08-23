@@ -117,7 +117,7 @@ const Contact = () => {
               The Centre has free on-site parking, step-free access to the main entrance, a licensed bar and a dining room where the Festive Board is held after each meeting. Guildford railway station is roughly a ten-minute walk away, and the A3 is a few minutes by car.
             </p>
             <p className="text-muted-foreground font-sans leading-relaxed">
-              Visitors are always welcome. If you are coming for the first time, <Link to="/first-visit" className="text-gold hover:underline">Your Initiation Night</Link> explains what to expect on the evening, and our <Link to="/events" className="text-gold hover:underline">events page</Link> lists upcoming meetings at the Centre.
+              Visitors are always welcome. If you are coming for the first time, <Link to="/freemason-initiation-night" className="text-gold hover:underline">Your Initiation Night</Link> explains what to expect on the evening, and our <Link to="/events" className="text-gold hover:underline">events page</Link> lists upcoming meetings at the Centre.
             </p>
           </div>
         </section>

@@ -135,7 +135,7 @@ const faqCategories: FAQCategory[] = [
             care, guided by the ritual of the First Degree, and focuses on the principles of integrity,
             charity, and self-reflection. You leave as an Entered Apprentice — a Freemason. Read a full,
             candid walkthrough on our{" "}
-            <Link to="/first-visit" className="text-gold underline hover:opacity-80 transition-opacity">
+            <Link to="/freemason-initiation-night" className="text-gold underline hover:opacity-80 transition-opacity">
               Your Initiation Night
             </Link>{" "}
             page.

@@ -80,15 +80,15 @@ const FirstVisit = () => {
   const pageSchema = useMemo(() => {
     const breadcrumb = breadcrumbSchema([
       { name: "Home", url: "/" },
-      { name: "Your Initiation Night", url: "/first-visit" },
+      { name: "Your Initiation Night", url: "/freemason-initiation-night" },
     ]);
 
     return [
       {
         "@context": "https://schema.org",
         "@type": "WebPage",
-        "@id": "https://weybridgelodge.org.uk/first-visit#webpage",
-        url: "https://weybridgelodge.org.uk/first-visit",
+        "@id": "https://weybridgelodge.org.uk/freemason-initiation-night#webpage",
+        url: "https://weybridgelodge.org.uk/freemason-initiation-night",
         name: "Your Initiation Night | Freemasons in Guildford, Surrey — Weybridge Lodge No. 6787",
         description:
           "A candid, reassuring guide to your Masonic initiation night at Weybridge Lodge No. 6787 — what happens, what to wear, and what to expect at the Guildford Masonic Centre, GU2 4DR.",
@@ -106,7 +106,7 @@ const FirstVisit = () => {
       <SEO
         title="Your Initiation Night"
         description="A candid, reassuring guide to your Masonic initiation night at Weybridge Lodge No. 6787 — what happens, what to wear, and what to expect at the Guildford Masonic Centre, GU2 4DR."
-        canonical="/first-visit"
+        canonical="/freemason-initiation-night"
         schema={pageSchema}
       />
       <a href="#main-content" className="skip-to-content">Skip to main content</a>
