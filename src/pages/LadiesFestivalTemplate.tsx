@@ -1244,9 +1244,10 @@ useEffect(() => {
                         </Button>
                         <Button
                           type="submit"
-                          className="w-full sm:flex-1 bg-gold-shimmer text-accent-foreground py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity h-auto"
+                          disabled
+                          className="w-full sm:flex-1 bg-muted text-muted-foreground py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest opacity-50 cursor-not-allowed h-auto"
                         >
-                          <CreditCard className="w-4 h-4 mr-2" /> Continue to Payment
+                          <CreditCard className="w-4 h-4 mr-2" /> Payments Disabled (Reference Template)
                         </Button>
                       </div>
 
