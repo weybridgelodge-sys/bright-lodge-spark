@@ -4,7 +4,8 @@ import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
 import SEO, { breadcrumbSchema } from "@/components/SEO";
 import { Link } from "react-router-dom";
-import { MapPin, Clock, Shirt, UserCheck, BookOpen, ArrowRight } from "lucide-react";
+import { motion } from "framer-motion";
+import { MapPin, Shirt, UserCheck, BookOpen, ArrowRight, Users, DoorOpen, Sparkles, Utensils, Moon, UtensilsCrossed } from "lucide-react";
 
 interface InfoCard {
   icon: React.ElementType;
