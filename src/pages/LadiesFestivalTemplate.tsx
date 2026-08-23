@@ -296,10 +296,10 @@ useEffect(() => {
 }, []);
   return (
     <div className="min-h-screen">
+      <Helmet><meta name="robots" content="noindex, nofollow" /></Helmet>
       <SEO
         title="Ladies Festival 2026"
         description="Join Weybridge & Astolat Lodges for a black tie charity gala on 22 August 2026 at Macdonald Frimley Hall Hotel. Three-course dinner, DJ, raffle — in aid of Action for Carers Surrey. Tickets £75."
-        canonical="/ladies-festival"
         schema={[
           breadcrumbSchema([
             { name: "Home", url: "/" },
