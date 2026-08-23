@@ -4,7 +4,15 @@ import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
 import SEO, { breadcrumbSchema } from "@/components/SEO";
 import { Link } from "react-router-dom";
-import { MapPin, Clock, Shirt, UserCheck, BookOpen, ArrowRight } from "lucide-react";
+import { motion } from "framer-motion";
+import { MapPin, Shirt, UserCheck, BookOpen, ArrowRight, Users, DoorOpen, Sparkles, Utensils, Moon, UtensilsCrossed } from "lucide-react";
+
+interface TimelineStep {
+  icon: React.ElementType;
+  time: string;
+  title: string;
+  body: string;
+}
 
 interface InfoCard {
   icon: React.ElementType;
@@ -12,26 +20,59 @@ interface InfoCard {
   body: string;
 }
 
-const infoCards: InfoCard[] = [
+const timeline: TimelineStep[] = [
   {
-    icon: MapPin,
-    title: "Where We Meet",
-    body: "Your initiation takes place at the Guildford Masonic Centre, Weybourne House, Hitherbury Close, Guildford, GU2 4DR. The centre is easily reached from Guildford town centre and the A3, with on-site parking available.",
+    icon: Users,
+    time: "Before the night",
+    title: "Everything that leads here",
+    body: "By the time you reach your initiation night, we've already spoken on the phone, exchanged emails, shown you around the Masonic Centre, and met for a relaxed informal interview. You've completed your application form and your ballot has been successful. Now all that remains is the evening itself.",
   },
+  {
+    icon: DoorOpen,
+    time: "Arrival & greeting",
+    title: "Arrival & greeting",
+    body: "You'll arrive at the Guildford Masonic Centre, Weybourne House, Hitherbury Close, Guildford, GU2 4DR, and be greeted warmly by your Proposer and the Director of Ceremonies. There'll be time to settle in, meet a few familiar faces, and calm any nerves. On-site parking is available, and the centre is around a 10-minute walk or a 3-minute taxi ride from Guildford station.",
+  },
+  {
+    icon: Sparkles,
+    time: "The ceremony of Initiation",
+    title: "The ceremony of Initiation",
+    body: "You'll be escorted into the Lodge room and prepared for the ceremony. You don't need to memorise anything, and you won't be left alone for a single moment — your Proposer is with you throughout. The initiation is a time-honoured ceremony rich in symbolism: think of it as a short allegorical journey from darkness into light, marking the beginning of your Masonic life.",
+  },
+  {
+    icon: Utensils,
+    time: "The Festive Board",
+    title: "The Festive Board",
+    body: "After the ceremony, everyone retires to the dining room for a celebratory three-course meal. This is where the real celebration happens — your new brethren will want to congratulate you, welcome you properly, and hear your first impressions.",
+  },
+  {
+    icon: Moon,
+    time: "Home as a Freemason",
+    title: "Home as a Freemason",
+    body: "You leave with new friends, a new title — Entered Apprentice — and the start of a journey that lasts a lifetime. Or stay for a few drinks with your new lodge mates — the bar stays open for those who want to linger.",
+  },
+];
+
+const practicalCards: InfoCard[] = [
   {
     icon: Shirt,
     title: "What to Wear",
-    body: "For your initiation ceremony, wear a dark lounge suit, white shirt, and dark tie. White gloves are provided for you on the night — you do not need to bring your own. Keep it simple and smart; you will look exactly right.",
+    body: "For your initiation ceremony, wear a dark lounge suit, white shirt, and dark tie. White gloves are provided for you on the night — you do not need to bring your own.",
   },
   {
-    icon: Clock,
-    title: "Arrive an Hour Early",
-    body: "We ask you to arrive approximately one hour before the ceremony begins. This is not a formality — it is your time. You will be welcomed into the bar, introduced to members at your own pace, and given the chance to settle, have a drink, and breathe before the evening gets underway.",
+    icon: MapPin,
+    title: "Where We Meet",
+    body: "Your initiation takes place at the Guildford Masonic Centre, Weybourne House, Hitherbury Close, Guildford, GU2 4DR. On-site parking is available, and the centre is around a 10-minute walk or a 3-minute taxi ride from Guildford station.",
   },
   {
     icon: UserCheck,
-    title: "Who Will Be There for You",
-    body: "Your Proposer — the member who put your name forward — will be present, along with the Lodge Mentor, whose specific role is to support new candidates. You will not be handed around strangers. These are people who are genuinely pleased you are there.",
+    title: "Who Will Be There",
+    body: "Your Proposer — the member who put your name forward — will be present, along with the Lodge Mentor, whose specific role is to support new candidates. You will not be handed around strangers.",
+  },
+  {
+    icon: UtensilsCrossed,
+    title: "Dietary Needs",
+    body: "Just let us know in advance — vegetarian, vegan, gluten-free, allergies. All easily handled.",
   },
 ];
 
@@ -96,13 +137,49 @@ const FirstVisit = () => {
               </p>
             </section>
 
+            {/* Timeline of the Evening */}
+            <section aria-labelledby="timeline-heading" className="mb-12">
+              <h2 id="timeline-heading" className="sr-only">
+                Timeline of your initiation night at Weybridge Lodge, Guildford
+              </h2>
+              <div className="relative">
+                <div className="absolute left-6 top-2 bottom-2 w-px bg-gold/30 hidden sm:block" />
+                <ul className="space-y-10">
+                  {timeline.map((step, idx) => {
+                    const Icon = step.icon;
+                    return (
+                      <motion.li
+                        key={step.title}
+                        initial={{ opacity: 0, x: -20 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.5, delay: idx * 0.05 }}
+                        className="relative flex gap-5 sm:gap-8"
+                      >
+                        <div className="relative shrink-0">
+                          <div className="w-12 h-12 rounded-full bg-navy text-gold-dark flex items-center justify-center border border-gold-dark/40 shadow-md">
+                            <Icon className="w-5 h-5" aria-hidden="true" />
+                          </div>
+                        </div>
+                        <div className="flex-1 pt-1">
+                          <p className="text-gold-dark font-sans text-xs uppercase tracking-widest mb-1">{step.time}</p>
+                          <h3 className="text-xl font-serif text-foreground mb-2">{step.title}</h3>
+                          <p className="text-muted-foreground font-sans text-sm leading-relaxed">{step.body}</p>
+                        </div>
+                      </motion.li>
+                    );
+                  })}
+                </ul>
+              </div>
+            </section>
+
             {/* Practical Cards Grid */}
             <section aria-labelledby="practical-heading" className="mb-12">
               <h2 id="practical-heading" className="sr-only">
                 Practical information for your initiation night at Weybridge Lodge, Guildford
               </h2>
               <ul className="grid grid-cols-1 md:grid-cols-2 gap-6 list-none p-0">
-                {infoCards.map(({ icon: Icon, title, body }) => (
+                {practicalCards.map(({ icon: Icon, title, body }) => (
                   <li
                     key={title}
                     className="bg-card p-6 rounded-sm border border-border flex gap-4"

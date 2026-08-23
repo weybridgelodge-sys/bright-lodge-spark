@@ -74,13 +74,6 @@ const staticRoutes: RouteMeta[] = [
     canonical: "/first-visit",
   },
   {
-    route: "your-initiation",
-    title: "Your Initiation Night",
-    description:
-      "What actually happens on your initiation night at Weybridge Lodge No. 6787 — from arrival to the Festive Board. Your first visit as a Freemason in Guildford.",
-    canonical: "/your-initiation",
-  },
-  {
     route: "your-journey",
     title: "How to Join the Freemasons in Guildford, Surrey",
     description:

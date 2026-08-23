@@ -46,7 +46,6 @@ const ThamesChallengePage = lazy(() => import("./pages/ThamesChallengePage"));
 const Events = lazy(() => import("./pages/Events"));
 const LadiesFestival = lazy(() => import("./pages/LadiesFestival"));
 const FirstVisit = lazy(() => import("./pages/FirstVisit"));
-const YourInitiation = lazy(() => import("./pages/YourInitiation"));
 const YourJourney = lazy(() => import("./pages/YourJourney"));
 const LodgeTraditions = lazy(() => import("./pages/LodgeTraditions"));
 const Quiz = lazy(() => import("./pages/Quiz"));
@@ -91,7 +90,6 @@ const App = () => (
             <Route path="/our-charities" element={<OurCharities />} />
             <Route path="/join-us" element={<JoinUs />} />
             <Route path="/first-visit" element={<FirstVisit />} />
-            <Route path="/your-initiation" element={<YourInitiation />} />
             <Route path="/your-journey" element={<YourJourney />} />
             <Route path="/lodge-traditions" element={<LodgeTraditions />} />
             <Route path="/data-protection" element={<DataProtection />} />
@@ -165,6 +163,7 @@ const App = () => (
             {/* Join & contact */}
             <Route path="/surrey-freemasons-join-us" element={<Navigate to="/join-us" replace />} />
             <Route path="/contact-weybridge-lodge-freemasons" element={<Navigate to="/contact" replace />} />
+            <Route path="/your-initiation" element={<Navigate to="/first-visit" replace />} />
             {/* Charity */}
             <Route path="/guildford-freemasons-charity-surrey" element={<Navigate to="/our-charities" replace />} />
             <Route path="/freemasons-charity-weybridge-lodge-raise-31000-for-sands-charity" element={<Navigate to="/our-charities" replace />} />
