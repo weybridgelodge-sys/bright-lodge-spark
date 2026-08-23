@@ -137,13 +137,49 @@ const FirstVisit = () => {
               </p>
             </section>
 
+            {/* Timeline of the Evening */}
+            <section aria-labelledby="timeline-heading" className="mb-12">
+              <h2 id="timeline-heading" className="sr-only">
+                Timeline of your initiation night at Weybridge Lodge, Guildford
+              </h2>
+              <div className="relative">
+                <div className="absolute left-6 top-2 bottom-2 w-px bg-gold/30 hidden sm:block" />
+                <ul className="space-y-10">
+                  {timeline.map((step, idx) => {
+                    const Icon = step.icon;
+                    return (
+                      <motion.li
+                        key={step.title}
+                        initial={{ opacity: 0, x: -20 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.5, delay: idx * 0.05 }}
+                        className="relative flex gap-5 sm:gap-8"
+                      >
+                        <div className="relative shrink-0">
+                          <div className="w-12 h-12 rounded-full bg-navy text-gold-dark flex items-center justify-center border border-gold-dark/40 shadow-md">
+                            <Icon className="w-5 h-5" aria-hidden="true" />
+                          </div>
+                        </div>
+                        <div className="flex-1 pt-1">
+                          <p className="text-gold-dark font-sans text-xs uppercase tracking-widest mb-1">{step.time}</p>
+                          <h3 className="text-xl font-serif text-foreground mb-2">{step.title}</h3>
+                          <p className="text-muted-foreground font-sans text-sm leading-relaxed">{step.body}</p>
+                        </div>
+                      </motion.li>
+                    );
+                  })}
+                </ul>
+              </div>
+            </section>
+
             {/* Practical Cards Grid */}
             <section aria-labelledby="practical-heading" className="mb-12">
               <h2 id="practical-heading" className="sr-only">
                 Practical information for your initiation night at Weybridge Lodge, Guildford
               </h2>
               <ul className="grid grid-cols-1 md:grid-cols-2 gap-6 list-none p-0">
-                {infoCards.map(({ icon: Icon, title, body }) => (
+                {practicalCards.map(({ icon: Icon, title, body }) => (
                   <li
                     key={title}
                     className="bg-card p-6 rounded-sm border border-border flex gap-4"
