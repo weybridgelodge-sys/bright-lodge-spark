@@ -45,6 +45,7 @@ const RoyalArchExplained = lazy(() => import("./pages/news/RoyalArchExplained"))
 const ThamesChallengePage = lazy(() => import("./pages/ThamesChallengePage"));
 const Events = lazy(() => import("./pages/Events"));
 const LadiesFestival = lazy(() => import("./pages/LadiesFestival"));
+const LadiesFestivalTemplate = lazy(() => import("./pages/LadiesFestivalTemplate"));
 const FirstVisit = lazy(() => import("./pages/FirstVisit"));
 const YourJourney = lazy(() => import("./pages/YourJourney"));
 const LodgeTraditions = lazy(() => import("./pages/LodgeTraditions"));
