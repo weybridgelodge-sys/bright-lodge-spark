@@ -89,7 +89,7 @@ const App = () => (
             <Route path="/freemasonry-and-charity" element={<FreemasonryCharity />} />
             <Route path="/our-charities" element={<OurCharities />} />
             <Route path="/join-us" element={<JoinUs />} />
-            <Route path="/first-visit" element={<FirstVisit />} />
+            <Route path="/freemason-initiation-night" element={<FirstVisit />} />
             <Route path="/your-journey" element={<YourJourney />} />
             <Route path="/lodge-traditions" element={<LodgeTraditions />} />
             <Route path="/data-protection" element={<DataProtection />} />
@@ -163,7 +163,8 @@ const App = () => (
             {/* Join & contact */}
             <Route path="/surrey-freemasons-join-us" element={<Navigate to="/join-us" replace />} />
             <Route path="/contact-weybridge-lodge-freemasons" element={<Navigate to="/contact" replace />} />
-            <Route path="/your-initiation" element={<Navigate to="/first-visit" replace />} />
+            <Route path="/your-initiation" element={<Navigate to="/freemason-initiation-night" replace />} />
+            <Route path="/first-visit" element={<Navigate to="/freemason-initiation-night" replace />} />
             {/* Charity */}
             <Route path="/guildford-freemasons-charity-surrey" element={<Navigate to="/our-charities" replace />} />
             <Route path="/freemasons-charity-weybridge-lodge-raise-31000-for-sands-charity" element={<Navigate to="/our-charities" replace />} />

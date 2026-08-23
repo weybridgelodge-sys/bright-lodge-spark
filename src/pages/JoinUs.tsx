@@ -231,7 +231,7 @@ const JoinUs = () => {
             {/* ── Secondary CTAs ── */}
             <div className="flex flex-col sm:flex-row flex-wrap gap-4 justify-center mt-12">
               <Link
-                to="/first-visit"
+                to="/freemason-initiation-night"
                 aria-label="Learn what to expect on your initiation night"
                 className="inline-flex items-center justify-center border border-gold text-gold px-8 py-4 rounded-sm text-sm font-sans uppercase tracking-widest hover:bg-gold hover:text-navy transition-colors min-h-[48px]"
               >

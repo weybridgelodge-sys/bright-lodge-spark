@@ -212,7 +212,7 @@ const LodgeTraditions = () => {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
-                to="/first-visit"
+                to="/freemason-initiation-night"
                 className="inline-flex items-center justify-center bg-gold-shimmer text-accent-foreground px-8 py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity"
               >
                 Your Initiation Night

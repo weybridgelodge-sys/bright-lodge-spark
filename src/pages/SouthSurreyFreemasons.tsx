@@ -302,7 +302,7 @@ const SouthSurreyFreemasons = () => {
                   <ArrowRight className="h-4 w-4" aria-hidden="true" />
                 </Link>
                 <Link
-                  to="/first-visit"
+                  to="/freemason-initiation-night"
                   aria-label="Learn what to expect on your initiation night"
                   className="inline-flex items-center justify-center bg-transparent text-gold border border-gold/40 px-8 py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity min-h-[48px] w-full sm:w-auto"
                 >

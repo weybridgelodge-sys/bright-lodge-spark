@@ -270,7 +270,7 @@ const Quiz = () => {
                             <ArrowRight className="h-4 w-4" />
                           </Link>
                           <Link
-                            to="/first-visit"
+                            to="/freemason-initiation-night"
                             className="inline-flex items-center justify-center border border-border text-foreground px-6 py-3 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:border-gold hover:text-gold transition-colors"
                           >
                             Your Initiation Night
