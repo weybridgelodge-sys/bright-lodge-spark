@@ -139,7 +139,7 @@ type GuestInfo = {
 };
 
 /* ── Component ── */
-const LadiesFestival = () => {
+const LadiesFestivalTemplate = () => {
   const countdown = useCountdown();
   const { toast } = useToast();
   const [wineOrders, setWineOrders] = useState<Record<string, number>>({});
