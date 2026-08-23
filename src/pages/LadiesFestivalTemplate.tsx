@@ -1340,4 +1340,4 @@ useEffect(() => {
   );
 };
 
-export default LadiesFestival;
+export default LadiesFestivalTemplate;
