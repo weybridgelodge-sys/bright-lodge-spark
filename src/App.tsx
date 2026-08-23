@@ -163,6 +163,7 @@ const App = () => (
             {/* Join & contact */}
             <Route path="/surrey-freemasons-join-us" element={<Navigate to="/join-us" replace />} />
             <Route path="/contact-weybridge-lodge-freemasons" element={<Navigate to="/contact" replace />} />
+            <Route path="/your-initiation" element={<Navigate to="/first-visit" replace />} />
             {/* Charity */}
             <Route path="/guildford-freemasons-charity-surrey" element={<Navigate to="/our-charities" replace />} />
             <Route path="/freemasons-charity-weybridge-lodge-raise-31000-for-sands-charity" element={<Navigate to="/our-charities" replace />} />
