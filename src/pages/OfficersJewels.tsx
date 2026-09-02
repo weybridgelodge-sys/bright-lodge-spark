@@ -273,9 +273,9 @@ const OfficersJewels = () => {
         "@type": "WebPage",
         "@id": "https://weybridgelodge.org.uk/officers-jewels#webpage",
         url: "https://weybridgelodge.org.uk/officers-jewels",
-        name: "Masonic Officer Jewels Explained | Weybridge Lodge No. 6787",
+        name: "Masonic Lodge Officers' Jewels Explained — Every Office & Emblem | Weybridge Lodge No. 6787",
         description:
-          "What does each Masonic Lodge officer's jewel mean? A clear guide to every office and jewel, from Steward to Worshipful Master — Weybridge Lodge, Guildford.",
+          "A complete visual guide to every Masonic Lodge officers' jewel — from Steward to Worshipful Master — explained with images and duties, by Weybridge Lodge No. 6787 in Guildford, Surrey.",
         inLanguage: "en-GB",
         isPartOf: {
           "@id": "https://weybridgelodge.org.uk/#website",
@@ -288,8 +288,8 @@ const OfficersJewels = () => {
   return (
     <div className="min-h-screen overflow-x-hidden">
       <SEO
-        title="Masonic Officer Jewels Explained | Weybridge Lodge No. 6787"
-        description="What does each Masonic Lodge officer's jewel mean? A clear guide to every office and jewel, from Steward to Worshipful Master — Weybridge Lodge, Guildford."
+        title="Masonic Lodge Officers' Jewels Explained — Every Office & Emblem | Weybridge Lodge No. 6787"
+        description="A complete visual guide to every Masonic Lodge officers' jewel — from Steward to Worshipful Master — explained with images and duties, by Weybridge Lodge No. 6787 in Guildford, Surrey."
         canonical="/officers-jewels"
         type="website"
         schema={pageSchema}

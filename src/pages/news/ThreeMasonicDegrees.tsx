@@ -28,9 +28,9 @@ const tocItems = [
 const apronImgClass = "mt-6 mx-auto block w-full max-w-xs rounded-sm border border-border bg-card";
 
 const URL = "/news/three-masonic-degrees-explained";
-const TITLE = "The Three Masonic Degrees Explained";
+const TITLE = "The Three Degrees of Freemasonry Explained — Entered Apprentice, Fellow Craft & Master Mason";
 const DESCRIPTION =
-  "A clear, modern guide to the three degrees of Freemasonry — Entered Apprentice, Fellow Craft and Master Mason — and what each one means for a new member of Weybridge Lodge No. 6787 in Guildford.";
+  "What are the three degrees of Freemasonry? A clear guide to Entered Apprentice, Fellow Craft and Master Mason — what each ceremony means and how the journey unfolds, from Weybridge Lodge No. 6787.";
 
 const ThreeMasonicDegrees = () => {
   return (
