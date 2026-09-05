@@ -24,12 +24,16 @@ const staticImageBySlug: Record<string, string> = Object.fromEntries(
 );
 
 // ─── Thumbnail resolver — pure function, no closure dependencies ─────────────
+// Prefer Sanity's mainImage; for static posts with no Sanity image, use the
+// static asset mapped by slug, and only fall back to the lodge crest otherwise.
 const resolveThumb = (
   post: SanityPost,
   w = 800,
   h = 450,
 ): string | null =>
-  getPostThumbnail(post, w, h) ?? staticImageBySlug[post.slug] ?? null;
+  post.mainImage
+    ? getPostThumbnail(post, w, h)
+    : staticImageBySlug[post.slug] ?? getPostThumbnail(post, w, h);
 
 const News = () => {
   const shouldReduceMotion = useReducedMotion();
