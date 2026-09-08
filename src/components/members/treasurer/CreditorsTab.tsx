@@ -316,6 +316,8 @@ export default function CreditorsTab({ canEdit }: { canEdit: boolean }) {
         </div>
       </section>
 
+      <AnnualReturnCalculator canEdit={canEdit} />
+
       <section className="rounded-lg border border-gold/20 bg-primary-foreground/5 p-4">
         <h2 className="font-serif text-lg text-gold mb-3">Creditors Balance</h2>
         {loading ? (
