@@ -226,6 +226,98 @@ async function handleDuesSubscriptionUpdated(subscription: any) {
     .eq("id", sub.id);
 }
 
+// ------------------- Stripe payout handler -------------------
+
+async function handlePayoutPaid(payout: any, env: StripeEnv) {
+  // 1. Idempotency check — key on the Stripe payout ID itself, not the event ID.
+  //    This is deliberately more robust than event-based dedup: it also covers
+  //    any duplicate delivery from any source, not just Stripe's own retries.
+  const { data: existing } = await getSupabase()
+    .from("stripe_payouts")
+    .select("id")
+    .eq("stripe_payout_id", payout.id)
+    .maybeSingle();
+  if (existing) {
+    console.log("payout.paid already processed, skipping:", payout.id);
+    return;
+  }
+
+  // 2. Record the payout regardless of env, for visibility.
+  const arrivalDate = new Date(payout.arrival_date * 1000).toISOString().slice(0, 10);
+  const { data: payoutRow, error: payoutInsertErr } = await getSupabase()
+    .from("stripe_payouts")
+    .insert({
+      stripe_payout_id: payout.id,
+      amount_pence: payout.amount,
+      currency: payout.currency,
+      arrival_date: arrivalDate,
+      status: payout.status,
+      env,
+    })
+    .select("id")
+    .single();
+  if (payoutInsertErr) {
+    console.error("Failed to record stripe_payouts row:", payoutInsertErr);
+    return;
+  }
+
+  // 3. SANDBOX PAYOUTS NEVER TOUCH THE REAL LEDGER. Only 'live' posts.
+  if (env !== "live") {
+    console.log("Sandbox payout recorded, not posted to ledger:", payout.id);
+    return;
+  }
+
+  // 4. Post Dr 1000 Bank / Cr 1010 Stripe Suspense. Wrap in try/catch so a
+  //    ledger-posting failure never causes a non-200 response back to Stripe
+  //    (which would trigger retries). If this fails, journal_entry_id stays
+  //    null on the stripe_payouts row — that's the visible "needs manual
+  //    posting" marker for the Treasurer to catch later.
+  try {
+    const { data: accounts } = await getSupabase()
+      .from("chart_of_accounts")
+      .select("id, code")
+      .in("code", ["1000", "1010"]);
+    const bankAcct = accounts?.find((a: any) => a.code === "1000")?.id;
+    const suspenseAcct = accounts?.find((a: any) => a.code === "1010")?.id;
+    if (!bankAcct || !suspenseAcct) throw new Error("Missing 1000/1010 accounts");
+
+    const { data: openPeriod } = await getSupabase()
+      .from("treasurer_periods")
+      .select("id")
+      .eq("status", "open")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    const { data: entry, error: entryErr } = await getSupabase()
+      .from("journal_entries")
+      .insert({
+        entry_date: arrivalDate,
+        description: `Stripe payout — arrived ${arrivalDate} — £${(payout.amount / 100).toFixed(2)}`,
+        source_type: "stripe_payout",
+        source_id: payoutRow.id,
+        period_id: openPeriod?.id ?? null,
+        created_by: null, // system-generated, not a human-entered transaction
+      })
+      .select("id")
+      .single();
+    if (entryErr) throw entryErr;
+
+    const { error: lineErr } = await getSupabase().from("journal_lines").insert([
+      { entry_id: entry.id, account_id: bankAcct, debit_pence: payout.amount, credit_pence: 0 },
+      { entry_id: entry.id, account_id: suspenseAcct, debit_pence: 0, credit_pence: payout.amount },
+    ]);
+    if (lineErr) {
+      await getSupabase().from("journal_entries").delete().eq("id", entry.id);
+      throw lineErr;
+    }
+
+    await getSupabase().from("stripe_payouts").update({ journal_entry_id: entry.id }).eq("id", payoutRow.id);
+  } catch (e) {
+    console.error("Failed to post payout to ledger (payout recorded, needs manual posting):", e);
+  }
+}
+
 // ------------------- Dispatcher -------------------
 
 Deno.serve(async (req) => {
@@ -268,6 +360,9 @@ Deno.serve(async (req) => {
       case "customer.subscription.updated":
       case "customer.subscription.deleted":
         await handleDuesSubscriptionUpdated(event.data.object);
+        break;
+      case "payout.paid":
+        await handlePayoutPaid(event.data.object, env);
         break;
       default:
         console.log("Unhandled webhook event:", event.type);

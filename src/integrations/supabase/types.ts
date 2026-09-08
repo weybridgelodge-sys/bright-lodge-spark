@@ -2912,6 +2912,50 @@ export type Database = {
         }
         Relationships: []
       }
+      stripe_payouts: {
+        Row: {
+          amount_pence: number
+          arrival_date: string
+          created_at: string
+          currency: string
+          env: string
+          id: string
+          journal_entry_id: string | null
+          status: string
+          stripe_payout_id: string
+        }
+        Insert: {
+          amount_pence: number
+          arrival_date: string
+          created_at?: string
+          currency?: string
+          env: string
+          id?: string
+          journal_entry_id?: string | null
+          status: string
+          stripe_payout_id: string
+        }
+        Update: {
+          amount_pence?: number
+          arrival_date?: string
+          created_at?: string
+          currency?: string
+          env?: string
+          id?: string
+          journal_entry_id?: string | null
+          status?: string
+          stripe_payout_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stripe_payouts_journal_entry_id_fkey"
+            columns: ["journal_entry_id"]
+            isOneToOne: false
+            referencedRelation: "journal_entries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       succession_risks: {
         Row: {
           created_at: string
