@@ -3103,6 +3103,7 @@ export type Database = {
           invoice_date: string | null
           invoice_headcount: number | null
           invoice_number: string | null
+          journal_entry_id: string | null
           meeting_id: string
           notes: string | null
           override_total_pence: number | null
@@ -3117,6 +3118,7 @@ export type Database = {
           invoice_date?: string | null
           invoice_headcount?: number | null
           invoice_number?: string | null
+          journal_entry_id?: string | null
           meeting_id: string
           notes?: string | null
           override_total_pence?: number | null
@@ -3131,6 +3133,7 @@ export type Database = {
           invoice_date?: string | null
           invoice_headcount?: number | null
           invoice_number?: string | null
+          journal_entry_id?: string | null
           meeting_id?: string
           notes?: string | null
           override_total_pence?: number | null
@@ -3139,6 +3142,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "treasurer_dining_invoices_journal_entry_id_fkey"
+            columns: ["journal_entry_id"]
+            isOneToOne: false
+            referencedRelation: "journal_entries"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "treasurer_dining_invoices_meeting_id_fkey"
             columns: ["meeting_id"]
