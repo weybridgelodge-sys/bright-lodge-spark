@@ -169,6 +169,104 @@ function MeetingPanel({
 
   const netIncome = stripeSummary.net + nonStripeCollected;
 
+  // ── Stripe receipt ledger posting (dining bookings only: meeting_id is set) ──
+  const receiptSets = useMemo(() => {
+    const syncable = bookings.filter(
+      (b) =>
+        b.meeting_id != null &&
+        b.payment_status === "paid" &&
+        !!b.stripe_payment_intent_id &&
+        b.stripe_fee_pence != null &&
+        b.stripe_net_pence != null
+    );
+    return {
+      syncable,
+      posted: syncable.filter((b) => b.journal_entry_id != null),
+      postable: syncable.filter((b) => b.journal_entry_id == null),
+    };
+  }, [bookings]);
+
+  const postStripeReceipts = async () => {
+    if (receiptSets.postable.length === 0) return;
+    setPosting(true);
+    const [{ data: u }, accounts, openPeriod] = await Promise.all([
+      supabase.auth.getUser(),
+      supabase.from("chart_of_accounts" as any).select("id,code").in("code", ["1010", "4100", "4120", "5420"]),
+      supabase
+        .from("treasurer_periods" as any)
+        .select("id")
+        .eq("status", "open")
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle(),
+    ]);
+    const accRows = (accounts.data as any[]) ?? [];
+    const acct = (code: string) => accRows.find((a) => a.code === code)?.id as string | undefined;
+    const suspense = acct("1010");
+    const diningIncome = acct("4100");
+    const feeCover = acct("4120");
+    const cardFees = acct("5420");
+    if (!suspense || !diningIncome || !feeCover || !cardFees) {
+      setPosting(false);
+      toast({ title: "Accounts 1010 / 4100 / 4120 / 5420 not found", variant: "destructive" });
+      return;
+    }
+    const periodId = (openPeriod.data as any)?.id ?? null;
+    let ok = 0;
+    let failed = 0;
+
+    for (const b of receiptSets.postable) {
+      const label = `Stripe dining receipt — ${b.contact_name ?? "Unknown"} — ${b.event_label ?? meetingTypeLabel(meeting.meeting_type)}`;
+      const { data: entry, error: entryErr } = await supabase
+        .from("journal_entries" as any)
+        .insert({
+          entry_date: (b.paid_at ?? meeting.meeting_date).slice(0, 10),
+          description: label,
+          source_type: "stripe_receipt",
+          source_id: b.id,
+          period_id: periodId,
+          created_by: u.user?.id ?? null,
+        })
+        .select("id")
+        .single();
+      if (entryErr || !entry) {
+        failed += 1;
+        continue;
+      }
+      const entryId = (entry as any).id as string;
+      const lines: any[] = [
+        { entry_id: entryId, account_id: suspense, debit_pence: b.stripe_net_pence, credit_pence: 0, description: label },
+        { entry_id: entryId, account_id: cardFees, debit_pence: b.stripe_fee_pence, credit_pence: 0, description: label },
+        { entry_id: entryId, account_id: diningIncome, debit_pence: 0, credit_pence: b.subtotal_pence ?? 0, description: label },
+      ];
+      if ((b.fee_pence ?? 0) > 0) {
+        lines.push({ entry_id: entryId, account_id: feeCover, debit_pence: 0, credit_pence: b.fee_pence, description: label });
+      }
+      const { error: lineErr } = await supabase.from("journal_lines" as any).insert(lines);
+      if (lineErr) {
+        await supabase.from("journal_entries" as any).delete().eq("id", entryId);
+        failed += 1;
+        continue;
+      }
+      const { error: linkErr } = await supabase
+        .from("bookings" as any)
+        .update({ journal_entry_id: entryId })
+        .eq("id", b.id);
+      if (linkErr) failed += 1;
+      else ok += 1;
+    }
+
+    setPosting(false);
+    toast({
+      title: failed === 0 ? `${ok} Stripe receipt${ok === 1 ? "" : "s"} posted to ledger` : `${ok} posted, ${failed} failed`,
+      description: failed > 0 ? "Failed receipts were rolled back — check the underlying figures balance." : undefined,
+      variant: failed > 0 ? "destructive" : undefined,
+    });
+    onChanged();
+  };
+
+
+
 
 
   const draftTotal = useMemo(() => {
