@@ -9,6 +9,8 @@ import { Loader2 } from "lucide-react";
 
 const PAYEES = ["GMC", "UGLE", "Provincial Grand Lodge", "Other"] as const;
 
+const RECOGNITION_TYPES = ["UGLE", "Provincial Grand Lodge", "GMC Levy", "Other"] as const;
+
 const money = (pence: number) =>
   `${pence < 0 ? "-" : ""}£${(Math.abs(pence) / 100).toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
@@ -26,18 +28,43 @@ export default function CreditorsTab({ canEdit }: { canEdit: boolean }) {
   const [reference, setReference] = useState("");
   const [saving, setSaving] = useState(false);
 
+  const [recDate, setRecDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [recPayee, setRecPayee] = useState<string>("UGLE");
+  const [recOtherPayee, setRecOtherPayee] = useState("");
+  const [recAmount, setRecAmount] = useState("0.00");
+  const [recReference, setRecReference] = useState("");
+  const [recSaving, setRecSaving] = useState(false);
+
   const [lines, setLines] = useState<LineRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [accounts, setAccounts] = useState<Map<string, string>>(new Map());
+  const [openPeriodId, setOpenPeriodId] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
-    const { data: acct } = await supabase
-      .from("chart_of_accounts" as any)
-      .select("id")
-      .eq("code", "2000")
-      .maybeSingle();
-    const accountId = (acct as any)?.id as string | undefined;
-    if (!accountId) {
+    const [{ data: accts }, { data: period }] = await Promise.all([
+      supabase
+        .from("chart_of_accounts" as any)
+        .select("id,code")
+        .in("code", ["1000", "2000", "5000", "5100", "5200", "5900"]),
+      supabase
+        .from("treasurer_periods" as any)
+        .select("id")
+        .eq("status", "open")
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle(),
+    ]);
+
+    const map = new Map<string, string>();
+    for (const a of (accts as any[]) ?? []) {
+      if (a.code && a.id) map.set(a.code as string, a.id as string);
+    }
+    setAccounts(map);
+    setOpenPeriodId((period as any)?.id ?? null);
+
+    const creditorsId = map.get("2000");
+    if (!creditorsId) {
       setLines([]);
       setLoading(false);
       return;
@@ -45,7 +72,7 @@ export default function CreditorsTab({ canEdit }: { canEdit: boolean }) {
     const { data, error } = await supabase
       .from("journal_lines" as any)
       .select("debit_pence,credit_pence,journal_entries(id,payee)")
-      .eq("account_id", accountId);
+      .eq("account_id", creditorsId);
     if (error) toast({ title: "Could not load creditors", description: error.message, variant: "destructive" });
     setLines(((data as unknown as LineRow[]) ?? []));
     setLoading(false);
@@ -69,7 +96,7 @@ export default function CreditorsTab({ canEdit }: { canEdit: boolean }) {
 
   const resolvedPayee = payee === "Other" ? otherPayee.trim() : payee;
 
-  const submit = async () => {
+  const submitPayment = async () => {
     const pence = Math.round(parseFloat(amount || "0") * 100);
     if (!Number.isFinite(pence) || pence <= 0) {
       toast({ title: "Enter a positive amount", variant: "destructive" });
@@ -81,15 +108,12 @@ export default function CreditorsTab({ canEdit }: { canEdit: boolean }) {
     }
     setSaving(true);
 
-    const [{ data: u }, accounts, openPeriod] = await Promise.all([
+    const [{ data: u }] = await Promise.all([
       supabase.auth.getUser(),
-      supabase.from("chart_of_accounts" as any).select("id,code").in("code", ["1000", "2000"]),
-      supabase.from("treasurer_periods" as any).select("id").eq("status", "open").order("created_at", { ascending: false }).limit(1).maybeSingle(),
     ]);
 
-    const rows = (accounts.data as any[]) ?? [];
-    const bank = rows.find((a) => a.code === "1000")?.id;
-    const creditors = rows.find((a) => a.code === "2000")?.id;
+    const bank = accounts.get("1000");
+    const creditors = accounts.get("2000");
     if (!bank || !creditors) {
       setSaving(false);
       toast({ title: "Accounts 1000 / 2000 not found", variant: "destructive" });
@@ -104,7 +128,7 @@ export default function CreditorsTab({ canEdit }: { canEdit: boolean }) {
         description: ref ? `Payment to ${resolvedPayee} — ${ref}` : `Payment to ${resolvedPayee}`,
         source_type: "creditor_payment",
         payee: resolvedPayee,
-        period_id: (openPeriod.data as any)?.id ?? null,
+        period_id: openPeriodId,
         created_by: u.user?.id ?? null,
       })
       .select("id")
@@ -133,6 +157,79 @@ export default function CreditorsTab({ canEdit }: { canEdit: boolean }) {
     setAmount("0.00");
     setReference("");
     toast({ title: "Creditor payment recorded" });
+    load();
+  };
+
+  const recognitionMapping: Record<string, { code: string; payee: string }> = {
+    UGLE: { code: "5000", payee: "UGLE" },
+    "Provincial Grand Lodge": { code: "5100", payee: "Provincial Grand Lodge" },
+    "GMC Levy": { code: "5200", payee: "GMC" },
+    Other: { code: "5900", payee: "" },
+  };
+
+  const submitRecognition = async () => {
+    const pence = Math.round(parseFloat(recAmount || "0") * 100);
+    if (!Number.isFinite(pence) || pence <= 0) {
+      toast({ title: "Enter a positive amount", variant: "destructive" });
+      return;
+    }
+
+    const mapping = recognitionMapping[recPayee];
+    const payeeTag = recPayee === "Other" ? recOtherPayee.trim() : mapping.payee;
+    if (!payeeTag) {
+      toast({ title: "Enter a payee name", variant: "destructive" });
+      return;
+    }
+
+    const expenseAccountId = accounts.get(mapping.code);
+    const creditorsId = accounts.get("2000");
+    if (!expenseAccountId || !creditorsId) {
+      toast({ title: "Required expense or creditors account not found", variant: "destructive" });
+      return;
+    }
+
+    setRecSaving(true);
+    const { data: u } = await supabase.auth.getUser();
+
+    const ref = recReference.trim();
+    const description = ref ? `${payeeTag} — ${ref}` : payeeTag;
+
+    const { data: entry, error: entryErr } = await supabase
+      .from("journal_entries" as any)
+      .insert({
+        entry_date: recDate,
+        description,
+        source_type: "creditor_recognition",
+        payee: payeeTag,
+        period_id: openPeriodId,
+        created_by: u.user?.id ?? null,
+      })
+      .select("id")
+      .single();
+
+    if (entryErr || !entry) {
+      setRecSaving(false);
+      toast({ title: "Save failed", description: entryErr?.message, variant: "destructive" });
+      return;
+    }
+
+    const entryId = (entry as any).id as string;
+    const { error: lineErr } = await supabase.from("journal_lines" as any).insert([
+      { entry_id: entryId, account_id: expenseAccountId, debit_pence: pence, credit_pence: 0, description: ref || null },
+      { entry_id: entryId, account_id: creditorsId, debit_pence: 0, credit_pence: pence, description: ref || null },
+    ]);
+
+    if (lineErr) {
+      await supabase.from("journal_entries" as any).delete().eq("id", entryId);
+      setRecSaving(false);
+      toast({ title: "Save failed", description: lineErr.message, variant: "destructive" });
+      return;
+    }
+
+    setRecSaving(false);
+    setRecAmount("0.00");
+    setRecReference("");
+    toast({ title: "Liability recognised" });
     load();
   };
 
@@ -173,8 +270,49 @@ export default function CreditorsTab({ canEdit }: { canEdit: boolean }) {
           </div>
         </div>
         <div className="mt-4">
-          <Button className="bg-gold text-navy hover:bg-gold/90" disabled={!canEdit || saving} onClick={submit}>
+          <Button className="bg-gold text-navy hover:bg-gold/90" disabled={!canEdit || saving} onClick={submitPayment}>
             {saving && <Loader2 className="w-4 h-4 mr-1 animate-spin" />}Record payment
+          </Button>
+        </div>
+      </section>
+
+      <section className="rounded-lg border border-gold/20 bg-primary-foreground/5 p-4">
+        <h2 className="font-serif text-lg text-gold mb-1">Recognise a Liability</h2>
+        <p className="text-primary-foreground/60 text-sm mb-4">
+          Records money the lodge owes before it is paid. Posts a double-entry: Dr expense account, Cr 2000 Creditors.
+        </p>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div>
+            <Label>Date</Label>
+            <Input type="date" value={recDate} onChange={(e) => setRecDate(e.target.value)} disabled={!canEdit} />
+          </div>
+          <div>
+            <Label>Type</Label>
+            <Select value={recPayee} onValueChange={setRecPayee} disabled={!canEdit}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {RECOGNITION_TYPES.map((p) => <SelectItem key={p} value={p}>{p}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+          {recPayee === "Other" && (
+            <div className="sm:col-span-2">
+              <Label>Payee name</Label>
+              <Input value={recOtherPayee} onChange={(e) => setRecOtherPayee(e.target.value)} placeholder="e.g. Metropolitan Grand Lodge" disabled={!canEdit} />
+            </div>
+          )}
+          <div>
+            <Label>Amount (£)</Label>
+            <Input type="number" step="0.01" min="0" value={recAmount} onChange={(e) => setRecAmount(e.target.value)} disabled={!canEdit} />
+          </div>
+          <div className="sm:col-span-2">
+            <Label>Reference / description</Label>
+            <Input value={recReference} onChange={(e) => setRecReference(e.target.value)} placeholder="Optional — e.g. Annual Return year ending 30 Sept 2027" disabled={!canEdit} />
+          </div>
+        </div>
+        <div className="mt-4">
+          <Button className="bg-gold text-navy hover:bg-gold/90" disabled={!canEdit || recSaving} onClick={submitRecognition}>
+            {recSaving && <Loader2 className="w-4 h-4 mr-1 animate-spin" />}Recognise liability
           </Button>
         </div>
       </section>
