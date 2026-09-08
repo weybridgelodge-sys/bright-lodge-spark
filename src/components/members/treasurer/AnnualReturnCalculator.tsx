@@ -134,17 +134,24 @@ export default function AnnualReturnCalculator({ canEdit }: { canEdit: boolean }
       }
       if (!chargeable) continue;
 
-      // Age as at the return year end (30 September). Unknown DOB → counted as 25+.
-      let is25Plus = true;
-      if (p.date_of_birth) {
-        const dob = new Date(`${p.date_of_birth}T00:00:00Z`);
-        const end = new Date(`${yearEnd}T00:00:00Z`);
-        let age = end.getUTCFullYear() - dob.getUTCFullYear();
-        const m = end.getUTCMonth() - dob.getUTCMonth();
-        if (m < 0 || (m === 0 && end.getUTCDate() < dob.getUTCDate())) age--;
-        is25Plus = age >= 25;
+      // Chargeable but no DOB on file — exclude from counts entirely and flag
+      // separately (likely a test/placeholder account, but must not be dropped silently).
+      if (!p.date_of_birth) {
+        missingDob.push({
+          id: p.id,
+          name: p.full_name || `${p.first_name ?? ""} ${p.last_name ?? ""}`.trim() || p.id,
+          status,
+        });
+        continue;
       }
-      if (is25Plus) over++; else under++;
+
+      // Age as at the return year end (30 September).
+      const dob = new Date(`${p.date_of_birth}T00:00:00Z`);
+      const end = new Date(`${yearEnd}T00:00:00Z`);
+      let age = end.getUTCFullYear() - dob.getUTCFullYear();
+      const m = end.getUTCMonth() - dob.getUTCMonth();
+      if (m < 0 || (m === 0 && end.getUTCDate() < dob.getUTCDate())) age--;
+      if (age >= 25) over++; else under++;
     }
 
     setRows((rs) =>
