@@ -1,0 +1,1 @@
+alter table public.treasurer_dining_invoices add column if not exists journal_entry_id uuid references public.journal_entries(id);

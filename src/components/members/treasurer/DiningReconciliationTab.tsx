@@ -45,6 +45,7 @@ type Invoice = {
   override_total_pence: number | null;
   notes: string | null;
   transaction_id: string | null;
+  journal_entry_id: string | null;
   invoice_number: string | null;
   invoice_date: string | null;
 };
@@ -201,55 +202,101 @@ function MeetingPanel({
     onChanged();
   };
 
+  const postingDescription = `GMC dining invoice${invoiceNumber.trim() ? ` ${invoiceNumber.trim()}` : ""} — ${new Date(meeting.meeting_date).toLocaleDateString("en-GB")} ${meetingTypeLabel(meeting.meeting_type)}${
+    invHc != null ? ` (${invHc} diners)` : ""
+  }${invoiceDate ? ` — invoiced ${new Date(invoiceDate).toLocaleDateString("en-GB")}` : ""}`;
+
   const createTransaction = async () => {
     if (draftTotal == null || draftTotal <= 0) {
       toast({ title: "Enter the invoice figures first", variant: "destructive" });
       return;
     }
     setCreating(true);
-    const { data: u } = await supabase.auth.getUser();
-    const { data: tx, error } = await supabase
-      .from("treasurer_transactions" as any)
+    const [{ data: u }, accounts, openPeriod] = await Promise.all([
+      supabase.auth.getUser(),
+      supabase.from("chart_of_accounts" as any).select("id,code").in("code", ["5210", "2000"]),
+      supabase
+        .from("treasurer_periods" as any)
+        .select("id")
+        .eq("status", "open")
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle(),
+    ]);
+
+    const accRows = (accounts.data as any[]) ?? [];
+    const diningAcct = accRows.find((a) => a.code === "5210")?.id;
+    const creditorsAcct = accRows.find((a) => a.code === "2000")?.id;
+    if (!diningAcct || !creditorsAcct) {
+      setCreating(false);
+      toast({ title: "Accounts 5210 / 2000 not found", variant: "destructive" });
+      return;
+    }
+
+    const invoicePayload = {
+      meeting_id: meeting.id,
+      invoice_headcount: headcount.trim() ? parseInt(headcount, 10) : null,
+      per_head_pence: perHead.trim() ? Math.round(parseFloat(perHead) * 100) : null,
+      override_total_pence: override.trim() ? Math.round(parseFloat(override) * 100) : null,
+      notes: notes.trim() || null,
+      invoice_number: invoiceNumber.trim() || null,
+      invoice_date: invoiceDate || null,
+      created_by: u.user?.id ?? null,
+    };
+
+    const { data: invRow, error: invErr } = await supabase
+      .from("treasurer_dining_invoices" as any)
+      .upsert(invoicePayload as any, { onConflict: "meeting_id" })
+      .select("id")
+      .single();
+    if (invErr || !invRow) {
+      setCreating(false);
+      toast({ title: "Couldn't save the invoice", description: invErr?.message, variant: "destructive" });
+      return;
+    }
+    const invoiceId = (invRow as any).id as string;
+
+    const { data: entry, error: entryErr } = await supabase
+      .from("journal_entries" as any)
       .insert({
-        transaction_date: invoiceDate || meeting.meeting_date,
-        direction: "expense",
-        payment_method: "bank_transfer",
-        category: "gmc_dining",
-        amount_pence: draftTotal,
-        description: `GMC dining invoice${invoiceNumber.trim() ? ` ${invoiceNumber.trim()}` : ""} — ${new Date(meeting.meeting_date).toLocaleDateString("en-GB")} ${meetingTypeLabel(meeting.meeting_type)}${
-          invHc != null ? ` (${invHc} diners)` : ""
-        }${invoiceDate ? ` — invoiced ${new Date(invoiceDate).toLocaleDateString("en-GB")}` : ""}`,
-        reconciled: false,
+        entry_date: invoiceDate || meeting.meeting_date,
+        description: postingDescription,
+        source_type: "gmc_dining_invoice",
+        source_id: invoiceId,
+        payee: "GMC",
+        period_id: (openPeriod.data as any)?.id ?? null,
         created_by: u.user?.id ?? null,
       })
       .select("id")
       .single();
-    if (error || !tx) {
+
+    if (entryErr || !entry) {
       setCreating(false);
-      toast({ title: "Couldn't create transaction", description: error?.message, variant: "destructive" });
+      toast({ title: "Couldn't post to the ledger", description: entryErr?.message, variant: "destructive" });
       return;
     }
+
+    const entryId = (entry as any).id as string;
+    const { error: lineErr } = await supabase.from("journal_lines" as any).insert([
+      { entry_id: entryId, account_id: diningAcct, debit_pence: draftTotal, credit_pence: 0, description: postingDescription },
+      { entry_id: entryId, account_id: creditorsAcct, debit_pence: 0, credit_pence: draftTotal, description: postingDescription },
+    ]);
+
+    if (lineErr) {
+      await supabase.from("journal_entries" as any).delete().eq("id", entryId);
+      setCreating(false);
+      toast({ title: "Couldn't post to the ledger", description: lineErr.message, variant: "destructive" });
+      return;
+    }
+
     const { error: linkErr } = await supabase
       .from("treasurer_dining_invoices" as any)
-      .upsert(
-        {
-          meeting_id: meeting.id,
-          invoice_headcount: headcount.trim() ? parseInt(headcount, 10) : null,
-          per_head_pence: perHead.trim() ? Math.round(parseFloat(perHead) * 100) : null,
-          override_total_pence: override.trim() ? Math.round(parseFloat(override) * 100) : null,
-          notes: notes.trim() || null,
-          invoice_number: invoiceNumber.trim() || null,
-          invoice_date: invoiceDate || null,
-          transaction_id: (tx as any).id,
-          created_by: u.user?.id ?? null,
-        } as any,
-        { onConflict: "meeting_id" }
-      );
+      .upsert({ ...invoicePayload, journal_entry_id: entryId } as any, { onConflict: "meeting_id" });
     setCreating(false);
     if (linkErr) {
-      toast({ title: "Transaction created but not linked", description: linkErr.message, variant: "destructive" });
+      toast({ title: "Posted to ledger but not linked", description: linkErr.message, variant: "destructive" });
     } else {
-      toast({ title: "Transaction created in the register" });
+      toast({ title: "GMC dining invoice posted to ledger" });
     }
     onChanged();
   };
@@ -407,7 +454,13 @@ function MeetingPanel({
               <Button size="sm" className="bg-gold text-navy hover:bg-gold/90 min-h-11 sm:min-h-0" disabled={saving} onClick={save}>
                 {saving ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Save className="w-4 h-4 mr-1" />} Save invoice
               </Button>
-              {invoice?.transaction_id ? (
+              {invoice?.journal_entry_id ? (
+                <span className="inline-flex items-center text-sm text-emerald-300">
+                  <Check className="w-4 h-4 mr-1" />
+                  Posted to ledger — Dr GMC Dining Invoice {draftTotal != null ? gbp(draftTotal) : "—"} / Cr Creditors{" "}
+                  {draftTotal != null ? gbp(draftTotal) : "—"}
+                </span>
+              ) : invoice?.transaction_id ? (
                 <Button size="sm" variant="outline" className="min-h-11 sm:min-h-0" onClick={() => onGoToTransaction(invoice.transaction_id!)}>
                   <ExternalLink className="w-4 h-4 mr-1" /> View linked transaction
                 </Button>
