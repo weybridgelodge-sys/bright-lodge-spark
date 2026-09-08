@@ -361,6 +361,9 @@ Deno.serve(async (req) => {
       case "customer.subscription.deleted":
         await handleDuesSubscriptionUpdated(event.data.object);
         break;
+      case "payout.paid":
+        await handlePayoutPaid(event.data.object, env);
+        break;
       default:
         console.log("Unhandled webhook event:", event.type);
     }
