@@ -2711,6 +2711,7 @@ export type Database = {
           rank: string | null
           royal_arch_date: string | null
           status: Database["public"]["Enums"]["member_status"]
+          status_changed_at: string | null
           title: string | null
           town: string | null
           ugle_reg_number: string | null
@@ -2753,6 +2754,7 @@ export type Database = {
           rank?: string | null
           royal_arch_date?: string | null
           status?: Database["public"]["Enums"]["member_status"]
+          status_changed_at?: string | null
           title?: string | null
           town?: string | null
           ugle_reg_number?: string | null
@@ -2795,6 +2797,7 @@ export type Database = {
           rank?: string | null
           royal_arch_date?: string | null
           status?: Database["public"]["Enums"]["member_status"]
+          status_changed_at?: string | null
           title?: string | null
           town?: string | null
           ugle_reg_number?: string | null
