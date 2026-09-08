@@ -123,7 +123,7 @@ export default function MembersAdmin() {
   const isEdit = !!form.id;
 
   const load = async () => {
-    const [{ data: p }, { data: r }, { data: n }] = await Promise.all([
+    const [{ data: p, error: pErr }, { data: r, error: rErr }, { data: n, error: nErr }] = await Promise.all([
       supabase
         .from("profiles")
         .select(
@@ -133,12 +133,16 @@ export default function MembersAdmin() {
       supabase.from("user_roles").select("user_id,role"),
       supabase.from("member_notices").select("*").order("created_at", { ascending: false }),
     ]);
+    if (pErr) toast.error(`Could not load members: ${pErr.message}`);
+    if (rErr) toast.error(`Could not load roles: ${rErr.message}`);
+    if (nErr) toast.error(`Could not load notices: ${nErr.message}`);
     const baseProfiles = (p as Profile[]) ?? [];
     // Merge sensitive fields (DOB, address, phone, UGLE no.) via secure RPC
     const ids = baseProfiles.map((x) => x.id);
     let merged: Profile[] = baseProfiles;
     if (ids.length) {
-      const { data: pii } = await (supabase as any).rpc("get_profiles_pii", { _ids: ids });
+      const { data: pii, error: piiErr } = await (supabase as any).rpc("get_profiles_pii", { _ids: ids });
+      if (piiErr) toast.error(`Could not load member contact details: ${piiErr.message}`);
       const idx: Record<string, Partial<Profile>> = {};
       for (const row of (pii as Partial<Profile>[]) ?? []) if (row.id) idx[row.id] = row;
       merged = baseProfiles.map((b) => ({ ...b, ...(idx[b.id] ?? {}) }));
