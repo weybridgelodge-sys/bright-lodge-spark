@@ -1036,6 +1036,7 @@ export type Database = {
           description: string
           entry_date: string
           id: string
+          payee: string | null
           period_id: string | null
           reconciled: boolean
           source_id: string | null
@@ -1051,6 +1052,7 @@ export type Database = {
           description: string
           entry_date: string
           id?: string
+          payee?: string | null
           period_id?: string | null
           reconciled?: boolean
           source_id?: string | null
@@ -1066,6 +1068,7 @@ export type Database = {
           description?: string
           entry_date?: string
           id?: string
+          payee?: string | null
           period_id?: string | null
           reconciled?: boolean
           source_id?: string | null

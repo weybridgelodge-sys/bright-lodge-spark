@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import MembersLayout from "@/components/members/MembersLayout";
 import ProtectedRoute from "@/components/members/ProtectedRoute";
 import DiningReconciliationTab from "@/components/members/treasurer/DiningReconciliationTab";
+import CreditorsTab from "@/components/members/treasurer/CreditorsTab";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -672,6 +673,7 @@ function Inner() {
           <TabsList className="h-auto flex-wrap justify-start sm:flex-nowrap">
             <TabsTrigger value="transactions">Transaction Register</TabsTrigger>
             <TabsTrigger value="dining">Dining Reconciliation</TabsTrigger>
+            {isAdmin && <TabsTrigger value="creditors">Creditors</TabsTrigger>}
             <TabsTrigger value="reconciliation">Reconciliation</TabsTrigger>
           </TabsList>
           <TabsContent value="transactions" className="mt-4">
@@ -683,6 +685,11 @@ function Inner() {
               onGoToTransaction={(id) => { setHighlightTxId(id); setTab("transactions"); load(); }}
             />
           </TabsContent>
+          {isAdmin && (
+            <TabsContent value="creditors" className="mt-4">
+              <CreditorsTab canEdit={isAdmin} />
+            </TabsContent>
+          )}
           <TabsContent value="reconciliation" className="mt-4">
             <ReconciliationTab periods={periods} isTreasurer={isCurrentTreasurer} isSecretary={isSecretary} isAdmin={isAdmin} onChange={load} />
           </TabsContent>
