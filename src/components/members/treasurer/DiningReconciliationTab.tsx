@@ -45,6 +45,7 @@ type Invoice = {
   override_total_pence: number | null;
   notes: string | null;
   transaction_id: string | null;
+  journal_entry_id: string | null;
   invoice_number: string | null;
   invoice_date: string | null;
 };
