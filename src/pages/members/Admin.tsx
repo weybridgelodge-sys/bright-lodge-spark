@@ -793,7 +793,17 @@ export default function MembersAdmin() {
               Member status
               <select
                 value={form.status}
-                onChange={(e) => setForm({ ...form, status: e.target.value as Status })}
+                onChange={(e) => {
+                  const next = e.target.value as Status;
+                  setForm({
+                    ...form,
+                    status: next,
+                    status_changed_at:
+                      next !== form.status
+                        ? new Date().toISOString().slice(0, 10)
+                        : form.status_changed_at,
+                  });
+                }}
                 className={`mt-1 ${inputCls} normal-case tracking-normal text-primary-foreground`}
               >
                 {STATUSES.map((s) => (
