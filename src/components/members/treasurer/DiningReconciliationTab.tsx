@@ -99,6 +99,7 @@ function MeetingPanel({
   const [invoiceDate, setInvoiceDate] = useState("");
   const [saving, setSaving] = useState(false);
   const [creating, setCreating] = useState(false);
+  const [posting, setPosting] = useState(false);
 
   useEffect(() => {
     setHeadcount(invoice?.invoice_headcount != null ? String(invoice.invoice_headcount) : "");
