@@ -114,6 +114,7 @@ export default function AnnualReturnCalculator({ canEdit }: { canEdit: boolean }
     let over = 0;
     let under = 0;
     const needsReview: ReviewMember[] = [];
+    const missingDob: ReviewMember[] = [];
 
     for (const p of (data as any[]) ?? []) {
       const status = p.status as string;
