@@ -504,7 +504,7 @@ export default function DiningReconciliationTab({
       supabase.from("festive_board_meetings" as any).select("id,meeting_date,meeting_type").order("meeting_date", { ascending: false }),
       supabase.from("festive_board_attendance" as any).select("meeting_id,member_id,visitor_lodge_name,attendance_status,payment_method,amount_pence,is_meeting_only"),
       supabase.from("treasurer_dining_invoices" as any).select("*"),
-      supabase.from("bookings" as any).select("meeting_id,payment_status,total_pence,stripe_fee_pence,stripe_net_pence,stripe_payment_intent_id"),
+      supabase.from("bookings" as any).select("id,meeting_id,payment_status,contact_name,event_label,paid_at,subtotal_pence,fee_pence,total_pence,stripe_fee_pence,stripe_net_pence,stripe_payment_intent_id,journal_entry_id"),
     ]);
     if (!m.error) setMeetings((m.data as unknown as Meeting[]) ?? []);
     if (!a.error) setRows((a.data as unknown as AttRow[]) ?? []);
