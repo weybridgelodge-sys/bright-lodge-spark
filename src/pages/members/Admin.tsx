@@ -156,7 +156,11 @@ export default function MembersAdmin() {
   }, []);
 
   const setStatus = async (id: string, status: Profile["status"]) => {
-    const { error } = await supabase.from("profiles").update({ status }).eq("id", id);
+    const today = new Date().toISOString().slice(0, 10);
+    const { error } = await supabase
+      .from("profiles")
+      .update({ status, status_changed_at: today })
+      .eq("id", id);
     if (error) toast.error(error.message);
     else {
       toast.success(`Member ${status}`);

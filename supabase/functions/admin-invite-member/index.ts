@@ -30,6 +30,7 @@ const Body = z.object({
   status: z
     .enum(["pending", "active", "suspended", "year_out", "resigned", "excluded", "deceased"])
     .default("active"),
+  status_changed_at: z.string().trim().regex(/^\d{4}-\d{2}-\d{2}$/).optional().nullable(),
   passing_date: z.string().trim().regex(/^\d{4}-\d{2}-\d{2}$/).optional().nullable(),
   raising_date: z.string().trim().regex(/^\d{4}-\d{2}-\d{2}$/).optional().nullable(),
   joined_lodge_date: z.string().trim().regex(/^\d{4}-\d{2}-\d{2}$/).optional().nullable(),
@@ -97,6 +98,7 @@ Deno.serve(async (req) => {
       is_honorary_member: b.is_honorary_member ?? false,
       rank: b.rank ?? null,
       status: b.status,
+      status_changed_at: b.status_changed_at ?? null,
       email: b.email,
       passing_date: b.passing_date ?? null,
       raising_date: b.raising_date ?? null,
