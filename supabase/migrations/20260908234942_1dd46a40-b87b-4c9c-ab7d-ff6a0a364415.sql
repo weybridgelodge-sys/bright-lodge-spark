@@ -1,0 +1,1 @@
+GRANT SELECT (status_changed_at) ON public.profiles TO authenticated;
