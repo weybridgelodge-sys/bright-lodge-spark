@@ -284,6 +284,19 @@ export default function AnnualReturnCalculator({ canEdit }: { canEdit: boolean }
         </div>
       )}
 
+      {noDob.length > 0 && (
+        <div className="mb-4 rounded-md border border-gold/40 bg-gold/10 p-3">
+          <p className="text-sm text-primary-foreground mb-2">
+            {noDob.length} chargeable member{noDob.length === 1 ? " has" : "s have"} no date of birth on file and
+            {noDob.length === 1 ? " was" : " were"} excluded from the count — confirm these are test/placeholder
+            accounts, not real members missing data.
+          </p>
+          <ul className="text-sm text-primary-foreground/80 list-disc pl-5">
+            {noDob.map((m) => <li key={m.id}>{m.name} — {m.status.replace("_", " ")}</li>)}
+          </ul>
+        </div>
+      )}
+
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
