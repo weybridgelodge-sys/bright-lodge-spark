@@ -45,6 +45,7 @@ type Profile = {
   ugle_reg_number: string | null;
   mother_lodge: string | null;
   status: Status;
+  status_changed_at: string | null;
   degree: Degree;
   is_past_master: boolean;
   is_royal_arch: boolean;
@@ -91,6 +92,7 @@ const EMPTY_FORM = {
   is_honorary_member: false,
   rank: "",
   status: "active" as Status,
+  status_changed_at: "",
   is_ugle_portal_registered: false,
   passing_date: "",
   raising_date: "",
@@ -125,7 +127,7 @@ export default function MembersAdmin() {
       supabase
         .from("profiles")
         .select(
-          "id,email,full_name,title,first_name,middle_name,last_name,preferred_name,post_nominals,provincial_rank,grand_rank,initiation_date,rank,mother_lodge,status,degree,is_past_master,is_royal_arch,is_honorary_member,is_ugle_portal_registered,passing_date,raising_date,joined_lodge_date,created_at"
+          "id,email,full_name,title,first_name,middle_name,last_name,preferred_name,post_nominals,provincial_rank,grand_rank,initiation_date,rank,mother_lodge,status,status_changed_at,degree,is_past_master,is_royal_arch,is_honorary_member,is_ugle_portal_registered,passing_date,raising_date,joined_lodge_date,created_at"
         )
         .order("created_at", { ascending: false }),
       supabase.from("user_roles").select("user_id,role"),
@@ -256,6 +258,7 @@ export default function MembersAdmin() {
       is_honorary_member: p.is_honorary_member,
       rank: p.rank ?? "",
       status: p.status,
+      status_changed_at: p.status_changed_at ?? "",
       is_ugle_portal_registered: p.is_ugle_portal_registered ?? false,
       passing_date: p.passing_date ?? "",
       raising_date: p.raising_date ?? "",
@@ -313,6 +316,7 @@ export default function MembersAdmin() {
       is_honorary_member: form.is_honorary_member,
       rank: form.rank.trim() || null,
       status: form.status,
+      status_changed_at: form.status_changed_at || null,
       is_ugle_portal_registered: form.is_ugle_portal_registered,
       passing_date: form.passing_date || null,
       raising_date: form.raising_date || null,
