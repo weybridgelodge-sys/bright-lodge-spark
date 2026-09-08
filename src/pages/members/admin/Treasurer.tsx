@@ -673,7 +673,7 @@ function Inner() {
           <TabsList className="h-auto flex-wrap justify-start sm:flex-nowrap">
             <TabsTrigger value="transactions">Transaction Register</TabsTrigger>
             <TabsTrigger value="dining">Dining Reconciliation</TabsTrigger>
-            {isAdmin && <TabsTrigger value="creditors">Creditors</TabsTrigger>}
+            {canEditTx && <TabsTrigger value="creditors">Creditors</TabsTrigger>}
             <TabsTrigger value="reconciliation">Reconciliation</TabsTrigger>
           </TabsList>
           <TabsContent value="transactions" className="mt-4">
@@ -685,9 +685,9 @@ function Inner() {
               onGoToTransaction={(id) => { setHighlightTxId(id); setTab("transactions"); load(); }}
             />
           </TabsContent>
-          {isAdmin && (
+          {canEditTx && (
             <TabsContent value="creditors" className="mt-4">
-              <CreditorsTab canEdit={isAdmin} />
+              <CreditorsTab canEdit={canEditTx} />
             </TabsContent>
           )}
           <TabsContent value="reconciliation" className="mt-4">
