@@ -38,6 +38,7 @@ export default function AnnualReturnCalculator({ canEdit }: { canEdit: boolean }
   const [suggesting, setSuggesting] = useState(false);
   const [posting, setPosting] = useState(false);
   const [review, setReview] = useState<ReviewMember[]>([]);
+  const [noDob, setNoDob] = useState<ReviewMember[]>([]);
   const [suggestNote, setSuggestNote] = useState<string | null>(null);
 
   const [accounts, setAccounts] = useState<Map<string, string>>(new Map());
@@ -91,6 +92,7 @@ export default function AnnualReturnCalculator({ canEdit }: { canEdit: boolean }
   const suggest = async () => {
     setSuggesting(true);
     setReview([]);
+    setNoDob([]);
     setSuggestNote(null);
 
     const yearEnd = `${year}-09-30`;
