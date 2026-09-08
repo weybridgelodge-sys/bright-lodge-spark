@@ -38,6 +38,7 @@ export default function AnnualReturnCalculator({ canEdit }: { canEdit: boolean }
   const [suggesting, setSuggesting] = useState(false);
   const [posting, setPosting] = useState(false);
   const [review, setReview] = useState<ReviewMember[]>([]);
+  const [noDob, setNoDob] = useState<ReviewMember[]>([]);
   const [suggestNote, setSuggestNote] = useState<string | null>(null);
 
   const [accounts, setAccounts] = useState<Map<string, string>>(new Map());
@@ -91,6 +92,7 @@ export default function AnnualReturnCalculator({ canEdit }: { canEdit: boolean }
   const suggest = async () => {
     setSuggesting(true);
     setReview([]);
+    setNoDob([]);
     setSuggestNote(null);
 
     const yearEnd = `${year}-09-30`;
@@ -112,6 +114,7 @@ export default function AnnualReturnCalculator({ canEdit }: { canEdit: boolean }
     let over = 0;
     let under = 0;
     const needsReview: ReviewMember[] = [];
+    const missingDob: ReviewMember[] = [];
 
     for (const p of (data as any[]) ?? []) {
       const status = p.status as string;
@@ -131,17 +134,24 @@ export default function AnnualReturnCalculator({ canEdit }: { canEdit: boolean }
       }
       if (!chargeable) continue;
 
-      // Age as at the return year end (30 September). Unknown DOB → counted as 25+.
-      let is25Plus = true;
-      if (p.date_of_birth) {
-        const dob = new Date(`${p.date_of_birth}T00:00:00Z`);
-        const end = new Date(`${yearEnd}T00:00:00Z`);
-        let age = end.getUTCFullYear() - dob.getUTCFullYear();
-        const m = end.getUTCMonth() - dob.getUTCMonth();
-        if (m < 0 || (m === 0 && end.getUTCDate() < dob.getUTCDate())) age--;
-        is25Plus = age >= 25;
+      // Chargeable but no DOB on file — exclude from counts entirely and flag
+      // separately (likely a test/placeholder account, but must not be dropped silently).
+      if (!p.date_of_birth) {
+        missingDob.push({
+          id: p.id,
+          name: p.full_name || `${p.first_name ?? ""} ${p.last_name ?? ""}`.trim() || p.id,
+          status,
+        });
+        continue;
       }
-      if (is25Plus) over++; else under++;
+
+      // Age as at the return year end (30 September).
+      const dob = new Date(`${p.date_of_birth}T00:00:00Z`);
+      const end = new Date(`${yearEnd}T00:00:00Z`);
+      let age = end.getUTCFullYear() - dob.getUTCFullYear();
+      const m = end.getUTCMonth() - dob.getUTCMonth();
+      if (m < 0 || (m === 0 && end.getUTCDate() < dob.getUTCDate())) age--;
+      if (age >= 25) over++; else under++;
     }
 
     setRows((rs) =>
@@ -153,6 +163,7 @@ export default function AnnualReturnCalculator({ canEdit }: { canEdit: boolean }
       }),
     );
     setReview(needsReview);
+    setNoDob(missingDob);
     setSuggestNote(`Suggested from members: ${over} aged 25 and over, ${under} under 25 (${over + under} chargeable).`);
     setSuggesting(false);
   };
@@ -269,6 +280,19 @@ export default function AnnualReturnCalculator({ canEdit }: { canEdit: boolean }
           </p>
           <ul className="text-sm text-primary-foreground/80 list-disc pl-5">
             {review.map((m) => <li key={m.id}>{m.name} — {m.status.replace("_", " ")}</li>)}
+          </ul>
+        </div>
+      )}
+
+      {noDob.length > 0 && (
+        <div className="mb-4 rounded-md border border-gold/40 bg-gold/10 p-3">
+          <p className="text-sm text-primary-foreground mb-2">
+            {noDob.length} chargeable member{noDob.length === 1 ? " has" : "s have"} no date of birth on file and
+            {noDob.length === 1 ? " was" : " were"} excluded from the count — confirm these are test/placeholder
+            accounts, not real members missing data.
+          </p>
+          <ul className="text-sm text-primary-foreground/80 list-disc pl-5">
+            {noDob.map((m) => <li key={m.id}>{m.name} — {m.status.replace("_", " ")}</li>)}
           </ul>
         </div>
       )}
