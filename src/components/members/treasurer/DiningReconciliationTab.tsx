@@ -554,6 +554,27 @@ function MeetingPanel({
             </div>
           </div>
 
+          <div className="mt-3 rounded-sm border border-gold/15 p-3 space-y-2">
+            <h5 className="text-xs uppercase tracking-wider text-primary-foreground/60">Stripe receipts in the ledger</h5>
+            <div className="text-sm text-primary-foreground/70">
+              <span className="tabular-nums text-primary-foreground">{receiptSets.posted.length}</span> of{" "}
+              <span className="tabular-nums text-primary-foreground">{receiptSets.syncable.length}</span> Stripe receipts posted to ledger
+            </div>
+            {canEdit && (
+              <Button
+                size="sm"
+                variant="outline"
+                className="min-h-11 sm:min-h-0"
+                disabled={posting || receiptSets.postable.length === 0}
+                onClick={postStripeReceipts}
+              >
+                {posting ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Plus className="w-4 h-4 mr-1" />} Post Stripe receipts to ledger
+              </Button>
+            )}
+          </div>
+
+
+
 
 
           {canEdit && (
