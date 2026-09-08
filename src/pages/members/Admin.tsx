@@ -812,6 +812,19 @@ export default function MembersAdmin() {
               </select>
             </label>
 
+            <label className={`${labelCls} sm:col-span-3`}>
+              Status changed on
+              <input
+                type="date"
+                value={form.status_changed_at}
+                onChange={(e) => setForm({ ...form, status_changed_at: e.target.value })}
+                className={`mt-1 ${inputCls} normal-case tracking-normal text-primary-foreground`}
+              />
+              <span className="block mt-1 text-xs normal-case tracking-normal text-primary-foreground/50">
+                Defaults to today when you change the status — edit it for historical dates.
+              </span>
+            </label>
+
             <div className="sm:col-span-6 flex flex-wrap gap-4 pt-1">
               <label className="flex items-center gap-2 text-sm">
                 <input
