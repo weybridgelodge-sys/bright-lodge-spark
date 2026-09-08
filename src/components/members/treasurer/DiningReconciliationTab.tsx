@@ -454,7 +454,13 @@ function MeetingPanel({
               <Button size="sm" className="bg-gold text-navy hover:bg-gold/90 min-h-11 sm:min-h-0" disabled={saving} onClick={save}>
                 {saving ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Save className="w-4 h-4 mr-1" />} Save invoice
               </Button>
-              {invoice?.transaction_id ? (
+              {invoice?.journal_entry_id ? (
+                <span className="inline-flex items-center text-sm text-emerald-300">
+                  <Check className="w-4 h-4 mr-1" />
+                  Posted to ledger — Dr GMC Dining Invoice {draftTotal != null ? gbp(draftTotal) : "—"} / Cr Creditors{" "}
+                  {draftTotal != null ? gbp(draftTotal) : "—"}
+                </span>
+              ) : invoice?.transaction_id ? (
                 <Button size="sm" variant="outline" className="min-h-11 sm:min-h-0" onClick={() => onGoToTransaction(invoice.transaction_id!)}>
                   <ExternalLink className="w-4 h-4 mr-1" /> View linked transaction
                 </Button>
