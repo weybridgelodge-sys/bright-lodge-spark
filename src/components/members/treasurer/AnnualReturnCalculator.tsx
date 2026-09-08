@@ -163,6 +163,7 @@ export default function AnnualReturnCalculator({ canEdit }: { canEdit: boolean }
       }),
     );
     setReview(needsReview);
+    setNoDob(missingDob);
     setSuggestNote(`Suggested from members: ${over} aged 25 and over, ${under} under 25 (${over + under} chargeable).`);
     setSuggesting(false);
   };
