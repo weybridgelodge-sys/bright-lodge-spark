@@ -29,13 +29,21 @@ type AttRow = {
 };
 
 type BookingRow = {
+  id: string;
   meeting_id: string | null;
   payment_status: string;
+  contact_name: string | null;
+  event_label: string | null;
+  paid_at: string | null;
+  subtotal_pence: number | null;
+  fee_pence: number | null;
   total_pence: number | null;
   stripe_fee_pence: number | null;
   stripe_net_pence: number | null;
   stripe_payment_intent_id: string | null;
+  journal_entry_id: string | null;
 };
+
 
 type Invoice = {
   id: string;
@@ -91,6 +99,7 @@ function MeetingPanel({
   const [invoiceDate, setInvoiceDate] = useState("");
   const [saving, setSaving] = useState(false);
   const [creating, setCreating] = useState(false);
+  const [posting, setPosting] = useState(false);
 
   useEffect(() => {
     setHeadcount(invoice?.invoice_headcount != null ? String(invoice.invoice_headcount) : "");
@@ -160,6 +169,104 @@ function MeetingPanel({
   );
 
   const netIncome = stripeSummary.net + nonStripeCollected;
+
+  // ── Stripe receipt ledger posting (dining bookings only: meeting_id is set) ──
+  const receiptSets = useMemo(() => {
+    const syncable = bookings.filter(
+      (b) =>
+        b.meeting_id != null &&
+        b.payment_status === "paid" &&
+        !!b.stripe_payment_intent_id &&
+        b.stripe_fee_pence != null &&
+        b.stripe_net_pence != null
+    );
+    return {
+      syncable,
+      posted: syncable.filter((b) => b.journal_entry_id != null),
+      postable: syncable.filter((b) => b.journal_entry_id == null),
+    };
+  }, [bookings]);
+
+  const postStripeReceipts = async () => {
+    if (receiptSets.postable.length === 0) return;
+    setPosting(true);
+    const [{ data: u }, accounts, openPeriod] = await Promise.all([
+      supabase.auth.getUser(),
+      supabase.from("chart_of_accounts" as any).select("id,code").in("code", ["1010", "4100", "4120", "5420"]),
+      supabase
+        .from("treasurer_periods" as any)
+        .select("id")
+        .eq("status", "open")
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle(),
+    ]);
+    const accRows = (accounts.data as any[]) ?? [];
+    const acct = (code: string) => accRows.find((a) => a.code === code)?.id as string | undefined;
+    const suspense = acct("1010");
+    const diningIncome = acct("4100");
+    const feeCover = acct("4120");
+    const cardFees = acct("5420");
+    if (!suspense || !diningIncome || !feeCover || !cardFees) {
+      setPosting(false);
+      toast({ title: "Accounts 1010 / 4100 / 4120 / 5420 not found", variant: "destructive" });
+      return;
+    }
+    const periodId = (openPeriod.data as any)?.id ?? null;
+    let ok = 0;
+    let failed = 0;
+
+    for (const b of receiptSets.postable) {
+      const label = `Stripe dining receipt — ${b.contact_name ?? "Unknown"} — ${b.event_label ?? meetingTypeLabel(meeting.meeting_type)}`;
+      const { data: entry, error: entryErr } = await supabase
+        .from("journal_entries" as any)
+        .insert({
+          entry_date: (b.paid_at ?? meeting.meeting_date).slice(0, 10),
+          description: label,
+          source_type: "stripe_receipt",
+          source_id: b.id,
+          period_id: periodId,
+          created_by: u.user?.id ?? null,
+        })
+        .select("id")
+        .single();
+      if (entryErr || !entry) {
+        failed += 1;
+        continue;
+      }
+      const entryId = (entry as any).id as string;
+      const lines: any[] = [
+        { entry_id: entryId, account_id: suspense, debit_pence: b.stripe_net_pence, credit_pence: 0, description: label },
+        { entry_id: entryId, account_id: cardFees, debit_pence: b.stripe_fee_pence, credit_pence: 0, description: label },
+        { entry_id: entryId, account_id: diningIncome, debit_pence: 0, credit_pence: b.subtotal_pence ?? 0, description: label },
+      ];
+      if ((b.fee_pence ?? 0) > 0) {
+        lines.push({ entry_id: entryId, account_id: feeCover, debit_pence: 0, credit_pence: b.fee_pence, description: label });
+      }
+      const { error: lineErr } = await supabase.from("journal_lines" as any).insert(lines);
+      if (lineErr) {
+        await supabase.from("journal_entries" as any).delete().eq("id", entryId);
+        failed += 1;
+        continue;
+      }
+      const { error: linkErr } = await supabase
+        .from("bookings" as any)
+        .update({ journal_entry_id: entryId })
+        .eq("id", b.id);
+      if (linkErr) failed += 1;
+      else ok += 1;
+    }
+
+    setPosting(false);
+    toast({
+      title: failed === 0 ? `${ok} Stripe receipt${ok === 1 ? "" : "s"} posted to ledger` : `${ok} posted, ${failed} failed`,
+      description: failed > 0 ? "Failed receipts were rolled back — check the underlying figures balance." : undefined,
+      variant: failed > 0 ? "destructive" : undefined,
+    });
+    onChanged();
+  };
+
+
 
 
 
@@ -447,6 +554,27 @@ function MeetingPanel({
             </div>
           </div>
 
+          <div className="mt-3 rounded-sm border border-gold/15 p-3 space-y-2">
+            <h5 className="text-xs uppercase tracking-wider text-primary-foreground/60">Stripe receipts in the ledger</h5>
+            <div className="text-sm text-primary-foreground/70">
+              <span className="tabular-nums text-primary-foreground">{receiptSets.posted.length}</span> of{" "}
+              <span className="tabular-nums text-primary-foreground">{receiptSets.syncable.length}</span> Stripe receipts posted to ledger
+            </div>
+            {canEdit && (
+              <Button
+                size="sm"
+                variant="outline"
+                className="min-h-11 sm:min-h-0"
+                disabled={posting || receiptSets.postable.length === 0}
+                onClick={postStripeReceipts}
+              >
+                {posting ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Plus className="w-4 h-4 mr-1" />} Post Stripe receipts to ledger
+              </Button>
+            )}
+          </div>
+
+
+
 
 
           {canEdit && (
@@ -496,7 +624,7 @@ export default function DiningReconciliationTab({
       supabase.from("festive_board_meetings" as any).select("id,meeting_date,meeting_type").order("meeting_date", { ascending: false }),
       supabase.from("festive_board_attendance" as any).select("meeting_id,member_id,visitor_lodge_name,attendance_status,payment_method,amount_pence,is_meeting_only"),
       supabase.from("treasurer_dining_invoices" as any).select("*"),
-      supabase.from("bookings" as any).select("meeting_id,payment_status,total_pence,stripe_fee_pence,stripe_net_pence,stripe_payment_intent_id"),
+      supabase.from("bookings" as any).select("id,meeting_id,payment_status,contact_name,event_label,paid_at,subtotal_pence,fee_pence,total_pence,stripe_fee_pence,stripe_net_pence,stripe_payment_intent_id,journal_entry_id"),
     ]);
     if (!m.error) setMeetings((m.data as unknown as Meeting[]) ?? []);
     if (!a.error) setRows((a.data as unknown as AttRow[]) ?? []);

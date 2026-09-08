@@ -114,6 +114,7 @@ export type Database = {
           event_label: string
           fee_pence: number
           id: string
+          journal_entry_id: string | null
           line_items: Json
           meeting_id: string | null
           paid_at: string | null
@@ -145,6 +146,7 @@ export type Database = {
           event_label: string
           fee_pence?: number
           id?: string
+          journal_entry_id?: string | null
           line_items?: Json
           meeting_id?: string | null
           paid_at?: string | null
@@ -176,6 +178,7 @@ export type Database = {
           event_label?: string
           fee_pence?: number
           id?: string
+          journal_entry_id?: string | null
           line_items?: Json
           meeting_id?: string | null
           paid_at?: string | null
@@ -196,6 +199,13 @@ export type Database = {
           waitlist_refunded_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "bookings_journal_entry_id_fkey"
+            columns: ["journal_entry_id"]
+            isOneToOne: false
+            referencedRelation: "journal_entries"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "bookings_meeting_id_fkey"
             columns: ["meeting_id"]
