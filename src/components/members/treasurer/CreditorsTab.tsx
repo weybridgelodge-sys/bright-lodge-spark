@@ -6,10 +6,11 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
+import AnnualReturnCalculator from "./AnnualReturnCalculator";
 
 const PAYEES = ["GMC", "UGLE", "Provincial Grand Lodge", "Other"] as const;
 
-const RECOGNITION_TYPES = ["UGLE", "Provincial Grand Lodge", "GMC Levy", "Other"] as const;
+const RECOGNITION_TYPES = ["GMC Levy", "Other"] as const;
 
 const money = (pence: number) =>
   `${pence < 0 ? "-" : ""}£${(Math.abs(pence) / 100).toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -29,7 +30,7 @@ export default function CreditorsTab({ canEdit }: { canEdit: boolean }) {
   const [saving, setSaving] = useState(false);
 
   const [recDate, setRecDate] = useState(() => new Date().toISOString().slice(0, 10));
-  const [recPayee, setRecPayee] = useState<string>("UGLE");
+  const [recPayee, setRecPayee] = useState<string>("GMC Levy");
   const [recOtherPayee, setRecOtherPayee] = useState("");
   const [recAmount, setRecAmount] = useState("0.00");
   const [recReference, setRecReference] = useState("");
@@ -161,8 +162,6 @@ export default function CreditorsTab({ canEdit }: { canEdit: boolean }) {
   };
 
   const recognitionMapping: Record<string, { code: string; payee: string }> = {
-    UGLE: { code: "5000", payee: "UGLE" },
-    "Provincial Grand Lodge": { code: "5100", payee: "Provincial Grand Lodge" },
     "GMC Levy": { code: "5200", payee: "GMC" },
     Other: { code: "5900", payee: "" },
   };
