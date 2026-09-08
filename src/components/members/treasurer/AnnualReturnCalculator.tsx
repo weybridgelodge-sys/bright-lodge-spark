@@ -254,9 +254,13 @@ export default function AnnualReturnCalculator({ canEdit }: { canEdit: boolean }
             value={year}
             onChange={(e) => setYear(Number(e.target.value))}
             disabled={!canEdit}
-            className="mt-1 w-full h-10 rounded-md border border-input bg-background px-3 text-sm"
+            className="mt-1 w-full h-10 rounded-sm border border-gold/20 bg-navy px-3 text-sm text-primary-foreground focus:outline-none focus:border-gold"
           >
-            {years.map((y) => <option key={y} value={y}>30 September {y}</option>)}
+            {years.map((y) => (
+              <option key={y} value={y} className="bg-navy text-primary-foreground">
+                30 September {y}
+              </option>
+            ))}
           </select>
         </div>
         <div className="flex items-end">
@@ -297,13 +301,35 @@ export default function AnnualReturnCalculator({ canEdit }: { canEdit: boolean }
         </div>
       )}
 
-      <div className="overflow-x-auto">
+      {/* Mobile: stacked cards so rate/count values are never clipped */}
+      <div className="space-y-3 sm:hidden">
+        {rows.map((r) => (
+          <div key={r.key} className="rounded-md border border-gold/20 p-3">
+            <p className="text-primary-foreground mb-2">{r.label}</p>
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <span className="text-xs text-primary-foreground/60">Rate (£)</span>
+                <Input type="number" step="0.01" min="0" inputMode="decimal" value={r.rate} disabled={!canEdit}
+                  onChange={(e) => setRow(r.key, "rate", e.target.value)} />
+              </div>
+              <div>
+                <span className="text-xs text-primary-foreground/60">Count</span>
+                <Input type="number" step="1" min="0" inputMode="numeric" value={r.count} disabled={!canEdit}
+                  onChange={(e) => setRow(r.key, "count", e.target.value)} />
+              </div>
+            </div>
+            <p className="mt-2 text-right text-primary-foreground">Subtotal: {money(subtotal(r))}</p>
+          </div>
+        ))}
+      </div>
+
+      <div className="hidden sm:block overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="text-left text-primary-foreground/60 border-b border-gold/20">
               <th className="py-2">Line</th>
-              <th className="py-2 w-32">Rate (£)</th>
-              <th className="py-2 w-28">Count</th>
+              <th className="py-2 w-28">Rate (£)</th>
+              <th className="py-2 w-24">Count</th>
               <th className="py-2 text-right w-32">Subtotal</th>
             </tr>
           </thead>
