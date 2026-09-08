@@ -29,13 +29,21 @@ type AttRow = {
 };
 
 type BookingRow = {
+  id: string;
   meeting_id: string | null;
   payment_status: string;
+  contact_name: string | null;
+  event_label: string | null;
+  paid_at: string | null;
+  subtotal_pence: number | null;
+  fee_pence: number | null;
   total_pence: number | null;
   stripe_fee_pence: number | null;
   stripe_net_pence: number | null;
   stripe_payment_intent_id: string | null;
+  journal_entry_id: string | null;
 };
+
 
 type Invoice = {
   id: string;
