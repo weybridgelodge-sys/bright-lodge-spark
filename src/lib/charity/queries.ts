@@ -64,6 +64,9 @@ export type Donation = {
   confirmation_received: boolean;
   is_festival_contribution: boolean;
   from_relief_chest: boolean;
+  banked_date: string | null;
+  banked_by: string | null;
+  journal_entry_id: string | null;
 };
 
 
