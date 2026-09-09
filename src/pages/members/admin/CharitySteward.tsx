@@ -13,7 +13,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
-import { Loader2, Plus, Pencil, Trash2, Download, Save, ExternalLink } from "lucide-react";
+import { Loader2, Plus, Pencil, Trash2, Download, Save, ExternalLink, HandCoins, HeartHandshake, BookOpen, Trophy, FileBarChart, Rss } from "lucide-react";
 import {
   fetchCharities, fetchCollections, fetchDonations, fetchFestivalSettings,
   COLLECTION_TYPE_LABEL, PAYMENT_METHOD_LABEL, AUTHORISED_LABEL,
