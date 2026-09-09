@@ -74,6 +74,8 @@ export default function TransactionDetailReport({ canEdit }: { canEdit: boolean 
       if (error) throw error;
       const rows: Line[] = ((data as any[]) ?? []).map((r) => ({
         id: r.id,
+        entryId: r.journal_entries.id,
+        reconciled: !!r.journal_entries.reconciled,
         date: r.journal_entries.entry_date,
         code: r.chart_of_accounts.code,
         accountName: r.chart_of_accounts.name,
