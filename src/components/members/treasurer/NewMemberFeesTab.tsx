@@ -232,14 +232,17 @@ export default function NewMemberFeesTab({ canEdit }: { canEdit: boolean }) {
               </div>
               <div className="space-y-3">
                 <div>
-                  <Label>New member&apos;s age at initiation</Label>
+                  <Label>New member&apos;s age</Label>
                   <Select value={ageBracket} onValueChange={(v) => applyAgeBandDefault(v as "over25" | "under25")} disabled={!canEdit}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="over25">25 and over (£132.00)</SelectItem>
-                      <SelectItem value="under25">Under 25 (£66.00)</SelectItem>
+                      <SelectItem value="over25">25 and over</SelectItem>
+                      <SelectItem value="under25">Under 25</SelectItem>
                     </SelectContent>
                   </Select>
+                  <p className="text-primary-foreground/50 text-xs mt-1">
+                    UGLE Form P rate — confirm this hasn&apos;t changed before relying on the default.
+                  </p>
                 </div>
                 <div>
                   <Label>UGLE registration fee (£)</Label>
