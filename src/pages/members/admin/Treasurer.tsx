@@ -6,6 +6,8 @@ import CreditorsTab from "@/components/members/treasurer/CreditorsTab";
 import DirectPaymentTab from "@/components/members/treasurer/DirectPaymentTab";
 import NewMemberFeesTab from "@/components/members/treasurer/NewMemberFeesTab";
 import GeneralJournalTab from "@/components/members/treasurer/GeneralJournalTab";
+import IncomeExpenditureReport from "@/components/members/treasurer/IncomeExpenditureReport";
+import BalanceSheetReport from "@/components/members/treasurer/BalanceSheetReport";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
