@@ -179,8 +179,10 @@ const App = () => (
             <Route path="/data-protection-policy" element={<Navigate to="/data-protection" replace />} />
             
             <Route path="/masonic-website-links" element={<Navigate to="/masonic-links" replace />} />
+            <Route path="/tmp-prop-test" element={<TmpPropTest />} />
 
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>
