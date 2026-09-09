@@ -353,13 +353,14 @@ export default function PropertyRegisterTab({ canEdit }: { canEdit: boolean }) {
                   <th className="py-2 pr-3 whitespace-nowrap">Condition</th>
                   <th className="py-2 pr-3 whitespace-nowrap">Date acquired</th>
                   <th className="py-2 pr-3 min-w-[220px]">Notes</th>
+                  <th className="py-2 pr-3 whitespace-nowrap">Photos</th>
                   {canEdit && <th className="py-2 text-right">Actions</th>}
                 </tr>
               </thead>
               <tbody>
                 {rows.length === 0 ? (
                   <tr>
-                    <td colSpan={canEdit ? 8 : 7} className="py-3 text-primary-foreground/60">No property recorded yet.</td>
+                    <td colSpan={canEdit ? 9 : 8} className="py-3 text-primary-foreground/60">No property recorded yet.</td>
                   </tr>
                 ) : rows.map((r) => (
                   <tr key={r.id} className="border-b border-gold/10 align-top">
