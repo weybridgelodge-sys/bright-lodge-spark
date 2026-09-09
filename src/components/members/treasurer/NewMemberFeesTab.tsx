@@ -179,6 +179,7 @@ export default function NewMemberFeesTab({ canEdit }: { canEdit: boolean }) {
 
     setSaving(false);
     setName("");
+    setAgeBracket("over25");
     setUgleFee("0.00");
     setPglFee("0.00");
     setBankReference("");
