@@ -3,7 +3,7 @@ import autoTable from "jspdf-autotable";
 import { assetUrl } from "@/lib/assetUrl";
 import logoAsset from "@/assets/weybridge-logo-white.png.asset.json";
 import { supabase } from "@/integrations/supabase/client";
-import { masonicYearBounds } from "@/lib/charity/queries";
+
 
 export const NAVY: [number, number, number] = [27, 42, 74];
 export const GOLD: [number, number, number] = [201, 164, 50];
@@ -27,14 +27,18 @@ export const shiftBackOneYear = (iso: string) => {
   return d.toISOString().slice(0, 10);
 };
 
-/** The masonic year whose bounds contain the given ISO date. */
-export function masonicYearContaining(iso: string): number {
+/**
+ * Treasurer financial year: fixed calendar dates, 1 October – 30 September.
+ * `year` is the year in which the period STARTS (e.g. 2025 → 1 Oct 2025 – 30 Sep 2026).
+ */
+export function treasurerYearBounds(year: number): { start: string; end: string; label: string } {
+  return { start: `${year}-10-01`, end: `${year + 1}-09-30`, label: `${year}/${year + 1}` };
+}
+
+/** The treasurer financial year (starting year) whose bounds contain the given ISO date. */
+export function treasurerYearContaining(iso: string): number {
   const y = Number(iso.slice(0, 4));
-  for (const candidate of [y, y - 1]) {
-    const b = masonicYearBounds(candidate);
-    if (iso >= b.start && iso <= b.end) return candidate;
-  }
-  return y;
+  return iso >= `${y}-10-01` ? y : y - 1;
 }
 
 export async function fetchAccounts(): Promise<Account[]> {

@@ -5,10 +5,10 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
 import { Download, Loader2 } from "lucide-react";
-import { masonicYearBounds } from "@/lib/charity/queries";
 import {
-  acct, fetchAccounts, fetchMovements, fmtDate, masonicYearContaining, money,
-  reportPdfDoc, reportSection, reportTable, shiftBackOneYear, signedBalance, type Account,
+  acct, fetchAccounts, fetchMovements, fmtDate, money,
+  reportPdfDoc, reportSection, reportTable, shiftBackOneYear, signedBalance,
+  treasurerYearBounds, treasurerYearContaining, type Account,
 } from "@/lib/treasurer/reports";
 
 type Row = { code: string; name: string; current: number; prior: number };
@@ -16,13 +16,13 @@ type Row = { code: string; name: string; current: number; prior: number };
 const today = () => new Date().toISOString().slice(0, 10);
 
 export default function BalanceSheetReport({ canEdit }: { canEdit: boolean }) {
-  const currentMasonicYear = useMemo(() => masonicYearContaining(today()), []);
+  const currentMasonicYear = useMemo(() => treasurerYearContaining(today()), []);
   const yearOptions = useMemo(() => [0, 1, 2, 3, 4].map((i) => currentMasonicYear - i), [currentMasonicYear]);
 
   const [mode, setMode] = useState<string>(String(currentMasonicYear));
   const [customDate, setCustomDate] = useState(today);
 
-  const asAt = mode === "custom" ? customDate : masonicYearBounds(Number(mode)).end;
+  const asAt = mode === "custom" ? customDate : treasurerYearBounds(Number(mode)).end;
   const priorAsAt = shiftBackOneYear(asAt);
 
   const [accounts, setAccounts] = useState<Account[]>([]);
@@ -35,9 +35,9 @@ export default function BalanceSheetReport({ canEdit }: { canEdit: boolean }) {
     setLoading(true);
     try {
       const accts = await fetchAccounts();
-      const yearOf = (iso: string) => masonicYearContaining(iso);
-      const curYearStart = masonicYearBounds(yearOf(asAt)).start;
-      const priYearStart = masonicYearBounds(yearOf(priorAsAt)).start;
+      const yearOf = (iso: string) => treasurerYearContaining(iso);
+      const curYearStart = treasurerYearBounds(yearOf(asAt)).start;
+      const priYearStart = treasurerYearBounds(yearOf(priorAsAt)).start;
       // day before the masonic-year start, for the brought-forward cumulative figure
       const dayBefore = (iso: string) => {
         const d = new Date(iso + "T00:00:00Z");
@@ -201,7 +201,7 @@ export default function BalanceSheetReport({ canEdit }: { canEdit: boolean }) {
               <SelectContent>
                 {yearOptions.map((y) => (
                   <SelectItem key={y} value={String(y)}>
-                    Masonic year end {masonicYearBounds(y).label} ({fmtDate(masonicYearBounds(y).end)})
+                    Masonic year end {treasurerYearBounds(y).label} ({fmtDate(treasurerYearBounds(y).end)})
                   </SelectItem>
                 ))}
                 <SelectItem value="custom">Custom date</SelectItem>

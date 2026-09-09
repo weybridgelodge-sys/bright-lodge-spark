@@ -5,10 +5,9 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
 import { Download, Loader2 } from "lucide-react";
-import { masonicYearBounds } from "@/lib/charity/queries";
 import {
   acct, fetchAccounts, fetchMovements, fmtDate, money, reportPdfDoc, reportSection, reportTable,
-  shiftBackOneYear, signedBalance, type Account,
+  shiftBackOneYear, signedBalance, treasurerYearBounds, type Account,
 } from "@/lib/treasurer/reports";
 
 type Row = { code: string; name: string; current: number; prior: number };
@@ -19,7 +18,7 @@ export default function IncomeExpenditureReport({ canEdit }: { canEdit: boolean 
   const currentMasonicYear = useMemo(() => {
     const iso = today();
     const y = Number(iso.slice(0, 4));
-    return iso >= masonicYearBounds(y).start ? y : y - 1;
+    return iso >= treasurerYearBounds(y).start ? y : y - 1;
   }, []);
   const yearOptions = useMemo(
     () => [0, 1, 2, 3, 4].map((i) => currentMasonicYear - i),
@@ -27,7 +26,7 @@ export default function IncomeExpenditureReport({ canEdit }: { canEdit: boolean 
   );
 
   const [mode, setMode] = useState<string>(String(currentMasonicYear));
-  const [customStart, setCustomStart] = useState(() => masonicYearBounds(currentMasonicYear).start);
+  const [customStart, setCustomStart] = useState(() => treasurerYearBounds(currentMasonicYear).start);
   const [customEnd, setCustomEnd] = useState(today);
 
   const [accounts, setAccounts] = useState<Account[]>([]);
@@ -47,8 +46,8 @@ export default function IncomeExpenditureReport({ canEdit }: { canEdit: boolean 
       };
     }
     const y = Number(mode);
-    const b = masonicYearBounds(y);
-    const p = masonicYearBounds(y - 1);
+    const b = treasurerYearBounds(y);
+    const p = treasurerYearBounds(y - 1);
     return { label: b.label, start: b.start, end: b.end, priorLabel: p.label, priorStart: p.start, priorEnd: p.end };
   }, [mode, customStart, customEnd]);
 
@@ -176,7 +175,7 @@ export default function IncomeExpenditureReport({ canEdit }: { canEdit: boolean 
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
                 {yearOptions.map((y) => (
-                  <SelectItem key={y} value={String(y)}>Masonic year {masonicYearBounds(y).label}</SelectItem>
+                  <SelectItem key={y} value={String(y)}>Masonic year {treasurerYearBounds(y).label}</SelectItem>
                 ))}
                 <SelectItem value="custom">Custom range</SelectItem>
               </SelectContent>
