@@ -249,12 +249,16 @@ function MeetingPanel({
         failed += 1;
         continue;
       }
-      const { error: linkErr } = await supabase
-        .from("bookings" as any)
-        .update({ journal_entry_id: entryId })
-        .eq("id", b.id);
-      if (linkErr) failed += 1;
-      else ok += 1;
+      const { error: linkErr } = await (supabase as any).rpc("link_booking_journal_entry", {
+        _booking_id: b.id,
+        _entry_id: entryId,
+      });
+      if (linkErr) {
+        await supabase.from("journal_entries" as any).delete().eq("id", entryId);
+        failed += 1;
+        continue;
+      }
+      ok += 1;
     }
 
     setPosting(false);
