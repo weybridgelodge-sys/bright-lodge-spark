@@ -217,6 +217,109 @@ async function handleDuesChargeRefunded(charge: any, _env: StripeEnv) {
   }
 }
 
+// ------------------- Dining booking refunds -------------------
+
+async function handleBookingChargeRefunded(charge: any, env: StripeEnv) {
+  const pi = charge.payment_intent;
+  if (!pi) return;
+
+  const { data: booking } = await getSupabase()
+    .from("bookings")
+    .select("id, contact_name, event_label, subtotal_pence, fee_pence, total_pence, journal_entry_id, refund_journal_entry_id")
+    .eq("stripe_payment_intent_id", pi)
+    .eq("environment", env)
+    .maybeSingle();
+  if (!booking) return; // not a dining booking
+
+  const b: any = booking;
+
+  const { error: updErr } = await getSupabase()
+    .from("bookings")
+    .update({ payment_status: "refunded" })
+    .eq("id", b.id);
+  if (updErr) console.error("Failed to mark booking refunded:", updErr);
+
+  // Never posted to the ledger, or already reversed — nothing to do.
+  if (!b.journal_entry_id || b.refund_journal_entry_id) return;
+
+  try {
+    const refunded: number = charge.amount_refunded ?? 0;
+    if (refunded <= 0) return;
+
+    const origSub: number = b.subtotal_pence ?? 0;
+    const origFee: number = b.fee_pence ?? 0;
+    const origTotal: number = origSub + origFee;
+
+    let drSub = origSub;
+    let drFee = origFee;
+    if (origTotal > 0 && refunded !== origTotal) {
+      // Rare partial refund: split proportionally, remainder to subtotal.
+      drFee = Math.round((refunded * origFee) / origTotal);
+      drSub = refunded - drFee;
+    } else if (origTotal === 0) {
+      drSub = refunded;
+      drFee = 0;
+    }
+
+    const { data: accounts } = await getSupabase()
+      .from("chart_of_accounts")
+      .select("id, code")
+      .in("code", ["1010", "4100", "4120"]);
+    const suspense = accounts?.find((a: any) => a.code === "1010")?.id;
+    const diningIncome = accounts?.find((a: any) => a.code === "4100")?.id;
+    const feeCover = accounts?.find((a: any) => a.code === "4120")?.id;
+    if (!suspense || !diningIncome) throw new Error("Missing 1010/4100 accounts");
+    if (drFee > 0 && !feeCover) throw new Error("Missing 4120 account");
+
+    const { data: openPeriod } = await getSupabase()
+      .from("treasurer_periods")
+      .select("id")
+      .eq("status", "open")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    const today = new Date().toISOString().slice(0, 10);
+    const label = `Refund — ${b.contact_name ?? "Unknown"} — ${b.event_label ?? "Dining"}`;
+
+    const { data: entry, error: entryErr } = await getSupabase()
+      .from("journal_entries")
+      .insert({
+        entry_date: today,
+        description: label,
+        source_type: "booking_refund",
+        source_id: b.id,
+        period_id: openPeriod?.id ?? null,
+        created_by: null,
+      })
+      .select("id")
+      .single();
+    if (entryErr) throw entryErr;
+
+    const lines: any[] = [
+      { entry_id: entry.id, account_id: diningIncome, debit_pence: drSub, credit_pence: 0, description: label },
+      { entry_id: entry.id, account_id: suspense, debit_pence: 0, credit_pence: refunded, description: label },
+    ];
+    if (drFee > 0) {
+      lines.push({ entry_id: entry.id, account_id: feeCover, debit_pence: drFee, credit_pence: 0, description: label });
+    }
+
+    const { error: lineErr } = await getSupabase().from("journal_lines").insert(lines);
+    if (lineErr) {
+      await getSupabase().from("journal_entries").delete().eq("id", entry.id);
+      throw lineErr;
+    }
+
+    const { error: linkErr } = await getSupabase()
+      .from("bookings")
+      .update({ refund_journal_entry_id: entry.id })
+      .eq("id", b.id);
+    if (linkErr) console.error("Failed to link refund journal entry:", linkErr);
+  } catch (e) {
+    console.error("Refund ledger reversal failed (needs manual reversal):", b.id, e);
+  }
+}
+
 async function handleDuesSubscriptionUpdated(subscription: any) {
   const sub = await findDuesSubscriptionByStripeSub(subscription.id);
   if (!sub) return;
