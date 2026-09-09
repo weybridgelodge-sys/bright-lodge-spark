@@ -402,7 +402,7 @@ export default function PropertyRegisterTab({ canEdit }: { canEdit: boolean }) {
                 <tr className="border-t border-gold/30">
                   <td className="py-3 text-primary-foreground font-semibold" colSpan={3}>Total estimated value</td>
                   <td className="py-3 text-right text-gold font-semibold">{money(totalPence)}</td>
-                  <td className="py-3" colSpan={canEdit ? 4 : 3}></td>
+                  <td className="py-3" colSpan={canEdit ? 5 : 4}></td>
 
                 </tr>
               </tfoot>
