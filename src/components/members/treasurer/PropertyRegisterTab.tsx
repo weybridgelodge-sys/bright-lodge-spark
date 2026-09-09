@@ -371,6 +371,20 @@ export default function PropertyRegisterTab({ canEdit }: { canEdit: boolean }) {
                     <td className="py-2 pr-3 text-primary-foreground/80 whitespace-nowrap">{r.condition ?? "—"}</td>
                     <td className="py-2 pr-3 text-primary-foreground/80 whitespace-nowrap">{fmtDate(r.date_acquired)}</td>
                     <td className="py-2 pr-3 text-primary-foreground/70 whitespace-pre-wrap min-w-[220px]">{r.notes ?? ""}</td>
+                    <td className="py-2 pr-3 whitespace-nowrap">
+                      {imagesFor(r.id).length === 0 ? (
+                        <span className="text-primary-foreground/40">No photos</span>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => openViewer(r)}
+                          className="inline-flex items-center gap-1 text-gold hover:underline"
+                          aria-label={`View ${imagesFor(r.id).length} photos of ${r.item}`}
+                        >
+                          <Camera className="w-4 h-4" /> {imagesFor(r.id).length}
+                        </button>
+                      )}
+                    </td>
                     {canEdit && (
                       <td className="py-2 text-right whitespace-nowrap">
                         <Button variant="ghost" size="icon" className="text-primary-foreground/70 hover:text-gold" onClick={() => openEdit(r)} aria-label={`Edit ${r.item}`}>
