@@ -8,6 +8,7 @@ import NewMemberFeesTab from "@/components/members/treasurer/NewMemberFeesTab";
 import GeneralJournalTab from "@/components/members/treasurer/GeneralJournalTab";
 import IncomeExpenditureReport from "@/components/members/treasurer/IncomeExpenditureReport";
 import BalanceSheetReport from "@/components/members/treasurer/BalanceSheetReport";
+import TransactionDetailReport from "@/components/members/treasurer/TransactionDetailReport";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -684,6 +685,7 @@ function Inner() {
             {canEditTx && <TabsTrigger value="general-journal">General Journal</TabsTrigger>}
             {canEditTx && <TabsTrigger value="income-expenditure">Income &amp; Expenditure</TabsTrigger>}
             {canEditTx && <TabsTrigger value="balance-sheet">Balance Sheet</TabsTrigger>}
+            {canEditTx && <TabsTrigger value="transaction-detail">Transaction Detail</TabsTrigger>}
             <TabsTrigger value="reconciliation">Reconciliation</TabsTrigger>
           </TabsList>
           <TabsContent value="transactions" className="mt-4">
@@ -723,6 +725,11 @@ function Inner() {
           {canEditTx && (
             <TabsContent value="balance-sheet" className="mt-4">
               <BalanceSheetReport canEdit={canEditTx} />
+            </TabsContent>
+          )}
+          {canEditTx && (
+            <TabsContent value="transaction-detail" className="mt-4">
+              <TransactionDetailReport canEdit={canEditTx} />
             </TabsContent>
           )}
           <TabsContent value="reconciliation" className="mt-4">
