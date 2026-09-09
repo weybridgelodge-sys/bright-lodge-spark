@@ -4125,6 +4125,18 @@ export type Database = {
         }[]
       }
       get_admin_profiles: { Args: never; Returns: Json[] }
+      get_annual_return_members: {
+        Args: never
+        Returns: {
+          date_of_birth: string
+          first_name: string
+          full_name: string
+          id: string
+          last_name: string
+          status: Database["public"]["Enums"]["member_status"]
+          status_changed_at: string
+        }[]
+      }
       get_members_last_sign_in: {
         Args: never
         Returns: {
