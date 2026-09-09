@@ -11,7 +11,6 @@ import Index from "./pages/Index";
 
 // Lazy-load everything except the landing page to keep the initial bundle tiny.
 const NotFound = lazy(() => import("./pages/NotFound"));
-const TmpPropTest = lazy(() => import("./pages/TmpPropTest"));
 
 const Unsubscribe = lazy(() => import("./pages/Unsubscribe"));
 const SummonsRedirect = lazy(() => import("./pages/SummonsRedirect"));
@@ -181,7 +180,6 @@ const App = () => (
             <Route path="/data-protection-policy" element={<Navigate to="/data-protection" replace />} />
             
             <Route path="/masonic-website-links" element={<Navigate to="/masonic-links" replace />} />
-            <Route path="/tmp-prop-test" element={<TmpPropTest />} />
 
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
 
