@@ -1041,9 +1041,11 @@ export type Database = {
           attachment_name: string | null
           attachment_path: string | null
           attachment_size: number | null
+          bank_reference: string | null
           created_at: string
           created_by: string | null
           description: string
+          document_number: string | null
           entry_date: string
           id: string
           payee: string | null
@@ -1057,9 +1059,11 @@ export type Database = {
           attachment_name?: string | null
           attachment_path?: string | null
           attachment_size?: number | null
+          bank_reference?: string | null
           created_at?: string
           created_by?: string | null
           description: string
+          document_number?: string | null
           entry_date: string
           id?: string
           payee?: string | null
@@ -1073,9 +1077,11 @@ export type Database = {
           attachment_name?: string | null
           attachment_path?: string | null
           attachment_size?: number | null
+          bank_reference?: string | null
           created_at?: string
           created_by?: string | null
           description?: string
+          document_number?: string | null
           entry_date?: string
           id?: string
           payee?: string | null
