@@ -682,6 +682,7 @@ function Inner() {
             <TabsTrigger value="dining">Dining Reconciliation</TabsTrigger>
             {canEditTx && <TabsTrigger value="creditors">Creditors</TabsTrigger>}
             {canEditTx && <TabsTrigger value="direct-payment">Direct Payment</TabsTrigger>}
+            {canEditTx && <TabsTrigger value="direct-receipt">Direct Receipt</TabsTrigger>}
             {canEditTx && <TabsTrigger value="new-member-fees">New Member Fees</TabsTrigger>}
             {canEditTx && <TabsTrigger value="general-journal">General Journal</TabsTrigger>}
             {canEditTx && <TabsTrigger value="income-expenditure">Income &amp; Expenditure</TabsTrigger>}
