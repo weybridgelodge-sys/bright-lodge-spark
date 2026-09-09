@@ -6,6 +6,8 @@ import CreditorsTab from "@/components/members/treasurer/CreditorsTab";
 import DirectPaymentTab from "@/components/members/treasurer/DirectPaymentTab";
 import NewMemberFeesTab from "@/components/members/treasurer/NewMemberFeesTab";
 import GeneralJournalTab from "@/components/members/treasurer/GeneralJournalTab";
+import IncomeExpenditureReport from "@/components/members/treasurer/IncomeExpenditureReport";
+import BalanceSheetReport from "@/components/members/treasurer/BalanceSheetReport";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -680,6 +682,8 @@ function Inner() {
             {canEditTx && <TabsTrigger value="direct-payment">Direct Payment</TabsTrigger>}
             {canEditTx && <TabsTrigger value="new-member-fees">New Member Fees</TabsTrigger>}
             {canEditTx && <TabsTrigger value="general-journal">General Journal</TabsTrigger>}
+            {canEditTx && <TabsTrigger value="income-expenditure">Income &amp; Expenditure</TabsTrigger>}
+            {canEditTx && <TabsTrigger value="balance-sheet">Balance Sheet</TabsTrigger>}
             <TabsTrigger value="reconciliation">Reconciliation</TabsTrigger>
           </TabsList>
           <TabsContent value="transactions" className="mt-4">
@@ -709,6 +713,16 @@ function Inner() {
           {canEditTx && (
             <TabsContent value="general-journal" className="mt-4">
               <GeneralJournalTab canEdit={canEditTx} />
+            </TabsContent>
+          )}
+          {canEditTx && (
+            <TabsContent value="income-expenditure" className="mt-4">
+              <IncomeExpenditureReport canEdit={canEditTx} />
+            </TabsContent>
+          )}
+          {canEditTx && (
+            <TabsContent value="balance-sheet" className="mt-4">
+              <BalanceSheetReport canEdit={canEditTx} />
             </TabsContent>
           )}
           <TabsContent value="reconciliation" className="mt-4">
