@@ -677,6 +677,7 @@ function Inner() {
             <TabsTrigger value="dining">Dining Reconciliation</TabsTrigger>
             {canEditTx && <TabsTrigger value="creditors">Creditors</TabsTrigger>}
             {canEditTx && <TabsTrigger value="direct-payment">Direct Payment</TabsTrigger>}
+            {canEditTx && <TabsTrigger value="new-member-fees">New Member Fees</TabsTrigger>}
             <TabsTrigger value="reconciliation">Reconciliation</TabsTrigger>
           </TabsList>
           <TabsContent value="transactions" className="mt-4">
@@ -696,6 +697,11 @@ function Inner() {
           {canEditTx && (
             <TabsContent value="direct-payment" className="mt-4">
               <DirectPaymentTab canEdit={canEditTx} />
+            </TabsContent>
+          )}
+          {canEditTx && (
+            <TabsContent value="new-member-fees" className="mt-4">
+              <NewMemberFeesTab canEdit={canEditTx} />
             </TabsContent>
           )}
           <TabsContent value="reconciliation" className="mt-4">
