@@ -144,11 +144,33 @@ export default function TransactionDetailReport({ canEdit }: { canEdit: boolean 
         </div>
         <div className="space-y-1">
           <Label htmlFor="td-cf">From code</Label>
-          <Input id="td-cf" value={codeFrom} onChange={(e) => setCodeFrom(e.target.value)} placeholder="1000" />
+          <Select value={codeFrom} onValueChange={setCodeFrom}>
+            <SelectTrigger id="td-cf">
+              <SelectValue placeholder="From code" />
+            </SelectTrigger>
+            <SelectContent>
+              {accounts.map((a) => (
+                <SelectItem key={a.id} value={a.code}>
+                  {a.code} — {a.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
         <div className="space-y-1">
           <Label htmlFor="td-ct">To code</Label>
-          <Input id="td-ct" value={codeTo} onChange={(e) => setCodeTo(e.target.value)} placeholder="5999" />
+          <Select value={codeTo} onValueChange={setCodeTo}>
+            <SelectTrigger id="td-ct">
+              <SelectValue placeholder="To code" />
+            </SelectTrigger>
+            <SelectContent>
+              {accounts.map((a) => (
+                <SelectItem key={a.id} value={a.code}>
+                  {a.code} — {a.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
