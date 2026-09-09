@@ -7,7 +7,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
-import { Loader2, Plus, Pencil, Trash2, FileDown } from "lucide-react";
+import { Loader2, Plus, Pencil, Trash2, FileDown, Camera, X, ChevronLeft, ChevronRight, Upload } from "lucide-react";
+import { toUploadBody } from "@/lib/nativeUpload";
 import autoTable from "jspdf-autotable";
 import { reportPdfDoc, INK, GOLD, NAVY } from "@/lib/treasurer/reports";
 import { saveJsPdf } from "@/lib/nativeDownload";
@@ -22,6 +23,14 @@ const fmtDate = (d: string | null) => {
   const date = new Date(d);
   if (Number.isNaN(date.getTime())) return d;
   return date.toLocaleDateString("en-GB");
+};
+
+type PropertyImage = {
+  id: string;
+  property_item_id: string;
+  storage_path: string;
+  file_name: string;
+  file_size: number | null;
 };
 
 type Item = {
@@ -102,6 +111,12 @@ export default function PropertyRegisterTab({ canEdit }: { canEdit: boolean }) {
   const [location, setLocation] = useState("");
   const [notes, setNotes] = useState("");
 
+  const [images, setImages] = useState<PropertyImage[]>([]);
+  const [uploading, setUploading] = useState(false);
+  const [viewerItem, setViewerItem] = useState<Item | null>(null);
+  const [viewerIndex, setViewerIndex] = useState(0);
+  const [signedUrls, setSignedUrls] = useState<Record<string, string>>({});
+
   const load = useCallback(async () => {
     setLoading(true);
     const { data, error } = await supabase
@@ -113,7 +128,102 @@ export default function PropertyRegisterTab({ canEdit }: { canEdit: boolean }) {
     setLoading(false);
   }, []);
 
-  useEffect(() => { load(); }, [load]);
+  const loadImages = useCallback(async () => {
+    const { data, error } = await supabase
+      .from("lodge_property_images" as any)
+      .select("id,property_item_id,storage_path,file_name,file_size")
+      .order("uploaded_at", { ascending: true });
+    if (error) {
+      toast({ title: "Could not load photos", description: error.message, variant: "destructive" });
+      return;
+    }
+    setImages((data as unknown as PropertyImage[]) ?? []);
+  }, []);
+
+  useEffect(() => { load(); loadImages(); }, [load, loadImages]);
+
+  const imagesFor = useCallback(
+    (itemId: string) => images.filter((i) => i.property_item_id === itemId),
+    [images],
+  );
+
+  const signUrls = useCallback(async (list: PropertyImage[]) => {
+    const missing = list.filter((i) => !signedUrls[i.storage_path]);
+    if (missing.length === 0) return;
+    const entries: Record<string, string> = {};
+    await Promise.all(
+      missing.map(async (i) => {
+        const { data } = await supabase.storage
+          .from("lodge-property-images")
+          .createSignedUrl(i.storage_path, 3600);
+        if (data?.signedUrl) entries[i.storage_path] = data.signedUrl;
+      }),
+    );
+    if (Object.keys(entries).length) setSignedUrls((p) => ({ ...p, ...entries }));
+  }, [signedUrls]);
+
+  const openViewer = async (r: Item) => {
+    const list = imagesFor(r.id);
+    if (list.length === 0) return;
+    setViewerItem(r);
+    setViewerIndex(0);
+    await signUrls(list);
+  };
+
+  const uploadFiles = async (files: FileList | null) => {
+    if (!files || !editingId) return;
+    setUploading(true);
+    const { data: auth } = await supabase.auth.getUser();
+    for (const file of Array.from(files)) {
+      if (file.size > 10 * 1024 * 1024) {
+        toast({ title: `${file.name} is too large`, description: "Maximum photo size is 10MB.", variant: "destructive" });
+        continue;
+      }
+      const ext = file.name.split(".").pop() ?? "jpg";
+      const path = `${editingId}/${crypto.randomUUID()}.${ext}`;
+      const body = await toUploadBody(file);
+      const { error: upErr } = await supabase.storage
+        .from("lodge-property-images")
+        .upload(path, body, { contentType: file.type || "image/jpeg" });
+      if (upErr) {
+        toast({ title: "Upload failed", description: upErr.message, variant: "destructive" });
+        continue;
+      }
+      const { error: rowErr } = await supabase.from("lodge_property_images" as any).insert({
+        property_item_id: editingId,
+        storage_path: path,
+        file_name: file.name,
+        file_size: file.size,
+        uploaded_by: auth?.user?.id ?? null,
+      });
+      if (rowErr) {
+        await supabase.storage.from("lodge-property-images").remove([path]);
+        toast({ title: "Could not save photo", description: rowErr.message, variant: "destructive" });
+      }
+    }
+    setUploading(false);
+    await loadImages();
+  };
+
+  const deleteImage = async (img: PropertyImage) => {
+    const { error: sErr } = await supabase.storage.from("lodge-property-images").remove([img.storage_path]);
+    if (sErr) {
+      toast({ title: "Could not delete photo file", description: sErr.message, variant: "destructive" });
+      return;
+    }
+    const { error } = await supabase.from("lodge_property_images" as any).delete().eq("id", img.id);
+    if (error) {
+      toast({ title: "Could not delete photo", description: error.message, variant: "destructive" });
+      return;
+    }
+    setSignedUrls((p) => { const n = { ...p }; delete n[img.storage_path]; return n; });
+    toast({ title: "Photo deleted" });
+    await loadImages();
+  };
+
+  useEffect(() => {
+    if (open && editingId) signUrls(imagesFor(editingId));
+  }, [open, editingId, images, imagesFor, signUrls]);
 
   const totalPence = useMemo(() => rows.reduce((s, r) => s + (r.value_pence ?? 0), 0), [rows]);
 
@@ -243,13 +353,14 @@ export default function PropertyRegisterTab({ canEdit }: { canEdit: boolean }) {
                   <th className="py-2 pr-3 whitespace-nowrap">Condition</th>
                   <th className="py-2 pr-3 whitespace-nowrap">Date acquired</th>
                   <th className="py-2 pr-3 min-w-[220px]">Notes</th>
+                  <th className="py-2 pr-3 whitespace-nowrap">Photos</th>
                   {canEdit && <th className="py-2 text-right">Actions</th>}
                 </tr>
               </thead>
               <tbody>
                 {rows.length === 0 ? (
                   <tr>
-                    <td colSpan={canEdit ? 8 : 7} className="py-3 text-primary-foreground/60">No property recorded yet.</td>
+                    <td colSpan={canEdit ? 9 : 8} className="py-3 text-primary-foreground/60">No property recorded yet.</td>
                   </tr>
                 ) : rows.map((r) => (
                   <tr key={r.id} className="border-b border-gold/10 align-top">
@@ -260,6 +371,20 @@ export default function PropertyRegisterTab({ canEdit }: { canEdit: boolean }) {
                     <td className="py-2 pr-3 text-primary-foreground/80 whitespace-nowrap">{r.condition ?? "—"}</td>
                     <td className="py-2 pr-3 text-primary-foreground/80 whitespace-nowrap">{fmtDate(r.date_acquired)}</td>
                     <td className="py-2 pr-3 text-primary-foreground/70 whitespace-pre-wrap min-w-[220px]">{r.notes ?? ""}</td>
+                    <td className="py-2 pr-3 whitespace-nowrap">
+                      {imagesFor(r.id).length === 0 ? (
+                        <span className="text-primary-foreground/40">No photos</span>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => openViewer(r)}
+                          className="inline-flex items-center gap-1 text-gold hover:underline"
+                          aria-label={`View ${imagesFor(r.id).length} photos of ${r.item}`}
+                        >
+                          <Camera className="w-4 h-4" /> {imagesFor(r.id).length}
+                        </button>
+                      )}
+                    </td>
                     {canEdit && (
                       <td className="py-2 text-right whitespace-nowrap">
                         <Button variant="ghost" size="icon" className="text-primary-foreground/70 hover:text-gold" onClick={() => openEdit(r)} aria-label={`Edit ${r.item}`}>
@@ -277,7 +402,7 @@ export default function PropertyRegisterTab({ canEdit }: { canEdit: boolean }) {
                 <tr className="border-t border-gold/30">
                   <td className="py-3 text-primary-foreground font-semibold" colSpan={3}>Total estimated value</td>
                   <td className="py-3 text-right text-gold font-semibold">{money(totalPence)}</td>
-                  <td className="py-3" colSpan={canEdit ? 4 : 3}></td>
+                  <td className="py-3" colSpan={canEdit ? 5 : 4}></td>
 
                 </tr>
               </tfoot>
@@ -327,6 +452,46 @@ export default function PropertyRegisterTab({ canEdit }: { canEdit: boolean }) {
               <Label className="text-primary-foreground">Notes</Label>
               <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Optional — condition detail, provenance, insurance notes" />
             </div>
+            <div>
+              <Label className="text-primary-foreground">Photos</Label>
+              {editingId ? (
+                <>
+                  <div className="mt-1 flex items-center gap-2">
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      disabled={uploading}
+                      className="text-primary-foreground"
+                      onChange={(e) => { uploadFiles(e.target.files); e.currentTarget.value = ""; }}
+                    />
+                    {uploading ? <Loader2 className="w-4 h-4 animate-spin text-gold" /> : <Upload className="w-4 h-4 text-gold" />}
+                  </div>
+                  <p className="text-xs text-primary-foreground/60 mt-1">Up to 10MB per photo. Useful for insurance records.</p>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {imagesFor(editingId).map((img) => (
+                      <div key={img.id} className="relative">
+                        <img
+                          src={signedUrls[img.storage_path]}
+                          alt={img.file_name}
+                          className="w-20 h-20 object-cover rounded-sm border border-gold/30"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => deleteImage(img)}
+                          aria-label={`Delete photo ${img.file_name}`}
+                          className="absolute -top-2 -right-2 rounded-full bg-destructive text-destructive-foreground w-5 h-5 flex items-center justify-center"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <p className="text-xs text-primary-foreground/60 mt-1">Save the item first, then reopen it to add photos.</p>
+              )}
+            </div>
           </div>
           <DialogFooter>
             <Button variant="ghost" onClick={() => setOpen(false)}>Cancel</Button>
@@ -334,6 +499,49 @@ export default function PropertyRegisterTab({ canEdit }: { canEdit: boolean }) {
               {saving && <Loader2 className="w-4 h-4 mr-1 animate-spin" />}{editingId ? "Save changes" : "Add item"}
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!viewerItem} onOpenChange={(o) => { if (!o) setViewerItem(null); }}>
+        <DialogContent className="bg-navy-light border-gold/30 max-w-3xl max-h-[90vh] overflow-y-auto p-4 sm:p-6">
+          <DialogHeader>
+            <DialogTitle className="font-serif text-gold">{viewerItem?.item} — photos</DialogTitle>
+          </DialogHeader>
+          {viewerItem && (() => {
+            const list = imagesFor(viewerItem.id);
+            const current = list[Math.min(viewerIndex, list.length - 1)];
+            if (!current) return <p className="text-primary-foreground/70">No photos.</p>;
+            return (
+              <div className="space-y-3">
+                <img
+                  src={signedUrls[current.storage_path]}
+                  alt={current.file_name}
+                  className="w-full max-h-[60vh] object-contain rounded-sm border border-gold/20 bg-navy"
+                />
+                <div className="flex items-center justify-between">
+                  <Button
+                    variant="ghost"
+                    className="text-primary-foreground/80 hover:text-gold"
+                    disabled={list.length < 2}
+                    onClick={() => setViewerIndex((i) => (i - 1 + list.length) % list.length)}
+                  >
+                    <ChevronLeft className="w-4 h-4 mr-1" /> Previous
+                  </Button>
+                  <span className="text-primary-foreground/70 text-sm">
+                    {Math.min(viewerIndex, list.length - 1) + 1} of {list.length}
+                  </span>
+                  <Button
+                    variant="ghost"
+                    className="text-primary-foreground/80 hover:text-gold"
+                    disabled={list.length < 2}
+                    onClick={() => setViewerIndex((i) => (i + 1) % list.length)}
+                  >
+                    Next <ChevronRight className="w-4 h-4 ml-1" />
+                  </Button>
+                </div>
+              </div>
+            );
+          })()}
         </DialogContent>
       </Dialog>
     </div>
