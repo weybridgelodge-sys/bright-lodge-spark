@@ -3,6 +3,7 @@ import MembersLayout from "@/components/members/MembersLayout";
 import ProtectedRoute from "@/components/members/ProtectedRoute";
 import DiningReconciliationTab from "@/components/members/treasurer/DiningReconciliationTab";
 import CreditorsTab from "@/components/members/treasurer/CreditorsTab";
+import DirectPaymentTab from "@/components/members/treasurer/DirectPaymentTab";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -674,6 +675,7 @@ function Inner() {
             <TabsTrigger value="transactions">Transaction Register</TabsTrigger>
             <TabsTrigger value="dining">Dining Reconciliation</TabsTrigger>
             {canEditTx && <TabsTrigger value="creditors">Creditors</TabsTrigger>}
+            {canEditTx && <TabsTrigger value="direct-payment">Direct Payment</TabsTrigger>}
             <TabsTrigger value="reconciliation">Reconciliation</TabsTrigger>
           </TabsList>
           <TabsContent value="transactions" className="mt-4">
@@ -688,6 +690,11 @@ function Inner() {
           {canEditTx && (
             <TabsContent value="creditors" className="mt-4">
               <CreditorsTab canEdit={canEditTx} />
+            </TabsContent>
+          )}
+          {canEditTx && (
+            <TabsContent value="direct-payment" className="mt-4">
+              <DirectPaymentTab canEdit={canEditTx} />
             </TabsContent>
           )}
           <TabsContent value="reconciliation" className="mt-4">
