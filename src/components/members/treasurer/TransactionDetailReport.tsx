@@ -106,6 +106,27 @@ export default function TransactionDetailReport({ canEdit }: { canEdit: boolean 
     [lines]
   );
 
+  const setEntryReconciled = (entryId: string, value: boolean) =>
+    setLines((prev) => prev.map((l) => (l.entryId === entryId ? { ...l, reconciled: value } : l)));
+
+  const toggleReconciled = async (entryId: string, current: boolean) => {
+    const next = !current;
+    setEntryReconciled(entryId, next);
+    const { error } = await supabase
+      .from("journal_entries" as any)
+      .update({ reconciled: next })
+      .eq("id", entryId)
+      .select("id");
+    if (error) {
+      setEntryReconciled(entryId, current);
+      toast({
+        title: "Can't change reconciled status — this entry's period is locked",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
   const exportCsv = () => {
     const header = ["Date", "Account Code", "Account Name", "Description", "Debit (£)", "Credit (£)"];
     const body = lines.map((l) => [
