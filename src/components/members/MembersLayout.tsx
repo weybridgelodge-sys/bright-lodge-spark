@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { LayoutDashboard, Users, FileText, User as UserIcon, ShieldCheck, LogOut, Shield, CalendarDays, BookOpen, Crown, CalendarPlus, BarChart3, GraduationCap, Utensils, Mail, HeartHandshake, Sprout, Hexagon, Banknote, Menu } from "lucide-react";
