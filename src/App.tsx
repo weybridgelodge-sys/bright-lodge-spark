@@ -11,6 +11,7 @@ import Index from "./pages/Index";
 
 // Lazy-load everything except the landing page to keep the initial bundle tiny.
 const NotFound = lazy(() => import("./pages/NotFound"));
+
 const Unsubscribe = lazy(() => import("./pages/Unsubscribe"));
 const SummonsRedirect = lazy(() => import("./pages/SummonsRedirect"));
 const WhatIsFreemasonry = lazy(() => import("./pages/WhatIsFreemasonry"));
@@ -181,6 +182,7 @@ const App = () => (
             <Route path="/masonic-website-links" element={<Navigate to="/masonic-links" replace />} />
 
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>
