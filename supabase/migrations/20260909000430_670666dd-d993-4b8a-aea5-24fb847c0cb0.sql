@@ -1,0 +1,1 @@
+ALTER FUNCTION public.get_admin_profiles() SECURITY DEFINER;
