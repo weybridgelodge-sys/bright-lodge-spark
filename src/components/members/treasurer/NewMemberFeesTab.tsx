@@ -247,17 +247,17 @@ export default function NewMemberFeesTab({ canEdit }: { canEdit: boolean }) {
                     </SelectContent>
                   </Select>
                   <p className="text-primary-foreground/50 text-xs mt-1">
-                    UGLE Form P rate — confirm this hasn&apos;t changed before relying on the default.
+                    UGLE Form P &amp; PGL registration rates — confirm these haven&apos;t changed before relying on the defaults.
                   </p>
                 </div>
                 <div>
                   <Label>UGLE registration fee (£)</Label>
                   <Input type="number" step="0.01" min="0" value={ugleFee} onChange={(e) => setUgleFee(e.target.value)} disabled={!canEdit} />
                 </div>
-              </div>
-              <div>
-                <Label>PGL registration fee (£)</Label>
-                <Input type="number" step="0.01" min="0" value={pglFee} onChange={(e) => setPglFee(e.target.value)} disabled={!canEdit} />
+                <div>
+                  <Label>PGL registration fee (£)</Label>
+                  <Input type="number" step="0.01" min="0" value={pglFee} onChange={(e) => setPglFee(e.target.value)} disabled={!canEdit} />
+                </div>
               </div>
               <div className="sm:col-span-2">
                 <Label>Bank reference</Label>
