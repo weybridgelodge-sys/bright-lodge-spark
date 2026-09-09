@@ -1,4 +1,3 @@
-import TmpNavTest from "./pages/TmpNavTest";
 import { lazy, Suspense } from "react";
 import { Capacitor } from "@capacitor/core";
 import DeferredToasters from "@/components/DeferredToasters";
@@ -87,7 +86,6 @@ const App = () => (
         <ScrollToTopButton />
         <Suspense fallback={null}>
           <Routes>
-          <Route path="/tmp-nav-test" element={<TmpNavTest />} />
             <Route path="/" element={<HomeRoute />} />
             <Route path="/what-is-freemasonry" element={<WhatIsFreemasonry />} />
             <Route path="/freemasonry-and-charity" element={<FreemasonryCharity />} />
