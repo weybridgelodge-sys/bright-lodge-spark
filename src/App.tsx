@@ -11,6 +11,8 @@ import Index from "./pages/Index";
 
 // Lazy-load everything except the landing page to keep the initial bundle tiny.
 const NotFound = lazy(() => import("./pages/NotFound"));
+const TmpPropTest = lazy(() => import("./pages/TmpPropTest"));
+
 const Unsubscribe = lazy(() => import("./pages/Unsubscribe"));
 const SummonsRedirect = lazy(() => import("./pages/SummonsRedirect"));
 const WhatIsFreemasonry = lazy(() => import("./pages/WhatIsFreemasonry"));
