@@ -680,6 +680,8 @@ function Inner() {
             {canEditTx && <TabsTrigger value="direct-payment">Direct Payment</TabsTrigger>}
             {canEditTx && <TabsTrigger value="new-member-fees">New Member Fees</TabsTrigger>}
             {canEditTx && <TabsTrigger value="general-journal">General Journal</TabsTrigger>}
+            {canEditTx && <TabsTrigger value="income-expenditure">Income &amp; Expenditure</TabsTrigger>}
+            {canEditTx && <TabsTrigger value="balance-sheet">Balance Sheet</TabsTrigger>}
             <TabsTrigger value="reconciliation">Reconciliation</TabsTrigger>
           </TabsList>
           <TabsContent value="transactions" className="mt-4">
