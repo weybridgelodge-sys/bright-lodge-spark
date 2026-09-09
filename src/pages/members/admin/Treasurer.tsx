@@ -4,6 +4,7 @@ import ProtectedRoute from "@/components/members/ProtectedRoute";
 import DiningReconciliationTab from "@/components/members/treasurer/DiningReconciliationTab";
 import CreditorsTab from "@/components/members/treasurer/CreditorsTab";
 import DirectPaymentTab from "@/components/members/treasurer/DirectPaymentTab";
+import DirectReceiptTab from "@/components/members/treasurer/DirectReceiptTab";
 import NewMemberFeesTab from "@/components/members/treasurer/NewMemberFeesTab";
 import GeneralJournalTab from "@/components/members/treasurer/GeneralJournalTab";
 import IncomeExpenditureReport from "@/components/members/treasurer/IncomeExpenditureReport";
