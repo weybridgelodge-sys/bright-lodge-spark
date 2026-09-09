@@ -7,7 +7,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
-import { Loader2, Plus, Pencil, Trash2 } from "lucide-react";
+import { Loader2, Plus, Pencil, Trash2, FileDown } from "lucide-react";
+import autoTable from "jspdf-autotable";
+import { reportPdfDoc, INK, GOLD, NAVY } from "@/lib/treasurer/reports";
+import { saveJsPdf } from "@/lib/nativeDownload";
 
 const CONDITIONS = ["Excellent", "Good", "Fair", "Poor", "Needs Repair/Replacement"] as const;
 
@@ -141,6 +144,52 @@ export default function PropertyRegisterTab({ canEdit }: { canEdit: boolean }) {
     load();
   };
 
+  const exportPdf = async () => {
+    const { doc, pageW, margin } = await reportPdfDoc(
+      "Lodge Property Register",
+      `Stock check sheet — ${rows.length} line${rows.length === 1 ? "" : "s"}`,
+    );
+    autoTable(doc, {
+      startY: 135,
+      head: [["Item", "Count", "Location", "Value", "Condition", "Date acquired", "Notes", "Checked / present?"]],
+      body: rows.map((r) => [
+        r.item,
+        String(r.count ?? 0),
+        r.location ?? "—",
+        money(r.value_pence ?? 0),
+        r.condition ?? "—",
+        fmtDate(r.date_acquired),
+        r.notes ?? "",
+        "",
+      ]),
+      foot: [["Total estimated value", "", "", money(totalPence), "", "", "", ""]],
+      margin: { left: margin, right: margin, bottom: 50 },
+      styles: { font: "helvetica", fontSize: 8, cellPadding: 4, textColor: INK, lineColor: [220, 215, 200], lineWidth: 0.4, overflow: "linebreak" },
+      headStyles: { fillColor: GOLD, textColor: NAVY, fontStyle: "bold" },
+      footStyles: { fillColor: [250, 247, 238], textColor: INK, fontStyle: "bold" },
+      alternateRowStyles: { fillColor: [250, 247, 238] },
+      theme: "grid",
+      columnStyles: {
+        0: { cellWidth: 105 },
+        1: { cellWidth: 34, halign: "right" },
+        2: { cellWidth: 70 },
+        3: { cellWidth: 55, halign: "right" },
+        4: { cellWidth: 60 },
+        5: { cellWidth: 62 },
+        6: { cellWidth: 80 },
+        7: { cellWidth: 50 },
+      },
+      rowPageBreak: "avoid",
+    });
+    const y = (doc as any).lastAutoTable.finalY + 24;
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.setTextColor(...INK);
+    doc.text("Checked by: ______________________________", margin, y);
+    doc.text(`Date: ______________________`, pageW - margin - 160, y);
+    await saveJsPdf(doc, `lodge-property-register-${new Date().toISOString().slice(0, 10)}.pdf`);
+  };
+
   return (
     <div className="space-y-4">
       <section className="rounded-lg border border-gold/20 bg-primary-foreground/5 p-4">
@@ -151,11 +200,21 @@ export default function PropertyRegisterTab({ canEdit }: { canEdit: boolean }) {
               Audit of lodge property with estimated values — useful when discussing insurance cover with the Province.
             </p>
           </div>
-          {canEdit && (
-            <Button className="bg-gold text-navy hover:bg-gold/90" onClick={openNew}>
-              <Plus className="w-4 h-4 mr-1" /> New item
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant="outline"
+              className="border-gold/40 text-gold hover:bg-gold/10 hover:text-gold"
+              onClick={exportPdf}
+              disabled={loading || rows.length === 0}
+            >
+              <FileDown className="w-4 h-4 mr-1" /> Download PDF
             </Button>
-          )}
+            {canEdit && (
+              <Button className="bg-gold text-navy hover:bg-gold/90" onClick={openNew}>
+                <Plus className="w-4 h-4 mr-1" /> New item
+              </Button>
+            )}
+          </div>
         </div>
 
         {loading ? (
@@ -221,25 +280,25 @@ export default function PropertyRegisterTab({ canEdit }: { canEdit: boolean }) {
           </DialogHeader>
           <div className="grid gap-3">
             <div>
-              <Label>Item</Label>
+              <Label className="text-primary-foreground">Item</Label>
               <Input value={item} onChange={(e) => setItem(e.target.value)} placeholder="e.g. Master's chair" />
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
               <div>
-                <Label>Count</Label>
+                <Label className="text-primary-foreground">Count</Label>
                 <Input type="number" min="0" step="1" value={count} onChange={(e) => setCount(e.target.value)} />
               </div>
               <div>
-                <Label>Value (£)</Label>
+                <Label className="text-primary-foreground">Value (£)</Label>
                 <Input type="number" min="0" step="0.01" value={value} onChange={(e) => setValue(e.target.value)} />
               </div>
             </div>
             <div>
-              <Label>Location</Label>
+              <Label className="text-primary-foreground">Location</Label>
               <Input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="e.g. Lodge Room, GMC store, Secretary's custody" />
             </div>
             <div>
-              <Label>Condition</Label>
+              <Label className="text-primary-foreground">Condition</Label>
               <Select value={condition} onValueChange={setCondition}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
@@ -248,11 +307,11 @@ export default function PropertyRegisterTab({ canEdit }: { canEdit: boolean }) {
               </Select>
             </div>
             <div>
-              <Label>Date acquired</Label>
+              <Label className="text-primary-foreground">Date acquired</Label>
               <Input type="date" value={dateAcquired} onChange={(e) => setDateAcquired(e.target.value)} />
             </div>
             <div>
-              <Label>Notes</Label>
+              <Label className="text-primary-foreground">Notes</Label>
               <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Optional — condition detail, provenance, insurance notes" />
             </div>
           </div>
