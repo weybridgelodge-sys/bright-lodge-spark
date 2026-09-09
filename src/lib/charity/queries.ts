@@ -46,6 +46,9 @@ export type Collection = {
   costs: number;
   net_amount: number;
   notes: string | null;
+  banked_date: string | null;
+  banked_by: string | null;
+  journal_entry_id: string | null;
 };
 
 export type Donation = {
