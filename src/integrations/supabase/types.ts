@@ -4124,6 +4124,7 @@ export type Database = {
           waitlisted_seats: number
         }[]
       }
+      get_admin_profiles: { Args: never; Returns: Json[] }
       get_members_last_sign_in: {
         Args: never
         Returns: {
