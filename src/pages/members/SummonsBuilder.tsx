@@ -169,12 +169,42 @@ export default function SummonsBuilder() {
         </header>
 
         <Tabs value={tab} onValueChange={setTab} className="space-y-4">
-          <TabsList className="bg-navy-light/60 border border-gold/20 h-auto flex-wrap justify-start sm:flex-nowrap">
-            <TabsTrigger value="new">{editingId ? "Edit Summons" : "New Summons"}</TabsTrigger>
-            <TabsTrigger value="preview">Print Preview</TabsTrigger>
-            <TabsTrigger value="template">Lodge Template</TabsTrigger>
-            <TabsTrigger value="officers">Officer Roll</TabsTrigger>
-            <TabsTrigger value="history">History</TabsTrigger>
+          <TabsList className="flex flex-col w-full h-auto items-stretch gap-1 bg-navy p-2 rounded-sm border border-gold/20 mb-4">
+            <TabsTrigger
+              value="new"
+              className="w-full flex items-center justify-start gap-3 px-4 py-3 rounded-sm text-sm font-sans text-primary-foreground/80 transition-colors hover:text-gold hover:bg-navy-light/40 data-[state=active]:bg-gold/15 data-[state=active]:text-gold data-[state=active]:shadow-none"
+            >
+              <FilePlus className="w-4 h-4 shrink-0" />
+              <span>{editingId ? "Edit Summons" : "New Summons"}</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="preview"
+              className="w-full flex items-center justify-start gap-3 px-4 py-3 rounded-sm text-sm font-sans text-primary-foreground/80 transition-colors hover:text-gold hover:bg-navy-light/40 data-[state=active]:bg-gold/15 data-[state=active]:text-gold data-[state=active]:shadow-none"
+            >
+              <Printer className="w-4 h-4 shrink-0" />
+              <span>Print Preview</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="template"
+              className="w-full flex items-center justify-start gap-3 px-4 py-3 rounded-sm text-sm font-sans text-primary-foreground/80 transition-colors hover:text-gold hover:bg-navy-light/40 data-[state=active]:bg-gold/15 data-[state=active]:text-gold data-[state=active]:shadow-none"
+            >
+              <Building2 className="w-4 h-4 shrink-0" />
+              <span>Lodge Template</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="officers"
+              className="w-full flex items-center justify-start gap-3 px-4 py-3 rounded-sm text-sm font-sans text-primary-foreground/80 transition-colors hover:text-gold hover:bg-navy-light/40 data-[state=active]:bg-gold/15 data-[state=active]:text-gold data-[state=active]:shadow-none"
+            >
+              <Users className="w-4 h-4 shrink-0" />
+              <span>Officer Roll</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="history"
+              className="w-full flex items-center justify-start gap-3 px-4 py-3 rounded-sm text-sm font-sans text-primary-foreground/80 transition-colors hover:text-gold hover:bg-navy-light/40 data-[state=active]:bg-gold/15 data-[state=active]:text-gold data-[state=active]:shadow-none"
+            >
+              <History className="w-4 h-4 shrink-0" />
+              <span>History</span>
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="new"><NewSummonsTab editingId={editingId} onDoneEditing={() => setEditingId(null)} /></TabsContent>
