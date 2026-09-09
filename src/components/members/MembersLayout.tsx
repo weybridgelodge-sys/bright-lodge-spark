@@ -19,27 +19,9 @@ export default function MembersLayout({ children }: { children: React.ReactNode 
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   useEffect(() => {
-    const root = document.documentElement;
-    const updateVisualViewportBottom = () => {
-      const viewport = window.visualViewport;
-      const bottomInset = viewport
-        ? Math.max(0, root.clientHeight - viewport.height - viewport.offsetTop)
-        : 0;
-      root.style.setProperty("--portal-visual-viewport-bottom", `${bottomInset}px`);
-    };
-
-    root.classList.add("portal-canvas");
-    updateVisualViewportBottom();
-    window.visualViewport?.addEventListener("resize", updateVisualViewportBottom);
-    window.visualViewport?.addEventListener("scroll", updateVisualViewportBottom);
-    window.addEventListener("resize", updateVisualViewportBottom);
-
+    document.documentElement.classList.add("portal-canvas");
     return () => {
-      root.classList.remove("portal-canvas");
-      root.style.removeProperty("--portal-visual-viewport-bottom");
-      window.visualViewport?.removeEventListener("resize", updateVisualViewportBottom);
-      window.visualViewport?.removeEventListener("scroll", updateVisualViewportBottom);
-      window.removeEventListener("resize", updateVisualViewportBottom);
+      document.documentElement.classList.remove("portal-canvas");
     };
   }, []);
 
@@ -201,9 +183,8 @@ export default function MembersLayout({ children }: { children: React.ReactNode 
 
       {/* Mobile Bottom Sticky Navigation Strip — Visible below 1024px */}
       <div
-        className="lg:hidden fixed left-0 right-0 min-h-[4.5rem] bg-navy-dark border-t border-gold/20 flex items-stretch justify-around z-50"
+        className="lg:hidden fixed bottom-0 left-0 right-0 min-h-[4.5rem] bg-navy-dark border-t border-gold/20 flex items-stretch justify-around z-50"
         style={{
-          bottom: "var(--portal-visual-viewport-bottom, 0px)",
           paddingTop: "0.5rem",
           paddingBottom: "max(0.5rem, env(safe-area-inset-bottom))",
         }}
