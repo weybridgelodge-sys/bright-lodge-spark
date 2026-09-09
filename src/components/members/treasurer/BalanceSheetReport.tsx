@@ -5,10 +5,10 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
 import { Download, Loader2 } from "lucide-react";
-import { masonicYearBounds } from "@/lib/charity/queries";
 import {
-  acct, fetchAccounts, fetchMovements, fmtDate, masonicYearContaining, money,
-  reportPdfDoc, reportSection, reportTable, shiftBackOneYear, signedBalance, type Account,
+  acct, fetchAccounts, fetchMovements, fmtDate, money,
+  reportPdfDoc, reportSection, reportTable, shiftBackOneYear, signedBalance,
+  treasurerYearBounds, treasurerYearContaining, type Account,
 } from "@/lib/treasurer/reports";
 
 type Row = { code: string; name: string; current: number; prior: number };
