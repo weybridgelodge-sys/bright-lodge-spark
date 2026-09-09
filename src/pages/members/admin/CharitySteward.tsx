@@ -13,7 +13,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
-import { Loader2, Plus, Pencil, Trash2, Download, Save, ExternalLink, HandCoins, HeartHandshake, BookOpen, Trophy, FileBarChart, Rss } from "lucide-react";
+import { Loader2, Plus, Pencil, Trash2, Download, Save, ExternalLink, HandCoins, HeartHandshake, BookOpen, Trophy, FileBarChart, Rss, BookCheck } from "lucide-react";
 import {
   fetchCharities, fetchCollections, fetchDonations, fetchFestivalSettings,
   COLLECTION_TYPE_LABEL, PAYMENT_METHOD_LABEL, AUTHORISED_LABEL,
@@ -22,6 +22,7 @@ import {
   currentMasonicYear, masonicYearBounds, inYear, reliefChestBalance, gbp,
   isFestivalDonation,
 } from "@/lib/charity/queries";
+import { postCollectionToLedger, postDonationToLedger } from "@/lib/charity/posting";
 import { buildCharityAnnualReportPdf } from "@/lib/charity/annualReportPdf";
 import { buildCharityPeriodicReportPdf } from "@/lib/charity/periodicReportPdf";
 import { saveJsPdf } from "@/lib/nativeDownload";
@@ -51,11 +52,23 @@ function Stat({ label, value }: { label: string; value: React.ReactNode }) {
 // ─────────────────────────────────────────────────────────────────────────────
 // Collections tab
 // ─────────────────────────────────────────────────────────────────────────────
-function CollectionsTab({ collections, donations, canEdit, onChange }: {
-  collections: Collection[]; donations: Donation[]; canEdit: boolean; onChange: () => void;
+function CollectionsTab({ collections, donations, canEdit, canPost, onChange }: {
+  collections: Collection[]; donations: Donation[]; canEdit: boolean; canPost: boolean; onChange: () => void;
 }) {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Collection | null>(null);
+  const [posting, setPosting] = useState<string | null>(null);
+
+  const post = async (c: Collection) => {
+    setPosting(c.id);
+    try {
+      await postCollectionToLedger(c, COLLECTION_TYPE_LABEL[c.collection_type]);
+      toast({ title: "Posted to accounts" });
+      onChange();
+    } catch (e: any) {
+      toast({ title: "Could not post to accounts", description: e.message, variant: "destructive" });
+    } finally { setPosting(null); }
+  };
   const year = currentMasonicYear();
   const bounds = masonicYearBounds(year);
 
@@ -122,13 +135,15 @@ function CollectionsTab({ collections, donations, canEdit, onChange }: {
                 <th className="px-4 py-2 text-right">Gross</th>
                 <th className="px-4 py-2 text-right">Costs</th>
                 <th className="px-4 py-2 text-right">Net</th>
+                <th className="px-4 py-2">Banked</th>
                 <th className="px-4 py-2">Notes</th>
+                {canPost && <th className="px-4 py-2">Accounts</th>}
                 {canEdit && <th className="px-4 py-2 w-20"></th>}
               </tr>
             </thead>
             <tbody>
               {collections.length === 0 && (
-                <tr><td colSpan={canEdit ? 7 : 6} className="px-4 py-6 text-center text-primary-foreground/50">No collections recorded.</td></tr>
+                <tr><td colSpan={(canEdit ? 8 : 7) + (canPost ? 1 : 0)} className="px-4 py-6 text-center text-primary-foreground/50">No collections recorded.</td></tr>
               )}
               {collections.map((c) => (
                 <tr key={c.id} className="border-b border-gold/10 hover:bg-navy-light/30">
@@ -137,7 +152,30 @@ function CollectionsTab({ collections, donations, canEdit, onChange }: {
                   <td className="px-4 py-2 text-right tabular-nums">{gbp(Number(c.gross_amount))}</td>
                   <td className="px-4 py-2 text-right tabular-nums">{gbp(Number(c.costs))}</td>
                   <td className="px-4 py-2 text-right tabular-nums text-gold">{gbp(Number(c.net_amount))}</td>
+                  <td className="px-4 py-2 text-xs text-primary-foreground/70 whitespace-nowrap">
+                    {c.banked_date ? new Date(c.banked_date).toLocaleDateString("en-GB") : <span className="text-amber-300/80">Not banked</span>}
+                    {c.banked_by && <span className="block text-primary-foreground/50">by {c.banked_by}</span>}
+                  </td>
                   <td className="px-4 py-2 text-xs text-primary-foreground/70 max-w-[260px] truncate" title={c.notes ?? ""}>{c.notes}</td>
+                  {canPost && (
+                    <td className="px-4 py-2">
+                      {c.journal_entry_id ? (
+                        <Badge variant="outline" className="border-emerald-400/40 text-emerald-300 text-[10px]">Posted</Badge>
+                      ) : (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-7 border-gold/30 text-xs"
+                          disabled={!c.banked_date || posting === c.id}
+                          title={!c.banked_date ? "Enter banked date first" : "Post to accounts"}
+                          onClick={() => post(c)}
+                        >
+                          {posting === c.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <BookCheck className="w-3.5 h-3.5 mr-1" />}
+                          Post to accounts
+                        </Button>
+                      )}
+                    </td>
+                  )}
                   {canEdit && (
                     <td className="px-4 py-2 text-right">
                       <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => { setEditing(c); setOpen(true); }}>
