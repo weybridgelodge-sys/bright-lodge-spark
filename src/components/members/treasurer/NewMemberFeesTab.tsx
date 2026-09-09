@@ -38,13 +38,19 @@ export default function NewMemberFeesTab({ canEdit }: { canEdit: boolean }) {
   const [saving, setSaving] = useState(false);
 
   const lastUgleDefaultRef = useRef<string>("132.00");
+  const lastPglDefaultRef = useRef<string>("15.12");
 
   const applyAgeBandDefault = (band: "over25" | "under25") => {
-    const next = band === "over25" ? "132.00" : "66.00";
-    // Only overwrite if the current value is still the last auto-default, blank, or zero.
+    const nextUgle = band === "over25" ? "132.00" : "66.00";
+    const nextPgl = band === "over25" ? "15.12" : "7.56";
+    // Only overwrite each field if its current value is still its own last auto-default, blank, or zero.
     if (ugleFee === lastUgleDefaultRef.current || ugleFee === "" || /^0\.?0*$/.test(ugleFee)) {
-      setUgleFee(next);
-      lastUgleDefaultRef.current = next;
+      setUgleFee(nextUgle);
+      lastUgleDefaultRef.current = nextUgle;
+    }
+    if (pglFee === lastPglDefaultRef.current || pglFee === "" || /^0\.?0*$/.test(pglFee)) {
+      setPglFee(nextPgl);
+      lastPglDefaultRef.current = nextPgl;
     }
     setAgeBracket(band);
   };
