@@ -280,25 +280,25 @@ export default function PropertyRegisterTab({ canEdit }: { canEdit: boolean }) {
           </DialogHeader>
           <div className="grid gap-3">
             <div>
-              <Label>Item</Label>
+              <Label className="text-primary-foreground">Item</Label>
               <Input value={item} onChange={(e) => setItem(e.target.value)} placeholder="e.g. Master's chair" />
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
               <div>
-                <Label>Count</Label>
+                <Label className="text-primary-foreground">Count</Label>
                 <Input type="number" min="0" step="1" value={count} onChange={(e) => setCount(e.target.value)} />
               </div>
               <div>
-                <Label>Value (£)</Label>
+                <Label className="text-primary-foreground">Value (£)</Label>
                 <Input type="number" min="0" step="0.01" value={value} onChange={(e) => setValue(e.target.value)} />
               </div>
             </div>
             <div>
-              <Label>Location</Label>
+              <Label className="text-primary-foreground">Location</Label>
               <Input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="e.g. Lodge Room, GMC store, Secretary's custody" />
             </div>
             <div>
-              <Label>Condition</Label>
+              <Label className="text-primary-foreground">Condition</Label>
               <Select value={condition} onValueChange={setCondition}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
@@ -307,11 +307,11 @@ export default function PropertyRegisterTab({ canEdit }: { canEdit: boolean }) {
               </Select>
             </div>
             <div>
-              <Label>Date acquired</Label>
+              <Label className="text-primary-foreground">Date acquired</Label>
               <Input type="date" value={dateAcquired} onChange={(e) => setDateAcquired(e.target.value)} />
             </div>
             <div>
-              <Label>Notes</Label>
+              <Label className="text-primary-foreground">Notes</Label>
               <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Optional — condition detail, provenance, insurance notes" />
             </div>
           </div>
