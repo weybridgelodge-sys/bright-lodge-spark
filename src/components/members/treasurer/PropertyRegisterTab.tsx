@@ -70,6 +70,11 @@ export async function buildPropertyRegisterPdf(rows: Item[], totalPence: number)
       6: { cellWidth: 80 },
       7: { cellWidth: 50 },
     },
+    didParseCell: (data) => {
+      if (data.section === "foot" && data.column.index === 3) {
+        data.cell.styles.halign = "right";
+      }
+    },
     rowPageBreak: "avoid",
   });
   const y = (doc as any).lastAutoTable.finalY + 24;
