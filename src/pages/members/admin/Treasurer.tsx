@@ -713,8 +713,16 @@ function Inner() {
               <GeneralJournalTab canEdit={canEditTx} />
             </TabsContent>
           )}
-          <TabsContent value="reconciliation" className="mt-4">
-            <ReconciliationTab periods={periods} isTreasurer={isCurrentTreasurer} isSecretary={isSecretary} isAdmin={isAdmin} onChange={load} />
+          {canEditTx && (
+            <TabsContent value="income-expenditure" className="mt-4">
+              <IncomeExpenditureReport canEdit={canEditTx} />
+            </TabsContent>
+          )}
+          {canEditTx && (
+            <TabsContent value="balance-sheet" className="mt-4">
+              <BalanceSheetReport canEdit={canEditTx} />
+            </TabsContent>
+          )}
           </TabsContent>
         </Tabs>
 
