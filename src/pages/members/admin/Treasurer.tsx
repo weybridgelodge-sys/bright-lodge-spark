@@ -5,6 +5,7 @@ import DiningReconciliationTab from "@/components/members/treasurer/DiningReconc
 import CreditorsTab from "@/components/members/treasurer/CreditorsTab";
 import DirectPaymentTab from "@/components/members/treasurer/DirectPaymentTab";
 import NewMemberFeesTab from "@/components/members/treasurer/NewMemberFeesTab";
+import GeneralJournalTab from "@/components/members/treasurer/GeneralJournalTab";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
