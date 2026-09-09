@@ -727,6 +727,11 @@ function Inner() {
               <BalanceSheetReport canEdit={canEditTx} />
             </TabsContent>
           )}
+          {canEditTx && (
+            <TabsContent value="transaction-detail" className="mt-4">
+              <TransactionDetailReport canEdit={canEditTx} />
+            </TabsContent>
+          )}
           <TabsContent value="reconciliation" className="mt-4">
             <ReconciliationTab periods={periods} isTreasurer={isCurrentTreasurer} isSecretary={isSecretary} isAdmin={isAdmin} onChange={load} />
           </TabsContent>
