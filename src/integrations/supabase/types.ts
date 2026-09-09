@@ -1389,6 +1389,39 @@ export type Database = {
           },
         ]
       }
+      lodge_property_items: {
+        Row: {
+          condition: string | null
+          count: number
+          created_at: string
+          id: string
+          item: string
+          notes: string | null
+          updated_at: string
+          value_pence: number
+        }
+        Insert: {
+          condition?: string | null
+          count?: number
+          created_at?: string
+          id?: string
+          item: string
+          notes?: string | null
+          updated_at?: string
+          value_pence?: number
+        }
+        Update: {
+          condition?: string | null
+          count?: number
+          created_at?: string
+          id?: string
+          item?: string
+          notes?: string | null
+          updated_at?: string
+          value_pence?: number
+        }
+        Relationships: []
+      }
       lodge_socials: {
         Row: {
           created_at: string
