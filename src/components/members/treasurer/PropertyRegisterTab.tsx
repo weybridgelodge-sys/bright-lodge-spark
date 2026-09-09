@@ -35,6 +35,53 @@ type Item = {
   notes: string | null;
 };
 
+export async function buildPropertyRegisterPdf(rows: Item[], totalPence: number) {
+  const { doc, pageW, margin } = await reportPdfDoc(
+    "Lodge Property Register",
+    `Stock check sheet — ${rows.length} line${rows.length === 1 ? "" : "s"}`,
+  );
+  autoTable(doc, {
+    startY: 135,
+    head: [["Item", "Count", "Location", "Value", "Condition", "Date acquired", "Notes", "Checked / present?"]],
+    body: rows.map((r) => [
+      r.item,
+      String(r.count ?? 0),
+      r.location ?? "—",
+      money(r.value_pence ?? 0),
+      r.condition ?? "—",
+      fmtDate(r.date_acquired),
+      r.notes ?? "",
+      "",
+    ]),
+    foot: [["Total estimated value", "", "", money(totalPence), "", "", "", ""]],
+    margin: { left: margin, right: margin, bottom: 50 },
+    styles: { font: "helvetica", fontSize: 8, cellPadding: 4, textColor: INK, lineColor: [220, 215, 200], lineWidth: 0.4, overflow: "linebreak" },
+    headStyles: { fillColor: GOLD, textColor: NAVY, fontStyle: "bold" },
+    footStyles: { fillColor: [250, 247, 238], textColor: INK, fontStyle: "bold" },
+    alternateRowStyles: { fillColor: [250, 247, 238] },
+    theme: "grid",
+    columnStyles: {
+      0: { cellWidth: 105 },
+      1: { cellWidth: 34, halign: "right" },
+      2: { cellWidth: 70 },
+      3: { cellWidth: 55, halign: "right" },
+      4: { cellWidth: 60 },
+      5: { cellWidth: 62 },
+      6: { cellWidth: 80 },
+      7: { cellWidth: 50 },
+    },
+    rowPageBreak: "avoid",
+  });
+  const y = (doc as any).lastAutoTable.finalY + 24;
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(9);
+  doc.setTextColor(...INK);
+  doc.text("Checked by: ______________________________", margin, y);
+  doc.text(`Date: ______________________`, pageW - margin - 160, y);
+  return doc;
+}
+
+
 export default function PropertyRegisterTab({ canEdit }: { canEdit: boolean }) {
   const [rows, setRows] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
