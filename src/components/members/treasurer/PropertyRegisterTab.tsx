@@ -7,7 +7,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
-import { Loader2, Plus, Pencil, Trash2 } from "lucide-react";
+import { Loader2, Plus, Pencil, Trash2, FileDown } from "lucide-react";
+import autoTable from "jspdf-autotable";
+import { reportPdfDoc, INK, GOLD, NAVY, fmtDate as fmtLongDate } from "@/lib/treasurer/reports";
+import { saveJsPdf } from "@/lib/nativeDownload";
 
 const CONDITIONS = ["Excellent", "Good", "Fair", "Poor", "Needs Repair/Replacement"] as const;
 
