@@ -170,40 +170,52 @@ export default function PropertyRegisterTab({ canEdit }: { canEdit: boolean }) {
     await signUrls(list);
   };
 
-  const uploadFiles = async (files: FileList | null) => {
-    if (!files || !editingId) return;
-    setUploading(true);
-    const { data: auth } = await supabase.auth.getUser();
-    for (const file of Array.from(files)) {
-      if (file.size > 10 * 1024 * 1024) {
-        toast({ title: `${file.name} is too large`, description: "Maximum photo size is 10MB.", variant: "destructive" });
-        continue;
-      }
-      const ext = file.name.split(".").pop() ?? "jpg";
-      const path = `${editingId}/${crypto.randomUUID()}.${ext}`;
-      const body = await toUploadBody(file);
-      const { error: upErr } = await supabase.storage
-        .from("lodge-property-images")
-        .upload(path, body, { contentType: file.type || "image/jpeg" });
-      if (upErr) {
-        toast({ title: "Upload failed", description: upErr.message, variant: "destructive" });
-        continue;
-      }
-      const { error: rowErr } = await supabase.from("lodge_property_images" as any).insert({
-        property_item_id: editingId,
-        storage_path: path,
-        file_name: file.name,
-        file_size: file.size,
-        uploaded_by: auth?.user?.id ?? null,
-      });
-      if (rowErr) {
-        await supabase.storage.from("lodge-property-images").remove([path]);
-        toast({ title: "Could not save photo", description: rowErr.message, variant: "destructive" });
-      }
+  const uploadFiles = async (selected: File[]) => {
+    if (selected.length === 0) return;
+    if (!editingId) {
+      toast({ title: "Save the item first", description: "Photos can only be added to a saved item.", variant: "destructive" });
+      return;
     }
-    setUploading(false);
-    await loadImages();
+    setUploading(true);
+    try {
+      const { data: auth } = await supabase.auth.getUser();
+      for (const file of selected) {
+        if (file.size > 10 * 1024 * 1024) {
+          toast({ title: `${file.name} is too large`, description: "Maximum photo size is 10MB.", variant: "destructive" });
+          continue;
+        }
+        const ext = file.name.split(".").pop() ?? "jpg";
+        const path = `${editingId}/${crypto.randomUUID()}.${ext}`;
+        const body = await toUploadBody(file);
+        const { error: upErr } = await supabase.storage
+          .from("lodge-property-images")
+          .upload(path, body, { contentType: file.type || "image/jpeg" });
+        if (upErr) {
+          toast({ title: "Upload failed", description: upErr.message, variant: "destructive" });
+          continue;
+        }
+        const { error: rowErr } = await supabase.from("lodge_property_images" as any).insert({
+          property_item_id: editingId,
+          storage_path: path,
+          file_name: file.name,
+          file_size: file.size,
+          uploaded_by: auth?.user?.id ?? null,
+        });
+        if (rowErr) {
+          await supabase.storage.from("lodge-property-images").remove([path]);
+          toast({ title: "Could not save photo", description: rowErr.message, variant: "destructive" });
+          continue;
+        }
+        toast({ title: "Photo added", description: file.name });
+      }
+      await loadImages();
+    } catch (e) {
+      toast({ title: "Upload failed", description: e instanceof Error ? e.message : String(e), variant: "destructive" });
+    } finally {
+      setUploading(false);
+    }
   };
+
 
   const deleteImage = async (img: PropertyImage) => {
     const { error: sErr } = await supabase.storage.from("lodge-property-images").remove([img.storage_path]);
