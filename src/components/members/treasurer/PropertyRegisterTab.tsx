@@ -200,11 +200,21 @@ export default function PropertyRegisterTab({ canEdit }: { canEdit: boolean }) {
               Audit of lodge property with estimated values — useful when discussing insurance cover with the Province.
             </p>
           </div>
-          {canEdit && (
-            <Button className="bg-gold text-navy hover:bg-gold/90" onClick={openNew}>
-              <Plus className="w-4 h-4 mr-1" /> New item
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant="outline"
+              className="border-gold/40 text-gold hover:bg-gold/10 hover:text-gold"
+              onClick={exportPdf}
+              disabled={loading || rows.length === 0}
+            >
+              <FileDown className="w-4 h-4 mr-1" /> Download PDF
             </Button>
-          )}
+            {canEdit && (
+              <Button className="bg-gold text-navy hover:bg-gold/90" onClick={openNew}>
+                <Plus className="w-4 h-4 mr-1" /> New item
+              </Button>
+            )}
+          </div>
         </div>
 
         {loading ? (
