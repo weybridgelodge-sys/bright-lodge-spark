@@ -121,7 +121,7 @@ export default function TransactionDetailReport({ canEdit }: { canEdit: boolean 
       setEntryReconciled(entryId, current);
       toast({
         title: "Can't change reconciled status — this entry's period is locked",
-        description: error.message,
+        description: error?.message ?? "No change was saved.",
         variant: "destructive",
       });
     }
