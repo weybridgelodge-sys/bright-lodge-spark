@@ -4234,6 +4234,10 @@ export type Database = {
         Returns: boolean
       }
       last_engagement_date: { Args: { _member: string }; Returns: string }
+      link_booking_journal_entry: {
+        Args: { _booking_id: string; _entry_id: string }
+        Returns: undefined
+      }
       lock_treasurer_period: {
         Args: { _period_id: string }
         Returns: undefined
