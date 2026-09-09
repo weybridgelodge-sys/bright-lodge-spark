@@ -33,7 +33,7 @@ export default function NewMemberFeesTab({ canEdit }: { canEdit: boolean }) {
   const [subRate, setSubRate] = useState("250.00");
   const [ageBracket, setAgeBracket] = useState<"over25" | "under25">("over25");
   const [ugleFee, setUgleFee] = useState("132.00");
-  const [pglFee, setPglFee] = useState("0.00");
+  const [pglFee, setPglFee] = useState("15.12");
   const [bankReference, setBankReference] = useState("");
   const [saving, setSaving] = useState(false);
 
