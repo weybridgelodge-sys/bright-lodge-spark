@@ -100,6 +100,13 @@
     @apply bg-background text-foreground font-sans antialiased;
   }
 
+  /* Members portal: keep the page canvas navy so no light band shows
+     below fixed UI when Android Chrome's dynamic toolbar resizes the viewport. */
+  html.portal-canvas,
+  html.portal-canvas body {
+    background-color: hsl(var(--navy-dark));
+  }
+
   h1, h2, h3, h4 {
     font-family: 'Playfair Display', serif;
   }

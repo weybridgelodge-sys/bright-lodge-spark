@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { LayoutDashboard, Users, FileText, User as UserIcon, ShieldCheck, LogOut, Shield, CalendarDays, BookOpen, Crown, CalendarPlus, BarChart3, GraduationCap, Utensils, Mail, HeartHandshake, Sprout, Hexagon, Banknote, Menu } from "lucide-react";
@@ -17,6 +17,11 @@ export default function MembersLayout({ children }: { children: React.ReactNode 
   const canSeeMatrix = isAdmin || isWorshipfulMaster || isDirectorOfCeremonies;
   const navigate = useNavigate();
   const [drawerOpen, setDrawerOpen] = useState(false);
+
+  useEffect(() => {
+    document.documentElement.classList.add("portal-canvas");
+    return () => document.documentElement.classList.remove("portal-canvas");
+  }, []);
 
   const handleSignOut = async () => {
     await signOut();
@@ -110,7 +115,7 @@ export default function MembersLayout({ children }: { children: React.ReactNode 
   );
 
   return (
-    <div className="min-h-screen bg-navy text-primary-foreground">
+    <div className="min-h-screen min-h-[100dvh] bg-navy text-primary-foreground">
       <header className="border-b border-gold/20 bg-navy-dark/80 backdrop-blur sticky top-0 z-40 pt-[max(0px,env(safe-area-inset-top))]">
         <div className="container mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
@@ -176,26 +181,26 @@ export default function MembersLayout({ children }: { children: React.ReactNode 
 
       {/* Mobile Bottom Sticky Navigation Strip — Visible below 1024px */}
       <div
-        className="lg:hidden fixed bottom-0 left-0 right-0 min-h-[6.5rem] bg-card border-t border-border flex items-stretch justify-around z-50"
+        className="lg:hidden fixed bottom-0 left-0 right-0 min-h-[6.5rem] bg-navy-dark border-t border-gold/20 flex items-stretch justify-around z-50"
         style={{ paddingTop: "0.75rem", paddingBottom: "max(3.5rem, env(safe-area-inset-bottom))" }}
       >
-        <NavLink to="/members" end className={({ isActive }) => `flex flex-col items-center justify-center gap-1 leading-none text-[10px] font-bold ${isActive ? "text-gold" : "text-muted-foreground"}`}>
+        <NavLink to="/members" end className={({ isActive }) => `flex flex-col items-center justify-center gap-1 leading-none text-[10px] font-bold ${isActive ? "text-gold" : "text-primary-foreground/60"}`}>
           <Shield className="h-5 w-5" />
           Hub
         </NavLink>
-        <NavLink to="/members/calendar" className={({ isActive }) => `flex flex-col items-center justify-center gap-1 leading-none text-[10px] font-bold ${isActive ? "text-gold" : "text-muted-foreground"}`}>
+        <NavLink to="/members/calendar" className={({ isActive }) => `flex flex-col items-center justify-center gap-1 leading-none text-[10px] font-bold ${isActive ? "text-gold" : "text-primary-foreground/60"}`}>
           <CalendarDays className="h-5 w-5" />
           Calendar
         </NavLink>
-        <NavLink to="/members/directory" className={({ isActive }) => `flex flex-col items-center justify-center gap-1 leading-none text-[10px] font-bold ${isActive ? "text-gold" : "text-muted-foreground"}`}>
+        <NavLink to="/members/directory" className={({ isActive }) => `flex flex-col items-center justify-center gap-1 leading-none text-[10px] font-bold ${isActive ? "text-gold" : "text-primary-foreground/60"}`}>
           <Users className="h-5 w-5" />
           Directory
         </NavLink>
-        <NavLink to="/members/profile" className={({ isActive }) => `flex flex-col items-center justify-center gap-1 leading-none text-[10px] font-bold ${isActive ? "text-gold" : "text-muted-foreground"}`}>
+        <NavLink to="/members/profile" className={({ isActive }) => `flex flex-col items-center justify-center gap-1 leading-none text-[10px] font-bold ${isActive ? "text-gold" : "text-primary-foreground/60"}`}>
           <UserIcon className="h-5 w-5" />
           Profile
         </NavLink>
-        <NavLink to="/members/ritual" className={({ isActive }) => `flex flex-col items-center justify-center gap-1 leading-none text-[10px] font-bold ${isActive ? "text-gold" : "text-muted-foreground"}`}>
+        <NavLink to="/members/ritual" className={({ isActive }) => `flex flex-col items-center justify-center gap-1 leading-none text-[10px] font-bold ${isActive ? "text-gold" : "text-primary-foreground/60"}`}>
           <BookOpen className="h-5 w-5" />
           Ritual
         </NavLink>
