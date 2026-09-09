@@ -1,0 +1,1 @@
+REVOKE ALL ON FUNCTION public.guard_charity_journal_link() FROM PUBLIC, anon, authenticated;

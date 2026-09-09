@@ -326,6 +326,8 @@ export type Database = {
       }
       charity_collections: {
         Row: {
+          banked_by: string | null
+          banked_date: string | null
           collection_date: string
           collection_type: Database["public"]["Enums"]["charity_collection_type"]
           costs: number
@@ -333,12 +335,15 @@ export type Database = {
           created_by: string | null
           gross_amount: number
           id: string
+          journal_entry_id: string | null
           lodge_event_id: string | null
           net_amount: number | null
           notes: string | null
           updated_at: string
         }
         Insert: {
+          banked_by?: string | null
+          banked_date?: string | null
           collection_date: string
           collection_type: Database["public"]["Enums"]["charity_collection_type"]
           costs?: number
@@ -346,12 +351,15 @@ export type Database = {
           created_by?: string | null
           gross_amount?: number
           id?: string
+          journal_entry_id?: string | null
           lodge_event_id?: string | null
           net_amount?: number | null
           notes?: string | null
           updated_at?: string
         }
         Update: {
+          banked_by?: string | null
+          banked_date?: string | null
           collection_date?: string
           collection_type?: Database["public"]["Enums"]["charity_collection_type"]
           costs?: number
@@ -359,12 +367,20 @@ export type Database = {
           created_by?: string | null
           gross_amount?: number
           id?: string
+          journal_entry_id?: string | null
           lodge_event_id?: string | null
           net_amount?: number | null
           notes?: string | null
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "charity_collections_journal_entry_id_fkey"
+            columns: ["journal_entry_id"]
+            isOneToOne: false
+            referencedRelation: "journal_entries"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "charity_collections_lodge_event_id_fkey"
             columns: ["lodge_event_id"]
@@ -378,6 +394,8 @@ export type Database = {
         Row: {
           amount: number
           authorised_by: Database["public"]["Enums"]["charity_authorised_by"]
+          banked_by: string | null
+          banked_date: string | null
           charity_id: string
           confirmation_received: boolean
           created_at: string
@@ -386,6 +404,7 @@ export type Database = {
           from_relief_chest: boolean
           id: string
           is_festival_contribution: boolean
+          journal_entry_id: string | null
           match_funding_amount: number
           payment_method: Database["public"]["Enums"]["charity_payment_method"]
           payment_reference: string | null
@@ -395,6 +414,8 @@ export type Database = {
         Insert: {
           amount: number
           authorised_by?: Database["public"]["Enums"]["charity_authorised_by"]
+          banked_by?: string | null
+          banked_date?: string | null
           charity_id: string
           confirmation_received?: boolean
           created_at?: string
@@ -403,6 +424,7 @@ export type Database = {
           from_relief_chest?: boolean
           id?: string
           is_festival_contribution?: boolean
+          journal_entry_id?: string | null
           match_funding_amount?: number
           payment_method: Database["public"]["Enums"]["charity_payment_method"]
           payment_reference?: string | null
@@ -412,6 +434,8 @@ export type Database = {
         Update: {
           amount?: number
           authorised_by?: Database["public"]["Enums"]["charity_authorised_by"]
+          banked_by?: string | null
+          banked_date?: string | null
           charity_id?: string
           confirmation_received?: boolean
           created_at?: string
@@ -420,6 +444,7 @@ export type Database = {
           from_relief_chest?: boolean
           id?: string
           is_festival_contribution?: boolean
+          journal_entry_id?: string | null
           match_funding_amount?: number
           payment_method?: Database["public"]["Enums"]["charity_payment_method"]
           payment_reference?: string | null
@@ -440,6 +465,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "public_charity_year_breakdown"
             referencedColumns: ["charity_id"]
+          },
+          {
+            foreignKeyName: "charity_donations_journal_entry_id_fkey"
+            columns: ["journal_entry_id"]
+            isOneToOne: false
+            referencedRelation: "journal_entries"
+            referencedColumns: ["id"]
           },
         ]
       }

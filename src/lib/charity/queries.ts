@@ -46,6 +46,9 @@ export type Collection = {
   costs: number;
   net_amount: number;
   notes: string | null;
+  banked_date: string | null;
+  banked_by: string | null;
+  journal_entry_id: string | null;
 };
 
 export type Donation = {
@@ -61,6 +64,9 @@ export type Donation = {
   confirmation_received: boolean;
   is_festival_contribution: boolean;
   from_relief_chest: boolean;
+  banked_date: string | null;
+  banked_by: string | null;
+  journal_entry_id: string | null;
 };
 
 
@@ -114,7 +120,7 @@ export async function fetchCharities(): Promise<Charity[]> {
 export async function fetchCollections(): Promise<Collection[]> {
   const { data, error } = await supabase
     .from("charity_collections")
-    .select("id,collection_date,lodge_event_id,collection_type,gross_amount,costs,net_amount,notes")
+    .select("id,collection_date,lodge_event_id,collection_type,gross_amount,costs,net_amount,notes,banked_date,banked_by,journal_entry_id")
     .order("collection_date", { ascending: false });
   if (error) throw error;
   return (data ?? []) as Collection[];
@@ -124,7 +130,7 @@ export async function fetchDonations(): Promise<Donation[]> {
   const { data, error } = await supabase
     .from("charity_donations")
     .select(
-      "id,donation_date,charity_id,amount,match_funding_amount,purpose,payment_method,payment_reference,authorised_by,confirmation_received,is_festival_contribution,from_relief_chest",
+      "id,donation_date,charity_id,amount,match_funding_amount,purpose,payment_method,payment_reference,authorised_by,confirmation_received,is_festival_contribution,from_relief_chest,banked_date,banked_by,journal_entry_id",
     )
 
     .order("donation_date", { ascending: false });
