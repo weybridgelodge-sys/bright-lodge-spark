@@ -13,7 +13,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
-import { Loader2, Plus, Pencil, Trash2, Download, Save, ExternalLink } from "lucide-react";
+import { Loader2, Plus, Pencil, Trash2, Download, Save, ExternalLink, HandCoins, HeartHandshake, BookOpen, Trophy, FileBarChart, Rss } from "lucide-react";
 import {
   fetchCharities, fetchCollections, fetchDonations, fetchFestivalSettings,
   COLLECTION_TYPE_LABEL, PAYMENT_METHOD_LABEL, AUTHORISED_LABEL,
@@ -1386,13 +1386,49 @@ function Inner() {
       </header>
 
       <Tabs defaultValue="collections" className="space-y-4">
-        <TabsList className="bg-navy-light/40 flex-wrap h-auto">
-          <TabsTrigger value="collections">Collections</TabsTrigger>
-          <TabsTrigger value="donations">Donations</TabsTrigger>
-          <TabsTrigger value="ledger">Charity Ledger</TabsTrigger>
-          <TabsTrigger value="festival">Festival Tracker</TabsTrigger>
-          <TabsTrigger value="report">Reports</TabsTrigger>
-          <TabsTrigger value="feed">Website Feed</TabsTrigger>
+        <TabsList className="flex flex-col w-full h-auto items-stretch gap-1 bg-navy p-2 rounded-sm border border-gold/20 mb-4">
+          <TabsTrigger
+            value="collections"
+            className="w-full flex items-center justify-start gap-3 px-4 py-3 rounded-sm text-sm font-sans text-primary-foreground/80 transition-colors hover:text-gold hover:bg-navy-light/40 data-[state=active]:bg-gold/15 data-[state=active]:text-gold data-[state=active]:shadow-none"
+          >
+            <HandCoins className="w-4 h-4 shrink-0" />
+            <span>Collections</span>
+          </TabsTrigger>
+          <TabsTrigger
+            value="donations"
+            className="w-full flex items-center justify-start gap-3 px-4 py-3 rounded-sm text-sm font-sans text-primary-foreground/80 transition-colors hover:text-gold hover:bg-navy-light/40 data-[state=active]:bg-gold/15 data-[state=active]:text-gold data-[state=active]:shadow-none"
+          >
+            <HeartHandshake className="w-4 h-4 shrink-0" />
+            <span>Donations</span>
+          </TabsTrigger>
+          <TabsTrigger
+            value="ledger"
+            className="w-full flex items-center justify-start gap-3 px-4 py-3 rounded-sm text-sm font-sans text-primary-foreground/80 transition-colors hover:text-gold hover:bg-navy-light/40 data-[state=active]:bg-gold/15 data-[state=active]:text-gold data-[state=active]:shadow-none"
+          >
+            <BookOpen className="w-4 h-4 shrink-0" />
+            <span>Charity Ledger</span>
+          </TabsTrigger>
+          <TabsTrigger
+            value="festival"
+            className="w-full flex items-center justify-start gap-3 px-4 py-3 rounded-sm text-sm font-sans text-primary-foreground/80 transition-colors hover:text-gold hover:bg-navy-light/40 data-[state=active]:bg-gold/15 data-[state=active]:text-gold data-[state=active]:shadow-none"
+          >
+            <Trophy className="w-4 h-4 shrink-0" />
+            <span>Festival Tracker</span>
+          </TabsTrigger>
+          <TabsTrigger
+            value="report"
+            className="w-full flex items-center justify-start gap-3 px-4 py-3 rounded-sm text-sm font-sans text-primary-foreground/80 transition-colors hover:text-gold hover:bg-navy-light/40 data-[state=active]:bg-gold/15 data-[state=active]:text-gold data-[state=active]:shadow-none"
+          >
+            <FileBarChart className="w-4 h-4 shrink-0" />
+            <span>Reports</span>
+          </TabsTrigger>
+          <TabsTrigger
+            value="feed"
+            className="w-full flex items-center justify-start gap-3 px-4 py-3 rounded-sm text-sm font-sans text-primary-foreground/80 transition-colors hover:text-gold hover:bg-navy-light/40 data-[state=active]:bg-gold/15 data-[state=active]:text-gold data-[state=active]:shadow-none"
+          >
+            <Rss className="w-4 h-4 shrink-0" />
+            <span>Website Feed</span>
+          </TabsTrigger>
         </TabsList>
         <TabsContent value="collections"><CollectionsTab collections={collections} donations={donations} canEdit={canEdit} onChange={reload} /></TabsContent>
         <TabsContent value="donations"><DonationsTab donations={donations} charities={charities} festival={festival} canEdit={canEdit} onChange={reload} /></TabsContent>
