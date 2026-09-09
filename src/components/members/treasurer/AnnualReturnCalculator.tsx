@@ -98,11 +98,7 @@ export default function AnnualReturnCalculator({ canEdit }: { canEdit: boolean }
     const yearEnd = `${year}-09-30`;
     const yearStart = `${year - 1}-10-01`; // return year end minus 1 year, plus 1 day
 
-    const { data, error } = await supabase
-      .from("profiles")
-      .select("id,full_name,first_name,last_name,status,status_changed_at,date_of_birth,is_honorary_member")
-      .eq("is_honorary_member", false)
-      .neq("status", "pending");
+    const { data, error } = await (supabase as any).rpc("get_annual_return_members");
 
     if (error) {
       setSuggesting(false);
