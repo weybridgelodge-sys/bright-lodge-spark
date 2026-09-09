@@ -62,7 +62,7 @@ export default function TransactionDetailReport({ canEdit }: { canEdit: boolean 
         .from("journal_lines" as any)
         .select(
           "id,debit_pence,credit_pence,description," +
-            "journal_entries!inner(entry_date,description,source_type,payee)," +
+            "journal_entries!inner(id,entry_date,description,source_type,payee,reconciled)," +
             "chart_of_accounts!inner(code,name)"
         )
         .gte("journal_entries.entry_date", from)
