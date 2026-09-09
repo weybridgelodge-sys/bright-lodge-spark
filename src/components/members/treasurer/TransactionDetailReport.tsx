@@ -2,10 +2,11 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
 import { Download, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { fmtDate, money } from "@/lib/treasurer/reports";
+import { fetchAccounts, treasurerYearBounds, treasurerYearContaining, fmtDate, money, type Account } from "@/lib/treasurer/reports";
 
 type Line = {
   id: string;
@@ -17,19 +18,38 @@ type Line = {
   credit: number;
 };
 
-const today = () => new Date().toISOString().slice(0, 10);
-const firstOfYear = () => `${new Date().getFullYear()}-01-01`;
+const defaultRange = () => {
+  const todayIso = new Date().toISOString().slice(0, 10);
+  return treasurerYearBounds(treasurerYearContaining(todayIso));
+};
 
 const csvEscape = (v: string) => (/[",\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v);
 
 export default function TransactionDetailReport({ canEdit }: { canEdit: boolean }) {
-  const [from, setFrom] = useState(firstOfYear);
-  const [to, setTo] = useState(today);
+  const { start, end } = defaultRange();
+  const [from, setFrom] = useState(start);
+  const [to, setTo] = useState(end);
   const [codeFrom, setCodeFrom] = useState("1000");
-  const [codeTo, setCodeTo] = useState("5999");
+  const [codeTo, setCodeTo] = useState("5900");
+  const [accounts, setAccounts] = useState<Account[]>([]);
   const [lines, setLines] = useState<Line[]>([]);
   const [loading, setLoading] = useState(false);
   const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    if (!canEdit) return;
+    fetchAccounts()
+      .then((accs) => {
+        setAccounts(accs);
+        if (accs.length > 0) {
+          setCodeFrom(accs[0].code);
+          setCodeTo(accs[accs.length - 1].code);
+        }
+      })
+      .catch((e: any) => {
+        toast({ title: "Could not load accounts", description: e.message, variant: "destructive" });
+      });
+  }, [canEdit]);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -124,11 +144,33 @@ export default function TransactionDetailReport({ canEdit }: { canEdit: boolean 
         </div>
         <div className="space-y-1">
           <Label htmlFor="td-cf">From code</Label>
-          <Input id="td-cf" value={codeFrom} onChange={(e) => setCodeFrom(e.target.value)} placeholder="1000" />
+          <Select value={codeFrom} onValueChange={setCodeFrom}>
+            <SelectTrigger id="td-cf">
+              <SelectValue placeholder="From code" />
+            </SelectTrigger>
+            <SelectContent>
+              {accounts.map((a) => (
+                <SelectItem key={a.id} value={a.code}>
+                  {a.code} — {a.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
         <div className="space-y-1">
           <Label htmlFor="td-ct">To code</Label>
-          <Input id="td-ct" value={codeTo} onChange={(e) => setCodeTo(e.target.value)} placeholder="5999" />
+          <Select value={codeTo} onValueChange={setCodeTo}>
+            <SelectTrigger id="td-ct">
+              <SelectValue placeholder="To code" />
+            </SelectTrigger>
+            <SelectContent>
+              {accounts.map((a) => (
+                <SelectItem key={a.id} value={a.code}>
+                  {a.code} — {a.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
