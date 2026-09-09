@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { toast } from "@/hooks/use-toast";
 import { Loader2, Plus, Pencil, Trash2, FileDown } from "lucide-react";
 import autoTable from "jspdf-autotable";
-import { reportPdfDoc, INK, GOLD, NAVY, fmtDate as fmtLongDate } from "@/lib/treasurer/reports";
+import { reportPdfDoc, INK, GOLD, NAVY } from "@/lib/treasurer/reports";
 import { saveJsPdf } from "@/lib/nativeDownload";
 
 const CONDITIONS = ["Excellent", "Good", "Fair", "Poor", "Needs Repair/Replacement"] as const;
