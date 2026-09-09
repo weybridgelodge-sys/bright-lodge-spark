@@ -452,6 +452,46 @@ export default function PropertyRegisterTab({ canEdit }: { canEdit: boolean }) {
               <Label className="text-primary-foreground">Notes</Label>
               <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Optional — condition detail, provenance, insurance notes" />
             </div>
+            <div>
+              <Label className="text-primary-foreground">Photos</Label>
+              {editingId ? (
+                <>
+                  <div className="mt-1 flex items-center gap-2">
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      disabled={uploading}
+                      className="text-primary-foreground"
+                      onChange={(e) => { uploadFiles(e.target.files); e.currentTarget.value = ""; }}
+                    />
+                    {uploading ? <Loader2 className="w-4 h-4 animate-spin text-gold" /> : <Upload className="w-4 h-4 text-gold" />}
+                  </div>
+                  <p className="text-xs text-primary-foreground/60 mt-1">Up to 10MB per photo. Useful for insurance records.</p>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {imagesFor(editingId).map((img) => (
+                      <div key={img.id} className="relative">
+                        <img
+                          src={signedUrls[img.storage_path]}
+                          alt={img.file_name}
+                          className="w-20 h-20 object-cover rounded-sm border border-gold/30"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => deleteImage(img)}
+                          aria-label={`Delete photo ${img.file_name}`}
+                          className="absolute -top-2 -right-2 rounded-full bg-destructive text-destructive-foreground w-5 h-5 flex items-center justify-center"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <p className="text-xs text-primary-foreground/60 mt-1">Save the item first, then reopen it to add photos.</p>
+              )}
+            </div>
           </div>
           <DialogFooter>
             <Button variant="ghost" onClick={() => setOpen(false)}>Cancel</Button>
