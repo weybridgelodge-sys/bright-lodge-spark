@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -37,9 +37,17 @@ export default function NewMemberFeesTab({ canEdit }: { canEdit: boolean }) {
   const [bankReference, setBankReference] = useState("");
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    setUgleFee(ageBracket === "over25" ? "132.00" : "66.00");
-  }, [ageBracket]);
+  const lastUgleDefaultRef = useRef<string>("132.00");
+
+  const applyAgeBandDefault = (band: "over25" | "under25") => {
+    const next = band === "over25" ? "132.00" : "66.00";
+    // Only overwrite if the current value is still the last auto-default, blank, or zero.
+    if (ugleFee === lastUgleDefaultRef.current || ugleFee === "" || /^0\.?0*$/.test(ugleFee)) {
+      setUgleFee(next);
+      lastUgleDefaultRef.current = next;
+    }
+    setAgeBracket(band);
+  };
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -180,7 +188,8 @@ export default function NewMemberFeesTab({ canEdit }: { canEdit: boolean }) {
     setSaving(false);
     setName("");
     setAgeBracket("over25");
-    setUgleFee("0.00");
+    setUgleFee("132.00");
+    lastUgleDefaultRef.current = "132.00";
     setPglFee("0.00");
     setBankReference("");
     toast({ title: "New member fees posted", description: `${posted.length} ledger entries created.` });
@@ -221,19 +230,21 @@ export default function NewMemberFeesTab({ canEdit }: { canEdit: boolean }) {
                 <Label>Annual subscription rate (£)</Label>
                 <Input type="number" step="0.01" min="0" value={subRate} onChange={(e) => setSubRate(e.target.value)} disabled={!canEdit} />
               </div>
-              <div>
-                <Label>New member&apos;s age bracket</Label>
-                <Select value={ageBracket} onValueChange={(v) => setAgeBracket(v as "over25" | "under25")} disabled={!canEdit}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="over25">25 and over</SelectItem>
-                    <SelectItem value="under25">Under 25</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label>UGLE registration fee (£)</Label>
-                <Input type="number" step="0.01" min="0" value={ugleFee} onChange={(e) => setUgleFee(e.target.value)} disabled={!canEdit} />
+              <div className="space-y-3">
+                <div>
+                  <Label>New member&apos;s age at initiation</Label>
+                  <Select value={ageBracket} onValueChange={(v) => applyAgeBandDefault(v as "over25" | "under25")} disabled={!canEdit}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="over25">25 and over (£132.00)</SelectItem>
+                      <SelectItem value="under25">Under 25 (£66.00)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>UGLE registration fee (£)</Label>
+                  <Input type="number" step="0.01" min="0" value={ugleFee} onChange={(e) => setUgleFee(e.target.value)} disabled={!canEdit} />
+                </div>
               </div>
               <div>
                 <Label>PGL registration fee (£)</Label>
