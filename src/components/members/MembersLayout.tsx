@@ -18,6 +18,11 @@ export default function MembersLayout({ children }: { children: React.ReactNode 
   const navigate = useNavigate();
   const [drawerOpen, setDrawerOpen] = useState(false);
 
+  useEffect(() => {
+    document.documentElement.classList.add("portal-canvas");
+    return () => document.documentElement.classList.remove("portal-canvas");
+  }, []);
+
   const handleSignOut = async () => {
     await signOut();
     navigate("/members/login");
