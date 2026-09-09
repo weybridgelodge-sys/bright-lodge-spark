@@ -103,6 +103,12 @@ export default function PropertyRegisterTab({ canEdit }: { canEdit: boolean }) {
   const [location, setLocation] = useState("");
   const [notes, setNotes] = useState("");
 
+  const [images, setImages] = useState<PropertyImage[]>([]);
+  const [uploading, setUploading] = useState(false);
+  const [viewerItem, setViewerItem] = useState<Item | null>(null);
+  const [viewerIndex, setViewerIndex] = useState(0);
+  const [signedUrls, setSignedUrls] = useState<Record<string, string>>({});
+
   const load = useCallback(async () => {
     setLoading(true);
     const { data, error } = await supabase
@@ -114,7 +120,102 @@ export default function PropertyRegisterTab({ canEdit }: { canEdit: boolean }) {
     setLoading(false);
   }, []);
 
-  useEffect(() => { load(); }, [load]);
+  const loadImages = useCallback(async () => {
+    const { data, error } = await supabase
+      .from("lodge_property_images" as any)
+      .select("id,property_item_id,storage_path,file_name,file_size")
+      .order("uploaded_at", { ascending: true });
+    if (error) {
+      toast({ title: "Could not load photos", description: error.message, variant: "destructive" });
+      return;
+    }
+    setImages((data as unknown as PropertyImage[]) ?? []);
+  }, []);
+
+  useEffect(() => { load(); loadImages(); }, [load, loadImages]);
+
+  const imagesFor = useCallback(
+    (itemId: string) => images.filter((i) => i.property_item_id === itemId),
+    [images],
+  );
+
+  const signUrls = useCallback(async (list: PropertyImage[]) => {
+    const missing = list.filter((i) => !signedUrls[i.storage_path]);
+    if (missing.length === 0) return;
+    const entries: Record<string, string> = {};
+    await Promise.all(
+      missing.map(async (i) => {
+        const { data } = await supabase.storage
+          .from("lodge-property-images")
+          .createSignedUrl(i.storage_path, 3600);
+        if (data?.signedUrl) entries[i.storage_path] = data.signedUrl;
+      }),
+    );
+    if (Object.keys(entries).length) setSignedUrls((p) => ({ ...p, ...entries }));
+  }, [signedUrls]);
+
+  const openViewer = async (r: Item) => {
+    const list = imagesFor(r.id);
+    if (list.length === 0) return;
+    setViewerItem(r);
+    setViewerIndex(0);
+    await signUrls(list);
+  };
+
+  const uploadFiles = async (files: FileList | null) => {
+    if (!files || !editingId) return;
+    setUploading(true);
+    const { data: auth } = await supabase.auth.getUser();
+    for (const file of Array.from(files)) {
+      if (file.size > 10 * 1024 * 1024) {
+        toast({ title: `${file.name} is too large`, description: "Maximum photo size is 10MB.", variant: "destructive" });
+        continue;
+      }
+      const ext = file.name.split(".").pop() ?? "jpg";
+      const path = `${editingId}/${crypto.randomUUID()}.${ext}`;
+      const body = await toUploadBody(file);
+      const { error: upErr } = await supabase.storage
+        .from("lodge-property-images")
+        .upload(path, body, { contentType: file.type || "image/jpeg" });
+      if (upErr) {
+        toast({ title: "Upload failed", description: upErr.message, variant: "destructive" });
+        continue;
+      }
+      const { error: rowErr } = await supabase.from("lodge_property_images" as any).insert({
+        property_item_id: editingId,
+        storage_path: path,
+        file_name: file.name,
+        file_size: file.size,
+        uploaded_by: auth?.user?.id ?? null,
+      });
+      if (rowErr) {
+        await supabase.storage.from("lodge-property-images").remove([path]);
+        toast({ title: "Could not save photo", description: rowErr.message, variant: "destructive" });
+      }
+    }
+    setUploading(false);
+    await loadImages();
+  };
+
+  const deleteImage = async (img: PropertyImage) => {
+    const { error: sErr } = await supabase.storage.from("lodge-property-images").remove([img.storage_path]);
+    if (sErr) {
+      toast({ title: "Could not delete photo file", description: sErr.message, variant: "destructive" });
+      return;
+    }
+    const { error } = await supabase.from("lodge_property_images" as any).delete().eq("id", img.id);
+    if (error) {
+      toast({ title: "Could not delete photo", description: error.message, variant: "destructive" });
+      return;
+    }
+    setSignedUrls((p) => { const n = { ...p }; delete n[img.storage_path]; return n; });
+    toast({ title: "Photo deleted" });
+    await loadImages();
+  };
+
+  useEffect(() => {
+    if (open && editingId) signUrls(imagesFor(editingId));
+  }, [open, editingId, images, imagesFor, signUrls]);
 
   const totalPence = useMemo(() => rows.reduce((s, r) => s + (r.value_pence ?? 0), 0), [rows]);
 
