@@ -33,18 +33,24 @@ export default function NewMemberFeesTab({ canEdit }: { canEdit: boolean }) {
   const [subRate, setSubRate] = useState("250.00");
   const [ageBracket, setAgeBracket] = useState<"over25" | "under25">("over25");
   const [ugleFee, setUgleFee] = useState("132.00");
-  const [pglFee, setPglFee] = useState("0.00");
+  const [pglFee, setPglFee] = useState("15.12");
   const [bankReference, setBankReference] = useState("");
   const [saving, setSaving] = useState(false);
 
   const lastUgleDefaultRef = useRef<string>("132.00");
+  const lastPglDefaultRef = useRef<string>("15.12");
 
   const applyAgeBandDefault = (band: "over25" | "under25") => {
-    const next = band === "over25" ? "132.00" : "66.00";
-    // Only overwrite if the current value is still the last auto-default, blank, or zero.
+    const nextUgle = band === "over25" ? "132.00" : "66.00";
+    const nextPgl = band === "over25" ? "15.12" : "7.56";
+    // Only overwrite each field if its current value is still its own last auto-default, blank, or zero.
     if (ugleFee === lastUgleDefaultRef.current || ugleFee === "" || /^0\.?0*$/.test(ugleFee)) {
-      setUgleFee(next);
-      lastUgleDefaultRef.current = next;
+      setUgleFee(nextUgle);
+      lastUgleDefaultRef.current = nextUgle;
+    }
+    if (pglFee === lastPglDefaultRef.current || pglFee === "" || /^0\.?0*$/.test(pglFee)) {
+      setPglFee(nextPgl);
+      lastPglDefaultRef.current = nextPgl;
     }
     setAgeBracket(band);
   };
@@ -190,7 +196,8 @@ export default function NewMemberFeesTab({ canEdit }: { canEdit: boolean }) {
     setAgeBracket("over25");
     setUgleFee("132.00");
     lastUgleDefaultRef.current = "132.00";
-    setPglFee("0.00");
+    setPglFee("15.12");
+    lastPglDefaultRef.current = "15.12";
     setBankReference("");
     toast({ title: "New member fees posted", description: `${posted.length} ledger entries created.` });
   };
@@ -241,17 +248,17 @@ export default function NewMemberFeesTab({ canEdit }: { canEdit: boolean }) {
                     </SelectContent>
                   </Select>
                   <p className="text-primary-foreground/50 text-xs mt-1">
-                    UGLE Form P rate — confirm this hasn&apos;t changed before relying on the default.
+                    UGLE Form P &amp; PGL registration rates — confirm these haven&apos;t changed before relying on the defaults.
                   </p>
                 </div>
                 <div>
                   <Label>UGLE registration fee (£)</Label>
                   <Input type="number" step="0.01" min="0" value={ugleFee} onChange={(e) => setUgleFee(e.target.value)} disabled={!canEdit} />
                 </div>
-              </div>
-              <div>
-                <Label>PGL registration fee (£)</Label>
-                <Input type="number" step="0.01" min="0" value={pglFee} onChange={(e) => setPglFee(e.target.value)} disabled={!canEdit} />
+                <div>
+                  <Label>PGL registration fee (£)</Label>
+                  <Input type="number" step="0.01" min="0" value={pglFee} onChange={(e) => setPglFee(e.target.value)} disabled={!canEdit} />
+                </div>
               </div>
               <div className="sm:col-span-2">
                 <Label>Bank reference</Label>
