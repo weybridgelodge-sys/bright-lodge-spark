@@ -203,6 +203,8 @@ function CollectionDialog({ open, onOpenChange, editing, onSaved }: {
   const [gross, setGross] = useState("0");
   const [costs, setCosts] = useState("0");
   const [notes, setNotes] = useState("");
+  const [bankedDate, setBankedDate] = useState("");
+  const [bankedBy, setBankedBy] = useState("");
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -213,10 +215,12 @@ function CollectionDialog({ open, onOpenChange, editing, onSaved }: {
       setGross(String(editing.gross_amount));
       setCosts(String(editing.costs));
       setNotes(editing.notes ?? "");
+      setBankedDate(editing.banked_date ?? "");
+      setBankedBy(editing.banked_by ?? "");
     } else {
       setDate(new Date().toISOString().slice(0, 10));
       setType("charity_column");
-      setGross("0"); setCosts("0"); setNotes("");
+      setGross("0"); setCosts("0"); setNotes(""); setBankedDate(""); setBankedBy("");
     }
   }, [open, editing]);
 
@@ -228,6 +232,8 @@ function CollectionDialog({ open, onOpenChange, editing, onSaved }: {
       gross_amount: Number(gross) || 0,
       costs: Number(costs) || 0,
       notes: notes || null,
+      banked_date: bankedDate || null,
+      banked_by: bankedBy || null,
     };
     const { error } = editing
       ? await supabase.from("charity_collections").update(payload).eq("id", editing.id)
@@ -265,6 +271,10 @@ function CollectionDialog({ open, onOpenChange, editing, onSaved }: {
             <div><Label>Gross amount (£)</Label><Input type="number" step="0.01" value={gross} onChange={(e) => setGross(e.target.value)} /></div>
             <div><Label>Costs (£)</Label><Input type="number" step="0.01" value={costs} onChange={(e) => setCosts(e.target.value)} /></div>
           </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div><Label>Banked date</Label><Input type="date" value={bankedDate} onChange={(e) => setBankedDate(e.target.value)} /></div>
+            <div><Label>Banked by</Label><Input value={bankedBy} onChange={(e) => setBankedBy(e.target.value)} placeholder="e.g. Charity Steward" /></div>
+          </div>
           <div><Label>Notes</Label><Textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} /></div>
         </div>
         <DialogFooter className="flex items-center justify-between gap-2">
@@ -281,11 +291,12 @@ function CollectionDialog({ open, onOpenChange, editing, onSaved }: {
 // ─────────────────────────────────────────────────────────────────────────────
 // Donations tab
 // ─────────────────────────────────────────────────────────────────────────────
-function DonationsTab({ donations, charities, festival, canEdit, onChange }: {
-  donations: Donation[]; charities: Charity[]; festival: FestivalSettings | null; canEdit: boolean; onChange: () => void;
+function DonationsTab({ donations, charities, festival, canEdit, canPost, onChange }: {
+  donations: Donation[]; charities: Charity[]; festival: FestivalSettings | null; canEdit: boolean; canPost: boolean; onChange: () => void;
 }) {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Donation | null>(null);
+  const [posting, setPosting] = useState<string | null>(null);
   const year = currentMasonicYear();
   const ytd = donations.filter((d) => inYear(d.donation_date, year));
   const sumLodge = (xs: Donation[]) => xs.reduce((a, d) => a + Number(d.amount), 0);
@@ -300,6 +311,17 @@ function DonationsTab({ donations, charities, festival, canEdit, onChange }: {
 
 
   const charityById = new Map(charities.map((c) => [c.id, c]));
+
+  const post = async (d: Donation) => {
+    setPosting(d.id);
+    try {
+      await postDonationToLedger(d, charityById.get(d.charity_id)?.name ?? "charity");
+      toast({ title: "Posted to accounts" });
+      onChange();
+    } catch (e: any) {
+      toast({ title: "Could not post to accounts", description: e.message, variant: "destructive" });
+    } finally { setPosting(null); }
+  };
 
   return (
     <div className="space-y-4">
@@ -345,13 +367,15 @@ function DonationsTab({ donations, charities, festival, canEdit, onChange }: {
                 <th className="px-4 py-2 text-right">Total donation</th>
                 <th className="px-4 py-2">Purpose</th>
                 <th className="px-4 py-2">Method</th>
+                <th className="px-4 py-2">Banked</th>
                 <th className="px-4 py-2">Flags</th>
+                {canPost && <th className="px-4 py-2">Accounts</th>}
                 {canEdit && <th className="px-4 py-2 w-12"></th>}
               </tr>
             </thead>
             <tbody>
               {donations.length === 0 && (
-                <tr><td colSpan={canEdit ? 9 : 8} className="px-4 py-6 text-center text-primary-foreground/50">No donations recorded.</td></tr>
+                <tr><td colSpan={(canEdit ? 10 : 9) + (canPost ? 1 : 0)} className="px-4 py-6 text-center text-primary-foreground/50">No donations recorded.</td></tr>
               )}
               {donations.map((d) => {
                 const lodge = Number(d.amount);
@@ -365,12 +389,37 @@ function DonationsTab({ donations, charities, festival, canEdit, onChange }: {
                   <td className="px-4 py-2 text-right tabular-nums text-gold">{gbp(lodge + match)}</td>
                   <td className="px-4 py-2 text-xs text-primary-foreground/70 max-w-[200px] truncate" title={d.purpose ?? ""}>{d.purpose}</td>
                   <td className="px-4 py-2">{PAYMENT_METHOD_LABEL[d.payment_method]}</td>
+                  <td className="px-4 py-2 text-xs text-primary-foreground/70 whitespace-nowrap">
+                    {d.banked_date ? new Date(d.banked_date).toLocaleDateString("en-GB") : <span className="text-amber-300/80">Not paid</span>}
+                    {d.banked_by && <span className="block text-primary-foreground/50">by {d.banked_by}</span>}
+                  </td>
                   <td className="px-4 py-2 space-x-1">
                     {isFestivalDonation(d, charities, festival) && <Badge variant="outline" className="border-gold/40 text-gold text-[10px]">Festival</Badge>}
                     {match > 0 && <Badge variant="outline" className="border-emerald-400/40 text-emerald-300 text-[10px]">Match</Badge>}
                     {d.from_relief_chest && <Badge variant="outline" className="border-blue-400/40 text-blue-300 text-[10px]">Relief Chest</Badge>}
                     {d.confirmation_received && <Badge variant="outline" className="border-emerald-400/40 text-emerald-300 text-[10px]">✓</Badge>}
                   </td>
+                  {canPost && (
+                    <td className="px-4 py-2">
+                      {d.is_festival_contribution ? (
+                        <span className="text-[11px] text-primary-foreground/50 italic">Memorandum only</span>
+                      ) : d.journal_entry_id ? (
+                        <Badge variant="outline" className="border-emerald-400/40 text-emerald-300 text-[10px]">Posted</Badge>
+                      ) : (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-7 border-gold/30 text-xs"
+                          disabled={!d.banked_date || posting === d.id}
+                          title={!d.banked_date ? "Enter banked date first" : "Post to accounts"}
+                          onClick={() => post(d)}
+                        >
+                          {posting === d.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <BookCheck className="w-3.5 h-3.5 mr-1" />}
+                          Post to accounts
+                        </Button>
+                      )}
+                    </td>
+                  )}
                   {canEdit && (
                     <td className="px-4 py-2 text-right">
                       <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => { setEditing(d); setOpen(true); }}>
@@ -387,7 +436,7 @@ function DonationsTab({ donations, charities, festival, canEdit, onChange }: {
                   <td className="px-4 py-2 text-right tabular-nums">{gbp(grandLodge)}</td>
                   <td className="px-4 py-2 text-right tabular-nums">{gbp(grandMatch)}</td>
                   <td className="px-4 py-2 text-right tabular-nums text-gold">{gbp(grandTotal)}</td>
-                  <td colSpan={canEdit ? 4 : 3}></td>
+                  <td colSpan={(canEdit ? 5 : 4) + (canPost ? 1 : 0)}></td>
                 </tr>
               )}
 
@@ -416,6 +465,8 @@ function DonationDialog({ open, onOpenChange, editing, charities, onSaved }: {
   const [confirmed, setConfirmed] = useState(false);
   const [isFestival, setIsFestival] = useState(false);
   const [fromChest, setFromChest] = useState(false);
+  const [bankedDate, setBankedDate] = useState("");
+  const [bankedBy, setBankedBy] = useState("");
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -427,11 +478,13 @@ function DonationDialog({ open, onOpenChange, editing, charities, onSaved }: {
       setPurpose(editing.purpose ?? ""); setMethod(editing.payment_method); setReference(editing.payment_reference ?? "");
       setAuthBy(editing.authorised_by); setConfirmed(editing.confirmation_received);
       setIsFestival(editing.is_festival_contribution); setFromChest(editing.from_relief_chest);
+      setBankedDate(editing.banked_date ?? ""); setBankedBy(editing.banked_by ?? "");
     } else {
       setDate(new Date().toISOString().slice(0, 10));
       setCharityId(charities[0]?.id ?? ""); setAmount("0"); setHasMatch(false); setMatchAmount("0");
       setPurpose(""); setMethod("bacs");
       setReference(""); setAuthBy("wm"); setConfirmed(false); setIsFestival(false); setFromChest(false);
+      setBankedDate(""); setBankedBy("");
     }
   }, [open, editing, charities]);
 
@@ -506,6 +559,13 @@ function DonationDialog({ open, onOpenChange, editing, charities, onSaved }: {
               </Select>
             </div>
             <div><Label>Reference</Label><Input value={reference} onChange={(e) => setReference(e.target.value)} placeholder="Cheque no. / BACS ref" /></div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label>Date payment left the bank</Label>
+              <Input type="date" value={bankedDate} onChange={(e) => setBankedDate(e.target.value)} />
+            </div>
+            <div><Label>Paid by</Label><Input value={bankedBy} onChange={(e) => setBankedBy(e.target.value)} placeholder="e.g. Treasurer" /></div>
           </div>
           <div>
             <Label>Authorised by</Label>
@@ -1370,7 +1430,7 @@ function FeedTab({ festival, canEdit, onChange }: { festival: FestivalSettings |
 // Page shell
 // ─────────────────────────────────────────────────────────────────────────────
 function Inner() {
-  const { isAdmin, isWorshipfulMaster, isSecretary } = useAuth();
+  const { isAdmin, isWorshipfulMaster, isSecretary, isCurrentTreasurer } = useAuth();
   // We can't yet rely on a charity_steward role from useAuth — check via SQL helper instead.
   const [canEdit, setCanEdit] = useState(isAdmin || isWorshipfulMaster);
   const [charities, setCharities] = useState<Charity[]>([]);
@@ -1468,8 +1528,8 @@ function Inner() {
             <span>Website Feed</span>
           </TabsTrigger>
         </TabsList>
-        <TabsContent value="collections"><CollectionsTab collections={collections} donations={donations} canEdit={canEdit} onChange={reload} /></TabsContent>
-        <TabsContent value="donations"><DonationsTab donations={donations} charities={charities} festival={festival} canEdit={canEdit} onChange={reload} /></TabsContent>
+        <TabsContent value="collections"><CollectionsTab collections={collections} donations={donations} canEdit={canEdit} canPost={isAdmin || isCurrentTreasurer} onChange={reload} /></TabsContent>
+        <TabsContent value="donations"><DonationsTab donations={donations} charities={charities} festival={festival} canEdit={canEdit} canPost={isAdmin || isCurrentTreasurer} onChange={reload} /></TabsContent>
         <TabsContent value="ledger"><LedgerTab charities={charities} donations={donations} canEdit={canEdit} onChange={reload} /></TabsContent>
         <TabsContent value="festival"><FestivalTab donations={donations} charities={charities} festival={festival} canEdit={canEdit} onChange={reload} /></TabsContent>
         <TabsContent value="report"><ReportTab charities={charities} collections={collections} donations={donations} festival={festival} canEdit={canEdit} /></TabsContent>
