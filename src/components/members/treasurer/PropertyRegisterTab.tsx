@@ -475,7 +475,13 @@ export default function PropertyRegisterTab({ canEdit }: { canEdit: boolean }) {
                       multiple
                       disabled={uploading}
                       className="text-primary-foreground"
-                      onChange={(e) => { uploadFiles(e.target.files); e.currentTarget.value = ""; }}
+                      onChange={(e) => {
+                        const input = e.currentTarget;
+                        const selected = Array.from(input.files ?? []);
+                        input.value = "";
+                        void uploadFiles(selected);
+                      }}
+
                     />
                     {uploading ? <Loader2 className="w-4 h-4 animate-spin text-gold" /> : <Upload className="w-4 h-4 text-gold" />}
                   </div>
