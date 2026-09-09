@@ -124,12 +124,7 @@ export default function MembersAdmin() {
 
   const load = async () => {
     const [{ data: p, error: pErr }, { data: r, error: rErr }, { data: n, error: nErr }] = await Promise.all([
-      supabase
-        .from("profiles")
-        .select(
-          "id,email,full_name,title,first_name,middle_name,last_name,preferred_name,post_nominals,provincial_rank,grand_rank,initiation_date,rank,mother_lodge,status,status_changed_at,degree,is_past_master,is_royal_arch,is_honorary_member,is_ugle_portal_registered,passing_date,raising_date,joined_lodge_date,created_at"
-        )
-        .order("created_at", { ascending: false }),
+      (supabase as any).rpc("get_admin_profiles"),
       supabase.from("user_roles").select("user_id,role"),
       supabase.from("member_notices").select("*").order("created_at", { ascending: false }),
     ]);
