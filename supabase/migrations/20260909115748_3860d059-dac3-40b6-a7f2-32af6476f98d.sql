@@ -1,0 +1,1 @@
+alter table public.bookings add column if not exists refund_journal_entry_id uuid references public.journal_entries(id);
