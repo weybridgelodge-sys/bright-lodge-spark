@@ -4,6 +4,7 @@ import ProtectedRoute from "@/components/members/ProtectedRoute";
 import DiningReconciliationTab from "@/components/members/treasurer/DiningReconciliationTab";
 import CreditorsTab from "@/components/members/treasurer/CreditorsTab";
 import DirectPaymentTab from "@/components/members/treasurer/DirectPaymentTab";
+import NewMemberFeesTab from "@/components/members/treasurer/NewMemberFeesTab";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
