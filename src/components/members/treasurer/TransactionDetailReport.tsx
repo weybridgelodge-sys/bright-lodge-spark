@@ -242,6 +242,13 @@ export default function TransactionDetailReport({ canEdit }: { canEdit: boolean 
                       <td className="px-3 py-1.5">{l.description}</td>
                       <td className="px-3 py-1.5 text-right tabular-nums">{l.debit ? money(l.debit) : ""}</td>
                       <td className="px-3 py-1.5 text-right tabular-nums">{l.credit ? money(l.credit) : ""}</td>
+                      <td className="px-3 py-1.5 text-center">
+                        <Checkbox
+                          checked={l.reconciled}
+                          onCheckedChange={() => toggleReconciled(l.entryId, l.reconciled)}
+                          aria-label="Mark entry reconciled"
+                        />
+                      </td>
                     </tr>
                   ))}
                 </tbody>
