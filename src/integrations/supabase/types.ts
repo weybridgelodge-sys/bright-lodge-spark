@@ -122,6 +122,7 @@ export type Database = {
           promoted_at: string | null
           promoted_from_waitlist: boolean
           promotion_notified_at: string | null
+          refund_journal_entry_id: string | null
           stripe_balance_transaction_id: string | null
           stripe_fee_pence: number | null
           stripe_net_pence: number | null
@@ -154,6 +155,7 @@ export type Database = {
           promoted_at?: string | null
           promoted_from_waitlist?: boolean
           promotion_notified_at?: string | null
+          refund_journal_entry_id?: string | null
           stripe_balance_transaction_id?: string | null
           stripe_fee_pence?: number | null
           stripe_net_pence?: number | null
@@ -186,6 +188,7 @@ export type Database = {
           promoted_at?: string | null
           promoted_from_waitlist?: boolean
           promotion_notified_at?: string | null
+          refund_journal_entry_id?: string | null
           stripe_balance_transaction_id?: string | null
           stripe_fee_pence?: number | null
           stripe_net_pence?: number | null
@@ -211,6 +214,13 @@ export type Database = {
             columns: ["meeting_id"]
             isOneToOne: false
             referencedRelation: "festive_board_meetings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_refund_journal_entry_id_fkey"
+            columns: ["refund_journal_entry_id"]
+            isOneToOne: false
+            referencedRelation: "journal_entries"
             referencedColumns: ["id"]
           },
         ]
