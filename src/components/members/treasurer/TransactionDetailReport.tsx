@@ -112,12 +112,12 @@ export default function TransactionDetailReport({ canEdit }: { canEdit: boolean 
   const toggleReconciled = async (entryId: string, current: boolean) => {
     const next = !current;
     setEntryReconciled(entryId, next);
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from("journal_entries" as any)
       .update({ reconciled: next })
       .eq("id", entryId)
       .select("id");
-    if (error) {
+    if (error || !data || data.length === 0) {
       setEntryReconciled(entryId, current);
       toast({
         title: "Can't change reconciled status — this entry's period is locked",
