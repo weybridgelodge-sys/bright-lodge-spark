@@ -4,6 +4,7 @@ import ProtectedRoute from "@/components/members/ProtectedRoute";
 import DiningReconciliationTab from "@/components/members/treasurer/DiningReconciliationTab";
 import CreditorsTab from "@/components/members/treasurer/CreditorsTab";
 import DirectPaymentTab from "@/components/members/treasurer/DirectPaymentTab";
+import DirectReceiptTab from "@/components/members/treasurer/DirectReceiptTab";
 import NewMemberFeesTab from "@/components/members/treasurer/NewMemberFeesTab";
 import GeneralJournalTab from "@/components/members/treasurer/GeneralJournalTab";
 import IncomeExpenditureReport from "@/components/members/treasurer/IncomeExpenditureReport";
@@ -681,6 +682,7 @@ function Inner() {
             <TabsTrigger value="dining">Dining Reconciliation</TabsTrigger>
             {canEditTx && <TabsTrigger value="creditors">Creditors</TabsTrigger>}
             {canEditTx && <TabsTrigger value="direct-payment">Direct Payment</TabsTrigger>}
+            {canEditTx && <TabsTrigger value="direct-receipt">Direct Receipt</TabsTrigger>}
             {canEditTx && <TabsTrigger value="new-member-fees">New Member Fees</TabsTrigger>}
             {canEditTx && <TabsTrigger value="general-journal">General Journal</TabsTrigger>}
             {canEditTx && <TabsTrigger value="income-expenditure">Income &amp; Expenditure</TabsTrigger>}
@@ -705,6 +707,11 @@ function Inner() {
           {canEditTx && (
             <TabsContent value="direct-payment" className="mt-4">
               <DirectPaymentTab canEdit={canEditTx} />
+            </TabsContent>
+          )}
+          {canEditTx && (
+            <TabsContent value="direct-receipt" className="mt-4">
+              <DirectReceiptTab canEdit={canEditTx} />
             </TabsContent>
           )}
           {canEditTx && (
