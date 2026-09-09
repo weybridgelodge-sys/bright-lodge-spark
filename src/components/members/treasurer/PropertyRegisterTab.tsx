@@ -501,6 +501,49 @@ export default function PropertyRegisterTab({ canEdit }: { canEdit: boolean }) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <Dialog open={!!viewerItem} onOpenChange={(o) => { if (!o) setViewerItem(null); }}>
+        <DialogContent className="bg-navy-light border-gold/30 max-w-3xl max-h-[90vh] overflow-y-auto p-4 sm:p-6">
+          <DialogHeader>
+            <DialogTitle className="font-serif text-gold">{viewerItem?.item} — photos</DialogTitle>
+          </DialogHeader>
+          {viewerItem && (() => {
+            const list = imagesFor(viewerItem.id);
+            const current = list[Math.min(viewerIndex, list.length - 1)];
+            if (!current) return <p className="text-primary-foreground/70">No photos.</p>;
+            return (
+              <div className="space-y-3">
+                <img
+                  src={signedUrls[current.storage_path]}
+                  alt={current.file_name}
+                  className="w-full max-h-[60vh] object-contain rounded-sm border border-gold/20 bg-navy"
+                />
+                <div className="flex items-center justify-between">
+                  <Button
+                    variant="ghost"
+                    className="text-primary-foreground/80 hover:text-gold"
+                    disabled={list.length < 2}
+                    onClick={() => setViewerIndex((i) => (i - 1 + list.length) % list.length)}
+                  >
+                    <ChevronLeft className="w-4 h-4 mr-1" /> Previous
+                  </Button>
+                  <span className="text-primary-foreground/70 text-sm">
+                    {Math.min(viewerIndex, list.length - 1) + 1} of {list.length}
+                  </span>
+                  <Button
+                    variant="ghost"
+                    className="text-primary-foreground/80 hover:text-gold"
+                    disabled={list.length < 2}
+                    onClick={() => setViewerIndex((i) => (i + 1) % list.length)}
+                  >
+                    Next <ChevronRight className="w-4 h-4 ml-1" />
+                  </Button>
+                </div>
+              </div>
+            );
+          })()}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
