@@ -19,8 +19,28 @@ export default function MembersLayout({ children }: { children: React.ReactNode 
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   useEffect(() => {
-    document.documentElement.classList.add("portal-canvas");
-    return () => document.documentElement.classList.remove("portal-canvas");
+    const root = document.documentElement;
+    const updateVisualViewportBottom = () => {
+      const viewport = window.visualViewport;
+      const bottomInset = viewport
+        ? Math.max(0, root.clientHeight - viewport.height - viewport.offsetTop)
+        : 0;
+      root.style.setProperty("--portal-visual-viewport-bottom", `${bottomInset}px`);
+    };
+
+    root.classList.add("portal-canvas");
+    updateVisualViewportBottom();
+    window.visualViewport?.addEventListener("resize", updateVisualViewportBottom);
+    window.visualViewport?.addEventListener("scroll", updateVisualViewportBottom);
+    window.addEventListener("resize", updateVisualViewportBottom);
+
+    return () => {
+      root.classList.remove("portal-canvas");
+      root.style.removeProperty("--portal-visual-viewport-bottom");
+      window.visualViewport?.removeEventListener("resize", updateVisualViewportBottom);
+      window.visualViewport?.removeEventListener("scroll", updateVisualViewportBottom);
+      window.removeEventListener("resize", updateVisualViewportBottom);
+    };
   }, []);
 
   const handleSignOut = async () => {
@@ -181,8 +201,12 @@ export default function MembersLayout({ children }: { children: React.ReactNode 
 
       {/* Mobile Bottom Sticky Navigation Strip — Visible below 1024px */}
       <div
-        className="lg:hidden fixed bottom-0 left-0 right-0 min-h-[6.5rem] bg-navy-dark border-t border-gold/20 flex items-stretch justify-around z-50"
-        style={{ paddingTop: "0.75rem", paddingBottom: "max(3.5rem, env(safe-area-inset-bottom))" }}
+        className="lg:hidden fixed left-0 right-0 min-h-[4.5rem] bg-navy-dark border-t border-gold/20 flex items-stretch justify-around z-50"
+        style={{
+          bottom: "var(--portal-visual-viewport-bottom, 0px)",
+          paddingTop: "0.5rem",
+          paddingBottom: "max(0.5rem, env(safe-area-inset-bottom))",
+        }}
       >
         <NavLink to="/members" end className={({ isActive }) => `flex flex-col items-center justify-center gap-1 leading-none text-[10px] font-bold ${isActive ? "text-gold" : "text-primary-foreground/60"}`}>
           <Shield className="h-5 w-5" />
