@@ -710,6 +710,11 @@ function Inner() {
             </TabsContent>
           )}
           {canEditTx && (
+            <TabsContent value="direct-receipt" className="mt-4">
+              <DirectReceiptTab canEdit={canEditTx} />
+            </TabsContent>
+          )}
+          {canEditTx && (
             <TabsContent value="new-member-fees" className="mt-4">
               <NewMemberFeesTab canEdit={canEditTx} />
             </TabsContent>
