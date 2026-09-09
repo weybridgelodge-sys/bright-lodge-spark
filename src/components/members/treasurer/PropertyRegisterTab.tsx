@@ -25,6 +25,14 @@ const fmtDate = (d: string | null) => {
   return date.toLocaleDateString("en-GB");
 };
 
+type PropertyImage = {
+  id: string;
+  property_item_id: string;
+  storage_path: string;
+  file_name: string;
+  file_size: number | null;
+};
+
 type Item = {
   id: string;
   item: string;
