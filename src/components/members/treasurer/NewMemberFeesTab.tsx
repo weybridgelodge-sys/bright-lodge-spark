@@ -229,19 +229,21 @@ export default function NewMemberFeesTab({ canEdit }: { canEdit: boolean }) {
                 <Label>Annual subscription rate (£)</Label>
                 <Input type="number" step="0.01" min="0" value={subRate} onChange={(e) => setSubRate(e.target.value)} disabled={!canEdit} />
               </div>
-              <div>
-                <Label>New member&apos;s age bracket</Label>
-                <Select value={ageBracket} onValueChange={(v) => setAgeBracket(v as "over25" | "under25")} disabled={!canEdit}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="over25">25 and over</SelectItem>
-                    <SelectItem value="under25">Under 25</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label>UGLE registration fee (£)</Label>
-                <Input type="number" step="0.01" min="0" value={ugleFee} onChange={(e) => setUgleFee(e.target.value)} disabled={!canEdit} />
+              <div className="space-y-3">
+                <div>
+                  <Label>New member&apos;s age at initiation</Label>
+                  <Select value={ageBracket} onValueChange={(v) => applyAgeBandDefault(v as "over25" | "under25")} disabled={!canEdit}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="over25">25 and over (£132.00)</SelectItem>
+                      <SelectItem value="under25">Under 25 (£66.00)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>UGLE registration fee (£)</Label>
+                  <Input type="number" step="0.01" min="0" value={ugleFee} onChange={(e) => setUgleFee(e.target.value)} disabled={!canEdit} />
+                </div>
               </div>
               <div>
                 <Label>PGL registration fee (£)</Label>
