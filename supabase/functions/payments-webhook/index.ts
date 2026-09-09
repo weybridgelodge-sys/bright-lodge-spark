@@ -459,6 +459,7 @@ Deno.serve(async (req) => {
         break;
       case "charge.refunded":
         await handleDuesChargeRefunded(event.data.object, env);
+        await handleBookingChargeRefunded(event.data.object, env);
         break;
       case "customer.subscription.updated":
       case "customer.subscription.deleted":
