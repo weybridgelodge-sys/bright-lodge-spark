@@ -10,6 +10,8 @@ import { fetchAccounts, treasurerYearBounds, treasurerYearContaining, fmtDate, m
 
 type Line = {
   id: string;
+  entryId: string;
+  reconciled: boolean;
   date: string;
   code: string;
   accountName: string;
