@@ -1421,6 +1421,44 @@ export type Database = {
           },
         ]
       }
+      lodge_property_images: {
+        Row: {
+          file_name: string
+          file_size: number | null
+          id: string
+          property_item_id: string
+          storage_path: string
+          uploaded_at: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          file_name: string
+          file_size?: number | null
+          id?: string
+          property_item_id: string
+          storage_path: string
+          uploaded_at?: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          file_name?: string
+          file_size?: number | null
+          id?: string
+          property_item_id?: string
+          storage_path?: string
+          uploaded_at?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lodge_property_images_property_item_id_fkey"
+            columns: ["property_item_id"]
+            isOneToOne: false
+            referencedRelation: "lodge_property_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lodge_property_items: {
         Row: {
           condition: string | null
