@@ -274,7 +274,7 @@ export default function PropertyRegisterTab({ canEdit }: { canEdit: boolean }) {
       </section>
 
       <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) resetForm(); }}>
-        <DialogContent className="bg-navy-light border-gold/30">
+        <DialogContent className="bg-navy-light border-gold/30 max-h-[90vh] overflow-y-auto p-4 sm:p-6">
           <DialogHeader>
             <DialogTitle className="font-serif text-gold">{editingId ? "Edit item" : "Add item"}</DialogTitle>
           </DialogHeader>
