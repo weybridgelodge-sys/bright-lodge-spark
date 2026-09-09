@@ -196,7 +196,8 @@ export default function NewMemberFeesTab({ canEdit }: { canEdit: boolean }) {
     setAgeBracket("over25");
     setUgleFee("132.00");
     lastUgleDefaultRef.current = "132.00";
-    setPglFee("0.00");
+    setPglFee("15.12");
+    lastPglDefaultRef.current = "15.12";
     setBankReference("");
     toast({ title: "New member fees posted", description: `${posted.length} ledger entries created.` });
   };
