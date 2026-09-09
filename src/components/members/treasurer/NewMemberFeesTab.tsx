@@ -31,10 +31,15 @@ export default function NewMemberFeesTab({ canEdit }: { canEdit: boolean }) {
   const [meeting, setMeeting] = useState<string>("October");
   const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [subRate, setSubRate] = useState("250.00");
-  const [ugleFee, setUgleFee] = useState("0.00");
+  const [ageBracket, setAgeBracket] = useState<"over25" | "under25">("over25");
+  const [ugleFee, setUgleFee] = useState("132.00");
   const [pglFee, setPglFee] = useState("0.00");
   const [bankReference, setBankReference] = useState("");
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    setUgleFee(ageBracket === "over25" ? "132.00" : "66.00");
+  }, [ageBracket]);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -174,6 +179,7 @@ export default function NewMemberFeesTab({ canEdit }: { canEdit: boolean }) {
 
     setSaving(false);
     setName("");
+    setAgeBracket("over25");
     setUgleFee("0.00");
     setPglFee("0.00");
     setBankReference("");
@@ -214,6 +220,16 @@ export default function NewMemberFeesTab({ canEdit }: { canEdit: boolean }) {
               <div>
                 <Label>Annual subscription rate (£)</Label>
                 <Input type="number" step="0.01" min="0" value={subRate} onChange={(e) => setSubRate(e.target.value)} disabled={!canEdit} />
+              </div>
+              <div>
+                <Label>New member&apos;s age bracket</Label>
+                <Select value={ageBracket} onValueChange={(v) => setAgeBracket(v as "over25" | "under25")} disabled={!canEdit}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="over25">25 and over</SelectItem>
+                    <SelectItem value="under25">Under 25</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <div>
                 <Label>UGLE registration fee (£)</Label>
