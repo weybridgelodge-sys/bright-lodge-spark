@@ -23,7 +23,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
 import { toUploadBody } from "@/lib/nativeUpload";
-import { Loader2, Plus, Pencil, Trash2, Lock, Unlock, ShieldCheck, Paperclip } from "lucide-react";
+import { Loader2, Plus, Pencil, Trash2, Lock, Unlock, ShieldCheck, Paperclip, Table, Utensils, Handshake, ArrowUpCircle, ArrowDownCircle, UserPlus, BookOpen, TrendingUp, Scale, Search } from "lucide-react";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 type Period = {
@@ -677,18 +677,100 @@ function Inner() {
         <p className="text-primary-foreground/60"><Loader2 className="w-4 h-4 mr-1 inline animate-spin" /> Loading…</p>
       ) : (
         <Tabs value={tab} onValueChange={setTab}>
-          <TabsList className="h-auto flex-wrap justify-start sm:flex-nowrap">
-            <TabsTrigger value="transactions">Transaction Register</TabsTrigger>
-            <TabsTrigger value="dining">Dining Reconciliation</TabsTrigger>
-            {canEditTx && <TabsTrigger value="creditors">Creditors</TabsTrigger>}
-            {canEditTx && <TabsTrigger value="direct-payment">Direct Payment</TabsTrigger>}
-            {canEditTx && <TabsTrigger value="direct-receipt">Direct Receipt</TabsTrigger>}
-            {canEditTx && <TabsTrigger value="new-member-fees">New Member Fees</TabsTrigger>}
-            {canEditTx && <TabsTrigger value="general-journal">General Journal</TabsTrigger>}
-            {canEditTx && <TabsTrigger value="income-expenditure">Income &amp; Expenditure</TabsTrigger>}
-            {canEditTx && <TabsTrigger value="balance-sheet">Balance Sheet</TabsTrigger>}
-            {canEditTx && <TabsTrigger value="transaction-detail">Transaction Detail</TabsTrigger>}
-            <TabsTrigger value="reconciliation">Reconciliation</TabsTrigger>
+          <TabsList className="flex flex-col w-full h-auto items-stretch gap-1 bg-navy p-2 rounded-sm border border-gold/20 mb-4">
+            <TabsTrigger
+              value="transactions"
+              className="w-full flex items-center justify-start gap-3 px-4 py-3 rounded-sm text-sm font-sans text-primary-foreground/80 transition-colors hover:text-gold hover:bg-navy-light/40 data-[state=active]:bg-gold/15 data-[state=active]:text-gold data-[state=active]:shadow-none"
+            >
+              <Table className="w-4 h-4 shrink-0" />
+              <span>Transaction Register</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="dining"
+              className="w-full flex items-center justify-start gap-3 px-4 py-3 rounded-sm text-sm font-sans text-primary-foreground/80 transition-colors hover:text-gold hover:bg-navy-light/40 data-[state=active]:bg-gold/15 data-[state=active]:text-gold data-[state=active]:shadow-none"
+            >
+              <Utensils className="w-4 h-4 shrink-0" />
+              <span>Dining Reconciliation</span>
+            </TabsTrigger>
+            {canEditTx && (
+              <TabsTrigger
+                value="creditors"
+                className="w-full flex items-center justify-start gap-3 px-4 py-3 rounded-sm text-sm font-sans text-primary-foreground/80 transition-colors hover:text-gold hover:bg-navy-light/40 data-[state=active]:bg-gold/15 data-[state=active]:text-gold data-[state=active]:shadow-none"
+              >
+                <Handshake className="w-4 h-4 shrink-0" />
+                <span>Creditors</span>
+              </TabsTrigger>
+            )}
+            {canEditTx && (
+              <TabsTrigger
+                value="direct-payment"
+                className="w-full flex items-center justify-start gap-3 px-4 py-3 rounded-sm text-sm font-sans text-primary-foreground/80 transition-colors hover:text-gold hover:bg-navy-light/40 data-[state=active]:bg-gold/15 data-[state=active]:text-gold data-[state=active]:shadow-none"
+              >
+                <ArrowUpCircle className="w-4 h-4 shrink-0" />
+                <span>Direct Payment</span>
+              </TabsTrigger>
+            )}
+            {canEditTx && (
+              <TabsTrigger
+                value="direct-receipt"
+                className="w-full flex items-center justify-start gap-3 px-4 py-3 rounded-sm text-sm font-sans text-primary-foreground/80 transition-colors hover:text-gold hover:bg-navy-light/40 data-[state=active]:bg-gold/15 data-[state=active]:text-gold data-[state=active]:shadow-none"
+              >
+                <ArrowDownCircle className="w-4 h-4 shrink-0" />
+                <span>Direct Receipt</span>
+              </TabsTrigger>
+            )}
+            {canEditTx && (
+              <TabsTrigger
+                value="new-member-fees"
+                className="w-full flex items-center justify-start gap-3 px-4 py-3 rounded-sm text-sm font-sans text-primary-foreground/80 transition-colors hover:text-gold hover:bg-navy-light/40 data-[state=active]:bg-gold/15 data-[state=active]:text-gold data-[state=active]:shadow-none"
+              >
+                <UserPlus className="w-4 h-4 shrink-0" />
+                <span>New Member Fees</span>
+              </TabsTrigger>
+            )}
+            {canEditTx && (
+              <TabsTrigger
+                value="general-journal"
+                className="w-full flex items-center justify-start gap-3 px-4 py-3 rounded-sm text-sm font-sans text-primary-foreground/80 transition-colors hover:text-gold hover:bg-navy-light/40 data-[state=active]:bg-gold/15 data-[state=active]:text-gold data-[state=active]:shadow-none"
+              >
+                <BookOpen className="w-4 h-4 shrink-0" />
+                <span>General Journal</span>
+              </TabsTrigger>
+            )}
+            {canEditTx && (
+              <TabsTrigger
+                value="income-expenditure"
+                className="w-full flex items-center justify-start gap-3 px-4 py-3 rounded-sm text-sm font-sans text-primary-foreground/80 transition-colors hover:text-gold hover:bg-navy-light/40 data-[state=active]:bg-gold/15 data-[state=active]:text-gold data-[state=active]:shadow-none"
+              >
+                <TrendingUp className="w-4 h-4 shrink-0" />
+                <span>Income &amp; Expenditure</span>
+              </TabsTrigger>
+            )}
+            {canEditTx && (
+              <TabsTrigger
+                value="balance-sheet"
+                className="w-full flex items-center justify-start gap-3 px-4 py-3 rounded-sm text-sm font-sans text-primary-foreground/80 transition-colors hover:text-gold hover:bg-navy-light/40 data-[state=active]:bg-gold/15 data-[state=active]:text-gold data-[state=active]:shadow-none"
+              >
+                <Scale className="w-4 h-4 shrink-0" />
+                <span>Balance Sheet</span>
+              </TabsTrigger>
+            )}
+            {canEditTx && (
+              <TabsTrigger
+                value="transaction-detail"
+                className="w-full flex items-center justify-start gap-3 px-4 py-3 rounded-sm text-sm font-sans text-primary-foreground/80 transition-colors hover:text-gold hover:bg-navy-light/40 data-[state=active]:bg-gold/15 data-[state=active]:text-gold data-[state=active]:shadow-none"
+              >
+                <Search className="w-4 h-4 shrink-0" />
+                <span>Transaction Detail</span>
+              </TabsTrigger>
+            )}
+            <TabsTrigger
+              value="reconciliation"
+              className="w-full flex items-center justify-start gap-3 px-4 py-3 rounded-sm text-sm font-sans text-primary-foreground/80 transition-colors hover:text-gold hover:bg-navy-light/40 data-[state=active]:bg-gold/15 data-[state=active]:text-gold data-[state=active]:shadow-none"
+            >
+              <Lock className="w-4 h-4 shrink-0" />
+              <span>Reconciliation</span>
+            </TabsTrigger>
           </TabsList>
           <TabsContent value="transactions" className="mt-4">
             <TransactionsTab transactions={transactions} periods={periods} canEdit={canEditTx} onChange={load} highlightTxId={highlightTxId} />
