@@ -1394,8 +1394,10 @@ export type Database = {
           condition: string | null
           count: number
           created_at: string
+          date_acquired: string | null
           id: string
           item: string
+          location: string | null
           notes: string | null
           updated_at: string
           value_pence: number
@@ -1404,8 +1406,10 @@ export type Database = {
           condition?: string | null
           count?: number
           created_at?: string
+          date_acquired?: string | null
           id?: string
           item: string
+          location?: string | null
           notes?: string | null
           updated_at?: string
           value_pence?: number
@@ -1414,8 +1418,10 @@ export type Database = {
           condition?: string | null
           count?: number
           created_at?: string
+          date_acquired?: string | null
           id?: string
           item?: string
+          location?: string | null
           notes?: string | null
           updated_at?: string
           value_pence?: number

@@ -1,0 +1,1 @@
+ALTER TABLE public.lodge_property_items ADD COLUMN date_acquired date, ADD COLUMN location text;

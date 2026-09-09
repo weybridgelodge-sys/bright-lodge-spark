@@ -14,12 +14,21 @@ const CONDITIONS = ["Excellent", "Good", "Fair", "Poor", "Needs Repair/Replaceme
 const money = (pence: number) =>
   `${pence < 0 ? "-" : ""}£${(Math.abs(pence) / 100).toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
+const fmtDate = (d: string | null) => {
+  if (!d) return "—";
+  const date = new Date(d);
+  if (Number.isNaN(date.getTime())) return d;
+  return date.toLocaleDateString("en-GB");
+};
+
 type Item = {
   id: string;
   item: string;
   count: number;
   value_pence: number;
   condition: string | null;
+  date_acquired: string | null;
+  location: string | null;
   notes: string | null;
 };
 
@@ -34,13 +43,15 @@ export default function PropertyRegisterTab({ canEdit }: { canEdit: boolean }) {
   const [count, setCount] = useState("1");
   const [value, setValue] = useState("0.00");
   const [condition, setCondition] = useState<string>("Good");
+  const [dateAcquired, setDateAcquired] = useState("");
+  const [location, setLocation] = useState("");
   const [notes, setNotes] = useState("");
 
   const load = useCallback(async () => {
     setLoading(true);
     const { data, error } = await supabase
       .from("lodge_property_items" as any)
-      .select("id,item,count,value_pence,condition,notes")
+      .select("id,item,count,value_pence,condition,date_acquired,location,notes")
       .order("item", { ascending: true });
     if (error) toast({ title: "Could not load property register", description: error.message, variant: "destructive" });
     setRows(((data as unknown as Item[]) ?? []));
@@ -57,6 +68,8 @@ export default function PropertyRegisterTab({ canEdit }: { canEdit: boolean }) {
     setCount("1");
     setValue("0.00");
     setCondition("Good");
+    setDateAcquired("");
+    setLocation("");
     setNotes("");
   };
 
@@ -68,6 +81,8 @@ export default function PropertyRegisterTab({ canEdit }: { canEdit: boolean }) {
     setCount(String(r.count ?? 1));
     setValue(((r.value_pence ?? 0) / 100).toFixed(2));
     setCondition(r.condition ?? "Good");
+    setDateAcquired(r.date_acquired ?? "");
+    setLocation(r.location ?? "");
     setNotes(r.notes ?? "");
     setOpen(true);
   };
@@ -95,6 +110,8 @@ export default function PropertyRegisterTab({ canEdit }: { canEdit: boolean }) {
       count: cnt,
       value_pence: pence,
       condition,
+      date_acquired: dateAcquired || null,
+      location: location.trim() || null,
       notes: notes.trim() || null,
     };
 
@@ -150,8 +167,10 @@ export default function PropertyRegisterTab({ canEdit }: { canEdit: boolean }) {
                 <tr className="text-left text-primary-foreground/60 border-b border-gold/20">
                   <th className="py-2">Item</th>
                   <th className="py-2 text-right">Count</th>
+                  <th className="py-2">Location</th>
                   <th className="py-2 text-right">Value</th>
                   <th className="py-2">Condition</th>
+                  <th className="py-2">Date acquired</th>
                   <th className="py-2">Notes</th>
                   {canEdit && <th className="py-2 text-right">Actions</th>}
                 </tr>
@@ -159,14 +178,16 @@ export default function PropertyRegisterTab({ canEdit }: { canEdit: boolean }) {
               <tbody>
                 {rows.length === 0 ? (
                   <tr>
-                    <td colSpan={canEdit ? 6 : 5} className="py-3 text-primary-foreground/60">No property recorded yet.</td>
+                    <td colSpan={canEdit ? 8 : 7} className="py-3 text-primary-foreground/60">No property recorded yet.</td>
                   </tr>
                 ) : rows.map((r) => (
                   <tr key={r.id} className="border-b border-gold/10 align-top">
                     <td className="py-2 text-primary-foreground">{r.item}</td>
                     <td className="py-2 text-right text-primary-foreground">{r.count}</td>
+                    <td className="py-2 text-primary-foreground/80">{r.location ?? "—"}</td>
                     <td className="py-2 text-right text-primary-foreground">{money(r.value_pence ?? 0)}</td>
                     <td className="py-2 text-primary-foreground/80">{r.condition ?? "—"}</td>
+                    <td className="py-2 text-primary-foreground/80">{fmtDate(r.date_acquired)}</td>
                     <td className="py-2 text-primary-foreground/70 whitespace-pre-wrap">{r.notes ?? ""}</td>
                     {canEdit && (
                       <td className="py-2 text-right whitespace-nowrap">
@@ -185,7 +206,7 @@ export default function PropertyRegisterTab({ canEdit }: { canEdit: boolean }) {
                 <tr className="border-t border-gold/30">
                   <td className="py-3 text-primary-foreground font-semibold" colSpan={2}>Total estimated value</td>
                   <td className="py-3 text-right text-gold font-semibold">{money(totalPence)}</td>
-                  <td className="py-3" colSpan={canEdit ? 3 : 2}></td>
+                  <td className="py-3" colSpan={canEdit ? 5 : 4}></td>
                 </tr>
               </tfoot>
             </table>
@@ -214,6 +235,10 @@ export default function PropertyRegisterTab({ canEdit }: { canEdit: boolean }) {
               </div>
             </div>
             <div>
+              <Label>Location</Label>
+              <Input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="e.g. Lodge Room, GMC store, Secretary's custody" />
+            </div>
+            <div>
               <Label>Condition</Label>
               <Select value={condition} onValueChange={setCondition}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
@@ -223,8 +248,12 @@ export default function PropertyRegisterTab({ canEdit }: { canEdit: boolean }) {
               </Select>
             </div>
             <div>
+              <Label>Date acquired</Label>
+              <Input type="date" value={dateAcquired} onChange={(e) => setDateAcquired(e.target.value)} />
+            </div>
+            <div>
               <Label>Notes</Label>
-              <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Optional — condition detail, location, provenance" />
+              <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Optional — condition detail, provenance, insurance notes" />
             </div>
           </div>
           <DialogFooter>
