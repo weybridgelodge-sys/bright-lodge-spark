@@ -1,18 +1,24 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
-import { Loader2 } from "lucide-react";
+import { Loader2, Plus, Trash2 } from "lucide-react";
 
 const EXCLUDED_CODES = new Set(["5000", "5100", "5200", "5210", "5420", "5600"]);
 
-type Account = { id: string; code: string; name: string };
+type Account = { id: string; code: string; name: string; account_type?: string };
+
+type ExtraLine = { key: string; accountId: string; direction: "debit" | "credit"; amount: string; description: string };
+
+const toPence = (v: string) => Math.round(parseFloat(v || "0") * 100);
+const fmt = (p: number) => `£${(p / 100).toFixed(2)}`;
 
 export default function DirectPaymentTab({ canEdit }: { canEdit: boolean }) {
   const [accounts, setAccounts] = useState<Account[]>([]);
+  const [allAccounts, setAllAccounts] = useState<Account[]>([]);
   const [bankId, setBankId] = useState<string | null>(null);
   const [openPeriodId, setOpenPeriodId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -23,12 +29,14 @@ export default function DirectPaymentTab({ canEdit }: { canEdit: boolean }) {
   const [documentNumber, setDocumentNumber] = useState("");
   const [bankReference, setBankReference] = useState("");
   const [amount, setAmount] = useState("0.00");
+  const [presetAmount, setPresetAmount] = useState("0.00");
+  const [extraLines, setExtraLines] = useState<ExtraLine[]>([]);
   const [saving, setSaving] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
     const [{ data: accts, error: acctErr }, { data: period }] = await Promise.all([
-      supabase.from("chart_of_accounts" as any).select("id,code,name").order("code"),
+      supabase.from("chart_of_accounts" as any).select("id,code,name,account_type").order("code"),
       supabase
         .from("treasurer_periods" as any)
         .select("id")
@@ -39,20 +47,55 @@ export default function DirectPaymentTab({ canEdit }: { canEdit: boolean }) {
     ]);
     if (acctErr) toast({ title: "Could not load accounts", description: acctErr.message, variant: "destructive" });
 
-    const all = ((accts as any[]) ?? []) as (Account & { account_type?: string })[];
+    const all = ((accts as any[]) ?? []) as Account[];
     setBankId(all.find((a) => a.code === "1000")?.id ?? null);
-    setAccounts(
-      all.filter((a) => a.code?.startsWith("5") && !EXCLUDED_CODES.has(a.code)),
-    );
+    setAccounts(all.filter((a) => a.code?.startsWith("5") && !EXCLUDED_CODES.has(a.code)));
+    setAllAccounts(all.filter((a) => !EXCLUDED_CODES.has(a.code)));
     setOpenPeriodId((period as any)?.id ?? null);
     setLoading(false);
   }, []);
 
   useEffect(() => { load(); }, [load]);
 
+  const onAmountChange = (v: string) => {
+    setAmount(v);
+    if (extraLines.length === 0) setPresetAmount(v);
+  };
+
+  const addLine = () => {
+    if (extraLines.length === 0) setPresetAmount(amount);
+    setExtraLines((l) => [
+      ...l,
+      { key: `${Date.now()}-${Math.random()}`, accountId: "", direction: "debit", amount: "0.00", description: "" },
+    ]);
+  };
+
+  const updateLine = (key: string, patch: Partial<ExtraLine>) =>
+    setExtraLines((l) => l.map((x) => (x.key === key ? { ...x, ...patch } : x)));
+  const removeLine = (key: string) =>
+    setExtraLines((l) => {
+      const next = l.filter((x) => x.key !== key);
+      if (next.length === 0) setPresetAmount(amount);
+      return next;
+    });
+
+  const effectivePreset = extraLines.length === 0 ? amount : presetAmount;
+
+  const { debitTotal, creditTotal, diff } = useMemo(() => {
+    let c = toPence(amount); // bank line, Cr
+    let d = toPence(effectivePreset); // expense line, Dr
+    for (const l of extraLines) {
+      const p = toPence(l.amount);
+      if (l.direction === "debit") d += p; else c += p;
+    }
+    return { debitTotal: d, creditTotal: c, diff: d - c };
+  }, [amount, effectivePreset, extraLines]);
+
+  const balanced = diff === 0 && debitTotal > 0;
+
   const submit = async () => {
-    const pence = Math.round(parseFloat(amount || "0") * 100);
-    if (!Number.isFinite(pence) || pence <= 0) {
+    const bankPence = toPence(amount);
+    if (!Number.isFinite(bankPence) || bankPence <= 0) {
       toast({ title: "Enter a positive amount", variant: "destructive" });
       return;
     }
@@ -66,6 +109,14 @@ export default function DirectPaymentTab({ canEdit }: { canEdit: boolean }) {
     }
     if (!bankId) {
       toast({ title: "Bank account 1000 not found", variant: "destructive" });
+      return;
+    }
+    if (extraLines.some((l) => !l.accountId || toPence(l.amount) <= 0)) {
+      toast({ title: "Every added line needs an account and a positive amount", variant: "destructive" });
+      return;
+    }
+    if (!balanced) {
+      toast({ title: "Entry is out of balance", variant: "destructive" });
       return;
     }
 
@@ -93,10 +144,21 @@ export default function DirectPaymentTab({ canEdit }: { canEdit: boolean }) {
     }
 
     const entryId = (entry as any).id as string;
-    const { error: lineErr } = await supabase.from("journal_lines" as any).insert([
-      { entry_id: entryId, account_id: accountId, debit_pence: pence, credit_pence: 0, description: description.trim() },
-      { entry_id: entryId, account_id: bankId, debit_pence: 0, credit_pence: pence, description: description.trim() },
-    ]);
+    const presetPence = toPence(effectivePreset);
+    const lines = [
+      ...(presetPence > 0
+        ? [{ entry_id: entryId, account_id: accountId, debit_pence: presetPence, credit_pence: 0, description: description.trim() }]
+        : []),
+      { entry_id: entryId, account_id: bankId, debit_pence: 0, credit_pence: bankPence, description: description.trim() },
+      ...extraLines.map((l) => ({
+        entry_id: entryId,
+        account_id: l.accountId,
+        debit_pence: l.direction === "debit" ? toPence(l.amount) : 0,
+        credit_pence: l.direction === "credit" ? toPence(l.amount) : 0,
+        description: l.description.trim() || description.trim(),
+      })),
+    ];
+    const { error: lineErr } = await supabase.from("journal_lines" as any).insert(lines);
 
     if (lineErr) {
       await supabase.from("journal_entries" as any).delete().eq("id", entryId);
@@ -107,6 +169,8 @@ export default function DirectPaymentTab({ canEdit }: { canEdit: boolean }) {
 
     setSaving(false);
     setAmount("0.00");
+    setPresetAmount("0.00");
+    setExtraLines([]);
     setDescription("");
     setDocumentNumber("");
     setBankReference("");
@@ -119,7 +183,8 @@ export default function DirectPaymentTab({ canEdit }: { canEdit: boolean }) {
         <h2 className="font-serif text-lg text-gold mb-1">Record a Direct Payment</h2>
         <p className="text-primary-foreground/60 text-sm mb-4">
           For costs paid straight from the bank with no invoice or credit period — e.g. reimbursing an officer
-          who paid personally. Posts a double-entry: Dr expense account, Cr 1000 Bank.
+          who paid personally. Posts a double-entry: Dr expense account, Cr 1000 Bank. Add extra lines if the payment
+          doesn't map to a single account.
         </p>
 
         {loading ? (
@@ -147,9 +212,15 @@ export default function DirectPaymentTab({ canEdit }: { canEdit: boolean }) {
                 <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} disabled={!canEdit} />
               </div>
               <div>
-                <Label>Amount (£)</Label>
-                <Input type="number" step="0.01" min="0" value={amount} onChange={(e) => setAmount(e.target.value)} disabled={!canEdit} />
+                <Label>Amount (£) — paid from 1000 Bank</Label>
+                <Input type="number" step="0.01" min="0" value={amount} onChange={(e) => onAmountChange(e.target.value)} disabled={!canEdit} />
               </div>
+              {extraLines.length > 0 && (
+                <div>
+                  <Label>Expense line amount (£) — debit</Label>
+                  <Input type="number" step="0.01" min="0" value={presetAmount} onChange={(e) => setPresetAmount(e.target.value)} disabled={!canEdit} />
+                </div>
+              )}
               <div className="sm:col-span-2">
                 <Label>Description</Label>
                 <Input
@@ -168,8 +239,65 @@ export default function DirectPaymentTab({ canEdit }: { canEdit: boolean }) {
                 <Input value={bankReference} onChange={(e) => setBankReference(e.target.value)} placeholder="Optional" disabled={!canEdit} />
               </div>
             </div>
+
+            <div className="mt-6 space-y-3">
+              <div className="flex items-center justify-between">
+                <h3 className="font-serif text-gold">Additional lines</h3>
+                <Button type="button" variant="outline" size="sm" onClick={addLine} disabled={!canEdit}>
+                  <Plus className="w-4 h-4 mr-1" /> Add line
+                </Button>
+              </div>
+              {extraLines.map((l) => (
+                <div key={l.key} className="grid gap-2 sm:grid-cols-12 items-end rounded border border-gold/10 p-3">
+                  <div className="sm:col-span-5">
+                    <Label>Account</Label>
+                    <Select value={l.accountId} onValueChange={(v) => updateLine(l.key, { accountId: v })} disabled={!canEdit}>
+                      <SelectTrigger><SelectValue placeholder="Choose an account" /></SelectTrigger>
+                      <SelectContent>
+                        {allAccounts.map((a) => (
+                          <SelectItem key={a.id} value={a.id}>{a.code} — {a.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="sm:col-span-2">
+                    <Label>Dr / Cr</Label>
+                    <Select value={l.direction} onValueChange={(v) => updateLine(l.key, { direction: v as "debit" | "credit" })} disabled={!canEdit}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="debit">Debit</SelectItem>
+                        <SelectItem value="credit">Credit</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="sm:col-span-2">
+                    <Label>Amount (£)</Label>
+                    <Input type="number" step="0.01" min="0" value={l.amount} onChange={(e) => updateLine(l.key, { amount: e.target.value })} disabled={!canEdit} />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <Label>Line note</Label>
+                    <Input value={l.description} onChange={(e) => updateLine(l.key, { description: e.target.value })} placeholder="Optional" disabled={!canEdit} />
+                  </div>
+                  <div className="sm:col-span-1">
+                    <Button type="button" variant="ghost" size="icon" onClick={() => removeLine(l.key)} disabled={!canEdit}>
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-4 text-sm text-primary-foreground/70">
+              Debits {fmt(debitTotal)} · Credits {fmt(creditTotal)} ·{" "}
+              {diff === 0 ? (
+                <span className="text-emerald-400">Balanced</span>
+              ) : (
+                <span className="text-destructive">Out of balance by {fmt(Math.abs(diff))}</span>
+              )}
+            </div>
+
             <div className="mt-4">
-              <Button className="bg-gold text-navy hover:bg-gold/90" disabled={!canEdit || saving} onClick={submit}>
+              <Button className="bg-gold text-navy hover:bg-gold/90" disabled={!canEdit || saving || !balanced} onClick={submit}>
                 {saving && <Loader2 className="w-4 h-4 mr-1 animate-spin" />}Record payment
               </Button>
             </div>
