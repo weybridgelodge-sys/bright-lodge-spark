@@ -10,6 +10,7 @@ import GeneralJournalTab from "@/components/members/treasurer/GeneralJournalTab"
 import IncomeExpenditureReport from "@/components/members/treasurer/IncomeExpenditureReport";
 import BalanceSheetReport from "@/components/members/treasurer/BalanceSheetReport";
 import TransactionDetailReport from "@/components/members/treasurer/TransactionDetailReport";
+import PropertyRegisterTab from "@/components/members/treasurer/PropertyRegisterTab";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -23,7 +24,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
 import { toUploadBody } from "@/lib/nativeUpload";
-import { Loader2, Plus, Pencil, Trash2, Lock, Unlock, ShieldCheck, Paperclip, Table, Utensils, Handshake, ArrowUpCircle, ArrowDownCircle, UserPlus, BookOpen, TrendingUp, Scale, Search } from "lucide-react";
+import { Loader2, Plus, Pencil, Trash2, Lock, Unlock, ShieldCheck, Paperclip, Table, Utensils, Handshake, ArrowUpCircle, ArrowDownCircle, UserPlus, BookOpen, TrendingUp, Scale, Search, Archive } from "lucide-react";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 type Period = {
@@ -765,6 +766,13 @@ function Inner() {
               </TabsTrigger>
             )}
             <TabsTrigger
+              value="property"
+              className="w-full flex items-center justify-start gap-3 px-4 py-3 rounded-sm text-sm font-sans text-primary-foreground/80 transition-colors hover:text-gold hover:bg-navy-light/40 data-[state=active]:bg-gold/15 data-[state=active]:text-gold data-[state=active]:shadow-none"
+            >
+              <Archive className="w-4 h-4 shrink-0" />
+              <span>Property Register</span>
+            </TabsTrigger>
+            <TabsTrigger
               value="reconciliation"
               className="w-full flex items-center justify-start gap-3 px-4 py-3 rounded-sm text-sm font-sans text-primary-foreground/80 transition-colors hover:text-gold hover:bg-navy-light/40 data-[state=active]:bg-gold/15 data-[state=active]:text-gold data-[state=active]:shadow-none"
             >
@@ -821,6 +829,9 @@ function Inner() {
               <TransactionDetailReport canEdit={canEditTx} />
             </TabsContent>
           )}
+          <TabsContent value="property" className="mt-4">
+            <PropertyRegisterTab canEdit={canEditTx} />
+          </TabsContent>
           <TabsContent value="reconciliation" className="mt-4">
             <ReconciliationTab periods={periods} isTreasurer={isCurrentTreasurer} isSecretary={isSecretary} isAdmin={isAdmin} onChange={load} />
           </TabsContent>
