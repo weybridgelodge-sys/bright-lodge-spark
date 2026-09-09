@@ -233,16 +233,16 @@ export default function PropertyRegisterTab({ canEdit }: { canEdit: boolean }) {
           <p className="text-primary-foreground/60"><Loader2 className="w-4 h-4 mr-1 inline animate-spin" /> Loading…</p>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full min-w-[980px] text-sm">
               <thead>
                 <tr className="text-left text-primary-foreground/60 border-b border-gold/20">
-                  <th className="py-2">Item</th>
-                  <th className="py-2 text-right">Count</th>
-                  <th className="py-2">Location</th>
-                  <th className="py-2 text-right">Value</th>
-                  <th className="py-2">Condition</th>
-                  <th className="py-2">Date acquired</th>
-                  <th className="py-2">Notes</th>
+                  <th className="py-2 pr-3 min-w-[160px]">Item</th>
+                  <th className="py-2 pr-3 text-right whitespace-nowrap">Count</th>
+                  <th className="py-2 pr-3 min-w-[120px]">Location</th>
+                  <th className="py-2 pr-3 text-right whitespace-nowrap">Value</th>
+                  <th className="py-2 pr-3 whitespace-nowrap">Condition</th>
+                  <th className="py-2 pr-3 whitespace-nowrap">Date acquired</th>
+                  <th className="py-2 pr-3 min-w-[220px]">Notes</th>
                   {canEdit && <th className="py-2 text-right">Actions</th>}
                 </tr>
               </thead>
@@ -253,13 +253,13 @@ export default function PropertyRegisterTab({ canEdit }: { canEdit: boolean }) {
                   </tr>
                 ) : rows.map((r) => (
                   <tr key={r.id} className="border-b border-gold/10 align-top">
-                    <td className="py-2 text-primary-foreground">{r.item}</td>
-                    <td className="py-2 text-right text-primary-foreground">{r.count}</td>
-                    <td className="py-2 text-primary-foreground/80">{r.location ?? "—"}</td>
-                    <td className="py-2 text-right text-primary-foreground">{money(r.value_pence ?? 0)}</td>
-                    <td className="py-2 text-primary-foreground/80">{r.condition ?? "—"}</td>
-                    <td className="py-2 text-primary-foreground/80">{fmtDate(r.date_acquired)}</td>
-                    <td className="py-2 text-primary-foreground/70 whitespace-pre-wrap">{r.notes ?? ""}</td>
+                    <td className="py-2 pr-3 text-primary-foreground min-w-[160px]">{r.item}</td>
+                    <td className="py-2 pr-3 text-right text-primary-foreground">{r.count}</td>
+                    <td className="py-2 pr-3 text-primary-foreground/80 min-w-[120px]">{r.location ?? "—"}</td>
+                    <td className="py-2 pr-3 text-right text-primary-foreground whitespace-nowrap">{money(r.value_pence ?? 0)}</td>
+                    <td className="py-2 pr-3 text-primary-foreground/80 whitespace-nowrap">{r.condition ?? "—"}</td>
+                    <td className="py-2 pr-3 text-primary-foreground/80 whitespace-nowrap">{fmtDate(r.date_acquired)}</td>
+                    <td className="py-2 pr-3 text-primary-foreground/70 whitespace-pre-wrap min-w-[220px]">{r.notes ?? ""}</td>
                     {canEdit && (
                       <td className="py-2 text-right whitespace-nowrap">
                         <Button variant="ghost" size="icon" className="text-primary-foreground/70 hover:text-gold" onClick={() => openEdit(r)} aria-label={`Edit ${r.item}`}>
