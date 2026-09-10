@@ -92,6 +92,10 @@ export default function NewMemberFeesTab({ canEdit }: { canEdit: boolean }) {
       toast({ title: "Enter the new member's name", variant: "destructive" });
       return;
     }
+    if (!bankReference.trim()) {
+      toast({ title: "Bank reference is required", variant: "destructive" });
+      return;
+    }
     if (totalPence <= 0) {
       toast({ title: "Total received must be greater than zero", variant: "destructive" });
       return;
@@ -261,8 +265,8 @@ export default function NewMemberFeesTab({ canEdit }: { canEdit: boolean }) {
                 </div>
               </div>
               <div className="sm:col-span-2">
-                <Label>Bank reference</Label>
-                <Input value={bankReference} onChange={(e) => setBankReference(e.target.value)} placeholder="Optional" disabled={!canEdit} />
+                <Label>Bank reference *</Label>
+                <Input value={bankReference} onChange={(e) => setBankReference(e.target.value)} placeholder="Required" disabled={!canEdit} />
                 <p className="text-primary-foreground/50 text-xs mt-1">
                   Lodge Number + Registration Fee (RF) + Candidate&apos;s Surname (e.g. L6787 RF Smith)
                 </p>
