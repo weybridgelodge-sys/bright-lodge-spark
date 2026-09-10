@@ -44,15 +44,32 @@ function Inner() {
     if (!user) return;
     (async () => {
       setLoading(true);
-      let recQuery = supabase.from("member_development_records").select("member_id, assigned_mentor_id");
+      const { data: profs } = await supabase
+        .from("profiles")
+        .select("id, full_name, first_name, last_name, preferred_name, degree")
+        .eq("status", "active")
+        .or("is_honorary_member.eq.false,is_honorary_member.is.null")
+        .order("last_name", { ascending: true });
+
+      const activeIds = (profs ?? []).map((p) => p.id);
+      if (activeIds.length === 0) { setRows([]); setLoading(false); return; }
+
+      let recQuery = supabase
+        .from("member_development_records")
+        .select("member_id, assigned_mentor_id")
+        .in("member_id", activeIds);
       if (!seesAll) recQuery = recQuery.eq("assigned_mentor_id", user.id);
       const { data: records } = await recQuery;
-      const memberIds = (records ?? []).map((r) => r.member_id);
-      if (memberIds.length === 0) { setRows([]); setLoading(false); return; }
-      const [{ data: profs }, { data: items }] = await Promise.all([
-        supabase.from("profiles").select("id, full_name, first_name, last_name, preferred_name, degree").in("id", memberIds),
-        supabase.from("member_checklist_items").select("member_id, status, target_date, completed_date").in("member_id", memberIds),
-      ]);
+
+      const displayIds = seesAll
+        ? activeIds
+        : (records ?? []).map((r) => r.member_id);
+
+      const { data: items } = await supabase
+        .from("member_checklist_items")
+        .select("member_id, status, target_date, completed_date")
+        .in("member_id", displayIds);
+
       const byMember = new Map<string, { total: number; completed: number; overdue: number; lastCheckIn: string | null }>();
       const today = new Date().toISOString().slice(0, 10);
       for (const it of items ?? []) {
@@ -66,15 +83,17 @@ function Inner() {
       const recordMap = new Map((records ?? []).map((r) => [r.member_id, r.assigned_mentor_id]));
       const touchpoints = await Promise.all((profs ?? []).map(async (p: any) => [p.id, await lastTouchpoint(p.id)] as const));
       const tMap = new Map(touchpoints);
-      const next: Row[] = (profs ?? []).map((p: any) => ({
-        id: p.id,
-        full_name: p.full_name, first_name: p.first_name, last_name: p.last_name, preferred_name: p.preferred_name,
-        degree: p.degree,
-        assigned_mentor_id: recordMap.get(p.id) ?? null,
-        lastTouchpoint: tMap.get(p.id) ?? null,
-        ...(byMember.get(p.id) ?? { total: 0, completed: 0, overdue: 0, lastCheckIn: null }),
-      }));
-      next.sort((a, b) => displayName(a).localeCompare(displayName(b)));
+
+      const next: Row[] = (profs ?? [])
+        .filter((p: any) => displayIds.includes(p.id))
+        .map((p: any) => ({
+          id: p.id,
+          full_name: p.full_name, first_name: p.first_name, last_name: p.last_name, preferred_name: p.preferred_name,
+          degree: p.degree,
+          assigned_mentor_id: recordMap.get(p.id) ?? null,
+          lastTouchpoint: tMap.get(p.id) ?? null,
+          ...(byMember.get(p.id) ?? { total: 0, completed: 0, overdue: 0, lastCheckIn: null }),
+        }));
       setRows(next);
       setLoading(false);
     })();
