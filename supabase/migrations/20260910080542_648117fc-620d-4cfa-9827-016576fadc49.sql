@@ -1,0 +1,1 @@
+GRANT SELECT (is_test_account) ON public.profiles TO authenticated;
