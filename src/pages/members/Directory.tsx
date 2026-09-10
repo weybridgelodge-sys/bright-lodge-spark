@@ -74,8 +74,9 @@ export default function MembersDirectory() {
         .order("last_name", { ascending: true, nullsFirst: false })
         .order("first_name", { ascending: true, nullsFirst: false });
       const base = (m as Member[]) ?? [];
-      const enriched = await enrichWithPii(base);
-      setMembers(enriched as (Member & Partial<ProfilePii>)[]);
+      const contacts = await fetchDirectoryContactInfo(base.map((x) => x.id));
+      const contactMap = Object.fromEntries(contacts.map((c) => [c.id, c]));
+      setMembers(base.map((member) => ({ ...member, ...(contactMap[member.id] ?? {}) })));
 
       const { data: a } = await supabase
         .from("officer_appointments")
