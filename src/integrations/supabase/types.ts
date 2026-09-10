@@ -4262,6 +4262,19 @@ export type Database = {
           status_changed_at: string
         }[]
       }
+      get_directory_contact_info: {
+        Args: { _ids: string[] }
+        Returns: {
+          address_line1: string
+          address_line2: string
+          address_line3: string
+          county: string
+          id: string
+          phone: string
+          postcode: string
+          town: string
+        }[]
+      }
       get_members_last_sign_in: {
         Args: never
         Returns: {

@@ -3,7 +3,29 @@ import MembersLayout from "@/components/members/MembersLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { Search, Mail, Phone, MapPin } from "lucide-react";
 import { formatMemberLine } from "@/lib/summons";
-import { enrichWithPii, type ProfilePii } from "@/lib/profilePii";
+
+type DirectoryContact = {
+  id: string;
+  phone: string | null;
+  address_line1: string | null;
+  address_line2: string | null;
+  address_line3: string | null;
+  town: string | null;
+  county: string | null;
+  postcode: string | null;
+};
+
+async function fetchDirectoryContactInfo(ids: string[]): Promise<DirectoryContact[]> {
+  if (!ids.length) return [];
+  const uniq = Array.from(new Set(ids));
+  const { data, error } = await (supabase as any).rpc("get_directory_contact_info", { _ids: uniq });
+  if (error) {
+    // eslint-disable-next-line no-console
+    console.error("Directory contact lookup failed:", error);
+    return [];
+  }
+  return (data as DirectoryContact[]) ?? [];
+}
 
 type Member = {
   id: string;
@@ -52,8 +74,9 @@ export default function MembersDirectory() {
         .order("last_name", { ascending: true, nullsFirst: false })
         .order("first_name", { ascending: true, nullsFirst: false });
       const base = (m as Member[]) ?? [];
-      const enriched = await enrichWithPii(base);
-      setMembers(enriched as (Member & Partial<ProfilePii>)[]);
+      const contacts = await fetchDirectoryContactInfo(base.map((x) => x.id));
+      const contactMap = Object.fromEntries(contacts.map((c) => [c.id, c]));
+      setMembers(base.map((member) => ({ ...member, ...(contactMap[member.id] ?? {}) })));
 
       const { data: a } = await supabase
         .from("officer_appointments")
