@@ -92,6 +92,10 @@ export default function NewMemberFeesTab({ canEdit }: { canEdit: boolean }) {
       toast({ title: "Enter the new member's name", variant: "destructive" });
       return;
     }
+    if (!bankReference.trim()) {
+      toast({ title: "Bank reference is required", variant: "destructive" });
+      return;
+    }
     if (totalPence <= 0) {
       toast({ title: "Total received must be greater than zero", variant: "destructive" });
       return;
