@@ -263,6 +263,9 @@ export default function NewMemberFeesTab({ canEdit }: { canEdit: boolean }) {
               <div className="sm:col-span-2">
                 <Label>Bank reference</Label>
                 <Input value={bankReference} onChange={(e) => setBankReference(e.target.value)} placeholder="Optional" disabled={!canEdit} />
+                <p className="text-primary-foreground/50 text-xs mt-1">
+                  Lodge Number + Registration Fee (RF) + Candidate&apos;s Surname (e.g. L6787 RF Smith)
+                </p>
               </div>
             </div>
 
