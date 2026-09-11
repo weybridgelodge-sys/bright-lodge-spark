@@ -478,7 +478,7 @@ function ReconciliationTab({
     <div className="space-y-4">
       <div className="rounded-sm border border-gold/20 bg-navy-light/30">
         <div className="flex items-center justify-between px-4 py-3 border-b border-gold/15 flex-wrap gap-2">
-          <h3 className="font-serif text-gold">Reconciliation periods</h3>
+          <h3 className="font-serif text-gold">Closed periods</h3>
           {canEditPeriods && (
             <Button size="sm" className="bg-gold text-navy hover:bg-gold/90 min-h-11 sm:min-h-0" onClick={() => { setEditing(null); setOpen(true); }}>
               <Plus className="w-4 h-4 mr-1" /> New period
@@ -803,7 +803,7 @@ function Inner() {
               className="w-full flex items-center justify-start gap-3 px-4 py-3 rounded-sm text-sm font-sans text-primary-foreground/80 transition-colors hover:text-gold hover:bg-navy-light/40 data-[state=active]:bg-gold/15 data-[state=active]:text-gold data-[state=active]:shadow-none"
             >
               <Lock className="w-4 h-4 shrink-0" />
-              <span>Reconciliation</span>
+              <span>Period Close</span>
             </TabsTrigger>
           </TabsList>
           {canEditTx && (
