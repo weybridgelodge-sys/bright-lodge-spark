@@ -87,9 +87,15 @@ export default function TransactionDetailReport({ canEdit }: { canEdit: boolean 
         debit: Number(r.debit_pence ?? 0),
         credit: Number(r.credit_pence ?? 0),
       }));
+      rows.sort((a, b) => (a.date === b.date ? a.code.localeCompare(b.code) : a.date.localeCompare(b.date)));
       setLines(rows);
       setLoaded(true);
+      setApplied({ from, to, codeFrom, codeTo });
     } catch (e: any) {
+      setLines([]);
+      setLoaded(true);
+      setApplied({ from, to, codeFrom, codeTo });
+      setLoadError(e?.message || "Unknown error");
       toast({ title: "Could not load transactions", description: e.message, variant: "destructive" });
     } finally {
       setLoading(false);
