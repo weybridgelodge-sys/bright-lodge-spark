@@ -1165,6 +1165,7 @@ export type Database = {
           debit_pence: number
           description: string | null
           entry_id: string
+          fund_code: string | null
           id: string
         }
         Insert: {
@@ -1174,6 +1175,7 @@ export type Database = {
           debit_pence?: number
           description?: string | null
           entry_id: string
+          fund_code?: string | null
           id?: string
         }
         Update: {
@@ -1183,6 +1185,7 @@ export type Database = {
           debit_pence?: number
           description?: string | null
           entry_id?: string
+          fund_code?: string | null
           id?: string
         }
         Relationships: [
