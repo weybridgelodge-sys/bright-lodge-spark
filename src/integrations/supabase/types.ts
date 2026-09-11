@@ -107,6 +107,11 @@ export type Database = {
           created_at: string
           description: string | null
           id: string
+          match_rejected: boolean
+          match_type: string | null
+          matched_at: string | null
+          matched_entry_id: string | null
+          matched_journal_line_id: string | null
           parse_order: number
           raw_memo: string | null
           statement_id: string
@@ -117,6 +122,11 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          match_rejected?: boolean
+          match_type?: string | null
+          matched_at?: string | null
+          matched_entry_id?: string | null
+          matched_journal_line_id?: string | null
           parse_order?: number
           raw_memo?: string | null
           statement_id: string
@@ -127,6 +137,11 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          match_rejected?: boolean
+          match_type?: string | null
+          matched_at?: string | null
+          matched_entry_id?: string | null
+          matched_journal_line_id?: string | null
           parse_order?: number
           raw_memo?: string | null
           statement_id?: string
