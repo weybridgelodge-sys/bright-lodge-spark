@@ -101,6 +101,83 @@ export type Database = {
         }
         Relationships: []
       }
+      bank_statement_transactions: {
+        Row: {
+          amount_pence: number
+          created_at: string
+          description: string | null
+          id: string
+          parse_order: number
+          raw_memo: string | null
+          statement_id: string
+          transaction_date: string | null
+        }
+        Insert: {
+          amount_pence: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          parse_order?: number
+          raw_memo?: string | null
+          statement_id: string
+          transaction_date?: string | null
+        }
+        Update: {
+          amount_pence?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          parse_order?: number
+          raw_memo?: string | null
+          statement_id?: string
+          transaction_date?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bank_statement_transactions_statement_id_fkey"
+            columns: ["statement_id"]
+            isOneToOne: false
+            referencedRelation: "bank_statements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bank_statements: {
+        Row: {
+          file_name: string
+          file_size: number | null
+          id: string
+          parse_message: string | null
+          parse_status: string
+          period_label: string
+          storage_path: string
+          uploaded_at: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          file_name: string
+          file_size?: number | null
+          id?: string
+          parse_message?: string | null
+          parse_status?: string
+          period_label: string
+          storage_path: string
+          uploaded_at?: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          file_name?: string
+          file_size?: number | null
+          id?: string
+          parse_message?: string | null
+          parse_status?: string
+          period_label?: string
+          storage_path?: string
+          uploaded_at?: string
+          uploaded_by?: string | null
+        }
+        Relationships: []
+      }
       bookings: {
         Row: {
           contact_email: string
