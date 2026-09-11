@@ -38,6 +38,8 @@ export default function TransactionDetailReport({ canEdit }: { canEdit: boolean 
   const [lines, setLines] = useState<Line[]>([]);
   const [loading, setLoading] = useState(false);
   const [loaded, setLoaded] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [applied, setApplied] = useState<{ from: string; to: string; codeFrom: string; codeTo: string } | null>(null);
 
   useEffect(() => {
     if (!canEdit) return;
@@ -56,6 +58,7 @@ export default function TransactionDetailReport({ canEdit }: { canEdit: boolean 
 
   const load = useCallback(async () => {
     setLoading(true);
+    setLoadError(null);
     try {
       const cf = codeFrom.trim() || "0000";
       const ct = codeTo.trim() || "9999";
@@ -84,9 +87,15 @@ export default function TransactionDetailReport({ canEdit }: { canEdit: boolean 
         debit: Number(r.debit_pence ?? 0),
         credit: Number(r.credit_pence ?? 0),
       }));
+      rows.sort((a, b) => (a.date === b.date ? a.code.localeCompare(b.code) : a.date.localeCompare(b.date)));
       setLines(rows);
       setLoaded(true);
+      setApplied({ from, to, codeFrom, codeTo });
     } catch (e: any) {
+      setLines([]);
+      setLoaded(true);
+      setApplied({ from, to, codeFrom, codeTo });
+      setLoadError(e?.message || "Unknown error");
       toast({ title: "Could not load transactions", description: e.message, variant: "destructive" });
     } finally {
       setLoading(false);
@@ -97,6 +106,8 @@ export default function TransactionDetailReport({ canEdit }: { canEdit: boolean 
     if (canEdit) load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [canEdit]);
+
+  const filtersChanged = !!applied && (applied.from !== from || applied.to !== to || applied.codeFrom !== codeFrom || applied.codeTo !== codeTo);
 
   const totals = useMemo(
     () =>
@@ -210,9 +221,23 @@ export default function TransactionDetailReport({ canEdit }: { canEdit: boolean 
         </Button>
       </div>
 
+      {!loading && filtersChanged && (
+        <p className="rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm text-amber-700 dark:text-amber-400">
+          Filters have changed since this report was run — press “Run report” to update the results below.
+        </p>
+      )}
+
       {loading ? (
         <div className="flex justify-center py-10">
           <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        </div>
+      ) : loadError ? (
+        <div className="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-4 text-sm text-destructive">
+          <p className="font-medium">Report failed to load — no results are shown.</p>
+          <p className="mt-1 break-words">{loadError}</p>
+          <Button variant="outline" size="sm" className="mt-3" onClick={load}>
+            Try again
+          </Button>
         </div>
       ) : loaded ? (
         lines.length === 0 ? (
