@@ -81,7 +81,10 @@ export default function NewMemberFeesTab({ canEdit }: { canEdit: boolean }) {
   useEffect(() => { load(); }, [load]);
 
   const pct = MEETINGS.find((m) => m.key === meeting)?.pct ?? 1;
-  const proratedPence = useMemo(() => Math.round(toPence(subRate) * pct), [subRate, pct]);
+  const proratedPence = useMemo(
+    () => Math.round(toPence(subRate) * pct * (ageBracket === "under25" ? 0.5 : 1)),
+    [subRate, pct, ageBracket],
+  );
   const uglePence = toPence(ugleFee);
   const pglPence = toPence(pglFee);
   const regPence = uglePence + pglPence;
