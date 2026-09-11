@@ -1,5 +1,6 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
-import { type StripeEnv, createStripeClient, verifyWebhook } from "../_shared/stripe.ts";
+import { type StripeEnv, verifyWebhook } from "../_shared/stripe.ts";
+import { syncBookingStripeFee } from "../_shared/stripe-fees.ts";
 
 import { sendBookingEmails } from "../_shared/send-booking-emails.ts";
 
@@ -61,32 +62,12 @@ async function recordActualStripeFee(
   paymentIntentId: string | null | undefined,
   env: StripeEnv,
 ) {
-  if (!paymentIntentId) return;
-  try {
-    const stripe = createStripeClient(env);
-    const pi = await stripe.paymentIntents.retrieve(paymentIntentId, {
-      expand: ["latest_charge.balance_transaction"],
-    });
-    const charge: any = (pi as any).latest_charge;
-    const bt: any = charge?.balance_transaction;
-    if (!bt || typeof bt === "string") {
-      console.warn("No expanded balance_transaction for", paymentIntentId);
-      return;
-    }
-    const { error } = await getSupabase()
-      .from("bookings")
-      .update({
-        stripe_fee_pence: bt.fee ?? null,
-        stripe_net_pence: bt.net ?? null,
-        stripe_balance_transaction_id: bt.id ?? null,
-      })
-      .eq("id", bookingId)
-      .eq("environment", env);
-    if (error) console.error("Failed to store Stripe fee:", error);
-  } catch (e) {
-    // Never fail the webhook over fee capture — reconciliation can be manual.
-    console.error("recordActualStripeFee failed:", e);
-  }
+  // Two attempts, ~3s apart: Stripe sometimes hasn't attached the
+  // balance_transaction yet the instant checkout completes. Never throws.
+  await syncBookingStripeFee(getSupabase(), bookingId, paymentIntentId, env, {
+    attempts: 2,
+    retryDelayMs: 3000,
+  });
 }
 
 
