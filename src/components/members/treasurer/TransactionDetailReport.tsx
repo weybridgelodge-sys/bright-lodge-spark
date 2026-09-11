@@ -212,8 +212,8 @@ export default function TransactionDetailReport({ canEdit }: { canEdit: boolean 
       </div>
 
       <div className="flex gap-2">
-        <Button onClick={load} disabled={loading}>
-          {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+        <Button onClick={load} disabled={loading} className="shadow-sm">
+          {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Search className="mr-2 h-4 w-4" />}
           Run report
         </Button>
         <Button variant="outline" onClick={exportCsv} disabled={loading || lines.length === 0}>
