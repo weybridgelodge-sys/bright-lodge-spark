@@ -11,6 +11,7 @@ import IncomeExpenditureReport from "@/components/members/treasurer/IncomeExpend
 import BalanceSheetReport from "@/components/members/treasurer/BalanceSheetReport";
 import TransactionDetailReport from "@/components/members/treasurer/TransactionDetailReport";
 import PropertyRegisterTab from "@/components/members/treasurer/PropertyRegisterTab";
+import BreakevenCalculatorTab from "@/components/members/treasurer/BreakevenCalculatorTab";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -24,7 +25,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
 import { toUploadBody } from "@/lib/nativeUpload";
-import { Loader2, Plus, Pencil, Trash2, Lock, Unlock, ShieldCheck, Paperclip, Table, Utensils, Handshake, ArrowUpCircle, ArrowDownCircle, UserPlus, BookOpen, TrendingUp, Scale, Search, Archive } from "lucide-react";
+import { Loader2, Plus, Pencil, Trash2, Lock, Unlock, ShieldCheck, Paperclip, Table, Utensils, Handshake, ArrowUpCircle, ArrowDownCircle, UserPlus, BookOpen, TrendingUp, Scale, Search, Archive, Calculator } from "lucide-react";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 type Period = {
@@ -765,6 +766,15 @@ function Inner() {
                 <span>Transaction Detail</span>
               </TabsTrigger>
             )}
+            {canEditTx && (
+              <TabsTrigger
+                value="breakeven"
+                className="w-full flex items-center justify-start gap-3 px-4 py-3 rounded-sm text-sm font-sans text-primary-foreground/80 transition-colors hover:text-gold hover:bg-navy-light/40 data-[state=active]:bg-gold/15 data-[state=active]:text-gold data-[state=active]:shadow-none"
+              >
+                <Calculator className="w-4 h-4 shrink-0" />
+                <span>Membership Breakeven</span>
+              </TabsTrigger>
+            )}
             <TabsTrigger
               value="property"
               className="w-full flex items-center justify-start gap-3 px-4 py-3 rounded-sm text-sm font-sans text-primary-foreground/80 transition-colors hover:text-gold hover:bg-navy-light/40 data-[state=active]:bg-gold/15 data-[state=active]:text-gold data-[state=active]:shadow-none"
@@ -780,6 +790,11 @@ function Inner() {
               <span>Reconciliation</span>
             </TabsTrigger>
           </TabsList>
+          {canEditTx && (
+            <TabsContent value="breakeven" className="mt-4">
+              <BreakevenCalculatorTab canEdit={canEditTx} />
+            </TabsContent>
+          )}
           <TabsContent value="transactions" className="mt-4">
             <TransactionsTab transactions={transactions} periods={periods} canEdit={canEditTx} onChange={load} highlightTxId={highlightTxId} />
           </TabsContent>

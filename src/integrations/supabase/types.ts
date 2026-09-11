@@ -3087,6 +3087,57 @@ export type Database = {
           },
         ]
       }
+      subscription_reserve_pots: {
+        Row: {
+          annual_pence: number
+          fund_code: string
+          id: string
+          label: string
+          sort_order: number
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          annual_pence?: number
+          fund_code: string
+          id?: string
+          label: string
+          sort_order?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          annual_pence?: number
+          fund_code?: string
+          id?: string
+          label?: string
+          sort_order?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
+      subscription_settings: {
+        Row: {
+          annual_rate_pence: number
+          id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          annual_rate_pence?: number
+          id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          annual_rate_pence?: number
+          id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       succession_risks: {
         Row: {
           created_at: string
