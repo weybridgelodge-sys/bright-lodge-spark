@@ -22,6 +22,13 @@
       "when": 1789165290191,
       "tag": "0002_engagement_log_remove_self_insert",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1789165640063,
+      "tag": "0003_bank_statement_repository",
+      "breakpoints": true
     }
   ]
 }
