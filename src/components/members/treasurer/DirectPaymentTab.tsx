@@ -95,11 +95,12 @@ export default function DirectPaymentTab({ canEdit }: { canEdit: boolean }) {
 
   const submit = async () => {
     const bankPence = toPence(amount);
+    const presetPence = toPence(effectivePreset);
     if (!Number.isFinite(bankPence) || bankPence <= 0) {
       toast({ title: "Enter a positive amount", variant: "destructive" });
       return;
     }
-    if (!accountId) {
+    if (presetPence > 0 && !accountId) {
       toast({ title: "Choose an expense account", variant: "destructive" });
       return;
     }
@@ -144,7 +145,6 @@ export default function DirectPaymentTab({ canEdit }: { canEdit: boolean }) {
     }
 
     const entryId = (entry as any).id as string;
-    const presetPence = toPence(effectivePreset);
     const lines = [
       ...(presetPence > 0
         ? [{ entry_id: entryId, account_id: accountId, debit_pence: presetPence, credit_pence: 0, description: description.trim() }]

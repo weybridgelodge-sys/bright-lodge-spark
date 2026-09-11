@@ -95,11 +95,12 @@ export default function DirectReceiptTab({ canEdit }: { canEdit: boolean }) {
 
   const submit = async () => {
     const bankPence = toPence(amount);
+    const presetPence = toPence(effectivePreset);
     if (!Number.isFinite(bankPence) || bankPence <= 0) {
       toast({ title: "Enter a positive amount", variant: "destructive" });
       return;
     }
-    if (!accountId) {
+    if (presetPence > 0 && !accountId) {
       toast({ title: "Choose an income account", variant: "destructive" });
       return;
     }
@@ -144,7 +145,6 @@ export default function DirectReceiptTab({ canEdit }: { canEdit: boolean }) {
     }
 
     const entryId = (entry as any).id as string;
-    const presetPence = toPence(effectivePreset);
     const lines = [
       { entry_id: entryId, account_id: bankId, debit_pence: bankPence, credit_pence: 0, description: description.trim() },
       ...(presetPence > 0
