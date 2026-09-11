@@ -39,7 +39,7 @@ export default function TransactionDetailReport({ canEdit }: { canEdit: boolean 
   const [loading, setLoading] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [stale, setStale] = useState(false);
+  const [applied, setApplied] = useState<{ from: string; to: string; codeFrom: string; codeTo: string } | null>(null);
 
   useEffect(() => {
     if (!canEdit) return;
