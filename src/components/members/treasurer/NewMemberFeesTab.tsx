@@ -17,8 +17,8 @@ const MEETINGS = [
 const RESERVE_POTS = [
   { fund_code: "ALMONERS", label: "Almoners", basePence: 1000 },
   { fund_code: "INITIATES_REGALIA", label: "Initiates & Regalia", basePence: 900 },
-  { fund_code: "MASTERS_FUND", label: "Master's Fund", basePence: 2000 },
-  { fund_code: "TYLER_PROVISION", label: "Tyler Provision", basePence: 1200 },
+  { fund_code: "MASTERS_FUND", label: "Master's Fund", basePence: 1000 },
+  { fund_code: "TYLER_PROVISION", label: "Tyler Provision", basePence: 1000 },
 ] as const;
 
 const money = (pence: number) =>
