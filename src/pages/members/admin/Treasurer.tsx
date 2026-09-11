@@ -11,6 +11,7 @@ import IncomeExpenditureReport from "@/components/members/treasurer/IncomeExpend
 import BalanceSheetReport from "@/components/members/treasurer/BalanceSheetReport";
 import TransactionDetailReport from "@/components/members/treasurer/TransactionDetailReport";
 import PropertyRegisterTab from "@/components/members/treasurer/PropertyRegisterTab";
+import BankStatementsTab from "@/components/members/treasurer/BankStatementsTab";
 import BreakevenCalculatorTab from "@/components/members/treasurer/BreakevenCalculatorTab";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -25,7 +26,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
 import { toUploadBody } from "@/lib/nativeUpload";
-import { Loader2, Plus, Pencil, Trash2, Lock, Unlock, ShieldCheck, Paperclip, Table, Utensils, Handshake, ArrowUpCircle, ArrowDownCircle, UserPlus, BookOpen, TrendingUp, Scale, Search, Archive, Calculator } from "lucide-react";
+import { Loader2, Plus, Pencil, Trash2, Lock, Unlock, ShieldCheck, Paperclip, Table, Utensils, Handshake, ArrowUpCircle, ArrowDownCircle, UserPlus, BookOpen, TrendingUp, Scale, Search, Archive, Calculator, Landmark } from "lucide-react";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 type Period = {
@@ -781,6 +782,13 @@ function Inner() {
             >
               <Archive className="w-4 h-4 shrink-0" />
               <span>Property Register</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="bank-statements"
+              className="w-full flex items-center justify-start gap-3 px-4 py-3 rounded-sm text-sm font-sans text-primary-foreground/80 transition-colors hover:text-gold hover:bg-navy-light/40 data-[state=active]:bg-gold/15 data-[state=active]:text-gold data-[state=active]:shadow-none"
+            >
+              <Landmark className="w-4 h-4 shrink-0" />
+              <span>Bank Statement Repository</span>
             </TabsTrigger>
             <TabsTrigger
               value="reconciliation"
