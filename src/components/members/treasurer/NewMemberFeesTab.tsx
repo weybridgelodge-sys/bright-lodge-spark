@@ -68,7 +68,7 @@ export default function NewMemberFeesTab({ canEdit }: { canEdit: boolean }) {
       supabase
         .from("chart_of_accounts" as any)
         .select("id,code")
-        .in("code", ["1000", "2000", "4000", "4500", "5000", "5100"]),
+        .in("code", ["1000", "2000", "3000", "3100", "4000", "4500", "5000", "5100"]),
       supabase
         .from("treasurer_periods" as any)
         .select("id")
@@ -96,6 +96,12 @@ export default function NewMemberFeesTab({ canEdit }: { canEdit: boolean }) {
   const pglPence = toPence(pglFee);
   const regPence = uglePence + pglPence;
   const totalPence = proratedPence + regPence;
+  const reserveMultiplier = ageBracket === "under25" ? 0.5 : 1;
+  const reserveAllocations = useMemo(
+    () => RESERVE_POTS.map((p) => ({ ...p, pence: Math.round(p.basePence * reserveMultiplier) })),
+    [reserveMultiplier],
+  );
+  const reserveTotalPence = reserveAllocations.reduce((s, r) => s + r.pence, 0);
 
   const submit = async () => {
     if (!name.trim()) {
@@ -110,7 +116,7 @@ export default function NewMemberFeesTab({ canEdit }: { canEdit: boolean }) {
       toast({ title: "Total received must be greater than zero", variant: "destructive" });
       return;
     }
-    const need = ["1000", "2000", "4000", "4500", "5000", "5100"].filter((c) => !accounts.get(c));
+    const need = ["1000", "2000", "3000", "3100", "4000", "4500", "5000", "5100"].filter((c) => !accounts.get(c));
     if (need.length) {
       toast({ title: `Missing accounts: ${need.join(", ")}`, variant: "destructive" });
       return;
@@ -127,7 +133,7 @@ export default function NewMemberFeesTab({ canEdit }: { canEdit: boolean }) {
 
     const postEntry = async (
       entry: Record<string, unknown>,
-      lines: { account_id: string; debit_pence: number; credit_pence: number }[],
+      lines: { account_id: string; debit_pence: number; credit_pence: number; fund_code?: string }[],
       stage: string,
     ): Promise<boolean> => {
       const { data: e, error: entryErr } = await supabase
@@ -143,7 +149,7 @@ export default function NewMemberFeesTab({ canEdit }: { canEdit: boolean }) {
       const id = (e as any).id as string;
       const { error: lineErr } = await supabase
         .from("journal_lines" as any)
-        .insert(lines.map((l) => ({ entry_id: id, ...l, description: null })));
+        .insert(lines.map((l) => ({ entry_id: id, fund_code: null, ...l, description: null })));
       if (lineErr) {
         await supabase.from("journal_entries" as any).delete().eq("id", id);
         await rollbackAll();
@@ -203,6 +209,23 @@ export default function NewMemberFeesTab({ canEdit }: { canEdit: boolean }) {
         "the PGL liability entry",
       );
       if (!ok3) { setSaving(false); return; }
+    }
+
+    if (reserveTotalPence > 0) {
+      const ok4 = await postEntry(
+        {
+          description: `Designated reserves allocation — ${name.trim()}`,
+          source_type: "reserve_allocation",
+        },
+        [
+          { account_id: A("3000"), debit_pence: reserveTotalPence, credit_pence: 0 },
+          ...reserveAllocations
+            .filter((r) => r.pence > 0)
+            .map((r) => ({ account_id: A("3100"), debit_pence: 0, credit_pence: r.pence, fund_code: r.fund_code as string })),
+        ],
+        "the designated reserves entry",
+      );
+      if (!ok4) { setSaving(false); return; }
     }
 
     setSaving(false);
@@ -287,6 +310,13 @@ export default function NewMemberFeesTab({ canEdit }: { canEdit: boolean }) {
               <div className="rounded-md border border-gold/20 p-3">
                 <p className="text-primary-foreground/60 text-sm">Prorated subscription</p>
                 <p className="text-gold font-semibold text-lg">{money(proratedPence)}</p>
+              </div>
+              <div className="rounded-md border border-gold/20 p-3">
+                <p className="text-primary-foreground/60 text-sm">Designated reserves allocation</p>
+                <p className="text-gold font-semibold text-lg">{money(reserveTotalPence)}</p>
+                <p className="text-primary-foreground/50 text-xs mt-1">
+                  {reserveAllocations.map((r) => `${r.label} ${money(r.pence)}`).join(" · ")}
+                </p>
               </div>
               <div className="rounded-md border border-gold/20 p-3">
                 <p className="text-primary-foreground/60 text-sm">Total received</p>
