@@ -312,22 +312,51 @@ export default function DirectReceiptTab({ canEdit }: { canEdit: boolean }) {
           <p className="text-primary-foreground/60"><Loader2 className="w-4 h-4 mr-1 inline animate-spin" /> Loading…</p>
         ) : (
           <>
+            <div className="mb-4 flex items-center gap-2">
+              <Checkbox
+                id="dr-renewal"
+                checked={isRenewal}
+                onCheckedChange={(v) => setIsRenewal(v === true)}
+                disabled={!canEdit}
+              />
+              <Label htmlFor="dr-renewal" className="cursor-pointer">This is a subscription renewal payment</Label>
+            </div>
+
             <div className="grid gap-3 sm:grid-cols-2">
-              <div className="sm:col-span-2">
-                <Label>Income account</Label>
-                <Select value={accountId} onValueChange={setAccountId} disabled={!canEdit}>
-                  <SelectTrigger><SelectValue placeholder="Choose an income account" /></SelectTrigger>
-                  <SelectContent>
-                    {accounts.map((a) => (
-                      <SelectItem key={a.id} value={a.id}>{a.code} — {a.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <p className="text-primary-foreground/50 text-xs mt-1">
-                  Card fee-cover and new-member registration fees are handled by their own dedicated tabs — use this
-                  for everything else, including bank-transfer or cash payments that don't go through Stripe.
-                </p>
-              </div>
+              {!isRenewal ? (
+                <div className="sm:col-span-2">
+                  <Label>Income account</Label>
+                  <Select value={accountId} onValueChange={setAccountId} disabled={!canEdit}>
+                    <SelectTrigger><SelectValue placeholder="Choose an income account" /></SelectTrigger>
+                    <SelectContent>
+                      {accounts.map((a) => (
+                        <SelectItem key={a.id} value={a.id}>{a.code} — {a.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-primary-foreground/50 text-xs mt-1">
+                    Card fee-cover and new-member registration fees are handled by their own dedicated tabs — use this
+                    for everything else, including bank-transfer or cash payments that don't go through Stripe.
+                  </p>
+                </div>
+              ) : (
+                <>
+                  <div>
+                    <Label>Member name</Label>
+                    <Input value={memberName} onChange={(e) => setMemberName(e.target.value)} placeholder="e.g. John Smith" disabled={!canEdit} />
+                  </div>
+                  <div>
+                    <Label>Member&apos;s age</Label>
+                    <Select value={ageBracket} onValueChange={(v) => setAgeBracket(v as "over25" | "under25")} disabled={!canEdit}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="over25">25 and over</SelectItem>
+                        <SelectItem value="under25">Under 25</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </>
+              )}
               <div>
                 <Label>Date</Label>
                 <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} disabled={!canEdit} />
@@ -342,15 +371,17 @@ export default function DirectReceiptTab({ canEdit }: { canEdit: boolean }) {
                   <Input type="number" step="0.01" min="0" value={presetAmount} onChange={(e) => setPresetAmount(e.target.value)} disabled={!canEdit} />
                 </div>
               )}
-              <div className="sm:col-span-2">
-                <Label>Description</Label>
-                <Input
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="e.g. Raffle proceeds paid in — September meeting"
-                  disabled={!canEdit}
-                />
-              </div>
+              {!isRenewal && (
+                <div className="sm:col-span-2">
+                  <Label>Description</Label>
+                  <Input
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    placeholder="e.g. Raffle proceeds paid in — September meeting"
+                    disabled={!canEdit}
+                  />
+                </div>
+              )}
               <div>
                 <Label>Document / receipt number</Label>
                 <Input value={documentNumber} onChange={(e) => setDocumentNumber(e.target.value)} placeholder="Optional" disabled={!canEdit} />
@@ -361,65 +392,89 @@ export default function DirectReceiptTab({ canEdit }: { canEdit: boolean }) {
               </div>
             </div>
 
-            <div className="mt-6 space-y-3">
-              <div className="flex items-center justify-between">
-                <h3 className="font-serif text-gold">Additional lines</h3>
-                <Button type="button" variant="outline" size="sm" onClick={addLine} disabled={!canEdit}>
-                  <Plus className="w-4 h-4 mr-1" /> Add line
-                </Button>
-              </div>
-              {extraLines.map((l) => (
-                <div key={l.key} className="grid gap-2 sm:grid-cols-12 items-end rounded border border-gold/10 p-3">
-                  <div className="sm:col-span-5">
-                    <Label>Account</Label>
-                    <Select value={l.accountId} onValueChange={(v) => updateLine(l.key, { accountId: v })} disabled={!canEdit}>
-                      <SelectTrigger><SelectValue placeholder="Choose an account" /></SelectTrigger>
-                      <SelectContent>
-                        {allAccounts.map((a) => (
-                          <SelectItem key={a.id} value={a.id}>{a.code} — {a.name}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="sm:col-span-2">
-                    <Label>Dr / Cr</Label>
-                    <Select value={l.direction} onValueChange={(v) => updateLine(l.key, { direction: v as "debit" | "credit" })} disabled={!canEdit}>
-                      <SelectTrigger><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="debit">Debit</SelectItem>
-                        <SelectItem value="credit">Credit</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="sm:col-span-2">
-                    <Label>Amount (£)</Label>
-                    <Input type="number" step="0.01" min="0" value={l.amount} onChange={(e) => updateLine(l.key, { amount: e.target.value })} disabled={!canEdit} />
-                  </div>
-                  <div className="sm:col-span-2">
-                    <Label>Line note</Label>
-                    <Input value={l.description} onChange={(e) => updateLine(l.key, { description: e.target.value })} placeholder="Optional" disabled={!canEdit} />
-                  </div>
-                  <div className="sm:col-span-1">
-                    <Button type="button" variant="ghost" size="icon" onClick={() => removeLine(l.key)} disabled={!canEdit}>
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
+            {isRenewal ? (
+              <div className="mt-4 grid gap-2 sm:grid-cols-2">
+                <div className="rounded-md border border-gold/20 p-3">
+                  <p className="text-primary-foreground/60 text-sm">Subscription received</p>
+                  <p className="text-gold font-semibold text-lg">{fmt(toPence(amount))}</p>
+                  <p className="text-primary-foreground/50 text-xs mt-1">Dr 1000 Bank · Cr 1100 Debtors — Subscriptions</p>
                 </div>
-              ))}
-            </div>
-
-            <div className="mt-4 text-sm text-primary-foreground/70">
-              Debits {fmt(debitTotal)} · Credits {fmt(creditTotal)} ·{" "}
-              {diff === 0 ? (
-                <span className="text-emerald-400">Balanced</span>
-              ) : (
-                <span className="text-destructive">Out of balance by {fmt(Math.abs(diff))}</span>
-              )}
-            </div>
+                <div className="rounded-md border border-gold/20 p-3">
+                  <p className="text-primary-foreground/60 text-sm">Designated reserves allocation</p>
+                  <p className="text-gold font-semibold text-lg">{fmt(reserveTotalPence)}</p>
+                  <p className="text-primary-foreground/50 text-xs mt-1">
+                    {reserveAllocations.map((r) => `${r.label} ${fmt(r.pence)}`).join(" · ")}
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <>
+              <div className="mt-6 space-y-3">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-serif text-gold">Additional lines</h3>
+                  <Button type="button" variant="outline" size="sm" onClick={addLine} disabled={!canEdit}>
+                    <Plus className="w-4 h-4 mr-1" /> Add line
+                  </Button>
+                </div>
+                {extraLines.map((l) => (
+                  <div key={l.key} className="grid gap-2 sm:grid-cols-12 items-end rounded border border-gold/10 p-3">
+                    <div className="sm:col-span-5">
+                      <Label>Account</Label>
+                      <Select value={l.accountId} onValueChange={(v) => updateLine(l.key, { accountId: v })} disabled={!canEdit}>
+                        <SelectTrigger><SelectValue placeholder="Choose an account" /></SelectTrigger>
+                        <SelectContent>
+                          {allAccounts.map((a) => (
+                            <SelectItem key={a.id} value={a.id}>{a.code} — {a.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="sm:col-span-2">
+                      <Label>Dr / Cr</Label>
+                      <Select value={l.direction} onValueChange={(v) => updateLine(l.key, { direction: v as "debit" | "credit" })} disabled={!canEdit}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="debit">Debit</SelectItem>
+                          <SelectItem value="credit">Credit</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="sm:col-span-2">
+                      <Label>Amount (£)</Label>
+                      <Input type="number" step="0.01" min="0" value={l.amount} onChange={(e) => updateLine(l.key, { amount: e.target.value })} disabled={!canEdit} />
+                    </div>
+                    <div className="sm:col-span-2">
+                      <Label>Line note</Label>
+                      <Input value={l.description} onChange={(e) => updateLine(l.key, { description: e.target.value })} placeholder="Optional" disabled={!canEdit} />
+                    </div>
+                    <div className="sm:col-span-1">
+                      <Button type="button" variant="ghost" size="icon" onClick={() => removeLine(l.key)} disabled={!canEdit}>
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+  
+              <div className="mt-4 text-sm text-primary-foreground/70">
+                Debits {fmt(debitTotal)} · Credits {fmt(creditTotal)} ·{" "}
+                {diff === 0 ? (
+                  <span className="text-emerald-400">Balanced</span>
+                ) : (
+                  <span className="text-destructive">Out of balance by {fmt(Math.abs(diff))}</span>
+                )}
+              </div>
+              </>
+            )}
 
             <div className="mt-4">
-              <Button className="bg-gold text-navy hover:bg-gold/90" disabled={!canEdit || saving || !balanced} onClick={submit}>
-                {saving && <Loader2 className="w-4 h-4 mr-1 animate-spin" />}Record receipt
+              <Button
+                className="bg-gold text-navy hover:bg-gold/90"
+                disabled={!canEdit || saving || (!isRenewal && !balanced)}
+                onClick={isRenewal ? submitRenewal : submit}
+              >
+                {saving && <Loader2 className="w-4 h-4 mr-1 animate-spin" />}
+                {isRenewal ? "Post subscription renewal" : "Record receipt"}
               </Button>
             </div>
           </>
