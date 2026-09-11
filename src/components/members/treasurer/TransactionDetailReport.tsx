@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
-import { Download, Loader2, Search } from "lucide-react";
+import { Download, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchAccounts, treasurerYearBounds, treasurerYearContaining, fmtDate, money, type Account } from "@/lib/treasurer/reports";
 
@@ -212,8 +212,8 @@ export default function TransactionDetailReport({ canEdit }: { canEdit: boolean 
       </div>
 
       <div className="flex gap-2">
-        <Button onClick={load} disabled={loading} className="shadow-sm">
-          {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Search className="mr-2 h-4 w-4" />}
+        <Button onClick={load} disabled={loading} className="bg-gold text-navy hover:bg-gold/90">
+          {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           Run report
         </Button>
         <Button variant="outline" onClick={exportCsv} disabled={loading || lines.length === 0}>
