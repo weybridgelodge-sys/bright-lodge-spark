@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
+import { fetchReservePots, type ReservePot } from "@/lib/treasurer/subscriptionSettings";
 
 const MEETINGS = [
   { key: "October", label: "October (100%)", pct: 1 },
@@ -14,12 +15,6 @@ const MEETINGS = [
   { key: "May", label: "May (25%)", pct: 0.25 },
 ] as const;
 
-const RESERVE_POTS = [
-  { fund_code: "ALMONERS", label: "Almoners", basePence: 1000 },
-  { fund_code: "INITIATES_REGALIA", label: "Initiates & Regalia", basePence: 900 },
-  { fund_code: "MASTERS_FUND", label: "Master's Fund", basePence: 1000 },
-  { fund_code: "TYLER_PROVISION", label: "Tyler Provision", basePence: 1000 },
-] as const;
 
 const money = (pence: number) =>
   `£${(pence / 100).toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -32,6 +27,7 @@ const toPence = (v: string) => {
 export default function NewMemberFeesTab({ canEdit }: { canEdit: boolean }) {
   const [accounts, setAccounts] = useState<Map<string, string>>(new Map());
   const [openPeriodId, setOpenPeriodId] = useState<string | null>(null);
+  const [pots, setPots] = useState<ReservePot[]>([]);
   const [loading, setLoading] = useState(true);
 
   const [name, setName] = useState("");
@@ -64,7 +60,7 @@ export default function NewMemberFeesTab({ canEdit }: { canEdit: boolean }) {
 
   const load = useCallback(async () => {
     setLoading(true);
-    const [{ data: accts, error: acctErr }, { data: period }] = await Promise.all([
+    const [{ data: accts, error: acctErr }, { data: period }, potRows] = await Promise.all([
       supabase
         .from("chart_of_accounts" as any)
         .select("id,code")
@@ -76,7 +72,9 @@ export default function NewMemberFeesTab({ canEdit }: { canEdit: boolean }) {
         .order("created_at", { ascending: false })
         .limit(1)
         .maybeSingle(),
+      fetchReservePots(),
     ]);
+    setPots(potRows);
     if (acctErr) toast({ title: "Could not load accounts", description: acctErr.message, variant: "destructive" });
     const map = new Map<string, string>();
     for (const a of (accts as any[]) ?? []) if (a.code && a.id) map.set(a.code as string, a.id as string);
@@ -98,8 +96,8 @@ export default function NewMemberFeesTab({ canEdit }: { canEdit: boolean }) {
   const totalPence = proratedPence + regPence;
   const reserveMultiplier = ageBracket === "under25" ? 0.5 : 1;
   const reserveAllocations = useMemo(
-    () => RESERVE_POTS.map((p) => ({ ...p, pence: Math.round(p.basePence * reserveMultiplier) })),
-    [reserveMultiplier],
+    () => pots.map((p) => ({ ...p, pence: Math.round(p.annual_pence * reserveMultiplier) })),
+    [pots, reserveMultiplier],
   );
   const reserveTotalPence = reserveAllocations.reduce((s, r) => s + r.pence, 0);
 
