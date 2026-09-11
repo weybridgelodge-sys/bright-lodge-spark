@@ -855,6 +855,9 @@ function Inner() {
           <TabsContent value="property" className="mt-4">
             <PropertyRegisterTab canEdit={canEditTx} />
           </TabsContent>
+          <TabsContent value="bank-statements" className="mt-4">
+            <BankStatementsTab canEdit={canEditTx} />
+          </TabsContent>
           <TabsContent value="reconciliation" className="mt-4">
             <ReconciliationTab periods={periods} isTreasurer={isCurrentTreasurer} isSecretary={isSecretary} isAdmin={isAdmin} onChange={load} />
           </TabsContent>
