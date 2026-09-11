@@ -12,6 +12,7 @@ import BalanceSheetReport from "@/components/members/treasurer/BalanceSheetRepor
 import TransactionDetailReport from "@/components/members/treasurer/TransactionDetailReport";
 import PropertyRegisterTab from "@/components/members/treasurer/PropertyRegisterTab";
 import BankStatementsTab from "@/components/members/treasurer/BankStatementsTab";
+import BankReconciliationTab from "@/components/members/treasurer/BankReconciliationTab";
 import BreakevenCalculatorTab from "@/components/members/treasurer/BreakevenCalculatorTab";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -791,6 +792,13 @@ function Inner() {
               <span>Bank Statement Repository</span>
             </TabsTrigger>
             <TabsTrigger
+              value="bank-reconciliation"
+              className="w-full flex items-center justify-start gap-3 px-4 py-3 rounded-sm text-sm font-sans text-primary-foreground/80 transition-colors hover:text-gold hover:bg-navy-light/40 data-[state=active]:bg-gold/15 data-[state=active]:text-gold data-[state=active]:shadow-none"
+            >
+              <Scale className="w-4 h-4 shrink-0" />
+              <span>Bank Reconciliation</span>
+            </TabsTrigger>
+            <TabsTrigger
               value="reconciliation"
               className="w-full flex items-center justify-start gap-3 px-4 py-3 rounded-sm text-sm font-sans text-primary-foreground/80 transition-colors hover:text-gold hover:bg-navy-light/40 data-[state=active]:bg-gold/15 data-[state=active]:text-gold data-[state=active]:shadow-none"
             >
@@ -857,6 +865,9 @@ function Inner() {
           </TabsContent>
           <TabsContent value="bank-statements" className="mt-4">
             <BankStatementsTab canEdit={canEditTx} />
+          </TabsContent>
+          <TabsContent value="bank-reconciliation" className="mt-4">
+            <BankReconciliationTab canEdit={canEditTx} />
           </TabsContent>
           <TabsContent value="reconciliation" className="mt-4">
             <ReconciliationTab periods={periods} isTreasurer={isCurrentTreasurer} isSecretary={isSecretary} isAdmin={isAdmin} onChange={load} />
