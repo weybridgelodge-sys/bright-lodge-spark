@@ -5,7 +5,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Loader2, Plus, Trash2 } from "lucide-react";
+import { fetchReservePots, fetchSubscriptionSettings, type ReservePot } from "@/lib/treasurer/subscriptionSettings";
 
 const EXCLUDED_CODES = new Set(["4120", "4500"]);
 
@@ -33,9 +35,16 @@ export default function DirectReceiptTab({ canEdit }: { canEdit: boolean }) {
   const [extraLines, setExtraLines] = useState<ExtraLine[]>([]);
   const [saving, setSaving] = useState(false);
 
+  const [codeMap, setCodeMap] = useState<Map<string, string>>(new Map());
+  const [isRenewal, setIsRenewal] = useState(false);
+  const [memberName, setMemberName] = useState("");
+  const [ageBracket, setAgeBracket] = useState<"over25" | "under25">("over25");
+  const [pots, setPots] = useState<ReservePot[]>([]);
+  const [annualRatePence, setAnnualRatePence] = useState(25000);
+
   const load = useCallback(async () => {
     setLoading(true);
-    const [{ data: accts, error: acctErr }, { data: period }] = await Promise.all([
+    const [{ data: accts, error: acctErr }, { data: period }, potRows, settings] = await Promise.all([
       supabase.from("chart_of_accounts" as any).select("id,code,name,account_type").order("code"),
       supabase
         .from("treasurer_periods" as any)
@@ -44,10 +53,17 @@ export default function DirectReceiptTab({ canEdit }: { canEdit: boolean }) {
         .order("created_at", { ascending: false })
         .limit(1)
         .maybeSingle(),
+      fetchReservePots(),
+      fetchSubscriptionSettings(),
     ]);
+    setPots(potRows);
+    if (settings) setAnnualRatePence(settings.annual_rate_pence);
     if (acctErr) toast({ title: "Could not load accounts", description: acctErr.message, variant: "destructive" });
 
     const all = ((accts as any[]) ?? []) as Account[];
+    const cm = new Map<string, string>();
+    for (const a of all) if (a.code && a.id) cm.set(a.code, a.id);
+    setCodeMap(cm);
     setBankId(all.find((a) => a.code === "1000")?.id ?? null);
     setAccounts(all.filter((a) => a.account_type === "income" && !EXCLUDED_CODES.has(a.code)));
     setAllAccounts(all.filter((a) => !EXCLUDED_CODES.has(a.code)));
@@ -56,6 +72,112 @@ export default function DirectReceiptTab({ canEdit }: { canEdit: boolean }) {
   }, []);
 
   useEffect(() => { load(); }, [load]);
+
+  const reserveMultiplier = ageBracket === "under25" ? 0.5 : 1;
+  const reserveAllocations = useMemo(
+    () => pots.map((p) => ({ ...p, pence: Math.round(p.annual_pence * reserveMultiplier) })),
+    [pots, reserveMultiplier],
+  );
+  const reserveTotalPence = reserveAllocations.reduce((s, r) => s + r.pence, 0);
+
+  useEffect(() => {
+    if (!isRenewal) return;
+    setAmount((annualRatePence * (ageBracket === "under25" ? 0.5 : 1) / 100).toFixed(2));
+  }, [isRenewal, ageBracket, annualRatePence]);
+
+  const submitRenewal = async () => {
+    const bankPence = toPence(amount);
+    if (!memberName.trim()) {
+      toast({ title: "Enter the member's name", variant: "destructive" });
+      return;
+    }
+    if (bankPence <= 0) {
+      toast({ title: "Enter a positive amount", variant: "destructive" });
+      return;
+    }
+    const need = ["1000", "1100", "3000", "3100"].filter((c) => !codeMap.get(c));
+    if (need.length) {
+      toast({ title: `Missing accounts: ${need.join(", ")}`, variant: "destructive" });
+      return;
+    }
+
+    setSaving(true);
+    const { data: u } = await supabase.auth.getUser();
+    const createdBy = u.user?.id ?? null;
+    const posted: string[] = [];
+    const A = (c: string) => codeMap.get(c) as string;
+
+    const rollbackAll = async () => {
+      if (posted.length) await supabase.from("journal_entries" as any).delete().in("id", posted);
+    };
+
+    const postEntry = async (
+      entry: Record<string, unknown>,
+      lines: { account_id: string; debit_pence: number; credit_pence: number; fund_code?: string }[],
+      stage: string,
+    ): Promise<boolean> => {
+      const { data: e, error: entryErr } = await supabase
+        .from("journal_entries" as any)
+        .insert({ entry_date: date, period_id: openPeriodId, created_by: createdBy, ...entry })
+        .select("id")
+        .single();
+      if (entryErr || !e) {
+        await rollbackAll();
+        toast({ title: `Save failed at ${stage}`, description: entryErr?.message, variant: "destructive" });
+        return false;
+      }
+      const id = (e as any).id as string;
+      const { error: lineErr } = await supabase
+        .from("journal_lines" as any)
+        .insert(lines.map((l) => ({ entry_id: id, fund_code: null, ...l, description: null })));
+      if (lineErr) {
+        await supabase.from("journal_entries" as any).delete().eq("id", id);
+        await rollbackAll();
+        toast({ title: `Save failed at ${stage}`, description: lineErr.message, variant: "destructive" });
+        return false;
+      }
+      posted.push(id);
+      return true;
+    };
+
+    const ok1 = await postEntry(
+      {
+        description: `Subscription renewal — ${memberName.trim()}${ageBracket === "under25" ? " (under 25)" : ""}`,
+        source_type: "subscription_renewal",
+        document_number: documentNumber.trim() || null,
+        bank_reference: bankReference.trim() || null,
+      },
+      [
+        { account_id: A("1000"), debit_pence: bankPence, credit_pence: 0 },
+        { account_id: A("1100"), debit_pence: 0, credit_pence: bankPence },
+      ],
+      "the subscription receipt entry",
+    );
+    if (!ok1) { setSaving(false); return; }
+
+    if (reserveTotalPence > 0) {
+      const ok2 = await postEntry(
+        {
+          description: `Designated reserves allocation — ${memberName.trim()}`,
+          source_type: "reserve_allocation",
+        },
+        [
+          { account_id: A("3000"), debit_pence: reserveTotalPence, credit_pence: 0 },
+          ...reserveAllocations
+            .filter((r) => r.pence > 0)
+            .map((r) => ({ account_id: A("3100"), debit_pence: 0, credit_pence: r.pence, fund_code: r.fund_code })),
+        ],
+        "the designated reserves entry",
+      );
+      if (!ok2) { setSaving(false); return; }
+    }
+
+    setSaving(false);
+    setMemberName("");
+    setDocumentNumber("");
+    setBankReference("");
+    toast({ title: "Subscription renewal posted", description: `${posted.length} ledger entries created.` });
+  };
 
   const onAmountChange = (v: string) => {
     setAmount(v);
