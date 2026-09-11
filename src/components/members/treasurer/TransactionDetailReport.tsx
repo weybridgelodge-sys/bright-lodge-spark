@@ -58,6 +58,7 @@ export default function TransactionDetailReport({ canEdit }: { canEdit: boolean 
 
   const load = useCallback(async () => {
     setLoading(true);
+    setLoadError(null);
     try {
       const cf = codeFrom.trim() || "0000";
       const ct = codeTo.trim() || "9999";
