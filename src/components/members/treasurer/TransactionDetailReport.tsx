@@ -219,9 +219,23 @@ export default function TransactionDetailReport({ canEdit }: { canEdit: boolean 
         </Button>
       </div>
 
+      {!loading && filtersChanged && (
+        <p className="rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm text-amber-700 dark:text-amber-400">
+          Filters have changed since this report was run — press “Run report” to update the results below.
+        </p>
+      )}
+
       {loading ? (
         <div className="flex justify-center py-10">
           <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        </div>
+      ) : loadError ? (
+        <div className="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-4 text-sm text-destructive">
+          <p className="font-medium">Report failed to load — no results are shown.</p>
+          <p className="mt-1 break-words">{loadError}</p>
+          <Button variant="outline" size="sm" className="mt-3" onClick={load}>
+            Try again
+          </Button>
         </div>
       ) : loaded ? (
         lines.length === 0 ? (
