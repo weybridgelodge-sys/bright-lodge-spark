@@ -107,6 +107,8 @@ export default function TransactionDetailReport({ canEdit }: { canEdit: boolean 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [canEdit]);
 
+  const filtersChanged = !!applied && (applied.from !== from || applied.to !== to || applied.codeFrom !== codeFrom || applied.codeTo !== codeTo);
+
   const totals = useMemo(
     () =>
       lines.reduce(
