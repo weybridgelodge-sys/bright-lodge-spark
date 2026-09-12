@@ -102,7 +102,7 @@ export async function postCollectionToLedger(c: Collection, typeLabel: string): 
     { code: INCOME_CODE[c.collection_type], debit: 0, credit: gross, description: typeLabel },
   ];
   if (costs > 0) lines.push({ code: "5310", debit: costs, credit: 0, description: "Raffle prizes / collection costs" });
-  if (stripeFee > 0) lines.push({ code: "5410", debit: stripeFee, credit: 0, description: "Stripe card processing fee" });
+  if (stripeFee > 0) lines.push({ code: "5420", debit: stripeFee, credit: 0, description: "Stripe card processing fee" });
 
   const meeting = new Date(c.collection_date).toLocaleDateString("en-GB");
   const description = `${typeLabel} collection, meeting ${meeting}${c.banked_by ? ` — banked by ${c.banked_by}` : ""}`;
