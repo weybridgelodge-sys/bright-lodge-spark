@@ -442,13 +442,14 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
                 <thead>
                   <tr className="text-left text-xs uppercase tracking-wider text-primary-foreground/60 border-b border-gold/15">
                     <th className="px-2 py-2">Category</th>
+                    <th className="px-2 py-2">Mode</th>
                     <th className="px-2 py-2 text-right">Planned (£)</th>
                     {canEdit && <th className="px-2 py-2 w-12"></th>}
                   </tr>
                 </thead>
                 <tbody>
                   {budget.length === 0 && (
-                    <tr><td colSpan={3} className="px-2 py-4 text-primary-foreground/50">No budget lines yet.</td></tr>
+                    <tr><td colSpan={4} className="px-2 py-4 text-primary-foreground/50">No budget lines yet.</td></tr>
                   )}
                   {budget.map((l) => (
                     <tr key={l.id} className="border-b border-gold/10">
@@ -457,10 +458,40 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
                           onChange={(e) => setBudget((ls) => ls.map((x) => x.id === l.id ? { ...x, category: e.target.value } : x))}
                           onBlur={(e) => updateBudgetLine(l.id, { category: e.target.value })} />
                       </td>
+                      <td className="px-2 py-1.5">
+                        <div className="inline-flex rounded-sm border border-gold/20 overflow-hidden">
+                          {(["total", "perHead"] as const).map((m) => (
+                            <button key={m} type="button" disabled={!canEdit}
+                              className={`px-2 py-1 text-xs ${lineMode(l) === m ? "bg-gold text-navy" : "text-primary-foreground/60 hover:text-primary-foreground"}`}
+                              onClick={() => lineMode(l) !== m && setBudgetLineMode(l, m)}>
+                              {m === "total" ? "Total" : "Per head"}
+                            </button>
+                          ))}
+                        </div>
+                      </td>
                       <td className="px-2 py-1.5 text-right">
-                        <Input type="number" step="0.01" className="text-right" disabled={!canEdit}
-                          defaultValue={fromPence(l.planned_pence)}
-                          onBlur={(e) => updateBudgetLine(l.id, { planned_pence: toPence(e.target.value) })} />
+                        {lineMode(l) === "perHead" ? (
+                          <div className="flex items-center justify-end gap-2 flex-wrap">
+                            <Input type="number" step="0.01" className="w-24 text-right" disabled={!canEdit}
+                              aria-label="Cost per head (£)"
+                              defaultValue={fromPence(l.unit_cost_pence ?? 0)}
+                              key={`u-${l.id}-${l.unit_cost_pence}`}
+                              onBlur={(e) => updatePerHead(l, toPence(e.target.value), l.quantity ?? 0)} />
+                            <span className="text-primary-foreground/60">×</span>
+                            <Input type="number" min="0" step="1" className="w-20 text-right" disabled={!canEdit}
+                              aria-label="Quantity"
+                              defaultValue={String(l.quantity ?? 0)}
+                              key={`q-${l.id}-${l.quantity}`}
+                              onBlur={(e) => updatePerHead(l, l.unit_cost_pence ?? 0, Math.max(0, Math.round(parseFloat(e.target.value || "0") || 0)))} />
+                            <span className="text-primary-foreground/60">=</span>
+                            <span className="tabular-nums text-gold font-medium">{money(l.planned_pence)}</span>
+                          </div>
+                        ) : (
+                          <Input type="number" step="0.01" className="text-right" disabled={!canEdit}
+                            defaultValue={fromPence(l.planned_pence)}
+                            key={`p-${l.id}-${l.planned_pence}`}
+                            onBlur={(e) => updateBudgetLine(l.id, { planned_pence: toPence(e.target.value) })} />
+                        )}
                       </td>
                       {canEdit && (
                         <td className="px-2 py-1.5">
