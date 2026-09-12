@@ -429,7 +429,7 @@ export type Database = {
           id: string
           journal_entry_id: string | null
           lodge_event_id: string | null
-          net_amount: number | null
+          net_amount: number
           notes: string | null
           stripe_fee: number
           updated_at: string
@@ -446,7 +446,7 @@ export type Database = {
           id?: string
           journal_entry_id?: string | null
           lodge_event_id?: string | null
-          net_amount?: number | null
+          net_amount?: number
           notes?: string | null
           stripe_fee?: number
           updated_at?: string
@@ -463,7 +463,7 @@ export type Database = {
           id?: string
           journal_entry_id?: string | null
           lodge_event_id?: string | null
-          net_amount?: number | null
+          net_amount?: number
           notes?: string | null
           stripe_fee?: number
           updated_at?: string
