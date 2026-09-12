@@ -11,7 +11,7 @@ import { toast } from "@/hooks/use-toast";
 import { Loader2, Plus, Trash2, FileDown, ChevronDown, ChevronRight, Pencil } from "lucide-react";
 import autoTable from "jspdf-autotable";
 import { reportPdfDoc, reportSection, INK, GOLD, NAVY, MUTED } from "@/lib/treasurer/reports";
-import { saveJsPdf } from "@/lib/nativeDownload";
+import { saveJsPdf, saveText } from "@/lib/nativeDownload";
 
 const money = (pence: number) =>
   `${pence < 0 ? "-" : ""}£${(Math.abs(pence) / 100).toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -38,6 +38,7 @@ type Booking = {
 type Guest = {
   id: string; booking_id: string; name: string | null; seating_preference: string | null;
   menu_choice: string | null; allergies: string | null; wine_preorder: string | null;
+  is_female: boolean; is_vip: boolean;
 };
 type ActualLine = {
   event_id: string; debit_pence: number; credit_pence: number; description: string | null;
@@ -309,6 +310,7 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
   const openGuest = (bookingId: string, g?: Guest) => {
     setGuestDraft(g ? { ...g } : {
       booking_id: bookingId, name: "", seating_preference: "", menu_choice: "", allergies: "", wine_preorder: "",
+      is_female: false, is_vip: false,
     });
     setGuestDialog(true);
   };
@@ -322,6 +324,8 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
       menu_choice: (d.menu_choice || "").trim() || null,
       allergies: (d.allergies || "").trim() || null,
       wine_preorder: (d.wine_preorder || "").trim() || null,
+      is_female: !!d.is_female,
+      is_vip: !!d.is_vip,
     };
     const { error } = d.id
       ? await supabase.from("event_guests" as any).update(payload).eq("id", d.id)
@@ -329,6 +333,48 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
     if (error) { toast({ title: "Save failed", description: error.message, variant: "destructive" }); return; }
     setGuestDialog(false);
     loadEventData(eventId);
+  };
+
+  const toggleGuestFlag = async (g: Guest, field: "is_female" | "is_vip") => {
+    setGuests((gs) => gs.map((x) => (x.id === g.id ? { ...x, [field]: !g[field] } : x)));
+    const { error } = await supabase.from("event_guests" as any).update({ [field]: !g[field] }).eq("id", g.id);
+    if (error) {
+      setGuests((gs) => gs.map((x) => (x.id === g.id ? { ...x, [field]: g[field] } : x)));
+      toast({ title: "Update failed", description: error.message, variant: "destructive" });
+    }
+  };
+
+  // ─── CSV (PerfectTablePlan-compatible) ───────────────────────────────────
+  const csvCell = (v: string | null | undefined) => {
+    const s = v ?? "";
+    return /[",\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+  };
+
+  const exportCsv = async () => {
+    if (!event) return;
+    const bookingById = new Map(bookings.map((b) => [b.id, b]));
+    const rows = guests
+      .filter((g) => (g.name || "").trim())
+      .map((g) => {
+        const b = bookingById.get(g.booking_id);
+        const notes = [
+          g.wine_preorder?.trim() ? `Wine: ${g.wine_preorder.trim()}` : "",
+          g.seating_preference?.trim() ? `Seating: ${g.seating_preference.trim()}` : "",
+        ].filter(Boolean).join("; ");
+        return [
+          g.name!.trim(),
+          b?.payer_name ?? "",
+          g.menu_choice ?? "",
+          g.allergies ?? "",
+          g.is_female ? "F" : "M",
+          g.is_vip ? "Y" : "",
+          notes,
+        ].map(csvCell).join(",");
+      });
+    if (!rows.length) { toast({ title: "No named guests to export yet" }); return; }
+    const header = "Name,Group,Meal,Special req.,Gender,VIP,Notes";
+    await saveText([header, ...rows].join("\r\n"), `event-account-${event.name.toLowerCase().replace(/\s+/g, "-")}.csv`);
+    toast({ title: `Exported ${rows.length} guest${rows.length === 1 ? "" : "s"} to CSV` });
   };
 
   const deleteGuest = async (id: string) => {
@@ -512,6 +558,9 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
           )}
           <Button variant="outline" className="border-gold/30" onClick={exportPdf} disabled={!event}>
             <FileDown className="w-4 h-4 mr-1" /> Export PDF
+          </Button>
+          <Button variant="outline" className="border-gold/30" onClick={exportCsv} disabled={!event}>
+            <FileDown className="w-4 h-4 mr-1" /> Export CSV
           </Button>
         </div>
       </div>
@@ -760,7 +809,24 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
                                 )}
                                 {bGuests.map((g) => (
                                   <tr key={g.id} className="border-t border-gold/10">
-                                    <td className="px-2 py-1">{g.name || <span className="text-primary-foreground/50">TBC</span>}</td>
+                                    <td className="px-2 py-1">
+                                      {g.name || <span className="text-primary-foreground/50">TBC</span>}
+                                      {canEdit ? (
+                                        <>
+                                          <button type="button" title="Toggle female"
+                                            className={`ml-2 px-1.5 py-0.5 rounded-sm text-[10px] font-semibold border ${g.is_female ? "bg-gold text-navy border-gold" : "border-gold/30 text-primary-foreground/50"}`}
+                                            onClick={() => toggleGuestFlag(g, "is_female")}>F</button>
+                                          <button type="button" title="Toggle VIP"
+                                            className={`ml-1 px-1.5 py-0.5 rounded-sm text-[10px] font-semibold border ${g.is_vip ? "bg-gold text-navy border-gold" : "border-gold/30 text-primary-foreground/50"}`}
+                                            onClick={() => toggleGuestFlag(g, "is_vip")}>VIP</button>
+                                        </>
+                                      ) : (
+                                        <>
+                                          {g.is_female && <span className="ml-2 px-1.5 py-0.5 rounded-sm text-[10px] font-semibold bg-gold text-navy">F</span>}
+                                          {g.is_vip && <span className="ml-1 px-1.5 py-0.5 rounded-sm text-[10px] font-semibold bg-gold text-navy">VIP</span>}
+                                        </>
+                                      )}
+                                    </td>
                                     <td className="px-2 py-1">{g.seating_preference || "—"}</td>
                                     <td className="px-2 py-1">{g.menu_choice || "—"}</td>
                                     <td className="px-2 py-1">{g.allergies || "—"}</td>
@@ -1049,6 +1115,16 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
               <div>
                 <Label>Wine pre-order</Label>
                 <Input value={guestDraft.wine_preorder ?? ""} onChange={(e) => setGuestDraft({ ...guestDraft, wine_preorder: e.target.value })} />
+              </div>
+              <div className="flex items-center gap-6">
+                <label className="flex items-center gap-2 text-sm">
+                  <Checkbox checked={!!guestDraft.is_female} onCheckedChange={(v) => setGuestDraft({ ...guestDraft, is_female: !!v })} />
+                  Female
+                </label>
+                <label className="flex items-center gap-2 text-sm">
+                  <Checkbox checked={!!guestDraft.is_vip} onCheckedChange={(v) => setGuestDraft({ ...guestDraft, is_vip: !!v })} />
+                  VIP
+                </label>
               </div>
             </div>
           )}

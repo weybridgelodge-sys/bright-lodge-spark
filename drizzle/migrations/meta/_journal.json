@@ -57,6 +57,13 @@
       "when": 1789193451204,
       "tag": "0007_add_line_type_to_event_budget_lines",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1789196522701,
+      "tag": "0008_event_guests_female_vip_flags",
+      "breakpoints": true
     }
   ]
 }

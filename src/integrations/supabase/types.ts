@@ -1169,6 +1169,8 @@ export type Database = {
           booking_id: string
           created_at: string
           id: string
+          is_female: boolean
+          is_vip: boolean
           menu_choice: string | null
           name: string | null
           seating_preference: string | null
@@ -1180,6 +1182,8 @@ export type Database = {
           booking_id: string
           created_at?: string
           id?: string
+          is_female?: boolean
+          is_vip?: boolean
           menu_choice?: string | null
           name?: string | null
           seating_preference?: string | null
@@ -1191,6 +1195,8 @@ export type Database = {
           booking_id?: string
           created_at?: string
           id?: string
+          is_female?: boolean
+          is_vip?: boolean
           menu_choice?: string | null
           name?: string | null
           seating_preference?: string | null
