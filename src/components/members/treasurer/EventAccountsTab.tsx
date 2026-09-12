@@ -81,6 +81,7 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
   const [newCategory, setNewCategory] = useState("");
   const [newPlanned, setNewPlanned] = useState("0.00");
   const [newMode, setNewMode] = useState<BudgetMode>("total");
+  const [newLineType, setNewLineType] = useState<LineType>("expense");
   const [newUnitCost, setNewUnitCost] = useState("0.00");
   const [newQuantity, setNewQuantity] = useState("1");
 
