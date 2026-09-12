@@ -23,7 +23,12 @@ const METHODS = ["stripe", "bank_transfer", "cash"] as const;
 const STATUSES = ["planning", "active", "closed"] as const;
 
 export type EventAccount = { id: string; name: string; event_date: string; status: string };
-type BudgetLine = { id: string; event_id: string; category: string; planned_pence: number };
+type BudgetLine = {
+  id: string; event_id: string; category: string; planned_pence: number;
+  unit_cost_pence: number | null; quantity: number | null;
+};
+type BudgetMode = "total" | "perHead";
+const lineMode = (l: BudgetLine): BudgetMode => (l.unit_cost_pence != null && l.quantity != null ? "perHead" : "total");
 type Booking = {
   id: string; event_id: string; payer_name: string; ticket_count: number; is_placeholder: boolean;
   deposit_pence: number; deposit_paid: boolean; deposit_method: string | null;
@@ -74,6 +79,9 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
 
   const [newCategory, setNewCategory] = useState("");
   const [newPlanned, setNewPlanned] = useState("0.00");
+  const [newMode, setNewMode] = useState<BudgetMode>("total");
+  const [newUnitCost, setNewUnitCost] = useState("0.00");
+  const [newQuantity, setNewQuantity] = useState("1");
 
   const loadEvents = useCallback(async () => {
     const { data, error } = await supabase
