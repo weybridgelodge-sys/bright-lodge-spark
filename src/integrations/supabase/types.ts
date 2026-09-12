@@ -431,6 +431,7 @@ export type Database = {
           lodge_event_id: string | null
           net_amount: number | null
           notes: string | null
+          stripe_fee: number
           updated_at: string
         }
         Insert: {
@@ -447,6 +448,7 @@ export type Database = {
           lodge_event_id?: string | null
           net_amount?: number | null
           notes?: string | null
+          stripe_fee?: number
           updated_at?: string
         }
         Update: {
@@ -463,6 +465,7 @@ export type Database = {
           lodge_event_id?: string | null
           net_amount?: number | null
           notes?: string | null
+          stripe_fee?: number
           updated_at?: string
         }
         Relationships: [

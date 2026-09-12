@@ -64,6 +64,13 @@
       "when": 1789196522701,
       "tag": "0008_event_guests_female_vip_flags",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1789227836589,
+      "tag": "0009_add_stripe_fee_to_charity_collections",
+      "breakpoints": true
     }
   ]
 }

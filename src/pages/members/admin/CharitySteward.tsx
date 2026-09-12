@@ -134,6 +134,7 @@ function CollectionsTab({ collections, donations, canEdit, canPost, onChange }: 
                 <th className="px-4 py-2">Type</th>
                 <th className="px-4 py-2 text-right">Gross</th>
                 <th className="px-4 py-2 text-right">Costs</th>
+                <th className="px-4 py-2 text-right">Stripe fee</th>
                 <th className="px-4 py-2 text-right">Net</th>
                 <th className="px-4 py-2">Banked</th>
                 <th className="px-4 py-2">Notes</th>
@@ -143,7 +144,7 @@ function CollectionsTab({ collections, donations, canEdit, canPost, onChange }: 
             </thead>
             <tbody>
               {collections.length === 0 && (
-                <tr><td colSpan={(canEdit ? 8 : 7) + (canPost ? 1 : 0)} className="px-4 py-6 text-center text-primary-foreground/50">No collections recorded.</td></tr>
+                <tr><td colSpan={(canEdit ? 9 : 8) + (canPost ? 1 : 0)} className="px-4 py-6 text-center text-primary-foreground/50">No collections recorded.</td></tr>
               )}
               {collections.map((c) => (
                 <tr key={c.id} className="border-b border-gold/10 hover:bg-navy-light/30">
@@ -151,6 +152,7 @@ function CollectionsTab({ collections, donations, canEdit, canPost, onChange }: 
                   <td className="px-4 py-2">{COLLECTION_TYPE_LABEL[c.collection_type]}</td>
                   <td className="px-4 py-2 text-right tabular-nums">{gbp(Number(c.gross_amount))}</td>
                   <td className="px-4 py-2 text-right tabular-nums">{gbp(Number(c.costs))}</td>
+                  <td className="px-4 py-2 text-right tabular-nums">{gbp(Number(c.stripe_fee ?? 0))}</td>
                   <td className="px-4 py-2 text-right tabular-nums text-gold">{gbp(Number(c.net_amount))}</td>
                   <td className="px-4 py-2 text-xs text-primary-foreground/70 whitespace-nowrap">
                     {c.banked_date ? new Date(c.banked_date).toLocaleDateString("en-GB") : <span className="text-amber-300/80">Not banked</span>}
@@ -202,6 +204,7 @@ function CollectionDialog({ open, onOpenChange, editing, onSaved }: {
   const [type, setType] = useState<CollectionType>("charity_column");
   const [gross, setGross] = useState("0");
   const [costs, setCosts] = useState("0");
+  const [stripeFee, setStripeFee] = useState("0");
   const [notes, setNotes] = useState("");
   const [bankedDate, setBankedDate] = useState("");
   const [bankedBy, setBankedBy] = useState("");
@@ -214,13 +217,14 @@ function CollectionDialog({ open, onOpenChange, editing, onSaved }: {
       setType(editing.collection_type);
       setGross(String(editing.gross_amount));
       setCosts(String(editing.costs));
+      setStripeFee(String(editing.stripe_fee ?? 0));
       setNotes(editing.notes ?? "");
       setBankedDate(editing.banked_date ?? "");
       setBankedBy(editing.banked_by ?? "");
     } else {
       setDate(new Date().toISOString().slice(0, 10));
       setType("charity_column");
-      setGross("0"); setCosts("0"); setNotes(""); setBankedDate(""); setBankedBy("");
+      setGross("0"); setCosts("0"); setStripeFee("0"); setNotes(""); setBankedDate(""); setBankedBy("");
     }
   }, [open, editing]);
 
@@ -231,6 +235,7 @@ function CollectionDialog({ open, onOpenChange, editing, onSaved }: {
       collection_type: type,
       gross_amount: Number(gross) || 0,
       costs: Number(costs) || 0,
+      stripe_fee: Number(stripeFee) || 0,
       notes: notes || null,
       banked_date: bankedDate || null,
       banked_by: bankedBy || null,
@@ -270,6 +275,11 @@ function CollectionDialog({ open, onOpenChange, editing, onSaved }: {
           <div className="grid grid-cols-2 gap-3">
             <div><Label>Gross amount (£)</Label><Input type="number" step="0.01" value={gross} onChange={(e) => setGross(e.target.value)} /></div>
             <div><Label>Costs (£)</Label><Input type="number" step="0.01" value={costs} onChange={(e) => setCosts(e.target.value)} /></div>
+          </div>
+          <div>
+            <Label>Stripe fee (£)</Label>
+            <Input type="number" step="0.01" value={stripeFee} onChange={(e) => setStripeFee(e.target.value)} />
+            <p className="text-xs text-primary-foreground/50 mt-1">Card processing fee on online payments — posted to Bank &amp; card charges (5410), separate from prize costs (5310).</p>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div><Label>Banked date</Label><Input type="date" value={bankedDate} onChange={(e) => setBankedDate(e.target.value)} /></div>
