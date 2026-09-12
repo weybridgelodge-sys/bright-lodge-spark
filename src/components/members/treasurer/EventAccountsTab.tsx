@@ -658,7 +658,7 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
                 {newMode === "perHead" ? (
                   <>
                     <div className="w-28">
-                      <Label className="text-xs">Cost per head (£)</Label>
+                      <Label className="text-xs">{newLineType === "income" ? "Price per head (£)" : "Cost per head (£)"}</Label>
                       <Input type="number" step="0.01" value={newUnitCost} onChange={(e) => setNewUnitCost(e.target.value)} />
                     </div>
                     <div className="w-20">
