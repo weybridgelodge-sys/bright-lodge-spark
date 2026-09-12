@@ -14,6 +14,7 @@ import PropertyRegisterTab from "@/components/members/treasurer/PropertyRegister
 import BankStatementsTab from "@/components/members/treasurer/BankStatementsTab";
 import BankReconciliationTab from "@/components/members/treasurer/BankReconciliationTab";
 import BreakevenCalculatorTab from "@/components/members/treasurer/BreakevenCalculatorTab";
+import EventAccountsTab from "@/components/members/treasurer/EventAccountsTab";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
