@@ -45,9 +45,15 @@ export default function TransactionDetailReport({ canEdit }: { canEdit: boolean 
   const [loaded, setLoaded] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [applied, setApplied] = useState<{ from: string; to: string; codeFrom: string; codeTo: string } | null>(null);
+  const [events, setEvents] = useState<EventOption[]>([]);
 
   useEffect(() => {
     if (!canEdit) return;
+    supabase
+      .from("event_accounts" as any)
+      .select("id,name,event_date")
+      .order("event_date", { ascending: false })
+      .then(({ data }) => setEvents(((data as any[]) ?? []) as EventOption[]));
     fetchAccounts()
       .then((accs) => {
         setAccounts(accs);
