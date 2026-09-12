@@ -217,13 +217,14 @@ function CollectionDialog({ open, onOpenChange, editing, onSaved }: {
       setType(editing.collection_type);
       setGross(String(editing.gross_amount));
       setCosts(String(editing.costs));
+      setStripeFee(String(editing.stripe_fee ?? 0));
       setNotes(editing.notes ?? "");
       setBankedDate(editing.banked_date ?? "");
       setBankedBy(editing.banked_by ?? "");
     } else {
       setDate(new Date().toISOString().slice(0, 10));
       setType("charity_column");
-      setGross("0"); setCosts("0"); setNotes(""); setBankedDate(""); setBankedBy("");
+      setGross("0"); setCosts("0"); setStripeFee("0"); setNotes(""); setBankedDate(""); setBankedBy("");
     }
   }, [open, editing]);
 
@@ -234,6 +235,7 @@ function CollectionDialog({ open, onOpenChange, editing, onSaved }: {
       collection_type: type,
       gross_amount: Number(gross) || 0,
       costs: Number(costs) || 0,
+      stripe_fee: Number(stripeFee) || 0,
       notes: notes || null,
       banked_date: bankedDate || null,
       banked_by: bankedBy || null,
@@ -273,6 +275,11 @@ function CollectionDialog({ open, onOpenChange, editing, onSaved }: {
           <div className="grid grid-cols-2 gap-3">
             <div><Label>Gross amount (£)</Label><Input type="number" step="0.01" value={gross} onChange={(e) => setGross(e.target.value)} /></div>
             <div><Label>Costs (£)</Label><Input type="number" step="0.01" value={costs} onChange={(e) => setCosts(e.target.value)} /></div>
+          </div>
+          <div>
+            <Label>Stripe fee (£)</Label>
+            <Input type="number" step="0.01" value={stripeFee} onChange={(e) => setStripeFee(e.target.value)} />
+            <p className="text-xs text-primary-foreground/50 mt-1">Card processing fee on online payments — posted to Bank &amp; card charges (5410), separate from prize costs (5310).</p>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div><Label>Banked date</Label><Input type="date" value={bankedDate} onChange={(e) => setBankedDate(e.target.value)} /></div>
