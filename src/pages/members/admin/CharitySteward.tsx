@@ -134,6 +134,7 @@ function CollectionsTab({ collections, donations, canEdit, canPost, onChange }: 
                 <th className="px-4 py-2">Type</th>
                 <th className="px-4 py-2 text-right">Gross</th>
                 <th className="px-4 py-2 text-right">Costs</th>
+                <th className="px-4 py-2 text-right">Stripe fee</th>
                 <th className="px-4 py-2 text-right">Net</th>
                 <th className="px-4 py-2">Banked</th>
                 <th className="px-4 py-2">Notes</th>
@@ -143,7 +144,7 @@ function CollectionsTab({ collections, donations, canEdit, canPost, onChange }: 
             </thead>
             <tbody>
               {collections.length === 0 && (
-                <tr><td colSpan={(canEdit ? 8 : 7) + (canPost ? 1 : 0)} className="px-4 py-6 text-center text-primary-foreground/50">No collections recorded.</td></tr>
+                <tr><td colSpan={(canEdit ? 9 : 8) + (canPost ? 1 : 0)} className="px-4 py-6 text-center text-primary-foreground/50">No collections recorded.</td></tr>
               )}
               {collections.map((c) => (
                 <tr key={c.id} className="border-b border-gold/10 hover:bg-navy-light/30">
@@ -151,6 +152,7 @@ function CollectionsTab({ collections, donations, canEdit, canPost, onChange }: 
                   <td className="px-4 py-2">{COLLECTION_TYPE_LABEL[c.collection_type]}</td>
                   <td className="px-4 py-2 text-right tabular-nums">{gbp(Number(c.gross_amount))}</td>
                   <td className="px-4 py-2 text-right tabular-nums">{gbp(Number(c.costs))}</td>
+                  <td className="px-4 py-2 text-right tabular-nums">{gbp(Number(c.stripe_fee ?? 0))}</td>
                   <td className="px-4 py-2 text-right tabular-nums text-gold">{gbp(Number(c.net_amount))}</td>
                   <td className="px-4 py-2 text-xs text-primary-foreground/70 whitespace-nowrap">
                     {c.banked_date ? new Date(c.banked_date).toLocaleDateString("en-GB") : <span className="text-amber-300/80">Not banked</span>}
