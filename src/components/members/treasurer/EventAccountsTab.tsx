@@ -774,36 +774,75 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
                   </tr>
                 </thead>
                 <tbody>
-                  {budgetVsActual.rows.map((r) => (
-                    <tr key={r.category} className="border-b border-gold/10">
+                  <tr className="bg-navy/40">
+                    <td colSpan={4} className="px-2 py-1.5 text-xs uppercase tracking-wider text-gold">Income actually received (ledger)</td>
+                  </tr>
+                  {budgetVsActual.incomeRows.length === 0 && (
+                    <tr><td colSpan={4} className="px-2 py-2 text-primary-foreground/50">No income budget lines.</td></tr>
+                  )}
+                  {budgetVsActual.incomeRows.map((r) => (
+                    <tr key={r.key} className="border-b border-gold/10">
                       <td className="px-2 py-1.5">{r.category}</td>
                       <td className="px-2 py-1.5 text-right tabular-nums">{money(r.planned)}</td>
                       <td className="px-2 py-1.5 text-right tabular-nums">{money(r.actual)}</td>
                       <td className={`px-2 py-1.5 text-right tabular-nums ${r.variance < 0 ? "text-red-400" : "text-emerald-400"}`}>{money(r.variance)}</td>
                     </tr>
                   ))}
+                  <tr className="border-b border-gold/20">
+                    <td className="px-2 py-1.5 font-medium text-primary-foreground">Total income</td>
+                    <td className="px-2 py-1.5 text-right tabular-nums">{money(plannedIncomeTotal)}</td>
+                    <td className="px-2 py-1.5 text-right tabular-nums">{money(actualIncomeTotal)}</td>
+                    <td className="px-2 py-1.5 text-right tabular-nums">{money(actualIncomeTotal - plannedIncomeTotal)}</td>
+                  </tr>
+                  <tr className="bg-navy/40">
+                    <td colSpan={4} className="px-2 py-1.5 text-xs uppercase tracking-wider text-gold">Costs actually incurred (ledger)</td>
+                  </tr>
+                  {budgetVsActual.expenseRows.length === 0 && (
+                    <tr><td colSpan={4} className="px-2 py-2 text-primary-foreground/50">No expense budget lines.</td></tr>
+                  )}
+                  {budgetVsActual.expenseRows.map((r) => (
+                    <tr key={r.key} className="border-b border-gold/10">
+                      <td className="px-2 py-1.5">{r.category}</td>
+                      <td className="px-2 py-1.5 text-right tabular-nums">{money(r.planned)}</td>
+                      <td className="px-2 py-1.5 text-right tabular-nums">{money(r.actual)}</td>
+                      <td className={`px-2 py-1.5 text-right tabular-nums ${r.variance < 0 ? "text-red-400" : "text-emerald-400"}`}>{money(r.variance)}</td>
+                    </tr>
+                  ))}
+                  <tr className="border-b border-gold/20">
+                    <td className="px-2 py-1.5 font-medium text-primary-foreground">Total expenditure</td>
+                    <td className="px-2 py-1.5 text-right tabular-nums">{money(plannedExpenseTotal)}</td>
+                    <td className="px-2 py-1.5 text-right tabular-nums">{money(actualExpenseTotal)}</td>
+                    <td className="px-2 py-1.5 text-right tabular-nums">{money(plannedExpenseTotal - actualExpenseTotal)}</td>
+                  </tr>
                   <tr>
-                    <td className="px-2 py-2 font-medium text-gold">Total</td>
-                    <td className="px-2 py-2 text-right tabular-nums text-gold">{money(plannedTotal)}</td>
-                    <td className="px-2 py-2 text-right tabular-nums text-gold">{money(actualExpenseTotal)}</td>
-                    <td className="px-2 py-2 text-right tabular-nums text-gold">{money(plannedTotal - actualExpenseTotal)}</td>
+                    <td className="px-2 py-2 font-medium text-gold">Result (income less costs)</td>
+                    <td className="px-2 py-2 text-right tabular-nums text-gold">{money(projectedResult)}</td>
+                    <td className="px-2 py-2 text-right tabular-nums text-gold">{money(actualIncomeTotal - actualExpenseTotal)}</td>
+                    <td className="px-2 py-2"></td>
                   </tr>
                 </tbody>
               </table>
             </div>
-            {budgetVsActual.unmatched.length > 0 && (
+            {(budgetVsActual.unmatchedIncome.length > 0 || budgetVsActual.unmatchedExpense.length > 0) && (
               <div className="pt-2">
-                <p className="text-xs uppercase tracking-wider text-primary-foreground/60 mb-1">Event costs not matched to a budget category</p>
+                <p className="text-xs uppercase tracking-wider text-primary-foreground/60 mb-1">Ledger amounts not matched to a budget category</p>
                 <ul className="text-sm space-y-1">
-                  {budgetVsActual.unmatched.map((a) => (
-                    <li key={a.code} className="flex justify-between">
-                      <span className="text-primary-foreground/80">{a.code} — {a.name}</span>
+                  {budgetVsActual.unmatchedIncome.map((a) => (
+                    <li key={`i-${a.code}`} className="flex justify-between">
+                      <span className="text-primary-foreground/80">{a.code} — {a.name} <span className="text-primary-foreground/50">(income)</span></span>
+                      <span className="tabular-nums">{money(a.pence)}</span>
+                    </li>
+                  ))}
+                  {budgetVsActual.unmatchedExpense.map((a) => (
+                    <li key={`e-${a.code}`} className="flex justify-between">
+                      <span className="text-primary-foreground/80">{a.code} — {a.name} <span className="text-primary-foreground/50">(cost)</span></span>
                       <span className="tabular-nums">{money(a.pence)}</span>
                     </li>
                   ))}
                 </ul>
               </div>
             )}
+
             <p className="text-xs text-primary-foreground/50">
               Actuals are the sum of journal lines tagged to this event. Tag lines from Transaction Detail.
             </p>
