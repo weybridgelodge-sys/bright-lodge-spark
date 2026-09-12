@@ -225,9 +225,10 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
     if (!newCategory.trim()) { toast({ title: "Enter a category", variant: "destructive" }); return; }
     const unit = toPence(newUnitCost);
     const qty = Math.max(0, Math.round(parseFloat(newQuantity || "0") || 0));
+    const base = { event_id: eventId, category: newCategory.trim(), line_type: newLineType };
     const payload = newMode === "perHead"
-      ? { event_id: eventId, category: newCategory.trim(), unit_cost_pence: unit, quantity: qty, planned_pence: unit * qty }
-      : { event_id: eventId, category: newCategory.trim(), planned_pence: toPence(newPlanned), unit_cost_pence: null, quantity: null };
+      ? { ...base, unit_cost_pence: unit, quantity: qty, planned_pence: unit * qty }
+      : { ...base, planned_pence: toPence(newPlanned), unit_cost_pence: null, quantity: null };
     const { error } = await supabase.from("event_budget_lines" as any).insert(payload);
     if (error) { toast({ title: "Save failed", description: error.message, variant: "destructive" }); return; }
     setNewCategory(""); setNewPlanned("0.00"); setNewMode("total"); setNewUnitCost("0.00"); setNewQuantity("1");
