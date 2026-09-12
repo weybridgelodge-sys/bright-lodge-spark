@@ -151,6 +151,25 @@ export default function TransactionDetailReport({ canEdit }: { canEdit: boolean 
     }
   };
 
+  const assignEvent = async (lineId: string, value: string) => {
+    const next = value === NO_EVENT ? null : value;
+    const prev = lines.find((l) => l.id === lineId)?.eventId ?? null;
+    setLines((ls) => ls.map((l) => (l.id === lineId ? { ...l, eventId: next } : l)));
+    const { data, error } = await supabase
+      .from("journal_lines" as any)
+      .update({ event_id: next })
+      .eq("id", lineId)
+      .select("id");
+    if (error || !data || data.length === 0) {
+      setLines((ls) => ls.map((l) => (l.id === lineId ? { ...l, eventId: prev } : l)));
+      toast({
+        title: "Couldn't tag this line to an event",
+        description: error?.message ?? "The entry's period may be locked.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const exportCsv = () => {
     const header = ["Date", "Account Code", "Account Name", "Description", "Debit (£)", "Credit (£)"];
     const body = lines.map((l) => [
