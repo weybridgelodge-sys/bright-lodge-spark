@@ -680,7 +680,21 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
                 </Button>
               </div>
             )}
-            <p className="text-sm text-primary-foreground">Total planned: <span className="text-gold font-medium">{money(plannedTotal)}</span></p>
+            <div className="rounded-sm border border-gold/20 bg-navy/40 p-3 space-y-1">
+              <div className="flex justify-between text-sm text-primary-foreground/80">
+                <span>Total planned income</span><span className="tabular-nums">{money(plannedIncomeTotal)}</span>
+              </div>
+              <div className="flex justify-between text-sm text-primary-foreground/80">
+                <span>Total planned expenditure</span><span className="tabular-nums">{money(plannedExpenseTotal)}</span>
+              </div>
+              <div className={`flex justify-between text-base font-semibold pt-1 border-t border-gold/15 ${projectedResult >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+                <span>{projectedResult >= 0 ? "Projected surplus" : "Projected deficit"}</span>
+                <span className="tabular-nums">{money(Math.abs(projectedResult))}</span>
+              </div>
+              <p className="text-xs text-primary-foreground/50">
+                Planning figures only — what you intend to charge and spend. Actual money received or paid appears in Budget vs Actual and Event Reconciliation below.
+              </p>
+            </div>
           </Card>
 
           {/* Bookings */}
