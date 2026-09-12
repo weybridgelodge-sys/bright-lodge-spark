@@ -44,6 +44,7 @@ export type Collection = {
   collection_type: CollectionType;
   gross_amount: number;
   costs: number;
+  stripe_fee: number;
   net_amount: number;
   notes: string | null;
   banked_date: string | null;
@@ -120,7 +121,7 @@ export async function fetchCharities(): Promise<Charity[]> {
 export async function fetchCollections(): Promise<Collection[]> {
   const { data, error } = await supabase
     .from("charity_collections")
-    .select("id,collection_date,lodge_event_id,collection_type,gross_amount,costs,net_amount,notes,banked_date,banked_by,journal_entry_id")
+    .select("id,collection_date,lodge_event_id,collection_type,gross_amount,costs,stripe_fee,net_amount,notes,banked_date,banked_by,journal_entry_id")
     .order("collection_date", { ascending: false });
   if (error) throw error;
   return (data ?? []) as Collection[];
