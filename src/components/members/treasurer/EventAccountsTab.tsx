@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,9 +23,10 @@ const METHODS = ["stripe", "bank_transfer", "cash"] as const;
 const STATUSES = ["planning", "active", "closed"] as const;
 
 export type EventAccount = { id: string; name: string; event_date: string; status: string };
+type LineType = "income" | "expense";
 type BudgetLine = {
   id: string; event_id: string; category: string; planned_pence: number;
-  unit_cost_pence: number | null; quantity: number | null;
+  unit_cost_pence: number | null; quantity: number | null; line_type: LineType;
 };
 type BudgetMode = "total" | "perHead";
 const lineMode = (l: BudgetLine): BudgetMode => (l.unit_cost_pence != null && l.quantity != null ? "perHead" : "total");
@@ -80,6 +81,7 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
   const [newCategory, setNewCategory] = useState("");
   const [newPlanned, setNewPlanned] = useState("0.00");
   const [newMode, setNewMode] = useState<BudgetMode>("total");
+  const [newLineType, setNewLineType] = useState<LineType>("expense");
   const [newUnitCost, setNewUnitCost] = useState("0.00");
   const [newQuantity, setNewQuantity] = useState("1");
 
@@ -140,36 +142,59 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
   const ticketTotal = bookings.reduce((s, b) => s + (b.ticket_count ?? 0), 0);
   const namedGuests = guests.filter((g) => (g.name || "").trim()).length;
 
+  // ─── Derived: planning-stage budget totals (no ledger involvement) ────────
+  const incomeLines = useMemo(() => budget.filter((b) => b.line_type === "income"), [budget]);
+  const expenseLines = useMemo(() => budget.filter((b) => b.line_type !== "income"), [budget]);
+  const plannedIncomeTotal = incomeLines.reduce((s, b) => s + b.planned_pence, 0);
+  const plannedExpenseTotal = expenseLines.reduce((s, b) => s + b.planned_pence, 0);
+  const projectedResult = plannedIncomeTotal - plannedExpenseTotal;
+
   // ─── Derived: budget vs actual ────────────────────────────────────────────
-  const expenseByAccount = useMemo(() => {
+  const byAccount = useCallback((type: "expense" | "income") => {
     const m = new Map<string, { code: string; name: string; pence: number }>();
     for (const l of actuals) {
       const a = l.chart_of_accounts;
-      if (!a || a.account_type !== "expense") continue;
+      if (!a || a.account_type !== type) continue;
       const cur = m.get(a.code) ?? { code: a.code, name: a.name, pence: 0 };
-      cur.pence += (l.debit_pence ?? 0) - (l.credit_pence ?? 0);
+      cur.pence += type === "expense"
+        ? (l.debit_pence ?? 0) - (l.credit_pence ?? 0)
+        : (l.credit_pence ?? 0) - (l.debit_pence ?? 0);
       m.set(a.code, cur);
     }
     return [...m.values()].sort((a, b) => a.code.localeCompare(b.code));
   }, [actuals]);
 
-  const budgetVsActual = useMemo(() => {
-    const used = new Set<string>();
-    const rows = budget.map((bl) => {
-      const cat = bl.category.trim().toLowerCase();
-      let actual = 0;
-      for (const acc of expenseByAccount) {
-        const hay = `${acc.name}`.toLowerCase();
-        if (cat && (hay.includes(cat) || cat.includes(hay))) { actual += acc.pence; used.add(acc.code); }
-      }
-      return { category: bl.category, planned: bl.planned_pence, actual, variance: bl.planned_pence - actual };
-    });
-    const unmatched = expenseByAccount.filter((a) => !used.has(a.code));
-    return { rows, unmatched };
-  }, [budget, expenseByAccount]);
+  const expenseByAccount = useMemo(() => byAccount("expense"), [byAccount]);
+  const incomeByAccount = useMemo(() => byAccount("income"), [byAccount]);
 
-  const plannedTotal = budget.reduce((s, b) => s + b.planned_pence, 0);
+  const budgetVsActual = useMemo(() => {
+    const usedExpense = new Set<string>();
+    const usedIncome = new Set<string>();
+    const build = (lines: BudgetLine[], accounts: typeof expenseByAccount, used: Set<string>) =>
+      lines.map((bl) => {
+        const cat = bl.category.trim().toLowerCase();
+        let actual = 0;
+        for (const acc of accounts) {
+          const hay = `${acc.name}`.toLowerCase();
+          if (cat && (hay.includes(cat) || cat.includes(hay))) { actual += acc.pence; used.add(acc.code); }
+        }
+        // Expense: under budget is good. Income: over budget is good.
+        const variance = bl.line_type === "income" ? actual - bl.planned_pence : bl.planned_pence - actual;
+        return { key: bl.id, category: bl.category, planned: bl.planned_pence, actual, variance };
+      });
+    const expenseRows = build(expenseLines, expenseByAccount, usedExpense);
+    const incomeRows = build(incomeLines, incomeByAccount, usedIncome);
+    return {
+      expenseRows,
+      incomeRows,
+      unmatchedExpense: expenseByAccount.filter((a) => !usedExpense.has(a.code)),
+      unmatchedIncome: incomeByAccount.filter((a) => !usedIncome.has(a.code)),
+    };
+  }, [expenseLines, incomeLines, expenseByAccount, incomeByAccount]);
+
+  
   const actualExpenseTotal = expenseByAccount.reduce((s, a) => s + a.pence, 0);
+  const actualIncomeTotal = incomeByAccount.reduce((s, a) => s + a.pence, 0);
 
   // ─── Derived: event reconciliation ────────────────────────────────────────
   const expectedIncome = bookings.reduce(
@@ -200,9 +225,10 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
     if (!newCategory.trim()) { toast({ title: "Enter a category", variant: "destructive" }); return; }
     const unit = toPence(newUnitCost);
     const qty = Math.max(0, Math.round(parseFloat(newQuantity || "0") || 0));
+    const base = { event_id: eventId, category: newCategory.trim(), line_type: newLineType };
     const payload = newMode === "perHead"
-      ? { event_id: eventId, category: newCategory.trim(), unit_cost_pence: unit, quantity: qty, planned_pence: unit * qty }
-      : { event_id: eventId, category: newCategory.trim(), planned_pence: toPence(newPlanned), unit_cost_pence: null, quantity: null };
+      ? { ...base, unit_cost_pence: unit, quantity: qty, planned_pence: unit * qty }
+      : { ...base, planned_pence: toPence(newPlanned), unit_cost_pence: null, quantity: null };
     const { error } = await supabase.from("event_budget_lines" as any).insert(payload);
     if (error) { toast({ title: "Save failed", description: error.message, variant: "destructive" }); return; }
     setNewCategory(""); setNewPlanned("0.00"); setNewMode("total"); setNewUnitCost("0.00"); setNewQuantity("1");
@@ -321,36 +347,95 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
       `Event Account — ${event.name}`,
       `Event date: ${new Date(event.event_date).toLocaleDateString("en-GB")}`,
     );
-    let y = reportSection(doc, pageW, margin, 135, "Budget vs Actual");
+    
+    const tableStyle = {
+      margin: { left: margin, right: margin, bottom: 50 },
+      styles: { font: "helvetica" as const, fontSize: 9, cellPadding: 5, textColor: INK, lineColor: [220, 215, 200] as [number, number, number], lineWidth: 0.4 },
+      headStyles: { fillColor: GOLD, textColor: NAVY, fontStyle: "bold" as const },
+      footStyles: { fillColor: [250, 247, 238] as [number, number, number], textColor: INK, fontStyle: "bold" as const },
+      alternateRowStyles: { fillColor: [250, 247, 238] as [number, number, number] },
+      theme: "grid" as const,
+      columnStyles: { 0: { cellWidth: 200 }, 1: { halign: "right" as const }, 2: { halign: "right" as const }, 3: { halign: "right" as const } },
+    };
+
+    // Planning stage — intentions only, nothing from the ledger.
+    let y = reportSection(doc, pageW, margin, 135, "Budget plan (planning stage — not actual money)");
     autoTable(doc, {
       startY: y,
-      head: [["Category", "Planned", "Actual", "Variance"]],
-      body: budgetVsActual.rows.map((r) => [r.category, money(r.planned), money(r.actual), money(r.variance)]),
-      foot: [["Total", money(plannedTotal), money(actualExpenseTotal), money(plannedTotal - actualExpenseTotal)]],
-      margin: { left: margin, right: margin, bottom: 50 },
-      styles: { font: "helvetica", fontSize: 9, cellPadding: 5, textColor: INK, lineColor: [220, 215, 200], lineWidth: 0.4 },
-      headStyles: { fillColor: GOLD, textColor: NAVY, fontStyle: "bold" },
-      footStyles: { fillColor: [250, 247, 238], textColor: INK, fontStyle: "bold" },
-      alternateRowStyles: { fillColor: [250, 247, 238] },
-      theme: "grid",
-      columnStyles: { 0: { cellWidth: 200 }, 1: { halign: "right" }, 2: { halign: "right" }, 3: { halign: "right" } },
+      head: [["Planned income", "", "", "Amount"]],
+      body: incomeLines.length
+        ? incomeLines.map((l) => [l.category, l.quantity != null ? `${money(l.unit_cost_pence ?? 0)} × ${l.quantity}` : "Total", "", money(l.planned_pence)])
+        : [["No planned income lines", "", "", money(0)]],
+      foot: [["Total planned income", "", "", money(plannedIncomeTotal)]],
+      ...tableStyle,
+    });
+    y = (doc as any).lastAutoTable.finalY + 12;
+    autoTable(doc, {
+      startY: y,
+      head: [["Planned expenditure", "", "", "Amount"]],
+      body: expenseLines.length
+        ? expenseLines.map((l) => [l.category, l.quantity != null ? `${money(l.unit_cost_pence ?? 0)} × ${l.quantity}` : "Total", "", money(l.planned_pence)])
+        : [["No planned expenditure lines", "", "", money(0)]],
+      foot: [
+        ["Total planned expenditure", "", "", money(plannedExpenseTotal)],
+        [projectedResult >= 0 ? "PROJECTED SURPLUS" : "PROJECTED DEFICIT", "", "", money(Math.abs(projectedResult))],
+      ],
+      ...tableStyle,
+    });
+    y = (doc as any).lastAutoTable.finalY + 8;
+    doc.setFont("helvetica", "italic");
+    doc.setFontSize(8);
+    doc.setTextColor(...MUTED);
+    doc.text(
+      "Projected figures above are the plan only. Actual money is shown in Budget vs Actual and Reconciliation below.",
+      margin, y,
+    );
+    y += 22;
+
+    y = reportSection(doc, pageW, margin, y, "Budget vs Actual (posted to the ledger)");
+    autoTable(doc, {
+      startY: y,
+      head: [["Income category", "Planned", "Actual", "Variance"]],
+      body: budgetVsActual.incomeRows.length
+        ? budgetVsActual.incomeRows.map((r) => [r.category, money(r.planned), money(r.actual), money(r.variance)])
+        : [["No income budget lines", money(0), money(actualIncomeTotal), money(0)]],
+      foot: [["Total income", money(plannedIncomeTotal), money(actualIncomeTotal), money(actualIncomeTotal - plannedIncomeTotal)]],
+      ...tableStyle,
+    });
+    y = (doc as any).lastAutoTable.finalY + 12;
+    autoTable(doc, {
+      startY: y,
+      head: [["Expense category", "Planned", "Actual", "Variance"]],
+      body: budgetVsActual.expenseRows.length
+        ? budgetVsActual.expenseRows.map((r) => [r.category, money(r.planned), money(r.actual), money(r.variance)])
+        : [["No expense budget lines", money(0), money(actualExpenseTotal), money(0)]],
+      foot: [
+        ["Total expenditure", money(plannedExpenseTotal), money(actualExpenseTotal), money(plannedExpenseTotal - actualExpenseTotal)],
+        ["Actual result to date", money(projectedResult), money(actualIncomeTotal - actualExpenseTotal), ""],
+      ],
+      ...tableStyle,
     });
     y = (doc as any).lastAutoTable.finalY + 20;
 
-    if (budgetVsActual.unmatched.length) {
-      y = reportSection(doc, pageW, margin, y, "Event costs not matched to a budget category");
+    const unmatched = [
+      ...budgetVsActual.unmatchedIncome.map((a) => ({ ...a, kind: "Income" })),
+      ...budgetVsActual.unmatchedExpense.map((a) => ({ ...a, kind: "Cost" })),
+    ];
+    if (unmatched.length) {
+      y = reportSection(doc, pageW, margin, y, "Ledger amounts not matched to a budget category");
       autoTable(doc, {
         startY: y,
-        head: [["Account", "Actual"]],
-        body: budgetVsActual.unmatched.map((a) => [`${a.code} — ${a.name}`, money(a.pence)]),
+        head: [["Account", "Type", "Actual"]],
+        body: unmatched.map((a) => [`${a.code} — ${a.name}`, a.kind, money(a.pence)]),
         margin: { left: margin, right: margin, bottom: 50 },
         styles: { font: "helvetica", fontSize: 9, cellPadding: 5, textColor: INK, lineColor: [220, 215, 200], lineWidth: 0.4 },
         headStyles: { fillColor: GOLD, textColor: NAVY, fontStyle: "bold" },
         theme: "grid",
-        columnStyles: { 0: { cellWidth: 320 }, 1: { halign: "right" } },
+        columnStyles: { 0: { cellWidth: 280 }, 2: { halign: "right" } },
       });
       y = (doc as any).lastAutoTable.finalY + 20;
     }
+
 
     y = reportSection(doc, pageW, margin, y, "Bookings & reconciliation");
     autoTable(doc, {
@@ -451,60 +536,93 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
                   {budget.length === 0 && (
                     <tr><td colSpan={4} className="px-2 py-4 text-primary-foreground/50">No budget lines yet.</td></tr>
                   )}
-                  {budget.map((l) => (
-                    <tr key={l.id} className="border-b border-gold/10">
-                      <td className="px-2 py-1.5">
-                        <Input value={l.category} disabled={!canEdit}
-                          onChange={(e) => setBudget((ls) => ls.map((x) => x.id === l.id ? { ...x, category: e.target.value } : x))}
-                          onBlur={(e) => updateBudgetLine(l.id, { category: e.target.value })} />
-                      </td>
-                      <td className="px-2 py-1.5">
-                        <div className="inline-flex rounded-sm border border-gold/20 overflow-hidden">
-                          {(["total", "perHead"] as const).map((m) => (
-                            <button key={m} type="button" disabled={!canEdit}
-                              className={`px-2 py-1 text-xs ${lineMode(l) === m ? "bg-gold text-navy" : "text-primary-foreground/60 hover:text-primary-foreground"}`}
-                              onClick={() => lineMode(l) !== m && setBudgetLineMode(l, m)}>
-                              {m === "total" ? "Total" : "Per head"}
-                            </button>
-                          ))}
-                        </div>
-                      </td>
-                      <td className="px-2 py-1.5 text-right">
-                        {lineMode(l) === "perHead" ? (
-                          <div className="flex items-center justify-end gap-2 flex-wrap">
-                            <Input type="number" step="0.01" className="w-24 text-right" disabled={!canEdit}
-                              aria-label="Cost per head (£)"
-                              defaultValue={fromPence(l.unit_cost_pence ?? 0)}
-                              key={`u-${l.id}-${l.unit_cost_pence}`}
-                              onBlur={(e) => updatePerHead(l, toPence(e.target.value), l.quantity ?? 0)} />
-                            <span className="text-primary-foreground/60">×</span>
-                            <Input type="number" min="0" step="1" className="w-20 text-right" disabled={!canEdit}
-                              aria-label="Quantity"
-                              defaultValue={String(l.quantity ?? 0)}
-                              key={`q-${l.id}-${l.quantity}`}
-                              onBlur={(e) => updatePerHead(l, l.unit_cost_pence ?? 0, Math.max(0, Math.round(parseFloat(e.target.value || "0") || 0)))} />
-                            <span className="text-primary-foreground/60">=</span>
-                            <span className="tabular-nums text-gold font-medium">{money(l.planned_pence)}</span>
-                          </div>
-                        ) : (
-                          <Input type="number" step="0.01" className="text-right" disabled={!canEdit}
-                            defaultValue={fromPence(l.planned_pence)}
-                            key={`p-${l.id}-${l.planned_pence}`}
-                            onBlur={(e) => updateBudgetLine(l.id, { planned_pence: toPence(e.target.value) })} />
-                        )}
-                      </td>
-                      {canEdit && (
-                        <td className="px-2 py-1.5">
-                          <Button variant="ghost" size="icon" aria-label="Delete budget line"
-                            className="text-primary-foreground/60 hover:text-destructive"
-                            onClick={() => deleteBudgetLine(l.id)}>
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </td>
-                      )}
-                    </tr>
-                  ))}
+                  {(["income", "expense"] as const).map((t) => {
+                    const ls = t === "income" ? incomeLines : expenseLines;
+                    if (ls.length === 0) return null;
+                    const subtotal = t === "income" ? plannedIncomeTotal : plannedExpenseTotal;
+                    return (
+                      <Fragment key={t}>
+                        <tr className="bg-navy/40">
+                          <td colSpan={canEdit ? 4 : 3} className="px-2 py-1.5 text-xs uppercase tracking-wider text-gold">
+                            {t === "income" ? "Planned income" : "Planned expenditure"}
+                          </td>
+                        </tr>
+                        {ls.map((l) => (
+                          <tr key={l.id} className="border-b border-gold/10">
+                            <td className="px-2 py-1.5">
+                              <div className="space-y-1">
+                                <Input value={l.category} disabled={!canEdit}
+                                  onChange={(e) => setBudget((lsx) => lsx.map((x) => x.id === l.id ? { ...x, category: e.target.value } : x))}
+                                  onBlur={(e) => updateBudgetLine(l.id, { category: e.target.value })} />
+                                <div className="inline-flex rounded-sm border border-gold/20 overflow-hidden">
+                                  {(["income", "expense"] as const).map((k) => (
+                                    <button key={k} type="button" disabled={!canEdit}
+                                      className={`px-2 py-0.5 text-xs capitalize ${l.line_type === k ? "bg-gold text-navy" : "text-primary-foreground/60 hover:text-primary-foreground"}`}
+                                      onClick={() => l.line_type !== k && updateBudgetLine(l.id, { line_type: k })}>
+                                      {k}
+                                    </button>
+                                  ))}
+                                </div>
+                              </div>
+                            </td>
+                            <td className="px-2 py-1.5">
+                              <div className="inline-flex rounded-sm border border-gold/20 overflow-hidden">
+                                {(["total", "perHead"] as const).map((m) => (
+                                  <button key={m} type="button" disabled={!canEdit}
+                                    className={`px-2 py-1 text-xs ${lineMode(l) === m ? "bg-gold text-navy" : "text-primary-foreground/60 hover:text-primary-foreground"}`}
+                                    onClick={() => lineMode(l) !== m && setBudgetLineMode(l, m)}>
+                                    {m === "total" ? "Total" : "Per head"}
+                                  </button>
+                                ))}
+                              </div>
+                            </td>
+                            <td className="px-2 py-1.5 text-right">
+                              {lineMode(l) === "perHead" ? (
+                                <div className="flex items-center justify-end gap-2 flex-wrap">
+                                  <Input type="number" step="0.01" className="w-24 text-right" disabled={!canEdit}
+                                    aria-label={l.line_type === "income" ? "Price per head (£)" : "Cost per head (£)"}
+                                    defaultValue={fromPence(l.unit_cost_pence ?? 0)}
+                                    key={`u-${l.id}-${l.unit_cost_pence}`}
+                                    onBlur={(e) => updatePerHead(l, toPence(e.target.value), l.quantity ?? 0)} />
+                                  <span className="text-primary-foreground/60">×</span>
+                                  <Input type="number" min="0" step="1" className="w-20 text-right" disabled={!canEdit}
+                                    aria-label="Quantity"
+                                    defaultValue={String(l.quantity ?? 0)}
+                                    key={`q-${l.id}-${l.quantity}`}
+                                    onBlur={(e) => updatePerHead(l, l.unit_cost_pence ?? 0, Math.max(0, Math.round(parseFloat(e.target.value || "0") || 0)))} />
+                                  <span className="text-primary-foreground/60">=</span>
+                                  <span className="tabular-nums text-gold font-medium">{money(l.planned_pence)}</span>
+                                </div>
+                              ) : (
+                                <Input type="number" step="0.01" className="text-right" disabled={!canEdit}
+                                  defaultValue={fromPence(l.planned_pence)}
+                                  key={`p-${l.id}-${l.planned_pence}`}
+                                  onBlur={(e) => updateBudgetLine(l.id, { planned_pence: toPence(e.target.value) })} />
+                              )}
+                            </td>
+                            {canEdit && (
+                              <td className="px-2 py-1.5">
+                                <Button variant="ghost" size="icon" aria-label="Delete budget line"
+                                  className="text-primary-foreground/60 hover:text-destructive"
+                                  onClick={() => deleteBudgetLine(l.id)}>
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </td>
+                            )}
+                          </tr>
+                        ))}
+                        <tr className="border-b border-gold/20">
+                          <td className="px-2 py-1.5 text-primary-foreground font-medium" colSpan={2}>
+                            {t === "income" ? "Income subtotal" : "Expenditure subtotal"}
+                          </td>
+                          <td className="px-2 py-1.5 text-right tabular-nums text-gold">{money(subtotal)}</td>
+                          {canEdit && <td />}
+                        </tr>
+                      </Fragment>
+                    );
+                  })}
                 </tbody>
+
               </table>
             </div>
             {canEdit && (
@@ -512,6 +630,18 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
                 <div className="flex-1 min-w-[180px]">
                   <Label className="text-xs">New category</Label>
                   <Input value={newCategory} onChange={(e) => setNewCategory(e.target.value)} placeholder="e.g. Venue" />
+                </div>
+                <div>
+                  <Label className="text-xs">Type</Label>
+                  <div className="inline-flex rounded-sm border border-gold/20 overflow-hidden h-9">
+                    {(["income", "expense"] as const).map((k) => (
+                      <button key={k} type="button"
+                        className={`px-2 text-xs capitalize ${newLineType === k ? "bg-gold text-navy" : "text-primary-foreground/60 hover:text-primary-foreground"}`}
+                        onClick={() => setNewLineType(k)}>
+                        {k}
+                      </button>
+                    ))}
+                  </div>
                 </div>
                 <div>
                   <Label className="text-xs">Mode</Label>
@@ -528,7 +658,7 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
                 {newMode === "perHead" ? (
                   <>
                     <div className="w-28">
-                      <Label className="text-xs">Cost per head (£)</Label>
+                      <Label className="text-xs">{newLineType === "income" ? "Price per head (£)" : "Cost per head (£)"}</Label>
                       <Input type="number" step="0.01" value={newUnitCost} onChange={(e) => setNewUnitCost(e.target.value)} />
                     </div>
                     <div className="w-20">
@@ -550,7 +680,21 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
                 </Button>
               </div>
             )}
-            <p className="text-sm text-primary-foreground">Total planned: <span className="text-gold font-medium">{money(plannedTotal)}</span></p>
+            <div className="rounded-sm border border-gold/20 bg-navy/40 p-3 space-y-1">
+              <div className="flex justify-between text-sm text-primary-foreground/80">
+                <span>Total planned income</span><span className="tabular-nums">{money(plannedIncomeTotal)}</span>
+              </div>
+              <div className="flex justify-between text-sm text-primary-foreground/80">
+                <span>Total planned expenditure</span><span className="tabular-nums">{money(plannedExpenseTotal)}</span>
+              </div>
+              <div className={`flex justify-between text-base font-semibold pt-1 border-t border-gold/15 ${projectedResult >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+                <span>{projectedResult >= 0 ? "Projected surplus" : "Projected deficit"}</span>
+                <span className="tabular-nums">{money(Math.abs(projectedResult))}</span>
+              </div>
+              <p className="text-xs text-primary-foreground/50">
+                Planning figures only — what you intend to charge and spend. Actual money received or paid appears in Budget vs Actual and Event Reconciliation below.
+              </p>
+            </div>
           </Card>
 
           {/* Bookings */}
@@ -689,36 +833,75 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
                   </tr>
                 </thead>
                 <tbody>
-                  {budgetVsActual.rows.map((r) => (
-                    <tr key={r.category} className="border-b border-gold/10">
+                  <tr className="bg-navy/40">
+                    <td colSpan={4} className="px-2 py-1.5 text-xs uppercase tracking-wider text-gold">Income actually received (ledger)</td>
+                  </tr>
+                  {budgetVsActual.incomeRows.length === 0 && (
+                    <tr><td colSpan={4} className="px-2 py-2 text-primary-foreground/50">No income budget lines.</td></tr>
+                  )}
+                  {budgetVsActual.incomeRows.map((r) => (
+                    <tr key={r.key} className="border-b border-gold/10">
                       <td className="px-2 py-1.5">{r.category}</td>
                       <td className="px-2 py-1.5 text-right tabular-nums">{money(r.planned)}</td>
                       <td className="px-2 py-1.5 text-right tabular-nums">{money(r.actual)}</td>
                       <td className={`px-2 py-1.5 text-right tabular-nums ${r.variance < 0 ? "text-red-400" : "text-emerald-400"}`}>{money(r.variance)}</td>
                     </tr>
                   ))}
+                  <tr className="border-b border-gold/20">
+                    <td className="px-2 py-1.5 font-medium text-primary-foreground">Total income</td>
+                    <td className="px-2 py-1.5 text-right tabular-nums">{money(plannedIncomeTotal)}</td>
+                    <td className="px-2 py-1.5 text-right tabular-nums">{money(actualIncomeTotal)}</td>
+                    <td className="px-2 py-1.5 text-right tabular-nums">{money(actualIncomeTotal - plannedIncomeTotal)}</td>
+                  </tr>
+                  <tr className="bg-navy/40">
+                    <td colSpan={4} className="px-2 py-1.5 text-xs uppercase tracking-wider text-gold">Costs actually incurred (ledger)</td>
+                  </tr>
+                  {budgetVsActual.expenseRows.length === 0 && (
+                    <tr><td colSpan={4} className="px-2 py-2 text-primary-foreground/50">No expense budget lines.</td></tr>
+                  )}
+                  {budgetVsActual.expenseRows.map((r) => (
+                    <tr key={r.key} className="border-b border-gold/10">
+                      <td className="px-2 py-1.5">{r.category}</td>
+                      <td className="px-2 py-1.5 text-right tabular-nums">{money(r.planned)}</td>
+                      <td className="px-2 py-1.5 text-right tabular-nums">{money(r.actual)}</td>
+                      <td className={`px-2 py-1.5 text-right tabular-nums ${r.variance < 0 ? "text-red-400" : "text-emerald-400"}`}>{money(r.variance)}</td>
+                    </tr>
+                  ))}
+                  <tr className="border-b border-gold/20">
+                    <td className="px-2 py-1.5 font-medium text-primary-foreground">Total expenditure</td>
+                    <td className="px-2 py-1.5 text-right tabular-nums">{money(plannedExpenseTotal)}</td>
+                    <td className="px-2 py-1.5 text-right tabular-nums">{money(actualExpenseTotal)}</td>
+                    <td className="px-2 py-1.5 text-right tabular-nums">{money(plannedExpenseTotal - actualExpenseTotal)}</td>
+                  </tr>
                   <tr>
-                    <td className="px-2 py-2 font-medium text-gold">Total</td>
-                    <td className="px-2 py-2 text-right tabular-nums text-gold">{money(plannedTotal)}</td>
-                    <td className="px-2 py-2 text-right tabular-nums text-gold">{money(actualExpenseTotal)}</td>
-                    <td className="px-2 py-2 text-right tabular-nums text-gold">{money(plannedTotal - actualExpenseTotal)}</td>
+                    <td className="px-2 py-2 font-medium text-gold">Result (income less costs)</td>
+                    <td className="px-2 py-2 text-right tabular-nums text-gold">{money(projectedResult)}</td>
+                    <td className="px-2 py-2 text-right tabular-nums text-gold">{money(actualIncomeTotal - actualExpenseTotal)}</td>
+                    <td className="px-2 py-2"></td>
                   </tr>
                 </tbody>
               </table>
             </div>
-            {budgetVsActual.unmatched.length > 0 && (
+            {(budgetVsActual.unmatchedIncome.length > 0 || budgetVsActual.unmatchedExpense.length > 0) && (
               <div className="pt-2">
-                <p className="text-xs uppercase tracking-wider text-primary-foreground/60 mb-1">Event costs not matched to a budget category</p>
+                <p className="text-xs uppercase tracking-wider text-primary-foreground/60 mb-1">Ledger amounts not matched to a budget category</p>
                 <ul className="text-sm space-y-1">
-                  {budgetVsActual.unmatched.map((a) => (
-                    <li key={a.code} className="flex justify-between">
-                      <span className="text-primary-foreground/80">{a.code} — {a.name}</span>
+                  {budgetVsActual.unmatchedIncome.map((a) => (
+                    <li key={`i-${a.code}`} className="flex justify-between">
+                      <span className="text-primary-foreground/80">{a.code} — {a.name} <span className="text-primary-foreground/50">(income)</span></span>
+                      <span className="tabular-nums">{money(a.pence)}</span>
+                    </li>
+                  ))}
+                  {budgetVsActual.unmatchedExpense.map((a) => (
+                    <li key={`e-${a.code}`} className="flex justify-between">
+                      <span className="text-primary-foreground/80">{a.code} — {a.name} <span className="text-primary-foreground/50">(cost)</span></span>
                       <span className="tabular-nums">{money(a.pence)}</span>
                     </li>
                   ))}
                 </ul>
               </div>
             )}
+
             <p className="text-xs text-primary-foreground/50">
               Actuals are the sum of journal lines tagged to this event. Tag lines from Transaction Detail.
             </p>
