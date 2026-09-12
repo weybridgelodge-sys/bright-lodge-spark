@@ -412,7 +412,7 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
       body: incomeLines.length
         ? incomeLines.map((l) => [l.category, l.quantity != null ? `${money(l.unit_cost_pence ?? 0)} × ${l.quantity}` : "Total", "", money(l.planned_pence)])
         : [["No planned income lines", "", "", money(0)]],
-      foot: [["Total planned income", "", "", money(plannedIncomeTotal)]],
+      foot: [[{ content: "Total planned income", colSpan: 3 }, money(plannedIncomeTotal)]],
       ...tableStyle,
     });
     y = (doc as any).lastAutoTable.finalY + 12;
@@ -423,8 +423,8 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
         ? expenseLines.map((l) => [l.category, l.quantity != null ? `${money(l.unit_cost_pence ?? 0)} × ${l.quantity}` : "Total", "", money(l.planned_pence)])
         : [["No planned expenditure lines", "", "", money(0)]],
       foot: [
-        ["Total planned expenditure", "", "", money(plannedExpenseTotal)],
-        [projectedResult >= 0 ? "PROJECTED SURPLUS" : "PROJECTED DEFICIT", "", "", money(Math.abs(projectedResult))],
+        [{ content: "Total planned expenditure", colSpan: 3 }, money(plannedExpenseTotal)],
+        [{ content: projectedResult >= 0 ? "PROJECTED SURPLUS" : "PROJECTED DEFICIT", colSpan: 3 }, money(Math.abs(projectedResult))],
       ],
       ...tableStyle,
     });
