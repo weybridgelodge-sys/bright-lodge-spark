@@ -559,7 +559,8 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
           <Button variant="outline" className="border-gold/30" onClick={exportPdf} disabled={!event}>
             <FileDown className="w-4 h-4 mr-1" /> Export PDF
           </Button>
-          <Button variant="outline" size="sm" className="border-gold/30" onClick={exportCsv} disabled={!eventId}>
+          <Button variant="outline" className="border-gold/30" onClick={exportCsv} disabled={!event}>
+            <FileDown className="w-4 h-4 mr-1" /> Export CSV
           </Button>
         </div>
       </div>
