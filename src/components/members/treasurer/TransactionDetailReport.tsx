@@ -19,7 +19,12 @@ type Line = {
   description: string;
   debit: number;
   credit: number;
+  eventId: string | null;
 };
+
+type EventOption = { id: string; name: string; event_date: string };
+
+const NO_EVENT = "__none__";
 
 const defaultRange = () => {
   const todayIso = new Date().toISOString().slice(0, 10);
