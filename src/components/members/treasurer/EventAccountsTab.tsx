@@ -348,35 +348,94 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
       `Event date: ${new Date(event.event_date).toLocaleDateString("en-GB")}`,
     );
     let y = reportSection(doc, pageW, margin, 135, "Budget vs Actual");
+    const tableStyle = {
+      margin: { left: margin, right: margin, bottom: 50 },
+      styles: { font: "helvetica" as const, fontSize: 9, cellPadding: 5, textColor: INK, lineColor: [220, 215, 200] as [number, number, number], lineWidth: 0.4 },
+      headStyles: { fillColor: GOLD, textColor: NAVY, fontStyle: "bold" as const },
+      footStyles: { fillColor: [250, 247, 238] as [number, number, number], textColor: INK, fontStyle: "bold" as const },
+      alternateRowStyles: { fillColor: [250, 247, 238] as [number, number, number] },
+      theme: "grid" as const,
+      columnStyles: { 0: { cellWidth: 200 }, 1: { halign: "right" as const }, 2: { halign: "right" as const }, 3: { halign: "right" as const } },
+    };
+
+    // Planning stage — intentions only, nothing from the ledger.
+    let y = reportSection(doc, pageW, margin, 135, "Budget plan (planning stage — not actual money)");
     autoTable(doc, {
       startY: y,
-      head: [["Category", "Planned", "Actual", "Variance"]],
-      body: budgetVsActual.rows.map((r) => [r.category, money(r.planned), money(r.actual), money(r.variance)]),
-      foot: [["Total", money(plannedTotal), money(actualExpenseTotal), money(plannedTotal - actualExpenseTotal)]],
-      margin: { left: margin, right: margin, bottom: 50 },
-      styles: { font: "helvetica", fontSize: 9, cellPadding: 5, textColor: INK, lineColor: [220, 215, 200], lineWidth: 0.4 },
-      headStyles: { fillColor: GOLD, textColor: NAVY, fontStyle: "bold" },
-      footStyles: { fillColor: [250, 247, 238], textColor: INK, fontStyle: "bold" },
-      alternateRowStyles: { fillColor: [250, 247, 238] },
-      theme: "grid",
-      columnStyles: { 0: { cellWidth: 200 }, 1: { halign: "right" }, 2: { halign: "right" }, 3: { halign: "right" } },
+      head: [["Planned income", "", "", "Amount"]],
+      body: incomeLines.length
+        ? incomeLines.map((l) => [l.category, l.quantity != null ? `${money(l.unit_cost_pence ?? 0)} × ${l.quantity}` : "Total", "", money(l.planned_pence)])
+        : [["No planned income lines", "", "", money(0)]],
+      foot: [["Total planned income", "", "", money(plannedIncomeTotal)]],
+      ...tableStyle,
+    });
+    y = (doc as any).lastAutoTable.finalY + 12;
+    autoTable(doc, {
+      startY: y,
+      head: [["Planned expenditure", "", "", "Amount"]],
+      body: expenseLines.length
+        ? expenseLines.map((l) => [l.category, l.quantity != null ? `${money(l.unit_cost_pence ?? 0)} × ${l.quantity}` : "Total", "", money(l.planned_pence)])
+        : [["No planned expenditure lines", "", "", money(0)]],
+      foot: [
+        ["Total planned expenditure", "", "", money(plannedExpenseTotal)],
+        [projectedResult >= 0 ? "PROJECTED SURPLUS" : "PROJECTED DEFICIT", "", "", money(Math.abs(projectedResult))],
+      ],
+      ...tableStyle,
+    });
+    y = (doc as any).lastAutoTable.finalY + 8;
+    doc.setFont("helvetica", "italic");
+    doc.setFontSize(8);
+    doc.setTextColor(...MUTED);
+    doc.text(
+      "Projected figures above are the plan only. Actual money is shown in Budget vs Actual and Reconciliation below.",
+      margin, y,
+    );
+    y += 22;
+
+    y = reportSection(doc, pageW, margin, y, "Budget vs Actual (posted to the ledger)");
+    autoTable(doc, {
+      startY: y,
+      head: [["Income category", "Planned", "Actual", "Variance"]],
+      body: budgetVsActual.incomeRows.length
+        ? budgetVsActual.incomeRows.map((r) => [r.category, money(r.planned), money(r.actual), money(r.variance)])
+        : [["No income budget lines", money(0), money(actualIncomeTotal), money(0)]],
+      foot: [["Total income", money(plannedIncomeTotal), money(actualIncomeTotal), money(actualIncomeTotal - plannedIncomeTotal)]],
+      ...tableStyle,
+    });
+    y = (doc as any).lastAutoTable.finalY + 12;
+    autoTable(doc, {
+      startY: y,
+      head: [["Expense category", "Planned", "Actual", "Variance"]],
+      body: budgetVsActual.expenseRows.length
+        ? budgetVsActual.expenseRows.map((r) => [r.category, money(r.planned), money(r.actual), money(r.variance)])
+        : [["No expense budget lines", money(0), money(actualExpenseTotal), money(0)]],
+      foot: [
+        ["Total expenditure", money(plannedExpenseTotal), money(actualExpenseTotal), money(plannedExpenseTotal - actualExpenseTotal)],
+        ["Actual result to date", money(projectedResult), money(actualIncomeTotal - actualExpenseTotal), ""],
+      ],
+      ...tableStyle,
     });
     y = (doc as any).lastAutoTable.finalY + 20;
 
-    if (budgetVsActual.unmatched.length) {
-      y = reportSection(doc, pageW, margin, y, "Event costs not matched to a budget category");
+    const unmatched = [
+      ...budgetVsActual.unmatchedIncome.map((a) => ({ ...a, kind: "Income" })),
+      ...budgetVsActual.unmatchedExpense.map((a) => ({ ...a, kind: "Cost" })),
+    ];
+    if (unmatched.length) {
+      y = reportSection(doc, pageW, margin, y, "Ledger amounts not matched to a budget category");
       autoTable(doc, {
         startY: y,
-        head: [["Account", "Actual"]],
-        body: budgetVsActual.unmatched.map((a) => [`${a.code} — ${a.name}`, money(a.pence)]),
+        head: [["Account", "Type", "Actual"]],
+        body: unmatched.map((a) => [`${a.code} — ${a.name}`, a.kind, money(a.pence)]),
         margin: { left: margin, right: margin, bottom: 50 },
         styles: { font: "helvetica", fontSize: 9, cellPadding: 5, textColor: INK, lineColor: [220, 215, 200], lineWidth: 0.4 },
         headStyles: { fillColor: GOLD, textColor: NAVY, fontStyle: "bold" },
         theme: "grid",
-        columnStyles: { 0: { cellWidth: 320 }, 1: { halign: "right" } },
+        columnStyles: { 0: { cellWidth: 280 }, 2: { halign: "right" } },
       });
       y = (doc as any).lastAutoTable.finalY + 20;
     }
+
 
     y = reportSection(doc, pageW, margin, y, "Bookings & reconciliation");
     autoTable(doc, {
