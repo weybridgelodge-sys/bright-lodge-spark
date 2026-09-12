@@ -11,7 +11,7 @@ import { toast } from "@/hooks/use-toast";
 import { Loader2, Plus, Trash2, FileDown, ChevronDown, ChevronRight, Pencil } from "lucide-react";
 import autoTable from "jspdf-autotable";
 import { reportPdfDoc, reportSection, INK, GOLD, NAVY, MUTED } from "@/lib/treasurer/reports";
-import { saveJsPdf } from "@/lib/nativeDownload";
+import { saveJsPdf, saveText } from "@/lib/nativeDownload";
 
 const money = (pence: number) =>
   `${pence < 0 ? "-" : ""}£${(Math.abs(pence) / 100).toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -333,6 +333,48 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
     if (error) { toast({ title: "Save failed", description: error.message, variant: "destructive" }); return; }
     setGuestDialog(false);
     loadEventData(eventId);
+  };
+
+  const toggleGuestFlag = async (g: Guest, field: "is_female" | "is_vip") => {
+    setGuests((gs) => gs.map((x) => (x.id === g.id ? { ...x, [field]: !g[field] } : x)));
+    const { error } = await supabase.from("event_guests" as any).update({ [field]: !g[field] }).eq("id", g.id);
+    if (error) {
+      setGuests((gs) => gs.map((x) => (x.id === g.id ? { ...x, [field]: g[field] } : x)));
+      toast({ title: "Update failed", description: error.message, variant: "destructive" });
+    }
+  };
+
+  // ─── CSV (PerfectTablePlan-compatible) ───────────────────────────────────
+  const csvCell = (v: string | null | undefined) => {
+    const s = v ?? "";
+    return /[",\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+  };
+
+  const exportCsv = async () => {
+    if (!event) return;
+    const bookingById = new Map(bookings.map((b) => [b.id, b]));
+    const rows = guests
+      .filter((g) => (g.name || "").trim())
+      .map((g) => {
+        const b = bookingById.get(g.booking_id);
+        const notes = [
+          g.wine_preorder?.trim() ? `Wine: ${g.wine_preorder.trim()}` : "",
+          g.seating_preference?.trim() ? `Seating: ${g.seating_preference.trim()}` : "",
+        ].filter(Boolean).join("; ");
+        return [
+          g.name!.trim(),
+          b?.payer_name ?? "",
+          g.menu_choice ?? "",
+          g.allergies ?? "",
+          g.is_female ? "F" : "M",
+          g.is_vip ? "Y" : "",
+          notes,
+        ].map(csvCell).join(",");
+      });
+    if (!rows.length) { toast({ title: "No named guests to export yet" }); return; }
+    const header = "Name,Group,Meal,Special req.,Gender,VIP,Notes";
+    await saveText([header, ...rows].join("\r\n"), `event-account-${event.name.toLowerCase().replace(/\s+/g, "-")}.csv`);
+    toast({ title: `Exported ${rows.length} guest${rows.length === 1 ? "" : "s"} to CSV` });
   };
 
   const deleteGuest = async (id: string) => {
