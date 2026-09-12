@@ -70,7 +70,7 @@ export default function TransactionDetailReport({ canEdit }: { canEdit: boolean 
       const { data, error } = await supabase
         .from("journal_lines" as any)
         .select(
-          "id,debit_pence,credit_pence,description," +
+          "id,debit_pence,credit_pence,description,event_id," +
             "journal_entries!inner(id,entry_date,description,source_type,payee,reconciled)," +
             "chart_of_accounts!inner(code,name)"
         )
