@@ -632,6 +632,18 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
                   <Input value={newCategory} onChange={(e) => setNewCategory(e.target.value)} placeholder="e.g. Venue" />
                 </div>
                 <div>
+                  <Label className="text-xs">Type</Label>
+                  <div className="inline-flex rounded-sm border border-gold/20 overflow-hidden h-9">
+                    {(["income", "expense"] as const).map((k) => (
+                      <button key={k} type="button"
+                        className={`px-2 text-xs capitalize ${newLineType === k ? "bg-gold text-navy" : "text-primary-foreground/60 hover:text-primary-foreground"}`}
+                        onClick={() => setNewLineType(k)}>
+                        {k}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div>
                   <Label className="text-xs">Mode</Label>
                   <div className="inline-flex rounded-sm border border-gold/20 overflow-hidden h-9">
                     {(["total", "perHead"] as const).map((m) => (
