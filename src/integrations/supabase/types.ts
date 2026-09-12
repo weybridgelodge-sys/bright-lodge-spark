@@ -1126,6 +1126,8 @@ export type Database = {
           event_id: string
           id: string
           planned_pence: number
+          quantity: number | null
+          unit_cost_pence: number | null
           updated_at: string
         }
         Insert: {
@@ -1134,6 +1136,8 @@ export type Database = {
           event_id: string
           id?: string
           planned_pence?: number
+          quantity?: number | null
+          unit_cost_pence?: number | null
           updated_at?: string
         }
         Update: {
@@ -1142,6 +1146,8 @@ export type Database = {
           event_id?: string
           id?: string
           planned_pence?: number
+          quantity?: number | null
+          unit_cost_pence?: number | null
           updated_at?: string
         }
         Relationships: [

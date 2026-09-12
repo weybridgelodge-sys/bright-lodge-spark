@@ -43,6 +43,13 @@
       "when": 1789174048434,
       "tag": "0005_create_event_accounts",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1789193057497,
+      "tag": "0006_budget_line_per_head",
+      "breakpoints": true
     }
   ]
 }
