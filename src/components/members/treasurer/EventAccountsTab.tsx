@@ -513,10 +513,38 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
                   <Label className="text-xs">New category</Label>
                   <Input value={newCategory} onChange={(e) => setNewCategory(e.target.value)} placeholder="e.g. Venue" />
                 </div>
-                <div className="w-32">
-                  <Label className="text-xs">Planned (£)</Label>
-                  <Input type="number" step="0.01" value={newPlanned} onChange={(e) => setNewPlanned(e.target.value)} />
+                <div>
+                  <Label className="text-xs">Mode</Label>
+                  <div className="inline-flex rounded-sm border border-gold/20 overflow-hidden h-9">
+                    {(["total", "perHead"] as const).map((m) => (
+                      <button key={m} type="button"
+                        className={`px-2 text-xs ${newMode === m ? "bg-gold text-navy" : "text-primary-foreground/60 hover:text-primary-foreground"}`}
+                        onClick={() => setNewMode(m)}>
+                        {m === "total" ? "Total" : "Per head"}
+                      </button>
+                    ))}
+                  </div>
                 </div>
+                {newMode === "perHead" ? (
+                  <>
+                    <div className="w-28">
+                      <Label className="text-xs">Cost per head (£)</Label>
+                      <Input type="number" step="0.01" value={newUnitCost} onChange={(e) => setNewUnitCost(e.target.value)} />
+                    </div>
+                    <div className="w-20">
+                      <Label className="text-xs">Quantity</Label>
+                      <Input type="number" min="0" step="1" value={newQuantity} onChange={(e) => setNewQuantity(e.target.value)} />
+                    </div>
+                    <div className="text-sm text-primary-foreground/80 pb-2 tabular-nums">
+                      = {money(toPence(newUnitCost) * Math.max(0, Math.round(parseFloat(newQuantity || "0") || 0)))}
+                    </div>
+                  </>
+                ) : (
+                  <div className="w-32">
+                    <Label className="text-xs">Planned (£)</Label>
+                    <Input type="number" step="0.01" value={newPlanned} onChange={(e) => setNewPlanned(e.target.value)} />
+                  </div>
+                )}
                 <Button className="bg-gold text-navy hover:bg-gold/90" onClick={addBudgetLine}>
                   <Plus className="w-4 h-4 mr-1" /> Add
                 </Button>
