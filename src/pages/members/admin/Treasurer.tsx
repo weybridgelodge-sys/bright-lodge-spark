@@ -800,6 +800,13 @@ function Inner() {
               <span>Bank Reconciliation</span>
             </TabsTrigger>
             <TabsTrigger
+              value="event-accounts"
+              className="w-full flex items-center justify-start gap-3 px-4 py-3 rounded-sm text-sm font-sans text-primary-foreground/80 transition-colors hover:text-gold hover:bg-navy-light/40 data-[state=active]:bg-gold/15 data-[state=active]:text-gold data-[state=active]:shadow-none"
+            >
+              <PartyPopper className="w-4 h-4 shrink-0" />
+              <span>Event Accounts</span>
+            </TabsTrigger>
+            <TabsTrigger
               value="reconciliation"
               className="w-full flex items-center justify-start gap-3 px-4 py-3 rounded-sm text-sm font-sans text-primary-foreground/80 transition-colors hover:text-gold hover:bg-navy-light/40 data-[state=active]:bg-gold/15 data-[state=active]:text-gold data-[state=active]:shadow-none"
             >
