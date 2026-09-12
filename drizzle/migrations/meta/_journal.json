@@ -71,6 +71,13 @@
       "when": 1789227836589,
       "tag": "0009_add_stripe_fee_to_charity_collections",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1789227987835,
+      "tag": "0010_net_amount_includes_stripe_fee",
+      "breakpoints": true
     }
   ]
 }
