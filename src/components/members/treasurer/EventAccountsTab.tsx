@@ -38,6 +38,7 @@ type Booking = {
 type Guest = {
   id: string; booking_id: string; name: string | null; seating_preference: string | null;
   menu_choice: string | null; allergies: string | null; wine_preorder: string | null;
+  is_female: boolean; is_vip: boolean;
 };
 type ActualLine = {
   event_id: string; debit_pence: number; credit_pence: number; description: string | null;
@@ -309,6 +310,7 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
   const openGuest = (bookingId: string, g?: Guest) => {
     setGuestDraft(g ? { ...g } : {
       booking_id: bookingId, name: "", seating_preference: "", menu_choice: "", allergies: "", wine_preorder: "",
+      is_female: false, is_vip: false,
     });
     setGuestDialog(true);
   };
@@ -322,6 +324,8 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
       menu_choice: (d.menu_choice || "").trim() || null,
       allergies: (d.allergies || "").trim() || null,
       wine_preorder: (d.wine_preorder || "").trim() || null,
+      is_female: !!d.is_female,
+      is_vip: !!d.is_vip,
     };
     const { error } = d.id
       ? await supabase.from("event_guests" as any).update(payload).eq("id", d.id)
@@ -1049,6 +1053,16 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
               <div>
                 <Label>Wine pre-order</Label>
                 <Input value={guestDraft.wine_preorder ?? ""} onChange={(e) => setGuestDraft({ ...guestDraft, wine_preorder: e.target.value })} />
+              </div>
+              <div className="flex items-center gap-6">
+                <label className="flex items-center gap-2 text-sm">
+                  <Checkbox checked={!!guestDraft.is_female} onCheckedChange={(v) => setGuestDraft({ ...guestDraft, is_female: !!v })} />
+                  Female
+                </label>
+                <label className="flex items-center gap-2 text-sm">
+                  <Checkbox checked={!!guestDraft.is_vip} onCheckedChange={(v) => setGuestDraft({ ...guestDraft, is_vip: !!v })} />
+                  VIP
+                </label>
               </div>
             </div>
           )}
