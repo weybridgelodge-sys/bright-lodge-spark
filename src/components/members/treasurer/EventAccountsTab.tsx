@@ -192,7 +192,7 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
     };
   }, [expenseLines, incomeLines, expenseByAccount, incomeByAccount]);
 
-  const plannedTotal = plannedExpenseTotal;
+  
   const actualExpenseTotal = expenseByAccount.reduce((s, a) => s + a.pence, 0);
   const actualIncomeTotal = incomeByAccount.reduce((s, a) => s + a.pence, 0);
 
