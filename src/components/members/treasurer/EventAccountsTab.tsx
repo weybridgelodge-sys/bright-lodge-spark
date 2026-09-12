@@ -536,60 +536,93 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
                   {budget.length === 0 && (
                     <tr><td colSpan={4} className="px-2 py-4 text-primary-foreground/50">No budget lines yet.</td></tr>
                   )}
-                  {budget.map((l) => (
-                    <tr key={l.id} className="border-b border-gold/10">
-                      <td className="px-2 py-1.5">
-                        <Input value={l.category} disabled={!canEdit}
-                          onChange={(e) => setBudget((ls) => ls.map((x) => x.id === l.id ? { ...x, category: e.target.value } : x))}
-                          onBlur={(e) => updateBudgetLine(l.id, { category: e.target.value })} />
-                      </td>
-                      <td className="px-2 py-1.5">
-                        <div className="inline-flex rounded-sm border border-gold/20 overflow-hidden">
-                          {(["total", "perHead"] as const).map((m) => (
-                            <button key={m} type="button" disabled={!canEdit}
-                              className={`px-2 py-1 text-xs ${lineMode(l) === m ? "bg-gold text-navy" : "text-primary-foreground/60 hover:text-primary-foreground"}`}
-                              onClick={() => lineMode(l) !== m && setBudgetLineMode(l, m)}>
-                              {m === "total" ? "Total" : "Per head"}
-                            </button>
-                          ))}
-                        </div>
-                      </td>
-                      <td className="px-2 py-1.5 text-right">
-                        {lineMode(l) === "perHead" ? (
-                          <div className="flex items-center justify-end gap-2 flex-wrap">
-                            <Input type="number" step="0.01" className="w-24 text-right" disabled={!canEdit}
-                              aria-label="Cost per head (£)"
-                              defaultValue={fromPence(l.unit_cost_pence ?? 0)}
-                              key={`u-${l.id}-${l.unit_cost_pence}`}
-                              onBlur={(e) => updatePerHead(l, toPence(e.target.value), l.quantity ?? 0)} />
-                            <span className="text-primary-foreground/60">×</span>
-                            <Input type="number" min="0" step="1" className="w-20 text-right" disabled={!canEdit}
-                              aria-label="Quantity"
-                              defaultValue={String(l.quantity ?? 0)}
-                              key={`q-${l.id}-${l.quantity}`}
-                              onBlur={(e) => updatePerHead(l, l.unit_cost_pence ?? 0, Math.max(0, Math.round(parseFloat(e.target.value || "0") || 0)))} />
-                            <span className="text-primary-foreground/60">=</span>
-                            <span className="tabular-nums text-gold font-medium">{money(l.planned_pence)}</span>
-                          </div>
-                        ) : (
-                          <Input type="number" step="0.01" className="text-right" disabled={!canEdit}
-                            defaultValue={fromPence(l.planned_pence)}
-                            key={`p-${l.id}-${l.planned_pence}`}
-                            onBlur={(e) => updateBudgetLine(l.id, { planned_pence: toPence(e.target.value) })} />
-                        )}
-                      </td>
-                      {canEdit && (
-                        <td className="px-2 py-1.5">
-                          <Button variant="ghost" size="icon" aria-label="Delete budget line"
-                            className="text-primary-foreground/60 hover:text-destructive"
-                            onClick={() => deleteBudgetLine(l.id)}>
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </td>
-                      )}
-                    </tr>
-                  ))}
+                  {(["income", "expense"] as const).map((t) => {
+                    const ls = t === "income" ? incomeLines : expenseLines;
+                    if (ls.length === 0) return null;
+                    const subtotal = t === "income" ? plannedIncomeTotal : plannedExpenseTotal;
+                    return (
+                      <Fragment key={t}>
+                        <tr className="bg-navy/40">
+                          <td colSpan={canEdit ? 4 : 3} className="px-2 py-1.5 text-xs uppercase tracking-wider text-gold">
+                            {t === "income" ? "Planned income" : "Planned expenditure"}
+                          </td>
+                        </tr>
+                        {ls.map((l) => (
+                          <tr key={l.id} className="border-b border-gold/10">
+                            <td className="px-2 py-1.5">
+                              <div className="space-y-1">
+                                <Input value={l.category} disabled={!canEdit}
+                                  onChange={(e) => setBudget((lsx) => lsx.map((x) => x.id === l.id ? { ...x, category: e.target.value } : x))}
+                                  onBlur={(e) => updateBudgetLine(l.id, { category: e.target.value })} />
+                                <div className="inline-flex rounded-sm border border-gold/20 overflow-hidden">
+                                  {(["income", "expense"] as const).map((k) => (
+                                    <button key={k} type="button" disabled={!canEdit}
+                                      className={`px-2 py-0.5 text-xs capitalize ${l.line_type === k ? "bg-gold text-navy" : "text-primary-foreground/60 hover:text-primary-foreground"}`}
+                                      onClick={() => l.line_type !== k && updateBudgetLine(l.id, { line_type: k })}>
+                                      {k}
+                                    </button>
+                                  ))}
+                                </div>
+                              </div>
+                            </td>
+                            <td className="px-2 py-1.5">
+                              <div className="inline-flex rounded-sm border border-gold/20 overflow-hidden">
+                                {(["total", "perHead"] as const).map((m) => (
+                                  <button key={m} type="button" disabled={!canEdit}
+                                    className={`px-2 py-1 text-xs ${lineMode(l) === m ? "bg-gold text-navy" : "text-primary-foreground/60 hover:text-primary-foreground"}`}
+                                    onClick={() => lineMode(l) !== m && setBudgetLineMode(l, m)}>
+                                    {m === "total" ? "Total" : "Per head"}
+                                  </button>
+                                ))}
+                              </div>
+                            </td>
+                            <td className="px-2 py-1.5 text-right">
+                              {lineMode(l) === "perHead" ? (
+                                <div className="flex items-center justify-end gap-2 flex-wrap">
+                                  <Input type="number" step="0.01" className="w-24 text-right" disabled={!canEdit}
+                                    aria-label={l.line_type === "income" ? "Price per head (£)" : "Cost per head (£)"}
+                                    defaultValue={fromPence(l.unit_cost_pence ?? 0)}
+                                    key={`u-${l.id}-${l.unit_cost_pence}`}
+                                    onBlur={(e) => updatePerHead(l, toPence(e.target.value), l.quantity ?? 0)} />
+                                  <span className="text-primary-foreground/60">×</span>
+                                  <Input type="number" min="0" step="1" className="w-20 text-right" disabled={!canEdit}
+                                    aria-label="Quantity"
+                                    defaultValue={String(l.quantity ?? 0)}
+                                    key={`q-${l.id}-${l.quantity}`}
+                                    onBlur={(e) => updatePerHead(l, l.unit_cost_pence ?? 0, Math.max(0, Math.round(parseFloat(e.target.value || "0") || 0)))} />
+                                  <span className="text-primary-foreground/60">=</span>
+                                  <span className="tabular-nums text-gold font-medium">{money(l.planned_pence)}</span>
+                                </div>
+                              ) : (
+                                <Input type="number" step="0.01" className="text-right" disabled={!canEdit}
+                                  defaultValue={fromPence(l.planned_pence)}
+                                  key={`p-${l.id}-${l.planned_pence}`}
+                                  onBlur={(e) => updateBudgetLine(l.id, { planned_pence: toPence(e.target.value) })} />
+                              )}
+                            </td>
+                            {canEdit && (
+                              <td className="px-2 py-1.5">
+                                <Button variant="ghost" size="icon" aria-label="Delete budget line"
+                                  className="text-primary-foreground/60 hover:text-destructive"
+                                  onClick={() => deleteBudgetLine(l.id)}>
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </td>
+                            )}
+                          </tr>
+                        ))}
+                        <tr className="border-b border-gold/20">
+                          <td className="px-2 py-1.5 text-primary-foreground font-medium" colSpan={2}>
+                            {t === "income" ? "Income subtotal" : "Expenditure subtotal"}
+                          </td>
+                          <td className="px-2 py-1.5 text-right tabular-nums text-gold">{money(subtotal)}</td>
+                          {canEdit && <td />}
+                        </tr>
+                      </Fragment>
+                    );
+                  })}
                 </tbody>
+
               </table>
             </div>
             {canEdit && (
