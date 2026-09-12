@@ -1,0 +1,1 @@
+ALTER TABLE public.charity_collections ADD COLUMN IF NOT EXISTS stripe_fee numeric NOT NULL DEFAULT 0;
