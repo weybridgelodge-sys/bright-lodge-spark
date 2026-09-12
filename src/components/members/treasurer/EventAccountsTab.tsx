@@ -23,9 +23,10 @@ const METHODS = ["stripe", "bank_transfer", "cash"] as const;
 const STATUSES = ["planning", "active", "closed"] as const;
 
 export type EventAccount = { id: string; name: string; event_date: string; status: string };
+type LineType = "income" | "expense";
 type BudgetLine = {
   id: string; event_id: string; category: string; planned_pence: number;
-  unit_cost_pence: number | null; quantity: number | null;
+  unit_cost_pence: number | null; quantity: number | null; line_type: LineType;
 };
 type BudgetMode = "total" | "perHead";
 const lineMode = (l: BudgetLine): BudgetMode => (l.unit_cost_pence != null && l.quantity != null ? "perHead" : "total");
