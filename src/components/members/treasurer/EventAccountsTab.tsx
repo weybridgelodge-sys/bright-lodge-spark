@@ -198,10 +198,14 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
 
   const addBudgetLine = async () => {
     if (!newCategory.trim()) { toast({ title: "Enter a category", variant: "destructive" }); return; }
-    const { error } = await supabase.from("event_budget_lines" as any)
-      .insert({ event_id: eventId, category: newCategory.trim(), planned_pence: toPence(newPlanned) });
+    const unit = toPence(newUnitCost);
+    const qty = Math.max(0, Math.round(parseFloat(newQuantity || "0") || 0));
+    const payload = newMode === "perHead"
+      ? { event_id: eventId, category: newCategory.trim(), unit_cost_pence: unit, quantity: qty, planned_pence: unit * qty }
+      : { event_id: eventId, category: newCategory.trim(), planned_pence: toPence(newPlanned), unit_cost_pence: null, quantity: null };
+    const { error } = await supabase.from("event_budget_lines" as any).insert(payload);
     if (error) { toast({ title: "Save failed", description: error.message, variant: "destructive" }); return; }
-    setNewCategory(""); setNewPlanned("0.00");
+    setNewCategory(""); setNewPlanned("0.00"); setNewMode("total"); setNewUnitCost("0.00"); setNewQuantity("1");
     loadEventData(eventId);
   };
 
@@ -209,6 +213,22 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
     setBudget((ls) => ls.map((l) => (l.id === id ? { ...l, ...patch } : l)));
     const { error } = await supabase.from("event_budget_lines" as any).update(patch).eq("id", id);
     if (error) toast({ title: "Save failed", description: error.message, variant: "destructive" });
+  };
+
+  // Switch a line between Total and Per head modes, keeping planned_pence coherent.
+  const setBudgetLineMode = (l: BudgetLine, mode: BudgetMode) => {
+    if (mode === "perHead") {
+      const unit = l.planned_pence;
+      const quantity = 1;
+      updateBudgetLine(l.id, { unit_cost_pence: unit, quantity, planned_pence: unit * quantity });
+    } else {
+      updateBudgetLine(l.id, { unit_cost_pence: null, quantity: null });
+    }
+  };
+
+  // Per-head line edit: recalculate planned_pence from unit × quantity and save both.
+  const updatePerHead = (l: BudgetLine, unitPence: number, qty: number) => {
+    updateBudgetLine(l.id, { unit_cost_pence: unitPence, quantity: qty, planned_pence: unitPence * qty });
   };
 
   const deleteBudgetLine = async (id: string) => {
