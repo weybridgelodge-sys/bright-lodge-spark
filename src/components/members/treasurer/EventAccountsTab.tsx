@@ -559,6 +559,8 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
           <Button variant="outline" className="border-gold/30" onClick={exportPdf} disabled={!event}>
             <FileDown className="w-4 h-4 mr-1" /> Export PDF
           </Button>
+          <Button variant="outline" size="sm" className="border-gold/30" onClick={exportCsv} disabled={!eventId}>
+          </Button>
         </div>
       </div>
 
@@ -806,7 +808,24 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
                                 )}
                                 {bGuests.map((g) => (
                                   <tr key={g.id} className="border-t border-gold/10">
-                                    <td className="px-2 py-1">{g.name || <span className="text-primary-foreground/50">TBC</span>}</td>
+                                    <td className="px-2 py-1">
+                                      {g.name || <span className="text-primary-foreground/50">TBC</span>}
+                                      {canEdit ? (
+                                        <>
+                                          <button type="button" title="Toggle female"
+                                            className={`ml-2 px-1.5 py-0.5 rounded-sm text-[10px] font-semibold border ${g.is_female ? "bg-gold text-navy border-gold" : "border-gold/30 text-primary-foreground/50"}`}
+                                            onClick={() => toggleGuestFlag(g, "is_female")}>F</button>
+                                          <button type="button" title="Toggle VIP"
+                                            className={`ml-1 px-1.5 py-0.5 rounded-sm text-[10px] font-semibold border ${g.is_vip ? "bg-gold text-navy border-gold" : "border-gold/30 text-primary-foreground/50"}`}
+                                            onClick={() => toggleGuestFlag(g, "is_vip")}>VIP</button>
+                                        </>
+                                      ) : (
+                                        <>
+                                          {g.is_female && <span className="ml-2 px-1.5 py-0.5 rounded-sm text-[10px] font-semibold bg-gold text-navy">F</span>}
+                                          {g.is_vip && <span className="ml-1 px-1.5 py-0.5 rounded-sm text-[10px] font-semibold bg-gold text-navy">VIP</span>}
+                                        </>
+                                      )}
+                                    </td>
                                     <td className="px-2 py-1">{g.seating_preference || "—"}</td>
                                     <td className="px-2 py-1">{g.menu_choice || "—"}</td>
                                     <td className="px-2 py-1">{g.allergies || "—"}</td>
