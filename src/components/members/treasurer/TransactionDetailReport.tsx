@@ -307,6 +307,21 @@ export default function TransactionDetailReport({ canEdit }: { canEdit: boolean 
                           aria-label="Mark entry reconciled"
                         />
                       </td>
+                      {events.length > 0 && (
+                        <td className="px-3 py-1.5">
+                          <Select value={l.eventId ?? NO_EVENT} onValueChange={(v) => assignEvent(l.id, v)}>
+                            <SelectTrigger className="h-8 min-w-[170px]" aria-label="Assign to event">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value={NO_EVENT}>No event</SelectItem>
+                              {events.map((e) => (
+                                <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </td>
+                      )}
                     </tr>
                   ))}
                 </tbody>
