@@ -287,6 +287,7 @@ export default function TransactionDetailReport({ canEdit }: { canEdit: boolean 
                     <th className="px-3 py-2 font-medium text-right">Debit</th>
                     <th className="px-3 py-2 font-medium text-right">Credit</th>
                     <th className="px-3 py-2 font-medium text-center">Reconciled</th>
+                    {events.length > 0 && <th className="px-3 py-2 font-medium">Event</th>}
                   </tr>
                 </thead>
                 <tbody>
