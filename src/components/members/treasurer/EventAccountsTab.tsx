@@ -142,36 +142,59 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
   const ticketTotal = bookings.reduce((s, b) => s + (b.ticket_count ?? 0), 0);
   const namedGuests = guests.filter((g) => (g.name || "").trim()).length;
 
+  // ─── Derived: planning-stage budget totals (no ledger involvement) ────────
+  const incomeLines = useMemo(() => budget.filter((b) => b.line_type === "income"), [budget]);
+  const expenseLines = useMemo(() => budget.filter((b) => b.line_type !== "income"), [budget]);
+  const plannedIncomeTotal = incomeLines.reduce((s, b) => s + b.planned_pence, 0);
+  const plannedExpenseTotal = expenseLines.reduce((s, b) => s + b.planned_pence, 0);
+  const projectedResult = plannedIncomeTotal - plannedExpenseTotal;
+
   // ─── Derived: budget vs actual ────────────────────────────────────────────
-  const expenseByAccount = useMemo(() => {
+  const byAccount = useCallback((type: "expense" | "income") => {
     const m = new Map<string, { code: string; name: string; pence: number }>();
     for (const l of actuals) {
       const a = l.chart_of_accounts;
-      if (!a || a.account_type !== "expense") continue;
+      if (!a || a.account_type !== type) continue;
       const cur = m.get(a.code) ?? { code: a.code, name: a.name, pence: 0 };
-      cur.pence += (l.debit_pence ?? 0) - (l.credit_pence ?? 0);
+      cur.pence += type === "expense"
+        ? (l.debit_pence ?? 0) - (l.credit_pence ?? 0)
+        : (l.credit_pence ?? 0) - (l.debit_pence ?? 0);
       m.set(a.code, cur);
     }
     return [...m.values()].sort((a, b) => a.code.localeCompare(b.code));
   }, [actuals]);
 
-  const budgetVsActual = useMemo(() => {
-    const used = new Set<string>();
-    const rows = budget.map((bl) => {
-      const cat = bl.category.trim().toLowerCase();
-      let actual = 0;
-      for (const acc of expenseByAccount) {
-        const hay = `${acc.name}`.toLowerCase();
-        if (cat && (hay.includes(cat) || cat.includes(hay))) { actual += acc.pence; used.add(acc.code); }
-      }
-      return { category: bl.category, planned: bl.planned_pence, actual, variance: bl.planned_pence - actual };
-    });
-    const unmatched = expenseByAccount.filter((a) => !used.has(a.code));
-    return { rows, unmatched };
-  }, [budget, expenseByAccount]);
+  const expenseByAccount = useMemo(() => byAccount("expense"), [byAccount]);
+  const incomeByAccount = useMemo(() => byAccount("income"), [byAccount]);
 
-  const plannedTotal = budget.reduce((s, b) => s + b.planned_pence, 0);
+  const budgetVsActual = useMemo(() => {
+    const usedExpense = new Set<string>();
+    const usedIncome = new Set<string>();
+    const build = (lines: BudgetLine[], accounts: typeof expenseByAccount, used: Set<string>) =>
+      lines.map((bl) => {
+        const cat = bl.category.trim().toLowerCase();
+        let actual = 0;
+        for (const acc of accounts) {
+          const hay = `${acc.name}`.toLowerCase();
+          if (cat && (hay.includes(cat) || cat.includes(hay))) { actual += acc.pence; used.add(acc.code); }
+        }
+        // Expense: under budget is good. Income: over budget is good.
+        const variance = bl.line_type === "income" ? actual - bl.planned_pence : bl.planned_pence - actual;
+        return { key: bl.id, category: bl.category, planned: bl.planned_pence, actual, variance };
+      });
+    const expenseRows = build(expenseLines, expenseByAccount, usedExpense);
+    const incomeRows = build(incomeLines, incomeByAccount, usedIncome);
+    return {
+      expenseRows,
+      incomeRows,
+      unmatchedExpense: expenseByAccount.filter((a) => !usedExpense.has(a.code)),
+      unmatchedIncome: incomeByAccount.filter((a) => !usedIncome.has(a.code)),
+    };
+  }, [expenseLines, incomeLines, expenseByAccount, incomeByAccount]);
+
+  const plannedTotal = plannedExpenseTotal;
   const actualExpenseTotal = expenseByAccount.reduce((s, a) => s + a.pence, 0);
+  const actualIncomeTotal = incomeByAccount.reduce((s, a) => s + a.pence, 0);
 
   // ─── Derived: event reconciliation ────────────────────────────────────────
   const expectedIncome = bookings.reduce(
