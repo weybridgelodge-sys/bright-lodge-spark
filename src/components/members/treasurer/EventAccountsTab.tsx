@@ -23,7 +23,12 @@ const METHODS = ["stripe", "bank_transfer", "cash"] as const;
 const STATUSES = ["planning", "active", "closed"] as const;
 
 export type EventAccount = { id: string; name: string; event_date: string; status: string };
-type BudgetLine = { id: string; event_id: string; category: string; planned_pence: number };
+type BudgetLine = {
+  id: string; event_id: string; category: string; planned_pence: number;
+  unit_cost_pence: number | null; quantity: number | null;
+};
+type BudgetMode = "total" | "perHead";
+const lineMode = (l: BudgetLine): BudgetMode => (l.unit_cost_pence != null && l.quantity != null ? "perHead" : "total");
 type Booking = {
   id: string; event_id: string; payer_name: string; ticket_count: number; is_placeholder: boolean;
   deposit_pence: number; deposit_paid: boolean; deposit_method: string | null;
@@ -74,6 +79,9 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
 
   const [newCategory, setNewCategory] = useState("");
   const [newPlanned, setNewPlanned] = useState("0.00");
+  const [newMode, setNewMode] = useState<BudgetMode>("total");
+  const [newUnitCost, setNewUnitCost] = useState("0.00");
+  const [newQuantity, setNewQuantity] = useState("1");
 
   const loadEvents = useCallback(async () => {
     const { data, error } = await supabase
@@ -190,10 +198,14 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
 
   const addBudgetLine = async () => {
     if (!newCategory.trim()) { toast({ title: "Enter a category", variant: "destructive" }); return; }
-    const { error } = await supabase.from("event_budget_lines" as any)
-      .insert({ event_id: eventId, category: newCategory.trim(), planned_pence: toPence(newPlanned) });
+    const unit = toPence(newUnitCost);
+    const qty = Math.max(0, Math.round(parseFloat(newQuantity || "0") || 0));
+    const payload = newMode === "perHead"
+      ? { event_id: eventId, category: newCategory.trim(), unit_cost_pence: unit, quantity: qty, planned_pence: unit * qty }
+      : { event_id: eventId, category: newCategory.trim(), planned_pence: toPence(newPlanned), unit_cost_pence: null, quantity: null };
+    const { error } = await supabase.from("event_budget_lines" as any).insert(payload);
     if (error) { toast({ title: "Save failed", description: error.message, variant: "destructive" }); return; }
-    setNewCategory(""); setNewPlanned("0.00");
+    setNewCategory(""); setNewPlanned("0.00"); setNewMode("total"); setNewUnitCost("0.00"); setNewQuantity("1");
     loadEventData(eventId);
   };
 
@@ -201,6 +213,22 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
     setBudget((ls) => ls.map((l) => (l.id === id ? { ...l, ...patch } : l)));
     const { error } = await supabase.from("event_budget_lines" as any).update(patch).eq("id", id);
     if (error) toast({ title: "Save failed", description: error.message, variant: "destructive" });
+  };
+
+  // Switch a line between Total and Per head modes, keeping planned_pence coherent.
+  const setBudgetLineMode = (l: BudgetLine, mode: BudgetMode) => {
+    if (mode === "perHead") {
+      const unit = l.planned_pence;
+      const quantity = 1;
+      updateBudgetLine(l.id, { unit_cost_pence: unit, quantity, planned_pence: unit * quantity });
+    } else {
+      updateBudgetLine(l.id, { unit_cost_pence: null, quantity: null });
+    }
+  };
+
+  // Per-head line edit: recalculate planned_pence from unit × quantity and save both.
+  const updatePerHead = (l: BudgetLine, unitPence: number, qty: number) => {
+    updateBudgetLine(l.id, { unit_cost_pence: unitPence, quantity: qty, planned_pence: unitPence * qty });
   };
 
   const deleteBudgetLine = async (id: string) => {
@@ -414,13 +442,14 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
                 <thead>
                   <tr className="text-left text-xs uppercase tracking-wider text-primary-foreground/60 border-b border-gold/15">
                     <th className="px-2 py-2">Category</th>
+                    <th className="px-2 py-2">Mode</th>
                     <th className="px-2 py-2 text-right">Planned (£)</th>
                     {canEdit && <th className="px-2 py-2 w-12"></th>}
                   </tr>
                 </thead>
                 <tbody>
                   {budget.length === 0 && (
-                    <tr><td colSpan={3} className="px-2 py-4 text-primary-foreground/50">No budget lines yet.</td></tr>
+                    <tr><td colSpan={4} className="px-2 py-4 text-primary-foreground/50">No budget lines yet.</td></tr>
                   )}
                   {budget.map((l) => (
                     <tr key={l.id} className="border-b border-gold/10">
@@ -429,10 +458,40 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
                           onChange={(e) => setBudget((ls) => ls.map((x) => x.id === l.id ? { ...x, category: e.target.value } : x))}
                           onBlur={(e) => updateBudgetLine(l.id, { category: e.target.value })} />
                       </td>
+                      <td className="px-2 py-1.5">
+                        <div className="inline-flex rounded-sm border border-gold/20 overflow-hidden">
+                          {(["total", "perHead"] as const).map((m) => (
+                            <button key={m} type="button" disabled={!canEdit}
+                              className={`px-2 py-1 text-xs ${lineMode(l) === m ? "bg-gold text-navy" : "text-primary-foreground/60 hover:text-primary-foreground"}`}
+                              onClick={() => lineMode(l) !== m && setBudgetLineMode(l, m)}>
+                              {m === "total" ? "Total" : "Per head"}
+                            </button>
+                          ))}
+                        </div>
+                      </td>
                       <td className="px-2 py-1.5 text-right">
-                        <Input type="number" step="0.01" className="text-right" disabled={!canEdit}
-                          defaultValue={fromPence(l.planned_pence)}
-                          onBlur={(e) => updateBudgetLine(l.id, { planned_pence: toPence(e.target.value) })} />
+                        {lineMode(l) === "perHead" ? (
+                          <div className="flex items-center justify-end gap-2 flex-wrap">
+                            <Input type="number" step="0.01" className="w-24 text-right" disabled={!canEdit}
+                              aria-label="Cost per head (£)"
+                              defaultValue={fromPence(l.unit_cost_pence ?? 0)}
+                              key={`u-${l.id}-${l.unit_cost_pence}`}
+                              onBlur={(e) => updatePerHead(l, toPence(e.target.value), l.quantity ?? 0)} />
+                            <span className="text-primary-foreground/60">×</span>
+                            <Input type="number" min="0" step="1" className="w-20 text-right" disabled={!canEdit}
+                              aria-label="Quantity"
+                              defaultValue={String(l.quantity ?? 0)}
+                              key={`q-${l.id}-${l.quantity}`}
+                              onBlur={(e) => updatePerHead(l, l.unit_cost_pence ?? 0, Math.max(0, Math.round(parseFloat(e.target.value || "0") || 0)))} />
+                            <span className="text-primary-foreground/60">=</span>
+                            <span className="tabular-nums text-gold font-medium">{money(l.planned_pence)}</span>
+                          </div>
+                        ) : (
+                          <Input type="number" step="0.01" className="text-right" disabled={!canEdit}
+                            defaultValue={fromPence(l.planned_pence)}
+                            key={`p-${l.id}-${l.planned_pence}`}
+                            onBlur={(e) => updateBudgetLine(l.id, { planned_pence: toPence(e.target.value) })} />
+                        )}
                       </td>
                       {canEdit && (
                         <td className="px-2 py-1.5">
@@ -454,10 +513,38 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
                   <Label className="text-xs">New category</Label>
                   <Input value={newCategory} onChange={(e) => setNewCategory(e.target.value)} placeholder="e.g. Venue" />
                 </div>
-                <div className="w-32">
-                  <Label className="text-xs">Planned (£)</Label>
-                  <Input type="number" step="0.01" value={newPlanned} onChange={(e) => setNewPlanned(e.target.value)} />
+                <div>
+                  <Label className="text-xs">Mode</Label>
+                  <div className="inline-flex rounded-sm border border-gold/20 overflow-hidden h-9">
+                    {(["total", "perHead"] as const).map((m) => (
+                      <button key={m} type="button"
+                        className={`px-2 text-xs ${newMode === m ? "bg-gold text-navy" : "text-primary-foreground/60 hover:text-primary-foreground"}`}
+                        onClick={() => setNewMode(m)}>
+                        {m === "total" ? "Total" : "Per head"}
+                      </button>
+                    ))}
+                  </div>
                 </div>
+                {newMode === "perHead" ? (
+                  <>
+                    <div className="w-28">
+                      <Label className="text-xs">Cost per head (£)</Label>
+                      <Input type="number" step="0.01" value={newUnitCost} onChange={(e) => setNewUnitCost(e.target.value)} />
+                    </div>
+                    <div className="w-20">
+                      <Label className="text-xs">Quantity</Label>
+                      <Input type="number" min="0" step="1" value={newQuantity} onChange={(e) => setNewQuantity(e.target.value)} />
+                    </div>
+                    <div className="text-sm text-primary-foreground/80 pb-2 tabular-nums">
+                      = {money(toPence(newUnitCost) * Math.max(0, Math.round(parseFloat(newQuantity || "0") || 0)))}
+                    </div>
+                  </>
+                ) : (
+                  <div className="w-32">
+                    <Label className="text-xs">Planned (£)</Label>
+                    <Input type="number" step="0.01" value={newPlanned} onChange={(e) => setNewPlanned(e.target.value)} />
+                  </div>
+                )}
                 <Button className="bg-gold text-navy hover:bg-gold/90" onClick={addBudgetLine}>
                   <Plus className="w-4 h-4 mr-1" /> Add
                 </Button>
