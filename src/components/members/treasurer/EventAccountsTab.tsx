@@ -347,7 +347,7 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
       `Event Account — ${event.name}`,
       `Event date: ${new Date(event.event_date).toLocaleDateString("en-GB")}`,
     );
-    let y = reportSection(doc, pageW, margin, 135, "Budget vs Actual");
+    
     const tableStyle = {
       margin: { left: margin, right: margin, bottom: 50 },
       styles: { font: "helvetica" as const, fontSize: 9, cellPadding: 5, textColor: INK, lineColor: [220, 215, 200] as [number, number, number], lineWidth: 0.4 },
