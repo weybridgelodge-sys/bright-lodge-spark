@@ -91,6 +91,7 @@ export default function TransactionDetailReport({ canEdit }: { canEdit: boolean 
         description: r.description || r.journal_entries.description || "",
         debit: Number(r.debit_pence ?? 0),
         credit: Number(r.credit_pence ?? 0),
+        eventId: r.event_id ?? null,
       }));
       rows.sort((a, b) => (a.date === b.date ? a.code.localeCompare(b.code) : a.date.localeCompare(b.date)));
       setLines(rows);
