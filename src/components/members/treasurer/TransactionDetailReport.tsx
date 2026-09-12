@@ -19,7 +19,12 @@ type Line = {
   description: string;
   debit: number;
   credit: number;
+  eventId: string | null;
 };
+
+type EventOption = { id: string; name: string; event_date: string };
+
+const NO_EVENT = "__none__";
 
 const defaultRange = () => {
   const todayIso = new Date().toISOString().slice(0, 10);
@@ -40,9 +45,15 @@ export default function TransactionDetailReport({ canEdit }: { canEdit: boolean 
   const [loaded, setLoaded] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [applied, setApplied] = useState<{ from: string; to: string; codeFrom: string; codeTo: string } | null>(null);
+  const [events, setEvents] = useState<EventOption[]>([]);
 
   useEffect(() => {
     if (!canEdit) return;
+    supabase
+      .from("event_accounts" as any)
+      .select("id,name,event_date")
+      .order("event_date", { ascending: false })
+      .then(({ data }) => setEvents(((data as any[]) ?? []) as EventOption[]));
     fetchAccounts()
       .then((accs) => {
         setAccounts(accs);
@@ -65,7 +76,7 @@ export default function TransactionDetailReport({ canEdit }: { canEdit: boolean 
       const { data, error } = await supabase
         .from("journal_lines" as any)
         .select(
-          "id,debit_pence,credit_pence,description," +
+          "id,debit_pence,credit_pence,description,event_id," +
             "journal_entries!inner(id,entry_date,description,source_type,payee,reconciled)," +
             "chart_of_accounts!inner(code,name)"
         )
@@ -86,6 +97,7 @@ export default function TransactionDetailReport({ canEdit }: { canEdit: boolean 
         description: r.description || r.journal_entries.description || "",
         debit: Number(r.debit_pence ?? 0),
         credit: Number(r.credit_pence ?? 0),
+        eventId: r.event_id ?? null,
       }));
       rows.sort((a, b) => (a.date === b.date ? a.code.localeCompare(b.code) : a.date.localeCompare(b.date)));
       setLines(rows);
@@ -134,6 +146,25 @@ export default function TransactionDetailReport({ canEdit }: { canEdit: boolean 
       toast({
         title: "Can't change reconciled status — this entry's period is locked",
         description: error?.message ?? "No change was saved.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const assignEvent = async (lineId: string, value: string) => {
+    const next = value === NO_EVENT ? null : value;
+    const prev = lines.find((l) => l.id === lineId)?.eventId ?? null;
+    setLines((ls) => ls.map((l) => (l.id === lineId ? { ...l, eventId: next } : l)));
+    const { data, error } = await supabase
+      .from("journal_lines" as any)
+      .update({ event_id: next })
+      .eq("id", lineId)
+      .select("id");
+    if (error || !data || data.length === 0) {
+      setLines((ls) => ls.map((l) => (l.id === lineId ? { ...l, eventId: prev } : l)));
+      toast({
+        title: "Couldn't tag this line to an event",
+        description: error?.message ?? "The entry's period may be locked.",
         variant: "destructive",
       });
     }
@@ -256,6 +287,7 @@ export default function TransactionDetailReport({ canEdit }: { canEdit: boolean 
                     <th className="px-3 py-2 font-medium text-right">Debit</th>
                     <th className="px-3 py-2 font-medium text-right">Credit</th>
                     <th className="px-3 py-2 font-medium text-center">Reconciled</th>
+                    {events.length > 0 && <th className="px-3 py-2 font-medium">Event</th>}
                   </tr>
                 </thead>
                 <tbody>
@@ -275,6 +307,21 @@ export default function TransactionDetailReport({ canEdit }: { canEdit: boolean 
                           aria-label="Mark entry reconciled"
                         />
                       </td>
+                      {events.length > 0 && (
+                        <td className="px-3 py-1.5">
+                          <Select value={l.eventId ?? NO_EVENT} onValueChange={(v) => assignEvent(l.id, v)}>
+                            <SelectTrigger className="h-8 min-w-[170px]" aria-label="Assign to event">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value={NO_EVENT}>No event</SelectItem>
+                              {events.map((e) => (
+                                <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </td>
+                      )}
                     </tr>
                   ))}
                 </tbody>

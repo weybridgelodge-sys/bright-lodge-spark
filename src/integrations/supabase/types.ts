@@ -1030,6 +1030,174 @@ export type Database = {
         }
         Relationships: []
       }
+      event_accounts: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          event_date: string
+          id: string
+          name: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          event_date: string
+          id?: string
+          name: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          event_date?: string
+          id?: string
+          name?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      event_bookings: {
+        Row: {
+          balance_method: string | null
+          balance_paid: boolean
+          balance_pence: number
+          created_at: string
+          deposit_method: string | null
+          deposit_paid: boolean
+          deposit_pence: number
+          event_id: string
+          id: string
+          is_placeholder: boolean
+          notes: string | null
+          payer_name: string
+          ticket_count: number
+          updated_at: string
+        }
+        Insert: {
+          balance_method?: string | null
+          balance_paid?: boolean
+          balance_pence?: number
+          created_at?: string
+          deposit_method?: string | null
+          deposit_paid?: boolean
+          deposit_pence?: number
+          event_id: string
+          id?: string
+          is_placeholder?: boolean
+          notes?: string | null
+          payer_name: string
+          ticket_count?: number
+          updated_at?: string
+        }
+        Update: {
+          balance_method?: string | null
+          balance_paid?: boolean
+          balance_pence?: number
+          created_at?: string
+          deposit_method?: string | null
+          deposit_paid?: boolean
+          deposit_pence?: number
+          event_id?: string
+          id?: string
+          is_placeholder?: boolean
+          notes?: string | null
+          payer_name?: string
+          ticket_count?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_bookings_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "event_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_budget_lines: {
+        Row: {
+          category: string
+          created_at: string
+          event_id: string
+          id: string
+          planned_pence: number
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          event_id: string
+          id?: string
+          planned_pence?: number
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          event_id?: string
+          id?: string
+          planned_pence?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_budget_lines_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "event_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_guests: {
+        Row: {
+          allergies: string | null
+          booking_id: string
+          created_at: string
+          id: string
+          menu_choice: string | null
+          name: string | null
+          seating_preference: string | null
+          updated_at: string
+          wine_preorder: string | null
+        }
+        Insert: {
+          allergies?: string | null
+          booking_id: string
+          created_at?: string
+          id?: string
+          menu_choice?: string | null
+          name?: string | null
+          seating_preference?: string | null
+          updated_at?: string
+          wine_preorder?: string | null
+        }
+        Update: {
+          allergies?: string | null
+          booking_id?: string
+          created_at?: string
+          id?: string
+          menu_choice?: string | null
+          name?: string | null
+          seating_preference?: string | null
+          updated_at?: string
+          wine_preorder?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_guests_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "event_bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       festive_board_attendance: {
         Row: {
           amount_pence: number
@@ -1257,6 +1425,7 @@ export type Database = {
           debit_pence: number
           description: string | null
           entry_id: string
+          event_id: string | null
           fund_code: string | null
           id: string
         }
@@ -1267,6 +1436,7 @@ export type Database = {
           debit_pence?: number
           description?: string | null
           entry_id: string
+          event_id?: string | null
           fund_code?: string | null
           id?: string
         }
@@ -1277,6 +1447,7 @@ export type Database = {
           debit_pence?: number
           description?: string | null
           entry_id?: string
+          event_id?: string | null
           fund_code?: string | null
           id?: string
         }
@@ -1293,6 +1464,13 @@ export type Database = {
             columns: ["entry_id"]
             isOneToOne: false
             referencedRelation: "journal_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "journal_lines_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "event_accounts"
             referencedColumns: ["id"]
           },
         ]

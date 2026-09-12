@@ -14,6 +14,7 @@ import PropertyRegisterTab from "@/components/members/treasurer/PropertyRegister
 import BankStatementsTab from "@/components/members/treasurer/BankStatementsTab";
 import BankReconciliationTab from "@/components/members/treasurer/BankReconciliationTab";
 import BreakevenCalculatorTab from "@/components/members/treasurer/BreakevenCalculatorTab";
+import EventAccountsTab from "@/components/members/treasurer/EventAccountsTab";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -27,7 +28,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
 import { toUploadBody } from "@/lib/nativeUpload";
-import { Loader2, Plus, Pencil, Trash2, Lock, Unlock, ShieldCheck, Paperclip, Table, Utensils, Handshake, ArrowUpCircle, ArrowDownCircle, UserPlus, BookOpen, TrendingUp, Scale, Search, Archive, Calculator, Landmark } from "lucide-react";
+import { Loader2, Plus, Pencil, Trash2, Lock, Unlock, ShieldCheck, Paperclip, Table, Utensils, Handshake, ArrowUpCircle, ArrowDownCircle, UserPlus, BookOpen, TrendingUp, Scale, Search, Archive, Calculator, Landmark, PartyPopper } from "lucide-react";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 type Period = {
@@ -799,6 +800,13 @@ function Inner() {
               <span>Bank Reconciliation</span>
             </TabsTrigger>
             <TabsTrigger
+              value="event-accounts"
+              className="w-full flex items-center justify-start gap-3 px-4 py-3 rounded-sm text-sm font-sans text-primary-foreground/80 transition-colors hover:text-gold hover:bg-navy-light/40 data-[state=active]:bg-gold/15 data-[state=active]:text-gold data-[state=active]:shadow-none"
+            >
+              <PartyPopper className="w-4 h-4 shrink-0" />
+              <span>Event Accounts</span>
+            </TabsTrigger>
+            <TabsTrigger
               value="reconciliation"
               className="w-full flex items-center justify-start gap-3 px-4 py-3 rounded-sm text-sm font-sans text-primary-foreground/80 transition-colors hover:text-gold hover:bg-navy-light/40 data-[state=active]:bg-gold/15 data-[state=active]:text-gold data-[state=active]:shadow-none"
             >
@@ -868,6 +876,9 @@ function Inner() {
           </TabsContent>
           <TabsContent value="bank-reconciliation" className="mt-4">
             <BankReconciliationTab canEdit={canEditTx} />
+          </TabsContent>
+          <TabsContent value="event-accounts" className="mt-4">
+            <EventAccountsTab canEdit={canEditTx} />
           </TabsContent>
           <TabsContent value="reconciliation" className="mt-4">
             <ReconciliationTab periods={periods} isTreasurer={isCurrentTreasurer} isSecretary={isSecretary} isAdmin={isAdmin} onChange={load} />
