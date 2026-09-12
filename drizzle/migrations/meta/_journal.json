@@ -50,6 +50,13 @@
       "when": 1789193057497,
       "tag": "0006_budget_line_per_head",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1789193451204,
+      "tag": "0007_add_line_type_to_event_budget_lines",
+      "breakpoints": true
     }
   ]
 }

@@ -1125,6 +1125,7 @@ export type Database = {
           created_at: string
           event_id: string
           id: string
+          line_type: string
           planned_pence: number
           quantity: number | null
           unit_cost_pence: number | null
@@ -1135,6 +1136,7 @@ export type Database = {
           created_at?: string
           event_id: string
           id?: string
+          line_type?: string
           planned_pence?: number
           quantity?: number | null
           unit_cost_pence?: number | null
@@ -1145,6 +1147,7 @@ export type Database = {
           created_at?: string
           event_id?: string
           id?: string
+          line_type?: string
           planned_pence?: number
           quantity?: number | null
           unit_cost_pence?: number | null
