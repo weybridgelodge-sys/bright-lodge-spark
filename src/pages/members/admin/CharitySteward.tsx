@@ -204,6 +204,7 @@ function CollectionDialog({ open, onOpenChange, editing, onSaved }: {
   const [type, setType] = useState<CollectionType>("charity_column");
   const [gross, setGross] = useState("0");
   const [costs, setCosts] = useState("0");
+  const [stripeFee, setStripeFee] = useState("0");
   const [notes, setNotes] = useState("");
   const [bankedDate, setBankedDate] = useState("");
   const [bankedBy, setBankedBy] = useState("");
