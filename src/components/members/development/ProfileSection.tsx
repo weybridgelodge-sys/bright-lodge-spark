@@ -58,9 +58,16 @@ export default function ProfileSection({
   const [royalArchDate, setRoyalArchDate] = useState(profile.royal_arch_date ?? "");
   const [proposer, setProposer] = useState(profile.proposer ?? "");
   const [grandLodgeNo, setGrandLodgeNo] = useState(profile.ugle_reg_number ?? "");
+  const [passingScheduled, setPassingScheduled] = useState(record?.passing_scheduled_date ?? "");
+  const [raisingScheduled, setRaisingScheduled] = useState(record?.raising_scheduled_date ?? "");
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => { setMentorId(record?.assigned_mentor_id ?? ""); setExperience(record?.previous_masonic_experience ?? ""); }, [record]);
+  useEffect(() => {
+    setMentorId(record?.assigned_mentor_id ?? "");
+    setExperience(record?.previous_masonic_experience ?? "");
+    setPassingScheduled(record?.passing_scheduled_date ?? "");
+    setRaisingScheduled(record?.raising_scheduled_date ?? "");
+  }, [record]);
   useEffect(() => {
     setRoyalArchDate(profile.royal_arch_date ?? "");
     setProposer(profile.proposer ?? "");
