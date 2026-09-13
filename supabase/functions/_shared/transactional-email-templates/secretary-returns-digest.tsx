@@ -137,10 +137,10 @@ export const template = {
     reportDate: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
     portalUrl: 'https://weybridgelodge.org.uk/members/admin/secretary-returns',
     overdue: [
-      { typeLabel: 'Form P', masonicYear: '2025/2026', dateDue: '2026-09-01', person: 'Mr John Smith' },
+      { typeLabel: 'Form P', masonicYear: '2025/2026', dateDue: '2026-09-01', person: 'John Smith', personLabel: 'Candidate' },
     ],
     dueSoon: [
-      { typeLabel: 'Installation Return', masonicYear: '2026/2027', dateDue: '2026-09-24', person: null },
+      { typeLabel: 'Installation Return', masonicYear: '2026/2027', dateDue: '2026-09-24', person: null, personLabel: 'Member' },
     ],
   },
 } satisfies TemplateEntry
