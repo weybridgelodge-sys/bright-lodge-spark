@@ -128,7 +128,7 @@ function Inner() {
 
   const [fType, setFType] = useState<string>("all");
   const [fStatus, setFStatus] = useState<string>("all");
-  const [fYear, setFYear] = useState<string>("");
+  const [fYear, setFYear] = useState<string>("all");
   const [fSearch, setFSearch] = useState("");
 
   const load = async () => {
