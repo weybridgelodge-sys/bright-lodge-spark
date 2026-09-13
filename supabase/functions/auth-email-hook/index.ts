@@ -153,6 +153,8 @@ const handler = createAuthEmailHandler({
         React.createElement(MagicLinkEmail, {
           siteName: SITE_NAME,
           confirmationUrl: data.url,
+          token: data.token,
+          client: extractClientHint(data.url),
         }),
     },
     recovery: {
