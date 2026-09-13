@@ -120,6 +120,13 @@
       "when": 1789320583954,
       "tag": "0016_create_secretary_returns",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1789320601927,
+      "tag": "0017_secretary_returns_storage_policies",
+      "breakpoints": true
     }
   ]
 }
