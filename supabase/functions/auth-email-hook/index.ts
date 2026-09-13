@@ -120,6 +120,25 @@ async function handlePreview(req: Request): Promise<Response> {
   })
 }
 
+// Extract the `client` hint (app|web) from the confirmation URL's redirect_to,
+// so the magic-link template can render app-only or web-only content.
+function extractClientHint(url: string | undefined): string | undefined {
+  if (!url) return undefined
+  try {
+    const confirmUrl = new URL(url)
+    const redirectTo = confirmUrl.searchParams.get('redirect_to')
+    if (redirectTo) {
+      const c = new URL(redirectTo).searchParams.get('client')
+      if (c) return c
+    }
+    const c = confirmUrl.searchParams.get('client')
+    if (c) return c
+  } catch (_) {
+    // fall through — leave undefined so the template falls back to both
+  }
+  return undefined
+}
+
 // The SDK handler owns verification, dispatch, and retry semantics; this file
 // owns only the email decisions: subjects, templates, and per-type props.
 const handler = createAuthEmailHandler({
