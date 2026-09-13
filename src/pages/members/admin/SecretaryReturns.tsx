@@ -282,7 +282,7 @@ function Inner() {
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
         <Select value={fType} onValueChange={setFType}>
-          <SelectTrigger><SelectValue placeholder="All types" /></SelectTrigger>
+          <SelectTrigger className="bg-navy border-gold/20 text-primary-foreground"><SelectValue placeholder="All types" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All types</SelectItem>
             {(Object.keys(TYPE_LABELS) as ReturnType[]).map((t) => (
@@ -291,7 +291,7 @@ function Inner() {
           </SelectContent>
         </Select>
         <Select value={fStatus} onValueChange={setFStatus}>
-          <SelectTrigger><SelectValue placeholder="All statuses" /></SelectTrigger>
+          <SelectTrigger className="bg-navy border-gold/20 text-primary-foreground"><SelectValue placeholder="All statuses" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All statuses</SelectItem>
             {(Object.keys(STATUS_LABELS) as ReturnStatus[]).map((s) => (
@@ -299,8 +299,8 @@ function Inner() {
             ))}
           </SelectContent>
         </Select>
-        <Input placeholder="Masonic year" value={fYear} onChange={(e) => setFYear(e.target.value)} />
-        <Input placeholder="Search name" value={fSearch} onChange={(e) => setFSearch(e.target.value)} />
+        <Input placeholder="Masonic year" value={fYear} onChange={(e) => setFYear(e.target.value)} className="bg-navy border-gold/20 text-primary-foreground placeholder:text-primary-foreground/40" />
+        <Input placeholder="Search name" value={fSearch} onChange={(e) => setFSearch(e.target.value)} className="bg-navy border-gold/20 text-primary-foreground placeholder:text-primary-foreground/40" />
       </div>
 
       {loading ? (
@@ -345,7 +345,7 @@ function Inner() {
       )}
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-h-[90vh] overflow-y-auto bg-navy-dark text-primary-foreground border-gold/30">
           <DialogHeader>
             <DialogTitle>{form.id ? "Edit return" : "Log a new return"}</DialogTitle>
           </DialogHeader>
@@ -366,7 +366,7 @@ function Inner() {
                   }));
                 }}
               >
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger className="bg-navy border-gold/20 text-primary-foreground"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   {(Object.keys(TYPE_LABELS) as ReturnType[]).map((t) => (
                     <SelectItem key={t} value={t}>{TYPE_LABELS[t]}</SelectItem>
@@ -378,7 +378,7 @@ function Inner() {
             <div>
               <label className="text-xs text-primary-foreground/70">Person (member or candidate)</label>
               <Select value={form.personKey || "none"} onValueChange={(v) => setForm({ ...form, personKey: v === "none" ? "" : v })}>
-                <SelectTrigger><SelectValue placeholder="Not person-specific" /></SelectTrigger>
+                <SelectTrigger className="bg-navy border-gold/20 text-primary-foreground"><SelectValue placeholder="Not person-specific" /></SelectTrigger>
                 <SelectContent className="max-h-64">
                   <SelectItem value="none">Not person-specific</SelectItem>
                   {people.map((p) => (
@@ -391,12 +391,12 @@ function Inner() {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="text-xs text-primary-foreground/70">Masonic year</label>
-                <Input type="number" value={form.masonic_year} onChange={(e) => setForm({ ...form, masonic_year: e.target.value })} />
+                <Input type="number" value={form.masonic_year} onChange={(e) => setForm({ ...form, masonic_year: e.target.value })} className="bg-navy border-gold/20 text-primary-foreground placeholder:text-primary-foreground/40" />
               </div>
               <div>
                 <label className="text-xs text-primary-foreground/70">Status</label>
                 <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v as ReturnStatus })}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectTrigger className="bg-navy border-gold/20 text-primary-foreground"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     {(Object.keys(STATUS_LABELS) as ReturnStatus[]).map((s) => (
                       <SelectItem key={s} value={s}>{STATUS_LABELS[s]}</SelectItem>
@@ -417,22 +417,23 @@ function Inner() {
                       date_due: f.return_type === "lp_a5_certificate" && v ? addDays(v, 28) : f.date_due,
                     }));
                   }}
+                  className="bg-navy border-gold/20 text-primary-foreground placeholder:text-primary-foreground/40 [color-scheme:dark]"
                 />
               </div>
               <div>
                 <label className="text-xs text-primary-foreground/70">Date due</label>
-                <Input type="date" value={form.date_due} onChange={(e) => setForm({ ...form, date_due: e.target.value })} />
+                <Input type="date" value={form.date_due} onChange={(e) => setForm({ ...form, date_due: e.target.value })} className="bg-navy border-gold/20 text-primary-foreground placeholder:text-primary-foreground/40 [color-scheme:dark]" />
               </div>
             </div>
 
             <div>
               <label className="text-xs text-primary-foreground/70">Notes</label>
-              <Textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} rows={3} />
+              <Textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} rows={3} className="bg-navy border-gold/20 text-primary-foreground placeholder:text-primary-foreground/40" />
             </div>
 
             <div>
               <label className="text-xs text-primary-foreground/70">Attachment (PDF)</label>
-              <Input type="file" accept="application/pdf" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
+              <Input type="file" accept="application/pdf" onChange={(e) => setFile(e.target.files?.[0] ?? null)} className="bg-navy border-gold/20 text-primary-foreground placeholder:text-primary-foreground/40" />
             </div>
           </div>
           <DialogFooter>
