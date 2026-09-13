@@ -5,7 +5,7 @@ import { highestAwardAchieved } from "@/lib/charity/festivalAwards";
 const gbp = (n: number) => new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP", maximumFractionDigits: 0 }).format(n);
 
 type YearRow = { charity_id: string; name: string; website: string | null; year_total: number };
-type Totals = { total_raised: number; public_feed_start_date: string | null };
+type Totals = { total_raised: number; current_year_total: number; public_feed_start_date: string | null };
 type Festival = { festival_name: string; target_amount: number };
 type FeedMetrics = {
   total_raised: number;
