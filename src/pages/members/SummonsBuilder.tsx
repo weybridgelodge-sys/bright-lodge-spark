@@ -1314,7 +1314,7 @@ function VisitorEmailDialog(props: {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl bg-navy text-primary-foreground border-gold/30">
+      <DialogContent className="max-w-3xl bg-navy text-primary-foreground border-gold/30 max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-gold">Email Summons to Visitors</DialogTitle>
           <DialogDescription className="text-primary-foreground/70">

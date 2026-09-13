@@ -135,7 +135,7 @@ export default function MembersDashboard() {
       </section>
 
       <Dialog open={!!activeNotice} onOpenChange={(o) => !o && setActiveNotice(null)}>
-        <DialogContent className="max-w-2xl bg-navy-dark border-gold/30 text-primary-foreground">
+        <DialogContent className="max-w-2xl bg-navy-dark border-gold/30 text-primary-foreground max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="font-serif text-xl text-gold pr-6">
               {activeNotice?.title}

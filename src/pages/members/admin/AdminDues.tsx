@@ -156,7 +156,7 @@ function MembersTab({ members, subs, payments, calcs, onRefresh }: {
 
       {/* History dialog */}
       <Dialog open={!!historyMember} onOpenChange={(o) => !o && setHistoryMember(null)}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Payment history — {historyMember?.full_name || historyMember?.email}</DialogTitle>
             <DialogDescription>All Stripe payment and refund events for this member (test mode).</DialogDescription>
@@ -236,7 +236,7 @@ function RefundDialog({ payment, onClose, onDone }: { payment: DuesPayment | nul
 
   return (
     <Dialog open={!!payment} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent>
+      <DialogContent className="max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Refund payment</DialogTitle>
           <DialogDescription>

@@ -989,7 +989,7 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
 
       {/* Event dialog */}
       <Dialog open={eventDialog} onOpenChange={setEventDialog}>
-        <DialogContent>
+        <DialogContent className="max-h-[90vh] overflow-y-auto">
           <DialogHeader><DialogTitle>{eventDraft.id ? "Edit event" : "New event"}</DialogTitle></DialogHeader>
           <div className="space-y-3">
             <div>
@@ -1092,7 +1092,7 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
 
       {/* Guest dialog */}
       <Dialog open={guestDialog} onOpenChange={setGuestDialog}>
-        <DialogContent>
+        <DialogContent className="max-h-[90vh] overflow-y-auto">
           <DialogHeader><DialogTitle>{guestDraft?.id ? "Edit guest" : "Add guest"}</DialogTitle></DialogHeader>
           {guestDraft && (
             <div className="space-y-3">
