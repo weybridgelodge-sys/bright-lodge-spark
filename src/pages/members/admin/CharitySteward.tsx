@@ -1539,6 +1539,13 @@ function Inner() {
       <Tabs defaultValue="collections" className="space-y-4">
         <TabsList className="flex flex-col w-full h-auto items-stretch gap-1 bg-navy p-2 rounded-sm border border-gold/20 mb-4">
           <TabsTrigger
+            value="ledger"
+            className="w-full flex items-center justify-start gap-3 px-4 py-3 rounded-sm text-sm font-sans text-primary-foreground/80 transition-colors hover:text-gold hover:bg-navy-light/40 data-[state=active]:bg-gold/15 data-[state=active]:text-gold data-[state=active]:shadow-none"
+          >
+            <BookOpen className="w-4 h-4 shrink-0" />
+            <span>Charity Ledger</span>
+          </TabsTrigger>
+          <TabsTrigger
             value="collections"
             className="w-full flex items-center justify-start gap-3 px-4 py-3 rounded-sm text-sm font-sans text-primary-foreground/80 transition-colors hover:text-gold hover:bg-navy-light/40 data-[state=active]:bg-gold/15 data-[state=active]:text-gold data-[state=active]:shadow-none"
           >
@@ -1551,13 +1558,6 @@ function Inner() {
           >
             <HeartHandshake className="w-4 h-4 shrink-0" />
             <span>Donations</span>
-          </TabsTrigger>
-          <TabsTrigger
-            value="ledger"
-            className="w-full flex items-center justify-start gap-3 px-4 py-3 rounded-sm text-sm font-sans text-primary-foreground/80 transition-colors hover:text-gold hover:bg-navy-light/40 data-[state=active]:bg-gold/15 data-[state=active]:text-gold data-[state=active]:shadow-none"
-          >
-            <BookOpen className="w-4 h-4 shrink-0" />
-            <span>Charity Ledger</span>
           </TabsTrigger>
           <TabsTrigger
             value="festival"

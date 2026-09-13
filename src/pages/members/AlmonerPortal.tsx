@@ -288,18 +288,11 @@ function PortalBody() {
     <Tabs defaultValue="board" className="w-full">
       <TabsList className="flex flex-col w-full h-auto items-stretch gap-1 bg-navy p-2 rounded-sm border border-gold/20 mb-4">
         <TabsTrigger
-          value="board"
+          value="absences"
           className="w-full flex items-center justify-start gap-3 px-4 py-3 rounded-sm text-sm font-sans text-primary-foreground/80 transition-colors hover:text-gold hover:bg-navy-light/40 data-[state=active]:bg-gold/15 data-[state=active]:text-gold data-[state=active]:shadow-none"
         >
-          <LayoutDashboard className="w-4 h-4 shrink-0" />
-          <span>Welfare Board</span>
-        </TabsTrigger>
-        <TabsTrigger
-          value="events"
-          className="w-full flex items-center justify-start gap-3 px-4 py-3 rounded-sm text-sm font-sans text-primary-foreground/80 transition-colors hover:text-gold hover:bg-navy-light/40 data-[state=active]:bg-gold/15 data-[state=active]:text-gold data-[state=active]:shadow-none"
-        >
-          <HeartHandshake className="w-4 h-4 shrink-0" />
-          <span>Life Events</span>
+          <UserX className="w-4 h-4 shrink-0" />
+          <span>Absences</span>
         </TabsTrigger>
         <TabsTrigger
           value="correspondence"
@@ -309,6 +302,13 @@ function PortalBody() {
           <span>Correspondence</span>
         </TabsTrigger>
         <TabsTrigger
+          value="events"
+          className="w-full flex items-center justify-start gap-3 px-4 py-3 rounded-sm text-sm font-sans text-primary-foreground/80 transition-colors hover:text-gold hover:bg-navy-light/40 data-[state=active]:bg-gold/15 data-[state=active]:text-gold data-[state=active]:shadow-none"
+        >
+          <HeartHandshake className="w-4 h-4 shrink-0" />
+          <span>Life Events</span>
+        </TabsTrigger>
+        <TabsTrigger
           value="referrals"
           className="w-full flex items-center justify-start gap-3 px-4 py-3 rounded-sm text-sm font-sans text-primary-foreground/80 transition-colors hover:text-gold hover:bg-navy-light/40 data-[state=active]:bg-gold/15 data-[state=active]:text-gold data-[state=active]:shadow-none"
         >
@@ -316,18 +316,18 @@ function PortalBody() {
           <span>Referrals</span>
         </TabsTrigger>
         <TabsTrigger
-          value="absences"
-          className="w-full flex items-center justify-start gap-3 px-4 py-3 rounded-sm text-sm font-sans text-primary-foreground/80 transition-colors hover:text-gold hover:bg-navy-light/40 data-[state=active]:bg-gold/15 data-[state=active]:text-gold data-[state=active]:shadow-none"
-        >
-          <UserX className="w-4 h-4 shrink-0" />
-          <span>Absences</span>
-        </TabsTrigger>
-        <TabsTrigger
           value="report"
           className="w-full flex items-center justify-start gap-3 px-4 py-3 rounded-sm text-sm font-sans text-primary-foreground/80 transition-colors hover:text-gold hover:bg-navy-light/40 data-[state=active]:bg-gold/15 data-[state=active]:text-gold data-[state=active]:shadow-none"
         >
           <FileText className="w-4 h-4 shrink-0" />
           <span>Report</span>
+        </TabsTrigger>
+        <TabsTrigger
+          value="board"
+          className="w-full flex items-center justify-start gap-3 px-4 py-3 rounded-sm text-sm font-sans text-primary-foreground/80 transition-colors hover:text-gold hover:bg-navy-light/40 data-[state=active]:bg-gold/15 data-[state=active]:text-gold data-[state=active]:shadow-none"
+        >
+          <LayoutDashboard className="w-4 h-4 shrink-0" />
+          <span>Welfare Board</span>
         </TabsTrigger>
       </TabsList>
 
