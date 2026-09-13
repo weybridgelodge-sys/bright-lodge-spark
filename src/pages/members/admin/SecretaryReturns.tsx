@@ -303,7 +303,15 @@ function Inner() {
             ))}
           </SelectContent>
         </Select>
-        <Input placeholder="Masonic year" value={fYear} onChange={(e) => setFYear(e.target.value)} className="bg-navy border-gold/20 text-primary-foreground placeholder:text-primary-foreground/40" />
+        <Select value={fYear} onValueChange={setFYear}>
+          <SelectTrigger className="bg-navy border-gold/20 text-primary-foreground"><SelectValue placeholder="All years" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All years</SelectItem>
+            {MASONIC_YEAR_OPTIONS.map((y) => (
+              <SelectItem key={y} value={String(y)}>Masonic year {treasurerYearBounds(y).label}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
         <Input placeholder="Search name" value={fSearch} onChange={(e) => setFSearch(e.target.value)} className="bg-navy border-gold/20 text-primary-foreground placeholder:text-primary-foreground/40" />
       </div>
 
