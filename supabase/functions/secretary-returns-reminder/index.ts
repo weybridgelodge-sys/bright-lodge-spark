@@ -89,7 +89,7 @@ Deno.serve(async (req) => {
       .select(
         'id,return_type,masonic_year,date_due,member_id,candidate_id,' +
           'member:profiles!secretary_returns_member_id_fkey(full_name,preferred_name,first_name,last_name),' +
-          'candidate:candidates!secretary_returns_candidate_id_fkey(full_name,first_name,last_name)',
+          'candidate:candidates!secretary_returns_candidate_id_fkey(first_name,last_name)',
       )
       .eq('status', 'draft')
       .not('date_due', 'is', null)
