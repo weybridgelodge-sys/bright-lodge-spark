@@ -166,6 +166,8 @@ export default function CandidatesManager({ onChange }: { onChange?: () => void 
                   {[c.email, c.phone].filter(Boolean).join(" · ") || "No contact"}
                   {c.proposer && ` · Prop: ${c.proposer}`}
                   {c.seconder && ` · Sec: ${c.seconder}`}
+                  {c.initiation_scheduled_date &&
+                    ` · Initiation: ${new Date(c.initiation_scheduled_date).toLocaleDateString("en-GB")}`}
                 </p>
                 {c.notes && <p className="text-[11px] text-primary-foreground/50 mt-1">{c.notes}</p>}
               </div>
@@ -173,6 +175,17 @@ export default function CandidatesManager({ onChange }: { onChange?: () => void 
                 value={c.stage}
                 onChange={(s) => updateRow(c.id, { stage: s })}
               />
+              <div>
+                <Label>Initiation</Label>
+                <input
+                  type="date"
+                  value={c.initiation_scheduled_date ?? ""}
+                  onChange={(e) =>
+                    updateRow(c.id, { initiation_scheduled_date: e.target.value || null })
+                  }
+                  className="bg-navy border border-gold/20 rounded-sm px-2 py-1.5 text-xs text-primary-foreground"
+                />
+              </div>
               <button
                 onClick={() => remove(c.id)}
                 className="text-primary-foreground/50 hover:text-red-400 p-2"
