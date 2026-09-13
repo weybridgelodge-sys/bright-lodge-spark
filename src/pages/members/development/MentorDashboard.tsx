@@ -104,8 +104,28 @@ function Inner() {
 
   const filtered = rows.filter((r) => displayName(r).toLowerCase().includes(filter.toLowerCase()));
 
+  if (!canAccessPage) {
+    return <p className="text-primary-foreground/70">You don't have permission to view the Mentor Portal.</p>;
+  }
+
   return (
     <div className="space-y-6">
+      {(canSeeMemberManagement || canSeeMatrix) && (
+        <div className="grid sm:grid-cols-2 gap-4">
+          {canSeeMemberManagement && (
+            <Link to="/members/admin" className="group rounded-sm border border-gold/20 bg-navy-light/30 p-4 hover:border-gold/50 hover:bg-navy-light/50 transition-colors">
+              <h2 className="font-serif text-gold text-base mb-1">Member Management</h2>
+              <p className="text-primary-foreground/70 text-xs">Directory, member records, roles and notices.</p>
+            </Link>
+          )}
+          {canSeeMatrix && (
+            <Link to="/members/admin/skills-matrix" className="group rounded-sm border border-gold/20 bg-navy-light/30 p-4 hover:border-gold/50 hover:bg-navy-light/50 transition-colors">
+              <h2 className="font-serif text-gold text-base mb-1">Skills Matrix</h2>
+              <p className="text-primary-foreground/70 text-xs">Lodge-wide ritual skills coverage and gap report.</p>
+            </Link>
+          )}
+        </div>
+      )}
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
           <h1 className="font-serif text-2xl text-primary-foreground">Member Development</h1>
