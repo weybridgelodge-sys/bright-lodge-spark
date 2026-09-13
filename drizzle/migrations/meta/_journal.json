@@ -85,6 +85,13 @@
       "when": 1789297916422,
       "tag": "0011_add_candidate_initiation_scheduled_date",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1789298184574,
+      "tag": "0012_add_development_scheduled_dates",
+      "breakpoints": true
     }
   ]
 }
