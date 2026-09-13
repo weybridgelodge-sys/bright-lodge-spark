@@ -252,7 +252,7 @@ export default function LoiAdmin() {
                             ))}
                         </ul>
                       )}
-                      {canManageLOI && (
+                      {canEdit && (
                         <div className="flex gap-2 pt-2">
                           <Button
                             variant="outline"
