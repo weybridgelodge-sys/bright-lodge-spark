@@ -32,7 +32,6 @@ import {
   partLabel,
   kpiCategoryLabel,
   autoKpiCategory,
-  masonicYearStart,
 } from "@/lib/loi";
 
 type Session = {
