@@ -106,7 +106,8 @@ const EMPTY_FORM = {
 };
 
 export default function MembersAdmin() {
-  const { user } = useAuth();
+  const { user, isAdmin, isSecretary, isWorshipfulMaster } = useAuth();
+  const canManageMembers = isAdmin || isSecretary || isWorshipfulMaster;
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [roles, setRoles] = useState<Role[]>([]);
   const [lastSignIn, setLastSignIn] = useState<Record<string, string | null>>({});
@@ -351,6 +352,14 @@ export default function MembersAdmin() {
     "w-full bg-navy border border-gold/20 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-gold";
   const labelCls = "text-xs uppercase tracking-wider text-primary-foreground/60 block";
 
+  if (!canManageMembers) {
+    return (
+      <MembersLayout>
+        <p className="text-primary-foreground/70">You don't have permission to view Member Management.</p>
+      </MembersLayout>
+    );
+  }
+
   return (
     <MembersLayout>
       <div className="mb-6 flex items-start justify-between gap-4 flex-wrap">
@@ -489,18 +498,20 @@ export default function MembersAdmin() {
                           <X className="w-4 h-4" />
                         </button>
                       )}
-                      <button
-                        onClick={() => toggleAdmin(p.id, !isAdminUser(p.id))}
-                        className="p-1.5 text-primary-foreground/70 hover:text-gold hover:bg-gold/10 rounded-sm"
-                        aria-label={isAdminUser(p.id) ? "Remove admin" : "Make admin"}
-                        title={isAdminUser(p.id) ? "Remove admin" : "Make admin"}
-                      >
-                        {isAdminUser(p.id) ? (
-                          <ShieldMinus className="w-4 h-4" />
-                        ) : (
-                          <ShieldPlus className="w-4 h-4" />
-                        )}
-                      </button>
+                      {isAdmin && (
+                        <button
+                          onClick={() => toggleAdmin(p.id, !isAdminUser(p.id))}
+                          className="p-1.5 text-primary-foreground/70 hover:text-gold hover:bg-gold/10 rounded-sm"
+                          aria-label={isAdminUser(p.id) ? "Remove admin" : "Make admin"}
+                          title={isAdminUser(p.id) ? "Remove admin" : "Make admin"}
+                        >
+                          {isAdminUser(p.id) ? (
+                            <ShieldMinus className="w-4 h-4" />
+                          ) : (
+                            <ShieldPlus className="w-4 h-4" />
+                          )}
+                        </button>
+                      )}
                       <button
                         onClick={() => toggleAlmoner(p.id, !isAlmonerUser(p.id))}
                         className={`p-1.5 rounded-sm ${isAlmonerUser(p.id) ? "text-gold bg-gold/10" : "text-primary-foreground/70 hover:text-gold hover:bg-gold/10"}`}
@@ -510,7 +521,7 @@ export default function MembersAdmin() {
                         <HeartHandshake className="w-4 h-4" />
                       </button>
 
-                      {user?.id !== p.id && (
+                      {isAdmin && user?.id !== p.id && (
                         <button
                           onClick={() => deleteMember(p)}
                           className="p-1.5 text-red-400 hover:bg-red-500/10 rounded-sm"

@@ -2,12 +2,12 @@ import { Link } from "react-router-dom";
 import MembersLayout from "@/components/members/MembersLayout";
 import ProtectedRoute from "@/components/members/ProtectedRoute";
 import { useAuth } from "@/hooks/useAuth";
-import { CalendarPlus, Utensils, Mail, BarChart3, ArrowRight } from "lucide-react";
+import { CalendarPlus, Utensils, Mail, BarChart3, ArrowRight, Users } from "lucide-react";
 
 type Tile = { to: string; title: string; description: string; icon: React.ComponentType<{ className?: string }>; visible: boolean };
 
 function Inner() {
-  const { canManageSummons, canManageProgression } = useAuth();
+  const { canManageSummons, canManageProgression, isAdmin, isSecretary, isWorshipfulMaster, isAssistantSecretary } = useAuth();
 
   if (!canManageSummons) {
     return (
@@ -18,6 +18,7 @@ function Inner() {
   }
 
   const tiles: Tile[] = [
+    { to: "/members/admin", title: "Member Management", description: "Directory, member records, roles, and notices.", icon: Users, visible: isAdmin || isSecretary || isWorshipfulMaster || isAssistantSecretary },
     { to: "/members/events", title: "Meetings", description: "Edit the meeting shown on the public Bookings page.", icon: CalendarPlus, visible: true },
     { to: "/members/admin/festive-board", title: "Festive Board Register", description: "Attendance, visitors, waitlist, walk-ins and table plan export.", icon: Utensils, visible: true },
     { to: "/members/summons", title: "Summons Builder", description: "Build, preview and circulate the Lodge summons.", icon: Mail, visible: true },
