@@ -259,7 +259,7 @@ function CollectionDialog({ open, onOpenChange, editing, onSaved }: {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-navy text-primary-foreground border-gold/30">
+      <DialogContent className="bg-navy text-primary-foreground border-gold/30 max-h-[90vh] overflow-y-auto">
         <DialogHeader><DialogTitle className="font-serif text-gold">{editing ? "Edit collection" : "New collection"}</DialogTitle></DialogHeader>
         <div className="space-y-3">
           <div><Label>Date</Label><Input type="date" value={date} onChange={(e) => setDate(e.target.value)} /></div>
@@ -532,7 +532,7 @@ function DonationDialog({ open, onOpenChange, editing, charities, onSaved }: {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-navy text-primary-foreground border-gold/30 max-w-lg">
+      <DialogContent className="bg-navy text-primary-foreground border-gold/30 max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader><DialogTitle className="font-serif text-gold">{editing ? "Edit donation" : "New donation"}</DialogTitle></DialogHeader>
         <div className="space-y-3">
           <div className="grid grid-cols-2 gap-3">
@@ -736,7 +736,7 @@ function LedgerTab({ charities, donations, canEdit, onChange }: {
       <CharityDialog open={open} onOpenChange={setOpen} editing={editing} onSaved={() => { setOpen(false); onChange(); }} />
 
       <Dialog open={!!drawerId} onOpenChange={(v) => !v && setDrawerId(null)}>
-        <DialogContent className="bg-navy text-primary-foreground border-gold/30 max-w-2xl">
+        <DialogContent className="bg-navy text-primary-foreground border-gold/30 max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader><DialogTitle className="font-serif text-gold">{drawerCharity?.name}</DialogTitle></DialogHeader>
           {drawerCharity && (
             <div className="space-y-3 text-sm">
@@ -820,7 +820,7 @@ function CharityDialog({ open, onOpenChange, editing, onSaved }: {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-navy text-primary-foreground border-gold/30 max-w-lg">
+      <DialogContent className="bg-navy text-primary-foreground border-gold/30 max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader><DialogTitle className="font-serif text-gold">{editing ? "Edit charity" : "New charity"}</DialogTitle></DialogHeader>
         <div className="space-y-3">
           <div><Label>Name</Label><Input value={name} onChange={(e) => setName(e.target.value)} /></div>
