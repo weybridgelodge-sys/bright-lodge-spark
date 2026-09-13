@@ -4,7 +4,7 @@ import ProtectedRoute from "@/components/members/ProtectedRoute";
 import { useAuth } from "@/hooks/useAuth";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Users, HeartHandshake, GraduationCap, BarChart3, Banknote, Mail, Vote, ArrowRight, CreditCard, BookOpen, FileText, Wallet } from "lucide-react";
+import { HeartHandshake, GraduationCap, BarChart3, Banknote, Mail, Vote, ArrowRight, CreditCard, BookOpen, FileText, Wallet } from "lucide-react";
 
 type Tile = { to: string; title: string; description: string; icon: React.ComponentType<{ className?: string }>; visible: boolean };
 
@@ -27,7 +27,6 @@ function Inner() {
   }, []);
 
   const tiles: Tile[] = [
-    { to: "/members/admin", title: "Members", description: "Directory, member records, roles, and notices.", icon: Users, visible: isAdmin || isSecretary || isWorshipfulMaster },
     { to: "/members/almoner", title: "Almoner Portal", description: "Welfare board, life events, correspondence, referrals.", icon: HeartHandshake, visible: canAccessAlmoner },
     { to: "/members/admin/development", title: "Mentor Portal", description: "Mentor dashboard, development records, summary report, Member Management and Skills Matrix.", icon: GraduationCap, visible: isAdmin || canManageProgression },
     { to: "/members/admin/secretary", title: "Secretary Portal", description: "Meetings, Festive Board Register, Summons Builder and KPI Dashboard.", icon: BarChart3, visible: canManageSummons },
