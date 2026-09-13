@@ -44,6 +44,7 @@ const Treasurer = lazy(() => import("./pages/members/admin/Treasurer"));
 const SecretaryPortal = lazy(() => import("./pages/members/admin/SecretaryPortal"));
 const FestiveBoardAdmin = lazy(() => import("./pages/members/admin/FestiveBoardAdmin"));
 const LoiAdmin = lazy(() => import("./pages/members/admin/LoiAdmin"));
+const SecretaryReturns = lazy(() => import("./pages/members/admin/SecretaryReturns"));
 
 const MembersRoutes = () => (
   <AuthProvider>
