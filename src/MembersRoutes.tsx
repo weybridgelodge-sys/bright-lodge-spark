@@ -43,6 +43,7 @@ const DocumentsAdmin = lazy(() => import("./pages/members/admin/DocumentsAdmin")
 const Treasurer = lazy(() => import("./pages/members/admin/Treasurer"));
 const SecretaryPortal = lazy(() => import("./pages/members/admin/SecretaryPortal"));
 const FestiveBoardAdmin = lazy(() => import("./pages/members/admin/FestiveBoardAdmin"));
+const LoiAdmin = lazy(() => import("./pages/members/admin/LoiAdmin"));
 
 const MembersRoutes = () => (
   <AuthProvider>
@@ -82,6 +83,7 @@ const MembersRoutes = () => (
         <Route path="admin/treasurer" element={<Treasurer />} />
         <Route path="admin/secretary" element={<ProtectedRoute><SecretaryPortal /></ProtectedRoute>} />
         <Route path="admin/festive-board" element={<ProtectedRoute><FestiveBoardAdmin /></ProtectedRoute>} />
+        <Route path="admin/loi" element={<ProtectedRoute><LoiAdmin /></ProtectedRoute>} />
         <Route path="working-groups" element={<WorkingGroupsIndex />} />
         <Route path="working-groups/admin" element={<WorkingGroupsAdmin />} />
         <Route path="working-groups/socials" element={<AdHocSocials />} />
