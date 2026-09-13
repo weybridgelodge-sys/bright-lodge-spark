@@ -42,16 +42,21 @@ const addDays = (iso: string, n: number): string => {
 const yearLabel = (y: number | null): string =>
   typeof y === 'number' ? `${y}/${y + 1}` : '—'
 
-const personName = (m: any, c: any): string | null => {
+const personName = (m: any, c: any): string => {
   const from = (p: any) => {
-    if (!p) return null
+    if (!p) return ''
     const first = (p.preferred_name?.trim() || p.first_name?.trim() || '').trim()
     const last = (p.last_name?.trim() || '').trim()
     const composed = [first, last].filter(Boolean).join(' ').trim()
-    return composed || (p.full_name?.trim() || null)
+    return composed || (p.full_name?.trim() || '')
   }
-  return from(m) ?? from(c)
+  return from(m) || from(c) || ''
 }
+
+const DEFAULT_LEAD_DAYS = 14
+// Widest window we ever need to pull from the database; per-row lead times are
+// applied in code afterwards.
+const MAX_LEAD_DAYS = 3650
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
