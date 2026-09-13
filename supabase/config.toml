@@ -3,6 +3,8 @@ project_id = "kntcjlztmcgmagwgheyx"
 [functions]
   [functions.almoner-overdue-check]
     verify_jwt = false
+  [functions.secretary-returns-reminder]
+    verify_jwt = false
   [functions.auth-email-hook]
     verify_jwt = false
   [functions.create-checkout]
