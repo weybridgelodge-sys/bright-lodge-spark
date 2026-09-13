@@ -3358,6 +3358,7 @@ export type Database = {
           masonic_year: number | null
           member_id: string | null
           notes: string | null
+          reminder_lead_days: number | null
           return_type: Database["public"]["Enums"]["secretary_return_type"]
           status: Database["public"]["Enums"]["secretary_return_status"]
           updated_at: string
@@ -3373,6 +3374,7 @@ export type Database = {
           masonic_year?: number | null
           member_id?: string | null
           notes?: string | null
+          reminder_lead_days?: number | null
           return_type: Database["public"]["Enums"]["secretary_return_type"]
           status?: Database["public"]["Enums"]["secretary_return_status"]
           updated_at?: string
@@ -3388,6 +3390,7 @@ export type Database = {
           masonic_year?: number | null
           member_id?: string | null
           notes?: string | null
+          reminder_lead_days?: number | null
           return_type?: Database["public"]["Enums"]["secretary_return_type"]
           status?: Database["public"]["Enums"]["secretary_return_status"]
           updated_at?: string

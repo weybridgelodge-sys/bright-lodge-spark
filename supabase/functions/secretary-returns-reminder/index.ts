@@ -42,16 +42,21 @@ const addDays = (iso: string, n: number): string => {
 const yearLabel = (y: number | null): string =>
   typeof y === 'number' ? `${y}/${y + 1}` : '—'
 
-const personName = (m: any, c: any): string | null => {
+const personName = (m: any, c: any): string => {
   const from = (p: any) => {
-    if (!p) return null
+    if (!p) return ''
     const first = (p.preferred_name?.trim() || p.first_name?.trim() || '').trim()
     const last = (p.last_name?.trim() || '').trim()
     const composed = [first, last].filter(Boolean).join(' ').trim()
-    return composed || (p.full_name?.trim() || null)
+    return composed || (p.full_name?.trim() || '')
   }
-  return from(m) ?? from(c)
+  return from(m) || from(c) || ''
 }
+
+const DEFAULT_LEAD_DAYS = 14
+// Widest window we ever need to pull from the database; per-row lead times are
+// applied in code afterwards.
+const MAX_LEAD_DAYS = 3650
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -82,12 +87,12 @@ Deno.serve(async (req) => {
 
   try {
     const today = londonToday()
-    const horizon = addDays(today, 14)
+    const horizon = addDays(today, MAX_LEAD_DAYS)
 
     const { data: rows, error } = await supabase
       .from('secretary_returns')
       .select(
-        'id,return_type,masonic_year,date_due,member_id,candidate_id,' +
+        'id,return_type,masonic_year,date_due,member_id,candidate_id,reminder_lead_days,' +
           'member:profiles!secretary_returns_member_id_fkey(full_name,preferred_name,first_name,last_name),' +
           'candidate:candidates!secretary_returns_candidate_id_fkey(first_name,last_name)',
       )
@@ -97,12 +102,21 @@ Deno.serve(async (req) => {
       .order('date_due', { ascending: true })
     if (error) throw error
 
-    const all = (rows ?? []) as any[]
+    // Per-row lead time: a row is in scope when its due date falls within its
+    // own reminder_lead_days (default 14) of today, or is already overdue.
+    const all = (rows ?? []).filter((r: any) => {
+      const lead =
+        typeof r.reminder_lead_days === 'number' && r.reminder_lead_days >= 0
+          ? r.reminder_lead_days
+          : DEFAULT_LEAD_DAYS
+      return r.date_due <= addDays(today, lead)
+    }) as any[]
     const shape = (r: any) => ({
       typeLabel: TYPE_LABELS[r.return_type] ?? r.return_type,
       masonicYear: yearLabel(r.masonic_year),
       dateDue: r.date_due,
       person: personName(r.member, r.candidate),
+      personLabel: r.member_id ? 'Member' : 'Candidate',
     })
     const overdue = all.filter((r) => r.date_due < today).map(shape)
     const dueSoon = all.filter((r) => r.date_due >= today).map(shape)
