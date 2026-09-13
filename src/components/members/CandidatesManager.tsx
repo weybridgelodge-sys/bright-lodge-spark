@@ -108,6 +108,12 @@ export default function CandidatesManager({ onChange }: { onChange?: () => void 
               value={draft.date_of_enquiry ?? ""}
               onChange={(v) => setDraft({ ...draft, date_of_enquiry: v })}
             />
+            <Input
+              label="Initiation scheduled"
+              type="date"
+              value={draft.initiation_scheduled_date ?? ""}
+              onChange={(v) => setDraft({ ...draft, initiation_scheduled_date: v || null })}
+            />
           </div>
           <div>
             <Label>Notes</Label>
