@@ -48,6 +48,8 @@ export type DevelopmentRecord = {
   member_id: string;
   assigned_mentor_id: string | null;
   previous_masonic_experience: string | null;
+  passing_scheduled_date?: string | null;
+  raising_scheduled_date?: string | null;
   mentoring_exempt?: boolean;
   exemption_reason?: string | null;
   exemption_note?: string | null;
