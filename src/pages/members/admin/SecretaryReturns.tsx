@@ -175,7 +175,7 @@ function Inner() {
       rows.filter((r) => {
         if (fType !== "all" && r.return_type !== fType) return false;
         if (fStatus !== "all" && r.status !== fStatus) return false;
-        if (fYear.trim() && String(r.masonic_year ?? "") !== fYear.trim()) return false;
+        if (fYear !== "all" && String(r.masonic_year ?? "") !== fYear) return false;
         if (fSearch.trim() && !personName(r).toLowerCase().includes(fSearch.trim().toLowerCase())) return false;
         return true;
       }),
