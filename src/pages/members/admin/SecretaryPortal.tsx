@@ -24,6 +24,7 @@ function Inner() {
     { to: "/members/admin/loi", title: "LOI Register", description: "Sessions, attendance and ritual parts practised.", icon: GraduationCap, visible: true },
     { to: "/members/summons", title: "Summons Builder", description: "Build, preview and circulate the Lodge summons.", icon: Mail, visible: true },
     { to: "/members/kpis", title: "KPI Dashboard", description: "Membership, LOI, Festive Board, Royal Arch conversion.", icon: BarChart3, visible: canManageProgression },
+    { to: "/members/officers-tracker", title: "Officers Tracker", description: "Officer progression, succession risk, and appointment tracking.", icon: Crown, visible: canManageProgression },
   ];
 
   const visible = tiles.filter((t) => t.visible);
