@@ -99,6 +99,13 @@
       "when": 1789298493590,
       "tag": "0013_add_candidate_stage_information_provided",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1789299965236,
+      "tag": "0014_sync_degree_from_ceremony_dates",
+      "breakpoints": true
     }
   ]
 }
