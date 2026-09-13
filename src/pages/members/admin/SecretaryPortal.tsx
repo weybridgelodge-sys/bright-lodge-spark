@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import MembersLayout from "@/components/members/MembersLayout";
 import ProtectedRoute from "@/components/members/ProtectedRoute";
 import { useAuth } from "@/hooks/useAuth";
-import { CalendarPlus, Utensils, Mail, BarChart3, ArrowRight, Users, GraduationCap, Crown } from "lucide-react";
+import { CalendarPlus, Utensils, Mail, BarChart3, ArrowRight, Users, GraduationCap, Crown, FileCheck } from "lucide-react";
 
 type Tile = { to: string; title: string; description: string; icon: React.ComponentType<{ className?: string }>; visible: boolean };
 
@@ -24,6 +24,7 @@ function Inner() {
     { to: "/members/events", title: "Meetings", description: "Edit the meeting shown on the public Bookings page.", icon: CalendarPlus, visible: true },
     { to: "/members/admin", title: "Member Management", description: "Directory, member records, roles, and notices.", icon: Users, visible: isAdmin || isSecretary || isWorshipfulMaster || isAssistantSecretary },
     { to: "/members/officers-tracker", title: "Officers Tracker", description: "Officer progression, succession risk, and appointment tracking.", icon: Crown, visible: canManageProgression },
+    { to: "/members/admin/returns", title: "Returns & Certificates", description: "UGLE and Provincial forms — Form P, LP&A5, clearance letters, change of status, Installation and Provincial Returns.", icon: FileCheck, visible: isAdmin || isSecretary || isAssistantSecretary || isWorshipfulMaster },
     { to: "/members/summons", title: "Summons Builder", description: "Build, preview and circulate the Lodge summons.", icon: Mail, visible: true },
   ];
 
