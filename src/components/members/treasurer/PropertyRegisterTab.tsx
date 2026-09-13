@@ -143,6 +143,7 @@ export default function PropertyRegisterTab({ canEdit }: { canEdit: boolean }) {
   const [dateAcquired, setDateAcquired] = useState("");
   const [location, setLocation] = useState("");
   const [notes, setNotes] = useState("");
+  const [lastAudited, setLastAudited] = useState("");
 
   const [images, setImages] = useState<PropertyImage[]>([]);
   const [uploading, setUploading] = useState(false);
@@ -281,6 +282,7 @@ export default function PropertyRegisterTab({ canEdit }: { canEdit: boolean }) {
     setDateAcquired("");
     setLocation("");
     setNotes("");
+    setLastAudited("");
   };
 
   const openNew = () => { resetForm(); setOpen(true); };
@@ -294,6 +296,7 @@ export default function PropertyRegisterTab({ canEdit }: { canEdit: boolean }) {
     setDateAcquired(r.date_acquired ?? "");
     setLocation(r.location ?? "");
     setNotes(r.notes ?? "");
+    setLastAudited(r.last_audited_date ?? "");
     setOpen(true);
   };
 
@@ -323,6 +326,7 @@ export default function PropertyRegisterTab({ canEdit }: { canEdit: boolean }) {
       date_acquired: dateAcquired || null,
       location: location.trim() || null,
       notes: notes.trim() || null,
+      last_audited_date: lastAudited || null,
     };
 
     const { error } = editingId
