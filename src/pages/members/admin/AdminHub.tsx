@@ -9,7 +9,7 @@ import { Users, HeartHandshake, GraduationCap, BarChart3, Banknote, Mail, Vote, 
 type Tile = { to: string; title: string; description: string; icon: React.ComponentType<{ className?: string }>; visible: boolean };
 
 function Inner() {
-  const { isAdmin, isSecretary, isWorshipfulMaster, canAccessAlmoner, canManageProgression, canAccessTreasurer } = useAuth();
+  const { isAdmin, isSecretary, isWorshipfulMaster, canAccessAlmoner, canManageProgression, canManageSummons, canAccessTreasurer } = useAuth();
   const [isCharitySteward, setIsCharitySteward] = useState(false);
   const [canEditNewsletter, setCanEditNewsletter] = useState(false);
 
@@ -29,10 +29,10 @@ function Inner() {
   const tiles: Tile[] = [
     { to: "/members/admin", title: "Members", description: "Directory, member records, roles, and notices.", icon: Users, visible: isAdmin || isSecretary || isWorshipfulMaster },
     { to: "/members/almoner", title: "Almoner Portal", description: "Welfare board, life events, correspondence, referrals.", icon: HeartHandshake, visible: canAccessAlmoner },
-    { to: "/members/admin/development", title: "Mentor Portal", description: "Mentor dashboard, development records, summary report.", icon: GraduationCap, visible: isAdmin || canManageProgression },
-    { to: "/members/admin/charity", title: "Charity Steward", description: "Collections, donations, Charity Ledger, Festival tracker.", icon: Banknote, visible: isAdmin || isWorshipfulMaster || isCharitySteward || isSecretary },
-    { to: "/members/admin/treasurer", title: "Treasurer", description: "Transaction register and reconciliation-period locking.", icon: Wallet, visible: canAccessTreasurer },
-    { to: "/members/kpis", title: "KPI Dashboard", description: "Membership, LOI, Festive Board, Royal Arch conversion.", icon: BarChart3, visible: canManageProgression },
+    { to: "/members/admin/development", title: "Mentor Portal", description: "Mentor dashboard, development records, summary report, Member Management and Skills Matrix.", icon: GraduationCap, visible: isAdmin || canManageProgression },
+    { to: "/members/admin/secretary", title: "Secretary Portal", description: "Meetings, Festive Board Register, Summons Builder and KPI Dashboard.", icon: BarChart3, visible: canManageSummons },
+    { to: "/members/admin/charity", title: "Charity Steward Portal", description: "Collections, donations, Charity Ledger, Festival tracker.", icon: Banknote, visible: isAdmin || isWorshipfulMaster || isCharitySteward || isSecretary },
+    { to: "/members/admin/treasurer", title: "Treasurer Portal", description: "Transaction register and reconciliation-period locking.", icon: Wallet, visible: canAccessTreasurer },
     { to: "/members/admin/newsletter", title: "Newsletter Hub", description: "Compose and broadcast the Monthly Chronicle.", icon: Mail, visible: canEditNewsletter },
     { to: "/members/admin/polls", title: "Polls & Voting", description: "Ask the brethren a question; live results on the Dashboard.", icon: Vote, visible: isAdmin || isSecretary || isWorshipfulMaster },
     { to: "/members/admin/dues", title: "Dues & Subscriptions (TEST)", description: "Annual subscription collection, refunds, and price changes. Sandbox only.", icon: CreditCard, visible: isAdmin },
