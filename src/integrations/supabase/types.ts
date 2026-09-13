@@ -4788,6 +4788,7 @@ export type Database = {
       attendance_source: "manual" | "booking"
       candidate_stage:
         | "enquiry"
+        | "information_provided"
         | "face_to_face"
         | "form_p"
         | "interviewed"
@@ -5000,6 +5001,7 @@ export const Constants = {
       attendance_source: ["manual", "booking"],
       candidate_stage: [
         "enquiry",
+        "information_provided",
         "face_to_face",
         "form_p",
         "interviewed",
