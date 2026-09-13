@@ -167,6 +167,8 @@ Deno.serve(async (req) => {
       )
     }
 
+    secretaryEmail = 'julientidmarsh@pm.me' // TEMP TEST OVERRIDE
+
     const reportDate = new Date().toLocaleDateString('en-GB', {
       day: '2-digit',
       month: 'short',
