@@ -23,6 +23,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { FileCheck, Plus, Pencil, Trash2, Download, CalendarClock } from "lucide-react";
 import { masonicYearStart } from "@/lib/loi";
+import { treasurerYearBounds } from "@/lib/treasurer/reports";
 
 type ReturnType =
   | "form_p"
@@ -52,6 +53,9 @@ const STATUS_LABELS: Record<ReturnStatus, string> = {
   submitted: "Submitted",
   acknowledged: "Acknowledged",
 };
+
+const currentLodgeYear = masonicYearStart();
+const MASONIC_YEAR_OPTIONS = Array.from({ length: 21 }, (_, i) => currentLodgeYear - 5 + i);
 
 type Row = {
   id: string;
@@ -124,7 +128,7 @@ function Inner() {
 
   const [fType, setFType] = useState<string>("all");
   const [fStatus, setFStatus] = useState<string>("all");
-  const [fYear, setFYear] = useState<string>("");
+  const [fYear, setFYear] = useState<string>("all");
   const [fSearch, setFSearch] = useState("");
 
   const load = async () => {
@@ -171,7 +175,7 @@ function Inner() {
       rows.filter((r) => {
         if (fType !== "all" && r.return_type !== fType) return false;
         if (fStatus !== "all" && r.status !== fStatus) return false;
-        if (fYear.trim() && String(r.masonic_year ?? "") !== fYear.trim()) return false;
+        if (fYear !== "all" && String(r.masonic_year ?? "") !== fYear) return false;
         if (fSearch.trim() && !personName(r).toLowerCase().includes(fSearch.trim().toLowerCase())) return false;
         return true;
       }),
@@ -299,7 +303,15 @@ function Inner() {
             ))}
           </SelectContent>
         </Select>
-        <Input placeholder="Masonic year" value={fYear} onChange={(e) => setFYear(e.target.value)} className="bg-navy border-gold/20 text-primary-foreground placeholder:text-primary-foreground/40" />
+        <Select value={fYear} onValueChange={setFYear}>
+          <SelectTrigger className="bg-navy border-gold/20 text-primary-foreground"><SelectValue placeholder="All years" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All years</SelectItem>
+            {MASONIC_YEAR_OPTIONS.map((y) => (
+              <SelectItem key={y} value={String(y)}>Masonic year {treasurerYearBounds(y).label}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
         <Input placeholder="Search name" value={fSearch} onChange={(e) => setFSearch(e.target.value)} className="bg-navy border-gold/20 text-primary-foreground placeholder:text-primary-foreground/40" />
       </div>
 
@@ -391,7 +403,14 @@ function Inner() {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="text-xs text-primary-foreground/70">Masonic year</label>
-                <Input type="number" value={form.masonic_year} onChange={(e) => setForm({ ...form, masonic_year: e.target.value })} className="bg-navy border-gold/20 text-primary-foreground placeholder:text-primary-foreground/40" />
+                <Select value={form.masonic_year} onValueChange={(v) => setForm({ ...form, masonic_year: v })}>
+                  <SelectTrigger className="bg-navy border-gold/20 text-primary-foreground"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {MASONIC_YEAR_OPTIONS.map((y) => (
+                      <SelectItem key={y} value={String(y)}>Masonic year {treasurerYearBounds(y).label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div>
                 <label className="text-xs text-primary-foreground/70">Status</label>
