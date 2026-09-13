@@ -401,6 +401,7 @@ export default function PropertyRegisterTab({ canEdit }: { canEdit: boolean }) {
                   <th className="py-2 pr-3 text-right whitespace-nowrap">Value</th>
                   <th className="py-2 pr-3 whitespace-nowrap">Condition</th>
                   <th className="py-2 pr-3 whitespace-nowrap">Date acquired</th>
+                  <th className="py-2 pr-3 whitespace-nowrap">Last audited</th>
                   <th className="py-2 pr-3 min-w-[220px]">Notes</th>
                   <th className="py-2 pr-3 whitespace-nowrap">Photos</th>
                   {canEdit && <th className="py-2 text-right">Actions</th>}
@@ -409,7 +410,7 @@ export default function PropertyRegisterTab({ canEdit }: { canEdit: boolean }) {
               <tbody>
                 {rows.length === 0 ? (
                   <tr>
-                    <td colSpan={canEdit ? 9 : 8} className="py-3 text-primary-foreground/60">No property recorded yet.</td>
+                    <td colSpan={canEdit ? 10 : 9} className="py-3 text-primary-foreground/60">No property recorded yet.</td>
                   </tr>
                 ) : rows.map((r) => (
                   <tr key={r.id} className="border-b border-gold/10 align-top">
@@ -419,6 +420,12 @@ export default function PropertyRegisterTab({ canEdit }: { canEdit: boolean }) {
                     <td className="py-2 pr-3 text-right text-primary-foreground whitespace-nowrap">{money(r.value_pence ?? 0)}</td>
                     <td className="py-2 pr-3 text-primary-foreground/80 whitespace-nowrap">{r.condition ?? "—"}</td>
                     <td className="py-2 pr-3 text-primary-foreground/80 whitespace-nowrap">{fmtDate(r.date_acquired)}</td>
+                    <td className="py-2 pr-3 text-primary-foreground/80 whitespace-nowrap">
+                      <span className="inline-flex items-center gap-1 flex-wrap">
+                        {fmtDate(r.last_audited_date)}
+                        {auditBadge(r)}
+                      </span>
+                    </td>
                     <td className="py-2 pr-3 text-primary-foreground/70 whitespace-pre-wrap min-w-[220px]">{r.notes ?? ""}</td>
                     <td className="py-2 pr-3 whitespace-nowrap">
                       {imagesFor(r.id).length === 0 ? (
@@ -451,7 +458,7 @@ export default function PropertyRegisterTab({ canEdit }: { canEdit: boolean }) {
                 <tr className="border-t border-gold/30">
                   <td className="py-3 text-primary-foreground font-semibold" colSpan={3}>Total estimated value</td>
                   <td className="py-3 text-right text-gold font-semibold">{money(totalPence)}</td>
-                  <td className="py-3" colSpan={canEdit ? 5 : 4}></td>
+                  <td className="py-3" colSpan={canEdit ? 6 : 5}></td>
 
                 </tr>
               </tfoot>
@@ -496,6 +503,20 @@ export default function PropertyRegisterTab({ canEdit }: { canEdit: boolean }) {
             <div>
               <Label className="text-primary-foreground">Date acquired</Label>
               <Input type="date" value={dateAcquired} onChange={(e) => setDateAcquired(e.target.value)} />
+            </div>
+            <div>
+              <Label className="text-primary-foreground">Last audited</Label>
+              <div className="flex items-center gap-2">
+                <Input type="date" value={lastAudited} onChange={(e) => setLastAudited(e.target.value)} />
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="border-gold/40 text-gold hover:bg-gold/10 hover:text-gold whitespace-nowrap"
+                  onClick={() => setLastAudited(new Date().toISOString().slice(0, 10))}
+                >
+                  <CheckCircle2 className="w-4 h-4 mr-1" /> Mark as audited today
+                </Button>
+              </div>
             </div>
             <div>
               <Label className="text-primary-foreground">Notes</Label>
