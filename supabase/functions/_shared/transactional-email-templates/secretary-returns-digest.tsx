@@ -20,6 +20,7 @@ interface ReturnRow {
   masonicYear: string
   dateDue: string
   person?: string | null
+  personLabel?: string | null
 }
 
 interface Props {
