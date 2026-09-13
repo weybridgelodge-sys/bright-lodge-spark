@@ -29,7 +29,7 @@ function Inner() {
   const tiles: Tile[] = [
     { to: "/members/almoner", title: "Almoner Portal", description: "Welfare board, life events, correspondence, referrals.", icon: HeartHandshake, visible: canAccessAlmoner },
     { to: "/members/admin/development", title: "Mentor Portal", description: "Mentor dashboard, development records, summary report, Member Management and Skills Matrix.", icon: GraduationCap, visible: isAdmin || canManageProgression },
-    { to: "/members/admin/secretary", title: "Secretary Portal", description: "Meetings, Festive Board Register, Summons Builder and KPI Dashboard.", icon: BarChart3, visible: canManageSummons },
+    { to: "/members/admin/secretary", title: "Secretary Portal", description: "Meetings, Festive Board Register, LOI Register, Summons Builder and KPI Dashboard.", icon: BarChart3, visible: canManageSummons },
     { to: "/members/admin/charity", title: "Charity Steward Portal", description: "Collections, donations, Charity Ledger, Festival tracker.", icon: Banknote, visible: isAdmin || isWorshipfulMaster || isCharitySteward || isSecretary },
     { to: "/members/admin/treasurer", title: "Treasurer Portal", description: "Transaction register and reconciliation-period locking.", icon: Wallet, visible: canAccessTreasurer },
     { to: "/members/admin/newsletter", title: "Newsletter Hub", description: "Compose and broadcast the Monthly Chronicle.", icon: Mail, visible: canEditNewsletter },
