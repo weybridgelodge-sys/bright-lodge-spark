@@ -1,0 +1,1653 @@
+import { useEffect, useMemo, useState } from "react";
+import MembersLayout from "@/components/members/MembersLayout";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { formatMemberLine, type MemberRow } from "@/lib/summons";
+import { normaliseName } from "@/lib/nameCase";
+import { saveBlob } from "@/lib/nativeDownload";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { useToast } from "@/hooks/use-toast";
+import { Utensils, Plus, Pencil, ChevronRight, Trash2, UserPlus, Download } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  FB_MEETING_TYPES,
+  FB_ATTENDANCE_STATUSES,
+  FB_PAYMENT_METHODS,
+  type FbMeetingType,
+  type FbAttendanceStatus,
+  type FbPaymentMethod,
+  meetingTypeLabel,
+  attendanceStatusLabel,
+  paymentMethodLabel,
+  computeHeadcount,
+  isWeybridgeLodge,
+  statusRank,
+  surnameKey,
+  statusBreakdown,
+} from "@/lib/festiveBoard";
+
+
+type Meeting = {
+  id: string;
+  meeting_date: string;
+  meeting_type: FbMeetingType;
+  notes: string | null;
+  headcount_override: number | null;
+  event_key: string;
+  status: "draft" | "published" | "completed";
+  is_white_table: boolean;
+  dining_price_pence: number;
+};
+
+
+type Attendance = {
+  id: string;
+  meeting_id: string;
+  member_id: string | null;
+  visitor_name: string | null;
+  visitor_lodge_name: string | null;
+  visitor_lodge_number: string | null;
+  email: string | null;
+  attendance_status: FbAttendanceStatus;
+  payment_method: FbPaymentMethod;
+  amount_pence: number;
+  is_meeting_only: boolean;
+  booking_id: string | null;
+  source?: "manual" | "booking" | null;
+  source_booking_id?: string | null;
+  dietary?: string | null;
+};
+
+
+
+type Member = {
+  id: string;
+  full_name: string | null;
+  first_name: string | null;
+  middle_name: string | null;
+  last_name: string | null;
+  preferred_name: string | null;
+  post_nominals: string | null;
+  title: string | null;
+  is_past_master: boolean | null;
+  rank: string | null;
+  grand_rank: string | null;
+  provincial_rank: string | null;
+};
+
+function memberDisplay(m: Member) {
+  const row: MemberRow = {
+    ...m,
+    initiation_date: null,
+    joined_lodge_date: null,
+    joined_year: null,
+    is_royal_arch: null,
+    status: "active",
+  };
+  return formatMemberLine(row) || "Unnamed brother";
+}
+
+
+const fmtDate = (s: string) =>
+  new Date(s).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+
+export default function FestiveBoardAdmin() {
+  const { isAdmin, isSecretary, isAssistantSecretary, user } = useAuth();
+  const canEdit = isAdmin || isSecretary || isAssistantSecretary;
+  const canManageLOI = canEdit;
+  const { toast } = useToast();
+  const [meetings, setMeetings] = useState<Meeting[]>([]);
+  const [attendance, setAttendance] = useState<Attendance[]>([]);
+  const [members, setMembers] = useState<Member[]>([]);
+  const [waitlist, setWaitlist] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [editing, setEditing] = useState<Meeting | null>(null);
+  const [creating, setCreating] = useState(false);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+
+  const loadAll = async () => {
+    setLoading(true);
+    const [mt, at, mb, wl] = await Promise.all([
+      supabase
+        .from("festive_board_meetings")
+        .select("*")
+        .order("meeting_date", { ascending: false }),
+      supabase.from("festive_board_attendance").select("*"),
+      supabase
+        .from("profiles")
+        .select("id,full_name,first_name,middle_name,last_name,preferred_name,post_nominals,title,is_past_master,rank,grand_rank,provincial_rank")
+        .eq("status", "active")
+        .eq("is_honorary_member", false)
+        .order("last_name", { ascending: true }),
+      supabase
+        .from("bookings")
+        .select("id, contact_name, contact_email, event_label, event_key, meeting_id, payment_status, total_pence, details, created_at")
+        .in("payment_status", ["waitlisted", "waitlisted_refunded"] as any)
+        .order("created_at", { ascending: true }),
+    ]);
+    setMeetings((mt.data as Meeting[]) ?? []);
+    setAttendance((at.data as Attendance[]) ?? []);
+    setMembers((mb.data as Member[]) ?? []);
+    setWaitlist((wl.data as any[]) ?? []);
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    loadAll();
+  }, []);
+
+  const attendanceByMeeting = useMemo(() => {
+    const map: Record<string, Attendance[]> = {};
+    for (const r of attendance) (map[r.meeting_id] ??= []).push(r);
+    return map;
+  }, [attendance]);
+
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Delete this Lodge Meeting record and all attendance?")) return;
+    const { error } = await supabase.from("festive_board_meetings").delete().eq("id", id);
+    if (error) {
+      toast({ title: "Delete failed", description: error.message, variant: "destructive" });
+      return;
+    }
+    toast({ title: "Record deleted" });
+    loadAll();
+  };
+
+  const exportPerfectTablePlan = async (mtg: Meeting) => {
+    // Source of truth = festive_board_attendance (covers online bookings + manual walk-ins)
+    const { data: att, error } = await supabase
+      .from("festive_board_attendance")
+      .select("id, member_id, visitor_name, visitor_lodge_name, visitor_lodge_number, attendance_status, is_meeting_only, source, source_booking_id, dietary")
+      .eq("meeting_id", mtg.id)
+      .in("attendance_status", ["attended", "booked"]);
+    if (error) {
+      toast({ title: "Export failed", description: error.message, variant: "destructive" });
+      return;
+    }
+    const rowsRaw = (att ?? []) as Array<{
+      id: string;
+      member_id: string | null;
+      visitor_name: string | null;
+      visitor_lodge_name: string | null;
+      visitor_lodge_number: string | null;
+      attendance_status: string;
+      is_meeting_only: boolean | null;
+      source: string | null;
+      source_booking_id: string | null;
+      dietary: string | null;
+    }>;
+
+    // Fetch linked profiles (for member names/titles)
+    const memberIds = Array.from(new Set(rowsRaw.map((r) => r.member_id).filter(Boolean) as string[]));
+    const profilesMap = new Map<string, Member>();
+    if (memberIds.length) {
+      const { data: profs } = await supabase
+        .from("profiles")
+        .select("id,full_name,first_name,middle_name,last_name,preferred_name,post_nominals,title,is_past_master,rank,grand_rank,provincial_rank")
+        .in("id", memberIds);
+      for (const p of (profs ?? []) as Member[]) profilesMap.set(p.id, p);
+    }
+
+    // Fetch linked bookings for Meal / dietary fallback. source_booking_id can be `<uuid>` or `<uuid>::gN`.
+    const bookingIds = Array.from(
+      new Set(
+        rowsRaw
+          .map((r) => (r.source_booking_id ? r.source_booking_id.split("::")[0] : null))
+          .filter(Boolean) as string[],
+      ),
+    );
+    const bookingsMap = new Map<string, any>();
+    if (bookingIds.length) {
+      const { data: bks } = await supabase
+        .from("bookings")
+        .select("id, details")
+        .in("id", bookingIds);
+      for (const b of (bks ?? []) as any[]) bookingsMap.set(b.id, b);
+    }
+
+    const cleanDiet = (s: string) => (/^none$/i.test(s.trim()) ? "" : s.trim());
+
+    const rows: Array<Record<string, string>> = [];
+    for (const r of rowsRaw) {
+      const parentBookingId = r.source_booking_id ? r.source_booking_id.split("::")[0] : null;
+      const guestIdx = r.source_booking_id && r.source_booking_id.includes("::g")
+        ? parseInt(r.source_booking_id.split("::g")[1] ?? "", 10)
+        : null;
+      const booking = parentBookingId ? bookingsMap.get(parentBookingId) : null;
+      const bDetails: any = booking?.details ?? {};
+      const guest: any = guestIdx != null && Array.isArray(bDetails.guests) ? bDetails.guests[guestIdx] ?? {} : null;
+
+      let title = "";
+      let first = "";
+      let last = "";
+      let group = "";
+
+      if (r.member_id) {
+        const p = profilesMap.get(r.member_id);
+        title = (p?.title ?? "").trim();
+        first = (p?.preferred_name ?? p?.first_name ?? "").trim();
+        last = (p?.last_name ?? "").trim();
+        group = "Weybridge 6787";
+      } else if (guest) {
+        const name = String(guest?.name ?? r.visitor_name ?? "").trim();
+        const parts = name.split(/\s+/);
+        title = String(guest?.title ?? "").trim();
+        first = String(guest?.firstName ?? parts[0] ?? "").trim();
+        last = String(guest?.lastName ?? parts.slice(1).join(" ") ?? "").trim();
+        group = String(guest?.lodge ?? r.visitor_lodge_name ?? bDetails.lodge ?? "").trim();
+      } else if (booking) {
+        // Primary respondent from a booking
+        title = String(bDetails.title ?? "").trim();
+        first = String(bDetails.firstName ?? "").trim();
+        last = String(bDetails.lastName ?? "").trim();
+        group = String(bDetails.lodge ?? r.visitor_lodge_name ?? "").trim();
+      } else {
+        // Manual visitor entry — no linked booking
+        const name = String(r.visitor_name ?? "").trim();
+        const parts = name.split(/\s+/);
+        first = parts[0] ?? "";
+        last = parts.slice(1).join(" ") ?? "";
+        group = String(r.visitor_lodge_name ?? "").trim();
+      }
+
+      // Meal: from linked booking's diningOption (or guest.diningOption/meal); blank when meeting-only or manual
+      let meal = "";
+      if (!r.is_meeting_only) {
+        if (guest) meal = String(guest?.diningOption ?? guest?.meal ?? bDetails.diningOption ?? "").trim();
+        else if (booking) meal = String(bDetails.diningOption ?? "").trim();
+      }
+
+      // Dietary: manual field on attendance row wins; else fallback to booking's dietary
+      const manualDiet = (r.dietary ?? "").trim();
+      let dietary = manualDiet;
+      if (!dietary) {
+        if (guest) dietary = String(guest?.dietary ?? "").trim();
+        else if (booking) dietary = String(bDetails.dietary ?? "").trim();
+      }
+
+      rows.push({
+        Title: title,
+        "First Name": first,
+        "Last Name": last,
+        Group: group,
+        Meal: meal,
+        "Special requirements": cleanDiet(dietary),
+        "RSVP status": "Attending",
+      });
+    }
+
+    const headers = ["Title", "First Name", "Last Name", "Group", "Meal", "Special requirements", "RSVP status"];
+    const esc = (v: string) => {
+      const s = v ?? "";
+      return /[",\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+    };
+    const csv =
+      headers.join(",") +
+      "\r\n" +
+      rows.map((r) => headers.map((h) => esc(r[h] ?? "")).join(",")).join("\r\n");
+    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8" });
+    await saveBlob(blob, `perfecttableplan-${mtg.meeting_date}-${mtg.id.slice(0, 8)}.csv`);
+    toast({ title: "Exported", description: `${rows.length} attendee row${rows.length === 1 ? "" : "s"}.` });
+  };
+
+  const promoteWaitlistBooking = async (b: any) => {
+    if (!confirm(`Promote ${b.contact_name} from the waitlist to a confirmed seat?`)) return;
+    const { error: updErr } = await supabase
+      .from("bookings")
+      .update({ payment_status: "confirmed", promoted_from_waitlist: true, promoted_at: new Date().toISOString() })
+      .eq("id", b.id);
+    if (updErr) {
+      toast({ title: "Promote failed", description: updErr.message, variant: "destructive" });
+      return;
+    }
+    try {
+      await supabase.functions.invoke("notify-waitlist-promoted", { body: { booking_id: b.id } });
+    } catch (e) {
+      console.error("notify-waitlist-promoted failed", e);
+    }
+    toast({ title: "Promoted", description: `${b.contact_name} has been confirmed and notified.` });
+    loadAll();
+  };
+
+  const closeWaitlistForMeeting = async (meetingId: string, count: number) => {
+    if (!confirm(
+      `Close the waitlist for this meeting and refund ${count} booking${count === 1 ? "" : "s"} now?\n\n` +
+      `This will immediately issue full Stripe refunds and send the "waitlist refunded" email to each booker. This cannot be undone.`
+    )) return;
+    toast({ title: "Refunding waitlist…", description: "Please wait." });
+    const { data, error } = await supabase.functions.invoke("waitlist-refund-sweep", {
+      body: { meeting_id: meetingId },
+    });
+    if (error) {
+      toast({ title: "Refund failed", description: error.message, variant: "destructive" });
+      return;
+    }
+    toast({
+      title: "Waitlist closed",
+      description: `Refunded ${(data as any)?.refunded ?? 0} booking(s).`,
+    });
+    loadAll();
+  };
+
+
+  if (!canEdit) {
+    return (
+      <MembersLayout>
+        <p className="text-primary-foreground/70">You don't have permission to manage the Festive Board Register.</p>
+      </MembersLayout>
+    );
+  }
+
+  return (
+    <MembersLayout>
+      <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="font-serif text-3xl text-gold mb-1 flex items-center gap-2">
+            <Utensils className="w-6 h-6" /> Festive Board Register
+          </h1>
+          <p className="text-primary-foreground/60 text-sm">
+            Meeting attendance, visitors, walk-ins and payment records.
+          </p>
+        </div>
+        {canManageLOI && (
+          <Button
+            onClick={() => setCreating(true)}
+            className="bg-gold text-navy hover:bg-gold/90"
+          >
+            <Plus className="w-4 h-4 mr-1" /> New record
+          </Button>
+        )}
+      </div>
+
+
+      {/* Waitlist (venue capacity overflow) */}
+      {waitlist.length > 0 && (
+        <section className="bg-navy-dark/60 border border-gold/15 rounded-sm p-5 mb-6">
+          <h2 className="font-serif text-lg text-gold mb-1">Dining waitlist</h2>
+          <p className="text-xs text-primary-foreground/60 mb-3">
+            Bookings held on the waitlist because the venue's dining room was at capacity when they booked.
+            Payment has been captured — they'll be promoted automatically as seats free up, or refunded in full after the event if not seated.
+          </p>
+          {(() => {
+            const groups = new Map<string, any[]>();
+            for (const b of waitlist) {
+              const k = b.meeting_id ?? "_none";
+              (groups.get(k) ?? groups.set(k, []).get(k)!).push(b);
+            }
+            return Array.from(groups.entries()).map(([meetingId, items]) => {
+              const m = meetings.find((x) => x.id === meetingId);
+              const activeCount = items.filter((b) => b.payment_status === "waitlisted").length;
+              return (
+                <div key={meetingId} className="mb-4 last:mb-0">
+                  <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+                    <p className="text-xs font-semibold text-gold/80 uppercase tracking-wider">
+                      {m ? fmtDate(m.meeting_date) : "Unassigned"}
+                      <span className="text-primary-foreground/40 normal-case font-normal">
+                        {" "}· {activeCount} waitlisted
+                      </span>
+                    </p>
+                    {canManageLOI && activeCount > 0 && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => closeWaitlistForMeeting(meetingId, activeCount)}
+                        className="border-destructive/50 text-destructive hover:bg-destructive/10 min-h-11 sm:min-h-0"
+                      >
+                        Close waitlist & refund now
+                      </Button>
+                    )}
+                  </div>
+                  <ul className="divide-y divide-gold/10 text-sm">
+                    {items.map((b) => {
+                      const seats = (Number(b.details?.guestCount) || 0) + 1;
+                      const isRefunded = b.payment_status === "waitlisted_refunded";
+                      return (
+                        <li key={b.id} className="py-2 flex flex-wrap items-center justify-between gap-3">
+                          <div className="min-w-0">
+                            <p className="text-primary-foreground truncate">
+                              <span className="font-semibold">{b.contact_name}</span>
+                              <span className="text-primary-foreground/50"> · {seats} seat{seats === 1 ? "" : "s"}</span>
+                              {b.total_pence != null && (
+                                <span className="text-primary-foreground/50"> · £{(b.total_pence / 100).toFixed(2)}</span>
+                              )}
+                            </p>
+                            <p className="text-[11px] text-primary-foreground/50">{b.event_label}</p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {isRefunded ? (
+                              <span className="text-[10px] uppercase tracking-wider text-primary-foreground/60 border border-primary-foreground/30 rounded px-1.5 py-0.5">
+                                Refunded
+                              </span>
+                            ) : canManageLOI ? (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => promoteWaitlistBooking(b)}
+                                className="border-gold/40 text-gold hover:bg-gold/10 min-h-11 sm:min-h-0"
+                              >
+                                Promote now
+                              </Button>
+                            ) : (
+                              <span className="text-[10px] uppercase tracking-wider text-gold border border-gold/40 rounded px-1.5 py-0.5">
+                                Waitlisted
+                              </span>
+                            )}
+                          </div>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              );
+            });
+          })()}
+
+        </section>
+      )}
+
+      {/* Past meetings */}
+      <section className="bg-navy-dark/60 border border-gold/15 rounded-sm p-5">
+        <h2 className="font-serif text-lg text-gold mb-3">Meeting records</h2>
+        {loading ? (
+          <p className="text-xs text-primary-foreground/50">Loading…</p>
+        ) : meetings.length === 0 ? (
+          <p className="text-xs text-primary-foreground/50 italic">
+            No Lodge Meetings recorded yet.
+          </p>
+        ) : (
+          <ul className="divide-y divide-gold/10">
+            {meetings.map((mtg) => {
+              const rows = attendanceByMeeting[mtg.id] ?? [];
+              const hc = computeHeadcount(rows, mtg.headcount_override);
+              const isOpen = expandedId === mtg.id;
+              return (
+                <li key={mtg.id} className="py-3">
+                  <button
+                    type="button"
+                    onClick={() => setExpandedId(isOpen ? null : mtg.id)}
+                    className="w-full text-left flex flex-wrap items-center justify-between gap-3"
+                  >
+                    <div>
+                      <p className="font-semibold text-sm">
+                        {fmtDate(mtg.meeting_date)}{" "}
+                        <span className="text-primary-foreground/60 font-normal">
+                          · {meetingTypeLabel(mtg.meeting_type)}
+                        </span>
+                      </p>
+                      {mtg.notes && (
+                        <p className="text-xs text-primary-foreground/50 mt-0.5 line-clamp-1">
+                          {mtg.notes}
+                        </p>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="flex flex-col items-end gap-0.5">
+                        <span className="text-xs text-gold">
+                          {hc.total} attending{" "}
+                          <span className="text-primary-foreground/50">
+                            ({hc.members} M / {hc.visitors} V
+                            {hc.isOverride ? " · override" : ""})
+                          </span>
+                        </span>
+                        <span className="text-[10px] text-primary-foreground/60">
+                          {hc.diningTotal} dining
+                          {hc.meetingOnlyCount > 0 && ` · ${hc.meetingOnlyCount} meeting-only`}
+                        </span>
+                        {statusBreakdown(rows) && (
+                          <span className="text-[10px] text-primary-foreground/50 text-right">
+                            {statusBreakdown(rows)}
+                          </span>
+                        )}
+                      </div>
+                      <ChevronRight
+                        className={`w-4 h-4 text-primary-foreground/40 transition-transform ${
+                          isOpen ? "rotate-90" : ""
+                        }`}
+                      />
+                    </div>
+                  </button>
+                  {isOpen && (
+                    <div className="mt-3 pl-3 border-l-2 border-gold/20 space-y-2">
+                      {mtg.notes && (
+                        <p className="text-xs text-primary-foreground/70 whitespace-pre-wrap">
+                          {mtg.notes}
+                        </p>
+                      )}
+                      {rows.length === 0 ? (
+                        <p className="text-xs italic text-primary-foreground/50">
+                          No attendees recorded.
+                        </p>
+                      ) : (
+                        <div className="text-xs space-y-3">
+                          {(() => {
+                            const enriched = rows.map((r) => {
+                              const m = r.member_id
+                                ? members.find((x) => x.id === r.member_id)
+                                : null;
+                              const name = m
+                                ? memberDisplay(m)
+                                : `${r.visitor_name ?? "Visitor"}${
+                                    r.visitor_lodge_name
+                                      ? ` — ${r.visitor_lodge_name}${
+                                          r.visitor_lodge_number
+                                            ? ` no. ${r.visitor_lodge_number}`
+                                            : ""
+                                        }`
+                                      : ""
+                                  }`;
+                              return { r, name, isMember: !!m || isWeybridgeLodge(r.visitor_lodge_name) };
+                            });
+                            const byStatusThenName = (a: typeof enriched[number], b: typeof enriched[number]) => {
+                              const d = statusRank(a.r.attendance_status) - statusRank(b.r.attendance_status);
+                              return d !== 0 ? d : surnameKey(a.name).localeCompare(surnameKey(b.name));
+                            };
+                            const membersList = enriched.filter((x) => x.isMember).sort(byStatusThenName);
+                            const visitorsList = enriched.filter((x) => !x.isMember).sort(byStatusThenName);
+                            const membersBreakdown = statusBreakdown(membersList.map((x) => x.r));
+                            const visitorsBreakdown = statusBreakdown(visitorsList.map((x) => x.r));
+                            return (
+                              <>
+                                <div>
+                                  <h4 className="text-[10px] uppercase tracking-wider text-gold/80 mb-1.5">Members ({membersList.length})</h4>
+                                  {membersBreakdown && (
+                                    <p className="text-[10px] text-primary-foreground/60 mb-1.5">{membersBreakdown}</p>
+                                  )}
+                                  <ul className="space-y-1">
+                                    {membersList.map(({ r, name }) => (
+                                      <li key={r.id} className="flex flex-wrap justify-between gap-3 border-b border-gold/5 pb-1">
+                                        <span className="flex items-center gap-1.5 flex-wrap">
+                                          <span className="text-primary-foreground">{name}</span>
+                                          {r.is_meeting_only && (
+                                            <span className="text-[9px] uppercase tracking-wider text-primary-foreground/70 border border-primary-foreground/30 rounded px-1 py-0.5" title="Attending meeting only — not dining">Meeting only</span>
+                                          )}
+                                          {!r.is_meeting_only && (
+                                            <span className="text-primary-foreground/40 ml-1">· {paymentMethodLabel(r.payment_method)}</span>
+                                          )}
+                                        </span>
+                                        <span className={r.attendance_status === "attended" ? "text-gold" : r.attendance_status === "no_show" ? "text-destructive" : "text-primary-foreground/60"}>
+                                          {attendanceStatusLabel(r.attendance_status)}
+                                        </span>
+                                      </li>
+                                    ))}
+                                    {membersList.length === 0 && <li className="text-primary-foreground/50 italic">No members.</li>}
+                                  </ul>
+                                </div>
+                                <div>
+                                  <h4 className="text-[10px] uppercase tracking-wider text-gold/80 mb-1.5">Visitors ({visitorsList.length})</h4>
+                                  {visitorsBreakdown && (
+                                    <p className="text-[10px] text-primary-foreground/60 mb-1.5">{visitorsBreakdown}</p>
+                                  )}
+                                  <ul className="space-y-1">
+                                    {visitorsList.map(({ r, name }) => (
+                                      <li key={r.id} className="flex flex-wrap justify-between gap-3 border-b border-gold/5 pb-1">
+                                        <span className="flex items-center gap-1.5 flex-wrap">
+                                          <span className="text-primary-foreground/80 italic">{name}</span>
+                                          {r.is_meeting_only && (
+                                            <span className="text-[9px] uppercase tracking-wider text-primary-foreground/70 border border-primary-foreground/30 rounded px-1 py-0.5" title="Attending meeting only — not dining">Meeting only</span>
+                                          )}
+                                          {!r.is_meeting_only && (
+                                            <span className="text-primary-foreground/40 ml-1">· {paymentMethodLabel(r.payment_method)}</span>
+                                          )}
+                                        </span>
+                                        <span className={r.attendance_status === "attended" ? "text-gold" : r.attendance_status === "no_show" ? "text-destructive" : "text-primary-foreground/60"}>
+                                          {attendanceStatusLabel(r.attendance_status)}
+                                        </span>
+                                      </li>
+                                    ))}
+                                    {visitorsList.length === 0 && <li className="text-primary-foreground/50 italic">No visitors.</li>}
+                                  </ul>
+                                </div>
+                              </>
+                            );
+                          })()}
+                        </div>
+                      )}
+                      {canManageLOI && (
+                        <div className="flex gap-2 pt-2 flex-wrap">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setEditing(mtg)}
+                            className="border-gold/40 text-gold hover:bg-gold/10 min-h-11 sm:min-h-0"
+                          >
+                            <Pencil className="w-3 h-3 mr-1" /> Edit / mark attendance
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => exportPerfectTablePlan(mtg)}
+                            className="border-gold/40 text-gold hover:bg-gold/10 min-h-11 sm:min-h-0"
+                          >
+                            <Download className="w-3 h-3 mr-1" /> Export for PerfectTablePlan
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleDelete(mtg.id)}
+                            className="border-destructive/40 text-destructive hover:bg-destructive/10 min-h-11 sm:min-h-0"
+                          >
+                            <Trash2 className="w-3 h-3 mr-1" /> Delete
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </section>
+
+      {(creating || editing) && (
+        <MeetingDialog
+          open
+          onClose={() => {
+            setCreating(false);
+            setEditing(null);
+          }}
+          onSaved={() => {
+            setCreating(false);
+            setEditing(null);
+            loadAll();
+          }}
+          members={members}
+          existing={editing}
+          existingAttendance={editing ? attendanceByMeeting[editing.id] ?? [] : []}
+        />
+      )}
+    </MembersLayout>
+  );
+}
+
+// ---------- Create / edit dialog ----------
+
+type MemberDraft = {
+  present: boolean;
+  status: FbAttendanceStatus;
+  paymentMethod: FbPaymentMethod;
+  amountPounds: string;
+  isMeetingOnly: boolean;
+  dietary?: string;
+  synced?: boolean;
+  sourceBookingId?: string | null;
+};
+
+type VisitorDraft = {
+  id: string; // local key (existing row id or temp)
+  existingId?: string;
+  name: string;
+  lodgeName: string;
+  lodgeNumber: string;
+  email: string;
+  status: FbAttendanceStatus;
+  paymentMethod: FbPaymentMethod;
+  amountPounds: string;
+  isMeetingOnly: boolean;
+  dietary?: string;
+  synced?: boolean;
+  sourceBookingId?: string | null;
+};
+
+
+type VisitorSuggestion = {
+  id: string;
+  name: string | null;
+  lodge_name: string | null;
+  lodge_number: string | null;
+  email: string | null;
+  last_seen_at: string | null;
+};
+
+type LodgeEventLink = {
+  id: string;
+  slug: string;
+  title: string;
+  event_date: string;
+  published: boolean;
+};
+
+function tempId() {
+  return `tmp_${Math.random().toString(36).slice(2)}`;
+}
+
+function MeetingDialog({
+  open,
+  onClose,
+  onSaved,
+  members,
+  existing,
+  existingAttendance,
+}: {
+  open: boolean;
+  onClose: () => void;
+  onSaved: () => void;
+  members: Member[];
+  existing: Meeting | null;
+  existingAttendance: Attendance[];
+}) {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [date, setDate] = useState(
+    existing?.meeting_date ?? new Date().toISOString().slice(0, 10)
+  );
+  const [type, setType] = useState<FbMeetingType>(existing?.meeting_type ?? "regular");
+  const [notes, setNotes] = useState(existing?.notes ?? "");
+  const [override, setOverride] = useState<string>(
+    existing?.headcount_override != null ? String(existing.headcount_override) : ""
+  );
+  const [status, setStatus] = useState<"draft" | "published" | "completed">(existing?.status ?? "draft");
+  const [isWhiteTable, setIsWhiteTable] = useState<boolean>(existing?.is_white_table ?? false);
+  const [diningPricePounds, setDiningPricePounds] = useState<string>(
+    existing ? ((existing.dining_price_pence ?? 3500) / 100).toFixed(2) : "35.00"
+  );
+  const [eventKey, setEventKey] = useState<string>(existing?.event_key ?? `festive-board-${date}`);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (existing || !date) return;
+    let cancelled = false;
+    const start = `${date}T00:00:00`;
+    const endDate = new Date(`${date}T00:00:00`);
+    endDate.setDate(endDate.getDate() + 1);
+    const end = endDate.toISOString().slice(0, 19);
+    supabase
+      .from("lodge_events")
+      .select("id,slug,title,event_date,published")
+      .gte("event_date", start)
+      .lt("event_date", end)
+      .order("published", { ascending: false })
+      .order("event_date", { ascending: true })
+      .limit(1)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (cancelled || !data) return;
+        const event = data as LodgeEventLink;
+        setEventKey(event.slug);
+        if (event.published) setStatus("published");
+        setNotes((current) => current || event.title);
+      });
+    return () => { cancelled = true; };
+  }, [date, existing]);
+
+  const [memberDrafts, setMemberDrafts] = useState<Record<string, MemberDraft>>(() => {
+    const initial: Record<string, MemberDraft> = {};
+    for (const m of members) {
+      const row = existingAttendance.find((a) => a.member_id === m.id);
+      initial[m.id] = {
+        present: !!row,
+        status: (row?.attendance_status as FbAttendanceStatus) ?? "booked",
+        paymentMethod: (row?.payment_method as FbPaymentMethod) ?? "unknown",
+        amountPounds: row ? (row.amount_pence / 100).toFixed(2) : "",
+        isMeetingOnly: !!row?.is_meeting_only,
+        dietary: row?.dietary ?? "",
+        synced: row?.source === "booking",
+        sourceBookingId: row?.source_booking_id ?? null,
+      };
+    }
+    return initial;
+  });
+
+  const [visitorDrafts, setVisitorDrafts] = useState<VisitorDraft[]>(() =>
+    existingAttendance
+      .filter((a) => !a.member_id)
+      .map((a) => ({
+        id: a.id,
+        existingId: a.id,
+        name: a.visitor_name ?? "",
+        lodgeName: a.visitor_lodge_name ?? "",
+        lodgeNumber: a.visitor_lodge_number ?? "",
+        email: a.email ?? "",
+        status: a.attendance_status as FbAttendanceStatus,
+        paymentMethod: a.payment_method as FbPaymentMethod,
+        amountPounds: (a.amount_pence / 100).toFixed(2),
+        isMeetingOnly: !!a.is_meeting_only,
+        dietary: a.dietary ?? "",
+        synced: a.source === "booking",
+        sourceBookingId: a.source_booking_id ?? null,
+      }))
+  );
+
+  const [visitorSuggestions, setVisitorSuggestions] = useState<VisitorSuggestion[]>([]);
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from("visitor_contacts")
+        .select("id,name,lodge_name,lodge_number,email,last_seen_at")
+        .order("last_seen_at", { ascending: false })
+        .limit(500);
+      if (!cancelled) setVisitorSuggestions((data as VisitorSuggestion[]) ?? []);
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  // Auto-sync bookings → draft attendance rows (additive only, non-white-table meetings)
+  useEffect(() => {
+    if (!existing || isWhiteTable) return;
+    let cancelled = false;
+    (async () => {
+      const { data: bookings } = await supabase
+        .from("bookings")
+        .select("id,contact_name,contact_email,details,payment_status")
+        .or(`meeting_id.eq.${existing.id},event_key.eq.${existing.event_key}`);
+      if (cancelled || !bookings?.length) return;
+
+      const alreadySynced = new Set(
+        existingAttendance.map((a) => a.source_booking_id).filter(Boolean) as string[]
+      );
+
+      const diningPence = existing.dining_price_pence ?? 3500;
+      const newVisitorDrafts: VisitorDraft[] = [];
+      const memberPatches: { id: string; patch: Partial<MemberDraft> }[] = [];
+
+      for (const b of bookings) {
+        if (alreadySynced.has(b.id)) continue;
+        const d = (b.details ?? {}) as Record<string, unknown>;
+        const opt = String(d.meetingOption ?? "");
+        if (opt === "apologies" || b.payment_status === "apologies") continue;
+        const amount = opt === "meeting-and-festive-board" ? (diningPence / 100).toFixed(2) : "0.00";
+        const meetingOnly = opt === "meeting-only";
+
+        // Respondent
+        const respLodge = String(d.lodge ?? "");
+        const respondentIsMember = isWeybridgeLodge(respLodge);
+        if (respondentIsMember) {
+          // Try to match by email or full name
+          const targetEmail = (b.contact_email ?? "").toLowerCase().trim();
+          const targetName = (b.contact_name ?? "").toLowerCase().trim();
+          const match = members.find((m) => {
+            const profileFull = [m.first_name, m.last_name].filter(Boolean).join(" ").toLowerCase();
+            return (m.full_name?.toLowerCase() === targetName) || (profileFull === targetName);
+          });
+          if (match) {
+            memberPatches.push({
+              id: match.id,
+              patch: {
+                present: true,
+                status: "booked",
+                paymentMethod: "unknown",
+                amountPounds: amount,
+                isMeetingOnly: meetingOnly,
+                synced: true,
+                sourceBookingId: b.id,
+              },
+            });
+          } else {
+            // Unmatched Weybridge respondent — fall through as a visitor row so the Secretary can reconcile
+            newVisitorDrafts.push({
+              id: tempId(),
+              name: String(b.contact_name ?? ""),
+              lodgeName: respLodge,
+              lodgeNumber: "",
+              email: String(b.contact_email ?? ""),
+              status: "booked",
+              paymentMethod: "unknown",
+              amountPounds: amount,
+              isMeetingOnly: meetingOnly,
+              synced: true,
+              sourceBookingId: b.id,
+            });
+          }
+        } else {
+          newVisitorDrafts.push({
+            id: tempId(),
+            name: String(b.contact_name ?? ""),
+            lodgeName: respLodge,
+            lodgeNumber: "",
+            email: String(b.contact_email ?? ""),
+            status: "booked",
+            paymentMethod: "unknown",
+            amountPounds: amount,
+            isMeetingOnly: meetingOnly,
+            synced: true,
+            sourceBookingId: b.id,
+          });
+        }
+
+        // Guests
+        const guests = Array.isArray(d.guests) ? (d.guests as Array<{ name?: string; lodge?: string }>) : [];
+        for (const [gi, g] of guests.entries()) {
+          const gLodge = String(g.lodge ?? "");
+          const guestBookingId = `${b.id}::g${gi}`;
+          if (alreadySynced.has(guestBookingId)) continue;
+          const guestIsMember = isWeybridgeLodge(gLodge);
+          if (guestIsMember) {
+            const targetName = (g.name ?? "").toLowerCase().trim();
+            const match = members.find((m) => {
+              const profileFull = [m.first_name, m.last_name].filter(Boolean).join(" ").toLowerCase();
+              return (m.full_name?.toLowerCase() === targetName) || (profileFull === targetName);
+            });
+            if (match) {
+              memberPatches.push({
+                id: match.id,
+                patch: {
+                  present: true,
+                  status: "booked",
+                  paymentMethod: "unknown",
+                  amountPounds: amount,
+                  isMeetingOnly: meetingOnly,
+                  synced: true,
+                  sourceBookingId: b.id,
+                },
+              });
+              continue;
+            }
+          }
+          newVisitorDrafts.push({
+            id: tempId(),
+            name: String(g.name ?? ""),
+            lodgeName: gLodge,
+            lodgeNumber: "",
+            email: "",
+            status: "booked",
+            paymentMethod: "unknown",
+            amountPounds: amount,
+            isMeetingOnly: meetingOnly,
+            synced: true,
+            sourceBookingId: b.id,
+          });
+        }
+      }
+
+      if (memberPatches.length) {
+        setMemberDrafts((prev) => {
+          const next = { ...prev };
+          for (const { id, patch } of memberPatches) {
+            if (next[id] && !next[id].present) next[id] = { ...next[id], ...patch };
+          }
+          return next;
+        });
+      }
+      if (newVisitorDrafts.length) {
+        setVisitorDrafts((prev) => [...prev, ...newVisitorDrafts]);
+      }
+    })();
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [existing?.id, isWhiteTable]);
+
+
+
+
+  const setMember = (id: string, patch: Partial<MemberDraft>) =>
+    setMemberDrafts((p) => ({ ...p, [id]: { ...p[id], ...patch } }));
+
+  const setVisitor = (id: string, patch: Partial<VisitorDraft>) =>
+    setVisitorDrafts((p) => p.map((v) => (v.id === id ? { ...v, ...patch } : v)));
+
+  const addVisitor = () =>
+    setVisitorDrafts((p) => [
+      ...p,
+      {
+        id: tempId(),
+        name: "",
+        lodgeName: "",
+        lodgeNumber: "",
+        email: "",
+        status: "attended",
+        paymentMethod: "unknown",
+        amountPounds: "",
+        isMeetingOnly: false,
+      },
+    ]);
+
+
+  const removeVisitor = (id: string) =>
+    setVisitorDrafts((p) => p.filter((v) => v.id !== id));
+
+  const computedAttended = useMemo(() => {
+    const presentMembers = Object.values(memberDrafts).filter(
+      (d) => d.present && (d.status === "attended" || d.status === "booked")
+    );
+    const presentVisitors = visitorDrafts.filter(
+      (d) => d.name.trim() && (d.status === "attended" || d.status === "booked")
+    );
+    const members = presentMembers.length;
+    const visitors = presentVisitors.length;
+    const diningMembers = presentMembers.filter((d) => !d.isMeetingOnly).length;
+    const diningVisitors = presentVisitors.filter((d) => !d.isMeetingOnly).length;
+    return {
+      members,
+      visitors,
+      total: members + visitors,
+      diningMembers,
+      diningVisitors,
+      diningTotal: diningMembers + diningVisitors,
+      meetingOnly: (members - diningMembers) + (visitors - diningVisitors),
+    };
+  }, [memberDrafts, visitorDrafts]);
+
+  const parsePounds = (s: string): number => {
+    const n = parseFloat(s);
+    if (Number.isNaN(n)) return 0;
+    return Math.round(n * 100);
+  };
+
+  const handleSave = async () => {
+    if (!date) {
+      toast({ title: "Please select a date", variant: "destructive" });
+      return;
+    }
+    for (const v of visitorDrafts) {
+      if (!v.name.trim()) {
+        toast({ title: "Visitor needs a name", description: "Remove blank visitor rows or fill in their name.", variant: "destructive" });
+        return;
+      }
+    }
+    setSaving(true);
+    try {
+      const payload = {
+        meeting_date: date,
+        meeting_type: type,
+        notes: notes.trim() || null,
+        headcount_override: override.trim() === "" ? null : Number(override),
+        created_by: user?.id ?? null,
+        event_key: eventKey.trim() || `festive-board-${date}`,
+        status,
+        is_white_table: isWhiteTable,
+        dining_price_pence: parsePounds(diningPricePounds) || 3500,
+      };
+
+      // If publishing this meeting, demote any other currently-published meeting to draft
+      if (status === "published") {
+        await supabase
+          .from("festive_board_meetings")
+          .update({ status: "draft" })
+          .eq("status", "published")
+          .neq("id", existing?.id ?? "00000000-0000-0000-0000-000000000000");
+      }
+
+      let meetingId = existing?.id;
+      if (existing) {
+        const { error } = await supabase
+          .from("festive_board_meetings")
+          .update(payload)
+          .eq("id", existing.id);
+        if (error) throw error;
+      } else {
+        const { data, error } = await supabase
+          .from("festive_board_meetings")
+          .insert(payload)
+          .select("id")
+          .single();
+        if (error) throw error;
+        meetingId = data.id;
+      }
+
+      // Replace all attendance rows (simple + reliable)
+      await supabase.from("festive_board_attendance").delete().eq("meeting_id", meetingId!);
+
+      const memberRows = Object.entries(memberDrafts)
+        .filter(([, d]) => d.present)
+        .map(([mid, d]) => ({
+          meeting_id: meetingId!,
+          member_id: mid,
+          attendance_status: d.status,
+          payment_method: d.paymentMethod,
+          amount_pence: parsePounds(d.amountPounds),
+          is_meeting_only: d.isMeetingOnly,
+          dietary: d.dietary?.trim() || null,
+          created_by: user?.id ?? null,
+          source: (d.synced ? "booking" : "manual") as "booking" | "manual",
+          source_booking_id: d.sourceBookingId ?? null,
+        }));
+
+      const visitorRows = visitorDrafts
+        .filter((v) => v.name.trim())
+        .map((v) => ({
+          meeting_id: meetingId!,
+          visitor_name: normaliseName(v.name),
+          visitor_lodge_name: v.lodgeName.trim() ? normaliseName(v.lodgeName) : null,
+          visitor_lodge_number: v.lodgeNumber.trim() || null,
+          email: v.email.trim().toLowerCase() || null,
+          attendance_status: v.status,
+          payment_method: v.paymentMethod,
+          amount_pence: parsePounds(v.amountPounds),
+          is_meeting_only: v.isMeetingOnly,
+          dietary: v.dietary?.trim() || null,
+          created_by: user?.id ?? null,
+          source: (v.synced ? "booking" : "manual") as "booking" | "manual",
+          source_booking_id: v.sourceBookingId ?? null,
+        }));
+
+
+
+      // Dedupe member rows by member_id (auto-sync from multiple bookings can produce duplicates)
+      const seen = new Set<string>();
+      const dedupedMemberRows = memberRows.filter((r) => {
+        if (seen.has(r.member_id)) return false;
+        seen.add(r.member_id);
+        return true;
+      });
+
+      const all = [...dedupedMemberRows, ...visitorRows];
+      if (all.length) {
+        const { error } = await supabase.from("festive_board_attendance").insert(all);
+        if (error) throw error;
+      }
+      toast({ title: existing ? "Record updated" : "Record created" });
+      onSaved();
+    } catch (e) {
+      const err = e as { message?: string };
+      toast({
+        title: "Save failed",
+        description: err.message ?? "Unknown error",
+        variant: "destructive",
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto bg-navy-dark text-primary-foreground border-gold/30">
+        <DialogHeader>
+          <DialogTitle className="font-serif text-gold">
+            {existing ? "Edit Lodge Meeting record" : "New Lodge Meeting record"}
+          </DialogTitle>
+        </DialogHeader>
+
+        <div className="space-y-5">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <label className="text-xs uppercase tracking-wider text-primary-foreground/60 mb-1 block">
+                Date
+              </label>
+              <Input
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                className="bg-navy border-gold/20 text-primary-foreground placeholder:text-primary-foreground/40 [color-scheme:dark]"
+              />
+            </div>
+            <div>
+              <label className="text-xs uppercase tracking-wider text-primary-foreground/60 mb-1 block">
+                Meeting type
+              </label>
+              <Select value={type} onValueChange={(v) => setType(v as FbMeetingType)}>
+                <SelectTrigger className="bg-navy border-gold/20 text-primary-foreground">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {FB_MEETING_TYPES.map((o) => (
+                    <SelectItem key={o.value} value={o.value}>
+                      {o.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <label className="text-xs uppercase tracking-wider text-primary-foreground/60 mb-1 block">
+                Headcount override
+              </label>
+              <Input
+                type="number"
+                min={0}
+                placeholder={`auto: ${computedAttended.total}`}
+                value={override}
+                onChange={(e) => setOverride(e.target.value)}
+                className="bg-navy border-gold/20 text-primary-foreground placeholder:text-primary-foreground/40"
+              />
+            </div>
+          </div>
+
+          {/* Booking sync controls */}
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 p-3 rounded-sm border border-gold/15 bg-navy/40">
+            <div>
+              <label className="text-xs uppercase tracking-wider text-primary-foreground/60 mb-1 block">
+                Bookings status
+              </label>
+              <Select value={status} onValueChange={(v) => setStatus(v as typeof status)}>
+                <SelectTrigger className="bg-navy border-gold/20 h-9 text-primary-foreground"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="draft">Draft (not yet open)</SelectItem>
+                  <SelectItem value="published">Published (live on /bookings)</SelectItem>
+                  <SelectItem value="completed">Completed</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <label className="text-xs uppercase tracking-wider text-primary-foreground/60 mb-1 block">
+                Dining price (£)
+              </label>
+              <Input
+                type="number" step="0.01" min={0}
+                value={diningPricePounds}
+                onChange={(e) => setDiningPricePounds(e.target.value)}
+                className="bg-navy border-gold/20 h-9 text-primary-foreground placeholder:text-primary-foreground/40"
+              />
+            </div>
+            <div>
+              <label className="text-xs uppercase tracking-wider text-primary-foreground/60 mb-1 block">
+                Public booking slug
+              </label>
+              <Input
+                value={eventKey}
+                onChange={(e) => setEventKey(e.target.value)}
+                placeholder={`festive-board-${date}`}
+                className="bg-navy border-gold/20 h-9 text-primary-foreground placeholder:text-primary-foreground/40"
+              />
+            </div>
+            <label className="flex items-center gap-2 text-xs text-primary-foreground/80 mt-5">
+              <input
+                type="checkbox"
+                checked={isWhiteTable}
+                onChange={(e) => setIsWhiteTable(e.target.checked)}
+                className="accent-gold w-4 h-4"
+              />
+              Open to non-Masons (white table) — disables auto-sync from bookings
+            </label>
+          </div>
+
+
+          <div>
+            <label className="text-xs uppercase tracking-wider text-primary-foreground/60 mb-1 block">
+              Notes
+            </label>
+            <Textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              rows={2}
+              className="bg-navy border-gold/20 text-primary-foreground placeholder:text-primary-foreground/40"
+              placeholder="Optional context, menu, special guests, etc."
+            />
+          </div>
+
+          {/* Members grid */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="font-serif text-base text-gold">Members</h3>
+              <span className="text-[11px] text-primary-foreground/60">
+                {computedAttended.members} attending
+              </span>
+            </div>
+            <div className="hidden sm:grid grid-cols-[auto_1fr_140px_180px_100px] gap-2 px-2 pb-1 text-[10px] uppercase tracking-wide text-gold/70">
+              <span className="w-4" aria-hidden />
+              <span>Member</span>
+              <span>Status</span>
+              <span>Payment method</span>
+              <span>Amount</span>
+            </div>
+            <div className="border border-gold/15 rounded-sm divide-y divide-gold/10">
+              {members.map((m) => {
+                const d = memberDrafts[m.id];
+                if (!d) return null;
+                return (
+                  <div
+                    key={m.id}
+                    className="grid grid-cols-[auto_1fr] sm:grid-cols-[auto_1fr_140px_180px_100px] gap-2 items-center p-2 text-sm"
+                  >
+                    <Checkbox
+                      checked={d.present}
+                      onCheckedChange={(v) => setMember(m.id, { present: !!v })}
+                    />
+                    <span className="truncate flex items-center gap-1.5 flex-wrap">
+                      {memberDisplay(m)}
+                      {d.synced && (
+                        <span className="text-[9px] uppercase tracking-wider text-gold border border-gold/40 rounded px-1 py-0.5">Synced</span>
+                      )}
+                      {d.isMeetingOnly && (
+                        <span className="text-[9px] uppercase tracking-wider text-primary-foreground/70 border border-primary-foreground/30 rounded px-1 py-0.5">Meeting only</span>
+                      )}
+                    </span>
+                    {d.present && (
+                      <>
+                        <div className="col-span-full sm:col-span-1">
+                          <Select
+                            value={d.status}
+                            onValueChange={(v) =>
+                              setMember(m.id, { status: v as FbAttendanceStatus })
+                            }
+                          >
+                            <SelectTrigger className="bg-navy border-gold/20 h-8 text-xs text-primary-foreground placeholder:text-primary-foreground/40">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {FB_ATTENDANCE_STATUSES.map((o) => (
+                                <SelectItem key={o.value} value={o.value}>
+                                  {o.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        {d.isMeetingOnly ? (
+                          <div className="col-span-full sm:col-span-1 bg-navy border border-gold/20 h-8 rounded px-3 flex items-center text-xs text-primary-foreground/40">
+                            —
+                          </div>
+                        ) : (
+                          <div className="col-span-full sm:col-span-1">
+                            <Select
+                              value={d.paymentMethod}
+                              onValueChange={(v) =>
+                                setMember(m.id, { paymentMethod: v as FbPaymentMethod })
+                              }
+                            >
+                              <SelectTrigger className="bg-navy border-gold/20 h-8 text-xs text-primary-foreground placeholder:text-primary-foreground/40">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {FB_PAYMENT_METHODS.map((o) => (
+                                  <SelectItem key={o.value} value={o.value}>
+                                    {o.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        )}
+                        <div className="col-span-full sm:col-span-1">
+                          <Input
+                            type="number"
+                            step="0.01"
+                            min={0}
+                            placeholder="£"
+                            value={d.amountPounds}
+                            onChange={(e) =>
+                              setMember(m.id, { amountPounds: e.target.value })
+                            }
+                            className="bg-navy border-gold/20 h-8 text-xs text-primary-foreground placeholder:text-primary-foreground/40"
+                          />
+                        </div>
+                        <Input
+                          value={d.dietary ?? ""}
+                          onChange={(e) => setMember(m.id, { dietary: e.target.value })}
+                          placeholder="Dietary / allergies (optional)"
+                          className="col-span-full sm:col-start-2 sm:col-end-6 bg-navy border-gold/20 h-8 text-xs text-primary-foreground placeholder:text-primary-foreground/40"
+                        />
+                        {!((parseFloat(d.amountPounds || "0") || 0) > 0 && !d.isMeetingOnly) && (
+                          <label className="col-span-full sm:col-start-2 sm:col-end-6 flex items-center gap-2 text-[11px] text-primary-foreground/70 -mt-1">
+                            <input
+                              type="checkbox"
+                              checked={d.isMeetingOnly}
+                              onChange={(e) => setMember(m.id, { isMeetingOnly: e.target.checked })}
+                              className="accent-gold w-3.5 h-3.5"
+                            />
+                            Meeting only (not dining)
+                          </label>
+                        )}
+                      </>
+                    )}
+                  </div>
+                );
+              })}
+              {members.length === 0 && (
+                <p className="p-3 text-xs italic text-primary-foreground/50">
+                  No active members.
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* Visitors */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="font-serif text-base text-gold">Visitors</h3>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={addVisitor}
+                className="border-gold/40 text-gold hover:bg-gold/10"
+              >
+                <UserPlus className="w-3 h-3 mr-1" /> Add visitor / walk-in
+              </Button>
+            </div>
+            {visitorDrafts.length === 0 ? (
+              <p className="text-xs italic text-primary-foreground/50 border border-dashed border-gold/15 rounded-sm p-3">
+                No visitors recorded. Use "Add visitor" for guests, late phone bookings or walk-ins paying on the night.
+              </p>
+            ) : (
+              <div className="space-y-2">
+                <div className="hidden sm:grid grid-cols-[1fr_1fr_90px_1fr_140px_180px_100px_auto] gap-2 px-2 text-[10px] uppercase tracking-wide text-gold/70">
+                  <span>Visitor name</span>
+                  <span>Lodge name</span>
+                  <span>Lodge no.</span>
+                  <span>Email</span>
+                  <span>Status</span>
+                  <span>Payment method</span>
+                  <span>Amount</span>
+                  <span aria-hidden />
+                </div>
+                {visitorDrafts.map((v) => (
+                  <div
+                    key={v.id}
+                    className={`border rounded-sm p-2 grid grid-cols-1 sm:grid-cols-[1fr_1fr_90px_1fr_140px_180px_100px_auto] gap-2 items-center ${v.synced ? "border-gold/40 bg-gold/5" : "border-gold/15"}`}
+                  >
+                    <div className="flex items-center gap-1.5">
+                      {v.synced && (
+                        <span className="text-[9px] uppercase tracking-wider text-gold border border-gold/40 rounded px-1 py-0.5 shrink-0" title="Synced from public booking">Synced</span>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <VisitorNameInput
+                          value={v.name}
+                          suggestions={visitorSuggestions}
+                          onChange={(name) => setVisitor(v.id, { name })}
+                          onPick={(s) => setVisitor(v.id, {
+                            name: s.name ?? "",
+                            lodgeName: s.lodge_name ?? "",
+                            lodgeNumber: s.lodge_number ?? "",
+                            ...(s.email ? { email: s.email } : {}),
+                          })}
+                        />
+                      </div>
+                    </div>
+                    <Input
+                      value={v.lodgeName}
+                      placeholder="Lodge name"
+                      onChange={(e) => setVisitor(v.id, { lodgeName: e.target.value })}
+                      className="bg-navy border-gold/20 h-8 text-xs text-primary-foreground placeholder:text-primary-foreground/40"
+                    />
+                    <Input
+                      value={v.lodgeNumber}
+                      placeholder="No."
+                      onChange={(e) => setVisitor(v.id, { lodgeNumber: e.target.value })}
+                      className="bg-navy border-gold/20 h-8 text-xs text-primary-foreground placeholder:text-primary-foreground/40"
+                    />
+                    <Input
+                      type="email"
+                      value={v.email}
+                      placeholder="Email (optional, for newsletter)"
+                      onChange={(e) => setVisitor(v.id, { email: e.target.value })}
+                      className="bg-navy border-gold/20 h-8 text-xs text-primary-foreground placeholder:text-primary-foreground/40"
+                    />
+
+                    <Select
+                      value={v.status}
+                      onValueChange={(val) =>
+                        setVisitor(v.id, { status: val as FbAttendanceStatus })
+                      }
+                    >
+                      <SelectTrigger className="bg-navy border-gold/20 h-8 text-xs text-primary-foreground placeholder:text-primary-foreground/40">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {FB_ATTENDANCE_STATUSES.map((o) => (
+                          <SelectItem key={o.value} value={o.value}>
+                            {o.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {v.isMeetingOnly ? (
+                      <div className="bg-navy border border-gold/20 h-8 rounded px-3 flex items-center text-xs text-primary-foreground/40">
+                        —
+                      </div>
+                    ) : (
+                      <Select
+                        value={v.paymentMethod}
+                        onValueChange={(val) =>
+                          setVisitor(v.id, { paymentMethod: val as FbPaymentMethod })
+                        }
+                      >
+                        <SelectTrigger className="bg-navy border-gold/20 h-8 text-xs text-primary-foreground placeholder:text-primary-foreground/40">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {FB_PAYMENT_METHODS.map((o) => (
+                            <SelectItem key={o.value} value={o.value}>
+                              {o.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                    <Input
+                      type="number"
+                      step="0.01"
+                      min={0}
+                      placeholder="£"
+                      value={v.amountPounds}
+                      onChange={(e) => setVisitor(v.id, { amountPounds: e.target.value })}
+                      className="bg-navy border-gold/20 h-8 text-xs text-primary-foreground placeholder:text-primary-foreground/40"
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => removeVisitor(v.id)}
+                      className="text-destructive hover:bg-destructive/10 h-8 w-8"
+                      aria-label="Remove visitor"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </Button>
+                    <Input
+                      value={v.dietary ?? ""}
+                      onChange={(e) => setVisitor(v.id, { dietary: e.target.value })}
+                      placeholder="Dietary / allergies (optional)"
+                      className="sm:col-span-8 bg-navy border-gold/20 h-8 text-xs text-primary-foreground placeholder:text-primary-foreground/40"
+                    />
+                    {!((parseFloat(v.amountPounds || "0") || 0) > 0 && !v.isMeetingOnly) && (
+                      <label className="sm:col-span-8 flex items-center gap-2 text-[11px] text-primary-foreground/70">
+                        <input
+                          type="checkbox"
+                          checked={v.isMeetingOnly}
+                          onChange={(e) => setVisitor(v.id, { isMeetingOnly: e.target.checked })}
+                          className="accent-gold w-3.5 h-3.5"
+                        />
+                        Meeting only (not dining)
+                      </label>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="text-xs text-primary-foreground/60 border-t border-gold/10 pt-3 space-y-1">
+            <div>
+              Attendance headcount:{" "}
+              <span className="text-gold font-semibold">{computedAttended.total}</span>{" "}
+              ({computedAttended.members} members, {computedAttended.visitors} visitors).{" "}
+              {override.trim() !== "" && (
+                <span className="text-gold">Override active: {override}.</span>
+              )}
+            </div>
+            <div>
+              Dining covers:{" "}
+              <span className="text-gold font-semibold">{computedAttended.diningTotal}</span>{" "}
+              ({computedAttended.diningMembers} members, {computedAttended.diningVisitors} visitors)
+              {computedAttended.meetingOnly > 0 && (
+                <span className="text-primary-foreground/60">
+                  {" "}— {computedAttended.meetingOnly} meeting-only excluded
+                </span>
+              )}
+              .
+            </div>
+          </div>
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button
+            onClick={handleSave}
+            disabled={saving}
+            className="bg-gold text-navy hover:bg-gold/90"
+          >
+            {saving ? "Saving…" : existing ? "Save changes" : "Create record"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ---------- Visitor name autocomplete ----------
+
+function VisitorNameInput({
+  value,
+  suggestions,
+  onChange,
+  onPick,
+}: {
+  value: string;
+  suggestions: VisitorSuggestion[];
+  onChange: (v: string) => void;
+  onPick: (s: VisitorSuggestion) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const q = value.trim().toLowerCase();
+  const matches = useMemo(() => {
+    if (q.length < 2) return [];
+    return suggestions
+      .filter((s) => (s.name ?? "").toLowerCase().includes(q))
+      .slice(0, 6);
+  }, [q, suggestions]);
+
+  const showList = open && matches.length > 0;
+  return (
+    <div className="relative">
+      <Input
+        value={value}
+        placeholder="Visitor name (start typing to find past visitors)"
+        onChange={(e) => { onChange(e.target.value); setOpen(true); }}
+        onFocus={() => setOpen(true)}
+        onBlur={() => { setTimeout(() => setOpen(false), 150); }}
+        className="bg-navy border-gold/20 h-8 text-xs text-primary-foreground placeholder:text-primary-foreground/40"
+      />
+      {showList && (
+        <ul className="absolute z-50 left-0 top-full mt-1 w-[320px] max-w-[90vw] p-1 bg-navy-dark border border-gold/30 rounded-sm text-xs shadow-lg">
+          {matches.map((s) => (
+            <li key={s.id}>
+              <button
+                type="button"
+                onMouseDown={(e) => { e.preventDefault(); onPick(s); setOpen(false); }}
+                className="w-full text-left px-2 py-1.5 rounded hover:bg-gold/10"
+              >
+                <div className="text-primary-foreground">{s.name || "Unnamed visitor"}</div>
+                <div className="text-[10px] text-primary-foreground/60">
+                  {s.lodge_name ? `${s.lodge_name}${s.lodge_number ? ` No. ${s.lodge_number}` : ""}` : "Lodge unknown"}
+                  {s.last_seen_at ? ` · last seen ${new Date(s.last_seen_at).toLocaleDateString("en-GB", { month: "short", year: "numeric" })}` : ""}
+                </div>
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+

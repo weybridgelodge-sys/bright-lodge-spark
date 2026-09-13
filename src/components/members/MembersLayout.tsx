@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { LayoutDashboard, Users, FileText, User as UserIcon, ShieldCheck, LogOut, Shield, CalendarDays, BookOpen, Crown, CalendarPlus, BarChart3, GraduationCap, Utensils, Mail, HeartHandshake, Sprout, Hexagon, Banknote, Menu } from "lucide-react";
+import { LayoutDashboard, Users, FileText, User as UserIcon, ShieldCheck, LogOut, Shield, CalendarDays, BookOpen, Crown, CalendarPlus, BarChart3, GraduationCap, Utensils, Mail, HeartHandshake, Sprout, Hexagon, Banknote, Wallet, Menu } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import logoAsset from "@/assets/weybridge-logo-no-bg.png.asset.json";
 import { assetUrl } from "@/lib/assetUrl";
@@ -13,8 +13,7 @@ const navCls = ({ isActive }: { isActive: boolean }) =>
   }`;
 
 export default function MembersLayout({ children }: { children: React.ReactNode }) {
-  const { profile, isAdmin, isSecretary, isWorshipfulMaster, isDirectorOfCeremonies, canManageProgression, canManageSummons, canAccessAlmoner, canAccessCharity, canAccessAdminArea, signOut } = useAuth();
-  const canSeeMatrix = isAdmin || isWorshipfulMaster || isDirectorOfCeremonies;
+  const { profile, isAdmin, isWorshipfulMaster, isDirectorOfCeremonies, canManageProgression, canManageSummons, canAccessAlmoner, canAccessCharity, canAccessTreasurer, canAccessAdminArea, signOut } = useAuth();
   const navigate = useNavigate();
   const [drawerOpen, setDrawerOpen] = useState(false);
 
@@ -54,8 +53,8 @@ export default function MembersLayout({ children }: { children: React.ReactNode 
         <Utensils className="w-4 h-4" /> Lodge Meetings
       </NavLink>
       {canManageSummons && (
-        <NavLink to="/members/summons" className={navCls}>
-          <Mail className="w-4 h-4" /> Summons Builder
+        <NavLink to="/members/admin/secretary" className={navCls}>
+          <Mail className="w-4 h-4" /> Secretary Portal
         </NavLink>
       )}
       {canAccessAlmoner && (
@@ -65,7 +64,12 @@ export default function MembersLayout({ children }: { children: React.ReactNode 
       )}
       {canAccessCharity && (
         <NavLink to="/members/admin/charity" className={navCls}>
-          <Banknote className="w-4 h-4" /> Charity Steward
+          <Banknote className="w-4 h-4" /> Charity Steward Portal
+        </NavLink>
+      )}
+      {canAccessTreasurer && (
+        <NavLink to="/members/admin/treasurer" className={navCls}>
+          <Wallet className="w-4 h-4" /> Treasurer Portal
         </NavLink>
       )}
       {canAccessAdminArea && (
@@ -82,12 +86,7 @@ export default function MembersLayout({ children }: { children: React.ReactNode 
       </NavLink>
       {(isAdmin || canManageProgression) && (
         <NavLink to="/members/admin/development" className={navCls}>
-          <GraduationCap className="w-4 h-4" /> Member Development
-        </NavLink>
-      )}
-      {canSeeMatrix && (
-        <NavLink to="/members/admin/skills-matrix" className={navCls}>
-          <BarChart3 className="w-4 h-4" /> Skills Matrix
+          <GraduationCap className="w-4 h-4" /> Mentor Portal
         </NavLink>
       )}
       <NavLink to="/members/working-groups" className={navCls}>
@@ -96,16 +95,6 @@ export default function MembersLayout({ children }: { children: React.ReactNode 
       {canManageProgression && (
         <NavLink to="/members/officers-tracker" className={navCls}>
           <Crown className="w-4 h-4" /> Officers Tracker
-        </NavLink>
-      )}
-      {(isAdmin || isSecretary) && (
-        <NavLink to="/members/events" className={navCls}>
-          <CalendarPlus className="w-4 h-4" /> Meetings
-        </NavLink>
-      )}
-      {canManageProgression && (
-        <NavLink to="/members/kpis" className={navCls}>
-          <BarChart3 className="w-4 h-4" /> KPIs
         </NavLink>
       )}
       {isAdmin && (
