@@ -110,7 +110,14 @@ export default function Kpis() {
   const pl = pipeline(bundle);
   const my = currentMasonicYear();
   const maxBand = Math.max(1, ...s.ageBands.map((b) => b.count));
-  const funnelMax = Math.max(1, pl.candidates.length, pl.ea.length, pl.fc.length, pl.mm.length);
+  const funnelMax = Math.max(
+    1,
+    pl.candidates.length,
+    pl.ea.length,
+    pl.fc.length,
+    pl.mmPlain.length,
+    pl.pm.length
+  );
 
   return (
     <MembersLayout>
@@ -293,13 +300,14 @@ export default function Kpis() {
             <Stat label="Candidates" value={pl.candidates.length} />
             <Stat label="EA → FC" value={pl.ea.length} />
             <Stat label="FC → MM" value={pl.fc.length} />
-            <Stat label="Master Masons" value={pl.mm.length} />
+            <Stat label="Master Masons" value={pl.mm} />
           </div>
           <div className="space-y-1.5">
             <BarRow label="Cand." value={pl.candidates.length} max={funnelMax} />
             <BarRow label="EA" value={pl.ea.length} max={funnelMax} />
             <BarRow label="FC" value={pl.fc.length} max={funnelMax} />
-            <BarRow label="MM" value={pl.mm.length} max={funnelMax} />
+            <BarRow label="MM" value={pl.mmPlain.length} max={funnelMax} />
+            <BarRow label="PM" value={pl.pm.length} max={funnelMax} />
           </div>
           <div className="mt-6 pt-5 border-t border-gold/10">
             <h3 className="font-serif text-base text-gold mb-3">Prospective candidates</h3>
