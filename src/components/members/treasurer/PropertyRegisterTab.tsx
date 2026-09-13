@@ -7,7 +7,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
-import { Loader2, Plus, Pencil, Trash2, FileDown, Camera, X, ChevronLeft, ChevronRight, Upload } from "lucide-react";
+import { Loader2, Plus, Pencil, Trash2, FileDown, Camera, X, ChevronLeft, ChevronRight, Upload, CalendarClock, CheckCircle2 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { toUploadBody } from "@/lib/nativeUpload";
 import autoTable from "jspdf-autotable";
 import { reportPdfDoc, INK, GOLD, NAVY } from "@/lib/treasurer/reports";
@@ -42,7 +43,37 @@ type Item = {
   date_acquired: string | null;
   location: string | null;
   notes: string | null;
+  last_audited_date: string | null;
 };
+
+function auditBadge(r: Item) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  if (!r.last_audited_date) {
+    return (
+      <Badge variant="outline" className="border-red-500/50 text-red-400 text-[10px] px-1.5 py-0">
+        <CalendarClock className="w-3 h-3 mr-1" /> Audit overdue
+      </Badge>
+    );
+  }
+  const audited = new Date(r.last_audited_date);
+  const months = (today.getFullYear() - audited.getFullYear()) * 12 + (today.getMonth() - audited.getMonth());
+  if (months > 12 || (months === 12 && today.getDate() >= audited.getDate())) {
+    return (
+      <Badge variant="outline" className="border-red-500/50 text-red-400 text-[10px] px-1.5 py-0">
+        <CalendarClock className="w-3 h-3 mr-1" /> Audit overdue
+      </Badge>
+    );
+  }
+  if (months >= 11) {
+    return (
+      <Badge variant="outline" className="border-amber-400/50 text-amber-300 text-[10px] px-1.5 py-0">
+        <CalendarClock className="w-3 h-3 mr-1" /> Audit due soon
+      </Badge>
+    );
+  }
+  return null;
+}
 
 export async function buildPropertyRegisterPdf(rows: Item[], totalPence: number) {
   const { doc, pageW, margin } = await reportPdfDoc(
