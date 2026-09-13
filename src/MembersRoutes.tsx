@@ -85,6 +85,7 @@ const MembersRoutes = () => (
         <Route path="admin/secretary" element={<ProtectedRoute><SecretaryPortal /></ProtectedRoute>} />
         <Route path="admin/festive-board" element={<ProtectedRoute><FestiveBoardAdmin /></ProtectedRoute>} />
         <Route path="admin/loi" element={<ProtectedRoute><LoiAdmin /></ProtectedRoute>} />
+        <Route path="admin/returns" element={<ProtectedRoute><SecretaryReturns /></ProtectedRoute>} />
         <Route path="working-groups" element={<WorkingGroupsIndex />} />
         <Route path="working-groups/admin" element={<WorkingGroupsAdmin />} />
         <Route path="working-groups/socials" element={<AdHocSocials />} />
