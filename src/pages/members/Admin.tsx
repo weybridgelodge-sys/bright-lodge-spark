@@ -2,13 +2,25 @@ import { useEffect, useState } from "react";
 import MembersLayout from "@/components/members/MembersLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Check, X, ShieldPlus, ShieldMinus, Plus, Trash2, Pencil, HeartHandshake } from "lucide-react";
+import { Check, X, ShieldPlus, ShieldMinus, Plus, Trash2, Pencil, HeartHandshake, FileCheck, Download } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { formatMemberLine } from "@/lib/summons";
+import { useNavigate } from "react-router-dom";
 
 type Degree = "entered_apprentice" | "fellow_craft" | "master_mason";
 type Title = "Bro" | "W Bro" | "VW Bro" | "RW Bro";
 type Status = "pending" | "active" | "suspended" | "year_out" | "resigned" | "excluded" | "deceased";
+
+const SECRETARY_RETURN_LABELS: Record<string, string> = {
+  form_p: "Form P",
+  lp_a5_certificate: "LP&A5 certificate application",
+  candidate_letter: "Candidate letter",
+  clearance_letter: "Clearance letter",
+  change_of_status: "Change of status",
+  installation_return: "Installation Return",
+  provincial_return: "Provincial Return",
+  other: "Other",
+};
 
 const TITLES: Title[] = ["Bro", "W Bro", "VW Bro", "RW Bro"];
 const STATUSES: { value: Status; label: string }[] = [
@@ -122,6 +134,28 @@ export default function MembersAdmin() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [busy, setBusy] = useState(false);
   const isEdit = !!form.id;
+  const navigate = useNavigate();
+  const [memberReturns, setMemberReturns] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (!form.id) {
+      setMemberReturns([]);
+      return;
+    }
+    (async () => {
+      const { data } = await (supabase.from as any)("secretary_returns")
+        .select("id,return_type,status,date_submitted,date_due,file_path")
+        .eq("member_id", form.id)
+        .order("created_at", { ascending: false });
+      setMemberReturns(data ?? []);
+    })();
+  }, [form.id]);
+
+  const openReturnFile = async (path: string) => {
+    const { data, error } = await supabase.storage.from("secretary-returns").createSignedUrl(path, 300);
+    if (error || !data) return toast.error(error?.message ?? "Could not open file");
+    window.open(data.signedUrl, "_blank", "noopener,noreferrer");
+  };
 
   const load = async () => {
     const [{ data: p, error: pErr }, { data: r, error: rErr }, { data: n, error: nErr }] = await Promise.all([
@@ -845,6 +879,46 @@ export default function MembersAdmin() {
             </div>
           </div>
 
+
+          {isEdit && (
+            <div className="border-t border-gold/15 pt-4 space-y-2">
+              <div className="flex items-center justify-between gap-2 flex-wrap">
+                <div className="flex items-center gap-2 text-gold">
+                  <FileCheck className="w-4 h-4" />
+                  <h3 className="font-serif text-sm">Returns &amp; Certificates</h3>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => navigate("/members/admin/returns")}
+                  className="text-xs uppercase tracking-wider text-primary-foreground/60 hover:text-gold"
+                >
+                  Log a return for this member
+                </button>
+              </div>
+              {memberReturns.length === 0 ? (
+                <p className="text-xs text-primary-foreground/60">No returns logged for this member.</p>
+              ) : (
+                <ul className="space-y-1">
+                  {memberReturns.map((r) => (
+                    <li key={r.id} className="text-xs text-primary-foreground/75 flex items-center gap-2 flex-wrap">
+                      <span className="text-gold/90">{SECRETARY_RETURN_LABELS[r.return_type] ?? r.return_type}</span>
+                      <span>· {r.date_submitted ?? r.date_due ?? "—"}</span>
+                      <span>· {r.status}</span>
+                      {r.file_path && (
+                        <button
+                          type="button"
+                          onClick={() => openReturnFile(r.file_path)}
+                          className="inline-flex items-center gap-1 text-gold hover:underline"
+                        >
+                          <Download className="w-3 h-3" /> File
+                        </button>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
 
           <div className="flex items-center gap-3 pt-1">
             <button
