@@ -45,6 +45,7 @@ export type Appointment = { position_key: string; member_id: string; lodge_year:
 
 export type CandidateStage =
   | "enquiry"
+  | "information_provided"
   | "face_to_face"
   | "form_p"
   | "interviewed"
@@ -408,6 +409,7 @@ export function pipeline(bundle: KpiBundle) {
 
 export const CANDIDATE_STAGE_LABELS: Record<CandidateStage, string> = {
   enquiry: "Enquiry",
+  information_provided: "Information Provided",
   face_to_face: "Face to Face",
   form_p: "Form P",
   interviewed: "Interviewed",
@@ -418,6 +420,7 @@ export const CANDIDATE_STAGE_LABELS: Record<CandidateStage, string> = {
 
 export const CANDIDATE_STAGE_ORDER: CandidateStage[] = [
   "enquiry",
+  "information_provided",
   "face_to_face",
   "form_p",
   "interviewed",

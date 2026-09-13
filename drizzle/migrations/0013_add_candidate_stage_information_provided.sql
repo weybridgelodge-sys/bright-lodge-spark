@@ -1,0 +1,1 @@
+ALTER TYPE public.candidate_stage ADD VALUE IF NOT EXISTS 'information_provided' AFTER 'enquiry';
