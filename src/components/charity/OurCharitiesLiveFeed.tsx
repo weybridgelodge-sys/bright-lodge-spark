@@ -57,7 +57,7 @@ export default function OurCharitiesLiveFeed() {
 
   if (!totals && rows.length === 0) return null;
 
-  const yearTotal = rows.reduce((a, r) => a + r.year_total, 0);
+  const yearTotal = totals ? totals.current_year_total : rows.reduce((a, r) => a + r.year_total, 0);
   const rawPct = festival && festival.target_amount > 0 ? (festivalCumulative / festival.target_amount) * 100 : 0;
   const barPct = Math.min(100, rawPct);
   const targetReached = festival ? festivalCumulative >= festival.target_amount && festival.target_amount > 0 : false;
