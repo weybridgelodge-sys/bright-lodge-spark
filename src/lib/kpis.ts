@@ -399,12 +399,14 @@ export function pipeline(bundle: KpiBundle) {
   const fc = members.filter(
     (m) => m.status === "active" && m.degree === "fellow_craft" && !m.raising_date
   );
-  const mm = members.filter(
-    (m) =>
-      m.status === "active" &&
-      (m.degree === "master_mason" || m.degree === "installed_master" || m.is_past_master)
+  const mmPlain = members.filter(
+    (m) => m.status === "active" && m.degree === "master_mason" && !m.is_past_master
   );
-  return { candidates, ea, fc, mm };
+  const pm = members.filter(
+    (m) => m.status === "active" && (m.degree === "installed_master" || m.is_past_master)
+  );
+  const mm = mmPlain.length + pm.length;
+  return { candidates, ea, fc, mm, mmPlain, pm };
 }
 
 export const CANDIDATE_STAGE_LABELS: Record<CandidateStage, string> = {
