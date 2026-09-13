@@ -54,6 +54,9 @@ const STATUS_LABELS: Record<ReturnStatus, string> = {
   acknowledged: "Acknowledged",
 };
 
+const currentLodgeYear = masonicYearStart();
+const MASONIC_YEAR_OPTIONS = Array.from({ length: 21 }, (_, i) => currentLodgeYear - 5 + i);
+
 type Row = {
   id: string;
   return_type: ReturnType;
