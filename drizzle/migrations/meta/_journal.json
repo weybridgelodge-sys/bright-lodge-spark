@@ -127,6 +127,13 @@
       "when": 1789320601927,
       "tag": "0017_secretary_returns_storage_policies",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1789329291267,
+      "tag": "0018_add_last_audited_to_property_items",
+      "breakpoints": true
     }
   ]
 }

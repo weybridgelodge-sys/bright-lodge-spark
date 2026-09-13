@@ -1761,6 +1761,7 @@ export type Database = {
           date_acquired: string | null
           id: string
           item: string
+          last_audited_date: string | null
           location: string | null
           notes: string | null
           updated_at: string
@@ -1773,6 +1774,7 @@ export type Database = {
           date_acquired?: string | null
           id?: string
           item: string
+          last_audited_date?: string | null
           location?: string | null
           notes?: string | null
           updated_at?: string
@@ -1785,6 +1787,7 @@ export type Database = {
           date_acquired?: string | null
           id?: string
           item?: string
+          last_audited_date?: string | null
           location?: string | null
           notes?: string | null
           updated_at?: string
