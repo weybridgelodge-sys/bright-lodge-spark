@@ -82,7 +82,7 @@ export async function buildPropertyRegisterPdf(rows: Item[], totalPence: number)
   );
   autoTable(doc, {
     startY: 135,
-    head: [["Item", "Count", "Location", "Value", "Condition", "Date acquired", "Notes", "Checked / present?"]],
+    head: [["Item", "Count", "Location", "Value", "Condition", "Date acquired", "Last audited", "Notes", "Checked / present?"]],
     body: rows.map((r) => [
       r.item,
       String(r.count ?? 0),
@@ -90,10 +90,11 @@ export async function buildPropertyRegisterPdf(rows: Item[], totalPence: number)
       money(r.value_pence ?? 0),
       r.condition ?? "—",
       fmtDate(r.date_acquired),
+      fmtDate(r.last_audited_date),
       r.notes ?? "",
       "",
     ]),
-    foot: [["Total estimated value", "", "", money(totalPence), "", "", "", ""]],
+    foot: [["Total estimated value", "", "", money(totalPence), "", "", "", "", ""]],
     margin: { left: margin, right: margin, bottom: 50 },
     styles: { font: "helvetica", fontSize: 8, cellPadding: 4, textColor: INK, lineColor: [220, 215, 200], lineWidth: 0.4, overflow: "linebreak" },
     headStyles: { fillColor: GOLD, textColor: NAVY, fontStyle: "bold" },
@@ -105,10 +106,11 @@ export async function buildPropertyRegisterPdf(rows: Item[], totalPence: number)
       1: { cellWidth: 34, halign: "right" },
       2: { cellWidth: 70 },
       3: { cellWidth: 55, halign: "right" },
-      4: { cellWidth: 60 },
-      5: { cellWidth: 62 },
-      6: { cellWidth: 80 },
-      7: { cellWidth: 50 },
+      4: { cellWidth: 55 },
+      5: { cellWidth: 58 },
+      6: { cellWidth: 58 },
+      7: { cellWidth: 75 },
+      8: { cellWidth: 45 },
     },
     didParseCell: (data) => {
       if (data.section === "foot" && data.column.index === 3) {
@@ -152,7 +154,7 @@ export default function PropertyRegisterTab({ canEdit }: { canEdit: boolean }) {
     setLoading(true);
     const { data, error } = await supabase
       .from("lodge_property_items" as any)
-      .select("id,item,count,value_pence,condition,date_acquired,location,notes")
+      .select("id,item,count,value_pence,condition,date_acquired,location,notes,last_audited_date")
       .order("item", { ascending: true });
     if (error) toast({ title: "Could not load property register", description: error.message, variant: "destructive" });
     setRows(((data as unknown as Item[]) ?? []));
