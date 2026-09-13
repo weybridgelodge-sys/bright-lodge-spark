@@ -45,6 +45,7 @@ export type Appointment = { position_key: string; member_id: string; lodge_year:
 
 export type CandidateStage =
   | "enquiry"
+  | "information_provided"
   | "face_to_face"
   | "form_p"
   | "interviewed"
