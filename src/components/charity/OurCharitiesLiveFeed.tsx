@@ -5,7 +5,7 @@ import { highestAwardAchieved } from "@/lib/charity/festivalAwards";
 const gbp = (n: number) => new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP", maximumFractionDigits: 0 }).format(n);
 
 type YearRow = { charity_id: string; name: string; website: string | null; year_total: number };
-type Totals = { total_raised: number; public_feed_start_date: string | null };
+type Totals = { total_raised: number; current_year_total: number; public_feed_start_date: string | null };
 type Festival = { festival_name: string; target_amount: number };
 type FeedMetrics = {
   total_raised: number;
@@ -31,11 +31,19 @@ export default function OurCharitiesLiveFeed() {
       ]);
       if (m) {
         const metrics = m as FeedMetrics;
-        setTotals({ total_raised: Number(metrics.total_raised), public_feed_start_date: metrics.public_feed_start_date });
+        setTotals({
+          total_raised: Number(metrics.total_raised),
+          current_year_total: Number(metrics.current_year_total),
+          public_feed_start_date: metrics.public_feed_start_date,
+        });
         setFestival({ festival_name: metrics.festival_name, target_amount: Number(metrics.festival_target_amount) });
         setFestivalCumulative(Number(metrics.festival_total));
       } else if (t) {
-        setTotals({ total_raised: Number((t as any).total_raised), public_feed_start_date: (t as any).public_feed_start_date });
+        setTotals({
+          total_raised: Number((t as any).total_raised),
+          current_year_total: 0,
+          public_feed_start_date: (t as any).public_feed_start_date,
+        });
       }
       if (r) {
         const mappedRows = (r as any[]).map((x) => ({ ...x, year_total: Number(x.year_total) }));
@@ -49,7 +57,7 @@ export default function OurCharitiesLiveFeed() {
 
   if (!totals && rows.length === 0) return null;
 
-  const yearTotal = rows.reduce((a, r) => a + r.year_total, 0);
+  const yearTotal = totals ? totals.current_year_total : rows.reduce((a, r) => a + r.year_total, 0);
   const rawPct = festival && festival.target_amount > 0 ? (festivalCumulative / festival.target_amount) * 100 : 0;
   const barPct = Math.min(100, rawPct);
   const targetReached = festival ? festivalCumulative >= festival.target_amount && festival.target_amount > 0 : false;
