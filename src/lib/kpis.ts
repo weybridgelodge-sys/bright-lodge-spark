@@ -63,6 +63,7 @@ export type Candidate = {
   stage: CandidateStage;
   notes: string | null;
   date_of_enquiry: string | null;
+  initiation_scheduled_date: string | null;
   converted_member_id: string | null;
   created_at: string;
   updated_at: string;

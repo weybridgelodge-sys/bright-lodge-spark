@@ -19,6 +19,7 @@ const EMPTY: Omit<Candidate, "id" | "created_at" | "updated_at"> = {
   stage: "enquiry",
   notes: "",
   date_of_enquiry: new Date().toISOString().slice(0, 10),
+  initiation_scheduled_date: null,
   converted_member_id: null,
 };
 
