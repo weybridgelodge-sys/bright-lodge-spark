@@ -108,8 +108,10 @@ function memberDisplay(m: Member) {
 const fmtDate = (s: string) =>
   new Date(s).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
 
-export default function FestiveBoardRegister() {
-  const { canManageLOI, user } = useAuth();
+export default function FestiveBoardAdmin() {
+  const { isAdmin, isSecretary, isAssistantSecretary, user } = useAuth();
+  const canEdit = isAdmin || isSecretary || isAssistantSecretary;
+  const canManageLOI = canEdit;
   const { toast } = useToast();
   const [meetings, setMeetings] = useState<Meeting[]>([]);
   const [attendance, setAttendance] = useState<Attendance[]>([]);
@@ -157,19 +159,6 @@ export default function FestiveBoardRegister() {
     return map;
   }, [attendance]);
 
-  // My attendance — meetings where I'm marked attended
-  const myAttendance = useMemo(() => {
-    if (!user) return [];
-    return attendance
-      .filter((a) => a.member_id === user.id)
-      .map((a) => ({ a, m: meetings.find((x) => x.id === a.meeting_id) }))
-      .filter((x) => x.m)
-      .sort((a, b) => b.m!.meeting_date.localeCompare(a.m!.meeting_date));
-  }, [attendance, meetings, user]);
-
-  const myAttendedCount = myAttendance.filter(
-    (x) => x.a.attendance_status === "attended"
-  ).length;
 
   const handleDelete = async (id: string) => {
     if (!confirm("Delete this Lodge Meeting record and all attendance?")) return;
@@ -359,12 +348,20 @@ export default function FestiveBoardRegister() {
   };
 
 
+  if (!canEdit) {
+    return (
+      <MembersLayout>
+        <p className="text-primary-foreground/70">You don't have permission to manage the Festive Board Register.</p>
+      </MembersLayout>
+    );
+  }
+
   return (
     <MembersLayout>
       <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1 className="font-serif text-3xl text-gold mb-1 flex items-center gap-2">
-            <Utensils className="w-6 h-6" /> Lodge Meetings Register
+            <Utensils className="w-6 h-6" /> Festive Board Register
           </h1>
           <p className="text-primary-foreground/60 text-sm">
             Meeting attendance, visitors, walk-ins and payment records.
@@ -380,38 +377,6 @@ export default function FestiveBoardRegister() {
         )}
       </div>
 
-      {/* My attendance */}
-      <section className="bg-navy-dark/60 border border-gold/15 rounded-sm p-5 mb-6">
-        <h2 className="font-serif text-lg text-gold mb-3">My Lodge Meeting attendance</h2>
-        <p className="text-xs text-primary-foreground/60 mb-3">
-          <span className="text-gold font-semibold">{myAttendedCount}</span> meeting
-          {myAttendedCount === 1 ? "" : "s"} attended
-        </p>
-        {myAttendance.length === 0 ? (
-          <p className="text-xs text-primary-foreground/50 italic">
-            No Lodge Meeting attendance recorded for you yet.
-          </p>
-        ) : (
-          <ul className="space-y-1.5 text-sm">
-            {myAttendance.map(({ a, m }) => (
-              <li
-                key={a.id}
-                className="flex flex-wrap justify-between gap-2 border-l-2 border-gold/40 pl-3 py-1"
-              >
-                <span>
-                  {fmtDate(m!.meeting_date)}{" "}
-                  <span className="text-primary-foreground/60">
-                    · {meetingTypeLabel(m!.meeting_type)}
-                  </span>
-                </span>
-                <span className="text-gold text-xs">
-                  {attendanceStatusLabel(a.attendance_status)}
-                </span>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
 
       {/* Waitlist (venue capacity overflow) */}
       {waitlist.length > 0 && (
