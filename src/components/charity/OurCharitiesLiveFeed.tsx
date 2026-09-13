@@ -31,11 +31,19 @@ export default function OurCharitiesLiveFeed() {
       ]);
       if (m) {
         const metrics = m as FeedMetrics;
-        setTotals({ total_raised: Number(metrics.total_raised), public_feed_start_date: metrics.public_feed_start_date });
+        setTotals({
+          total_raised: Number(metrics.total_raised),
+          current_year_total: Number(metrics.current_year_total),
+          public_feed_start_date: metrics.public_feed_start_date,
+        });
         setFestival({ festival_name: metrics.festival_name, target_amount: Number(metrics.festival_target_amount) });
         setFestivalCumulative(Number(metrics.festival_total));
       } else if (t) {
-        setTotals({ total_raised: Number((t as any).total_raised), public_feed_start_date: (t as any).public_feed_start_date });
+        setTotals({
+          total_raised: Number((t as any).total_raised),
+          current_year_total: 0,
+          public_feed_start_date: (t as any).public_feed_start_date,
+        });
       }
       if (r) {
         const mappedRows = (r as any[]).map((x) => ({ ...x, year_total: Number(x.year_total) }));
