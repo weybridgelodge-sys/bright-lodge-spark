@@ -7,7 +7,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
-import { Loader2, Plus, Pencil, Trash2, FileDown, Camera, X, ChevronLeft, ChevronRight, Upload } from "lucide-react";
+import { Loader2, Plus, Pencil, Trash2, FileDown, Camera, X, ChevronLeft, ChevronRight, Upload, CalendarClock, CheckCircle2 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { toUploadBody } from "@/lib/nativeUpload";
 import autoTable from "jspdf-autotable";
 import { reportPdfDoc, INK, GOLD, NAVY } from "@/lib/treasurer/reports";
@@ -42,7 +43,37 @@ type Item = {
   date_acquired: string | null;
   location: string | null;
   notes: string | null;
+  last_audited_date: string | null;
 };
+
+function auditBadge(r: Item) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  if (!r.last_audited_date) {
+    return (
+      <Badge variant="outline" className="border-red-500/50 text-red-400 text-[10px] px-1.5 py-0">
+        <CalendarClock className="w-3 h-3 mr-1" /> Audit overdue
+      </Badge>
+    );
+  }
+  const audited = new Date(r.last_audited_date);
+  const months = (today.getFullYear() - audited.getFullYear()) * 12 + (today.getMonth() - audited.getMonth());
+  if (months > 12 || (months === 12 && today.getDate() >= audited.getDate())) {
+    return (
+      <Badge variant="outline" className="border-red-500/50 text-red-400 text-[10px] px-1.5 py-0">
+        <CalendarClock className="w-3 h-3 mr-1" /> Audit overdue
+      </Badge>
+    );
+  }
+  if (months >= 11) {
+    return (
+      <Badge variant="outline" className="border-amber-400/50 text-amber-300 text-[10px] px-1.5 py-0">
+        <CalendarClock className="w-3 h-3 mr-1" /> Audit due soon
+      </Badge>
+    );
+  }
+  return null;
+}
 
 export async function buildPropertyRegisterPdf(rows: Item[], totalPence: number) {
   const { doc, pageW, margin } = await reportPdfDoc(
@@ -51,7 +82,7 @@ export async function buildPropertyRegisterPdf(rows: Item[], totalPence: number)
   );
   autoTable(doc, {
     startY: 135,
-    head: [["Item", "Count", "Location", "Value", "Condition", "Date acquired", "Notes", "Checked / present?"]],
+    head: [["Item", "Count", "Location", "Value", "Condition", "Date acquired", "Last audited", "Notes", "Checked / present?"]],
     body: rows.map((r) => [
       r.item,
       String(r.count ?? 0),
@@ -59,10 +90,11 @@ export async function buildPropertyRegisterPdf(rows: Item[], totalPence: number)
       money(r.value_pence ?? 0),
       r.condition ?? "—",
       fmtDate(r.date_acquired),
+      fmtDate(r.last_audited_date),
       r.notes ?? "",
       "",
     ]),
-    foot: [["Total estimated value", "", "", money(totalPence), "", "", "", ""]],
+    foot: [["Total estimated value", "", "", money(totalPence), "", "", "", "", ""]],
     margin: { left: margin, right: margin, bottom: 50 },
     styles: { font: "helvetica", fontSize: 8, cellPadding: 4, textColor: INK, lineColor: [220, 215, 200], lineWidth: 0.4, overflow: "linebreak" },
     headStyles: { fillColor: GOLD, textColor: NAVY, fontStyle: "bold" },
@@ -74,10 +106,11 @@ export async function buildPropertyRegisterPdf(rows: Item[], totalPence: number)
       1: { cellWidth: 34, halign: "right" },
       2: { cellWidth: 70 },
       3: { cellWidth: 55, halign: "right" },
-      4: { cellWidth: 60 },
-      5: { cellWidth: 62 },
-      6: { cellWidth: 80 },
-      7: { cellWidth: 50 },
+      4: { cellWidth: 55 },
+      5: { cellWidth: 58 },
+      6: { cellWidth: 58 },
+      7: { cellWidth: 75 },
+      8: { cellWidth: 45 },
     },
     didParseCell: (data) => {
       if (data.section === "foot" && data.column.index === 3) {
@@ -110,6 +143,7 @@ export default function PropertyRegisterTab({ canEdit }: { canEdit: boolean }) {
   const [dateAcquired, setDateAcquired] = useState("");
   const [location, setLocation] = useState("");
   const [notes, setNotes] = useState("");
+  const [lastAudited, setLastAudited] = useState("");
 
   const [images, setImages] = useState<PropertyImage[]>([]);
   const [uploading, setUploading] = useState(false);
@@ -121,7 +155,7 @@ export default function PropertyRegisterTab({ canEdit }: { canEdit: boolean }) {
     setLoading(true);
     const { data, error } = await supabase
       .from("lodge_property_items" as any)
-      .select("id,item,count,value_pence,condition,date_acquired,location,notes")
+      .select("id,item,count,value_pence,condition,date_acquired,location,notes,last_audited_date")
       .order("item", { ascending: true });
     if (error) toast({ title: "Could not load property register", description: error.message, variant: "destructive" });
     setRows(((data as unknown as Item[]) ?? []));
@@ -248,6 +282,7 @@ export default function PropertyRegisterTab({ canEdit }: { canEdit: boolean }) {
     setDateAcquired("");
     setLocation("");
     setNotes("");
+    setLastAudited("");
   };
 
   const openNew = () => { resetForm(); setOpen(true); };
@@ -261,6 +296,7 @@ export default function PropertyRegisterTab({ canEdit }: { canEdit: boolean }) {
     setDateAcquired(r.date_acquired ?? "");
     setLocation(r.location ?? "");
     setNotes(r.notes ?? "");
+    setLastAudited(r.last_audited_date ?? "");
     setOpen(true);
   };
 
@@ -290,6 +326,7 @@ export default function PropertyRegisterTab({ canEdit }: { canEdit: boolean }) {
       date_acquired: dateAcquired || null,
       location: location.trim() || null,
       notes: notes.trim() || null,
+      last_audited_date: lastAudited || null,
     };
 
     const { error } = editingId
@@ -364,6 +401,7 @@ export default function PropertyRegisterTab({ canEdit }: { canEdit: boolean }) {
                   <th className="py-2 pr-3 text-right whitespace-nowrap">Value</th>
                   <th className="py-2 pr-3 whitespace-nowrap">Condition</th>
                   <th className="py-2 pr-3 whitespace-nowrap">Date acquired</th>
+                  <th className="py-2 pr-3 whitespace-nowrap">Last audited</th>
                   <th className="py-2 pr-3 min-w-[220px]">Notes</th>
                   <th className="py-2 pr-3 whitespace-nowrap">Photos</th>
                   {canEdit && <th className="py-2 text-right">Actions</th>}
@@ -372,7 +410,7 @@ export default function PropertyRegisterTab({ canEdit }: { canEdit: boolean }) {
               <tbody>
                 {rows.length === 0 ? (
                   <tr>
-                    <td colSpan={canEdit ? 9 : 8} className="py-3 text-primary-foreground/60">No property recorded yet.</td>
+                    <td colSpan={canEdit ? 10 : 9} className="py-3 text-primary-foreground/60">No property recorded yet.</td>
                   </tr>
                 ) : rows.map((r) => (
                   <tr key={r.id} className="border-b border-gold/10 align-top">
@@ -382,6 +420,12 @@ export default function PropertyRegisterTab({ canEdit }: { canEdit: boolean }) {
                     <td className="py-2 pr-3 text-right text-primary-foreground whitespace-nowrap">{money(r.value_pence ?? 0)}</td>
                     <td className="py-2 pr-3 text-primary-foreground/80 whitespace-nowrap">{r.condition ?? "—"}</td>
                     <td className="py-2 pr-3 text-primary-foreground/80 whitespace-nowrap">{fmtDate(r.date_acquired)}</td>
+                    <td className="py-2 pr-3 text-primary-foreground/80 whitespace-nowrap">
+                      <span className="inline-flex items-center gap-1 flex-wrap">
+                        {fmtDate(r.last_audited_date)}
+                        {auditBadge(r)}
+                      </span>
+                    </td>
                     <td className="py-2 pr-3 text-primary-foreground/70 whitespace-pre-wrap min-w-[220px]">{r.notes ?? ""}</td>
                     <td className="py-2 pr-3 whitespace-nowrap">
                       {imagesFor(r.id).length === 0 ? (
@@ -414,7 +458,7 @@ export default function PropertyRegisterTab({ canEdit }: { canEdit: boolean }) {
                 <tr className="border-t border-gold/30">
                   <td className="py-3 text-primary-foreground font-semibold" colSpan={3}>Total estimated value</td>
                   <td className="py-3 text-right text-gold font-semibold">{money(totalPence)}</td>
-                  <td className="py-3" colSpan={canEdit ? 5 : 4}></td>
+                  <td className="py-3" colSpan={canEdit ? 6 : 5}></td>
 
                 </tr>
               </tfoot>
@@ -459,6 +503,20 @@ export default function PropertyRegisterTab({ canEdit }: { canEdit: boolean }) {
             <div>
               <Label className="text-primary-foreground">Date acquired</Label>
               <Input type="date" value={dateAcquired} onChange={(e) => setDateAcquired(e.target.value)} />
+            </div>
+            <div>
+              <Label className="text-primary-foreground">Last audited</Label>
+              <div className="flex items-center gap-2">
+                <Input type="date" value={lastAudited} onChange={(e) => setLastAudited(e.target.value)} />
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="border-gold/40 text-gold hover:bg-gold/10 hover:text-gold whitespace-nowrap"
+                  onClick={() => setLastAudited(new Date().toISOString().slice(0, 10))}
+                >
+                  <CheckCircle2 className="w-4 h-4 mr-1" /> Mark as audited today
+                </Button>
+              </div>
             </div>
             <div>
               <Label className="text-primary-foreground">Notes</Label>
