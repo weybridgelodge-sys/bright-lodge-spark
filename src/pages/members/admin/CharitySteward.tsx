@@ -633,6 +633,29 @@ function LedgerTab({ charities, donations, canEdit, onChange }: {
   const drawerCharity = drawerId ? charities.find((c) => c.id === drawerId) : null;
   const drawerDonations = drawerId ? donations.filter((d) => d.charity_id === drawerId).sort((a, b) => b.donation_date.localeCompare(a.donation_date)) : [];
 
+  const deleteCharity = async (c: Charity & { total: number }) => {
+    if (!confirm("Delete this charity? It has no donations logged against it.")) return;
+    const { error } = await supabase.from("charity_ledger").delete().eq("id", c.id);
+    if (error) {
+      toast({ title: "Delete failed", description: error.message, variant: "destructive" });
+      return;
+    }
+    toast({ title: "Charity deleted" });
+    onChange();
+  };
+
+  const toggleCharityStatus = async (c: Charity) => {
+    const newStatus = c.status === "active" ? "inactive" : "active";
+    const { error } = await supabase.from("charity_ledger").update({ status: newStatus }).eq("id", c.id);
+    if (error) {
+      toast({ title: "Update failed", description: error.message, variant: "destructive" });
+      return;
+    }
+    toast({ title: `Charity ${newStatus === "active" ? "activated" : "archived"}` });
+    onChange();
+  };
+
+
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-3">
