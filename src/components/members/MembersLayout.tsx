@@ -92,11 +92,6 @@ export default function MembersLayout({ children }: { children: React.ReactNode 
       <NavLink to="/members/working-groups" className={navCls}>
         <Hexagon className="w-4 h-4" /> Working Groups
       </NavLink>
-      {canManageProgression && (
-        <NavLink to="/members/officers-tracker" className={navCls}>
-          <Crown className="w-4 h-4" /> Officers Tracker
-        </NavLink>
-      )}
       {isAdmin && (
         <NavLink to="/members/admin" className={navCls}>
           <ShieldCheck className="w-4 h-4" /> Admin
