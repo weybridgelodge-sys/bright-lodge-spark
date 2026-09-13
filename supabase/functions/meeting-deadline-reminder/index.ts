@@ -9,6 +9,7 @@
 //   ?meeting_id=<uuid>  target one specific meeting regardless of its deadline date
 //   ?test_email=a@b.c   send the real email to this address only (no push, no marking)
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { sendTransactionalEmail } from "../_shared/send-email.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -138,22 +139,17 @@ Deno.serve(async (req) => {
           ? `meeting-deadline-${m.id}-test-${crypto.randomUUID()}`
           : `meeting-deadline-${m.id}-${r.email}`;
         try {
-          const res = await fetch(`${SUPABASE_URL}/functions/v1/send-transactional-email`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json", Authorization: `Bearer ${SERVICE_ROLE}` },
-            body: JSON.stringify({
-              templateName: "meeting-deadline-reminder",
-              recipientEmail: r.email,
-              idempotencyKey,
-              templateData: {
-                meetingDate,
-                deadlineDate,
-                bookingUrl: "https://weybridgelodge.org.uk/bookings",
-              },
-            }),
+          const res = await sendTransactionalEmail({
+            templateName: "meeting-deadline-reminder",
+            recipientEmail: r.email,
+            idempotencyKey,
+            templateData: {
+              meetingDate,
+              deadlineDate,
+              bookingUrl: "https://weybridgelodge.org.uk/bookings",
+            },
           });
-          const out = await res.json().catch(() => ({}));
-          if (!res.ok) throw new Error((out as any)?.error || `HTTP ${res.status}`);
+          if (!res.ok) throw new Error(String((res.error as any) ?? `HTTP ${res.status}`));
           sent++;
         } catch (e) {
           failures.push({ email: r.email, error: (e as Error).message });
