@@ -475,6 +475,7 @@ function DonationDialog({ open, onOpenChange, editing, charities, onSaved }: {
   const [confirmed, setConfirmed] = useState(false);
   const [isFestival, setIsFestival] = useState(false);
   const [fromChest, setFromChest] = useState(false);
+  const [isPassThrough, setIsPassThrough] = useState(false);
   const [bankedDate, setBankedDate] = useState("");
   const [bankedBy, setBankedBy] = useState("");
   const [saving, setSaving] = useState(false);
@@ -488,12 +489,14 @@ function DonationDialog({ open, onOpenChange, editing, charities, onSaved }: {
       setPurpose(editing.purpose ?? ""); setMethod(editing.payment_method); setReference(editing.payment_reference ?? "");
       setAuthBy(editing.authorised_by); setConfirmed(editing.confirmation_received);
       setIsFestival(editing.is_festival_contribution); setFromChest(editing.from_relief_chest);
+      setIsPassThrough(editing.is_pass_through);
       setBankedDate(editing.banked_date ?? ""); setBankedBy(editing.banked_by ?? "");
     } else {
       setDate(new Date().toISOString().slice(0, 10));
       setCharityId(charities[0]?.id ?? ""); setAmount("0"); setHasMatch(false); setMatchAmount("0");
       setPurpose(""); setMethod("bacs");
       setReference(""); setAuthBy("wm"); setConfirmed(false); setIsFestival(false); setFromChest(false);
+      setIsPassThrough(false);
       setBankedDate(""); setBankedBy("");
     }
   }, [open, editing, charities]);
@@ -513,6 +516,7 @@ function DonationDialog({ open, onOpenChange, editing, charities, onSaved }: {
       confirmation_received: confirmed,
       is_festival_contribution: isFestival,
       from_relief_chest: fromChest,
+      is_pass_through: isPassThrough,
       banked_date: bankedDate || null,
       banked_by: bankedBy || null,
     };
@@ -589,7 +593,8 @@ function DonationDialog({ open, onOpenChange, editing, charities, onSaved }: {
           <div className="space-y-2 pt-1">
             <label className="flex items-center gap-2 text-sm"><Checkbox checked={confirmed} onCheckedChange={(v) => setConfirmed(!!v)} /> Confirmation received</label>
             <label className="flex items-center gap-2 text-sm"><Checkbox checked={isFestival} onCheckedChange={(v) => setIsFestival(!!v)} /> Counts toward Surrey 2030 Festival</label>
-            <label className="flex items-center gap-2 text-sm"><Checkbox checked={fromChest} onCheckedChange={(v) => setFromChest(!!v)} /> Drawn from Relief Chest</label>
+            <label className="flex items-center gap-2 text-sm"><Checkbox checked={fromChest} onCheckedChange={(v) => { setFromChest(!!v); if (v) setIsPassThrough(false); }} /> Drawn from Relief Chest</label>
+            <label className="flex items-center gap-2 text-sm"><Checkbox checked={isPassThrough} onCheckedChange={(v) => { setIsPassThrough(!!v); if (v) setFromChest(false); }} /> Funds held for others (pass-through)</label>
           </div>
         </div>
         <DialogFooter className="flex items-center justify-between gap-2">
