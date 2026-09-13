@@ -52,11 +52,6 @@ export default function MembersLayout({ children }: { children: React.ReactNode 
       <NavLink to="/members/festive-register" className={navCls}>
         <Utensils className="w-4 h-4" /> Lodge Meetings
       </NavLink>
-      {canManageSummons && (
-        <NavLink to="/members/admin/secretary" className={navCls}>
-          <Mail className="w-4 h-4" /> Secretary Portal
-        </NavLink>
-      )}
       {canAccessAlmoner && (
         <NavLink to="/members/almoner" className={navCls}>
           <HeartHandshake className="w-4 h-4" /> Almoner Portal
@@ -65,6 +60,16 @@ export default function MembersLayout({ children }: { children: React.ReactNode 
       {canAccessCharity && (
         <NavLink to="/members/admin/charity" className={navCls}>
           <Banknote className="w-4 h-4" /> Charity Steward Portal
+        </NavLink>
+      )}
+      {(isAdmin || canManageProgression) && (
+        <NavLink to="/members/admin/development" className={navCls}>
+          <GraduationCap className="w-4 h-4" /> Mentor Portal
+        </NavLink>
+      )}
+      {canManageSummons && (
+        <NavLink to="/members/admin/secretary" className={navCls}>
+          <Mail className="w-4 h-4" /> Secretary Portal
         </NavLink>
       )}
       {canAccessTreasurer && (
@@ -84,11 +89,6 @@ export default function MembersLayout({ children }: { children: React.ReactNode 
       <NavLink to="/members/development" className={navCls}>
         <Sprout className="w-4 h-4" /> My Development
       </NavLink>
-      {(isAdmin || canManageProgression) && (
-        <NavLink to="/members/admin/development" className={navCls}>
-          <GraduationCap className="w-4 h-4" /> Mentor Portal
-        </NavLink>
-      )}
       <NavLink to="/members/working-groups" className={navCls}>
         <Hexagon className="w-4 h-4" /> Working Groups
       </NavLink>

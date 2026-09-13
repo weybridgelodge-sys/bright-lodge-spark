@@ -33,7 +33,7 @@ const displayName = (p?: MentorOption | null) => {
   return [f, p.last_name?.trim() || ""].filter(Boolean).join(" ") || p.full_name || "Unnamed";
 };
 
-export default function MemberDevelopmentInner({ memberIdOverride }: { memberIdOverride?: string }) {
+export default function MemberDevelopmentInner({ memberIdOverride, forceReadOnly = false }: { memberIdOverride?: string; forceReadOnly?: boolean }) {
   const params = useParams<{ memberId?: string }>();
   const { user, isAdmin, isWorshipfulMaster, isDirectorOfCeremonies } = useAuth();
   const showPreceptorNotes = isAdmin || isWorshipfulMaster || isDirectorOfCeremonies;
@@ -51,7 +51,7 @@ export default function MemberDevelopmentInner({ memberIdOverride }: { memberIdO
 
   const isOwn = !!user && memberId === user.id;
   const isAssignedMentor = !!user && record?.assigned_mentor_id === user.id;
-  const canEdit = isAdmin || isWorshipfulMaster || isAssignedMentor;
+  const canEdit = !forceReadOnly && (isAdmin || isWorshipfulMaster || isAssignedMentor);
   const canEditRitual = canEdit; // RLS also allows secretary/DC server-side
 
   useEffect(() => {
@@ -180,7 +180,7 @@ export function MyDevelopmentPage() {
   return (
     <ProtectedRoute>
       <MembersLayout>
-        <MemberDevelopmentInner />
+        <MemberDevelopmentInner forceReadOnly />
       </MembersLayout>
     </ProtectedRoute>
   );
