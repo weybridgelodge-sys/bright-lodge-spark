@@ -513,6 +513,8 @@ function DonationDialog({ open, onOpenChange, editing, charities, onSaved }: {
       confirmation_received: confirmed,
       is_festival_contribution: isFestival,
       from_relief_chest: fromChest,
+      banked_date: bankedDate || null,
+      banked_by: bankedBy || null,
     };
     const { error } = editing
       ? await supabase.from("charity_donations").update(payload).eq("id", editing.id)
