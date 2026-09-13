@@ -47,7 +47,9 @@ const Rows = ({ rows, tone }: { rows: ReturnRow[]; tone: 'red' | 'amber' }) => (
         style={{ padding: '10px 0', borderBottom: i === rows.length - 1 ? 'none' : '1px solid #e8e3d3' }}
       >
         <Text style={itemName}>{r.typeLabel}</Text>
-        {r.person && <Text style={flagSoft}>• {r.person}</Text>}
+        <Text style={flagSoft}>
+          • {r.personLabel || 'Candidate'}: {(r.person || '').trim()}
+        </Text>
         <Text style={flagSoft}>• Masonic year {r.masonicYear}</Text>
         <Text style={tone === 'red' ? flagRed : flagAmber}>• Due {fmt(r.dateDue)}</Text>
       </div>
