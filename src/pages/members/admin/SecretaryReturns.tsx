@@ -403,7 +403,14 @@ function Inner() {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="text-xs text-primary-foreground/70">Masonic year</label>
-                <Input type="number" value={form.masonic_year} onChange={(e) => setForm({ ...form, masonic_year: e.target.value })} className="bg-navy border-gold/20 text-primary-foreground placeholder:text-primary-foreground/40" />
+                <Select value={form.masonic_year} onValueChange={(v) => setForm({ ...form, masonic_year: v })}>
+                  <SelectTrigger className="bg-navy border-gold/20 text-primary-foreground"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {MASONIC_YEAR_OPTIONS.map((y) => (
+                      <SelectItem key={y} value={String(y)}>Masonic year {treasurerYearBounds(y).label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div>
                 <label className="text-xs text-primary-foreground/70">Status</label>
