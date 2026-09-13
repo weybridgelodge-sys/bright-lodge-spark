@@ -83,8 +83,9 @@ function memberDisplay(m: Member) {
   return formatMemberLine(m as any) || "Unnamed brother";
 }
 
-export default function LoiRegister() {
-  const { canManageLOI, user } = useAuth();
+export default function LoiAdmin() {
+  const { isAdmin, isSecretary, isAssistantSecretary, user } = useAuth();
+  const canEdit = isAdmin || isSecretary || isAssistantSecretary;
   const { toast } = useToast();
   const [sessions, setSessions] = useState<Session[]>([]);
   const [attendance, setAttendance] = useState<Attendance[]>([]);
@@ -123,20 +124,6 @@ export default function LoiRegister() {
     }
     return map;
   }, [attendance]);
-
-  // Personal stats
-  const myYearAttendance = useMemo(() => {
-    if (!user) return [];
-    const start = masonicYearStart();
-    const cutoff = new Date(start, 9, 1); // Oct 1
-    return attendance
-      .filter((a) => a.member_id === user.id)
-      .map((a) => ({ att: a, sess: sessions.find((s) => s.id === a.session_id) }))
-      .filter((x) => x.sess && new Date(x.sess.session_date) >= cutoff)
-      .sort((a, b) =>
-        (b.sess!.session_date).localeCompare(a.sess!.session_date)
-      );
-  }, [attendance, sessions, user]);
 
   const handleDelete = async (id: string) => {
     if (!confirm("Delete this LOI session and all attendance?")) return;
