@@ -5,6 +5,7 @@
 // Body: { settings_id }
 
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { sendTransactionalEmail } from "../_shared/send-email.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -90,26 +91,21 @@ Deno.serve(async (req) => {
       const p = byMember.get((s as any).member_id);
       if (!p?.email) continue;
       try {
-        const res = await fetch(`${SUPABASE_URL}/functions/v1/send-transactional-email`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json", Authorization: `Bearer ${SERVICE_ROLE}` },
-          body: JSON.stringify({
-            templateName: "dues-price-change-notice",
-            recipientEmail: p.email,
-            idempotencyKey: `dues-notice-${settings_id}-${(s as any).member_id}`,
-            templateData: {
-              firstName: p.first_name ?? null,
-              oldAnnual: oldAnnual ? gbp(oldAnnual) : undefined,
-              newAnnual: gbp(newAnnual),
-              newMonthly: gbp(Math.round(newAnnual / 12)),
-              effectiveDate,
-              method: (s as any).method,
-              noticeDays: 10,
-            },
-          }),
+        const res = await sendTransactionalEmail({
+          templateName: "dues-price-change-notice",
+          recipientEmail: p.email,
+          idempotencyKey: `dues-notice-${settings_id}-${(s as any).member_id}`,
+          templateData: {
+            firstName: p.first_name ?? null,
+            oldAnnual: oldAnnual ? gbp(oldAnnual) : undefined,
+            newAnnual: gbp(newAnnual),
+            newMonthly: gbp(Math.round(newAnnual / 12)),
+            effectiveDate,
+            method: (s as any).method,
+            noticeDays: 10,
+          },
         });
-        const r = await res.json().catch(() => ({}));
-        if (!res.ok) throw new Error((r as any)?.error || `HTTP ${res.status}`);
+        if (!res.ok) throw new Error(String((res.error as any) ?? `HTTP ${res.status}`));
         sent++;
       } catch (e) {
         failures.push({ email: p.email, error: (e as Error).message });
