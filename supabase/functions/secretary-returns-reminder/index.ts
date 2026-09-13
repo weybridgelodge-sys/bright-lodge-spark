@@ -87,12 +87,12 @@ Deno.serve(async (req) => {
 
   try {
     const today = londonToday()
-    const horizon = addDays(today, 14)
+    const horizon = addDays(today, MAX_LEAD_DAYS)
 
     const { data: rows, error } = await supabase
       .from('secretary_returns')
       .select(
-        'id,return_type,masonic_year,date_due,member_id,candidate_id,' +
+        'id,return_type,masonic_year,date_due,member_id,candidate_id,reminder_lead_days,' +
           'member:profiles!secretary_returns_member_id_fkey(full_name,preferred_name,first_name,last_name),' +
           'candidate:candidates!secretary_returns_candidate_id_fkey(first_name,last_name)',
       )
