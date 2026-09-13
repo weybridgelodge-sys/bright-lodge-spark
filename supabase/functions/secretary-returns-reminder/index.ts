@@ -102,12 +102,21 @@ Deno.serve(async (req) => {
       .order('date_due', { ascending: true })
     if (error) throw error
 
-    const all = (rows ?? []) as any[]
+    // Per-row lead time: a row is in scope when its due date falls within its
+    // own reminder_lead_days (default 14) of today, or is already overdue.
+    const all = (rows ?? []).filter((r: any) => {
+      const lead =
+        typeof r.reminder_lead_days === 'number' && r.reminder_lead_days >= 0
+          ? r.reminder_lead_days
+          : DEFAULT_LEAD_DAYS
+      return r.date_due <= addDays(today, lead)
+    }) as any[]
     const shape = (r: any) => ({
       typeLabel: TYPE_LABELS[r.return_type] ?? r.return_type,
       masonicYear: yearLabel(r.masonic_year),
       dateDue: r.date_due,
       person: personName(r.member, r.candidate),
+      personLabel: r.member_id ? 'Member' : 'Candidate',
     })
     const overdue = all.filter((r) => r.date_due < today).map(shape)
     const dueSoon = all.filter((r) => r.date_due >= today).map(shape)
