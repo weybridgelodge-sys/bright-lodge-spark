@@ -58,9 +58,16 @@ export default function ProfileSection({
   const [royalArchDate, setRoyalArchDate] = useState(profile.royal_arch_date ?? "");
   const [proposer, setProposer] = useState(profile.proposer ?? "");
   const [grandLodgeNo, setGrandLodgeNo] = useState(profile.ugle_reg_number ?? "");
+  const [passingScheduled, setPassingScheduled] = useState(record?.passing_scheduled_date ?? "");
+  const [raisingScheduled, setRaisingScheduled] = useState(record?.raising_scheduled_date ?? "");
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => { setMentorId(record?.assigned_mentor_id ?? ""); setExperience(record?.previous_masonic_experience ?? ""); }, [record]);
+  useEffect(() => {
+    setMentorId(record?.assigned_mentor_id ?? "");
+    setExperience(record?.previous_masonic_experience ?? "");
+    setPassingScheduled(record?.passing_scheduled_date ?? "");
+    setRaisingScheduled(record?.raising_scheduled_date ?? "");
+  }, [record]);
   useEffect(() => {
     setRoyalArchDate(profile.royal_arch_date ?? "");
     setProposer(profile.proposer ?? "");
@@ -75,6 +82,8 @@ export default function ProfileSection({
         member_id: profile.id,
         assigned_mentor_id: mentorId || null,
         previous_masonic_experience: experience || null,
+        passing_scheduled_date: passingScheduled || null,
+        raising_scheduled_date: raisingScheduled || null,
       }, { onConflict: "member_id" })
       .select()
       .single();
@@ -96,11 +105,33 @@ export default function ProfileSection({
       <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
         <Field label="Name" value={displayName(profile)} />
         <Field label="Initiation" value={fmt(profile.initiation_date)} />
-        <Field label="Passed" value={fmt(profile.passing_date)} />
-        <Field label="Raised" value={fmt(profile.raising_date)} />
         <Field label="Royal Arch" value={fmt(profile.royal_arch_date)} />
         <Field label="Grand Lodge No." value={profile.ugle_reg_number || "—"} />
         <Field label="Proposer" value={profile.proposer || "—"} />
+      </div>
+
+      <div className="grid sm:grid-cols-2 gap-4">
+        {canEdit ? (
+          <>
+            <div>
+              <Label htmlFor="passing-scheduled" className="text-xs text-primary-foreground/70">Passing scheduled</Label>
+              <Input id="passing-scheduled" type="date" value={passingScheduled ?? ""} onChange={(e) => setPassingScheduled(e.target.value)} className="bg-navy-dark text-primary-foreground" />
+            </div>
+            <Field label="Passed" value={fmt(profile.passing_date)} />
+            <div>
+              <Label htmlFor="raising-scheduled" className="text-xs text-primary-foreground/70">Raising scheduled</Label>
+              <Input id="raising-scheduled" type="date" value={raisingScheduled ?? ""} onChange={(e) => setRaisingScheduled(e.target.value)} className="bg-navy-dark text-primary-foreground" />
+            </div>
+            <Field label="Raised" value={fmt(profile.raising_date)} />
+          </>
+        ) : (
+          <>
+            <Field label="Passing scheduled" value={fmt(record?.passing_scheduled_date)} />
+            <Field label="Passed" value={fmt(profile.passing_date)} />
+            <Field label="Raising scheduled" value={fmt(record?.raising_scheduled_date)} />
+            <Field label="Raised" value={fmt(profile.raising_date)} />
+          </>
+        )}
       </div>
 
       {canEdit && (

@@ -2276,7 +2276,9 @@ export type Database = {
           last_checkin_date: string | null
           member_id: string
           mentoring_exempt: boolean
+          passing_scheduled_date: string | null
           previous_masonic_experience: string | null
+          raising_scheduled_date: string | null
           updated_at: string
         }
         Insert: {
@@ -2287,7 +2289,9 @@ export type Database = {
           last_checkin_date?: string | null
           member_id: string
           mentoring_exempt?: boolean
+          passing_scheduled_date?: string | null
           previous_masonic_experience?: string | null
+          raising_scheduled_date?: string | null
           updated_at?: string
         }
         Update: {
@@ -2298,7 +2302,9 @@ export type Database = {
           last_checkin_date?: string | null
           member_id?: string
           mentoring_exempt?: boolean
+          passing_scheduled_date?: string | null
           previous_masonic_experience?: string | null
+          raising_scheduled_date?: string | null
           updated_at?: string
         }
         Relationships: [
