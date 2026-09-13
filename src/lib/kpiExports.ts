@@ -175,7 +175,7 @@ export async function exportFullKpi(bundle: KpiBundle) {
       ["Candidates awaiting Initiation", String(pl.candidates.length)],
       ["EA not yet Passed", String(pl.ea.length)],
       ["FC not yet Raised", String(pl.fc.length)],
-      ["Master Masons (incl. PMs/IM)", String(pl.mm.length)],
+      ["Master Masons (incl. PMs/IM)", String(pl.mm)],
     ],
     theme: "striped",
     headStyles: { fillColor: [27, 42, 74], textColor: [201, 164, 50] },
