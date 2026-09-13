@@ -13,7 +13,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
-import { Loader2, Plus, Pencil, Trash2, Download, Save, ExternalLink, HandCoins, HeartHandshake, BookOpen, Trophy, FileBarChart, Rss, BookCheck } from "lucide-react";
+import { Loader2, Plus, Pencil, Trash2, Download, Save, ExternalLink, HandCoins, HeartHandshake, BookOpen, Trophy, FileBarChart, Rss, BookCheck, Archive, ArchiveRestore } from "lucide-react";
 import {
   fetchCharities, fetchCollections, fetchDonations, fetchFestivalSettings,
   COLLECTION_TYPE_LABEL, PAYMENT_METHOD_LABEL, AUTHORISED_LABEL,
@@ -633,6 +633,29 @@ function LedgerTab({ charities, donations, canEdit, onChange }: {
   const drawerCharity = drawerId ? charities.find((c) => c.id === drawerId) : null;
   const drawerDonations = drawerId ? donations.filter((d) => d.charity_id === drawerId).sort((a, b) => b.donation_date.localeCompare(a.donation_date)) : [];
 
+  const deleteCharity = async (c: Charity & { total: number }) => {
+    if (!confirm("Delete this charity? It has no donations logged against it.")) return;
+    const { error } = await supabase.from("charity_ledger").delete().eq("id", c.id);
+    if (error) {
+      toast({ title: "Delete failed", description: error.message, variant: "destructive" });
+      return;
+    }
+    toast({ title: "Charity deleted" });
+    onChange();
+  };
+
+  const toggleCharityStatus = async (c: Charity) => {
+    const newStatus = c.status === "active" ? "inactive" : "active";
+    const { error } = await supabase.from("charity_ledger").update({ status: newStatus }).eq("id", c.id);
+    if (error) {
+      toast({ title: "Update failed", description: error.message, variant: "destructive" });
+      return;
+    }
+    toast({ title: `Charity ${newStatus === "active" ? "activated" : "archived"}` });
+    onChange();
+  };
+
+
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-3">
@@ -681,6 +704,26 @@ function LedgerTab({ charities, donations, canEdit, onChange }: {
                   <td className="px-4 py-2 text-right" onClick={(e) => e.stopPropagation()}>
                     <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => { setEditing(c); setOpen(true); }}>
                       <Pencil className="w-3.5 h-3.5" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7 text-red-300 hover:text-red-200"
+                      title="Delete"
+                      disabled={c.total !== 0}
+                      style={{ visibility: c.total === 0 ? "visible" : "hidden" }}
+                      onClick={(e) => { e.stopPropagation(); deleteCharity(c); }}
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7 text-primary-foreground/70 hover:text-primary-foreground"
+                      title={c.status === "active" ? "Archive" : "Activate"}
+                      onClick={(e) => { e.stopPropagation(); toggleCharityStatus(c); }}
+                    >
+                      {c.status === "active" ? <Archive className="w-3.5 h-3.5" /> : <ArchiveRestore className="w-3.5 h-3.5" />}
                     </Button>
                   </td>
                 )}
