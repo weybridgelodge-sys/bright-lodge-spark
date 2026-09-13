@@ -131,7 +131,7 @@ export async function postDonationToLedger(d: Donation, charityName: string): Pr
   if (!d.banked_date) throw new Error("Enter banked date first");
 
   const amount = pence(d.amount);
-  const debitCode = d.from_relief_chest ? "2200" : "5300";
+  const debitCode = d.is_pass_through ? "2300" : d.from_relief_chest ? "2200" : "5300";
   const lines: Line[] = [
     { code: debitCode, debit: amount, credit: 0, description: charityName },
     { code: "1000", debit: 0, credit: amount, description: "Paid from bank" },

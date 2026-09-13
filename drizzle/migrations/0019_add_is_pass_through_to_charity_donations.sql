@@ -1,0 +1,1 @@
+ALTER TABLE public.charity_donations ADD COLUMN is_pass_through boolean NOT NULL DEFAULT false;

@@ -134,6 +134,13 @@
       "when": 1789329291267,
       "tag": "0018_add_last_audited_to_property_items",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1789335719602,
+      "tag": "0019_add_is_pass_through_to_charity_donations",
+      "breakpoints": true
     }
   ]
 }

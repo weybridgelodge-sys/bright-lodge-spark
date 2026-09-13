@@ -65,6 +65,7 @@ export type Donation = {
   confirmation_received: boolean;
   is_festival_contribution: boolean;
   from_relief_chest: boolean;
+  is_pass_through: boolean;
   banked_date: string | null;
   banked_by: string | null;
   journal_entry_id: string | null;
@@ -131,7 +132,7 @@ export async function fetchDonations(): Promise<Donation[]> {
   const { data, error } = await supabase
     .from("charity_donations")
     .select(
-      "id,donation_date,charity_id,amount,match_funding_amount,purpose,payment_method,payment_reference,authorised_by,confirmation_received,is_festival_contribution,from_relief_chest,banked_date,banked_by,journal_entry_id",
+      "id,donation_date,charity_id,amount,match_funding_amount,purpose,payment_method,payment_reference,authorised_by,confirmation_received,is_festival_contribution,from_relief_chest,is_pass_through,banked_date,banked_by,journal_entry_id",
     )
 
     .order("donation_date", { ascending: false });
