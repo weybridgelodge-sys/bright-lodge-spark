@@ -82,6 +82,8 @@ export default function ProfileSection({
         member_id: profile.id,
         assigned_mentor_id: mentorId || null,
         previous_masonic_experience: experience || null,
+        passing_scheduled_date: passingScheduled || null,
+        raising_scheduled_date: raisingScheduled || null,
       }, { onConflict: "member_id" })
       .select()
       .single();
