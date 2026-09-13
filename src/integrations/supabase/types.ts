@@ -3340,6 +3340,90 @@ export type Database = {
         }
         Relationships: []
       }
+      secretary_returns: {
+        Row: {
+          candidate_id: string | null
+          created_at: string
+          created_by: string | null
+          date_due: string | null
+          date_submitted: string | null
+          file_path: string | null
+          id: string
+          masonic_year: number | null
+          member_id: string | null
+          notes: string | null
+          return_type: Database["public"]["Enums"]["secretary_return_type"]
+          status: Database["public"]["Enums"]["secretary_return_status"]
+          updated_at: string
+        }
+        Insert: {
+          candidate_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          date_due?: string | null
+          date_submitted?: string | null
+          file_path?: string | null
+          id?: string
+          masonic_year?: number | null
+          member_id?: string | null
+          notes?: string | null
+          return_type: Database["public"]["Enums"]["secretary_return_type"]
+          status?: Database["public"]["Enums"]["secretary_return_status"]
+          updated_at?: string
+        }
+        Update: {
+          candidate_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          date_due?: string | null
+          date_submitted?: string | null
+          file_path?: string | null
+          id?: string
+          masonic_year?: number | null
+          member_id?: string | null
+          notes?: string | null
+          return_type?: Database["public"]["Enums"]["secretary_return_type"]
+          status?: Database["public"]["Enums"]["secretary_return_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "secretary_returns_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "candidates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "secretary_returns_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "calendar_subscription_status"
+            referencedColumns: ["member_id"]
+          },
+          {
+            foreignKeyName: "secretary_returns_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "secretary_returns_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "calendar_subscription_status"
+            referencedColumns: ["member_id"]
+          },
+          {
+            foreignKeyName: "secretary_returns_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       stripe_payouts: {
         Row: {
           amount_pence: number
@@ -4560,6 +4644,10 @@ export type Database = {
         Returns: boolean
       }
       can_edit_newsletter: { Args: { _user: string }; Returns: boolean }
+      can_manage_secretary_returns: {
+        Args: { _user: string }
+        Returns: boolean
+      }
       can_manage_socials: { Args: { _user: string }; Returns: boolean }
       can_manage_visits: { Args: { _user: string }; Returns: boolean }
       can_view_charity: { Args: { _user: string }; Returns: boolean }
@@ -4817,6 +4905,16 @@ export type Database = {
         | "deceased"
       progression_readiness: "ready" | "needs_experience" | "non_progressive"
       ritual_doc_type: "text" | "audio" | "video"
+      secretary_return_status: "draft" | "submitted" | "acknowledged"
+      secretary_return_type:
+        | "form_p"
+        | "lp_a5_certificate"
+        | "candidate_letter"
+        | "clearance_letter"
+        | "change_of_status"
+        | "installation_return"
+        | "provincial_return"
+        | "other"
       summons_status: "draft" | "finalised" | "sent"
       welfare_contact_nature:
         | "routine"
@@ -5037,6 +5135,17 @@ export const Constants = {
       ],
       progression_readiness: ["ready", "needs_experience", "non_progressive"],
       ritual_doc_type: ["text", "audio", "video"],
+      secretary_return_status: ["draft", "submitted", "acknowledged"],
+      secretary_return_type: [
+        "form_p",
+        "lp_a5_certificate",
+        "candidate_letter",
+        "clearance_letter",
+        "change_of_status",
+        "installation_return",
+        "provincial_return",
+        "other",
+      ],
       summons_status: ["draft", "finalised", "sent"],
       welfare_contact_nature: [
         "routine",
