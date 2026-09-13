@@ -705,6 +705,26 @@ function LedgerTab({ charities, donations, canEdit, onChange }: {
                     <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => { setEditing(c); setOpen(true); }}>
                       <Pencil className="w-3.5 h-3.5" />
                     </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7 text-red-300 hover:text-red-200"
+                      title="Delete"
+                      disabled={c.total !== 0}
+                      style={{ visibility: c.total === 0 ? "visible" : "hidden" }}
+                      onClick={(e) => { e.stopPropagation(); deleteCharity(c); }}
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7 text-primary-foreground/70 hover:text-primary-foreground"
+                      title={c.status === "active" ? "Archive" : "Activate"}
+                      onClick={(e) => { e.stopPropagation(); toggleCharityStatus(c); }}
+                    >
+                      {c.status === "active" ? <Archive className="w-3.5 h-3.5" /> : <ArchiveRestore className="w-3.5 h-3.5" />}
+                    </Button>
                   </td>
                 )}
               </tr>
