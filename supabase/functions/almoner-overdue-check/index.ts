@@ -10,6 +10,7 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors'
 import { detectCelebrations, londonToday } from './celebrations.ts'
+import { sendTransactionalEmail } from '../_shared/send-email.ts'
 
 const SITE_URL = 'https://weybridgelodge.org.uk'
 const PORTAL_URL = `${SITE_URL}/members/almoner`
@@ -320,35 +321,27 @@ Deno.serve(async (req) => {
       : `almoner-overdue-${today}-c${celebrations.length}`
 
 
-    const resp = await fetch(`${supabaseUrl}/functions/v1/send-transactional-email`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${serviceKey}`,
+    const resp = await sendTransactionalEmail({
+      templateName: 'almoner-overdue-digest',
+      recipientEmail: almonerEmail,
+      idempotencyKey,
+      templateData: {
+        members: flagged,
+        celebrations: celebrations.map((c) => ({
+          name: c.name,
+          type: c.type,
+          years: c.years,
+          message: c.message,
+          whatsappUrl: c.whatsappUrl,
+        })),
+        reportDate,
+        portalUrl: PORTAL_URL,
       },
-      body: JSON.stringify({
-        templateName: 'almoner-overdue-digest',
-        recipientEmail: almonerEmail,
-        idempotencyKey,
-        templateData: {
-          members: flagged,
-          celebrations: celebrations.map((c) => ({
-            name: c.name,
-            type: c.type,
-            years: c.years,
-            message: c.message,
-            whatsappUrl: c.whatsappUrl,
-          })),
-          reportDate,
-          portalUrl: PORTAL_URL,
-        },
-      }),
     })
-    const sendResult = await resp.json().catch(() => ({}))
     if (!resp.ok) {
-      console.error('send-transactional-email failed', resp.status, sendResult)
+      console.error('almoner digest send failed', resp.status, resp.error)
       return new Response(
-        JSON.stringify({ ok: false, error: 'send_failed', detail: sendResult }),
+        JSON.stringify({ ok: false, error: 'send_failed', detail: resp.error }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
       )
     }

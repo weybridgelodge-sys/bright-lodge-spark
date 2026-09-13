@@ -4,6 +4,7 @@
 // pattern as send-summons-email.
 
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { sendTransactionalEmail } from "../_shared/send-email.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -93,27 +94,19 @@ Deno.serve(async (req) => {
         ? `poll-open-${poll.id}-test-${testRunId}-${r.email}`
         : `poll-open-${poll.id}-${r.email}`;
       try {
-        const res = await fetch(`${SUPABASE_URL}/functions/v1/send-transactional-email`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${SERVICE_ROLE}`,
+        const res = await sendTransactionalEmail({
+          templateName: "poll-opened",
+          recipientEmail: r.email,
+          idempotencyKey,
+          templateData: {
+            question,
+            options,
+            dashboardUrl,
+            closesAt,
+            liveResults,
           },
-          body: JSON.stringify({
-            templateName: "poll-opened",
-            recipientEmail: r.email,
-            idempotencyKey,
-            templateData: {
-              question,
-              options,
-              dashboardUrl,
-              closesAt,
-              liveResults,
-            },
-          }),
         });
-        const result = await res.json().catch(() => ({}));
-        if (!res.ok) throw new Error((result as any)?.error || `HTTP ${res.status}`);
+        if (!res.ok) throw new Error(String((res.error as any) ?? `HTTP ${res.status}`));
         sent++;
       } catch (e) {
         failures.push({ email: r.email, error: (e as Error).message });

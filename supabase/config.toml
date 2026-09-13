@@ -11,10 +11,6 @@ project_id = "kntcjlztmcgmagwgheyx"
     verify_jwt = true
   [functions.get-booking-by-session]
     verify_jwt = false
-  [functions.handle-email-suppression]
-    verify_jwt = false
-  [functions.handle-email-unsubscribe]
-    verify_jwt = false
   [functions.member-calendar-feed]
     verify_jwt = false
   [functions.notify-waitlist-promoted]
@@ -23,12 +19,8 @@ project_id = "kntcjlztmcgmagwgheyx"
     verify_jwt = false
   [functions.preview-transactional-email]
     verify_jwt = false
-  [functions.process-email-queue]
-    verify_jwt = true
   [functions.reviewer-signin]
     verify_jwt = false
-  [functions.send-transactional-email]
-    verify_jwt = true
   [functions.summons-link]
     verify_jwt = false
   [functions.submit-enquiry]

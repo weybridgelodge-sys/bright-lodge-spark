@@ -7,6 +7,7 @@
 // for the PDF stored in the lodge-docs bucket.
 
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { sendTransactionalEmail } from "../_shared/send-email.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -189,29 +190,21 @@ Deno.serve(async (req) => {
           ? `summons-${summons.id}-resend-${r.email}`
           : `summons-${summons.id}-${r.email}`;
       try {
-        const res = await fetch(`${SUPABASE_URL}/functions/v1/send-transactional-email`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${SERVICE_ROLE}`,
+        const res = await sendTransactionalEmail({
+          templateName: "summons-distribution",
+          recipientEmail: r.email,
+          idempotencyKey,
+          templateData: {
+            meetingDateLabel,
+            meetingNumber: summons.meeting_number,
+            pdfUrl,
+            secretaryName,
+            secretaryTitle,
+            secretaryOffice: "Secretary",
+            isTest,
           },
-          body: JSON.stringify({
-            templateName: "summons-distribution",
-            recipientEmail: r.email,
-            idempotencyKey,
-            templateData: {
-              meetingDateLabel,
-              meetingNumber: summons.meeting_number,
-              pdfUrl,
-              secretaryName,
-              secretaryTitle,
-              secretaryOffice: "Secretary",
-              isTest,
-            },
-          }),
         });
-        const result = await res.json().catch(() => ({}));
-        if (!res.ok) throw new Error((result as any)?.error || `HTTP ${res.status}`);
+        if (!res.ok) throw new Error(String((res.error as any) ?? `HTTP ${res.status}`));
 
         await admin.from("summons_email_log").insert({
           summons_id: summons.id,

@@ -1,11 +1,13 @@
-// Shared helper for server-to-server transactional email sends.
+// Shared helper for server-side app email sends.
 //
-// IMPORTANT: do NOT use `supabase.functions.invoke('send-transactional-email')`
-// from inside another edge function. Since the signing-keys change, invoke() no
-// longer forwards a service-role Authorization header, so send-transactional-email
-// rejects the call with 403 Forbidden and no email is ever queued. Always use
-// this direct fetch with the service role key (the pattern proven working in
-// almoner-overdue-check, send-summons-email, meeting-deadline-reminder).
+// Sends go directly through Lovable's managed email API (see
+// ./transactional-email-templates/send-email.ts). Suppression, retries and
+// rate limits are enforced by Lovable server-side; this wrapper keeps the
+// project's own email_send_log history and the tolerant
+// `{ ok, status, result }` return shape used across the edge functions.
+
+import { createClient } from 'npm:@supabase/supabase-js@2'
+import { sendTemplateEmail } from './transactional-email-templates/send-email.ts'
 
 export interface SendEmailPayload {
   templateName: string
@@ -15,34 +17,61 @@ export interface SendEmailPayload {
   templateData?: Record<string, unknown>
 }
 
+function logClient() {
+  const supabaseUrl = Deno.env.get('SUPABASE_URL')
+  const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+  if (!supabaseUrl || !serviceKey) return null
+  return createClient(supabaseUrl, serviceKey)
+}
+
+async function writeLog(
+  status: 'sent' | 'suppressed' | 'failed',
+  payload: SendEmailPayload,
+  errorMessage?: string,
+) {
+  const supabase = logClient()
+  if (!supabase) return
+  const { error } = await supabase.from('email_send_log').insert({
+    message_id: null,
+    template_name: payload.templateName,
+    recipient_email: payload.recipientEmail,
+    status,
+    ...(errorMessage ? { error_message: errorMessage.slice(0, 1000) } : {}),
+  })
+  if (error) {
+    console.error('email_send_log insert failed', {
+      code: error.code,
+      message: error.message,
+      status,
+    })
+  }
+}
+
 export async function sendTransactionalEmail(
   payload: SendEmailPayload,
 ): Promise<{ ok: boolean; status: number; result: unknown; error?: unknown }> {
-  const supabaseUrl = Deno.env.get('SUPABASE_URL')
-  const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
-  if (!supabaseUrl || !serviceKey) {
-    const error = 'missing service credentials'
-    console.error('sendTransactionalEmail:', error)
-    return { ok: false, status: 0, result: null, error }
-  }
-
   try {
-    const resp = await fetch(`${supabaseUrl}/functions/v1/send-transactional-email`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${serviceKey}`,
-      },
-      body: JSON.stringify(payload),
+    const result = await sendTemplateEmail(payload.templateName, payload.recipientEmail, {
+      templateData: payload.templateData as Record<string, any> | undefined,
+      idempotencyKey: payload.idempotencyKey,
+      replyTo: payload.replyTo,
     })
-    const result = await resp.json().catch(() => ({}))
-    if (!resp.ok) {
-      console.error('send-transactional-email failed', payload.templateName, resp.status, result)
-      return { ok: false, status: resp.status, result, error: result }
+
+    if (result.sent) {
+      await writeLog('sent', payload)
+      return { ok: true, status: 200, result: { success: true } }
     }
-    return { ok: true, status: resp.status, result }
+
+    await writeLog('suppressed', payload)
+    return {
+      ok: true,
+      status: 200,
+      result: { success: false, reason: 'email_suppressed' },
+    }
   } catch (e) {
-    console.error('send-transactional-email exception', payload.templateName, e)
-    return { ok: false, status: 0, result: null, error: e }
+    const message = e instanceof Error ? e.message : String(e)
+    console.error('send email failed', payload.templateName, message)
+    await writeLog('failed', payload, message)
+    return { ok: false, status: 500, result: null, error: message }
   }
 }
