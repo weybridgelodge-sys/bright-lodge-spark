@@ -136,6 +136,14 @@ export default function LoiAdmin() {
     loadAll();
   };
 
+  if (!canEdit) {
+    return (
+      <MembersLayout>
+        <p className="text-primary-foreground/70">You don't have permission to view the LOI Register.</p>
+      </MembersLayout>
+    );
+  }
+
   return (
     <MembersLayout>
       <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
@@ -147,7 +155,7 @@ export default function LoiAdmin() {
             Lodge of Instruction sessions, attendance and parts taken.
           </p>
         </div>
-        {canManageLOI && (
+        {canEdit && (
           <Button
             onClick={() => setCreating(true)}
             className="bg-gold text-navy hover:bg-gold/90"
@@ -157,43 +165,6 @@ export default function LoiAdmin() {
         )}
       </div>
 
-      {/* My attendance */}
-      <section className="bg-navy-dark/60 border border-gold/15 rounded-sm p-5 mb-6">
-        <h2 className="font-serif text-lg text-gold mb-3">My LOI attendance</h2>
-        <p className="text-xs text-primary-foreground/60 mb-3">
-          Masonic year {masonicYearStart()}–{masonicYearStart() + 1} ·{" "}
-          <span className="text-gold font-semibold">{myYearAttendance.length}</span> session
-          {myYearAttendance.length === 1 ? "" : "s"} attended
-        </p>
-        {myYearAttendance.length === 0 ? (
-          <p className="text-xs text-primary-foreground/50 italic">
-            No attendance recorded yet this Masonic year.
-          </p>
-        ) : (
-          <ul className="space-y-1.5 text-sm">
-            {myYearAttendance.map(({ att, sess }) => (
-              <li
-                key={att.id}
-                className="flex flex-wrap justify-between gap-2 border-l-2 border-gold/40 pl-3 py-1"
-              >
-                <span>
-                  {new Date(sess!.session_date).toLocaleDateString("en-GB", {
-                    day: "2-digit",
-                    month: "short",
-                    year: "numeric",
-                  })}{" "}
-                  <span className="text-primary-foreground/60">
-                    · {focusLabel(sess!.focus, sess!.focus_other)}
-                  </span>
-                </span>
-                <span className="text-gold text-xs">
-                  {partLabel(att.part, att.part_other)}
-                </span>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
 
       {/* Past sessions */}
       <section className="bg-navy-dark/60 border border-gold/15 rounded-sm p-5">
