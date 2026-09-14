@@ -3,6 +3,7 @@ import MembersLayout from "@/components/members/MembersLayout";
 import ProtectedRoute from "@/components/members/ProtectedRoute";
 import DiningReconciliationTab from "@/components/members/treasurer/DiningReconciliationTab";
 import CreditorsTab from "@/components/members/treasurer/CreditorsTab";
+import CreditorDebtorBalances from "@/components/members/treasurer/CreditorDebtorBalances";
 import DirectPaymentTab from "@/components/members/treasurer/DirectPaymentTab";
 import DirectReceiptTab from "@/components/members/treasurer/DirectReceiptTab";
 import NewMemberFeesTab from "@/components/members/treasurer/NewMemberFeesTab";
@@ -25,7 +26,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
-import { Loader2, Plus, Pencil, Trash2, Lock, Unlock, ShieldCheck, Utensils, Handshake, ArrowUpCircle, ArrowDownCircle, UserPlus, BookOpen, TrendingUp, Scale, Search, Archive, Calculator, Landmark, PartyPopper } from "lucide-react";
+import { Loader2, Plus, Pencil, Trash2, Lock, Unlock, ShieldCheck, Utensils, Handshake, ArrowUpCircle, ArrowDownCircle, UserPlus, BookOpen, TrendingUp, Scale, Search, Archive, Calculator, Landmark, PartyPopper, Users } from "lucide-react";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 type Period = {
@@ -319,6 +320,15 @@ function Inner() {
             </TabsTrigger>
             {canEditTx && (
               <TabsTrigger
+                value="creditor-debtor-balances"
+                className="w-full flex items-center justify-start gap-3 px-4 py-3 rounded-sm text-sm font-sans text-primary-foreground/80 transition-colors hover:text-gold hover:bg-navy-light/40 data-[state=active]:bg-gold/15 data-[state=active]:text-gold data-[state=active]:shadow-none"
+              >
+                <Users className="w-4 h-4 shrink-0" />
+                <span>Creditor &amp; Debtor Balances</span>
+              </TabsTrigger>
+            )}
+            {canEditTx && (
+              <TabsTrigger
                 value="creditors"
                 className="w-full flex items-center justify-start gap-3 px-4 py-3 rounded-sm text-sm font-sans text-primary-foreground/80 transition-colors hover:text-gold hover:bg-navy-light/40 data-[state=active]:bg-gold/15 data-[state=active]:text-gold data-[state=active]:shadow-none"
               >
@@ -426,6 +436,11 @@ function Inner() {
           <TabsContent value="dining" className="mt-4">
             <DiningReconciliationTab canEdit={canEditTx} />
           </TabsContent>
+          {canEditTx && (
+            <TabsContent value="creditor-debtor-balances" className="mt-4">
+              <CreditorDebtorBalances canEdit={canEditTx} />
+            </TabsContent>
+          )}
           {canEditTx && (
             <TabsContent value="creditors" className="mt-4">
               <CreditorsTab canEdit={canEditTx} />
