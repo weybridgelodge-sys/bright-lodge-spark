@@ -11,13 +11,14 @@ if (typeof FileReader === "undefined") {
   globalThis.FileReader = class {
     result: any = null;
     onload: any = null;
+    onloadend: any = null;
     onerror: any = null;
     readAsDataURL(blob: Blob) {
       blob.arrayBuffer().then((buf) => {
         const b64 = Buffer.from(buf).toString("base64");
         this.result = `data:${blob.type || "image/png"};base64,${b64}`;
-        this.onload?.({ target: this });
-      }).catch((e) => this.onerror?.(e));
+        this.onload?.({ target: this }); this.onloadend?.({ target: this });
+      }).catch((e) => { this.onerror?.(e); this.onloadend?.({ target: this }); });
     }
   };
 }
