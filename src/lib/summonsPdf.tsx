@@ -828,9 +828,14 @@ const SummonsDocument: React.FC<{
   coverRightDataUrl: string | null;
   overflow: OverflowPlan;
   manualHidden?: NoticeKey[];
-}> = ({ template, officers, members, summons, diningQrDataUrl, logoDataUrl, coverLeftDataUrl, coverRightDataUrl, overflow, manualHidden = [] }) => {
+  density?: number;
+}> = ({ template, officers, members, summons, diningQrDataUrl, logoDataUrl, coverLeftDataUrl, coverRightDataUrl, overflow, manualHidden = [], density = 0 }) => {
   const hidden = new Set<NoticeKey>([...overflow.hidden, ...manualHidden]);
   const shortened = new Set<NoticeKey>(overflow.shortened);
+  // Last-resort density steps: shorten, then drop, the longest static notices.
+  if (density >= 3) shortened.add("data_protection");
+  if (density >= 4) hidden.add("overseas");
+
 
   return (
     <Document title={`Summons #${summons.meeting_number}`}>
