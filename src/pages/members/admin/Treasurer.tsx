@@ -285,7 +285,7 @@ function Inner() {
       <header className="mb-6">
         <h1 className="font-serif text-2xl md:text-3xl text-gold">Treasurer</h1>
         <p className="text-primary-foreground/60 text-sm">
-          Transaction register and reconciliation-period locking. Access follows the current Treasurer, Auditor 1, and Auditor 2 offices — it rotates automatically at Installation.
+          Journals, reports, bank reconciliation and period locking. Access follows the current Treasurer, Auditor 1, and Auditor 2 offices — it rotates automatically at Installation.
         </p>
       </header>
 

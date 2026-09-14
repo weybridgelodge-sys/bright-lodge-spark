@@ -663,7 +663,7 @@ export default function DiningReconciliationTab({
     <div className="space-y-4">
       <p className="text-sm text-primary-foreground/60">
         Dining headcounts are derived from the Festive Board Register (booked or attended, dining only — meeting-only attendees are excluded).
-        Enter the GMC invoice figures to check them against the register and post the invoice to the Transaction Register.
+        Enter the GMC invoice figures to check them against the register and post the invoice to the ledger.
       </p>
       {meetings.length === 0 && <p className="text-primary-foreground/50">No Festive Board meetings recorded.</p>}
       {meetings.map((m) => (
