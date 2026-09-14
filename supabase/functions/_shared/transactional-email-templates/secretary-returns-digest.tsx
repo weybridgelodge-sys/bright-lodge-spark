@@ -19,6 +19,8 @@ interface ReturnRow {
   typeLabel: string
   masonicYear: string
   dateDue: string
+  daysUntil?: number
+  showPerson?: boolean
   person?: string | null
   personLabel?: string | null
 }
