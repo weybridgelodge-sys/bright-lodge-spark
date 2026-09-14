@@ -211,7 +211,7 @@ export default function CreditorDebtorBalances({ canEdit }: { canEdit: boolean }
                         {isOpen && (
                           <tr className="border-t border-border bg-muted/20">
                             <td colSpan={3} className="px-3 py-2">
-                              <div className="overflow-x-auto rounded-md border border-border bg-background">
+                              <div className="overflow-x-auto rounded-md border border-border bg-card">
                                 <table className="w-full text-sm">
                                   <thead>
                                     <tr className="bg-muted/50 text-left">
