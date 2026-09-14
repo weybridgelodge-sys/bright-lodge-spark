@@ -662,24 +662,31 @@ const AgendaPanel: React.FC<{
   template: LodgeTemplate;
   summons: SummonsData;
   diningQrDataUrl: string | null;
-}> = ({ template, summons, diningQrDataUrl }) => (
+  density?: number;
+}> = ({ template, summons, diningQrDataUrl, density = 0 }) => {
+  const ad = {
+    row: density >= 1 ? { marginBottom: density >= 2 ? 1 : 1.5 } : null,
+    text: density >= 2 ? { fontSize: 8.5, lineHeight: 1.2 } : null,
+    heading: density >= 1 ? { marginTop: 2, marginBottom: 4 } : null,
+  };
+  return (
   <View style={s.panel}>
-    <Text style={s.panelHeading}>AGENDA</Text>
+    <Text style={[s.panelHeading, ad.heading]}>AGENDA</Text>
     {summons.agenda.length === 0 ? (
       <Text style={s.smallText}>No agenda items.</Text>
     ) : (
       summons.agenda.map((item, i) => (
         <View key={item.id} wrap={false}>
-          <View style={s.agendaRow}>
-            <Text style={s.agendaNum}>{i + 1}.</Text>
-            <Text style={s.agendaText}>{item.label}</Text>
+          <View style={[s.agendaRow, ad.row]}>
+            <Text style={[s.agendaNum, ad.text]}>{i + 1}.</Text>
+            <Text style={[s.agendaText, ad.text]}>{item.label}</Text>
           </View>
           {item.children && item.children.length > 0 && (
             <View style={{ marginLeft: 16, marginBottom: 2 }}>
               {item.children.map((c, ci) => (
-                <View key={c.id} style={s.agendaRow}>
-                  <Text style={s.agendaNum}>{subLetter(ci)}.</Text>
-                  <Text style={s.agendaText}>{c.label}</Text>
+                <View key={c.id} style={[s.agendaRow, ad.row]}>
+                  <Text style={[s.agendaNum, ad.text]}>{subLetter(ci)}.</Text>
+                  <Text style={[s.agendaText, ad.text]}>{c.label}</Text>
                 </View>
               ))}
             </View>
@@ -693,13 +700,16 @@ const AgendaPanel: React.FC<{
         (acc, it) => acc + 1 + (it.children?.length ?? 0),
         0,
       );
-      // Reduce trailing spacers when the agenda is long, so the dining
-      // section doesn't overflow the panel.
-      const spacerCount = agendaLineCount >= 15 ? 3 : agendaLineCount >= 12 ? 5 : 7;
+      // Trailing spacers are decorative breathing room only — drop them
+      // entirely as soon as the document needs to be tightened to fit.
+      const spacerCount = density >= 1
+        ? 0
+        : agendaLineCount >= 15 ? 3 : agendaLineCount >= 12 ? 5 : 7;
       return Array.from({ length: spacerCount }).map((_, i) => (
         <Text key={`agenda-spacer-${i}`} style={{ fontSize: 9, lineHeight: 1.3 }}> </Text>
       ));
     })()}
+
 
     {summons.candidates.length > 0 && (
       <View style={{ marginTop: 6 }}>
