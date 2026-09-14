@@ -866,7 +866,8 @@ const SummonsDocument: React.FC<{
             diningQrDataUrl={diningQrDataUrl}
             hidden={hidden}
             shortened={shortened}
-          />
+            density={density}
+
         </View>
         <View style={{ flex: 1, padding: 0 }}>
           <AgendaPanel template={template} summons={summons} diningQrDataUrl={diningQrDataUrl} />
