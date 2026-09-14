@@ -239,6 +239,7 @@ export default function CreditorsTab({ canEdit }: { canEdit: boolean }) {
     setRecSaving(false);
     setRecAmount("0.00");
     setRecReference("");
+    setRecAccountId("");
     toast({ title: "Liability recognised" });
     load();
   };
@@ -289,7 +290,7 @@ export default function CreditorsTab({ canEdit }: { canEdit: boolean }) {
       <section className="rounded-lg border border-gold/20 bg-primary-foreground/5 p-4">
         <h2 className="font-serif text-lg text-gold mb-1">Recognise a Liability</h2>
         <p className="text-primary-foreground/60 text-sm mb-4">
-          Records money the lodge owes before it is paid. Posts a double-entry: Dr expense account, Cr 2000 Creditors.
+          Records money the lodge owes before it is paid. Posts a double-entry: Dr the chosen account, Cr 2000 Creditors.
         </p>
         <div className="grid gap-3 sm:grid-cols-2">
           <div>
