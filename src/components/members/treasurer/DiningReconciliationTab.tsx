@@ -141,6 +141,7 @@ function MeetingPanel({
   // ── Stripe side: actual charged / fees / net from the bookings ledger ──
   const stripeSummary = useMemo(() => {
     const paid = bookings.filter((b) => b.payment_status === "paid" && b.stripe_payment_intent_id);
+    const refunded = bookings.filter((b) => b.payment_status === "refunded" && b.stripe_payment_intent_id);
     let charged = 0;
     let fees = 0;
     let known = 0;
@@ -149,6 +150,15 @@ function MeetingPanel({
       if (b.stripe_fee_pence != null) {
         fees += b.stripe_fee_pence;
         known += 1;
+      }
+    }
+    // Stripe retains its processing fee on a refunded charge even though the
+    // gross amount is returned to the payer — that fee is a real sunk cost,
+    // so it must still reduce net dining income, even though the refunded
+    // booking itself contributes no income or headcount.
+    for (const b of refunded) {
+      if (b.stripe_fee_pence != null) {
+        fees += b.stripe_fee_pence;
       }
     }
     return {
