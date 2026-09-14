@@ -148,6 +148,13 @@
       "when": 1789340299748,
       "tag": "0020_add_reminder_lead_days_to_secretary_returns",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1789390277475,
+      "tag": "0021_event_header_image",
+      "breakpoints": true
     }
   ]
 }
