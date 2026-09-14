@@ -298,6 +298,34 @@ function EventEditor({ id, onBack, onDeleted }: { id: string; onBack: () => void
           <p className="text-[11px] text-primary-foreground/40 mt-1">Separate paragraphs with blank lines. Wrap text in **double asterisks** for bold.</p>
         </div>
 
+        {/* Header image */}
+        <div>
+          <label className={labelCls}>Meeting image (shown on the public Bookings page)</label>
+          {imgPreview ? (
+            <img src={imgPreview} alt="Current meeting image" className="w-full max-w-md h-auto rounded-sm border border-gold/20 mb-3" />
+          ) : (
+            <p className="text-[11px] text-primary-foreground/40 mb-2">No custom image — the standard lodge photo is shown.</p>
+          )}
+          <div className="flex items-center gap-3 flex-wrap">
+            <label className="cursor-pointer inline-flex items-center gap-2 bg-gold/15 hover:bg-gold/25 text-gold border border-gold/40 px-3 py-2 rounded-sm text-sm">
+              {imgUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ImageIcon className="w-4 h-4" />}
+              {event.header_image_url ? "Replace image" : "Upload image"}
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                disabled={imgUploading}
+                onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadImage(f); e.target.value = ""; }}
+              />
+            </label>
+            {event.header_image_url && (
+              <button type="button" onClick={() => update("header_image_url", null)} className="text-sm text-red-400 hover:text-red-300">
+                Clear image
+              </button>
+            )}
+          </div>
+        </div>
+
         {/* Useful stuff */}
         <fieldset className="bg-navy-dark/40 border border-gold/15 rounded-sm p-4 space-y-4">
           <legend className="px-2 text-gold font-serif text-sm">The Useful Stuff</legend>
