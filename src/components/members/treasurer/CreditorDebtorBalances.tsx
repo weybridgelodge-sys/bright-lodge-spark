@@ -40,6 +40,7 @@ const normaliseParty = (raw: string) => {
 export default function CreditorDebtorBalances({ canEdit }: { canEdit: boolean }) {
   const [side, setSide] = useState<Side>("creditors");
   const [unreconciledOnly, setUnreconciledOnly] = useState(true);
+  const [showZero, setShowZero] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [rows, setRows] = useState<Record<Side, Line[]>>({ creditors: [], debtors: [] });
@@ -109,11 +110,11 @@ export default function CreditorDebtorBalances({ canEdit }: { canEdit: boolean }
       g.lines.push(l);
       map.set(l.party, g);
     }
-    const list = [...map.values()];
+    const list = [...map.values()].filter((g) => (showZero ? true : g.balance !== 0));
     for (const g of list) g.lines.sort((a, b) => a.date.localeCompare(b.date));
     list.sort((a, b) => b.balance - a.balance || a.party.localeCompare(b.party));
     return list;
-  }, [rows, side, unreconciledOnly]);
+  }, [rows, side, unreconciledOnly, showZero]);
 
   const total = useMemo(() => groups.reduce((t, g) => t + g.balance, 0), [groups]);
 
@@ -153,6 +154,9 @@ export default function CreditorDebtorBalances({ canEdit }: { canEdit: boolean }
               onClick={() => setUnreconciledOnly(false)}
             >
               All items ever posted
+            </Button>
+            <Button size="sm" variant="outline" onClick={() => setShowZero((v) => !v)}>
+              {showZero ? "Hide settled (zero) balances" : "Show settled (zero) balances"}
             </Button>
             <Button size="sm" variant="outline" onClick={load} disabled={loading} className="ml-auto">
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Refresh
