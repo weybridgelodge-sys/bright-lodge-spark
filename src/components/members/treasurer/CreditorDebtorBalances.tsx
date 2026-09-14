@@ -211,10 +211,10 @@ export default function CreditorDebtorBalances({ canEdit }: { canEdit: boolean }
                         {isOpen && (
                           <tr className="border-t border-border bg-muted/20">
                             <td colSpan={3} className="px-3 py-2">
-                              <div className="overflow-x-auto rounded-md border border-border bg-card">
+                              <div className="overflow-x-auto rounded-md border border-white/15 bg-navy text-cream">
                                 <table className="w-full text-sm">
                                   <thead>
-                                    <tr className="bg-muted/50 text-left">
+                                    <tr className="bg-navy-dark text-left text-cream">
                                       <th className="px-3 py-2 font-medium">Date</th>
                                       <th className="px-3 py-2 font-medium">Description</th>
                                       <th className="px-3 py-2 font-medium text-right">Debit</th>
@@ -225,7 +225,7 @@ export default function CreditorDebtorBalances({ canEdit }: { canEdit: boolean }
                                   </thead>
                                   <tbody>
                                     {g.lines.map((l) => (
-                                      <tr key={l.id} className="border-t border-border">
+                                      <tr key={l.id} className="border-t border-white/10 text-cream">
                                         <td className="px-3 py-1.5 whitespace-nowrap">{fmtDate(l.date)}</td>
                                         <td className="px-3 py-1.5">{l.description}</td>
                                         <td className="px-3 py-1.5 text-right tabular-nums">{l.debit ? money(l.debit) : ""}</td>
