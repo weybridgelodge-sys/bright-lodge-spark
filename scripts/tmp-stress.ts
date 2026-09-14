@@ -1,0 +1,89 @@
+import { createClient } from "@supabase/supabase-js";
+import { generateSummonsBlob } from "@/lib/summonsPdf";
+import { normaliseTemplateAssets, sortMembersBySeniority, formatMemberLine, formatMemberLineFormal} from "@/lib/summons";
+import { POSITION_LABELS, NON_PROGRESSIVE_LABELS } from "@/lib/officersProgression";
+import { writeFileSync } from "node:fs";
+
+// FileReader polyfill for Bun/Node
+// @ts-ignore
+if (typeof FileReader === "undefined") {
+  // @ts-ignore
+  globalThis.FileReader = class {
+    result: any = null;
+    onload: any = null;
+    onloadend: any = null;
+    onerror: any = null;
+    readAsDataURL(blob: Blob) {
+      blob.arrayBuffer().then((buf) => {
+        const b64 = Buffer.from(buf).toString("base64");
+        this.result = `data:${blob.type || "image/png"};base64,${b64}`;
+        this.onload?.({ target: this }); this.onloadend?.({ target: this });
+      }).catch((e) => { this.onerror?.(e); this.onloadend?.({ target: this }); });
+    }
+  };
+}
+
+const _f = globalThis.fetch;
+// @ts-ignore
+globalThis.fetch = async (...a: any[]) => {
+  const url = String(a[0]);
+  if (/^https?:/.test(url) && !url.includes("supabase.co")) {
+    const proc = Bun.spawnSync(["curl", "-sL", "--max-time", "30", url]);
+    const buf = proc.stdout;
+    const type = url.endsWith(".png") ? "image/png" : url.endsWith(".webp") ? "image/webp" : "image/jpeg";
+    console.log("CURL", url.slice(-40), buf.length);
+    return new Response(buf, { status: 200, headers: { "content-type": type } });
+  }
+  return _f(...(a as [any]));
+};
+const sb = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+
+const { data: sRow } = await sb.from("summonses").select("*").eq("meeting_number", 386).single();
+const { data: tplRow } = await sb.from("lodge_template").select("*").eq("id", "default").single();
+const { data: mem } = await sb.from("profiles")
+  .select("id,title,first_name,middle_name,last_name,full_name,preferred_name,post_nominals,rank,grand_rank,provincial_rank,initiation_date,joined_lodge_date,joined_year,is_past_master,is_royal_arch,is_honorary_member,status")
+  .eq("status", "active");
+
+const lodgeYear = 2025;
+const { data: appts } = await sb.from("officer_appointments").select("position_key,member_id").eq("lodge_year", lodgeYear);
+const ids = Array.from(new Set((appts ?? []).map((a: any) => a.member_id).filter(Boolean)));
+const { data: profs } = await sb.from("profiles").select("*").in("id", ids);
+const byId = new Map((profs ?? []).map((p: any) => [p.id, p]));
+const allKeys = ["worshipful_master","senior_warden","junior_warden","immediate_past_master","chaplain","treasurer","secretary","assistant_secretary","director_of_ceremonies","assistant_director_of_ceremonies","senior_deacon","junior_deacon","inner_guard","almoner","charity_steward","mentor","membership_officer","senior_steward","steward_1","steward_2","steward_3","steward_4","steward_5","tyler","assistant_tyler"];
+const labelFor = (k: string) => (POSITION_LABELS as any)[k] || (NON_PROGRESSIVE_LABELS as any)[k] || k;
+const officers = allKeys.map((k) => {
+  const a = (appts ?? []).find((x: any) => x.position_key === k);
+  const p = a?.member_id ? byId.get(a.member_id) : null;
+  return {
+    label: labelFor(k),
+    member: p ? formatMemberLine(p as any) : "",
+    member_formal: p ? formatMemberLineFormal(p as any) : "",
+    post_nominals: p?.post_nominals ?? null,
+    grand_rank: p?.grand_rank ?? null,
+    provincial_rank: p?.provincial_rank ?? null,
+    rank: p?.rank ?? null,
+    email: p?.email ?? null,
+    phone: p?.phone ?? null,
+  };
+});
+
+const template = normaliseTemplateAssets({ ...(tplRow as any), lodge_representatives: (tplRow as any).lodge_representatives ?? [] } as any);
+const summons: any = { ...sRow, dining_enquiry_email: (sRow as any).dining_enquiry_email ?? "" };
+const members = sortMembersBySeniority((mem ?? []) as any);
+
+
+
+async function count(args: any) {
+  const blob = await generateSummonsBlob(args);
+  const buf = Buffer.from(await blob.arrayBuffer());
+  const m = buf.toString("latin1").match(/\/Type\s*\/Page[^s]/g);
+  return { pages: m ? m.length : -1, buf };
+}
+const base = { template: template as any, officers: officers as any, members: members as any, summons, manualHidden: ((sRow as any).notice_overrides?.manualHidden ?? []) as any };
+console.log("386 real", (await count(base)).pages);
+for (const extra of [5, 10, 20]) {
+  const more = [...(officers as any), ...(officers as any).slice(0, extra)];
+  console.log("stress officers", more.length, (await count({ ...base, officers: more })).pages);
+}
+const bigAgenda = Array.from({ length: 30 }).map((_, i) => ({ id: `x${i}`, label: `Stress agenda item number ${i + 1} with a reasonably long label to force wrapping`, children: [] }));
+console.log("stress agenda 30", (await count({ ...base, summons: { ...summons, agenda: bigAgenda } })).pages);
