@@ -545,6 +545,28 @@ const BackCoverPanel: React.FC<{
   );
 };
 
+// Density steps applied to the officers/notices panel when its content would
+// otherwise spill past the A5 panel and make react-pdf emit a third page.
+// Step 0 is the normal layout; higher steps progressively tighten spacing
+// before any content is shortened or dropped (see generateSummonsBlob).
+export const MAX_DENSITY = 4;
+
+function densityStyles(density: number) {
+  return {
+    officerRow: density >= 1 ? { marginBottom: density >= 2 ? 0 : 0.5 } : null,
+    officerText:
+      density >= 4
+        ? { fontSize: 8, lineHeight: 1.1 }
+        : density >= 2
+          ? { fontSize: 8.5, lineHeight: 1.2 }
+          : null,
+    heading: density >= 1 ? { marginTop: 4, marginBottom: 2 } : null,
+    divider: density >= 1 ? { marginVertical: 3 } : null,
+    notice: density >= 4 ? { lineHeight: 1.1 } : density >= 2 ? { lineHeight: 1.15 } : null,
+  };
+}
+
+
 const OfficersDiningPanel: React.FC<{
   template: LodgeTemplate;
   officers: OfficerRollRow[];
@@ -552,7 +574,9 @@ const OfficersDiningPanel: React.FC<{
   diningQrDataUrl: string | null;
   hidden: Set<NoticeKey>;
   shortened: Set<NoticeKey>;
-}> = ({ template, officers, hidden, shortened }) => {
+  density?: number;
+}> = ({ template, officers, hidden, shortened, density = 0 }) => {
+  const d = densityStyles(density);
   // Steward positions are only printed when filled; all other offices are
   // always shown, even if vacant, to preserve the full office structure.
   const VACANT_STEWARD_LABELS = new Set(
@@ -565,24 +589,25 @@ const OfficersDiningPanel: React.FC<{
   );
   return (
     <View style={s.panel}>
-      <Text style={s.panelHeading}>OFFICERS {officerSeason()}</Text>
+      <Text style={[s.panelHeading, d.heading]}>OFFICERS {officerSeason()}</Text>
+
       {printableOfficers.map((o, i) =>
         o.member ? (
-          <View key={i} style={s.officerRow}>
+          <View key={i} style={[s.officerRow, d.officerRow]}>
             <BoldNameText
-              style={s.officerName}
+              style={[s.officerName, d.officerText]}
               fullName={o.member}
               post_nominals={o.post_nominals}
               grand_rank={o.grand_rank}
               provincial_rank={o.provincial_rank}
               rank={o.rank}
             />
-            <Text style={s.officerRole}>{shortRole(o.label)}</Text>
+            <Text style={[s.officerRole, d.officerText]}>{shortRole(o.label)}</Text>
           </View>
         ) : (
-          <View key={i} style={s.officerRow}>
-            <Text style={s.officerName}>Vacant</Text>
-            <Text style={s.officerRole}>{shortRole(o.label)}</Text>
+          <View key={i} style={[s.officerRow, d.officerRow]}>
+            <Text style={[s.officerName, d.officerText]}>Vacant</Text>
+            <Text style={[s.officerRole, d.officerText]}>{shortRole(o.label)}</Text>
           </View>
         )
       )}
@@ -590,27 +615,27 @@ const OfficersDiningPanel: React.FC<{
 
       {template.lodge_representatives?.length > 0 && (
       <>
-        <View style={s.thinDivider} />
+        <View style={[s.thinDivider, d.divider]} />
         <View>
           {template.lodge_representatives.map((r, i) => {
             const cleanedRole = (r.role ?? "")
               .replace(/^\s*lodge\s+representative\s+to\s+/i, "")
               .trim();
             return (
-              <Text key={i} style={s.smallText}>
+              <Text key={i} style={[s.smallText, d.officerText]}>
                 <Text>{r.name}</Text> — Lodge representative to {cleanedRole}
               </Text>
             );
           })}
         </View>
-        <View style={s.thinDivider} />
+        <View style={[s.thinDivider, d.divider]} />
       </>
     )}
 
     {!hidden.has("data_protection") && template.data_protection_text && (
       <>
-        <Text style={s.sectionHeadingLarge}>Data Protection Act</Text>
-        <Text style={s.microLarge}>
+        <Text style={[s.sectionHeadingLarge, d.heading]}>Data Protection Act</Text>
+        <Text style={[s.microLarge, d.notice]}>
           {shortened.has("data_protection")
             ? flow(template.data_protection_text_short ||
                 "See lodge data protection notice — copies available from the Secretary.")
@@ -620,20 +645,21 @@ const OfficersDiningPanel: React.FC<{
     )}
     {!hidden.has("overseas") && template.overseas_attendance_text && (
       <>
-        <Text style={s.sectionHeadingLarge}>Attendance at Lodges Overseas</Text>
-        <Text style={s.microLarge}>{flow(template.overseas_attendance_text)}</Text>
+        <Text style={[s.sectionHeadingLarge, d.heading]}>Attendance at Lodges Overseas</Text>
+        <Text style={[s.microLarge, d.notice]}>{flow(template.overseas_attendance_text)}</Text>
       </>
     )}
     {/* Newsletter consent — establishes lawful basis for adding visiting
         Freemasons captured via summons / Festive Board portal to the
         Weybridge Chronicle list. Existing members are covered by separate
         membership data-handling terms (see Data Protection notice above). */}
-    <Text style={[s.microLarge, { marginTop: 6 }]}>
+    <Text style={[s.microLarge, d.notice, { marginTop: density >= 1 ? 3 : 6 }]}>
       <Text style={s.bold}>Newsletter consent: </Text>
       As part of receiving this summons, Weybridge Lodge will send you newsletters or other Masonic-related information.
       You can unsubscribe at any time using the link in the footer of each newsletter.
     </Text>
   </View>
+
 );
 };
 
@@ -642,24 +668,31 @@ const AgendaPanel: React.FC<{
   template: LodgeTemplate;
   summons: SummonsData;
   diningQrDataUrl: string | null;
-}> = ({ template, summons, diningQrDataUrl }) => (
+  density?: number;
+}> = ({ template, summons, diningQrDataUrl, density = 0 }) => {
+  const ad = {
+    row: density >= 1 ? { marginBottom: density >= 2 ? 1 : 1.5 } : null,
+    text: density >= 2 ? { fontSize: 8.5, lineHeight: 1.2 } : null,
+    heading: density >= 1 ? { marginTop: 2, marginBottom: 4 } : null,
+  };
+  return (
   <View style={s.panel}>
-    <Text style={s.panelHeading}>AGENDA</Text>
+    <Text style={[s.panelHeading, ad.heading]}>AGENDA</Text>
     {summons.agenda.length === 0 ? (
       <Text style={s.smallText}>No agenda items.</Text>
     ) : (
       summons.agenda.map((item, i) => (
         <View key={item.id} wrap={false}>
-          <View style={s.agendaRow}>
-            <Text style={s.agendaNum}>{i + 1}.</Text>
-            <Text style={s.agendaText}>{item.label}</Text>
+          <View style={[s.agendaRow, ad.row]}>
+            <Text style={[s.agendaNum, ad.text]}>{i + 1}.</Text>
+            <Text style={[s.agendaText, ad.text]}>{item.label}</Text>
           </View>
           {item.children && item.children.length > 0 && (
             <View style={{ marginLeft: 16, marginBottom: 2 }}>
               {item.children.map((c, ci) => (
-                <View key={c.id} style={s.agendaRow}>
-                  <Text style={s.agendaNum}>{subLetter(ci)}.</Text>
-                  <Text style={s.agendaText}>{c.label}</Text>
+                <View key={c.id} style={[s.agendaRow, ad.row]}>
+                  <Text style={[s.agendaNum, ad.text]}>{subLetter(ci)}.</Text>
+                  <Text style={[s.agendaText, ad.text]}>{c.label}</Text>
                 </View>
               ))}
             </View>
@@ -673,13 +706,16 @@ const AgendaPanel: React.FC<{
         (acc, it) => acc + 1 + (it.children?.length ?? 0),
         0,
       );
-      // Reduce trailing spacers when the agenda is long, so the dining
-      // section doesn't overflow the panel.
-      const spacerCount = agendaLineCount >= 15 ? 3 : agendaLineCount >= 12 ? 5 : 7;
+      // Trailing spacers are decorative breathing room only — drop them
+      // entirely as soon as the document needs to be tightened to fit.
+      const spacerCount = density >= 1
+        ? 0
+        : agendaLineCount >= 15 ? 3 : agendaLineCount >= 12 ? 5 : 7;
       return Array.from({ length: spacerCount }).map((_, i) => (
         <Text key={`agenda-spacer-${i}`} style={{ fontSize: 9, lineHeight: 1.3 }}> </Text>
       ));
     })()}
+
 
     {summons.candidates.length > 0 && (
       <View style={{ marginTop: 6 }}>
@@ -753,7 +789,9 @@ const AgendaPanel: React.FC<{
       )}
     </View>
   </View>
-);
+  );
+};
+
 
 
 // ---------- helpers ----------
@@ -808,9 +846,14 @@ const SummonsDocument: React.FC<{
   coverRightDataUrl: string | null;
   overflow: OverflowPlan;
   manualHidden?: NoticeKey[];
-}> = ({ template, officers, members, summons, diningQrDataUrl, logoDataUrl, coverLeftDataUrl, coverRightDataUrl, overflow, manualHidden = [] }) => {
+  density?: number;
+}> = ({ template, officers, members, summons, diningQrDataUrl, logoDataUrl, coverLeftDataUrl, coverRightDataUrl, overflow, manualHidden = [], density = 0 }) => {
   const hidden = new Set<NoticeKey>([...overflow.hidden, ...manualHidden]);
   const shortened = new Set<NoticeKey>(overflow.shortened);
+  // Last-resort density steps: shorten, then drop, the longest static notices.
+  if (density >= 3) shortened.add("data_protection");
+  if (density >= 4) hidden.add("overseas");
+
 
   return (
     <Document title={`Summons #${summons.meeting_number}`}>
@@ -841,10 +884,13 @@ const SummonsDocument: React.FC<{
             diningQrDataUrl={diningQrDataUrl}
             hidden={hidden}
             shortened={shortened}
+            density={density}
           />
+
+
         </View>
         <View style={{ flex: 1, padding: 0 }}>
-          <AgendaPanel template={template} summons={summons} diningQrDataUrl={diningQrDataUrl} />
+          <AgendaPanel template={template} summons={summons} diningQrDataUrl={diningQrDataUrl} density={density} />
         </View>
       </Page>
     </Document>
@@ -900,20 +946,49 @@ export async function generateSummonsBlob(args: {
   const coverLeftDataUrl = coverLeftUrl ? await fetchImageAsDataUrl(coverLeftUrl) : null;
   const coverRightDataUrl = coverRightUrl ? await fetchImageAsDataUrl(coverRightUrl) : null;
   const overflow = planOverflow(args.members.length);
-  const doc = (
-    <SummonsDocument
-      template={args.template}
-      officers={args.officers}
-      members={args.members}
-      summons={args.summons}
-      diningQrDataUrl={diningQrDataUrl}
-      logoDataUrl={logoDataUrl}
-      coverLeftDataUrl={coverLeftDataUrl}
-      coverRightDataUrl={coverRightDataUrl}
-      overflow={overflow}
-      manualHidden={args.manualHidden}
-    />
-  );
 
-  return await pdf(doc).toBlob();
+  const render = async (density: number) =>
+    await pdf(
+      <SummonsDocument
+        template={args.template}
+        officers={args.officers}
+        members={args.members}
+        summons={args.summons}
+        diningQrDataUrl={diningQrDataUrl}
+        logoDataUrl={logoDataUrl}
+        coverLeftDataUrl={coverLeftDataUrl}
+        coverRightDataUrl={coverRightDataUrl}
+        overflow={overflow}
+        manualHidden={args.manualHidden}
+        density={density}
+      />,
+    ).toBlob();
+
+  // The summons is a single folded A4 sheet: exactly two PDF pages. If a long
+  // officer roll / agenda / notice set pushes a panel past the page height,
+  // react-pdf silently emits an extra (usually blank-looking) page. Rather
+  // than tuning content per summons, render, verify the real page count, and
+  // re-render one density step tighter until it genuinely fits.
+  let blob = await render(0);
+  for (let density = 1; density <= MAX_DENSITY && (await countPdfPages(blob)) > 2; density++) {
+    blob = await render(density);
+  }
+  return blob;
 }
+
+/** Counts page objects in a rendered PDF blob (react-pdf output is uncompressed enough for this). */
+async function countPdfPages(blob: Blob): Promise<number> {
+  try {
+    const bytes = new Uint8Array(await blob.arrayBuffer());
+    let text = "";
+    const CHUNK = 0x8000;
+    for (let i = 0; i < bytes.length; i += CHUNK) {
+      text += String.fromCharCode(...bytes.subarray(i, i + CHUNK));
+    }
+    const matches = text.match(/\/Type\s*\/Page[^s]/g);
+    return matches ? matches.length : 2;
+  } catch {
+    return 2; // never loop on a parsing failure
+  }
+}
+
