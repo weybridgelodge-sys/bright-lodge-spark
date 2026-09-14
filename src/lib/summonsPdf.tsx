@@ -587,21 +587,21 @@ const OfficersDiningPanel: React.FC<{
 
       {printableOfficers.map((o, i) =>
         o.member ? (
-          <View key={i} style={s.officerRow}>
+          <View key={i} style={[s.officerRow, d.officerRow]}>
             <BoldNameText
-              style={s.officerName}
+              style={[s.officerName, d.officerText]}
               fullName={o.member}
               post_nominals={o.post_nominals}
               grand_rank={o.grand_rank}
               provincial_rank={o.provincial_rank}
               rank={o.rank}
             />
-            <Text style={s.officerRole}>{shortRole(o.label)}</Text>
+            <Text style={[s.officerRole, d.officerText]}>{shortRole(o.label)}</Text>
           </View>
         ) : (
-          <View key={i} style={s.officerRow}>
-            <Text style={s.officerName}>Vacant</Text>
-            <Text style={s.officerRole}>{shortRole(o.label)}</Text>
+          <View key={i} style={[s.officerRow, d.officerRow]}>
+            <Text style={[s.officerName, d.officerText]}>Vacant</Text>
+            <Text style={[s.officerRole, d.officerText]}>{shortRole(o.label)}</Text>
           </View>
         )
       )}
@@ -609,27 +609,27 @@ const OfficersDiningPanel: React.FC<{
 
       {template.lodge_representatives?.length > 0 && (
       <>
-        <View style={s.thinDivider} />
+        <View style={[s.thinDivider, d.divider]} />
         <View>
           {template.lodge_representatives.map((r, i) => {
             const cleanedRole = (r.role ?? "")
               .replace(/^\s*lodge\s+representative\s+to\s+/i, "")
               .trim();
             return (
-              <Text key={i} style={s.smallText}>
+              <Text key={i} style={[s.smallText, d.officerText]}>
                 <Text>{r.name}</Text> — Lodge representative to {cleanedRole}
               </Text>
             );
           })}
         </View>
-        <View style={s.thinDivider} />
+        <View style={[s.thinDivider, d.divider]} />
       </>
     )}
 
     {!hidden.has("data_protection") && template.data_protection_text && (
       <>
-        <Text style={s.sectionHeadingLarge}>Data Protection Act</Text>
-        <Text style={s.microLarge}>
+        <Text style={[s.sectionHeadingLarge, d.heading]}>Data Protection Act</Text>
+        <Text style={[s.microLarge, d.notice]}>
           {shortened.has("data_protection")
             ? flow(template.data_protection_text_short ||
                 "See lodge data protection notice — copies available from the Secretary.")
@@ -639,20 +639,21 @@ const OfficersDiningPanel: React.FC<{
     )}
     {!hidden.has("overseas") && template.overseas_attendance_text && (
       <>
-        <Text style={s.sectionHeadingLarge}>Attendance at Lodges Overseas</Text>
-        <Text style={s.microLarge}>{flow(template.overseas_attendance_text)}</Text>
+        <Text style={[s.sectionHeadingLarge, d.heading]}>Attendance at Lodges Overseas</Text>
+        <Text style={[s.microLarge, d.notice]}>{flow(template.overseas_attendance_text)}</Text>
       </>
     )}
     {/* Newsletter consent — establishes lawful basis for adding visiting
         Freemasons captured via summons / Festive Board portal to the
         Weybridge Chronicle list. Existing members are covered by separate
         membership data-handling terms (see Data Protection notice above). */}
-    <Text style={[s.microLarge, { marginTop: 6 }]}>
+    <Text style={[s.microLarge, d.notice, { marginTop: density >= 1 ? 3 : 6 }]}>
       <Text style={s.bold}>Newsletter consent: </Text>
       As part of receiving this summons, Weybridge Lodge will send you newsletters or other Masonic-related information.
       You can unsubscribe at any time using the link in the footer of each newsletter.
     </Text>
   </View>
+
 );
 };
 
