@@ -110,11 +110,11 @@ export default function CreditorDebtorBalances({ canEdit }: { canEdit: boolean }
       g.lines.push(l);
       map.set(l.party, g);
     }
-    const list = [...map.values()];
+    const list = [...map.values()].filter((g) => (showZero ? true : g.balance !== 0));
     for (const g of list) g.lines.sort((a, b) => a.date.localeCompare(b.date));
     list.sort((a, b) => b.balance - a.balance || a.party.localeCompare(b.party));
     return list;
-  }, [rows, side, unreconciledOnly]);
+  }, [rows, side, unreconciledOnly, showZero]);
 
   const total = useMemo(() => groups.reduce((t, g) => t + g.balance, 0), [groups]);
 
