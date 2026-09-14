@@ -111,10 +111,18 @@ Deno.serve(async (req) => {
           : DEFAULT_LEAD_DAYS
       return r.date_due <= addDays(today, lead)
     }) as any[]
+    const daysBetween = (from: string, to: string) =>
+      Math.round(
+        (new Date(`${to}T00:00:00Z`).getTime() - new Date(`${from}T00:00:00Z`).getTime()) / 86400000,
+      )
+    // Lodge-level returns are not tied to a candidate or member.
+    const LODGE_LEVEL = new Set(['installation_return', 'provincial_return'])
     const shape = (r: any) => ({
       typeLabel: TYPE_LABELS[r.return_type] ?? r.return_type,
       masonicYear: yearLabel(r.masonic_year),
       dateDue: r.date_due,
+      daysUntil: daysBetween(today, r.date_due),
+      showPerson: !LODGE_LEVEL.has(r.return_type),
       person: personName(r.member, r.candidate),
       personLabel: r.member_id ? 'Member' : 'Candidate',
     })

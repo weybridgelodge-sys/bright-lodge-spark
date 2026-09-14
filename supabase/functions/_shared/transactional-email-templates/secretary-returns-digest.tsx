@@ -19,6 +19,8 @@ interface ReturnRow {
   typeLabel: string
   masonicYear: string
   dateDue: string
+  daysUntil?: number
+  showPerson?: boolean
   person?: string | null
   personLabel?: string | null
 }
@@ -47,11 +49,22 @@ const Rows = ({ rows, tone }: { rows: ReturnRow[]; tone: 'red' | 'amber' }) => (
         style={{ padding: '10px 0', borderBottom: i === rows.length - 1 ? 'none' : '1px solid #e8e3d3' }}
       >
         <Text style={itemName}>{r.typeLabel}</Text>
-        <Text style={flagSoft}>
-          • {r.personLabel || 'Candidate'}: {(r.person || '').trim()}
-        </Text>
+        {r.showPerson !== false && (
+          <Text style={flagSoft}>
+            • {r.personLabel || 'Candidate'}: {(r.person || '').trim()}
+          </Text>
+        )}
         <Text style={flagSoft}>• Masonic year {r.masonicYear}</Text>
-        <Text style={tone === 'red' ? flagRed : flagAmber}>• Due {fmt(r.dateDue)}</Text>
+        <Text style={tone === 'red' ? flagRed : flagAmber}>
+          • Due {fmt(r.dateDue)}
+          {typeof r.daysUntil === 'number'
+            ? r.daysUntil < 0
+              ? ` — ${Math.abs(r.daysUntil)} day${Math.abs(r.daysUntil) === 1 ? '' : 's'} overdue`
+              : r.daysUntil === 0
+                ? ' — due today'
+                : ` — in ${r.daysUntil} day${r.daysUntil === 1 ? '' : 's'}`
+            : ''}
+        </Text>
       </div>
     ))}
   </Section>
@@ -63,7 +76,7 @@ const Email = ({ overdue = [], dueSoon = [], reportDate, portalUrl }: Props) => 
     <Preview>
       {overdue.length > 0
         ? `${overdue.length} return${overdue.length === 1 ? '' : 's'} overdue · ${dueSoon.length} due soon`
-        : `${dueSoon.length} return${dueSoon.length === 1 ? '' : 's'} due within 14 days`}
+        : `${dueSoon.length} return${dueSoon.length === 1 ? '' : 's'} approaching their submission deadline`}
     </Preview>
     <Body style={main}>
       <Container style={container}>
@@ -98,7 +111,7 @@ const Email = ({ overdue = [], dueSoon = [], reportDate, portalUrl }: Props) => 
           <>
             <Heading style={h2}>Due soon</Heading>
             <Text style={intro}>
-              These draft returns fall due within the next 14 days.
+              These draft returns are approaching their submission deadline.
             </Text>
             <Rows rows={dueSoon} tone="amber" />
           </>
