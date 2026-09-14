@@ -45,11 +45,15 @@ export default function CreditorsTab({ canEdit }: { canEdit: boolean }) {
 
   const load = useCallback(async () => {
     setLoading(true);
-    const [{ data: accts }, { data: period }] = await Promise.all([
+    const [{ data: accts }, { data: allAccts }, { data: period }] = await Promise.all([
       supabase
         .from("chart_of_accounts" as any)
         .select("id,code")
         .in("code", ["1000", "2000", "5000", "5100", "5200", "5900"]),
+      supabase
+        .from("chart_of_accounts" as any)
+        .select("id,code,name")
+        .order("code"),
       supabase
         .from("treasurer_periods" as any)
         .select("id")
@@ -64,6 +68,7 @@ export default function CreditorsTab({ canEdit }: { canEdit: boolean }) {
       if (a.code && a.id) map.set(a.code as string, a.id as string);
     }
     setAccounts(map);
+    setAllAccounts(((allAccts as any[]) ?? []).filter((a) => a.code !== "2000"));
     setOpenPeriodId((period as any)?.id ?? null);
 
     const creditorsId = map.get("2000");
