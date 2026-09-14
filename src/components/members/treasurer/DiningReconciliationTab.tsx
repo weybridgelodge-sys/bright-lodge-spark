@@ -295,6 +295,7 @@ function MeetingPanel({
 
   const invHc = headcount.trim() ? parseInt(headcount, 10) : null;
   const diff = invHc != null && Number.isFinite(invHc) ? invHc - summary.total : null;
+  const fullyReconciled = diff === 0 && receiptSets.postable.length === 0 && invoice?.journal_entry_id != null;
 
   const save = async () => {
     setSaving(true);
@@ -427,16 +428,13 @@ function MeetingPanel({
           {new Date(meeting.meeting_date).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}
           <span className="text-primary-foreground/60 text-sm ml-2">{meetingTypeLabel(meeting.meeting_type)}</span>
         </h3>
-        {diff == null ? (
-          <Badge variant="outline" className="border-gold/40 text-primary-foreground/70">No invoice entered</Badge>
-        ) : diff === 0 ? (
+        {fullyReconciled ? (
           <Badge variant="outline" className="border-emerald-500/60 text-emerald-300">
-            <Check className="w-3.5 h-3.5 mr-1" /> Matches — {summary.total} diners
+            <Check className="w-3.5 h-3.5 mr-1" /> Meeting fully reconciled
           </Badge>
         ) : (
-          <Badge variant="outline" className={Math.abs(diff) > 2 ? "border-red-500/60 text-red-300" : "border-amber-500/60 text-amber-300"}>
-            <AlertTriangle className="w-3.5 h-3.5 mr-1" />
-            GMC {diff > 0 ? "higher" : "lower"} by {Math.abs(diff)} (invoice {invHc} vs portal {summary.total})
+          <Badge variant="outline" className="border-amber-500/60 text-amber-300">
+            <AlertTriangle className="w-3.5 h-3.5 mr-1" /> Meeting unreconciled
           </Badge>
         )}
       </div>
