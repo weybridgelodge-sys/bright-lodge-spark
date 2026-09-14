@@ -126,6 +126,8 @@ function EventEditor({ id, onBack, onDeleted }: { id: string; onBack: () => void
   const [options, setOptions] = useState<OptionDraft[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [imgUploading, setImgUploading] = useState(false);
+  const [imgPreview, setImgPreview] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -139,6 +141,37 @@ function EventEditor({ id, onBack, onDeleted }: { id: string; onBack: () => void
       setLoading(false);
     })();
   }, [id]);
+
+  const headerPath = event?.header_image_url || null;
+  useEffect(() => {
+    let cancelled = false;
+    if (!headerPath) { setImgPreview(null); return; }
+    (async () => {
+      const { data } = await supabase.storage.from("event-images").createSignedUrl(headerPath, 300);
+      if (!cancelled) setImgPreview(data?.signedUrl ?? null);
+    })();
+    return () => { cancelled = true; };
+  }, [headerPath]);
+
+  const uploadImage = async (file: File) => {
+    setImgUploading(true);
+    try {
+      const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+      const path = `${id}/${crypto.randomUUID()}.${ext}`;
+      const body = await toUploadBody(file);
+      const { error } = await supabase.storage.from("event-images").upload(path, body, {
+        contentType: file.type || "image/jpeg",
+        upsert: true,
+      });
+      if (error) throw error;
+      setEvent((prev) => (prev ? { ...prev, header_image_url: path } : prev));
+      toast.success("Image uploaded — remember to save");
+    } catch (err: any) {
+      toast.error(err.message || "Could not upload image");
+    } finally {
+      setImgUploading(false);
+    }
+  };
 
   if (loading || !event) {
     return <div className="flex justify-center py-12"><Loader2 className="w-6 h-6 text-gold animate-spin" /></div>;
