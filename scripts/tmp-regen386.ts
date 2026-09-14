@@ -85,3 +85,8 @@ const buf = Buffer.from(await blob.arrayBuffer());
 writeFileSync(`/tmp/browser/${MN}.pdf`, buf);
 console.log("size", buf.length);
 
+if (process.env.UPLOAD === "1") {
+  const path = (sRow as any).pdf_storage_path;
+  const up = await sb.storage.from("lodge-docs").upload(path, buf, { contentType: "application/pdf", upsert: true });
+  console.log("upload", path, up.error?.message ?? "ok");
+}
