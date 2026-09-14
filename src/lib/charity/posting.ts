@@ -97,8 +97,9 @@ export async function postCollectionToLedger(c: Collection, typeLabel: string): 
   const bank = gross - costs - stripeFee;
   if (bank < 0) throw new Error("Costs and Stripe fee together exceed the gross amount");
 
+  const bankCode = stripeFee > 0 ? "1010" : "1000";
   const lines: Line[] = [
-    { code: "1000", debit: bank, credit: 0, description: "Banked" },
+    { code: bankCode, debit: bank, credit: 0, description: "Banked" },
     { code: INCOME_CODE[c.collection_type], debit: 0, credit: gross, description: typeLabel },
   ];
   if (costs > 0) lines.push({ code: "5310", debit: costs, credit: 0, description: "Raffle prizes / collection costs" });
