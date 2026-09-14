@@ -34,11 +34,13 @@ export default function CreditorsTab({ canEdit }: { canEdit: boolean }) {
   const [recOtherPayee, setRecOtherPayee] = useState("");
   const [recAmount, setRecAmount] = useState("0.00");
   const [recReference, setRecReference] = useState("");
+  const [recAccountId, setRecAccountId] = useState("");
   const [recSaving, setRecSaving] = useState(false);
 
   const [lines, setLines] = useState<LineRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [accounts, setAccounts] = useState<Map<string, string>>(new Map());
+  const [allAccounts, setAllAccounts] = useState<{ id: string; code: string; name: string }[]>([]);
   const [openPeriodId, setOpenPeriodId] = useState<string | null>(null);
 
   const load = useCallback(async () => {
