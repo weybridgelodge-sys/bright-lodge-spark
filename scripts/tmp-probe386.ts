@@ -72,12 +72,12 @@ const summons: any = { ...sRow, dining_enquiry_email: (sRow as any).dining_enqui
 const members = sortMembersBySeniority((mem ?? []) as any);
 
 
-import { PDFDocument } from "pdf-lib";
+
 async function count(args: any) {
   const blob = await generateSummonsBlob(args);
   const buf = Buffer.from(await blob.arrayBuffer());
-  const d = await PDFDocument.load(buf);
-  return { pages: d.getPageCount(), buf };
+  const m = buf.toString("latin1").match(/\/Type\s*\/Page[^s]/g);
+  return { pages: m ? m.length : -1, buf };
 }
 const base = { template: template as any, officers: officers as any, members: members as any, summons, manualHidden: ((sRow as any).notice_overrides?.manualHidden ?? []) as any };
 console.log("baseline", (await count(base)).pages);
