@@ -311,6 +311,19 @@ export default function CreditorsTab({ canEdit }: { canEdit: boolean }) {
               <Input value={recOtherPayee} onChange={(e) => setRecOtherPayee(e.target.value)} placeholder="e.g. Metropolitan Grand Lodge" disabled={!canEdit} />
             </div>
           )}
+          {recPayee === "Other" && (
+            <div className="sm:col-span-2">
+              <Label>Debit account</Label>
+              <Select value={recAccountId} onValueChange={setRecAccountId} disabled={!canEdit}>
+                <SelectTrigger><SelectValue placeholder="Choose the debit account" /></SelectTrigger>
+                <SelectContent>
+                  {allAccounts.map((a) => (
+                    <SelectItem key={a.id} value={a.id}>{a.code} — {a.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
           <div>
             <Label>Amount (£)</Label>
             <Input type="number" step="0.01" min="0" value={recAmount} onChange={(e) => setRecAmount(e.target.value)} disabled={!canEdit} />
