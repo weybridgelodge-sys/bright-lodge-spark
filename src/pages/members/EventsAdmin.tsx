@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { fetchAllEvents, fetchEventBundle, type LodgeEvent, type EventCourse, type DiningOption } from "@/lib/lodgeEvents";
 import { toUploadBody } from "@/lib/nativeUpload";
 import { toast } from "sonner";
-import { Plus, Trash2, Save, Loader2, CalendarDays, Eye, EyeOff, ChevronLeft } from "lucide-react";
+import { Plus, Trash2, Save, Loader2, CalendarDays, Eye, EyeOff, ChevronLeft, Image as ImageIcon } from "lucide-react";
 
 type CourseDraft = Partial<EventCourse> & { _tempId?: string };
 type OptionDraft = Partial<DiningOption> & { _tempId?: string };
