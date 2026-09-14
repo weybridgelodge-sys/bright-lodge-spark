@@ -4,8 +4,9 @@ import MembersLayout from "@/components/members/MembersLayout";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchAllEvents, fetchEventBundle, type LodgeEvent, type EventCourse, type DiningOption } from "@/lib/lodgeEvents";
+import { toUploadBody } from "@/lib/nativeUpload";
 import { toast } from "sonner";
-import { Plus, Trash2, Save, Loader2, CalendarDays, Eye, EyeOff, ChevronLeft } from "lucide-react";
+import { Plus, Trash2, Save, Loader2, CalendarDays, Eye, EyeOff, ChevronLeft, Image as ImageIcon } from "lucide-react";
 
 type CourseDraft = Partial<EventCourse> & { _tempId?: string };
 type OptionDraft = Partial<DiningOption> & { _tempId?: string };
@@ -126,6 +127,8 @@ function EventEditor({ id, onBack, onDeleted }: { id: string; onBack: () => void
   const [options, setOptions] = useState<OptionDraft[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [imgUploading, setImgUploading] = useState(false);
+  const [imgPreview, setImgPreview] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -139,6 +142,37 @@ function EventEditor({ id, onBack, onDeleted }: { id: string; onBack: () => void
       setLoading(false);
     })();
   }, [id]);
+
+  const headerPath = event?.header_image_url || null;
+  useEffect(() => {
+    let cancelled = false;
+    if (!headerPath) { setImgPreview(null); return; }
+    (async () => {
+      const { data } = await supabase.storage.from("event-images").createSignedUrl(headerPath, 300);
+      if (!cancelled) setImgPreview(data?.signedUrl ?? null);
+    })();
+    return () => { cancelled = true; };
+  }, [headerPath]);
+
+  const uploadImage = async (file: File) => {
+    setImgUploading(true);
+    try {
+      const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+      const path = `${id}/${crypto.randomUUID()}.${ext}`;
+      const body = await toUploadBody(file);
+      const { error } = await supabase.storage.from("event-images").upload(path, body, {
+        contentType: file.type || "image/jpeg",
+        upsert: true,
+      });
+      if (error) throw error;
+      setEvent((prev) => (prev ? { ...prev, header_image_url: path } : prev));
+      toast.success("Image uploaded — remember to save");
+    } catch (err: any) {
+      toast.error(err.message || "Could not upload image");
+    } finally {
+      setImgUploading(false);
+    }
+  };
 
   if (loading || !event) {
     return <div className="flex justify-center py-12"><Loader2 className="w-6 h-6 text-gold animate-spin" /></div>;
@@ -175,6 +209,7 @@ function EventEditor({ id, onBack, onDeleted }: { id: string; onBack: () => void
           location: event.location,
           dress_code: event.dress_code,
           booking_deadline: event.booking_deadline || null,
+          header_image_url: event.header_image_url || null,
           published: event.published,
         })
         .eq("id", event.id);
@@ -261,6 +296,34 @@ function EventEditor({ id, onBack, onDeleted }: { id: string; onBack: () => void
           <label className={labelCls}>Intro paragraphs</label>
           <textarea rows={8} className={inputCls} value={event.intro} onChange={(e) => update("intro", e.target.value)} placeholder="Use blank lines to separate paragraphs. Use **bold** for emphasis." />
           <p className="text-[11px] text-primary-foreground/40 mt-1">Separate paragraphs with blank lines. Wrap text in **double asterisks** for bold.</p>
+        </div>
+
+        {/* Header image */}
+        <div>
+          <label className={labelCls}>Meeting image (shown on the public Bookings page)</label>
+          {imgPreview ? (
+            <img src={imgPreview} alt="Current meeting image" className="w-full max-w-md h-auto rounded-sm border border-gold/20 mb-3" />
+          ) : (
+            <p className="text-[11px] text-primary-foreground/40 mb-2">No custom image — the standard lodge photo is shown.</p>
+          )}
+          <div className="flex items-center gap-3 flex-wrap">
+            <label className="cursor-pointer inline-flex items-center gap-2 bg-gold/15 hover:bg-gold/25 text-gold border border-gold/40 px-3 py-2 rounded-sm text-sm">
+              {imgUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ImageIcon className="w-4 h-4" />}
+              {event.header_image_url ? "Replace image" : "Upload image"}
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                disabled={imgUploading}
+                onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadImage(f); e.target.value = ""; }}
+              />
+            </label>
+            {event.header_image_url && (
+              <button type="button" onClick={() => update("header_image_url", null)} className="text-sm text-red-400 hover:text-red-300">
+                Clear image
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Useful stuff */}
