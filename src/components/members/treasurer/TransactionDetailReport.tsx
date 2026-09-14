@@ -300,8 +300,46 @@ export default function TransactionDetailReport({ canEdit }: { canEdit: boolean 
               <table className="w-full text-sm">
                 <thead>
                   <tr className="bg-muted/50 text-left">
-                    <th className="px-3 py-2 font-medium">Date</th>
-                    <th className="px-3 py-2 font-medium">Account</th>
+                    <th className="px-3 py-2 font-medium">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setSortConfig((prev) => ({
+                            key: "date",
+                            direction: prev.key === "date" && prev.direction === "asc" ? "desc" : "asc",
+                          }))
+                        }
+                        className="inline-flex items-center gap-1 hover:text-gold focus:outline-none"
+                      >
+                        Date
+                        {sortConfig.key === "date" &&
+                          (sortConfig.direction === "asc" ? (
+                            <ArrowUp className="h-3 w-3" />
+                          ) : (
+                            <ArrowDown className="h-3 w-3" />
+                          ))}
+                      </button>
+                    </th>
+                    <th className="px-3 py-2 font-medium">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setSortConfig((prev) => ({
+                            key: "account",
+                            direction: prev.key === "account" && prev.direction === "asc" ? "desc" : "asc",
+                          }))
+                        }
+                        className="inline-flex items-center gap-1 hover:text-gold focus:outline-none"
+                      >
+                        Account
+                        {sortConfig.key === "account" &&
+                          (sortConfig.direction === "asc" ? (
+                            <ArrowUp className="h-3 w-3" />
+                          ) : (
+                            <ArrowDown className="h-3 w-3" />
+                          ))}
+                      </button>
+                    </th>
                     <th className="px-3 py-2 font-medium">Description</th>
                     <th className="px-3 py-2 font-medium text-right">Debit</th>
                     <th className="px-3 py-2 font-medium text-right">Credit</th>
@@ -310,7 +348,7 @@ export default function TransactionDetailReport({ canEdit }: { canEdit: boolean 
                   </tr>
                 </thead>
                 <tbody>
-                  {lines.map((l) => (
+                  {sortedLines.map((l) => (
                     <tr key={l.id} className="border-t border-border">
                       <td className="px-3 py-1.5 whitespace-nowrap">{fmtDate(l.date)}</td>
                       <td className="px-3 py-1.5 whitespace-nowrap">
