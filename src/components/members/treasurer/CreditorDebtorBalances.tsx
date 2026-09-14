@@ -155,6 +155,9 @@ export default function CreditorDebtorBalances({ canEdit }: { canEdit: boolean }
             >
               All items ever posted
             </Button>
+            <Button size="sm" variant="outline" onClick={() => setShowZero((v) => !v)}>
+              {showZero ? "Hide settled (zero) balances" : "Show settled (zero) balances"}
+            </Button>
             <Button size="sm" variant="outline" onClick={load} disabled={loading} className="ml-auto">
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Refresh
             </Button>
