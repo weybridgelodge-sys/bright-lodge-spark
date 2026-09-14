@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "@/hooks/use-toast";
@@ -186,8 +186,8 @@ export default function CreditorDebtorBalances({ canEdit }: { canEdit: boolean }
                   {groups.map((g) => {
                     const isOpen = open === g.party;
                     return (
-                      <>
-                        <tr key={g.party} className="border-t border-border">
+                      <Fragment key={g.party}>
+                        <tr className="border-t border-border">
                           <td className="px-3 py-1.5">
                             <button
                               type="button"
@@ -205,7 +205,7 @@ export default function CreditorDebtorBalances({ canEdit }: { canEdit: boolean }
                           </td>
                         </tr>
                         {isOpen && (
-                          <tr key={`${g.party}-detail`} className="border-t border-border bg-muted/20">
+                          <tr className="border-t border-border bg-muted/20">
                             <td colSpan={3} className="px-3 py-2">
                               <div className="overflow-x-auto rounded-md border border-border bg-background">
                                 <table className="w-full text-sm">
@@ -236,7 +236,7 @@ export default function CreditorDebtorBalances({ canEdit }: { canEdit: boolean }
                             </td>
                           </tr>
                         )}
-                      </>
+                      </Fragment>
                     );
                   })}
                 </tbody>
