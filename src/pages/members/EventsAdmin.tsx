@@ -4,6 +4,7 @@ import MembersLayout from "@/components/members/MembersLayout";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchAllEvents, fetchEventBundle, type LodgeEvent, type EventCourse, type DiningOption } from "@/lib/lodgeEvents";
+import { toUploadBody } from "@/lib/nativeUpload";
 import { toast } from "sonner";
 import { Plus, Trash2, Save, Loader2, CalendarDays, Eye, EyeOff, ChevronLeft } from "lucide-react";
 
