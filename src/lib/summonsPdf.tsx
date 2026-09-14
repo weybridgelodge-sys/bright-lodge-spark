@@ -884,7 +884,7 @@ const SummonsDocument: React.FC<{
 
         </View>
         <View style={{ flex: 1, padding: 0 }}>
-          <AgendaPanel template={template} summons={summons} diningQrDataUrl={diningQrDataUrl} />
+          <AgendaPanel template={template} summons={summons} diningQrDataUrl={diningQrDataUrl} density={density} />
         </View>
       </Page>
     </Document>
