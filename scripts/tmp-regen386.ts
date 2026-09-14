@@ -27,7 +27,7 @@ const _f = globalThis.fetch;
 // @ts-ignore
 globalThis.fetch = async (...a: any[]) => {
   const url = String(a[0]);
-  if (!url.includes("supabase.co")) {
+  if (/^https?:/.test(url) && !url.includes("supabase.co")) {
     const proc = Bun.spawnSync(["curl", "-sL", "--max-time", "30", url]);
     const buf = proc.stdout;
     const type = url.endsWith(".png") ? "image/png" : url.endsWith(".webp") ? "image/webp" : "image/jpeg";
