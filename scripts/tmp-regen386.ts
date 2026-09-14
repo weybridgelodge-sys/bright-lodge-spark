@@ -24,7 +24,17 @@ if (typeof FileReader === "undefined") {
 
 const _f = globalThis.fetch;
 // @ts-ignore
-globalThis.fetch = async (...a: any[]) => { console.log("FETCH", String(a[0]).slice(0,120)); try { const r = await _f(...(a as [any])); console.log("FETCH-OK", r.status); return r; } catch (e: any) { console.log("FETCH-ERR", e?.message); throw e; } };
+globalThis.fetch = async (...a: any[]) => {
+  const url = String(a[0]);
+  if (!url.includes("supabase.co")) {
+    const proc = Bun.spawnSync(["curl", "-sL", "--max-time", "30", url]);
+    const buf = proc.stdout;
+    const type = url.endsWith(".png") ? "image/png" : url.endsWith(".webp") ? "image/webp" : "image/jpeg";
+    console.log("CURL", url.slice(-40), buf.length);
+    return new Response(buf, { status: 200, headers: { "content-type": type } });
+  }
+  return _f(...(a as [any]));
+};
 const sb = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
 
 const { data: sRow } = await sb.from("summonses").select("*").eq("meeting_number", 386).single();
