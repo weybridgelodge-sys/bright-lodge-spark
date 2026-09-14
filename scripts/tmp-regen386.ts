@@ -82,6 +82,6 @@ const blob = await generateSummonsBlob({
 });
 //UPLOADOFF
 const buf = Buffer.from(await blob.arrayBuffer());
-writeFileSync(`/tmp/browser/${MN}.pdf`", buf);
+writeFileSync(`/tmp/browser/${MN}.pdf`, buf);
 console.log("size", buf.length);
 
