@@ -38,7 +38,8 @@ globalThis.fetch = async (...a: any[]) => {
 };
 const sb = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
 
-const { data: sRow } = await sb.from("summonses").select("*").eq("meeting_number", 386).single();
+const MN = Number(process.argv[2] ?? 386);
+const { data: sRow } = await sb.from("summonses").select("*").eq("meeting_number", MN).single();
 const { data: tplRow } = await sb.from("lodge_template").select("*").eq("id", "default").single();
 const { data: mem } = await sb.from("profiles")
   .select("id,title,first_name,middle_name,last_name,full_name,preferred_name,post_nominals,rank,grand_rank,provincial_rank,initiation_date,joined_lodge_date,joined_year,is_past_master,is_royal_arch,is_honorary_member,status")
@@ -81,6 +82,6 @@ const blob = await generateSummonsBlob({
 });
 //UPLOADOFF
 const buf = Buffer.from(await blob.arrayBuffer());
-writeFileSync("/tmp/browser/386.pdf", buf);
+writeFileSync(`/tmp/browser/${MN}.pdf`", buf);
 console.log("size", buf.length);
 
