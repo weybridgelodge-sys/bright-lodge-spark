@@ -783,7 +783,9 @@ const AgendaPanel: React.FC<{
       )}
     </View>
   </View>
-);
+  );
+};
+
 
 
 // ---------- helpers ----------
