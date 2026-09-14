@@ -155,6 +155,20 @@ const BookingsEvent = ({
     }
   }, [step]);
 
+  // Per-meeting header image (private bucket → signed URL); falls back to the
+  // generic Fellow Craft photo when this meeting has no custom image.
+  const [headerImageUrl, setHeaderImageUrl] = useState<string | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    const path = (event as any).header_image_url as string | null | undefined;
+    if (!path) { setHeaderImageUrl(null); return; }
+    (async () => {
+      const { data } = await supabase.storage.from("event-images").createSignedUrl(path, 60 * 60);
+      if (!cancelled) setHeaderImageUrl(data?.signedUrl ?? null);
+    })();
+    return () => { cancelled = true; };
+  }, [event]);
+
   const [showCheckout, setShowCheckout] = useState(false);
   const [submissionStatus, setSubmissionStatus] = useState<
     "idle" | "submitting" | "meeting-only" | "apologies" | "bank-transfer" | "cash-cheque" | "error"
