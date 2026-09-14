@@ -676,7 +676,6 @@ export default function DiningReconciliationTab({
 
           canEdit={canEdit}
           onChanged={load}
-          onGoToTransaction={onGoToTransaction}
         />
       ))}
     </div>
