@@ -40,6 +40,7 @@ const normaliseParty = (raw: string) => {
 export default function CreditorDebtorBalances({ canEdit }: { canEdit: boolean }) {
   const [side, setSide] = useState<Side>("creditors");
   const [unreconciledOnly, setUnreconciledOnly] = useState(true);
+  const [showZero, setShowZero] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [rows, setRows] = useState<Record<Side, Line[]>>({ creditors: [], debtors: [] });
