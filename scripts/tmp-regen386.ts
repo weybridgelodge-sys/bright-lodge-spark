@@ -22,6 +22,9 @@ if (typeof FileReader === "undefined") {
   };
 }
 
+const _f = globalThis.fetch;
+// @ts-ignore
+globalThis.fetch = async (...a: any[]) => { console.log("FETCH", String(a[0]).slice(0,120)); try { const r = await _f(...(a as [any])); console.log("FETCH-OK", r.status); return r; } catch (e: any) { console.log("FETCH-ERR", e?.message); throw e; } };
 const sb = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
 
 const { data: sRow } = await sb.from("summonses").select("*").eq("meeting_number", 386).single();
