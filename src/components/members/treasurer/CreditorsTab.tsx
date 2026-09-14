@@ -170,7 +170,7 @@ export default function CreditorsTab({ canEdit }: { canEdit: boolean }) {
 
   const recognitionMapping: Record<string, { code: string; payee: string }> = {
     "GMC Levy": { code: "5200", payee: "GMC" },
-    Other: { code: "5900", payee: "" },
+    Other: { code: "", payee: "" },
   };
 
   const submitRecognition = async () => {
@@ -187,10 +187,14 @@ export default function CreditorsTab({ canEdit }: { canEdit: boolean }) {
       return;
     }
 
-    const expenseAccountId = accounts.get(mapping.code);
+    const debitAccountId = recPayee === "Other" ? recAccountId : accounts.get(mapping.code);
+    if (recPayee === "Other" && !debitAccountId) {
+      toast({ title: "Choose a debit account", variant: "destructive" });
+      return;
+    }
     const creditorsId = accounts.get("2000");
-    if (!expenseAccountId || !creditorsId) {
-      toast({ title: "Required expense or creditors account not found", variant: "destructive" });
+    if (!debitAccountId || !creditorsId) {
+      toast({ title: "Required account not found", variant: "destructive" });
       return;
     }
 
