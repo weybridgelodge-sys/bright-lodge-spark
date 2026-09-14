@@ -554,12 +554,18 @@ export const MAX_DENSITY = 4;
 function densityStyles(density: number) {
   return {
     officerRow: density >= 1 ? { marginBottom: density >= 2 ? 0 : 0.5 } : null,
-    officerText: density >= 2 ? { fontSize: 8.5, lineHeight: 1.2 } : null,
+    officerText:
+      density >= 4
+        ? { fontSize: 8, lineHeight: 1.1 }
+        : density >= 2
+          ? { fontSize: 8.5, lineHeight: 1.2 }
+          : null,
     heading: density >= 1 ? { marginTop: 4, marginBottom: 2 } : null,
     divider: density >= 1 ? { marginVertical: 3 } : null,
-    notice: density >= 2 ? { lineHeight: 1.15 } : null,
+    notice: density >= 4 ? { lineHeight: 1.1 } : density >= 2 ? { lineHeight: 1.15 } : null,
   };
 }
+
 
 const OfficersDiningPanel: React.FC<{
   template: LodgeTemplate;
