@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
-import { Loader2, Check, AlertTriangle, Save, Plus, ExternalLink } from "lucide-react";
+import { Loader2, Check, AlertTriangle, Save, Plus } from "lucide-react";
 import {
   isWeybridgeLodge,
   meetingTypeLabel,
@@ -80,7 +80,6 @@ function MeetingPanel({
   invoice,
   canEdit,
   onChanged,
-  onGoToTransaction,
 }: {
   meeting: Meeting;
   rows: AttRow[];
@@ -88,7 +87,6 @@ function MeetingPanel({
   invoice: Invoice | null;
   canEdit: boolean;
   onChanged: () => void;
-  onGoToTransaction: (txId: string) => void;
 }) {
 
   const [headcount, setHeadcount] = useState("");
@@ -592,10 +590,6 @@ function MeetingPanel({
                   Posted to ledger — Dr GMC Dining Invoice {draftTotal != null ? gbp(draftTotal) : "—"} / Cr Creditors{" "}
                   {draftTotal != null ? gbp(draftTotal) : "—"}
                 </span>
-              ) : invoice?.transaction_id ? (
-                <Button size="sm" variant="outline" className="min-h-11 sm:min-h-0" onClick={() => onGoToTransaction(invoice.transaction_id!)}>
-                  <ExternalLink className="w-4 h-4 mr-1" /> View linked transaction
-                </Button>
               ) : (
                 <Button size="sm" variant="outline" className="min-h-11 sm:min-h-0" disabled={creating} onClick={createTransaction}>
                   {creating ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Plus className="w-4 h-4 mr-1" />} Create GMC dining transaction
@@ -611,10 +605,8 @@ function MeetingPanel({
 
 export default function DiningReconciliationTab({
   canEdit,
-  onGoToTransaction,
 }: {
   canEdit: boolean;
-  onGoToTransaction: (txId: string) => void;
 }) {
   const [meetings, setMeetings] = useState<Meeting[]>([]);
   const [rows, setRows] = useState<AttRow[]>([]);
