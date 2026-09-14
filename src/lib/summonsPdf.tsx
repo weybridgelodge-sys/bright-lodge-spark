@@ -928,20 +928,49 @@ export async function generateSummonsBlob(args: {
   const coverLeftDataUrl = coverLeftUrl ? await fetchImageAsDataUrl(coverLeftUrl) : null;
   const coverRightDataUrl = coverRightUrl ? await fetchImageAsDataUrl(coverRightUrl) : null;
   const overflow = planOverflow(args.members.length);
-  const doc = (
-    <SummonsDocument
-      template={args.template}
-      officers={args.officers}
-      members={args.members}
-      summons={args.summons}
-      diningQrDataUrl={diningQrDataUrl}
-      logoDataUrl={logoDataUrl}
-      coverLeftDataUrl={coverLeftDataUrl}
-      coverRightDataUrl={coverRightDataUrl}
-      overflow={overflow}
-      manualHidden={args.manualHidden}
-    />
-  );
 
-  return await pdf(doc).toBlob();
+  const render = async (density: number) =>
+    await pdf(
+      <SummonsDocument
+        template={args.template}
+        officers={args.officers}
+        members={args.members}
+        summons={args.summons}
+        diningQrDataUrl={diningQrDataUrl}
+        logoDataUrl={logoDataUrl}
+        coverLeftDataUrl={coverLeftDataUrl}
+        coverRightDataUrl={coverRightDataUrl}
+        overflow={overflow}
+        manualHidden={args.manualHidden}
+        density={density}
+      />,
+    ).toBlob();
+
+  // The summons is a single folded A4 sheet: exactly two PDF pages. If a long
+  // officer roll / agenda / notice set pushes a panel past the page height,
+  // react-pdf silently emits an extra (usually blank-looking) page. Rather
+  // than tuning content per summons, render, verify the real page count, and
+  // re-render one density step tighter until it genuinely fits.
+  let blob = await render(0);
+  for (let density = 1; density <= MAX_DENSITY && (await countPdfPages(blob)) > 2; density++) {
+    blob = await render(density);
+  }
+  return blob;
 }
+
+/** Counts page objects in a rendered PDF blob (react-pdf output is uncompressed enough for this). */
+async function countPdfPages(blob: Blob): Promise<number> {
+  try {
+    const bytes = new Uint8Array(await blob.arrayBuffer());
+    let text = "";
+    const CHUNK = 0x8000;
+    for (let i = 0; i < bytes.length; i += CHUNK) {
+      text += String.fromCharCode(...bytes.subarray(i, i + CHUNK));
+    }
+    const matches = text.match(/\/Type\s*\/Page[^s]/g);
+    return matches ? matches.length : 2;
+  } catch {
+    return 2; // never loop on a parsing failure
+  }
+}
+
