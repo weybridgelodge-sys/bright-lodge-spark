@@ -136,6 +136,19 @@ export default function TransactionDetailReport({ canEdit }: { canEdit: boolean 
     [lines]
   );
 
+  const sortedLines = useMemo(() => {
+    const sorted = [...lines];
+    sorted.sort((a, b) => {
+      if (sortConfig.key === "date") {
+        return sortConfig.direction === "asc" ? a.date.localeCompare(b.date) : b.date.localeCompare(a.date);
+      }
+      return sortConfig.direction === "asc"
+        ? a.code.localeCompare(b.code, undefined, { numeric: true })
+        : b.code.localeCompare(a.code, undefined, { numeric: true });
+    });
+    return sorted;
+  }, [lines, sortConfig]);
+
   const setEntryReconciled = (entryId: string, value: boolean) =>
     setLines((prev) => prev.map((l) => (l.entryId === entryId ? { ...l, reconciled: value } : l)));
 
