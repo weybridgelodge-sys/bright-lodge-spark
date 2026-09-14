@@ -295,54 +295,7 @@ function Inner() {
       ) : (
         <Tabs value={tab} onValueChange={setTab}>
           <TabsList className="flex flex-col w-full h-auto items-stretch gap-1 bg-navy p-2 rounded-sm border border-gold/20 mb-4">
-            {canEditTx && (
-              <TabsTrigger
-                value="balance-sheet"
-                className="w-full flex items-center justify-start gap-3 px-4 py-3 rounded-sm text-sm font-sans text-primary-foreground/80 transition-colors hover:text-gold hover:bg-navy-light/40 data-[state=active]:bg-gold/15 data-[state=active]:text-gold data-[state=active]:shadow-none"
-              >
-                <Scale className="w-4 h-4 shrink-0" />
-                <span>Balance Sheet</span>
-              </TabsTrigger>
-            )}
-            <TabsTrigger
-              value="bank-reconciliation"
-              className="w-full flex items-center justify-start gap-3 px-4 py-3 rounded-sm text-sm font-sans text-primary-foreground/80 transition-colors hover:text-gold hover:bg-navy-light/40 data-[state=active]:bg-gold/15 data-[state=active]:text-gold data-[state=active]:shadow-none"
-            >
-              <Scale className="w-4 h-4 shrink-0" />
-              <span>Bank Reconciliation</span>
-            </TabsTrigger>
-            <TabsTrigger
-              value="bank-statements"
-              className="w-full flex items-center justify-start gap-3 px-4 py-3 rounded-sm text-sm font-sans text-primary-foreground/80 transition-colors hover:text-gold hover:bg-navy-light/40 data-[state=active]:bg-gold/15 data-[state=active]:text-gold data-[state=active]:shadow-none"
-            >
-              <Landmark className="w-4 h-4 shrink-0" />
-              <span>Bank Statement Repository</span>
-            </TabsTrigger>
-            {canEditTx && (
-              <TabsTrigger
-                value="creditor-debtor-balances"
-                className="w-full flex items-center justify-start gap-3 px-4 py-3 rounded-sm text-sm font-sans text-primary-foreground/80 transition-colors hover:text-gold hover:bg-navy-light/40 data-[state=active]:bg-gold/15 data-[state=active]:text-gold data-[state=active]:shadow-none"
-              >
-                <Users className="w-4 h-4 shrink-0" />
-                <span>Creditor &amp; Debtor Balances</span>
-              </TabsTrigger>
-            )}
-            {canEditTx && (
-              <TabsTrigger
-                value="creditors"
-                className="w-full flex items-center justify-start gap-3 px-4 py-3 rounded-sm text-sm font-sans text-primary-foreground/80 transition-colors hover:text-gold hover:bg-navy-light/40 data-[state=active]:bg-gold/15 data-[state=active]:text-gold data-[state=active]:shadow-none"
-              >
-                <Handshake className="w-4 h-4 shrink-0" />
-                <span>Creditors</span>
-              </TabsTrigger>
-            )}
-            <TabsTrigger
-              value="dining"
-              className="w-full flex items-center justify-start gap-3 px-4 py-3 rounded-sm text-sm font-sans text-primary-foreground/80 transition-colors hover:text-gold hover:bg-navy-light/40 data-[state=active]:bg-gold/15 data-[state=active]:text-gold data-[state=active]:shadow-none"
-            >
-              <Utensils className="w-4 h-4 shrink-0" />
-              <span>Dining Reconciliation</span>
-            </TabsTrigger>
+            <div className="px-4 py-2 text-xs font-sans font-semibold uppercase tracking-wider text-gold">Transactions</div>
             {canEditTx && (
               <TabsTrigger
                 value="direct-payment"
@@ -361,13 +314,15 @@ function Inner() {
                 <span>Direct Receipt</span>
               </TabsTrigger>
             )}
-            <TabsTrigger
-              value="event-accounts"
-              className="w-full flex items-center justify-start gap-3 px-4 py-3 rounded-sm text-sm font-sans text-primary-foreground/80 transition-colors hover:text-gold hover:bg-navy-light/40 data-[state=active]:bg-gold/15 data-[state=active]:text-gold data-[state=active]:shadow-none"
-            >
-              <PartyPopper className="w-4 h-4 shrink-0" />
-              <span>Event Accounts</span>
-            </TabsTrigger>
+            {canEditTx && (
+              <TabsTrigger
+                value="creditors"
+                className="w-full flex items-center justify-start gap-3 px-4 py-3 rounded-sm text-sm font-sans text-primary-foreground/80 transition-colors hover:text-gold hover:bg-navy-light/40 data-[state=active]:bg-gold/15 data-[state=active]:text-gold data-[state=active]:shadow-none"
+              >
+                <Handshake className="w-4 h-4 shrink-0" />
+                <span>Creditors</span>
+              </TabsTrigger>
+            )}
             {canEditTx && (
               <TabsTrigger
                 value="general-journal"
@@ -375,6 +330,33 @@ function Inner() {
               >
                 <BookOpen className="w-4 h-4 shrink-0" />
                 <span>General Journal</span>
+              </TabsTrigger>
+            )}
+            {canEditTx && (
+              <TabsTrigger
+                value="new-member-fees"
+                className="w-full flex items-center justify-start gap-3 px-4 py-3 rounded-sm text-sm font-sans text-primary-foreground/80 transition-colors hover:text-gold hover:bg-navy-light/40 data-[state=active]:bg-gold/15 data-[state=active]:text-gold data-[state=active]:shadow-none"
+              >
+                <UserPlus className="w-4 h-4 shrink-0" />
+                <span>New Member Fees</span>
+              </TabsTrigger>
+            )}
+            <TabsTrigger
+              value="event-accounts"
+              className="w-full flex items-center justify-start gap-3 px-4 py-3 rounded-sm text-sm font-sans text-primary-foreground/80 transition-colors hover:text-gold hover:bg-navy-light/40 data-[state=active]:bg-gold/15 data-[state=active]:text-gold data-[state=active]:shadow-none"
+            >
+              <PartyPopper className="w-4 h-4 shrink-0" />
+              <span>Event Accounts</span>
+            </TabsTrigger>
+
+            <div className="mt-2 px-4 py-2 text-xs font-sans font-semibold uppercase tracking-wider text-gold border-t border-gold/20">Reporting</div>
+            {canEditTx && (
+              <TabsTrigger
+                value="balance-sheet"
+                className="w-full flex items-center justify-start gap-3 px-4 py-3 rounded-sm text-sm font-sans text-primary-foreground/80 transition-colors hover:text-gold hover:bg-navy-light/40 data-[state=active]:bg-gold/15 data-[state=active]:text-gold data-[state=active]:shadow-none"
+              >
+                <Scale className="w-4 h-4 shrink-0" />
+                <span>Balance Sheet</span>
               </TabsTrigger>
             )}
             {canEditTx && (
@@ -388,38 +370,6 @@ function Inner() {
             )}
             {canEditTx && (
               <TabsTrigger
-                value="breakeven"
-                className="w-full flex items-center justify-start gap-3 px-4 py-3 rounded-sm text-sm font-sans text-primary-foreground/80 transition-colors hover:text-gold hover:bg-navy-light/40 data-[state=active]:bg-gold/15 data-[state=active]:text-gold data-[state=active]:shadow-none"
-              >
-                <Calculator className="w-4 h-4 shrink-0" />
-                <span>Membership Breakeven</span>
-              </TabsTrigger>
-            )}
-            {canEditTx && (
-              <TabsTrigger
-                value="new-member-fees"
-                className="w-full flex items-center justify-start gap-3 px-4 py-3 rounded-sm text-sm font-sans text-primary-foreground/80 transition-colors hover:text-gold hover:bg-navy-light/40 data-[state=active]:bg-gold/15 data-[state=active]:text-gold data-[state=active]:shadow-none"
-              >
-                <UserPlus className="w-4 h-4 shrink-0" />
-                <span>New Member Fees</span>
-              </TabsTrigger>
-            )}
-            <TabsTrigger
-              value="reconciliation"
-              className="w-full flex items-center justify-start gap-3 px-4 py-3 rounded-sm text-sm font-sans text-primary-foreground/80 transition-colors hover:text-gold hover:bg-navy-light/40 data-[state=active]:bg-gold/15 data-[state=active]:text-gold data-[state=active]:shadow-none"
-            >
-              <Lock className="w-4 h-4 shrink-0" />
-              <span>Period Close</span>
-            </TabsTrigger>
-            <TabsTrigger
-              value="property"
-              className="w-full flex items-center justify-start gap-3 px-4 py-3 rounded-sm text-sm font-sans text-primary-foreground/80 transition-colors hover:text-gold hover:bg-navy-light/40 data-[state=active]:bg-gold/15 data-[state=active]:text-gold data-[state=active]:shadow-none"
-            >
-              <Archive className="w-4 h-4 shrink-0" />
-              <span>Property Register</span>
-            </TabsTrigger>
-            {canEditTx && (
-              <TabsTrigger
                 value="transaction-detail"
                 className="w-full flex items-center justify-start gap-3 px-4 py-3 rounded-sm text-sm font-sans text-primary-foreground/80 transition-colors hover:text-gold hover:bg-navy-light/40 data-[state=active]:bg-gold/15 data-[state=active]:text-gold data-[state=active]:shadow-none"
               >
@@ -427,6 +377,62 @@ function Inner() {
                 <span>Transaction Detail</span>
               </TabsTrigger>
             )}
+            {canEditTx && (
+              <TabsTrigger
+                value="creditor-debtor-balances"
+                className="w-full flex items-center justify-start gap-3 px-4 py-3 rounded-sm text-sm font-sans text-primary-foreground/80 transition-colors hover:text-gold hover:bg-navy-light/40 data-[state=active]:bg-gold/15 data-[state=active]:text-gold data-[state=active]:shadow-none"
+              >
+                <Users className="w-4 h-4 shrink-0" />
+                <span>Creditor &amp; Debtor Balances</span>
+              </TabsTrigger>
+            )}
+            {canEditTx && (
+              <TabsTrigger
+                value="breakeven"
+                className="w-full flex items-center justify-start gap-3 px-4 py-3 rounded-sm text-sm font-sans text-primary-foreground/80 transition-colors hover:text-gold hover:bg-navy-light/40 data-[state=active]:bg-gold/15 data-[state=active]:text-gold data-[state=active]:shadow-none"
+              >
+                <Calculator className="w-4 h-4 shrink-0" />
+                <span>Membership Breakeven</span>
+              </TabsTrigger>
+            )}
+
+            <div className="mt-2 px-4 py-2 text-xs font-sans font-semibold uppercase tracking-wider text-gold border-t border-gold/20">Reconciliation</div>
+            <TabsTrigger
+              value="bank-statements"
+              className="w-full flex items-center justify-start gap-3 px-4 py-3 rounded-sm text-sm font-sans text-primary-foreground/80 transition-colors hover:text-gold hover:bg-navy-light/40 data-[state=active]:bg-gold/15 data-[state=active]:text-gold data-[state=active]:shadow-none"
+            >
+              <Landmark className="w-4 h-4 shrink-0" />
+              <span>Bank Statement Repository</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="bank-reconciliation"
+              className="w-full flex items-center justify-start gap-3 px-4 py-3 rounded-sm text-sm font-sans text-primary-foreground/80 transition-colors hover:text-gold hover:bg-navy-light/40 data-[state=active]:bg-gold/15 data-[state=active]:text-gold data-[state=active]:shadow-none"
+            >
+              <Scale className="w-4 h-4 shrink-0" />
+              <span>Bank Reconciliation</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="dining"
+              className="w-full flex items-center justify-start gap-3 px-4 py-3 rounded-sm text-sm font-sans text-primary-foreground/80 transition-colors hover:text-gold hover:bg-navy-light/40 data-[state=active]:bg-gold/15 data-[state=active]:text-gold data-[state=active]:shadow-none"
+            >
+              <Utensils className="w-4 h-4 shrink-0" />
+              <span>Dining Reconciliation</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="reconciliation"
+              className="w-full flex items-center justify-start gap-3 px-4 py-3 rounded-sm text-sm font-sans text-primary-foreground/80 transition-colors hover:text-gold hover:bg-navy-light/40 data-[state=active]:bg-gold/15 data-[state=active]:text-gold data-[state=active]:shadow-none"
+            >
+              <Lock className="w-4 h-4 shrink-0" />
+              <span>Period Close</span>
+            </TabsTrigger>
+
+            <TabsTrigger
+              value="property"
+              className="mt-2 w-full flex items-center justify-start gap-3 px-4 py-3 rounded-sm text-sm font-sans text-primary-foreground/80 transition-colors hover:text-gold hover:bg-navy-light/40 border-t border-gold/20 data-[state=active]:bg-gold/15 data-[state=active]:text-gold data-[state=active]:shadow-none"
+            >
+              <Archive className="w-4 h-4 shrink-0" />
+              <span>Property Register</span>
+            </TabsTrigger>
           </TabsList>
           {canEditTx && (
             <TabsContent value="breakeven" className="mt-4">
