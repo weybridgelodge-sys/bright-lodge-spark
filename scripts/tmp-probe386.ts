@@ -80,9 +80,9 @@ async function count(args: any) {
   return { pages: m ? m.length : -1, buf };
 }
 const base = { template: template as any, officers: officers as any, members: members as any, summons, manualHidden: ((sRow as any).notice_overrides?.manualHidden ?? []) as any };
-console.log("baseline", (await count(base)).pages);
-console.log("no agenda", (await count({ ...base, summons: { ...summons, agenda: [] } })).pages);
-console.log("no officers", (await count({ ...base, officers: [] })).pages);
-console.log("officers half", (await count({ ...base, officers: (officers as any).slice(0, 12) })).pages);
-console.log("agenda half", (await count({ ...base, summons: { ...summons, agenda: (summons.agenda ?? []).slice(0, 7) } })).pages);
-console.log("no members", (await count({ ...base, members: [] })).pages);
+for (const n of [25,24,23,22,21,20]) {
+  console.log("officers", n, (await count({ ...base, officers: (officers as any).slice(0, n) })).pages);
+}
+console.log("no reps", (await count({ ...base, template: { ...(template as any), lodge_representatives: [] } })).pages);
+console.log("hide overseas", (await count({ ...base, manualHidden: ["overseas"] })).pages);
+console.log("hide dp", (await count({ ...base, manualHidden: ["data_protection"] })).pages);
