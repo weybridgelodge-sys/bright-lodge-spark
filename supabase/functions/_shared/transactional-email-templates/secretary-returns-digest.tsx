@@ -76,7 +76,7 @@ const Email = ({ overdue = [], dueSoon = [], reportDate, portalUrl }: Props) => 
     <Preview>
       {overdue.length > 0
         ? `${overdue.length} return${overdue.length === 1 ? '' : 's'} overdue · ${dueSoon.length} due soon`
-        : `${dueSoon.length} return${dueSoon.length === 1 ? '' : 's'} due within 14 days`}
+        : `${dueSoon.length} return${dueSoon.length === 1 ? '' : 's'} approaching their submission deadline`}
     </Preview>
     <Body style={main}>
       <Container style={container}>
@@ -111,7 +111,7 @@ const Email = ({ overdue = [], dueSoon = [], reportDate, portalUrl }: Props) => 
           <>
             <Heading style={h2}>Due soon</Heading>
             <Text style={intro}>
-              These draft returns fall due within the next 14 days.
+              These draft returns are approaching their submission deadline.
             </Text>
             <Rows rows={dueSoon} tone="amber" />
           </>
