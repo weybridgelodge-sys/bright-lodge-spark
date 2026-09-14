@@ -34,20 +34,26 @@ export default function CreditorsTab({ canEdit }: { canEdit: boolean }) {
   const [recOtherPayee, setRecOtherPayee] = useState("");
   const [recAmount, setRecAmount] = useState("0.00");
   const [recReference, setRecReference] = useState("");
+  const [recAccountId, setRecAccountId] = useState("");
   const [recSaving, setRecSaving] = useState(false);
 
   const [lines, setLines] = useState<LineRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [accounts, setAccounts] = useState<Map<string, string>>(new Map());
+  const [allAccounts, setAllAccounts] = useState<{ id: string; code: string; name: string }[]>([]);
   const [openPeriodId, setOpenPeriodId] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
-    const [{ data: accts }, { data: period }] = await Promise.all([
+    const [{ data: accts }, { data: allAccts }, { data: period }] = await Promise.all([
       supabase
         .from("chart_of_accounts" as any)
         .select("id,code")
         .in("code", ["1000", "2000", "5000", "5100", "5200", "5900"]),
+      supabase
+        .from("chart_of_accounts" as any)
+        .select("id,code,name")
+        .order("code"),
       supabase
         .from("treasurer_periods" as any)
         .select("id")
@@ -62,6 +68,7 @@ export default function CreditorsTab({ canEdit }: { canEdit: boolean }) {
       if (a.code && a.id) map.set(a.code as string, a.id as string);
     }
     setAccounts(map);
+    setAllAccounts(((allAccts as any[]) ?? []).filter((a) => a.code !== "2000"));
     setOpenPeriodId((period as any)?.id ?? null);
 
     const creditorsId = map.get("2000");
@@ -163,7 +170,7 @@ export default function CreditorsTab({ canEdit }: { canEdit: boolean }) {
 
   const recognitionMapping: Record<string, { code: string; payee: string }> = {
     "GMC Levy": { code: "5200", payee: "GMC" },
-    Other: { code: "5900", payee: "" },
+    Other: { code: "", payee: "" },
   };
 
   const submitRecognition = async () => {
@@ -180,10 +187,14 @@ export default function CreditorsTab({ canEdit }: { canEdit: boolean }) {
       return;
     }
 
-    const expenseAccountId = accounts.get(mapping.code);
+    const debitAccountId = recPayee === "Other" ? recAccountId : accounts.get(mapping.code);
+    if (recPayee === "Other" && !debitAccountId) {
+      toast({ title: "Choose a debit account", variant: "destructive" });
+      return;
+    }
     const creditorsId = accounts.get("2000");
-    if (!expenseAccountId || !creditorsId) {
-      toast({ title: "Required expense or creditors account not found", variant: "destructive" });
+    if (!debitAccountId || !creditorsId) {
+      toast({ title: "Required account not found", variant: "destructive" });
       return;
     }
 
@@ -214,7 +225,7 @@ export default function CreditorsTab({ canEdit }: { canEdit: boolean }) {
 
     const entryId = (entry as any).id as string;
     const { error: lineErr } = await supabase.from("journal_lines" as any).insert([
-      { entry_id: entryId, account_id: expenseAccountId, debit_pence: pence, credit_pence: 0, description: ref || null },
+      { entry_id: entryId, account_id: debitAccountId, debit_pence: pence, credit_pence: 0, description: ref || null },
       { entry_id: entryId, account_id: creditorsId, debit_pence: 0, credit_pence: pence, description: ref || null },
     ]);
 
@@ -228,6 +239,7 @@ export default function CreditorsTab({ canEdit }: { canEdit: boolean }) {
     setRecSaving(false);
     setRecAmount("0.00");
     setRecReference("");
+    setRecAccountId("");
     toast({ title: "Liability recognised" });
     load();
   };
@@ -278,7 +290,7 @@ export default function CreditorsTab({ canEdit }: { canEdit: boolean }) {
       <section className="rounded-lg border border-gold/20 bg-primary-foreground/5 p-4">
         <h2 className="font-serif text-lg text-gold mb-1">Recognise a Liability</h2>
         <p className="text-primary-foreground/60 text-sm mb-4">
-          Records money the lodge owes before it is paid. Posts a double-entry: Dr expense account, Cr 2000 Creditors.
+          Records money the lodge owes before it is paid. Posts a double-entry: Dr the chosen account, Cr 2000 Creditors.
         </p>
         <div className="grid gap-3 sm:grid-cols-2">
           <div>
@@ -298,6 +310,19 @@ export default function CreditorsTab({ canEdit }: { canEdit: boolean }) {
             <div className="sm:col-span-2">
               <Label>Payee name</Label>
               <Input value={recOtherPayee} onChange={(e) => setRecOtherPayee(e.target.value)} placeholder="e.g. Metropolitan Grand Lodge" disabled={!canEdit} />
+            </div>
+          )}
+          {recPayee === "Other" && (
+            <div className="sm:col-span-2">
+              <Label>Debit account</Label>
+              <Select value={recAccountId} onValueChange={setRecAccountId} disabled={!canEdit}>
+                <SelectTrigger><SelectValue placeholder="Choose the debit account" /></SelectTrigger>
+                <SelectContent>
+                  {allAccounts.map((a) => (
+                    <SelectItem key={a.id} value={a.id}>{a.code} — {a.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           )}
           <div>
