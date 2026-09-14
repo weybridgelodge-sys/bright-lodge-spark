@@ -545,6 +545,22 @@ const BackCoverPanel: React.FC<{
   );
 };
 
+// Density steps applied to the officers/notices panel when its content would
+// otherwise spill past the A5 panel and make react-pdf emit a third page.
+// Step 0 is the normal layout; higher steps progressively tighten spacing
+// before any content is shortened or dropped (see generateSummonsBlob).
+export const MAX_DENSITY = 4;
+
+function densityStyles(density: number) {
+  return {
+    officerRow: density >= 1 ? { marginBottom: density >= 2 ? 0 : 0.5 } : null,
+    officerText: density >= 2 ? { fontSize: 8.5, lineHeight: 1.2 } : null,
+    heading: density >= 1 ? { marginTop: 4, marginBottom: 2 } : null,
+    divider: density >= 1 ? { marginVertical: 3 } : null,
+    notice: density >= 2 ? { lineHeight: 1.15 } : null,
+  };
+}
+
 const OfficersDiningPanel: React.FC<{
   template: LodgeTemplate;
   officers: OfficerRollRow[];
@@ -552,7 +568,9 @@ const OfficersDiningPanel: React.FC<{
   diningQrDataUrl: string | null;
   hidden: Set<NoticeKey>;
   shortened: Set<NoticeKey>;
-}> = ({ template, officers, hidden, shortened }) => {
+  density?: number;
+}> = ({ template, officers, hidden, shortened, density = 0 }) => {
+  const d = densityStyles(density);
   // Steward positions are only printed when filled; all other offices are
   // always shown, even if vacant, to preserve the full office structure.
   const VACANT_STEWARD_LABELS = new Set(
@@ -565,7 +583,8 @@ const OfficersDiningPanel: React.FC<{
   );
   return (
     <View style={s.panel}>
-      <Text style={s.panelHeading}>OFFICERS {officerSeason()}</Text>
+      <Text style={[s.panelHeading, d.heading]}>OFFICERS {officerSeason()}</Text>
+
       {printableOfficers.map((o, i) =>
         o.member ? (
           <View key={i} style={s.officerRow}>
