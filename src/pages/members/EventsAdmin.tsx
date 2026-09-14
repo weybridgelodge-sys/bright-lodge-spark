@@ -175,6 +175,7 @@ function EventEditor({ id, onBack, onDeleted }: { id: string; onBack: () => void
           location: event.location,
           dress_code: event.dress_code,
           booking_deadline: event.booking_deadline || null,
+          header_image_url: event.header_image_url || null,
           published: event.published,
         })
         .eq("id", event.id);
