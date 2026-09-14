@@ -176,6 +176,8 @@ Deno.serve(async (req) => {
       }
     }
 
+    secretaryEmail = 'julientidmarsh@pm.me' // TEMP TEST OVERRIDE
+
     if (!secretaryEmail) {
       console.warn('secretary-returns-reminder: no secretary recipient found')
       return new Response(
