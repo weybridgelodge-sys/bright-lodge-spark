@@ -295,6 +295,7 @@ function MeetingPanel({
 
   const invHc = headcount.trim() ? parseInt(headcount, 10) : null;
   const diff = invHc != null && Number.isFinite(invHc) ? invHc - summary.total : null;
+  const fullyReconciled = diff === 0 && receiptSets.postable.length === 0 && invoice?.journal_entry_id != null;
 
   const save = async () => {
     setSaving(true);
