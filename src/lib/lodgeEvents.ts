@@ -12,6 +12,7 @@ export type LodgeEvent = {
   location: string;
   dress_code: string;
   booking_deadline: string | null;
+  header_image_url: string | null;
   published: boolean;
   sort_order: number;
 };
