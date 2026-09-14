@@ -225,7 +225,7 @@ export default function CreditorsTab({ canEdit }: { canEdit: boolean }) {
 
     const entryId = (entry as any).id as string;
     const { error: lineErr } = await supabase.from("journal_lines" as any).insert([
-      { entry_id: entryId, account_id: expenseAccountId, debit_pence: pence, credit_pence: 0, description: ref || null },
+      { entry_id: entryId, account_id: debitAccountId, debit_pence: pence, credit_pence: 0, description: ref || null },
       { entry_id: entryId, account_id: creditorsId, debit_pence: 0, credit_pence: pence, description: ref || null },
     ]);
 
