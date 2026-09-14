@@ -5,9 +5,11 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
-import { Download, Loader2 } from "lucide-react";
+import { Download, Loader2, ArrowUp, ArrowDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchAccounts, treasurerYearBounds, treasurerYearContaining, fmtDate, money, type Account } from "@/lib/treasurer/reports";
+
+type SortKey = "date" | "account";
 
 type Line = {
   id: string;
@@ -46,6 +48,10 @@ export default function TransactionDetailReport({ canEdit }: { canEdit: boolean 
   const [loadError, setLoadError] = useState<string | null>(null);
   const [applied, setApplied] = useState<{ from: string; to: string; codeFrom: string; codeTo: string } | null>(null);
   const [events, setEvents] = useState<EventOption[]>([]);
+  const [sortConfig, setSortConfig] = useState<{ key: SortKey; direction: "asc" | "desc" }>({
+    key: "date",
+    direction: "asc",
+  });
 
   useEffect(() => {
     if (!canEdit) return;
@@ -129,6 +135,19 @@ export default function TransactionDetailReport({ canEdit }: { canEdit: boolean 
       ),
     [lines]
   );
+
+  const sortedLines = useMemo(() => {
+    const sorted = [...lines];
+    sorted.sort((a, b) => {
+      if (sortConfig.key === "date") {
+        return sortConfig.direction === "asc" ? a.date.localeCompare(b.date) : b.date.localeCompare(a.date);
+      }
+      return sortConfig.direction === "asc"
+        ? a.code.localeCompare(b.code, undefined, { numeric: true })
+        : b.code.localeCompare(a.code, undefined, { numeric: true });
+    });
+    return sorted;
+  }, [lines, sortConfig]);
 
   const setEntryReconciled = (entryId: string, value: boolean) =>
     setLines((prev) => prev.map((l) => (l.entryId === entryId ? { ...l, reconciled: value } : l)));
@@ -281,8 +300,46 @@ export default function TransactionDetailReport({ canEdit }: { canEdit: boolean 
               <table className="w-full text-sm">
                 <thead>
                   <tr className="bg-muted/50 text-left">
-                    <th className="px-3 py-2 font-medium">Date</th>
-                    <th className="px-3 py-2 font-medium">Account</th>
+                    <th className="px-3 py-2 font-medium">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setSortConfig((prev) => ({
+                            key: "date",
+                            direction: prev.key === "date" && prev.direction === "asc" ? "desc" : "asc",
+                          }))
+                        }
+                        className="inline-flex items-center gap-1 hover:text-gold focus:outline-none"
+                      >
+                        Date
+                        {sortConfig.key === "date" &&
+                          (sortConfig.direction === "asc" ? (
+                            <ArrowUp className="h-3 w-3" />
+                          ) : (
+                            <ArrowDown className="h-3 w-3" />
+                          ))}
+                      </button>
+                    </th>
+                    <th className="px-3 py-2 font-medium">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setSortConfig((prev) => ({
+                            key: "account",
+                            direction: prev.key === "account" && prev.direction === "asc" ? "desc" : "asc",
+                          }))
+                        }
+                        className="inline-flex items-center gap-1 hover:text-gold focus:outline-none"
+                      >
+                        Account
+                        {sortConfig.key === "account" &&
+                          (sortConfig.direction === "asc" ? (
+                            <ArrowUp className="h-3 w-3" />
+                          ) : (
+                            <ArrowDown className="h-3 w-3" />
+                          ))}
+                      </button>
+                    </th>
                     <th className="px-3 py-2 font-medium">Description</th>
                     <th className="px-3 py-2 font-medium text-right">Debit</th>
                     <th className="px-3 py-2 font-medium text-right">Credit</th>
@@ -291,7 +348,7 @@ export default function TransactionDetailReport({ canEdit }: { canEdit: boolean 
                   </tr>
                 </thead>
                 <tbody>
-                  {lines.map((l) => (
+                  {sortedLines.map((l) => (
                     <tr key={l.id} className="border-t border-border">
                       <td className="px-3 py-1.5 whitespace-nowrap">{fmtDate(l.date)}</td>
                       <td className="px-3 py-1.5 whitespace-nowrap">
