@@ -257,20 +257,13 @@ function PeriodDialog({
 // ─── Page ───────────────────────────────────────────────────────────────────
 function Inner() {
   const { isAdmin, isSecretary, isCurrentTreasurer, canAccessTreasurer } = useAuth();
-  const [transactions, setTransactions] = useState<Tx[]>([]);
   const [periods, setPeriods] = useState<Period[]>([]);
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState("transactions");
-  const [highlightTxId, setHighlightTxId] = useState<string | null>(null);
-
+  const [tab, setTab] = useState("bank-reconciliation");
 
   const load = useCallback(async () => {
     setLoading(true);
-    const [tx, ps] = await Promise.all([
-      supabase.from("treasurer_transactions" as any).select("*").order("transaction_date", { ascending: false }),
-      supabase.from("treasurer_periods" as any).select("*").order("created_at", { ascending: false }),
-    ]);
-    if (!tx.error) setTransactions((tx.data as unknown as Tx[]) ?? []);
+    const ps = await supabase.from("treasurer_periods" as any).select("*").order("created_at", { ascending: false });
     if (!ps.error) setPeriods((ps.data as unknown as Period[]) ?? []);
     setLoading(false);
   }, []);
@@ -424,27 +417,14 @@ function Inner() {
                 <span>Transaction Detail</span>
               </TabsTrigger>
             )}
-            <TabsTrigger
-              value="transactions"
-              className="w-full flex items-center justify-start gap-3 px-4 py-3 rounded-sm text-sm font-sans text-primary-foreground/80 transition-colors hover:text-gold hover:bg-navy-light/40 data-[state=active]:bg-gold/15 data-[state=active]:text-gold data-[state=active]:shadow-none"
-            >
-              <Table className="w-4 h-4 shrink-0" />
-              <span>Transaction Register</span>
-            </TabsTrigger>
           </TabsList>
           {canEditTx && (
             <TabsContent value="breakeven" className="mt-4">
               <BreakevenCalculatorTab canEdit={canEditTx} />
             </TabsContent>
           )}
-          <TabsContent value="transactions" className="mt-4">
-            <TransactionsTab transactions={transactions} periods={periods} canEdit={canEditTx} onChange={load} highlightTxId={highlightTxId} />
-          </TabsContent>
           <TabsContent value="dining" className="mt-4">
-            <DiningReconciliationTab
-              canEdit={canEditTx}
-              onGoToTransaction={(id) => { setHighlightTxId(id); setTab("transactions"); load(); }}
-            />
+            <DiningReconciliationTab canEdit={canEditTx} />
           </TabsContent>
           {canEditTx && (
             <TabsContent value="creditors" className="mt-4">
