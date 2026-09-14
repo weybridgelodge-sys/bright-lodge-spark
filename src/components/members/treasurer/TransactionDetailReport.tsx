@@ -48,6 +48,10 @@ export default function TransactionDetailReport({ canEdit }: { canEdit: boolean 
   const [loadError, setLoadError] = useState<string | null>(null);
   const [applied, setApplied] = useState<{ from: string; to: string; codeFrom: string; codeTo: string } | null>(null);
   const [events, setEvents] = useState<EventOption[]>([]);
+  const [sortConfig, setSortConfig] = useState<{ key: SortKey; direction: "asc" | "desc" }>({
+    key: "date",
+    direction: "asc",
+  });
 
   useEffect(() => {
     if (!canEdit) return;
