@@ -162,6 +162,13 @@
       "when": 1789399825602,
       "tag": "0022_scope_event_images_and_active_working_groups",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1789467233285,
+      "tag": "0023_scope_visitor_contacts_read",
+      "breakpoints": true
     }
   ]
 }
