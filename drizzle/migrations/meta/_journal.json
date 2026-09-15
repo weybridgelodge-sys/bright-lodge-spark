@@ -169,6 +169,13 @@
       "when": 1789467233285,
       "tag": "0023_scope_visitor_contacts_read",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1789476553831,
+      "tag": "0024_revoke_anon_grants_profiles_socials",
+      "breakpoints": true
     }
   ]
 }
