@@ -313,6 +313,147 @@ function Inner() {
     }
   };
 
+  const startGenerate = () => {
+    setGType("committee");
+    setGDate("");
+    setGEventId("");
+    setGTranscript("");
+    setGenOpen(true);
+  };
+
+  const loadTranscriptFile = async (f: File | null | undefined) => {
+    if (!f) return;
+    setGTranscript(await f.text());
+  };
+
+  /** Generates a brand-new draft record — never modifies an existing one. */
+  const generateFromTranscript = async () => {
+    if (!gDate) return toast({ title: "Choose the meeting date", variant: "destructive" });
+    if (gType === "lodge" && !gEventId) {
+      return toast({ title: "Choose the Lodge meeting to take the agenda from", variant: "destructive" });
+    }
+    if (!gTranscript.trim()) return toast({ title: "Paste or upload the transcript", variant: "destructive" });
+
+    setGenerating(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-minutes-from-transcript", {
+        body: {
+          transcript_text: gTranscript,
+          meeting_type: gType,
+          meeting_date: gDate,
+          lodge_event_id: gType === "lodge" ? gEventId : undefined,
+        },
+      });
+      const result = data as any;
+      if (error || result?.error) {
+        const msg = await readFunctionError(error, data, "Generation failed");
+        toast({
+          title: result?.parse_error ? "The model's reply couldn't be read" : "Could not generate minutes",
+          description: result?.parse_error ? String(result.raw ?? "").slice(0, 400) : msg,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const evt = events.find((e) => e.id === gEventId);
+      const dateLabel = new Date(gDate).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+      const title = gType === "committee"
+        ? `Lodge Committee Meeting — ${dateLabel}`
+        : `${evt?.title ?? "Lodge Meeting"} — ${dateLabel}`;
+
+      const payload = {
+        meeting_type: gType === "committee" ? "committee" : "regular",
+        meeting_date: gDate,
+        title,
+        lodge_event_id: gType === "lodge" ? gEventId : null,
+        status: "draft",
+        source: "ai_generated",
+        transcript_text: gTranscript,
+        apologies: result.apologies || null,
+        previous_minutes_note: result.previous_minutes_note || null,
+        sections: result.sections ?? [],
+        action_items: result.action_items ?? [],
+        next_meeting_date: result.next_meeting_date || null,
+        created_by: user?.id ?? null,
+      };
+
+      const { data: inserted, error: insErr } = await (supabase.from as any)("meeting_minutes")
+        .insert(payload)
+        .select("*")
+        .single();
+      if (insErr) throw insErr;
+
+      toast({ title: "Draft minutes generated — please review" });
+      setGenOpen(false);
+      await load();
+      setShowTranscript(false);
+      setEditing({
+        ...(inserted as Row),
+        sections: payload.sections,
+        action_items: payload.action_items,
+      });
+    } catch (err: any) {
+      toast({ title: "Could not generate minutes", description: err.message, variant: "destructive" });
+    } finally {
+      setGenerating(false);
+    }
+  };
+
+  /**
+   * Files an approved set of minutes as a Document. Creates the lodge_documents
+   * row the first time; afterwards it overwrites the same stored file so
+   * re-approving never produces a duplicate.
+   */
+  const fileApprovedMinutes = async (row: Row): Promise<string | null> => {
+    const doc = await buildMinutesPdf(row);
+    const blob = doc.output("blob") as Blob;
+    const category = row.meeting_type === "committee" ? "committee_minutes" : "meeting_minutes";
+
+    if (row.filed_document_id) {
+      const { data: existing } = await supabase
+        .from("lodge_documents")
+        .select("file_path")
+        .eq("id", row.filed_document_id)
+        .maybeSingle();
+      if (existing?.file_path) {
+        const { error: upErr } = await supabase.storage
+          .from("lodge-docs")
+          .upload(existing.file_path, blob, { contentType: "application/pdf", upsert: true });
+        if (upErr) throw upErr;
+        const { error: dbErr } = await supabase
+          .from("lodge_documents")
+          .update({ file_size_bytes: blob.size })
+          .eq("id", row.filed_document_id);
+        if (dbErr) throw dbErr;
+        return row.filed_document_id;
+      }
+    }
+
+    const docId = crypto.randomUUID();
+    const path = `${category}/${docId}.pdf`;
+    const { error: upErr } = await supabase.storage
+      .from("lodge-docs")
+      .upload(path, blob, { contentType: "application/pdf", upsert: false });
+    if (upErr) throw upErr;
+
+    const label = row.meeting_type === "committee" ? "Committee Meeting Minutes" : "Lodge Meeting Minutes";
+    const dateLabel = new Date(row.meeting_date).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+    const { data: created, error: dbErr } = await supabase
+      .from("lodge_documents")
+      .insert({
+        title: `${label} — ${dateLabel}`,
+        category: category as any,
+        file_path: path,
+        file_size_bytes: blob.size,
+        uploaded_by: user?.id ?? null,
+        is_general: true,
+      })
+      .select("id")
+      .single();
+    if (dbErr) throw dbErr;
+    return (created as { id: string }).id;
+  };
+
   const saveEditing = async () => {
     if (!editing) return;
     setBusy(true);
@@ -332,7 +473,27 @@ function Inner() {
         })
         .eq("id", editing.id);
       if (error) throw error;
-      toast({ title: "Minutes saved" });
+
+      if (editing.status === "approved") {
+        try {
+          const filedId = await fileApprovedMinutes(editing);
+          if (filedId && filedId !== editing.filed_document_id) {
+            await (supabase.from as any)("meeting_minutes")
+              .update({ filed_document_id: filedId })
+              .eq("id", editing.id);
+          }
+          toast({ title: "Minutes saved and filed in Documents" });
+        } catch (fileErr: any) {
+          toast({
+            title: "Minutes saved, but filing the PDF failed",
+            description: fileErr.message,
+            variant: "destructive",
+          });
+        }
+      } else {
+        toast({ title: "Minutes saved" });
+      }
+
       setEditing(null);
       load();
     } catch (err: any) {
