@@ -2181,6 +2181,85 @@ export type Database = {
         }
         Relationships: []
       }
+      meeting_minutes: {
+        Row: {
+          action_items: Json
+          apologies: string | null
+          approved_date: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          lodge_event_id: string | null
+          meeting_date: string
+          meeting_type: Database["public"]["Enums"]["meeting_minutes_type"]
+          next_meeting_date: string | null
+          previous_minutes_note: string | null
+          sections: Json
+          status: Database["public"]["Enums"]["meeting_minutes_status"]
+          title: string
+          transcript_text: string | null
+          updated_at: string
+        }
+        Insert: {
+          action_items?: Json
+          apologies?: string | null
+          approved_date?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          lodge_event_id?: string | null
+          meeting_date: string
+          meeting_type: Database["public"]["Enums"]["meeting_minutes_type"]
+          next_meeting_date?: string | null
+          previous_minutes_note?: string | null
+          sections?: Json
+          status?: Database["public"]["Enums"]["meeting_minutes_status"]
+          title: string
+          transcript_text?: string | null
+          updated_at?: string
+        }
+        Update: {
+          action_items?: Json
+          apologies?: string | null
+          approved_date?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          lodge_event_id?: string | null
+          meeting_date?: string
+          meeting_type?: Database["public"]["Enums"]["meeting_minutes_type"]
+          next_meeting_date?: string | null
+          previous_minutes_note?: string | null
+          sections?: Json
+          status?: Database["public"]["Enums"]["meeting_minutes_status"]
+          title?: string
+          transcript_text?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meeting_minutes_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "calendar_subscription_status"
+            referencedColumns: ["member_id"]
+          },
+          {
+            foreignKeyName: "meeting_minutes_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meeting_minutes_lodge_event_id_fkey"
+            columns: ["lodge_event_id"]
+            isOneToOne: false
+            referencedRelation: "lodge_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       member_calendar_tokens: {
         Row: {
           created_at: string
@@ -4656,6 +4735,7 @@ export type Database = {
         Returns: boolean
       }
       can_edit_newsletter: { Args: { _user: string }; Returns: boolean }
+      can_manage_meeting_minutes: { Args: { _user: string }; Returns: boolean }
       can_manage_secretary_returns: {
         Args: { _user: string }
         Returns: boolean
@@ -4906,6 +4986,8 @@ export type Database = {
         | "fellow_craft"
         | "master_mason"
         | "installed_master"
+      meeting_minutes_status: "draft" | "approved"
+      meeting_minutes_type: "regular" | "committee"
       meeting_status: "draft" | "published" | "completed"
       member_status:
         | "pending"
@@ -5135,6 +5217,8 @@ export const Constants = {
         "master_mason",
         "installed_master",
       ],
+      meeting_minutes_status: ["draft", "approved"],
+      meeting_minutes_type: ["regular", "committee"],
       meeting_status: ["draft", "published", "completed"],
       member_status: [
         "pending",
