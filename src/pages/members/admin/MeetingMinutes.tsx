@@ -218,6 +218,7 @@ function Inner() {
   // Edit form
   const [editing, setEditing] = useState<Row | null>(null);
   const [showTranscript, setShowTranscript] = useState(false);
+  const [pasteText, setPasteText] = useState("");
 
   const load = async () => {
     setLoading(true);
@@ -360,6 +361,62 @@ function Inner() {
     const next = [...editing!.sections];
     [next[i], next[j]] = [next[j], next[i]];
     patch({ sections: next });
+  };
+
+  const parsePastedMinutes = () => {
+    if (!editing) return;
+    const raw = pasteText;
+    if (!raw.trim()) {
+      toast({ title: "Paste the minutes text first", variant: "destructive" });
+      return;
+    }
+    const lines = raw.split(/\r?\n/);
+    const isNumbered = (l: string) => /^\d+\.\s+[A-Z][A-Z\s,'’&/-]+$/.test(l);
+    const isLettered = (l: string) => /^(AOB\s*)?[ivxlc]+\)\s+.+$/i.test(l);
+    const nextNonBlank = (i: number) => {
+      for (let j = i + 1; j < lines.length; j++) if (lines[j].trim()) return lines[j].trim();
+      return "";
+    };
+    const isHeading = (i: number) => {
+      const l = lines[i].trim();
+      if (!l) return false;
+      if (isNumbered(l) || isLettered(l)) return true;
+      if (l.length < 90 && !/[.,;:]$/.test(l)) {
+        const nxt = nextNonBlank(i);
+        if (nxt.length > 90) return true;
+      }
+      return false;
+    };
+    const parsed: { heading: string; bodyLines: string[] }[] = [];
+    for (let i = 0; i < lines.length; i++) {
+      if (isHeading(i)) parsed.push({ heading: lines[i].trim(), bodyLines: [] });
+      else if (parsed.length) parsed[parsed.length - 1].bodyLines.push(lines[i]);
+    }
+    if (parsed.length === 0) {
+      toast({
+        title: "Couldn't detect section headings — check the pasted text follows the usual numbered/lettered heading style, or add sections manually below",
+        variant: "destructive",
+      });
+      return;
+    }
+    if (!confirm("This will replace all current sections with the parsed result. Continue?")) return;
+    let apologies = editing.apologies ?? "";
+    let prevNote = editing.previous_minutes_note ?? "";
+    const sections: Section[] = [];
+    for (const p of parsed) {
+      // Preserve blank-line-separated paragraphs in the body.
+      const body = p.bodyLines.join("\n").replace(/\n{3,}/g, "\n\n").trim();
+      const h = p.heading.toLowerCase();
+      if (h.includes("apolog")) {
+        if (body) apologies = body;
+      } else if ((h.includes("confirm") || h.includes("previous")) && h.includes("minutes")) {
+        if (body) prevNote = body;
+      } else {
+        sections.push({ heading: p.heading, body });
+      }
+    }
+    patch({ sections, apologies, previous_minutes_note: prevNote });
+    toast({ title: `Parsed ${parsed.length} headings into ${sections.length} sections` });
   };
 
   const setAction = (i: number, p: Partial<ActionItem>) =>
