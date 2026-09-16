@@ -218,6 +218,7 @@ function Inner() {
   // Edit form
   const [editing, setEditing] = useState<Row | null>(null);
   const [showTranscript, setShowTranscript] = useState(false);
+  const [pasteText, setPasteText] = useState("");
 
   const load = async () => {
     setLoading(true);
@@ -362,6 +363,62 @@ function Inner() {
     patch({ sections: next });
   };
 
+  const parsePastedMinutes = () => {
+    if (!editing) return;
+    const raw = pasteText;
+    if (!raw.trim()) {
+      toast({ title: "Paste the minutes text first", variant: "destructive" });
+      return;
+    }
+    const lines = raw.split(/\r?\n/);
+    const isNumbered = (l: string) => /^\d+\.\s+[A-Z][A-Z\s,'’&/-]+$/.test(l);
+    const isLettered = (l: string) => /^(AOB\s*)?[ivxlc]+\)\s+.+$/i.test(l);
+    const nextNonBlank = (i: number) => {
+      for (let j = i + 1; j < lines.length; j++) if (lines[j].trim()) return lines[j].trim();
+      return "";
+    };
+    const isHeading = (i: number) => {
+      const l = lines[i].trim();
+      if (!l) return false;
+      if (isNumbered(l) || isLettered(l)) return true;
+      if (l.length < 90 && !/[.,;:]$/.test(l)) {
+        const nxt = nextNonBlank(i);
+        if (nxt.length > 90) return true;
+      }
+      return false;
+    };
+    const parsed: { heading: string; bodyLines: string[] }[] = [];
+    for (let i = 0; i < lines.length; i++) {
+      if (isHeading(i)) parsed.push({ heading: lines[i].trim(), bodyLines: [] });
+      else if (parsed.length) parsed[parsed.length - 1].bodyLines.push(lines[i]);
+    }
+    if (parsed.length === 0) {
+      toast({
+        title: "Couldn't detect section headings — check the pasted text follows the usual numbered/lettered heading style, or add sections manually below",
+        variant: "destructive",
+      });
+      return;
+    }
+    if (!confirm("This will replace all current sections with the parsed result. Continue?")) return;
+    let apologies = editing.apologies ?? "";
+    let prevNote = editing.previous_minutes_note ?? "";
+    const sections: Section[] = [];
+    for (const p of parsed) {
+      // Preserve blank-line-separated paragraphs in the body.
+      const body = p.bodyLines.join("\n").replace(/\n{3,}/g, "\n\n").trim();
+      const h = p.heading.toLowerCase();
+      if (h.includes("apolog")) {
+        if (body) apologies = body;
+      } else if ((h.includes("confirm") || h.includes("previous")) && h.includes("minutes")) {
+        if (body) prevNote = body;
+      } else {
+        sections.push({ heading: p.heading, body });
+      }
+    }
+    patch({ sections, apologies, previous_minutes_note: prevNote });
+    toast({ title: `Parsed ${parsed.length} headings into ${sections.length} sections` });
+  };
+
   const setAction = (i: number, p: Partial<ActionItem>) =>
     patch({ action_items: editing!.action_items.map((a, idx) => (idx === i ? { ...a, ...p } : a)) });
   const addAction = () =>
@@ -417,6 +474,23 @@ function Inner() {
             <label className="text-xs text-primary-foreground/70">Minutes of the previous meeting (confirmation / amendments)</label>
             <Textarea rows={2} value={editing.previous_minutes_note ?? ""} onChange={(e) => patch({ previous_minutes_note: e.target.value })} className={INPUT} />
           </div>
+
+          <section>
+            <label className="text-xs text-primary-foreground/70">Paste full minutes text</label>
+            <p className="text-xs text-primary-foreground/50 mb-1">
+              Paste the complete finished minutes as one block, then click Parse — this replaces the sections below.
+            </p>
+            <Textarea
+              rows={8}
+              value={pasteText}
+              onChange={(e) => setPasteText(e.target.value)}
+              className={INPUT}
+              placeholder={"1. APOLOGIES FOR ABSENCE\nW Bro. Smith …\n\n2. CONFIRMATION OF MINUTES\n…"}
+            />
+            <Button size="sm" variant="outline" className="mt-2" onClick={parsePastedMinutes}>
+              Parse into sections
+            </Button>
+          </section>
 
           <section>
             <div className="flex items-center justify-between mb-2">
