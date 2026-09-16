@@ -103,12 +103,23 @@ export async function buildMinutesPdf(row: Row) {
     doc.setFont("helvetica", "normal");
     doc.setFontSize(10);
     doc.setTextColor(...INK);
-    const lines = doc.splitTextToSize(text || "—", usableW);
-    for (const line of lines) {
-      ensure(14);
-      doc.text(line, margin, y);
-      y += 13;
-    }
+    // Split on blank lines (\n\n) or single newlines so either convention
+    // yields distinct paragraphs in the PDF.
+    const paras = (text || "")
+      .split(/\n\s*\n|\n/)
+      .map((p) => p.trim())
+      .filter(Boolean);
+    const list = paras.length > 0 ? paras : ["—"];
+    list.forEach((p, pi) => {
+      const lines = doc.splitTextToSize(p, usableW);
+      lines.forEach((line: string, li: number) => {
+        ensure(14);
+        doc.text(line, margin, y);
+        y += 13;
+      });
+      // Extra gap between paragraphs so breaks are visually distinct from line wrap.
+      if (pi < list.length - 1) y += 7;
+    });
     y += 8;
   };
 
@@ -430,7 +441,7 @@ function Inner() {
                   <Textarea
                     rows={3}
                     value={s.body}
-                    placeholder="What was decided or reported"
+                    placeholder="What was decided or reported. Separate distinct points into their own paragraph (blank line between them) for readability"
                     onChange={(e) => setSection(i, { body: e.target.value })}
                     className={INPUT}
                   />
