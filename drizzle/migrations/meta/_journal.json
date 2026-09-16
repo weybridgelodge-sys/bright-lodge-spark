@@ -176,6 +176,13 @@
       "when": 1789476553831,
       "tag": "0024_revoke_anon_grants_profiles_socials",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1789595180288,
+      "tag": "0025_create_meeting_minutes",
+      "breakpoints": true
     }
   ]
 }
