@@ -22,7 +22,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { NotebookPen, Plus, Pencil, Trash2, Download, ArrowUp, ArrowDown, X, ChevronDown, ChevronRight } from "lucide-react";
+import { NotebookPen, Plus, Pencil, Trash2, Download, ArrowUp, ArrowDown, X, ChevronDown, ChevronRight, Sparkles, Loader2 } from "lucide-react";
+import { readFunctionError } from "@/lib/functionError";
 import { masonicYearStart } from "@/lib/loi";
 import { treasurerYearBounds } from "@/lib/treasurer/reports";
 import { reportPdfDoc, reportSection, INK, MUTED, GOLD, NAVY, fmtDate } from "@/lib/treasurer/reports";
@@ -48,6 +49,8 @@ type Row = {
   action_items: ActionItem[];
   next_meeting_date: string | null;
   transcript_text: string | null;
+  source?: string | null;
+  filed_document_id?: string | null;
 };
 
 type LodgeEvent = { id: string; title: string; event_date: string };
@@ -220,6 +223,14 @@ function Inner() {
   const [showTranscript, setShowTranscript] = useState(false);
   const [pasteText, setPasteText] = useState("");
 
+  // Generate-from-transcript dialog
+  const [genOpen, setGenOpen] = useState(false);
+  const [gType, setGType] = useState<"committee" | "lodge">("committee");
+  const [gDate, setGDate] = useState("");
+  const [gEventId, setGEventId] = useState("");
+  const [gTranscript, setGTranscript] = useState("");
+  const [generating, setGenerating] = useState(false);
+
   const load = async () => {
     setLoading(true);
     const [m, e] = await Promise.all([
@@ -302,6 +313,147 @@ function Inner() {
     }
   };
 
+  const startGenerate = () => {
+    setGType("committee");
+    setGDate("");
+    setGEventId("");
+    setGTranscript("");
+    setGenOpen(true);
+  };
+
+  const loadTranscriptFile = async (f: File | null | undefined) => {
+    if (!f) return;
+    setGTranscript(await f.text());
+  };
+
+  /** Generates a brand-new draft record — never modifies an existing one. */
+  const generateFromTranscript = async () => {
+    if (!gDate) return toast({ title: "Choose the meeting date", variant: "destructive" });
+    if (gType === "lodge" && !gEventId) {
+      return toast({ title: "Choose the Lodge meeting to take the agenda from", variant: "destructive" });
+    }
+    if (!gTranscript.trim()) return toast({ title: "Paste or upload the transcript", variant: "destructive" });
+
+    setGenerating(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-minutes-from-transcript", {
+        body: {
+          transcript_text: gTranscript,
+          meeting_type: gType,
+          meeting_date: gDate,
+          lodge_event_id: gType === "lodge" ? gEventId : undefined,
+        },
+      });
+      const result = data as any;
+      if (error || result?.error) {
+        const msg = await readFunctionError(error, data, "Generation failed");
+        toast({
+          title: result?.parse_error ? "The model's reply couldn't be read" : "Could not generate minutes",
+          description: result?.parse_error ? String(result.raw ?? "").slice(0, 400) : msg,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const evt = events.find((e) => e.id === gEventId);
+      const dateLabel = new Date(gDate).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+      const title = gType === "committee"
+        ? `Lodge Committee Meeting — ${dateLabel}`
+        : `${evt?.title ?? "Lodge Meeting"} — ${dateLabel}`;
+
+      const payload = {
+        meeting_type: gType === "committee" ? "committee" : "regular",
+        meeting_date: gDate,
+        title,
+        lodge_event_id: gType === "lodge" ? gEventId : null,
+        status: "draft",
+        source: "ai_generated",
+        transcript_text: gTranscript,
+        apologies: result.apologies || null,
+        previous_minutes_note: result.previous_minutes_note || null,
+        sections: result.sections ?? [],
+        action_items: result.action_items ?? [],
+        next_meeting_date: result.next_meeting_date || null,
+        created_by: user?.id ?? null,
+      };
+
+      const { data: inserted, error: insErr } = await (supabase.from as any)("meeting_minutes")
+        .insert(payload)
+        .select("*")
+        .single();
+      if (insErr) throw insErr;
+
+      toast({ title: "Draft minutes generated — please review" });
+      setGenOpen(false);
+      await load();
+      setShowTranscript(false);
+      setEditing({
+        ...(inserted as Row),
+        sections: payload.sections,
+        action_items: payload.action_items,
+      });
+    } catch (err: any) {
+      toast({ title: "Could not generate minutes", description: err.message, variant: "destructive" });
+    } finally {
+      setGenerating(false);
+    }
+  };
+
+  /**
+   * Files an approved set of minutes as a Document. Creates the lodge_documents
+   * row the first time; afterwards it overwrites the same stored file so
+   * re-approving never produces a duplicate.
+   */
+  const fileApprovedMinutes = async (row: Row): Promise<string | null> => {
+    const doc = await buildMinutesPdf(row);
+    const blob = doc.output("blob") as Blob;
+    const category = row.meeting_type === "committee" ? "committee_minutes" : "meeting_minutes";
+
+    if (row.filed_document_id) {
+      const { data: existing } = await supabase
+        .from("lodge_documents")
+        .select("file_path")
+        .eq("id", row.filed_document_id)
+        .maybeSingle();
+      if (existing?.file_path) {
+        const { error: upErr } = await supabase.storage
+          .from("lodge-docs")
+          .upload(existing.file_path, blob, { contentType: "application/pdf", upsert: true });
+        if (upErr) throw upErr;
+        const { error: dbErr } = await supabase
+          .from("lodge_documents")
+          .update({ file_size_bytes: blob.size })
+          .eq("id", row.filed_document_id);
+        if (dbErr) throw dbErr;
+        return row.filed_document_id;
+      }
+    }
+
+    const docId = crypto.randomUUID();
+    const path = `${category}/${docId}.pdf`;
+    const { error: upErr } = await supabase.storage
+      .from("lodge-docs")
+      .upload(path, blob, { contentType: "application/pdf", upsert: false });
+    if (upErr) throw upErr;
+
+    const label = row.meeting_type === "committee" ? "Committee Meeting Minutes" : "Lodge Meeting Minutes";
+    const dateLabel = new Date(row.meeting_date).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+    const { data: created, error: dbErr } = await supabase
+      .from("lodge_documents")
+      .insert({
+        title: `${label} — ${dateLabel}`,
+        category: category as any,
+        file_path: path,
+        file_size_bytes: blob.size,
+        uploaded_by: user?.id ?? null,
+        is_general: true,
+      })
+      .select("id")
+      .single();
+    if (dbErr) throw dbErr;
+    return (created as { id: string }).id;
+  };
+
   const saveEditing = async () => {
     if (!editing) return;
     setBusy(true);
@@ -321,7 +473,27 @@ function Inner() {
         })
         .eq("id", editing.id);
       if (error) throw error;
-      toast({ title: "Minutes saved" });
+
+      if (editing.status === "approved") {
+        try {
+          const filedId = await fileApprovedMinutes(editing);
+          if (filedId && filedId !== editing.filed_document_id) {
+            await (supabase.from as any)("meeting_minutes")
+              .update({ filed_document_id: filedId })
+              .eq("id", editing.id);
+          }
+          toast({ title: "Minutes saved and filed in Documents" });
+        } catch (fileErr: any) {
+          toast({
+            title: "Minutes saved, but filing the PDF failed",
+            description: fileErr.message,
+            variant: "destructive",
+          });
+        }
+      } else {
+        toast({ title: "Minutes saved" });
+      }
+
       setEditing(null);
       load();
     } catch (err: any) {
@@ -616,9 +788,18 @@ function Inner() {
             Regular and Committee meeting minutes, with action items and the source transcript.
           </p>
         </div>
-        <Button onClick={startNew} className="bg-gold-shimmer text-accent-foreground">
-          <Plus className="w-4 h-4 mr-1" /> New minutes
-        </Button>
+        <div className="flex gap-2 flex-wrap">
+          <Button
+            onClick={startGenerate}
+            variant="outline"
+            className="border-gold/40 text-gold hover:bg-gold/10"
+          >
+            <Sparkles className="w-4 h-4 mr-1" /> Generate from transcript
+          </Button>
+          <Button onClick={startNew} className="bg-gold-shimmer text-accent-foreground">
+            <Plus className="w-4 h-4 mr-1" /> New minutes
+          </Button>
+        </div>
       </header>
 
       <div className="grid sm:grid-cols-3 gap-3 mb-5">
@@ -737,6 +918,86 @@ function Inner() {
             <Button variant="outline" onClick={() => setNewOpen(false)}>Cancel</Button>
             <Button onClick={createMinutes} disabled={busy} className="bg-gold-shimmer text-accent-foreground">
               {busy ? "Creating…" : "Create"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={genOpen} onOpenChange={(o) => !generating && setGenOpen(o)}>
+        <DialogContent className="max-h-[90vh] overflow-y-auto bg-navy-dark text-primary-foreground border-gold/30 sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-gold" /> Generate minutes from a transcript
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <p className="text-xs text-primary-foreground/60">
+              Creates a new draft for review. Nothing existing is changed.
+            </p>
+
+            <div>
+              <label className="text-xs text-primary-foreground/70">Meeting type</label>
+              <Select value={gType} onValueChange={(v) => setGType(v as "committee" | "lodge")}>
+                <SelectTrigger className={INPUT}><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="committee">Committee meeting</SelectItem>
+                  <SelectItem value="lodge">Lodge meeting (follows the Summons agenda)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <label className="text-xs text-primary-foreground/70">Meeting date</label>
+              <Input type="date" value={gDate} onChange={(e) => setGDate(e.target.value)} className={DATE_INPUT} />
+            </div>
+
+            {gType === "lodge" && (
+              <div>
+                <label className="text-xs text-primary-foreground/70">Lodge meeting</label>
+                <Select value={gEventId || "none"} onValueChange={(v) => setGEventId(v === "none" ? "" : v)}>
+                  <SelectTrigger className={INPUT}><SelectValue placeholder="Choose a meeting" /></SelectTrigger>
+                  <SelectContent className="max-h-64">
+                    <SelectItem value="none">Choose a meeting</SelectItem>
+                    {events.map((e) => (
+                      <SelectItem key={e.id} value={e.id}>
+                        {e.title} — {new Date(e.event_date).toLocaleDateString("en-GB")}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
+            <div>
+              <label className="text-xs text-primary-foreground/70">Transcript</label>
+              <Textarea
+                value={gTranscript}
+                onChange={(e) => setGTranscript(e.target.value)}
+                rows={12}
+                placeholder="Paste the full recording transcript here…"
+                className={INPUT}
+              />
+              <div className="mt-2 flex items-center gap-2">
+                <input
+                  type="file"
+                  accept=".txt,text/plain"
+                  onChange={(e) => loadTranscriptFile(e.target.files?.[0])}
+                  className="text-xs text-primary-foreground/70 file:mr-2 file:rounded file:border-0 file:bg-gold/20 file:px-2 file:py-1 file:text-gold"
+                />
+                {gTranscript && (
+                  <span className="text-xs text-primary-foreground/50">
+                    {gTranscript.length.toLocaleString()} characters
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setGenOpen(false)} disabled={generating}>Cancel</Button>
+            <Button onClick={generateFromTranscript} disabled={generating} className="bg-gold-shimmer text-accent-foreground">
+              {generating
+                ? (<><Loader2 className="w-4 h-4 mr-1 animate-spin" /> Generating… this can take 30 seconds</>)
+                : "Generate draft"}
             </Button>
           </DialogFooter>
         </DialogContent>

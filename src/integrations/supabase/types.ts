@@ -2188,6 +2188,7 @@ export type Database = {
           approved_date: string | null
           created_at: string
           created_by: string | null
+          filed_document_id: string | null
           id: string
           lodge_event_id: string | null
           meeting_date: string
@@ -2195,6 +2196,7 @@ export type Database = {
           next_meeting_date: string | null
           previous_minutes_note: string | null
           sections: Json
+          source: string
           status: Database["public"]["Enums"]["meeting_minutes_status"]
           title: string
           transcript_text: string | null
@@ -2206,6 +2208,7 @@ export type Database = {
           approved_date?: string | null
           created_at?: string
           created_by?: string | null
+          filed_document_id?: string | null
           id?: string
           lodge_event_id?: string | null
           meeting_date: string
@@ -2213,6 +2216,7 @@ export type Database = {
           next_meeting_date?: string | null
           previous_minutes_note?: string | null
           sections?: Json
+          source?: string
           status?: Database["public"]["Enums"]["meeting_minutes_status"]
           title: string
           transcript_text?: string | null
@@ -2224,6 +2228,7 @@ export type Database = {
           approved_date?: string | null
           created_at?: string
           created_by?: string | null
+          filed_document_id?: string | null
           id?: string
           lodge_event_id?: string | null
           meeting_date?: string
@@ -2231,6 +2236,7 @@ export type Database = {
           next_meeting_date?: string | null
           previous_minutes_note?: string | null
           sections?: Json
+          source?: string
           status?: Database["public"]["Enums"]["meeting_minutes_status"]
           title?: string
           transcript_text?: string | null
@@ -2249,6 +2255,13 @@ export type Database = {
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meeting_minutes_filed_document_id_fkey"
+            columns: ["filed_document_id"]
+            isOneToOne: false
+            referencedRelation: "lodge_documents"
             referencedColumns: ["id"]
           },
           {
