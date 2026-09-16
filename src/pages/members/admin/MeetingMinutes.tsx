@@ -49,6 +49,8 @@ type Row = {
   action_items: ActionItem[];
   next_meeting_date: string | null;
   transcript_text: string | null;
+  source?: string | null;
+  filed_document_id?: string | null;
 };
 
 type LodgeEvent = { id: string; title: string; event_date: string };
