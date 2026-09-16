@@ -476,6 +476,23 @@ function Inner() {
           </div>
 
           <section>
+            <label className="text-xs text-primary-foreground/70">Paste full minutes text</label>
+            <p className="text-xs text-primary-foreground/50 mb-1">
+              Paste the complete finished minutes as one block, then click Parse — this replaces the sections below.
+            </p>
+            <Textarea
+              rows={8}
+              value={pasteText}
+              onChange={(e) => setPasteText(e.target.value)}
+              className={INPUT}
+              placeholder={"1. APOLOGIES FOR ABSENCE\nW Bro. Smith …\n\n2. CONFIRMATION OF MINUTES\n…"}
+            />
+            <Button size="sm" variant="outline" className="mt-2" onClick={parsePastedMinutes}>
+              Parse into sections
+            </Button>
+          </section>
+
+          <section>
             <div className="flex items-center justify-between mb-2">
               <h2 className="font-serif text-gold text-lg">Sections</h2>
               <Button size="sm" variant="outline" onClick={addSection}><Plus className="w-3 h-3 mr-1" /> Add section</Button>
