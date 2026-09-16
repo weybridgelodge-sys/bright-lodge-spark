@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import MembersLayout from "@/components/members/MembersLayout";
 import ProtectedRoute from "@/components/members/ProtectedRoute";
 import { useAuth } from "@/hooks/useAuth";
-import { CalendarPlus, Utensils, Mail, BarChart3, ArrowRight, Users, GraduationCap, Crown, FileCheck } from "lucide-react";
+import { CalendarPlus, Utensils, Mail, BarChart3, ArrowRight, Users, GraduationCap, Crown, FileCheck, NotebookPen } from "lucide-react";
 
 type Tile = { to: string; title: string; description: string; icon: React.ComponentType<{ className?: string }>; visible: boolean };
 
