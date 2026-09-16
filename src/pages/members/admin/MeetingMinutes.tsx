@@ -441,7 +441,7 @@ function Inner() {
                   <Textarea
                     rows={3}
                     value={s.body}
-                    placeholder="What was decided or reported"
+                    placeholder="What was decided or reported. Separate distinct points into their own paragraph (blank line between them) for readability"
                     onChange={(e) => setSection(i, { body: e.target.value })}
                     className={INPUT}
                   />
