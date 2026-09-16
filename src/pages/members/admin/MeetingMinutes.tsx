@@ -22,7 +22,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { NotebookPen, Plus, Pencil, Trash2, Download, ArrowUp, ArrowDown, X, ChevronDown, ChevronRight } from "lucide-react";
+import { NotebookPen, Plus, Pencil, Trash2, Download, ArrowUp, ArrowDown, X, ChevronDown, ChevronRight, Sparkles, Loader2 } from "lucide-react";
+import { readFunctionError } from "@/lib/functionError";
 import { masonicYearStart } from "@/lib/loi";
 import { treasurerYearBounds } from "@/lib/treasurer/reports";
 import { reportPdfDoc, reportSection, INK, MUTED, GOLD, NAVY, fmtDate } from "@/lib/treasurer/reports";
