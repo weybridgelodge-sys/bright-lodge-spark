@@ -788,9 +788,18 @@ function Inner() {
             Regular and Committee meeting minutes, with action items and the source transcript.
           </p>
         </div>
-        <Button onClick={startNew} className="bg-gold-shimmer text-accent-foreground">
-          <Plus className="w-4 h-4 mr-1" /> New minutes
-        </Button>
+        <div className="flex gap-2 flex-wrap">
+          <Button
+            onClick={startGenerate}
+            variant="outline"
+            className="border-gold/40 text-gold hover:bg-gold/10"
+          >
+            <Sparkles className="w-4 h-4 mr-1" /> Generate from transcript
+          </Button>
+          <Button onClick={startNew} className="bg-gold-shimmer text-accent-foreground">
+            <Plus className="w-4 h-4 mr-1" /> New minutes
+          </Button>
+        </div>
       </header>
 
       <div className="grid sm:grid-cols-3 gap-3 mb-5">
