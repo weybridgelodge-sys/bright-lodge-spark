@@ -223,6 +223,14 @@ function Inner() {
   const [showTranscript, setShowTranscript] = useState(false);
   const [pasteText, setPasteText] = useState("");
 
+  // Generate-from-transcript dialog
+  const [genOpen, setGenOpen] = useState(false);
+  const [gType, setGType] = useState<"committee" | "lodge">("committee");
+  const [gDate, setGDate] = useState("");
+  const [gEventId, setGEventId] = useState("");
+  const [gTranscript, setGTranscript] = useState("");
+  const [generating, setGenerating] = useState(false);
+
   const load = async () => {
     setLoading(true);
     const [m, e] = await Promise.all([
