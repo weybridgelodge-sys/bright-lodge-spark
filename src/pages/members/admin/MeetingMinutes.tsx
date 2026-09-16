@@ -922,6 +922,86 @@ function Inner() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <Dialog open={genOpen} onOpenChange={(o) => !generating && setGenOpen(o)}>
+        <DialogContent className="max-h-[90vh] overflow-y-auto bg-navy-dark text-primary-foreground border-gold/30 sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-gold" /> Generate minutes from a transcript
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <p className="text-xs text-primary-foreground/60">
+              Creates a new draft for review. Nothing existing is changed.
+            </p>
+
+            <div>
+              <label className="text-xs text-primary-foreground/70">Meeting type</label>
+              <Select value={gType} onValueChange={(v) => setGType(v as "committee" | "lodge")}>
+                <SelectTrigger className={INPUT}><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="committee">Committee meeting</SelectItem>
+                  <SelectItem value="lodge">Lodge meeting (follows the Summons agenda)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <label className="text-xs text-primary-foreground/70">Meeting date</label>
+              <Input type="date" value={gDate} onChange={(e) => setGDate(e.target.value)} className={DATE_INPUT} />
+            </div>
+
+            {gType === "lodge" && (
+              <div>
+                <label className="text-xs text-primary-foreground/70">Lodge meeting</label>
+                <Select value={gEventId || "none"} onValueChange={(v) => setGEventId(v === "none" ? "" : v)}>
+                  <SelectTrigger className={INPUT}><SelectValue placeholder="Choose a meeting" /></SelectTrigger>
+                  <SelectContent className="max-h-64">
+                    <SelectItem value="none">Choose a meeting</SelectItem>
+                    {events.map((e) => (
+                      <SelectItem key={e.id} value={e.id}>
+                        {e.title} — {new Date(e.event_date).toLocaleDateString("en-GB")}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
+            <div>
+              <label className="text-xs text-primary-foreground/70">Transcript</label>
+              <Textarea
+                value={gTranscript}
+                onChange={(e) => setGTranscript(e.target.value)}
+                rows={12}
+                placeholder="Paste the full recording transcript here…"
+                className={INPUT}
+              />
+              <div className="mt-2 flex items-center gap-2">
+                <input
+                  type="file"
+                  accept=".txt,text/plain"
+                  onChange={(e) => loadTranscriptFile(e.target.files?.[0])}
+                  className="text-xs text-primary-foreground/70 file:mr-2 file:rounded file:border-0 file:bg-gold/20 file:px-2 file:py-1 file:text-gold"
+                />
+                {gTranscript && (
+                  <span className="text-xs text-primary-foreground/50">
+                    {gTranscript.length.toLocaleString()} characters
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setGenOpen(false)} disabled={generating}>Cancel</Button>
+            <Button onClick={generateFromTranscript} disabled={generating} className="bg-gold-shimmer text-accent-foreground">
+              {generating
+                ? (<><Loader2 className="w-4 h-4 mr-1 animate-spin" /> Generating… this can take 30 seconds</>)
+                : "Generate draft"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </MembersLayout>
   );
 }
