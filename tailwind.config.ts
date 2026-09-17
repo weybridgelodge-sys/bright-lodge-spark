@@ -63,6 +63,13 @@ export default {
         },
         cream: "hsl(var(--cream))",
         "warm-white": "hsl(var(--warm-white))",
+        // Lodge Health RAG bands — muted, low-saturation tones in keeping
+        // with the restrained navy/gold palette (no semantic set exists).
+        health: {
+          green: "#5B8468",
+          amber: "#B08A3E",
+          red: "#9E5B5B",
+        },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",

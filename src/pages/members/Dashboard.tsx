@@ -8,6 +8,25 @@ import { listMyGroups } from "@/lib/workingGroups";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import ActivePoll from "@/components/members/ActivePoll";
 import { DuesAttentionBanner } from "@/components/members/DuesStatusCard";
+import { fetchLodgeHealthBundle, lodgeHealth, type LodgeHealth, type HealthBand } from "@/lib/kpis";
+import { Activity } from "lucide-react";
+
+const BAND_LABEL: Record<HealthBand, string> = { green: "Green", amber: "Amber", red: "Red" };
+const BAND_SWATCH: Record<HealthBand, string> = {
+  green: "bg-health-green",
+  amber: "bg-health-amber",
+  red: "bg-health-red",
+};
+
+function healthSummary(h: LodgeHealth): string {
+  if (h.overall === "green") {
+    return "Membership growing, no vacant key roles, active candidate pipeline.";
+  }
+  const concerns = [h.components.growth, h.components.succession, h.components.pipeline]
+    .filter((c) => c.band !== "green")
+    .map((c) => c.detail.replace(/\.$/, ""));
+  return concerns.join("; ") + ".";
+}
 
 
 type Notice = { id: string; title: string; body: string; event_date: string | null; created_at: string };
@@ -20,6 +39,8 @@ export default function MembersDashboard() {
   const [docs, setDocs] = useState<Doc[]>([]);
   const [myGroups, setMyGroups] = useState<MyGroup[]>([]);
   const [activeNotice, setActiveNotice] = useState<Notice | null>(null);
+  const [health, setHealth] = useState<LodgeHealth | null>(null);
+
 
 
   useEffect(() => {
@@ -36,6 +57,9 @@ export default function MembersDashboard() {
       .limit(5)
       .then(({ data }) => setDocs((data as Doc[]) ?? []));
     if (user?.id) listMyGroups(user.id).then((g) => setMyGroups(g as MyGroup[]));
+    fetchLodgeHealthBundle()
+      .then((b) => setHealth(lodgeHealth(b)))
+      .catch(() => setHealth(null)); // card simply stays hidden if it can't load
   }, [user?.id]);
 
   return (
@@ -52,6 +76,19 @@ export default function MembersDashboard() {
       {isAdmin && user?.id && <DuesAttentionBanner memberId={user.id} />}
 
       <ActivePoll />
+
+      {health && (
+        <section className="mb-6 bg-navy-dark/60 border border-gold/15 rounded-sm px-5 py-4 flex items-center gap-4">
+          <span className={`w-3.5 h-3.5 rounded-full shrink-0 ${BAND_SWATCH[health.overall]}`} aria-hidden="true" />
+          <div className="min-w-0">
+            <p className="text-sm font-semibold flex items-center gap-2">
+              <Activity className="w-4 h-4 text-gold shrink-0" />
+              Lodge Health: {BAND_LABEL[health.overall]}
+            </p>
+            <p className="text-xs text-primary-foreground/60 mt-0.5">{healthSummary(health)}</p>
+          </div>
+        </section>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <section className="bg-navy-dark/60 border border-gold/15 rounded-sm p-6">

@@ -409,6 +409,128 @@ export function pipeline(bundle: KpiBundle) {
   return { candidates, ea, fc, mm, mmPlain, pm };
 }
 
+// ───── Lodge Health (RAG)
+export type HealthBand = "green" | "amber" | "red";
+export type HealthComponent = { band: HealthBand; detail: string };
+export type LodgeHealth = {
+  overall: HealthBand;
+  components: { growth: HealthComponent; succession: HealthComponent; pipeline: HealthComponent };
+};
+
+export function lodgeHealth(bundle: KpiBundle): LodgeHealth {
+  const mv = movement(bundle.members);
+  const oh = officersHealth(bundle);
+  const pl = pipeline(bundle);
+
+  // Growth — net membership movement over the rolling 12 months.
+  const net = mv.net;
+  const growth: HealthComponent =
+    net >= 0
+      ? { band: "green", detail: `Net membership ${net > 0 ? "+" : ""}${net} over the last 12 months` }
+      : net === -1
+        ? { band: "amber", detail: "Net membership −1 over the last 12 months" }
+        : { band: "red", detail: `Net membership ${net} over the last 12 months` };
+
+  // Succession — progressive vacancies and critical-role risk flags.
+  const vacant = oh.progressiveVacant;
+  const riskyCriticals = oh.criticals.filter((c) => c.risk);
+  let succession: HealthComponent;
+  if (vacant.length === 0 && riskyCriticals.length === 0) {
+    succession = { band: "green", detail: "All progressive offices filled and no key roles flagged at risk" };
+  } else if (vacant.length > 0 && riskyCriticals.length > 0) {
+    succession = {
+      band: "red",
+      detail: `${vacant.length} progressive office${vacant.length === 1 ? "" : "s"} vacant (${vacant.map((p) => p.label).join(", ")}) and ${riskyCriticals.map((c) => c.label).join(", ")} flagged at risk`,
+    };
+  } else if (vacant.length >= 2) {
+    succession = {
+      band: "red",
+      detail: `${vacant.length} progressive offices vacant (${vacant.map((p) => p.label).join(", ")})`,
+    };
+  } else if (vacant.length === 1) {
+    succession = { band: "amber", detail: `1 progressive office vacant (${vacant[0].label})` };
+  } else {
+    succession = {
+      band: "amber",
+      detail: `${riskyCriticals.map((c) => c.label).join(", ")} flagged as a succession risk`,
+    };
+  }
+
+  // Pipeline — active candidates, with EA/FC still progressing as a fallback signal.
+  const activeCandidates = pl.candidates.length;
+  const progressing = pl.ea.length + pl.fc.length;
+  let pipelineH: HealthComponent;
+  if (activeCandidates >= 1) {
+    pipelineH = {
+      band: "green",
+      detail: `${activeCandidates} active candidate${activeCandidates === 1 ? "" : "s"} in the pipeline`,
+    };
+  } else if (progressing > 0) {
+    pipelineH = {
+      band: "amber",
+      detail: `No active candidates, but ${progressing} member${progressing === 1 ? "" : "s"} progressing through the First/Second Degree`,
+    };
+  } else {
+    pipelineH = { band: "red", detail: "No active candidates and no one progressing through the degrees" };
+  }
+
+  const bands = [growth.band, succession.band, pipelineH.band];
+  const overall: HealthBand = bands.includes("red") ? "red" : bands.includes("amber") ? "amber" : "green";
+  return { overall, components: { growth, succession, pipeline: pipelineH } };
+}
+
+/**
+ * Lightweight bundle for the member-facing Dashboard health card.
+ * Ordinary members cannot read officer_appointments, succession_risks or
+ * candidates (officer-only RLS), so those come from an aggregate-only
+ * SECURITY DEFINER RPC and are shaped into a minimal KpiBundle that
+ * lodgeHealth() can reason over — no PII is exposed.
+ */
+export async function fetchLodgeHealthBundle(): Promise<KpiBundle> {
+  const my = currentMasonicYear();
+  const [m, p, agg] = await Promise.all([
+    supabase
+      .from("profiles")
+      .select(
+        "id,full_name,first_name,middle_name,last_name,preferred_name,post_nominals,title,status,degree,is_past_master,is_royal_arch,is_honorary_member,initiation_date,passing_date,raising_date,joined_lodge_date,is_ugle_portal_registered,rank,grand_rank,provincial_rank,updated_at"
+      ),
+    supabase.from("officer_positions").select("key,label,is_progressive,order_index"),
+    (supabase as any).rpc("get_lodge_health_aggregates", { _lodge_year: my }),
+  ]);
+  const a = (agg.data ?? {}) as {
+    filled_position_keys?: string[];
+    risk_role_keys?: string[];
+    active_candidate_count?: number;
+  };
+  const filled = a.filled_position_keys ?? [];
+  const risks = a.risk_role_keys ?? [];
+  const candCount = a.active_candidate_count ?? 0;
+  return {
+    members: ((m.data as unknown) as KpiMember[]) ?? [],
+    wmTerms: [],
+    appointments: filled.map((key) => ({ position_key: key, member_id: "", lodge_year: my })),
+    risks: risks.map((role_key, i) => ({ id: String(i), role_key, note: null })),
+    positions: (p.data as KpiBundle["positions"]) ?? [],
+    // Count-only stubs — lodgeHealth/pipeline only inspect stage + length.
+    candidates: Array.from({ length: candCount }, (_, i) => ({
+      id: String(i),
+      first_name: "",
+      last_name: "",
+      email: null,
+      phone: null,
+      proposer: null,
+      seconder: null,
+      stage: "enquiry" as CandidateStage,
+      notes: null,
+      date_of_enquiry: null,
+      initiation_scheduled_date: null,
+      converted_member_id: null,
+      created_at: "",
+      updated_at: "",
+    })),
+  };
+}
+
 export const CANDIDATE_STAGE_LABELS: Record<CandidateStage, string> = {
   enquiry: "Enquiry",
   information_provided: "Information Provided",

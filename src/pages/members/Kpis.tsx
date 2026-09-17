@@ -13,6 +13,7 @@ import {
   milestones,
   officersHealth,
   pipeline,
+  lodgeHealth,
   fullName,
   currentMasonicYear,
   type KpiBundle,
@@ -108,6 +109,7 @@ export default function Kpis() {
   const ms = milestones(bundle.members, bundle.wmTerms);
   const oh = officersHealth(bundle);
   const pl = pipeline(bundle);
+  const health = lodgeHealth(bundle);
   const my = currentMasonicYear();
   const maxBand = Math.max(1, ...s.ageBands.map((b) => b.count));
   const funnelMax = Math.max(
@@ -145,6 +147,50 @@ export default function Kpis() {
       </div>
 
       <div className="space-y-4">
+        {/* Lodge Health summary */}
+        <section className="bg-navy-dark/60 border border-gold/15 rounded-sm p-4 sm:p-5">
+          <div className="flex items-center justify-between flex-wrap gap-2 mb-4">
+            <h2 className="font-serif text-lg sm:text-xl text-gold">Lodge Health</h2>
+            <span
+              className={`text-[11px] uppercase tracking-wider font-semibold px-2.5 py-1 rounded-sm border ${
+                health.overall === "green"
+                  ? "border-health-green/50 text-health-green"
+                  : health.overall === "amber"
+                    ? "border-health-amber/50 text-health-amber"
+                    : "border-health-red/50 text-health-red"
+              }`}
+            >
+              Overall: {health.overall}
+            </span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {(
+              [
+                ["Growth", health.components.growth],
+                ["Succession", health.components.succession],
+                ["Pipeline", health.components.pipeline],
+              ] as const
+            ).map(([label, comp]) => (
+              <div key={label} className="bg-navy/60 border border-gold/10 rounded-sm p-3">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <span
+                    className={`w-2.5 h-2.5 rounded-full shrink-0 ${
+                      comp.band === "green"
+                        ? "bg-health-green"
+                        : comp.band === "amber"
+                          ? "bg-health-amber"
+                          : "bg-health-red"
+                    }`}
+                    aria-hidden="true"
+                  />
+                  <p className="text-[11px] uppercase tracking-wider text-primary-foreground/60">{label}</p>
+                </div>
+                <p className="text-xs text-primary-foreground/85">{comp.detail}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
         {/* Section 1 */}
         <Section title="1 · Membership Snapshot">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
