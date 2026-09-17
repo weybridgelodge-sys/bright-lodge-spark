@@ -4151,7 +4151,7 @@ export type Database = {
       visitor_contacts: {
         Row: {
           created_at: string
-          email: string
+          email: string | null
           first_seen_at: string
           id: string
           last_seen_at: string
@@ -4164,7 +4164,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
-          email: string
+          email?: string | null
           first_seen_at?: string
           id?: string
           last_seen_at?: string
@@ -4177,7 +4177,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
-          email?: string
+          email?: string | null
           first_seen_at?: string
           id?: string
           last_seen_at?: string

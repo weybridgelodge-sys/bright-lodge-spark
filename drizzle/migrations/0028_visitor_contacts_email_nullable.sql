@@ -1,0 +1,1 @@
+ALTER TABLE public.visitor_contacts ALTER COLUMN email DROP NOT NULL;
