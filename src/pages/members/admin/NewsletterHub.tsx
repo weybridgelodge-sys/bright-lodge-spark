@@ -960,6 +960,15 @@ function NewsletterHubInner() {
             <Button type="button" variant="outline" onClick={() => setPreviewOpen((v) => !v)} className="border-gold/40 text-gold hover:bg-gold/10 h-auto min-h-10 whitespace-normal text-center leading-snug py-2">
               <Eye className="h-4 w-4 mr-1.5 shrink-0" /> {previewOpen ? "Hide preview" : "Show preview"}
             </Button>
+            <span className="text-[11px] text-primary-foreground/60" aria-live="polite">
+              {autosaveError
+                ? <span className="text-red-300">Autosave failed — click Save</span>
+                : autosaving || saving
+                  ? "Saving…"
+                  : dirty
+                    ? "Unsaved changes"
+                    : savedSnapshot !== null ? "All changes saved" : ""}
+            </span>
             <Button type="button" variant="outline" onClick={saveDraft} disabled={saving} className="border-gold/40 text-gold hover:bg-gold/10 h-auto min-h-10 whitespace-normal text-center leading-snug py-2">
               {saving ? <Loader2 className="h-4 w-4 mr-1.5 shrink-0 animate-spin" /> : <Save className="h-4 w-4 mr-1.5 shrink-0" />}
               Save
