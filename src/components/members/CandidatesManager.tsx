@@ -197,6 +197,13 @@ export default function CandidatesManager({ onChange }: { onChange?: () => void 
                   className="bg-navy border border-gold/20 rounded-sm px-2 py-1.5 text-xs text-primary-foreground"
                 />
               </div>
+              <div className="min-w-[10rem]">
+                <Label>Heard about us</Label>
+                <ReferralSelect
+                  value={c.referral_source}
+                  onChange={(v) => updateRow(c.id, { referral_source: v })}
+                />
+              </div>
               <button
                 onClick={() => remove(c.id)}
                 className="text-primary-foreground/50 hover:text-red-400 p-2"
