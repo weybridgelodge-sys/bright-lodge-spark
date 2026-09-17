@@ -184,7 +184,15 @@ export async function exportFullKpi(bundle: KpiBundle, eng?: EngagementBundle | 
       ["Progressive offices filled", `${oh.progressiveFilled.length} / ${oh.progressiveTotal}`],
       ["Vacant progressive offices", oh.progressiveVacant.map((v) => v.label).join(", ") || "None"],
       ...oh.criticals.map(
-        (c) => [c.label, c.risk ? `RISK: ${c.risk.note ?? "flagged"}` : c.holder ? fullName(c.holder) : "VACANT"] as [string, string]
+        (c) =>
+          [
+            c.label,
+            c.risk?.is_at_risk
+              ? `RISK: ${c.risk.note ?? "flagged"}`
+              : c.holder
+                ? fullName(c.holder)
+                : "VACANT",
+          ] as [string, string]
       ),
     ],
     theme: "striped",
