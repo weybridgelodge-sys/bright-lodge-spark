@@ -139,18 +139,18 @@ Match that style. Do not copy its content.`;
 
     const system = `${BASE_RULES}\n\n${structure}`;
 
-    const aiRes = await fetch("https://api.anthropic.com/v1/messages", {
+    const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-api-key": ANTHROPIC_API_KEY,
-        "anthropic-version": "2023-06-01",
+        "Authorization": `Bearer ${LOVABLE_API_KEY}`,
       },
       body: JSON.stringify({
-        model: "claude-sonnet-4-5",
-        max_tokens: 8000,
-        system,
+        model: "openai/gpt-6-astra",
+        reasoning_effort: "low",
+        response_format: { type: "json_object" },
         messages: [
+          { role: "system", content: system },
           {
             role: "user",
             content: `Meeting date: ${meeting_date}\n\nTranscript:\n"""\n${transcript_text}\n"""\n\nReturn the strict JSON object now.`,
@@ -165,11 +165,7 @@ Match that style. Do not copy its content.`;
     }
 
     const payload = await aiRes.json();
-    const raw: string = (payload?.content ?? [])
-      .filter((c: { type?: string }) => c?.type === "text")
-      .map((c: { text?: string }) => c.text ?? "")
-      .join("")
-      .trim();
+    const raw: string = (payload?.choices?.[0]?.message?.content ?? "").toString().trim();
 
     const cleaned = raw.replace(/^```(?:json)?\s*/i, "").replace(/```\s*$/, "").trim();
 
