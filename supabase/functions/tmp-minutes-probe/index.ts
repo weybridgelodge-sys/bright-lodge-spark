@@ -45,7 +45,7 @@ Rules:
 - "apologies" lists only the brethren who sent apologies for absence, as a short sentence or comma list.
 - "previous_minutes_note" records the confirmation (and any amendment) of the previous meeting's minutes. Empty string if the transcript does not cover it.
 - "action_items" capture tasks agreed in the meeting: task, the person responsible, a deadline as an ISO date (YYYY-MM-DD) or an empty string if none was given, and done: false.
-- Infer deadlines from dates mentioned anywhere in the transcript, not only from explicit statements of a deadline. If a date is given for an event (an Installation, a meeting, a ceremony, a festive board) and a task is described as needing to happen "before", "ahead of", "in good time for", "in advance of" or "ready for" that event, use that event's date as the task's deadline. Read the transcript for contextual timing cues the way a competent Secretary would, and only leave a deadline empty when no related date can reasonably be derived.
+- Infer deadlines from dates mentioned anywhere in the transcript, not only from explicit statements of a deadline. If a date is given for an event (an Installation, a meeting, a ceremony, a festive board) and a task is described as needing to happen "before", "ahead of", "in good time for", "in advance of" or "ready for" that event, use that event's date as the task's deadline. Read the transcript for contextual timing cues the way a competent Secretary would, and only leave a deadline empty when no related date can reasonably be derived. Where a task supports a dated event discussed in the meeting (for example preparations for an Installation held on a known date), that event's date is the deadline. Where the agenda or transcript gives a date for the next meeting and a task is to be reported or completed by then, use that date.
 - "next_meeting_date" is an ISO date if a next meeting date was agreed, otherwise null.
 - Do not invent content that is not supported by the transcript.
 
@@ -142,7 +142,7 @@ Match that style. Do not copy its content.`;
       },
       body: JSON.stringify({
         model: "openai/gpt-6-astra",
-        reasoning_effort: "low",
+        reasoning_effort: "medium",
         response_format: { type: "json_object" },
         messages: [
           { role: "system", content: system },
