@@ -84,6 +84,14 @@ function agendaSections(previousDate: string, additional: Section[] = []): Secti
   ];
 }
 
+function isCommitteeAgenda(row: Row | null): boolean {
+  if (!row || row.meeting_type !== "committee" || row.transcript_text?.trim()) return false;
+  return !row.apologies?.trim()
+    && !row.previous_minutes_note?.trim()
+    && (row.action_items ?? []).length === 0
+    && (row.sections ?? []).every((section) => !section.body?.trim());
+}
+
 const currentLodgeYear = masonicYearStart();
 const MASONIC_YEAR_OPTIONS = Array.from({ length: 21 }, (_, i) => currentLodgeYear - 5 + i);
 
@@ -433,7 +441,7 @@ function Inner() {
   };
 
   const openEditing = (row: Row) => {
-    const isAgenda = row.meeting_type === "committee" && !row.transcript_text?.trim();
+    const isAgenda = isCommitteeAgenda(row);
     if (!isAgenda) {
       setAgendaPreviousDate("");
       setEditing(row);
@@ -480,7 +488,7 @@ function Inner() {
       };
       const { data, error } = await (supabase.from as any)("meeting_minutes").insert(payload).select("*").single();
       if (error) throw error;
-      toast({ title: "Minutes created" });
+      toast({ title: nAgenda ? "Committee agenda created" : "Minutes created" });
       setNewOpen(false);
       await load();
       const created = { ...(data as Row), sections, action_items: [] };
@@ -861,7 +869,7 @@ function Inner() {
     patch({ sections: next });
   };
 
-  const isAgendaEditing = editing?.meeting_type === "committee" && !editing.transcript_text?.trim();
+  const isAgendaEditing = isCommitteeAgenda(editing);
   const setAgendaPreviousMeetingDate = (date: string) => {
     if (!editing) return;
     setAgendaPreviousDate(date);
