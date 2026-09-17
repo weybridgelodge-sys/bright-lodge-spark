@@ -39,6 +39,8 @@ export default function MembersDashboard() {
   const [docs, setDocs] = useState<Doc[]>([]);
   const [myGroups, setMyGroups] = useState<MyGroup[]>([]);
   const [activeNotice, setActiveNotice] = useState<Notice | null>(null);
+  const [health, setHealth] = useState<LodgeHealth | null>(null);
+
 
 
   useEffect(() => {
@@ -55,6 +57,9 @@ export default function MembersDashboard() {
       .limit(5)
       .then(({ data }) => setDocs((data as Doc[]) ?? []));
     if (user?.id) listMyGroups(user.id).then((g) => setMyGroups(g as MyGroup[]));
+    fetchLodgeHealthBundle()
+      .then((b) => setHealth(lodgeHealth(b)))
+      .catch(() => setHealth(null)); // card simply stays hidden if it can't load
   }, [user?.id]);
 
   return (
@@ -71,6 +76,19 @@ export default function MembersDashboard() {
       {isAdmin && user?.id && <DuesAttentionBanner memberId={user.id} />}
 
       <ActivePoll />
+
+      {health && (
+        <section className="mb-6 bg-navy-dark/60 border border-gold/15 rounded-sm px-5 py-4 flex items-center gap-4">
+          <span className={`w-3.5 h-3.5 rounded-full shrink-0 ${BAND_SWATCH[health.overall]}`} aria-hidden="true" />
+          <div className="min-w-0">
+            <p className="text-sm font-semibold flex items-center gap-2">
+              <Activity className="w-4 h-4 text-gold shrink-0" />
+              Lodge Health: {BAND_LABEL[health.overall]}
+            </p>
+            <p className="text-xs text-primary-foreground/60 mt-0.5">{healthSummary(health)}</p>
+          </div>
+        </section>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <section className="bg-navy-dark/60 border border-gold/15 rounded-sm p-6">
