@@ -8,6 +8,25 @@ import { listMyGroups } from "@/lib/workingGroups";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import ActivePoll from "@/components/members/ActivePoll";
 import { DuesAttentionBanner } from "@/components/members/DuesStatusCard";
+import { fetchLodgeHealthBundle, lodgeHealth, type LodgeHealth, type HealthBand } from "@/lib/kpis";
+import { Activity } from "lucide-react";
+
+const BAND_LABEL: Record<HealthBand, string> = { green: "Green", amber: "Amber", red: "Red" };
+const BAND_SWATCH: Record<HealthBand, string> = {
+  green: "bg-health-green",
+  amber: "bg-health-amber",
+  red: "bg-health-red",
+};
+
+function healthSummary(h: LodgeHealth): string {
+  if (h.overall === "green") {
+    return "Membership growing, no vacant key roles, active candidate pipeline.";
+  }
+  const concerns = [h.components.growth, h.components.succession, h.components.pipeline]
+    .filter((c) => c.band !== "green")
+    .map((c) => c.detail.replace(/\.$/, ""));
+  return concerns.join("; ") + ".";
+}
 
 
 type Notice = { id: string; title: string; body: string; event_date: string | null; created_at: string };
