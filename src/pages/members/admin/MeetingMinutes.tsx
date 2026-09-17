@@ -268,8 +268,8 @@ export async function buildMinutesPdf(row: Row) {
  * as a numbered list. Bodies, action items and signature block are deliberately
  * omitted — none of that exists before the meeting takes place.
  */
-export async function buildAgendaPdf(row: Row, secretaryName = "Secretary not recorded") {
-  const { doc, pageW, margin } = await reportPdfDoc("AGENDA", `${row.title} — ${fmtDateTime(row.meeting_at)}`);
+export async function buildAgendaPdf(row: Row, letterhead: Letterhead = {}) {
+  const { doc, pageW, margin } = await reportPdfDoc("AGENDA", `${row.title} — ${fmtDateTime(row.meeting_at)}`, true);
   const usableW = pageW - margin * 2;
   let y = 135;
 
@@ -280,15 +280,36 @@ export async function buildAgendaPdf(row: Row, secretaryName = "Secretary not re
     }
   };
 
+  // Letterhead: Secretary (left) and Treasurer (right), name + full address.
+  const colW = usableW / 2 - 10;
+  const column = (label: string, officer: OfficerContact | null | undefined, x: number) => {
+    let cy = y;
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(9);
+    doc.setTextColor(...NAVY);
+    doc.text(label, x, cy);
+    cy += 13;
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(...INK);
+    const lines = officer ? [officer.name, ...officer.address] : ["Not recorded"];
+    for (const line of lines) {
+      const wrapped = doc.splitTextToSize(line, colW) as string[];
+      wrapped.forEach((w) => {
+        doc.text(w, x, cy);
+        cy += 12;
+      });
+    }
+    return cy;
+  };
+  const leftEnd = column("Secretary:", letterhead.secretary, margin);
+  const rightEnd = column("Treasurer:", letterhead.treasurer, margin + usableW / 2 + 10);
+  y = Math.max(leftEnd, rightEnd) + 18;
+
+  ensure(40);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(11);
   doc.setTextColor(...INK);
   doc.text(`On ${fmtDateTime(row.meeting_at)}`, margin, y);
-  y += 20;
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(9);
-  doc.setTextColor(...MUTED);
-  doc.text(`Secretary: ${secretaryName}`, margin, y);
   y += 28;
 
   doc.setFont("helvetica", "normal");
