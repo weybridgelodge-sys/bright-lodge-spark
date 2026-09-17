@@ -53,6 +53,7 @@ type Row = {
   transcript_text: string | null;
   source?: string | null;
   filed_document_id?: string | null;
+  filed_agenda_document_id?: string | null;
 };
 
 type LodgeEvent = { id: string; title: string; event_date: string };
