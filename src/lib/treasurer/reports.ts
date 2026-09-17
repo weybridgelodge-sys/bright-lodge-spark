@@ -82,7 +82,7 @@ export function signedBalance(accountType: string, m: Movement | undefined): num
     : m.credit - m.debit;
 }
 
-export async function reportPdfDoc(subtitle: string, periodLine: string) {
+export async function reportPdfDoc(subtitle: string, periodLine: string, hideGeneratedDate = false) {
   const doc = new jsPDF({ unit: "pt", format: "a4" });
   const pageW = doc.internal.pageSize.getWidth();
   const margin = 40;
