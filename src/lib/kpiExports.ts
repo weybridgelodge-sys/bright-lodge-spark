@@ -3,6 +3,7 @@ import autoTable from "jspdf-autotable";
 import { saveJsPdf } from "./nativeDownload";
 import {
   type KpiBundle,
+  type EngagementBundle,
   snapshot,
   movement,
   uglePortal,
@@ -10,6 +11,13 @@ import {
   milestones,
   officersHealth,
   pipeline,
+  lodgeHealth,
+  referralRate,
+  activeVsInactive,
+  quarterlyEngagement,
+  visitorFrequency,
+  disengagementRisk,
+  REFERRAL_SOURCE_LABELS,
   fullName,
   currentMasonicYear,
 } from "./kpis";
