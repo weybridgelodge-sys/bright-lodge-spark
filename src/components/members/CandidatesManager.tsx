@@ -5,8 +5,11 @@ import { Plus, Trash2, Save, X, UserPlus } from "lucide-react";
 import {
   type Candidate,
   type CandidateStage,
+  type ReferralSource,
   CANDIDATE_STAGE_LABELS,
   CANDIDATE_STAGE_ORDER,
+  REFERRAL_SOURCES,
+  REFERRAL_SOURCE_LABELS,
 } from "@/lib/kpis";
 
 const EMPTY: Omit<Candidate, "id" | "created_at" | "updated_at"> = {
@@ -21,6 +24,7 @@ const EMPTY: Omit<Candidate, "id" | "created_at" | "updated_at"> = {
   date_of_enquiry: new Date().toISOString().slice(0, 10),
   initiation_scheduled_date: null,
   converted_member_id: null,
+  referral_source: null,
 };
 
 export default function CandidatesManager({ onChange }: { onChange?: () => void }) {
