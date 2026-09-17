@@ -996,6 +996,11 @@ function Inner() {
             <Button variant="outline" onClick={() => exportPdf(editing)}>
               <Download className="w-4 h-4 mr-1" /> Export PDF
             </Button>
+            {editing.meeting_type === "committee" && (
+              <Button variant="outline" onClick={() => exportAgendaPdf(editing)}>
+                <Download className="w-4 h-4 mr-1" /> Export Agenda PDF
+              </Button>
+            )}
           </div>
         </div>
       </MembersLayout>
