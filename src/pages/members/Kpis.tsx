@@ -444,7 +444,7 @@ export default function Kpis() {
         </Section>
 
         {/* Section 11 */}
-        <Section title="10 · Visitor Frequency">
+        <Section title="11 · Visitor Frequency">
           {visitors.length === 0 ? (
             <p className="text-sm text-primary-foreground/60">No visitor attendances recorded yet.</p>
           ) : (
@@ -477,8 +477,8 @@ export default function Kpis() {
           )}
         </Section>
 
-        {/* Section 11 */}
-        <Section title="11 · Quarterly Engagement">
+        {/* Section 12 */}
+        <Section title="12 · Quarterly Engagement">
           {quarterly.length === 0 ? (
             <p className="text-sm text-primary-foreground/60">No past meetings recorded yet.</p>
           ) : (
@@ -509,8 +509,8 @@ export default function Kpis() {
           )}
         </Section>
 
-        {/* Section 12 */}
-        <Section title="12 · Quarterly Engagement">
+        {/* Section 13 */}
+        <Section title="13 · Attendance Analytics" defaultOpen={false}>
           <AttendanceCharts />
         </Section>
       </div>
