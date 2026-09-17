@@ -16,6 +16,14 @@ import {
   lodgeHealth,
   fullName,
   currentMasonicYear,
+  referralRate,
+  REFERRAL_SOURCE_LABELS,
+  fetchEngagementBundle,
+  activeVsInactive,
+  visitorFrequency,
+  quarterlyEngagement,
+  disengagementRisk,
+  type EngagementBundle,
   type KpiBundle,
 } from "@/lib/kpis";
 import { exportVoReport, exportFullKpi } from "@/lib/kpiExports";
