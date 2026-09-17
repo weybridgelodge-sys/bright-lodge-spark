@@ -358,29 +358,63 @@ function NewsletterHubInner() {
     setError(null);
   };
 
+  // ---- Autosave plumbing -------------------------------------------------
+  // A serialised snapshot of everything the editor persists. Compared against
+  // the last successfully-saved snapshot to decide "dirty".
+  const serialize = (v: Section[]) =>
+    JSON.stringify({ subject, status, unifiedContent, membersSections, visitorsSections: v });
+  const snapshot = useMemo(
+    () => serialize(visitorsSections),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [subject, status, unifiedContent, membersSections, visitorsSections],
+  );
+  const [savedSnapshot, setSavedSnapshot] = useState<string | null>(null);
+  const pendingBaselineRef = useRef(true); // capture baseline on mount / load / reset
+  const [autosaving, setAutosaving] = useState(false);
+  const [autosaveError, setAutosaveError] = useState<string | null>(null);
+  const inFlightRef = useRef(false);
+
+  useEffect(() => {
+    if (pendingBaselineRef.current) {
+      pendingBaselineRef.current = false;
+      setSavedSnapshot(snapshot);
+    }
+  }, [snapshot]);
+
+  const dirty = savedSnapshot !== null && snapshot !== savedSnapshot;
+
+  // Shared persistence path used by both the manual Save button and autosave.
+  const persist = async (): Promise<string> => {
+    const v = syncStructure(membersSections, visitorsSections);
+    setVisitorsSections(v);
+    const payload = {
+      subject: subject.trim() || DEFAULT_SUBJECT,
+      target_list: "members_pipeline",
+      content: { sections: membersSections } satisfies NewsletterContent,
+      content_visitors: { sections: v } satisfies NewsletterContent,
+      status,
+      audience: null,
+      unified_content: unifiedContent,
+    };
+    if (broadcastId) {
+      const { error: err } = await supabase.from("newsletter_broadcasts" as any).update(payload).eq("id", broadcastId);
+      if (err) throw err;
+    } else {
+      const { data, error: err } = await supabase.from("newsletter_broadcasts" as any).insert(payload).select("id").single();
+      if (err) throw err;
+      setBroadcastId((data as unknown as { id: string }).id);
+    }
+    return serialize(v);
+  };
+
   const saveDraft = async () => {
     setError(null);
     setSaving(true);
+    inFlightRef.current = true;
     try {
-      const v = syncStructure(membersSections, visitorsSections);
-      setVisitorsSections(v);
-      const payload = {
-        subject: subject.trim() || DEFAULT_SUBJECT,
-        target_list: "members_pipeline",
-        content: { sections: membersSections } satisfies NewsletterContent,
-        content_visitors: { sections: v } satisfies NewsletterContent,
-        status,
-        audience: null,
-        unified_content: unifiedContent,
-      };
-      if (broadcastId) {
-        const { error: err } = await supabase.from("newsletter_broadcasts" as any).update(payload).eq("id", broadcastId);
-        if (err) throw err;
-      } else {
-        const { data, error: err } = await supabase.from("newsletter_broadcasts" as any).insert(payload).select("id").single();
-        if (err) throw err;
-        setBroadcastId((data as unknown as { id: string }).id);
-      }
+      const saved = await persist();
+      setSavedSnapshot(saved);
+      setAutosaveError(null);
       toast.success(status === "ready_to_send" ? "Saved — marked Ready to send" : "Draft saved");
       loadDrafts();
     } catch (err) {
@@ -388,9 +422,46 @@ function NewsletterHubInner() {
       setError(msg);
       toast.error(msg);
     } finally {
+      inFlightRef.current = false;
       setSaving(false);
     }
   };
+
+  // Debounced silent autosave: fires ~4s after the last edit, never toasts on
+  // success, and never touches sentSummary/error state.
+  useEffect(() => {
+    if (!hasAccess || !dirty) return;
+    if (saving || sending || testing || inFlightRef.current) return;
+    const t = setTimeout(async () => {
+      if (inFlightRef.current) return;
+      inFlightRef.current = true;
+      setAutosaving(true);
+      try {
+        const saved = await persist();
+        setSavedSnapshot(saved);
+        setAutosaveError(null);
+        loadDrafts();
+      } catch (err) {
+        setAutosaveError(err instanceof Error ? err.message : "Autosave failed");
+      } finally {
+        inFlightRef.current = false;
+        setAutosaving(false);
+      }
+    }, 4000);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [snapshot, dirty, hasAccess, saving, sending, testing]);
+
+  // Warn before losing unsaved edits (back button, tab close, refresh).
+  useEffect(() => {
+    if (!dirty) return;
+    const handler = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, [dirty]);
 
   const deleteDraft = async (id: string) => {
     if (!confirm("Delete this draft?")) return;
