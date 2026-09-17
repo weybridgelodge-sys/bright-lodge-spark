@@ -92,6 +92,28 @@ type Member = {
   provincial_rank: string | null;
 };
 
+/** Normalise a person's name for roster matching: drop masonic prefixes,
+ *  punctuation and extra spaces, then lowercase. */
+function nameKey(raw: string | null | undefined): string {
+  return String(raw ?? "")
+    .toLowerCase()
+    .replace(/[.,]/g, " ")
+    .replace(/\b(v\s*w|r\s*w|w)?\s*bro(ther)?\b/g, " ")
+    .replace(/\b(jnr|jr|snr|sr)\b/g, " ")
+    .replace(/[^a-z\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function memberNameKeys(m: Member): string[] {
+  const keys = [
+    nameKey(m.full_name),
+    nameKey(`${m.first_name ?? ""} ${m.last_name ?? ""}`),
+    nameKey(`${m.preferred_name ?? ""} ${m.last_name ?? ""}`),
+  ];
+  return keys.filter(Boolean);
+}
+
 function memberDisplay(m: Member) {
   const row: MemberRow = {
     ...m,
