@@ -45,6 +45,7 @@ Rules:
 - "apologies" lists only the brethren who sent apologies for absence, as a short sentence or comma list.
 - "previous_minutes_note" records the confirmation (and any amendment) of the previous meeting's minutes. Empty string if the transcript does not cover it.
 - "action_items" capture tasks agreed in the meeting: task, the person responsible, a deadline as an ISO date (YYYY-MM-DD) or an empty string if none was given, and done: false.
+- Infer deadlines from dates mentioned anywhere in the transcript, not only from explicit statements of a deadline. If a date is given for an event (an Installation, a meeting, a ceremony, a festive board) and a task is described as needing to happen "before", "ahead of", "in good time for", "in advance of" or "ready for" that event, use that event's date as the task's deadline. Read the transcript for contextual timing cues the way a competent Secretary would, and only leave a deadline empty when no related date can reasonably be derived.
 - "next_meeting_date" is an ISO date if a next meeting date was agreed, otherwise null.
 - Do not invent content that is not supported by the transcript.
 
