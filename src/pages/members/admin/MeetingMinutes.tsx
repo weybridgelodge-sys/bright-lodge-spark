@@ -229,6 +229,7 @@ function Inner() {
   const [gDate, setGDate] = useState("");
   const [gEventId, setGEventId] = useState("");
   const [gTranscript, setGTranscript] = useState("");
+  const [gAgenda, setGAgenda] = useState("");
   const [generating, setGenerating] = useState(false);
 
   const load = async () => {
