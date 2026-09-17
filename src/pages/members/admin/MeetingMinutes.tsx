@@ -208,6 +208,62 @@ export async function buildMinutesPdf(row: Row) {
   return doc;
 }
 
+/**
+ * Agenda-style document for a Committee meeting: the section headings only,
+ * as a numbered list. Bodies, action items and signature block are deliberately
+ * omitted — none of that exists before the meeting takes place.
+ */
+export async function buildAgendaPdf(row: Row) {
+  const { doc, pageW, margin } = await reportPdfDoc("Agenda", `${row.title} — ${fmtDate(row.meeting_date)}`);
+  const usableW = pageW - margin * 2;
+  let y = 135;
+
+  const ensure = (needed: number) => {
+    if (y + needed > doc.internal.pageSize.getHeight() - 50) {
+      doc.addPage();
+      y = 50;
+    }
+  };
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(11);
+  doc.setTextColor(...INK);
+  doc.text(`Committee Meeting — ${fmtDate(row.meeting_date)}`, margin, y);
+  y += 28;
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(10);
+  const items = (row.sections ?? []).map((s) => s.heading?.trim()).filter(Boolean) as string[];
+  items.forEach((heading, i) => {
+    const lines = doc.splitTextToSize(heading, usableW - 24) as string[];
+    ensure(lines.length * 15 + 8);
+    doc.setFont("helvetica", "bold");
+    doc.text(`${i + 1}.`, margin, y);
+    doc.setFont("helvetica", "normal");
+    lines.forEach((line, li) => {
+      doc.text(line, margin + 24, y + li * 15);
+    });
+    y += lines.length * 15 + 8;
+  });
+
+  if (items.length === 0) {
+    doc.setTextColor(...MUTED);
+    doc.text("No agenda items yet.", margin, y);
+    y += 20;
+  }
+
+  if (row.next_meeting_date) {
+    ensure(30);
+    y += 8;
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(10);
+    doc.setTextColor(...INK);
+    doc.text(`Date of the next Committee meeting: ${fmtDate(row.next_meeting_date)}`, margin, y);
+  }
+
+  return doc;
+}
+
 function Inner() {
   const { isAdmin, isSecretary, isAssistantSecretary, isWorshipfulMaster, user } = useAuth();
   const canManage = isAdmin || isSecretary || isAssistantSecretary || isWorshipfulMaster;
