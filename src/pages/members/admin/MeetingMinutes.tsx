@@ -356,6 +356,7 @@ function Inner() {
   const [rows, setRows] = useState<Row[]>([]);
   const [events, setEvents] = useState<LodgeEvent[]>([]);
   const [secretaryName, setSecretaryName] = useState("Secretary not recorded");
+  const [letterhead, setLetterhead] = useState<Letterhead>({});
   const [loading, setLoading] = useState(true);
 
   const [fType, setFType] = useState("all");
