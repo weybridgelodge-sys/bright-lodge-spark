@@ -2197,6 +2197,7 @@ export type Database = {
           approved_date: string | null
           created_at: string
           created_by: string | null
+          filed_agenda_document_id: string | null
           filed_document_id: string | null
           id: string
           lodge_event_id: string | null
@@ -2219,6 +2220,7 @@ export type Database = {
           approved_date?: string | null
           created_at?: string
           created_by?: string | null
+          filed_agenda_document_id?: string | null
           filed_document_id?: string | null
           id?: string
           lodge_event_id?: string | null
@@ -2241,6 +2243,7 @@ export type Database = {
           approved_date?: string | null
           created_at?: string
           created_by?: string | null
+          filed_agenda_document_id?: string | null
           filed_document_id?: string | null
           id?: string
           lodge_event_id?: string | null
@@ -2270,6 +2273,13 @@ export type Database = {
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meeting_minutes_filed_agenda_document_id_fkey"
+            columns: ["filed_agenda_document_id"]
+            isOneToOne: false
+            referencedRelation: "lodge_documents"
             referencedColumns: ["id"]
           },
           {
