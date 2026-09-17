@@ -38,7 +38,7 @@ type ActionItem = { task: string; responsible: string; deadline: string; done: b
 type Row = {
   id: string;
   meeting_type: MinutesType;
-  meeting_date: string;
+  meeting_at: string;
   title: string;
   lodge_event_id: string | null;
   status: MinutesStatus;
@@ -47,7 +47,7 @@ type Row = {
   previous_minutes_note: string | null;
   sections: Section[];
   action_items: ActionItem[];
-  next_meeting_date: string | null;
+  next_meeting_at: string | null;
   transcript_text: string | null;
   source?: string | null;
   filed_document_id?: string | null;
@@ -101,7 +101,7 @@ function masonicYearOf(iso: string) {
 export async function buildMinutesPdf(row: Row) {
   const { doc, pageW, margin } = await reportPdfDoc(
     `${TYPE_LABELS[row.meeting_type]} Meeting Minutes`,
-    `${row.title} — ${fmtDate(row.meeting_date)}`,
+    `${row.title} — ${fmtDate(row.meeting_at)}`,
   );
   const usableW = pageW - margin * 2;
   let y = 135;
@@ -173,12 +173,12 @@ export async function buildMinutesPdf(row: Row) {
     y = (doc as any).lastAutoTable.finalY + 20;
   }
 
-  if (row.next_meeting_date) {
+  if (row.next_meeting_at) {
     ensure(30);
     doc.setFont("helvetica", "bold");
     doc.setFontSize(10);
     doc.setTextColor(...INK);
-    doc.text(`Date of the next meeting: ${fmtDate(row.next_meeting_date)}`, margin, y);
+    doc.text(`Date of the next meeting: ${fmtDate(row.next_meeting_at)}`, margin, y);
     y += 26;
   }
 
@@ -214,7 +214,7 @@ export async function buildMinutesPdf(row: Row) {
  * omitted — none of that exists before the meeting takes place.
  */
 export async function buildAgendaPdf(row: Row) {
-  const { doc, pageW, margin } = await reportPdfDoc("Agenda", `${row.title} — ${fmtDate(row.meeting_date)}`);
+  const { doc, pageW, margin } = await reportPdfDoc("Agenda", `${row.title} — ${fmtDate(row.meeting_at)}`);
   const usableW = pageW - margin * 2;
   let y = 135;
 
@@ -228,7 +228,7 @@ export async function buildAgendaPdf(row: Row) {
   doc.setFont("helvetica", "bold");
   doc.setFontSize(11);
   doc.setTextColor(...INK);
-  doc.text(`Committee Meeting — ${fmtDate(row.meeting_date)}`, margin, y);
+  doc.text(`Committee Meeting — ${fmtDate(row.meeting_at)}`, margin, y);
   y += 28;
 
   doc.setFont("helvetica", "normal");
@@ -252,13 +252,13 @@ export async function buildAgendaPdf(row: Row) {
     y += 20;
   }
 
-  if (row.next_meeting_date) {
+  if (row.next_meeting_at) {
     ensure(30);
     y += 8;
     doc.setFont("helvetica", "bold");
     doc.setFontSize(10);
     doc.setTextColor(...INK);
-    doc.text(`Date of the next Committee meeting: ${fmtDate(row.next_meeting_date)}`, margin, y);
+    doc.text(`Date of the next Committee meeting: ${fmtDate(row.next_meeting_at)}`, margin, y);
   }
 
   return doc;
@@ -303,7 +303,7 @@ function Inner() {
   const load = async () => {
     setLoading(true);
     const [m, e] = await Promise.all([
-      (supabase.from as any)("meeting_minutes").select("*").order("meeting_date", { ascending: false }),
+      (supabase.from as any)("meeting_minutes").select("*").order("meeting_at", { ascending: false }),
       supabase.from("lodge_events").select("id,title,event_date").order("event_date", { ascending: false }),
     ]);
     if (m.error) toast({ title: "Could not load minutes", description: m.error.message, variant: "destructive" });
@@ -327,7 +327,7 @@ function Inner() {
       rows.filter((r) => {
         if (fType !== "all" && r.meeting_type !== fType) return false;
         if (fStatus !== "all" && r.status !== fStatus) return false;
-        if (fYear !== "all" && String(masonicYearOf(r.meeting_date)) !== fYear) return false;
+        if (fYear !== "all" && String(masonicYearOf(r.meeting_at)) !== fYear) return false;
         return true;
       }),
     [rows, fType, fStatus, fYear],
@@ -372,7 +372,7 @@ function Inner() {
       }
       const payload = {
         meeting_type: nType,
-        meeting_date: nDate,
+        meeting_at: nDate,
         title: nTitle.trim(),
         lodge_event_id: nType === "regular" && nEventId ? nEventId : null,
         sections,
@@ -528,7 +528,7 @@ function Inner() {
         body: {
           transcript_text: gTranscript,
           meeting_type: gType,
-          meeting_date: gDate,
+          meeting_at: gDate,
           lodge_event_id: gType === "lodge" ? gEventId : undefined,
           agenda_text: gType === "committee" && gAgenda.trim() ? gAgenda : undefined,
         },
@@ -554,7 +554,7 @@ function Inner() {
 
       const payload = {
         meeting_type: gType === "committee" ? "committee" : "regular",
-        meeting_date: gDate,
+        meeting_at: gDate,
         title,
         lodge_event_id: gType === "lodge" ? gEventId : null,
         status: "draft",
@@ -564,7 +564,7 @@ function Inner() {
         previous_minutes_note: result.previous_minutes_note || null,
         sections: result.sections ?? [],
         action_items: result.action_items ?? [],
-        next_meeting_date: result.next_meeting_date || null,
+        next_meeting_at: result.next_meeting_at || null,
         created_by: user?.id ?? null,
       };
 
@@ -628,7 +628,7 @@ function Inner() {
     if (upErr) throw upErr;
 
     const label = row.meeting_type === "committee" ? "Committee Meeting Minutes" : "Lodge Meeting Minutes";
-    const dateLabel = new Date(row.meeting_date).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+    const dateLabel = new Date(row.meeting_at).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
     const { data: created, error: dbErr } = await supabase
       .from("lodge_documents")
       .insert({
@@ -652,12 +652,12 @@ function Inner() {
       const { error } = await (supabase.from as any)("meeting_minutes")
         .update({
           title: editing.title,
-          meeting_date: editing.meeting_date,
+          meeting_at: editing.meeting_at,
           apologies: editing.apologies?.trim() || null,
           previous_minutes_note: editing.previous_minutes_note?.trim() || null,
           sections: editing.sections,
           action_items: editing.action_items,
-          next_meeting_date: editing.next_meeting_date || null,
+          next_meeting_at: editing.next_meeting_at || null,
           status: editing.status,
           approved_date: editing.status === "approved" ? editing.approved_date || null : null,
           transcript_text: editing.transcript_text?.trim() || null,
@@ -705,7 +705,7 @@ function Inner() {
   const exportPdf = async (r: Row) => {
     try {
       const doc = await buildMinutesPdf(r);
-      doc.save(`minutes-${r.meeting_date}-${r.meeting_type}.pdf`);
+      doc.save(`minutes-${r.meeting_at}-${r.meeting_type}.pdf`);
     } catch (e: any) {
       toast({ title: "Could not build the PDF", description: e.message, variant: "destructive" });
     }
@@ -719,7 +719,7 @@ function Inner() {
   const exportAgendaPdf = async (r: Row) => {
     try {
       const doc = await buildAgendaPdf(r);
-      doc.save(`agenda-${r.meeting_date}-committee.pdf`);
+      doc.save(`agenda-${r.meeting_at}-committee.pdf`);
 
       const blob = doc.output("blob") as Blob;
       const docId = crypto.randomUUID();
@@ -729,7 +729,7 @@ function Inner() {
         .upload(path, blob, { contentType: "application/pdf", upsert: false });
       if (upErr) throw upErr;
 
-      const dateLabel = new Date(r.meeting_date).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+      const dateLabel = new Date(r.meeting_at).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
       const { error: dbErr } = await supabase.from("lodge_documents").insert({
         title: `Committee Meeting Agenda — ${dateLabel}`,
         category: "committee_agendas" as any,
@@ -839,7 +839,7 @@ function Inner() {
               <NotebookPen className="w-6 h-6" /> {editing.title}
             </h1>
             <p className="text-primary-foreground/60 text-sm">
-              {TYPE_LABELS[editing.meeting_type]} meeting · {editing.meeting_date}
+              {TYPE_LABELS[editing.meeting_type]} meeting · {editing.meeting_at}
             </p>
           </div>
           <div className="flex gap-2">
@@ -858,7 +858,7 @@ function Inner() {
             </div>
             <div>
               <label className="text-xs text-primary-foreground/70">Meeting date</label>
-              <Input type="date" value={editing.meeting_date} onChange={(e) => patch({ meeting_date: e.target.value })} className={DATE_INPUT} />
+              <Input type="date" value={editing.meeting_at} onChange={(e) => patch({ meeting_at: e.target.value })} className={DATE_INPUT} />
             </div>
           </div>
 
@@ -948,7 +948,7 @@ function Inner() {
           <div className="grid sm:grid-cols-3 gap-3">
             <div>
               <label className="text-xs text-primary-foreground/70">Next meeting date</label>
-              <Input type="date" value={editing.next_meeting_date ?? ""} onChange={(e) => patch({ next_meeting_date: e.target.value })} className={DATE_INPUT} />
+              <Input type="date" value={editing.next_meeting_at ?? ""} onChange={(e) => patch({ next_meeting_at: e.target.value })} className={DATE_INPUT} />
             </div>
             <div>
               <label className="text-xs text-primary-foreground/70">Status</label>
@@ -1093,7 +1093,7 @@ function Inner() {
                   </Badge>
                 </div>
                 <p className="text-primary-foreground/60 text-xs mt-1">
-                  {r.meeting_date} · {r.sections.length} section{r.sections.length === 1 ? "" : "s"} · {r.action_items.length} action{r.action_items.length === 1 ? "" : "s"}
+                  {r.meeting_at} · {r.sections.length} section{r.sections.length === 1 ? "" : "s"} · {r.action_items.length} action{r.action_items.length === 1 ? "" : "s"}
                   {r.approved_date ? ` · confirmed ${r.approved_date}` : ""}
                 </p>
               </div>
