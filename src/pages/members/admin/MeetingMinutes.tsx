@@ -1284,10 +1284,10 @@ function Inner() {
       <header className="mb-6 flex items-start justify-between gap-3 flex-wrap">
         <div>
           <h1 className="font-serif text-2xl md:text-3xl text-gold flex items-center gap-2">
-            <NotebookPen className="w-6 h-6" /> Minutes
+            <NotebookPen className="w-6 h-6" /> Minutes & Agenda Generator
           </h1>
           <p className="text-primary-foreground/60 text-sm">
-            Regular and Committee meeting minutes, with action items and the source transcript.
+            Regular and Committee meeting minutes, Committee agendas, action items, and the source transcript.
           </p>
         </div>
         <div className="flex gap-2 flex-wrap">
