@@ -27,6 +27,7 @@ import { readFunctionError } from "@/lib/functionError";
 import { masonicYearStart } from "@/lib/loi";
 import { treasurerYearBounds } from "@/lib/treasurer/reports";
 import { reportPdfDoc, reportSection, INK, MUTED, GOLD, NAVY, fmtDate } from "@/lib/treasurer/reports";
+import { fetchProfilesPii, indexPii } from "@/lib/profilePii";
 import { formatMemberLine, type MemberRow } from "@/lib/summons";
 import autoTable from "jspdf-autotable";
 
@@ -263,13 +264,16 @@ export async function buildMinutesPdf(row: Row) {
   return doc;
 }
 
+export type OfficerContact = { name: string; address: string[] };
+export type Letterhead = { secretary?: OfficerContact | null; treasurer?: OfficerContact | null };
+
 /**
  * Agenda-style document for a Committee meeting: the section headings only,
  * as a numbered list. Bodies, action items and signature block are deliberately
  * omitted — none of that exists before the meeting takes place.
  */
-export async function buildAgendaPdf(row: Row, secretaryName = "Secretary not recorded") {
-  const { doc, pageW, margin } = await reportPdfDoc("AGENDA", `${row.title} — ${fmtDateTime(row.meeting_at)}`);
+export async function buildAgendaPdf(row: Row, letterhead: Letterhead = {}) {
+  const { doc, pageW, margin } = await reportPdfDoc("AGENDA", `${row.title} — ${fmtDateTime(row.meeting_at)}`, true);
   const usableW = pageW - margin * 2;
   let y = 135;
 
@@ -280,15 +284,36 @@ export async function buildAgendaPdf(row: Row, secretaryName = "Secretary not re
     }
   };
 
+  // Letterhead: Secretary (left) and Treasurer (right), name + full address.
+  const colW = usableW / 2 - 10;
+  const column = (label: string, officer: OfficerContact | null | undefined, x: number) => {
+    let cy = y;
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(9);
+    doc.setTextColor(...NAVY);
+    doc.text(label, x, cy);
+    cy += 13;
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(...INK);
+    const lines = officer ? [officer.name, ...officer.address] : ["Not recorded"];
+    for (const line of lines) {
+      const wrapped = doc.splitTextToSize(line, colW) as string[];
+      wrapped.forEach((w) => {
+        doc.text(w, x, cy);
+        cy += 12;
+      });
+    }
+    return cy;
+  };
+  const leftEnd = column("Secretary:", letterhead.secretary, margin);
+  const rightEnd = column("Treasurer:", letterhead.treasurer, margin + usableW / 2 + 10);
+  y = Math.max(leftEnd, rightEnd) + 18;
+
+  ensure(40);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(11);
   doc.setTextColor(...INK);
   doc.text(`On ${fmtDateTime(row.meeting_at)}`, margin, y);
-  y += 20;
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(9);
-  doc.setTextColor(...MUTED);
-  doc.text(`Secretary: ${secretaryName}`, margin, y);
   y += 28;
 
   doc.setFont("helvetica", "normal");
@@ -332,6 +357,7 @@ function Inner() {
   const [rows, setRows] = useState<Row[]>([]);
   const [events, setEvents] = useState<LodgeEvent[]>([]);
   const [secretaryName, setSecretaryName] = useState("Secretary not recorded");
+  const [letterhead, setLetterhead] = useState<Letterhead>({});
   const [loading, setLoading] = useState(true);
 
   const [fType, setFType] = useState("all");
@@ -378,19 +404,36 @@ function Inner() {
     })) as Row[]);
     setEvents(((e.data as any[]) ?? []) as LodgeEvent[]);
     const lodgeYear = Number(yearResult.data) || masonicYearStart();
-    const { data: appointment } = await supabase
+    const { data: appointments } = await supabase
       .from("officer_appointments")
-      .select("member_id")
-      .eq("position_key", "secretary")
-      .eq("lodge_year", lodgeYear)
-      .maybeSingle();
-    if (appointment?.member_id) {
-      const { data: secretary } = await supabase
-        .from("profiles")
-        .select("id,title,first_name,middle_name,last_name,full_name,preferred_name,post_nominals,rank,grand_rank,provincial_rank,initiation_date,joined_lodge_date,joined_year,is_past_master,is_royal_arch,status")
-        .eq("id", appointment.member_id)
-        .maybeSingle();
-      if (secretary) setSecretaryName(formatMemberLine(secretary as MemberRow));
+      .select("member_id,position_key")
+      .in("position_key", ["secretary", "treasurer"])
+      .eq("lodge_year", lodgeYear);
+    const appts = (appointments as { member_id: string; position_key: string }[]) ?? [];
+    const ids = appts.map((a) => a.member_id).filter(Boolean);
+    if (ids.length) {
+      const [{ data: people }, pii] = await Promise.all([
+        supabase
+          .from("profiles")
+          .select("id,title,first_name,middle_name,last_name,full_name,preferred_name,post_nominals,rank,grand_rank,provincial_rank,initiation_date,joined_lodge_date,joined_year,is_past_master,is_royal_arch,status")
+          .in("id", ids),
+        fetchProfilesPii(ids),
+      ]);
+      const piiIdx = indexPii(pii);
+      const byId = new Map(((people as any[]) ?? []).map((p) => [p.id as string, p]));
+      const contact = (key: string): OfficerContact | null => {
+        const memberId = appts.find((a) => a.position_key === key)?.member_id;
+        const prof = memberId ? byId.get(memberId) : null;
+        if (!prof) return null;
+        const a = piiIdx[prof.id];
+        const address = [a?.address_line1, a?.address_line2, a?.address_line3, a?.town, a?.county, a?.postcode]
+          .map((v) => (v ?? "").trim())
+          .filter(Boolean);
+        return { name: formatMemberLine(prof as MemberRow), address };
+      };
+      const sec = contact("secretary");
+      setLetterhead({ secretary: sec, treasurer: contact("treasurer") });
+      if (sec) setSecretaryName(sec.name);
     }
     setLoading(false);
   };
@@ -827,7 +870,7 @@ function Inner() {
    */
   const exportAgendaPdf = async (r: Row) => {
     try {
-      const doc = await buildAgendaPdf(r, secretaryName);
+      const doc = await buildAgendaPdf(r, letterhead);
       doc.save(`agenda-${r.meeting_at.slice(0, 10)}-committee.pdf`);
 
       const blob = doc.output("blob") as Blob;

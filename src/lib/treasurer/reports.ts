@@ -82,7 +82,7 @@ export function signedBalance(accountType: string, m: Movement | undefined): num
     : m.credit - m.debit;
 }
 
-export async function reportPdfDoc(subtitle: string, periodLine: string) {
+export async function reportPdfDoc(subtitle: string, periodLine: string, hideGeneratedDate = false) {
   const doc = new jsPDF({ unit: "pt", format: "a4" });
   const pageW = doc.internal.pageSize.getWidth();
   const margin = 40;
@@ -115,7 +115,9 @@ export async function reportPdfDoc(subtitle: string, periodLine: string) {
   doc.setFontSize(9);
   doc.setTextColor(230, 230, 235);
   doc.text(periodLine, margin + 80, 90);
-  doc.text(`Generated: ${fmtDate(new Date().toISOString())}`, pageW - margin, 90, { align: "right" });
+  if (!hideGeneratedDate) {
+    doc.text(`Generated: ${fmtDate(new Date().toISOString())}`, pageW - margin, 90, { align: "right" });
+  }
 
   return { doc, pageW, margin };
 }
