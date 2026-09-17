@@ -257,23 +257,41 @@ export async function exportFullKpi(bundle: KpiBundle, eng?: EngagementBundle | 
     const totalVisits = visitors.reduce((n, v) => n + v.visits, 0);
     // Normalise the grouping key so the same lodge written differently
     // ("Astolat Lodge No 5848" vs "Astolat 5848") counts as one lodge.
-    const lodgeKey = (raw: string) =>
-      raw
+    // Normalise the grouping key so the same lodge written differently
+    // ("Astolat Lodge No 5848" vs "Astolat 5848") counts as one lodge.
+    // Keep the lodge number in the key so genuinely different lodges that
+    // share a name aren't merged — but an unnumbered variant folds into a
+    // numbered group with the same name ("Worplesdon" → "Worplesdon 9076").
+    const lodgeParts = (raw: string) => {
+      const norm = raw
         .toLowerCase()
         .replace(/[^a-z0-9\s]/g, " ")
         .replace(/\b(lodge|no)\b/g, " ")
         .replace(/\s+/g, " ")
         .trim();
-    const byLodge = new Map<string, { visits: number; label: string }>();
+      const num = norm.match(/\d+/)?.[0] ?? "";
+      const name = norm.replace(/\d+/g, " ").replace(/\s+/g, " ").trim();
+      return { name, num };
+    };
+    const byLodge = new Map<string, { visits: number; label: string; name: string; num: string }>();
     for (const v of visitors) {
       const lodge = (v.lodge_name ?? "").trim();
       if (!lodge) {
-        const cur = byLodge.get("__none__") ?? { visits: 0, label: "Lodge not recorded" };
+        const cur = byLodge.get("__none__") ?? { visits: 0, label: "Lodge not recorded", name: "", num: "" };
         cur.visits += v.visits;
         byLodge.set("__none__", cur);
         continue;
       }
-      const key = lodgeKey(lodge) || lodge.toLowerCase();
+      const { name, num } = lodgeParts(lodge);
+      // Exact key, or (when this entry has no number) an existing group
+      // with the same name that does have one.
+      let key = `${name}|${num}`;
+      if (!num) {
+        for (const [k, g] of byLodge) {
+          if (g.name === name && g.num) { key = k; break; }
+        }
+      }
+      const cur = byLodge.get(key) ?? { visits: 0, label: lodge, name, num };
       const cur = byLodge.get(key) ?? { visits: 0, label: lodge };
       cur.visits += v.visits;
       // Display the longest / most complete original variant as the label.
