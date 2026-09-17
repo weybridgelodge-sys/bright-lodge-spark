@@ -204,6 +204,13 @@
       "when": 1789628874924,
       "tag": "0028_visitor_contacts_email_nullable",
       "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1789630485121,
+      "tag": "0029_visitor_contact_upsert_update_wins",
+      "breakpoints": true
     }
   ]
 }
