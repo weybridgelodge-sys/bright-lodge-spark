@@ -1278,7 +1278,14 @@ function Inner() {
                 </p>
               </div>
               <div className="flex items-center gap-2">
-                <Button size="sm" variant="outline" onClick={() => exportPdf(r)}><Download className="w-3 h-3" /></Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => isCommitteeAgenda(r) ? exportAgendaPdf(r) : exportPdf(r)}
+                  aria-label={isCommitteeAgenda(r) ? "Export Agenda PDF" : "Export Minutes PDF"}
+                >
+                  <Download className="w-3 h-3" />
+                </Button>
                 <Button size="sm" variant="outline" onClick={() => { setShowTranscript(false); openEditing(r); }}><Pencil className="w-3 h-3" /></Button>
                 <Button size="sm" variant="outline" onClick={() => remove(r)}><Trash2 className="w-3 h-3" /></Button>
               </div>
