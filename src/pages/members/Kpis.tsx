@@ -154,7 +154,7 @@ export default function Kpis() {
             <FileText className="w-3.5 h-3.5" /> Export VO Report
           </button>
           <button
-            onClick={() => exportFullKpi(bundle)}
+            onClick={() => exportFullKpi(bundle, eng)}
             className="flex items-center gap-1.5 bg-gold-shimmer text-accent-foreground px-3 py-2 rounded-sm text-xs uppercase tracking-wider font-semibold"
           >
             <Download className="w-3.5 h-3.5" /> Export Full KPI

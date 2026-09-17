@@ -3,6 +3,7 @@ import autoTable from "jspdf-autotable";
 import { saveJsPdf } from "./nativeDownload";
 import {
   type KpiBundle,
+  type EngagementBundle,
   snapshot,
   movement,
   uglePortal,
@@ -10,6 +11,13 @@ import {
   milestones,
   officersHealth,
   pipeline,
+  lodgeHealth,
+  referralRate,
+  activeVsInactive,
+  quarterlyEngagement,
+  visitorFrequency,
+  disengagementRisk,
+  REFERRAL_SOURCE_LABELS,
   fullName,
   currentMasonicYear,
 } from "./kpis";
@@ -86,7 +94,7 @@ export async function exportVoReport(bundle: KpiBundle) {
   await saveJsPdf(doc, `vo-report-${new Date().toISOString().slice(0, 10)}.pdf`);
 }
 
-export async function exportFullKpi(bundle: KpiBundle) {
+export async function exportFullKpi(bundle: KpiBundle, eng?: EngagementBundle | null) {
   const doc = new jsPDF();
   const s = snapshot(bundle.members);
   const mv = movement(bundle.members);
@@ -95,8 +103,22 @@ export async function exportFullKpi(bundle: KpiBundle) {
   const ms = milestones(bundle.members, bundle.wmTerms);
   const oh = officersHealth(bundle);
   const pl = pipeline(bundle);
+  const lh = lodgeHealth(bundle);
+  const rr = referralRate(bundle.candidates);
 
   header(doc, `Full KPI Summary — Masonic Year ${currentMasonicYear()}/${currentMasonicYear() + 1}`);
+
+  autoTable(doc, {
+    startY: 32,
+    head: [["Lodge Health", `OVERALL: ${lh.overall.toUpperCase()}`]],
+    body: [
+      [`Growth — ${lh.components.growth.band.toUpperCase()}`, lh.components.growth.detail],
+      [`Succession — ${lh.components.succession.band.toUpperCase()}`, lh.components.succession.detail],
+      [`Pipeline — ${lh.components.pipeline.band.toUpperCase()}`, lh.components.pipeline.detail],
+    ],
+    theme: "striped",
+    headStyles: { fillColor: [27, 42, 74], textColor: [201, 164, 50] },
+  });
 
   autoTable(doc, {
     startY: 32,
@@ -162,7 +184,15 @@ export async function exportFullKpi(bundle: KpiBundle) {
       ["Progressive offices filled", `${oh.progressiveFilled.length} / ${oh.progressiveTotal}`],
       ["Vacant progressive offices", oh.progressiveVacant.map((v) => v.label).join(", ") || "None"],
       ...oh.criticals.map(
-        (c) => [c.label, c.risk ? `RISK: ${c.risk.note ?? "flagged"}` : c.holder ? fullName(c.holder) : "VACANT"] as [string, string]
+        (c) =>
+          [
+            c.label,
+            c.risk?.is_at_risk
+              ? `RISK: ${c.risk.note ?? "flagged"}`
+              : c.holder
+                ? fullName(c.holder)
+                : "VACANT",
+          ] as [string, string]
       ),
     ],
     theme: "striped",
@@ -180,6 +210,87 @@ export async function exportFullKpi(bundle: KpiBundle) {
     theme: "striped",
     headStyles: { fillColor: [27, 42, 74], textColor: [201, 164, 50] },
   });
+
+  autoTable(doc, {
+    head: [["7a. Referral Sources (all candidates recorded)", "Count"]],
+    body: (Object.keys(REFERRAL_SOURCE_LABELS) as (keyof typeof REFERRAL_SOURCE_LABELS)[]).map(
+      (k) => [REFERRAL_SOURCE_LABELS[k], String(rr[k])] as [string, string]
+    ),
+    theme: "striped",
+    headStyles: { fillColor: [27, 42, 74], textColor: [201, 164, 50] },
+  });
+
+  if (eng) {
+    const avi = activeVsInactive(bundle.members, eng);
+    autoTable(doc, {
+      head: [["8. Active vs Inactive Members", ""]],
+      body: [
+        ["Meetings considered", String(avi.meetingsConsidered)],
+        ["Active", String(avi.active.length)],
+        ["Inactive", String(avi.inactive.length)],
+        ["Active %", `${avi.activePct}%`],
+      ],
+      theme: "striped",
+      headStyles: { fillColor: [27, 42, 74], textColor: [201, 164, 50] },
+    });
+
+    const qe = quarterlyEngagement(eng);
+    if (qe.length) {
+      autoTable(doc, {
+        head: [["9. Quarterly Engagement", "Meetings", "Members", "Visitors", "Avg members"]],
+        body: qe.map((q) => [
+          q.quarter,
+          String(q.meetings),
+          String(q.members),
+          String(q.visitors),
+          String(q.avgMembers),
+        ]),
+        theme: "striped",
+        headStyles: { fillColor: [27, 42, 74], textColor: [201, 164, 50] },
+      });
+    }
+
+    // Aggregate only — this document may be printed or shared outside the portal,
+    // so individual visitor names are deliberately omitted.
+    const visitors = visitorFrequency(eng, 1000);
+    const totalVisits = visitors.reduce((n, v) => n + v.visits, 0);
+    const byLodge = new Map<string, number>();
+    for (const v of visitors) {
+      const lodge = (v.lodge_name ?? "").trim() || "Lodge not recorded";
+      byLodge.set(lodge, (byLodge.get(lodge) ?? 0) + v.visits);
+    }
+    const topLodges = [...byLodge.entries()].sort((a, b) => b[1] - a[1]).slice(0, 3);
+    autoTable(doc, {
+      head: [["10. Visitor Frequency (aggregate)", ""]],
+      body: [
+        ["Unique visitors", String(visitors.length)],
+        ["Total visits", String(totalVisits)],
+        ...topLodges.map(
+          ([lodge, n], i) => [`Top visiting lodge ${i + 1}`, `${lodge} (${n} visit${n === 1 ? "" : "s"})`] as [string, string]
+        ),
+      ],
+      theme: "striped",
+      headStyles: { fillColor: [27, 42, 74], textColor: [201, 164, 50] },
+    });
+
+    // Pastoral-sensitive: count only, names stay in the access-controlled portal.
+    const dr = disengagementRisk(bundle.members, eng);
+    autoTable(doc, {
+      head: [["11. Disengagement Risk", ""]],
+      body: [
+        [
+          "Members flagged for follow-up",
+          `${dr.members.length} member${dr.members.length === 1 ? "" : "s"} flagged for follow-up`,
+        ],
+        [
+          "Basis",
+          `Missed all of the last ${dr.meetingsConsidered} meeting${dr.meetingsConsidered === 1 ? "" : "s"} with no apology sent and no welfare absence recorded. Names are held in the members' portal only.`,
+        ],
+      ],
+      theme: "striped",
+      headStyles: { fillColor: [27, 42, 74], textColor: [201, 164, 50] },
+    });
+  }
 
   await saveJsPdf(doc, `kpi-summary-${new Date().toISOString().slice(0, 10)}.pdf`);
 }
