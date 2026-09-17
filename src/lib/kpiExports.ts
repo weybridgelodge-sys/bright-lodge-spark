@@ -109,7 +109,7 @@ export async function exportFullKpi(bundle: KpiBundle, eng?: EngagementBundle | 
   header(doc, `Full KPI Summary — Masonic Year ${currentMasonicYear()}/${currentMasonicYear() + 1}`);
 
   autoTable(doc, {
-    startY: 32,
+    pageBreak: "avoid",
     head: [["Lodge Health", `OVERALL: ${lh.overall.toUpperCase()}`]],
     body: [
       [`Growth — ${lh.components.growth.band.toUpperCase()}`, lh.components.growth.detail],
@@ -213,6 +213,7 @@ export async function exportFullKpi(bundle: KpiBundle, eng?: EngagementBundle | 
   });
 
   autoTable(doc, {
+    pageBreak: "avoid",
     head: [["7a. Referral Sources (all candidates recorded)", "Count"]],
     body: (Object.keys(REFERRAL_SOURCE_LABELS) as (keyof typeof REFERRAL_SOURCE_LABELS)[]).map(
       (k) => [REFERRAL_SOURCE_LABELS[k], String(rr[k])] as [string, string]
@@ -224,6 +225,7 @@ export async function exportFullKpi(bundle: KpiBundle, eng?: EngagementBundle | 
   if (eng) {
     const avi = activeVsInactive(bundle.members, eng);
     autoTable(doc, {
+      pageBreak: "avoid",
       head: [["8. Active vs Inactive Members", ""]],
       body: [
         ["Meetings considered", String(avi.meetingsConsidered)],
@@ -238,6 +240,7 @@ export async function exportFullKpi(bundle: KpiBundle, eng?: EngagementBundle | 
     const qe = quarterlyEngagement(eng);
     if (qe.length) {
       autoTable(doc, {
+        pageBreak: "avoid",
         head: [["9. Quarterly Engagement", "Meetings", "Members", "Visitors", "Avg members"]],
         body: qe.map((q) => [
           q.quarter,
@@ -313,6 +316,7 @@ export async function exportFullKpi(bundle: KpiBundle, eng?: EngagementBundle | 
     }
     const topLodges = [...byLodge.values()].sort((a, b) => b.visits - a.visits).slice(0, 3);
     autoTable(doc, {
+      pageBreak: "avoid",
       head: [["10. Visitor Frequency (aggregate)", ""]],
       body: [
         ["Unique visitors", String(visitors.length)],
@@ -328,6 +332,7 @@ export async function exportFullKpi(bundle: KpiBundle, eng?: EngagementBundle | 
     // Pastoral-sensitive: count only, names stay in the access-controlled portal.
     const dr = disengagementRisk(bundle.members, eng);
     autoTable(doc, {
+      pageBreak: "avoid",
       head: [["11. Disengagement Risk", ""]],
       body: [
         [
