@@ -263,6 +263,9 @@ export async function buildMinutesPdf(row: Row) {
   return doc;
 }
 
+export type OfficerContact = { name: string; address: string[] };
+export type Letterhead = { secretary?: OfficerContact | null; treasurer?: OfficerContact | null };
+
 /**
  * Agenda-style document for a Committee meeting: the section headings only,
  * as a numbered list. Bodies, action items and signature block are deliberately
