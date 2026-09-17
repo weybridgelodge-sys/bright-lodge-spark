@@ -319,6 +319,7 @@ function Inner() {
     setGDate("");
     setGEventId("");
     setGTranscript("");
+    setGAgenda("");
     setGenOpen(true);
   };
 
@@ -326,6 +327,12 @@ function Inner() {
     if (!f) return;
     setGTranscript(await f.text());
   };
+
+  const loadAgendaFile = async (f: File | null | undefined) => {
+    if (!f) return;
+    setGAgenda(await f.text());
+  };
+
 
   /** Generates a brand-new draft record — never modifies an existing one. */
   const generateFromTranscript = async () => {
