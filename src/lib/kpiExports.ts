@@ -121,7 +121,8 @@ export async function exportFullKpi(bundle: KpiBundle, eng?: EngagementBundle | 
   });
 
   autoTable(doc, {
-    startY: 32,
+    // Continue below Lodge Health rather than overlapping it.
+    startY: (doc as any).lastAutoTable.finalY + 8,
     head: [["1. Snapshot", "Value"]],
     body: [
       ["Subscribing", String(s.subscribingCount)],
@@ -254,19 +255,70 @@ export async function exportFullKpi(bundle: KpiBundle, eng?: EngagementBundle | 
     // so individual visitor names are deliberately omitted.
     const visitors = visitorFrequency(eng, 1000);
     const totalVisits = visitors.reduce((n, v) => n + v.visits, 0);
-    const byLodge = new Map<string, number>();
+    // Normalise the grouping key so the same lodge written differently
+    // ("Astolat Lodge No 5848" vs "Astolat 5848") counts as one lodge.
+    // Normalise the grouping key so the same lodge written differently
+    // ("Astolat Lodge No 5848" vs "Astolat 5848") counts as one lodge.
+    // Keep the lodge number in the key so genuinely different lodges that
+    // share a name aren't merged — but an unnumbered variant folds into a
+    // numbered group with the same name ("Worplesdon" → "Worplesdon 9076").
+    const lodgeParts = (raw: string) => {
+      const norm = raw
+        .toLowerCase()
+        .replace(/[^a-z0-9\s]/g, " ")
+        .replace(/\b(lodge|no)\b/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+      const num = norm.match(/\d+/)?.[0] ?? "";
+      const name = norm.replace(/\d+/g, " ").replace(/\s+/g, " ").trim();
+      return { name, num };
+    };
+    const byLodge = new Map<string, { visits: number; label: string; name: string; num: string }>();
     for (const v of visitors) {
-      const lodge = (v.lodge_name ?? "").trim() || "Lodge not recorded";
-      byLodge.set(lodge, (byLodge.get(lodge) ?? 0) + v.visits);
+      const lodge = (v.lodge_name ?? "").trim();
+      if (!lodge) {
+        const cur = byLodge.get("__none__") ?? { visits: 0, label: "Lodge not recorded", name: "", num: "" };
+        cur.visits += v.visits;
+        byLodge.set("__none__", cur);
+        continue;
+      }
+      const { name, num } = lodgeParts(lodge);
+      // Exact key, or (when this entry has no number) an existing group
+      // with the same name that does have one.
+      let key = `${name}|${num}`;
+      if (!num) {
+        for (const [k, g] of byLodge) {
+          if (g.name === name && g.num) { key = k; break; }
+        }
+      }
+      // If a numbered entry arrives after an unnumbered group with the same
+      // name already exists, fold that group into this one.
+      if (num) {
+        const bareKey = `${name}|`;
+        const bare = byLodge.get(bareKey);
+        if (bare) {
+          byLodge.delete(bareKey);
+          const cur = byLodge.get(key) ?? { visits: 0, label: lodge, name, num };
+          cur.visits += bare.visits + v.visits;
+          cur.label = [lodge, bare.label, cur.label].sort((a, b) => b.length - a.length)[0];
+          byLodge.set(key, cur);
+          continue;
+        }
+      }
+      const cur = byLodge.get(key) ?? { visits: 0, label: lodge, name, num };
+      cur.visits += v.visits;
+      // Display the longest / most complete original variant as the label.
+      if (lodge.length > cur.label.length) cur.label = lodge;
+      byLodge.set(key, cur);
     }
-    const topLodges = [...byLodge.entries()].sort((a, b) => b[1] - a[1]).slice(0, 3);
+    const topLodges = [...byLodge.values()].sort((a, b) => b.visits - a.visits).slice(0, 3);
     autoTable(doc, {
       head: [["10. Visitor Frequency (aggregate)", ""]],
       body: [
         ["Unique visitors", String(visitors.length)],
         ["Total visits", String(totalVisits)],
         ...topLodges.map(
-          ([lodge, n], i) => [`Top visiting lodge ${i + 1}`, `${lodge} (${n} visit${n === 1 ? "" : "s"})`] as [string, string]
+          (l, i) => [`Top visiting lodge ${i + 1}`, `${l.label} (${l.visits} visit${l.visits === 1 ? "" : "s"})`] as [string, string]
         ),
       ],
       theme: "striped",
