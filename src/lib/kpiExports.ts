@@ -292,7 +292,6 @@ export async function exportFullKpi(bundle: KpiBundle, eng?: EngagementBundle | 
         }
       }
       const cur = byLodge.get(key) ?? { visits: 0, label: lodge, name, num };
-      const cur = byLodge.get(key) ?? { visits: 0, label: lodge };
       cur.visits += v.visits;
       // Display the longest / most complete original variant as the label.
       if (lodge.length > cur.label.length) cur.label = lodge;
