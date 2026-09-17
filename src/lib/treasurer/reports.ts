@@ -115,7 +115,9 @@ export async function reportPdfDoc(subtitle: string, periodLine: string, hideGen
   doc.setFontSize(9);
   doc.setTextColor(230, 230, 235);
   doc.text(periodLine, margin + 80, 90);
-  doc.text(`Generated: ${fmtDate(new Date().toISOString())}`, pageW - margin, 90, { align: "right" });
+  if (!hideGeneratedDate) {
+    doc.text(`Generated: ${fmtDate(new Date().toISOString())}`, pageW - margin, 90, { align: "right" });
+  }
 
   return { doc, pageW, margin };
 }
