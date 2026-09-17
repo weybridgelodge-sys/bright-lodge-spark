@@ -659,6 +659,16 @@ function attendedMemberIds(eng: EngagementBundle, meetingIds: Set<string>): Set<
   return out;
 }
 
+/** Member_ids who sent apologies for any of the given meetings. */
+function apologisedMemberIds(eng: EngagementBundle, meetingIds: Set<string>): Set<string> {
+  const out = new Set<string>();
+  for (const r of eng.attendance) {
+    if (r.member_id && meetingIds.has(r.meeting_id) && r.attendance_status === "apologies")
+      out.add(r.member_id);
+  }
+  return out;
+}
+
 /** Active = attended at least one of the last `window` occurred meetings. */
 export function activeVsInactive(members: KpiMember[], eng: EngagementBundle, window = 6) {
   const recent = eng.meetings.slice(-window);
