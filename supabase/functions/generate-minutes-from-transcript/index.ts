@@ -137,6 +137,10 @@ Match that style. Do not copy its content.`;
       } else {
         structure = `This is a Lodge Committee meeting. Choose section headings that reflect the business actually discussed, typically including Matters Arising, Update and Confirmation of Lodge Officers, meeting arrangements, and any other business.`;
       }
+
+      if (agenda_text.trim()) {
+        structure += `\n\nThe pre-meeting agenda for this Committee meeting (may include a proposed date for the next meeting, which should be used for next_meeting_date if the transcript doesn't state one explicitly):\n"""\n${agenda_text.trim()}\n"""`;
+      }
     }
 
     const system = `${BASE_RULES}\n\n${structure}`;
