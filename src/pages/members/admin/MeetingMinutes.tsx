@@ -138,7 +138,7 @@ function fmtDateTime(v?: string | null): string {
 export async function buildMinutesPdf(row: Row) {
   const { doc, pageW, margin } = await reportPdfDoc(
     `${TYPE_LABELS[row.meeting_type]} Meeting Minutes`,
-    `${row.title} — ${fmtDate(row.meeting_at)}`,
+    `${row.title} — ${fmtDateTime(row.meeting_at)}`,
   );
   const usableW = pageW - margin * 2;
   let y = 135;
@@ -215,7 +215,7 @@ export async function buildMinutesPdf(row: Row) {
     doc.setFont("helvetica", "bold");
     doc.setFontSize(10);
     doc.setTextColor(...INK);
-    doc.text(`Date of the next meeting: ${fmtDate(row.next_meeting_at)}`, margin, y);
+    doc.text(`Date of the next meeting: ${fmtDateTime(row.next_meeting_at)}`, margin, y);
     y += 26;
   }
 
@@ -251,7 +251,7 @@ export async function buildMinutesPdf(row: Row) {
  * omitted — none of that exists before the meeting takes place.
  */
 export async function buildAgendaPdf(row: Row) {
-  const { doc, pageW, margin } = await reportPdfDoc("Agenda", `${row.title} — ${fmtDate(row.meeting_at)}`);
+  const { doc, pageW, margin } = await reportPdfDoc("Agenda", `${row.title} — ${fmtDateTime(row.meeting_at)}`);
   const usableW = pageW - margin * 2;
   let y = 135;
 
@@ -265,7 +265,7 @@ export async function buildAgendaPdf(row: Row) {
   doc.setFont("helvetica", "bold");
   doc.setFontSize(11);
   doc.setTextColor(...INK);
-  doc.text(`Committee Meeting — ${fmtDate(row.meeting_at)}`, margin, y);
+  doc.text(`On ${fmtDateTime(row.meeting_at)}`, margin, y);
   y += 28;
 
   doc.setFont("helvetica", "normal");
@@ -295,7 +295,7 @@ export async function buildAgendaPdf(row: Row) {
     doc.setFont("helvetica", "bold");
     doc.setFontSize(10);
     doc.setTextColor(...INK);
-    doc.text(`Date of the next Committee meeting: ${fmtDate(row.next_meeting_at)}`, margin, y);
+    doc.text(`Date of the next Committee meeting: ${fmtDateTime(row.next_meeting_at)}`, margin, y);
   }
 
   return doc;
@@ -665,7 +665,7 @@ function Inner() {
     if (upErr) throw upErr;
 
     const label = row.meeting_type === "committee" ? "Committee Meeting Minutes" : "Lodge Meeting Minutes";
-    const dateLabel = new Date(row.meeting_at).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+    const dateLabel = new Date(row.meeting_at).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
     const { data: created, error: dbErr } = await supabase
       .from("lodge_documents")
       .insert({
@@ -742,7 +742,7 @@ function Inner() {
   const exportPdf = async (r: Row) => {
     try {
       const doc = await buildMinutesPdf(r);
-      doc.save(`minutes-${r.meeting_at}-${r.meeting_type}.pdf`);
+      doc.save(`minutes-${r.meeting_at.slice(0, 10)}-${r.meeting_type}.pdf`);
     } catch (e: any) {
       toast({ title: "Could not build the PDF", description: e.message, variant: "destructive" });
     }
@@ -756,7 +756,7 @@ function Inner() {
   const exportAgendaPdf = async (r: Row) => {
     try {
       const doc = await buildAgendaPdf(r);
-      doc.save(`agenda-${r.meeting_at}-committee.pdf`);
+      doc.save(`agenda-${r.meeting_at.slice(0, 10)}-committee.pdf`);
 
       const blob = doc.output("blob") as Blob;
       const docId = crypto.randomUUID();
@@ -766,7 +766,7 @@ function Inner() {
         .upload(path, blob, { contentType: "application/pdf", upsert: false });
       if (upErr) throw upErr;
 
-      const dateLabel = new Date(r.meeting_at).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+      const dateLabel = new Date(r.meeting_at).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
       const { error: dbErr } = await supabase.from("lodge_documents").insert({
         title: `Committee Meeting Agenda — ${dateLabel}`,
         category: "committee_agendas" as any,
