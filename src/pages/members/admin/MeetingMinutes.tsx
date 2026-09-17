@@ -357,7 +357,7 @@ function Inner() {
     // apps) write UTF-16, which File.text() decodes as UTF-8 garbage — sniff
     // the byte-order mark and decode accordingly so those files still load.
     try {
-      const buf = await f.arrayBuffer();
+      const buf = await readBytes(f);
       const bytes = new Uint8Array(buf);
       let text: string;
       if (bytes.length >= 2 && bytes[0] === 0xff && bytes[1] === 0xfe) {
