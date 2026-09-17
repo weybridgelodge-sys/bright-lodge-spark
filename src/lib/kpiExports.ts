@@ -121,7 +121,8 @@ export async function exportFullKpi(bundle: KpiBundle, eng?: EngagementBundle | 
   });
 
   autoTable(doc, {
-    startY: 32,
+    // Continue below Lodge Health rather than overlapping it.
+    startY: (doc as any).lastAutoTable.finalY + 8,
     head: [["1. Snapshot", "Value"]],
     body: [
       ["Subscribing", String(s.subscribingCount)],
@@ -254,12 +255,32 @@ export async function exportFullKpi(bundle: KpiBundle, eng?: EngagementBundle | 
     // so individual visitor names are deliberately omitted.
     const visitors = visitorFrequency(eng, 1000);
     const totalVisits = visitors.reduce((n, v) => n + v.visits, 0);
-    const byLodge = new Map<string, number>();
+    // Normalise the grouping key so the same lodge written differently
+    // ("Astolat Lodge No 5848" vs "Astolat 5848") counts as one lodge.
+    const lodgeKey = (raw: string) =>
+      raw
+        .toLowerCase()
+        .replace(/[^a-z0-9\s]/g, " ")
+        .replace(/\b(lodge|no)\b/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+    const byLodge = new Map<string, { visits: number; label: string }>();
     for (const v of visitors) {
-      const lodge = (v.lodge_name ?? "").trim() || "Lodge not recorded";
-      byLodge.set(lodge, (byLodge.get(lodge) ?? 0) + v.visits);
+      const lodge = (v.lodge_name ?? "").trim();
+      if (!lodge) {
+        const cur = byLodge.get("__none__") ?? { visits: 0, label: "Lodge not recorded" };
+        cur.visits += v.visits;
+        byLodge.set("__none__", cur);
+        continue;
+      }
+      const key = lodgeKey(lodge) || lodge.toLowerCase();
+      const cur = byLodge.get(key) ?? { visits: 0, label: lodge };
+      cur.visits += v.visits;
+      // Display the longest / most complete original variant as the label.
+      if (lodge.length > cur.label.length) cur.label = lodge;
+      byLodge.set(key, cur);
     }
-    const topLodges = [...byLodge.entries()].sort((a, b) => b[1] - a[1]).slice(0, 3);
+    const topLodges = [...byLodge.values()].sort((a, b) => b.visits - a.visits).slice(0, 3);
     autoTable(doc, {
       head: [["10. Visitor Frequency (aggregate)", ""]],
       body: [
