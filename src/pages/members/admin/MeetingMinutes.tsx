@@ -98,6 +98,43 @@ function masonicYearOf(iso: string) {
   return iso >= `${y}-10-01` ? y : y - 1;
 }
 
+/** Default Committee start time (7.30 p.m.), the lodge's standing convention. */
+const DEFAULT_START_TIME = "19:30";
+
+/** Stored timestamp -> value for an <input type="datetime-local">. Treated as UTC throughout. */
+function toInput(v?: string | null): string {
+  if (!v) return "";
+  if (v.length <= 10) return `${v}T00:00`;
+  return v.slice(0, 16);
+}
+
+/** datetime-local value -> stored timestamp (UTC). */
+function fromInput(v: string): string | null {
+  if (!v) return null;
+  return v.length <= 10 ? `${v}T00:00:00Z` : `${v}:00Z`;
+}
+
+const ORDINAL = (d: number) =>
+  d % 10 === 1 && d !== 11 ? "st" : d % 10 === 2 && d !== 12 ? "nd" : d % 10 === 3 && d !== 13 ? "rd" : "th";
+
+/** House convention: "Thursday 10th September 2026 at 7.30 p.m." */
+function fmtDateTime(v?: string | null): string {
+  if (!v) return "—";
+  const d = new Date(toInput(v) + "Z");
+  if (Number.isNaN(d.getTime())) return String(v);
+  const weekday = d.toLocaleDateString("en-GB", { weekday: "long", timeZone: "UTC" });
+  const month = d.toLocaleDateString("en-GB", { month: "long", timeZone: "UTC" });
+  const day = d.getUTCDate();
+  const h24 = d.getUTCHours();
+  const mins = d.getUTCMinutes();
+  const suffix = h24 >= 12 ? "p.m." : "a.m.";
+  const h12 = h24 % 12 === 0 ? 12 : h24 % 12;
+  const time = mins === 0 ? `${h12}` : `${h12}.${String(mins).padStart(2, "0")}`;
+  return `${weekday} ${day}${ORDINAL(day)} ${month} ${d.getUTCFullYear()} at ${time} ${suffix}`;
+}
+
+
+
 export async function buildMinutesPdf(row: Row) {
   const { doc, pageW, margin } = await reportPdfDoc(
     `${TYPE_LABELS[row.meeting_type]} Meeting Minutes`,
