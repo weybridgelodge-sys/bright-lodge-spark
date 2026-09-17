@@ -1026,6 +1026,13 @@ function Inner() {
           >
             <Sparkles className="w-4 h-4 mr-1" /> Generate from transcript
           </Button>
+          <Button
+            onClick={startNewAgenda}
+            variant="outline"
+            className="border-gold/40 text-gold hover:bg-gold/10"
+          >
+            <Plus className="w-4 h-4 mr-1" /> New Committee Agenda
+          </Button>
           <Button onClick={startNew} className="bg-gold-shimmer text-accent-foreground">
             <Plus className="w-4 h-4 mr-1" /> New minutes
           </Button>
