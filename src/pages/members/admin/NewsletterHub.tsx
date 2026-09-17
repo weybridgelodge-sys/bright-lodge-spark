@@ -343,6 +343,7 @@ function NewsletterHubInner() {
     setAudience("members");
     setUnifiedContent(false);
     setError(null);
+    pendingBaselineRef.current = true;
   };
 
   const loadDraft = (d: DraftRow) => {
