@@ -283,6 +283,7 @@ function Inner() {
   const [nTitle, setNTitle] = useState("");
   const [nDate, setNDate] = useState("");
   const [nEventId, setNEventId] = useState("");
+  const [nAgenda, setNAgenda] = useState(false);
   const [busy, setBusy] = useState(false);
 
   // Edit form
