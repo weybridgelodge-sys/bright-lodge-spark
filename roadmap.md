@@ -1,1 +1,1 @@
-- [ ] Build dedicated Committee Agenda editor and verify the 11 January 2027 PDF.
+- [x] Build dedicated Committee Agenda editor and verify the 11 January 2027 PDF.
