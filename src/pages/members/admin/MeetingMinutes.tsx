@@ -851,7 +851,7 @@ function Inner() {
    */
   const exportAgendaPdf = async (r: Row) => {
     try {
-      const doc = await buildAgendaPdf(r, secretaryName);
+      const doc = await buildAgendaPdf(r, letterhead);
       doc.save(`agenda-${r.meeting_at.slice(0, 10)}-committee.pdf`);
 
       const blob = doc.output("blob") as Blob;
