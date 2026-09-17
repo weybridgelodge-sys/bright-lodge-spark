@@ -323,14 +323,47 @@ function Inner() {
     setGenOpen(true);
   };
 
+  /**
+   * Reads an uploaded file as plain text. Word (.docx) files are binary, so
+   * reading them with File.text() produced garbled output — extract the real
+   * text instead. Anything else unreadable is rejected with a clear message.
+   */
+  const readUploadedText = async (f: File): Promise<string | null> => {
+    const name = f.name.toLowerCase();
+    if (name.endsWith(".docx")) {
+      try {
+        const mammoth = await import("mammoth/mammoth.browser.js");
+        const buf = await f.arrayBuffer();
+        const res = await (mammoth as any).extractRawText({ arrayBuffer: buf });
+        const text = String(res?.value ?? "").trim();
+        if (!text) throw new Error("empty");
+        return text;
+      } catch {
+        toast({ title: "Couldn't read that Word file", description: "Try saving it as plain text (.txt) and uploading again.", variant: "destructive" });
+        return null;
+      }
+    }
+    if (name.endsWith(".doc") || name.endsWith(".pdf")) {
+      toast({
+        title: "That file type isn't supported",
+        description: "Please upload a .txt or .docx file, or paste the text into the box above.",
+        variant: "destructive",
+      });
+      return null;
+    }
+    return await f.text();
+  };
+
   const loadTranscriptFile = async (f: File | null | undefined) => {
     if (!f) return;
-    setGTranscript(await f.text());
+    const text = await readUploadedText(f);
+    if (text !== null) setGTranscript(text);
   };
 
   const loadAgendaFile = async (f: File | null | undefined) => {
     if (!f) return;
-    setGAgenda(await f.text());
+    const text = await readUploadedText(f);
+    if (text !== null) setGAgenda(text);
   };
 
 
@@ -989,7 +1022,7 @@ function Inner() {
               <div className="mt-2 flex items-center gap-2">
                 <input
                   type="file"
-                  accept=".txt,text/plain"
+                  accept=".txt,.docx,text/plain,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                   onChange={(e) => loadTranscriptFile(e.target.files?.[0])}
                   className="text-xs text-primary-foreground/70 file:mr-2 file:rounded file:border-0 file:bg-gold/20 file:px-2 file:py-1 file:text-gold"
                 />
@@ -1017,7 +1050,7 @@ function Inner() {
                 <div className="mt-2 flex items-center gap-2">
                   <input
                     type="file"
-                    accept=".txt,text/plain"
+                    accept=".txt,.docx,text/plain,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                     onChange={(e) => loadAgendaFile(e.target.files?.[0])}
                     className="text-xs text-primary-foreground/70 file:mr-2 file:rounded file:border-0 file:bg-gold/20 file:px-2 file:py-1 file:text-gold"
                   />
