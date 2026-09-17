@@ -94,7 +94,7 @@ export async function exportVoReport(bundle: KpiBundle) {
   await saveJsPdf(doc, `vo-report-${new Date().toISOString().slice(0, 10)}.pdf`);
 }
 
-export async function exportFullKpi(bundle: KpiBundle) {
+export async function exportFullKpi(bundle: KpiBundle, eng?: EngagementBundle | null) {
   const doc = new jsPDF();
   const s = snapshot(bundle.members);
   const mv = movement(bundle.members);
@@ -103,8 +103,22 @@ export async function exportFullKpi(bundle: KpiBundle) {
   const ms = milestones(bundle.members, bundle.wmTerms);
   const oh = officersHealth(bundle);
   const pl = pipeline(bundle);
+  const lh = lodgeHealth(bundle);
+  const rr = referralRate(bundle.candidates);
 
   header(doc, `Full KPI Summary — Masonic Year ${currentMasonicYear()}/${currentMasonicYear() + 1}`);
+
+  autoTable(doc, {
+    startY: 32,
+    head: [["Lodge Health", `OVERALL: ${lh.overall.toUpperCase()}`]],
+    body: [
+      [`Growth — ${lh.components.growth.band.toUpperCase()}`, lh.components.growth.detail],
+      [`Succession — ${lh.components.succession.band.toUpperCase()}`, lh.components.succession.detail],
+      [`Pipeline — ${lh.components.pipeline.band.toUpperCase()}`, lh.components.pipeline.detail],
+    ],
+    theme: "striped",
+    headStyles: { fillColor: [27, 42, 74], textColor: [201, 164, 50] },
+  });
 
   autoTable(doc, {
     startY: 32,
