@@ -338,6 +338,16 @@ function Inner() {
     setNTitle("");
     setNDate("");
     setNEventId("");
+    setNAgenda(false);
+    setNewOpen(true);
+  };
+
+  const startNewAgenda = () => {
+    setNType("committee");
+    setNTitle("");
+    setNDate("");
+    setNEventId("");
+    setNAgenda(true);
     setNewOpen(true);
   };
 
