@@ -67,6 +67,17 @@ const COMMITTEE_SKELETON: Section[] = [
   { heading: "AOB", body: "" },
 ];
 
+/** Standing Committee agenda headings, used when starting a record as an agenda. */
+const COMMITTEE_AGENDA_SKELETON: Section[] = [
+  { heading: "Apologies for Absence", body: "" },
+  { heading: "Confirmation of Previous Minutes", body: "" },
+  { heading: "Matters Arising", body: "" },
+  { heading: "Update and Confirmation of Lodge Officers for the Ensuing Year", body: "" },
+  { heading: "Arrangements for the Next Lodge Meeting", body: "" },
+  { heading: "Any Other Business", body: "" },
+  { heading: "Date of Next Committee Meeting", body: "" },
+];
+
 const currentLodgeYear = masonicYearStart();
 const MASONIC_YEAR_OPTIONS = Array.from({ length: 21 }, (_, i) => currentLodgeYear - 5 + i);
 
