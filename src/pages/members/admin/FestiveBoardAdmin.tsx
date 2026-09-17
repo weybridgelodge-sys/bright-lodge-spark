@@ -1045,12 +1045,15 @@ function MeetingDialog({
       if (newVisitorDrafts.length) {
         setVisitorDrafts((prev) => [...prev, ...newVisitorDrafts]);
       }
-      if (duplicateMemberNames.size) {
+      // The duplicate set is filled inside the state updater above, which runs
+      // on the next render — defer the notice until then.
+      setTimeout(() => {
+        if (cancelled || !duplicateMemberNames.size) return;
         toast({
           title: "Duplicate bookings skipped",
           description: `Extra bookings found for ${[...duplicateMemberNames].join(", ")} — they are already marked present, so nothing was added.`,
         });
-      }
+      }, 0);
     })();
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
