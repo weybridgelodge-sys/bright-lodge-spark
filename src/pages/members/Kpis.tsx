@@ -71,13 +71,15 @@ function BarRow({ label, value, max }: { label: string; value: number; max: numb
 export default function Kpis() {
   const { user } = useAuth();
   const [bundle, setBundle] = useState<KpiBundle | null>(null);
+  const [eng, setEng] = useState<EngagementBundle | null>(null);
   const [loading, setLoading] = useState(true);
 
   const load = async () => {
     setLoading(true);
     try {
-      const b = await fetchKpiBundle();
+      const [b, e] = await Promise.all([fetchKpiBundle(), fetchEngagementBundle()]);
       setBundle(b);
+      setEng(e);
     } catch (e) {
       toast.error("Could not load KPI data");
     } finally {
@@ -370,7 +372,139 @@ export default function Kpis() {
         </Section>
 
         {/* Section 8 */}
-        <Section title="8 · Attendance Analytics" defaultOpen={false}>
+        <Section title="8 · Referral Sources">
+          <p className="text-xs text-primary-foreground/60 mb-3">
+            How every candidate on record first heard about the Lodge.
+          </p>
+          <div className="space-y-1.5">
+            {(Object.entries(referrals) as [keyof typeof referrals, number][]).map(([k, v]) => (
+              <div key={k} className="flex items-center gap-2 text-xs">
+                <span className="w-32 text-primary-foreground/70">{REFERRAL_SOURCE_LABELS[k]}</span>
+                <div className="flex-1 bg-navy h-3 rounded-sm overflow-hidden">
+                  <div
+                    className="h-full bg-gold-shimmer"
+                    style={{ width: `${referralMax ? (v / referralMax) * 100 : 0}%` }}
+                  />
+                </div>
+                <span className="w-6 text-right text-gold">{v}</span>
+              </div>
+            ))}
+          </div>
+        </Section>
+
+        {/* Section 9 */}
+        <Section title="9 · Active vs Inactive Members">
+          {!avi ? (
+            <p className="text-sm text-primary-foreground/60">No past meetings recorded yet.</p>
+          ) : (
+            <>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
+                <Stat label="Active" value={avi.active.length} sub={`Last ${avi.meetingsConsidered} meetings`} />
+                <Stat label="Inactive" value={avi.inactive.length} />
+                <Stat label="% active" value={`${avi.activePct}%`} />
+              </div>
+              {avi.inactive.length > 0 && (
+                <ul className="text-sm space-y-1">
+                  {avi.inactive.map((m) => (
+                    <li key={m.id} className="text-primary-foreground/80">• {fullName(m)}</li>
+                  ))}
+                </ul>
+              )}
+            </>
+          )}
+        </Section>
+
+        {/* Section 10 */}
+        <Section title="10 · Visitor Frequency">
+          {visitors.length === 0 ? (
+            <p className="text-sm text-primary-foreground/60">No visitor attendances recorded yet.</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="text-xs uppercase tracking-wider text-primary-foreground/50">
+                  <tr>
+                    <th className="text-left p-2">Visitor</th>
+                    <th className="text-left p-2">Lodge</th>
+                    <th className="text-left p-2">Last seen</th>
+                    <th className="text-right p-2">Visits</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gold/10">
+                  {visitors.map((v) => (
+                    <tr key={v.id}>
+                      <td className="p-2">{v.name || "—"}</td>
+                      <td className="p-2 text-primary-foreground/70">
+                        {[v.lodge_name, v.lodge_number].filter(Boolean).join(" ") || "—"}
+                      </td>
+                      <td className="p-2 text-primary-foreground/70">
+                        {v.last_seen_at ? new Date(v.last_seen_at).toLocaleDateString("en-GB") : "—"}
+                      </td>
+                      <td className="p-2 text-right text-gold">{v.visits}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </Section>
+
+        {/* Section 11 */}
+        <Section title="11 · Quarterly Engagement">
+          {quarterly.length === 0 ? (
+            <p className="text-sm text-primary-foreground/60">No past meetings recorded yet.</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="text-xs uppercase tracking-wider text-primary-foreground/50">
+                  <tr>
+                    <th className="text-left p-2">Quarter</th>
+                    <th className="text-right p-2">Meetings</th>
+                    <th className="text-right p-2">Members</th>
+                    <th className="text-right p-2">Visitors</th>
+                    <th className="text-right p-2">Avg. members</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gold/10">
+                  {quarterly.map((q) => (
+                    <tr key={q.quarter}>
+                      <td className="p-2">{q.quarter}</td>
+                      <td className="p-2 text-right text-primary-foreground/70">{q.meetings}</td>
+                      <td className="p-2 text-right text-primary-foreground/70">{q.members}</td>
+                      <td className="p-2 text-right text-primary-foreground/70">{q.visitors}</td>
+                      <td className="p-2 text-right text-gold">{q.avgMembers}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </Section>
+
+        {/* Section 12 */}
+        <Section title="12 · Disengagement Risk">
+          {!risk || risk.meetingsConsidered === 0 ? (
+            <p className="text-sm text-primary-foreground/60">No past meetings recorded yet.</p>
+          ) : risk.members.length === 0 ? (
+            <p className="text-sm text-primary-foreground/60">
+              No subscribing member has missed all of the last {risk.meetingsConsidered} meetings unexcused.
+            </p>
+          ) : (
+            <>
+              <p className="text-xs text-primary-foreground/60 mb-3">
+                Missed all of the last {risk.meetingsConsidered} meetings, with no welfare absence on record
+                covering that period.
+              </p>
+              <ul className="text-sm space-y-1">
+                {risk.members.map((m) => (
+                  <li key={m.id} className="text-primary-foreground/80">• {fullName(m)}</li>
+                ))}
+              </ul>
+            </>
+          )}
+        </Section>
+
+        {/* Section 13 */}
+        <Section title="13 · Attendance Analytics" defaultOpen={false}>
           <AttendanceCharts />
         </Section>
       </div>
