@@ -528,7 +528,7 @@ function Inner() {
         body: {
           transcript_text: gTranscript,
           meeting_type: gType,
-          meeting_at: gDate,
+          meeting_date: gDate.slice(0, 10),
           lodge_event_id: gType === "lodge" ? gEventId : undefined,
           agenda_text: gType === "committee" && gAgenda.trim() ? gAgenda : undefined,
         },
