@@ -84,6 +84,7 @@ Deno.serve(async (req) => {
     const meeting_type: string = body.meeting_type === "lodge" ? "lodge" : "committee";
     const meeting_date: string = (body.meeting_date ?? "").toString();
     const lodge_event_id: string | undefined = body.lodge_event_id || undefined;
+    const agenda_text: string = (body.agenda_text ?? "").toString();
 
     if (!transcript_text.trim()) return json({ error: "transcript_text required" }, 400);
     if (!meeting_date) return json({ error: "meeting_date required" }, 400);
