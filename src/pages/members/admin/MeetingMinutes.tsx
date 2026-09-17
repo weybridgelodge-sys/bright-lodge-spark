@@ -368,7 +368,7 @@ function Inner() {
         text = new TextDecoder("utf-8").decode(bytes);
       }
       // Guard against undecodable/binary content slipping through as NULs.
-      if (text.includes("")) {
+      if (text.indexOf("\0") !== -1) {
         text = new TextDecoder("utf-16le").decode(bytes);
       }
       if (!text.trim()) {
