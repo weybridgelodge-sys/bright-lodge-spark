@@ -40,7 +40,7 @@ export type KpiMember = {
 };
 
 export type WmTerm = { id: string; member_id: string; year_started: number; year_ended: number | null };
-export type SuccessionRisk = { id: string; role_key: string; note: string | null };
+export type SuccessionRisk = { id: string; role_key: string; note: string | null; is_at_risk: boolean };
 export type Appointment = { position_key: string; member_id: string; lodge_year: number };
 
 export type CandidateStage =
@@ -119,7 +119,7 @@ export async function fetchKpiBundle(): Promise<KpiBundle> {
         "id,full_name,first_name,middle_name,last_name,preferred_name,post_nominals,title,status,degree,is_past_master,is_royal_arch,is_honorary_member,initiation_date,passing_date,raising_date,joined_lodge_date,is_ugle_portal_registered,rank,grand_rank,provincial_rank,updated_at"
       ),
     (supabase.from as any)("member_wm_terms").select("id,member_id,year_started,year_ended"),
-    (supabase.from as any)("succession_risks").select("id,role_key,note"),
+    (supabase.from as any)("succession_risks").select("id,role_key,note,is_at_risk"),
     supabase.from("officer_appointments").select("position_key,member_id,lodge_year"),
     supabase.from("officer_positions").select("key,label,is_progressive,order_index"),
     (supabase.from as any)("candidates").select("*"),
@@ -433,7 +433,7 @@ export function lodgeHealth(bundle: KpiBundle): LodgeHealth {
 
   // Succession — progressive vacancies and critical-role risk flags.
   const vacant = oh.progressiveVacant;
-  const riskyCriticals = oh.criticals.filter((c) => c.risk);
+  const riskyCriticals = oh.criticals.filter((c) => c.risk?.is_at_risk);
   let succession: HealthComponent;
   if (vacant.length === 0 && riskyCriticals.length === 0) {
     succession = { band: "green", detail: "All progressive offices filled and no key roles flagged at risk" };
@@ -500,16 +500,17 @@ export async function fetchLodgeHealthBundle(): Promise<KpiBundle> {
   const a = (agg.data ?? {}) as {
     filled_position_keys?: string[];
     risk_role_keys?: string[];
+    active_candidates?: number;
     active_candidate_count?: number;
   };
   const filled = a.filled_position_keys ?? [];
   const risks = a.risk_role_keys ?? [];
-  const candCount = a.active_candidate_count ?? 0;
+  const candCount = a.active_candidates ?? a.active_candidate_count ?? 0;
   return {
     members: ((m.data as unknown) as KpiMember[]) ?? [],
     wmTerms: [],
     appointments: filled.map((key) => ({ position_key: key, member_id: "", lodge_year: my })),
-    risks: risks.map((role_key, i) => ({ id: String(i), role_key, note: null })),
+    risks: risks.map((role_key, i) => ({ id: String(i), role_key, note: null, is_at_risk: true })),
     positions: (p.data as KpiBundle["positions"]) ?? [],
     // Count-only stubs — lodgeHealth/pipeline only inspect stage + length.
     candidates: Array.from({ length: candCount }, (_, i) => ({

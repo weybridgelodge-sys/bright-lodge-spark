@@ -80,13 +80,13 @@ export default function Kpis() {
     load();
   }, []);
 
-  const saveRisk = async (roleKey: string, note: string) => {
+  const saveRisk = async (roleKey: string, note: string, isAtRisk: boolean) => {
     const trimmed = note.trim();
-    if (!trimmed) {
+    if (!trimmed && !isAtRisk) {
       await (supabase.from as any)("succession_risks").delete().eq("role_key", roleKey);
     } else {
       await (supabase.from as any)("succession_risks").upsert(
-        { role_key: roleKey, note: trimmed, flagged_by: user?.id ?? null },
+        { role_key: roleKey, note: trimmed || null, is_at_risk: isAtRisk, flagged_by: user?.id ?? null },
         { onConflict: "role_key" }
       );
     }
@@ -332,8 +332,8 @@ export default function Kpis() {
                 </div>
                 <RiskInput
                   initial={c.risk?.note ?? ""}
-                  onSave={(v) => saveRisk(c.key, v)}
-                  flagged={!!c.risk}
+                  initialAtRisk={c.risk?.is_at_risk ?? false}
+                  onSave={(v, r) => saveRisk(c.key, v, r)}
                 />
               </div>
             ))}
@@ -373,27 +373,37 @@ export default function Kpis() {
 
 function RiskInput({
   initial,
+  initialAtRisk,
   onSave,
-  flagged,
 }: {
   initial: string;
-  onSave: (v: string) => void;
-  flagged: boolean;
+  initialAtRisk: boolean;
+  onSave: (v: string, isAtRisk: boolean) => void;
 }) {
   const [v, setV] = useState(initial);
-  const dirty = v !== initial;
+  const [atRisk, setAtRisk] = useState(initialAtRisk);
+  const dirty = v !== initial || atRisk !== initialAtRisk;
   return (
-    <div className="flex items-center gap-2 w-full sm:w-auto">
-      {flagged && <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" aria-label="Flagged" />}
+    <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+      {atRisk && <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" aria-label="Flagged at risk" />}
       <input
         value={v}
         onChange={(e) => setV(e.target.value)}
-        placeholder="Succession risk note…"
+        placeholder="Succession note (neutral unless flagged)…"
         className="flex-1 sm:w-72 bg-navy border border-gold/20 rounded-sm px-2 py-1.5 text-xs"
       />
+      <label className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-primary-foreground/70 cursor-pointer select-none">
+        <input
+          type="checkbox"
+          checked={atRisk}
+          onChange={(e) => setAtRisk(e.target.checked)}
+          className="accent-amber-400 w-3.5 h-3.5"
+        />
+        At risk
+      </label>
       {dirty && (
         <button
-          onClick={() => onSave(v)}
+          onClick={() => onSave(v, atRisk)}
           className="text-[11px] uppercase tracking-wider text-gold border border-gold/40 px-2 py-1 rounded-sm hover:bg-gold/10"
         >
           Save
