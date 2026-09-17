@@ -467,10 +467,12 @@ function Inner() {
       }
 
       const evt = events.find((e) => e.id === gEventId);
-      const dateLabel = new Date(gDate).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+      // No date in the stored title — the PDF subtitle, register and filed
+      // document title all add the meeting date themselves, so embedding it
+      // here duplicates it ("… — 10 September 2026 — 10 Sept 2026").
       const title = gType === "committee"
-        ? `Lodge Committee Meeting — ${dateLabel}`
-        : `${evt?.title ?? "Lodge Meeting"} — ${dateLabel}`;
+        ? "Lodge Committee Meeting"
+        : evt?.title ?? "Lodge Meeting";
 
       const payload = {
         meeting_type: gType === "committee" ? "committee" : "regular",
