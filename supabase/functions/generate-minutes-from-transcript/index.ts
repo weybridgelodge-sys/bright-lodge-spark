@@ -75,13 +75,8 @@ Deno.serve(async (req) => {
     );
     if (!allowed) return json({ error: "Forbidden" }, 403);
 
-    const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY");
-    if (!ANTHROPIC_API_KEY) {
-      return json(
-        { error: "Anthropic API key not configured — add ANTHROPIC_API_KEY as a Supabase secret" },
-        400,
-      );
-    }
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY")!;
+
 
     const body = await req.json().catch(() => ({}));
     const transcript_text: string = (body.transcript_text ?? "").toString();
