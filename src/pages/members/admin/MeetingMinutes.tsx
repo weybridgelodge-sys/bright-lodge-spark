@@ -38,7 +38,7 @@ type ActionItem = { task: string; responsible: string; deadline: string; done: b
 type Row = {
   id: string;
   meeting_type: MinutesType;
-  meeting_date: string;
+  meeting_at: string;
   title: string;
   lodge_event_id: string | null;
   status: MinutesStatus;
@@ -47,7 +47,7 @@ type Row = {
   previous_minutes_note: string | null;
   sections: Section[];
   action_items: ActionItem[];
-  next_meeting_date: string | null;
+  next_meeting_at: string | null;
   transcript_text: string | null;
   source?: string | null;
   filed_document_id?: string | null;
@@ -98,10 +98,51 @@ function masonicYearOf(iso: string) {
   return iso >= `${y}-10-01` ? y : y - 1;
 }
 
+/** Default Committee start time (7.30 p.m.), the lodge's standing convention. */
+const DEFAULT_START_TIME = "19:30";
+
+/** Stored timestamp -> value for an <input type="datetime-local">. Treated as UTC throughout. */
+function toInput(v?: string | null): string {
+  if (!v) return "";
+  if (v.length <= 10) return `${v}T00:00`;
+  return v.slice(0, 16);
+}
+
+/** datetime-local value -> stored timestamp (UTC). */
+function fromInput(v: string): string | null {
+  if (!v) return null;
+  return v.length <= 10 ? `${v}T00:00:00Z` : `${v}:00Z`;
+}
+
+const datePart = (v?: string | null) => (v ? toInput(v).slice(0, 10) : "");
+const timePart = (v?: string | null) => (v ? toInput(v).slice(11, 16) : "");
+const combine = (d: string, t: string): string | null => (d ? `${d}T${t || "00:00"}:00Z` : null);
+
+const ORDINAL = (d: number) =>
+  d % 10 === 1 && d !== 11 ? "st" : d % 10 === 2 && d !== 12 ? "nd" : d % 10 === 3 && d !== 13 ? "rd" : "th";
+
+/** House convention: "Thursday 10th September 2026 at 7.30 p.m." */
+function fmtDateTime(v?: string | null): string {
+  if (!v) return "—";
+  const d = new Date(toInput(v) + "Z");
+  if (Number.isNaN(d.getTime())) return String(v);
+  const weekday = d.toLocaleDateString("en-GB", { weekday: "long", timeZone: "UTC" });
+  const month = d.toLocaleDateString("en-GB", { month: "long", timeZone: "UTC" });
+  const day = d.getUTCDate();
+  const h24 = d.getUTCHours();
+  const mins = d.getUTCMinutes();
+  const suffix = h24 >= 12 ? "p.m." : "a.m.";
+  const h12 = h24 % 12 === 0 ? 12 : h24 % 12;
+  const time = mins === 0 ? `${h12}` : `${h12}.${String(mins).padStart(2, "0")}`;
+  return `${weekday} ${day}${ORDINAL(day)} ${month} ${d.getUTCFullYear()} at ${time} ${suffix}`;
+}
+
+
+
 export async function buildMinutesPdf(row: Row) {
   const { doc, pageW, margin } = await reportPdfDoc(
     `${TYPE_LABELS[row.meeting_type]} Meeting Minutes`,
-    `${row.title} — ${fmtDate(row.meeting_date)}`,
+    `${row.title} — ${fmtDateTime(row.meeting_at)}`,
   );
   const usableW = pageW - margin * 2;
   let y = 135;
@@ -173,12 +214,12 @@ export async function buildMinutesPdf(row: Row) {
     y = (doc as any).lastAutoTable.finalY + 20;
   }
 
-  if (row.next_meeting_date) {
+  if (row.next_meeting_at) {
     ensure(30);
     doc.setFont("helvetica", "bold");
     doc.setFontSize(10);
     doc.setTextColor(...INK);
-    doc.text(`Date of the next meeting: ${fmtDate(row.next_meeting_date)}`, margin, y);
+    doc.text(`Date of the next meeting: ${fmtDateTime(row.next_meeting_at)}`, margin, y);
     y += 26;
   }
 
@@ -214,7 +255,7 @@ export async function buildMinutesPdf(row: Row) {
  * omitted — none of that exists before the meeting takes place.
  */
 export async function buildAgendaPdf(row: Row) {
-  const { doc, pageW, margin } = await reportPdfDoc("Agenda", `${row.title} — ${fmtDate(row.meeting_date)}`);
+  const { doc, pageW, margin } = await reportPdfDoc("Agenda", `${row.title} — ${fmtDateTime(row.meeting_at)}`);
   const usableW = pageW - margin * 2;
   let y = 135;
 
@@ -228,7 +269,7 @@ export async function buildAgendaPdf(row: Row) {
   doc.setFont("helvetica", "bold");
   doc.setFontSize(11);
   doc.setTextColor(...INK);
-  doc.text(`Committee Meeting — ${fmtDate(row.meeting_date)}`, margin, y);
+  doc.text(`On ${fmtDateTime(row.meeting_at)}`, margin, y);
   y += 28;
 
   doc.setFont("helvetica", "normal");
@@ -252,13 +293,13 @@ export async function buildAgendaPdf(row: Row) {
     y += 20;
   }
 
-  if (row.next_meeting_date) {
+  if (row.next_meeting_at) {
     ensure(30);
     y += 8;
     doc.setFont("helvetica", "bold");
     doc.setFontSize(10);
     doc.setTextColor(...INK);
-    doc.text(`Date of the next Committee meeting: ${fmtDate(row.next_meeting_date)}`, margin, y);
+    doc.text(`Date of the next Committee meeting: ${fmtDateTime(row.next_meeting_at)}`, margin, y);
   }
 
   return doc;
@@ -282,6 +323,7 @@ function Inner() {
   const [nType, setNType] = useState<MinutesType>("regular");
   const [nTitle, setNTitle] = useState("");
   const [nDate, setNDate] = useState("");
+  const [nTime, setNTime] = useState("");
   const [nEventId, setNEventId] = useState("");
   const [nAgenda, setNAgenda] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -303,7 +345,7 @@ function Inner() {
   const load = async () => {
     setLoading(true);
     const [m, e] = await Promise.all([
-      (supabase.from as any)("meeting_minutes").select("*").order("meeting_date", { ascending: false }),
+      (supabase.from as any)("meeting_minutes").select("*").order("meeting_at", { ascending: false }),
       supabase.from("lodge_events").select("id,title,event_date").order("event_date", { ascending: false }),
     ]);
     if (m.error) toast({ title: "Could not load minutes", description: m.error.message, variant: "destructive" });
@@ -327,7 +369,7 @@ function Inner() {
       rows.filter((r) => {
         if (fType !== "all" && r.meeting_type !== fType) return false;
         if (fStatus !== "all" && r.status !== fStatus) return false;
-        if (fYear !== "all" && String(masonicYearOf(r.meeting_date)) !== fYear) return false;
+        if (fYear !== "all" && String(masonicYearOf(r.meeting_at)) !== fYear) return false;
         return true;
       }),
     [rows, fType, fStatus, fYear],
@@ -337,6 +379,7 @@ function Inner() {
     setNType("regular");
     setNTitle("");
     setNDate("");
+    setNTime("");
     setNEventId("");
     setNAgenda(false);
     setNewOpen(true);
@@ -346,6 +389,7 @@ function Inner() {
     setNType("committee");
     setNTitle("");
     setNDate("");
+    setNTime(DEFAULT_START_TIME);
     setNEventId("");
     setNAgenda(true);
     setNewOpen(true);
@@ -372,7 +416,7 @@ function Inner() {
       }
       const payload = {
         meeting_type: nType,
-        meeting_date: nDate,
+        meeting_at: combine(nDate, nTime),
         title: nTitle.trim(),
         lodge_event_id: nType === "regular" && nEventId ? nEventId : null,
         sections,
@@ -528,7 +572,7 @@ function Inner() {
         body: {
           transcript_text: gTranscript,
           meeting_type: gType,
-          meeting_date: gDate,
+          meeting_date: gDate.slice(0, 10),
           lodge_event_id: gType === "lodge" ? gEventId : undefined,
           agenda_text: gType === "committee" && gAgenda.trim() ? gAgenda : undefined,
         },
@@ -554,7 +598,7 @@ function Inner() {
 
       const payload = {
         meeting_type: gType === "committee" ? "committee" : "regular",
-        meeting_date: gDate,
+        meeting_at: combine(gDate.slice(0, 10), gType === "committee" ? DEFAULT_START_TIME : "00:00"),
         title,
         lodge_event_id: gType === "lodge" ? gEventId : null,
         status: "draft",
@@ -564,7 +608,7 @@ function Inner() {
         previous_minutes_note: result.previous_minutes_note || null,
         sections: result.sections ?? [],
         action_items: result.action_items ?? [],
-        next_meeting_date: result.next_meeting_date || null,
+        next_meeting_at: result.next_meeting_date ? combine(String(result.next_meeting_date).slice(0, 10), DEFAULT_START_TIME) : null,
         created_by: user?.id ?? null,
       };
 
@@ -628,7 +672,7 @@ function Inner() {
     if (upErr) throw upErr;
 
     const label = row.meeting_type === "committee" ? "Committee Meeting Minutes" : "Lodge Meeting Minutes";
-    const dateLabel = new Date(row.meeting_date).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+    const dateLabel = new Date(row.meeting_at).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
     const { data: created, error: dbErr } = await supabase
       .from("lodge_documents")
       .insert({
@@ -652,12 +696,12 @@ function Inner() {
       const { error } = await (supabase.from as any)("meeting_minutes")
         .update({
           title: editing.title,
-          meeting_date: editing.meeting_date,
+          meeting_at: editing.meeting_at,
           apologies: editing.apologies?.trim() || null,
           previous_minutes_note: editing.previous_minutes_note?.trim() || null,
           sections: editing.sections,
           action_items: editing.action_items,
-          next_meeting_date: editing.next_meeting_date || null,
+          next_meeting_at: editing.next_meeting_at || null,
           status: editing.status,
           approved_date: editing.status === "approved" ? editing.approved_date || null : null,
           transcript_text: editing.transcript_text?.trim() || null,
@@ -705,7 +749,7 @@ function Inner() {
   const exportPdf = async (r: Row) => {
     try {
       const doc = await buildMinutesPdf(r);
-      doc.save(`minutes-${r.meeting_date}-${r.meeting_type}.pdf`);
+      doc.save(`minutes-${r.meeting_at.slice(0, 10)}-${r.meeting_type}.pdf`);
     } catch (e: any) {
       toast({ title: "Could not build the PDF", description: e.message, variant: "destructive" });
     }
@@ -719,7 +763,7 @@ function Inner() {
   const exportAgendaPdf = async (r: Row) => {
     try {
       const doc = await buildAgendaPdf(r);
-      doc.save(`agenda-${r.meeting_date}-committee.pdf`);
+      doc.save(`agenda-${r.meeting_at.slice(0, 10)}-committee.pdf`);
 
       const blob = doc.output("blob") as Blob;
       const docId = crypto.randomUUID();
@@ -729,7 +773,7 @@ function Inner() {
         .upload(path, blob, { contentType: "application/pdf", upsert: false });
       if (upErr) throw upErr;
 
-      const dateLabel = new Date(r.meeting_date).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+      const dateLabel = new Date(r.meeting_at).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
       const { error: dbErr } = await supabase.from("lodge_documents").insert({
         title: `Committee Meeting Agenda — ${dateLabel}`,
         category: "committee_agendas" as any,
@@ -839,7 +883,7 @@ function Inner() {
               <NotebookPen className="w-6 h-6" /> {editing.title}
             </h1>
             <p className="text-primary-foreground/60 text-sm">
-              {TYPE_LABELS[editing.meeting_type]} meeting · {editing.meeting_date}
+              {TYPE_LABELS[editing.meeting_type]} meeting · {fmtDateTime(editing.meeting_at)}
             </p>
           </div>
           <div className="flex gap-2">
@@ -858,7 +902,20 @@ function Inner() {
             </div>
             <div>
               <label className="text-xs text-primary-foreground/70">Meeting date</label>
-              <Input type="date" value={editing.meeting_date} onChange={(e) => patch({ meeting_date: e.target.value })} className={DATE_INPUT} />
+              <div className="grid grid-cols-2 gap-2">
+                <Input
+                  type="date"
+                  value={datePart(editing.meeting_at)}
+                  onChange={(e) => patch({ meeting_at: combine(e.target.value, timePart(editing.meeting_at)) ?? editing.meeting_at })}
+                  className={DATE_INPUT}
+                />
+                <Input
+                  type="time"
+                  value={timePart(editing.meeting_at)}
+                  onChange={(e) => patch({ meeting_at: combine(datePart(editing.meeting_at), e.target.value) ?? editing.meeting_at })}
+                  className={DATE_INPUT}
+                />
+              </div>
             </div>
           </div>
 
@@ -948,7 +1005,20 @@ function Inner() {
           <div className="grid sm:grid-cols-3 gap-3">
             <div>
               <label className="text-xs text-primary-foreground/70">Next meeting date</label>
-              <Input type="date" value={editing.next_meeting_date ?? ""} onChange={(e) => patch({ next_meeting_date: e.target.value })} className={DATE_INPUT} />
+              <div className="grid grid-cols-2 gap-2">
+                <Input
+                  type="date"
+                  value={datePart(editing.next_meeting_at)}
+                  onChange={(e) => patch({ next_meeting_at: combine(e.target.value, timePart(editing.next_meeting_at) || DEFAULT_START_TIME) })}
+                  className={DATE_INPUT}
+                />
+                <Input
+                  type="time"
+                  value={timePart(editing.next_meeting_at)}
+                  onChange={(e) => patch({ next_meeting_at: combine(datePart(editing.next_meeting_at), e.target.value) })}
+                  className={DATE_INPUT}
+                />
+              </div>
             </div>
             <div>
               <label className="text-xs text-primary-foreground/70">Status</label>
@@ -1093,7 +1163,7 @@ function Inner() {
                   </Badge>
                 </div>
                 <p className="text-primary-foreground/60 text-xs mt-1">
-                  {r.meeting_date} · {r.sections.length} section{r.sections.length === 1 ? "" : "s"} · {r.action_items.length} action{r.action_items.length === 1 ? "" : "s"}
+                  {fmtDateTime(r.meeting_at)} · {r.sections.length} section{r.sections.length === 1 ? "" : "s"} · {r.action_items.length} action{r.action_items.length === 1 ? "" : "s"}
                   {r.approved_date ? ` · confirmed ${r.approved_date}` : ""}
                 </p>
               </div>
@@ -1110,7 +1180,12 @@ function Inner() {
       <Dialog open={newOpen} onOpenChange={setNewOpen}>
         <DialogContent className="max-h-[90vh] overflow-y-auto bg-navy-dark text-primary-foreground border-gold/30">
           <DialogHeader>
-            <DialogTitle>New minutes</DialogTitle>
+            <DialogTitle>{nAgenda ? "New Committee Agenda" : "New minutes"}</DialogTitle>
+            {nAgenda && (
+              <p className="text-xs text-primary-foreground/60">
+                Starts with the seven standard headings — just add the date, time, and title below.
+              </p>
+            )}
           </DialogHeader>
           <div className="space-y-3">
             <div>
@@ -1147,8 +1222,11 @@ function Inner() {
               <Input value={nTitle} onChange={(e) => setNTitle(e.target.value)} placeholder="e.g. Lodge Committee Meeting" className={INPUT} />
             </div>
             <div>
-              <label className="text-xs text-primary-foreground/70">Meeting date</label>
-              <Input type="date" value={nDate} onChange={(e) => setNDate(e.target.value)} className={DATE_INPUT} />
+              <label className="text-xs text-primary-foreground/70">Meeting date and time</label>
+              <div className="grid grid-cols-2 gap-2">
+                <Input type="date" value={nDate} onChange={(e) => setNDate(e.target.value)} className={DATE_INPUT} />
+                <Input type="time" value={nTime} onChange={(e) => setNTime(e.target.value)} className={DATE_INPUT} />
+              </div>
             </div>
           </div>
           <DialogFooter>

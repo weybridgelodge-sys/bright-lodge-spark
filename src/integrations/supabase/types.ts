@@ -2200,8 +2200,10 @@ export type Database = {
           filed_document_id: string | null
           id: string
           lodge_event_id: string | null
-          meeting_date: string
+          meeting_at: string | null
+          meeting_date: string | null
           meeting_type: Database["public"]["Enums"]["meeting_minutes_type"]
+          next_meeting_at: string | null
           next_meeting_date: string | null
           previous_minutes_note: string | null
           sections: Json
@@ -2220,8 +2222,10 @@ export type Database = {
           filed_document_id?: string | null
           id?: string
           lodge_event_id?: string | null
-          meeting_date: string
+          meeting_at?: string | null
+          meeting_date?: string | null
           meeting_type: Database["public"]["Enums"]["meeting_minutes_type"]
+          next_meeting_at?: string | null
           next_meeting_date?: string | null
           previous_minutes_note?: string | null
           sections?: Json
@@ -2240,8 +2244,10 @@ export type Database = {
           filed_document_id?: string | null
           id?: string
           lodge_event_id?: string | null
-          meeting_date?: string
+          meeting_at?: string | null
+          meeting_date?: string | null
           meeting_type?: Database["public"]["Enums"]["meeting_minutes_type"]
+          next_meeting_at?: string | null
           next_meeting_date?: string | null
           previous_minutes_note?: string | null
           sections?: Json
