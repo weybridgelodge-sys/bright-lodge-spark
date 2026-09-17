@@ -218,6 +218,13 @@
       "when": 1789633298097,
       "tag": "0030_meeting_minutes_add_timestamptz_columns",
       "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1789649190633,
+      "tag": "0031_add_filed_agenda_document_id",
+      "breakpoints": true
     }
   ]
 }
