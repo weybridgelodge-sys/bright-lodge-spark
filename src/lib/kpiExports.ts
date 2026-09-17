@@ -287,7 +287,7 @@ export async function exportFullKpi(bundle: KpiBundle, eng?: EngagementBundle | 
         ["Unique visitors", String(visitors.length)],
         ["Total visits", String(totalVisits)],
         ...topLodges.map(
-          ([lodge, n], i) => [`Top visiting lodge ${i + 1}`, `${lodge} (${n} visit${n === 1 ? "" : "s"})`] as [string, string]
+          (l, i) => [`Top visiting lodge ${i + 1}`, `${l.label} (${l.visits} visit${l.visits === 1 ? "" : "s"})`] as [string, string]
         ),
       ],
       theme: "striped",
