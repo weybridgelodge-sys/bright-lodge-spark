@@ -67,6 +67,7 @@ export type Candidate = {
   date_of_enquiry: string | null;
   initiation_scheduled_date: string | null;
   converted_member_id: string | null;
+  referral_source: "website" | "member" | "province" | "event" | "social_media" | null;
   created_at: string;
   updated_at: string;
 };
@@ -531,6 +532,7 @@ export async function fetchLodgeHealthBundle(): Promise<KpiBundle> {
       date_of_enquiry: null,
       initiation_scheduled_date: null,
       converted_member_id: null,
+      referral_source: null,
       created_at: "",
       updated_at: "",
     })),
