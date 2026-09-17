@@ -4810,6 +4810,10 @@ export type Database = {
           town: string
         }[]
       }
+      get_lodge_health_aggregates: {
+        Args: { _lodge_year: number }
+        Returns: Json
+      }
       get_members_last_sign_in: {
         Args: never
         Returns: {
