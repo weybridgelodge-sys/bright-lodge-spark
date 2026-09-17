@@ -92,6 +92,28 @@ type Member = {
   provincial_rank: string | null;
 };
 
+/** Normalise a person's name for roster matching: drop masonic prefixes,
+ *  punctuation and extra spaces, then lowercase. */
+function nameKey(raw: string | null | undefined): string {
+  return String(raw ?? "")
+    .toLowerCase()
+    .replace(/[.,]/g, " ")
+    .replace(/\b(v\s*w|r\s*w|w)?\s*bro(ther)?\b/g, " ")
+    .replace(/\b(jnr|jr|snr|sr)\b/g, " ")
+    .replace(/[^a-z\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function memberNameKeys(m: Member): string[] {
+  const keys = [
+    nameKey(m.full_name),
+    nameKey(`${m.first_name ?? ""} ${m.last_name ?? ""}`),
+    nameKey(`${m.preferred_name ?? ""} ${m.last_name ?? ""}`),
+  ];
+  return keys.filter(Boolean);
+}
+
 function memberDisplay(m: Member) {
   const row: MemberRow = {
     ...m,
@@ -826,6 +848,21 @@ function MeetingDialog({
       }))
   );
 
+  // Roster lookup so a lodge member typed into the free-text visitor field is
+  // caught rather than silently saved as a visitor.
+  const rosterByName = useMemo(() => {
+    const map = new Map<string, Member>();
+    for (const m of members) {
+      for (const k of memberNameKeys(m)) if (!map.has(k)) map.set(k, m);
+    }
+    return map;
+  }, [members]);
+
+  const matchRosterMember = (name: string): Member | null => {
+    const k = nameKey(name);
+    return k ? rosterByName.get(k) ?? null : null;
+  };
+
   const [visitorSuggestions, setVisitorSuggestions] = useState<VisitorSuggestion[]>([]);
   useEffect(() => {
     let cancelled = false;
@@ -1052,6 +1089,20 @@ function MeetingDialog({
         toast({ title: "Visitor needs a name", description: "Remove blank visitor rows or fill in their name.", variant: "destructive" });
         return;
       }
+    }
+    // A lodge member typed into the free-text visitor field should be recorded
+    // against their member record instead, or they end up as a "visitor" contact.
+    const rosterClashes = visitorDrafts
+      .map((v) => ({ v, m: matchRosterMember(v.name) }))
+      .filter((x) => x.m);
+    if (rosterClashes.length) {
+      const names = rosterClashes.map((x) => memberDisplay(x.m!)).join(", ");
+      const proceed = window.confirm(
+        `${names} ${rosterClashes.length === 1 ? "is a lodge member" : "are lodge members"}, not a visitor. ` +
+          `Tick them in the member list above instead, so their attendance is recorded against their member record.\n\n` +
+          `Save anyway as a visitor?`
+      );
+      if (!proceed) return;
     }
     setSaving(true);
     try {
@@ -1451,6 +1502,11 @@ function MeetingDialog({
                             ...(s.email ? { email: s.email } : {}),
                           })}
                         />
+                        {matchRosterMember(v.name) && (
+                          <p className="mt-1 text-[10px] leading-snug text-amber-300">
+                            {memberDisplay(matchRosterMember(v.name)!)} is a lodge member — tick them in the member list above instead of adding them as a visitor.
+                          </p>
+                        )}
                       </div>
                     </div>
                     <Input
