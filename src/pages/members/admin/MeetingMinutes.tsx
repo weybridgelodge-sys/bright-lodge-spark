@@ -229,6 +229,7 @@ function Inner() {
   const [gDate, setGDate] = useState("");
   const [gEventId, setGEventId] = useState("");
   const [gTranscript, setGTranscript] = useState("");
+  const [gAgenda, setGAgenda] = useState("");
   const [generating, setGenerating] = useState(false);
 
   const load = async () => {
@@ -318,6 +319,7 @@ function Inner() {
     setGDate("");
     setGEventId("");
     setGTranscript("");
+    setGAgenda("");
     setGenOpen(true);
   };
 
@@ -325,6 +327,12 @@ function Inner() {
     if (!f) return;
     setGTranscript(await f.text());
   };
+
+  const loadAgendaFile = async (f: File | null | undefined) => {
+    if (!f) return;
+    setGAgenda(await f.text());
+  };
+
 
   /** Generates a brand-new draft record — never modifies an existing one. */
   const generateFromTranscript = async () => {
@@ -342,6 +350,7 @@ function Inner() {
           meeting_type: gType,
           meeting_date: gDate,
           lodge_event_id: gType === "lodge" ? gEventId : undefined,
+          agenda_text: gType === "committee" && gAgenda.trim() ? gAgenda : undefined,
         },
       });
       const result = data as any;
@@ -991,6 +1000,35 @@ function Inner() {
                 )}
               </div>
             </div>
+
+            {gType === "committee" && (
+              <div>
+                <label className="text-xs text-primary-foreground/70">Committee agenda (optional)</label>
+                <p className="text-xs text-primary-foreground/50 mb-1">
+                  If you have the pre-meeting agenda for this Committee meeting, paste it here too — it often has the next meeting date already proposed on it.
+                </p>
+                <Textarea
+                  value={gAgenda}
+                  onChange={(e) => setGAgenda(e.target.value)}
+                  rows={6}
+                  placeholder="Paste the pre-meeting agenda here…"
+                  className={INPUT}
+                />
+                <div className="mt-2 flex items-center gap-2">
+                  <input
+                    type="file"
+                    accept=".txt,text/plain"
+                    onChange={(e) => loadAgendaFile(e.target.files?.[0])}
+                    className="text-xs text-primary-foreground/70 file:mr-2 file:rounded file:border-0 file:bg-gold/20 file:px-2 file:py-1 file:text-gold"
+                  />
+                  {gAgenda && (
+                    <span className="text-xs text-primary-foreground/50">
+                      {gAgenda.length.toLocaleString()} characters
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setGenOpen(false)} disabled={generating}>Cancel</Button>
