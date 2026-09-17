@@ -372,7 +372,11 @@ export function officersHealth(bundle: KpiBundle) {
   const my = currentMasonicYear();
   const yearAppointments = bundle.appointments.filter((a) => a.lodge_year === my);
   const filledKeys = new Set(yearAppointments.map((a) => a.position_key));
-  const progressive = bundle.positions.filter((p) => p.is_progressive);
+  // Steward offices are optional: lodges need not appoint them, so an empty
+  // steward slot is neither a vacancy to report nor a succession risk.
+  const progressive = bundle.positions.filter(
+    (p) => p.is_progressive && !OPTIONAL_POSITIONS.has(p.key)
+  );
   const filled = progressive.filter((p) => filledKeys.has(p.key));
   const vacant = progressive.filter((p) => !filledKeys.has(p.key));
 

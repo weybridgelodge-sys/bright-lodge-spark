@@ -23,6 +23,17 @@ export const POSITION_ORDER = [
 
 export type PositionKey = (typeof POSITION_ORDER)[number];
 
+// Steward offices are optional — a lodge is not required to appoint them, and
+// an empty steward slot is not a succession risk. They are never warned about.
+export const OPTIONAL_POSITIONS = new Set<string>([
+  "steward_5",
+  "steward_4",
+  "steward_3",
+  "steward_2",
+  "steward_1",
+  "senior_steward",
+]);
+
 export const POSITION_LABELS: Record<PositionKey, string> = {
   steward_5: "Steward 5",
   steward_4: "Steward 4",
@@ -228,7 +239,9 @@ export function computeProjection(input: ProjectionInput): ProjectionResult {
       overrideBy: ovr?.override_by_name ?? null,
       source: memberId ? "current" : "vacant",
     };
-    if (!memberId) warnings.push({ kind: "vacant_feeder", position: pos, year: currentYear });
+    if (!memberId && !OPTIONAL_POSITIONS.has(pos)) {
+      warnings.push({ kind: "vacant_feeder", position: pos, year: currentYear });
+    }
   }
 
   // Project each subsequent year
@@ -277,7 +290,7 @@ export function computeProjection(input: ProjectionInput): ProjectionResult {
               : "advanced"
           : "vacant",
       };
-      if (!memberId) {
+      if (!memberId && !OPTIONAL_POSITIONS.has(pos)) {
         warnings.push({ kind: pos === "inner_guard" ? "vacant_feeder" : "gap", position: pos, year: y });
       }
     }
