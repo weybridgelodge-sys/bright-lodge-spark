@@ -366,7 +366,7 @@ function Inner() {
     if (name.endsWith(".docx")) {
       try {
         const mammoth = await import("mammoth/mammoth.browser.js");
-        const buf = await f.arrayBuffer();
+        const buf = await readBytes(f);
         const res = await (mammoth as any).extractRawText({ arrayBuffer: buf });
         const text = String(res?.value ?? "").trim();
         if (!text) throw new Error("empty");
