@@ -29,6 +29,3 @@ project_id = "kntcjlztmcgmagwgheyx"
     verify_jwt = false
   [functions.waitlist-refund-sweep]
     verify_jwt = false
-
-  [functions.tmp-minutes-probe]
-    verify_jwt = false
