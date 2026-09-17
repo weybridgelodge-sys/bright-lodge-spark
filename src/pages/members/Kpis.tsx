@@ -120,6 +120,12 @@ export default function Kpis() {
   const oh = officersHealth(bundle);
   const pl = pipeline(bundle);
   const health = lodgeHealth(bundle);
+  const referrals = referralRate(bundle.candidates);
+  const referralMax = Math.max(1, ...Object.values(referrals));
+  const avi = eng ? activeVsInactive(bundle.members, eng) : null;
+  const visitors = eng ? visitorFrequency(eng) : [];
+  const quarterly = eng ? quarterlyEngagement(eng) : [];
+  const risk = eng ? disengagementRisk(bundle.members, eng) : null;
   const my = currentMasonicYear();
   const maxBand = Math.max(1, ...s.ageBands.map((b) => b.count));
   const funnelMax = Math.max(
