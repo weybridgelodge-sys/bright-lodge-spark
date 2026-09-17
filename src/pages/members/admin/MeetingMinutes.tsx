@@ -27,6 +27,7 @@ import { readFunctionError } from "@/lib/functionError";
 import { masonicYearStart } from "@/lib/loi";
 import { treasurerYearBounds } from "@/lib/treasurer/reports";
 import { reportPdfDoc, reportSection, INK, MUTED, GOLD, NAVY, fmtDate } from "@/lib/treasurer/reports";
+import { formatMemberLine, type MemberRow } from "@/lib/summons";
 import autoTable from "jspdf-autotable";
 
 type MinutesType = "regular" | "committee";
@@ -67,16 +68,21 @@ const COMMITTEE_SKELETON: Section[] = [
   { heading: "AOB", body: "" },
 ];
 
-/** Standing Committee agenda headings, used when starting a record as an agenda. */
-const COMMITTEE_AGENDA_SKELETON: Section[] = [
-  { heading: "Apologies for Absence", body: "" },
-  { heading: "Confirmation of Previous Minutes", body: "" },
-  { heading: "Matters Arising", body: "" },
-  { heading: "Update and Confirmation of Lodge Officers for the Ensuing Year", body: "" },
-  { heading: "Arrangements for the Next Lodge Meeting", body: "" },
-  { heading: "Any Other Business", body: "" },
-  { heading: "Date of Next Committee Meeting", body: "" },
-];
+const FIXED_AGENDA_POINT_1 = "To receive apologies for absence.";
+const FIXED_AGENDA_POINT_3 = "To deal with any matters arising from the Minutes.";
+
+function previousMinutesPoint(date: string) {
+  return `To confirm the Minutes of the Committee meeting held on ${date ? fmtDate(date) : "[DATE]"}.`;
+}
+
+function agendaSections(previousDate: string, additional: Section[] = []): Section[] {
+  return [
+    { heading: FIXED_AGENDA_POINT_1, body: "" },
+    { heading: previousMinutesPoint(previousDate), body: "" },
+    { heading: FIXED_AGENDA_POINT_3, body: "" },
+    ...additional.map((s) => ({ heading: s.heading, body: "" })),
+  ];
+}
 
 const currentLodgeYear = masonicYearStart();
 const MASONIC_YEAR_OPTIONS = Array.from({ length: 21 }, (_, i) => currentLodgeYear - 5 + i);
@@ -254,8 +260,8 @@ export async function buildMinutesPdf(row: Row) {
  * as a numbered list. Bodies, action items and signature block are deliberately
  * omitted — none of that exists before the meeting takes place.
  */
-export async function buildAgendaPdf(row: Row) {
-  const { doc, pageW, margin } = await reportPdfDoc("Agenda", `${row.title} — ${fmtDateTime(row.meeting_at)}`);
+export async function buildAgendaPdf(row: Row, secretaryName = "Secretary not recorded") {
+  const { doc, pageW, margin } = await reportPdfDoc("AGENDA", `${row.title} — ${fmtDateTime(row.meeting_at)}`);
   const usableW = pageW - margin * 2;
   let y = 135;
 
@@ -270,6 +276,11 @@ export async function buildAgendaPdf(row: Row) {
   doc.setFontSize(11);
   doc.setTextColor(...INK);
   doc.text(`On ${fmtDateTime(row.meeting_at)}`, margin, y);
+  y += 20;
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(9);
+  doc.setTextColor(...MUTED);
+  doc.text(`Secretary: ${secretaryName}`, margin, y);
   y += 28;
 
   doc.setFont("helvetica", "normal");
@@ -312,6 +323,7 @@ function Inner() {
 
   const [rows, setRows] = useState<Row[]>([]);
   const [events, setEvents] = useState<LodgeEvent[]>([]);
+  const [secretaryName, setSecretaryName] = useState("Secretary not recorded");
   const [loading, setLoading] = useState(true);
 
   const [fType, setFType] = useState("all");
@@ -330,6 +342,7 @@ function Inner() {
 
   // Edit form
   const [editing, setEditing] = useState<Row | null>(null);
+  const [agendaPreviousDate, setAgendaPreviousDate] = useState("");
   const [showTranscript, setShowTranscript] = useState(false);
   const [pasteText, setPasteText] = useState("");
 
@@ -344,9 +357,10 @@ function Inner() {
 
   const load = async () => {
     setLoading(true);
-    const [m, e] = await Promise.all([
+    const [m, e, yearResult] = await Promise.all([
       (supabase.from as any)("meeting_minutes").select("*").order("meeting_at", { ascending: false }),
       supabase.from("lodge_events").select("id,title,event_date").order("event_date", { ascending: false }),
+      (supabase as any).rpc("current_lodge_year"),
     ]);
     if (m.error) toast({ title: "Could not load minutes", description: m.error.message, variant: "destructive" });
     setRows(((m.data as any[]) ?? []).map((r) => ({
@@ -355,6 +369,21 @@ function Inner() {
       action_items: Array.isArray(r.action_items) ? r.action_items : [],
     })) as Row[]);
     setEvents(((e.data as any[]) ?? []) as LodgeEvent[]);
+    const lodgeYear = Number(yearResult.data) || masonicYearStart();
+    const { data: appointment } = await supabase
+      .from("officer_appointments")
+      .select("member_id")
+      .eq("position_key", "secretary")
+      .eq("lodge_year", lodgeYear)
+      .maybeSingle();
+    if (appointment?.member_id) {
+      const { data: secretary } = await supabase
+        .from("profiles")
+        .select("id,title,first_name,middle_name,last_name,full_name,preferred_name,post_nominals,rank,grand_rank,provincial_rank,initiation_date,joined_lodge_date,joined_year,is_past_master,is_royal_arch,status")
+        .eq("id", appointment.member_id)
+        .maybeSingle();
+      if (secretary) setSecretaryName(formatMemberLine(secretary as MemberRow));
+    }
     setLoading(false);
   };
 
@@ -395,6 +424,30 @@ function Inner() {
     setNewOpen(true);
   };
 
+  const mostRecentPreviousCommitteeDate = (meetingAt: string, excludeId?: string) => {
+    const target = new Date(meetingAt).getTime();
+    const previous = rows
+      .filter((r) => r.meeting_type === "committee" && r.id !== excludeId && new Date(r.meeting_at).getTime() < target)
+      .sort((a, b) => new Date(b.meeting_at).getTime() - new Date(a.meeting_at).getTime())[0];
+    return previous ? datePart(previous.meeting_at) : "";
+  };
+
+  const openEditing = (row: Row) => {
+    const isAgenda = row.meeting_type === "committee" && !row.transcript_text?.trim();
+    if (!isAgenda) {
+      setAgendaPreviousDate("");
+      setEditing(row);
+      return;
+    }
+    const embeddedDate = row.sections?.[1]?.heading.match(/(\d{1,2}\s+[A-Za-z]+\s+\d{4})/)?.[1];
+    const parsedEmbedded = embeddedDate ? new Date(`${embeddedDate} UTC`) : null;
+    const previousDate = parsedEmbedded && !Number.isNaN(parsedEmbedded.getTime())
+      ? parsedEmbedded.toISOString().slice(0, 10)
+      : mostRecentPreviousCommitteeDate(row.meeting_at, row.id);
+    setAgendaPreviousDate(previousDate);
+    setEditing({ ...row, sections: agendaSections(previousDate, row.sections.slice(3)) });
+  };
+
   const createMinutes = async () => {
     if (!nTitle.trim() || !nDate) {
       toast({ title: "Add a title and a meeting date", variant: "destructive" });
@@ -404,7 +457,9 @@ function Inner() {
     try {
       let sections: Section[] = [];
       if (nType === "committee") {
-        sections = (nAgenda ? COMMITTEE_AGENDA_SKELETON : COMMITTEE_SKELETON).map((s) => ({ ...s }));
+        sections = nAgenda
+          ? agendaSections(mostRecentPreviousCommitteeDate(combine(nDate, nTime) ?? nDate))
+          : COMMITTEE_SKELETON.map((s) => ({ ...s }));
       } else if (nEventId) {
         const { data } = await (supabase.from as any)("summonses")
           .select("agenda")
@@ -428,7 +483,9 @@ function Inner() {
       toast({ title: "Minutes created" });
       setNewOpen(false);
       await load();
-      setEditing({ ...(data as Row), sections, action_items: [] });
+      const created = { ...(data as Row), sections, action_items: [] };
+      if (nAgenda) openEditing(created);
+      else setEditing(created);
     } catch (err: any) {
       toast({ title: "Could not create minutes", description: err.message, variant: "destructive" });
     } finally {
@@ -762,7 +819,7 @@ function Inner() {
    */
   const exportAgendaPdf = async (r: Row) => {
     try {
-      const doc = await buildAgendaPdf(r);
+      const doc = await buildAgendaPdf(r, secretaryName);
       doc.save(`agenda-${r.meeting_at.slice(0, 10)}-committee.pdf`);
 
       const blob = doc.output("blob") as Blob;
@@ -803,6 +860,15 @@ function Inner() {
     [next[i], next[j]] = [next[j], next[i]];
     patch({ sections: next });
   };
+
+  const isAgendaEditing = editing?.meeting_type === "committee" && !editing.transcript_text?.trim();
+  const setAgendaPreviousMeetingDate = (date: string) => {
+    if (!editing) return;
+    setAgendaPreviousDate(date);
+    patch({ sections: agendaSections(date, editing.sections.slice(3)) });
+  };
+  const setAgendaPoint = (i: number, heading: string) => setSection(i, { heading, body: "" });
+  const addAgendaPoint = () => patch({ sections: [...editing!.sections, { heading: "", body: "" }] });
 
   const parsePastedMinutes = () => {
     if (!editing) return;
@@ -919,6 +985,7 @@ function Inner() {
             </div>
           </div>
 
+          {!isAgendaEditing && <>
           <div>
             <label className="text-xs text-primary-foreground/70">Apologies</label>
             <Textarea rows={2} value={editing.apologies ?? ""} onChange={(e) => patch({ apologies: e.target.value })} className={INPUT} />
@@ -945,7 +1012,41 @@ function Inner() {
               Parse into sections
             </Button>
           </section>
+          </>}
 
+          {isAgendaEditing ? (
+          <section>
+            <div className="mb-3">
+              <h2 className="font-serif text-gold text-lg">Committee Agenda</h2>
+              <p className="text-xs text-primary-foreground/60">Secretary: {secretaryName}</p>
+            </div>
+            <div className="space-y-3">
+              <div className="rounded-sm border border-gold/15 bg-navy-light/30 p-3 text-sm text-primary-foreground">
+                <span className="font-semibold text-gold mr-2">1.</span>{FIXED_AGENDA_POINT_1}
+              </div>
+              <div className="rounded-sm border border-gold/15 bg-navy-light/30 p-3 space-y-2">
+                <div className="text-sm text-primary-foreground"><span className="font-semibold text-gold mr-2">2.</span>To confirm the Minutes of the Committee meeting held on:</div>
+                <Input type="date" value={agendaPreviousDate} onChange={(e) => setAgendaPreviousMeetingDate(e.target.value)} className={`${DATE_INPUT} max-w-xs`} />
+              </div>
+              <div className="rounded-sm border border-gold/15 bg-navy-light/30 p-3 text-sm text-primary-foreground">
+                <span className="font-semibold text-gold mr-2">3.</span>{FIXED_AGENDA_POINT_3}
+              </div>
+              {editing.sections.slice(3).map((s, offset) => {
+                const i = offset + 3;
+                return (
+                  <div key={i} className="flex items-center gap-2 rounded-sm border border-gold/15 bg-navy-light/30 p-3">
+                    <span className="w-6 shrink-0 text-sm font-semibold text-gold">{i + 1}.</span>
+                    <Input value={s.heading} placeholder="Agenda point" onChange={(e) => setAgendaPoint(i, e.target.value)} className={INPUT} />
+                    <Button size="sm" variant="outline" onClick={() => moveSection(i, -1)} disabled={i === 3}><ArrowUp className="w-3 h-3" /></Button>
+                    <Button size="sm" variant="outline" onClick={() => moveSection(i, 1)} disabled={i === editing.sections.length - 1}><ArrowDown className="w-3 h-3" /></Button>
+                    <Button size="sm" variant="outline" onClick={() => removeSection(i)}><X className="w-3 h-3" /></Button>
+                  </div>
+                );
+              })}
+              <Button size="sm" variant="outline" onClick={addAgendaPoint}><Plus className="w-3 h-3 mr-1" /> Add point</Button>
+            </div>
+          </section>
+          ) : (
           <section>
             <div className="flex items-center justify-between mb-2">
               <h2 className="font-serif text-gold text-lg">Sections</h2>
@@ -977,8 +1078,9 @@ function Inner() {
               ))}
             </div>
           </section>
+          )}
 
-          <section>
+          {!isAgendaEditing && <section>
             <div className="flex items-center justify-between mb-2">
               <h2 className="font-serif text-gold text-lg">Action items</h2>
               <Button size="sm" variant="outline" onClick={addAction}><Plus className="w-3 h-3 mr-1" /> Add row</Button>
@@ -1000,7 +1102,7 @@ function Inner() {
                 ))}
               </div>
             )}
-          </section>
+          </section>}
 
           <div className="grid sm:grid-cols-3 gap-3">
             <div>
@@ -1039,7 +1141,7 @@ function Inner() {
             )}
           </div>
 
-          <section className="rounded-sm border border-gold/15 bg-navy-light/20 p-3">
+          {!isAgendaEditing && <section className="rounded-sm border border-gold/15 bg-navy-light/20 p-3">
             <button
               type="button"
               onClick={() => setShowTranscript((v) => !v)}
@@ -1057,15 +1159,15 @@ function Inner() {
                 className={`${INPUT} mt-3`}
               />
             )}
-          </section>
+          </section>}
 
           <div className="flex gap-2">
             <Button onClick={saveEditing} disabled={busy} className="bg-gold-shimmer text-accent-foreground">
               {busy ? "Saving…" : "Save"}
             </Button>
-            <Button variant="outline" onClick={() => exportPdf(editing)}>
+            {!isAgendaEditing && <Button variant="outline" onClick={() => exportPdf(editing)}>
               <Download className="w-4 h-4 mr-1" /> Export PDF
-            </Button>
+            </Button>}
             {editing.meeting_type === "committee" && (
               <Button variant="outline" onClick={() => exportAgendaPdf(editing)}>
                 <Download className="w-4 h-4 mr-1" /> Export Agenda PDF
@@ -1169,7 +1271,7 @@ function Inner() {
               </div>
               <div className="flex items-center gap-2">
                 <Button size="sm" variant="outline" onClick={() => exportPdf(r)}><Download className="w-3 h-3" /></Button>
-                <Button size="sm" variant="outline" onClick={() => { setShowTranscript(false); setEditing(r); }}><Pencil className="w-3 h-3" /></Button>
+                <Button size="sm" variant="outline" onClick={() => { setShowTranscript(false); openEditing(r); }}><Pencil className="w-3 h-3" /></Button>
                 <Button size="sm" variant="outline" onClick={() => remove(r)}><Trash2 className="w-3 h-3" /></Button>
               </div>
             </div>
