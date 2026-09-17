@@ -118,6 +118,13 @@ export default function CandidatesManager({ onChange }: { onChange?: () => void 
               value={draft.initiation_scheduled_date ?? ""}
               onChange={(v) => setDraft({ ...draft, initiation_scheduled_date: v || null })}
             />
+            <div>
+              <Label>How did they hear about us?</Label>
+              <ReferralSelect
+                value={draft.referral_source}
+                onChange={(v) => setDraft({ ...draft, referral_source: v })}
+              />
+            </div>
           </div>
           <div>
             <Label>Notes</Label>
