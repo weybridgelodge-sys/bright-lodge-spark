@@ -421,6 +421,29 @@ export default function Kpis() {
         </Section>
 
         {/* Section 10 */}
+        <Section title="10 · Disengagement Risk">
+          {!risk || risk.meetingsConsidered === 0 ? (
+            <p className="text-sm text-primary-foreground/60">No past meetings recorded yet.</p>
+          ) : risk.members.length === 0 ? (
+            <p className="text-sm text-primary-foreground/60">
+              No subscribing member has missed all of the last {risk.meetingsConsidered} meetings unexcused.
+            </p>
+          ) : (
+            <>
+              <p className="text-xs text-primary-foreground/60 mb-3">
+                Missed all of the last {risk.meetingsConsidered} meetings with no apology sent and no
+                welfare absence on record covering that period.
+              </p>
+              <ul className="text-sm space-y-1">
+                {risk.members.map((m) => (
+                  <li key={m.id} className="text-primary-foreground/80">• {fullName(m)}</li>
+                ))}
+              </ul>
+            </>
+          )}
+        </Section>
+
+        {/* Section 11 */}
         <Section title="10 · Visitor Frequency">
           {visitors.length === 0 ? (
             <p className="text-sm text-primary-foreground/60">No visitor attendances recorded yet.</p>
