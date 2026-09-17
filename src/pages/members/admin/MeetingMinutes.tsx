@@ -851,6 +851,19 @@ function Inner() {
     if (!confirm("Delete these minutes? This cannot be undone.")) return;
     const { error } = await (supabase.from as any)("meeting_minutes").delete().eq("id", r.id);
     if (error) return toast({ title: "Could not delete", description: error.message, variant: "destructive" });
+
+    // Tidy up any filed copies (Minutes and/or Agenda) so nothing is orphaned.
+    const docIds = [r.filed_document_id, r.filed_agenda_document_id].filter(Boolean) as string[];
+    if (docIds.length) {
+      const { data: docs } = await supabase
+        .from("lodge_documents")
+        .select("id,file_path")
+        .in("id", docIds);
+      const paths = ((docs as { file_path: string }[]) ?? []).map((d) => d.file_path).filter(Boolean);
+      if (paths.length) await supabase.storage.from("lodge-docs").remove(paths);
+      await supabase.from("lodge_documents").delete().in("id", docIds);
+    }
+
     toast({ title: "Minutes deleted" });
     load();
   };
