@@ -330,6 +330,37 @@ function Inner() {
    * Every failure path shows a toast — a silent failure leaves the textarea
    * empty and the Secretary has no idea what went wrong.
    */
+  /**
+   * Android/Samsung browsers often throw NotReadableError from File.arrayBuffer()
+   * when the file comes from Downloads or a cloud provider — the reference goes
+   * stale. Retry through FileReader and a fresh slice before giving up.
+   */
+  const readBytes = async (f: File): Promise<ArrayBuffer> => {
+    const viaReader = () =>
+      new Promise<ArrayBuffer>((resolve, reject) => {
+        const r = new FileReader();
+        r.onload = () => resolve(r.result as ArrayBuffer);
+        r.onerror = () => reject(r.error ?? new Error("read failed"));
+        r.readAsArrayBuffer(f);
+      });
+    const attempts: Array<() => Promise<ArrayBuffer>> = [
+      () => f.arrayBuffer(),
+      viaReader,
+      () => f.slice(0, f.size).arrayBuffer(),
+      async () => new TextEncoder().encode(await f.text()).buffer as ArrayBuffer,
+    ];
+    let lastErr: any;
+    for (const attempt of attempts) {
+      try {
+        const buf = await attempt();
+        if (buf && (buf.byteLength > 0 || f.size === 0)) return buf;
+      } catch (err) {
+        lastErr = err;
+      }
+    }
+    throw lastErr ?? new Error("The file could not be read.");
+  };
+
   const readUploadedText = async (f: File): Promise<string | null> => {
     const name = f.name.toLowerCase();
     if (name.endsWith(".docx")) {
