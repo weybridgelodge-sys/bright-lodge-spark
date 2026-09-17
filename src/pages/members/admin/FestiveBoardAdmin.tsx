@@ -848,6 +848,21 @@ function MeetingDialog({
       }))
   );
 
+  // Roster lookup so a lodge member typed into the free-text visitor field is
+  // caught rather than silently saved as a visitor.
+  const rosterByName = useMemo(() => {
+    const map = new Map<string, Member>();
+    for (const m of members) {
+      for (const k of memberNameKeys(m)) if (!map.has(k)) map.set(k, m);
+    }
+    return map;
+  }, [members]);
+
+  const matchRosterMember = (name: string): Member | null => {
+    const k = nameKey(name);
+    return k ? rosterByName.get(k) ?? null : null;
+  };
+
   const [visitorSuggestions, setVisitorSuggestions] = useState<VisitorSuggestion[]>([]);
   useEffect(() => {
     let cancelled = false;
