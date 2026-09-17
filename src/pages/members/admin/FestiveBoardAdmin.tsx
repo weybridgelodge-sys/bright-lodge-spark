@@ -1502,6 +1502,11 @@ function MeetingDialog({
                             ...(s.email ? { email: s.email } : {}),
                           })}
                         />
+                        {matchRosterMember(v.name) && (
+                          <p className="mt-1 text-[10px] leading-snug text-amber-300">
+                            {memberDisplay(matchRosterMember(v.name)!)} is a lodge member — tick them in the member list above instead of adding them as a visitor.
+                          </p>
+                        )}
                       </div>
                     </div>
                     <Input
