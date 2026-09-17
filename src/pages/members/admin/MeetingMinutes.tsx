@@ -711,6 +711,40 @@ function Inner() {
     }
   };
 
+  /**
+   * Downloads the Committee agenda PDF and files a copy in Documents under
+   * Committee agendas. An agenda isn't formally confirmed, so there's no
+   * approval gate — each click files the current version.
+   */
+  const exportAgendaPdf = async (r: Row) => {
+    try {
+      const doc = await buildAgendaPdf(r);
+      doc.save(`agenda-${r.meeting_date}-committee.pdf`);
+
+      const blob = doc.output("blob") as Blob;
+      const docId = crypto.randomUUID();
+      const path = `committee_agendas/${docId}.pdf`;
+      const { error: upErr } = await supabase.storage
+        .from("lodge-docs")
+        .upload(path, blob, { contentType: "application/pdf", upsert: false });
+      if (upErr) throw upErr;
+
+      const dateLabel = new Date(r.meeting_date).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+      const { error: dbErr } = await supabase.from("lodge_documents").insert({
+        title: `Committee Meeting Agenda — ${dateLabel}`,
+        category: "committee_agendas" as any,
+        file_path: path,
+        file_size_bytes: blob.size,
+        uploaded_by: user?.id ?? null,
+        is_general: true,
+      });
+      if (dbErr) throw dbErr;
+      toast({ title: "Agenda exported and filed in Documents" });
+    } catch (e: any) {
+      toast({ title: "Could not build the agenda PDF", description: e.message, variant: "destructive" });
+    }
+  };
+
   // Section / action-item editors
   const patch = (p: Partial<Row>) => setEditing((prev) => (prev ? { ...prev, ...p } : prev));
 
