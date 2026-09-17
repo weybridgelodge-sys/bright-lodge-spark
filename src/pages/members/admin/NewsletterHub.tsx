@@ -357,6 +357,8 @@ function NewsletterHubInner() {
     setUnifiedContent(!!d.unified_content);
     setSentSummary(null);
     setError(null);
+    setAutosaveError(null);
+    pendingBaselineRef.current = true;
   };
 
   // ---- Autosave plumbing -------------------------------------------------
