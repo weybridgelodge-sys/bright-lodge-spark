@@ -895,6 +895,29 @@ function MeetingDialog({
       const diningPence = existing.dining_price_pence ?? 3500;
       const newVisitorDrafts: VisitorDraft[] = [];
       const memberPatches: { id: string; patch: Partial<MemberDraft> }[] = [];
+      const duplicateMemberNames = new Set<string>();
+
+      // Never create a visitor draft for someone who is on the member roster —
+      // attach the booking to their member row instead.
+      const pushVisitorOrMember = (draft: VisitorDraft) => {
+        const match = matchRosterMember(draft.name);
+        if (match) {
+          memberPatches.push({
+            id: match.id,
+            patch: {
+              present: true,
+              status: draft.status,
+              paymentMethod: draft.paymentMethod,
+              amountPounds: draft.amountPounds,
+              isMeetingOnly: draft.isMeetingOnly,
+              synced: true,
+              sourceBookingId: draft.sourceBookingId ?? null,
+            },
+          });
+          return;
+        }
+        newVisitorDrafts.push(draft);
+      };
 
       for (const b of bookings) {
         if (alreadySynced.has(b.id)) continue;
@@ -909,7 +932,6 @@ function MeetingDialog({
         const respondentIsMember = isWeybridgeLodge(respLodge);
         if (respondentIsMember) {
           // Try to match by email or full name
-          const targetEmail = (b.contact_email ?? "").toLowerCase().trim();
           const targetName = (b.contact_name ?? "").toLowerCase().trim();
           const match = members.find((m) => {
             const profileFull = [m.first_name, m.last_name].filter(Boolean).join(" ").toLowerCase();
@@ -929,8 +951,8 @@ function MeetingDialog({
               },
             });
           } else {
-            // Unmatched Weybridge respondent — fall through as a visitor row so the Secretary can reconcile
-            newVisitorDrafts.push({
+            // Unmatched Weybridge respondent — reconcile via roster before falling back to a visitor row
+            pushVisitorOrMember({
               id: tempId(),
               name: String(b.contact_name ?? ""),
               lodgeName: respLodge,
@@ -945,7 +967,7 @@ function MeetingDialog({
             });
           }
         } else {
-          newVisitorDrafts.push({
+          pushVisitorOrMember({
             id: tempId(),
             name: String(b.contact_name ?? ""),
             lodgeName: respLodge,
@@ -989,7 +1011,7 @@ function MeetingDialog({
               continue;
             }
           }
-          newVisitorDrafts.push({
+          pushVisitorOrMember({
             id: tempId(),
             name: String(g.name ?? ""),
             lodgeName: gLodge,
@@ -1009,7 +1031,13 @@ function MeetingDialog({
         setMemberDrafts((prev) => {
           const next = { ...prev };
           for (const { id, patch } of memberPatches) {
-            if (next[id] && !next[id].present) next[id] = { ...next[id], ...patch };
+            if (!next[id]) continue;
+            if (!next[id].present) {
+              next[id] = { ...next[id], ...patch };
+            } else {
+              const m = members.find((mm) => mm.id === id);
+              if (m) duplicateMemberNames.add(memberDisplay(m));
+            }
           }
           return next;
         });
@@ -1017,6 +1045,15 @@ function MeetingDialog({
       if (newVisitorDrafts.length) {
         setVisitorDrafts((prev) => [...prev, ...newVisitorDrafts]);
       }
+      // The duplicate set is filled inside the state updater above, which runs
+      // on the next render — defer the notice until then.
+      setTimeout(() => {
+        if (cancelled || !duplicateMemberNames.size) return;
+        toast({
+          title: "Duplicate bookings skipped",
+          description: `Extra bookings found for ${[...duplicateMemberNames].join(", ")} — they are already marked present, so nothing was added.`,
+        });
+      }, 0);
     })();
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
