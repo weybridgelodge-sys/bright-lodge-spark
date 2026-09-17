@@ -1022,7 +1022,7 @@ function Inner() {
               <div className="mt-2 flex items-center gap-2">
                 <input
                   type="file"
-                  accept=".txt,text/plain"
+                  accept=".txt,.docx,text/plain,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                   onChange={(e) => loadTranscriptFile(e.target.files?.[0])}
                   className="text-xs text-primary-foreground/70 file:mr-2 file:rounded file:border-0 file:bg-gold/20 file:px-2 file:py-1 file:text-gold"
                 />
@@ -1050,7 +1050,7 @@ function Inner() {
                 <div className="mt-2 flex items-center gap-2">
                   <input
                     type="file"
-                    accept=".txt,text/plain"
+                    accept=".txt,.docx,text/plain,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                     onChange={(e) => loadAgendaFile(e.target.files?.[0])}
                     className="text-xs text-primary-foreground/70 file:mr-2 file:rounded file:border-0 file:bg-gold/20 file:px-2 file:py-1 file:text-gold"
                   />
