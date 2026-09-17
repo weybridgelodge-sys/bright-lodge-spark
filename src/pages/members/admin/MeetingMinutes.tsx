@@ -67,6 +67,17 @@ const COMMITTEE_SKELETON: Section[] = [
   { heading: "AOB", body: "" },
 ];
 
+/** Standing Committee agenda headings, used when starting a record as an agenda. */
+const COMMITTEE_AGENDA_SKELETON: Section[] = [
+  { heading: "Apologies for Absence", body: "" },
+  { heading: "Confirmation of Previous Minutes", body: "" },
+  { heading: "Matters Arising", body: "" },
+  { heading: "Update and Confirmation of Lodge Officers for the Ensuing Year", body: "" },
+  { heading: "Arrangements for the Next Lodge Meeting", body: "" },
+  { heading: "Any Other Business", body: "" },
+  { heading: "Date of Next Committee Meeting", body: "" },
+];
+
 const currentLodgeYear = masonicYearStart();
 const MASONIC_YEAR_OPTIONS = Array.from({ length: 21 }, (_, i) => currentLodgeYear - 5 + i);
 
@@ -197,6 +208,62 @@ export async function buildMinutesPdf(row: Row) {
   return doc;
 }
 
+/**
+ * Agenda-style document for a Committee meeting: the section headings only,
+ * as a numbered list. Bodies, action items and signature block are deliberately
+ * omitted — none of that exists before the meeting takes place.
+ */
+export async function buildAgendaPdf(row: Row) {
+  const { doc, pageW, margin } = await reportPdfDoc("Agenda", `${row.title} — ${fmtDate(row.meeting_date)}`);
+  const usableW = pageW - margin * 2;
+  let y = 135;
+
+  const ensure = (needed: number) => {
+    if (y + needed > doc.internal.pageSize.getHeight() - 50) {
+      doc.addPage();
+      y = 50;
+    }
+  };
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(11);
+  doc.setTextColor(...INK);
+  doc.text(`Committee Meeting — ${fmtDate(row.meeting_date)}`, margin, y);
+  y += 28;
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(10);
+  const items = (row.sections ?? []).map((s) => s.heading?.trim()).filter(Boolean) as string[];
+  items.forEach((heading, i) => {
+    const lines = doc.splitTextToSize(heading, usableW - 24) as string[];
+    ensure(lines.length * 15 + 8);
+    doc.setFont("helvetica", "bold");
+    doc.text(`${i + 1}.`, margin, y);
+    doc.setFont("helvetica", "normal");
+    lines.forEach((line, li) => {
+      doc.text(line, margin + 24, y + li * 15);
+    });
+    y += lines.length * 15 + 8;
+  });
+
+  if (items.length === 0) {
+    doc.setTextColor(...MUTED);
+    doc.text("No agenda items yet.", margin, y);
+    y += 20;
+  }
+
+  if (row.next_meeting_date) {
+    ensure(30);
+    y += 8;
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(10);
+    doc.setTextColor(...INK);
+    doc.text(`Date of the next Committee meeting: ${fmtDate(row.next_meeting_date)}`, margin, y);
+  }
+
+  return doc;
+}
+
 function Inner() {
   const { isAdmin, isSecretary, isAssistantSecretary, isWorshipfulMaster, user } = useAuth();
   const canManage = isAdmin || isSecretary || isAssistantSecretary || isWorshipfulMaster;
@@ -216,6 +283,7 @@ function Inner() {
   const [nTitle, setNTitle] = useState("");
   const [nDate, setNDate] = useState("");
   const [nEventId, setNEventId] = useState("");
+  const [nAgenda, setNAgenda] = useState(false);
   const [busy, setBusy] = useState(false);
 
   // Edit form
@@ -270,6 +338,16 @@ function Inner() {
     setNTitle("");
     setNDate("");
     setNEventId("");
+    setNAgenda(false);
+    setNewOpen(true);
+  };
+
+  const startNewAgenda = () => {
+    setNType("committee");
+    setNTitle("");
+    setNDate("");
+    setNEventId("");
+    setNAgenda(true);
     setNewOpen(true);
   };
 
@@ -282,7 +360,7 @@ function Inner() {
     try {
       let sections: Section[] = [];
       if (nType === "committee") {
-        sections = COMMITTEE_SKELETON.map((s) => ({ ...s }));
+        sections = (nAgenda ? COMMITTEE_AGENDA_SKELETON : COMMITTEE_SKELETON).map((s) => ({ ...s }));
       } else if (nEventId) {
         const { data } = await (supabase.from as any)("summonses")
           .select("agenda")
@@ -633,6 +711,40 @@ function Inner() {
     }
   };
 
+  /**
+   * Downloads the Committee agenda PDF and files a copy in Documents under
+   * Committee agendas. An agenda isn't formally confirmed, so there's no
+   * approval gate — each click files the current version.
+   */
+  const exportAgendaPdf = async (r: Row) => {
+    try {
+      const doc = await buildAgendaPdf(r);
+      doc.save(`agenda-${r.meeting_date}-committee.pdf`);
+
+      const blob = doc.output("blob") as Blob;
+      const docId = crypto.randomUUID();
+      const path = `committee_agendas/${docId}.pdf`;
+      const { error: upErr } = await supabase.storage
+        .from("lodge-docs")
+        .upload(path, blob, { contentType: "application/pdf", upsert: false });
+      if (upErr) throw upErr;
+
+      const dateLabel = new Date(r.meeting_date).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+      const { error: dbErr } = await supabase.from("lodge_documents").insert({
+        title: `Committee Meeting Agenda — ${dateLabel}`,
+        category: "committee_agendas" as any,
+        file_path: path,
+        file_size_bytes: blob.size,
+        uploaded_by: user?.id ?? null,
+        is_general: true,
+      });
+      if (dbErr) throw dbErr;
+      toast({ title: "Agenda exported and filed in Documents" });
+    } catch (e: any) {
+      toast({ title: "Could not build the agenda PDF", description: e.message, variant: "destructive" });
+    }
+  };
+
   // Section / action-item editors
   const patch = (p: Partial<Row>) => setEditing((prev) => (prev ? { ...prev, ...p } : prev));
 
@@ -884,6 +996,11 @@ function Inner() {
             <Button variant="outline" onClick={() => exportPdf(editing)}>
               <Download className="w-4 h-4 mr-1" /> Export PDF
             </Button>
+            {editing.meeting_type === "committee" && (
+              <Button variant="outline" onClick={() => exportAgendaPdf(editing)}>
+                <Download className="w-4 h-4 mr-1" /> Export Agenda PDF
+              </Button>
+            )}
           </div>
         </div>
       </MembersLayout>
@@ -908,6 +1025,13 @@ function Inner() {
             className="border-gold/40 text-gold hover:bg-gold/10"
           >
             <Sparkles className="w-4 h-4 mr-1" /> Generate from transcript
+          </Button>
+          <Button
+            onClick={startNewAgenda}
+            variant="outline"
+            className="border-gold/40 text-gold hover:bg-gold/10"
+          >
+            <Plus className="w-4 h-4 mr-1" /> New Committee Agenda
           </Button>
           <Button onClick={startNew} className="bg-gold-shimmer text-accent-foreground">
             <Plus className="w-4 h-4 mr-1" /> New minutes
