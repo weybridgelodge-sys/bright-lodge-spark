@@ -360,7 +360,7 @@ function Inner() {
     try {
       let sections: Section[] = [];
       if (nType === "committee") {
-        sections = COMMITTEE_SKELETON.map((s) => ({ ...s }));
+        sections = (nAgenda ? COMMITTEE_AGENDA_SKELETON : COMMITTEE_SKELETON).map((s) => ({ ...s }));
       } else if (nEventId) {
         const { data } = await (supabase.from as any)("summonses")
           .select("agenda")
