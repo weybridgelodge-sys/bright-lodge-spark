@@ -402,19 +402,36 @@ function Inner() {
     })) as Row[]);
     setEvents(((e.data as any[]) ?? []) as LodgeEvent[]);
     const lodgeYear = Number(yearResult.data) || masonicYearStart();
-    const { data: appointment } = await supabase
+    const { data: appointments } = await supabase
       .from("officer_appointments")
-      .select("member_id")
-      .eq("position_key", "secretary")
-      .eq("lodge_year", lodgeYear)
-      .maybeSingle();
-    if (appointment?.member_id) {
-      const { data: secretary } = await supabase
-        .from("profiles")
-        .select("id,title,first_name,middle_name,last_name,full_name,preferred_name,post_nominals,rank,grand_rank,provincial_rank,initiation_date,joined_lodge_date,joined_year,is_past_master,is_royal_arch,status")
-        .eq("id", appointment.member_id)
-        .maybeSingle();
-      if (secretary) setSecretaryName(formatMemberLine(secretary as MemberRow));
+      .select("member_id,position_key")
+      .in("position_key", ["secretary", "treasurer"])
+      .eq("lodge_year", lodgeYear);
+    const appts = (appointments as { member_id: string; position_key: string }[]) ?? [];
+    const ids = appts.map((a) => a.member_id).filter(Boolean);
+    if (ids.length) {
+      const [{ data: people }, pii] = await Promise.all([
+        supabase
+          .from("profiles")
+          .select("id,title,first_name,middle_name,last_name,full_name,preferred_name,post_nominals,rank,grand_rank,provincial_rank,initiation_date,joined_lodge_date,joined_year,is_past_master,is_royal_arch,status")
+          .in("id", ids),
+        fetchProfilesPii(ids),
+      ]);
+      const piiIdx = indexPii(pii);
+      const byId = new Map(((people as any[]) ?? []).map((p) => [p.id as string, p]));
+      const contact = (key: string): OfficerContact | null => {
+        const memberId = appts.find((a) => a.position_key === key)?.member_id;
+        const prof = memberId ? byId.get(memberId) : null;
+        if (!prof) return null;
+        const a = piiIdx[prof.id];
+        const address = [a?.address_line1, a?.address_line2, a?.address_line3, a?.town, a?.county, a?.postcode]
+          .map((v) => (v ?? "").trim())
+          .filter(Boolean);
+        return { name: formatMemberLine(prof as MemberRow), address };
+      };
+      const sec = contact("secretary");
+      setLetterhead({ secretary: sec, treasurer: contact("treasurer") });
+      if (sec) setSecretaryName(sec.name);
     }
     setLoading(false);
   };
