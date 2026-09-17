@@ -880,7 +880,8 @@ function Inner() {
   /**
    * Downloads the Committee agenda PDF and files a copy in Documents under
    * Committee agendas. An agenda isn't formally confirmed, so there's no
-   * approval gate — each click files the current version.
+   * approval gate — re-exporting overwrites the filed copy rather than
+   * creating a duplicate.
    */
   const exportAgendaPdf = async (r: Row) => {
     try {
@@ -888,6 +889,28 @@ function Inner() {
       doc.save(`agenda-${r.meeting_at.slice(0, 10)}-committee.pdf`);
 
       const blob = doc.output("blob") as Blob;
+
+      if (r.filed_agenda_document_id) {
+        const { data: existing } = await supabase
+          .from("lodge_documents")
+          .select("file_path")
+          .eq("id", r.filed_agenda_document_id)
+          .maybeSingle();
+        if (existing?.file_path) {
+          const { error: upErr } = await supabase.storage
+            .from("lodge-docs")
+            .upload(existing.file_path, blob, { contentType: "application/pdf", upsert: true });
+          if (upErr) throw upErr;
+          const { error: dbErr } = await supabase
+            .from("lodge_documents")
+            .update({ file_size_bytes: blob.size })
+            .eq("id", r.filed_agenda_document_id);
+          if (dbErr) throw dbErr;
+          toast({ title: "Agenda exported and filed copy updated" });
+          return;
+        }
+      }
+
       const docId = crypto.randomUUID();
       const path = `committee_agendas/${docId}.pdf`;
       const { error: upErr } = await supabase.storage
@@ -896,15 +919,27 @@ function Inner() {
       if (upErr) throw upErr;
 
       const dateLabel = new Date(r.meeting_at).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
-      const { error: dbErr } = await supabase.from("lodge_documents").insert({
-        title: `Committee Meeting Agenda — ${dateLabel}`,
-        category: "committee_agendas" as any,
-        file_path: path,
-        file_size_bytes: blob.size,
-        uploaded_by: user?.id ?? null,
-        is_general: true,
-      });
+      const { data: created, error: dbErr } = await supabase
+        .from("lodge_documents")
+        .insert({
+          title: `Committee Meeting Agenda — ${dateLabel}`,
+          category: "committee_agendas" as any,
+          file_path: path,
+          file_size_bytes: blob.size,
+          uploaded_by: user?.id ?? null,
+          is_general: true,
+        })
+        .select("id")
+        .single();
       if (dbErr) throw dbErr;
+
+      const newId = (created as { id: string }).id;
+      await (supabase.from as any)("meeting_minutes")
+        .update({ filed_agenda_document_id: newId })
+        .eq("id", r.id);
+      setEditing((prev) => (prev && prev.id === r.id ? { ...prev, filed_agenda_document_id: newId } : prev));
+      load();
+
       toast({ title: "Agenda exported and filed in Documents" });
     } catch (e: any) {
       toast({ title: "Could not build the agenda PDF", description: e.message, variant: "destructive" });
