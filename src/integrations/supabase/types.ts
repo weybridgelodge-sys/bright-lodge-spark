@@ -3628,6 +3628,7 @@ export type Database = {
           created_at: string
           flagged_by: string | null
           id: string
+          is_at_risk: boolean
           note: string | null
           role_key: string
           updated_at: string
@@ -3636,6 +3637,7 @@ export type Database = {
           created_at?: string
           flagged_by?: string | null
           id?: string
+          is_at_risk?: boolean
           note?: string | null
           role_key: string
           updated_at?: string
@@ -3644,6 +3646,7 @@ export type Database = {
           created_at?: string
           flagged_by?: string | null
           id?: string
+          is_at_risk?: boolean
           note?: string | null
           role_key?: string
           updated_at?: string
