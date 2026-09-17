@@ -261,3 +261,26 @@ function StageSelect({
     </select>
   );
 }
+
+function ReferralSelect({
+  value,
+  onChange,
+}: {
+  value: ReferralSource | null;
+  onChange: (v: ReferralSource | null) => void;
+}) {
+  return (
+    <select
+      value={value ?? ""}
+      onChange={(e) => onChange((e.target.value || null) as ReferralSource | null)}
+      className="w-full bg-navy border border-gold/20 rounded-sm px-2 py-1.5 text-xs text-primary-foreground"
+    >
+      <option value="">Not recorded</option>
+      {REFERRAL_SOURCES.map((s) => (
+        <option key={s} value={s}>
+          {REFERRAL_SOURCE_LABELS[s]}
+        </option>
+      ))}
+    </select>
+  );
+}
