@@ -27,6 +27,7 @@ import { readFunctionError } from "@/lib/functionError";
 import { masonicYearStart } from "@/lib/loi";
 import { treasurerYearBounds } from "@/lib/treasurer/reports";
 import { reportPdfDoc, reportSection, INK, MUTED, GOLD, NAVY, fmtDate } from "@/lib/treasurer/reports";
+import { fetchProfilesPii, indexPii } from "@/lib/profilePii";
 import { formatMemberLine, type MemberRow } from "@/lib/summons";
 import autoTable from "jspdf-autotable";
 
