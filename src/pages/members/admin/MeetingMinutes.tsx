@@ -350,6 +350,7 @@ function Inner() {
           meeting_type: gType,
           meeting_date: gDate,
           lodge_event_id: gType === "lodge" ? gEventId : undefined,
+          agenda_text: gType === "committee" && gAgenda.trim() ? gAgenda : undefined,
         },
       });
       const result = data as any;
