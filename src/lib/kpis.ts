@@ -659,6 +659,16 @@ function attendedMemberIds(eng: EngagementBundle, meetingIds: Set<string>): Set<
   return out;
 }
 
+/** Member_ids who sent apologies for any of the given meetings. */
+function apologisedMemberIds(eng: EngagementBundle, meetingIds: Set<string>): Set<string> {
+  const out = new Set<string>();
+  for (const r of eng.attendance) {
+    if (r.member_id && meetingIds.has(r.meeting_id) && r.attendance_status === "apologies")
+      out.add(r.member_id);
+  }
+  return out;
+}
+
 /** Active = attended at least one of the last `window` occurred meetings. */
 export function activeVsInactive(members: KpiMember[], eng: EngagementBundle, window = 6) {
   const recent = eng.meetings.slice(-window);
@@ -710,14 +720,15 @@ export function quarterlyEngagement(eng: EngagementBundle, quarters = 8) {
 
 /**
  * Members who missed all of the last 3 occurred meetings and have no
- * recorded welfare absence covering that period — i.e. quietly drifting
- * rather than known to be away.
+ * recorded welfare absence covering that period and sent no apologies —
+ * i.e. quietly drifting rather than known to be away.
  */
 export function disengagementRisk(members: KpiMember[], eng: EngagementBundle) {
   const recent = eng.meetings.slice(-3);
   if (recent.length === 0) return { meetingsConsidered: 0, members: [] as KpiMember[] };
   const ids = new Set(recent.map((m) => m.id));
   const attended = attendedMemberIds(eng, ids);
+  const apologised = apologisedMemberIds(eng, ids);
   const from = recent[0].meeting_date;
   const to = recent[recent.length - 1].meeting_date;
   const excused = new Set(
@@ -726,7 +737,12 @@ export function disengagementRisk(members: KpiMember[], eng: EngagementBundle) {
       .map((a) => a.member_id)
   );
   const at = members.filter(
-    (m) => m.status === "active" && !m.is_honorary_member && !attended.has(m.id) && !excused.has(m.id)
+    (m) =>
+      m.status === "active" &&
+      !m.is_honorary_member &&
+      !attended.has(m.id) &&
+      !apologised.has(m.id) &&
+      !excused.has(m.id)
   );
   return { meetingsConsidered: recent.length, from, to, members: at };
 }

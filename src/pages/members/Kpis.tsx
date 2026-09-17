@@ -497,8 +497,8 @@ export default function Kpis() {
           ) : (
             <>
               <p className="text-xs text-primary-foreground/60 mb-3">
-                Missed all of the last {risk.meetingsConsidered} meetings, with no welfare absence on record
-                covering that period.
+                Missed all of the last {risk.meetingsConsidered} meetings with no apology sent and no
+                welfare absence on record covering that period.
               </p>
               <ul className="text-sm space-y-1">
                 {risk.members.map((m) => (

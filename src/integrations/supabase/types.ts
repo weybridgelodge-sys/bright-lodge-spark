@@ -331,6 +331,9 @@ export type Database = {
           notes: string | null
           phone: string | null
           proposer: string | null
+          referral_source:
+            | Database["public"]["Enums"]["candidate_referral_source"]
+            | null
           seconder: string | null
           stage: Database["public"]["Enums"]["candidate_stage"]
           updated_at: string
@@ -348,6 +351,9 @@ export type Database = {
           notes?: string | null
           phone?: string | null
           proposer?: string | null
+          referral_source?:
+            | Database["public"]["Enums"]["candidate_referral_source"]
+            | null
           seconder?: string | null
           stage?: Database["public"]["Enums"]["candidate_stage"]
           updated_at?: string
@@ -365,6 +371,9 @@ export type Database = {
           notes?: string | null
           phone?: string | null
           proposer?: string | null
+          referral_source?:
+            | Database["public"]["Enums"]["candidate_referral_source"]
+            | null
           seconder?: string | null
           stage?: Database["public"]["Enums"]["candidate_stage"]
           updated_at?: string
@@ -4960,6 +4969,12 @@ export type Database = {
         | "almoner"
         | "charity_steward"
       attendance_source: "manual" | "booking"
+      candidate_referral_source:
+        | "website"
+        | "member"
+        | "province"
+        | "event"
+        | "social_media"
       candidate_stage:
         | "enquiry"
         | "information_provided"
@@ -5185,6 +5200,13 @@ export const Constants = {
         "charity_steward",
       ],
       attendance_source: ["manual", "booking"],
+      candidate_referral_source: [
+        "website",
+        "member",
+        "province",
+        "event",
+        "social_media",
+      ],
       candidate_stage: [
         "enquiry",
         "information_provided",
