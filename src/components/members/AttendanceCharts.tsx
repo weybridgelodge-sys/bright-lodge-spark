@@ -35,7 +35,12 @@ function useLiveLoi(): LiveLoi | null {
   useEffect(() => {
     (async () => {
       const [s, a, m] = await Promise.all([
-        supabase.from("loi_sessions").select("id,session_date,kpi_category"),
+        supabase
+          .from("loi_sessions")
+          .select("id,session_date,kpi_category")
+          // Only sessions that have actually happened — future ones have no
+          // attendance recorded yet and would distort every average.
+          .lte("session_date", new Date().toISOString().slice(0, 10)),
         supabase.from("loi_attendance").select("session_id"),
         supabase.from("profiles").select("id", { count: "exact", head: true }).eq("status", "active").eq("is_honorary_member", false),
       ]);
@@ -90,6 +95,8 @@ function useLiveFestive(): LiveFestive | null {
         supabase
           .from("festive_board_meetings")
           .select("id,meeting_date,meeting_type,headcount_override")
+          // Past meetings only — future ones have no attendance recorded yet.
+          .lte("meeting_date", new Date().toISOString().slice(0, 10))
           .order("meeting_date", { ascending: true }),
         supabase
           .from("festive_board_attendance")

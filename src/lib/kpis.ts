@@ -67,6 +67,7 @@ export type Candidate = {
   date_of_enquiry: string | null;
   initiation_scheduled_date: string | null;
   converted_member_id: string | null;
+  referral_source: "website" | "member" | "province" | "event" | "social_media" | null;
   created_at: string;
   updated_at: string;
 };
@@ -531,6 +532,7 @@ export async function fetchLodgeHealthBundle(): Promise<KpiBundle> {
       date_of_enquiry: null,
       initiation_scheduled_date: null,
       converted_member_id: null,
+      referral_source: null,
       created_at: "",
       updated_at: "",
     })),
@@ -559,3 +561,172 @@ export const CANDIDATE_STAGE_ORDER: CandidateStage[] = [
   "withdrawn",
 ];
 
+
+// ───── Referral sources
+export const REFERRAL_SOURCES = ["website", "member", "province", "event", "social_media"] as const;
+export type ReferralSource = (typeof REFERRAL_SOURCES)[number];
+export const REFERRAL_SOURCE_LABELS: Record<ReferralSource | "unknown", string> = {
+  website: "Website",
+  member: "Existing Member",
+  province: "Province",
+  event: "Event",
+  social_media: "Social Media",
+  unknown: "Not recorded",
+};
+
+export type ReferralRate = Record<ReferralSource | "unknown", number>;
+
+/**
+ * Counts every candidate ever recorded (including those already initiated)
+ * by how they first heard about the lodge. Candidates with no source on
+ * file — mostly historical records predating the field — are counted
+ * plainly as "unknown" rather than hidden.
+ */
+export function referralRate(candidates: Candidate[]): ReferralRate {
+  const out: ReferralRate = {
+    website: 0,
+    member: 0,
+    province: 0,
+    event: 0,
+    social_media: 0,
+    unknown: 0,
+  };
+  for (const c of candidates) {
+    const src = c.referral_source;
+    if (src && (REFERRAL_SOURCES as readonly string[]).includes(src)) out[src as ReferralSource] += 1;
+    else out.unknown += 1;
+  }
+  return out;
+}
+
+// ───── Engagement analytics (attendance / visitors / welfare)
+export type OccurredMeeting = { id: string; meeting_date: string; meeting_type: string };
+export type AttendanceRow = { meeting_id: string; member_id: string | null; attendance_status: string };
+export type AbsenceRow = { member_id: string; period_start: string; period_end: string | null };
+export type VisitorRow = {
+  id: string;
+  name: string | null;
+  lodge_name: string | null;
+  lodge_number: string | null;
+  last_seen_at: string | null;
+  visits: number;
+};
+
+export type EngagementBundle = {
+  meetings: OccurredMeeting[]; // ascending by date, past meetings only
+  attendance: AttendanceRow[];
+  absences: AbsenceRow[];
+  visitors: VisitorRow[];
+};
+
+const ATTENDED_STATUSES = new Set(["booked", "attended"]);
+
+export async function fetchEngagementBundle(): Promise<EngagementBundle> {
+  const today = new Date().toISOString().slice(0, 10);
+  const [mt, at, ab, vc, va] = await Promise.all([
+    supabase
+      .from("festive_board_meetings")
+      .select("id,meeting_date,meeting_type")
+      .lte("meeting_date", today)
+      .order("meeting_date", { ascending: true }),
+    supabase.from("festive_board_attendance").select("meeting_id,member_id,attendance_status"),
+    (supabase.from as any)("welfare_absences").select("member_id,period_start,period_end,deleted_at"),
+    (supabase.from as any)("visitor_contacts").select("id,name,lodge_name,lodge_number,last_seen_at"),
+    (supabase.from as any)("visitor_attendances").select("visitor_contact_id"),
+  ]);
+  const visitCounts: Record<string, number> = {};
+  for (const r of ((va?.data as { visitor_contact_id: string }[]) ?? []))
+    visitCounts[r.visitor_contact_id] = (visitCounts[r.visitor_contact_id] ?? 0) + 1;
+  return {
+    meetings: (mt.data as OccurredMeeting[]) ?? [],
+    attendance: (at.data as AttendanceRow[]) ?? [],
+    absences: (((ab?.data as (AbsenceRow & { deleted_at: string | null })[]) ?? []).filter(
+      (r) => !r.deleted_at
+    ) as AbsenceRow[]),
+    visitors: (((vc?.data as Omit<VisitorRow, "visits">[]) ?? []).map((v) => ({
+      ...v,
+      visits: visitCounts[v.id] ?? 0,
+    })) as VisitorRow[]).sort((a, b) => b.visits - a.visits),
+  };
+}
+
+function attendedMemberIds(eng: EngagementBundle, meetingIds: Set<string>): Set<string> {
+  const out = new Set<string>();
+  for (const r of eng.attendance) {
+    if (r.member_id && meetingIds.has(r.meeting_id) && ATTENDED_STATUSES.has(r.attendance_status))
+      out.add(r.member_id);
+  }
+  return out;
+}
+
+/** Active = attended at least one of the last `window` occurred meetings. */
+export function activeVsInactive(members: KpiMember[], eng: EngagementBundle, window = 6) {
+  const recent = eng.meetings.slice(-window);
+  const ids = new Set(recent.map((m) => m.id));
+  const attended = attendedMemberIds(eng, ids);
+  const subscribing = members.filter((m) => m.status === "active" && !m.is_honorary_member);
+  const active = subscribing.filter((m) => attended.has(m.id));
+  const inactive = subscribing.filter((m) => !attended.has(m.id));
+  return {
+    meetingsConsidered: recent.length,
+    active,
+    inactive,
+    activePct: subscribing.length ? Math.round((active.length / subscribing.length) * 100) : 0,
+  };
+}
+
+/** Visitors ranked by how often they have dined with us. */
+export function visitorFrequency(eng: EngagementBundle, limit = 10) {
+  return eng.visitors.filter((v) => v.visits > 0).slice(0, limit);
+}
+
+/** Member attendance rolled up by calendar quarter of the meeting date. */
+export function quarterlyEngagement(eng: EngagementBundle, quarters = 8) {
+  const byQuarter: Record<string, { meetings: number; members: number; visitors: number }> = {};
+  const counts: Record<string, { members: number; visitors: number }> = {};
+  for (const r of eng.attendance) {
+    if (!ATTENDED_STATUSES.has(r.attendance_status)) continue;
+    const c = (counts[r.meeting_id] ??= { members: 0, visitors: 0 });
+    if (r.member_id) c.members += 1;
+    else c.visitors += 1;
+  }
+  for (const m of eng.meetings) {
+    const d = new Date(m.meeting_date);
+    const key = `${d.getFullYear()} Q${Math.floor(d.getMonth() / 3) + 1}`;
+    const g = (byQuarter[key] ??= { meetings: 0, members: 0, visitors: 0 });
+    g.meetings += 1;
+    g.members += counts[m.id]?.members ?? 0;
+    g.visitors += counts[m.id]?.visitors ?? 0;
+  }
+  return Object.entries(byQuarter)
+    .map(([quarter, v]) => ({
+      quarter,
+      ...v,
+      avgMembers: v.meetings ? Math.round((v.members / v.meetings) * 10) / 10 : 0,
+    }))
+    .sort((a, b) => (a.quarter < b.quarter ? -1 : 1))
+    .slice(-quarters);
+}
+
+/**
+ * Members who missed all of the last 3 occurred meetings and have no
+ * recorded welfare absence covering that period — i.e. quietly drifting
+ * rather than known to be away.
+ */
+export function disengagementRisk(members: KpiMember[], eng: EngagementBundle) {
+  const recent = eng.meetings.slice(-3);
+  if (recent.length === 0) return { meetingsConsidered: 0, members: [] as KpiMember[] };
+  const ids = new Set(recent.map((m) => m.id));
+  const attended = attendedMemberIds(eng, ids);
+  const from = recent[0].meeting_date;
+  const to = recent[recent.length - 1].meeting_date;
+  const excused = new Set(
+    eng.absences
+      .filter((a) => a.period_start <= to && (a.period_end == null || a.period_end >= from))
+      .map((a) => a.member_id)
+  );
+  const at = members.filter(
+    (m) => m.status === "active" && !m.is_honorary_member && !attended.has(m.id) && !excused.has(m.id)
+  );
+  return { meetingsConsidered: recent.length, from, to, members: at };
+}

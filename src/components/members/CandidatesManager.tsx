@@ -5,8 +5,11 @@ import { Plus, Trash2, Save, X, UserPlus } from "lucide-react";
 import {
   type Candidate,
   type CandidateStage,
+  type ReferralSource,
   CANDIDATE_STAGE_LABELS,
   CANDIDATE_STAGE_ORDER,
+  REFERRAL_SOURCES,
+  REFERRAL_SOURCE_LABELS,
 } from "@/lib/kpis";
 
 const EMPTY: Omit<Candidate, "id" | "created_at" | "updated_at"> = {
@@ -21,6 +24,7 @@ const EMPTY: Omit<Candidate, "id" | "created_at" | "updated_at"> = {
   date_of_enquiry: new Date().toISOString().slice(0, 10),
   initiation_scheduled_date: null,
   converted_member_id: null,
+  referral_source: null,
 };
 
 export default function CandidatesManager({ onChange }: { onChange?: () => void }) {
@@ -114,6 +118,13 @@ export default function CandidatesManager({ onChange }: { onChange?: () => void 
               value={draft.initiation_scheduled_date ?? ""}
               onChange={(v) => setDraft({ ...draft, initiation_scheduled_date: v || null })}
             />
+            <div>
+              <Label>How did they hear about us?</Label>
+              <ReferralSelect
+                value={draft.referral_source}
+                onChange={(v) => setDraft({ ...draft, referral_source: v })}
+              />
+            </div>
           </div>
           <div>
             <Label>Notes</Label>
@@ -186,6 +197,13 @@ export default function CandidatesManager({ onChange }: { onChange?: () => void 
                   className="bg-navy border border-gold/20 rounded-sm px-2 py-1.5 text-xs text-primary-foreground"
                 />
               </div>
+              <div className="min-w-[10rem]">
+                <Label>Heard about us</Label>
+                <ReferralSelect
+                  value={c.referral_source}
+                  onChange={(v) => updateRow(c.id, { referral_source: v })}
+                />
+              </div>
               <button
                 onClick={() => remove(c.id)}
                 className="text-primary-foreground/50 hover:text-red-400 p-2"
@@ -245,6 +263,29 @@ function StageSelect({
       {CANDIDATE_STAGE_ORDER.map((s) => (
         <option key={s} value={s}>
           {CANDIDATE_STAGE_LABELS[s]}
+        </option>
+      ))}
+    </select>
+  );
+}
+
+function ReferralSelect({
+  value,
+  onChange,
+}: {
+  value: ReferralSource | null;
+  onChange: (v: ReferralSource | null) => void;
+}) {
+  return (
+    <select
+      value={value ?? ""}
+      onChange={(e) => onChange((e.target.value || null) as ReferralSource | null)}
+      className="w-full bg-navy border border-gold/20 rounded-sm px-2 py-1.5 text-xs text-primary-foreground"
+    >
+      <option value="">Not recorded</option>
+      {REFERRAL_SOURCES.map((s) => (
+        <option key={s} value={s}>
+          {REFERRAL_SOURCE_LABELS[s]}
         </option>
       ))}
     </select>
