@@ -327,6 +327,8 @@ function Inner() {
    * Reads an uploaded file as plain text. Word (.docx) files are binary, so
    * reading them with File.text() produced garbled output — extract the real
    * text instead. Anything else unreadable is rejected with a clear message.
+   * Every failure path shows a toast — a silent failure leaves the textarea
+   * empty and the Secretary has no idea what went wrong.
    */
   const readUploadedText = async (f: File): Promise<string | null> => {
     const name = f.name.toLowerCase();
@@ -351,19 +353,55 @@ function Inner() {
       });
       return null;
     }
-    return await f.text();
+    // Plain-text path: some recorders (e.g. Plaud exports saved from certain
+    // apps) write UTF-16, which File.text() decodes as UTF-8 garbage — sniff
+    // the byte-order mark and decode accordingly so those files still load.
+    try {
+      const buf = await f.arrayBuffer();
+      const bytes = new Uint8Array(buf);
+      let text: string;
+      if (bytes.length >= 2 && bytes[0] === 0xff && bytes[1] === 0xfe) {
+        text = new TextDecoder("utf-16le").decode(bytes.subarray(2));
+      } else if (bytes.length >= 2 && bytes[0] === 0xfe && bytes[1] === 0xff) {
+        text = new TextDecoder("utf-16be").decode(bytes.subarray(2));
+      } else {
+        text = new TextDecoder("utf-8").decode(bytes);
+      }
+      // Guard against undecodable/binary content slipping through as NULs.
+      if (text.includes("")) {
+        text = new TextDecoder("utf-16le").decode(bytes);
+      }
+      if (!text.trim()) {
+        toast({ title: "That file appears to be empty", description: "Check it's the finished transcript file and try again.", variant: "destructive" });
+        return null;
+      }
+      return text;
+    } catch (err: any) {
+      toast({
+        title: "Couldn't read that file",
+        description: `${err?.message ?? "The phone couldn't read it."} Try pasting the text into the box instead.`,
+        variant: "destructive",
+      });
+      return null;
+    }
   };
 
   const loadTranscriptFile = async (f: File | null | undefined) => {
     if (!f) return;
     const text = await readUploadedText(f);
-    if (text !== null) setGTranscript(text);
+    if (text !== null) {
+      setGTranscript(text);
+      toast({ title: "Transcript loaded", description: `${text.length.toLocaleString()} characters ready.` });
+    }
   };
 
   const loadAgendaFile = async (f: File | null | undefined) => {
     if (!f) return;
     const text = await readUploadedText(f);
-    if (text !== null) setGAgenda(text);
+    if (text !== null) {
+      setGAgenda(text);
+      toast({ title: "Agenda loaded", description: `${text.length.toLocaleString()} characters ready.` });
+    }
   };
 
 
