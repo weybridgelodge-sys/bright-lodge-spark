@@ -554,7 +554,7 @@ function Inner() {
 
       const payload = {
         meeting_type: gType === "committee" ? "committee" : "regular",
-        meeting_at: gDate,
+        meeting_at: fromInput(gDate),
         title,
         lodge_event_id: gType === "lodge" ? gEventId : null,
         status: "draft",
