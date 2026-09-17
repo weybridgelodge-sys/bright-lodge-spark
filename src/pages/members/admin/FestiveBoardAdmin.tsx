@@ -1090,6 +1090,20 @@ function MeetingDialog({
         return;
       }
     }
+    // A lodge member typed into the free-text visitor field should be recorded
+    // against their member record instead, or they end up as a "visitor" contact.
+    const rosterClashes = visitorDrafts
+      .map((v) => ({ v, m: matchRosterMember(v.name) }))
+      .filter((x) => x.m);
+    if (rosterClashes.length) {
+      const names = rosterClashes.map((x) => memberDisplay(x.m!)).join(", ");
+      const proceed = window.confirm(
+        `${names} ${rosterClashes.length === 1 ? "is a lodge member" : "are lodge members"}, not a visitor. ` +
+          `Tick them in the member list above instead, so their attendance is recorded against their member record.\n\n` +
+          `Save anyway as a visitor?`
+      );
+      if (!proceed) return;
+    }
     setSaving(true);
     try {
       const payload = {
