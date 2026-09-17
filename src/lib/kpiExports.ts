@@ -291,6 +291,20 @@ export async function exportFullKpi(bundle: KpiBundle, eng?: EngagementBundle | 
           if (g.name === name && g.num) { key = k; break; }
         }
       }
+      // If a numbered entry arrives after an unnumbered group with the same
+      // name already exists, fold that group into this one.
+      if (num) {
+        const bareKey = `${name}|`;
+        const bare = byLodge.get(bareKey);
+        if (bare) {
+          byLodge.delete(bareKey);
+          const cur = byLodge.get(key) ?? { visits: 0, label: lodge, name, num };
+          cur.visits += bare.visits + v.visits;
+          cur.label = [lodge, bare.label, cur.label].sort((a, b) => b.length - a.length)[0];
+          byLodge.set(key, cur);
+          continue;
+        }
+      }
       const cur = byLodge.get(key) ?? { visits: 0, label: lodge, name, num };
       cur.visits += v.visits;
       // Display the longest / most complete original variant as the label.
