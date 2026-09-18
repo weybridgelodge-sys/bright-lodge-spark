@@ -154,7 +154,7 @@ const History = () => {
               viewport={{ once: true }}
             >
               <p className="text-gold text-sm font-sans uppercase tracking-wide mb-2">
-                Consecrated 29th January 1949
+                Consecrated 19th January 1949
               </p>
               {/* text-gold replaces unapproved text-primary-foreground */}
               <h2
@@ -176,12 +176,12 @@ const History = () => {
                 Masonic interests, but the community itself — helping to bind together a town that
                 risked losing its sense of place.
               </p>
-              {/* Date clarified: petition 1948, Warrant issued 29th January 1949 */}
+              {/* Date clarified: petition 1948, Warrant issued 19th January 1949 */}
               <p className="text-gold/70 font-sans leading-relaxed mb-4">
                 The petition for Weybridge Lodge No. 6787 was submitted in 1948 under the
                 sponsorship of our Mother Lodge, Noel Money No. 2521, from whom the Lodge also drew
                 a number of its early members. The Warrant of Constitution was issued by the United
-                Grand Lodge of England on 3rd November 1948, and the Lodge was consecrated on 29th
+                Grand Lodge of England on 3rd November 1948, and the Lodge was consecrated on 19th
                 January 1949 — the date from which Weybridge Lodge counts its years. Both dates are
                 recorded in Lane's Masonic Records, held by the Museum of Freemasonry.
               </p>
