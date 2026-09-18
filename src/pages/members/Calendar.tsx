@@ -1,13 +1,14 @@
 import { useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   addMonths, endOfMonth, endOfWeek, format, isSameDay, isSameMonth, isToday,
   startOfMonth, startOfWeek,
 } from "date-fns";
 import {
   Calendar, ChevronDown, ChevronLeft, ChevronRight, Copy, ExternalLink,
-  Info, Loader2, Monitor, Smartphone,
+  Info, Loader2, Monitor, RefreshCw, Smartphone,
 } from "lucide-react";
+
 import MembersLayout from "@/components/members/MembersLayout";
 import ProtectedRoute from "@/components/members/ProtectedRoute";
 import { Button } from "@/components/ui/button";
@@ -175,6 +176,23 @@ function Inner() {
     }
   };
 
+  const queryClient = useQueryClient();
+  const [regenerating, setRegenerating] = useState(false);
+
+  const regenerate = async () => {
+    setRegenerating(true);
+    try {
+      const { data, error } = await (supabase as any).rpc("regenerate_my_calendar_token");
+      if (error || !data) throw error ?? new Error("No token returned");
+      await queryClient.invalidateQueries({ queryKey: ["member-calendar-token", user?.id] });
+      toast.success("New calendar link created — re-subscribe on each device; the old link no longer works.");
+    } catch {
+      toast.error("Could not create a new link. Please try again.");
+    } finally {
+      setRegenerating(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-start justify-between gap-4 flex-wrap">
@@ -184,8 +202,16 @@ function Inner() {
             All lodge meetings, festive boards, ad-hoc socials and Thursday LOIs — live.
           </p>
         </div>
-        <SubscribePanel webcalUrl={webcalUrl} feedUrl={feedUrl} onCopy={copyUrl} loading={tokenQ.isLoading} />
+        <SubscribePanel
+          webcalUrl={webcalUrl}
+          feedUrl={feedUrl}
+          onCopy={copyUrl}
+          loading={tokenQ.isLoading}
+          onRegenerate={regenerate}
+          regenerating={regenerating}
+        />
       </div>
+
 
       <div className="rounded-sm border border-gold/30 bg-navy-dark/60 p-4">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-3">
@@ -327,13 +353,16 @@ function Inner() {
 }
 
 function SubscribePanel({
-  webcalUrl, feedUrl, onCopy, loading,
+  webcalUrl, feedUrl, onCopy, loading, onRegenerate, regenerating,
 }: {
   webcalUrl: string | null; feedUrl: string | null;
   onCopy: (v: string) => void; loading: boolean;
+  onRegenerate: () => void; regenerating: boolean;
 }) {
   const [showHelp, setShowHelp] = useState(false);
+  const [confirmReset, setConfirmReset] = useState(false);
   const platform = useMemo(getPlatformHint, []);
+
 
   if (loading) {
     return <div className="text-xs text-primary-foreground/50"><Loader2 className="w-3 h-3 animate-spin inline mr-1"/>Preparing your subscription…</div>;
@@ -385,7 +414,45 @@ function SubscribePanel({
         >
           <Copy className="w-3.5 h-3.5 mr-2" /> Copy subscription URL
         </Button>
+
+        {confirmReset ? (
+          <div className="rounded-sm border border-gold/30 bg-navy/60 p-2 space-y-2">
+            <p className="text-[11px] text-primary-foreground/80">
+              This creates a brand-new private link. The current one stops working immediately, so
+              you'll need to subscribe again on every device.
+            </p>
+            <div className="flex gap-2">
+              <Button
+                size="sm"
+                className="bg-gold text-navy hover:bg-gold/90"
+                disabled={regenerating}
+                onClick={() => { setConfirmReset(false); onRegenerate(); }}
+              >
+                {regenerating ? <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5 mr-2" />}
+                Yes, create a new link
+              </Button>
+              <Button
+                size="sm" variant="outline"
+                className="border-gold/40 bg-transparent text-primary-foreground hover:bg-navy hover:text-gold"
+                onClick={() => setConfirmReset(false)}
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <Button
+            size="sm" variant="outline"
+            className="border-gold/40 bg-transparent text-primary-foreground hover:bg-navy hover:text-gold justify-start"
+            disabled={regenerating}
+            onClick={() => setConfirmReset(true)}
+          >
+            {regenerating ? <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5 mr-2" />}
+            Reset my calendar link
+          </Button>
+        )}
       </div>
+
 
       <button
         type="button"

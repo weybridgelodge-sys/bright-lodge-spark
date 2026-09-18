@@ -4968,6 +4968,7 @@ export type Database = {
         Returns: boolean
       }
       refresh_charity_public_feed_metrics: { Args: never; Returns: undefined }
+      regenerate_my_calendar_token: { Args: never; Returns: string }
       request_unlock_treasurer_period: {
         Args: { _period_id: string; _reason: string }
         Returns: undefined
