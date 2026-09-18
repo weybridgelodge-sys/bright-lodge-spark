@@ -18,7 +18,7 @@ const milestones: TimelineEntry[] = [
     year: "1949",
     title: "Lodge Consecrated",
     description:
-      "Weybridge Lodge No. 6787 is consecrated on 29th January 1949, its Warrant of Constitution having been granted the previous November — becoming a new home for Freemasonry in Surrey.",
+      "Weybridge Lodge No. 6787 is consecrated on 19th January 1949, its Warrant of Constitution having been granted the previous November — becoming a new home for Freemasonry in Surrey.",
   },
   {
     year: "1986",

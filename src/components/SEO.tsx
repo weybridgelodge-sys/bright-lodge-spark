@@ -68,7 +68,7 @@ export const organizationSchema = {
   logo: "https://weybridgelodge.org.uk/weybridge-logo.svg",
   description:
     "An open, friendly and sociable Freemasons Lodge within the Province of Surrey, based at the Guildford Masonic Centre in Guildford.",
-  foundingDate: "1949-01-29",
+  foundingDate: "1949-01-19",
   address: {
     "@type": "PostalAddress",
     streetAddress: "Hitherbury Close",
@@ -139,7 +139,7 @@ export const localBusinessSchema = {
     { "@type": "City", "name": "Farnham" },
     { "@type": "AdministrativeArea", "name": "Surrey" },
   ],
-  foundingDate: "1949-01-29",
+  foundingDate: "1949-01-19",
   foundingLocation: {
     "@type": "Place",
     name: "Weybridge, Surrey",

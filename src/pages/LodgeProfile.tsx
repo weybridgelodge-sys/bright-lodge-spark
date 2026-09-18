@@ -17,7 +17,7 @@ const meetingDates: string[] = [
 
 const stats: { label: string; value: string }[] = [
   { label: "Lodge Number", value: "6787" },
-  { label: "Consecrated", value: "29th January 1949" },
+  { label: "Consecrated", value: "19th January 1949" },
   { label: "Subscribing Members", value: "22 (incl. 1 honorary)" },
   { label: "Average Member Age", value: "53" },
   { label: "Meeting Day", value: "Wednesday" },
@@ -94,7 +94,7 @@ const LodgeProfile = () => {
             <motion.div variants={fadeUp} initial="hidden" whileInView={shouldReduceMotion ? "static" : "visible"} viewport={{ once: true }} custom={0}>
               <div className="h-px w-16 bg-gold mb-6" aria-hidden="true" />
               <h2 id="overview-heading" className="text-2xl md:text-3xl font-serif text-foreground mb-6">About Weybridge Lodge No. 6787 — Freemasons in Guildford, Surrey</h2>
-              <p className="text-muted-foreground font-sans leading-relaxed mb-4">Weybridge Lodge No. 6787 is a Lodge of Freemasons meeting in Guildford, Surrey. Founded in 1948 by members of our Mother Lodge, Noel Money No. 2521, and by workers from the Vickers-Armstrong aircraft factory at Brooklands in Weybridge, the Lodge was consecrated on 29th January 1949.</p>
+              <p className="text-muted-foreground font-sans leading-relaxed mb-4">Weybridge Lodge No. 6787 is a Lodge of Freemasons meeting in Guildford, Surrey. Founded in 1948 by members of our Mother Lodge, Noel Money No. 2521, and by workers from the Vickers-Armstrong aircraft factory at Brooklands in Weybridge, the Lodge was consecrated on 19th January 1949.</p>
               <p className="text-muted-foreground font-sans leading-relaxed mb-4">From those wartime roots — aircraft engineers, local tradesmen, shopkeepers and professionals bound together by a shared Wednesday afternoon — Weybridge Lodge has grown into the diverse, active community it is today. Our 22 members range in age from 18 to 80 and bring with them a wide spectrum of backgrounds, professions and interests. We are proud of our friendliness to new members and visitors alike — those who come to our meetings consistently remark on the warmth of the welcome and the quality of the ceremony, and many return.</p>
               <p className="text-muted-foreground font-sans leading-relaxed">The Lodge holds a strong reputation within the Province of Surrey and plays an active role in Provincial life, including the <Link to="/our-charities" className="text-gold hover:underline">Surrey 2030 Festival</Link> — a major fundraising programme supporting Masonic and non-Masonic charities across the county. In 2026, members of Weybridge Lodge completed the <Link to="/thames-challenge" className="text-gold hover:underline">Thames Towpath Challenge</Link> — 183 miles in 10 days — raising £10,000 for the Festival. That spirit of fellowship in action is what Weybridge Lodge is about. Learn more about <Link to="/history" className="text-gold hover:underline">our history</Link>.</p>
             </motion.div>

@@ -72,9 +72,9 @@ const meetingPlaces = [
   { years: "1986 – present", venue: "Guildford Masonic Centre", locality: "Weybourne House, Hitherbury Close, Guildford, GU2 4DR" },
 ];
 
-// Consecration date corrected to 29th January 1949 per Lane's Masonic
+// Consecration date corrected to 19th January 1949 per Lane's Masonic
 // Records (Museum of Freemasonry): Warrant of Constitution 3rd November
-// 1948; Consecrated 29th January 1949.
+// 1948; Consecrated 19th January 1949.
 const archiveSchema = {
   "@context": "https://schema.org",
   "@type": "CreativeWork",
@@ -84,7 +84,7 @@ const archiveSchema = {
   about: {
     "@type": "Organization",
     name: "Weybridge Lodge No. 6787",
-    foundingDate: "1949-01-29",
+    foundingDate: "1949-01-19",
   },
   temporalCoverage: "1954/1969",
 };
@@ -266,7 +266,7 @@ export default function HeritageArchive() {
             ✦ ✦ ✦
           </p>
           <p className="mb-3 font-serif text-xs uppercase tracking-[0.3em] text-gold">
-            Province of Surrey · Consecrated 29th January 1949
+            Province of Surrey · Consecrated 19th January 1949
           </p>
           <h1 className="mb-2 font-serif text-3xl text-background sm:text-4xl">
             Weybridge Lodge No. 6787
@@ -307,7 +307,7 @@ export default function HeritageArchive() {
           {/* ── Two founding dates, explained ──
               Added per Lane's Masonic Records (Museum of Freemasonry):
               Warrant of Constitution 3rd November 1948; Consecrated
-              29th January 1949. */}
+              19th January 1949. */}
           <section className="mb-12" aria-labelledby="founding-dates-heading">
             <h2 id="founding-dates-heading" className="mb-5 flex items-center gap-4 font-serif text-xs uppercase tracking-[0.25em] text-navy">
               <span>Two Dates, One Founding</span>
@@ -328,7 +328,7 @@ export default function HeritageArchive() {
                 <p className="font-serif text-xs uppercase tracking-[0.15em] text-gold mb-1">
                   Consecration
                 </p>
-                <p className="font-serif text-xl text-navy">29th January 1949</p>
+                <p className="font-serif text-xl text-navy">19th January 1949</p>
                 <p className="mt-2 font-sans text-sm leading-relaxed text-muted-foreground">
                   The ceremony that formally brought the Lodge to life — the date from which
                   Weybridge Lodge counts its years.
@@ -488,7 +488,7 @@ export default function HeritageArchive() {
           </nav>
 
           <p className="px-0 pb-2 pt-8 text-center font-sans text-xs tracking-wide text-muted-foreground">
-            Weybridge Lodge No. 6787 · Province of Surrey · Consecrated 29th January 1949
+            Weybridge Lodge No. 6787 · Province of Surrey · Consecrated 19th January 1949
           </p>
         </div>
       </main>
