@@ -1,13 +1,14 @@
 import { useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   addMonths, endOfMonth, endOfWeek, format, isSameDay, isSameMonth, isToday,
   startOfMonth, startOfWeek,
 } from "date-fns";
 import {
   Calendar, ChevronDown, ChevronLeft, ChevronRight, Copy, ExternalLink,
-  Info, Loader2, Monitor, Smartphone,
+  Info, Loader2, Monitor, RefreshCw, Smartphone,
 } from "lucide-react";
+
 import MembersLayout from "@/components/members/MembersLayout";
 import ProtectedRoute from "@/components/members/ProtectedRoute";
 import { Button } from "@/components/ui/button";
