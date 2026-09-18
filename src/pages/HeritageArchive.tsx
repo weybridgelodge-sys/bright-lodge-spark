@@ -27,7 +27,7 @@ type HeritageDoc = {
   displayOrder?: number;
 };
 
-const HERITAGE_QUERY = `*[_type == "heritageDocument"] | order(displayOrder asc, date asc) {
+const HERITAGE_QUERY = `*[_type == "heritageDocument"] | order(date asc, displayOrder asc) {
   _id,
   title,
   date,
