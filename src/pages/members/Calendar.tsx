@@ -414,7 +414,45 @@ function SubscribePanel({
         >
           <Copy className="w-3.5 h-3.5 mr-2" /> Copy subscription URL
         </Button>
+
+        {confirmReset ? (
+          <div className="rounded-sm border border-gold/30 bg-navy/60 p-2 space-y-2">
+            <p className="text-[11px] text-primary-foreground/80">
+              This creates a brand-new private link. The current one stops working immediately, so
+              you'll need to subscribe again on every device.
+            </p>
+            <div className="flex gap-2">
+              <Button
+                size="sm"
+                className="bg-gold text-navy hover:bg-gold/90"
+                disabled={regenerating}
+                onClick={() => { setConfirmReset(false); onRegenerate(); }}
+              >
+                {regenerating ? <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5 mr-2" />}
+                Yes, create a new link
+              </Button>
+              <Button
+                size="sm" variant="outline"
+                className="border-gold/40 bg-transparent text-primary-foreground hover:bg-navy hover:text-gold"
+                onClick={() => setConfirmReset(false)}
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <Button
+            size="sm" variant="outline"
+            className="border-gold/40 bg-transparent text-primary-foreground hover:bg-navy hover:text-gold justify-start"
+            disabled={regenerating}
+            onClick={() => setConfirmReset(true)}
+          >
+            {regenerating ? <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5 mr-2" />}
+            Reset my calendar link
+          </Button>
+        )}
       </div>
+
 
       <button
         type="button"
