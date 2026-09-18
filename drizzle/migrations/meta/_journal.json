@@ -232,6 +232,13 @@
       "when": 1789760879437,
       "tag": "0032_restrict_anon_table_grants",
       "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1789760914622,
+      "tag": "0033_regenerate_my_calendar_token",
+      "breakpoints": true
     }
   ]
 }
