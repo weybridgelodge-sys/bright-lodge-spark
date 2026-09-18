@@ -176,6 +176,23 @@ function Inner() {
     }
   };
 
+  const queryClient = useQueryClient();
+  const [regenerating, setRegenerating] = useState(false);
+
+  const regenerate = async () => {
+    setRegenerating(true);
+    try {
+      const { data, error } = await (supabase as any).rpc("regenerate_my_calendar_token");
+      if (error || !data) throw error ?? new Error("No token returned");
+      await queryClient.invalidateQueries({ queryKey: ["member-calendar-token", user?.id] });
+      toast.success("New calendar link created — re-subscribe on each device; the old link no longer works.");
+    } catch {
+      toast.error("Could not create a new link. Please try again.");
+    } finally {
+      setRegenerating(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-start justify-between gap-4 flex-wrap">
@@ -185,8 +202,16 @@ function Inner() {
             All lodge meetings, festive boards, ad-hoc socials and Thursday LOIs — live.
           </p>
         </div>
-        <SubscribePanel webcalUrl={webcalUrl} feedUrl={feedUrl} onCopy={copyUrl} loading={tokenQ.isLoading} />
+        <SubscribePanel
+          webcalUrl={webcalUrl}
+          feedUrl={feedUrl}
+          onCopy={copyUrl}
+          loading={tokenQ.isLoading}
+          onRegenerate={regenerate}
+          regenerating={regenerating}
+        />
       </div>
+
 
       <div className="rounded-sm border border-gold/30 bg-navy-dark/60 p-4">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-3">
