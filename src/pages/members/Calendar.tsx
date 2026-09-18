@@ -353,13 +353,16 @@ function Inner() {
 }
 
 function SubscribePanel({
-  webcalUrl, feedUrl, onCopy, loading,
+  webcalUrl, feedUrl, onCopy, loading, onRegenerate, regenerating,
 }: {
   webcalUrl: string | null; feedUrl: string | null;
   onCopy: (v: string) => void; loading: boolean;
+  onRegenerate: () => void; regenerating: boolean;
 }) {
   const [showHelp, setShowHelp] = useState(false);
+  const [confirmReset, setConfirmReset] = useState(false);
   const platform = useMemo(getPlatformHint, []);
+
 
   if (loading) {
     return <div className="text-xs text-primary-foreground/50"><Loader2 className="w-3 h-3 animate-spin inline mr-1"/>Preparing your subscription…</div>;
