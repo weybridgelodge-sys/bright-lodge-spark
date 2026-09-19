@@ -16,6 +16,10 @@ import {
   Ticket,
   ArrowRight,
   Compass,
+  HeartHandshake,
+  GraduationCap,
+  HandHelping,
+  CalendarCheck,
   type LucideIcon,
 } from "lucide-react";
 import EnquiryForm from "@/components/EnquiryForm";
@@ -27,6 +31,11 @@ interface CostCard {
   amount: string;
   note: string;
   badge?: string;
+}
+
+interface ProfilePoint {
+  icon: LucideIcon;
+  text: string;
 }
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
