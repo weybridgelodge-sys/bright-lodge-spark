@@ -141,12 +141,14 @@ const ThamesChallengePage = () => {
         description={DESCRIPTION}
         canonical={URL}
         type="article"
+        image={assetUrl(maidenheadBridge)}
         schema={[
           articleSchema({
             title: TITLE,
             description: DESCRIPTION,
             date: "2026-06-25",
             url: URL,
+            image: assetUrl(maidenheadBridge),
           }),
           breadcrumbSchema([
             { name: "Home", url: "/" },
