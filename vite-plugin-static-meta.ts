@@ -29,7 +29,12 @@ interface RouteMeta {
   description: string;
   /** Canonical path (may differ from route, e.g. the /ladies-night alias) */
   canonical: string;
+  /** Absolute social-share image URL; falls back to DEFAULT_OG_IMAGE. */
+  image?: string;
 }
+
+// Mirrors DEFAULT_OG_IMAGE in src/components/SEO.tsx
+const DEFAULT_OG_IMAGE = `${BASE_URL}/og-image.png`;
 
 const buildTitle = (title: string) =>
   title.includes(SITE_NAME) ? title : `${title} | ${SITE_NAME}`;
