@@ -29,7 +29,12 @@ interface RouteMeta {
   description: string;
   /** Canonical path (may differ from route, e.g. the /ladies-night alias) */
   canonical: string;
+  /** Absolute social-share image URL; falls back to DEFAULT_OG_IMAGE. */
+  image?: string;
 }
+
+// Mirrors DEFAULT_OG_IMAGE in src/components/SEO.tsx
+const DEFAULT_OG_IMAGE = `${BASE_URL}/og-image.png`;
 
 const buildTitle = (title: string) =>
   title.includes(SITE_NAME) ? title : `${title} | ${SITE_NAME}`;
@@ -199,6 +204,8 @@ const staticRoutes: RouteMeta[] = [
     description:
       "Join Weybridge & Astolat Lodges for a black tie charity gala on 22 August 2026 at Macdonald Frimley Hall Hotel. Three-course dinner, DJ, raffle — in aid of Action for Carers Surrey. Tickets £75.",
     canonical: "/ladies-festival",
+    image:
+      "https://weybridgelodge.org.uk/__l5e/assets-v1/b967fd27-560d-40ad-bd79-1dcd5c4c5dba/ladies-festival-2026-group-staircase.jpg",
   },
   {
     // Intentional alias of /ladies-festival — same meta, canonical stays put.
@@ -207,6 +214,8 @@ const staticRoutes: RouteMeta[] = [
     description:
       "Join Weybridge & Astolat Lodges for a black tie charity gala on 22 August 2026 at Macdonald Frimley Hall Hotel. Three-course dinner, DJ, raffle — in aid of Action for Carers Surrey. Tickets £75.",
     canonical: "/ladies-festival",
+    image:
+      "https://weybridgelodge.org.uk/__l5e/assets-v1/b967fd27-560d-40ad-bd79-1dcd5c4c5dba/ladies-festival-2026-group-staircase.jpg",
   },
   {
     route: "quiz",
@@ -265,10 +274,11 @@ async function postRoutes(): Promise<RouteMeta[]> {
         slug?: { current?: string };
         excerpt?: string;
         legacyRoute?: string;
+        mainImageUrl?: string;
       }[]
     >(
       `*[_type == "post" && defined(slug.current)] | order(publishedAt desc) {
-        title, slug, excerpt, legacyRoute
+        title, slug, excerpt, legacyRoute, "mainImageUrl": mainImage.asset->url
       }`,
     );
     return rows
@@ -282,7 +292,10 @@ async function postRoutes(): Promise<RouteMeta[]> {
           : toMetaDescription(
               `${r.title} — news from Weybridge Lodge No. 6787, Freemasons at the Guildford Masonic Centre in Surrey.`,
             );
-        return { route, title: r.title!, description, canonical: `/${route}` };
+        const image = r.mainImageUrl
+          ? `${r.mainImageUrl}?w=1200&h=630&fit=crop&auto=format`
+          : undefined;
+        return { route, title: r.title!, description, canonical: `/${route}`, image };
       });
   } catch (err) {
     console.warn("static-meta: could not fetch posts from Sanity.", err);
@@ -294,10 +307,15 @@ async function videoRoutes(): Promise<RouteMeta[]> {
 
   try {
     const rows = await sanity.fetch<
-      { title?: string; slug?: { current?: string }; description?: string }[]
+      {
+        title?: string;
+        slug?: { current?: string };
+        description?: string;
+        youtubeId?: string;
+      }[]
     >(
       `*[_type == "video" && published != false && defined(youtubeId)] | order(coalesce(order, 999), title asc) {
-        title, slug, description
+        title, slug, description, youtubeId
       }`,
     );
     return rows
@@ -312,6 +330,9 @@ async function videoRoutes(): Promise<RouteMeta[]> {
           title: `${r.title} — Video`,
           description: toMetaDescription(description),
           canonical: `/video-hub/${slug}`,
+          image: r.youtubeId
+            ? `https://i.ytimg.com/vi/${r.youtubeId}/hqdefault.jpg`
+            : undefined,
         };
       });
   } catch (err) {
@@ -336,6 +357,7 @@ function renderHead(baseHtml: string, meta: RouteMeta) {
   const t = escape(buildTitle(meta.title));
   const d = escape(meta.description);
   const url = `${BASE_URL}${meta.canonical}`;
+  const img = escape(meta.image || DEFAULT_OG_IMAGE);
 
   let html = baseHtml;
   html = replaceTag(html, /<title>[\s\S]*?<\/title>/, `<title>${t}</title>`);
@@ -373,6 +395,16 @@ function renderHead(baseHtml: string, meta: RouteMeta) {
     html,
     /<meta name="twitter:description" content="[^"]*" \/>/,
     `<meta name="twitter:description" content="${d}" />`,
+  );
+  html = replaceTag(
+    html,
+    /<meta property="og:image" content="[^"]*" \/>/,
+    `<meta property="og:image" content="${img}" />`,
+  );
+  html = replaceTag(
+    html,
+    /<meta name="twitter:image" content="[^"]*" \/>/,
+    `<meta name="twitter:image" content="${img}" />`,
   );
   return html;
 }
