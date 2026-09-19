@@ -86,7 +86,7 @@ const ladiesFestivalSchema = {
   endDate: "2026-08-23T01:00:00+01:00",
   description:
     "Black tie charity gala dinner in aid of Action for Carers Surrey. Three-course dinner, DJ, Grand Raffle and more at the Macdonald Frimley Hall Hotel.",
-  image: "https://weybridgelodge.org.uk/og-image.png",
+  image: "https://weybridgelodge.org.uk/__l5e/assets-v1/b967fd27-560d-40ad-bd79-1dcd5c4c5dba/ladies-festival-2026-group-staircase.jpg",
   eventStatus: "https://schema.org/EventScheduled",
   eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
   location: {
@@ -299,6 +299,7 @@ useEffect(() => {
         title="Ladies Festival 2026"
         description="Join Weybridge & Astolat Lodges for a black tie charity gala on 22 August 2026 at Macdonald Frimley Hall Hotel. Three-course dinner, DJ, raffle — in aid of Action for Carers Surrey. Tickets £75."
         canonical="/ladies-festival"
+        image="https://weybridgelodge.org.uk/__l5e/assets-v1/b967fd27-560d-40ad-bd79-1dcd5c4c5dba/ladies-festival-2026-group-staircase.jpg"
         schema={[
           breadcrumbSchema([
             { name: "Home", url: "/" },
