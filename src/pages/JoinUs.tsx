@@ -16,6 +16,10 @@ import {
   Ticket,
   ArrowRight,
   Compass,
+  HeartHandshake,
+  GraduationCap,
+  HandHelping,
+  CalendarCheck,
   type LucideIcon,
 } from "lucide-react";
 import EnquiryForm from "@/components/EnquiryForm";
@@ -27,6 +31,11 @@ interface CostCard {
   amount: string;
   note: string;
   badge?: string;
+}
+
+interface ProfilePoint {
+  icon: LucideIcon;
+  text: string;
 }
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
@@ -65,6 +74,33 @@ const costCards: CostCard[] = [
     title: "Incidentals",
     amount: "A few pounds",
     note: "Raffle tickets, drinks at the bar, and other optional extras on the night — entirely your choice.",
+  },
+];
+
+const profilePoints: ProfilePoint[] = [
+  {
+    icon: MapPin,
+    text: "You're a man roughly in your mid-20s to 60s, living in or near Guildford, Woking, Godalming, Farnham, Cranleigh or Leatherhead.",
+  },
+  {
+    icon: HeartHandshake,
+    text: "You're looking for genuine friendship, not networking — a real connection rather than a professional or transactional angle.",
+  },
+  {
+    icon: GraduationCap,
+    text: "You're drawn to self-improvement through structure, ceremony and mentorship from those who've walked the path before you.",
+  },
+  {
+    icon: HandHelping,
+    text: "You're community-minded, with a natural pull toward charitable giving and volunteering in Guildford and across Surrey.",
+  },
+  {
+    icon: Compass,
+    text: "You're comfortable with tradition and ritual — even brand new to it. Curiosity matters far more than prior knowledge.",
+  },
+  {
+    icon: CalendarCheck,
+    text: "You're willing to commit time: regular Lodge meetings, the Festive Board afterward, and genuinely progressing through the three degrees.",
   },
 ];
 
@@ -254,6 +290,69 @@ const JoinUs = () => {
                 Frequently Asked Questions
               </Link>
             </div>
+          </div>
+        </section>
+
+        {/* ── Is This You? — soft self-assessment, not a hard gate ── */}
+        <section
+          className="py-12 sm:py-20 md:py-24 bg-background border-t border-border"
+          aria-labelledby="is-this-you-heading"
+        >
+          <div className="container mx-auto px-4 sm:px-6 max-w-4xl">
+            <motion.div {...motionProps()} className="text-center mb-12">
+              <div className="h-0.5 w-16 bg-gold mx-auto mb-6" aria-hidden="true" />
+              <h2
+                id="is-this-you-heading"
+                className="text-3xl md:text-4xl font-serif text-foreground mb-4"
+              >
+                Is This You?
+              </h2>
+              <p className="text-muted-foreground font-sans max-w-2xl mx-auto leading-relaxed">
+                There's no single "type" who joins Freemasons in Guildford — but most of our members
+                recognise a little of themselves in the list below before they ever pick up the phone.
+              </p>
+            </motion.div>
+
+            <ul className="grid sm:grid-cols-2 gap-5 list-none p-0 m-0">
+              {profilePoints.map(({ icon: Icon, text }, i) => (
+                <motion.li
+                  key={text}
+                  {...motionProps(i * 0.06)}
+                  className="flex items-start gap-4 bg-card border border-border rounded-sm p-5"
+                >
+                  <span
+                    className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-gold-light/40 shrink-0"
+                    aria-hidden="true"
+                  >
+                    <Icon className="w-5 h-5 text-gold-dark" aria-hidden="true" />
+                  </span>
+                  <span className="text-foreground font-sans text-sm leading-relaxed pt-1.5">
+                    {text}
+                  </span>
+                </motion.li>
+              ))}
+            </ul>
+
+            <motion.div {...motionProps(0.3)} className="text-center mt-10">
+              <p className="text-muted-foreground font-sans text-sm max-w-2xl mx-auto mb-4">
+                New to Freemasonry entirely, with no family connection and no one to vouch for you?
+                That's absolutely fine — curiosity matters far more than prior knowledge. Weybridge
+                Lodge openly welcomes enquiries; we're a Masonic Lodge in Surrey, not a closed,
+                invitation-only circle.{" "}
+                <Link to="/faq" className="text-gold hover:underline font-medium">
+                  See who can join on our FAQ page
+                </Link>
+                .
+              </p>
+              <Link
+                to="/quiz"
+                aria-label="Not sure? Take the 2-minute suitability quiz"
+                className="inline-flex items-center gap-2 text-sm font-sans font-semibold text-gold uppercase tracking-widest hover:underline min-h-[48px]"
+              >
+                Not sure yet? Take the 2-Min Quiz
+                <ArrowRight className="w-4 h-4" aria-hidden="true" />
+              </Link>
+            </motion.div>
           </div>
         </section>
 
