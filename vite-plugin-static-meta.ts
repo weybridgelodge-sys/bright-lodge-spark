@@ -204,6 +204,8 @@ const staticRoutes: RouteMeta[] = [
     description:
       "Join Weybridge & Astolat Lodges for a black tie charity gala on 22 August 2026 at Macdonald Frimley Hall Hotel. Three-course dinner, DJ, raffle — in aid of Action for Carers Surrey. Tickets £75.",
     canonical: "/ladies-festival",
+    image:
+      "https://weybridgelodge.org.uk/__l5e/assets-v1/b967fd27-560d-40ad-bd79-1dcd5c4c5dba/ladies-festival-2026-group-staircase.jpg",
   },
   {
     // Intentional alias of /ladies-festival — same meta, canonical stays put.
@@ -212,6 +214,8 @@ const staticRoutes: RouteMeta[] = [
     description:
       "Join Weybridge & Astolat Lodges for a black tie charity gala on 22 August 2026 at Macdonald Frimley Hall Hotel. Three-course dinner, DJ, raffle — in aid of Action for Carers Surrey. Tickets £75.",
     canonical: "/ladies-festival",
+    image:
+      "https://weybridgelodge.org.uk/__l5e/assets-v1/b967fd27-560d-40ad-bd79-1dcd5c4c5dba/ladies-festival-2026-group-staircase.jpg",
   },
   {
     route: "quiz",
@@ -288,7 +292,10 @@ async function postRoutes(): Promise<RouteMeta[]> {
           : toMetaDescription(
               `${r.title} — news from Weybridge Lodge No. 6787, Freemasons at the Guildford Masonic Centre in Surrey.`,
             );
-        return { route, title: r.title!, description, canonical: `/${route}` };
+        const image = r.mainImageUrl
+          ? `${r.mainImageUrl}?w=1200&h=630&fit=crop&auto=format`
+          : undefined;
+        return { route, title: r.title!, description, canonical: `/${route}`, image };
       });
   } catch (err) {
     console.warn("static-meta: could not fetch posts from Sanity.", err);
@@ -300,10 +307,15 @@ async function videoRoutes(): Promise<RouteMeta[]> {
 
   try {
     const rows = await sanity.fetch<
-      { title?: string; slug?: { current?: string }; description?: string }[]
+      {
+        title?: string;
+        slug?: { current?: string };
+        description?: string;
+        youtubeId?: string;
+      }[]
     >(
       `*[_type == "video" && published != false && defined(youtubeId)] | order(coalesce(order, 999), title asc) {
-        title, slug, description
+        title, slug, description, youtubeId
       }`,
     );
     return rows
@@ -318,6 +330,9 @@ async function videoRoutes(): Promise<RouteMeta[]> {
           title: `${r.title} — Video`,
           description: toMetaDescription(description),
           canonical: `/video-hub/${slug}`,
+          image: r.youtubeId
+            ? `https://i.ytimg.com/vi/${r.youtubeId}/hqdefault.jpg`
+            : undefined,
         };
       });
   } catch (err) {
