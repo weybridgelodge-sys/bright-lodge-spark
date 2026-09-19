@@ -45,10 +45,10 @@ const quizQuestions: Question[] = [
   },
   {
     id: 3,
-    text: "Lodge attendance involves a regular commitment — usually one evening a month for meetings, plus occasional practices. Can you balance this with your family and work life?",
+    text: "Lodge attendance means four formal Lodge meetings a year (October, December, February and May), plus weekly Lodge of Instruction evenings from September through May — some purely social in character. Can you balance this with your family and work life?",
     options: [
-      { text: "Yes, I can comfortably commit to a regular evening each month.", score: "high" },
-      { text: "My schedule is busy, but I can prioritise something that matters to me.", score: "neutral" },
+      { text: "Yes, I can comfortably commit to the four main meetings and a good number of LOI evenings.", score: "high" },
+      { text: "My schedule is busy, but I can prioritise something that matters to me — even if I can't make every LOI night.", score: "neutral" },
       { text: "My schedule is completely unpredictable and leaves very little free time.", score: "low" },
     ],
   },
