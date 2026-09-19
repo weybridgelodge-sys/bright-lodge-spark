@@ -77,6 +77,33 @@ const costCards: CostCard[] = [
   },
 ];
 
+const profilePoints: ProfilePoint[] = [
+  {
+    icon: MapPin,
+    text: "You're a man roughly in your mid-20s to 60s, living in or near Guildford, Woking, Godalming, Farnham, Cranleigh or Leatherhead.",
+  },
+  {
+    icon: HeartHandshake,
+    text: "You're looking for genuine friendship, not networking — a real connection rather than a professional or transactional angle.",
+  },
+  {
+    icon: GraduationCap,
+    text: "You're drawn to self-improvement through structure, ceremony and mentorship from those who've walked the path before you.",
+  },
+  {
+    icon: HandHelping,
+    text: "You're community-minded, with a natural pull toward charitable giving and volunteering in Guildford and across Surrey.",
+  },
+  {
+    icon: Compass,
+    text: "You're comfortable with tradition and ritual — even brand new to it. Curiosity matters far more than prior knowledge.",
+  },
+  {
+    icon: CalendarCheck,
+    text: "You're willing to commit time: regular Lodge meetings, the Festive Board afterward, and genuinely progressing through the three degrees.",
+  },
+];
+
 // ─── Component ────────────────────────────────────────────────────────────────
 const JoinUs = () => {
   const shouldReduceMotion = useReducedMotion();
