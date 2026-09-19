@@ -270,10 +270,11 @@ async function postRoutes(): Promise<RouteMeta[]> {
         slug?: { current?: string };
         excerpt?: string;
         legacyRoute?: string;
+        mainImageUrl?: string;
       }[]
     >(
       `*[_type == "post" && defined(slug.current)] | order(publishedAt desc) {
-        title, slug, excerpt, legacyRoute
+        title, slug, excerpt, legacyRoute, "mainImageUrl": mainImage.asset->url
       }`,
     );
     return rows
@@ -341,6 +342,7 @@ function renderHead(baseHtml: string, meta: RouteMeta) {
   const t = escape(buildTitle(meta.title));
   const d = escape(meta.description);
   const url = `${BASE_URL}${meta.canonical}`;
+  const img = escape(meta.image || DEFAULT_OG_IMAGE);
 
   let html = baseHtml;
   html = replaceTag(html, /<title>[\s\S]*?<\/title>/, `<title>${t}</title>`);
@@ -378,6 +380,16 @@ function renderHead(baseHtml: string, meta: RouteMeta) {
     html,
     /<meta name="twitter:description" content="[^"]*" \/>/,
     `<meta name="twitter:description" content="${d}" />`,
+  );
+  html = replaceTag(
+    html,
+    /<meta property="og:image" content="[^"]*" \/>/,
+    `<meta property="og:image" content="${img}" />`,
+  );
+  html = replaceTag(
+    html,
+    /<meta name="twitter:image" content="[^"]*" \/>/,
+    `<meta name="twitter:image" content="${img}" />`,
   );
   return html;
 }
