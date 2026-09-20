@@ -635,6 +635,19 @@ function NewsletterHubInner() {
     if (!s) return;
     updateSection(sectionId, { blocks: s.blocks.filter((b) => b.id !== blockId) });
   };
+  const moveBlock = (sectionId: string, blockId: string, dir: -1 | 1) =>
+    updateSection(sectionId, {
+      blocks: (() => {
+        const s = sections.find((x) => x.id === sectionId);
+        if (!s) return s?.blocks || [];
+        const i = s.blocks.findIndex((b) => b.id === blockId);
+        const j = i + dir;
+        if (i < 0 || j < 0 || j >= s.blocks.length) return s.blocks;
+        const next = [...s.blocks];
+        [next[i], next[j]] = [next[j], next[i]];
+        return next;
+      })(),
+    });
 
   /** Copy the body of this section from the OTHER audience variant into the current one. */
   const copyFromOther = (sectionId: string) => {
@@ -865,17 +878,29 @@ function NewsletterHubInner() {
 
 
                 <div className="space-y-2 pl-1">
-                  {s.blocks.map((b) => (
+                  {s.blocks.map((b, bIdx) => (
                     <div key={b.id} className="rounded border border-gold/10 bg-navy-dark/60 p-2">
                       <div className="flex items-center justify-between mb-1.5">
                         <span className="text-[10px] uppercase tracking-wider text-gold/70 flex items-center gap-1">
                           {b.type === "text" ? <Type className="h-3 w-3" /> : <ImageIcon className="h-3 w-3" />}
                           {b.type}
                         </span>
-                        <button type="button" onClick={() => removeBlock(s.id, b.id)}
-                          className="text-red-400/80 hover:text-red-400" aria-label="Remove block">
-                          <Trash2 className="h-3 w-3" />
-                        </button>
+                        <div className="flex items-center gap-2">
+                          <button type="button" onClick={() => moveBlock(s.id, b.id, -1)} disabled={bIdx === 0}
+                            className="text-gold/70 hover:text-gold disabled:opacity-30 disabled:hover:text-gold/70"
+                            aria-label="Move block up" title="Move block up">
+                            <ArrowUp className="h-3 w-3" />
+                          </button>
+                          <button type="button" onClick={() => moveBlock(s.id, b.id, 1)} disabled={bIdx === s.blocks.length - 1}
+                            className="text-gold/70 hover:text-gold disabled:opacity-30 disabled:hover:text-gold/70"
+                            aria-label="Move block down" title="Move block down">
+                            <ArrowDown className="h-3 w-3" />
+                          </button>
+                          <button type="button" onClick={() => removeBlock(s.id, b.id)}
+                            className="text-red-400/80 hover:text-red-400" aria-label="Remove block">
+                            <Trash2 className="h-3 w-3" />
+                          </button>
+                        </div>
                       </div>
                       {b.type === "text" ? (
                         <div className="space-y-1.5">
