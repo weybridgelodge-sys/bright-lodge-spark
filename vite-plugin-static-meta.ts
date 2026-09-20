@@ -80,6 +80,13 @@ const staticRoutes: RouteMeta[] = [
     canonical: "/news/category/ceremony",
   },
   {
+    route: "news/category/general",
+    title: "General News",
+    description:
+      "General news and updates from Weybridge Lodge No. 6787 in Guildford, Surrey.",
+    canonical: "/news/category/general",
+  },
+  {
 
     route: "what-is-freemasonry",
     title:
