@@ -238,7 +238,7 @@ const staticRoutes: RouteMeta[] = [
       "Follow Weybridge Lodge No. 6787 on the Thames Towpath Challenge — a long-distance charity walk from London to the source, told through the people, places, setbacks and determination behind the miles.",
     canonical: "/thames-challenge",
     image:
-      "https://weybridgelodge.org.uk/__l5e/assets-v1/a5a19380-00b3-4528-b352-273e6e6ac212/tc-maidenhead-bridge.jpg",
+      "https://weybridgelodge.org.uk/__l5e/assets-v1/078ef524-5c5f-4169-92a8-5a04de22aacb/tc-maidenhead-bridge.jpg",
   },
 ];
 
