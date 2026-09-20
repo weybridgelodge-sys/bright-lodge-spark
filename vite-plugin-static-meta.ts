@@ -42,6 +42,44 @@ const buildTitle = (title: string) =>
 // ── Static pages — props copied verbatim from each page component ──
 const staticRoutes: RouteMeta[] = [
   {
+    // Homepage — overwrites dist/index.html, which also serves as the SPA
+    // fallback for any route without its own prerendered variant.
+    route: "",
+    title: "Freemasons in Guildford, Surrey | Weybridge Lodge No. 6787",
+    description:
+      "Join the Freemasons in Guildford, Surrey. Weybridge Lodge No. 6787 is a friendly, open lodge at Guildford Masonic Centre — find out how to join, our charity work, and our history.",
+    canonical: "/",
+  },
+  {
+    route: "news",
+    title: "News",
+    description:
+      "Latest news and updates from Weybridge Lodge No. 6787 — Masonic meetings, charity events and social gatherings in Guildford, Surrey.",
+    canonical: "/news",
+  },
+  {
+    route: "news/category/charity",
+    title: "Charity News",
+    description:
+      "Charity news and updates from Weybridge Lodge No. 6787 in Guildford, Surrey.",
+    canonical: "/news/category/charity",
+  },
+  {
+    route: "news/category/lodge-meetings",
+    title: "Lodge Meetings News",
+    description:
+      "Lodge Meetings news and updates from Weybridge Lodge No. 6787 in Guildford, Surrey.",
+    canonical: "/news/category/lodge-meetings",
+  },
+  {
+    route: "news/category/ceremony",
+    title: "Ceremony News",
+    description:
+      "Ceremony news and updates from Weybridge Lodge No. 6787 in Guildford, Surrey.",
+    canonical: "/news/category/ceremony",
+  },
+  {
+
     route: "what-is-freemasonry",
     title:
       "What is Freemasonry? | Freemasons in Guildford, Surrey — Weybridge Lodge No. 6787",
