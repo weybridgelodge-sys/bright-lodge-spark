@@ -15,8 +15,9 @@ import { createClient } from "@sanity/client";
  *   title === SITE_NAME ? title : `${title} | ${SITE_NAME}`
  *
  * Excluded by design: /members/*, /checkout/return, /unsubscribe,
- * /history/archive (duplicate of /heritage), /news/category/*, and the
- * generic /news/:slug Sanity fallback.
+ * /history/archive (duplicate of /heritage), and the generic /news/:slug
+ * Sanity fallback.
+
  */
 
 const SITE_NAME = "Weybridge Lodge No. 6787";
