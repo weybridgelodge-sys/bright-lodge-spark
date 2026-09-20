@@ -14,7 +14,33 @@ const BASE_URL = "https://weybridgelodge.org.uk";
 
 const DEFAULT_OG_IMAGE = `${BASE_URL}/og-image.png`;
 
+/**
+ * The build-time prerender (vite-plugin-static-meta.ts) bakes description,
+ * canonical, og:* and twitter:* tags into each route's static HTML. Helmet
+ * only dedupes tags it rendered itself, so those static tags would otherwise
+ * survive alongside Helmet's, giving every page two meta descriptions.
+ *
+ * Helmet marks everything it owns with data-rh, so any tag of exactly these
+ * types WITHOUT data-rh is a static leftover and is removed once, before the
+ * first Helmet render. Nothing else in <head> is touched.
+ */
+let staticMetaCleared = false;
+const clearStaticMeta = () => {
+  if (staticMetaCleared || typeof document === "undefined") return;
+  staticMetaCleared = true;
+  document.head
+    .querySelectorAll(
+      'meta[name="description"]:not([data-rh]),' +
+        'link[rel="canonical"]:not([data-rh]),' +
+        'meta[property^="og:"]:not([data-rh]),' +
+        'meta[name^="twitter:"]:not([data-rh])',
+    )
+    .forEach((el) => el.remove());
+};
+
 const SEO = ({ title, description, canonical, type = "website", image, schema }: SEOProps) => {
+  clearStaticMeta();
+
   const fullTitle = title.includes(SITE_NAME) ? title : `${title} | ${SITE_NAME}`;
   const url = canonical ? `${BASE_URL}${canonical}` : undefined;
   const ogImage = image || DEFAULT_OG_IMAGE;
