@@ -9,9 +9,12 @@ import { Loader2, Target } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { fetchAccounts, money, type Account } from "@/lib/treasurer/reports";
 import {
-  budgetYearOptions, fetchAnnualBudget, fetchBudgetLines, saveAnnualBudget, upsertBudgetLine,
-  type AnnualBudget, type LodgeYear,
+  budgetYearOptions, fetchAnnualBudget, fetchBudgetLines, fetchReserveBudgetLines, saveAnnualBudget,
+  upsertBudgetLine, upsertReserveBudgetLine, type AnnualBudget, type LodgeYear,
 } from "@/lib/treasurer/budget";
+import { fetchReservePots, type ReservePot } from "@/lib/treasurer/subscriptionSettings";
+
+type Row = { id: string; label: string };
 
 const toPence = (v: string) => Math.round((parseFloat(v || "0") || 0) * 100);
 const toPounds = (p: number) => (p / 100).toFixed(2);
@@ -27,22 +30,33 @@ export default function AnnualBudgetTab({ canEdit }: { canEdit: boolean }) {
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [amounts, setAmounts] = useState<Record<string, string>>({});
   const [saved, setSaved] = useState<Record<string, number>>({});
+  const [pots, setPots] = useState<ReservePot[]>([]);
   const [existing, setExisting] = useState<AnnualBudget | null>(null);
   const [notes, setNotes] = useState("");
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const [accts, lines, header] = await Promise.all([
+      const [accts, lines, reservePots, reserveLines, header] = await Promise.all([
         fetchAccounts(),
         fetchBudgetLines(ly.start),
+        fetchReservePots(),
+        fetchReserveBudgetLines(ly.start),
         fetchAnnualBudget(ly.start),
       ]);
-      setAccounts(accts.filter((a) => a.account_type === "income" || a.account_type === "expense"));
-      const byAccount: Record<string, number> = {};
-      for (const l of lines) byAccount[l.account_id] = Number(l.amount_pence ?? 0);
-      setSaved(byAccount);
-      setAmounts(Object.fromEntries(accts.map((a) => [a.id, toPounds(byAccount[a.id] ?? 0)])));
+      const pl = accts.filter((a) => a.account_type === "income" || a.account_type === "expense");
+      // pots with generated fallback ids aren't real rows and can't be budgeted against
+      const realPots = reservePots.filter((p) => !p.id.startsWith("fallback-"));
+      setAccounts(pl);
+      setPots(realPots);
+
+      const byKey: Record<string, number> = {};
+      for (const l of lines) byKey[l.account_id] = Number(l.amount_pence ?? 0);
+      for (const l of reserveLines) byKey[l.pot_id] = Number(l.amount_pence ?? 0);
+      setSaved(byKey);
+      setAmounts(
+        Object.fromEntries([...pl, ...realPots].map((r) => [r.id, toPounds(byKey[r.id] ?? 0)])),
+      );
       setExisting(header);
       setNotes(header?.notes ?? "");
     } catch (e: any) {
@@ -53,13 +67,17 @@ export default function AnnualBudgetTab({ canEdit }: { canEdit: boolean }) {
 
   useEffect(() => { load(); }, [load]);
 
-  const income = accounts.filter((a) => a.account_type === "income");
-  const expense = accounts.filter((a) => a.account_type === "expense");
-  const total = (rows: Account[]) => rows.reduce((s, a) => s + toPence(amounts[a.id] ?? "0"), 0);
+  const income: Row[] = accounts.filter((a) => a.account_type === "income").map((a) => ({ id: a.id, label: `${a.code} — ${a.name}` }));
+  const expense: Row[] = accounts.filter((a) => a.account_type === "expense").map((a) => ({ id: a.id, label: `${a.code} — ${a.name}` }));
+  const reserves: Row[] = pots.map((p) => ({ id: p.id, label: p.label }));
+  const total = (rows: Row[]) => rows.reduce((s, r) => s + toPence(amounts[r.id] ?? "0"), 0);
   const incomeTotal = total(income);
   const expenseTotal = total(expense);
+  const reserveTotal = total(reserves);
 
-  const dirty = accounts.filter((a) => toPence(amounts[a.id] ?? "0") !== (saved[a.id] ?? 0));
+  const isDirty = (id: string) => toPence(amounts[id] ?? "0") !== (saved[id] ?? 0);
+  const dirty = accounts.filter((a) => isDirty(a.id));
+  const dirtyPots = pots.filter((p) => isDirty(p.id));
   const notesDirty = (notes.trim() || null) !== (existing?.notes ?? null);
 
   const save = async () => {
@@ -70,6 +88,14 @@ export default function AnnualBudgetTab({ canEdit }: { canEdit: boolean }) {
           lodgeYear: ly,
           accountId: a.id,
           amountPence: toPence(amounts[a.id] ?? "0"),
+          userId: user?.id ?? null,
+        });
+      }
+      for (const p of dirtyPots) {
+        await upsertReserveBudgetLine({
+          lodgeYear: ly,
+          potId: p.id,
+          amountPence: toPence(amounts[p.id] ?? "0"),
           userId: user?.id ?? null,
         });
       }
