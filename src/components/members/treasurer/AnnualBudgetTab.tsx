@@ -144,7 +144,7 @@ export default function AnnualBudgetTab({ canEdit }: { canEdit: boolean }) {
           </div>
         ))}
         <div className="flex items-center justify-between border-t border-gold/30 pt-2 font-semibold">
-          <span className="text-gold text-sm">Total {title.toLowerCase()}</span>
+          <span className="text-gold text-sm">{totalLabel ?? `Total ${title.toLowerCase()}`}</span>
           <span className="tabular-nums text-sm pr-3">{money(totalPence)}</span>
         </div>
       </div>
@@ -181,6 +181,13 @@ export default function AnnualBudgetTab({ canEdit }: { canEdit: boolean }) {
           <>
             <Group title="Income" rows={income} totalPence={incomeTotal} />
             <Group title="Expenditure" rows={expense} totalPence={expenseTotal} />
+            <Group
+              title="Designated reserves"
+              rows={reserves}
+              totalPence={reserveTotal}
+              totalLabel="Total designated reserves"
+              hint="Balance-sheet reserve pots — planning only; not included in the income or expenditure budget totals."
+            />
 
             <div className="space-y-1.5 pt-2">
               <Label htmlFor="budget-notes">Notes</Label>
