@@ -396,6 +396,14 @@ function Inner() {
                 <span>Membership Breakeven</span>
               </TabsTrigger>
             )}
+            <TabsTrigger
+              value="budget"
+              className="w-full flex items-center justify-start gap-3 px-4 py-3 rounded-sm text-sm font-sans text-primary-foreground/80 transition-colors hover:text-gold hover:bg-navy-light/40 data-[state=active]:bg-gold/15 data-[state=active]:text-gold data-[state=active]:shadow-none"
+            >
+              <Target className="w-4 h-4 shrink-0" />
+              <span>Budget</span>
+            </TabsTrigger>
+
 
             <div className="mt-2 px-4 py-2 text-xs font-sans font-semibold uppercase tracking-wider text-gold border-t border-gold/20">Reconciliation</div>
             <TabsTrigger
@@ -440,6 +448,9 @@ function Inner() {
               <BreakevenCalculatorTab canEdit={canEditTx} />
             </TabsContent>
           )}
+          <TabsContent value="budget" className="mt-4">
+            <AnnualBudgetTab canEdit={canEditTx} />
+          </TabsContent>
           <TabsContent value="dining" className="mt-4">
             <DiningReconciliationTab canEdit={canEditTx} />
           </TabsContent>
