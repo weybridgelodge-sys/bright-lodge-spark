@@ -63,12 +63,12 @@ export default function TreasuryBudgetCard() {
               <Line label="Year to date actual" value={gbpPence(snap.incomeActualPence)} />
               <Line
                 label="Annual budget"
-                value={snap.budget ? gbpPence(snap.budget.income_budget_pence) : "—"}
+                value={snap.budget ? gbpPence(snap.budget.incomePence) : "—"}
                 muted={!snap.budget}
               />
               {snap.budget && (
                 <p className="text-[11px] text-primary-foreground/60">
-                  {pct(snap.incomeActualPence, snap.budget.income_budget_pence) ?? "No budget figure set"}
+                  {pct(snap.incomeActualPence, snap.budget.incomePence) ?? "No budget figure set"}
                 </p>
               )}
             </div>
@@ -78,12 +78,12 @@ export default function TreasuryBudgetCard() {
               <Line label="Year to date actual" value={gbpPence(snap.expenditureActualPence)} />
               <Line
                 label="Annual budget"
-                value={snap.budget ? gbpPence(snap.budget.expenditure_budget_pence) : "—"}
+                value={snap.budget ? gbpPence(snap.budget.expenditurePence) : "—"}
                 muted={!snap.budget}
               />
               {snap.budget && (
                 <p className="text-[11px] text-primary-foreground/60">
-                  {pct(snap.expenditureActualPence, snap.budget.expenditure_budget_pence) ?? "No budget figure set"}
+                  {pct(snap.expenditureActualPence, snap.budget.expenditurePence) ?? "No budget figure set"}
                 </p>
               )}
             </div>
