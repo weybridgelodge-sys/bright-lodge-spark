@@ -200,22 +200,23 @@ function ReconciliationTab({
 function PeriodDialog({
   open, onOpenChange, editing, onSaved,
 }: { open: boolean; onOpenChange: (v: boolean) => void; editing: Period | null; onSaved: () => void }) {
-  const [label, setLabel] = useState("");
-  const [start, setStart] = useState("");
-  const [end, setEnd] = useState("");
+  const [month, setMonth] = useState(""); // "YYYY-MM"
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (!open) return;
-    setLabel(editing?.label ?? "");
-    setStart(editing?.period_start ?? "");
-    setEnd(editing?.period_end ?? "");
+    setMonth(editing?.period_start ? editing.period_start.slice(0, 7) : "");
   }, [open, editing]);
 
   const save = async () => {
-    if (!label.trim()) { toast({ title: "Label required", variant: "destructive" }); return; }
+    if (!/^\d{4}-\d{2}$/.test(month)) { toast({ title: "Choose a month", variant: "destructive" }); return; }
     setSaving(true);
-    const payload = { label: label.trim(), period_start: start || null, period_end: end || null };
+    const [y, m] = month.split("-").map(Number);
+    const period_start = `${month}-01`;
+    const lastDay = new Date(Date.UTC(y, m, 0)).getUTCDate(); // m is 1-based; day 0 of next month
+    const period_end = `${month}-${String(lastDay).padStart(2, "0")}`;
+    const label = new Date(Date.UTC(y, m - 1, 1)).toLocaleDateString("en-GB", { month: "long", year: "numeric", timeZone: "UTC" });
+    const payload = { label, period_start, period_end };
     const res = editing
       ? await supabase.from("treasurer_periods" as any).update(payload).eq("id", editing.id)
       : await supabase.from("treasurer_periods" as any).insert(payload);
@@ -231,18 +232,11 @@ function PeriodDialog({
         <DialogHeader><DialogTitle className="font-serif text-gold">{editing ? "Edit period" : "New period"}</DialogTitle></DialogHeader>
         <div className="space-y-3">
           <div>
-            <Label>Label</Label>
-            <Input value={label} onChange={(e) => setLabel(e.target.value)} placeholder="e.g. October 2026 Meeting" />
-          </div>
-          <div className="grid sm:grid-cols-2 gap-3">
-            <div>
-              <Label>Start date</Label>
-              <Input type="date" value={start} onChange={(e) => setStart(e.target.value)} />
-            </div>
-            <div>
-              <Label>End date</Label>
-              <Input type="date" value={end} onChange={(e) => setEnd(e.target.value)} />
-            </div>
+            <Label>Month</Label>
+            <Input type="month" value={month} onChange={(e) => setMonth(e.target.value)} />
+            <p className="text-xs text-primary-foreground/60 mt-1">
+              The period covers the whole calendar month (1st to last day), labelled automatically.
+            </p>
           </div>
         </div>
         <DialogFooter>

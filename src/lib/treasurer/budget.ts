@@ -69,7 +69,8 @@ const monthKey = (y: number, m: number) => `${y}-${String(m + 1).padStart(2, "0"
 
 /**
  * A quarter counts as closed only when each of its three months is covered by a
- * locked treasurer_periods row (a locked period whose date range intersects the month).
+ * locked treasurer_periods row that matches that month exactly (period_start is
+ * the 1st of the month and period_end is the last day of the month).
  * Looks backwards from today and returns the most recent qualifying quarter.
  */
 export async function findLatestClosedQuarter(): Promise<ClosedQuarter | null> {
@@ -84,11 +85,12 @@ export async function findLatestClosedQuarter(): Promise<ClosedQuarter | null> {
   for (const p of periods) {
     const s = new Date(p.period_start + "T00:00:00Z");
     const e = new Date(p.period_end + "T00:00:00Z");
-    const cur = new Date(Date.UTC(s.getUTCFullYear(), s.getUTCMonth(), 1));
-    while (cur <= e) {
-      lockedMonths.add(monthKey(cur.getUTCFullYear(), cur.getUTCMonth()));
-      cur.setUTCMonth(cur.getUTCMonth() + 1);
-    }
+    // exact whole-month match: starts on the 1st, ends on the last day of the same month
+    if (s.getUTCDate() !== 1) continue;
+    if (s.getUTCFullYear() !== e.getUTCFullYear() || s.getUTCMonth() !== e.getUTCMonth()) continue;
+    const lastDay = new Date(Date.UTC(s.getUTCFullYear(), s.getUTCMonth() + 1, 0)).getUTCDate();
+    if (e.getUTCDate() !== lastDay) continue;
+    lockedMonths.add(monthKey(s.getUTCFullYear(), s.getUTCMonth()));
   }
 
   const now = new Date();
