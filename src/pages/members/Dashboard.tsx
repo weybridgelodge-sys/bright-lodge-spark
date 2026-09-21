@@ -76,6 +76,8 @@ export default function MembersDashboard() {
 
       {isAdmin && user?.id && <DuesAttentionBanner memberId={user.id} />}
 
+      {isAdmin && <TreasuryBudgetCard />}
+
       <ActivePoll />
 
       {health && (
