@@ -3848,9 +3848,9 @@ export type Database = {
         Row: {
           created_at: string
           created_by: string | null
-          expenditure_budget_pence: number
+          expenditure_budget_pence: number | null
           id: string
-          income_budget_pence: number
+          income_budget_pence: number | null
           label: string
           lodge_year_end: string
           lodge_year_start: string
@@ -3861,9 +3861,9 @@ export type Database = {
         Insert: {
           created_at?: string
           created_by?: string | null
-          expenditure_budget_pence?: number
+          expenditure_budget_pence?: number | null
           id?: string
-          income_budget_pence?: number
+          income_budget_pence?: number | null
           label: string
           lodge_year_end: string
           lodge_year_start: string
@@ -3874,9 +3874,9 @@ export type Database = {
         Update: {
           created_at?: string
           created_by?: string | null
-          expenditure_budget_pence?: number
+          expenditure_budget_pence?: number | null
           id?: string
-          income_budget_pence?: number
+          income_budget_pence?: number | null
           label?: string
           lodge_year_end?: string
           lodge_year_start?: string
@@ -3911,6 +3911,53 @@ export type Database = {
             columns: ["updated_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      treasurer_budget_lines: {
+        Row: {
+          account_id: string
+          amount_pence: number
+          created_at: string
+          created_by: string | null
+          id: string
+          label: string
+          lodge_year_end: string
+          lodge_year_start: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          account_id: string
+          amount_pence?: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          label: string
+          lodge_year_end: string
+          lodge_year_start: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          account_id?: string
+          amount_pence?: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          label?: string
+          lodge_year_end?: string
+          lodge_year_start?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "treasurer_budget_lines_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "chart_of_accounts"
             referencedColumns: ["id"]
           },
         ]

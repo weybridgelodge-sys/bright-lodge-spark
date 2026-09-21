@@ -246,6 +246,13 @@
       "when": 1789999499947,
       "tag": "0034_create_treasurer_annual_budgets",
       "breakpoints": true
+    },
+    {
+      "idx": 35,
+      "version": "7",
+      "when": 1790024515632,
+      "tag": "0035_create_treasurer_budget_lines",
+      "breakpoints": true
     }
   ]
 }
