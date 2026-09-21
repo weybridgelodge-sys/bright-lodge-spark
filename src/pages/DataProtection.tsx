@@ -9,7 +9,7 @@ const DataProtection = () => {
     <div className="min-h-screen">
       <SEO
         title="Data Protection Policy"
-        description="Data protection and privacy policy for Weybridge Lodge No. 6787 website."
+        description="Data protection and privacy policy for Weybridge Lodge No. 6787, the Freemasons Lodge in Guildford, Surrey — how we handle your personal data."
         canonical="/data-protection"
       />
       <a href="#main-content" className="skip-to-content">Skip to main content</a>

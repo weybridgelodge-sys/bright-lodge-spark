@@ -62,28 +62,28 @@ const staticRoutes: RouteMeta[] = [
     route: "news/category/charity",
     title: "Charity News",
     description:
-      "Charity news and updates from Weybridge Lodge No. 6787 in Guildford, Surrey.",
+      "Charity news and fundraising updates from Weybridge Lodge No. 6787 — supporting local and national causes across Guildford and Surrey.",
     canonical: "/news/category/charity",
   },
   {
     route: "news/category/lodge-meetings",
     title: "Lodge Meetings News",
     description:
-      "Lodge Meetings news and updates from Weybridge Lodge No. 6787 in Guildford, Surrey.",
+      "News and updates from Lodge meetings at Weybridge Lodge No. 6787 — business, ceremony and fellowship at the Guildford Masonic Centre, Surrey.",
     canonical: "/news/category/lodge-meetings",
   },
   {
     route: "news/category/ceremony",
     title: "Ceremony News",
     description:
-      "Ceremony news and updates from Weybridge Lodge No. 6787 in Guildford, Surrey.",
+      "Ceremony news from Weybridge Lodge No. 6787 — initiations, passings, raisings and other Masonic ceremonies at the Guildford Masonic Centre, Surrey.",
     canonical: "/news/category/ceremony",
   },
   {
     route: "news/category/general",
     title: "General News",
     description:
-      "General news and updates from Weybridge Lodge No. 6787 in Guildford, Surrey.",
+      "General news and updates from Weybridge Lodge No. 6787 — Freemasons in Guildford, Surrey, covering stories beyond our main news categories.",
     canonical: "/news/category/general",
   },
   {
@@ -143,7 +143,7 @@ const staticRoutes: RouteMeta[] = [
     route: "data-protection",
     title: "Data Protection Policy",
     description:
-      "Data protection and privacy policy for Weybridge Lodge No. 6787 website.",
+      "Data protection and privacy policy for Weybridge Lodge No. 6787, the Freemasons Lodge in Guildford, Surrey — how we handle your personal data.",
     canonical: "/data-protection",
   },
   {
