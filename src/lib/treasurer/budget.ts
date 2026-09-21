@@ -224,7 +224,7 @@ export async function fetchBudgetSnapshot(): Promise<BudgetSnapshot> {
     quarter,
     incomeActualPence,
     expenditureActualPence,
-    budget,
+    budget: totals.hasLines ? totals : null,
     reliefChestBalance: reliefChestBalance(collections, donations),
   };
 }
