@@ -118,39 +118,6 @@ export default function AnnualBudgetTab({ canEdit }: { canEdit: boolean }) {
     }
   };
 
-  const Group = ({ title, rows, totalPence, totalLabel, hint }: {
-    title: string; rows: Row[]; totalPence: number; totalLabel?: string; hint?: string;
-  }) => (
-    <div className="mt-5">
-      <h4 className="font-serif text-gold mb-2">{title}</h4>
-      {hint && <p className="text-[11px] text-primary-foreground/50 mb-2">{hint}</p>}
-      <div className="space-y-2">
-        {rows.length === 0 && (
-          <p className="text-xs text-primary-foreground/50">No categories defined.</p>
-        )}
-        {rows.map((a) => (
-          <div key={a.id} className="grid grid-cols-[1fr_auto] items-center gap-3">
-            <Label htmlFor={`budget-${a.id}`} className="text-sm text-primary-foreground/85 font-normal">
-              {a.label}
-            </Label>
-            <Input
-              id={`budget-${a.id}`}
-              inputMode="decimal"
-              className="w-32 text-right tabular-nums"
-              value={amounts[a.id] ?? "0.00"}
-              disabled={!canEdit}
-              onChange={(e) => setAmounts((m) => ({ ...m, [a.id]: e.target.value }))}
-            />
-          </div>
-        ))}
-        <div className="flex items-center justify-between border-t border-gold/30 pt-2 font-semibold">
-          <span className="text-gold text-sm">{totalLabel ?? `Total ${title.toLowerCase()}`}</span>
-          <span className="tabular-nums text-sm pr-3">{money(totalPence)}</span>
-        </div>
-      </div>
-    </div>
-  );
-
   return (
     <div className="rounded-sm border border-gold/20 bg-navy-light/30 max-w-2xl">
       <div className="px-4 py-3 border-b border-gold/15 flex items-center gap-2">
