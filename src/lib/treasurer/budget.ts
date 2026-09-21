@@ -188,15 +188,16 @@ export type BudgetSnapshot = {
   quarter: ClosedQuarter | null;
   incomeActualPence: number;
   expenditureActualPence: number;
-  budget: AnnualBudget | null;
+  /** Summed from this lodge year's per-category budget lines; null when none are set. */
+  budget: BudgetTotals | null;
   reliefChestBalance: number; // pounds
 };
 
 export async function fetchBudgetSnapshot(): Promise<BudgetSnapshot> {
   const ly = currentLodgeYear();
-  const [quarter, budget, collections, donations] = await Promise.all([
+  const [quarter, totals, collections, donations] = await Promise.all([
     findLatestClosedQuarter(),
-    fetchAnnualBudget(ly.start),
+    fetchBudgetTotals(ly.start),
     fetchCollections(),
     fetchDonations(),
   ]);
