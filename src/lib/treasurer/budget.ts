@@ -104,6 +104,48 @@ export async function upsertBudgetLine(input: {
   if (error) throw error;
 }
 
+// ─── Designated reserve budget lines (balance sheet — never part of P&L totals) ──
+
+export type ReserveBudgetLine = {
+  id: string;
+  lodge_year_start: string;
+  pot_id: string;
+  amount_pence: number;
+};
+
+export async function fetchReserveBudgetLines(startIso: string): Promise<ReserveBudgetLine[]> {
+  const { data, error } = await supabase
+    .from("treasurer_reserve_budget_lines" as any)
+    .select("id,lodge_year_start,pot_id,amount_pence")
+    .eq("lodge_year_start", startIso);
+  if (error) throw error;
+  return ((data as unknown as ReserveBudgetLine[]) ?? []);
+}
+
+/** Insert or update a single designated reserve pot's budgeted amount for a lodge year. */
+export async function upsertReserveBudgetLine(input: {
+  lodgeYear: LodgeYear;
+  potId: string;
+  amountPence: number;
+  userId: string | null;
+}): Promise<void> {
+  const { error } = await supabase
+    .from("treasurer_reserve_budget_lines" as any)
+    .upsert(
+      {
+        lodge_year_start: input.lodgeYear.start,
+        lodge_year_end: input.lodgeYear.end,
+        label: input.lodgeYear.label,
+        pot_id: input.potId,
+        amount_pence: input.amountPence,
+        created_by: input.userId,
+        updated_by: input.userId,
+      },
+      { onConflict: "lodge_year_start,pot_id" },
+    );
+  if (error) throw error;
+}
+
 export type BudgetTotals = { incomePence: number; expenditurePence: number; hasLines: boolean };
 
 /** Income / expenditure budget totals for a lodge year, summed from the line items. */
