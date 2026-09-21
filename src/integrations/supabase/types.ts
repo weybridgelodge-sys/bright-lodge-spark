@@ -3844,6 +3844,77 @@ export type Database = {
         }
         Relationships: []
       }
+      treasurer_annual_budgets: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          expenditure_budget_pence: number
+          id: string
+          income_budget_pence: number
+          label: string
+          lodge_year_end: string
+          lodge_year_start: string
+          notes: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          expenditure_budget_pence?: number
+          id?: string
+          income_budget_pence?: number
+          label: string
+          lodge_year_end: string
+          lodge_year_start: string
+          notes?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          expenditure_budget_pence?: number
+          id?: string
+          income_budget_pence?: number
+          label?: string
+          lodge_year_end?: string
+          lodge_year_start?: string
+          notes?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "treasurer_annual_budgets_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "calendar_subscription_status"
+            referencedColumns: ["member_id"]
+          },
+          {
+            foreignKeyName: "treasurer_annual_budgets_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "treasurer_annual_budgets_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "calendar_subscription_status"
+            referencedColumns: ["member_id"]
+          },
+          {
+            foreignKeyName: "treasurer_annual_budgets_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       treasurer_dining_invoices: {
         Row: {
           created_at: string
