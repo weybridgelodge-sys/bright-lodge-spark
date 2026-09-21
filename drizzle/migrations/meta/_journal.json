@@ -253,6 +253,13 @@
       "when": 1790024515632,
       "tag": "0035_create_treasurer_budget_lines",
       "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1790024784781,
+      "tag": "0036_create_treasurer_reserve_budget_lines",
+      "breakpoints": true
     }
   ]
 }

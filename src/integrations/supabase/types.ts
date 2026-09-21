@@ -4122,6 +4122,53 @@ export type Database = {
           },
         ]
       }
+      treasurer_reserve_budget_lines: {
+        Row: {
+          amount_pence: number
+          created_at: string
+          created_by: string | null
+          id: string
+          label: string
+          lodge_year_end: string
+          lodge_year_start: string
+          pot_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          amount_pence?: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          label: string
+          lodge_year_end: string
+          lodge_year_start: string
+          pot_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          amount_pence?: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          label?: string
+          lodge_year_end?: string
+          lodge_year_start?: string
+          pot_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "treasurer_reserve_budget_lines_pot_id_fkey"
+            columns: ["pot_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_reserve_pots"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       treasurer_transactions: {
         Row: {
           amount_pence: number
