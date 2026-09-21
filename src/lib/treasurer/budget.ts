@@ -7,22 +7,36 @@ export type AnnualBudget = {
   lodge_year_start: string;
   lodge_year_end: string;
   label: string;
-  income_budget_pence: number;
-  expenditure_budget_pence: number;
   notes: string | null;
 };
 
+/** One budgeted amount for one chart-of-accounts category in one lodge year. */
+export type BudgetLine = {
+  id: string;
+  lodge_year_start: string;
+  account_id: string;
+  amount_pence: number;
+};
+
+export type LodgeYear = { year: number; start: string; end: string; label: string };
+
 /** The lodge (treasurer) year containing today: 1 Oct – 30 Sep. */
-export function currentLodgeYear(): { year: number; start: string; end: string; label: string } {
+export function currentLodgeYear(): LodgeYear {
   const today = new Date().toISOString().slice(0, 10);
   const year = treasurerYearContaining(today);
   return { year, ...treasurerYearBounds(year) };
 }
 
+/** Current lodge year plus the next two. */
+export function budgetYearOptions(): LodgeYear[] {
+  const base = currentLodgeYear().year;
+  return [0, 1, 2].map((i) => ({ year: base + i, ...treasurerYearBounds(base + i) }));
+}
+
 export async function fetchAnnualBudget(startIso: string): Promise<AnnualBudget | null> {
   const { data, error } = await supabase
     .from("treasurer_annual_budgets" as any)
-    .select("id,lodge_year_start,lodge_year_end,label,income_budget_pence,expenditure_budget_pence,notes")
+    .select("id,lodge_year_start,lodge_year_end,label,notes")
     .eq("lodge_year_start", startIso)
     .maybeSingle();
   if (error) throw error;
@@ -34,8 +48,6 @@ export async function saveAnnualBudget(input: {
   lodge_year_start: string;
   lodge_year_end: string;
   label: string;
-  income_budget_pence: number;
-  expenditure_budget_pence: number;
   notes: string | null;
   userId: string | null;
 }): Promise<void> {
@@ -43,8 +55,6 @@ export async function saveAnnualBudget(input: {
     lodge_year_start: input.lodge_year_start,
     lodge_year_end: input.lodge_year_end,
     label: input.label,
-    income_budget_pence: input.income_budget_pence,
-    expenditure_budget_pence: input.expenditure_budget_pence,
     notes: input.notes,
     updated_by: input.userId,
   };
@@ -57,6 +67,63 @@ export async function saveAnnualBudget(input: {
       .insert({ ...row, created_by: input.userId });
     if (error) throw error;
   }
+}
+
+// ─── Per-category budget lines ──────────────────────────────────────────────
+
+export async function fetchBudgetLines(startIso: string): Promise<BudgetLine[]> {
+  const { data, error } = await supabase
+    .from("treasurer_budget_lines" as any)
+    .select("id,lodge_year_start,account_id,amount_pence")
+    .eq("lodge_year_start", startIso);
+  if (error) throw error;
+  return ((data as unknown as BudgetLine[]) ?? []);
+}
+
+/** Insert or update a single category's budgeted amount for a lodge year. */
+export async function upsertBudgetLine(input: {
+  lodgeYear: LodgeYear;
+  accountId: string;
+  amountPence: number;
+  userId: string | null;
+}): Promise<void> {
+  const { error } = await supabase
+    .from("treasurer_budget_lines" as any)
+    .upsert(
+      {
+        lodge_year_start: input.lodgeYear.start,
+        lodge_year_end: input.lodgeYear.end,
+        label: input.lodgeYear.label,
+        account_id: input.accountId,
+        amount_pence: input.amountPence,
+        created_by: input.userId,
+        updated_by: input.userId,
+      },
+      { onConflict: "lodge_year_start,account_id" },
+    );
+  if (error) throw error;
+}
+
+export type BudgetTotals = { incomePence: number; expenditurePence: number; hasLines: boolean };
+
+/** Income / expenditure budget totals for a lodge year, summed from the line items. */
+export async function fetchBudgetTotals(startIso: string): Promise<BudgetTotals> {
+  const [lines, { data: accounts, error }] = await Promise.all([
+    fetchBudgetLines(startIso),
+    supabase.from("chart_of_accounts" as any).select("id,account_type"),
+  ]);
+  if (error) throw error;
+  const typeById = new Map<string, string>(
+    ((accounts as any[]) ?? []).map((a) => [a.id as string, a.account_type as string]),
+  );
+  let incomePence = 0;
+  let expenditurePence = 0;
+  for (const l of lines) {
+    const t = typeById.get(l.account_id);
+    if (t === "income") incomePence += Number(l.amount_pence ?? 0);
+    else if (t === "expense") expenditurePence += Number(l.amount_pence ?? 0);
+  }
+  return { incomePence, expenditurePence, hasLines: lines.length > 0 };
 }
 
 // ─── Closed-quarter detection ───────────────────────────────────────────────
