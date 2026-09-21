@@ -16,6 +16,7 @@ import BankStatementsTab from "@/components/members/treasurer/BankStatementsTab"
 import BankReconciliationTab from "@/components/members/treasurer/BankReconciliationTab";
 import BreakevenCalculatorTab from "@/components/members/treasurer/BreakevenCalculatorTab";
 import EventAccountsTab from "@/components/members/treasurer/EventAccountsTab";
+import AnnualBudgetTab from "@/components/members/treasurer/AnnualBudgetTab";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -26,7 +27,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
-import { Loader2, Plus, Pencil, Trash2, Lock, Unlock, ShieldCheck, Utensils, Handshake, ArrowUpCircle, ArrowDownCircle, UserPlus, BookOpen, TrendingUp, Scale, Search, Archive, Calculator, Landmark, PartyPopper, Users } from "lucide-react";
+import { Loader2, Plus, Pencil, Trash2, Lock, Unlock, ShieldCheck, Utensils, Handshake, ArrowUpCircle, ArrowDownCircle, UserPlus, BookOpen, TrendingUp, Scale, Search, Archive, Calculator, Landmark, PartyPopper, Users, Target } from "lucide-react";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 type Period = {
@@ -395,6 +396,14 @@ function Inner() {
                 <span>Membership Breakeven</span>
               </TabsTrigger>
             )}
+            <TabsTrigger
+              value="budget"
+              className="w-full flex items-center justify-start gap-3 px-4 py-3 rounded-sm text-sm font-sans text-primary-foreground/80 transition-colors hover:text-gold hover:bg-navy-light/40 data-[state=active]:bg-gold/15 data-[state=active]:text-gold data-[state=active]:shadow-none"
+            >
+              <Target className="w-4 h-4 shrink-0" />
+              <span>Budget</span>
+            </TabsTrigger>
+
 
             <div className="mt-2 px-4 py-2 text-xs font-sans font-semibold uppercase tracking-wider text-gold border-t border-gold/20">Reconciliation</div>
             <TabsTrigger
@@ -439,6 +448,9 @@ function Inner() {
               <BreakevenCalculatorTab canEdit={canEditTx} />
             </TabsContent>
           )}
+          <TabsContent value="budget" className="mt-4">
+            <AnnualBudgetTab canEdit={canEditTx} />
+          </TabsContent>
           <TabsContent value="dining" className="mt-4">
             <DiningReconciliationTab canEdit={canEditTx} />
           </TabsContent>

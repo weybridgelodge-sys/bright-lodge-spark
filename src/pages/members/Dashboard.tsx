@@ -8,6 +8,7 @@ import { listMyGroups } from "@/lib/workingGroups";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import ActivePoll from "@/components/members/ActivePoll";
 import { DuesAttentionBanner } from "@/components/members/DuesStatusCard";
+import TreasuryBudgetCard from "@/components/members/TreasuryBudgetCard";
 import { fetchLodgeHealthBundle, lodgeHealth, type LodgeHealth, type HealthBand } from "@/lib/kpis";
 import { Activity } from "lucide-react";
 
@@ -74,6 +75,8 @@ export default function MembersDashboard() {
       </div>
 
       {isAdmin && user?.id && <DuesAttentionBanner memberId={user.id} />}
+
+      {isAdmin && <TreasuryBudgetCard />}
 
       <ActivePoll />
 

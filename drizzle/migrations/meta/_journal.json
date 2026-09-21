@@ -239,6 +239,13 @@
       "when": 1789760914622,
       "tag": "0033_regenerate_my_calendar_token",
       "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1789999499947,
+      "tag": "0034_create_treasurer_annual_budgets",
+      "breakpoints": true
     }
   ]
 }
