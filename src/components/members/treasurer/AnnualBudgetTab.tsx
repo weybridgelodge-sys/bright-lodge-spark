@@ -118,14 +118,20 @@ export default function AnnualBudgetTab({ canEdit }: { canEdit: boolean }) {
     }
   };
 
-  const Group = ({ title, rows, totalPence }: { title: string; rows: Account[]; totalPence: number }) => (
+  const Group = ({ title, rows, totalPence, totalLabel, hint }: {
+    title: string; rows: Row[]; totalPence: number; totalLabel?: string; hint?: string;
+  }) => (
     <div className="mt-5">
       <h4 className="font-serif text-gold mb-2">{title}</h4>
+      {hint && <p className="text-[11px] text-primary-foreground/50 mb-2">{hint}</p>}
       <div className="space-y-2">
+        {rows.length === 0 && (
+          <p className="text-xs text-primary-foreground/50">No categories defined.</p>
+        )}
         {rows.map((a) => (
           <div key={a.id} className="grid grid-cols-[1fr_auto] items-center gap-3">
             <Label htmlFor={`budget-${a.id}`} className="text-sm text-primary-foreground/85 font-normal">
-              {a.code} — {a.name}
+              {a.label}
             </Label>
             <Input
               id={`budget-${a.id}`}
