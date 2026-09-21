@@ -23,6 +23,19 @@ const staticImageBySlug: Record<string, string> = Object.fromEntries(
   staticPosts.map((p) => [p.slug, p.image]),
 );
 
+// ─── Per-category meta descriptions — kept in sync with staticRoutes in
+// vite-plugin-static-meta.ts. Keyed by slugified category name. ───────────────
+const CATEGORY_DESCRIPTIONS: Record<string, string> = {
+  charity:
+    "Charity news and fundraising updates from Weybridge Lodge No. 6787 — supporting local and national causes across Guildford and Surrey.",
+  ceremony:
+    "Ceremony news from Weybridge Lodge No. 6787 — initiations, passings, raisings and other Masonic ceremonies at the Guildford Masonic Centre, Surrey.",
+  "lodge-meetings":
+    "News and updates from Lodge meetings at Weybridge Lodge No. 6787 — business, ceremony and fellowship at the Guildford Masonic Centre, Surrey.",
+  general:
+    "General news and updates from Weybridge Lodge No. 6787 — Freemasons in Guildford, Surrey, covering stories beyond our main news categories.",
+};
+
 // ─── Thumbnail resolver — pure function, no closure dependencies ─────────────
 // Prefer Sanity's mainImage; for static posts with no Sanity image, use the
 // static asset mapped by slug, and only fall back to the lodge crest otherwise.
@@ -127,7 +140,8 @@ const News = () => {
           ? `${categoryFromSlug} News | Freemasons in Guildford, Surrey — Weybridge Lodge No. 6787`
           : "News & Updates | Freemasons in Guildford, Surrey — Weybridge Lodge No. 6787",
         description: categoryFromSlug
-          ? `${categoryFromSlug} news and updates from Weybridge Lodge No. 6787 — a Freemasons Lodge in Guildford, Surrey.`
+          ? CATEGORY_DESCRIPTIONS[slugifyCategory(categoryFromSlug)] ??
+            `${categoryFromSlug} news and updates from Weybridge Lodge No. 6787 — a Freemasons Lodge in Guildford, Surrey.`
           : "Latest news and updates from Weybridge Lodge No. 6787 — Masonic meetings, charity events and social gatherings at the Guildford Masonic Centre, GU2 4DR.",
         inLanguage: "en-GB",
         isPartOf: {
@@ -154,7 +168,8 @@ const News = () => {
         title={categoryFromSlug ? `${categoryFromSlug} News` : "News"}
         description={
           categoryFromSlug
-            ? `${categoryFromSlug} news and updates from Weybridge Lodge No. 6787 in Guildford, Surrey.`
+            ? CATEGORY_DESCRIPTIONS[slugifyCategory(categoryFromSlug)] ??
+              `${categoryFromSlug} news and updates from Weybridge Lodge No. 6787 in Guildford, Surrey.`
             : "Latest news and updates from Weybridge Lodge No. 6787 — Masonic meetings, charity events and social gatherings in Guildford, Surrey."
         }
         canonical={
