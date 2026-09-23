@@ -163,8 +163,8 @@ const BookingsEvent = ({
     const path = (event as any).header_image_url as string | null | undefined;
     if (!path) { setHeaderImageUrl(null); return; }
     (async () => {
-      const { data } = await supabase.storage.from("event-images").createSignedUrl(path, 60 * 60);
-      if (!cancelled) setHeaderImageUrl(data?.signedUrl ?? null);
+      const { data } = await supabase.functions.invoke("event-header-image", { body: { path } });
+      if (!cancelled) setHeaderImageUrl((data as { signedUrl?: string } | null)?.signedUrl ?? null);
     })();
     return () => { cancelled = true; };
   }, [event]);
