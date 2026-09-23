@@ -9,7 +9,6 @@ import {
   Calendar as CalendarIcon, MapPin, Clock, Ticket,
   ArrowRight, Users, Music, Gift, UtensilsCrossed,
 } from "lucide-react";
-import ladiesFestivalImg from "@/assets/events/ladies-festival-venue.jpg";
 import { Calendar } from "@/components/ui/calendar";
 import { format, isSameDay } from "date-fns";
 import { useEvents, typeLabel, typeBadgeClass } from "@/data/events";
@@ -17,51 +16,6 @@ import { useEvents, typeLabel, typeBadgeClass } from "@/data/events";
 // project theme tokens (navy, gold, background, card, border, foreground, muted-foreground).
 // Any Tailwind colour scales found there should be replaced with project tokens.
 
-
-// ─── Ladies Festival schema ───────────────────────────────────────────────────
-const ladiesFestivalSchema = {
-  "@context": "https://schema.org",
-  "@type": "SocialEvent",
-  name: "Weybridge & Astolat Lodges Ladies Festival 2026",
-  startDate: "2026-08-22T18:30:00+01:00",
-  endDate: "2026-08-23T01:00:00+01:00",
-  description:
-    "Black tie charity gala dinner in aid of Action for Carers Surrey. Three-course dinner, DJ, Grand Raffle and more at the Macdonald Frimley Hall Hotel.",
-  image: "https://weybridgelodge.org.uk/og-image.png",
-  eventStatus: "https://schema.org/EventScheduled",
-  eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
-  location: {
-    "@type": "Place",
-    name: "Macdonald Frimley Hall Hotel",
-    address: {
-      "@type": "PostalAddress",
-      streetAddress: "Lime Avenue, Frimley",
-      addressLocality: "Camberley",
-      addressRegion: "Surrey",
-      postalCode: "GU15 2BG",
-      addressCountry: "GB",
-    },
-  },
-  organizer: {
-    "@type": "Organization",
-    name: "Weybridge Lodge No. 6787",
-    url: "https://weybridgelodge.org.uk",
-  },
-  performer: [
-    {
-      "@type": "PerformingGroup",
-      name: "Weybridge & Astolat Lodges",
-    },
-  ],
-  offers: {
-    "@type": "Offer",
-    price: "75",
-    priceCurrency: "GBP",
-    availability: "https://schema.org/InStock",
-    url: "https://weybridgelodge.org.uk/events",
-    validFrom: "2026-08-22T18:30:00+01:00",
-  },
-};
 
 // ─── Animation Variants ───────────────────────────────────────────────────────
 const fadeUp = {
@@ -102,7 +56,7 @@ const Events = () => {
         url: "https://weybridgelodge.org.uk/events",
         name: "Events & Meetings | Freemasons in Guildford, Surrey — Weybridge Lodge No. 6787",
         description:
-          "View upcoming Freemasons meetings, the 2026 Ladies Festival black tie gala, and weekly Lodge of Instruction evenings at Weybridge Lodge No. 6787, Guildford Masonic Centre, GU2 4DR.",
+          "View upcoming Freemasons meetings, Officers Nights and Lodge of Instruction evenings at Weybridge Lodge No. 6787, Guildford Masonic Centre, GU2 4DR.",
         inLanguage: "en-GB",
         isPartOf: { "@id": "https://weybridgelodge.org.uk/#website" },
       },
@@ -119,7 +73,6 @@ const Events = () => {
             description: e.description || e.title,
           })
         ),
-      ladiesFestivalSchema,
     ],
     [events]
   );
@@ -128,7 +81,7 @@ const Events = () => {
     <div className="min-h-screen overflow-x-hidden">
       <SEO
         title="Events & Meetings | Freemasons in Guildford, Surrey — Weybridge Lodge No. 6787"
-        description="View upcoming Freemasons meetings, the 2026 Ladies Festival black tie gala, and weekly Lodge of Instruction evenings at Weybridge Lodge No. 6787, Guildford Masonic Centre, GU2 4DR."
+        description="View upcoming Freemasons meetings, Officers Nights and Lodge of Instruction evenings at Weybridge Lodge No. 6787, Guildford Masonic Centre, GU2 4DR."
         canonical="/events"
         type="website"
         schema={schemas}
@@ -299,173 +252,6 @@ const Events = () => {
                 </ul>
               </div>
             </div>
-          </div>
-        </section>
-
-        {/* ── Ladies Festival Feature ── */}
-        <section
-          className="py-16 md:py-24 bg-card border-t border-border"
-          aria-labelledby="ladies-festival-heading"
-        >
-          <div className="container mx-auto px-4 sm:px-6 max-w-4xl">
-            <motion.div
-              variants={fadeUp}
-              initial="hidden"
-              whileInView={shouldReduceMotion ? "static" : "visible"}
-              viewport={{ once: true }}
-              custom={0}
-            >
-              <div className="h-px w-16 bg-gold mx-auto mb-6" aria-hidden="true" />
-              <h2
-                id="ladies-festival-heading"
-                className="text-3xl md:text-4xl font-serif text-foreground text-center mb-2"
-              >
-                Ladies Festival 2026
-              </h2>
-              <p className="text-center text-muted-foreground font-sans mb-10">
-                Weybridge &amp; Astolat Lodges
-              </p>
-            </motion.div>
-
-            {/* shadow-lg removed — not a project token */}
-            <motion.div
-              variants={fadeUp}
-              initial="hidden"
-              whileInView={shouldReduceMotion ? "static" : "visible"}
-              viewport={{ once: true }}
-              custom={0.2}
-              className="border border-border rounded-sm overflow-hidden"
-            >
-              <div className="relative">
-                <img
-                  src={ladiesFestivalImg}
-                  alt="Elegant black-tie gala dinner venue with round tables and chandeliers — Ladies Festival 2026 by Weybridge and Astolat Lodges"
-                  width={1600}
-                  height={900}
-                  loading="lazy"
-                  decoding="async"
-                  className="w-full h-56 md:h-72 object-cover"
-                />
-                {/* from-navy/90 to-navy/40 replaces unapproved hsl(var(--primary)) gradient */}
-                <div className="absolute inset-0 bg-gradient-to-t from-navy/90 to-navy/40" />
-                <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-8">
-                  {/* text-gold replaces unapproved text-gold-dark */}
-                  <p className="text-gold uppercase tracking-widest text-sm font-sans mb-2">
-                    Black Tie
-                  </p>
-                  {/* text-gold replaces unapproved text-primary-foreground */}
-                  <p className="text-3xl md:text-4xl font-serif text-gold">
-                    Saturday 22nd August 2026
-                  </p>
-                  {/* text-gold/60 replaces unapproved text-primary-foreground/60 */}
-                  <p className="text-gold/60 font-sans text-sm mt-2">6.30 pm – 1.00 am</p>
-                </div>
-              </div>
-
-              <div className="p-8 space-y-6">
-                <div className="flex items-start gap-4">
-                  <MapPin className="w-5 h-5 text-gold mt-0.5 shrink-0" aria-hidden="true" />
-                  <div>
-                    <p className="font-sans font-medium text-foreground">
-                      Macdonald Frimley Hall Hotel
-                    </p>
-                    <p className="text-sm text-muted-foreground font-sans">
-                      Lime Avenue, Frimley, Camberley GU15 2BG
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-4">
-                  <Ticket className="w-5 h-5 text-gold mt-0.5 shrink-0" aria-hidden="true" />
-                  <div>
-                    <p className="font-sans font-medium text-foreground">Tickets: £75 per person</p>
-                    <p className="text-sm text-muted-foreground font-sans">
-                      Three-course dinner included
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-4">
-                  <UtensilsCrossed className="w-5 h-5 text-gold mt-0.5 shrink-0" aria-hidden="true" />
-                  <div>
-                    <p className="font-sans font-medium text-foreground">Three-Course Dinner</p>
-                    {/* bg-background replaces unapproved bg-muted/50 */}
-                    <div className="mt-2 bg-background border border-border rounded-sm p-4 text-sm text-muted-foreground font-sans space-y-2">
-                      <p className="font-medium text-foreground">Menu</p>
-                      <p>
-                        <span className="text-gold font-medium">Starter:</span> Roasted Butternut Squash Soup (V) Curried oil or Ham Hock & Pea Terrine Plum chutney, balsamic glaze, seasonal greens and herb croutons
-                      </p>
-                      <p>
-                        <span className="text-gold font-medium">Main:</span> Corn Fed Chicken Breast Red wine jus, thyme roasted potato, glazed carrots and fine beans (GF) or Mediterranean Roasted Vegetable Strudel (V) Thyme roasted potato and broccoli basil tomato sauce
-
-                      </p>
-                      <p>
-                        <span className="text-gold font-medium">Dessert:</span> Sticky Toffee Pudding Toffee sauce, clotted cream ice cream or Frimley Mess (V)
-                      </p>
-                         <p>
-                        <span className="text-gold font-medium">To Finish:</span> Tea & Coffee
-                      </p>
-                      <p className="text-xs italic mt-2">
-                        Full menu details coming soon. Dietary requirements will be catered for —
-                        please advise when booking.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <h3 className="text-lg font-serif text-foreground pt-2">The Evening Includes</h3>
-                <ul className="grid sm:grid-cols-2 gap-3 text-sm font-sans text-muted-foreground list-none p-0 m-0">
-                  <li className="flex items-center gap-2">
-                    <Music className="w-4 h-4 text-gold shrink-0" aria-hidden="true" />
-                    DJ &amp; dancing
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Gift className="w-4 h-4 text-gold shrink-0" aria-hidden="true" />
-                    Charity Grand Raffle
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Ticket className="w-4 h-4 text-gold shrink-0" aria-hidden="true" />
-                    Fun Casino
-                  </li>
-                </ul>
-
-                {/* bg-background replaces unapproved bg-muted/30 */}
-                <div className="mt-6 bg-background border border-border rounded-sm p-6">
-                  <h3 className="text-lg font-serif text-foreground mb-3">
-                    In Aid of Action for Carers Surrey
-                  </h3>
-                  <p className="text-sm font-sans text-muted-foreground leading-relaxed mb-3">
-                    Action for Carers Surrey is the county's leading charity supporting unpaid carers
-                    of all ages — from young carers as young as five through to adults looking after
-                    family members, friends or neighbours. Their services provide vital information,
-                    advice, advocacy and respite, helping carers across Surrey to maintain their own
-                    health, wellbeing and independence.
-                  </p>
-                  <p className="text-sm font-sans text-muted-foreground leading-relaxed mb-4">
-                    By attending the Ladies Festival, you will be directly contributing to the work
-                    of this remarkable charity, supporting carers right here in our local community.
-                  </p>
-                  <a
-                    href="https://www.actionforcarers.org.uk/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="Learn more about Action for Carers Surrey (opens in new tab)"
-                    className="inline-flex items-center gap-2 text-sm font-sans font-medium text-gold hover:opacity-80 transition-opacity min-h-[48px]"
-                  >
-                    Learn more about Action for Carers Surrey
-                    <ArrowRight className="w-4 h-4" aria-hidden="true" />
-                  </a>
-                </div>
-
-                <a
-                  href="/ladies-festival"
-                  aria-label="Enquire about tickets for the Ladies Festival 2026"
-                  className="flex w-full items-center justify-center bg-gold-shimmer text-accent-foreground py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity mt-4 min-h-[48px]"
-                >
-                  Enquire About Tickets
-                </a>
-              </div>
-            </motion.div>
           </div>
         </section>
 
