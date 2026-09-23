@@ -2,10 +2,11 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { MapPin, ArrowRight } from "lucide-react";
 import { format } from "date-fns";
-import { getUpcoming, typeLabel, typeBadgeClass } from "@/data/events";
+import { useEvents, filterUpcoming, typeLabel, typeBadgeClass } from "@/data/events";
 
 const LiveEventsFeed = () => {
-  const upcoming = getUpcoming(4);
+  const { events, loading } = useEvents();
+  const upcoming = filterUpcoming(events, 4);
 
   return (
     <section className="py-16 sm:py-20 md:py-28 bg-warm-white">
@@ -33,8 +34,18 @@ const LiveEventsFeed = () => {
           </Link>
         </motion.div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
-          {upcoming.map((ev, i) => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5" aria-busy={loading}>
+          {loading && Array.from({ length: 4 }).map((_, i) => (
+            <div key={`sk-${i}`} aria-hidden="true" className="bg-card border border-border rounded-sm overflow-hidden animate-pulse">
+              <div className="bg-navy-gradient h-[108px]" />
+              <div className="p-5 space-y-3">
+                <div className="h-3 w-20 bg-muted rounded" />
+                <div className="h-5 w-3/4 bg-muted rounded" />
+                <div className="h-3 w-1/2 bg-muted rounded" />
+              </div>
+            </div>
+          ))}
+          {!loading && upcoming.map((ev, i) => (
             <motion.div
               key={i}
               initial={{ opacity: 0, y: 20 }}

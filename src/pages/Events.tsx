@@ -12,13 +12,11 @@ import {
 import ladiesFestivalImg from "@/assets/events/ladies-festival-venue.jpg";
 import { Calendar } from "@/components/ui/calendar";
 import { format, isSameDay } from "date-fns";
-import { events, typeLabel, typeBadgeClass } from "@/data/events";
+import { useEvents, typeLabel, typeBadgeClass } from "@/data/events";
 // TODO: audit typeBadgeClass in @/data/events to confirm it uses only
 // project theme tokens (navy, gold, background, card, border, foreground, muted-foreground).
 // Any Tailwind colour scales found there should be replaced with project tokens.
 
-// ─── Derived data ─────────────────────────────────────────────────────────────
-const eventDates = events.map((e) => e.date);
 
 // ─── Ladies Festival schema ───────────────────────────────────────────────────
 const ladiesFestivalSchema = {
@@ -80,6 +78,8 @@ const fadeUp = {
 const Events = () => {
   const shouldReduceMotion = useReducedMotion();
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
+  const { events, loading: eventsLoading } = useEvents();
+  const eventDates = useMemo(() => events.map((e) => e.date), [events]);
 
   const eventsForDate = selectedDate
     ? events.filter((e) => isSameDay(e.date, selectedDate))
@@ -90,7 +90,7 @@ const Events = () => {
       [...events]
         .filter((e) => e.date >= new Date())
         .sort((a, b) => a.date.getTime() - b.date.getTime()),
-    []
+    [events]
   );
 
   const schemas = useMemo(
@@ -121,7 +121,7 @@ const Events = () => {
         ),
       ladiesFestivalSchema,
     ],
-    []
+    [events]
   );
 
   return (
@@ -221,8 +221,15 @@ const Events = () => {
                 <h2 className="text-2xl font-serif text-foreground mb-6">
                   Upcoming Events
                 </h2>
-                <ul className="space-y-6 list-none p-0 m-0">
-                  {upcomingEvents.map((ev, i) => (
+                <ul className="space-y-6 list-none p-0 m-0" aria-busy={eventsLoading}>
+                  {eventsLoading && Array.from({ length: 3 }).map((_, i) => (
+                    <li key={`sk-${i}`} aria-hidden="true" className="border border-border rounded-sm bg-card p-6 animate-pulse space-y-3">
+                      <div className="h-3 w-24 bg-muted rounded" />
+                      <div className="h-5 w-2/3 bg-muted rounded" />
+                      <div className="h-3 w-1/2 bg-muted rounded" />
+                    </li>
+                  ))}
+                  {!eventsLoading && upcomingEvents.map((ev, i) => (
                     <motion.li
                       // key on title+date — stable if event order changes
                       key={`${ev.title}-${ev.date.toISOString()}`}
