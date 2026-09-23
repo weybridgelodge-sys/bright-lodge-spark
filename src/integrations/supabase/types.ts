@@ -2154,6 +2154,48 @@ export type Database = {
           },
         ]
       }
+      loi_schedule_entries: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          event_date: string
+          id: string
+          time_from: string
+          time_to: string
+          title: string
+          updated_at: string
+          updated_by: string | null
+          venue: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          event_date: string
+          id?: string
+          time_from?: string
+          time_to?: string
+          title?: string
+          updated_at?: string
+          updated_by?: string | null
+          venue?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          event_date?: string
+          id?: string
+          time_from?: string
+          time_to?: string
+          title?: string
+          updated_at?: string
+          updated_by?: string | null
+          venue?: string
+        }
+        Relationships: []
+      }
       loi_sessions: {
         Row: {
           created_at: string
