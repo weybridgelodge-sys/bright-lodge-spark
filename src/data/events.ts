@@ -1,9 +1,11 @@
+import { useEffect, useState } from "react";
+
 // Single source of truth for all lodge events.
 // Used by both the homepage Live Events Feed and the /events calendar page.
 //
 // HOW TO UPDATE: Edit the `events` array below. To add a one-off date, append
-// a new entry. Weekly Lodge of Instruction Thursdays are generated automatically
-// by `getRollingLOIs()` — no need to add those manually.
+// a new entry. Lodge of Instruction sessions come live from the portal's LOI Schedule
+// (public_loi_schedule view) via `useEvents()` / `getEventsAsync()`.
 
 export type EventType = "meeting" | "social" | "loi";
 
@@ -91,47 +93,66 @@ const fixedEvents: LodgeEvent[] = [
   },
 ];
 
-/**
- * Generate the next `count` Thursday Lodge of Instruction dates from today.
- * Skips the summer break — no LOI sessions resume until Thursday 20 August 2026.
- * Keeps the events feed automatically "live" without manual updates.
- */
-export function getRollingLOIs(count = 6): LodgeEvent[] {
-  const result: LodgeEvent[] = [];
-  const resumeDate = new Date(2026, 7, 20); // Thu 20 Aug 2026
-  const d = new Date();
-  d.setHours(19, 30, 0, 0);
-  const day = d.getDay();
-  const diff = (4 - day + 7) % 7 || 7; // next Thursday
-  d.setDate(d.getDate() + diff);
-  if (d.getTime() < resumeDate.getTime()) {
-    d.setFullYear(resumeDate.getFullYear(), resumeDate.getMonth(), resumeDate.getDate());
-  }
-
-  for (let i = 0; i < count; i++) {
-    const date = new Date(d);
-    date.setDate(d.getDate() + i * 7);
-    result.push({
-      title: "Lodge of Instruction",
-      date,
-      time: "7.30 pm",
-      venue: "Guildford Masonic Centre",
-      address: "Hitherbury Close, Guildford GU2 4DR",
-      type: "loi",
-      description: "Weekly rehearsal and ritual practice — visitors welcome by arrangement.",
-      link: "/events#loi",
-    });
-  }
-  return result;
+function fmtTime(t: string | null): string | undefined {
+  const m = (t ?? "").match(/^(\d{1,2}):(\d{2})/);
+  if (!m) return undefined;
+  const h = Number(m[1]);
+  const suffix = h >= 12 ? "pm" : "am";
+  return `${h % 12 || 12}.${m[2]} ${suffix}`;
 }
 
-/** All events (fixed + rolling LOIs), sorted ascending by date. */
-export const events: LodgeEvent[] = [...fixedEvents, ...getRollingLOIs(6)].sort(
-  (a, b) => a.date.getTime() - b.date.getTime()
-);
+/** Map a public_loi_schedule row to the shared LodgeEvent shape. */
+function loiRowToEvent(r: {
+  title: string | null; event_date: string | null; time_from: string | null;
+  time_to: string | null; venue: string | null; description: string | null;
+}): LodgeEvent | null {
+  if (!r.event_date) return null;
+  const [y, mo, d] = r.event_date.split("-").map(Number);
+  const [hh, mm] = (r.time_from ?? "19:30").split(":").map(Number);
+  const from = fmtTime(r.time_from);
+  const to = fmtTime(r.time_to);
+  const venue = r.venue || "Guildford Masonic Centre";
+  return {
+    title: r.title || "Lodge of Instruction",
+    date: new Date(y, mo - 1, d, hh || 0, mm || 0),
+    time: from && to ? `${from} – ${to}` : from,
+    venue,
+    address: venue === "Guildford Masonic Centre" ? "Hitherbury Close, Guildford GU2 4DR" : undefined,
+    type: "loi",
+    description: r.description ?? undefined,
+    link: "/events#loi",
+  };
+}
+
+const sortByDate = (list: LodgeEvent[]) =>
+  [...list].sort((a, b) => a.date.getTime() - b.date.getTime());
+
+/** Fetch all events: fixed events + live LOI schedule, sorted ascending by date. */
+export async function getEventsAsync(): Promise<LodgeEvent[]> {
+  const { supabase } = await import("@/integrations/supabase/client");
+  const { data, error } = await supabase
+    .from("public_loi_schedule")
+    .select("title,event_date,time_from,time_to,venue,description");
+  if (error) console.error("LOI schedule fetch failed", error);
+  const lois = (data ?? []).map(loiRowToEvent).filter((e): e is LodgeEvent => !!e);
+  return sortByDate([...fixedEvents, ...lois]);
+}
+
+/** Shared hook used by the homepage feed and the /events page. */
+export function useEvents(): { events: LodgeEvent[]; loading: boolean } {
+  const [state, setState] = useState<{ events: LodgeEvent[]; loading: boolean }>({ events: [], loading: true });
+  useEffect(() => {
+    let alive = true;
+    getEventsAsync()
+      .catch(() => sortByDate(fixedEvents))
+      .then((events) => { if (alive) setState({ events, loading: false }); });
+    return () => { alive = false; };
+  }, []);
+  return state;
+}
 
 /** Upcoming events from now (inclusive of today). */
-export function getUpcoming(limit?: number): LodgeEvent[] {
+export function filterUpcoming(events: LodgeEvent[], limit?: number): LodgeEvent[] {
   const now = Date.now() - 86_400_000;
   const list = events.filter((e) => e.date.getTime() >= now);
   return typeof limit === "number" ? list.slice(0, limit) : list;
