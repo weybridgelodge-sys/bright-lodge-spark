@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 // a new entry. Lodge of Instruction sessions come live from the portal's LOI Schedule
 // (public_loi_schedule view) via `useEvents()` / `getEventsAsync()`.
 
-export type EventType = "meeting" | "social" | "loi";
+export type EventType = "meeting" | "officers" | "social" | "loi";
 
 export interface LodgeEvent {
   title: string;
@@ -23,75 +23,77 @@ export interface LodgeEvent {
 
 export const typeLabel: Record<EventType, string> = {
   meeting: "Lodge Meeting",
+  officers: "Officers Night",
   social: "Social Event",
   loi: "Lodge of Instruction",
 };
 
 export const typeBadgeClass: Record<EventType, string> = {
   meeting: "bg-primary text-primary-foreground",
+  officers: "bg-primary/80 text-primary-foreground",
   social: "bg-accent text-accent-foreground",
   loi: "bg-secondary text-secondary-foreground",
 };
 
-/** Fixed, known events. Add new dated entries here. */
-const fixedEvents: LodgeEvent[] = [
-  {
-    title: "Initiation Ceremony",
-    date: new Date(2026, 3, 15),
-    time: "6.00 pm",
-    venue: "Guildford Masonic Centre",
-    address: "Hitherbury Close, Guildford GU2 4DR",
+/** All events are now live from the portal — no hardcoded entries. */
+const fixedEvents: LodgeEvent[] = [];
+
+const GMC_ADDRESS = "Hitherbury Close, Guildford GU2 4DR";
+
+function londonParts(iso: string) {
+  const d = new Date(iso);
+  const p = Object.fromEntries(
+    new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/London", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hour12: false })
+      .formatToParts(d).map((x) => [x.type, x.value]),
+  );
+  return { y: +p.year, m: +p.month, d: +p.day, hh: +p.hour % 24, mm: +p.minute };
+}
+
+function meetingRowToEvent(r: { title: string | null; event_date: string | null; location: string | null; description: string | null }): LodgeEvent | null {
+  if (!r.event_date) return null;
+  const { y, m, d, hh, mm } = londonParts(r.event_date);
+  const loc = r.location || "Guildford Masonic Centre";
+  const isGmc = /guildford masonic centre/i.test(loc);
+  return {
+    title: r.title || "Lodge Meeting",
+    date: new Date(y, m - 1, d, hh, mm),
+    time: fmtTime(`${hh}:${String(mm).padStart(2, "0")}`),
+    venue: isGmc ? "Guildford Masonic Centre" : loc,
+    address: isGmc ? GMC_ADDRESS : undefined,
     type: "meeting",
-    description:
-      "Initiation ceremony welcoming a new candidate into Freemasonry — our fifth of the year.",
+    description: r.description ?? undefined,
     highlight: true,
     link: "/bookings",
-  },
-  {
-    title: "Installation Meeting",
-    date: new Date(2026, 9, 21),
-    time: "Evening",
-    venue: "Guildford Masonic Centre",
-    address: "Hitherbury Close, Guildford GU2 4DR",
-    type: "meeting",
-    description: "Installation of the new Worshipful Master for the ensuing year.",
-    link: "/bookings",
-  },
-  {
-    title: "Initiation Ceremony",
-    date: new Date(2026, 11, 16),
-    time: "5.30 pm",
-    venue: "Guildford Masonic Centre",
-    address: "Hitherbury Close, Guildford GU2 4DR",
-    type: "meeting",
-    link: "/bookings",
-  },
-  {
-    title: "Weybridge & Astolat Lodges Ladies Festival",
-    date: new Date(2026, 7, 22),
-    time: "6.30 pm – 1.00 am",
-    venue: "Macdonald Frimley Hall Hotel",
+  };
+}
+
+function officersRowToEvent(r: { officer_night_date: string | null; venue: string | null }): LodgeEvent | null {
+  if (!r.officer_night_date) return null;
+  const [y, m, d] = r.officer_night_date.slice(0, 10).split("-").map(Number);
+  const venue = r.venue || "Guildford Masonic Centre";
+  return {
+    title: "Officers Night",
+    date: new Date(y, m - 1, d, 19, 0),
+    time: "7.00 pm – 9.30 pm",
+    venue,
+    address: /guildford masonic centre|masonic centre/i.test(venue) ? GMC_ADDRESS : undefined,
+    type: "officers",
+    description: "Officers rehearsal ahead of the next regular meeting.",
+  };
+}
+
+function festivalRowToEvent(r: { name: string | null; event_date: string | null }): LodgeEvent | null {
+  if (!r.event_date) return null;
+  const [y, m, d] = r.event_date.slice(0, 10).split("-").map(Number);
+  return {
+    title: r.name || "Ladies Festival",
+    date: new Date(y, m - 1, d, 18, 30),
+    venue: "See event details",
     type: "social",
-    description:
-      "Black Tie evening in aid of Action for Carers Surrey featuring three-course dinner, DJ, Grand Raffle, and more.",
     highlight: true,
     link: "/ladies-festival",
-  },
-
-
-  {
-    title: "Super Saturday",
-    date: new Date(2026, 8, 12),
-    time: "10.00 am",
-    venue: "Guildford Masonic Centre",
-    address: "Hitherbury Close, Guildford GU2 4DR",
-    type: "meeting",
-    description:
-      "A triple double-passing ceremony — three candidates advanced to the Fellow Craft degree — kicking off the new Masonic season. Open to all Brethren.",
-    highlight: true,
-    link: "/bookings",
-  },
-];
+  };
+}
 
 function fmtTime(t: string | null): string | undefined {
   const m = (t ?? "").match(/^(\d{1,2}):(\d{2})/);
@@ -127,15 +129,27 @@ function loiRowToEvent(r: {
 const sortByDate = (list: LodgeEvent[]) =>
   [...list].sort((a, b) => a.date.getTime() - b.date.getTime());
 
-/** Fetch all events: fixed events + live LOI schedule, sorted ascending by date. */
+/** Fetch all live events (published meeting, Officers Nights, LOI, Ladies Festival promo), sorted by date. */
 export async function getEventsAsync(): Promise<LodgeEvent[]> {
   const { supabase } = await import("@/integrations/supabase/client");
-  const { data, error } = await supabase
-    .from("public_loi_schedule")
-    .select("title,event_date,time_from,time_to,venue,description");
-  if (error) console.error("LOI schedule fetch failed", error);
-  const lois = (data ?? []).map(loiRowToEvent).filter((e): e is LodgeEvent => !!e);
-  return sortByDate([...fixedEvents, ...lois]);
+  const sb = supabase as any;
+  const [loi, mtg, off, fest] = await Promise.all([
+    sb.from("public_loi_schedule").select("title,event_date,time_from,time_to,venue,description"),
+    sb.from("public_lodge_meetings").select("title,event_date,location,description"),
+    sb.from("public_officers_nights").select("officer_night_date,venue"),
+    sb.from("public_ladies_festival_promo").select("name,event_date"),
+  ]);
+  for (const [n, r] of [["LOI", loi], ["meetings", mtg], ["officers", off], ["festival", fest]] as const) {
+    if (r.error) console.error(`${n} fetch failed`, r.error);
+  }
+  const keep = (e: LodgeEvent | null): e is LodgeEvent => !!e;
+  return sortByDate([
+    ...fixedEvents,
+    ...(loi.data ?? []).map(loiRowToEvent).filter(keep),
+    ...(mtg.data ?? []).map(meetingRowToEvent).filter(keep),
+    ...(off.data ?? []).map(officersRowToEvent).filter(keep),
+    ...(fest.data ?? []).map(festivalRowToEvent).filter(keep),
+  ]);
 }
 
 /** Shared hook used by the homepage feed and the /events page. */
