@@ -122,35 +122,27 @@ function parseTime(free?: string | null, fallback = { hh: 18, mm: 15 }): { hh: n
   return fallback;
 }
 
-/** Rolling Thursday LOI dates — mirrors src/data/events.ts getRollingLOIs().
- *  All in London wall-clock so DST is handled correctly. */
-function rollingLOIs(count = 26): CalEvent[] {
-  const out: CalEvent[] = [];
-  // Anchor: Thu 20 Aug 2026 (resume date after the summer break).
-  const RESUME = { y: 2026, m1: 8, d: 20 };
-  const todayLondon = londonParts(new Date());
-  // Find the next Thursday relative to *London* today.
-  const anchor = new Date(Date.UTC(Number(todayLondon.y), Number(todayLondon.m) - 1, Number(todayLondon.d)));
-  const day = anchor.getUTCDay(); // Sun=0..Sat=6
-  const diff = (4 - day + 7) % 7 || 7;
-  anchor.setUTCDate(anchor.getUTCDate() + diff);
-  const resumeAnchor = new Date(Date.UTC(RESUME.y, RESUME.m1 - 1, RESUME.d));
-  if (anchor.getTime() < resumeAnchor.getTime()) {
-    anchor.setTime(resumeAnchor.getTime());
-  }
-  for (let i = 0; i < count; i++) {
-    const dt = new Date(anchor.getTime() + i * 7 * 86400_000);
-    const start = wall(dt.getUTCFullYear(), dt.getUTCMonth() + 1, dt.getUTCDate(), 19, 30);
-    const end = addHours(start, 2);
-    out.push({
-      uid: `loi-${start.y}${start.m}${start.d}@${LODGE_DOMAIN}`,
-      title: "LOI: Lodge of Instruction",
-      location: "Guildford Masonic Centre, Hitherbury Close, Guildford GU2 4DR",
-      description: "Weekly rehearsal and ritual practice.",
-      start, end,
-    });
-  }
-  return out;
+/** Parse a Postgres time ("19:30:00") to H/M. */
+function parseDbTime(t: string | null | undefined, fallback: { hh: number; mm: number }) {
+  const m = (t ?? "").match(/^(\d{1,2}):(\d{2})/);
+  return m ? { hh: Number(m[1]), mm: Number(m[2]) } : fallback;
+}
+
+/** LOI entries from the editable loi_schedule_entries table (London wall-clock). */
+function loiFromSchedule(rows: any[]): CalEvent[] {
+  return rows.map((r) => {
+    const ymd = londonYMD(r.event_date as string);
+    const f = parseDbTime(r.time_from, { hh: 19, mm: 30 });
+    const t = parseDbTime(r.time_to, { hh: 21, mm: 30 });
+    return {
+      uid: `loi-${r.id}@${LODGE_DOMAIN}`,
+      title: `LOI: ${r.title}`,
+      location: r.venue ?? "Guildford Masonic Centre",
+      description: r.description ?? "",
+      start: wall(ymd.y, ymd.m1, ymd.d, f.hh, f.mm),
+      end: wall(ymd.y, ymd.m1, ymd.d, t.hh, t.mm),
+    };
+  });
 }
 
 function classifyEventTitle(raw: string): string {
