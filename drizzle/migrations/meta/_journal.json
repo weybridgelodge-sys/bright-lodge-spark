@@ -274,6 +274,27 @@
       "when": 1790187220976,
       "tag": "0038_create_public_loi_schedule_view",
       "breakpoints": true
+    },
+    {
+      "idx": 39,
+      "version": "7",
+      "when": 1790187354781,
+      "tag": "0039_lock_down_public_loi_schedule_grants",
+      "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1790187377114,
+      "tag": "0040_views_select_only_grants",
+      "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "7",
+      "when": 1790187386919,
+      "tag": "0041_views_revoke_maintain",
+      "breakpoints": true
     }
   ]
 }

@@ -1,0 +1,1 @@
+REVOKE MAINTAIN ON public.calendar_subscription_status, public.public_charity_totals, public.public_charity_year_breakdown, public.working_group_report_items FROM anon, authenticated;
