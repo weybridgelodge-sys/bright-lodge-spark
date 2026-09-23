@@ -295,6 +295,13 @@
       "when": 1790187386919,
       "tag": "0041_views_revoke_maintain",
       "breakpoints": true
+    },
+    {
+      "idx": 42,
+      "version": "7",
+      "when": 1790198494688,
+      "tag": "0042_public_events_views",
+      "breakpoints": true
     }
   ]
 }
