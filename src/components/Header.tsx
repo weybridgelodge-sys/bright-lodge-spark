@@ -3,6 +3,7 @@ import { Menu, X, Phone, ChevronDown, Mail, Lock } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import logoAsset from "@/assets/weybridge-logo-96.webp.asset.json";
 import { assetUrl } from "@/lib/assetUrl";
+import { useLadiesFestivalPromo } from "@/data/events";
 const logo = assetUrl(logoAsset);
 
 
@@ -24,7 +25,7 @@ interface NavItem {
   sections?: NavSection[];
 }
 
-const navItems: NavItem[] = [
+const baseNavItems: NavItem[] = [
   {
     label: "About Us",
     href: "/lodge-profile",
@@ -86,7 +87,6 @@ const navItems: NavItem[] = [
         items: [
           { label: "Book Into Our Next Meeting", href: "/bookings", accent: true },
           { label: "Events Calendar", href: "/events" },
-          { label: "Ladies Festival August 2026", href: "/ladies-festival", accent: true },
         ],
       },
     ],
@@ -201,6 +201,14 @@ const DropdownMenu = ({ item }: { item: NavItem }) => {
 };
 
 const Header = () => {
+  const festivalName = useLadiesFestivalPromo();
+  const navItems: NavItem[] = festivalName
+    ? baseNavItems.map((item) =>
+        item.label === "Meetings & Events" && item.sections
+          ? { ...item, sections: item.sections.map((s, i) => (i === 0 ? { ...s, items: [...s.items, { label: festivalName, href: "/ladies-festival", accent: true }] } : s)) }
+          : item,
+      )
+    : baseNavItems;
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileExpanded, setMobileExpanded] = useState<string | null>(null);
 

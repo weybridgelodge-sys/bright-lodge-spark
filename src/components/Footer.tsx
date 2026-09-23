@@ -5,6 +5,7 @@ import { assetUrl } from "@/lib/assetUrl";
 const logo = assetUrl(logoAsset);
 import charterMark from "@/assets/charter-mark.png";
 import NewsletterSignup from "@/components/NewsletterSignup";
+import { useLadiesFestivalPromo } from "@/data/events";
 
 interface FooterLink {
   label: string;
@@ -17,7 +18,7 @@ interface FooterColumn {
   links: FooterLink[];
 }
 
-const footerColumns: FooterColumn[] = [
+const baseFooterColumns: FooterColumn[] = [
   {
     heading: "About Us",
     links: [
@@ -47,7 +48,6 @@ const footerColumns: FooterColumn[] = [
     links: [
       { label: "Book Into Our Next Meeting", href: "/bookings" },
       { label: "Events Calendar", href: "/events" },
-      { label: "Ladies Festival August 2026", href: "/ladies-festival" },
     ],
   },
   {
@@ -70,6 +70,14 @@ const footerColumns: FooterColumn[] = [
 ];
 
 const Footer = () => {
+  const festivalName = useLadiesFestivalPromo();
+  const footerColumns: FooterColumn[] = festivalName
+    ? baseFooterColumns.map((col) =>
+        col.heading === "Meetings & Events"
+          ? { ...col, links: [...col.links, { label: festivalName, href: "/ladies-festival" }] }
+          : col,
+      )
+    : baseFooterColumns;
   return (
     <footer className="bg-navy-dark py-16 border-t border-gold/10" role="contentinfo">
       <div className="container mx-auto px-4 sm:px-6">
