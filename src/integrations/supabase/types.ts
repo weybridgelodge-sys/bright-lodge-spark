@@ -4951,6 +4951,36 @@ export type Database = {
         }
         Relationships: []
       }
+      public_loi_schedule: {
+        Row: {
+          description: string | null
+          event_date: string | null
+          id: string | null
+          time_from: string | null
+          time_to: string | null
+          title: string | null
+          venue: string | null
+        }
+        Insert: {
+          description?: string | null
+          event_date?: string | null
+          id?: string | null
+          time_from?: string | null
+          time_to?: string | null
+          title?: string | null
+          venue?: string | null
+        }
+        Update: {
+          description?: string | null
+          event_date?: string | null
+          id?: string | null
+          time_from?: string | null
+          time_to?: string | null
+          title?: string | null
+          venue?: string | null
+        }
+        Relationships: []
+      }
       working_group_report_items: {
         Row: {
           detail: string | null

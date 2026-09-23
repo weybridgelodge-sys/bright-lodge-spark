@@ -267,6 +267,13 @@
       "when": 1790186750589,
       "tag": "0037_create_loi_schedule_entries",
       "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "7",
+      "when": 1790187220976,
+      "tag": "0038_create_public_loi_schedule_view",
+      "breakpoints": true
     }
   ]
 }
