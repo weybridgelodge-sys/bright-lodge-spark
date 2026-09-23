@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS "Published event images readable" ON storage.objects;

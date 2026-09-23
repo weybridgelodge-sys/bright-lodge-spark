@@ -302,6 +302,13 @@
       "when": 1790198494688,
       "tag": "0042_public_events_views",
       "breakpoints": true
+    },
+    {
+      "idx": 43,
+      "version": "7",
+      "when": 1790200093044,
+      "tag": "0043_drop_public_event_images_read",
+      "breakpoints": true
     }
   ]
 }
