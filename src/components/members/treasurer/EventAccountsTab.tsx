@@ -22,7 +22,7 @@ const fromPence = (p: number) => (p / 100).toFixed(2);
 const METHODS = ["stripe", "bank_transfer", "cash"] as const;
 const STATUSES = ["planning", "active", "closed"] as const;
 
-export type EventAccount = { id: string; name: string; event_date: string; status: string };
+export type EventAccount = { id: string; name: string; event_date: string; status: string; promote_publicly?: boolean };
 type LineType = "income" | "expense";
 type BudgetLine = {
   id: string; event_id: string; category: string; planned_pence: number;
@@ -89,7 +89,7 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
   const loadEvents = useCallback(async () => {
     const { data, error } = await supabase
       .from("event_accounts" as any)
-      .select("id,name,event_date,status")
+      .select("id,name,event_date,status,promote_publicly")
       .order("event_date", { ascending: false });
     if (error) toast({ title: "Could not load events", description: error.message, variant: "destructive" });
     const rows = ((data as any[]) ?? []) as EventAccount[];
@@ -563,6 +563,24 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
             <FileDown className="w-4 h-4 mr-1" /> Export CSV
           </Button>
         </div>
+        {event && /ladies festival/i.test(event.name) && (
+          <label className="mt-3 flex items-center gap-3 text-sm">
+            <input
+              type="checkbox"
+              className="h-4 w-4 accent-gold"
+              checked={!!event.promote_publicly}
+              disabled={!canEdit}
+              onChange={async (e) => {
+                const val = e.target.checked;
+                const { error } = await supabase.from("event_accounts" as any).update({ promote_publicly: val }).eq("id", event.id);
+                if (error) { toast({ title: "Could not update", description: error.message, variant: "destructive" }); return; }
+                setEvents((list) => list.map((x) => (x.id === event.id ? { ...x, promote_publicly: val } : x)));
+                toast({ title: val ? "Now shown on the public Events page" : "Hidden from the public Events page" });
+              }}
+            />
+            <span>Ready to promote publicly <span className="text-primary-foreground/60">— shows a Ladies Festival tile on the public Events page and homepage</span></span>
+          </label>
+        )}
       </div>
 
       {!event ? (

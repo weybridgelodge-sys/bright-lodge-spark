@@ -495,6 +495,13 @@ export type Database = {
             referencedRelation: "lodge_events"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "charity_collections_lodge_event_id_fkey"
+            columns: ["lodge_event_id"]
+            isOneToOne: false
+            referencedRelation: "public_lodge_meetings"
+            referencedColumns: ["id"]
+          },
         ]
       }
       charity_donations: {
@@ -1055,6 +1062,7 @@ export type Database = {
           event_date: string
           id: string
           name: string
+          promote_publicly: boolean
           status: string
           updated_at: string
         }
@@ -1064,6 +1072,7 @@ export type Database = {
           event_date: string
           id?: string
           name: string
+          promote_publicly?: boolean
           status?: string
           updated_at?: string
         }
@@ -1073,6 +1082,7 @@ export type Database = {
           event_date?: string
           id?: string
           name?: string
+          promote_publicly?: boolean
           status?: string
           updated_at?: string
         }
@@ -1619,6 +1629,13 @@ export type Database = {
             referencedRelation: "lodge_events"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "lodge_event_courses_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "public_lodge_meetings"
+            referencedColumns: ["id"]
+          },
         ]
       }
       lodge_event_dining_options: {
@@ -1658,6 +1675,13 @@ export type Database = {
             columns: ["event_id"]
             isOneToOne: false
             referencedRelation: "lodge_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lodge_event_dining_options_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "public_lodge_meetings"
             referencedColumns: ["id"]
           },
         ]
@@ -2336,6 +2360,13 @@ export type Database = {
             columns: ["lodge_event_id"]
             isOneToOne: false
             referencedRelation: "lodge_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meeting_minutes_lodge_event_id_fkey"
+            columns: ["lodge_event_id"]
+            isOneToOne: false
+            referencedRelation: "public_lodge_meetings"
             referencedColumns: ["id"]
           },
         ]
@@ -3860,6 +3891,13 @@ export type Database = {
             referencedRelation: "lodge_events"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "summonses_lodge_event_id_fkey"
+            columns: ["lodge_event_id"]
+            isOneToOne: false
+            referencedRelation: "public_lodge_meetings"
+            referencedColumns: ["id"]
+          },
         ]
       }
       suppressed_emails: {
@@ -4951,6 +4989,48 @@ export type Database = {
         }
         Relationships: []
       }
+      public_ladies_festival_promo: {
+        Row: {
+          event_date: string | null
+          name: string | null
+        }
+        Insert: {
+          event_date?: string | null
+          name?: string | null
+        }
+        Update: {
+          event_date?: string | null
+          name?: string | null
+        }
+        Relationships: []
+      }
+      public_lodge_meetings: {
+        Row: {
+          description: string | null
+          event_date: string | null
+          id: string | null
+          location: string | null
+          title: string | null
+          tyling_time: string | null
+        }
+        Insert: {
+          description?: string | null
+          event_date?: string | null
+          id?: string | null
+          location?: string | null
+          title?: string | null
+          tyling_time?: string | null
+        }
+        Update: {
+          description?: string | null
+          event_date?: string | null
+          id?: string | null
+          location?: string | null
+          title?: string | null
+          tyling_time?: string | null
+        }
+        Relationships: []
+      }
       public_loi_schedule: {
         Row: {
           description: string | null
@@ -4978,6 +5058,21 @@ export type Database = {
           time_to?: string | null
           title?: string | null
           venue?: string | null
+        }
+        Relationships: []
+      }
+      public_officers_nights: {
+        Row: {
+          officer_night_date: string | null
+          venue: string | null
+        }
+        Insert: {
+          officer_night_date?: string | null
+          venue?: never
+        }
+        Update: {
+          officer_night_date?: string | null
+          venue?: never
         }
         Relationships: []
       }
