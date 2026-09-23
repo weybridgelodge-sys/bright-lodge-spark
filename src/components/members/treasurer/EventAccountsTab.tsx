@@ -567,7 +567,7 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
           <label className="mt-3 flex items-center gap-3 text-sm">
             <input
               type="checkbox"
-              className="h-4 w-4 accent-[hsl(var(--gold))]"
+              className="h-4 w-4 accent-gold"
               checked={!!event.promote_publicly}
               disabled={!canEdit}
               onChange={async (e) => {
