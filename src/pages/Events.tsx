@@ -221,8 +221,15 @@ const Events = () => {
                 <h2 className="text-2xl font-serif text-foreground mb-6">
                   Upcoming Events
                 </h2>
-                <ul className="space-y-6 list-none p-0 m-0">
-                  {upcomingEvents.map((ev, i) => (
+                <ul className="space-y-6 list-none p-0 m-0" aria-busy={eventsLoading}>
+                  {eventsLoading && Array.from({ length: 3 }).map((_, i) => (
+                    <li key={`sk-${i}`} aria-hidden="true" className="border border-border rounded-sm bg-card p-6 animate-pulse space-y-3">
+                      <div className="h-3 w-24 bg-muted rounded" />
+                      <div className="h-5 w-2/3 bg-muted rounded" />
+                      <div className="h-3 w-1/2 bg-muted rounded" />
+                    </li>
+                  ))}
+                  {!eventsLoading && upcomingEvents.map((ev, i) => (
                     <motion.li
                       // key on title+date — stable if event order changes
                       key={`${ev.title}-${ev.date.toISOString()}`}
