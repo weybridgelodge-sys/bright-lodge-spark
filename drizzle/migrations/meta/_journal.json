@@ -288,6 +288,13 @@
       "when": 1790187377114,
       "tag": "0040_views_select_only_grants",
       "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "7",
+      "when": 1790187386919,
+      "tag": "0041_views_revoke_maintain",
+      "breakpoints": true
     }
   ]
 }
