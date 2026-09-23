@@ -281,6 +281,13 @@
       "when": 1790187354781,
       "tag": "0039_lock_down_public_loi_schedule_grants",
       "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1790187377114,
+      "tag": "0040_views_select_only_grants",
+      "breakpoints": true
     }
   ]
 }
