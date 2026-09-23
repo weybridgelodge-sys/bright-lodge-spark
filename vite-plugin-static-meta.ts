@@ -241,7 +241,7 @@ const staticRoutes: RouteMeta[] = [
     title:
       "Events & Meetings | Freemasons in Guildford, Surrey — Weybridge Lodge No. 6787",
     description:
-      "View upcoming Freemasons meetings, the 2026 Ladies Festival black tie gala, and weekly Lodge of Instruction evenings at Weybridge Lodge No. 6787, Guildford Masonic Centre, GU2 4DR.",
+      "View upcoming Freemasons meetings, Officers Nights and Lodge of Instruction evenings at Weybridge Lodge No. 6787, Guildford Masonic Centre, GU2 4DR.",
     canonical: "/events",
   },
   {
