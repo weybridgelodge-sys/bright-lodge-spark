@@ -130,6 +130,34 @@ const sortByDate = (list: LodgeEvent[]) =>
   [...list].sort((a, b) => a.date.getTime() - b.date.getTime());
 
 /** Fetch all live events (published meeting, Officers Nights, LOI, Ladies Festival promo), sorted by date. */
+type FestivalPromoResult = { data: { name: string | null; event_date: string | null }[] | null; error: unknown };
+let festivalPromoPromise: Promise<FestivalPromoResult> | null = null;
+
+/** Single shared (cached per page load) read of public_ladies_festival_promo. */
+export function fetchLadiesFestivalPromo(): Promise<FestivalPromoResult> {
+  if (!festivalPromoPromise) {
+    festivalPromoPromise = import("@/integrations/supabase/client")
+      .then(({ supabase }) => (supabase as any).from("public_ladies_festival_promo").select("name,event_date"))
+      .then((r: any) => ({ data: r.data ?? null, error: r.error ?? null }))
+      .catch((error: unknown) => ({ data: null, error }));
+  }
+  return festivalPromoPromise;
+}
+
+/** Name of the publicly promoted Ladies Festival, or null when the toggle is off. */
+export function useLadiesFestivalPromo(): string | null {
+  const [name, setName] = useState<string | null>(null);
+  useEffect(() => {
+    let alive = true;
+    fetchLadiesFestivalPromo().then((r) => {
+      const row = r.data?.[0];
+      if (alive) setName(row ? row.name || "Ladies Festival" : null);
+    });
+    return () => { alive = false; };
+  }, []);
+  return name;
+}
+
 export async function getEventsAsync(): Promise<LodgeEvent[]> {
   const { supabase } = await import("@/integrations/supabase/client");
   const sb = supabase as any;
@@ -137,7 +165,7 @@ export async function getEventsAsync(): Promise<LodgeEvent[]> {
     sb.from("public_loi_schedule").select("title,event_date,time_from,time_to,venue,description"),
     sb.from("public_lodge_meetings").select("title,event_date,location,description"),
     sb.from("public_officers_nights").select("officer_night_date,venue"),
-    sb.from("public_ladies_festival_promo").select("name,event_date"),
+    fetchLadiesFestivalPromo(),
   ]);
   for (const [n, r] of [["LOI", loi], ["meetings", mtg], ["officers", off], ["festival", fest]] as const) {
     if (r.error) console.error(`${n} fetch failed`, r.error);

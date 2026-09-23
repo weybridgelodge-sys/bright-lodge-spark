@@ -47,7 +47,6 @@ const footerColumns: FooterColumn[] = [
     links: [
       { label: "Book Into Our Next Meeting", href: "/bookings" },
       { label: "Events Calendar", href: "/events" },
-      { label: "Ladies Festival August 2026", href: "/ladies-festival" },
     ],
   },
   {

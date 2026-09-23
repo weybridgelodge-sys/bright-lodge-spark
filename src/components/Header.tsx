@@ -86,7 +86,6 @@ const navItems: NavItem[] = [
         items: [
           { label: "Book Into Our Next Meeting", href: "/bookings", accent: true },
           { label: "Events Calendar", href: "/events" },
-          { label: "Ladies Festival August 2026", href: "/ladies-festival", accent: true },
         ],
       },
     ],
