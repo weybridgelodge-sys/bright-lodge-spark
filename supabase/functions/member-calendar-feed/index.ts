@@ -1,8 +1,8 @@
 // Personal per-member calendar subscription feed.
 // Reached at /functions/v1/member-calendar-feed?token=... (no JWT required —
 // the token itself is the credential). Returns a live iCalendar document that
-// merges lodge_events, festive_board_meetings, lodge_socials, and the rolling
-// Thursday Lodge of Instruction dates. Lodge Visits are intentionally excluded.
+// merges lodge_events, festive_board_meetings, lodge_socials, and the editable
+// loi_schedule_entries LOI schedule. Lodge Visits are intentionally excluded.
 //
 // Times are emitted as floating local times with TZID=Europe/London plus a
 // VTIMEZONE block. This is deliberate — Deno runs in UTC, so anything built
@@ -222,7 +222,7 @@ Deno.serve(async (req) => {
     const fromIso = new Date(Date.now() - 365 * 86400_000).toISOString();
     const toIso = new Date(Date.now() + 2 * 365 * 86400_000).toISOString();
 
-    const [eventsRes, meetingsRes, socialsRes, officersRes] = await Promise.all([
+    const [eventsRes, meetingsRes, socialsRes, officersRes, loiRes] = await Promise.all([
       admin.from("lodge_events")
         .select("id,slug,title,event_date,tyling_time,location,intro")
         .eq("published", true)
@@ -239,6 +239,10 @@ Deno.serve(async (req) => {
         .select("id,officer_night_date,officer_night_venue,meeting_date")
         .not("officer_night_date", "is", null)
         .gte("officer_night_date", fromIso.slice(0, 10)),
+      admin.from("loi_schedule_entries")
+        .select("id,title,event_date,time_from,time_to,venue,description")
+        .gte("event_date", fromIso.slice(0, 10))
+        .lte("event_date", toIso.slice(0, 10)),
     ]);
 
     const cal: CalEvent[] = [];
@@ -315,7 +319,8 @@ Deno.serve(async (req) => {
       });
     }
 
-    for (const l of rollingLOIs(26)) cal.push(l);
+    if (loiRes.error) throw loiRes.error;
+    for (const l of loiFromSchedule(loiRes.data ?? [])) cal.push(l);
 
     const lines: string[] = [
       "BEGIN:VCALENDAR",
