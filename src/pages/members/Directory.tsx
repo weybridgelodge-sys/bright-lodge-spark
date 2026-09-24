@@ -116,6 +116,7 @@ export default function MembersDirectory() {
     if (!s) return true;
     return (
       (m.full_name ?? "").toLowerCase().includes(s) ||
+      (m.preferred_name ?? "").toLowerCase().includes(s) ||
       (officeFor(m) ?? "").toLowerCase().includes(s) ||
       (m.rank ?? "").toLowerCase().includes(s)
     );
