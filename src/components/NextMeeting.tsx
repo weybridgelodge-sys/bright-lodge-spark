@@ -113,9 +113,8 @@ const NextMeeting = () => {
                 <Calendar className="w-5 h-5 text-gold mt-0.5 shrink-0" aria-hidden="true" />
                 <div>
                   <p className="font-sans font-medium text-foreground">
-                    {meeting.tyling_time || "Times to be confirmed"}
+                    {meeting.tyling_time || formatLondonDate(meeting.event_date)}
                   </p>
-                  <p className="text-sm text-muted-foreground font-sans">Doors and bar open ahead of the meeting</p>
                 </div>
               </div>
 
