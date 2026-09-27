@@ -116,7 +116,7 @@ const NotFound = () => {
                   >
                     <Link
                       to={card.to}
-                      className="flex h-full min-h-[48px] flex-col items-start gap-4 rounded-sm border border-border bg-card p-8 transition-colors hover:border-gold/50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
+                      className="group flex h-full min-h-[48px] flex-col items-start gap-4 rounded-sm border border-border bg-card p-8 transition-colors hover:border-gold/50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
                     >
                       <span
                         className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-navy border border-gold/30"
@@ -135,9 +135,11 @@ const NotFound = () => {
                           {card.description}
                         </span>
                       </span>
-                      <span className="mt-auto inline-flex items-center gap-2 text-xs font-sans font-semibold uppercase tracking-widest text-gold">
-                        Go
-                        <ArrowRight className="w-4 h-4" aria-hidden="true" />
+                      <span
+                        className="mt-auto inline-flex items-center text-gold"
+                        aria-hidden="true"
+                      >
+                        <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
                       </span>
                     </Link>
                   </motion.li>
