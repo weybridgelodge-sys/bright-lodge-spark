@@ -71,10 +71,6 @@ export const EnquiryForm = () => {
       if (data?.success) {
         setFirstName(payload.full_name.split(/\s+/)[0] || "");
         setSubmitted(true);
-        toast({
-          title: "Enquiry sent",
-          description: "Thank you — we'll be in touch within a few days.",
-        });
         (e.target as HTMLFormElement).reset();
       }
     } catch (err: any) {
@@ -91,7 +87,7 @@ export const EnquiryForm = () => {
   if (submitted) {
     return (
       <div className="mt-8 border-t border-border pt-8">
-        <h4 className="text-lg font-serif text-foreground mb-2">Thank you</h4>
+        <h4 className="text-lg font-serif text-foreground mb-2">Thank you{firstName ? `, ${firstName}` : ""}</h4>
         <p className="text-muted-foreground font-sans">
           Thanks so much{firstName ? `, ${firstName}` : ""} — we're really glad you got in
           touch. Check your inbox for a short guide with more about us, and expect a
