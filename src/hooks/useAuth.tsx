@@ -118,24 +118,52 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
+    // Backstop: if the auth chain below ever fails to settle for any reason, the
+    // app must not sit behind ProtectedRoute's full-screen loader forever.
+    const SETTLE_GUARD_MS = 8000;
+    let settled = false;
+    const settle = () => {
+      if (settled) return;
+      settled = true;
+      setLoading(false);
+    };
+
     const { data: sub } = supabase.auth.onAuthStateChange((_event, sess) => {
       setSession(sess);
       if (sess?.user) {
-        setTimeout(() => loadProfileAndRole(sess.user.id), 0);
+        setTimeout(() => {
+          loadProfileAndRole(sess.user.id).catch(() => {}).finally(settle);
+        }, 0);
       } else {
         setProfile(null);
         setRoles([]);
         setIsCurrentWmOrIpm(false);
+        settle();
       }
     });
 
-    supabase.auth.getSession().then(({ data: { session: sess } }) => {
-      setSession(sess);
-      if (sess?.user) loadProfileAndRole(sess.user.id).finally(() => setLoading(false));
-      else setLoading(false);
-    });
+    supabase.auth
+      .getSession()
+      .then(({ data: { session: sess } }) => {
+        setSession(sess ?? null);
+        if (sess?.user) loadProfileAndRole(sess.user.id).catch(() => {}).finally(settle);
+        else settle();
+      })
+      .catch(() => {
+        // getSession() itself failed (storage/network/browser context): fall
+        // through to the normal "not logged in" path instead of hanging.
+        setSession(null);
+        setProfile(null);
+        setRoles([]);
+        settle();
+      });
 
-    return () => sub.subscription.unsubscribe();
+    const guard = window.setTimeout(() => settle(), SETTLE_GUARD_MS);
+
+    return () => {
+      window.clearTimeout(guard);
+      sub.subscription.unsubscribe();
+    };
   }, []);
 
   const refreshProfile = async () => {
