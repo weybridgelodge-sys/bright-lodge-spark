@@ -7,6 +7,12 @@ interface SEOProps {
   type?: string;
   image?: string;
   schema?: object | object[];
+  /**
+   * Opt-in: emits <meta name="robots" content="noindex, nofollow">. Used by
+   * pages that must never be indexed (e.g. the 404 fallback), which otherwise
+   * inherit the standard indexable setup below.
+   */
+  noindex?: boolean;
 }
 
 const SITE_NAME = "Weybridge Lodge No. 6787";
@@ -38,7 +44,15 @@ const clearStaticMeta = () => {
     .forEach((el) => el.remove());
 };
 
-const SEO = ({ title, description, canonical, type = "website", image, schema }: SEOProps) => {
+const SEO = ({
+  title,
+  description,
+  canonical,
+  type = "website",
+  image,
+  schema,
+  noindex = false,
+}: SEOProps) => {
   clearStaticMeta();
 
   const fullTitle = title.includes(SITE_NAME) ? title : `${title} | ${SITE_NAME}`;
@@ -54,6 +68,7 @@ const SEO = ({ title, description, canonical, type = "website", image, schema }:
   return (
     <Helmet>
       <title>{fullTitle}</title>
+      {noindex && <meta name="robots" content="noindex, nofollow" />}
       <meta name="description" content={description} />
       {url && <link rel="canonical" href={url} />}
 
