@@ -5,7 +5,8 @@ import { verifyTurnstile } from '../_shared/verify-turnstile.ts'
 import { sendTransactionalEmail } from '../_shared/send-email.ts'
 
 const SECRETARY_EMAIL = 'secretary@weybridgelodge.org.uk'
-const GUIDE_URL = 'https://weybridgelodge.org.uk/downloads/information-for-prospective-members.pdf'
+const MEMBERSHIP_CC_EMAIL = 'membershipsecretary@weybridgelodge.org.uk'
+const GUIDE_URL = 'https://weybridgelodge.org.uk/downloads/information-for-prospective-members.pdf?v=2'
 
 const BodySchema = z.object({
   full_name: z.string().trim().min(2, 'Please enter your full name').max(120),
@@ -97,58 +98,36 @@ Deno.serve(async (req) => {
   })
   if (notifRes.error) console.error('Notification email failed', notifRes.error)
 
-  // Look up current Lodge Secretary for signature
-  let secretaryName = ''
-  let secretaryOffice = 'Lodge Secretary'
-  try {
-    const now = new Date()
-    const lodgeYear = now.getUTCMonth() + 1 >= 10 ? now.getUTCFullYear() : now.getUTCFullYear() - 1
-    const { data: appts, error: apptErr } = await supabase
-      .from('officer_appointments')
-      .select('member_id, position_key, lodge_year')
-      .eq('position_key', 'secretary')
-      .eq('lodge_year', lodgeYear)
-      .limit(1)
-    if (apptErr) console.error('Secretary appt lookup error', apptErr)
-    const memberId = appts?.[0]?.member_id
-    if (memberId) {
-      const { data: prof, error: profErr } = await supabase
-        .from('profiles')
-        .select('full_name, first_name, last_name, is_past_master')
-        .eq('id', memberId)
-        .maybeSingle()
-      if (profErr) console.error('Secretary profile lookup error', profErr)
-      if (prof) {
-        const fallback = `${prof.is_past_master ? 'W Bro. ' : 'Bro. '}${[prof.first_name, prof.last_name].filter(Boolean).join(' ')}`.trim()
-        secretaryName = (prof.full_name && prof.full_name.trim()) || fallback
-      }
-      const { data: posRow } = await supabase
-        .from('officer_positions')
-        .select('label')
-        .eq('key', 'secretary')
-        .maybeSingle()
-      secretaryOffice = `Lodge ${posRow?.label || 'Secretary'}`
-    } else {
-      console.warn('No secretary appointment found for lodge year', lodgeYear)
-    }
-  } catch (e) {
-    console.error('Secretary lookup failed', e)
-  }
-  console.log('Secretary signature:', { secretaryName, secretaryOffice })
+  // Look up current Membership Officer — signs the enquirer's confirmation
+  const now = new Date()
+  const lodgeYear = now.getUTCMonth() + 1 >= 10 ? now.getUTCFullYear() : now.getUTCFullYear() - 1
+  const signer = await lookupOfficer(supabase, 'membership_officer', lodgeYear, 'Membership Officer')
+  console.log('Confirmation signer:', signer)
 
   // 2) Confirmation to the enquirer
+  const confData = {
+    name: full_name.split(' ')[0] || full_name,
+    secretaryName: signer.name,
+    secretaryOffice: signer.office,
+    guideUrl: GUIDE_URL,
+  }
   const confRes = await sendTransactionalEmail({
       templateName: 'enquiry-confirmation',
       recipientEmail: email,
       idempotencyKey: `enquiry-confirm-${row.id}`,
-      templateData: {
-        name: full_name.split(' ')[0] || full_name,
-        secretaryName,
-        secretaryOffice,
-        guideUrl: GUIDE_URL,
-      },
+      templateData: confData,
   })
   if (confRes.error) console.error('Confirmation email failed', confRes.error)
+
+  // 3) Identical copy to the Membership Officer (email service has no CC field)
+  const ccRes = await sendTransactionalEmail({
+      templateName: 'enquiry-confirmation',
+      recipientEmail: MEMBERSHIP_CC_EMAIL,
+      idempotencyKey: `enquiry-confirm-cc-${row.id}`,
+      replyTo: email || undefined,
+      templateData: confData,
+  })
+  if (ccRes.error) console.error('Membership officer copy failed', ccRes.error)
 
   return json({ success: true, id: row.id }, 200)
 })
@@ -158,4 +137,47 @@ function json(body: unknown, status: number) {
     status,
     headers: { ...corsHeaders, 'Content-Type': 'application/json' },
   })
+}
+
+async function lookupOfficer(
+  supabase: ReturnType<typeof createClient>,
+  positionKey: string,
+  lodgeYear: number,
+  fallbackLabel: string,
+): Promise<{ name: string; office: string }> {
+  let name = ''
+  let office = fallbackLabel
+  try {
+    const { data: appts, error } = await supabase
+      .from('officer_appointments')
+      .select('member_id')
+      .eq('position_key', positionKey)
+      .eq('lodge_year', lodgeYear)
+      .limit(1)
+    if (error) console.error(`${positionKey} appt lookup error`, error)
+    const memberId = (appts as any)?.[0]?.member_id
+    if (!memberId) {
+      console.warn(`No ${positionKey} appointment for lodge year`, lodgeYear)
+      return { name, office }
+    }
+    const { data: prof } = await supabase
+      .from('profiles')
+      .select('full_name, first_name, last_name, is_past_master')
+      .eq('id', memberId)
+      .maybeSingle()
+    if (prof) {
+      const p = prof as any
+      const fallback = `${p.is_past_master ? 'W Bro. ' : 'Bro. '}${[p.first_name, p.last_name].filter(Boolean).join(' ')}`.trim()
+      name = (p.full_name && p.full_name.trim()) || fallback
+    }
+    const { data: pos } = await supabase
+      .from('officer_positions')
+      .select('label')
+      .eq('key', positionKey)
+      .maybeSingle()
+    if ((pos as any)?.label) office = (pos as any).label
+  } catch (e) {
+    console.error(`${positionKey} lookup failed`, e)
+  }
+  return { name, office }
 }
