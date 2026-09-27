@@ -116,6 +116,10 @@ export default function DirectPaymentTab({ canEdit }: { canEdit: boolean }) {
       return;
     }
 
+    if (!openPeriodId) {
+      toast({ title: "Choose a period to post into", description: "No unlocked period is selected for this date.", variant: "destructive" });
+      return;
+    }
     setSaving(true);
     const { data: u } = await supabase.auth.getUser();
 

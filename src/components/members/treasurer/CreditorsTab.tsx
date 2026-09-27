@@ -34,6 +34,7 @@ export default function CreditorsTab({ canEdit }: { canEdit: boolean }) {
   const [saving, setSaving] = useState(false);
 
   const [recDate, setRecDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const recPosting = usePostingPeriod(recDate);
   const [recPayee, setRecPayee] = useState<string>("GMC Levy");
   const [recOtherPayee, setRecOtherPayee] = useState("");
   const [recAmount, setRecAmount] = useState("0.00");
@@ -107,6 +108,10 @@ export default function CreditorsTab({ canEdit }: { canEdit: boolean }) {
     }
     if (!resolvedPayee) {
       toast({ title: "Enter a payee name", variant: "destructive" });
+      return;
+    }
+    if (!openPeriodId) {
+      toast({ title: "Choose a period to post into", description: "No unlocked period is selected for this date.", variant: "destructive" });
       return;
     }
     setSaving(true);
@@ -193,6 +198,10 @@ export default function CreditorsTab({ canEdit }: { canEdit: boolean }) {
       return;
     }
 
+    if (!recPosting.periodId) {
+      toast({ title: "Choose a period to post into", variant: "destructive" });
+      return;
+    }
     setRecSaving(true);
     const { data: u } = await supabase.auth.getUser();
 
@@ -206,7 +215,7 @@ export default function CreditorsTab({ canEdit }: { canEdit: boolean }) {
         description,
         source_type: "creditor_recognition",
         payee: payeeTag,
-        period_id: openPeriodId,
+        period_id: recPosting.periodId,
         created_by: u.user?.id ?? null,
       })
       .select("id")
