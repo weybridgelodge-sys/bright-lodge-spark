@@ -14,16 +14,19 @@ import {
 import type { TemplateEntry } from './registry.ts'
 import { LOGO_HEIGHT, LOGO_URL, LOGO_WIDTH } from './_brand.ts'
 
+const DEFAULT_GUIDE_URL = 'https://weybridgelodge.org.uk/downloads/information-for-prospective-members.pdf'
+
 interface Props {
   name?: string
   secretaryName?: string
   secretaryOffice?: string
+  guideUrl?: string
 }
 
-const Email = ({ name, secretaryName, secretaryOffice }: Props) => (
+const Email = ({ name, secretaryName, secretaryOffice, guideUrl }: Props) => (
   <Html lang="en" dir="ltr">
     <Head />
-    <Preview>Thank you for your enquiry to Weybridge Lodge No. 6787</Preview>
+    <Preview>Great to hear from you — a short guide to Weybridge Lodge</Preview>
     <Body style={main}>
       <Container style={container}>
         <Section style={header}>
@@ -41,14 +44,23 @@ const Email = ({ name, secretaryName, secretaryOffice }: Props) => (
         <Section style={card}>
           <Heading as="h2" style={h2}>Thank you{name ? `, ${name}` : ''}</Heading>
           <Text style={p}>
-            We have received your enquiry about joining Weybridge Lodge and one
-            of our members will be in touch with you personally within a few
-            days.
+            Thanks so much for reaching out to Weybridge Lodge — it's great to
+            hear you're curious about Freemasonry here in Guildford.
           </Text>
           <Text style={p}>
-            In the meantime, you are welcome to read more about what to expect
-            on your first visit and about Freemasonry in general on our
-            website.
+            While you wait to hear from us properly, here's a short guide with a
+            bit more about who we are, what a typical evening looks like, and
+            what joining actually involves:
+          </Text>
+          <Section style={{ textAlign: 'center' as const, margin: '8px 0 16px' }}>
+            <Button href={guideUrl || DEFAULT_GUIDE_URL} style={button}>
+              Read the guide
+            </Button>
+          </Section>
+          <Text style={p}>
+            {secretaryName || 'Our Lodge Secretary'}{secretaryName ? ', our Lodge Secretary,' : ''} will
+            give you a call in the next day or two for a friendly, no-obligation
+            chat and to answer any questions you might have.
           </Text>
           <Hr style={hr} />
           <Text style={signOff}>Yours sincerely,</Text>
