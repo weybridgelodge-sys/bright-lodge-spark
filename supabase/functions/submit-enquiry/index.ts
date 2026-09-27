@@ -98,17 +98,20 @@ Deno.serve(async (req) => {
   })
   if (notifRes.error) console.error('Notification email failed', notifRes.error)
 
-  // Look up current Membership Officer — signs the enquirer's confirmation
+  // Look up who signs the enquirer's confirmation (Secretary) and who is
+  // named in the body as the caller (Membership Officer)
   const now = new Date()
   const lodgeYear = now.getUTCMonth() + 1 >= 10 ? now.getUTCFullYear() : now.getUTCFullYear() - 1
-  const signer = await lookupOfficer(supabase, 'membership_officer', lodgeYear, 'Membership Officer')
-  console.log('Confirmation signer:', signer)
+  const secretary = await lookupOfficer(supabase, 'secretary', lodgeYear, 'Lodge Secretary')
+  const membershipOfficer = await lookupOfficer(supabase, 'membership_officer', lodgeYear, 'Membership Officer')
+  console.log('Confirmation sign-off:', secretary, '| Body caller:', membershipOfficer)
 
   // 2) Confirmation to the enquirer
   const confData = {
     name: full_name.split(' ')[0] || full_name,
-    secretaryName: signer.name,
-    secretaryOffice: signer.office,
+    secretaryName: secretary.name,
+    secretaryOffice: secretary.office,
+    membershipOfficerName: membershipOfficer.name,
     guideUrl: GUIDE_URL,
   }
   const confRes = await sendTransactionalEmail({
