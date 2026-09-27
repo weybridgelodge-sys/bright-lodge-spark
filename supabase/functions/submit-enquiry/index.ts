@@ -5,6 +5,7 @@ import { verifyTurnstile } from '../_shared/verify-turnstile.ts'
 import { sendTransactionalEmail } from '../_shared/send-email.ts'
 
 const SECRETARY_EMAIL = 'secretary@weybridgelodge.org.uk'
+const GUIDE_URL = 'https://weybridgelodge.org.uk/downloads/information-for-prospective-members.pdf'
 
 const BodySchema = z.object({
   full_name: z.string().trim().min(2, 'Please enter your full name').max(120),
@@ -144,6 +145,7 @@ Deno.serve(async (req) => {
         name: full_name.split(' ')[0] || full_name,
         secretaryName,
         secretaryOffice,
+        guideUrl: GUIDE_URL,
       },
   })
   if (confRes.error) console.error('Confirmation email failed', confRes.error)

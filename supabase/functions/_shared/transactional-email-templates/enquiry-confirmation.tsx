@@ -1,6 +1,7 @@
 import * as React from 'npm:react@18.3.1'
 import {
   Body,
+  Button,
   Container,
   Head,
   Heading,
@@ -85,9 +86,9 @@ const Email = ({ name, secretaryName, secretaryOffice, guideUrl }: Props) => (
 
 export const template = {
   component: Email,
-  subject: 'Thank you for your enquiry — Weybridge Lodge',
+  subject: (d: Props) => (d?.name ? `Great to hear from you, ${d.name}!` : 'Great to hear from you!'),
   displayName: 'Enquiry confirmation',
-  previewData: { name: 'Jane', secretaryName: 'W Bro. Richard Smith', secretaryOffice: 'Lodge Secretary' },
+  previewData: { name: 'Jane', secretaryName: 'W Bro. Richard Smith', secretaryOffice: 'Lodge Secretary', guideUrl: DEFAULT_GUIDE_URL },
 } satisfies TemplateEntry
 
 const main = { backgroundColor: '#ffffff', fontFamily: 'Georgia, "Times New Roman", serif', margin: 0, padding: 0 }
@@ -106,3 +107,4 @@ const footerText = { color: '#888', fontSize: '11px', margin: 0, fontFamily: 'Ar
 const signOff = { color: '#2a2a2a', fontSize: '15px', lineHeight: '1.5', margin: '0 0 8px', fontFamily: 'Arial, sans-serif' }
 const signName = { color: '#1B2A4A', fontSize: '15px', fontWeight: 600, lineHeight: '1.4', margin: 0, fontFamily: 'Arial, sans-serif' }
 const signOffice = { color: '#1B2A4A', fontSize: '14px', lineHeight: '1.4', margin: 0, fontFamily: 'Arial, sans-serif', fontStyle: 'italic' as const }
+const button = { backgroundColor: '#1B2A4A', color: '#ffffff', fontSize: '14px', fontFamily: 'Arial, sans-serif', fontWeight: 600, textDecoration: 'none', padding: '12px 24px', borderRadius: '4px', display: 'inline-block', letterSpacing: '0.5px' }
