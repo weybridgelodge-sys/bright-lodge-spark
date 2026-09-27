@@ -21,9 +21,9 @@ const tabOf = (e: Enquiry): Tab =>
 const candidateHref = (id: string) => `/members/kpis?candidate=${id}#candidates`;
 
 function Inner() {
-  const { isAdmin, isSecretary, isWorshipfulMaster } = useAuth();
+  const { isAdmin, isSecretary, isAssistantSecretary, isWorshipfulMaster } = useAuth();
   const navigate = useNavigate();
-  const canEdit = isAdmin || isSecretary;
+  const canEdit = isAdmin || isSecretary || isAssistantSecretary;
   const canView = canEdit || isWorshipfulMaster;
   const [rows, setRows] = useState<Enquiry[]>([]);
   const [candEmails, setCandEmails] = useState<Map<string, string>>(new Map());
