@@ -270,7 +270,7 @@ function MeetingPanel({
     setPosting(false);
     toast({
       title: failed === 0 ? `${ok} Stripe receipt${ok === 1 ? "" : "s"} posted to ledger` : `${ok} posted, ${failed} failed`,
-      description: failed > 0 ? "Failed receipts were rolled back — check the underlying figures balance." : undefined,
+      description: failed > 0 ? "Failed receipts were rolled back — check the figures balance and that the payment date falls in an unlocked period." : undefined,
       variant: failed > 0 ? "destructive" : undefined,
     });
     onChanged();

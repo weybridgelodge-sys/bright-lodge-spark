@@ -63,16 +63,6 @@ export async function fetchAccountMap(codes: string[]): Promise<Map<string, stri
   return m;
 }
 
-export async function fetchOpenPeriodId(): Promise<string | null> {
-  const { data } = await supabase
-    .from("treasurer_periods" as any)
-    .select("id")
-    .eq("status", "open")
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-  return (data as any)?.id ?? null;
-}
 
 /**
  * Outstanding 1100 Debtors per member: grouped by the journal line description

@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { fetchPeriodIdForDate } from "@/lib/treasurer/periods";
 import type { Collection, Donation, CollectionType } from "@/lib/charity/queries";
 
 const pence = (n: number) => Math.round(Number(n || 0) * 100);
@@ -17,16 +18,6 @@ async function accountIdsByCode(codes: string[]): Promise<Map<string, string>> {
   return map;
 }
 
-async function openPeriodId(): Promise<string | null> {
-  const { data } = await supabase
-    .from("treasurer_periods" as any)
-    .select("id")
-    .eq("status", "open")
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-  return (data as any)?.id ?? null;
-}
 
 /** Posts one balanced journal entry with the given lines, rolling back the entry if the lines fail. */
 async function postEntry(opts: {
@@ -38,7 +29,7 @@ async function postEntry(opts: {
 }): Promise<string> {
   const codes = Array.from(new Set(opts.lines.map((l) => l.code)));
   const accounts = await accountIdsByCode(codes);
-  const periodId = await openPeriodId();
+  const periodId = await fetchPeriodIdForDate(opts.entry_date);
   const { data: u } = await supabase.auth.getUser();
 
   const debits = opts.lines.reduce((a, l) => a + l.debit, 0);

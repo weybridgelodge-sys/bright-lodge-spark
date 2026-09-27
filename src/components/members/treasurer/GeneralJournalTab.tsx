@@ -145,7 +145,7 @@ export default function GeneralJournalTab({ canEdit }: { canEdit: boolean }) {
           right accounts and safeguards in place automatically.
         </p>
         <p className="text-primary-foreground/50 text-xs mb-4">
-          Posts one journal entry with one line per row entered, to the currently-open Treasurer period.
+          Posts one journal entry with one line per row entered, to the period you choose — it defaults to the unlocked period containing the entry date.
           Debits must equal credits before the entry can be posted.
         </p>
 
