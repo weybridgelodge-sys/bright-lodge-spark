@@ -59,14 +59,14 @@ const Email = ({ name, secretaryName, secretaryOffice, guideUrl }: Props) => (
             </Button>
           </Section>
           <Text style={p}>
-            {secretaryName || 'Our Lodge Secretary'}{secretaryName ? ', our Lodge Secretary,' : ''} will
+            {secretaryName ? `${secretaryName}, our ${secretaryOffice || 'Membership Officer'},` : 'Our Membership Officer'} will
             give you a call in the next day or two for a friendly, no-obligation
             chat and to answer any questions you might have.
           </Text>
           <Hr style={hr} />
           <Text style={signOff}>Yours sincerely,</Text>
-          <Text style={signName}>{secretaryName || 'The Secretary'}</Text>
-          <Text style={signOffice}>{secretaryOffice || 'Lodge Secretary'}</Text>
+          <Text style={signName}>{secretaryName || 'The Membership Officer'}</Text>
+          <Text style={signOffice}>{secretaryOffice || 'Membership Officer'}</Text>
           <Hr style={hr} />
           <Text style={small}>
             If you did not submit this enquiry, please ignore this email — no
@@ -88,7 +88,7 @@ export const template = {
   component: Email,
   subject: (d: Props) => (d?.name ? `Great to hear from you, ${d.name}!` : 'Great to hear from you!'),
   displayName: 'Enquiry confirmation',
-  previewData: { name: 'Jane', secretaryName: 'W Bro. Richard Smith', secretaryOffice: 'Lodge Secretary', guideUrl: DEFAULT_GUIDE_URL },
+  previewData: { name: 'Jane', secretaryName: 'W Bro. Ben Connolly', secretaryOffice: 'Membership Officer', guideUrl: DEFAULT_GUIDE_URL },
 } satisfies TemplateEntry
 
 const main = { backgroundColor: '#ffffff', fontFamily: 'Georgia, "Times New Roman", serif', margin: 0, padding: 0 }
