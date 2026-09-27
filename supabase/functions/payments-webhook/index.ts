@@ -15,6 +15,25 @@ function getSupabase() {
   return _supabase;
 }
 
+/** YYYY-MM-DD in Europe/London (avoids UTC off-by-one around midnight/BST). */
+export function londonDate(d: Date): string {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/London", year: "numeric", month: "2-digit", day: "2-digit" }).format(d);
+}
+
+/** The unlocked (non-locked) period whose range contains `date`, else null. Mirrors periodIdForDate() in src/lib/treasurer/periods.ts. */
+async function periodIdForDate(date: string): Promise<string | null> {
+  const { data, error } = await getSupabase()
+    .from("treasurer_periods")
+    .select("id")
+    .neq("status", "locked")
+    .lte("period_start", date)
+    .gte("period_end", date)
+    .limit(1)
+    .maybeSingle();
+  if (error) console.error("Period lookup failed:", error);
+  return (data as any)?.id ?? null;
+}
+
 async function handleCheckoutCompleted(session: any, env: StripeEnv) {
   // Dues checkout — routed by metadata.kind
   if (session.metadata?.kind === "dues") {
@@ -252,15 +271,9 @@ async function handleBookingChargeRefunded(charge: any, env: StripeEnv) {
     if (!suspense || !diningIncome) throw new Error("Missing 1010/4100 accounts");
     if (drFee > 0 && !feeCover) throw new Error("Missing 4120 account");
 
-    const { data: openPeriod } = await getSupabase()
-      .from("treasurer_periods")
-      .select("id")
-      .eq("status", "open")
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-
-    const today = new Date().toISOString().slice(0, 10);
+    
+    const today = londonDate(new Date());
+    const periodId = await periodIdForDate(today);
     const label = `Refund — ${b.contact_name ?? "Unknown"} — ${b.event_label ?? "Dining"}`;
 
     const { data: entry, error: entryErr } = await getSupabase()
@@ -270,7 +283,7 @@ async function handleBookingChargeRefunded(charge: any, env: StripeEnv) {
         description: label,
         source_type: "booking_refund",
         source_id: b.id,
-        period_id: openPeriod?.id ?? null,
+        period_id: periodId,
         created_by: null,
       })
       .select("id")
@@ -365,13 +378,7 @@ async function handlePayoutPaid(payout: any, env: StripeEnv) {
     const suspenseAcct = accounts?.find((a: any) => a.code === "1010")?.id;
     if (!bankAcct || !suspenseAcct) throw new Error("Missing 1000/1010 accounts");
 
-    const { data: openPeriod } = await getSupabase()
-      .from("treasurer_periods")
-      .select("id")
-      .eq("status", "open")
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
+    const periodId = await periodIdForDate(arrivalDate);
 
     const { data: entry, error: entryErr } = await getSupabase()
       .from("journal_entries")
@@ -380,7 +387,7 @@ async function handlePayoutPaid(payout: any, env: StripeEnv) {
         description: `Stripe payout — arrived ${arrivalDate} — £${(payout.amount / 100).toFixed(2)}`,
         source_type: "stripe_payout",
         source_id: payoutRow.id,
-        period_id: openPeriod?.id ?? null,
+        period_id: periodId,
         created_by: null, // system-generated, not a human-entered transaction
       })
       .select("id")
