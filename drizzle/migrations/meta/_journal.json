@@ -316,6 +316,13 @@
       "when": 1790509313699,
       "tag": "0044_enquiry_conversion",
       "breakpoints": true
+    },
+    {
+      "idx": 45,
+      "version": "7",
+      "when": 1790510437508,
+      "tag": "0045_enquiries_assistant_secretary_access",
+      "breakpoints": true
     }
   ]
 }
