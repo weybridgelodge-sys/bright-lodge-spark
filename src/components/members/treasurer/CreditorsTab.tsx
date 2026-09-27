@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { usePostingPeriod } from "@/lib/treasurer/periods";
+import PeriodPicker from "@/components/members/treasurer/PeriodPicker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -23,6 +25,8 @@ type LineRow = {
 
 export default function CreditorsTab({ canEdit }: { canEdit: boolean }) {
   const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const posting = usePostingPeriod(date);
+  const openPeriodId = posting.periodId;
   const [payee, setPayee] = useState<string>("GMC");
   const [otherPayee, setOtherPayee] = useState("");
   const [amount, setAmount] = useState("0.00");
@@ -30,6 +34,7 @@ export default function CreditorsTab({ canEdit }: { canEdit: boolean }) {
   const [saving, setSaving] = useState(false);
 
   const [recDate, setRecDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const recPosting = usePostingPeriod(recDate);
   const [recPayee, setRecPayee] = useState<string>("GMC Levy");
   const [recOtherPayee, setRecOtherPayee] = useState("");
   const [recAmount, setRecAmount] = useState("0.00");
@@ -41,11 +46,10 @@ export default function CreditorsTab({ canEdit }: { canEdit: boolean }) {
   const [loading, setLoading] = useState(true);
   const [accounts, setAccounts] = useState<Map<string, string>>(new Map());
   const [allAccounts, setAllAccounts] = useState<{ id: string; code: string; name: string }[]>([]);
-  const [openPeriodId, setOpenPeriodId] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
-    const [{ data: accts }, { data: allAccts }, { data: period }] = await Promise.all([
+    const [{ data: accts }, { data: allAccts }] = await Promise.all([
       supabase
         .from("chart_of_accounts" as any)
         .select("id,code")
@@ -54,13 +58,6 @@ export default function CreditorsTab({ canEdit }: { canEdit: boolean }) {
         .from("chart_of_accounts" as any)
         .select("id,code,name")
         .order("code"),
-      supabase
-        .from("treasurer_periods" as any)
-        .select("id")
-        .eq("status", "open")
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle(),
     ]);
 
     const map = new Map<string, string>();
@@ -69,7 +66,6 @@ export default function CreditorsTab({ canEdit }: { canEdit: boolean }) {
     }
     setAccounts(map);
     setAllAccounts(((allAccts as any[]) ?? []).filter((a) => a.code !== "2000"));
-    setOpenPeriodId((period as any)?.id ?? null);
 
     const creditorsId = map.get("2000");
     if (!creditorsId) {
@@ -112,6 +108,10 @@ export default function CreditorsTab({ canEdit }: { canEdit: boolean }) {
     }
     if (!resolvedPayee) {
       toast({ title: "Enter a payee name", variant: "destructive" });
+      return;
+    }
+    if (!openPeriodId) {
+      toast({ title: "Choose a period to post into", description: "No unlocked period is selected for this date.", variant: "destructive" });
       return;
     }
     setSaving(true);
@@ -198,6 +198,10 @@ export default function CreditorsTab({ canEdit }: { canEdit: boolean }) {
       return;
     }
 
+    if (!recPosting.periodId) {
+      toast({ title: "Choose a period to post into", variant: "destructive" });
+      return;
+    }
     setRecSaving(true);
     const { data: u } = await supabase.auth.getUser();
 
@@ -211,7 +215,7 @@ export default function CreditorsTab({ canEdit }: { canEdit: boolean }) {
         description,
         source_type: "creditor_recognition",
         payee: payeeTag,
-        period_id: openPeriodId,
+        period_id: recPosting.periodId,
         created_by: u.user?.id ?? null,
       })
       .select("id")
@@ -256,6 +260,7 @@ export default function CreditorsTab({ canEdit }: { canEdit: boolean }) {
             <Label>Date</Label>
             <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} disabled={!canEdit} />
           </div>
+          <PeriodPicker periods={posting.periods} value={posting.periodId} autoId={posting.autoId} onChange={posting.setPeriodId} disabled={!canEdit} />
           <div>
             <Label>Payee</Label>
             <Select value={payee} onValueChange={setPayee} disabled={!canEdit}>
@@ -297,6 +302,7 @@ export default function CreditorsTab({ canEdit }: { canEdit: boolean }) {
             <Label>Date</Label>
             <Input type="date" value={recDate} onChange={(e) => setRecDate(e.target.value)} disabled={!canEdit} />
           </div>
+          <PeriodPicker periods={recPosting.periods} value={recPosting.periodId} autoId={recPosting.autoId} onChange={recPosting.setPeriodId} disabled={!canEdit} />
           <div>
             <Label>Type</Label>
             <Select value={recPayee} onValueChange={setRecPayee} disabled={!canEdit}>

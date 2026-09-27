@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { usePostingPeriod } from "@/lib/treasurer/periods";
+import PeriodPicker from "@/components/members/treasurer/PeriodPicker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -22,11 +24,12 @@ export default function DirectReceiptTab({ canEdit }: { canEdit: boolean }) {
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [allAccounts, setAllAccounts] = useState<Account[]>([]);
   const [bankId, setBankId] = useState<string | null>(null);
-  const [openPeriodId, setOpenPeriodId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   const [accountId, setAccountId] = useState<string>("");
   const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const posting = usePostingPeriod(date);
+  const openPeriodId = posting.periodId;
   const [description, setDescription] = useState("");
   const [documentNumber, setDocumentNumber] = useState("");
   const [bankReference, setBankReference] = useState("");
@@ -44,15 +47,8 @@ export default function DirectReceiptTab({ canEdit }: { canEdit: boolean }) {
 
   const load = useCallback(async () => {
     setLoading(true);
-    const [{ data: accts, error: acctErr }, { data: period }, potRows, settings] = await Promise.all([
+    const [{ data: accts, error: acctErr }, potRows, settings] = await Promise.all([
       supabase.from("chart_of_accounts" as any).select("id,code,name,account_type").order("code"),
-      supabase
-        .from("treasurer_periods" as any)
-        .select("id")
-        .eq("status", "open")
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle(),
       fetchReservePots(),
       fetchSubscriptionSettings(),
     ]);
@@ -67,7 +63,6 @@ export default function DirectReceiptTab({ canEdit }: { canEdit: boolean }) {
     setBankId(all.find((a) => a.code === "1000")?.id ?? null);
     setAccounts(all.filter((a) => a.account_type === "income" && !EXCLUDED_CODES.has(a.code)));
     setAllAccounts(all.filter((a) => !EXCLUDED_CODES.has(a.code)));
-    setOpenPeriodId((period as any)?.id ?? null);
     setLoading(false);
   }, []);
 
@@ -101,6 +96,10 @@ export default function DirectReceiptTab({ canEdit }: { canEdit: boolean }) {
       return;
     }
 
+    if (!openPeriodId) {
+      toast({ title: "Choose a period to post into", description: "No unlocked period is selected for this date.", variant: "destructive" });
+      return;
+    }
     setSaving(true);
     const { data: u } = await supabase.auth.getUser();
     const createdBy = u.user?.id ?? null;
@@ -243,6 +242,10 @@ export default function DirectReceiptTab({ canEdit }: { canEdit: boolean }) {
       return;
     }
 
+    if (!openPeriodId) {
+      toast({ title: "Choose a period to post into", description: "No unlocked period is selected for this date.", variant: "destructive" });
+      return;
+    }
     setSaving(true);
     const { data: u } = await supabase.auth.getUser();
 
@@ -361,6 +364,7 @@ export default function DirectReceiptTab({ canEdit }: { canEdit: boolean }) {
                 <Label>Date</Label>
                 <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} disabled={!canEdit} />
               </div>
+              <PeriodPicker periods={posting.periods} value={posting.periodId} autoId={posting.autoId} onChange={posting.setPeriodId} disabled={!canEdit} />
               <div>
                 <Label>Amount (£) — banked to 1000 Bank</Label>
                 <Input type="number" step="0.01" min="0" value={amount} onChange={(e) => onAmountChange(e.target.value)} disabled={!canEdit} />

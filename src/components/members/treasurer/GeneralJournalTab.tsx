@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { usePostingPeriod } from "@/lib/treasurer/periods";
+import PeriodPicker from "@/components/members/treasurer/PeriodPicker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -25,29 +27,22 @@ const money = (pence: number) =>
 
 export default function GeneralJournalTab({ canEdit }: { canEdit: boolean }) {
   const [accounts, setAccounts] = useState<Account[]>([]);
-  const [openPeriodId, setOpenPeriodId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const posting = usePostingPeriod(date);
+  const openPeriodId = posting.periodId;
   const [description, setDescription] = useState("");
   const [lines, setLines] = useState<LineRow[]>([blankLine(), blankLine()]);
   const [saving, setSaving] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
-    const [{ data: accts, error: acctErr }, { data: period }] = await Promise.all([
+    const [{ data: accts, error: acctErr }] = await Promise.all([
       supabase.from("chart_of_accounts" as any).select("id,code,name,account_type").order("code"),
-      supabase
-        .from("treasurer_periods" as any)
-        .select("id")
-        .eq("status", "open")
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle(),
     ]);
     if (acctErr) toast({ title: "Could not load accounts", description: acctErr.message, variant: "destructive" });
     setAccounts(((accts as any[]) ?? []) as Account[]);
-    setOpenPeriodId((period as any)?.id ?? null);
     setLoading(false);
   }, []);
 
@@ -88,6 +83,10 @@ export default function GeneralJournalTab({ canEdit }: { canEdit: boolean }) {
       return;
     }
 
+    if (!openPeriodId) {
+      toast({ title: "Choose a period to post into", description: "No unlocked period is selected for this date.", variant: "destructive" });
+      return;
+    }
     setSaving(true);
     const { data: u } = await supabase.auth.getUser();
 
@@ -146,7 +145,7 @@ export default function GeneralJournalTab({ canEdit }: { canEdit: boolean }) {
           right accounts and safeguards in place automatically.
         </p>
         <p className="text-primary-foreground/50 text-xs mb-4">
-          Posts one journal entry with one line per row entered, to the currently-open Treasurer period.
+          Posts one journal entry with one line per row entered, to the period you choose — it defaults to the unlocked period containing the entry date.
           Debits must equal credits before the entry can be posted.
         </p>
 
@@ -159,6 +158,7 @@ export default function GeneralJournalTab({ canEdit }: { canEdit: boolean }) {
                 <Label>Date</Label>
                 <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} disabled={!canEdit} />
               </div>
+              <PeriodPicker periods={posting.periods} value={posting.periodId} autoId={posting.autoId} onChange={posting.setPeriodId} disabled={!canEdit} />
               <div>
                 <Label>Description</Label>
                 <Input

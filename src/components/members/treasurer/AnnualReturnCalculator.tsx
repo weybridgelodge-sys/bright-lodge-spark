@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchPeriodIdForDate } from "@/lib/treasurer/periods";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -42,26 +43,17 @@ export default function AnnualReturnCalculator({ canEdit }: { canEdit: boolean }
   const [suggestNote, setSuggestNote] = useState<string | null>(null);
 
   const [accounts, setAccounts] = useState<Map<string, string>>(new Map());
-  const [openPeriodId, setOpenPeriodId] = useState<string | null>(null);
 
   const load = useCallback(async () => {
-    const [{ data: accts }, { data: period }] = await Promise.all([
+    const [{ data: accts }] = await Promise.all([
       supabase
         .from("chart_of_accounts" as any)
         .select("id,code")
         .in("code", ["2000", "5000", "5100"]),
-      supabase
-        .from("treasurer_periods" as any)
-        .select("id")
-        .eq("status", "open")
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle(),
     ]);
     const map = new Map<string, string>();
     for (const a of (accts as any[]) ?? []) if (a.code && a.id) map.set(a.code as string, a.id as string);
     setAccounts(map);
-    setOpenPeriodId((period as any)?.id ?? null);
   }, []);
 
   useEffect(() => { load(); }, [load]);
@@ -179,7 +171,7 @@ export default function AnnualReturnCalculator({ canEdit }: { canEdit: boolean }
         description,
         source_type: "creditor_recognition",
         payee,
-        period_id: openPeriodId,
+        period_id: await fetchPeriodIdForDate(`${year}-09-30`),
         created_by: userId,
       })
       .select("id")

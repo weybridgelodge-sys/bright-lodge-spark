@@ -1,0 +1,1 @@
+- Treasurer posting periods: any non-locked treasurer_periods row is postable; screens use usePostingPeriod/PeriodPicker (default = period containing entry date) — never a single global 'open' period. Why: backfills and late postings were misfiled.

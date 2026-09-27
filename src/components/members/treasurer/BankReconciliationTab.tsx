@@ -2,9 +2,13 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import PeriodPicker from "@/components/members/treasurer/PeriodPicker";
+import { fetchUnlockedPeriods, periodIdForDate, type PostingPeriod } from "@/lib/treasurer/periods";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
-import { Loader2, Check, X, FileDown, Zap } from "lucide-react";
+import { Loader2, Check, X, FileDown, Zap, Link2 } from "lucide-react";
 import { saveJsPdf } from "@/lib/nativeDownload";
 import {
   reportPdfDoc, reportSection, reportTable, fmtDate as fmtLong,
@@ -12,7 +16,7 @@ import {
 import {
   BankLine, Suggestion, OutstandingBalance, BankLedgerLine,
   money, isBankCharge, isUnreconciled, buildSuggestions,
-  fetchOutstandingCreditors, fetchOutstandingDebtors, fetchAccountMap, fetchOpenPeriodId,
+  fetchOutstandingCreditors, fetchOutstandingDebtors, fetchAccountMap,
   postEntry, markMatched, fetchBankLedgerLines, fetchBankNominalBalance,
 } from "@/lib/treasurer/bankRecon";
 
@@ -30,6 +34,23 @@ export default function BankReconciliationTab({ canEdit }: { canEdit: boolean })
   const [nominal, setNominal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<string | null>(null);
+  const [periods, setPeriods] = useState<PostingPeriod[]>([]);
+  const [periodOverrides, setPeriodOverrides] = useState<Record<string, string>>({});
+  const [matchFor, setMatchFor] = useState<BankLine | null>(null);
+  const [candidates, setCandidates] = useState<BankLedgerLine[]>([]);
+  const [candLoading, setCandLoading] = useState(false);
+  const [candSearch, setCandSearch] = useState("");
+
+  useEffect(() => { fetchUnlockedPeriods().then(setPeriods).catch(() => setPeriods([])); }, []);
+
+  /** Posting period for a bank line: manual choice, else the unlocked period containing its transaction date. */
+  const autoPeriodFor = (l: BankLine) => periodIdForDate(periods, l.transaction_date);
+  const periodFor = (l: BankLine) => periodOverrides[l.id] ?? autoPeriodFor(l);
+  const linePicker = (l: BankLine) => (
+    <PeriodPicker compact label={`Period for ${l.description ?? "line"}`} periods={periods}
+      value={periodFor(l)} autoId={autoPeriodFor(l)} disabled={!canEdit}
+      onChange={(id) => setPeriodOverrides((m) => ({ ...m, [l.id]: id }))} />
+  );
 
   useEffect(() => {
     (async () => {
@@ -128,9 +149,11 @@ export default function BankReconciliationTab({ canEdit }: { canEdit: boolean })
       const bank = accounts.get("1000");
       const chargeAcct = accounts.get("5410");
       if (!bank || !chargeAcct) throw new Error("Accounts 1000 / 5410 not found.");
-      const periodId = await fetchOpenPeriodId();
+      const missing = charges.filter((l) => !periodFor(l));
+      if (missing.length) throw new Error(`${missing.length} charge(s) have no unlocked period — choose one on each line.`);
       let done = 0;
       for (const l of charges) {
+        const periodId = periodFor(l);
         const pence = Math.abs(l.amount_pence);
         if (pence <= 0) continue;
         const date = l.transaction_date ?? new Date().toISOString().slice(0, 10);
@@ -160,7 +183,8 @@ export default function BankReconciliationTab({ canEdit }: { canEdit: boolean })
     try {
       const accounts = await fetchAccountMap(["1000", "1100", "2000"]);
       const bank = accounts.get("1000");
-      const periodId = await fetchOpenPeriodId();
+      const periodId = periodFor(s.line);
+      if (!periodId) throw new Error("No unlocked period for this line's date — choose one first.");
       const date = s.line.transaction_date ?? new Date().toISOString().slice(0, 10);
       const pence = Math.abs(s.line.amount_pence);
       if (!bank) throw new Error("Account 1000 not found.");
@@ -212,6 +236,54 @@ export default function BankReconciliationTab({ canEdit }: { canEdit: boolean })
       setBusy(null);
     }
   };
+
+  // ---- Manual match to an existing ledger line (links only, posts nothing) ---
+  const openManualMatch = async (l: BankLine) => {
+    setMatchFor(l); setCandSearch(""); setCandidates([]); setCandLoading(true);
+    try {
+      const base = l.transaction_date ?? new Date().toISOString().slice(0, 10);
+      const shift = (days: number) => { const d = new Date(base); d.setDate(d.getDate() + days); return d.toISOString().slice(0, 10); };
+      const [ledgerLines, { data: taken, error }] = await Promise.all([
+        fetchBankLedgerLines(shift(-120), shift(120)),
+        supabase.from("bank_statement_transactions" as any).select("matched_journal_line_id,matched_entry_id").not("matched_entry_id", "is", null),
+      ]);
+      if (error) throw new Error(error.message);
+      const takenLines = new Set(((taken as any[]) ?? []).map((r) => r.matched_journal_line_id).filter(Boolean));
+      const takenEntries = new Set(((taken as any[]) ?? []).map((r) => r.matched_entry_id).filter(Boolean));
+      const want = Math.abs(l.amount_pence);
+      const day = (d: string) => new Date(d).getTime() / 86400000;
+      const rows = ledgerLines
+        .filter((c) => !takenLines.has(c.id) && !takenEntries.has(c.entry_id))
+        .filter((c) => (l.amount_pence > 0 ? c.debit_pence > 0 : c.credit_pence > 0))
+        .sort((a, b) => {
+          const amt = (c: BankLedgerLine) => Math.abs((c.debit_pence || c.credit_pence) - want);
+          return amt(a) - amt(b) || Math.abs(day(a.entry_date) - day(base)) - Math.abs(day(b.entry_date) - day(base));
+        });
+      setCandidates(rows);
+    } catch (e: any) {
+      toast({ title: "Could not load ledger lines", description: e?.message, variant: "destructive" });
+    } finally {
+      setCandLoading(false);
+    }
+  };
+
+  const linkManual = async (c: BankLedgerLine) => {
+    if (!matchFor) return;
+    setBusy(matchFor.id);
+    try {
+      await markMatched(matchFor.id, "manual", c.entry_id, c.id);
+      toast({ title: "Bank line matched to existing ledger entry" });
+      setMatchFor(null);
+      await load();
+    } catch (e: any) {
+      toast({ title: "Could not link", description: e?.message, variant: "destructive" });
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const shownCandidates = candidates.filter((c) =>
+    !candSearch.trim() || `${c.description ?? ""} ${c.entry_date}`.toLowerCase().includes(candSearch.trim().toLowerCase()));
 
   const reject = async (s: Suggestion) => {
     setBusy(s.line.id);
@@ -304,8 +376,9 @@ export default function BankReconciliationTab({ canEdit }: { canEdit: boolean })
               <>
                 <ul className="text-sm mb-3 space-y-1">
                   {charges.map((c) => (
-                    <li key={c.id} className="text-primary-foreground">
-                      {fmtDate(c.transaction_date)} · {c.description} · <span className="text-red-300">{money(c.amount_pence)}</span>
+                    <li key={c.id} className="text-primary-foreground flex flex-wrap items-center gap-2">
+                      <span className="flex-1 min-w-0">{fmtDate(c.transaction_date)} · {c.description} · <span className="text-red-300">{money(c.amount_pence)}</span></span>
+                      {linePicker(c)}
                     </li>
                   ))}
                 </ul>
@@ -335,6 +408,7 @@ export default function BankReconciliationTab({ canEdit }: { canEdit: boolean })
                       </p>
                       <p className="text-gold/80 text-xs">{s.label}</p>
                     </div>
+                    {linePicker(s.line)}
                     <Button size="sm" className="bg-gold text-navy hover:bg-gold/90" disabled={!canEdit || busy === s.line.id} onClick={() => confirm(s)}>
                       <Check className="w-3.5 h-3.5 mr-1" /> Confirm
                     </Button>
@@ -355,14 +429,55 @@ export default function BankReconciliationTab({ canEdit }: { canEdit: boolean })
             ) : (
               <ul className="text-sm space-y-1">
                 {unmatched.map((l) => (
-                  <li key={l.id} className="text-primary-foreground/85">
-                    {fmtDate(l.transaction_date)} · {l.description} · {money(l.amount_pence)}
-                    {l.match_rejected && <span className="text-amber-300 text-xs"> · suggestion rejected</span>}
+                  <li key={l.id} className="text-primary-foreground/85 flex flex-wrap items-center gap-2 border-b border-gold/10 pb-1">
+                    <span className="flex-1 min-w-0">
+                      {fmtDate(l.transaction_date)} · {l.description} · {money(l.amount_pence)}
+                      {l.match_rejected && <span className="text-amber-300 text-xs"> · suggestion rejected</span>}
+                    </span>
+                    <Button size="sm" variant="outline" disabled={!canEdit || busy === l.id} onClick={() => openManualMatch(l)}>
+                      <Link2 className="w-3.5 h-3.5 mr-1" /> Match to ledger
+                    </Button>
                   </li>
                 ))}
               </ul>
             )}
           </section>
+
+          <Dialog open={!!matchFor} onOpenChange={(v) => { if (!v) setMatchFor(null); }}>
+            <DialogContent className="max-w-2xl">
+              <DialogHeader>
+                <DialogTitle>Match to an existing ledger entry</DialogTitle>
+                <DialogDescription>
+                  {matchFor && <>{fmtDate(matchFor.transaction_date)} · {matchFor.description} · {money(matchFor.amount_pence)}. </>}
+                  Links the bank line to an entry already on 1000 Bank. Nothing new is posted.
+                </DialogDescription>
+              </DialogHeader>
+              <Input placeholder="Search description or date" value={candSearch} onChange={(e) => setCandSearch(e.target.value)} aria-label="Search ledger lines" />
+              <div className="max-h-96 overflow-y-auto">
+                {candLoading ? (
+                  <p className="text-sm"><Loader2 className="w-4 h-4 mr-1 inline animate-spin" /> Loading…</p>
+                ) : shownCandidates.length === 0 ? (
+                  <p className="text-sm italic">No unmatched ledger lines found within four months of this date.</p>
+                ) : (
+                  <ul className="space-y-1">
+                    {shownCandidates.map((c) => {
+                      const amt = c.debit_pence || c.credit_pence;
+                      const exact = matchFor && amt === Math.abs(matchFor.amount_pence);
+                      return (
+                        <li key={c.id} className="flex items-center gap-2 border-b border-gold/10 py-1 text-sm">
+                          <span className="flex-1 min-w-0">
+                            {fmtDate(c.entry_date)} · {c.description ?? "—"} · {money(c.debit_pence ? amt : -amt)}
+                            {exact && <span className="text-emerald-500 text-xs"> · exact amount</span>}
+                          </span>
+                          <Button size="sm" disabled={busy === matchFor?.id} onClick={() => linkManual(c)}>Link</Button>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+              </div>
+            </DialogContent>
+          </Dialog>
 
           {/* 4. Report */}
           <section className="rounded-lg border border-gold/20 bg-primary-foreground/5 p-4">
