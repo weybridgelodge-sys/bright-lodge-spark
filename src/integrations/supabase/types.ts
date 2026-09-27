@@ -5196,6 +5196,17 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_my_pending_unlock_approvals: {
+        Args: never
+        Returns: {
+          id: string
+          label: string
+          needs_secretary: boolean
+          needs_treasurer: boolean
+          unlock_reason: string
+          unlock_requested_at: string
+        }[]
+      }
       get_next_public_meeting: {
         Args: never
         Returns: {

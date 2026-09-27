@@ -77,7 +77,12 @@ function ReconciliationTab({
     const { error } = await supabase.rpc("request_unlock_treasurer_period" as any, { _period_id: unlockFor.id, _reason: reason.trim() } as any);
     setBusyId(null);
     if (error) toast({ title: "Request failed", description: error.message, variant: "destructive" });
-    else { toast({ title: "Unlock requested" }); setUnlockFor(null); setReason(""); onChange(); }
+    else {
+      toast({ title: "Unlock requested" });
+      // One-off email to the approvers; failure never blocks the request.
+      supabase.functions.invoke("notify-unlock-requested", { body: { period_id: unlockFor.id } }).catch(() => {});
+      setUnlockFor(null); setReason(""); onChange();
+    }
   };
 
   const approve = async (p: Period) => {

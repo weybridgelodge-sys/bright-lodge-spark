@@ -8,6 +8,7 @@ import { listMyGroups } from "@/lib/workingGroups";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import ActivePoll from "@/components/members/ActivePoll";
 import { DuesAttentionBanner } from "@/components/members/DuesStatusCard";
+import PendingUnlockApprovalBanner from "@/components/members/PendingUnlockApprovalBanner";
 import TreasuryBudgetCard from "@/components/members/TreasuryBudgetCard";
 import { fetchLodgeHealthBundle, lodgeHealth, type LodgeHealth, type HealthBand } from "@/lib/kpis";
 import { Activity } from "lucide-react";
@@ -73,6 +74,8 @@ export default function MembersDashboard() {
           The private area for brethren of Weybridge Lodge No. 6787.
         </p>
       </div>
+
+      {user?.id && <PendingUnlockApprovalBanner />}
 
       {isAdmin && user?.id && <DuesAttentionBanner memberId={user.id} />}
 
