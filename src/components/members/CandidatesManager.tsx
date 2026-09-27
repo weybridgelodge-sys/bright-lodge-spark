@@ -47,6 +47,12 @@ export default function CandidatesManager({ onChange }: { onChange?: () => void 
     load();
   }, []);
 
+  const highlight = typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("candidate") : null;
+  useEffect(() => {
+    if (!highlight || loading) return;
+    document.getElementById(`candidate-${highlight}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, [highlight, loading]);
+
   const save = async () => {
     if (!draft.first_name.trim() || !draft.last_name.trim()) {
       toast.error("First and last name required");
@@ -166,7 +172,8 @@ export default function CandidatesManager({ onChange }: { onChange?: () => void 
           {rows.map((c) => (
             <div
               key={c.id}
-              className="bg-navy/60 border border-gold/10 rounded-sm p-3 flex flex-wrap items-center gap-3"
+              id={`candidate-${c.id}`}
+              className={`bg-navy/60 border rounded-sm p-3 flex flex-wrap items-center gap-3 scroll-mt-24 ${highlight === c.id ? "border-gold ring-1 ring-gold" : "border-gold/10"}`}
             >
               <div className="flex-1 min-w-[10rem]">
                 <p className="font-medium text-sm flex items-center gap-2">
