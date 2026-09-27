@@ -167,8 +167,8 @@ function ReconciliationTab({
                   </div>
                   {(isTreasurer || isSecretary) && (
                     <div className="pt-1">
-                      <Button size="sm" variant="outline" className="min-h-11 sm:min-h-0" disabled={busyId === p.id || (isTreasurer && p.unlock_approved_by_treasurer && !isSecretary) || (isSecretary && p.unlock_approved_by_secretary && !isTreasurer)} onClick={() => approve(p)}>
-                        <ShieldCheck className="w-3.5 h-3.5 mr-1" /> Approve unlock (as {isTreasurer ? "Treasurer" : "Secretary"})
+                      <Button size="sm" variant="outline" className="min-h-11 sm:min-h-0" disabled={busyId === p.id || ((!isTreasurer || p.unlock_approved_by_treasurer) && (!isSecretary || p.unlock_approved_by_secretary))} onClick={() => approve(p)}>
+                        <ShieldCheck className="w-3.5 h-3.5 mr-1" /> Approve unlock (as {isTreasurer && isSecretary ? "Treasurer & Secretary" : isTreasurer ? "Treasurer" : "Secretary"})
                       </Button>
                     </div>
                   )}
@@ -252,7 +252,7 @@ function PeriodDialog({
 
 // ─── Page ───────────────────────────────────────────────────────────────────
 function Inner() {
-  const { isAdmin, isSecretary, isCurrentTreasurer, canAccessTreasurer } = useAuth();
+  const { isAdmin, isCurrentSecretary, isCurrentTreasurer, canAccessTreasurer } = useAuth();
   const [periods, setPeriods] = useState<Period[]>([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState("bank-reconciliation");
@@ -506,7 +506,7 @@ function Inner() {
             <EventAccountsTab canEdit={canEditTx} />
           </TabsContent>
           <TabsContent value="reconciliation" className="mt-4">
-            <ReconciliationTab periods={periods} isTreasurer={isCurrentTreasurer} isSecretary={isSecretary} isAdmin={isAdmin} onChange={load} />
+            <ReconciliationTab periods={periods} isTreasurer={isCurrentTreasurer} isSecretary={isCurrentSecretary} isAdmin={isAdmin} onChange={load} />
           </TabsContent>
         </Tabs>
 
