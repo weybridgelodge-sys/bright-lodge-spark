@@ -2970,6 +2970,7 @@ export type Database = {
       }
       membership_enquiries: {
         Row: {
+          converted_candidate_id: string | null
           created_at: string
           email: string
           full_name: string
@@ -2984,6 +2985,7 @@ export type Database = {
           user_agent: string | null
         }
         Insert: {
+          converted_candidate_id?: string | null
           created_at?: string
           email: string
           full_name: string
@@ -2998,6 +3000,7 @@ export type Database = {
           user_agent?: string | null
         }
         Update: {
+          converted_candidate_id?: string | null
           created_at?: string
           email?: string
           full_name?: string
@@ -3011,7 +3014,15 @@ export type Database = {
           updated_at?: string
           user_agent?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "membership_enquiries_converted_candidate_id_fkey"
+            columns: ["converted_candidate_id"]
+            isOneToOne: false
+            referencedRelation: "candidates"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       module_settings: {
         Row: {
@@ -5119,6 +5130,10 @@ export type Database = {
       can_view_skills_matrix: { Args: { _user: string }; Returns: boolean }
       check_and_book_seats: {
         Args: { _event_key: string; _meeting_id: string; _seats: number }
+        Returns: string
+      }
+      convert_enquiry_to_candidate: {
+        Args: { _enquiry_id: string; _link_existing?: boolean }
         Returns: string
       }
       current_lodge_year: { Args: never; Returns: number }
