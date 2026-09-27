@@ -21,10 +21,11 @@ interface Props {
   name?: string
   secretaryName?: string
   secretaryOffice?: string
+  membershipOfficerName?: string
   guideUrl?: string
 }
 
-const Email = ({ name, secretaryName, secretaryOffice, guideUrl }: Props) => (
+const Email = ({ name, secretaryName, secretaryOffice, membershipOfficerName, guideUrl }: Props) => (
   <Html lang="en" dir="ltr">
     <Head />
     <Preview>Great to hear from you — a short guide to Weybridge Lodge</Preview>
@@ -59,14 +60,14 @@ const Email = ({ name, secretaryName, secretaryOffice, guideUrl }: Props) => (
             </Button>
           </Section>
           <Text style={p}>
-            {secretaryName ? `${secretaryName}, our ${secretaryOffice || 'Membership Officer'},` : 'Our Membership Officer'} will
+            Our membership secretary{membershipOfficerName ? ` ${membershipOfficerName}` : ''} will
             give you a call in the next day or two for a friendly, no-obligation
             chat and to answer any questions you might have.
           </Text>
           <Hr style={hr} />
           <Text style={signOff}>Yours sincerely,</Text>
-          <Text style={signName}>{secretaryName || 'The Membership Officer'}</Text>
-          <Text style={signOffice}>{secretaryOffice || 'Membership Officer'}</Text>
+          <Text style={signName}>{secretaryName || 'The Lodge Secretary'}</Text>
+          <Text style={signOffice}>{secretaryOffice || 'Lodge Secretary'}</Text>
           <Hr style={hr} />
           <Text style={small}>
             If you did not submit this enquiry, please ignore this email — no
@@ -88,7 +89,7 @@ export const template = {
   component: Email,
   subject: (d: Props) => (d?.name ? `Great to hear from you, ${d.name}!` : 'Great to hear from you!'),
   displayName: 'Enquiry confirmation',
-  previewData: { name: 'Jane', secretaryName: 'W Bro. Ben Connolly', secretaryOffice: 'Membership Officer', guideUrl: DEFAULT_GUIDE_URL },
+  previewData: { name: 'Jane', secretaryName: 'W Bro. Richard Smith', secretaryOffice: 'Lodge Secretary', membershipOfficerName: 'W Bro. Ben Connolly', guideUrl: DEFAULT_GUIDE_URL },
 } satisfies TemplateEntry
 
 const main = { backgroundColor: '#ffffff', fontFamily: 'Georgia, "Times New Roman", serif', margin: 0, padding: 0 }
