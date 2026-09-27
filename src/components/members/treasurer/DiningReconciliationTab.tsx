@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { usePostingPeriod, fetchUnlockedPeriods, periodIdForDate } from "@/lib/treasurer/periods";
+import PeriodPicker from "@/components/members/treasurer/PeriodPicker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -95,6 +97,7 @@ function MeetingPanel({
   const [notes, setNotes] = useState("");
   const [invoiceNumber, setInvoiceNumber] = useState("");
   const [invoiceDate, setInvoiceDate] = useState("");
+  const invoicePosting = usePostingPeriod((invoiceDate || meeting.meeting_date || "").slice(0, 10));
   const [saving, setSaving] = useState(false);
   const [creating, setCreating] = useState(false);
   const [posting, setPosting] = useState(false);
@@ -198,16 +201,10 @@ function MeetingPanel({
   const postStripeReceipts = async () => {
     if (receiptSets.postable.length === 0) return;
     setPosting(true);
-    const [{ data: u }, accounts, openPeriod] = await Promise.all([
+    const [{ data: u }, accounts, unlockedPeriods] = await Promise.all([
       supabase.auth.getUser(),
       supabase.from("chart_of_accounts" as any).select("id,code").in("code", ["1010", "4100", "4120", "5420"]),
-      supabase
-        .from("treasurer_periods" as any)
-        .select("id")
-        .eq("status", "open")
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle(),
+      fetchUnlockedPeriods(),
     ]);
     const accRows = (accounts.data as any[]) ?? [];
     const acct = (code: string) => accRows.find((a) => a.code === code)?.id as string | undefined;
@@ -220,11 +217,12 @@ function MeetingPanel({
       toast({ title: "Accounts 1010 / 4100 / 4120 / 5420 not found", variant: "destructive" });
       return;
     }
-    const periodId = (openPeriod.data as any)?.id ?? null;
     let ok = 0;
     let failed = 0;
 
     for (const b of receiptSets.postable) {
+      const periodId = periodIdForDate(unlockedPeriods, (b.paid_at ?? meeting.meeting_date).slice(0, 10));
+      if (!periodId) { failed += 1; continue; }
       const label = `Stripe dining receipt — ${b.contact_name ?? "Unknown"} — ${b.event_label ?? meetingTypeLabel(meeting.meeting_type)}`;
       const { data: entry, error: entryErr } = await supabase
         .from("journal_entries" as any)
@@ -331,17 +329,15 @@ function MeetingPanel({
       toast({ title: "Enter the invoice figures first", variant: "destructive" });
       return;
     }
+    if (!invoicePosting.periodId) {
+      toast({ title: "Choose a period to post into", variant: "destructive" });
+      return;
+    }
     setCreating(true);
-    const [{ data: u }, accounts, openPeriod] = await Promise.all([
+    const [{ data: u }, accounts, unlockedPeriods] = await Promise.all([
       supabase.auth.getUser(),
       supabase.from("chart_of_accounts" as any).select("id,code").in("code", ["5210", "2000"]),
-      supabase
-        .from("treasurer_periods" as any)
-        .select("id")
-        .eq("status", "open")
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle(),
+      fetchUnlockedPeriods(),
     ]);
 
     const accRows = (accounts.data as any[]) ?? [];
@@ -384,7 +380,7 @@ function MeetingPanel({
         source_type: "gmc_dining_invoice",
         source_id: invoiceId,
         payee: "GMC",
-        period_id: (openPeriod.data as any)?.id ?? null,
+        period_id: invoicePosting.periodId,
         created_by: u.user?.id ?? null,
       })
       .select("id")
@@ -489,6 +485,7 @@ function MeetingPanel({
               <Label>Invoice date — optional</Label>
               <Input type="date" value={invoiceDate} disabled={!canEdit} onChange={(e) => setInvoiceDate(e.target.value)} />
             </div>
+            <PeriodPicker label="Posting period" periods={invoicePosting.periods} value={invoicePosting.periodId} autoId={invoicePosting.autoId} onChange={invoicePosting.setPeriodId} disabled={!canEdit} />
             <div>
               <Label>Invoice headcount</Label>
               <Input inputMode="numeric" value={headcount} disabled={!canEdit} onChange={(e) => setHeadcount(e.target.value)} placeholder="34" />
