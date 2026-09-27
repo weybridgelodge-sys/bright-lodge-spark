@@ -267,6 +267,7 @@ export default function NewMemberFeesTab({ canEdit }: { canEdit: boolean }) {
                 <Label>Date received</Label>
                 <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} disabled={!canEdit} />
               </div>
+              <PeriodPicker periods={posting.periods} value={posting.periodId} autoId={posting.autoId} onChange={posting.setPeriodId} disabled={!canEdit} />
               <div>
                 <Label>Annual subscription rate (£)</Label>
                 <Input type="number" step="0.01" min="0" value={subRate} onChange={(e) => setSubRate(e.target.value)} disabled={!canEdit} />

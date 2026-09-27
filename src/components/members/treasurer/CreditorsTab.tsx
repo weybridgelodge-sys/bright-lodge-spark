@@ -260,6 +260,7 @@ export default function CreditorsTab({ canEdit }: { canEdit: boolean }) {
             <Label>Date</Label>
             <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} disabled={!canEdit} />
           </div>
+          <PeriodPicker periods={posting.periods} value={posting.periodId} autoId={posting.autoId} onChange={posting.setPeriodId} disabled={!canEdit} />
           <div>
             <Label>Payee</Label>
             <Select value={payee} onValueChange={setPayee} disabled={!canEdit}>
@@ -301,6 +302,7 @@ export default function CreditorsTab({ canEdit }: { canEdit: boolean }) {
             <Label>Date</Label>
             <Input type="date" value={recDate} onChange={(e) => setRecDate(e.target.value)} disabled={!canEdit} />
           </div>
+          <PeriodPicker periods={recPosting.periods} value={recPosting.periodId} autoId={recPosting.autoId} onChange={recPosting.setPeriodId} disabled={!canEdit} />
           <div>
             <Label>Type</Label>
             <Select value={recPayee} onValueChange={setRecPayee} disabled={!canEdit}>

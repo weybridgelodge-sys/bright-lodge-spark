@@ -210,6 +210,7 @@ export default function DirectPaymentTab({ canEdit }: { canEdit: boolean }) {
                 <Label>Date</Label>
                 <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} disabled={!canEdit} />
               </div>
+              <PeriodPicker periods={posting.periods} value={posting.periodId} autoId={posting.autoId} onChange={posting.setPeriodId} disabled={!canEdit} />
               <div>
                 <Label>Amount (£) — paid from 1000 Bank</Label>
                 <Input type="number" step="0.01" min="0" value={amount} onChange={(e) => onAmountChange(e.target.value)} disabled={!canEdit} />

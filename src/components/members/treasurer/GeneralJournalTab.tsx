@@ -158,6 +158,7 @@ export default function GeneralJournalTab({ canEdit }: { canEdit: boolean }) {
                 <Label>Date</Label>
                 <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} disabled={!canEdit} />
               </div>
+              <PeriodPicker periods={posting.periods} value={posting.periodId} autoId={posting.autoId} onChange={posting.setPeriodId} disabled={!canEdit} />
               <div>
                 <Label>Description</Label>
                 <Input
