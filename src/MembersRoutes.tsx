@@ -57,6 +57,11 @@ const MembersRoutes = () => (
       <Routes>
         <Route path="login" element={<MembersLogin />} />
         <Route path="pending" element={<MembersPending />} />
+        {/* Email links (unlock approval, poll opened) point at /members/dashboard;
+            the dashboard is the portal index, so send them there. */}
+        <Route path="dashboard" element={<Navigate to="/members" replace />} />
+        {/* Safety net: an unmatched /members/* path must never render a blank page. */}
+        <Route path="*" element={<Navigate to="/members" replace />} />
         <Route path="" element={<ProtectedRoute><MembersDashboard /></ProtectedRoute>} />
         <Route path="directory" element={<ProtectedRoute><MembersDirectory /></ProtectedRoute>} />
         <Route path="documents" element={<ProtectedRoute><MembersDocuments /></ProtectedRoute>} />
