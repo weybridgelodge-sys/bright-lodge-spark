@@ -1,6 +1,7 @@
 import * as React from 'npm:react@18.3.1'
 import {
   Body,
+  Button,
   Container,
   Head,
   Heading,
@@ -14,16 +15,19 @@ import {
 import type { TemplateEntry } from './registry.ts'
 import { LOGO_HEIGHT, LOGO_URL, LOGO_WIDTH } from './_brand.ts'
 
+const DEFAULT_GUIDE_URL = 'https://weybridgelodge.org.uk/downloads/information-for-prospective-members.pdf'
+
 interface Props {
   name?: string
   secretaryName?: string
   secretaryOffice?: string
+  guideUrl?: string
 }
 
-const Email = ({ name, secretaryName, secretaryOffice }: Props) => (
+const Email = ({ name, secretaryName, secretaryOffice, guideUrl }: Props) => (
   <Html lang="en" dir="ltr">
     <Head />
-    <Preview>Thank you for your enquiry to Weybridge Lodge No. 6787</Preview>
+    <Preview>Great to hear from you — a short guide to Weybridge Lodge</Preview>
     <Body style={main}>
       <Container style={container}>
         <Section style={header}>
@@ -41,14 +45,23 @@ const Email = ({ name, secretaryName, secretaryOffice }: Props) => (
         <Section style={card}>
           <Heading as="h2" style={h2}>Thank you{name ? `, ${name}` : ''}</Heading>
           <Text style={p}>
-            We have received your enquiry about joining Weybridge Lodge and one
-            of our members will be in touch with you personally within a few
-            days.
+            Thanks so much for reaching out to Weybridge Lodge — it's great to
+            hear you're curious about Freemasonry here in Guildford.
           </Text>
           <Text style={p}>
-            In the meantime, you are welcome to read more about what to expect
-            on your first visit and about Freemasonry in general on our
-            website.
+            While you wait to hear from us properly, here's a short guide with a
+            bit more about who we are, what a typical evening looks like, and
+            what joining actually involves:
+          </Text>
+          <Section style={{ textAlign: 'center' as const, margin: '8px 0 16px' }}>
+            <Button href={guideUrl || DEFAULT_GUIDE_URL} style={button}>
+              Read the guide
+            </Button>
+          </Section>
+          <Text style={p}>
+            {secretaryName || 'Our Lodge Secretary'}{secretaryName ? ', our Lodge Secretary,' : ''} will
+            give you a call in the next day or two for a friendly, no-obligation
+            chat and to answer any questions you might have.
           </Text>
           <Hr style={hr} />
           <Text style={signOff}>Yours sincerely,</Text>
@@ -73,9 +86,9 @@ const Email = ({ name, secretaryName, secretaryOffice }: Props) => (
 
 export const template = {
   component: Email,
-  subject: 'Thank you for your enquiry — Weybridge Lodge',
+  subject: (d: Props) => (d?.name ? `Great to hear from you, ${d.name}!` : 'Great to hear from you!'),
   displayName: 'Enquiry confirmation',
-  previewData: { name: 'Jane', secretaryName: 'W Bro. Richard Smith', secretaryOffice: 'Lodge Secretary' },
+  previewData: { name: 'Jane', secretaryName: 'W Bro. Richard Smith', secretaryOffice: 'Lodge Secretary', guideUrl: DEFAULT_GUIDE_URL },
 } satisfies TemplateEntry
 
 const main = { backgroundColor: '#ffffff', fontFamily: 'Georgia, "Times New Roman", serif', margin: 0, padding: 0 }
@@ -94,3 +107,4 @@ const footerText = { color: '#888', fontSize: '11px', margin: 0, fontFamily: 'Ar
 const signOff = { color: '#2a2a2a', fontSize: '15px', lineHeight: '1.5', margin: '0 0 8px', fontFamily: 'Arial, sans-serif' }
 const signName = { color: '#1B2A4A', fontSize: '15px', fontWeight: 600, lineHeight: '1.4', margin: 0, fontFamily: 'Arial, sans-serif' }
 const signOffice = { color: '#1B2A4A', fontSize: '14px', lineHeight: '1.4', margin: 0, fontFamily: 'Arial, sans-serif', fontStyle: 'italic' as const }
+const button = { backgroundColor: '#1B2A4A', color: '#ffffff', fontSize: '14px', fontFamily: 'Arial, sans-serif', fontWeight: 600, textDecoration: 'none', padding: '12px 24px', borderRadius: '4px', display: 'inline-block', letterSpacing: '0.5px' }

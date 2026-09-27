@@ -17,6 +17,7 @@ export const EnquiryForm = () => {
   const [submitted, setSubmitted] = useState(false);
   const [errors, setErrors] = useState<FieldErrors>({});
   const [turnstileToken, setTurnstileToken] = useState<string>("");
+  const [firstName, setFirstName] = useState("");
 
 
   const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -68,6 +69,7 @@ export const EnquiryForm = () => {
       }
 
       if (data?.success) {
+        setFirstName(payload.full_name.split(/\s+/)[0] || "");
         setSubmitted(true);
         toast({
           title: "Enquiry sent",
@@ -91,9 +93,9 @@ export const EnquiryForm = () => {
       <div className="mt-8 border-t border-border pt-8">
         <h4 className="text-lg font-serif text-foreground mb-2">Thank you</h4>
         <p className="text-muted-foreground font-sans">
-          Your enquiry has been received. A confirmation email is on its way to your
-          inbox, and one of our members will be in touch with you personally within a
-          few days.
+          Thanks so much{firstName ? `, ${firstName}` : ""} — we're really glad you got in
+          touch. Check your inbox for a short guide with more about us, and expect a
+          friendly call from our Secretary in the next day or two to have a proper chat.
         </p>
         <button
           type="button"
