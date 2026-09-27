@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { usePostingPeriod } from "@/lib/treasurer/periods";
+import PeriodPicker from "@/components/members/treasurer/PeriodPicker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,11 +22,12 @@ export default function DirectPaymentTab({ canEdit }: { canEdit: boolean }) {
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [allAccounts, setAllAccounts] = useState<Account[]>([]);
   const [bankId, setBankId] = useState<string | null>(null);
-  const [openPeriodId, setOpenPeriodId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   const [accountId, setAccountId] = useState<string>("");
   const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const posting = usePostingPeriod(date);
+  const openPeriodId = posting.periodId;
   const [description, setDescription] = useState("");
   const [documentNumber, setDocumentNumber] = useState("");
   const [bankReference, setBankReference] = useState("");
@@ -35,15 +38,8 @@ export default function DirectPaymentTab({ canEdit }: { canEdit: boolean }) {
 
   const load = useCallback(async () => {
     setLoading(true);
-    const [{ data: accts, error: acctErr }, { data: period }] = await Promise.all([
+    const [{ data: accts, error: acctErr }] = await Promise.all([
       supabase.from("chart_of_accounts" as any).select("id,code,name,account_type").order("code"),
-      supabase
-        .from("treasurer_periods" as any)
-        .select("id")
-        .eq("status", "open")
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle(),
     ]);
     if (acctErr) toast({ title: "Could not load accounts", description: acctErr.message, variant: "destructive" });
 
@@ -51,7 +47,6 @@ export default function DirectPaymentTab({ canEdit }: { canEdit: boolean }) {
     setBankId(all.find((a) => a.code === "1000")?.id ?? null);
     setAccounts(all.filter((a) => a.code?.startsWith("5") && !EXCLUDED_CODES.has(a.code)));
     setAllAccounts(all.filter((a) => !EXCLUDED_CODES.has(a.code)));
-    setOpenPeriodId((period as any)?.id ?? null);
     setLoading(false);
   }, []);
 

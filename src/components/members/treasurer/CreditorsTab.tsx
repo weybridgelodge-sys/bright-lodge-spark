@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { usePostingPeriod } from "@/lib/treasurer/periods";
+import PeriodPicker from "@/components/members/treasurer/PeriodPicker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -23,6 +25,8 @@ type LineRow = {
 
 export default function CreditorsTab({ canEdit }: { canEdit: boolean }) {
   const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const posting = usePostingPeriod(date);
+  const openPeriodId = posting.periodId;
   const [payee, setPayee] = useState<string>("GMC");
   const [otherPayee, setOtherPayee] = useState("");
   const [amount, setAmount] = useState("0.00");
@@ -41,11 +45,10 @@ export default function CreditorsTab({ canEdit }: { canEdit: boolean }) {
   const [loading, setLoading] = useState(true);
   const [accounts, setAccounts] = useState<Map<string, string>>(new Map());
   const [allAccounts, setAllAccounts] = useState<{ id: string; code: string; name: string }[]>([]);
-  const [openPeriodId, setOpenPeriodId] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
-    const [{ data: accts }, { data: allAccts }, { data: period }] = await Promise.all([
+    const [{ data: accts }, { data: allAccts }] = await Promise.all([
       supabase
         .from("chart_of_accounts" as any)
         .select("id,code")
@@ -54,13 +57,6 @@ export default function CreditorsTab({ canEdit }: { canEdit: boolean }) {
         .from("chart_of_accounts" as any)
         .select("id,code,name")
         .order("code"),
-      supabase
-        .from("treasurer_periods" as any)
-        .select("id")
-        .eq("status", "open")
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle(),
     ]);
 
     const map = new Map<string, string>();
@@ -69,7 +65,6 @@ export default function CreditorsTab({ canEdit }: { canEdit: boolean }) {
     }
     setAccounts(map);
     setAllAccounts(((allAccts as any[]) ?? []).filter((a) => a.code !== "2000"));
-    setOpenPeriodId((period as any)?.id ?? null);
 
     const creditorsId = map.get("2000");
     if (!creditorsId) {

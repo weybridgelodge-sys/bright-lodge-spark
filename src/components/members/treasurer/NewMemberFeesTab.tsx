@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { usePostingPeriod } from "@/lib/treasurer/periods";
+import PeriodPicker from "@/components/members/treasurer/PeriodPicker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -26,13 +28,14 @@ const toPence = (v: string) => {
 
 export default function NewMemberFeesTab({ canEdit }: { canEdit: boolean }) {
   const [accounts, setAccounts] = useState<Map<string, string>>(new Map());
-  const [openPeriodId, setOpenPeriodId] = useState<string | null>(null);
   const [pots, setPots] = useState<ReservePot[]>([]);
   const [loading, setLoading] = useState(true);
 
   const [name, setName] = useState("");
   const [meeting, setMeeting] = useState<string>("October");
   const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const posting = usePostingPeriod(date);
+  const openPeriodId = posting.periodId;
   const [subRate, setSubRate] = useState("250.00");
   const [ageBracket, setAgeBracket] = useState<"over25" | "under25">("over25");
   const [ugleFee, setUgleFee] = useState("132.00");
@@ -60,18 +63,11 @@ export default function NewMemberFeesTab({ canEdit }: { canEdit: boolean }) {
 
   const load = useCallback(async () => {
     setLoading(true);
-    const [{ data: accts, error: acctErr }, { data: period }, potRows] = await Promise.all([
+    const [{ data: accts, error: acctErr }, potRows] = await Promise.all([
       supabase
         .from("chart_of_accounts" as any)
         .select("id,code")
         .in("code", ["1000", "2000", "3000", "3100", "4000", "4500", "5000", "5100"]),
-      supabase
-        .from("treasurer_periods" as any)
-        .select("id")
-        .eq("status", "open")
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle(),
       fetchReservePots(),
     ]);
     setPots(potRows);
@@ -79,7 +75,6 @@ export default function NewMemberFeesTab({ canEdit }: { canEdit: boolean }) {
     const map = new Map<string, string>();
     for (const a of (accts as any[]) ?? []) if (a.code && a.id) map.set(a.code as string, a.id as string);
     setAccounts(map);
-    setOpenPeriodId((period as any)?.id ?? null);
     setLoading(false);
   }, []);
 
