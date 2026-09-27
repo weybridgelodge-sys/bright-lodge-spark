@@ -330,6 +330,13 @@
       "when": 1790533353715,
       "tag": "0046_unlock_secretary_via_office",
       "breakpoints": true
+    },
+    {
+      "idx": 47,
+      "version": "7",
+      "when": 1790533440561,
+      "tag": "0047_my_pending_unlock_approvals",
+      "breakpoints": true
     }
   ]
 }
