@@ -244,7 +244,7 @@ export async function fetchBankLedgerLines(from: string, to: string): Promise<Ba
   if (!id) return [];
   const { data, error } = await supabase
     .from("journal_lines" as any)
-    .select("id,entry_id,debit_pence,credit_pence,description,journal_entries!inner(entry_date)")
+    .select("id,entry_id,debit_pence,credit_pence,description,journal_entries!inner(entry_date,description)")
     .eq("account_id", id)
     .gte("journal_entries.entry_date", from)
     .lte("journal_entries.entry_date", to);
@@ -253,7 +253,7 @@ export async function fetchBankLedgerLines(from: string, to: string): Promise<Ba
     id: r.id,
     entry_id: r.entry_id,
     entry_date: r.journal_entries?.entry_date,
-    description: r.description,
+    description: r.description ?? r.journal_entries?.description ?? null,
     debit_pence: Number(r.debit_pence ?? 0),
     credit_pence: Number(r.credit_pence ?? 0),
   }));
