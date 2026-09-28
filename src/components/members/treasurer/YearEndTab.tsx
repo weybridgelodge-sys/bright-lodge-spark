@@ -4,11 +4,20 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
-import { Loader2, Lock, CalendarCheck, Scale, TrendingUp } from "lucide-react";
+import { Loader2, Lock, CalendarCheck, Scale, TrendingUp, Send, History } from "lucide-react";
 import { acct, fetchAccounts, fetchLedgerLines, fetchMovements, fetchReportCalendar, fmtDate, money, signedBalance } from "@/lib/treasurer/reports";
 import { formatEntryNumber } from "@/lib/treasurer/entryNumber";
 import { buildClosingJournal, canCloseYear, FUND_CODE, fyLabel, yearEndDate, yearEndYears } from "@/lib/treasurer/yearEnd";
 import EntryDrilldown from "./EntryDrilldown";
+import YearSnapshotView from "./YearSnapshotView";
+import { AUDITOR_LABEL, AUDITOR_ROLES, STATUS_LABEL, canClose, canSubmit, statusOf, type Approval, type AuditStatus, type Round, type Signoff } from "@/lib/treasurer/yearAudit";
+
+const STATUS_STYLE: Record<AuditStatus, string> = {
+  draft: "border-primary-foreground/30 text-primary-foreground/80",
+  submitted: "border-sky-400/60 text-sky-300",
+  query: "border-amber-400/70 text-amber-300",
+  approved: "border-emerald-400/70 text-emerald-300",
+};
 
 type Closed = { id: string; entry_number: number; entry_date: string; fund: number };
 type Draft = ReturnType<typeof buildClosingJournal>;
@@ -25,6 +34,13 @@ export default function YearEndTab({ canEdit, onOpenTab }: { canEdit: boolean; o
   const [posting, setPosting] = useState(false);
   const [entryId, setEntryId] = useState<string | null>(null);
   const today = londonToday();
+  const [approvals, setApprovals] = useState<Map<number, Approval>>(new Map());
+  const [rounds, setRounds] = useState<Round[]>([]);
+  const [sigs, setSigs] = useState<Signoff[]>([]);
+  const [names, setNames] = useState<Map<string, string>>(new Map());
+  const [submitting, setSubmitting] = useState<number | null>(null);
+  const [history, setHistory] = useState<number | null>(null);
+  const [snapView, setSnapView] = useState<Round | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -56,6 +72,21 @@ export default function YearEndTab({ canEdit, onOpenTab }: { canEdit: boolean; o
           bf.set(y, signedBalance("equity", mv.get(fundAcct.id)));
         }));
       }
+      const [ap, rd, sg] = await Promise.all([
+        supabase.from("treasurer_year_approvals" as any).select("*"),
+        supabase.from("treasurer_year_approval_rounds" as any).select("*").order("round_number", { ascending: false }),
+        supabase.from("treasurer_year_signoffs" as any).select("*").order("signed_at"),
+      ]);
+      const apList = ((ap.data as any[]) ?? []) as Approval[];
+      const sgList = ((sg.data as any[]) ?? []) as Signoff[];
+      const rdList = ((rd.data as any[]) ?? []) as Round[];
+      const people = [...new Set([...sgList.map((x) => x.signed_by), ...rdList.map((x) => x.submitted_by).filter(Boolean) as string[]])];
+      const nm = new Map<string, string>();
+      if (people.length) {
+        const { data: pr } = await supabase.from("profiles").select("id,full_name").in("id", people);
+        for (const p of (pr as any[]) ?? []) nm.set(p.id, p.full_name ?? "");
+      }
+      setApprovals(new Map(apList.map((a) => [a.masonic_year, a]))); setRounds(rdList); setSigs(sgList); setNames(nm);
       setYears(ys); setClosed(m); setFundBf(bf);
     } catch (e: any) {
       toast({ title: "Could not load Year End", description: e?.message, variant: "destructive" });
@@ -75,6 +106,17 @@ export default function YearEndTab({ canEdit, onOpenTab }: { canEdit: boolean; o
     }
     setBusy(null);
   };
+
+  const submit = async (year: number) => {
+    setSubmitting(year);
+    const { data, error } = await supabase.rpc("submit_year_for_audit" as any, { _year: year } as any);
+    setSubmitting(null);
+    if (error) { toast({ title: "Not submitted", description: error.message, variant: "destructive" }); return; }
+    supabase.functions.invoke("notify-year-audit", { body: { approval_id: data } }).catch(() => {});
+    toast({ title: `${fyLabel(year)} submitted for audit review`, description: "Figures snapshotted; Auditor 1 and Auditor 2 have been emailed." });
+    load();
+  };
+  const who = (id: string | null) => (id && names.get(id)) || "Unknown";
 
   const post = async () => {
     if (!draft) return;
@@ -114,7 +156,7 @@ export default function YearEndTab({ canEdit, onOpenTab }: { canEdit: boolean; o
                   </div>
                   {c
                     ? <Badge variant="outline" className="border-gold/60 text-gold"><Lock className="w-3 h-3 mr-1" />Closed</Badge>
-                    : <Badge variant="outline" className="border-primary-foreground/30 text-primary-foreground/70">Not closed</Badge>}
+                    : <Badge variant="outline" className={STATUS_STYLE[statusOf(approvals.get(y))]}>Not closed · {STATUS_LABEL[statusOf(approvals.get(y))]}</Badge>}
                 </div>
 
                 {c ? (
@@ -131,24 +173,102 @@ export default function YearEndTab({ canEdit, onOpenTab }: { canEdit: boolean; o
                       <dd className="text-right tabular-nums text-gold">{acct((fundBf.get(y) ?? 0) + c.fund)}</dd>
                     </dl>
                   </div>
-                ) : guard.ok ? (
-                  <div className="flex flex-wrap gap-2">
-                    <Button variant="outline" className="min-h-[48px]" onClick={() => onOpenTab("balance-sheet")}>
-                      <Scale className="w-4 h-4 mr-1" /> Review Balance Sheet
-                    </Button>
-                    <Button variant="outline" className="min-h-[48px]" onClick={() => onOpenTab("income-expenditure")}>
-                      <TrendingUp className="w-4 h-4 mr-1" /> Review Income &amp; Expenditure
-                    </Button>
-                    {canEdit && (
-                      <Button className="min-h-[48px] bg-gold text-navy hover:bg-gold/90" disabled={busy === y} onClick={() => preview(y)}>
-                        {busy === y ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <CalendarCheck className="w-4 h-4 mr-1" />}
-                        Close {fyLabel(y)}
+) : (
+                  <div className="space-y-3">
+                    {(() => {
+                      const a = approvals.get(y);
+                      const st = statusOf(a);
+                      const round = a ? sigs.filter((x) => x.approval_id === a.id && x.round_number === a.round_number) : [];
+                      const q = round.find((x) => x.decision === "query");
+                      return (
+                        <div className="space-y-2 text-sm font-sans">
+                          {st === "submitted" && a && (
+                            <p className="text-primary-foreground/80">
+                              Round {a.round_number} submitted {a.submitted_at ? fmtDate(a.submitted_at.slice(0, 10)) : ""}.{" "}
+                              {AUDITOR_ROLES.map((r) => {
+                                const sg = round.find((x) => x.officer_role === r);
+                                return `${AUDITOR_LABEL[r]}: ${sg ? `confirmed by ${who(sg.signed_by)}` : "awaiting"}`;
+                              }).join(" · ")}
+                            </p>
+                          )}
+                          {st === "query" && q && (
+                            <div className="rounded border border-amber-400/50 bg-amber-400/10 p-3">
+                              <p className="font-semibold text-amber-300">Query from {who(q.signed_by)} ({AUDITOR_LABEL[q.officer_role]}) · {fmtDate(q.signed_at.slice(0, 10))}</p>
+                              <p className="mt-1 whitespace-pre-wrap">{q.note}</p>
+                              <p className="mt-1 text-xs text-primary-foreground/60">Make any corrections as normal (e.g. General Journal), then resubmit.</p>
+                            </div>
+                          )}
+                          {st === "approved" && (
+                            <ul className="text-emerald-300">
+                              {round.filter((x) => x.decision === "confirmed").map((x) => (
+                                <li key={x.id}>{AUDITOR_LABEL[x.officer_role]}: {who(x.signed_by)} · confirmed {fmtDate(x.signed_at.slice(0, 10))}</li>
+                              ))}
+                            </ul>
+                          )}
+                        </div>
+                      );
+                    })()}
+                    <div className="flex flex-wrap gap-2">
+                      <Button variant="outline" className="min-h-[48px]" onClick={() => onOpenTab("balance-sheet")}>
+                        <Scale className="w-4 h-4 mr-1" /> Review Balance Sheet
                       </Button>
+                      <Button variant="outline" className="min-h-[48px]" onClick={() => onOpenTab("income-expenditure")}>
+                        <TrendingUp className="w-4 h-4 mr-1" /> Review Income &amp; Expenditure
+                      </Button>
+                      {canEdit && canSubmit(statusOf(approvals.get(y))) && (
+                        <Button className="min-h-[48px] bg-gold text-navy hover:bg-gold/90" disabled={submitting === y} onClick={() => submit(y)}>
+                          {submitting === y ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Send className="w-4 h-4 mr-1" />}
+                          {statusOf(approvals.get(y)) === "query" ? "Resubmit for audit review" : "Submit for audit review"}
+                        </Button>
+                      )}
+                      {canEdit && guard.ok && canClose(statusOf(approvals.get(y))) && (
+                        <Button className="min-h-[48px] bg-gold text-navy hover:bg-gold/90" disabled={busy === y} onClick={() => preview(y)}>
+                          {busy === y ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <CalendarCheck className="w-4 h-4 mr-1" />}
+                          Close {fyLabel(y)}
+                        </Button>
+                      )}
+                    </div>
+                    {!guard.ok && "reason" in guard && <p className="text-xs text-primary-foreground/60">{guard.reason}</p>}
+                    {guard.ok && !canClose(statusOf(approvals.get(y))) && (
+                      <p className="text-xs text-primary-foreground/60">Closing becomes available once both auditors have approved the accounts.</p>
                     )}
                   </div>
-                ) : (
-                  <p className="text-xs text-primary-foreground/60">{"reason" in guard ? guard.reason : ""}</p>
                 )}
+                {(() => {
+                  const a = approvals.get(y);
+                  const rs = a ? rounds.filter((r) => r.approval_id === a.id) : [];
+                  if (!rs.length) return null;
+                  return (
+                    <div>
+                      <Button variant="ghost" className="min-h-[48px] text-gold px-2" onClick={() => setHistory(history === y ? null : y)} aria-expanded={history === y}>
+                        <History className="w-4 h-4 mr-1" /> Review history ({rs.length} round{rs.length > 1 ? "s" : ""})
+                      </Button>
+                      {history === y && (
+                        <ol className="space-y-2 text-xs font-sans mt-1">
+                          {rs.map((r) => (
+                            <li key={r.id} className="rounded border border-gold/15 p-2">
+                              <div className="flex flex-wrap items-center justify-between gap-2">
+                                <span className="text-primary-foreground/80">
+                                  Round {r.round_number} · submitted {fmtDate(r.submitted_at.slice(0, 10))} by {who(r.submitted_by)} ·{" "}
+                                  {r.outcome === "approved" ? "Approved" : r.outcome === "query" ? "Query raised" : "Awaiting sign-off"}
+                                </span>
+                                <Button variant="outline" size="sm" className="min-h-[40px]" onClick={() => setSnapView(r)}>View snapshot</Button>
+                              </div>
+                              <ul className="mt-1 space-y-0.5">
+                                {sigs.filter((x) => x.approval_id === r.approval_id && x.round_number === r.round_number).map((x) => (
+                                  <li key={x.id}>
+                                    {AUDITOR_LABEL[x.officer_role]} ({who(x.signed_by)}) · {x.decision === "confirmed" ? "confirmed" : "query"} · {fmtDate(x.signed_at.slice(0, 10))}
+                                    {x.note ? <span className="text-primary-foreground/60"> — {x.note}</span> : null}
+                                  </li>
+                                ))}
+                              </ul>
+                            </li>
+                          ))}
+                        </ol>
+                      )}
+                    </div>
+                  );
+                })()}
               </li>
             );
           })}
@@ -203,6 +323,20 @@ export default function YearEndTab({ canEdit, onOpenTab }: { canEdit: boolean; o
                   {posting && <Loader2 className="w-4 h-4 mr-1 animate-spin" />}Post closing journal
                 </Button>
               </DialogFooter>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!snapView} onOpenChange={(v) => { if (!v) setSnapView(null); }}>
+        <DialogContent className="bg-navy-light text-primary-foreground border-gold/30 max-w-2xl max-h-[90vh] overflow-y-auto">
+          {snapView && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="font-serif text-gold">{fyLabel(snapView.figures_snapshot.masonic_year)} — round {snapView.round_number} snapshot</DialogTitle>
+                <DialogDescription className="text-primary-foreground/70 font-sans">Figures as submitted for audit review.</DialogDescription>
+              </DialogHeader>
+              <YearSnapshotView snap={snapView.figures_snapshot} round={snapView.round_number} />
             </>
           )}
         </DialogContent>
