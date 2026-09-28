@@ -1,4 +1,5 @@
 import { lazy, Suspense } from "react";
+import AppErrorBoundary, { PageLoader } from "@/components/AppErrorBoundary";
 import { Capacitor } from "@capacitor/core";
 import DeferredToasters from "@/components/DeferredToasters";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -82,9 +83,10 @@ const App = () => (
       <DeferredToasters />
       <NoindexGuard />
       <BrowserRouter>
+        <AppErrorBoundary>
         <ScrollToTop />
         <ScrollToTopButton />
-        <Suspense fallback={null}>
+        <Suspense fallback={<PageLoader />}>
           <Routes>
             <Route path="/" element={<HomeRoute />} />
             <Route path="/what-is-freemasonry" element={<WhatIsFreemasonry />} />
@@ -186,6 +188,7 @@ const App = () => (
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>
+        </AppErrorBoundary>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

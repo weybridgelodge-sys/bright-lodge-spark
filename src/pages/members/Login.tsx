@@ -23,6 +23,13 @@ type View = "login" | "register" | "request-sent";
 
 const emailSchema = z.string().trim().email("Enter a valid email").max(255);
 
+function describeLinkError(code: string): string {
+  if (/expired|otp_expired|access_denied|invalid/i.test(code)) {
+    return "This link has expired or has already been used. Links work once only, and some email security scanners open them before you do. Enter your email below to get a new one, or use the 6-digit code from the email instead.";
+  }
+  return "We couldn't sign you in with that link. Enter your email below to request a new one.";
+}
+
 const registerSchema = z.object({
   fullName: z.string().trim().min(2, "Enter your full name").max(120),
   ugleRegNumber: z.string().trim().min(2, "UGLE registration number is required").max(40),
@@ -51,6 +58,19 @@ export default function MembersLogin() {
 
   // honeypot (bots fill hidden fields)
   const [honeypot, setHoneypot] = useState("");
+
+  // Expired / already-used magic link: captured from the URL in main.tsx before
+  // the auth client strips it, shown once here.
+  const [linkError] = useState<string | null>(() => {
+    try {
+      const raw = sessionStorage.getItem("auth-link-error");
+      if (!raw) return null;
+      sessionStorage.removeItem("auth-link-error");
+      return describeLinkError(raw);
+    } catch {
+      return null;
+    }
+  });
 
   useEffect(() => {
     if (session) navigate("/members", { replace: true });
@@ -272,6 +292,14 @@ export default function MembersLogin() {
                         Enter your registered email to receive a secure, passwordless Magic Link. No passwords to remember.
                       </p>
                     </div>
+
+                    {linkError && (
+                      <div role="alert" className="mb-5 rounded-md border border-gold/50 bg-gold/10 p-3 text-sm text-primary-foreground">
+                        <p className="font-semibold text-gold">That sign-in link didn't work</p>
+                        <p className="mt-1 text-primary-foreground/80 text-xs leading-relaxed">{linkError}</p>
+                      </div>
+                    )}
+
 
                     <form onSubmit={handleMagicLink} className="space-y-4">
                       {/* Honeypot */}
