@@ -264,8 +264,8 @@ function Inner() {
 
   const load = useCallback(async () => {
     setLoading(true);
-    const ps = await supabase.from("treasurer_periods" as any).select("*").order("created_at", { ascending: false });
-    if (!ps.error) setPeriods((ps.data as unknown as Period[]) ?? []);
+    const ps = await supabase.from("treasurer_periods" as any).select("*");
+    if (!ps.error) setPeriods(sortPeriodsNewestFirst((ps.data as unknown as Period[]) ?? []));
     setLoading(false);
   }, []);
 
