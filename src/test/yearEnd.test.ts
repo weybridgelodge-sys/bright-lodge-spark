@@ -74,7 +74,7 @@ describe("double-close guard", () => {
     expect(canCloseYear(2025, "2026-10-01", false).ok).toBe(true);
   });
   it("lists years from earliest activity to now", () => {
-    expect(yearEndYears(["2025-10-01", "2027-09-01"], "2026-09-28")).toEqual([2025]);
-    expect(yearEndYears(["2024-12-01"], "2026-10-02")).toEqual([2026, 2025, 2024]);
+    expect(yearEndYears(["2025-10-01", "2027-09-01"], "2026-09-28")).toEqual([2026, 2025]);
+    expect(yearEndYears(["2024-12-01"], "2026-10-02")).toEqual([2027, 2026, 2024]);
   });
 });

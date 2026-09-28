@@ -1,3 +1,4 @@
+import { masonicYearOptions } from "./reportPeriods";
 /**
  * Pure helpers for the Year End close. The closing journal's only job is to move a
  * masonic year's income & expenditure into 3000 General Fund (next year's opening fund).
@@ -64,11 +65,6 @@ export function canCloseYear(year: number, today: string, alreadyClosed: boolean
 }
 
 /** Masonic years from the earliest ledger/period date up to the current year, newest first. */
-export function yearEndYears(dates: string[], today: string): number[] {
-  const current = masonicYearOf(today);
-  const ys = dates.filter(Boolean).map(masonicYearOf).filter((y) => y <= current);
-  const lo = ys.length ? Math.min(...ys) : current;
-  const out: number[] = [];
-  for (let y = current; y >= lo; y--) out.push(y);
-  return out;
+export function yearEndYears(periodDates: string[], today: string): number[] {
+  return masonicYearOptions(masonicYearOf(today), periodDates);
 }

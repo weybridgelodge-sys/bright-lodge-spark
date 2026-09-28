@@ -39,7 +39,9 @@ describe("report period ranges", () => {
   });
 
   it("year options include future years that have periods", () => {
-    expect(masonicYearOptions(2025, ["2027-09-01", "2019-12-01"])).toEqual([2026, 2025, 2024, 2023, 2022, 2021, 2020, 2019]);
+    expect(masonicYearOptions(2025, [])).toEqual([2026, 2025]);
+    expect(masonicYearOptions(2025, ["2025-10-01", "2027-09-01", null])).toEqual([2026, 2025]);
+    expect(masonicYearOptions(2026, ["2024-12-01"])).toEqual([2027, 2026, 2024]);
   });
 });
 

@@ -114,13 +114,10 @@ export function bsComparative(s: BSSelection, basis: CompareBasis): AsAt {
 export const monthsOfYear = (y: number) => Array.from({ length: 12 }, (_, i) => addMonths(`${y}-10`, i));
 
 /** Masonic years to offer: rolling 5 back from `current`, plus any year covered by periods or ledger dates. */
-export function masonicYearOptions(current: number, dates: (string | null | undefined)[]): number[] {
-  const set = new Set<number>([0, 1, 2, 3, 4].map((i) => current - i));
-  const ys = dates.filter(Boolean).map((d) => masonicYearOf(d as string));
-  if (ys.length) {
-    const lo = Math.min(...ys), hi = Math.max(...ys);
-    for (let y = lo; y <= hi; y++) set.add(y);
-  }
+/** Masonic years with a real (non-closing) treasurer_periods row, plus always the current and next year. */
+export function masonicYearOptions(current: number, periodDates: (string | null | undefined)[]): number[] {
+  const set = new Set<number>([current, current + 1]);
+  for (const d of periodDates) if (d) set.add(masonicYearOf(d));
   return [...set].sort((a, b) => b - a);
 }
 
