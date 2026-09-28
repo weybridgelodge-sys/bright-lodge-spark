@@ -9,3 +9,4 @@
 
 - App shell: AppErrorBoundary wraps all routes (and the members portal); Suspense fallbacks use PageLoader, never null; chunk-load reloads add a ?_r= cache-buster and may retry after 60s. Why: a render crash or stale edge-cached HTML otherwise left a blank navy screen after magic-link sign-in.
 - Magic-link errors (#error=/error_code=) are captured in main.tsx into sessionStorage "auth-link-error" and shown once on the Login page. Why: expired/pre-scanned links otherwise bounced silently to sign-in.
+- Year-end audit sign-off: treasurer_year_approvals status changes only via submit_year_for_audit RPC (server-computed snapshot, new round each time) and the signoff insert trigger (query→'query', both confirmed→'approved'); signoffs are insert-only; post_year_close requires 'approved'. Why: auditors' certification must be tamper-proof and each round auditable.
