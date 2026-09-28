@@ -444,17 +444,42 @@ export default function BankReconciliationTab({ canEdit }: { canEdit: boolean })
             )}
           </section>
 
+          {matched.length > 0 && (
+            <details className="rounded-lg border border-gold/20 bg-primary-foreground/5 p-4">
+              <summary className="cursor-pointer font-serif text-lg text-gold min-h-12 flex items-center">Matched bank lines ({matched.length})</summary>
+              <ul className="text-sm space-y-1 mt-2">
+                {matched.map((l) => (
+                  <li key={l.id} className="text-primary-foreground/85 flex flex-wrap items-center gap-2 border-b border-gold/10 pb-1">
+                    <span className="flex-1 min-w-0">
+                      {fmtDate(l.transaction_date)} · {l.description} · {money(l.amount_pence)}
+                      <span className="text-primary-foreground/50 text-xs"> · {l.match_type ?? "matched"}{(splitCounts[l.id] ?? 0) > 0 ? ` · split across ${(splitCounts[l.id] ?? 0) + 1} ledger lines` : ""}</span>
+                    </span>
+                    {l.matched_journal_line_id && (
+                      <Button size="sm" variant="outline" className="min-h-10" disabled={!canEdit || busy === l.id} onClick={() => openManualMatch(l)}>
+                        <Link2 className="w-3.5 h-3.5 mr-1" /> Add lines
+                      </Button>
+                    )}
+                    <Button size="sm" variant="outline" className="min-h-10" disabled={!canEdit || busy === l.id} onClick={() => unmatch(l)}>
+                      <X className="w-3.5 h-3.5 mr-1" /> Unmatch
+                    </Button>
+                  </li>
+                ))}
+              </ul>
+              <p className="text-primary-foreground/50 text-xs mt-2">Unmatching removes every ledger link for that bank line. Ledger entries themselves are not changed.</p>
+            </details>
+          )}
+
           <Dialog open={!!matchFor} onOpenChange={(v) => { if (!v) setMatchFor(null); }}>
-            <DialogContent className="max-w-2xl">
+            <DialogContent className="max-w-2xl max-h-[92vh] flex flex-col">
               <DialogHeader>
                 <DialogTitle>Match to an existing ledger entry</DialogTitle>
                 <DialogDescription>
                   {matchFor && <>{fmtDate(matchFor.transaction_date)} · {matchFor.description} · {money(matchFor.amount_pence)}. </>}
-                  Links the bank line to an entry already on 1000 Bank. Nothing new is posted.
+                  Links the bank line to lines already on 1000 Bank. Nothing new is posted. Tick several lines if one bank payment covers more than one ledger line.
                 </DialogDescription>
               </DialogHeader>
-              <Input placeholder="Search description or date" value={candSearch} onChange={(e) => setCandSearch(e.target.value)} aria-label="Search ledger lines" />
-              <div className="max-h-96 overflow-y-auto">
+              <Input placeholder="Search doc no., description or date" value={candSearch} onChange={(e) => setCandSearch(e.target.value)} aria-label="Search ledger lines" />
+              <div className="flex-1 min-h-0 max-h-96 overflow-y-auto">
                 {candLoading ? (
                   <p className="text-sm"><Loader2 className="w-4 h-4 mr-1 inline animate-spin" /> Loading…</p>
                 ) : shownCandidates.length === 0 ? (
@@ -464,21 +489,42 @@ export default function BankReconciliationTab({ canEdit }: { canEdit: boolean })
                     {shownCandidates.map((c) => {
                       const amt = c.debit_pence || c.credit_pence;
                       const exact = matchFor && amt === Math.abs(matchFor.amount_pence);
+                      const checked = selected.has(c.id);
                       return (
-                        <li key={c.id} className="flex items-center gap-2 border-b border-gold/10 py-1 text-sm">
-                          <span className="flex-1 min-w-0">
-                            {c.entry_number ? <span className="font-mono text-xs opacity-70">{formatEntryNumber(c.entry_number)} · </span> : null}
-                            {fmtDate(c.entry_date)} · {c.description ?? "—"} · {money(c.debit_pence ? amt : -amt)}
-                            {exact && <span className="text-emerald-500 text-xs"> · exact amount</span>}
-                          </span>
-                          <Button size="sm" variant="link" className="px-1" onClick={() => setViewEntry({ entryId: c.entry_id, lineId: c.id })}>View entry</Button>
-                          <Button size="sm" disabled={busy === matchFor?.id} onClick={() => linkManual(c)}>Link</Button>
+                        <li key={c.id} className={`flex items-center gap-2 border-b border-gold/10 py-1 text-sm ${checked ? "bg-gold/10" : ""}`}>
+                          <label className="flex flex-1 min-w-0 items-center gap-3 min-h-12 cursor-pointer">
+                            <Checkbox checked={checked} onCheckedChange={() => toggleSelected(c.id)} aria-label={`Select ${formatEntryNumber(c.entry_number)} ${money(amt)}`} />
+                            <span className="flex-1 min-w-0">
+                              {c.entry_number ? <span className="font-mono text-xs opacity-70">{formatEntryNumber(c.entry_number)} · </span> : null}
+                              {fmtDate(c.entry_date)} · {c.description ?? "—"} · {money(c.debit_pence ? amt : -amt)}
+                              {exact && <span className="text-emerald-500 text-xs"> · exact amount</span>}
+                            </span>
+                          </label>
+                          <Button size="sm" variant="link" className="px-1 min-h-12" onClick={() => setViewEntry({ entryId: c.entry_id, lineId: c.id })}>View entry</Button>
+                          {exact && selected.size === 0 && (
+                            <Button size="sm" className="min-h-10" disabled={busy === matchFor?.id} onClick={() => linkManual([c.id])}>Link</Button>
+                          )}
                         </li>
                       );
                     })}
                   </ul>
                 )}
               </div>
+              {matchFor && (
+                <div className="border-t border-gold/20 pt-3 flex flex-wrap items-center gap-3 text-sm">
+                  <div className="flex-1 min-w-0 tabular-nums">
+                    Selected {money(selStatus.total)} of {money(selStatus.target)}
+                    {selected.size > 0 && (
+                      <span className={selStatus.exact ? "text-emerald-500" : "text-amber-500"}>
+                        {" · "}{selStatus.exact ? "exact" : selStatus.remaining > 0 ? `${money(selStatus.remaining)} still to find` : `${money(-selStatus.remaining)} too much`}
+                      </span>
+                    )}
+                  </div>
+                  <Button className="min-h-12" disabled={!selStatus.exact || busy === matchFor.id} onClick={() => linkManual([...selected])}>
+                    Link {selected.size || ""} line{selected.size === 1 ? "" : "s"}
+                  </Button>
+                </div>
+              )}
             </DialogContent>
           </Dialog>
 
