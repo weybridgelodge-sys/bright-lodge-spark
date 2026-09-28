@@ -11,6 +11,7 @@ import { toast } from "@/hooks/use-toast";
 import { Loader2, Check, X, FileDown, Zap, Link2 } from "lucide-react";
 import { saveJsPdf } from "@/lib/nativeDownload";
 import { formatEntryNumber, entryNumberMatches } from "@/lib/treasurer/entryNumber";
+import EntryDrilldown from "@/components/members/treasurer/EntryDrilldown";
 import {
   reportPdfDoc, reportSection, reportTable, fmtDate as fmtLong,
 } from "@/lib/treasurer/reports";
@@ -236,6 +237,7 @@ export default function BankReconciliationTab({ canEdit }: { canEdit: boolean })
   };
 
   // ---- Manual match to an existing ledger line (links only, posts nothing) ---
+  const [viewEntry, setViewEntry] = useState<{ entryId: string; lineId: string } | null>(null);
   const openManualMatch = async (l: BankLine) => {
     setMatchFor(l); setCandSearch(""); setCandidates([]); setCandLoading(true);
     try {
@@ -469,6 +471,7 @@ export default function BankReconciliationTab({ canEdit }: { canEdit: boolean })
                             {fmtDate(c.entry_date)} · {c.description ?? "—"} · {money(c.debit_pence ? amt : -amt)}
                             {exact && <span className="text-emerald-500 text-xs"> · exact amount</span>}
                           </span>
+                          <Button size="sm" variant="link" className="px-1" onClick={() => setViewEntry({ entryId: c.entry_id, lineId: c.id })}>View entry</Button>
                           <Button size="sm" disabled={busy === matchFor?.id} onClick={() => linkManual(c)}>Link</Button>
                         </li>
                       );
@@ -478,6 +481,12 @@ export default function BankReconciliationTab({ canEdit }: { canEdit: boolean })
               </div>
             </DialogContent>
           </Dialog>
+
+          <EntryDrilldown
+            entryId={viewEntry?.entryId ?? null}
+            highlightLineId={viewEntry?.lineId}
+            onClose={() => setViewEntry(null)}
+          />
 
           {/* 4. Report */}
           <section className="rounded-lg border border-gold/20 bg-primary-foreground/5 p-4">

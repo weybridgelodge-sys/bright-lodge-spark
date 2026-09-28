@@ -9,6 +9,7 @@ import { Download, Loader2, ArrowUp, ArrowDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchAccounts, treasurerYearBounds, treasurerYearContaining, fmtDate, money, type Account } from "@/lib/treasurer/reports";
 import { formatEntryNumber, entryNumberMatches, compareWithinEntry } from "@/lib/treasurer/entryNumber";
+import EntryDrilldown from "@/components/members/treasurer/EntryDrilldown";
 
 type SortKey = "date" | "account" | "doc";
 
@@ -55,6 +56,7 @@ export default function TransactionDetailReport({ canEdit }: { canEdit: boolean 
     direction: "asc",
   });
   const [search, setSearch] = useState("");
+  const [drill, setDrill] = useState<{ entryId: string; lineId: string | null } | null>(null);
 
   useEffect(() => {
     if (!canEdit) return;
@@ -303,7 +305,7 @@ export default function TransactionDetailReport({ canEdit }: { canEdit: boolean 
       </div>
       <p className="text-xs text-muted-foreground">
         Doc no. is assigned automatically and never changes; every line of the same entry shares it. Gaps in the
-        sequence are normal where an entry was deleted.
+        sequence are normal where an entry was deleted. Click any row to see every line of that entry.
       </p>
 
       {!loading && filtersChanged && (
@@ -349,11 +351,21 @@ export default function TransactionDetailReport({ canEdit }: { canEdit: boolean 
                   {sortedLines.map((l, i) => (
                     <tr
                       key={l.id}
-                      className={
+                      tabIndex={0}
+                      aria-label={`View all lines of ${formatEntryNumber(l.entryNumber)}`}
+                      onClick={() => setDrill({ entryId: l.entryId, lineId: l.id })}
+                      onKeyDown={(e) => {
+                        if (e.target !== e.currentTarget) return;
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          setDrill({ entryId: l.entryId, lineId: l.id });
+                        }
+                      }}
+                      className={`h-12 cursor-pointer transition-colors hover:bg-gold/10 focus-visible:outline-none focus-visible:bg-gold/10 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-gold ${
                         i > 0 && sortedLines[i - 1].entryNumber === l.entryNumber
                           ? "border-t border-border/40"
                           : "border-t border-border"
-                      }
+                      }`}
                     >
                       <td className="px-3 py-1.5 whitespace-nowrap font-mono text-xs text-muted-foreground">
                         {formatEntryNumber(l.entryNumber)}
@@ -365,7 +377,7 @@ export default function TransactionDetailReport({ canEdit }: { canEdit: boolean 
                       <td className="px-3 py-1.5">{l.description}</td>
                       <td className="px-3 py-1.5 text-right tabular-nums">{l.debit ? money(l.debit) : ""}</td>
                       <td className="px-3 py-1.5 text-right tabular-nums">{l.credit ? money(l.credit) : ""}</td>
-                      <td className="px-3 py-1.5 text-center">
+                      <td className="px-3 py-1.5 text-center" onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
                         <Checkbox
                           checked={l.reconciled}
                           onCheckedChange={() => toggleReconciled(l.entryId, l.reconciled)}
@@ -373,7 +385,7 @@ export default function TransactionDetailReport({ canEdit }: { canEdit: boolean 
                         />
                       </td>
                       {events.length > 0 && (
-                        <td className="px-3 py-1.5">
+                        <td className="px-3 py-1.5" onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
                           <Select value={l.eventId ?? NO_EVENT} onValueChange={(v) => assignEvent(l.id, v)}>
                             <SelectTrigger className="h-8 min-w-[170px]" aria-label="Assign to event">
                               <SelectValue />
@@ -409,6 +421,12 @@ export default function TransactionDetailReport({ canEdit }: { canEdit: boolean 
           </>
         )
       ) : null}
+      <EntryDrilldown
+        entryId={drill?.entryId ?? null}
+        highlightLineId={drill?.lineId}
+        onClose={() => setDrill(null)}
+        onNavigate={(id) => setDrill({ entryId: id, lineId: null })}
+      />
     </div>
   );
 }
