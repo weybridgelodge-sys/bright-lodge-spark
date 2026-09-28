@@ -52,6 +52,15 @@ export default function YearAuditReviewBanner() {
     setBusy(false);
     if (error) { toast({ title: "Sign-off not recorded", description: error.message, variant: "destructive" }); return; }
     supabase.functions.invoke("notify-year-audit", { body: { approval_id: open.id } }).catch(() => {});
+    if (decision === "confirmed") {
+      // If this was the second confirmation, the year is now approved: store the certified pack.
+      const year = open.masonic_year;
+      supabase.from("treasurer_year_approvals" as any).select("status").eq("id", open.id).maybeSingle().then(({ data }) => {
+        if ((data as any)?.status === "approved") {
+          import("@/lib/treasurer/accountsPackPdf").then((m) => m.storeCertifiedPack(year)).catch(() => {});
+        }
+      });
+    }
     toast({ title: decision === "confirmed" ? "Accounts confirmed" : "Query raised", description: "The Treasurer will be notified where needed." });
     setOpen(null); setNote(""); setMode("view"); load();
   };

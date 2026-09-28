@@ -4,7 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
-import { Loader2, Lock, CalendarCheck, Scale, TrendingUp, Send, History } from "lucide-react";
+import { Loader2, Lock, CalendarCheck, Scale, TrendingUp, Send, History, Download, Save } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { saveJsPdf, saveBlob } from "@/lib/nativeDownload";
+import { frozenRemarks } from "@/lib/treasurer/accountsPack";
 import { acct, fetchAccounts, fetchLedgerLines, fetchMovements, fetchReportCalendar, fmtDate, money, signedBalance } from "@/lib/treasurer/reports";
 import { formatEntryNumber } from "@/lib/treasurer/entryNumber";
 import { buildClosingJournal, canCloseYear, FUND_CODE, fyLabel, yearEndDate, yearEndYears } from "@/lib/treasurer/yearEnd";
@@ -41,6 +45,9 @@ export default function YearEndTab({ canEdit, onOpenTab }: { canEdit: boolean; o
   const [submitting, setSubmitting] = useState<number | null>(null);
   const [history, setHistory] = useState<number | null>(null);
   const [snapView, setSnapView] = useState<Round | null>(null);
+  const [remarks, setRemarks] = useState<Map<number, string>>(new Map());
+  const [savingRemarks, setSavingRemarks] = useState<number | null>(null);
+  const [packBusy, setPackBusy] = useState<number | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -86,13 +93,20 @@ export default function YearEndTab({ canEdit, onOpenTab }: { canEdit: boolean; o
         const { data: pr } = await supabase.from("profiles").select("id,full_name").in("id", people);
         for (const p of (pr as any[]) ?? []) nm.set(p.id, p.full_name ?? "");
       }
+      setRemarks(new Map(apList.map((a) => [a.masonic_year, a.treasurer_remarks ?? ""])));
+      if (canEdit) {
+        // Safety net: an approved year without a stored certified pack gets one now.
+        for (const a of apList.filter((x) => x.status === "approved" && !x.certified_pack_path)) {
+          import("@/lib/treasurer/accountsPackPdf").then((m) => m.storeCertifiedPack(a.masonic_year)).catch(() => {});
+        }
+      }
       setApprovals(new Map(apList.map((a) => [a.masonic_year, a]))); setRounds(rdList); setSigs(sgList); setNames(nm);
       setYears(ys); setClosed(m); setFundBf(bf);
     } catch (e: any) {
       toast({ title: "Could not load Year End", description: e?.message, variant: "destructive" });
     }
     setLoading(false);
-  }, [today]);
+  }, [today, canEdit]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -116,6 +130,35 @@ export default function YearEndTab({ canEdit, onOpenTab }: { canEdit: boolean; o
     toast({ title: `${fyLabel(year)} submitted for audit review`, description: "Figures snapshotted; Auditor 1 and Auditor 2 have been emailed." });
     load();
   };
+  const saveRemarks = async (year: number) => {
+    setSavingRemarks(year);
+    const { error } = await supabase.rpc("save_year_remarks" as any, { _year: year, _remarks: remarks.get(year) ?? "" } as any);
+    setSavingRemarks(null);
+    if (error) { toast({ title: "Remarks not saved", description: error.message, variant: "destructive" }); return; }
+    toast({ title: "Treasurer's Remarks saved" });
+    load();
+  };
+
+  const downloadPack = async (year: number) => {
+    setPackBusy(year);
+    try {
+      const a = approvals.get(year);
+      const name = `weybridge-annual-accounts-${year}-${year + 1}`;
+      if (a?.status === "approved" && a.certified_pack_path) {
+        const { data, error } = await supabase.storage.from("lodge-docs").download(a.certified_pack_path);
+        if (error) throw error;
+        await saveBlob(data, `${name}-certified.pdf`);
+      } else {
+        const m = await import("@/lib/treasurer/accountsPackPdf");
+        const { doc, src } = await m.generateAccountsPack(year);
+        await saveJsPdf(doc, `${name}${src.draft ? "-DRAFT" : "-certified"}.pdf`);
+      }
+    } catch (e: any) {
+      toast({ title: "Could not create accounts pack", description: e?.message, variant: "destructive" });
+    }
+    setPackBusy(null);
+  };
+
   const who = (id: string | null) => (id && names.get(id)) || "Unknown";
 
   const post = async () => {
@@ -234,6 +277,44 @@ export default function YearEndTab({ canEdit, onOpenTab }: { canEdit: boolean; o
                     )}
                   </div>
                 )}
+                {(() => {
+                  const a = approvals.get(y);
+                  const st = statusOf(a);
+                  const frozen = frozenRemarks(a, rounds);
+                  return (
+                    <div className="space-y-2 text-sm font-sans">
+                      {st !== "draft" && (
+                        <div className="rounded border border-gold/20 p-3">
+                          <p className="text-xs text-gold mb-1">Treasurer's Remarks as submitted · round {a?.round_number}</p>
+                          <p className="whitespace-pre-wrap text-primary-foreground/80">{frozen || "No remarks were included in this round."}</p>
+                        </div>
+                      )}
+                      {canEdit && !c && (
+                        <div className="space-y-1">
+                          <Label htmlFor={`remarks-${y}`} className="text-primary-foreground/80">
+                            Treasurer's Remarks{st !== "draft" ? " (draft for the next submission)" : ""}
+                          </Label>
+                          <Textarea id={`remarks-${y}`} rows={5} value={remarks.get(y) ?? ""}
+                            onChange={(e) => setRemarks((m) => new Map(m).set(y, e.target.value))}
+                            placeholder="Notes to the accounts: explain exceptions, one-off items and anything that would look odd unexplained, e.g. a deferred-income release or a re-dated levy."
+                            className="bg-navy/40 border-gold/30" />
+                          <p className="text-xs text-primary-foreground/60">Printed in the accounts pack and frozen with the figures each time you submit for audit review.</p>
+                        </div>
+                      )}
+                      <div className="flex flex-wrap gap-2">
+                        {canEdit && !c && (
+                          <Button variant="outline" className="min-h-[48px]" disabled={savingRemarks === y} onClick={() => saveRemarks(y)}>
+                            {savingRemarks === y ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Save className="w-4 h-4 mr-1" />} Save remarks
+                          </Button>
+                        )}
+                        <Button variant="outline" className="min-h-[48px]" disabled={packBusy === y} onClick={() => downloadPack(y)}>
+                          {packBusy === y ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Download className="w-4 h-4 mr-1" />}
+                          Download accounts pack{st === "approved" ? " (certified)" : " (draft)"}
+                        </Button>
+                      </div>
+                    </div>
+                  );
+                })()}
                 {(() => {
                   const a = approvals.get(y);
                   const rs = a ? rounds.filter((r) => r.approval_id === a.id) : [];
