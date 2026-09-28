@@ -12,6 +12,8 @@ export type YearSnapshot = {
   balance_sheet: { assets: number; liabilities: number; net_assets: number; fund_bf: number; surplus: number; total_funds: number };
   trial_balance: { debit: number; credit: number };
   accounts: { code: string; name: string; type: string; net: number }[];
+  /** Prior masonic year's figures (balances as at the prior 30 Sep); absent on pre-comparative snapshots. */
+  comparative?: Omit<YearSnapshot, "comparative"> | null;
 };
 export type Approval = {
   id: string; masonic_year: number; status: AuditStatus; round_number: number;
