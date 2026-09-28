@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "@/hooks/use-toast";
 import { Loader2, Check, X, FileDown, Zap, Link2 } from "lucide-react";
 import { saveJsPdf } from "@/lib/nativeDownload";
+import { formatEntryNumber, entryNumberMatches } from "@/lib/treasurer/entryNumber";
 import {
   reportPdfDoc, reportSection, reportTable, fmtDate as fmtLong,
 } from "@/lib/treasurer/reports";
