@@ -147,7 +147,7 @@ export default function YearEndTab({ canEdit, onOpenTab }: { canEdit: boolean; o
                     )}
                   </div>
                 ) : (
-                  <p className="text-xs text-primary-foreground/60">{guard.reason}</p>
+                  <p className="text-xs text-primary-foreground/60">{"reason" in guard ? guard.reason : ""}</p>
                 )}
               </li>
             );
