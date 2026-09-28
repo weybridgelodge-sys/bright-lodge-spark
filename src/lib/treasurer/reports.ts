@@ -100,21 +100,25 @@ export function signedBalance(accountType: string, m: Movement | undefined): num
     : m.credit - m.debit;
 }
 
+/** Lodge crest (white) as a data URL for PDFs; null if it can't be fetched. */
+export async function loadReportLogo(): Promise<string | null> {
+  try {
+    const res = await fetch(assetUrl(logoAsset));
+    const blob = await res.blob();
+    return await new Promise<string>((r) => {
+      const fr = new FileReader();
+      fr.onload = () => r(fr.result as string);
+      fr.readAsDataURL(blob);
+    });
+  } catch { return null; }
+}
+
 export async function reportPdfDoc(subtitle: string, periodLine: string, hideGeneratedDate = false) {
   const doc = new jsPDF({ unit: "pt", format: "a4" });
   const pageW = doc.internal.pageSize.getWidth();
   const margin = 40;
 
-  let logoData: string | null = null;
-  try {
-    const res = await fetch(assetUrl(logoAsset));
-    const blob = await res.blob();
-    logoData = await new Promise<string>((r) => {
-      const fr = new FileReader();
-      fr.onload = () => r(fr.result as string);
-      fr.readAsDataURL(blob);
-    });
-  } catch { /* ignore */ }
+  const logoData = await loadReportLogo();
 
   doc.setFillColor(...NAVY);
   doc.rect(0, 0, pageW, 110, "F");
