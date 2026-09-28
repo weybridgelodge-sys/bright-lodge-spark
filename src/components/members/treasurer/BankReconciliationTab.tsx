@@ -17,7 +17,7 @@ import {
   BankLine, Suggestion, OutstandingBalance, BankLedgerLine,
   money, isBankCharge, isUnreconciled, buildSuggestions,
   fetchOutstandingCreditors, fetchOutstandingDebtors, fetchAccountMap,
-  postEntry, markMatched, fetchBankLedgerLines, fetchBankNominalBalance,
+  postEntry, markMatched, fetchBankLedgerLines, fetchBankNominalBalance, buildTakenLedgerFilter,
 } from "@/lib/treasurer/bankRecon";
 
 type Statement = { id: string; period_label: string; file_name: string };
@@ -123,17 +123,14 @@ export default function BankReconciliationTab({ canEdit }: { canEdit: boolean })
   /** Statement closing balance — sum of its own transactions (no balance column captured in QIF). */
   const statementClosing = useMemo(() => lines.reduce((s, l) => s + l.amount_pence, 0), [lines]);
 
-  const matchedEntryIds = useMemo(
-    () => new Set(lines.map((l) => l.matched_entry_id).filter(Boolean) as string[]),
-    [lines],
-  );
+  const isLedgerTaken = useMemo(() => buildTakenLedgerFilter(lines), [lines]);
   const unmatchedLedgerReceipts = useMemo(
-    () => ledger.filter((l) => l.debit_pence > 0 && !matchedEntryIds.has(l.entry_id)),
-    [ledger, matchedEntryIds],
+    () => ledger.filter((l) => l.debit_pence > 0 && !isLedgerTaken(l)),
+    [ledger, isLedgerTaken],
   );
   const unmatchedLedgerPayments = useMemo(
-    () => ledger.filter((l) => l.credit_pence > 0 && !matchedEntryIds.has(l.entry_id)),
-    [ledger, matchedEntryIds],
+    () => ledger.filter((l) => l.credit_pence > 0 && !isLedgerTaken(l)),
+    [ledger, isLedgerTaken],
   );
   const addTotal = unmatchedLedgerReceipts.reduce((s, l) => s + l.debit_pence, 0);
   const lessTotal = unmatchedLedgerPayments.reduce((s, l) => s + l.credit_pence, 0);
@@ -248,12 +245,11 @@ export default function BankReconciliationTab({ canEdit }: { canEdit: boolean })
         supabase.from("bank_statement_transactions" as any).select("matched_journal_line_id,matched_entry_id").not("matched_entry_id", "is", null),
       ]);
       if (error) throw new Error(error.message);
-      const takenLines = new Set(((taken as any[]) ?? []).map((r) => r.matched_journal_line_id).filter(Boolean));
-      const takenEntries = new Set(((taken as any[]) ?? []).map((r) => r.matched_entry_id).filter(Boolean));
+      const isTaken = buildTakenLedgerFilter((taken as any[]) ?? []);
       const want = Math.abs(l.amount_pence);
       const day = (d: string) => new Date(d).getTime() / 86400000;
       const rows = ledgerLines
-        .filter((c) => !takenLines.has(c.id) && !takenEntries.has(c.entry_id))
+        .filter((c) => !isTaken(c))
         .filter((c) => (l.amount_pence > 0 ? c.debit_pence > 0 : c.credit_pence > 0))
         .sort((a, b) => {
           const amt = (c: BankLedgerLine) => Math.abs((c.debit_pence || c.credit_pence) - want);
