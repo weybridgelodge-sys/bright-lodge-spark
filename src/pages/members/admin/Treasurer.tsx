@@ -28,6 +28,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
 import { Loader2, Plus, Pencil, Trash2, Lock, Unlock, ShieldCheck, Utensils, Handshake, ArrowUpCircle, ArrowDownCircle, UserPlus, BookOpen, TrendingUp, Scale, Search, Archive, Calculator, Landmark, PartyPopper, Users, Target } from "lucide-react";
+import { sortPeriodsNewestFirst } from "@/lib/treasurer/periods";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 type Period = {
