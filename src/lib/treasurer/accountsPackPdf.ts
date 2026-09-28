@@ -1,10 +1,25 @@
 import jsPDF from "jspdf";
 import { supabase } from "@/integrations/supabase/client";
+import { assetUrl } from "@/lib/assetUrl";
+import coverLogoAsset from "@/assets/weybridge-logo-navy-transparent.png.asset.json";
 import { GOLD, INK, MUTED, NAVY, acct, fmtDate, loadReportLogo, reportSection, reportTable } from "./reports";
 import { AUDITOR_LABEL, type Approval, type Round, type Signoff, type YearSnapshot } from "./yearAudit";
 import { certifiedPackPath, packStatements, selectPackSource, type PackSource } from "./accountsPack";
 
 export type Certifier = { role: string; name: string; rank: string; date: string };
+
+async function loadImageData(input: { url?: string }): Promise<string | null> {
+  try {
+    const res = await fetch(assetUrl(input));
+    if (!res.ok) return null;
+    const blob = await res.blob();
+    return await new Promise<string>((resolve) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.readAsDataURL(blob);
+    });
+  } catch { return null; }
+}
 
 function pageHeader(doc: jsPDF, pageW: number, margin: number, title: string, draft: boolean) {
   doc.setFillColor(...NAVY); doc.rect(0, 0, pageW, 60, "F");
@@ -22,26 +37,30 @@ export async function buildAccountsPackPdf(src: PackSource, year: number, certif
   const pageW = doc.internal.pageSize.getWidth(), pageH = doc.internal.pageSize.getHeight(), margin = 40;
   const endLabel = `30 September ${year + 1}`;
   const logo = await loadReportLogo();
+  const coverLogo = await loadImageData(coverLogoAsset);
 
   // 1. Cover
-  doc.setFillColor(...NAVY); doc.rect(0, 0, pageW, pageH, "F");
-  doc.setFillColor(...GOLD); doc.rect(margin, 110, pageW - margin * 2, 2, "F");
-  if (logo) { try { doc.addImage(logo, "PNG", pageW / 2 - 70, 170, 140, 140); } catch { /* ignore */ } }
-  doc.setTextColor(255, 255, 255); doc.setFont("times", "bold"); doc.setFontSize(26);
-  doc.text("Weybridge Lodge No. 6787", pageW / 2, 370, { align: "center" });
+  doc.setFillColor(250, 250, 247); doc.rect(0, 0, pageW, pageH, "F");
+  doc.setFillColor(...NAVY); doc.rect(0, 0, pageW, 96, "F");
+  doc.setFillColor(...GOLD); doc.rect(0, 96, pageW, 3, "F");
+  doc.setDrawColor(...NAVY); doc.setLineWidth(1); doc.rect(margin, 132, pageW - margin * 2, 548);
+  if (coverLogo) { try { doc.addImage(coverLogo, "PNG", pageW / 2 - 65, 172, 130, 130); } catch { /* ignore */ } }
+  doc.setTextColor(...NAVY); doc.setFont("times", "bold"); doc.setFontSize(26);
+  doc.text("Weybridge Lodge No. 6787", pageW / 2, 350, { align: "center" });
   doc.setFont("times", "italic"); doc.setFontSize(14); doc.setTextColor(...GOLD);
-  doc.text("Province of Surrey", pageW / 2, 395, { align: "center" });
-  doc.setFont("times", "bold"); doc.setFontSize(18); doc.setTextColor(255, 255, 255);
-  doc.text("Annual Accounts", pageW / 2, 460, { align: "center" });
+  doc.text("Province of Surrey", pageW / 2, 375, { align: "center" });
+  doc.setFillColor(...GOLD); doc.rect(pageW / 2 - 90, 402, 180, 2, "F");
+  doc.setFont("times", "bold"); doc.setFontSize(18); doc.setTextColor(...NAVY);
+  doc.text("Annual Accounts", pageW / 2, 455, { align: "center" });
   doc.setFont("times", "normal"); doc.setFontSize(14);
-  doc.text(`for the year ended ${endLabel}`, pageW / 2, 482, { align: "center" });
+  doc.text(`for the year ended ${endLabel}`, pageW / 2, 477, { align: "center" });
   if (src.draft) {
     doc.setDrawColor(...GOLD); doc.setLineWidth(1.5); doc.rect(pageW / 2 - 150, 520, 300, 40);
-    doc.setFont("helvetica", "bold"); doc.setFontSize(14); doc.setTextColor(...GOLD);
+    doc.setFont("helvetica", "bold"); doc.setFontSize(14); doc.setTextColor(...NAVY);
     doc.text("DRAFT — not yet approved", pageW / 2, 545, { align: "center" });
   }
   doc.setFillColor(...GOLD); doc.rect(margin, pageH - 110, pageW - margin * 2, 2, "F");
-  doc.setFont("helvetica", "normal"); doc.setFontSize(9); doc.setTextColor(230, 230, 235);
+  doc.setFont("helvetica", "normal"); doc.setFontSize(9); doc.setTextColor(...MUTED);
   doc.text(src.draft ? `Live figures as generated ${fmtDate(new Date().toISOString())}` : `Certified figures · audit round ${src.round} · snapshot taken ${fmtDate(src.snap.taken_at.slice(0, 10))}`,
     pageW / 2, pageH - 85, { align: "center" });
 

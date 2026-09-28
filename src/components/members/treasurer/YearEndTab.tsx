@@ -296,8 +296,7 @@ export default function YearEndTab({ canEdit, onOpenTab }: { canEdit: boolean; o
                           </Label>
                           <Textarea id={`remarks-${y}`} rows={5} value={remarks.get(y) ?? ""}
                             onChange={(e) => setRemarks((m) => new Map(m).set(y, e.target.value))}
-                            placeholder="Notes to the accounts: explain exceptions, one-off items and anything that would look odd unexplained, e.g. a deferred-income release or a re-dated levy."
-                            className="bg-navy/40 border-gold/30" />
+                             placeholder="Notes to the accounts: explain exceptions, one-off items and anything that would look odd unexplained, e.g. a deferred-income release or a re-dated levy." />
                           <p className="text-xs text-primary-foreground/60">Printed in the accounts pack and frozen with the figures each time you submit for audit review.</p>
                         </div>
                       )}
