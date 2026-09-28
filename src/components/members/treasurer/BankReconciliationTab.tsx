@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import PeriodPicker from "@/components/members/treasurer/PeriodPicker";
 import { fetchUnlockedPeriods, periodIdForDate, type PostingPeriod } from "@/lib/treasurer/periods";
@@ -20,6 +21,7 @@ import {
   money, isBankCharge, isUnreconciled, buildSuggestions,
   fetchOutstandingCreditors, fetchOutstandingDebtors, fetchAccountMap,
   postEntry, markMatched, fetchBankLedgerLines, fetchBankNominalBalance, buildTakenLedgerFilter,
+  fetchTakenLedgerFilter, splitSelectionStatus, linkBankRowToLines, unlinkBankRow,
 } from "@/lib/treasurer/bankRecon";
 
 type Statement = { id: string; period_label: string; file_name: string };
@@ -42,6 +44,8 @@ export default function BankReconciliationTab({ canEdit }: { canEdit: boolean })
   const [candidates, setCandidates] = useState<BankLedgerLine[]>([]);
   const [candLoading, setCandLoading] = useState(false);
   const [candSearch, setCandSearch] = useState("");
+  const [takenFilter, setTakenFilter] = useState<((c: { id: string; entry_id: string }) => boolean) | null>(null);
+  const [splitCounts, setSplitCounts] = useState<Record<string, number>>({});
 
   useEffect(() => { fetchUnlockedPeriods().then(setPeriods).catch(() => setPeriods([])); }, []);
 
@@ -85,16 +89,24 @@ export default function BankReconciliationTab({ canEdit }: { canEdit: boolean })
       const from = dates.length ? dates.reduce((a, b) => (a < b ? a : b)) : new Date().toISOString().slice(0, 10);
       const to = dates.length ? dates.reduce((a, b) => (a > b ? a : b)) : from;
 
-      const [d, c, l, n] = await Promise.all([
+      const [d, c, l, n, t, splits] = await Promise.all([
         fetchOutstandingDebtors(),
         fetchOutstandingCreditors(),
         fetchBankLedgerLines(from, to),
         fetchBankNominalBalance(to),
+        fetchTakenLedgerFilter(),
+        rows.length
+          ? supabase.from("bank_statement_match_lines" as any).select("bank_transaction_id").in("bank_transaction_id", rows.map((r) => r.id))
+          : Promise.resolve({ data: [] as any[] }),
       ]);
       setDebtors(d);
       setCreditors(c);
       setLedger(l);
       setNominal(n);
+      setTakenFilter(() => t);
+      const counts: Record<string, number> = {};
+      for (const s of ((splits as any).data as any[]) ?? []) counts[s.bank_transaction_id] = (counts[s.bank_transaction_id] ?? 0) + 1;
+      setSplitCounts(counts);
     } catch (e: any) {
       toast({ title: "Could not load reconciliation data", description: e?.message, variant: "destructive" });
     } finally {
@@ -125,7 +137,8 @@ export default function BankReconciliationTab({ canEdit }: { canEdit: boolean })
   /** Statement closing balance — sum of its own transactions (no balance column captured in QIF). */
   const statementClosing = useMemo(() => lines.reduce((s, l) => s + l.amount_pence, 0), [lines]);
 
-  const isLedgerTaken = useMemo(() => buildTakenLedgerFilter(lines), [lines]);
+  // Global: a ledger line matched on ANY statement (primary or split link) is not "unmatched".
+  const isLedgerTaken = useMemo(() => takenFilter ?? buildTakenLedgerFilter(lines), [takenFilter, lines]);
   const unmatchedLedgerReceipts = useMemo(
     () => ledger.filter((l) => l.debit_pence > 0 && !isLedgerTaken(l)),
     [ledger, isLedgerTaken],
