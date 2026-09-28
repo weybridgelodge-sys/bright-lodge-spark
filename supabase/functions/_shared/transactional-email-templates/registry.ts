@@ -13,6 +13,7 @@ import { template as duesPriceChangeNotice } from './dues-price-change-notice.ts
 import { template as meetingDeadlineReminder } from './meeting-deadline-reminder.tsx'
 import { template as secretaryReturnsDigest } from './secretary-returns-digest.tsx'
 import { template as periodUnlockRequested } from './period-unlock-requested.tsx'
+import { template as yearAuditUpdate } from './year-audit-update.tsx'
 
 export interface TemplateEntry {
   component: any
@@ -38,4 +39,5 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'meeting-deadline-reminder': meetingDeadlineReminder,
   'secretary-returns-digest': secretaryReturnsDigest,
   'period-unlock-requested': periodUnlockRequested,
+  'year-audit-update': yearAuditUpdate,
 }
