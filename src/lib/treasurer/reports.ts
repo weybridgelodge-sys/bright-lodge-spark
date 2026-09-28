@@ -57,15 +57,21 @@ type Movement = { debit: number; credit: number };
  * Pass from = null for "from inception".
  */
 export async function fetchMovements(from: string | null, to: string): Promise<Map<string, Movement>> {
-  let q = supabase
-    .from("journal_lines" as any)
-    .select("account_id,debit_pence,credit_pence,journal_entries!inner(entry_date)")
-    .lte("journal_entries.entry_date", to);
-  if (from) q = q.gte("journal_entries.entry_date", from);
-  const { data, error } = await q;
-  if (error) throw error;
+  const data: any[] = [];
+  // Page through in 1000-row chunks so large ledgers are never truncated by the API row cap.
+  for (let offset = 0; ; offset += 1000) {
+    let q = supabase
+      .from("journal_lines" as any)
+      .select("id,account_id,debit_pence,credit_pence,journal_entries!inner(entry_date)")
+      .lte("journal_entries.entry_date", to);
+    if (from) q = q.gte("journal_entries.entry_date", from);
+    const { data: page, error } = await q.order("id").range(offset, offset + 999);
+    if (error) throw error;
+    data.push(...((page as any[]) ?? []));
+    if (!page || page.length < 1000) break;
+  }
   const map = new Map<string, Movement>();
-  for (const row of ((data as any[]) ?? [])) {
+  for (const row of data) {
     const cur = map.get(row.account_id) ?? { debit: 0, credit: 0 };
     cur.debit += Number(row.debit_pence ?? 0);
     cur.credit += Number(row.credit_pence ?? 0);

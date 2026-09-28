@@ -23,15 +23,20 @@ export type DrillTarget = {
 };
 
 async function fetchAccountLines(t: DrillTarget): Promise<DrillSourceLine[]> {
-  let q = supabase
-    .from("journal_lines" as any)
-    .select("id,entry_id,description,debit_pence,credit_pence,journal_entries!inner(entry_number,entry_date,description,source_type)")
-    .eq("account_id", t.account.id)
-    .lte("journal_entries.entry_date", t.end);
-  if (t.start) q = q.gte("journal_entries.entry_date", t.start);
-  const { data, error } = await q;
-  if (error) throw error;
-  return (((data as any[]) ?? [])).map((r) => ({
+  const data: any[] = [];
+  for (let offset = 0; ; offset += 1000) {
+    let q = supabase
+      .from("journal_lines" as any)
+      .select("id,entry_id,description,debit_pence,credit_pence,journal_entries!inner(entry_number,entry_date,description,source_type)")
+      .eq("account_id", t.account.id)
+      .lte("journal_entries.entry_date", t.end);
+    if (t.start) q = q.gte("journal_entries.entry_date", t.start);
+    const { data: page, error } = await q.order("id").range(offset, offset + 999);
+    if (error) throw error;
+    data.push(...((page as any[]) ?? []));
+    if (!page || page.length < 1000) break;
+  }
+  return data.map((r) => ({
     id: r.id,
     entry_id: r.entry_id,
     entry_number: r.journal_entries?.entry_number ?? null,
