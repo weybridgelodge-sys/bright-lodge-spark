@@ -23,9 +23,17 @@ export function assetUrl(input: { url?: string } | string | null | undefined): s
 
   try {
     if (!Capacitor.isNativePlatform() && typeof window !== "undefined") {
-      const host = window.location.hostname;
-      // Canonical production host serves the CDN paths itself.
-      if (host === "weybridgelodge.org.uk" || host.endsWith(".weybridgelodge.org.uk")) {
+      const { hostname: host, protocol } = window.location;
+      // Only the dev server / editor preview sandbox can't serve CDN paths.
+      // Every published web host (apex, www, *.lovable.app, any browser incl.
+      // Samsung Internet) serves them same-origin, so keep them relative there
+      // rather than depending on a single cross-origin host.
+      const isSandbox =
+        host === "localhost" ||
+        host === "127.0.0.1" ||
+        host.endsWith(".lovableproject.com") ||
+        host.startsWith("id-preview--");
+      if (protocol.startsWith("http") && !isSandbox) {
         return raw;
       }
     }
