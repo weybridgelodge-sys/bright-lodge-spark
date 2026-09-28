@@ -358,6 +358,13 @@
       "when": 1790630875639,
       "tag": "0050_year_end_close_stage1",
       "breakpoints": true
+    },
+    {
+      "idx": 51,
+      "version": "7",
+      "when": 1790633429207,
+      "tag": "0051_year_end_audit_signoff_stage2",
+      "breakpoints": true
     }
   ]
 }

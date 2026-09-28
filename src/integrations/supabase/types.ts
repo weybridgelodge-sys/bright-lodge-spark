@@ -4394,6 +4394,121 @@ export type Database = {
           },
         ]
       }
+      treasurer_year_approval_rounds: {
+        Row: {
+          approval_id: string
+          figures_snapshot: Json
+          id: string
+          outcome: string | null
+          round_number: number
+          submitted_at: string
+          submitted_by: string | null
+        }
+        Insert: {
+          approval_id: string
+          figures_snapshot: Json
+          id?: string
+          outcome?: string | null
+          round_number: number
+          submitted_at?: string
+          submitted_by?: string | null
+        }
+        Update: {
+          approval_id?: string
+          figures_snapshot?: Json
+          id?: string
+          outcome?: string | null
+          round_number?: number
+          submitted_at?: string
+          submitted_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "treasurer_year_approval_rounds_approval_id_fkey"
+            columns: ["approval_id"]
+            isOneToOne: false
+            referencedRelation: "treasurer_year_approvals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      treasurer_year_approvals: {
+        Row: {
+          created_at: string
+          figures_snapshot: Json | null
+          id: string
+          masonic_year: number
+          round_number: number
+          status: string
+          submitted_at: string | null
+          submitted_by: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          figures_snapshot?: Json | null
+          id?: string
+          masonic_year: number
+          round_number?: number
+          status?: string
+          submitted_at?: string | null
+          submitted_by?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          figures_snapshot?: Json | null
+          id?: string
+          masonic_year?: number
+          round_number?: number
+          status?: string
+          submitted_at?: string | null
+          submitted_by?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      treasurer_year_signoffs: {
+        Row: {
+          approval_id: string
+          decision: string
+          id: string
+          note: string | null
+          officer_role: string
+          round_number: number
+          signed_at: string
+          signed_by: string
+        }
+        Insert: {
+          approval_id: string
+          decision: string
+          id?: string
+          note?: string | null
+          officer_role: string
+          round_number: number
+          signed_at?: string
+          signed_by?: string
+        }
+        Update: {
+          approval_id?: string
+          decision?: string
+          id?: string
+          note?: string | null
+          officer_role?: string
+          round_number?: number
+          signed_at?: string
+          signed_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "treasurer_year_signoffs_approval_id_fkey"
+            columns: ["approval_id"]
+            isOneToOne: false
+            referencedRelation: "treasurer_year_approvals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -5186,6 +5301,7 @@ export type Database = {
       can_manage_visits: { Args: { _user: string }; Returns: boolean }
       can_view_charity: { Args: { _user: string }; Returns: boolean }
       can_view_skills_matrix: { Args: { _user: string }; Returns: boolean }
+      can_view_year_audit: { Args: { _user: string }; Returns: boolean }
       check_and_book_seats: {
         Args: { _event_key: string; _meeting_id: string; _seats: number }
         Returns: string
@@ -5263,6 +5379,16 @@ export type Database = {
           needs_treasurer: boolean
           unlock_reason: string
           unlock_requested_at: string
+        }[]
+      }
+      get_my_pending_year_reviews: {
+        Args: never
+        Returns: {
+          approval_id: string
+          masonic_year: number
+          officer_role: string
+          round_number: number
+          submitted_at: string
         }[]
       }
       get_next_public_meeting: {
@@ -5397,7 +5523,9 @@ export type Database = {
         Args: { _period_id: string; _reason: string }
         Returns: undefined
       }
+      submit_year_for_audit: { Args: { _year: number }; Returns: string }
       unlink_bank_row: { Args: { p_bank_txn_id: string }; Returns: undefined }
+      year_audit_snapshot: { Args: { _year: number }; Returns: Json }
     }
     Enums: {
       almoner_report_status: "draft" | "final"

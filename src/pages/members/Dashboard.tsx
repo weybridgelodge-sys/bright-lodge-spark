@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import ActivePoll from "@/components/members/ActivePoll";
 import { DuesAttentionBanner } from "@/components/members/DuesStatusCard";
 import PendingUnlockApprovalBanner from "@/components/members/PendingUnlockApprovalBanner";
+import YearAuditReviewBanner from "@/components/members/YearAuditReviewBanner";
 import TreasuryBudgetCard from "@/components/members/TreasuryBudgetCard";
 import { fetchLodgeHealthBundle, lodgeHealth, type LodgeHealth, type HealthBand } from "@/lib/kpis";
 import { Activity } from "lucide-react";
@@ -76,6 +77,7 @@ export default function MembersDashboard() {
       </div>
 
       {user?.id && <PendingUnlockApprovalBanner />}
+      {user?.id && <YearAuditReviewBanner />}
 
       {isAdmin && user?.id && <DuesAttentionBanner memberId={user.id} />}
 
