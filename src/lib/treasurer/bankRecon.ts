@@ -53,12 +53,14 @@ export function isUnreconciled(l: BankLine): boolean {
 
 /**
  * Line-level "already matched" test for 1000 Bank ledger lines. A ledger line is taken
- * only if its own id is a bank row's matched_journal_line_id. Entry-level exclusion is a
+ * if its own id is a bank row's matched_journal_line_id (primary link) or appears in
+ * bank_statement_match_lines (additional split-match lines). Entry-level exclusion is a
  * fallback solely for legacy matches that stored no line id — one entry can hold several
- * separate bank movements (e.g. a contra journal).
+ * separate bank movements (e.g. a contra journal). Pass rows from ALL statements.
  */
 export function buildTakenLedgerFilter(
   rows: { matched_journal_line_id: string | null; matched_entry_id: string | null }[],
+  splitLines: { journal_line_id: string }[] = [],
 ): (c: { id: string; entry_id: string }) => boolean {
   const takenLines = new Set<string>();
   const takenEntries = new Set<string>();
@@ -66,7 +68,36 @@ export function buildTakenLedgerFilter(
     if (r.matched_journal_line_id) takenLines.add(r.matched_journal_line_id);
     else if (r.matched_entry_id) takenEntries.add(r.matched_entry_id);
   }
+  for (const s of splitLines) takenLines.add(s.journal_line_id);
   return (c) => takenLines.has(c.id) || takenEntries.has(c.entry_id);
+}
+
+/** Global taken-line filter: every primary match and split link across all statements. */
+export async function fetchTakenLedgerFilter() {
+  const [primary, split] = await Promise.all([
+    supabase.from("bank_statement_transactions" as any).select("matched_journal_line_id,matched_entry_id").not("matched_entry_id", "is", null),
+    supabase.from("bank_statement_match_lines" as any).select("journal_line_id"),
+  ]);
+  if (primary.error) throw new Error(primary.error.message);
+  if (split.error) throw new Error(split.error.message);
+  return buildTakenLedgerFilter((primary.data as any[]) ?? [], (split.data as any[]) ?? []);
+}
+
+/** Running total for a multi-line selection against a bank amount (pence, signed). */
+export function splitSelectionStatus(bankAmountPence: number, selected: { debit_pence: number; credit_pence: number }[]) {
+  const target = Math.abs(bankAmountPence);
+  const total = selected.reduce((s, c) => s + (bankAmountPence > 0 ? c.debit_pence : c.credit_pence), 0);
+  return { target, total, remaining: target - total, exact: selected.length > 0 && total === target };
+}
+
+export async function linkBankRowToLines(bankTxnId: string, lineIds: string[]) {
+  const { error } = await supabase.rpc("link_bank_row_to_lines" as any, { p_bank_txn_id: bankTxnId, p_line_ids: lineIds });
+  if (error) throw new Error(error.message);
+}
+
+export async function unlinkBankRow(bankTxnId: string) {
+  const { error } = await supabase.rpc("unlink_bank_row" as any, { p_bank_txn_id: bankTxnId });
+  if (error) throw new Error(error.message);
 }
 
 /** Map of account code -> id for the codes this module posts to. */
