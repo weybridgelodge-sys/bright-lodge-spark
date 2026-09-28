@@ -216,8 +216,9 @@ export default function TransactionDetailReport({ canEdit }: { canEdit: boolean 
   };
 
   const exportCsv = () => {
-    const header = ["Date", "Account Code", "Account Name", "Description", "Debit (£)", "Credit (£)"];
-    const body = lines.map((l) => [
+    const header = ["Doc No", "Date", "Account Code", "Account Name", "Description", "Debit (£)", "Credit (£)"];
+    const body = sortedLines.map((l) => [
+      formatEntryNumber(l.entryNumber),
       l.date,
       l.code,
       csvEscape(l.accountName),
@@ -287,7 +288,7 @@ export default function TransactionDetailReport({ canEdit }: { canEdit: boolean 
         </div>
       </div>
 
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2 items-end">
         <Button onClick={load} disabled={loading} className="bg-gold text-navy hover:bg-gold/90">
           {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           Run report
@@ -295,7 +296,15 @@ export default function TransactionDetailReport({ canEdit }: { canEdit: boolean 
         <Button variant="outline" onClick={exportCsv} disabled={loading || lines.length === 0}>
           <Download className="mr-2 h-4 w-4" /> Export CSV
         </Button>
+        <div className="w-full sm:w-64 sm:ml-auto space-y-1">
+          <Label htmlFor="td-search">Search doc no. or description</Label>
+          <Input id="td-search" placeholder="e.g. JE-000123" value={search} onChange={(e) => setSearch(e.target.value)} />
+        </div>
       </div>
+      <p className="text-xs text-muted-foreground">
+        Doc no. is assigned automatically and never changes; every line of the same entry shares it. Gaps in the
+        sequence are normal where an entry was deleted.
+      </p>
 
       {!loading && filtersChanged && (
         <p className="rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm text-amber-700 dark:text-amber-400">
@@ -326,46 +335,9 @@ export default function TransactionDetailReport({ canEdit }: { canEdit: boolean 
               <table className="w-full text-sm">
                 <thead>
                   <tr className="bg-muted/50 text-left">
-                    <th className="px-3 py-2 font-medium">
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setSortConfig((prev) => ({
-                            key: "date",
-                            direction: prev.key === "date" && prev.direction === "asc" ? "desc" : "asc",
-                          }))
-                        }
-                        className="inline-flex items-center gap-1 hover:text-gold focus:outline-none"
-                      >
-                        Date
-                        {sortConfig.key === "date" &&
-                          (sortConfig.direction === "asc" ? (
-                            <ArrowUp className="h-3 w-3" />
-                          ) : (
-                            <ArrowDown className="h-3 w-3" />
-                          ))}
-                      </button>
-                    </th>
-                    <th className="px-3 py-2 font-medium">
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setSortConfig((prev) => ({
-                            key: "account",
-                            direction: prev.key === "account" && prev.direction === "asc" ? "desc" : "asc",
-                          }))
-                        }
-                        className="inline-flex items-center gap-1 hover:text-gold focus:outline-none"
-                      >
-                        Account
-                        {sortConfig.key === "account" &&
-                          (sortConfig.direction === "asc" ? (
-                            <ArrowUp className="h-3 w-3" />
-                          ) : (
-                            <ArrowDown className="h-3 w-3" />
-                          ))}
-                      </button>
-                    </th>
+                    <th className="px-3 py-2 font-medium whitespace-nowrap">{sortHeader("doc", "Doc no.")}</th>
+                    <th className="px-3 py-2 font-medium">{sortHeader("date", "Date")}</th>
+                    <th className="px-3 py-2 font-medium">{sortHeader("account", "Account")}</th>
                     <th className="px-3 py-2 font-medium">Description</th>
                     <th className="px-3 py-2 font-medium text-right">Debit</th>
                     <th className="px-3 py-2 font-medium text-right">Credit</th>
@@ -374,8 +346,18 @@ export default function TransactionDetailReport({ canEdit }: { canEdit: boolean 
                   </tr>
                 </thead>
                 <tbody>
-                  {sortedLines.map((l) => (
-                    <tr key={l.id} className="border-t border-border">
+                  {sortedLines.map((l, i) => (
+                    <tr
+                      key={l.id}
+                      className={
+                        i > 0 && sortedLines[i - 1].entryNumber === l.entryNumber
+                          ? "border-t border-border/40"
+                          : "border-t border-border"
+                      }
+                    >
+                      <td className="px-3 py-1.5 whitespace-nowrap font-mono text-xs text-muted-foreground">
+                        {formatEntryNumber(l.entryNumber)}
+                      </td>
                       <td className="px-3 py-1.5 whitespace-nowrap">{fmtDate(l.date)}</td>
                       <td className="px-3 py-1.5 whitespace-nowrap">
                         {l.code} — {l.accountName}
