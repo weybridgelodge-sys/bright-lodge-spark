@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { buildClosingJournal, canCloseYear, closingEntryDate, closingPeriodLabel, yearEndYears } from "@/lib/treasurer/yearEnd";
 import { computeTrialBalance, type TBAccount, type TBLine } from "@/lib/treasurer/reportPeriods";
-import { keepForClosingMode } from "@/lib/treasurer/reports";
+import { keepForClosingMode } from "@/lib/treasurer/reportPeriods";
 
 const A = (id: string, code: string, t: string): TBAccount => ({ id, code, name: code, account_type: t });
 const accounts = [A("bank", "1000", "asset"), A("fund", "3000", "equity"), A("subs", "4000", "income"),

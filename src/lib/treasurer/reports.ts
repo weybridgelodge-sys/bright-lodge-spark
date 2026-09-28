@@ -59,18 +59,8 @@ export async function fetchClosingPeriodIds(): Promise<Set<string>> {
   return new Set(((data as any[]) ?? []).map((r) => r.id));
 }
 
-/**
- * "all" = every entry by date (Balance Sheet cumulative); "exclude" = drop entries in a
- * closing period (I&E movement); "only" = just closing-period entries.
- */
-export type ClosingMode = "all" | "exclude" | "only";
-
-/** Pure filter used by fetchMovements; exported for tests. */
-export const keepForClosingMode = (periodId: string | null | undefined, closing: Set<string>, mode: ClosingMode) => {
-  if (mode === "all") return true;
-  const isClosing = !!periodId && closing.has(periodId);
-  return mode === "only" ? isClosing : !isClosing;
-};
+export { keepForClosingMode, type ClosingMode } from "./reportPeriods";
+import { keepForClosingMode, type ClosingMode } from "./reportPeriods";
 
 /**
  * Sums journal lines by account for entries whose entry_date falls in [from, to].

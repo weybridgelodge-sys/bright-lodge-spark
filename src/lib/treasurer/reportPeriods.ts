@@ -209,3 +209,18 @@ export function computeTrialBalance(accounts: TBAccount[], lines: TBLine[], asAt
   const totalCr = rows.reduce((s, r) => s + r.cr, 0) + priorSurplus.cr;
   return { rows, priorSurplus, yearStart, totalDr, totalCr, difference: totalDr - totalCr };
 }
+
+// ---------- Year-end closing entries ----------
+
+/**
+ * "all" = every entry by date (Balance Sheet cumulative); "exclude" = drop entries in a
+ * closing period (I&E movement); "only" = just closing-period entries.
+ */
+export type ClosingMode = "all" | "exclude" | "only";
+
+/** Pure filter used by fetchMovements; exported for tests. */
+export const keepForClosingMode = (periodId: string | null | undefined, closing: Set<string>, mode: ClosingMode) => {
+  if (mode === "all") return true;
+  const isClosing = !!periodId && closing.has(periodId);
+  return mode === "only" ? isClosing : !isClosing;
+};
