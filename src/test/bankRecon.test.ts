@@ -71,3 +71,26 @@ describe("buildTakenLedgerFilter (line-level matching)", () => {
     expect(taken(stripe1)).toBe(true);
   });
 });
+
+import { splitSelectionStatus } from "@/lib/treasurer/bankRecon";
+describe("split matching helpers", () => {
+  it("treats split-link lines as taken, globally", () => {
+    const taken = buildTakenLedgerFilter(
+      [{ matched_journal_line_id: "p90", matched_entry_id: "JE72" }],
+      [{ journal_line_id: "s2070" }],
+    );
+    expect(taken({ id: "p90", entry_id: "JE72" })).toBe(true);
+    expect(taken({ id: "s2070", entry_id: "JE76" })).toBe(true);
+    expect(taken({ id: "other", entry_id: "JE76" })).toBe(false);
+  });
+  it("tracks running total against a payment", () => {
+    const c90 = { debit_pence: 0, credit_pence: 9000 };
+    const c2070 = { debit_pence: 0, credit_pence: 207000 };
+    expect(splitSelectionStatus(-216000, [c90])).toMatchObject({ total: 9000, remaining: 207000, exact: false });
+    expect(splitSelectionStatus(-216000, [c90, c2070])).toMatchObject({ total: 216000, remaining: 0, exact: true });
+    expect(splitSelectionStatus(-216000, []).exact).toBe(false);
+  });
+  it("counts debits for receipts only", () => {
+    expect(splitSelectionStatus(500, [{ debit_pence: 500, credit_pence: 0 }, { debit_pence: 0, credit_pence: 500 }]).exact).toBe(true);
+  });
+});

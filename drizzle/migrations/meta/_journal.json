@@ -344,6 +344,13 @@
       "when": 1790607565060,
       "tag": "0048_journal_entry_numbers",
       "breakpoints": true
+    },
+    {
+      "idx": 49,
+      "version": "7",
+      "when": 1790609415811,
+      "tag": "0049_bank_statement_match_lines",
+      "breakpoints": true
     }
   ]
 }

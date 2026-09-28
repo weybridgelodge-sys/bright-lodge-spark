@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import PeriodPicker from "@/components/members/treasurer/PeriodPicker";
 import { fetchUnlockedPeriods, periodIdForDate, type PostingPeriod } from "@/lib/treasurer/periods";
@@ -20,6 +21,7 @@ import {
   money, isBankCharge, isUnreconciled, buildSuggestions,
   fetchOutstandingCreditors, fetchOutstandingDebtors, fetchAccountMap,
   postEntry, markMatched, fetchBankLedgerLines, fetchBankNominalBalance, buildTakenLedgerFilter,
+  fetchTakenLedgerFilter, splitSelectionStatus, linkBankRowToLines, unlinkBankRow,
 } from "@/lib/treasurer/bankRecon";
 
 type Statement = { id: string; period_label: string; file_name: string };
@@ -42,6 +44,8 @@ export default function BankReconciliationTab({ canEdit }: { canEdit: boolean })
   const [candidates, setCandidates] = useState<BankLedgerLine[]>([]);
   const [candLoading, setCandLoading] = useState(false);
   const [candSearch, setCandSearch] = useState("");
+  const [takenFilter, setTakenFilter] = useState<((c: { id: string; entry_id: string }) => boolean) | null>(null);
+  const [splitCounts, setSplitCounts] = useState<Record<string, number>>({});
 
   useEffect(() => { fetchUnlockedPeriods().then(setPeriods).catch(() => setPeriods([])); }, []);
 
@@ -85,16 +89,24 @@ export default function BankReconciliationTab({ canEdit }: { canEdit: boolean })
       const from = dates.length ? dates.reduce((a, b) => (a < b ? a : b)) : new Date().toISOString().slice(0, 10);
       const to = dates.length ? dates.reduce((a, b) => (a > b ? a : b)) : from;
 
-      const [d, c, l, n] = await Promise.all([
+      const [d, c, l, n, t, splits] = await Promise.all([
         fetchOutstandingDebtors(),
         fetchOutstandingCreditors(),
         fetchBankLedgerLines(from, to),
         fetchBankNominalBalance(to),
+        fetchTakenLedgerFilter(),
+        rows.length
+          ? supabase.from("bank_statement_match_lines" as any).select("bank_transaction_id").in("bank_transaction_id", rows.map((r) => r.id))
+          : Promise.resolve({ data: [] as any[] }),
       ]);
       setDebtors(d);
       setCreditors(c);
       setLedger(l);
       setNominal(n);
+      setTakenFilter(() => t);
+      const counts: Record<string, number> = {};
+      for (const s of ((splits as any).data as any[]) ?? []) counts[s.bank_transaction_id] = (counts[s.bank_transaction_id] ?? 0) + 1;
+      setSplitCounts(counts);
     } catch (e: any) {
       toast({ title: "Could not load reconciliation data", description: e?.message, variant: "destructive" });
     } finally {
@@ -125,7 +137,8 @@ export default function BankReconciliationTab({ canEdit }: { canEdit: boolean })
   /** Statement closing balance — sum of its own transactions (no balance column captured in QIF). */
   const statementClosing = useMemo(() => lines.reduce((s, l) => s + l.amount_pence, 0), [lines]);
 
-  const isLedgerTaken = useMemo(() => buildTakenLedgerFilter(lines), [lines]);
+  // Global: a ledger line matched on ANY statement (primary or split link) is not "unmatched".
+  const isLedgerTaken = useMemo(() => takenFilter ?? buildTakenLedgerFilter(lines), [takenFilter, lines]);
   const unmatchedLedgerReceipts = useMemo(
     () => ledger.filter((l) => l.debit_pence > 0 && !isLedgerTaken(l)),
     [ledger, isLedgerTaken],
@@ -236,29 +249,40 @@ export default function BankReconciliationTab({ canEdit }: { canEdit: boolean })
     }
   };
 
-  // ---- Manual match to an existing ledger line (links only, posts nothing) ---
+  // ---- Manual match to existing ledger line(s) (links only, posts nothing) ---
   const [viewEntry, setViewEntry] = useState<{ entryId: string; lineId: string } | null>(null);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const toggleSelected = (id: string) => setSelected((s) => {
+    const n = new Set(s); if (n.has(id)) n.delete(id); else n.add(id); return n;
+  });
   const openManualMatch = async (l: BankLine) => {
-    setMatchFor(l); setCandSearch(""); setCandidates([]); setCandLoading(true);
+    setMatchFor(l); setCandSearch(""); setCandidates([]); setCandLoading(true); setSelected(new Set());
     try {
       const base = l.transaction_date ?? new Date().toISOString().slice(0, 10);
       const shift = (days: number) => { const d = new Date(base); d.setDate(d.getDate() + days); return d.toISOString().slice(0, 10); };
-      const [ledgerLines, { data: taken, error }] = await Promise.all([
+      // When extending an existing match, its own lines stay selectable and pre-ticked.
+      const own: string[] = [];
+      if (l.matched_journal_line_id) {
+        own.push(l.matched_journal_line_id);
+        const { data } = await supabase.from("bank_statement_match_lines" as any).select("journal_line_id").eq("bank_transaction_id", l.id);
+        for (const r of (data as any[]) ?? []) own.push(r.journal_line_id);
+      }
+      const ownSet = new Set(own);
+      const [ledgerLines, isTaken] = await Promise.all([
         fetchBankLedgerLines(shift(-120), shift(120)),
-        supabase.from("bank_statement_transactions" as any).select("matched_journal_line_id,matched_entry_id").not("matched_entry_id", "is", null),
+        fetchTakenLedgerFilter(),
       ]);
-      if (error) throw new Error(error.message);
-      const isTaken = buildTakenLedgerFilter((taken as any[]) ?? []);
       const want = Math.abs(l.amount_pence);
       const day = (d: string) => new Date(d).getTime() / 86400000;
       const rows = ledgerLines
-        .filter((c) => !isTaken(c))
+        .filter((c) => ownSet.has(c.id) || !isTaken(c))
         .filter((c) => (l.amount_pence > 0 ? c.debit_pence > 0 : c.credit_pence > 0))
         .sort((a, b) => {
           const amt = (c: BankLedgerLine) => Math.abs((c.debit_pence || c.credit_pence) - want);
-          return amt(a) - amt(b) || Math.abs(day(a.entry_date) - day(base)) - Math.abs(day(b.entry_date) - day(base));
+          return Number(ownSet.has(b.id)) - Number(ownSet.has(a.id)) || amt(a) - amt(b) || Math.abs(day(a.entry_date) - day(base)) - Math.abs(day(b.entry_date) - day(base));
         });
       setCandidates(rows);
+      setSelected(new Set(own.filter((id) => rows.some((r) => r.id === id))));
     } catch (e: any) {
       toast({ title: "Could not load ledger lines", description: e?.message, variant: "destructive" });
     } finally {
@@ -266,12 +290,12 @@ export default function BankReconciliationTab({ canEdit }: { canEdit: boolean })
     }
   };
 
-  const linkManual = async (c: BankLedgerLine) => {
-    if (!matchFor) return;
+  const linkManual = async (lineIds: string[]) => {
+    if (!matchFor || !lineIds.length) return;
     setBusy(matchFor.id);
     try {
-      await markMatched(matchFor.id, "manual", c.entry_id, c.id);
-      toast({ title: "Bank line matched to existing ledger entry" });
+      await linkBankRowToLines(matchFor.id, lineIds);
+      toast({ title: lineIds.length > 1 ? `Bank line matched to ${lineIds.length} ledger lines` : "Bank line matched to existing ledger entry" });
       setMatchFor(null);
       await load();
     } catch (e: any) {
@@ -281,7 +305,27 @@ export default function BankReconciliationTab({ canEdit }: { canEdit: boolean })
     }
   };
 
+  const unmatch = async (l: BankLine) => {
+    if (!window.confirm("Remove every ledger link for this bank line? No ledger entries are changed.")) return;
+    setBusy(l.id);
+    try {
+      await unlinkBankRow(l.id);
+      toast({ title: "Bank line unmatched" });
+      await load();
+    } catch (e: any) {
+      toast({ title: "Could not unmatch", description: e?.message, variant: "destructive" });
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const selStatus = splitSelectionStatus(
+    matchFor?.amount_pence ?? 0,
+    candidates.filter((c) => selected.has(c.id)),
+  );
+
   const shownCandidates = candidates.filter((c) =>
+    selected.has(c.id) ||
     !candSearch.trim() ||
     entryNumberMatches(c.entry_number, candSearch) ||
     `${c.description ?? ""} ${c.entry_date}`.toLowerCase().includes(candSearch.trim().toLowerCase()));
@@ -444,17 +488,42 @@ export default function BankReconciliationTab({ canEdit }: { canEdit: boolean })
             )}
           </section>
 
+          {matched.length > 0 && (
+            <details className="rounded-lg border border-gold/20 bg-primary-foreground/5 p-4">
+              <summary className="cursor-pointer font-serif text-lg text-gold min-h-12 flex items-center">Matched bank lines ({matched.length})</summary>
+              <ul className="text-sm space-y-1 mt-2">
+                {matched.map((l) => (
+                  <li key={l.id} className="text-primary-foreground/85 flex flex-wrap items-center gap-2 border-b border-gold/10 pb-1">
+                    <span className="flex-1 min-w-0">
+                      {fmtDate(l.transaction_date)} · {l.description} · {money(l.amount_pence)}
+                      <span className="text-primary-foreground/50 text-xs"> · {l.match_type ?? "matched"}{(splitCounts[l.id] ?? 0) > 0 ? ` · split across ${(splitCounts[l.id] ?? 0) + 1} ledger lines` : ""}</span>
+                    </span>
+                    {l.matched_journal_line_id && (
+                      <Button size="sm" variant="outline" className="min-h-10" disabled={!canEdit || busy === l.id} onClick={() => openManualMatch(l)}>
+                        <Link2 className="w-3.5 h-3.5 mr-1" /> Add lines
+                      </Button>
+                    )}
+                    <Button size="sm" variant="outline" className="min-h-10" disabled={!canEdit || busy === l.id} onClick={() => unmatch(l)}>
+                      <X className="w-3.5 h-3.5 mr-1" /> Unmatch
+                    </Button>
+                  </li>
+                ))}
+              </ul>
+              <p className="text-primary-foreground/50 text-xs mt-2">Unmatching removes every ledger link for that bank line. Ledger entries themselves are not changed.</p>
+            </details>
+          )}
+
           <Dialog open={!!matchFor} onOpenChange={(v) => { if (!v) setMatchFor(null); }}>
-            <DialogContent className="max-w-2xl">
+            <DialogContent className="max-w-2xl max-h-[92vh] flex flex-col">
               <DialogHeader>
                 <DialogTitle>Match to an existing ledger entry</DialogTitle>
                 <DialogDescription>
                   {matchFor && <>{fmtDate(matchFor.transaction_date)} · {matchFor.description} · {money(matchFor.amount_pence)}. </>}
-                  Links the bank line to an entry already on 1000 Bank. Nothing new is posted.
+                  Links the bank line to lines already on 1000 Bank. Nothing new is posted. Tick several lines if one bank payment covers more than one ledger line.
                 </DialogDescription>
               </DialogHeader>
-              <Input placeholder="Search description or date" value={candSearch} onChange={(e) => setCandSearch(e.target.value)} aria-label="Search ledger lines" />
-              <div className="max-h-96 overflow-y-auto">
+              <Input placeholder="Search doc no., description or date" value={candSearch} onChange={(e) => setCandSearch(e.target.value)} aria-label="Search ledger lines" />
+              <div className="flex-1 min-h-0 max-h-96 overflow-y-auto">
                 {candLoading ? (
                   <p className="text-sm"><Loader2 className="w-4 h-4 mr-1 inline animate-spin" /> Loading…</p>
                 ) : shownCandidates.length === 0 ? (
@@ -464,21 +533,42 @@ export default function BankReconciliationTab({ canEdit }: { canEdit: boolean })
                     {shownCandidates.map((c) => {
                       const amt = c.debit_pence || c.credit_pence;
                       const exact = matchFor && amt === Math.abs(matchFor.amount_pence);
+                      const checked = selected.has(c.id);
                       return (
-                        <li key={c.id} className="flex items-center gap-2 border-b border-gold/10 py-1 text-sm">
-                          <span className="flex-1 min-w-0">
-                            {c.entry_number ? <span className="font-mono text-xs opacity-70">{formatEntryNumber(c.entry_number)} · </span> : null}
-                            {fmtDate(c.entry_date)} · {c.description ?? "—"} · {money(c.debit_pence ? amt : -amt)}
-                            {exact && <span className="text-emerald-500 text-xs"> · exact amount</span>}
-                          </span>
-                          <Button size="sm" variant="link" className="px-1" onClick={() => setViewEntry({ entryId: c.entry_id, lineId: c.id })}>View entry</Button>
-                          <Button size="sm" disabled={busy === matchFor?.id} onClick={() => linkManual(c)}>Link</Button>
+                        <li key={c.id} className={`flex items-center gap-2 border-b border-gold/10 py-1 text-sm ${checked ? "bg-gold/10" : ""}`}>
+                          <label className="flex flex-1 min-w-0 items-center gap-3 min-h-12 cursor-pointer">
+                            <Checkbox checked={checked} onCheckedChange={() => toggleSelected(c.id)} aria-label={`Select ${formatEntryNumber(c.entry_number)} ${money(amt)}`} />
+                            <span className="flex-1 min-w-0">
+                              {c.entry_number ? <span className="font-mono text-xs opacity-70">{formatEntryNumber(c.entry_number)} · </span> : null}
+                              {fmtDate(c.entry_date)} · {c.description ?? "—"} · {money(c.debit_pence ? amt : -amt)}
+                              {exact && <span className="text-emerald-500 text-xs"> · exact amount</span>}
+                            </span>
+                          </label>
+                          <Button size="sm" variant="link" className="px-1 min-h-12" onClick={() => setViewEntry({ entryId: c.entry_id, lineId: c.id })}>View entry</Button>
+                          {exact && selected.size === 0 && (
+                            <Button size="sm" className="min-h-10" disabled={busy === matchFor?.id} onClick={() => linkManual([c.id])}>Link</Button>
+                          )}
                         </li>
                       );
                     })}
                   </ul>
                 )}
               </div>
+              {matchFor && (
+                <div className="border-t border-gold/20 pt-3 flex flex-wrap items-center gap-3 text-sm">
+                  <div className="flex-1 min-w-0 tabular-nums">
+                    Selected {money(selStatus.total)} of {money(selStatus.target)}
+                    {selected.size > 0 && (
+                      <span className={selStatus.exact ? "text-emerald-500" : "text-amber-500"}>
+                        {" · "}{selStatus.exact ? "exact" : selStatus.remaining > 0 ? `${money(selStatus.remaining)} still to find` : `${money(-selStatus.remaining)} too much`}
+                      </span>
+                    )}
+                  </div>
+                  <Button className="min-h-12" disabled={!selStatus.exact || busy === matchFor.id} onClick={() => linkManual([...selected])}>
+                    Link {selected.size || ""} line{selected.size === 1 ? "" : "s"}
+                  </Button>
+                </div>
+              )}
             </DialogContent>
           </Dialog>
 

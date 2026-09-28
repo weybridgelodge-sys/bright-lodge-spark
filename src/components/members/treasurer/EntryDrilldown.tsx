@@ -55,15 +55,27 @@ async function loadEntry(entryId: string): Promise<Loaded> {
     debit: Number(r.debit_pence ?? 0),
     credit: Number(r.credit_pence ?? 0),
   }));
-  // Also catch bank rows linked by line id only.
-  let bankRows: any[] = ((bankByEntry as any).data as any[]) ?? [];
+  // Primary links (by entry or line id) plus split-match links from bank_statement_match_lines.
+  // Each item carries _lineId: the ledger line on THIS entry that the bank row is linked to.
+  const cols = "id,statement_id,transaction_date,amount_pence,description,match_type,matched_journal_line_id,matched_entry_id,bank_statements(period_label)";
+  const lineIds = new Set(lines.map((l) => l.id));
+  let bankRows: any[] = (((bankByEntry as any).data as any[]) ?? []).map((r) => ({ ...r, _lineId: r.matched_journal_line_id, _split: false }));
   if (lines.length) {
-    const { data: byLine } = await supabase
-      .from("bank_statement_transactions" as any)
-      .select("id,statement_id,transaction_date,amount_pence,description,match_type,matched_journal_line_id,matched_entry_id,bank_statements(period_label)")
-      .in("matched_journal_line_id", lines.map((l) => l.id));
-    const seen = new Set(bankRows.map((r) => r.id));
-    for (const r of (byLine as any[]) ?? []) if (!seen.has(r.id)) bankRows.push(r);
+    const [{ data: byLine }, { data: splits }] = await Promise.all([
+      supabase.from("bank_statement_transactions" as any).select(cols).in("matched_journal_line_id", [...lineIds]),
+      supabase.from("bank_statement_match_lines" as any).select(`journal_line_id,bank_statement_transactions(${cols})`).in("journal_line_id", [...lineIds]),
+    ]);
+    const seen = new Set(bankRows.map((r) => `${r.id}:${r._lineId}`));
+    for (const r of (byLine as any[]) ?? []) {
+      const k = `${r.id}:${r.matched_journal_line_id}`;
+      if (!seen.has(k)) { seen.add(k); bankRows.push({ ...r, _lineId: r.matched_journal_line_id, _split: false }); }
+    }
+    for (const s of (splits as any[]) ?? []) {
+      const r = s.bank_statement_transactions;
+      if (!r) continue;
+      const k = `${r.id}:${s.journal_line_id}`;
+      if (!seen.has(k)) { seen.add(k); bankRows.push({ ...r, _lineId: s.journal_line_id, _split: true }); }
+    }
   }
   const links: string[] = [];
   for (const p of ((payouts as any).data as any[]) ?? []) links.push(`Stripe payout ${p.stripe_payout_id}`);
@@ -183,10 +195,10 @@ function Body({ entryId, highlightLineId, onNavigate }: Omit<Props, "onClose">) 
         ) : (
           <ul className="space-y-1">
             {data.bankRows.map((r) => (
-              <li key={r.id} className="rounded border border-border px-3 py-2">
+              <li key={`${r.id}:${r._lineId}`} className="rounded border border-border px-3 py-2">
                 {r.bank_statements?.period_label ?? "Statement"} · {fmtDate(r.transaction_date)} · {money(r.amount_pence)} · {r.description}
                 <div className="text-xs text-muted-foreground">
-                  {r.match_type ? `${r.match_type} match` : "Matched"} · linked to {lineLabel(r.matched_journal_line_id)}
+                  {r.match_type ? `${r.match_type} match` : "Matched"}{r._split ? " (split — additional line)" : ""} · linked to {lineLabel(r._lineId)}
                 </div>
               </li>
             ))}
