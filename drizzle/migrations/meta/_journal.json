@@ -372,6 +372,13 @@
       "when": 1790634593316,
       "tag": "0052_year_end_stage3_remarks_pack",
       "breakpoints": true
+    },
+    {
+      "idx": 53,
+      "version": "7",
+      "when": 1790639510663,
+      "tag": "0053_year_snapshot_comparative",
+      "breakpoints": true
     }
   ]
 }
