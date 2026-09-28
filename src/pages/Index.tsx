@@ -1,4 +1,5 @@
 import { lazy, Suspense } from "react";
+import { PageLoader } from "@/components/AppErrorBoundary";
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import About from "@/components/About";
@@ -84,7 +85,7 @@ const Index = () => {
         </section>
 
         <About />
-        <Suspense fallback={null}>
+        <Suspense fallback={<PageLoader />}>
           <HomepageCharityCTA />
 
           {/* Quiz invitation banner — uses the project's gold-shimmer gradient
