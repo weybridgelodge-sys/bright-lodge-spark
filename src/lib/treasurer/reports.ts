@@ -166,11 +166,7 @@ export function reportTable(doc: jsPDF, margin: number, y: number, head: string[
 
 /** Month keys (YYYY-MM, newest first, incl. future periods) from treasurer_periods, plus ledger date extremes. */
 export async function fetchReportCalendar(): Promise<{ months: { ym: string; label: string }[]; dates: string[] }> {
-  const [p, lo, hi] = await Promise.all([
-    supabase.from("treasurer_periods" as any).select("label,period_start,period_type"),
-    supabase.from("journal_entries" as any).select("entry_date").order("entry_date", { ascending: true }).limit(1),
-    supabase.from("journal_entries" as any).select("entry_date").order("entry_date", { ascending: false }).limit(1),
-  ]);
+  const p = await supabase.from("treasurer_periods" as any).select("label,period_start,period_type");
   const seen = new Map<string, string>();
   for (const r of ((p.data as any[]) ?? [])) {
     if (!r.period_start || r.period_type === "closing") continue;
@@ -178,11 +174,8 @@ export async function fetchReportCalendar(): Promise<{ months: { ym: string; lab
     if (!seen.has(ym)) seen.set(ym, r.label);
   }
   const months = [...seen.entries()].sort((a, b) => (a[0] < b[0] ? 1 : -1)).map(([ym, label]) => ({ ym, label }));
-  const dates = [
-    ...months.map((m) => `${m.ym}-01`),
-    ((lo.data as any[]) ?? [])[0]?.entry_date,
-    ((hi.data as any[]) ?? [])[0]?.entry_date,
-  ].filter(Boolean) as string[];
+  // Year lists come only from genuine periods, so a stray back-dated entry can't widen them.
+  const dates = months.map((m) => `${m.ym}-01`);
   return { months, dates };
 }
 
