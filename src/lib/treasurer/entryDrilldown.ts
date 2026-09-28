@@ -14,6 +14,7 @@ export const SOURCE_TYPE_LABELS: Record<string, string> = {
   reserve_allocation: "Reserve allocation",
   gmc_dining_invoice: "Dining invoice",
   general_journal: "General Journal",
+  year_close: "Year-end closing journal",
 };
 
 export function sourceTypeLabel(t: string | null | undefined): string {

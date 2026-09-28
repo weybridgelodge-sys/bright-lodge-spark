@@ -52,17 +52,38 @@ export async function fetchAccounts(): Promise<Account[]> {
 
 type Movement = { debit: number; credit: number };
 
+/** Ids of year-end closing periods (period_type = 'closing'). */
+export async function fetchClosingPeriodIds(): Promise<Set<string>> {
+  const { data, error } = await supabase.from("treasurer_periods" as any).select("id").eq("period_type", "closing");
+  if (error) throw error;
+  return new Set(((data as any[]) ?? []).map((r) => r.id));
+}
+
+/**
+ * "all" = every entry by date (Balance Sheet cumulative); "exclude" = drop entries in a
+ * closing period (I&E movement); "only" = just closing-period entries.
+ */
+export type ClosingMode = "all" | "exclude" | "only";
+
+/** Pure filter used by fetchMovements; exported for tests. */
+export const keepForClosingMode = (periodId: string | null | undefined, closing: Set<string>, mode: ClosingMode) => {
+  if (mode === "all") return true;
+  const isClosing = !!periodId && closing.has(periodId);
+  return mode === "only" ? isClosing : !isClosing;
+};
+
 /**
  * Sums journal lines by account for entries whose entry_date falls in [from, to].
  * Pass from = null for "from inception".
  */
-export async function fetchMovements(from: string | null, to: string): Promise<Map<string, Movement>> {
+export async function fetchMovements(from: string | null, to: string, mode: ClosingMode = "all"): Promise<Map<string, Movement>> {
   const data: any[] = [];
+  const closing = mode === "all" ? new Set<string>() : await fetchClosingPeriodIds();
   // Page through in 1000-row chunks so large ledgers are never truncated by the API row cap.
   for (let offset = 0; ; offset += 1000) {
     let q = supabase
       .from("journal_lines" as any)
-      .select("id,account_id,debit_pence,credit_pence,journal_entries!inner(entry_date)")
+      .select("id,account_id,debit_pence,credit_pence,journal_entries!inner(entry_date,period_id)")
       .lte("journal_entries.entry_date", to);
     if (from) q = q.gte("journal_entries.entry_date", from);
     const { data: page, error } = await q.order("id").range(offset, offset + 999);
@@ -72,6 +93,7 @@ export async function fetchMovements(from: string | null, to: string): Promise<M
   }
   const map = new Map<string, Movement>();
   for (const row of data) {
+    if (!keepForClosingMode(row.journal_entries?.period_id, closing, mode)) continue;
     const cur = map.get(row.account_id) ?? { debit: 0, credit: 0 };
     cur.debit += Number(row.debit_pence ?? 0);
     cur.credit += Number(row.credit_pence ?? 0);
@@ -155,13 +177,13 @@ export function reportTable(doc: jsPDF, margin: number, y: number, head: string[
 /** Month keys (YYYY-MM, newest first, incl. future periods) from treasurer_periods, plus ledger date extremes. */
 export async function fetchReportCalendar(): Promise<{ months: { ym: string; label: string }[]; dates: string[] }> {
   const [p, lo, hi] = await Promise.all([
-    supabase.from("treasurer_periods" as any).select("label,period_start"),
+    supabase.from("treasurer_periods" as any).select("label,period_start,period_type"),
     supabase.from("journal_entries" as any).select("entry_date").order("entry_date", { ascending: true }).limit(1),
     supabase.from("journal_entries" as any).select("entry_date").order("entry_date", { ascending: false }).limit(1),
   ]);
   const seen = new Map<string, string>();
   for (const r of ((p.data as any[]) ?? [])) {
-    if (!r.period_start) continue;
+    if (!r.period_start || r.period_type === "closing") continue;
     const ym = String(r.period_start).slice(0, 7);
     if (!seen.has(ym)) seen.set(ym, r.label);
   }
@@ -175,18 +197,19 @@ export async function fetchReportCalendar(): Promise<{ months: { ym: string; lab
 }
 
 /** Every journal line up to `to` (account, date, amounts), paged past the 1000-row API cap. */
-export async function fetchLedgerLines(to: string): Promise<{ account_id: string; entry_date: string; debit: number; credit: number }[]> {
-  const out: { account_id: string; entry_date: string; debit: number; credit: number }[] = [];
+export async function fetchLedgerLines(to: string): Promise<{ account_id: string; entry_date: string; debit: number; credit: number; closing: boolean }[]> {
+  const closing = await fetchClosingPeriodIds();
+  const out: { account_id: string; entry_date: string; debit: number; credit: number; closing: boolean }[] = [];
   for (let offset = 0; ; offset += 1000) {
     const { data, error } = await supabase
       .from("journal_lines" as any)
-      .select("id,account_id,debit_pence,credit_pence,journal_entries!inner(entry_date)")
+      .select("id,account_id,debit_pence,credit_pence,journal_entries!inner(entry_date,period_id)")
       .lte("journal_entries.entry_date", to)
       .order("id")
       .range(offset, offset + 999);
     if (error) throw error;
     for (const r of ((data as any[]) ?? [])) {
-      out.push({ account_id: r.account_id, entry_date: r.journal_entries.entry_date, debit: Number(r.debit_pence ?? 0), credit: Number(r.credit_pence ?? 0) });
+      out.push({ account_id: r.account_id, entry_date: r.journal_entries.entry_date, debit: Number(r.debit_pence ?? 0), credit: Number(r.credit_pence ?? 0), closing: closing.has(r.journal_entries.period_id) });
     }
     if (!data || data.length < 1000) break;
   }

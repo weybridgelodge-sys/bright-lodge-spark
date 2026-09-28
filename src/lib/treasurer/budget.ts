@@ -185,10 +185,10 @@ const monthKey = (y: number, m: number) => `${y}-${String(m + 1).padStart(2, "0"
 export async function findLatestClosedQuarter(): Promise<ClosedQuarter | null> {
   const { data, error } = await supabase
     .from("treasurer_periods" as any)
-    .select("period_start,period_end,status")
+    .select("period_start,period_end,status,period_type")
     .eq("status", "locked");
   if (error) throw error;
-  const periods = ((data as any[]) ?? []).filter((p) => p.period_start && p.period_end);
+  const periods = ((data as any[]) ?? []).filter((p) => p.period_start && p.period_end && p.period_type !== "closing");
 
   const lockedMonths = new Set<string>();
   for (const p of periods) {
