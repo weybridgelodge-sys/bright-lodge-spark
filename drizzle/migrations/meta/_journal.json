@@ -337,6 +337,13 @@
       "when": 1790533440561,
       "tag": "0047_my_pending_unlock_approvals",
       "breakpoints": true
+    },
+    {
+      "idx": 48,
+      "version": "7",
+      "when": 1790607565060,
+      "tag": "0048_journal_entry_numbers",
+      "breakpoints": true
     }
   ]
 }
