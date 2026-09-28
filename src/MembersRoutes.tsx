@@ -1,4 +1,5 @@
 import { lazy, Suspense } from "react";
+import AppErrorBoundary, { PageLoader } from "@/components/AppErrorBoundary";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./hooks/useAuth";
 import ProtectedRoute from "./components/members/ProtectedRoute";
@@ -52,7 +53,8 @@ const MembershipEnquiries = lazy(() => import("./pages/members/admin/MembershipE
 const MembersRoutes = () => (
   <AuthProvider>
     <PushRegistrar />
-    <Suspense fallback={null}>
+    <AppErrorBoundary>
+    <Suspense fallback={<PageLoader />}>
 
       <Routes>
         <Route path="login" element={<MembersLogin />} />
@@ -104,6 +106,7 @@ const MembersRoutes = () => (
         <Route path="working-groups/:slug" element={<WorkingGroupDetail />} />
       </Routes>
     </Suspense>
+    </AppErrorBoundary>
   </AuthProvider>
 );
 
