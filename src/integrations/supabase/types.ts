@@ -101,6 +101,55 @@ export type Database = {
         }
         Relationships: []
       }
+      bank_statement_match_lines: {
+        Row: {
+          bank_transaction_id: string
+          created_at: string
+          created_by: string | null
+          entry_id: string
+          id: string
+          journal_line_id: string
+        }
+        Insert: {
+          bank_transaction_id: string
+          created_at?: string
+          created_by?: string | null
+          entry_id: string
+          id?: string
+          journal_line_id: string
+        }
+        Update: {
+          bank_transaction_id?: string
+          created_at?: string
+          created_by?: string | null
+          entry_id?: string
+          id?: string
+          journal_line_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bank_statement_match_lines_bank_transaction_id_fkey"
+            columns: ["bank_transaction_id"]
+            isOneToOne: false
+            referencedRelation: "bank_statement_transactions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bank_statement_match_lines_entry_id_fkey"
+            columns: ["entry_id"]
+            isOneToOne: false
+            referencedRelation: "journal_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bank_statement_match_lines_journal_line_id_fkey"
+            columns: ["journal_line_id"]
+            isOneToOne: true
+            referencedRelation: "journal_lines"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bank_statement_transactions: {
         Row: {
           amount_pence: number
@@ -5294,6 +5343,10 @@ export type Database = {
         Returns: boolean
       }
       last_engagement_date: { Args: { _member: string }; Returns: string }
+      link_bank_row_to_lines: {
+        Args: { p_bank_txn_id: string; p_line_ids: string[] }
+        Returns: undefined
+      }
       link_booking_journal_entry: {
         Args: { _booking_id: string; _entry_id: string }
         Returns: undefined
@@ -5334,6 +5387,7 @@ export type Database = {
         Args: { _period_id: string; _reason: string }
         Returns: undefined
       }
+      unlink_bank_row: { Args: { p_bank_txn_id: string }; Returns: undefined }
     }
     Enums: {
       almoner_report_status: "draft" | "final"
