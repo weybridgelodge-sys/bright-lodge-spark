@@ -4403,6 +4403,7 @@ export type Database = {
           round_number: number
           submitted_at: string
           submitted_by: string | null
+          treasurer_remarks: string | null
         }
         Insert: {
           approval_id: string
@@ -4412,6 +4413,7 @@ export type Database = {
           round_number: number
           submitted_at?: string
           submitted_by?: string | null
+          treasurer_remarks?: string | null
         }
         Update: {
           approval_id?: string
@@ -4421,6 +4423,7 @@ export type Database = {
           round_number?: number
           submitted_at?: string
           submitted_by?: string | null
+          treasurer_remarks?: string | null
         }
         Relationships: [
           {
@@ -4434,6 +4437,8 @@ export type Database = {
       }
       treasurer_year_approvals: {
         Row: {
+          certified_pack_at: string | null
+          certified_pack_path: string | null
           created_at: string
           figures_snapshot: Json | null
           id: string
@@ -4442,9 +4447,12 @@ export type Database = {
           status: string
           submitted_at: string | null
           submitted_by: string | null
+          treasurer_remarks: string | null
           updated_at: string
         }
         Insert: {
+          certified_pack_at?: string | null
+          certified_pack_path?: string | null
           created_at?: string
           figures_snapshot?: Json | null
           id?: string
@@ -4453,9 +4461,12 @@ export type Database = {
           status?: string
           submitted_at?: string | null
           submitted_by?: string | null
+          treasurer_remarks?: string | null
           updated_at?: string
         }
         Update: {
+          certified_pack_at?: string | null
+          certified_pack_path?: string | null
           created_at?: string
           figures_snapshot?: Json | null
           id?: string
@@ -4464,6 +4475,7 @@ export type Database = {
           status?: string
           submitted_at?: string | null
           submitted_by?: string | null
+          treasurer_remarks?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -5517,15 +5529,24 @@ export type Database = {
         Args: { _booking_id: string }
         Returns: boolean
       }
+      record_certified_pack: {
+        Args: { _approval_id: string; _path: string }
+        Returns: undefined
+      }
       refresh_charity_public_feed_metrics: { Args: never; Returns: undefined }
       regenerate_my_calendar_token: { Args: never; Returns: string }
       request_unlock_treasurer_period: {
         Args: { _period_id: string; _reason: string }
         Returns: undefined
       }
+      save_year_remarks: {
+        Args: { _remarks: string; _year: number }
+        Returns: undefined
+      }
       submit_year_for_audit: { Args: { _year: number }; Returns: string }
       unlink_bank_row: { Args: { p_bank_txn_id: string }; Returns: undefined }
       year_audit_snapshot: { Args: { _year: number }; Returns: Json }
+      year_live_snapshot: { Args: { _year: number }; Returns: Json }
     }
     Enums: {
       almoner_report_status: "draft" | "final"
