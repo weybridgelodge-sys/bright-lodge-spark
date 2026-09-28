@@ -279,7 +279,9 @@ export default function BankReconciliationTab({ canEdit }: { canEdit: boolean })
   };
 
   const shownCandidates = candidates.filter((c) =>
-    !candSearch.trim() || `${c.description ?? ""} ${c.entry_date}`.toLowerCase().includes(candSearch.trim().toLowerCase()));
+    !candSearch.trim() ||
+    entryNumberMatches(c.entry_number, candSearch) ||
+    `${c.description ?? ""} ${c.entry_date}`.toLowerCase().includes(candSearch.trim().toLowerCase()));
 
   const reject = async (s: Suggestion) => {
     setBusy(s.line.id);
@@ -318,10 +320,10 @@ export default function BankReconciliationTab({ canEdit }: { canEdit: boolean })
     if (unmatchedLedgerReceipts.length || unmatchedLedgerPayments.length) {
       y = reportSection(doc, pageW, margin, y, "Unpresented ledger items");
       y = reportTable(doc, margin, y,
-        [["Date", "Description", "Amount"]],
+        [["Doc no.", "Date", "Description", "Amount"]],
         [
-          ...unmatchedLedgerReceipts.map((l) => [fmtDate(l.entry_date), l.description ?? "—", money(l.debit_pence)]),
-          ...unmatchedLedgerPayments.map((l) => [fmtDate(l.entry_date), l.description ?? "—", `(${money(l.credit_pence)})`]),
+          ...unmatchedLedgerReceipts.map((l) => [formatEntryNumber(l.entry_number), fmtDate(l.entry_date), l.description ?? "—", money(l.debit_pence)]),
+          ...unmatchedLedgerPayments.map((l) => [formatEntryNumber(l.entry_number), fmtDate(l.entry_date), l.description ?? "—", `(${money(l.credit_pence)})`]),
         ],
       );
     }
@@ -462,6 +464,7 @@ export default function BankReconciliationTab({ canEdit }: { canEdit: boolean })
                       return (
                         <li key={c.id} className="flex items-center gap-2 border-b border-gold/10 py-1 text-sm">
                           <span className="flex-1 min-w-0">
+                            {c.entry_number ? <span className="font-mono text-xs opacity-70">{formatEntryNumber(c.entry_number)} · </span> : null}
                             {fmtDate(c.entry_date)} · {c.description ?? "—"} · {money(c.debit_pence ? amt : -amt)}
                             {exact && <span className="text-emerald-500 text-xs"> · exact amount</span>}
                           </span>
