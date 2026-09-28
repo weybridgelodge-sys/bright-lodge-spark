@@ -169,3 +169,40 @@ export function sumForRange(lines: DrillSourceLine[], accountType: string, start
 }
 
 export const agreement = (total: number, expected: number) => ({ agrees: total === expected, difference: total - expected });
+
+// ---------- Trial balance ----------
+
+export type TBAccount = { id: string; code: string; name: string; account_type: string };
+export type TBLine = { account_id: string; entry_date: string; debit: number; credit: number };
+export type TBRow = TBAccount & { dr: number; cr: number; start: string | null };
+
+/**
+ * Per-account Dr/Cr as at `asAt`. Balance-sheet accounts are cumulative from inception;
+ * income/expense accounts show the masonic year-to-date position. Prior years' income and
+ * expense (never closed off) is returned as `priorSurplus` so the whole ledger still balances.
+ * Every line up to asAt is counted exactly once.
+ */
+export function computeTrialBalance(accounts: TBAccount[], lines: TBLine[], asAt: string) {
+  const yearStart = `${masonicYearOf(asAt)}-10-01`;
+  const byId = new Map(accounts.map((a) => [a.id, a]));
+  const net = new Map<string, number>(); // debit − credit
+  let priorNet = 0; // debit − credit of prior-year I&E lines
+  for (const l of lines) {
+    if (l.entry_date > asAt) continue;
+    const a = byId.get(l.account_id);
+    const pl = a && (a.account_type === "income" || a.account_type === "expense");
+    if (pl && l.entry_date < yearStart) { priorNet += l.debit - l.credit; continue; }
+    net.set(l.account_id, (net.get(l.account_id) ?? 0) + l.debit - l.credit);
+  }
+  const rows: TBRow[] = [...accounts]
+    .sort((a, b) => a.code.localeCompare(b.code, undefined, { numeric: true }))
+    .map((a) => {
+      const n = net.get(a.id) ?? 0;
+      const pl = a.account_type === "income" || a.account_type === "expense";
+      return { ...a, dr: n > 0 ? n : 0, cr: n < 0 ? -n : 0, start: pl ? yearStart : null };
+    });
+  const priorSurplus = { dr: priorNet > 0 ? priorNet : 0, cr: priorNet < 0 ? -priorNet : 0 };
+  const totalDr = rows.reduce((s, r) => s + r.dr, 0) + priorSurplus.dr;
+  const totalCr = rows.reduce((s, r) => s + r.cr, 0) + priorSurplus.cr;
+  return { rows, priorSurplus, yearStart, totalDr, totalCr, difference: totalDr - totalCr };
+}

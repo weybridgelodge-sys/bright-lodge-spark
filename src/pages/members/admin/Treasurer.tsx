@@ -10,6 +10,7 @@ import NewMemberFeesTab from "@/components/members/treasurer/NewMemberFeesTab";
 import GeneralJournalTab from "@/components/members/treasurer/GeneralJournalTab";
 import IncomeExpenditureReport from "@/components/members/treasurer/IncomeExpenditureReport";
 import BalanceSheetReport from "@/components/members/treasurer/BalanceSheetReport";
+import TrialBalanceReport from "@/components/members/treasurer/TrialBalanceReport";
 import TransactionDetailReport from "@/components/members/treasurer/TransactionDetailReport";
 import PropertyRegisterTab from "@/components/members/treasurer/PropertyRegisterTab";
 import BankStatementsTab from "@/components/members/treasurer/BankStatementsTab";
@@ -371,6 +372,15 @@ function Inner() {
             )}
             {canEditTx && (
               <TabsTrigger
+                value="trial-balance"
+                className="w-full flex items-center justify-start gap-3 px-4 py-3 rounded-sm text-sm font-sans text-primary-foreground/80 transition-colors hover:text-gold hover:bg-navy-light/40 data-[state=active]:bg-gold/15 data-[state=active]:text-gold data-[state=active]:shadow-none"
+              >
+                <Scale className="w-4 h-4 shrink-0" />
+                <span>Trial Balance</span>
+              </TabsTrigger>
+            )}
+            {canEditTx && (
+              <TabsTrigger
                 value="transaction-detail"
                 className="w-full flex items-center justify-start gap-3 px-4 py-3 rounded-sm text-sm font-sans text-primary-foreground/80 transition-colors hover:text-gold hover:bg-navy-light/40 data-[state=active]:bg-gold/15 data-[state=active]:text-gold data-[state=active]:shadow-none"
               >
@@ -487,6 +497,11 @@ function Inner() {
           {canEditTx && (
             <TabsContent value="income-expenditure" className="mt-4">
               <IncomeExpenditureReport canEdit={canEditTx} />
+            </TabsContent>
+          )}
+          {canEditTx && (
+            <TabsContent value="trial-balance" className="mt-4">
+              <TrialBalanceReport />
             </TabsContent>
           )}
           {canEditTx && (

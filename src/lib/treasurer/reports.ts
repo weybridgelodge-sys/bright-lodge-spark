@@ -57,15 +57,21 @@ type Movement = { debit: number; credit: number };
  * Pass from = null for "from inception".
  */
 export async function fetchMovements(from: string | null, to: string): Promise<Map<string, Movement>> {
-  let q = supabase
-    .from("journal_lines" as any)
-    .select("account_id,debit_pence,credit_pence,journal_entries!inner(entry_date)")
-    .lte("journal_entries.entry_date", to);
-  if (from) q = q.gte("journal_entries.entry_date", from);
-  const { data, error } = await q;
-  if (error) throw error;
+  const data: any[] = [];
+  // Page through in 1000-row chunks so large ledgers are never truncated by the API row cap.
+  for (let offset = 0; ; offset += 1000) {
+    let q = supabase
+      .from("journal_lines" as any)
+      .select("id,account_id,debit_pence,credit_pence,journal_entries!inner(entry_date)")
+      .lte("journal_entries.entry_date", to);
+    if (from) q = q.gte("journal_entries.entry_date", from);
+    const { data: page, error } = await q.order("id").range(offset, offset + 999);
+    if (error) throw error;
+    data.push(...((page as any[]) ?? []));
+    if (!page || page.length < 1000) break;
+  }
   const map = new Map<string, Movement>();
-  for (const row of ((data as any[]) ?? [])) {
+  for (const row of data) {
     const cur = map.get(row.account_id) ?? { debit: 0, credit: 0 };
     cur.debit += Number(row.debit_pence ?? 0);
     cur.credit += Number(row.credit_pence ?? 0);
@@ -166,4 +172,23 @@ export async function fetchReportCalendar(): Promise<{ months: { ym: string; lab
     ((hi.data as any[]) ?? [])[0]?.entry_date,
   ].filter(Boolean) as string[];
   return { months, dates };
+}
+
+/** Every journal line up to `to` (account, date, amounts), paged past the 1000-row API cap. */
+export async function fetchLedgerLines(to: string): Promise<{ account_id: string; entry_date: string; debit: number; credit: number }[]> {
+  const out: { account_id: string; entry_date: string; debit: number; credit: number }[] = [];
+  for (let offset = 0; ; offset += 1000) {
+    const { data, error } = await supabase
+      .from("journal_lines" as any)
+      .select("id,account_id,debit_pence,credit_pence,journal_entries!inner(entry_date)")
+      .lte("journal_entries.entry_date", to)
+      .order("id")
+      .range(offset, offset + 999);
+    if (error) throw error;
+    for (const r of ((data as any[]) ?? [])) {
+      out.push({ account_id: r.account_id, entry_date: r.journal_entries.entry_date, debit: Number(r.debit_pence ?? 0), credit: Number(r.credit_pence ?? 0) });
+    }
+    if (!data || data.length < 1000) break;
+  }
+  return out;
 }
