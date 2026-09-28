@@ -215,7 +215,7 @@ export default function BalanceSheetReport({ canEdit }: { canEdit: boolean }) {
             <h2 className="font-serif text-lg text-gold mb-1">Balance Sheet</h2>
             <p className="text-primary-foreground/60 text-sm">
               Cumulative balances to the chosen date. Reserves are derived (General Fund brought forward plus
-              the year-to-date surplus or deficit) — no year-end closing entry is needed.
+              the year-to-date surplus or deficit). Once a year is closed on Year End, its closing journal carries that surplus into the General Fund brought forward.
             </p>
           </div>
           <Button onClick={exportPdf} disabled={loading} className="bg-gold text-primary hover:bg-gold/90">
