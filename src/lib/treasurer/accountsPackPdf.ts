@@ -19,7 +19,7 @@ function pageHeader(doc: jsPDF, pageW: number, margin: number, title: string, dr
 
 export async function buildAccountsPackPdf(src: PackSource, year: number, certifiers: Certifier[]): Promise<jsPDF> {
   const doc = new jsPDF({ unit: "pt", format: "a4" });
-  const pageW = doc.internal.pageSize.getWidth(), pageH = doc.internal.pageSize.getHeight(), margin = 50;
+  const pageW = doc.internal.pageSize.getWidth(), pageH = doc.internal.pageSize.getHeight(), margin = 40;
   const endLabel = `30 September ${year + 1}`;
   const logo = await loadReportLogo();
 
