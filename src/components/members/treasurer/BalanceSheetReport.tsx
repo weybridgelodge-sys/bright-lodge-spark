@@ -48,7 +48,7 @@ export default function BalanceSheetReport({ canEdit }: { canEdit: boolean }) {
   const [assets, setAssets] = useState<Row[]>([]);
   const [liabilities, setLiabilities] = useState<Row[]>([]);
   const [reserves, setReserves] = useState({ curBf: 0, curYtd: 0, priBf: 0, priYtd: 0 });
-  const [fund, setFund] = useState<{ account: Account; curEnd: string; priEnd: string } | null>(null);
+  const [fund, setFund] = useState<{ account: Account; curEnd: string; priEnd: string; curAsAt: string; priAsAt: string } | null>(null);
   const [loading, setLoading] = useState(true);
 
   const load = useCallback(async () => {
