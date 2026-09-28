@@ -25,10 +25,11 @@ export function sortPeriodsNewestFirst<T extends { id: string; label?: string | 
 export async function fetchUnlockedPeriods(): Promise<PostingPeriod[]> {
   const { data, error } = await supabase
     .from("treasurer_periods" as any)
-    .select("id,label,period_start,period_end,status")
+    .select("id,label,period_start,period_end,status,period_type")
     .neq("status", "locked");
   if (error) throw new Error(error.message);
-  return sortPeriodsNewestFirst(((data as any[]) ?? []).map((p) => ({
+  // Year-end closing periods are never offered for ordinary postings.
+  return sortPeriodsNewestFirst(((data as any[]) ?? []).filter((p) => p.period_type !== "closing").map((p) => ({
     id: p.id, label: p.label, period_start: p.period_start, period_end: p.period_end,
   })));
 }

@@ -55,8 +55,8 @@ export default function IncomeExpenditureReport({ canEdit }: { canEdit: boolean 
     try {
       const [accts, cur, pri] = await Promise.all([
         fetchAccounts(),
-        fetchMovements(period.start, period.end),
-        fetchMovements(period.priorStart, period.priorEnd),
+        fetchMovements(period.start, period.end, "exclude"),
+        fetchMovements(period.priorStart, period.priorEnd, "exclude"),
       ]);
       setAccounts(accts);
       const build = (type: "income" | "expense") =>

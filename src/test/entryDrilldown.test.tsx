@@ -23,8 +23,8 @@ describe("entry drill-down helpers", () => {
     expect(r.difference).toBe(1);
   });
 
-  it("labels all 14 known source types and falls back sensibly", () => {
-    expect(Object.keys(SOURCE_TYPE_LABELS)).toHaveLength(14);
+  it("labels all 15 known source types and falls back sensibly", () => {
+    expect(Object.keys(SOURCE_TYPE_LABELS)).toHaveLength(15);
     expect(sourceTypeLabel("stripe_payout")).toBe("Stripe payout");
     expect(sourceTypeLabel("general_journal")).toBe("General Journal");
     expect(sourceTypeLabel("annual_return")).toBe("Annual return");
