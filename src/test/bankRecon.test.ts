@@ -53,3 +53,21 @@ describe("bank reconciliation", () => {
 
   it("formats money", () => expect(money(-1250)).toBe("-£12.50"));
 });
+
+import { buildTakenLedgerFilter } from "@/lib/treasurer/bankRecon";
+describe("buildTakenLedgerFilter (line-level matching)", () => {
+  const E = "7f6fbc80";
+  const hotel = { id: "1a9aee26", entry_id: E };
+  const stripe1 = { id: "53ac2165", entry_id: E };
+  const stripe2 = { id: "d0c32f3b", entry_id: E };
+  it("excludes only the matched line of a multi-line contra entry", () => {
+    const taken = buildTakenLedgerFilter([{ matched_journal_line_id: hotel.id, matched_entry_id: E }]);
+    expect(taken(hotel)).toBe(true);
+    expect(taken(stripe1)).toBe(false);
+    expect(taken(stripe2)).toBe(false);
+  });
+  it("falls back to entry-level only for legacy matches without a line id", () => {
+    const taken = buildTakenLedgerFilter([{ matched_journal_line_id: null, matched_entry_id: E }]);
+    expect(taken(stripe1)).toBe(true);
+  });
+});
