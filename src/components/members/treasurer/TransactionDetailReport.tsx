@@ -8,12 +8,14 @@ import { toast } from "@/hooks/use-toast";
 import { Download, Loader2, ArrowUp, ArrowDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchAccounts, treasurerYearBounds, treasurerYearContaining, fmtDate, money, type Account } from "@/lib/treasurer/reports";
+import { formatEntryNumber, entryNumberMatches, compareWithinEntry } from "@/lib/treasurer/entryNumber";
 
-type SortKey = "date" | "account";
+type SortKey = "date" | "account" | "doc";
 
 type Line = {
   id: string;
   entryId: string;
+  entryNumber: number;
   reconciled: boolean;
   date: string;
   code: string;
@@ -52,6 +54,7 @@ export default function TransactionDetailReport({ canEdit }: { canEdit: boolean 
     key: "date",
     direction: "asc",
   });
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     if (!canEdit) return;
@@ -83,7 +86,7 @@ export default function TransactionDetailReport({ canEdit }: { canEdit: boolean 
         .from("journal_lines" as any)
         .select(
           "id,debit_pence,credit_pence,description,event_id," +
-            "journal_entries!inner(id,entry_date,description,source_type,payee,reconciled)," +
+            "journal_entries!inner(id,entry_number,entry_date,description,source_type,payee,reconciled)," +
             "chart_of_accounts!inner(code,name)"
         )
         .gte("journal_entries.entry_date", from)
@@ -96,6 +99,7 @@ export default function TransactionDetailReport({ canEdit }: { canEdit: boolean 
       const rows: Line[] = ((data as any[]) ?? []).map((r) => ({
         id: r.id,
         entryId: r.journal_entries.id,
+        entryNumber: Number(r.journal_entries.entry_number ?? 0),
         reconciled: !!r.journal_entries.reconciled,
         date: r.journal_entries.entry_date,
         code: r.chart_of_accounts.code,
@@ -105,7 +109,7 @@ export default function TransactionDetailReport({ canEdit }: { canEdit: boolean 
         credit: Number(r.credit_pence ?? 0),
         eventId: r.event_id ?? null,
       }));
-      rows.sort((a, b) => (a.date === b.date ? a.code.localeCompare(b.code) : a.date.localeCompare(b.date)));
+      rows.sort((a, b) => a.date.localeCompare(b.date) || compareWithinEntry(a, b));
       setLines(rows);
       setLoaded(true);
       setApplied({ from, to, codeFrom, codeTo });
@@ -137,17 +141,39 @@ export default function TransactionDetailReport({ canEdit }: { canEdit: boolean 
   );
 
   const sortedLines = useMemo(() => {
-    const sorted = [...lines];
-    sorted.sort((a, b) => {
-      if (sortConfig.key === "date") {
-        return sortConfig.direction === "asc" ? a.date.localeCompare(b.date) : b.date.localeCompare(a.date);
-      }
-      return sortConfig.direction === "asc"
-        ? a.code.localeCompare(b.code, undefined, { numeric: true })
-        : b.code.localeCompare(a.code, undefined, { numeric: true });
+    const filtered = search.trim()
+      ? lines.filter(
+          (l) =>
+            entryNumberMatches(l.entryNumber, search) ||
+            l.description.toLowerCase().includes(search.trim().toLowerCase())
+        )
+      : [...lines];
+    const dir = sortConfig.direction === "asc" ? 1 : -1;
+    filtered.sort((a, b) => {
+      let primary = 0;
+      if (sortConfig.key === "date") primary = a.date.localeCompare(b.date);
+      else if (sortConfig.key === "account") primary = a.code.localeCompare(b.code, undefined, { numeric: true });
+      else primary = a.entryNumber - b.entryNumber;
+      if (primary !== 0) return primary * dir;
+      if (sortConfig.key === "account") return a.date.localeCompare(b.date) || a.entryNumber - b.entryNumber;
+      return compareWithinEntry(a, b);
     });
-    return sorted;
-  }, [lines, sortConfig]);
+    return filtered;
+  }, [lines, sortConfig, search]);
+
+  const sortHeader = (key: SortKey, label: string) => (
+    <button
+      type="button"
+      onClick={() =>
+        setSortConfig((prev) => ({ key, direction: prev.key === key && prev.direction === "asc" ? "desc" : "asc" }))
+      }
+      className="inline-flex items-center gap-1 hover:text-gold focus:outline-none"
+    >
+      {label}
+      {sortConfig.key === key &&
+        (sortConfig.direction === "asc" ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />)}
+    </button>
+  );
 
   const setEntryReconciled = (entryId: string, value: boolean) =>
     setLines((prev) => prev.map((l) => (l.entryId === entryId ? { ...l, reconciled: value } : l)));
