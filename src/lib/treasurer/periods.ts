@@ -8,16 +8,29 @@ import { supabase } from "@/integrations/supabase/client";
  */
 export type PostingPeriod = { id: string; label: string; period_start: string | null; period_end: string | null };
 
+/**
+ * Deterministic period order: newest period_start first; undated last;
+ * ties broken by period_end desc, then label, then id.
+ */
+export function sortPeriodsNewestFirst<T extends { id: string; label?: string | null; period_start: string | null; period_end?: string | null }>(ps: T[]): T[] {
+  const desc = (a: string | null | undefined, b: string | null | undefined) =>
+    a === b ? 0 : !a ? 1 : !b ? -1 : a < b ? 1 : -1;
+  return [...ps].sort((a, b) =>
+    desc(a.period_start, b.period_start) ||
+    desc(a.period_end, b.period_end) ||
+    (a.label ?? "").localeCompare(b.label ?? "") ||
+    a.id.localeCompare(b.id));
+}
+
 export async function fetchUnlockedPeriods(): Promise<PostingPeriod[]> {
   const { data, error } = await supabase
     .from("treasurer_periods" as any)
     .select("id,label,period_start,period_end,status")
-    .neq("status", "locked")
-    .order("period_start", { ascending: true });
+    .neq("status", "locked");
   if (error) throw new Error(error.message);
-  return ((data as any[]) ?? []).map((p) => ({
+  return sortPeriodsNewestFirst(((data as any[]) ?? []).map((p) => ({
     id: p.id, label: p.label, period_start: p.period_start, period_end: p.period_end,
-  }));
+  })));
 }
 
 /** The unlocked period whose range contains the date, or null. */

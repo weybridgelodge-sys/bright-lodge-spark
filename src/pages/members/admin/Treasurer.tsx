@@ -28,6 +28,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
 import { Loader2, Plus, Pencil, Trash2, Lock, Unlock, ShieldCheck, Utensils, Handshake, ArrowUpCircle, ArrowDownCircle, UserPlus, BookOpen, TrendingUp, Scale, Search, Archive, Calculator, Landmark, PartyPopper, Users, Target } from "lucide-react";
+import { sortPeriodsNewestFirst } from "@/lib/treasurer/periods";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 type Period = {
@@ -264,8 +265,8 @@ function Inner() {
 
   const load = useCallback(async () => {
     setLoading(true);
-    const ps = await supabase.from("treasurer_periods" as any).select("*").order("created_at", { ascending: false });
-    if (!ps.error) setPeriods((ps.data as unknown as Period[]) ?? []);
+    const ps = await supabase.from("treasurer_periods" as any).select("*");
+    if (!ps.error) setPeriods(sortPeriodsNewestFirst((ps.data as unknown as Period[]) ?? []));
     setLoading(false);
   }, []);
 
