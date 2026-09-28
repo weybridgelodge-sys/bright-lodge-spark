@@ -173,3 +173,22 @@ export async function fetchReportCalendar(): Promise<{ months: { ym: string; lab
   ].filter(Boolean) as string[];
   return { months, dates };
 }
+
+/** Every journal line up to `to` (account, date, amounts), paged past the 1000-row API cap. */
+export async function fetchLedgerLines(to: string): Promise<{ account_id: string; entry_date: string; debit: number; credit: number }[]> {
+  const out: { account_id: string; entry_date: string; debit: number; credit: number }[] = [];
+  for (let offset = 0; ; offset += 1000) {
+    const { data, error } = await supabase
+      .from("journal_lines" as any)
+      .select("id,account_id,debit_pence,credit_pence,journal_entries!inner(entry_date)")
+      .lte("journal_entries.entry_date", to)
+      .order("id")
+      .range(offset, offset + 999);
+    if (error) throw error;
+    for (const r of ((data as any[]) ?? [])) {
+      out.push({ account_id: r.account_id, entry_date: r.journal_entries.entry_date, debit: Number(r.debit_pence ?? 0), credit: Number(r.credit_pence ?? 0) });
+    }
+    if (!data || data.length < 1000) break;
+  }
+  return out;
+}
