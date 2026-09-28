@@ -16,12 +16,13 @@ export type YearSnapshot = {
 export type Approval = {
   id: string; masonic_year: number; status: AuditStatus; round_number: number;
   figures_snapshot: YearSnapshot | null; submitted_at: string | null; submitted_by: string | null;
+  treasurer_remarks?: string | null; certified_pack_path?: string | null;
 };
 export type Signoff = {
   id: string; approval_id: string; round_number: number; officer_role: AuditorRole;
   signed_by: string; signed_at: string; decision: "confirmed" | "query"; note: string | null;
 };
-export type Round = { id: string; approval_id: string; round_number: number; figures_snapshot: YearSnapshot; submitted_at: string; submitted_by: string | null; outcome: "query" | "approved" | null };
+export type Round = { id: string; approval_id: string; round_number: number; figures_snapshot: YearSnapshot; submitted_at: string; submitted_by: string | null; outcome: "query" | "approved" | null; treasurer_remarks?: string | null };
 
 export const STATUS_LABEL: Record<AuditStatus, string> = {
   draft: "Draft",
