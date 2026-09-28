@@ -101,7 +101,7 @@ async function loadEntry(entryId: string): Promise<Loaded> {
   };
 }
 
-function Body({ entryId, highlightLineId, onNavigate }: Omit<Props, "onClose">) {
+export function EntryDrilldownBody({ entryId, highlightLineId, onNavigate, prevId: prevO, nextId: nextO }: Omit<Props, "onClose"> & { prevId?: string | null; nextId?: string | null }) {
   const [data, setData] = useState<Loaded | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -220,10 +220,10 @@ function Body({ entryId, highlightLineId, onNavigate }: Omit<Props, "onClose">) 
 
       {onNavigate && (
         <div className="flex justify-between gap-2 pt-1">
-          <Button variant="outline" className="min-h-12" disabled={!data.prevId} onClick={() => data.prevId && onNavigate(data.prevId)}>
+          <Button variant="outline" className="min-h-12" disabled={!(prevO !== undefined ? prevO : data.prevId)} onClick={() => { const t = prevO !== undefined ? prevO : data.prevId; if (t) onNavigate(t); }}>
             <ChevronLeft className="mr-1 h-4 w-4" /> Previous
           </Button>
-          <Button variant="outline" className="min-h-12" disabled={!data.nextId} onClick={() => data.nextId && onNavigate(data.nextId)}>
+          <Button variant="outline" className="min-h-12" disabled={!(nextO !== undefined ? nextO : data.nextId)} onClick={() => { const t = nextO !== undefined ? nextO : data.nextId; if (t) onNavigate(t); }}>
             Next <ChevronRight className="ml-1 h-4 w-4" />
           </Button>
         </div>
@@ -248,7 +248,7 @@ export default function EntryDrilldown({ entryId, highlightLineId, onClose, onNa
   const open = !!entryId;
   const t = useTitle(entryId);
   const title = <>Journal entry {t.num && <span className="font-mono text-gold">{t.num}</span>}</>;
-  const body = <Body entryId={entryId} highlightLineId={highlightLineId} onNavigate={onNavigate} />;
+  const body = <EntryDrilldownBody entryId={entryId} highlightLineId={highlightLineId} onNavigate={onNavigate} />;
   if (isMobile) {
     return (
       <Sheet open={open} onOpenChange={(v) => !v && onClose()}>
