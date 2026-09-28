@@ -8,27 +8,47 @@ import { Download, Loader2 } from "lucide-react";
 import {
   acct, fetchAccounts, fetchMovements, fmtDate, money,
   reportPdfDoc, reportSection, reportTable, shiftBackOneYear, signedBalance,
-  treasurerYearBounds, treasurerYearContaining, type Account,
+  treasurerYearBounds, treasurerYearContaining, type Account, fetchReportCalendar,
 } from "@/lib/treasurer/reports";
+import {
+  bsAsAt, bsComparative, defaultBasis, masonicYearOptions, ymOf, type BSKind, type CompareBasis,
+} from "@/lib/treasurer/reportPeriods";
+import AccountDrilldown, { DrillAccountRow, type DrillTarget } from "./AccountDrilldown";
 
-type Row = { code: string; name: string; current: number; prior: number };
+type Row = { account: Account; code: string; name: string; current: number; prior: number };
 
 const today = () => new Date().toISOString().slice(0, 10);
 
 export default function BalanceSheetReport({ canEdit }: { canEdit: boolean }) {
   const currentMasonicYear = useMemo(() => treasurerYearContaining(today()), []);
-  const yearOptions = useMemo(() => [0, 1, 2, 3, 4].map((i) => currentMasonicYear - i), [currentMasonicYear]);
+  const [months, setMonths] = useState<{ ym: string; label: string }[]>([]);
+  const [calDates, setCalDates] = useState<string[]>([]);
+  useEffect(() => {
+    fetchReportCalendar().then((c) => { setMonths(c.months); setCalDates(c.dates); }).catch(() => {});
+  }, []);
+  const yearOptions = useMemo(() => masonicYearOptions(currentMasonicYear, calDates), [currentMasonicYear, calDates]);
+  const monthOptions = months.length ? months : [{ ym: ymOf(today()), label: ymOf(today()) }];
 
-  const [mode, setMode] = useState<string>(String(currentMasonicYear));
+  const [kind, setKind] = useState<BSKind>("year");
+  const [ym, setYm] = useState(ymOf(today()));
+  const [year, setYear] = useState(currentMasonicYear);
   const [customDate, setCustomDate] = useState(today);
+  const [basis, setBasis] = useState<CompareBasis>(defaultBasis("year"));
+  const changeKind = (k: BSKind) => { setKind(k); setBasis(defaultBasis(k)); };
+  const [drill, setDrill] = useState<DrillTarget | null>(null);
 
-  const asAt = mode === "custom" ? customDate : treasurerYearBounds(Number(mode)).end;
-  const priorAsAt = shiftBackOneYear(asAt);
+  const sel = { kind, ym, year, customDate };
+  const cur = bsAsAt(sel);
+  const pri = bsComparative(sel, basis);
+  const asAt = cur.date;
+  const priorAsAt = pri.date;
+  void shiftBackOneYear;
 
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [assets, setAssets] = useState<Row[]>([]);
   const [liabilities, setLiabilities] = useState<Row[]>([]);
   const [reserves, setReserves] = useState({ curBf: 0, curYtd: 0, priBf: 0, priYtd: 0 });
+  const [fund, setFund] = useState<{ account: Account; curEnd: string; priEnd: string } | null>(null);
   const [loading, setLoading] = useState(true);
 
   const load = useCallback(async () => {
@@ -60,6 +80,7 @@ export default function BalanceSheetReport({ canEdit }: { canEdit: boolean }) {
         accts
           .filter((a) => a.account_type === type)
           .map((a) => ({
+            account: a,
             code: a.code,
             name: a.name,
             current: signedBalance(type, cum.get(a.id)),
@@ -77,6 +98,7 @@ export default function BalanceSheetReport({ canEdit }: { canEdit: boolean }) {
           return total;
         }, 0);
 
+      setFund(generalFund ? { account: generalFund, curEnd: dayBefore(curYearStart), priEnd: dayBefore(priYearStart) } : null);
       setReserves({
         curBf: generalFund ? signedBalance("equity", curBfM.get(generalFund.id)) : 0,
         priBf: generalFund ? signedBalance("equity", priBfM.get(generalFund.id)) : 0,
@@ -102,10 +124,17 @@ export default function BalanceSheetReport({ canEdit }: { canEdit: boolean }) {
 
   const curLabel = fmtDate(asAt);
   const priLabel = fmtDate(priorAsAt);
+  const openDrill = (r: Row, which: "current" | "prior") =>
+    setDrill({
+      account: r.account, start: null,
+      end: which === "current" ? asAt : priorAsAt,
+      periodLabel: `as at ${which === "current" ? curLabel : priLabel}`,
+      expected: r[which],
+    });
 
   const exportPdf = async () => {
     try {
-      const { doc, pageW, margin } = await reportPdfDoc("Balance Sheet", `As at ${curLabel} · comparative: ${priLabel}`);
+      const { doc, pageW, margin } = await reportPdfDoc("Balance Sheet", `${cur.label} · comparative: ${pri.label}`);
       let y = 130;
       const head = [["Account", curLabel, priLabel]];
 
@@ -160,11 +189,8 @@ export default function BalanceSheetReport({ canEdit }: { canEdit: boolean }) {
               <tr><td colSpan={3} className="py-3 text-primary-foreground/50">No balances on either date.</td></tr>
             )}
             {rows.map((r) => (
-              <tr key={r.code} className="border-b border-gold/10">
-                <td className="py-2 text-primary-foreground/85">{r.code} — {r.name}</td>
-                <td className={`py-2 text-right tabular-nums ${amountCls(r.current)}`}>{acct(r.current)}</td>
-                <td className={`py-2 text-right tabular-nums ${amountCls(r.prior)}`}>{acct(r.prior)}</td>
-              </tr>
+              <DrillAccountRow key={r.code} code={r.code} name={r.name} current={r.current} prior={r.prior}
+                onCurrent={() => openDrill(r, "current")} onPrior={() => openDrill(r, "prior")} />
             ))}
             <tr className="border-t border-gold/30 font-semibold">
               <td className="py-2 text-gold">{totalLabel}</td>
@@ -193,30 +219,63 @@ export default function BalanceSheetReport({ canEdit }: { canEdit: boolean }) {
           </Button>
         </div>
 
-        <div className="grid gap-3 sm:grid-cols-3 mt-4">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 mt-4">
           <div>
             <Label>As at</Label>
-            <Select value={mode} onValueChange={setMode}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+            <Select value={kind} onValueChange={(v) => changeKind(v as BSKind)}>
+              <SelectTrigger className="min-h-[48px]" aria-label="As at type"><SelectValue /></SelectTrigger>
               <SelectContent>
-                {yearOptions.map((y) => (
-                  <SelectItem key={y} value={String(y)}>
-                    Masonic year end {treasurerYearBounds(y).label} ({fmtDate(treasurerYearBounds(y).end)})
-                  </SelectItem>
-                ))}
+                <SelectItem value="month">Month end</SelectItem>
+                <SelectItem value="year">Masonic year end</SelectItem>
                 <SelectItem value="custom">Custom date</SelectItem>
               </SelectContent>
             </Select>
           </div>
-          {mode === "custom" && (
+          {kind === "month" && (
             <div>
-              <Label>As at date</Label>
-              <Input type="date" value={customDate} onChange={(e) => setCustomDate(e.target.value)} />
+              <Label>Month</Label>
+              <Select value={ym} onValueChange={setYm}>
+                <SelectTrigger className="min-h-[48px]" aria-label="Month"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {monthOptions.map((m) => <SelectItem key={m.ym} value={m.ym}>{m.label}</SelectItem>)}
+                </SelectContent>
+              </Select>
             </div>
           )}
+          {kind === "year" && (
+            <div>
+              <Label>Masonic year</Label>
+              <Select value={String(year)} onValueChange={(v) => setYear(Number(v))}>
+                <SelectTrigger className="min-h-[48px]" aria-label="Masonic year"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {yearOptions.map((y) => (
+                    <SelectItem key={y} value={String(y)}>
+                      Masonic year end {treasurerYearBounds(y).label} ({fmtDate(treasurerYearBounds(y).end)})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+          {kind === "custom" && (
+            <div>
+              <Label>As at date</Label>
+              <Input type="date" className="min-h-[48px]" value={customDate} onChange={(e) => setCustomDate(e.target.value)} />
+            </div>
+          )}
+          <div>
+            <Label>Compare with</Label>
+            <Select value={basis} onValueChange={(v) => setBasis(v as CompareBasis)}>
+              <SelectTrigger className="min-h-[48px]" aria-label="Compare with"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="previous">{kind === "year" ? "Previous year end" : "Previous month end"}</SelectItem>
+                <SelectItem value="last_year">Same date last year</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
         <p className="text-primary-foreground/50 text-xs mt-2">
-          As at {curLabel} · comparative as at {priLabel}
+          {cur.label} · comparative {pri.label}
         </p>
 
         {loading ? (
@@ -230,11 +289,18 @@ export default function BalanceSheetReport({ canEdit }: { canEdit: boolean }) {
               <h3 className="font-serif text-gold mb-2">Reserves</h3>
               <table className="w-full text-sm">
                 <tbody>
+                  {fund ? (
+                    <DrillAccountRow code={fund.account.code} name={`${fund.account.name} brought forward`}
+                      current={reserves.curBf} prior={reserves.priBf}
+                      onCurrent={() => setDrill({ account: fund.account, start: null, end: fund.curEnd, periodLabel: `b/f to ${fmtDate(fund.curEnd)}`, expected: reserves.curBf })}
+                      onPrior={() => setDrill({ account: fund.account, start: null, end: fund.priEnd, periodLabel: `b/f to ${fmtDate(fund.priEnd)}`, expected: reserves.priBf })} />
+                  ) : (
                   <tr className="border-b border-gold/10">
                     <td className="py-2 text-primary-foreground/85">General Fund brought forward</td>
                     <td className={`py-2 text-right tabular-nums ${amountCls(reserves.curBf)}`}>{acct(reserves.curBf)}</td>
                     <td className={`py-2 text-right tabular-nums ${amountCls(reserves.priBf)}`}>{acct(reserves.priBf)}</td>
                   </tr>
+                  )}
                   <tr className="border-b border-gold/10">
                     <td className="py-2 text-primary-foreground/85">Surplus / (Deficit) for the year to date</td>
                     <td className={`py-2 text-right tabular-nums ${amountCls(reserves.curYtd)}`}>{acct(reserves.curYtd)}</td>
@@ -271,6 +337,7 @@ export default function BalanceSheetReport({ canEdit }: { canEdit: boolean }) {
           <p className="text-primary-foreground/50 text-xs mt-3">No chart of accounts found.</p>
         )}
       </section>
+      <AccountDrilldown target={drill} onClose={() => setDrill(null)} />
     </div>
   );
 }

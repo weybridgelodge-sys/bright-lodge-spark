@@ -4,3 +4,4 @@
 
 - Journal document numbers: journal_entries.entry_number is assigned only by the tg_journal_entry_number trigger (sequence) and is immutable; display via formatEntryNumber (JE-000123). document_number stays free-text user reference. Why: every posting path, including edge functions, gets a permanent number without code changes.
 - Bank split matching: bank_statement_transactions.matched_journal_line_id stays the primary link; extra ledger lines go in bank_statement_match_lines, written only via link_bank_row_to_lines / unlink_bank_row RPCs; "taken" checks use both, across all statements. Why: one bank payment can settle several ledger lines without breaking existing matches.
+- Treasurer report period ranges live as pure helpers in src/lib/treasurer/reportPeriods.ts; account drill-downs use the shared AccountDrilldown. Why: one tested source keeps month/YTD/year figures reconciling and drill totals agreeing with reports.
