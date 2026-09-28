@@ -65,13 +65,17 @@ export default function BalanceSheetReport({ canEdit }: { canEdit: boolean }) {
         return d.toISOString().slice(0, 10);
       };
 
-      const [cum, priCum, curBfM, priBfM, curYtdM, priYtdM] = await Promise.all([
+      // The closing journal (dated 1 Oct, in a closing period) moves last year's surplus
+      // into 3000: it belongs in the fund brought forward, never in this year's surplus.
+      const [cum, priCum, curBfM, priBfM, curYtdM, priYtdM, curCloseM, priCloseM] = await Promise.all([
         fetchMovements(null, asAt),
         fetchMovements(null, priorAsAt),
         fetchMovements(null, dayBefore(curYearStart)),
         fetchMovements(null, dayBefore(priYearStart)),
-        fetchMovements(curYearStart, asAt),
-        fetchMovements(priYearStart, priorAsAt),
+        fetchMovements(curYearStart, asAt, "exclude"),
+        fetchMovements(priYearStart, priorAsAt, "exclude"),
+        fetchMovements(curYearStart, asAt, "only"),
+        fetchMovements(priYearStart, priorAsAt, "only"),
       ]);
 
       setAccounts(accts);
@@ -98,10 +102,10 @@ export default function BalanceSheetReport({ canEdit }: { canEdit: boolean }) {
           return total;
         }, 0);
 
-      setFund(generalFund ? { account: generalFund, curEnd: dayBefore(curYearStart), priEnd: dayBefore(priYearStart) } : null);
+      setFund(generalFund ? { account: generalFund, curEnd: dayBefore(curYearStart), priEnd: dayBefore(priYearStart), curAsAt: asAt, priAsAt: priorAsAt } : null);
       setReserves({
-        curBf: generalFund ? signedBalance("equity", curBfM.get(generalFund.id)) : 0,
-        priBf: generalFund ? signedBalance("equity", priBfM.get(generalFund.id)) : 0,
+        curBf: generalFund ? signedBalance("equity", curBfM.get(generalFund.id)) + signedBalance("equity", curCloseM.get(generalFund.id)) : 0,
+        priBf: generalFund ? signedBalance("equity", priBfM.get(generalFund.id)) + signedBalance("equity", priCloseM.get(generalFund.id)) : 0,
         curYtd: surplus(curYtdM),
         priYtd: surplus(priYtdM),
       });
@@ -292,8 +296,8 @@ export default function BalanceSheetReport({ canEdit }: { canEdit: boolean }) {
                   {fund ? (
                     <DrillAccountRow code={fund.account.code} name={`${fund.account.name} brought forward`}
                       current={reserves.curBf} prior={reserves.priBf}
-                      onCurrent={() => setDrill({ account: fund.account, start: null, end: fund.curEnd, periodLabel: `b/f to ${fmtDate(fund.curEnd)}`, expected: reserves.curBf })}
-                      onPrior={() => setDrill({ account: fund.account, start: null, end: fund.priEnd, periodLabel: `b/f to ${fmtDate(fund.priEnd)}`, expected: reserves.priBf })} />
+                      onCurrent={() => setDrill({ account: fund.account, start: null, end: fund.curEnd, periodLabel: `b/f to ${fmtDate(fund.curEnd)}`, expected: reserves.curBf, includeClosingTo: fund.curAsAt })}
+                      onPrior={() => setDrill({ account: fund.account, start: null, end: fund.priEnd, periodLabel: `b/f to ${fmtDate(fund.priEnd)}`, expected: reserves.priBf, includeClosingTo: fund.priAsAt })} />
                   ) : (
                   <tr className="border-b border-gold/10">
                     <td className="py-2 text-primary-foreground/85">General Fund brought forward</td>

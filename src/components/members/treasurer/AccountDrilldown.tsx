@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ArrowDown, ArrowUp, Check, ChevronLeft, ChevronRight, Loader2, AlertTriangle } from "lucide-react";
-import { acct, fmtDate, money } from "@/lib/treasurer/reports";
+import { acct, fetchClosingPeriodIds, fmtDate, money } from "@/lib/treasurer/reports";
 import { formatEntryNumber, entryNumberMatches } from "@/lib/treasurer/entryNumber";
 import { agreement, buildAccountDrill, type DrillSourceLine } from "@/lib/treasurer/reportPeriods";
 import { EntryDrilldownBody } from "./EntryDrilldown";
@@ -20,23 +20,33 @@ export type DrillTarget = {
   periodLabel: string;
   /** The figure shown in the report, in pence, same sign convention. */
   expected: number;
+  /** Also include closing-journal lines dated after `end` up to this date (fund b/f). */
+  includeClosingTo?: string;
 };
 
 async function fetchAccountLines(t: DrillTarget): Promise<DrillSourceLine[]> {
   const data: any[] = [];
+  const closing = await fetchClosingPeriodIds();
+  const isPl = t.account.account_type === "income" || t.account.account_type === "expense";
+  const fetchTo = t.includeClosingTo && t.includeClosingTo > t.end ? t.includeClosingTo : t.end;
   for (let offset = 0; ; offset += 1000) {
     let q = supabase
       .from("journal_lines" as any)
-      .select("id,entry_id,description,debit_pence,credit_pence,journal_entries!inner(entry_number,entry_date,description,source_type)")
+      .select("id,entry_id,description,debit_pence,credit_pence,journal_entries!inner(entry_number,entry_date,description,source_type,period_id)")
       .eq("account_id", t.account.id)
-      .lte("journal_entries.entry_date", t.end);
+      .lte("journal_entries.entry_date", fetchTo);
     if (t.start) q = q.gte("journal_entries.entry_date", t.start);
     const { data: page, error } = await q.order("id").range(offset, offset + 999);
     if (error) throw error;
     data.push(...((page as any[]) ?? []));
     if (!page || page.length < 1000) break;
   }
-  return data.map((r) => ({
+  const kept = data.filter((r) => {
+    const c = closing.has(r.journal_entries?.period_id);
+    if (r.journal_entries?.entry_date > t.end) return c; // only closing lines beyond end (fund b/f)
+    return !(c && isPl && t.start); // I&E year movement never includes the closing journal
+  });
+  return kept.map((r) => ({
     id: r.id,
     entry_id: r.entry_id,
     entry_number: r.journal_entries?.entry_number ?? null,
