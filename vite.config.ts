@@ -21,6 +21,10 @@ export default defineConfig(({ mode }) => ({
     },
   },
   build: {
+    // Conservative target so older Samsung Internet / Android WebView engines
+    // (Chromium 79-era, before ?. and ??) can parse the bundle. esbuild lowers
+    // ?., ??, ??=, class fields etc. to ES2019 at build time.
+    target: ["es2019", "chrome79", "safari13", "firefox72", "edge79"],
     cssCodeSplit: true,
     rollupOptions: {
       output: {
