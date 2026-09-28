@@ -76,8 +76,6 @@ async function loadEntry(entryId: string): Promise<Loaded> {
       const k = `${r.id}:${s.journal_line_id}`;
       if (!seen.has(k)) { seen.add(k); bankRows.push({ ...r, _lineId: s.journal_line_id, _split: true }); }
     }
-    // A primary link whose line sits on another entry (matched by entry only) keeps its own label.
-    bankRows = bankRows.map((r) => (r._lineId && !lineIds.has(r._lineId) && !r._split ? { ...r } : r));
   }
   const links: string[] = [];
   for (const p of ((payouts as any).data as any[]) ?? []) links.push(`Stripe payout ${p.stripe_payout_id}`);
