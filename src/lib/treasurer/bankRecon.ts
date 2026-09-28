@@ -51,6 +51,24 @@ export function isUnreconciled(l: BankLine): boolean {
   return !l.matched_journal_line_id;
 }
 
+/**
+ * Line-level "already matched" test for 1000 Bank ledger lines. A ledger line is taken
+ * only if its own id is a bank row's matched_journal_line_id. Entry-level exclusion is a
+ * fallback solely for legacy matches that stored no line id — one entry can hold several
+ * separate bank movements (e.g. a contra journal).
+ */
+export function buildTakenLedgerFilter(
+  rows: { matched_journal_line_id: string | null; matched_entry_id: string | null }[],
+): (c: { id: string; entry_id: string }) => boolean {
+  const takenLines = new Set<string>();
+  const takenEntries = new Set<string>();
+  for (const r of rows) {
+    if (r.matched_journal_line_id) takenLines.add(r.matched_journal_line_id);
+    else if (r.matched_entry_id) takenEntries.add(r.matched_entry_id);
+  }
+  return (c) => takenLines.has(c.id) || takenEntries.has(c.entry_id);
+}
+
 /** Map of account code -> id for the codes this module posts to. */
 export async function fetchAccountMap(codes: string[]): Promise<Map<string, string>> {
   const { data, error } = await supabase
