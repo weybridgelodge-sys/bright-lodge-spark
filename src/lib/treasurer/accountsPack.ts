@@ -51,3 +51,20 @@ export function packStatements(snap: YearSnapshot) {
 
 export const certifiedPackPath = (year: number, round: number) =>
   `year-end-accounts/FY${year}-${year + 1}-round-${round}-certified.pdf`;
+
+export type CompLine = { code: string; name: string; cur: number; pri: number | null };
+/** Merge current and prior statement lines by account code (prior null when no comparative). */
+export function packComparative(snap: YearSnapshot) {
+  const cur = packStatements(snap);
+  const pri = snap.comparative ? packStatements(snap.comparative as YearSnapshot) : null;
+  const merge = (k: keyof typeof cur): CompLine[] => {
+    const m = new Map<string, CompLine>();
+    for (const l of cur[k]) m.set(l.code, { code: l.code, name: l.name, cur: l.amount, pri: pri ? 0 : null });
+    for (const l of pri?.[k] ?? []) {
+      const e = m.get(l.code);
+      if (e) e.pri = l.amount; else m.set(l.code, { code: l.code, name: l.name, cur: 0, pri: l.amount });
+    }
+    return [...m.values()].sort((a, b) => a.code.localeCompare(b.code));
+  };
+  return { income: merge("income"), expense: merge("expense"), assets: merge("assets"), liabilities: merge("liabilities"), hasPrior: !!pri };
+}

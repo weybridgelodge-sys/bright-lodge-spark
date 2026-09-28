@@ -2,9 +2,10 @@ import jsPDF from "jspdf";
 import { supabase } from "@/integrations/supabase/client";
 import { assetUrl } from "@/lib/assetUrl";
 import coverLogoAsset from "@/assets/weybridge-logo-navy-transparent.png.asset.json";
-import { GOLD, INK, MUTED, NAVY, acct, fmtDate, loadReportLogo, reportSection, reportTable } from "./reports";
+import { GOLD, INK, MUTED, NAVY, acct, fmtDate, loadReportLogo, reportSection } from "./reports";
 import { AUDITOR_LABEL, type Approval, type Round, type Signoff, type YearSnapshot } from "./yearAudit";
-import { certifiedPackPath, packStatements, selectPackSource, type PackSource } from "./accountsPack";
+import autoTable from "jspdf-autotable";
+import { certifiedPackPath, packComparative, selectPackSource, type CompLine, type PackSource } from "./accountsPack";
 
 export type Certifier = { role: string; name: string; rank: string; date: string };
 
@@ -74,32 +75,62 @@ export async function buildAccountsPackPdf(src: PackSource, year: number, certif
     doc.text(line, margin, y); y += 15;
   }
 
-  const st = packStatements(src.snap);
+  const st = packComparative(src.snap);
   const bs = src.snap.balance_sheet, ie = src.snap.income_expenditure;
-  const rows = (ls: { code: string; name: string; amount: number }[]) => ls.map((l) => [`${l.code} — ${l.name}`, acct(l.amount), ""]);
+  const pbs = src.snap.comparative?.balance_sheet, pie = src.snap.comparative?.income_expenditure;
+  const curH = `${year}/${String(year + 1).slice(2)} £`, priH = `${year - 1}/${String(year).slice(2)} £`;
+  const head = [["Account", curH, st.hasPrior ? priH : ""]];
+  const p = (v: number | null | undefined) => (st.hasPrior && v != null ? acct(v) : "");
+  const rows = (ls: CompLine[]) => ls.map((l) => [`${l.code} — ${l.name}`, acct(l.cur), p(l.pri)]);
+  const tot = (label: string, c: number, pr: number | null | undefined) => [label, acct(c), p(pr)];
+  const table = (yy: number, body: string[][], boldFrom: number) => {
+    autoTable(doc, {
+      head, body, startY: yy,
+      margin: { left: margin, right: margin, bottom: 60 },
+      styles: { font: "helvetica", fontSize: 9, cellPadding: 5, textColor: INK, lineColor: [220, 215, 200], lineWidth: 0.4, overflow: "linebreak" },
+      headStyles: { fillColor: GOLD, textColor: NAVY, fontStyle: "bold", halign: "right" },
+      alternateRowStyles: { fillColor: [250, 247, 238] },
+      theme: "grid",
+      columnStyles: { 0: { cellWidth: 275 }, 1: { cellWidth: 120, halign: "right" }, 2: { cellWidth: 120, halign: "right", textColor: MUTED } },
+      rowPageBreak: "avoid",
+      didParseCell: (d) => {
+        if (d.section === "head" && d.column.index === 0) d.cell.styles.halign = "left";
+        if (d.section === "body" && d.row.index >= boldFrom) d.cell.styles.fontStyle = "bold";
+      },
+    });
+    return (doc as any).lastAutoTable.finalY + 16;
+  };
 
   // 3. Balance Sheet
   doc.addPage();
   y = pageHeader(doc, pageW, margin, `Balance Sheet as at ${endLabel}`, src.draft);
+  if (st.hasPrior) {
+    doc.setFont("helvetica", "italic"); doc.setFontSize(8.5); doc.setTextColor(...MUTED);
+    doc.text(`Comparative figures: as at 30 September ${year}.`, margin, y - 8);
+  }
   y = reportSection(doc, pageW, margin, y, "Assets");
-  y = reportTable(doc, margin, y, [["Account", "£", ""]], [...rows(st.assets), ["Total assets", "", acct(bs.assets)]]);
+  y = table(y, [...rows(st.assets), tot("Total assets", bs.assets, pbs?.assets)], st.assets.length);
   y = reportSection(doc, pageW, margin, y, "Liabilities");
-  y = reportTable(doc, margin, y, [["Account", "£", ""]], [...rows(st.liabilities), ["Total liabilities", "", acct(bs.liabilities)], ["Net assets", "", acct(bs.net_assets)]]);
+  y = table(y, [...rows(st.liabilities), tot("Total liabilities", bs.liabilities, pbs?.liabilities), tot("Net assets", bs.net_assets, pbs?.net_assets)], st.liabilities.length);
   y = reportSection(doc, pageW, margin, y, "Funds");
-  reportTable(doc, margin, y, [["", "", "£"]], [
-    ["General Fund brought forward", "", acct(bs.fund_bf)],
-    [bs.surplus >= 0 ? "Surplus for the year" : "Deficit for the year", "", acct(bs.surplus)],
-    ["Total funds", "", acct(bs.total_funds)],
-  ]);
+  table(y, [
+    tot("General Fund brought forward", bs.fund_bf, pbs?.fund_bf),
+    tot("Surplus/(deficit) for the year", bs.surplus, pbs?.surplus),
+    tot("Total funds", bs.total_funds, pbs?.total_funds),
+  ], 2);
 
   // 4. Income & Expenditure
   doc.addPage();
   y = pageHeader(doc, pageW, margin, `Income & Expenditure for the year ended ${endLabel}`, src.draft);
+  if (st.hasPrior) {
+    doc.setFont("helvetica", "italic"); doc.setFontSize(8.5); doc.setTextColor(...MUTED);
+    doc.text(`Comparative figures: year ended 30 September ${year}.`, margin, y - 8);
+  }
   y = reportSection(doc, pageW, margin, y, "Income");
-  y = reportTable(doc, margin, y, [["Account", "£", ""]], [...rows(st.income), ["Total income", "", acct(ie.income)]]);
+  y = table(y, [...rows(st.income), tot("Total income", ie.income, pie?.income)], st.income.length);
   y = reportSection(doc, pageW, margin, y, "Expenditure");
-  y = reportTable(doc, margin, y, [["Account", "£", ""]], [...rows(st.expense), ["Total expenditure", "", acct(ie.expenditure)]]);
-  reportTable(doc, margin, y, [["", "", "£"]], [[ie.surplus >= 0 ? "Surplus for the year" : "Deficit for the year", "", acct(ie.surplus)]]);
+  y = table(y, [...rows(st.expense), tot("Total expenditure", ie.expenditure, pie?.expenditure)], st.expense.length);
+  table(y, [tot("Surplus/(deficit) for the year", ie.surplus, pie?.surplus)], 0);
 
   // 5. Certificate (approved only)
   if (!src.draft && certifiers.length) {

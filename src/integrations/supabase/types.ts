@@ -5546,6 +5546,7 @@ export type Database = {
       submit_year_for_audit: { Args: { _year: number }; Returns: string }
       unlink_bank_row: { Args: { p_bank_txn_id: string }; Returns: undefined }
       year_audit_snapshot: { Args: { _year: number }; Returns: Json }
+      year_audit_snapshot_base: { Args: { _year: number }; Returns: Json }
       year_live_snapshot: { Args: { _year: number }; Returns: Json }
     }
     Enums: {

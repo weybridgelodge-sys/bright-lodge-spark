@@ -57,3 +57,23 @@ describe("pack content selection", () => {
     expect(certifiedPackPath(2025, 2)).toBe("year-end-accounts/FY2025-2026-round-2-certified.pdf");
   });
 });
+
+import { packComparative } from "@/lib/treasurer/accountsPack";
+describe("accounts pack comparative", () => {
+  const base = { masonic_year: 2025, as_at: "2026-09-30", taken_at: "2026-10-02T00:00:00Z",
+    income_expenditure: { income: 0, expenditure: 0, surplus: 0 },
+    balance_sheet: { assets: 0, liabilities: 0, net_assets: 0, fund_bf: 0, surplus: 0, total_funds: 0 },
+    trial_balance: { debit: 0, credit: 0 } };
+  it("merges prior-year lines by code, zero-filling either side", () => {
+    const c = packComparative({ ...base, accounts: [{ code: "1000", name: "Bank", type: "asset", net: 100 }],
+      comparative: { ...base, masonic_year: 2024, accounts: [{ code: "1000", name: "Bank", type: "asset", net: 652493 }, { code: "4300", name: "Raffle", type: "income", net: -67000 }] } } as any);
+    expect(c.hasPrior).toBe(true);
+    expect(c.assets).toEqual([{ code: "1000", name: "Bank", cur: 100, pri: 652493 }]);
+    expect(c.income).toEqual([{ code: "4300", name: "Raffle", cur: 0, pri: 67000 }]);
+  });
+  it("old snapshots without a comparative show no prior column", () => {
+    const c = packComparative({ ...base, accounts: [{ code: "1000", name: "Bank", type: "asset", net: 5 }] } as any);
+    expect(c.hasPrior).toBe(false);
+    expect(c.assets[0].pri).toBeNull();
+  });
+});
