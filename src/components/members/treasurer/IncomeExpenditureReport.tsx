@@ -6,50 +6,49 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "@/hooks/use-toast";
 import { Download, Loader2 } from "lucide-react";
 import {
-  acct, fetchAccounts, fetchMovements, fmtDate, money, reportPdfDoc, reportSection, reportTable,
-  shiftBackOneYear, signedBalance, treasurerYearBounds, type Account,
+  acct, fetchAccounts, fetchMovements, fetchReportCalendar, fmtDate, money, reportPdfDoc, reportSection, reportTable,
+  signedBalance, treasurerYearBounds, type Account,
 } from "@/lib/treasurer/reports";
+import {
+  defaultBasis, ieComparative, ieRange, masonicYearOf, masonicYearOptions, ymOf,
+  type CompareBasis, type IEKind,
+} from "@/lib/treasurer/reportPeriods";
+import AccountDrilldown, { DrillAccountRow, type DrillTarget } from "./AccountDrilldown";
 
-type Row = { code: string; name: string; current: number; prior: number };
+type Row = { account: Account; code: string; name: string; current: number; prior: number };
 
 const today = () => new Date().toISOString().slice(0, 10);
 
 export default function IncomeExpenditureReport({ canEdit }: { canEdit: boolean }) {
-  const currentMasonicYear = useMemo(() => {
-    const iso = today();
-    const y = Number(iso.slice(0, 4));
-    return iso >= treasurerYearBounds(y).start ? y : y - 1;
+  const currentMasonicYear = useMemo(() => masonicYearOf(today()), []);
+  const [months, setMonths] = useState<{ ym: string; label: string }[]>([]);
+  const [calDates, setCalDates] = useState<string[]>([]);
+  useEffect(() => {
+    fetchReportCalendar().then((c) => { setMonths(c.months); setCalDates(c.dates); }).catch(() => {});
   }, []);
-  const yearOptions = useMemo(
-    () => [0, 1, 2, 3, 4].map((i) => currentMasonicYear - i),
-    [currentMasonicYear],
-  );
+  const yearOptions = useMemo(() => masonicYearOptions(currentMasonicYear, calDates), [currentMasonicYear, calDates]);
+  const monthOptions = months.length ? months : [{ ym: ymOf(today()), label: ymOf(today()) }];
 
-  const [mode, setMode] = useState<string>(String(currentMasonicYear));
+  const [kind, setKind] = useState<IEKind>("year");
+  const [ym, setYm] = useState(ymOf(today()));
+  const [year, setYear] = useState(currentMasonicYear);
   const [customStart, setCustomStart] = useState(() => treasurerYearBounds(currentMasonicYear).start);
   const [customEnd, setCustomEnd] = useState(today);
+  const [basis, setBasis] = useState<CompareBasis>(defaultBasis("year"));
+  const changeKind = (k: IEKind) => { setKind(k); setBasis(defaultBasis(k)); };
 
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [income, setIncome] = useState<Row[]>([]);
   const [expense, setExpense] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
+  const [drill, setDrill] = useState<DrillTarget | null>(null);
 
   const period = useMemo(() => {
-    if (mode === "custom") {
-      return {
-        label: `${fmtDate(customStart)} – ${fmtDate(customEnd)}`,
-        start: customStart,
-        end: customEnd,
-        priorLabel: `${fmtDate(shiftBackOneYear(customStart))} – ${fmtDate(shiftBackOneYear(customEnd))}`,
-        priorStart: shiftBackOneYear(customStart),
-        priorEnd: shiftBackOneYear(customEnd),
-      };
-    }
-    const y = Number(mode);
-    const b = treasurerYearBounds(y);
-    const p = treasurerYearBounds(y - 1);
-    return { label: b.label, start: b.start, end: b.end, priorLabel: p.label, priorStart: p.start, priorEnd: p.end };
-  }, [mode, customStart, customEnd]);
+    const sel = { kind, ym, year, customStart, customEnd };
+    const cur = ieRange(sel);
+    const pri = ieComparative(sel, basis);
+    return { label: cur.label, start: cur.start, end: cur.end, priorLabel: pri.label, priorStart: pri.start, priorEnd: pri.end };
+  }, [kind, ym, year, customStart, customEnd, basis]);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -64,6 +63,7 @@ export default function IncomeExpenditureReport({ canEdit }: { canEdit: boolean 
         accts
           .filter((a) => a.account_type === type)
           .map((a) => ({
+            account: a,
             code: a.code,
             name: a.name,
             current: signedBalance(type, cur.get(a.id)),
@@ -89,7 +89,7 @@ export default function IncomeExpenditureReport({ canEdit }: { canEdit: boolean 
     try {
       const { doc, pageW, margin } = await reportPdfDoc(
         "Income & Expenditure Account",
-        `${period.label} · comparative: ${period.priorLabel}`,
+        `${period.label} (${fmtDate(period.start)} – ${fmtDate(period.end)}) · comparative: ${period.priorLabel} (${fmtDate(period.priorStart)} – ${fmtDate(period.priorEnd)})`,
       );
       let y = 130;
       const head = [["Account", period.label, period.priorLabel]];
@@ -118,6 +118,14 @@ export default function IncomeExpenditureReport({ canEdit }: { canEdit: boolean 
   };
 
   const amountCls = (v: number) => (v < 0 ? "text-red-400" : "text-primary-foreground");
+  const openDrill = (r: Row, which: "current" | "prior") =>
+    setDrill({
+      account: r.account,
+      start: which === "current" ? period.start : period.priorStart,
+      end: which === "current" ? period.end : period.priorEnd,
+      periodLabel: which === "current" ? period.label : period.priorLabel,
+      expected: r[which],
+    });
 
   const Section = ({ title, rows, totalLabel, tc, tp }: { title: string; rows: Row[]; totalLabel: string; tc: number; tp: number }) => (
     <div className="mt-5">
@@ -136,11 +144,8 @@ export default function IncomeExpenditureReport({ canEdit }: { canEdit: boolean 
               <tr><td colSpan={3} className="py-3 text-primary-foreground/50">No activity in either period.</td></tr>
             )}
             {rows.map((r) => (
-              <tr key={r.code} className="border-b border-gold/10">
-                <td className="py-2 text-primary-foreground/85">{r.code} — {r.name}</td>
-                <td className={`py-2 text-right tabular-nums ${amountCls(r.current)}`}>{acct(r.current)}</td>
-                <td className={`py-2 text-right tabular-nums ${amountCls(r.prior)}`}>{acct(r.prior)}</td>
-              </tr>
+              <DrillAccountRow key={r.code} code={r.code} name={r.name} current={r.current} prior={r.prior}
+                onCurrent={() => openDrill(r, "current")} onPrior={() => openDrill(r, "prior")} />
             ))}
             <tr className="border-t border-gold/30 font-semibold">
               <td className="py-2 text-gold">{totalLabel}</td>
@@ -154,48 +159,82 @@ export default function IncomeExpenditureReport({ canEdit }: { canEdit: boolean 
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 overflow-x-hidden">
       <section className="rounded-lg border border-gold/20 bg-primary-foreground/5 p-4">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <h2 className="font-serif text-lg text-gold mb-1">Income &amp; Expenditure</h2>
             <p className="text-primary-foreground/60 text-sm">
-              Net movement on every income and expenditure account, with the prior period shown alongside.
+              Net movement on every income and expenditure account, with a comparative period alongside. Click any account to see its transactions.
             </p>
           </div>
-          <Button onClick={exportPdf} disabled={loading} className="bg-gold text-primary hover:bg-gold/90">
+          <Button onClick={exportPdf} disabled={loading} className="bg-gold text-primary hover:bg-gold/90 min-h-[48px]">
             <Download className="w-4 h-4 mr-1" /> Export PDF
           </Button>
         </div>
 
-        <div className="grid gap-3 sm:grid-cols-3 mt-4">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 mt-4">
           <div>
-            <Label>Period</Label>
-            <Select value={mode} onValueChange={setMode}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+            <Label>Period type</Label>
+            <Select value={kind} onValueChange={(v) => changeKind(v as IEKind)}>
+              <SelectTrigger className="min-h-[48px]" aria-label="Period type"><SelectValue /></SelectTrigger>
               <SelectContent>
-                {yearOptions.map((y) => (
-                  <SelectItem key={y} value={String(y)}>Masonic year {treasurerYearBounds(y).label}</SelectItem>
-                ))}
+                <SelectItem value="month">Month</SelectItem>
+                <SelectItem value="ytd">Year to date</SelectItem>
+                <SelectItem value="year">Masonic year</SelectItem>
                 <SelectItem value="custom">Custom range</SelectItem>
               </SelectContent>
             </Select>
           </div>
-          {mode === "custom" && (
+          {(kind === "month" || kind === "ytd") && (
+            <div>
+              <Label>{kind === "ytd" ? "Up to end of" : "Month"}</Label>
+              <Select value={ym} onValueChange={setYm}>
+                <SelectTrigger className="min-h-[48px]" aria-label="Month"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {monthOptions.map((m) => <SelectItem key={m.ym} value={m.ym}>{m.label}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+          {kind === "year" && (
+            <div>
+              <Label>Masonic year</Label>
+              <Select value={String(year)} onValueChange={(v) => setYear(Number(v))}>
+                <SelectTrigger className="min-h-[48px]" aria-label="Masonic year"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {yearOptions.map((y) => (
+                    <SelectItem key={y} value={String(y)}>Masonic year {treasurerYearBounds(y).label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+          {kind === "custom" && (
             <>
               <div>
                 <Label>Start date</Label>
-                <Input type="date" value={customStart} onChange={(e) => setCustomStart(e.target.value)} />
+                <Input type="date" className="min-h-[48px]" value={customStart} onChange={(e) => setCustomStart(e.target.value)} />
               </div>
               <div>
                 <Label>End date</Label>
-                <Input type="date" value={customEnd} onChange={(e) => setCustomEnd(e.target.value)} />
+                <Input type="date" className="min-h-[48px]" value={customEnd} onChange={(e) => setCustomEnd(e.target.value)} />
               </div>
             </>
           )}
+          <div>
+            <Label>Compare with</Label>
+            <Select value={basis} onValueChange={(v) => setBasis(v as CompareBasis)}>
+              <SelectTrigger className="min-h-[48px]" aria-label="Compare with"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="previous">{kind === "month" ? "Previous month" : kind === "custom" ? "Previous period" : "Previous period (prior year)"}</SelectItem>
+                <SelectItem value="last_year">Same period last year</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
         <p className="text-primary-foreground/50 text-xs mt-2">
-          {fmtDate(period.start)} – {fmtDate(period.end)} · comparative {fmtDate(period.priorStart)} – {fmtDate(period.priorEnd)}
+          {period.label}: {fmtDate(period.start)} – {fmtDate(period.end)} · comparative {period.priorLabel}: {fmtDate(period.priorStart)} – {fmtDate(period.priorEnd)}
         </p>
 
         {loading ? (
@@ -207,7 +246,7 @@ export default function IncomeExpenditureReport({ canEdit }: { canEdit: boolean 
 
             <div className="mt-6 border-t border-gold/30 pt-4">
               <div className="flex flex-wrap items-center justify-between gap-3">
-                <p className="font-serif text-gold">Surplus / (Deficit) for the year</p>
+                <p className="font-serif text-gold">Surplus / (Deficit) for the period</p>
                 <div className="flex gap-6">
                   <p className={`text-lg font-semibold tabular-nums ${surCur < 0 ? "text-red-400" : "text-emerald-400"}`}>
                     {acct(surCur)} <span className="text-xs text-primary-foreground/50">{period.label}</span>
@@ -225,6 +264,7 @@ export default function IncomeExpenditureReport({ canEdit }: { canEdit: boolean 
           <p className="text-primary-foreground/50 text-xs mt-3">No chart of accounts found. {money(0)}</p>
         )}
       </section>
+      <AccountDrilldown target={drill} onClose={() => setDrill(null)} />
     </div>
   );
 }
