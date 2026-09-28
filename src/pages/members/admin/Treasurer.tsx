@@ -18,6 +18,7 @@ import BankReconciliationTab from "@/components/members/treasurer/BankReconcilia
 import BreakevenCalculatorTab from "@/components/members/treasurer/BreakevenCalculatorTab";
 import EventAccountsTab from "@/components/members/treasurer/EventAccountsTab";
 import AnnualBudgetTab from "@/components/members/treasurer/AnnualBudgetTab";
+import YearEndTab from "@/components/members/treasurer/YearEndTab";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -28,7 +29,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
-import { Loader2, Plus, Pencil, Trash2, Lock, Unlock, ShieldCheck, Utensils, Handshake, ArrowUpCircle, ArrowDownCircle, UserPlus, BookOpen, TrendingUp, Scale, Search, Archive, Calculator, Landmark, PartyPopper, Users, Target } from "lucide-react";
+import { Loader2, Plus, Pencil, Trash2, Lock, Unlock, ShieldCheck, Utensils, Handshake, ArrowUpCircle, ArrowDownCircle, UserPlus, BookOpen, TrendingUp, Scale, Search, Archive, Calculator, Landmark, PartyPopper, Users, Target, CalendarCheck } from "lucide-react";
 import { sortPeriodsNewestFirst } from "@/lib/treasurer/periods";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
@@ -46,6 +47,7 @@ type Period = {
   unlock_reason: string | null;
   unlock_approved_by_treasurer: boolean;
   unlock_approved_by_secretary: boolean;
+  period_type?: "month" | "closing";
 };
 
 
@@ -123,6 +125,7 @@ function ReconciliationTab({
                 <div>
                   <div className="flex items-center gap-2 flex-wrap">
                     <h4 className="font-serif text-gold">{p.label}</h4>
+                    {p.period_type === "closing" && <Badge variant="outline" className="border-gold/40 text-gold/80">Year-end close</Badge>}
                     {p.status === "locked"
                       ? <Badge variant="outline" className="border-gold/60 text-gold"><Lock className="w-3 h-3 mr-1" />Locked</Badge>
                       : <Badge variant="outline" className="border-emerald-500/60 text-emerald-300"><Unlock className="w-3 h-3 mr-1" />Open</Badge>}
@@ -134,7 +137,7 @@ function ReconciliationTab({
                   </p>
                 </div>
                 <div className="flex gap-2 flex-wrap">
-                  {p.status === "open" && isTreasurer && (
+                  {p.status === "open" && isTreasurer && p.period_type !== "closing" && (
                     <Button size="sm" variant="outline" className="min-h-11 sm:min-h-0" disabled={busyId === p.id} onClick={() => lock(p)}>
                       <Lock className="w-3.5 h-3.5 mr-1" /> Lock
                     </Button>
@@ -144,7 +147,7 @@ function ReconciliationTab({
                       <Unlock className="w-3.5 h-3.5 mr-1" /> Request unlock
                     </Button>
                   )}
-                  {canEditPeriods && (
+                  {canEditPeriods && p.period_type !== "closing" && (
                     <>
                       <Button size="sm" variant="ghost" className="min-h-11 sm:min-h-0" onClick={() => { setEditing(p); setOpen(true); }}>
                         <Pencil className="w-3.5 h-3.5" />
@@ -438,6 +441,13 @@ function Inner() {
               <span>Dining Reconciliation</span>
             </TabsTrigger>
             <TabsTrigger
+              value="year-end"
+              className="w-full flex items-center justify-start gap-3 px-4 py-3 rounded-sm text-sm font-sans text-primary-foreground/80 transition-colors hover:text-gold hover:bg-navy-light/40 data-[state=active]:bg-gold/15 data-[state=active]:text-gold data-[state=active]:shadow-none"
+            >
+              <CalendarCheck className="w-4 h-4 shrink-0" />
+              <span>Year End</span>
+            </TabsTrigger>
+            <TabsTrigger
               value="reconciliation"
               className="w-full flex items-center justify-start gap-3 px-4 py-3 rounded-sm text-sm font-sans text-primary-foreground/80 transition-colors hover:text-gold hover:bg-navy-light/40 data-[state=active]:bg-gold/15 data-[state=active]:text-gold data-[state=active]:shadow-none"
             >
@@ -525,6 +535,9 @@ function Inner() {
           </TabsContent>
           <TabsContent value="event-accounts" className="mt-4">
             <EventAccountsTab canEdit={canEditTx} />
+          </TabsContent>
+          <TabsContent value="year-end" className="mt-4">
+            <YearEndTab canEdit={canEditTx} onOpenTab={(t) => setTab(canEditTx ? t : "year-end")} />
           </TabsContent>
           <TabsContent value="reconciliation" className="mt-4">
             <ReconciliationTab periods={periods} isTreasurer={isCurrentTreasurer} isSecretary={isCurrentSecretary} isAdmin={isAdmin} onChange={load} />
