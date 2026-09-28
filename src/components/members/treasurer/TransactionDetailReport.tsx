@@ -8,12 +8,14 @@ import { toast } from "@/hooks/use-toast";
 import { Download, Loader2, ArrowUp, ArrowDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchAccounts, treasurerYearBounds, treasurerYearContaining, fmtDate, money, type Account } from "@/lib/treasurer/reports";
+import { formatEntryNumber, entryNumberMatches, compareWithinEntry } from "@/lib/treasurer/entryNumber";
 
-type SortKey = "date" | "account";
+type SortKey = "date" | "account" | "doc";
 
 type Line = {
   id: string;
   entryId: string;
+  entryNumber: number;
   reconciled: boolean;
   date: string;
   code: string;
@@ -52,6 +54,7 @@ export default function TransactionDetailReport({ canEdit }: { canEdit: boolean 
     key: "date",
     direction: "asc",
   });
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     if (!canEdit) return;
@@ -83,7 +86,7 @@ export default function TransactionDetailReport({ canEdit }: { canEdit: boolean 
         .from("journal_lines" as any)
         .select(
           "id,debit_pence,credit_pence,description,event_id," +
-            "journal_entries!inner(id,entry_date,description,source_type,payee,reconciled)," +
+            "journal_entries!inner(id,entry_number,entry_date,description,source_type,payee,reconciled)," +
             "chart_of_accounts!inner(code,name)"
         )
         .gte("journal_entries.entry_date", from)
@@ -96,6 +99,7 @@ export default function TransactionDetailReport({ canEdit }: { canEdit: boolean 
       const rows: Line[] = ((data as any[]) ?? []).map((r) => ({
         id: r.id,
         entryId: r.journal_entries.id,
+        entryNumber: Number(r.journal_entries.entry_number ?? 0),
         reconciled: !!r.journal_entries.reconciled,
         date: r.journal_entries.entry_date,
         code: r.chart_of_accounts.code,
@@ -105,7 +109,7 @@ export default function TransactionDetailReport({ canEdit }: { canEdit: boolean 
         credit: Number(r.credit_pence ?? 0),
         eventId: r.event_id ?? null,
       }));
-      rows.sort((a, b) => (a.date === b.date ? a.code.localeCompare(b.code) : a.date.localeCompare(b.date)));
+      rows.sort((a, b) => a.date.localeCompare(b.date) || compareWithinEntry(a, b));
       setLines(rows);
       setLoaded(true);
       setApplied({ from, to, codeFrom, codeTo });
@@ -137,17 +141,39 @@ export default function TransactionDetailReport({ canEdit }: { canEdit: boolean 
   );
 
   const sortedLines = useMemo(() => {
-    const sorted = [...lines];
-    sorted.sort((a, b) => {
-      if (sortConfig.key === "date") {
-        return sortConfig.direction === "asc" ? a.date.localeCompare(b.date) : b.date.localeCompare(a.date);
-      }
-      return sortConfig.direction === "asc"
-        ? a.code.localeCompare(b.code, undefined, { numeric: true })
-        : b.code.localeCompare(a.code, undefined, { numeric: true });
+    const filtered = search.trim()
+      ? lines.filter(
+          (l) =>
+            entryNumberMatches(l.entryNumber, search) ||
+            l.description.toLowerCase().includes(search.trim().toLowerCase())
+        )
+      : [...lines];
+    const dir = sortConfig.direction === "asc" ? 1 : -1;
+    filtered.sort((a, b) => {
+      let primary = 0;
+      if (sortConfig.key === "date") primary = a.date.localeCompare(b.date);
+      else if (sortConfig.key === "account") primary = a.code.localeCompare(b.code, undefined, { numeric: true });
+      else primary = a.entryNumber - b.entryNumber;
+      if (primary !== 0) return primary * dir;
+      if (sortConfig.key === "account") return a.date.localeCompare(b.date) || a.entryNumber - b.entryNumber;
+      return compareWithinEntry(a, b);
     });
-    return sorted;
-  }, [lines, sortConfig]);
+    return filtered;
+  }, [lines, sortConfig, search]);
+
+  const sortHeader = (key: SortKey, label: string) => (
+    <button
+      type="button"
+      onClick={() =>
+        setSortConfig((prev) => ({ key, direction: prev.key === key && prev.direction === "asc" ? "desc" : "asc" }))
+      }
+      className="inline-flex items-center gap-1 hover:text-gold focus:outline-none"
+    >
+      {label}
+      {sortConfig.key === key &&
+        (sortConfig.direction === "asc" ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />)}
+    </button>
+  );
 
   const setEntryReconciled = (entryId: string, value: boolean) =>
     setLines((prev) => prev.map((l) => (l.entryId === entryId ? { ...l, reconciled: value } : l)));
@@ -190,8 +216,9 @@ export default function TransactionDetailReport({ canEdit }: { canEdit: boolean 
   };
 
   const exportCsv = () => {
-    const header = ["Date", "Account Code", "Account Name", "Description", "Debit (£)", "Credit (£)"];
-    const body = lines.map((l) => [
+    const header = ["Doc No", "Date", "Account Code", "Account Name", "Description", "Debit (£)", "Credit (£)"];
+    const body = sortedLines.map((l) => [
+      formatEntryNumber(l.entryNumber),
       l.date,
       l.code,
       csvEscape(l.accountName),
@@ -261,7 +288,7 @@ export default function TransactionDetailReport({ canEdit }: { canEdit: boolean 
         </div>
       </div>
 
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2 items-end">
         <Button onClick={load} disabled={loading} className="bg-gold text-navy hover:bg-gold/90">
           {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           Run report
@@ -269,7 +296,15 @@ export default function TransactionDetailReport({ canEdit }: { canEdit: boolean 
         <Button variant="outline" onClick={exportCsv} disabled={loading || lines.length === 0}>
           <Download className="mr-2 h-4 w-4" /> Export CSV
         </Button>
+        <div className="w-full sm:w-64 sm:ml-auto space-y-1">
+          <Label htmlFor="td-search">Search doc no. or description</Label>
+          <Input id="td-search" placeholder="e.g. JE-000123" value={search} onChange={(e) => setSearch(e.target.value)} />
+        </div>
       </div>
+      <p className="text-xs text-muted-foreground">
+        Doc no. is assigned automatically and never changes; every line of the same entry shares it. Gaps in the
+        sequence are normal where an entry was deleted.
+      </p>
 
       {!loading && filtersChanged && (
         <p className="rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm text-amber-700 dark:text-amber-400">
@@ -300,46 +335,9 @@ export default function TransactionDetailReport({ canEdit }: { canEdit: boolean 
               <table className="w-full text-sm">
                 <thead>
                   <tr className="bg-muted/50 text-left">
-                    <th className="px-3 py-2 font-medium">
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setSortConfig((prev) => ({
-                            key: "date",
-                            direction: prev.key === "date" && prev.direction === "asc" ? "desc" : "asc",
-                          }))
-                        }
-                        className="inline-flex items-center gap-1 hover:text-gold focus:outline-none"
-                      >
-                        Date
-                        {sortConfig.key === "date" &&
-                          (sortConfig.direction === "asc" ? (
-                            <ArrowUp className="h-3 w-3" />
-                          ) : (
-                            <ArrowDown className="h-3 w-3" />
-                          ))}
-                      </button>
-                    </th>
-                    <th className="px-3 py-2 font-medium">
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setSortConfig((prev) => ({
-                            key: "account",
-                            direction: prev.key === "account" && prev.direction === "asc" ? "desc" : "asc",
-                          }))
-                        }
-                        className="inline-flex items-center gap-1 hover:text-gold focus:outline-none"
-                      >
-                        Account
-                        {sortConfig.key === "account" &&
-                          (sortConfig.direction === "asc" ? (
-                            <ArrowUp className="h-3 w-3" />
-                          ) : (
-                            <ArrowDown className="h-3 w-3" />
-                          ))}
-                      </button>
-                    </th>
+                    <th className="px-3 py-2 font-medium whitespace-nowrap">{sortHeader("doc", "Doc no.")}</th>
+                    <th className="px-3 py-2 font-medium">{sortHeader("date", "Date")}</th>
+                    <th className="px-3 py-2 font-medium">{sortHeader("account", "Account")}</th>
                     <th className="px-3 py-2 font-medium">Description</th>
                     <th className="px-3 py-2 font-medium text-right">Debit</th>
                     <th className="px-3 py-2 font-medium text-right">Credit</th>
@@ -348,8 +346,18 @@ export default function TransactionDetailReport({ canEdit }: { canEdit: boolean 
                   </tr>
                 </thead>
                 <tbody>
-                  {sortedLines.map((l) => (
-                    <tr key={l.id} className="border-t border-border">
+                  {sortedLines.map((l, i) => (
+                    <tr
+                      key={l.id}
+                      className={
+                        i > 0 && sortedLines[i - 1].entryNumber === l.entryNumber
+                          ? "border-t border-border/40"
+                          : "border-t border-border"
+                      }
+                    >
+                      <td className="px-3 py-1.5 whitespace-nowrap font-mono text-xs text-muted-foreground">
+                        {formatEntryNumber(l.entryNumber)}
+                      </td>
                       <td className="px-3 py-1.5 whitespace-nowrap">{fmtDate(l.date)}</td>
                       <td className="px-3 py-1.5 whitespace-nowrap">
                         {l.code} — {l.accountName}

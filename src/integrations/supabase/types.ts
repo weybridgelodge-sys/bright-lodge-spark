@@ -1392,6 +1392,7 @@ export type Database = {
           description: string
           document_number: string | null
           entry_date: string
+          entry_number: number
           id: string
           payee: string | null
           period_id: string | null
@@ -1410,6 +1411,7 @@ export type Database = {
           description: string
           document_number?: string | null
           entry_date: string
+          entry_number?: number
           id?: string
           payee?: string | null
           period_id?: string | null
@@ -1428,6 +1430,7 @@ export type Database = {
           description?: string
           document_number?: string | null
           entry_date?: string
+          entry_number?: number
           id?: string
           payee?: string | null
           period_id?: string | null
