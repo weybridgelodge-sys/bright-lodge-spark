@@ -351,6 +351,13 @@
       "when": 1790609415811,
       "tag": "0049_bank_statement_match_lines",
       "breakpoints": true
+    },
+    {
+      "idx": 50,
+      "version": "7",
+      "when": 1790630875639,
+      "tag": "0050_year_end_close_stage1",
+      "breakpoints": true
     }
   ]
 }

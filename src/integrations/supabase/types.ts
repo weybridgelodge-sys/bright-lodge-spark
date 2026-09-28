@@ -4182,9 +4182,11 @@ export type Database = {
           label: string
           locked_at: string | null
           locked_by: string | null
+          masonic_year: number | null
           meeting_id: string | null
           period_end: string | null
           period_start: string | null
+          period_type: string
           status: string
           unlock_approved_by_secretary: boolean
           unlock_approved_by_treasurer: boolean
@@ -4199,9 +4201,11 @@ export type Database = {
           label: string
           locked_at?: string | null
           locked_by?: string | null
+          masonic_year?: number | null
           meeting_id?: string | null
           period_end?: string | null
           period_start?: string | null
+          period_type?: string
           status?: string
           unlock_approved_by_secretary?: boolean
           unlock_approved_by_treasurer?: boolean
@@ -4216,9 +4220,11 @@ export type Database = {
           label?: string
           locked_at?: string | null
           locked_by?: string | null
+          masonic_year?: number | null
           meeting_id?: string | null
           period_end?: string | null
           period_start?: string | null
+          period_type?: string
           status?: string
           unlock_approved_by_secretary?: boolean
           unlock_approved_by_treasurer?: boolean
@@ -5372,6 +5378,10 @@ export type Database = {
       lodge_social_guest_emails: {
         Args: { _social_id: string }
         Returns: string[]
+      }
+      post_year_close: {
+        Args: { _expected_net: number; _year: number }
+        Returns: string
       }
       promote_next_waitlisted: {
         Args: { _event_key: string; _freed_seats: number; _meeting_id: string }
