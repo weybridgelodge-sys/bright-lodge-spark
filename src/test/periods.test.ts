@@ -6,7 +6,7 @@ const rows = [
   { id: "nov", label: "November 2025", period_start: "2025-11-01", period_end: "2025-11-30", status: "open" },
 ];
 vi.mock("@/integrations/supabase/client", () => ({
-  supabase: { from: () => ({ select: () => ({ neq: () => ({ order: async () => ({ data: rows, error: null }) }) }) }) },
+  supabase: { from: () => ({ select: () => ({ neq: async () => ({ data: rows, error: null }) }) }) },
 }));
 
 import { periodIdForDate, usePostingPeriod } from "@/lib/treasurer/periods";
