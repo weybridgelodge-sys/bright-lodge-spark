@@ -6,8 +6,9 @@ import { Check, X, ShieldPlus, ShieldMinus, Plus, Trash2, Pencil, HeartHandshake
 import { useAuth } from "@/hooks/useAuth";
 import { formatMemberLine } from "@/lib/summons";
 import { useNavigate } from "react-router-dom";
+import { readFunctionError } from "@/lib/functionError";
 
-type Degree = "entered_apprentice" | "fellow_craft" | "master_mason";
+type Degree = "entered_apprentice" | "fellow_craft" | "master_mason" | "installed_master";
 type Title = "Bro" | "W Bro" | "VW Bro" | "RW Bro";
 type Status = "pending" | "active" | "suspended" | "year_out" | "resigned" | "excluded" | "deceased";
 
