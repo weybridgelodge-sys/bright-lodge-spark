@@ -325,9 +325,12 @@ export default function NewMemberFeesTab({ canEdit }: { canEdit: boolean }) {
                 <p className="text-primary-foreground/80 text-xs mt-1">
                   4000 Subscriptions {money(incomePence)} (prorated remainder)
                 </p>
-                <p className="text-primary-foreground/80 text-xs">
-                  3100 reserves {money(reserveTotalPence)} — {potLines.map((r) => `${r.label} ${money(r.pence)}`).join(" · ")}
-                </p>
+                <div className="text-primary-foreground/80 text-xs">
+                  <span>3100 reserves {money(reserveTotalPence)} — </span>
+                  <span className="inline-flex flex-wrap gap-x-2">
+                    {potLines.map((r) => <span key={r.fund_code}>{r.label} {money(r.pence)}</span>)}
+                  </span>
+                </div>
                 <p className="text-primary-foreground/80 text-xs">2200 Relief Chest {money(reliefPence)}</p>
                 <p className="text-primary-foreground/50 text-xs mt-1">Reserve and Relief Chest shares are always the full annual amount.</p>
               </div>

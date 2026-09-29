@@ -218,9 +218,9 @@ export default function GeneralJournalTab({ canEdit }: { canEdit: boolean }) {
                       <Label className="text-xs">Reserve pot</Label>
                       <Select value={line.fundCode} onValueChange={(v) => updateLine(line.key, { fundCode: v })} disabled={!canEdit}>
                         <SelectTrigger><SelectValue placeholder="Choose the reserve pot" /></SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="max-w-[calc(100vw-2rem)]">
                           {pots.map((p) => (
-                            <SelectItem key={p.fund_code} value={p.fund_code}>{p.label} ({p.fund_code})</SelectItem>
+                            <SelectItem className="whitespace-normal" key={p.fund_code} value={p.fund_code}>{p.label} ({p.fund_code})</SelectItem>
                           ))}
                         </SelectContent>
                       </Select>

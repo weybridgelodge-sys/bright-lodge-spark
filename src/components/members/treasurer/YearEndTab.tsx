@@ -215,13 +215,13 @@ export default function YearEndTab({ canEdit, onOpenTab }: { canEdit: boolean; o
                     <Button variant="outline" className="min-h-[48px] w-full whitespace-normal sm:w-auto" onClick={() => setEntryId(c.id)} aria-label={`Open closing journal ${formatEntryNumber(c.entry_number)}`}>
                       Closing journal {formatEntryNumber(c.entry_number)} · {fmtDate(c.entry_date)}
                     </Button>
-                    <dl className="grid grid-cols-[1fr_auto] gap-x-4 gap-y-1 max-w-md">
+                    <dl className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-1 max-w-md">
                       <dt className="text-primary-foreground/70">General Fund at 30 Sep {y + 1}</dt>
-                      <dd className="text-right tabular-nums">{acct(fundBf.get(y) ?? 0)}</dd>
+                      <dd className="text-right tabular-nums whitespace-nowrap">{acct(fundBf.get(y) ?? 0)}</dd>
                       <dt className="text-primary-foreground/70">{c.fund >= 0 ? "Surplus" : "Deficit"} transferred</dt>
-                      <dd className="text-right tabular-nums">{acct(c.fund)}</dd>
+                      <dd className="text-right tabular-nums whitespace-nowrap">{acct(c.fund)}</dd>
                       <dt className="text-gold">Opening General Fund 1 Oct {y + 1}</dt>
-                      <dd className="text-right tabular-nums text-gold">{acct((fundBf.get(y) ?? 0) + c.fund)}</dd>
+                      <dd className="text-right tabular-nums whitespace-nowrap text-gold">{acct((fundBf.get(y) ?? 0) + c.fund)}</dd>
                     </dl>
                   </div>
 ) : (
@@ -443,10 +443,10 @@ function AccountsSentNote({ year, a, today, summonsNo }: { year: number; a: Appr
     return <p className="break-words text-emerald-300">Accounts sent to members{n ? ` with Summons #${n}` : " with a summons"} on {fmtDate(a.accounts_sent_at!.slice(0, 10))}.</p>;
   }
   if (st === "past_may") return (
-    <p className="rounded border border-red-400/60 bg-red-400/10 p-2 text-red-300">Accounts not yet sent to members — now past the May meeting (target was the {accountsTargetLabel(year)}). Please attach them to the next summons.</p>
+    <p className="break-words rounded border border-red-400/60 bg-red-400/10 p-2 text-red-300">Accounts not yet sent to members — now past the May meeting (target was the {accountsTargetLabel(year)}). Please attach them to the next summons.</p>
   );
   if (st === "past_feb") return (
-    <p className="rounded border border-amber-400/50 bg-amber-400/10 p-2 text-amber-300">Accounts not yet sent to members — the {accountsTargetLabel(year)} target has passed. Attach them to the next summons.</p>
+    <p className="break-words rounded border border-amber-400/50 bg-amber-400/10 p-2 text-amber-300">Accounts not yet sent to members — the {accountsTargetLabel(year)} target has passed. Attach them to the next summons.</p>
   );
-  return <p className="text-primary-foreground/70">Accounts not yet sent to members · target: {accountsTargetLabel(year)}. Attach them in the Summons Builder.</p>;
+  return <p className="break-words text-primary-foreground/70">Accounts not yet sent to members · target: {accountsTargetLabel(year)}. Attach them in the Summons Builder.</p>;
 }
