@@ -7,12 +7,14 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { ArrowLeft, Download, RefreshCw, Upload, AlertTriangle } from "lucide-react";
+import { ArrowLeft, Download, RefreshCw, Upload, AlertTriangle, Send } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { formatMasonicYear } from "@/lib/officersProgression";
 import {
   buildFieldSpecs, fillTemplate, loadReturnData, blockName, lodgeEmailFor, ukDate,
-  MEMBERSHIP_EMAIL_OPTIONS, MEMBERSHIP_EMAIL_SETTING, TEMPLATE_BUCKET, TEMPLATE_PATH,
-  type Provenance, type ResolvedOffice, type ReturnData, type FillReport,
+  MEMBERSHIP_EMAIL_OPTIONS, MEMBERSHIP_EMAIL_SETTING, TEMPLATE_BUCKET, TEMPLATE_PATH, PROVINCE_EMAIL_SETTING,
+  type YesNo, type Provenance, type ResolvedOffice, type ReturnData, type FillReport,
 } from "@/lib/installationReturn";
 
 const PROV: Record<Provenance, { label: string; cls: string }> = {
@@ -29,7 +31,14 @@ function defaultYear() {
 }
 
 function Inner() {
-  const { canManageSummons, isWorshipfulMaster, isAdmin, isSecretary } = useAuth();
+  const { canManageSummons, isWorshipfulMaster, isAdmin, isSecretary, isCurrentSecretary } = useAuth();
+  const canSubmit = isAdmin || isSecretary || isCurrentSecretary;
+  const [secChanged, setSecChanged] = useState<YesNo>("");
+  const [provinceEmail, setProvinceEmail] = useState("");
+  const [provinceDraft, setProvinceDraft] = useState("");
+  const [submissions, setSubmissions] = useState<any[]>([]);
+  const [pending, setPending] = useState<{ path: string; url: string; missing: number } | null>(null);
+  const [sending, setSending] = useState(false);
   const [year, setYear] = useState(defaultYear());
   const [data, setData] = useState<ReturnData | null>(null);
   const [loading, setLoading] = useState(false);
@@ -43,6 +52,11 @@ function Inner() {
       setData(await loadReturnData(year));
       const { data: list } = await supabase.storage.from(TEMPLATE_BUCKET).list("templates");
       setHasTemplate(!!list?.some((f) => f.name === "New_IR_Craft.pdf"));
+      const { data: pe } = await supabase.from("module_settings").select("value").eq("key", PROVINCE_EMAIL_SETTING).maybeSingle();
+      const v = typeof pe?.value === "string" ? pe.value : "";
+      setProvinceEmail(v); setProvinceDraft(v);
+      const { data: subs } = await supabase.from("installation_return_submissions").select("*").eq("lodge_year", year).order("sent_at", { ascending: false });
+      setSubmissions(subs ?? []);
     } catch (e: any) {
       toast.error(e?.message ?? "Could not load");
     } finally {
@@ -51,7 +65,7 @@ function Inner() {
   }, [year]);
   useEffect(() => { load(); }, [load]);
 
-  const specs = useMemo(() => (data ? buildFieldSpecs(data) : []), [data]);
+  const specs = useMemo(() => (data ? buildFieldSpecs(data, { secretaryChanged: secChanged }) : []), [data, secChanged]);
 
   if (!(canManageSummons || isWorshipfulMaster)) {
     return <MembersLayout><p className="text-primary-foreground/70">You don't have permission to view this page.</p></MembersLayout>;
@@ -80,7 +94,7 @@ function Inner() {
       setData(fresh);
       const { data: blob, error } = await supabase.storage.from(TEMPLATE_BUCKET).download(TEMPLATE_PATH);
       if (error || !blob) throw new Error("UGLE template not found — upload New_IR_Craft.pdf first.");
-      const { bytes, report } = await fillTemplate(await blob.arrayBuffer(), buildFieldSpecs(fresh));
+      const { bytes, report } = await fillTemplate(await blob.arrayBuffer(), buildFieldSpecs(fresh, { secretaryChanged: secChanged }));
       setReport(report);
       const url = URL.createObjectURL(new Blob([bytes as unknown as BlobPart], { type: "application/pdf" }));
       const a = document.createElement("a");
@@ -95,6 +109,64 @@ function Inner() {
     } finally {
       setBusy(false);
     }
+  };
+
+  const saveProvinceEmail = async () => {
+    const v = provinceDraft.trim().toLowerCase();
+    if (v && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) return toast.error("That doesn't look like an email address");
+    const { error } = await supabase.from("module_settings").upsert({ key: PROVINCE_EMAIL_SETTING, value: v as any }, { onConflict: "key" });
+    if (error) return toast.error(error.message);
+    toast.success("Provincial Office address saved");
+    load();
+  };
+
+  // Step 1: build the final PDF fresh, store it, then show the confirmation.
+  const prepareSubmit = async () => {
+    if (!provinceEmail) return toast.error("Set the Provincial Office email address first.");
+    setBusy(true);
+    try {
+      const fresh = await loadReturnData(year);
+      setData(fresh);
+      const { data: blob, error } = await supabase.storage.from(TEMPLATE_BUCKET).download(TEMPLATE_PATH);
+      if (error || !blob) throw new Error("UGLE template not found — upload New_IR_Craft.pdf first.");
+      const { bytes, report } = await fillTemplate(await blob.arrayBuffer(), buildFieldSpecs(fresh, { secretaryChanged: secChanged }));
+      setReport(report);
+      const path = `installation-returns/${year}/Installation-Return-6787-${year}-${Date.now()}.pdf`;
+      const pdfBlob = new Blob([bytes as unknown as BlobPart], { type: "application/pdf" });
+      const { error: upErr } = await supabase.storage.from(TEMPLATE_BUCKET).upload(path, pdfBlob, { contentType: "application/pdf" });
+      if (upErr) throw upErr;
+      setPending({ path, url: URL.createObjectURL(pdfBlob), missing: report.missing.length });
+    } catch (e: any) {
+      toast.error(e?.message ?? "Could not prepare the return");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const cancelSubmit = async () => {
+    if (pending) {
+      URL.revokeObjectURL(pending.url);
+      await supabase.storage.from(TEMPLATE_BUCKET).remove([pending.path]);
+    }
+    setPending(null);
+  };
+
+  const confirmSubmit = async () => {
+    if (!pending || !data) return;
+    setSending(true);
+    const { data: res, error } = await supabase.functions.invoke("submit-installation-return", {
+      body: { lodge_year: year, storage_path: pending.path, recipient_email: provinceEmail, secretary_changed: secChanged, installation_date: data.installationDate ? ukDate(data.installationDate) : "" },
+    });
+    setSending(false);
+    if (error || (res as any)?.error) {
+      let msg = (res as any)?.error;
+      try { msg = msg ?? (await (error as any)?.context?.json())?.error; } catch { /* ignore */ }
+      return toast.error(msg ?? "Sending failed");
+    }
+    URL.revokeObjectURL(pending.url);
+    setPending(null);
+    toast.success(`Installation Return sent to ${provinceEmail}`);
+    load();
   };
 
   const years = Array.from({ length: 6 }, (_, i) => defaultYear() - 3 + i);
@@ -137,6 +209,7 @@ function Inner() {
           </Select>
           <Button variant="outline" onClick={load} disabled={loading}><RefreshCw className="w-4 h-4 mr-1" />Refresh</Button>
           <Button onClick={exportPdf} disabled={busy || !data || !hasTemplate}><Download className="w-4 h-4 mr-1" />Export PDF</Button>
+          {canSubmit && <Button variant="secondary" onClick={prepareSubmit} disabled={busy || !data || !hasTemplate || !provinceEmail}><Send className="w-4 h-4 mr-1" />Submit to Province</Button>}
         </div>
       </header>
 
@@ -196,6 +269,39 @@ function Inner() {
             <p className="text-xs text-primary-foreground/60 mt-2">UGLE's own form has no lodge email box for the Treasurer, so only the personal address can be given.</p>
           </section>
 
+          <section className="rounded-sm border border-gold/20 bg-navy-light/30 p-4">
+            <h2 className="font-serif text-gold text-lg mb-2">Has the Secretary or his details changed?</h2>
+            <div className="flex gap-2" role="radiogroup" aria-label="Has the Secretary or his details changed">
+              {(["Y", "N", ""] as YesNo[]).map((v) => (
+                <Button key={v || "blank"} size="sm" role="radio" aria-checked={secChanged === v} variant={secChanged === v ? "default" : "outline"} onClick={() => setSecChanged(v)}>
+                  {v === "Y" ? "Yes (Y)" : v === "N" ? "No (N)" : "Leave blank"}
+                </Button>
+              ))}
+            </div>
+            <p className="text-xs text-primary-foreground/60 mt-2">Your choice fills the Y/N box on the form. It isn't saved, so check it each time you export.</p>
+          </section>
+
+          <section className="rounded-sm border border-gold/20 bg-navy-light/30 p-4">
+            <h2 className="font-serif text-gold text-lg mb-2">Submit to Province</h2>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-xs">Provincial Office email:</span>
+              {canSubmit ? (
+                <>
+                  <Input className="w-72 h-8" type="email" value={provinceDraft} onChange={(e) => setProvinceDraft(e.target.value)} placeholder="Not set yet" aria-label="Provincial Office email address" />
+                  <Button size="sm" variant="outline" onClick={saveProvinceEmail} disabled={provinceDraft.trim().toLowerCase() === provinceEmail}>Save</Button>
+                </>
+              ) : <span>{provinceEmail || "Not set yet"}</span>}
+            </div>
+            {!canSubmit && <p className="text-xs text-amber-300 mt-2">Only the Secretary or an administrator can submit the return.</p>}
+            <p className="text-xs text-primary-foreground/60 mt-2">The email carries a secure 30-day download link to the PDF (our email service can't send attachments). Signature boxes stay blank.</p>
+            <h3 className="text-gold text-sm mt-3 mb-1">Sent for {formatMasonicYear(year)}</h3>
+            {submissions.length === 0 ? <p className="text-xs text-primary-foreground/60">Not sent yet.</p> : (
+              <ul className="text-xs space-y-1">{submissions.map((s) => (
+                <li key={s.id}>{new Date(s.sent_at).toLocaleString("en-GB")} — by {s.sent_by_name ?? "unknown"} to {s.recipient_email}{s.secretary_changed ? ` (Secretary changed: ${s.secretary_changed})` : ""}</li>
+              ))}</ul>
+            )}
+          </section>
+
           <section className="rounded-sm border border-gold/20 bg-navy-light/30 p-4 overflow-x-auto">
             <h2 className="font-serif text-gold text-lg mb-2">Every field that will be filled</h2>
             <table className="w-full text-xs">
@@ -215,6 +321,31 @@ function Inner() {
           )}
         </div>
       )}
+
+      <AlertDialog open={!!pending} onOpenChange={(o) => { if (!o && !sending) cancelSubmit(); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Send the Installation Return to Province?</AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-2 text-sm">
+                <p><strong>To:</strong> {provinceEmail}</p>
+                <p><strong>Reply-to:</strong> secretary@weybridgelodge.org.uk</p>
+                <p><strong>Subject:</strong> Weybridge Lodge No. 6787 — Installation Return {formatMasonicYear(year)}</p>
+                <p><strong>Document:</strong> Installation-Return-6787-{year}.pdf, filled just now from the live records (sent as a 30-day download link). <a href={pending?.url} target="_blank" rel="noopener noreferrer" className="underline">Open the exact PDF</a></p>
+                <p><strong>Secretary changed (Y/N):</strong> {secChanged || "left blank"}</p>
+                <p>Signatures are left blank.</p>
+                {data && data.issues.length > 0 && <p className="text-destructive">{data.issues.length} warning(s) are still showing on the page.</p>}
+                {pending && pending.missing > 0 && <p className="text-destructive">{pending.missing} field(s) weren't found in the template.</p>}
+                <p>This is an official document to an external body and can't be recalled once sent.</p>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={sending}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={(e) => { e.preventDefault(); confirmSubmit(); }} disabled={sending}>{sending ? "Sending…" : "Send to Province"}</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </MembersLayout>
   );
 }

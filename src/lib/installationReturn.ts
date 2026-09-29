@@ -1,6 +1,6 @@
 // UGLE Installation Return — live resolver + AcroForm filler.
 // Every call reads current database state; nothing is cached.
-import { PDFDocument, PDFTextField, PDFName, PDFDict } from "pdf-lib";
+import { PDFDocument, PDFTextField, PDFCheckBox, PDFRadioGroup, PDFDropdown, PDFName, PDFDict, TextAlignment } from "pdf-lib";
 import { supabase } from "@/integrations/supabase/client";
 import { computeProjection, type Appointment, type MemberLite, type PositionKey } from "@/lib/officersProgression";
 
@@ -241,11 +241,15 @@ export function ukDate(iso: string | null) {
 }
 
 /** A field spec: exact template name + a fallback matcher used only if the exact name is absent. */
-export type FieldSpec = { id: string; label: string; value: string; match?: (name: string) => boolean };
+export type FieldSpec = { id: string; label: string; value: string; match?: (name: string) => boolean; center?: boolean };
+
+export const SECRETARY_CHANGED_FIELD = "LodgeHas the Secretary or his details changed YN";
+export const PROVINCE_EMAIL_SETTING = "installation_return_province_email";
+export type YesNo = "Y" | "N" | "";
 
 const has = (...parts: string[]) => (n: string) => parts.every((p) => n.toLowerCase().includes(p.toLowerCase()));
 
-export function buildFieldSpecs(d: ReturnData): FieldSpec[] {
+export function buildFieldSpecs(d: ReturnData, opts: { secretaryChanged?: YesNo } = {}): FieldSpec[] {
   const P = (id: string | null) => (id ? d.profiles[id] : null);
   const prescribed = dateParts(d.prescribedDate);
   const actualDiffers = !!d.installationDate && d.installationDate !== d.prescribedDate;
@@ -287,7 +291,7 @@ export function buildFieldSpecs(d: ReturnData): FieldSpec[] {
     const lodgeEmail = o.memberId ? lodgeEmailFor(o.key, d.membershipLodgeEmail) : "";
     if (o.key === "membership_officer") {
       specs.push(
-        { id: "Name (Block Letters)_Membership Oﬃcer", label: "Membership Officer name", value: blockName(p), match: has("name", "membership") },
+        { id: "Name (Block Letters)_Membership Oﬃcer", label: "Membership Officer name", value: blockName(p), center: true, match: has("name", "membership") },
         { id: "Membership Oﬃcer Personal Email Address", label: "Membership Officer personal email", value: p?.email ?? "", match: has("membership", "personal") },
         { id: "Membership Oﬃcer Lodge Email Address", label: "Membership Officer lodge email", value: lodgeEmail, match: has("membership", "lodge") },
       );
@@ -295,21 +299,22 @@ export function buildFieldSpecs(d: ReturnData): FieldSpec[] {
     }
     const role = o.label;
     specs.push(
-      { id: `Name Block Letters${role}`, label: `${role} name`, value: blockName(p), match: (n) => has("name", "block")(n) && n.toLowerCase().includes(role.toLowerCase()) },
+      { id: `Name Block Letters${role}`, label: `${role} name`, value: blockName(p), center: true, match: (n) => has("name", "block")(n) && n.toLowerCase().includes(role.toLowerCase()) },
       { id: `${role} Personal Email Address`, label: `${role} personal email`, value: p?.email ?? "", match: has(role, "personal") },
       { id: `${role} Lodge Email Address`, label: `${role} lodge email`, value: lodgeEmail, match: has(role, "lodge email") },
     );
   }
   specs.push(
-    { id: "Date Signed", label: "Date signed (Master)", value: instDate },
-    { id: "Date Signed_2", label: "Date signed (Secretary)", value: instDate },
+    { id: "Date Signed", label: "Date signed (Master)", value: instDate, center: true },
+    { id: "Date Signed_2", label: "Date signed (Secretary)", value: instDate, center: true },
+    { id: SECRETARY_CHANGED_FIELD, label: "Has the Secretary or his details changed? (Y/N — set on this page)", value: opts.secretaryChanged ?? "" },
   );
   return specs;
 }
 
 // Qualification-1 "Lodge No" matcher must not grab "Lodge Number"/"Lodge No_2"; exact names only for those.
 // Signature fields are listed so we can prove they are left untouched.
-export const NEVER_FILL = ["Worshipful MasterRow1", "SecretaryRow1", "Date of Disp", "LodgeHas the Secretary or his details changed YN"];
+export const NEVER_FILL = ["Worshipful MasterRow1", "SecretaryRow1", "Date of Disp"];
 
 export type FillReport = { filled: { id: string; field: string; fuzzy: boolean }[]; missing: string[]; templateFields: string[] };
 
@@ -354,6 +359,14 @@ export async function fillTemplate(templateBytes: ArrayBuffer | Uint8Array, spec
       const f = form.getField(name);
       if (f instanceof PDFTextField) {
         f.setText(s.value || "");
+        if (s.center) f.setAlignment(TextAlignment.Center);
+        report.filled.push({ id: s.id, field: name, fuzzy });
+      } else if (f instanceof PDFCheckBox) {
+        if (s.value === "Y") f.check(); else f.uncheck();
+        report.filled.push({ id: s.id, field: name, fuzzy });
+      } else if (f instanceof PDFRadioGroup || f instanceof PDFDropdown) {
+        const opt = f.getOptions().find((o) => o.trim().toUpperCase().startsWith(s.value));
+        if (s.value && opt) f.select(opt); else if (!s.value) f.clear();
         report.filled.push({ id: s.id, field: name, fuzzy });
       } else {
         report.missing.push(`${s.id} (not a text field)`);
