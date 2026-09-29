@@ -197,24 +197,24 @@ function Inner() {
   return (
     <MembersLayout>
       <Link to="/members/admin/secretary" className="inline-flex items-center gap-1 text-sm text-gold/80 hover:text-gold mb-3"><ArrowLeft className="w-4 h-4" /> Secretary Portal</Link>
-      <header className="mb-4 flex flex-wrap items-end justify-between gap-3">
-        <div>
+      <header className="mb-4 flex min-w-0 flex-col items-stretch gap-3 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
+        <div className="min-w-0">
           <h1 className="font-serif text-2xl md:text-3xl text-gold">UGLE Installation Return</h1>
           <p className="text-primary-foreground/60 text-sm">Read live from the lodge records every time you open or export it.</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="grid w-full min-w-0 grid-cols-1 gap-2 sm:flex sm:w-auto sm:flex-wrap sm:items-center">
           <Select value={String(year)} onValueChange={(v) => setYear(Number(v))}>
-            <SelectTrigger className="w-32"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="w-full sm:w-32"><SelectValue /></SelectTrigger>
             <SelectContent>{years.map((y) => <SelectItem key={y} value={String(y)}>{formatMasonicYear(y)}</SelectItem>)}</SelectContent>
           </Select>
-          <Button variant="outline" onClick={load} disabled={loading}><RefreshCw className="w-4 h-4 mr-1" />Refresh</Button>
-          <Button onClick={exportPdf} disabled={busy || !data || !hasTemplate}><Download className="w-4 h-4 mr-1" />Export PDF</Button>
-          {canSubmit && <Button variant="secondary" onClick={prepareSubmit} disabled={busy || !data || !hasTemplate || !provinceEmail}><Send className="w-4 h-4 mr-1" />Submit to Province</Button>}
+          <Button className="w-full sm:w-auto" variant="outline" onClick={load} disabled={loading}><RefreshCw className="w-4 h-4 mr-1" />Refresh</Button>
+          <Button className="w-full sm:w-auto" onClick={exportPdf} disabled={busy || !data || !hasTemplate}><Download className="w-4 h-4 mr-1" />Export PDF</Button>
+          {canSubmit && <Button className="w-full sm:w-auto" variant="secondary" onClick={prepareSubmit} disabled={busy || !data || !hasTemplate || !provinceEmail}><Send className="w-4 h-4 mr-1" />Submit to Province</Button>}
         </div>
       </header>
 
       {hasTemplate === false && (
-        <div className="rounded-sm border border-amber-400/50 bg-amber-400/10 p-4 mb-4 text-sm">
+        <div className="min-w-0 break-words rounded-sm border border-amber-400/50 bg-amber-400/10 p-4 mb-4 text-sm">
           <p className="mb-2">The official UGLE form (New_IR_Craft.pdf) hasn't been uploaded yet. Export needs it — it is filled fresh each time.</p>
           <label className="inline-flex items-center gap-2 cursor-pointer text-gold"><Upload className="w-4 h-4" /> Upload New_IR_Craft.pdf
             <input type="file" accept="application/pdf" className="hidden" onChange={(e) => e.target.files?.[0] && uploadTemplate(e.target.files[0])} />
@@ -223,11 +223,11 @@ function Inner() {
       )}
 
       {data && (
-        <div className="space-y-5 text-primary-foreground text-sm">
+        <div className="min-w-0 space-y-5 text-primary-foreground text-sm">
           {data.issues.length > 0 && (
-            <div className="rounded-sm border border-amber-400/40 bg-amber-400/10 p-4">
-              <p className="font-semibold text-amber-300 flex items-center gap-1 mb-1"><AlertTriangle className="w-4 h-4" /> Check before sending</p>
-              <ul className="list-disc ml-5 space-y-0.5">{data.issues.map((i) => <li key={i}>{i}</li>)}</ul>
+            <div className="min-w-0 break-words rounded-sm border border-amber-400/40 bg-amber-400/10 p-4">
+              <p className="font-semibold text-amber-300 flex items-start gap-1 mb-1"><AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" /> Check before sending</p>
+              <ul className="min-w-0 list-disc ml-5 space-y-0.5">{data.issues.map((i) => <li className="break-words" key={i}>{i}</li>)}</ul>
             </div>
           )}
 
@@ -259,10 +259,10 @@ function Inner() {
               <thead><tr className="text-left text-xs text-primary-foreground/60"><th>Office</th><th>Name</th><th>Personal</th><th>Lodge</th><th>Status</th></tr></thead>
               <tbody>{data.officers.map((o) => <Row key={o.key} o={o} email />)}</tbody>
             </table>
-            <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
+            <div className="mt-3 flex min-w-0 flex-col items-stretch gap-2 text-xs sm:flex-row sm:flex-wrap sm:items-center">
               <span>Membership Officer lodge email:</span>
               <Select value={data.membershipLodgeEmail} onValueChange={setMembershipEmail} disabled={!(isAdmin || isSecretary)}>
-                <SelectTrigger className="w-72 h-8"><SelectValue /></SelectTrigger>
+                <SelectTrigger className="h-8 w-full min-w-0 sm:w-72"><SelectValue /></SelectTrigger>
                 <SelectContent>{MEMBERSHIP_EMAIL_OPTIONS.map((e) => <SelectItem key={e} value={e}>{e}</SelectItem>)}</SelectContent>
               </Select>
             </div>
@@ -271,7 +271,7 @@ function Inner() {
 
           <section className="rounded-sm border border-gold/20 bg-navy-light/30 p-4">
             <h2 className="font-serif text-gold text-lg mb-2">Has the Secretary or his details changed?</h2>
-            <div className="flex gap-2" role="radiogroup" aria-label="Has the Secretary or his details changed">
+            <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Has the Secretary or his details changed">
               {(["Y", "N", ""] as YesNo[]).map((v) => (
                 <Button key={v || "blank"} size="sm" role="radio" aria-checked={secChanged === v} variant={secChanged === v ? "default" : "outline"} onClick={() => setSecChanged(v)}>
                   {v === "Y" ? "Yes (Y)" : v === "N" ? "No (N)" : "Leave blank"}
@@ -283,12 +283,12 @@ function Inner() {
 
           <section className="rounded-sm border border-gold/20 bg-navy-light/30 p-4">
             <h2 className="font-serif text-gold text-lg mb-2">Submit to Province</h2>
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex min-w-0 flex-col items-stretch gap-2 sm:flex-row sm:flex-wrap sm:items-center">
               <span className="text-xs">Provincial Office email:</span>
               {canSubmit ? (
                 <>
-                  <Input className="w-72 h-8" type="email" value={provinceDraft} onChange={(e) => setProvinceDraft(e.target.value)} placeholder="Not set yet" aria-label="Provincial Office email address" />
-                  <Button size="sm" variant="outline" onClick={saveProvinceEmail} disabled={provinceDraft.trim().toLowerCase() === provinceEmail}>Save</Button>
+                  <Input className="h-8 w-full min-w-0 sm:w-72" type="email" value={provinceDraft} onChange={(e) => setProvinceDraft(e.target.value)} placeholder="Not set yet" aria-label="Provincial Office email address" />
+                  <Button className="w-full sm:w-auto" size="sm" variant="outline" onClick={saveProvinceEmail} disabled={provinceDraft.trim().toLowerCase() === provinceEmail}>Save</Button>
                 </>
               ) : <span>{provinceEmail || "Not set yet"}</span>}
             </div>
@@ -297,7 +297,7 @@ function Inner() {
             <h3 className="text-gold text-sm mt-3 mb-1">Sent for {formatMasonicYear(year)}</h3>
             {submissions.length === 0 ? <p className="text-xs text-primary-foreground/60">Not sent yet.</p> : (
               <ul className="text-xs space-y-1">{submissions.map((s) => (
-                <li key={s.id}>{new Date(s.sent_at).toLocaleString("en-GB")} — by {s.sent_by_name ?? "unknown"} to {s.recipient_email}{s.secretary_changed ? ` (Secretary changed: ${s.secretary_changed})` : ""}</li>
+                <li className="break-words" key={s.id}>{new Date(s.sent_at).toLocaleString("en-GB")} — by {s.sent_by_name ?? "unknown"} to {s.recipient_email}{s.secretary_changed ? ` (Secretary changed: ${s.secretary_changed})` : ""}</li>
               ))}</ul>
             )}
           </section>
