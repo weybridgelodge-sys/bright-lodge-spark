@@ -398,9 +398,10 @@ export default function DirectReceiptTab({ canEdit }: { canEdit: boolean }) {
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">Not a subscription — ordinary receipt</SelectItem>
+                  <SelectItem value="candidate">Subscription: new candidate&apos;s first payment (not yet a member, never charged)</SelectItem>
+                  <SelectItem value="advance">Subscription: existing member paying in advance, before this year&apos;s charge exists</SelectItem>
                   <SelectItem value="in_year">Subscription: member paying a balance already charged in October</SelectItem>
-                  <SelectItem value="candidate">Subscription: new candidate&apos;s first payment (not yet charged)</SelectItem>
-                  <SelectItem value="clear_prepayment">Subscription: clear a prepayment now the year has been charged</SelectItem>
+                  <SelectItem value="clear_prepayment">Subscription: clear an advance payment now the year has been charged</SelectItem>
                 </SelectContent>
               </Select>
               <p className="text-primary-foreground/50 text-xs mt-1">
