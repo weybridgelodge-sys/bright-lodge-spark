@@ -14,7 +14,7 @@ import { formatEntryNumber } from "@/lib/treasurer/entryNumber";
 import { buildClosingJournal, canCloseYear, FUND_CODE, fyLabel, yearEndDate, yearEndYears } from "@/lib/treasurer/yearEnd";
 import EntryDrilldown from "./EntryDrilldown";
 import YearSnapshotView from "./YearSnapshotView";
-import { AUDITOR_LABEL, AUDITOR_ROLES, STATUS_LABEL, canClose, canSubmit, statusOf, type Approval, type AuditStatus, type Round, type Signoff } from "@/lib/treasurer/yearAudit";
+import { accountsDistributionStatus, accountsTargetLabel, AUDITOR_LABEL, AUDITOR_ROLES, STATUS_LABEL, canClose, canSubmit, statusOf, type Approval, type AuditStatus, type Round, type Signoff } from "@/lib/treasurer/yearAudit";
 
 const STATUS_STYLE: Record<AuditStatus, string> = {
   draft: "border-primary-foreground/30 text-primary-foreground/80",
@@ -38,6 +38,13 @@ export default function YearEndTab({ canEdit, onOpenTab }: { canEdit: boolean; o
   const [posting, setPosting] = useState(false);
   const [entryId, setEntryId] = useState<string | null>(null);
   const today = londonToday();
+  const [summonsNos, setSummonsNos] = useState<Map<string, number>>(new Map());
+  useEffect(() => {
+    const ids = [...approvals.values()].map((a) => a.accounts_sent_with_summons_id).filter(Boolean) as string[];
+    if (!ids.length) return;
+    supabase.from("summonses").select("id,meeting_number").in("id", ids).then(({ data }) =>
+      setSummonsNos(new Map((data ?? []).map((r: any) => [r.id, r.meeting_number]))));
+  }, [approvals]);
   const [approvals, setApprovals] = useState<Map<number, Approval>>(new Map());
   const [rounds, setRounds] = useState<Round[]>([]);
   const [sigs, setSigs] = useState<Signoff[]>([]);
@@ -204,6 +211,7 @@ export default function YearEndTab({ canEdit, onOpenTab }: { canEdit: boolean; o
 
                 {c ? (
                   <div className="space-y-2 text-sm font-sans">
+                    {approvals.get(y)?.status === "approved" && <AccountsSentNote year={y} a={approvals.get(y)!} today={today} summonsNo={summonsNos} />}
                     <Button variant="outline" className="min-h-[48px]" onClick={() => setEntryId(c.id)} aria-label={`Open closing journal ${formatEntryNumber(c.entry_number)}`}>
                       Closing journal {formatEntryNumber(c.entry_number)} · {fmtDate(c.entry_date)}
                     </Button>
@@ -248,6 +256,7 @@ export default function YearEndTab({ canEdit, onOpenTab }: { canEdit: boolean; o
                               ))}
                             </ul>
                           )}
+                          {st === "approved" && a && <AccountsSentNote year={y} a={a} today={today} summonsNo={summonsNos} />}
                         </div>
                       );
                     })()}
@@ -425,4 +434,19 @@ export default function YearEndTab({ canEdit, onOpenTab }: { canEdit: boolean; o
       <EntryDrilldown entryId={entryId} onClose={() => setEntryId(null)} />
     </div>
   );
+}
+
+function AccountsSentNote({ year, a, today, summonsNo }: { year: number; a: Approval; today: string; summonsNo: Map<string, number> }) {
+  const st = accountsDistributionStatus(year, a.accounts_sent_at, today);
+  if (st === "sent") {
+    const n = a.accounts_sent_with_summons_id ? summonsNo.get(a.accounts_sent_with_summons_id) : undefined;
+    return <p className="text-emerald-300">Accounts sent to members{n ? ` with Summons #${n}` : " with a summons"} on {fmtDate(a.accounts_sent_at!.slice(0, 10))}.</p>;
+  }
+  if (st === "past_may") return (
+    <p className="rounded border border-red-400/60 bg-red-400/10 p-2 text-red-300">Accounts not yet sent to members — now past the May meeting (target was the {accountsTargetLabel(year)}). Please attach them to the next summons.</p>
+  );
+  if (st === "past_feb") return (
+    <p className="rounded border border-amber-400/50 bg-amber-400/10 p-2 text-amber-300">Accounts not yet sent to members — the {accountsTargetLabel(year)} target has passed. Attach them to the next summons.</p>
+  );
+  return <p className="text-primary-foreground/70">Accounts not yet sent to members · target: {accountsTargetLabel(year)}. Attach them in the Summons Builder.</p>;
 }

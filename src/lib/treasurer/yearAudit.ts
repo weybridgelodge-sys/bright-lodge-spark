@@ -19,6 +19,7 @@ export type Approval = {
   id: string; masonic_year: number; status: AuditStatus; round_number: number;
   figures_snapshot: YearSnapshot | null; submitted_at: string | null; submitted_by: string | null;
   treasurer_remarks?: string | null; certified_pack_path?: string | null;
+  accounts_sent_at?: string | null; accounts_sent_with_summons_id?: string | null;
 };
 export type Signoff = {
   id: string; approval_id: string; round_number: number; officer_role: AuditorRole;
