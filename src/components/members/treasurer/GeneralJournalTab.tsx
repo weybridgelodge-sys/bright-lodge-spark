@@ -147,8 +147,8 @@ export default function GeneralJournalTab({ canEdit }: { canEdit: boolean }) {
   };
 
   return (
-    <div className="space-y-6">
-      <section className="rounded-lg border border-gold/20 bg-primary-foreground/5 p-4">
+    <div className="min-w-0 space-y-6 overflow-x-hidden">
+      <section className="min-w-0 rounded-lg border border-gold/20 bg-primary-foreground/5 p-4">
         <h2 className="font-serif text-lg text-gold mb-1">General Journal</h2>
         <p className="text-primary-foreground/60 text-sm mb-1">
           For corrections, adjustments, and opening balances. For routine transactions, use the specific
@@ -164,7 +164,7 @@ export default function GeneralJournalTab({ canEdit }: { canEdit: boolean }) {
           <p className="text-primary-foreground/60"><Loader2 className="w-4 h-4 mr-1 inline animate-spin" /> Loading…</p>
         ) : (
           <>
-            <div className="grid gap-3 sm:grid-cols-2 mb-5">
+            <div className="grid gap-3 sm:grid-cols-2 mb-5 [&>*]:min-w-0">
               <div>
                 <Label>Date</Label>
                 <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} disabled={!canEdit} />
@@ -183,8 +183,8 @@ export default function GeneralJournalTab({ canEdit }: { canEdit: boolean }) {
 
             <div className="space-y-3">
               {lines.map((line, idx) => (
-                <div key={line.key} className="grid gap-2 sm:grid-cols-[1fr_110px_110px_1fr_auto] items-end rounded-md border border-gold/10 p-3">
-                  <div>
+                <div key={line.key} className="grid min-w-0 gap-2 sm:grid-cols-[1fr_110px_110px_1fr_auto] items-end rounded-md border border-gold/10 p-3">
+                  <div className="min-w-0">
                     <Label className="text-xs">Account</Label>
                     <Select value={line.accountId} onValueChange={(v) => updateLine(line.key, { accountId: v })} disabled={!canEdit}>
                       <SelectTrigger><SelectValue placeholder="Choose an account" /></SelectTrigger>
@@ -214,13 +214,13 @@ export default function GeneralJournalTab({ canEdit }: { canEdit: boolean }) {
                     <Input value={line.description} onChange={(e) => updateLine(line.key, { description: e.target.value })} disabled={!canEdit} />
                   </div>
                   {line.accountId && line.accountId === accounts.find((a) => a.code === "3100")?.id ? (
-                    <div className="sm:col-span-5 sm:order-last">
+                    <div className="min-w-0 sm:col-span-5 sm:order-last">
                       <Label className="text-xs">Reserve pot</Label>
                       <Select value={line.fundCode} onValueChange={(v) => updateLine(line.key, { fundCode: v })} disabled={!canEdit}>
                         <SelectTrigger><SelectValue placeholder="Choose the reserve pot" /></SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="max-w-[calc(100vw-2rem)]">
                           {pots.map((p) => (
-                            <SelectItem key={p.fund_code} value={p.fund_code}>{p.label} ({p.fund_code})</SelectItem>
+                            <SelectItem className="whitespace-normal" key={p.fund_code} value={p.fund_code}>{p.label} ({p.fund_code})</SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
@@ -232,7 +232,7 @@ export default function GeneralJournalTab({ canEdit }: { canEdit: boolean }) {
                     onClick={() => removeLine(line.key)}
                     disabled={!canEdit || lines.length <= 2}
                     aria-label={`Remove line ${idx + 1}`}
-                    className="text-primary-foreground/60 hover:text-destructive"
+                    className="justify-self-end text-primary-foreground/60 hover:text-destructive sm:justify-self-auto"
                   >
                     <Trash2 className="w-4 h-4" />
                   </Button>
@@ -263,7 +263,7 @@ export default function GeneralJournalTab({ canEdit }: { canEdit: boolean }) {
             </div>
 
             <div className="mt-4">
-              <Button className="bg-gold text-navy hover:bg-gold/90" disabled={!canEdit || saving || !balanced} onClick={submit}>
+              <Button className="w-full bg-gold text-navy hover:bg-gold/90 sm:w-auto" disabled={!canEdit || saving || !balanced} onClick={submit}>
                 {saving && <Loader2 className="w-4 h-4 mr-1 animate-spin" />}Post journal entry
               </Button>
             </div>

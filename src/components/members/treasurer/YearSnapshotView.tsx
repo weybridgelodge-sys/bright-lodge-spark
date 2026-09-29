@@ -12,14 +12,14 @@ const Row = ({ k, v, strong }: { k: string; v: number; strong?: boolean }) => (
 export default function YearSnapshotView({ snap, round }: { snap: YearSnapshot; round?: number }) {
   const ie = snap.income_expenditure, bs = snap.balance_sheet, tb = snap.trial_balance;
   return (
-    <div className="space-y-4 text-sm font-sans">
+    <div className="min-w-0 space-y-4 text-sm font-sans">
       <p className="rounded border border-gold/30 bg-gold/10 px-3 py-2 text-xs text-gold">
         Submitted snapshot{round ? ` · round ${round}` : ""} · taken {fmtDate(snap.taken_at.slice(0, 10))} · as at {fmtDate(snap.as_at)}.
         These figures do not change if the ledger is edited later.
       </p>
       <section>
         <h4 className="font-serif text-gold mb-1">Income &amp; Expenditure</h4>
-        <dl className="grid grid-cols-[1fr_auto] gap-x-4 gap-y-1">
+        <dl className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-1">
           <Row k="Total income" v={ie.income} />
           <Row k="Total expenditure" v={ie.expenditure} />
           <Row k={ie.surplus >= 0 ? "Surplus for the year" : "Deficit for the year"} v={ie.surplus} strong />
@@ -27,7 +27,7 @@ export default function YearSnapshotView({ snap, round }: { snap: YearSnapshot; 
       </section>
       <section>
         <h4 className="font-serif text-gold mb-1">Balance Sheet</h4>
-        <dl className="grid grid-cols-[1fr_auto] gap-x-4 gap-y-1">
+        <dl className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-1">
           <Row k="Assets" v={bs.assets} />
           <Row k="Liabilities" v={bs.liabilities} />
           <Row k="Net assets" v={bs.net_assets} strong />
@@ -42,7 +42,8 @@ export default function YearSnapshotView({ snap, round }: { snap: YearSnapshot; 
       {snap.accounts?.length ? (
         <details>
           <summary className="cursor-pointer text-gold text-xs min-h-[48px] flex items-center">Account balances ({snap.accounts.length})</summary>
-          <table className="w-full text-xs mt-1">
+          <div className="overflow-x-auto">
+          <table className="w-full min-w-[28rem] text-xs mt-1">
             <tbody>
               {snap.accounts.map((a) => {
                 const natural = a.type === "asset" || a.type === "expense" ? a.net : -a.net;
@@ -57,6 +58,7 @@ export default function YearSnapshotView({ snap, round }: { snap: YearSnapshot; 
               })}
             </tbody>
           </table>
+          </div>
         </details>
       ) : null}
     </div>

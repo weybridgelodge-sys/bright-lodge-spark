@@ -198,7 +198,7 @@ export default function YearEndTab({ canEdit, onOpenTab }: { canEdit: boolean; o
             const c = closed.get(y);
             const guard = canCloseYear(y, today, !!c);
             return (
-              <li key={y} className="rounded-lg border border-gold/20 bg-navy-light/30 p-4 space-y-3">
+              <li key={y} className="min-w-0 rounded-lg border border-gold/20 bg-navy-light/30 p-4 space-y-3">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div>
                     <h3 className="font-serif text-gold">{fyLabel(y)}</h3>
@@ -206,22 +206,22 @@ export default function YearEndTab({ canEdit, onOpenTab }: { canEdit: boolean; o
                   </div>
                   {c
                     ? <Badge variant="outline" className="border-gold/60 text-gold"><Lock className="w-3 h-3 mr-1" />Closed</Badge>
-                    : <Badge variant="outline" className={STATUS_STYLE[statusOf(approvals.get(y))]}>Not closed · {STATUS_LABEL[statusOf(approvals.get(y))]}</Badge>}
+                    : <Badge variant="outline" className={`max-w-full whitespace-normal text-center ${STATUS_STYLE[statusOf(approvals.get(y))]}`}>Not closed · {STATUS_LABEL[statusOf(approvals.get(y))]}</Badge>}
                 </div>
 
                 {c ? (
                   <div className="space-y-2 text-sm font-sans">
                     {approvals.get(y)?.status === "approved" && <AccountsSentNote year={y} a={approvals.get(y)!} today={today} summonsNo={summonsNos} />}
-                    <Button variant="outline" className="min-h-[48px]" onClick={() => setEntryId(c.id)} aria-label={`Open closing journal ${formatEntryNumber(c.entry_number)}`}>
+                    <Button variant="outline" className="min-h-[48px] w-full whitespace-normal sm:w-auto" onClick={() => setEntryId(c.id)} aria-label={`Open closing journal ${formatEntryNumber(c.entry_number)}`}>
                       Closing journal {formatEntryNumber(c.entry_number)} · {fmtDate(c.entry_date)}
                     </Button>
-                    <dl className="grid grid-cols-[1fr_auto] gap-x-4 gap-y-1 max-w-md">
+                    <dl className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-1 max-w-md">
                       <dt className="text-primary-foreground/70">General Fund at 30 Sep {y + 1}</dt>
-                      <dd className="text-right tabular-nums">{acct(fundBf.get(y) ?? 0)}</dd>
+                      <dd className="text-right tabular-nums whitespace-nowrap">{acct(fundBf.get(y) ?? 0)}</dd>
                       <dt className="text-primary-foreground/70">{c.fund >= 0 ? "Surplus" : "Deficit"} transferred</dt>
-                      <dd className="text-right tabular-nums">{acct(c.fund)}</dd>
+                      <dd className="text-right tabular-nums whitespace-nowrap">{acct(c.fund)}</dd>
                       <dt className="text-gold">Opening General Fund 1 Oct {y + 1}</dt>
-                      <dd className="text-right tabular-nums text-gold">{acct((fundBf.get(y) ?? 0) + c.fund)}</dd>
+                      <dd className="text-right tabular-nums whitespace-nowrap text-gold">{acct((fundBf.get(y) ?? 0) + c.fund)}</dd>
                     </dl>
                   </div>
 ) : (
@@ -234,7 +234,7 @@ export default function YearEndTab({ canEdit, onOpenTab }: { canEdit: boolean; o
                       return (
                         <div className="space-y-2 text-sm font-sans">
                           {st === "submitted" && a && (
-                            <p className="text-primary-foreground/80">
+                            <p className="break-words text-primary-foreground/80">
                               Round {a.round_number} submitted {a.submitted_at ? fmtDate(a.submitted_at.slice(0, 10)) : ""}.{" "}
                               {AUDITOR_ROLES.map((r) => {
                                 const sg = round.find((x) => x.officer_role === r);
@@ -244,13 +244,13 @@ export default function YearEndTab({ canEdit, onOpenTab }: { canEdit: boolean; o
                           )}
                           {st === "query" && q && (
                             <div className="rounded border border-amber-400/50 bg-amber-400/10 p-3">
-                              <p className="font-semibold text-amber-300">Query from {who(q.signed_by)} ({AUDITOR_LABEL[q.officer_role]}) · {fmtDate(q.signed_at.slice(0, 10))}</p>
-                              <p className="mt-1 whitespace-pre-wrap">{q.note}</p>
+                              <p className="break-words font-semibold text-amber-300">Query from {who(q.signed_by)} ({AUDITOR_LABEL[q.officer_role]}) · {fmtDate(q.signed_at.slice(0, 10))}</p>
+                              <p className="mt-1 whitespace-pre-wrap break-words">{q.note}</p>
                               <p className="mt-1 text-xs text-primary-foreground/60">Make any corrections as normal (e.g. General Journal), then resubmit.</p>
                             </div>
                           )}
                           {st === "approved" && (
-                            <ul className="text-emerald-300">
+                            <ul className="break-words text-emerald-300">
                               {round.filter((x) => x.decision === "confirmed").map((x) => (
                                 <li key={x.id}>{AUDITOR_LABEL[x.officer_role]}: {who(x.signed_by)} · confirmed {fmtDate(x.signed_at.slice(0, 10))}</li>
                               ))}
@@ -260,21 +260,21 @@ export default function YearEndTab({ canEdit, onOpenTab }: { canEdit: boolean; o
                         </div>
                       );
                     })()}
-                    <div className="flex flex-wrap gap-2">
-                      <Button variant="outline" className="min-h-[48px]" onClick={() => onOpenTab("balance-sheet")}>
+                    <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+                      <Button variant="outline" className="min-h-[48px] w-full whitespace-normal sm:w-auto" onClick={() => onOpenTab("balance-sheet")}>
                         <Scale className="w-4 h-4 mr-1" /> Review Balance Sheet
                       </Button>
-                      <Button variant="outline" className="min-h-[48px]" onClick={() => onOpenTab("income-expenditure")}>
+                      <Button variant="outline" className="min-h-[48px] w-full whitespace-normal sm:w-auto" onClick={() => onOpenTab("income-expenditure")}>
                         <TrendingUp className="w-4 h-4 mr-1" /> Review Income &amp; Expenditure
                       </Button>
                       {canEdit && canSubmit(statusOf(approvals.get(y))) && (
-                        <Button className="min-h-[48px] bg-gold text-navy hover:bg-gold/90" disabled={submitting === y} onClick={() => submit(y)}>
+                        <Button className="min-h-[48px] w-full whitespace-normal bg-gold text-navy hover:bg-gold/90 sm:w-auto" disabled={submitting === y} onClick={() => submit(y)}>
                           {submitting === y ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Send className="w-4 h-4 mr-1" />}
                           {statusOf(approvals.get(y)) === "query" ? "Resubmit for audit review" : "Submit for audit review"}
                         </Button>
                       )}
                       {canEdit && guard.ok && canClose(statusOf(approvals.get(y))) && (
-                        <Button className="min-h-[48px] bg-gold text-navy hover:bg-gold/90" disabled={busy === y} onClick={() => preview(y)}>
+                        <Button className="min-h-[48px] w-full whitespace-normal bg-gold text-navy hover:bg-gold/90 sm:w-auto" disabled={busy === y} onClick={() => preview(y)}>
                           {busy === y ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <CalendarCheck className="w-4 h-4 mr-1" />}
                           Close {fyLabel(y)}
                         </Button>
@@ -295,7 +295,7 @@ export default function YearEndTab({ canEdit, onOpenTab }: { canEdit: boolean; o
                       {st !== "draft" && (
                         <div className="rounded border border-gold/20 p-3">
                           <p className="text-xs text-gold mb-1">Treasurer's Remarks as submitted · round {a?.round_number}</p>
-                          <p className="whitespace-pre-wrap text-primary-foreground/80">{frozen || "No remarks were included in this round."}</p>
+                          <p className="whitespace-pre-wrap break-words text-primary-foreground/80">{frozen || "No remarks were included in this round."}</p>
                         </div>
                       )}
                       {canEdit && !c && (
@@ -309,13 +309,13 @@ export default function YearEndTab({ canEdit, onOpenTab }: { canEdit: boolean; o
                           <p className="text-xs text-primary-foreground/60">Printed in the accounts pack and frozen with the figures each time you submit for audit review.</p>
                         </div>
                       )}
-                      <div className="flex flex-wrap gap-2">
+                      <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
                         {canEdit && !c && (
-                          <Button variant="outline" className="min-h-[48px]" disabled={savingRemarks === y} onClick={() => saveRemarks(y)}>
+                          <Button variant="outline" className="min-h-[48px] w-full whitespace-normal sm:w-auto" disabled={savingRemarks === y} onClick={() => saveRemarks(y)}>
                             {savingRemarks === y ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Save className="w-4 h-4 mr-1" />} Save remarks
                           </Button>
                         )}
-                        <Button variant="outline" className="min-h-[48px]" disabled={packBusy === y} onClick={() => downloadPack(y)}>
+                        <Button variant="outline" className="min-h-[48px] w-full whitespace-normal sm:w-auto" disabled={packBusy === y} onClick={() => downloadPack(y)}>
                           {packBusy === y ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Download className="w-4 h-4 mr-1" />}
                           Download accounts pack{st === "approved" ? " (certified)" : " (draft)"}
                         </Button>
@@ -329,23 +329,23 @@ export default function YearEndTab({ canEdit, onOpenTab }: { canEdit: boolean; o
                   if (!rs.length) return null;
                   return (
                     <div>
-                      <Button variant="ghost" className="min-h-[48px] text-gold px-2" onClick={() => setHistory(history === y ? null : y)} aria-expanded={history === y}>
+                      <Button variant="ghost" className="min-h-[48px] max-w-full whitespace-normal text-gold px-2" onClick={() => setHistory(history === y ? null : y)} aria-expanded={history === y}>
                         <History className="w-4 h-4 mr-1" /> Review history ({rs.length} round{rs.length > 1 ? "s" : ""})
                       </Button>
                       {history === y && (
                         <ol className="space-y-2 text-xs font-sans mt-1">
                           {rs.map((r) => (
-                            <li key={r.id} className="rounded border border-gold/15 p-2">
-                              <div className="flex flex-wrap items-center justify-between gap-2">
-                                <span className="text-primary-foreground/80">
+                            <li key={r.id} className="min-w-0 break-words rounded border border-gold/15 p-2">
+                              <div className="flex min-w-0 flex-col items-stretch gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+                                <span className="min-w-0 break-words text-primary-foreground/80">
                                   Round {r.round_number} · submitted {fmtDate(r.submitted_at.slice(0, 10))} by {who(r.submitted_by)} ·{" "}
                                   {r.outcome === "approved" ? "Approved" : r.outcome === "query" ? "Query raised" : "Awaiting sign-off"}
                                 </span>
-                                <Button variant="outline" size="sm" className="min-h-[40px]" onClick={() => setSnapView(r)}>View snapshot</Button>
+                                <Button variant="outline" size="sm" className="min-h-[40px] w-full sm:w-auto" onClick={() => setSnapView(r)}>View snapshot</Button>
                               </div>
                               <ul className="mt-1 space-y-0.5">
                                 {sigs.filter((x) => x.approval_id === r.approval_id && x.round_number === r.round_number).map((x) => (
-                                  <li key={x.id}>
+                                  <li className="break-words" key={x.id}>
                                     {AUDITOR_LABEL[x.officer_role]} ({who(x.signed_by)}) · {x.decision === "confirmed" ? "confirmed" : "query"} · {fmtDate(x.signed_at.slice(0, 10))}
                                     {x.note ? <span className="text-primary-foreground/60"> — {x.note}</span> : null}
                                   </li>
@@ -440,13 +440,13 @@ function AccountsSentNote({ year, a, today, summonsNo }: { year: number; a: Appr
   const st = accountsDistributionStatus(year, a.accounts_sent_at, today);
   if (st === "sent") {
     const n = a.accounts_sent_with_summons_id ? summonsNo.get(a.accounts_sent_with_summons_id) : undefined;
-    return <p className="text-emerald-300">Accounts sent to members{n ? ` with Summons #${n}` : " with a summons"} on {fmtDate(a.accounts_sent_at!.slice(0, 10))}.</p>;
+    return <p className="break-words text-emerald-300">Accounts sent to members{n ? ` with Summons #${n}` : " with a summons"} on {fmtDate(a.accounts_sent_at!.slice(0, 10))}.</p>;
   }
   if (st === "past_may") return (
-    <p className="rounded border border-red-400/60 bg-red-400/10 p-2 text-red-300">Accounts not yet sent to members — now past the May meeting (target was the {accountsTargetLabel(year)}). Please attach them to the next summons.</p>
+    <p className="break-words rounded border border-red-400/60 bg-red-400/10 p-2 text-red-300">Accounts not yet sent to members — now past the May meeting (target was the {accountsTargetLabel(year)}). Please attach them to the next summons.</p>
   );
   if (st === "past_feb") return (
-    <p className="rounded border border-amber-400/50 bg-amber-400/10 p-2 text-amber-300">Accounts not yet sent to members — the {accountsTargetLabel(year)} target has passed. Attach them to the next summons.</p>
+    <p className="break-words rounded border border-amber-400/50 bg-amber-400/10 p-2 text-amber-300">Accounts not yet sent to members — the {accountsTargetLabel(year)} target has passed. Attach them to the next summons.</p>
   );
-  return <p className="text-primary-foreground/70">Accounts not yet sent to members · target: {accountsTargetLabel(year)}. Attach them in the Summons Builder.</p>;
+  return <p className="break-words text-primary-foreground/70">Accounts not yet sent to members · target: {accountsTargetLabel(year)}. Attach them in the Summons Builder.</p>;
 }

@@ -246,8 +246,8 @@ export default function NewMemberFeesTab({ canEdit }: { canEdit: boolean }) {
   };
 
   return (
-    <div className="space-y-6">
-      <section className="rounded-lg border border-gold/20 bg-primary-foreground/5 p-4">
+    <div className="min-w-0 space-y-6 overflow-x-hidden">
+      <section className="min-w-0 rounded-lg border border-gold/20 bg-primary-foreground/5 p-4">
         <h2 className="font-serif text-lg text-gold mb-1">New Member Fees</h2>
         <p className="text-primary-foreground/60 text-sm mb-4">
           Records the one-off money received from a newly-initiated member: prorated first subscription plus UGLE and
@@ -260,7 +260,7 @@ export default function NewMemberFeesTab({ canEdit }: { canEdit: boolean }) {
           <p className="text-primary-foreground/60"><Loader2 className="w-4 h-4 mr-1 inline animate-spin" /> Loading…</p>
         ) : (
           <>
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid gap-3 sm:grid-cols-2 [&>*]:min-w-0">
               <div>
                 <Label>New member name</Label>
                 <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. John Smith" disabled={!canEdit} />
@@ -316,22 +316,25 @@ export default function NewMemberFeesTab({ canEdit }: { canEdit: boolean }) {
             </div>
 
             <div className="mt-4 grid gap-2 sm:grid-cols-2">
-              <div className="rounded-md border border-gold/20 p-3">
+              <div className="min-w-0 rounded-md border border-gold/20 p-3">
                 <p className="text-primary-foreground/60 text-sm">Prorated subscription</p>
                 <p className="text-gold font-semibold text-lg">{money(proratedPence)}</p>
               </div>
-              <div className="rounded-md border border-gold/20 p-3">
+              <div className="min-w-0 break-words rounded-md border border-gold/20 p-3">
                 <p className="text-primary-foreground/60 text-sm">How the subscription is split</p>
                 <p className="text-primary-foreground/80 text-xs mt-1">
                   4000 Subscriptions {money(incomePence)} (prorated remainder)
                 </p>
-                <p className="text-primary-foreground/80 text-xs">
-                  3100 reserves {money(reserveTotalPence)} — {potLines.map((r) => `${r.label} ${money(r.pence)}`).join(" · ")}
-                </p>
+                <div className="text-primary-foreground/80 text-xs">
+                  <span>3100 reserves {money(reserveTotalPence)} — </span>
+                  <span className="inline-flex flex-wrap gap-x-2">
+                    {potLines.map((r) => <span key={r.fund_code}>{r.label} {money(r.pence)}</span>)}
+                  </span>
+                </div>
                 <p className="text-primary-foreground/80 text-xs">2200 Relief Chest {money(reliefPence)}</p>
                 <p className="text-primary-foreground/50 text-xs mt-1">Reserve and Relief Chest shares are always the full annual amount.</p>
               </div>
-              <div className="rounded-md border border-gold/20 p-3">
+              <div className="min-w-0 rounded-md border border-gold/20 p-3">
                 <p className="text-primary-foreground/60 text-sm">Total received</p>
                 <p className="text-gold font-semibold text-lg">{money(totalPence)}</p>
               </div>
@@ -344,7 +347,7 @@ export default function NewMemberFeesTab({ canEdit }: { canEdit: boolean }) {
             )}
 
             <div className="mt-4">
-              <Button className="bg-gold text-navy hover:bg-gold/90" disabled={!canEdit || saving || !!split.error} onClick={submit}>
+              <Button className="w-full bg-gold text-navy hover:bg-gold/90 sm:w-auto" disabled={!canEdit || saving || !!split.error} onClick={submit}>
                 {saving && <Loader2 className="w-4 h-4 mr-1 animate-spin" />}Post to ledger
               </Button>
             </div>
