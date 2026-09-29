@@ -8,7 +8,8 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
-import { fetchReservePots, type ReservePot } from "@/lib/treasurer/subscriptionSettings";
+import { fetchReservePots, fetchSubscriptionSettings, type ReservePot } from "@/lib/treasurer/subscriptionSettings";
+import { splitSubscription, type SplitLine } from "@/lib/treasurer/subscriptionSplit";
 
 const MEETINGS = [
   { key: "October", label: "October (100%)", pct: 1 },
@@ -29,6 +30,7 @@ const toPence = (v: string) => {
 export default function NewMemberFeesTab({ canEdit }: { canEdit: boolean }) {
   const [accounts, setAccounts] = useState<Map<string, string>>(new Map());
   const [pots, setPots] = useState<ReservePot[]>([]);
+  const [reliefChestPence, setReliefChestPence] = useState(1000);
   const [loading, setLoading] = useState(true);
 
   const [name, setName] = useState("");
@@ -63,14 +65,19 @@ export default function NewMemberFeesTab({ canEdit }: { canEdit: boolean }) {
 
   const load = useCallback(async () => {
     setLoading(true);
-    const [{ data: accts, error: acctErr }, potRows] = await Promise.all([
+    const [{ data: accts, error: acctErr }, potRows, settings] = await Promise.all([
       supabase
         .from("chart_of_accounts" as any)
         .select("id,code")
-        .in("code", ["1000", "2000", "3000", "3100", "4000", "4500", "5000", "5100"]),
+        .in("code", ["1000", "2000", "2200", "3100", "4000", "4500", "5000", "5100"]),
       fetchReservePots(),
+      fetchSubscriptionSettings(),
     ]);
     setPots(potRows);
+    if (settings) {
+      setReliefChestPence(settings.relief_chest_pence ?? 1000);
+      setSubRate((settings.annual_rate_pence / 100).toFixed(2));
+    }
     if (acctErr) toast({ title: "Could not load accounts", description: acctErr.message, variant: "destructive" });
     const map = new Map<string, string>();
     for (const a of (accts as any[]) ?? []) if (a.code && a.id) map.set(a.code as string, a.id as string);
@@ -89,12 +96,19 @@ export default function NewMemberFeesTab({ canEdit }: { canEdit: boolean }) {
   const pglPence = toPence(pglFee);
   const regPence = uglePence + pglPence;
   const totalPence = proratedPence + regPence;
-  const reserveMultiplier = ageBracket === "under25" ? 0.5 : 1;
-  const reserveAllocations = useMemo(
-    () => pots.map((p) => ({ ...p, pence: Math.round(p.annual_pence * reserveMultiplier) })),
-    [pots, reserveMultiplier],
-  );
-  const reserveTotalPence = reserveAllocations.reduce((s, r) => s + r.pence, 0);
+  // Reserve pots and Relief Chest are always the full annual share for the age bracket;
+  // only the 4000 remainder reflects proration.
+  const split = useMemo(() => {
+    try {
+      return { lines: splitSubscription(proratedPence, ageBracket === "under25", pots, reliefChestPence), error: null as string | null };
+    } catch {
+      return { lines: [] as SplitLine[], error: "The prorated subscription is smaller than the full reserve and Relief Chest shares, so it can't be split without a negative Subscriptions line. Not posted — please raise this with the Treasurer's design before recording." };
+    }
+  }, [proratedPence, ageBracket, pots, reliefChestPence]);
+  const incomePence = split.lines.find((l) => l.code === "4000")?.pence ?? 0;
+  const potLines = split.lines.filter((l) => l.code === "3100");
+  const reliefPence = split.lines.find((l) => l.code === "2200")?.pence ?? 0;
+  const reserveTotalPence = potLines.reduce((s, r) => s + r.pence, 0);
 
   const submit = async () => {
     if (!name.trim()) {
