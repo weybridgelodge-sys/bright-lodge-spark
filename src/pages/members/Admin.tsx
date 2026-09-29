@@ -368,8 +368,7 @@ export default function MembersAdmin() {
     setBusy(false);
 
     if (error || (data as { error?: unknown })?.error) {
-      const msg = (data as { error?: string })?.error ?? error?.message ?? "Could not save member";
-      toast.error(typeof msg === "string" ? msg : "Could not save member");
+      toast.error(await readFunctionError(error, data, "Could not save member"));
       return;
     }
     toast.success(isEdit ? "Member updated" : `${form.first_name} ${form.last_name} added`);
