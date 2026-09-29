@@ -25,6 +25,8 @@ project_id = "kntcjlztmcgmagwgheyx"
     verify_jwt = false
   [functions.summons-link]
     verify_jwt = false
+  [functions.accounts-link]
+    verify_jwt = false
   [functions.submit-enquiry]
     verify_jwt = false
   [functions.waitlist-refund-sweep]
