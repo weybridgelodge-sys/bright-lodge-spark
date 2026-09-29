@@ -193,6 +193,16 @@ export default function DirectReceiptTab({ canEdit }: { canEdit: boolean }) {
         ],
         "the subscription receipt entry",
       );
+    } else if (mode === "advance") {
+      ok = await postEntry(
+        { description: `Subscription paid in advance — ${memberName.trim()}`, source_type: "subscription_advance",
+          document_number: documentNumber.trim() || null, bank_reference: bankReference.trim() || null },
+        [
+          { account_id: A("1000"), debit_pence: bankPence, credit_pence: 0 },
+          { account_id: A("2100"), debit_pence: 0, credit_pence: bankPence, description: memberName.trim() },
+        ],
+        "the advance subscription entry",
+      );
     } else {
       if (!split) { toast({ title: "Amount is too small for the subscription split", variant: "destructive" }); setSaving(false); return; }
       ok = await postEntry(
@@ -214,7 +224,7 @@ export default function DirectReceiptTab({ canEdit }: { canEdit: boolean }) {
     setMemberName("");
     setDocumentNumber("");
     setBankReference("");
-    toast({ title: mode === "in_year" ? "Subscription payment posted" : "Candidate subscription posted" });
+    toast({ title: mode === "in_year" ? "Subscription payment posted" : mode === "advance" ? "Advance subscription posted to Deferred Income" : "Candidate subscription posted" });
   };
 
   const submitClear = async () => {
