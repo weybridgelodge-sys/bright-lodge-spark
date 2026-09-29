@@ -283,7 +283,8 @@ export function buildFieldSpecs(d: ReturnData): FieldSpec[] {
   }
   for (const o of d.officers) {
     const p = P(o.memberId);
-    const lodgeEmail = lodgeEmailFor(o.key, d.membershipLodgeEmail);
+    // No holder → no lodge email either (a mailbox nobody reads helps no one).
+    const lodgeEmail = o.memberId ? lodgeEmailFor(o.key, d.membershipLodgeEmail) : "";
     if (o.key === "membership_officer") {
       specs.push(
         { id: "Name (Block Letters)_Membership Oﬃcer", label: "Membership Officer name", value: blockName(p), match: has("name", "membership") },
