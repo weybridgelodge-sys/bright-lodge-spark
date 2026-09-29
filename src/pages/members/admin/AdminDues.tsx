@@ -489,19 +489,19 @@ function Inner() {
 
       <TestModeBanner />
 
-      <div className="flex gap-2 mb-4 border-b border-gold/20">
+      <div className="mb-4 grid grid-cols-1 gap-1 border-b border-gold/20 min-[360px]:grid-cols-2 sm:flex sm:gap-2">
         {(["members", "settings", "demo"] as Tab[]).map(t => (
           <button
             key={t}
             onClick={() => setTab(t)}
-            className={`px-4 py-2 text-sm capitalize border-b-2 -mb-px ${
+            className={`min-h-[48px] min-w-0 px-3 py-2 text-sm capitalize border-b-2 -mb-px sm:px-4 ${
               tab === t ? "border-gold text-gold" : "border-transparent text-primary-foreground/60 hover:text-primary-foreground"
             }`}
           >
             {t === "demo" ? "Demo as member" : t}
           </button>
         ))}
-        <button onClick={load} className="ml-auto text-primary-foreground/60 hover:text-gold p-2" title="Refresh">
+        <button onClick={load} aria-label="Refresh dues" className="min-h-[48px] min-w-0 p-2 text-primary-foreground/60 hover:text-gold sm:ml-auto" title="Refresh">
           <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
         </button>
       </div>

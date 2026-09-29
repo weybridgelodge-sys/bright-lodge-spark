@@ -58,16 +58,58 @@ type AuthCtx = {
 
 const Ctx = createContext<AuthCtx | undefined>(undefined);
 
+const isLocalLayoutTest =
+  import.meta.env.MODE === "e2e" &&
+  typeof window !== "undefined" &&
+  (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
+
+const layoutTestUser = {
+  id: "00000000-0000-4000-8000-000000000001",
+  aud: "authenticated",
+  role: "authenticated",
+  email: "portal-layout-test@localhost.invalid",
+  app_metadata: {},
+  user_metadata: {},
+  created_at: "2026-01-01T00:00:00.000Z",
+} as User;
+
+const layoutTestSession = {
+  access_token: "local-layout-test-only",
+  refresh_token: "local-layout-test-only",
+  expires_in: 3600,
+  token_type: "bearer",
+  user: layoutTestUser,
+} as Session;
+
+const layoutTestProfile: Profile = {
+  id: layoutTestUser.id,
+  email: layoutTestUser.email ?? null,
+  full_name: "W Bro. Bartholomew Montgomery-Smythe",
+  title: "W Bro.",
+  first_name: "Bartholomew",
+  last_name: "Montgomery-Smythe",
+  rank: null,
+  office: null,
+  provincial_rank: null,
+  grand_rank: null,
+  date_of_birth: null,
+  joined_year: 2000,
+  phone: null,
+  avatar_url: null,
+  status: "active",
+  degree: "installed_master",
+};
+
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [session, setSession] = useState<Session | null>(null);
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [roles, setRoles] = useState<Role[]>([]);
-  const [isCurrentWmOrIpm, setIsCurrentWmOrIpm] = useState(false);
-  const [isCurrentTreasurer, setIsCurrentTreasurer] = useState(false);
-  const [isCurrentAuditor1, setIsCurrentAuditor1] = useState(false);
-  const [isCurrentAuditor2, setIsCurrentAuditor2] = useState(false);
-  const [isCurrentSecretary, setIsCurrentSecretary] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [session, setSession] = useState<Session | null>(isLocalLayoutTest ? layoutTestSession : null);
+  const [profile, setProfile] = useState<Profile | null>(isLocalLayoutTest ? layoutTestProfile : null);
+  const [roles, setRoles] = useState<Role[]>(isLocalLayoutTest ? ["admin", "secretary", "worshipful_master"] : []);
+  const [isCurrentWmOrIpm, setIsCurrentWmOrIpm] = useState(isLocalLayoutTest);
+  const [isCurrentTreasurer, setIsCurrentTreasurer] = useState(isLocalLayoutTest);
+  const [isCurrentAuditor1, setIsCurrentAuditor1] = useState(isLocalLayoutTest);
+  const [isCurrentAuditor2, setIsCurrentAuditor2] = useState(isLocalLayoutTest);
+  const [isCurrentSecretary, setIsCurrentSecretary] = useState(isLocalLayoutTest);
+  const [loading, setLoading] = useState(!isLocalLayoutTest);
 
 
   const loadProfileAndRole = async (uid: string) => {
@@ -118,6 +160,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
+    if (isLocalLayoutTest) return;
     // Backstop: if the auth chain below ever fails to settle for any reason, the
     // app must not sit behind ProtectedRoute's full-screen loader forever.
     const SETTLE_GUARD_MS = 8000;

@@ -103,8 +103,8 @@ export default function MembersLayout({ children }: { children: React.ReactNode 
   return (
     <div className="min-h-screen min-h-[100dvh] bg-navy text-primary-foreground">
       <header className="border-b border-gold/20 bg-navy-dark/80 backdrop-blur sticky top-0 z-40 pt-[max(0px,env(safe-area-inset-top))]">
-        <div className="container mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
+        <div className="container mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-2 sm:gap-4">
+          <div className="flex min-w-0 items-center gap-2 sm:gap-3">
             <Sheet open={drawerOpen} onOpenChange={setDrawerOpen}>
               <SheetTrigger asChild>
                 <button
@@ -130,7 +130,7 @@ export default function MembersLayout({ children }: { children: React.ReactNode 
               </SheetContent>
 
             </Sheet>
-            <Link to="/members" className="flex items-center gap-3">
+            <Link to="/members" className="flex min-w-0 items-center gap-2 sm:gap-3">
               <img src={logo} alt="Weybridge Lodge crest" width={44} height={44} decoding="async" className="h-11 w-11 shrink-0 bg-primary-foreground/90 rounded-full p-0.5" />
               <div className="min-w-0">
                 <p className="font-serif text-sm font-semibold leading-tight truncate">Members Portal</p>
@@ -139,7 +139,7 @@ export default function MembersLayout({ children }: { children: React.ReactNode 
             </Link>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex shrink-0 items-center gap-3">
             <Link to="/" className="text-xs text-primary-foreground/60 hover:text-gold hidden sm:inline">
               ← Public site
             </Link>
@@ -148,9 +148,10 @@ export default function MembersLayout({ children }: { children: React.ReactNode 
             </span>
             <button
               onClick={handleSignOut}
-              className="flex items-center gap-1.5 text-xs border border-gold/40 text-gold px-3 py-1.5 rounded-sm hover:bg-gold/10"
+              aria-label="Sign out"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-sm border border-gold/40 text-xs text-gold hover:bg-gold/10 sm:h-auto sm:w-auto sm:gap-1.5 sm:px-3 sm:py-1.5"
             >
-              <LogOut className="w-3.5 h-3.5" /> Sign out
+              <LogOut className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Sign out</span>
             </button>
           </div>
         </div>
