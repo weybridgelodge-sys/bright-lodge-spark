@@ -17,7 +17,7 @@ const EXCLUDED_CODES = new Set(["4120", "4500"]);
 
 type Account = { id: string; code: string; name: string; account_type?: string };
 
-type SubMode = "none" | "in_year" | "candidate" | "clear_prepayment";
+type SubMode = "none" | "candidate" | "advance" | "in_year" | "clear_prepayment";
 type DebtorLine = { id: string; name: string; pence: number; entry_number: number | null };
 
 type ExtraLine = { key: string; accountId: string; direction: "debit" | "credit"; amount: string; description: string };
@@ -132,7 +132,7 @@ export default function DirectReceiptTab({ canEdit }: { canEdit: boolean }) {
       toast({ title: "Enter a positive amount", variant: "destructive" });
       return;
     }
-    const need = (mode === "in_year" ? ["1000", "1100"] : ["1000", "4000", "3100", "2200"]).filter((c) => !codeMap.get(c));
+    const need = (mode === "candidate" ? ["1000", "4000", "3100", "2200"] : mode === "advance" ? ["1000", "2100"] : ["1000", "1100"]).filter((c) => !codeMap.get(c));
     if (need.length) {
       toast({ title: `Missing accounts: ${need.join(", ")}`, variant: "destructive" });
       return;
