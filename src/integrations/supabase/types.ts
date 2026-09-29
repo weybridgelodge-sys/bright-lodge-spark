@@ -3767,18 +3767,21 @@ export type Database = {
         Row: {
           annual_rate_pence: number
           id: string
+          relief_chest_pence: number
           updated_at: string
           updated_by: string | null
         }
         Insert: {
           annual_rate_pence?: number
           id?: string
+          relief_chest_pence?: number
           updated_at?: string
           updated_by?: string | null
         }
         Update: {
           annual_rate_pence?: number
           id?: string
+          relief_chest_pence?: number
           updated_at?: string
           updated_by?: string | null
         }
@@ -5539,6 +5542,10 @@ export type Database = {
         Args: { _social_id: string }
         Returns: string[]
       }
+      post_subscription_accrual: {
+        Args: { _period_id: string; _year: number }
+        Returns: string
+      }
       post_year_close: {
         Args: { _expected_net: number; _year: number }
         Returns: string
@@ -5570,6 +5577,21 @@ export type Database = {
         Returns: undefined
       }
       submit_year_for_audit: { Args: { _year: number }; Returns: string }
+      subscription_accrual_preview: {
+        Args: { _year: number }
+        Returns: {
+          amount_pence: number
+          dob_missing: boolean
+          exempt_reason: string
+          full_name: string
+          member_id: string
+          under_25: boolean
+        }[]
+      }
+      subscription_exempt_member_ids: {
+        Args: { _year: number }
+        Returns: string[]
+      }
       unlink_bank_row: { Args: { p_bank_txn_id: string }; Returns: undefined }
       year_audit_snapshot: { Args: { _year: number }; Returns: Json }
       year_audit_snapshot_base: { Args: { _year: number }; Returns: Json }

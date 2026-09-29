@@ -386,6 +386,13 @@
       "when": 1790641285265,
       "tag": "0054_year_end_stage4_accounts_distribution",
       "breakpoints": true
+    },
+    {
+      "idx": 55,
+      "version": "7",
+      "when": 1790684422625,
+      "tag": "0055_subscription_split_accrual",
+      "breakpoints": true
     }
   ]
 }
