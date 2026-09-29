@@ -123,7 +123,11 @@ export default function NewMemberFeesTab({ canEdit }: { canEdit: boolean }) {
       toast({ title: "Total received must be greater than zero", variant: "destructive" });
       return;
     }
-    const need = ["1000", "2000", "3000", "3100", "4000", "4500", "5000", "5100"].filter((c) => !accounts.get(c));
+    if (split.error) {
+      toast({ title: "Not posted", description: split.error, variant: "destructive" });
+      return;
+    }
+    const need = ["1000", "2000", "2200", "3100", "4000", "4500", "5000", "5100"].filter((c) => !accounts.get(c));
     if (need.length) {
       toast({ title: `Missing accounts: ${need.join(", ")}`, variant: "destructive" });
       return;
@@ -173,9 +177,16 @@ export default function NewMemberFeesTab({ canEdit }: { canEdit: boolean }) {
 
     const A = (c: string) => accounts.get(c) as string;
 
-    const receiptLines = [
+    const receiptLines: { account_id: string; debit_pence: number; credit_pence: number; fund_code?: string }[] = [
       { account_id: A("1000"), debit_pence: totalPence, credit_pence: 0 },
-      { account_id: A("4000"), debit_pence: 0, credit_pence: proratedPence },
+      ...split.lines
+        .filter((l) => l.pence > 0)
+        .map((l) => ({
+          account_id: A(l.code),
+          debit_pence: 0,
+          credit_pence: l.pence,
+          ...(l.fund_code ? { fund_code: l.fund_code } : {}),
+        })),
     ];
     if (regPence > 0) receiptLines.push({ account_id: A("4500"), debit_pence: 0, credit_pence: regPence });
 
