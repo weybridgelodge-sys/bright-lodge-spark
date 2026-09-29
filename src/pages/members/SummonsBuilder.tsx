@@ -1003,7 +1003,21 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
       </Section>
 
       {attachable.length > 0 && (
-...
+        <div className="rounded border border-gold/40 bg-gold/10 p-3 space-y-2 text-sm">
+          <label className="flex items-center gap-2 cursor-pointer">
+            <Checkbox checked={attachOn} onCheckedChange={(v) => setAttachOn(v === true)} aria-label="Attach approved annual accounts" />
+            <span className="text-primary-foreground">
+              {attachable.length === 1 ? accountsOptionLabel(attachable[0]) : "Attach approved annual accounts"}
+            </span>
+          </label>
+          {attachable.length > 1 && (
+            <Select value={attachId} onValueChange={setAttachId}>
+              <SelectTrigger className="max-w-md"><SelectValue placeholder="Choose which year" /></SelectTrigger>
+              <SelectContent>
+                {attachable.map((a) => <SelectItem key={a.approval_id} value={a.approval_id}>{accountsOptionLabel(a)}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          )}
           <p className="text-xs text-primary-foreground/60">
             Sent as a second download link in the summons email, separate from the summons itself. Test emails include it too, but only a real send records the accounts as sent.
             {alreadySent && " This summons has already been sent, so the accounts link will appear on test emails only."}
