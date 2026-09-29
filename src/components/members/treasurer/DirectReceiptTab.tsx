@@ -499,6 +499,8 @@ export default function DirectReceiptTab({ canEdit }: { canEdit: boolean }) {
               <div className="mt-4 rounded-md border border-gold/20 p-3 text-sm">
                 {mode === "in_year" ? (
                   <p className="text-primary-foreground/80">Dr 1000 Bank {fmt(toPence(amount))} · Cr 1100 Debtors {fmt(toPence(amount))}</p>
+                ) : mode === "advance" ? (
+                  <p className="text-primary-foreground/80">Dr 1000 Bank {fmt(toPence(amount))} · Cr 2100 Deferred Income — Subscriptions in Advance {fmt(toPence(amount))}</p>
                 ) : split ? (
                   <ul className="space-y-1 text-primary-foreground/80">
                     <li>Dr 1000 Bank {fmt(toPence(amount))}</li>
