@@ -62,3 +62,23 @@ export function nextStatus(a: Approval, sigs: Signoff[]): AuditStatus {
 
 export const confirmWording = (year: number) =>
   `By confirming, you are certifying that you have examined the accounts for the year ended 30 September ${year + 1} and believe them accurate. This is recorded against your name and cannot be undone.`;
+
+/* ---------- Stage 4: accounts distributed with a summons ---------- */
+export type AccountsDistribution = "sent" | "on_track" | "past_feb" | "past_may";
+/** Accounts for FY y (ends 30 Sep y+1) are due by the third meeting after year-end: February y+2. */
+export const accountsTargetLabel = (year: number) => `February ${year + 2} meeting`;
+export function accountsDistributionStatus(year: number, sentAt: string | null | undefined, todayIso: string): AccountsDistribution {
+  if (sentAt) return "sent";
+  const d = todayIso.slice(0, 10);
+  if (d > `${year + 2}-05-31`) return "past_may";
+  if (d > `${year + 2}-02-${(year + 2) % 4 === 0 ? "29" : "28"}`) return "past_feb";
+  return "on_track";
+}
+export type AttachableAccounts = { approval_id: string; masonic_year: number; certified_at: string | null };
+export const accountsOptionLabel = (a: AttachableAccounts) => {
+  const fy = `FY${a.masonic_year}/${String(a.masonic_year + 1).slice(-2)}`;
+  const d = a.certified_at
+    ? new Date(a.certified_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "Europe/London" })
+    : null;
+  return `Attach ${fy} accounts${d ? `, certified ${d}` : ""}`;
+};
