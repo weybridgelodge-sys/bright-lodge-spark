@@ -7,6 +7,7 @@ import CreditorDebtorBalances from "@/components/members/treasurer/CreditorDebto
 import DirectPaymentTab from "@/components/members/treasurer/DirectPaymentTab";
 import DirectReceiptTab from "@/components/members/treasurer/DirectReceiptTab";
 import NewMemberFeesTab from "@/components/members/treasurer/NewMemberFeesTab";
+import SubscriptionAccrualPanel from "@/components/members/treasurer/SubscriptionAccrualPanel";
 import GeneralJournalTab from "@/components/members/treasurer/GeneralJournalTab";
 import IncomeExpenditureReport from "@/components/members/treasurer/IncomeExpenditureReport";
 import BalanceSheetReport from "@/components/members/treasurer/BalanceSheetReport";
@@ -492,6 +493,7 @@ function Inner() {
           {canEditTx && (
             <TabsContent value="direct-receipt" className="mt-4">
               <DirectReceiptTab canEdit={canEditTx} />
+              <div className="mt-6"><SubscriptionAccrualPanel canEdit={canEditTx} /></div>
             </TabsContent>
           )}
           {canEditTx && (

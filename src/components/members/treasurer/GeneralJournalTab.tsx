@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
 import { Loader2, Plus, Trash2 } from "lucide-react";
+import { fetchReservePots, type ReservePot } from "@/lib/treasurer/subscriptionSettings";
 
 type Account = { id: string; code: string; name: string; account_type?: string };
 
@@ -17,10 +18,11 @@ type LineRow = {
   side: "dr" | "cr";
   amount: string;
   description: string;
+  fundCode: string;
 };
 
 let nextKey = 1;
-const blankLine = (): LineRow => ({ key: nextKey++, accountId: "", side: "dr", amount: "0.00", description: "" });
+const blankLine = (): LineRow => ({ key: nextKey++, accountId: "", side: "dr", amount: "0.00", description: "", fundCode: "" });
 
 const money = (pence: number) =>
   `£${(pence / 100).toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -35,12 +37,15 @@ export default function GeneralJournalTab({ canEdit }: { canEdit: boolean }) {
   const [description, setDescription] = useState("");
   const [lines, setLines] = useState<LineRow[]>([blankLine(), blankLine()]);
   const [saving, setSaving] = useState(false);
+  const [pots, setPots] = useState<ReservePot[]>([]);
 
   const load = useCallback(async () => {
     setLoading(true);
-    const [{ data: accts, error: acctErr }] = await Promise.all([
+    const [{ data: accts, error: acctErr }, potRows] = await Promise.all([
       supabase.from("chart_of_accounts" as any).select("id,code,name,account_type").order("code"),
+      fetchReservePots(),
     ]);
+    setPots(potRows);
     if (acctErr) toast({ title: "Could not load accounts", description: acctErr.message, variant: "destructive" });
     setAccounts(((accts as any[]) ?? []) as Account[]);
     setLoading(false);
@@ -76,6 +81,11 @@ export default function GeneralJournalTab({ canEdit }: { canEdit: boolean }) {
     }
     if (!description.trim()) {
       toast({ title: "Enter a description for the entry", variant: "destructive" });
+      return;
+    }
+    const reservesId = accounts.find((a) => a.code === "3100")?.id;
+    if (reservesId && lines.some((l) => l.accountId === reservesId && !l.fundCode)) {
+      toast({ title: "Choose a reserve pot on every 3100 Designated Reserves line", variant: "destructive" });
       return;
     }
     if (lines.some((l) => !l.accountId)) {
@@ -117,6 +127,7 @@ export default function GeneralJournalTab({ canEdit }: { canEdit: boolean }) {
         debit_pence: l.side === "dr" ? pence : 0,
         credit_pence: l.side === "cr" ? pence : 0,
         description: l.description.trim() || null,
+        fund_code: l.accountId === accounts.find((a) => a.code === "3100")?.id ? l.fundCode || null : null,
       };
     });
 
@@ -202,6 +213,19 @@ export default function GeneralJournalTab({ canEdit }: { canEdit: boolean }) {
                     <Label className="text-xs">Line description (optional)</Label>
                     <Input value={line.description} onChange={(e) => updateLine(line.key, { description: e.target.value })} disabled={!canEdit} />
                   </div>
+                  {line.accountId && line.accountId === accounts.find((a) => a.code === "3100")?.id ? (
+                    <div className="sm:col-span-5 sm:order-last">
+                      <Label className="text-xs">Reserve pot</Label>
+                      <Select value={line.fundCode} onValueChange={(v) => updateLine(line.key, { fundCode: v })} disabled={!canEdit}>
+                        <SelectTrigger><SelectValue placeholder="Choose the reserve pot" /></SelectTrigger>
+                        <SelectContent>
+                          {pots.map((p) => (
+                            <SelectItem key={p.fund_code} value={p.fund_code}>{p.label} ({p.fund_code})</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  ) : null}
                   <Button
                     variant="ghost"
                     size="icon"

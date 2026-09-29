@@ -8,12 +8,17 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
 import { Checkbox } from "@/components/ui/checkbox";
+import type { ReactNode } from "react";
 import { Loader2, Plus, Trash2 } from "lucide-react";
+import { splitSubscription } from "@/lib/treasurer/subscriptionSplit";
 import { fetchReservePots, fetchSubscriptionSettings, type ReservePot } from "@/lib/treasurer/subscriptionSettings";
 
 const EXCLUDED_CODES = new Set(["4120", "4500"]);
 
 type Account = { id: string; code: string; name: string; account_type?: string };
+
+type SubMode = "none" | "in_year" | "candidate" | "clear_prepayment";
+type DebtorLine = { id: string; name: string; pence: number; entry_number: number | null };
 
 type ExtraLine = { key: string; accountId: string; direction: "debit" | "credit"; amount: string; description: string };
 
@@ -39,7 +44,11 @@ export default function DirectReceiptTab({ canEdit }: { canEdit: boolean }) {
   const [saving, setSaving] = useState(false);
 
   const [codeMap, setCodeMap] = useState<Map<string, string>>(new Map());
-  const [isRenewal, setIsRenewal] = useState(false);
+  const [mode, setMode] = useState<SubMode>("none");
+  const isRenewal = mode !== "none";
+  const [reliefPence, setReliefPence] = useState(1000);
+  const [debtorLines, setDebtorLines] = useState<DebtorLine[]>([]);
+  const [clearPick, setClearPick] = useState<Record<string, boolean>>({});
   const [memberName, setMemberName] = useState("");
   const [ageBracket, setAgeBracket] = useState<"over25" | "under25">("over25");
   const [pots, setPots] = useState<ReservePot[]>([]);
@@ -53,7 +62,10 @@ export default function DirectReceiptTab({ canEdit }: { canEdit: boolean }) {
       fetchSubscriptionSettings(),
     ]);
     setPots(potRows);
-    if (settings) setAnnualRatePence(settings.annual_rate_pence);
+    if (settings) {
+      setAnnualRatePence(settings.annual_rate_pence);
+      if (settings.relief_chest_pence != null) setReliefPence(settings.relief_chest_pence);
+    }
     if (acctErr) toast({ title: "Could not load accounts", description: acctErr.message, variant: "destructive" });
 
     const all = ((accts as any[]) ?? []) as Account[];
@@ -68,15 +80,45 @@ export default function DirectReceiptTab({ canEdit }: { canEdit: boolean }) {
 
   useEffect(() => { load(); }, [load]);
 
-  const reserveMultiplier = ageBracket === "under25" ? 0.5 : 1;
-  const reserveAllocations = useMemo(
-    () => pots.map((p) => ({ ...p, pence: Math.round(p.annual_pence * reserveMultiplier) })),
-    [pots, reserveMultiplier],
-  );
-  const reserveTotalPence = reserveAllocations.reduce((s, r) => s + r.pence, 0);
+  const under25 = ageBracket === "under25";
+  const split = useMemo(() => {
+    try { return splitSubscription(toPence(amount), under25, pots, reliefPence); } catch { return null; }
+  }, [amount, under25, pots, reliefPence]);
+
+  const loadDebtors = useCallback(async () => {
+    const acct1100 = codeMap.get("1100");
+    if (!acct1100) return;
+    const { data: dr } = await supabase
+      .from("journal_lines" as any)
+      .select("id,description,debit_pence,journal_entries!inner(entry_number,source_type,description)")
+      .eq("account_id", acct1100)
+      .gt("debit_pence", 0);
+    const { data: cr } = await supabase
+      .from("journal_lines" as any)
+      .select("description,credit_pence")
+      .eq("account_id", acct1100)
+      .gt("credit_pence", 0);
+    // Net credits already posted against each member name (by line text), oldest debit first.
+    const paid = new Map<string, number>();
+    for (const c of (cr as any[]) ?? []) {
+      const n = String(c.description ?? "").trim().toLowerCase();
+      paid.set(n, (paid.get(n) ?? 0) + c.credit_pence);
+    }
+    const out: DebtorLine[] = [];
+    for (const d of ((dr as any[]) ?? []).sort((x, y) => (x.journal_entries?.entry_number ?? 0) - (y.journal_entries?.entry_number ?? 0))) {
+      const name = String(d.description ?? "").trim();
+      const key = name.toLowerCase();
+      const used = Math.min(paid.get(key) ?? 0, d.debit_pence);
+      paid.set(key, (paid.get(key) ?? 0) - used);
+      if (d.debit_pence - used > 0) out.push({ id: d.id, name, pence: d.debit_pence - used, entry_number: d.journal_entries?.entry_number ?? null });
+    }
+    setDebtorLines(out);
+  }, [codeMap]);
+
+  useEffect(() => { if (mode === "clear_prepayment") loadDebtors(); }, [mode, loadDebtors]);
 
   useEffect(() => {
-    if (!isRenewal) return;
+    if (mode !== "candidate") return;
     setAmount((annualRatePence * (ageBracket === "under25" ? 0.5 : 1) / 100).toFixed(2));
   }, [isRenewal, ageBracket, annualRatePence]);
 
@@ -90,7 +132,7 @@ export default function DirectReceiptTab({ canEdit }: { canEdit: boolean }) {
       toast({ title: "Enter a positive amount", variant: "destructive" });
       return;
     }
-    const need = ["1000", "1100", "3000", "3100"].filter((c) => !codeMap.get(c));
+    const need = (mode === "in_year" ? ["1000", "1100"] : ["1000", "4000", "3100", "2200"]).filter((c) => !codeMap.get(c));
     if (need.length) {
       toast({ title: `Missing accounts: ${need.join(", ")}`, variant: "destructive" });
       return;
@@ -112,7 +154,7 @@ export default function DirectReceiptTab({ canEdit }: { canEdit: boolean }) {
 
     const postEntry = async (
       entry: Record<string, unknown>,
-      lines: { account_id: string; debit_pence: number; credit_pence: number; fund_code?: string }[],
+      lines: { account_id: string; debit_pence: number; credit_pence: number; fund_code?: string; description?: string }[],
       stage: string,
     ): Promise<boolean> => {
       const { data: e, error: entryErr } = await supabase
@@ -128,7 +170,7 @@ export default function DirectReceiptTab({ canEdit }: { canEdit: boolean }) {
       const id = (e as any).id as string;
       const { error: lineErr } = await supabase
         .from("journal_lines" as any)
-        .insert(lines.map((l) => ({ entry_id: id, fund_code: null, ...l, description: null })));
+        .insert(lines.map((l) => ({ entry_id: id, fund_code: null, description: null, ...l })));
       if (lineErr) {
         await supabase.from("journal_entries" as any).delete().eq("id", id);
         await rollbackAll();
@@ -139,43 +181,68 @@ export default function DirectReceiptTab({ canEdit }: { canEdit: boolean }) {
       return true;
     };
 
-    const ok1 = await postEntry(
-      {
-        description: `Subscription renewal — ${memberName.trim()}${ageBracket === "under25" ? " (under 25)" : ""}`,
-        source_type: "subscription_renewal",
-        document_number: documentNumber.trim() || null,
-        bank_reference: bankReference.trim() || null,
-      },
-      [
-        { account_id: A("1000"), debit_pence: bankPence, credit_pence: 0 },
-        { account_id: A("1100"), debit_pence: 0, credit_pence: bankPence },
-      ],
-      "the subscription receipt entry",
-    );
-    if (!ok1) { setSaving(false); return; }
-
-    if (reserveTotalPence > 0) {
-      const ok2 = await postEntry(
-        {
-          description: `Designated reserves allocation — ${memberName.trim()}`,
-          source_type: "reserve_allocation",
-        },
+    const who = `${memberName.trim()}${under25 ? " (under 25)" : ""}`;
+    let ok = false;
+    if (mode === "in_year") {
+      ok = await postEntry(
+        { description: `Subscription received — ${memberName.trim()}`, source_type: "subscription_renewal",
+          document_number: documentNumber.trim() || null, bank_reference: bankReference.trim() || null },
         [
-          { account_id: A("3000"), debit_pence: reserveTotalPence, credit_pence: 0 },
-          ...reserveAllocations
-            .filter((r) => r.pence > 0)
-            .map((r) => ({ account_id: A("3100"), debit_pence: 0, credit_pence: r.pence, fund_code: r.fund_code })),
+          { account_id: A("1000"), debit_pence: bankPence, credit_pence: 0 },
+          { account_id: A("1100"), debit_pence: 0, credit_pence: bankPence, description: memberName.trim() },
         ],
-        "the designated reserves entry",
+        "the subscription receipt entry",
       );
-      if (!ok2) { setSaving(false); return; }
+    } else {
+      if (!split) { toast({ title: "Amount is too small for the subscription split", variant: "destructive" }); setSaving(false); return; }
+      ok = await postEntry(
+        { description: `New candidate subscription — ${who}`, source_type: "subscription_candidate",
+          document_number: documentNumber.trim() || null, bank_reference: bankReference.trim() || null },
+        [
+          { account_id: A("1000"), debit_pence: bankPence, credit_pence: 0 },
+          ...split.filter((l) => l.pence > 0).map((l) => ({
+            account_id: A(l.code), debit_pence: 0, credit_pence: l.pence,
+            ...(l.fund_code ? { fund_code: l.fund_code } : {}),
+          })),
+        ],
+        "the candidate subscription entry",
+      );
     }
+    if (!ok) { setSaving(false); return; }
 
     setSaving(false);
     setMemberName("");
     setDocumentNumber("");
     setBankReference("");
-    toast({ title: "Subscription renewal posted", description: `${posted.length} ledger entries created.` });
+    toast({ title: mode === "in_year" ? "Subscription payment posted" : "Candidate subscription posted" });
+  };
+
+  const submitClear = async () => {
+    const chosen = debtorLines.filter((l) => clearPick[l.id]);
+    if (!chosen.length) { toast({ title: "Tick at least one member", variant: "destructive" }); return; }
+    const a2100 = codeMap.get("2100"); const a1100 = codeMap.get("1100");
+    if (!a2100 || !a1100) { toast({ title: "Accounts 2100 / 1100 not found", variant: "destructive" }); return; }
+    if (!openPeriodId) { toast({ title: "Choose a period to post into", variant: "destructive" }); return; }
+    setSaving(true);
+    const { data: u } = await supabase.auth.getUser();
+    const { data: e, error } = await supabase.from("journal_entries" as any).insert({
+      entry_date: date, period_id: openPeriodId, created_by: u.user?.id ?? null, source_type: "subscription_prepayment_clear",
+      description: `Prepayments cleared against subscription charges — ${chosen.map((c) => c.name).join(", ")}`,
+    }).select("id").single();
+    if (error || !e) { setSaving(false); toast({ title: "Save failed", description: error?.message, variant: "destructive" }); return; }
+    const id = (e as any).id as string;
+    const rows = chosen.flatMap((c) => [
+      { entry_id: id, account_id: a2100, debit_pence: c.pence, credit_pence: 0, description: c.name },
+      { entry_id: id, account_id: a1100, debit_pence: 0, credit_pence: c.pence, description: c.name },
+    ]);
+    const { error: le } = await supabase.from("journal_lines" as any).insert(rows);
+    if (le) {
+      await supabase.from("journal_entries" as any).delete().eq("id", id);
+      setSaving(false); toast({ title: "Save failed", description: le.message, variant: "destructive" }); return;
+    }
+    setSaving(false); setClearPick({});
+    toast({ title: `Cleared ${chosen.length} prepayment${chosen.length > 1 ? "s" : ""}` });
+    loadDebtors();
   };
 
   const onAmountChange = (v: string) => {
@@ -315,16 +382,36 @@ export default function DirectReceiptTab({ canEdit }: { canEdit: boolean }) {
           <p className="text-primary-foreground/60"><Loader2 className="w-4 h-4 mr-1 inline animate-spin" /> Loading…</p>
         ) : (
           <>
-            <div className="mb-4 flex items-center gap-2">
-              <Checkbox
-                id="dr-renewal"
-                checked={isRenewal}
-                onCheckedChange={(v) => setIsRenewal(v === true)}
-                disabled={!canEdit}
-              />
-              <Label htmlFor="dr-renewal" className="cursor-pointer">This is a subscription renewal payment</Label>
+            <div className="mb-4 max-w-xl">
+              <Label>What is this receipt?</Label>
+              <Select value={mode} onValueChange={(v) => setMode(v as SubMode)} disabled={!canEdit}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Not a subscription — ordinary receipt</SelectItem>
+                  <SelectItem value="in_year">Subscription: member paying a balance already charged in October</SelectItem>
+                  <SelectItem value="candidate">Subscription: new candidate&apos;s first payment (not yet charged)</SelectItem>
+                  <SelectItem value="clear_prepayment">Subscription: clear a prepayment now the year has been charged</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-primary-foreground/50 text-xs mt-1">
+                {mode === "in_year" && "Dr 1000 Bank · Cr 1100 Debtors. No split — the reserves and Relief Chest shares were posted when the year was charged."}
+                {mode === "candidate" && "Dr 1000 Bank · Cr 4000 Subscriptions, 3100 reserve pots (tagged) and 2200 Relief Chest — the full split, because no charge exists yet for this person."}
+                {mode === "clear_prepayment" && "No money moves: Dr 2100 Deferred Income · Cr 1100 Debtors for each member you tick, matched to their own charge."}
+              </p>
             </div>
 
+            {mode === "clear_prepayment" ? (
+              <ClearPrepayment
+                lines={debtorLines}
+                pick={clearPick}
+                setPick={setClearPick}
+                canEdit={canEdit}
+                saving={saving}
+                onSubmit={submitClear}
+                period={<PeriodPicker periods={posting.periods} value={posting.periodId} autoId={posting.autoId} onChange={posting.setPeriodId} disabled={!canEdit} />}
+                dateInput={<div><Label>Date</Label><Input type="date" value={date} onChange={(e) => setDate(e.target.value)} disabled={!canEdit} /></div>}
+              />
+            ) : (<>
             <div className="grid gap-3 sm:grid-cols-2">
               {!isRenewal ? (
                 <div className="sm:col-span-2">
@@ -348,7 +435,7 @@ export default function DirectReceiptTab({ canEdit }: { canEdit: boolean }) {
                     <Label>Member name</Label>
                     <Input value={memberName} onChange={(e) => setMemberName(e.target.value)} placeholder="e.g. John Smith" disabled={!canEdit} />
                   </div>
-                  <div>
+                  {mode === "candidate" && <div>
                     <Label>Member&apos;s age</Label>
                     <Select value={ageBracket} onValueChange={(v) => setAgeBracket(v as "over25" | "under25")} disabled={!canEdit}>
                       <SelectTrigger><SelectValue /></SelectTrigger>
@@ -357,7 +444,7 @@ export default function DirectReceiptTab({ canEdit }: { canEdit: boolean }) {
                         <SelectItem value="under25">Under 25</SelectItem>
                       </SelectContent>
                     </Select>
-                  </div>
+                  </div>}
                 </>
               )}
               <div>
@@ -397,19 +484,19 @@ export default function DirectReceiptTab({ canEdit }: { canEdit: boolean }) {
             </div>
 
             {isRenewal ? (
-              <div className="mt-4 grid gap-2 sm:grid-cols-2">
-                <div className="rounded-md border border-gold/20 p-3">
-                  <p className="text-primary-foreground/60 text-sm">Subscription received</p>
-                  <p className="text-gold font-semibold text-lg">{fmt(toPence(amount))}</p>
-                  <p className="text-primary-foreground/50 text-xs mt-1">Dr 1000 Bank · Cr 1100 Debtors — Subscriptions</p>
-                </div>
-                <div className="rounded-md border border-gold/20 p-3">
-                  <p className="text-primary-foreground/60 text-sm">Designated reserves allocation</p>
-                  <p className="text-gold font-semibold text-lg">{fmt(reserveTotalPence)}</p>
-                  <p className="text-primary-foreground/50 text-xs mt-1">
-                    {reserveAllocations.map((r) => `${r.label} ${fmt(r.pence)}`).join(" · ")}
-                  </p>
-                </div>
+              <div className="mt-4 rounded-md border border-gold/20 p-3 text-sm">
+                {mode === "in_year" ? (
+                  <p className="text-primary-foreground/80">Dr 1000 Bank {fmt(toPence(amount))} · Cr 1100 Debtors {fmt(toPence(amount))}</p>
+                ) : split ? (
+                  <ul className="space-y-1 text-primary-foreground/80">
+                    <li>Dr 1000 Bank {fmt(toPence(amount))}</li>
+                    {split.map((l) => (
+                      <li key={l.code + (l.fund_code ?? "")}>Cr {l.code} {l.label}{l.fund_code ? ` (${l.fund_code})` : ""} {fmt(l.pence)}</li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-destructive">The amount is smaller than the reserve and Relief Chest shares.</p>
+                )}
               </div>
             ) : (
               <>
@@ -474,16 +561,50 @@ export default function DirectReceiptTab({ canEdit }: { canEdit: boolean }) {
             <div className="mt-4">
               <Button
                 className="bg-gold text-navy hover:bg-gold/90"
-                disabled={!canEdit || saving || (!isRenewal && !balanced)}
+                disabled={!canEdit || saving || (!isRenewal && !balanced) || (mode === "candidate" && !split)}
                 onClick={isRenewal ? submitRenewal : submit}
               >
                 {saving && <Loader2 className="w-4 h-4 mr-1 animate-spin" />}
-                {isRenewal ? "Post subscription renewal" : "Record receipt"}
+                {isRenewal ? "Post subscription payment" : "Record receipt"}
               </Button>
             </div>
+            </>)}
           </>
         )}
       </section>
+    </div>
+  );
+}
+
+function ClearPrepayment({ lines, pick, setPick, canEdit, saving, onSubmit, period, dateInput }: {
+  lines: DebtorLine[]; pick: Record<string, boolean>; setPick: (p: Record<string, boolean>) => void;
+  canEdit: boolean; saving: boolean; onSubmit: () => void; period: ReactNode; dateInput: ReactNode;
+}) {
+  const total = lines.filter((l) => pick[l.id]).reduce((s, l) => s + l.pence, 0);
+  return (
+    <div className="space-y-3">
+      <div className="grid gap-3 sm:grid-cols-2">{dateInput}{period}</div>
+      <p className="text-primary-foreground/60 text-sm">
+        Outstanding subscription charges. Tick each member whose prepayment is sitting in 2100 Deferred Income — each gets its own pair of lines.
+      </p>
+      {lines.length === 0 ? (
+        <p className="text-primary-foreground/50 text-sm">No outstanding charges found.</p>
+      ) : (
+        <ul className="divide-y divide-gold/10 rounded border border-gold/10">
+          {lines.map((l) => (
+            <li key={l.id} className="flex items-center gap-3 px-3 py-2 text-sm">
+              <Checkbox id={`clr-${l.id}`} checked={!!pick[l.id]} disabled={!canEdit}
+                onCheckedChange={(v) => setPick({ ...pick, [l.id]: v === true })} />
+              <Label htmlFor={`clr-${l.id}`} className="flex-1 cursor-pointer">{l.name}</Label>
+              <span className="text-primary-foreground/50 text-xs">{l.entry_number ? `JE-${String(l.entry_number).padStart(6, "0")}` : ""}</span>
+              <span className="text-gold w-20 text-right">{fmt(l.pence)}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+      <Button className="bg-gold text-navy hover:bg-gold/90" disabled={!canEdit || saving || total === 0} onClick={onSubmit}>
+        {saving && <Loader2 className="w-4 h-4 mr-1 animate-spin" />}Clear {fmt(total)} of prepayments
+      </Button>
     </div>
   );
 }

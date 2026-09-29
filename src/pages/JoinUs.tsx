@@ -54,14 +54,14 @@ const costCards: CostCard[] = [
     title: "UGLE Registration",
     amount: "£132",
     note: "A one-off fee paid to the United Grand Lodge of England when you are initiated.",
-    badge: "50% off for under-21s",
+    badge: "50% off for under-25s",
   },
   {
     icon: CalendarDays,
     title: "Annual Subscription",
     amount: "£250 / year",
     note: "Pro-rated based on when you join during the Lodge year.",
-    badge: "50% off for under-21s",
+    badge: "50% off for under-25s",
   },
   {
     icon: Utensils,

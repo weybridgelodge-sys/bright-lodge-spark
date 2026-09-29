@@ -83,7 +83,7 @@ const faqCategories: FAQCategory[] = [
       {
         question: "What does membership cost?",
         answer:
-          "There is a one-off UGLE registration fee of £132 payable on initiation, and an annual subscription of £250 which supports Lodge activities and charitable giving. After each meeting, members dine together at the Festive Board — a three-course dinner at approximately £32. Other costs (bar, raffle) are entirely optional. Under-21s receive a 50% reduction on both the registration fee and annual subscription.",
+          "There is a one-off UGLE registration fee of £132 payable on initiation, and an annual subscription of £250 which supports Lodge activities and charitable giving. After each meeting, members dine together at the Festive Board — a three-course dinner at approximately £32. Other costs (bar, raffle) are entirely optional. Members under 25 receive a 50% reduction on both the registration fee and annual subscription.",
       },
       {
         question: "Can anyone join a Masonic Lodge in Surrey?",
