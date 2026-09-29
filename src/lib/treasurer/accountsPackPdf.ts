@@ -91,7 +91,7 @@ export async function buildAccountsPackPdf(src: PackSource, year: number, certif
       headStyles: { fillColor: GOLD, textColor: NAVY, fontStyle: "bold", halign: "right" },
       alternateRowStyles: { fillColor: [250, 247, 238] },
       theme: "grid",
-      columnStyles: { 0: { cellWidth: 275 }, 1: { cellWidth: 120, halign: "right" }, 2: { cellWidth: 120, halign: "right", textColor: MUTED } },
+      columnStyles: { 0: { cellWidth: 274 }, 1: { cellWidth: 120, halign: "right" }, 2: { cellWidth: 120, halign: "right", textColor: MUTED } },
       rowPageBreak: "avoid",
       didParseCell: (d) => {
         if (d.section === "head" && d.column.index === 0) d.cell.styles.halign = "left";
