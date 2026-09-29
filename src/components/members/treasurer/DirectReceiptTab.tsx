@@ -405,8 +405,9 @@ export default function DirectReceiptTab({ canEdit }: { canEdit: boolean }) {
                 </SelectContent>
               </Select>
               <p className="text-primary-foreground/50 text-xs mt-1">
-                {mode === "in_year" && "Dr 1000 Bank · Cr 1100 Debtors. No split — the reserves and Relief Chest shares were posted when the year was charged."}
                 {mode === "candidate" && "Dr 1000 Bank · Cr 4000 Subscriptions, 3100 reserve pots (tagged) and 2200 Relief Chest — the full split, because no charge exists yet for this person."}
+                {mode === "advance" && "Dr 1000 Bank · Cr 2100 Deferred Income. No split — nothing is recognised as income yet. Use \"clear an advance payment\" after October's charge to move it onto their account."}
+                {mode === "in_year" && "Dr 1000 Bank · Cr 1100 Debtors. No split — the reserves and Relief Chest shares were posted when the year was charged."}
                 {mode === "clear_prepayment" && "No money moves: Dr 2100 Deferred Income · Cr 1100 Debtors for each member you tick, matched to their own charge."}
               </p>
             </div>
