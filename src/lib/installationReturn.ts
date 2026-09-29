@@ -274,7 +274,7 @@ export function buildFieldSpecs(d: ReturnData): FieldSpec[] {
       { id: `Surname${tag}`, label: `${tag} surname`, value: surname(p).toUpperCase() },
       { id: `Forenames${tag}`, label: `${tag} forenames`, value: forenames(p).toUpperCase() },
       {
-        id: `Date of Installation/Investiture or reason for Absence${tag}`,
+        id: `Date of Installation Investiture or reason for Absence${tag}`,
         label: `${tag} date of installation / investiture`,
         value: tag === "IPM" ? "" : o.memberId ? instDate : "",
         match: (n) => n.toLowerCase().startsWith("date") && !n.toLowerCase().startsWith("date signed") && n.endsWith(tag),
@@ -311,7 +311,7 @@ export function buildFieldSpecs(d: ReturnData): FieldSpec[] {
 
 // Qualification-1 "Lodge No" matcher must not grab "Lodge Number"/"Lodge No_2"; exact names only for those.
 // Signature fields are listed so we can prove they are left untouched.
-export const NEVER_FILL = ["Worshipful MasterRow1", "SecretaryRow1", "Date of Disp"];
+export const NEVER_FILL = ["Worshipful MasterRow1", "SecretaryRow1", "Date of Disp", "LodgeHas the Secretary or his details changed YN"];
 
 export type FillReport = { filled: { id: string; field: string; fuzzy: boolean }[]; missing: string[]; templateFields: string[] };
 
