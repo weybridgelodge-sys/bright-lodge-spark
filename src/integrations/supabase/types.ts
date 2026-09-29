@@ -4437,6 +4437,8 @@ export type Database = {
       }
       treasurer_year_approvals: {
         Row: {
+          accounts_sent_at: string | null
+          accounts_sent_with_summons_id: string | null
           certified_pack_at: string | null
           certified_pack_path: string | null
           created_at: string
@@ -4451,6 +4453,8 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          accounts_sent_at?: string | null
+          accounts_sent_with_summons_id?: string | null
           certified_pack_at?: string | null
           certified_pack_path?: string | null
           created_at?: string
@@ -4465,6 +4469,8 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          accounts_sent_at?: string | null
+          accounts_sent_with_summons_id?: string | null
           certified_pack_at?: string | null
           certified_pack_path?: string | null
           created_at?: string
@@ -4478,7 +4484,15 @@ export type Database = {
           treasurer_remarks?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "treasurer_year_approvals_accounts_sent_with_summons_id_fkey"
+            columns: ["accounts_sent_with_summons_id"]
+            isOneToOne: false
+            referencedRelation: "summonses"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       treasurer_year_signoffs: {
         Row: {
@@ -5358,6 +5372,14 @@ export type Database = {
           status_changed_at: string
         }[]
       }
+      get_attachable_accounts: {
+        Args: never
+        Returns: {
+          approval_id: string
+          certified_at: string
+          masonic_year: number
+        }[]
+      }
       get_directory_contact_info: {
         Args: { _ids: string[] }
         Returns: {
@@ -5528,6 +5550,10 @@ export type Database = {
       promote_waitlisted_by_id: {
         Args: { _booking_id: string }
         Returns: boolean
+      }
+      record_accounts_sent: {
+        Args: { _approval_id: string; _summons_id: string }
+        Returns: undefined
       }
       record_certified_pack: {
         Args: { _approval_id: string; _path: string }
