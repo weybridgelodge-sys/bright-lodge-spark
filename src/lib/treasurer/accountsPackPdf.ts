@@ -83,15 +83,15 @@ export async function buildAccountsPackPdf(src: PackSource, year: number, certif
   const p = (v: number | null | undefined) => (st.hasPrior && v != null ? acct(v) : "");
   const rows = (ls: CompLine[]) => ls.map((l) => [`${l.code} — ${l.name}`, acct(l.cur), p(l.pri)]);
   const tot = (label: string, c: number, pr: number | null | undefined) => [label, acct(c), p(pr)];
-  const table = (yy: number, body: string[][], boldFrom: number) => {
+  const table = (yy: number, body: string[][], boldFrom: number, showAccountHeading = true) => {
     autoTable(doc, {
-      head, body, startY: yy,
+      head: [[showAccountHeading ? "Account" : "", curH, st.hasPrior ? priH : ""]], body, startY: yy,
       margin: { left: margin, right: margin, bottom: 60 },
       styles: { font: "helvetica", fontSize: 9, cellPadding: 5, textColor: INK, lineColor: [220, 215, 200], lineWidth: 0.4, overflow: "linebreak" },
       headStyles: { fillColor: GOLD, textColor: NAVY, fontStyle: "bold", halign: "right" },
       alternateRowStyles: { fillColor: [250, 247, 238] },
       theme: "grid",
-      columnStyles: { 0: { cellWidth: 275 }, 1: { cellWidth: 120, halign: "right" }, 2: { cellWidth: 120, halign: "right", textColor: MUTED } },
+      columnStyles: { 0: { cellWidth: 274 }, 1: { cellWidth: 120, halign: "right" }, 2: { cellWidth: 120, halign: "right", textColor: MUTED } },
       rowPageBreak: "avoid",
       didParseCell: (d) => {
         if (d.section === "head" && d.column.index === 0) d.cell.styles.halign = "left";
@@ -117,7 +117,7 @@ export async function buildAccountsPackPdf(src: PackSource, year: number, certif
     tot("General Fund brought forward", bs.fund_bf, pbs?.fund_bf),
     tot("Surplus/(deficit) for the year", bs.surplus, pbs?.surplus),
     tot("Total funds", bs.total_funds, pbs?.total_funds),
-  ], 2);
+  ], 2, false);
 
   // 4. Income & Expenditure
   doc.addPage();
@@ -130,7 +130,7 @@ export async function buildAccountsPackPdf(src: PackSource, year: number, certif
   y = table(y, [...rows(st.income), tot("Total income", ie.income, pie?.income)], st.income.length);
   y = reportSection(doc, pageW, margin, y, "Expenditure");
   y = table(y, [...rows(st.expense), tot("Total expenditure", ie.expenditure, pie?.expenditure)], st.expense.length);
-  table(y, [tot("Surplus/(deficit) for the year", ie.surplus, pie?.surplus)], 0);
+  table(y, [tot("Surplus/(deficit) for the year", ie.surplus, pie?.surplus)], 0, false);
 
   // 5. Certificate (approved only)
   if (!src.draft && certifiers.length) {
