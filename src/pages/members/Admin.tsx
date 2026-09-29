@@ -38,6 +38,7 @@ const DEGREE_LABEL: Record<Degree, string> = {
   entered_apprentice: "Entered Apprentice",
   fellow_craft: "Fellow Craft",
   master_mason: "Master Mason",
+  installed_master: "Installed Master",
 };
 
 type Profile = {
