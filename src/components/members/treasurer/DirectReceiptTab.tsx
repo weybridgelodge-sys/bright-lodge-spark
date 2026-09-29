@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "@/hooks/use-toast";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Loader2, Plus, Trash2 } from "lucide-react";
+import { splitSubscription } from "@/lib/treasurer/subscriptionSplit";
 import { fetchReservePots, fetchSubscriptionSettings, type ReservePot } from "@/lib/treasurer/subscriptionSettings";
 
 const EXCLUDED_CODES = new Set(["4120", "4500"]);
@@ -99,7 +100,7 @@ export default function DirectReceiptTab({ canEdit }: { canEdit: boolean }) {
     // Net credits already posted against each member name (by line text), oldest debit first.
     const paid = new Map<string, number>();
     for (const c of (cr as any[]) ?? []) {
-      const n = String(c.description ?? "").replace(/^Prepayment cleared — |^Subscription (renewal|received) — /, "").trim().toLowerCase();
+      const n = String(c.description ?? "").trim().toLowerCase();
       paid.set(n, (paid.get(n) ?? 0) + c.credit_pence);
     }
     const out: DebtorLine[] = [];
@@ -152,7 +153,7 @@ export default function DirectReceiptTab({ canEdit }: { canEdit: boolean }) {
 
     const postEntry = async (
       entry: Record<string, unknown>,
-      lines: { account_id: string; debit_pence: number; credit_pence: number; fund_code?: string }[],
+      lines: { account_id: string; debit_pence: number; credit_pence: number; fund_code?: string; description?: string }[],
       stage: string,
     ): Promise<boolean> => {
       const { data: e, error: entryErr } = await supabase
@@ -168,7 +169,7 @@ export default function DirectReceiptTab({ canEdit }: { canEdit: boolean }) {
       const id = (e as any).id as string;
       const { error: lineErr } = await supabase
         .from("journal_lines" as any)
-        .insert(lines.map((l) => ({ entry_id: id, fund_code: null, ...l, description: null })));
+        .insert(lines.map((l) => ({ entry_id: id, fund_code: null, description: null, ...l })));
       if (lineErr) {
         await supabase.from("journal_entries" as any).delete().eq("id", id);
         await rollbackAll();
@@ -187,7 +188,7 @@ export default function DirectReceiptTab({ canEdit }: { canEdit: boolean }) {
           document_number: documentNumber.trim() || null, bank_reference: bankReference.trim() || null },
         [
           { account_id: A("1000"), debit_pence: bankPence, credit_pence: 0 },
-          { account_id: A("1100"), debit_pence: 0, credit_pence: bankPence },
+          { account_id: A("1100"), debit_pence: 0, credit_pence: bankPence, description: memberName.trim() },
         ],
         "the subscription receipt entry",
       );
