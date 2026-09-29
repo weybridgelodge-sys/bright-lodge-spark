@@ -277,7 +277,7 @@ export function buildFieldSpecs(d: ReturnData): FieldSpec[] {
         id: `Date of Installation/Investiture or reason for Absence${tag}`,
         label: `${tag} date of installation / investiture`,
         value: tag === "IPM" ? "" : o.memberId ? instDate : "",
-        match: (n) => n.toLowerCase().startsWith("date") && n.endsWith(tag) && !n.endsWith(`I${tag}`) === (tag !== "PM"),
+        match: (n) => n.toLowerCase().startsWith("date") && !n.toLowerCase().startsWith("date signed") && n.endsWith(tag),
       },
     );
   }
