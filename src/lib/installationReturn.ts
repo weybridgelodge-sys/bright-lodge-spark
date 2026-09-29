@@ -313,10 +313,31 @@ export const NEVER_FILL = ["Worshipful MasterRow1", "SecretaryRow1", "Date of Di
 
 export type FillReport = { filled: { id: string; field: string; fuzzy: boolean }[]; missing: string[]; templateFields: string[] };
 
+/** Some fields (e.g. "Treasurer Lodge Email Address") are authored as widgets that inherit
+ *  /FT from their parent node instead of setting it directly. pdf-lib classifies fields by the
+ *  field node's own /FT, so copy the parent's /FT down onto any field dict that lacks it. */
+function resolveInheritedFieldTypes(pdf: PDFDocument) {
+  for (const [, obj] of pdf.context.enumerateIndirectObjects()) {
+    if (!(obj instanceof PDFDict)) continue;
+    if (!obj.has(PDFName.of("T")) || obj.has(PDFName.of("FT"))) continue;
+    const parent = obj.lookup(PDFName.of("Parent"));
+    if (parent instanceof PDFDict && parent.has(PDFName.of("FT"))) {
+      obj.set(PDFName.of("FT"), parent.get(PDFName.of("FT"))!);
+    }
+  }
+}
+
 export async function fillTemplate(templateBytes: ArrayBuffer | Uint8Array, specs: FieldSpec[]): Promise<{ bytes: Uint8Array; report: FillReport }> {
   const pdf = await PDFDocument.load(templateBytes);
+  resolveInheritedFieldTypes(pdf);
   const form = pdf.getForm();
-  const names = form.getFields().map((f) => f.getName());
+  let names: string[];
+  try {
+    names = form.getFields().map((f) => f.getName());
+  } catch {
+    // A field pdf-lib still cannot classify — list names from the raw field tree instead.
+    names = form.acroForm.getAllFields().map((f) => f.getName());
+  }
   const used = new Set<string>();
   const report: FillReport = { filled: [], missing: [], templateFields: names };
   for (const s of specs) {
@@ -329,10 +350,16 @@ export async function fillTemplate(templateBytes: ArrayBuffer | Uint8Array, spec
     if (!name) { report.missing.push(s.id); continue; }
     used.add(name);
     if (NEVER_FILL.includes(name)) continue;
-    const f = form.getField(name);
-    if (f instanceof PDFTextField) {
-      f.setText(s.value || "");
-      report.filled.push({ id: s.id, field: name, fuzzy });
+    try {
+      const f = form.getField(name);
+      if (f instanceof PDFTextField) {
+        f.setText(s.value || "");
+        report.filled.push({ id: s.id, field: name, fuzzy });
+      } else {
+        report.missing.push(`${s.id} (not a text field)`);
+      }
+    } catch {
+      report.missing.push(`${s.id} (field unreadable)`);
     }
   }
   const bytes = await pdf.save();
