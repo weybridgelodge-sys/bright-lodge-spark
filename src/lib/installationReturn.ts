@@ -1,6 +1,6 @@
 // UGLE Installation Return — live resolver + AcroForm filler.
 // Every call reads current database state; nothing is cached.
-import { PDFDocument, PDFTextField } from "pdf-lib";
+import { PDFDocument, PDFTextField, PDFName, PDFDict } from "pdf-lib";
 import { supabase } from "@/integrations/supabase/client";
 import { computeProjection, type Appointment, type MemberLite, type PositionKey } from "@/lib/officersProgression";
 
@@ -11,8 +11,8 @@ export const TEMPLATE_BUCKET = "secretary-returns";
 export const TEMPLATE_PATH = "templates/New_IR_Craft.pdf";
 export const MEMBERSHIP_EMAIL_SETTING = "installation_return_membership_officer_email";
 export const MEMBERSHIP_EMAIL_OPTIONS = [
-  `membershipofficer@${LODGE_EMAIL_DOMAIN}`,
   `membershipsecretary@${LODGE_EMAIL_DOMAIN}`,
+  `membershipofficer@${LODGE_EMAIL_DOMAIN}`,
 ];
 
 /** confirmed = saved, non-projection row for this year; planned = saved ladder projection row;
@@ -204,7 +204,7 @@ export async function loadReturnData(year: number): Promise<ReturnData> {
 
   const settingVal = (settingRes.data?.value as string | undefined) ?? null;
   const membershipLodgeEmail = settingVal || MEMBERSHIP_EMAIL_OPTIONS[0];
-  if (!settingVal) issues.push("Membership Officer lodge email has not been chosen yet; using membershipofficer@ until it is.");
+  if (!settingVal) issues.push("Membership Officer lodge email has not been chosen yet; using membershipsecretary@ until it is.");
 
   for (const o of [wm, sw, jw, ipm, ...officers]) {
     if (o.memberId && !byId[o.memberId]?.email) issues.push(`${o.label}: no personal email on their profile.`);
@@ -297,10 +297,8 @@ export function buildFieldSpecs(d: ReturnData): FieldSpec[] {
     specs.push(
       { id: `Name Block Letters${role}`, label: `${role} name`, value: blockName(p), match: (n) => has("name", "block")(n) && n.toLowerCase().includes(role.toLowerCase()) },
       { id: `${role} Personal Email Address`, label: `${role} personal email`, value: p?.email ?? "", match: has(role, "personal") },
+      { id: `${role} Lodge Email Address`, label: `${role} lodge email`, value: lodgeEmail, match: has(role, "lodge email") },
     );
-    if (o.key !== "treasurer") {
-      specs.push({ id: `${role} Lodge Email Address`, label: `${role} lodge email`, value: lodgeEmail, match: has(role, "lodge email") });
-    }
   }
   specs.push(
     { id: "Date Signed", label: "Date signed (Master)", value: instDate },
@@ -315,10 +313,31 @@ export const NEVER_FILL = ["Worshipful MasterRow1", "SecretaryRow1", "Date of Di
 
 export type FillReport = { filled: { id: string; field: string; fuzzy: boolean }[]; missing: string[]; templateFields: string[] };
 
+/** Some fields (e.g. "Treasurer Lodge Email Address") are authored as widgets that inherit
+ *  /FT from their parent node instead of setting it directly. pdf-lib classifies fields by the
+ *  field node's own /FT, so copy the parent's /FT down onto any field dict that lacks it. */
+function resolveInheritedFieldTypes(pdf: PDFDocument) {
+  for (const [, obj] of pdf.context.enumerateIndirectObjects()) {
+    if (!(obj instanceof PDFDict)) continue;
+    if (!obj.has(PDFName.of("T")) || obj.has(PDFName.of("FT"))) continue;
+    const parent = obj.lookup(PDFName.of("Parent"));
+    if (parent instanceof PDFDict && parent.has(PDFName.of("FT"))) {
+      obj.set(PDFName.of("FT"), parent.get(PDFName.of("FT"))!);
+    }
+  }
+}
+
 export async function fillTemplate(templateBytes: ArrayBuffer | Uint8Array, specs: FieldSpec[]): Promise<{ bytes: Uint8Array; report: FillReport }> {
   const pdf = await PDFDocument.load(templateBytes);
+  resolveInheritedFieldTypes(pdf);
   const form = pdf.getForm();
-  const names = form.getFields().map((f) => f.getName());
+  let names: string[];
+  try {
+    names = form.getFields().map((f) => f.getName());
+  } catch {
+    // A field pdf-lib still cannot classify — list names from the raw field tree instead.
+    names = form.acroForm.getAllFields().map(([f]) => f.dict.lookup(PDFName.of("T"))?.toString() ?? "");
+  }
   const used = new Set<string>();
   const report: FillReport = { filled: [], missing: [], templateFields: names };
   for (const s of specs) {
@@ -331,10 +350,16 @@ export async function fillTemplate(templateBytes: ArrayBuffer | Uint8Array, spec
     if (!name) { report.missing.push(s.id); continue; }
     used.add(name);
     if (NEVER_FILL.includes(name)) continue;
-    const f = form.getField(name);
-    if (f instanceof PDFTextField) {
-      f.setText(s.value || "");
-      report.filled.push({ id: s.id, field: name, fuzzy });
+    try {
+      const f = form.getField(name);
+      if (f instanceof PDFTextField) {
+        f.setText(s.value || "");
+        report.filled.push({ id: s.id, field: name, fuzzy });
+      } else {
+        report.missing.push(`${s.id} (not a text field)`);
+      }
+    } catch {
+      report.missing.push(`${s.id} (field unreadable)`);
     }
   }
   const bytes = await pdf.save();
