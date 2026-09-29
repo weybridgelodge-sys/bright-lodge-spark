@@ -241,6 +241,9 @@ Deno.serve(async (req) => {
             secretaryTitle,
             secretaryOffice: "Secretary",
             isTest,
+            accountsUrl,
+            accountsYearLabel,
+            accountsCertifiedLabel,
           },
         });
         if (!res.ok) throw new Error(String((res.error as any) ?? `HTTP ${res.status}`));
@@ -274,9 +277,15 @@ Deno.serve(async (req) => {
           status: "sent",
         })
         .eq("id", summons.id);
+      if (accounts) {
+        const { error: recErr } = await admin.rpc("record_accounts_sent", {
+          _approval_id: accounts.id, _summons_id: summons.id,
+        });
+        if (recErr) console.error("record_accounts_sent failed", recErr);
+      }
     }
 
-    return json({ ok: true, test: isTest, sent, recipients: recipients.length, failures });
+    return json({ ok: true, test: isTest, accounts_included: !!accounts, sent, recipients: recipients.length, failures });
   } catch (e) {
     console.error(e);
     return json({ error: (e as Error).message }, 500);
