@@ -17,7 +17,7 @@ const EXCLUDED_CODES = new Set(["4120", "4500"]);
 
 type Account = { id: string; code: string; name: string; account_type?: string };
 
-type SubMode = "none" | "in_year" | "candidate" | "clear_prepayment";
+type SubMode = "none" | "candidate" | "advance" | "in_year" | "clear_prepayment";
 type DebtorLine = { id: string; name: string; pence: number; entry_number: number | null };
 
 type ExtraLine = { key: string; accountId: string; direction: "debit" | "credit"; amount: string; description: string };
@@ -132,7 +132,7 @@ export default function DirectReceiptTab({ canEdit }: { canEdit: boolean }) {
       toast({ title: "Enter a positive amount", variant: "destructive" });
       return;
     }
-    const need = (mode === "in_year" ? ["1000", "1100"] : ["1000", "4000", "3100", "2200"]).filter((c) => !codeMap.get(c));
+    const need = (mode === "candidate" ? ["1000", "4000", "3100", "2200"] : mode === "advance" ? ["1000", "2100"] : ["1000", "1100"]).filter((c) => !codeMap.get(c));
     if (need.length) {
       toast({ title: `Missing accounts: ${need.join(", ")}`, variant: "destructive" });
       return;
@@ -193,6 +193,16 @@ export default function DirectReceiptTab({ canEdit }: { canEdit: boolean }) {
         ],
         "the subscription receipt entry",
       );
+    } else if (mode === "advance") {
+      ok = await postEntry(
+        { description: `Subscription paid in advance — ${memberName.trim()}`, source_type: "subscription_advance",
+          document_number: documentNumber.trim() || null, bank_reference: bankReference.trim() || null },
+        [
+          { account_id: A("1000"), debit_pence: bankPence, credit_pence: 0 },
+          { account_id: A("2100"), debit_pence: 0, credit_pence: bankPence, description: memberName.trim() },
+        ],
+        "the advance subscription entry",
+      );
     } else {
       if (!split) { toast({ title: "Amount is too small for the subscription split", variant: "destructive" }); setSaving(false); return; }
       ok = await postEntry(
@@ -214,7 +224,7 @@ export default function DirectReceiptTab({ canEdit }: { canEdit: boolean }) {
     setMemberName("");
     setDocumentNumber("");
     setBankReference("");
-    toast({ title: mode === "in_year" ? "Subscription payment posted" : "Candidate subscription posted" });
+    toast({ title: mode === "in_year" ? "Subscription payment posted" : mode === "advance" ? "Advance subscription posted to Deferred Income" : "Candidate subscription posted" });
   };
 
   const submitClear = async () => {
@@ -388,14 +398,16 @@ export default function DirectReceiptTab({ canEdit }: { canEdit: boolean }) {
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">Not a subscription — ordinary receipt</SelectItem>
+                  <SelectItem value="candidate">Subscription: new candidate&apos;s first payment (not yet a member, never charged)</SelectItem>
+                  <SelectItem value="advance">Subscription: existing member paying in advance, before this year&apos;s charge exists</SelectItem>
                   <SelectItem value="in_year">Subscription: member paying a balance already charged in October</SelectItem>
-                  <SelectItem value="candidate">Subscription: new candidate&apos;s first payment (not yet charged)</SelectItem>
-                  <SelectItem value="clear_prepayment">Subscription: clear a prepayment now the year has been charged</SelectItem>
+                  <SelectItem value="clear_prepayment">Subscription: clear an advance payment now the year has been charged</SelectItem>
                 </SelectContent>
               </Select>
               <p className="text-primary-foreground/50 text-xs mt-1">
-                {mode === "in_year" && "Dr 1000 Bank · Cr 1100 Debtors. No split — the reserves and Relief Chest shares were posted when the year was charged."}
                 {mode === "candidate" && "Dr 1000 Bank · Cr 4000 Subscriptions, 3100 reserve pots (tagged) and 2200 Relief Chest — the full split, because no charge exists yet for this person."}
+                {mode === "advance" && "Dr 1000 Bank · Cr 2100 Deferred Income. No split — nothing is recognised as income yet. Use \"clear an advance payment\" after October's charge to move it onto their account."}
+                {mode === "in_year" && "Dr 1000 Bank · Cr 1100 Debtors. No split — the reserves and Relief Chest shares were posted when the year was charged."}
                 {mode === "clear_prepayment" && "No money moves: Dr 2100 Deferred Income · Cr 1100 Debtors for each member you tick, matched to their own charge."}
               </p>
             </div>
@@ -487,6 +499,8 @@ export default function DirectReceiptTab({ canEdit }: { canEdit: boolean }) {
               <div className="mt-4 rounded-md border border-gold/20 p-3 text-sm">
                 {mode === "in_year" ? (
                   <p className="text-primary-foreground/80">Dr 1000 Bank {fmt(toPence(amount))} · Cr 1100 Debtors {fmt(toPence(amount))}</p>
+                ) : mode === "advance" ? (
+                  <p className="text-primary-foreground/80">Dr 1000 Bank {fmt(toPence(amount))} · Cr 2100 Deferred Income — Subscriptions in Advance {fmt(toPence(amount))}</p>
                 ) : split ? (
                   <ul className="space-y-1 text-primary-foreground/80">
                     <li>Dr 1000 Bank {fmt(toPence(amount))}</li>
