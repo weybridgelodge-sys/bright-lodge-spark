@@ -297,10 +297,8 @@ export function buildFieldSpecs(d: ReturnData): FieldSpec[] {
     specs.push(
       { id: `Name Block Letters${role}`, label: `${role} name`, value: blockName(p), match: (n) => has("name", "block")(n) && n.toLowerCase().includes(role.toLowerCase()) },
       { id: `${role} Personal Email Address`, label: `${role} personal email`, value: p?.email ?? "", match: has(role, "personal") },
+      { id: `${role} Lodge Email Address`, label: `${role} lodge email`, value: lodgeEmail, match: has(role, "lodge email") },
     );
-    if (o.key !== "treasurer") {
-      specs.push({ id: `${role} Lodge Email Address`, label: `${role} lodge email`, value: lodgeEmail, match: has(role, "lodge email") });
-    }
   }
   specs.push(
     { id: "Date Signed", label: "Date signed (Master)", value: instDate },
