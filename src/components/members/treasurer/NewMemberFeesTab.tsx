@@ -251,7 +251,9 @@ export default function NewMemberFeesTab({ canEdit }: { canEdit: boolean }) {
         <h2 className="font-serif text-lg text-gold mb-1">New Member Fees</h2>
         <p className="text-primary-foreground/60 text-sm mb-4">
           Records the one-off money received from a newly-initiated member: prorated first subscription plus UGLE and
-          PGL registration fees. Posts the receipt to the bank and recognises what is owed onward.
+          PGL registration fees. Posts one receipt split across 4000 Subscriptions (prorated remainder), the three 3100
+          reserve pots and 2200 Relief Chest (always full annual shares), plus 4500 registration fees, and recognises what
+          is owed onward to UGLE and PGL.
         </p>
 
         {loading ? (

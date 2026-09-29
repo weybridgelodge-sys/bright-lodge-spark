@@ -29,4 +29,15 @@ describe("subscription split", () => {
   it("rejects an amount below the shares", () => {
     expect(() => splitSubscription(1000, false, pots, 1000)).toThrow();
   });
+  it("new member prorated: reserves and Relief Chest stay full, 4000 takes the rest", () => {
+    // May initiation (25%): over-25 £62.50, under-25 £31.25
+    const o = splitSubscription(6250, false, pots, 1000);
+    expect(by(o, "3100")).toBe(2900);
+    expect(by(o, "2200")).toBe(1000);
+    expect(by(o, "4000")).toBe(2350);
+    const u = splitSubscription(3125, true, pots, 1000);
+    expect(by(u, "3100")).toBe(1450);
+    expect(by(u, "2200")).toBe(500);
+    expect(by(u, "4000")).toBe(1175);
+  });
 });
