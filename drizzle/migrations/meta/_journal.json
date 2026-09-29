@@ -393,6 +393,13 @@
       "when": 1790684422625,
       "tag": "0055_subscription_split_accrual",
       "breakpoints": true
+    },
+    {
+      "idx": 56,
+      "version": "7",
+      "when": 1790686778145,
+      "tag": "0056_honorary_member_subscription_exemption",
+      "breakpoints": true
     }
   ]
 }
