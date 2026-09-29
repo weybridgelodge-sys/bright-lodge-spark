@@ -28,6 +28,7 @@ function Inner() {
     { to: "/members/admin/minutes", title: "Minutes & Agenda Generator", description: "AI-drafted from your meeting transcript, then reviewed and approved — Regular and Committee minutes, Committee agendas, action items, and the source transcript kept alongside.", icon: NotebookPen, visible: canManageSummons },
     { to: "/members/officers-tracker", title: "Officers Tracker", description: "Officer progression, succession risk, and appointment tracking.", icon: Crown, visible: canManageProgression },
     { to: "/members/admin/returns", title: "Returns & Certificates", description: "UGLE and Provincial forms — Form P, LP&A5, clearance letters, change of status, Installation and Provincial Returns.", icon: FileCheck, visible: isAdmin || isSecretary || isAssistantSecretary || isWorshipfulMaster },
+    { to: "/members/admin/installation-return", title: "UGLE Installation Return", description: "Live review of the officers, dates and emails, then fill the official UGLE form.", icon: FileCheck, visible: isAdmin || isSecretary || isAssistantSecretary || isWorshipfulMaster || canManageSummons },
     { to: "/members/summons", title: "Summons Builder", description: "Build, preview and circulate the Lodge summons.", icon: Mail, visible: true },
   ];
 
