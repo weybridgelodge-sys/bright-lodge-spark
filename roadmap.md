@@ -18,3 +18,10 @@
 - [x] Verify and fix Year End at 320px
 - [x] Verify and fix General Journal at 320px
 - [x] Run the full test suite and confirm a clean preview build
+
+## Enforced portal mobile regression standard
+- [ ] Add the 320px verification rule to AGENTS.md
+- [ ] Add route-driven automated browser overflow coverage for Treasurer and Secretary tools
+- [ ] Establish or document the safest reliable authenticated test-session mechanism
+- [ ] Include the browser check in the normal test command
+- [ ] Run the full suite and confirm a clean build
