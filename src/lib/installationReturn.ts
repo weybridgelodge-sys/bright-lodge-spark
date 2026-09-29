@@ -336,7 +336,7 @@ export async function fillTemplate(templateBytes: ArrayBuffer | Uint8Array, spec
     names = form.getFields().map((f) => f.getName());
   } catch {
     // A field pdf-lib still cannot classify — list names from the raw field tree instead.
-    names = form.acroForm.getAllFields().map((f) => f.getName());
+    names = form.acroForm.getAllFields().map(([f]) => f.getName());
   }
   const used = new Set<string>();
   const report: FillReport = { filled: [], missing: [], templateFields: names };
