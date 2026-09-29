@@ -164,7 +164,7 @@ export default function GeneralJournalTab({ canEdit }: { canEdit: boolean }) {
           <p className="text-primary-foreground/60"><Loader2 className="w-4 h-4 mr-1 inline animate-spin" /> Loading…</p>
         ) : (
           <>
-            <div className="grid gap-3 sm:grid-cols-2 mb-5">
+            <div className="grid gap-3 sm:grid-cols-2 mb-5 [&>*]:min-w-0">
               <div>
                 <Label>Date</Label>
                 <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} disabled={!canEdit} />

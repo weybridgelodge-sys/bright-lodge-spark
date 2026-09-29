@@ -396,12 +396,12 @@ export default function DirectReceiptTab({ canEdit }: { canEdit: boolean }) {
               <Label>What is this receipt?</Label>
               <Select value={mode} onValueChange={(v) => setMode(v as SubMode)} disabled={!canEdit}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">Not a subscription — ordinary receipt</SelectItem>
-                  <SelectItem value="candidate">Subscription: new candidate&apos;s first payment (not yet a member, never charged)</SelectItem>
-                  <SelectItem value="advance">Subscription: existing member paying in advance, before this year&apos;s charge exists</SelectItem>
-                  <SelectItem value="in_year">Subscription: member paying a balance already charged in October</SelectItem>
-                  <SelectItem value="clear_prepayment">Subscription: clear an advance payment now the year has been charged</SelectItem>
+                <SelectContent className="max-w-[calc(100vw-2rem)]">
+                  <SelectItem className="whitespace-normal" value="none">Not a subscription — ordinary receipt</SelectItem>
+                  <SelectItem className="whitespace-normal" value="candidate">Subscription: new candidate&apos;s first payment (not yet a member, never charged)</SelectItem>
+                  <SelectItem className="whitespace-normal" value="advance">Subscription: existing member paying in advance, before this year&apos;s charge exists</SelectItem>
+                  <SelectItem className="whitespace-normal" value="in_year">Subscription: member paying a balance already charged in October</SelectItem>
+                  <SelectItem className="whitespace-normal" value="clear_prepayment">Subscription: clear an advance payment now the year has been charged</SelectItem>
                 </SelectContent>
               </Select>
               <p className="break-words text-primary-foreground/50 text-xs mt-1">
@@ -424,7 +424,7 @@ export default function DirectReceiptTab({ canEdit }: { canEdit: boolean }) {
                 dateInput={<div><Label>Date</Label><Input type="date" value={date} onChange={(e) => setDate(e.target.value)} disabled={!canEdit} /></div>}
               />
             ) : (<>
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid gap-3 sm:grid-cols-2 [&>*]:min-w-0">
               {!isRenewal ? (
                 <div className="sm:col-span-2">
                   <Label>Income account</Label>

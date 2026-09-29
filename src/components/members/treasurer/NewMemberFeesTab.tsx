@@ -260,7 +260,7 @@ export default function NewMemberFeesTab({ canEdit }: { canEdit: boolean }) {
           <p className="text-primary-foreground/60"><Loader2 className="w-4 h-4 mr-1 inline animate-spin" /> Loading…</p>
         ) : (
           <>
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid gap-3 sm:grid-cols-2 [&>*]:min-w-0">
               <div>
                 <Label>New member name</Label>
                 <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. John Smith" disabled={!canEdit} />
