@@ -15,6 +15,9 @@ const EXCLUDED_CODES = new Set(["4120", "4500"]);
 
 type Account = { id: string; code: string; name: string; account_type?: string };
 
+type SubMode = "none" | "in_year" | "candidate" | "clear_prepayment";
+type DebtorLine = { id: string; name: string; pence: number; entry_number: number | null };
+
 type ExtraLine = { key: string; accountId: string; direction: "debit" | "credit"; amount: string; description: string };
 
 const toPence = (v: string) => Math.round(parseFloat(v || "0") * 100);
@@ -39,7 +42,11 @@ export default function DirectReceiptTab({ canEdit }: { canEdit: boolean }) {
   const [saving, setSaving] = useState(false);
 
   const [codeMap, setCodeMap] = useState<Map<string, string>>(new Map());
-  const [isRenewal, setIsRenewal] = useState(false);
+  const [mode, setMode] = useState<SubMode>("none");
+  const isRenewal = mode !== "none";
+  const [reliefPence, setReliefPence] = useState(1000);
+  const [debtorLines, setDebtorLines] = useState<DebtorLine[]>([]);
+  const [clearPick, setClearPick] = useState<Record<string, boolean>>({});
   const [memberName, setMemberName] = useState("");
   const [ageBracket, setAgeBracket] = useState<"over25" | "under25">("over25");
   const [pots, setPots] = useState<ReservePot[]>([]);
@@ -53,7 +60,10 @@ export default function DirectReceiptTab({ canEdit }: { canEdit: boolean }) {
       fetchSubscriptionSettings(),
     ]);
     setPots(potRows);
-    if (settings) setAnnualRatePence(settings.annual_rate_pence);
+    if (settings) {
+      setAnnualRatePence(settings.annual_rate_pence);
+      if (settings.relief_chest_pence != null) setReliefPence(settings.relief_chest_pence);
+    }
     if (acctErr) toast({ title: "Could not load accounts", description: acctErr.message, variant: "destructive" });
 
     const all = ((accts as any[]) ?? []) as Account[];
@@ -68,15 +78,45 @@ export default function DirectReceiptTab({ canEdit }: { canEdit: boolean }) {
 
   useEffect(() => { load(); }, [load]);
 
-  const reserveMultiplier = ageBracket === "under25" ? 0.5 : 1;
-  const reserveAllocations = useMemo(
-    () => pots.map((p) => ({ ...p, pence: Math.round(p.annual_pence * reserveMultiplier) })),
-    [pots, reserveMultiplier],
-  );
-  const reserveTotalPence = reserveAllocations.reduce((s, r) => s + r.pence, 0);
+  const under25 = ageBracket === "under25";
+  const split = useMemo(() => {
+    try { return splitSubscription(toPence(amount), under25, pots, reliefPence); } catch { return null; }
+  }, [amount, under25, pots, reliefPence]);
+
+  const loadDebtors = useCallback(async () => {
+    const acct1100 = codeMap.get("1100");
+    if (!acct1100) return;
+    const { data: dr } = await supabase
+      .from("journal_lines" as any)
+      .select("id,description,debit_pence,journal_entries!inner(entry_number,source_type,description)")
+      .eq("account_id", acct1100)
+      .gt("debit_pence", 0);
+    const { data: cr } = await supabase
+      .from("journal_lines" as any)
+      .select("description,credit_pence")
+      .eq("account_id", acct1100)
+      .gt("credit_pence", 0);
+    // Net credits already posted against each member name (by line text), oldest debit first.
+    const paid = new Map<string, number>();
+    for (const c of (cr as any[]) ?? []) {
+      const n = String(c.description ?? "").replace(/^Prepayment cleared — |^Subscription (renewal|received) — /, "").trim().toLowerCase();
+      paid.set(n, (paid.get(n) ?? 0) + c.credit_pence);
+    }
+    const out: DebtorLine[] = [];
+    for (const d of ((dr as any[]) ?? []).sort((x, y) => (x.journal_entries?.entry_number ?? 0) - (y.journal_entries?.entry_number ?? 0))) {
+      const name = String(d.description ?? "").trim();
+      const key = name.toLowerCase();
+      const used = Math.min(paid.get(key) ?? 0, d.debit_pence);
+      paid.set(key, (paid.get(key) ?? 0) - used);
+      if (d.debit_pence - used > 0) out.push({ id: d.id, name, pence: d.debit_pence - used, entry_number: d.journal_entries?.entry_number ?? null });
+    }
+    setDebtorLines(out);
+  }, [codeMap]);
+
+  useEffect(() => { if (mode === "clear_prepayment") loadDebtors(); }, [mode, loadDebtors]);
 
   useEffect(() => {
-    if (!isRenewal) return;
+    if (mode !== "candidate") return;
     setAmount((annualRatePence * (ageBracket === "under25" ? 0.5 : 1) / 100).toFixed(2));
   }, [isRenewal, ageBracket, annualRatePence]);
 
@@ -90,7 +130,7 @@ export default function DirectReceiptTab({ canEdit }: { canEdit: boolean }) {
       toast({ title: "Enter a positive amount", variant: "destructive" });
       return;
     }
-    const need = ["1000", "1100", "3000", "3100"].filter((c) => !codeMap.get(c));
+    const need = (mode === "in_year" ? ["1000", "1100"] : ["1000", "4000", "3100", "2200"]).filter((c) => !codeMap.get(c));
     if (need.length) {
       toast({ title: `Missing accounts: ${need.join(", ")}`, variant: "destructive" });
       return;
@@ -139,43 +179,40 @@ export default function DirectReceiptTab({ canEdit }: { canEdit: boolean }) {
       return true;
     };
 
-    const ok1 = await postEntry(
-      {
-        description: `Subscription renewal — ${memberName.trim()}${ageBracket === "under25" ? " (under 25)" : ""}`,
-        source_type: "subscription_renewal",
-        document_number: documentNumber.trim() || null,
-        bank_reference: bankReference.trim() || null,
-      },
-      [
-        { account_id: A("1000"), debit_pence: bankPence, credit_pence: 0 },
-        { account_id: A("1100"), debit_pence: 0, credit_pence: bankPence },
-      ],
-      "the subscription receipt entry",
-    );
-    if (!ok1) { setSaving(false); return; }
-
-    if (reserveTotalPence > 0) {
-      const ok2 = await postEntry(
-        {
-          description: `Designated reserves allocation — ${memberName.trim()}`,
-          source_type: "reserve_allocation",
-        },
+    const who = `${memberName.trim()}${under25 ? " (under 25)" : ""}`;
+    let ok = false;
+    if (mode === "in_year") {
+      ok = await postEntry(
+        { description: `Subscription received — ${memberName.trim()}`, source_type: "subscription_renewal",
+          document_number: documentNumber.trim() || null, bank_reference: bankReference.trim() || null },
         [
-          { account_id: A("3000"), debit_pence: reserveTotalPence, credit_pence: 0 },
-          ...reserveAllocations
-            .filter((r) => r.pence > 0)
-            .map((r) => ({ account_id: A("3100"), debit_pence: 0, credit_pence: r.pence, fund_code: r.fund_code })),
+          { account_id: A("1000"), debit_pence: bankPence, credit_pence: 0 },
+          { account_id: A("1100"), debit_pence: 0, credit_pence: bankPence },
         ],
-        "the designated reserves entry",
+        "the subscription receipt entry",
       );
-      if (!ok2) { setSaving(false); return; }
+    } else {
+      if (!split) { toast({ title: "Amount is too small for the subscription split", variant: "destructive" }); setSaving(false); return; }
+      ok = await postEntry(
+        { description: `New candidate subscription — ${who}`, source_type: "subscription_candidate",
+          document_number: documentNumber.trim() || null, bank_reference: bankReference.trim() || null },
+        [
+          { account_id: A("1000"), debit_pence: bankPence, credit_pence: 0 },
+          ...split.filter((l) => l.pence > 0).map((l) => ({
+            account_id: A(l.code), debit_pence: 0, credit_pence: l.pence,
+            ...(l.fund_code ? { fund_code: l.fund_code } : {}),
+          })),
+        ],
+        "the candidate subscription entry",
+      );
     }
+    if (!ok) { setSaving(false); return; }
 
     setSaving(false);
     setMemberName("");
     setDocumentNumber("");
     setBankReference("");
-    toast({ title: "Subscription renewal posted", description: `${posted.length} ledger entries created.` });
+    toast({ title: mode === "in_year" ? "Subscription payment posted" : "Candidate subscription posted" });
   };
 
   const onAmountChange = (v: string) => {
