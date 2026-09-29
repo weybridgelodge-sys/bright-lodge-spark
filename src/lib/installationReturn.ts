@@ -1,6 +1,6 @@
 // UGLE Installation Return — live resolver + AcroForm filler.
 // Every call reads current database state; nothing is cached.
-import { PDFDocument, PDFTextField } from "pdf-lib";
+import { PDFDocument, PDFTextField, PDFName, PDFDict } from "pdf-lib";
 import { supabase } from "@/integrations/supabase/client";
 import { computeProjection, type Appointment, type MemberLite, type PositionKey } from "@/lib/officersProgression";
 
