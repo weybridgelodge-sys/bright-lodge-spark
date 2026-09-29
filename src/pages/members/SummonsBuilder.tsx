@@ -710,16 +710,19 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
     const dateLabel = summons.meeting_date
       ? new Date(summons.meeting_date + "T00:00:00").toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" })
       : "";
+    // Accounts can only go out with a first full send — on an already-sent
+    // summons the tick-box is for test-email previews only.
+    const liveAccounts = alreadySent ? null : chosenAccounts;
     const ok = window.confirm(
-      chosenAccounts
-        ? `This will email ALL active members:\n\n1. Summons #${summons.meeting_number}${dateLabel ? ` for ${dateLabel}` : ""}\n2. ${accountsOptionLabel(chosenAccounts).replace(/^Attach /, "The ")} (separate download link)\n\nThe accounts will be recorded as sent with this summons. Continue?`
+      liveAccounts
+        ? `This will email ALL active members:\n\n1. Summons #${summons.meeting_number}${dateLabel ? ` for ${dateLabel}` : ""}\n2. ${accountsOptionLabel(liveAccounts).replace(/^Attach /, "The ")} (separate download link)\n\nThe accounts will be recorded as sent with this summons. Continue?`
         : `This will email Summons #${summons.meeting_number}${dateLabel ? ` for ${dateLabel}` : ""} to ALL active members. Continue?`,
     );
     if (!ok) return;
     const id = await generatePdf("email");
     if (!id) return;
     const { data, error } = await supabase.functions.invoke("send-summons-email", {
-      body: { summons_id: id, accounts_approval_id: chosenAccounts?.approval_id ?? undefined },
+      body: { summons_id: id, accounts_approval_id: liveAccounts?.approval_id ?? undefined },
     });
     if (error) {
       toast.error(error.message ?? "Email send failed");
