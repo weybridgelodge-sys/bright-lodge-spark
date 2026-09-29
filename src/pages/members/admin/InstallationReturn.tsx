@@ -82,7 +82,7 @@ function Inner() {
       if (error || !blob) throw new Error("UGLE template not found — upload New_IR_Craft.pdf first.");
       const { bytes, report } = await fillTemplate(await blob.arrayBuffer(), buildFieldSpecs(fresh));
       setReport(report);
-      const url = URL.createObjectURL(new Blob([bytes], { type: "application/pdf" }));
+      const url = URL.createObjectURL(new Blob([bytes as unknown as BlobPart], { type: "application/pdf" }));
       const a = document.createElement("a");
       a.href = url;
       a.download = `Installation-Return-6787-${fresh.year}.pdf`;
