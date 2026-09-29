@@ -54,8 +54,8 @@ export default function SubscriptionAccrualPanel({ canEdit }: { canEdit: boolean
       <h2 className="font-serif text-lg text-gold mb-1">Annual subscriptions charge</h2>
       <p className="text-primary-foreground/60 text-sm mb-4">
         Charges every active member for the year on 1 October: Dr 1100 Debtors for each member, split across 4000 Subscriptions,
-        the 3100 reserve pots (tagged) and 2200 Relief Chest. Under-25s at 1 October pay half. The current Treasurer and
-        Secretary (most recent appointment) are exempt. Each year can only be charged once.
+        the 3100 reserve pots (tagged) and 2200 Relief Chest. Under-25s at 1 October pay half. Honorary members and the
+        current Treasurer and Secretary (most recent appointment) are exempt. Each year can only be charged once.
       </p>
       <div className="grid gap-3 sm:grid-cols-3 items-end">
         <div>
