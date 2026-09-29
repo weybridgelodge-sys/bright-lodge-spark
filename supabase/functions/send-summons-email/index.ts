@@ -120,6 +120,47 @@ Deno.serve(async (req) => {
     // to a freshly signed storage URL on click (summons-link function).
     const pdfUrl = `https://weybridgelodge.org.uk/summons/${summons.meeting_number}?k=${summons.id}`;
 
+    // Optional: certified annual accounts as a second branded link.
+    // - live full send / test: only an approved, stored, not-yet-sent year, on an unsent summons
+    // - resend to selected: only the accounts this summons originally went out with
+    const accountsApprovalId: string | null = body.accounts_approval_id ?? null;
+    let accounts: { id: string; year: number; certifiedAt: string | null } | null = null;
+    const loadAccounts = async (id: string) => {
+      const { data: a } = await admin.from("treasurer_year_approvals")
+        .select("id,masonic_year,status,certified_pack_path,round_number,accounts_sent_at,accounts_sent_with_summons_id")
+        .eq("id", id).maybeSingle();
+      if (!a || a.status !== "approved" || !a.certified_pack_path) return null;
+      const { data: s } = await admin.from("treasurer_year_signoffs").select("signed_at")
+        .eq("approval_id", a.id).eq("round_number", a.round_number).eq("decision", "confirmed")
+        .order("signed_at", { ascending: false }).limit(1);
+      return { row: a, certifiedAt: (s?.[0]?.signed_at as string) ?? null };
+    };
+    if (resendRecipients.length > 0) {
+      const { data: prior } = await admin.from("treasurer_year_approvals").select("id")
+        .eq("accounts_sent_with_summons_id", summons.id).maybeSingle();
+      if (prior?.id) {
+        const r = await loadAccounts(prior.id);
+        if (r) accounts = { id: r.row.id, year: r.row.masonic_year, certifiedAt: r.certifiedAt };
+      }
+    } else if (accountsApprovalId) {
+      // sent_at is set only by this function after a real full send (the builder
+      // sets status="sent" just before invoking us, so status can't be used here).
+      const { data: sRow } = await admin.from("summonses").select("sent_at").eq("id", summons.id).single();
+      if (!isTest && sRow?.sent_at) {
+        return json({ error: "This summons has already been sent; accounts can only go out with an unsent summons." }, 400);
+      }
+      const r = await loadAccounts(accountsApprovalId);
+      if (!r || r.row.accounts_sent_at) {
+        return json({ error: "Those accounts are not ready to send (not approved, not stored, or already sent)." }, 400);
+      }
+      accounts = { id: r.row.id, year: r.row.masonic_year, certifiedAt: r.certifiedAt };
+    }
+    const accountsUrl = accounts ? `https://weybridgelodge.org.uk/accounts/${accounts.year}?k=${accounts.id}` : undefined;
+    const accountsYearLabel = accounts ? `FY${accounts.year}/${String(accounts.year + 1).slice(-2)}` : undefined;
+    const accountsCertifiedLabel = accounts?.certifiedAt
+      ? new Date(accounts.certifiedAt).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "Europe/London" })
+      : undefined;
+
     // Resolve recipients
     let recipients: { email: string; user_id: string | null }[] = [];
     if (isTest) {
@@ -202,6 +243,9 @@ Deno.serve(async (req) => {
             secretaryTitle,
             secretaryOffice: "Secretary",
             isTest,
+            accountsUrl,
+            accountsYearLabel,
+            accountsCertifiedLabel,
           },
         });
         if (!res.ok) throw new Error(String((res.error as any) ?? `HTTP ${res.status}`));
@@ -235,9 +279,15 @@ Deno.serve(async (req) => {
           status: "sent",
         })
         .eq("id", summons.id);
+      if (accounts) {
+        const { error: recErr } = await admin.rpc("record_accounts_sent", {
+          _approval_id: accounts.id, _summons_id: summons.id,
+        });
+        if (recErr) console.error("record_accounts_sent failed", recErr);
+      }
     }
 
-    return json({ ok: true, test: isTest, sent, recipients: recipients.length, failures });
+    return json({ ok: true, test: isTest, accounts_included: !!accounts, sent, recipients: recipients.length, failures });
   } catch (e) {
     console.error(e);
     return json({ error: (e as Error).message }, 500);

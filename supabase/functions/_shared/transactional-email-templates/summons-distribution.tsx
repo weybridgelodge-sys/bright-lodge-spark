@@ -23,6 +23,9 @@ interface Props {
   secretaryTitle?: string
   secretaryOffice?: string
   isTest?: boolean
+  accountsUrl?: string
+  accountsYearLabel?: string
+  accountsCertifiedLabel?: string
 }
 
 function ordinalSuffix(n: number): string {
@@ -39,6 +42,9 @@ const Email = ({
   secretaryTitle,
   secretaryOffice,
   isTest,
+  accountsUrl,
+  accountsYearLabel,
+  accountsCertifiedLabel,
 }: Props) => (
   <Html lang="en" dir="ltr">
     <Head />
@@ -93,6 +99,30 @@ const Email = ({
             </Section>
           )}
 
+          {accountsUrl && (
+            <Section style={accountsBox}>
+              <Text style={itemLabel}>Also enclosed</Text>
+              <Heading as="h3" style={h3}>
+                Annual accounts{accountsYearLabel ? `: ${accountsYearLabel}` : ''}
+              </Heading>
+              <Text style={p}>
+                The Lodge's annual accounts
+                {accountsCertifiedLabel ? `, certified by the Auditors on ${accountsCertifiedLabel},` : ''}{' '}
+                are available to download below. This is a separate document from the Summons.
+              </Text>
+              <Section style={{ textAlign: 'center', margin: '8px 0 4px' }}>
+                <Button href={accountsUrl} style={btn}>
+                  Download Annual Accounts (PDF)
+                </Button>
+                <Text style={small}>
+                  If the button does not work, copy and paste this URL into your browser:
+                  <br />
+                  <span style={{ wordBreak: 'break-all' }}>{accountsUrl}</span>
+                </Text>
+              </Section>
+            </Section>
+          )}
+
           <Hr style={hr} />
           <Text style={signOff}>Best wishes</Text>
           <Text style={signOff}>S&amp;F</Text>
@@ -128,6 +158,9 @@ export const template = {
     secretaryName: 'Richard Smith',
     secretaryOffice: 'Secretary',
     isTest: true,
+    accountsUrl: 'https://example.com/accounts.pdf',
+    accountsYearLabel: 'FY2025/26',
+    accountsCertifiedLabel: '15 October 2026',
   },
 } satisfies TemplateEntry
 
@@ -149,3 +182,6 @@ const signName = { color: '#1B2A4A', fontSize: '15px', fontWeight: 600, lineHeig
 const signOffice = { color: '#1B2A4A', fontSize: '14px', lineHeight: '1.4', margin: 0, fontFamily: 'Arial, sans-serif', fontStyle: 'italic' as const }
 const btn = { backgroundColor: '#C9A432', color: '#1B2A4A', padding: '12px 24px', borderRadius: '4px', fontFamily: 'Arial, sans-serif', fontSize: '15px', fontWeight: 600, textDecoration: 'none', display: 'inline-block' }
 const testBanner = { backgroundColor: '#fff3cd', border: '1px solid #ffe69c', color: '#664d03', padding: '8px 12px', borderRadius: '4px', fontFamily: 'Arial, sans-serif', fontSize: '13px', margin: '0 0 14px' }
+const accountsBox = { borderTop: '2px solid #C9A432', margin: '22px 0 0', padding: '16px 0 0' }
+const itemLabel = { color: '#C9A432', fontSize: '11px', letterSpacing: '2px', textTransform: 'uppercase' as const, margin: '0 0 4px', fontFamily: 'Arial, sans-serif' }
+const h3 = { color: '#1B2A4A', fontSize: '18px', margin: '0 0 10px' }
