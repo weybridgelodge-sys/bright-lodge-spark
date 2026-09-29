@@ -214,7 +214,7 @@ export default function GeneralJournalTab({ canEdit }: { canEdit: boolean }) {
                     <Input value={line.description} onChange={(e) => updateLine(line.key, { description: e.target.value })} disabled={!canEdit} />
                   </div>
                   {line.accountId && line.accountId === accounts.find((a) => a.code === "3100")?.id ? (
-                    <div className="sm:col-span-5">
+                    <div className="sm:col-span-5 sm:order-last">
                       <Label className="text-xs">Reserve pot</Label>
                       <Select value={line.fundCode} onValueChange={(v) => updateLine(line.key, { fundCode: v })} disabled={!canEdit}>
                         <SelectTrigger><SelectValue placeholder="Choose the reserve pot" /></SelectTrigger>
