@@ -38,6 +38,7 @@ export default function YearEndTab({ canEdit, onOpenTab }: { canEdit: boolean; o
   const [posting, setPosting] = useState(false);
   const [entryId, setEntryId] = useState<string | null>(null);
   const today = londonToday();
+  const [approvals, setApprovals] = useState<Map<number, Approval>>(new Map());
   const [summonsNos, setSummonsNos] = useState<Map<string, number>>(new Map());
   useEffect(() => {
     const ids = [...approvals.values()].map((a) => a.accounts_sent_with_summons_id).filter(Boolean) as string[];
@@ -45,7 +46,6 @@ export default function YearEndTab({ canEdit, onOpenTab }: { canEdit: boolean; o
     supabase.from("summonses").select("id,meeting_number").in("id", ids).then(({ data }) =>
       setSummonsNos(new Map((data ?? []).map((r: any) => [r.id, r.meeting_number]))));
   }, [approvals]);
-  const [approvals, setApprovals] = useState<Map<number, Approval>>(new Map());
   const [rounds, setRounds] = useState<Round[]>([]);
   const [sigs, setSigs] = useState<Signoff[]>([]);
   const [names, setNames] = useState<Map<string, string>>(new Map());
