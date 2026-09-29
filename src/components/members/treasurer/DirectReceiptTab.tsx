@@ -380,8 +380,8 @@ export default function DirectReceiptTab({ canEdit }: { canEdit: boolean }) {
   };
 
   return (
-    <div className="space-y-6">
-      <section className="rounded-lg border border-gold/20 bg-primary-foreground/5 p-4">
+    <div className="min-w-0 space-y-6 overflow-x-hidden">
+      <section className="min-w-0 rounded-lg border border-gold/20 bg-primary-foreground/5 p-4">
         <h2 className="font-serif text-lg text-gold mb-1">Record a Direct Receipt</h2>
         <p className="text-primary-foreground/60 text-sm mb-4">
           For money received straight into the bank — e.g. a bank transfer or cash paid in. Posts a double-entry:
@@ -392,7 +392,7 @@ export default function DirectReceiptTab({ canEdit }: { canEdit: boolean }) {
           <p className="text-primary-foreground/60"><Loader2 className="w-4 h-4 mr-1 inline animate-spin" /> Loading…</p>
         ) : (
           <>
-            <div className="mb-4 max-w-xl">
+            <div className="mb-4 min-w-0 max-w-xl">
               <Label>What is this receipt?</Label>
               <Select value={mode} onValueChange={(v) => setMode(v as SubMode)} disabled={!canEdit}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
@@ -404,7 +404,7 @@ export default function DirectReceiptTab({ canEdit }: { canEdit: boolean }) {
                   <SelectItem value="clear_prepayment">Subscription: clear an advance payment now the year has been charged</SelectItem>
                 </SelectContent>
               </Select>
-              <p className="text-primary-foreground/50 text-xs mt-1">
+              <p className="break-words text-primary-foreground/50 text-xs mt-1">
                 {mode === "candidate" && "Dr 1000 Bank · Cr 4000 Subscriptions, 3100 reserve pots (tagged) and 2200 Relief Chest — the full split, because no charge exists yet for this person."}
                 {mode === "advance" && "Dr 1000 Bank · Cr 2100 Deferred Income. No split — nothing is recognised as income yet. Use \"clear an advance payment\" after October's charge to move it onto their account."}
                 {mode === "in_year" && "Dr 1000 Bank · Cr 1100 Debtors. No split — the reserves and Relief Chest shares were posted when the year was charged."}
@@ -496,7 +496,7 @@ export default function DirectReceiptTab({ canEdit }: { canEdit: boolean }) {
             </div>
 
             {isRenewal ? (
-              <div className="mt-4 rounded-md border border-gold/20 p-3 text-sm">
+              <div className="mt-4 min-w-0 break-words rounded-md border border-gold/20 p-3 text-sm">
                 {mode === "in_year" ? (
                   <p className="text-primary-foreground/80">Dr 1000 Bank {fmt(toPence(amount))} · Cr 1100 Debtors {fmt(toPence(amount))}</p>
                 ) : mode === "advance" ? (
@@ -515,7 +515,7 @@ export default function DirectReceiptTab({ canEdit }: { canEdit: boolean }) {
             ) : (
               <>
               <div className="mt-6 space-y-3">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-wrap items-center justify-between gap-2">
                   <h3 className="font-serif text-gold">Additional lines</h3>
                   <Button type="button" variant="outline" size="sm" onClick={addLine} disabled={!canEdit}>
                     <Plus className="w-4 h-4 mr-1" /> Add line
@@ -573,8 +573,8 @@ export default function DirectReceiptTab({ canEdit }: { canEdit: boolean }) {
             )}
 
             <div className="mt-4">
-              <Button
-                className="bg-gold text-navy hover:bg-gold/90"
+               <Button
+                 className="w-full bg-gold text-navy hover:bg-gold/90 sm:w-auto"
                 disabled={!canEdit || saving || (!isRenewal && !balanced) || (mode === "candidate" && !split)}
                 onClick={isRenewal ? submitRenewal : submit}
               >
@@ -606,17 +606,17 @@ function ClearPrepayment({ lines, pick, setPick, canEdit, saving, onSubmit, peri
       ) : (
         <ul className="divide-y divide-gold/10 rounded border border-gold/10">
           {lines.map((l) => (
-            <li key={l.id} className="flex items-center gap-3 px-3 py-2 text-sm">
+            <li key={l.id} className="grid min-w-0 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 px-3 py-2 text-sm sm:grid-cols-[auto_minmax(0,1fr)_auto_auto] sm:gap-3">
               <Checkbox id={`clr-${l.id}`} checked={!!pick[l.id]} disabled={!canEdit}
                 onCheckedChange={(v) => setPick({ ...pick, [l.id]: v === true })} />
-              <Label htmlFor={`clr-${l.id}`} className="flex-1 cursor-pointer">{l.name}</Label>
-              <span className="text-primary-foreground/50 text-xs">{l.entry_number ? `JE-${String(l.entry_number).padStart(6, "0")}` : ""}</span>
-              <span className="text-gold w-20 text-right">{fmt(l.pence)}</span>
+              <Label htmlFor={`clr-${l.id}`} className="min-w-0 cursor-pointer break-words">{l.name}</Label>
+              <span className="col-start-2 text-primary-foreground/50 text-xs sm:col-start-auto">{l.entry_number ? `JE-${String(l.entry_number).padStart(6, "0")}` : ""}</span>
+              <span className="row-span-2 w-20 text-right text-gold sm:row-span-1">{fmt(l.pence)}</span>
             </li>
           ))}
         </ul>
       )}
-      <Button className="bg-gold text-navy hover:bg-gold/90" disabled={!canEdit || saving || total === 0} onClick={onSubmit}>
+      <Button className="w-full bg-gold text-navy hover:bg-gold/90 sm:w-auto" disabled={!canEdit || saving || total === 0} onClick={onSubmit}>
         {saving && <Loader2 className="w-4 h-4 mr-1 animate-spin" />}Clear {fmt(total)} of prepayments
       </Button>
     </div>
