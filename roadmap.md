@@ -13,8 +13,8 @@
 - [x] Restructure #128 credits per member (debits untouched); age check report
 
 ## Treasurer mobile layout audit (Sep 2026)
-- [ ] Verify and fix Direct Receipt at 320px across all five modes
-- [ ] Verify and fix New Member Fees at 320px
-- [ ] Verify and fix Year End at 320px
-- [ ] Verify and fix General Journal at 320px
-- [ ] Run the full test suite and confirm a clean preview build
+- [x] Verify and fix Direct Receipt at 320px across all five modes
+- [x] Verify and fix New Member Fees at 320px
+- [x] Verify and fix Year End at 320px
+- [x] Verify and fix General Journal at 320px
+- [x] Run the full test suite and confirm a clean preview build
