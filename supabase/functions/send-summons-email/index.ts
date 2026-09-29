@@ -143,8 +143,10 @@ Deno.serve(async (req) => {
         if (r) accounts = { id: r.row.id, year: r.row.masonic_year, certifiedAt: r.certifiedAt };
       }
     } else if (accountsApprovalId) {
-      const { data: sRow } = await admin.from("summonses").select("status,sent_at").eq("id", summons.id).single();
-      if (!isTest && (sRow?.sent_at || sRow?.status === "sent")) {
+      // sent_at is set only by this function after a real full send (the builder
+      // sets status="sent" just before invoking us, so status can't be used here).
+      const { data: sRow } = await admin.from("summonses").select("sent_at").eq("id", summons.id).single();
+      if (!isTest && sRow?.sent_at) {
         return json({ error: "This summons has already been sent; accounts can only go out with an unsent summons." }, 400);
       }
       const r = await loadAccounts(accountsApprovalId);

@@ -43,6 +43,7 @@ import {
 import { generateICS, icsFilename } from "@/lib/generateICS";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
+import { accountsOptionLabel, type AttachableAccounts } from "@/lib/treasurer/yearAudit";
 import SummonsPrintPreview from "@/components/members/SummonsPrintPreview";
 import {
   NON_PROGRESSIVE_LABELS,
@@ -438,6 +439,18 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
   const [presetIndex, setPresetIndex] = useState<string>("");
   const [manualHidden, setManualHidden] = useState<string[]>([]);
   const [currentId, setCurrentId] = useState<string | null>(null);
+  const [alreadySent, setAlreadySent] = useState(false);
+  const [attachable, setAttachable] = useState<AttachableAccounts[]>([]);
+  const [attachOn, setAttachOn] = useState(false);
+  const [attachId, setAttachId] = useState<string>("");
+  useEffect(() => {
+    (supabase as any).rpc("get_attachable_accounts").then(({ data }: any) => {
+      const list = (data ?? []) as AttachableAccounts[];
+      setAttachable(list);
+      setAttachId((cur) => cur || list[0]?.approval_id || "");
+    });
+  }, []);
+  const chosenAccounts = attachOn && !alreadySent ? attachable.find((a) => a.approval_id === attachId) ?? null : null;
 
   useEffect(() => {
     (async () => {
@@ -473,6 +486,7 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
       const { data, error } = await supabase.from("summonses").select("id,meeting_number,lodge_event_id,meeting_date,meeting_time,meeting_type,dress_code,minutes_confirmation_date,next_meeting_date,officer_night_date,officer_night_venue,agenda,candidates,dining_enquiry_name,notice_overrides,pdf_storage_path,status,sent_at,sent_to_count,created_by,created_at,updated_at,dining_menu,dining_price,dining_deadline").eq("id", editingId).maybeSingle();
       if (error || !data) { toast.error(error?.message ?? "Summons not found"); return; }
       const r: any = data;
+      setAlreadySent(!!r.sent_at);
       // dining_enquiry_email is column-restricted; fetch via secure RPC (secretary/admin/WM)
       let diningEmail: string | null = null;
       try {
@@ -693,21 +707,30 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
   };
 
   const emailAll = async () => {
+    const dateLabel = summons.meeting_date
+      ? new Date(summons.meeting_date + "T00:00:00").toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" })
+      : "";
     const ok = window.confirm(
-      `This will email Summons #${summons.meeting_number} to ALL active members. Continue?`,
+      chosenAccounts
+        ? `This will email ALL active members:\n\n1. Summons #${summons.meeting_number}${dateLabel ? ` for ${dateLabel}` : ""}\n2. ${accountsOptionLabel(chosenAccounts).replace(/^Attach /, "The ")} (separate download link)\n\nThe accounts will be recorded as sent with this summons. Continue?`
+        : `This will email Summons #${summons.meeting_number}${dateLabel ? ` for ${dateLabel}` : ""} to ALL active members. Continue?`,
     );
     if (!ok) return;
     const id = await generatePdf("email");
     if (!id) return;
     const { data, error } = await supabase.functions.invoke("send-summons-email", {
-      body: { summons_id: id },
+      body: { summons_id: id, accounts_approval_id: chosenAccounts?.approval_id ?? undefined },
     });
     if (error) {
       toast.error(error.message ?? "Email send failed");
       return;
     }
     const d = data as any;
-    toast.success(`Summons emailed to ${d?.sent ?? 0} of ${d?.recipients ?? 0} members`);
+    toast.success(`Summons${d?.accounts_included ? " and annual accounts" : ""} emailed to ${d?.sent ?? 0} of ${d?.recipients ?? 0} members`);
+    if (d?.sent > 0) {
+      setAlreadySent(true);
+      if (d?.accounts_included) setAttachable((l) => l.filter((a) => a.approval_id !== chosenAccounts?.approval_id));
+    }
     if (d?.failures?.length) {
       toast.error(`${d.failures.length} delivery(ies) failed — see history log`);
     }
@@ -747,7 +770,7 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
     const id = await generatePdf("save");
     if (!id) return;
     const { data, error } = await supabase.functions.invoke("send-summons-email", {
-      body: { summons_id: id, test_recipient: addr.trim() },
+      body: { summons_id: id, test_recipient: addr.trim(), accounts_approval_id: chosenAccounts?.approval_id ?? undefined },
     });
     if (error) {
       toast.error(error.message ?? "Test summons email failed");
@@ -975,6 +998,26 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
           );
         })()}
       </Section>
+
+      {attachable.length > 0 && !alreadySent && (
+        <div className="rounded border border-gold/40 bg-gold/10 p-3 space-y-2 text-sm">
+          <label className="flex items-center gap-2 cursor-pointer">
+            <Checkbox checked={attachOn} onCheckedChange={(v) => setAttachOn(v === true)} aria-label="Attach approved annual accounts" />
+            <span className="text-primary-foreground">
+              {attachable.length === 1 ? accountsOptionLabel(attachable[0]) : "Attach approved annual accounts"}
+            </span>
+          </label>
+          {attachable.length > 1 && (
+            <Select value={attachId} onValueChange={setAttachId}>
+              <SelectTrigger className="max-w-md"><SelectValue placeholder="Choose which year" /></SelectTrigger>
+              <SelectContent>
+                {attachable.map((a) => <SelectItem key={a.approval_id} value={a.approval_id}>{accountsOptionLabel(a)}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          )}
+          <p className="text-xs text-primary-foreground/60">Sent as a second download link in the summons email, separate from the summons itself. Test emails include it too, but only a real send records the accounts as sent.</p>
+        </div>
+      )}
 
       <div className="flex flex-wrap gap-2">
         <Button onClick={() => generatePdf("download")} disabled={busy}><Download className="w-4 h-4 mr-2" /> Download PDF</Button>
