@@ -46,6 +46,7 @@ const Treasurer = lazy(() => import("./pages/members/admin/Treasurer"));
 const SecretaryPortal = lazy(() => import("./pages/members/admin/SecretaryPortal"));
 const FestiveBoardAdmin = lazy(() => import("./pages/members/admin/FestiveBoardAdmin"));
 const LoiAdmin = lazy(() => import("./pages/members/admin/LoiAdmin"));
+const InstallationReturn = lazy(() => import("./pages/members/admin/InstallationReturn"));
 const SecretaryReturns = lazy(() => import("./pages/members/admin/SecretaryReturns"));
 const MeetingMinutes = lazy(() => import("./pages/members/admin/MeetingMinutes"));
 const MembershipEnquiries = lazy(() => import("./pages/members/admin/MembershipEnquiries"));
@@ -96,6 +97,7 @@ const MembersRoutes = () => (
         <Route path="admin/festive-board" element={<ProtectedRoute><FestiveBoardAdmin /></ProtectedRoute>} />
         <Route path="admin/loi" element={<ProtectedRoute><LoiAdmin /></ProtectedRoute>} />
         <Route path="admin/loi-schedule" element={<LoiSchedule />} />
+        <Route path="admin/installation-return" element={<ProtectedRoute><InstallationReturn /></ProtectedRoute>} />
         <Route path="admin/returns" element={<ProtectedRoute><SecretaryReturns /></ProtectedRoute>} />
         <Route path="admin/minutes" element={<ProtectedRoute><MeetingMinutes /></ProtectedRoute>} />
         <Route path="admin/enquiries" element={<MembershipEnquiries />} />
