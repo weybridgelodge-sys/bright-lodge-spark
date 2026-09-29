@@ -222,22 +222,6 @@ export default function NewMemberFeesTab({ canEdit }: { canEdit: boolean }) {
       if (!ok3) { setSaving(false); return; }
     }
 
-    if (reserveTotalPence > 0) {
-      const ok4 = await postEntry(
-        {
-          description: `Designated reserves allocation — ${name.trim()}`,
-          source_type: "reserve_allocation",
-        },
-        [
-          { account_id: A("3000"), debit_pence: reserveTotalPence, credit_pence: 0 },
-          ...reserveAllocations
-            .filter((r) => r.pence > 0)
-            .map((r) => ({ account_id: A("3100"), debit_pence: 0, credit_pence: r.pence, fund_code: r.fund_code as string })),
-        ],
-        "the designated reserves entry",
-      );
-      if (!ok4) { setSaving(false); return; }
-    }
 
     setSaving(false);
     setName("");
@@ -324,11 +308,15 @@ export default function NewMemberFeesTab({ canEdit }: { canEdit: boolean }) {
                 <p className="text-gold font-semibold text-lg">{money(proratedPence)}</p>
               </div>
               <div className="rounded-md border border-gold/20 p-3">
-                <p className="text-primary-foreground/60 text-sm">Designated reserves allocation</p>
-                <p className="text-gold font-semibold text-lg">{money(reserveTotalPence)}</p>
-                <p className="text-primary-foreground/50 text-xs mt-1">
-                  {reserveAllocations.map((r) => `${r.label} ${money(r.pence)}`).join(" · ")}
+                <p className="text-primary-foreground/60 text-sm">How the subscription is split</p>
+                <p className="text-primary-foreground/80 text-xs mt-1">
+                  4000 Subscriptions {money(incomePence)} (prorated remainder)
                 </p>
+                <p className="text-primary-foreground/80 text-xs">
+                  3100 reserves {money(reserveTotalPence)} — {potLines.map((r) => `${r.label} ${money(r.pence)}`).join(" · ")}
+                </p>
+                <p className="text-primary-foreground/80 text-xs">2200 Relief Chest {money(reliefPence)}</p>
+                <p className="text-primary-foreground/50 text-xs mt-1">Reserve and Relief Chest shares are always the full annual amount.</p>
               </div>
               <div className="rounded-md border border-gold/20 p-3">
                 <p className="text-primary-foreground/60 text-sm">Total received</p>
@@ -336,8 +324,14 @@ export default function NewMemberFeesTab({ canEdit }: { canEdit: boolean }) {
               </div>
             </div>
 
+            {split.error && (
+              <p role="alert" className="mt-3 rounded-md border border-destructive/50 bg-destructive/10 p-3 text-sm text-destructive">
+                {split.error}
+              </p>
+            )}
+
             <div className="mt-4">
-              <Button className="bg-gold text-navy hover:bg-gold/90" disabled={!canEdit || saving} onClick={submit}>
+              <Button className="bg-gold text-navy hover:bg-gold/90" disabled={!canEdit || saving || !!split.error} onClick={submit}>
                 {saving && <Loader2 className="w-4 h-4 mr-1 animate-spin" />}Post to ledger
               </Button>
             </div>
