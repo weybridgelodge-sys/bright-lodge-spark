@@ -6,8 +6,9 @@ import { Check, X, ShieldPlus, ShieldMinus, Plus, Trash2, Pencil, HeartHandshake
 import { useAuth } from "@/hooks/useAuth";
 import { formatMemberLine } from "@/lib/summons";
 import { useNavigate } from "react-router-dom";
+import { readFunctionError } from "@/lib/functionError";
 
-type Degree = "entered_apprentice" | "fellow_craft" | "master_mason";
+type Degree = "entered_apprentice" | "fellow_craft" | "master_mason" | "installed_master";
 type Title = "Bro" | "W Bro" | "VW Bro" | "RW Bro";
 type Status = "pending" | "active" | "suspended" | "year_out" | "resigned" | "excluded" | "deceased";
 
@@ -37,6 +38,7 @@ const DEGREE_LABEL: Record<Degree, string> = {
   entered_apprentice: "Entered Apprentice",
   fellow_craft: "Fellow Craft",
   master_mason: "Master Mason",
+  installed_master: "Installed Master",
 };
 
 type Profile = {
@@ -368,8 +370,7 @@ export default function MembersAdmin() {
     setBusy(false);
 
     if (error || (data as { error?: unknown })?.error) {
-      const msg = (data as { error?: string })?.error ?? error?.message ?? "Could not save member";
-      toast.error(typeof msg === "string" ? msg : "Could not save member");
+      toast.error(await readFunctionError(error, data, "Could not save member"));
       return;
     }
     toast.success(isEdit ? "Member updated" : `${form.first_name} ${form.last_name} added`);

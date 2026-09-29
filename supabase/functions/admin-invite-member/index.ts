@@ -22,7 +22,8 @@ const Body = z.object({
   grand_rank: z.string().trim().max(80).optional().nullable(),
   date_of_birth: z.string().trim().regex(/^\d{4}-\d{2}-\d{2}$/).optional().nullable(),
   initiation_date: z.string().trim().regex(/^\d{4}-\d{2}-\d{2}$/).optional().nullable(),
-  degree: z.enum(["entered_apprentice", "fellow_craft", "master_mason"]).default("master_mason"),
+  // Must match every value of the masonic_degree enum (installed_master included).
+  degree: z.enum(["entered_apprentice", "fellow_craft", "master_mason", "installed_master"]).default("master_mason"),
   is_past_master: z.boolean().optional().default(false),
   is_royal_arch: z.boolean().optional().default(false),
   is_honorary_member: z.boolean().optional().default(false),
@@ -75,7 +76,10 @@ Deno.serve(async (req) => {
 
     const parsed = Body.safeParse(await req.json());
     if (!parsed.success) {
-      return json({ error: parsed.error.flatten().fieldErrors }, 400);
+      const fe = parsed.error.flatten().fieldErrors as Record<string, string[] | undefined>;
+      const detail = Object.entries(fe).map(([k, v]) => `${k}: ${(v ?? []).join(", ")}`).join("; ");
+      console.error("admin-invite-member validation failed:", detail);
+      return json({ error: `Invalid member details — ${detail || "check the form"}` }, 400);
     }
     const b = parsed.data;
     const full_name = composeFullName(b.title ?? null, b.first_name, b.last_name);
