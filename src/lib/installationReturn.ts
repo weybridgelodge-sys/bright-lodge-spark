@@ -11,8 +11,8 @@ export const TEMPLATE_BUCKET = "secretary-returns";
 export const TEMPLATE_PATH = "templates/New_IR_Craft.pdf";
 export const MEMBERSHIP_EMAIL_SETTING = "installation_return_membership_officer_email";
 export const MEMBERSHIP_EMAIL_OPTIONS = [
-  `membershipofficer@${LODGE_EMAIL_DOMAIN}`,
   `membershipsecretary@${LODGE_EMAIL_DOMAIN}`,
+  `membershipofficer@${LODGE_EMAIL_DOMAIN}`,
 ];
 
 /** confirmed = saved, non-projection row for this year; planned = saved ladder projection row;
@@ -204,7 +204,7 @@ export async function loadReturnData(year: number): Promise<ReturnData> {
 
   const settingVal = (settingRes.data?.value as string | undefined) ?? null;
   const membershipLodgeEmail = settingVal || MEMBERSHIP_EMAIL_OPTIONS[0];
-  if (!settingVal) issues.push("Membership Officer lodge email has not been chosen yet; using membershipofficer@ until it is.");
+  if (!settingVal) issues.push("Membership Officer lodge email has not been chosen yet; using membershipsecretary@ until it is.");
 
   for (const o of [wm, sw, jw, ipm, ...officers]) {
     if (o.memberId && !byId[o.memberId]?.email) issues.push(`${o.label}: no personal email on their profile.`);
