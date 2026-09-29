@@ -1430,6 +1430,42 @@ export type Database = {
         }
         Relationships: []
       }
+      installation_return_submissions: {
+        Row: {
+          id: string
+          lodge_year: number
+          note: string | null
+          recipient_email: string
+          secretary_changed: string | null
+          sent_at: string
+          sent_by: string
+          sent_by_name: string | null
+          storage_path: string
+        }
+        Insert: {
+          id?: string
+          lodge_year: number
+          note?: string | null
+          recipient_email: string
+          secretary_changed?: string | null
+          sent_at?: string
+          sent_by: string
+          sent_by_name?: string | null
+          storage_path: string
+        }
+        Update: {
+          id?: string
+          lodge_year?: number
+          note?: string | null
+          recipient_email?: string
+          secretary_changed?: string | null
+          sent_at?: string
+          sent_by?: string
+          sent_by_name?: string | null
+          storage_path?: string
+        }
+        Relationships: []
+      }
       journal_entries: {
         Row: {
           attachment_name: string | null
