@@ -45,11 +45,11 @@ function cell(text: string, width: number, opts: CellOpts = {}) {
     columnSpan: opts.span,
     verticalAlign: VerticalAlign.CENTER,
     margins: { top: 25, bottom: 25, left: 70, right: 70 },
-    children: [new Paragraph({
+    children: text.split("\n").map((line) => new Paragraph({
       alignment: opts.center ? AlignmentType.CENTER : AlignmentType.LEFT,
       spacing: { before: 0, after: 0, line: 190 },
-      children: [new TextRun({ text, bold: opts.bold, size: opts.size ?? 16, font: "Arial" })],
-    })],
+      children: [new TextRun({ text: line, bold: opts.bold, size: opts.size ?? 16, font: "Arial" })],
+    })),
   });
 }
 
@@ -191,7 +191,7 @@ const pageBreak = () => new Paragraph({ children: [new PageBreak()] });
 const continued = () => new Paragraph({
   alignment: AlignmentType.RIGHT,
   spacing: { before: 260 },
-  children: [new TextRun({ text: "PLEASE CHECK THE PRINTED DETAILS ON THIS FORM AND CORRECT ANY ERRORS\nCONTINUED OVERLEAF", font: "Times New Roman", size: 15 })],
+  children: [new TextRun({ text: "PLEASE CHECK THE PRINTED DETAILS ON THIS FORM AND CORRECT ANY ERRORS", font: "Times New Roman", size: 15 })],
 });
 
 export async function buildDocx(d: ProvincialData): Promise<Blob> {
@@ -204,9 +204,12 @@ export async function buildDocx(d: ProvincialData): Promise<Blob> {
         ...formHeader(), topTable(d), gap(350), officersTable(c.main, true), notesTable(), pageBreak(),
         ...formHeader(), officersTable(c.lower, false), gap(360), secretaryTable(c.secretary), gap(500),
         new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "Signed.............................    Sec      Date..................        Signed.............................    WM      Date..................", font: "Times New Roman", size: 17 })] }),
-        continued(), pageBreak(),
+        continued(),
+        new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: "CONTINUED OVERLEAF", font: "Times New Roman", size: 15 })] }),
+        pageBreak(),
         ...formHeader(),
-        new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 100 }, children: [new TextRun({ text: "PLEASE CHECK AND AMEND THE LISTS OF SUBSCRIBING PAST MASTERS OF THE LODGE\nAND OTHER PAST MASTERS IN THE LODGE.", bold: true, italics: true, underline: {}, font: "Times New Roman", size: 17 })] }),
+        new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "PLEASE CHECK AND AMEND THE LISTS OF SUBSCRIBING PAST MASTERS OF THE LODGE", bold: true, italics: true, underline: {}, font: "Times New Roman", size: 17 })] }),
+        new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 100 }, children: [new TextRun({ text: "AND OTHER PAST MASTERS IN THE LODGE.", bold: true, italics: true, underline: {}, font: "Times New Roman", size: 17 })] }),
         new Paragraph({ spacing: { after: 80 }, children: [new TextRun({ text: "Lodge No. L6787", bold: true, font: "Times New Roman", size: 17 })] }),
         pastMastersTable(c.pastMasters),
         new Paragraph({ spacing: { before: 150 }, children: [new TextRun({ text: `NOTES     ${PM_NOTE}`, font: "Times New Roman", size: 17 })] }),
