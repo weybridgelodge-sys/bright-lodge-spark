@@ -51,7 +51,7 @@ function Inner() {
       setData(fresh);
       const blob = kind === "docx"
         ? await buildDocx(fresh)
-        : new Blob([await buildPdf(fresh)], { type: "application/pdf" });
+        : new Blob([(await buildPdf(fresh)) as BlobPart], { type: "application/pdf" });
       await saveBlob(blob, `${fileBase(year)}.${kind}`);
     } catch (e: any) { toast.error(e?.message ?? "Download failed"); }
     finally { setBusy(""); }
