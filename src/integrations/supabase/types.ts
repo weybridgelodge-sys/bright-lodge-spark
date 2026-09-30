@@ -2004,6 +2004,7 @@ export type Database = {
           provincial_website: string | null
           regular_meeting_pattern: string | null
           royal_arch_rep: string | null
+          royal_arch_rep_member_id: string | null
           secretary_contact: string | null
           updated_at: string
           updated_by: string | null
@@ -2032,6 +2033,7 @@ export type Database = {
           provincial_website?: string | null
           regular_meeting_pattern?: string | null
           royal_arch_rep?: string | null
+          royal_arch_rep_member_id?: string | null
           secretary_contact?: string | null
           updated_at?: string
           updated_by?: string | null
@@ -2060,13 +2062,29 @@ export type Database = {
           provincial_website?: string | null
           regular_meeting_pattern?: string | null
           royal_arch_rep?: string | null
+          royal_arch_rep_member_id?: string | null
           secretary_contact?: string | null
           updated_at?: string
           updated_by?: string | null
           venue_address?: string | null
           wm_contact?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "lodge_template_royal_arch_rep_member_id_fkey"
+            columns: ["royal_arch_rep_member_id"]
+            isOneToOne: false
+            referencedRelation: "calendar_subscription_status"
+            referencedColumns: ["member_id"]
+          },
+          {
+            foreignKeyName: "lodge_template_royal_arch_rep_member_id_fkey"
+            columns: ["royal_arch_rep_member_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       lodge_visits: {
         Row: {
