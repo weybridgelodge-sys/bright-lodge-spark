@@ -92,51 +92,47 @@ function Inner() {
           )}
 
           <section className="rounded-sm border border-gold/20 bg-navy-light/30 p-4 text-sm text-primary-foreground/80 space-y-1 break-words">
+            <p><span className="text-gold">Consecrated:</span> {ukLongDate(data.consecrated)}</p>
             <p><span className="text-gold">Lodge:</span> {lodgeLine()}</p>
-            <p><span className="text-gold">Installation:</span> {ukLongDate(data.installationDate)}</p>
             <p><span className="text-gold">Venue:</span> {data.venue}</p>
             <p><span className="text-gold">Meeting days:</span> {data.meetingPattern}</p>
+            <p><span className="text-gold">Scheduled Installation:</span> {ukLongDate(data.scheduledDate)}</p>
+            <p><span className="text-gold">Actual, if different:</span> {data.actualDate ? ukLongDate(data.actualDate) : "— (same day)"}</p>
           </section>
 
-          <section>
-            <h2 className="font-serif text-lg text-gold mb-2">Officers</h2>
-            <ul className="divide-y divide-gold/10 rounded-sm border border-gold/20">
-              {data.rows.map((r, i) => {
-                const pl = PROV_LABEL[r.provenance];
-                return (
-                  <li key={i} className="flex min-w-0 flex-col gap-1 p-3 sm:flex-row sm:items-center sm:gap-3">
-                    <span className="w-36 shrink-0 text-gold text-sm">{r.label}</span>
-                    <span className="min-w-0 flex-1 break-words text-primary-foreground">{r.name || <em className="text-primary-foreground/50">blank</em>}{r.decorations && <span className="text-primary-foreground/60"> · {r.decorations}</span>}</span>
-                    <Badge className={`self-start sm:self-auto ${pl.cls}`}>{pl.text}{r.provenance === "carried" && r.office?.fromYear ? ` from ${formatMasonicYear(r.office.fromYear)}` : ""}</Badge>
-                  </li>
-                );
-              })}
-            </ul>
-            <p className="mt-2 text-xs text-primary-foreground/60">The grey text after a name is the member's post-nominals field, which prints in the decorations column. Edit it on the member's record if it should only show civil or military honours.</p>
-          </section>
+          {([["Officers", data.rows], ["Tyler, Representatives and LMO", data.lowerRows]] as const).map(([title, list]) => (
+            <section key={title}>
+              <h2 className="font-serif text-lg text-gold mb-2">{title}</h2>
+              <ul className="divide-y divide-gold/10 rounded-sm border border-gold/20">
+                {list.map((r, i) => {
+                  const pl = r.provenance === "rep"
+                    ? { text: r.vacantRep ? "Vacant" : "From lodge details", cls: "bg-navy-light text-primary-foreground" }
+                    : PROV_LABEL[r.provenance];
+                  const name = [r.firstNames, r.surname].filter(Boolean).join(" ");
+                  return (
+                    <li key={i} className="flex min-w-0 flex-col gap-1 p-3 sm:flex-row sm:items-center sm:gap-3">
+                      <span className="w-32 shrink-0 text-gold text-sm">{r.label}</span>
+                      <span className="min-w-0 flex-1 break-words text-primary-foreground">{name || <em className="text-primary-foreground/50">blank</em>}{r.decorations && <span className="text-primary-foreground/60"> · {r.decorations}</span>}</span>
+                      <Badge className={`self-start sm:self-auto ${pl.cls}`}>{pl.text}{r.provenance === "carried" && r.office?.fromYear ? ` from ${formatMasonicYear(r.office.fromYear)}` : ""}</Badge>
+                    </li>
+                  );
+                })}
+              </ul>
+            </section>
+          ))}
+          <p className="text-xs text-primary-foreground/60">Grey text after a name is the member's post-nominals, printed in the "Civil & Military Decorations" column. Edit it on the member's record if it holds masonic ranks.</p>
 
           <section>
-            <h2 className="font-serif text-lg text-gold mb-2">Lodge Representatives</h2>
-            <ul className="divide-y divide-gold/10 rounded-sm border border-gold/20">
-              {data.reps.map((r) => (
-                <li key={r.label} className="flex min-w-0 flex-col gap-1 p-3 sm:flex-row sm:gap-3">
-                  <span className="w-36 shrink-0 text-gold text-sm">{r.label}</span>
-                  <span className="min-w-0 break-words text-primary-foreground">{r.vacant ? <em className="text-primary-foreground/50">Vacant</em> : r.name}</span>
-                </li>
-              ))}
-            </ul>
-          </section>
-
-          <section>
-            <h2 className="font-serif text-lg text-gold mb-2">Past Masters</h2>
+            <h2 className="font-serif text-lg text-gold mb-2">Subscribing Past Masters of the Lodge</h2>
             <ul className="divide-y divide-gold/10 rounded-sm border border-gold/20">
               {data.pastMasters.map((m) => (
                 <li key={m.name + m.years[0]} className="flex min-w-0 flex-col gap-1 p-3 sm:flex-row sm:gap-3">
-                  <span className="w-36 shrink-0 text-gold text-sm break-words">{m.years.join(", ")}</span>
+                  <span className="w-32 shrink-0 text-gold text-sm break-words">{m.years.join(", ")}</span>
                   <span className="min-w-0 break-words text-primary-foreground">{m.name}</span>
                 </li>
               ))}
             </ul>
+            <p className="mt-2 text-xs text-primary-foreground/60">A Master is added only once he is confirmed as IPM, with all his years as Master. "Subscribing Past Masters in the Lodge" prints empty.</p>
           </section>
 
           <section>
