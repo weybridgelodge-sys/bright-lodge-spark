@@ -107,6 +107,41 @@
     background-color: hsl(var(--navy-dark));
   }
 
+  /* Members portal date controls: Chromium/WebKit otherwise render a dark
+     calendar glyph that disappears against the Lodge's navy fields. Keep
+     this portal-wide so every present and future date input is accessible. */
+  html.portal-canvas input[type="date"] {
+    color-scheme: dark;
+    min-height: 48px;
+    background-color: hsl(var(--navy));
+    color: hsl(var(--cream));
+    border-color: hsl(var(--gold) / 0.55);
+  }
+
+  html.portal-canvas input[type="date"]::-webkit-calendar-picker-indicator {
+    box-sizing: border-box;
+    width: 48px;
+    height: 48px;
+    margin: -8px -8px -8px 0;
+    padding: 14px;
+    cursor: pointer;
+    opacity: 1;
+    filter: invert(1);
+  }
+
+  html.portal-canvas input[type="date"]:focus,
+  html.portal-canvas input[type="date"]:focus-visible {
+    border-color: hsl(var(--gold));
+    outline: 3px solid hsl(var(--gold));
+    outline-offset: 2px;
+  }
+
+  html.portal-canvas input[type="date"]:focus::-webkit-calendar-picker-indicator,
+  html.portal-canvas input[type="date"]:focus-visible::-webkit-calendar-picker-indicator {
+    opacity: 1;
+    filter: invert(86%) sepia(38%) saturate(723%) hue-rotate(354deg) brightness(93%) contrast(89%);
+  }
+
   h1, h2, h3, h4 {
     font-family: 'Playfair Display', serif;
   }
