@@ -641,21 +641,27 @@ function LadderView({
         </button>
       </div>
 
-      <div className="overflow-x-auto border border-gold/20 rounded-sm">
-        <table className="min-w-full text-sm">
-          <thead className="bg-navy-dark/70">
+      <div
+        className="max-h-[70vh] overflow-auto border border-gold/40 rounded-sm bg-navy"
+        aria-label="Progressive officers by lodge year"
+        tabIndex={0}
+      >
+        <table className="min-w-full border-separate border-spacing-0 text-sm">
+          <thead>
             <tr>
-              <th className="px-3 py-2 text-left font-serif text-gold border-b border-gold/20">Office</th>
+              <th className="sticky left-0 top-0 z-40 w-[104px] min-w-[104px] max-w-[104px] sm:w-40 sm:min-w-40 sm:max-w-40 px-2 sm:px-3 py-2 text-left font-serif leading-tight whitespace-normal break-words text-gold bg-navy-dark border-r border-b border-gold/40">
+                Office
+              </th>
               {years.map((y) => (
                 <th
                   key={y}
-                  className={`px-3 py-2 text-left font-serif border-b border-gold/20 ${
-                    y === currentYear ? "text-gold" : "text-primary-foreground/80"
+                  className={`sticky top-0 z-30 min-w-40 px-3 py-2 text-left font-serif bg-navy-dark border-b border-gold/40 ${
+                    y === currentYear ? "text-gold" : "text-cream"
                   }`}
                 >
                   {formatMasonicYear(y)}
                   {y === currentYear && (
-                    <span className="ml-1 text-[10px] uppercase">(current)</span>
+                    <span className="block text-[10px] uppercase text-gold">(CURRENT)</span>
                   )}
                 </th>
               ))}
@@ -664,7 +670,7 @@ function LadderView({
           <tbody>
             {[...POSITION_ORDER].reverse().map((pos) => (
               <tr key={pos} className="hover:bg-navy-light/20">
-                <td className="px-3 py-2 font-serif text-primary-foreground border-b border-gold/10 whitespace-nowrap">
+                <td className="sticky left-0 z-20 w-[104px] min-w-[104px] max-w-[104px] sm:w-40 sm:min-w-40 sm:max-w-40 px-2 sm:px-3 py-2 font-serif leading-tight whitespace-normal break-words text-cream bg-navy border-r border-b border-gold/40">
                   {POSITION_LABELS[pos]}
                 </td>
                 {years.map((y) => {
@@ -674,7 +680,7 @@ function LadderView({
                   return (
                     <td
                       key={y}
-                      className={`px-3 py-2 border-b border-gold/10 align-top ${
+                      className={`min-w-40 px-3 py-2 border-b border-gold/20 align-top bg-navy ${
                         !cell.member ? "bg-amber-500/5" : ""
                       }`}
                     >
@@ -686,7 +692,7 @@ function LadderView({
                         }}
                         className="text-left w-full hover:text-gold transition-colors"
                       >
-                        <span className="block text-primary-foreground text-sm">
+                        <span className="block text-cream text-sm">
                           {cell.member?.full_name ?? <span className="text-amber-300">— vacant —</span>}
                         </span>
                         {isOverride && (
@@ -695,7 +701,7 @@ function LadderView({
                           </span>
                         )}
                         {isOverride && cell.overrideReason && (
-                          <span className="block text-[10px] text-primary-foreground/55">
+                          <span className="block text-[10px] text-cream">
                             {cell.overrideReason} · {cell.overrideBy}
                           </span>
                         )}
