@@ -1057,14 +1057,11 @@ function NonProgressiveBoard({
                     <label className="block text-[10px] uppercase tracking-wider text-primary-foreground/60 mb-1">
                       Date first held this post
                     </label>
-                    <input
-                      type="date"
-                      defaultValue={appt.appointed_on ?? ""}
-                      onBlur={(e) => {
-                        const v = e.target.value || null;
-                        if (v !== (appt.appointed_on ?? null)) onUpdateDate(appt.id, v);
-                      }}
-                      className="w-full bg-navy-dark border border-gold/20 text-primary-foreground rounded-sm px-2 py-1.5 text-sm"
+                    <FirstHeldDateInput
+                      key={`${appt.id}:${appt.appointed_on ?? ""}`}
+                      label={`Date first held — ${NON_PROGRESSIVE_LABELS[pos]}`}
+                      saved={appt.appointed_on ?? null}
+                      onSave={(v) => onUpdateDate(appt.id, v)}
                     />
                   </div>
                 )}
