@@ -33,3 +33,5 @@ project_id = "kntcjlztmcgmagwgheyx"
     verify_jwt = false
   [functions.submit-installation-return]
     verify_jwt = false
+  [functions.submit-provincial-return]
+    verify_jwt = false

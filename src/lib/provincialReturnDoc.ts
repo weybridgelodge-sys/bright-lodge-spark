@@ -37,6 +37,22 @@ export function content(d: ProvincialData) {
   };
 }
 
+/** Year(s) column of the Past Masters lists — wide enough for "2018, 2019, 2020" with clear space. */
+const PM_YEAR_W = 2000;
+
+/** Signature date = the Installation date: actual if recorded and different, else scheduled. */
+export function signatureDate(d: ProvincialData) {
+  return ukLongDate(d.actualDate ?? d.scheduledDate);
+}
+
+export function signatureLines(d: ProvincialData) {
+  const date = signatureDate(d);
+  return [
+    `Signed ....................................................   Sec      Date  ${date}`,
+    `Signed ....................................................   WM      Date  ${date}`,
+  ];
+}
+
 type CellOpts = { bold?: boolean; center?: boolean; size?: number; span?: number; height?: number };
 function cell(text: string, width: number, opts: CellOpts = {}) {
   return new TableCell({
@@ -121,7 +137,7 @@ function topTable(d: ProvincialData) {
       row(["CONSECRATED", "LODGE", "NUMBER"], [widths[0], widths[1] + widths[2], widths[3]], { bold: true, center: true, height: 300 }),
       row([ukLongDate(d.consecrated), "WEYBRIDGE", "L6787"], [widths[0], widths[1] + widths[2], widths[3]], { center: true, height: 300 }),
       row(["VENUE", "DAYS OF MEETINGS"], [widths[0], widths[1] + widths[2] + widths[3]], { bold: true, center: true, height: 300 }),
-      row([d.venue, d.meetingPattern], [widths[0], widths[1] + widths[2] + widths[3]], { center: true, height: 330 }),
+      row([d.venue, d.meetingPattern], [widths[0], widths[1] + widths[2] + widths[3]], { center: true, height: 820 }),
       row(["Scheduled\nInstallation date", ukLongDate(d.scheduledDate), "Actual Installation\ndate (if different from scheduled)", ukLongDate(d.actualDate)], widths, { center: true, height: 650 }),
     ],
   });
@@ -168,7 +184,7 @@ function secretaryTable(rows: string[][]) {
 
 function pastMastersTable(rows: string[][]) {
   const half = CONTENT / 2;
-  const inner = [1300, half - 1300];
+  const inner = [PM_YEAR_W, half - PM_YEAR_W];
   const subtable = (title: string, data: string[][]) => new TableCell({
     borders,
     width: { size: half, type: WidthType.DXA },
@@ -183,7 +199,7 @@ function pastMastersTable(rows: string[][]) {
     })],
   });
   const rightRows = Array.from({ length: Math.max(10, rows.length) }, () => ["", ""]);
-  return new Table({ width: { size: CONTENT, type: WidthType.DXA }, columnWidths: [half, half], rows: [new TableRow({ children: [subtable("Subscribing Past Masters of the Lodge", rows), subtable("Subscribing Past Masters in the Lodge", rightRows)] })] });
+  return new Table({ width: { size: CONTENT, type: WidthType.DXA }, columnWidths: [half, half], rows: [new TableRow({ children: [subtable("Subscribing Past Masters of the Lodge", [...rows, ...rightRows.slice(rows.length)]), subtable("Subscribing Past Masters in the Lodge", rightRows)] })] });
 }
 
 const gap = (after: number) => new Paragraph({ spacing: { after }, children: [] });
@@ -202,8 +218,9 @@ export async function buildDocx(d: ProvincialData): Promise<Blob> {
       properties: { page: { size: { width: PAGE_W, height: PAGE_H }, margin: { top: MARGIN, bottom: MARGIN, left: MARGIN, right: MARGIN } } },
       children: [
         ...formHeader(), topTable(d), gap(350), officersTable(c.main, true), notesTable(), pageBreak(),
-        ...formHeader(), officersTable(c.lower, false), gap(360), secretaryTable(c.secretary), gap(500),
-        new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "Signed.............................    Sec      Date..................        Signed.............................    WM      Date..................", font: "Times New Roman", size: 17 })] }),
+        ...formHeader(), officersTable(c.lower, false), gap(360), secretaryTable(c.secretary), gap(900),
+        ...signatureLines(d).map((text, i) => new Paragraph({ spacing: { before: i === 0 ? 0 : 1100 }, children: [new TextRun({ text, font: "Times New Roman", size: 20 })] })),
+        gap(600),
         continued(),
         new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: "CONTINUED OVERLEAF", font: "Times New Roman", size: 15 })] }),
         pageBreak(),
@@ -310,9 +327,8 @@ export async function buildPdf(d: ProvincialData): Promise<Uint8Array> {
     addressLines.forEach((txt, li) => drawText(txt, M + 5, y - 30 - li * 12, times, 9, secWidths[0] - 10));
     y -= h;
   });
-  y -= 65;
-  drawText("Signed.............................    Sec      Date..................", M + 5, y, times, 9);
-  drawText("Signed.............................    WM      Date..................", M + full / 2 + 5, y, times, 9);
+  y -= 70;
+  signatureLines(d).forEach((txt, i) => drawText(txt, M + 5, y - i * 70, times, 10.5));
   continuedPdf();
 
   // Page 3 — Past Masters, matching the attached form's separate final section.
@@ -332,12 +348,12 @@ export async function buildPdf(d: ProvincialData): Promise<Uint8Array> {
   drawText("Insert new Masters as appropriate", M + half + 58, y - 13, timesItalic, 8); y -= 20;
   const pmRows = Math.max(10, c.pastMasters.length);
   for (let i = 0; i < pmRows; i += 1) {
-    const h = 22; const pm = c.pastMasters[i];
-    page.drawRectangle({ x: M, y: y - h, width: 65, height: h, borderColor: line, borderWidth: 0.55 });
-    page.drawRectangle({ x: M + 65, y: y - h, width: half - 65, height: h, borderColor: line, borderWidth: 0.55 });
-    page.drawRectangle({ x: M + half, y: y - h, width: 65, height: h, borderColor: line, borderWidth: 0.55 });
-    page.drawRectangle({ x: M + half + 65, y: y - h, width: half - 65, height: h, borderColor: line, borderWidth: 0.55 });
-    if (pm) { drawText(pm[0], M + 4, y - 14, helvetica, 8); drawText(pm[1], M + 69, y - 14, helvetica, 8); }
+    const h = 22; const pm = c.pastMasters[i]; const YW = 100;
+    page.drawRectangle({ x: M, y: y - h, width: YW, height: h, borderColor: line, borderWidth: 0.55 });
+    page.drawRectangle({ x: M + YW, y: y - h, width: half - YW, height: h, borderColor: line, borderWidth: 0.55 });
+    page.drawRectangle({ x: M + half, y: y - h, width: YW, height: h, borderColor: line, borderWidth: 0.55 });
+    page.drawRectangle({ x: M + half + YW, y: y - h, width: half - YW, height: h, borderColor: line, borderWidth: 0.55 });
+    if (pm) { drawText(pm[0], M + 5, y - 14, helvetica, 8, YW - 10); drawText(pm[1], M + YW + 5, y - 14, helvetica, 8, half - YW - 10); }
     y -= h;
   }
   y -= 18;
