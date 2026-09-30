@@ -49,6 +49,7 @@ describe("provincial return", () => {
 });
 
 import { buildRepRow } from "@/lib/provincialReturn";
+import { content } from "@/lib/provincialReturnDoc";
 describe("representative rows", () => {
   const byId: any = { m1: { id: "m1", first_name: "Anthony", middle_name: "John", last_name: "Mallard", post_nominals: "MBE" } };
   it("splits a linked member like an officer", () => {
@@ -59,5 +60,21 @@ describe("representative rows", () => {
     const r = buildRepRow("HALLS REP", { name: "Bro  D Blackburn" }, byId);
     expect([r.firstNames, r.surname]).toEqual(["Bro D Blackburn", ""]);
     expect(buildRepRow("PET'NS REP", { name: "" }, byId).vacantRep).toBe(true);
+  });
+});
+
+describe("Provincial return document structure", () => {
+  it("places Tyler before the notes and starts the continuation with ORG (G)", () => {
+    const base = (label: string): any => ({ label, key: null, office: null, firstNames: "", surname: "", decorations: "", provenance: "none" });
+    const shaped = content({
+      year: 2026, consecrated: "1949-01-19", scheduledDate: "2026-10-21", actualDate: null,
+      venue: "Hitherbury Close", meetingPattern: "3rd Wed Feb/Oct, 2nd Wed May/Dec",
+      rows: [base("WM"), base("IPM")],
+      lowerRows: [base("TYLER**"), base("ORG (G)"), base("PET'NS REP"), base("LMO")],
+      pastMasters: [], appended: [], issues: [],
+      secretary: { name: "", address: "", mobile: "", personalEmail: "", lodgeEmail: "", visible: true },
+    });
+    expect(shaped.main.map((r) => r[0])).toEqual(["WM", "TYLER", "IPM"]);
+    expect(shaped.lower.map((r) => r[0])).toEqual(["ORG (G)", "PET'NS REP", "LMO"]);
   });
 });

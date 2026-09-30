@@ -5,7 +5,7 @@ import {
 } from "docx";
 import { PDFDocument, StandardFonts, rgb, type PDFFont, type PDFPage } from "pdf-lib";
 import {
-  PM_NOTE, PROVINCE_SUBTITLE, PROVINCE_TITLE, TABLE_NOTE, ukLongDate,
+  PM_NOTE, PROVINCE_SUBTITLE, PROVINCE_TITLE, ukLongDate,
   type ProvincialData, type ProvRow,
 } from "@/lib/provincialReturn";
 
@@ -262,7 +262,7 @@ export async function buildPdf(d: ProvincialData): Promise<Uint8Array> {
     rows.forEach((values, ri) => {
       const isHead = opts.header && ri === 0; const fs = opts.fontSize ?? 7.5;
       const fonts = values.map((_v, i) => isHead || i === 0 ? helveticaBold : helvetica);
-      const wrapped = values.map((value, i) => wrap(value, fonts[i], fs, widths[i] - 8));
+      const wrapped = values.map((value, i) => value.split("\n").flatMap((part) => wrap(part, fonts[i], fs, widths[i] - 8)));
       const h = isHead ? (opts.headerHeight ?? 48) : Math.max(opts.rowHeight ?? 18, Math.max(...wrapped.map((ls) => ls.length)) * (fs + 2) + 6);
       values.forEach((_value, i) => {
         page.drawRectangle({ x: xs[i], y: y - h, width: widths[i], height: h, borderColor: line, borderWidth: 0.55 });
