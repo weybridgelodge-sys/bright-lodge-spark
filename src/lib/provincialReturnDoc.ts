@@ -37,6 +37,22 @@ export function content(d: ProvincialData) {
   };
 }
 
+/** Year(s) column of the Past Masters lists — wide enough for "2018, 2019, 2020" with clear space. */
+const PM_YEAR_W = 2000;
+
+/** Signature date = the Installation date: actual if recorded and different, else scheduled. */
+export function signatureDate(d: ProvincialData) {
+  return ukLongDate(d.actualDate ?? d.scheduledDate);
+}
+
+export function signatureLines(d: ProvincialData) {
+  const date = signatureDate(d);
+  return [
+    `Signed ....................................................   Sec      Date  ${date}`,
+    `Signed ....................................................   WM      Date  ${date}`,
+  ];
+}
+
 type CellOpts = { bold?: boolean; center?: boolean; size?: number; span?: number; height?: number };
 function cell(text: string, width: number, opts: CellOpts = {}) {
   return new TableCell({
@@ -168,7 +184,7 @@ function secretaryTable(rows: string[][]) {
 
 function pastMastersTable(rows: string[][]) {
   const half = CONTENT / 2;
-  const inner = [1300, half - 1300];
+  const inner = [PM_YEAR_W, half - PM_YEAR_W];
   const subtable = (title: string, data: string[][]) => new TableCell({
     borders,
     width: { size: half, type: WidthType.DXA },
@@ -202,8 +218,9 @@ export async function buildDocx(d: ProvincialData): Promise<Blob> {
       properties: { page: { size: { width: PAGE_W, height: PAGE_H }, margin: { top: MARGIN, bottom: MARGIN, left: MARGIN, right: MARGIN } } },
       children: [
         ...formHeader(), topTable(d), gap(350), officersTable(c.main, true), notesTable(), pageBreak(),
-        ...formHeader(), officersTable(c.lower, false), gap(360), secretaryTable(c.secretary), gap(500),
-        new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "Signed.............................    Sec      Date..................        Signed.............................    WM      Date..................", font: "Times New Roman", size: 17 })] }),
+        ...formHeader(), officersTable(c.lower, false), gap(360), secretaryTable(c.secretary), gap(900),
+        ...signatureLines(d).map((text, i) => new Paragraph({ spacing: { before: i === 0 ? 0 : 1100 }, children: [new TextRun({ text, font: "Times New Roman", size: 20 })] })),
+        gap(600),
         continued(),
         new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: "CONTINUED OVERLEAF", font: "Times New Roman", size: 15 })] }),
         pageBreak(),
