@@ -327,9 +327,8 @@ export async function buildPdf(d: ProvincialData): Promise<Uint8Array> {
     addressLines.forEach((txt, li) => drawText(txt, M + 5, y - 30 - li * 12, times, 9, secWidths[0] - 10));
     y -= h;
   });
-  y -= 65;
-  drawText("Signed.............................    Sec      Date..................", M + 5, y, times, 9);
-  drawText("Signed.............................    WM      Date..................", M + full / 2 + 5, y, times, 9);
+  y -= 70;
+  signatureLines(d).forEach((txt, i) => drawText(txt, M + 5, y - i * 70, times, 10.5));
   continuedPdf();
 
   // Page 3 — Past Masters, matching the attached form's separate final section.
@@ -349,12 +348,12 @@ export async function buildPdf(d: ProvincialData): Promise<Uint8Array> {
   drawText("Insert new Masters as appropriate", M + half + 58, y - 13, timesItalic, 8); y -= 20;
   const pmRows = Math.max(10, c.pastMasters.length);
   for (let i = 0; i < pmRows; i += 1) {
-    const h = 22; const pm = c.pastMasters[i];
-    page.drawRectangle({ x: M, y: y - h, width: 65, height: h, borderColor: line, borderWidth: 0.55 });
-    page.drawRectangle({ x: M + 65, y: y - h, width: half - 65, height: h, borderColor: line, borderWidth: 0.55 });
-    page.drawRectangle({ x: M + half, y: y - h, width: 65, height: h, borderColor: line, borderWidth: 0.55 });
-    page.drawRectangle({ x: M + half + 65, y: y - h, width: half - 65, height: h, borderColor: line, borderWidth: 0.55 });
-    if (pm) { drawText(pm[0], M + 4, y - 14, helvetica, 8); drawText(pm[1], M + 69, y - 14, helvetica, 8); }
+    const h = 22; const pm = c.pastMasters[i]; const YW = 100;
+    page.drawRectangle({ x: M, y: y - h, width: YW, height: h, borderColor: line, borderWidth: 0.55 });
+    page.drawRectangle({ x: M + YW, y: y - h, width: half - YW, height: h, borderColor: line, borderWidth: 0.55 });
+    page.drawRectangle({ x: M + half, y: y - h, width: YW, height: h, borderColor: line, borderWidth: 0.55 });
+    page.drawRectangle({ x: M + half + YW, y: y - h, width: half - YW, height: h, borderColor: line, borderWidth: 0.55 });
+    if (pm) { drawText(pm[0], M + 5, y - 14, helvetica, 8, YW - 10); drawText(pm[1], M + YW + 5, y - 14, helvetica, 8, half - YW - 10); }
     y -= h;
   }
   y -= 18;
