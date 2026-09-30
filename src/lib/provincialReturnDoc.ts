@@ -137,7 +137,7 @@ function topTable(d: ProvincialData) {
       row(["CONSECRATED", "LODGE", "NUMBER"], [widths[0], widths[1] + widths[2], widths[3]], { bold: true, center: true, height: 300 }),
       row([ukLongDate(d.consecrated), "WEYBRIDGE", "L6787"], [widths[0], widths[1] + widths[2], widths[3]], { center: true, height: 300 }),
       row(["VENUE", "DAYS OF MEETINGS"], [widths[0], widths[1] + widths[2] + widths[3]], { bold: true, center: true, height: 300 }),
-      row([d.venue, d.meetingPattern], [widths[0], widths[1] + widths[2] + widths[3]], { center: true, height: 330 }),
+      row([d.venue, d.meetingPattern], [widths[0], widths[1] + widths[2] + widths[3]], { center: true, height: 820 }),
       row(["Scheduled\nInstallation date", ukLongDate(d.scheduledDate), "Actual Installation\ndate (if different from scheduled)", ukLongDate(d.actualDate)], widths, { center: true, height: 650 }),
     ],
   });
@@ -199,7 +199,7 @@ function pastMastersTable(rows: string[][]) {
     })],
   });
   const rightRows = Array.from({ length: Math.max(10, rows.length) }, () => ["", ""]);
-  return new Table({ width: { size: CONTENT, type: WidthType.DXA }, columnWidths: [half, half], rows: [new TableRow({ children: [subtable("Subscribing Past Masters of the Lodge", rows), subtable("Subscribing Past Masters in the Lodge", rightRows)] })] });
+  return new Table({ width: { size: CONTENT, type: WidthType.DXA }, columnWidths: [half, half], rows: [new TableRow({ children: [subtable("Subscribing Past Masters of the Lodge", [...rows, ...rightRows.slice(rows.length)]), subtable("Subscribing Past Masters in the Lodge", rightRows)] })] });
 }
 
 const gap = (after: number) => new Paragraph({ spacing: { after }, children: [] });
