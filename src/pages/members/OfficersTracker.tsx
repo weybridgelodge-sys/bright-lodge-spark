@@ -1057,14 +1057,11 @@ function NonProgressiveBoard({
                     <label className="block text-[10px] uppercase tracking-wider text-primary-foreground/60 mb-1">
                       Date first held this post
                     </label>
-                    <input
-                      type="date"
-                      defaultValue={appt.appointed_on ?? ""}
-                      onBlur={(e) => {
-                        const v = e.target.value || null;
-                        if (v !== (appt.appointed_on ?? null)) onUpdateDate(appt.id, v);
-                      }}
-                      className="w-full bg-navy-dark border border-gold/20 text-primary-foreground rounded-sm px-2 py-1.5 text-sm"
+                    <FirstHeldDateInput
+                      key={`${appt.id}:${appt.appointed_on ?? ""}`}
+                      label={`Date first held — ${NON_PROGRESSIVE_LABELS[pos]}`}
+                      saved={appt.appointed_on ?? null}
+                      onSave={(v) => onUpdateDate(appt.id, v)}
                     />
                   </div>
                 )}
@@ -1074,5 +1071,40 @@ function NonProgressiveBoard({
         })}
       </div>
     </section>
+  );
+}
+
+// Saves as soon as a complete date is picked (native mobile pickers don't
+// reliably fire blur), and again on blur for typed/cleared values.
+function FirstHeldDateInput({
+  saved,
+  onSave,
+  label,
+}: {
+  saved: string | null;
+  onSave: (v: string | null) => void;
+  label: string;
+}) {
+  const [value, setValue] = useState(saved ?? "");
+  const [lastSent, setLastSent] = useState<string | null>(saved);
+  const commit = (raw: string) => {
+    const v = raw || null;
+    if (v && (!/^\d{4}-\d{2}-\d{2}$/.test(v) || Number(v.slice(0, 4)) < 1900)) return;
+    if (v === lastSent) return;
+    setLastSent(v);
+    onSave(v);
+  };
+  return (
+    <input
+      type="date"
+      aria-label={label}
+      value={value}
+      onChange={(e) => {
+        setValue(e.target.value);
+        if (e.target.value) commit(e.target.value);
+      }}
+      onBlur={(e) => commit(e.target.value)}
+      className="w-full bg-navy-dark border border-gold/20 text-primary-foreground rounded-sm px-2 py-1.5 text-sm"
+    />
   );
 }
