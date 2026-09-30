@@ -3588,6 +3588,36 @@ export type Database = {
         }
         Relationships: []
       }
+      provincial_return_submissions: {
+        Row: {
+          id: string
+          lodge_year: number
+          recipient_email: string
+          sent_at: string
+          sent_by: string | null
+          sent_by_name: string | null
+          storage_path: string
+        }
+        Insert: {
+          id?: string
+          lodge_year: number
+          recipient_email: string
+          sent_at?: string
+          sent_by?: string | null
+          sent_by_name?: string | null
+          storage_path: string
+        }
+        Update: {
+          id?: string
+          lodge_year?: number
+          recipient_email?: string
+          sent_at?: string
+          sent_by?: string | null
+          sent_by_name?: string | null
+          storage_path?: string
+        }
+        Relationships: []
+      }
       push_device_tokens: {
         Row: {
           created_at: string
