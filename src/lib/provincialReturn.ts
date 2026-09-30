@@ -88,6 +88,15 @@ export function printName(p?: Person | null): string {
   return [firstNames(p), (p.last_name ?? "").trim()].filter(Boolean).join(" ") || (p.full_name ?? "").trim();
 }
 
+/** Rep row: a linked member prints split like any officer; otherwise the free text prints whole. */
+export function buildRepRow(label: string, entry: { name?: string | null; member_id?: string | null }, byId: Record<string, Person>): ProvRow {
+  const p = entry.member_id ? byId[entry.member_id] : null;
+  if (p) return { label, key: null, office: null, firstNames: firstNames(p), surname: surnameUpper(p), decorations: p.post_nominals?.trim() ?? "", provenance: "rep" };
+  const name = String(entry.name ?? "").replace(/\s+/g, " ").trim();
+  const vacant = !name || /^vacant$/i.test(name);
+  return { label, key: null, office: null, firstNames: vacant ? "" : name, surname: "", decorations: "", provenance: "rep", vacantRep: vacant };
+}
+
 /** Group roll rows into "1998, 2006 — J V C French" lines (one per person), ordered by first year. */
 export function groupPastMasters(rows: RollRow[]): PastMasterLine[] {
   const map = new Map<string, PastMasterLine>();
@@ -137,7 +146,7 @@ export async function loadProvincialData(year: number, opts: { canAppend: boolea
     supabase.from("member_progression_status").select("member_id,readiness,seniority_initiation_date,seniority_tiebreaker"),
     supabase.from("lodge_events").select("title,event_date").ilike("title", "%installation%").eq("published", true)
       .gte("event_date", `${year}-09-01`).lt("event_date", `${year + 1}-09-01`).order("event_date"),
-    supabase.from("lodge_template").select("venue_address,regular_meeting_pattern,royal_arch_rep,lodge_representatives,consecration_date").eq("id", "default").maybeSingle(),
+    supabase.from("lodge_template").select("venue_address,regular_meeting_pattern,royal_arch_rep,royal_arch_rep_member_id,lodge_representatives,consecration_date").eq("id", "default").maybeSingle(),
     supabase.from("profiles").select("id,first_name,middle_name,last_name,full_name,post_nominals,email,status,initiation_date"),
   ]);
   if (apptRes.error) throw apptRes.error;
@@ -159,13 +168,12 @@ export async function loadProvincialData(year: number, opts: { canAppend: boolea
     const p = office.memberId ? byId[office.memberId] : null;
     return { label, key, office, firstNames: firstNames(p), surname: surnameUpper(p), decorations: p?.post_nominals?.trim() ?? "", provenance: office.provenance };
   };
-  const repList = (tpl.lodge_representatives ?? []) as { role?: string; name?: string }[];
+  const repList = (tpl.lodge_representatives ?? []) as { role?: string; name?: string; member_id?: string | null }[];
   const repRow = (label: string, word: string): ProvRow => {
-    const raw = word === "royal_arch" ? (tpl.royal_arch_rep ?? "") : (repList.find((x) => (x.role ?? "").toLowerCase().includes(word))?.name ?? "");
-    const name = String(raw).replace(/\s+/g, " ").trim();
-    const vacant = !name || /^vacant$/i.test(name);
-    // Reps are held as one free-text name (with ranks); print it whole in the names column.
-    return { label, key: null, office: null, firstNames: vacant ? "" : name, surname: "", decorations: "", provenance: "rep", vacantRep: vacant };
+    const entry = word === "royal_arch"
+      ? { name: tpl.royal_arch_rep ?? "", member_id: (tpl as any).royal_arch_rep_member_id ?? null }
+      : (repList.find((x) => (x.role ?? "").toLowerCase().includes(word)) ?? { name: "", member_id: null });
+    return buildRepRow(label, entry, byId);
   };
   const rows = PROVINCIAL_ROWS.map(({ label, key }) => officeRow(label, key));
   const lowerRows = LOWER_ROWS.map(({ label, key, rep }) => (rep ? repRow(label, rep) : officeRow(label, key)));

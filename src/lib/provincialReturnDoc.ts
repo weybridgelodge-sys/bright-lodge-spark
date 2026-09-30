@@ -120,13 +120,27 @@ export async function buildPdf(d: ProvincialData): Promise<Uint8Array> {
     const scale = full / cols.reduce((a, x) => a + x, 0);
     const ws = cols.map((x) => x * scale);
     const xs = ws.reduce<number[]>((a, _c, i) => [...a, i ? a[i - 1] + ws[i - 1] : M], []);
+    const lines = (t: string, f: PDFFont, maxW: number) => {
+      const out: string[] = []; let line = "";
+      for (const w of clean(t).split(" ").filter(Boolean)) {
+        const next = line ? `${line} ${w}` : w;
+        if (line && f.widthOfTextAtSize(next, size) > maxW) { out.push(line); line = w; } else line = next;
+      }
+      if (line) out.push(line);
+      return out.length ? out : [""];
+    };
     const draw = (r: string[], head: boolean) => {
-      need(lh + 4);
-      r.forEach((t, i) => {
-        page.drawRectangle({ x: xs[i], y: y - 4, width: ws[i], height: lh, borderColor: rgb(0.5, 0.5, 0.5), borderWidth: 0.5, color: head ? rgb(0.9, 0.91, 0.93) : undefined });
-        text(t, xs[i] + 3, head || i === 0 ? bold : font, size, ws[i] - 6);
+      const cellLines = r.map((t, i) => lines(t, head || i === 0 ? bold : font, ws[i] - 6));
+      const n = Math.max(...cellLines.map((l) => l.length));
+      const h = lh + (n - 1) * (size + 2);
+      need(h + 4);
+      r.forEach((_t, i) => {
+        page.drawRectangle({ x: xs[i], y: y - 4 - (h - lh), width: ws[i], height: h, borderColor: rgb(0.5, 0.5, 0.5), borderWidth: 0.5, color: head ? rgb(0.9, 0.91, 0.93) : undefined });
+        const y0 = y;
+        cellLines[i].forEach((ln, k) => { y = y0 - k * (size + 2); text(ln, xs[i] + 3, head || i === 0 ? bold : font, size, ws[i] - 6); });
+        y = y0;
       });
-      y -= lh;
+      y -= h;
     };
     if (header) draw(header, true);
     rows.forEach((r) => draw(r, false));

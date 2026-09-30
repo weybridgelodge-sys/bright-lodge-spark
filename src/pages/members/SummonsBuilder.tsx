@@ -81,7 +81,20 @@ export function parseSalutation(raw: string | null | undefined): string {
   return `${finalTitle} ${surname}`.trim();
 }
 
-type Rep = { role: string; name: string };
+type Rep = { role: string; name: string; member_id?: string | null };
+type PickMember = { id: string; label: string };
+const NO_LINK = "__none__";
+function MemberLink({ value, onChange, members, label }: { value?: string | null; onChange: (id: string | null) => void; members: PickMember[]; label: string }) {
+  return (
+    <Select value={value || NO_LINK} onValueChange={(v) => onChange(v === NO_LINK ? null : v)}>
+      <SelectTrigger className="w-full min-w-0" aria-label={label}><SelectValue /></SelectTrigger>
+      <SelectContent>
+        <SelectItem value={NO_LINK}>Not linked to a member</SelectItem>
+        {members.map((m) => <SelectItem key={m.id} value={m.id}>{m.label}</SelectItem>)}
+      </SelectContent>
+    </Select>
+  );
+}
 
 const EMPTY_TEMPLATE: LodgeTemplate = {
   lodge_name: "Weybridge Lodge",
@@ -253,6 +266,7 @@ function TemplateTab() {
   const [t, setT] = useState<LodgeTemplate>(EMPTY_TEMPLATE);
   const [saving, setSaving] = useState(false);
   const [reps, setReps] = useState<Rep[]>([]);
+  const [pick, setPick] = useState<PickMember[]>([]);
 
   useEffect(() => {
     (async () => {
@@ -262,6 +276,8 @@ function TemplateTab() {
         setT(merged);
         setReps(((data as any).lodge_representatives ?? []) as Rep[]);
       }
+      const { data: mem } = await supabase.from("profiles").select("id,first_name,last_name,full_name").eq("status", "active");
+      setPick(((mem ?? []) as any[]).map((m) => ({ id: m.id, label: [m.first_name, m.last_name].filter(Boolean).join(" ") || m.full_name || "Unnamed" })).sort((a, b) => a.label.localeCompare(b.label)));
     })();
   }, []);
 
@@ -312,7 +328,11 @@ function TemplateTab() {
       <div className="grid sm:grid-cols-2 gap-3">
         {F("provincial_website", "Provincial website")}
         {F("mcf_contact", "MCF contact", "textarea")}
-        {F("royal_arch_rep", "Royal Arch Representative", "textarea")}
+        <div className="min-w-0 space-y-2">
+          {F("royal_arch_rep", "Royal Arch Representative", "textarea")}
+          <Label className="text-xs">Linked member (used by the Provincial Return only)</Label>
+          <MemberLink label="Royal Arch Representative linked member" members={pick} value={(t as any).royal_arch_rep_member_id} onChange={(id) => setT({ ...t, royal_arch_rep_member_id: id } as any)} />
+        </div>
         {F("honorary_members", "Honorary members", "textarea")}
         {F("wm_contact", "Worshipful Master — home address & contact", "textarea")}
         {F("secretary_contact", "Secretary — contact", "textarea")}
@@ -326,12 +346,14 @@ function TemplateTab() {
 
       <div>
         <Label>Lodge Representatives</Label>
+        <p className="text-xs text-primary-foreground/60">The Summons prints the Name as typed. The linked member is used only by the Provincial Return, to split first names, surname and decorations.</p>
         <div className="space-y-2 mt-1">
           {reps.map((r, i) => (
-            <div key={i} className="flex gap-2">
-              <Input placeholder="Role" value={r.role} onChange={(e) => setReps(reps.map((x, j) => j === i ? { ...x, role: e.target.value } : x))} />
-              <Input placeholder="Name" value={r.name} onChange={(e) => setReps(reps.map((x, j) => j === i ? { ...x, name: e.target.value } : x))} />
-              <Button type="button" variant="destructive" size="sm" onClick={() => setReps(reps.filter((_, j) => j !== i))}><Trash2 className="w-4 h-4" /></Button>
+            <div key={i} className="grid min-w-0 grid-cols-1 gap-2 rounded-sm border border-gold/10 p-2 sm:grid-cols-[1fr_1fr_1fr_auto] sm:border-0 sm:p-0">
+              <Input className="min-w-0" placeholder="Role" value={r.role} onChange={(e) => setReps(reps.map((x, j) => j === i ? { ...x, role: e.target.value } : x))} />
+              <Input className="min-w-0" placeholder="Name" value={r.name} onChange={(e) => setReps(reps.map((x, j) => j === i ? { ...x, name: e.target.value } : x))} />
+              <MemberLink label={`${r.role || "Representative"} linked member`} members={pick} value={r.member_id} onChange={(id) => setReps(reps.map((x, j) => j === i ? { ...x, member_id: id } : x))} />
+              <Button type="button" variant="destructive" size="sm" aria-label="Remove representative" onClick={() => setReps(reps.filter((_, j) => j !== i))}><Trash2 className="w-4 h-4" /></Button>
             </div>
           ))}
           <Button type="button" variant="outline" size="sm" className="text-navy" onClick={() => setReps([...reps, { role: "", name: "" }])}><Plus className="w-4 h-4 mr-1" /> Add</Button>
