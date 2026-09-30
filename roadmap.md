@@ -20,8 +20,15 @@
 - [x] Run the full test suite and confirm a clean preview build
 
 ## Enforced portal mobile regression standard
-- [ ] Add the 320px verification rule to AGENTS.md
-- [ ] Add route-driven automated browser overflow coverage for Treasurer and Secretary tools
-- [ ] Establish or document the safest reliable authenticated test-session mechanism
-- [ ] Include the browser check in the normal test command
-- [ ] Run the full suite and confirm a clean build
+- [x] Add the 320px verification rule to AGENTS.md
+- [x] Add route-driven automated browser overflow coverage for Treasurer and Secretary tools
+- [x] Establish or document the safest reliable authenticated test-session mechanism
+- [x] Include the browser check in the normal test command
+- [x] Run the full suite and confirm a clean build
+
+## Provincial Installation Return restyle
+- [x] Match the supplied Province form's typography, tables, spacing, and three-page structure
+- [x] End page 1 immediately after the Organist and Tyler notes
+- [x] Start page 3 with the Past Masters section
+- [x] Validate and visually inspect both Word and PDF output
+- [x] Run the full unit and 320px portal test suite
