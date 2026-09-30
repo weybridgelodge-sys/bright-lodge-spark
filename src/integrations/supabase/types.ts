@@ -3328,6 +3328,48 @@ export type Database = {
         }
         Relationships: []
       }
+      past_masters: {
+        Row: {
+          created_at: string
+          display_name: string
+          id: string
+          lodge_year: number
+          member_id: string | null
+          source: string
+        }
+        Insert: {
+          created_at?: string
+          display_name: string
+          id?: string
+          lodge_year: number
+          member_id?: string | null
+          source?: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string
+          id?: string
+          lodge_year?: number
+          member_id?: string | null
+          source?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "past_masters_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "calendar_subscription_status"
+            referencedColumns: ["member_id"]
+          },
+          {
+            foreignKeyName: "past_masters_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       poll_votes: {
         Row: {
           id: string
