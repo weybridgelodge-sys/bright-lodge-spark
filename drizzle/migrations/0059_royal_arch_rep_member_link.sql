@@ -1,0 +1,2 @@
+ALTER TABLE public.lodge_template ADD COLUMN IF NOT EXISTS royal_arch_rep_member_id uuid NULL REFERENCES public.profiles(id) ON DELETE SET NULL;
+COMMENT ON COLUMN public.lodge_template.royal_arch_rep_member_id IS 'Optional link to the member who is RA Rep; royal_arch_rep free text stays the Summons source.';

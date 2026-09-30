@@ -47,3 +47,17 @@ describe("provincial return", () => {
     expect(formatAddress({ address_line1: "1 High St", address_line2: " ", town: "Guildford", postcode: "GU1 1AA" })).toBe("1 High St, Guildford, GU1 1AA");
   });
 });
+
+import { buildRepRow } from "@/lib/provincialReturn";
+describe("representative rows", () => {
+  const byId: any = { m1: { id: "m1", first_name: "Anthony", middle_name: "John", last_name: "Mallard", post_nominals: "MBE" } };
+  it("splits a linked member like an officer", () => {
+    const r = buildRepRow("SPORTS REP", { name: "W Bro A.J. Mallard (Tony) MBE, PPAGDC", member_id: "m1" }, byId);
+    expect([r.firstNames, r.surname, r.decorations]).toEqual(["Anthony John", "MALLARD", "MBE"]);
+  });
+  it("falls back to the free text whole when unlinked", () => {
+    const r = buildRepRow("HALLS REP", { name: "Bro  D Blackburn" }, byId);
+    expect([r.firstNames, r.surname]).toEqual(["Bro D Blackburn", ""]);
+    expect(buildRepRow("PET'NS REP", { name: "" }, byId).vacantRep).toBe(true);
+  });
+});

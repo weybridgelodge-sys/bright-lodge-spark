@@ -70,8 +70,9 @@ export type LodgeTemplate = {
   wm_contact: string | null;
   secretary_contact: string | null;
   royal_arch_rep: string | null;
+  royal_arch_rep_member_id?: string | null;
   honorary_members: string | null;
-  lodge_representatives: { role: string; name: string }[];
+  lodge_representatives: { role: string; name: string; member_id?: string | null }[];
 };
 
 export type OfficerRollRow = {
