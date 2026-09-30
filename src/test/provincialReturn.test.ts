@@ -1,14 +1,16 @@
 import { describe, it, expect, vi } from "vitest";
 vi.mock("@/integrations/supabase/client", () => ({ supabase: {} }));
-import { groupPastMasters, missingRollEntries, rollName, PROVINCIAL_ROWS, formatAddress } from "@/lib/provincialReturn";
+import { groupPastMasters, rollEntriesFromIpm, rollName, PROVINCIAL_ROWS, LOWER_ROWS, formatAddress } from "@/lib/provincialReturn";
 
 const person = (id: string, f: string, m: string | null, l: string) => ({ id, first_name: f, middle_name: m, last_name: l, full_name: `${f} ${l}`, post_nominals: null, email: null, status: "active", initiation_date: null });
+const wm = (id: string, y: number, proj = false) => ({ position_key: "worshipful_master", member_id: id, lodge_year: y, is_projection: proj });
+const ipm = (id: string, y: number) => ({ position_key: "immediate_past_master", member_id: id, lodge_year: y, is_projection: false });
 
 describe("provincial return", () => {
   it("formats roll names as initials + surname", () => {
     expect(rollName(person("a", "Julien", "Philip", "Tidmarsh"))).toBe("J P Tidmarsh");
   });
-  it("groups a Past Master's years on one line, ordered by first year", () => {
+  it("groups a Past Master's years on one line", () => {
     const g = groupPastMasters([
       { display_name: "J T Coleman", lodge_year: 2009, member_id: "c" },
       { display_name: "J T Coleman", lodge_year: 1997, member_id: "c" },
@@ -16,20 +18,30 @@ describe("provincial return", () => {
     ]);
     expect(g).toEqual([{ name: "J T Coleman", years: [1997, 2009] }, { name: "K P Brennan", years: [2003] }]);
   });
-  it("appends only confirmed, earlier, missing WM years", () => {
-    const people = { j: person("j", "Julien", "Philip", "Tidmarsh"), m: person("m", "Murray", null, "Grubb") };
-    const appts = [
-      { position_key: "worshipful_master", member_id: "j", lodge_year: 2025, is_projection: false },
-      { position_key: "worshipful_master", member_id: "j", lodge_year: 2026, is_projection: false },
-      { position_key: "worshipful_master", member_id: "m", lodge_year: 2024, is_projection: false },
-      { position_key: "worshipful_master", member_id: "m", lodge_year: 2023, is_projection: true },
-    ];
-    const out = missingRollEntries(2026, appts, [{ member_id: "m", lodge_year: 2024 }], people);
-    expect(out).toEqual([{ member_id: "j", lodge_year: 2025, display_name: "J P Tidmarsh" }]);
+  it("does not add a Master staying in the chair (no IPM yet)", () => {
+    const people = { j: person("j", "Julien", "Philip", "Tidmarsh") };
+    expect(rollEntriesFromIpm(2026, [wm("j", 2025), wm("j", 2026)], [], people)).toEqual([]);
   });
-  it("fills MO and LMO from the same office and never fills Organist", () => {
-    expect(PROVINCIAL_ROWS.filter((r) => r.key === "membership_officer").map((r) => r.label)).toEqual(["MO", "LMO"]);
-    expect(PROVINCIAL_ROWS.find((r) => r.label === "Organist")?.key).toBeNull();
+  it("adds the full career once confirmed as IPM", () => {
+    const people = { j: person("j", "Julien", "Philip", "Tidmarsh") };
+    const out = rollEntriesFromIpm(2027, [wm("j", 2025), wm("j", 2026), ipm("j", 2027)], [], people);
+    expect(out.map((o) => o.lodge_year)).toEqual([2025, 2026]);
+  });
+  it("merges a second, non-consecutive term into the existing roll name", () => {
+    const people = { r: person("r", "Richard", "David", "Smith") };
+    const roll = [{ display_name: "R D Smith", lodge_year: 2016, member_id: "r" }];
+    const out = rollEntriesFromIpm(2023, [wm("r", 2016), wm("r", 2022), ipm("r", 2017), ipm("r", 2023)], roll, people);
+    expect(out).toEqual([{ member_id: "r", lodge_year: 2022, display_name: "R D Smith" }]);
+  });
+  it("ignores projected IPM and WM rows", () => {
+    const people = { m: person("m", "Murray", null, "Grubb") };
+    const appts = [wm("m", 2024, true), { ...ipm("m", 2025), is_projection: true }];
+    expect(rollEntriesFromIpm(2025, appts, [], people)).toEqual([]);
+  });
+  it("fills MO and LMO from the same office, never fills Organist rows", () => {
+    const all = [...PROVINCIAL_ROWS, ...LOWER_ROWS];
+    expect(all.filter((r) => r.key === "membership_officer").map((r) => r.label)).toEqual(["MO", "LMO"]);
+    expect(all.filter((r) => r.label.startsWith("ORG")).every((r) => r.key === null)).toBe(true);
   });
   it("joins address parts, skipping blanks", () => {
     expect(formatAddress({ address_line1: "1 High St", address_line2: " ", town: "Guildford", postcode: "GU1 1AA" })).toBe("1 High St, Guildford, GU1 1AA");
