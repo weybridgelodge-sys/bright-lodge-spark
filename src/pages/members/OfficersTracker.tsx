@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import MembersLayout from "@/components/members/MembersLayout";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -93,8 +93,11 @@ export default function OfficersTracker() {
 
   const currentYear = masonicYear();
 
+  const loadedOnce = useRef(false);
   const load = async () => {
-    setLoading(true);
+    // Only show the full-page loader on first load; refreshes after a save
+    // must keep the page mounted so scroll position and focus are preserved.
+    if (!loadedOnce.current) setLoading(true);
     const [{ data: m, error: e1 }, { data: s, error: e2 }, { data: a, error: e3 }] = await Promise.all([
       supabase
         .from("profiles")
@@ -110,6 +113,7 @@ export default function OfficersTracker() {
     setMembers((m as ProfileRow[]) ?? []);
     setStatuses((s as StatusRow[]) ?? []);
     setAppointments((a as AppointmentRow[]) ?? []);
+    loadedOnce.current = true;
     setLoading(false);
   };
 
@@ -1058,7 +1062,7 @@ function NonProgressiveBoard({
                       Date first held this post
                     </label>
                     <FirstHeldDateInput
-                      key={`${appt.id}:${appt.appointed_on ?? ""}`}
+                      key={appt.id}
                       label={`Date first held — ${NON_PROGRESSIVE_LABELS[pos]}`}
                       saved={appt.appointed_on ?? null}
                       onSave={(v) => onUpdateDate(appt.id, v)}
@@ -1086,12 +1090,15 @@ function FirstHeldDateInput({
   label: string;
 }) {
   const [value, setValue] = useState(saved ?? "");
-  const [lastSent, setLastSent] = useState<string | null>(saved);
+  const lastSent = useRef<string | null>(saved);
+  const timer = useRef<ReturnType<typeof setTimeout>>();
+  useEffect(() => () => clearTimeout(timer.current), []);
   const commit = (raw: string) => {
+    clearTimeout(timer.current);
     const v = raw || null;
     if (v && (!/^\d{4}-\d{2}-\d{2}$/.test(v) || Number(v.slice(0, 4)) < 1900)) return;
-    if (v === lastSent) return;
-    setLastSent(v);
+    if (v === lastSent.current) return;
+    lastSent.current = v;
     onSave(v);
   };
   return (
@@ -1101,7 +1108,10 @@ function FirstHeldDateInput({
       value={value}
       onChange={(e) => {
         setValue(e.target.value);
-        if (e.target.value) commit(e.target.value);
+        const v = e.target.value;
+        clearTimeout(timer.current);
+        // Debounced so spinning a native date wheel doesn't save every step.
+        if (v) timer.current = setTimeout(() => commit(v), 1200);
       }}
       onBlur={(e) => commit(e.target.value)}
       className="w-full bg-navy-dark border border-gold/20 text-primary-foreground rounded-sm px-2 py-1.5 text-sm"
