@@ -126,7 +126,7 @@
     padding: 14px;
     cursor: pointer;
     opacity: 1;
-    filter: invert(1);
+    filter: brightness(0) invert(1);
   }
 
   html.portal-canvas input[type="date"]:focus,
@@ -139,7 +139,7 @@
   html.portal-canvas input[type="date"]:focus::-webkit-calendar-picker-indicator,
   html.portal-canvas input[type="date"]:focus-visible::-webkit-calendar-picker-indicator {
     opacity: 1;
-    filter: invert(86%) sepia(38%) saturate(723%) hue-rotate(354deg) brightness(93%) contrast(89%);
+    filter: brightness(0) saturate(100%) invert(71%) sepia(64%) saturate(465%) hue-rotate(357deg) brightness(91%) contrast(85%);
   }
 
   h1, h2, h3, h4 {
