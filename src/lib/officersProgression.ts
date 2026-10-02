@@ -300,3 +300,16 @@ export function computeProjection(input: ProjectionInput): ProjectionResult {
 
   return { years, grid, warnings, consumedReady };
 }
+
+// Officers' (Installation) year from the stored Installation date (server rule),
+// falling back to the 3rd-Wednesday calculation if the lookup fails.
+export async function fetchOfficerYear(): Promise<number> {
+  try {
+    const { supabase } = await import("@/integrations/supabase/client");
+    const { data, error } = await supabase.rpc("current_officer_year" as any);
+    if (!error && typeof data === "number") return data;
+  } catch {
+    /* fall through */
+  }
+  return masonicYear();
+}

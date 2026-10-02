@@ -14,6 +14,7 @@ import {
   sortBySeniority,
   detectDuplicateInitiations,
   masonicYear,
+  fetchOfficerYear,
   formatMasonicYear,
   NON_PROGRESSIVE_ORDER,
   NON_PROGRESSIVE_LABELS,
@@ -91,7 +92,12 @@ export default function OfficersTracker() {
   const [statuses, setStatuses] = useState<StatusRow[]>([]);
   const [appointments, setAppointments] = useState<AppointmentRow[]>([]);
 
-  const currentYear = masonicYear();
+  const [currentYear, setCurrentYear] = useState(() => masonicYear());
+  useEffect(() => {
+    let live = true;
+    fetchOfficerYear().then((y) => { if (live) setCurrentYear(y); });
+    return () => { live = false; };
+  }, []);
 
   const loadedOnce = useRef(false);
   const load = async () => {
