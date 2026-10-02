@@ -39,7 +39,8 @@ function Inner() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("");
   const seesAll = isAdmin || isWorshipfulMaster;
-  const canAccessPage = isAdmin || canManageProgression || isDirectorOfCeremonies;
+  const { canAccessMentorPortal } = useAuth();
+  const canAccessPage = canAccessMentorPortal;
   const canSeeMatrix = isAdmin || isWorshipfulMaster || isDirectorOfCeremonies;
 
   useEffect(() => {
