@@ -13,7 +13,7 @@ const navCls = ({ isActive }: { isActive: boolean }) =>
   }`;
 
 export default function MembersLayout({ children }: { children: React.ReactNode }) {
-  const { profile, isAdmin, isWorshipfulMaster, isDirectorOfCeremonies, canManageProgression, canManageSummons, canAccessAlmoner, canAccessCharity, canAccessTreasurer, canAccessAdminArea, signOut } = useAuth();
+  const { profile, isAdmin, isWorshipfulMaster, isDirectorOfCeremonies, canAccessMentorPortal, canManageSummons, canAccessAlmoner, canAccessCharity, canAccessTreasurer, canAccessAdminArea, signOut } = useAuth();
   const navigate = useNavigate();
   const [drawerOpen, setDrawerOpen] = useState(false);
 
@@ -62,7 +62,7 @@ export default function MembersLayout({ children }: { children: React.ReactNode 
           <Banknote className="w-4 h-4" /> Charity Steward Portal
         </NavLink>
       )}
-      {(isAdmin || canManageProgression) && (
+      {canAccessMentorPortal && (
         <NavLink to="/members/admin/development" className={navCls}>
           <GraduationCap className="w-4 h-4" /> Mentor Portal
         </NavLink>

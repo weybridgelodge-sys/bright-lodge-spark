@@ -9,7 +9,7 @@ import { HeartHandshake, GraduationCap, BarChart3, Banknote, Mail, Vote, ArrowRi
 type Tile = { to: string; title: string; description: string; icon: React.ComponentType<{ className?: string }>; visible: boolean };
 
 function Inner() {
-  const { isAdmin, isSecretary, isWorshipfulMaster, canAccessAlmoner, canManageProgression, canManageSummons, canAccessTreasurer } = useAuth();
+  const { isAdmin, isSecretary, isWorshipfulMaster, canAccessAlmoner, canAccessMentorPortal, canAccessCharity, canManageSummons, canAccessTreasurer } = useAuth();
   const [isCharitySteward, setIsCharitySteward] = useState(false);
   const [canEditNewsletter, setCanEditNewsletter] = useState(false);
 
@@ -28,8 +28,8 @@ function Inner() {
 
   const tiles: Tile[] = [
     { to: "/members/almoner", title: "Almoner Portal", description: "Welfare board, life events, correspondence, referrals.", icon: HeartHandshake, visible: canAccessAlmoner },
-    { to: "/members/admin/charity", title: "Charity Steward Portal", description: "Collections, donations, Charity Ledger, Festival tracker.", icon: Banknote, visible: isAdmin || isWorshipfulMaster || isCharitySteward || isSecretary },
-    { to: "/members/admin/development", title: "Mentor Portal", description: "Mentor dashboard, development records, summary report, Member Management and Skills Matrix.", icon: GraduationCap, visible: isAdmin || canManageProgression },
+    { to: "/members/admin/charity", title: "Charity Steward Portal", description: "Collections, donations, Charity Ledger, Festival tracker.", icon: Banknote, visible: canAccessCharity || isCharitySteward },
+    { to: "/members/admin/development", title: "Mentor Portal", description: "Mentor dashboard, development records, summary report, Member Management and Skills Matrix.", icon: GraduationCap, visible: canAccessMentorPortal },
     { to: "/members/admin/secretary", title: "Secretary Portal", description: "Meetings, Minutes, Festive Board Register, Rehearsal Register, Returns & Certificates, Summons Builder, KPI Dashboard and Officers Tracker.", icon: BarChart3, visible: canManageSummons },
     { to: "/members/admin/treasurer", title: "Treasurer Portal", description: "Transaction register and reconciliation-period locking.", icon: Wallet, visible: canAccessTreasurer },
     { to: "/members/admin/documents", title: "Document Archive", description: "Upload, replace, and manage Lodge documents.", icon: FileText, visible: isAdmin },

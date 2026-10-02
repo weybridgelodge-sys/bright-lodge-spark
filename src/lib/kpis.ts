@@ -1,7 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import { firstWmYearForMember } from "@/data/worshipfulMasters";
 import { formatMemberLine } from "@/lib/summons";
-import { OPTIONAL_POSITIONS } from "@/lib/officersProgression";
+import { OPTIONAL_POSITIONS, fetchOfficerYear } from "@/lib/officersProgression";
 
 export type MemberStatus =
   | "pending"
@@ -73,6 +73,8 @@ export type Candidate = {
 };
 
 export type KpiBundle = {
+  /** Officers' (Installation) year used for vacancy checks. */
+  officerYear?: number;
   members: KpiMember[];
   wmTerms: WmTerm[];
   risks: SuccessionRisk[];
@@ -371,7 +373,7 @@ export const CRITICAL_ROLE_LABELS: Record<(typeof CRITICAL_ROLES)[number], strin
 };
 
 export function officersHealth(bundle: KpiBundle) {
-  const my = currentMasonicYear();
+  const my = bundle.officerYear ?? currentMasonicYear();
   const yearAppointments = bundle.appointments.filter((a) => a.lodge_year === my);
   const filledKeys = new Set(yearAppointments.map((a) => a.position_key));
   // Steward offices are optional: lodges need not appoint them, so an empty
@@ -493,7 +495,7 @@ export function lodgeHealth(bundle: KpiBundle): LodgeHealth {
  * lodgeHealth() can reason over — no PII is exposed.
  */
 export async function fetchLodgeHealthBundle(): Promise<KpiBundle> {
-  const my = currentMasonicYear();
+  const my = await fetchOfficerYear();
   const [m, p, agg] = await Promise.all([
     supabase
       .from("profiles")
@@ -513,6 +515,7 @@ export async function fetchLodgeHealthBundle(): Promise<KpiBundle> {
   const risks = a.risk_role_keys ?? [];
   const candCount = a.active_candidates ?? a.active_candidate_count ?? 0;
   return {
+    officerYear: my,
     members: ((m.data as unknown) as KpiMember[]) ?? [],
     wmTerms: [],
     appointments: filled.map((key) => ({ position_key: key, member_id: "", lodge_year: my })),

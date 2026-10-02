@@ -34,12 +34,12 @@ const DEGREE_LABEL: Record<string, string> = {
 };
 
 function Inner() {
-  const { user, isAdmin, isWorshipfulMaster, isDirectorOfCeremonies, canManageProgression } = useAuth();
+  const { user, isAdmin, isWorshipfulMaster, isDirectorOfCeremonies, canAccessMentorPortal } = useAuth();
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("");
   const seesAll = isAdmin || isWorshipfulMaster;
-  const canAccessPage = isAdmin || canManageProgression || isDirectorOfCeremonies;
+  const canAccessPage = canAccessMentorPortal;
   const canSeeMatrix = isAdmin || isWorshipfulMaster || isDirectorOfCeremonies;
 
   useEffect(() => {
