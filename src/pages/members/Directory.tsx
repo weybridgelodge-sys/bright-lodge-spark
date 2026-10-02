@@ -3,6 +3,7 @@ import MembersLayout from "@/components/members/MembersLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { Search, Mail, Phone, MapPin } from "lucide-react";
 import { formatMemberLine } from "@/lib/summons";
+import OfficesHeld from "@/components/members/OfficesHeld";
 
 type DirectoryContact = {
   id: string;
@@ -62,6 +63,7 @@ export default function MembersDirectory() {
   const [members, setMembers] = useState<Member[]>([]);
   const [offices, setOffices] = useState<Record<string, string>>({});
   const [q, setQ] = useState("");
+  const [openId, setOpenId] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -181,6 +183,17 @@ export default function MembersDirectory() {
                       </span>
                     </div>
                   )}
+                </div>
+                <div className="mt-3 pt-2 border-t border-gold/10">
+                  <button
+                    type="button"
+                    aria-expanded={openId === m.id}
+                    onClick={() => setOpenId(openId === m.id ? null : m.id)}
+                    className="text-xs text-gold hover:underline min-h-11 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold rounded-sm"
+                  >
+                    {openId === m.id ? "Hide offices held" : "Offices held"}
+                  </button>
+                  {openId === m.id && <OfficesHeld memberId={m.id} compact />}
                 </div>
               </div>
             );
