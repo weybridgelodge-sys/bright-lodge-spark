@@ -136,7 +136,7 @@ function loiFromSchedule(rows: any[]): CalEvent[] {
     const t = parseDbTime(r.time_to, { hh: 21, mm: 30 });
     return {
       uid: `loi-${r.id}@${LODGE_DOMAIN}`,
-      title: `LOI: ${r.title}`,
+      title: r.title,
       location: r.venue ?? "Guildford Masonic Centre",
       description: r.description ?? "",
       start: wall(ymd.y, ymd.m1, ymd.d, f.hh, f.mm),
@@ -346,7 +346,12 @@ Deno.serve(async (req) => {
       );
       if (ev.location) lines.push(`LOCATION:${escText(ev.location)}`);
       if (ev.description) lines.push(`DESCRIPTION:${escText(ev.description)}`);
-      lines.push("STATUS:CONFIRMED", "TRANSP:OPAQUE", "END:VEVENT");
+      // One on-screen reminder, 12 hours before the start. No email alarm.
+      lines.push(
+        "STATUS:CONFIRMED", "TRANSP:OPAQUE",
+        "BEGIN:VALARM", "ACTION:DISPLAY", `DESCRIPTION:${escText(ev.title)}`, "TRIGGER:-PT12H", "END:VALARM",
+        "END:VEVENT",
+      );
     }
     lines.push("END:VCALENDAR");
     const body = lines.map(fold).join("\r\n");

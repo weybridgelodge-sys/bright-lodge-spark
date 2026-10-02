@@ -36,11 +36,11 @@ type CalEvent = {
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
 
-const KIND_STYLES: Record<CalEvent["kind"], { dot: string; pill: string; label: string }> = {
+const KIND_STYLES: Record<CalEvent["kind"], { dot: string; pill: string; label: string; legend?: string }> = {
   meeting:  { dot: "bg-gold",       pill: "bg-gold/20 text-gold border-gold/40",           label: "Meeting" },
   social:   { dot: "bg-emerald-400",pill: "bg-emerald-500/15 text-emerald-200 border-emerald-500/40", label: "Social" },
   officers: { dot: "bg-purple-400", pill: "bg-purple-500/15 text-purple-200 border-purple-500/40",   label: "Officers Night" },
-  loi:      { dot: "bg-sky-400",    pill: "bg-sky-500/15 text-sky-200 border-sky-500/40",   label: "LOI" },
+  loi:      { dot: "bg-sky-400",    pill: "bg-sky-500/15 text-sky-200 border-sky-500/40",   label: "Rehearsal", legend: "Rehearsals" },
   other:    { dot: "bg-primary-foreground/60", pill: "bg-white/10 text-primary-foreground/80 border-white/20", label: "Other" },
 };
 
@@ -60,14 +60,22 @@ function parseICS(ics: string): CalEvent[] {
   const lines = unfolded.split(/\r?\n/);
   const events: CalEvent[] = [];
   let cur: Record<string, string> | null = null;
+  let inAlarm = false;
   for (const line of lines) {
+    if (line === "BEGIN:VALARM") { inAlarm = true; continue; }
+    if (line === "END:VALARM") { inAlarm = false; continue; }
+    if (inAlarm) continue; // reminder blocks carry their own DESCRIPTION; never let them overwrite the event's
     if (line === "BEGIN:VEVENT") { cur = {}; continue; }
     if (line === "END:VEVENT") {
       if (cur) {
         const start = parseICSDate(cur.DTSTART);
         const end = cur.DTEND ? parseICSDate(cur.DTEND) : undefined;
         const rawTitle = unescapeICS(cur.SUMMARY ?? "(untitled)");
-        const { kind, clean } = classify(rawTitle);
+        const classified = classify(rawTitle);
+        // Rehearsal sessions keep the internal "loi" key; the feed marks them by UID prefix, not by title.
+        const { kind, clean } = (cur.UID ?? "").startsWith("loi-")
+          ? { kind: "loi" as const, clean: classified.clean }
+          : classified;
         events.push({
           id: cur.UID ?? `${start.toISOString()}-${rawTitle}`,
           title: clean,
@@ -199,7 +207,7 @@ function Inner() {
         <div>
           <h1 className="font-serif text-2xl text-primary-foreground">Member Calendar</h1>
           <p className="text-xs text-primary-foreground/60 mt-1">
-            All lodge meetings, festive boards, ad-hoc socials and Thursday LOIs — live.
+            All lodge meetings, festive boards, ad-hoc socials and Thursday rehearsals — live.
           </p>
         </div>
         <SubscribePanel
@@ -248,7 +256,7 @@ function Inner() {
             {(["meeting", "social", "officers", "loi"] as const).map((k) => (
               <span key={k} className="inline-flex items-center gap-1">
                 <span className={`w-2 h-2 rounded-full ${KIND_STYLES[k].dot}`} />
-                {KIND_STYLES[k].label}
+                {KIND_STYLES[k].legend ?? KIND_STYLES[k].label}
               </span>
             ))}
           </div>

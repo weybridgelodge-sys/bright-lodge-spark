@@ -22,7 +22,7 @@ const inputCls = "w-full bg-navy-dark/50 border border-gold/20 rounded-sm px-3 p
 const labelCls = "block text-xs uppercase tracking-wider text-gold mb-1.5";
 
 const blank = (): Draft => ({
-  title: "Lodge of Instruction",
+  title: "Rehearsal Night",
   event_date: new Date().toISOString().slice(0, 10),
   time_from: "19:30",
   time_to: "21:30",
