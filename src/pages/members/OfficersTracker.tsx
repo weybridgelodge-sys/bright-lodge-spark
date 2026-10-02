@@ -25,6 +25,7 @@ import { Loader2, AlertTriangle, Crown, Download, UserPlus, Lock, ShieldAlert, X
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { saveJsPdf } from "@/lib/nativeDownload";
+import InstallationDateCard from "@/components/members/officers/InstallationDateCard";
 
 type Tab = "board" | "ladder" | "readiness";
 type Readiness = "ready" | "needs_experience" | "non_progressive";
@@ -84,7 +85,7 @@ const READINESS_LABEL: Record<Readiness, string> = {
 };
 
 export default function OfficersTracker() {
-  const { user, profile } = useAuth();
+  const { user, profile, isAdmin, isSecretary } = useAuth();
   const [tab, setTab] = useState<Tab>("board");
   const [loading, setLoading] = useState(true);
 
@@ -406,6 +407,15 @@ export default function OfficersTracker() {
             Weybridge Lodge No. 6787 · Eight-year progression based on initiation seniority, plus non-progressive offices.
           </p>
         </header>
+
+        <InstallationDateCard
+          year={currentYear}
+          rows={appointments}
+          nameOf={overrideByName}
+          canEdit={isAdmin || isSecretary}
+          onSaved={() => { fetchOfficerYear().then(setCurrentYear); load(); }}
+        />
+
 
         {/* Tabs */}
         <nav className="flex gap-1 border-b border-gold/20" aria-label="Tracker views">
