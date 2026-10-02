@@ -5492,7 +5492,7 @@ export type Database = {
       current_lodge_year: { Args: never; Returns: number }
       current_office_label: { Args: { _user_id: string }; Returns: string }
       current_officer_holder: {
-        Args: { _position_key: string }
+        Args: { _at?: string; _position_key: string }
         Returns: string
       }
       current_officer_year: { Args: never; Returns: number }
@@ -5697,6 +5697,15 @@ export type Database = {
         Args: { _social_id: string }
         Returns: string[]
       }
+      officer_appointment_effective: {
+        Args: {
+          _appointed_on: string
+          _is_progressive: boolean
+          _lodge_year: number
+        }
+        Returns: string
+      }
+      officer_year_at: { Args: { _at: string }; Returns: number }
       officer_year_start: { Args: { _year: number }; Returns: string }
       post_subscription_accrual: {
         Args: { _period_id: string; _year: number }
