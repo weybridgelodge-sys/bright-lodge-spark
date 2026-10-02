@@ -14,3 +14,4 @@
 - Installation Returns resolve live and fill exact AcroForm IDs; signatures and dispensation remain blank.
 - Every new or modified interactive `/members` screen must pass the automated 320px check before completion: no document overflow or unreachable control; verify the real authenticated page or faithful worst-case reconstruction.
 - Browser layout tests may use only a Vite `e2e`-mode, localhost-only synthetic identity; it never grants backend access or ships in production.
+- Officer access uses the officers' (Installation) year, never the 1 October financial year: current holder = latest confirmed appointment on or before current_officer_year(), which starts on the stored Installation date (fallback 3rd Wednesday of October); non-progressive offices carry forward. Dues, accounts and periods stay on the financial year.
