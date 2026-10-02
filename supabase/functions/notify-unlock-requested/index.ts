@@ -30,9 +30,12 @@ Deno.serve(async (req) => {
     // Only the actual requester can trigger the email, and only for a live request.
     if (!p || p.status !== "locked" || p.unlock_requested_by !== user.id) return json({ error: "No pending request" }, 400);
 
-    const { data: yr } = await admin.rpc("current_lodge_year");
-    const { data: appts } = await admin.from("officer_appointments")
-      .select("member_id,position_key").eq("lodge_year", yr).in("position_key", ["treasurer", "secretary"]);
+    // Current holders by the officers' (Installation) year, carrying non-progressive offices forward.
+    const appts: { member_id: string; position_key: string }[] = [];
+    for (const key of ["treasurer", "secretary"]) {
+      const { data: id } = await admin.rpc("current_officer_holder", { _position_key: key });
+      if (id) appts.push({ member_id: id as unknown as string, position_key: key });
+    }
 
     const byMember = new Map<string, string[]>();
     for (const a of appts ?? []) {

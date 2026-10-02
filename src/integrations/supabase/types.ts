@@ -3325,6 +3325,30 @@ export type Database = {
           },
         ]
       }
+      officer_installation_dates: {
+        Row: {
+          created_at: string
+          installation_date: string
+          lodge_year: number
+          notes: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          installation_date: string
+          lodge_year: number
+          notes?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          installation_date?: string
+          lodge_year?: number
+          notes?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       officer_positions: {
         Row: {
           is_progressive: boolean
@@ -5467,6 +5491,11 @@ export type Database = {
       }
       current_lodge_year: { Args: never; Returns: number }
       current_office_label: { Args: { _user_id: string }; Returns: string }
+      current_officer_holder: {
+        Args: { _position_key: string }
+        Returns: string
+      }
+      current_officer_year: { Args: never; Returns: number }
       current_user_degree_level: { Args: { _user_id: string }; Returns: number }
       degree_level: {
         Args: { _d: Database["public"]["Enums"]["masonic_degree"] }
@@ -5668,6 +5697,7 @@ export type Database = {
         Args: { _social_id: string }
         Returns: string[]
       }
+      officer_year_start: { Args: { _year: number }; Returns: string }
       post_subscription_accrual: {
         Args: { _period_id: string; _year: number }
         Returns: string
