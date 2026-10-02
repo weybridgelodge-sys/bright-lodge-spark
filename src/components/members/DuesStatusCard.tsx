@@ -40,7 +40,7 @@ export default function DuesStatusCard({ memberId, showTestBadge = true }: Props
           <span className="text-emerald-300 font-semibold">£0 — Exempt as {calc.exempt_reason}.</span>
         </p>
         <p className="text-xs text-primary-foreground/60 mt-1">
-          Members currently serving as Treasurer or Secretary are exempt from the annual subscription.
+          The member currently serving as Secretary is exempt from the annual subscription.
         </p>
         {testBadge}
       </section>
