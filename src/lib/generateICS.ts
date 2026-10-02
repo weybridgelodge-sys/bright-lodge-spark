@@ -110,6 +110,12 @@ export function generateICS(event: ICSEventInput): string {
     "STATUS:CONFIRMED",
     "SEQUENCE:0",
     "TRANSP:OPAQUE",
+    // One on-screen reminder, 12 hours before the start. No email alarm.
+    "BEGIN:VALARM",
+    "ACTION:DISPLAY",
+    `DESCRIPTION:${escapeText(event.title)}`,
+    "TRIGGER:-PT12H",
+    "END:VALARM",
     "END:VEVENT",
     "END:VCALENDAR",
   );

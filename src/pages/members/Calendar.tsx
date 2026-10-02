@@ -207,7 +207,7 @@ function Inner() {
         <div>
           <h1 className="font-serif text-2xl text-primary-foreground">Member Calendar</h1>
           <p className="text-xs text-primary-foreground/60 mt-1">
-            All lodge meetings, festive boards, ad-hoc socials and Thursday LOIs — live.
+            All lodge meetings, festive boards, ad-hoc socials and Thursday rehearsals — live.
           </p>
         </div>
         <SubscribePanel
@@ -256,7 +256,7 @@ function Inner() {
             {(["meeting", "social", "officers", "loi"] as const).map((k) => (
               <span key={k} className="inline-flex items-center gap-1">
                 <span className={`w-2 h-2 rounded-full ${KIND_STYLES[k].dot}`} />
-                {KIND_STYLES[k].label}
+                {KIND_STYLES[k].legend ?? KIND_STYLES[k].label}
               </span>
             ))}
           </div>
