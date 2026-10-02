@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
-import { CHECKLIST_STAGES, STATUS_LABELS } from "@/lib/development/catalogues";
+import { CHECKLIST_STAGES, STATUS_LABELS, rehearsalDisplayLabel } from "@/lib/development/catalogues";
 import type { ChecklistItem } from "@/lib/development/queries";
 
 export default function MentoringChecklist({
@@ -72,7 +72,7 @@ export default function MentoringChecklist({
                     return (
                       <div key={r.id} className={`rounded-sm border p-3 ${overdue ? "border-amber-500/50 bg-amber-500/5" : "border-gold/15 bg-navy-dark/40"}`}>
                         <div className="grid gap-2 md:grid-cols-[1fr_140px_140px_150px]">
-                          <p className="text-sm text-primary-foreground">{r.topic}</p>
+                          <p className="text-sm text-primary-foreground">{rehearsalDisplayLabel(r.topic)}</p>
                           <label className="text-[10px] uppercase tracking-wider text-gold/70">Target
                             <Input type="date" disabled={!canEdit} value={r.target_date ?? ""}
                               onChange={(e) => patch(r.id, { target_date: e.target.value || null })}

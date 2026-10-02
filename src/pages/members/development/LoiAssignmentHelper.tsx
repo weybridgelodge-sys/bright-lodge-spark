@@ -4,7 +4,7 @@ import ProtectedRoute from "@/components/members/ProtectedRoute";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { loadSkillsMatrix, type SkillsMatrix, pieceKey, displayMember, piecePeople } from "@/lib/development/skillsMatrix";
-import { RITUAL_CATALOGUE, RITUAL_GROUPS } from "@/lib/development/catalogues";
+import { RITUAL_CATALOGUE, RITUAL_GROUPS, rehearsalDisplayLabel } from "@/lib/development/catalogues";
 import { Loader2, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -141,7 +141,7 @@ function Inner() {
           <Select value={groupFilter} onValueChange={setGroupFilter}>
             <SelectTrigger className="bg-navy-dark text-primary-foreground w-56"><SelectValue /></SelectTrigger>
             <SelectContent>
-              {RITUAL_GROUPS.map((g) => <SelectItem key={g} value={g}>{g}</SelectItem>)}
+              {RITUAL_GROUPS.map((g) => <SelectItem key={g} value={g}>{rehearsalDisplayLabel(g)}</SelectItem>)}
             </SelectContent>
           </Select>
         </div>

@@ -2,7 +2,7 @@ import { Fragment, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { RITUAL_GROUPS } from "@/lib/development/catalogues";
+import { RITUAL_GROUPS, rehearsalDisplayLabel } from "@/lib/development/catalogues";
 import type { RitualRow } from "@/lib/development/queries";
 import PreceptorNotesField from "./PreceptorNotesField";
 
@@ -46,7 +46,7 @@ export default function RitualRecord({
         if (list.length === 0) return null;
         return (
           <div key={group}>
-            <h3 className="font-serif text-gold text-sm mb-2">{group}</h3>
+            <h3 className="font-serif text-gold text-sm mb-2">{rehearsalDisplayLabel(group)}</h3>
             <div className="overflow-x-auto rounded-sm border border-gold/20">
               <table className="w-full text-xs">
                 <thead className="bg-navy-light/40 text-gold/80 uppercase text-[10px] tracking-wider">

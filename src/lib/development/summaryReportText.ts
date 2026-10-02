@@ -42,13 +42,13 @@ export function buildSummaryReportText(d: SummaryReportData, mentorStatement: st
   lines.push(`  • Amber (single point of failure): ${d.ritual.amber}`);
   if (d.ritual.amberList.length) lines.push(d.ritual.amberList.slice(0, 12).map((s) => `      – ${s}`).join("\n"));
   lines.push(`  • Green (two or more qualified): ${d.ritual.green} (${d.ritual.greenPct}%)`);
-  lines.push(`  • New deliveries in period (LoI + Lodge): ${d.ritual.newDeliveries}`);
+  lines.push(`  • New deliveries in period (Rehearsal + Lodge): ${d.ritual.newDeliveries}`);
   if (d.ritual.firstDeliveriesInLodge.length) {
     lines.push(`  • First-time Lodge deliveries:`);
     lines.push(list(d.ritual.firstDeliveriesInLodge));
   }
   lines.push("");
-  lines.push("4. LODGE OF INSTRUCTION");
+  lines.push("4. REHEARSALS");
   lines.push(`  • Sessions held: ${d.loi.sessions}`);
   lines.push(`  • Average attendance: ${d.loi.avgAttendance} (${d.loi.avgAttendancePct}% of active membership)`);
   lines.push(`  • Trend: ${d.loi.trend}`);

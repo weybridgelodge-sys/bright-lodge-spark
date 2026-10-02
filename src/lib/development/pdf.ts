@@ -2,7 +2,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { assetUrl } from "@/lib/assetUrl";
 import logoAsset from "@/assets/weybridge-logo-white.png.asset.json";
-import { CHECKLIST_STAGES, RITUAL_GROUPS, STATUS_LABELS } from "./catalogues";
+import { CHECKLIST_STAGES, RITUAL_GROUPS, STATUS_LABELS, rehearsalDisplayLabel } from "./catalogues";
 import type {
   ChecklistItem,
   RitualRow,
@@ -164,10 +164,10 @@ export async function buildDevelopmentPdf(args: {
     doc.setFont("times", "bold");
     doc.setFontSize(10);
     doc.setTextColor(...NAVY);
-    doc.text(group, margin, y);
+    doc.text(rehearsalDisplayLabel(group), margin, y);
     y += 10;
     table(
-      [["Ritual / Part", "Learned", "Assessed", "LoI", "In Lodge", "Notes"]],
+      [["Ritual / Part", "Learned", "Assessed", "Rehearsal", "In Lodge", "Notes"]],
       rows.map((r) => [r.piece, fmt(r.date_first_learned), fmt(r.date_assessed), fmt(r.date_delivered_loi), fmt(r.date_delivered_lodge), r.notes || ""]),
     );
   }

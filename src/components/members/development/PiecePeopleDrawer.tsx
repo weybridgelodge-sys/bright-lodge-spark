@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { X } from "lucide-react";
 import { displayMember, piecePeople, type MatrixPiece, type SkillsMatrix } from "@/lib/development/skillsMatrix";
+import { rehearsalDisplayLabel } from "@/lib/development/catalogues";
 
 export default function PiecePeopleDrawer({
   matrix,
@@ -43,7 +44,7 @@ export default function PiecePeopleDrawer({
       >
         <div className="flex items-start justify-between gap-3 mb-4">
           <div>
-            <p className="text-[10px] uppercase tracking-wider text-gold/70">{piece.ritual_group}</p>
+            <p className="text-[10px] uppercase tracking-wider text-gold/70">{rehearsalDisplayLabel(piece.ritual_group)}</p>
             <h2 className="font-serif text-lg text-primary-foreground">{piece.piece}</h2>
           </div>
           <button onClick={onClose} className="text-gold/70 hover:text-gold p-1" aria-label="Close">
