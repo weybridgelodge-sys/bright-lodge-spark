@@ -435,6 +435,13 @@
       "when": 1790946168428,
       "tag": "0061_secretary_only_subscription_exemption",
       "breakpoints": true
+    },
+    {
+      "idx": 62,
+      "version": "7",
+      "when": 1790952308661,
+      "tag": "0062_migration",
+      "breakpoints": true
     }
   ]
 }
