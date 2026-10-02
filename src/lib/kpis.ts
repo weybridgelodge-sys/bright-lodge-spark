@@ -1,7 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import { firstWmYearForMember } from "@/data/worshipfulMasters";
 import { formatMemberLine } from "@/lib/summons";
-import { OPTIONAL_POSITIONS } from "@/lib/officersProgression";
+import { OPTIONAL_POSITIONS, fetchOfficerYear } from "@/lib/officersProgression";
 
 export type MemberStatus =
   | "pending"
@@ -73,6 +73,8 @@ export type Candidate = {
 };
 
 export type KpiBundle = {
+  /** Officers' (Installation) year used for vacancy checks. */
+  officerYear?: number;
   members: KpiMember[];
   wmTerms: WmTerm[];
   risks: SuccessionRisk[];
