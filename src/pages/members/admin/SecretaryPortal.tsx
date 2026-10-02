@@ -19,9 +19,9 @@ function Inner() {
 
   const tiles: Tile[] = [
     { to: "/members/admin/festive-board", title: "Festive Board Register", description: "Attendance, visitors, waitlist, walk-ins and table plan export.", icon: Utensils, visible: true },
-    { to: "/members/kpis", title: "KPI Dashboard", description: "Membership, LOI, Festive Board, Royal Arch conversion.", icon: BarChart3, visible: canManageProgression },
-    { to: "/members/admin/loi", title: "LOI Register", description: "Sessions, attendance and ritual parts practised.", icon: GraduationCap, visible: true },
-    { to: "/members/admin/loi-schedule", title: "LOI Schedule", description: "Plan upcoming LOI and training sessions — shown in every member's calendar.", icon: CalendarClock, visible: true },
+    { to: "/members/kpis", title: "KPI Dashboard", description: "Membership, rehearsals, Festive Board, Royal Arch conversion.", icon: BarChart3, visible: canManageProgression },
+    { to: "/members/admin/loi", title: "Rehearsal Register", description: "Rehearsal sessions, attendance and ritual parts practised.", icon: GraduationCap, visible: true },
+    { to: "/members/admin/loi-schedule", title: "Rehearsal Schedule", description: "Plan upcoming rehearsals and training sessions — shown in every member's calendar.", icon: CalendarClock, visible: true },
     { to: "/members/events", title: "Meetings", description: "Edit the meeting shown on the public Bookings page.", icon: CalendarPlus, visible: true },
       { to: "/members/admin", title: "Member Management", description: "Directory, member records, roles, and notices.", icon: Users, visible: isAdmin || isSecretary || isWorshipfulMaster || isAssistantSecretary },
     { to: "/members/admin/enquiries", title: "Membership Enquiries", description: "Join Us form enquiries — convert to candidates or dismiss.", icon: Inbox, visible: isAdmin || isSecretary || isAssistantSecretary || isWorshipfulMaster },

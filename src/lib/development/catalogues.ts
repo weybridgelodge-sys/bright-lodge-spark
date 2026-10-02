@@ -4,6 +4,10 @@
 export type ChecklistSeed = { stage: string; topic: string };
 export type RitualSeed = { ritual_group: string; piece: string; degree: string | null };
 
+export const rehearsalDisplayLabel = (value: string) => value
+  .replace(/Lodge of Instruction/gi, "Rehearsal Night")
+  .replace(/\bLoI\b/g, "Rehearsal");
+
 export const CHECKLIST_STAGES = [
   "Pre-Initiation",
   "First Degree — Entered Apprentice",

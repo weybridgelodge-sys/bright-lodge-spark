@@ -9,7 +9,7 @@ import {
   memberInitials,
   displayMember,
 } from "@/lib/development/skillsMatrix";
-import { RITUAL_GROUPS } from "@/lib/development/catalogues";
+import { RITUAL_GROUPS, rehearsalDisplayLabel } from "@/lib/development/catalogues";
 import PiecePeopleDrawer from "./PiecePeopleDrawer";
 
 const GROUPS = [...RITUAL_GROUPS] as string[];
@@ -51,7 +51,7 @@ export default function SkillsMatrixGrid({ matrix }: { matrix: SkillsMatrix }) {
             className="bg-navy-dark border border-gold/30 text-primary-foreground rounded-sm px-2 py-1 text-xs"
           >
             <option value="all">All</option>
-            {GROUPS.map((g) => <option key={g} value={g}>{g}</option>)}
+            {GROUPS.map((g) => <option key={g} value={g}>{rehearsalDisplayLabel(g)}</option>)}
           </select>
         </div>
         <div className="flex items-center gap-1 text-xs">
@@ -108,7 +108,7 @@ export default function SkillsMatrixGrid({ matrix }: { matrix: SkillsMatrix }) {
                       className={`text-left text-xs border px-2 py-1 rounded-sm w-full ${riskTint(p.risk)}`}
                     >
                       <span className="block font-medium">{p.piece}</span>
-                      <span className="block text-[10px] opacity-70">{p.ritual_group}</span>
+                      <span className="block text-[10px] opacity-70">{rehearsalDisplayLabel(p.ritual_group)}</span>
                     </button>
                   </td>
                   {matrix.members.map((m) => {
@@ -139,7 +139,7 @@ export default function SkillsMatrixGrid({ matrix }: { matrix: SkillsMatrix }) {
       </div>
 
       <p className="text-[10px] text-primary-foreground/60">
-        L = Learned · A = Assessed · I = Delivered at LoI · Lodge = Delivered in Lodge.
+        L = Learned · A = Assessed · I = Delivered at Rehearsal · Lodge = Delivered in Lodge.
         Click a piece for a member breakdown; click a member's initials or a cell to open their record.
       </p>
 

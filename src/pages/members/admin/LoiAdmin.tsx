@@ -125,7 +125,7 @@ export default function LoiAdmin() {
   }, [attendance]);
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Delete this LOI session and all attendance?")) return;
+    if (!confirm("Delete this rehearsal session and all attendance?")) return;
     const { error } = await supabase.from("loi_sessions").delete().eq("id", id);
     if (error) {
       toast({ title: "Delete failed", description: error.message, variant: "destructive" });
@@ -138,7 +138,7 @@ export default function LoiAdmin() {
   if (!canEdit) {
     return (
       <MembersLayout>
-        <p className="text-primary-foreground/70">You don't have permission to view the LOI Register.</p>
+        <p className="text-primary-foreground/70">You don't have permission to view the Rehearsal Register.</p>
       </MembersLayout>
     );
   }
@@ -148,10 +148,10 @@ export default function LoiAdmin() {
       <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1 className="font-serif text-3xl text-gold mb-1 flex items-center gap-2">
-            <GraduationCap className="w-6 h-6" /> LOI Register
+            <GraduationCap className="w-6 h-6" /> Rehearsal Register
           </h1>
           <p className="text-primary-foreground/60 text-sm">
-            Lodge of Instruction sessions, attendance and parts taken.
+            Rehearsal Night sessions, attendance and parts taken.
           </p>
         </div>
         {canEdit && (
@@ -172,7 +172,7 @@ export default function LoiAdmin() {
           <p className="text-xs text-primary-foreground/50">Loading…</p>
         ) : sessions.length === 0 ? (
           <p className="text-xs text-primary-foreground/50 italic">
-            No LOI sessions recorded yet.
+            No rehearsal sessions recorded yet.
           </p>
         ) : (
           <ul className="divide-y divide-gold/10">
@@ -444,7 +444,7 @@ function SessionDialog({
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-navy-dark text-primary-foreground border-gold/30">
         <DialogHeader>
           <DialogTitle className="font-serif text-gold">
-            {existing ? "Edit LOI session" : "New LOI session"}
+            {existing ? "Edit rehearsal session" : "New rehearsal session"}
           </DialogTitle>
         </DialogHeader>
 

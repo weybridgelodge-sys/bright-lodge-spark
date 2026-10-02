@@ -159,15 +159,15 @@ export async function buildSummaryReportPdf(args: {
       ["Red — no qualified member", `${data.ritual.red} (${data.ritual.redPct}%)`],
       ["Amber — single point of failure", String(data.ritual.amber)],
       ["Green — two or more qualified", `${data.ritual.green} (${data.ritual.greenPct}%)`],
-      ["New deliveries (LoI + Lodge) in period", String(data.ritual.newDeliveries)],
+      ["New deliveries (Rehearsal + Lodge) in period", String(data.ritual.newDeliveries)],
       ["First-time Lodge deliveries", String(data.ritual.firstDeliveriesInLodge.length)],
     ],
   );
   if (data.ritual.amberList.length) para("Amber pieces", data.ritual.amberList.slice(0, 30).join("; "));
   if (data.ritual.firstDeliveriesInLodge.length) para("First-time Lodge deliveries", flagged(data.ritual.firstDeliveriesInLodge));
 
-  // 4. LoI
-  section("4. Lodge of Instruction");
+  // 4. Rehearsals
+  section("4. Rehearsals");
   table(
     [["Metric", "Value"]],
     [

@@ -56,7 +56,7 @@ function Inner() {
         </div>
         <div className="flex gap-2">
           <Link to="/members/admin/loi-helper" className="inline-flex items-center gap-1 text-xs border border-gold/40 text-gold px-3 py-2 rounded-sm hover:bg-gold/10">
-            LoI Part Assignment Helper
+            Rehearsal Part Assignment Helper
           </Link>
           <Button onClick={exportGap} disabled={exporting} className="bg-gold text-navy hover:bg-gold/90">
             <FileDown className="w-4 h-4 mr-2" /> {exporting ? "Building…" : "Gap Report PDF"}

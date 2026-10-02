@@ -473,7 +473,7 @@ export function buildExecSummary(d: SummaryReportData): string {
   bits.push(`Of ${d.ritual.totalPieces} ritual pieces, ${redV}, ${amberV}.`);
   if (d.loi.sessions > 0) {
     bits.push(
-      `LoI attendance averaged ${d.loi.avgAttendancePct}% across ${d.loi.sessions} session${d.loi.sessions === 1 ? "" : "s"}${d.loi.trend !== "n/a" ? ` (${d.loi.trend} vs previous period)` : ""}.`
+      `Rehearsal attendance averaged ${d.loi.avgAttendancePct}% across ${d.loi.sessions} session${d.loi.sessions === 1 ? "" : "s"}${d.loi.trend !== "n/a" ? ` (${d.loi.trend} vs previous period)` : ""}.`
     );
   }
   if (d.workingGroups.active > 0) {
