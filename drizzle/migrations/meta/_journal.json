@@ -428,6 +428,13 @@
       "when": 1790751877534,
       "tag": "0060_provincial_return_submissions",
       "breakpoints": true
+    },
+    {
+      "idx": 61,
+      "version": "7",
+      "when": 1790946168428,
+      "tag": "0061_secretary_only_subscription_exemption",
+      "breakpoints": true
     }
   ]
 }
