@@ -128,7 +128,7 @@ const ThreeMasonicDegrees = () => {
                   The First Degree, or Initiation, is your formal welcome into Freemasonry. It is a memorable evening — slightly mysterious by tradition, but warm and reassuring throughout. The ceremony introduces the idea that a Mason should be a good man trying to become better, and it presents the symbolic working tools of an Entered Apprentice: the 24-inch gauge, the common gavel and the chisel — reminders to use our time wisely, to control our impulses and to refine our character.
                 </p>
                 <p className="text-muted-foreground font-sans leading-relaxed mt-4">
-                  After Initiation, the new Brother begins to attend our weekly Lodge of Instruction, meet the other members of the Lodge informally, and prepare quietly for the next step.
+                  After Initiation, the new Brother begins to attend our weekly Rehearsal Night, meet the other members of the Lodge informally, and prepare quietly for the next step.
                 </p>
                 <img src={enteredApprenticeImg} alt="Entered Apprentice apron — plain white lambskin" loading="lazy" className={apronImgClass} />
               </section>
@@ -176,7 +176,7 @@ const ThreeMasonicDegrees = () => {
                 <div className="h-0.5 w-16 bg-gold mb-6" />
                 <h2 className="text-2xl font-serif text-foreground mb-4">A Lifelong Journey</h2>
                 <p className="text-muted-foreground font-sans leading-relaxed">
-                  Although there are only three degrees, Freemasonry itself is a lifelong journey. New members of Weybridge Lodge are supported by an experienced Mentor, by our weekly Lodge of Instruction, and by a friendly group of Brethren — aged from 18 to 80 — who genuinely enjoy each other's company. If any of this resonates with you, we would be very pleased to hear from you.
+                  Although there are only three degrees, Freemasonry itself is a lifelong journey. New members of Weybridge Lodge are supported by an experienced Mentor, by our weekly Rehearsal Night, and by a friendly group of Brethren — aged from 18 to 80 — who genuinely enjoy each other's company. If any of this resonates with you, we would be very pleased to hear from you.
                 </p>
                 <p className="mt-6">
                   <Link

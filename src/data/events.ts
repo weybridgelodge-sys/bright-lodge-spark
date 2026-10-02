@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 // Used by both the homepage Live Events Feed and the /events calendar page.
 //
 // HOW TO UPDATE: Edit the `events` array below. To add a one-off date, append
-// a new entry. Lodge of Instruction sessions come live from the portal's LOI Schedule
+// a new entry. Rehearsal Night sessions come live from the portal's rehearsal schedule
 // (public_loi_schedule view) via `useEvents()` / `getEventsAsync()`.
 
 export type EventType = "meeting" | "officers" | "social" | "loi";
@@ -25,7 +25,7 @@ export const typeLabel: Record<EventType, string> = {
   meeting: "Lodge Meeting",
   officers: "Officers Night",
   social: "Social Event",
-  loi: "Lodge of Instruction",
+  loi: "Rehearsal Night",
 };
 
 export const typeBadgeClass: Record<EventType, string> = {
@@ -103,6 +103,12 @@ function fmtTime(t: string | null): string | undefined {
   return `${h % 12 || 12}.${m[2]} ${suffix}`;
 }
 
+/** Public site calls the Thursday sessions "Rehearsal Night"; portal titles may still say LOI. */
+function publicRehearsalTitle(t: string | null): string {
+  if (!t || /lodge of instruction|\bLoI\b/i.test(t)) return "Rehearsal Night";
+  return t;
+}
+
 /** Map a public_loi_schedule row to the shared LodgeEvent shape. */
 function loiRowToEvent(r: {
   title: string | null; event_date: string | null; time_from: string | null;
@@ -115,14 +121,14 @@ function loiRowToEvent(r: {
   const to = fmtTime(r.time_to);
   const venue = r.venue || "Guildford Masonic Centre";
   return {
-    title: r.title || "Lodge of Instruction",
+    title: publicRehearsalTitle(r.title),
     date: new Date(y, mo - 1, d, hh || 0, mm || 0),
     time: from && to ? `${from} – ${to}` : from,
     venue,
     address: venue === "Guildford Masonic Centre" ? "Hitherbury Close, Guildford GU2 4DR" : undefined,
     type: "loi",
     description: r.description ?? undefined,
-    link: "/events#loi",
+    link: "/events#rehearsal-night",
   };
 }
 

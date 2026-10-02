@@ -22,7 +22,7 @@ const LiveEventsFeed = () => {
             <div className="h-0.5 w-16 bg-gold mb-6" />
             <h2 className="text-3xl md:text-4xl font-serif text-foreground">What's Coming Up</h2>
             <p className="text-muted-foreground font-sans mt-2">
-              A live feed of our next ceremonies, social evenings and Lodge of Instruction.
+              A live feed of our next ceremonies, social evenings and Rehearsal Nights.
             </p>
           </div>
           <Link
