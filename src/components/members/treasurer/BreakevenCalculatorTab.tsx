@@ -52,7 +52,7 @@ export default function BreakevenCalculatorTab({ canEdit }: { canEdit: boolean }
       fetchSubscriptionSettings(),
       fetchReservePots(),
       supabase.from("profiles").select("id,full_name,first_name,last_name").eq("status", "active").eq("is_honorary_member", false),
-      supabase.from("officer_appointments" as any).select("member_id,position_key,lodge_year").in("position_key", ["treasurer", "secretary"]),
+      supabase.from("officer_appointments" as any).select("member_id,position_key,lodge_year").eq("position_key", "secretary"),
     ]);
 
     if (settings) {
@@ -62,11 +62,14 @@ export default function BreakevenCalculatorTab({ canEdit }: { canEdit: boolean }
     setPots(potRows);
     setPotValues(Object.fromEntries(potRows.map((p) => [p.fund_code, fromPence(p.annual_pence)])));
 
+    // Only the Secretary is exempt (one membership); the Treasurer pays.
+    // Use the latest Secretary appointment on or before the current lodge year.
     const now = new Date();
     const lodgeYear = now.getUTCMonth() >= 9 ? now.getUTCFullYear() : now.getUTCFullYear() - 1;
-    const exemptIds = new Set(
-      ((officersRes.data as any[]) ?? []).filter((o) => o.lodge_year === lodgeYear).map((o) => o.member_id as string),
-    );
+    const latestSec = ((officersRes.data as any[]) ?? [])
+      .filter((o) => o.member_id && o.lodge_year <= lodgeYear)
+      .sort((a, b) => b.lodge_year - a.lodge_year)[0];
+    const exemptIds = new Set<string>(latestSec ? [latestSec.member_id as string] : []);
     const members = ((membersRes.data as any[]) ?? []).filter((m) => !exemptIds.has(m.id));
     const excluded = ((membersRes.data as any[]) ?? [])
       .filter((m) => exemptIds.has(m.id))
@@ -154,8 +157,8 @@ export default function BreakevenCalculatorTab({ canEdit }: { canEdit: boolean }
                 <Label>Chargeable members</Label>
                 <Input type="number" min="0" value={memberCount} onChange={(e) => setMemberCount(e.target.value)} disabled={!canEdit} />
                 <p className="text-primary-foreground/50 text-xs mt-1">
-                  Active, non-honorary members, excluding the current Treasurer and Secretary
-                  {excludedNames.length ? ` (${excludedNames.join(", ")})` : ""}.
+                  Active, non-honorary members, excluding 1 exempt membership: the Secretary
+                  {excludedNames.length ? ` (${excludedNames.join(", ")})` : ""}. The Treasurer pays.
                 </p>
               </div>
               <div>
