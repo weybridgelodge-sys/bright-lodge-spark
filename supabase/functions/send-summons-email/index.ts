@@ -193,14 +193,9 @@ Deno.serve(async (req) => {
     let secretaryName = secretary_name_override || "";
     let secretaryTitle = "";
     if (!secretary_name_override) {
-      const { data: yearRow } = await admin.rpc("current_lodge_year");
-      const lodgeYear = (yearRow as unknown as number) ?? new Date().getFullYear();
-      const { data: appt } = await admin
-        .from("officer_appointments")
-        .select("member_id")
-        .eq("lodge_year", lodgeYear)
-        .eq("position_key", "secretary")
-        .maybeSingle();
+      // Current Secretary = latest confirmed appointment in the officers' (Installation) year.
+      const { data: secId } = await admin.rpc("current_officer_holder", { _position_key: "secretary" });
+      const appt = secId ? { member_id: secId as unknown as string } : null;
       if (appt?.member_id) {
         const { data: prof } = await admin
           .from("profiles")

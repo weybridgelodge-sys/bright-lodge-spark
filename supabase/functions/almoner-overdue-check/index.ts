@@ -221,18 +221,11 @@ Deno.serve(async (req) => {
 
 
     // ---- Resolve Almoner (email + member id for push) ----
-    const lodgeYear =
-      new Date().getMonth() + 1 >= 10 ? new Date().getFullYear() : new Date().getFullYear() - 1
-
     let almonerEmail: string | null = null
     let almonerId: string | null = null
-    const { data: appt } = await supabase
-      .from('officer_appointments')
-      .select('member_id')
-      .eq('position_key', 'almoner')
-      .eq('lodge_year', lodgeYear)
-      .limit(1)
-      .maybeSingle()
+    // Current Almoner = latest confirmed appointment in the officers' (Installation) year.
+    const { data: almonerHolder } = await supabase.rpc('current_officer_holder', { _position_key: 'almoner' })
+    const appt = almonerHolder ? { member_id: almonerHolder as unknown as string } : null
 
     if (appt?.member_id) {
       const { data: prof } = await supabase

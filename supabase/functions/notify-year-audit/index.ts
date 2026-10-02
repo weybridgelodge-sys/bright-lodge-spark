@@ -46,9 +46,12 @@ Deno.serve(async (req) => {
       if (q) { note = q.note ?? ""; actorId = q.signed_by; }
     } else return json({ ok: true, sent: 0 });
 
-    const { data: yr } = await admin.rpc("current_lodge_year");
-    const { data: appts } = await admin.from("officer_appointments")
-      .select("member_id,position_key").eq("lodge_year", yr).in("position_key", roles);
+    // Current holders by the officers' (Installation) year, carrying non-progressive offices forward.
+    const appts: { member_id: string; position_key: string }[] = [];
+    for (const key of roles) {
+      const { data: id } = await admin.rpc("current_officer_holder", { _position_key: key });
+      if (id) appts.push({ member_id: id as unknown as string, position_key: key });
+    }
     const ids = [...new Set([...(appts ?? []).map((x: any) => x.member_id), ...(actorId ? [actorId] : [])])];
     const { data: profs } = await admin.from("profiles").select("id,email,full_name").in("id", ids);
     const actor = profs?.find((p: any) => p.id === actorId)?.full_name ?? "";
