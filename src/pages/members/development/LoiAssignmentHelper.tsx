@@ -88,7 +88,7 @@ function Inner() {
   };
 
   const save = async () => {
-    if (!sessionId) { toast.error("Pick an LoI session first"); return; }
+    if (!sessionId) { toast.error("Pick a rehearsal session first"); return; }
     setSaving(true);
     // wipe & rewrite for this session
     await supabase.from("loi_part_assignments").delete().eq("loi_session_id", sessionId);
@@ -116,15 +116,15 @@ function Inner() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="font-serif text-2xl text-primary-foreground">LoI Part Assignment Helper</h1>
+        <h1 className="font-serif text-2xl text-primary-foreground">Rehearsal Part Assignment Helper</h1>
         <p className="text-xs text-primary-foreground/60 mt-1">
-          Pick an LoI session, tick the pieces you'll rehearse, accept the suggested member or override.
+          Pick a rehearsal session, tick the pieces you'll rehearse, accept the suggested member or override.
         </p>
       </div>
 
       <div className="flex flex-wrap items-end gap-3">
         <div>
-          <p className="text-[10px] uppercase tracking-wider text-gold/80 mb-1">LoI Session</p>
+          <p className="text-[10px] uppercase tracking-wider text-gold/80 mb-1">Rehearsal Session</p>
           <Select value={sessionId} onValueChange={setSessionId}>
             <SelectTrigger className="bg-navy-dark text-primary-foreground w-72"><SelectValue placeholder="Select session" /></SelectTrigger>
             <SelectContent>

@@ -139,7 +139,7 @@ export default function SkillsMatrixGrid({ matrix }: { matrix: SkillsMatrix }) {
       </div>
 
       <p className="text-[10px] text-primary-foreground/60">
-        L = Learned · A = Assessed · I = Delivered at LoI · Lodge = Delivered in Lodge.
+        L = Learned · A = Assessed · I = Delivered at Rehearsal · Lodge = Delivered in Lodge.
         Click a piece for a member breakdown; click a member's initials or a cell to open their record.
       </p>
 

@@ -54,7 +54,7 @@ export default function RitualRecord({
                     <th className="text-left p-2">Ritual / Part</th>
                     <th className="text-left p-2 w-32">Learned</th>
                     <th className="text-left p-2 w-32">Assessed</th>
-                    <th className="text-left p-2 w-32">LoI</th>
+                    <th className="text-left p-2 w-32">Rehearsal</th>
                     <th className="text-left p-2 w-32">In Lodge</th>
                     <th className="text-left p-2">Notes</th>
                   </tr>

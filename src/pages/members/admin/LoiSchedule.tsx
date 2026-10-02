@@ -114,8 +114,8 @@ function Inner() {
     <MembersLayout>
       <header className="mb-6 flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="font-serif text-2xl md:text-3xl text-gold flex items-center gap-2"><CalendarClock className="w-7 h-7" /> LOI Schedule</h1>
-          <p className="text-primary-foreground/60 text-sm">Planned Lodge of Instruction and training sessions — feeds every member's personal calendar.</p>
+          <h1 className="font-serif text-2xl md:text-3xl text-gold flex items-center gap-2"><CalendarClock className="w-7 h-7" /> Rehearsal Schedule</h1>
+          <p className="text-primary-foreground/60 text-sm">Planned rehearsals and training sessions — feeds every member's personal calendar.</p>
         </div>
         {canEdit && !draft && (
           <button onClick={() => setDraft(blank())} className="inline-flex items-center gap-2 px-4 py-2 bg-gold text-navy font-semibold text-sm rounded-sm hover:bg-gold/90"><Plus className="w-4 h-4" /> Add entry</button>

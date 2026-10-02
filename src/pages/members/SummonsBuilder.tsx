@@ -324,7 +324,7 @@ function TemplateTab() {
       </div>
       {F("venue_address", "Venue full address", "textarea")}
       {F("regular_meeting_pattern", "Regular meeting pattern", "textarea")}
-      {F("loi_details", "Lodge of Instruction (day / time / venue)", "textarea")}
+      {F("loi_details", "Rehearsal Night (day / time / venue)", "textarea")}
       <div className="grid sm:grid-cols-2 gap-3">
         {F("provincial_website", "Provincial website")}
         {F("mcf_contact", "MCF contact", "textarea")}

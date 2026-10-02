@@ -178,7 +178,7 @@ function Inner() {
         <div>
           <h1 className="font-serif text-2xl text-primary-foreground">Lodge Development Summary Report</h1>
           <p className="text-xs text-primary-foreground/60 mt-1">
-            Consolidated view across Members, Mentoring, Ritual, LoI, Working Groups, Engagement and Royal Arch.
+            Consolidated view across Members, Mentoring, Ritual, Rehearsals, Working Groups, Engagement and Royal Arch.
           </p>
         </div>
         <div className="flex gap-2 flex-wrap">
@@ -294,7 +294,7 @@ function Inner() {
               </div>
             </Card>
 
-            <Card title="4. Lodge of Instruction">
+            <Card title="4. Rehearsals">
               <Stat label="Sessions held" value={data.loi.sessions} />
               <Stat label="Avg attendance" value={data.loi.avgAttendance} />
               <Stat label="Avg attendance %" value={`${data.loi.avgAttendancePct}%`} />

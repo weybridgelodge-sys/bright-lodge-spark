@@ -502,7 +502,7 @@ const BackCoverPanel: React.FC<{
         )}
         {!hidden.has("loi") && template.loi_details && (
           <>
-            <Text style={s.sectionHeadingLarge}>Lodge of Instruction</Text>
+            <Text style={s.sectionHeadingLarge}>Rehearsal Night</Text>
             <Text style={s.smallTextLarge}>
               {flow(`${template.loi_details}${template.progression_notice_text ? ` ${template.progression_notice_text}` : ""}`)}
             </Text>

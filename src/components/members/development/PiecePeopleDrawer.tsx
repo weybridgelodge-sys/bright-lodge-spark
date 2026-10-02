@@ -51,7 +51,7 @@ export default function PiecePeopleDrawer({
           </button>
         </div>
         <div className="space-y-5">
-          <Section title="Available now (LoI / Lodge)" list={delivered} tone="text-emerald-300" />
+          <Section title="Available now (Rehearsal / Lodge)" list={delivered} tone="text-emerald-300" />
           <Section title="Candidates (Learned / Assessed)" list={candidates} tone="text-gold" />
           <Section title="Not started" list={notStarted} tone="text-primary-foreground/60" />
         </div>

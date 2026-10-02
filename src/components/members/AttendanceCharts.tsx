@@ -162,7 +162,7 @@ export default function AttendanceCharts() {
             ? `Live from the Lodge Meetings Register — ${liveFestive.recordCount} meeting${liveFestive.recordCount === 1 ? "" : "s"} recorded.`
             : !liveFestive && activeTab === "festive"
             ? "Mock data — add Lodge Meeting records to replace this placeholder."
-            : "Attendance analytics — toggle between Lodge Meetings and LOI views."}
+            : "Attendance analytics — toggle between Lodge Meetings and Rehearsal views."}
         </p>
         <div className="flex bg-navy p-1 rounded-sm border border-gold/15">
           <button
@@ -183,7 +183,7 @@ export default function AttendanceCharts() {
                 : "text-primary-foreground/70 hover:text-gold"
             }`}
           >
-            Lodge of Instruction
+            Rehearsal
           </button>
         </div>
       </div>
@@ -198,7 +198,7 @@ export default function AttendanceCharts() {
 
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <StatBanner icon={<Calendar className="w-4 h-4" />} label="Avg. LOI turnout" value={loiAvgTurnout} />
+          <StatBanner icon={<Calendar className="w-4 h-4" />} label="Avg. rehearsal turnout" value={loiAvgTurnout} />
           <StatBanner icon={<TrendingUp className="w-4 h-4" />} label="Floorwork engagement" value={loiEngagementLabel} />
         </div>
       )}
@@ -208,7 +208,7 @@ export default function AttendanceCharts() {
         <h3 className="font-serif text-base text-gold mb-4">
           {activeTab === "festive"
             ? "Historical covers & dining demographics"
-            : "LOI attendance & engagement curves"}
+            : "Rehearsal attendance & engagement curves"}
         </h3>
 
         {activeTab === "festive" ? (
@@ -275,7 +275,7 @@ export default function AttendanceCharts() {
             ))}
             <p className="text-[11px] text-primary-foreground/60 pt-2 italic">
               {liveLoi
-                ? `Live from the LOI Register — ${liveLoi.totalSessions} session${liveLoi.totalSessions === 1 ? "" : "s"} recorded.`
+                ? `Live from the Rehearsal Register — ${liveLoi.totalSessions} session${liveLoi.totalSessions === 1 ? "" : "s"} recorded.`
                 : "Insight: rehearsal turnout dips mid-season. Targeted reminders to Junior Officers help maintain ritual accuracy ahead of degree workings."}
             </p>
           </div>

@@ -54,16 +54,16 @@ export default function LoiRegister() {
     <MembersLayout>
       <div className="mb-6">
         <h1 className="font-serif text-3xl text-gold mb-1 flex items-center gap-2">
-          <GraduationCap className="w-6 h-6" /> LOI Register
+          <GraduationCap className="w-6 h-6" /> Rehearsal Register
         </h1>
         <p className="text-primary-foreground/60 text-sm">
-          Your personal record of Lodge of Instruction attendance.
+          Your personal record of Rehearsal Night attendance.
         </p>
       </div>
 
       {/* My attendance */}
       <section className="bg-navy-dark/60 border border-gold/15 rounded-sm p-5 mb-6">
-        <h2 className="font-serif text-lg text-gold mb-3">My LOI attendance</h2>
+        <h2 className="font-serif text-lg text-gold mb-3">My rehearsal attendance</h2>
         <p className="text-xs text-primary-foreground/60 mb-3">
           Masonic year {masonicYearStart()}–{masonicYearStart() + 1} ·{" "}
           <span className="text-gold font-semibold">{myYearAttendance.length}</span> session
