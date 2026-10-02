@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import DuesStatusCard from "@/components/members/DuesStatusCard";
+import OfficesHeld from "@/components/members/OfficesHeld";
 
 export default function MembersProfile() {
   const { profile, user, refreshProfile, isAdmin } = useAuth();
@@ -135,6 +136,13 @@ export default function MembersProfile() {
           These details are maintained by the Lodge. Contact the Secretary to update them.
         </p>
       </div>
+
+      {user?.id && (
+        <div className="max-w-2xl mb-6 bg-navy-dark/60 border border-gold/15 rounded-sm p-4 sm:p-6">
+          <h2 className="font-serif text-xl text-gold mb-3">Offices held</h2>
+          <OfficesHeld memberId={user.id} />
+        </div>
+      )}
 
       {/* Editable member-controlled fields */}
       <form

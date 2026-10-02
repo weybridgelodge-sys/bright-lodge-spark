@@ -3250,6 +3250,42 @@ export type Database = {
         }
         Relationships: []
       }
+      officer_appointment_audit: {
+        Row: {
+          acted_at: string
+          acted_by: string | null
+          acted_by_label: string
+          action: string
+          after_row: Json | null
+          appointment_id: string | null
+          before_row: Json | null
+          id: number
+          note: string | null
+        }
+        Insert: {
+          acted_at?: string
+          acted_by?: string | null
+          acted_by_label?: string
+          action: string
+          after_row?: Json | null
+          appointment_id?: string | null
+          before_row?: Json | null
+          id?: number
+          note?: string | null
+        }
+        Update: {
+          acted_at?: string
+          acted_by?: string | null
+          acted_by_label?: string
+          action?: string
+          after_row?: Json | null
+          appointment_id?: string | null
+          before_row?: Json | null
+          id?: number
+          note?: string | null
+        }
+        Relationships: []
+      }
       officer_appointments: {
         Row: {
           appointed_on: string | null
@@ -5554,6 +5590,19 @@ export type Database = {
       get_lodge_health_aggregates: {
         Args: { _lodge_year: number }
         Returns: Json
+      }
+      get_member_offices_held: {
+        Args: { _member: string }
+        Returns: {
+          first_year: number
+          from_date: string
+          is_current: boolean
+          is_upcoming: boolean
+          label: string
+          last_year: number
+          position_key: string
+          to_date: string
+        }[]
       }
       get_members_last_sign_in: {
         Args: never
