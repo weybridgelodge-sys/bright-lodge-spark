@@ -56,7 +56,7 @@ const Events = () => {
         url: "https://weybridgelodge.org.uk/events",
         name: "Events & Meetings | Freemasons in Guildford, Surrey — Weybridge Lodge No. 6787",
         description:
-          "View upcoming Freemasons meetings, Officers Nights and Lodge of Instruction evenings at Weybridge Lodge No. 6787, Guildford Masonic Centre, GU2 4DR.",
+          "View upcoming Freemasons meetings, Officers Nights and Rehearsal Nights at Weybridge Lodge No. 6787, Guildford Masonic Centre, GU2 4DR.",
         inLanguage: "en-GB",
         isPartOf: { "@id": "https://weybridgelodge.org.uk/#website" },
       },
@@ -81,7 +81,7 @@ const Events = () => {
     <div className="min-h-screen overflow-x-hidden">
       <SEO
         title="Events & Meetings | Freemasons in Guildford, Surrey — Weybridge Lodge No. 6787"
-        description="View upcoming Freemasons meetings, Officers Nights and Lodge of Instruction evenings at Weybridge Lodge No. 6787, Guildford Masonic Centre, GU2 4DR."
+        description="View upcoming Freemasons meetings, Officers Nights and Rehearsal Nights at Weybridge Lodge No. 6787, Guildford Masonic Centre, GU2 4DR."
         canonical="/events"
         type="website"
         schema={schemas}
@@ -96,7 +96,7 @@ const Events = () => {
         {/* ── H1 — geo-anchored ── */}
         <PageHeader
           title="Events & Meetings at Weybridge Lodge — Guildford Masonic Centre"
-          subtitle="Masonic meetings, social events and Lodge of Instruction in Guildford, Surrey"
+          subtitle="Masonic meetings, social events and Rehearsal Nights in Guildford, Surrey"
         />
 
         {/* ── Calendar + Upcoming Events ── */}
@@ -255,11 +255,13 @@ const Events = () => {
           </div>
         </section>
 
-        {/* ── Lodge of Instruction ── */}
+        {/* ── Rehearsal Night ── */}
+        {/* Legacy anchor: keeps old /events#loi links landing here */}
+        <span id="loi" aria-hidden="true" />
         <section
-  id="loi"
+  id="rehearsal-night"
   className="py-16 md:py-24 bg-background border-t border-border"
-  aria-labelledby="loi-heading"
+  aria-labelledby="rehearsal-night-heading"
 >
           <div className="container mx-auto px-4 sm:px-6 max-w-4xl">
             <motion.div
@@ -272,10 +274,10 @@ const Events = () => {
             >
               <div className="h-px w-16 bg-gold mx-auto mb-6" aria-hidden="true" />
               <h2
-                id="loi-heading"
+                id="rehearsal-night-heading"
                 className="text-3xl md:text-4xl font-serif text-foreground mb-4"
               >
-                Lodge of Instruction
+                Rehearsal Night
               </h2>
               <p className="text-muted-foreground font-sans mb-10 max-w-xl mx-auto">
                 Sharpen your ritual and enjoy the fellowship of Brethren from across the Province
@@ -324,7 +326,7 @@ const Events = () => {
                 </div>
 
                 <p className="text-sm font-sans text-muted-foreground leading-relaxed">
-                  Join us at our weekly Lodge of Instruction sessions where we practise the next
+                  Join us at our weekly Rehearsal Night sessions where we practise the next
                   ceremony in our Masonic diary. Open to all Freemasons from any Lodge in Surrey
                   and beyond.
                 </p>
@@ -335,8 +337,8 @@ const Events = () => {
                 </p>
 
                 <a
-                  href="mailto:secretary@weybridgelodge.org.uk?subject=Lodge%20of%20Instruction"
-                  aria-label="Email to find out more about the Lodge of Instruction at Weybridge Lodge"
+                  href="mailto:secretary@weybridgelodge.org.uk?subject=Rehearsal%20Night"
+                  aria-label="Email to find out more about Rehearsal Night at Weybridge Lodge"
                   className="flex w-full items-center justify-center bg-gold-shimmer text-accent-foreground py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity mt-4 min-h-[48px]"
                 >
                   Email for Details

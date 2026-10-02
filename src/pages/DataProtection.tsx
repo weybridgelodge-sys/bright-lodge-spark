@@ -34,7 +34,7 @@ const DataProtection = () => {
             <h2>The Members Portal and mobile app</h2>
             <p>Members of Weybridge Lodge No. 6787 who register for the Members Portal and its companion mobile app provide us with additional information beyond what is described above, in order to run the Lodge and support its members. This includes:</p>
             <ul>
-              <li><strong>Membership record details:</strong> rank, office, initiation and progression dates, and attendance at meetings, Lodge of Instruction sessions, and social events.</li>
+              <li><strong>Membership record details:</strong> rank, office, initiation and progression dates, and attendance at meetings, Rehearsal Night sessions, and social events.</li>
               <li><strong>Mentoring and development records:</strong> a member's progress through the Lodge's mentoring checklist, ritual learning record, and related notes made by their assigned Mentor or the Director of Ceremonies.</li>
               <li><strong>Welfare records:</strong> where a member is supported by the Lodge's Almoner, records of contact, welfare status, and any referrals to Masonic charitable bodies such as the Masonic Charitable Foundation are kept. These records are strictly confidential and are visible only to the Almoner and the current Worshipful Master — access is revoked automatically once a new Master is installed. Welfare records are never shared with other members, and are held separately from general membership records.</li>
               <li><strong>Financial records:</strong> dues subscription and payment records, where a member pays Lodge subscriptions through the Portal.</li>

@@ -174,7 +174,7 @@ const LodgeProfile = () => {
               <div className="h-px w-16 bg-gold mb-6" aria-hidden="true" />
               <h2 id="quality-heading" className="text-2xl md:text-3xl font-serif text-foreground mb-6">A Lodge Built on Quality</h2>
               <p className="text-muted-foreground font-sans leading-relaxed mb-4">We currently have 22 members whose ages range from 18 to 80. We welcome men of all ages and backgrounds — whether you are a young professional looking for personal development and new friendships, or more established in your career. Weybridge Lodge prides itself on its friendliness to new members and visitors alike.</p>
-              <p className="text-muted-foreground font-sans leading-relaxed">The Lodge has a long-established reputation for the quality of its ceremonies. This is due in no small part to our very active Lodge of Instruction (LoI), which meets every Thursday at 7.30 pm at the Guildford Masonic Centre, GU2 4DR. The LoI is strongly supported by all members, and particularly by our more senior brethren, whose aim is to guide, mentor and entertain our newer members as they learn the Craft.</p>
+              <p className="text-muted-foreground font-sans leading-relaxed">The Lodge has a long-established reputation for the quality of its ceremonies. This is due in no small part to our very active weekly Rehearsal Night, which meets every Thursday at 7.30 pm at the Guildford Masonic Centre, GU2 4DR. Rehearsal Night is strongly supported by all members, and particularly by our more senior brethren, whose aim is to guide, mentor and entertain our newer members as they learn the Craft.</p>
             </motion.div>
           </div>
         </section>

@@ -118,7 +118,7 @@ const DoubleInitiationDecember2025 = () => {
                   We were delighted to initiate <strong>Bro. Jesse Bishop</strong> and <strong>Bro. Josh Bishop</strong> on the same evening — a moment of real significance for the Bishop family and a memory that the Lodge will treasure for many years to come. Both took their Obligation with composure and went on to receive the working tools of an Entered Apprentice Freemason.
                 </p>
                 <p className="text-muted-foreground font-sans leading-relaxed mt-4">
-                  Their journey now begins in earnest. Over the coming months they will work with their Mentors, attend our weekly Lodge of Instruction and prepare for their Second Degree.
+                  Their journey now begins in earnest. Over the coming months they will work with their Mentors, attend our weekly Rehearsal Night and prepare for their Second Degree.
                 </p>
               </section>
 
