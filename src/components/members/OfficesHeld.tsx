@@ -41,7 +41,7 @@ export default function OfficesHeld({ memberId, compact = false }: { memberId: s
               {r.is_upcoming && <span className="text-[10px] uppercase tracking-wider text-gold/70">From Installation</span>}
             </div>
             <div className="text-xs text-primary-foreground/60">
-              {fmt(r.from_date)} – {r.to_date ? fmt(r.to_date) : r.is_upcoming ? "" : "present"}
+              {r.is_upcoming ? `Takes effect ${fmt(r.from_date)}` : `${fmt(r.from_date)} – ${r.to_date ? fmt(r.to_date) : "present"}`}
             </div>
           </li>
         ))}
