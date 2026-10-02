@@ -9,7 +9,8 @@
 - Audit rounds/signoffs are immutable server workflows; closing requires approval. Certified packs are frozen and never overwritten.
 - Accounts distribution uses the separate secure link and record_accounts_sent; never attach it to an already-sent summons.
 - Subscription recognition uses splitSubscription once; receipts and prepayment clears never split again. Under-25 means age on 1 October.
-- Treasurer/Secretary exemptions use the latest appointment on or before the year.
+- Only the Secretary is exempt from subscriptions (latest Secretary appointment on or before the year); the Treasurer pays like any member. Honorary members remain exempt.
+- Thursday sessions are called "Rehearsal Night" (never "Lodge of Instruction" or "LOI") in all member-facing and public wording, because subscriptions aren't collected at them. Internal names, routes and database identifiers still use "loi" and must not be renamed.
 - Installation Returns resolve live and fill exact AcroForm IDs; signatures and dispensation remain blank.
 - Every new or modified interactive `/members` screen must pass the automated 320px check before completion: no document overflow or unreachable control; verify the real authenticated page or faithful worst-case reconstruction.
 - Browser layout tests may use only a Vite `e2e`-mode, localhost-only synthetic identity; it never grants backend access or ships in production.
