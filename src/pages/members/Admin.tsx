@@ -358,6 +358,14 @@ export default function MembersAdmin() {
       toast.error("Title, first name, last name and email are required");
       return;
     }
+    const prevStatus = form.id ? profiles.find((x) => x.id === form.id)?.status : undefined;
+    if (
+      CONFIRM_STATUSES.includes(form.status) &&
+      form.status !== prevStatus &&
+      !window.confirm(`Mark ${form.first_name} ${form.last_name} as ${STATUSES.find((s) => s.value === form.status)?.label}? Please check you have the right member.`)
+    ) {
+      return;
+    }
     setBusy(true);
     // For initiates, joined_lodge_date mirrors initiation_date so KPI "movement in" still works.
     const joinedLodge =
