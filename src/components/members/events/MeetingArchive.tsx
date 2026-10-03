@@ -93,20 +93,20 @@ export function ArchivedMeetingCard({ event, onRestore, onDelete }: { event: Lod
   const menu = bundle?.courses.map((c) => [c.course_label, c.dish].filter(Boolean).join(": ") + (c.description ? `\n  ${c.description}` : "")).join("\n") ?? "";
   const dining = bundle?.diningOptions.map((o) => `${o.label} — £${(o.price_pence / 100).toFixed(2)}${o.is_default ? " (default)" : ""}`).join("\n") ?? "";
 
-  const btn = "inline-flex items-center justify-center gap-1.5 min-h-11 min-w-11 px-3 rounded-sm border text-sm";
+  const btn = "inline-flex items-center justify-center gap-1.5 min-h-[48px] min-w-11 px-3 rounded-sm border text-sm";
   return (
     <article className="bg-navy-dark/60 border border-gold/15 rounded-sm p-4 space-y-3">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="min-w-0">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0 flex-1">
           <p className="font-serif text-base text-cream break-words">{event.title}</p>
           <p className="text-xs text-gold flex items-center gap-1.5 mt-1"><CalendarDays className="w-3 h-3 shrink-0" />{fmtDate(event.event_date)}</p>
           {event.archived_at && <p className="text-[11px] text-cream/50 mt-1">Archived {new Date(event.archived_at).toLocaleDateString("en-GB", { dateStyle: "medium" })}</p>}
         </div>
-        <div className="flex flex-wrap gap-2">
-          <button type="button" onClick={onRestore} className={`${btn} border-gold/40 text-gold hover:bg-gold/15`} aria-label={`Restore ${event.title}`}>
+        <div className="flex w-full gap-3 sm:w-auto sm:shrink-0">
+          <button type="button" onClick={onRestore} className={`${btn} flex-1 border-gold/40 text-gold hover:bg-gold/15 sm:flex-none`} aria-label={`Restore ${event.title}`}>
             <ArchiveRestore className="w-4 h-4" /> Restore
           </button>
-          <button type="button" onClick={onDelete} className={`${btn} border-red-400/40 text-red-400 hover:bg-red-400/10`} aria-label={`Delete ${event.title}`}>
+          <button type="button" onClick={onDelete} className={`${btn} flex-1 border-destructive/40 text-destructive hover:bg-destructive/10 sm:flex-none`} aria-label={`Delete ${event.title}`}>
             <Trash2 className="w-4 h-4" /> Delete
           </button>
         </div>

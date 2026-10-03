@@ -98,7 +98,7 @@ export default function EventsAdmin() {
     );
   }
 
-  const actionBtn = "inline-flex items-center justify-center gap-1.5 min-h-11 min-w-11 px-3 rounded-sm border text-sm";
+  const actionBtn = "inline-flex items-center justify-center gap-1.5 min-h-[48px] min-w-11 px-3 rounded-sm border text-sm";
 
   return (
     <MembersLayout>
@@ -123,26 +123,26 @@ export default function EventsAdmin() {
           ) : (
             <ul className="space-y-2">
               {active.map((e) => (
-                <li key={e.id} className="bg-navy-dark/60 border border-gold/15 hover:border-gold/50 rounded-sm transition-colors flex flex-wrap items-stretch">
-                  <button onClick={() => setSelectedId(e.id)} className="flex-1 min-w-0 text-left p-4">
-                    <div className="flex items-center justify-between gap-4 flex-wrap">
-                      <div className="min-w-0">
+                <li key={e.id} className="bg-navy-dark/60 border border-gold/15 hover:border-gold/50 rounded-sm transition-colors flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                  <button onClick={() => setSelectedId(e.id)} className="w-full min-w-0 flex-1 text-left p-4 pb-0 sm:pb-4">
+                    <div className="flex min-w-0 flex-1 flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+                      <div className="min-w-0 flex-1">
                         <p className="font-serif text-base text-primary-foreground break-words">{e.title}</p>
                         <p className="text-xs text-gold flex items-center gap-1.5 mt-1">
                           <CalendarDays className="w-3 h-3 shrink-0" />
                           {new Date(e.event_date).toLocaleString("en-GB", { dateStyle: "full", timeStyle: "short" })}
                         </p>
                       </div>
-                      <span className={`text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-sm border ${e.published ? "border-emerald-500/40 text-emerald-400" : "border-amber-500/40 text-amber-400"}`}>
+                      <span className={`shrink-0 text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-sm border ${e.published ? "border-emerald-500/40 text-emerald-400" : "border-amber-500/40 text-amber-400"}`}>
                         {e.published ? <><Eye className="w-3 h-3 inline mr-1" />Published</> : <><EyeOff className="w-3 h-3 inline mr-1" />Draft</>}
                       </span>
                     </div>
                   </button>
-                  <div className="flex items-center gap-2 px-3 pb-3 sm:pb-0">
-                    <button type="button" onClick={() => askArchive(e, "archive")} className={`${actionBtn} border-gold/40 text-gold hover:bg-gold/15`} aria-label={`Archive ${e.title}`}>
+                  <div className="flex w-full items-center gap-3 px-4 pb-4 sm:w-auto sm:shrink-0 sm:px-3 sm:py-3">
+                    <button type="button" onClick={() => askArchive(e, "archive")} className={`${actionBtn} flex-1 border-gold/40 text-gold hover:bg-gold/15 sm:flex-none`} aria-label={`Archive ${e.title}`}>
                       <Archive className="w-4 h-4" /> Archive
                     </button>
-                    <button type="button" onClick={() => askArchive(e, "delete")} className={`${actionBtn} border-red-400/40 text-red-400 hover:bg-red-400/10`} aria-label={`Delete ${e.title}`}>
+                    <button type="button" onClick={() => askArchive(e, "delete")} className={`${actionBtn} flex-1 border-destructive/40 text-destructive hover:bg-destructive/10 sm:flex-none`} aria-label={`Delete ${e.title}`}>
                       <Trash2 className="w-4 h-4" /> Delete
                     </button>
                   </div>
