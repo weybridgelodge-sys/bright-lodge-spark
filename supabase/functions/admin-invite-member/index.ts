@@ -137,11 +137,14 @@ Deno.serve(async (req) => {
         if (b.email.toLowerCase() !== loginEmail) {
           return json({ error: "Only an admin can change a member's sign-in email" }, 403);
         }
-        // Approve/suspend stays admin-only: keep the existing status.
-        profileFields.status = cur.status;
-        profileFields.status_changed_at = cur.status_changed_at;
-      } else if (b.status !== "active" && b.status !== "pending") {
-        return json({ error: "New members can only be added as active or pending" }, 403);
+        // Secretary may set any status on other members, never on himself.
+        if (userId === caller.id && b.status !== cur.status) {
+          return json({ error: "You cannot change your own status" }, 403);
+        }
+        if (userId === caller.id) {
+          profileFields.status = cur.status;
+          profileFields.status_changed_at = cur.status_changed_at;
+        }
       }
     }
 
