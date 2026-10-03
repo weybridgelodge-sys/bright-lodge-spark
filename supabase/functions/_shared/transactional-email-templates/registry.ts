@@ -16,6 +16,7 @@ import { template as periodUnlockRequested } from './period-unlock-requested.tsx
 import { template as yearAuditUpdate } from './year-audit-update.tsx'
 import { template as installationReturnSubmission } from './installation-return-submission.tsx'
 import { template as provincialReturnSubmission } from './provincial-return-submission.tsx'
+import { template as secretaryUgleMissing } from './secretary-ugle-missing.tsx'
 
 export interface TemplateEntry {
   component: any
@@ -44,4 +45,5 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'year-audit-update': yearAuditUpdate,
   'installation-return-submission': installationReturnSubmission,
   'provincial-return-submission': provincialReturnSubmission,
+  'secretary-ugle-missing': secretaryUgleMissing,
 }
