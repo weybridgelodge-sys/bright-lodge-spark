@@ -173,7 +173,7 @@ test("Admin member list Grand Lodge number editor fits 320px with 48px targets",
   expect(doc).toBeLessThanOrEqual(320);
 });
 
-test("Secretary-only Member Management fits 320px and hides admin-only controls", async ({ page }) => {
+test("Secretary-only Member Management fits 320px and shows approve/suspend, hides admin-only controls", async ({ page }) => {
   const id = "11111111-2222-3333-4444-555555555556";
   await page.route("**/rest/v1/rpc/get_admin_profiles**", (r) => r.fulfill({ json: [{ id, email: "long.name@example.com", title: "W Bro", first_name: "Bartholomew-Maximilian", last_name: "Featherstonehaugh-Wolstenholme", degree: "master_mason", status: "pending", is_past_master: false, is_royal_arch: false, is_honorary_member: false, initiation_date: "2026-05-13" }] }));
   await page.route("**/rest/v1/rpc/get_profiles_pii**", (r) => r.fulfill({ json: [{ id, ugle_reg_number: null }] }));
@@ -181,7 +181,9 @@ test("Secretary-only Member Management fits 320px and hides admin-only controls"
   await waitForPortal(page);
   await expect(page.getByLabel("Grand Lodge Ref. No.")).toBeVisible();
   await expect(page.getByRole("button", { name: "Edit member" })).toBeVisible();
-  for (const name of ["Approve", "Suspend", "Make admin", "Assign Almoner role", "Delete member"]) {
+  await expect(page.getByRole("button", { name: "Approve", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Suspend", exact: true })).toBeVisible();
+  for (const name of ["Make admin", "Assign Almoner role", "Delete member"]) {
     await expect(page.getByRole("button", { name, exact: true })).toHaveCount(0);
   }
   await expect(page.getByRole("button", { name: /^notices$/i })).toHaveCount(0);
