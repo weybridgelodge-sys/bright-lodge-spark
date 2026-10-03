@@ -45,11 +45,10 @@ Deno.serve(async (req) => {
     const token = auth.startsWith('Bearer ') ? auth.slice(7) : ''
     let ok = !!expected && token === expected
     if (!ok && token) {
-      // Accept any valid service-role key (e.g. the vault copy used by cron):
-      // only a service-role key can call the admin users API.
-      const probe = createClient(Deno.env.get('SUPABASE_URL')!, token, { auth: { persistSession: false } })
-      const { error } = await probe.auth.admin.listUsers({ page: 1, perPage: 1 })
-      ok = !error
+      // Also accept the vault copy of the service-role key that cron uses.
+      const svc = createClient(Deno.env.get('SUPABASE_URL')!, expected)
+      const { data } = await svc.rpc('check_cron_trigger_key', { _token: token })
+      ok = data === true
     }
     if (!ok) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
