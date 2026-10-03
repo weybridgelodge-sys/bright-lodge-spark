@@ -98,12 +98,12 @@ test("every Treasurer tab stays within a 320px viewport", async ({ page }) => {
     await expectNoViewportOverflow(page, `Treasurer / ${name}`);
   }
 });
-test("Meeting Events archive controls stay within 320px with 44px targets", async ({ page }) => {
+test("Meeting Events archive controls stay within 320px with 48px targets", async ({ page }) => {
   const future = new Date(Date.now() + 20 * 86400_000).toISOString();
   const past = new Date(Date.now() - 200 * 86400_000).toISOString();
   const base = { intro_heading: null, tyling_time: "Tyling at 6.00 pm prompt", dining_time: "Dining 7.45 pm", location: "Guildford Masonic Centre", dress_code: "Dark suit", booking_deadline: null, header_image_url: null, sort_order: 0, archived_by: null };
   const rows = [
-    { ...base, id: "e1", slug: "e1", title: "Initiation Ceremony — A Very Long Meeting Title For Narrow Phones", intro: "Intro paragraph one.\n\nIntro two.", event_date: future, published: true, archived_at: null },
+    { ...base, id: "e1", slug: "e1", title: "Double Initiation Ceremony — December Meeting", intro: "Intro paragraph one.\n\nIntro two.", event_date: future, published: false, archived_at: null },
     { ...base, id: "e2", slug: "e2", title: "Installation Meeting and Charitable White Table", intro: "Archived intro text to copy.", event_date: past, published: false, archived_at: past },
   ];
   await page.route("**/rest/v1/lodge_events?**", (r) => {
@@ -117,13 +117,21 @@ test("Meeting Events archive controls stay within 320px with 44px targets", asyn
 
   await page.goto("/members/events");
   await waitForPortal(page);
-  const archiveBtn = page.getByRole("button", { name: /^Archive Initiation/ });
+  const archiveBtn = page.getByRole("button", { name: /^Archive Double Initiation/ });
   if (!(await archiveBtn.isVisible().catch(() => false))) test.skip(true, "Synthetic identity cannot edit meetings");
   await expectNoViewportOverflow(page, "Meeting Events list");
-  for (const name of [/^Archive Initiation/, /^Delete Initiation/, /^Archived \(1\)/]) {
+  for (const name of [/^Archive Double Initiation/, /^Delete Double Initiation/, /^Archived \(1\)/]) {
     const box = await page.getByRole("button", { name }).boundingBox();
-    expect(box!.height, `${name} touch target`).toBeGreaterThanOrEqual(44);
+    expect(box!.height, `${name} touch target`).toBeGreaterThanOrEqual(48);
   }
+  const activeActions = await Promise.all([
+    page.getByRole("button", { name: /^Archive Double Initiation/ }).boundingBox(),
+    page.getByRole("button", { name: /^Delete Double Initiation/ }).boundingBox(),
+  ]);
+  expect(activeActions[0]?.y).toBe(activeActions[1]?.y);
+  expect(Math.abs((activeActions[0]?.width ?? 0) - (activeActions[1]?.width ?? 0))).toBeLessThanOrEqual(1);
+  const title = await page.getByText("Double Initiation Ceremony — December Meeting").boundingBox();
+  expect(title?.width).toBeGreaterThan(180);
   await archiveBtn.click();
   await expect(page.getByRole("alert")).toContainText(/\d+ bookings?/);
   await expectNoViewportOverflow(page, "Archive confirmation");
@@ -132,6 +140,17 @@ test("Meeting Events archive controls stay within 320px with 44px targets", asyn
   await page.getByRole("button", { name: /Show content/ }).click();
   await expect(page.getByText("Roast beef with all the trimmings")).toBeVisible();
   await expectNoViewportOverflow(page, "Archived meetings");
-  const restore = await page.getByRole("button", { name: /^Restore Installation/ }).boundingBox();
-  expect(restore!.height).toBeGreaterThanOrEqual(44);
+  const archivedActions = await Promise.all([
+    page.getByRole("button", { name: /^Restore Installation/ }).boundingBox(),
+    page.getByRole("button", { name: /^Delete Installation/ }).boundingBox(),
+  ]);
+  expect(archivedActions[0]?.height).toBeGreaterThanOrEqual(48);
+  expect(archivedActions[1]?.height).toBeGreaterThanOrEqual(48);
+  expect(archivedActions[0]?.y).toBe(archivedActions[1]?.y);
+  expect(Math.abs((archivedActions[0]?.width ?? 0) - (archivedActions[1]?.width ?? 0))).toBeLessThanOrEqual(1);
+
+  await page.locator("main").evaluate((main) => window.scrollTo(0, main.getBoundingClientRect().bottom + window.scrollY));
+  const lastCard = await page.locator("main article").last().boundingBox();
+  const bottomNav = await page.getByRole("link", { name: "Hub", exact: true }).locator("..").boundingBox();
+  expect(lastCard && bottomNav ? lastCard.y + lastCard.height <= bottomNav.y : false, "last meeting card clears the fixed bottom navigation").toBe(true);
 });
