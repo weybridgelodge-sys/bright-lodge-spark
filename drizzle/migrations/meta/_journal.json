@@ -484,6 +484,13 @@
       "when": 1791059789367,
       "tag": "0068_secretary_member_status",
       "breakpoints": true
+    },
+    {
+      "idx": 69,
+      "version": "7",
+      "when": 1791060331427,
+      "tag": "0069_migration",
+      "breakpoints": true
     }
   ]
 }
