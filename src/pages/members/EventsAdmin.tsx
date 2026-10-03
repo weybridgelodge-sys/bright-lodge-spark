@@ -25,7 +25,165 @@ function toLocalInput(iso: string) {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
-__LIST__
+export default function EventsAdmin() {
+  const { isAdmin, isSecretary } = useAuth();
+  const canEdit = isAdmin || isSecretary;
+
+  const [events, setEvents] = useState<LodgeEvent[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [showArchived, setShowArchived] = useState(false);
+  const [target, setTarget] = useState<ArchiveTarget | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  const refresh = async () => {
+    setLoading(true);
+    const list = await fetchAllEvents();
+    setEvents(list);
+    setLoading(false);
+  };
+
+  useEffect(() => { refresh(); }, []);
+
+  const active = events.filter((e) => !e.archived_at);
+  const archived = events.filter((e) => !!e.archived_at);
+
+  const createNew = async () => {
+    const title = "New Meeting";
+    const slug = `event_${Date.now()}`;
+    const { data, error } = await supabase
+      .from("lodge_events")
+      .insert({
+        slug,
+        title,
+        intro: "",
+        event_date: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
+        published: false,
+      })
+      .select("id")
+      .single();
+    if (error) { toast.error(error.message); return; }
+    await refresh();
+    setSelectedId(data!.id);
+  };
+
+  const askArchive = async (e: LodgeEvent, mode: ArchiveTarget["mode"]) => {
+    let bookings = 0;
+    if (mode !== "restore") {
+      const { count } = await supabase.from("bookings").select("id", { count: "exact", head: true }).eq("event_key", e.slug);
+      bookings = count ?? 0;
+    }
+    setTarget({ event: e, mode, bookings });
+  };
+
+  const confirmTarget = async () => {
+    if (!target) return;
+    setBusy(true);
+    const { event: e, mode } = target;
+    const { error } = mode === "delete"
+      ? await supabase.from("lodge_events").delete().eq("id", e.id)
+      : await supabase.from("lodge_events").update({ archived_at: mode === "archive" ? new Date().toISOString() : null } as any).eq("id", e.id);
+    setBusy(false);
+    if (error) { toast.error(error.message); return; }
+    toast.success(mode === "delete" ? "Meeting deleted" : mode === "archive" ? "Meeting archived" : "Meeting restored");
+    setTarget(null);
+    refresh();
+  };
+
+  if (!canEdit) {
+    return (
+      <MembersLayout>
+        <p className="text-primary-foreground/70">You don't have permission to manage events.</p>
+      </MembersLayout>
+    );
+  }
+
+  const actionBtn = "inline-flex items-center justify-center gap-1.5 min-h-11 min-w-11 px-3 rounded-sm border text-sm";
+
+  return (
+    <MembersLayout>
+      {selectedId ? (
+        <EventEditor id={selectedId} onBack={() => { setSelectedId(null); refresh(); }} onDeleted={() => { setSelectedId(null); refresh(); }} />
+      ) : (
+        <>
+          <div className="flex items-start justify-between mb-6 gap-4 flex-wrap">
+            <div className="min-w-0">
+              <h1 className="font-serif text-3xl text-gold mb-1">Meeting Events</h1>
+              <p className="text-xs text-primary-foreground/60">Edit the meeting shown on the public Bookings page (intro, useful stuff, menu and dining options).</p>
+            </div>
+            <button onClick={createNew} className="flex items-center gap-2 min-h-11 bg-gold/15 hover:bg-gold/25 text-gold border border-gold/40 px-4 py-2 rounded-sm text-sm">
+              <Plus className="w-4 h-4" /> New meeting
+            </button>
+          </div>
+
+          {loading ? (
+            <div className="flex justify-center py-12"><Loader2 className="w-6 h-6 text-gold animate-spin" /></div>
+          ) : active.length === 0 ? (
+            <p className="text-sm text-primary-foreground/60">No current meetings. Click "New meeting" to add one.</p>
+          ) : (
+            <ul className="space-y-2">
+              {active.map((e) => (
+                <li key={e.id} className="bg-navy-dark/60 border border-gold/15 hover:border-gold/50 rounded-sm transition-colors flex flex-wrap items-stretch">
+                  <button onClick={() => setSelectedId(e.id)} className="flex-1 min-w-0 text-left p-4">
+                    <div className="flex items-center justify-between gap-4 flex-wrap">
+                      <div className="min-w-0">
+                        <p className="font-serif text-base text-primary-foreground break-words">{e.title}</p>
+                        <p className="text-xs text-gold flex items-center gap-1.5 mt-1">
+                          <CalendarDays className="w-3 h-3 shrink-0" />
+                          {new Date(e.event_date).toLocaleString("en-GB", { dateStyle: "full", timeStyle: "short" })}
+                        </p>
+                      </div>
+                      <span className={`text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-sm border ${e.published ? "border-emerald-500/40 text-emerald-400" : "border-amber-500/40 text-amber-400"}`}>
+                        {e.published ? <><Eye className="w-3 h-3 inline mr-1" />Published</> : <><EyeOff className="w-3 h-3 inline mr-1" />Draft</>}
+                      </span>
+                    </div>
+                  </button>
+                  <div className="flex items-center gap-2 px-3 pb-3 sm:pb-0">
+                    <button type="button" onClick={() => askArchive(e, "archive")} className={`${actionBtn} border-gold/40 text-gold hover:bg-gold/15`} aria-label={`Archive ${e.title}`}>
+                      <Archive className="w-4 h-4" /> Archive
+                    </button>
+                    <button type="button" onClick={() => askArchive(e, "delete")} className={`${actionBtn} border-red-400/40 text-red-400 hover:bg-red-400/10`} aria-label={`Delete ${e.title}`}>
+                      <Trash2 className="w-4 h-4" /> Delete
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          {!loading && (
+            <section className="mt-10 border-t border-gold/15 pt-6">
+              <button type="button" onClick={() => setShowArchived((v) => !v)} aria-expanded={showArchived}
+                className={`${actionBtn} border-gold/30 text-gold hover:bg-gold/10`}>
+                <ArchiveRestore className="w-4 h-4" /> Archived ({archived.length}) {showArchived ? "— hide" : "— show"}
+              </button>
+              {showArchived && (
+                archived.length === 0 ? (
+                  <p className="mt-4 text-sm text-primary-foreground/60">No archived meetings.</p>
+                ) : (
+                  <ul className="mt-4 space-y-4">
+                    {archived.map((e) => (
+                      <li key={e.id}>
+                        <ArchivedMeetingCard event={e} onRestore={() => askArchive(e, "restore")} onDelete={() => askArchive(e, "delete")} />
+                      </li>
+                    ))}
+                  </ul>
+                )
+              )}
+            </section>
+          )}
+
+          <p className="mt-8 text-xs text-primary-foreground/50">
+            Public page: <Link to="/bookings" className="text-gold underline">/bookings</Link>
+            {" "}— it shows the next upcoming published meeting. Archived meetings never appear publicly.
+          </p>
+        </>
+      )}
+      <ArchiveConfirmDialog target={target} busy={busy} onCancel={() => setTarget(null)} onConfirm={confirmTarget} />
+    </MembersLayout>
+  );
+}
+
 function EventEditor({ id, onBack, onDeleted }: { id: string; onBack: () => void; onDeleted: () => void }) {
   const [event, setEvent] = useState<LodgeEvent | null>(null);
   const [courses, setCourses] = useState<CourseDraft[]>([]);
