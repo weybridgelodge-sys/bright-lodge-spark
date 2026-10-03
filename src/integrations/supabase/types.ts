@@ -5709,6 +5709,7 @@ export type Database = {
       }
       is_current_wm_or_ipm: { Args: { _user_id: string }; Returns: boolean }
       is_event_key_archived: { Args: { _event_key: string }; Returns: boolean }
+      is_lodge_secretary: { Args: { _user: string }; Returns: boolean }
       is_period_locked: { Args: { p_period_id: string }; Returns: boolean }
       is_working_group_lead: {
         Args: { _group: string; _user: string }
