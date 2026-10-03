@@ -875,6 +875,8 @@ export default function MembersAdmin() {
               Member status
               <select
                 value={form.status}
+                disabled={!isAdmin && !!form.id && form.id === user?.id}
+                title={!isAdmin && !!form.id && form.id === user?.id ? "You cannot change your own status" : undefined}
                 onChange={(e) => {
                   const next = e.target.value as Status;
                   setForm({
