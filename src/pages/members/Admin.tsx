@@ -218,7 +218,7 @@ export default function MembersAdmin() {
   const [pendingStatus, setPendingStatus] = useState<{ id: string; name: string; status: Status } | null>(null);
   const requestStatus = (p: Profile, status: Status) => {
     if (status === p.status) return;
-    if (CONFIRM_STATUSES.includes(status)) setPendingStatus({ id: p.id, name: p.full_name, status });
+    if (CONFIRM_STATUSES.includes(status)) setPendingStatus({ id: p.id, name: p.full_name || p.email || "this member", status });
     else setStatus(p.id, status);
   };
 
@@ -1065,6 +1065,25 @@ export default function MembersAdmin() {
           </ul>
         </div>
       )}
+      <AlertDialog open={!!pendingStatus} onOpenChange={(o) => !o && setPendingStatus(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Mark {pendingStatus?.name} as {STATUSES.find((s) => s.value === pendingStatus?.status)?.label}?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This changes the member's status and records today as the date of change. It can be reversed later, but please check you have the right member.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="min-h-[48px]">Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="min-h-[48px]"
+              onClick={() => { if (pendingStatus) setStatus(pendingStatus.id, pendingStatus.status); setPendingStatus(null); }}
+            >
+              Confirm
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </MembersLayout>
   );
 }
