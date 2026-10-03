@@ -76,13 +76,19 @@ Deno.serve(async (req) => {
 
     let q = admin
       .from("festive_board_meetings")
-      .select("id, meeting_date, meeting_type, status")
+      .select("id, meeting_date, meeting_type, status, event_key")
       .eq("meeting_type", "regular")
       .eq("status", "published");
     q = meetingIdParam ? q.eq("id", meetingIdParam) : q.eq("meeting_date", targetStr);
 
-    const { data: meetings, error: mErr } = await q;
+    const { data: rawMeetings, error: mErr } = await q;
     if (mErr) throw mErr;
+
+    // Archived meetings (lodge_events.archived_at) never trigger reminders.
+    const { data: archivedRows } = await admin
+      .from("lodge_events").select("slug").not("archived_at", "is", null);
+    const archivedKeys = new Set((archivedRows ?? []).map((r: any) => r.slug));
+    const meetings = (rawMeetings ?? []).filter((m: any) => !m.event_key || !archivedKeys.has(m.event_key));
 
     if (!meetings || meetings.length === 0) {
       return json({ ok: true, dry_run: dryRun, target_meeting_date: targetStr, meetings: 0 });
