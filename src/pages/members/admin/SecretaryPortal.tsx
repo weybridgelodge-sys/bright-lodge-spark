@@ -7,7 +7,7 @@ import { CalendarPlus, CalendarClock, Utensils, Mail, BarChart3, ArrowRight, Use
 type Tile = { to: string; title: string; description: string; icon: React.ComponentType<{ className?: string }>; visible: boolean };
 
 function Inner() {
-  const { canManageSummons, canManageProgression, isAdmin, isSecretary, isWorshipfulMaster, isAssistantSecretary } = useAuth();
+  const { canManageSummons, canManageProgression, isAdmin, isSecretary, isWorshipfulMaster, isAssistantSecretary, isCurrentSecretary } = useAuth();
 
   if (!canManageSummons) {
     return (
@@ -23,7 +23,7 @@ function Inner() {
     { to: "/members/admin/loi", title: "Rehearsal Register", description: "Rehearsal sessions, attendance and ritual parts practised.", icon: GraduationCap, visible: true },
     { to: "/members/admin/loi-schedule", title: "Rehearsal Schedule", description: "Plan upcoming rehearsals and training sessions — shown in every member's calendar.", icon: CalendarClock, visible: true },
     { to: "/members/events", title: "Meetings", description: "Edit the meeting shown on the public Bookings page.", icon: CalendarPlus, visible: true },
-      { to: "/members/admin", title: "Member Management", description: "Directory, member records, roles, and notices.", icon: Users, visible: isAdmin || isSecretary || isWorshipfulMaster || isAssistantSecretary },
+      { to: "/members/admin", title: "Member Management", description: "Directory, member records, roles, and notices.", icon: Users, visible: isAdmin || isSecretary || isCurrentSecretary },
     { to: "/members/admin/enquiries", title: "Membership Enquiries", description: "Join Us form enquiries — convert to candidates or dismiss.", icon: Inbox, visible: isAdmin || isSecretary || isAssistantSecretary || isWorshipfulMaster },
     { to: "/members/admin/minutes", title: "Minutes & Agenda Generator", description: "AI-drafted from your meeting transcript, then reviewed and approved — Regular and Committee minutes, Committee agendas, action items, and the source transcript kept alongside.", icon: NotebookPen, visible: canManageSummons },
     { to: "/members/officers-tracker", title: "Officers Tracker", description: "Officer progression, succession risk, and appointment tracking.", icon: Crown, visible: canManageProgression },

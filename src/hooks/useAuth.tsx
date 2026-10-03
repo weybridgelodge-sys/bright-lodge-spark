@@ -105,18 +105,26 @@ const layoutTestProfile: Profile = {
   degree: "installed_master",
 };
 
+// Local layout tests only: "?e2e_as=secretary" narrows the synthetic identity
+// to the Secretary alone (no admin, no other offices).
+const layoutTestSecretaryOnly =
+  isLocalLayoutTest && new URLSearchParams(window.location.search).get("e2e_as") === "secretary";
+const layoutAll = isLocalLayoutTest && !layoutTestSecretaryOnly;
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(isLocalLayoutTest ? layoutTestSession : null);
   const [profile, setProfile] = useState<Profile | null>(isLocalLayoutTest ? layoutTestProfile : null);
-  const [roles, setRoles] = useState<Role[]>(isLocalLayoutTest ? ["admin", "secretary", "worshipful_master"] : []);
-  const [isCurrentWmOrIpm, setIsCurrentWmOrIpm] = useState(isLocalLayoutTest);
-  const [isCurrentTreasurer, setIsCurrentTreasurer] = useState(isLocalLayoutTest);
-  const [isCurrentAuditor1, setIsCurrentAuditor1] = useState(isLocalLayoutTest);
-  const [isCurrentAuditor2, setIsCurrentAuditor2] = useState(isLocalLayoutTest);
+  const [roles, setRoles] = useState<Role[]>(
+    layoutTestSecretaryOnly ? ["member", "secretary"] as Role[] : isLocalLayoutTest ? ["admin", "secretary", "worshipful_master"] : [],
+  );
+  const [isCurrentWmOrIpm, setIsCurrentWmOrIpm] = useState(layoutAll);
+  const [isCurrentTreasurer, setIsCurrentTreasurer] = useState(layoutAll);
+  const [isCurrentAuditor1, setIsCurrentAuditor1] = useState(layoutAll);
+  const [isCurrentAuditor2, setIsCurrentAuditor2] = useState(layoutAll);
   const [isCurrentSecretary, setIsCurrentSecretary] = useState(isLocalLayoutTest);
-  const [isCurrentAlmoner, setIsCurrentAlmoner] = useState(isLocalLayoutTest);
-  const [isCurrentCharitySteward, setIsCurrentCharitySteward] = useState(isLocalLayoutTest);
-  const [isCurrentMentor, setIsCurrentMentor] = useState(isLocalLayoutTest);
+  const [isCurrentAlmoner, setIsCurrentAlmoner] = useState(layoutAll);
+  const [isCurrentCharitySteward, setIsCurrentCharitySteward] = useState(layoutAll);
+  const [isCurrentMentor, setIsCurrentMentor] = useState(layoutAll);
   const [loading, setLoading] = useState(!isLocalLayoutTest);
 
 

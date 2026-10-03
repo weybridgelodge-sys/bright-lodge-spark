@@ -1,4 +1,4 @@
-// Admin-only edge function: create OR update a member profile.
+// Admin or current Secretary edge function: create OR update a member profile.
 // - Create: provisions a new auth user (email_confirm:true) + fills profile.
 // - Update: updates an existing profile by user_id.
 import { createClient } from "npm:@supabase/supabase-js@2";
@@ -72,7 +72,13 @@ Deno.serve(async (req) => {
       _role: "admin",
     });
     if (rerr) return json({ error: rerr.message }, 500);
-    if (!isAdmin) return json({ error: "Forbidden — admins only" }, 403);
+    let isSecretary = false;
+    if (!isAdmin) {
+      const { data: sec, error: serr } = await admin.rpc("is_lodge_secretary", { _user: userRes.user.id });
+      if (serr) return json({ error: serr.message }, 500);
+      isSecretary = sec === true;
+    }
+    if (!isAdmin && !isSecretary) return json({ error: "Forbidden — admin or Secretary only" }, 403);
 
     const parsed = Body.safeParse(await req.json());
     if (!parsed.success) {
@@ -117,6 +123,27 @@ Deno.serve(async (req) => {
     };
 
     let userId = b.id;
+
+    // Secretary limits (admin is unrestricted). Roles are never part of this
+    // function; unknown keys are stripped by the schema.
+    if (isSecretary) {
+      if (userId) {
+        const { data: cur, error: ce } = await admin
+          .from("profiles").select("email,status,status_changed_at").eq("id", userId).maybeSingle();
+        if (ce) return json({ error: ce.message }, 500);
+        if (!cur) return json({ error: "Member not found" }, 404);
+        const { data: au } = await admin.auth.admin.getUserById(userId);
+        const loginEmail = (au?.user?.email ?? cur.email ?? "").toLowerCase();
+        if (b.email.toLowerCase() !== loginEmail) {
+          return json({ error: "Only an admin can change a member's sign-in email" }, 403);
+        }
+        // Approve/suspend stays admin-only: keep the existing status.
+        profileFields.status = cur.status;
+        profileFields.status_changed_at = cur.status_changed_at;
+      } else if (b.status !== "active" && b.status !== "pending") {
+        return json({ error: "New members can only be added as active or pending" }, 403);
+      }
+    }
 
     if (!userId) {
       // CREATE
