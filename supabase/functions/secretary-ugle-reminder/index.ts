@@ -39,6 +39,18 @@ Deno.serve(async (req) => {
   const url = new URL(req.url)
   const force = url.searchParams.get('force') === '1'
   const dryRun = url.searchParams.get('dry_run') === '1'
+  if (force || dryRun) {
+    const expected = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    const auth = req.headers.get('Authorization') ?? ''
+    const token = auth.startsWith('Bearer ') ? auth.slice(7) : ''
+    const ok = !!expected && token === expected
+    if (!ok) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+  }
   if (!force && !dryRun && !isSendWindow(new Date())) {
     return json({ ok: true, skipped: true })
   }
