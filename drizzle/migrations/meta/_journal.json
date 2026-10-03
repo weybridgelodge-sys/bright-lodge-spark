@@ -463,6 +463,13 @@
       "when": 1791036122152,
       "tag": "0065_lodge_events_archive",
       "breakpoints": true
+    },
+    {
+      "idx": 66,
+      "version": "7",
+      "when": 1791058138390,
+      "tag": "0066_migration",
+      "breakpoints": true
     }
   ]
 }
