@@ -98,7 +98,7 @@ test("every Treasurer tab stays within a 320px viewport", async ({ page }) => {
     await expectNoViewportOverflow(page, `Treasurer / ${name}`);
   }
 });
-test("Meeting Events archive controls stay within 320px with 44px targets", async ({ page }) => {
+test("Meeting Events archive controls stay within 320px with 48px targets", async ({ page }) => {
   const future = new Date(Date.now() + 20 * 86400_000).toISOString();
   const past = new Date(Date.now() - 200 * 86400_000).toISOString();
   const base = { intro_heading: null, tyling_time: "Tyling at 6.00 pm prompt", dining_time: "Dining 7.45 pm", location: "Guildford Masonic Centre", dress_code: "Dark suit", booking_deadline: null, header_image_url: null, sort_order: 0, archived_by: null };
