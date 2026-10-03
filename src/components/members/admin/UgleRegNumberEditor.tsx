@@ -36,7 +36,7 @@ export default function UgleRegNumberEditor({
   };
 
   return (
-    <div className="mt-2 max-w-xs">
+    <div className="mt-2 w-56 max-w-full">
       <label htmlFor={inputId} className="block text-[11px] uppercase tracking-wider text-primary-foreground/60">
         Grand Lodge Ref. No.
       </label>
