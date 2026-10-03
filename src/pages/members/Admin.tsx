@@ -121,8 +121,9 @@ const EMPTY_FORM = {
 };
 
 export default function MembersAdmin() {
-  const { user, isAdmin, isSecretary, isWorshipfulMaster } = useAuth();
-  const canManageMembers = isAdmin || isSecretary || isWorshipfulMaster;
+  const { user, isAdmin, isSecretary, isCurrentSecretary } = useAuth();
+  // Admin, or the Secretary (role or current office). Not the WM.
+  const canManageMembers = isAdmin || isSecretary || isCurrentSecretary;
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [roles, setRoles] = useState<Role[]>([]);
   const [lastSignIn, setLastSignIn] = useState<Record<string, string | null>>({});
@@ -209,11 +210,13 @@ export default function MembersAdmin() {
 
   const setStatus = async (id: string, status: Profile["status"]) => {
     const today = new Date().toISOString().slice(0, 10);
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from("profiles")
       .update({ status, status_changed_at: today })
-      .eq("id", id);
+      .eq("id", id)
+      .select("id");
     if (error) toast.error(error.message);
+    else if (!data?.length) toast.error("Not changed — you don't have permission to do this.");
     else {
       toast.success(`Member ${status}`);
       load();
@@ -239,8 +242,9 @@ export default function MembersAdmin() {
       if (error) toast.error(error.message);
       else toast.success("Assigned Almoner role");
     } else {
-      const { error } = await supabase.from("user_roles").delete().eq("user_id", uid).eq("role", "almoner");
+      const { data, error } = await supabase.from("user_roles").delete().eq("user_id", uid).eq("role", "almoner").select("id");
       if (error) toast.error(error.message);
+      else if (!data?.length) toast.error("Not changed — you don't have permission to do this.");
       else toast.success("Almoner role removed");
     }
     load();
@@ -284,7 +288,10 @@ export default function MembersAdmin() {
 
   const deleteNotice = async (id: string) => {
     if (!confirm("Delete this notice?")) return;
-    await supabase.from("member_notices").delete().eq("id", id);
+    const { data, error } = await supabase.from("member_notices").delete().eq("id", id).select("id");
+    if (error) toast.error(error.message);
+    else if (!data?.length) toast.error("Not deleted — you don't have permission to do this.");
+    else toast.success("Notice deleted");
     load();
   };
 
@@ -418,7 +425,7 @@ export default function MembersAdmin() {
 
 
       <div className="flex gap-2 border-b border-gold/15 mb-6">
-        {(["users", "add", "notices"] as const).map((t) => (
+        {((isAdmin ? ["users", "add", "notices"] : ["users", "add"]) as ("users" | "add" | "notices")[]).map((t) => (
           <button
             key={t}
             onClick={() => {
@@ -519,7 +526,7 @@ export default function MembersAdmin() {
                       >
                         <Pencil className="w-4 h-4" />
                       </button>
-                      {p.status !== "active" && (
+                      {isAdmin && p.status !== "active" && (
                         <button
                           onClick={() => setStatus(p.id, "active")}
                           className="p-1.5 text-gold hover:bg-gold/10 rounded-sm"
@@ -529,7 +536,7 @@ export default function MembersAdmin() {
                           <Check className="w-4 h-4" />
                         </button>
                       )}
-                      {p.status !== "suspended" && (
+                      {isAdmin && p.status !== "suspended" && (
                         <button
                           onClick={() => setStatus(p.id, "suspended")}
                           className="p-1.5 text-red-400 hover:bg-red-500/10 rounded-sm"
@@ -553,6 +560,7 @@ export default function MembersAdmin() {
                           )}
                         </button>
                       )}
+                      {isAdmin && (
                       <button
                         onClick={() => toggleAlmoner(p.id, !isAlmonerUser(p.id))}
                         className={`p-1.5 rounded-sm ${isAlmonerUser(p.id) ? "text-gold bg-gold/10" : "text-primary-foreground/70 hover:text-gold hover:bg-gold/10"}`}
@@ -561,6 +569,7 @@ export default function MembersAdmin() {
                       >
                         <HeartHandshake className="w-4 h-4" />
                       </button>
+                      )}
 
                       {isAdmin && user?.id !== p.id && (
                         <button
@@ -971,7 +980,7 @@ export default function MembersAdmin() {
         </form>
       )}
 
-      {tab === "notices" && (
+      {tab === "notices" && isAdmin && (
         <div className="space-y-6">
           <form onSubmit={addNotice} className="bg-navy-dark/60 border border-gold/15 rounded-sm p-5 space-y-3">
             <div className="flex items-center gap-2 text-gold">
