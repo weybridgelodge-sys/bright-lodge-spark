@@ -138,10 +138,10 @@ Deno.serve(async (req) => {
           return json({ error: "Only an admin can change a member's sign-in email" }, 403);
         }
         // Secretary may set any status on other members, never on himself.
-        if (userId === caller.id && b.status !== cur.status) {
+        if (userId === userRes.user.id && b.status !== cur.status) {
           return json({ error: "You cannot change your own status" }, 403);
         }
-        if (userId === caller.id) {
+        if (userId === userRes.user.id) {
           profileFields.status = cur.status;
           profileFields.status_changed_at = cur.status_changed_at;
         }
