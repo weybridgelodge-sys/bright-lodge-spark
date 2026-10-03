@@ -7,7 +7,7 @@ import { CalendarPlus, CalendarClock, Utensils, Mail, BarChart3, ArrowRight, Use
 type Tile = { to: string; title: string; description: string; icon: React.ComponentType<{ className?: string }>; visible: boolean };
 
 function Inner() {
-  const { canManageSummons, canManageProgression, isAdmin, isSecretary, isWorshipfulMaster, isAssistantSecretary } = useAuth();
+  const { canManageSummons, canManageProgression, isAdmin, isSecretary, isWorshipfulMaster, isAssistantSecretary, isCurrentSecretary } = useAuth();
 
   if (!canManageSummons) {
     return (
