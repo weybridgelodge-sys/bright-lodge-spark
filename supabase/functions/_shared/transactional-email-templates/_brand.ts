@@ -47,3 +47,6 @@ export const brandStyles = {
   hr: { borderColor: BRAND.hairline, margin: '20px 0 10px' } as const,
   footerText: { color: BRAND.muted, fontSize: '13px', margin: '18px 0 0' } as const,
 }
+
+// Shared lodge name for automated emails (subject lines and headings).
+export const LODGE_NAME = 'Weybridge Lodge No. 6787'

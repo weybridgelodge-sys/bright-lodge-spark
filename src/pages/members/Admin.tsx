@@ -1,3 +1,4 @@
+import UgleRegNumberEditor from "@/components/members/admin/UgleRegNumberEditor";
 import { useEffect, useState } from "react";
 import MembersLayout from "@/components/members/MembersLayout";
 import { supabase } from "@/integrations/supabase/client";
@@ -192,6 +193,19 @@ export default function MembersAdmin() {
   useEffect(() => {
     load();
   }, []);
+
+  // Deep link from the monthly "missing Grand Lodge number" email: #member-<id>
+  const [highlightId, setHighlightId] = useState<string | null>(null);
+  useEffect(() => {
+    const m = /^#member-([0-9a-f-]{36})$/i.exec(window.location.hash);
+    if (!m || !profiles.length) return;
+    const el = document.getElementById(`member-${m[1]}`);
+    if (!el) return;
+    setHighlightId(m[1]);
+    el.scrollIntoView({ block: "center" });
+    const input = document.getElementById(`ugle-${m[1]}`) as HTMLInputElement | null;
+    input?.focus({ preventScroll: true });
+  }, [profiles.length]);
 
   const setStatus = async (id: string, status: Profile["status"]) => {
     const today = new Date().toISOString().slice(0, 10);
@@ -443,7 +457,11 @@ export default function MembersAdmin() {
                 if (lastCmp !== 0) return lastCmp;
                 return (a.first_name || "").localeCompare(b.first_name || "", undefined, { sensitivity: "base" });
               }).map((p) => (
-                <tr key={p.id}>
+                <tr
+                  key={p.id}
+                  id={`member-${p.id}`}
+                  className={highlightId === p.id ? "bg-gold/10 outline outline-2 outline-gold" : undefined}
+                >
                   <td className="p-3">
                     <p className="font-medium">{formatMemberLine(p as any) || "(No name)"}</p>
                     <p className="text-xs text-primary-foreground/50">{p.email}</p>
@@ -451,6 +469,15 @@ export default function MembersAdmin() {
                       <p className="text-[11px] text-primary-foreground/60 mt-1">
                         {p.grand_rank ? `Grand: ${p.grand_rank}` : `Prov: ${p.provincial_rank}`}
                       </p>
+                    )}
+                    {canManageMembers && (
+                      <UgleRegNumberEditor
+                        memberId={p.id}
+                        value={p.ugle_reg_number}
+                        onSaved={(v) =>
+                          setProfiles((prev) => prev.map((x) => (x.id === p.id ? { ...x, ugle_reg_number: v } : x)))
+                        }
+                      />
                     )}
                   </td>
                   <td className="p-3 text-xs uppercase tracking-wider">

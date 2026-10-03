@@ -35,3 +35,5 @@ project_id = "kntcjlztmcgmagwgheyx"
     verify_jwt = false
   [functions.submit-provincial-return]
     verify_jwt = false
+  [functions.secretary-ugle-reminder]
+    verify_jwt = false

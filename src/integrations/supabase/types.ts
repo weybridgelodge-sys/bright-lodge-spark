@@ -5797,6 +5797,10 @@ export type Database = {
         Args: { _remarks: string; _year: number }
         Returns: undefined
       }
+      set_member_ugle_reg_number: {
+        Args: { _member: string; _value: string }
+        Returns: undefined
+      }
       submit_year_for_audit: { Args: { _year: number }; Returns: string }
       subscription_accrual_preview: {
         Args: { _year: number }
