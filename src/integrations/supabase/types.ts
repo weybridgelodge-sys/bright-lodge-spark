@@ -5798,6 +5798,13 @@ export type Database = {
         Args: { _remarks: string; _year: number }
         Returns: undefined
       }
+      set_member_status: {
+        Args: {
+          _member: string
+          _status: Database["public"]["Enums"]["member_status"]
+        }
+        Returns: undefined
+      }
       set_member_ugle_reg_number: {
         Args: { _member: string; _value: string }
         Returns: undefined
