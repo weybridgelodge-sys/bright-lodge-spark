@@ -37,7 +37,16 @@ Deno.serve(async (req) => {
   if (force) {
     const expected = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     const auth = req.headers.get('Authorization') ?? ''
-    if (!expected || auth !== `Bearer ${expected}`) {
+    const token = auth.startsWith('Bearer ') ? auth.slice(7) : ''
+    let ok = !!expected && token === expected
+    if (!ok && token) {
+      // Accept any valid service-role key (e.g. the vault copy used by cron):
+      // only a service-role key can call the admin users API.
+      const probe = createClient(Deno.env.get('SUPABASE_URL')!, token, { auth: { persistSession: false } })
+      const { error } = await probe.auth.admin.listUsers({ page: 1, perPage: 1 })
+      ok = !error
+    }
+    if (!ok) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
