@@ -190,6 +190,10 @@ test("Secretary-only Member Management fits 320px and shows approve/suspend, hid
   }
   const box = await statusMenu.boundingBox();
   expect(box && box.height >= 48).toBeTruthy();
+  await statusMenu.selectOption("deceased");
+  await expect(page.getByRole("alertdialog")).toBeVisible();
+  await expectNoViewportOverflow(page, "Secretary status confirmation");
+  await page.getByRole("button", { name: "Cancel" }).click();
   for (const name of ["Make admin", "Assign Almoner role", "Delete member"]) {
     await expect(page.getByRole("button", { name, exact: true })).toHaveCount(0);
   }
