@@ -477,6 +477,13 @@
       "when": 1791059291361,
       "tag": "0067_secretary_member_admin_access",
       "breakpoints": true
+    },
+    {
+      "idx": 68,
+      "version": "7",
+      "when": 1791059789367,
+      "tag": "0068_secretary_member_status",
+      "breakpoints": true
     }
   ]
 }
