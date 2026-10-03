@@ -6,7 +6,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { fetchAllEvents, fetchEventBundle, type LodgeEvent, type EventCourse, type DiningOption } from "@/lib/lodgeEvents";
 import { toUploadBody } from "@/lib/nativeUpload";
 import { toast } from "sonner";
-import { Plus, Trash2, Save, Loader2, CalendarDays, Eye, EyeOff, ChevronLeft, Image as ImageIcon } from "lucide-react";
+import { Plus, Trash2, Save, Loader2, CalendarDays, Eye, EyeOff, ChevronLeft, Image as ImageIcon, Archive, ArchiveRestore } from "lucide-react";
+import { ArchiveConfirmDialog, ArchivedMeetingCard, type ArchiveTarget } from "@/components/members/events/MeetingArchive";
 
 type CourseDraft = Partial<EventCourse> & { _tempId?: string };
 type OptionDraft = Partial<DiningOption> & { _tempId?: string };
@@ -24,103 +25,7 @@ function toLocalInput(iso: string) {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
-export default function EventsAdmin() {
-  const { isAdmin, isSecretary } = useAuth();
-  const canEdit = isAdmin || isSecretary;
-
-  const [events, setEvents] = useState<LodgeEvent[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-
-  const refresh = async () => {
-    setLoading(true);
-    const list = await fetchAllEvents();
-    setEvents(list);
-    setLoading(false);
-  };
-
-  useEffect(() => { refresh(); }, []);
-
-  const createNew = async () => {
-    const title = "New Meeting";
-    const slug = `event_${Date.now()}`;
-    const { data, error } = await supabase
-      .from("lodge_events")
-      .insert({
-        slug,
-        title,
-        intro: "",
-        event_date: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
-        published: false,
-      })
-      .select("id")
-      .single();
-    if (error) { toast.error(error.message); return; }
-    await refresh();
-    setSelectedId(data!.id);
-  };
-
-  if (!canEdit) {
-    return (
-      <MembersLayout>
-        <p className="text-primary-foreground/70">You don't have permission to manage events.</p>
-      </MembersLayout>
-    );
-  }
-
-  return (
-    <MembersLayout>
-      {selectedId ? (
-        <EventEditor id={selectedId} onBack={() => { setSelectedId(null); refresh(); }} onDeleted={() => { setSelectedId(null); refresh(); }} />
-      ) : (
-        <>
-          <div className="flex items-start justify-between mb-6 gap-4 flex-wrap">
-            <div>
-              <h1 className="font-serif text-3xl text-gold mb-1">Meeting Events</h1>
-              <p className="text-xs text-primary-foreground/60">Edit the meeting shown on the public Bookings page (intro, useful stuff, menu and dining options).</p>
-            </div>
-            <button onClick={createNew} className="flex items-center gap-2 bg-gold/15 hover:bg-gold/25 text-gold border border-gold/40 px-4 py-2 rounded-sm text-sm">
-              <Plus className="w-4 h-4" /> New meeting
-            </button>
-          </div>
-
-          {loading ? (
-            <div className="flex justify-center py-12"><Loader2 className="w-6 h-6 text-gold animate-spin" /></div>
-          ) : events.length === 0 ? (
-            <p className="text-sm text-primary-foreground/60">No meetings yet. Click "New meeting" to add one.</p>
-          ) : (
-            <ul className="space-y-2">
-              {events.map((e) => (
-                <li key={e.id}>
-                  <button onClick={() => setSelectedId(e.id)} className="w-full text-left bg-navy-dark/60 border border-gold/15 hover:border-gold/50 rounded-sm p-4 transition-colors">
-                    <div className="flex items-center justify-between gap-4 flex-wrap">
-                      <div>
-                        <p className="font-serif text-base text-primary-foreground">{e.title}</p>
-                        <p className="text-xs text-gold flex items-center gap-1.5 mt-1">
-                          <CalendarDays className="w-3 h-3" />
-                          {new Date(e.event_date).toLocaleString("en-GB", { dateStyle: "full", timeStyle: "short" })}
-                        </p>
-                      </div>
-                      <span className={`text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-sm border ${e.published ? "border-emerald-500/40 text-emerald-400" : "border-amber-500/40 text-amber-400"}`}>
-                        {e.published ? <><Eye className="w-3 h-3 inline mr-1" />Published</> : <><EyeOff className="w-3 h-3 inline mr-1" />Draft</>}
-                      </span>
-                    </div>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
-
-          <p className="mt-8 text-xs text-primary-foreground/50">
-            Public page: <Link to="/bookings" className="text-gold underline">/bookings</Link>
-            {" "}— it shows the next upcoming published meeting.
-          </p>
-        </>
-      )}
-    </MembersLayout>
-  );
-}
-
+__LIST__
 function EventEditor({ id, onBack, onDeleted }: { id: string; onBack: () => void; onDeleted: () => void }) {
   const [event, setEvent] = useState<LodgeEvent | null>(null);
   const [courses, setCourses] = useState<CourseDraft[]>([]);
