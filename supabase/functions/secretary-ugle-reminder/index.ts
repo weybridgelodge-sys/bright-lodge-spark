@@ -83,9 +83,9 @@ Deno.serve(async (req) => {
       return json({
         ok: true,
         dry_run: true,
-        recipient: secretaryEmail,
+        // Public endpoint: counts only, no names, emails or numbers.
+        recipient_found: true,
         missing: missing.length,
-        members: missing.map((m) => ({ name: m.name, initiated: m.initiationLabel })),
       })
     }
 
