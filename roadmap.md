@@ -32,3 +32,7 @@
 - [x] Start page 3 with the Past Masters section
 - [x] Validate and visually inspect both Word and PDF output
 - [x] Run the full unit and 320px portal test suite
+
+## Automated officer digests
+- [x] Almoner overdue digest: daily 06:00 UK (hourly cron `0 * * * *` + Europe/London guard), recipient = current Almoner, ?force=1 to re-send.
+- [x] Secretary "missing Grand Lodge number" digest (secretary-ugle-reminder): monthly 07:00 UK on the 1st (hourly cron `10 * * * *` + Europe/London guard), active initiated members with blank ugle_reg_number, oldest first; recipient = current Secretary (role fallback); skips when empty; ?dry_run=1 previews, ?force=1 sends now. Links to /members/admin#member-<id>, where admin/Secretary/WM edit the number inline.
