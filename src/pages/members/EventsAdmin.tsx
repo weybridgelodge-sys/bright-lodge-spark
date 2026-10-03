@@ -6,7 +6,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { fetchAllEvents, fetchEventBundle, type LodgeEvent, type EventCourse, type DiningOption } from "@/lib/lodgeEvents";
 import { toUploadBody } from "@/lib/nativeUpload";
 import { toast } from "sonner";
-import { Plus, Trash2, Save, Loader2, CalendarDays, Eye, EyeOff, ChevronLeft, Image as ImageIcon } from "lucide-react";
+import { Plus, Trash2, Save, Loader2, CalendarDays, Eye, EyeOff, ChevronLeft, Image as ImageIcon, Archive, ArchiveRestore } from "lucide-react";
+import { ArchiveConfirmDialog, ArchivedMeetingCard, type ArchiveTarget } from "@/components/members/events/MeetingArchive";
 
 type CourseDraft = Partial<EventCourse> & { _tempId?: string };
 type OptionDraft = Partial<DiningOption> & { _tempId?: string };
@@ -31,6 +32,9 @@ export default function EventsAdmin() {
   const [events, setEvents] = useState<LodgeEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [showArchived, setShowArchived] = useState(false);
+  const [target, setTarget] = useState<ArchiveTarget | null>(null);
+  const [busy, setBusy] = useState(false);
 
   const refresh = async () => {
     setLoading(true);
@@ -40,6 +44,9 @@ export default function EventsAdmin() {
   };
 
   useEffect(() => { refresh(); }, []);
+
+  const active = events.filter((e) => !e.archived_at);
+  const archived = events.filter((e) => !!e.archived_at);
 
   const createNew = async () => {
     const title = "New Meeting";
@@ -60,6 +67,29 @@ export default function EventsAdmin() {
     setSelectedId(data!.id);
   };
 
+  const askArchive = async (e: LodgeEvent, mode: ArchiveTarget["mode"]) => {
+    let bookings = 0;
+    if (mode !== "restore") {
+      const { count } = await supabase.from("bookings").select("id", { count: "exact", head: true }).eq("event_key", e.slug);
+      bookings = count ?? 0;
+    }
+    setTarget({ event: e, mode, bookings });
+  };
+
+  const confirmTarget = async () => {
+    if (!target) return;
+    setBusy(true);
+    const { event: e, mode } = target;
+    const { error } = mode === "delete"
+      ? await supabase.from("lodge_events").delete().eq("id", e.id)
+      : await supabase.from("lodge_events").update({ archived_at: mode === "archive" ? new Date().toISOString() : null } as any).eq("id", e.id);
+    setBusy(false);
+    if (error) { toast.error(error.message); return; }
+    toast.success(mode === "delete" ? "Meeting deleted" : mode === "archive" ? "Meeting archived" : "Meeting restored");
+    setTarget(null);
+    refresh();
+  };
+
   if (!canEdit) {
     return (
       <MembersLayout>
@@ -68,6 +98,8 @@ export default function EventsAdmin() {
     );
   }
 
+  const actionBtn = "inline-flex items-center justify-center gap-1.5 min-h-11 min-w-11 px-3 rounded-sm border text-sm";
+
   return (
     <MembersLayout>
       {selectedId ? (
@@ -75,29 +107,29 @@ export default function EventsAdmin() {
       ) : (
         <>
           <div className="flex items-start justify-between mb-6 gap-4 flex-wrap">
-            <div>
+            <div className="min-w-0">
               <h1 className="font-serif text-3xl text-gold mb-1">Meeting Events</h1>
               <p className="text-xs text-primary-foreground/60">Edit the meeting shown on the public Bookings page (intro, useful stuff, menu and dining options).</p>
             </div>
-            <button onClick={createNew} className="flex items-center gap-2 bg-gold/15 hover:bg-gold/25 text-gold border border-gold/40 px-4 py-2 rounded-sm text-sm">
+            <button onClick={createNew} className="flex items-center gap-2 min-h-11 bg-gold/15 hover:bg-gold/25 text-gold border border-gold/40 px-4 py-2 rounded-sm text-sm">
               <Plus className="w-4 h-4" /> New meeting
             </button>
           </div>
 
           {loading ? (
             <div className="flex justify-center py-12"><Loader2 className="w-6 h-6 text-gold animate-spin" /></div>
-          ) : events.length === 0 ? (
-            <p className="text-sm text-primary-foreground/60">No meetings yet. Click "New meeting" to add one.</p>
+          ) : active.length === 0 ? (
+            <p className="text-sm text-primary-foreground/60">No current meetings. Click "New meeting" to add one.</p>
           ) : (
             <ul className="space-y-2">
-              {events.map((e) => (
-                <li key={e.id}>
-                  <button onClick={() => setSelectedId(e.id)} className="w-full text-left bg-navy-dark/60 border border-gold/15 hover:border-gold/50 rounded-sm p-4 transition-colors">
+              {active.map((e) => (
+                <li key={e.id} className="bg-navy-dark/60 border border-gold/15 hover:border-gold/50 rounded-sm transition-colors flex flex-wrap items-stretch">
+                  <button onClick={() => setSelectedId(e.id)} className="flex-1 min-w-0 text-left p-4">
                     <div className="flex items-center justify-between gap-4 flex-wrap">
-                      <div>
-                        <p className="font-serif text-base text-primary-foreground">{e.title}</p>
+                      <div className="min-w-0">
+                        <p className="font-serif text-base text-primary-foreground break-words">{e.title}</p>
                         <p className="text-xs text-gold flex items-center gap-1.5 mt-1">
-                          <CalendarDays className="w-3 h-3" />
+                          <CalendarDays className="w-3 h-3 shrink-0" />
                           {new Date(e.event_date).toLocaleString("en-GB", { dateStyle: "full", timeStyle: "short" })}
                         </p>
                       </div>
@@ -106,17 +138,48 @@ export default function EventsAdmin() {
                       </span>
                     </div>
                   </button>
+                  <div className="flex items-center gap-2 px-3 pb-3 sm:pb-0">
+                    <button type="button" onClick={() => askArchive(e, "archive")} className={`${actionBtn} border-gold/40 text-gold hover:bg-gold/15`} aria-label={`Archive ${e.title}`}>
+                      <Archive className="w-4 h-4" /> Archive
+                    </button>
+                    <button type="button" onClick={() => askArchive(e, "delete")} className={`${actionBtn} border-red-400/40 text-red-400 hover:bg-red-400/10`} aria-label={`Delete ${e.title}`}>
+                      <Trash2 className="w-4 h-4" /> Delete
+                    </button>
+                  </div>
                 </li>
               ))}
             </ul>
           )}
 
+          {!loading && (
+            <section className="mt-10 border-t border-gold/15 pt-6">
+              <button type="button" onClick={() => setShowArchived((v) => !v)} aria-expanded={showArchived}
+                className={`${actionBtn} border-gold/30 text-gold hover:bg-gold/10`}>
+                <ArchiveRestore className="w-4 h-4" /> Archived ({archived.length}) {showArchived ? "— hide" : "— show"}
+              </button>
+              {showArchived && (
+                archived.length === 0 ? (
+                  <p className="mt-4 text-sm text-primary-foreground/60">No archived meetings.</p>
+                ) : (
+                  <ul className="mt-4 space-y-4">
+                    {archived.map((e) => (
+                      <li key={e.id}>
+                        <ArchivedMeetingCard event={e} onRestore={() => askArchive(e, "restore")} onDelete={() => askArchive(e, "delete")} />
+                      </li>
+                    ))}
+                  </ul>
+                )
+              )}
+            </section>
+          )}
+
           <p className="mt-8 text-xs text-primary-foreground/50">
             Public page: <Link to="/bookings" className="text-gold underline">/bookings</Link>
-            {" "}— it shows the next upcoming published meeting.
+            {" "}— it shows the next upcoming published meeting. Archived meetings never appear publicly.
           </p>
         </>
       )}
+      <ArchiveConfirmDialog target={target} busy={busy} onCancel={() => setTarget(null)} onConfirm={confirmTarget} />
     </MembersLayout>
   );
 }

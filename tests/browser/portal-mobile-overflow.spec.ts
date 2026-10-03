@@ -98,3 +98,40 @@ test("every Treasurer tab stays within a 320px viewport", async ({ page }) => {
     await expectNoViewportOverflow(page, `Treasurer / ${name}`);
   }
 });
+test("Meeting Events archive controls stay within 320px with 44px targets", async ({ page }) => {
+  const future = new Date(Date.now() + 20 * 86400_000).toISOString();
+  const past = new Date(Date.now() - 200 * 86400_000).toISOString();
+  const base = { intro_heading: null, tyling_time: "Tyling at 6.00 pm prompt", dining_time: "Dining 7.45 pm", location: "Guildford Masonic Centre", dress_code: "Dark suit", booking_deadline: null, header_image_url: null, sort_order: 0, archived_by: null };
+  const rows = [
+    { ...base, id: "e1", slug: "e1", title: "Initiation Ceremony — A Very Long Meeting Title For Narrow Phones", intro: "Intro paragraph one.\n\nIntro two.", event_date: future, published: true, archived_at: null },
+    { ...base, id: "e2", slug: "e2", title: "Installation Meeting and Charitable White Table", intro: "Archived intro text to copy.", event_date: past, published: false, archived_at: past },
+  ];
+  await page.route("**/rest/v1/lodge_events?**", (r) => {
+    const u = r.request().url();
+    const one = u.includes("id=eq.e2") ? rows[1] : null;
+    return r.fulfill({ json: one ?? rows, headers: { "content-range": "0-1/2" } });
+  });
+  await page.route("**/rest/v1/lodge_event_courses?**", (r) => r.fulfill({ json: [{ id: "c1", event_id: "e2", course_label: "Main", dish: "Roast beef with all the trimmings", description: "", position: 1 }] }));
+  await page.route("**/rest/v1/lodge_event_dining_options?**", (r) => r.fulfill({ json: [{ id: "o1", event_id: "e2", label: "Three-course dinner", price_pence: 3500, position: 1, is_default: true }] }));
+  await page.route("**/rest/v1/bookings?**", (r) => r.fulfill({ json: [], headers: { "content-range": "*/3" } }));
+
+  await page.goto("/members/events");
+  await waitForPortal(page);
+  const archiveBtn = page.getByRole("button", { name: /^Archive Initiation/ });
+  if (!(await archiveBtn.isVisible().catch(() => false))) test.skip(true, "Synthetic identity cannot edit meetings");
+  await expectNoViewportOverflow(page, "Meeting Events list");
+  for (const name of [/^Archive Initiation/, /^Delete Initiation/, /^Archived \(1\)/]) {
+    const box = await page.getByRole("button", { name }).boundingBox();
+    expect(box!.height, `${name} touch target`).toBeGreaterThanOrEqual(44);
+  }
+  await archiveBtn.click();
+  await expect(page.getByRole("alert")).toContainText(/\d+ bookings?/);
+  await expectNoViewportOverflow(page, "Archive confirmation");
+  await page.getByRole("button", { name: "Cancel" }).click();
+  await page.getByRole("button", { name: /^Archived \(1\)/ }).click();
+  await page.getByRole("button", { name: /Show content/ }).click();
+  await expect(page.getByText("Roast beef with all the trimmings")).toBeVisible();
+  await expectNoViewportOverflow(page, "Archived meetings");
+  const restore = await page.getByRole("button", { name: /^Restore Installation/ }).boundingBox();
+  expect(restore!.height).toBeGreaterThanOrEqual(44);
+});

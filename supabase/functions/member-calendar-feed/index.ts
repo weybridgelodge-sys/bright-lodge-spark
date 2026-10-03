@@ -226,6 +226,7 @@ Deno.serve(async (req) => {
       admin.from("lodge_events")
         .select("id,slug,title,event_date,tyling_time,location,intro")
         .eq("published", true)
+        .is("archived_at", null)
         .gte("event_date", fromIso)
         .lte("event_date", toIso),
       admin.from("festive_board_meetings")
@@ -247,9 +248,15 @@ Deno.serve(async (req) => {
 
     const cal: CalEvent[] = [];
 
+    // Archived meetings never appear in the feed.
+    const { data: archivedRows } = await admin
+      .from("lodge_events").select("slug").not("archived_at", "is", null);
+    const archivedKeys = new Set((archivedRows ?? []).map((r: any) => r.slug));
     const meetingsByKey = new Map<string, any>();
     for (const m of (meetingsRes.data ?? [])) {
-      if ((m as any).event_key) meetingsByKey.set((m as any).event_key, m);
+      const k = (m as any).event_key;
+      if (!k || archivedKeys.has(k)) continue;
+      meetingsByKey.set(k, m);
     }
     for (const e of (eventsRes.data ?? [])) {
       const ev = e as any;

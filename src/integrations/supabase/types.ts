@@ -1776,6 +1776,8 @@ export type Database = {
       }
       lodge_events: {
         Row: {
+          archived_at: string | null
+          archived_by: string | null
           booking_deadline: string | null
           created_at: string
           dining_time: string
@@ -1795,6 +1797,8 @@ export type Database = {
           venue_id: string | null
         }
         Insert: {
+          archived_at?: string | null
+          archived_by?: string | null
           booking_deadline?: string | null
           created_at?: string
           dining_time?: string
@@ -1814,6 +1818,8 @@ export type Database = {
           venue_id?: string | null
         }
         Update: {
+          archived_at?: string | null
+          archived_by?: string | null
           booking_deadline?: string | null
           created_at?: string
           dining_time?: string
@@ -5702,6 +5708,7 @@ export type Database = {
         Returns: boolean
       }
       is_current_wm_or_ipm: { Args: { _user_id: string }; Returns: boolean }
+      is_event_key_archived: { Args: { _event_key: string }; Returns: boolean }
       is_period_locked: { Args: { p_period_id: string }; Returns: boolean }
       is_working_group_lead: {
         Args: { _group: string; _user: string }

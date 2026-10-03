@@ -15,6 +15,8 @@ export type LodgeEvent = {
   header_image_url: string | null;
   published: boolean;
   sort_order: number;
+  archived_at?: string | null;
+  archived_by?: string | null;
 };
 
 export type EventCourse = {
@@ -84,6 +86,7 @@ export async function fetchNextEvent(): Promise<EventBundle | null> {
     .from("lodge_events")
     .select("*")
     .eq("published", true)
+    .is("archived_at", null)
     .gte("event_date", startOfToday.toISOString())
     .order("event_date", { ascending: true })
     .limit(1);
