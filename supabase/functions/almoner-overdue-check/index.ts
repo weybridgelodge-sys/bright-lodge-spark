@@ -38,13 +38,7 @@ Deno.serve(async (req) => {
     const expected = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     const auth = req.headers.get('Authorization') ?? ''
     const token = auth.startsWith('Bearer ') ? auth.slice(7) : ''
-    let ok = !!expected && token === expected
-    if (!ok && token) {
-      // Also accept the vault copy of the service-role key that cron uses.
-      const svc = createClient(Deno.env.get('SUPABASE_URL')!, expected)
-      const { data } = await svc.rpc('check_cron_trigger_key', { _token: token })
-      ok = data === true
-    }
+    const ok = !!expected && token === expected
     if (!ok) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
         status: 401,
