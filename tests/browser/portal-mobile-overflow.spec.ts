@@ -117,7 +117,7 @@ test("Meeting Events archive controls stay within 320px with 44px targets", asyn
 
   await page.goto("/members/events");
   await waitForPortal(page);
-  const archiveBtn = page.getByRole("button", { name: /^Archive Initiation/ });
+  const archiveBtn = page.getByRole("button", { name: /^Archive Double Initiation/ });
   if (!(await archiveBtn.isVisible().catch(() => false))) test.skip(true, "Synthetic identity cannot edit meetings");
   await expectNoViewportOverflow(page, "Meeting Events list");
   for (const name of [/^Archive Double Initiation/, /^Delete Double Initiation/, /^Archived \(1\)/]) {
