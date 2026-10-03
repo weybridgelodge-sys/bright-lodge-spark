@@ -456,6 +456,13 @@
       "when": 1790956423966,
       "tag": "0064_officer_appointment_audit_and_history",
       "breakpoints": true
+    },
+    {
+      "idx": 65,
+      "version": "7",
+      "when": 1791036122152,
+      "tag": "0065_lodge_events_archive",
+      "breakpoints": true
     }
   ]
 }
