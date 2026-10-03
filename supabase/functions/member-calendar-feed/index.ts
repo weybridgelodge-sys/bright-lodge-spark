@@ -255,8 +255,8 @@ Deno.serve(async (req) => {
     const meetingsByKey = new Map<string, any>();
     for (const m of (meetingsRes.data ?? [])) {
       const k = (m as any).event_key;
-      if (k && archivedKeys.has(k)) continue;
-      meetingsByKey.set(k ?? `id-${(m as any).id}`, m);
+      if (!k || archivedKeys.has(k)) continue;
+      meetingsByKey.set(k, m);
     }
     for (const e of (eventsRes.data ?? [])) {
       const ev = e as any;
