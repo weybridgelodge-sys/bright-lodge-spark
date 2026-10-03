@@ -183,6 +183,17 @@ test("Secretary-only Member Management fits 320px and shows approve/suspend, hid
   await expect(page.getByRole("button", { name: "Edit member" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Approve", exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "Suspend", exact: true })).toBeVisible();
+  const statusMenu = page.getByRole("combobox", { name: /^Change status for/ }).first();
+  await expect(statusMenu).toBeVisible();
+  for (const v of ["pending", "active", "year_out", "suspended", "resigned", "excluded", "deceased"]) {
+    await expect(statusMenu.locator(`option[value="${v}"]`)).toHaveCount(1);
+  }
+  const box = await statusMenu.boundingBox();
+  expect(box && box.height >= 48).toBeTruthy();
+  await statusMenu.selectOption("deceased");
+  await expect(page.getByRole("alertdialog")).toBeVisible();
+  await expectNoViewportOverflow(page, "Secretary status confirmation");
+  await page.getByRole("button", { name: "Cancel" }).click();
   for (const name of ["Make admin", "Assign Almoner role", "Delete member"]) {
     await expect(page.getByRole("button", { name, exact: true })).toHaveCount(0);
   }

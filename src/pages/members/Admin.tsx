@@ -8,6 +8,13 @@ import { useAuth } from "@/hooks/useAuth";
 import { formatMemberLine } from "@/lib/summons";
 import { useNavigate } from "react-router-dom";
 import { readFunctionError } from "@/lib/functionError";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+
+// Statuses that look final; changing to these always asks for confirmation.
+const CONFIRM_STATUSES: Status[] = ["resigned", "excluded", "deceased"];
 
 type Degree = "entered_apprentice" | "fellow_craft" | "master_mason" | "installed_master";
 type Title = "Bro" | "W Bro" | "VW Bro" | "RW Bro";
@@ -208,6 +215,13 @@ export default function MembersAdmin() {
     input?.focus({ preventScroll: true });
   }, [profiles.length]);
 
+  const [pendingStatus, setPendingStatus] = useState<{ id: string; name: string; status: Status } | null>(null);
+  const requestStatus = (p: Profile, status: Status) => {
+    if (status === p.status) return;
+    if (CONFIRM_STATUSES.includes(status)) setPendingStatus({ id: p.id, name: p.full_name || p.email || "this member", status });
+    else setStatus(p.id, status);
+  };
+
   const setStatus = async (id: string, status: Profile["status"]) => {
     // Server checks admin or current Secretary; no-change raises an error.
     const { error } = await (supabase as any).rpc("set_member_status", { _member: id, _status: status });
@@ -342,6 +356,14 @@ export default function MembersAdmin() {
     e.preventDefault();
     if (!form.email.trim() || !form.first_name.trim() || !form.last_name.trim()) {
       toast.error("Title, first name, last name and email are required");
+      return;
+    }
+    const prevStatus = form.id ? profiles.find((x) => x.id === form.id)?.status : undefined;
+    if (
+      CONFIRM_STATUSES.includes(form.status) &&
+      form.status !== prevStatus &&
+      !window.confirm(`Mark ${form.first_name} ${form.last_name} as ${STATUSES.find((s) => s.value === form.status)?.label}? Please check you have the right member.`)
+    ) {
       return;
     }
     setBusy(true);
@@ -524,7 +546,7 @@ export default function MembersAdmin() {
                       {(isAdmin || user?.id !== p.id) && p.status !== "active" && (
                         <button
                           onClick={() => setStatus(p.id, "active")}
-                          className="p-1.5 text-gold hover:bg-gold/10 rounded-sm"
+                          className="min-h-[48px] min-w-[48px] inline-flex items-center justify-center p-1.5 text-gold hover:bg-gold/10 rounded-sm"
                           aria-label={p.status === "pending" ? "Approve" : "Reactivate"}
                           title={p.status === "pending" ? "Approve" : "Reactivate"}
                         >
@@ -534,12 +556,25 @@ export default function MembersAdmin() {
                       {(isAdmin || user?.id !== p.id) && p.status !== "suspended" && (
                         <button
                           onClick={() => setStatus(p.id, "suspended")}
-                          className="p-1.5 text-red-400 hover:bg-red-500/10 rounded-sm"
+                          className="min-h-[48px] min-w-[48px] inline-flex items-center justify-center p-1.5 text-red-400 hover:bg-red-500/10 rounded-sm"
                           aria-label="Suspend"
                           title="Suspend"
                         >
                           <X className="w-4 h-4" />
                         </button>
+                      )}
+                      {(isAdmin || user?.id !== p.id) && (
+                        <select
+                          value={p.status}
+                          onChange={(e) => requestStatus(p, e.target.value as Status)}
+                          aria-label={`Change status for ${p.full_name}`}
+                          title="Change status"
+                          className="min-h-[48px] max-w-[8.5rem] bg-navy-dark/60 border border-gold/30 rounded-sm px-2 text-xs text-primary-foreground"
+                        >
+                          {STATUSES.map((s) => (
+                            <option key={s.value} value={s.value}>{s.label}</option>
+                          ))}
+                        </select>
                       )}
                       {isAdmin && (
                         <button
@@ -848,6 +883,8 @@ export default function MembersAdmin() {
               Member status
               <select
                 value={form.status}
+                disabled={!isAdmin && !!form.id && form.id === user?.id}
+                title={!isAdmin && !!form.id && form.id === user?.id ? "You cannot change your own status" : undefined}
                 onChange={(e) => {
                   const next = e.target.value as Status;
                   setForm({
@@ -1038,6 +1075,25 @@ export default function MembersAdmin() {
           </ul>
         </div>
       )}
+      <AlertDialog open={!!pendingStatus} onOpenChange={(o) => !o && setPendingStatus(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Mark {pendingStatus?.name} as {STATUSES.find((s) => s.value === pendingStatus?.status)?.label}?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This changes the member's status and records today as the date of change. It can be reversed later, but please check you have the right member.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="min-h-[48px]">Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="min-h-[48px]"
+              onClick={() => { if (pendingStatus) setStatus(pendingStatus.id, pendingStatus.status); setPendingStatus(null); }}
+            >
+              Confirm
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </MembersLayout>
   );
 }
