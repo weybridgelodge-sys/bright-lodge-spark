@@ -34,6 +34,16 @@ Deno.serve(async (req) => {
   // scheduled run failed and the digest still needs to go out today).
   const url = new URL(req.url)
   const force = url.searchParams.get('force') === '1'
+  if (force) {
+    const expected = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    const auth = req.headers.get('Authorization') ?? ''
+    if (!expected || auth !== `Bearer ${expected}`) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+  }
   const londonHour = parseInt(
     new Intl.DateTimeFormat('en-GB', {
       timeZone: 'Europe/London',
