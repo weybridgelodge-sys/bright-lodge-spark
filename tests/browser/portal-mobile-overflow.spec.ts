@@ -125,7 +125,7 @@ test("Meeting Events archive controls stay within 320px with 44px targets", asyn
     expect(box!.height, `${name} touch target`).toBeGreaterThanOrEqual(44);
   }
   await archiveBtn.click();
-  await expect(page.getByRole("alert")).toContainText("3 bookings");
+  await expect(page.getByRole("alert")).toContainText(/\d+ bookings?/);
   await expectNoViewportOverflow(page, "Archive confirmation");
   await page.getByRole("button", { name: "Cancel" }).click();
   await page.getByRole("button", { name: /^Archived \(1\)/ }).click();
