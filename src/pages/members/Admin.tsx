@@ -451,7 +451,7 @@ export default function MembersAdmin() {
                 <th className="text-left p-3">Last logged on</th>
                 <th className="text-left p-3">Role</th>
                 <th className="text-left p-3">Flags</th>
-                <th className="text-right p-3">Actions</th>
+                <th className="text-right p-3 sticky right-0 bg-navy-dark">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gold/10">
@@ -516,11 +516,11 @@ export default function MembersAdmin() {
                     {p.is_royal_arch && <div>RA</div>}
                     {p.is_honorary_member && <div>Honorary</div>}
                   </td>
-                  <td className="p-3">
+                  <td className="p-3 sticky right-0 bg-navy-dark">
                     <div className="flex items-center gap-1 justify-end">
                       <button
                         onClick={() => startEdit(p)}
-                        className="p-1.5 text-primary-foreground/70 hover:text-gold hover:bg-gold/10 rounded-sm"
+                        className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center p-1.5 text-primary-foreground/70 hover:text-gold hover:bg-gold/10 rounded-sm"
                         aria-label="Edit member"
                         title="Edit member"
                       >
