@@ -8,6 +8,13 @@ import { useAuth } from "@/hooks/useAuth";
 import { formatMemberLine } from "@/lib/summons";
 import { useNavigate } from "react-router-dom";
 import { readFunctionError } from "@/lib/functionError";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+
+// Statuses that look final; changing to these always asks for confirmation.
+const CONFIRM_STATUSES: Status[] = ["resigned", "excluded", "deceased"];
 
 type Degree = "entered_apprentice" | "fellow_craft" | "master_mason" | "installed_master";
 type Title = "Bro" | "W Bro" | "VW Bro" | "RW Bro";
@@ -207,6 +214,13 @@ export default function MembersAdmin() {
     const input = document.getElementById(`ugle-${m[1]}`) as HTMLInputElement | null;
     input?.focus({ preventScroll: true });
   }, [profiles.length]);
+
+  const [pendingStatus, setPendingStatus] = useState<{ id: string; name: string; status: Status } | null>(null);
+  const requestStatus = (p: Profile, status: Status) => {
+    if (status === p.status) return;
+    if (CONFIRM_STATUSES.includes(status)) setPendingStatus({ id: p.id, name: p.full_name, status });
+    else setStatus(p.id, status);
+  };
 
   const setStatus = async (id: string, status: Profile["status"]) => {
     // Server checks admin or current Secretary; no-change raises an error.
@@ -524,7 +538,7 @@ export default function MembersAdmin() {
                       {(isAdmin || user?.id !== p.id) && p.status !== "active" && (
                         <button
                           onClick={() => setStatus(p.id, "active")}
-                          className="p-1.5 text-gold hover:bg-gold/10 rounded-sm"
+                          className="min-h-[48px] min-w-[48px] inline-flex items-center justify-center p-1.5 text-gold hover:bg-gold/10 rounded-sm"
                           aria-label={p.status === "pending" ? "Approve" : "Reactivate"}
                           title={p.status === "pending" ? "Approve" : "Reactivate"}
                         >
@@ -534,12 +548,25 @@ export default function MembersAdmin() {
                       {(isAdmin || user?.id !== p.id) && p.status !== "suspended" && (
                         <button
                           onClick={() => setStatus(p.id, "suspended")}
-                          className="p-1.5 text-red-400 hover:bg-red-500/10 rounded-sm"
+                          className="min-h-[48px] min-w-[48px] inline-flex items-center justify-center p-1.5 text-red-400 hover:bg-red-500/10 rounded-sm"
                           aria-label="Suspend"
                           title="Suspend"
                         >
                           <X className="w-4 h-4" />
                         </button>
+                      )}
+                      {(isAdmin || user?.id !== p.id) && (
+                        <select
+                          value={p.status}
+                          onChange={(e) => requestStatus(p, e.target.value as Status)}
+                          aria-label={`Change status for ${p.full_name}`}
+                          title="Change status"
+                          className="min-h-[48px] max-w-[8.5rem] bg-navy-dark/60 border border-gold/30 rounded-sm px-2 text-xs text-primary-foreground"
+                        >
+                          {STATUSES.map((s) => (
+                            <option key={s.value} value={s.value}>{s.label}</option>
+                          ))}
+                        </select>
                       )}
                       {isAdmin && (
                         <button
