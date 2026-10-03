@@ -154,3 +154,21 @@ test("Meeting Events archive controls stay within 320px with 48px targets", asyn
   const bottomNav = await page.getByRole("link", { name: "Hub", exact: true }).locator("..").boundingBox();
   expect(lastCard && bottomNav ? lastCard.y + lastCard.height <= bottomNav.y : false, "last meeting card clears the fixed bottom navigation").toBe(true);
 });
+
+test("Admin member list Grand Lodge number editor fits 320px with 48px targets", async ({ page }) => {
+  const id = "11111111-2222-3333-4444-555555555555";
+  await page.route("**/rest/v1/rpc/get_admin_profiles**", (r) => r.fulfill({ json: [{ id, email: "long.name@example.com", title: "W Bro", first_name: "Bartholomew-Maximilian", last_name: "Featherstonehaugh-Wolstenholme", degree: "master_mason", status: "active", is_past_master: false, is_royal_arch: false, is_honorary_member: false, initiation_date: "2026-05-13" }] }));
+  await page.route("**/rest/v1/rpc/get_profiles_pii**", (r) => r.fulfill({ json: [{ id, ugle_reg_number: null }] }));
+  await page.goto(`/members/admin#member-${id}`);
+  await waitForPortal(page);
+  const input = page.getByLabel("Grand Lodge Ref. No.");
+  if (!(await input.isVisible().catch(() => false))) test.skip(true, "Synthetic identity cannot manage members");
+  await expect(input).toBeFocused();
+  const save = page.getByRole("button", { name: "Save" });
+  for (const box of [await input.boundingBox(), await save.boundingBox()]) {
+    expect(box!.height).toBeGreaterThanOrEqual(48);
+    expect(box!.x + box!.width).toBeLessThanOrEqual(320);
+  }
+  const doc = await page.evaluate(() => document.documentElement.scrollWidth);
+  expect(doc).toBeLessThanOrEqual(320);
+});
