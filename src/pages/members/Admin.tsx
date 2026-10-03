@@ -209,14 +209,9 @@ export default function MembersAdmin() {
   }, [profiles.length]);
 
   const setStatus = async (id: string, status: Profile["status"]) => {
-    const today = new Date().toISOString().slice(0, 10);
-    const { data, error } = await supabase
-      .from("profiles")
-      .update({ status, status_changed_at: today })
-      .eq("id", id)
-      .select("id");
-    if (error) toast.error(error.message);
-    else if (!data?.length) toast.error("Not changed — you don't have permission to do this.");
+    // Server checks admin or current Secretary; no-change raises an error.
+    const { error } = await (supabase as any).rpc("set_member_status", { _member: id, _status: status });
+    if (error) toast.error(`Status not changed: ${error.message}`);
     else {
       toast.success(`Member ${status}`);
       load();
@@ -526,17 +521,17 @@ export default function MembersAdmin() {
                       >
                         <Pencil className="w-4 h-4" />
                       </button>
-                      {isAdmin && p.status !== "active" && (
+                      {(isAdmin || user?.id !== p.id) && p.status !== "active" && (
                         <button
                           onClick={() => setStatus(p.id, "active")}
                           className="p-1.5 text-gold hover:bg-gold/10 rounded-sm"
-                          aria-label="Approve"
-                          title="Approve"
+                          aria-label={p.status === "pending" ? "Approve" : "Reactivate"}
+                          title={p.status === "pending" ? "Approve" : "Reactivate"}
                         >
                           <Check className="w-4 h-4" />
                         </button>
                       )}
-                      {isAdmin && p.status !== "suspended" && (
+                      {(isAdmin || user?.id !== p.id) && p.status !== "suspended" && (
                         <button
                           onClick={() => setStatus(p.id, "suspended")}
                           className="p-1.5 text-red-400 hover:bg-red-500/10 rounded-sm"
