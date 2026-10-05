@@ -889,7 +889,7 @@ export default function MembersAdmin() {
                 inputMode="numeric"
                 placeholder="Not yet recorded"
                 onChange={(e) => setForm({ ...form, ugle_reg_number: e.target.value })}
-                className={`mt-1 ${inputCls} normal-case tracking-normal text-primary-foreground`}
+                className={`mt-1 min-h-[44px] ${inputCls} normal-case tracking-normal text-primary-foreground`}
               />
             </label>
             <label className={`${labelCls} sm:col-span-6`}>
