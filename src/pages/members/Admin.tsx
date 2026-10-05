@@ -446,7 +446,7 @@ export default function MembersAdmin() {
       </div>
 
 
-      <div className="flex gap-2 border-b border-gold/15 mb-6">
+      <div className="flex flex-wrap gap-x-1 gap-y-0 border-b border-gold/15 mb-6">
         {((isAdmin ? ["users", "add", "import", "notices"] : ["users", "add", "import"]) as ("users" | "add" | "import" | "notices")[]).map((t) => (
           <button
             key={t}
@@ -454,7 +454,7 @@ export default function MembersAdmin() {
               if (t === "add" && tab !== "add") resetForm();
               setTab(t);
             }}
-            className={`px-3 py-2 text-sm uppercase tracking-wider border-b-2 -mb-px ${
+            className={`px-2 sm:px-3 py-2 min-h-11 text-sm uppercase tracking-wider border-b-2 -mb-px ${
               tab === t ? "border-gold text-gold" : "border-transparent text-primary-foreground/60 hover:text-gold"
             }`}
           >
