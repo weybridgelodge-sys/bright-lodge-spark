@@ -11,6 +11,7 @@ export type ProfilePii = {
   county: string | null;
   postcode: string | null;
   ugle_reg_number: string | null;
+  dietary_requirements: string | null;
 };
 
 /**
