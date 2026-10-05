@@ -3532,6 +3532,7 @@ export type Database = {
           created_at: string
           date_of_birth: string | null
           degree: Database["public"]["Enums"]["masonic_degree"]
+          dietary_requirements: string | null
           email: string | null
           first_name: string | null
           full_name: string | null
@@ -3575,6 +3576,7 @@ export type Database = {
           created_at?: string
           date_of_birth?: string | null
           degree?: Database["public"]["Enums"]["masonic_degree"]
+          dietary_requirements?: string | null
           email?: string | null
           first_name?: string | null
           full_name?: string | null
@@ -3618,6 +3620,7 @@ export type Database = {
           created_at?: string
           date_of_birth?: string | null
           degree?: Database["public"]["Enums"]["masonic_degree"]
+          dietary_requirements?: string | null
           email?: string | null
           first_name?: string | null
           full_name?: string | null
@@ -5667,6 +5670,7 @@ export type Database = {
           address_line3: string
           county: string
           date_of_birth: string
+          dietary_requirements: string
           id: string
           phone: string
           postcode: string
