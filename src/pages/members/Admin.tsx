@@ -138,7 +138,7 @@ export default function MembersAdmin() {
   const [roles, setRoles] = useState<Role[]>([]);
   const [lastSignIn, setLastSignIn] = useState<Record<string, string | null>>({});
   const [notices, setNotices] = useState<Notice[]>([]);
-  const [tab, setTab] = useState<"users" | "add" | "notices">("users");
+  const [tab, setTab] = useState<"users" | "add" | "import" | "notices">("users");
 
   const [nTitle, setNTitle] = useState("");
   const [nBody, setNBody] = useState("");
