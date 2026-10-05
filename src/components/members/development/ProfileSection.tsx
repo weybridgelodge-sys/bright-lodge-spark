@@ -57,7 +57,6 @@ export default function ProfileSection({
   const [experience, setExperience] = useState(record?.previous_masonic_experience ?? "");
   const [royalArchDate, setRoyalArchDate] = useState(profile.royal_arch_date ?? "");
   const [proposer, setProposer] = useState(profile.proposer ?? "");
-  const [grandLodgeNo, setGrandLodgeNo] = useState(profile.ugle_reg_number ?? "");
   const [passingScheduled, setPassingScheduled] = useState(record?.passing_scheduled_date ?? "");
   const [raisingScheduled, setRaisingScheduled] = useState(record?.raising_scheduled_date ?? "");
   const [saving, setSaving] = useState(false);
@@ -71,7 +70,6 @@ export default function ProfileSection({
   useEffect(() => {
     setRoyalArchDate(profile.royal_arch_date ?? "");
     setProposer(profile.proposer ?? "");
-    setGrandLodgeNo(profile.ugle_reg_number ?? "");
   }, [profile]);
 
   const save = async () => {
@@ -92,7 +90,6 @@ export default function ProfileSection({
     const { error: pErr } = await supabase.from("profiles").update({
       royal_arch_date: royalArchDate || null,
       proposer: proposer || null,
-      ugle_reg_number: grandLodgeNo || null,
     }).eq("id", profile.id);
     if (pErr) toast.message("Record saved. Profile fields require admin permission to update.");
     else toast.success("Profile section saved.");
@@ -141,10 +138,6 @@ export default function ProfileSection({
             <div>
               <Label htmlFor="ra" className="text-xs text-primary-foreground/70">Royal Arch date</Label>
               <Input id="ra" type="date" value={royalArchDate ?? ""} onChange={(e) => setRoyalArchDate(e.target.value)} className="bg-navy-dark text-primary-foreground" />
-            </div>
-            <div>
-              <Label htmlFor="gl" className="text-xs text-primary-foreground/70">Grand Lodge No.</Label>
-              <Input id="gl" value={grandLodgeNo ?? ""} onChange={(e) => setGrandLodgeNo(e.target.value)} className="bg-navy-dark text-primary-foreground" />
             </div>
             <div>
               <Label htmlFor="pr" className="text-xs text-primary-foreground/70">Proposer</Label>
