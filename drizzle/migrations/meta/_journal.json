@@ -498,6 +498,13 @@
       "when": 1791206907160,
       "tag": "0070_profile_dietary_requirements",
       "breakpoints": true
+    },
+    {
+      "idx": 71,
+      "version": "7",
+      "when": 1791214177734,
+      "tag": "0071_ugle_reg_number_secretary_admin_only",
+      "breakpoints": true
     }
   ]
 }

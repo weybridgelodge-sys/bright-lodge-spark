@@ -155,22 +155,22 @@ test("Meeting Events archive controls stay within 320px with 48px targets", asyn
   expect(lastCard && bottomNav ? lastCard.y + lastCard.height <= bottomNav.y : false, "last meeting card clears the fixed bottom navigation").toBe(true);
 });
 
-test("Admin member list Grand Lodge number editor fits 320px with 48px targets", async ({ page }) => {
+test("Grand Lodge number deep link opens Edit Member with the field focused at 320px (Secretary)", async ({ page }) => {
   const id = "11111111-2222-3333-4444-555555555555";
   await page.route("**/rest/v1/rpc/get_admin_profiles**", (r) => r.fulfill({ json: [{ id, email: "long.name@example.com", title: "W Bro", first_name: "Bartholomew-Maximilian", last_name: "Featherstonehaugh-Wolstenholme", degree: "master_mason", status: "active", is_past_master: false, is_royal_arch: false, is_honorary_member: false, initiation_date: "2026-05-13" }] }));
-  await page.route("**/rest/v1/rpc/get_profiles_pii**", (r) => r.fulfill({ json: [{ id, ugle_reg_number: null }] }));
-  await page.goto(`/members/admin#member-${id}`);
+  await page.route("**/rest/v1/rpc/get_profiles_pii**", (r) => r.fulfill({ json: [{ id, ugle_reg_number: "123456" }] }));
+  await page.goto(`/members/admin?e2e_as=secretary#member-${id}`);
   await waitForPortal(page);
   const input = page.getByLabel("Grand Lodge Ref. No.");
-  if (!(await input.isVisible().catch(() => false))) test.skip(true, "Synthetic identity cannot manage members");
+  await expect(input).toBeVisible();
   await expect(input).toBeFocused();
-  const save = page.getByRole("button", { name: "Save" });
-  for (const box of [await input.boundingBox(), await save.boundingBox()]) {
-    expect(box!.height).toBeGreaterThanOrEqual(48);
-    expect(box!.x + box!.width).toBeLessThanOrEqual(320);
-  }
-  const doc = await page.evaluate(() => document.documentElement.scrollWidth);
-  expect(doc).toBeLessThanOrEqual(320);
+  await expect(input).toHaveValue("123456");
+  // No standalone Save button next to the field: it saves with the form.
+  await expect(page.getByRole("button", { name: "Save", exact: true })).toHaveCount(0);
+  const box = await input.boundingBox();
+  expect(box!.height).toBeGreaterThanOrEqual(44);
+  expect(box!.x + box!.width).toBeLessThanOrEqual(320);
+  await expectNoViewportOverflow(page, "Edit Member with Grand Lodge number");
 });
 
 test("Secretary-only Member Management fits 320px and shows approve/suspend, hides admin-only controls", async ({ page }) => {
@@ -179,7 +179,7 @@ test("Secretary-only Member Management fits 320px and shows approve/suspend, hid
   await page.route("**/rest/v1/rpc/get_profiles_pii**", (r) => r.fulfill({ json: [{ id, ugle_reg_number: null }] }));
   await page.goto("/members/admin?e2e_as=secretary");
   await waitForPortal(page);
-  await expect(page.getByLabel("Grand Lodge Ref. No.")).toBeVisible();
+  await expect(page.getByLabel("Grand Lodge Ref. No.")).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Edit member" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Approve", exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "Suspend", exact: true })).toBeVisible();
