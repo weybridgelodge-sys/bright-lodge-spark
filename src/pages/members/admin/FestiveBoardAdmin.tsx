@@ -1,3 +1,4 @@
+import { fetchProfilesPii } from "@/lib/profilePii";
 import { useEffect, useMemo, useState } from "react";
 import MembersLayout from "@/components/members/MembersLayout";
 import { useAuth } from "@/hooks/useAuth";
@@ -227,6 +228,13 @@ export default function FestiveBoardAdmin() {
         .in("id", memberIds);
       for (const p of (profs ?? []) as Member[]) profilesMap.set(p.id, p);
     }
+    // Profile-level dietary note (private; only returned for callers allowed to see it).
+    const profileDiet = new Map<string, string>();
+    if (memberIds.length) {
+      for (const row of await fetchProfilesPii(memberIds)) {
+        if (row.dietary_requirements?.trim()) profileDiet.set(row.id, row.dietary_requirements.trim());
+      }
+    }
 
     // Fetch linked bookings for Meal / dietary fallback. source_booking_id can be `<uuid>` or `<uuid>::gN`.
     const bookingIds = Array.from(
@@ -304,6 +312,8 @@ export default function FestiveBoardAdmin() {
         if (guest) dietary = String(guest?.dietary ?? "").trim();
         else if (booking) dietary = String(bDetails.dietary ?? "").trim();
       }
+      // Last resort for members: their profile dietary note.
+      if (!cleanDiet(dietary) && r.member_id && !guest) dietary = profileDiet.get(r.member_id) ?? "";
 
       rows.push({
         Title: title,

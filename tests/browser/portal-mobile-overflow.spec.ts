@@ -203,3 +203,23 @@ test("Secretary-only Member Management fits 320px and shows approve/suspend, hid
   await expectNoViewportOverflow(page, "Secretary edit member form");
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
 });
+
+test("Secretary member import preview fits 320px", async ({ page }) => {
+  await page.route("**/rest/v1/rpc/get_admin_profiles**", (r) => r.fulfill({ json: [] }));
+  await page.route("**/functions/v1/admin-import-members**", (r) => r.fulfill({ json: { ok: true, dry_run: true,
+    summary: { create: 1, fill: 1, unchanged: 0, error: 1 },
+    results: [
+      { row: 2, email: "bartholomew.maximilian.featherstonehaugh@example-long-domain.co.uk", action: "create", fields: ["first_name", "last_name", "initiation_date", "dietary_requirements"] },
+      { row: 3, email: "a@b.com", action: "fill", fields: ["town"] },
+      { row: 4, email: "bad", action: "error", message: "valid email is required; date_of_birth is not a real date (use dd/mm/yyyy or yyyy-mm-dd)" },
+    ] } }));
+  await page.goto("/members/admin?e2e_as=secretary");
+  await waitForPortal(page);
+  await page.getByRole("button", { name: /^import$/i }).click();
+  await page.locator('input[type=file]').setInputFiles({ name: "members.csv", mimeType: "text/csv",
+    buffer: Buffer.from("email,first_name,last_name\na@b.com,A,B\nc@d.com,C,D\nbad,E,F\n") });
+  await expect(page.getByRole("button", { name: /Import 2 rows/ })).toBeVisible();
+  const box = await page.getByRole("button", { name: /Import 2 rows/ }).boundingBox();
+  expect(box && box.height >= 44).toBeTruthy();
+  await expectNoViewportOverflow(page, "Member import preview");
+});

@@ -17,6 +17,7 @@ export default function MembersProfile() {
   const [town, setTown] = useState("");
   const [county, setCounty] = useState("");
   const [postcode, setPostcode] = useState("");
+  const [dietary, setDietary] = useState("");
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
@@ -30,6 +31,7 @@ export default function MembersProfile() {
     setTown(p.town ?? "");
     setCounty(p.county ?? "");
     setPostcode(p.postcode ?? "");
+    setDietary(p.dietary_requirements ?? "");
   }, [profile]);
 
   const save = async (e: React.FormEvent) => {
@@ -47,6 +49,7 @@ export default function MembersProfile() {
         town: town.trim() || null,
         county: county.trim() || null,
         postcode: postcode.trim() || null,
+        dietary_requirements: dietary.trim() || null,
       })
       .eq("id", user.id);
     setBusy(false);
@@ -194,6 +197,22 @@ export default function MembersProfile() {
               <input value={postcode} onChange={(e) => setPostcode(e.target.value)} className={`${inputCls} uppercase`} />
             </div>
           </div>
+        </div>
+
+        <div className="pt-3 mt-2 border-t border-gold/10">
+          <label htmlFor="profile-dietary" className={labelCls}>Dietary requirements / allergies (optional)</label>
+          <textarea
+            id="profile-dietary"
+            value={dietary}
+            maxLength={500}
+            rows={2}
+            onChange={(e) => setDietary(e.target.value)}
+            placeholder="e.g. Vegetarian; nut allergy"
+            className={inputCls}
+          />
+          <p className="text-xs text-primary-foreground/50 mt-1">
+            Private: seen only by you and the Lodge officers who arrange dining. Used to pre-fill your bookings, and you can still change it for any one event.
+          </p>
         </div>
 
         <p className="text-xs text-primary-foreground/50 pt-2 border-t border-gold/10">

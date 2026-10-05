@@ -190,6 +190,20 @@ const BookingsEvent = ({
   const [guestCount, setGuestCount] = useState<number>(0);
   const [guests, setGuests] = useState<Guest[]>([]);
   const [dietary, setDietary] = useState("");
+  // Pre-fill (only while empty) from a signed-in member's own private profile note.
+  const dietaryTouched = useRef(false);
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      const uid = session?.user?.id;
+      if (!uid) return;
+      const { data } = await (supabase as any).rpc("get_profiles_pii", { _ids: [uid] });
+      const note = Array.isArray(data) && data[0]?.dietary_requirements ? String(data[0].dietary_requirements).trim() : "";
+      if (!cancelled && note && !dietaryTouched.current) setDietary((d) => (d.trim() ? d : note));
+    })().catch(() => {});
+    return () => { cancelled = true; };
+  }, []);
   const [diningOptionId, setDiningOptionId] = useState<string>("");
   const [paymentMethod, setPaymentMethod] = useState<"card" | "bank-transfer" | "cash-cheque" | "">("");
   const [coverFee, setCoverFee] = useState(true);
@@ -950,7 +964,7 @@ useEffect(() => {
                               id="evf-dietary"
                               rows={3}
                               value={dietary}
-                              onChange={(e) => setDietary(e.target.value)}
+                              onChange={(e) => { dietaryTouched.current = true; setDietary(e.target.value); }}
                               className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                               placeholder="Please note any dietary allergies or requirements for yourself or guests"
                             />

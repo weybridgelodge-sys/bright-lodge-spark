@@ -1,5 +1,6 @@
 import UgleRegNumberEditor from "@/components/members/admin/UgleRegNumberEditor";
 import { useEffect, useState } from "react";
+import MemberImport from "@/components/members/MemberImport";
 import MembersLayout from "@/components/members/MembersLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -82,6 +83,7 @@ type Profile = {
   town: string | null;
   county: string | null;
   postcode: string | null;
+  dietary_requirements?: string | null;
   created_at: string;
 };
 
@@ -125,6 +127,7 @@ const EMPTY_FORM = {
   town: "",
   county: "",
   postcode: "",
+  dietary_requirements: "",
 };
 
 export default function MembersAdmin() {
@@ -135,7 +138,7 @@ export default function MembersAdmin() {
   const [roles, setRoles] = useState<Role[]>([]);
   const [lastSignIn, setLastSignIn] = useState<Record<string, string | null>>({});
   const [notices, setNotices] = useState<Notice[]>([]);
-  const [tab, setTab] = useState<"users" | "add" | "notices">("users");
+  const [tab, setTab] = useState<"users" | "add" | "import" | "notices">("users");
 
   const [nTitle, setNTitle] = useState("");
   const [nBody, setNBody] = useState("");
@@ -335,6 +338,7 @@ export default function MembersAdmin() {
       town: p.town ?? "",
       county: p.county ?? "",
       postcode: p.postcode ?? "",
+      dietary_requirements: p.dietary_requirements ?? "",
     });
     setTab("add");
   };
@@ -401,6 +405,7 @@ export default function MembersAdmin() {
       town: form.town.trim() || null,
       county: form.county.trim() || null,
       postcode: form.postcode.trim() || null,
+      dietary_requirements: form.dietary_requirements.trim() || null,
     };
     if (form.id) payload.id = form.id;
 
@@ -441,22 +446,24 @@ export default function MembersAdmin() {
       </div>
 
 
-      <div className="flex gap-2 border-b border-gold/15 mb-6">
-        {((isAdmin ? ["users", "add", "notices"] : ["users", "add"]) as ("users" | "add" | "notices")[]).map((t) => (
+      <div className="flex flex-wrap gap-x-1 gap-y-0 border-b border-gold/15 mb-6">
+        {((isAdmin ? ["users", "add", "import", "notices"] : ["users", "add", "import"]) as ("users" | "add" | "import" | "notices")[]).map((t) => (
           <button
             key={t}
             onClick={() => {
               if (t === "add" && tab !== "add") resetForm();
               setTab(t);
             }}
-            className={`px-3 py-2 text-sm uppercase tracking-wider border-b-2 -mb-px ${
+            className={`px-2 sm:px-3 py-2 min-h-11 text-sm uppercase tracking-wider border-b-2 -mb-px ${
               tab === t ? "border-gold text-gold" : "border-transparent text-primary-foreground/60 hover:text-gold"
             }`}
           >
-            {t === "add" ? (isEdit ? "Edit Member" : "Add Member") : t}
+            {t === "add" ? (isEdit ? "Edit Member" : "Add Member") : t === "import" ? "Import" : t}
           </button>
         ))}
       </div>
+
+      {tab === "import" && <MemberImport onDone={load} />}
 
       {tab === "users" && (
         <div className="bg-navy-dark/60 border border-gold/15 rounded-sm overflow-x-auto">
@@ -875,6 +882,17 @@ export default function MembersAdmin() {
                 value={form.postcode}
                 onChange={(e) => setForm({ ...form, postcode: e.target.value })}
                 className={`mt-1 ${inputCls} normal-case tracking-normal text-primary-foreground uppercase`}
+              />
+            </label>
+            <label className={`${labelCls} sm:col-span-6`}>
+              Dietary requirements / allergies
+              <textarea
+                value={form.dietary_requirements}
+                maxLength={500}
+                rows={2}
+                onChange={(e) => setForm({ ...form, dietary_requirements: e.target.value })}
+                placeholder="e.g. Vegetarian; nut allergy"
+                className={`mt-1 ${inputCls} normal-case tracking-normal text-primary-foreground`}
               />
             </label>
 
