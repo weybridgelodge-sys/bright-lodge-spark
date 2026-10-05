@@ -1,4 +1,3 @@
-import UgleRegNumberEditor from "@/components/members/admin/UgleRegNumberEditor";
 import { useEffect, useState } from "react";
 import MemberImport from "@/components/members/MemberImport";
 import MembersLayout from "@/components/members/MembersLayout";
@@ -128,6 +127,7 @@ const EMPTY_FORM = {
   county: "",
   postcode: "",
   dietary_requirements: "",
+  ugle_reg_number: "",
 };
 
 export default function MembersAdmin() {
@@ -210,12 +210,15 @@ export default function MembersAdmin() {
   useEffect(() => {
     const m = /^#member-([0-9a-f-]{36})$/i.exec(window.location.hash);
     if (!m || !profiles.length) return;
-    const el = document.getElementById(`member-${m[1]}`);
-    if (!el) return;
+    const p = profiles.find((x) => x.id === m[1]);
+    if (!p) return;
     setHighlightId(m[1]);
-    el.scrollIntoView({ block: "center" });
-    const input = document.getElementById(`ugle-${m[1]}`) as HTMLInputElement | null;
-    input?.focus({ preventScroll: true });
+    startEdit(p);
+    window.setTimeout(() => {
+      const input = document.getElementById("form-ugle_reg_number") as HTMLInputElement | null;
+      input?.scrollIntoView({ block: "center" });
+      input?.focus({ preventScroll: true });
+    }, 50);
   }, [profiles.length]);
 
   const [pendingStatus, setPendingStatus] = useState<{ id: string; name: string; status: Status } | null>(null);
@@ -339,6 +342,7 @@ export default function MembersAdmin() {
       county: p.county ?? "",
       postcode: p.postcode ?? "",
       dietary_requirements: p.dietary_requirements ?? "",
+      ugle_reg_number: p.ugle_reg_number ?? "",
     });
     setTab("add");
   };
@@ -406,6 +410,7 @@ export default function MembersAdmin() {
       county: form.county.trim() || null,
       postcode: form.postcode.trim() || null,
       dietary_requirements: form.dietary_requirements.trim() || null,
+      ugle_reg_number: form.ugle_reg_number.trim() || null,
     };
     if (form.id) payload.id = form.id;
 
@@ -500,15 +505,6 @@ export default function MembersAdmin() {
                       <p className="text-[11px] text-primary-foreground/60 mt-1">
                         {p.grand_rank ? `Grand: ${p.grand_rank}` : `Prov: ${p.provincial_rank}`}
                       </p>
-                    )}
-                    {canManageMembers && (
-                      <UgleRegNumberEditor
-                        memberId={p.id}
-                        value={p.ugle_reg_number}
-                        onSaved={(v) =>
-                          setProfiles((prev) => prev.map((x) => (x.id === p.id ? { ...x, ugle_reg_number: v } : x)))
-                        }
-                      />
                     )}
                   </td>
                   <td className="p-3 text-xs uppercase tracking-wider">
@@ -882,6 +878,18 @@ export default function MembersAdmin() {
                 value={form.postcode}
                 onChange={(e) => setForm({ ...form, postcode: e.target.value })}
                 className={`mt-1 ${inputCls} normal-case tracking-normal text-primary-foreground uppercase`}
+              />
+            </label>
+            <label className={`${labelCls} sm:col-span-3`}>
+              Grand Lodge Ref. No.
+              <input
+                id="form-ugle_reg_number"
+                value={form.ugle_reg_number}
+                maxLength={40}
+                inputMode="numeric"
+                placeholder="Not yet recorded"
+                onChange={(e) => setForm({ ...form, ugle_reg_number: e.target.value })}
+                className={`mt-1 ${inputCls} normal-case tracking-normal text-primary-foreground`}
               />
             </label>
             <label className={`${labelCls} sm:col-span-6`}>

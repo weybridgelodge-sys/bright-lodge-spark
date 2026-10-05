@@ -43,6 +43,8 @@ const Body = z.object({
   county: z.string().trim().max(80).optional().nullable(),
   postcode: z.string().trim().max(20).optional().nullable(),
   dietary_requirements: z.string().trim().max(500).optional().nullable(),
+  // Grand Lodge Ref. No. — only admin/Secretary reach this function.
+  ugle_reg_number: z.string().trim().max(40).optional().nullable(),
 });
 
 function composeFullName(title: string | null | undefined, first: string, last: string) {
@@ -122,6 +124,7 @@ Deno.serve(async (req) => {
       county: b.county ?? null,
       postcode: b.postcode ?? null,
       dietary_requirements: b.dietary_requirements ?? null,
+      ugle_reg_number: b.ugle_reg_number ? b.ugle_reg_number : null,
     };
 
     let userId = b.id;
