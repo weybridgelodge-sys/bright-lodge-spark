@@ -103,6 +103,66 @@ export type Database = {
           },
         ]
       }
+      almoner_widow_gifts: {
+        Row: {
+          amount: number | null
+          created_at: string
+          date_sent: string
+          description: string | null
+          funding_collection_id: string | null
+          gift_type: string
+          id: string
+          lodge_year: number
+          logged_by: string | null
+          notes: string | null
+          updated_at: string
+          widow_id: string
+        }
+        Insert: {
+          amount?: number | null
+          created_at?: string
+          date_sent: string
+          description?: string | null
+          funding_collection_id?: string | null
+          gift_type: string
+          id?: string
+          lodge_year: number
+          logged_by?: string | null
+          notes?: string | null
+          updated_at?: string
+          widow_id: string
+        }
+        Update: {
+          amount?: number | null
+          created_at?: string
+          date_sent?: string
+          description?: string | null
+          funding_collection_id?: string | null
+          gift_type?: string
+          id?: string
+          lodge_year?: number
+          logged_by?: string | null
+          notes?: string | null
+          updated_at?: string
+          widow_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "almoner_widow_gifts_funding_collection_id_fkey"
+            columns: ["funding_collection_id"]
+            isOneToOne: false
+            referencedRelation: "charity_collections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "almoner_widow_gifts_widow_id_fkey"
+            columns: ["widow_id"]
+            isOneToOne: false
+            referencedRelation: "almoner_widows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       almoner_widow_kin: {
         Row: {
           created_at: string
@@ -5737,6 +5797,17 @@ export type Database = {
         }[]
       }
       get_admin_profiles: { Args: never; Returns: Json[] }
+      get_almoner_raffle_collections: {
+        Args: never
+        Returns: {
+          allocated: number
+          collection_date: string
+          event_title: string
+          id: string
+          net_amount: number
+          notes: string
+        }[]
+      }
       get_annual_return_members: {
         Args: never
         Returns: {

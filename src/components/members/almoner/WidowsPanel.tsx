@@ -9,8 +9,9 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { ArrowLeft, Flower2, Pencil, Plus, ShieldAlert, Trash2, X } from "lucide-react";
+import { ArrowLeft, Flower2, Gift, Pencil, Plus, ShieldAlert, Trash2, X } from "lucide-react";
 import { computeContactDue, formatPartialDob, isValidPartialDob, partialDobAge } from "@/lib/widowContactDue";
+import { GIFT_LABEL, formatGiftHistory, type GiftType } from "@/lib/widowGifts";
 
 type Widow = {
   id: string; full_name: string; preferred_address: string | null; address: string | null;
@@ -364,7 +365,124 @@ function WidowDetail({ widow, members, canEdit, onBack, onChanged }: { widow: Wi
           </ul>
         )}
       </section>
+
+      <GiftsSection widowId={widow.id} canEdit={canEdit} memberMap={memberMap} />
     </div>
+  );
+}
+
+type GiftRow = { id: string; widow_id: string; lodge_year: number; gift_type: GiftType; description: string | null; amount: number | null; date_sent: string; funding_collection_id: string | null; notes: string | null; logged_by: string | null };
+type Raffle = { id: string; collection_date: string; event_title: string | null; net_amount: number | null; allocated: number };
+const raffleLabel = (r: Raffle) => `${r.event_title ?? "Raffle"} · ${fmt(r.collection_date)} · net £${Number(r.net_amount ?? 0).toFixed(2)}`;
+
+function GiftsSection({ widowId, canEdit, memberMap }: { widowId: string; canEdit: boolean; memberMap: Map<string, Member> }) {
+  const [gifts, setGifts] = useState<GiftRow[]>([]);
+  const [raffles, setRaffles] = useState<Raffle[]>([]);
+  const [adding, setAdding] = useState(false);
+  const load = async () => {
+    const [g, r] = await Promise.all([
+      db.from("almoner_widow_gifts").select("*").eq("widow_id", widowId).order("date_sent", { ascending: false }),
+      db.rpc("get_almoner_raffle_collections"),
+    ]);
+    if (g.error) { toast.error(g.error.message); return; }
+    setGifts(g.data ?? []); setRaffles(r.data ?? []);
+  };
+  useEffect(() => { load(); }, [widowId]);
+  const raffleMap = new Map(raffles.map((r) => [r.id, r]));
+  const del = async (id: string) => {
+    if (!confirm("Remove this gift record?")) return;
+    const { data, error } = await db.from("almoner_widow_gifts").delete().eq("id", id).select("id");
+    if (error || !data?.length) { toast.error(`Not removed: ${error?.message ?? "no permission"}`); return; }
+    toast.success("Removed"); load();
+  };
+  const history = formatGiftHistory(gifts);
+  return (
+    <section className="bg-navy-light/40 border border-gold/15 rounded p-4 space-y-3" aria-label="Gifts">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <h4 className="font-serif text-base text-primary-foreground flex items-center"><Gift className="w-4 h-4 mr-2 text-gold" />Gifts</h4>
+        {canEdit && <Button variant="outline" className={btnOutline} onClick={() => setAdding((v) => !v)}>{adding ? "Cancel" : <><Plus className="w-4 h-4 mr-1" /> Record gift</>}</Button>}
+      </div>
+      {history && <p className="text-sm text-primary-foreground/85 break-words"><span className="text-[10px] uppercase tracking-wider text-primary-foreground/50 block">History</span>{history}</p>}
+      {canEdit && adding && <GiftForm widowId={widowId} raffles={raffles} onSaved={() => { setAdding(false); load(); }} />}
+      {gifts.length === 0 ? <p className="text-sm text-primary-foreground/60 italic">No gifts recorded.</p> : (
+        <ul className="space-y-2">
+          {gifts.map((g) => {
+            const r = g.funding_collection_id ? raffleMap.get(g.funding_collection_id) : undefined;
+            return (
+              <li key={g.id} className="border border-gold/10 rounded p-3 flex items-start gap-2">
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm text-primary-foreground break-words">
+                    <span className="font-semibold">{g.gift_type === "other" && g.description ? g.description : GIFT_LABEL[g.gift_type]}</span>
+                    {g.amount != null && <> · £{Number(g.amount).toFixed(2)}</>} · {fmt(g.date_sent)}
+                    <span className="text-primary-foreground/60"> · {g.lodge_year}/{String((g.lodge_year + 1) % 100).padStart(2, "0")}</span>
+                  </p>
+                  <p className="text-xs text-primary-foreground/70 break-words">Funded by: {g.funding_collection_id ? (r ? raffleLabel(r) : "Charity collection") : "Not linked"} · {memberName(g.logged_by ? memberMap.get(g.logged_by) : undefined)}</p>
+                  {g.notes && <p className="text-xs text-primary-foreground/60 mt-1 whitespace-pre-wrap break-words">{g.notes}</p>}
+                </div>
+                {canEdit && <button onClick={() => del(g.id)} className="min-w-[48px] min-h-[48px] flex items-center justify-center text-primary-foreground/40 hover:text-destructive" aria-label="Remove gift record"><Trash2 className="w-4 h-4" /></button>}
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </section>
+  );
+}
+
+function GiftForm({ widowId, raffles, onSaved }: { widowId: string; raffles: Raffle[]; onSaved: () => void }) {
+  const today = new Date().toISOString().slice(0, 10);
+  const [type, setType] = useState<GiftType>("hamper");
+  const [description, setDescription] = useState("");
+  const [amount, setAmount] = useState("");
+  const [date, setDate] = useState(today);
+  const [fund, setFund] = useState("none");
+  const [notes, setNotes] = useState("");
+  const [busy, setBusy] = useState(false);
+  const monetary = type !== "hamper";
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const amt = monetary && amount.trim() ? Number(amount) : null;
+    if (amt != null && (!Number.isFinite(amt) || amt <= 0)) { toast.error("Amount must be more than £0"); return; }
+    if ((type === "cheque" || type === "voucher") && amt == null) { toast.error("Enter the amount"); return; }
+    if (date > today) { toast.error("Date sent can't be in the future"); return; }
+    setBusy(true);
+    const { data, error } = await db.from("almoner_widow_gifts").insert({
+      widow_id: widowId, gift_type: type, description: type === "other" ? blank(description) : null,
+      amount: amt, date_sent: date, funding_collection_id: fund === "none" ? null : fund, notes: blank(notes),
+      lodge_year: 0, // set by the database from the date sent
+    }).select("id");
+    setBusy(false);
+    if (error || !data?.length) { toast.error(`Not saved: ${error?.message ?? "no permission"}`); return; }
+    toast.success("Gift recorded"); onSaved();
+  };
+  return (
+    <form onSubmit={submit} className="bg-navy-light/60 border border-gold/30 rounded p-3 space-y-3" aria-label="Record gift">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <Label className="text-xs">Gift type</Label>
+          <Select value={type} onValueChange={(v) => setType(v as GiftType)}>
+            <SelectTrigger className={inputCls} aria-label="Gift type"><SelectValue /></SelectTrigger>
+            <SelectContent>{Object.entries(GIFT_LABEL).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}</SelectContent>
+          </Select>
+        </div>
+        <div><Label htmlFor="gift-date" className="text-xs">Date sent</Label><Input id="gift-date" type="date" value={date} max={today} onChange={(e) => setDate(e.target.value)} className={inputCls} required /></div>
+        {type === "other" && <div><Label htmlFor="gift-desc" className="text-xs">Describe gift</Label><Input id="gift-desc" value={description} onChange={(e) => setDescription(e.target.value)} className={inputCls} maxLength={300} placeholder="e.g. flowers" /></div>}
+        {monetary && <div><Label htmlFor="gift-amount" className="text-xs">Amount (£){type === "other" ? " — if monetary" : ""}</Label><Input id="gift-amount" type="number" inputMode="decimal" min="0.01" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} className={inputCls} /></div>}
+        <div className="sm:col-span-2">
+          <Label className="text-xs">Funded by (raffle collection)</Label>
+          <Select value={fund} onValueChange={setFund}>
+            <SelectTrigger className={inputCls} aria-label="Funded by"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">Not linked</SelectItem>
+              {raffles.map((r) => <SelectItem key={r.id} value={r.id}>{raffleLabel(r)} · £{Number(r.allocated).toFixed(2)} allocated</SelectItem>)}
+            </SelectContent>
+          </Select>
+          {raffles.length === 0 && <p className="text-[11px] text-primary-foreground/60 mt-1">No raffle collections recorded by the Charity Steward yet.</p>}
+        </div>
+      </div>
+      <div><Label className="text-xs">Notes</Label><Textarea value={notes} onChange={(e) => setNotes(e.target.value)} className={inputCls} rows={2} maxLength={2000} /></div>
+      <Button type="submit" disabled={busy} className={btnGold}>Save gift</Button>
+    </form>
   );
 }
 
