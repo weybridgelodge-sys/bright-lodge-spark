@@ -1,0 +1,2 @@
+ALTER TABLE public.almoner_widows ADD COLUMN care_home_contact_hours text;
+COMMENT ON COLUMN public.almoner_widows.care_home_contact_hours IS 'Free-text contact/visiting hours, only relevant when home_type = care_home.';
