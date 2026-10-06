@@ -52,7 +52,10 @@ type AuthCtx = {
   canManageProgression: boolean;
   canManageLOI: boolean;
   canManageSummons: boolean;
+  /** Almoner portal read access (Almoner, Secretary, current WM, admin). */
   canAccessAlmoner: boolean;
+  /** Almoner portal write access (Almoner, Secretary, admin). WM is read-only. */
+  canEditAlmoner: boolean;
   canAccessCharity: boolean;
   canAccessTreasurer: boolean;
   canAccessAdminArea: boolean;
@@ -125,6 +128,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isCurrentAlmoner, setIsCurrentAlmoner] = useState(layoutAll);
   const [isCurrentCharitySteward, setIsCurrentCharitySteward] = useState(layoutAll);
   const [isCurrentMentor, setIsCurrentMentor] = useState(layoutAll);
+  const [canViewAlmonerDb, setCanViewAlmonerDb] = useState(isLocalLayoutTest && !layoutTestSecretaryOnly ? true : isLocalLayoutTest);
+  const [canEditAlmonerDb, setCanEditAlmonerDb] = useState(isLocalLayoutTest && new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '').get('e2e_almoner') !== 'readonly');
   const [loading, setLoading] = useState(!isLocalLayoutTest);
 
 
@@ -154,7 +159,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setRoles(((r as { role: Role }[]) ?? []).map((x) => x.role));
     // WM/IPM + Treasurer/Auditor detection for current lodge year (auto-rotates on installation)
     try {
-      const [{ data: wm }, { data: tr }, { data: a1 }, { data: a2 }, { data: sec }, { data: alm }, { data: cs }, { data: men }] = await Promise.all([
+      const [{ data: wm }, { data: tr }, { data: a1 }, { data: a2 }, { data: sec }, { data: alm }, { data: cs }, { data: men }, { data: av }, { data: ae }] = await Promise.all([
         supabase.rpc("is_current_wm_or_ipm", { _user_id: uid }),
         supabase.rpc("is_current_officer" as any, { _user_id: uid, _position_key: "treasurer" } as any),
         supabase.rpc("is_current_officer" as any, { _user_id: uid, _position_key: "auditor_1" } as any),
@@ -163,7 +168,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         supabase.rpc("is_current_officer" as any, { _user_id: uid, _position_key: "almoner" } as any),
         supabase.rpc("is_current_officer" as any, { _user_id: uid, _position_key: "charity_steward" } as any),
         supabase.rpc("is_current_officer" as any, { _user_id: uid, _position_key: "mentor" } as any),
+        supabase.rpc("can_view_almoner" as any, { _user_id: uid } as any),
+        supabase.rpc("can_edit_almoner" as any, { _user_id: uid } as any),
       ]);
+      setCanViewAlmonerDb(!!av);
+      setCanEditAlmonerDb(!!ae);
       setIsCurrentWmOrIpm(!!wm);
       setIsCurrentTreasurer(!!tr);
       setIsCurrentAuditor1(!!a1);
@@ -181,6 +190,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setIsCurrentAlmoner(false);
       setIsCurrentCharitySteward(false);
       setIsCurrentMentor(false);
+      setCanViewAlmonerDb(false);
+      setCanEditAlmonerDb(false);
     }
   };
 
@@ -206,6 +217,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setProfile(null);
         setRoles([]);
         setIsCurrentWmOrIpm(false);
+        setCanViewAlmonerDb(false);
+        setCanEditAlmonerDb(false);
         settle();
       }
     });
@@ -255,14 +268,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const canManageProgression = isAdmin || isSecretary || isWorshipfulMaster;
   const canManageLOI = isAdmin || isSecretary || isWorshipfulMaster || isDirectorOfCeremonies;
   const canManageSummons = isAdmin || isSecretary || isAssistantSecretary;
-  const canAccessAlmoner = isAdmin || isAlmoner || isCurrentAlmoner || isCurrentWmOrIpm;
+  // Server-resolved (can_view_almoner / can_edit_almoner); WM read-only, IPM excluded.
+  const canAccessAlmoner = canViewAlmonerDb;
+  const canEditAlmoner = canEditAlmonerDb && canViewAlmonerDb;
   const canAccessCharity = isAdmin || isWorshipfulMaster || isCharitySteward || isCurrentCharitySteward;
   const canAccessMentorPortal = isAdmin || isWorshipfulMaster || isDirectorOfCeremonies || isCurrentMentor;
   const canAccessTreasurer = isAdmin || isCurrentTreasurer || isCurrentAuditor1 || isCurrentAuditor2 || isWorshipfulMaster || isCurrentWmOrIpm || isSecretary || isCurrentSecretary;
   const canAccessAdminArea = isAdmin || isSecretary || isWorshipfulMaster || isDirectorOfCeremonies || isAlmoner || isCharitySteward || isAssistantSecretary || isCurrentAlmoner || isCurrentCharitySteward || isCurrentMentor || isCurrentWmOrIpm || isCurrentSecretary || isCurrentTreasurer || isCurrentAuditor1 || isCurrentAuditor2;
 
   return (
-    <Ctx.Provider value={{ session, user: session?.user ?? null, profile, isAdmin, isSecretary, isAssistantSecretary, isWorshipfulMaster, isDirectorOfCeremonies, isAlmoner, isCharitySteward, isCurrentWmOrIpm, isCurrentTreasurer, isCurrentAuditor1, isCurrentAuditor2, isCurrentSecretary, isCurrentAlmoner, isCurrentCharitySteward, isCurrentMentor, canAccessMentorPortal, canManageProgression, canManageLOI, canManageSummons, canAccessAlmoner, canAccessCharity, canAccessTreasurer, canAccessAdminArea, loading, refreshProfile, signOut }}>
+    <Ctx.Provider value={{ session, user: session?.user ?? null, profile, isAdmin, isSecretary, isAssistantSecretary, isWorshipfulMaster, isDirectorOfCeremonies, isAlmoner, isCharitySteward, isCurrentWmOrIpm, isCurrentTreasurer, isCurrentAuditor1, isCurrentAuditor2, isCurrentSecretary, isCurrentAlmoner, isCurrentCharitySteward, isCurrentMentor, canAccessMentorPortal, canManageProgression, canManageLOI, canManageSummons, canAccessAlmoner, canEditAlmoner, canAccessCharity, canAccessTreasurer, canAccessAdminArea, loading, refreshProfile, signOut }}>
       {children}
     </Ctx.Provider>
   );
