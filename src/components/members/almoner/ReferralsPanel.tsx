@@ -1,3 +1,4 @@
+import { useAuth } from "@/hooks/useAuth";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -42,6 +43,7 @@ const memberName = (m?: Member) => {
 const fmt = (s: string | null) => s ? new Date(s).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) : "—";
 
 export default function ReferralsPanel({ members, userId }: { members: Member[]; userId: string | null }) {
+  const { canEditAlmoner } = useAuth();
   const [rows, setRows] = useState<Row[]>([]);
   const [showForm, setShowForm] = useState(false);
   const memberMap = useMemo(() => new Map(members.map((m) => [m.id, m])), [members]);
@@ -79,12 +81,12 @@ export default function ReferralsPanel({ members, userId }: { members: Member[];
           <h3 className="font-serif text-lg text-primary-foreground">MCF / Provincial Referrals</h3>
           <p className="text-xs text-primary-foreground/60">Tracked welfare and charitable referrals</p>
         </div>
-        <Button size="sm" className="bg-gold text-navy hover:bg-gold/90" onClick={() => setShowForm((v) => !v)}>
+        {canEditAlmoner && (<Button size="sm" className="bg-gold text-navy hover:bg-gold/90" onClick={() => setShowForm((v) => !v)}>
           {showForm ? <><X className="w-4 h-4 mr-1" /> Cancel</> : <><Plus className="w-4 h-4 mr-1" /> New referral</>}
-        </Button>
+        </Button>)}
       </div>
 
-      {showForm && <NewForm members={members} userId={userId} onSaved={() => { setShowForm(false); load(); }} />}
+      {canEditAlmoner && showForm && <NewForm members={members} userId={userId} onSaved={() => { setShowForm(false); load(); }} />}
 
       {rows.length === 0 ? (
         <p className="text-sm text-primary-foreground/60 italic">No referrals on record.</p>
@@ -101,15 +103,15 @@ export default function ReferralsPanel({ members, userId }: { members: Member[];
                   </div>
                 </div>
                 <div className="flex items-center gap-2 w-full sm:w-auto">
-                  <Select value={r.status} onValueChange={(v) => changeStatus(r.id, v as Status)}>
+                  <Select value={r.status} onValueChange={(v) => changeStatus(r.id, v as Status)} disabled={!canEditAlmoner}>
                     <SelectTrigger className="w-[140px] h-7 text-[11px] bg-navy border-gold/30 text-primary-foreground">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>{(Object.keys(STATUS_LABEL) as Status[]).map((k) => <SelectItem key={k} value={k}>{STATUS_LABEL[k]}</SelectItem>)}</SelectContent>
                   </Select>
-                  <button onClick={() => archive(r.id)} className="p-1.5 text-primary-foreground/40 hover:text-red-400" aria-label="Archive">
+                  {canEditAlmoner && (<button onClick={() => archive(r.id)} className="p-1.5 text-primary-foreground/40 hover:text-red-400" aria-label="Archive">
                     <Trash2 className="w-4 h-4" />
-                  </button>
+                  </button>)}
                 </div>
               </div>
               <Badge variant="outline" className={`${STATUS_COLOR[r.status]} text-[10px] mb-2`}>{STATUS_LABEL[r.status]}</Badge>
