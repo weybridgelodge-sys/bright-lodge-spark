@@ -234,3 +234,25 @@ test("Almoner portal read-only view (WM) fits 320px and hides write controls", a
   }
   await expectNoViewportOverflow(page, "Almoner read-only");
 });
+
+test("Widows register read-only view (WM) fits 320px and hides write controls", async ({ page }) => {
+  await page.addInitScript(() => sessionStorage.setItem("almoner-confidentiality", "1"));
+  await page.goto("/members/almoner?e2e_almoner=readonly");
+  await waitForPortal(page);
+  await page.getByRole("tab", { name: /Widows/ }).click();
+  await expect(page.getByRole("heading", { name: /Widows & Dependants/ })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Add widow" })).toHaveCount(0);
+  await expectNoViewportOverflow(page, "Widows read-only");
+});
+
+test("Widows register editor form fits 320px with 48px controls", async ({ page }) => {
+  await page.addInitScript(() => sessionStorage.setItem("almoner-confidentiality", "1"));
+  await page.goto("/members/almoner");
+  await waitForPortal(page);
+  await page.getByRole("tab", { name: /Widows/ }).click();
+  await page.getByRole("button", { name: "Add widow" }).click();
+  await expect(page.getByLabel("Year (if known)")).toBeVisible();
+  const box = await page.getByRole("button", { name: "Add widow" }).last().boundingBox();
+  expect(box && box.height >= 44).toBeTruthy();
+  await expectNoViewportOverflow(page, "Widows add form");
+});
