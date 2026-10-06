@@ -33,3 +33,20 @@ export function defaultWidowReportFrom(lastFinalTo: string | null, lastMeeting: 
   d.setUTCDate(d.getUTCDate() - 90);
   return d.toISOString().slice(0, 10);
 }
+
+export type FundingSource = "none" | "lodge_account" | "almoner_fund" | "raffle";
+export const FUNDING_LABEL: Record<FundingSource, string> = { none: "Not linked", lodge_account: "Lodge account", almoner_fund: "Almoner fund", raffle: "Raffle" };
+
+/** Map the dropdown value (a category or a collection id) to the two stored columns. */
+export function fundingFromChoice(choice: string): { funding_source: FundingSource; funding_collection_id: string | null } {
+  if (choice === "none" || choice === "lodge_account" || choice === "almoner_fund") return { funding_source: choice, funding_collection_id: null };
+  return { funding_source: "raffle", funding_collection_id: choice };
+}
+
+/** Text after "Funded by: ". */
+export function fundingLabel(source: FundingSource | null | undefined, raffleText?: string | null, hasCollection = false): string {
+  const s = source ?? (hasCollection ? "raffle" : "none");
+  if (s !== "raffle") return FUNDING_LABEL[s];
+  if (raffleText) return `Raffle — ${raffleText}`;
+  return hasCollection ? "Raffle collection" : "Raffle (collection removed)";
+}
