@@ -1,0 +1,2 @@
+- Widow gifts link to Charity Steward raffle rows only via get_almoner_raffle_collections() (SECURITY DEFINER, can_view_almoner); never widen charity_collections RLS. Why: Almoner users must not see the full charity ledger.
+- Almoner's Report widows lines are drafted by the almoner-widow-report function (can_edit_almoner, reads via caller RLS, no addresses/phones/DOB/kin sent to AI) and stored in almoner_reports.snapshot.widows. Why: one reporting tool, frozen with the report.
