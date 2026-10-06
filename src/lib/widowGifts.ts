@@ -50,3 +50,15 @@ export function fundingLabel(source: FundingSource | null | undefined, raffleTex
   if (raffleText) return `Raffle — ${raffleText}`;
   return hasCollection ? "Raffle collection" : "Raffle (collection removed)";
 }
+
+export type RaffleCollectionLike = { collection_date: string; event_title: string | null; net_amount: number | string | null };
+
+/**
+ * Text after the "Raffle — " prefix: "Christmas Meeting · 10 Dec 2025 · net £300.00".
+ * With no meeting title the date and net amount stand alone — never a second "Raffle".
+ */
+export function raffleCollectionLabel(r: RaffleCollectionLike, formatDate: (d: string) => string): string {
+  const title = r.event_title?.trim();
+  const rest = `${formatDate(r.collection_date)} · net £${Number(r.net_amount ?? 0).toFixed(2)}`;
+  return title ? `${title} · ${rest}` : rest;
+}

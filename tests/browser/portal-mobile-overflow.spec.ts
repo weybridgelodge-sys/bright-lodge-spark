@@ -270,8 +270,9 @@ const mockWidow = async (page: import("@playwright/test").Page) => {
   await page.route("**/rest/v1/almoner_widow_gifts?**", (r) => r.fulfill({ json: [
     { id: "g1", widow_id: "w1", lodge_year: 2025, gift_type: "cheque", description: null, amount: 50, date_sent: "2025-12-10", funding_collection_id: "c1", notes: null, logged_by: null },
     { id: "g2", widow_id: "w1", lodge_year: 2024, gift_type: "hamper", description: null, amount: null, date_sent: "2024-12-12", funding_collection_id: null, notes: null, logged_by: null },
+    { id: "g3", widow_id: "w1", lodge_year: 2025, gift_type: "voucher", description: null, amount: 25, date_sent: "2025-12-10", funding_collection_id: "c2", notes: null, logged_by: null },
   ] }));
-  await page.route("**/rest/v1/rpc/get_almoner_raffle_collections**", (r) => r.fulfill({ json: [{ id: "c1", collection_date: "2025-12-17", event_title: "Christmas Regular Meeting and Festive Board", net_amount: 412.5, allocated: 50, notes: null }] }));
+  await page.route("**/rest/v1/rpc/get_almoner_raffle_collections**", (r) => r.fulfill({ json: [{ id: "c1", collection_date: "2025-12-17", event_title: "Christmas Regular Meeting and Festive Board", net_amount: 412.5, allocated: 50, notes: null }, { id: "c2", collection_date: "2025-12-10", event_title: null, net_amount: 300, allocated: 0, notes: null }] }));
 };
 
 test("Widow gifts section fits 320px; editor form has 48px controls", async ({ page }) => {
@@ -302,6 +303,23 @@ test("Widow gifts read-only (WM) hides write controls at 320px", async ({ page }
   await expect(page.getByRole("button", { name: "Record gift" })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Remove gift record" })).toHaveCount(0);
   await expectNoViewportOverflow(page, "Widow gifts read-only");
+});
+
+test("Raffle funding label never repeats 'Raffle' at 320px", async ({ page }) => {
+  await page.addInitScript(() => sessionStorage.setItem("almoner-confidentiality", "1"));
+  await mockWidow(page);
+  await page.goto("/members/almoner");
+  await waitForPortal(page);
+  await page.getByRole("tab", { name: /Widows/ }).click();
+  await page.getByText("Doris Featherstonehaugh-Wolstenholme").first().click();
+  // Untitled collection: date and net amount only, once the prefix is added.
+  await expect(page.getByText("Funded by: Raffle — 10 Dec 2025 · net £300.00").first()).toBeVisible();
+  await expect(page.getByText("Raffle — Raffle")).toHaveCount(0);
+  await page.getByRole("button", { name: "Record gift" }).click();
+  await page.getByLabel("Funded by").click();
+  await expect(page.getByRole("option", { name: "Raffle — 10 Dec 2025 · net £300.00" })).toBeVisible();
+  await expect(page.getByRole("option", { name: "Raffle — Raffle" })).toHaveCount(0);
+  await expectNoViewportOverflow(page, "Raffle funding labels");
 });
 
 test("Report widows section drafts lines and fits 320px", async ({ page }) => {
