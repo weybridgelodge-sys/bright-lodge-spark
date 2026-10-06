@@ -255,4 +255,9 @@ test("Widows register editor form fits 320px with 48px controls", async ({ page 
   const box = await page.getByRole("button", { name: "Add widow" }).last().boundingBox();
   expect(box && box.height >= 44).toBeTruthy();
   await expectNoViewportOverflow(page, "Widows add form");
+  // Care-home-only fields (name, address, contact hours) appear without overflow
+  await page.getByLabel("Lives in").click();
+  await page.getByRole("option", { name: "Care home" }).click();
+  await expect(page.getByLabel("Contact hours")).toBeVisible();
+  await expectNoViewportOverflow(page, "Widows care-home fields");
 });

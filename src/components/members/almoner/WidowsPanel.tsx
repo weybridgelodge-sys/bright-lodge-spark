@@ -14,7 +14,7 @@ import { computeContactDue, formatPartialDob, isValidPartialDob, partialDobAge }
 
 type Widow = {
   id: string; full_name: string; preferred_address: string | null; address: string | null;
-  home_type: "own_home" | "care_home" | "with_family"; care_home_name: string | null; care_home_address: string | null;
+  home_type: "own_home" | "care_home" | "with_family"; care_home_name: string | null; care_home_address: string | null; care_home_contact_hours: string | null;
   phone: string | null; dob_day: number | null; dob_month: number | null; dob_year: number | null;
   husband_name: string | null; husband_lodge: string | null;
   connection_source: "lodge_member" | "smwa"; smwa_reference: string | null; smwa_liaison: string | null;
@@ -129,7 +129,7 @@ export default function WidowsPanel({ members }: { members: Member[] }) {
 function WidowForm({ widow, onSaved, onCancel }: { widow?: Widow; onSaved: (id?: string) => void; onCancel?: () => void }) {
   const [f, setF] = useState(() => ({
     full_name: widow?.full_name ?? "", preferred_address: widow?.preferred_address ?? "", address: widow?.address ?? "",
-    home_type: widow?.home_type ?? "own_home", care_home_name: widow?.care_home_name ?? "", care_home_address: widow?.care_home_address ?? "",
+    home_type: widow?.home_type ?? "own_home", care_home_name: widow?.care_home_name ?? "", care_home_address: widow?.care_home_address ?? "", care_home_contact_hours: widow?.care_home_contact_hours ?? "",
     phone: widow?.phone ?? "", dob_day: widow?.dob_day?.toString() ?? "", dob_month: widow?.dob_month?.toString() ?? "", dob_year: widow?.dob_year?.toString() ?? "",
     husband_name: widow?.husband_name ?? "", husband_lodge: widow?.husband_lodge ?? "",
     connection_source: widow?.connection_source ?? "lodge_member", smwa_reference: widow?.smwa_reference ?? "", smwa_liaison: widow?.smwa_liaison ?? "",
@@ -148,7 +148,7 @@ function WidowForm({ widow, onSaved, onCancel }: { widow?: Widow; onSaved: (id?:
     const care = f.home_type === "care_home", smwa = f.connection_source === "smwa";
     const payload = {
       full_name: f.full_name.trim(), preferred_address: blank(f.preferred_address), address: blank(f.address),
-      home_type: f.home_type, care_home_name: care ? blank(f.care_home_name) : null, care_home_address: care ? blank(f.care_home_address) : null,
+      home_type: f.home_type, care_home_name: care ? blank(f.care_home_name) : null, care_home_address: care ? blank(f.care_home_address) : null, care_home_contact_hours: care ? blank(f.care_home_contact_hours) : null,
       phone: blank(f.phone), dob_day: day, dob_month: month, dob_year: year,
       husband_name: blank(f.husband_name), husband_lodge: blank(f.husband_lodge),
       connection_source: f.connection_source, smwa_reference: smwa ? blank(f.smwa_reference) : null, smwa_liaison: smwa ? blank(f.smwa_liaison) : null,
@@ -172,7 +172,7 @@ function WidowForm({ widow, onSaved, onCancel }: { widow?: Widow; onSaved: (id?:
         <div>
           <Label className="text-xs">Lives in</Label>
           <Select value={f.home_type} onValueChange={(v) => setF((p) => ({ ...p, home_type: v as Widow["home_type"] }))}>
-            <SelectTrigger className={inputCls}><SelectValue /></SelectTrigger>
+            <SelectTrigger className={inputCls} aria-label="Lives in"><SelectValue /></SelectTrigger>
             <SelectContent><SelectItem value="own_home">Own home</SelectItem><SelectItem value="care_home">Care home</SelectItem><SelectItem value="with_family">Living with family</SelectItem></SelectContent>
           </Select>
         </div>
@@ -182,6 +182,7 @@ function WidowForm({ widow, onSaved, onCancel }: { widow?: Widow; onSaved: (id?:
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div><Label className="text-xs">Care home name</Label><Input value={f.care_home_name} onChange={set("care_home_name")} className={inputCls} maxLength={200} /></div>
           <div><Label className="text-xs">Care home address</Label><Input value={f.care_home_address} onChange={set("care_home_address")} className={inputCls} maxLength={500} /></div>
+          <div className="sm:col-span-2"><Label className="text-xs">Contact hours</Label><Input aria-label="Contact hours" value={f.care_home_contact_hours} onChange={set("care_home_contact_hours")} className={inputCls} maxLength={200} placeholder="e.g. Ring between 2pm and 6pm, visiting Saturdays only" /></div>
         </div>
       )}
       <fieldset>
@@ -303,6 +304,7 @@ function WidowDetail({ widow, members, canEdit, onBack, onChanged }: { widow: Wi
             <Row k="Phone" v={widow.phone && <a className="text-gold underline" href={`tel:${widow.phone}`}>{widow.phone}</a>} />
             <Row k="Lives in" v={widow.home_type === "care_home" ? `Care home: ${widow.care_home_name ?? "—"}` : widow.home_type === "with_family" ? "Living with family" : "Own home"} />
             {widow.home_type === "care_home" && <Row k="Care home address" v={widow.care_home_address} />}
+            {widow.home_type === "care_home" && <Row k="Contact hours" v={widow.care_home_contact_hours} />}
             <Row k={widow.home_type === "care_home" ? "Other address" : "Address"} v={widow.address} />
             <Row k="Date of birth" v={`${formatPartialDob(widow.dob_day, widow.dob_month, widow.dob_year)}${age != null ? ` (age ${age})` : ""}`} />
             <Row k="Husband" v={[widow.husband_name, widow.husband_lodge].filter(Boolean).join(" — ")} />

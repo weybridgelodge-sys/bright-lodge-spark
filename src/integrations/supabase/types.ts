@@ -154,6 +154,7 @@ export type Database = {
         Row: {
           address: string | null
           care_home_address: string | null
+          care_home_contact_hours: string | null
           care_home_name: string | null
           connection_source: string
           contact_interval_days: number
@@ -179,6 +180,7 @@ export type Database = {
         Insert: {
           address?: string | null
           care_home_address?: string | null
+          care_home_contact_hours?: string | null
           care_home_name?: string | null
           connection_source?: string
           contact_interval_days?: number
@@ -204,6 +206,7 @@ export type Database = {
         Update: {
           address?: string | null
           care_home_address?: string | null
+          care_home_contact_hours?: string | null
           care_home_name?: string | null
           connection_source?: string
           contact_interval_days?: number
