@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { ArrowLeft, Flower2, Gift, Pencil, Plus, ShieldAlert, Trash2, X } from "lucide-react";
 import { computeContactDue, formatPartialDob, isValidPartialDob, partialDobAge } from "@/lib/widowContactDue";
-import { GIFT_LABEL, formatGiftHistory, fundingFromChoice, fundingLabel, type FundingSource, type GiftType } from "@/lib/widowGifts";
+import { GIFT_LABEL, formatGiftHistory, fundingFromChoice, fundingLabel, raffleCollectionLabel, type FundingSource, type GiftType } from "@/lib/widowGifts";
 
 type Widow = {
   id: string; full_name: string; preferred_address: string | null; address: string | null;
@@ -373,7 +373,7 @@ function WidowDetail({ widow, members, canEdit, onBack, onChanged }: { widow: Wi
 
 type GiftRow = { id: string; widow_id: string; lodge_year: number; gift_type: GiftType; description: string | null; amount: number | null; date_sent: string; funding_source: FundingSource | null; funding_collection_id: string | null; notes: string | null; logged_by: string | null };
 type Raffle = { id: string; collection_date: string; event_title: string | null; net_amount: number | null; allocated: number };
-const raffleLabel = (r: Raffle) => `${r.event_title ?? "Raffle"} · ${fmt(r.collection_date)} · net £${Number(r.net_amount ?? 0).toFixed(2)}`;
+const raffleLabel = (r: Raffle) => raffleCollectionLabel(r, fmt);
 
 function GiftsSection({ widowId, canEdit, memberMap }: { widowId: string; canEdit: boolean; memberMap: Map<string, Member> }) {
   const [gifts, setGifts] = useState<GiftRow[]>([]);
@@ -475,7 +475,7 @@ function GiftForm({ widowId, raffles, onSaved }: { widowId: string; raffles: Raf
             <SelectContent>
               <SelectItem value="lodge_account">Lodge account</SelectItem>
               <SelectItem value="almoner_fund">Almoner fund</SelectItem>
-              {raffles.map((r) => <SelectItem key={r.id} value={r.id}>Raffle — {raffleLabel(r)} · £{Number(r.allocated).toFixed(2)} allocated</SelectItem>)}
+              {raffles.map((r) => <SelectItem key={r.id} value={r.id}>{fundingLabel("raffle", raffleLabel(r))} · £{Number(r.allocated).toFixed(2)} allocated</SelectItem>)}
               <SelectItem value="none">Not linked</SelectItem>
             </SelectContent>
           </Select>
