@@ -261,3 +261,68 @@ test("Widows register editor form fits 320px with 48px controls", async ({ page 
   await expect(page.getByLabel("Contact hours")).toBeVisible();
   await expectNoViewportOverflow(page, "Widows care-home fields");
 });
+
+const mockWidow = async (page: import("@playwright/test").Page) => {
+  const widow = { id: "w1", full_name: "Doris Featherstonehaugh-Wolstenholme", preferred_address: "Mrs Featherstonehaugh", address: null, home_type: "own_home", care_home_name: null, care_home_address: null, care_home_contact_hours: null, phone: null, dob_day: null, dob_month: null, dob_year: null, husband_name: null, husband_lodge: null, connection_source: "smwa", smwa_reference: null, smwa_liaison: null, status: "active", deceased_on: null, contact_interval_days: 90, notes: null, created_at: "2025-01-01T00:00:00Z" };
+  await page.route("**/rest/v1/almoner_widows?**", (r) => r.fulfill({ json: [widow] }));
+  await page.route("**/rest/v1/almoner_widow_contacts?**", (r) => r.fulfill({ json: [] }));
+  await page.route("**/rest/v1/almoner_widow_kin?**", (r) => r.fulfill({ json: [] }));
+  await page.route("**/rest/v1/almoner_widow_gifts?**", (r) => r.fulfill({ json: [
+    { id: "g1", widow_id: "w1", lodge_year: 2025, gift_type: "cheque", description: null, amount: 50, date_sent: "2025-12-10", funding_collection_id: "c1", notes: null, logged_by: null },
+    { id: "g2", widow_id: "w1", lodge_year: 2024, gift_type: "hamper", description: null, amount: null, date_sent: "2024-12-12", funding_collection_id: null, notes: null, logged_by: null },
+  ] }));
+  await page.route("**/rest/v1/rpc/get_almoner_raffle_collections**", (r) => r.fulfill({ json: [{ id: "c1", collection_date: "2025-12-17", event_title: "Christmas Regular Meeting and Festive Board", net_amount: 412.5, allocated: 50, notes: null }] }));
+};
+
+test("Widow gifts section fits 320px; editor form has 48px controls", async ({ page }) => {
+  await page.addInitScript(() => sessionStorage.setItem("almoner-confidentiality", "1"));
+  await mockWidow(page);
+  await page.goto("/members/almoner");
+  await waitForPortal(page);
+  await page.getByRole("tab", { name: /Widows/ }).click();
+  await page.getByText("Doris Featherstonehaugh-Wolstenholme").first().click();
+  await expect(page.getByText("Hamper 2024 · Cheque £50 2025")).toBeVisible();
+  await page.getByRole("button", { name: "Record gift" }).click();
+  await page.getByLabel("Gift type").click();
+  await page.getByRole("option", { name: "Cheque" }).click();
+  await expect(page.getByLabel("Amount (£)")).toBeVisible();
+  const box = await page.getByRole("button", { name: "Save gift" }).boundingBox();
+  expect(box && box.height >= 44).toBeTruthy();
+  await expectNoViewportOverflow(page, "Widow gifts form");
+});
+
+test("Widow gifts read-only (WM) hides write controls at 320px", async ({ page }) => {
+  await page.addInitScript(() => sessionStorage.setItem("almoner-confidentiality", "1"));
+  await mockWidow(page);
+  await page.goto("/members/almoner?e2e_almoner=readonly");
+  await waitForPortal(page);
+  await page.getByRole("tab", { name: /Widows/ }).click();
+  await page.getByText("Doris Featherstonehaugh-Wolstenholme").first().click();
+  await expect(page.getByText("Hamper 2024 · Cheque £50 2025")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Record gift" })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Remove gift record" })).toHaveCount(0);
+  await expectNoViewportOverflow(page, "Widow gifts read-only");
+});
+
+test("Report widows section drafts lines and fits 320px", async ({ page }) => {
+  await page.addInitScript(() => sessionStorage.setItem("almoner-confidentiality", "1"));
+  await page.route("**/functions/v1/almoner-widow-report**", (r) => r.fulfill({ json: { considered: 1, lines: [{ widow_id: "w1", name: "Mrs Featherstonehaugh-Wolstenholme", text: "Doris has not been too well but thanks the Lodge for her Christmas hamper." }] } }));
+  await page.goto("/members/almoner");
+  await waitForPortal(page);
+  await page.getByRole("tab", { name: "Report" }).click();
+  await page.getByRole("button", { name: "Draft widow updates" }).click();
+  await expect(page.getByLabel("Mrs Featherstonehaugh-Wolstenholme")).toHaveValue(/thanks the Lodge/);
+  const box = await page.getByRole("button", { name: /widow updates/ }).boundingBox();
+  expect(box && box.height >= 44).toBeTruthy();
+  await expectNoViewportOverflow(page, "Report widows section");
+});
+
+test("Report widows section is read-only for WM at 320px", async ({ page }) => {
+  await page.addInitScript(() => sessionStorage.setItem("almoner-confidentiality", "1"));
+  await page.goto("/members/almoner?e2e_almoner=readonly");
+  await waitForPortal(page);
+  await page.getByRole("tab", { name: "Report" }).click();
+  await expect(page.getByRole("region", { name: "Widows and dependants" })).toBeVisible();
+  await expect(page.getByRole("button", { name: /widow updates/ })).toHaveCount(0);
+  await expectNoViewportOverflow(page, "Report widows read-only");
+});
