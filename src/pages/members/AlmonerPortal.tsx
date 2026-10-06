@@ -121,7 +121,7 @@ const daysAgo = (s: string | null) => {
 
 // ============ Page ============
 export default function AlmonerPortal() {
-  const { canAccessAlmoner, loading } = useAuth();
+  const { canAccessAlmoner, canEditAlmoner, loading } = useAuth();
   const [acknowledged, setAcknowledged] = useState(() => sessionStorage.getItem("almoner-confidentiality") === "1");
 
   if (loading) return null;
@@ -136,6 +136,9 @@ export default function AlmonerPortal() {
         <div>
           <h1 className="font-serif text-2xl text-primary-foreground">Almoner Portal</h1>
           <p className="text-sm text-primary-foreground/60">Confidential member welfare records</p>
+          {!canEditAlmoner && (
+            <p className="mt-1 inline-block text-xs uppercase tracking-wider text-gold border border-gold/40 rounded px-2 py-0.5" role="status">Read-only view</p>
+          )}
         </div>
       </header>
 
