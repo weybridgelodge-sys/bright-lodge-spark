@@ -182,7 +182,7 @@ function WidowForm({ widow, onSaved, onCancel }: { widow?: Widow; onSaved: (id?:
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div><Label className="text-xs">Care home name</Label><Input value={f.care_home_name} onChange={set("care_home_name")} className={inputCls} maxLength={200} /></div>
           <div><Label className="text-xs">Care home address</Label><Input value={f.care_home_address} onChange={set("care_home_address")} className={inputCls} maxLength={500} /></div>
-          <div className="sm:col-span-2"><Label className="text-xs">Contact hours</Label><Input value={f.care_home_contact_hours} onChange={set("care_home_contact_hours")} className={inputCls} maxLength={200} placeholder="e.g. Ring between 2pm and 6pm, visiting Saturdays only" /></div>
+          <div className="sm:col-span-2"><Label className="text-xs">Contact hours</Label><Input aria-label="Contact hours" value={f.care_home_contact_hours} onChange={set("care_home_contact_hours")} className={inputCls} maxLength={200} placeholder="e.g. Ring between 2pm and 6pm, visiting Saturdays only" /></div>
         </div>
       )}
       <fieldset>
