@@ -1,0 +1,2 @@
+ALTER TABLE public.almoner_widows DROP CONSTRAINT almoner_widows_home_type_check;
+ALTER TABLE public.almoner_widows ADD CONSTRAINT almoner_widows_home_type_check CHECK (home_type IN ('own_home','care_home','with_family'));
