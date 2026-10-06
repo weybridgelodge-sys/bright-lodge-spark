@@ -110,6 +110,7 @@ export type Database = {
           date_sent: string
           description: string | null
           funding_collection_id: string | null
+          funding_source: string
           gift_type: string
           id: string
           lodge_year: number
@@ -124,6 +125,7 @@ export type Database = {
           date_sent: string
           description?: string | null
           funding_collection_id?: string | null
+          funding_source?: string
           gift_type: string
           id?: string
           lodge_year: number
@@ -138,6 +140,7 @@ export type Database = {
           date_sent?: string
           description?: string | null
           funding_collection_id?: string | null
+          funding_source?: string
           gift_type?: string
           id?: string
           lodge_year?: number
