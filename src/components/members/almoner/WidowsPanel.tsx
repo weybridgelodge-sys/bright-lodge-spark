@@ -465,9 +465,9 @@ function GiftForm({ widowId, raffles, onSaved }: { widowId: string; raffles: Raf
             <SelectContent>{Object.entries(GIFT_LABEL).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}</SelectContent>
           </Select>
         </div>
-        <div><Label className="text-xs">Date sent</Label><Input type="date" value={date} max={today} onChange={(e) => setDate(e.target.value)} className={inputCls} required /></div>
-        {type === "other" && <div><Label className="text-xs">Describe gift</Label><Input value={description} onChange={(e) => setDescription(e.target.value)} className={inputCls} maxLength={300} placeholder="e.g. flowers" /></div>}
-        {monetary && <div><Label className="text-xs">Amount (£){type === "other" ? " — if monetary" : ""}</Label><Input type="number" inputMode="decimal" min="0.01" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} className={inputCls} /></div>}
+        <div><Label htmlFor="gift-date" className="text-xs">Date sent</Label><Input id="gift-date" type="date" value={date} max={today} onChange={(e) => setDate(e.target.value)} className={inputCls} required /></div>
+        {type === "other" && <div><Label htmlFor="gift-desc" className="text-xs">Describe gift</Label><Input id="gift-desc" value={description} onChange={(e) => setDescription(e.target.value)} className={inputCls} maxLength={300} placeholder="e.g. flowers" /></div>}
+        {monetary && <div><Label htmlFor="gift-amount" className="text-xs">Amount (£){type === "other" ? " — if monetary" : ""}</Label><Input id="gift-amount" type="number" inputMode="decimal" min="0.01" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} className={inputCls} /></div>}
         <div className="sm:col-span-2">
           <Label className="text-xs">Funded by (raffle collection)</Label>
           <Select value={fund} onValueChange={setFund}>

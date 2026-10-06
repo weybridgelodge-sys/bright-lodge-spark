@@ -311,7 +311,7 @@ test("Report widows section drafts lines and fits 320px", async ({ page }) => {
   await waitForPortal(page);
   await page.getByRole("tab", { name: "Report" }).click();
   await page.getByRole("button", { name: "Draft widow updates" }).click();
-  await expect(page.getByLabel("Mrs Featherstonehaugh-Wolstenholme")).toHaveValue(/thanks the Lodge/);
+  await expect(page.getByRole("textbox", { name: "Mrs Featherstonehaugh-Wolstenholme" })).toHaveValue(/thanks the Lodge/);
   const box = await page.getByRole("button", { name: /widow updates/ }).boundingBox();
   expect(box && box.height >= 44).toBeTruthy();
   await expectNoViewportOverflow(page, "Report widows section");
