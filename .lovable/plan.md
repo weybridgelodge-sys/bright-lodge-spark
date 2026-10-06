@@ -1,58 +1,51 @@
-# Almoner portal: two-tier access (view vs edit)
+# Widows & Dependants Welfare Register — Phase 1
 
-## What depends on can_access_almoner() today
+A new "Widows" panel in the Almoner Portal, beside the Welfare board, Life Events, Correspondence, Referrals, Absences and Reports. It uses the same access rules as the rest of the Almoner Portal.
 
-Database (all gated by the one function, identical for read and write):
-- welfare_absences: select / insert / update / delete
-- welfare_life_events: select / insert / update / delete
-- welfare_correspondence: select / insert / update / delete
-- welfare_rmtgb_referrals: select / insert / update / delete
-- welfare_member_status: select / insert / update / delete
-- welfare_log_entries: select / insert (also logged_by = self) / update / delete
-- almoner_reports: select / insert (also created_by = self) / update
-- File storage, welfare-attachments bucket: select / insert / delete (no update policy)
-- No other database function calls it.
+## Who can do what
+- Almoner, Secretary and admin can view and edit.
+- WM can view only. He sees the same "Read-only view" notice, and every add, edit and log button is hidden.
+- IPM and everyone else can't see the panel. The database refuses all their requests.
 
-Current function: admin role OR almoner role OR current Almoner office OR current WM/IPM.
+## Module 1 — Widow register
+Each widow record holds:
+- **Name:** full name and preferred form of address (for example "Mrs Smith" or "Joan").
+- **Address:** her address, plus where she lives: **Own home** or **Care home**. The care home's name and address only appear when Care home is chosen.
+- **Phone.**
+- **Date of birth:** day and month, with the year optional. If the year is unknown, the record shows "12 March (year unknown)". No made-up year is stored, so age only shows when the year is known.
+- **Husband:** his name, plus his Lodge name and number.
+- **Connection:** **Weybridge Lodge widow** or **Assigned via SMWA**. Both are treated as equal options. For SMWA widows there is also an SMWA reference and liaison contact.
+- **Status:** Active or Deceased. Records are never deleted. Marking a widow Deceased records the date and moves her to an "Inactive" section, the same way Honorary Members are handled. She can be restored if the change was a mistake.
+- **Contact interval:** how often she should be contacted, in days. Default 90, adjustable per widow.
 
-App screens (use a separate client-side flag, canAccessAlmoner = admin, almoner role, current Almoner, current WM or IPM):
-- Members menu "Almoner" link, Admin hub "Almoner Portal" tile, and the portal page guard.
-- Every Almoner panel (Absences, Life Events, Correspondence, Referrals, Welfare board/log, Reports) shows add/edit/delete/upload buttons to anyone who can open the page. There is no read-only mode, so the WM would see buttons that fail once the database is narrowed.
-- The Secretary is not included anywhere, so the Secretary currently sees no Almoner link.
+**Next of kin** (as many as needed per widow): name, relationship, phone, email and notes. Relationship is a pick-list (Son, Daughter, Neighbour, Friend, Other). Choosing Other opens a free-text box.
 
-Almoner digest email (almoner-overdue-check): sends only to the current Almoner office holder, falling back to anyone with the almoner role. It does not use can_access_almoner, so this change does not affect it. WM, IPM and Secretary never received it and still will not.
+## Module 2 — Contact log
+- Each contact has: date, type (Phone call, Visit, Card, Letter, Gift, Other), notes, and who logged it. "Logged by" is filled in automatically with the signed-in officer.
+- A **Welfare concern** tickbox. Entries with a concern are highlighted, and a filter shows only concerns. The widow's row gets a concern badge while her latest contact is flagged.
+- **Next contact due** = date of last contact + her contact interval. With no contacts yet, it counts from when she was added. Overdue widows get the same gentle gold "check-in due" badge used on the Welfare board. Active widows only.
+- Gift appears only as a contact type. Full gift tracking comes in Phase 2.
 
-Unaffected: is_current_wm_or_ipm stays in use for Treasurer access and elsewhere; only its use for Almoner is removed.
+## Layout
+- One "Widows" tab, styled like the other panels: navy cards, gold accents, sort by overdue first, and a toggle for active/inactive.
+- Opening a widow shows her details, next of kin and contact log stacked vertically, with 48px buttons and nothing overflowing at 320px.
 
-## New rule
-
-| Person | Almoner portal |
-|---|---|
-| Almoner (role or current office) | read + write |
-| Secretary (role or current office, via is_lodge_secretary()) | read + write (new) |
-| Worshipful Master (current office) | read only (narrowed) |
-| IPM | none (removed) |
-| Admin | read + write (kept as baseline; flagged in report for confirmation) |
-| Everyone else | none |
-
-WM means the current WM office holder only. The worshipful_master role on its own does not grant access, matching the "current officer" wording. Assumption, to be confirmed in the report.
-
-## Changes
-
-1. New migration:
-   - `can_edit_almoner(uid)` = admin OR almoner role OR current Almoner OR is_lodge_secretary-equivalent for that uid.
-   - `can_view_almoner(uid)` = can_edit_almoner(uid) OR current WM office.
-   - Re-point every SELECT policy (and the storage select) to can_view_almoner; every INSERT/UPDATE/DELETE policy (and storage insert/delete) to can_edit_almoner, keeping the existing logged_by / created_by conditions.
-   - Redefine can_access_almoner as a thin alias of can_view_almoner (kept so nothing breaks), with a comment marking it deprecated. Widows & Dependants Register will reuse the two new functions.
-2. App: replace canAccessAlmoner with canViewAlmoner and canEditAlmoner in the auth context (adds a current-WM check; IPM no longer counts). Menu link, hub tile and page guard use canViewAlmoner. All Almoner panels hide add/edit/delete/upload controls when not canEditAlmoner, and show a small "Read-only view" note for the WM.
-3. Record the two-tier rule in AGENTS.md.
+## Not in this build (Phase 2)
+- Gift tracking.
+- The Almoner's report generator.
+- Widows are left out of the existing Reports tab and the daily Almoner digest email.
 
 ## Verification
-
-- Rolled-back SQL transaction as each real person (current Almoner, Richard as Secretary, current WM, current IPM, an admin, an ordinary member): select, insert, update and delete on each welfare table, almoner_reports and the attachments bucket; results must match the table above exactly.
-- Full unit suite; 320px phone check of the Almoner portal in both edit and read-only views.
+- **Access tests:** run inside rolled-back database transactions as each real person: Almoner (temporary role, as last time), Secretary (Richard), WM-only (Julien with admin temporarily removed), IPM, admin, and an ordinary member. Check read and write on all three tables.
+- **Phone-width checks:** 320px checks of the editor view and the WM read-only view.
+- **Full suite:** all unit and browser tests.
 
 ## Technical details
-
-- Secretary check uses the same logic as is_lodge_secretary() but parameterised by uid (that function reads auth.uid()), so a uid-taking helper is added or inlined.
-- No changes to the digest email, Treasurer access or any other module.
+- **Migration:** new tables `almoner_widows`, `almoner_widow_kin` and `almoner_widow_contacts`.
+  - Grants go to authenticated users and service_role only. There is no anon access.
+  - Row-level security is on. SELECT uses `public.can_view_almoner()`. INSERT, UPDATE and DELETE use `public.can_edit_almoner()`.
+  - DELETE is allowed on kin and contacts only. Widows have no DELETE policy, so records can only be archived.
+- **Date of birth:** stored as `dob_day smallint`, `dob_month smallint` and `dob_year smallint null`. A validation trigger checks the date is real; 29 Feb is allowed when the year is unknown.
+- **Other fields:** `connection_source`, `home_type` and `status` use CHECK lists. `relationship` is text plus `relationship_other`. `logged_by` defaults to `auth.uid()`. `updated_at` triggers on each table.
+- **Due-date logic:** a pure helper in `src/lib/widowContactDue.ts`, with unit tests.
+- **Frontend:** new `src/components/members/almoner/WidowsPanel.tsx`, gated by `canEditAlmoner`. `AGENTS.md` gets a one-line rule that new sensitive registers reuse the view/edit pair.
