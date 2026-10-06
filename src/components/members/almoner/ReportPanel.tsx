@@ -260,7 +260,7 @@ export default function ReportPanel({ members }: { members: Member[] }) {
         corrRows: corr.data ?? [],
         activeRefs: (refs.data ?? []).filter((r: any) => !["closed", "declined"].includes(r.status)),
         absRows: abs.data ?? [],
-        derivedLife, manualLife,
+        derivedLife, manualLife, widows,
       };
       setData(snap);
       setReport(buildMarkdown(from, to, advice, snap));
