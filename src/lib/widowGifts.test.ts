@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { defaultWidowReportFrom, formatGiftHistory } from "./widowGifts";
+import { defaultWidowReportFrom, formatGiftHistory, fundingFromChoice, fundingLabel } from "./widowGifts";
 
 describe("formatGiftHistory", () => {
   it("orders oldest first and shows amounts", () => {
@@ -21,7 +21,7 @@ describe("defaultWidowReportFrom", () => {
   it("never after today", () => expect(defaultWidowReportFrom("2026-10-06", null, "2026-10-06")).toBe("2026-10-06"));
 });
 
-import { fundingFromChoice, fundingLabel } from "./widowGifts";
+
 describe("gift funding", () => {
   it("maps categories and collection ids", () => {
     expect(fundingFromChoice("lodge_account")).toEqual({ funding_source: "lodge_account", funding_collection_id: null });

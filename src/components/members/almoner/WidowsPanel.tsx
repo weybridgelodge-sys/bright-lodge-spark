@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { ArrowLeft, Flower2, Gift, Pencil, Plus, ShieldAlert, Trash2, X } from "lucide-react";
 import { computeContactDue, formatPartialDob, isValidPartialDob, partialDobAge } from "@/lib/widowContactDue";
-import { GIFT_LABEL, formatGiftHistory, type GiftType } from "@/lib/widowGifts";
+import { GIFT_LABEL, formatGiftHistory, fundingFromChoice, fundingLabel, type FundingSource, type GiftType } from "@/lib/widowGifts";
 
 type Widow = {
   id: string; full_name: string; preferred_address: string | null; address: string | null;
