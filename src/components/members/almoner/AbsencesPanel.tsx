@@ -1,3 +1,4 @@
+import { useAuth } from "@/hooks/useAuth";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -62,7 +63,7 @@ export default function AbsencesPanel({ members, userId }: { members: Member[]; 
       </div>
       {canEditAlmoner && <button onClick={() => archive(r.id)} className="p-1.5 text-primary-foreground/40 hover:text-red-400" aria-label="Archive">
         <Trash2 className="w-4 h-4" />
-      </button>
+      </button>}
     </div>
   );
 
