@@ -371,12 +371,12 @@ function WidowDetail({ widow, members, canEdit, onBack, onChanged }: { widow: Wi
   );
 }
 
-type Gift = { id: string; widow_id: string; lodge_year: number; gift_type: GiftType; description: string | null; amount: number | null; date_sent: string; funding_collection_id: string | null; notes: string | null; logged_by: string | null };
+type GiftRow = { id: string; widow_id: string; lodge_year: number; gift_type: GiftType; description: string | null; amount: number | null; date_sent: string; funding_collection_id: string | null; notes: string | null; logged_by: string | null };
 type Raffle = { id: string; collection_date: string; event_title: string | null; net_amount: number | null; allocated: number };
 const raffleLabel = (r: Raffle) => `${r.event_title ?? "Raffle"} · ${fmt(r.collection_date)} · net £${Number(r.net_amount ?? 0).toFixed(2)}`;
 
 function GiftsSection({ widowId, canEdit, memberMap }: { widowId: string; canEdit: boolean; memberMap: Map<string, Member> }) {
-  const [gifts, setGifts] = useState<Gift[]>([]);
+  const [gifts, setGifts] = useState<GiftRow[]>([]);
   const [raffles, setRaffles] = useState<Raffle[]>([]);
   const [adding, setAdding] = useState(false);
   const load = async () => {
