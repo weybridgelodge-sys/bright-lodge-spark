@@ -13,13 +13,14 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { ArrowLeft, CalendarClock, HeartHandshake, PhoneCall, Plus, ShieldAlert, X, LayoutDashboard, Mail, Share2, UserX, FileText } from "lucide-react";
+import { ArrowLeft, CalendarClock, HeartHandshake, PhoneCall, Plus, ShieldAlert, X, LayoutDashboard, Mail, Share2, UserX, FileText, Flower2 } from "lucide-react";
 import { computeCheckInFlags, type CheckInFlag } from "@/lib/almonerAbsencePattern";
 import LifeEventsPanel from "@/components/members/almoner/LifeEventsPanel";
 import CorrespondencePanel from "@/components/members/almoner/CorrespondencePanel";
 import ReferralsPanel from "@/components/members/almoner/ReferralsPanel";
 import AbsencesPanel from "@/components/members/almoner/AbsencesPanel";
 import ReportPanel from "@/components/members/almoner/ReportPanel";
+import WidowsPanel from "@/components/members/almoner/WidowsPanel";
 
 // ============ Types ============
 type WelfareStatus = "green" | "amber" | "red";
@@ -319,6 +320,13 @@ function PortalBody() {
           <span>Referrals</span>
         </TabsTrigger>
         <TabsTrigger
+          value="widows"
+          className="w-full flex items-center justify-start gap-3 px-4 py-3 rounded-sm text-sm font-sans text-primary-foreground/80 transition-colors hover:text-gold hover:bg-navy-light/40 data-[state=active]:bg-gold/15 data-[state=active]:text-gold data-[state=active]:shadow-none"
+        >
+          <Flower2 className="w-4 h-4 shrink-0" />
+          <span>Widows &amp; Dependants</span>
+        </TabsTrigger>
+        <TabsTrigger
           value="report"
           className="w-full flex items-center justify-start gap-3 px-4 py-3 rounded-sm text-sm font-sans text-primary-foreground/80 transition-colors hover:text-gold hover:bg-navy-light/40 data-[state=active]:bg-gold/15 data-[state=active]:text-gold data-[state=active]:shadow-none"
         >
@@ -393,6 +401,7 @@ function PortalBody() {
       <TabsContent value="correspondence"><CorrespondencePanel members={members} userId={user?.id ?? null} /></TabsContent>
       <TabsContent value="referrals"><ReferralsPanel members={members} userId={user?.id ?? null} /></TabsContent>
       <TabsContent value="absences"><AbsencesPanel members={members} userId={user?.id ?? null} /></TabsContent>
+      <TabsContent value="widows"><WidowsPanel members={members} /></TabsContent>
       <TabsContent value="report"><ReportPanel members={members} /></TabsContent>
     </Tabs>
   );
