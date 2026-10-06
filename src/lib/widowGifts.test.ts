@@ -20,3 +20,18 @@ describe("defaultWidowReportFrom", () => {
   it("falls back to 90 days", () => expect(defaultWidowReportFrom(null, null, "2026-10-06")).toBe("2026-07-08"));
   it("never after today", () => expect(defaultWidowReportFrom("2026-10-06", null, "2026-10-06")).toBe("2026-10-06"));
 });
+
+import { fundingFromChoice, fundingLabel } from "./widowGifts";
+describe("gift funding", () => {
+  it("maps categories and collection ids", () => {
+    expect(fundingFromChoice("lodge_account")).toEqual({ funding_source: "lodge_account", funding_collection_id: null });
+    expect(fundingFromChoice("none")).toEqual({ funding_source: "none", funding_collection_id: null });
+    expect(fundingFromChoice("abc")).toEqual({ funding_source: "raffle", funding_collection_id: "abc" });
+  });
+  it("labels", () => {
+    expect(fundingLabel("almoner_fund")).toBe("Almoner fund");
+    expect(fundingLabel("none")).toBe("Not linked");
+    expect(fundingLabel("raffle", "Christmas · 10 Dec 2025", true)).toBe("Raffle — Christmas · 10 Dec 2025");
+    expect(fundingLabel("raffle", null, false)).toBe("Raffle (collection removed)");
+  });
+});

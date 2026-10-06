@@ -371,7 +371,7 @@ function WidowDetail({ widow, members, canEdit, onBack, onChanged }: { widow: Wi
   );
 }
 
-type GiftRow = { id: string; widow_id: string; lodge_year: number; gift_type: GiftType; description: string | null; amount: number | null; date_sent: string; funding_collection_id: string | null; notes: string | null; logged_by: string | null };
+type GiftRow = { id: string; widow_id: string; lodge_year: number; gift_type: GiftType; description: string | null; amount: number | null; date_sent: string; funding_source: FundingSource | null; funding_collection_id: string | null; notes: string | null; logged_by: string | null };
 type Raffle = { id: string; collection_date: string; event_title: string | null; net_amount: number | null; allocated: number };
 const raffleLabel = (r: Raffle) => `${r.event_title ?? "Raffle"} · ${fmt(r.collection_date)} · net £${Number(r.net_amount ?? 0).toFixed(2)}`;
 
@@ -416,7 +416,7 @@ function GiftsSection({ widowId, canEdit, memberMap }: { widowId: string; canEdi
                     {g.amount != null && <> · £{Number(g.amount).toFixed(2)}</>} · {fmt(g.date_sent)}
                     <span className="text-primary-foreground/60"> · {g.lodge_year}/{String((g.lodge_year + 1) % 100).padStart(2, "0")}</span>
                   </p>
-                  <p className="text-xs text-primary-foreground/70 break-words">Funded by: {g.funding_collection_id ? (r ? raffleLabel(r) : "Charity collection") : "Not linked"} · {memberName(g.logged_by ? memberMap.get(g.logged_by) : undefined)}</p>
+                  <p className="text-xs text-primary-foreground/70 break-words">Funded by: {fundingLabel(g.funding_source, r ? raffleLabel(r) : null, !!g.funding_collection_id)} · {memberName(g.logged_by ? memberMap.get(g.logged_by) : undefined)}</p>
                   {g.notes && <p className="text-xs text-primary-foreground/60 mt-1 whitespace-pre-wrap break-words">{g.notes}</p>}
                 </div>
                 {canEdit && <button onClick={() => del(g.id)} className="min-w-[48px] min-h-[48px] flex items-center justify-center text-primary-foreground/40 hover:text-destructive" aria-label="Remove gift record"><Trash2 className="w-4 h-4" /></button>}
@@ -448,7 +448,7 @@ function GiftForm({ widowId, raffles, onSaved }: { widowId: string; raffles: Raf
     setBusy(true);
     const { data, error } = await db.from("almoner_widow_gifts").insert({
       widow_id: widowId, gift_type: type, description: type === "other" ? blank(description) : null,
-      amount: amt, date_sent: date, funding_collection_id: fund === "none" ? null : fund, notes: blank(notes),
+      amount: amt, date_sent: date, ...fundingFromChoice(fund), notes: blank(notes),
       lodge_year: 0, // set by the database from the date sent
     }).select("id");
     setBusy(false);
@@ -469,12 +469,14 @@ function GiftForm({ widowId, raffles, onSaved }: { widowId: string; raffles: Raf
         {type === "other" && <div><Label htmlFor="gift-desc" className="text-xs">Describe gift</Label><Input id="gift-desc" value={description} onChange={(e) => setDescription(e.target.value)} className={inputCls} maxLength={300} placeholder="e.g. flowers" /></div>}
         {monetary && <div><Label htmlFor="gift-amount" className="text-xs">Amount (£){type === "other" ? " — if monetary" : ""}</Label><Input id="gift-amount" type="number" inputMode="decimal" min="0.01" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} className={inputCls} /></div>}
         <div className="sm:col-span-2">
-          <Label className="text-xs">Funded by (raffle collection)</Label>
+          <Label className="text-xs">Funded by</Label>
           <Select value={fund} onValueChange={setFund}>
             <SelectTrigger className={inputCls} aria-label="Funded by"><SelectValue /></SelectTrigger>
             <SelectContent>
+              <SelectItem value="lodge_account">Lodge account</SelectItem>
+              <SelectItem value="almoner_fund">Almoner fund</SelectItem>
+              {raffles.map((r) => <SelectItem key={r.id} value={r.id}>Raffle — {raffleLabel(r)} · £{Number(r.allocated).toFixed(2)} allocated</SelectItem>)}
               <SelectItem value="none">Not linked</SelectItem>
-              {raffles.map((r) => <SelectItem key={r.id} value={r.id}>{raffleLabel(r)} · £{Number(r.allocated).toFixed(2)} allocated</SelectItem>)}
             </SelectContent>
           </Select>
           {raffles.length === 0 && <p className="text-[11px] text-primary-foreground/60 mt-1">No raffle collections recorded by the Charity Steward yet.</p>}
