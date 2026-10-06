@@ -7,7 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Copy, FileText, FileDown, Save, CheckCircle2, Trash2, FolderOpen, Printer, Plus } from "lucide-react";
+import { Copy, FileText, FileDown, Save, CheckCircle2, Trash2, FolderOpen, Printer, Plus, Sparkles, X } from "lucide-react";
+import { defaultWidowReportFrom } from "@/lib/widowGifts";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { saveBlob, saveJsPdf } from "@/lib/nativeDownload";
@@ -44,9 +45,12 @@ const MUTED: [number, number, number] = [110, 110, 120];
 
 type LifeEventRow = { member: string; type: string; date: string; detail: string };
 
+type WidowLine = { widow_id: string; name: string; text: string };
+
 type SnapshotData = {
   concern: any[]; logRows: any[]; corrRows: any[]; activeRefs: any[]; absRows: any[];
   derivedLife: LifeEventRow[]; manualLife: LifeEventRow[];
+  widows?: WidowLine[];
 };
 
 type SavedReport = {
@@ -61,6 +65,7 @@ export default function ReportPanel({ members }: { members: Member[] }) {
   const today = new Date();
   const monthAgo = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate()).toISOString().slice(0, 10);
   const [from, setFrom] = useState(monthAgo);
+  const [defaultFrom, setDefaultFrom] = useState(monthAgo);
   const [to, setTo] = useState(today.toISOString().slice(0, 10));
   const [advice, setAdvice] = useState("");
   const [title, setTitle] = useState("Almoner's Report");
@@ -72,6 +77,9 @@ export default function ReportPanel({ members }: { members: Member[] }) {
   const [currentStatus, setCurrentStatus] = useState<"draft" | "final" | null>(null);
   const [saved, setSaved] = useState<SavedReport[]>([]);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [widows, setWidows] = useState<WidowLine[]>([]);
+  const [widowsNote, setWidowsNote] = useState("");
+  const [drafting, setDrafting] = useState(false);
   const memberMap = useMemo(() => new Map(members.map((m) => [m.id, m])), [members]);
 
   const loadList = async () => {
@@ -89,12 +97,23 @@ export default function ReportPanel({ members }: { members: Member[] }) {
       const { data: roles } = await (supabase as any).from("user_roles").select("role").eq("user_id", u.user.id);
       setIsAdmin(!!roles?.some((r: any) => r.role === "admin"));
     })();
+    (async () => {
+      const todayIso = today.toISOString().slice(0, 10);
+      const [lastFinal, lastMeeting] = await Promise.all([
+        (supabase as any).from("almoner_reports").select("period_to").eq("status", "final").order("period_to", { ascending: false }).limit(1),
+        (supabase as any).from("lodge_events").select("event_date").lte("event_date", todayIso).is("archived_at", null).order("event_date", { ascending: false }).limit(1),
+      ]);
+      const d = defaultWidowReportFrom(lastFinal.data?.[0]?.period_to ?? null, lastMeeting.data?.[0]?.event_date?.slice(0, 10) ?? null, todayIso);
+      setDefaultFrom(d);
+      setFrom((cur) => (cur === monthAgo ? d : cur));
+    })();
   }, []);
 
   const resetForm = () => {
     setCurrentId(null); setCurrentStatus(null);
     setReport(""); setData(null); setAdvice(""); setTitle("Almoner's Report");
-    setFrom(monthAgo); setTo(today.toISOString().slice(0, 10));
+    setWidows([]); setWidowsNote("");
+    setFrom(defaultFrom); setTo(today.toISOString().slice(0, 10));
   };
 
   const buildLifeEvents = (toDate: string, wmTerms: { member_id: string; year_started: number }[]): LifeEventRow[] => {
@@ -193,8 +212,14 @@ export default function ReportPanel({ members }: { members: Member[] }) {
       for (const e of d.manualLife) lines.push(`- ${e.date} · **${e.member}** · ${e.type}${e.detail ? ` — ${e.detail}` : ""}`);
     }
     lines.push("");
+    const wl = d.widows ?? [];
+    if (wl.length) {
+      lines.push(`## 7. Widows & Dependants (${wl.length})`);
+      for (const w of wl) lines.push(`- **${w.name}** — ${w.text}`);
+      lines.push("");
+    }
     if (adviceText.trim()) {
-      lines.push(`## 7. Almoner's Advice & Notes`);
+      lines.push(`## ${wl.length ? 8 : 7}. Almoner's Advice & Notes`);
       lines.push(adviceText.trim());
       lines.push("");
     }
@@ -278,7 +303,35 @@ export default function ReportPanel({ members }: { members: Member[] }) {
     setCurrentId(r.id); setCurrentStatus(r.status);
     setTitle(r.title); setFrom(r.period_from); setTo(r.period_to);
     setAdvice(r.advice); setData(r.snapshot); setReport(r.markdown);
+    setWidows(r.snapshot?.widows ?? []); setWidowsNote("");
     toast.success(`Loaded "${r.title}"`);
+  };
+
+  const applyWidows = (list: WidowLine[]) => {
+    setWidows(list);
+    if (data) {
+      const nd = { ...data, widows: list };
+      setData(nd); setReport(buildMarkdown(from, to, advice, nd));
+    }
+  };
+
+  const draftWidows = async () => {
+    setDrafting(true); setWidowsNote("");
+    try {
+      const { data: res, error } = await supabase.functions.invoke("almoner-widow-report", { body: { from, to } });
+      if (error) {
+        let msg = error.message;
+        try { msg = (await (error as any).context?.json())?.error ?? msg; } catch { /* keep default */ }
+        throw new Error(msg);
+      }
+      const lines: WidowLine[] = res?.lines ?? [];
+      applyWidows(lines);
+      if (lines.length === 0) setWidowsNote(res?.considered ? "Nothing reportable found in the contact notes for this period." : "No widow contacts or gifts logged in this period.");
+      else toast.success(`Drafted ${lines.length} widow update${lines.length === 1 ? "" : "s"}`);
+    } catch (e) {
+      toast.error(`Widow updates not drafted: ${(e as Error).message}`);
+    }
+    setDrafting(false);
   };
 
   const removeReport = async (id: string) => {
@@ -407,9 +460,15 @@ export default function ReportPanel({ members }: { members: Member[] }) {
     if (lifeRows.length === 0) empty("Nothing in the next 3 months.");
     else table([["Date", "Member", "Event", "Detail"]], lifeRows);
 
+    const wl = d.widows ?? [];
+    if (wl.length) {
+      section("7. Widows & Dependants", wl.length);
+      table([["Widow", "Update"]], wl.map((w) => [stripEmoji(w.name), stripEmoji(w.text)]));
+    }
+
     const cleanAdvice = stripEmoji(adviceText).trim();
     if (cleanAdvice) {
-      section("7. Almoner's Advice & Notes");
+      section(`${wl.length ? 8 : 7}. Almoner's Advice & Notes`);
       doc.setTextColor(...INK);
       doc.setFont("helvetica", "normal");
       doc.setFontSize(10);
@@ -501,6 +560,40 @@ export default function ReportPanel({ members }: { members: Member[] }) {
         />
         <p className="text-[11px] text-primary-foreground/50">Regenerate after editing to refresh the preview. Note: emoji will be removed from the printed PDF.</p>
       </div>
+
+      <section aria-label="Widows and dependants" className="bg-navy-light/40 border border-gold/20 rounded p-4 space-y-3">
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
+          <div className="min-w-0">
+            <h4 className="font-serif text-sm text-gold">Widows &amp; Dependants</h4>
+            <p className="text-[11px] text-primary-foreground/60">Short lines drafted from the widows' contact log and gifts between the From and To dates. Widows with nothing new are left out.</p>
+          </div>
+          {canEditAlmoner && (
+            <Button onClick={draftWidows} disabled={drafting} variant="outline" className="border-gold/30 text-gold hover:bg-gold/10 min-h-[48px] w-full sm:w-auto">
+              <Sparkles className="w-4 h-4 mr-1" /> {drafting ? "Drafting…" : widows.length ? "Redraft widow updates" : "Draft widow updates"}
+            </Button>
+          )}
+        </div>
+        {widows.length === 0 ? (
+          <p className="text-xs text-primary-foreground/50 italic">{widowsNote || "No widow updates in this report."}</p>
+        ) : (
+          <ul className="space-y-2">
+            {widows.map((w, i) => (
+              <li key={w.widow_id} className="space-y-1">
+                <div className="flex items-center justify-between gap-2">
+                  <Label htmlFor={`widow-line-${i}`} className="text-xs text-primary-foreground/80 break-words">{w.name}</Label>
+                  {canEditAlmoner && (
+                    <button onClick={() => applyWidows(widows.filter((_, j) => j !== i))} className="min-w-[48px] min-h-[48px] flex items-center justify-center text-primary-foreground/40 hover:text-destructive" aria-label={`Remove line for ${w.name}`}><X className="w-4 h-4" /></button>
+                  )}
+                </div>
+                <Textarea id={`widow-line-${i}`} value={w.text} readOnly={!canEditAlmoner} rows={2} maxLength={600}
+                  onChange={(e) => applyWidows(widows.map((x, j) => (j === i ? { ...x, text: e.target.value } : x)))}
+                  className="bg-navy text-primary-foreground border-gold/30" />
+              </li>
+            ))}
+          </ul>
+        )}
+        {canEditAlmoner && widows.length > 0 && <p className="text-[11px] text-primary-foreground/50">AI-drafted — check each line before saving. Edits update the report preview below.</p>}
+      </section>
 
       {report && (
         <div className="bg-navy-light/40 border border-gold/20 rounded p-4">
