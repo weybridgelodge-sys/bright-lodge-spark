@@ -83,7 +83,7 @@ export default function WidowsPanel({ members }: { members: Member[] }) {
         )}
       </div>
 
-      {canEditAlmoner && adding && <WidowForm onSaved={() => { setAdding(false); load(); }} />}
+      {canEditAlmoner && adding && <WidowForm onSaved={(id) => { setAdding(false); load(); if (id) setOpenId(id); }} />}
 
       <div className="grid grid-cols-2 gap-2" role="group" aria-label="Show widows">
         {(["active", "deceased"] as const).map((s) => (
@@ -126,7 +126,7 @@ export default function WidowsPanel({ members }: { members: Member[] }) {
   );
 }
 
-function WidowForm({ widow, onSaved, onCancel }: { widow?: Widow; onSaved: () => void; onCancel?: () => void }) {
+function WidowForm({ widow, onSaved, onCancel }: { widow?: Widow; onSaved: (id?: string) => void; onCancel?: () => void }) {
   const [f, setF] = useState(() => ({
     full_name: widow?.full_name ?? "", preferred_address: widow?.preferred_address ?? "", address: widow?.address ?? "",
     home_type: widow?.home_type ?? "own_home", care_home_name: widow?.care_home_name ?? "", care_home_address: widow?.care_home_address ?? "",
@@ -160,7 +160,7 @@ function WidowForm({ widow, onSaved, onCancel }: { widow?: Widow; onSaved: () =>
     setBusy(false);
     if (error) { toast.error(`Not saved: ${error.message}`); return; }
     if (!data?.length) { toast.error("Not saved: you may not have permission"); return; }
-    toast.success(widow ? "Details updated" : "Widow added"); onSaved();
+    toast.success(widow ? "Details updated" : "Widow added — now add next of kin below"); onSaved(widow ? undefined : data[0].id);
   };
 
   return (
@@ -217,6 +217,12 @@ function WidowForm({ widow, onSaved, onCancel }: { widow?: Widow; onSaved: () =>
         </div>
       )}
       <div><Label className="text-xs">Notes</Label><Textarea value={f.notes} onChange={set("notes")} className={inputCls} rows={2} maxLength={2000} /></div>
+      {!widow && (
+        <div className="border border-dashed border-gold/30 rounded p-3">
+          <p className="font-serif text-sm text-primary-foreground">Next of kin</p>
+          <p className="text-xs text-primary-foreground/60">Save her details first. Her record will then open, where you can add next of kin and log contacts.</p>
+        </div>
+      )}
       <div className="flex flex-col sm:flex-row gap-2">
         <Button type="submit" disabled={busy} className={btnGold}>{widow ? "Save details" : "Add widow"}</Button>
         {onCancel && <Button type="button" variant="outline" className={btnOutline} onClick={onCancel}>Cancel</Button>}
