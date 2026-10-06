@@ -14,7 +14,7 @@ import { computeContactDue, formatPartialDob, isValidPartialDob, partialDobAge }
 
 type Widow = {
   id: string; full_name: string; preferred_address: string | null; address: string | null;
-  home_type: "own_home" | "care_home"; care_home_name: string | null; care_home_address: string | null;
+  home_type: "own_home" | "care_home" | "with_family"; care_home_name: string | null; care_home_address: string | null;
   phone: string | null; dob_day: number | null; dob_month: number | null; dob_year: number | null;
   husband_name: string | null; husband_lodge: string | null;
   connection_source: "lodge_member" | "smwa"; smwa_reference: string | null; smwa_liaison: string | null;
@@ -173,7 +173,7 @@ function WidowForm({ widow, onSaved, onCancel }: { widow?: Widow; onSaved: () =>
           <Label className="text-xs">Lives in</Label>
           <Select value={f.home_type} onValueChange={(v) => setF((p) => ({ ...p, home_type: v as Widow["home_type"] }))}>
             <SelectTrigger className={inputCls}><SelectValue /></SelectTrigger>
-            <SelectContent><SelectItem value="own_home">Own home</SelectItem><SelectItem value="care_home">Care home</SelectItem></SelectContent>
+            <SelectContent><SelectItem value="own_home">Own home</SelectItem><SelectItem value="care_home">Care home</SelectItem><SelectItem value="with_family">Living with family</SelectItem></SelectContent>
           </Select>
         </div>
       </div>
@@ -295,7 +295,7 @@ function WidowDetail({ widow, members, canEdit, onBack, onChanged }: { widow: Wi
           <dl className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Row k="Preferred form of address" v={widow.preferred_address} />
             <Row k="Phone" v={widow.phone && <a className="text-gold underline" href={`tel:${widow.phone}`}>{widow.phone}</a>} />
-            <Row k="Lives in" v={widow.home_type === "care_home" ? `Care home: ${widow.care_home_name ?? "—"}` : "Own home"} />
+            <Row k="Lives in" v={widow.home_type === "care_home" ? `Care home: ${widow.care_home_name ?? "—"}` : widow.home_type === "with_family" ? "Living with family" : "Own home"} />
             {widow.home_type === "care_home" && <Row k="Care home address" v={widow.care_home_address} />}
             <Row k={widow.home_type === "care_home" ? "Other address" : "Address"} v={widow.address} />
             <Row k="Date of birth" v={`${formatPartialDob(widow.dob_day, widow.dob_month, widow.dob_year)}${age != null ? ` (age ${age})` : ""}`} />
