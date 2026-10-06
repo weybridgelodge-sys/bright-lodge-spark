@@ -1,3 +1,4 @@
+import { useAuth } from "@/hooks/useAuth";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -67,6 +68,7 @@ type UpcomingItem = {
 };
 
 export default function LifeEventsPanel({ members, userId }: { members: Member[]; userId: string | null }) {
+  const { canEditAlmoner } = useAuth();
   const [events, setEvents] = useState<LifeEvent[]>([]);
   const [wmTerms, setWmTerms] = useState<{ member_id: string; year_started: number }[]>([]);
   const [showForm, setShowForm] = useState(false);
@@ -185,12 +187,12 @@ export default function LifeEventsPanel({ members, userId }: { members: Member[]
             Birthdays, initiation &amp; Worshipful Master milestone anniversaries pulled from member records · add weddings, bereavements and other milestones below
           </p>
         </div>
-        <Button size="sm" className="bg-gold text-navy hover:bg-gold/90" onClick={() => setShowForm((v) => !v)}>
+        {canEditAlmoner && (<Button size="sm" className="bg-gold text-navy hover:bg-gold/90" onClick={() => setShowForm((v) => !v)}>
           {showForm ? <><X className="w-4 h-4 mr-1" /> Cancel</> : <><Plus className="w-4 h-4 mr-1" /> Add event</>}
-        </Button>
+        </Button>)}
       </div>
 
-      {showForm && <NewEventForm members={members} userId={userId} onSaved={() => { setShowForm(false); load(); }} />}
+      {canEditAlmoner && showForm && <NewEventForm members={members} userId={userId} onSaved={() => { setShowForm(false); load(); }} />}
 
       <section>
         <p className="text-[11px] uppercase tracking-wider text-gold mb-2">Upcoming · next 3 months</p>
@@ -245,9 +247,9 @@ export default function LifeEventsPanel({ members, userId }: { members: Member[]
                         {fmt(when)}{e.recurring ? " · annual" : ""}{e.notes ? ` · ${e.notes}` : ""}
                       </p>
                     </div>
-                    <button onClick={() => archive(e.id)} className="text-primary-foreground/40 hover:text-red-400" aria-label="Archive">
+                    {canEditAlmoner && (<button onClick={() => archive(e.id)} className="text-primary-foreground/40 hover:text-red-400" aria-label="Archive">
                       <Trash2 className="w-4 h-4" />
-                    </button>
+                    </button>)}
                   </div>
                 );
               })}

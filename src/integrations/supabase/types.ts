@@ -5506,6 +5506,7 @@ export type Database = {
         Returns: number
       }
       can_access_almoner: { Args: { _user_id: string }; Returns: boolean }
+      can_edit_almoner: { Args: { _user_id: string }; Returns: boolean }
       can_edit_charity: { Args: { _user: string }; Returns: boolean }
       can_edit_member_development: {
         Args: { _editor: string; _member: string }
@@ -5523,6 +5524,7 @@ export type Database = {
       }
       can_manage_socials: { Args: { _user: string }; Returns: boolean }
       can_manage_visits: { Args: { _user: string }; Returns: boolean }
+      can_view_almoner: { Args: { _user_id: string }; Returns: boolean }
       can_view_charity: { Args: { _user: string }; Returns: boolean }
       can_view_skills_matrix: { Args: { _user: string }; Returns: boolean }
       can_view_year_audit: { Args: { _user: string }; Returns: boolean }

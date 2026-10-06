@@ -1,3 +1,4 @@
+import { useAuth } from "@/hooks/useAuth";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -31,6 +32,7 @@ const memberName = (m?: Member) => {
 const fmt = (s: string) => new Date(s).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
 
 export default function CorrespondencePanel({ members, userId }: { members: Member[]; userId: string | null }) {
+  const { canEditAlmoner } = useAuth();
   const [rows, setRows] = useState<Row[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<Row | null>(null);
@@ -65,12 +67,12 @@ export default function CorrespondencePanel({ members, userId }: { members: Memb
           <h3 className="font-serif text-lg text-primary-foreground">Correspondence Log</h3>
           <p className="text-xs text-primary-foreground/60">Cards, letters, calls and flowers sent or received</p>
         </div>
-        <Button size="sm" className="bg-gold text-navy hover:bg-gold/90" onClick={() => { setEditing(null); setShowForm((v) => !v); }}>
+        {canEditAlmoner && (<Button size="sm" className="bg-gold text-navy hover:bg-gold/90" onClick={() => { setEditing(null); setShowForm((v) => !v); }}>
           {showForm && !editing ? <><X className="w-4 h-4 mr-1" /> Cancel</> : <><Plus className="w-4 h-4 mr-1" /> New entry</>}
-        </Button>
+        </Button>)}
       </div>
 
-      {(showForm || editing) && (
+      {canEditAlmoner && (showForm || editing) && (
         <EntryForm
           key={editing?.id ?? "new"}
           members={members}
@@ -102,14 +104,14 @@ export default function CorrespondencePanel({ members, userId }: { members: Memb
                   {r.body && <p className="text-sm text-primary-foreground/80 mt-2 whitespace-pre-wrap">{r.body}</p>}
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <button
+                  {canEditAlmoner && (<button
                     onClick={() => { setShowForm(false); setEditing(r); }}
                     className="p-1.5 text-primary-foreground/40 hover:text-gold"
                     aria-label="Edit"
                     title="Edit"
                   >
                     <Pencil className="w-4 h-4" />
-                  </button>
+                  </button>)}
                   {r.attachment_path && (
                     <button
                       onClick={() => openAttachment(r.attachment_path!)}
@@ -120,9 +122,9 @@ export default function CorrespondencePanel({ members, userId }: { members: Memb
                       <Paperclip className="w-4 h-4" />
                     </button>
                   )}
-                  <button onClick={() => archive(r.id)} className="p-1.5 text-primary-foreground/40 hover:text-red-400" aria-label="Archive" title="Archive">
+                  {canEditAlmoner && (<button onClick={() => archive(r.id)} className="p-1.5 text-primary-foreground/40 hover:text-red-400" aria-label="Archive" title="Archive">
                     <Trash2 className="w-4 h-4" />
-                  </button>
+                  </button>)}
                 </div>
               </div>
             </article>

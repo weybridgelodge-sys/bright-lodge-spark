@@ -1,3 +1,4 @@
+import { useAuth } from "@/hooks/useAuth";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -56,6 +57,7 @@ type SavedReport = {
 };
 
 export default function ReportPanel({ members }: { members: Member[] }) {
+  const { canEditAlmoner } = useAuth();
   const today = new Date();
   const monthAgo = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate()).toISOString().slice(0, 10);
   const [from, setFrom] = useState(monthAgo);
@@ -503,12 +505,14 @@ export default function ReportPanel({ members }: { members: Member[] }) {
       {report && (
         <div className="bg-navy-light/40 border border-gold/20 rounded p-4">
           <div className="flex items-center justify-end gap-2 mb-2 flex-wrap">
+            {canEditAlmoner && (<>
             <Button size="sm" variant="outline" onClick={() => persist("draft")} disabled={saving} className="border-gold/30 text-gold hover:bg-gold/10">
               <Save className="w-4 h-4 mr-1" /> Save draft
             </Button>
             <Button size="sm" variant="outline" onClick={() => persist("final")} disabled={saving} className="border-gold/30 text-gold hover:bg-gold/10">
               <CheckCircle2 className="w-4 h-4 mr-1" /> Finalise
             </Button>
+            </>)}
             <Button size="sm" variant="outline" onClick={copy} className="border-gold/30 text-gold hover:bg-gold/10">
               <Copy className="w-4 h-4 mr-1" /> Copy
             </Button>
@@ -550,7 +554,7 @@ export default function ReportPanel({ members }: { members: Member[] }) {
                   <Button size="sm" variant="ghost" onClick={() => reprint(r)} className="text-gold hover:bg-gold/10 h-8 px-2">
                     <Printer className="w-4 h-4" />
                   </Button>
-                  {isAdmin && (
+                  {isAdmin && canEditAlmoner && (
                     <Button size="sm" variant="ghost" onClick={() => removeReport(r.id)} className="text-red-400 hover:bg-red-500/10 h-8 px-2">
                       <Trash2 className="w-4 h-4" />
                     </Button>

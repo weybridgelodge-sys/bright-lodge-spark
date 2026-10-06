@@ -1,3 +1,4 @@
+import { useAuth } from "@/hooks/useAuth";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -25,6 +26,7 @@ const memberName = (m?: Member) => {
 const fmt = (s: string | null) => s ? new Date(s).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) : "ongoing";
 
 export default function AbsencesPanel({ members, userId }: { members: Member[]; userId: string | null }) {
+  const { canEditAlmoner } = useAuth();
   const [rows, setRows] = useState<Row[]>([]);
   const [showForm, setShowForm] = useState(false);
   const memberMap = useMemo(() => new Map(members.map((m) => [m.id, m])), [members]);
@@ -59,9 +61,9 @@ export default function AbsencesPanel({ members, userId }: { members: Member[]; 
         </p>
         <p className="text-[11px] text-primary-foreground/60">{fmt(r.period_start)} → {fmt(r.period_end)}{r.notes ? ` · ${r.notes}` : ""}</p>
       </div>
-      <button onClick={() => archive(r.id)} className="p-1.5 text-primary-foreground/40 hover:text-red-400" aria-label="Archive">
+      {canEditAlmoner && <button onClick={() => archive(r.id)} className="p-1.5 text-primary-foreground/40 hover:text-red-400" aria-label="Archive">
         <Trash2 className="w-4 h-4" />
-      </button>
+      </button>}
     </div>
   );
 
@@ -72,12 +74,12 @@ export default function AbsencesPanel({ members, userId }: { members: Member[]; 
           <h3 className="font-serif text-lg text-primary-foreground">Member Absences</h3>
           <p className="text-xs text-primary-foreground/60">Known reasons members are away — illness, travel, work</p>
         </div>
-        <Button size="sm" className="bg-gold text-navy hover:bg-gold/90" onClick={() => setShowForm((v) => !v)}>
+        {canEditAlmoner && <Button size="sm" className="bg-gold text-navy hover:bg-gold/90" onClick={() => setShowForm((v) => !v)}>
           {showForm ? <><X className="w-4 h-4 mr-1" /> Cancel</> : <><Plus className="w-4 h-4 mr-1" /> Log absence</>}
-        </Button>
+        </Button>}
       </div>
 
-      {showForm && <NewForm members={members} userId={userId} onSaved={() => { setShowForm(false); load(); }} />}
+      {canEditAlmoner && showForm && <NewForm members={members} userId={userId} onSaved={() => { setShowForm(false); load(); }} />}
 
       <section>
         <p className="text-[11px] uppercase tracking-wider text-gold mb-2">Currently absent</p>

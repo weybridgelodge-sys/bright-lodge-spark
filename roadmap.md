@@ -35,6 +35,7 @@
 
 ## Automated officer digests
 - [x] Almoner overdue digest: daily 06:00 UK (hourly cron `0 * * * *` + Europe/London guard), recipient = current Almoner, ?force=1 to re-send.
+- [x] Almoner two-tier access: Almoner/Secretary/admin edit, current WM read-only, IPM removed.
 - [x] Secretary "missing Grand Lodge number" digest (secretary-ugle-reminder): monthly 07:00 UK on the 1st (hourly cron `10 * * * *` + Europe/London guard), active initiated members with blank ugle_reg_number, oldest first; recipient = current Secretary (role fallback); skips when empty; ?dry_run=1 previews, ?force=1 sends now. Links to /members/admin#member-<id>, where admin/Secretary/WM edit the number inline.
 
 ## Dietary requirements + bulk import (Oct 2026)

@@ -121,7 +121,7 @@ const daysAgo = (s: string | null) => {
 
 // ============ Page ============
 export default function AlmonerPortal() {
-  const { canAccessAlmoner, loading } = useAuth();
+  const { canAccessAlmoner, canEditAlmoner, loading } = useAuth();
   const [acknowledged, setAcknowledged] = useState(() => sessionStorage.getItem("almoner-confidentiality") === "1");
 
   if (loading) return null;
@@ -136,6 +136,9 @@ export default function AlmonerPortal() {
         <div>
           <h1 className="font-serif text-2xl text-primary-foreground">Almoner Portal</h1>
           <p className="text-sm text-primary-foreground/60">Confidential member welfare records</p>
+          {!canEditAlmoner && (
+            <p className="mt-1 inline-block text-xs uppercase tracking-wider text-gold border border-gold/40 rounded px-2 py-0.5" role="status">Read-only view</p>
+          )}
         </div>
       </header>
 
@@ -401,7 +404,7 @@ function MemberRecord({ member, currentStatus, onBack }: {
   currentStatus: WelfareStatus;
   onBack: () => void;
 }) {
-  const { user } = useAuth();
+  const { user, canEditAlmoner } = useAuth();
   const [logs, setLogs] = useState<LogRow[]>([]);
   const [status, setStatus] = useState<WelfareStatus>(currentStatus);
   const [statusNote, setStatusNote] = useState("");
@@ -464,7 +467,7 @@ function MemberRecord({ member, currentStatus, onBack }: {
           </div>
           <div className="flex items-center gap-2">
             <Label className="text-xs uppercase tracking-wider text-primary-foreground/60">Status</Label>
-            <Select value={status} onValueChange={(v) => saveStatus(v as WelfareStatus)}>
+            <Select value={status} onValueChange={(v) => saveStatus(v as WelfareStatus)} disabled={!canEditAlmoner}>
               <SelectTrigger className="w-[200px] bg-navy text-primary-foreground border-gold/30">
                 <SelectValue />
               </SelectTrigger>
@@ -480,12 +483,12 @@ function MemberRecord({ member, currentStatus, onBack }: {
 
       <div className="flex items-center justify-between mb-3">
         <h3 className="font-serif text-lg text-primary-foreground">Welfare Log</h3>
-        <Button size="sm" className="bg-gold text-navy hover:bg-gold/90" onClick={() => setShowForm((v) => !v)}>
+        {canEditAlmoner && (<Button size="sm" className="bg-gold text-navy hover:bg-gold/90" onClick={() => setShowForm((v) => !v)}>
           {showForm ? <><X className="w-4 h-4 mr-1" /> Cancel</> : <><Plus className="w-4 h-4 mr-1" /> New log entry</>}
-        </Button>
+        </Button>)}
       </div>
 
-      {showForm && (
+      {canEditAlmoner && showForm && (
         <NewLogEntryForm
           memberId={member.id}
           loggedBy={user?.id ?? null}
