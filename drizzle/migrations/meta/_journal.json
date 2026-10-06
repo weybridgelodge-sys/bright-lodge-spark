@@ -519,6 +519,13 @@
       "when": 1791314882547,
       "tag": "0073_almoner_access_coalesce",
       "breakpoints": true
+    },
+    {
+      "idx": 74,
+      "version": "7",
+      "when": 1791315438291,
+      "tag": "0074_almoner_widows_register",
+      "breakpoints": true
     }
   ]
 }

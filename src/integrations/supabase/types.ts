@@ -59,6 +59,175 @@ export type Database = {
         }
         Relationships: []
       }
+      almoner_widow_contacts: {
+        Row: {
+          contact_date: string
+          contact_type: string
+          created_at: string
+          id: string
+          logged_by: string | null
+          notes: string | null
+          updated_at: string
+          welfare_concern: boolean
+          widow_id: string
+        }
+        Insert: {
+          contact_date?: string
+          contact_type: string
+          created_at?: string
+          id?: string
+          logged_by?: string | null
+          notes?: string | null
+          updated_at?: string
+          welfare_concern?: boolean
+          widow_id: string
+        }
+        Update: {
+          contact_date?: string
+          contact_type?: string
+          created_at?: string
+          id?: string
+          logged_by?: string | null
+          notes?: string | null
+          updated_at?: string
+          welfare_concern?: boolean
+          widow_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "almoner_widow_contacts_widow_id_fkey"
+            columns: ["widow_id"]
+            isOneToOne: false
+            referencedRelation: "almoner_widows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      almoner_widow_kin: {
+        Row: {
+          created_at: string
+          email: string | null
+          id: string
+          name: string
+          notes: string | null
+          phone: string | null
+          relationship: string
+          relationship_other: string | null
+          updated_at: string
+          widow_id: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          phone?: string | null
+          relationship?: string
+          relationship_other?: string | null
+          updated_at?: string
+          widow_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          phone?: string | null
+          relationship?: string
+          relationship_other?: string | null
+          updated_at?: string
+          widow_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "almoner_widow_kin_widow_id_fkey"
+            columns: ["widow_id"]
+            isOneToOne: false
+            referencedRelation: "almoner_widows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      almoner_widows: {
+        Row: {
+          address: string | null
+          care_home_address: string | null
+          care_home_name: string | null
+          connection_source: string
+          contact_interval_days: number
+          created_at: string
+          created_by: string | null
+          deceased_on: string | null
+          dob_day: number | null
+          dob_month: number | null
+          dob_year: number | null
+          full_name: string
+          home_type: string
+          husband_lodge: string | null
+          husband_name: string | null
+          id: string
+          notes: string | null
+          phone: string | null
+          preferred_address: string | null
+          smwa_liaison: string | null
+          smwa_reference: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          care_home_address?: string | null
+          care_home_name?: string | null
+          connection_source?: string
+          contact_interval_days?: number
+          created_at?: string
+          created_by?: string | null
+          deceased_on?: string | null
+          dob_day?: number | null
+          dob_month?: number | null
+          dob_year?: number | null
+          full_name: string
+          home_type?: string
+          husband_lodge?: string | null
+          husband_name?: string | null
+          id?: string
+          notes?: string | null
+          phone?: string | null
+          preferred_address?: string | null
+          smwa_liaison?: string | null
+          smwa_reference?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          care_home_address?: string | null
+          care_home_name?: string | null
+          connection_source?: string
+          contact_interval_days?: number
+          created_at?: string
+          created_by?: string | null
+          deceased_on?: string | null
+          dob_day?: number | null
+          dob_month?: number | null
+          dob_year?: number | null
+          full_name?: string
+          home_type?: string
+          husband_lodge?: string | null
+          husband_name?: string | null
+          id?: string
+          notes?: string | null
+          phone?: string | null
+          preferred_address?: string | null
+          smwa_liaison?: string | null
+          smwa_reference?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       backup_log: {
         Row: {
           created_at: string
