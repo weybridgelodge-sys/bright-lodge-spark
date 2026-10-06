@@ -172,7 +172,7 @@ function WidowForm({ widow, onSaved, onCancel }: { widow?: Widow; onSaved: (id?:
         <div>
           <Label className="text-xs">Lives in</Label>
           <Select value={f.home_type} onValueChange={(v) => setF((p) => ({ ...p, home_type: v as Widow["home_type"] }))}>
-            <SelectTrigger className={inputCls}><SelectValue /></SelectTrigger>
+            <SelectTrigger className={inputCls} aria-label="Lives in"><SelectValue /></SelectTrigger>
             <SelectContent><SelectItem value="own_home">Own home</SelectItem><SelectItem value="care_home">Care home</SelectItem><SelectItem value="with_family">Living with family</SelectItem></SelectContent>
           </Select>
         </div>
