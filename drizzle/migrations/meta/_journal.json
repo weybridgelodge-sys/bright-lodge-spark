@@ -512,6 +512,13 @@
       "when": 1791314809260,
       "tag": "0072_almoner_two_tier_access",
       "breakpoints": true
+    },
+    {
+      "idx": 73,
+      "version": "7",
+      "when": 1791314882547,
+      "tag": "0073_almoner_access_coalesce",
+      "breakpoints": true
     }
   ]
 }
