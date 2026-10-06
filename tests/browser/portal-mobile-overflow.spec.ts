@@ -223,3 +223,14 @@ test("Secretary member import preview fits 320px", async ({ page }) => {
   expect(box && box.height >= 44).toBeTruthy();
   await expectNoViewportOverflow(page, "Member import preview");
 });
+
+test("Almoner portal read-only view (WM) fits 320px and hides write controls", async ({ page }) => {
+  await page.addInitScript(() => sessionStorage.setItem("almoner-confidentiality", "1"));
+  await page.goto("/members/almoner?e2e_almoner=readonly");
+  await waitForPortal(page);
+  await expect(page.getByText("Read-only view")).toBeVisible();
+  for (const name of ["New log entry", "Log absence", "Add event", "New entry", "New referral"]) {
+    await expect(page.getByRole("button", { name })).toHaveCount(0);
+  }
+  await expectNoViewportOverflow(page, "Almoner read-only");
+});
