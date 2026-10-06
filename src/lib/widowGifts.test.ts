@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { defaultWidowReportFrom, formatGiftHistory, fundingFromChoice, fundingLabel } from "./widowGifts";
+import { defaultWidowReportFrom, formatGiftHistory, fundingFromChoice, fundingLabel, raffleCollectionLabel } from "./widowGifts";
 
 describe("formatGiftHistory", () => {
   it("orders oldest first and shows amounts", () => {
@@ -33,5 +33,20 @@ describe("gift funding", () => {
     expect(fundingLabel("none")).toBe("Not linked");
     expect(fundingLabel("raffle", "Christmas · 10 Dec 2025", true)).toBe("Raffle — Christmas · 10 Dec 2025");
     expect(fundingLabel("raffle", null, false)).toBe("Raffle (collection removed)");
+  });
+});
+
+describe("raffleCollectionLabel", () => {
+  const fmt = (d: string) => d;
+  it("shows the meeting title when there is one", () => {
+    expect(raffleCollectionLabel({ collection_date: "2025-12-10", event_title: "Christmas Meeting", net_amount: 300 }, fmt)).toBe("Christmas Meeting · 2025-12-10 · net £300.00");
+  });
+  it("drops a missing or blank title instead of repeating 'Raffle'", () => {
+    expect(raffleCollectionLabel({ collection_date: "2025-12-10", event_title: null, net_amount: 300 }, fmt)).toBe("2025-12-10 · net £300.00");
+    expect(raffleCollectionLabel({ collection_date: "2025-12-10", event_title: "   ", net_amount: "300.5" }, fmt)).toBe("2025-12-10 · net £300.50");
+  });
+  it("reads once after the 'Raffle — ' prefix", () => {
+    const text = raffleCollectionLabel({ collection_date: "2025-12-10", event_title: null, net_amount: 300 }, fmt);
+    expect(fundingLabel("raffle", text, true)).toBe("Raffle — 2025-12-10 · net £300.00");
   });
 });
