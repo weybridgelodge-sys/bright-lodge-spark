@@ -65,6 +65,8 @@ type Profile = {
   initiation_date: string | null;
   rank: string | null;
   ugle_reg_number: string | null;
+  mmh_number?: string | null;
+  rose_croix_number?: string | null;
   mother_lodge: string | null;
   status: Status;
   status_changed_at: string | null;
@@ -128,6 +130,8 @@ const EMPTY_FORM = {
   postcode: "",
   dietary_requirements: "",
   ugle_reg_number: "",
+  mmh_number: "",
+  rose_croix_number: "",
 };
 
 export default function MembersAdmin() {
@@ -343,6 +347,8 @@ export default function MembersAdmin() {
       postcode: p.postcode ?? "",
       dietary_requirements: p.dietary_requirements ?? "",
       ugle_reg_number: p.ugle_reg_number ?? "",
+      mmh_number: p.mmh_number ?? "",
+      rose_croix_number: p.rose_croix_number ?? "",
     });
     setTab("add");
   };
@@ -411,6 +417,8 @@ export default function MembersAdmin() {
       postcode: form.postcode.trim() || null,
       dietary_requirements: form.dietary_requirements.trim() || null,
       ugle_reg_number: form.ugle_reg_number.trim() || null,
+      mmh_number: form.mmh_number.trim() || null,
+      rose_croix_number: form.rose_croix_number.trim() || null,
     };
     if (form.id) payload.id = form.id;
 
@@ -891,6 +899,34 @@ export default function MembersAdmin() {
                 onChange={(e) => setForm({ ...form, ugle_reg_number: e.target.value })}
                 className={`mt-1 min-h-[44px] ${inputCls} normal-case tracking-normal text-primary-foreground`}
               />
+            </label>
+            <label className={`${labelCls} sm:col-span-3`}>
+              MMH Number
+              <input
+                id="form-mmh_number"
+                value={form.mmh_number}
+                maxLength={40}
+                inputMode="numeric"
+                placeholder="Not yet recorded"
+                aria-describedby="hint-mmh_number"
+                onChange={(e) => setForm({ ...form, mmh_number: e.target.value })}
+                className={`mt-1 min-h-[44px] ${inputCls} normal-case tracking-normal text-primary-foreground`}
+              />
+              <span id="hint-mmh_number" className="mt-1 block text-[11px] normal-case tracking-normal text-primary-foreground/50">Mark Masons' Hall — same across Mark, RAM and companion Orders</span>
+            </label>
+            <label className={`${labelCls} sm:col-span-3`}>
+              Rose Croix Number
+              <input
+                id="form-rose_croix_number"
+                value={form.rose_croix_number}
+                maxLength={40}
+                inputMode="numeric"
+                placeholder="Not yet recorded"
+                aria-describedby="hint-rose_croix_number"
+                onChange={(e) => setForm({ ...form, rose_croix_number: e.target.value })}
+                className={`mt-1 min-h-[44px] ${inputCls} normal-case tracking-normal text-primary-foreground`}
+              />
+              <span id="hint-rose_croix_number" className="mt-1 block text-[11px] normal-case tracking-normal text-primary-foreground/50">Ancient and Accepted Rite (Supreme Council 33°)</span>
             </label>
             <label className={`${labelCls} sm:col-span-6`}>
               Dietary requirements / allergies
