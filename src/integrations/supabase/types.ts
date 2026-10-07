@@ -3783,6 +3783,7 @@ export type Database = {
           joined_year: number | null
           last_name: string | null
           middle_name: string | null
+          mmh_number: string | null
           mother_lodge: string | null
           office: string | null
           passing_date: string | null
@@ -3794,6 +3795,7 @@ export type Database = {
           provincial_rank: string | null
           raising_date: string | null
           rank: string | null
+          rose_croix_number: string | null
           royal_arch_date: string | null
           status: Database["public"]["Enums"]["member_status"]
           status_changed_at: string | null
@@ -3827,6 +3829,7 @@ export type Database = {
           joined_year?: number | null
           last_name?: string | null
           middle_name?: string | null
+          mmh_number?: string | null
           mother_lodge?: string | null
           office?: string | null
           passing_date?: string | null
@@ -3838,6 +3841,7 @@ export type Database = {
           provincial_rank?: string | null
           raising_date?: string | null
           rank?: string | null
+          rose_croix_number?: string | null
           royal_arch_date?: string | null
           status?: Database["public"]["Enums"]["member_status"]
           status_changed_at?: string | null
@@ -3871,6 +3875,7 @@ export type Database = {
           joined_year?: number | null
           last_name?: string | null
           middle_name?: string | null
+          mmh_number?: string | null
           mother_lodge?: string | null
           office?: string | null
           passing_date?: string | null
@@ -3882,6 +3887,7 @@ export type Database = {
           provincial_rank?: string | null
           raising_date?: string | null
           rank?: string | null
+          rose_croix_number?: string | null
           royal_arch_date?: string | null
           status?: Database["public"]["Enums"]["member_status"]
           status_changed_at?: string | null
@@ -5920,8 +5926,10 @@ export type Database = {
           date_of_birth: string
           dietary_requirements: string
           id: string
+          mmh_number: string
           phone: string
           postcode: string
+          rose_croix_number: string
           town: string
           ugle_reg_number: string
         }[]
