@@ -41,3 +41,6 @@
 ## Dietary requirements + bulk import (Oct 2026)
 - [x] Private profile dietary field (My Profile, Member Admin, Festive Board table-plan fallback, booking pre-fill)
 - [x] CSV member import (admin + Secretary), fill-blanks only, preview first
+
+- [ ] MMH Number field (approved plan)
+- [ ] Rose Croix Number field (same pattern, plan pending)
