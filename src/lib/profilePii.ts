@@ -12,6 +12,8 @@ export type ProfilePii = {
   postcode: string | null;
   ugle_reg_number: string | null;
   dietary_requirements: string | null;
+  mmh_number: string | null;
+  rose_croix_number: string | null;
 };
 
 /**
