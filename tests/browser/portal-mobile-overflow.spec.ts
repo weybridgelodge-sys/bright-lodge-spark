@@ -158,7 +158,7 @@ test("Meeting Events archive controls stay within 320px with 48px targets", asyn
 test("Grand Lodge number deep link opens Edit Member with the field focused at 320px (Secretary)", async ({ page }) => {
   const id = "11111111-2222-3333-4444-555555555555";
   await page.route("**/rest/v1/rpc/get_admin_profiles**", (r) => r.fulfill({ json: [{ id, email: "long.name@example.com", title: "W Bro", first_name: "Bartholomew-Maximilian", last_name: "Featherstonehaugh-Wolstenholme", degree: "master_mason", status: "active", is_past_master: false, is_royal_arch: false, is_honorary_member: false, initiation_date: "2026-05-13" }] }));
-  await page.route("**/rest/v1/rpc/get_profiles_pii**", (r) => r.fulfill({ json: [{ id, ugle_reg_number: "123456" }] }));
+  await page.route("**/rest/v1/rpc/get_profiles_pii**", (r) => r.fulfill({ json: [{ id, ugle_reg_number: "123456", mmh_number: "1270787", rose_croix_number: "RC-998877" }] }));
   await page.goto(`/members/admin?e2e_as=secretary#member-${id}`);
   await waitForPortal(page);
   const input = page.getByLabel("Grand Lodge Ref. No.");
@@ -167,10 +167,18 @@ test("Grand Lodge number deep link opens Edit Member with the field focused at 3
   await expect(input).toHaveValue("123456");
   // No standalone Save button next to the field: it saves with the form.
   await expect(page.getByRole("button", { name: "Save", exact: true })).toHaveCount(0);
+  for (const [label, val] of [["MMH Number", "1270787"], ["Rose Croix Number", "RC-998877"]] as const) {
+    const f = page.getByLabel(label);
+    await expect(f).toBeVisible();
+    await expect(f).toHaveValue(val);
+    const b = await f.boundingBox();
+    expect(b!.height).toBeGreaterThanOrEqual(44);
+    expect(b!.x + b!.width).toBeLessThanOrEqual(320);
+  }
   const box = await input.boundingBox();
   expect(box!.height).toBeGreaterThanOrEqual(44);
   expect(box!.x + box!.width).toBeLessThanOrEqual(320);
-  await expectNoViewportOverflow(page, "Edit Member with Grand Lodge number");
+  await expectNoViewportOverflow(page, "Edit Member with Grand Lodge, MMH and Rose Croix numbers");
 });
 
 test("Secretary-only Member Management fits 320px and shows approve/suspend, hides admin-only controls", async ({ page }) => {
