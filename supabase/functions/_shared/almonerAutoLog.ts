@@ -66,7 +66,7 @@ export function evaluateAutoLog(
     for (const mt of usable) {
       // Not yet a member at this meeting.
       if (mem.initiation_date && mt.meeting_date < mem.initiation_date) continue
-      const st = status.get(`${mem.id}|${mt.meeting_id ?? mt.id}`)
+      const st = status.get(`${mem.id}|${mt.id}`)
       const isNew = !!mem.initiation_date && mt.meeting_date < addYear(mem.initiation_date)
       const present = !!st && PRESENT.has(st)
 
@@ -100,7 +100,9 @@ export function evaluateAutoLog(
       const list = yearMisses.get(ly) ?? []
       list.push(mt)
       yearMisses.set(ly, list)
-      if (list.length === 3) {
+      // Skip if this gap is already covered by the consecutive entry.
+      const coveredByStreak = streakLogged && list.every((x) => streak.includes(x))
+      if (list.length === 3 && !coveredByStreak) {
         const dates = list.map((s) => s.meeting_date)
         out.push({
           member_id: mem.id, key: `t1y:${ly}`, tier: 1, trigger_date: mt.meeting_date,
