@@ -29,6 +29,7 @@ import {
 import { exportVoReport, exportFullKpi } from "@/lib/kpiExports";
 import AttendanceCharts from "@/components/members/AttendanceCharts";
 import CandidatesManager from "@/components/members/CandidatesManager";
+import { useInitialLoading } from "@/hooks/useInitialLoading";
 
 function Section({ title, children, defaultOpen = true }: { title: string; children: React.ReactNode; defaultOpen?: boolean }) {
   return (
@@ -72,7 +73,7 @@ export default function Kpis() {
   const { user } = useAuth();
   const [bundle, setBundle] = useState<KpiBundle | null>(null);
   const [eng, setEng] = useState<EngagementBundle | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useInitialLoading();
 
   const load = async () => {
     setLoading(true);

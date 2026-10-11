@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { BookOpen, Upload, Trash2, Download, Loader2, Clock, Eye, ExternalLink, Link2, RefreshCw, FileText, Video, Music, Search } from "lucide-react";
 import { toast } from "sonner";
 import { toUploadBody } from "@/lib/nativeUpload";
+import { useInitialLoading } from "@/hooks/useInitialLoading";
 
 type Degree = "entered_apprentice" | "fellow_craft" | "master_mason" | "installed_master";
 type DegreeOrGeneral = Degree | "general";
@@ -45,7 +46,7 @@ type Doc = {
 function Inner() {
   const { user } = useAuth();
   const [docs, setDocs] = useState<Doc[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useInitialLoading();
 
   const [previewDegree, setPreviewDegree] = useState<Degree | null>(null);
   const [typeFilter, setTypeFilter] = useState<DocType | "all">("all");

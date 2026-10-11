@@ -26,6 +26,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { saveJsPdf } from "@/lib/nativeDownload";
 import InstallationDateCard from "@/components/members/officers/InstallationDateCard";
+import { useInitialLoading } from "@/hooks/useInitialLoading";
 
 type Tab = "board" | "ladder" | "readiness";
 type Readiness = "ready" | "needs_experience" | "non_progressive";
@@ -87,7 +88,7 @@ const READINESS_LABEL: Record<Readiness, string> = {
 export default function OfficersTracker() {
   const { user, profile, isAdmin, isSecretary } = useAuth();
   const [tab, setTab] = useState<Tab>("board");
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useInitialLoading();
 
   const [members, setMembers] = useState<ProfileRow[]>([]);
   const [statuses, setStatuses] = useState<StatusRow[]>([]);
@@ -100,11 +101,8 @@ export default function OfficersTracker() {
     return () => { live = false; };
   }, []);
 
-  const loadedOnce = useRef(false);
   const load = async () => {
-    // Only show the full-page loader on first load; refreshes after a save
-    // must keep the page mounted so scroll position and focus are preserved.
-    if (!loadedOnce.current) setLoading(true);
+    setLoading(true); // first load only (useInitialLoading)
     const [{ data: m, error: e1 }, { data: s, error: e2 }, { data: a, error: e3 }] = await Promise.all([
       supabase
         .from("profiles")
@@ -120,7 +118,6 @@ export default function OfficersTracker() {
     setMembers((m as ProfileRow[]) ?? []);
     setStatuses((s as StatusRow[]) ?? []);
     setAppointments((a as AppointmentRow[]) ?? []);
-    loadedOnce.current = true;
     setLoading(false);
   };
 

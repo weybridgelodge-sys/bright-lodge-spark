@@ -11,6 +11,7 @@ import {
   REFERRAL_SOURCES,
   REFERRAL_SOURCE_LABELS,
 } from "@/lib/kpis";
+import { useInitialLoading } from "@/hooks/useInitialLoading";
 
 const EMPTY: Omit<Candidate, "id" | "created_at" | "updated_at"> = {
   first_name: "",
@@ -29,7 +30,7 @@ const EMPTY: Omit<Candidate, "id" | "created_at" | "updated_at"> = {
 
 export default function CandidatesManager({ onChange }: { onChange?: () => void }) {
   const [rows, setRows] = useState<Candidate[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useInitialLoading();
   const [adding, setAdding] = useState(false);
   const [draft, setDraft] = useState<typeof EMPTY>(EMPTY);
 
