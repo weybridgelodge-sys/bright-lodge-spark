@@ -20,6 +20,8 @@ interface FlaggedMember {
   overdueFollowUp?: string | null // ISO date
   missedMeetings?: boolean
   checkIn?: string | null
+  /** New system-logged disengagement entries added today. */
+  systemLogged?: string[]
   portalUrl: string
 }
 
@@ -136,6 +138,9 @@ const Email = ({ members = [], celebrations = [], reportDate, portalUrl }: Props
                     <Text style={flagAmber}>• Missed the last 2 meetings</Text>
                   )}
                   {m.checkIn && <Text style={flagSoft}>• {m.checkIn}</Text>}
+                  {(m.systemLogged ?? []).map((r, j) => (
+                    <Text key={j} style={flagAmber}>• New system log entry — {r.replace(/^System: /, '')}</Text>
+                  ))}
                   <Text style={{ margin: '6px 0 0' }}>
                     <Link href={m.portalUrl} style={linkStyle}>Open record →</Link>
                   </Text>

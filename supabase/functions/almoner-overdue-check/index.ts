@@ -11,6 +11,7 @@ import { createClient } from 'npm:@supabase/supabase-js@2'
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors'
 import { detectCelebrations, londonToday } from './celebrations.ts'
 import { sendTransactionalEmail } from '../_shared/send-email.ts'
+import { evaluateAutoLog } from '../_shared/almonerAutoLog.ts'
 
 const SITE_URL = 'https://weybridgelodge.org.uk'
 const PORTAL_URL = `${SITE_URL}/members/almoner`
@@ -33,7 +34,8 @@ Deno.serve(async (req) => {
   // Manual re-triggers can bypass the guard via ?force=1 (used by ops when a
   // scheduled run failed and the digest still needs to go out today).
   const url = new URL(req.url)
-  const force = url.searchParams.get('force') === '1'
+  const dryRun = url.searchParams.get('dry_run') === '1'
+  const force = url.searchParams.get('force') === '1' || dryRun
   if (force) {
     const expected = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     const auth = req.headers.get('Authorization') ?? ''
@@ -193,11 +195,71 @@ Deno.serve(async (req) => {
       }
     }
 
+    // ---- Almoner Auto-Log: system Welfare Log entries for genuine disengagement ----
+    const autoLogNew: Array<{ member_id: string; key: string; tier: 1 | 2; trigger_date: string; reason: string }> = []
+    {
+      const { data: autoMeetings, error: amErr } = await supabase
+        .from('festive_board_meetings')
+        .select('id,meeting_date,meeting_type')
+        .gte('meeting_date', '2026-02-18')
+        .lte('meeting_date', today)
+      if (amErr) throw amErr
+      const ids = ((autoMeetings as any[]) ?? []).map((m) => m.id)
+      let autoAtt: any[] = []
+      if (ids.length) {
+        const { data, error } = await supabase
+          .from('festive_board_attendance')
+          .select('member_id,meeting_id,attendance_status')
+          .in('meeting_id', ids)
+        if (error) throw error
+        autoAtt = (data as any[]) ?? []
+      }
+      const escalations = evaluateAutoLog(
+        (autoMeetings as any[]) ?? [],
+        autoAtt,
+        (members as any[]).map((m) => ({ id: m.id, initiation_date: m.initiation_date ?? null })),
+        today,
+      )
+      // Existing keys, including dismissed (soft-deleted) ones, are never re-created.
+      const { data: existing, error: exErr } = await supabase
+        .from('welfare_log_entries')
+        .select('member_id,system_key')
+        .not('system_key', 'is', null)
+      if (exErr) throw exErr
+      const seen = new Set(((existing as any[]) ?? []).map((r) => `${r.member_id}|${r.system_key}`))
+      for (const e of escalations) if (!seen.has(`${e.member_id}|${e.key}`)) autoLogNew.push(e)
+      if (!dryRun && autoLogNew.length) {
+        const { error: insErr } = await supabase.from('welfare_log_entries').insert(
+          autoLogNew.map((e) => ({
+            member_id: e.member_id,
+            contact_date: e.trigger_date,
+            contact_type: 'none',
+            contact_nature: 'routine',
+            notes: e.reason,
+            is_system: true,
+            system_reason: e.tier === 2 ? 'new_member_missed' : 'missed_without_apology',
+            system_key: e.key,
+            logged_by: null,
+          })),
+        )
+        if (insErr) throw insErr
+      }
+    }
+    const autoLogByMember: Record<string, string[]> = {}
+    for (const e of autoLogNew) (autoLogByMember[e.member_id] ??= []).push(e.reason)
+    if (dryRun) {
+      return new Response(
+        JSON.stringify({ ok: true, dry_run: true, auto_log_new: autoLogNew.map((e) => ({ member_id: e.member_id, key: e.key, tier: e.tier, trigger_date: e.trigger_date })) }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+      )
+    }
+
     // ---- Build flagged list ----
     const flaggedIds = new Set<string>([
       ...Object.keys(overdue),
       ...Object.keys(absentFlags),
       ...Object.keys(checkInFlags),
+      ...Object.keys(autoLogByMember),
     ])
     const flagged = Array.from(flaggedIds)
       .map((id) => {
@@ -208,10 +270,11 @@ Deno.serve(async (req) => {
           overdueFollowUp: overdue[id] ?? null,
           missedMeetings: !!absentFlags[id],
           checkIn: checkInFlags[id] ?? null,
+          systemLogged: autoLogByMember[id] ?? [],
           portalUrl: PORTAL_URL,
         }
       })
-      .filter(Boolean) as Array<{ name: string; overdueFollowUp: string | null; missedMeetings: boolean; checkIn: string | null; portalUrl: string }>
+      .filter(Boolean) as Array<{ name: string; overdueFollowUp: string | null; missedMeetings: boolean; checkIn: string | null; systemLogged: string[]; portalUrl: string }>
 
     // ---- Memorable dates (birthdays / years as a Freemason) ----
     const celebrations = detectCelebrations(members as any[], celebrationDay)
@@ -323,7 +386,7 @@ Deno.serve(async (req) => {
     // birthday must not be de-duplicated against an earlier flagged-only send.
     const idempotencyKey = force || testDate
       ? `almoner-overdue-${today}-force-${Date.now()}`
-      : `almoner-overdue-${today}-c${celebrations.length}`
+      : `almoner-overdue-${today}-c${celebrations.length}-s${autoLogNew.length}`
 
 
     const resp = await sendTransactionalEmail({
