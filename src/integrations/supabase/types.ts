@@ -5284,10 +5284,13 @@ export type Database = {
           deleted_at: string | null
           follow_up_date: string | null
           id: string
+          is_system: boolean
           logged_by: string | null
           member_id: string
           nature_detail: string | null
           notes: string | null
+          system_key: string | null
+          system_reason: string | null
           updated_at: string
         }
         Insert: {
@@ -5299,10 +5302,13 @@ export type Database = {
           deleted_at?: string | null
           follow_up_date?: string | null
           id?: string
+          is_system?: boolean
           logged_by?: string | null
           member_id: string
           nature_detail?: string | null
           notes?: string | null
+          system_key?: string | null
+          system_reason?: string | null
           updated_at?: string
         }
         Update: {
@@ -5314,10 +5320,13 @@ export type Database = {
           deleted_at?: string | null
           follow_up_date?: string | null
           id?: string
+          is_system?: boolean
           logged_by?: string | null
           member_id?: string
           nature_detail?: string | null
           notes?: string | null
+          system_key?: string | null
+          system_reason?: string | null
           updated_at?: string
         }
         Relationships: [
