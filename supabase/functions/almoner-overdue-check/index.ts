@@ -1,6 +1,7 @@
 // Daily scheduled edge function: computes overdue Almoner follow-ups and
-// members who missed their last two meetings, then emails a digest to the
-// current Almoner via send-transactional-email.
+// absence flags and creates system Welfare Log entries EVERY day, but emails
+// the summary to the current Almoner only on DIGEST_WEEKDAY (Monday), covering
+// what is still open plus anything new since the last digest actually sent.
 //
 // It also detects "memorable dates" (birthdays and years-as-a-Freemason
 // anniversaries) for the day and, when there are any, sends the Almoner a push
@@ -13,6 +14,7 @@ import { detectCelebrations, londonToday } from './celebrations.ts'
 import { sendTransactionalEmail } from '../_shared/send-email.ts'
 import { evaluateAutoLog } from '../_shared/almonerAutoLog.ts'
 import { computeCheckInFlags } from '../_shared/almonerCheckIn.ts'
+import { isDigestDay, digestWindowStart, datesBetween, addDays } from '../_shared/almonerDigestSchedule.ts'
 
 const SITE_URL = 'https://weybridgelodge.org.uk'
 const PORTAL_URL = `${SITE_URL}/members/almoner`
@@ -223,11 +225,46 @@ Deno.serve(async (req) => {
         if (insErr) throw insErr
       }
     }
+    // ---- Weekly email window: "since the last digest actually sent" ----
+    // Detection above runs daily; only the email is weekly (DIGEST_WEEKDAY).
+    const isDigest = isDigestDay(celebrationDay) || (force && !dryRun) || !!testDate
+    const { data: lastSend } = await supabase
+      .from('email_send_log')
+      .select('created_at')
+      .eq('template_name', 'almoner-overdue-digest')
+      .eq('status', 'sent')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    const windowStart = digestWindowStart((lastSend as any)?.created_at ?? null, new Date())
+    const windowStartDate = windowStart.slice(0, 10)
+
+    // System entries created since the last email (dismissed ones excluded).
+    const { data: sysRows, error: sysErr } = await supabase
+      .from('welfare_log_entries')
+      .select('member_id,notes,created_at')
+      .eq('is_system', true)
+      .is('deleted_at', null)
+      .gte('created_at', windowStart)
+      .order('created_at', { ascending: true })
+    if (sysErr) throw sysErr
     const autoLogByMember: Record<string, string[]> = {}
-    for (const e of autoLogNew) (autoLogByMember[e.member_id] ??= []).push(e.reason)
+    for (const r of (sysRows as any[]) ?? []) {
+      if (!memberById.has(r.member_id)) continue
+      const when = new Date(r.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', timeZone: 'Europe/London' })
+      ;(autoLogByMember[r.member_id] ??= []).push(`${String(r.notes ?? '').replace(/^System: /, '')} (logged ${when})`)
+    }
     if (dryRun) {
       return new Response(
-        JSON.stringify({ ok: true, dry_run: true, auto_log_new: autoLogNew.map((e) => ({ member_id: e.member_id, key: e.key, tier: e.tier, trigger_date: e.trigger_date })) }),
+        JSON.stringify({
+          ok: true,
+          dry_run: true,
+          digest_day: isDigestDay(celebrationDay),
+          window_start: windowStart,
+          auto_log_new: autoLogNew.map((e) => ({ member_id: e.member_id, key: e.key, tier: e.tier, trigger_date: e.trigger_date })),
+          system_entries_since_last_email: Object.values(autoLogByMember).flat().length,
+          open_flags: new Set([...Object.keys(overdue), ...Object.keys(absentFlags), ...Object.keys(checkInFlags)]).size,
+        }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
       )
     }
@@ -254,10 +291,21 @@ Deno.serve(async (req) => {
       })
       .filter(Boolean) as Array<{ name: string; overdueFollowUp: string | null; missedMeetings: boolean; checkIn: string | null; systemLogged: string[]; portalUrl: string }>
 
-    // ---- Memorable dates (birthdays / years as a Freemason) ----
+    // ---- Memorable dates ----
+    // Today's drive the daily push; the weekly email lists those since the
+    // last email plus the coming 7 days.
     const celebrations = detectCelebrations(members as any[], celebrationDay)
+    const weekCelebrations = datesBetween(
+      windowStartDate < celebrationDay ? addDays(windowStartDate, 1) : celebrationDay,
+      addDays(celebrationDay, 7),
+    ).flatMap((d) => detectCelebrations(members as any[], d).map((c) => ({ ...c, date: d })))
 
-    if (flagged.length === 0 && celebrations.length === 0) {
+    if (!isDigest && celebrations.length === 0) {
+      return new Response(JSON.stringify({ ok: true, sent: false, reason: 'not_digest_day', auto_log_new: autoLogNew.length }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+    if (isDigest && flagged.length === 0 && weekCelebrations.length === 0 && celebrations.length === 0) {
       console.log('almoner-overdue-check: nothing to report')
       return new Response(JSON.stringify({ ok: true, sent: false, reason: 'nothing_flagged' }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -347,6 +395,19 @@ Deno.serve(async (req) => {
       if (pushErrors.length) console.warn('celebration push failures', pushErrors)
     }
 
+    // Non-digest days stop after the push: no email.
+    if (!isDigest) {
+      return new Response(
+        JSON.stringify({ ok: true, sent: false, reason: 'not_digest_day', push_sent: pushSent, push_errors: pushErrors }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+      )
+    }
+    if (flagged.length === 0 && weekCelebrations.length === 0) {
+      return new Response(JSON.stringify({ ok: true, sent: false, reason: 'nothing_flagged', push_sent: pushSent }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
     if (!almonerEmail) {
       console.warn('almoner-overdue-check: no almoner appointment or role holder found; flagged=', flagged.length)
       return new Response(
@@ -356,15 +417,15 @@ Deno.serve(async (req) => {
     }
 
 
-    // ---- Invoke send-transactional-email ----
-    const reportDate = new Date().toLocaleDateString('en-GB', {
-      day: '2-digit', month: 'short', year: 'numeric',
-    })
-    // Celebrations are part of the digest's identity: a day with a new
-    // birthday must not be de-duplicated against an earlier flagged-only send.
+    // ---- Weekly email ----
+    const fmtUk = (iso: string) =>
+      new Date(iso).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'Europe/London' })
+    const reportDate = fmtUk(new Date().toISOString())
+    const sinceDate = fmtUk(windowStart)
+    // One email per week: a rerun on the same digest day is de-duplicated.
     const idempotencyKey = force || testDate
-      ? `almoner-overdue-${today}-force-${Date.now()}`
-      : `almoner-overdue-${today}-c${celebrations.length}-s${autoLogNew.length}`
+      ? `almoner-weekly-${today}-force-${Date.now()}`
+      : `almoner-weekly-${celebrationDay}`
 
 
     const resp = await sendTransactionalEmail({
@@ -373,14 +434,17 @@ Deno.serve(async (req) => {
       idempotencyKey,
       templateData: {
         members: flagged,
-        celebrations: celebrations.map((c) => ({
+        celebrations: weekCelebrations.map((c) => ({
           name: c.name,
           type: c.type,
           years: c.years,
           message: c.message,
           whatsappUrl: c.whatsappUrl,
+          date: c.date,
+          upcoming: c.date > celebrationDay,
         })),
         reportDate,
+        sinceDate,
         portalUrl: PORTAL_URL,
       },
     })
