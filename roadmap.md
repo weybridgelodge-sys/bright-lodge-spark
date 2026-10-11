@@ -52,4 +52,4 @@
 - [x] Almoner Auto-Log: per-meeting Disengagement Risk fix + automatic system Welfare Log entries (Tier 1/Tier 2) in digest
 - [x] Almoner contact acknowledges "worth a call?", missed-meetings digest line and Tier 1/2 auto-log until a fresh miss
 - [x] Almoner digest email weekly (Mondays); detection stays daily
-- [ ] Welfare Board sort: worth-a-call badge, then RAG worst-first, then surname/first name
+- [x] Welfare Board sort: worth-a-call badge, then RAG worst-first, then surname/first name

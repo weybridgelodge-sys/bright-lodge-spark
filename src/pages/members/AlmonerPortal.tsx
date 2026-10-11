@@ -33,7 +33,6 @@ const STATUS_LABEL: Record<WelfareStatus, string> = {
   amber: "Needs monitoring",
   green: "Fine",
 };
-const STATUS_RANK: Record<WelfareStatus, number> = { red: 0, amber: 1, green: 2 };
 const STATUS_DOT: Record<WelfareStatus, string> = {
   red: "bg-red-500",
   amber: "bg-amber-400",
