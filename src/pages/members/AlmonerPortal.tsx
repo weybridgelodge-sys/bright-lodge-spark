@@ -182,6 +182,7 @@ function PortalBody() {
   const [lastContactByMember, setLastContactByMember] = useState<Record<string, string>>({});
   const [openFollowUps, setOpenFollowUps] = useState<Record<string, string>>({});
   const [checkInFlags, setCheckInFlags] = useState<Record<string, CheckInFlag>>({});
+  const [systemFlags, setSystemFlags] = useState<Record<string, number>>({});
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const loadAll = async () => {
@@ -191,7 +192,7 @@ function PortalBody() {
         .eq("status", "active"),
       supabase.from("welfare_member_status").select("member_id,status,updated_at"),
       supabase.from("welfare_log_entries")
-        .select("id,member_id,contact_date,follow_up_date,created_at")
+        .select("id,member_id,contact_date,follow_up_date,created_at,is_system")
         .is("deleted_at", null)
         .order("contact_date", { ascending: false }),
       supabase.from("festive_board_meetings")
@@ -220,7 +221,10 @@ function PortalBody() {
     // Last contact per member: from logs ordered desc, first row per member_id wins
     const last: Record<string, string> = {};
     const followUp: Record<string, string> = {}; // earliest open follow_up per member
+    const sys: Record<string, number> = {};
     (lgs as any[] ?? []).forEach((l) => {
+      // System auto-log entries are not contact and never count as "last contact".
+      if (l.is_system) { sys[l.member_id] = (sys[l.member_id] ?? 0) + 1; return; }
       if (!last[l.member_id]) last[l.member_id] = l.contact_date;
       if (l.follow_up_date) {
         const existing = followUp[l.member_id];
@@ -228,6 +232,7 @@ function PortalBody() {
       }
     });
     setLastContactByMember(last);
+    setSystemFlags(sys);
 
     // Overdue follow-up if follow_up_date < today AND no new log after that date
     const today = new Date().toISOString().slice(0, 10);
@@ -383,6 +388,11 @@ function PortalBody() {
                           <PhoneCall className="w-3 h-3 mr-1" /> {checkInFlags[m.id].label}
                         </Badge>
                       )}
+                      {systemFlags[m.id] > 0 && (
+                        <Badge variant="outline" className="border-dashed border-primary-foreground/40 text-primary-foreground/80 text-[10px] px-1.5 py-0" title="Automatic entry on the Welfare Log — no contact has been made">
+                          <Bot className="w-3 h-3 mr-1" /> System flag{systemFlags[m.id] > 1 ? ` ×${systemFlags[m.id]}` : ""}
+                        </Badge>
+                      )}
                       {openFollowUps[m.id] && (
                         <Badge variant="outline" className="border-red-500/50 text-red-400 text-[10px] px-1.5 py-0">
                           <CalendarClock className="w-3 h-3 mr-1" /> Follow-up overdue
@@ -443,6 +453,14 @@ function MemberRecord({ member, currentStatus, onBack }: {
   };
 
   useEffect(() => { loadLogs(); loadStatus(); }, [member.id]);
+
+  const dismissSystem = async (id: string) => {
+    if (!window.confirm("Dismiss this automatic entry? It won't be re-created for the same gap.")) return;
+    const { error } = await supabase.from("welfare_log_entries").update({ deleted_at: new Date().toISOString() }).eq("id", id);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Automatic entry dismissed");
+    loadLogs();
+  };
 
   const saveStatus = async (next: WelfareStatus, noteOverride?: string) => {
     const payload = {
@@ -509,7 +527,28 @@ function MemberRecord({ member, currentStatus, onBack }: {
         <p className="text-sm text-primary-foreground/60 italic">No log entries yet.</p>
       ) : (
         <div className="space-y-3">
-          {logs.map((l) => (
+          {logs.map((l) => l.is_system ? (
+            <article key={l.id} data-system-entry className="bg-navy/40 border border-dashed border-primary-foreground/30 rounded p-4">
+              <div className="flex items-start justify-between gap-3 flex-wrap mb-2">
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-primary-foreground/80">{fmtDate(l.contact_date)}</p>
+                  <p className="text-[11px] text-primary-foreground/60 mt-0.5">Automatic entry — no contact made</p>
+                </div>
+                <Badge variant="outline" className="border-dashed border-primary-foreground/40 text-primary-foreground/80 text-[10px]">
+                  <Bot className="w-3 h-3 mr-1" /> System
+                </Badge>
+              </div>
+              {l.notes && <p className="text-sm text-primary-foreground/75 italic whitespace-pre-wrap mb-2">{l.notes}</p>}
+              {canEditAlmoner && (
+                <button
+                  onClick={() => dismissSystem(l.id)}
+                  className="min-h-[44px] text-[11px] uppercase tracking-wider text-gold hover:text-gold/80"
+                >
+                  Dismiss
+                </button>
+              )}
+            </article>
+          ) : (
             <article key={l.id} className="bg-navy-light/40 border border-gold/15 rounded p-4">
               <div className="flex items-start justify-between gap-3 flex-wrap mb-2">
                 <div>
