@@ -150,6 +150,11 @@ const Email = ({ members = [], celebrations = [], reportDate, sinceDate, portalU
                   {(m.systemLogged ?? []).map((r, j) => (
                     <Text key={j} style={flagAmber}>• New system log entry — {r.replace(/^System: /, '')}</Text>
                   ))}
+                  <Text style={{ margin: '6px 0 0' }}>
+                    <Link href={m.portalUrl} style={linkStyle}>Open record →</Link>
+                  </Text>
+                </div>
+              ))}
             </Section>
           </>
         )}
