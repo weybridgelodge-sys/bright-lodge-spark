@@ -1,6 +1,7 @@
 // Daily scheduled edge function: computes overdue Almoner follow-ups and
-// members who missed their last two meetings, then emails a digest to the
-// current Almoner via send-transactional-email.
+// absence flags and creates system Welfare Log entries EVERY day, but emails
+// the summary to the current Almoner only on DIGEST_WEEKDAY (Monday), covering
+// what is still open plus anything new since the last digest actually sent.
 //
 // It also detects "memorable dates" (birthdays and years-as-a-Freemason
 // anniversaries) for the day and, when there are any, sends the Almoner a push

@@ -20,7 +20,7 @@ interface FlaggedMember {
   overdueFollowUp?: string | null // ISO date
   missedMeetings?: boolean
   checkIn?: string | null
-  /** New system-logged disengagement entries added today. */
+  /** System-logged disengagement entries added since the last summary. */
   systemLogged?: string[]
   portalUrl: string
 }
@@ -31,12 +31,15 @@ interface Celebration {
   years?: number
   message: string
   whatsappUrl: string
+  date?: string
+  upcoming?: boolean
 }
 
 interface Props {
   members?: FlaggedMember[]
   celebrations?: Celebration[]
   reportDate?: string
+  sinceDate?: string
   portalUrl?: string
 }
 
@@ -49,14 +52,20 @@ const fmt = (s?: string | null) => {
     return s
   }
 }
+const fmtDay = (s?: string) => {
+  if (!s) return ''
+  try {
+    return new Date(`${s}T12:00:00Z`).toLocaleDateString('en-GB', { weekday: 'short', day: '2-digit', month: 'short' })
+  } catch {
+    return s
+  }
+}
 
-const Email = ({ members = [], celebrations = [], reportDate, portalUrl }: Props) => (
+const Email = ({ members = [], celebrations = [], reportDate, sinceDate, portalUrl }: Props) => (
   <Html lang="en" dir="ltr">
     <Head />
     <Preview>
-      {celebrations.length > 0
-        ? `${celebrations.length} to celebrate today · ${members.length} needing follow-up`
-        : `${members.length} member${members.length === 1 ? '' : 's'} need Almoner follow-up`}
+      {`${members.length} member${members.length === 1 ? '' : 's'} to review this week${celebrations.length ? ` · ${celebrations.length} dates to mark` : ''}`}
     </Preview>
     <Body style={main}>
       <Container style={container}>
@@ -73,21 +82,19 @@ const Email = ({ members = [], celebrations = [], reportDate, portalUrl }: Props
         </Section>
 
 
-        <Heading style={h1}>Almoner — daily welfare digest</Heading>
+        <Heading style={h1}>Almoner — weekly welfare summary</Heading>
         <Text style={meta}>
-          {reportDate ? `Report for ${reportDate}` : ''} · {members.length} member
-          {members.length === 1 ? '' : 's'} flagged
-          {celebrations.length > 0
-            ? ` · ${celebrations.length} to celebrate`
-            : ''}
+          {reportDate ? `Week to ${reportDate}` : ''}
+          {sinceDate ? ` · new since ${sinceDate}` : ''} · {members.length} member
+          {members.length === 1 ? '' : 's'} to review
         </Text>
 
         {celebrations.length > 0 && (
           <>
-            <Heading style={h2}>Today's celebrations</Heading>
+            <Heading style={h2}>Memorable dates</Heading>
             <Text style={intro}>
-              Tap the link under each one to open WhatsApp with the message ready to send —
-              just pick the Lodge group.
+              Since the last summary and the coming week. Tap a link to open WhatsApp with the
+              message ready to send — just pick the Lodge group.
             </Text>
             <Section style={celebrationCard}>
               {celebrations.map((c, i) => (
@@ -100,10 +107,11 @@ const Email = ({ members = [], celebrations = [], reportDate, portalUrl }: Props
                 >
                   <Text style={memberName}>
                     {c.type === 'birthday' ? '🎉 ' : '🎓 '}
+                    {c.date ? `${fmtDay(c.date)}${c.upcoming ? ' (coming up)' : ''} — ` : ''}
                     {c.name}
                     {typeof c.years === 'number'
                       ? c.type === 'birthday'
-                        ? ` — ${c.years} today`
+                        ? ` — ${c.years}`
                         : ` — ${c.years} year${c.years === 1 ? '' : 's'} a Freemason`
                       : ''}
                   </Text>
@@ -121,10 +129,11 @@ const Email = ({ members = [], celebrations = [], reportDate, portalUrl }: Props
 
         {members.length > 0 && (
           <>
-            {celebrations.length > 0 && <Heading style={h2}>Needing follow-up</Heading>}
+            <Heading style={h2}>Still open / new this week</Heading>
             <Text style={intro}>
-              The following members require your attention. Please review each record in the Almoner
-              Portal and log a contact where appropriate.
+              Follow-ups and attendance flags are as they stand this morning — anything you have
+              already dealt with is left out. New system entries are those logged since the last
+              summary. Please review each record in the Almoner Portal.
             </Text>
 
             <Section style={card}>
@@ -141,11 +150,6 @@ const Email = ({ members = [], celebrations = [], reportDate, portalUrl }: Props
                   {(m.systemLogged ?? []).map((r, j) => (
                     <Text key={j} style={flagAmber}>• New system log entry — {r.replace(/^System: /, '')}</Text>
                   ))}
-                  <Text style={{ margin: '6px 0 0' }}>
-                    <Link href={m.portalUrl} style={linkStyle}>Open record →</Link>
-                  </Text>
-                </div>
-              ))}
             </Section>
           </>
         )}
