@@ -575,6 +575,13 @@
       "when": 1791717803013,
       "tag": "0081_almoner_auto_log",
       "breakpoints": true
+    },
+    {
+      "idx": 82,
+      "version": "7",
+      "when": 1791717981099,
+      "tag": "0082_almoner_auto_log_guard_role",
+      "breakpoints": true
     }
   ]
 }
