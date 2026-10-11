@@ -179,23 +179,19 @@ export const template = {
   subject: (d: any) => {
     const n = Array.isArray(d?.members) ? d.members.length : 0
     const c = Array.isArray(d?.celebrations) ? d.celebrations.length : 0
-    if (c > 0 && n === 0) {
-      return `Almoner — ${c} to celebrate today`
-    }
-    if (c > 0) {
-      return `Almoner digest — ${c} to celebrate · ${n} need follow-up`
-    }
-    return `Almoner digest — ${n} member${n === 1 ? '' : 's'} need follow-up`
+    return `Almoner weekly summary — ${n} member${n === 1 ? '' : 's'} to review${c ? ` · ${c} dates to mark` : ''}`
   },
-  displayName: 'Almoner overdue follow-up digest',
+  displayName: 'Almoner weekly welfare summary',
   previewData: {
     reportDate: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+    sinceDate: '05 Oct 2026',
     portalUrl: 'https://weybridgelodge.org.uk/members/almoner',
     celebrations: [
       {
         name: 'W Bro. Kevin Brennan',
         type: 'birthday',
         years: 70,
+        date: '2026-10-08',
         message: 'Wishing our dear Brother Kevin a very happy 70th birthday today! 🎉',
         whatsappUrl:
           'https://wa.me/?text=Wishing%20our%20dear%20Brother%20Kevin%20a%20very%20happy%2070th%20birthday%20today!%20%F0%9F%8E%89',
@@ -204,6 +200,8 @@ export const template = {
         name: 'W Bro. Kenneth Holdsworth',
         type: 'anniversary',
         years: 14,
+        date: '2026-10-15',
+        upcoming: true,
         message: "Let's all congratulate our dear Brother Kenneth on 14 years as a Freemason today!",
         whatsappUrl:
           "https://wa.me/?text=Let's%20all%20congratulate%20our%20dear%20Brother%20Kenneth%20on%2014%20years%20as%20a%20Freemason%20today!",
