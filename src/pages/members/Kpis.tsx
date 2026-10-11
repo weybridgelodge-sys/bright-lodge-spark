@@ -427,17 +427,22 @@ export default function Kpis() {
             <p className="text-sm text-primary-foreground/60">No past meetings recorded yet.</p>
           ) : risk.members.length === 0 ? (
             <p className="text-sm text-primary-foreground/60">
-              No subscribing member has missed all of the last {risk.meetingsConsidered} meetings unexcused.
+              No subscribing member has 2 consecutive unexcused misses or 3 this lodge year.
             </p>
           ) : (
             <>
               <p className="text-xs text-primary-foreground/60 mb-3">
-                Missed all of the last {risk.meetingsConsidered} meetings with no apology sent and no
-                welfare absence on record covering that period.
+                2 consecutive meetings, or 3 this lodge year (Oct–Sep), missed with no apology and no
+                welfare absence on record. Counted from 18 Feb 2026; first-year members excluded.
               </p>
               <ul className="text-sm space-y-1">
-                {risk.members.map((m) => (
-                  <li key={m.id} className="text-primary-foreground/80">• {fullName(m)}</li>
+                {risk.details.map(({ member: m, reasons }) => (
+                  <li key={m.id} className="text-primary-foreground/80 break-words">
+                    • {fullName(m)}
+                    {reasons.map((r) => (
+                      <span key={r} className="block pl-3 text-xs text-primary-foreground/60">{r}</span>
+                    ))}
+                  </li>
                 ))}
               </ul>
             </>
