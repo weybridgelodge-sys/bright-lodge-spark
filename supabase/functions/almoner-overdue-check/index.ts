@@ -92,6 +92,7 @@ Deno.serve(async (req) => {
         .from('welfare_log_entries')
         .select('member_id,contact_date,follow_up_date')
         .is('deleted_at', null)
+        .eq('is_system', false)
         .order('contact_date', { ascending: false }),
       supabase
         .from('festive_board_meetings')

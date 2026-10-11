@@ -256,7 +256,7 @@ export default function ReportPanel({ members }: { members: Member[] }) {
 
       const snap: SnapshotData = {
         concern: status.data ?? [],
-        logRows: logs.data ?? [],
+        logRows: ((logs.data as any[]) ?? []).filter((l) => !l.is_system),
         corrRows: corr.data ?? [],
         activeRefs: (refs.data ?? []).filter((r: any) => !["closed", "declined"].includes(r.status)),
         absRows: abs.data ?? [],

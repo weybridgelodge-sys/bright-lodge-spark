@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { ArrowLeft, CalendarClock, HeartHandshake, PhoneCall, Plus, ShieldAlert, X, LayoutDashboard, Mail, Share2, UserX, FileText, Flower2 } from "lucide-react";
+import { ArrowLeft, CalendarClock, HeartHandshake, PhoneCall, Plus, ShieldAlert, X, LayoutDashboard, Mail, Share2, UserX, FileText, Flower2, Bot } from "lucide-react";
 import { computeCheckInFlags, type CheckInFlag } from "@/lib/almonerAbsencePattern";
 import LifeEventsPanel from "@/components/members/almoner/LifeEventsPanel";
 import CorrespondencePanel from "@/components/members/almoner/CorrespondencePanel";
@@ -84,6 +84,7 @@ type LogRow = {
   follow_up_date: string | null;
   logged_by: string | null;
   created_at: string;
+  is_system?: boolean;
 };
 
 // ============ Helpers ============
