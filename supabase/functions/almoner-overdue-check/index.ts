@@ -13,6 +13,7 @@ import { detectCelebrations, londonToday } from './celebrations.ts'
 import { sendTransactionalEmail } from '../_shared/send-email.ts'
 import { evaluateAutoLog } from '../_shared/almonerAutoLog.ts'
 import { computeCheckInFlags } from '../_shared/almonerCheckIn.ts'
+import { isDigestDay, digestWindowStart, datesBetween, addDays } from '../_shared/almonerDigestSchedule.ts'
 
 const SITE_URL = 'https://weybridgelodge.org.uk'
 const PORTAL_URL = `${SITE_URL}/members/almoner`
@@ -393,6 +394,19 @@ Deno.serve(async (req) => {
       if (pushErrors.length) console.warn('celebration push failures', pushErrors)
     }
 
+    // Non-digest days stop after the push: no email.
+    if (!isDigest) {
+      return new Response(
+        JSON.stringify({ ok: true, sent: false, reason: 'not_digest_day', push_sent: pushSent, push_errors: pushErrors }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+      )
+    }
+    if (flagged.length === 0 && weekCelebrations.length === 0) {
+      return new Response(JSON.stringify({ ok: true, sent: false, reason: 'nothing_flagged', push_sent: pushSent }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
     if (!almonerEmail) {
       console.warn('almoner-overdue-check: no almoner appointment or role holder found; flagged=', flagged.length)
       return new Response(
@@ -402,15 +416,15 @@ Deno.serve(async (req) => {
     }
 
 
-    // ---- Invoke send-transactional-email ----
-    const reportDate = new Date().toLocaleDateString('en-GB', {
-      day: '2-digit', month: 'short', year: 'numeric',
-    })
-    // Celebrations are part of the digest's identity: a day with a new
-    // birthday must not be de-duplicated against an earlier flagged-only send.
+    // ---- Weekly email ----
+    const fmtUk = (iso: string) =>
+      new Date(iso).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'Europe/London' })
+    const reportDate = fmtUk(new Date().toISOString())
+    const sinceDate = fmtUk(windowStart)
+    // One email per week: a rerun on the same digest day is de-duplicated.
     const idempotencyKey = force || testDate
-      ? `almoner-overdue-${today}-force-${Date.now()}`
-      : `almoner-overdue-${today}-c${celebrations.length}-s${autoLogNew.length}`
+      ? `almoner-weekly-${today}-force-${Date.now()}`
+      : `almoner-weekly-${celebrationDay}`
 
 
     const resp = await sendTransactionalEmail({
@@ -419,14 +433,17 @@ Deno.serve(async (req) => {
       idempotencyKey,
       templateData: {
         members: flagged,
-        celebrations: celebrations.map((c) => ({
+        celebrations: weekCelebrations.map((c) => ({
           name: c.name,
           type: c.type,
           years: c.years,
           message: c.message,
           whatsappUrl: c.whatsappUrl,
+          date: c.date,
+          upcoming: c.date > celebrationDay,
         })),
         reportDate,
+        sinceDate,
         portalUrl: PORTAL_URL,
       },
     })
