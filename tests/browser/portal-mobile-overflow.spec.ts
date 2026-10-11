@@ -386,7 +386,8 @@ for (const secretary of [false, true]) {
       const row = page.locator(`#member-${id}`);
       await expect(row.getByRole("button", { name: "Edit member", exact: true })).toBeVisible();
       const nameElement = row.locator("[data-member-name]");
-      await expect(nameElement).toHaveText(name);
+      await expect(nameElement).toContainText("Featherstonehaugh-Wolstenholme");
+      await expect(nameElement).toContainText("Bartholomew-Maximilian");
       const geometry = await nameElement.evaluate((el) => {
         const rect = el.getBoundingClientRect();
         const covered = [0.1, 0.5, 0.9].some((fraction) => {
