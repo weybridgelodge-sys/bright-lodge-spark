@@ -11,20 +11,36 @@ const base = meetings.map((m) => ({ member_id: "x", meeting_id: m.id, attendance
 const today = "2026-10-11";
 const est = { id: "w", initiation_date: "2010-01-01" };
 
-describe("Disengagement Risk — per-meeting apology", () => {
-  const member: any = { id: "w", status: "active", is_honorary_member: false };
-  const eng = (att: any[]) => ({ meetings: [feb, may, sep], attendance: [...base, ...att], absences: [], visitors: [] });
-  it("flags a member who missed all 3 with no record", () => {
-    expect(disengagementRisk([member], eng([])).members.map((m) => m.id)).toEqual(["w"]);
+describe("Disengagement Risk = Tier 1 rule", () => {
+  const member: any = { id: "w", status: "active", is_honorary_member: false, initiation_date: "2010-01-01" };
+  const eng = (att: any[], absences: any[] = []) => ({ meetings: [feb, may, sep], attendance: [...base, ...att], absences, visitors: [] });
+  const ids = (e: any, mem = member) => disengagementRisk([mem], e, today).members.map((m) => m.id);
+  it("flags 2 consecutive unexcused misses after an apology (Aldington-Smyth pattern)", () => {
+    expect(ids(eng([{ member_id: "w", meeting_id: "feb", attendance_status: "apologies" }]))).toEqual(["w"]);
   });
-  it("an apology excuses only its own meeting (that meeting is not a miss)", () => {
-    expect(disengagementRisk([member], eng([{ member_id: "w", meeting_id: "feb", attendance_status: "apologies" }])).members).toEqual([]);
+  it("does not flag booked then two apologies (French / Mallard pattern)", () => {
+    expect(ids(eng([
+      { member_id: "w", meeting_id: "feb", attendance_status: "booked" },
+      { member_id: "w", meeting_id: "may", attendance_status: "apologies" },
+      { member_id: "w", meeting_id: "sep", attendance_status: "apologies" }]))).toEqual([]);
   });
-  it("a welfare absence covering a different meeting does not excuse others", () => {
-    const e = { ...eng([]), absences: [{ member_id: "w", period_start: "2026-01-01", period_end: "2026-03-01" }] };
-    expect(disengagementRisk([member], e).members).toEqual([]);
-    const e2 = { ...eng([]), absences: [{ member_id: "w", period_start: "2026-10-01", period_end: null }] };
-    expect(disengagementRisk([member], e2).members.map((m) => m.id)).toEqual(["w"]);
+  it("a single unexcused miss is not enough", () => {
+    expect(ids(eng([
+      { member_id: "w", meeting_id: "feb", attendance_status: "attended" },
+      { member_id: "w", meeting_id: "may", attendance_status: "apologies" }]))).toEqual([]);
+  });
+  it("excludes honorary members", () => {
+    expect(ids(eng([]), { ...member, is_honorary_member: true })).toEqual([]);
+  });
+  it("a welfare absence covering a meeting excuses it, in both KPI and Auto-Log", () => {
+    const abs = [{ member_id: "w", period_start: "2026-05-01", period_end: "2026-05-31" }];
+    expect(ids(eng([{ member_id: "w", meeting_id: "feb", attendance_status: "attended" }], abs))).toEqual([]);
+    expect(evaluateAutoLog(meetings, [...base, { member_id: "w", meeting_id: "feb", attendance_status: "attended" }], [est], today, undefined, abs)).toEqual([]);
+  });
+  it("agrees with Auto-Log Tier 1 on the same data", () => {
+    const att = [...base, { member_id: "w", meeting_id: "feb", attendance_status: "apologies" }];
+    const t1 = evaluateAutoLog(meetings, att, [est], today).filter((e) => e.tier === 1).map((e) => e.member_id);
+    expect(ids({ meetings: [feb, may, sep], attendance: att, absences: [], visitors: [] })).toEqual([...new Set(t1)]);
   });
 });
 

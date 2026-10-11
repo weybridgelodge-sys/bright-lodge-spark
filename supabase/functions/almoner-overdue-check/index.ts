@@ -215,11 +215,18 @@ Deno.serve(async (req) => {
         if (error) throw error
         autoAtt = (data as any[]) ?? []
       }
+      const { data: absRows, error: absErr } = await supabase
+        .from('welfare_absences')
+        .select('member_id,period_start,period_end,deleted_at')
+      if (absErr) throw absErr
+      const autoAbs = ((absRows as any[]) ?? []).filter((a) => !a.deleted_at)
       const escalations = evaluateAutoLog(
         (autoMeetings as any[]) ?? [],
         autoAtt,
         (members as any[]).map((m) => ({ id: m.id, initiation_date: m.initiation_date ?? null })),
         today,
+        undefined,
+        autoAbs,
       )
       // Existing keys, including dismissed (soft-deleted) ones, are never re-created.
       const { data: existing, error: exErr } = await supabase

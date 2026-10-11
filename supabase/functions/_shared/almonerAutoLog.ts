@@ -14,6 +14,7 @@ export const AUTO_LOG_FROM = '2026-02-18'
 export type AutoLogMeeting = { id: string; meeting_date: string; meeting_type: string }
 export type AutoLogAttendance = { member_id: string | null; meeting_id: string; attendance_status: string }
 export type AutoLogMember = { id: string; initiation_date: string | null }
+export type AutoLogAbsence = { member_id: string; period_start: string; period_end: string | null }
 
 export type AutoLogEscalation = {
   member_id: string
@@ -48,7 +49,11 @@ export function evaluateAutoLog(
   members: AutoLogMember[],
   today: string,
   from: string = AUTO_LOG_FROM,
+  absences: AutoLogAbsence[] = [],
 ): AutoLogEscalation[] {
+  // A recorded welfare absence covering a meeting excuses that meeting.
+  const covered = (memberId: string, date: string) =>
+    absences.some((a) => a.member_id === memberId && a.period_start <= date && (a.period_end == null || a.period_end >= date))
   const recorded = new Set(attendance.map((a) => a.meeting_id))
   const usable = meetings
     .filter((m) => m.meeting_type === 'regular' && m.meeting_date >= from && m.meeting_date <= today && recorded.has(m.id))
@@ -69,6 +74,10 @@ export function evaluateAutoLog(
       const st = status.get(`${mem.id}|${mt.id}`)
       const isNew = !!mem.initiation_date && mt.meeting_date < addYear(mem.initiation_date)
       const present = !!st && PRESENT.has(st)
+      if (!present && covered(mem.id, mt.meeting_date)) {
+        if (!isNew) { streak = []; streakLogged = false }
+        continue
+      }
 
       if (isNew) {
         if (!present) {
