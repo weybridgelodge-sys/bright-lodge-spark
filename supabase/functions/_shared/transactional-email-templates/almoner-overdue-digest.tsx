@@ -52,10 +52,10 @@ const fmt = (s?: string | null) => {
     return s
   }
 }
-const fmtDay = (s?: string) => {
+function fmtDay(s: string | undefined): string {
   if (!s) return ''
   try {
-    return new Date(`${s}T12:00:00Z`).toLocaleDateString('en-GB', { weekday: 'short', day: '2-digit', month: 'short' })
+    return new Date(s + 'T12:00:00Z').toLocaleDateString('en-GB', { weekday: 'short', day: '2-digit', month: 'short' })
   } catch {
     return s
   }
