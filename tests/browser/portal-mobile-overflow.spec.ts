@@ -370,3 +370,48 @@ test("KPI candidate change keeps scroll position at 320px", async ({ page }) => 
   expect(Math.abs(after - before)).toBeLessThan(50);
   await expectNoViewportOverflow(page, "KPI candidates");
 });
+
+for (const secretary of [false, true]) {
+  for (const width of [320, 390]) {
+    test(`Users names and actions remain readable at ${width}px (${secretary ? "Secretary" : "admin"})`, async ({ page }) => {
+      const id = "11111111-2222-3333-4444-555555555557";
+      const name = "W Bro. Bartholomew-Maximilian Featherstonehaugh-Wolstenholme";
+      await page.setViewportSize({ width, height: 900 });
+      await page.route("**/rest/v1/**", (r) => r.fulfill({ json: r.request().url().includes("get_admin_profiles") ? [{
+        id, email: "bartholomew.maximilian.featherstonehaugh@example-long-domain.co.uk",
+        full_name: name, title: "W Bro", first_name: "Bartholomew-Maximilian", last_name: "Featherstonehaugh-Wolstenholme",
+        degree: "installed_master", status: "pending", is_past_master: true, is_royal_arch: true, is_honorary_member: true,
+      }] : [] }));
+      await page.goto(`/members/admin${secretary ? "?e2e_as=secretary" : ""}`);
+      const row = page.locator(`#member-${id}`);
+      await expect(row.getByRole("button", { name: "Edit member", exact: true })).toBeVisible();
+      const nameElement = row.locator("[data-member-name]");
+      await expect(nameElement).toContainText("Featherstonehaugh-Wolstenholme");
+      await expect(nameElement).toContainText("Bartholomew-Maximilian");
+      const geometry = await nameElement.evaluate((el) => {
+        const rect = el.getBoundingClientRect();
+        const covered = [0.1, 0.5, 0.9].some((fraction) => {
+          const top = document.elementFromPoint(rect.left + rect.width * fraction, rect.top + rect.height / 2);
+          return !top || (top !== el && !el.contains(top));
+        });
+        return { left: rect.left, right: rect.right, width: rect.width, bottom: rect.bottom, clipped: el.scrollWidth > el.clientWidth, covered };
+      });
+      expect(geometry.width).toBeGreaterThanOrEqual(width - 70);
+      expect(geometry.left).toBeGreaterThanOrEqual(0);
+      expect(geometry.right).toBeLessThanOrEqual(width);
+      expect(geometry.clipped).toBe(false);
+      expect(geometry.covered).toBe(false);
+      const actions = await row.locator("[data-member-actions]").boundingBox();
+      expect(actions && actions.y >= geometry.bottom).toBe(true);
+      for (const button of await row.getByRole("button").all()) {
+        const box = await button.boundingBox();
+        expect(box && box.height >= 48 && box.width >= 48).toBe(true);
+      }
+      await expectNoViewportOverflow(page, `Populated Users ${width}px ${secretary ? "Secretary" : "admin"}`);
+      await row.getByRole("button", { name: "Edit member", exact: true }).click();
+      await expect(page.getByLabel("First name", { exact: true })).toHaveValue("Bartholomew-Maximilian");
+      await expect(page.getByLabel("Last name", { exact: true })).toHaveValue("Featherstonehaugh-Wolstenholme");
+      await expectNoViewportOverflow(page, `Edit selected member ${width}px`);
+    });
+  }
+}

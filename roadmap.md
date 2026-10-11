@@ -46,6 +46,6 @@
 - [x] Rose Croix Number field
 
 ## Member Admin portrait names
-- [ ] Fix stacked narrow-screen member rows without changing permissions
-- [ ] Add populated admin/Secretary name-readability regressions and inspect portrait/desktop
-- [ ] Run the full suite and check preview errors
+- [x] Fix stacked narrow-screen member rows without changing permissions
+- [x] Add populated admin/Secretary name-readability regressions and inspect portrait/desktop
+- [x] Run the full suite and check preview errors (119 unit, 58 browser; build OK)
