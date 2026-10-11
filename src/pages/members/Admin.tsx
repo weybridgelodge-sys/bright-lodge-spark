@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
 import MemberImport from "@/components/members/MemberImport";
 import MembersLayout from "@/components/members/MembersLayout";
 import { supabase } from "@/integrations/supabase/client";
@@ -479,9 +480,9 @@ export default function MembersAdmin() {
       {tab === "import" && <MemberImport onDone={load} />}
 
       {tab === "users" && (
-        <div className="bg-navy-dark/60 border border-gold/15 rounded-sm overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="text-xs uppercase tracking-wider text-primary-foreground/50">
+        <div className="bg-navy-dark/60 border border-gold/15 rounded-sm lg:overflow-x-auto">
+          <table aria-label="Members" className="block w-full text-sm lg:table">
+            <thead className="hidden lg:table-header-group text-xs uppercase tracking-wider text-primary-foreground/50">
               <tr>
                 <th className="text-left p-3">Member</th>
                 <th className="text-left p-3">Status</th>
@@ -491,7 +492,7 @@ export default function MembersAdmin() {
                 <th className="text-right p-3 sticky right-0 bg-navy-dark">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gold/10">
+            <tbody className="block lg:table-row-group divide-y divide-gold/10">
               {[...profiles].sort((a, b) => {
                 const aLast = (a.last_name || "").trim();
                 const bLast = (b.last_name || "").trim();
@@ -504,18 +505,19 @@ export default function MembersAdmin() {
                 <tr
                   key={p.id}
                   id={`member-${p.id}`}
-                  className={highlightId === p.id ? "bg-gold/10 outline outline-2 outline-gold" : undefined}
+                  className={`grid grid-cols-2 min-w-0 p-3 gap-x-3 gap-y-3 lg:table-row lg:p-0 lg:gap-0 ${highlightId === p.id ? "bg-gold/10 outline outline-2 outline-gold" : ""}`}
                 >
-                  <td className="p-3">
-                    <p className="font-medium">{formatMemberLine(p as any) || "(No name)"}</p>
-                    <p className="text-xs text-primary-foreground/50">{p.email}</p>
+                  <td className="block col-span-2 min-w-0 lg:table-cell lg:p-3">
+                    <p data-member-name className="font-medium break-words [overflow-wrap:anywhere]">{formatMemberLine(p as any) || "(No name)"}</p>
+                    <p className="text-xs text-primary-foreground/50 break-words [overflow-wrap:anywhere]">{p.email}</p>
                     {(p.provincial_rank || p.grand_rank) && (
                       <p className="text-[11px] text-primary-foreground/60 mt-1">
                         {p.grand_rank ? `Grand: ${p.grand_rank}` : `Prov: ${p.provincial_rank}`}
                       </p>
                     )}
                   </td>
-                  <td className="p-3 text-xs uppercase tracking-wider">
+                  <td className="block min-w-0 text-xs uppercase tracking-wider lg:table-cell lg:p-3">
+                    <span className="block mb-1 text-primary-foreground/50 lg:hidden">Status</span>
                     <span
                       className={
                         p.status === "active"
@@ -528,51 +530,53 @@ export default function MembersAdmin() {
                       {p.status}
                     </span>
                   </td>
-                  <td className="p-3 text-xs text-primary-foreground/70 whitespace-nowrap">
+                  <td className="block min-w-0 text-xs text-primary-foreground/70 lg:table-cell lg:p-3 lg:whitespace-nowrap">
+                    <span className="block mb-1 text-primary-foreground/50 lg:hidden">Last logged on</span>
                     {lastSignIn[p.id]
                       ? new Date(lastSignIn[p.id] as string).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })
                       : <span className="text-primary-foreground/40">Never</span>}
                   </td>
-                  <td className="p-3 text-xs uppercase tracking-wider">
+                  <td className="block min-w-0 text-xs uppercase tracking-wider lg:table-cell lg:p-3">
+                    <span className="block mb-1 text-primary-foreground/50 lg:hidden">Role</span>
                     {isAdminUser(p.id) ? "Admin" : "Member"}
                     {isAlmonerUser(p.id) && <div className="text-gold normal-case tracking-normal text-[10px]">Almoner</div>}
                   </td>
 
-                  <td className="p-3 text-[11px] text-primary-foreground/70 space-y-0.5">
+                  <td className="block min-w-0 lg:table-cell lg:p-3 text-[11px] text-primary-foreground/70 space-y-0.5">
                     <div>{DEGREE_LABEL[p.degree]}</div>
                     {p.is_past_master && <div className="text-gold">PM</div>}
                     {p.is_royal_arch && <div>RA</div>}
                     {p.is_honorary_member && <div>Honorary</div>}
                   </td>
-                  <td className="p-3 sticky right-0 bg-navy-dark">
-                    <div className="flex items-center gap-1 justify-end">
-                      <button
+                  <td data-member-actions className="block col-span-2 min-w-0 border-t border-gold/10 pt-3 lg:table-cell lg:border-0 lg:p-3 lg:sticky lg:right-0 lg:bg-navy-dark">
+                    <div className="flex flex-wrap items-center gap-1 lg:flex-nowrap lg:justify-end">
+                      <Button variant="ghost" size="icon"
                         onClick={() => startEdit(p)}
-                        className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center p-1.5 text-primary-foreground/70 hover:text-gold hover:bg-gold/10 rounded-sm"
+                        className="min-h-[48px] min-w-[48px] inline-flex items-center justify-center p-1.5 text-primary-foreground/70 hover:text-gold hover:bg-gold/10 rounded-sm"
                         aria-label="Edit member"
                         title="Edit member"
                       >
                         <Pencil className="w-4 h-4" />
-                      </button>
+                      </Button>
                       {(isAdmin || user?.id !== p.id) && p.status !== "active" && (
-                        <button
+                        <Button variant="ghost" size="icon"
                           onClick={() => setStatus(p.id, "active")}
                           className="min-h-[48px] min-w-[48px] inline-flex items-center justify-center p-1.5 text-gold hover:bg-gold/10 rounded-sm"
                           aria-label={p.status === "pending" ? "Approve" : "Reactivate"}
                           title={p.status === "pending" ? "Approve" : "Reactivate"}
                         >
                           <Check className="w-4 h-4" />
-                        </button>
+                        </Button>
                       )}
                       {(isAdmin || user?.id !== p.id) && p.status !== "suspended" && (
-                        <button
+                        <Button variant="ghost" size="icon"
                           onClick={() => setStatus(p.id, "suspended")}
                           className="min-h-[48px] min-w-[48px] inline-flex items-center justify-center p-1.5 text-red-400 hover:bg-red-500/10 rounded-sm"
                           aria-label="Suspend"
                           title="Suspend"
                         >
                           <X className="w-4 h-4" />
-                        </button>
+                        </Button>
                       )}
                       {(isAdmin || user?.id !== p.id) && (
                         <select
@@ -588,9 +592,9 @@ export default function MembersAdmin() {
                         </select>
                       )}
                       {isAdmin && (
-                        <button
+                        <Button variant="ghost" size="icon"
                           onClick={() => toggleAdmin(p.id, !isAdminUser(p.id))}
-                          className="p-1.5 text-primary-foreground/70 hover:text-gold hover:bg-gold/10 rounded-sm"
+                          className="min-h-[48px] min-w-[48px] lg:min-h-0 lg:min-w-0 lg:h-auto lg:w-auto p-1.5 text-primary-foreground/70 hover:text-gold hover:bg-gold/10 rounded-sm"
                           aria-label={isAdminUser(p.id) ? "Remove admin" : "Make admin"}
                           title={isAdminUser(p.id) ? "Remove admin" : "Make admin"}
                         >
@@ -599,28 +603,28 @@ export default function MembersAdmin() {
                           ) : (
                             <ShieldPlus className="w-4 h-4" />
                           )}
-                        </button>
+                        </Button>
                       )}
                       {isAdmin && (
-                      <button
+                      <Button variant="ghost" size="icon"
                         onClick={() => toggleAlmoner(p.id, !isAlmonerUser(p.id))}
-                        className={`p-1.5 rounded-sm ${isAlmonerUser(p.id) ? "text-gold bg-gold/10" : "text-primary-foreground/70 hover:text-gold hover:bg-gold/10"}`}
+                        className={`min-h-[48px] min-w-[48px] lg:min-h-0 lg:min-w-0 lg:h-auto lg:w-auto p-1.5 rounded-sm ${isAlmonerUser(p.id) ? "text-gold bg-gold/10" : "text-primary-foreground/70 hover:text-gold hover:bg-gold/10"}`}
                         aria-label={isAlmonerUser(p.id) ? "Remove Almoner role" : "Assign Almoner role"}
                         title={isAlmonerUser(p.id) ? "Remove Almoner role" : "Assign Almoner role"}
                       >
                         <HeartHandshake className="w-4 h-4" />
-                      </button>
+                      </Button>
                       )}
 
                       {isAdmin && user?.id !== p.id && (
-                        <button
+                        <Button variant="ghost" size="icon"
                           onClick={() => deleteMember(p)}
-                          className="p-1.5 text-red-400 hover:bg-red-500/10 rounded-sm"
+                          className="min-h-[48px] min-w-[48px] lg:min-h-0 lg:min-w-0 lg:h-auto lg:w-auto p-1.5 text-red-400 hover:bg-red-500/10 rounded-sm"
                           aria-label="Delete member"
                           title="Delete member"
                         >
                           <Trash2 className="w-4 h-4" />
-                        </button>
+                        </Button>
                       )}
                     </div>
                   </td>
