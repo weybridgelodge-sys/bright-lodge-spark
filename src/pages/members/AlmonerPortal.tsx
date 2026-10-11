@@ -1,3 +1,4 @@
+import { compareWelfareBoard } from "@/lib/welfareBoardSort";
 import { useEffect, useMemo, useState } from "react";
 import { Navigate } from "react-router-dom";
 import MembersLayout from "@/components/members/MembersLayout";
@@ -32,7 +33,6 @@ const STATUS_LABEL: Record<WelfareStatus, string> = {
   amber: "Needs monitoring",
   green: "Fine",
 };
-const STATUS_RANK: Record<WelfareStatus, number> = { red: 0, amber: 1, green: 2 };
 const STATUS_DOT: Record<WelfareStatus, string> = {
   red: "bg-red-500",
   amber: "bg-amber-400",
@@ -270,18 +270,10 @@ function PortalBody() {
   useEffect(() => { loadAll(); }, []);
 
   const sorted = useMemo(() => {
-    return [...members].sort((a, b) => {
-      const sa = statuses[a.id]?.status ?? "green";
-      const sb = statuses[b.id]?.status ?? "green";
-      if (STATUS_RANK[sa] !== STATUS_RANK[sb]) return STATUS_RANK[sa] - STATUS_RANK[sb];
-      const fa = (a.preferred_name?.trim() || a.first_name?.trim() || "").toLowerCase();
-      const fb = (b.preferred_name?.trim() || b.first_name?.trim() || "").toLowerCase();
-      if (fa !== fb) return fa.localeCompare(fb);
-      const la = (a.last_name?.trim() || "").toLowerCase();
-      const lb = (b.last_name?.trim() || "").toLowerCase();
-      return la.localeCompare(lb);
-    });
-  }, [members, statuses, lastContactByMember]);
+    return [...members].sort((a, b) =>
+      compareWelfareBoard(a, b, (id) => !!checkInFlags[id], (id) => (statuses[id]?.status ?? "green") as WelfareStatus)
+    );
+  }, [members, statuses, checkInFlags]);
 
   if (selectedId) {
     const member = members.find((m) => m.id === selectedId);
