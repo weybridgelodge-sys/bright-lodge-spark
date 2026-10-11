@@ -364,7 +364,7 @@ test("KPI candidate change keeps scroll position at 320px", async ({ page }) => 
   await page.evaluate(() => window.scrollBy(0, 50));
   const before = await page.evaluate(() => window.scrollY);
   expect(before).toBeGreaterThan(300);
-  await row.locator("select").first().selectOption("proposed");
+  await row.locator("select").first().selectOption({ index: 1 });
   await page.waitForTimeout(1500);
   const after = await page.evaluate(() => window.scrollY);
   expect(Math.abs(after - before)).toBeLessThan(50);
