@@ -1,3 +1,4 @@
+import { compareWelfareBoard } from "@/lib/welfareBoardSort";
 import { useEffect, useMemo, useState } from "react";
 import { Navigate } from "react-router-dom";
 import MembersLayout from "@/components/members/MembersLayout";
