@@ -722,30 +722,28 @@ export function quarterlyEngagement(eng: EngagementBundle, quarters = 8) {
 }
 
 /**
- * Members who missed all of the last 3 occurred meetings and have no
- * recorded welfare absence covering that period and sent no apologies —
- * i.e. quietly drifting rather than known to be away.
+ * Members for whom every one of the last 3 occurred meetings was an
+ * unexcused miss. Each meeting is judged on its own: attendance, an apology
+ * or a welfare absence only excuses the specific meeting it covers — it never
+ * clears a different meeting's miss.
  */
 export function disengagementRisk(members: KpiMember[], eng: EngagementBundle) {
   const recent = eng.meetings.slice(-3);
   if (recent.length === 0) return { meetingsConsidered: 0, members: [] as KpiMember[] };
-  const ids = new Set(recent.map((m) => m.id));
-  const attended = attendedMemberIds(eng, ids);
-  const apologised = apologisedMemberIds(eng, ids);
   const from = recent[0].meeting_date;
   const to = recent[recent.length - 1].meeting_date;
-  const excused = new Set(
-    eng.absences
-      .filter((a) => a.period_start <= to && (a.period_end == null || a.period_end >= from))
-      .map((a) => a.member_id)
-  );
+  const statusOf = new Map<string, string>();
+  for (const r of eng.attendance) if (r.member_id) statusOf.set(`${r.member_id}|${r.meeting_id}`, r.attendance_status);
+  const coveredByAbsence = (memberId: string, date: string) =>
+    eng.absences.some(
+      (a) => a.member_id === memberId && a.period_start <= date && (a.period_end == null || a.period_end >= date)
+    );
+  const excusedAt = (memberId: string, m: OccurredMeeting) => {
+    const st = statusOf.get(`${memberId}|${m.id}`);
+    return (st != null && (ATTENDED_STATUSES.has(st) || st === "apologies")) || coveredByAbsence(memberId, m.meeting_date);
+  };
   const at = members.filter(
-    (m) =>
-      m.status === "active" &&
-      !m.is_honorary_member &&
-      !attended.has(m.id) &&
-      !apologised.has(m.id) &&
-      !excused.has(m.id)
+    (m) => m.status === "active" && !m.is_honorary_member && recent.every((mt) => !excusedAt(m.id, mt))
   );
   return { meetingsConsidered: recent.length, from, to, members: at };
 }
