@@ -50,6 +50,8 @@ export function evaluateAutoLog(
   today: string,
   from: string = AUTO_LOG_FROM,
   absences: AutoLogAbsence[] = [],
+  /** Latest genuine Almoner contact per member; misses on/before it are handled. */
+  acks: Record<string, string | undefined> = {},
 ): AutoLogEscalation[] {
   // A recorded welfare absence covering a meeting excuses that meeting.
   const covered = (memberId: string, date: string) =>
@@ -67,6 +69,9 @@ export function evaluateAutoLog(
   for (const mem of members) {
     let streak: AutoLogMeeting[] = []
     let streakLogged = false
+    let streakTrig = ''
+    const yearTrig = new Map<number, string>()
+    const ack = acks[mem.id] ?? ''
     const yearMisses = new Map<number, AutoLogMeeting[]>()
     for (const mt of usable) {
       // Not yet a member at this meeting.
@@ -75,12 +80,12 @@ export function evaluateAutoLog(
       const isNew = !!mem.initiation_date && mt.meeting_date < addYear(mem.initiation_date)
       const present = !!st && PRESENT.has(st)
       if (!present && covered(mem.id, mt.meeting_date)) {
-        if (!isNew) { streak = []; streakLogged = false }
+        if (!isNew) { streak = []; streakLogged = false; streakTrig = '' }
         continue
       }
 
       if (isNew) {
-        if (!present) {
+        if (!present && mt.meeting_date > ack) {
           out.push({
             member_id: mem.id, key: `t2:${mt.id}`, tier: 2, trigger_date: mt.meeting_date,
             meeting_dates: [mt.meeting_date],
@@ -88,19 +93,28 @@ export function evaluateAutoLog(
           })
         }
         // New-member meetings don't feed Tier 1 counters.
-        streak = []; streakLogged = false
+        streak = []; streakLogged = false; streakTrig = ''
         continue
       }
 
       const unexplained = !present && st !== 'apologies'
-      if (!unexplained) { streak = []; streakLogged = false; continue }
+      if (!unexplained) { streak = []; streakLogged = false; streakTrig = ''; continue }
 
       streak.push(mt)
-      if (streak.length >= 2 && !streakLogged) {
-        streakLogged = true
+      const fresh = mt.meeting_date > ack
+      let emittedHere = false
+      // First escalation of a streak, or a fresh miss after the Almoner
+      // acknowledged (contacted) an earlier escalation of the same streak.
+      const firstTime = streak.length >= 2 && !streakLogged
+      const reopen = streakLogged && streakTrig <= ack && fresh
+      if (firstTime) { streakLogged = true; streakTrig = mt.meeting_date }
+      if ((firstTime && fresh) || reopen) {
+        const wasReopen = reopen
+        streakTrig = mt.meeting_date
+        emittedHere = true
         const dates = streak.map((s) => s.meeting_date)
         out.push({
-          member_id: mem.id, key: `t1c:${streak[0].id}`, tier: 1, trigger_date: mt.meeting_date,
+          member_id: mem.id, key: wasReopen ? `t1c:${streak[0].id}:${mt.id}` : `t1c:${streak[0].id}`, tier: 1, trigger_date: mt.meeting_date,
           meeting_dates: dates,
           reason: `System: missed without apology — ${dates.map(fmt).join(', ')} (2 consecutive meetings).`,
         })
@@ -111,10 +125,15 @@ export function evaluateAutoLog(
       yearMisses.set(ly, list)
       // Skip if this gap is already covered by the consecutive entry.
       const coveredByStreak = streakLogged && list.every((x) => streak.includes(x))
-      if (list.length === 3 && !coveredByStreak) {
+      const yt = yearTrig.get(ly)
+      const yFirst = list.length === 3 && yt === undefined
+      const yReopen = yt !== undefined && yt <= ack && fresh
+      if (yFirst) yearTrig.set(ly, mt.meeting_date)
+      if (((yFirst && fresh && !coveredByStreak) || yReopen) && !emittedHere) {
+        yearTrig.set(ly, mt.meeting_date)
         const dates = list.map((s) => s.meeting_date)
         out.push({
-          member_id: mem.id, key: `t1y:${ly}`, tier: 1, trigger_date: mt.meeting_date,
+          member_id: mem.id, key: yReopen ? `t1y:${ly}:${mt.id}` : `t1y:${ly}`, tier: 1, trigger_date: mt.meeting_date,
           meeting_dates: dates,
           reason: `System: missed without apology — ${dates.map(fmt).join(', ')} (3 meetings this lodge year).`,
         })
