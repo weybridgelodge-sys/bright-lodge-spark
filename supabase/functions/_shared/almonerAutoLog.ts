@@ -116,7 +116,7 @@ export function evaluateAutoLog(
         out.push({
           member_id: mem.id, key: wasReopen ? `t1c:${streak[0].id}:${mt.id}` : `t1c:${streak[0].id}`, tier: 1, trigger_date: mt.meeting_date,
           meeting_dates: dates,
-          reason: `System: missed without apology — ${dates.map(fmt).join(', ')} (2 consecutive meetings).`,
+          reason: `System: missed without apology — ${dates.map(fmt).join(', ')} (${dates.length} consecutive meetings).`,
         })
       }
       const ly = lodgeYearOf(mt.meeting_date)
@@ -135,7 +135,7 @@ export function evaluateAutoLog(
         out.push({
           member_id: mem.id, key: yReopen ? `t1y:${ly}:${mt.id}` : `t1y:${ly}`, tier: 1, trigger_date: mt.meeting_date,
           meeting_dates: dates,
-          reason: `System: missed without apology — ${dates.map(fmt).join(', ')} (3 meetings this lodge year).`,
+          reason: `System: missed without apology — ${dates.map(fmt).join(', ')} (${dates.length} meetings this lodge year).`,
         })
       }
     }

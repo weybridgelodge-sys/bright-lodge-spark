@@ -12,6 +12,7 @@ import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors'
 import { detectCelebrations, londonToday } from './celebrations.ts'
 import { sendTransactionalEmail } from '../_shared/send-email.ts'
 import { evaluateAutoLog } from '../_shared/almonerAutoLog.ts'
+import { computeCheckInFlags } from '../_shared/almonerCheckIn.ts'
 
 const SITE_URL = 'https://weybridgelodge.org.uk'
 const PORTAL_URL = `${SITE_URL}/members/almoner`
@@ -153,47 +154,15 @@ Deno.serve(async (req) => {
       if (meetingIds.length >= 2) {
         for (const m of members as any[]) {
           const s = present.get(m.id) ?? new Set()
-          if (!s.has(meetingIds[0]) && !s.has(meetingIds[1])) absentFlags[m.id] = true
+          const ack = last[m.id] ?? ''
+          const fresh = allMeetings[0].meeting_date > ack || allMeetings[1].meeting_date > ack
+          if (!s.has(meetingIds[0]) && !s.has(meetingIds[1]) && fresh) absentFlags[m.id] = true
         }
       }
 
-      // (b) Soft flag: pattern of not being around at Regular meetings.
-      // Any non-"Attended" status counts equally; only "attended" (and
-      // "booked" for future meetings) breaks a streak.
-      const recorded = new Set(rows.map((a: any) => a.meeting_id))
-      const regular = allMeetings
-        .filter((m) => m.meeting_type === 'regular' && recorded.has(m.id))
-        .sort((a, b) => b.meeting_date.localeCompare(a.meeting_date))
-      const statusBy = new Map<string, Map<string, string>>()
-      for (const a of rows) {
-        if (!a.member_id) continue
-        if (!statusBy.has(a.member_id)) statusBy.set(a.member_id, new Map())
-        statusBy.get(a.member_id)!.set(a.meeting_id, a.attendance_status)
-      }
-      const lyStart = new Date().getMonth() + 1 >= 10 ? new Date().getFullYear() : new Date().getFullYear() - 1
-      const yStart = `${lyStart}-10-01`
-      const yEnd = `${lyStart + 1}-09-30`
-      const breaks = new Set(['attended', 'booked'])
-      for (const m of members as any[]) {
-        const own = statusBy.get(m.id) ?? new Map<string, string>()
-        let consecutive = 0
-        for (const mt of regular) {
-          const st = own.get(mt.id)
-          if (st && breaks.has(st)) break
-          consecutive += 1
-        }
-        let yearMissed = 0
-        for (const mt of regular) {
-          if (mt.meeting_date < yStart || mt.meeting_date > yEnd) continue
-          const st = own.get(mt.id)
-          if (!st || !breaks.has(st)) yearMissed += 1
-        }
-        if (consecutive >= 2) {
-          checkInFlags[m.id] = `Not at the last ${consecutive} meetings — worth a call?`
-        } else if (yearMissed >= 3) {
-          checkInFlags[m.id] = `Missed ${yearMissed} meetings this lodge year — worth a call?`
-        }
-      }
+      // (b) Soft flag: shared with the Welfare Board badge so they never drift.
+      const flags = computeCheckInFlags(allMeetings, rows, (members as any[]).map((m) => m.id), new Date(), last)
+      for (const [id, f] of Object.entries(flags)) checkInFlags[id] = f.label
     }
 
     // ---- Almoner Auto-Log: system Welfare Log entries for genuine disengagement ----
@@ -227,6 +196,7 @@ Deno.serve(async (req) => {
         today,
         undefined,
         autoAbs,
+        last,
       )
       // Existing keys, including dismissed (soft-deleted) ones, are never re-created.
       const { data: existing, error: exErr } = await supabase

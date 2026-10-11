@@ -257,7 +257,10 @@ function PortalBody() {
         computeCheckInFlags(
           allMeetings,
           ((att as any[]) ?? []) as any,
-          ((ms as any[]) ?? []).map((m) => m.id)
+          ((ms as any[]) ?? []).map((m) => m.id),
+          new Date(),
+          // A genuine contact acknowledges misses up to its date.
+          last
         )
       );
     }
