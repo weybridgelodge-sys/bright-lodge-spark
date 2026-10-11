@@ -32,6 +32,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { toast } from "@/hooks/use-toast";
 import { Loader2, Plus, Pencil, Trash2, Lock, Unlock, ShieldCheck, Utensils, Handshake, ArrowUpCircle, ArrowDownCircle, UserPlus, BookOpen, TrendingUp, Scale, Search, Archive, Calculator, Landmark, PartyPopper, Users, Target, CalendarCheck } from "lucide-react";
 import { sortPeriodsNewestFirst } from "@/lib/treasurer/periods";
+import { useInitialLoading } from "@/hooks/useInitialLoading";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 type Period = {
@@ -265,7 +266,7 @@ function PeriodDialog({
 function Inner() {
   const { isAdmin, isCurrentSecretary, isCurrentTreasurer, canAccessTreasurer } = useAuth();
   const [periods, setPeriods] = useState<Period[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useInitialLoading();
   const [tab, setTab] = useState("bank-reconciliation");
 
   const load = useCallback(async () => {

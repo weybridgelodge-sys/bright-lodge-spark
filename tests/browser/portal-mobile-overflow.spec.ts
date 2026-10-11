@@ -352,3 +352,21 @@ test("Report widows section is read-only for WM at 320px", async ({ page }) => {
   await expect(page.getByRole("button", { name: /widow updates/ })).toHaveCount(0);
   await expectNoViewportOverflow(page, "Report widows read-only");
 });
+
+test("KPI candidate change keeps scroll position at 320px", async ({ page }) => {
+  const cand = { id: "cand1", first_name: "Bartholomew", last_name: "Featherstonehaugh", email: "b@example.com", phone: null, proposer: "W Bro. Smith", seconder: null, stage: "enquiry", notes: null, date_of_enquiry: "2026-09-01", initiation_scheduled_date: null, converted_member_id: null, referral_source: null, created_at: "2026-09-01", updated_at: "2026-09-01" };
+  await page.route("**/rest/v1/candidates?**", (r) => r.request().method() === "PATCH" ? r.fulfill({ status: 204, body: "" }) : r.fulfill({ json: [cand] }));
+  await page.goto("/members/kpis");
+  await waitForPortal(page);
+  const row = page.locator("#candidate-cand1");
+  await row.waitFor({ state: "visible", timeout: 15_000 });
+  await row.scrollIntoViewIfNeeded();
+  await page.evaluate(() => window.scrollBy(0, 50));
+  const before = await page.evaluate(() => window.scrollY);
+  expect(before).toBeGreaterThan(300);
+  await row.locator("select").first().selectOption({ index: 1 });
+  await page.waitForTimeout(1500);
+  const after = await page.evaluate(() => window.scrollY);
+  expect(Math.abs(after - before)).toBeLessThan(50);
+  await expectNoViewportOverflow(page, "KPI candidates");
+});
