@@ -1,3 +1,4 @@
+import { evaluateAutoLog, AUTO_LOG_FROM, type AutoLogEscalation } from "../../supabase/functions/_shared/almonerAutoLog";
 import { supabase } from "@/integrations/supabase/client";
 import { firstWmYearForMember } from "@/data/worshipfulMasters";
 import { formatMemberLine } from "@/lib/summons";
@@ -717,23 +718,29 @@ export function quarterlyEngagement(eng: EngagementBundle, quarters = 8) {
  * or a welfare absence only excuses the specific meeting it covers — it never
  * clears a different meeting's miss.
  */
-export function disengagementRisk(members: KpiMember[], eng: EngagementBundle) {
-  const recent = eng.meetings.slice(-3);
-  if (recent.length === 0) return { meetingsConsidered: 0, members: [] as KpiMember[] };
-  const from = recent[0].meeting_date;
-  const to = recent[recent.length - 1].meeting_date;
-  const statusOf = new Map<string, string>();
-  for (const r of eng.attendance) if (r.member_id) statusOf.set(`${r.member_id}|${r.meeting_id}`, r.attendance_status);
-  const coveredByAbsence = (memberId: string, date: string) =>
-    eng.absences.some(
-      (a) => a.member_id === memberId && a.period_start <= date && (a.period_end == null || a.period_end >= date)
-    );
-  const excusedAt = (memberId: string, m: OccurredMeeting) => {
-    const st = statusOf.get(`${memberId}|${m.id}`);
-    return (st != null && (ATTENDED_STATUSES.has(st) || st === "apologies")) || coveredByAbsence(memberId, m.meeting_date);
-  };
-  const at = members.filter(
-    (m) => m.status === "active" && !m.is_honorary_member && recent.every((mt) => !excusedAt(m.id, mt))
-  );
-  return { meetingsConsidered: recent.length, from, to, members: at };
+/**
+ * Disengagement Risk = the Almoner Auto-Log Tier 1 rule, run by the same
+ * shared evaluator: 2 consecutive unexcused misses, or 3 in the lodge year.
+ * Scope: active, non-honorary members only (first-year members fall under
+ * Tier 2 and are not counted here).
+ */
+export function disengagementRisk(members: KpiMember[], eng: EngagementBundle, today = new Date().toISOString().slice(0, 10)) {
+  const scope = members.filter((m) => m.status === "active" && !m.is_honorary_member);
+  const meetingsConsidered = eng.meetings.filter(
+    (m) => m.meeting_date >= AUTO_LOG_FROM && m.meeting_date <= today
+  ).length;
+  const hits = evaluateAutoLog(
+    eng.meetings.map((m) => ({ id: m.id, meeting_date: m.meeting_date, meeting_type: (m as any).meeting_type ?? "regular" })),
+    eng.attendance,
+    scope.map((m) => ({ id: m.id, initiation_date: m.initiation_date })),
+    today,
+    AUTO_LOG_FROM,
+    eng.absences,
+  ).filter((e) => e.tier === 1);
+  const byMember = new Map<string, AutoLogEscalation[]>();
+  for (const h of hits) byMember.set(h.member_id, [...(byMember.get(h.member_id) ?? []), h]);
+  const flagged = scope
+    .filter((m) => byMember.has(m.id))
+    .map((m) => ({ member: m, reasons: byMember.get(m.id)!.map((h) => h.reason.replace(/^System: /, "")) }));
+  return { meetingsConsidered, members: flagged.map((f) => f.member), details: flagged };
 }
