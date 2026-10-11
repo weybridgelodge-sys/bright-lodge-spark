@@ -49,3 +49,4 @@
 - [x] Fix stacked narrow-screen member rows without changing permissions
 - [x] Add populated admin/Secretary name-readability regressions and inspect portrait/desktop
 - [x] Run the full suite and check preview errors (119 unit, 58 browser; build OK)
+- [x] Almoner Auto-Log: per-meeting Disengagement Risk fix + automatic system Welfare Log entries (Tier 1/Tier 2) in digest
