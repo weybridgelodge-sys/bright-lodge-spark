@@ -415,3 +415,23 @@ for (const secretary of [false, true]) {
     });
   }
 }
+
+test("Almoner system auto-log entries are marked on the board and distinct in the Welfare Log at 320px", async ({ page }) => {
+  await page.addInitScript(() => sessionStorage.setItem("almoner-confidentiality", "1"));
+  const member = { id: "m1", full_name: "Wilberforce Aldington-Smythe-Featherstone", preferred_name: null, first_name: "Wilberforce", last_name: "Aldington-Smythe-Featherstone", title: "W Bro.", initiation_date: "2010-01-01", joined_lodge_date: null, joined_year: null, status: "active" };
+  const sysEntry = { id: "s1", member_id: "m1", contact_date: "2026-09-12", contact_type: "none", contact_nature: "routine", nature_detail: null, notes: "System: missed without apology — 13 May 2026, 12 Sept 2026 (2 consecutive meetings).", action_taken: null, follow_up_date: null, logged_by: null, created_at: "2026-10-11T06:00:00Z", is_system: true };
+  await page.route("**/rest/v1/profiles?**", (r) => r.fulfill({ json: [member] }));
+  await page.route("**/rest/v1/welfare_log_entries?**", (r) => r.fulfill({ json: [sysEntry] }));
+  await page.goto("/members/almoner");
+  await waitForPortal(page);
+  await expect(page.getByText(/System flag/)).toBeVisible();
+  await expect(page.getByText(/Last contact:/).first()).toContainText("Never");
+  await expectNoViewportOverflow(page, "Welfare Board system flag");
+  await page.getByRole("button", { name: /Wilberforce/ }).first().click();
+  const entry = page.locator("[data-system-entry]");
+  await expect(entry).toBeVisible();
+  await expect(entry.getByText("Automatic entry — no contact made")).toBeVisible();
+  const box = await entry.getByRole("button", { name: "Dismiss" }).boundingBox();
+  expect(box && box.height >= 44).toBeTruthy();
+  await expectNoViewportOverflow(page, "Welfare Log system entry");
+});

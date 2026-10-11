@@ -543,7 +543,7 @@ function MemberRecord({ member, currentStatus, onBack }: {
               {canEditAlmoner && (
                 <button
                   onClick={() => dismissSystem(l.id)}
-                  className="min-h-[44px] text-[11px] uppercase tracking-wider text-gold hover:text-gold/80"
+                  className="min-h-[48px] text-[11px] uppercase tracking-wider text-gold hover:text-gold/80"
                 >
                   Dismiss
                 </button>
