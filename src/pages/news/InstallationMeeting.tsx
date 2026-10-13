@@ -84,7 +84,7 @@ const InstallationMeeting = () => {
               <ol className="list-decimal list-inside space-y-1.5">
                 {tocItems.map((item) => (
                   <li key={item.id}>
-                    <a href={`#${item.id}`} className="text-sm font-sans text-primary  hover:underline">
+                    <a href={`#${item.id}`} className="text-sm font-sans text-primary hover:underline">
                       {item.label}
                     </a>
                   </li>
