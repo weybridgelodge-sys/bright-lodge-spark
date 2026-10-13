@@ -24,3 +24,4 @@
 - Page/list loading uses useInitialLoading, never useState(true), so save refreshes retain content and scroll.
 - Member Admin stacks rows below desktop widths; populated admin/Secretary tests check readable names and overlap. Why: pinned actions can hide names without document overflow.
 - KPI Summary: async crest header, explicit table start, final page-count loop in bottom margin; VO unchanged. Why: prevent overlap, ensure correct totals.
+- Meeting event label (lodge_events.event_label, default 'Festive Board') drives booking-form/email wording; title-aware attendance options live in src/lib/bookingTitles.ts. Why: White Table and other non-Festive-Board events reuse one form.
