@@ -117,7 +117,7 @@ const ThreeMasonicDegrees = () => {
                 <div className="h-0.5 w-16 bg-gold mb-6" />
                 <h2 className="text-2xl font-serif text-foreground mb-4">An Overview of the Three Degrees</h2>
                 <p className="text-muted-foreground font-sans leading-relaxed">
-                  The three degrees draw on the language and tools of the medieval stonemasons who built Europe's great cathedrals. We use those tools as symbols — not as a job description — to talk about character, integrity and self-improvement. The progression is gentle and supportive: most members take their three degrees over the course of around twelve to eighteen months, with help from a personal Mentor at every step.
+                  The three degrees draw on the language and tools of the medieval stonemasons who built Europe's great cathedrals. We use those tools as symbols — not as a job description — to talk about character, integrity and self-improvement. The progression is gentle and supportive: most members complete their three degrees around 1–2 years after Initiation, with help from a personal Mentor at every step.
                 </p>
               </section>
 
@@ -176,7 +176,7 @@ const ThreeMasonicDegrees = () => {
                 <div className="h-0.5 w-16 bg-gold mb-6" />
                 <h2 className="text-2xl font-serif text-foreground mb-4">A Lifelong Journey</h2>
                 <p className="text-muted-foreground font-sans leading-relaxed">
-                  Although there are only three degrees, Freemasonry itself is a lifelong journey. New members of Weybridge Lodge are supported by an experienced Mentor, by our weekly Rehearsal Night, and by a friendly group of Brethren — aged from 18 to 80 — who genuinely enjoy each other's company. If any of this resonates with you, we would be very pleased to hear from you.
+                  Although there are only three degrees, Freemasonry itself is a lifelong journey. New members of Weybridge Lodge are supported by an experienced Mentor, by our weekly Rehearsal Night, and by a friendly group of Brethren — aged from 18 to 83 — who genuinely enjoy each other's company. If any of this resonates with you, we would be very pleased to hear from you.
                 </p>
                 <p className="mt-6">
                   <Link
