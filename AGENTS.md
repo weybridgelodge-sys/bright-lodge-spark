@@ -23,4 +23,4 @@
 - Almoner access is two-tier: can_view_almoner(auth.uid()) gates SELECT, can_edit_almoner(auth.uid()) writes (incl. welfare-attachments storage and registers like Widows, whose primary rows archive by status, never delete); app mirrors as canAccessAlmoner/canEditAlmoner, hiding write controls. can_access_almoner is a deprecated alias. Why: read-only offices; one shape for welfare data.
 - Page/list loading uses useInitialLoading, never useState(true), so save refreshes retain content and scroll.
 - Member Admin stacks rows below desktop widths; populated admin/Secretary tests check readable names and overlap. Why: pinned actions can hide names without document overflow.
-- KPI Summary has a separate async crest header and explicit first-table position; preserve the VO header. Why: prevent header/table overlap.
+- KPI Summary: async crest header, explicit table start, final page-count loop in bottom margin; VO unchanged. Why: prevent overlap, ensure correct totals.

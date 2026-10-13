@@ -383,5 +383,21 @@ export async function exportFullKpi(bundle: KpiBundle, eng?: EngagementBundle | 
     });
   }
 
+  // Final pagination gives accurate totals; the default 14mm table margin
+  // reserves space above the footer.
+  const totalPages = doc.getNumberOfPages();
+  for (let page = 1; page <= totalPages; page++) {
+    doc.setPage(page);
+    const width = doc.internal.pageSize.getWidth();
+    const height = doc.internal.pageSize.getHeight();
+    doc.setDrawColor(201, 164, 50);
+    doc.setLineWidth(0.3);
+    doc.line(14, height - 11, width - 14, height - 11);
+    doc.setTextColor(27, 42, 74);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.text(`Page ${page} of ${totalPages}`, width / 2, height - 6, { align: "center" });
+  }
+
   await saveJsPdf(doc, `kpi-summary-${new Date().toISOString().slice(0, 10)}.pdf`);
 }
