@@ -41,7 +41,7 @@ const commuterAreas: CommuterArea[] = [
   {
     towns: "Godalming, Milford & Haslemere",
     routeNote:
-      "A quick run up the A3100 (Portsmouth Road) typically takes well under 20 minutes, and there's a direct South Western Railway service into Guildford station too — from there it's roughly a 10-minute walk or a 3-minute taxi to the Guildford Masonic Centre.",
+      "A quick run up the A3100 typically takes well under 20 minutes, and there's a direct South Western Railway service into Guildford station too — from there it's roughly a 10-minute walk or a 3-minute taxi to the Guildford Masonic Centre.",
     icon: Car,
   },
   {
@@ -122,7 +122,7 @@ const SouthSurreyFreemasons = () => {
     <div className="min-h-screen overflow-x-hidden">
       <SEO
         title="Surrey Masons: Join a Guildford Lodge That Fits Your Commute"
-        description="Thinking of joining the Surrey masons? Weybridge Lodge meets four times a year in Guildford (GU2 4DR), 5 minutes from the station — easy from Woking, Godalming, Farnham and Haslemere. See what a meeting involves and how to visit."
+        description="Thinking of joining the Surrey masons? Weybridge Lodge meets four times a year in Guildford (GU2 4DR), about a 10-minute walk from Guildford station — easy from Woking, Godalming, Farnham and Haslemere. See what a meeting involves and how to visit."
         canonical="/south-surrey-freemasons"
         schema={pageSchema}
       />
@@ -161,12 +161,12 @@ const SouthSurreyFreemasons = () => {
               <p className="text-muted-foreground font-sans leading-relaxed text-lg mt-4">
                 Members who travel in from across Surrey are part of the same Lodge that raised
                 over £31,000 for Farnborough SANDS —{" "}
-                <a
-                  href="https://weybridgelodge.org.uk/news/sands-charity"
-                  className="text-gold hover:underline"
+                <Link
+                  to="/news/sands-charity"
+                  className="text-gold hover:underline inline-block py-2"
                 >
                   read the full story
-                </a>
+                </Link>
                 . Fellowship at Weybridge Lodge extends well beyond the meeting room.
               </p>
             </motion.div>

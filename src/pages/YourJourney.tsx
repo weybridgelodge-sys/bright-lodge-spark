@@ -204,11 +204,11 @@ const YourJourney = () => {
         />
 
         {/* ── Intro ── */}
-        <section className="py-12 sm:py-20 bg-warm-white">
+        <section aria-labelledby="journey-intro-heading" className="py-12 sm:py-20 bg-warm-white">
           <div className="container mx-auto px-4 sm:px-6 max-w-3xl text-center">
             <motion.div {...motionProps()}>
               <div className="h-0.5 w-16 bg-gold mx-auto mb-6" />
-              <h2 className="text-3xl md:text-4xl font-serif text-foreground mb-6">
+              <h2 id="journey-intro-heading" className="text-3xl md:text-4xl font-serif text-foreground mb-6">
                 Straightforward, unhurried, and entirely on your terms
               </h2>
               <p className="text-muted-foreground font-sans leading-relaxed">
@@ -222,11 +222,11 @@ const YourJourney = () => {
         </section>
 
         {/* ── Five Join Steps ── */}
-        <section className="py-12 sm:py-20 bg-background">
+        <section aria-labelledby="application-heading" className="py-12 sm:py-20 bg-background">
           <div className="container mx-auto px-4 sm:px-6 max-w-5xl">
             <motion.div {...motionProps()} className="text-center mb-12">
               <div className="h-0.5 w-16 bg-gold mx-auto mb-6" />
-              <h2 className="text-3xl md:text-4xl font-serif text-foreground mb-4">
+              <h2 id="application-heading" className="text-3xl md:text-4xl font-serif text-foreground mb-4">
                 The Application Process
               </h2>
               <p className="text-muted-foreground font-sans max-w-2xl mx-auto">
@@ -283,13 +283,13 @@ const YourJourney = () => {
         </section>
 
         {/* ── Journey Timeline ── */}
-        <section className="bg-warm-white py-16 px-4 sm:px-6 lg:px-8 border-t border-border">
+        <section aria-labelledby="progression-heading" className="bg-warm-white py-16 px-4 sm:px-6 lg:px-8 border-t border-border">
           <div className="max-w-3xl mx-auto">
             <motion.div {...motionProps()} className="text-center mb-12">
               <span className="text-gold font-semibold tracking-wide uppercase text-sm">
                 Chronology
               </span>
-              <h2 className="mt-2 text-3xl font-extrabold text-foreground tracking-tight sm:text-4xl font-serif">
+              <h2 id="progression-heading" className="mt-2 text-3xl font-extrabold text-foreground tracking-tight sm:text-4xl font-serif">
                 Step-by-Step Progression
               </h2>
               <p className="mt-4 text-base text-muted-foreground max-w-xl mx-auto">
@@ -375,6 +375,12 @@ const YourJourney = () => {
                 );
               })}
             </ul>
+            <p className="text-center">
+              <Link to="/news/three-masonic-degrees-explained" className="text-gold hover:underline inline-flex items-center min-h-[48px]">
+                The three Masonic degrees explained
+                <ArrowRight className="w-4 h-4 ml-2" aria-hidden="true" />
+              </Link>
+            </p>
           </div>
         </section>
 
@@ -406,6 +412,10 @@ const YourJourney = () => {
                     Many members of our Freemasons Lodge in Guildford go on to enjoy it when the
                     time feels right — there is no rush and no expectation.
                   </p>
+                  <Link to="/news/royal-arch-explained" className="text-gold hover:underline inline-flex items-center min-h-[48px]">
+                    The Royal Arch explained
+                    <ArrowRight className="w-4 h-4 ml-2" aria-hidden="true" />
+                  </Link>
                 </div>
               </div>
             </motion.div>
@@ -428,18 +438,24 @@ const YourJourney = () => {
                 <Link
                   to="/join-us"
                   aria-label="Begin your application to join Weybridge Lodge No. 6787 in Guildford"
-                  className="inline-flex items-center justify-center bg-gold-shimmer text-accent-foreground px-8 py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity"
+                  className="inline-flex items-center justify-center bg-gold-shimmer text-accent-foreground px-8 py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity min-h-[48px] w-full sm:w-auto"
                 >
                   Begin Your Application
                   <ArrowRight className="w-4 h-4 ml-2" aria-hidden="true" />
                 </Link>
                 <Link
                   to="/quiz"
-                  className="inline-flex items-center justify-center border border-gold text-gold px-8 py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:bg-gold hover:text-navy transition-colors"
+                  className="inline-flex items-center justify-center border border-gold text-gold px-8 py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:bg-gold hover:text-navy transition-colors min-h-[48px] w-full sm:w-auto"
                 >
                   Take the 2-Min Quiz
                 </Link>
               </div>
+              <p className="text-center text-primary-foreground/70 font-sans mt-8">
+                Want to know what the first night is like?{" "}
+                <Link to="/freemason-initiation-night" className="inline-flex items-center min-h-[48px] text-gold hover:underline">
+                  Read the initiation night guide
+                </Link>
+              </p>
             </motion.div>
           </div>
         </section>
