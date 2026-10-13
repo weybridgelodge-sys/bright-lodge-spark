@@ -123,6 +123,7 @@ export async function exportFullKpi(bundle: KpiBundle, eng?: EngagementBundle | 
   autoTable(doc, {
     // Continue below Lodge Health rather than overlapping it.
     startY: (doc as any).lastAutoTable.finalY + 8,
+    pageBreak: "avoid",
     head: [["1. Snapshot", "Value"]],
     body: [
       ["Subscribing", String(s.subscribingCount)],
@@ -137,6 +138,7 @@ export async function exportFullKpi(bundle: KpiBundle, eng?: EngagementBundle | 
   });
 
   autoTable(doc, {
+    pageBreak: "avoid",
     head: [["2. Movement (12mo)", "Count"]],
     body: [
       ["Initiated", String(mv.initiated.length)],
@@ -152,6 +154,7 @@ export async function exportFullKpi(bundle: KpiBundle, eng?: EngagementBundle | 
   });
 
   autoTable(doc, {
+    pageBreak: "avoid",
     head: [["3. UGLE Portal", ""]],
     body: [
       ["Registered", `${ra.registeredCount} / ${ra.totalActive} (${ra.pct}%)`],
@@ -163,6 +166,7 @@ export async function exportFullKpi(bundle: KpiBundle, eng?: EngagementBundle | 
 
   if (conv.length) {
     autoTable(doc, {
+      pageBreak: "avoid",
       head: [["4. RA Conversion", "Raised", "Months"]],
       body: conv.map((r) => [fullName(r.member), r.member.raising_date ?? "—", String(r.monthsEligible)]),
       theme: "striped",
@@ -172,6 +176,7 @@ export async function exportFullKpi(bundle: KpiBundle, eng?: EngagementBundle | 
 
   if (ms.length) {
     autoTable(doc, {
+      pageBreak: "avoid",
       head: [["5. Milestones", "Date", "Detail"]],
       body: ms.map((x) => [fullName(x.member), new Date(x.date).toLocaleDateString("en-GB"), x.label]),
       theme: "striped",
@@ -180,6 +185,7 @@ export async function exportFullKpi(bundle: KpiBundle, eng?: EngagementBundle | 
   }
 
   autoTable(doc, {
+    pageBreak: "avoid",
     head: [["6. Officers & Succession", ""]],
     body: [
       ["Progressive offices filled", `${oh.progressiveFilled.length} / ${oh.progressiveTotal}`],
@@ -201,6 +207,7 @@ export async function exportFullKpi(bundle: KpiBundle, eng?: EngagementBundle | 
   });
 
   autoTable(doc, {
+    pageBreak: "avoid",
     head: [["7. Pipeline", "Count"]],
     body: [
       ["Candidates awaiting Initiation", String(pl.candidates.length)],
