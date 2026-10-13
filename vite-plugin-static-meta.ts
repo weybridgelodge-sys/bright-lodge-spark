@@ -59,6 +59,14 @@ export const staticRoutes: RouteMeta[] = [
     canonical: "/news",
   },
   {
+    // Bespoke legacyRoute page: its SEO props take precedence over Sanity copy.
+    route: "news/three-masonic-degrees-explained",
+    title: "The 3 Degrees of Freemasonry Explained",
+    description:
+      "What are the three degrees of Freemasonry? Entered Apprentice, Fellow Craft and Master Mason explained simply, by Freemasons in Guildford, Surrey.",
+    canonical: "/news/three-masonic-degrees-explained",
+  },
+  {
     route: "news/category/charity",
     title: "Charity News",
     description:

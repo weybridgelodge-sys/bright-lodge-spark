@@ -1,5 +1,9 @@
 - [x] Build dedicated Committee Agenda editor and verify the 11 January 2027 PDF.
 
+## Three degrees article SEO
+- [ ] Update search metadata and static head without changing existing article copy; add closing links and inline cross-link.
+- [ ] Verify headings, schema, raw HTML metadata, phone layout and full tests/build.
+
 - [x] Optimize 15 flagged web images, correct APGM formats, update Thames social image, and report size results.
 
 - [x] Treasurer reports: monthly periods (I&E, Balance Sheet) + account drill-down to journal entry
