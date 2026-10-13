@@ -453,7 +453,7 @@ test("Summons visitor email dialog fits 320px with worst-case names", async ({ p
   await expect(dialog.getByText("Email Summons to Visitors")).toBeVisible();
   // Long names/emails must render; the apology-only visitor shows "Not yet attended"
   await expect(dialog.getByText("W Bro. Bartholomew Featherstonehaugh-Wolstenholme")).toBeVisible();
-  await expect(dialog.getByText("Not yet attended")).toBeVisible();
+  await expect(dialog.getByText("Not yet attended").first()).toBeVisible();
   // Salutation inputs remain reachable inside the scrollable table
   await expect(dialog.getByPlaceholder("e.g. W Bro Smith").first()).toBeVisible();
   await expectNoViewportOverflow(page, "Summons visitor email dialog");
