@@ -361,7 +361,7 @@ const Header = () => {
           </div>
         </Link>
 
-        <nav aria-label="Main navigation" className="hidden lg:flex items-center gap-7 lg:gap-5">
+        <nav aria-label="Main navigation" className="hidden xl:flex items-center gap-7">
           {navItems.map((item) => renderDesktopItem(item))}
         </nav>
 
@@ -390,7 +390,7 @@ const Header = () => {
           </Link>
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
-            className="lg:hidden text-primary-foreground min-h-[48px] min-w-[48px] flex items-center justify-center"
+            className="xl:hidden text-primary-foreground min-h-[48px] min-w-[48px] flex items-center justify-center"
             aria-label="Toggle menu"
             aria-expanded={mobileOpen}
           >
@@ -400,7 +400,7 @@ const Header = () => {
       </div>
 
       {mobileOpen && (
-        <div className="lg:hidden bg-navy-dark border-t border-gold/10 max-h-[calc(100vh-4rem)] overflow-y-auto overflow-x-hidden animate-in fade-in slide-in-from-top-1 duration-150">
+        <div className="xl:hidden bg-navy-dark border-t border-gold/10 max-h-[calc(100vh-4rem)] overflow-y-auto overflow-x-hidden animate-in fade-in slide-in-from-top-1 duration-150">
           <nav aria-label="Mobile navigation" className="flex flex-col px-6 py-4 gap-2">
             {navItems.map((item) => renderMobileItem(item))}
             <Link
