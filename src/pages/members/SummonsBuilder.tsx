@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import MembersLayout from "@/components/members/MembersLayout";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { countVisitorVisits, isRecentVisitor, type VisitorAttendanceRow } from "@/lib/kpis";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -1250,7 +1251,7 @@ function VisitorEmailDialog(props: {
       const sel: Record<string, boolean> = {};
       const sal: Record<string, string> = {};
       for (const r of list) {
-        sel[r.id] = !!r.real_last_seen && new Date(r.real_last_seen).getTime() >= twoYearsAgo;
+        sel[r.id] = isRecentVisitor(r.real_last_seen, twoYearsAgo);
         sal[r.id] = parseSalutation(r.name);
       }
       setSelected(sel);

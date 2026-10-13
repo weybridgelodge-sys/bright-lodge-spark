@@ -20,3 +20,11 @@ describe("visitor visits", () => {
     expect(r.lastSeen.a).toBe("2026-02-18");
   });
 });
+
+import { isRecentVisitor } from "@/lib/kpis";
+describe("summons pre-tick", () => {
+  const cutoff = new Date("2024-10-13").getTime();
+  it("never-attended visitor is not pre-ticked", () => expect(isRecentVisitor(null, cutoff)).toBe(false));
+  it("visit within two years is pre-ticked", () => expect(isRecentVisitor("2026-05-13", cutoff)).toBe(true));
+  it("visit older than two years is not", () => expect(isRecentVisitor("2024-01-10", cutoff)).toBe(false));
+});
