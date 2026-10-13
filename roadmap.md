@@ -49,11 +49,6 @@
 - [x] Update public member ages, ballot sequence and degree timings only; report changed lines and CMS/ambiguous findings.
 - [x] Verify six public pages; 159 unit tests and 60 browser tests passed; preview build OK.
 
-## Public low-vision accessibility (part 3b)
-- [ ] Capture baseline and repeat contrast/link/target audits at 320px and 1280px across the 17 requested routes.
-- [ ] Apply only requested public contrast, underline, text-size and global focus/input/error changes.
-- [ ] Verify narrow-screen visibility, keyboard focus on light/navy, and existing unit/browser tests; report remaining exceptions.
-
 ## Member Admin portrait names
 - [x] Fix stacked narrow-screen member rows without changing permissions
 - [x] Add populated admin/Secretary name-readability regressions and inspect portrait/desktop
