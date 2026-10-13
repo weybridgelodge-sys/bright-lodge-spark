@@ -25,7 +25,7 @@ const timeline: TimelineStep[] = [
     icon: Users,
     time: "Before the night",
     title: "Everything that leads here",
-    body: "By the time you reach your initiation night, we've already spoken on the phone, exchanged emails, shown you around the Masonic Centre, and met for a relaxed informal interview. You've completed your application form and your ballot has been successful. Now all that remains is the evening itself.",
+    body: "By the time you reach your initiation night, we've already spoken on the phone, exchanged emails, shown you around the Masonic Centre, and met for a relaxed informal interview. You've completed your application form, and your name has been read in open Lodge at the previous meeting. On the night itself a formal ballot is taken in the Lodge room before you are admitted — a traditional formality — and then your evening begins.",
   },
   {
     icon: DoorOpen,

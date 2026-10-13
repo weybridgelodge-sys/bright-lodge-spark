@@ -58,7 +58,7 @@ const Hero = () => {
             </p>
 
             <p className="text-lg md:text-xl text-warm-white/80 font-sans font-light leading-relaxed mb-10 max-w-xl">
-              Weybridge Lodge No. 6787 is a friendly Masonic Lodge in Surrey, a group of men in Guildford — aged 18 to 80 — who meet to make genuine friendships, support local charities, and grow as people. New members are always welcome.
+              Weybridge Lodge No. 6787 is a friendly Masonic Lodge in Surrey, a group of men in Guildford — aged 18 to 83 — who meet to make genuine friendships, support local charities, and grow as people. New members are always welcome.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <Link
