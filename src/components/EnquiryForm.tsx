@@ -87,7 +87,7 @@ export const EnquiryForm = () => {
   if (submitted) {
     return (
       <div className="mt-8 border-t border-border pt-8">
-        <h4 className="text-lg font-serif text-foreground mb-2">Thank you{firstName ? `, ${firstName}` : ""}</h4>
+        <h3 className="text-lg font-serif text-foreground mb-2">Thank you{firstName ? `, ${firstName}` : ""}</h3>
         <p className="text-muted-foreground font-sans">
           Thanks so much{firstName ? `, ${firstName}` : ""} — we're really glad you got in
           touch. Check your inbox for a short guide with more about us, and expect a
@@ -115,12 +115,9 @@ export const EnquiryForm = () => {
       className="mt-8 space-y-4 border-t border-border pt-8"
       noValidate
     >
-      <h4 className="text-lg font-serif text-foreground mb-2">Enquiry Form</h4>
+      <h3 className="text-lg font-serif text-foreground mb-2">Enquiry Form</h3>
 
-      {/* Honeypot — hidden from real users.
-          CONFIRMED CORRECT: aria-hidden, off-screen absolute position,
-          tabIndex={-1}, autoComplete="off" — this already meets the
-          anti-spam requirement. No change made. */}
+      {/* Honeypot — hidden from real users. */}
       <div aria-hidden="true" style={{ position: "absolute", left: "-10000px", height: 0, width: 0, overflow: "hidden" }}>
         <label htmlFor="website">Website (leave blank)</label>
         <input type="text" id="website" name="website" tabIndex={-1} autoComplete="off" />
@@ -128,35 +125,26 @@ export const EnquiryForm = () => {
 
       <div>
         <label htmlFor="full_name" className="block text-sm font-sans font-medium text-foreground mb-1">
-          {/* NOTE: text-destructive is used here for the required-field
-              marker and below for error text. It isn't in the approved
-              navy/gold/background/card/border/text-foreground/muted-foreground
-              list, but the Brand Identity doc also doesn't define an
-              error/validation colour at all. Removing it would hurt
-              accessibility of required-field and error states, so it's left
-              as-is — flagging for you to either confirm --destructive as a
-              sanctioned exception, or add a proper error token to the brand
-              doc. */}
           Full Name <span className="text-destructive">*</span>
         </label>
-        <input type="text" id="full_name" name="full_name" required maxLength={120} className={inputClass} placeholder="Your full name" />
-        {errors.full_name && <p className="text-xs text-destructive mt-1">{errors.full_name[0]}</p>}
+        <input type="text" id="full_name" name="full_name" aria-invalid={!!errors.full_name} aria-describedby="full_name-error" required maxLength={120} className={inputClass} placeholder="Your full name" />
+        {errors.full_name && <p id="full_name-error" role="alert" className="text-xs text-destructive mt-1">{errors.full_name[0]}</p>}
       </div>
 
       <div>
         <label htmlFor="email" className="block text-sm font-sans font-medium text-foreground mb-1">
           Email Address <span className="text-destructive">*</span>
         </label>
-        <input type="email" id="email" name="email" required maxLength={255} className={inputClass} placeholder="you@example.com" />
-        {errors.email && <p className="text-xs text-destructive mt-1">{errors.email[0]}</p>}
+        <input type="email" id="email" name="email" aria-invalid={!!errors.email} aria-describedby="email-error" required maxLength={255} className={inputClass} placeholder="you@example.com" />
+        {errors.email && <p id="email-error" role="alert" className="text-xs text-destructive mt-1">{errors.email[0]}</p>}
       </div>
 
       <div>
         <label htmlFor="phone" className="block text-sm font-sans font-medium text-foreground mb-1">
           Contact Number
         </label>
-        <input type="tel" id="phone" name="phone" maxLength={40} className={inputClass} placeholder="07xxx xxx xxx" />
-        {errors.phone && <p className="text-xs text-destructive mt-1">{errors.phone[0]}</p>}
+        <input type="tel" id="phone" name="phone" aria-invalid={!!errors.phone} aria-describedby="phone-error" maxLength={40} className={inputClass} placeholder="07xxx xxx xxx" />
+        {errors.phone && <p id="phone-error" role="alert" className="text-xs text-destructive mt-1">{errors.phone[0]}</p>}
       </div>
 
       <div>
@@ -165,7 +153,7 @@ export const EnquiryForm = () => {
         </label>
         <textarea
           id="reason"
-          name="reason"
+          name="reason" aria-invalid={!!errors.reason} aria-describedby="reason-error"
           required
           minLength={10}
           maxLength={2000}
@@ -173,14 +161,11 @@ export const EnquiryForm = () => {
           className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           placeholder="Tell us why you're interested in joining..."
         />
-        {errors.reason && <p className="text-xs text-destructive mt-1">{errors.reason[0]}</p>}
+        {errors.reason && <p id="reason-error" role="alert" className="text-xs text-destructive mt-1">{errors.reason[0]}</p>}
       </div>
 
       <TurnstileWidget onToken={setTurnstileToken} onExpire={() => setTurnstileToken("")} />
 
-      {/* FIXED: bg-gold-shimmer / text-accent-foreground are not approved
-          project tokens — replaced with bg-gold / text-navy. Added explicit
-          min-h-[48px] (py-4 already exceeds it, but making it explicit). */}
       <button
         type="submit"
         disabled={submitting || !turnstileToken}

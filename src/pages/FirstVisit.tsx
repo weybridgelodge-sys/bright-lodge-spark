@@ -89,7 +89,7 @@ const FirstVisit = () => {
         "@type": "WebPage",
         "@id": "https://weybridgelodge.org.uk/freemason-initiation-night#webpage",
         url: "https://weybridgelodge.org.uk/freemason-initiation-night",
-        name: "Your Initiation Night | Freemasons in Guildford, Surrey — Weybridge Lodge No. 6787",
+        name: "Your Freemason Initiation Night in Guildford | Weybridge Lodge No. 6787",
         description:
           "A candid, reassuring guide to your Masonic initiation night at Weybridge Lodge No. 6787 — what happens, what to wear, and what to expect at the Guildford Masonic Centre, GU2 4DR.",
         inLanguage: "en-GB",
@@ -104,7 +104,7 @@ const FirstVisit = () => {
   return (
     <div className="min-h-screen overflow-x-hidden">
       <SEO
-        title="Your Initiation Night"
+        title="Freemason Initiation Night, Guildford"
         description="A candid, reassuring guide to your Masonic initiation night at Weybridge Lodge No. 6787 — what happens, what to wear, and what to expect at the Guildford Masonic Centre, GU2 4DR."
         canonical="/freemason-initiation-night"
         schema={pageSchema}
@@ -113,7 +113,7 @@ const FirstVisit = () => {
       <Header />
       <main id="main-content">
         <PageHeader
-          title="Your Initiation Night"
+          title="Your Freemason Initiation Night in Guildford"
           subtitle="A candid, reassuring guide to your first evening as a Freemason at the Guildford Masonic Centre"
         />
 
@@ -316,6 +316,13 @@ const FirstVisit = () => {
                 className="inline-flex items-center gap-1 text-gold hover:underline font-medium min-h-[48px]"
               >
                 Find out how to begin your application
+                <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+              </Link>{" "}
+              <Link
+                to="/your-journey"
+                className="inline-flex items-center gap-1 text-gold hover:underline font-medium min-h-[48px]"
+              >
+                Or see the full journey timeline
                 <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
               </Link>
             </p>

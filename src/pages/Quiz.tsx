@@ -133,9 +133,9 @@ const Quiz = () => {
         "@type": "WebPage",
         "@id": "https://weybridgelodge.org.uk/quiz#webpage",
         url: "https://weybridgelodge.org.uk/quiz",
-        name: "Is Freemasonry Right for You? | Weybridge Lodge No. 6787 — Freemasons in Guildford, Surrey",
+        name: "Freemasonry Quiz: Is It for Me? | Weybridge Lodge No. 6787, Freemasons in Guildford",
         description:
-          "Take our short personalised quiz to discover whether Freemasonry at Weybridge Lodge No. 6787 in Guildford, Surrey might be right for you.",
+          "Take our 2-minute quiz to find out whether joining Freemasons in Guildford, Surrey is right for you. Private, no sign-up, from Weybridge Lodge No. 6787.",
         inLanguage: "en-GB",
         isPartOf: {
           "@id": "https://weybridgelodge.org.uk/#website",
@@ -150,8 +150,8 @@ const Quiz = () => {
   return (
     <div className="min-h-screen">
       <SEO
-        title="Is Freemasonry Right for You?"
-        description="Take our short personalised quiz to discover whether Freemasonry at Weybridge Lodge No. 6787 in Guildford, Surrey might be right for you."
+        title="Freemasonry Quiz: Is It for Me?"
+        description="Take our 2-minute quiz to find out whether joining Freemasons in Guildford, Surrey is right for you. Private, no sign-up, from Weybridge Lodge No. 6787."
         canonical="/quiz"
         schema={pageSchema}
       />
@@ -211,7 +211,7 @@ const Quiz = () => {
                     transition={{ duration: shouldReduceMotion ? 0 : 0.3 }}
                   >
                     <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-gold font-sans mb-4">
-                      <HelpCircle className="h-4 w-4" />
+                      <HelpCircle className="h-4 w-4" aria-hidden="true" />
                       Suitability Assessment
                     </div>
 
@@ -247,7 +247,7 @@ const Quiz = () => {
                     transition={{ duration: shouldReduceMotion ? 0 : 0.4 }}
                   >
                     <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-navy text-gold mb-6">
-                      <CheckCircle2 className="h-7 w-7" />
+                      <CheckCircle2 className="h-7 w-7" aria-hidden="true" />
                     </div>
 
                     {outcome === "high-fit" && (
@@ -264,16 +264,22 @@ const Quiz = () => {
                         <div className="flex flex-wrap gap-4 mb-8">
                           <Link
                             to="/join-us"
-                            className="inline-flex items-center justify-center gap-2 bg-gold-shimmer text-accent-foreground px-6 py-3 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity"
+                            className="inline-flex items-center justify-center gap-2 bg-gold-shimmer text-accent-foreground px-6 py-3 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity min-h-[48px]"
                           >
                             Begin Your Application
-                            <ArrowRight className="h-4 w-4" />
+                            <ArrowRight className="h-4 w-4" aria-hidden="true" />
                           </Link>
                           <Link
                             to="/freemason-initiation-night"
-                            className="inline-flex items-center justify-center border border-border text-foreground px-6 py-3 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:border-gold hover:text-gold transition-colors"
+                            className="inline-flex items-center justify-center border border-border text-foreground px-6 py-3 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:border-gold hover:text-gold transition-colors min-h-[48px]"
                           >
                             Your Initiation Night
+                          </Link>
+                          <Link
+                            to="/your-journey"
+                            className="inline-flex items-center justify-center border border-border text-foreground px-6 py-3 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:border-gold hover:text-gold transition-colors min-h-[48px]"
+                          >
+                            See the journey timeline
                           </Link>
                         </div>
                       </>
@@ -293,16 +299,22 @@ const Quiz = () => {
                         <div className="flex flex-wrap gap-4 mb-8">
                           <Link
                             to="/faq"
-                            className="inline-flex items-center justify-center gap-2 bg-gold-shimmer text-accent-foreground px-6 py-3 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity"
+                            className="inline-flex items-center justify-center gap-2 bg-gold-shimmer text-accent-foreground px-6 py-3 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity min-h-[48px]"
                           >
                             Browse Our FAQs
-                            <ArrowRight className="h-4 w-4" />
+                            <ArrowRight className="h-4 w-4" aria-hidden="true" />
                           </Link>
                           <Link
                             to="/contact"
-                            className="inline-flex items-center justify-center border border-border text-foreground px-6 py-3 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:border-gold hover:text-gold transition-colors"
+                            className="inline-flex items-center justify-center border border-border text-foreground px-6 py-3 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:border-gold hover:text-gold transition-colors min-h-[48px]"
                           >
                             Ask a Question
+                          </Link>
+                          <Link
+                            to="/your-journey"
+                            className="inline-flex items-center justify-center border border-border text-foreground px-6 py-3 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:border-gold hover:text-gold transition-colors min-h-[48px]"
+                          >
+                            See the journey timeline
                           </Link>
                         </div>
                       </>
@@ -322,15 +334,21 @@ const Quiz = () => {
                         <div className="flex flex-wrap gap-4 mb-8">
                           <Link
                             to="/faq"
-                            className="inline-flex items-center justify-center border border-border text-foreground px-6 py-3 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:border-gold hover:text-gold transition-colors"
+                            className="inline-flex items-center justify-center border border-border text-foreground px-6 py-3 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:border-gold hover:text-gold transition-colors min-h-[48px]"
                           >
                             Read Our FAQs
                           </Link>
                           <Link
                             to="/contact"
-                            className="inline-flex items-center justify-center border border-border text-foreground px-6 py-3 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:border-gold hover:text-gold transition-colors"
+                            className="inline-flex items-center justify-center border border-border text-foreground px-6 py-3 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:border-gold hover:text-gold transition-colors min-h-[48px]"
                           >
                             Get in Touch
+                          </Link>
+                          <Link
+                            to="/your-journey"
+                            className="inline-flex items-center justify-center border border-border text-foreground px-6 py-3 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:border-gold hover:text-gold transition-colors min-h-[48px]"
+                          >
+                            See the journey timeline
                           </Link>
                         </div>
                       </>
@@ -338,9 +356,9 @@ const Quiz = () => {
 
                     <button
                       onClick={resetQuiz}
-                      className="inline-flex items-center gap-2 text-sm font-sans text-muted-foreground hover:text-gold transition-colors"
+                      className="inline-flex items-center gap-2 text-sm font-sans text-muted-foreground hover:text-gold transition-colors min-h-[48px]"
                     >
-                      <RotateCcw className="h-4 w-4" />
+                      <RotateCcw className="h-4 w-4" aria-hidden="true" />
                       Restart Assessment
                     </button>
                   </motion.div>

@@ -210,9 +210,8 @@ const JoinUs = () => {
                         Call our Membership Secretary
                       </p>
                       <a
-                        href="tel:07921589039"
+                        href="tel:+447921589039"
                         className="text-gold hover:text-gold/80 font-sans transition-colors text-sm min-h-[48px] inline-flex items-center"
-                        aria-label="Call Weybridge Lodge Membership Secretary"
                       >
                         07921 589 039
                       </a>
@@ -226,7 +225,6 @@ const JoinUs = () => {
                       <a
                         href="mailto:secretary@weybridgelodge.org.uk?subject=Weybridge%20Lodge%20Website%20Enquiry"
                         className="text-gold hover:text-gold/80 font-sans transition-colors text-sm break-all min-h-[48px] inline-flex items-center"
-                        aria-label="Email Weybridge Lodge secretary"
                       >
                         secretary@weybridgelodge.org.uk
                       </a>
@@ -257,7 +255,6 @@ const JoinUs = () => {
               Commuting from Godalming, Farnham or Woking?{" "}
               <Link
                 to="/south-surrey-freemasons"
-                aria-label="See how the commute to Guildford works for South Surrey members"
                 className="text-gold hover:underline font-medium min-h-[48px] inline-flex items-center"
               >
                 See how the journey works
@@ -346,7 +343,6 @@ const JoinUs = () => {
               </p>
               <Link
                 to="/quiz"
-                aria-label="Not sure? Take the 2-minute suitability quiz"
                 className="inline-flex items-center gap-2 text-sm font-sans font-semibold text-gold uppercase tracking-widest hover:underline min-h-[48px]"
               >
                 Not sure yet? Take the 2-Min Quiz
@@ -371,7 +367,6 @@ const JoinUs = () => {
               </p>
               <Link
                 to="/quiz"
-                aria-label="Take the 2-minute Freemasonry quiz"
                 className="inline-flex items-center justify-center gap-2 bg-gold-shimmer text-accent-foreground px-8 py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity min-h-[48px]"
               >
                 Take the 2-Min Quiz
@@ -470,8 +465,7 @@ const JoinUs = () => {
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
                 <a
-                  href="tel:07921589039"
-                  aria-label="Call Weybridge Lodge Membership Secretary to begin your application"
+                  href="tel:+447921589039"
                   className="inline-flex items-center justify-center gap-2 bg-gold-shimmer text-accent-foreground px-8 py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity min-h-[48px] w-full sm:w-auto"
                 >
                   <Phone className="w-4 h-4" aria-hidden="true" />
@@ -479,7 +473,6 @@ const JoinUs = () => {
                 </a>
                 <a
                   href="mailto:secretary@weybridgelodge.org.uk?subject=Weybridge%20Lodge%20Website%20Enquiry"
-                  aria-label="Email Weybridge Lodge to begin your application"
                   className="inline-flex items-center justify-center gap-2 bg-transparent text-gold border border-gold/40 px-8 py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity min-h-[48px] w-full sm:w-auto"
                 >
                   <Mail className="w-4 h-4" aria-hidden="true" />
