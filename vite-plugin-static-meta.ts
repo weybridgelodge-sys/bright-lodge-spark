@@ -41,14 +41,14 @@ const buildTitle = (title: string) =>
   title.includes(SITE_NAME) ? title : `${title} | ${SITE_NAME}`;
 
 // ── Static pages — props copied verbatim from each page component ──
-const staticRoutes: RouteMeta[] = [
+export const staticRoutes: RouteMeta[] = [
   {
     // Homepage — overwrites dist/index.html, which also serves as the SPA
     // fallback for any route without its own prerendered variant.
     route: "",
     title: "Freemasons in Guildford, Surrey | Weybridge Lodge No. 6787",
     description:
-      "Join the Freemasons in Guildford, Surrey. Weybridge Lodge No. 6787 is a friendly, open lodge at Guildford Masonic Centre — find out how to join, our charity work, and our history.",
+      "Weybridge Lodge No. 6787: a friendly Masonic Lodge in Surrey meeting in Guildford GU2 4DR. Take the 2-minute quiz, see your journey and how to join.",
     canonical: "/",
   },
   {
@@ -119,7 +119,7 @@ const staticRoutes: RouteMeta[] = [
   },
   {
     route: "freemason-initiation-night",
-    title: "Your Initiation Night",
+    title: "Freemason Initiation Night, Guildford",
     description:
       "A candid, reassuring guide to your Masonic initiation night at Weybridge Lodge No. 6787 — what happens, what to wear, and what to expect at the Guildford Masonic Centre, GU2 4DR.",
     canonical: "/freemason-initiation-night",
@@ -201,9 +201,9 @@ const staticRoutes: RouteMeta[] = [
   },
   {
     route: "contact",
-    title: "Contact Us — Guildford Masonic Centre, GU2 4DR",
+    title: "Contact Freemasons in Guildford | Weybridge Lodge No. 6787",
     description:
-      "Contact Weybridge Lodge No. 6787 and find the Guildford Masonic Centre — Weybourne House, Hitherbury Close, Guildford GU2 4DR. Directions, parking, phone and email.",
+      "Contact Weybridge Lodge No. 6787, a Masonic Lodge in Surrey meeting at Guildford Masonic Centre, Weybourne House, Hitherbury Close, Guildford GU2 4DR. Phone, email and directions.",
     canonical: "/contact",
   },
   {
@@ -231,9 +231,10 @@ const staticRoutes: RouteMeta[] = [
   },
   {
     route: "officers-jewels",
-    title: "Masonic Officer Jewels Explained | Weybridge Lodge No. 6787",
+    title:
+      "Masonic Lodge Officers' Jewels Explained — Every Office & Emblem | Weybridge Lodge No. 6787",
     description:
-      "What does each Masonic Lodge officer's jewel mean? A clear guide to every office and jewel, from Steward to Worshipful Master — Weybridge Lodge, Guildford.",
+      "A complete visual guide to every Masonic Lodge officers' jewel — from Steward to Worshipful Master — explained with images and duties, by Weybridge Lodge No. 6787 in Guildford, Surrey.",
     canonical: "/officers-jewels",
   },
   {
@@ -265,16 +266,16 @@ const staticRoutes: RouteMeta[] = [
   },
   {
     route: "quiz",
-    title: "Is Freemasonry Right for You?",
+    title: "Freemasonry Quiz: Is It for Me?",
     description:
-      "Take our short personalised quiz to discover whether Freemasonry at Weybridge Lodge No. 6787 in Guildford, Surrey might be right for you.",
+      "Take our 2-minute quiz to find out whether joining Freemasons in Guildford, Surrey is right for you. Private, no sign-up, from Weybridge Lodge No. 6787.",
     canonical: "/quiz",
   },
   {
     route: "south-surrey-freemasons",
     title: "Surrey Masons: Join a Guildford Lodge That Fits Your Commute",
     description:
-      "Thinking of joining the Surrey masons? Weybridge Lodge meets four times a year in Guildford (GU2 4DR), 5 minutes from the station — easy from Woking, Godalming, Farnham and Haslemere. See what a meeting involves and how to visit.",
+      "Thinking of joining the Surrey masons? Weybridge Lodge meets four times a year in Guildford (GU2 4DR), about a 10-minute walk from Guildford station — easy from Woking, Godalming, Farnham and Haslemere. See what a meeting involves and how to visit.",
     canonical: "/south-surrey-freemasons",
   },
   {
