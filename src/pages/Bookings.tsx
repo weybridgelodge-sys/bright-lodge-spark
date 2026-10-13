@@ -270,8 +270,8 @@ const BookingsEvent = ({
         toast({ title: "Choose a dining option", variant: "destructive" });
         return false;
       }
-      if (guests.some((g) => !g.name.trim() || (!nonMason && !g.lodge.trim()))) {
-        toast({ title: "Guest details required", description: nonMason ? "Please enter each guest's name." : "Please enter each guest's name and Lodge name & no.", variant: "destructive" });
+      if (guests.some((g) => !g.name.trim())) {
+        toast({ title: "Guest details required", description: "Please enter each guest's name.", variant: "destructive" });
         return false;
       }
     }
@@ -951,14 +951,13 @@ useEffect(() => {
                               </div>
                               <div>
                                 <label htmlFor={`gl${i}`} className={labelClass}>
-                                  Guest {i + 1} Lodge Name &amp; No. {nonMason ? <span className="text-muted-foreground font-normal normal-case">(optional)</span> : <span className="text-destructive">*</span>}
+                                  Guest {i + 1} Lodge Name &amp; No. <span className="text-muted-foreground font-normal normal-case">(optional)</span>
                                 </label>
                                 <input
                                   id={`gl${i}`}
                                   type="text"
                                   value={g.lodge}
                                   onChange={(e) => setGuests((prev) => prev.map((x, j) => j === i ? { ...x, lodge: e.target.value } : x))}
-                                  required={!nonMason}
                                   className={inputClass}
                                   placeholder="e.g. Weybridge Lodge No. 6787"
                                 />
