@@ -1,8 +1,8 @@
 - [x] Build dedicated Committee Agenda editor and verify the 11 January 2027 PDF.
 
 ## Three degrees article SEO
-- [ ] Update search metadata and static head without changing existing article copy; add closing links and inline cross-link.
-- [ ] Verify headings, schema, raw HTML metadata, phone layout and full tests/build.
+- [x] Update search metadata and static head without changing existing article copy; add closing links and inline cross-link.
+- [x] Verify headings, schema, raw HTML generator, 320/1280px layout and both links; 188 unit and 60 browser tests passed, preview build OK.
 
 - [x] Optimize 15 flagged web images, correct APGM formats, update Thames social image, and report size results.
 
