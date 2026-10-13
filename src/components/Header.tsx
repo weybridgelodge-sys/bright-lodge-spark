@@ -165,7 +165,7 @@ const DropdownMenu = ({ item }: { item: NavItem }) => {
           {item.sections!.map((section, sIdx) => (
             <div key={sIdx} className={sIdx > 0 ? "mt-2 pt-3 border-t border-gold/10" : ""}>
               {section.heading && (
-                <div className="px-5 pb-2 text-[10px] font-sans uppercase tracking-[0.18em] text-primary-foreground/80">
+                <div className="px-5 pb-2 text-sm font-sans uppercase tracking-wider text-primary-foreground/80">
                   {section.heading}
                 </div>
               )}
@@ -179,12 +179,12 @@ const DropdownMenu = ({ item }: { item: NavItem }) => {
                     className={`flex items-center justify-between gap-2 px-5 py-2.5 text-sm font-sans font-light tracking-wide transition-colors min-h-[48px] ${
                       child.accent
                         ? "text-gold hover:bg-gold/10"
-                        : "text-primary-foreground/70 hover:text-gold hover:bg-navy-light/30"
+                        : "text-primary-foreground/80 hover:text-gold hover:bg-navy-light/30"
                     }`}
                   >
                     <span>{child.label}</span>
                     {child.badge && (
-                      <span className="text-[10px] font-semibold uppercase tracking-wider bg-gold/15 text-gold px-2 py-0.5 rounded-full">
+                      <span className="text-sm font-semibold uppercase tracking-wider bg-gold/15 text-gold px-2 py-0.5 rounded-full">
                         {child.badge}
                       </span>
                     )}
@@ -246,7 +246,7 @@ const Header = () => {
               {item.sections.map((section, sIdx) => (
                 <div key={sIdx} className={sIdx > 0 ? "mt-2 pt-2 border-t border-gold/10" : ""}>
                   {section.heading && (
-                    <div className="text-[10px] font-sans uppercase tracking-[0.18em] text-primary-foreground/80 py-1.5">
+                    <div className="text-sm font-sans uppercase tracking-wider text-primary-foreground/80 py-1.5">
                       {section.heading}
                     </div>
                   )}
@@ -256,12 +256,12 @@ const Header = () => {
                       to={child.href}
                       onClick={() => setMobileOpen(false)}
                       className={`flex items-center justify-between gap-2 text-sm font-sans py-2 transition-colors min-h-[48px] ${
-                        child.accent ? "text-gold" : "text-primary-foreground/60 hover:text-gold"
+                        child.accent ? "text-gold" : "text-primary-foreground/80 hover:text-gold"
                       }`}
                     >
                       <span>{child.label}</span>
                       {child.badge && (
-                        <span className="text-[10px] font-semibold uppercase tracking-wider bg-gold/15 text-gold px-2 py-0.5 rounded-full">
+                        <span className="text-sm font-semibold uppercase tracking-wider bg-gold/15 text-gold px-2 py-0.5 rounded-full">
                           {child.badge}
                         </span>
                       )}
@@ -357,7 +357,7 @@ const Header = () => {
           <img src={logo} alt="Weybridge Lodge No. 6787 crest — Freemasons Lodge in Guildford, Surrey" width={48} height={48} fetchPriority="high" decoding="async" className="h-10 w-10 md:h-12 md:w-12 bg-primary-foreground/80 rounded-full p-0.5" />
           <div>
             <p className="font-serif text-primary-foreground text-sm md:text-base font-semibold leading-tight">Weybridge Lodge</p>
-            <p className="text-gold text-xs">No. 6787</p>
+            <p className="text-gold text-sm">No. 6787</p>
           </div>
         </Link>
 
@@ -368,32 +368,33 @@ const Header = () => {
         <div className="flex items-center gap-2 md:gap-4">
           <Link
             to="/members"
-            className="hidden md:inline-flex items-center gap-1.5 text-xs text-primary-foreground/70 hover:text-gold transition-colors uppercase tracking-wide min-h-[48px]"
+            className="hidden md:inline-flex items-center gap-1.5 text-sm text-primary-foreground/80 hover:text-gold transition-colors uppercase tracking-wide min-h-[48px]"
             title="Members Portal"
           >
-            <Lock className="w-3.5 h-3.5" />
+            <Lock className="w-3.5 h-3.5" aria-hidden="true" />
             Members
           </Link>
           <Link
             to="/contact"
             className="hidden md:inline-flex items-center gap-2 border border-gold/50 text-gold px-4 py-2 rounded-sm text-sm font-semibold font-sans hover:bg-gold/10 transition-colors min-h-[48px]"
           >
-            <Mail className="w-4 h-4" />
+            <Mail className="w-4 h-4" aria-hidden="true" />
             Contact
           </Link>
           <Link
             to="/join-us"
             className="hidden md:flex items-center gap-2 bg-gold-shimmer text-accent-foreground px-5 py-2.5 rounded-sm text-sm font-semibold font-sans hover:opacity-90 transition-opacity min-h-[48px]"
           >
-            <Phone className="w-4 h-4" />
+            <Phone className="w-4 h-4" aria-hidden="true" />
             Join Us
           </Link>
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
             className="lg:hidden text-primary-foreground min-h-[48px] min-w-[48px] flex items-center justify-center"
             aria-label="Toggle menu"
+            aria-expanded={mobileOpen}
           >
-            {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            {mobileOpen ? <X className="w-6 h-6" aria-hidden="true" /> : <Menu className="w-6 h-6" aria-hidden="true" />}
           </button>
         </div>
       </div>
@@ -407,7 +408,7 @@ const Header = () => {
               onClick={() => setMobileOpen(false)}
               className="flex items-center justify-center gap-2 border border-gold/50 text-gold px-5 py-3 rounded-sm text-sm font-semibold font-sans mt-2 min-h-[48px]"
             >
-              <Mail className="w-4 h-4" />
+              <Mail className="w-4 h-4" aria-hidden="true" />
               Contact Us
             </Link>
             <Link
@@ -415,15 +416,15 @@ const Header = () => {
               onClick={() => setMobileOpen(false)}
               className="flex items-center justify-center gap-2 bg-gold-shimmer text-accent-foreground px-5 py-3 rounded-sm text-sm font-semibold font-sans min-h-[48px]"
             >
-              <Phone className="w-4 h-4" />
+              <Phone className="w-4 h-4" aria-hidden="true" />
               Interested in Joining?
             </Link>
             <Link
               to="/members"
               onClick={() => setMobileOpen(false)}
-              className="flex items-center justify-center gap-2 text-xs text-primary-foreground/70 hover:text-gold uppercase tracking-wider py-2 min-h-[48px]"
+              className="flex items-center justify-center gap-2 text-sm text-primary-foreground/80 hover:text-gold uppercase tracking-wider py-2 min-h-[48px]"
             >
-              <Lock className="w-3.5 h-3.5" /> Members Portal
+              <Lock className="w-3.5 h-3.5" aria-hidden="true" /> Members Portal
             </Link>
           </nav>
         </div>
