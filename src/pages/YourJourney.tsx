@@ -104,13 +104,13 @@ const timelineData: TimelineStep[] = [
   },
   {
     title: "The Second Degree: Passing",
-    duration: "3 – 6 months later",
+    duration: "4–12 months after Initiation",
     description: "As a Fellow Craft Freemason, this stage symbolises the development of the mind — focusing on the pursuit of learning, the arts and sciences, and the importance of intellectual growth.",
     icon: BookOpen,
   },
   {
     title: "The Third Degree: Raising",
-    duration: "3 – 6 months later",
+    duration: "1–2 years after Initiation",
     description: "The pinnacle of your initial journey. You are raised to the sublime degree of Master Mason — a profound ceremony reflecting on human nature, integrity, and moral strength. From here, the whole of the Craft opens to you.",
     icon: Star,
   },
@@ -221,7 +221,7 @@ const YourJourney = () => {
           </div>
         </section>
 
-        {/* ── Five Join Steps ── */}
+        {/* ── Seven Join Steps ── */}
         <section aria-labelledby="application-heading" className="py-12 sm:py-20 bg-background">
           <div className="container mx-auto px-4 sm:px-6 max-w-5xl">
             <motion.div {...motionProps()} className="text-center mb-12">
