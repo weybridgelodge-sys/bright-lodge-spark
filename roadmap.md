@@ -53,4 +53,4 @@
 - [x] Almoner contact acknowledges "worth a call?", missed-meetings digest line and Tier 1/2 auto-log until a fresh miss
 - [x] Almoner digest email weekly (Mondays); detection stays daily
 - [x] Welfare Board sort: worth-a-call badge, then RAG worst-first, then surname/first name
-- [ ] KPI Summary PDF: keep sections 1–7 together, regenerate and visually check the boundary, run full suite
+- [x] KPI Summary PDF: keep sections 1–7 together; visually checked regenerated long-Outstanding and RA-boundary exports; 155 unit and 60 phone-width checks passed
