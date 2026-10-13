@@ -625,6 +625,32 @@ export type EngagementBundle = {
 
 const ATTENDED_STATUSES = new Set(["booked", "attended"]);
 
+export type VisitorAttendanceRow = {
+  visitor_contact_id: string;
+  festive_board_attendance: {
+    attendance_status: string;
+    festive_board_meetings: { meeting_date: string } | null;
+  } | null;
+};
+
+/**
+ * A visit is a Booked/Attended row at a meeting that has happened — the same
+ * rule as every other attendance KPI. Apologies, no-shows and cancellations
+ * are not visits and never move Last Seen.
+ */
+export function countVisitorVisits(rows: VisitorAttendanceRow[], today: string) {
+  const counts: Record<string, number> = {};
+  const lastSeen: Record<string, string> = {};
+  for (const r of rows) {
+    const a = r.festive_board_attendance;
+    const date = a?.festive_board_meetings?.meeting_date;
+    if (!a || !date || !ATTENDED_STATUSES.has(a.attendance_status) || date.slice(0, 10) > today) continue;
+    counts[r.visitor_contact_id] = (counts[r.visitor_contact_id] ?? 0) + 1;
+    if (!lastSeen[r.visitor_contact_id] || date > lastSeen[r.visitor_contact_id]) lastSeen[r.visitor_contact_id] = date;
+  }
+  return { counts, lastSeen };
+}
+
 export async function fetchEngagementBundle(): Promise<EngagementBundle> {
   const today = new Date().toISOString().slice(0, 10);
   const [mt, at, ab, vc, va] = await Promise.all([
@@ -636,11 +662,11 @@ export async function fetchEngagementBundle(): Promise<EngagementBundle> {
     supabase.from("festive_board_attendance").select("meeting_id,member_id,attendance_status"),
     (supabase.from as any)("welfare_absences").select("member_id,period_start,period_end,deleted_at"),
     (supabase.from as any)("visitor_contacts").select("id,name,lodge_name,lodge_number,last_seen_at"),
-    (supabase.from as any)("visitor_attendances").select("visitor_contact_id"),
+    (supabase.from as any)("visitor_attendances").select(
+      "visitor_contact_id, festive_board_attendance(attendance_status, festive_board_meetings(meeting_date))"
+    ),
   ]);
-  const visitCounts: Record<string, number> = {};
-  for (const r of ((va?.data as { visitor_contact_id: string }[]) ?? []))
-    visitCounts[r.visitor_contact_id] = (visitCounts[r.visitor_contact_id] ?? 0) + 1;
+  const { counts: visitCounts, lastSeen } = countVisitorVisits((va?.data as VisitorAttendanceRow[]) ?? [], today);
   return {
     meetings: (mt.data as OccurredMeeting[]) ?? [],
     attendance: (at.data as AttendanceRow[]) ?? [],
@@ -650,6 +676,7 @@ export async function fetchEngagementBundle(): Promise<EngagementBundle> {
     visitors: (((vc?.data as Omit<VisitorRow, "visits">[]) ?? []).map((v) => ({
       ...v,
       visits: visitCounts[v.id] ?? 0,
+      last_seen_at: lastSeen[v.id] ?? null,
     })) as VisitorRow[]).sort((a, b) => b.visits - a.visits),
   };
 }
