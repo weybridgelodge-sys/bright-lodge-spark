@@ -12,9 +12,6 @@ import {
 import { Calendar } from "@/components/ui/calendar";
 import { format, isSameDay } from "date-fns";
 import { useEvents, typeLabel, typeBadgeClass } from "@/data/events";
-// TODO: audit typeBadgeClass in @/data/events to confirm it uses only
-// project theme tokens (navy, gold, background, card, border, foreground, muted-foreground).
-// Any Tailwind colour scales found there should be replaced with project tokens.
 
 
 // ─── Animation Variants ───────────────────────────────────────────────────────
@@ -96,11 +93,11 @@ const Events = () => {
         {/* ── H1 — geo-anchored ── */}
         <PageHeader
           title="Events & Meetings at Weybridge Lodge — Guildford Masonic Centre"
-          subtitle="Masonic meetings, social events and Rehearsal Nights in Guildford, Surrey"
+          subtitle="Masonic meetings, social events and Rehearsal Nights at Guildford Masonic Centre, GU2 4DR"
         />
 
         {/* ── Calendar + Upcoming Events ── */}
-        {/* bg-background replaces unapproved bg-warm-white */}
+
         <section
           className="py-16 md:py-24 bg-background"
           aria-labelledby="events-calendar-heading"
@@ -133,7 +130,7 @@ const Events = () => {
                     className="p-3 pointer-events-auto"
                     modifiers={{ event: eventDates }}
                     modifiersClassNames={{
-                      // bg-gold text-navy replaces unapproved bg-accent text-accent-foreground
+
                       event: "bg-gold text-navy font-bold ring-2 ring-gold rounded-full",
                     }}
                   />
@@ -155,7 +152,7 @@ const Events = () => {
                               className="text-sm font-sans"
                             >
                               <span
-                                className={`inline-block px-2 py-0.5 rounded-full text-xs mr-2 ${typeBadgeClass[ev.type]}`}
+                                className={`inline-block px-2 py-0.5 rounded-full text-sm mr-2 ${typeBadgeClass[ev.type]}`}
                               >
                                 {typeLabel[ev.type]}
                               </span>
@@ -182,6 +179,16 @@ const Events = () => {
                       <div className="h-3 w-1/2 bg-muted rounded" />
                     </li>
                   ))}
+                  {!eventsLoading && upcomingEvents.length === 0 && (
+                    <li className="border border-border bg-card rounded-sm p-6">
+                      <h3 className="font-serif text-xl text-foreground mb-3">No upcoming events listed right now</h3>
+                      <p className="font-sans text-muted-foreground leading-relaxed mb-6">New dates are added as soon as they are confirmed. If you are thinking of joining, you do not need to wait for an event: start with the 2-minute quiz or get in touch.</p>
+                      <div className="flex flex-col sm:flex-row flex-wrap gap-4">
+                        <Link to="/quiz" className="inline-flex items-center justify-center bg-gold-shimmer text-accent-foreground px-6 py-3 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest min-h-[48px] w-full sm:w-auto">Take the 2-Min Quiz</Link>
+                        <Link to="/contact" className="inline-flex items-center justify-center border border-gold-dark text-gold-dark px-6 py-3 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest min-h-[48px] w-full sm:w-auto">Contact Us</Link>
+                      </div>
+                    </li>
+                  )}
                   {!eventsLoading && upcomingEvents.map((ev, i) => (
                     <motion.li
                       // key on title+date — stable if event order changes
@@ -191,14 +198,14 @@ const Events = () => {
                       whileInView={shouldReduceMotion ? "static" : "visible"}
                       viewport={{ once: true }}
                       custom={i * 0.08}
-                      // border-gold/40 replaces unapproved border-accent on highlighted events
+
                       // shadow-sm removed — not a project token
                       className={`border rounded-sm bg-card overflow-hidden ${
                         ev.highlight ? "border-gold/40" : "border-border"
                       }`}
                     >
                       {ev.highlight && (
-                        <div className="bg-gold-shimmer text-accent-foreground px-4 py-1 text-xs font-sans font-semibold uppercase tracking-widest">
+                        <div className="bg-gold-shimmer text-accent-foreground px-4 py-1 text-sm font-sans font-semibold uppercase tracking-widest">
                           Featured Event
                         </div>
                       )}
@@ -206,7 +213,7 @@ const Events = () => {
                         <div className="flex items-start justify-between gap-4 flex-wrap">
                           <div>
                             <span
-                              className={`inline-block px-2 py-0.5 rounded-full text-xs mb-2 ${typeBadgeClass[ev.type]}`}
+                              className={`inline-block px-2 py-0.5 rounded-full text-sm mb-2 ${typeBadgeClass[ev.type]}`}
                             >
                               {typeLabel[ev.type]}
                             </span>
@@ -215,7 +222,7 @@ const Events = () => {
                         </div>
                         <div className="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-sm text-muted-foreground font-sans">
                           <span className="inline-flex items-center gap-1.5">
-                            {/* text-gold replaces unapproved text-gold-dark */}
+
                             <CalendarIcon className="w-4 h-4 text-gold" aria-hidden="true" />
                             {format(ev.date, "EEEE d MMMM yyyy")}
                           </span>
@@ -296,15 +303,15 @@ const Events = () => {
             >
               {/* bg-navy flat: bg-navy-gradient is not a project token */}
               <div className="bg-navy p-8 text-center">
-                {/* text-gold replaces unapproved text-gold-dark */}
+
                 <p className="text-gold uppercase tracking-widest text-sm font-sans mb-2">
                   Weekly Sessions
                 </p>
-                {/* text-gold replaces unapproved text-primary-foreground */}
+
                 <p className="text-2xl md:text-3xl font-serif text-gold">
                   Thursday Evenings — 7.30 pm
                 </p>
-                {/* text-gold/60 replaces unapproved text-primary-foreground/60 */}
+
                 <p className="text-primary-foreground/80 font-sans text-sm mt-2">
                   1st Thursday in September to 2nd Thursday in May
                 </p>
@@ -338,7 +345,6 @@ const Events = () => {
 
                 <a
                   href="mailto:secretary@weybridgelodge.org.uk?subject=Rehearsal%20Night"
-                  aria-label="Email to find out more about Rehearsal Night at Weybridge Lodge"
                   className="flex w-full items-center justify-center bg-gold-shimmer text-accent-foreground py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity mt-4 min-h-[48px]"
                 >
                   Email for Details
@@ -375,10 +381,9 @@ const Events = () => {
                 Masonic Centre, GU2 4DR — three courses, good company, and a genuine Masonic
                 evening in Surrey.
               </p>
-              <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
+              <div className="flex flex-col sm:flex-row flex-wrap justify-center items-center gap-4">
                 <Link
                   to="/bookings"
-                  aria-label="Book a dining place at the next Weybridge Lodge Festive Board"
                   className="inline-flex items-center justify-center gap-2 bg-gold-shimmer text-accent-foreground px-8 py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity min-h-[48px] w-full sm:w-auto"
                 >
                   Book a Dining Place
@@ -386,11 +391,11 @@ const Events = () => {
                 </Link>
                 <Link
                   to="/join-us"
-                  aria-label="Find out how to join Weybridge Lodge No. 6787 in Guildford"
                   className="inline-flex items-center justify-center bg-transparent text-gold border border-gold/40 px-8 py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity min-h-[48px] w-full sm:w-auto"
                 >
-                  Join the Lodge
+                  Enquire About Joining
                 </Link>
+                <Link to="/freemason-initiation-night" className="inline-flex items-center justify-center bg-transparent text-gold border border-gold/40 px-8 py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity min-h-[48px] w-full sm:w-auto">Your Initiation Night</Link>
               </div>
             </motion.div>
           </div>

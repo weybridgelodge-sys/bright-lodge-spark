@@ -51,7 +51,7 @@ const faqCategories: FAQCategory[] = [
       {
         question: "Which famous people have been Freemasons?",
         answer:
-          "Notable Freemasons include Prince Philip (Duke of Edinburgh), Prince Edward (Duke of Kent and current Grand Master), Winston Churchill, Peter Sellers, Sir Alf Ramsey, Sir Ian Fleming, and Rudyard Kipling — among millions of others worldwide across more than 300 years of the modern Craft.",
+          "Notable Freemasons include Prince Philip (Duke of Edinburgh), Prince Edward (Duke of Kent and current Grand Master), Winston Churchill, Peter Sellers, Sir Alf Ramsey, Sir Alexander Fleming, and Rudyard Kipling — among millions of others worldwide across more than 300 years of the modern Craft.",
       },
     ],
   },
@@ -88,7 +88,7 @@ const faqCategories: FAQCategory[] = [
       {
         question: "Can anyone join a Masonic Lodge in Surrey?",
         answer:
-          "Freemasonry is open to men of good character aged 18 or over who hold a belief in a supreme being — the specific faith or denomination is not prescribed. Applications are considered individually, and no particular background, profession, or connection to existing members is required. If you are curious, the best first step is simply to get in touch.",
+          "Freemasonry is open to men of good character aged 18 or over who hold a belief in a supreme being — the specific faith or denomination is not prescribed. Applications are considered individually, and no particular background, profession, or connection to existing members is required. If you are curious, the best first step is simply to get in touch. Our members currently range in age from 18 to 83.",
       },
       {
         question: "Can I join with a friend?",
@@ -146,6 +146,12 @@ const faqCategories: FAQCategory[] = [
         question: "What happens at a Lodge meeting?",
         answer:
           "A Lodge meeting has two parts. The first is the formal business of the Lodge: approving minutes, correspondence, accounts, and any Lodge announcements. The second part is one of the three degree ceremonies — Initiation (First Degree), Passing (Second Degree), or Raising (Third Degree) — conducted for a candidate progressing through their Masonic journey. Every meeting is followed by the Festive Board: a three-course dinner with toasts, conversation, and the kind of warmth that keeps members coming back.",
+        renderAnswer: (
+          <>
+            A Lodge meeting has two parts. The first is the formal business of the Lodge: approving minutes, correspondence, accounts, and any Lodge announcements. The second part is one of the three degree ceremonies — Initiation (First Degree), Passing (Second Degree), or Raising (Third Degree) — conducted for a candidate progressing through their Masonic journey. Every meeting is followed by the Festive Board: a three-course dinner with toasts, conversation, and the kind of warmth that keeps members coming back. See what your first evening looks like on our{" "}
+            <Link to="/freemason-initiation-night" className="text-gold-dark underline underline-offset-4 inline-flex items-center min-h-[48px]">Your Initiation Night</Link>{" "}page.
+          </>
+        ),
       },
       {
         question: "What are the three degrees of Freemasonry?",
@@ -248,8 +254,8 @@ const FAQ = () => {
       <Header />
       <main id="main-content">
         <PageHeader
-          title="Frequently Asked Questions"
-          subtitle="Common questions about Freemasonry answered"
+          title="Freemasonry FAQ: Freemasons in Guildford"
+          subtitle="Honest answers about joining a Masonic Lodge in Surrey"
         />
 
         <section className="py-20 md:py-28 bg-warm-white" aria-labelledby="faq-intro-heading">
@@ -317,20 +323,20 @@ const FAQ = () => {
               <div className="flex flex-wrap justify-center gap-4">
                 <Link
                   to="/contact"
-                  className="inline-flex items-center justify-center gap-2 bg-gold-shimmer text-accent-foreground px-8 py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity min-h-[48px]"
+                  className="inline-flex items-center justify-center gap-2 bg-gold-shimmer text-accent-foreground px-8 py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity min-h-[48px] w-full sm:w-auto"
                 >
                   Contact Us
                   <ArrowRight className="h-4 w-4" aria-hidden="true" />
                 </Link>
                 <Link
                   to="/quiz"
-                  className="inline-flex items-center justify-center border border-gold text-gold px-8 py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:bg-gold hover:text-navy transition-colors min-h-[48px]"
+                  className="inline-flex items-center justify-center border border-gold text-gold px-8 py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:bg-gold hover:text-navy transition-colors min-h-[48px] w-full sm:w-auto"
                 >
                   Take the 2-Min Quiz
                 </Link>
                 <Link
                   to="/join-us"
-                  className="inline-flex items-center justify-center border border-gold/40 text-gold px-8 py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:bg-gold/10 transition-colors min-h-[48px]"
+                  className="inline-flex items-center justify-center border border-gold text-gold px-8 py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:bg-gold/10 transition-colors min-h-[48px] w-full sm:w-auto"
                 >
                   Begin Your Application
                 </Link>

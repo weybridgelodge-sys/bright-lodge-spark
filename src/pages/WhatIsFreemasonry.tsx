@@ -190,13 +190,13 @@ const WhatIsFreemasonry = () => {
                 A tradition built on brotherhood, charity, and self-improvement
               </h2>
               <p className="text-muted-foreground font-sans leading-relaxed text-lg mb-6">
-                Freemasonry is one of the world's oldest social and charitable organisations, with roots stretching back to the traditions of the medieval stonemasons who built our great cathedrals and castles. In that era, travelling craftsmen used special grips, words and signs to prove their qualifications to fellow workers — a practice that lives on symbolically in Masonic ceremonies today, including at Weybridge Lodge No. 6787, our Freemasons Lodge here in Guildford, Surrey.
+                Freemasonry is one of the world's oldest social and charitable organisations, with roots stretching back to the traditions of the medieval stonemasons who built our great cathedrals and castles. In that era, travelling craftsmen used special grips, words and signs to prove their qualifications to fellow workers — a practice that lives on symbolically in Masonic ceremonies today, including at Weybridge Lodge No. 6787, our Freemasons Lodge here in Guildford, Surrey. You can read more about us on our{" "}<Link to="/lodge-profile" className="text-gold-dark underline underline-offset-4 inline-flex items-center min-h-[48px]">Lodge profile</Link>, or see where we meet on the{" "}<Link to="/south-surrey-freemasons" className="text-gold-dark underline underline-offset-4 inline-flex items-center min-h-[48px]">South Surrey Freemasons</Link> page.
               </p>
               <p className="text-muted-foreground font-sans leading-relaxed text-lg mb-6">
                 Modern Freemasonry uses these building analogies to teach its members how to lead more fulfilling lives and contribute positively to their communities. Just as stonemasons once wore aprons and gloves to shape rough stone, today's Freemasons meet not to build physical structures but to build lasting friendships, develop their character and support those around them.
               </p>
               <p className="text-muted-foreground font-sans leading-relaxed text-lg">
-                The formation of the United Grand Lodge of England in 1717 marked a defining moment, but the traditions of the Craft reach much further into history. Today, around 175,000 Freemasons across England and Wales continue to uphold these time-honoured values — guided by four principles that are as relevant now as they have ever been.
+                The first Grand Lodge was founded in London in 1717, and the United Grand Lodge of England was formed in 1813, but the traditions of the Craft reach much further into history. Today, around 200,000 Freemasons under the United Grand Lodge of England continue to uphold these time-honoured values — guided by four principles that are as relevant now as they have ever been.
               </p>
             </motion.div>
           </div>
@@ -290,7 +290,7 @@ const WhatIsFreemasonry = () => {
                   </div>
                   <div>
                     <h3 className="text-lg font-serif text-gold">{d.title}</h3>
-                    <p className="text-primary-foreground/80 text-xs font-sans uppercase tracking-wide mb-2">{d.degree}</p>
+                    <p className="text-primary-foreground/80 text-sm font-sans uppercase tracking-wide mb-2">{d.degree}</p>
                     <p className="text-sm text-primary-foreground/80 font-sans leading-relaxed">{d.description}</p>
                   </div>
                 </motion.li>
