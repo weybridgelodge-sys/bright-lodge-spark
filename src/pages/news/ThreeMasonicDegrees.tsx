@@ -5,6 +5,7 @@ import SEO, { articleSchema, breadcrumbSchema } from "@/components/SEO";
 import PostNavigation from "@/components/PostNavigation";
 import RelatedPosts from "@/components/RelatedPosts";
 import SocialShare from "@/components/SocialShare";
+import { Button } from "@/components/ui/button";
 import CommentsSection, { commentCount } from "@/components/CommentsSection";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
@@ -36,8 +37,8 @@ const ThreeMasonicDegrees = () => {
   return (
     <div className="min-h-screen">
       <SEO
-        title={TITLE}
-        description={DESCRIPTION}
+        title="The 3 Degrees of Freemasonry Explained"
+        description="What are the three degrees of Freemasonry? Entered Apprentice, Fellow Craft and Master Mason explained simply, by Freemasons in Guildford, Surrey."
         canonical={URL}
         type="article"
         schema={[
@@ -110,7 +111,7 @@ const ThreeMasonicDegrees = () => {
 
             <article className="prose-custom space-y-10">
               <p className="text-muted-foreground font-sans leading-relaxed">
-                Every new Freemason joins through a series of three ceremonies known as the three degrees. They are not exams or tests — they are quiet, dignified moments of welcome, reflection and personal commitment. Each one builds on the last, and together they shape the way a Mason thinks about himself, his family, his work and the world around him.
+                Every new Freemason joins through a series of three ceremonies known as the three degrees. They are not exams or tests — they are quiet, dignified moments of welcome, reflection and personal commitment. Each one builds on the last, and together they shape the way a Mason thinks about himself, his family, his work and the world around him. <Link to="/what-is-freemasonry" className="text-gold-dark underline underline-offset-4">What is Freemasonry?</Link>
               </p>
 
               <section id="overview">
@@ -200,6 +201,19 @@ const ThreeMasonicDegrees = () => {
 
             <RelatedPosts currentSlug="three-masonic-degrees-explained" category="Discover Freemasonry" />
             <PostNavigation currentSlug="three-masonic-degrees-explained" />
+          </div>
+        </section>
+        <section className="py-16 bg-navy" aria-labelledby="first-step-heading">
+          <div className="container mx-auto px-4 sm:px-6 max-w-3xl text-center">
+            <h2 id="first-step-heading" className="text-2xl sm:text-3xl font-serif text-gold mb-8">Curious about taking the first step?</h2>
+            <div className="flex flex-col sm:flex-row flex-wrap justify-center gap-4">
+              <Button asChild className="min-h-[48px] w-full sm:w-auto bg-gold-shimmer text-accent-foreground font-sans hover:opacity-90">
+                <Link to="/quiz">Take the 2-Minute Quiz</Link>
+              </Button>
+              <Button asChild variant="outline" className="min-h-[48px] w-full sm:w-auto border-gold text-gold bg-transparent font-sans hover:bg-gold hover:text-navy">
+                <Link to="/your-journey">See Your Journey</Link>
+              </Button>
+            </div>
           </div>
         </section>
       </main>

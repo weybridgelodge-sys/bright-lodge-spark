@@ -1,4 +1,5 @@
 - Posting periods: any unlocked row is postable; use usePostingPeriod/PeriodPicker and default by entry date, never one global period.
+- Bespoke news SEO overrides belong in staticRoutes ahead of generated Sanity metadata and must be covered by staticMetaParity; why: legacyRoute pages own their search copy even when Sanity lists them.
 - Portal routing: `/members` is the dashboard; `/members/dashboard` and the inner catch-all redirect there so every portal URL resolves.
 - Auth bootstrap must always settle: retain getSession error handling, the 8s guard, and swallowed profile-load rejections.
 - Journal numbers come only from the immutable sequence trigger; show with formatEntryNumber. document_number remains free text.

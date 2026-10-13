@@ -9,6 +9,7 @@ import { staticRoutes } from "../../vite-plugin-static-meta";
  */
 const PAGE_FOR_ROUTE: Record<string, string> = {
   "": "Index",
+  "news/three-masonic-degrees-explained": "news/ThreeMasonicDegrees",
   "what-is-freemasonry": "WhatIsFreemasonry",
   "freemasonry-and-charity": "FreemasonryCharity",
   "our-charities": "OurCharities",
@@ -56,7 +57,7 @@ function seoProp(src: string, prop: "title" | "description"): string {
 
 describe("static meta parity with page <SEO> props", () => {
   for (const r of staticRoutes) {
-    if (r.route.startsWith("news")) continue;
+    if (r.route === "news" || r.route.startsWith("news/category/")) continue;
     it(`/${r.route}`, () => {
       const page = PAGE_FOR_ROUTE[r.route];
       expect(page, `no page mapped for ${r.route}`).toBeTruthy();
@@ -68,11 +69,12 @@ describe("static meta parity with page <SEO> props", () => {
 
   it("news routes match News.tsx", () => {
     const src = read("News");
-    for (const r of staticRoutes.filter((x) => x.route.startsWith("news"))) {
+    for (const r of staticRoutes.filter((x) => x.route === "news" || x.route.startsWith("news/category/"))) {
       if (r.route === "news") {
         expect(src).toContain(`: "${r.description}"`);
       } else {
-        const key = r.route.split("/").pop()!;
+        const key = r.route.split("/").pop();
+        if (!key) throw new Error(`missing category for ${r.route}`);
         const m = src.match(new RegExp(`"?${key}"?:\\s*"([^"]*)"`));
         expect(m?.[1]).toBe(r.description);
       }
