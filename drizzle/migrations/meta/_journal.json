@@ -589,6 +589,13 @@
       "when": 1791914669540,
       "tag": "0083_visitor_last_seen_attended_only",
       "breakpoints": true
+    },
+    {
+      "idx": 84,
+      "version": "7",
+      "when": 1791924370174,
+      "tag": "0084_lodge_events_event_label",
+      "breakpoints": true
     }
   ]
 }
