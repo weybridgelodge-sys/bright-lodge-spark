@@ -122,7 +122,7 @@ const NextMeeting = () => {
                 <MapPin className="w-5 h-5 text-gold mt-0.5 shrink-0" aria-hidden="true" />
                 <div>
                   <p className="font-sans font-medium text-foreground">{VENUE_NAME}</p>
-                  <p className="text-sm text-navy-light font-sans">{VENUE_ADDRESS}</p>
+                  <p className="text-sm text-navy font-sans">{VENUE_ADDRESS}</p>
                 </div>
               </div>
 
@@ -130,14 +130,14 @@ const NextMeeting = () => {
                 <Clock className="w-5 h-5 text-gold mt-0.5 shrink-0" aria-hidden="true" />
                 <div>
                   <p className="font-sans font-medium text-foreground">Now open for bookings</p>
-                  <p className="text-sm text-navy-light font-sans">
+                  <p className="text-sm text-navy font-sans">
                     Reserve your place using the button below
                   </p>
                 </div>
               </div>
 
               {meeting.description && (
-                <p className="text-sm text-navy-light font-sans leading-relaxed whitespace-pre-line pt-2 border-t border-border">
+                <p className="text-sm text-navy font-sans leading-relaxed whitespace-pre-line pt-2 border-t border-border">
                   {meeting.description}
                 </p>
               )}
