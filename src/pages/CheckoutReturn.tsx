@@ -100,7 +100,7 @@ const CheckoutReturn = () => {
                 <p className="text-muted-foreground mb-6">
                   We've received your details and Stripe is processing the payment. You'll receive a card receipt by email shortly. You may close this page.
                 </p>
-                <Link to="/" className="text-gold-dark  hover:underline">Back to Home</Link>
+                <Link to="/" className="text-gold-dark hover:underline">Back to Home</Link>
               </>
             )}
             {status === "waitlisted" && (
@@ -137,7 +137,7 @@ const CheckoutReturn = () => {
                     assistantsecretary@weybridgelodge.org.uk
                   </a>.
                 </p>
-                <Link to="/" className="text-gold-dark  hover:underline">Back to Home</Link>
+                <Link to="/" className="text-gold-dark hover:underline">Back to Home</Link>
               </>
             )}
           </div>
