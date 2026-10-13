@@ -6058,6 +6058,10 @@ export type Database = {
         Returns: undefined
       }
       refresh_charity_public_feed_metrics: { Args: never; Returns: undefined }
+      refresh_visitor_last_seen: {
+        Args: { _contact_id: string }
+        Returns: undefined
+      }
       regenerate_my_calendar_token: { Args: never; Returns: string }
       request_unlock_treasurer_period: {
         Args: { _period_id: string; _reason: string }
