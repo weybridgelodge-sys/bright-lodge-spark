@@ -91,7 +91,7 @@ const SaveTheDate = ({ meetings }: { meetings: RegisterMeeting[] }) => {
                   <Mail className="w-5 h-5 text-gold mt-0.5 shrink-0" aria-hidden="true" />
                   <span>
                     Details of our next meeting will be published here shortly. Please check back soon or{" "}
-                    <Link to="/contact" className="text-gold underline underline-offset-4">
+                    <Link to="/contact" className="text-gold-dark underline underline-offset-4">
                       contact the Assistant Secretary
                     </Link>
                     .
@@ -103,7 +103,7 @@ const SaveTheDate = ({ meetings }: { meetings: RegisterMeeting[] }) => {
             <Link
               to="/events"
               aria-label="View the full calendar of upcoming events at Weybridge Lodge No. 6787"
-              className="inline-flex items-center justify-center border border-border text-foreground px-8 py-4 rounded-sm text-sm font-sans uppercase tracking-widest hover:border-gold hover:text-gold transition-colors min-h-[48px]"
+              className="inline-flex items-center justify-center border border-border text-foreground px-8 py-4 rounded-sm text-sm font-sans uppercase tracking-widest hover:border-gold hover:text-gold-dark transition-colors min-h-[48px]"
             >
               View the Full Calendar
             </Link>

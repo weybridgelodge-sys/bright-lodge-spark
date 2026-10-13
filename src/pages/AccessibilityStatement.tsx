@@ -204,7 +204,7 @@ const AccessibilityStatement = () => {
                 To discuss any accessibility requirement for attending Weybridge Lodge, please contact the Secretary in the first instance:
               </p>
               <p className="text-muted-foreground font-sans leading-relaxed text-sm">
-                <a href="mailto:secretary@weybridgelodge.org.uk" className="text-gold-dark hover:text-gold transition-colors">
+                <a href="mailto:secretary@weybridgelodge.org.uk" className="text-gold-dark hover:text-navy transition-colors underline underline-offset-4">
                   secretary@weybridgelodge.org.uk
                 </a>
               </p>
@@ -227,7 +227,7 @@ const AccessibilityStatement = () => {
               </p>
               <p className="text-muted-foreground font-sans leading-relaxed text-sm mb-2">
                 <strong className="text-foreground">Email:</strong>{" "}
-                <a href="mailto:secretary@weybridgelodge.org.uk" className="text-gold-dark hover:text-gold transition-colors">
+                <a href="mailto:secretary@weybridgelodge.org.uk" className="text-gold-dark hover:text-navy transition-colors underline underline-offset-4">
                   secretary@weybridgelodge.org.uk
                 </a>
               </p>
@@ -237,7 +237,7 @@ const AccessibilityStatement = () => {
                   href="https://www.equalityadvisoryservice.com/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-gold-dark hover:text-gold transition-colors"
+                  className="text-gold-dark hover:text-navy transition-colors underline underline-offset-4"
                 >
                   Equality Advisory and Support Service (EASS)
                 </a>.

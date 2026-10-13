@@ -181,7 +181,7 @@ const LodgeTraditions = () => {
                     {t.link && (
                       <Link
                         to={t.link.to}
-                        className="text-gold text-sm font-sans mt-4 inline-flex items-center gap-1 hover:underline min-h-[44px] items-center"
+                        className="text-gold-dark text-sm font-sans mt-4 inline-flex items-center gap-1 min-h-[44px] items-center hover:underline"
                       >
                         {t.link.label}
                         <ArrowRight className="w-3 h-3" aria-hidden="true" />

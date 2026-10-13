@@ -240,7 +240,7 @@ const Events = () => {
                           // not external URLs. ExternalLink is semantically incorrect here.
                           <Link
                             to={ev.link}
-                            className="inline-flex items-center gap-1.5 mt-4 text-sm font-sans font-medium text-gold hover:opacity-80 transition-opacity min-h-[48px]"
+                            className="inline-flex items-center gap-1.5 mt-4 text-sm font-sans font-medium text-gold-dark hover:opacity-80 transition-opacity min-h-[48px]"
                           >
                             View Full Details
                             <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
@@ -305,7 +305,7 @@ const Events = () => {
                   Thursday Evenings — 7.30 pm
                 </p>
                 {/* text-gold/60 replaces unapproved text-primary-foreground/60 */}
-                <p className="text-gold/60 font-sans text-sm mt-2">
+                <p className="text-primary-foreground/80 font-sans text-sm mt-2">
                   1st Thursday in September to 2nd Thursday in May
                 </p>
               </div>
@@ -370,7 +370,7 @@ const Events = () => {
               >
                 Ready to join us at the table?
               </h2>
-              <p className="text-gold/70 font-sans mb-8">
+              <p className="text-primary-foreground/80 font-sans mb-8">
                 Reserve your place at the next Weybridge Lodge Festive Board at the Guildford
                 Masonic Centre, GU2 4DR — three courses, good company, and a genuine Masonic
                 evening in Surrey.

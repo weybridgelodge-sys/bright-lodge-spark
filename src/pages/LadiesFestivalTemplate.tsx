@@ -538,7 +538,7 @@ useEffect(() => {
                   <div>
                     <h3 className="font-sans font-medium text-foreground">Overnight Stay</h3>
                     <p className="text-sm text-muted-foreground font-sans">
-                      If you would like to stay overnight, the hotel is holding 20 rooms or more as required for our event. Please call the Macdonald Hotel central reservations office on <a href="tel:03448799000" className="underline hover:text-foreground">0344 879 9000</a> and quote block code <strong className="text-foreground">863804</strong> to book at the discounted rate of £170 for single occupancy and £180 for double occupancy, inclusive of breakfast.
+                      If you would like to stay overnight, the hotel is holding 20 rooms or more as required for our event. Please call the Macdonald Hotel central reservations office on <a href="tel:03448799000" className="underline hover:text-foreground underline-offset-4">0344 879 9000</a> and quote block code <strong className="text-foreground">863804</strong> to book at the discounted rate of £170 for single occupancy and £180 for double occupancy, inclusive of breakfast.
                     </p>
                     <p className="text-sm text-muted-foreground font-sans mt-2">
                       The overnight stay price includes breakfast and access to the onsite spa and gym (treatments at an additional cost).

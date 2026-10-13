@@ -165,7 +165,7 @@ const DropdownMenu = ({ item }: { item: NavItem }) => {
           {item.sections!.map((section, sIdx) => (
             <div key={sIdx} className={sIdx > 0 ? "mt-2 pt-3 border-t border-gold/10" : ""}>
               {section.heading && (
-                <div className="px-5 pb-2 text-[10px] font-sans uppercase tracking-[0.18em] text-gold/60">
+                <div className="px-5 pb-2 text-[10px] font-sans uppercase tracking-[0.18em] text-primary-foreground/80">
                   {section.heading}
                 </div>
               )}
@@ -246,7 +246,7 @@ const Header = () => {
               {item.sections.map((section, sIdx) => (
                 <div key={sIdx} className={sIdx > 0 ? "mt-2 pt-2 border-t border-gold/10" : ""}>
                   {section.heading && (
-                    <div className="text-[10px] font-sans uppercase tracking-[0.18em] text-gold/60 py-1.5">
+                    <div className="text-[10px] font-sans uppercase tracking-[0.18em] text-primary-foreground/80 py-1.5">
                       {section.heading}
                     </div>
                   )}

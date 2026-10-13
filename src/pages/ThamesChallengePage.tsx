@@ -230,7 +230,7 @@ const ThamesChallengePage = () => {
                 </section>
 
                 <section className="rounded-sm border border-gold/25 bg-gold/5 p-6 md:p-8">
-                  <p className="font-mono text-xs uppercase tracking-[0.22em] text-gold">Medical note</p>
+                  <p className="font-mono text-xs uppercase tracking-[0.22em] text-gold-dark">Medical note</p>
                   <h2 className="mt-3 font-serif text-2xl text-foreground">A challenge shaped by health as well as endurance</h2>
                   <p className="mt-4 font-sans leading-relaxed text-muted-foreground">
                     Long-distance walking stories can sound effortless when reduced to photos and milestones. They never are. Real-life challenges unfold alongside ordinary pressures, personal responsibilities and, for some participants, genuine health considerations. That context matters.
@@ -256,7 +256,7 @@ const ThamesChallengePage = () => {
 
               <aside className="space-y-6 lg:sticky lg:top-28">
                 <div className="rounded-sm border border-border bg-card p-6">
-                  <p className="font-mono text-xs uppercase tracking-[0.18em] text-gold">At a glance</p>
+                  <p className="font-mono text-xs uppercase tracking-[0.18em] text-gold-dark">At a glance</p>
                   <ul className="mt-4 space-y-4 text-sm font-sans text-muted-foreground">
                     <li><strong className="text-foreground">Route:</strong> London towards the source of the Thames</li>
                     <li><strong className="text-foreground">Theme:</strong> charity, endurance and fellowship</li>
@@ -333,7 +333,7 @@ const ThamesChallengePage = () => {
         {/* SECTION B — The Stats */}
         <section className="bg-[#f9f6f0] py-20">
           <div className="mx-auto max-w-[820px] px-6">
-            <p className="font-mono text-[10px] uppercase tracking-widest text-gold">By the Numbers</p>
+            <p className="font-mono text-[10px] uppercase tracking-widest text-gold-dark">By the Numbers</p>
             <h2 className="mt-3 font-serif font-bold text-[#1C294B]" style={{ fontSize: "clamp(1.7rem, 4vw, 2.5rem)" }}>
               The Grand Totals
             </h2>
@@ -366,7 +366,7 @@ const ThamesChallengePage = () => {
         <section className="bg-warm-white py-16 md:py-24">
           <div className="container mx-auto max-w-6xl px-4 sm:px-6">
             <div className="mb-12 text-center">
-              <p className="font-mono text-xs uppercase tracking-[0.25em] text-gold">Day-by-day timeline</p>
+              <p className="font-mono text-xs uppercase tracking-[0.25em] text-gold-dark">Day-by-day timeline</p>
               <h2 className="mt-3 font-serif text-3xl text-foreground md:text-4xl">From London back towards the spring</h2>
             </div>
             <div className="space-y-10">
@@ -379,7 +379,7 @@ const ThamesChallengePage = () => {
                   transition={{ duration: 0.5, delay: index * 0.06 }}
                   className="grid gap-6 overflow-hidden rounded-sm border border-border bg-card p-6 md:grid-cols-[88px_minmax(0,1fr)_320px] md:p-8"
                 >
-                  <div className="font-mono text-sm uppercase tracking-[0.2em] text-gold">Stage {index + 1}</div>
+                  <div className="font-mono text-sm uppercase tracking-[0.2em] text-gold-dark">Stage {index + 1}</div>
                   <div>
                     <h3 className="font-serif text-2xl text-foreground">{item.title}</h3>
                     <p className="mt-4 font-sans leading-relaxed text-muted-foreground">{item.text}</p>
@@ -397,7 +397,7 @@ const ThamesChallengePage = () => {
         <section className="bg-warm-white pb-16 md:pb-24">
           <div className="container mx-auto max-w-6xl px-4 sm:px-6">
             <div className="mb-12 text-center">
-              <p className="font-mono text-xs uppercase tracking-[0.25em] text-gold">People section</p>
+              <p className="font-mono text-xs uppercase tracking-[0.25em] text-gold-dark">People section</p>
               <h2 className="mt-3 font-serif text-3xl text-foreground md:text-4xl">The people behind the miles</h2>
             </div>
 

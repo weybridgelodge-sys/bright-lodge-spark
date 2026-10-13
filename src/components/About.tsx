@@ -19,7 +19,7 @@ const About = () => {
                 no local SEO signal, so a small kicker line above it covers
                 "Freemasons in Guildford, Surrey" without touching the
                 existing brand typography. */}
-            <p className="text-gold text-sm font-sans uppercase tracking-wide mb-3">
+            <p className="text-gold-dark text-sm font-sans uppercase tracking-wide mb-3">
               Freemasons in Guildford, Surrey
             </p>
             <h2 id="about-heading" className="text-3xl md:text-4xl lg:text-5xl font-serif text-foreground mb-6 leading-tight">

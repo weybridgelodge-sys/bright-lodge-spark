@@ -211,7 +211,7 @@ const MasonicLinks = () => {
                       />
                       <div>
                         {/* h3: link names subordinate to section h2 above */}
-                        <h3 className="font-serif text-foreground group-hover:text-gold transition-colors mb-1">
+                        <h3 className="font-serif text-foreground group-hover:text-gold-dark transition-colors mb-1">
                           {/* Stretch link: ::after overlay covers full card.
                               Heading is NOT inside the anchor — a11y compliant. */}
                           <a
@@ -264,7 +264,7 @@ const MasonicLinks = () => {
               >
                 Interested in joining a Masonic Lodge in Guildford?
               </h2>
-              <p className="text-gold/70 font-sans mb-8">
+              <p className="text-primary-foreground/80 font-sans mb-8">
                 Weybridge Lodge No. 6787 meets at the Guildford Masonic Centre, Weybourne House,
                 Hitherbury Close, Guildford,{" "}
                 <span className="font-semibold text-gold">GU2 4DR</span>. If you would like to

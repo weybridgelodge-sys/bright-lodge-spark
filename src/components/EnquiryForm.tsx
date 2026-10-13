@@ -96,7 +96,7 @@ export const EnquiryForm = () => {
         <button
           type="button"
           onClick={() => setSubmitted(false)}
-          className="mt-6 text-sm font-sans uppercase tracking-widest text-gold-dark hover:text-gold min-h-[48px]"
+          className="mt-6 text-sm font-sans uppercase tracking-widest text-gold-dark hover:text-navy min-h-[48px]"
         >
           Send another enquiry
         </button>
@@ -128,7 +128,7 @@ export const EnquiryForm = () => {
           Full Name <span className="text-destructive">*</span>
         </label>
         <input type="text" id="full_name" name="full_name" aria-invalid={!!errors.full_name} aria-describedby="full_name-error" required maxLength={120} className={inputClass} placeholder="Your full name" />
-        {errors.full_name && <p id="full_name-error" role="alert" className="text-xs text-destructive mt-1">{errors.full_name[0]}</p>}
+        {errors.full_name && <p id="full_name-error" role="alert" className="text-sm text-destructive mt-1">{errors.full_name[0]}</p>}
       </div>
 
       <div>
@@ -136,7 +136,7 @@ export const EnquiryForm = () => {
           Email Address <span className="text-destructive">*</span>
         </label>
         <input type="email" id="email" name="email" aria-invalid={!!errors.email} aria-describedby="email-error" required maxLength={255} className={inputClass} placeholder="you@example.com" />
-        {errors.email && <p id="email-error" role="alert" className="text-xs text-destructive mt-1">{errors.email[0]}</p>}
+        {errors.email && <p id="email-error" role="alert" className="text-sm text-destructive mt-1">{errors.email[0]}</p>}
       </div>
 
       <div>
@@ -144,7 +144,7 @@ export const EnquiryForm = () => {
           Contact Number
         </label>
         <input type="tel" id="phone" name="phone" aria-invalid={!!errors.phone} aria-describedby="phone-error" maxLength={40} className={inputClass} placeholder="07xxx xxx xxx" />
-        {errors.phone && <p id="phone-error" role="alert" className="text-xs text-destructive mt-1">{errors.phone[0]}</p>}
+        {errors.phone && <p id="phone-error" role="alert" className="text-sm text-destructive mt-1">{errors.phone[0]}</p>}
       </div>
 
       <div>
@@ -161,7 +161,7 @@ export const EnquiryForm = () => {
           className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           placeholder="Tell us why you're interested in joining..."
         />
-        {errors.reason && <p id="reason-error" role="alert" className="text-xs text-destructive mt-1">{errors.reason[0]}</p>}
+        {errors.reason && <p id="reason-error" role="alert" className="text-sm text-destructive mt-1">{errors.reason[0]}</p>}
       </div>
 
       <TurnstileWidget onToken={setTurnstileToken} onExpire={() => setTurnstileToken("")} />
@@ -175,7 +175,7 @@ export const EnquiryForm = () => {
       </button>
 
 
-      <p className="text-xs text-muted-foreground font-sans">
+      <p className="text-sm text-muted-foreground font-sans">
         Your details are sent securely to the Lodge Secretary and stored only for the purpose of replying to your enquiry. See our privacy notice for details.
       </p>
     </form>

@@ -89,7 +89,7 @@ const progressiveOfficers: OfficerJewel[] = [
         <br /><br />
         To see every brother who has served as Worshipful Master of Weybridge Lodge since our
         consecration in 1949, visit our{" "}
-        <Link to="/worshipful-masters" className="text-gold hover:underline font-medium">
+        <Link to="/worshipful-masters" className="text-gold-dark font-medium underline underline-offset-4">
           Roll of Honour →
         </Link>
         .
@@ -134,7 +134,7 @@ const nonProgressiveOfficers: OfficerJewel[] = [
         advance of what they have to do. As in public life when ceremonial is required — a State
         Funeral or Royal Wedding — the important events call for meticulous planning and rehearsal.
         The Assistant Director of Ceremonies helps the DC and acts as his understudy — see the{" "}
-        <a href="#adc" className="text-gold hover:underline font-medium">
+        <a href="#adc" className="text-gold-dark font-medium underline underline-offset-4">
           ADC role below
         </a>
         .
@@ -382,7 +382,7 @@ const OfficersJewels = () => {
                 Masonic Lodge Officers' Jewels
               </h2>
               {/* text-gold/70 replaces unapproved text-primary-foreground/70 */}
-              <p className="text-gold/70 font-sans text-sm leading-relaxed">
+              <p className="text-primary-foreground/80 font-sans text-sm leading-relaxed">
                 Below is a guide to all of the Masonic Lodge officers' jewels used at Weybridge
                 Lodge, together with a description of each office. The jewels are worn around the
                 neck on a turquoise blue collar decorated with silver braid and a silver beehive skep - the beehive being a long-standing Masonic emblem of industry, cooperation and the strength of working together.
@@ -487,7 +487,7 @@ const OfficersJewels = () => {
                 See who holds these offices at Weybridge Lodge today
               </h2>
               {/* text-gold/70 replaces unapproved text-primary-foreground/70 */}
-              <p className="text-gold/70 font-sans text-sm mb-8">
+              <p className="text-primary-foreground/80 font-sans text-sm mb-8">
                 Every office described above is currently filled by a serving member of our
                 Freemasons Lodge in Guildford. See who holds each role in the current Masonic Year,
                 or find out how to begin your own journey through the progressive offices.

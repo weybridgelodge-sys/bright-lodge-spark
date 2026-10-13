@@ -135,7 +135,7 @@ const FreemasonryCharity = () => {
                   >
                     <Icon className="w-8 h-8 text-gold mx-auto mb-3" />
                     <p className="text-3xl md:text-4xl font-serif text-gold mb-1">{stat.value}</p>
-                    <p className="text-xs text-gold/60 font-sans">{stat.label}</p>
+                    <p className="text-xs text-primary-foreground/80 font-sans">{stat.label}</p>
                   </motion.li>
                 );
               })}
@@ -176,7 +176,7 @@ const FreemasonryCharity = () => {
               <h2 className="text-3xl md:text-4xl font-serif text-gold mb-6">
                 The Masonic Charitable Foundation
               </h2>
-              <p className="text-gold/70 font-sans leading-relaxed mb-6">
+              <p className="text-primary-foreground/80 font-sans leading-relaxed mb-6">
                 The MCF was established to consolidate four national Masonic charities that have
                 operated — under different names — since the eighteenth century:
               </p>
@@ -184,11 +184,11 @@ const FreemasonryCharity = () => {
                 {mcfCharities.map((name) => (
                   <li key={name} className="flex items-center gap-3">
                     <span className="w-2 h-2 rounded-full bg-gold flex-shrink-0" aria-hidden="true" />
-                    <span className="text-gold/70 font-sans">{name}</span>
+                    <span className="text-primary-foreground/80 font-sans">{name}</span>
                   </li>
                 ))}
               </ul>
-              <p className="text-gold/70 font-sans leading-relaxed">
+              <p className="text-primary-foreground/80 font-sans leading-relaxed">
                 The MCF receives over 1,200 requests for grants each year, with more than 150
                 charities benefitting annually. All funds are raised directly by local Lodge
                 members and their families — including members of our Freemasons Lodge in

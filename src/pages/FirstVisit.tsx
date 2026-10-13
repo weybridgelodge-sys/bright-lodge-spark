@@ -122,7 +122,7 @@ const FirstVisit = () => {
 
             {/* Intro */}
             <section aria-labelledby="intro-heading" className="text-center mb-16">
-              <span className="text-gold font-sans font-semibold tracking-widest uppercase text-xs">
+              <span className="text-gold-dark font-sans font-semibold tracking-widest uppercase text-sm">
                 Your Evening
               </span>
               <h2 id="intro-heading" className="font-serif mt-3 text-3xl sm:text-4xl font-bold text-foreground tracking-tight">
@@ -162,7 +162,7 @@ const FirstVisit = () => {
                           </div>
                         </div>
                         <div className="flex-1 pt-1">
-                          <p className="text-gold-dark font-sans text-xs uppercase tracking-widest mb-1">{step.time}</p>
+                          <p className="text-gold-dark font-sans text-sm uppercase tracking-widest mb-1">{step.time}</p>
                           <h3 className="text-xl font-serif text-foreground mb-2">{step.title}</h3>
                           <p className="text-muted-foreground font-sans text-sm leading-relaxed">{step.body}</p>
                         </div>
@@ -313,14 +313,14 @@ const FirstVisit = () => {
               Not yet at this stage?{" "}
               <Link
                 to="/join-us"
-                className="inline-flex items-center gap-1 text-gold hover:underline font-medium min-h-[48px]"
+                className="inline-flex items-center gap-1 text-gold-dark font-medium min-h-[48px] underline underline-offset-4"
               >
                 Find out how to begin your application
                 <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
               </Link>{" "}
               <Link
                 to="/your-journey"
-                className="inline-flex items-center gap-1 text-gold hover:underline font-medium min-h-[48px]"
+                className="inline-flex items-center gap-1 text-gold-dark font-medium min-h-[48px] underline underline-offset-4"
               >
                 Or see the full journey timeline
                 <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />

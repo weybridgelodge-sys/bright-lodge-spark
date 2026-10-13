@@ -27,7 +27,7 @@ const LiveEventsFeed = () => {
           </div>
           <Link
             to="/events"
-            className="inline-flex items-center gap-1.5 text-sm font-sans font-medium text-gold hover:opacity-80 transition-opacity"
+            className="inline-flex items-center gap-1.5 text-sm font-sans font-medium text-gold-dark hover:opacity-80 transition-opacity"
           >
             View full calendar
             <ArrowRight className="w-4 h-4" />
@@ -74,7 +74,7 @@ const LiveEventsFeed = () => {
                 </p>
                 <Link
                   to={ev.link ?? "/events"}
-                  className="mt-auto inline-flex items-center gap-1 text-xs font-sans font-medium text-gold hover:opacity-80 transition-opacity"
+                  className="mt-auto inline-flex items-center gap-1 text-xs font-sans font-medium text-gold-dark hover:opacity-80 transition-opacity"
                 >
                   Details <ArrowRight className="w-3 h-3" />
                 </Link>

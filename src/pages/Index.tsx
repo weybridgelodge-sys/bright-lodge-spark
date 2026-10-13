@@ -89,7 +89,7 @@ const Index = () => {
         <section className="py-14 md:py-20 bg-background" aria-labelledby="vision-heading">
           <div className="container mx-auto px-6 max-w-3xl text-center">
             <motion.div {...fadeUp}>
-              <p className="text-gold text-sm font-sans uppercase tracking-wide mb-3">Our Vision</p>
+              <p className="text-gold-dark text-sm font-sans uppercase tracking-wide mb-3">Our Vision</p>
               <h2 id="vision-heading" className="text-2xl md:text-3xl font-serif text-foreground mb-5">
                 A welcoming Masonic Lodge in Surrey
               </h2>
@@ -127,10 +127,10 @@ const Index = () => {
                       className="group flex flex-col w-full min-h-[48px] p-6 bg-background border border-border rounded-sm hover:border-gold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
                     >
                       <Icon className="w-7 h-7 text-gold mb-4" aria-hidden="true" />
-                      <span className="text-gold text-xs font-sans uppercase tracking-widest mb-2">{kicker}</span>
+                      <span className="text-gold-dark text-sm font-sans uppercase tracking-widest mb-2">{kicker}</span>
                       <h3 className="text-xl font-serif text-foreground mb-2">{title}</h3>
                       <p className="text-sm font-sans text-muted-foreground leading-relaxed mb-5">{body}</p>
-                      <span className="mt-auto inline-flex items-center gap-2 text-sm font-sans font-semibold uppercase tracking-widest text-foreground group-hover:text-gold transition-colors">
+                      <span className="mt-auto inline-flex items-center gap-2 text-sm font-sans font-semibold uppercase tracking-widest text-foreground group-hover:text-gold-dark transition-colors">
                         {cta}
                         <ArrowRight className="w-4 h-4" aria-hidden="true" />
                       </span>
@@ -141,7 +141,7 @@ const Index = () => {
 
               <p className="text-center text-sm font-sans text-muted-foreground mt-8">
                 Live elsewhere in the county?{" "}
-                <Link to="/south-surrey-freemasons" className="text-foreground underline underline-offset-4 hover:text-gold inline-block py-2">
+                <Link to="/south-surrey-freemasons" className="text-foreground underline underline-offset-4 hover:text-gold-dark inline-block py-2">
                   Freemasons in South Surrey
                 </Link>
               </p>

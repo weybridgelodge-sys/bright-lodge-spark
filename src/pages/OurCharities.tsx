@@ -172,7 +172,7 @@ const OurCharities = () => {
           <div className="container mx-auto px-6 max-w-5xl">
             <div className="grid gap-8 rounded-sm border border-border bg-card p-8 md:grid-cols-[1.1fr_0.9fr] md:items-center md:p-10">
               <div>
-                <p className="text-gold text-sm font-sans uppercase tracking-wide mb-3">
+                <p className="text-gold-dark text-sm font-sans uppercase tracking-wide mb-3">
                   Featured charity story
                 </p>
                 <h2
@@ -260,7 +260,7 @@ const OurCharities = () => {
                       height={56}
                     />
                     <div>
-                      <p className="text-gold text-sm font-sans uppercase tracking-wide mb-2">
+                      <p className="text-gold-dark text-sm font-sans uppercase tracking-wide mb-2">
                         {charity.highlight}
                       </p>
                       {/* h3: charity names subordinate to section h2 */}
@@ -272,7 +272,7 @@ const OurCharities = () => {
                   </div>
 
                   {/* text-gold/70 replaces unapproved text-primary-foreground/70 */}
-                  <p className="text-gold/70 font-sans leading-relaxed mb-6">
+                  <p className="text-gold-dark font-sans leading-relaxed mb-6">
                     {charity.description}
                   </p>
 
@@ -281,7 +281,7 @@ const OurCharities = () => {
                       <Link
                         to={charity.postUrl}
                         aria-label={`Read the full story about Weybridge Lodge's support for ${charity.name}`}
-                        className="inline-flex items-center gap-2 text-gold hover:text-gold/80 transition-colors text-sm font-sans min-h-[48px]"
+                        className="inline-flex items-center gap-2 text-gold-dark hover:text-navy transition-colors text-sm font-sans min-h-[48px]"
                       >
                         Read the Full Story
                         <ArrowRight className="w-4 h-4" aria-hidden="true" />
@@ -293,7 +293,7 @@ const OurCharities = () => {
                       rel="noopener noreferrer"
                       aria-label={`Visit the ${charity.name} website (opens in new tab)`}
                       // hover:text-gold/80 replaces unapproved hover:text-gold-light
-                      className="inline-flex items-center gap-2 text-gold hover:text-gold/80 transition-colors text-sm font-sans min-h-[48px]"
+                      className="inline-flex items-center gap-2 text-gold-dark hover:text-navy transition-colors text-sm font-sans min-h-[48px]"
                     >
                       Visit Website
                       <ExternalLink className="w-4 h-4" aria-hidden="true" />
@@ -345,7 +345,7 @@ const OurCharities = () => {
                 <Link
                   to="/freemasonry-and-charity"
                   aria-label="Learn more about Freemasonry and charitable giving"
-                  className="inline-flex items-center justify-center border border-border text-foreground px-8 py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:border-gold hover:text-gold transition-colors min-h-[48px] w-full sm:w-auto"
+                  className="inline-flex items-center justify-center border border-border text-foreground px-8 py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:border-gold hover:text-gold-dark transition-colors min-h-[48px] w-full sm:w-auto"
                 >
                   Freemasonry &amp; Charity
                 </Link>
