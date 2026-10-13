@@ -371,7 +371,7 @@ useEffect(() => {
     <div className="min-h-screen overflow-x-hidden">
       <SEO
         title="Dining & Bookings | Weybridge Lodge No. 6787 — Guildford Masonic Centre"
-        description="Book your place at the next Weybridge Lodge meeting at the Guildford Masonic Centre, Weybourne House, Hitherbury Close, Guildford GU2 4DR. View the festive board menu and reserve your seat."
+        description={`Book your place at the next Weybridge Lodge meeting at the Guildford Masonic Centre, Weybourne House, Hitherbury Close, Guildford GU2 4DR. View the ${diningLabel.toLowerCase()} menu and reserve your seat.`}
         canonical="/bookings"
         type="website"
         schema={[
