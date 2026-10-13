@@ -45,6 +45,10 @@
 - [x] MMH Number field
 - [x] Rose Croix Number field
 
+## Public content consistency (part 3a)
+- [ ] Update public member ages, ballot sequence and degree timings only; report changed lines and CMS/ambiguous findings.
+- [ ] Verify public pages and run the test suite.
+
 ## Member Admin portrait names
 - [x] Fix stacked narrow-screen member rows without changing permissions
 - [x] Add populated admin/Secretary name-readability regressions and inspect portrait/desktop
