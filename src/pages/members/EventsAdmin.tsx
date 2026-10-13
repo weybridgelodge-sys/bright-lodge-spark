@@ -271,6 +271,7 @@ function EventEditor({ id, onBack, onDeleted }: { id: string; onBack: () => void
           dining_time: event.dining_time,
           location: event.location,
           dress_code: event.dress_code,
+          event_label: (event.event_label || "").trim() || "Festive Board",
           booking_deadline: event.booking_deadline || null,
           header_image_url: event.header_image_url || null,
           published: event.published,
@@ -408,6 +409,11 @@ function EventEditor({ id, onBack, onDeleted }: { id: string; onBack: () => void
             <div className="md:col-span-2">
               <label className={labelCls}>Dress Code</label>
               <input className={inputCls} value={event.dress_code} onChange={(e) => update("dress_code", e.target.value)} />
+            </div>
+            <div className="md:col-span-2">
+              <label className={labelCls}>Event label</label>
+              <input className={inputCls} value={event.event_label ?? "Festive Board"} onChange={(e) => update("event_label" as any, e.target.value)} placeholder="Festive Board" maxLength={60} />
+              <p className="text-xs text-muted-foreground mt-1">Shown on the booking form, e.g. "Festive Board" or "White Table".</p>
             </div>
             <div>
               <label className={labelCls}>Booking Deadline</label>

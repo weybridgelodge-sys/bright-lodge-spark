@@ -1,3 +1,4 @@
+import { attendanceOptions, diningEventLabel, isNonMasonTitle, lodgeRequired } from "@/lib/bookingTitles";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
@@ -238,11 +239,17 @@ const BookingsEvent = ({
     [event.event_date]
   );
   const eventLabel = `${event.title} — ${shortDate}`;
+  const diningLabel = diningEventLabel(event.event_label);
+  const nonMason = isNonMasonTitle(title);
+  // Non-Masons can't attend the meeting itself: drop a stale "meeting only" choice.
+  useEffect(() => {
+    if (nonMason && meetingOption === "meeting-only") setMeetingOption("");
+  }, [nonMason, meetingOption]);
 
   const validateStep1 = (): boolean => {
     // Honeypot check — bots fill hidden fields, humans don't
     if (honeypot) return false;
-    if (!title || !firstName.trim() || !lastName.trim() || !lodge.trim() || !email.trim() || !phone.trim()) {
+    if (!title || !firstName.trim() || !lastName.trim() || (lodgeRequired(title) && !lodge.trim()) || !email.trim() || !phone.trim()) {
       toast({ title: "Missing details", description: "Please fill in all required fields.", variant: "destructive" });
       return false;
     }
@@ -263,8 +270,8 @@ const BookingsEvent = ({
         toast({ title: "Choose a dining option", variant: "destructive" });
         return false;
       }
-      if (guests.some((g) => !g.name.trim() || !g.lodge.trim())) {
-        toast({ title: "Guest details required", description: "Please enter each guest's name and Lodge name & no.", variant: "destructive" });
+      if (guests.some((g) => !g.name.trim())) {
+        toast({ title: "Guest details required", description: "Please enter each guest's name.", variant: "destructive" });
         return false;
       }
     }
@@ -364,7 +371,7 @@ useEffect(() => {
     <div className="min-h-screen overflow-x-hidden">
       <SEO
         title="Dining & Bookings | Weybridge Lodge No. 6787 — Guildford Masonic Centre"
-        description="Book your place at the next Weybridge Lodge meeting at the Guildford Masonic Centre, Weybourne House, Hitherbury Close, Guildford GU2 4DR. View the festive board menu and reserve your seat."
+        description={`Book your place at the next Weybridge Lodge meeting at the Guildford Masonic Centre, Weybourne House, Hitherbury Close, Guildford GU2 4DR. View the ${diningLabel.toLowerCase()} menu and reserve your seat.`}
         canonical="/bookings"
         type="website"
         schema={[
@@ -504,7 +511,7 @@ useEffect(() => {
                 >
                   {/* aria-hidden on icon: already present, layout unusual but acceptable */}
                   <UtensilsCrossed className="inline w-8 h-8 text-gold mr-3 -mt-1" aria-hidden="true" />
-                  Festive Board Menu
+                  {diningLabel} Menu
                 </h2>
               </motion.div>
               <ul className="space-y-6 max-w-xl mx-auto list-none p-0 m-0">
@@ -778,6 +785,7 @@ useEffect(() => {
                           <option value="VW. Bro">VW. Bro</option>
                           <option value="RW. Bro">RW. Bro</option>
                           <option value="Mr">Mr</option>
+                          <option value="Mrs">Mrs</option>
                         </select>
                       </div>
                       <div className="grid grid-cols-2 gap-4">
@@ -810,14 +818,14 @@ useEffect(() => {
                       </div>
                       <div>
                         <label htmlFor="evf-lodge" className={labelClass}>
-                          Lodge Name & No. <span className="text-destructive">*</span>
+                          Lodge Name & No. {nonMason ? <span className="text-muted-foreground font-normal normal-case">(optional)</span> : <span className="text-destructive">*</span>}
                         </label>
                         <input
                           id="evf-lodge"
                           type="text"
                           value={lodge}
                           onChange={(e) => setLodge(e.target.value)}
-                          required
+                          required={!nonMason}
                           className={inputClass}
                           placeholder="e.g. Weybridge Lodge No. 6787"
                         />
@@ -878,8 +886,9 @@ useEffect(() => {
                           className={selectClass}
                         >
                           <option value="">Select option</option>
-                          <option value="meeting-and-festive-board">Attending Meeting + Festive Board</option>
-                          <option value="meeting-only">Attending Meeting ONLY</option>
+                          {attendanceOptions(title, diningLabel).filter((o) => o.value !== "apologies").map((o) => (
+                            <option key={o.value} value={o.value}>{o.label}</option>
+                          ))}
                           <option value="apologies">Not Attending (Apologies for absence)</option>
                         </select>
                       </div>
@@ -942,14 +951,13 @@ useEffect(() => {
                               </div>
                               <div>
                                 <label htmlFor={`gl${i}`} className={labelClass}>
-                                  Guest {i + 1} Lodge Name &amp; No. <span className="text-destructive">*</span>
+                                  Guest {i + 1} Lodge Name &amp; No. <span className="text-muted-foreground font-normal normal-case">(optional)</span>
                                 </label>
                                 <input
                                   id={`gl${i}`}
                                   type="text"
                                   value={g.lodge}
                                   onChange={(e) => setGuests((prev) => prev.map((x, j) => j === i ? { ...x, lodge: e.target.value } : x))}
-                                  required
                                   className={inputClass}
                                   placeholder="e.g. Weybridge Lodge No. 6787"
                                 />

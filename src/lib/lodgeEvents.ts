@@ -11,6 +11,7 @@ export type LodgeEvent = {
   dining_time: string;
   location: string;
   dress_code: string;
+  event_label?: string | null;
   booking_deadline: string | null;
   header_image_url: string | null;
   published: boolean;

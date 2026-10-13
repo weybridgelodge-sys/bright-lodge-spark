@@ -1,0 +1,1 @@
+ALTER TABLE public.lodge_events ADD COLUMN IF NOT EXISTS event_label text NOT NULL DEFAULT 'Festive Board';

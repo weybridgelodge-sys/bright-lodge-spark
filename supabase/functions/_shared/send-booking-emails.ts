@@ -35,9 +35,9 @@ function formatDate(value?: string | null): string {
   })
 }
 
-function meetingOptionLabel(opt?: string): string {
+function meetingOptionLabel(opt?: string, label = 'Festive Board'): string {
   switch ((opt || '').toLowerCase()) {
-    case 'meeting-and-festive-board': return 'Meeting & Festive Board'
+    case 'meeting-and-festive-board': return `Meeting & ${label}`
     case 'meeting-only': return 'Meeting only'
     case 'apologies': return 'Apologies'
     case 'festive-board-only': return 'Festive Board only'
@@ -150,6 +150,7 @@ export async function sendBookingEmails(bookingId: string, opts: SendOpts) {
   // Chain: bookings.meeting_id → festive_board_meetings → lodge_events
   // (event_key = lodge_events.slug, falling back to matching date) → summonses.lodge_event_id
   let summonsPdfUrl: string | undefined
+  let diningLabel = 'Festive Board'
   let summonsMeetingNumber: number | undefined
   if (!isLadiesFestival && (meetingEventKey || meetingDateISO)) {
     try {
@@ -157,20 +158,22 @@ export async function sendBookingEmails(bookingId: string, opts: SendOpts) {
       if (meetingEventKey) {
         const { data: le } = await supabase
           .from('lodge_events')
-          .select('id')
+          .select('id, event_label')
           .eq('slug', meetingEventKey)
           .maybeSingle()
         lodgeEventId = (le as any)?.id ?? null
+        if ((le as any)?.event_label) diningLabel = String((le as any).event_label)
       }
       if (!lodgeEventId && meetingDateISO) {
         const { data: le2 } = await supabase
           .from('lodge_events')
-          .select('id')
+          .select('id, event_label')
           .gte('event_date', `${meetingDateISO}T00:00:00`)
           .lt('event_date', `${meetingDateISO}T23:59:59`)
           .order('created_at', { ascending: false })
           .limit(1)
         lodgeEventId = (le2 as any)?.[0]?.id ?? null
+        if ((le2 as any)?.[0]?.event_label) diningLabel = String((le2 as any)[0].event_label)
       }
 
       if (lodgeEventId) {
@@ -296,7 +299,7 @@ export async function sendBookingEmails(bookingId: string, opts: SendOpts) {
           firstName,
           eventLabel,
           eventDate,
-          meetingOptionLabel: meetingOptionLabel(meetingOpt),
+          meetingOptionLabel: meetingOptionLabel(meetingOpt, diningLabel),
           lodgeName,
           guests,
           dietary,
@@ -329,7 +332,7 @@ export async function sendBookingEmails(bookingId: string, opts: SendOpts) {
           bookerPhone: b.contact_phone,
           eventLabel,
           eventDate,
-          meetingOptionLabel: meetingOptionLabel(meetingOpt),
+          meetingOptionLabel: meetingOptionLabel(meetingOpt, diningLabel),
           lodgeName,
           guests,
           dietary,

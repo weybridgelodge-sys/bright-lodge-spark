@@ -2018,6 +2018,7 @@ export type Database = {
           dining_time: string
           dress_code: string
           event_date: string
+          event_label: string
           header_image_url: string | null
           id: string
           intro: string
@@ -2039,6 +2040,7 @@ export type Database = {
           dining_time?: string
           dress_code?: string
           event_date: string
+          event_label?: string
           header_image_url?: string | null
           id?: string
           intro?: string
@@ -2060,6 +2062,7 @@ export type Database = {
           dining_time?: string
           dress_code?: string
           event_date?: string
+          event_label?: string
           header_image_url?: string | null
           id?: string
           intro?: string
