@@ -80,7 +80,7 @@ const costCards: CostCard[] = [
 const profilePoints: ProfilePoint[] = [
   {
     icon: MapPin,
-    text: "You're a man roughly in your mid-20s to 60s, living in or near Guildford, Woking, Godalming, Farnham, Cranleigh or Leatherhead.",
+    text: "You're a man of any adult age — our members currently range from 18 to 83 — living in or near Guildford, Woking, Godalming, Farnham, Cranleigh or Leatherhead.",
   },
   {
     icon: HeartHandshake,
