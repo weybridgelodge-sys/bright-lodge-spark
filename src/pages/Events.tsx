@@ -120,7 +120,6 @@ const Events = () => {
                 >
                   Event Calendar
                 </h2>
-                {/* shadow-sm removed — not a project token */}
                 <div className="border border-border rounded-sm bg-card p-4">
                   <Calendar
                     mode="single"
@@ -198,8 +197,6 @@ const Events = () => {
                       whileInView={shouldReduceMotion ? "static" : "visible"}
                       viewport={{ once: true }}
                       custom={i * 0.08}
-
-                      // shadow-sm removed — not a project token
                       className={`border rounded-sm bg-card overflow-hidden ${
                         ev.highlight ? "border-gold/40" : "border-border"
                       }`}
@@ -292,7 +289,6 @@ const Events = () => {
               </p>
             </motion.div>
 
-            {/* shadow-sm removed — not a project token */}
             <motion.div
               variants={fadeUp}
               initial="hidden"
@@ -301,7 +297,6 @@ const Events = () => {
               custom={0.2}
               className="max-w-2xl mx-auto border border-border rounded-sm bg-card overflow-hidden"
             >
-              {/* bg-navy flat: bg-navy-gradient is not a project token */}
               <div className="bg-navy p-8 text-center">
 
                 <p className="text-gold uppercase tracking-widest text-sm font-sans mb-2">
@@ -355,8 +350,7 @@ const Events = () => {
         </section>
 
         {/* ── Final CTA ── */}
-        {/* Previous version: bare section, single button, no heading, no copy — dead end.
-            bg-navy flat: bg-navy-gradient is not a project token. */}
+        {/* Previous version: bare section, single button, no heading, no copy — dead end. */}
         <section
           className="py-16 bg-navy"
           aria-labelledby="events-cta-heading"
