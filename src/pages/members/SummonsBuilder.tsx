@@ -1394,8 +1394,6 @@ function VisitorEmailDialog(props: {
     }
   };
 
-
-  return (
   const lastSeenLabel = (r: VisitorRow) => {
     const stale = !!r.real_last_seen && Date.now() - new Date(r.real_last_seen).getTime() > 2 * 365 * 24 * 60 * 60 * 1000;
     return (
