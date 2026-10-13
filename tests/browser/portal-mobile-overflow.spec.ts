@@ -441,8 +441,8 @@ test("Summons visitor email dialog fits 320px with worst-case names", async ({ p
     { id: "v1", name: "W Bro. Bartholomew Featherstonehaugh-Wolstenholme", email: "bartholomew.featherstonehaugh-wolstenholme@example.com", lodge_name: "United Grand Lodge of England Mark Master Masons", lodge_number: "6787", created_at: "2026-01-01T00:00:00Z" },
     { id: "v2", name: "Ben Dickson", email: "ben.dickson@example.com", lodge_name: null, lodge_number: null, created_at: "2026-01-01T00:00:00Z" },
   ];
-  await page.route("**/rest/v1/visitor_contacts?**", (r) => r.fulfill({ json: visitors }));
-  await page.route("**/rest/v1/visitor_attendances?**", (r) => r.fulfill({ json: [
+  await page.route("**/rest/v1/visitor_contacts**", (r) => r.fulfill({ json: visitors }));
+  await page.route("**/rest/v1/visitor_attendances**", (r) => r.fulfill({ json: [
     { visitor_contact_id: "v1", festive_board_attendance: { attendance_status: "Attended", festive_board_meetings: { meeting_date: "2026-05-13" } } },
     { visitor_contact_id: "v2", festive_board_attendance: { attendance_status: "Apologies", festive_board_meetings: { meeting_date: "2026-10-21" } } },
   ] }));
