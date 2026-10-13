@@ -10,7 +10,7 @@
 - Accounts distribution uses the separate secure link and record_accounts_sent; never attach it to an already-sent summons.
 - Subscription recognition uses splitSubscription once; receipts and prepayment clears never split again. Under-25 means age on 1 October.
 - Only the Secretary is exempt from subscriptions (latest Secretary appointment on or before the year); the Treasurer pays like any member. Honorary members remain exempt.
-- Thursday sessions are called "Rehearsal Night" (never "Lodge of Instruction" or "LOI") in all member-facing and public wording, because subscriptions aren't collected at them. Internal names, routes and database identifiers still use "loi" and must not be renamed.
+- Public/member Thursday wording is "Rehearsal Night", never "Lodge of Instruction"/"LOI" (no subscriptions collected). Keep internal `loi` identifiers.
 - Installation Returns resolve live and fill exact AcroForm IDs; signatures and dispensation remain blank.
 - Changed `/members` screens must pass 320px tests with real or faithful worst-case data: no overflow, unreachable controls or obscured content.
 - Browser layout tests may use only a Vite `e2e`-mode, localhost-only synthetic identity; it never grants backend access or ships in production.
@@ -23,3 +23,4 @@
 - Almoner access is two-tier: can_view_almoner(auth.uid()) gates SELECT, can_edit_almoner(auth.uid()) writes (incl. welfare-attachments storage and registers like Widows, whose primary rows archive by status, never delete); app mirrors as canAccessAlmoner/canEditAlmoner, hiding write controls. can_access_almoner is a deprecated alias. Why: read-only offices; one shape for welfare data.
 - Page/list loading uses useInitialLoading, never useState(true), so save refreshes retain content and scroll.
 - Member Admin stacks rows below desktop widths; populated admin/Secretary tests check readable names and overlap. Why: pinned actions can hide names without document overflow.
+- KPI Summary has a separate async crest header and explicit first-table position; preserve the VO header. Why: prevent header/table overlap.
