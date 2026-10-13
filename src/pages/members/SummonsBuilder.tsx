@@ -1394,6 +1394,50 @@ function VisitorEmailDialog(props: {
     }
   };
 
+  const lastSeenLabel = (r: VisitorRow) => {
+    const stale = !!r.real_last_seen && Date.now() - new Date(r.real_last_seen).getTime() > 2 * 365 * 24 * 60 * 60 * 1000;
+    return (
+      <>
+        {r.real_last_seen
+          ? new Date(r.real_last_seen).toLocaleDateString("en-GB")
+          : <span className="text-primary-foreground/60">Not yet attended</span>}
+        {stale && <span className="ml-1 text-primary-foreground/50">(&gt;2y)</span>}
+      </>
+    );
+  };
+
+  const salutationEditor = (r: VisitorRow) => (
+    <>
+      <Input
+        value={salutations[r.id] ?? ""}
+        onChange={(e) => setSalutations((s) => ({ ...s, [r.id]: e.target.value }))}
+        className="h-8 min-w-[140px] w-full"
+        placeholder="e.g. W Bro Smith"
+      />
+      <div className="text-[11px] text-primary-foreground/60 mt-0.5">
+        Preview: <em>Dear {(salutations[r.id] || "Brother").trim()},</em>
+      </div>
+      {failures[r.email.toLowerCase()] && (
+        <div className="mt-1 flex items-start gap-2 rounded border border-red-400/40 bg-red-500/10 p-1.5">
+          <div className="text-[11px] text-red-200 flex-1 break-words">
+            {failures[r.email.toLowerCase()]}
+          </div>
+          {isIdempotencyClash(failures[r.email.toLowerCase()]) && (
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              className="h-6 px-2 text-[11px] text-navy"
+              onClick={() => resendOne(r)}
+              disabled={resendingEmail === r.email.toLowerCase()}
+            >
+              {resendingEmail === r.email.toLowerCase() ? "Resending…" : "Resend anyway"}
+            </Button>
+          )}
+        </div>
+      )}
+    </>
+  );
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -1412,20 +1456,42 @@ function VisitorEmailDialog(props: {
           ) : rows.length === 0 ? (
             <p className="p-4 text-sm text-primary-foreground/70">No visitor contacts on file.</p>
           ) : (
-            <table className="w-full text-sm">
-              <thead className="text-xs text-primary-foreground/60 bg-navy-light/40 sticky top-0">
-                <tr>
-                  <th className="text-left p-2 w-8"></th>
-                  <th className="text-left p-2">Visitor</th>
-                  <th className="text-left p-2">Lodge</th>
-                  <th className="text-left p-2">Last seen</th>
-                  <th className="text-left p-2">Salutation</th>
-                </tr>
-              </thead>
-              <tbody>
-                {rows.map((r) => {
-                  const stale = !!r.real_last_seen && Date.now() - new Date(r.real_last_seen).getTime() > 2 * 365 * 24 * 60 * 60 * 1000;
-                  return (
+            <>
+              {/* Phone width: stacked cards so every control stays reachable without sideways scrolling */}
+              <div className="sm:hidden divide-y divide-gold/10">
+                {rows.map((r) => (
+                  <div key={r.id} className="p-2 space-y-2">
+                    <div className="flex items-start gap-2">
+                      <Checkbox
+                        className="mt-1"
+                        checked={!!selected[r.id]}
+                        onCheckedChange={(v) => setSelected((s) => ({ ...s, [r.id]: !!v }))}
+                      />
+                      <div className="min-w-0">
+                        <div className="break-words">{r.name || <span className="italic text-primary-foreground/60">no name</span>}</div>
+                        <div className="text-xs text-primary-foreground/60 break-all">{r.email}</div>
+                        <div className="text-xs text-primary-foreground/60 break-words">
+                          {[r.lodge_name, r.lodge_number].filter(Boolean).join(" · ") || "—"}
+                        </div>
+                        <div className="text-xs">{lastSeenLabel(r)}</div>
+                      </div>
+                    </div>
+                    {salutationEditor(r)}
+                  </div>
+                ))}
+              </div>
+              <table className="hidden sm:table w-full text-sm">
+                <thead className="text-xs text-primary-foreground/60 bg-navy-light/40 sticky top-0">
+                  <tr>
+                    <th className="text-left p-2 w-8"></th>
+                    <th className="text-left p-2">Visitor</th>
+                    <th className="text-left p-2">Lodge</th>
+                    <th className="text-left p-2">Last seen</th>
+                    <th className="text-left p-2">Salutation</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {rows.map((r) => (
                     <tr key={r.id} className="border-t border-gold/10">
                       <td className="p-2 align-top">
                         <Checkbox
@@ -1440,47 +1506,13 @@ function VisitorEmailDialog(props: {
                       <td className="p-2 align-top">
                         {[r.lodge_name, r.lodge_number].filter(Boolean).join(" · ") || "—"}
                       </td>
-                      <td className="p-2 align-top text-xs">
-                        {r.real_last_seen
-                          ? new Date(r.real_last_seen).toLocaleDateString("en-GB")
-                          : <span className="text-primary-foreground/60">Not yet attended</span>}
-                        {stale && <span className="ml-1 text-primary-foreground/50">(&gt;2y)</span>}
-                      </td>
-                      <td className="p-2 align-top">
-                        <Input
-                          value={salutations[r.id] ?? ""}
-                          onChange={(e) => setSalutations((s) => ({ ...s, [r.id]: e.target.value }))}
-                          className="h-8 min-w-[140px]"
-                          placeholder="e.g. W Bro Smith"
-                        />
-                        <div className="text-[11px] text-primary-foreground/60 mt-0.5">
-                          Preview: <em>Dear {(salutations[r.id] || "Brother").trim()},</em>
-                        </div>
-                        {failures[r.email.toLowerCase()] && (
-                          <div className="mt-1 flex items-start gap-2 rounded border border-red-400/40 bg-red-500/10 p-1.5">
-                            <div className="text-[11px] text-red-200 flex-1 break-words">
-                              {failures[r.email.toLowerCase()]}
-                            </div>
-                            {isIdempotencyClash(failures[r.email.toLowerCase()]) && (
-                              <Button
-                                type="button"
-                                size="sm"
-                                variant="outline"
-                                className="h-6 px-2 text-[11px] text-navy"
-                                onClick={() => resendOne(r)}
-                                disabled={resendingEmail === r.email.toLowerCase()}
-                              >
-                                {resendingEmail === r.email.toLowerCase() ? "Resending…" : "Resend anyway"}
-                              </Button>
-                            )}
-                          </div>
-                        )}
-                      </td>
+                      <td className="p-2 align-top text-xs">{lastSeenLabel(r)}</td>
+                      <td className="p-2 align-top">{salutationEditor(r)}</td>
                     </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                  ))}
+                </tbody>
+              </table>
+            </>
           )}
         </div>
 
