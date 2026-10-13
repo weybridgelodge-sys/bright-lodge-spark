@@ -58,12 +58,8 @@ const Hero = () => {
             </p>
 
             <p className="text-lg md:text-xl text-warm-white/80 font-sans font-light leading-relaxed mb-10 max-w-xl">
-              Weybridge Lodge No. 6787 is a friendly group of men in Guildford — aged 18 to 80 — who meet to make genuine friendships, support local charities, and grow as people. New members are always welcome.
+              Weybridge Lodge No. 6787 is a friendly Masonic Lodge in Surrey, a group of men in Guildford — aged 18 to 80 — who meet to make genuine friendships, support local charities, and grow as people. New members are always welcome.
             </p>
-            {/* FIXED: bg-gold-shimmer / text-accent-foreground are not
-                approved project tokens — replaced with bg-gold / text-navy.
-                border-primary-foreground → border-warm-white. Added
-                min-h-[48px] and full-width mobile hitboxes to both CTAs. */}
             <div className="flex flex-col sm:flex-row gap-4">
               <Link
                 to="/join-us"
@@ -94,7 +90,7 @@ const Hero = () => {
 
       <a
         href="#about"
-        className="absolute bottom-10 left-1/2 -translate-x-1/2 text-warm-white/60 hover:text-gold transition-colors hero-fade-in"
+        className="absolute bottom-6 left-1/2 -translate-x-1/2 inline-flex items-center justify-center min-w-[48px] min-h-[48px] text-warm-white/60 hover:text-gold transition-colors hero-fade-in"
         style={{ animationDelay: "1.5s" }}
         aria-label="Scroll to About section"
       >
