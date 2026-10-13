@@ -66,8 +66,8 @@ const joinSteps: JoinStep[] = [
   {
     n: "5",
     icon: CheckSquare,
-    title: "Interview & Confirmation",
-    body: "If the committee interview goes well, we will confirm your initiation date at that point. There is no waiting in the dark — a successful interview means you have a date in the diary.",
+    title: "Your Date is Confirmed",
+    body: "If the committee is happy, we confirm your initiation date there and then. There is no waiting in the dark — you leave with a date in the diary.",
   },
   {
     n: "6",
