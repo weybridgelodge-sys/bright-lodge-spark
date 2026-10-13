@@ -149,7 +149,7 @@ const faqCategories: FAQCategory[] = [
         renderAnswer: (
           <>
             A Lodge meeting has two parts. The first is the formal business of the Lodge: approving minutes, correspondence, accounts, and any Lodge announcements. The second part is one of the three degree ceremonies — Initiation (First Degree), Passing (Second Degree), or Raising (Third Degree) — conducted for a candidate progressing through their Masonic journey. Every meeting is followed by the Festive Board: a three-course dinner with toasts, conversation, and the kind of warmth that keeps members coming back. See what your first evening looks like on our{" "}
-            <Link to="/freemason-initiation-night" className="text-gold-dark underline underline-offset-4 inline-flex items-center min-h-[48px]">Your Initiation Night</Link>{" "}page.
+            <Link to="/freemason-initiation-night" className="text-gold-dark underline underline-offset-4">Your Initiation Night</Link>{" "}page.
           </>
         ),
       },
