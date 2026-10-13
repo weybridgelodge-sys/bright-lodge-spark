@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import MembersLayout from "@/components/members/MembersLayout";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { countVisitorVisits, isRecentVisitor, type VisitorAttendanceRow } from "@/lib/kpis";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -1200,6 +1201,8 @@ type VisitorRow = {
   lodge_name: string | null;
   lodge_number: string | null;
   last_seen_at: string;
+  /** Latest Booked/Attended meeting date, or null if he has never really visited. */
+  real_last_seen: string | null;
 };
 
 function VisitorEmailDialog(props: {
@@ -1233,13 +1236,22 @@ function VisitorEmailDialog(props: {
         .is("opted_out_at", null)
         .order("last_seen_at", { ascending: false });
       if (error) { toast.error(error.message); setLoading(false); return; }
-      const list = (data ?? []) as VisitorRow[];
+      // Only a Booked/Attended visit counts — apologies or a contact simply being
+      // on file must never make a visitor look "recently seen".
+      const { data: va } = await (supabase.from as any)("visitor_attendances").select(
+        "visitor_contact_id, festive_board_attendance(attendance_status, festive_board_meetings(meeting_date))"
+      );
+      const { lastSeen } = countVisitorVisits((va ?? []) as VisitorAttendanceRow[], "9999-12-31");
+      const list = ((data ?? []) as Omit<VisitorRow, "real_last_seen">[]).map((r) => ({
+        ...r,
+        real_last_seen: lastSeen[r.id] ?? null,
+      })) as VisitorRow[];
       setRows(list);
       const twoYearsAgo = Date.now() - 2 * 365 * 24 * 60 * 60 * 1000;
       const sel: Record<string, boolean> = {};
       const sal: Record<string, string> = {};
       for (const r of list) {
-        sel[r.id] = new Date(r.last_seen_at).getTime() >= twoYearsAgo;
+        sel[r.id] = isRecentVisitor(r.real_last_seen, twoYearsAgo);
         sal[r.id] = parseSalutation(r.name);
       }
       setSelected(sel);
@@ -1412,7 +1424,7 @@ function VisitorEmailDialog(props: {
               </thead>
               <tbody>
                 {rows.map((r) => {
-                  const stale = Date.now() - new Date(r.last_seen_at).getTime() > 2 * 365 * 24 * 60 * 60 * 1000;
+                  const stale = !!r.real_last_seen && Date.now() - new Date(r.real_last_seen).getTime() > 2 * 365 * 24 * 60 * 60 * 1000;
                   return (
                     <tr key={r.id} className="border-t border-gold/10">
                       <td className="p-2 align-top">
@@ -1429,7 +1441,9 @@ function VisitorEmailDialog(props: {
                         {[r.lodge_name, r.lodge_number].filter(Boolean).join(" · ") || "—"}
                       </td>
                       <td className="p-2 align-top text-xs">
-                        {new Date(r.last_seen_at).toLocaleDateString("en-GB")}
+                        {r.real_last_seen
+                          ? new Date(r.real_last_seen).toLocaleDateString("en-GB")
+                          : <span className="text-primary-foreground/60">Not yet attended</span>}
                         {stale && <span className="ml-1 text-primary-foreground/50">(&gt;2y)</span>}
                       </td>
                       <td className="p-2 align-top">

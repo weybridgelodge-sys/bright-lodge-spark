@@ -651,6 +651,11 @@ export function countVisitorVisits(rows: VisitorAttendanceRow[], today: string) 
   return { counts, lastSeen };
 }
 
+/** Summons pre-tick: only a real (Booked/Attended) visit on or after the cutoff counts. */
+export function isRecentVisitor(realLastSeen: string | null, cutoffMs: number) {
+  return !!realLastSeen && new Date(realLastSeen).getTime() >= cutoffMs;
+}
+
 export async function fetchEngagementBundle(): Promise<EngagementBundle> {
   const today = new Date().toISOString().slice(0, 10);
   const [mt, at, ab, vc, va] = await Promise.all([
