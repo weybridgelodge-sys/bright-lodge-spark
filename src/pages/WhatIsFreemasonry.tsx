@@ -226,7 +226,7 @@ const WhatIsFreemasonry = () => {
                     </div>
                     <h3 className="text-xl font-serif text-gold mb-1">{p.title}</h3>
                     <p className="text-gold text-sm font-sans mb-3">{p.subtitle}</p>
-                    <p className="text-sm text-gold/70 font-sans leading-relaxed">{p.description}</p>
+                    <p className="text-sm text-primary-foreground/80 font-sans leading-relaxed">{p.description}</p>
                   </motion.li>
                 );
               })}
@@ -261,7 +261,7 @@ const WhatIsFreemasonry = () => {
             <motion.div {...motionProps(0.3)} className="text-center mt-14">
               <Link
                 to="/lodge-traditions"
-                className="inline-flex items-center gap-2 text-sm font-sans font-semibold text-gold uppercase tracking-widest hover:underline min-h-[48px] px-2"
+                className="inline-flex items-center gap-2 text-sm font-sans font-semibold text-gold-dark uppercase tracking-widest min-h-[48px] px-2 hover:underline"
               >
                 Discover our Lodge traditions
                 <ArrowRight className="w-4 h-4" aria-hidden="true" />
@@ -277,7 +277,7 @@ const WhatIsFreemasonry = () => {
               <h2 id="degrees-heading" className="text-3xl md:text-4xl font-serif text-gold">
                 The Three Degrees of Freemasonry
               </h2>
-              <p className="text-gold/70 font-sans mt-4 max-w-2xl mx-auto">
+              <p className="text-primary-foreground/80 font-sans mt-4 max-w-2xl mx-auto">
                 Every Freemason in Surrey and across the world progresses through the same three stages — each a ceremony rich in symbolism, moral teaching, and personal meaning.
               </p>
             </motion.div>
@@ -290,8 +290,8 @@ const WhatIsFreemasonry = () => {
                   </div>
                   <div>
                     <h3 className="text-lg font-serif text-gold">{d.title}</h3>
-                    <p className="text-gold/70 text-xs font-sans uppercase tracking-wide mb-2">{d.degree}</p>
-                    <p className="text-sm text-gold/70 font-sans leading-relaxed">{d.description}</p>
+                    <p className="text-primary-foreground/80 text-xs font-sans uppercase tracking-wide mb-2">{d.degree}</p>
+                    <p className="text-sm text-primary-foreground/80 font-sans leading-relaxed">{d.description}</p>
                   </div>
                 </motion.li>
               ))}
@@ -300,7 +300,7 @@ const WhatIsFreemasonry = () => {
             <motion.div {...motionProps(0.3)} className="text-center mt-14">
               <Link
                 to="/your-journey"
-                className="inline-flex items-center gap-2 text-sm font-sans font-semibold text-gold uppercase tracking-widest hover:underline min-h-[48px] px-2"
+                className="inline-flex items-center gap-2 text-sm font-sans font-semibold text-gold uppercase tracking-widest min-h-[48px] px-2 hover:underline"
               >
                 <Compass className="w-4 h-4" aria-hidden="true" />
                 See the Full Journey Timeline
@@ -326,7 +326,7 @@ const WhatIsFreemasonry = () => {
               </p>
               <Link
                 to="/faq"
-                className="inline-flex items-center justify-center gap-2 border border-gold text-gold px-6 py-3 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:bg-gold hover:text-navy transition-colors min-h-[48px]"
+                className="inline-flex items-center justify-center gap-2 border border-gold-dark text-gold-dark px-6 py-3 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:bg-gold hover:text-navy transition-colors min-h-[48px]"
               >
                 See the Full FAQ
                 <ArrowRight className="w-4 h-4" aria-hidden="true" />

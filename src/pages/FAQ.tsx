@@ -66,14 +66,14 @@ const faqCategories: FAQCategory[] = [
         renderAnswer: (
           <>
             The simplest route is to contact our Membership Secretary by phone or email via our{" "}
-            <Link to="/join-us" className="text-gold underline hover:opacity-80 transition-opacity">
+            <Link to="/join-us" className="text-gold-dark underline hover:opacity-80 transition-opacity underline-offset-4">
               Join Us
             </Link>{" "}
             page. We will arrange an informal interview at the Guildford Masonic Centre, Weybourne House,
             Hitherbury Close, Guildford, GU2 4DR, so you can meet a few members, see where we meet, and
             ask any questions. If that goes well, you complete a straightforward application form and we
             confirm your initiation date — you can see the full{" "}
-            <Link to="/your-journey" className="text-gold underline hover:opacity-80 transition-opacity">
+            <Link to="/your-journey" className="text-gold-dark underline hover:opacity-80 transition-opacity underline-offset-4">
               Journey Timeline
             </Link>{" "}
             for what happens at each step. There is no pressure at any stage.
@@ -135,7 +135,7 @@ const faqCategories: FAQCategory[] = [
             care, guided by the ritual of the First Degree, and focuses on the principles of integrity,
             charity, and self-reflection. You leave as an Entered Apprentice — a Freemason. Read a full,
             candid walkthrough on our{" "}
-            <Link to="/freemason-initiation-night" className="text-gold underline hover:opacity-80 transition-opacity">
+            <Link to="/freemason-initiation-night" className="text-gold-dark underline hover:opacity-80 transition-opacity underline-offset-4">
               Your Initiation Night
             </Link>{" "}
             page.
@@ -288,7 +288,7 @@ const FAQ = () => {
                         value={`${cat.id}-${i}`}
                         className="border border-border rounded-sm px-6 bg-card"
                       >
-                        <AccordionTrigger className="text-left font-serif text-foreground hover:text-gold transition-colors min-h-[48px]">
+                        <AccordionTrigger className="text-left font-serif text-foreground hover:text-gold-dark transition-colors min-h-[48px]">
                           {faq.question}
                         </AccordionTrigger>
                         <AccordionContent className="text-muted-foreground font-sans leading-relaxed">
@@ -310,7 +310,7 @@ const FAQ = () => {
               <h2 id="faq-cta-heading" className="font-serif text-3xl md:text-4xl text-gold mb-4">
                 Still have questions?
               </h2>
-              <p className="font-sans leading-relaxed text-lg mb-10 text-gold/80">
+              <p className="font-sans leading-relaxed text-lg mb-10 text-primary-foreground/80">
                 Our Membership Secretary is happy to answer anything not covered above — or if you
                 are ready, take the next step toward joining our Masonic Lodge in Guildford.
               </p>

@@ -27,11 +27,11 @@
     --accent: 42 55% 55%;
     --accent-foreground: 220 40% 12%;
 
-    --destructive: 0 84.2% 60.2%;
+    --destructive: 0 72% 42%;
     --destructive-foreground: 210 40% 98%;
 
     --border: 220 15% 88%;
-    --input: 220 15% 88%;
+    --input: 220 15% 55%;
     --ring: 42 45% 65%;
 
     --radius: 0.5rem;
@@ -148,7 +148,9 @@
 
   /* WCAG 2.4.7 / 2.4.11 — visible focus indicator */
   :focus-visible {
-    @apply outline-2 outline-offset-2 outline-ring;
+    outline: 3px solid hsl(var(--navy-dark));
+    outline-offset: 2px;
+    box-shadow: 0 0 0 7px hsl(var(--warm-white));
   }
 
   /* Skip-to-content link */

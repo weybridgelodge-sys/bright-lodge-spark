@@ -230,7 +230,7 @@ const SanityPostPage = () => {
               )}
               <Link
                 to={`/news/category/${slugifyCategory(data.category)}`}
-                className="inline-flex items-center gap-1 text-primary font-medium hover:underline"
+                className="inline-flex items-center gap-1 text-primary font-medium  hover:underline"
               >
                 <Tag className="h-3 w-3" />
                 {data.category}
@@ -262,7 +262,7 @@ const SanityPostPage = () => {
                 <ol className="list-decimal list-inside space-y-1.5">
                   {toc.map((item) => (
                     <li key={item.id}>
-                      <a href={`#${item.id}`} className="text-sm font-sans text-primary hover:underline">
+                      <a href={`#${item.id}`} className="text-sm font-sans text-primary  hover:underline">
                         {item.label}
                       </a>
                     </li>
@@ -299,7 +299,7 @@ const SanityPostPage = () => {
               </p>
               <Link
                 to="/faq"
-                className="inline-flex items-center gap-2 text-primary font-sans font-medium hover:underline"
+                className="inline-flex items-center gap-2 text-primary font-sans font-medium  hover:underline"
               >
                 Read the FAQ <ArrowRight className="h-4 w-4" />
               </Link>

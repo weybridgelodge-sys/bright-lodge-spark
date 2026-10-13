@@ -163,7 +163,7 @@ const SouthSurreyFreemasons = () => {
                 over £31,000 for Farnborough SANDS —{" "}
                 <Link
                   to="/news/sands-charity"
-                  className="text-gold hover:underline inline-block py-2"
+                  className="text-gold-dark inline-block py-2 underline underline-offset-4"
                 >
                   read the full story
                 </Link>
@@ -184,10 +184,10 @@ const SouthSurreyFreemasons = () => {
               >
                 Getting to the Guildford Masonic Centre
               </h2>
-              <p className="text-gold/70 font-sans">
+              <p className="text-primary-foreground/80 font-sans">
                 Weybourne House, Hitherbury Close, Guildford, GU2 4DR
               </p>
-              <p className="text-gold/70 font-sans mt-2 text-sm">
+              <p className="text-primary-foreground/80 font-sans mt-2 text-sm">
                 Arriving by bus? It's roughly a 10-minute walk from Guildford's Friary Bus Station.
               </p>
             </motion.div>
@@ -208,7 +208,7 @@ const SouthSurreyFreemasons = () => {
                       <Icon className="w-6 h-6 text-gold" aria-hidden="true" />
                     </div>
                     <h3 className="text-lg font-serif text-gold mb-3">{area.towns}</h3>
-                    <p className="text-sm text-gold/70 font-sans leading-relaxed">
+                    <p className="text-sm text-primary-foreground/80 font-sans leading-relaxed">
                       {area.routeNote}
                     </p>
                   </motion.li>
@@ -263,7 +263,7 @@ const SouthSurreyFreemasons = () => {
                     value={`item-${i}`}
                     className="border border-border rounded-sm px-6 bg-card"
                   >
-                    <AccordionTrigger className="text-left font-serif text-foreground hover:text-gold transition-colors min-h-[48px]">
+                    <AccordionTrigger className="text-left font-serif text-foreground hover:text-gold-dark transition-colors min-h-[48px]">
                       {faq.question}
                     </AccordionTrigger>
                     <AccordionContent className="text-muted-foreground font-sans leading-relaxed">
@@ -287,7 +287,7 @@ const SouthSurreyFreemasons = () => {
               >
                 Guildford is closer than you think
               </h2>
-              <p className="text-gold/70 font-sans mb-8">
+              <p className="text-primary-foreground/80 font-sans mb-8">
                 If the commute was your last hesitation, take the next step — begin your
                 application to Weybridge Lodge No. 6787, or see what a first visit actually
                 involves.

@@ -165,7 +165,7 @@ function DocumentCard({
               {doc.title}
             </h3>
             {doc.date && (
-              <p className="font-sans text-sm italic text-gold/80">{formatDate(doc.date)}</p>
+              <p className="font-sans text-sm italic text-primary-foreground/80">{formatDate(doc.date)}</p>
             )}
           </div>
         </div>
@@ -315,7 +315,7 @@ export default function HeritageArchive() {
             </h2>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 mb-4">
               <div className="border border-border border-l-4 border-l-gold bg-card p-5">
-                <p className="font-serif text-xs uppercase tracking-[0.15em] text-gold mb-1">
+                <p className="font-serif text-xs uppercase tracking-[0.15em] text-gold-dark mb-1">
                   Warrant of Constitution
                 </p>
                 <p className="font-serif text-xl text-navy">3rd November 1948</p>
@@ -325,7 +325,7 @@ export default function HeritageArchive() {
                 </p>
               </div>
               <div className="border border-border border-l-4 border-l-gold bg-card p-5">
-                <p className="font-serif text-xs uppercase tracking-[0.15em] text-gold mb-1">
+                <p className="font-serif text-xs uppercase tracking-[0.15em] text-gold-dark mb-1">
                   Consecration
                 </p>
                 <p className="font-serif text-xl text-navy">19th January 1949</p>
@@ -358,7 +358,7 @@ export default function HeritageArchive() {
                       i === 0 ? "border-l-2" : ""
                     } ${i % 2 === 0 ? "bg-card" : "bg-background"}`}
                   >
-                    <p className="mb-1 font-sans text-[0.6rem] tracking-wide text-gold">
+                    <p className="mb-1 font-sans text-[0.6rem] tracking-wide text-gold-dark">
                       {m.years}
                     </p>
                     <p className="font-serif text-[0.65rem] leading-tight text-navy">
@@ -395,7 +395,7 @@ export default function HeritageArchive() {
                     i > 0 ? "border-t-0" : ""
                   } ${i % 2 === 0 ? "bg-card" : "bg-background"}`}
                 >
-                  <p className="w-28 flex-shrink-0 font-sans text-xs tracking-wide text-gold pt-0.5">
+                  <p className="w-28 flex-shrink-0 font-sans text-xs tracking-wide text-gold-dark pt-0.5">
                     {p.years}
                   </p>
                   <div>

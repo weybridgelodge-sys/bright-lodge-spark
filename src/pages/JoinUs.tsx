@@ -211,7 +211,7 @@ const JoinUs = () => {
                       </p>
                       <a
                         href="tel:+447921589039"
-                        className="text-gold hover:text-gold/80 font-sans transition-colors text-sm min-h-[48px] inline-flex items-center"
+                        className="text-gold-dark hover:text-navy font-sans transition-colors text-sm min-h-[48px] inline-flex items-center"
                       >
                         07921 589 039
                       </a>
@@ -224,7 +224,7 @@ const JoinUs = () => {
                       <p className="font-sans font-medium text-foreground text-sm">Email us</p>
                       <a
                         href="mailto:secretary@weybridgelodge.org.uk?subject=Weybridge%20Lodge%20Website%20Enquiry"
-                        className="text-gold hover:text-gold/80 font-sans transition-colors text-sm break-all min-h-[48px] inline-flex items-center"
+                        className="text-gold-dark hover:text-navy font-sans transition-colors text-sm break-all min-h-[48px] inline-flex items-center"
                       >
                         secretary@weybridgelodge.org.uk
                       </a>
@@ -255,7 +255,7 @@ const JoinUs = () => {
               Commuting from Godalming, Farnham or Woking?{" "}
               <Link
                 to="/south-surrey-freemasons"
-                className="text-gold hover:underline font-medium min-h-[48px] inline-flex items-center"
+                className="text-gold-dark font-medium min-h-[48px] inline-flex items-center underline underline-offset-4"
               >
                 See how the journey works
               </Link>
@@ -266,7 +266,7 @@ const JoinUs = () => {
               <Link
                 to="/freemason-initiation-night"
                 aria-label="Learn what to expect on your initiation night"
-                className="inline-flex items-center justify-center border border-gold text-gold px-8 py-4 rounded-sm text-sm font-sans uppercase tracking-widest hover:bg-gold hover:text-navy transition-colors min-h-[48px]"
+                className="inline-flex items-center justify-center border border-gold-dark text-gold-dark px-8 py-4 rounded-sm text-sm font-sans uppercase tracking-widest hover:bg-gold hover:text-navy transition-colors min-h-[48px]"
               >
                 Your Initiation Night
                 <ArrowRight className="w-4 h-4 ml-2" aria-hidden="true" />
@@ -274,7 +274,7 @@ const JoinUs = () => {
               <Link
                 to="/your-journey"
                 aria-label="See the full member journey timeline"
-                className="inline-flex items-center justify-center border border-gold text-gold px-8 py-4 rounded-sm text-sm font-sans uppercase tracking-widest hover:bg-gold hover:text-navy transition-colors min-h-[48px]"
+                className="inline-flex items-center justify-center border border-gold-dark text-gold-dark px-8 py-4 rounded-sm text-sm font-sans uppercase tracking-widest hover:bg-gold hover:text-navy transition-colors min-h-[48px]"
               >
                 <Compass className="w-4 h-4 mr-2" aria-hidden="true" />
                 Journey Timeline
@@ -282,7 +282,7 @@ const JoinUs = () => {
               <Link
                 to="/faq"
                 aria-label="Read frequently asked questions about joining"
-                className="inline-flex items-center justify-center border border-border text-foreground px-8 py-4 rounded-sm text-sm font-sans uppercase tracking-widest hover:border-gold hover:text-gold transition-colors min-h-[48px]"
+                className="inline-flex items-center justify-center border border-border text-foreground px-8 py-4 rounded-sm text-sm font-sans uppercase tracking-widest hover:border-gold hover:text-gold-dark transition-colors min-h-[48px]"
               >
                 Frequently Asked Questions
               </Link>
@@ -336,14 +336,14 @@ const JoinUs = () => {
                 That's absolutely fine — curiosity matters far more than prior knowledge. Weybridge
                 Lodge openly welcomes enquiries; we're a Masonic Lodge in Surrey, not a closed,
                 invitation-only circle.{" "}
-                <Link to="/faq" className="text-gold hover:underline font-medium">
+                <Link to="/faq" className="text-gold-dark font-medium underline underline-offset-4">
                   See who can join on our FAQ page
                 </Link>
                 .
               </p>
               <Link
                 to="/quiz"
-                className="inline-flex items-center gap-2 text-sm font-sans font-semibold text-gold uppercase tracking-widest hover:underline min-h-[48px]"
+                className="inline-flex items-center gap-2 text-sm font-sans font-semibold text-gold-dark uppercase tracking-widest min-h-[48px] underline underline-offset-4"
               >
                 Not sure yet? Take the 2-Min Quiz
                 <ArrowRight className="w-4 h-4" aria-hidden="true" />
@@ -360,7 +360,7 @@ const JoinUs = () => {
               <h2 id="quiz-strip-heading" className="text-2xl md:text-3xl font-serif text-gold mb-4">
                 Not quite ready to get in touch?
               </h2>
-              <p className="text-gold/80 font-sans max-w-2xl mx-auto mb-8 leading-relaxed">
+              <p className="text-primary-foreground/80 font-sans max-w-2xl mx-auto mb-8 leading-relaxed">
                 Take our two-minute quiz to see whether joining a Masonic Lodge in Surrey feels right
                 for you — no commitment, no details required, just an honest picture of what
                 membership at Weybridge Lodge No. 6787 involves.
@@ -399,12 +399,12 @@ const JoinUs = () => {
                 >
                   <Icon className="w-6 h-6 text-gold mb-3" aria-hidden="true" />
                   <h3 className="font-serif text-foreground text-lg mb-1">{title}</h3>
-                  <p className="text-xl font-serif text-gold mb-3 whitespace-nowrap">{amount}</p>
+                  <p className="text-xl font-serif text-gold-dark mb-3 whitespace-nowrap">{amount}</p>
                   <p className="text-muted-foreground font-sans text-sm leading-relaxed flex-1">
                     {note}
                   </p>
                   {badge && (
-                    <p className="mt-4 inline-flex self-start text-xs font-sans uppercase tracking-widest text-gold border border-gold/40 px-2 py-1 rounded-sm text-center">
+                    <p className="mt-4 inline-flex self-start text-sm font-sans uppercase tracking-widest text-gold-dark border border-gold/40 px-2 py-1 rounded-sm text-center">
                       {badge}
                     </p>
                   )}
@@ -442,7 +442,7 @@ const JoinUs = () => {
               </p>
               <Link
                 to="/faq"
-                className="inline-flex items-center justify-center gap-2 border border-gold text-gold px-6 py-3 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:bg-gold hover:text-navy transition-colors min-h-[48px]"
+                className="inline-flex items-center justify-center gap-2 border border-gold-dark text-gold-dark px-6 py-3 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:bg-gold hover:text-navy transition-colors min-h-[48px]"
               >
                 See the Full FAQ
                 <ArrowRight className="w-4 h-4" aria-hidden="true" />
@@ -459,7 +459,7 @@ const JoinUs = () => {
               <h2 id="final-cta-heading" className="text-2xl md:text-3xl font-serif text-gold mb-4">
                 Ready to start the conversation?
               </h2>
-              <p className="text-gold/80 font-sans max-w-xl mx-auto mb-8 leading-relaxed">
+              <p className="text-primary-foreground/80 font-sans max-w-xl mx-auto mb-8 leading-relaxed">
                 We would be delighted to hear from you. No paperwork, no pressure — just a friendly
                 chat about joining our Freemasons Lodge in Guildford.
               </p>

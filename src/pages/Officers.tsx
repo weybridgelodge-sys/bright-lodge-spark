@@ -190,7 +190,7 @@ const Officers = () => {
           <tr key={`divider-${rowKey}`} className="border-t-2 border-gold/40">
             <td
               colSpan={3}
-              className="text-gold text-[10px] font-sans uppercase tracking-[0.2em] py-3"
+              className="text-gold-dark text-[10px] font-sans uppercase tracking-[0.2em] py-3"
             >
               Progressive Offices ★
             </td>
@@ -200,16 +200,16 @@ const Officers = () => {
           key={rowKey}
           className="border-b border-gold/10 hover:bg-gold/5 transition-colors"
         >
-          <td className="text-gold font-sans text-sm py-3 pr-6">
+          <td className="text-gold-dark font-sans text-sm py-3 pr-6">
             {o.office}{" "}
             {o.progressive && (
-              <span className="text-gold" aria-label="progressive office">
+              <span className="text-gold-dark" aria-label="progressive office">
                 ★
               </span>
             )}
           </td>
-          <td className="text-gold/80 font-sans text-sm py-3 pr-6">{o.name}</td>
-          <td className="text-gold/60 font-sans text-xs py-3">{o.honours}</td>
+          <td className="text-gold-dark font-sans text-sm py-3 pr-6">{o.name}</td>
+          <td className="text-gold-dark font-sans text-xs py-3">{o.honours}</td>
         </tr>
       </>
     );
@@ -313,19 +313,19 @@ const Officers = () => {
                       <tr className="border-b border-gold/30">
                         <th
                           scope="col"
-                          className="text-gold text-xs font-sans uppercase tracking-widest py-4 pr-6"
+                          className="text-gold-dark text-xs font-sans uppercase tracking-widest py-4 pr-6"
                         >
                           Lodge Office
                         </th>
                         <th
                           scope="col"
-                          className="text-gold text-xs font-sans uppercase tracking-widest py-4 pr-6"
+                          className="text-gold-dark text-xs font-sans uppercase tracking-widest py-4 pr-6"
                         >
                           Name
                         </th>
                         <th
                           scope="col"
-                          className="text-gold text-xs font-sans uppercase tracking-widest py-4"
+                          className="text-gold-dark text-xs font-sans uppercase tracking-widest py-4"
                         >
                           Honours
                         </th>
@@ -334,7 +334,7 @@ const Officers = () => {
                     <tbody>
                       {rpcRows === null ? (
                         <tr>
-                          <td colSpan={3} className="text-gold/60 font-sans text-sm py-6 text-center">
+                          <td colSpan={3} className="text-gold-dark font-sans text-sm py-6 text-center">
                             Loading officers…
                           </td>
                         </tr>
@@ -346,7 +346,7 @@ const Officers = () => {
                 </div>
               </div>
 
-              <p className="text-gold/70 font-sans leading-relaxed mt-12 max-w-2xl mx-auto text-center">
+              <p className="text-primary-foreground/80 font-sans leading-relaxed mt-12 max-w-2xl mx-auto text-center">
                 The officers listed here give their time freely in service to the Lodge and to
                 Freemasonry. If you would like to know more about what each role involves — including
                 the journey from Steward to Worshipful Master — visit our{" "}
@@ -397,7 +397,7 @@ const Officers = () => {
                 <Link
                   to="/worshipful-masters"
                   aria-label="View the Roll of Honour of every Worshipful Master of Weybridge Lodge"
-                  className="inline-flex items-center justify-center border border-border text-foreground px-8 py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:border-gold hover:text-gold transition-colors min-h-[48px] w-full sm:w-auto"
+                  className="inline-flex items-center justify-center border border-border text-foreground px-8 py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:border-gold hover:text-gold-dark transition-colors min-h-[48px] w-full sm:w-auto"
                 >
                   View Worshipful Masters
                 </Link>

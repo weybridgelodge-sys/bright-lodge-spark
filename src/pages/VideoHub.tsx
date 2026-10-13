@@ -163,7 +163,7 @@ const VideoHub = () => {
               >
                 Ready to find out more?
               </h2>
-              <p className="text-gold/70 font-sans mb-8">
+              <p className="text-primary-foreground/80 font-sans mb-8">
                 Take our two-minute quiz, or go straight to beginning your application to join our
                 Freemasons Lodge in Guildford, Surrey.
               </p>

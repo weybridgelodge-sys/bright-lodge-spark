@@ -72,7 +72,7 @@ const RoyalArchExplained = () => {
               transition={{ duration: 0.5 }}
               className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mb-8"
             >
-              <Link to="/news" className="inline-flex items-center gap-1 text-primary hover:underline font-sans">
+              <Link to="/news" className="inline-flex items-center gap-1 text-primary font-sans hover:underline">
                 <ArrowLeft className="h-4 w-4" /> Back to News
               </Link>
               <span className="hidden sm:inline">|</span>
@@ -104,7 +104,7 @@ const RoyalArchExplained = () => {
               <ol className="list-decimal list-inside space-y-1.5">
                 {tocItems.map((item) => (
                   <li key={item.id}>
-                    <a href={`#${item.id}`} className="text-sm font-sans text-primary hover:underline">
+                    <a href={`#${item.id}`} className="text-sm font-sans text-primary  hover:underline">
                       {item.label}
                     </a>
                   </li>
@@ -118,7 +118,7 @@ const RoyalArchExplained = () => {
                 <h2 className="text-2xl font-serif text-foreground mb-4">Introduction</h2>
                 <p className="text-muted-foreground font-sans leading-relaxed">
                   If you have read our article on the{" "}
-                  <Link to="/news/three-masonic-degrees-explained" className="text-primary hover:underline">
+                  <Link to="/news/three-masonic-degrees-explained" className="text-primary underline underline-offset-4">
                     three Masonic degrees
                   </Link>
                   , you will know that the journey from Entered Apprentice to Master Mason takes most new members around twelve to eighteen months. It is a meaningful, well-structured progression — and for many, it feels like an arrival.
@@ -146,7 +146,7 @@ const RoyalArchExplained = () => {
                     href="https://www.ugle.org.uk/about-freemasonry/the-royal-arch"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-primary hover:underline"
+                    className="text-primary underline underline-offset-4"
                   >
                     Supreme Grand Chapter of England
                   </a>
@@ -231,7 +231,7 @@ const RoyalArchExplained = () => {
                     href="https://www.surreymason.org.uk/"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-primary hover:underline"
+                    className="text-primary underline underline-offset-4"
                   >
                     Province of Surrey
                   </a>

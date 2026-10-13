@@ -188,7 +188,7 @@ const Quiz = () => {
                   transition={{ duration: shouldReduceMotion ? 0 : 0.4 }}
                 />
               </div>
-              <p className="text-xs uppercase tracking-widest text-muted-foreground font-sans mt-3">
+              <p className="text-sm uppercase tracking-widest text-muted-foreground font-sans mt-3">
                 {quizComplete
                   ? "Assessment Complete"
                   : `Question ${currentQuestionIndex + 1} of ${quizQuestions.length}`}
@@ -210,7 +210,7 @@ const Quiz = () => {
                     exit="exit"
                     transition={{ duration: shouldReduceMotion ? 0 : 0.3 }}
                   >
-                    <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-gold font-sans mb-4">
+                    <div className="flex items-center gap-2 text-sm uppercase tracking-widest text-gold-dark font-sans mb-4">
                       <HelpCircle className="h-4 w-4" aria-hidden="true" />
                       Suitability Assessment
                     </div>
@@ -231,7 +231,7 @@ const Quiz = () => {
                           aria-label={`Option ${String.fromCharCode(65 + index)}: ${option.text}`}
                           className="w-full text-left p-4 rounded-sm border border-border bg-background hover:border-gold hover:bg-card transition-all duration-200 text-foreground font-sans text-sm sm:text-base leading-relaxed flex items-start gap-3 group min-h-[48px]"
                         >
-                          <span className="flex-shrink-0 w-7 h-7 rounded-full bg-muted text-muted-foreground group-hover:bg-gold group-hover:text-accent-foreground flex items-center justify-center text-xs font-semibold transition-colors">
+                          <span className="flex-shrink-0 w-7 h-7 rounded-full bg-muted text-muted-foreground group-hover:bg-gold group-hover:text-accent-foreground flex items-center justify-center text-sm font-semibold transition-colors">
                             {String.fromCharCode(65 + index)}
                           </span>
                           <span>{option.text}</span>
@@ -271,13 +271,13 @@ const Quiz = () => {
                           </Link>
                           <Link
                             to="/freemason-initiation-night"
-                            className="inline-flex items-center justify-center border border-border text-foreground px-6 py-3 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:border-gold hover:text-gold transition-colors min-h-[48px]"
+                            className="inline-flex items-center justify-center border border-border text-foreground px-6 py-3 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:border-gold hover:text-gold-dark transition-colors min-h-[48px]"
                           >
                             Your Initiation Night
                           </Link>
                           <Link
                             to="/your-journey"
-                            className="inline-flex items-center justify-center border border-border text-foreground px-6 py-3 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:border-gold hover:text-gold transition-colors min-h-[48px]"
+                            className="inline-flex items-center justify-center border border-border text-foreground px-6 py-3 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:border-gold hover:text-gold-dark transition-colors min-h-[48px]"
                           >
                             See the journey timeline
                           </Link>
@@ -306,13 +306,13 @@ const Quiz = () => {
                           </Link>
                           <Link
                             to="/contact"
-                            className="inline-flex items-center justify-center border border-border text-foreground px-6 py-3 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:border-gold hover:text-gold transition-colors min-h-[48px]"
+                            className="inline-flex items-center justify-center border border-border text-foreground px-6 py-3 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:border-gold hover:text-gold-dark transition-colors min-h-[48px]"
                           >
                             Ask a Question
                           </Link>
                           <Link
                             to="/your-journey"
-                            className="inline-flex items-center justify-center border border-border text-foreground px-6 py-3 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:border-gold hover:text-gold transition-colors min-h-[48px]"
+                            className="inline-flex items-center justify-center border border-border text-foreground px-6 py-3 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:border-gold hover:text-gold-dark transition-colors min-h-[48px]"
                           >
                             See the journey timeline
                           </Link>
@@ -334,19 +334,19 @@ const Quiz = () => {
                         <div className="flex flex-wrap gap-4 mb-8">
                           <Link
                             to="/faq"
-                            className="inline-flex items-center justify-center border border-border text-foreground px-6 py-3 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:border-gold hover:text-gold transition-colors min-h-[48px]"
+                            className="inline-flex items-center justify-center border border-border text-foreground px-6 py-3 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:border-gold hover:text-gold-dark transition-colors min-h-[48px]"
                           >
                             Read Our FAQs
                           </Link>
                           <Link
                             to="/contact"
-                            className="inline-flex items-center justify-center border border-border text-foreground px-6 py-3 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:border-gold hover:text-gold transition-colors min-h-[48px]"
+                            className="inline-flex items-center justify-center border border-border text-foreground px-6 py-3 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:border-gold hover:text-gold-dark transition-colors min-h-[48px]"
                           >
                             Get in Touch
                           </Link>
                           <Link
                             to="/your-journey"
-                            className="inline-flex items-center justify-center border border-border text-foreground px-6 py-3 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:border-gold hover:text-gold transition-colors min-h-[48px]"
+                            className="inline-flex items-center justify-center border border-border text-foreground px-6 py-3 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:border-gold hover:text-gold-dark transition-colors min-h-[48px]"
                           >
                             See the journey timeline
                           </Link>
@@ -356,7 +356,7 @@ const Quiz = () => {
 
                     <button
                       onClick={resetQuiz}
-                      className="inline-flex items-center gap-2 text-sm font-sans text-muted-foreground hover:text-gold transition-colors min-h-[48px]"
+                      className="inline-flex items-center gap-2 text-sm font-sans text-muted-foreground hover:text-gold-dark transition-colors min-h-[48px]"
                     >
                       <RotateCcw className="h-4 w-4" aria-hidden="true" />
                       Restart Assessment

@@ -46,7 +46,7 @@ const Contact = () => {
                     <Phone className="w-5 h-5 text-gold mt-0.5 shrink-0" />
                     <div>
                       <p className="font-sans font-medium text-foreground text-sm">Telephone</p>
-                      <a href="tel:07921589039" className="text-gold-dark hover:text-gold font-sans transition-colors">
+                      <a href="tel:07921589039" className="text-gold-dark hover:text-navy font-sans transition-colors">
                         07921 589 039
                       </a>
                     </div>
@@ -56,7 +56,7 @@ const Contact = () => {
                     <Mail className="w-5 h-5 text-gold mt-0.5 shrink-0" />
                     <div>
                       <p className="font-sans font-medium text-foreground text-sm">Email</p>
-                      <a href="mailto:secretary@weybridgelodge.org.uk?subject=Weybridge%20Lodge%20Website%20Enquiry" className="text-gold-dark hover:text-gold font-sans transition-colors text-sm break-all">
+                      <a href="mailto:secretary@weybridgelodge.org.uk?subject=Weybridge%20Lodge%20Website%20Enquiry" className="text-gold-dark hover:text-navy font-sans transition-colors text-sm break-all">
                         secretary@weybridgelodge.org.uk
                       </a>
                     </div>
@@ -117,7 +117,7 @@ const Contact = () => {
               The Centre has free on-site parking, step-free access to the main entrance, a licensed bar and a dining room where the Festive Board is held after each meeting. Guildford railway station is roughly a ten-minute walk away, and the A3 is a few minutes by car.
             </p>
             <p className="text-muted-foreground font-sans leading-relaxed">
-              Visitors are always welcome. If you are coming for the first time, <Link to="/freemason-initiation-night" className="text-gold hover:underline">Your Initiation Night</Link> explains what to expect on the evening, and our <Link to="/events" className="text-gold hover:underline">events page</Link> lists upcoming meetings at the Centre.
+              Visitors are always welcome. If you are coming for the first time, <Link to="/freemason-initiation-night" className="text-gold-dark underline underline-offset-4">Your Initiation Night</Link> explains what to expect on the evening, and our <Link to="/events" className="text-gold-dark underline underline-offset-4">events page</Link> lists upcoming meetings at the Centre.
             </p>
           </div>
         </section>

@@ -86,7 +86,7 @@ const NotFound = () => {
         >
           <div className="container mx-auto px-6">
             <motion.div {...motionProps()} className="text-center mb-16">
-              <p className="text-sm font-sans font-semibold uppercase tracking-widest text-gold mb-4">
+              <p className="text-sm font-sans font-semibold uppercase tracking-widest text-gold-dark mb-4">
                 404
               </p>
               <div

@@ -64,7 +64,7 @@ const DataProtection = () => {
           <div className="text-center mt-12">
             <Link
               to="/contact"
-              className="inline-flex items-center justify-center border border-border text-foreground px-8 py-4 rounded-sm text-sm font-sans uppercase tracking-widest hover:border-gold hover:text-gold transition-colors"
+              className="inline-flex items-center justify-center border border-border text-foreground px-8 py-4 rounded-sm text-sm font-sans uppercase tracking-widest hover:border-gold hover:text-gold-dark transition-colors"
             >
               Contact Us
             </Link>

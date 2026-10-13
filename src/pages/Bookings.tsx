@@ -481,7 +481,7 @@ useEffect(() => {
                     {/* text-gold replaces unapproved text-primary-foreground */}
                     <p className="font-sans font-medium text-gold text-sm">{detail.label}</p>
                     {/* text-gold/70 replaces unapproved text-primary-foreground/70 */}
-                    <p className="text-gold/70 font-sans text-sm">{detail.value}</p>
+                    <p className="text-primary-foreground/80 font-sans text-sm">{detail.value}</p>
                   </div>
                 </motion.li>
               ))}
@@ -525,7 +525,7 @@ useEffect(() => {
                     custom={i * 0.08}
                     className="text-center"
                   >
-                    <p className="text-gold text-xs font-sans uppercase tracking-widest mb-1">
+                    <p className="text-gold-dark text-xs font-sans uppercase tracking-widest mb-1">
                       {item.course_label}
                     </p>
                     <h3 className="text-lg font-serif text-foreground mb-1">{item.dish}</h3>
@@ -544,7 +544,7 @@ useEffect(() => {
                   custom={0.2}
                   className="text-center mt-10"
                 >
-                  <p className="text-gold font-serif text-lg">
+                  <p className="text-gold-dark font-serif text-lg">
                     {selectedOption.label} — {fmtGbp(seatPricePence)} per head
                   </p>
                 </motion.div>
@@ -576,7 +576,7 @@ useEffect(() => {
                 Booking Form
               </h2>
               {/* text-gold/70 replaces unapproved text-primary-foreground/70 */}
-              <p className="text-gold/70 font-sans text-sm leading-relaxed mb-2">
+              <p className="text-primary-foreground/80 font-sans text-sm leading-relaxed mb-2">
                 Please complete the form below for yourself and any guests. Pay securely by Debit
                 or Credit Card, or by bank transfer.
               </p>
@@ -586,12 +586,12 @@ useEffect(() => {
                 </p>
               )}
               {/* text-gold/60 replaces unapproved text-primary-foreground/60 */}
-              <p className="text-gold/60 font-sans text-xs mt-2">
+              <p className="text-primary-foreground/80 font-sans text-xs mt-2">
                 Queries? Email{" "}
                 <a
                   href="mailto:assistantsecretary@weybridgelodge.org.uk"
                   // hover:text-gold/80 replaces unapproved hover:text-gold-light
-                  className="text-gold hover:text-gold/80 transition-colors"
+                  className="text-gold hover:text-gold/80 transition-colors underline underline-offset-4"
                 >
                   assistantsecretary@weybridgelodge.org.uk
                 </a>
@@ -999,7 +999,7 @@ useEffect(() => {
                       <button
                         type="button"
                         onClick={() => setStep(1)}
-                        className="border border-border text-foreground px-6 py-3 rounded-sm text-sm font-sans uppercase tracking-widest hover:border-gold hover:text-gold transition-colors min-h-[48px]"
+                        className="border border-border text-foreground px-6 py-3 rounded-sm text-sm font-sans uppercase tracking-widest hover:border-gold hover:text-gold-dark transition-colors min-h-[48px]"
                       >
                         Back
                       </button>
@@ -1122,7 +1122,7 @@ useEffect(() => {
                             <div className="flex justify-between text-base font-sans font-semibold border-t border-border pt-2 mt-2">
                               <span className="text-foreground">Total</span>
                               {/* text-gold replaces unapproved text-gold-dark */}
-                              <span className="text-gold">{fmtGbp(totalPence)}</span>
+                              <span className="text-gold-dark">{fmtGbp(totalPence)}</span>
                             </div>
                           </div>
                         </div>
@@ -1132,7 +1132,7 @@ useEffect(() => {
                       <button
                         type="button"
                         onClick={() => setStep(2)}
-                        className="border border-border text-foreground px-6 py-3 rounded-sm text-sm font-sans uppercase tracking-widest hover:border-gold hover:text-gold transition-colors min-h-[48px]"
+                        className="border border-border text-foreground px-6 py-3 rounded-sm text-sm font-sans uppercase tracking-widest hover:border-gold hover:text-gold-dark transition-colors min-h-[48px]"
                       >
                         Back
                       </button>
@@ -1164,7 +1164,7 @@ useEffect(() => {
             <Link
               to="/events"
               aria-label="View all upcoming events at Weybridge Lodge No. 6787"
-              className="inline-flex items-center justify-center border border-border text-foreground px-8 py-4 rounded-sm text-sm font-sans uppercase tracking-widest hover:border-gold hover:text-gold transition-colors min-h-[48px]"
+              className="inline-flex items-center justify-center border border-border text-foreground px-8 py-4 rounded-sm text-sm font-sans uppercase tracking-widest hover:border-gold hover:text-gold-dark transition-colors min-h-[48px]"
             >
               View All Events
             </Link>

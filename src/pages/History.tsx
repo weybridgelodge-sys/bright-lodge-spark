@@ -164,12 +164,12 @@ const History = () => {
                 In the Beginning
               </h2>
               {/* text-gold/70 replaces unapproved text-primary-foreground/70 */}
-              <p className="text-gold/70 font-sans leading-relaxed mb-4">
+              <p className="text-primary-foreground/80 font-sans leading-relaxed mb-4">
                 Wednesday had been early-closing day in Weybridge since time immemorial. It was
                 this simple fact — a Wednesday afternoon free from the counter and the workshop —
                 that seeded the idea of a new Lodge.
               </p>
-              <p className="text-gold/70 font-sans leading-relaxed mb-4">
+              <p className="text-primary-foreground/80 font-sans leading-relaxed mb-4">
                 The concept was straightforward and, when proposed, "met with general acclaim": a
                 Lodge meeting late on a Wednesday afternoon, accessible to businessmen, tradesmen,
                 artisans and commuters alike. A Lodge that would serve not just Freemasons with
@@ -177,7 +177,7 @@ const History = () => {
                 risked losing its sense of place.
               </p>
               {/* Date clarified: petition 1948, Warrant issued 19th January 1949 */}
-              <p className="text-gold/70 font-sans leading-relaxed mb-4">
+              <p className="text-primary-foreground/80 font-sans leading-relaxed mb-4">
                 The petition for Weybridge Lodge No. 6787 was submitted in 1948 under the
                 sponsorship of our Mother Lodge, Noel Money No. 2521, from whom the Lodge also drew
                 a number of its early members. The Warrant of Constitution was issued by the United
@@ -185,7 +185,7 @@ const History = () => {
                 January 1949 — the date from which Weybridge Lodge counts its years. Both dates are
                 recorded in Lane's Masonic Records, held by the Museum of Freemasonry.
               </p>
-              <p className="text-gold/70 font-sans leading-relaxed">
+              <p className="text-primary-foreground/80 font-sans leading-relaxed">
                 The Lodge's aviation connection was honoured from the very beginning: W. Bro. Coley
                 of Coley & Atkinson — scrap metal contractors to the aircraft industry — presented
                 the Lodge with a handsome boxed set of Working Tools. As one account puts it, with
@@ -336,14 +336,14 @@ const History = () => {
               >
                 A Lodge on the Move
               </h2>
-              <p className="text-gold/70 font-sans leading-relaxed mb-4">
+              <p className="text-primary-foreground/80 font-sans leading-relaxed mb-4">
                 Finding a permanent Masonic home proved, in the early years, something of an
                 adventure. The Lodge held its first meetings at the Oatlands Park Hotel and St
                 George's Hill Tennis Club, acquiring its own Masonic furniture, collars, tracing
                 boards and — in a detail that says much about the Lodge's spirit — a set of
                 distinctive perspex nameplates for the Festive Board.
               </p>
-              <p className="text-gold/70 font-sans leading-relaxed mb-4">
+              <p className="text-primary-foreground/80 font-sans leading-relaxed mb-4">
                 After a few years, the Lodge settled at Chertsey Masonic Centre, where it remained
                 for some ten years. Chertsey had its qualities, but also its challenges: parking on
                 the road outside grew contentious as car ownership increased; the kitchen facilities
@@ -353,7 +353,7 @@ const History = () => {
                 meetings conducted in overcoats were considered tolerable — "just" — but "an
                 unheated floor in the third degree can almost result in hypothermia."
               </p>
-              <p className="text-gold/70 font-sans leading-relaxed mb-6">
+              <p className="text-primary-foreground/80 font-sans leading-relaxed mb-6">
                 The catering, however, had its consolations. Several tradesmen members supplemented
                 the table from their own stocks, and at one particularly memorable Installation,
                 there was reportedly so much fruit on the table that "a toga rather than a dark suit
@@ -371,12 +371,12 @@ const History = () => {
                 {/* text-gold/50 replaces unapproved text-primary-foreground/50 */}
                 <figcaption
                   id="masonic-centre-caption"
-                  className="text-xs text-gold/50 text-center mt-2 italic"
+                  className="text-xs text-primary-foreground/80 text-center mt-2 italic"
                 >
                   The Guildford Masonic Centre, Guildford — the Lodge's home since 1986.
                 </figcaption>
               </figure>
-              <p className="text-gold/70 font-sans leading-relaxed">
+              <p className="text-primary-foreground/80 font-sans leading-relaxed">
                 The Lodge moved next to Surbiton Masonic Centre — warmer, better equipped, with an
                 in-house bar and catering — before making its final move to its present home at the
                 Guildford Masonic Centre, Weybourne House, Hitherbury Close, Guildford,{" "}
@@ -474,33 +474,33 @@ const History = () => {
               >
                 Weybridge Lodge Today
               </h2>
-              <p className="text-gold/70 font-sans leading-relaxed mb-4">
+              <p className="text-primary-foreground/80 font-sans leading-relaxed mb-4">
                 From its roots in the aircraft factories of wartime Brooklands, through the market
                 traders and professionals of post-war Weybridge, and across five different meeting
                 venues, Weybridge Lodge has evolved into the Lodge it is today — meeting in
                 Guildford and drawing its members from across Surrey and beyond.
               </p>
-              <p className="text-gold/70 font-sans leading-relaxed mb-4">
+              <p className="text-primary-foreground/80 font-sans leading-relaxed mb-4">
                 The Lodge today reflects the breadth of Surrey's professional and business
                 community: entrepreneurs, lawyers, IT professionals, builders, and those from a
                 wide range of commercial interests. What has never changed is the spirit that first
                 called it into being — a commitment to Freemasonry, to fellowship, and to giving
                 something back to the community we serve.
               </p>
-              <p className="text-gold/70 font-sans leading-relaxed mb-4">
+              <p className="text-primary-foreground/80 font-sans leading-relaxed mb-4">
                 In recent years the Lodge has taken an active role in the{" "}
-                <Link to="/our-charities" className="text-gold hover:underline">
+                <Link to="/our-charities" className="text-gold underline underline-offset-4">
                   Province of Surrey's 2030 Festival
                 </Link>
                 , raising funds for good causes across the county. That commitment to charity — the
                 same impulse that sent £50 to a local hospice in 1988 — remains at the heart of
                 everything we do.
               </p>
-              <p className="text-gold/70 font-sans leading-relaxed">
+              <p className="text-primary-foreground/80 font-sans leading-relaxed">
                 The Lodge meets regularly at the Guildford Masonic Centre, Weybourne House,
                 Hitherbury Close, Guildford,{" "}
                 <span className="font-semibold text-gold">GU2 4DR</span>.{" "}
-                <Link to="/join-us" className="text-gold hover:underline">
+                <Link to="/join-us" className="text-gold underline underline-offset-4">
                   New members are always welcome.
                 </Link>
               </p>
@@ -546,14 +546,14 @@ const History = () => {
                 <Link
                   to="/lodge-profile"
                   aria-label="Read the full Lodge Profile for Weybridge Lodge No. 6787"
-                  className="inline-flex items-center justify-center border border-border text-foreground px-8 py-4 rounded-sm text-sm font-sans uppercase tracking-widest hover:border-gold hover:text-gold transition-colors min-h-[48px]"
+                  className="inline-flex items-center justify-center border border-border text-foreground px-8 py-4 rounded-sm text-sm font-sans uppercase tracking-widest hover:border-gold hover:text-gold-dark transition-colors min-h-[48px]"
                 >
                   Lodge Profile
                 </Link>
                 <Link
                   to="/worshipful-masters"
                   aria-label="View the list of Worshipful Masters of Weybridge Lodge No. 6787"
-                  className="inline-flex items-center justify-center border border-border text-foreground px-8 py-4 rounded-sm text-sm font-sans uppercase tracking-widest hover:border-gold hover:text-gold transition-colors min-h-[48px]"
+                  className="inline-flex items-center justify-center border border-border text-foreground px-8 py-4 rounded-sm text-sm font-sans uppercase tracking-widest hover:border-gold hover:text-gold-dark transition-colors min-h-[48px]"
                 >
                   Worshipful Masters
                 </Link>
@@ -572,7 +572,7 @@ const History = () => {
             touch target and aria-label this link was missing. */}
         <section className="container mx-auto px-4 sm:px-6 pb-12">
           <div className="border-t border-gold/40 pt-8 mt-10 text-center">
-            <p className="font-serif text-gold text-xs uppercase tracking-[0.25em] mb-3">
+            <p className="font-serif text-gold-dark text-xs uppercase tracking-[0.25em] mb-3">
               Primary Sources
             </p>
             <Link

@@ -286,7 +286,7 @@ const YourJourney = () => {
         <section aria-labelledby="progression-heading" className="bg-warm-white py-16 px-4 sm:px-6 lg:px-8 border-t border-border">
           <div className="max-w-3xl mx-auto">
             <motion.div {...motionProps()} className="text-center mb-12">
-              <span className="text-gold font-semibold tracking-wide uppercase text-sm">
+              <span className="text-gold-dark font-semibold tracking-wide uppercase text-sm">
                 Chronology
               </span>
               <h2 id="progression-heading" className="mt-2 text-3xl font-extrabold text-foreground tracking-tight sm:text-4xl font-serif">
@@ -317,7 +317,7 @@ const YourJourney = () => {
                           {i + 1}. {step.title}
                         </h3>
                         {step.duration && (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-navy text-gold whitespace-nowrap self-start sm:self-center">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-navy text-gold whitespace-normal max-w-full self-start sm:self-center">
                             {step.duration}
                           </span>
                         )}
@@ -362,7 +362,7 @@ const YourJourney = () => {
                       </div>
                     </div>
                     <div className="flex-1">
-                      <p className="text-gold font-sans text-xs uppercase tracking-widest mb-1">
+                      <p className="text-gold-dark font-sans text-sm uppercase tracking-widest mb-1">
                         {d.stage} · {d.when}
                       </p>
                       <h3 className="text-2xl font-serif text-foreground mb-1">{d.title}</h3>
@@ -376,7 +376,7 @@ const YourJourney = () => {
               })}
             </ul>
             <p className="text-center">
-              <Link to="/news/three-masonic-degrees-explained" className="text-gold hover:underline inline-flex items-center min-h-[48px]">
+              <Link to="/news/three-masonic-degrees-explained" className="text-gold-dark inline-flex items-center min-h-[48px] underline underline-offset-4">
                 The three Masonic degrees explained
                 <ArrowRight className="w-4 h-4 ml-2" aria-hidden="true" />
               </Link>
@@ -396,7 +396,7 @@ const YourJourney = () => {
                   <KeyRound className="w-6 h-6" aria-hidden="true" />
                 </div>
                 <div>
-                  <p className="text-gold font-sans text-xs uppercase tracking-widest mb-2">
+                  <p className="text-gold font-sans text-sm uppercase tracking-widest mb-2">
                     Beyond the Third Degree
                   </p>
                   <h2 className="text-2xl md:text-3xl font-serif text-primary-foreground mb-4">
@@ -412,7 +412,7 @@ const YourJourney = () => {
                     Many members of our Freemasons Lodge in Guildford go on to enjoy it when the
                     time feels right — there is no rush and no expectation.
                   </p>
-                  <Link to="/news/royal-arch-explained" className="text-gold hover:underline inline-flex items-center min-h-[48px]">
+                  <Link to="/news/royal-arch-explained" className="text-gold inline-flex items-center min-h-[48px] underline underline-offset-4">
                     The Royal Arch explained
                     <ArrowRight className="w-4 h-4 ml-2" aria-hidden="true" />
                   </Link>
@@ -452,7 +452,7 @@ const YourJourney = () => {
               </div>
               <p className="text-center text-primary-foreground/70 font-sans mt-8">
                 Want to know what the first night is like?{" "}
-                <Link to="/freemason-initiation-night" className="inline-flex items-center min-h-[48px] text-gold hover:underline">
+                <Link to="/freemason-initiation-night" className="inline-flex items-center min-h-[48px] text-gold underline underline-offset-4">
                   Read the initiation night guide
                 </Link>
               </p>

@@ -186,7 +186,7 @@ const VideoDetailPage = () => {
               <h2 id="video-cta-heading" className="font-serif text-gold text-2xl md:text-3xl mb-3">
                 Curious to see more?
               </h2>
-              <p className="text-gold/70 font-sans mb-8">
+              <p className="text-primary-foreground/80 font-sans mb-8">
                 Explore more videos in our library, or take the next step toward joining our
                 Freemasons Lodge in Guildford, Surrey.
               </p>

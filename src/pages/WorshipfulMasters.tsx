@@ -190,19 +190,19 @@ const WorshipfulMasters = () => {
                       <tr className="border-b border-gold/30">
                         <th
                           scope="col"
-                          className="text-gold text-xs font-sans uppercase tracking-widest py-4 pr-6"
+                          className="text-gold-dark text-xs font-sans uppercase tracking-widest py-4 pr-6"
                         >
                           Year
                         </th>
                         <th
                           scope="col"
-                          className="text-gold text-xs font-sans uppercase tracking-widest py-4 pr-6"
+                          className="text-gold-dark text-xs font-sans uppercase tracking-widest py-4 pr-6"
                         >
                           Name
                         </th>
                         <th
                           scope="col"
-                          className="text-gold text-xs font-sans uppercase tracking-widest py-4"
+                          className="text-gold-dark text-xs font-sans uppercase tracking-widest py-4"
                         >
                           Honours
                         </th>
@@ -211,7 +211,7 @@ const WorshipfulMasters = () => {
                     <tbody>
                       {isLoading && masters.length === 0 ? (
                         <tr>
-                          <td colSpan={3} className="text-gold/60 font-sans text-sm py-6 text-center">
+                          <td colSpan={3} className="text-gold-dark font-sans text-sm py-6 text-center">
                             Loading Roll of Honour…
                           </td>
                         </tr>
@@ -225,15 +225,15 @@ const WorshipfulMasters = () => {
                           className="border-b border-gold/10 hover:bg-gold/5 transition-colors"
                         >
                           {/* text-gold/80 replaces unapproved text-primary-foreground/80 */}
-                          <td className="text-gold/80 font-sans text-sm py-3 pr-6">
+                          <td className="text-gold-dark font-sans text-sm py-3 pr-6">
                             {m.year}
                           </td>
                           {/* text-gold replaces unapproved text-primary-foreground */}
-                          <td className="text-gold font-sans text-sm py-3 pr-6">
+                          <td className="text-gold-dark font-sans text-sm py-3 pr-6">
                             {m.name}
                           </td>
                           {/* text-gold/60 replaces unapproved text-primary-foreground/60 */}
-                          <td className="text-gold/60 font-sans text-xs py-3">
+                          <td className="text-gold-dark font-sans text-xs py-3">
                             {m.honours}
                           </td>
                         </tr>
@@ -244,14 +244,14 @@ const WorshipfulMasters = () => {
               </div>
 
               {/* text-gold/60 replaces unapproved text-primary-foreground/60 */}
-              <p className="text-gold/60 font-sans text-xs italic leading-relaxed mt-6 max-w-3xl mx-auto text-center">
+              <p className="text-primary-foreground/80 font-sans text-xs italic leading-relaxed mt-6 max-w-3xl mx-auto text-center">
                 Provincial and Grand honours are shown where held at time of service or subsequently
                 attained. If you believe an entry requires correction or addition, please contact
                 the Lodge Secretary.
               </p>
 
               {/* text-gold/70 replaces unapproved text-primary-foreground/85 */}
-              <p className="text-gold/70 font-sans leading-relaxed mt-12 max-w-2xl mx-auto text-center">
+              <p className="text-primary-foreground/80 font-sans leading-relaxed mt-12 max-w-2xl mx-auto text-center">
                 The role of Worshipful Master is one of the defining privileges of a Freemason's
                 life. If you are curious about what that journey looks like — from first steps as an
                 Entered Apprentice to the Chair of the Lodge — we would be delighted to{" "}
@@ -305,7 +305,7 @@ const WorshipfulMasters = () => {
                 <Link
                   to="/your-journey"
                   aria-label="Read about the Masonic journey from Entered Apprentice to Worshipful Master"
-                  className="inline-flex items-center justify-center border border-border text-foreground px-8 py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:border-gold hover:text-gold transition-colors min-h-[48px] w-full sm:w-auto"
+                  className="inline-flex items-center justify-center border border-border text-foreground px-8 py-4 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:border-gold hover:text-gold-dark transition-colors min-h-[48px] w-full sm:w-auto"
                 >
                   The Masonic Journey
                 </Link>

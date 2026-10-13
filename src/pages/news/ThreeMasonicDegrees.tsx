@@ -68,7 +68,7 @@ const ThreeMasonicDegrees = () => {
               transition={{ duration: 0.5 }}
               className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mb-8"
             >
-              <Link to="/news" className="inline-flex items-center gap-1 text-primary hover:underline font-sans">
+              <Link to="/news" className="inline-flex items-center gap-1 text-primary font-sans hover:underline">
                 <ArrowLeft className="h-4 w-4" /> Back to News
               </Link>
               <span className="hidden sm:inline">|</span>
@@ -100,7 +100,7 @@ const ThreeMasonicDegrees = () => {
               <ol className="list-decimal list-inside space-y-1.5">
                 {tocItems.map((item) => (
                   <li key={item.id}>
-                    <a href={`#${item.id}`} className="text-sm font-sans text-primary hover:underline">
+                    <a href={`#${item.id}`} className="text-sm font-sans text-primary  hover:underline">
                       {item.label}
                     </a>
                   </li>

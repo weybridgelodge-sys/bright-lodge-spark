@@ -42,7 +42,7 @@ const Testimonials = () => {
               <figcaption className="mt-6 pt-5 border-t border-border">
                 <p className="font-sans font-semibold text-foreground text-sm">{t.name}</p>
                 <p className="font-sans text-muted-foreground text-xs mt-0.5">{t.role}</p>
-                <p className="font-sans text-gold text-xs mt-0.5 uppercase tracking-wider">{t.joined}</p>
+                <p className="font-sans text-gold-dark text-xs mt-0.5 uppercase tracking-wider">{t.joined}</p>
               </figcaption>
             </motion.figure>
           ))}
