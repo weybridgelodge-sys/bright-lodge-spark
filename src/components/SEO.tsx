@@ -79,7 +79,9 @@ const SEO = ({
       <meta property="og:image" content={ogImage} />
       <meta property="og:image:width" content="1200" />
       <meta property="og:image:height" content="630" />
+      <meta property="og:image:alt" content="Weybridge Lodge No. 6787, Freemasons in Guildford, Surrey" />
       <meta property="og:site_name" content={SITE_NAME} />
+      <meta property="og:locale" content="en_GB" />
 
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content={fullTitle} />
@@ -102,6 +104,7 @@ export default SEO;
 export const organizationSchema = {
   "@context": "https://schema.org",
   "@type": "FraternalOrganization",
+  "@id": "https://weybridgelodge.org.uk/#organization",
   name: "Weybridge Lodge No. 6787",
   alternateName: "Weybridge Masonic Lodge",
   // url intentionally omitted — declared once in index.html JSON-LD @graph to avoid duplicate url properties in the merged Organization entity.
@@ -112,7 +115,7 @@ export const organizationSchema = {
   foundingDate: "1949-01-19",
   address: {
     "@type": "PostalAddress",
-    streetAddress: "Hitherbury Close",
+    streetAddress: "Guildford Masonic Centre, Hitherbury Close",
     addressLocality: "Guildford",
     addressRegion: "Surrey",
     postalCode: "GU2 4DR",
@@ -123,7 +126,7 @@ export const organizationSchema = {
     latitude: 51.2362,
     longitude: -0.5745,
   },
-  telephone: "+447921589039",
+  telephone: "+44-7921-589039",
   email: "secretary@weybridgelodge.org.uk",
   sameAs: [
     "https://instagram.com/weybridgelodge/",
@@ -147,6 +150,7 @@ export const organizationSchema = {
 export const localBusinessSchema = {
   "@context": "https://schema.org",
   "@type": ["FraternalOrganization", "LocalBusiness"],
+  "@id": "https://weybridgelodge.org.uk/#localbusiness",
   name: "Weybridge Lodge No. 6787",
   legalName: "Weybridge Lodge No. 6787, United Grand Lodge of England",
   alternateName: "Weybridge Masonic Lodge",
@@ -156,12 +160,11 @@ export const localBusinessSchema = {
   logo: "https://weybridgelodge.org.uk/weybridge-logo.svg",
   image: "https://weybridgelodge.org.uk/og-image.png",
   priceRange: "By appointment — free to enquire",
-  telephone: "+447921589039",
+  telephone: "+44-7921-589039",
   email: "secretary@weybridgelodge.org.uk",
   address: {
     "@type": "PostalAddress",
-    name: "Guildford Masonic Centre, Weybourne House",
-    streetAddress: "Hitherbury Close",
+    streetAddress: "Guildford Masonic Centre, Hitherbury Close",
     addressLocality: "Guildford",
     addressRegion: "Surrey",
     postalCode: "GU2 4DR",
@@ -172,6 +175,7 @@ export const localBusinessSchema = {
     latitude: 51.2362,
     longitude: -0.5745,
   },
+  location: { "@type": "Place", name: "Guildford Masonic Centre, Weybourne House" },
   hasMap: "https://www.google.com/maps?cid=16367882607439388236",
   areaServed: [
     { "@type": "City", "name": "Guildford" },

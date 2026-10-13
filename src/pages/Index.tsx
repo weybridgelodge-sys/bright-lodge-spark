@@ -7,9 +7,8 @@ import Footer from "@/components/Footer";
 import SEO, { organizationSchema, localBusinessSchema } from "@/components/SEO";
 import { motion, useReducedMotion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { Sparkles, ArrowRight } from "lucide-react";
+import { Sparkles, Route as RouteIcon, DoorOpen, ArrowRight } from "lucide-react";
 
-// Below-the-fold sections — defer to keep initial JS lean for mobile LCP.
 const LodgeTimeline = lazy(() => import("@/components/LodgeTimeline"));
 const Principles = lazy(() => import("@/components/Principles"));
 const Testimonials = lazy(() => import("@/components/Testimonials"));
@@ -18,26 +17,53 @@ const NextMeeting = lazy(() => import("@/components/NextMeeting"));
 const JoinCTA = lazy(() => import("@/components/JoinCTA"));
 const HomepageCharityCTA = lazy(() => import("@/components/charity/HomepageCharityCTA"));
 
-// WebPage JSON-LD node. Every other audited page carries one; Home was
-// previously relying on Organization + LocalBusiness alone.
+const PAGE_TITLE = "Freemasons in Guildford, Surrey | Weybridge Lodge No. 6787";
+const PAGE_DESC =
+  "Weybridge Lodge No. 6787: a friendly Masonic Lodge in Surrey meeting in Guildford GU2 4DR. Take the 2-minute quiz, see your journey and how to join.";
+
 const webPageSchema = {
   "@context": "https://schema.org",
   "@type": "WebPage",
   "@id": "https://weybridgelodge.org.uk/#webpage",
   url: "https://weybridgelodge.org.uk/",
-  name: "Freemasons in Guildford, Surrey | Weybridge Lodge No. 6787",
-  description:
-    "Join the Freemasons in Guildford, Surrey. Weybridge Lodge No. 6787 is a friendly, open lodge at Guildford Masonic Centre — find out how to join, our charity work, and our history.",
+  name: PAGE_TITLE,
+  description: PAGE_DESC,
   inLanguage: "en-GB",
-  isPartOf: {
-    "@id": "https://weybridgelodge.org.uk/#website",
-  },
+  isPartOf: { "@id": "https://weybridgelodge.org.uk/#website" },
+  about: { "@id": "https://weybridgelodge.org.uk/#organization" },
 };
+
+const steps = [
+  {
+    to: "/quiz",
+    icon: Sparkles,
+    kicker: "2 minutes",
+    title: "Is Freemasonry for me?",
+    body: "Answer a few quick questions for a personal, no-pressure answer.",
+    cta: "Take the quiz",
+  },
+  {
+    to: "/your-journey",
+    icon: RouteIcon,
+    kicker: "Step by step",
+    title: "See your journey",
+    body: "From first conversation to membership: what happens, and when.",
+    cta: "View the journey",
+  },
+  {
+    to: "/freemason-initiation-night",
+    icon: DoorOpen,
+    kicker: "First visit guide",
+    title: "What your first night is like",
+    body: "Where to park, what to wear and who you'll meet at Guildford Masonic Centre.",
+    cta: "Read the guide",
+  },
+];
 
 const Index = () => {
   const shouldReduceMotion = useReducedMotion();
 
-  const visionMotionProps = shouldReduceMotion
+  const fadeUp = shouldReduceMotion
     ? { initial: false, animate: { opacity: 1, y: 0 } }
     : {
         initial: { opacity: 0, y: 20 },
@@ -49,8 +75,8 @@ const Index = () => {
   return (
     <div className="min-h-screen overflow-x-hidden">
       <SEO
-        title="Freemasons in Guildford, Surrey | Weybridge Lodge No. 6787"
-        description="Join the Freemasons in Guildford, Surrey. Weybridge Lodge No. 6787 is a friendly, open lodge at Guildford Masonic Centre — find out how to join, our charity work, and our history."
+        title={PAGE_TITLE}
+        description={PAGE_DESC}
         canonical="/"
         schema={[organizationSchema, localBusinessSchema, webPageSchema]}
       />
@@ -59,60 +85,66 @@ const Index = () => {
       <main id="main-content">
         <Hero />
 
-        {/* ── VISION HOOK ──
-            Per Vision/Mission/Values doc: Home (alongside Lodge Profile) is
-            named as a page that should lead with the Vision statement as a
-            strong opening hook. Placed directly after Hero, before About. */}
-        <section
-          className="py-14 md:py-20 bg-background"
-          aria-labelledby="vision-heading"
-        >
+        {/* Vision hook */}
+        <section className="py-14 md:py-20 bg-background" aria-labelledby="vision-heading">
           <div className="container mx-auto px-6 max-w-3xl text-center">
-            <motion.div {...visionMotionProps}>
-              <p className="text-gold text-sm font-sans uppercase tracking-wide mb-3">
-                Our Vision
-              </p>
-              <h2
-                id="vision-heading"
-                className="text-xl md:text-2xl font-serif text-foreground leading-snug"
-              >
+            <motion.div {...fadeUp}>
+              <p className="text-gold text-sm font-sans uppercase tracking-wide mb-3">Our Vision</p>
+              <h2 id="vision-heading" className="text-2xl md:text-3xl font-serif text-foreground mb-5">
+                A welcoming Masonic Lodge in Surrey
+              </h2>
+              <p className="text-lg md:text-xl font-serif text-muted-foreground leading-snug">
                 To be Guildford's most welcoming home for men seeking friendship, purpose, and
                 personal growth — a Lodge where centuries-old tradition actively strengthens the
                 modern Surrey community.
-              </h2>
+              </p>
             </motion.div>
           </div>
         </section>
 
         <About />
+
         <Suspense fallback={<PageLoader />}>
           <HomepageCharityCTA />
 
-          {/* Quiz invitation banner — uses the project's gold-shimmer gradient
-              CTA treatment (confirmed correct site-wide, per live screenshot). */}
-          <section
-            className="py-12 sm:py-14 bg-card border-y border-border"
-            aria-labelledby="quiz-banner-heading"
-          >
-            <div className="container mx-auto px-4 sm:px-6 max-w-4xl flex flex-col md:flex-row items-center justify-between gap-5 md:gap-6 text-center md:text-left">
-              <div className="flex flex-col sm:flex-row items-center sm:items-start gap-3 sm:gap-4">
-                <Sparkles className="w-7 h-7 sm:w-8 sm:h-8 text-gold shrink-0 sm:mt-1" aria-hidden="true" />
-                <div>
-                  <h2 id="quiz-banner-heading" className="text-xl sm:text-2xl font-serif text-foreground">
-                    Is Freemasonry for me?
-                  </h2>
-                  <p className="text-muted-foreground font-sans text-sm mt-1">
-                    Take our short 5-question quiz for a personalised answer.
-                  </p>
-                </div>
+          {/* Soft-conversion row: Quiz, Journey, First Visit Guide */}
+          <section className="py-14 md:py-20 bg-card border-y border-border" aria-labelledby="next-steps-heading">
+            <div className="container mx-auto px-4 sm:px-6 max-w-5xl">
+              <div className="text-center mb-10">
+                <h2 id="next-steps-heading" className="text-3xl md:text-4xl font-serif text-foreground mb-3">
+                  Curious about Freemasons in Guildford?
+                </h2>
+                <p className="text-muted-foreground font-sans max-w-2xl mx-auto">
+                  No commitment, no pressure. Start wherever feels comfortable.
+                </p>
               </div>
-              <Link
-                to="/quiz"
-                aria-label="Start the 2-minute Freemasonry quiz"
-                className="inline-flex items-center justify-center gap-2 bg-gold-shimmer text-accent-foreground px-5 sm:px-6 py-3 rounded-sm text-xs sm:text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity shrink-0 w-full md:w-auto min-h-[48px]"
-              >
-                Start the Quiz <ArrowRight className="w-4 h-4" aria-hidden="true" />
-              </Link>
+
+              <ul className="grid gap-4 md:grid-cols-3 list-none p-0 m-0">
+                {steps.map(({ to, icon: Icon, kicker, title, body, cta }) => (
+                  <li key={to} className="flex">
+                    <Link
+                      to={to}
+                      className="group flex flex-col w-full min-h-[48px] p-6 bg-background border border-border rounded-sm hover:border-gold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
+                    >
+                      <Icon className="w-7 h-7 text-gold mb-4" aria-hidden="true" />
+                      <span className="text-gold text-xs font-sans uppercase tracking-widest mb-2">{kicker}</span>
+                      <h3 className="text-xl font-serif text-foreground mb-2">{title}</h3>
+                      <p className="text-sm font-sans text-muted-foreground leading-relaxed mb-5">{body}</p>
+                      <span className="mt-auto inline-flex items-center gap-2 text-sm font-sans font-semibold uppercase tracking-widest text-foreground group-hover:text-gold transition-colors">
+                        {cta}
+                        <ArrowRight className="w-4 h-4" aria-hidden="true" />
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+
+              <p className="text-center text-sm font-sans text-muted-foreground mt-8">
+                Live elsewhere in the county?{" "}
+                <Link to="/south-surrey-freemasons" className="text-foreground underline underline-offset-4 hover:text-gold inline-block py-2">
+                  Freemasons in South Surrey
+                </Link>
+              </p>
             </div>
           </section>
 
@@ -123,7 +155,6 @@ const Index = () => {
           <NextMeeting />
           <JoinCTA />
         </Suspense>
-
       </main>
       <Footer />
     </div>
