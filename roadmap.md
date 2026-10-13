@@ -54,3 +54,4 @@
 - [x] Almoner digest email weekly (Mondays); detection stays daily
 - [x] Welfare Board sort: worth-a-call badge, then RAG worst-first, then surname/first name
 - [x] KPI Summary PDF: keep sections 1–7 together; visually checked regenerated long-Outstanding and RA-boundary exports; 155 unit and 60 phone-width checks passed
+- [ ] KPI Summary PDF header: centred crest, dashboard title/year subtitle and spacing; regenerate, visually inspect and run full suite

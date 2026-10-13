@@ -1,6 +1,8 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { saveJsPdf } from "./nativeDownload";
+import { assetUrl } from "./assetUrl";
+import crestAsset from "@/assets/weybridge-logo-navy-transparent.png.asset.json";
 import {
   type KpiBundle,
   type EngagementBundle,
@@ -33,6 +35,30 @@ function header(doc: jsPDF, title: string) {
   doc.text(title, 14, 20);
   doc.setFontSize(9);
   doc.text(`Generated ${new Date().toLocaleDateString("en-GB")}`, 14, 25);
+}
+
+async function dashboardHeader(doc: jsPDF): Promise<number> {
+  const centre = doc.internal.pageSize.getWidth() / 2;
+  const response = await fetch(assetUrl(crestAsset), { signal: AbortSignal.timeout(15000) });
+  if (!response.ok) throw new Error("The Lodge crest could not be loaded. Please retry the export.");
+  const crest = new Uint8Array(await response.arrayBuffer());
+  doc.addImage(crest, "PNG", centre - 16, 10, 32, 32);
+
+  doc.setTextColor(27, 42, 74);
+  doc.setFont("times", "bold");
+  doc.setFontSize(22);
+  doc.text("Lodge KPI Dashboard", centre, 53, { align: "center" });
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(10);
+  const year = currentMasonicYear();
+  doc.text(`Live figures from member records · Masonic year ${year}/${year + 1}`, centre, 61, { align: "center" });
+  doc.setFontSize(9);
+  doc.text(`Generated ${new Date().toLocaleDateString("en-GB")}`, centre, 68, { align: "center" });
+  doc.setDrawColor(201, 164, 50);
+  doc.setLineWidth(0.3);
+  doc.line(14, 74, doc.internal.pageSize.getWidth() - 14, 74);
+  doc.setTextColor(0);
+  return 82;
 }
 
 export async function exportVoReport(bundle: KpiBundle) {
@@ -106,9 +132,10 @@ export async function exportFullKpi(bundle: KpiBundle, eng?: EngagementBundle | 
   const lh = lodgeHealth(bundle);
   const rr = referralRate(bundle.candidates);
 
-  header(doc, `Full KPI Summary — Masonic Year ${currentMasonicYear()}/${currentMasonicYear() + 1}`);
+  const firstSectionY = await dashboardHeader(doc);
 
   autoTable(doc, {
+    startY: firstSectionY,
     pageBreak: "avoid",
     head: [["Lodge Health", `OVERALL: ${lh.overall.toUpperCase()}`]],
     body: [
