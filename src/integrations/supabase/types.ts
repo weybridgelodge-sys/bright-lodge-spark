@@ -1342,11 +1342,13 @@ export type Database = {
       event_accounts: {
         Row: {
           adult_price_pence: number | null
+          archived_at: string | null
           booking_deadline: string | null
           capacity: number | null
           child_price_pence: number | null
           created_at: string
           created_by: string | null
+          dietary_choices: Json
           dress_code: string | null
           end_time: string | null
           event_date: string
@@ -1356,6 +1358,7 @@ export type Database = {
           id: string
           intro_copy: string | null
           is_public: boolean
+          menu_items: Json
           name: string
           promote_publicly: boolean
           public_title: string | null
@@ -1367,15 +1370,18 @@ export type Database = {
           tagline: string | null
           theme: string
           updated_at: string
+          useful_stuff: Json
           venue: string | null
         }
         Insert: {
           adult_price_pence?: number | null
+          archived_at?: string | null
           booking_deadline?: string | null
           capacity?: number | null
           child_price_pence?: number | null
           created_at?: string
           created_by?: string | null
+          dietary_choices?: Json
           dress_code?: string | null
           end_time?: string | null
           event_date: string
@@ -1385,6 +1391,7 @@ export type Database = {
           id?: string
           intro_copy?: string | null
           is_public?: boolean
+          menu_items?: Json
           name: string
           promote_publicly?: boolean
           public_title?: string | null
@@ -1396,15 +1403,18 @@ export type Database = {
           tagline?: string | null
           theme?: string
           updated_at?: string
+          useful_stuff?: Json
           venue?: string | null
         }
         Update: {
           adult_price_pence?: number | null
+          archived_at?: string | null
           booking_deadline?: string | null
           capacity?: number | null
           child_price_pence?: number | null
           created_at?: string
           created_by?: string | null
+          dietary_choices?: Json
           dress_code?: string | null
           end_time?: string | null
           event_date?: string
@@ -1414,6 +1424,7 @@ export type Database = {
           id?: string
           intro_copy?: string | null
           is_public?: boolean
+          menu_items?: Json
           name?: string
           promote_publicly?: boolean
           public_title?: string | null
@@ -1425,6 +1436,7 @@ export type Database = {
           tagline?: string | null
           theme?: string
           updated_at?: string
+          useful_stuff?: Json
           venue?: string | null
         }
         Relationships: []
@@ -1600,6 +1612,7 @@ export type Database = {
           allergies: string | null
           booking_id: string
           created_at: string
+          dietary_choice: string | null
           id: string
           is_child: boolean
           is_female: boolean
@@ -1615,6 +1628,7 @@ export type Database = {
           allergies?: string | null
           booking_id: string
           created_at?: string
+          dietary_choice?: string | null
           id?: string
           is_child?: boolean
           is_female?: boolean
@@ -1630,6 +1644,7 @@ export type Database = {
           allergies?: string | null
           booking_id?: string
           created_at?: string
+          dietary_choice?: string | null
           id?: string
           is_child?: boolean
           is_female?: boolean
@@ -5788,6 +5803,7 @@ export type Database = {
           booking_deadline: string | null
           capacity: number | null
           child_price_pence: number | null
+          dietary_choices: Json | null
           dress_code: string | null
           end_time: string | null
           event_date: string | null
@@ -5795,6 +5811,7 @@ export type Database = {
           hosting_lodges: string[] | null
           id: string | null
           intro_copy: string | null
+          menu_items: Json | null
           name: string | null
           public_title: string | null
           seats_taken: number | null
@@ -5802,6 +5819,7 @@ export type Database = {
           start_time: string | null
           tagline: string | null
           theme: string | null
+          useful_stuff: Json | null
           venue: string | null
         }
         Insert: {
@@ -5809,6 +5827,7 @@ export type Database = {
           booking_deadline?: string | null
           capacity?: number | null
           child_price_pence?: number | null
+          dietary_choices?: Json | null
           dress_code?: string | null
           end_time?: string | null
           event_date?: string | null
@@ -5816,6 +5835,7 @@ export type Database = {
           hosting_lodges?: string[] | null
           id?: string | null
           intro_copy?: string | null
+          menu_items?: Json | null
           name?: string | null
           public_title?: never
           seats_taken?: never
@@ -5823,6 +5843,7 @@ export type Database = {
           start_time?: string | null
           tagline?: string | null
           theme?: string | null
+          useful_stuff?: Json | null
           venue?: string | null
         }
         Update: {
@@ -5830,6 +5851,7 @@ export type Database = {
           booking_deadline?: string | null
           capacity?: number | null
           child_price_pence?: number | null
+          dietary_choices?: Json | null
           dress_code?: string | null
           end_time?: string | null
           event_date?: string | null
@@ -5837,6 +5859,7 @@ export type Database = {
           hosting_lodges?: string[] | null
           id?: string | null
           intro_copy?: string | null
+          menu_items?: Json | null
           name?: string | null
           public_title?: never
           seats_taken?: never
@@ -5844,6 +5867,7 @@ export type Database = {
           start_time?: string | null
           tagline?: string | null
           theme?: string | null
+          useful_stuff?: Json | null
           venue?: string | null
         }
         Relationships: []
@@ -5969,6 +5993,7 @@ export type Database = {
       }
       can_edit_newsletter: { Args: { _user: string }; Returns: boolean }
       can_manage_meeting_minutes: { Args: { _user: string }; Returns: boolean }
+      can_manage_public_events: { Args: { _uid: string }; Returns: boolean }
       can_manage_secretary_returns: {
         Args: { _user: string }
         Returns: boolean
