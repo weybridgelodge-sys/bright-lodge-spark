@@ -1,0 +1,2 @@
+ALTER TABLE public.event_bookings ADD COLUMN IF NOT EXISTS subtotal_pence integer, ADD COLUMN IF NOT EXISTS fee_pence integer NOT NULL DEFAULT 0;
+COMMENT ON COLUMN public.event_bookings.fee_pence IS 'Optional card-fee contribution paid by the booker (card only), kept separate from ticket income; mirrors bookings.fee_pence.';

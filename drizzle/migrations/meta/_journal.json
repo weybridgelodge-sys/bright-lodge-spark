@@ -624,6 +624,13 @@
       "when": 1792010158540,
       "tag": "0088_event_card_hold_expiry",
       "breakpoints": true
+    },
+    {
+      "idx": 89,
+      "version": "7",
+      "when": 1792011363780,
+      "tag": "0089_event_bookings_card_fee",
+      "breakpoints": true
     }
   ]
 }
