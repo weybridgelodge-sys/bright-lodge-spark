@@ -1,15 +1,10 @@
+- Subdirectories may have their own AGENTS.md (e.g. src/components/members/treasurer/); read it before changing files there.
 - Posting periods: any unlocked row is postable; use usePostingPeriod/PeriodPicker and default by entry date, never one global period.
 - Bespoke news SEO overrides belong in staticRoutes ahead of generated Sanity metadata and must be covered by staticMetaParity; why: legacyRoute pages own their search copy even when Sanity lists them.
 - Portal routing: `/members` is the dashboard; `/members/dashboard` and the inner catch-all redirect there so every portal URL resolves.
 - Auth bootstrap must always settle: retain getSession error handling, the 8s guard, and swallowed profile-load rejections.
-- Journal numbers come only from the immutable sequence trigger; show with formatEntryNumber. document_number remains free text.
-- Split bank matches use the primary line plus bank_statement_match_lines, only through link/unlink RPCs; taken checks use both.
-- Report ranges use reportPeriods helpers and shared AccountDrilldown so report totals reconcile.
-- Year close uses one closing period and post_year_close; exclude it from month/year movement and carry it into General Fund b/f.
 - AppErrorBoundary wraps routes; Suspense uses PageLoader; retain chunk retry and magic-link error surfacing.
-- Audit rounds/signoffs are immutable server workflows; closing requires approval. Certified packs are frozen and never overwritten.
 - Accounts distribution uses the separate secure link and record_accounts_sent; never attach it to an already-sent summons.
-- Subscription recognition uses splitSubscription once; receipts and prepayment clears never split again. Under-25 means age on 1 October.
 - Only the Secretary is exempt from subscriptions (latest Secretary appointment on or before the year); the Treasurer pays like any member. Honorary members remain exempt.
 - Public/member Thursday wording is "Rehearsal Night", never "Lodge of Instruction"/"LOI" (no subscriptions collected). Keep internal `loi` identifiers.
 - Installation Returns resolve live and fill exact AcroForm IDs; signatures and dispensation remain blank.
