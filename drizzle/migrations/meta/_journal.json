@@ -610,6 +610,13 @@
       "when": 1792006200355,
       "tag": "0086_public_events_manager",
       "breakpoints": true
+    },
+    {
+      "idx": 87,
+      "version": "7",
+      "when": 1792009021238,
+      "tag": "0087_public_events_access_tighten",
+      "breakpoints": true
     }
   ]
 }
