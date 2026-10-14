@@ -87,7 +87,7 @@ export async function sendEventBookingEmails(sb: any, bookingId: string, stage: 
     reference: b.reference,
     bank: b.payment_status === "paid" ? null : b.bank_instructions,
     eventUrl: `${SITE}/events/${ev.slug}`,
-    adminUrl: `${SITE}/members/admin/treasurer?tab=events&event=${ev.id}&booking=${b.id}`,
+    adminUrl: `${SITE}/members/admin/treasurer?tab=event-accounts&event=${ev.id}&booking=${b.id}`,
   };
   if (b.contact_email) {
     const r = await sendTransactionalEmail({

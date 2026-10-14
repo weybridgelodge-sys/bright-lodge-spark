@@ -267,7 +267,7 @@ function Inner() {
   const { isAdmin, isCurrentSecretary, isCurrentTreasurer, canAccessTreasurer } = useAuth();
   const [periods, setPeriods] = useState<Period[]>([]);
   const [loading, setLoading] = useInitialLoading();
-  const [tab, setTab] = useState("bank-reconciliation");
+  const [tab, setTab] = useState(() => new URLSearchParams(window.location.search).get("tab") || "bank-reconciliation");
 
   const load = useCallback(async () => {
     setLoading(true);

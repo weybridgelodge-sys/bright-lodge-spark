@@ -20,6 +20,9 @@ export type PublicEvent = {
   highlights: string[];
   dress_code: string | null;
   seats_taken: number;
+  useful_stuff: { parking?: string; timings?: string; access?: string };
+  menu_items: string[];
+  dietary_choices: string[];
 };
 
 export const DEFAULT_VENUE = "Guildford Masonic Centre, Hitherbury Close, Guildford GU2 4DR";
@@ -73,7 +76,7 @@ export function formatTime(t: string | null) {
 }
 
 function normalise(r: any): PublicEvent {
-  return { ...r, highlights: Array.isArray(r.highlights) ? r.highlights.map(String) : [], hosting_lodges: r.hosting_lodges ?? [] };
+  return { ...r, highlights: Array.isArray(r.highlights) ? r.highlights.map(String) : [], hosting_lodges: r.hosting_lodges ?? [], useful_stuff: r.useful_stuff ?? {}, menu_items: Array.isArray(r.menu_items) ? r.menu_items.map(String) : [], dietary_choices: Array.isArray(r.dietary_choices) ? r.dietary_choices.map(String) : [] };
 }
 
 export async function fetchPublicEvents(): Promise<PublicEvent[]> {
@@ -86,3 +89,26 @@ export async function fetchPublicEvent(slug: string): Promise<PublicEvent | null
   const { data } = await (supabase as any).from("public_events").select("*").eq("slug", slug).maybeSingle();
   return data ? normalise(data) : null;
 }
+
+/** What still blocks publishing: both prices, start/end times and a slug; archived events never publish. */
+export function publishBlockers(ev: {
+  adult_price_pence: number | null; child_price_pence: number | null; start_time: string | null; end_time: string | null;
+  slug: string | null; archived_at?: string | null;
+}): string[] {
+  const out: string[] = [];
+  if (ev.adult_price_pence == null) out.push("adult price");
+  if (ev.child_price_pence == null) out.push("child price");
+  if (!ev.start_time) out.push("start time");
+  if (!ev.end_time) out.push("end time");
+  if (!ev.slug) out.push("page slug");
+  if (ev.archived_at) out.push("restore from archive");
+  return out;
+}
+
+/** Public list never shows archived or unpublished events. */
+export function isPubliclyVisible(ev: { is_public: boolean; archived_at?: string | null; slug: string | null }): boolean {
+  return ev.is_public && !ev.archived_at && !!ev.slug;
+}
+
+/** Delete is only allowed when an event has no bookings. */
+export const canDeleteEvent = (bookingCount: number) => bookingCount === 0;

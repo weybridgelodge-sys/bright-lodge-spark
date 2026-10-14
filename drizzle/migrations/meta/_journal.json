@@ -603,6 +603,13 @@
       "when": 1792004851389,
       "tag": "0085_public_events_on_event_accounts",
       "breakpoints": true
+    },
+    {
+      "idx": 86,
+      "version": "7",
+      "when": 1792006200355,
+      "tag": "0086_public_events_manager",
+      "breakpoints": true
     }
   ]
 }
