@@ -129,7 +129,7 @@ Deno.serve(async (req) => {
         sort_code: addr?.sort_code ?? null,
         account_number: addr?.account_number ?? null,
         reference: instr.reference ?? null,
-        amount_pence: total,
+        amount_pence: instr.amount_remaining ?? total,
       } : null;
       await sb.from("event_bookings").update({
         stripe_customer_id: customer.id, stripe_payment_intent_id: pi.id, bank_instructions: bank,

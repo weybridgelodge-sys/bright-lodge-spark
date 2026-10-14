@@ -18,6 +18,7 @@ export interface EventBookingData {
   total?: string
   subtotal?: string
   cardFee?: string | null
+  feeLabel?: string
   paymentMethod?: string
   paymentStatus?: string
   reference?: string
@@ -76,7 +77,7 @@ const Email = (d: EventBookingData) => {
             <GuestList guests={d.guests} />
             <Hr style={hr} />
             {d.cardFee && <Row label="Subtotal" value={d.subtotal} />}
-            {d.cardFee && <Row label="Card fee" value={d.cardFee} />}
+            {d.cardFee && <Row label={d.feeLabel || "Fee"} value={d.cardFee} />}
             <Row label="Total" value={d.total} />
             <Row label="Payment method" value={d.paymentMethod} />
             <Row label="Payment status" value={d.paymentStatus} />
