@@ -111,3 +111,41 @@ export async function sendEventBookingEmails(sb: any, bookingId: string, stage: 
     if (r.error) console.error("event lodge email failed", to, r.error);
   }
 }
+
+/**
+ * Record the actual Stripe fees for an event booking from the EVENTS account:
+ * the charge fee (balance transaction) plus any refund/dispute fees.
+ * Retries once if the balance transaction isn't attached yet. Never throws.
+ */
+export async function syncEventBookingFees(sb: any, bookingId: string, piId: string | null | undefined, opts: { attempts?: number; retryDelayMs?: number } = {}): Promise<boolean> {
+  if (!piId) return false;
+  const attempts = opts.attempts ?? 2;
+  try {
+    const stripe = eventsStripe();
+    for (let a = 1; a <= attempts; a++) {
+      const pi: any = await stripe.paymentIntents.retrieve(piId, { expand: ["latest_charge.balance_transaction"] });
+      const charge: any = pi.latest_charge;
+      const bt: any = charge?.balance_transaction;
+      if (!bt || typeof bt === "string") {
+        if (a < attempts) { await new Promise((r) => setTimeout(r, opts.retryDelayMs ?? 3000)); continue; }
+        console.warn("events: no balance_transaction yet for", piId);
+        return false;
+      }
+      let other = 0;
+      const refunds: any = await stripe.refunds.list({ charge: charge.id, limit: 100, expand: ["data.balance_transaction"] });
+      for (const r of refunds.data ?? []) if (r.balance_transaction && typeof r.balance_transaction !== "string") other += r.balance_transaction.fee ?? 0;
+      const disputes: any = await stripe.disputes.list({ charge: charge.id, limit: 100 });
+      for (const d of disputes.data ?? []) for (const t of d.balance_transactions ?? []) other += t.fee ?? 0;
+      const { error } = await sb.from("event_bookings").update({
+        stripe_fee_pence: bt.fee ?? null, stripe_net_pence: bt.net ?? null,
+        stripe_balance_transaction_id: bt.id ?? null, stripe_other_fees_pence: other,
+      }).eq("id", bookingId);
+      if (error) { console.error("events: store fee failed", error); return false; }
+      return true;
+    }
+    return false;
+  } catch (e) {
+    console.error("syncEventBookingFees failed", bookingId, e);
+    return false;
+  }
+}
