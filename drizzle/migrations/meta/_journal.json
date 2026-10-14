@@ -631,6 +631,13 @@
       "when": 1792011363780,
       "tag": "0089_event_bookings_card_fee",
       "breakpoints": true
+    },
+    {
+      "idx": 90,
+      "version": "7",
+      "when": 1792013065475,
+      "tag": "0090_event_subledger",
+      "breakpoints": true
     }
   ]
 }

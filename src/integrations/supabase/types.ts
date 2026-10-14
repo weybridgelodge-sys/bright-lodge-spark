@@ -1468,7 +1468,11 @@ export type Database = {
           payment_status: string
           reference: string | null
           source: string
+          stripe_balance_transaction_id: string | null
           stripe_customer_id: string | null
+          stripe_fee_pence: number | null
+          stripe_net_pence: number | null
+          stripe_other_fees_pence: number
           stripe_payment_intent_id: string | null
           stripe_session_id: string | null
           subtotal_pence: number | null
@@ -1502,7 +1506,11 @@ export type Database = {
           payment_status?: string
           reference?: string | null
           source?: string
+          stripe_balance_transaction_id?: string | null
           stripe_customer_id?: string | null
+          stripe_fee_pence?: number | null
+          stripe_net_pence?: number | null
+          stripe_other_fees_pence?: number
           stripe_payment_intent_id?: string | null
           stripe_session_id?: string | null
           subtotal_pence?: number | null
@@ -1536,7 +1544,11 @@ export type Database = {
           payment_status?: string
           reference?: string | null
           source?: string
+          stripe_balance_transaction_id?: string | null
           stripe_customer_id?: string | null
+          stripe_fee_pence?: number | null
+          stripe_net_pence?: number | null
+          stripe_other_fees_pence?: number
           stripe_payment_intent_id?: string | null
           stripe_session_id?: string | null
           subtotal_pence?: number | null
@@ -1570,6 +1582,7 @@ export type Database = {
           line_type: string
           planned_pence: number
           quantity: number | null
+          system_key: string | null
           unit_cost_pence: number | null
           updated_at: string
         }
@@ -1581,6 +1594,7 @@ export type Database = {
           line_type?: string
           planned_pence?: number
           quantity?: number | null
+          system_key?: string | null
           unit_cost_pence?: number | null
           updated_at?: string
         }
@@ -1592,6 +1606,7 @@ export type Database = {
           line_type?: string
           planned_pence?: number
           quantity?: number | null
+          system_key?: string | null
           unit_cost_pence?: number | null
           updated_at?: string
         }
@@ -1670,6 +1685,85 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      event_payout_allocations: {
+        Row: {
+          amount_pence: number
+          created_at: string
+          created_by: string | null
+          event_id: string
+          id: string
+          payout_id: string
+        }
+        Insert: {
+          amount_pence: number
+          created_at?: string
+          created_by?: string | null
+          event_id: string
+          id?: string
+          payout_id: string
+        }
+        Update: {
+          amount_pence?: number
+          created_at?: string
+          created_by?: string | null
+          event_id?: string
+          id?: string
+          payout_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_payout_allocations_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "event_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_payout_allocations_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "public_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_payout_allocations_payout_id_fkey"
+            columns: ["payout_id"]
+            isOneToOne: false
+            referencedRelation: "event_stripe_payouts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_stripe_payouts: {
+        Row: {
+          amount_pence: number
+          arrival_date: string
+          created_at: string
+          currency: string
+          id: string
+          status: string
+          stripe_payout_id: string
+        }
+        Insert: {
+          amount_pence: number
+          arrival_date: string
+          created_at?: string
+          currency?: string
+          id?: string
+          status: string
+          stripe_payout_id: string
+        }
+        Update: {
+          amount_pence?: number
+          arrival_date?: string
+          created_at?: string
+          currency?: string
+          id?: string
+          status?: string
+          stripe_payout_id?: string
+        }
+        Relationships: []
       }
       festive_board_attendance: {
         Row: {
@@ -6305,6 +6399,10 @@ export type Database = {
       }
       save_year_remarks: {
         Args: { _remarks: string; _year: number }
+        Returns: undefined
+      }
+      seed_event_system_budget_lines: {
+        Args: { _event_id: string }
         Returns: undefined
       }
       set_member_status: {
