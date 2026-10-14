@@ -12,6 +12,7 @@ import { Loader2, Plus, Trash2, FileDown, ChevronDown, ChevronRight, Pencil } fr
 import autoTable from "jspdf-autotable";
 import { reportPdfDoc, reportSection, INK, GOLD, NAVY, MUTED } from "@/lib/treasurer/reports";
 import { saveJsPdf, saveText } from "@/lib/nativeDownload";
+import { DEFAULT_VENUE, STATEMENT_DESCRIPTOR_MAX } from "@/lib/publicEvents";
 
 const money = (pence: number) =>
   `${pence < 0 ? "-" : ""}£${(Math.abs(pence) / 100).toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
