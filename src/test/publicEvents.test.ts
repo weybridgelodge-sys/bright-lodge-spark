@@ -28,3 +28,20 @@ describe("public event bookings", () => {
     expect(isValidStatementDescriptor("X".repeat(23))).toBe(false);
   });
 });
+
+import { canDeleteEvent, isPubliclyVisible, publishBlockers } from "@/lib/publicEvents";
+describe("public events manager", () => {
+  const ready = { adult_price_pence: 4000, child_price_pence: 1500, start_time: "18:30", end_time: "23:00", slug: "x" };
+  it("blocks publish without prices or times", () => {
+    expect(publishBlockers(ready)).toEqual([]);
+    expect(publishBlockers({ ...ready, adult_price_pence: null, end_time: null })).toEqual(["adult price", "end time"]);
+  });
+  it("blocks delete when there are bookings", () => {
+    expect(canDeleteEvent(1)).toBe(false);
+    expect(canDeleteEvent(0)).toBe(true);
+  });
+  it("hides archived events from the public list", () => {
+    expect(isPubliclyVisible({ is_public: true, archived_at: "2026-10-01", slug: "x" })).toBe(false);
+    expect(isPubliclyVisible({ is_public: true, archived_at: null, slug: "x" })).toBe(true);
+  });
+});
