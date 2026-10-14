@@ -6032,6 +6032,10 @@ export type Database = {
         Args: { _member_id: string }
         Returns: string
       }
+      event_booking_holds_seat: {
+        Args: { _created: string; _method: string; _status: string }
+        Returns: boolean
+      }
       event_capacity_summary: {
         Args: { _meeting_id: string }
         Returns: {
