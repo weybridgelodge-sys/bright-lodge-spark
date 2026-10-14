@@ -90,6 +90,7 @@ const Email = (d: EventBookingData) => {
               <Row label="Account number" value={d.bank.account_number} />
               <Row label="Payment reference" value={d.bank.reference} />
               <Section style={notice}>
+                <Text style={{ ...noticeText, fontSize: '16px', margin: '0 0 8px' }}>Amount to transfer: {d.total}</Text>
                 <Text style={noticeText}>Please use the payment reference exactly as shown so we can match your payment. We will email you when it arrives.</Text>
               </Section>
             </Section>

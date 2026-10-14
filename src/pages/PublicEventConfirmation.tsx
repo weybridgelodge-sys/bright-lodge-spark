@@ -66,7 +66,8 @@ export default function PublicEventConfirmation() {
               <p className="text-foreground">Sort code: <strong>{b.bank.sort_code}</strong></p>
               <p className="text-foreground">Account number: <strong>{b.bank.account_number}</strong></p>
               <p className="text-foreground">Payment reference: <strong className="break-words">{b.bank.reference}</strong></p>
-              <div className="mt-4 border-2 border-gold bg-card rounded-sm p-4">
+              <div className="mt-4 border-2 border-gold bg-card rounded-sm p-4 space-y-2">
+                <p className="font-sans text-base font-bold text-foreground">Amount to transfer: {formatGBP(b.total_pence)}</p>
                 <p className="font-sans text-[15px] font-bold leading-relaxed text-foreground">
                   Please use the payment reference exactly as shown so we can match your payment. We will email you when it arrives.
                 </p>
