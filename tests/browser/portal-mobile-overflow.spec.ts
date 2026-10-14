@@ -458,3 +458,20 @@ test("Summons visitor email dialog fits 320px with worst-case names", async ({ p
   await expect(dialog.getByPlaceholder("e.g. W Bro Smith").first()).toBeVisible();
   await expectNoViewportOverflow(page, "Summons visitor email dialog");
 });
+
+test("Public Events cards and editor stay within 320px with 44px+ targets", async ({ page }) => {
+  const row = { id: "x1", name: "Christmas Party 2026", public_title: "Joint Christmas Party at Guildford Masonic Centre — a very long festive title", slug: "christmas-party-2026", event_date: "2026-12-19", start_time: null, end_time: null, is_public: false, archived_at: null, status: "planning", highlights: ["Hot buffet"], hosting_lodges: ["Weybridge Lodge No. 6787", "Astolat Lodge No. 5848"], menu_items: ["Hot buffet"], dietary_choices: [], useful_stuff: {}, theme: "christmas" };
+  await page.route("**/rest/v1/event_accounts?**", (r) => r.fulfill({ json: [row] }));
+  await page.goto("/members/public-events");
+  await waitForPortal(page);
+  const edit = page.getByRole("button", { name: "Edit" });
+  if (!(await edit.isVisible().catch(() => false))) test.skip(true, "Synthetic identity cannot manage public events");
+  await expectNoViewportOverflow(page, "Public Events list");
+  for (const name of ["Edit", "Publish", "Archive", "Delete"]) {
+    const box = await page.getByRole("button", { name, exact: true }).boundingBox();
+    expect(box!.height, `${name} touch target`).toBeGreaterThanOrEqual(44);
+  }
+  await edit.click();
+  await expect(page.getByLabel("Public title")).toBeVisible();
+  await expectNoViewportOverflow(page, "Public Events editor");
+});
