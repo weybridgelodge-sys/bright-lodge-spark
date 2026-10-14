@@ -11,12 +11,12 @@ Deno.serve(async (req) => {
   if (!p.success) return json({ error: "Invalid request" }, 400);
   const sb = serviceClient();
   const { data: b } = await sb.from("event_bookings")
-    .select("reference,payer_name,adult_count,child_count,total_pence,payment_method,payment_status,bank_instructions,event_id")
+    .select("reference,payer_name,adult_count,child_count,subtotal_pence,fee_pence,total_pence,payment_method,payment_status,bank_instructions,event_id")
     .eq("reference", p.data.reference).eq("access_token", p.data.token).maybeSingle();
   if (!b) return json({ error: "Booking not found" }, 404);
   return json({
     reference: b.reference, name: b.payer_name, adults: b.adult_count, children: b.child_count,
-    total_pence: b.total_pence, payment_method: methodLabel(b.payment_method), payment_status: b.payment_status,
+    subtotal_pence: b.subtotal_pence ?? b.total_pence, fee_pence: b.fee_pence ?? 0, total_pence: b.total_pence, payment_method: methodLabel(b.payment_method), payment_status: b.payment_status,
     bank: b.payment_status === "paid" ? null : b.bank_instructions,
   });
 });

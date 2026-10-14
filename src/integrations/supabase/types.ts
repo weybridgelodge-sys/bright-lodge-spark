@@ -1457,6 +1457,7 @@ export type Database = {
           deposit_paid: boolean
           deposit_pence: number
           event_id: string
+          fee_pence: number
           id: string
           is_placeholder: boolean
           lodge_label: string | null
@@ -1470,6 +1471,7 @@ export type Database = {
           stripe_customer_id: string | null
           stripe_payment_intent_id: string | null
           stripe_session_id: string | null
+          subtotal_pence: number | null
           ticket_count: number
           total_pence: number | null
           updated_at: string
@@ -1489,6 +1491,7 @@ export type Database = {
           deposit_paid?: boolean
           deposit_pence?: number
           event_id: string
+          fee_pence?: number
           id?: string
           is_placeholder?: boolean
           lodge_label?: string | null
@@ -1502,6 +1505,7 @@ export type Database = {
           stripe_customer_id?: string | null
           stripe_payment_intent_id?: string | null
           stripe_session_id?: string | null
+          subtotal_pence?: number | null
           ticket_count?: number
           total_pence?: number | null
           updated_at?: string
@@ -1521,6 +1525,7 @@ export type Database = {
           deposit_paid?: boolean
           deposit_pence?: number
           event_id?: string
+          fee_pence?: number
           id?: string
           is_placeholder?: boolean
           lodge_label?: string | null
@@ -1534,6 +1539,7 @@ export type Database = {
           stripe_customer_id?: string | null
           stripe_payment_intent_id?: string | null
           stripe_session_id?: string | null
+          subtotal_pence?: number | null
           ticket_count?: number
           total_pence?: number | null
           updated_at?: string

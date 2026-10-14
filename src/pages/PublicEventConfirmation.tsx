@@ -8,7 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { formatGBP } from "@/lib/publicEvents";
 
 type Summary = {
-  reference: string; name: string; adults: number; children: number; total_pence: number;
+  reference: string; name: string; adults: number; children: number; total_pence: number; subtotal_pence?: number; fee_pence?: number;
   payment_method: string; payment_status: string;
   bank: { account_holder_name?: string; sort_code?: string; account_number?: string; reference?: string } | null;
 };
@@ -54,6 +54,7 @@ export default function PublicEventConfirmation() {
                 Reference {b.reference}
               </h2>
               <p className="text-foreground">{b.adults} adult{b.adults === 1 ? "" : "s"}{b.children ? `, ${b.children} child${b.children === 1 ? "" : "ren"}` : ""} · {formatGBP(b.total_pence)}</p>
+              {(b.fee_pence ?? 0) > 0 && <p className="text-sm text-muted-foreground">Subtotal {formatGBP(b.subtotal_pence ?? b.total_pence - (b.fee_pence ?? 0))} + card fee {formatGBP(b.fee_pence ?? 0)}</p>}
               <p className="text-muted-foreground">Payment: {b.payment_method} — {paid ? "paid" : "pending payment"}</p>
               <p className="text-muted-foreground">A confirmation email is on its way to you.</p>
             </section>

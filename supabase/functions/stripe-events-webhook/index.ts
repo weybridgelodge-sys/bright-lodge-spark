@@ -1,8 +1,13 @@
 import { sendEventBookingEmails, serviceClient, verifyEventsWebhook } from "../_shared/stripe-events.ts";
 
-async function markPaid(bookingId: string | undefined, piId?: string | null) {
+async function markPaid(bookingId: string | undefined, piId?: string | null, amountPence?: number | null) {
   if (!bookingId) return;
   const sb = serviceClient();
+  if (amountPence != null) {
+    const { data: exp } = await sb.from("event_bookings").select("subtotal_pence,fee_pence,total_pence").eq("id", bookingId).maybeSingle();
+    const expected = exp ? (exp.subtotal_pence ?? exp.total_pence) + (exp.fee_pence ?? 0) : null;
+    if (expected != null && expected !== amountPence) console.warn("events webhook: paid amount differs from subtotal + fee", { bookingId, amountPence, expected });
+  }
   const { data } = await sb.from("event_bookings")
     .update({
       payment_status: "paid",
@@ -25,13 +30,13 @@ Deno.serve(async (req) => {
     const obj = event.data?.object ?? {};
     switch (event.type) {
       case "checkout.session.completed":
-        if (obj.payment_status !== "unpaid") await markPaid(obj.metadata?.booking_id, obj.payment_intent);
+        if (obj.payment_status !== "unpaid") await markPaid(obj.metadata?.booking_id, obj.payment_intent, obj.amount_total);
         break;
       case "checkout.session.async_payment_succeeded":
-        await markPaid(obj.metadata?.booking_id, obj.payment_intent);
+        await markPaid(obj.metadata?.booking_id, obj.payment_intent, obj.amount_total);
         break;
       case "payment_intent.succeeded":
-        await markPaid(obj.metadata?.booking_id, obj.id);
+        await markPaid(obj.metadata?.booking_id, obj.id, obj.amount_received ?? obj.amount);
         break;
       default:
         console.log("Unhandled events webhook:", event.type);

@@ -79,6 +79,8 @@ export async function sendEventBookingEmails(sb: any, bookingId: string, stage: 
     guests: (guests ?? []).map((g: any) => ({ name: g.name, age: g.age, isChild: g.is_child, dietary: g.allergies })),
     adults: b.adult_count,
     children: b.child_count,
+    subtotal: gbp(b.subtotal_pence ?? b.total_pence),
+    cardFee: (b.fee_pence ?? 0) > 0 ? gbp(b.fee_pence) : null,
     total: gbp(b.total_pence),
     paymentMethod: methodLabel(b.payment_method),
     paymentStatus: b.payment_status === "paid" ? "Paid" : "Awaiting payment",

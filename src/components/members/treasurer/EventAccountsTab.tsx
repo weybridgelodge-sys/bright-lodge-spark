@@ -41,6 +41,7 @@ type Booking = {
   balance_pence: number; balance_paid: boolean; balance_method: string | null; notes: string | null;
   reference?: string | null; payment_method?: string | null; payment_status?: string | null; source?: string | null; created_at?: string | null;
   contact_email?: string | null; lodge_label?: string | null;
+  subtotal_pence?: number | null; fee_pence?: number | null; total_pence?: number | null;
 };
 type Guest = {
   id: string; booking_id: string; name: string | null; seating_preference: string | null;
@@ -206,6 +207,8 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
   // ─── Derived: event reconciliation ────────────────────────────────────────
   const expectedIncome = bookings.reduce(
     (s, b) => s + (b.deposit_paid ? b.deposit_pence : 0) + (b.balance_paid ? b.balance_pence : 0), 0);
+  // Card-fee contributions (mirrors lodge bookings.fee_pence → 4120 Fee Cover Income), kept apart from ticket income.
+  const feeCoverReceived = bookings.reduce((s, b) => s + (b.balance_paid ? (b.fee_pence ?? 0) : 0), 0);
   const invoicedTotal = bookings.reduce((s, b) => s + b.deposit_pence + b.balance_pence, 0);
   const bankedForEvent = useMemo(
     () => actuals
@@ -822,7 +825,9 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
                           <Button size="sm" variant="outline" className="border-gold/30 min-h-[44px]" onClick={() => markPaid(b)}>Mark paid</Button>
                         )}
                         <span className="ml-auto text-xs tabular-nums text-primary-foreground/80">
-                          Dep {money(b.deposit_pence)}{b.deposit_paid ? " ✓" : ""} · Bal {money(b.balance_pence)}{b.balance_paid ? " ✓" : ""}
+                          {b.source === "public"
+                            ? <>Subtotal {money(b.subtotal_pence ?? (b.total_pence ?? b.balance_pence) - (b.fee_pence ?? 0))} · Card fee {money(b.fee_pence ?? 0)} · Total {money(b.total_pence ?? b.balance_pence)}{b.balance_paid ? " ✓" : ""}</>
+                            : <>Dep {money(b.deposit_pence)}{b.deposit_paid ? " ✓" : ""} · Bal {money(b.balance_pence)}{b.balance_paid ? " ✓" : ""}</>}
                         </span>
                         {canEdit && (
                           <>
@@ -1026,6 +1031,8 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
             <ul className="text-sm space-y-1">
               <li className="flex justify-between"><span className="text-primary-foreground/70">Invoiced to bookings (deposits + balances)</span><span className="tabular-nums">{money(invoicedTotal)}</span></li>
               <li className="flex justify-between"><span className="text-primary-foreground/70">Recorded as received (marked paid)</span><span className="tabular-nums">{money(expectedIncome)}</span></li>
+              <li className="flex justify-between"><span className="text-primary-foreground/70">…of which ticket income</span><span className="tabular-nums">{money(expectedIncome - feeCoverReceived)}</span></li>
+              <li className="flex justify-between"><span className="text-primary-foreground/70">…of which card-fee contributions (4120 Fee Cover Income)</span><span className="tabular-nums">{money(feeCoverReceived)}</span></li>
               <li className="flex justify-between"><span className="text-primary-foreground/70">Landed in Bank (1000), tagged to this event</span><span className="tabular-nums">{money(bankedForEvent)}</span></li>
             </ul>
             <p className={`text-sm font-semibold ${gap === 0 ? "text-emerald-400" : "text-amber-400"}`}>
