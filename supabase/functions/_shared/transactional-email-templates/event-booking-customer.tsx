@@ -84,7 +84,9 @@ const Email = (d: EventBookingData) => {
               <Row label="Sort code" value={d.bank.sort_code} />
               <Row label="Account number" value={d.bank.account_number} />
               <Row label="Payment reference" value={d.bank.reference} />
-              <Text style={small}>Please use the payment reference exactly as shown so we can match your payment. We will email you when it arrives.</Text>
+              <Section style={notice}>
+                <Text style={noticeText}>Please use the payment reference exactly as shown so we can match your payment. We will email you when it arrives.</Text>
+              </Section>
             </Section>
           )}
           {d.eventUrl && <Text style={small}>Event details: <Link href={d.eventUrl} style={link}>{d.eventUrl}</Link></Text>}
