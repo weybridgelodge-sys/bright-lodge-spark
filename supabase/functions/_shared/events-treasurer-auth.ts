@@ -8,7 +8,7 @@ export async function isEventsTreasurer(req: Request): Promise<boolean> {
   if (!u?.user) return false;
   const [a, t] = await Promise.all([
     sb.rpc("has_role", { _user_id: u.user.id, _role: "admin" }),
-    sb.rpc("is_current_officer", { _user_id: u.user.id, _office: "treasurer" } as any),
+    sb.rpc("is_current_officer", { _user_id: u.user.id, _position_key: "treasurer" }),
   ]);
   return a.data === true || t.data === true;
 }
