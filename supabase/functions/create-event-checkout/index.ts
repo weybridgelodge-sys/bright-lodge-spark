@@ -1,5 +1,6 @@
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { z } from "https://esm.sh/zod@3.23.8";
+import { eventFeePence } from "../_shared/cardFee.ts";
 import { eventsStripe, sendEventBookingEmails, serviceClient } from "../_shared/stripe-events.ts";
 
 const GuestSchema = z.object({
@@ -20,6 +21,7 @@ const BodySchema = z.object({
   children: z.number().int().min(0).max(50),
   guests: z.array(GuestSchema).max(100),
   payment_method: z.enum(["card", "pay_by_bank", "bank_transfer"]),
+  cover_fee: z.boolean().default(false),
   origin: z.string().url(),
   website: z.string().max(0).optional().default(""), // honeypot
 });
@@ -57,7 +59,10 @@ Deno.serve(async (req) => {
       if (taken + party > ev.capacity) return json({ error: `Sorry, only ${Math.max(0, ev.capacity - taken)} places remain.` }, 409);
     }
 
-    const total = input.adults * ev.adult_price_pence + input.children * ev.child_price_pence;
+    const subtotal = input.adults * ev.adult_price_pence + input.children * ev.child_price_pence;
+    // Server recalculates the fee itself from cover_fee; card only.
+    const fee = eventFeePence(subtotal, input.payment_method, input.cover_fee);
+    const total = subtotal + fee;
     const title = ev.public_title || ev.name;
     const stripeName = ev.name || title; // Accounts name for Stripe descriptions/line items
     const prefix = (ev.reference_prefix || "EVT").toUpperCase();
@@ -80,6 +85,8 @@ Deno.serve(async (req) => {
         lodge_label: input.lodge_label,
         adult_count: input.adults,
         child_count: input.children,
+        subtotal_pence: subtotal,
+        fee_pence: fee,
         total_pence: total,
         payment_method: input.payment_method,
         payment_status: "pending",
@@ -137,6 +144,7 @@ Deno.serve(async (req) => {
       line_items: [
         ...(input.adults ? [{ quantity: input.adults, price_data: { currency: "gbp", unit_amount: ev.adult_price_pence, product_data: { name: `${stripeName} — adult` } } }] : []),
         ...(input.children ? [{ quantity: input.children, price_data: { currency: "gbp", unit_amount: ev.child_price_pence, product_data: { name: `${stripeName} — child (12 and under)` } } }] : []),
+        ...(fee > 0 ? [{ quantity: 1, price_data: { currency: "gbp", unit_amount: fee, product_data: { name: "Card processing fee" } } }] : []),
       ],
       metadata,
       client_reference_id: booking.id,
