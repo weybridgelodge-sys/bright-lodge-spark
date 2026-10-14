@@ -15,6 +15,7 @@ const MembersDocuments = lazy(() => import("./pages/members/Documents"));
 const MembersProfile = lazy(() => import("./pages/members/Profile"));
 const MembersAdmin = lazy(() => import("./pages/members/Admin"));
 const EventsAdmin = lazy(() => import("./pages/members/EventsAdmin"));
+const PublicEventsAdmin = lazy(() => import("./pages/members/PublicEventsAdmin"));
 const LoiSchedule = lazy(() => import("./pages/members/admin/LoiSchedule"));
 const MembersRitual = lazy(() => import("./pages/members/Ritual"));
 const OfficersTracker = lazy(() => import("./pages/members/OfficersTracker"));
@@ -73,6 +74,7 @@ const MembersRoutes = () => (
         <Route path="profile" element={<ProtectedRoute><MembersProfile /></ProtectedRoute>} />
         <Route path="admin" element={<ProtectedRoute><MembersAdmin /></ProtectedRoute>} />
         <Route path="events" element={<ProtectedRoute><EventsAdmin /></ProtectedRoute>} />
+        <Route path="public-events" element={<ProtectedRoute><PublicEventsAdmin /></ProtectedRoute>} />
         <Route path="officers-tracker" element={<ProgressionRoute><OfficersTracker /></ProgressionRoute>} />
         <Route path="kpis" element={<ProgressionRoute><Kpis /></ProgressionRoute>} />
         <Route path="loi-register" element={<ProtectedRoute><LoiRegister /></ProtectedRoute>} />
