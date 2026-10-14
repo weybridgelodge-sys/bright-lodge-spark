@@ -12,6 +12,8 @@ import {
 import { Calendar } from "@/components/ui/calendar";
 import { format, isSameDay } from "date-fns";
 import { useEvents, typeLabel, typeBadgeClass } from "@/data/events";
+import { useEffect } from "react";
+import { fetchPublicEvents, formatEventDate, type PublicEvent } from "@/lib/publicEvents";
 
 
 // ─── Animation Variants ───────────────────────────────────────────────────────
@@ -30,6 +32,8 @@ const Events = () => {
   const shouldReduceMotion = useReducedMotion();
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const { events, loading: eventsLoading } = useEvents();
+  const [publicEvents, setPublicEvents] = useState<PublicEvent[]>([]);
+  useEffect(() => { fetchPublicEvents().then(setPublicEvents); }, []);
   const eventDates = useMemo(() => events.map((e) => e.date), [events]);
 
   const eventsForDate = selectedDate
@@ -95,6 +99,27 @@ const Events = () => {
           title="Events & Meetings at Weybridge Lodge — Guildford Masonic Centre"
           subtitle="Masonic meetings, social events and Rehearsal Nights at Guildford Masonic Centre, GU2 4DR"
         />
+
+        {publicEvents.length > 0 && (
+          <section className="pt-16 bg-background" aria-labelledby="public-events-heading">
+            <div className="container mx-auto px-4 sm:px-6 max-w-6xl">
+              <h2 id="public-events-heading" className="text-2xl font-serif text-foreground mb-4">Upcoming events — book online</h2>
+              <ul className="space-y-3">
+                {publicEvents.map((pe) => (
+                  <li key={pe.id}>
+                    <Link to={`/events/${pe.slug}`} className="flex items-center justify-between gap-4 w-full min-h-[64px] border border-border bg-card rounded-sm px-5 py-4 hover:border-gold-dark">
+                      <span>
+                        <span className="block font-serif text-lg text-foreground">{pe.public_title}</span>
+                        <span className="block text-sm font-sans text-muted-foreground">{formatEventDate(pe.event_date)} · Guildford Masonic Centre, GU2 4DR</span>
+                      </span>
+                      <ArrowRight className="w-5 h-5 text-gold-dark shrink-0" aria-hidden="true" />
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </section>
+        )}
 
         {/* ── Calendar + Upcoming Events ── */}
 

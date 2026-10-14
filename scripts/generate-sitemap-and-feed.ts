@@ -200,7 +200,20 @@ async function main() {
     priority: "0.5",
   }));
 
-  const allEntries = dedupeEntries([...staticEntries, ...postEntries, ...categoryEntries]);
+  // Public event pages (/events/:slug) from the public-safe events view.
+  let eventEntries: SitemapEntry[] = [];
+  try {
+    const url = process.env.VITE_SUPABASE_URL || "https://kntcjlztmcgmagwgheyx.supabase.co";
+    const key = process.env.VITE_SUPABASE_PUBLISHABLE_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtudGNqbHp0bWNnbWFnd2doZXl4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1MTQyNDAsImV4cCI6MjA5NzA5MDI0MH0.6TVyTN2zZgetChnWHKzwZkf0kiwvxbOn67STSo08d58";
+    const res = await fetch(`${url}/rest/v1/public_events?select=slug,event_date`, { headers: { apikey: key, Authorization: `Bearer ${key}` } });
+    const rows = res.ok ? ((await res.json()) as Array<{ slug: string }>) : [];
+    eventEntries = rows.map((r) => ({ path: `/events/${r.slug}`, changefreq: "weekly", priority: "0.7" }));
+    console.log(`Fetched ${eventEntries.length} public events`);
+  } catch (err) {
+    console.warn("Could not fetch public events for sitemap", err);
+  }
+
+  const allEntries = dedupeEntries([...staticEntries, ...postEntries, ...categoryEntries, ...eventEntries]);
 
   writeFileSync(resolve("public/sitemap.xml"), buildSitemap(allEntries));
   console.log(`sitemap.xml written (${allEntries.length} entries)`);

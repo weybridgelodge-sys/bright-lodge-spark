@@ -1341,42 +1341,105 @@ export type Database = {
       }
       event_accounts: {
         Row: {
+          adult_price_pence: number | null
+          booking_deadline: string | null
+          capacity: number | null
+          child_price_pence: number | null
           created_at: string
           created_by: string | null
+          dress_code: string | null
+          end_time: string | null
           event_date: string
+          events_notify_email: string | null
+          highlights: Json
+          hosting_lodges: string[]
           id: string
+          intro_copy: string | null
+          is_public: boolean
           name: string
           promote_publicly: boolean
+          public_title: string | null
+          reference_prefix: string | null
+          slug: string | null
+          start_time: string | null
+          statement_descriptor: string | null
           status: string
+          tagline: string | null
+          theme: string
           updated_at: string
+          venue: string | null
         }
         Insert: {
+          adult_price_pence?: number | null
+          booking_deadline?: string | null
+          capacity?: number | null
+          child_price_pence?: number | null
           created_at?: string
           created_by?: string | null
+          dress_code?: string | null
+          end_time?: string | null
           event_date: string
+          events_notify_email?: string | null
+          highlights?: Json
+          hosting_lodges?: string[]
           id?: string
+          intro_copy?: string | null
+          is_public?: boolean
           name: string
           promote_publicly?: boolean
+          public_title?: string | null
+          reference_prefix?: string | null
+          slug?: string | null
+          start_time?: string | null
+          statement_descriptor?: string | null
           status?: string
+          tagline?: string | null
+          theme?: string
           updated_at?: string
+          venue?: string | null
         }
         Update: {
+          adult_price_pence?: number | null
+          booking_deadline?: string | null
+          capacity?: number | null
+          child_price_pence?: number | null
           created_at?: string
           created_by?: string | null
+          dress_code?: string | null
+          end_time?: string | null
           event_date?: string
+          events_notify_email?: string | null
+          highlights?: Json
+          hosting_lodges?: string[]
           id?: string
+          intro_copy?: string | null
+          is_public?: boolean
           name?: string
           promote_publicly?: boolean
+          public_title?: string | null
+          reference_prefix?: string | null
+          slug?: string | null
+          start_time?: string | null
+          statement_descriptor?: string | null
           status?: string
+          tagline?: string | null
+          theme?: string
           updated_at?: string
+          venue?: string | null
         }
         Relationships: []
       }
       event_bookings: {
         Row: {
+          access_token: string
+          adult_count: number
           balance_method: string | null
           balance_paid: boolean
           balance_pence: number
+          bank_instructions: Json | null
+          child_count: number
+          contact_email: string | null
+          contact_phone: string | null
           created_at: string
           deposit_method: string | null
           deposit_paid: boolean
@@ -1384,15 +1447,31 @@ export type Database = {
           event_id: string
           id: string
           is_placeholder: boolean
+          lodge_label: string | null
           notes: string | null
+          paid_at: string | null
           payer_name: string
+          payment_method: string | null
+          payment_status: string
+          reference: string | null
+          source: string
+          stripe_customer_id: string | null
+          stripe_payment_intent_id: string | null
+          stripe_session_id: string | null
           ticket_count: number
+          total_pence: number | null
           updated_at: string
         }
         Insert: {
+          access_token?: string
+          adult_count?: number
           balance_method?: string | null
           balance_paid?: boolean
           balance_pence?: number
+          bank_instructions?: Json | null
+          child_count?: number
+          contact_email?: string | null
+          contact_phone?: string | null
           created_at?: string
           deposit_method?: string | null
           deposit_paid?: boolean
@@ -1400,15 +1479,31 @@ export type Database = {
           event_id: string
           id?: string
           is_placeholder?: boolean
+          lodge_label?: string | null
           notes?: string | null
+          paid_at?: string | null
           payer_name: string
+          payment_method?: string | null
+          payment_status?: string
+          reference?: string | null
+          source?: string
+          stripe_customer_id?: string | null
+          stripe_payment_intent_id?: string | null
+          stripe_session_id?: string | null
           ticket_count?: number
+          total_pence?: number | null
           updated_at?: string
         }
         Update: {
+          access_token?: string
+          adult_count?: number
           balance_method?: string | null
           balance_paid?: boolean
           balance_pence?: number
+          bank_instructions?: Json | null
+          child_count?: number
+          contact_email?: string | null
+          contact_phone?: string | null
           created_at?: string
           deposit_method?: string | null
           deposit_paid?: boolean
@@ -1416,9 +1511,19 @@ export type Database = {
           event_id?: string
           id?: string
           is_placeholder?: boolean
+          lodge_label?: string | null
           notes?: string | null
+          paid_at?: string | null
           payer_name?: string
+          payment_method?: string | null
+          payment_status?: string
+          reference?: string | null
+          source?: string
+          stripe_customer_id?: string | null
+          stripe_payment_intent_id?: string | null
+          stripe_session_id?: string | null
           ticket_count?: number
+          total_pence?: number | null
           updated_at?: string
         }
         Relationships: [
@@ -1427,6 +1532,13 @@ export type Database = {
             columns: ["event_id"]
             isOneToOne: false
             referencedRelation: "event_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_bookings_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "public_events"
             referencedColumns: ["id"]
           },
         ]
@@ -1473,14 +1585,23 @@ export type Database = {
             referencedRelation: "event_accounts"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "event_budget_lines_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "public_events"
+            referencedColumns: ["id"]
+          },
         ]
       }
       event_guests: {
         Row: {
+          age: number | null
           allergies: string | null
           booking_id: string
           created_at: string
           id: string
+          is_child: boolean
           is_female: boolean
           is_vip: boolean
           menu_choice: string | null
@@ -1490,10 +1611,12 @@ export type Database = {
           wine_preorder: string | null
         }
         Insert: {
+          age?: number | null
           allergies?: string | null
           booking_id: string
           created_at?: string
           id?: string
+          is_child?: boolean
           is_female?: boolean
           is_vip?: boolean
           menu_choice?: string | null
@@ -1503,10 +1626,12 @@ export type Database = {
           wine_preorder?: string | null
         }
         Update: {
+          age?: number | null
           allergies?: string | null
           booking_id?: string
           created_at?: string
           id?: string
+          is_child?: boolean
           is_female?: boolean
           is_vip?: boolean
           menu_choice?: string | null
@@ -1837,6 +1962,13 @@ export type Database = {
             columns: ["event_id"]
             isOneToOne: false
             referencedRelation: "event_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "journal_lines_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "public_events"
             referencedColumns: ["id"]
           },
         ]
@@ -5647,6 +5779,72 @@ export type Database = {
           name: string | null
           website: string | null
           year_total: number | null
+        }
+        Relationships: []
+      }
+      public_events: {
+        Row: {
+          adult_price_pence: number | null
+          booking_deadline: string | null
+          capacity: number | null
+          child_price_pence: number | null
+          dress_code: string | null
+          end_time: string | null
+          event_date: string | null
+          highlights: Json | null
+          hosting_lodges: string[] | null
+          id: string | null
+          intro_copy: string | null
+          name: string | null
+          public_title: string | null
+          seats_taken: number | null
+          slug: string | null
+          start_time: string | null
+          tagline: string | null
+          theme: string | null
+          venue: string | null
+        }
+        Insert: {
+          adult_price_pence?: number | null
+          booking_deadline?: string | null
+          capacity?: number | null
+          child_price_pence?: number | null
+          dress_code?: string | null
+          end_time?: string | null
+          event_date?: string | null
+          highlights?: Json | null
+          hosting_lodges?: string[] | null
+          id?: string | null
+          intro_copy?: string | null
+          name?: string | null
+          public_title?: never
+          seats_taken?: never
+          slug?: string | null
+          start_time?: string | null
+          tagline?: string | null
+          theme?: string | null
+          venue?: string | null
+        }
+        Update: {
+          adult_price_pence?: number | null
+          booking_deadline?: string | null
+          capacity?: number | null
+          child_price_pence?: number | null
+          dress_code?: string | null
+          end_time?: string | null
+          event_date?: string | null
+          highlights?: Json | null
+          hosting_lodges?: string[] | null
+          id?: string | null
+          intro_copy?: string | null
+          name?: string | null
+          public_title?: never
+          seats_taken?: never
+          slug?: string | null
+          start_time?: string | null
+          tagline?: string | null
+          theme?: string | null
+          venue?: string | null
         }
         Relationships: []
       }
