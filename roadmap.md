@@ -64,3 +64,5 @@
 - [x] KPI Summary PDF: keep sections 1–7 together; visually checked regenerated long-Outstanding and RA-boundary exports; 155 unit and 60 phone-width checks passed
 - [x] KPI Summary PDF header: centred crest, dashboard title/year subtitle and spacing; actual export regenerated with 22 synthetic members, all 3 pages visually checked (no overlap/clipping), 155 unit and 60 phone-width tests passed. Live signed-in verification unavailable because session minting could not match the requesting account.
 - [x] KPI Summary PDF: centred navy Page X of Y with gold rule; regenerated all 3 pages and visually checked (no overlap/clipping); 155 unit and 60 phone-width tests passed, build OK.
+
+- [ ] Event Accounts subledger: fixed budget lines, booking-driven actuals, real Stripe fees (incl refund/dispute), events payouts + allocations, events Stripe balance, tie-out (cash awaiting banking), remove 4120 wording
