@@ -1,5 +1,4 @@
 import { lazy, Suspense } from "react";
-import { PageLoader } from "@/components/AppErrorBoundary";
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import About from "@/components/About";
@@ -104,7 +103,7 @@ const Index = () => {
 
         <About />
 
-        <Suspense fallback={<PageLoader />}>
+        <Suspense fallback={<div className="min-h-[50vh] bg-navy" aria-busy="true" aria-label="Loading" />}>
           <HomepageCharityCTA />
 
           {/* Soft-conversion row: Quiz, Journey, First Visit Guide */}
