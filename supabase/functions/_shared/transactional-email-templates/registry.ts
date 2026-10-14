@@ -17,6 +17,8 @@ import { template as yearAuditUpdate } from './year-audit-update.tsx'
 import { template as installationReturnSubmission } from './installation-return-submission.tsx'
 import { template as provincialReturnSubmission } from './provincial-return-submission.tsx'
 import { template as secretaryUgleMissing } from './secretary-ugle-missing.tsx'
+import { template as eventBookingCustomer } from './event-booking-customer.tsx'
+import { template as eventBookingLodge } from './event-booking-lodge.tsx'
 
 export interface TemplateEntry {
   component: any
@@ -46,4 +48,6 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'installation-return-submission': installationReturnSubmission,
   'provincial-return-submission': provincialReturnSubmission,
   'secretary-ugle-missing': secretaryUgleMissing,
+  'event-booking-customer': eventBookingCustomer,
+  'event-booking-lodge': eventBookingLodge,
 }

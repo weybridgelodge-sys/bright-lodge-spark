@@ -12,6 +12,7 @@ import { Loader2, Plus, Trash2, FileDown, ChevronDown, ChevronRight, Pencil } fr
 import autoTable from "jspdf-autotable";
 import { reportPdfDoc, reportSection, INK, GOLD, NAVY, MUTED } from "@/lib/treasurer/reports";
 import { saveJsPdf, saveText } from "@/lib/nativeDownload";
+import { DEFAULT_VENUE, STATEMENT_DESCRIPTOR_MAX } from "@/lib/publicEvents";
 
 const money = (pence: number) =>
   `${pence < 0 ? "-" : ""}£${(Math.abs(pence) / 100).toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -22,7 +23,54 @@ const fromPence = (p: number) => (p / 100).toFixed(2);
 const METHODS = ["stripe", "bank_transfer", "cash"] as const;
 const STATUSES = ["planning", "active", "closed"] as const;
 
-export type EventAccount = { id: string; name: string; event_date: string; status: string; promote_publicly?: boolean };
+type EventDraft = {
+  id?: string; name: string; event_date: string; status: string;
+  is_public: boolean; slug: string; public_title: string; tagline: string; intro_copy: string; theme: "default" | "christmas";
+  start_time: string; end_time: string; venue: string; booking_deadline: string; capacity: string;
+  adult_price: string; child_price: string; hosting_lodges: string; highlights: string; dress_code: string;
+  reference_prefix: string; statement_descriptor: string; events_notify_email: string;
+};
+const blankEventDraft = (): EventDraft => ({
+  name: "", event_date: new Date().toISOString().slice(0, 10), status: "planning",
+  is_public: false, slug: "", public_title: "", tagline: "", intro_copy: "", theme: "default",
+  start_time: "", end_time: "", venue: DEFAULT_VENUE, booking_deadline: "", capacity: "",
+  adult_price: "", child_price: "", hosting_lodges: "", highlights: "", dress_code: "",
+  reference_prefix: "", statement_descriptor: "", events_notify_email: "",
+});
+const penceToInput = (p: number | null | undefined) => (p == null ? "" : (p / 100).toFixed(2));
+const inputToPence = (s: string) => (s.trim() === "" ? null : Math.round(parseFloat(s) * 100));
+function eventToDraft(e: EventAccount): EventDraft {
+  return {
+    id: e.id, name: e.name, event_date: e.event_date, status: e.status,
+    is_public: !!e.is_public, slug: e.slug ?? "", public_title: e.public_title ?? "", tagline: e.tagline ?? "",
+    intro_copy: e.intro_copy ?? "", theme: e.theme === "christmas" ? "christmas" : "default",
+    start_time: (e.start_time ?? "").slice(0, 5), end_time: (e.end_time ?? "").slice(0, 5), venue: e.venue ?? "",
+    booking_deadline: e.booking_deadline ? new Date(e.booking_deadline).toISOString().slice(0, 16) : "",
+    capacity: e.capacity == null ? "" : String(e.capacity),
+    adult_price: penceToInput(e.adult_price_pence), child_price: penceToInput(e.child_price_pence),
+    hosting_lodges: (e.hosting_lodges ?? []).join("\n"),
+    highlights: (Array.isArray(e.highlights) ? e.highlights : []).join("\n"),
+    dress_code: e.dress_code ?? "", reference_prefix: e.reference_prefix ?? "",
+    statement_descriptor: e.statement_descriptor ?? "", events_notify_email: e.events_notify_email ?? "",
+  };
+}
+const lines = (s: string) => s.split("\n").map((l) => l.trim()).filter(Boolean);
+const orNull = (s: string) => (s.trim() === "" ? null : s.trim());
+function draftToPayload(d: EventDraft) {
+  return {
+    name: d.name.trim(), event_date: d.event_date, status: d.status,
+    is_public: d.is_public, slug: orNull(d.slug.toLowerCase()), public_title: orNull(d.public_title), tagline: orNull(d.tagline),
+    intro_copy: orNull(d.intro_copy), theme: d.theme, start_time: orNull(d.start_time), end_time: orNull(d.end_time),
+    venue: orNull(d.venue), booking_deadline: d.booking_deadline ? new Date(d.booking_deadline).toISOString() : null,
+    capacity: d.capacity.trim() === "" ? null : parseInt(d.capacity, 10),
+    adult_price_pence: inputToPence(d.adult_price), child_price_pence: inputToPence(d.child_price),
+    hosting_lodges: lines(d.hosting_lodges), highlights: lines(d.highlights), dress_code: orNull(d.dress_code),
+    reference_prefix: orNull(d.reference_prefix.toUpperCase()), statement_descriptor: orNull(d.statement_descriptor),
+    events_notify_email: orNull(d.events_notify_email),
+  };
+}
+
+export type EventAccount = { id: string; name: string; event_date: string; status: string; promote_publicly?: boolean; [k: string]: any };
 type LineType = "income" | "expense";
 type BudgetLine = {
   id: string; event_id: string; category: string; planned_pence: number;
@@ -34,6 +82,8 @@ type Booking = {
   id: string; event_id: string; payer_name: string; ticket_count: number; is_placeholder: boolean;
   deposit_pence: number; deposit_paid: boolean; deposit_method: string | null;
   balance_pence: number; balance_paid: boolean; balance_method: string | null; notes: string | null;
+  reference?: string | null; payment_method?: string | null; payment_status?: string | null; source?: string | null;
+  contact_email?: string | null; lodge_label?: string | null;
 };
 type Guest = {
   id: string; booking_id: string; name: string | null; seating_preference: string | null;
@@ -44,6 +94,65 @@ type ActualLine = {
   event_id: string; debit_pence: number; credit_pence: number; description: string | null;
   chart_of_accounts: { code: string; name: string; account_type: string } | null;
 };
+
+function PublicEventFields({ draft, onChange }: { draft: EventDraft; onChange: (d: EventDraft) => void }) {
+  const set = (patch: Partial<EventDraft>) => onChange({ ...draft, ...patch });
+  const text = (k: keyof EventDraft, label: string, props: Record<string, unknown> = {}) => (
+    <div>
+      <Label>{label}</Label>
+      <Input value={draft[k] as string} onChange={(e) => set({ [k]: e.target.value } as any)} {...props} />
+    </div>
+  );
+  return (
+    <div className="space-y-3 border-t border-gold/20 pt-3">
+      <p className="font-serif text-gold">Public page</p>
+      <label className="flex items-center gap-2 min-h-[44px]">
+        <input type="checkbox" className="w-5 h-5" checked={draft.is_public} onChange={(e) => set({ is_public: e.target.checked })} />
+        <span>Show on the public website (/events)</span>
+      </label>
+      {text("slug", "Page slug (e.g. christmas-party-2026)")}
+      {text("public_title", "Public title")}
+      {text("tagline", "Tagline")}
+      <div>
+        <Label>Intro copy</Label>
+        <Textarea rows={4} value={draft.intro_copy} onChange={(e) => set({ intro_copy: e.target.value })} />
+      </div>
+      <div>
+        <Label>Theme</Label>
+        <Select value={draft.theme} onValueChange={(v) => set({ theme: v as any })}>
+          <SelectTrigger><SelectValue /></SelectTrigger>
+          <SelectContent><SelectItem value="default">Default</SelectItem><SelectItem value="christmas">Christmas</SelectItem></SelectContent>
+        </Select>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {text("start_time", "Start time", { type: "time" })}
+        {text("end_time", "End time", { type: "time" })}
+      </div>
+      {text("venue", "Venue")}
+      {text("booking_deadline", "Booking deadline", { type: "datetime-local" })}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        {text("capacity", "Capacity", { inputMode: "numeric" })}
+        {text("adult_price", "Adult price (£)", { inputMode: "decimal" })}
+        {text("child_price", "Child price (£, 12 and under)", { inputMode: "decimal" })}
+      </div>
+      <div>
+        <Label>Hosting lodges (one per line)</Label>
+        <Textarea rows={2} value={draft.hosting_lodges} onChange={(e) => set({ hosting_lodges: e.target.value })} />
+      </div>
+      <div>
+        <Label>Highlights (one per line)</Label>
+        <Textarea rows={4} value={draft.highlights} onChange={(e) => set({ highlights: e.target.value })} />
+      </div>
+      {text("dress_code", "Dress code")}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {text("reference_prefix", "Booking reference prefix")}
+        {text("statement_descriptor", `Card statement text (max ${STATEMENT_DESCRIPTOR_MAX})`, { maxLength: STATEMENT_DESCRIPTOR_MAX })}
+      </div>
+      {text("events_notify_email", "Notify email(s) — blank = Secretary + Treasurer")}
+      <p className="text-xs text-primary-foreground/70">Online booking stays closed until both prices are set.</p>
+    </div>
+  );
+}
 
 function Card({ title, action, children }: { title: string; action?: React.ReactNode; children: React.ReactNode }) {
   return (
@@ -69,9 +178,7 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
 
   const [eventDialog, setEventDialog] = useState(false);
-  const [eventDraft, setEventDraft] = useState<{ id?: string; name: string; event_date: string; status: string }>({
-    name: "", event_date: new Date().toISOString().slice(0, 10), status: "planning",
-  });
+  const [eventDraft, setEventDraft] = useState<EventDraft>(blankEventDraft());
 
   const [bookingDialog, setBookingDialog] = useState(false);
   const [bookingDraft, setBookingDraft] = useState<any>(null);
@@ -89,7 +196,7 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
   const loadEvents = useCallback(async () => {
     const { data, error } = await supabase
       .from("event_accounts" as any)
-      .select("id,name,event_date,status,promote_publicly")
+      .select("*")
       .order("event_date", { ascending: false });
     if (error) toast({ title: "Could not load events", description: error.message, variant: "destructive" });
     const rows = ((data as any[]) ?? []) as EventAccount[];
@@ -211,7 +318,9 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
   // ─── Mutations ────────────────────────────────────────────────────────────
   const saveEvent = async () => {
     if (!eventDraft.name.trim()) { toast({ title: "Enter an event name", variant: "destructive" }); return; }
-    const payload = { name: eventDraft.name.trim(), event_date: eventDraft.event_date, status: eventDraft.status };
+    if (eventDraft.statement_descriptor.length > STATEMENT_DESCRIPTOR_MAX) { toast({ title: "Statement descriptor must be 22 characters or fewer", variant: "destructive" }); return; }
+    if (eventDraft.is_public && !eventDraft.slug.trim()) { toast({ title: "Add a page slug before making the event public", variant: "destructive" }); return; }
+    const payload = draftToPayload(eventDraft);
     const { data, error } = eventDraft.id
       ? await supabase.from("event_accounts" as any).update(payload).eq("id", eventDraft.id).select("id").maybeSingle()
       : await supabase.from("event_accounts" as any).insert(payload).select("id").maybeSingle();
@@ -220,6 +329,16 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
     await loadEvents();
     if (!eventDraft.id && (data as any)?.id) setEventId((data as any).id);
     toast({ title: "Event saved" });
+  };
+
+  const markPaid = async (b: Booking) => {
+    if (!window.confirm(`Mark ${b.reference || b.payer_name} as paid (cash, cheque or other exception)?`)) return;
+    const { error } = await supabase.from("event_bookings" as any)
+      .update({ payment_status: "paid", balance_paid: true, balance_method: "manual", payment_method: "manual", paid_at: new Date().toISOString() })
+      .eq("id", b.id);
+    if (error) { toast({ title: "Could not mark paid", description: error.message, variant: "destructive" }); return; }
+    toast({ title: "Booking marked paid" });
+    await loadEventData(eventId);
   };
 
   const addBudgetLine = async () => {
@@ -546,12 +665,12 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
           {canEdit && (
             <>
               <Button variant="outline" className="border-gold/30"
-                onClick={() => { if (event) { setEventDraft({ id: event.id, name: event.name, event_date: event.event_date, status: event.status }); setEventDialog(true); } }}
+                onClick={() => { if (event) { setEventDraft(eventToDraft(event)); setEventDialog(true); } }}
                 disabled={!event}>
                 <Pencil className="w-4 h-4 mr-1" /> Edit
               </Button>
               <Button className="bg-gold text-navy hover:bg-gold/90"
-                onClick={() => { setEventDraft({ name: "", event_date: new Date().toISOString().slice(0, 10), status: "planning" }); setEventDialog(true); }}>
+                onClick={() => { setEventDraft(blankEventDraft()); setEventDialog(true); }}>
                 <Plus className="w-4 h-4 mr-1" /> New event
               </Button>
             </>
@@ -791,6 +910,15 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
                           {b.ticket_count} ticket{b.ticket_count === 1 ? "" : "s"}
                           {b.is_placeholder ? " · names TBC" : ""} · {bGuests.length} guest row{bGuests.length === 1 ? "" : "s"}
                         </span>
+                        {b.reference && <span className="text-xs text-gold">{b.reference}</span>}
+                        {b.source === "public" && (
+                          <span className="text-xs text-primary-foreground/80">
+                            {b.payment_method?.replace(/_/g, " ")} · {b.payment_status === "paid" ? "paid" : "pending payment"}
+                          </span>
+                        )}
+                        {canEdit && b.source === "public" && b.payment_status !== "paid" && (
+                          <Button size="sm" variant="outline" className="border-gold/30 min-h-[44px]" onClick={() => markPaid(b)}>Mark paid</Button>
+                        )}
                         <span className="ml-auto text-xs tabular-nums text-primary-foreground/80">
                           Dep {money(b.deposit_pence)}{b.deposit_paid ? " ✓" : ""} · Bal {money(b.balance_pence)}{b.balance_paid ? " ✓" : ""}
                         </span>
@@ -1027,6 +1155,7 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
                 </SelectContent>
               </Select>
             </div>
+            <PublicEventFields draft={eventDraft} onChange={setEventDraft} />
           </div>
           <DialogFooter>
             <Button className="bg-gold text-navy hover:bg-gold/90" onClick={saveEvent}>Save</Button>

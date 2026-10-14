@@ -47,7 +47,7 @@ const baseFooterColumns: FooterColumn[] = [
     heading: "Meetings & Events",
     links: [
       { label: "Book Into Our Next Meeting", href: "/bookings" },
-      { label: "Events Calendar", href: "/events" },
+      { label: "Events", href: "/events" },
     ],
   },
   {
