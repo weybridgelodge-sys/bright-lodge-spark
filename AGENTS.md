@@ -26,3 +26,4 @@
 - Member Admin stacks rows below desktop widths; populated admin/Secretary tests check readable names and overlap. Why: pinned actions can hide names without document overflow.
 - KPI Summary: async crest header, explicit table start, final page-count loop in bottom margin; VO unchanged. Why: prevent overlap, ensure correct totals.
 - Meeting event label (lodge_events.event_label, default 'Festive Board') drives booking-form/email wording; title-aware attendance options live in src/lib/bookingTitles.ts. Why: White Table and other non-Festive-Board events reuse one form.
+- Public event bookings (/events/:slug) use the separate events Stripe account via _shared/stripe-events.ts (STRIPE_EVENTS_* secrets) and event_accounts/event_bookings; never the Lovable-managed lodge Stripe. Why: events money lives in a separate Stripe account and Event Accounts, apart from the lodge ledger.

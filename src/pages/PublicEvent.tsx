@@ -294,7 +294,7 @@ export default function PublicEvent() {
                       ["bank_transfer", "Bank transfer", "We'll show you the account details and a reference"],
                     ] as const).map(([v, l, h]) => (
                       <label key={v} className={`flex items-center gap-3 min-h-[56px] w-full border rounded-sm px-4 py-2 cursor-pointer bg-background ${method === v ? "border-gold" : "border-border"}`}>
-                        <input type="radio" name="pay" value={v} checked={method === v} onChange={() => setMethod(v)} className="w-5 h-5 accent-[hsl(var(--gold))]" />
+                        <input type="radio" name="pay" value={v} checked={method === v} onChange={() => setMethod(v)} className="w-5 h-5 shrink-0 accent-[hsl(var(--gold))]" />
                         <span><span className="block font-semibold text-foreground">{l}</span><span className="block text-sm text-muted-foreground">{h}</span></span>
                       </label>
                     ))}
