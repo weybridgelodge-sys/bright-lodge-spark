@@ -13,6 +13,7 @@ import autoTable from "jspdf-autotable";
 import { reportPdfDoc, reportSection, INK, GOLD, NAVY, MUTED } from "@/lib/treasurer/reports";
 import { saveJsPdf, saveText } from "@/lib/nativeDownload";
 import { Link } from "react-router-dom";
+import { eventActuals, eventTieOut, defaultTicketPlan, isOfflineMethod, isPaidBooking } from "@/lib/treasurer/eventTieOut";
 
 const money = (pence: number) =>
   `${pence < 0 ? "-" : ""}£${(Math.abs(pence) / 100).toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -32,7 +33,15 @@ type LineType = "income" | "expense";
 type BudgetLine = {
   id: string; event_id: string; category: string; planned_pence: number;
   unit_cost_pence: number | null; quantity: number | null; line_type: LineType;
+  system_key?: "ticket_sales" | "fee_contributions" | "stripe_fees" | null;
 };
+const SYSTEM_LINE_NOTE: Record<string, string> = {
+  ticket_sales: "Actual = paid bookings (ticket subtotals)",
+  fee_contributions: "Actual = processing-fee contributions on paid bookings",
+  stripe_fees: "Actual = real Stripe fees (incl. refund/dispute fees)",
+};
+type Payout = { id: string; stripe_payout_id: string; amount_pence: number; arrival_date: string; status: string };
+type Allocation = { id: string; payout_id: string; event_id: string; amount_pence: number };
 type BudgetMode = "total" | "perHead";
 const lineMode = (l: BudgetLine): BudgetMode => (l.unit_cost_pence != null && l.quantity != null ? "perHead" : "total");
 type Booking = {
@@ -42,6 +51,7 @@ type Booking = {
   reference?: string | null; payment_method?: string | null; payment_status?: string | null; source?: string | null; created_at?: string | null;
   contact_email?: string | null; lodge_label?: string | null;
   subtotal_pence?: number | null; fee_pence?: number | null; total_pence?: number | null;
+  stripe_payment_intent_id?: string | null; stripe_fee_pence?: number | null; stripe_other_fees_pence?: number | null;
 };
 type Guest = {
   id: string; booking_id: string; name: string | null; seating_preference: string | null;
@@ -74,6 +84,12 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [guests, setGuests] = useState<Guest[]>([]);
   const [actuals, setActuals] = useState<ActualLine[]>([]);
+  const [payouts, setPayouts] = useState<Payout[]>([]);
+  const [allocations, setAllocations] = useState<Allocation[]>([]);
+  const [allocDraft, setAllocDraft] = useState<Record<string, string>>({});
+  const [stripeBalance, setStripeBalance] = useState<{ available_pence: number; pending_pence: number; checked_at: string } | null>(null);
+  const [balanceBusy, setBalanceBusy] = useState(false);
+  const [feesBusy, setFeesBusy] = useState(false);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
 
   const [eventDialog, setEventDialog] = useState(false);
@@ -107,14 +123,18 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
 
   const loadEventData = useCallback(async (id: string) => {
     if (!id) { setBudget([]); setBookings([]); setGuests([]); setActuals([]); return; }
-    const [b, bk, ac] = await Promise.all([
+    const [b, bk, ac, po, al] = await Promise.all([
       supabase.from("event_budget_lines" as any).select("*").eq("event_id", id).order("category"),
       supabase.from("event_bookings" as any).select("*").eq("event_id", id).order("payer_name"),
       supabase
         .from("journal_lines" as any)
         .select("event_id,debit_pence,credit_pence,description,chart_of_accounts(code,name,account_type)")
         .eq("event_id", id),
+      supabase.from("event_stripe_payouts" as any).select("*").order("arrival_date", { ascending: false }).limit(200),
+      supabase.from("event_payout_allocations" as any).select("*"),
     ]);
+    setPayouts(((po.data as any[]) ?? []) as Payout[]);
+    setAllocations(((al.data as any[]) ?? []) as Allocation[]);
     const bookingRows = ((bk.data as any[]) ?? []) as Booking[];
     setBudget(((b.data as any[]) ?? []) as BudgetLine[]);
     setBookings(bookingRows);
@@ -175,11 +195,20 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
   const expenseByAccount = useMemo(() => byAccount("expense"), [byAccount]);
   const incomeByAccount = useMemo(() => byAccount("income"), [byAccount]);
 
+  // Fixed lines: actuals from paid bookings and real Stripe fees, never from lodge income accounts.
+  const bookingActuals = useMemo(() => eventActuals(bookings), [bookings]);
+
   const budgetVsActual = useMemo(() => {
     const usedExpense = new Set<string>();
     const usedIncome = new Set<string>();
     const build = (lines: BudgetLine[], accounts: typeof expenseByAccount, used: Set<string>) =>
       lines.map((bl) => {
+        if (bl.system_key) {
+          const actual = bl.system_key === "ticket_sales" ? bookingActuals.ticketSales
+            : bl.system_key === "fee_contributions" ? bookingActuals.feeContributions : bookingActuals.stripeFees;
+          const variance = bl.line_type === "income" ? actual - bl.planned_pence : bl.planned_pence - actual;
+          return { key: bl.id, category: bl.category, planned: bl.planned_pence, actual, variance };
+        }
         const cat = bl.category.trim().toLowerCase();
         let actual = 0;
         for (const acc of accounts) {
@@ -198,16 +227,16 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
       unmatchedExpense: expenseByAccount.filter((a) => !usedExpense.has(a.code)),
       unmatchedIncome: incomeByAccount.filter((a) => !usedIncome.has(a.code)),
     };
-  }, [expenseLines, incomeLines, expenseByAccount, incomeByAccount]);
+  }, [expenseLines, incomeLines, expenseByAccount, incomeByAccount, bookingActuals]);
 
   
-  const actualExpenseTotal = expenseByAccount.reduce((s, a) => s + a.pence, 0);
-  const actualIncomeTotal = incomeByAccount.reduce((s, a) => s + a.pence, 0);
+  const actualExpenseTotal = budgetVsActual.expenseRows.reduce((s, r) => s + r.actual, 0) + budgetVsActual.unmatchedExpense.reduce((s, a) => s + a.pence, 0);
+  const actualIncomeTotal = budgetVsActual.incomeRows.reduce((s, r) => s + r.actual, 0) + budgetVsActual.unmatchedIncome.reduce((s, a) => s + a.pence, 0);
 
   // ─── Derived: event reconciliation ────────────────────────────────────────
   const expectedIncome = bookings.reduce(
     (s, b) => s + (b.deposit_paid ? b.deposit_pence : 0) + (b.balance_paid ? b.balance_pence : 0), 0);
-  // Card-fee contributions (mirrors lodge bookings.fee_pence → 4120 Fee Cover Income), kept apart from ticket income.
+  // Processing-fee contributions on event bookings, shown apart from ticket money (held for others, 2300).
   const feeCoverReceived = bookings.reduce((s, b) => s + (b.balance_paid ? (b.fee_pence ?? 0) : 0), 0);
   const invoicedTotal = bookings.reduce((s, b) => s + b.deposit_pence + b.balance_pence, 0);
   const bankedForEvent = useMemo(
@@ -216,6 +245,47 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
       .reduce((s, l) => s + (l.debit_pence ?? 0) - (l.credit_pence ?? 0), 0),
     [actuals]);
   const gap = expectedIncome - bankedForEvent;
+  const eventAllocations = allocations.filter((a) => a.event_id === eventId);
+  const payoutsAllocated = eventAllocations.reduce((s, a) => s + a.amount_pence, 0);
+  const tie = useMemo(() => eventTieOut(
+    bookings,
+    actuals.map((l) => ({ account_code: l.chart_of_accounts?.code, debit_pence: l.debit_pence, credit_pence: l.credit_pence })),
+    payoutsAllocated,
+  ), [bookings, actuals, payoutsAllocated]);
+  const cashBookings = bookings.filter((b) => isPaidBooking(b) && isOfflineMethod(b.payment_method));
+  const allocatedByPayout = (pid: string) => allocations.filter((a) => a.payout_id === pid).reduce((s, a) => s + a.amount_pence, 0);
+
+  const allocatePayout = async (p: Payout) => {
+    const amt = toPence(allocDraft[p.id] ?? fromPence(p.amount_pence - allocatedByPayout(p.id)));
+    if (amt <= 0) { toast({ title: "Enter an amount", variant: "destructive" }); return; }
+    const existing = eventAllocations.find((a) => a.payout_id === p.id);
+    const { error } = existing
+      ? await supabase.from("event_payout_allocations" as any).update({ amount_pence: amt }).eq("id", existing.id)
+      : await supabase.from("event_payout_allocations" as any).insert({ payout_id: p.id, event_id: eventId, amount_pence: amt });
+    if (error) { toast({ title: "Could not allocate", description: error.message, variant: "destructive" }); return; }
+    toast({ title: "Payout allocated" });
+    loadEventData(eventId);
+  };
+  const removeAllocation = async (id: string) => {
+    const { error } = await supabase.from("event_payout_allocations" as any).delete().eq("id", id);
+    if (error) toast({ title: "Could not remove", description: error.message, variant: "destructive" });
+    else loadEventData(eventId);
+  };
+  const checkStripeBalance = async () => {
+    setBalanceBusy(true);
+    const { data, error } = await supabase.functions.invoke("events-stripe-balance", { body: {} });
+    setBalanceBusy(false);
+    if (error || (data as any)?.error) { toast({ title: "Could not read Stripe balance", description: (data as any)?.error ?? error?.message, variant: "destructive" }); return; }
+    setStripeBalance(data as any);
+  };
+  const refreshStripeFees = async () => {
+    setFeesBusy(true);
+    const { data, error } = await supabase.functions.invoke("events-backfill-fees", { body: { event_id: eventId } });
+    setFeesBusy(false);
+    if (error || (data as any)?.error) { toast({ title: "Could not refresh fees", description: (data as any)?.error ?? error?.message, variant: "destructive" }); return; }
+    toast({ title: `Stripe fees updated for ${(data as any).updated} of ${(data as any).checked} booking(s)` });
+    loadEventData(eventId);
+  };
 
   // ─── Mutations ────────────────────────────────────────────────────────────
   const saveEvent = async () => {
@@ -526,9 +596,9 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
     doc.setFont("helvetica", "normal");
     doc.setFontSize(10);
     doc.setTextColor(...INK);
-    doc.text(`Recorded as received: ${money(expectedIncome)}`, margin, y);
-    doc.text(`Landed in Bank (1000) tagged to this event: ${money(bankedForEvent)}`, margin, y + 14);
-    doc.text(gap === 0 ? "Reconciled — no gap." : `Gap: ${money(gap)}`, margin, y + 28);
+    doc.text(`Received from bookings: ${money(tie.onlineReceived + tie.cashReceived)}  ·  Stripe fees: ${money(tie.stripeFees)}`, margin, y);
+    doc.text(`Landed in Lloyds (1000) tagged to this event: ${money(tie.bankReceipts)}  ·  Still in Stripe: ${money(tie.stillInStripe)}`, margin, y + 14);
+    doc.text(tie.unexplained === 0 ? "Tied out — no unexplained gap." : `Unexplained gap: ${money(tie.unexplained)}`, margin, y + 28);
     doc.setTextColor(...MUTED);
     doc.setFontSize(8);
     doc.text("Catering figures are computed live from guest entries and are not stored.", margin, y + 46);
@@ -642,6 +712,20 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
                           <tr key={l.id} className="border-b border-gold/10">
                             <td className="px-2 py-1.5">
                               <div className="space-y-1">
+                                {l.system_key ? (
+                                  <div>
+                                    <span className="font-medium text-primary-foreground">{l.category}</span>
+                                    <span className="ml-2 text-[11px] uppercase tracking-wider text-gold border border-gold/30 rounded-sm px-1">Fixed</span>
+                                    <p className="text-xs text-primary-foreground/60">{SYSTEM_LINE_NOTE[l.system_key]}</p>
+                                    {canEdit && l.system_key === "ticket_sales" && (
+                                      <Button type="button" size="sm" variant="outline" className="mt-1 border-gold/30 min-h-[44px]"
+                                        disabled={!defaultTicketPlan(event?.adult_price_pence, event?.capacity)}
+                                        onClick={() => updateBudgetLine(l.id, { planned_pence: defaultTicketPlan(event?.adult_price_pence, event?.capacity) })}>
+                                        Use expected attendees × adult price
+                                      </Button>
+                                    )}
+                                  </div>
+                                ) : (<>
                                 <Input value={l.category} disabled={!canEdit}
                                   onChange={(e) => setBudget((lsx) => lsx.map((x) => x.id === l.id ? { ...x, category: e.target.value } : x))}
                                   onBlur={(e) => updateBudgetLine(l.id, { category: e.target.value })} />
@@ -654,6 +738,7 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
                                     </button>
                                   ))}
                                 </div>
+                                </>)}
                               </div>
                             </td>
                             <td className="px-2 py-1.5">
@@ -693,11 +778,11 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
                             </td>
                             {canEdit && (
                               <td className="px-2 py-1.5">
-                                <Button variant="ghost" size="icon" aria-label="Delete budget line"
+                                {!l.system_key && <Button variant="ghost" size="icon" aria-label="Delete budget line"
                                   className="text-primary-foreground/60 hover:text-destructive"
                                   onClick={() => deleteBudgetLine(l.id)}>
                                   <Trash2 className="w-4 h-4" />
-                                </Button>
+                                </Button>}
                               </td>
                             )}
                           </tr>
@@ -953,7 +1038,7 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
                 </thead>
                 <tbody>
                   <tr className="bg-navy/40">
-                    <td colSpan={4} className="px-2 py-1.5 text-xs uppercase tracking-wider text-gold">Income actually received (ledger)</td>
+                    <td colSpan={4} className="px-2 py-1.5 text-xs uppercase tracking-wider text-gold">Income actually received</td>
                   </tr>
                   {budgetVsActual.incomeRows.length === 0 && (
                     <tr><td colSpan={4} className="px-2 py-2 text-primary-foreground/50">No income budget lines.</td></tr>
@@ -973,7 +1058,7 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
                     <td className="px-2 py-1.5 text-right tabular-nums">{money(actualIncomeTotal - plannedIncomeTotal)}</td>
                   </tr>
                   <tr className="bg-navy/40">
-                    <td colSpan={4} className="px-2 py-1.5 text-xs uppercase tracking-wider text-gold">Costs actually incurred (ledger)</td>
+                    <td colSpan={4} className="px-2 py-1.5 text-xs uppercase tracking-wider text-gold">Costs actually incurred</td>
                   </tr>
                   {budgetVsActual.expenseRows.length === 0 && (
                     <tr><td colSpan={4} className="px-2 py-2 text-primary-foreground/50">No expense budget lines.</td></tr>
@@ -1022,22 +1107,89 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
             )}
 
             <p className="text-xs text-primary-foreground/50">
-              Actuals are the sum of journal lines tagged to this event. Tag lines from Transaction Detail.
+              Fixed lines come from paid bookings and real Stripe fees. Other lines are journal lines tagged to this event (Transaction Detail). Event money is held for others (2300), never lodge income.
             </p>
           </Card>
 
-          {/* Reconciliation */}
+          {/* Reconciliation — tie-out */}
           <Card title="Event reconciliation">
             <ul className="text-sm space-y-1">
-              <li className="flex justify-between"><span className="text-primary-foreground/70">Invoiced to bookings (deposits + balances)</span><span className="tabular-nums">{money(invoicedTotal)}</span></li>
-              <li className="flex justify-between"><span className="text-primary-foreground/70">Recorded as received (marked paid)</span><span className="tabular-nums">{money(expectedIncome)}</span></li>
-              <li className="flex justify-between"><span className="text-primary-foreground/70">…of which ticket income</span><span className="tabular-nums">{money(expectedIncome - feeCoverReceived)}</span></li>
-              <li className="flex justify-between"><span className="text-primary-foreground/70">…of which processing-fee contributions (4120 Fee Cover Income)</span><span className="tabular-nums">{money(feeCoverReceived)}</span></li>
-              <li className="flex justify-between"><span className="text-primary-foreground/70">Landed in Bank (1000), tagged to this event</span><span className="tabular-nums">{money(bankedForEvent)}</span></li>
+              <li className="flex justify-between gap-3"><span className="text-primary-foreground/70">Received from online bookings (ticket + fee)</span><span className="tabular-nums shrink-0">{money(tie.onlineReceived)}</span></li>
+              <li className="flex justify-between gap-3"><span className="text-primary-foreground/70">…of which processing-fee contributions</span><span className="tabular-nums shrink-0">{money(feeCoverReceived)}</span></li>
+              <li className="flex justify-between gap-3"><span className="text-primary-foreground/70">− Stripe fees (actual)</span><span className="tabular-nums shrink-0">{money(tie.stripeFees)}</span></li>
+              <li className="flex justify-between gap-3"><span className="text-primary-foreground/70">− Landed in Lloyds (1000), tagged to this event</span><span className="tabular-nums shrink-0">{money(tie.bankReceipts)}</span></li>
+              <li className="flex justify-between gap-3"><span className="text-primary-foreground/70">− Still in Stripe for this event</span><span className="tabular-nums shrink-0">{money(tie.stillInStripe)}</span></li>
+              <li className="flex justify-between gap-3"><span className="text-primary-foreground/70">− Payouts allocated but not yet tagged in Lloyds</span><span className="tabular-nums shrink-0">{money(tie.payoutsNotYetInBank)}</span></li>
+              <li className="flex justify-between gap-3 pt-1 border-t border-gold/10"><span className="text-primary-foreground/70">Cash/cheque received</span><span className="tabular-nums shrink-0">{money(tie.cashReceived)}</span></li>
+              <li className="flex justify-between gap-3"><span className="text-primary-foreground/70">− Cash/cheque awaiting banking</span><span className="tabular-nums shrink-0">{money(tie.cashAwaitingBanking)}</span></li>
             </ul>
-            <p className={`text-sm font-semibold ${gap === 0 ? "text-emerald-400" : "text-amber-400"}`}>
-              {gap === 0 ? "Matched — no gap." : `Gap of ${money(Math.abs(gap))} — ${gap > 0 ? "marked paid but not yet seen in the bank" : "more in the bank than recorded against bookings"}.`}
+            <p className={`text-sm font-semibold ${tie.unexplained === 0 ? "text-emerald-400" : "text-amber-400"}`}>
+              {tie.unexplained === 0 ? "Tied out — no unexplained gap." : `Unexplained gap of ${money(Math.abs(tie.unexplained))} — ${tie.unexplained > 0 ? "received but not accounted for" : "more tagged in Lloyds than explained by payouts and banked cash"}.`}
             </p>
+            {tie.feesMissing > 0 && (
+              <p className="text-sm text-amber-400">{tie.feesMissing} paid booking{tie.feesMissing === 1 ? "" : "s"} still waiting for the actual Stripe fee — “Still in Stripe” is overstated until fetched.</p>
+            )}
+            <div className="flex flex-wrap gap-2">
+              {canEdit && (
+                <Button size="sm" variant="outline" className="border-gold/30 min-h-[44px]" onClick={refreshStripeFees} disabled={feesBusy}>
+                  {feesBusy && <Loader2 className="w-4 h-4 mr-1 animate-spin" />}Refresh Stripe fees
+                </Button>
+              )}
+              {canEdit && (
+                <Button size="sm" variant="outline" className="border-gold/30 min-h-[44px]" onClick={checkStripeBalance} disabled={balanceBusy}>
+                  {balanceBusy && <Loader2 className="w-4 h-4 mr-1 animate-spin" />}Check events Stripe balance
+                </Button>
+              )}
+            </div>
+            {stripeBalance && (
+              <p className="text-sm text-primary-foreground/80">
+                Events Stripe account (all events): available {money(stripeBalance.available_pence)} + pending {money(stripeBalance.pending_pence)} = <strong>{money(stripeBalance.available_pence + stripeBalance.pending_pence)}</strong>
+                <span className="text-primary-foreground/60"> · checked {new Date(stripeBalance.checked_at).toLocaleString("en-GB")}</span>
+              </p>
+            )}
+            <p className="text-xs text-primary-foreground/60">Tag each Lloyds payout credit to this event as Dr 1000 / Cr 2300 in Transaction Detail; vendor payments out as Dr 2300 / Cr 1000.</p>
+          </Card>
+
+          <Card title="Cash/cheque awaiting banking">
+            {cashBookings.length === 0 ? <p className="text-sm text-primary-foreground/50">No cash or cheque bookings.</p> : (
+              <ul className="text-sm space-y-1">
+                {cashBookings.map((b) => (
+                  <li key={b.id} className="flex justify-between gap-3"><span className="text-primary-foreground/80 break-words min-w-0">{b.reference || b.payer_name || "Booking"}</span><span className="tabular-nums shrink-0">{money((b.subtotal_pence ?? Math.max(0, (b.total_pence ?? 0) - (b.fee_pence ?? 0))) + (b.fee_pence ?? 0))}</span></li>
+                ))}
+              </ul>
+            )}
+            <p className="text-xs text-primary-foreground/60">Recorded only — nothing is posted when marked paid. When banked, tag the Lloyds credit to this event (Dr 1000 / Cr 2300). Still to bank: {money(tie.cashAwaitingBanking)}.</p>
+          </Card>
+
+          <Card title="Events Stripe payouts">
+            {payouts.length === 0 ? <p className="text-sm text-primary-foreground/50">No payouts received from the events Stripe account yet.</p> : (
+              <ul className="space-y-2">
+                {payouts.map((p) => {
+                  const used = allocatedByPayout(p.id);
+                  const mine = eventAllocations.find((a) => a.payout_id === p.id);
+                  return (
+                    <li key={p.id} className="rounded-sm border border-gold/15 p-3 text-sm space-y-2">
+                      <div className="flex flex-wrap justify-between gap-2">
+                        <span className="text-primary-foreground">{new Date(`${p.arrival_date}T12:00:00`).toLocaleDateString("en-GB")} · <span className="tabular-nums">{money(p.amount_pence)}</span></span>
+                        <span className="text-primary-foreground/60 break-all">{p.stripe_payout_id}</span>
+                      </div>
+                      <p className="text-primary-foreground/70">Allocated: {money(used)} · Unallocated: {money(p.amount_pence - used)}{mine ? ` · This event: ${money(mine.amount_pence)}` : ""}</p>
+                      {canEdit && (
+                        <div className="flex flex-wrap items-end gap-2">
+                          <div className="w-32">
+                            <Label className="text-xs">Allocate to this event (£)</Label>
+                            <Input type="number" step="0.01" value={allocDraft[p.id] ?? fromPence(mine?.amount_pence ?? Math.max(0, p.amount_pence - used))}
+                              onChange={(e) => setAllocDraft((d) => ({ ...d, [p.id]: e.target.value }))} />
+                          </div>
+                          <Button size="sm" className="min-h-[44px]" onClick={() => allocatePayout(p)}>{mine ? "Update" : "Allocate"}</Button>
+                          {mine && <Button size="sm" variant="outline" className="border-gold/30 min-h-[44px]" onClick={() => removeAllocation(mine.id)}>Remove</Button>}
+                        </div>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
           </Card>
         </>
       )}
