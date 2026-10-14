@@ -1,6 +1,6 @@
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { z } from "https://esm.sh/zod@3.23.8";
-import { eventFeePence } from "../_shared/cardFee.ts";
+import { eventFeePence, feeLineItemName } from "../_shared/cardFee.ts";
 import { eventsStripe, sendEventBookingEmails, serviceClient } from "../_shared/stripe-events.ts";
 
 const GuestSchema = z.object({
@@ -60,7 +60,7 @@ Deno.serve(async (req) => {
     }
 
     const subtotal = input.adults * ev.adult_price_pence + input.children * ev.child_price_pence;
-    // Server recalculates the fee itself from cover_fee; card only.
+    // Server recalculates the fee itself from cover_fee and the payment method.
     const fee = eventFeePence(subtotal, input.payment_method, input.cover_fee);
     const total = subtotal + fee;
     const title = ev.public_title || ev.name;
@@ -103,18 +103,19 @@ Deno.serve(async (req) => {
     })));
 
     const metadata = { event_id: ev.id, event_slug: ev.slug, booking_id: booking.id, booking_reference: booking.reference };
+    const btMetadata = { ...metadata, fee_pence: String(fee) };
     const suffix = ev.statement_descriptor ? String(ev.statement_descriptor).slice(0, 22) : undefined;
     const stripe = eventsStripe();
     const confirmUrl = `${input.origin}/events/${ev.slug}/confirmation?ref=${encodeURIComponent(booking.reference)}&t=${booking.access_token}`;
 
     if (input.payment_method === "bank_transfer") {
-      const customer = await stripe.customers.create({ name: input.contact_name, email: input.contact_email, metadata });
+      const customer = await stripe.customers.create({ name: input.contact_name, email: input.contact_email, metadata: btMetadata });
       const pi = await stripe.paymentIntents.create({
         amount: total,
         currency: "gbp",
         customer: customer.id,
         description: stripeName,
-        metadata,
+        metadata: btMetadata,
         ...(suffix && { statement_descriptor_suffix: suffix }),
         payment_method_types: ["customer_balance"],
         payment_method_data: { type: "customer_balance" },
@@ -128,7 +129,7 @@ Deno.serve(async (req) => {
         sort_code: addr?.sort_code ?? null,
         account_number: addr?.account_number ?? null,
         reference: instr.reference ?? null,
-        amount_pence: instr.amount_remaining ?? total,
+        amount_pence: total,
       } : null;
       await sb.from("event_bookings").update({
         stripe_customer_id: customer.id, stripe_payment_intent_id: pi.id, bank_instructions: bank,
@@ -144,7 +145,7 @@ Deno.serve(async (req) => {
       line_items: [
         ...(input.adults ? [{ quantity: input.adults, price_data: { currency: "gbp", unit_amount: ev.adult_price_pence, product_data: { name: `${stripeName} — adult` } } }] : []),
         ...(input.children ? [{ quantity: input.children, price_data: { currency: "gbp", unit_amount: ev.child_price_pence, product_data: { name: `${stripeName} — child (12 and under)` } } }] : []),
-        ...(fee > 0 ? [{ quantity: 1, price_data: { currency: "gbp", unit_amount: fee, product_data: { name: "Card processing fee" } } }] : []),
+        ...(fee > 0 ? [{ quantity: 1, price_data: { currency: "gbp", unit_amount: fee, product_data: { name: feeLineItemName(input.payment_method) } } }] : []),
       ],
       metadata,
       client_reference_id: booking.id,
