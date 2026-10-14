@@ -7,6 +7,7 @@ const GuestSchema = z.object({
   age: z.number().int().min(0).max(120).nullable().optional(),
   is_child: z.boolean(),
   dietary: z.string().trim().max(500).optional().default(""),
+  dietary_choice: z.string().trim().max(80).nullable().optional(),
 });
 
 const BodySchema = z.object({
@@ -40,7 +41,7 @@ Deno.serve(async (req) => {
     if (input.guests.some((g) => g.is_child && (g.age == null || g.age > 12))) return json({ error: "Children must be aged 12 and under." }, 400);
 
     const sb = serviceClient();
-    const { data: ev } = await sb.from("event_accounts").select("*").eq("slug", input.slug).eq("is_public", true).maybeSingle();
+    const { data: ev } = await sb.from("event_accounts").select("*").eq("slug", input.slug).eq("is_public", true).is("archived_at", null).maybeSingle();
     if (!ev) return json({ error: "Event not found." }, 404);
     if (ev.adult_price_pence == null || ev.child_price_pence == null) return json({ error: "Booking is not open yet." }, 409);
     const deadline = ev.booking_deadline ? new Date(ev.booking_deadline) : new Date(`${ev.event_date}T23:59:59Z`);
@@ -85,7 +86,8 @@ Deno.serve(async (req) => {
     if (!booking) throw new Error("Could not allocate a booking reference");
 
     await sb.from("event_guests").insert(input.guests.map((g) => ({
-      booking_id: booking.id, name: g.name, age: g.age ?? null, is_child: g.is_child, allergies: g.dietary || null,
+      booking_id: booking.id, name: g.name, age: g.age ?? null, is_child: g.is_child, dietary_choice: g.dietary_choice || null,
+      allergies: [g.dietary_choice, g.dietary].filter(Boolean).join(" — ") || null,
     })));
 
     const metadata = { event_id: ev.id, event_slug: ev.slug, booking_id: booking.id, booking_reference: booking.reference };

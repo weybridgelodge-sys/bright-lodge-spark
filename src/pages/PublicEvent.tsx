@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
-import { ArrowRight, Calendar, Clock, MapPin, Minus, Plus, Shirt, Star, Users } from "lucide-react";
+import { ArrowRight, Calendar, Clock, MapPin, Minus, Plus, Star, Users } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEO, { breadcrumbSchema } from "@/components/SEO";
@@ -11,7 +11,7 @@ import {
   formatGBP, formatTime, isChildAge, seatsLeft, type PublicEvent as Ev,
 } from "@/lib/publicEvents";
 
-type GuestRow = { name: string; age: string; dietary: string };
+type GuestRow = { name: string; age: string; dietary: string; choice: string };
 type PayMethod = "card" | "pay_by_bank" | "bank_transfer";
 const LODGES = ["Weybridge", "Astolat", "Other", "Guest"] as const;
 
@@ -49,7 +49,7 @@ function Stepper({ label, value, onChange, hint }: { label: string; value: numbe
 }
 
 const resize = (rows: GuestRow[], n: number) =>
-  n <= rows.length ? rows.slice(0, n) : [...rows, ...Array.from({ length: n - rows.length }, () => ({ name: "", age: "", dietary: "" }))];
+  n <= rows.length ? rows.slice(0, n) : [...rows, ...Array.from({ length: n - rows.length }, () => ({ name: "", age: "", dietary: "", choice: "" }))];
 
 export default function PublicEvent() {
   const { slug = "" } = useParams();
@@ -63,7 +63,7 @@ export default function PublicEvent() {
   const [lodge, setLodge] = useState<(typeof LODGES)[number]>("Weybridge");
   const [adults, setAdults] = useState(1);
   const [children, setChildren] = useState(0);
-  const [adultRows, setAdultRows] = useState<GuestRow[]>([{ name: "", age: "", dietary: "" }]);
+  const [adultRows, setAdultRows] = useState<GuestRow[]>([{ name: "", age: "", dietary: "", choice: "" }]);
   const [childRows, setChildRows] = useState<GuestRow[]>([]);
   const [method, setMethod] = useState<PayMethod>("card");
   const [honeypot, setHoneypot] = useState("");
@@ -120,8 +120,8 @@ export default function PublicEvent() {
     if (eventBookingState(ev, new Date(), adults + children) !== "open") { setError("Sorry, there are not enough places left for your party."); return; }
     setSubmitting(true);
     const guests = [
-      ...adultRows.map((g) => ({ name: g.name.trim(), age: g.age ? Number(g.age) : null, is_child: false, dietary: g.dietary.trim() })),
-      ...childRows.map((g) => ({ name: g.name.trim(), age: Number(g.age), is_child: true, dietary: g.dietary.trim() })),
+      ...adultRows.map((g) => ({ name: g.name.trim(), age: g.age ? Number(g.age) : null, is_child: false, dietary: g.dietary.trim(), dietary_choice: g.choice || null })),
+      ...childRows.map((g) => ({ name: g.name.trim(), age: Number(g.age), is_child: true, dietary: g.dietary.trim(), dietary_choice: g.choice || null })),
     ];
     const { data, error: fnErr } = await supabase.functions.invoke("create-event-checkout", {
       body: { slug, contact_name: name.trim(), contact_email: email.trim(), contact_phone: phone.trim(), lodge_label: lodge, adults, children, guests, payment_method: method, origin: window.location.origin, website: "" },
@@ -193,9 +193,38 @@ export default function PublicEvent() {
                 </p>
               )}
               <p className="text-muted-foreground"><MapPin className="inline w-4 h-4 mr-1 text-gold-dark" aria-hidden="true" />{venue.replace(/GU\d\s?\d\w\w/i, "GU2 4DR")}</p>
-              {ev.dress_code && <p className="text-muted-foreground"><Shirt className="inline w-4 h-4 mr-1 text-gold-dark" aria-hidden="true" />Dress code: {ev.dress_code}</p>}
             </div>
           </section>
+
+          {(ev.useful_stuff.parking || ev.useful_stuff.timings || ev.useful_stuff.access || ev.dress_code) && (
+            <section className="py-16 bg-card border-t border-border" aria-labelledby="useful-heading">
+              <div className="container mx-auto px-4 sm:px-6 max-w-3xl">
+                <h2 id="useful-heading" className="font-serif text-3xl text-foreground text-center">The Useful Stuff</h2>
+                <Divider festive={festive} />
+                <dl className="grid sm:grid-cols-2 gap-4 font-sans">
+                  {([["Timings", ev.useful_stuff.timings], ["Dress code", ev.dress_code], ["Parking", ev.useful_stuff.parking], ["Access", ev.useful_stuff.access]] as const)
+                    .filter(([, v]) => !!v).map(([k, v]) => (
+                      <div key={k} className="border border-border bg-background rounded-sm p-4">
+                        <dt className="font-semibold text-foreground">{k}</dt><dd className="text-muted-foreground">{v}</dd>
+                      </div>
+                    ))}
+                </dl>
+              </div>
+            </section>
+          )}
+
+          {ev.menu_items.length > 0 && (
+            <section className="py-16 bg-background border-t border-border" aria-labelledby="menu-heading">
+              <div className="container mx-auto px-4 sm:px-6 max-w-3xl text-center font-sans">
+                <h2 id="menu-heading" className="font-serif text-3xl text-foreground">Menu &amp; Dining</h2>
+                <Divider festive={festive} />
+                <ul className="space-y-2 text-lg text-foreground">{ev.menu_items.map((m) => <li key={m}>{m}</li>)}</ul>
+                <p className="mt-4 text-muted-foreground">
+                  {ev.dietary_choices.length > 0 ? `Dietary options: ${ev.dietary_choices.join(", ")}. ` : ""}Let us know any dietary needs for each guest when you book.
+                </p>
+              </div>
+            </section>
+          )}
 
           {ev.highlights.length > 0 && (
             <section className="py-16 bg-card border-y border-border" aria-labelledby="highlights-heading">
@@ -279,6 +308,14 @@ export default function PublicEvent() {
                               <label className="block"><span className="sr-only">Name</span><input className={inputCls} placeholder="Name" value={g.name} onChange={(e) => set({ name: e.target.value })} /></label>
                               {child && <label className="block"><span className="sr-only">Age</span><input className={inputCls} type="number" min={0} max={CHILD_MAX_AGE} placeholder="Age" value={g.age} onChange={(e) => set({ age: e.target.value })} /></label>}
                             </div>
+                            {ev.dietary_choices.length > 0 && (
+                              <label className="block"><span className="sr-only">Menu choice</span>
+                                <select className={inputCls} value={g.choice} onChange={(e) => set({ choice: e.target.value })}>
+                                  <option value="">Standard menu</option>
+                                  {ev.dietary_choices.map((c) => <option key={c} value={c}>{c}</option>)}
+                                </select>
+                              </label>
+                            )}
                             <label className="block"><span className="sr-only">Dietary needs</span><input className={inputCls} placeholder="Dietary needs or allergies (optional)" value={g.dietary} maxLength={500} onChange={(e) => set({ dietary: e.target.value })} /></label>
                           </div>
                         );

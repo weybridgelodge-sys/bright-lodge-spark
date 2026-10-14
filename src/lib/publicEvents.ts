@@ -20,6 +20,9 @@ export type PublicEvent = {
   highlights: string[];
   dress_code: string | null;
   seats_taken: number;
+  useful_stuff: { parking?: string; timings?: string; access?: string };
+  menu_items: string[];
+  dietary_choices: string[];
 };
 
 export const DEFAULT_VENUE = "Guildford Masonic Centre, Hitherbury Close, Guildford GU2 4DR";
@@ -73,7 +76,7 @@ export function formatTime(t: string | null) {
 }
 
 function normalise(r: any): PublicEvent {
-  return { ...r, highlights: Array.isArray(r.highlights) ? r.highlights.map(String) : [], hosting_lodges: r.hosting_lodges ?? [] };
+  return { ...r, highlights: Array.isArray(r.highlights) ? r.highlights.map(String) : [], hosting_lodges: r.hosting_lodges ?? [], useful_stuff: r.useful_stuff ?? {}, menu_items: Array.isArray(r.menu_items) ? r.menu_items.map(String) : [], dietary_choices: Array.isArray(r.dietary_choices) ? r.dietary_choices.map(String) : [] };
 }
 
 export async function fetchPublicEvents(): Promise<PublicEvent[]> {
