@@ -4,6 +4,7 @@ import { ArrowRight, Calendar, Clock, MapPin, Minus, Plus, Star, Users } from "l
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEO, { breadcrumbSchema } from "@/components/SEO";
+import { calcCardFeePence, eventFeePence } from "@/lib/cardFee";
 import { supabase } from "@/integrations/supabase/client";
 import { readFunctionError } from "@/lib/functionError";
 import {
@@ -68,6 +69,7 @@ export default function PublicEvent() {
   const [adultRows, setAdultRows] = useState<GuestRow[]>([{ name: "", age: "", dietary: "", choice: "" }]);
   const [childRows, setChildRows] = useState<GuestRow[]>([]);
   const [method, setMethod] = useState<PayMethod>("card");
+  const [coverFee, setCoverFee] = useState(true);
   const [honeypot, setHoneypot] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -80,7 +82,9 @@ export default function PublicEvent() {
   useEffect(() => setAdultRows((r) => resize(r, adults)), [adults]);
   useEffect(() => setChildRows((r) => resize(r, children)), [children]);
 
-  const total = ev ? calcEventTotalPence(adults, children, ev.adult_price_pence, ev.child_price_pence) : 0;
+  const subtotal = ev ? calcEventTotalPence(adults, children, ev.adult_price_pence, ev.child_price_pence) : 0;
+  const feePence = eventFeePence(subtotal, method, coverFee);
+  const total = subtotal + feePence;
   const state = ev ? eventBookingState(ev) : "closed";
   const left = ev ? seatsLeft(ev) : null;
   const festive = ev?.theme === "christmas";
@@ -126,7 +130,7 @@ export default function PublicEvent() {
       ...childRows.map((g) => ({ name: g.name.trim(), age: Number(g.age), is_child: true, dietary: g.dietary.trim(), dietary_choice: g.choice || null })),
     ];
     const { data, error: fnErr } = await supabase.functions.invoke("create-event-checkout", {
-      body: { slug, contact_name: name.trim(), contact_email: email.trim(), contact_phone: phone.trim(), lodge_label: lodge, adults, children, guests, payment_method: method, origin: window.location.origin, website: "" },
+      body: { slug, contact_name: name.trim(), contact_email: email.trim(), contact_phone: phone.trim(), lodge_label: lodge, adults, children, guests, payment_method: method, cover_fee: method === "card" && coverFee, origin: window.location.origin, website: "" },
     });
     if (fnErr || data?.error) {
       setError(await readFunctionError(fnErr, data, "Sorry, we could not start your booking."));
@@ -297,7 +301,7 @@ export default function PublicEvent() {
                     <legend className="font-serif text-xl text-foreground mb-2">Tickets</legend>
                     <Stepper label="Adults" value={adults} onChange={setAdults} hint={formatGBP(ev.adult_price_pence!)} />
                     <Stepper label="Children" value={children} onChange={setChildren} hint={`${formatGBP(ev.child_price_pence!)} · aged ${CHILD_MAX_AGE} and under`} />
-                    <p className="text-right text-lg text-foreground" aria-live="polite"><Users className="inline w-4 h-4 mr-1 text-gold-dark" aria-hidden="true" />Total: <strong>{formatGBP(total)}</strong></p>
+                    <p className="text-right text-lg text-foreground" aria-live="polite"><Users className="inline w-4 h-4 mr-1 text-gold-dark" aria-hidden="true" />Total: <strong>{formatGBP(subtotal)}</strong></p>
                   </fieldset>
 
                   {(adults + children) > 0 && (
@@ -340,6 +344,27 @@ export default function PublicEvent() {
                       </label>
                     ))}
                   </fieldset>
+
+                  {method === "card" && subtotal > 0 && (
+                    <div className="border-t border-border pt-4 space-y-3">
+                      <p className="block text-sm font-sans font-medium text-foreground mb-1">Cover the Stripe card processing fee?</p>
+                      <div className="space-y-2 mt-1" role="radiogroup" aria-label="Card fee preference">
+                        <label className="flex items-center gap-3 cursor-pointer min-h-[48px]">
+                          <input type="radio" name="fee" checked={coverFee} onChange={() => setCoverFee(true)} className="w-5 h-5 shrink-0 accent-[hsl(var(--gold))]" />
+                          <span className="text-sm font-sans text-foreground">Yes — add {formatGBP(calcCardFeePence(subtotal))} to my total</span>
+                        </label>
+                        <label className="flex items-center gap-3 cursor-pointer min-h-[48px]">
+                          <input type="radio" name="fee" checked={!coverFee} onChange={() => setCoverFee(false)} className="w-5 h-5 shrink-0 accent-[hsl(var(--gold))]" />
+                          <span className="text-sm font-sans text-foreground">No — the Lodge will cover it</span>
+                        </label>
+                      </div>
+                      <div className="bg-background border border-border rounded-sm p-4 space-y-1">
+                        <div className="flex justify-between text-sm font-sans"><span className="text-muted-foreground">Subtotal</span><span className="text-foreground">{formatGBP(subtotal)}</span></div>
+                        {feePence > 0 && <div className="flex justify-between text-sm font-sans"><span className="text-muted-foreground">Card fee</span><span className="text-foreground">{formatGBP(feePence)}</span></div>}
+                        <div className="flex justify-between text-base font-sans font-semibold border-t border-border pt-2 mt-2"><span className="text-foreground">Total</span><span className="text-gold-dark">{formatGBP(total)}</span></div>
+                      </div>
+                    </div>
+                  )}
 
                   {error && <p role="alert" className="text-destructive font-semibold">{error}</p>}
                   <button type="submit" disabled={submitting} className="w-full inline-flex items-center justify-center gap-2 bg-gold-shimmer text-accent-foreground px-8 py-3 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity min-h-[48px] disabled:opacity-60">
