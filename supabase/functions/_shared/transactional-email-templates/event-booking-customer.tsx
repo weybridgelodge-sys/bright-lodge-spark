@@ -84,7 +84,9 @@ const Email = (d: EventBookingData) => {
               <Row label="Sort code" value={d.bank.sort_code} />
               <Row label="Account number" value={d.bank.account_number} />
               <Row label="Payment reference" value={d.bank.reference} />
-              <Text style={small}>Please use the payment reference exactly as shown so we can match your payment. We will email you when it arrives.</Text>
+              <Section style={notice}>
+                <Text style={noticeText}>Please use the payment reference exactly as shown so we can match your payment. We will email you when it arrives.</Text>
+              </Section>
             </Section>
           )}
           {d.eventUrl && <Text style={small}>Event details: <Link href={d.eventUrl} style={link}>{d.eventUrl}</Link></Text>}
@@ -118,6 +120,8 @@ export const label = { color: BRAND.navy, fontWeight: 'bold' as const, fontSize:
 export const guestLine = { color: BRAND.body, fontSize: '14px', lineHeight: '1.5', margin: '2px 0' }
 export const hr = { borderColor: BRAND.hairline, margin: '14px 0' }
 export const small = { color: BRAND.muted, fontSize: '13px', margin: '16px 0 0' }
+export const notice = { backgroundColor: BRAND.bg, border: `2px solid ${BRAND.gold}`, borderRadius: '4px', padding: '14px 16px', margin: '16px 0 0' }
+export const noticeText = { color: BRAND.navy, fontSize: '14px', fontWeight: 'bold' as const, lineHeight: '1.5', margin: '0' }
 export const link = { color: BRAND.navy, textDecoration: 'underline' }
 const brand = { color: BRAND.navy, fontSize: '24px', margin: '12px 0 0', letterSpacing: '0.5px' }
 const brandSub = { color: BRAND.gold, fontSize: '12px', letterSpacing: '2px', textTransform: 'uppercase' as const, margin: '4px 0 12px' }
