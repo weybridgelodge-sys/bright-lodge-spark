@@ -81,6 +81,7 @@ export async function sendEventBookingEmails(sb: any, bookingId: string, stage: 
     children: b.child_count,
     subtotal: gbp(b.subtotal_pence ?? b.total_pence),
     cardFee: (b.fee_pence ?? 0) > 0 ? gbp(b.fee_pence) : null,
+    feeLabel: b.payment_method === "card" ? "Card fee" : "Processing fee",
     total: gbp(b.total_pence),
     paymentMethod: methodLabel(b.payment_method),
     paymentStatus: b.payment_status === "paid" ? "Paid" : "Awaiting payment",

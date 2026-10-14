@@ -826,7 +826,7 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
                         )}
                         <span className="ml-auto text-xs tabular-nums text-primary-foreground/80">
                           {b.source === "public"
-                            ? <>Subtotal {money(b.subtotal_pence ?? (b.total_pence ?? b.balance_pence) - (b.fee_pence ?? 0))} · Card fee {money(b.fee_pence ?? 0)} · Total {money(b.total_pence ?? b.balance_pence)}{b.balance_paid ? " ✓" : ""}</>
+                            ? <>Subtotal {money(b.subtotal_pence ?? (b.total_pence ?? b.balance_pence) - (b.fee_pence ?? 0))} · {b.payment_method === "card" ? "Card fee" : "Fee"} {money(b.fee_pence ?? 0)} · Total {money(b.total_pence ?? b.balance_pence)}{b.balance_paid ? " ✓" : ""}</>
                             : <>Dep {money(b.deposit_pence)}{b.deposit_paid ? " ✓" : ""} · Bal {money(b.balance_pence)}{b.balance_paid ? " ✓" : ""}</>}
                         </span>
                         {canEdit && (
@@ -1032,7 +1032,7 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
               <li className="flex justify-between"><span className="text-primary-foreground/70">Invoiced to bookings (deposits + balances)</span><span className="tabular-nums">{money(invoicedTotal)}</span></li>
               <li className="flex justify-between"><span className="text-primary-foreground/70">Recorded as received (marked paid)</span><span className="tabular-nums">{money(expectedIncome)}</span></li>
               <li className="flex justify-between"><span className="text-primary-foreground/70">…of which ticket income</span><span className="tabular-nums">{money(expectedIncome - feeCoverReceived)}</span></li>
-              <li className="flex justify-between"><span className="text-primary-foreground/70">…of which card-fee contributions (4120 Fee Cover Income)</span><span className="tabular-nums">{money(feeCoverReceived)}</span></li>
+              <li className="flex justify-between"><span className="text-primary-foreground/70">…of which processing-fee contributions (4120 Fee Cover Income)</span><span className="tabular-nums">{money(feeCoverReceived)}</span></li>
               <li className="flex justify-between"><span className="text-primary-foreground/70">Landed in Bank (1000), tagged to this event</span><span className="tabular-nums">{money(bankedForEvent)}</span></li>
             </ul>
             <p className={`text-sm font-semibold ${gap === 0 ? "text-emerald-400" : "text-amber-400"}`}>
