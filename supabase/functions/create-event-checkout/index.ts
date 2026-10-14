@@ -47,14 +47,19 @@ Deno.serve(async (req) => {
     const deadline = ev.booking_deadline ? new Date(ev.booking_deadline) : new Date(`${ev.event_date}T23:59:59Z`);
     if (new Date() > deadline) return json({ error: "Booking for this event has closed." }, 409);
     if (ev.capacity != null) {
-      const { data: rows } = await sb.from("event_bookings").select("adult_count,child_count")
-        .eq("event_id", ev.id).eq("source", "public").neq("payment_status", "cancelled");
-      const taken = (rows ?? []).reduce((s: number, r: any) => s + r.adult_count + r.child_count, 0);
+      const { data: rows } = await sb.from("event_bookings").select("adult_count,child_count,payment_status,payment_method,created_at")
+        .eq("event_id", ev.id).eq("source", "public");
+      // Paid bookings and pending bank transfers hold seats; unpaid card/Pay by Bank holds lapse after 30 minutes.
+      const cutoff = Date.now() - 30 * 60 * 1000;
+      const holds = (r: any) => r.payment_status === "paid" ||
+        (r.payment_status === "pending" && (r.payment_method === "bank_transfer" || new Date(r.created_at).getTime() > cutoff));
+      const taken = (rows ?? []).filter(holds).reduce((s: number, r: any) => s + r.adult_count + r.child_count, 0);
       if (taken + party > ev.capacity) return json({ error: `Sorry, only ${Math.max(0, ev.capacity - taken)} places remain.` }, 409);
     }
 
     const total = input.adults * ev.adult_price_pence + input.children * ev.child_price_pence;
     const title = ev.public_title || ev.name;
+    const stripeName = ev.name || title; // Accounts name for Stripe descriptions/line items
     const prefix = (ev.reference_prefix || "EVT").toUpperCase();
 
     // Create booking with a sequential reference (retry on collision).
@@ -101,7 +106,7 @@ Deno.serve(async (req) => {
         amount: total,
         currency: "gbp",
         customer: customer.id,
-        description: title,
+        description: stripeName,
         metadata,
         ...(suffix && { statement_descriptor_suffix: suffix }),
         payment_method_types: ["customer_balance"],
@@ -130,12 +135,13 @@ Deno.serve(async (req) => {
       customer_email: input.contact_email,
       payment_method_types: input.payment_method === "card" ? ["card"] : ["pay_by_bank"],
       line_items: [
-        ...(input.adults ? [{ quantity: input.adults, price_data: { currency: "gbp", unit_amount: ev.adult_price_pence, product_data: { name: `${title} — adult` } } }] : []),
-        ...(input.children ? [{ quantity: input.children, price_data: { currency: "gbp", unit_amount: ev.child_price_pence, product_data: { name: `${title} — child (12 and under)` } } }] : []),
+        ...(input.adults ? [{ quantity: input.adults, price_data: { currency: "gbp", unit_amount: ev.adult_price_pence, product_data: { name: `${stripeName} — adult` } } }] : []),
+        ...(input.children ? [{ quantity: input.children, price_data: { currency: "gbp", unit_amount: ev.child_price_pence, product_data: { name: `${stripeName} — child (12 and under)` } } }] : []),
       ],
       metadata,
       client_reference_id: booking.id,
-      payment_intent_data: { description: title, metadata, ...(suffix && { statement_descriptor_suffix: suffix }) },
+      payment_intent_data: { description: stripeName, metadata, ...(suffix && { statement_descriptor_suffix: suffix }) },
+      expires_at: Math.floor(Date.now() / 1000) + 31 * 60, // session dies with the 30-minute seat hold
       success_url: confirmUrl,
       cancel_url: `${input.origin}/events/${ev.slug}?cancelled=1`,
     } as any);

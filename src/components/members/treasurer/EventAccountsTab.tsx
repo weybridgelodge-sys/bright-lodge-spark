@@ -39,7 +39,7 @@ type Booking = {
   id: string; event_id: string; payer_name: string; ticket_count: number; is_placeholder: boolean;
   deposit_pence: number; deposit_paid: boolean; deposit_method: string | null;
   balance_pence: number; balance_paid: boolean; balance_method: string | null; notes: string | null;
-  reference?: string | null; payment_method?: string | null; payment_status?: string | null; source?: string | null;
+  reference?: string | null; payment_method?: string | null; payment_status?: string | null; source?: string | null; created_at?: string | null;
   contact_email?: string | null; lodge_label?: string | null;
 };
 type Guest = {
@@ -815,7 +815,7 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
                         {b.reference && <span className="text-xs text-gold">{b.reference}</span>}
                         {b.source === "public" && (
                           <span className="text-xs text-primary-foreground/80">
-                            {b.payment_method?.replace(/_/g, " ")} · {b.payment_status === "paid" ? "paid" : "pending payment"}
+                            {b.payment_method?.replace(/_/g, " ")} · {b.payment_status === "paid" ? "paid" : (b.payment_status === "pending" && b.payment_method !== "bank_transfer" && b.created_at && Date.now() - new Date(b.created_at).getTime() > 30 * 60 * 1000) ? "EXPIRED — unpaid, seats released" : b.payment_status === "cancelled" ? "cancelled" : "pending payment"}
                           </span>
                         )}
                         {canEdit && b.source === "public" && b.payment_status !== "paid" && (

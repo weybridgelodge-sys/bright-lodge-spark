@@ -42,25 +42,23 @@ const SECRETARY_EMAIL = "secretary@weybridgelodge.org.uk";
 const gbp = (p: number) => new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP" }).format((p || 0) / 100);
 const fmtDate = (d: string) =>
   new Date(`${d}T12:00:00`).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+/** Capitalise the first name only when typed all lower case ("julien smith" → "Julien smith"); leave McDonald etc. alone. */
+export const capFirst = (n?: string | null) => {
+  const s = String(n ?? "").trim();
+  const [first, ...rest] = s.split(/\s+/);
+  if (!first || first !== first.toLowerCase()) return s;
+  return [first.charAt(0).toUpperCase() + first.slice(1), ...rest].join(" ");
+};
 export const methodLabel = (m?: string | null) =>
   ({ card: "Card", pay_by_bank: "Pay by Bank", bank_transfer: "Bank transfer", manual: "Cash / cheque" } as Record<string, string>)[m || ""] || m || "";
 
-/** Lodge recipients: events_notify_email, else the Secretary address plus the current Treasurer's portal email. */
+const WEBMASTER_EMAIL = "webmaster@weybridgelodge.org.uk";
+/** Lodge recipients: events_notify_email, else Secretary + Webmaster. */
 async function lodgeRecipients(sb: any, ev: any): Promise<string[]> {
   if (ev.events_notify_email) {
     return String(ev.events_notify_email).split(/[,;\s]+/).filter((e: string) => e.includes("@"));
   }
-  const out = new Set<string>([SECRETARY_EMAIL]);
-  try {
-    const { data: tid } = await sb.rpc("current_officer_holder", { _position_key: "treasurer" });
-    if (tid) {
-      const { data: p } = await sb.from("profiles").select("email").eq("id", tid).maybeSingle();
-      if (p?.email) out.add(p.email);
-    }
-  } catch (e) {
-    console.error("Treasurer lookup failed", e);
-  }
-  return [...out];
+  return [SECRETARY_EMAIL, WEBMASTER_EMAIL];
 }
 
 export async function sendEventBookingEmails(sb: any, bookingId: string, stage: "booked" | "paid") {
@@ -74,7 +72,7 @@ export async function sendEventBookingEmails(sb: any, bookingId: string, stage: 
     eventTitle: ev.public_title || ev.name,
     eventDate: fmtDate(ev.event_date),
     venue: ev.venue || "Guildford Masonic Centre, Hitherbury Close, Guildford GU2 4DR",
-    bookerName: b.payer_name,
+    bookerName: capFirst(b.payer_name),
     bookerEmail: b.contact_email,
     bookerPhone: b.contact_phone,
     lodgeLabel: b.lodge_label,

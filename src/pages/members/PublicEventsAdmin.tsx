@@ -279,7 +279,7 @@ function Editor({ draft: initial, onBack }: { draft: Draft; onBack: () => void }
         <summary className="cursor-pointer min-h-[44px] flex items-center text-gold font-serif text-sm">Advanced (payments and emails)</summary>
         {field("reference_prefix", "Booking reference prefix", { placeholder: "XMAS26" })}
         {field("statement_descriptor", `Card statement text (max ${STATEMENT_DESCRIPTOR_MAX})`, { maxLength: STATEMENT_DESCRIPTOR_MAX })}
-        {field("events_notify_email", "Notification emails (blank = Secretary + Treasurer)")}
+        {field("events_notify_email", "Notification emails (blank = Secretary + Webmaster)")}
       </details>
       <p className="text-xs text-primary-foreground/70">Publishing needs both prices and start/end times. Online booking stays closed until then.</p>
       <div className="sticky bottom-20 md:bottom-4">
