@@ -99,7 +99,8 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
     if (error) toast({ title: "Could not load events", description: error.message, variant: "destructive" });
     const rows = ((data as any[]) ?? []) as EventAccount[];
     setEvents(rows);
-    setEventId((cur) => cur || rows[0]?.id || "");
+    const wanted = new URLSearchParams(window.location.search).get("event");
+    setEventId((cur) => cur || (wanted && rows.some((r) => r.id === wanted) ? wanted : rows[0]?.id) || "");
     setLoading(false);
   }, []);
 
