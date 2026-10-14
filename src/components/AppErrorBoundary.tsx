@@ -54,8 +54,8 @@ export default class AppErrorBoundary extends Component<{ children: ReactNode },
 
 export function PageLoader() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-navy" aria-busy="true" aria-label="Loading">
+    <main id="main-content" className="min-h-screen flex items-center justify-center bg-navy" aria-busy="true" aria-label="Loading">
       <div className="w-8 h-8 rounded-full border-2 border-gold/30 border-t-gold animate-spin" />
-    </div>
+    </main>
   );
 }
