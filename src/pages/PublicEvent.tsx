@@ -9,7 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { readFunctionError } from "@/lib/functionError";
 import {
   calcEventTotalPence, CHILD_MAX_AGE, DEFAULT_VENUE, eventBookingState, fetchPublicEvent, formatEventDate,
-  formatGBP, formatTime, isChildAge, seatsLeft, type PublicEvent as Ev,
+  formatGBP, formatTime, isChildAge, seatsLeft, keepPostcodeTogether, type PublicEvent as Ev,
 } from "@/lib/publicEvents";
 
 type GuestRow = { name: string; age: string; dietary: string; choice: string };
@@ -178,7 +178,7 @@ export default function PublicEvent() {
               <ul className="flex flex-col sm:flex-row flex-wrap justify-center gap-3 sm:gap-6 text-background/90 font-sans">
                 <li className="flex items-center justify-center gap-2"><Calendar className="w-4 h-4 text-gold" aria-hidden="true" />{formatEventDate(ev.event_date)}</li>
                 {time && <li className="flex items-center justify-center gap-2"><Clock className="w-4 h-4 text-gold" aria-hidden="true" />{time}</li>}
-                <li className="flex items-center justify-center gap-2"><MapPin className="w-4 h-4 text-gold" aria-hidden="true" />Guildford Masonic Centre, GU2 4DR</li>
+                <li className="inline-flex self-center sm:self-auto items-start justify-center gap-2 max-w-full"><MapPin className="w-4 h-4 text-gold shrink-0 mt-1" aria-hidden="true" /><span className="min-w-0">{keepPostcodeTogether("Guildford Masonic Centre, GU2 4DR")}</span></li>
               </ul>
               <a href="#book" className="mt-8 inline-flex items-center justify-center min-h-[48px] px-8 bg-gold-shimmer text-accent-foreground font-semibold rounded-sm">
                 Book your places <ArrowRight className="w-4 h-4 ml-2" aria-hidden="true" />
@@ -198,7 +198,7 @@ export default function PublicEvent() {
                     : "Members, families and guests are all welcome — you do not need to be a Freemason to attend. It is a relaxed way to meet a friendly Masonic Lodge in Surrey and the Freemasons in Guildford."}
                 </p>
               )}
-              <p className="text-muted-foreground"><MapPin className="inline w-4 h-4 mr-1 text-gold-dark" aria-hidden="true" />{venue.replace(/GU\d\s?\d\w\w/i, "GU2 4DR")}</p>
+              <p className="text-muted-foreground"><MapPin className="inline w-4 h-4 mr-1 text-gold-dark" aria-hidden="true" />{keepPostcodeTogether(venue)}</p>
             </div>
           </section>
 

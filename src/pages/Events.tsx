@@ -13,7 +13,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { format, isSameDay } from "date-fns";
 import { useEvents, typeLabel, typeBadgeClass } from "@/data/events";
 import { useEffect } from "react";
-import { fetchPublicEvents, formatEventDate, type PublicEvent } from "@/lib/publicEvents";
+import { fetchPublicEvents, formatEventDate, keepPostcodeTogether, type PublicEvent } from "@/lib/publicEvents";
 
 
 // ─── Animation Variants ───────────────────────────────────────────────────────
@@ -108,9 +108,9 @@ const Events = () => {
                 {publicEvents.map((pe) => (
                   <li key={pe.id}>
                     <Link to={`/events/${pe.slug}`} className="flex items-center justify-between gap-4 w-full min-h-[64px] border border-border bg-card rounded-sm px-5 py-4 hover:border-gold-dark">
-                      <span>
+                      <span className="min-w-0">
                         <span className="block font-serif text-lg text-foreground">{pe.public_title}</span>
-                        <span className="block text-sm font-sans text-muted-foreground">{formatEventDate(pe.event_date)} · Guildford Masonic Centre, GU2 4DR</span>
+                        <span className="block text-sm font-sans text-muted-foreground">{formatEventDate(pe.event_date)} · {keepPostcodeTogether("Guildford Masonic Centre, GU2 4DR")}</span>
                       </span>
                       <ArrowRight className="w-5 h-5 text-gold-dark shrink-0" aria-hidden="true" />
                     </Link>
@@ -180,7 +180,7 @@ const Events = () => {
                               >
                                 {typeLabel[ev.type]}
                               </span>
-                              {ev.title}
+                              {ev.link ? <Link to={ev.link} className="inline-flex items-center min-h-[48px] text-gold-dark underline underline-offset-4">{ev.title}</Link> : ev.title}
                             </li>
                           ))}
                         </ul>
@@ -256,7 +256,7 @@ const Events = () => {
                           )}
                           <span className="inline-flex items-center gap-1.5">
                             <MapPin className="w-4 h-4 text-gold" aria-hidden="true" />
-                            {ev.venue}
+                            {keepPostcodeTogether(ev.venue)}
                           </span>
                         </div>
                         {ev.description && (
@@ -347,7 +347,7 @@ const Events = () => {
                     {/* Address corrected: Weybourne House added — consistent with site-wide canonical address */}
                     <p className="text-sm text-muted-foreground font-sans">
                       Weybourne House, Hitherbury Close, Guildford,{" "}
-                      <span className="font-medium text-foreground">GU2 4DR</span>
+                      <span className="font-medium text-foreground">GU2&nbsp;4DR</span>
                     </p>
                   </div>
                 </div>
@@ -397,7 +397,7 @@ const Events = () => {
               </h2>
               <p className="text-primary-foreground/80 font-sans mb-8">
                 Reserve your place at the next Weybridge Lodge Festive Board at the Guildford
-                Masonic Centre, GU2 4DR — three courses, good company, and a genuine Masonic
+                Masonic Centre, GU2&nbsp;4DR — three courses, good company, and a genuine Masonic
                 evening in Surrey.
               </p>
               <div className="flex flex-col sm:flex-row flex-wrap justify-center items-center gap-4">

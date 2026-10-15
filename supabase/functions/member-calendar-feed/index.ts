@@ -11,6 +11,7 @@
 // the calendar client rewinds it to London local time.
 
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { londonToday, matchesPublicCalendarEvent, publicCalendarTimes, upcomingPublicCalendarRows, type PublicCalendarRow } from "../_shared/publicEventCalendar.ts";
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -94,6 +95,8 @@ type CalEvent = {
   description?: string;
   start: WallClock;
   end: WallClock;
+  url?: string;
+  slug?: string;
 };
 
 /** Extract London Y-M-D from a date-ish string. For plain "YYYY-MM-DD" we keep the digits;
@@ -192,10 +195,10 @@ Deno.serve(async (req) => {
       return new Response("Missing token", { status: 400, headers: cors });
     }
 
-    const admin = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-    );
+    const backendUrl = Deno.env.get("SUPABASE_URL");
+    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    if (!backendUrl || !serviceKey) throw new Error("Calendar configuration unavailable");
+    const admin = createClient(backendUrl, serviceKey);
 
     const { data: tokenRow, error: tokErr } = await admin
       .from("member_calendar_tokens")
@@ -222,7 +225,7 @@ Deno.serve(async (req) => {
     const fromIso = new Date(Date.now() - 365 * 86400_000).toISOString();
     const toIso = new Date(Date.now() + 2 * 365 * 86400_000).toISOString();
 
-    const [eventsRes, meetingsRes, socialsRes, officersRes, loiRes] = await Promise.all([
+    const [eventsRes, meetingsRes, socialsRes, officersRes, loiRes, publicRes] = await Promise.all([
       admin.from("lodge_events")
         .select("id,slug,title,event_date,tyling_time,location,intro")
         .eq("published", true)
@@ -243,6 +246,10 @@ Deno.serve(async (req) => {
       admin.from("loi_schedule_entries")
         .select("id,title,event_date,time_from,time_to,venue,description")
         .gte("event_date", fromIso.slice(0, 10))
+        .lte("event_date", toIso.slice(0, 10)),
+      admin.from("public_events")
+        .select("id,slug,public_title,name,event_date,start_time,end_time,venue,intro_copy")
+        .gte("event_date", londonToday())
         .lte("event_date", toIso.slice(0, 10)),
     ]);
 
@@ -272,6 +279,7 @@ Deno.serve(async (req) => {
         location: ev.location ?? "Guildford Masonic Centre",
         description: descParts.join("\n\n"),
         start, end,
+        slug: ev.slug,
       });
       if (linked) meetingsByKey.delete(ev.slug);
     }
@@ -286,6 +294,7 @@ Deno.serve(async (req) => {
         location: "Guildford Masonic Centre",
         description: (m as any).notes ?? "",
         start, end,
+        slug: (m as any).event_key,
       });
     }
 
@@ -329,6 +338,30 @@ Deno.serve(async (req) => {
     if (loiRes.error) throw loiRes.error;
     for (const l of loiFromSchedule(loiRes.data ?? [])) cal.push(l);
 
+    if (publicRes.error) throw publicRes.error;
+    for (const row of upcomingPublicCalendarRows((publicRes.data ?? []) as PublicCalendarRow[])) {
+      const matching = cal.filter((e) => matchesPublicCalendarEvent(row, {
+        date: `${e.start.y}-${e.start.m}-${e.start.d}`, title: e.title, slug: e.slug,
+      }));
+      // Retain an existing UID when replacing a matching record: subscribers update it rather than seeing a new duplicate.
+      const uid = matching[0]?.uid ?? `public-event-${row.id}@${LODGE_DOMAIN}`;
+      for (let i = cal.length - 1; i >= 0; i--) if (matching.includes(cal[i])) cal.splice(i, 1);
+      const times = publicCalendarTimes(row);
+      const toWall = (value: string) => {
+        const [date, time] = value.split("T");
+        const [y, m, d] = date.split("-").map(Number);
+        const [hh, mm, ss] = time.split(":").map(Number);
+        return wall(y, m, d, hh, mm, ss);
+      };
+      const start = toWall(times.start);
+      cal.push({
+        uid, title: `Social: ${row.public_title}`, start,
+        end: times.end ? toWall(times.end) : addHours(start, 3),
+        location: row.venue ?? "Guildford Masonic Centre", description: row.intro_copy ?? "",
+        url: `https://${LODGE_DOMAIN}/events/${row.slug}`,
+      });
+    }
+
     const lines: string[] = [
       "BEGIN:VCALENDAR",
       "VERSION:2.0",
@@ -353,6 +386,7 @@ Deno.serve(async (req) => {
       );
       if (ev.location) lines.push(`LOCATION:${escText(ev.location)}`);
       if (ev.description) lines.push(`DESCRIPTION:${escText(ev.description)}`);
+      if (ev.url) lines.push(`URL:${ev.url}`);
       // One on-screen reminder, 12 hours before the start. No email alarm.
       lines.push(
         "STATUS:CONFIRMED", "TRANSP:OPAQUE",
