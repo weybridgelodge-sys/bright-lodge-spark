@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   addMonths, endOfMonth, endOfWeek, format, isSameDay, isSameMonth, isToday,
@@ -32,6 +33,7 @@ type CalEvent = {
   end?: Date;
   location?: string;
   description?: string;
+  link?: string;
 };
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
@@ -84,6 +86,7 @@ function parseICS(ics: string): CalEvent[] {
           end,
           location: cur.LOCATION ? unescapeICS(cur.LOCATION) : undefined,
           description: cur.DESCRIPTION ? unescapeICS(cur.DESCRIPTION) : undefined,
+          link: cur.URL?.startsWith("https://weybridgelodge.org.uk/events/") ? new URL(cur.URL).pathname : undefined,
         });
       }
       cur = null;
@@ -123,7 +126,7 @@ function Inner() {
       const { data, error } = await supabase
         .from("member_calendar_tokens")
         .select("token")
-        .eq("member_id", user!.id)
+        .eq("member_id", user?.id ?? "")
         .maybeSingle();
       if (error) throw error;
       return (data as { token: string } | null)?.token ?? null;
@@ -143,7 +146,8 @@ function Inner() {
     queryKey: ["member-calendar-feed", tokenQ.data],
     enabled: !!feedUrl,
     queryFn: async () => {
-      const res = await fetch(feedUrl!, { cache: "no-store" });
+      if (!feedUrl) throw new Error("Calendar link unavailable");
+      const res = await fetch(feedUrl, { cache: "no-store" });
       if (!res.ok) throw new Error(`Feed failed: ${res.status}`);
       const text = await res.text();
       return parseICS(text);
@@ -277,6 +281,7 @@ function Inner() {
             return (
               <button
                 key={key}
+                aria-label={format(day, "EEEE d MMMM yyyy")}
                 onClick={() => setSelected(day)}
                 className={`bg-navy-dark min-h-[92px] text-left p-1.5 transition-colors ${
                   inMonth ? "" : "opacity-40"
@@ -341,7 +346,7 @@ function Inner() {
                     <span className={`text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded border ${KIND_STYLES[ev.kind].pill}`}>
                       {KIND_STYLES[ev.kind].label}
                     </span>
-                    <span className="text-primary-foreground font-medium">{ev.title}</span>
+                    {ev.link ? <Link to={ev.link} className="text-primary-foreground font-medium underline underline-offset-4 min-h-[48px] inline-flex items-center break-words">{ev.title}</Link> : <span className="text-primary-foreground font-medium">{ev.title}</span>}
                   </div>
                   <p className="text-xs text-primary-foreground/60 mt-1">
                     {format(ev.start, "HH:mm")}{ev.end ? ` – ${format(ev.end, "HH:mm")}` : ""}
