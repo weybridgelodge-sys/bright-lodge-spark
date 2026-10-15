@@ -1343,26 +1343,35 @@ export type Database = {
         Row: {
           adult_price_pence: number | null
           archived_at: string | null
+          balance_due_date: string | null
           booking_deadline: string | null
           capacity: number | null
           child_price_pence: number | null
           created_at: string
           created_by: string | null
+          deposit_percent: number | null
           dietary_choices: Json
           dress_code: string | null
           end_time: string | null
           event_date: string
+          event_type: string
           events_notify_email: string | null
+          fee_cover_enabled: boolean
           highlights: Json
           hosting_lodges: string[]
           id: string
           intro_copy: string | null
           is_public: boolean
           menu_items: Json
+          modules: Json
           name: string
+          og_image_url: string | null
+          payment_mode: string
           promote_publicly: boolean
           public_title: string | null
           reference_prefix: string | null
+          seo_description: string | null
+          seo_title: string | null
           short_link: string | null
           slug: string | null
           start_time: string | null
@@ -1377,26 +1386,35 @@ export type Database = {
         Insert: {
           adult_price_pence?: number | null
           archived_at?: string | null
+          balance_due_date?: string | null
           booking_deadline?: string | null
           capacity?: number | null
           child_price_pence?: number | null
           created_at?: string
           created_by?: string | null
+          deposit_percent?: number | null
           dietary_choices?: Json
           dress_code?: string | null
           end_time?: string | null
           event_date: string
+          event_type?: string
           events_notify_email?: string | null
+          fee_cover_enabled?: boolean
           highlights?: Json
           hosting_lodges?: string[]
           id?: string
           intro_copy?: string | null
           is_public?: boolean
           menu_items?: Json
+          modules?: Json
           name: string
+          og_image_url?: string | null
+          payment_mode?: string
           promote_publicly?: boolean
           public_title?: string | null
           reference_prefix?: string | null
+          seo_description?: string | null
+          seo_title?: string | null
           short_link?: string | null
           slug?: string | null
           start_time?: string | null
@@ -1411,26 +1429,35 @@ export type Database = {
         Update: {
           adult_price_pence?: number | null
           archived_at?: string | null
+          balance_due_date?: string | null
           booking_deadline?: string | null
           capacity?: number | null
           child_price_pence?: number | null
           created_at?: string
           created_by?: string | null
+          deposit_percent?: number | null
           dietary_choices?: Json
           dress_code?: string | null
           end_time?: string | null
           event_date?: string
+          event_type?: string
           events_notify_email?: string | null
+          fee_cover_enabled?: boolean
           highlights?: Json
           hosting_lodges?: string[]
           id?: string
           intro_copy?: string | null
           is_public?: boolean
           menu_items?: Json
+          modules?: Json
           name?: string
+          og_image_url?: string | null
+          payment_mode?: string
           promote_publicly?: boolean
           public_title?: string | null
           reference_prefix?: string | null
+          seo_description?: string | null
+          seo_title?: string | null
           short_link?: string | null
           slug?: string | null
           start_time?: string | null
@@ -1630,6 +1657,224 @@ export type Database = {
           },
         ]
       }
+      event_catalogue_categories: {
+        Row: {
+          created_at: string
+          event_id: string
+          id: string
+          name: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          id?: string
+          name: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          id?: string
+          name?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_catalogue_categories_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "event_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_catalogue_categories_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "public_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_catalogue_items: {
+        Row: {
+          active: boolean
+          category_id: string
+          created_at: string
+          description: string | null
+          event_id: string
+          id: string
+          kind: string
+          max_per_booking: number | null
+          name: string
+          price_pence: number
+          sort_order: number
+          unit_note: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          category_id: string
+          created_at?: string
+          description?: string | null
+          event_id: string
+          id?: string
+          kind?: string
+          max_per_booking?: number | null
+          name: string
+          price_pence: number
+          sort_order?: number
+          unit_note?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          category_id?: string
+          created_at?: string
+          description?: string | null
+          event_id?: string
+          id?: string
+          kind?: string
+          max_per_booking?: number | null
+          name?: string
+          price_pence?: number
+          sort_order?: number
+          unit_note?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_catalogue_items_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "event_catalogue_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_catalogue_items_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "event_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_catalogue_items_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "public_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_course_options: {
+        Row: {
+          active: boolean
+          course_id: string
+          created_at: string
+          description: string | null
+          dietary_tags: string[]
+          event_id: string
+          id: string
+          label: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          course_id: string
+          created_at?: string
+          description?: string | null
+          dietary_tags?: string[]
+          event_id: string
+          id?: string
+          label: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          course_id?: string
+          created_at?: string
+          description?: string | null
+          dietary_tags?: string[]
+          event_id?: string
+          id?: string
+          label?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_course_options_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "event_courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_course_options_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "event_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_course_options_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "public_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_courses: {
+        Row: {
+          created_at: string
+          event_id: string
+          id: string
+          menu_set: string
+          name: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          id?: string
+          menu_set?: string
+          name: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          id?: string
+          menu_set?: string
+          name?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_courses_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "event_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_courses_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "public_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       event_guests: {
         Row: {
           age: number | null
@@ -1685,6 +1930,69 @@ export type Database = {
             columns: ["booking_id"]
             isOneToOne: false
             referencedRelation: "event_bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_info_blocks: {
+        Row: {
+          body: string | null
+          created_at: string
+          details: Json
+          event_id: string
+          id: string
+          image_alt: string | null
+          image_path: string | null
+          kind: string
+          link_url: string | null
+          sort_order: number
+          title: string
+          updated_at: string
+          visible: boolean
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          details?: Json
+          event_id: string
+          id?: string
+          image_alt?: string | null
+          image_path?: string | null
+          kind?: string
+          link_url?: string | null
+          sort_order?: number
+          title: string
+          updated_at?: string
+          visible?: boolean
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          details?: Json
+          event_id?: string
+          id?: string
+          image_alt?: string | null
+          image_path?: string | null
+          kind?: string
+          link_url?: string | null
+          sort_order?: number
+          title?: string
+          updated_at?: string
+          visible?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_info_blocks_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "event_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_info_blocks_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "public_events"
             referencedColumns: ["id"]
           },
         ]
@@ -6103,10 +6411,12 @@ export type Database = {
       }
       can_manage_socials: { Args: { _user: string }; Returns: boolean }
       can_manage_visits: { Args: { _user: string }; Returns: boolean }
+      can_read_event_content: { Args: { _uid: string }; Returns: boolean }
       can_view_almoner: { Args: { _user_id: string }; Returns: boolean }
       can_view_charity: { Args: { _user: string }; Returns: boolean }
       can_view_skills_matrix: { Args: { _user: string }; Returns: boolean }
       can_view_year_audit: { Args: { _user: string }; Returns: boolean }
+      can_write_event_content: { Args: { _uid: string }; Returns: boolean }
       check_and_book_seats: {
         Args: { _event_key: string; _meeting_id: string; _seats: number }
         Returns: string
@@ -6130,6 +6440,10 @@ export type Database = {
       dues_calculate_amount: {
         Args: { _lodge_year: number; _member_id: string }
         Returns: Json
+      }
+      duplicate_event_content: {
+        Args: { _dst: string; _src: string }
+        Returns: undefined
       }
       effective_initiation_date: {
         Args: { _member_id: string }
@@ -6311,6 +6625,7 @@ export type Database = {
       }
       is_current_wm_or_ipm: { Args: { _user_id: string }; Returns: boolean }
       is_event_key_archived: { Args: { _event_key: string }; Returns: boolean }
+      is_event_published: { Args: { _event_id: string }; Returns: boolean }
       is_lodge_secretary: { Args: { _user: string }; Returns: boolean }
       is_period_locked: { Args: { p_period_id: string }; Returns: boolean }
       is_working_group_lead: {
