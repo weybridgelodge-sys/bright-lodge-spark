@@ -103,13 +103,13 @@ export default function MembersLayout({ children }: { children: React.ReactNode 
   return (
     <div className="min-h-screen min-h-[100dvh] bg-navy text-primary-foreground">
       <header className="border-b border-gold/20 bg-navy-dark/80 backdrop-blur sticky top-0 z-40 pt-[max(0px,env(safe-area-inset-top))]">
-        <div className="container mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-2 sm:gap-4">
-          <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+        <div className="container mx-auto px-4 sm:px-6 max-lg:pl-[max(1rem,env(safe-area-inset-left))] max-lg:pr-[max(1rem,env(safe-area-inset-right))] h-16 flex items-center justify-between gap-2 sm:gap-4">
+          <div className="flex min-w-0 flex-1 lg:flex-none items-center gap-2 sm:gap-3">
             <Sheet open={drawerOpen} onOpenChange={setDrawerOpen}>
               <SheetTrigger asChild>
                 <button
                   aria-label="Open navigation menu"
-                  className="lg:hidden inline-flex items-center justify-center w-10 h-10 rounded-sm text-primary-foreground/80 hover:text-gold hover:bg-navy-light/40"
+                  className="lg:hidden inline-flex shrink-0 items-center justify-center w-11 h-11 rounded-sm text-primary-foreground/80 hover:text-gold hover:bg-navy-light/40"
                 >
                   <Menu className="w-5 h-5" />
                 </button>
@@ -130,7 +130,7 @@ export default function MembersLayout({ children }: { children: React.ReactNode 
               </SheetContent>
 
             </Sheet>
-            <Link to="/members" className="flex min-w-0 items-center gap-2 sm:gap-3">
+            <Link to="/members" className="flex min-w-0 flex-1 lg:flex-none items-center gap-2 sm:gap-3">
               <img src={logo} alt="Weybridge Lodge crest" width={44} height={44} decoding="async" className="h-11 w-11 shrink-0 bg-primary-foreground/90 rounded-full p-0.5" />
               <div className="min-w-0">
                 <p className="font-serif text-sm font-semibold leading-tight truncate">Members Portal</p>
@@ -163,7 +163,7 @@ export default function MembersLayout({ children }: { children: React.ReactNode 
             {navItems}
           </nav>
         </aside>
-        <main className="pb-[max(5.5rem,calc(5rem+env(safe-area-inset-bottom)))] lg:pb-0">{children}</main>
+        <main className="min-w-0 pb-[max(5.5rem,calc(5rem+env(safe-area-inset-bottom)))] lg:pb-0">{children}</main>
       </div>
 
       {/* Mobile Bottom Sticky Navigation Strip — Visible below 1024px */}
