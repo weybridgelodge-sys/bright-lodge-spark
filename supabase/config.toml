@@ -43,3 +43,6 @@ project_id = "kntcjlztmcgmagwgheyx"
     verify_jwt = false
   [functions.get-event-booking]
     verify_jwt = false
+
+[functions.event-image]
+  verify_jwt = false
