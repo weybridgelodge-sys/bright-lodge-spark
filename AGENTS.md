@@ -24,3 +24,4 @@
 - Public calendars read public_events via _shared/publicEventCalendar rules; member Calendar uses member-calendar-feed only. Why: website and webcal show the same events.
 - Event pricing only via _shared/eventPricing.ts; booking form pieces via components/events/booking/BookingCore. Why: browser/server agree; one core.
 - Event module tables: public read via is_event_published(), writes via can_write_event_content(), copies via duplicate_event_content(). Why: drafts hidden, copies atomic.
+- Public event money state comes from event_booking_payments (one row per Stripe charge); event_bookings amount_paid/balance/fees are roll-ups via recomputeBooking, and balance-link tokens live only in the service-role-only event_booking_balance_tokens table. Why: deposits/balances/refunds need per-payment matching without exposing links.
