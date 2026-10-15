@@ -6,7 +6,7 @@ const card = { payment_method: "card", payment_status: "paid", subtotal_pence: 4
 describe("event subledger", () => {
   it("income actuals come from paid bookings, not ledger lines", () => {
     const a = eventActuals([card, { ...card, payment_status: "pending" }]);
-    expect(a).toEqual({ ticketSales: 4000, feeContributions: 100, stripeFees: 82 });
+    expect(a).toEqual({ ticketSales: 4000, preOrders: 0, feeContributions: 100, stripeFees: 82 });
   });
 
   it("old rows without subtotal fall back to total minus fee", () => {
