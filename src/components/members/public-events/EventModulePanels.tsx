@@ -84,7 +84,7 @@ export function PaymentSchedulePanel({ s, set, adultPricePence }: { s: ModuleSet
   let example: string | null = null;
   if (s.payment_mode === "full_or_deposit" && pct && pct > 0 && pct < 100) {
     const dep = depositPence(sample, effectiveDepositPercent(pct));
-    const q = quoteBooking({ orderPence: sample, plan: "deposit", depositPercent: effectiveDepositPercent(pct), method: "card", coverFee: s.fee_cover_enabled } as any);
+    const q = quoteBooking({ orderPence: sample, plan: "deposit", depositPercent: effectiveDepositPercent(pct), method: "card", coverFee: s.fee_cover_enabled });
     example = `Example: an order of ${formatGBP(sample)} takes a deposit of ${formatGBP(dep)}${s.fee_cover_enabled && q?.feePence ? ` (plus ${formatGBP(q.feePence)} card fee if the guest covers it)` : ""}, leaving ${formatGBP(sample - dep)} due later.`;
   }
   return (
@@ -167,14 +167,14 @@ export function SeoPanel({ s, set, eventId }: { s: ModuleSettings; set: (p: Part
 
 function useRows<T extends { id: string; sort_order: number }>(table: string, eventId: string, extra?: (q: any) => any) {
   const [rows, setRows] = useState<T[]>([]);
-  const { loading, done } = useInitialLoading();
+  const [loading, setLoading] = useInitialLoading();
   const load = async () => {
     let q = db.from(table).select("*").eq("event_id", eventId);
     if (extra) q = extra(q);
     const { data, error } = await q.order("sort_order").order("created_at");
     if (error) toast.error(error.message);
     setRows((data as T[]) ?? []);
-    done();
+    setLoading(false);
   };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { load(); }, [eventId, table]);
