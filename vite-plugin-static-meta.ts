@@ -1,7 +1,7 @@
 import { buildEventSeo } from "./src/lib/eventSeo";
 import fs from "fs";
 import path from "path";
-import { loadEnv, type Plugin } from "vite";
+import type { Plugin } from "vite";
 import { createClient } from "@sanity/client";
 
 /**
@@ -475,6 +475,7 @@ function renderHead(baseHtml: string, meta: RouteMeta) {
 
 /** Published public events (same view as the website), with meta + JSON-LD from event data. */
 async function eventRoutes(): Promise<RouteMeta[]> {
+  const { loadEnv } = await import("vite");
   const env = { ...loadEnv("production", process.cwd(), "VITE_"), ...process.env };
   const url = env.VITE_SUPABASE_URL;
   const key = env.VITE_SUPABASE_PUBLISHABLE_KEY;

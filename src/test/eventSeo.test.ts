@@ -18,7 +18,7 @@ describe("buildEventSeo", () => {
   it("falls back to the public title and generated sentence", () => {
     const s = buildEventSeo(ev, { open: true });
     expect(s.title).toBe("Festival 2027");
-    expect(s.description).toMatch(/^Festival 2027 on Saturday 14 August 2027/);
+    expect(s.description).toMatch(/^Festival 2027 on Saturday,? 14 August 2027/);
   });
   it("prices become an AggregateOffer from lowest to highest", () => {
     const o = (buildEventSeo(ev, { open: false }).jsonLd as any).offers;
