@@ -24,6 +24,7 @@ const fromPence = (p: number) => (p / 100).toFixed(2);
 const METHODS = ["stripe", "bank_transfer", "cash"] as const;
 const STATUSES = ["planning", "active", "closed"] as const;
 
+type PreOrder = { booking_id: string; name_snapshot: string; quantity: number; line_total_pence: number };
 type EventDraft = { id?: string; name: string; event_date: string; status: string };
 const blankEventDraft = (): EventDraft => ({ name: "", event_date: new Date().toISOString().slice(0, 10), status: "planning" });
 const eventToDraft = (e: EventAccount): EventDraft => ({ id: e.id, name: e.name, event_date: e.event_date, status: e.status });
@@ -92,6 +93,7 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
   const [balanceBusy, setBalanceBusy] = useState(false);
   const [feesBusy, setFeesBusy] = useState(false);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  const [preOrders, setPreOrders] = useState<PreOrder[]>([]);
 
   const [eventDialog, setEventDialog] = useState(false);
   const [eventDraft, setEventDraft] = useState<EventDraft>(blankEventDraft());
@@ -146,7 +148,10 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
         .select("*")
         .in("booking_id", bookingRows.map((r) => r.id));
       setGuests(((g as any[]) ?? []) as Guest[]);
-    } else setGuests([]);
+      const { data: it } = await supabase.from("event_booking_items" as any)
+        .select("booking_id,name_snapshot,quantity,line_total_pence").in("booking_id", bookingRows.map((r) => r.id)).order("created_at");
+      setPreOrders(((it as any[]) ?? []) as PreOrder[]);
+    } else { setGuests([]); setPreOrders([]); }
   }, []);
 
   useEffect(() => { loadEvents(); }, [loadEvents]);
@@ -931,6 +936,14 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
                       {open && (
                         <div className="border-t border-gold/10 px-3 py-2 space-y-2">
                           {b.notes && <p className="text-xs text-primary-foreground/60">{b.notes}</p>}
+                          {preOrders.some((p) => p.booking_id === b.id) && (
+                            <div className="text-sm">
+                              <p className="text-xs uppercase tracking-wider text-primary-foreground/60">Pre-orders (fixed at booking)</p>
+                              <ul className="text-primary-foreground/90">
+                                {preOrders.filter((p) => p.booking_id === b.id).map((p, i) => <li key={i}>{p.quantity} × {p.name_snapshot} · {money(p.line_total_pence)}</li>)}
+                              </ul>
+                            </div>
+                          )}
                           <div className="overflow-x-auto">
                             <table className="w-full text-sm min-w-[640px]">
                               <thead>
