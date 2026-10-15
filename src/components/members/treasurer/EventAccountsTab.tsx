@@ -13,7 +13,7 @@ import autoTable from "jspdf-autotable";
 import { reportPdfDoc, reportSection, INK, GOLD, NAVY, MUTED } from "@/lib/treasurer/reports";
 import { saveJsPdf, saveText } from "@/lib/nativeDownload";
 import { Link } from "react-router-dom";
-import { eventActuals, eventTieOut, defaultTicketPlan, isOfflineMethod, hasReceipts } from "@/lib/treasurer/eventTieOut";
+import { eventActuals, eventTieOut, defaultTicketPlan, hasReceipts, receivedSplit } from "@/lib/treasurer/eventTieOut";
 import EventBalancesPanel from "@/components/members/treasurer/EventBalancesPanel";
 
 const money = (pence: number) =>
@@ -142,6 +142,14 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
     setPayouts(((po.data as any[]) ?? []) as Payout[]);
     setAllocations(((al.data as any[]) ?? []) as Allocation[]);
     const bookingRows = ((bk.data as any[]) ?? []) as Booking[];
+    // Manual (cash/cheque) payment rows count as cash even on a card/Pay by Bank booking.
+    if (bookingRows.length) {
+      const { data: pays } = await supabase.from("event_booking_payments" as any)
+        .select("booking_id,method,status,amount_pence,refunded_pence").in("booking_id", bookingRows.map((r: any) => r.id)).eq("method", "manual");
+      const manual: Record<string, number> = {};
+      for (const p of (pays as any[]) ?? []) if (p.status === "paid" || p.status === "refunded") manual[p.booking_id] = (manual[p.booking_id] ?? 0) + Math.max(0, p.amount_pence - (p.refunded_pence ?? 0));
+      for (const r of bookingRows as any[]) r.manual_received_pence = manual[r.id] ?? 0;
+    }
     setBudget(((b.data as any[]) ?? []) as BudgetLine[]);
     setBookings(bookingRows);
     setActuals(((ac.data as any[]) ?? []) as ActualLine[]);
@@ -262,7 +270,7 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
     actuals.map((l) => ({ account_code: l.chart_of_accounts?.code, debit_pence: l.debit_pence, credit_pence: l.credit_pence })),
     payoutsAllocated,
   ), [bookings, actuals, payoutsAllocated]);
-  const cashBookings = bookings.filter((b) => hasReceipts(b) && isOfflineMethod(b.payment_method));
+  const cashBookings = bookings.filter((b) => hasReceipts(b) && receivedSplit(b).cash > 0);
   const allocatedByPayout = (pid: string) => allocations.filter((a) => a.payout_id === pid).reduce((s, a) => s + a.amount_pence, 0);
 
   const allocatePayout = async (p: Payout) => {
@@ -883,7 +891,7 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
             </div>
           </Card>
 
-          <EventBalancesPanel bookings={bookings} canRegenerate={canEdit} />
+          <EventBalancesPanel bookings={bookings} canRegenerate={canEdit} onRecorded={() => loadEventData(eventId)} />
 
           {/* Bookings */}
           <Card
@@ -1174,7 +1182,7 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
             {cashBookings.length === 0 ? <p className="text-sm text-primary-foreground/50">No cash or cheque bookings.</p> : (
               <ul className="text-sm space-y-1">
                 {cashBookings.map((b) => (
-                  <li key={b.id} className="flex justify-between gap-3"><span className="text-primary-foreground/80 break-words min-w-0">{b.reference || b.payer_name || "Booking"}</span><span className="tabular-nums shrink-0">{money((b.subtotal_pence ?? Math.max(0, (b.total_pence ?? 0) - (b.fee_pence ?? 0))) + (b.fee_pence ?? 0))}</span></li>
+                  <li key={b.id} className="flex justify-between gap-3"><span className="text-primary-foreground/80 break-words min-w-0">{b.reference || b.payer_name || "Booking"}</span><span className="tabular-nums shrink-0">{money(receivedSplit(b).cash)}</span></li>
                 ))}
               </ul>
             )}
