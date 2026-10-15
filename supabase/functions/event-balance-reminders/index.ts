@@ -4,7 +4,7 @@
 // Overdue balances are only flagged for the Treasurer (derived on screen); seats are never released.
 // Auth: service-role bearer only (the schedule passes it from the vault). ?dry_run=1 lists without sending.
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
-import { balanceReminderDue, choicesReminderDue } from "../_shared/eventPricing.ts";
+import { balanceReminderDue, balanceStillOwed, choicesReminderDue } from "../_shared/eventPricing.ts";
 import { londonToday, sendEventBookingEmails, serviceClient } from "../_shared/stripe-events.ts";
 
 const json = (b: unknown, s = 200) => new Response(JSON.stringify(b), { status: s, headers: { ...corsHeaders, "Content-Type": "application/json" } });
