@@ -38,7 +38,7 @@ Deno.serve(async (req) => {
   for (const b of bookings ?? []) {
     const ev: any = evById.get(b.event_id);
     const sent = sentBy.get(b.id) ?? new Set<string>();
-    if (b.payment_status === "deposit_paid" && b.balance_due_pence > 0 && b.balance_due_date) {
+    if (balanceStillOwed(b) && b.balance_due_date) {
       const k = balanceReminderDue(b.balance_due_date, today, sent);
       if (k) planned.push({ booking_id: b.id, kind: k });
     }

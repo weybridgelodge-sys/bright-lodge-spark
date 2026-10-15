@@ -138,3 +138,23 @@ export function choicesReminderDue(deadlineIso: string, todayIso: string, sent: 
 
 /** Balance link token format: 43-char base64url (32 random bytes). */
 export const isBalanceToken = (t: unknown): t is string => typeof t === "string" && /^[A-Za-z0-9_-]{43}$/.test(t);
+
+// ---------- Manual (cash/cheque/other) balance payments ----------
+
+/** Checks a manually recorded balance amount: whole pence, above zero, never more than the balance due. */
+export function validateManualBalance(balanceDuePence: number, amountPence: number): { ok: true } | { ok: false; error: string } {
+  if (!Number.isInteger(amountPence) || amountPence <= 0) return { ok: false, error: "Enter an amount above £0.00" };
+  if (balanceDuePence <= 0) return { ok: false, error: "This booking has no balance outstanding" };
+  if (amountPence > balanceDuePence) return { ok: false, error: "That is more than the balance due" };
+  return { ok: true };
+}
+
+/** A balance reminder can only go to a deposit booking that still owes money. */
+export const balanceStillOwed = (b: { payment_status?: string | null; balance_due_pence?: number | null }) =>
+  b.payment_status === "deposit_paid" && (b.balance_due_pence ?? 0) > 0;
+
+/** Public balance link works while a balance is owed or courses remain undecided; otherwise it is used up. */
+export function balanceLinkLive(b: { payment_status?: string | null; balance_due_pence?: number | null }, undecided: number) {
+  if (b.payment_status !== "deposit_paid" && b.payment_status !== "paid") return false;
+  return balanceStillOwed(b) || undecided > 0;
+}
