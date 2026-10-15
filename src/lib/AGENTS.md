@@ -1,0 +1,2 @@
+- KPI Summary: async crest header, explicit table start, final page-count loop in bottom margin; VO unchanged. Why: prevent overlap, ensure correct totals.
+- Public event duplication goes through buildDuplicatePayload (src/lib/eventDuplicate.ts): drafts only, never copies bookings/money/publish/archive state; QR PNGs render client-side via src/lib/eventQr.ts and are decode-tested. Why: annual events repeat safely without a paid QR service.
