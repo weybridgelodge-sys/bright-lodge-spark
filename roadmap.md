@@ -69,6 +69,6 @@
 - [x] Event Accounts subledger: fixed budget lines, booking-driven actuals, real Stripe fees (incl refund/dispute), events payouts + allocations, events Stripe balance, tie-out (cash awaiting banking), remove 4120 wording
 
 ## Public event calendar integration
-- [ ] Tidy public event address wrapping without changing stored values.
-- [ ] Include upcoming published public events once in website calendar and member ICS/calendar, preserving overnight times.
-- [ ] Verify December 19 links and mobile layouts without writing real records; deploy only the calendar feed.
+- [x] Tidy public event address wrapping without changing stored values; checked 360/390/430px, landscape and desktop.
+- [x] Include upcoming published public events once in website calendar and member ICS/calendar, preserving overnight times and existing matching UIDs.
+- [x] Verify December 19 links at 390px (live public reads; isolated member identity and actual handler output), 320px portal regression; 228 unit and 67 browser tests passed, preview build OK. Calendar feed deployed; no real record writes or website publication.
