@@ -1,253 +1,156 @@
-# Stage 2: Dinner & Festival schema and admin modules
+# Stage 3 plan: public event modules + full-payment checkout with line items
 
-## What I checked
-- `event_accounts` policies: Admin/current Treasurer full access; `can_manage_public_events()` (Admin or `is_lodge_secretary()`) can select/insert/update/delete. SELECT also covers Secretary role, Treasurer, Auditors 1/2 and the current WM.
-- `public_events` is a plain view, with no `security_invoker`. It runs as its owner and filters to `is_public AND slug IS NOT NULL AND archived_at IS NULL`. That is how drafts stay hidden today.
-- Storage: there is already a private `event-images` bucket. Its policies use `has_role(...'secretary')`, not the current-Secretary helper.
-- `PublicEventsAdmin.tsx` is 362 lines. Duplicate uses `buildDuplicatePayload` and then a single insert.
-- `ScrollToTopButton` is fixed at `bottom-6 right-6 z-50` on every public page.
+Plan only. Nothing runs until you approve. Simple events (Christmas party) must look and behave exactly as today.
 
-## Scope
-- Schema for the event type, modules, payment schedule, fee cover and SEO.
-- Four content tables (plus their child tables), the image bucket, and the admin panels.
-- Duplicate Event extension.
-- The back-to-top fix.
-- Not in this stage: booking tables, balance columns, changes to the public page beyond hiding the button, and anything Ladies-Festival-related.
+## What I checked in the code first
+- `public_events` view (last defined in migration 0088) has no Stage 2 columns yet: no event_type, modules, payment_mode, fee_cover_enabled, SEO fields. `PublicEvent.tsx` reads only this view through `fetchPublicEvent()`.
+- Stage 2 content tables (courses, course options, catalogue categories/items, info blocks) already have published-only public read policies through `is_event_published()`. So the public page can read them directly. No new public view is needed for them.
+- `modules` holds `courses, kids_menu, catalogue, deposit, info_blocks, sections{menu,drinks,info,hosting_lodges,highlights}`. There is **no "decide later" setting yet**. I propose adding `modules.courses_decide_later` (boolean, off by default). This changes the settings data only, not the database structure.
+- `create-event-checkout` works out prices on the server from adult/child prices with `quoteBooking(plan:"full")`. It ignores client totals, but it does not honour `fee_cover_enabled`. Stripe gets adult, child and fee lines.
+- `event_bookings` has no `payment_plan` column. `event_guests.menu_choice` and `wine_preorder` exist as text.
+- SEO: `SEO.tsx` sets meta tags in the browser only, using react-helmet. There is no prerender step. `prebuild` only generates the sitemap and RSS. So right now social crawlers that don't run JavaScript see the generic tags from `index.html` for every `/events/:slug`.
+- `event-header-image` returns a short-lived signed link for meeting header images. It is not suitable for og:image.
 
-## Public read path (drafts stay hidden)
-- `public_events` gets no new columns in this stage, so the view stays the same. Stage 3 will add `event_type`, `modules`, payment and SEO fields to it (CREATE OR REPLACE, with the new columns appended).
-- Content tables are read directly, with an anon/authenticated SELECT policy that calls a new SECURITY DEFINER helper `is_event_published(event_id)`. The helper uses the same predicate as the view.
-- An unpublished, archived or slug-less event therefore returns no courses, catalogue or blocks to the public. Inactive options/items and hidden blocks are filtered by the policy too.
-
-## Migration SQL (additive only)
+## Stage 3a: schema (one additive migration)
 
 ```sql
--- 1. event_accounts: new columns, all defaulted or nullable
-ALTER TABLE public.event_accounts
-  ADD COLUMN IF NOT EXISTS event_type text NOT NULL DEFAULT 'simple',
-  ADD COLUMN IF NOT EXISTS modules jsonb NOT NULL DEFAULT '{}'::jsonb,
-  ADD COLUMN IF NOT EXISTS payment_mode text NOT NULL DEFAULT 'full',
-  ADD COLUMN IF NOT EXISTS deposit_percent numeric(6,3),
-  ADD COLUMN IF NOT EXISTS balance_due_date date,
-  ADD COLUMN IF NOT EXISTS fee_cover_enabled boolean NOT NULL DEFAULT true,
-  ADD COLUMN IF NOT EXISTS seo_title text,
-  ADD COLUMN IF NOT EXISTS seo_description text,
-  ADD COLUMN IF NOT EXISTS og_image_url text;
+-- 1. Public view: append new columns at the end (CREATE OR REPLACE requires existing order unchanged).
+CREATE OR REPLACE VIEW public.public_events AS
+SELECT id, slug, COALESCE(public_title, name) AS public_title, name, tagline, intro_copy, theme, event_date, start_time, end_time, venue,
+  booking_deadline, capacity, adult_price_pence, child_price_pence, hosting_lodges, highlights, dress_code,
+  (SELECT COALESCE(sum(b.adult_count + b.child_count), 0)::integer FROM public.event_bookings b
+    WHERE b.event_id = e.id AND b.source = 'public'
+      AND public.event_booking_holds_seat(b.payment_status, b.payment_method, b.created_at)) AS seats_taken,
+  useful_stuff, menu_items, dietary_choices,
+  event_type, modules, payment_mode, deposit_percent, balance_due_date, fee_cover_enabled,
+  seo_title, seo_description, og_image_url
+FROM public.event_accounts e
+WHERE is_public = true AND slug IS NOT NULL AND archived_at IS NULL;
+GRANT SELECT ON public.public_events TO anon, authenticated;
 
-ALTER TABLE public.event_accounts
-  ADD CONSTRAINT event_accounts_event_type_chk CHECK (event_type IN ('simple','dinner_festival')),
-  ADD CONSTRAINT event_accounts_payment_mode_chk CHECK (payment_mode IN ('full','full_or_deposit')),
-  ADD CONSTRAINT event_accounts_deposit_pct_chk CHECK (deposit_percent IS NULL OR (deposit_percent > 0 AND deposit_percent < 100)),
-  ADD CONSTRAINT event_accounts_seo_len_chk CHECK ((seo_title IS NULL OR length(seo_title) <= 70) AND (seo_description IS NULL OR length(seo_description) <= 170));
--- "Deposit requires percent and due date" is checked in a trigger (the due date relates to event_date):
-CREATE OR REPLACE FUNCTION public.event_accounts_payment_schedule_validate()
-RETURNS trigger LANGUAGE plpgsql SET search_path = public AS $$
+-- 2. Minimal booking columns (defaults keep every existing row valid and unchanged in meaning).
+ALTER TABLE public.event_bookings
+  ADD COLUMN IF NOT EXISTS payment_plan text NOT NULL DEFAULT 'full'
+    CHECK (payment_plan IN ('full','deposit')),
+  ADD COLUMN IF NOT EXISTS tickets_subtotal_pence integer CHECK (tickets_subtotal_pence IS NULL OR tickets_subtotal_pence >= 0),
+  ADD COLUMN IF NOT EXISTS items_subtotal_pence integer NOT NULL DEFAULT 0 CHECK (items_subtotal_pence >= 0);
+
+-- 3. Drinks/vouchers per booking, with name and price snapshots.
+CREATE TABLE public.event_booking_items (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  booking_id uuid NOT NULL REFERENCES public.event_bookings(id) ON DELETE CASCADE,
+  event_id uuid NOT NULL REFERENCES public.event_accounts(id) ON DELETE CASCADE,
+  catalogue_item_id uuid REFERENCES public.event_catalogue_items(id) ON DELETE SET NULL,
+  kind text NOT NULL CHECK (kind IN ('drink','voucher')),
+  category_name text,
+  name_snapshot text NOT NULL,
+  unit_note_snapshot text,
+  unit_price_pence integer NOT NULL CHECK (unit_price_pence >= 0),
+  quantity integer NOT NULL CHECK (quantity > 0),
+  line_total_pence integer GENERATED ALWAYS AS (unit_price_pence * quantity) STORED,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX event_booking_items_booking_idx ON public.event_booking_items(booking_id);
+CREATE INDEX event_booking_items_event_idx ON public.event_booking_items(event_id);
+
+-- 4. Per-guest course choices ("decide later" = option_id NULL + decide_later true).
+CREATE TABLE public.event_guest_course_choices (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  guest_id uuid NOT NULL REFERENCES public.event_guests(id) ON DELETE CASCADE,
+  booking_id uuid NOT NULL REFERENCES public.event_bookings(id) ON DELETE CASCADE,
+  event_id uuid NOT NULL REFERENCES public.event_accounts(id) ON DELETE CASCADE,
+  course_id uuid REFERENCES public.event_courses(id) ON DELETE SET NULL,
+  option_id uuid REFERENCES public.event_course_options(id) ON DELETE SET NULL,
+  course_name_snapshot text NOT NULL,
+  option_label_snapshot text,
+  decide_later boolean NOT NULL DEFAULT false,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  CHECK (decide_later OR option_id IS NOT NULL OR option_label_snapshot IS NOT NULL),
+  UNIQUE (guest_id, course_id)
+);
+CREATE INDEX event_guest_course_choices_booking_idx ON public.event_guest_course_choices(booking_id);
+CREATE INDEX event_guest_course_choices_event_idx ON public.event_guest_course_choices(event_id);
+
+-- Grants: no anon access (the checkout function writes with the service role; public confirmation reads via get-event-booking).
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.event_booking_items, public.event_guest_course_choices TO authenticated;
+GRANT ALL ON public.event_booking_items, public.event_guest_course_choices TO service_role;
+
+ALTER TABLE public.event_booking_items ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.event_guest_course_choices ENABLE ROW LEVEL SECURITY;
+
+-- Same readers/writers as Stage 2 content (Admin, Secretary, Treasurer, Auditors, current WM read; Admin/Treasurer/Secretary write).
+CREATE POLICY "Event staff read booking items" ON public.event_booking_items FOR SELECT TO authenticated
+  USING (public.can_read_event_content(auth.uid()));
+CREATE POLICY "Event staff write booking items" ON public.event_booking_items FOR ALL TO authenticated
+  USING (public.can_write_event_content(auth.uid())) WITH CHECK (public.can_write_event_content(auth.uid()));
+CREATE POLICY "Event staff read course choices" ON public.event_guest_course_choices FOR SELECT TO authenticated
+  USING (public.can_read_event_content(auth.uid()));
+CREATE POLICY "Event staff write course choices" ON public.event_guest_course_choices FOR ALL TO authenticated
+  USING (public.can_write_event_content(auth.uid())) WITH CHECK (public.can_write_event_content(auth.uid()));
+
+-- Child rows must belong to the same event as their booking (reuse the Stage 2 pattern).
+CREATE OR REPLACE FUNCTION public.event_booking_child_match() RETURNS trigger
+LANGUAGE plpgsql SET search_path = public AS $$
 BEGIN
-  IF NEW.payment_mode = 'full_or_deposit' THEN
-    IF NEW.deposit_percent IS NULL THEN RAISE EXCEPTION 'Deposit percent is required for deposit payments'; END IF;
-    IF NEW.balance_due_date IS NULL THEN RAISE EXCEPTION 'Balance due date is required for deposit payments'; END IF;
-    IF NEW.balance_due_date > NEW.event_date THEN RAISE EXCEPTION 'Balance due date must be on or before the event date'; END IF;
+  IF NOT EXISTS (SELECT 1 FROM public.event_bookings b WHERE b.id = NEW.booking_id AND b.event_id = NEW.event_id) THEN
+    RAISE EXCEPTION 'Booking does not belong to this event';
   END IF;
   RETURN NEW;
 END $$;
-CREATE TRIGGER event_accounts_payment_schedule_validate
-  BEFORE INSERT OR UPDATE OF payment_mode, deposit_percent, balance_due_date, event_date
-  ON public.event_accounts FOR EACH ROW EXECUTE FUNCTION public.event_accounts_payment_schedule_validate();
-
--- 2. Shared helpers
-CREATE OR REPLACE FUNCTION public.is_event_published(_event_id uuid)
-RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public AS $$
-  SELECT EXISTS (SELECT 1 FROM public.event_accounts e
-    WHERE e.id = _event_id AND e.is_public AND e.slug IS NOT NULL AND e.archived_at IS NULL)
-$$;
-CREATE OR REPLACE FUNCTION public.can_read_event_content(_uid uuid)
-RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public AS $$
-  SELECT _uid IS NOT NULL AND (public.can_manage_public_events(_uid)
-    OR public.is_current_officer(_uid,'treasurer') OR public.is_current_officer(_uid,'auditor_1')
-    OR public.is_current_officer(_uid,'auditor_2') OR public.is_current_officer(_uid,'worshipful_master'))
-$$;
-GRANT EXECUTE ON FUNCTION public.is_event_published(uuid) TO anon, authenticated;
-GRANT EXECUTE ON FUNCTION public.can_read_event_content(uuid) TO authenticated;
-
--- 3. Courses (menu_set separates the adult and kids' menus)
-CREATE TABLE public.event_courses (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  event_id uuid NOT NULL REFERENCES public.event_accounts(id) ON DELETE CASCADE,
-  menu_set text NOT NULL DEFAULT 'adult' CHECK (menu_set IN ('adult','child')),
-  name text NOT NULL CHECK (length(trim(name)) > 0),
-  sort_order integer NOT NULL DEFAULT 0,
-  created_at timestamptz NOT NULL DEFAULT now(),
-  updated_at timestamptz NOT NULL DEFAULT now()
-);
-CREATE INDEX event_courses_event_idx ON public.event_courses(event_id, menu_set, sort_order);
-
-CREATE TABLE public.event_course_options (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  course_id uuid NOT NULL REFERENCES public.event_courses(id) ON DELETE CASCADE,
-  event_id uuid NOT NULL REFERENCES public.event_accounts(id) ON DELETE CASCADE,
-  label text NOT NULL CHECK (length(trim(label)) > 0),
-  description text,
-  dietary_tags text[] NOT NULL DEFAULT '{}',
-  active boolean NOT NULL DEFAULT true,
-  sort_order integer NOT NULL DEFAULT 0,
-  created_at timestamptz NOT NULL DEFAULT now(),
-  updated_at timestamptz NOT NULL DEFAULT now()
-);
-CREATE INDEX event_course_options_course_idx ON public.event_course_options(course_id, sort_order);
-CREATE INDEX event_course_options_event_idx ON public.event_course_options(event_id);
-
--- 4. Catalogue
-CREATE TABLE public.event_catalogue_categories (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  event_id uuid NOT NULL REFERENCES public.event_accounts(id) ON DELETE CASCADE,
-  name text NOT NULL CHECK (length(trim(name)) > 0),
-  sort_order integer NOT NULL DEFAULT 0,
-  created_at timestamptz NOT NULL DEFAULT now(),
-  updated_at timestamptz NOT NULL DEFAULT now()
-);
-CREATE INDEX event_catalogue_categories_event_idx ON public.event_catalogue_categories(event_id, sort_order);
-
-CREATE TABLE public.event_catalogue_items (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  category_id uuid NOT NULL REFERENCES public.event_catalogue_categories(id) ON DELETE CASCADE,
-  event_id uuid NOT NULL REFERENCES public.event_accounts(id) ON DELETE CASCADE,
-  name text NOT NULL CHECK (length(trim(name)) > 0),
-  description text,
-  unit_note text,
-  price_pence integer NOT NULL CHECK (price_pence >= 0),
-  kind text NOT NULL DEFAULT 'drink' CHECK (kind IN ('drink','voucher')),
-  max_per_booking integer CHECK (max_per_booking IS NULL OR max_per_booking > 0),
-  active boolean NOT NULL DEFAULT true,
-  sort_order integer NOT NULL DEFAULT 0,
-  created_at timestamptz NOT NULL DEFAULT now(),
-  updated_at timestamptz NOT NULL DEFAULT now()
-);
-CREATE INDEX event_catalogue_items_category_idx ON public.event_catalogue_items(category_id, sort_order);
-CREATE INDEX event_catalogue_items_event_idx ON public.event_catalogue_items(event_id);
-
--- 5. Info blocks
-CREATE TABLE public.event_info_blocks (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  event_id uuid NOT NULL REFERENCES public.event_accounts(id) ON DELETE CASCADE,
-  kind text NOT NULL DEFAULT 'custom' CHECK (kind IN ('hotel','charity','sponsor','dress','timings','custom')),
-  title text NOT NULL CHECK (length(trim(title)) > 0),
-  body text,
-  details jsonb NOT NULL DEFAULT '{}'::jsonb,   -- e.g. hotel {code, rate, phone, url, book_by}
-  image_path text,                              -- storage path in event-content-images
-  image_alt text,
-  link_url text CHECK (link_url IS NULL OR link_url ~* '^https://'),
-  visible boolean NOT NULL DEFAULT true,
-  sort_order integer NOT NULL DEFAULT 0,
-  created_at timestamptz NOT NULL DEFAULT now(),
-  updated_at timestamptz NOT NULL DEFAULT now()
-);
-CREATE INDEX event_info_blocks_event_idx ON public.event_info_blocks(event_id, sort_order);
-
--- 6. Option/item event_id must match its parent (prevents cross-event links)
-CREATE OR REPLACE FUNCTION public.event_child_parent_match()
-RETURNS trigger LANGUAGE plpgsql SET search_path = public AS $$
-BEGIN
-  IF TG_TABLE_NAME = 'event_course_options' THEN
-    IF NOT EXISTS (SELECT 1 FROM public.event_courses c WHERE c.id = NEW.course_id AND c.event_id = NEW.event_id)
-      THEN RAISE EXCEPTION 'Option event does not match course event'; END IF;
-  ELSIF TG_TABLE_NAME = 'event_catalogue_items' THEN
-    IF NOT EXISTS (SELECT 1 FROM public.event_catalogue_categories c WHERE c.id = NEW.category_id AND c.event_id = NEW.event_id)
-      THEN RAISE EXCEPTION 'Item event does not match category event'; END IF;
-  END IF;
-  NEW.updated_at := now();
-  RETURN NEW;
-END $$;
-CREATE TRIGGER event_course_options_match BEFORE INSERT OR UPDATE ON public.event_course_options
-  FOR EACH ROW EXECUTE FUNCTION public.event_child_parent_match();
-CREATE TRIGGER event_catalogue_items_match BEFORE INSERT OR UPDATE ON public.event_catalogue_items
-  FOR EACH ROW EXECUTE FUNCTION public.event_child_parent_match();
--- updated_at on the other three tables reuses the project's existing touch trigger function (name confirmed at build time).
-
--- 7. Grants, RLS and policies (same block for each of the 5 tables)
-DO $$ DECLARE t text; BEGIN
-  FOREACH t IN ARRAY ARRAY['event_courses','event_course_options','event_catalogue_categories','event_catalogue_items','event_info_blocks'] LOOP
-    EXECUTE format('GRANT SELECT ON public.%I TO anon', t);
-    EXECUTE format('GRANT SELECT, INSERT, UPDATE, DELETE ON public.%I TO authenticated', t);
-    EXECUTE format('GRANT ALL ON public.%I TO service_role', t);
-    EXECUTE format('ALTER TABLE public.%I ENABLE ROW LEVEL SECURITY', t);
-    EXECUTE format('CREATE POLICY %I ON public.%I FOR SELECT TO authenticated USING (public.can_read_event_content(auth.uid()))', t||'_staff_read', t);
-    EXECUTE format('CREATE POLICY %I ON public.%I FOR INSERT TO authenticated WITH CHECK (public.can_manage_public_events(auth.uid()))', t||'_mgr_insert', t);
-    EXECUTE format('CREATE POLICY %I ON public.%I FOR UPDATE TO authenticated USING (public.can_manage_public_events(auth.uid())) WITH CHECK (public.can_manage_public_events(auth.uid()))', t||'_mgr_update', t);
-    EXECUTE format('CREATE POLICY %I ON public.%I FOR DELETE TO authenticated USING (public.can_manage_public_events(auth.uid()))', t||'_mgr_delete', t);
-  END LOOP;
-END $$;
--- Public reads: published events only, active/visible rows only
-CREATE POLICY event_courses_public_read ON public.event_courses FOR SELECT TO anon, authenticated
-  USING (public.is_event_published(event_id));
-CREATE POLICY event_course_options_public_read ON public.event_course_options FOR SELECT TO anon, authenticated
-  USING (active AND public.is_event_published(event_id));
-CREATE POLICY event_catalogue_categories_public_read ON public.event_catalogue_categories FOR SELECT TO anon, authenticated
-  USING (public.is_event_published(event_id));
-CREATE POLICY event_catalogue_items_public_read ON public.event_catalogue_items FOR SELECT TO anon, authenticated
-  USING (active AND public.is_event_published(event_id));
-CREATE POLICY event_info_blocks_public_read ON public.event_info_blocks FOR SELECT TO anon, authenticated
-  USING (visible AND public.is_event_published(event_id));
-
--- 8. Storage policies for the new public-read bucket "event-content-images"
---    (the bucket itself is created with the storage tool: public read, 5 MB, image/jpeg|png|webp)
-CREATE POLICY "Event content images manager insert" ON storage.objects FOR INSERT TO authenticated
-  WITH CHECK (bucket_id = 'event-content-images' AND public.can_manage_public_events(auth.uid()));
-CREATE POLICY "Event content images manager update" ON storage.objects FOR UPDATE TO authenticated
-  USING (bucket_id = 'event-content-images' AND public.can_manage_public_events(auth.uid()));
-CREATE POLICY "Event content images manager delete" ON storage.objects FOR DELETE TO authenticated
-  USING (bucket_id = 'event-content-images' AND public.can_manage_public_events(auth.uid()));
+CREATE TRIGGER event_booking_items_match BEFORE INSERT OR UPDATE ON public.event_booking_items
+  FOR EACH ROW EXECUTE FUNCTION public.event_booking_child_match();
+CREATE TRIGGER event_guest_course_choices_match BEFORE INSERT OR UPDATE ON public.event_guest_course_choices
+  FOR EACH ROW EXECUTE FUNCTION public.event_booking_child_match();
 ```
+Existing Christmas bookings: `payment_plan` becomes 'full', `items_subtotal_pence` becomes 0 and `tickets_subtotal_pence` stays NULL. The app treats NULL as "equal to subtotal". No backfill and no change to their amounts.
 
-Notes:
-- Existing rows get `simple`, `{}`, `full` and fee cover on. No backfill is needed and the Christmas party is unchanged.
-- Fee cover "on" matches today's behaviour, where the fee question is offered. Checkout only starts reading `fee_cover_enabled` in stage 3.
-- `modules` keys (validated in the app by a shared pure parser, defaulting to off): `courses`, `kids_menu`, `catalogue`, `deposit`, `info_blocks`, and `sections` {menu, drinks, info, hosting_lodges, highlights}.
+## Stage 3b: server pricing and checkout
+- Extend `_shared/eventPricing.ts` with a pure `priceDinnerOrder(config, request)`. It validates:
+  - ticket counts
+  - each guest has exactly one active option per course in their menu set: adult courses for adults, child courses for children when kids' menu is on; children get adult courses when it is off
+  - "decide later" allowed only when `modules.courses_decide_later` is on
+  - catalogue items exist, are active, belong to this event, quantity is a whole number and no more than `max_per_booking`, and the catalogue module is on
+  - the fee is applied only when `fee_cover_enabled` is on and the guest chose to cover it
+  It returns ticket subtotal, items subtotal, order total, fee, total and Stripe lines.
+- `create-event-checkout`: the body adds optional `items[{item_id, qty}]` and `guests[].courses[{course_id, option_id|null, decide_later}]`. The server reloads courses, options and catalogue from the database and ignores any client price or label. Client totals are not accepted at all; any extra field is stripped by the schema. `payment_plan` is fixed to 'full'.
+- It inserts the booking, then guests, then course choices and items, using snapshots. It fills `event_guests.menu_choice` with a readable summary, e.g. "Starter: Soup; Main: Beef (decide later: Dessert)". If a later insert fails, it deletes the booking so no half booking holds seats.
+- Stripe lines: one per ticket type, then one per drink/voucher (`<Accounts name> — <item>`, qty, unit price), then one fee line. For bank transfer, a single PaymentIntent covers the full total and the metadata gains `items_pence`.
+- Simple events: the same code path produces identical lines and amounts. This is covered by a test comparing to today's output. `fee_cover_enabled=false` forces fee 0. Christmas is true by default, so it is unchanged.
+- Webhook: no logic change. It already checks paid amount equals subtotal plus fee, and subtotal will now include items. Event Accounts actuals use paid booking subtotal for "Ticket sales". **Decision needed (Q2):** count drinks inside Ticket sales, or show them as a separate read-only "Pre-orders" figure in the booking detail only. Treasurer booking detail lists items and course choices, read-only.
+- `get-event-booking`, the confirmation page and the customer/lodge emails list items and course choices, with "decide later" marked.
 
-## Admin UI
-The editor in `PublicEventsAdmin.tsx` stays the shell. The new panels live in `src/components/members/public-events/`. They are desktop/tablet first and use stacking flex/grid so a phone stays usable, with no 320px specs.
-- **EventTypePanel**: Simple / Dinner & Festival select, plus module toggles (switches with one-line help). Panels show only when their module is on. Switching back to Simple hides the panels but keeps the content.
-- **CoursesPanel**: tabs for Adult menu / Kids' menu (the second tab only when `kids_menu` is on). Each course is a card with a name, up/down reorder and delete. Options are rows with label, description, dietary tag chips (from the event's dietary choices plus free text), an active toggle and reorder.
-- **CataloguePanel**: categories as cards. Each item row has name, unit note, price (£ input stored as pence), Drink/Voucher, optional max per booking, active and reorder.
-- **PaymentSchedulePanel**: Full only / Full or deposit. The deposit percent has a "One third" preset button (33.334, shown as "one third, rounded up"). Balance due date. A live worked example on a sample order uses the stage 1 `eventPricing` module.
-- **FeeCoverPanel**: an on/off switch that shows the three shared rates as read-only text.
-- **InfoBlocksPanel**: block cards with kind, title, body textarea, kind-specific fields (hotel: code, rate, phone, link, book-by), image upload with preview, alt text (required when there is an image), visible and reorder. A "Preview" button renders the block as the public card will look.
-- **SeoPanel**: SEO title and description with character counters (70/170) and an OG image (upload or URL), falling back to the public title and tagline.
-- Data hooks: one `useEventModules(eventId)` loader plus small save helpers. Reorder writes `sort_order` in batches. Loading uses `useInitialLoading`.
+## Stage 3c: public page modules (`PublicEvent.tsx` + new `components/events/booking/` pieces)
+- `CourseSelects`: one select per course per guest, inside the existing guest row. It uses the kids' set for child rows. "Decide later" is shown only if enabled. Selects are full width and 48px tall.
+- `CatalogueStepper`: items grouped by category, reusing `Stepper`, with a running subtotal. Vouchers appear as their own group.
+- `InfoBlocks`: cards with serif headings, body text with `whitespace-pre-line`, optional image and an https link opening in a new tab.
+- `FeeAndSummary` gains optional item and ticket lines. It is hidden when fee cover is off.
+- Sections are shown or hidden from `modules.sections`. When `event_type='simple'` every new piece renders nothing and no extra data is fetched. The phone number stays optional, with a test asserting this on both form types.
 
-## Duplicate Event
-In `src/lib/eventDuplicate.ts`:
-- `COPY_FIELDS` gains `event_type, modules, payment_mode, deposit_percent, fee_cover_enabled, seo_title, seo_description, og_image_url`.
-- `balance_due_date` is rolled with `addOneYear` (null stays null). `seo_title` gets `bumpYear`.
-- A new pure `buildDuplicateChildren(src, newEventId)` returns new rows for courses → options and categories → items, mapping old ids to new ones, and info blocks. It strips ids and timestamps and keeps the same image paths (shared files, never deleted on duplicate).
-- The admin inserts parents first, then children. If a child insert fails, the new draft event is deleted so the copy is all-or-nothing.
-- It never copies bookings, guests, payments, tokens, ledger rows, `is_public`, `archived_at`, deadline or short link. Those are unchanged by this stage.
-
-## Back-to-top fix
-`ScrollToTopButton` returns null when the path matches `/events/<slug>` (the confirmation page included). Other pages are unchanged.
-
-## Phone number
-No change in this stage. It is recorded as a rule (optional on every public booking form) and asserted in stage 3 tests.
+## Stage 3d: SEO, sharing image and crawlers
+- Meta from data: title = `seo_title` or public title; description = `seo_description` or the current generated sentence; image = permanent image URL, then site default. JSON-LD Event uses venue from data with the current Guildford address as fallback only when the venue is default. It includes `image`, an AggregateOffer price range (adult/child lowest, adult highest) and organiser from hosting lodges, all built by one pure `buildEventSeo(ev)` with tests.
+- **Permanent image URL**: new public function `event-image`, e.g. `/functions/v1/event-image/<slug>/og` or `/<slug>/<block-id>`, no login. It checks the event is published, not archived, and the image path is in that event's folder. It streams the file bytes (no redirect, since some crawlers don't follow redirects to signed links) with `Content-Type` and `Cache-Control: public, max-age=3600, s-maxage=86400`, and returns 404 otherwise. `og_image_url` stores a storage path, or an external https URL used as-is.
+- Info-block images on the page also use this function. Recommended: one code path, cacheable, no expiring links in the page.
+- **Crawlers**: proposed minimum is a `postbuild` step. After `vite build`, for each published event, copy `dist/index.html` to `dist/events/<slug>/index.html` with title, description, canonical, og:* and twitter tags and JSON-LD replaced. React then takes over normally.
+  - Limits: tags refresh only when the site is next published, same as the sitemap today. **This depends on hosting serving that file before the SPA fallback, which I have not verified.** It is the first task of 3d. If hosting ignores it, the fallback is a `/functions/v1/event-share/<slug>` share link with full OG tags that sends people on to the event page, used for the QR code and social posts.
 
 ## Tests
-- Unit: duplicate copies the module fields and rolls `balance_due_date`; `buildDuplicateChildren` remaps course/option and category/item ids, preserves order, and never carries ids, tokens or payments; the modules parser defaults; the one-third preset maths through `eventPricing`; pence/£ input conversion.
-- Database checks (SQL as anon, ordinary member, Treasurer, Secretary, admin), each wrapped in a rolled-back transaction:
-  - anon sees content only for a published event, never for a draft or archived one, and never inactive or hidden rows;
-  - an ordinary member can't write;
-  - the Treasurer can read but not write;
-  - Admin and the current Secretary can write;
-  - the cross-event option trigger rejects mismatches;
-  - the payment schedule trigger rejects deposit mode without a percent or due date;
-  - storage upload is denied to an ordinary member.
-- Regression: the existing full suite and `public-events-duplicate-qr` / calendar browser specs; the Christmas page loads and its booking form opens unchanged (390px screenshot); a back-to-top check on `/events/christmas-party-2026`.
+- Unit: tampered totals and labels ignored; inactive, wrong-event or unknown item rejected; quantity over `max_per_booking` rejected; missing or extra course choice rejected; child using adult course when kids' menu on rejected; "decide later" only when enabled; fee on/off; simple-event line items byte-identical to today; `buildEventSeo` output; phone optional.
+- Rolled-back database checks: anon cannot read or write the new tables; member cannot read; Treasurer/Secretary/Admin can read; event-mismatch trigger blocks cross-event rows.
+- Browser: Christmas page markup and booking request before/after identical, and form at 320/390px with no overflow. Festival 2027 draft is previewed via a temporary published copy in a rolled-back state or a local mock, never by flipping `is_public` on real data. Courses, steppers and info cards are checked at 320/390px.
+- Image function: published returns 200 with the image and cache headers; draft, archived or wrong-folder returns 404; curl without JS fetches it.
+- Stripe test-mode run on the hidden Ladies Festival 2027 draft: **written out for your approval, not run.** Temporarily enable test keys? No: the events keys are now live. **Q3 below.**
 
 ## What could break existing events
-- New `event_accounts` columns have defaults and the view is unchanged, so public pages and checkout are unaffected.
-- The new triggers fire on event updates. The schedule trigger only acts in deposit mode, so it does nothing for existing events.
-- Duplicate becomes several inserts. A failure path cleans up the draft.
-- Existing `event-images` policies are untouched.
+- View redefinition: columns are only appended. The website calendar, portal feed and sitemap select named or `*` columns and tolerate extras.
+- Checkout refactor for Christmas: guarded by the identical-output test.
+- `fee_cover_enabled` is now honoured: Christmas is true, so no change.
+- The postbuild step adds files only. If wrong, it could show stale tags until the next publish.
+
+## Not touched
+`/ladies-festival`, `/ladies-night`, `LadiesFestival.tsx`, `LadiesFestivalTemplate.tsx`, old `bookings` table, lodge Stripe. No deposits, balance links, reminders, Treasurer balances or PerfectTablePlan export.
 
 ## Questions
-1. Image bucket: create a new **public-read** `event-content-images` bucket (public pages need images without sign-in), or reuse the private `event-images` bucket through signed links? I recommend the new public bucket.
-2. Read access for content: mirror today's `event_accounts` readers (Treasurer, Auditors, WM, plus Admin/Secretary)? Or Treasurer only plus editors, as your brief literally says?
-3. Kids' menu: separate courses (the plan above), or the same courses with child-only options?
-4. Is a per-item "max per booking" useful, or should I drop it?
+1. "Decide later": OK to store the on/off switch in the event's module settings (admin toggle beside Courses)?
+2. Should drinks/voucher income count inside Event Accounts "Ticket sales" actual, or have its own fixed line "Pre-orders" (a new system budget line on festival events only)?
+3. The events Stripe keys are now live. For the Stripe test-mode run, will you add test keys temporarily, or should I add separate `STRIPE_EVENTS_TEST_*` secrets used only when the draft is flagged for testing?
+4. OK to verify whether hosting serves per-event HTML files, falling back to the share link if not?
