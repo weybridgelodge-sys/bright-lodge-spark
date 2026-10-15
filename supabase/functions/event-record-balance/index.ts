@@ -52,7 +52,7 @@ Deno.serve(async (req) => {
     if (!before) return json({ error: "Booking not found" }, 404);
     if (before.booking.payment_plan !== "deposit" || before.booking.payment_status !== "deposit_paid") return json({ error: "This booking has no balance outstanding" }, 400);
     const v = validateManualBalance(before.balanceDue, d.amount_pence);
-    if (!v.ok) return json({ error: v.error }, 400);
+    if (v.ok === false) return json({ error: v.error }, 400);
     const now = new Date().toISOString();
     const { data: row, error } = await sb.from("event_booking_payments").insert({
       booking_id: d.booking_id, kind: "balance", method: "manual", manual_method: d.manual_method,
