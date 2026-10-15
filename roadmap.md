@@ -54,6 +54,7 @@
 - [x] Verify six public pages; 159 unit tests and 60 browser tests passed; preview build OK.
 
 ## Member Admin portrait names
+- [x] Replace fragile mobile table boxes with ordinary stacked elements, wrap actions and constrain the portal header; populated touch-emulated 320/360/390px rows and desktop visually verified, 221 unit and 64 browser tests passed (1 existing skip); no backend changes or publishing. Physical installed-app rendering remains unverified.
 - [x] Fix stacked narrow-screen member rows without changing permissions
 - [x] Add populated admin/Secretary name-readability regressions and inspect portrait/desktop
 - [x] Run the full suite and check preview errors (119 unit, 58 browser; build OK)

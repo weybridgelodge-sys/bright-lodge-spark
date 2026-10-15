@@ -372,15 +372,21 @@ test("KPI candidate change keeps scroll position at 320px", async ({ page }) => 
 });
 
 for (const secretary of [false, true]) {
-  for (const width of [320, 390]) {
-    test(`Users names and actions remain readable at ${width}px (${secretary ? "Secretary" : "admin"})`, async ({ page }) => {
+  for (const width of [320, 360, 390]) {
+    test(`Users names and actions remain readable at ${width}px (${secretary ? "Secretary" : "admin"})`, async ({ browser }) => {
+      const context = await browser.newContext({ baseURL: "http://localhost:4173", viewport: { width, height: 900 }, isMobile: true, hasTouch: true,
+        userAgent: "Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36" });
+      const page = await context.newPage();
       const id = "11111111-2222-3333-4444-555555555557";
       const name = "W Bro. Bartholomew-Maximilian Featherstonehaugh-Wolstenholme";
       await page.setViewportSize({ width, height: 900 });
       await page.route("**/rest/v1/**", (r) => r.fulfill({ json: r.request().url().includes("get_admin_profiles") ? [{
         id, email: "bartholomew.maximilian.featherstonehaugh@example-long-domain.co.uk",
         full_name: name, title: "W Bro", first_name: "Bartholomew-Maximilian", last_name: "Featherstonehaugh-Wolstenholme",
-        degree: "installed_master", status: "pending", is_past_master: true, is_royal_arch: true, is_honorary_member: true,
+        provincial_rank: "Past Provincial Junior Grand Warden", degree: "installed_master", status: "active", is_past_master: true, is_royal_arch: true, is_honorary_member: true,
+      }, {
+        id: "11111111-2222-3333-4444-555555555558", email: "alexander@example.com", full_name: "Bro. Alexander Montgomery-Smythe",
+        title: "Bro", first_name: "Alexander", last_name: "Montgomery-Smythe", degree: "entered_apprentice", status: "pending",
       }] : [] }));
       await page.goto(`/members/admin${secretary ? "?e2e_as=secretary" : ""}`);
       const row = page.locator(`#member-${id}`);
@@ -401,20 +407,62 @@ for (const secretary of [false, true]) {
       expect(geometry.right).toBeLessThanOrEqual(width);
       expect(geometry.clipped).toBe(false);
       expect(geometry.covered).toBe(false);
+      // A bounding box and textContent alone do not prove the text is painted.
+      for (const detail of ["[data-member-name]", "[data-member-email]", "[data-member-rank]", "[data-member-status]"]) {
+        const element = row.locator(detail);
+        await expect(element).toBeVisible();
+        const painted = await element.evaluate((el) => {
+          const style = getComputedStyle(el);
+          const range = document.createRange();
+          range.selectNodeContents(el);
+          const rects = [...range.getClientRects()];
+          return { opacity: style.opacity, color: style.color, clipped: el.scrollWidth > el.clientWidth,
+            inside: rects.length > 0 && rects.every((rect) => rect.width > 0 && rect.left >= 0 && rect.right <= innerWidth) };
+        });
+        expect(painted.opacity).toBe("1");
+        expect(painted.color).not.toBe("rgba(0, 0, 0, 0)");
+        expect(painted.clipped).toBe(false);
+        expect(painted.inside).toBe(true);
+      }
       const actions = await row.locator("[data-member-actions]").boundingBox();
       expect(actions && actions.y >= geometry.bottom).toBe(true);
       for (const button of await row.getByRole("button").all()) {
         const box = await button.boundingBox();
         expect(box && box.height >= 48 && box.width >= 48).toBe(true);
       }
+      const actionLines = await row.locator("[data-member-actions] button, [data-member-actions] select").evaluateAll((els) =>
+        new Set(els.map((el) => Math.round(el.getBoundingClientRect().top))).size);
+      // Secretary has fewer controls; only the full admin action set needs wrapping.
+      if (!secretary) expect(actionLines).toBeGreaterThan(1);
+      const headerEnd = await page.getByRole("button", { name: "Sign out", exact: true }).boundingBox();
+      expect(headerEnd && headerEnd.x + headerEnd.width <= width - 16).toBe(true);
+      await expect(page.locator("header").getByRole("img", { name: "Weybridge Lodge crest" })).toBeVisible();
       await expectNoViewportOverflow(page, `Populated Users ${width}px ${secretary ? "Secretary" : "admin"}`);
+      await page.screenshot({ path: `/tmp/browser/member-admin-${secretary ? "secretary" : "admin"}-${width}.png` });
       await row.getByRole("button", { name: "Edit member", exact: true }).click();
       await expect(page.getByLabel("First name", { exact: true })).toHaveValue("Bartholomew-Maximilian");
       await expect(page.getByLabel("Last name", { exact: true })).toHaveValue("Featherstonehaugh-Wolstenholme");
       await expectNoViewportOverflow(page, `Edit selected member ${width}px`);
+      await context.close();
     });
   }
 }
+
+test("Users retains a desktop table when resizing from phone", async ({ page }) => {
+  await page.route("**/rest/v1/**", (r) => r.fulfill({ json: r.request().url().includes("get_admin_profiles") ? [{
+    id: "desktop-member", full_name: "W Bro. Alexander Montgomery-Smythe", first_name: "Alexander", last_name: "Montgomery-Smythe",
+    email: "alexander@example.com", status: "active", degree: "installed_master",
+  }] : [] }));
+  await page.goto("/members/admin");
+  await expect(page.locator("[data-member-name]")).toBeVisible();
+  await expect(page.locator("#member-desktop-member")).toHaveJSProperty("tagName", "DIV");
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await expect(page.getByRole("table", { name: "Members" })).toBeVisible();
+  await expect(page.locator("#member-desktop-member")).toHaveJSProperty("tagName", "TR");
+  await expect(page.locator("thead th").filter({ hasText: "Actions" })).toBeVisible();
+  expect(await page.locator("[data-member-actions]").evaluate((el) => getComputedStyle(el).position)).toBe("sticky");
+  await page.screenshot({ path: "/tmp/browser/member-admin-desktop.png" });
+});
 
 test("Almoner system auto-log entries are marked on the board and distinct in the Welfare Log at 320px", async ({ page }) => {
   await page.addInitScript(() => sessionStorage.setItem("almoner-confidentiality", "1"));

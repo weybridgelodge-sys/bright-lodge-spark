@@ -144,6 +144,19 @@ export default function MembersAdmin() {
   const [lastSignIn, setLastSignIn] = useState<Record<string, string | null>>({});
   const [notices, setNotices] = useState<Notice[]>([]);
   const [tab, setTab] = useState<"users" | "add" | "import" | "notices">("users");
+  // Use ordinary elements on phones: changing table cells to grid/block can
+  // leave anonymous table boxes in mobile WebViews. Keep one set of controls.
+  const [stackedMembers, setStackedMembers] = useState(() => window.matchMedia("(max-width: 1023px)").matches);
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 1023px)");
+    const update = () => setStackedMembers(media.matches);
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, []);
+  const MemberTable = stackedMembers ? "div" : "table";
+  const MemberBody = stackedMembers ? "div" : "tbody";
+  const MemberRow = stackedMembers ? "div" : "tr";
+  const MemberCell = stackedMembers ? "div" : "td";
 
   const [nTitle, setNTitle] = useState("");
   const [nBody, setNBody] = useState("");
@@ -481,8 +494,8 @@ export default function MembersAdmin() {
 
       {tab === "users" && (
         <div className="bg-navy-dark/60 border border-gold/15 rounded-sm lg:overflow-x-auto">
-          <table aria-label="Members" className="block w-full text-sm lg:table">
-            <thead className="hidden lg:table-header-group text-xs uppercase tracking-wider text-primary-foreground/50">
+          <MemberTable aria-label="Members" className="block w-full min-w-0 text-sm lg:table">
+            {!stackedMembers && <thead className="hidden lg:table-header-group text-xs uppercase tracking-wider text-primary-foreground/50">
               <tr>
                 <th className="text-left p-3">Member</th>
                 <th className="text-left p-3">Status</th>
@@ -491,8 +504,8 @@ export default function MembersAdmin() {
                 <th className="text-left p-3">Flags</th>
                 <th className="text-right p-3 sticky right-0 bg-navy-dark">Actions</th>
               </tr>
-            </thead>
-            <tbody className="block lg:table-row-group divide-y divide-gold/10">
+            </thead>}
+            <MemberBody className="block lg:table-row-group divide-y divide-gold/10">
               {[...profiles].sort((a, b) => {
                 const aLast = (a.last_name || "").trim();
                 const bLast = (b.last_name || "").trim();
@@ -502,21 +515,21 @@ export default function MembersAdmin() {
                 if (lastCmp !== 0) return lastCmp;
                 return (a.first_name || "").localeCompare(b.first_name || "", undefined, { sensitivity: "base" });
               }).map((p) => (
-                <tr
+                <MemberRow
                   key={p.id}
                   id={`member-${p.id}`}
                   className={`grid grid-cols-2 min-w-0 p-3 gap-x-3 gap-y-3 lg:table-row lg:p-0 lg:gap-0 ${highlightId === p.id ? "bg-gold/10 outline outline-2 outline-gold" : ""}`}
                 >
-                  <td className="block col-span-2 min-w-0 lg:table-cell lg:p-3">
-                    <p data-member-name className="font-medium break-words [overflow-wrap:anywhere]">{formatMemberLine(p as any) || "(No name)"}</p>
-                    <p className="text-xs text-primary-foreground/50 break-words [overflow-wrap:anywhere]">{p.email}</p>
+                  <MemberCell className="block col-span-2 min-w-0 lg:table-cell lg:p-3">
+                    <p data-member-name className="font-medium text-primary-foreground break-words [overflow-wrap:anywhere]">{formatMemberLine(p as any) || "(No name)"}</p>
+                    <p data-member-email className="text-xs text-primary-foreground/80 lg:text-primary-foreground/50 break-words [overflow-wrap:anywhere]">{p.email}</p>
                     {(p.provincial_rank || p.grand_rank) && (
-                      <p className="text-[11px] text-primary-foreground/60 mt-1">
+                      <p data-member-rank className="text-xs text-primary-foreground/80 lg:text-[11px] lg:text-primary-foreground/60 mt-1 break-words [overflow-wrap:anywhere]">
                         {p.grand_rank ? `Grand: ${p.grand_rank}` : `Prov: ${p.provincial_rank}`}
                       </p>
                     )}
-                  </td>
-                  <td className="block min-w-0 text-xs uppercase tracking-wider lg:table-cell lg:p-3">
+                  </MemberCell>
+                  <MemberCell data-member-status className="block min-w-0 text-xs uppercase tracking-wider lg:table-cell lg:p-3">
                     <span className="block mb-1 text-primary-foreground/50 lg:hidden">Status</span>
                     <span
                       className={
@@ -529,27 +542,27 @@ export default function MembersAdmin() {
                     >
                       {p.status}
                     </span>
-                  </td>
-                  <td className="block min-w-0 text-xs text-primary-foreground/70 lg:table-cell lg:p-3 lg:whitespace-nowrap">
+                  </MemberCell>
+                  <MemberCell className="block min-w-0 text-xs text-primary-foreground/70 lg:table-cell lg:p-3 lg:whitespace-nowrap">
                     <span className="block mb-1 text-primary-foreground/50 lg:hidden">Last logged on</span>
                     {lastSignIn[p.id]
                       ? new Date(lastSignIn[p.id] as string).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })
                       : <span className="text-primary-foreground/40">Never</span>}
-                  </td>
-                  <td className="block min-w-0 text-xs uppercase tracking-wider lg:table-cell lg:p-3">
+                  </MemberCell>
+                  <MemberCell className="block min-w-0 text-xs uppercase tracking-wider lg:table-cell lg:p-3">
                     <span className="block mb-1 text-primary-foreground/50 lg:hidden">Role</span>
                     {isAdminUser(p.id) ? "Admin" : "Member"}
                     {isAlmonerUser(p.id) && <div className="text-gold normal-case tracking-normal text-[10px]">Almoner</div>}
-                  </td>
+                  </MemberCell>
 
-                  <td className="block min-w-0 lg:table-cell lg:p-3 text-[11px] text-primary-foreground/70 space-y-0.5">
+                  <MemberCell className="block min-w-0 lg:table-cell lg:p-3 text-[11px] text-primary-foreground/70 space-y-0.5">
                     <div>{DEGREE_LABEL[p.degree]}</div>
                     {p.is_past_master && <div className="text-gold">PM</div>}
                     {p.is_royal_arch && <div>RA</div>}
                     {p.is_honorary_member && <div>Honorary</div>}
-                  </td>
-                  <td data-member-actions className="block col-span-2 min-w-0 border-t border-gold/10 pt-3 lg:table-cell lg:border-0 lg:p-3 lg:sticky lg:right-0 lg:bg-navy-dark">
-                    <div className="flex flex-wrap items-center gap-1 lg:flex-nowrap lg:justify-end">
+                  </MemberCell>
+                  <MemberCell data-member-actions className="block col-span-2 min-w-0 border-t border-gold/10 pt-3 lg:table-cell lg:border-0 lg:p-3 lg:sticky lg:right-0 lg:bg-navy-dark">
+                    <div className="flex w-full min-w-0 flex-wrap items-center gap-2 lg:w-auto lg:gap-1 lg:flex-nowrap lg:justify-end [&>button]:shrink-0">
                       <Button variant="ghost" size="icon"
                         onClick={() => startEdit(p)}
                         className="min-h-[48px] min-w-[48px] inline-flex items-center justify-center p-1.5 text-primary-foreground/70 hover:text-gold hover:bg-gold/10 rounded-sm"
@@ -584,7 +597,7 @@ export default function MembersAdmin() {
                           onChange={(e) => requestStatus(p, e.target.value as Status)}
                           aria-label={`Change status for ${p.full_name}`}
                           title="Change status"
-                          className="min-h-[48px] max-w-[8.5rem] bg-navy-dark/60 border border-gold/30 rounded-sm px-2 text-xs text-primary-foreground"
+                          className="min-h-[48px] min-w-0 max-w-[8.5rem] shrink-0 bg-navy-dark/60 border border-gold/30 rounded-sm px-2 text-xs text-primary-foreground"
                         >
                           {STATUSES.map((s) => (
                             <option key={s.value} value={s.value}>{s.label}</option>
@@ -627,11 +640,11 @@ export default function MembersAdmin() {
                         </Button>
                       )}
                     </div>
-                  </td>
-                </tr>
+                  </MemberCell>
+                </MemberRow>
               ))}
-            </tbody>
-          </table>
+            </MemberBody>
+          </MemberTable>
         </div>
       )}
 
