@@ -75,7 +75,7 @@
 
 ## Dinner & Festival stage 2
 - [x] Migration: event_type/modules/payment/fee/SEO columns, five content tables, read/write helpers, duplicate_event_content()
-- [x] event-content-images bucket (public, 5 MB) and write policies
+- [x] event-content-images bucket (private, 5 MB, public read for published events) and write policies
 - [x] Admin module panels in the Public Events editor
 - [x] Duplicate copies module fields and content atomically
 - [x] Hide back-to-top on /events/:slug

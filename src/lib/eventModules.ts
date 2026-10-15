@@ -50,7 +50,7 @@ export function poundsToPence(s: string): number | null {
 export const penceToPounds = (p: number | null | undefined) => (p == null ? "" : (p / 100).toFixed(2));
 
 /** Storage path for an info-block image: always inside the event's own folder. */
-export function contentImagePath(eventId: string, fileName: string, rand = crypto.randomUUID()): string {
+export function contentImagePath(eventId: string, fileName: string, rand: string = crypto.randomUUID()): string {
   const ext = (fileName.split(".").pop() || "").toLowerCase();
   if (!["jpg", "jpeg", "png", "webp"].includes(ext)) throw new Error("Images must be JPEG, PNG or WebP");
   return `${eventId}/${rand}.${ext}`;

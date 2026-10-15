@@ -36,7 +36,7 @@ describe("event modules", () => {
     expect(paymentScheduleErrors({ payment_mode: "full", deposit_percent: null, balance_due_date: null, event_date: "2027-08-14" })).toEqual([]);
   });
   it("image paths stay inside the event folder and reject other types", () => {
-    expect(contentImagePath("ev1", "Hotel.JPG", "abc")).toBe("ev1/abc.jpg");
+    expect(contentImagePath("ev1", "Hotel.JPG", "a-b-c-d-e")).toBe("ev1/a-b-c-d-e.jpg");
     expect(() => contentImagePath("ev1", "x.gif")).toThrow();
     expect(remapImagePath("ev1/abc.jpg", "ev2")).toBe("ev2/abc.jpg");
   });
