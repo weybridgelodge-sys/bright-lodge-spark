@@ -9,6 +9,7 @@ export type TieOutBooking = {
   subtotal_pence?: number | null;
   fee_pence?: number | null;
   total_pence?: number | null;
+  items_subtotal_pence?: number | null;
   stripe_payment_intent_id?: string | null;
   stripe_fee_pence?: number | null;
   stripe_other_fees_pence?: number | null;
@@ -24,13 +25,17 @@ export const isPaidBooking = (b: TieOutBooking) => b.payment_status === "paid" |
 export const bookingFee = (b: TieOutBooking) => b.fee_pence ?? 0;
 /** Ticket amount; older rows without a stored subtotal fall back to total − fee. */
 export const bookingSubtotal = (b: TieOutBooking) => b.subtotal_pence ?? Math.max(0, (b.total_pence ?? 0) - bookingFee(b));
+/** Pre-ordered drinks/vouchers within the subtotal (0 for simple events). */
+export const bookingItems = (b: TieOutBooking) => Math.max(0, b.items_subtotal_pence ?? 0);
 export const bookingStripeFees = (b: TieOutBooking) => (b.stripe_fee_pence ?? 0) + (b.stripe_other_fees_pence ?? 0);
 
 export function eventActuals(bookings: TieOutBooking[]) {
   const paid = bookings.filter(isPaidBooking);
   const online = paid.filter((b) => !isOfflineMethod(b.payment_method));
   return {
-    ticketSales: paid.reduce((s, b) => s + bookingSubtotal(b), 0),
+    // Drinks/vouchers sit in their own Pre-orders line; tickets are the rest of the subtotal.
+    ticketSales: paid.reduce((s, b) => s + bookingSubtotal(b) - bookingItems(b), 0),
+    preOrders: paid.reduce((s, b) => s + bookingItems(b), 0),
     feeContributions: paid.reduce((s, b) => s + bookingFee(b), 0),
     stripeFees: online.reduce((s, b) => s + bookingStripeFees(b), 0),
   };
