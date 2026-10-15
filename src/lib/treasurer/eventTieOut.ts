@@ -20,6 +20,8 @@ export type TieOutBooking = {
   amount_paid_pence?: number | null;
   fees_paid_pence?: number | null;
   refunded_pence?: number | null;
+  /** Manual (cash/cheque/other) payment rows on a Stripe booking, e.g. a cash balance after a card deposit. */
+  manual_received_pence?: number | null;
 };
 
 export type TieOutBankLine = { account_code: string | null | undefined; debit_pence: number; credit_pence: number };
@@ -43,6 +45,13 @@ export const receivedOrder = (b: TieOutBooking) => ledgerTracked(b) ? Math.max(0
 export const receivedFee = (b: TieOutBooking) => ledgerTracked(b) ? Math.max(0, b.fees_paid_pence ?? 0) : isPaidBooking(b) ? bookingFee(b) : 0;
 /** Any money has come in (paid in full, deposit paid, or partly refunded). */
 export const hasReceipts = (b: TieOutBooking) => ledgerTracked(b) ? receivedOrder(b) + receivedFee(b) > 0 || bookingStripeFees(b) > 0 : isPaidBooking(b);
+
+/** Money received split by channel, per payment row: manual rows are cash even on a Stripe booking. */
+export function receivedSplit(b: TieOutBooking) {
+  const total = receivedOrder(b) + receivedFee(b);
+  const cash = isOfflineMethod(b.payment_method) ? total : Math.min(total, Math.max(0, b.manual_received_pence ?? 0));
+  return { online: total - cash, cash };
+}
 
 export function eventActuals(bookings: TieOutBooking[]) {
   const paid = bookings.filter(hasReceipts);
@@ -79,9 +88,8 @@ export type TieOut = {
 export function eventTieOut(bookings: TieOutBooking[], bankLines: TieOutBankLine[], payoutsAllocated: number): TieOut {
   const paid = bookings.filter(hasReceipts);
   const online = paid.filter((b) => !isOfflineMethod(b.payment_method));
-  const offline = paid.filter((b) => isOfflineMethod(b.payment_method));
-  const onlineReceived = online.reduce((s, b) => s + receivedOrder(b) + receivedFee(b), 0);
-  const cashReceived = offline.reduce((s, b) => s + receivedOrder(b) + receivedFee(b), 0);
+  const onlineReceived = online.reduce((s, b) => s + receivedSplit(b).online, 0);
+  const cashReceived = paid.reduce((s, b) => s + receivedSplit(b).cash, 0);
   const stripeFees = online.reduce((s, b) => s + bookingStripeFees(b), 0);
   const feesMissing = online.filter((b) => b.stripe_payment_intent_id && b.stripe_fee_pence == null).length;
   // Only money INTO Lloyds counts here; vendor payments out (Dr 2300 / Cr 1000) are costs, not receipts.

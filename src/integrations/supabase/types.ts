@@ -1579,9 +1579,15 @@ export type Database = {
           fee_pence: number
           id: string
           kind: string
+          manual_method: string | null
           method: string
+          note: string | null
           paid_at: string | null
+          recorded_at: string | null
+          recorded_by: string | null
+          reference: string | null
           refunded_pence: number
+          request_id: string | null
           status: string
           stripe_balance_transaction_id: string | null
           stripe_fee_pence: number | null
@@ -1598,9 +1604,15 @@ export type Database = {
           fee_pence?: number
           id?: string
           kind: string
+          manual_method?: string | null
           method: string
+          note?: string | null
           paid_at?: string | null
+          recorded_at?: string | null
+          recorded_by?: string | null
+          reference?: string | null
           refunded_pence?: number
+          request_id?: string | null
           status?: string
           stripe_balance_transaction_id?: string | null
           stripe_fee_pence?: number | null
@@ -1617,9 +1629,15 @@ export type Database = {
           fee_pence?: number
           id?: string
           kind?: string
+          manual_method?: string | null
           method?: string
+          note?: string | null
           paid_at?: string | null
+          recorded_at?: string | null
+          recorded_by?: string | null
+          reference?: string | null
           refunded_pence?: number
+          request_id?: string | null
           status?: string
           stripe_balance_transaction_id?: string | null
           stripe_fee_pence?: number | null

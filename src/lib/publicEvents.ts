@@ -1,3 +1,4 @@
+// Public event list helpers (website calendar and events pages).
 import { supabase } from "@/integrations/supabase/client";
 import { londonToday, upcomingPublicCalendarRows } from "../../supabase/functions/_shared/publicEventCalendar";
 
