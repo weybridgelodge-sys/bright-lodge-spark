@@ -5,7 +5,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import { readFunctionError } from "@/lib/functionError";
-import { isOverdue } from "@/lib/eventPricing";
+import { isOverdue, validateManualBalance } from "@/lib/eventPricing";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 type B = {
   id: string; reference?: string | null; payer_name: string; payment_plan?: string | null; payment_status?: string | null;
@@ -18,8 +20,12 @@ const londonToday = () => new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/L
 export const outstandingBalances = <T extends B>(rows: T[]) =>
   rows.filter((b) => b.payment_plan === "deposit" && b.payment_status === "deposit_paid" && (b.balance_due_pence ?? 0) > 0);
 
-export default function EventBalancesPanel({ bookings, canRegenerate }: { bookings: B[]; canRegenerate: boolean }) {
+type Draft = { id: string; requestId: string; amount: string; date: string; method: "cash" | "cheque" | "other"; reference: string; note: string };
+
+export default function EventBalancesPanel({ bookings, canRegenerate, onRecorded }: { bookings: B[]; canRegenerate: boolean; onRecorded?: () => void }) {
   const rows = outstandingBalances(bookings);
+  const [draft, setDraft] = useState<Draft | null>(null);
+  const [saving, setSaving] = useState(false);
   const [lastSent, setLastSent] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState<string | null>(null);
   const ids = rows.map((r) => r.id).join(",");
@@ -50,6 +56,28 @@ export default function EventBalancesPanel({ bookings, canRegenerate }: { bookin
     catch { window.prompt("Copy the balance link:", url); }
   };
 
+  const openRecord = (b: B) => setDraft({
+    id: b.id, requestId: crypto.randomUUID(), amount: ((b.balance_due_pence ?? 0) / 100).toFixed(2),
+    date: londonToday(), method: "cash", reference: "", note: "",
+  });
+
+  const saveRecord = async (b: B) => {
+    if (!draft || saving) return;
+    const pence = Math.round(Number(draft.amount) * 100);
+    const v = validateManualBalance(b.balance_due_pence ?? 0, pence);
+    if (!v.ok) { toast({ title: v.error, variant: "destructive" }); return; }
+    setSaving(true);
+    const { data, error } = await supabase.functions.invoke("event-record-balance", { body: {
+      booking_id: b.id, request_id: draft.requestId, amount_pence: pence, paid_at: draft.date,
+      manual_method: draft.method, reference: draft.reference || null, note: draft.note || null,
+    } });
+    setSaving(false);
+    if (error || (data as any)?.error) { toast({ title: "Could not record payment", description: await readFunctionError(error, data, "Please try again."), variant: "destructive" }); return; }
+    toast({ title: (data as any)?.status === "paid" ? "Balance recorded — booking fully paid" : "Part payment recorded" });
+    setDraft(null);
+    onRecorded?.();
+  };
+
   return (
     <div className="rounded-sm border border-gold/20 bg-navy-light/30 p-4 space-y-3">
       <h3 className="font-serif text-gold text-base">Balances outstanding</h3>
@@ -65,7 +93,7 @@ export default function EventBalancesPanel({ bookings, canRegenerate }: { bookin
           <tbody>
             {rows.map((b) => {
               const overdue = isOverdue(b.balance_due_date, today, b.balance_due_pence ?? 0);
-              return (
+              return [
                 <tr key={b.id} className="border-t border-gold/10 align-top">
                   <td className="py-2 pr-3 text-gold">{b.reference}</td>
                   <td className="py-2 pr-3 text-primary-foreground">{b.payer_name}</td>
@@ -80,11 +108,34 @@ export default function EventBalancesPanel({ bookings, canRegenerate }: { bookin
                     <div className="flex flex-wrap gap-1">
                       <Button size="sm" variant="outline" className="border-gold/30" disabled={!!busy} onClick={() => act(b, "get")}>Copy link</Button>
                       <Button size="sm" variant="outline" className="border-gold/30" disabled={!!busy} onClick={() => act(b, "resend")}>Resend</Button>
+                      {canRegenerate && <Button size="sm" variant="outline" className="border-gold/30" disabled={!!busy || saving} onClick={() => openRecord(b)}>Record balance received</Button>}
                       {canRegenerate && <Button size="sm" variant="ghost" className="text-primary-foreground/70" disabled={!!busy} onClick={() => act(b, "regenerate")}>Regenerate</Button>}
                     </div>
                   </td>
                 </tr>
-              );
+              ,
+                draft?.id === b.id && (
+                  <tr key={`${b.id}-rec`} className="border-t border-gold/10">
+                    <td colSpan={7} className="py-3">
+                      <form className="grid gap-3 sm:grid-cols-3" onSubmit={(e) => { e.preventDefault(); saveRecord(b); }}>
+                        <div><Label htmlFor={`amt-${b.id}`}>Amount received (£)</Label><Input id={`amt-${b.id}`} inputMode="decimal" value={draft.amount} onChange={(e) => setDraft({ ...draft, amount: e.target.value })} /></div>
+                        <div><Label htmlFor={`dt-${b.id}`}>Date received</Label><Input id={`dt-${b.id}`} type="date" max={today} value={draft.date} onChange={(e) => setDraft({ ...draft, date: e.target.value })} /></div>
+                        <div><Label htmlFor={`m-${b.id}`}>Method</Label>
+                          <select id={`m-${b.id}`} className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm text-foreground" value={draft.method} onChange={(e) => setDraft({ ...draft, method: e.target.value as Draft["method"] })}>
+                            <option value="cash">Cash</option><option value="cheque">Cheque</option><option value="other">Other</option>
+                          </select></div>
+                        <div><Label htmlFor={`ref-${b.id}`}>Reference (optional)</Label><Input id={`ref-${b.id}`} maxLength={100} value={draft.reference} onChange={(e) => setDraft({ ...draft, reference: e.target.value })} /></div>
+                        <div className="sm:col-span-2"><Label htmlFor={`note-${b.id}`}>Note (optional)</Label><Input id={`note-${b.id}`} maxLength={500} value={draft.note} onChange={(e) => setDraft({ ...draft, note: e.target.value })} /></div>
+                        <div className="sm:col-span-3 flex flex-wrap gap-2">
+                          <Button type="submit" size="sm" disabled={saving}>{saving ? "Saving…" : "Record payment"}</Button>
+                          <Button type="button" size="sm" variant="ghost" disabled={saving} onClick={() => setDraft(null)}>Cancel</Button>
+                          <span className="text-xs text-primary-foreground/60 self-center">Up to {money(b.balance_due_pence ?? 0)}. Part payments are allowed; no fee applies.</span>
+                        </div>
+                      </form>
+                    </td>
+                  </tr>
+                ),
+              ];
             })}
           </tbody>
         </table>
