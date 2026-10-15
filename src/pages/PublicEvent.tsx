@@ -1,24 +1,22 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
-import { ArrowRight, Calendar, Clock, MapPin, Minus, Plus, Star, Users } from "lucide-react";
+import { ArrowRight, Calendar, Clock, MapPin, Star, Users } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEO, { breadcrumbSchema } from "@/components/SEO";
-import { calcProcessingFeePence, eventFeePence, feeQuestion } from "@/lib/cardFee";
+import { orderTotalPence, quoteBooking } from "@/lib/eventPricing";
 import { supabase } from "@/integrations/supabase/client";
 import { readFunctionError } from "@/lib/functionError";
 import {
-  calcEventTotalPence, CHILD_MAX_AGE, DEFAULT_VENUE, eventBookingState, fetchPublicEvent, formatEventDate,
+  CHILD_MAX_AGE, DEFAULT_VENUE, eventBookingState, fetchPublicEvent, formatEventDate,
   formatGBP, formatTime, isChildAge, seatsLeft, keepPostcodeTogether, type PublicEvent as Ev,
 } from "@/lib/publicEvents";
+import {
+  emptyGuest, FeeAndSummary, GuestRowsFieldset, Honeypot, inputCls, labelClass, PaymentMethodFieldset, req,
+  resizeGuests as resize, Stepper, type GuestRow, type PayMethod,
+} from "@/components/events/booking/BookingCore";
 
-type GuestRow = { name: string; age: string; dietary: string; choice: string };
-type PayMethod = "card" | "pay_by_bank" | "bank_transfer";
 const LODGES = ["Weybridge", "Astolat", "Other", "Guest"] as const;
-
-const inputCls = "flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground font-sans ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 min-h-[48px]";
-const labelClass = "block text-sm font-sans font-medium text-foreground mb-1";
-const req = <span className="text-destructive"> *</span>;
 
 export const Divider = ({ festive }: { festive: boolean }) => (
   <div className="flex items-center justify-center gap-3 my-6" aria-hidden="true">
@@ -33,27 +31,6 @@ export const Divider = ({ festive }: { festive: boolean }) => (
   </div>
 );
 
-function Stepper({ label, value, onChange, hint }: { label: string; value: number; onChange: (n: number) => void; hint: string }) {
-  return (
-    <div className="flex items-center justify-between gap-4 border border-border bg-card rounded-sm p-3">
-      <div>
-        <p className="font-sans font-semibold text-foreground">{label}</p>
-        <p className="text-sm text-muted-foreground">{hint}</p>
-      </div>
-      <div className="flex items-center gap-2">
-        <button type="button" aria-label={`Fewer ${label.toLowerCase()}`} onClick={() => onChange(Math.max(0, value - 1))}
-          className="w-12 h-12 inline-flex items-center justify-center rounded-sm border border-border text-foreground"><Minus className="w-4 h-4" aria-hidden="true" /></button>
-        <span className="w-8 text-center font-semibold text-foreground" aria-live="polite">{value}</span>
-        <button type="button" aria-label={`More ${label.toLowerCase()}`} onClick={() => onChange(Math.min(20, value + 1))}
-          className="w-12 h-12 inline-flex items-center justify-center rounded-sm border border-border text-foreground"><Plus className="w-4 h-4" aria-hidden="true" /></button>
-      </div>
-    </div>
-  );
-}
-
-const resize = (rows: GuestRow[], n: number) =>
-  n <= rows.length ? rows.slice(0, n) : [...rows, ...Array.from({ length: n - rows.length }, () => ({ name: "", age: "", dietary: "", choice: "" }))];
-
 export default function PublicEvent() {
   const { slug = "" } = useParams();
   const [params] = useSearchParams();
@@ -66,7 +43,7 @@ export default function PublicEvent() {
   const [lodge, setLodge] = useState<(typeof LODGES)[number]>("Weybridge");
   const [adults, setAdults] = useState(1);
   const [children, setChildren] = useState(0);
-  const [adultRows, setAdultRows] = useState<GuestRow[]>([{ name: "", age: "", dietary: "", choice: "" }]);
+  const [adultRows, setAdultRows] = useState<GuestRow[]>([emptyGuest()]);
   const [childRows, setChildRows] = useState<GuestRow[]>([]);
   const [method, setMethod] = useState<PayMethod>("card");
   const [coverFee, setCoverFee] = useState(true);
@@ -82,9 +59,14 @@ export default function PublicEvent() {
   useEffect(() => setAdultRows((r) => resize(r, adults)), [adults]);
   useEffect(() => setChildRows((r) => resize(r, children)), [children]);
 
-  const subtotal = ev ? calcEventTotalPence(adults, children, ev.adult_price_pence, ev.child_price_pence) : 0;
-  const feePence = eventFeePence(subtotal, method, coverFee);
-  const total = subtotal + feePence;
+  // Simple events always pay in full; the shared rule gives subtotal + optional fee.
+  const quote = quoteBooking({
+    orderPence: ev ? orderTotalPence(adults, children, ev.adult_price_pence, ev.child_price_pence) : 0,
+    plan: "full", method, coverFee,
+  });
+  const subtotal = quote.chargePence;
+  const feePence = quote.feePence;
+  const total = quote.totalNowPence;
   const state = ev ? eventBookingState(ev) : "closed";
   const left = ev ? seatsLeft(ev) : null;
   const festive = ev?.theme === "christmas";
