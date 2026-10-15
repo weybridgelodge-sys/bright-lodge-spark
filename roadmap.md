@@ -54,6 +54,7 @@
 - [x] Verify six public pages; 159 unit tests and 60 browser tests passed; preview build OK.
 
 ## Member Admin portrait names
+- [ ] Diagnose installed-phone blank details, wrap all actions and constrain the portal header; verify populated 320/360/390px rows and desktop without backend changes.
 - [x] Fix stacked narrow-screen member rows without changing permissions
 - [x] Add populated admin/Secretary name-readability regressions and inspect portrait/desktop
 - [x] Run the full suite and check preview errors (119 unit, 58 browser; build OK)
