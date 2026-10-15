@@ -352,7 +352,7 @@ function QrDialog({ row, onClose }: { row: Record<string, any> & { name: string 
         <p className="text-sm text-primary-foreground break-all">{url}</p>
         <div className="grid grid-cols-1 gap-2">
           <button type="button" onClick={copy} className={`${actionBtn} border-gold/40 text-gold hover:bg-gold/15`}><Link2 className="w-4 h-4" aria-hidden="true" /> Copy link</button>
-          <button type="button" onClick={() => download("navy-on-white")} className={`${actionBtn} border-gold/40 text-gold hover:bg-gold/15`}><Download className="w-4 h-4" aria-hidden="true" /> PNG: navy on white</button>
+          <button type="button" onClick={() => download("navy-on-white")} className={`${actionBtn} border-gold/40 text-gold hover:bg-gold/15`}><Download className="w-4 h-4" aria-hidden="true" /> PNG: navy on white, gold border</button>
           <button type="button" onClick={() => download("white-on-navy")} className={`${actionBtn} border-gold/40 text-gold hover:bg-gold/15`}><Download className="w-4 h-4" aria-hidden="true" /> PNG: white on navy, gold border</button>
         </div>
       </div>

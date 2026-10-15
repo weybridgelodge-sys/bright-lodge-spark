@@ -30,7 +30,8 @@ export function readTokenColours(): QrColours {
 export function renderQrPixels(text: string, style: QrStyle, colours: QrColours, targetPx = 1600) {
   const qr = QRCode.create(text, { errorCorrectionLevel: "Q" });
   const n = qr.modules.size;
-  const border = style === "white-on-navy" ? BORDER : 0;
+  // Both styles get the gold border outside the quiet zone.
+  const border = BORDER;
   const units = n + QUIET_ZONE * 2 + border * 2;
   const scale = Math.max(1, Math.floor(targetPx / units));
   const size = units * scale;
