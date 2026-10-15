@@ -27,6 +27,12 @@ export type PublicEvent = {
   useful_stuff: { parking?: string; timings?: string; access?: string };
   menu_items: string[];
   dietary_choices: string[];
+  event_type?: string | null;
+  modules?: unknown;
+  fee_cover_enabled?: boolean | null;
+  seo_title?: string | null;
+  seo_description?: string | null;
+  og_image_url?: string | null;
 };
 
 export const DEFAULT_VENUE = "Guildford Masonic Centre, Hitherbury Close, Guildford GU2 4DR";
