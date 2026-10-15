@@ -15,8 +15,13 @@ export type EventModules = {
 export const MODULE_KEYS = ["courses", "kids_menu", "catalogue", "deposit", "info_blocks"] as const;
 export const SECTION_KEYS = ["menu", "drinks", "info", "hosting_lodges", "highlights"] as const;
 
-/** One third, stored to 3 dp; the shared pricing module rounds the deposit up in pence. */
-export const ONE_THIRD_PERCENT = 33.334;
+/** "One third" preset as stored (column is 3 dp); pricing treats it as exactly 100/3. */
+export const ONE_THIRD_STORED = 33.333;
+
+/** Exact percent to feed the shared pricing module: the stored preset means exactly one third. */
+export function effectiveDepositPercent(stored: number): number {
+  return Math.abs(stored - ONE_THIRD_STORED) < 1e-9 ? 100 / 3 : stored;
+}
 
 /** Anything unknown or missing is off; simple events always resolve to all modules off. */
 export function parseModules(raw: unknown, eventType: EventType = "dinner_festival"): EventModules {
