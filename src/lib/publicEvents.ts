@@ -30,6 +30,9 @@ export type PublicEvent = {
   event_type?: string | null;
   modules?: unknown;
   fee_cover_enabled?: boolean | null;
+  payment_mode?: string | null;
+  deposit_percent?: number | null;
+  balance_due_date?: string | null;
   seo_title?: string | null;
   seo_description?: string | null;
   og_image_url?: string | null;

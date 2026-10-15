@@ -52,6 +52,7 @@ const LadiesFestivalTemplate = lazy(() => import("./pages/LadiesFestivalTemplate
 const FirstVisit = lazy(() => import("./pages/FirstVisit"));
 const PublicEvent = lazy(() => import("./pages/PublicEvent"));
 const PublicEventConfirmation = lazy(() => import("./pages/PublicEventConfirmation"));
+const PublicEventBalance = lazy(() => import("./pages/PublicEventBalance"));
 const YourJourney = lazy(() => import("./pages/YourJourney"));
 const LodgeTraditions = lazy(() => import("./pages/LodgeTraditions"));
 const Quiz = lazy(() => import("./pages/Quiz"));
@@ -120,6 +121,7 @@ const App = () => (
             <Route path="/officers-jewels" element={<OfficersJewels />} />
             <Route path="/checkout/return" element={<CheckoutReturn />} />
             <Route path="/events" element={<Events />} />
+            <Route path="/events/balance/:token" element={<PublicEventBalance />} />
             <Route path="/events/:slug" element={<PublicEvent />} />
             <Route path="/events/:slug/confirmation" element={<PublicEventConfirmation />} />
             <Route path="/ladies-festival" element={<LadiesFestival />} />

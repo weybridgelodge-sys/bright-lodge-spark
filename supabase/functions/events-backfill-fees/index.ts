@@ -14,9 +14,12 @@ Deno.serve(async (req) => {
   const p = Body.safeParse(await req.json().catch(() => ({})));
   if (!p.success) return json({ error: "Invalid request" }, 400);
   const sb = serviceClient();
-  const { data } = await sb.from("event_bookings").select("id,stripe_payment_intent_id")
-    .eq("event_id", p.data.event_id).eq("payment_status", "paid").is("stripe_fee_pence", null).not("stripe_payment_intent_id", "is", null);
+  // Per payment: deposits and balances each have their own Stripe charge.
+  const { data: bks } = await sb.from("event_bookings").select("id").eq("event_id", p.data.event_id);
+  const ids = (bks ?? []).map((b: any) => b.id);
+  const { data } = ids.length ? await sb.from("event_booking_payments").select("booking_id,stripe_payment_intent_id")
+    .in("booking_id", ids).in("status", ["paid", "refunded"]).is("stripe_fee_pence", null).not("stripe_payment_intent_id", "is", null) : { data: [] as any[] };
   let updated = 0;
-  for (const b of data ?? []) if (await syncEventBookingFees(sb, b.id, b.stripe_payment_intent_id, { attempts: 1 })) updated++;
+  for (const b of data ?? []) if (await syncEventBookingFees(sb, b.booking_id, b.stripe_payment_intent_id, { attempts: 1 })) updated++;
   return json({ checked: data?.length ?? 0, updated });
 });

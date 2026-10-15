@@ -2,7 +2,8 @@ import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { z } from "https://esm.sh/zod@3.23.8";
 import { feeLineItemName } from "../_shared/cardFee.ts";
 import { orderModules, priceOrder, stripeLines, type ItemRow } from "../_shared/eventOrder.ts";
-import { eventsStripe, sendEventBookingEmails, serviceClient } from "../_shared/stripe-events.ts";
+import { depositAllowed, depositLineName, planMethods, quoteBooking } from "../_shared/eventPricing.ts";
+import { eventsStripe, londonToday, sendEventBookingEmails, serviceClient } from "../_shared/stripe-events.ts";
 
 const GuestSchema = z.object({
   name: z.string().trim().min(1).max(120),
@@ -24,6 +25,7 @@ const BodySchema = z.object({
   guests: z.array(GuestSchema).max(100),
   payment_method: z.enum(["card", "pay_by_bank", "bank_transfer"]),
   cover_fee: z.boolean().default(false),
+  plan: z.enum(["full", "deposit"]).optional().default("full"),
   items: z.array(z.object({ item_id: z.string().uuid(), qty: z.number().int().min(0).max(500) })).max(100).optional(),
   origin: z.string().url(),
   website: z.string().max(0).optional().default(""), // honeypot
@@ -56,7 +58,7 @@ Deno.serve(async (req) => {
         .eq("event_id", ev.id).eq("source", "public");
       // Paid bookings and pending bank transfers hold seats; unpaid card/Pay by Bank holds lapse after 30 minutes.
       const cutoff = Date.now() - 30 * 60 * 1000;
-      const holds = (r: any) => r.payment_status === "paid" ||
+      const holds = (r: any) => r.payment_status === "paid" || r.payment_status === "deposit_paid" ||
         (r.payment_status === "pending" && (r.payment_method === "bank_transfer" || new Date(r.created_at).getTime() > cutoff));
       const taken = (rows ?? []).filter(holds).reduce((s: number, r: any) => s + r.adult_count + r.child_count, 0);
       if (taken + party > ev.capacity) return json({ error: `Sorry, only ${Math.max(0, ev.capacity - taken)} places remain.` }, 409);
@@ -80,8 +82,17 @@ Deno.serve(async (req) => {
     if (!priced.ok) return json({ error: priced.error }, 400);
     const order = priced.order;
     const subtotal = order.subtotalPence;
-    const fee = order.feePence;
-    const total = order.totalPence;
+    const isDeposit = input.plan === "deposit";
+    if (isDeposit) {
+      if (!depositAllowed(ev, londonToday())) return json({ error: "A deposit is not available for this event. Please choose Pay in full." }, 400);
+      if (!planMethods("deposit").includes(input.payment_method)) return json({ error: "Deposits can be paid by card or Pay by Bank only." }, 400);
+    }
+    // Deposit: fee applies to the amount charged now (the deposit), worked out on the whole order.
+    const quote = quoteBooking({ orderPence: subtotal, plan: input.plan, depositPercent: Number(ev.deposit_percent), method: input.payment_method, coverFee: order.coverFee });
+    const depositPlan = isDeposit && quote.kind === "deposit";
+    const chargeNow = depositPlan ? quote.chargePence : subtotal;
+    const fee = depositPlan ? quote.feePence : order.feePence;
+    const total = subtotal + fee;
     const title = ev.public_title || ev.name;
     const stripeName = ev.name || title; // Accounts name for Stripe descriptions/line items
     const prefix = (ev.reference_prefix || "EVT").toUpperCase();
@@ -96,7 +107,7 @@ Deno.serve(async (req) => {
         payer_name: input.contact_name,
         ticket_count: party,
         deposit_pence: 0,
-        balance_pence: total,
+        balance_pence: total, // legacy column, kept as before
         balance_method: input.payment_method,
         reference,
         contact_email: input.contact_email,
@@ -107,7 +118,10 @@ Deno.serve(async (req) => {
         subtotal_pence: subtotal,
         tickets_subtotal_pence: order.ticketsPence,
         items_subtotal_pence: order.itemsPence,
-        payment_plan: "full",
+        payment_plan: depositPlan ? "deposit" : "full",
+        balance_due_pence: subtotal,
+        amount_paid_pence: 0,
+        balance_due_date: depositPlan ? ev.balance_due_date : null,
         fee_pence: fee,
         total_pence: total,
         payment_method: input.payment_method,
@@ -144,7 +158,15 @@ Deno.serve(async (req) => {
       throw e;
     }
 
-    const metadata = { event_id: ev.id, event_slug: ev.slug, booking_id: booking.id, booking_reference: booking.reference };
+    const { data: payRow, error: payErr } = await sb.from("event_booking_payments").insert({
+      booking_id: booking.id, kind: depositPlan ? "deposit" : "full", method: input.payment_method,
+      amount_pence: chargeNow, fee_pence: fee, status: "pending",
+    }).select("id").maybeSingle();
+    if (payErr || !payRow) { await sb.from("event_bookings").delete().eq("id", booking.id); throw payErr ?? new Error("payment row"); }
+    const metadata = {
+      event_id: ev.id, event_slug: ev.slug, booking_id: booking.id, booking_reference: booking.reference,
+      payment_id: payRow.id, payment_kind: depositPlan ? "deposit" : "full",
+    };
     const btMetadata = { ...metadata, fee_pence: String(fee), ...(order.itemsPence > 0 && { items_pence: String(order.itemsPence) }) };
     const suffix = ev.statement_descriptor ? String(ev.statement_descriptor).slice(0, 22) : undefined;
     const stripe = eventsStripe();
@@ -176,6 +198,7 @@ Deno.serve(async (req) => {
       await sb.from("event_bookings").update({
         stripe_customer_id: customer.id, stripe_payment_intent_id: pi.id, bank_instructions: bank,
       }).eq("id", booking.id);
+      await sb.from("event_booking_payments").update({ stripe_payment_intent_id: pi.id }).eq("id", payRow.id);
       await sendEventBookingEmails(sb, booking.id, "booked");
       return json({ reference: booking.reference, token: booking.access_token, confirm_url: confirmUrl });
     }
@@ -184,10 +207,15 @@ Deno.serve(async (req) => {
       mode: "payment",
       customer_email: input.contact_email,
       payment_method_types: input.payment_method === "card" ? ["card"] : ["pay_by_bank"],
-      line_items: stripeLines({
-        stripeName, adults: input.adults, children: input.children, adultPence: ev.adult_price_pence, childPence: ev.child_price_pence,
-        items: order.items, feePence: fee, feeName: feeLineItemName(input.payment_method),
-      }),
+      line_items: depositPlan
+        ? [
+            { quantity: 1, price_data: { currency: "gbp", unit_amount: chargeNow, product_data: { name: `${stripeName} — ${depositLineName(Number(ev.deposit_percent), subtotal)}` } } },
+            ...(fee > 0 ? [{ quantity: 1, price_data: { currency: "gbp", unit_amount: fee, product_data: { name: feeLineItemName(input.payment_method) } } }] : []),
+          ]
+        : stripeLines({
+            stripeName, adults: input.adults, children: input.children, adultPence: ev.adult_price_pence, childPence: ev.child_price_pence,
+            items: order.items, feePence: fee, feeName: feeLineItemName(input.payment_method),
+          }),
       metadata,
       client_reference_id: booking.id,
       payment_intent_data: { description: stripeName, metadata, ...(suffix && { statement_descriptor_suffix: suffix }) },
@@ -196,6 +224,7 @@ Deno.serve(async (req) => {
       cancel_url: `${input.origin}/events/${ev.slug}?cancelled=1`,
     } as any);
     await sb.from("event_bookings").update({ stripe_session_id: session.id }).eq("id", booking.id);
+    await sb.from("event_booking_payments").update({ stripe_session_id: session.id }).eq("id", payRow.id);
     return json({ reference: booking.reference, token: booking.access_token, url: session.url });
   } catch (e) {
     console.error("create-event-checkout error", e);

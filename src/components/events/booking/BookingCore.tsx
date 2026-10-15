@@ -100,8 +100,10 @@ export function PaymentMethodFieldset({ method, onChange, allowed }: { method: P
 }
 
 /** Yes/No fee question plus subtotal / fee / total summary for the amount being charged now. */
-export function FeeAndSummary({ subtotal, feePence, total, method, coverFee, onCoverFee }: {
+export function FeeAndSummary({ subtotal, feePence, total, method, coverFee, onCoverFee, hideSummary }: {
   subtotal: number; feePence: number; total: number; method: PayMethod; coverFee: boolean; onCoverFee: (v: boolean) => void;
+  /** Deposit and balance screens show their own summary. */
+  hideSummary?: boolean;
 }) {
   if (subtotal <= 0) return null;
   return (
@@ -117,11 +119,45 @@ export function FeeAndSummary({ subtotal, feePence, total, method, coverFee, onC
           <span className="text-sm font-sans text-foreground">No — the Lodge will cover it</span>
         </label>
       </div>
-      <div className="bg-background border border-border rounded-sm p-4 space-y-1">
+      {!hideSummary && <div className="bg-background border border-border rounded-sm p-4 space-y-1">
         <div className="flex justify-between text-sm font-sans"><span className="text-muted-foreground">Subtotal</span><span className="text-foreground">{formatGBP(subtotal)}</span></div>
         {feePence > 0 && <div className="flex justify-between text-sm font-sans"><span className="text-muted-foreground">{method === "card" ? "Card fee" : "Processing fee"}</span><span className="text-foreground">{formatGBP(feePence)}</span></div>}
         <div className="flex justify-between text-base font-sans font-semibold border-t border-border pt-2 mt-2"><span className="text-foreground">Total</span><span className="text-gold-dark">{formatGBP(total)}</span></div>
-      </div>
+      </div>}
+    </div>
+  );
+}
+
+/** "Pay in full" / "Pay deposit now" choice, shown only on deposit-enabled events. */
+export function PaymentPlanFieldset({ plan, onChange, depositLabel, dueDateLabel }: {
+  plan: "full" | "deposit"; onChange: (p: "full" | "deposit") => void; depositLabel: string; dueDateLabel: string;
+}) {
+  const opts = [
+    ["full", "Pay in full", "Pay the whole amount now"],
+    ["deposit", "Pay deposit now", `${depositLabel} now, balance due by ${dueDateLabel} (card or Pay by Bank)`],
+  ] as const;
+  return (
+    <fieldset className="space-y-2">
+      <legend className="font-serif text-xl text-foreground mb-2">How would you like to pay?</legend>
+      {opts.map(([v, l, h]) => (
+        <label key={v} className={`flex items-center gap-3 min-h-[56px] w-full border rounded-sm px-4 py-2 cursor-pointer bg-background ${plan === v ? "border-gold" : "border-border"}`}>
+          <input type="radio" name="plan" value={v} checked={plan === v} onChange={() => onChange(v)} className="w-5 h-5 shrink-0 accent-[hsl(var(--gold))]" />
+          <span className="min-w-0"><span className="block font-semibold text-foreground">{l}</span><span className="block text-sm text-muted-foreground break-words">{h}</span></span>
+        </label>
+      ))}
+    </fieldset>
+  );
+}
+
+/** Rows for what is paid now and what is left, used for deposits and balances. */
+export function PayNowSummary({ rows, totalLabel, total, note }: { rows: [string, number][]; totalLabel: string; total: number; note?: string }) {
+  return (
+    <div className="bg-background border border-border rounded-sm p-4 space-y-1" aria-live="polite">
+      {rows.map(([k, v]) => (
+        <div key={k} className="flex justify-between gap-3 text-sm font-sans"><span className="text-muted-foreground min-w-0">{k}</span><span className="text-foreground tabular-nums shrink-0">{formatGBP(v)}</span></div>
+      ))}
+      <div className="flex justify-between gap-3 text-base font-sans font-semibold border-t border-border pt-2 mt-2"><span className="text-foreground">{totalLabel}</span><span className="text-gold-dark tabular-nums">{formatGBP(total)}</span></div>
+      {note && <p className="text-sm text-foreground font-semibold pt-1 break-words">{note}</p>}
     </div>
   );
 }

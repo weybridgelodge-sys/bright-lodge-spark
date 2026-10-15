@@ -4,7 +4,7 @@ import { ArrowRight, Calendar, Clock, MapPin, Star, Users } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEO, { breadcrumbSchema } from "@/components/SEO";
-import { orderTotalPence, quoteBooking } from "@/lib/eventPricing";
+import { depositAllowed, depositLineName, depositPence, orderTotalPence, planMethods, quoteBooking } from "@/lib/eventPricing";
 import { supabase } from "@/integrations/supabase/client";
 import { readFunctionError } from "@/lib/functionError";
 import {
@@ -12,7 +12,7 @@ import {
   formatGBP, formatTime, isChildAge, seatsLeft, keepPostcodeTogether, type PublicEvent as Ev,
 } from "@/lib/publicEvents";
 import {
-  emptyGuest, FeeAndSummary, GuestRowsFieldset, Honeypot, inputCls, labelClass, PaymentMethodFieldset, req,
+  emptyGuest, FeeAndSummary, GuestRowsFieldset, Honeypot, inputCls, labelClass, PaymentMethodFieldset, PaymentPlanFieldset, PayNowSummary, req,
   resizeGuests as resize, Stepper, type GuestRow, type PayMethod,
 } from "@/components/events/booking/BookingCore";
 import { CatalogueSteppers, CourseSelects, DECIDE_LATER, eventImageUrl, InfoBlocks, useEventContent } from "@/components/events/booking/ModuleSections";
@@ -50,6 +50,7 @@ export default function PublicEvent() {
   const [childRows, setChildRows] = useState<GuestRow[]>([]);
   const [method, setMethod] = useState<PayMethod>("card");
   const [coverFee, setCoverFee] = useState(true);
+  const [plan, setPlan] = useState<"full" | "deposit">("full");
   const [honeypot, setHoneypot] = useState("");
   const [courseSel, setCourseSel] = useState<Record<string, Record<string, string>>>({});
   const [itemQty, setItemQty] = useState<Record<string, number>>({});
@@ -72,13 +73,20 @@ export default function PublicEvent() {
   const feeEnabled = ev?.fee_cover_enabled !== false;
   const itemsPence = content ? content.items.reduce((s, i) => s + (itemQty[i.id] ?? 0) * i.price_pence, 0) : 0;
   // Simple events always pay in full; the shared rule gives subtotal + optional fee.
+  // Deposit-enabled events may pay a deposit (on the whole order) before the balance due date.
+  const londonToday = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/London" }).format(new Date());
+  const canDeposit = !!ev && depositAllowed(ev, londonToday);
+  const activePlan = canDeposit ? plan : "full";
+  const orderPence = ev ? orderTotalPence(adults, children, ev.adult_price_pence, ev.child_price_pence) + itemsPence : 0;
   const quote = quoteBooking({
-    orderPence: ev ? orderTotalPence(adults, children, ev.adult_price_pence, ev.child_price_pence) + itemsPence : 0,
-    plan: "full", method, coverFee: feeEnabled && coverFee,
+    orderPence, plan: activePlan, depositPercent: ev?.deposit_percent ?? null, method, coverFee: feeEnabled && coverFee,
   });
-  const subtotal = quote.chargePence;
+  const isDepositNow = activePlan === "deposit" && quote.kind === "deposit";
+  const subtotal = orderPence;
   const feePence = quote.feePence;
   const total = quote.totalNowPence;
+  const dueLabel = ev?.balance_due_date ? formatEventDate(ev.balance_due_date) : "";
+  useEffect(() => { if (activePlan === "deposit" && method === "bank_transfer") setMethod("card"); }, [activePlan, method]);
   const state = ev ? eventBookingState(ev) : "closed";
   const left = ev ? seatsLeft(ev) : null;
   const festive = ev?.theme === "christmas";
@@ -121,7 +129,7 @@ export default function PublicEvent() {
     ];
     const items = Object.entries(itemQty).filter(([, q]) => q > 0).map(([item_id, qty]) => ({ item_id, qty }));
     const { data, error: fnErr } = await supabase.functions.invoke("create-event-checkout", {
-      body: { slug, contact_name: name.trim(), contact_email: email.trim(), contact_phone: phone.trim(), lodge_label: lodge, adults, children, guests, payment_method: method, cover_fee: feeEnabled && coverFee, ...(items.length && { items }), origin: window.location.origin, website: "" },
+      body: { slug, contact_name: name.trim(), contact_email: email.trim(), contact_phone: phone.trim(), lodge_label: lodge, adults, children, guests, payment_method: method, cover_fee: feeEnabled && coverFee, ...(items.length && { items }), ...(canDeposit && { plan: activePlan }), origin: window.location.origin, website: "" },
     });
     if (fnErr || data?.error) {
       setError(await readFunctionError(fnErr, data, "Sorry, we could not start your booking."));
@@ -304,9 +312,20 @@ export default function PublicEvent() {
 
                   {content && mods.catalogue && showSection("drinks") && <CatalogueSteppers content={content} qty={itemQty} onChange={setItemQty} />}
 
-                  <PaymentMethodFieldset method={method} onChange={setMethod} />
+                  {canDeposit && (
+                    <PaymentPlanFieldset plan={activePlan} onChange={setPlan} dueDateLabel={dueLabel}
+                      depositLabel={orderPence > 0 ? `${depositLineName(Number(ev.deposit_percent), orderPence)}: ${formatGBP(depositPence(orderPence, Number(ev.deposit_percent)))}` : "Deposit"} />
+                  )}
 
-                  {feeEnabled && <FeeAndSummary subtotal={subtotal} feePence={feePence} total={total} method={method} coverFee={coverFee} onCoverFee={setCoverFee} />}
+                  <PaymentMethodFieldset method={method} onChange={setMethod} {...(activePlan === "deposit" && { allowed: planMethods("deposit") })} />
+
+                  {feeEnabled && <FeeAndSummary subtotal={quote.chargePence} feePence={feePence} total={total} method={method} coverFee={coverFee} onCoverFee={setCoverFee} hideSummary={isDepositNow} />}
+                  {isDepositNow && (
+                    <PayNowSummary
+                      rows={[["Order total", orderPence], ["Deposit now", quote.chargePence], ...(feePence > 0 ? [[method === "card" ? "Card fee" : "Processing fee", feePence] as [string, number]] : [])]}
+                      totalLabel="Pay now" total={total}
+                      note={`Balance of ${formatGBP(quote.balanceAfterPence)} due by ${dueLabel}. We will email you a secure link to pay it.`} />
+                  )}
 
                   {error && <p role="alert" className="text-destructive font-semibold">{error}</p>}
                   <button type="submit" disabled={submitting} className="w-full inline-flex items-center justify-center gap-2 bg-gold-shimmer text-accent-foreground px-8 py-3 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity min-h-[48px] disabled:opacity-60">

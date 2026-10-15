@@ -1471,6 +1471,32 @@ export type Database = {
         }
         Relationships: []
       }
+      event_booking_balance_tokens: {
+        Row: {
+          booking_id: string
+          created_at: string
+          token: string
+        }
+        Insert: {
+          booking_id: string
+          created_at?: string
+          token: string
+        }
+        Update: {
+          booking_id?: string
+          created_at?: string
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_booking_balance_tokens_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: true
+            referencedRelation: "event_bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       event_booking_items: {
         Row: {
           booking_id: string
@@ -1545,10 +1571,110 @@ export type Database = {
           },
         ]
       }
+      event_booking_payments: {
+        Row: {
+          amount_pence: number
+          booking_id: string
+          created_at: string
+          fee_pence: number
+          id: string
+          kind: string
+          method: string
+          paid_at: string | null
+          refunded_pence: number
+          status: string
+          stripe_balance_transaction_id: string | null
+          stripe_fee_pence: number | null
+          stripe_net_pence: number | null
+          stripe_other_fees_pence: number
+          stripe_payment_intent_id: string | null
+          stripe_session_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount_pence: number
+          booking_id: string
+          created_at?: string
+          fee_pence?: number
+          id?: string
+          kind: string
+          method: string
+          paid_at?: string | null
+          refunded_pence?: number
+          status?: string
+          stripe_balance_transaction_id?: string | null
+          stripe_fee_pence?: number | null
+          stripe_net_pence?: number | null
+          stripe_other_fees_pence?: number
+          stripe_payment_intent_id?: string | null
+          stripe_session_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount_pence?: number
+          booking_id?: string
+          created_at?: string
+          fee_pence?: number
+          id?: string
+          kind?: string
+          method?: string
+          paid_at?: string | null
+          refunded_pence?: number
+          status?: string
+          stripe_balance_transaction_id?: string | null
+          stripe_fee_pence?: number | null
+          stripe_net_pence?: number | null
+          stripe_other_fees_pence?: number
+          stripe_payment_intent_id?: string | null
+          stripe_session_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_booking_payments_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "event_bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_booking_reminders: {
+        Row: {
+          booking_id: string
+          id: string
+          kind: string
+          sent_at: string
+        }
+        Insert: {
+          booking_id: string
+          id?: string
+          kind: string
+          sent_at?: string
+        }
+        Update: {
+          booking_id?: string
+          id?: string
+          kind?: string
+          sent_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_booking_reminders_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "event_bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       event_bookings: {
         Row: {
           access_token: string
           adult_count: number
+          amount_paid_pence: number
+          balance_due_date: string | null
+          balance_due_pence: number
           balance_method: string | null
           balance_paid: boolean
           balance_pence: number
@@ -1562,6 +1688,7 @@ export type Database = {
           deposit_pence: number
           event_id: string
           fee_pence: number
+          fees_paid_pence: number
           id: string
           is_placeholder: boolean
           items_subtotal_pence: number
@@ -1573,6 +1700,7 @@ export type Database = {
           payment_plan: string
           payment_status: string
           reference: string | null
+          refunded_pence: number
           source: string
           stripe_balance_transaction_id: string | null
           stripe_customer_id: string | null
@@ -1590,6 +1718,9 @@ export type Database = {
         Insert: {
           access_token?: string
           adult_count?: number
+          amount_paid_pence?: number
+          balance_due_date?: string | null
+          balance_due_pence?: number
           balance_method?: string | null
           balance_paid?: boolean
           balance_pence?: number
@@ -1603,6 +1734,7 @@ export type Database = {
           deposit_pence?: number
           event_id: string
           fee_pence?: number
+          fees_paid_pence?: number
           id?: string
           is_placeholder?: boolean
           items_subtotal_pence?: number
@@ -1614,6 +1746,7 @@ export type Database = {
           payment_plan?: string
           payment_status?: string
           reference?: string | null
+          refunded_pence?: number
           source?: string
           stripe_balance_transaction_id?: string | null
           stripe_customer_id?: string | null
@@ -1631,6 +1764,9 @@ export type Database = {
         Update: {
           access_token?: string
           adult_count?: number
+          amount_paid_pence?: number
+          balance_due_date?: string | null
+          balance_due_pence?: number
           balance_method?: string | null
           balance_paid?: boolean
           balance_pence?: number
@@ -1644,6 +1780,7 @@ export type Database = {
           deposit_pence?: number
           event_id?: string
           fee_pence?: number
+          fees_paid_pence?: number
           id?: string
           is_placeholder?: boolean
           items_subtotal_pence?: number
@@ -1655,6 +1792,7 @@ export type Database = {
           payment_plan?: string
           payment_status?: string
           reference?: string | null
+          refunded_pence?: number
           source?: string
           stripe_balance_transaction_id?: string | null
           stripe_customer_id?: string | null
