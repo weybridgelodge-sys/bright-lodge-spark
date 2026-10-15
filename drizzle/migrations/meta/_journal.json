@@ -666,6 +666,20 @@
       "when": 1792089482744,
       "tag": "0094_event_pre_orders_line",
       "breakpoints": true
+    },
+    {
+      "idx": 95,
+      "version": "7",
+      "when": 1792102338855,
+      "tag": "0095_event_deposits_balances",
+      "breakpoints": true
+    },
+    {
+      "idx": 96,
+      "version": "7",
+      "when": 1792102895894,
+      "tag": "0096_event_balance_revoke_defaults",
+      "breakpoints": true
     }
   ]
 }

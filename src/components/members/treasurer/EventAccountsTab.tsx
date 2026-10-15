@@ -13,7 +13,8 @@ import autoTable from "jspdf-autotable";
 import { reportPdfDoc, reportSection, INK, GOLD, NAVY, MUTED } from "@/lib/treasurer/reports";
 import { saveJsPdf, saveText } from "@/lib/nativeDownload";
 import { Link } from "react-router-dom";
-import { eventActuals, eventTieOut, defaultTicketPlan, isOfflineMethod, isPaidBooking } from "@/lib/treasurer/eventTieOut";
+import { eventActuals, eventTieOut, defaultTicketPlan, isOfflineMethod, hasReceipts } from "@/lib/treasurer/eventTieOut";
+import EventBalancesPanel from "@/components/members/treasurer/EventBalancesPanel";
 
 const money = (pence: number) =>
   `${pence < 0 ? "-" : ""}£${(Math.abs(pence) / 100).toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -37,9 +38,9 @@ type BudgetLine = {
   system_key?: "ticket_sales" | "fee_contributions" | "stripe_fees" | "pre_orders" | null;
 };
 const SYSTEM_LINE_NOTE: Record<string, string> = {
-  ticket_sales: "Actual = paid bookings (ticket subtotals)",
-  pre_orders: "Actual = drinks and vouchers pre-ordered on paid bookings",
-  fee_contributions: "Actual = processing-fee contributions on paid bookings",
+  ticket_sales: "Actual = ticket money received (full payments, deposits and balances)",
+  pre_orders: "Actual = drinks and vouchers share of money received",
+  fee_contributions: "Actual = processing-fee contributions received",
   stripe_fees: "Actual = real Stripe fees (incl. refund/dispute fees)",
 };
 type Payout = { id: string; stripe_payout_id: string; amount_pence: number; arrival_date: string; status: string };
@@ -54,6 +55,8 @@ type Booking = {
   contact_email?: string | null; lodge_label?: string | null;
   subtotal_pence?: number | null; fee_pence?: number | null; total_pence?: number | null;
   stripe_payment_intent_id?: string | null; stripe_fee_pence?: number | null; stripe_other_fees_pence?: number | null;
+  payment_plan?: string | null; amount_paid_pence?: number | null; balance_due_pence?: number | null; balance_due_date?: string | null;
+  fees_paid_pence?: number | null; refunded_pence?: number | null; items_subtotal_pence?: number | null;
 };
 type Guest = {
   id: string; booking_id: string; name: string | null; seating_preference: string | null;
@@ -259,7 +262,7 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
     actuals.map((l) => ({ account_code: l.chart_of_accounts?.code, debit_pence: l.debit_pence, credit_pence: l.credit_pence })),
     payoutsAllocated,
   ), [bookings, actuals, payoutsAllocated]);
-  const cashBookings = bookings.filter((b) => isPaidBooking(b) && isOfflineMethod(b.payment_method));
+  const cashBookings = bookings.filter((b) => hasReceipts(b) && isOfflineMethod(b.payment_method));
   const allocatedByPayout = (pid: string) => allocations.filter((a) => a.payout_id === pid).reduce((s, a) => s + a.amount_pence, 0);
 
   const allocatePayout = async (p: Payout) => {
@@ -880,6 +883,8 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
             </div>
           </Card>
 
+          <EventBalancesPanel bookings={bookings} canRegenerate={canEdit} />
+
           {/* Bookings */}
           <Card
             title="Bookings"
@@ -910,10 +915,10 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
                         {b.reference && <span className="text-xs text-gold">{b.reference}</span>}
                         {b.source === "public" && (
                           <span className="text-xs text-primary-foreground/80">
-                            {b.payment_method?.replace(/_/g, " ")} · {b.payment_status === "paid" ? "paid" : (b.payment_status === "pending" && b.payment_method !== "bank_transfer" && b.created_at && Date.now() - new Date(b.created_at).getTime() > 30 * 60 * 1000) ? "EXPIRED — unpaid, seats released" : b.payment_status === "cancelled" ? "cancelled" : "pending payment"}
+                            {b.payment_method?.replace(/_/g, " ")} · {b.payment_status === "paid" ? "paid" : b.payment_status === "deposit_paid" ? `deposit paid — ${money(b.balance_due_pence ?? 0)} due${b.balance_due_date ? ` by ${new Date(`${b.balance_due_date}T12:00:00`).toLocaleDateString("en-GB")}` : ""}` : b.payment_status === "refunded" ? "refunded" : (b.payment_status === "pending" && b.payment_method !== "bank_transfer" && b.created_at && Date.now() - new Date(b.created_at).getTime() > 30 * 60 * 1000) ? "EXPIRED — unpaid, seats released" : b.payment_status === "cancelled" ? "cancelled" : "pending payment"}
                           </span>
                         )}
-                        {canEdit && b.source === "public" && b.payment_status !== "paid" && (
+                        {canEdit && b.source === "public" && b.payment_plan !== "deposit" && b.payment_status !== "paid" && (
                           <Button size="sm" variant="outline" className="border-gold/30 min-h-[44px]" onClick={() => markPaid(b)}>Mark paid</Button>
                         )}
                         <span className="ml-auto text-xs tabular-nums text-primary-foreground/80">

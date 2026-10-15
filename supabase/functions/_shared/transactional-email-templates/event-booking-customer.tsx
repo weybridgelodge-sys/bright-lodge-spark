@@ -4,7 +4,13 @@ import type { TemplateEntry } from './registry.ts'
 import { BRAND, LOGO_HEIGHT, LOGO_URL, LOGO_WIDTH } from './_brand.ts'
 
 export interface EventBookingData {
-  stage?: 'booked' | 'paid'
+  stage?: 'booked' | 'paid' | 'deposit' | 'balance_paid' | 'reminder' | 'choices' | 'link'
+  reminderKind?: string | null
+  deposit?: boolean
+  amountPaid?: string
+  balanceDue?: string | null
+  balanceDueDate?: string | null
+  balanceUrl?: string | null
   eventTitle?: string
   eventDate?: string
   venue?: string
@@ -53,23 +59,47 @@ export const GuestList = ({ guests = [] }: { guests?: EventBookingData['guests']
   </>
 )
 
+/** Heading, preview and intro for each stage; booked/paid wording is unchanged. */
+export function stageCopy(d: EventBookingData) {
+  const paid = d.stage === 'paid' || d.stage === 'balance_paid' || d.paymentStatus === 'Paid'
+  switch (d.stage) {
+    case 'deposit': return { heading: 'Deposit received — your places are held', preview: `Deposit received — ${d.eventTitle}`,
+      intro: `We have received your deposit for ${d.eventTitle}. Your places are held.${d.balanceDue ? ` The balance of ${d.balanceDue} is due by ${d.balanceDueDate}.` : ''}` }
+    case 'balance_paid': return { heading: 'Balance received — you’re paid in full', preview: `Balance received — ${d.eventTitle}`,
+      intro: `We have received your balance payment for ${d.eventTitle}. Your booking is now paid in full. We look forward to welcoming you.` }
+    case 'reminder': return { heading: 'Balance reminder', preview: `Balance due ${d.balanceDueDate} — ${d.eventTitle}`,
+      intro: `This is a reminder that the balance of ${d.balanceDue} for ${d.eventTitle} is due by ${d.balanceDueDate}. You can pay securely using the link below.` }
+    case 'choices': return { heading: 'Please choose your menu', preview: `Menu choices — ${d.eventTitle}`,
+      intro: `Some guests on your booking for ${d.eventTitle} still need to choose their dishes. Please use the link below to make your choices.` }
+    case 'link': return { heading: 'Your booking link', preview: `Your booking link — ${d.eventTitle}`,
+      intro: d.balanceDue ? `Here is your secure link to pay the balance of ${d.balanceDue} for ${d.eventTitle}, due by ${d.balanceDueDate}.` : `Here is your secure link for your booking for ${d.eventTitle}.` }
+    default: return paid
+      ? { heading: 'Payment received — you’re booked!', preview: `Payment received — ${d.eventTitle}`, intro: `We have received your payment for ${d.eventTitle}. We look forward to welcoming you.` }
+      : { heading: 'Thank you for your booking', preview: `Booking received — ${d.eventTitle}`, intro: `We have received your booking for ${d.eventTitle}. Your place is held while we await payment.` }
+  }
+}
+
 const Email = (d: EventBookingData) => {
-  const paid = d.stage === 'paid' || d.paymentStatus === 'Paid'
+  const paid = d.stage === 'paid' || d.stage === 'balance_paid' || d.stage === 'deposit' || d.paymentStatus === 'Paid' || d.paymentStatus === 'Deposit paid'
+  const copy = stageCopy(d)
   const first = (d.bookerName || '').split(' ')[0]
   return (
     <Html lang="en" dir="ltr">
       <Head />
-      <Preview>{paid ? `Payment received — ${d.eventTitle}` : `Booking received — ${d.eventTitle}`}</Preview>
+      <Preview>{copy.preview}</Preview>
       <Body style={main}>
         <Container style={container}>
           <Crest />
-          <Heading style={h1}>{paid ? 'Payment received — you’re booked!' : 'Thank you for your booking'}</Heading>
+          <Heading style={h1}>{copy.heading}</Heading>
           <Text style={p}>Dear {first || 'guest'},</Text>
-          <Text style={p}>
-            {paid
-              ? `We have received your payment for ${d.eventTitle}. We look forward to welcoming you.`
-              : `We have received your booking for ${d.eventTitle}. Your place is held while we await payment.`}
-          </Text>
+          <Text style={p}>{copy.intro}</Text>
+          {d.balanceUrl && (
+            <Section style={notice}>
+              {d.balanceDue && <Text style={{ ...noticeText, fontSize: '16px', margin: '0 0 8px' }}>Balance due: {d.balanceDue}{d.balanceDueDate ? ` by ${d.balanceDueDate}` : ''}</Text>}
+              <Text style={noticeText}><Link href={d.balanceUrl} style={link}>{d.balanceDue ? 'Pay your balance' : 'Open your booking'}</Link></Text>
+              <Text style={{ ...small, margin: '8px 0 0' }}>This link is personal to your booking. Please keep it safe.</Text>
+            </Section>
+          )}
           <Section style={card}>
             <Row label="Event" value={d.eventTitle} />
             <Row label="Date" value={d.eventDate} />
@@ -81,7 +111,9 @@ const Email = (d: EventBookingData) => {
             <Hr style={hr} />
             {d.cardFee && <Row label="Subtotal" value={d.subtotal} />}
             {d.cardFee && <Row label={d.feeLabel || "Fee"} value={d.cardFee} />}
-            <Row label="Total" value={d.total} />
+            <Row label={d.deposit ? 'Order total' : 'Total'} value={d.deposit ? d.subtotal : d.total} />
+            {d.deposit && <Row label="Paid so far" value={d.amountPaid} />}
+            {d.deposit && d.balanceDue && <Row label="Balance due" value={`${d.balanceDue}${d.balanceDueDate ? ` by ${d.balanceDueDate}` : ''}`} />}
             <Row label="Payment method" value={d.paymentMethod} />
             <Row label="Payment status" value={d.paymentStatus} />
           </Section>
@@ -108,7 +140,18 @@ const Email = (d: EventBookingData) => {
 
 export const template = {
   component: Email,
-  subject: (d: any) => (d?.stage === 'paid' ? `Payment received — ${d?.eventTitle || 'your booking'}` : `Booking received — ${d?.eventTitle || 'your booking'} (${d?.reference || ''})`),
+  subject: (d: any) => {
+    const t = d?.eventTitle || 'your booking'
+    switch (d?.stage) {
+      case 'paid': return `Payment received — ${t}`
+      case 'deposit': return `Deposit received — ${t}`
+      case 'balance_paid': return `Balance received — ${t}`
+      case 'reminder': return `Balance due ${d?.balanceDueDate || ''} — ${t}`
+      case 'choices': return `Please choose your menu — ${t}`
+      case 'link': return `Your booking link — ${t}`
+      default: return `Booking received — ${t} (${d?.reference || ''})`
+    }
+  },
   displayName: 'Event booking (customer)',
   previewData: {
     stage: 'booked', eventTitle: 'Joint Christmas Party at Guildford Masonic Centre', eventDate: 'Saturday 19 December 2026',

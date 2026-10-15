@@ -85,3 +85,12 @@
 - [x] Public modules, admin decide-later, confirmation/emails/Treasurer pre-orders, SEO/JSON-LD, event-image function, per-event prerendered head
 - [ ] Positive image-function check needs a published event with an image (none yet)
 - [ ] Stripe test-mode run on the 2027 draft — awaiting approval and decision on test keys
+
+## Public events Stage 4 — deposits and balances
+- [x] Migration: payment ledger, booking balance columns, private token table, reminder log, seat hold for deposit_paid, backfill
+- [x] Shared deposit/balance/refund maths + tests
+- [x] Webhook per-payment matching, refunds/disputes, per-payment fee sync
+- [x] Checkout deposit plan; balance page + balance checkout; staff link function
+- [x] Daily reminders function + schedule (after deploy)
+- [x] Treasurer Balances outstanding + actuals; confirmation/emails
+- [x] Full unit + browser suites, 320/390px checks

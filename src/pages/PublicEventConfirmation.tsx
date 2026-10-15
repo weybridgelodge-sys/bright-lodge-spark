@@ -5,12 +5,13 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
 import { supabase } from "@/integrations/supabase/client";
-import { formatGBP } from "@/lib/publicEvents";
+import { formatEventDate, formatGBP } from "@/lib/publicEvents";
 
 type Summary = {
   reference: string; name: string; adults: number; children: number; total_pence: number; subtotal_pence?: number; fee_pence?: number;
   items?: { name: string; qty: number; unit_pence: number }[]; menus?: { name: string; menu: string }[];
   payment_method: string; payment_status: string;
+  payment_plan?: string; amount_paid_pence?: number; balance_due_pence?: number; balance_due_date?: string | null; balance_url?: string | null;
   bank: { account_holder_name?: string; sort_code?: string; account_number?: string; reference?: string } | null;
 };
 
@@ -32,13 +33,15 @@ export default function PublicEventConfirmation() {
       if (error || !data?.reference) { setFailed(true); return; }
       setB(data);
       // Card payments confirm via webhook a moment after redirect.
-      if (data.payment_status !== "paid" && data.payment_method !== "Bank transfer" && tries < 8) setTimeout(load, 2500);
+      if (data.payment_status !== "paid" && data.payment_status !== "deposit_paid" && data.payment_method !== "Bank transfer" && tries < 8) setTimeout(load, 2500);
     };
     if (ref && token) load(); else setFailed(true);
     return () => { alive = false; };
   }, [ref, token]);
 
-  const paid = b?.payment_status === "paid";
+  const depositPaid = b?.payment_status === "deposit_paid";
+  const paid = b?.payment_status === "paid" || depositPaid;
+  const isDeposit = b?.payment_plan === "deposit";
   return (
     <div className="min-h-screen overflow-x-hidden">
       <SEO title="Booking confirmation" description="Your event booking with Weybridge Lodge No. 6787." noindex />
@@ -46,7 +49,7 @@ export default function PublicEventConfirmation() {
       <main id="main-content" className="pt-32 pb-20 md:pt-40 bg-background">
         <div className="container mx-auto px-4 sm:px-6 max-w-2xl font-sans">
           <h1 className="font-serif text-3xl md:text-4xl text-foreground text-center mb-6">
-            {failed ? "Booking not found" : !b ? "Checking your booking…" : paid ? "You're booked!" : "Booking received"}
+            {failed ? "Booking not found" : !b ? "Checking your booking…" : depositPaid ? "Deposit received — you're booked!" : paid ? "You're booked!" : "Booking received"}
           </h1>
           {b && (
             <section className="border border-border bg-card rounded-sm p-6 space-y-2" aria-labelledby="summary-heading">
@@ -58,7 +61,19 @@ export default function PublicEventConfirmation() {
               {(b.fee_pence ?? 0) > 0 && <p className="text-sm text-muted-foreground">Subtotal {formatGBP(b.subtotal_pence ?? b.total_pence - (b.fee_pence ?? 0))} + {b.payment_method === "Card" ? "card fee" : "processing fee"} {formatGBP(b.fee_pence ?? 0)}</p>}
               {!!b.items?.length && <ul className="text-sm text-muted-foreground break-words">{b.items.map((i, k) => <li key={k}>{i.qty} × {i.name} · {formatGBP(i.qty * i.unit_pence)}</li>)}</ul>}
               {!!b.menus?.length && <ul className="text-sm text-muted-foreground break-words">{b.menus.map((m, k) => <li key={k}><strong className="text-foreground">{m.name}:</strong> {m.menu}</li>)}</ul>}
-              <p className="text-muted-foreground">Payment: {b.payment_method} — {paid ? "paid" : "pending payment"}</p>
+              <p className="text-muted-foreground">Payment: {b.payment_method} — {b.payment_status === "paid" ? "paid" : depositPaid ? "deposit paid" : "pending payment"}</p>
+              {isDeposit && paid && (
+                <div className="border-2 border-gold rounded-sm p-4 space-y-1">
+                  <p className="text-foreground">Paid so far: <strong>{formatGBP(b.amount_paid_pence ?? 0)}</strong></p>
+                  {(b.balance_due_pence ?? 0) > 0 ? (
+                    <>
+                      <p className="text-foreground font-bold break-words">Balance due: {formatGBP(b.balance_due_pence ?? 0)}{b.balance_due_date ? ` by ${formatEventDate(b.balance_due_date)}` : ""}</p>
+                      {b.balance_url && <a href={b.balance_url} className="mt-2 inline-flex items-center justify-center min-h-[48px] px-6 bg-gold-shimmer text-accent-foreground font-semibold rounded-sm">Pay your balance</a>}
+                      <p className="text-sm text-muted-foreground">We have also emailed you this link.</p>
+                    </>
+                  ) : <p className="text-foreground font-bold">Paid in full — thank you.</p>}
+                </div>
+              )}
               <p className="text-muted-foreground">A confirmation email is on its way to you.</p>
             </section>
           )}

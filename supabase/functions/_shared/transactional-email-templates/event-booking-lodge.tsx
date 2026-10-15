@@ -4,7 +4,8 @@ import type { TemplateEntry } from './registry.ts'
 import { card, container, Crest, type EventBookingData, GuestList, guestLine, h1, hr, label, link, main, Row, small } from './event-booking-customer.tsx'
 
 const Email = (d: EventBookingData) => {
-  const paid = d.stage === 'paid'
+  const paid = d.stage === 'paid' || d.stage === 'deposit' || d.stage === 'balance_paid'
+  const headline = d.stage === 'deposit' ? 'Event deposit received' : d.stage === 'balance_paid' ? 'Event balance received' : 'Event payment received'
   return (
     <Html lang="en" dir="ltr">
       <Head />
@@ -12,7 +13,7 @@ const Email = (d: EventBookingData) => {
       <Body style={main}>
         <Container style={container}>
           <Crest />
-          <Heading style={h1}>{paid ? 'Event payment received' : 'New event booking'}</Heading>
+          <Heading style={h1}>{paid ? headline : 'New event booking'}</Heading>
           <Section style={card}>
             <Row label="Event" value={d.eventTitle} />
             <Row label="Reference" value={d.reference} />
@@ -28,6 +29,8 @@ const Email = (d: EventBookingData) => {
             {d.cardFee && <Row label="Subtotal" value={d.subtotal} />}
             {d.cardFee && <Row label={d.feeLabel || "Fee"} value={d.cardFee} />}
             <Row label="Total" value={d.total} />
+            {d.deposit && <Row label="Paid so far" value={d.amountPaid} />}
+            {d.deposit && d.balanceDue && <Row label="Balance due" value={`${d.balanceDue}${d.balanceDueDate ? ` by ${d.balanceDueDate}` : ''}`} />}
             <Row label="Payment method" value={d.paymentMethod} />
             <Row label="Payment status" value={d.paymentStatus} />
           </Section>
@@ -40,7 +43,7 @@ const Email = (d: EventBookingData) => {
 
 export const template = {
   component: Email,
-  subject: (d: any) => (d?.stage === 'paid' ? `Payment received — ${d?.reference} (${d?.eventTitle})` : `New booking — ${d?.bookerName} for ${d?.eventTitle} (${d?.reference})`),
+  subject: (d: any) => (d?.stage === 'deposit' ? `Deposit received — ${d?.reference} (${d?.eventTitle})` : d?.stage === 'balance_paid' ? `Balance received — ${d?.reference} (${d?.eventTitle})` : d?.stage === 'paid' ? `Payment received — ${d?.reference} (${d?.eventTitle})` : `New booking — ${d?.bookerName} for ${d?.eventTitle} (${d?.reference})`),
   displayName: 'Event booking (lodge notification)',
   previewData: {
     stage: 'booked', eventTitle: 'Joint Christmas Party at Guildford Masonic Centre', reference: 'XMAS26-0001', bookerName: 'John Smith',
