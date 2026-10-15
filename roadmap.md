@@ -67,3 +67,8 @@
 - [x] KPI Summary PDF: centred navy Page X of Y with gold rule; regenerated all 3 pages and visually checked (no overlap/clipping); 155 unit and 60 phone-width tests passed, build OK.
 
 - [x] Event Accounts subledger: fixed budget lines, booking-driven actuals, real Stripe fees (incl refund/dispute), events payouts + allocations, events Stripe balance, tie-out (cash awaiting banking), remove 4120 wording
+
+## Public event calendar integration
+- [ ] Tidy public event address wrapping without changing stored values.
+- [ ] Include upcoming published public events once in website calendar and member ICS/calendar, preserving overnight times.
+- [ ] Verify December 19 links and mobile layouts without writing real records; deploy only the calendar feed.
