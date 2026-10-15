@@ -8,6 +8,8 @@ import { Copy, QrCode, X, Download, Link2, Archive, ArchiveRestore, CalendarDays
 import { buildDuplicatePayload, eventQrTarget, isValidShortLink } from "@/lib/eventDuplicate";
 import { renderQrPng, type QrStyle } from "@/lib/eventQr";
 import { saveBlob } from "@/lib/nativeDownload";
+import { CataloguePanel, CoursesPanel, EventTypePanel, FeeCoverPanel, InfoBlocksPanel, PaymentSchedulePanel, SeoPanel, type ModuleSettings } from "@/components/members/public-events/EventModulePanels";
+import { paymentScheduleErrors, parseModules, remapImagePath } from "@/lib/eventModules";
 import { canDeleteEvent, DEFAULT_VENUE, formatTime, publishBlockers, STATEMENT_DESCRIPTOR_MAX } from "@/lib/publicEvents";
 
 const inputCls = "w-full min-h-[44px] bg-navy-dark/50 border border-gold/20 rounded-sm px-3 py-2 text-sm text-primary-foreground placeholder:text-primary-foreground/40 focus:outline-none focus:border-gold/60";
@@ -22,7 +24,7 @@ type Draft = {
   menu_items: string; dietary_choices: string; highlights: string;
   adult_price: string; child_price: string; theme: "default" | "christmas"; hosting_lodges: string;
   reference_prefix: string; statement_descriptor: string; events_notify_email: string; short_link: string; is_public: boolean;
-};
+} & ModuleSettings;
 
 const pIn = (p: number | null | undefined) => (p == null ? "" : (p / 100).toFixed(2));
 const pOut = (s: string) => (s.trim() === "" ? null : Math.round(parseFloat(s) * 100));
@@ -43,6 +45,10 @@ function toDraft(r: Row): Draft {
     adult_price: pIn(r.adult_price_pence), child_price: pIn(r.child_price_pence),
     theme: r.theme === "christmas" ? "christmas" : "default", hosting_lodges: arr(r.hosting_lodges).join("\n"),
     reference_prefix: r.reference_prefix ?? "", statement_descriptor: r.statement_descriptor ?? "", events_notify_email: r.events_notify_email ?? "", short_link: r.short_link ?? "", is_public: !!r.is_public,
+    event_type: r.event_type === "dinner_festival" ? "dinner_festival" : "simple", modules: r.modules ?? {},
+    payment_mode: r.payment_mode === "full_or_deposit" ? "full_or_deposit" : "full",
+    deposit_percent: r.deposit_percent == null ? "" : String(Number(r.deposit_percent)), balance_due_date: r.balance_due_date ?? "",
+    fee_cover_enabled: r.fee_cover_enabled !== false, seo_title: r.seo_title ?? "", seo_description: r.seo_description ?? "", og_image_url: r.og_image_url ?? "",
   };
 }
 
@@ -58,6 +64,9 @@ function toPayload(d: Draft) {
     adult_price_pence: pOut(d.adult_price), child_price_pence: pOut(d.child_price), theme: d.theme, hosting_lodges: lines(d.hosting_lodges),
     reference_prefix: orNull(d.reference_prefix.toUpperCase()), statement_descriptor: orNull(d.statement_descriptor),
     events_notify_email: orNull(d.events_notify_email), short_link: orNull(d.short_link),
+    event_type: d.event_type, modules: d.modules ?? {}, payment_mode: d.payment_mode,
+    deposit_percent: d.deposit_percent.trim() === "" ? null : Number(d.deposit_percent), balance_due_date: orNull(d.balance_due_date),
+    fee_cover_enabled: d.fee_cover_enabled, seo_title: orNull(d.seo_title), seo_description: orNull(d.seo_description), og_image_url: orNull(d.og_image_url),
   };
 }
 
@@ -104,10 +113,39 @@ export default function PublicEventsAdmin() {
     const payload = buildDuplicatePayload(r, ((slugs as any[]) ?? []).map((x) => x.slug));
     const { data, error } = await supabase.from("event_accounts" as any).insert(payload).select("*").single();
     if (error) { toast.error(error.message); return; }
+    const newId = (data as any).id as string;
+    // Courses, catalogue and info blocks copy in one database transaction; on failure the new draft is removed.
+    const { error: cErr } = await (supabase as any).rpc("duplicate_event_content", { _src: r.id, _dst: newId });
+    if (cErr) {
+      await supabase.from("event_accounts" as any).delete().eq("id", newId);
+      toast.error(`Duplicate failed, nothing was created: ${cErr.message}`);
+      return;
+    }
+    await copyImages(r.id, newId, data as any);
     toast.success("Draft copy created");
     await refresh();
     setDupFrom(r.public_title || r.name);
     setEditing(toDraft(data as any));
+  };
+
+  /** Images live in each event's own folder so archiving the old event never hides the new one's pictures. */
+  const copyImages = async (srcId: string, newId: string, row: Record<string, any>) => {
+    const st = (supabase as any).storage.from("event-content-images");
+    const { data: blocks } = await (supabase as any).from("event_info_blocks").select("id,image_path").eq("event_id", newId).not("image_path", "is", null);
+    let failed = 0;
+    for (const b of (blocks as any[]) ?? []) {
+      const to = remapImagePath(b.image_path, newId);
+      const { error } = await st.copy(b.image_path, to);
+      if (error) { failed++; continue; }
+      await (supabase as any).from("event_info_blocks").update({ image_path: to }).eq("id", b.id);
+    }
+    const og: string | null = row.og_image_url;
+    if (og?.startsWith(`storage:${srcId}/`)) {
+      const to = remapImagePath(og.slice(8), newId);
+      const { error } = await st.copy(og.slice(8), to);
+      if (error) failed++; else await supabase.from("event_accounts" as any).update({ og_image_url: `storage:${to}` }).eq("id", newId);
+    }
+    if (failed) toast.warning(`${failed} image(s) could not be copied; re-upload them in the copy.`);
   };
 
   const togglePublish = async (r: Row) => {
@@ -240,6 +278,9 @@ function Editor({ draft: initial, onBack, duplicatedFrom, onQr }: { draft: Draft
   const save = async () => {
     if (d.statement_descriptor.length > STATEMENT_DESCRIPTOR_MAX) { toast.error("Card statement text must be 22 characters or fewer"); return; }
     if (!isValidShortLink(d.short_link)) { toast.error("Short link must start with https://"); return; }
+    const errs = paymentScheduleErrors({ payment_mode: d.payment_mode, deposit_percent: d.deposit_percent.trim() === "" ? null : Number(d.deposit_percent), balance_due_date: orNull(d.balance_due_date), event_date: d.event_date });
+    if (errs.length) { toast.error(errs.join(". ")); return; }
+    if (d.og_image_url && !/^(https:\/\/|storage:)/i.test(d.og_image_url.trim())) { toast.error("Sharing image must be an https link or an upload"); return; }
     setSaving(true);
     const { error } = await supabase.from("event_accounts" as any).update(toPayload(d)).eq("id", d.id);
     setSaving(false);
@@ -268,6 +309,7 @@ function Editor({ draft: initial, onBack, duplicatedFrom, onQr }: { draft: Draft
         {area("intro_copy", "Intro (blank line between paragraphs)", 5)}
         {field("short_link", "Short link for QR (optional, e.g. https://bit.ly/…)", { placeholder: "https://bit.ly/…", inputMode: "url" })}
       </fieldset>
+      <EventTypePanel s={d} set={set} />
       <fieldset className={fs}><legend className={lg}>The Useful Stuff</legend>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {field("event_date", "Date", { type: "date" })}
@@ -307,13 +349,26 @@ function Editor({ draft: initial, onBack, duplicatedFrom, onQr }: { draft: Draft
         </div>
         {area("hosting_lodges", "Hosting lodges (one per line)", 2)}
       </fieldset>
+      {d.event_type === "dinner_festival" && (() => {
+        const m = parseModules(d.modules, d.event_type);
+        return (
+          <>
+            {m.courses && <CoursesPanel eventId={d.id} kidsMenu={m.kids_menu} dietaryChoices={lines(d.dietary_choices)} />}
+            {m.catalogue && <CataloguePanel eventId={d.id} />}
+            {m.deposit && <PaymentSchedulePanel s={d} set={set} adultPricePence={pOut(d.adult_price)} />}
+            {m.info_blocks && <InfoBlocksPanel eventId={d.id} />}
+          </>
+        );
+      })()}
+      <FeeCoverPanel s={d} set={set} />
+      <SeoPanel s={d} set={set} eventId={d.id} />
       <details className={fs}>
         <summary className="cursor-pointer min-h-[44px] flex items-center text-gold font-serif text-sm">Advanced (payments and emails)</summary>
         {field("reference_prefix", "Booking reference prefix", { placeholder: "XMAS26" })}
         {field("statement_descriptor", `Card statement text (max ${STATEMENT_DESCRIPTOR_MAX})`, { maxLength: STATEMENT_DESCRIPTOR_MAX })}
         {field("events_notify_email", "Notification emails (blank = Secretary + Webmaster)")}
       </details>
-      <p className="text-xs text-primary-foreground/70">Publishing needs both prices and start/end times. Online booking stays closed until then.</p>
+      <p className="text-xs text-primary-foreground/70">Course, drink and information rows save with their own Save buttons; the event settings above save with Save event. Publishing needs both prices and start/end times. Online booking stays closed until then.</p>
       <div className="sticky bottom-20 md:bottom-4">
         <button type="button" onClick={save} disabled={saving} className="w-full sm:w-auto inline-flex items-center justify-center gap-2 min-h-[48px] px-6 bg-gold text-navy rounded-sm font-semibold disabled:opacity-60">
           {saving ? <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" /> : <Save className="w-4 h-4" aria-hidden="true" />} Save event
