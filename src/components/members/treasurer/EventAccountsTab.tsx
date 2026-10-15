@@ -33,10 +33,11 @@ type LineType = "income" | "expense";
 type BudgetLine = {
   id: string; event_id: string; category: string; planned_pence: number;
   unit_cost_pence: number | null; quantity: number | null; line_type: LineType;
-  system_key?: "ticket_sales" | "fee_contributions" | "stripe_fees" | null;
+  system_key?: "ticket_sales" | "fee_contributions" | "stripe_fees" | "pre_orders" | null;
 };
 const SYSTEM_LINE_NOTE: Record<string, string> = {
   ticket_sales: "Actual = paid bookings (ticket subtotals)",
+  pre_orders: "Actual = drinks and vouchers pre-ordered on paid bookings",
   fee_contributions: "Actual = processing-fee contributions on paid bookings",
   stripe_fees: "Actual = real Stripe fees (incl. refund/dispute fees)",
 };
@@ -205,6 +206,7 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
       lines.map((bl) => {
         if (bl.system_key) {
           const actual = bl.system_key === "ticket_sales" ? bookingActuals.ticketSales
+            : bl.system_key === "pre_orders" ? bookingActuals.preOrders
             : bl.system_key === "fee_contributions" ? bookingActuals.feeContributions : bookingActuals.stripeFees;
           const variance = bl.line_type === "income" ? actual - bl.planned_pence : bl.planned_pence - actual;
           return { key: bl.id, category: bl.category, planned: bl.planned_pence, actual, variance };

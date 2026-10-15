@@ -1,7 +1,7 @@
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { z } from "https://esm.sh/zod@3.23.8";
 import { feeLineItemName } from "../_shared/cardFee.ts";
-import { orderTotalPence, quoteBooking } from "../_shared/eventPricing.ts";
+import { orderModules, priceOrder, type ItemRow } from "../_shared/eventOrder.ts";
 import { eventsStripe, sendEventBookingEmails, serviceClient } from "../_shared/stripe-events.ts";
 
 const GuestSchema = z.object({
@@ -10,6 +10,7 @@ const GuestSchema = z.object({
   is_child: z.boolean(),
   dietary: z.string().trim().max(500).optional().default(""),
   dietary_choice: z.string().trim().max(80).nullable().optional(),
+  courses: z.array(z.object({ course_id: z.string().uuid(), option_id: z.string().uuid().nullable(), decide_later: z.boolean().optional() })).max(20).optional(),
 });
 
 const BodySchema = z.object({
@@ -23,6 +24,7 @@ const BodySchema = z.object({
   guests: z.array(GuestSchema).max(100),
   payment_method: z.enum(["card", "pay_by_bank", "bank_transfer"]),
   cover_fee: z.boolean().default(false),
+  items: z.array(z.object({ item_id: z.string().uuid(), qty: z.number().int().min(0).max(500) })).max(100).optional(),
   origin: z.string().url(),
   website: z.string().max(0).optional().default(""), // honeypot
 });
@@ -60,14 +62,26 @@ Deno.serve(async (req) => {
       if (taken + party > ev.capacity) return json({ error: `Sorry, only ${Math.max(0, ev.capacity - taken)} places remain.` }, 409);
     }
 
-    // Server recalculates order and fee itself via the shared pricing rule (simple events pay in full).
-    const quote = quoteBooking({
-      orderPence: orderTotalPence(input.adults, input.children, ev.adult_price_pence, ev.child_price_pence),
-      plan: "full", method: input.payment_method, coverFee: input.cover_fee,
-    });
-    const subtotal = quote.chargePence;
-    const fee = quote.feePence;
-    const total = quote.totalNowPence;
+    // Server recalculates the whole order from database rows; client totals/labels are never trusted.
+    const mods = orderModules(ev.modules, ev.event_type);
+    const [coursesRes, optionsRes, catsRes, itemsRes] = await Promise.all([
+      mods.courses ? sb.from("event_courses").select("id,menu_set,name,sort_order").eq("event_id", ev.id) : Promise.resolve({ data: [] }),
+      mods.courses ? sb.from("event_course_options").select("id,course_id,label,active").eq("event_id", ev.id) : Promise.resolve({ data: [] }),
+      mods.catalogue ? sb.from("event_catalogue_categories").select("id,name").eq("event_id", ev.id) : Promise.resolve({ data: [] }),
+      mods.catalogue ? sb.from("event_catalogue_items").select("id,category_id,name,price_pence,kind,active,max_per_booking,unit_note").eq("event_id", ev.id) : Promise.resolve({ data: [] }),
+    ] as any[]);
+    const catName = new Map(((catsRes.data ?? []) as any[]).map((c) => [c.id, c.name]));
+    const priced = priceOrder({
+      event_type: ev.event_type, modules: ev.modules, fee_cover_enabled: ev.fee_cover_enabled !== false,
+      adult_price_pence: ev.adult_price_pence, child_price_pence: ev.child_price_pence,
+      courses: coursesRes.data ?? [], options: optionsRes.data ?? [],
+      items: ((itemsRes.data ?? []) as any[]).map((i): ItemRow => ({ ...i, category_name: catName.get(i.category_id) ?? null })),
+    }, { adults: input.adults, children: input.children, guests: input.guests, items: input.items, method: input.payment_method, coverFee: input.cover_fee });
+    if (!priced.ok) return json({ error: priced.error }, 400);
+    const order = priced.order;
+    const subtotal = order.subtotalPence;
+    const fee = order.feePence;
+    const total = order.totalPence;
     const title = ev.public_title || ev.name;
     const stripeName = ev.name || title; // Accounts name for Stripe descriptions/line items
     const prefix = (ev.reference_prefix || "EVT").toUpperCase();
@@ -91,6 +105,9 @@ Deno.serve(async (req) => {
         adult_count: input.adults,
         child_count: input.children,
         subtotal_pence: subtotal,
+        tickets_subtotal_pence: order.ticketsPence,
+        items_subtotal_pence: order.itemsPence,
+        payment_plan: "full",
         fee_pence: fee,
         total_pence: total,
         payment_method: input.payment_method,
@@ -102,13 +119,33 @@ Deno.serve(async (req) => {
     }
     if (!booking) throw new Error("Could not allocate a booking reference");
 
-    await sb.from("event_guests").insert(input.guests.map((g) => ({
-      booking_id: booking.id, name: g.name, age: g.age ?? null, is_child: g.is_child, dietary_choice: g.dietary_choice || null,
-      allergies: [g.dietary_choice, g.dietary].filter(Boolean).join(" — ") || null,
-    })));
+    // Guests, then course choices and pre-order lines (with snapshots). Any failure removes the booking so no half booking holds seats.
+    try {
+      const { data: guestRows, error: gErr } = await sb.from("event_guests").insert(input.guests.map((g, i) => ({
+        booking_id: booking.id, name: g.name, age: g.age ?? null, is_child: g.is_child, dietary_choice: g.dietary_choice || null,
+        allergies: [g.dietary_choice, g.dietary].filter(Boolean).join(" — ") || null,
+        ...(order.menuSummaries[i] && { menu_choice: order.menuSummaries[i] }),
+      }))).select("id");
+      if (gErr) throw gErr;
+      const choiceRows = order.guestChoices.flatMap((cs, i) => cs.map((c) => ({
+        guest_id: (guestRows as any[])[i].id, booking_id: booking.id, event_id: ev.id, course_id: c.course_id, option_id: c.option_id,
+        course_name_snapshot: c.course_name, option_label_snapshot: c.option_label, decide_later: c.decide_later,
+      })));
+      if (choiceRows.length) { const { error } = await sb.from("event_guest_course_choices").insert(choiceRows); if (error) throw error; }
+      if (order.items.length) {
+        const { error } = await sb.from("event_booking_items").insert(order.items.map((it) => ({
+          booking_id: booking.id, event_id: ev.id, catalogue_item_id: it.id, kind: it.kind, category_name: it.category_name ?? null,
+          name_snapshot: it.name, unit_note_snapshot: it.unit_note ?? null, unit_price_pence: it.price_pence, quantity: it.qty,
+        })));
+        if (error) throw error;
+      }
+    } catch (e) {
+      await sb.from("event_bookings").delete().eq("id", booking.id);
+      throw e;
+    }
 
     const metadata = { event_id: ev.id, event_slug: ev.slug, booking_id: booking.id, booking_reference: booking.reference };
-    const btMetadata = { ...metadata, fee_pence: String(fee) };
+    const btMetadata = { ...metadata, fee_pence: String(fee), ...(order.itemsPence > 0 && { items_pence: String(order.itemsPence) }) };
     const suffix = ev.statement_descriptor ? String(ev.statement_descriptor).slice(0, 22) : undefined;
     const stripe = eventsStripe();
     const confirmUrl = `${input.origin}/events/${ev.slug}/confirmation?ref=${encodeURIComponent(booking.reference)}&t=${booking.access_token}`;
@@ -150,6 +187,7 @@ Deno.serve(async (req) => {
       line_items: [
         ...(input.adults ? [{ quantity: input.adults, price_data: { currency: "gbp", unit_amount: ev.adult_price_pence, product_data: { name: `${stripeName} — adult` } } }] : []),
         ...(input.children ? [{ quantity: input.children, price_data: { currency: "gbp", unit_amount: ev.child_price_pence, product_data: { name: `${stripeName} — child (12 and under)` } } }] : []),
+        ...order.items.map((it) => ({ quantity: it.qty, price_data: { currency: "gbp", unit_amount: it.price_pence, product_data: { name: `${stripeName} — ${it.name}` } } })),
         ...(fee > 0 ? [{ quantity: 1, price_data: { currency: "gbp", unit_amount: fee, product_data: { name: feeLineItemName(input.payment_method) } } }] : []),
       ],
       metadata,
