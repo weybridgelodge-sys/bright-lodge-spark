@@ -64,7 +64,9 @@ function toPayload(d: Draft) {
     adult_price_pence: pOut(d.adult_price), child_price_pence: pOut(d.child_price), theme: d.theme, hosting_lodges: lines(d.hosting_lodges),
     reference_prefix: orNull(d.reference_prefix.toUpperCase()), statement_descriptor: orNull(d.statement_descriptor),
     events_notify_email: orNull(d.events_notify_email), short_link: orNull(d.short_link),
-    event_type: d.event_type, modules: d.modules ?? {}, payment_mode: d.payment_mode,
+    event_type: d.event_type, modules: d.modules ?? {},
+    // Deposit mode only applies while the deposit module is on.
+    payment_mode: parseModules(d.modules, d.event_type).deposit ? d.payment_mode : "full",
     deposit_percent: d.deposit_percent.trim() === "" ? null : Number(d.deposit_percent), balance_due_date: orNull(d.balance_due_date),
     fee_cover_enabled: d.fee_cover_enabled, seo_title: orNull(d.seo_title), seo_description: orNull(d.seo_description), og_image_url: orNull(d.og_image_url),
   };
