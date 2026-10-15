@@ -211,7 +211,7 @@ export default function PublicEvent() {
                   {([["Timings", ev.useful_stuff.timings], ["Dress code", ev.dress_code], ["Parking", ev.useful_stuff.parking], ["Access", ev.useful_stuff.access]] as const)
                     .filter(([, v]) => !!v).map(([k, v]) => (
                       <div key={k} className="border border-border bg-background rounded-sm p-4">
-                        <dt className="font-semibold text-foreground">{k}</dt><dd className="text-muted-foreground">{v}</dd>
+                        <dt className="font-semibold text-foreground">{k}</dt><dd className={`text-muted-foreground ${k === "Timings" ? "whitespace-pre-line break-words" : ""}`}>{v}</dd>
                       </div>
                     ))}
                 </dl>

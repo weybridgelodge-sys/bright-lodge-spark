@@ -250,9 +250,12 @@ function Editor({ draft: initial, onBack }: { draft: Draft; onBack: () => void }
           {field("booking_deadline", "Booking deadline", { type: "datetime-local" })}
           {field("capacity", "Capacity (adults + children)", { inputMode: "numeric" })}
         </div>
+        <div>
+          {area("timings", "Timings (e.g. Arrive 6.30 pm, buffet 7.30 pm)", 5, "5.00 pm Doors open\n6.30 pm Arrive\n7.30 pm Buffet")}
+          <p className="mt-1 text-xs text-primary-foreground/60">One timing per line, e.g. 6.30 pm Arrive.</p>
+        </div>
         {field("parking", "Parking")}
         {field("dress_code", "Dress code")}
-        {field("timings", "Timings (e.g. Arrive 6.30 pm, buffet 7.30 pm)")}
         {field("access", "Access")}
       </fieldset>
       <fieldset className={fs}><legend className={lg}>Menu &amp; Dining</legend>
