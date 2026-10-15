@@ -94,3 +94,8 @@
 - [x] Daily reminders function + schedule (after deploy)
 - [x] Treasurer Balances outstanding + actuals; confirmation/emails
 - [x] Full unit + browser suites, 320/390px checks
+
+## Stage 4 follow-up: manual balance payments
+- [x] Record balance received (Admin/Treasurer), partial allowed, idempotent, audited
+- [x] Tie-out split cash vs online per payment row
+- [x] Tests; deploy event-record-balance

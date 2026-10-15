@@ -65,7 +65,7 @@ export default function EventBalancesPanel({ bookings, canRegenerate, onRecorded
     if (!draft || saving) return;
     const pence = Math.round(Number(draft.amount) * 100);
     const v = validateManualBalance(b.balance_due_pence ?? 0, pence);
-    if (!v.ok) { toast({ title: v.error, variant: "destructive" }); return; }
+    if (v.ok === false) { toast({ title: v.error, variant: "destructive" }); return; }
     setSaving(true);
     const { data, error } = await supabase.functions.invoke("event-record-balance", { body: {
       booking_id: b.id, request_id: draft.requestId, amount_pence: pence, paid_at: draft.date,
