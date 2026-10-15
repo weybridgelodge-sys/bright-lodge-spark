@@ -256,7 +256,6 @@ function Editor({ draft: initial, onBack }: { draft: Draft; onBack: () => void }
         </div>
         {field("parking", "Parking")}
         {field("dress_code", "Dress code")}
-        {field("timings", "Timings (e.g. Arrive 6.30 pm, buffet 7.30 pm)")}
         {field("access", "Access")}
       </fieldset>
       <fieldset className={fs}><legend className={lg}>Menu &amp; Dining</legend>
