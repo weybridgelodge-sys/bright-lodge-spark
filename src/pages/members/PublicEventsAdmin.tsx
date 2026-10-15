@@ -4,7 +4,10 @@ import MembersLayout from "@/components/members/MembersLayout";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Archive, ArchiveRestore, CalendarDays, ChevronLeft, Eye, EyeOff, ExternalLink, Loader2, Pencil, Plus, Save, Trash2, Wallet } from "lucide-react";
+import { Copy, QrCode, X, Download, Link2, Archive, ArchiveRestore, CalendarDays, ChevronLeft, Eye, EyeOff, ExternalLink, Loader2, Pencil, Plus, Save, Trash2, Wallet } from "lucide-react";
+import { buildDuplicatePayload, eventQrTarget, isValidShortLink } from "@/lib/eventDuplicate";
+import { renderQrPng, type QrStyle } from "@/lib/eventQr";
+import { saveBlob } from "@/lib/nativeDownload";
 import { canDeleteEvent, DEFAULT_VENUE, formatTime, publishBlockers, STATEMENT_DESCRIPTOR_MAX } from "@/lib/publicEvents";
 
 const inputCls = "w-full min-h-[44px] bg-navy-dark/50 border border-gold/20 rounded-sm px-3 py-2 text-sm text-primary-foreground placeholder:text-primary-foreground/40 focus:outline-none focus:border-gold/60";
@@ -18,7 +21,7 @@ type Draft = {
   parking: string; dress_code: string; timings: string; access: string;
   menu_items: string; dietary_choices: string; highlights: string;
   adult_price: string; child_price: string; theme: "default" | "christmas"; hosting_lodges: string;
-  reference_prefix: string; statement_descriptor: string; events_notify_email: string;
+  reference_prefix: string; statement_descriptor: string; events_notify_email: string; short_link: string; is_public: boolean;
 };
 
 const pIn = (p: number | null | undefined) => (p == null ? "" : (p / 100).toFixed(2));
@@ -39,7 +42,7 @@ function toDraft(r: Row): Draft {
     menu_items: arr(r.menu_items).join("\n"), dietary_choices: arr(r.dietary_choices).join("\n"), highlights: arr(r.highlights).join("\n"),
     adult_price: pIn(r.adult_price_pence), child_price: pIn(r.child_price_pence),
     theme: r.theme === "christmas" ? "christmas" : "default", hosting_lodges: arr(r.hosting_lodges).join("\n"),
-    reference_prefix: r.reference_prefix ?? "", statement_descriptor: r.statement_descriptor ?? "", events_notify_email: r.events_notify_email ?? "",
+    reference_prefix: r.reference_prefix ?? "", statement_descriptor: r.statement_descriptor ?? "", events_notify_email: r.events_notify_email ?? "", short_link: r.short_link ?? "", is_public: !!r.is_public,
   };
 }
 
@@ -54,7 +57,7 @@ function toPayload(d: Draft) {
     dress_code: orNull(d.dress_code), menu_items: lines(d.menu_items), dietary_choices: lines(d.dietary_choices), highlights: lines(d.highlights),
     adult_price_pence: pOut(d.adult_price), child_price_pence: pOut(d.child_price), theme: d.theme, hosting_lodges: lines(d.hosting_lodges),
     reference_prefix: orNull(d.reference_prefix.toUpperCase()), statement_descriptor: orNull(d.statement_descriptor),
-    events_notify_email: orNull(d.events_notify_email),
+    events_notify_email: orNull(d.events_notify_email), short_link: orNull(d.short_link),
   };
 }
 
@@ -66,6 +69,8 @@ export default function PublicEventsAdmin() {
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<Draft | null>(null);
   const [showArchived, setShowArchived] = useState(false);
+  const [dupFrom, setDupFrom] = useState<string | null>(null);
+  const [qrFor, setQrFor] = useState<Row | Draft | null>(null);
 
   const refresh = async () => {
     const { data, error } = await supabase.from("event_accounts" as any).select("*").order("event_date", { ascending: true });
@@ -91,6 +96,17 @@ export default function PublicEventsAdmin() {
       .select("*").single();
     if (error) { toast.error(error.message); return; }
     await refresh();
+    setEditing(toDraft(data as any));
+  };
+
+  const duplicate = async (r: Row) => {
+    const { data: slugs } = await supabase.from("event_accounts" as any).select("slug");
+    const payload = buildDuplicatePayload(r, ((slugs as any[]) ?? []).map((x) => x.slug));
+    const { data, error } = await supabase.from("event_accounts" as any).insert(payload).select("*").single();
+    if (error) { toast.error(error.message); return; }
+    toast.success("Draft copy created");
+    await refresh();
+    setDupFrom(r.public_title || r.name);
     setEditing(toDraft(data as any));
   };
 
@@ -131,7 +147,7 @@ export default function PublicEventsAdmin() {
     return <MembersLayout><p className="text-primary-foreground/70">You don't have permission to manage public events.</p></MembersLayout>;
   }
 
-  if (editing) return <MembersLayout><Editor draft={editing} onBack={() => { setEditing(null); refresh(); }} /></MembersLayout>;
+  if (editing) return <MembersLayout><Editor draft={editing} duplicatedFrom={dupFrom} onQr={setQrFor} onBack={() => { setEditing(null); setDupFrom(null); refresh(); }} />{qrFor && <QrDialog row={qrFor} onClose={() => setQrFor(null)} />}</MembersLayout>;
 
   const active = rows.filter((r) => !r.archived_at);
   const archived = rows.filter((r) => r.archived_at);
@@ -163,6 +179,8 @@ export default function PublicEventsAdmin() {
           <button type="button" onClick={() => setArchived(r, !r.archived_at)} className={`${actionBtn} border-gold/40 text-gold hover:bg-gold/15`}>
             {r.archived_at ? <><ArchiveRestore className="w-4 h-4" aria-hidden="true" /> Restore</> : <><Archive className="w-4 h-4" aria-hidden="true" /> Archive</>}
           </button>
+          <button type="button" onClick={() => duplicate(r)} className={`${actionBtn} border-gold/40 text-gold hover:bg-gold/15`}><Copy className="w-4 h-4" aria-hidden="true" /> Duplicate</button>
+          {r.is_public && r.slug && <button type="button" onClick={() => setQrFor(r)} className={`${actionBtn} border-gold/40 text-gold hover:bg-gold/15`}><QrCode className="w-4 h-4" aria-hidden="true" /> Event QR</button>}
           <button type="button" onClick={() => remove(r)} className={`${actionBtn} border-destructive/40 text-destructive hover:bg-destructive/10`}><Trash2 className="w-4 h-4" aria-hidden="true" /> Delete</button>
           <Link to={`/members/admin/treasurer?tab=event-accounts&event=${r.id}`} className={`${actionBtn} border-gold/30 text-gold hover:bg-gold/10`}><Wallet className="w-4 h-4" aria-hidden="true" /> Treasurer view</Link>
           {r.is_public && r.slug && <Link to={`/events/${r.slug}`} className={`${actionBtn} border-gold/30 text-gold hover:bg-gold/10`}><ExternalLink className="w-4 h-4" aria-hidden="true" /> View page</Link>}
@@ -197,12 +215,13 @@ export default function PublicEventsAdmin() {
             : <ul className="mt-4 space-y-3">{archived.map(card)}</ul>)}
         </section>
       )}
+      {qrFor && <QrDialog row={qrFor} onClose={() => setQrFor(null)} />}
       <p className="mt-8 text-xs text-primary-foreground/60">Public list: <Link to="/events" className="text-gold underline">/events</Link> — only published, non-archived events appear.</p>
     </MembersLayout>
   );
 }
 
-function Editor({ draft: initial, onBack }: { draft: Draft; onBack: () => void }) {
+function Editor({ draft: initial, onBack, duplicatedFrom, onQr }: { draft: Draft; onBack: () => void; duplicatedFrom: string | null; onQr: (d: Draft) => void }) {
   const [d, setD] = useState<Draft>(initial);
   const [saving, setSaving] = useState(false);
   const set = (patch: Partial<Draft>) => setD((x) => ({ ...x, ...patch }));
@@ -220,6 +239,7 @@ function Editor({ draft: initial, onBack }: { draft: Draft; onBack: () => void }
   );
   const save = async () => {
     if (d.statement_descriptor.length > STATEMENT_DESCRIPTOR_MAX) { toast.error("Card statement text must be 22 characters or fewer"); return; }
+    if (!isValidShortLink(d.short_link)) { toast.error("Short link must start with https://"); return; }
     setSaving(true);
     const { error } = await supabase.from("event_accounts" as any).update(toPayload(d)).eq("id", d.id);
     setSaving(false);
@@ -232,12 +252,21 @@ function Editor({ draft: initial, onBack }: { draft: Draft; onBack: () => void }
     <div className="space-y-5 pb-24">
       <button type="button" onClick={onBack} className="inline-flex items-center gap-1 min-h-[44px] text-gold text-sm"><ChevronLeft className="w-4 h-4" aria-hidden="true" /> Back to Public Events</button>
       <h1 className="font-serif text-2xl text-gold break-words">{d.public_title || d.name}</h1>
+      {duplicatedFrom && (
+        <p role="status" className="border-2 border-gold rounded-sm p-3 text-sm text-primary-foreground font-semibold">
+          Duplicated from {duplicatedFrom}. Check the date, times and prices before publishing. This copy is a draft and not public.
+        </p>
+      )}
+      {d.is_public && d.slug && (
+        <button type="button" onClick={() => onQr(d)} className={`${actionBtn} border-gold/40 text-gold hover:bg-gold/15`}><QrCode className="w-4 h-4" aria-hidden="true" /> Event QR</button>
+      )}
       <fieldset className={fs}><legend className={lg}>Basics</legend>
         {field("public_title", "Public title")}
         {field("name", "Accounts name (e.g. Christmas Party 2026)")}
         {field("slug", "Page address /events/…", { placeholder: "christmas-party-2026" })}
         {field("tagline", "Tagline")}
         {area("intro_copy", "Intro (blank line between paragraphs)", 5)}
+        {field("short_link", "Short link for QR (optional, e.g. https://bit.ly/…)", { placeholder: "https://bit.ly/…", inputMode: "url" })}
       </fieldset>
       <fieldset className={fs}><legend className={lg}>The Useful Stuff</legend>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -289,6 +318,42 @@ function Editor({ draft: initial, onBack }: { draft: Draft; onBack: () => void }
         <button type="button" onClick={save} disabled={saving} className="w-full sm:w-auto inline-flex items-center justify-center gap-2 min-h-[48px] px-6 bg-gold text-navy rounded-sm font-semibold disabled:opacity-60">
           {saving ? <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" /> : <Save className="w-4 h-4" aria-hidden="true" />} Save event
         </button>
+      </div>
+    </div>
+  );
+}
+
+function QrDialog({ row, onClose }: { row: { slug: string | null; short_link?: string | null; public_title?: string; name: string }; onClose: () => void }) {
+  const url = eventQrTarget({ slug: row.slug, short_link: row.short_link || null });
+  const [preview, setPreview] = useState<string | null>(null);
+  useEffect(() => {
+    if (!url) return;
+    let u: string | null = null;
+    renderQrPng(url, "navy-on-white").then((b) => { u = URL.createObjectURL(b); setPreview(u); });
+    return () => { if (u) URL.revokeObjectURL(u); };
+  }, [url]);
+  if (!url) return null;
+  const download = async (style: QrStyle) => {
+    const blob = await renderQrPng(url, style);
+    await saveBlob(blob, `${row.slug}-qr-${style}.png`);
+  };
+  const copy = async () => {
+    try { await navigator.clipboard.writeText(url); toast.success("Link copied"); } catch { toast.error("Could not copy link"); }
+  };
+  return (
+    <div role="dialog" aria-modal="true" aria-labelledby="qr-title" className="fixed inset-0 z-50 bg-navy-dark/90 flex items-center justify-center p-3 overflow-y-auto">
+      <div className="w-full max-w-md bg-navy border border-gold/40 rounded-sm p-4 space-y-4">
+        <div className="flex items-start justify-between gap-2">
+          <h2 id="qr-title" className="font-serif text-lg text-gold break-words min-w-0">Event QR: {row.public_title || row.name}</h2>
+          <button type="button" onClick={onClose} aria-label="Close" className="shrink-0 inline-flex items-center justify-center min-h-11 min-w-11 text-gold"><X className="w-5 h-5" aria-hidden="true" /></button>
+        </div>
+        {preview && <img src={preview} alt={`QR code for ${url}`} className="w-full max-w-[260px] mx-auto bg-background" />}
+        <p className="text-sm text-primary-foreground break-all">{url}</p>
+        <div className="grid grid-cols-1 gap-2">
+          <button type="button" onClick={copy} className={`${actionBtn} border-gold/40 text-gold hover:bg-gold/15`}><Link2 className="w-4 h-4" aria-hidden="true" /> Copy link</button>
+          <button type="button" onClick={() => download("navy-on-white")} className={`${actionBtn} border-gold/40 text-gold hover:bg-gold/15`}><Download className="w-4 h-4" aria-hidden="true" /> PNG: navy on white</button>
+          <button type="button" onClick={() => download("white-on-navy")} className={`${actionBtn} border-gold/40 text-gold hover:bg-gold/15`}><Download className="w-4 h-4" aria-hidden="true" /> PNG: white on navy, gold border</button>
+        </div>
       </div>
     </div>
   );
