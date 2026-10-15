@@ -652,6 +652,13 @@
       "when": 1792086496737,
       "tag": "0092_event_content_modules",
       "breakpoints": true
+    },
+    {
+      "idx": 93,
+      "version": "7",
+      "when": 1792088810651,
+      "tag": "0093_event_booking_line_items",
+      "breakpoints": true
     }
   ]
 }
