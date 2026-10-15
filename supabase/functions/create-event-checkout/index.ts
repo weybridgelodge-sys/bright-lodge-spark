@@ -1,6 +1,7 @@
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { z } from "https://esm.sh/zod@3.23.8";
-import { eventFeePence, feeLineItemName } from "../_shared/cardFee.ts";
+import { feeLineItemName } from "../_shared/cardFee.ts";
+import { orderTotalPence, quoteBooking } from "../_shared/eventPricing.ts";
 import { eventsStripe, sendEventBookingEmails, serviceClient } from "../_shared/stripe-events.ts";
 
 const GuestSchema = z.object({
@@ -59,10 +60,14 @@ Deno.serve(async (req) => {
       if (taken + party > ev.capacity) return json({ error: `Sorry, only ${Math.max(0, ev.capacity - taken)} places remain.` }, 409);
     }
 
-    const subtotal = input.adults * ev.adult_price_pence + input.children * ev.child_price_pence;
-    // Server recalculates the fee itself from cover_fee and the payment method.
-    const fee = eventFeePence(subtotal, input.payment_method, input.cover_fee);
-    const total = subtotal + fee;
+    // Server recalculates order and fee itself via the shared pricing rule (simple events pay in full).
+    const quote = quoteBooking({
+      orderPence: orderTotalPence(input.adults, input.children, ev.adult_price_pence, ev.child_price_pence),
+      plan: "full", method: input.payment_method, coverFee: input.cover_fee,
+    });
+    const subtotal = quote.chargePence;
+    const fee = quote.feePence;
+    const total = quote.totalNowPence;
     const title = ev.public_title || ev.name;
     const stripeName = ev.name || title; // Accounts name for Stripe descriptions/line items
     const prefix = (ev.reference_prefix || "EVT").toUpperCase();
