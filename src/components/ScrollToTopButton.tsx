@@ -1,9 +1,14 @@
 import { useState, useEffect } from "react";
 import { ArrowUp } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useLocation } from "react-router-dom";
+
+/** Event booking pages keep the floating button away from the ticket steppers. */
+export const hidesScrollToTop = (path: string) => /^\/events\/[^/]+/.test(path);
 
 const ScrollToTopButton = () => {
   const [visible, setVisible] = useState(false);
+  const { pathname } = useLocation();
 
   useEffect(() => {
     const onScroll = () => setVisible(window.scrollY > 300);
@@ -12,6 +17,8 @@ const ScrollToTopButton = () => {
   }, []);
 
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
+
+  if (hidesScrollToTop(pathname)) return null;
 
   return (
     <AnimatePresence>

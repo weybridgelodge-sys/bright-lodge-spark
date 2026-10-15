@@ -30,6 +30,8 @@ const COPY_FIELDS = [
   "tagline", "intro_copy", "useful_stuff", "dress_code", "menu_items", "dietary_choices", "highlights",
   "adult_price_pence", "child_price_pence", "theme", "hosting_lodges", "venue", "capacity",
   "start_time", "end_time", "statement_descriptor", "events_notify_email", "short_link",
+  "event_type", "modules", "payment_mode", "deposit_percent", "fee_cover_enabled",
+  "seo_title", "seo_description", "og_image_url",
 ] as const;
 
 /** Builds the insert payload for a new draft; never copies bookings, money, archive or publish state. */
@@ -46,6 +48,8 @@ export function buildDuplicatePayload(row: Record<string, any>, existingSlugs: I
   out.slug = uniqueSlug(slugBase.changed ? slugBase.text : `${slugBase.text}-copy`, existingSlugs);
   out.reference_prefix = row.reference_prefix ? bumpYear(row.reference_prefix).text : null;
   out.event_date = addOneYear(row.event_date);
+  if ("balance_due_date" in row) out.balance_due_date = row.balance_due_date ? addOneYear(row.balance_due_date) : null;
+  if (row.seo_title) out.seo_title = bumpYear(row.seo_title).text;
   out.booking_deadline = null;
   out.is_public = false;
   out.archived_at = null;
