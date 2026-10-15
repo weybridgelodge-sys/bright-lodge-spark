@@ -680,6 +680,13 @@
       "when": 1792102895894,
       "tag": "0096_event_balance_revoke_defaults",
       "breakpoints": true
+    },
+    {
+      "idx": 97,
+      "version": "7",
+      "when": 1792105228902,
+      "tag": "0097_event_manual_balance_payments",
+      "breakpoints": true
     }
   ]
 }
