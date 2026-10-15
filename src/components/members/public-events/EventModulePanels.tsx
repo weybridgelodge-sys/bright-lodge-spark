@@ -66,6 +66,9 @@ export function EventTypePanel({ s, set }: { s: ModuleSettings; set: (p: Partial
             {MODULE_KEYS.map((k) => (k === "kids_menu" && !m.courses) ? null : (
               <Switch key={k} id={`mod-${k}`} checked={raw[k] === true} onChange={(v) => toggle(k, v)} label={MODULE_LABELS[k][0]} help={MODULE_LABELS[k][1]} />
             ))}
+            {m.courses && (
+              <Switch id="mod-courses_decide_later" checked={raw.courses_decide_later === true} onChange={(v) => toggle("courses_decide_later", v)} label="Allow “decide later”" help="Guests may leave a course undecided and get a reminder." />
+            )}
           </div>
           <div className="space-y-1">
             <p className={labelCls}>Show on the public page</p>
