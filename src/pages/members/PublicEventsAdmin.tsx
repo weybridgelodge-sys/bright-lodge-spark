@@ -323,7 +323,7 @@ function Editor({ draft: initial, onBack, duplicatedFrom, onQr }: { draft: Draft
   );
 }
 
-function QrDialog({ row, onClose }: { row: { slug: string | null; short_link?: string | null; public_title?: string; name: string }; onClose: () => void }) {
+function QrDialog({ row, onClose }: { row: Record<string, any> & { name: string }; onClose: () => void }) {
   const url = eventQrTarget({ slug: row.slug, short_link: row.short_link || null });
   const [preview, setPreview] = useState<string | null>(null);
   useEffect(() => {

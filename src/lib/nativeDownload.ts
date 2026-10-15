@@ -23,6 +23,7 @@ function mimeFromFilename(filename: string): string {
     case "txt": return "text/plain";
     case "json": return "application/json";
     case "html": return "text/html";
+    case "png": return "image/png";
     default: return "application/octet-stream";
   }
 }
