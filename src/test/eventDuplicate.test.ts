@@ -43,11 +43,27 @@ describe("event QR", () => {
   });
   const colours = { navy: hslTokenToRgb("220 45% 10%"), gold: hslTokenToRgb("42 55% 55%"), white: [255, 255, 255] as [number, number, number] };
   for (const style of ["navy-on-white", "white-on-navy"] as const) {
+    const url = "https://weybridgelodge.org.uk/events/christmas-party-2026";
     it(`${style} decodes back to the URL`, () => {
-      const url = "https://weybridgelodge.org.uk/events/christmas-party-2026";
       const { data, size } = renderQrPixels(url, style, colours, 400);
       const res = jsQR(data, size, size, { inversionAttempts: "attemptBoth" });
       expect(res?.data).toBe(url);
+    });
+    it(`${style} PNG keeps a gold border outside a clean quiet zone`, () => {
+      const { data, size } = renderQrPixels(url, style, colours, 400);
+      const px = (x: number, y: number) => {
+        const i = (y * size + x) * 4;
+        return [data[i], data[i + 1], data[i + 2]] as [number, number, number];
+      };
+      const isGold = (x: number, y: number) => px(x, y).every((v, k) => v === colours.gold[k]);
+      for (const [x, y] of [[0, 0], [size - 1, 0], [0, size - 1], [size - 1, size - 1]]) expect(isGold(x, y)).toBe(true);
+      const mid = Math.floor(size / 2);
+      let edge = -1;
+      for (let x = 0; x < size; x++) if (!isGold(x, mid)) { edge = x; break; }
+      expect(edge).toBeGreaterThan(0);
+      const bg = style === "navy-on-white" ? colours.white : colours.navy;
+      expect(px(edge, mid)).toEqual(bg);
+      expect(px(edge * 2, mid)).toEqual(bg);
     });
   }
 });
