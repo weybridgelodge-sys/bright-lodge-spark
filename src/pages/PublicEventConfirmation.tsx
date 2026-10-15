@@ -9,6 +9,7 @@ import { formatGBP } from "@/lib/publicEvents";
 
 type Summary = {
   reference: string; name: string; adults: number; children: number; total_pence: number; subtotal_pence?: number; fee_pence?: number;
+  items?: { name: string; qty: number; unit_pence: number }[]; menus?: { name: string; menu: string }[];
   payment_method: string; payment_status: string;
   bank: { account_holder_name?: string; sort_code?: string; account_number?: string; reference?: string } | null;
 };
@@ -55,6 +56,8 @@ export default function PublicEventConfirmation() {
               </h2>
               <p className="text-foreground">{b.adults} adult{b.adults === 1 ? "" : "s"}{b.children ? `, ${b.children} child${b.children === 1 ? "" : "ren"}` : ""} · {formatGBP(b.total_pence)}</p>
               {(b.fee_pence ?? 0) > 0 && <p className="text-sm text-muted-foreground">Subtotal {formatGBP(b.subtotal_pence ?? b.total_pence - (b.fee_pence ?? 0))} + {b.payment_method === "Card" ? "card fee" : "processing fee"} {formatGBP(b.fee_pence ?? 0)}</p>}
+              {!!b.items?.length && <ul className="text-sm text-muted-foreground break-words">{b.items.map((i, k) => <li key={k}>{i.qty} × {i.name} · {formatGBP(i.qty * i.unit_pence)}</li>)}</ul>}
+              {!!b.menus?.length && <ul className="text-sm text-muted-foreground break-words">{b.menus.map((m, k) => <li key={k}><strong className="text-foreground">{m.name}:</strong> {m.menu}</li>)}</ul>}
               <p className="text-muted-foreground">Payment: {b.payment_method} — {paid ? "paid" : "pending payment"}</p>
               <p className="text-muted-foreground">A confirmation email is on its way to you.</p>
             </section>

@@ -43,10 +43,12 @@ export function Honeypot({ value, onChange }: { value: string; onChange: (v: str
   );
 }
 
-export function GuestRowsFieldset({ adultRows, childRows, setAdultRows, setChildRows, dietaryChoices }: {
+export function GuestRowsFieldset({ adultRows, childRows, setAdultRows, setChildRows, dietaryChoices, renderExtra }: {
   adultRows: GuestRow[]; childRows: GuestRow[];
   setAdultRows: React.Dispatch<React.SetStateAction<GuestRow[]>>; setChildRows: React.Dispatch<React.SetStateAction<GuestRow[]>>;
   dietaryChoices: string[];
+  /** Optional per-guest module controls (e.g. course choices); simple events pass nothing. */
+  renderExtra?: (child: boolean, i: number) => React.ReactNode;
 }) {
   return (
     <fieldset className="space-y-3">
@@ -60,6 +62,7 @@ export function GuestRowsFieldset({ adultRows, childRows, setAdultRows, setChild
               <label className="block"><span className="sr-only">Name</span><input className={inputCls} placeholder="Name" value={g.name} onChange={(e) => set({ name: e.target.value })} /></label>
               {child && <label className="block"><span className="sr-only">Age</span><input className={inputCls} type="number" min={0} max={CHILD_MAX_AGE} placeholder="Age" value={g.age} onChange={(e) => set({ age: e.target.value })} /></label>}
             </div>
+            {renderExtra?.(child, i)}
             {dietaryChoices.length > 0 && (
               <label className="block"><span className="sr-only">Menu choice</span>
                 <select className={inputCls} value={g.choice} onChange={(e) => set({ choice: e.target.value })}>

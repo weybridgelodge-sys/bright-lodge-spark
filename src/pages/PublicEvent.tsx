@@ -15,6 +15,8 @@ import {
   emptyGuest, FeeAndSummary, GuestRowsFieldset, Honeypot, inputCls, labelClass, PaymentMethodFieldset, req,
   resizeGuests as resize, Stepper, type GuestRow, type PayMethod,
 } from "@/components/events/booking/BookingCore";
+import { CatalogueSteppers, CourseSelects, DECIDE_LATER, eventImageUrl, InfoBlocks, useEventContent } from "@/components/events/booking/ModuleSections";
+import { coursesForGuest, orderModules } from "@/lib/eventOrder";
 
 const LODGES = ["Weybridge", "Astolat", "Other", "Guest"] as const;
 
@@ -48,6 +50,8 @@ export default function PublicEvent() {
   const [method, setMethod] = useState<PayMethod>("card");
   const [coverFee, setCoverFee] = useState(true);
   const [honeypot, setHoneypot] = useState("");
+  const [courseSel, setCourseSel] = useState<Record<string, Record<string, string>>>({});
+  const [itemQty, setItemQty] = useState<Record<string, number>>({});
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -59,10 +63,17 @@ export default function PublicEvent() {
   useEffect(() => setAdultRows((r) => resize(r, adults)), [adults]);
   useEffect(() => setChildRows((r) => resize(r, children)), [children]);
 
+  const content = useEventContent(ev?.id, ev?.event_type, ev?.modules);
+  const isSimple = !ev?.event_type || ev.event_type === "simple";
+  const mods = orderModules(ev?.modules, ev?.event_type);
+  const sections = (ev?.modules as any)?.sections ?? {};
+  const showSection = (k: string) => isSimple || sections[k] !== false;
+  const feeEnabled = ev?.fee_cover_enabled !== false;
+  const itemsPence = content ? content.items.reduce((s, i) => s + (itemQty[i.id] ?? 0) * i.price_pence, 0) : 0;
   // Simple events always pay in full; the shared rule gives subtotal + optional fee.
   const quote = quoteBooking({
-    orderPence: ev ? orderTotalPence(adults, children, ev.adult_price_pence, ev.child_price_pence) : 0,
-    plan: "full", method, coverFee,
+    orderPence: ev ? orderTotalPence(adults, children, ev.adult_price_pence, ev.child_price_pence) + itemsPence : 0,
+    plan: "full", method, coverFee: feeEnabled && coverFee,
   });
   const subtotal = quote.chargePence;
   const feePence = quote.feePence;
@@ -105,14 +116,26 @@ export default function PublicEvent() {
     if (adults + children < 1) { setError("Please add at least one guest."); return; }
     if ([...adultRows, ...childRows].some((g) => !g.name.trim())) { setError("Please give a name for every guest."); return; }
     if (childRows.some((g) => !isChildAge(g.age === "" ? null : Number(g.age)))) { setError(`Please give each child's age (${CHILD_MAX_AGE} and under).`); return; }
+    if (content && mods.courses) {
+      const missing = [...adultRows.map((_, i) => ({ k: `a-${i}`, child: false })), ...childRows.map((_, i) => ({ k: `c-${i}`, child: true }))]
+        .some(({ k, child }) => coursesForGuest(content, mods, child).some((c) => !courseSel[k]?.[c.id]));
+      if (missing) { setError("Please choose a dish for every course for each guest."); return; }
+    }
     if (eventBookingState(ev, new Date(), adults + children) !== "open") { setError("Sorry, there are not enough places left for your party."); return; }
     setSubmitting(true);
+    const coursesFor = (k: string, child: boolean) => (content && mods.courses)
+      ? { courses: coursesForGuest(content, mods, child).map((c) => {
+          const v = courseSel[k]?.[c.id];
+          return v === DECIDE_LATER ? { course_id: c.id, option_id: null, decide_later: true } : { course_id: c.id, option_id: v };
+        }) }
+      : {};
     const guests = [
-      ...adultRows.map((g) => ({ name: g.name.trim(), age: g.age ? Number(g.age) : null, is_child: false, dietary: g.dietary.trim(), dietary_choice: g.choice || null })),
-      ...childRows.map((g) => ({ name: g.name.trim(), age: Number(g.age), is_child: true, dietary: g.dietary.trim(), dietary_choice: g.choice || null })),
+      ...adultRows.map((g, i) => ({ name: g.name.trim(), age: g.age ? Number(g.age) : null, is_child: false, dietary: g.dietary.trim(), dietary_choice: g.choice || null, ...coursesFor(`a-${i}`, false) })),
+      ...childRows.map((g, i) => ({ name: g.name.trim(), age: Number(g.age), is_child: true, dietary: g.dietary.trim(), dietary_choice: g.choice || null, ...coursesFor(`c-${i}`, true) })),
     ];
+    const items = Object.entries(itemQty).filter(([, q]) => q > 0).map(([item_id, qty]) => ({ item_id, qty }));
     const { data, error: fnErr } = await supabase.functions.invoke("create-event-checkout", {
-      body: { slug, contact_name: name.trim(), contact_email: email.trim(), contact_phone: phone.trim(), lodge_label: lodge, adults, children, guests, payment_method: method, cover_fee: coverFee, origin: window.location.origin, website: "" },
+      body: { slug, contact_name: name.trim(), contact_email: email.trim(), contact_phone: phone.trim(), lodge_label: lodge, adults, children, guests, payment_method: method, cover_fee: feeEnabled && coverFee, ...(items.length && { items }), origin: window.location.origin, website: "" },
     });
     if (fnErr || data?.error) {
       setError(await readFunctionError(fnErr, data, "Sorry, we could not start your booking."));
@@ -139,11 +162,13 @@ export default function PublicEvent() {
     );
   }
 
-  const description = `${title} on ${formatEventDate(ev.event_date)} at Guildford Masonic Centre, GU2 4DR. Hosted by ${ev.hosting_lodges.join(" and ") || "Weybridge Lodge No. 6787"} — Freemasons in Guildford. Book online.`.slice(0, 300);
+  const autoDescription = `${title} on ${formatEventDate(ev.event_date)} at Guildford Masonic Centre, GU2 4DR. Hosted by ${ev.hosting_lodges.join(" and ") || "Weybridge Lodge No. 6787"} — Freemasons in Guildford. Book online.`.slice(0, 300);
+  const description = ev.seo_description?.trim() || autoDescription;
+  const ogImage = ev.og_image_url ? (/^https:\/\//.test(ev.og_image_url) ? ev.og_image_url : eventImageUrl(ev.slug, "og")) : undefined;
 
   return (
     <div className="min-h-screen overflow-x-hidden">
-      <SEO title={title} description={description} canonical={`/events/${ev.slug}`} type="website" schema={schema} />
+      <SEO title={ev.seo_title?.trim() || title} description={description}{...(ogImage && { image: ogImage })} canonical={`/events/${ev.slug}`} type="website" schema={schema} />
       <a href="#main-content" className="skip-to-content">Skip to main content</a>
       <Header />
       <main id="main-content">
@@ -184,7 +209,7 @@ export default function PublicEvent() {
             </div>
           </section>
 
-          {(ev.useful_stuff.parking || ev.useful_stuff.timings || ev.useful_stuff.access || ev.dress_code) && (
+          {showSection("info") && (ev.useful_stuff.parking || ev.useful_stuff.timings || ev.useful_stuff.access || ev.dress_code) && (
             <section className="py-20 md:py-28 bg-card border-t border-border" aria-labelledby="useful-heading">
               <div className="container mx-auto px-4 sm:px-6 max-w-3xl">
                 <h2 id="useful-heading" className="font-serif text-3xl text-foreground text-center">The Useful Stuff</h2>
@@ -201,7 +226,7 @@ export default function PublicEvent() {
             </section>
           )}
 
-          {ev.menu_items.length > 0 && (
+          {showSection("menu") && ev.menu_items.length > 0 && (
             <section className="py-20 md:py-28 bg-background border-t border-border" aria-labelledby="menu-heading">
               <div className="container mx-auto px-4 sm:px-6 max-w-3xl text-center font-sans">
                 <h2 id="menu-heading" className="font-serif text-3xl text-foreground">Menu &amp; Dining</h2>
@@ -214,7 +239,9 @@ export default function PublicEvent() {
             </section>
           )}
 
-          {ev.highlights.length > 0 && (
+          {content && <InfoBlocks content={content} slug={ev.slug} />}
+
+          {showSection("highlights") && ev.highlights.length > 0 && (
             <section className="py-20 md:py-28 bg-card border-y border-border" aria-labelledby="highlights-heading">
               <div className="container mx-auto px-4 sm:px-6 max-w-4xl">
                 <h2 id="highlights-heading" className="font-serif text-3xl text-foreground text-center">Highlights</h2>
@@ -283,12 +310,19 @@ export default function PublicEvent() {
                   </fieldset>
 
                   {(adults + children) > 0 && (
-                    <GuestRowsFieldset adultRows={adultRows} childRows={childRows} setAdultRows={setAdultRows} setChildRows={setChildRows} dietaryChoices={ev.dietary_choices} />
+                    <GuestRowsFieldset adultRows={adultRows} childRows={childRows} setAdultRows={setAdultRows} setChildRows={setChildRows} dietaryChoices={ev.dietary_choices}
+                      {...(content && mods.courses && { renderExtra: (child: boolean, i: number) => {
+                        const k = `${child ? "c" : "a"}-${i}`;
+                        return <CourseSelects content={content} modules={ev.modules} eventType={ev.event_type!} isChild={child} guestLabel={child ? `Child ${i + 1}` : `Adult ${i + 1}`}
+                          value={courseSel[k] ?? {}} onChange={(v) => setCourseSel((s) => ({ ...s, [k]: v }))} />;
+                      } })} />
                   )}
+
+                  {content && mods.catalogue && showSection("drinks") && <CatalogueSteppers content={content} qty={itemQty} onChange={setItemQty} />}
 
                   <PaymentMethodFieldset method={method} onChange={setMethod} />
 
-                  <FeeAndSummary subtotal={subtotal} feePence={feePence} total={total} method={method} coverFee={coverFee} onCoverFee={setCoverFee} />
+                  {feeEnabled && <FeeAndSummary subtotal={subtotal} feePence={feePence} total={total} method={method} coverFee={coverFee} onCoverFee={setCoverFee} />}
 
                   {error && <p role="alert" className="text-destructive font-semibold">{error}</p>}
                   <button type="submit" disabled={submitting} className="w-full inline-flex items-center justify-center gap-2 bg-gold-shimmer text-accent-foreground px-8 py-3 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity min-h-[48px] disabled:opacity-60">
