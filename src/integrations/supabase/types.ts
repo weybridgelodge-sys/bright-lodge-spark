@@ -1363,6 +1363,7 @@ export type Database = {
           promote_publicly: boolean
           public_title: string | null
           reference_prefix: string | null
+          short_link: string | null
           slug: string | null
           start_time: string | null
           statement_descriptor: string | null
@@ -1396,6 +1397,7 @@ export type Database = {
           promote_publicly?: boolean
           public_title?: string | null
           reference_prefix?: string | null
+          short_link?: string | null
           slug?: string | null
           start_time?: string | null
           statement_descriptor?: string | null
@@ -1429,6 +1431,7 @@ export type Database = {
           promote_publicly?: boolean
           public_title?: string | null
           reference_prefix?: string | null
+          short_link?: string | null
           slug?: string | null
           start_time?: string | null
           statement_descriptor?: string | null
