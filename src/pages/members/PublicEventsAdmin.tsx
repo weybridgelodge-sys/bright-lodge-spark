@@ -356,6 +356,7 @@ function QrDialog({ row, onClose }: { row: Record<string, any> & { name: string 
           <button type="button" onClick={() => download("white-on-navy")} className={`${actionBtn} border-gold/40 text-gold hover:bg-gold/15`}><Download className="w-4 h-4" aria-hidden="true" /> PNG: white on navy, gold border</button>
         </div>
       </div>
+      </div>
     </div>
   );
 }
