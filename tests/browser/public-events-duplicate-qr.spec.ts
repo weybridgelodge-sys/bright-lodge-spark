@@ -21,9 +21,19 @@ for (const width of [320, 390]) {
     const dialog = page.getByRole("dialog");
     await expect(dialog.getByText("https://weybridgelodge.org.uk/events/christmas-party-2026")).toBeVisible();
     await expect(dialog.getByRole("img")).toBeVisible();
-    const box = (await dialog.locator("> div").boundingBox())!;
+    const box = (await dialog.locator(".max-w-md").boundingBox())!;
     expect(box.x).toBeGreaterThanOrEqual(0);
     expect(box.x + box.width).toBeLessThanOrEqual(width);
+    // Bottom button reachable: scroll the dialog down, last button fully on screen
+    const last = dialog.getByRole("button", { name: "PNG: white on navy, gold border" });
+    await last.scrollIntoViewIfNeeded();
+    const lb = (await last.boundingBox())!;
+    const vh = (await page.evaluate(() => innerHeight))!;
+    expect(lb.y).toBeGreaterThanOrEqual(0);
+    expect(lb.y + lb.height).toBeLessThanOrEqual(vh);
+    // Top reachable again: scroll back, title/close visible
+    await dialog.evaluate((el) => { (el as HTMLElement).scrollTop = 0; });
+    await expect(dialog.getByRole("button", { name: "Close" })).toBeVisible();
     await page.screenshot({ path: `/tmp/browser/qr-${width}.png` });
   });
 }
