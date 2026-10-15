@@ -23,6 +23,7 @@ const Email = (d: EventBookingData) => {
             <Row label="Adults / children" value={`${d.adults ?? 0} / ${d.children ?? 0}`} />
             <Hr style={hr} />
             <GuestList guests={d.guests} />
+            {!!d.preOrders?.length && (<><Text style={label}>Pre-orders</Text>{d.preOrders.map((p, i) => <Text key={i} style={guestLine}>{p}</Text>)}</>)}
             <Hr style={hr} />
             {d.cardFee && <Row label="Subtotal" value={d.subtotal} />}
             {d.cardFee && <Row label={d.feeLabel || "Fee"} value={d.cardFee} />}
