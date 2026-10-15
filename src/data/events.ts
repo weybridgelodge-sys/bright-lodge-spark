@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { fetchPublicEvents } from "@/lib/publicEvents";
+import { matchesPublicCalendarEvent, publicCalendarTimes } from "../../supabase/functions/_shared/publicEventCalendar";
 
 // Single source of truth for all lodge events.
 // Used by both the homepage Live Events Feed and the /events calendar page.
@@ -167,22 +169,39 @@ export function useLadiesFestivalPromo(): string | null {
 export async function getEventsAsync(): Promise<LodgeEvent[]> {
   const { supabase } = await import("@/integrations/supabase/client");
   const sb = supabase as any;
-  const [loi, mtg, off, fest] = await Promise.all([
+  const [loi, mtg, off, fest, publicEvents] = await Promise.all([
     sb.from("public_loi_schedule").select("title,event_date,time_from,time_to,venue,description"),
     sb.from("public_lodge_meetings").select("title,event_date,location,description"),
     sb.from("public_officers_nights").select("officer_night_date,venue"),
     fetchLadiesFestivalPromo(),
+    fetchPublicEvents(),
   ]);
   for (const [n, r] of [["LOI", loi], ["meetings", mtg], ["officers", off], ["festival", fest]] as const) {
     if (r.error) console.error(`${n} fetch failed`, r.error);
   }
   const keep = (e: LodgeEvent | null): e is LodgeEvent => !!e;
-  return sortByDate([
+  const existing = [
     ...fixedEvents,
     ...(loi.data ?? []).map(loiRowToEvent).filter(keep),
     ...(mtg.data ?? []).map(meetingRowToEvent).filter(keep),
     ...(off.data ?? []).map(officersRowToEvent).filter(keep),
     ...(fest.data ?? []).map(festivalRowToEvent).filter(keep),
+  ];
+  const publicRows = publicEvents.map((r): LodgeEvent => {
+    const { start } = publicCalendarTimes(r);
+    return {
+      title: r.public_title, date: new Date(start), type: "social",
+      time: [fmtTime(r.start_time), fmtTime(r.end_time)].filter(Boolean).join(" – "),
+      venue: r.venue || "Guildford Masonic Centre", description: r.intro_copy ?? undefined,
+      link: `/events/${r.slug}`,
+    };
+  });
+  return sortByDate([
+    ...existing.filter((e) => !publicEvents.some((r) => matchesPublicCalendarEvent(r, {
+      date: `${e.date.getFullYear()}-${String(e.date.getMonth() + 1).padStart(2, "0")}-${String(e.date.getDate()).padStart(2, "0")}`,
+      title: e.title, slug: e.link?.split("/events/")[1],
+    }))),
+    ...publicRows,
   ]);
 }
 

@@ -1,4 +1,8 @@
 import { supabase } from "@/integrations/supabase/client";
+import { londonToday, upcomingPublicCalendarRows } from "../../supabase/functions/_shared/publicEventCalendar";
+
+/** Presentation only; stored addresses and metadata retain ordinary spaces. */
+export const keepPostcodeTogether = (text: string) => text.replace(/\b(GU2)\s+(4DR)\b/gi, "$1\u00a0$2");
 
 export type PublicEvent = {
   id: string;
@@ -80,9 +84,9 @@ function normalise(r: any): PublicEvent {
 }
 
 export async function fetchPublicEvents(): Promise<PublicEvent[]> {
-  const today = new Date().toISOString().slice(0, 10);
+  const today = londonToday();
   const { data } = await (supabase as any).from("public_events").select("*").gte("event_date", today).order("event_date");
-  return ((data as any[]) ?? []).map(normalise);
+  return upcomingPublicCalendarRows(((data as any[]) ?? []).map(normalise));
 }
 
 export async function fetchPublicEvent(slug: string): Promise<PublicEvent | null> {
