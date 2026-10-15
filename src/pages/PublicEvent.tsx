@@ -262,11 +262,7 @@ export default function PublicEvent() {
                 </div>
               ) : (
                 <form onSubmit={submit} noValidate className="space-y-6 font-sans">
-                  {/* HONEYPOT — off-screen (not display:none) so bots still fill it; checked again server-side. */}
-                  <div aria-hidden="true" style={{ position: "absolute", left: "-9999px", width: "1px", height: "1px", overflow: "hidden" }}>
-                    <label htmlFor="pev-website">Website (do not fill this in)</label>
-                    <input id="pev-website" name="website" type="text" value={honeypot} onChange={(e) => setHoneypot(e.target.value)} tabIndex={-1} autoComplete="off" />
-                  </div>
+                  <Honeypot value={honeypot} onChange={setHoneypot} />
                   <fieldset className="space-y-3">
                     <legend className="font-serif text-xl text-foreground mb-2">Your details</legend>
                     <label className="block" htmlFor="pev-name"><span className={labelClass}>Full name{req}</span><input id="pev-name" className={inputCls} required value={name} onChange={(e) => setName(e.target.value)} autoComplete="name" /></label>
@@ -287,66 +283,12 @@ export default function PublicEvent() {
                   </fieldset>
 
                   {(adults + children) > 0 && (
-                    <fieldset className="space-y-3">
-                      <legend className="font-serif text-xl text-foreground mb-2">Guest names and dietary needs</legend>
-                      {[...adultRows.map((g, i) => ({ g, i, child: false })), ...childRows.map((g, i) => ({ g, i, child: true }))].map(({ g, i, child }) => {
-                        const set = (patch: Partial<GuestRow>) => (child ? setChildRows : setAdultRows)((rows) => rows.map((r, j) => (j === i ? { ...r, ...patch } : r)));
-                        return (
-                          <div key={`${child}-${i}`} className="border border-border bg-background rounded-sm p-3 space-y-2">
-                            <p className="text-sm font-semibold text-foreground">{child ? `Child ${i + 1}` : `Adult ${i + 1}`}</p>
-                            <div className="grid sm:grid-cols-[1fr_6rem] gap-2">
-                              <label className="block"><span className="sr-only">Name</span><input className={inputCls} placeholder="Name" value={g.name} onChange={(e) => set({ name: e.target.value })} /></label>
-                              {child && <label className="block"><span className="sr-only">Age</span><input className={inputCls} type="number" min={0} max={CHILD_MAX_AGE} placeholder="Age" value={g.age} onChange={(e) => set({ age: e.target.value })} /></label>}
-                            </div>
-                            {ev.dietary_choices.length > 0 && (
-                              <label className="block"><span className="sr-only">Menu choice</span>
-                                <select className={inputCls} value={g.choice} onChange={(e) => set({ choice: e.target.value })}>
-                                  <option value="">Standard menu</option>
-                                  {ev.dietary_choices.map((c) => <option key={c} value={c}>{c}</option>)}
-                                </select>
-                              </label>
-                            )}
-                            <label className="block"><span className="sr-only">Dietary needs</span><input className={inputCls} placeholder="Dietary needs or allergies (optional)" value={g.dietary} maxLength={500} onChange={(e) => set({ dietary: e.target.value })} /></label>
-                          </div>
-                        );
-                      })}
-                    </fieldset>
+                    <GuestRowsFieldset adultRows={adultRows} childRows={childRows} setAdultRows={setAdultRows} setChildRows={setChildRows} dietaryChoices={ev.dietary_choices} />
                   )}
 
-                  <fieldset className="space-y-2">
-                    <legend className="font-serif text-xl text-foreground mb-2">Payment</legend>
-                    {([
-                      ["card", "Card", "Visa, Mastercard, Apple Pay or Google Pay"],
-                      ["pay_by_bank", "Pay by Bank", "Pay instantly from your banking app"],
-                      ["bank_transfer", "Bank transfer", "We'll show you the account details and a reference"],
-                    ] as const).map(([v, l, h]) => (
-                      <label key={v} className={`flex items-center gap-3 min-h-[56px] w-full border rounded-sm px-4 py-2 cursor-pointer bg-background ${method === v ? "border-gold" : "border-border"}`}>
-                        <input type="radio" name="pay" value={v} checked={method === v} onChange={() => setMethod(v)} className="w-5 h-5 shrink-0 accent-[hsl(var(--gold))]" />
-                        <span><span className="block font-semibold text-foreground">{l}</span><span className="block text-sm text-muted-foreground">{h}</span></span>
-                      </label>
-                    ))}
-                  </fieldset>
+                  <PaymentMethodFieldset method={method} onChange={setMethod} />
 
-                  {subtotal > 0 && (
-                    <div className="border-t border-border pt-4 space-y-3">
-                      <p className="block text-sm font-sans font-medium text-foreground mb-1">{feeQuestion(method)}</p>
-                      <div className="space-y-2 mt-1" role="radiogroup" aria-label="Processing fee preference">
-                        <label className="flex items-center gap-3 cursor-pointer min-h-[48px]">
-                          <input type="radio" name="fee" checked={coverFee} onChange={() => setCoverFee(true)} className="w-5 h-5 shrink-0 accent-[hsl(var(--gold))]" />
-                          <span className="text-sm font-sans text-foreground">Yes — add {formatGBP(calcProcessingFeePence(subtotal, method))} to my total</span>
-                        </label>
-                        <label className="flex items-center gap-3 cursor-pointer min-h-[48px]">
-                          <input type="radio" name="fee" checked={!coverFee} onChange={() => setCoverFee(false)} className="w-5 h-5 shrink-0 accent-[hsl(var(--gold))]" />
-                          <span className="text-sm font-sans text-foreground">No — the Lodge will cover it</span>
-                        </label>
-                      </div>
-                      <div className="bg-background border border-border rounded-sm p-4 space-y-1">
-                        <div className="flex justify-between text-sm font-sans"><span className="text-muted-foreground">Subtotal</span><span className="text-foreground">{formatGBP(subtotal)}</span></div>
-                        {feePence > 0 && <div className="flex justify-between text-sm font-sans"><span className="text-muted-foreground">{method === "card" ? "Card fee" : "Processing fee"}</span><span className="text-foreground">{formatGBP(feePence)}</span></div>}
-                        <div className="flex justify-between text-base font-sans font-semibold border-t border-border pt-2 mt-2"><span className="text-foreground">Total</span><span className="text-gold-dark">{formatGBP(total)}</span></div>
-                      </div>
-                    </div>
-                  )}
+                  <FeeAndSummary subtotal={subtotal} feePence={feePence} total={total} method={method} coverFee={coverFee} onCoverFee={setCoverFee} />
 
                   {error && <p role="alert" className="text-destructive font-semibold">{error}</p>}
                   <button type="submit" disabled={submitting} className="w-full inline-flex items-center justify-center gap-2 bg-gold-shimmer text-accent-foreground px-8 py-3 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity min-h-[48px] disabled:opacity-60">
