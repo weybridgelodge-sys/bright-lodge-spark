@@ -66,7 +66,8 @@ export async function sendEventBookingEmails(sb: any, bookingId: string, stage: 
   if (!b) return;
   const { data: ev } = await sb.from("event_accounts").select("*").eq("id", b.event_id).maybeSingle();
   if (!ev) return;
-  const { data: guests } = await sb.from("event_guests").select("name,age,is_child,allergies").eq("booking_id", b.id);
+  const { data: guests } = await sb.from("event_guests").select("name,age,is_child,allergies,menu_choice").eq("booking_id", b.id);
+  const { data: items } = await sb.from("event_booking_items").select("name_snapshot,quantity,line_total_pence").eq("booking_id", b.id);
   const data = {
     stage,
     eventTitle: ev.public_title || ev.name,
@@ -76,7 +77,8 @@ export async function sendEventBookingEmails(sb: any, bookingId: string, stage: 
     bookerEmail: b.contact_email,
     bookerPhone: b.contact_phone,
     lodgeLabel: b.lodge_label,
-    guests: (guests ?? []).map((g: any) => ({ name: g.name, age: g.age, isChild: g.is_child, dietary: g.allergies })),
+    guests: (guests ?? []).map((g: any) => ({ name: g.name, age: g.age, isChild: g.is_child, dietary: g.allergies, menu: g.menu_choice })),
+    preOrders: (items ?? []).map((i: any) => `${i.quantity} × ${i.name_snapshot} — ${gbp(i.line_total_pence)}`),
     adults: b.adult_count,
     children: b.child_count,
     subtotal: gbp(b.subtotal_pence ?? b.total_pence),

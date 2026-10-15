@@ -12,7 +12,8 @@ export interface EventBookingData {
   bookerEmail?: string
   bookerPhone?: string
   lodgeLabel?: string
-  guests?: { name?: string; age?: number | null; isChild?: boolean; dietary?: string | null }[]
+  guests?: { name?: string; age?: number | null; isChild?: boolean; dietary?: string | null; menu?: string | null }[]
+  preOrders?: string[]
   adults?: number
   children?: number
   total?: string
@@ -46,6 +47,7 @@ export const GuestList = ({ guests = [] }: { guests?: EventBookingData['guests']
       <Text key={i} style={guestLine}>
         {g.name || `Guest ${i + 1}`}{g.isChild ? ` (child${g.age != null ? `, ${g.age}` : ''})` : ''}
         {g.dietary ? ` — Dietary: ${g.dietary}` : ''}
+        {g.menu ? ` — Menu: ${g.menu}` : ''}
       </Text>
     ))}
   </>
@@ -75,6 +77,7 @@ const Email = (d: EventBookingData) => {
             <Row label="Reference" value={d.reference} />
             <Hr style={hr} />
             <GuestList guests={d.guests} />
+            {!!d.preOrders?.length && (<><Text style={label}>Pre-orders</Text>{d.preOrders.map((p, i) => <Text key={i} style={guestLine}>{p}</Text>)}</>)}
             <Hr style={hr} />
             {d.cardFee && <Row label="Subtotal" value={d.subtotal} />}
             {d.cardFee && <Row label={d.feeLabel || "Fee"} value={d.cardFee} />}
