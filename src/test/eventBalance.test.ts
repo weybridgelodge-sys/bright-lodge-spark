@@ -124,3 +124,47 @@ describe("Balances outstanding list", () => {
     expect(outstandingBalances(rows).map((r) => r.id)).toEqual(["a"]);
   });
 });
+
+describe("manual (cash/cheque) balance payments", async () => {
+  const { validateManualBalance, balanceStillOwed, balanceLinkLive } = await import("@/lib/eventPricing");
+  const { receivedSplit } = await import("@/lib/treasurer/eventTieOut");
+  const manual = (amount: number): PaymentRow => paid("balance", amount);
+  const dep = paid("deposit", 3334, 87);
+
+  it("partial then full manual balance: deposit_paid, then paid only at zero", () => {
+    expect(validateManualBalance(6666, 2000).ok).toBe(true);
+    const part = bookingBalanceState(10000, [dep, manual(2000)]);
+    expect(part).toMatchObject({ status: "deposit_paid", balanceDue: 4666, amountPaid: 5334, feesPaid: 87 });
+    expect(validateManualBalance(part.balanceDue, 4666).ok).toBe(true);
+    expect(bookingBalanceState(10000, [dep, manual(2000), manual(4666)])).toMatchObject({ status: "paid", balanceDue: 0, feesPaid: 87 });
+  });
+  it("more than the balance due is rejected, as are zero and fractions", () => {
+    expect(validateManualBalance(6666, 6667).ok).toBe(false);
+    expect(validateManualBalance(6666, 0).ok).toBe(false);
+    expect(validateManualBalance(6666, 10.5).ok).toBe(false);
+    expect(validateManualBalance(0, 100).ok).toBe(false);
+  });
+  it("a double submit (same request recorded once) cannot then be applied again", () => {
+    const after = bookingBalanceState(10000, [dep, manual(6666)]);
+    expect(validateManualBalance(after.balanceDue, 6666).ok).toBe(false);
+  });
+  it("no reminder once a manual payment clears the balance", () => {
+    expect(balanceStillOwed({ payment_status: "paid", balance_due_pence: 0 })).toBe(false);
+    expect(balanceStillOwed({ payment_status: "deposit_paid", balance_due_pence: 4666 })).toBe(true);
+  });
+  it("balance link is dead once paid (unless courses are still to choose)", () => {
+    expect(balanceLinkLive({ payment_status: "paid", balance_due_pence: 0 }, 0)).toBe(false);
+    expect(balanceLinkLive({ payment_status: "deposit_paid", balance_due_pence: 100 }, 0)).toBe(true);
+    expect(balanceLinkLive({ payment_status: "paid", balance_due_pence: 0 }, 2)).toBe(true);
+  });
+  it("card deposit + cash balance splits online vs cash per payment; actuals pro rata, no Stripe fee on cash", () => {
+    const b = { payment_method: "card", payment_status: "paid", payment_plan: "deposit", subtotal_pence: 10000, items_subtotal_pence: 2500,
+      amount_paid_pence: 10000, fees_paid_pence: 87, stripe_fee_pence: 70, manual_received_pence: 6666 };
+    expect(receivedSplit(b)).toEqual({ online: 3421, cash: 6666 });
+    const t = eventTieOut([b], [], 0);
+    expect(t.onlineReceived).toBe(3421);
+    expect(t.cashReceived).toBe(6666);
+    expect(t.cashAwaitingBanking).toBe(6666);
+    expect(eventActuals([b])).toEqual({ ticketSales: 7500, preOrders: 2500, feeContributions: 87, stripeFees: 70 });
+  });
+});
