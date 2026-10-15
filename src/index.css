@@ -107,10 +107,15 @@
     background-color: hsl(var(--navy-dark));
   }
 
-  /* Members portal date controls: Chromium/WebKit otherwise render a dark
-     calendar glyph that disappears against the Lodge's navy fields. Keep
-     this portal-wide so every present and future date input is accessible. */
-  html.portal-canvas input[type="date"] {
+  /* Members portal date/time controls: Chromium/WebKit otherwise render dark
+     calendar and clock glyphs that disappear against the Lodge's navy fields.
+     Keep this portal-wide so every present and future date, time,
+     datetime-local, month and week input is accessible. */
+  html.portal-canvas input[type="date"],
+  html.portal-canvas input[type="time"],
+  html.portal-canvas input[type="datetime-local"],
+  html.portal-canvas input[type="month"],
+  html.portal-canvas input[type="week"] {
     color-scheme: dark;
     min-height: 48px;
     background-color: hsl(var(--navy));
@@ -118,7 +123,11 @@
     border-color: hsl(var(--gold) / 0.55);
   }
 
-  html.portal-canvas input[type="date"]::-webkit-calendar-picker-indicator {
+  html.portal-canvas input[type="date"]::-webkit-calendar-picker-indicator,
+  html.portal-canvas input[type="time"]::-webkit-calendar-picker-indicator,
+  html.portal-canvas input[type="datetime-local"]::-webkit-calendar-picker-indicator,
+  html.portal-canvas input[type="month"]::-webkit-calendar-picker-indicator,
+  html.portal-canvas input[type="week"]::-webkit-calendar-picker-indicator {
     box-sizing: border-box;
     width: 48px;
     height: 48px;
@@ -130,14 +139,30 @@
   }
 
   html.portal-canvas input[type="date"]:focus,
-  html.portal-canvas input[type="date"]:focus-visible {
+  html.portal-canvas input[type="date"]:focus-visible,
+  html.portal-canvas input[type="time"]:focus,
+  html.portal-canvas input[type="time"]:focus-visible,
+  html.portal-canvas input[type="datetime-local"]:focus,
+  html.portal-canvas input[type="datetime-local"]:focus-visible,
+  html.portal-canvas input[type="month"]:focus,
+  html.portal-canvas input[type="month"]:focus-visible,
+  html.portal-canvas input[type="week"]:focus,
+  html.portal-canvas input[type="week"]:focus-visible {
     border-color: hsl(var(--gold));
     outline: 3px solid hsl(var(--gold));
     outline-offset: 2px;
   }
 
   html.portal-canvas input[type="date"]:focus::-webkit-calendar-picker-indicator,
-  html.portal-canvas input[type="date"]:focus-visible::-webkit-calendar-picker-indicator {
+  html.portal-canvas input[type="date"]:focus-visible::-webkit-calendar-picker-indicator,
+  html.portal-canvas input[type="time"]:focus::-webkit-calendar-picker-indicator,
+  html.portal-canvas input[type="time"]:focus-visible::-webkit-calendar-picker-indicator,
+  html.portal-canvas input[type="datetime-local"]:focus::-webkit-calendar-picker-indicator,
+  html.portal-canvas input[type="datetime-local"]:focus-visible::-webkit-calendar-picker-indicator,
+  html.portal-canvas input[type="month"]:focus::-webkit-calendar-picker-indicator,
+  html.portal-canvas input[type="month"]:focus-visible::-webkit-calendar-picker-indicator,
+  html.portal-canvas input[type="week"]:focus::-webkit-calendar-picker-indicator,
+  html.portal-canvas input[type="week"]:focus-visible::-webkit-calendar-picker-indicator {
     opacity: 1;
     filter: brightness(0) saturate(100%) invert(71%) sepia(64%) saturate(465%) hue-rotate(357deg) brightness(91%) contrast(85%);
   }
