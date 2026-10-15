@@ -72,3 +72,11 @@
 - [x] Tidy public event address wrapping without changing stored values; checked 360/390/430px, landscape and desktop.
 - [x] Include upcoming published public events once in website calendar and member ICS/calendar, preserving overnight times and existing matching UIDs.
 - [x] Verify December 19 links at 390px (live public reads; isolated member identity and actual handler output), 320px portal regression; 228 unit and 67 browser tests passed, preview build OK. Calendar feed deployed; no real record writes or website publication.
+
+## Dinner & Festival stage 2
+- [ ] Migration: event_type/modules/payment/fee/SEO columns, five content tables, read/write helpers, duplicate_event_content()
+- [ ] event-content-images bucket (public, 5 MB) and write policies
+- [ ] Admin module panels in the Public Events editor
+- [ ] Duplicate copies module fields and content atomically
+- [ ] Hide back-to-top on /events/:slug
+- [ ] Rolled-back permission checks (anon, member, Treasurer, Secretary, Admin) and tests
