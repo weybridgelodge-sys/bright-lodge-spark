@@ -341,7 +341,8 @@ function QrDialog({ row, onClose }: { row: Record<string, any> & { name: string 
     try { await navigator.clipboard.writeText(url); toast.success("Link copied"); } catch { toast.error("Could not copy link"); }
   };
   return (
-    <div role="dialog" aria-modal="true" aria-labelledby="qr-title" className="fixed inset-0 z-50 bg-navy-dark/90 flex items-center justify-center p-3 overflow-y-auto">
+    <div role="dialog" aria-modal="true" aria-labelledby="qr-title" className="fixed inset-0 z-[60] bg-navy-dark/90 overflow-y-auto overscroll-contain">
+      <div className="min-h-full w-full flex items-center justify-center p-3 pb-[calc(1rem+env(safe-area-inset-bottom))]">
       <div className="w-full max-w-md bg-navy border border-gold/40 rounded-sm p-4 space-y-4">
         <div className="flex items-start justify-between gap-2">
           <h2 id="qr-title" className="font-serif text-lg text-gold break-words min-w-0">Event QR: {row.public_title || row.name}</h2>
