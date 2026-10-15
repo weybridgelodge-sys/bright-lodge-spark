@@ -120,3 +120,19 @@ export function priceOrder(cfg: OrderConfig, req: OrderRequest): { ok: true; ord
 }
 
 export { eventFeePence };
+
+export type StripeLine = { quantity: number; price_data: { currency: "gbp"; unit_amount: number; product_data: { name: string } } };
+
+/** Stripe Checkout lines: tickets, then each pre-order item, then the fee. Simple events give exactly the pre-Stage-3 lines. */
+export function stripeLines(p: {
+  stripeName: string; adults: number; children: number; adultPence: number; childPence: number;
+  items: { name: string; qty: number; price_pence: number }[]; feePence: number; feeName: string;
+}): StripeLine[] {
+  const line = (quantity: number, unit_amount: number, name: string): StripeLine => ({ quantity, price_data: { currency: "gbp", unit_amount, product_data: { name } } });
+  return [
+    ...(p.adults ? [line(p.adults, p.adultPence, `${p.stripeName} — adult`)] : []),
+    ...(p.children ? [line(p.children, p.childPence, `${p.stripeName} — child (12 and under)`)] : []),
+    ...p.items.map((it) => line(it.qty, it.price_pence, `${p.stripeName} — ${it.name}`)),
+    ...(p.feePence > 0 ? [line(1, p.feePence, p.feeName)] : []),
+  ];
+}

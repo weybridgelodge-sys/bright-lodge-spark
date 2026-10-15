@@ -1,7 +1,7 @@
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { z } from "https://esm.sh/zod@3.23.8";
 import { feeLineItemName } from "../_shared/cardFee.ts";
-import { orderModules, priceOrder, type ItemRow } from "../_shared/eventOrder.ts";
+import { orderModules, priceOrder, stripeLines, type ItemRow } from "../_shared/eventOrder.ts";
 import { eventsStripe, sendEventBookingEmails, serviceClient } from "../_shared/stripe-events.ts";
 
 const GuestSchema = z.object({
@@ -184,12 +184,10 @@ Deno.serve(async (req) => {
       mode: "payment",
       customer_email: input.contact_email,
       payment_method_types: input.payment_method === "card" ? ["card"] : ["pay_by_bank"],
-      line_items: [
-        ...(input.adults ? [{ quantity: input.adults, price_data: { currency: "gbp", unit_amount: ev.adult_price_pence, product_data: { name: `${stripeName} — adult` } } }] : []),
-        ...(input.children ? [{ quantity: input.children, price_data: { currency: "gbp", unit_amount: ev.child_price_pence, product_data: { name: `${stripeName} — child (12 and under)` } } }] : []),
-        ...order.items.map((it) => ({ quantity: it.qty, price_data: { currency: "gbp", unit_amount: it.price_pence, product_data: { name: `${stripeName} — ${it.name}` } } })),
-        ...(fee > 0 ? [{ quantity: 1, price_data: { currency: "gbp", unit_amount: fee, product_data: { name: feeLineItemName(input.payment_method) } } }] : []),
-      ],
+      line_items: stripeLines({
+        stripeName, adults: input.adults, children: input.children, adultPence: ev.adult_price_pence, childPence: ev.child_price_pence,
+        items: order.items, feePence: fee, feeName: feeLineItemName(input.payment_method),
+      }),
       metadata,
       client_reference_id: booking.id,
       payment_intent_data: { description: stripeName, metadata, ...(suffix && { statement_descriptor_suffix: suffix }) },

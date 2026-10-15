@@ -1,3 +1,4 @@
+import { buildEventSeo } from "./src/lib/eventSeo";
 import fs from "fs";
 import path from "path";
 import type { Plugin } from "vite";
@@ -32,6 +33,8 @@ interface RouteMeta {
   canonical: string;
   /** Absolute social-share image URL; falls back to DEFAULT_OG_IMAGE. */
   image?: string;
+  /** Optional JSON-LD injected into <head> (event pages). */
+  jsonLd?: unknown;
 }
 
 // Mirrors DEFAULT_OG_IMAGE in src/components/SEO.tsx
@@ -463,7 +466,33 @@ function renderHead(baseHtml: string, meta: RouteMeta) {
     /<meta name="twitter:image" content="[^"]*" \/>/,
     `<meta name="twitter:image" content="${img}" />`,
   );
+  if (meta.jsonLd) {
+    const ld = JSON.stringify(meta.jsonLd).replace(/</g, "\\u003c");
+    html = html.replace("</head>", `<script type="application/ld+json">${ld}</script></head>`);
+  }
   return html;
+}
+
+/** Published public events (same view as the website), with meta + JSON-LD from event data. */
+async function eventRoutes(): Promise<RouteMeta[]> {
+  const { loadEnv } = await import("vite");
+  const env = { ...loadEnv("production", process.cwd(), "VITE_"), ...process.env };
+  const url = env.VITE_SUPABASE_URL;
+  const key = env.VITE_SUPABASE_PUBLISHABLE_KEY;
+  if (!url || !key) return [];
+  try {
+    const res = await fetch(`${url}/rest/v1/public_events?select=*`, { headers: { apikey: key, Authorization: `Bearer ${key}` } });
+    if (!res.ok) return [];
+    const rows = (await res.json()) as any[];
+    return rows.filter((r) => r.slug).map((r) => {
+      const ev = { ...r, public_title: r.public_title || r.name, hosting_lodges: r.hosting_lodges ?? [] };
+      const image = ev.og_image_url ? (/^https:\/\//.test(ev.og_image_url) ? ev.og_image_url : `${url}/functions/v1/event-image/${ev.slug}/og`) : undefined;
+      const seo = buildEventSeo(ev, { open: true, imageUrl: image });
+      return { route: `events/${ev.slug}`, title: seo.title, description: seo.description, canonical: `/events/${ev.slug}`, image, jsonLd: seo.jsonLd };
+    });
+  } catch {
+    return [];
+  }
 }
 
 export function staticMeta(): Plugin {
@@ -483,6 +512,7 @@ export function staticMeta(): Plugin {
         ...newsRoutes,
         ...(await postRoutes()),
         ...(await videoRoutes()),
+        ...(await eventRoutes()),
       ];
       const seen = new Set<string>();
       const routes = allRoutes.filter((r) =>

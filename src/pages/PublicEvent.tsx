@@ -16,6 +16,7 @@ import {
   resizeGuests as resize, Stepper, type GuestRow, type PayMethod,
 } from "@/components/events/booking/BookingCore";
 import { CatalogueSteppers, CourseSelects, DECIDE_LATER, eventImageUrl, InfoBlocks, useEventContent } from "@/components/events/booking/ModuleSections";
+import { buildEventSeo } from "@/lib/eventSeo";
 import { coursesForGuest, orderModules } from "@/lib/eventOrder";
 
 const LODGES = ["Weybridge", "Astolat", "Other", "Guest"] as const;
@@ -85,27 +86,12 @@ export default function PublicEvent() {
   const title = ev?.public_title || "";
   const time = ev ? [formatTime(ev.start_time), formatTime(ev.end_time)].filter(Boolean).join(" – ") : "";
 
+  const ogImage = ev?.og_image_url ? (/^https:\/\//.test(ev.og_image_url) ? ev.og_image_url : eventImageUrl(ev.slug, "og")) : undefined;
+  const seo = useMemo(() => (ev ? buildEventSeo(ev, { open: state === "open", imageUrl: ogImage }) : null), [ev, state, ogImage]);
   const schema = useMemo(() => {
-    if (!ev) return [];
-    const offers = [
-      ev.adult_price_pence != null && { "@type": "Offer", name: "Adult", price: (ev.adult_price_pence / 100).toFixed(2), priceCurrency: "GBP", availability: state === "open" ? "https://schema.org/InStock" : "https://schema.org/SoldOut", url: `https://weybridgelodge.org.uk/events/${ev.slug}` },
-      ev.child_price_pence != null && { "@type": "Offer", name: `Child (aged ${CHILD_MAX_AGE} and under)`, price: (ev.child_price_pence / 100).toFixed(2), priceCurrency: "GBP", url: `https://weybridgelodge.org.uk/events/${ev.slug}` },
-    ].filter(Boolean);
-    return [
-      {
-        "@context": "https://schema.org", "@type": "Event", name: title,
-        startDate: ev.start_time ? `${ev.event_date}T${ev.start_time.slice(0, 5)}` : ev.event_date,
-        ...(ev.end_time && { endDate: `${ev.event_date}T${ev.end_time.slice(0, 5)}` }),
-        eventStatus: "https://schema.org/EventScheduled",
-        eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
-        description: ev.tagline || ev.intro_copy || title,
-        location: { "@type": "Place", name: "Guildford Masonic Centre", address: { "@type": "PostalAddress", streetAddress: "Weybourne House, Hitherbury Close", addressLocality: "Guildford", addressRegion: "Surrey", postalCode: "GU2 4DR", addressCountry: "GB" } },
-        organizer: ev.hosting_lodges.map((n) => ({ "@type": "Organization", name: n })),
-        ...(offers.length && { offers }),
-      },
-      breadcrumbSchema([{ name: "Home", url: "/" }, { name: "Events", url: "/events" }, { name: title, url: `/events/${ev.slug}` }]),
-    ];
-  }, [ev, state, title]);
+    if (!ev || !seo) return [];
+    return [seo.jsonLd, breadcrumbSchema([{ name: "Home", url: "/" }, { name: "Events", url: "/events" }, { name: title, url: `/events/${ev.slug}` }])];
+  }, [ev, seo, title]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -162,13 +148,11 @@ export default function PublicEvent() {
     );
   }
 
-  const autoDescription = `${title} on ${formatEventDate(ev.event_date)} at Guildford Masonic Centre, GU2 4DR. Hosted by ${ev.hosting_lodges.join(" and ") || "Weybridge Lodge No. 6787"} — Freemasons in Guildford. Book online.`.slice(0, 300);
-  const description = ev.seo_description?.trim() || autoDescription;
-  const ogImage = ev.og_image_url ? (/^https:\/\//.test(ev.og_image_url) ? ev.og_image_url : eventImageUrl(ev.slug, "og")) : undefined;
+
 
   return (
     <div className="min-h-screen overflow-x-hidden">
-      <SEO title={ev.seo_title?.trim() || title} description={description}{...(ogImage && { image: ogImage })} canonical={`/events/${ev.slug}`} type="website" schema={schema} />
+      <SEO title={seo!.title} description={seo!.description}{...(ogImage && { image: ogImage })} canonical={`/events/${ev.slug}`} type="website" schema={schema} />
       <a href="#main-content" className="skip-to-content">Skip to main content</a>
       <Header />
       <main id="main-content">

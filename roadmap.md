@@ -80,3 +80,8 @@
 - [x] Duplicate copies module fields and content atomically
 - [x] Hide back-to-top on /events/:slug
 - [x] Rolled-back permission checks (anon, member, Treasurer, Secretary, Admin) and tests
+
+## Dinner & Festival Stage 3
+- [x] Public modules, admin decide-later, confirmation/emails/Treasurer pre-orders, SEO/JSON-LD, event-image function, per-event prerendered head
+- [ ] Positive image-function check needs a published event with an image (none yet)
+- [ ] Stripe test-mode run on the 2027 draft — awaiting approval and decision on test keys
