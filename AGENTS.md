@@ -22,5 +22,6 @@
 - Meeting event label (lodge_events.event_label, default 'Festive Board') drives booking-form/email wording; title-aware attendance options live in src/lib/bookingTitles.ts. Why: White Table and other non-Festive-Board events reuse one form.
 - Public event bookings (/events/:slug) use the separate events Stripe account via _shared/stripe-events.ts (STRIPE_EVENTS_* secrets) and event_accounts/event_bookings; never the Lovable-managed lodge Stripe. Why: events money lives in a separate Stripe account and Event Accounts, apart from the lodge ledger.
 - Public calendars read public_events via _shared/publicEventCalendar rules; member Calendar uses member-calendar-feed only. Why: website and webcal show the same events.
-- Event pricing only via _shared/eventPricing.ts; booking form pieces via components/events/booking/BookingCore. Why: browser/server agree; one core.
+- Event pricing via _shared/eventPricing.ts; form pieces via events/booking/BookingCore. Why: one shared rule.
 - Event module tables: public read via is_event_published(), writes via can_write_event_content(), copies via duplicate_event_content(). Why: drafts hidden, copies atomic.
+- Event money: one event_booking_payments row per Stripe charge; booking totals are recomputeBooking roll-ups; balance tokens are service-role only. Why: per-payment deposits/refunds, private links.
