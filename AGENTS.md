@@ -25,3 +25,4 @@
 - Event pricing via _shared/eventPricing.ts; form pieces via events/booking/BookingCore. Why: one shared rule.
 - Event module tables: public read via is_event_published(), writes via can_write_event_content(), copies via duplicate_event_content(). Why: drafts hidden, copies atomic.
 - Event money: one event_booking_payments row per Stripe charge; booking totals are recomputeBooking roll-ups; balance tokens are service-role only. Why: per-payment deposits/refunds, private links.
+- Manual membership enquiries are inserted only via add_manual_enquiry (admin/Secretary/Assistant Secretary, request_id idempotent, created_by audit); no table INSERT policy. Why: public Join Us insert path stays server-only.
