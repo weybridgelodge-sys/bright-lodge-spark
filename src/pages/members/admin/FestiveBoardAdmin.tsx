@@ -1380,108 +1380,64 @@ function MeetingDialog({
                 {computedAttended.members} attending
               </span>
             </div>
-            <div className="hidden sm:grid grid-cols-[auto_1fr_140px_180px_100px] gap-2 px-2 pb-1 text-[10px] uppercase tracking-wide text-gold/70">
-              <span className="w-4" aria-hidden />
-              <span>Member</span>
-              <span>Status</span>
-              <span>Payment method</span>
-              <span>Amount</span>
-            </div>
             <div className="border border-gold/15 rounded-sm divide-y divide-gold/10">
               {members.map((m) => {
                 const d = memberDrafts[m.id];
                 if (!d) return null;
                 return (
-                  <div
-                    key={m.id}
-                    className="grid grid-cols-[auto_1fr] sm:grid-cols-[auto_1fr_140px_180px_100px] gap-2 items-center p-2 text-sm"
-                  >
-                    <Checkbox
-                      checked={d.present}
-                      onCheckedChange={(v) => setMember(m.id, { present: !!v })}
-                    />
-                    <span className="truncate flex items-center gap-1.5 flex-wrap">
-                      {memberDisplay(m)}
-                      {d.synced && (
-                        <span className="text-[9px] uppercase tracking-wider text-gold border border-gold/40 rounded px-1 py-0.5">Synced</span>
-                      )}
-                      {d.isMeetingOnly && (
-                        <span className="text-[9px] uppercase tracking-wider text-primary-foreground/70 border border-primary-foreground/30 rounded px-1 py-0.5">Meeting only</span>
-                      )}
-                    </span>
+                  <div key={m.id} data-testid="fb-member-row" className="min-w-0 p-3 space-y-3 text-sm">
+                    <label className="flex items-center gap-3 min-h-11 min-w-0 cursor-pointer">
+                      <Checkbox
+                        checked={d.present}
+                        onCheckedChange={(v) => setMember(m.id, { present: !!v })}
+                        aria-label={`Attending: ${memberDisplay(m)}`}
+                      />
+                      <span className="min-w-0 break-words flex items-center gap-1.5 flex-wrap">
+                        {memberDisplay(m)}
+                        {d.synced && (
+                          <span className="text-[10px] uppercase tracking-wider text-gold border border-gold/40 rounded px-1.5 py-0.5">Synced</span>
+                        )}
+                        {d.isMeetingOnly && (
+                          <span className="text-[10px] uppercase tracking-wider text-primary-foreground/70 border border-primary-foreground/30 rounded px-1.5 py-0.5">Meeting only</span>
+                        )}
+                      </span>
+                    </label>
                     {d.present && (
                       <>
-                        <div className="col-span-full sm:col-span-1">
-                          <Select
-                            value={d.status}
-                            onValueChange={(v) =>
-                              setMember(m.id, { status: v as FbAttendanceStatus })
-                            }
-                          >
-                            <SelectTrigger className="bg-navy border-gold/20 h-8 text-xs text-primary-foreground placeholder:text-primary-foreground/40">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {FB_ATTENDANCE_STATUSES.map((o) => (
-                                <SelectItem key={o.value} value={o.value}>
-                                  {o.label}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        {d.isMeetingOnly ? (
-                          <div className="col-span-full sm:col-span-1 bg-navy border border-gold/20 h-8 rounded px-3 flex items-center text-xs text-primary-foreground/40">
-                            —
-                          </div>
-                        ) : (
-                          <div className="col-span-full sm:col-span-1">
-                            <Select
-                              value={d.paymentMethod}
-                              onValueChange={(v) =>
-                                setMember(m.id, { paymentMethod: v as FbPaymentMethod })
-                              }
-                            >
-                              <SelectTrigger className="bg-navy border-gold/20 h-8 text-xs text-primary-foreground placeholder:text-primary-foreground/40">
-                                <SelectValue />
-                              </SelectTrigger>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_110px_minmax(0,1.5fr)] gap-3">
+                          <FbField id={`${m.id}-status`} label="Status">
+                            <Select value={d.status} onValueChange={(v) => setMember(m.id, { status: v as FbAttendanceStatus })}>
+                              <SelectTrigger id={`${m.id}-status`} className={FB_FIELD}><SelectValue /></SelectTrigger>
                               <SelectContent>
-                                {FB_PAYMENT_METHODS.map((o) => (
-                                  <SelectItem key={o.value} value={o.value}>
-                                    {o.label}
-                                  </SelectItem>
-                                ))}
+                                {FB_ATTENDANCE_STATUSES.map((o) => (<SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>))}
                               </SelectContent>
                             </Select>
-                          </div>
-                        )}
-                        <div className="col-span-full sm:col-span-1">
-                          <Input
-                            type="number"
-                            step="0.01"
-                            min={0}
-                            placeholder="£"
-                            value={d.amountPounds}
-                            onChange={(e) =>
-                              setMember(m.id, { amountPounds: e.target.value })
-                            }
-                            className="bg-navy border-gold/20 h-8 text-xs text-primary-foreground placeholder:text-primary-foreground/40"
-                          />
+                          </FbField>
+                          <FbField id={`${m.id}-payment`} label="Payment">
+                            {d.isMeetingOnly ? (
+                              <div id={`${m.id}-payment`} className="bg-navy border border-gold/20 h-11 rounded-md px-3 flex items-center text-sm text-primary-foreground/40">—</div>
+                            ) : (
+                              <Select value={d.paymentMethod} onValueChange={(v) => setMember(m.id, { paymentMethod: v as FbPaymentMethod })}>
+                                <SelectTrigger id={`${m.id}-payment`} className={FB_FIELD}><SelectValue /></SelectTrigger>
+                                <SelectContent>
+                                  {FB_PAYMENT_METHODS.map((o) => (<SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>))}
+                                </SelectContent>
+                              </Select>
+                            )}
+                          </FbField>
+                          <FbField id={`${m.id}-amount`} label="Amount">
+                            <Input id={`${m.id}-amount`} type="number" step="0.01" min={0} placeholder="£" value={d.amountPounds}
+                              onChange={(e) => setMember(m.id, { amountPounds: e.target.value })} className={FB_FIELD} />
+                          </FbField>
+                          <FbField id={`${m.id}-dietary`} label="Dietary" className="sm:col-span-3 md:col-span-1">
+                            <Input id={`${m.id}-dietary`} value={d.dietary ?? ""} placeholder="Allergies (optional)"
+                              onChange={(e) => setMember(m.id, { dietary: e.target.value })} className={FB_FIELD} />
+                          </FbField>
                         </div>
-                        <Input
-                          value={d.dietary ?? ""}
-                          onChange={(e) => setMember(m.id, { dietary: e.target.value })}
-                          placeholder="Dietary / allergies (optional)"
-                          className="col-span-full sm:col-start-2 sm:col-end-6 bg-navy border-gold/20 h-8 text-xs text-primary-foreground placeholder:text-primary-foreground/40"
-                        />
                         {!((parseFloat(d.amountPounds || "0") || 0) > 0 && !d.isMeetingOnly) && (
-                          <label className="col-span-full sm:col-start-2 sm:col-end-6 flex items-center gap-2 text-[11px] text-primary-foreground/70 -mt-1">
-                            <input
-                              type="checkbox"
-                              checked={d.isMeetingOnly}
-                              onChange={(e) => setMember(m.id, { isMeetingOnly: e.target.checked })}
-                              className="accent-gold w-3.5 h-3.5"
-                            />
+                          <label className="flex items-center gap-2 min-h-11 text-xs text-primary-foreground/70">
+                            <input type="checkbox" checked={d.isMeetingOnly}
+                              onChange={(e) => setMember(m.id, { isMeetingOnly: e.target.checked })} className="accent-gold w-4 h-4" />
                             Meeting only (not dining)
                           </label>
                         )}
@@ -1518,27 +1474,16 @@ function MeetingDialog({
               </p>
             ) : (
               <div className="space-y-2">
-                <div className="hidden sm:grid grid-cols-[1fr_1fr_90px_1fr_140px_180px_100px_auto] gap-2 px-2 text-[10px] uppercase tracking-wide text-gold/70">
-                  <span>Visitor name</span>
-                  <span>Lodge name</span>
-                  <span>Lodge no.</span>
-                  <span>Email</span>
-                  <span>Status</span>
-                  <span>Payment method</span>
-                  <span>Amount</span>
-                  <span aria-hidden />
-                </div>
                 {visitorDrafts.map((v) => (
                   <div
                     key={v.id}
-                    className={`border rounded-sm p-2 grid grid-cols-1 sm:grid-cols-[1fr_1fr_90px_1fr_140px_180px_100px_auto] gap-2 items-center ${v.synced ? "border-gold/40 bg-gold/5" : "border-gold/15"}`}
+                    data-testid="fb-visitor-row"
+                    className={`min-w-0 border rounded-sm p-3 space-y-3 ${v.synced ? "border-gold/40 bg-gold/5" : "border-gold/15"}`}
                   >
-                    <div className="flex items-center gap-1.5">
-                      {v.synced && (
-                        <span className="text-[9px] uppercase tracking-wider text-gold border border-gold/40 rounded px-1 py-0.5 shrink-0" title="Synced from public booking">Synced</span>
-                      )}
-                      <div className="flex-1 min-w-0">
+                    <div className="flex items-end gap-2 min-w-0">
+                      <FbField id={`${v.id}-name`} label="Visitor name" className="flex-1">
                         <VisitorNameInput
+                          id={`${v.id}-name`}
                           value={v.name}
                           suggestions={visitorSuggestions}
                           onChange={(name) => setVisitor(v.id, { name })}
@@ -1549,106 +1494,74 @@ function MeetingDialog({
                             ...(s.email ? { email: s.email } : {}),
                           })}
                         />
-                        {matchRosterMember(v.name) && (
-                          <p className="mt-1 text-[10px] leading-snug text-amber-300">
-                            {memberDisplay(matchRosterMember(v.name)!)} is a lodge member — tick them in the member list above instead of adding them as a visitor.
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                    <Input
-                      value={v.lodgeName}
-                      placeholder="Lodge name"
-                      onChange={(e) => setVisitor(v.id, { lodgeName: e.target.value })}
-                      className="bg-navy border-gold/20 h-8 text-xs text-primary-foreground placeholder:text-primary-foreground/40"
-                    />
-                    <Input
-                      value={v.lodgeNumber}
-                      placeholder="No."
-                      onChange={(e) => setVisitor(v.id, { lodgeNumber: e.target.value })}
-                      className="bg-navy border-gold/20 h-8 text-xs text-primary-foreground placeholder:text-primary-foreground/40"
-                    />
-                    <Input
-                      type="email"
-                      value={v.email}
-                      placeholder="Email (optional, for newsletter)"
-                      onChange={(e) => setVisitor(v.id, { email: e.target.value })}
-                      className="bg-navy border-gold/20 h-8 text-xs text-primary-foreground placeholder:text-primary-foreground/40"
-                    />
-
-                    <Select
-                      value={v.status}
-                      onValueChange={(val) =>
-                        setVisitor(v.id, { status: val as FbAttendanceStatus })
-                      }
-                    >
-                      <SelectTrigger className="bg-navy border-gold/20 h-8 text-xs text-primary-foreground placeholder:text-primary-foreground/40">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {FB_ATTENDANCE_STATUSES.map((o) => (
-                          <SelectItem key={o.value} value={o.value}>
-                            {o.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {v.isMeetingOnly ? (
-                      <div className="bg-navy border border-gold/20 h-8 rounded px-3 flex items-center text-xs text-primary-foreground/40">
-                        —
-                      </div>
-                    ) : (
-                      <Select
-                        value={v.paymentMethod}
-                        onValueChange={(val) =>
-                          setVisitor(v.id, { paymentMethod: val as FbPaymentMethod })
-                        }
+                      </FbField>
+                      {v.synced && (
+                        <span className="mb-3 text-[10px] uppercase tracking-wider text-gold border border-gold/40 rounded px-1.5 py-0.5 shrink-0" title="Synced from public booking">Synced</span>
+                      )}
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => removeVisitor(v.id)}
+                        className="text-destructive hover:bg-destructive/10 h-11 w-11 shrink-0"
+                        aria-label="Remove visitor"
                       >
-                        <SelectTrigger className="bg-navy border-gold/20 h-8 text-xs text-primary-foreground placeholder:text-primary-foreground/40">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {FB_PAYMENT_METHODS.map((o) => (
-                            <SelectItem key={o.value} value={o.value}>
-                              {o.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                    {matchRosterMember(v.name) && (
+                      <p className="-mt-1 text-[11px] leading-snug text-amber-300">
+                        {memberDisplay(matchRosterMember(v.name)!)} is a lodge member — tick them in the member list above instead of adding them as a visitor.
+                      </p>
                     )}
-                    <Input
-                      type="number"
-                      step="0.01"
-                      min={0}
-                      placeholder="£"
-                      value={v.amountPounds}
-                      onChange={(e) => setVisitor(v.id, { amountPounds: e.target.value })}
-                      className="bg-navy border-gold/20 h-8 text-xs text-primary-foreground placeholder:text-primary-foreground/40"
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => removeVisitor(v.id)}
-                      className="text-destructive hover:bg-destructive/10 h-8 w-8"
-                      aria-label="Remove visitor"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </Button>
-                    <Input
-                      value={v.dietary ?? ""}
-                      onChange={(e) => setVisitor(v.id, { dietary: e.target.value })}
-                      placeholder="Dietary / allergies (optional)"
-                      className="sm:col-span-8 bg-navy border-gold/20 h-8 text-xs text-primary-foreground placeholder:text-primary-foreground/40"
-                    />
+                    <div className="grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_110px] md:grid-cols-[minmax(0,1fr)_110px_minmax(0,1fr)] gap-3">
+                      <FbField id={`${v.id}-lodge`} label="Lodge name">
+                        <Input id={`${v.id}-lodge`} value={v.lodgeName} placeholder="e.g. Royal Alfred Lodge"
+                          onChange={(e) => setVisitor(v.id, { lodgeName: e.target.value })} className={FB_FIELD} />
+                      </FbField>
+                      <FbField id={`${v.id}-lodgeno`} label="Lodge no.">
+                        <Input id={`${v.id}-lodgeno`} value={v.lodgeNumber} placeholder="e.g. 780"
+                          onChange={(e) => setVisitor(v.id, { lodgeNumber: e.target.value })} className={FB_FIELD} />
+                      </FbField>
+                      <FbField id={`${v.id}-email`} label="Email" className="sm:col-span-2 md:col-span-1">
+                        <Input id={`${v.id}-email`} type="email" value={v.email} placeholder="Optional, for newsletter"
+                          onChange={(e) => setVisitor(v.id, { email: e.target.value })} className={FB_FIELD} />
+                      </FbField>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_110px_minmax(0,1.5fr)] gap-3">
+                      <FbField id={`${v.id}-status`} label="Status">
+                        <Select value={v.status} onValueChange={(val) => setVisitor(v.id, { status: val as FbAttendanceStatus })}>
+                          <SelectTrigger id={`${v.id}-status`} className={FB_FIELD}><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            {FB_ATTENDANCE_STATUSES.map((o) => (<SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>))}
+                          </SelectContent>
+                        </Select>
+                      </FbField>
+                      <FbField id={`${v.id}-payment`} label="Payment">
+                        {v.isMeetingOnly ? (
+                          <div id={`${v.id}-payment`} className="bg-navy border border-gold/20 h-11 rounded-md px-3 flex items-center text-sm text-primary-foreground/40">—</div>
+                        ) : (
+                          <Select value={v.paymentMethod} onValueChange={(val) => setVisitor(v.id, { paymentMethod: val as FbPaymentMethod })}>
+                            <SelectTrigger id={`${v.id}-payment`} className={FB_FIELD}><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              {FB_PAYMENT_METHODS.map((o) => (<SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>))}
+                            </SelectContent>
+                          </Select>
+                        )}
+                      </FbField>
+                      <FbField id={`${v.id}-amount`} label="Amount">
+                        <Input id={`${v.id}-amount`} type="number" step="0.01" min={0} placeholder="£" value={v.amountPounds}
+                          onChange={(e) => setVisitor(v.id, { amountPounds: e.target.value })} className={FB_FIELD} />
+                      </FbField>
+                      <FbField id={`${v.id}-dietary`} label="Dietary" className="sm:col-span-3 md:col-span-1">
+                        <Input id={`${v.id}-dietary`} value={v.dietary ?? ""} placeholder="Allergies (optional)"
+                          onChange={(e) => setVisitor(v.id, { dietary: e.target.value })} className={FB_FIELD} />
+                      </FbField>
+                    </div>
                     {!((parseFloat(v.amountPounds || "0") || 0) > 0 && !v.isMeetingOnly) && (
-                      <label className="sm:col-span-8 flex items-center gap-2 text-[11px] text-primary-foreground/70">
-                        <input
-                          type="checkbox"
-                          checked={v.isMeetingOnly}
-                          onChange={(e) => setVisitor(v.id, { isMeetingOnly: e.target.checked })}
-                          className="accent-gold w-3.5 h-3.5"
-                        />
+                      <label className="flex items-center gap-2 min-h-11 text-xs text-primary-foreground/70">
+                        <input type="checkbox" checked={v.isMeetingOnly}
+                          onChange={(e) => setVisitor(v.id, { isMeetingOnly: e.target.checked })} className="accent-gold w-4 h-4" />
                         Meeting only (not dining)
                       </label>
                     )}
