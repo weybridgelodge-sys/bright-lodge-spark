@@ -1,37 +1,60 @@
-# Stage 4 follow-up: record manual balance payments
+# Add enquiry (manual) — Membership Enquiries
 
-## Findings (from code, no changes yet)
-- **Secretary access today:** the Treasurer Portal (and its Event Accounts tab) is open to Admin, current Treasurer, Auditors 1/2, current WM/IPM and Secretary (role or current office). Secretary can read Event Accounts (bookings included) but cannot edit anything: database writes on bookings/budget lines are Admin/current Treasurer only, and the tab gets `canEdit = Admin || current Treasurer`.
-- **Balances outstanding panel:** already visible to Secretary with **Copy link** and **Resend**; the `event-balance-link` function already allows Admin/current Secretary for get/resend and blocks regenerate. So no change is needed for item 2; Secretary will **not** see "Record balance received" or "Regenerate".
-- **Gap found:** the tie-out splits online vs cash per *booking* (`payment_method`), so a card deposit + cash balance would be counted entirely as online. Fix: split by payment rows when a booking has ledger rows.
-- `event_booking_payments.method` already allows `'manual'`; status/kind constraints already fit.
+## Findings
+- `membership_enquiries` has no INSERT policy for signed-in users (only the Join Us function writes, using the server key). So a manual add needs a new, narrow write path.
+- `email` is required (NOT NULL), so phone-only enquiries can't be stored today.
+- There is no `created_by` / `received_at` column. `created_at` can hold the received date.
+- Convert already handles a missing email (it only matches existing candidates by email). Manual sources map to referral source blank, same as non-website today.
+- Who can action enquiries today: Admin, Secretary, Assistant Secretary (WM view-only). The Add button uses exactly that set.
 
-## Proposed migration (needs your approval: adds columns)
+## Proposed migration (not applied — awaiting approval)
 ```sql
-ALTER TABLE public.event_booking_payments
-  ADD COLUMN IF NOT EXISTS manual_method text CHECK (manual_method IN ('cash','cheque','other')),
-  ADD COLUMN IF NOT EXISTS note text CHECK (char_length(note) <= 500),
-  ADD COLUMN IF NOT EXISTS reference text CHECK (char_length(reference) <= 100),
-  ADD COLUMN IF NOT EXISTS recorded_by uuid,
-  ADD COLUMN IF NOT EXISTS recorded_at timestamptz,
-  ADD COLUMN IF NOT EXISTS request_id uuid;
-CREATE UNIQUE INDEX IF NOT EXISTS event_booking_payments_request_uq
-  ON public.event_booking_payments(request_id) WHERE request_id IS NOT NULL;
+-- 1. allow phone-only manual enquiries (Join Us function still always sends an email)
+ALTER TABLE public.membership_enquiries ALTER COLUMN email DROP NOT NULL;
+
+-- 2. audit + double-submit protection
+ALTER TABLE public.membership_enquiries
+  ADD COLUMN created_by uuid,
+  ADD COLUMN request_id uuid;
+CREATE UNIQUE INDEX membership_enquiries_request_id_uidx
+  ON public.membership_enquiries(request_id) WHERE request_id IS NOT NULL;
+
+-- 3. narrow insert path (no new table policy, no anon access)
+CREATE OR REPLACE FUNCTION public.add_manual_enquiry(
+  _request_id uuid, _full_name text, _email text, _phone text,
+  _channel text, _received_on date, _message text)
+RETURNS uuid LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+DECLARE new_id uuid; nm text := btrim(coalesce(_full_name,''));
+  em text := nullif(lower(btrim(coalesce(_email,''))),'');
+  ph text := nullif(btrim(coalesce(_phone,'')),'');
+BEGIN
+  IF NOT (has_role(auth.uid(),'admin') OR has_role(auth.uid(),'secretary')
+          OR has_role(auth.uid(),'assistant_secretary')) THEN
+    RAISE EXCEPTION 'Not authorised'; END IF;
+  SELECT id INTO new_id FROM membership_enquiries WHERE request_id = _request_id;
+  IF new_id IS NOT NULL THEN RETURN new_id; END IF;          -- retry/double-click
+  IF length(nm) < 2 OR length(nm) > 120 THEN RAISE EXCEPTION 'Name is required'; END IF;
+  IF em IS NULL AND ph IS NULL THEN RAISE EXCEPTION 'Enter an email or a phone number'; END IF;
+  IF em IS NOT NULL AND (length(em) > 255 OR em !~ '^[^@\s]+@[^@\s]+\.[^@\s]+$') THEN
+    RAISE EXCEPTION 'Email address is not valid'; END IF;
+  IF ph IS NOT NULL AND length(ph) > 40 THEN RAISE EXCEPTION 'Phone number is too long'; END IF;
+  IF _channel NOT IN ('email','phone','in-person','other') THEN RAISE EXCEPTION 'Choose how they got in touch'; END IF;
+  IF _received_on IS NULL OR _received_on > (now() AT TIME ZONE 'Europe/London')::date THEN
+    RAISE EXCEPTION 'Date received cannot be in the future'; END IF;
+  IF length(coalesce(_message,'')) > 2000 THEN RAISE EXCEPTION 'Message is too long'; END IF;
+  INSERT INTO membership_enquiries(full_name,email,phone,reason,source,status,created_at,created_by,request_id)
+  VALUES (nm, em, ph, btrim(coalesce(_message,'')), 'manual-' || _channel, 'new',
+          (_received_on::timestamp + time '12:00') AT TIME ZONE 'Europe/London', auth.uid(), _request_id)
+  RETURNING id INTO new_id;
+  RETURN new_id;
+END $$;
+REVOKE ALL ON FUNCTION public.add_manual_enquiry(uuid,text,text,text,text,date,text) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.add_manual_enquiry(uuid,text,text,text,text,date,text) TO authenticated;
 ```
-No new tables, no policy or grant changes (writes stay service-role only via the function; existing read policy unchanged). Audit = `recorded_by` + `recorded_at` on the immutable payment row, plus a function log line.
+Note: step 1 (DROP NOT NULL) is flagged by the system as a sensitive change and will ask you yes/no when applied.
 
-## Build
-1. New function `event-record-balance` (Admin/current Treasurer via `isEventsTreasurer`): validates `booking_id`, `request_id` (uuid, generated once per dialog open), `amount_pence` > 0, `paid_at` (date, not future), `manual_method`, optional note/reference.
-   - Re-reads booking; must be `deposit_paid` with balance > 0; rejects amount > `balance_due_pence`.
-   - Inserts payment (kind `balance`, method `manual`, fee 0, status `paid`); duplicate `request_id` returns the existing result (double-click safe). Re-checks balance after insert; if a race overpaid, deletes its own row and rejects.
-   - Calls shared `recomputeBooking` (same as webhook: `paid` only at zero).
-2. Pure helper `validateManualBalance(balanceDue, amount)` in shared `eventPricing.ts` (browser + server).
-3. Panel: "Record balance received" button (canRegenerate holders only) opening a small form: amount (prefilled with full balance, editable for partial), date, cash/cheque/other, reference, note. Button disabled while saving.
-4. Tie-out/actuals: per-payment split so manual rows count in cash received / awaiting banking, still pro rata tickets vs pre-orders. Manual rows carry no Stripe fee.
-5. Link/reminders: no new logic needed; once balance is 0 the status becomes `paid`, `loadByBalanceToken` returns null (unless courses still undecided, by existing design), and reminders only fire for `deposit_paid` with balance > 0. Tests will lock this in.
-
-## Tests
-Manual partial then full (status deposit_paid then paid), over-balance rejected, double submit (same request id counted once), reminder skipped after manual payment, token dead after paid (pure link-state check extracted from `loadByBalanceToken`), tie-out split card deposit + cash balance. Then full unit and browser suites.
-
-## Not done
-No publishing, Stripe runs, test bookings, Ladies Festival/Night or old bookings changes.
+## Build after approval
+- `MembershipEnquiries.tsx`: "Add enquiry" button (Admin/Secretary/Asst Secretary), mobile-first dialog with labels above Name, Email, Phone, How they got in touch, Date received (today, max today), Message; 44px controls; button locked while saving; one request id per dialog open. Card already shows "Source: …".
+- Shared validation helper `src/lib/manualEnquiry.ts` + unit tests (name required, email-or-phone, invalid email, future date, source mapping).
+- Rolled-back database checks: Secretary insert works, ordinary member/WM refused, double submit returns same row, row lists as New, convert works on a phone-only manual enquiry.
+- Browser test at 320/390 for the dialog. Join Us form, its honeypot, and the `submit-enquiry` function untouched; no function deploys.
