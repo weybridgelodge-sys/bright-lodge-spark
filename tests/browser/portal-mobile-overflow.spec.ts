@@ -523,3 +523,51 @@ test("Public Events cards and editor stay within 320px with 44px+ targets", asyn
   await expect(page.getByLabel("Public title")).toBeVisible();
   await expectNoViewportOverflow(page, "Public Events editor");
 });
+
+test("Summons candidate card has labelled fields and 44px+ targets at 320px", async ({ page }) => {
+  await page.goto("/members/summons");
+  await waitForPortal(page);
+  await page.getByRole("button", { name: /Add candidate/ }).click();
+
+  const fields = [
+    ["Name", "Bartholomew Featherstonehaugh-Wolstenholme"],
+    ["Occupation", "Chartered Certified Accountant & Company Director"],
+    ["Address", "12 Queen Charlotte Street, Guildford, Surrey GU1 4AAA, United Kingdom"],
+    ["Proposer", "W Bro. Bartholomew Featherstonehaugh-Wolstenholme PProvJGW"],
+    ["Seconder", "W Bro. A Very Long Surname Indeed"],
+  ] as const;
+  for (const [label, value] of fields) {
+    await page.getByLabel(label, { exact: true }).fill(value);
+  }
+  await page.getByLabel("Date of birth", { exact: true }).fill("1990-05-14");
+  await page.getByLabel("Date proposed", { exact: true }).fill("2026-10-21");
+
+  for (const label of ["Name", "Ceremony", "Date of birth", "Occupation", "Address", "Proposer", "Seconder", "Date proposed"]) {
+    await expect(page.getByLabel(label, { exact: true }), `${label} field`).toBeVisible();
+  }
+  await expect(page.getByText("The meeting at which the candidate was proposed.")).toBeVisible();
+
+  for (const label of ["Name", "Ceremony", "Date of birth", "Occupation", "Address", "Proposer", "Seconder", "Date proposed"]) {
+    const box = await page.getByLabel(label, { exact: true }).boundingBox();
+    expect(box, `${label} is measurable`).not.toBeNull();
+    expect(box!.height, `${label} touch target`).toBeGreaterThanOrEqual(44);
+    expect(box!.width, `${label} fits the viewport`).toBeLessThanOrEqual(320);
+  }
+
+  // Phone layout stacks to a single column: every field shares the same left edge.
+  const lefts = await page.evaluate(() => {
+    const labels = ["Name", "Ceremony", "Date of birth", "Occupation", "Address", "Proposer", "Seconder", "Date proposed"];
+    const out: number[] = [];
+    for (const text of labels) {
+      const el = [...document.querySelectorAll<HTMLElement>("label")].find((l) => l.textContent?.trim() === text);
+      const control = el?.htmlFor ? document.getElementById(el.htmlFor) : document.querySelector(`[aria-label="${text}"]`);
+      if (control) out.push(Math.round(control.getBoundingClientRect().left));
+    }
+    return out;
+  });
+  expect(lefts).toHaveLength(8);
+  expect(new Set(lefts).size, "single column on phones").toBe(1);
+
+  await expect(page.getByLabel("Name", { exact: true })).toHaveValue("Bartholomew Featherstonehaugh-Wolstenholme");
+  await expectNoViewportOverflow(page, "Summons candidate card");
+});
