@@ -4201,13 +4201,15 @@ export type Database = {
         Row: {
           converted_candidate_id: string | null
           created_at: string
-          email: string
+          created_by: string | null
+          email: string | null
           full_name: string
           id: string
           ip_address: string | null
           notes: string | null
           phone: string | null
           reason: string
+          request_id: string | null
           source: string
           status: string
           updated_at: string
@@ -4216,13 +4218,15 @@ export type Database = {
         Insert: {
           converted_candidate_id?: string | null
           created_at?: string
-          email: string
+          created_by?: string | null
+          email?: string | null
           full_name: string
           id?: string
           ip_address?: string | null
           notes?: string | null
           phone?: string | null
           reason: string
+          request_id?: string | null
           source?: string
           status?: string
           updated_at?: string
@@ -4231,13 +4235,15 @@ export type Database = {
         Update: {
           converted_candidate_id?: string | null
           created_at?: string
-          email?: string
+          created_by?: string | null
+          email?: string | null
           full_name?: string
           id?: string
           ip_address?: string | null
           notes?: string | null
           phone?: string | null
           reason?: string
+          request_id?: string | null
           source?: string
           status?: string
           updated_at?: string
@@ -6731,6 +6737,18 @@ export type Database = {
       }
     }
     Functions: {
+      add_manual_enquiry: {
+        Args: {
+          _channel: string
+          _email: string
+          _full_name: string
+          _message: string
+          _phone: string
+          _received_on: string
+          _request_id: string
+        }
+        Returns: string
+      }
       approve_unlock_treasurer_period: {
         Args: { _period_id: string }
         Returns: undefined
