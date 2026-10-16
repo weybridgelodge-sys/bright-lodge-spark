@@ -555,19 +555,42 @@ test("Summons candidate card has labelled fields and 44px+ targets at 320px", as
   }
 
   // Phone layout stacks to a single column: every field shares the same left edge.
-  const lefts = await page.evaluate(() => {
+  const layout = await page.evaluate(() => {
+    const vw = document.documentElement.clientWidth;
     const labels = ["Name", "Ceremony", "Date of birth", "Occupation", "Address", "Proposer", "Seconder", "Date proposed"];
-    const out: number[] = [];
+    const lefts: number[] = [];
+    let card: HTMLElement | null = null;
     for (const text of labels) {
       const el = [...document.querySelectorAll<HTMLElement>("label")].find((l) => l.textContent?.trim() === text);
       const control = el?.htmlFor ? document.getElementById(el.htmlFor) : document.querySelector(`[aria-label="${text}"]`);
-      if (control) out.push(Math.round(control.getBoundingClientRect().left));
+      if (!control || !el) continue;
+      lefts.push(Math.round(control.getBoundingClientRect().left));
+      card ??= el.closest("div.border") as HTMLElement | null;
     }
-    return out;
+    if (!card) return { error: "candidate card not found" };
+    const cardBox = card.getBoundingClientRect();
+    const offenders = [...card.querySelectorAll<HTMLElement>("button, a, input, select, textarea, [role='combobox']")]
+      .filter((el) => {
+        const s = getComputedStyle(el);
+        if (s.display === "none" || s.visibility === "hidden") return false;
+        const r = el.getBoundingClientRect();
+        return r.left < -1 || r.right > vw + 1;
+      })
+      .map((el) => (el.textContent || el.getAttribute("aria-label") || el.tagName).trim().slice(0, 40));
+    return {
+      lefts,
+      offenders,
+      cardRight: Math.round(cardBox.right),
+      cardScrolls: card.scrollWidth > card.clientWidth + 1,
+      viewportWidth: vw,
+    };
   });
-  expect(lefts).toHaveLength(8);
-  expect(new Set(lefts).size, "single column on phones").toBe(1);
+  expect(layout).not.toHaveProperty("error");
+  expect(layout.lefts).toHaveLength(8);
+  expect(new Set(layout.lefts).size, "single column on phones").toBe(1);
+  expect(layout.offenders, "candidate card controls inside the viewport").toEqual([]);
+  expect(layout.cardRight).toBeLessThanOrEqual(layout.viewportWidth);
+  expect(layout.cardScrolls, "candidate card needs no horizontal scrolling").toBe(false);
 
   await expect(page.getByLabel("Name", { exact: true })).toHaveValue("Bartholomew Featherstonehaugh-Wolstenholme");
-  await expectNoViewportOverflow(page, "Summons candidate card");
 });
