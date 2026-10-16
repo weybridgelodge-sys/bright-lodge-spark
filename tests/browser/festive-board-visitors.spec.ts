@@ -10,7 +10,7 @@ const visitors = Array.from({ length: 15 }, (_, i) => ({
   visitor_lodge_name: i === 0 ? "Royal Alfred Lodge of Instruction and Benevolence" : "Astolat Lodge",
   visitor_lodge_number: "5848", visitor_email: i === 0 ? "maximilian.featherstonehaugh@example.com" : `v${i}@example.com`,
   attendance_status: "booked", payment_method: "stripe", amount_paid_pence: 3500, is_meeting_only: false,
-  source: i < 3 ? "booking_sync" : "manual", source_booking_id: i < 3 ? `b${i}` : null, dietary: "Vegetarian",
+  source: i < 3 ? "booking" : "manual", source_booking_id: i < 3 ? `b${i}` : null, dietary: "Vegetarian",
 }));
 
 for (const width of [900, 1280]) {
