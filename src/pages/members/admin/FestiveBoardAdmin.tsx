@@ -1258,7 +1258,7 @@ function MeetingDialog({
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto bg-navy-dark text-primary-foreground border-gold/30">
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto overflow-x-hidden bg-navy-dark text-primary-foreground border-gold/30">
         <DialogHeader>
           <DialogTitle className="font-serif text-gold">
             {existing ? "Edit Lodge Meeting record" : "New Lodge Meeting record"}
@@ -1611,14 +1611,27 @@ function MeetingDialog({
   );
 }
 
+const FB_FIELD = "bg-navy border-gold/20 h-11 min-h-11 w-full min-w-0 text-sm text-primary-foreground placeholder:text-primary-foreground/40";
+
+function FbField({ id, label, className, children }: { id: string; label: string; className?: string; children: React.ReactNode }) {
+  return (
+    <div className={`min-w-0 flex flex-col gap-1 ${className ?? ""}`}>
+      <label htmlFor={id} className="text-[11px] uppercase tracking-wide text-gold/80">{label}</label>
+      {children}
+    </div>
+  );
+}
+
 // ---------- Visitor name autocomplete ----------
 
 function VisitorNameInput({
+  id,
   value,
   suggestions,
   onChange,
   onPick,
 }: {
+  id?: string;
   value: string;
   suggestions: VisitorSuggestion[];
   onChange: (v: string) => void;
@@ -1637,12 +1650,13 @@ function VisitorNameInput({
   return (
     <div className="relative">
       <Input
+        id={id}
         value={value}
-        placeholder="Visitor name (start typing to find past visitors)"
+        placeholder="Start typing to find past visitors"
         onChange={(e) => { onChange(e.target.value); setOpen(true); }}
         onFocus={() => setOpen(true)}
         onBlur={() => { setTimeout(() => setOpen(false), 150); }}
-        className="bg-navy border-gold/20 h-8 text-xs text-primary-foreground placeholder:text-primary-foreground/40"
+        className="bg-navy border-gold/20 h-11 w-full min-w-[220px] text-sm text-primary-foreground placeholder:text-primary-foreground/40"
       />
       {showList && (
         <ul className="absolute z-50 left-0 top-full mt-1 w-[320px] max-w-[90vw] p-1 bg-navy-dark border border-gold/30 rounded-sm text-xs shadow-lg">
