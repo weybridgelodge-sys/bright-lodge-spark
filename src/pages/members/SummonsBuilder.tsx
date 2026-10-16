@@ -938,18 +938,43 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
         <div className="space-y-3">
           {summons.candidates.map((c) => (
             <div key={c.id} className="border border-gold/20 rounded p-3 space-y-2">
-              <div className="grid sm:grid-cols-2 gap-2">
-                <Input placeholder="Full name" value={c.name} onChange={(e) => updateCandidate(c.id, { name: e.target.value })} />
-                <Select value={c.ceremony_type} onValueChange={(v) => updateCandidate(c.id, { ceremony_type: v as any })}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>{CEREMONY_TYPES.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
-                </Select>
-                <Input type="date" placeholder="DOB" value={c.dob} onChange={(e) => updateCandidate(c.id, { dob: e.target.value })} />
-                <Input placeholder="Occupation" value={c.occupation} onChange={(e) => updateCandidate(c.id, { occupation: e.target.value })} />
-                <Input placeholder="Address" value={c.address} onChange={(e) => updateCandidate(c.id, { address: e.target.value })} />
-                <Input placeholder="Proposer" value={c.proposer} onChange={(e) => updateCandidate(c.id, { proposer: e.target.value })} />
-                <Input placeholder="Seconder" value={c.seconder} onChange={(e) => updateCandidate(c.id, { seconder: e.target.value })} />
-                <Input type="date" placeholder="Date proposed" value={c.date_proposed} onChange={(e) => updateCandidate(c.id, { date_proposed: e.target.value })} />
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div>
+                  <Label htmlFor={`${c.id}-name`}>Name</Label>
+                  <Input id={`${c.id}-name`} className="min-h-11" placeholder="e.g. Jules P Tidmarsh" value={c.name} onChange={(e) => updateCandidate(c.id, { name: e.target.value })} />
+                </div>
+                <div>
+                  <Label>Ceremony</Label>
+                  <Select value={c.ceremony_type} onValueChange={(v) => updateCandidate(c.id, { ceremony_type: v as any })}>
+                    <SelectTrigger className="min-h-11" aria-label="Ceremony"><SelectValue /></SelectTrigger>
+                    <SelectContent>{CEREMONY_TYPES.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor={`${c.id}-dob`}>Date of birth</Label>
+                  <Input id={`${c.id}-dob`} type="date" className="min-h-11" value={c.dob} onChange={(e) => updateCandidate(c.id, { dob: e.target.value })} />
+                </div>
+                <div>
+                  <Label htmlFor={`${c.id}-occupation`}>Occupation</Label>
+                  <Input id={`${c.id}-occupation`} className="min-h-11" placeholder="e.g. Chartered Surveyor" value={c.occupation} onChange={(e) => updateCandidate(c.id, { occupation: e.target.value })} />
+                </div>
+                <div>
+                  <Label htmlFor={`${c.id}-address`}>Address</Label>
+                  <Input id={`${c.id}-address`} className="min-h-11" placeholder="e.g. 12 High Street, Guildford" value={c.address} onChange={(e) => updateCandidate(c.id, { address: e.target.value })} />
+                </div>
+                <div>
+                  <Label htmlFor={`${c.id}-proposer`}>Proposer</Label>
+                  <Input id={`${c.id}-proposer`} className="min-h-11" placeholder="e.g. W Bro. A Brother" value={c.proposer} onChange={(e) => updateCandidate(c.id, { proposer: e.target.value })} />
+                </div>
+                <div>
+                  <Label htmlFor={`${c.id}-seconder`}>Seconder</Label>
+                  <Input id={`${c.id}-seconder`} className="min-h-11" placeholder="e.g. W Bro. B Brother" value={c.seconder} onChange={(e) => updateCandidate(c.id, { seconder: e.target.value })} />
+                </div>
+                <div>
+                  <Label htmlFor={`${c.id}-date-proposed`}>Date proposed</Label>
+                  <Input id={`${c.id}-date-proposed`} type="date" className="min-h-11" value={c.date_proposed} onChange={(e) => updateCandidate(c.id, { date_proposed: e.target.value })} />
+                  <p className="text-xs text-primary-foreground/60 mt-1">The meeting at which the candidate was proposed.</p>
+                </div>
               </div>
               <Button type="button" variant="destructive" size="sm" onClick={() => removeCandidate(c.id)}>
                 <Trash2 className="w-4 h-4 mr-1" /> Remove
