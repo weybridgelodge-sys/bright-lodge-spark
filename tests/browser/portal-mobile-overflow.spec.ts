@@ -594,3 +594,22 @@ test("Summons candidate card has labelled fields and 44px+ targets at 320px", as
 
   await expect(page.getByLabel("Name", { exact: true })).toHaveValue("Bartholomew Featherstonehaugh-Wolstenholme");
 });
+
+test("Add enquiry dialog is labelled, validates and fits at 320px", async ({ page }) => {
+  await page.goto("/members/admin/enquiries");
+  await waitForPortal(page);
+  await page.getByRole("button", { name: "Add enquiry" }).click();
+  const dialog = page.getByRole("dialog");
+  for (const label of ["Name", "Email", "Phone", "How they got in touch", "Date received", "Message / notes"]) {
+    await expect(dialog.getByLabel(label, { exact: true })).toBeVisible();
+  }
+  await dialog.getByRole("button", { name: "Add enquiry" }).click();
+  await expect(dialog.getByText("Enter the enquirer's name")).toBeVisible();
+  await expect(dialog.getByText("Enter an email or a phone number")).toBeVisible();
+  for (const label of ["Name", "Email", "Phone", "How they got in touch", "Date received"]) {
+    const box = await dialog.getByLabel(label, { exact: true }).boundingBox();
+    expect(box!.height, `${label} touch target`).toBeGreaterThanOrEqual(44);
+    expect(box!.x + box!.width, `${label} fits`).toBeLessThanOrEqual(320);
+  }
+  await expectNoViewportOverflow(page, "Add enquiry dialog");
+});

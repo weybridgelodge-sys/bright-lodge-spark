@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { ArrowLeft, UserPlus, Ban, CheckCircle2, Link2, ExternalLink } from "lucide-react";
+import { ArrowLeft, UserPlus, Ban, CheckCircle2, Link2, ExternalLink, Plus } from "lucide-react";
 import MembersLayout from "@/components/members/MembersLayout";
 import ProtectedRoute from "@/components/members/ProtectedRoute";
+import AddEnquiryDialog from "@/components/members/AddEnquiryDialog";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -32,6 +33,7 @@ function Inner() {
   const [busy, setBusy] = useState<string | null>(null);
   const [dismissing, setDismissing] = useState<string | null>(null);
   const [note, setNote] = useState("");
+  const [adding, setAdding] = useState(false);
 
   const load = async () => {
     setLoading(true);
@@ -94,10 +96,18 @@ function Inner() {
       <Link to="/members/admin/secretary" className="inline-flex items-center gap-1 text-xs text-gold/80 hover:text-gold mb-3">
         <ArrowLeft className="w-3 h-3" /> Secretary Portal
       </Link>
-      <header className="mb-4">
-        <h1 className="font-serif text-2xl md:text-3xl text-gold">Membership Enquiries</h1>
-        <p className="text-primary-foreground/60 text-sm">Enquiries from the public Join Us form. Convert genuine ones to candidates and dismiss the rest.</p>
+      <header className="mb-4 flex flex-wrap items-start justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          <h1 className="font-serif text-2xl md:text-3xl text-gold">Membership Enquiries</h1>
+          <p className="text-primary-foreground/60 text-sm">Enquiries from the public Join Us form, plus any you add by hand. Convert genuine ones to candidates and dismiss the rest.</p>
+        </div>
+        {canEdit && (
+          <button onClick={() => setAdding(true)} className="inline-flex items-center gap-1.5 min-h-11 px-4 rounded-sm text-sm text-accent-foreground bg-gold-shimmer font-semibold">
+            <Plus className="w-4 h-4" /> Add enquiry
+          </button>
+        )}
       </header>
+      {canEdit && <AddEnquiryDialog open={adding} onOpenChange={setAdding} onSaved={() => { setTab("new"); load(); }} />}
 
       <div className="flex flex-wrap gap-2 mb-4" role="tablist">
         {tabs.map(([k, l]) => (
