@@ -1,6 +1,6 @@
 // Event page meta + JSON-LD, built only from event data (nothing event-specific in code).
 import { CHILD_MAX_AGE, DEFAULT_VENUE, formatEventDate } from "./publicEventFormat";
-import type { PublicEvent } from "./publicEvents";
+import type { PublicEvent } from "./publicEventTypes";
 
 const SITE = "https://weybridgelodge.org.uk";
 
