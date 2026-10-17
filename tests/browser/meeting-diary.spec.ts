@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { expectNoAxeViolations } from "./helpers/axe";
 
 // Faithful worst-case diary data: long notes/reasons, cancelled and installation rows.
 const rule = { id: "r1", unit_id: "u", mode: "weekday_rule", installation_month: 10, installation_ordinal: "3", installation_weekday: 3, fixed_day: null, applies_from_year: null, unit_number: "6787", default_venue: "Guildford Masonic Centre, Hitherbury Close, Portsmouth Road, Guildford GU2 4DR", election_month: 5, ritual: "Emulation", consecration_date: "1949-01-01" };
@@ -51,6 +52,11 @@ test("Meeting diary has no overflow at 320px", { timeout: 90_000 }, async ({ pag
   });
   expect(fieldIssues).toEqual([]);
   await expect(page.getByText("Format dd/mm/yyyy")).toBeVisible();
+  await page.getByPlaceholder("e.g. Emulation").fill("Emulation working");
+  await expectNoAxeViolations(page, "diary page");
+  await page.evaluate(() => document.documentElement.classList.add("dark"));
+  await expectNoAxeViolations(page, "diary page dark");
+  await page.evaluate(() => document.documentElement.classList.remove("dark"));
   for (const b of await page.locator("main button:visible").all()) {
     const box = await b.boundingBox();
     if (box) expect(box.height, await b.innerText()).toBeGreaterThanOrEqual(44);
@@ -61,9 +67,11 @@ test("Meeting diary has no overflow at 320px", { timeout: 90_000 }, async ({ pag
   await dialog.getByLabel("New date").fill("2027-10-27");
   await expect(dialog.getByTestId("kpi-effect")).toBeVisible();
   await check("move dialog");
+  await expectNoAxeViolations(page, "move dialog");
   await page.screenshot({ path: "/tmp/browser/diary-move-320.png" });
   await dialog.getByRole("button", { name: "Back" }).click();
   await page.getByRole("button", { name: "Drop" }).first().click();
   await expect(page.getByRole("dialog")).toContainText("nothing is deleted");
   await check("drop dialog");
+  await expectNoAxeViolations(page, "drop dialog");
 });
