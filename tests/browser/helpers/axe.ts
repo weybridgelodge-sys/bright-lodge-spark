@@ -11,7 +11,7 @@ export async function expectNoAxeViolations(page: Page, ctx: string, exclude: st
   for (const s of exclude) b = b.exclude(s);
   const { violations } = await b.analyze();
   const bad = violations.filter((v) => v.impact === "serious" || v.impact === "critical")
-    .map((v) => `${v.id} @ ${new URL(page.url()).pathname}: ${v.nodes.slice(0, 4).map((n) => `${n.target.join(" ")} => ${n.html.slice(0, 140)}`).join(" | ")}`);
+    .map((v) => `${v.id} @ ${new URL(page.url()).pathname}: ${v.nodes.slice(0, 4).map((n) => `${n.target.join(" ")} => ${n.html.slice(0, 600) + " TEXT=" + (n.any?.[0]?.message ?? "")}`).join(" | ")}`);
   // Soft: record every page's violations and keep going; the test still fails at the end.
   expect.soft(bad, `AXE ${ctx}`).toEqual([]);
 }
