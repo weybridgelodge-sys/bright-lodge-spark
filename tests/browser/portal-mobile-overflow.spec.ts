@@ -668,3 +668,23 @@ test("KPI Movement period picker fits at 320px", async ({ page }) => {
     await expectNoViewportOverflow(page, `KPI movement ${v}`);
   }
 });
+
+test("TMPSHOT gifts buttons", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 900 });
+  await page.addInitScript(() => sessionStorage.setItem("almoner-confidentiality", "1"));
+  await mockWidow(page);
+  await page.goto("/members/almoner");
+  await waitForPortal(page);
+  await page.getByRole("tab", { name: /Widows/ }).click();
+  await page.getByText("Doris Featherstonehaugh-Wolstenholme").first().click();
+  const rec = page.getByRole("button", { name: "Record gift" });
+  await rec.scrollIntoViewIfNeeded();
+  const css = (l: any) => l.evaluate((e: HTMLElement) => { const s = getComputedStyle(e); return [s.backgroundColor, s.color, s.borderColor, e.className]; });
+  console.log("REC", await css(rec));
+  console.log("LOG", await css(page.getByRole("button", { name: "Log contact" })));
+  await page.screenshot({ path: "/tmp/browser/g1.png" });
+  await rec.click();
+  const c = page.getByRole("button", { name: "Cancel" }).first();
+  console.log("CANCEL", await css(c));
+  await page.screenshot({ path: "/tmp/browser/g2.png" });
+});
