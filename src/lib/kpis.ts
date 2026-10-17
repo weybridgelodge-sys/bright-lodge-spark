@@ -3,6 +3,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { firstWmYearForMember } from "@/data/worshipfulMasters";
 import { formatMemberLine } from "@/lib/summons";
 import { OPTIONAL_POSITIONS, fetchOfficerYear } from "@/lib/officersProgression";
+import {
+  fetchInstallationConfig,
+  formatRangeDate,
+  getMasonicYear,
+  getMasonicYearRange,
+  localIsoDate,
+  type InstallationConfig,
+} from "@/lib/masonicYear";
 
 export type MemberStatus =
   | "pending"
@@ -39,6 +47,7 @@ export type KpiMember = {
   grand_rank: string | null;
   provincial_rank: string | null;
   updated_at: string;
+  status_changed_at?: string | null;
 };
 
 export type WmTerm = { id: string; member_id: string; year_started: number; year_ended: number | null };
@@ -73,6 +82,14 @@ export type Candidate = {
   updated_at: string;
 };
 
+export type StatusHistoryRow = {
+  profile_id: string;
+  kind: "status" | "initiated" | "joined";
+  status: string;
+  effective_date: string;
+  created_at: string;
+};
+
 export type KpiBundle = {
   /** Officers' (Installation) year used for vacancy checks. */
   officerYear?: number;
@@ -82,6 +99,9 @@ export type KpiBundle = {
   appointments: Appointment[];
   positions: { key: string; label: string; is_progressive: boolean; order_index: number }[];
   candidates: Candidate[];
+  /** member_status_history events (KPI dashboard only). */
+  statusHistory?: StatusHistoryRow[];
+  installation?: InstallationConfig;
 };
 
 
@@ -117,17 +137,19 @@ export function monthsBetween(fromIso: string, to: Date = new Date()): number {
 }
 
 export async function fetchKpiBundle(): Promise<KpiBundle> {
-  const [m, w, r, a, p, c] = await Promise.all([
+  const [m, w, r, a, p, c, h, cfg] = await Promise.all([
     supabase
       .from("profiles")
       .select(
-        "id,full_name,first_name,middle_name,last_name,preferred_name,post_nominals,title,status,degree,is_past_master,is_royal_arch,is_honorary_member,initiation_date,passing_date,raising_date,joined_lodge_date,is_ugle_portal_registered,rank,grand_rank,provincial_rank,updated_at"
+        "id,full_name,first_name,middle_name,last_name,preferred_name,post_nominals,title,status,degree,is_past_master,is_royal_arch,is_honorary_member,initiation_date,passing_date,raising_date,joined_lodge_date,is_ugle_portal_registered,rank,grand_rank,provincial_rank,updated_at,status_changed_at"
       ),
     (supabase.from as any)("member_wm_terms").select("id,member_id,year_started,year_ended"),
     (supabase.from as any)("succession_risks").select("id,role_key,note,is_at_risk"),
     supabase.from("officer_appointments").select("position_key,member_id,lodge_year"),
     supabase.from("officer_positions").select("key,label,is_progressive,order_index"),
     (supabase.from as any)("candidates").select("*"),
+    (supabase.from as any)("member_status_history").select("profile_id,kind,status,effective_date,created_at"),
+    fetchInstallationConfig(),
   ]);
   const baseMembers = ((m.data as unknown) as KpiMember[]) ?? [];
   // Merge DOB (PII) via secure RPC; caller must have admin/secretary/WM/almoner/IPM role
@@ -146,6 +168,8 @@ export async function fetchKpiBundle(): Promise<KpiBundle> {
     appointments: (a.data as Appointment[]) ?? [],
     positions: (p.data as KpiBundle["positions"]) ?? [],
     candidates: ((c?.data as Candidate[]) ?? []),
+    statusHistory: (h.data as StatusHistoryRow[]) ?? [],
+    installation: cfg,
   };
 }
 
@@ -196,22 +220,110 @@ export function snapshot(members: KpiMember[]) {
   };
 }
 
-// ───── Section 2: Movement (rolling 12 months from today)
-export function movement(members: KpiMember[]) {
-  const now = new Date();
-  const cutoff = new Date(now);
-  cutoff.setFullYear(cutoff.getFullYear() - 1);
-  const inRange = (iso: string | null) => !!iso && new Date(iso) >= cutoff && new Date(iso) <= now;
+// ───── Section 2: Movement (KPI dashboard / Members)
+export type MovementPeriodKey = "current" | "previous" | "rolling";
+export const MOVEMENT_PERIOD_LABELS: Record<MovementPeriodKey, string> = {
+  current: "Current Masonic year",
+  previous: "Previous Masonic year",
+  rolling: "Rolling 12 months",
+};
+export type MovementPeriod = {
+  key: MovementPeriodKey;
+  label: string;
+  start: string;
+  /** Inclusive end used for counting. */
+  end: string;
+  /** Human-readable range, e.g. "15 Oct 2025 – 20 Oct 2026". */
+  rangeLabel: string;
+};
+
+/**
+ * Resolves the chosen Movement period. Masonic years come from the shared
+ * installation helper; when the next installation is unknown the year is
+ * counted up to today and labelled as open-ended.
+ */
+export function movementPeriod(
+  key: MovementPeriodKey,
+  cfg: InstallationConfig,
+  today: string = localIsoDate()
+): MovementPeriod | null {
+  if (key === "rolling") {
+    const [y, m, d] = today.split("-");
+    const start = `${Number(y) - 1}-${m}-${d}`;
+    return { key, label: MOVEMENT_PERIOD_LABELS[key], start, end: today, rangeLabel: `${formatRangeDate(start)} – ${formatRangeDate(today)}` };
+  }
+  const cur = getMasonicYear(today, cfg);
+  if (!cur) return null;
+  const range = key === "current" ? cur : getMasonicYearRange(cur.startYear - 1, cfg);
+  if (!range) return null;
+  const end = range.end ?? today;
+  const endLabel = range.end ? formatRangeDate(range.end) : "next Installation not yet set";
+  return { key, label: MOVEMENT_PERIOD_LABELS[key], start: range.start, end, rangeLabel: `${formatRangeDate(range.start)} – ${endLabel}` };
+}
+
+const TERMINAL = new Set(["resigned", "excluded", "deceased"]);
+
+function rollingDefault(): { start: string; end: string } {
+  const today = localIsoDate();
+  const [y, m, d] = today.split("-");
+  return { start: `${Number(y) - 1}-${m}-${d}`, end: today };
+}
+
+/**
+ * Counts movement inside [start, end] (inclusive ISO dates). Leavers and
+ * rejoiners come from member_status_history events; members without history
+ * fall back to current status dated by status_changed_at. Default period is
+ * rolling 12 months (used by the Lodge Health card).
+ */
+export function movement(
+  members: KpiMember[],
+  opts: { start: string; end: string; history?: StatusHistoryRow[] } = rollingDefault()
+) {
+  const { start, end } = opts;
+  const inRange = (iso: string | null | undefined) => !!iso && iso.slice(0, 10) >= start && iso.slice(0, 10) <= end;
+  const byMember = new Map<string, StatusHistoryRow[]>();
+  for (const h of opts.history ?? []) {
+    const list = byMember.get(h.profile_id) ?? [];
+    list.push(h);
+    byMember.set(h.profile_id, list);
+  }
 
   const initiated = members.filter((m) => inRange(m.initiation_date));
-  // Joiners only — exclude initiates whose joined_lodge_date mirrors their initiation_date.
-  const joined = members.filter(
-    (m) => inRange(m.joined_lodge_date) && m.joined_lodge_date !== m.initiation_date
-  );
-  // Status-based outs — approximated by updated_at + current terminal status.
-  const resigned = members.filter((m) => m.status === "resigned" && inRange(m.updated_at));
-  const excluded = members.filter((m) => m.status === "excluded" && inRange(m.updated_at));
-  const deceased = members.filter((m) => m.status === "deceased" && inRange(m.updated_at));
+  const joined: KpiMember[] = [];
+  const resigned: KpiMember[] = [];
+  const excluded: KpiMember[] = [];
+  const deceased: KpiMember[] = [];
+
+  for (const m of members) {
+    const rows = byMember.get(m.id) ?? [];
+    const entryRows = rows.filter((r) => r.kind === "initiated" || r.kind === "joined");
+    const statusRows = rows
+      .filter((r) => r.kind === "status")
+      .sort((a, b) => (a.effective_date === b.effective_date ? (a.created_at < b.created_at ? -1 : 1) : a.effective_date < b.effective_date ? -1 : 1));
+
+    const joinDates = new Set<string>();
+    if (entryRows.length) {
+      for (const r of entryRows) if (r.kind === "joined") joinDates.add(r.effective_date);
+    } else if (m.joined_lodge_date && m.joined_lodge_date !== m.initiation_date) {
+      // Joiners only — initiates whose joined date mirrors initiation are excluded.
+      joinDates.add(m.joined_lodge_date.slice(0, 10));
+    }
+
+    if (statusRows.length) {
+      let prev: string | null = null;
+      for (const r of statusRows) {
+        if (TERMINAL.has(r.status) && r.status !== prev && inRange(r.effective_date)) {
+          (r.status === "resigned" ? resigned : r.status === "excluded" ? excluded : deceased).push(m);
+        }
+        if (!TERMINAL.has(r.status) && prev && TERMINAL.has(prev)) joinDates.add(r.effective_date); // rejoined
+        prev = r.status;
+      }
+    } else if (TERMINAL.has(m.status) && inRange(m.status_changed_at)) {
+      (m.status === "resigned" ? resigned : m.status === "excluded" ? excluded : deceased).push(m);
+    }
+
+    for (const d of joinDates) if (inRange(d)) joined.push(m);
+  }
   const yearOut = members.filter((m) => m.status === "year_out");
 
   const inCount = initiated.length + joined.length;
@@ -272,11 +384,17 @@ export type Milestone = {
   label: string;
 };
 
-export function milestones(members: KpiMember[], wmTerms: WmTerm[]): Milestone[] {
+export function milestones(
+  members: KpiMember[],
+  wmTerms: WmTerm[],
+  /** Masonic-year window (installation to installation); defaults to 1 Oct–30 Sep. */
+  yearRange?: { start: string; end: string | null }
+): Milestone[] {
   const today = new Date();
   const my = currentMasonicYear(today);
-  const yearStart = new Date(my, 9, 1); // 1 Oct
-  const yearEnd = new Date(my + 1, 8, 30); // 30 Sep
+  const toLocal = (s: string) => { const [y, m, d] = s.split("-").map(Number); return new Date(y, m - 1, d); };
+  const yearStart = yearRange ? toLocal(yearRange.start) : new Date(my, 9, 1);
+  const yearEnd = yearRange?.end ? toLocal(yearRange.end) : new Date(my + 1, 8, 30);
   const out: Milestone[] = [];
 
   // Format a Date as YYYY-MM-DD using local components — avoids the
@@ -431,7 +549,7 @@ export function lodgeHealth(bundle: KpiBundle): LodgeHealth {
   const oh = officersHealth(bundle);
   const pl = pipeline(bundle);
 
-  // Growth — net membership movement over the rolling 12 months.
+  // Growth — net membership movement over the rolling 12 months (deliberately rolling).
   const net = mv.net;
   const growth: HealthComponent =
     net >= 0
@@ -501,7 +619,7 @@ export async function fetchLodgeHealthBundle(): Promise<KpiBundle> {
     supabase
       .from("profiles")
       .select(
-        "id,full_name,first_name,middle_name,last_name,preferred_name,post_nominals,title,status,degree,is_past_master,is_royal_arch,is_honorary_member,initiation_date,passing_date,raising_date,joined_lodge_date,is_ugle_portal_registered,rank,grand_rank,provincial_rank,updated_at"
+        "id,full_name,first_name,middle_name,last_name,preferred_name,post_nominals,title,status,degree,is_past_master,is_royal_arch,is_honorary_member,initiation_date,passing_date,raising_date,joined_lodge_date,is_ugle_portal_registered,rank,grand_rank,provincial_rank,updated_at,status_changed_at"
       ),
     supabase.from("officer_positions").select("key,label,is_progressive,order_index"),
     (supabase as any).rpc("get_lodge_health_aggregates", { _lodge_year: my }),

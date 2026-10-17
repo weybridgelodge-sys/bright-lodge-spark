@@ -613,3 +613,18 @@ test("Add enquiry dialog is labelled, validates and fits at 320px", async ({ pag
   }
   await expectNoViewportOverflow(page, "Add enquiry dialog");
 });
+
+test("KPI Movement period picker fits at 320px", async ({ page }) => {
+  await page.route("**/rest/v1/installation_rule_settings?**", (r) => r.fulfill({ json: { mode: "weekday_rule", installation_month: 10, installation_ordinal: "3", installation_weekday: 3, fixed_day: null, applies_from_year: null } }));
+  await page.goto("/members/kpis");
+  await waitForPortal(page);
+  const picker = page.locator("#movement-period");
+  await picker.waitFor({ state: "visible", timeout: 15_000 });
+  for (const v of ["current", "previous", "rolling"]) {
+    await picker.selectOption(v);
+    await expect(page.getByText(/2 · Movement \(\d{1,2} \w{3} \d{4} – /)).toBeVisible();
+    const box = await picker.boundingBox();
+    expect(box!.height).toBeGreaterThanOrEqual(44);
+    await expectNoViewportOverflow(page, `KPI movement ${v}`);
+  }
+});

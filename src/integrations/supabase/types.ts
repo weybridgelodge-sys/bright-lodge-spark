@@ -2573,6 +2573,48 @@ export type Database = {
         }
         Relationships: []
       }
+      installation_rule_settings: {
+        Row: {
+          applies_from_year: number | null
+          created_at: string
+          fixed_day: number | null
+          id: string
+          installation_month: number
+          installation_ordinal: string | null
+          installation_weekday: number | null
+          mode: string
+          unit_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          applies_from_year?: number | null
+          created_at?: string
+          fixed_day?: number | null
+          id?: string
+          installation_month: number
+          installation_ordinal?: string | null
+          installation_weekday?: number | null
+          mode?: string
+          unit_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          applies_from_year?: number | null
+          created_at?: string
+          fixed_day?: number | null
+          id?: string
+          installation_month?: number
+          installation_ordinal?: string | null
+          installation_weekday?: number | null
+          mode?: string
+          unit_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       journal_entries: {
         Row: {
           attachment_name: string | null
@@ -4146,6 +4188,57 @@ export type Database = {
           {
             foreignKeyName: "member_ritual_records_updated_by_fkey"
             columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      member_status_history: {
+        Row: {
+          created_at: string
+          effective_date: string
+          id: string
+          kind: string
+          note: string | null
+          profile_id: string
+          recorded_by: string | null
+          status: string
+          unit_id: string
+        }
+        Insert: {
+          created_at?: string
+          effective_date: string
+          id?: string
+          kind?: string
+          note?: string | null
+          profile_id: string
+          recorded_by?: string | null
+          status: string
+          unit_id?: string
+        }
+        Update: {
+          created_at?: string
+          effective_date?: string
+          id?: string
+          kind?: string
+          note?: string | null
+          profile_id?: string
+          recorded_by?: string | null
+          status?: string
+          unit_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "member_status_history_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "calendar_subscription_status"
+            referencedColumns: ["member_id"]
+          },
+          {
+            foreignKeyName: "member_status_history_profile_id_fkey"
+            columns: ["profile_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -6798,6 +6891,7 @@ export type Database = {
         Returns: string
       }
       current_officer_year: { Args: never; Returns: number }
+      current_unit_id: { Args: never; Returns: string }
       current_user_degree_level: { Args: { _user_id: string }; Returns: number }
       degree_level: {
         Args: { _d: Database["public"]["Enums"]["masonic_degree"] }

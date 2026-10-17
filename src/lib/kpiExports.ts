@@ -22,7 +22,18 @@ import {
   REFERRAL_SOURCE_LABELS,
   fullName,
   currentMasonicYear,
+  type MovementPeriod,
 } from "./kpis";
+import { getMasonicYear, localIsoDate } from "./masonicYear";
+
+// KPI dashboard / Members — Movement follows the period chosen on screen.
+function periodMovement(bundle: KpiBundle, period?: MovementPeriod | null) {
+  return period
+    ? movement(bundle.members, { start: period.start, end: period.end, history: bundle.statusHistory })
+    : movement(bundle.members);
+}
+const periodTitle = (period?: MovementPeriod | null) =>
+  period ? `${period.label}: ${period.rangeLabel}` : "rolling 12 months";
 
 const LODGE = "Weybridge Lodge No. 6787";
 
@@ -61,10 +72,10 @@ async function dashboardHeader(doc: jsPDF): Promise<number> {
   return 82;
 }
 
-export async function exportVoReport(bundle: KpiBundle) {
+export async function exportVoReport(bundle: KpiBundle, period?: MovementPeriod | null) {
   const doc = new jsPDF();
   const s = snapshot(bundle.members);
-  const mv = movement(bundle.members);
+  const mv = periodMovement(bundle, period);
   const ra = uglePortal(bundle.members);
 
   header(doc, "Membership Snapshot — Visiting Officer Report");
@@ -93,7 +104,8 @@ export async function exportVoReport(bundle: KpiBundle) {
   });
 
   autoTable(doc, {
-    head: [["Movement (rolling 12 months)", ""]],
+    pageBreak: "avoid",
+    head: [[`Movement (${periodTitle(period)})`, ""]],
     body: [
       ["Initiated", String(mv.initiated.length)],
       ["Joined", String(mv.joined.length)],
@@ -120,13 +132,14 @@ export async function exportVoReport(bundle: KpiBundle) {
   await saveJsPdf(doc, `vo-report-${new Date().toISOString().slice(0, 10)}.pdf`);
 }
 
-export async function exportFullKpi(bundle: KpiBundle, eng?: EngagementBundle | null) {
+export async function exportFullKpi(bundle: KpiBundle, eng?: EngagementBundle | null, period?: MovementPeriod | null) {
   const doc = new jsPDF();
   const s = snapshot(bundle.members);
-  const mv = movement(bundle.members);
+  const mv = periodMovement(bundle, period);
   const ra = uglePortal(bundle.members);
   const conv = raConversion(bundle.members);
-  const ms = milestones(bundle.members, bundle.wmTerms);
+  const curYear = bundle.installation ? getMasonicYear(localIsoDate(), bundle.installation) : null;
+  const ms = milestones(bundle.members, bundle.wmTerms, curYear ?? undefined);
   const oh = officersHealth(bundle);
   const pl = pipeline(bundle);
   const lh = lodgeHealth(bundle);
@@ -166,7 +179,7 @@ export async function exportFullKpi(bundle: KpiBundle, eng?: EngagementBundle | 
 
   autoTable(doc, {
     pageBreak: "avoid",
-    head: [["2. Movement (12mo)", "Count"]],
+    head: [[`2. Movement (${periodTitle(period)})`, "Count"]],
     body: [
       ["Initiated", String(mv.initiated.length)],
       ["Joined", String(mv.joined.length)],
