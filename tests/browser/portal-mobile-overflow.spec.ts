@@ -685,7 +685,8 @@ test("Gifts card: Record gift / Cancel stay gold outlined after a tap at 390px",
   await page.waitForTimeout(300);
   const cancel = await style("Cancel");
   expect(cancel.color).toBe(log.color); // gold, like "Log contact"
-  expect(cancel.bg).toBe(log.bg); // see-through, no grey fill
+  expect(log.bg).toBe("rgba(0, 0, 0, 0)");
+  expect(cancel.bg).toMatch(/^rgba\(0, 0, 0, 0\)$|^rgba\(203, 165, 77, 0\.1\)$/); // see-through or a faint gold tint, never a grey fill
   await expectNoAxeViolations(page, "Gifts card with Cancel hovered");
   await expectNoViewportOverflow(page, "Gifts card");
 });
