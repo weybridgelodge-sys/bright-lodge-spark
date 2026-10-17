@@ -18,7 +18,7 @@ test("Meeting diary has no overflow at 320px", async ({ page }) => {
   await page.route("**/rest/v1/rpc/meeting_dependencies**", (r) => r.fulfill({ json: { attendance: 30, bookings: 4, summonses: 1, dining_invoices: 2, booking_page: 1 } }));
   await page.goto("/members/admin/diary");
   const heading = page.getByRole("heading", { name: "Installation rule and meeting diary" });
-  if (!(await heading.isVisible({ timeout: 10000 }).catch(() => false))) test.skip(true, "Synthetic identity cannot open the diary");
+  if (!(await heading.isVisible({ timeout: 10000 }).catch(() => false))) { console.log((await page.locator("body").innerText()).slice(0, 600)); test.skip(true, "Synthetic identity cannot open the diary"); }
   await expect(page.getByTestId("rule-preview")).toContainText("2027");
   const check = async (ctx: string) => {
     const bad = await page.evaluate(() => {
