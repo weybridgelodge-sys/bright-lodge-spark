@@ -10,13 +10,13 @@
 - Installation Returns resolve live and fill exact AcroForm IDs; signatures and dispensation remain blank.
 - Changed `/members` screens pass 320px tests with real or faithful worst-case data: no overflow, unreachable or obscured controls.
 - Browser layout tests use only a Vite `e2e`-mode, localhost-only synthetic identity; never backend access or production.
-- Officer access = Installation year: current_officer_holder() is the latest confirmed appointment in effect (stored date, else installation_rule_date(); non-progressive also >= appointed_on); offices carry forward; current Almoner/Charity Steward/Mentor get portals. Lookups never switch on 1 Oct; sync labels: masonicYearStartSync. Dues/accounts/periods/Almoner year stay Oct–Sep.
+- Officer access = Installation year: current_officer_holder() is the latest confirmed appointment in effect (stored date, else installation_rule_date(); non-progressive also >= appointed_on); offices carry forward; current Almoner/Charity Steward/Mentor: portals. Never switch on 1 Oct; sync labels: masonicYearStartSync. Dues/accounts/periods/Almoner year stay Oct–Sep.
 - Officer appointment changes log via swallow-on-error AFTER trigger to officer_appointment_audit (admin/Secretary read); offices-held history only via get_member_offices_held (same effective-date rule, visibility enforced in DB).
 - Member records: admin or is_lodge_secretary() list/add/edit via get_admin_profiles/admin-invite-member and set others' member_status (own: admin-only); roles, deletion, sign-in email admin-only server-side. Why: Secretary owns member data; admin is operator.
 - Profile dietary_requirements is private health data: no column SELECT grant; read only via get_profiles_pii; booking forms pre-fill it only while empty. Why: allergies are special-category data.
 - Bulk import only via admin-import-members (validation in _shared/memberImport.ts); fills blanks only, never roles, sign-in email or status. Why: safe re-runs.
 - Registration numbers (ugle/mmh/rose_croix) are private (get_profiles_pii), edited only in Edit Member by admin/Secretary. Why: Secretary-owned records.
-- Almoner two-tier: can_view_almoner gates SELECT, can_edit_almoner writes (incl. welfare-attachments, Widows archive by status, never delete); app mirrors canAccessAlmoner/canEditAlmoner; can_access_almoner deprecated. Why: read-only offices.
+- Almoner two-tier: can_view_almoner gates SELECT, can_edit_almoner writes (incl. welfare-attachments, Widows archive by status, never delete); app mirrors canAccessAlmoner/canEditAlmoner; can_access_almoner deprecated; missed-meeting types: _shared/almonerMeetingTypes. Why: read-only offices.
 - Page/list loading uses useInitialLoading, never useState(true), so save refreshes retain content and scroll.
 - lodge_events.event_label drives booking/email wording; titles in lib/bookingTitles. Why: non-Festive-Board events reuse one form.
 - Public event bookings use the separate events Stripe (_shared/stripe-events.ts, STRIPE_EVENTS_*) and event_* tables, never lodge Stripe. Why: events money stays off the lodge ledger.

@@ -10,9 +10,9 @@ export type PatternMeeting = { id: string; meeting_date: string; meeting_type: s
 export type PatternAttendance = { member_id: string | null; meeting_id: string; attendance_status: string };
 
 export type CheckInFlag = {
-  /** Count of consecutive most-recent regular meetings not attended. */
+  /** Count of consecutive most-recent counted meetings (see almonerMeetingTypes) not attended. */
   consecutive: number;
-  /** Non-attended regular meetings in the current lodge year (Oct–Sep). */
+  /** Non-attended counted meetings in the current lodge year (Oct–Sep). */
   yearMissed: number;
   reason: "consecutive" | "frequency";
   label: string;
