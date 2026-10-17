@@ -1,3 +1,4 @@
+import { fieldCls } from "@/lib/fieldStyle";
 import { useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -76,17 +77,17 @@ export default function MentoringChecklist({
                           <label className="text-[10px] uppercase tracking-wider text-gold/70">Target
                             <Input type="date" disabled={!canEdit} value={r.target_date ?? ""}
                               onChange={(e) => patch(r.id, { target_date: e.target.value || null })}
-                              className="mt-1 h-8 bg-navy-dark text-primary-foreground text-xs" />
+                              className={`mt-1 ${fieldCls}`} />
                           </label>
                           <label className="text-[10px] uppercase tracking-wider text-gold/70">Completed
                             <Input type="date" disabled={!canEdit} value={r.completed_date ?? ""}
                               onChange={(e) => patch(r.id, { completed_date: e.target.value || null })}
-                              className="mt-1 h-8 bg-navy-dark text-primary-foreground text-xs" />
+                              className={`mt-1 ${fieldCls}`} />
                           </label>
                           <label className="text-[10px] uppercase tracking-wider text-gold/70">Status
                             <Select disabled={!canEdit} value={r.status}
                               onValueChange={(v) => patch(r.id, { status: v as ChecklistItem["status"] })}>
-                              <SelectTrigger className="mt-1 h-8 bg-navy-dark text-primary-foreground text-xs"><SelectValue /></SelectTrigger>
+                              <SelectTrigger className={`mt-1 ${fieldCls}`}><SelectValue /></SelectTrigger>
                               <SelectContent>
                                 {Object.entries(STATUS_LABELS).map(([k, v]) => (
                                   <SelectItem key={k} value={k}>{v}</SelectItem>
@@ -98,7 +99,7 @@ export default function MentoringChecklist({
                         <Textarea disabled={!canEdit} rows={2} placeholder="Mentor notes"
                           value={r.mentor_notes ?? ""}
                           onChange={(e) => patch(r.id, { mentor_notes: e.target.value })}
-                          className="mt-2 bg-navy-dark text-primary-foreground text-xs" />
+                          className={`mt-2 ${fieldCls}`} />
                         {savingId === r.id && <p className="text-[10px] text-gold/60 mt-1">Saving…</p>}
                       </div>
                     );

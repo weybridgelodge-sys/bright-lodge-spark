@@ -1,3 +1,4 @@
+import { fieldCls } from "@/lib/fieldStyle";
 import { Fragment, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
@@ -66,19 +67,19 @@ export default function RitualRecord({
                       <td className="p-2 text-primary-foreground">{r.piece}</td>
                       <td className="p-2"><Input type="date" disabled={!canEdit} value={r.date_first_learned ?? ""}
                         onChange={(e) => patch(r.id, { date_first_learned: e.target.value || null })}
-                        className="h-7 bg-navy-dark text-primary-foreground text-xs" /></td>
+                        className={`${fieldCls}`} /></td>
                       <td className="p-2"><Input type="date" disabled={!canEdit} value={r.date_assessed ?? ""}
                         onChange={(e) => patch(r.id, { date_assessed: e.target.value || null })}
-                        className="h-7 bg-navy-dark text-primary-foreground text-xs" /></td>
+                        className={`${fieldCls}`} /></td>
                       <td className="p-2"><Input type="date" disabled={!canEdit} value={r.date_delivered_loi ?? ""}
                         onChange={(e) => patch(r.id, { date_delivered_loi: e.target.value || null })}
-                        className="h-7 bg-navy-dark text-primary-foreground text-xs" /></td>
+                        className={`${fieldCls}`} /></td>
                       <td className="p-2"><Input type="date" disabled={!canEdit} value={r.date_delivered_lodge ?? ""}
                         onChange={(e) => patch(r.id, { date_delivered_lodge: e.target.value || null })}
-                        className="h-7 bg-navy-dark text-primary-foreground text-xs" /></td>
+                        className={`${fieldCls}`} /></td>
                       <td className="p-2"><Input disabled={!canEdit} value={r.notes ?? ""}
                         onChange={(e) => patch(r.id, { notes: e.target.value })}
-                        className="h-7 bg-navy-dark text-primary-foreground text-xs" /></td>
+                        className={`${fieldCls}`} /></td>
                     </tr>
                     {showPreceptorNotes && (
                       <tr className="border-t border-gold/5">

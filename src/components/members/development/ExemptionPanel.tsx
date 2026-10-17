@@ -1,3 +1,4 @@
+import { fieldCls } from "@/lib/fieldStyle";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Switch } from "@/components/ui/switch";
@@ -64,7 +65,7 @@ export default function ExemptionPanel({
       {exempt && (
         <div className="grid sm:grid-cols-[200px_1fr] gap-2">
           <Select value={reason} onValueChange={setReason}>
-            <SelectTrigger className="bg-navy-dark text-primary-foreground text-xs h-8"><SelectValue /></SelectTrigger>
+            <SelectTrigger className={`${fieldCls}`}><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="joining_member">Joining Member</SelectItem>
               <SelectItem value="senior_member">Senior Member</SelectItem>
@@ -75,7 +76,7 @@ export default function ExemptionPanel({
             placeholder="Note (e.g. 'Past Master of another lodge, exempt from checklist.')"
             value={note}
             onChange={(e) => setNote(e.target.value)}
-            className="bg-navy-dark text-primary-foreground text-xs"
+            className={`${fieldCls}`}
           />
         </div>
       )}
