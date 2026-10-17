@@ -62,8 +62,7 @@ export function masonicYearStartSync(d: Date | string = new Date()): number {
 /** Start/end/label for a Masonic year from the cached config. */
 export function masonicYearBoundsSync(startYear: number): { start: string; end: string; label: string } {
   const r = getMasonicYearRange(startYear, cachedInstallationConfig());
-  const next = getMasonicYearRange(startYear + 1, cachedInstallationConfig());
   const start = r?.start ?? `${startYear}-10-01`;
-  const end = r?.end ?? (next ? r?.end : null) ?? `${startYear + 1}-09-30`;
+  const end = r?.end ?? `${startYear + 1}-09-30`;
   return { start, end, label: `${startYear}/${startYear + 1}` };
 }

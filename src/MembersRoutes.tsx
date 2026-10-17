@@ -5,6 +5,7 @@ import { AuthProvider } from "./hooks/useAuth";
 import ProtectedRoute from "./components/members/ProtectedRoute";
 import ProgressionRoute from "./components/members/ProgressionRoute";
 import PushRegistrar from "./components/members/PushRegistrar";
+import InstallationConfigGate from "./components/members/InstallationConfigGate";
 
 
 const MembersLogin = lazy(() => import("./pages/members/Login"));
@@ -58,6 +59,7 @@ const MembersRoutes = () => (
     <PushRegistrar />
     <AppErrorBoundary>
     <Suspense fallback={<PageLoader />}>
+    <InstallationConfigGate>
 
       <Routes>
         <Route path="login" element={<MembersLogin />} />
