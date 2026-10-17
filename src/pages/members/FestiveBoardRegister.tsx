@@ -38,6 +38,7 @@ export default function FestiveBoardRegister() {
         supabase
           .from("festive_board_meetings")
           .select("id,meeting_date,meeting_type")
+          .is("cancelled_at", null)
           .order("meeting_date", { ascending: false }),
         supabase
           .from("festive_board_attendance")

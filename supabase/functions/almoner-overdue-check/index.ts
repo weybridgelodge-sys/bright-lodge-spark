@@ -100,6 +100,7 @@ Deno.serve(async (req) => {
       supabase
         .from('festive_board_meetings')
         .select('id,meeting_date,meeting_type')
+        .is('cancelled_at', null)
         .lte('meeting_date', today)
         .order('meeting_date', { ascending: false })
         .limit(24),

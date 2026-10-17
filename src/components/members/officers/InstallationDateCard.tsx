@@ -10,6 +10,7 @@ import { CalendarDays, ChevronLeft, ChevronRight, AlertTriangle } from "lucide-r
 import {
   POSITION_ORDER, POSITION_LABELS, NON_PROGRESSIVE_LABELS, formatMasonicYear,
 } from "@/lib/officersProgression";
+import { cachedInstallationConfig, ruleDateFor } from "@/lib/masonicYear";
 
 type Row = {
   position_key: string;
@@ -19,11 +20,9 @@ type Row = {
   is_projection: boolean;
 };
 
-/** Third Wednesday in October, as YYYY-MM-DD (matches officer_year_start fallback). */
-export function thirdWednesdayIso(year: number): string {
-  const d = new Date(Date.UTC(year, 9, 15));
-  while (d.getUTCDay() !== 3) d.setUTCDate(d.getUTCDate() + 1);
-  return d.toISOString().slice(0, 10);
+/** The unit installation rule's date for `year` (matches officer_year_start fallback). */
+export function ruleDateIso(year: number): string {
+  return ruleDateFor(year, cachedInstallationConfig().rule) ?? `${year}-10-01`;
 }
 
 const fmt = (iso: string) =>
@@ -79,14 +78,15 @@ export default function InstallationDateCard({
   };
   useEffect(() => { loadDates(); }, []);
 
-  const fallback = thirdWednesdayIso(year);
+  const fallback = ruleDateIso(year);
   const current = stored[year] ?? fallback;
   const isStored = !!stored[year];
 
   const valid = /^\d{4}-\d{2}-\d{2}$/.test(draft) && !Number.isNaN(Date.parse(draft + "T00:00:00Z"));
   const draftYear = valid ? Number(draft.slice(0, 4)) : NaN;
   const draftMonth = valid ? Number(draft.slice(5, 7)) : NaN;
-  const inRange = valid && draftYear === year && draftMonth >= 9 && draftMonth <= 11;
+  const ruleMonth = Number(fallback.slice(5, 7));
+  const inRange = valid && draftYear === year && Math.abs(draftMonth - ruleMonth) <= 1;
   const drift = valid ? Math.abs(dayDiff(draft, fallback)) : 0;
   const farWarning = inRange && drift > 14;
 
@@ -127,7 +127,7 @@ export default function InstallationDateCard({
       <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-2">
         <p className="text-primary-foreground text-sm">
           {fmt(current)}{" "}
-          <span className="text-primary-foreground/60 text-xs">{isStored ? "(set)" : "(default: third Wednesday in October)"}</span>
+          <span className="text-primary-foreground/60 text-xs">{isStored ? "(set)" : "(default from the installation rule)"}</span>
         </p>
         {canEdit && (
           <Button size="sm" variant="outline" className="border-gold/50 text-gold bg-transparent hover:bg-gold/10 min-h-[44px]" onClick={startEdit}>
@@ -151,16 +151,16 @@ export default function InstallationDateCard({
             <div className="space-y-3">
               <label className="block text-xs uppercase tracking-wider text-gold/80">
                 Date
-                <Input type="date" value={draft} min={`${year}-09-01`} max={`${year}-11-30`}
+                <Input type="date" value={draft} 
                   onChange={(e) => setDraft(e.target.value)} className="mt-1 bg-navy-dark text-primary-foreground" />
               </label>
               {!valid && <p role="alert" className="text-sm text-red-300">Enter a real date.</p>}
               {valid && !inRange && (
-                <p role="alert" className="text-sm text-red-300">The date must fall between September and November {year}.</p>
+                <p role="alert" className="text-sm text-red-300">The date must be in {year}, within a month of the installation rule date.</p>
               )}
               {farWarning && (
                 <p className="text-sm text-amber-300 flex gap-2"><AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
-                  This is {drift} days from the third Wednesday in October ({fmt(fallback)}). Please check it is right.
+                  This is {drift} days from the installation rule date ({fmt(fallback)}). Please check it is right.
                 </p>
               )}
             </div>

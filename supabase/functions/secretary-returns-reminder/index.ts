@@ -138,17 +138,10 @@ Deno.serve(async (req) => {
     }
 
     // ---- Resolve the current Secretary ----
-    const lodgeYear =
-      new Date().getMonth() + 1 >= 10 ? new Date().getFullYear() : new Date().getFullYear() - 1
-
+    // Secretary in post today (Installation year, offices carry forward).
     let secretaryEmail: string | null = null
-    const { data: appt } = await supabase
-      .from('officer_appointments')
-      .select('member_id')
-      .eq('position_key', 'secretary')
-      .eq('lodge_year', lodgeYear)
-      .limit(1)
-      .maybeSingle()
+    const { data: holderId } = await supabase.rpc('current_officer_holder', { _position_key: 'secretary' })
+    const appt = { member_id: (holderId as string | null) ?? null }
 
     if (appt?.member_id) {
       const { data: prof } = await supabase

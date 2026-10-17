@@ -7,6 +7,7 @@
 //
 // When printed double-sided (flip on short edge) and folded down the centre
 // the panels read in the correct order: Front → Inside-L → Inside-R → Back.
+import { masonicYearStartSync } from "@/lib/masonicYear";
 import React from "react";
 import {
   Document,
@@ -810,7 +811,7 @@ function ordinal(n: number): string {
 
 function officerSeason(): string {
   const now = new Date();
-  const y = now.getMonth() + 1 >= 10 ? now.getFullYear() : now.getFullYear() - 1;
+  const y = masonicYearStartSync(now);
   return `${y}-${(y + 1).toString().slice(-2)}`;
 }
 

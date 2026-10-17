@@ -198,6 +198,7 @@ function PortalBody() {
         .order("contact_date", { ascending: false }),
       supabase.from("festive_board_meetings")
         .select("id,meeting_date,meeting_type")
+        .is("cancelled_at", null)
         .lte("meeting_date", new Date().toISOString().slice(0, 10))
         .order("meeting_date", { ascending: false })
         .limit(24),

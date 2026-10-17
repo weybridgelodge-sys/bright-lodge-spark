@@ -1,3 +1,4 @@
+import { masonicYearStartSync, masonicYearBoundsSync } from "@/lib/masonicYear";
 import { evaluateAutoLog, AUTO_LOG_FROM, type AutoLogEscalation } from "../../supabase/functions/_shared/almonerAutoLog";
 import { supabase } from "@/integrations/supabase/client";
 import { firstWmYearForMember } from "@/data/worshipfulMasters";
@@ -105,15 +106,9 @@ export type KpiBundle = {
 };
 
 
-function thirdWednesdayInOctober(year: number): Date {
-  const dt = new Date(year, 9, 15);
-  while (dt.getDay() !== 3) dt.setDate(dt.getDate() + 1);
-  return new Date(Date.UTC(year, 9, dt.getDate()));
-}
 
 export function currentMasonicYear(d = new Date()): number {
-  const start = thirdWednesdayInOctober(d.getFullYear());
-  return d >= start ? d.getFullYear() : d.getFullYear() - 1;
+  return masonicYearStartSync(d);
 }
 
 export function fullName(m: KpiMember): string {
@@ -780,6 +775,7 @@ export async function fetchEngagementBundle(): Promise<EngagementBundle> {
     supabase
       .from("festive_board_meetings")
       .select("id,meeting_date,meeting_type")
+      .is("cancelled_at", null)
       .lte("meeting_date", today)
       .order("meeting_date", { ascending: true }),
     supabase.from("festive_board_attendance").select("meeting_id,member_id,attendance_status"),

@@ -151,6 +151,7 @@ export default function FestiveBoardAdmin() {
       supabase
         .from("festive_board_meetings")
         .select("*")
+        .is("cancelled_at", null)
         .order("meeting_date", { ascending: false }),
       supabase.from("festive_board_attendance").select("*"),
       supabase

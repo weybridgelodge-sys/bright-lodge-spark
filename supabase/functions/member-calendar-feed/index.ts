@@ -235,6 +235,7 @@ Deno.serve(async (req) => {
       admin.from("festive_board_meetings")
         .select("id,event_key,meeting_date,meeting_type,notes,status")
         .eq("status", "published")
+        .is("cancelled_at", null)
         .gte("meeting_date", fromIso.slice(0, 10)),
       admin.from("lodge_socials")
         .select("id,title,starts_at,ends_at,venue,description")

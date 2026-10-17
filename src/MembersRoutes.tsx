@@ -5,6 +5,7 @@ import { AuthProvider } from "./hooks/useAuth";
 import ProtectedRoute from "./components/members/ProtectedRoute";
 import ProgressionRoute from "./components/members/ProgressionRoute";
 import PushRegistrar from "./components/members/PushRegistrar";
+import InstallationConfigGate from "./components/members/InstallationConfigGate";
 
 
 const MembersLogin = lazy(() => import("./pages/members/Login"));
@@ -47,6 +48,7 @@ const Treasurer = lazy(() => import("./pages/members/admin/Treasurer"));
 const SecretaryPortal = lazy(() => import("./pages/members/admin/SecretaryPortal"));
 const FestiveBoardAdmin = lazy(() => import("./pages/members/admin/FestiveBoardAdmin"));
 const LoiAdmin = lazy(() => import("./pages/members/admin/LoiAdmin"));
+const MeetingDiary = lazy(() => import("./pages/members/admin/MeetingDiary"));
 const InstallationReturn = lazy(() => import("./pages/members/admin/InstallationReturn"));
 const ProvincialReturn = lazy(() => import("./pages/members/admin/ProvincialReturn"));
 const SecretaryReturns = lazy(() => import("./pages/members/admin/SecretaryReturns"));
@@ -58,6 +60,7 @@ const MembersRoutes = () => (
     <PushRegistrar />
     <AppErrorBoundary>
     <Suspense fallback={<PageLoader />}>
+    <InstallationConfigGate>
 
       <Routes>
         <Route path="login" element={<MembersLogin />} />
@@ -96,6 +99,7 @@ const MembersRoutes = () => (
         <Route path="admin/ritual" element={<ProtectedRoute adminOnly><RitualAdmin /></ProtectedRoute>} />
         <Route path="admin/documents" element={<ProtectedRoute adminOnly><DocumentsAdmin /></ProtectedRoute>} />
         <Route path="admin/treasurer" element={<Treasurer />} />
+        <Route path="admin/diary" element={<ProtectedRoute><MeetingDiary /></ProtectedRoute>} />
         <Route path="admin/secretary" element={<ProtectedRoute><SecretaryPortal /></ProtectedRoute>} />
         <Route path="admin/festive-board" element={<ProtectedRoute><FestiveBoardAdmin /></ProtectedRoute>} />
         <Route path="admin/loi" element={<ProtectedRoute><LoiAdmin /></ProtectedRoute>} />
@@ -111,6 +115,7 @@ const MembersRoutes = () => (
         <Route path="working-groups/visits" element={<LodgeVisits />} />
         <Route path="working-groups/:slug" element={<WorkingGroupDetail />} />
       </Routes>
+    </InstallationConfigGate>
     </Suspense>
     </AppErrorBoundary>
   </AuthProvider>

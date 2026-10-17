@@ -73,15 +73,9 @@ async function lookupSecretarySignature(supabase: SupabaseClient) {
   let secretaryName = ''
   let secretaryOffice = 'Lodge Secretary'
   try {
-    const now = new Date()
-    const lodgeYear = now.getUTCMonth() + 1 >= 10 ? now.getUTCFullYear() : now.getUTCFullYear() - 1
-    const { data: appts } = await supabase
-      .from('officer_appointments')
-      .select('member_id')
-      .eq('position_key', 'secretary')
-      .eq('lodge_year', lodgeYear)
-      .limit(1)
-    const memberId = (appts?.[0] as any)?.member_id
+    // Secretary in post today (Installation year, carries forward).
+    const { data: holder } = await supabase.rpc('current_officer_holder', { _position_key: 'secretary' })
+    const memberId = (holder as string | null) ?? null
     if (memberId) {
       const { data: prof } = await supabase
         .from('profiles')

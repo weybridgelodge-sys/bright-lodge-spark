@@ -2,6 +2,7 @@
 // Every call reads current database state; nothing is cached.
 import { PDFDocument, PDFTextField, PDFCheckBox, PDFRadioGroup, PDFDropdown, PDFName, PDFDict, TextAlignment } from "pdf-lib";
 import { supabase } from "@/integrations/supabase/client";
+import { cachedInstallationConfig, ruleDateFor } from "@/lib/masonicYear";
 import { computeProjection, type Appointment, type MemberLite, type PositionKey } from "@/lib/officersProgression";
 
 export const LODGE_NAME = "Weybridge Lodge";
@@ -55,7 +56,7 @@ export type ResolvedOffice = {
 export type ReturnData = {
   year: number;
   installationDate: string | null; // ISO yyyy-mm-dd
-  prescribedDate: string; // 3rd Wednesday of October
+  prescribedDate: string; // date from the unit installation rule
   installationEventTitle: string | null;
   wm: ResolvedOffice;
   sw: ResolvedOffice;
@@ -80,10 +81,9 @@ export const EMAIL_OFFICES: { key: string; label: string; slug: string }[] = [
   { key: "secretary", label: "Secretary", slug: "secretary" },
 ];
 
+/** The unit rule's date for that year (ignores stored overrides), "" when no rule applies. */
 export function prescribedInstallationDate(year: number): string {
-  const d = new Date(Date.UTC(year, 9, 15));
-  while (d.getUTCDay() !== 3) d.setUTCDate(d.getUTCDate() + 1);
-  return d.toISOString().slice(0, 10);
+  return ruleDateFor(year, cachedInstallationConfig().rule) ?? "";
 }
 
 /** Resolve a non-ladder office: this year's row with a member, else most recent earlier row with

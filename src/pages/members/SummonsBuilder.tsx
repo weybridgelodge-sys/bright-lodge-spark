@@ -48,6 +48,7 @@ import { accountsOptionLabel, type AttachableAccounts } from "@/lib/treasurer/ye
 import SummonsPrintPreview from "@/components/members/SummonsPrintPreview";
 import {
   NON_PROGRESSIVE_LABELS,
+  fetchOfficerYear,
   NonProgressiveKey,
   POSITION_LABELS,
   PositionKey,
@@ -401,8 +402,8 @@ function OfficerRollTab() {
 
 async function loadOfficers(setRows: (rows: OfficerRollRow[]) => void, setLoading: (b: boolean) => void) {
   setLoading(true);
-  const now = new Date();
-  const lodgeYear = now.getMonth() + 1 >= 10 ? now.getFullYear() : now.getFullYear() - 1;
+  // Officers in post for the current Masonic year (Installation day = new year).
+  const lodgeYear = await fetchOfficerYear();
   const { data: appts } = await supabase
     .from("officer_appointments")
     .select("position_key,member_id")
@@ -769,12 +770,10 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
 
   const resolveOfficerDisplayName = async (positionKey: string): Promise<string> => {
     try {
-      const { data: yearRow } = await (supabase as any).rpc("current_lodge_year");
-      const lodgeYear = (yearRow as number) ?? new Date().getFullYear();
-      const { data: appt } = await supabase
-        .from("officer_appointments").select("member_id")
-        .eq("lodge_year", lodgeYear).eq("position_key", positionKey).maybeSingle();
-      if (!appt?.member_id) return "";
+      // Holder in post today (Installation year, offices carry forward).
+      const { data: holderId } = await (supabase as any).rpc("current_officer_holder", { _position_key: positionKey });
+      const appt = { member_id: (holderId as string | null) ?? null };
+      if (!appt.member_id) return "";
       const { data: prof } = await supabase
         .from("profiles")
         .select("id,title,first_name,middle_name,last_name,full_name,preferred_name,post_nominals,rank,grand_rank,provincial_rank,initiation_date,joined_lodge_date,joined_year,is_past_master,is_royal_arch,status")

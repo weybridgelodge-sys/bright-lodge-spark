@@ -22,6 +22,7 @@ function Inner() {
     { to: "/members/kpis", title: "KPI Dashboard", description: "Membership, rehearsals, Festive Board, Royal Arch conversion.", icon: BarChart3, visible: canManageProgression },
     { to: "/members/admin/loi", title: "Rehearsal Register", description: "Rehearsal sessions, attendance and ritual parts practised.", icon: GraduationCap, visible: true },
     { to: "/members/admin/loi-schedule", title: "Rehearsal Schedule", description: "Plan upcoming rehearsals and training sessions — shown in every member's calendar.", icon: CalendarClock, visible: true },
+    { to: "/members/admin/diary", title: "Installation rule and meeting diary", description: "Installation rule, stored Installation dates, and adding, moving or dropping meetings.", icon: CalendarClock, visible: isAdmin || isSecretary || isCurrentSecretary },
     { to: "/members/events", title: "Meetings", description: "Edit the meeting shown on the public Bookings page.", icon: CalendarPlus, visible: true },
     { to: "/members/public-events", title: "Public Events", description: "Edit public events such as the Christmas Party.", icon: PartyPopper, visible: true },
       { to: "/members/admin", title: "Member Management", description: "Directory, member records, roles, and notices.", icon: Users, visible: isAdmin || isSecretary || isCurrentSecretary },

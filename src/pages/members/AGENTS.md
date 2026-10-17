@@ -1,0 +1,1 @@
+- Member Admin: plain stacked rows when narrow, semantic table on desktop, shared handlers; populated mobile tests check details, actions and header. Why: restyled table boxes hid details.
