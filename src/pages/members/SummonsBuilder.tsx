@@ -348,7 +348,7 @@ function TemplateTab() {
 
       <div>
         <Label>Lodge Representatives</Label>
-        <p className="text-xs text-primary-foreground/60">The Summons prints the Name as typed. The linked member is used only by the Provincial Return, to split first names, surname and decorations.</p>
+        <p className="text-xs text-primary-foreground/80">The Summons prints the Name as typed. The linked member is used only by the Provincial Return, to split first names, surname and decorations.</p>
         <div className="space-y-2 mt-1">
           {reps.map((r, i) => (
             <div key={i} className="grid min-w-0 grid-cols-1 gap-2 rounded-sm border border-gold/10 p-2 sm:grid-cols-[1fr_1fr_1fr_auto] sm:border-0 sm:p-0">
@@ -389,7 +389,7 @@ function OfficerRollTab() {
               {rows.map((r, i) => (
                 <tr key={i} className="border-b border-gold/10">
                   <td className="py-1.5 pr-2 font-medium text-primary-foreground/80">{r.label}</td>
-                  <td className="py-1.5">{r.member || <span className="text-primary-foreground/40">—</span>}</td>
+                  <td className="py-1.5">{r.member || <span className="text-primary-foreground/80">—</span>}</td>
                 </tr>
               ))}
             </tbody>
@@ -903,7 +903,7 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
           {summons.agenda.map((a, i) => (
             <li key={a.id} className="space-y-1">
               <div className="flex items-center gap-2">
-                <span className="w-6 text-xs text-primary-foreground/60">{i + 1}.</span>
+                <span className="w-6 text-xs text-primary-foreground/80">{i + 1}.</span>
                 <Input value={a.label} onChange={(e) => updateAgenda(a.id, e.target.value)} />
                 {a.kind !== "standing" && (
                   <Badge variant="outline" className="text-[10px]">{a.kind}</Badge>
@@ -917,7 +917,7 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
                 <ol className="space-y-1 pl-8">
                   {a.children.map((c, ci) => (
                     <li key={c.id} className="flex items-center gap-2">
-                      <span className="w-6 text-xs text-primary-foreground/60">{subLetter(ci)}.</span>
+                      <span className="w-6 text-xs text-primary-foreground/80">{subLetter(ci)}.</span>
                       <Input value={c.label} onChange={(e) => updateAgenda(c.id, e.target.value)} />
                       <Button type="button" size="sm" variant="ghost" className="text-gold hover:text-gold hover:bg-gold/10" onClick={() => moveSubItem(a.id, ci, -1)}><ArrowUp className="w-4 h-4" /></Button>
                       <Button type="button" size="sm" variant="ghost" className="text-gold hover:text-gold hover:bg-gold/10" onClick={() => moveSubItem(a.id, ci, 1)}><ArrowDown className="w-4 h-4" /></Button>
@@ -933,7 +933,7 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
 
       {/* Candidates */}
       <Section title="Candidates" subtitle="Add one block per candidate. Each candidate auto-inserts an agenda line.">
-        {summons.candidates.length === 0 && <p className="text-sm text-primary-foreground/60">No candidates this meeting.</p>}
+        {summons.candidates.length === 0 && <p className="text-sm text-primary-foreground/80">No candidates this meeting.</p>}
         <div className="space-y-3">
           {summons.candidates.map((c) => (
             <div key={c.id} className="border border-gold/20 rounded p-3 space-y-2">
@@ -972,7 +972,7 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
                 <div>
                   <Label htmlFor={`${c.id}-date-proposed`}>Date proposed</Label>
                   <Input id={`${c.id}-date-proposed`} type="date" className="min-h-11" value={c.date_proposed} onChange={(e) => updateCandidate(c.id, { date_proposed: e.target.value })} />
-                  <p className="text-xs text-primary-foreground/60 mt-1">The meeting at which the candidate was proposed.</p>
+                  <p className="text-xs text-primary-foreground/80 mt-1">The meeting at which the candidate was proposed.</p>
                 </div>
               </div>
               <Button type="button" variant="destructive" size="sm" onClick={() => removeCandidate(c.id)}>
@@ -1065,7 +1065,7 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
               </SelectContent>
             </Select>
           )}
-          <p className="text-xs text-primary-foreground/60">
+          <p className="text-xs text-primary-foreground/80">
             Sent as a second download link in the summons email, separate from the summons itself. Test emails include it too, but only a real send records the accounts as sent.
             {alreadySent && " This summons has already been sent, so the accounts link will appear on test emails only."}
           </p>
@@ -1102,7 +1102,7 @@ function Section({ title, subtitle, children }: { title: string; subtitle?: stri
   return (
     <section className="bg-navy-light/40 border border-gold/20 rounded p-4">
       <h2 className="font-serif text-lg text-gold">{title}</h2>
-      {subtitle && <p className="text-xs text-primary-foreground/60 mb-2">{subtitle}</p>}
+      {subtitle && <p className="text-xs text-primary-foreground/80 mb-2">{subtitle}</p>}
       <div className="mt-2">{children}</div>
     </section>
   );
@@ -1165,10 +1165,10 @@ function HistoryTab({ onEdit }: { onEdit: (id: string) => void }) {
     s === "finalised" || s === "sent" ? "finalised" : "in_progress";
   return (
     <div className="bg-navy-light/40 border border-gold/20 rounded p-4">
-        {rows.length === 0 ? <p className="text-sm text-primary-foreground/60">No summonses saved yet.</p> : (
+        {rows.length === 0 ? <p className="text-sm text-primary-foreground/80">No summonses saved yet.</p> : (
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="text-xs text-primary-foreground/60">
+            <thead className="text-xs text-primary-foreground/80">
               <tr><th className="text-left py-1">#</th><th className="text-left">Date</th><th className="text-left">Type</th><th className="text-left">Status</th><th className="text-left">Sent to</th><th></th></tr>
             </thead>
             <tbody>
@@ -1424,8 +1424,8 @@ function VisitorEmailDialog(props: {
       <>
         {r.real_last_seen
           ? new Date(r.real_last_seen).toLocaleDateString("en-GB")
-          : <span className="text-primary-foreground/60">Not yet attended</span>}
-        {stale && <span className="ml-1 text-primary-foreground/50">(&gt;2y)</span>}
+          : <span className="text-primary-foreground/80">Not yet attended</span>}
+        {stale && <span className="ml-1 text-primary-foreground/80">(&gt;2y)</span>}
       </>
     );
   };
@@ -1438,7 +1438,7 @@ function VisitorEmailDialog(props: {
         className="h-8 min-w-[140px] w-full"
         placeholder="e.g. W Bro Smith"
       />
-      <div className="text-[11px] text-primary-foreground/60 mt-0.5">
+      <div className="text-[11px] text-primary-foreground/80 mt-0.5">
         Preview: <em>Dear {(salutations[r.id] || "Brother").trim()},</em>
       </div>
       {failures[r.email.toLowerCase()] && (
@@ -1492,9 +1492,9 @@ function VisitorEmailDialog(props: {
                         onCheckedChange={(v) => setSelected((s) => ({ ...s, [r.id]: !!v }))}
                       />
                       <div className="min-w-0">
-                        <div className="break-words">{r.name || <span className="italic text-primary-foreground/60">no name</span>}</div>
-                        <div className="text-xs text-primary-foreground/60 break-all">{r.email}</div>
-                        <div className="text-xs text-primary-foreground/60 break-words">
+                        <div className="break-words">{r.name || <span className="italic text-primary-foreground/80">no name</span>}</div>
+                        <div className="text-xs text-primary-foreground/80 break-all">{r.email}</div>
+                        <div className="text-xs text-primary-foreground/80 break-words">
                           {[r.lodge_name, r.lodge_number].filter(Boolean).join(" · ") || "—"}
                         </div>
                         <div className="text-xs">{lastSeenLabel(r)}</div>
@@ -1505,7 +1505,7 @@ function VisitorEmailDialog(props: {
                 ))}
               </div>
               <table className="hidden sm:table w-full text-sm">
-                <thead className="text-xs text-primary-foreground/60 bg-navy-light/40 sticky top-0">
+                <thead className="text-xs text-primary-foreground/80 bg-navy-light/40 sticky top-0">
                   <tr>
                     <th className="text-left p-2 w-8"></th>
                     <th className="text-left p-2">Visitor</th>
@@ -1524,8 +1524,8 @@ function VisitorEmailDialog(props: {
                         />
                       </td>
                       <td className="p-2 align-top">
-                        <div>{r.name || <span className="italic text-primary-foreground/60">no name</span>}</div>
-                        <div className="text-xs text-primary-foreground/60">{r.email}</div>
+                        <div>{r.name || <span className="italic text-primary-foreground/80">no name</span>}</div>
+                        <div className="text-xs text-primary-foreground/80">{r.email}</div>
                       </td>
                       <td className="p-2 align-top">
                         {[r.lodge_name, r.lodge_number].filter(Boolean).join(" · ") || "—"}

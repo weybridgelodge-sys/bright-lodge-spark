@@ -12,7 +12,7 @@ import { CataloguePanel, CoursesPanel, EventTypePanel, FeeCoverPanel, InfoBlocks
 import { paymentScheduleErrors, parseModules, remapImagePath } from "@/lib/eventModules";
 import { canDeleteEvent, DEFAULT_VENUE, formatTime, publishBlockers, STATEMENT_DESCRIPTOR_MAX } from "@/lib/publicEvents";
 
-const inputCls = "w-full min-h-[44px] bg-navy-dark/50 border border-gold/20 rounded-sm px-3 py-2 text-sm text-primary-foreground placeholder:text-primary-foreground/40 focus:outline-none focus:border-gold/60";
+const inputCls = "w-full min-h-[44px] bg-navy-dark/50 border border-gold/20 rounded-sm px-3 py-2 text-sm text-primary-foreground placeholder:text-primary-foreground/80 focus:outline-none focus:border-gold/60";
 const labelCls = "block text-xs uppercase tracking-wider text-gold mb-1.5";
 const actionBtn = "inline-flex items-center justify-center gap-1.5 min-h-[48px] min-w-11 px-3 rounded-sm border text-sm";
 
@@ -256,7 +256,7 @@ export default function PublicEventsAdmin() {
         </section>
       )}
       {qrFor && <QrDialog row={qrFor} onClose={() => setQrFor(null)} />}
-      <p className="mt-8 text-xs text-primary-foreground/60">Public list: <Link to="/events" className="text-gold underline">/events</Link> — only published, non-archived events appear.</p>
+      <p className="mt-8 text-xs text-primary-foreground/80">Public list: <Link to="/events" className="text-gold underline">/events</Link> — only published, non-archived events appear.</p>
     </MembersLayout>
   );
 }
@@ -325,7 +325,7 @@ function Editor({ draft: initial, onBack, duplicatedFrom, onQr }: { draft: Draft
         </div>
         <div>
           {area("timings", "Timings (e.g. Arrive 6.30 pm, buffet 7.30 pm)", 5, "5.00 pm Doors open\n6.30 pm Arrive\n7.30 pm Buffet")}
-          <p className="mt-1 text-xs text-primary-foreground/60">One timing per line, e.g. 6.30 pm Arrive.</p>
+          <p className="mt-1 text-xs text-primary-foreground/80">One timing per line, e.g. 6.30 pm Arrive.</p>
         </div>
         {field("parking", "Parking")}
         {field("dress_code", "Dress code")}

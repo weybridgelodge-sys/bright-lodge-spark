@@ -180,14 +180,14 @@ export default function DirectPaymentTab({ canEdit }: { canEdit: boolean }) {
     <div className="space-y-6">
       <section className="rounded-lg border border-gold/20 bg-primary-foreground/5 p-4">
         <h2 className="font-serif text-lg text-gold mb-1">Record a Direct Payment</h2>
-        <p className="text-primary-foreground/60 text-sm mb-4">
+        <p className="text-primary-foreground/80 text-sm mb-4">
           For costs paid straight from the bank with no invoice or credit period — e.g. reimbursing an officer
           who paid personally. Posts a double-entry: Dr expense account, Cr 1000 Bank. Add extra lines if the payment
           doesn't map to a single account.
         </p>
 
         {loading ? (
-          <p className="text-primary-foreground/60"><Loader2 className="w-4 h-4 mr-1 inline animate-spin" /> Loading…</p>
+          <p className="text-primary-foreground/80"><Loader2 className="w-4 h-4 mr-1 inline animate-spin" /> Loading…</p>
         ) : (
           <>
             <div className="grid gap-3 sm:grid-cols-2">
@@ -201,7 +201,7 @@ export default function DirectPaymentTab({ canEdit }: { canEdit: boolean }) {
                     ))}
                   </SelectContent>
                 </Select>
-                <p className="text-primary-foreground/50 text-xs mt-1">
+                <p className="text-primary-foreground/80 text-xs mt-1">
                   UGLE, PGL, GMC Levy, and GMC Dining are paid via the Creditors tab, not here — they already have a
                   recognised liability to clear.
                 </p>

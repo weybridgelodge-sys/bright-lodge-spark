@@ -57,19 +57,19 @@ function GroupEditor({ group, profiles, onSaved }: { group: WorkingGroup; profil
     <details className="rounded-sm border border-gold/20 bg-navy-dark/40 p-4 group" open={false}>
       <summary className="cursor-pointer font-serif text-gold text-lg flex items-center justify-between">
         <span>{group.name}</span>
-        <span className="text-xs text-primary-foreground/50">{memberIds.length} member{memberIds.length === 1 ? "" : "s"}</span>
+        <span className="text-xs text-primary-foreground/80">{memberIds.length} member{memberIds.length === 1 ? "" : "s"}</span>
       </summary>
       <div className="space-y-3 mt-4">
         <div>
-          <label className="text-[10px] text-primary-foreground/60 uppercase">Name</label>
+          <label className="text-[10px] text-primary-foreground/80 uppercase">Name</label>
           <Input value={name} onChange={(e) => setName(e.target.value)} className="bg-navy text-primary-foreground" />
         </div>
         <div>
-          <label className="text-[10px] text-primary-foreground/60 uppercase">Remit</label>
+          <label className="text-[10px] text-primary-foreground/80 uppercase">Remit</label>
           <Textarea rows={3} value={remit} onChange={(e) => setRemit(e.target.value)} className="bg-navy text-primary-foreground" />
         </div>
         <div>
-          <label className="text-[10px] text-primary-foreground/60 uppercase">Lead Brother</label>
+          <label className="text-[10px] text-primary-foreground/80 uppercase">Lead Brother</label>
           <Select value={leadId} onValueChange={setLeadId}>
             <SelectTrigger className="bg-navy text-primary-foreground"><SelectValue /></SelectTrigger>
             <SelectContent>
@@ -79,8 +79,8 @@ function GroupEditor({ group, profiles, onSaved }: { group: WorkingGroup; profil
           </Select>
         </div>
         <div>
-          <label className="text-[10px] text-primary-foreground/60 uppercase">Members</label>
-          {!loaded ? <p className="text-xs text-primary-foreground/50">Loading…</p> : (
+          <label className="text-[10px] text-primary-foreground/80 uppercase">Members</label>
+          {!loaded ? <p className="text-xs text-primary-foreground/80">Loading…</p> : (
             <div className="grid grid-cols-2 md:grid-cols-3 gap-1 mt-1 max-h-64 overflow-y-auto rounded-sm border border-gold/10 p-2">
               {profiles.map((p) => (
                 <label key={p.id} className="flex items-center gap-2 text-xs text-primary-foreground/80 hover:text-gold cursor-pointer">
@@ -148,20 +148,20 @@ function Inner() {
     <div className="space-y-8">
       <div>
         <h1 className="font-serif text-2xl text-primary-foreground">Manage Working Groups</h1>
-        <p className="text-xs text-primary-foreground/60 mt-1">Edit remits, leads, members, and create new groups.</p>
+        <p className="text-xs text-primary-foreground/80 mt-1">Edit remits, leads, members, and create new groups.</p>
       </div>
 
       <section className="rounded-sm border border-gold/20 bg-navy-dark/40 p-5 space-y-3">
         <h2 className="font-serif text-gold text-lg">Module Settings</h2>
         <div className="flex items-end gap-2 flex-wrap">
           <div>
-            <label className="text-[10px] text-primary-foreground/60 uppercase">Mentoring threshold date</label>
+            <label className="text-[10px] text-primary-foreground/80 uppercase">Mentoring threshold date</label>
             <Input type="date" value={threshold} onChange={(e) => setThreshold(e.target.value)} className="bg-navy text-primary-foreground" />
           </div>
           <Button onClick={saveThreshold} disabled={savingThreshold} className="bg-gold text-navy hover:bg-gold/90">
             <Save className="w-4 h-4 mr-1" /> Save
           </Button>
-          <p className="text-[10px] text-primary-foreground/50 italic ml-2 max-w-md">
+          <p className="text-[10px] text-primary-foreground/80 italic ml-2 max-w-md">
             Members initiated on/after this date follow the full structured checklist; earlier members can be marked exempt.
           </p>
         </div>
@@ -170,7 +170,7 @@ function Inner() {
       <section className="space-y-3">
         <div className="flex items-end gap-2">
           <div className="flex-1 max-w-sm">
-            <label className="text-[10px] text-primary-foreground/60 uppercase">New group name</label>
+            <label className="text-[10px] text-primary-foreground/80 uppercase">New group name</label>
             <Input value={newName} onChange={(e) => setNewName(e.target.value)} className="bg-navy text-primary-foreground" placeholder="e.g. Mentoring Sub-Committee" />
           </div>
           <Button onClick={createGroup} className="bg-gold text-navy hover:bg-gold/90">

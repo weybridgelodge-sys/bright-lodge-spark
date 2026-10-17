@@ -45,10 +45,10 @@ function Inner() {
     <MembersLayout>
       <header className="mb-6">
         <h1 className="font-serif text-2xl md:text-3xl text-gold">Admin</h1>
-        <p className="text-primary-foreground/60 text-sm">Tools for officers and lodge administrators.</p>
+        <p className="text-primary-foreground/80 text-sm">Tools for officers and lodge administrators.</p>
       </header>
       {visible.length === 0 ? (
-        <p className="text-primary-foreground/60">You don't have access to any admin sections.</p>
+        <p className="text-primary-foreground/80">You don't have access to any admin sections.</p>
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {visible.map((t) => (

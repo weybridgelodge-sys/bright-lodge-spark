@@ -11,7 +11,7 @@ import {
   SECTION_KEYS, type EventModules, type EventType, type PaymentMode,
 } from "@/lib/eventModules";
 
-export const inputCls = "w-full min-h-[44px] bg-navy-dark/50 border border-gold/20 rounded-sm px-3 py-2 text-sm text-primary-foreground placeholder:text-primary-foreground/40 focus:outline-none focus:border-gold/60";
+export const inputCls = "w-full min-h-[44px] bg-navy-dark/50 border border-gold/20 rounded-sm px-3 py-2 text-sm text-primary-foreground placeholder:text-primary-foreground/80 focus:outline-none focus:border-gold/60";
 const labelCls = "block text-xs uppercase tracking-wider text-gold mb-1.5";
 const fs = "border border-gold/20 rounded-sm p-4 space-y-3";
 const lg = "px-2 text-gold font-serif text-sm";
@@ -40,7 +40,7 @@ const SECTION_LABELS: Record<(typeof SECTION_KEYS)[number], string> = {
 const Switch = ({ id, checked, onChange, label, help }: { id: string; checked: boolean; onChange: (v: boolean) => void; label: string; help?: string }) => (
   <label htmlFor={id} className="flex items-start gap-3 min-h-[44px] cursor-pointer">
     <input id={id} type="checkbox" className="mt-1 h-5 w-5 accent-[hsl(var(--gold))]" checked={checked} onChange={(e) => onChange(e.target.checked)} />
-    <span><span className="text-sm text-primary-foreground">{label}</span>{help && <span className="block text-xs text-primary-foreground/60">{help}</span>}</span>
+    <span><span className="text-sm text-primary-foreground">{label}</span>{help && <span className="block text-xs text-primary-foreground/80">{help}</span>}</span>
   </label>
 );
 
@@ -57,7 +57,7 @@ export function EventTypePanel({ s, set }: { s: ModuleSettings; set: (p: Partial
           <option value="simple">Simple (tickets only)</option>
           <option value="dinner_festival">Dinner &amp; Festival</option>
         </select>
-        <p className="mt-1 text-xs text-primary-foreground/60">Switching back to Simple hides the modules but keeps their content.</p>
+        <p className="mt-1 text-xs text-primary-foreground/80">Switching back to Simple hides the modules but keeps their content.</p>
       </div>
       {s.event_type === "dinner_festival" && (
         <div className="grid gap-4 md:grid-cols-2">
@@ -107,7 +107,7 @@ export function PaymentSchedulePanel({ s, set, adultPricePence }: { s: ModuleSet
               <input id="f-dep-pct" className={inputCls} inputMode="decimal" value={s.deposit_percent} onChange={(e) => set({ deposit_percent: e.target.value })} placeholder="e.g. 25" />
               <button type="button" className={`${btn} shrink-0 ${isThird ? "bg-gold/20" : ""}`} onClick={() => set({ deposit_percent: String(ONE_THIRD_STORED) })}>One third</button>
             </div>
-            {isThird && <p className="mt-1 text-xs text-primary-foreground/60">One third, rounded up to the penny.</p>}
+            {isThird && <p className="mt-1 text-xs text-primary-foreground/80">One third, rounded up to the penny.</p>}
           </div>
           <div>
             <label className={labelCls} htmlFor="f-bal-due">Balance due date</label>
@@ -254,7 +254,7 @@ export function CoursesPanel({ eventId, kidsMenu, dietaryChoices }: { eventId: s
               <MoveBtns label="course" onUp={() => move("event_courses", list, i, -1, courses.load)} onDown={() => move("event_courses", list, i, 1, courses.load)} />
               <button type="button" className={delBtn} aria-label="Delete course" onClick={async () => { if (await deleteRow("event_courses", c.id, "course and its options")) { courses.load(); options.load(); } }}><Trash2 className="w-4 h-4" aria-hidden="true" /></button>
             </div>
-            {c.id.startsWith("new-") ? <p className="text-xs text-primary-foreground/60">Save the course to add options.</p> : (
+            {c.id.startsWith("new-") ? <p className="text-xs text-primary-foreground/80">Save the course to add options.</p> : (
               <div className="space-y-2 pl-0 md:pl-4">
                 {opts.map((o, oi) => (
                   <div key={o.id} className="grid gap-2 md:grid-cols-[1fr_1fr_auto] items-end border-t border-gold/10 pt-2">
@@ -326,7 +326,7 @@ export function CataloguePanel({ eventId }: { eventId: string }) {
               <MoveBtns label="category" onUp={() => move("event_catalogue_categories", cats.rows, i, -1, cats.load)} onDown={() => move("event_catalogue_categories", cats.rows, i, 1, cats.load)} />
               <button type="button" className={delBtn} aria-label="Delete category" onClick={async () => { if (await deleteRow("event_catalogue_categories", c.id, "category and its items")) { cats.load(); items.load(); } }}><Trash2 className="w-4 h-4" aria-hidden="true" /></button>
             </div>
-            {c.id.startsWith("new-") ? <p className="text-xs text-primary-foreground/60">Save the category to add items.</p> : (
+            {c.id.startsWith("new-") ? <p className="text-xs text-primary-foreground/80">Save the category to add items.</p> : (
               <div className="space-y-2">
                 {its.map((it, ii) => (
                   <div key={it.id} className="grid gap-2 md:grid-cols-[2fr_1fr_1fr_1fr_auto] items-end border-t border-gold/10 pt-2">

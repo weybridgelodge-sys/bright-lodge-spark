@@ -708,6 +708,13 @@
       "when": 1792266822358,
       "tag": "0100_installation_rule_fallback_and_meeting_diary",
       "breakpoints": true
+    },
+    {
+      "idx": 101,
+      "version": "7",
+      "when": 1792268854835,
+      "tag": "0101_meeting_series_schedule",
+      "breakpoints": true
     }
   ]
 }

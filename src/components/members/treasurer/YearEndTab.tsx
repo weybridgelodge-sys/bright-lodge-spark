@@ -183,7 +183,7 @@ export default function YearEndTab({ canEdit, onOpenTab }: { canEdit: boolean; o
     <div className="space-y-4 overflow-x-hidden">
       <section className="rounded-lg border border-gold/20 bg-primary-foreground/5 p-4">
         <h2 className="font-serif text-lg text-gold mb-1">Year End</h2>
-        <p className="text-primary-foreground/60 text-sm font-sans">
+        <p className="text-primary-foreground/80 text-sm font-sans">
           The closing journal only sets next year's opening General Fund (3000): it moves the year's income and
           expenditure into the fund, dated 1 October, in that year's own closing period, which is then locked.
           Reports read live figures, so you can review the accounts before closing.
@@ -191,7 +191,7 @@ export default function YearEndTab({ canEdit, onOpenTab }: { canEdit: boolean; o
       </section>
 
       {loading ? (
-        <p className="text-primary-foreground/60"><Loader2 className="w-4 h-4 mr-1 inline animate-spin" /> Loading…</p>
+        <p className="text-primary-foreground/80"><Loader2 className="w-4 h-4 mr-1 inline animate-spin" /> Loading…</p>
       ) : (
         <ul className="space-y-3">
           {years.map((y) => {
@@ -202,7 +202,7 @@ export default function YearEndTab({ canEdit, onOpenTab }: { canEdit: boolean; o
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div>
                     <h3 className="font-serif text-gold">{fyLabel(y)}</h3>
-                    <p className="text-xs text-primary-foreground/60">1 Oct {y} – 30 Sep {y + 1}</p>
+                    <p className="text-xs text-primary-foreground/80">1 Oct {y} – 30 Sep {y + 1}</p>
                   </div>
                   {c
                     ? <Badge variant="outline" className="border-gold/60 text-gold"><Lock className="w-3 h-3 mr-1" />Closed</Badge>
@@ -246,7 +246,7 @@ export default function YearEndTab({ canEdit, onOpenTab }: { canEdit: boolean; o
                             <div className="rounded border border-amber-400/50 bg-amber-400/10 p-3">
                               <p className="break-words font-semibold text-amber-300">Query from {who(q.signed_by)} ({AUDITOR_LABEL[q.officer_role]}) · {fmtDate(q.signed_at.slice(0, 10))}</p>
                               <p className="mt-1 whitespace-pre-wrap break-words">{q.note}</p>
-                              <p className="mt-1 text-xs text-primary-foreground/60">Make any corrections as normal (e.g. General Journal), then resubmit.</p>
+                              <p className="mt-1 text-xs text-primary-foreground/80">Make any corrections as normal (e.g. General Journal), then resubmit.</p>
                             </div>
                           )}
                           {st === "approved" && (
@@ -280,9 +280,9 @@ export default function YearEndTab({ canEdit, onOpenTab }: { canEdit: boolean; o
                         </Button>
                       )}
                     </div>
-                    {!guard.ok && "reason" in guard && <p className="text-xs text-primary-foreground/60">{guard.reason}</p>}
+                    {!guard.ok && "reason" in guard && <p className="text-xs text-primary-foreground/80">{guard.reason}</p>}
                     {guard.ok && !canClose(statusOf(approvals.get(y))) && (
-                      <p className="text-xs text-primary-foreground/60">Closing becomes available once both auditors have approved the accounts.</p>
+                      <p className="text-xs text-primary-foreground/80">Closing becomes available once both auditors have approved the accounts.</p>
                     )}
                   </div>
                 )}
@@ -306,7 +306,7 @@ export default function YearEndTab({ canEdit, onOpenTab }: { canEdit: boolean; o
                           <Textarea id={`remarks-${y}`} rows={5} value={remarks.get(y) ?? ""}
                             onChange={(e) => setRemarks((m) => new Map(m).set(y, e.target.value))}
                              placeholder="Notes to the accounts: explain exceptions, one-off items and anything that would look odd unexplained, e.g. a deferred-income release or a re-dated levy." />
-                          <p className="text-xs text-primary-foreground/60">Printed in the accounts pack and frozen with the figures each time you submit for audit review.</p>
+                          <p className="text-xs text-primary-foreground/80">Printed in the accounts pack and frozen with the figures each time you submit for audit review.</p>
                         </div>
                       )}
                       <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
@@ -347,7 +347,7 @@ export default function YearEndTab({ canEdit, onOpenTab }: { canEdit: boolean; o
                                 {sigs.filter((x) => x.approval_id === r.approval_id && x.round_number === r.round_number).map((x) => (
                                   <li className="break-words" key={x.id}>
                                     {AUDITOR_LABEL[x.officer_role]} ({who(x.signed_by)}) · {x.decision === "confirmed" ? "confirmed" : "query"} · {fmtDate(x.signed_at.slice(0, 10))}
-                                    {x.note ? <span className="text-primary-foreground/60"> — {x.note}</span> : null}
+                                    {x.note ? <span className="text-primary-foreground/80"> — {x.note}</span> : null}
                                   </li>
                                 ))}
                               </ul>
@@ -381,7 +381,7 @@ export default function YearEndTab({ canEdit, onOpenTab }: { canEdit: boolean; o
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm font-sans">
-                    <thead><tr className="text-primary-foreground/60 border-b border-gold/20">
+                    <thead><tr className="text-primary-foreground/80 border-b border-gold/20">
                       <th className="text-left py-2 font-normal">Account</th>
                       <th className="text-right py-2 font-normal">Debit</th>
                       <th className="text-right py-2 font-normal">Credit</th>

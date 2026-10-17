@@ -176,7 +176,7 @@ export default function MembersDocuments() {
       <div className="mb-6 flex items-start justify-between gap-3">
         <div>
           <h1 className="font-serif text-3xl text-gold mb-2">Documents</h1>
-          <p className="text-sm text-primary-foreground/60">Summons, meeting minutes, committee minutes, agendas, media files, ritual notes, and Lodge papers.</p>
+          <p className="text-sm text-primary-foreground/80">Summons, meeting minutes, committee minutes, agendas, media files, ritual notes, and Lodge papers.</p>
           {showLDGateBanner && profile && (
             <p className="text-[11px] text-primary-foreground/55 mt-2">
               Learning &amp; Development material is displayed according to your verified Masonic degree — currently{" "}
@@ -198,7 +198,7 @@ export default function MembersDocuments() {
             className={`px-3 py-1.5 sm:py-1 text-xs uppercase tracking-wider rounded-sm border ${
               filter === c
                 ? "border-gold text-gold bg-gold/10"
-                : "border-gold/20 text-primary-foreground/60 hover:text-gold"
+                : "border-gold/20 text-primary-foreground/80 hover:text-gold"
             }`}
           >
             {c === "all" ? "All" : CATEGORY_LABELS[c]}
@@ -207,7 +207,7 @@ export default function MembersDocuments() {
       </div>
 
       {filtered.length === 0 ? (
-        <p className="text-sm text-primary-foreground/50">No documents in this category.</p>
+        <p className="text-sm text-primary-foreground/80">No documents in this category.</p>
       ) : (
         <ul className="divide-y divide-gold/10 border border-gold/15 rounded-sm bg-navy-dark/40">
           {filtered.map((d) => (
@@ -219,7 +219,7 @@ export default function MembersDocuments() {
                   {d.description && (
                     <p className="text-xs text-primary-foreground/70 mt-1 whitespace-pre-wrap">{d.description}</p>
                   )}
-                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-[11px] text-primary-foreground/50">
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-[11px] text-primary-foreground/80">
                     <span className="text-gold bg-gold/5 px-2 py-0.5 rounded-sm border border-gold/15">
                       {CATEGORY_LABELS[d.category]}
                     </span>

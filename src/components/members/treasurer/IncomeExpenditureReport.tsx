@@ -133,7 +133,7 @@ export default function IncomeExpenditureReport({ canEdit }: { canEdit: boolean 
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="text-primary-foreground/60 border-b border-gold/20">
+            <tr className="text-primary-foreground/80 border-b border-gold/20">
               <th className="text-left py-2 font-normal">Account</th>
               <th className="text-right py-2 font-normal">{period.label}</th>
               <th className="text-right py-2 font-normal">{period.priorLabel}</th>
@@ -141,7 +141,7 @@ export default function IncomeExpenditureReport({ canEdit }: { canEdit: boolean 
           </thead>
           <tbody>
             {rows.length === 0 && (
-              <tr><td colSpan={3} className="py-3 text-primary-foreground/50">No activity in either period.</td></tr>
+              <tr><td colSpan={3} className="py-3 text-primary-foreground/80">No activity in either period.</td></tr>
             )}
             {rows.map((r) => (
               <DrillAccountRow key={r.code} code={r.code} name={r.name} current={r.current} prior={r.prior}
@@ -164,7 +164,7 @@ export default function IncomeExpenditureReport({ canEdit }: { canEdit: boolean 
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <h2 className="font-serif text-lg text-gold mb-1">Income &amp; Expenditure</h2>
-            <p className="text-primary-foreground/60 text-sm">
+            <p className="text-primary-foreground/80 text-sm">
               Net movement on every income and expenditure account, with a comparative period alongside. Click any account to see its transactions.
             </p>
           </div>
@@ -233,12 +233,12 @@ export default function IncomeExpenditureReport({ canEdit }: { canEdit: boolean 
             </Select>
           </div>
         </div>
-        <p className="text-primary-foreground/50 text-xs mt-2">
+        <p className="text-primary-foreground/80 text-xs mt-2">
           {period.label}: {fmtDate(period.start)} – {fmtDate(period.end)} · comparative {period.priorLabel}: {fmtDate(period.priorStart)} – {fmtDate(period.priorEnd)}
         </p>
 
         {loading ? (
-          <p className="text-primary-foreground/60 mt-4"><Loader2 className="w-4 h-4 mr-1 inline animate-spin" /> Building report…</p>
+          <p className="text-primary-foreground/80 mt-4"><Loader2 className="w-4 h-4 mr-1 inline animate-spin" /> Building report…</p>
         ) : (
           <>
             <Section title="Income" rows={income} totalLabel="Total income" tc={incCur} tp={incPri} />
@@ -249,10 +249,10 @@ export default function IncomeExpenditureReport({ canEdit }: { canEdit: boolean 
                 <p className="font-serif text-gold">Surplus / (Deficit) for the period</p>
                 <div className="flex gap-6">
                   <p className={`text-lg font-semibold tabular-nums ${surCur < 0 ? "text-red-400" : "text-emerald-400"}`}>
-                    {acct(surCur)} <span className="text-xs text-primary-foreground/50">{period.label}</span>
+                    {acct(surCur)} <span className="text-xs text-primary-foreground/80">{period.label}</span>
                   </p>
                   <p className={`text-lg font-semibold tabular-nums ${surPri < 0 ? "text-red-400" : "text-emerald-400"}`}>
-                    {acct(surPri)} <span className="text-xs text-primary-foreground/50">{period.priorLabel}</span>
+                    {acct(surPri)} <span className="text-xs text-primary-foreground/80">{period.priorLabel}</span>
                   </p>
                 </div>
               </div>
@@ -261,7 +261,7 @@ export default function IncomeExpenditureReport({ canEdit }: { canEdit: boolean 
         )}
         {!canEdit && <p className="sr-only">Read only</p>}
         {accounts.length === 0 && !loading && (
-          <p className="text-primary-foreground/50 text-xs mt-3">No chart of accounts found. {money(0)}</p>
+          <p className="text-primary-foreground/80 text-xs mt-3">No chart of accounts found. {money(0)}</p>
         )}
       </section>
       <AccountDrilldown target={drill} onClose={() => setDrill(null)} />

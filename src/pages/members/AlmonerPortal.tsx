@@ -137,7 +137,7 @@ export default function AlmonerPortal() {
         </div>
         <div>
           <h1 className="font-serif text-2xl text-primary-foreground">Almoner Portal</h1>
-          <p className="text-sm text-primary-foreground/60">Confidential member welfare records</p>
+          <p className="text-sm text-primary-foreground/80">Confidential member welfare records</p>
           {!canEditAlmoner && (
             <p className="mt-1 inline-block text-xs uppercase tracking-wider text-gold border border-gold/40 rounded px-2 py-0.5" role="status">Read-only view</p>
           )}
@@ -347,10 +347,10 @@ function PortalBody() {
       <TabsContent value="board">
         <div className="mb-4 flex items-center justify-between flex-wrap gap-2">
           <h2 className="font-serif text-xl text-primary-foreground">Member Welfare Board</h2>
-          <p className="text-xs text-primary-foreground/50">{sorted.length} active members</p>
+          <p className="text-xs text-primary-foreground/80">{sorted.length} active members</p>
         </div>
         {sorted.length === 0 ? (
-          <p className="text-sm text-primary-foreground/60">No active members.</p>
+          <p className="text-sm text-primary-foreground/80">No active members.</p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {sorted.map((m) => {
@@ -366,7 +366,7 @@ function PortalBody() {
                   <div className="flex items-start justify-between gap-2 mb-2">
                     <div>
                       <p className="font-serif text-base text-primary-foreground leading-tight">{displayName(m)}</p>
-                      <p className="text-[11px] text-primary-foreground/50 mt-0.5">
+                      <p className="text-[11px] text-primary-foreground/80 mt-0.5">
                         {ageFrom(m.date_of_birth) != null ? `Age ${ageFrom(m.date_of_birth)}` : "Age —"}
                         {" · "}
                         {yearsMember(m) != null ? `${yearsMember(m)} yrs member` : "—"}
@@ -377,7 +377,7 @@ function PortalBody() {
                   <div className="text-[11px] text-primary-foreground/70 space-y-1">
                     <div>
                       Last contact: <span className="text-primary-foreground">{last ? fmtDate(last) : "Never"}</span>
-                      {lastDays != null && <span className="text-primary-foreground/40"> · {lastDays}d ago</span>}
+                      {lastDays != null && <span className="text-primary-foreground/80"> · {lastDays}d ago</span>}
                     </div>
                     <div className="flex gap-1.5 flex-wrap pt-1">
                       {checkInFlags[m.id] && (
@@ -482,7 +482,7 @@ function MemberRecord({ member, currentStatus, onBack }: {
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
             <h2 className="font-serif text-2xl text-primary-foreground">{displayName(member)}</h2>
-            <p className="text-xs text-primary-foreground/60 mt-1">
+            <p className="text-xs text-primary-foreground/80 mt-1">
               {ageFrom(member.date_of_birth) != null ? `Age ${ageFrom(member.date_of_birth)}` : "Age —"}
               {" · "}
               {yearsMember(member) != null ? `${yearsMember(member)} years a member` : "—"}
@@ -490,7 +490,7 @@ function MemberRecord({ member, currentStatus, onBack }: {
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <Label className="text-xs uppercase tracking-wider text-primary-foreground/60">Status</Label>
+            <Label className="text-xs uppercase tracking-wider text-primary-foreground/80">Status</Label>
             <Select value={status} onValueChange={(v) => saveStatus(v as WelfareStatus)} disabled={!canEditAlmoner}>
               <SelectTrigger className="w-[200px] bg-navy text-primary-foreground border-gold/30">
                 <SelectValue />
@@ -521,7 +521,7 @@ function MemberRecord({ member, currentStatus, onBack }: {
       )}
 
       {logs.length === 0 ? (
-        <p className="text-sm text-primary-foreground/60 italic">No log entries yet.</p>
+        <p className="text-sm text-primary-foreground/80 italic">No log entries yet.</p>
       ) : (
         <div className="space-y-3">
           {logs.map((l) => l.is_system ? (
@@ -529,7 +529,7 @@ function MemberRecord({ member, currentStatus, onBack }: {
               <div className="flex items-start justify-between gap-3 flex-wrap mb-2">
                 <div className="min-w-0">
                   <p className="text-sm font-semibold text-primary-foreground/80">{fmtDate(l.contact_date)}</p>
-                  <p className="text-[11px] text-primary-foreground/60 mt-0.5">Automatic entry — no contact made</p>
+                  <p className="text-[11px] text-primary-foreground/80 mt-0.5">Automatic entry — no contact made</p>
                 </div>
                 <Badge variant="outline" className="border-dashed border-primary-foreground/40 text-primary-foreground/80 text-[10px]">
                   <Bot className="w-3 h-3 mr-1" /> System
@@ -550,7 +550,7 @@ function MemberRecord({ member, currentStatus, onBack }: {
               <div className="flex items-start justify-between gap-3 flex-wrap mb-2">
                 <div>
                   <p className="text-sm font-semibold text-primary-foreground">{fmtDate(l.contact_date)}</p>
-                  <p className="text-[11px] text-primary-foreground/60 mt-0.5">
+                  <p className="text-[11px] text-primary-foreground/80 mt-0.5">
                     {CONTACT_TYPE_LABEL[l.contact_type]} · {NATURE_LABEL[l.contact_nature]}
                     {l.nature_detail && ` (${l.nature_detail})`}
                   </p>
@@ -564,7 +564,7 @@ function MemberRecord({ member, currentStatus, onBack }: {
               {l.notes && <p className="text-sm text-primary-foreground/85 whitespace-pre-wrap mb-2">{l.notes}</p>}
               {l.action_taken && (
                 <p className="text-xs text-primary-foreground/70">
-                  <span className="uppercase tracking-wider text-primary-foreground/50 mr-1">Action:</span>
+                  <span className="uppercase tracking-wider text-primary-foreground/80 mr-1">Action:</span>
                   {l.action_taken}
                 </p>
               )}

@@ -455,7 +455,7 @@ export default function MembersAdmin() {
 
   const inputCls =
     "w-full bg-navy border border-gold/20 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-gold";
-  const labelCls = "text-xs uppercase tracking-wider text-primary-foreground/60 block";
+  const labelCls = "text-xs uppercase tracking-wider text-primary-foreground/80 block";
 
   if (!canManageMembers) {
     return (
@@ -469,7 +469,7 @@ export default function MembersAdmin() {
     <MembersLayout>
       <div className="mb-6">
         <h1 className="font-serif text-3xl text-gold mb-2">Admin</h1>
-        <p className="text-sm text-primary-foreground/60">Manage members, roles, and notices.</p>
+        <p className="text-sm text-primary-foreground/80">Manage members, roles, and notices.</p>
       </div>
 
 
@@ -482,7 +482,7 @@ export default function MembersAdmin() {
               setTab(t);
             }}
             className={`px-2 sm:px-3 py-2 min-h-11 text-sm uppercase tracking-wider border-b-2 -mb-px ${
-              tab === t ? "border-gold text-gold" : "border-transparent text-primary-foreground/60 hover:text-gold"
+              tab === t ? "border-gold text-gold" : "border-transparent text-primary-foreground/80 hover:text-gold"
             }`}
           >
             {t === "add" ? (isEdit ? "Edit Member" : "Add Member") : t === "import" ? "Import" : t}
@@ -495,7 +495,7 @@ export default function MembersAdmin() {
       {tab === "users" && (
         <div className="bg-navy-dark/60 border border-gold/15 rounded-sm lg:overflow-x-auto">
           <MemberTable aria-label="Members" className="block w-full min-w-0 text-sm lg:table">
-            {!stackedMembers && <thead className="hidden lg:table-header-group text-xs uppercase tracking-wider text-primary-foreground/50">
+            {!stackedMembers && <thead className="hidden lg:table-header-group text-xs uppercase tracking-wider text-primary-foreground/80">
               <tr>
                 <th className="text-left p-3">Member</th>
                 <th className="text-left p-3">Status</th>
@@ -522,15 +522,15 @@ export default function MembersAdmin() {
                 >
                   <MemberCell className="block col-span-2 min-w-0 lg:table-cell lg:p-3">
                     <p data-member-name className="font-medium text-primary-foreground break-words [overflow-wrap:anywhere]">{formatMemberLine(p as any) || "(No name)"}</p>
-                    <p data-member-email className="text-xs text-primary-foreground/80 lg:text-primary-foreground/50 break-words [overflow-wrap:anywhere]">{p.email}</p>
+                    <p data-member-email className="text-xs text-primary-foreground/80 lg:text-primary-foreground/80 break-words [overflow-wrap:anywhere]">{p.email}</p>
                     {(p.provincial_rank || p.grand_rank) && (
-                      <p data-member-rank className="text-xs text-primary-foreground/80 lg:text-[11px] lg:text-primary-foreground/60 mt-1 break-words [overflow-wrap:anywhere]">
+                      <p data-member-rank className="text-xs text-primary-foreground/80 lg:text-[11px] lg:text-primary-foreground/80 mt-1 break-words [overflow-wrap:anywhere]">
                         {p.grand_rank ? `Grand: ${p.grand_rank}` : `Prov: ${p.provincial_rank}`}
                       </p>
                     )}
                   </MemberCell>
                   <MemberCell data-member-status className="block min-w-0 text-xs uppercase tracking-wider lg:table-cell lg:p-3">
-                    <span className="block mb-1 text-primary-foreground/50 lg:hidden">Status</span>
+                    <span className="block mb-1 text-primary-foreground/80 lg:hidden">Status</span>
                     <span
                       className={
                         p.status === "active"
@@ -544,13 +544,13 @@ export default function MembersAdmin() {
                     </span>
                   </MemberCell>
                   <MemberCell className="block min-w-0 text-xs text-primary-foreground/70 lg:table-cell lg:p-3 lg:whitespace-nowrap">
-                    <span className="block mb-1 text-primary-foreground/50 lg:hidden">Last logged on</span>
+                    <span className="block mb-1 text-primary-foreground/80 lg:hidden">Last logged on</span>
                     {lastSignIn[p.id]
                       ? new Date(lastSignIn[p.id] as string).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })
-                      : <span className="text-primary-foreground/40">Never</span>}
+                      : <span className="text-primary-foreground/80">Never</span>}
                   </MemberCell>
                   <MemberCell className="block min-w-0 text-xs uppercase tracking-wider lg:table-cell lg:p-3">
-                    <span className="block mb-1 text-primary-foreground/50 lg:hidden">Role</span>
+                    <span className="block mb-1 text-primary-foreground/80 lg:hidden">Role</span>
                     {isAdminUser(p.id) ? "Admin" : "Member"}
                     {isAlmonerUser(p.id) && <div className="text-gold normal-case tracking-normal text-[10px]">Almoner</div>}
                   </MemberCell>
@@ -664,7 +664,7 @@ export default function MembersAdmin() {
               <button
                 type="button"
                 onClick={resetForm}
-                className="text-xs uppercase tracking-wider text-primary-foreground/60 hover:text-gold"
+                className="text-xs uppercase tracking-wider text-primary-foreground/80 hover:text-gold"
               >
                 + New instead
               </button>
@@ -672,7 +672,7 @@ export default function MembersAdmin() {
           </div>
 
           {!isEdit && (
-            <p className="text-xs text-primary-foreground/60">
+            <p className="text-xs text-primary-foreground/80">
               Adds the brother to the portal with an active account so he can sign in via magic
               link or Google straight away — no registration step required.
             </p>
@@ -855,7 +855,7 @@ export default function MembersAdmin() {
             )}
 
             <div className="sm:col-span-6 pt-2 mt-2 border-t border-gold/10">
-              <p className="text-xs uppercase tracking-wider text-gold/70 mb-2">Address</p>
+              <p className="text-xs uppercase tracking-wider text-gold mb-2">Address</p>
             </div>
             <label className={`${labelCls} sm:col-span-3`}>
               Address line 1
@@ -929,7 +929,7 @@ export default function MembersAdmin() {
                 onChange={(e) => setForm({ ...form, mmh_number: e.target.value })}
                 className={`mt-1 min-h-[44px] ${inputCls} normal-case tracking-normal text-primary-foreground`}
               />
-              <span id="hint-mmh_number" className="mt-1 block text-[11px] normal-case tracking-normal text-primary-foreground/50">Mark Masons' Hall — same across Mark, RAM and companion Orders</span>
+              <span id="hint-mmh_number" className="mt-1 block text-[11px] normal-case tracking-normal text-primary-foreground/80">Mark Masons' Hall — same across Mark, RAM and companion Orders</span>
             </label>
             <label className={`${labelCls} sm:col-span-3`}>
               Rose Croix Number
@@ -943,7 +943,7 @@ export default function MembersAdmin() {
                 onChange={(e) => setForm({ ...form, rose_croix_number: e.target.value })}
                 className={`mt-1 min-h-[44px] ${inputCls} normal-case tracking-normal text-primary-foreground`}
               />
-              <span id="hint-rose_croix_number" className="mt-1 block text-[11px] normal-case tracking-normal text-primary-foreground/50">Ancient and Accepted Rite (Supreme Council 33°)</span>
+              <span id="hint-rose_croix_number" className="mt-1 block text-[11px] normal-case tracking-normal text-primary-foreground/80">Ancient and Accepted Rite (Supreme Council 33°)</span>
             </label>
             <label className={`${labelCls} sm:col-span-6`}>
               Dietary requirements / allergies
@@ -991,7 +991,7 @@ export default function MembersAdmin() {
                 onChange={(e) => setForm({ ...form, status_changed_at: e.target.value })}
                 className={`mt-1 ${inputCls} normal-case tracking-normal text-primary-foreground`}
               />
-              <span className="block mt-1 text-xs normal-case tracking-normal text-primary-foreground/50">
+              <span className="block mt-1 text-xs normal-case tracking-normal text-primary-foreground/80">
                 Defaults to today when you change the status — edit it for historical dates.
               </span>
             </label>
@@ -1038,13 +1038,13 @@ export default function MembersAdmin() {
                 <button
                   type="button"
                   onClick={() => navigate("/members/admin/returns")}
-                  className="text-xs uppercase tracking-wider text-primary-foreground/60 hover:text-gold"
+                  className="text-xs uppercase tracking-wider text-primary-foreground/80 hover:text-gold"
                 >
                   Log a return for this member
                 </button>
               </div>
               {memberReturns.length === 0 ? (
-                <p className="text-xs text-primary-foreground/60">No returns logged for this member.</p>
+                <p className="text-xs text-primary-foreground/80">No returns logged for this member.</p>
               ) : (
                 <ul className="space-y-1">
                   {memberReturns.map((r) => (
@@ -1082,7 +1082,7 @@ export default function MembersAdmin() {
                   resetForm();
                   setTab("users");
                 }}
-                className="text-sm text-primary-foreground/60 hover:text-gold"
+                className="text-sm text-primary-foreground/80 hover:text-gold"
               >
                 Cancel
               </button>

@@ -1,0 +1,2 @@
+ALTER TABLE public.meeting_series ADD COLUMN IF NOT EXISTS schedule jsonb NOT NULL DEFAULT '[]'::jsonb;
+COMMENT ON COLUMN public.meeting_series.schedule IS 'Per-month meeting schedule: [{month, ordinal, weekday, meeting_type}]. Replaces the single ordinal/weekday/months rule for new series.';

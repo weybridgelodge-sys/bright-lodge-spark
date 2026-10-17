@@ -73,13 +73,13 @@ export default function EngagementTracker({
       {canEdit && (
         <div className="rounded-sm border border-gold/20 bg-navy-dark/30 p-3 grid grid-cols-1 md:grid-cols-[120px_180px_1fr_auto] gap-2 items-end">
           <div>
-            <label className="text-[10px] text-primary-foreground/60 uppercase">Date</label>
+            <label className="text-[10px] text-primary-foreground/80 uppercase">Date</label>
             <Input type="date" value={form.occurred_on}
               onChange={(e) => setForm({ ...form, occurred_on: e.target.value })}
               className="bg-navy text-primary-foreground" />
           </div>
           <div>
-            <label className="text-[10px] text-primary-foreground/60 uppercase">Category</label>
+            <label className="text-[10px] text-primary-foreground/80 uppercase">Category</label>
             <Select value={form.category} onValueChange={(v) => setForm({ ...form, category: v as EngagementCategory })}>
               <SelectTrigger className="bg-navy text-primary-foreground"><SelectValue /></SelectTrigger>
               <SelectContent>
@@ -88,7 +88,7 @@ export default function EngagementTracker({
             </Select>
           </div>
           <div>
-            <label className="text-[10px] text-primary-foreground/60 uppercase">Summary</label>
+            <label className="text-[10px] text-primary-foreground/80 uppercase">Summary</label>
             <Textarea rows={1} value={form.summary} onChange={(e) => setForm({ ...form, summary: e.target.value })}
               className="bg-navy text-primary-foreground min-h-[40px]" placeholder="e.g. Attended Topgolf social" />
           </div>
@@ -117,7 +117,7 @@ export default function EngagementTracker({
                   <td className="p-2 text-primary-foreground">{r.summary}</td>
                   {canEdit && (
                     <td className="p-2 text-right">
-                      <button onClick={() => onDelete(r.id)} className="text-primary-foreground/50 hover:text-red-400">
+                      <button onClick={() => onDelete(r.id)} className="text-primary-foreground/80 hover:text-red-400">
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     </td>
@@ -125,7 +125,7 @@ export default function EngagementTracker({
                 </tr>
               ))}
               {rows.length === 0 && (
-                <tr><td colSpan={canEdit ? 4 : 3} className="p-4 text-center text-primary-foreground/60 italic">No engagement logged yet.</td></tr>
+                <tr><td colSpan={canEdit ? 4 : 3} className="p-4 text-center text-primary-foreground/80 italic">No engagement logged yet.</td></tr>
               )}
             </tbody>
           </table>

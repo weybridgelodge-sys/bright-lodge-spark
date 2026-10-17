@@ -33,7 +33,7 @@ export default function MembersPending() {
           </Link>
           <button
             onClick={handleSignOut}
-            className="flex items-center justify-center gap-2 text-xs text-primary-foreground/50 hover:text-gold py-2"
+            className="flex items-center justify-center gap-2 text-xs text-primary-foreground/80 hover:text-gold py-2"
           >
             <LogOut className="w-3.5 h-3.5" /> Sign out
           </button>

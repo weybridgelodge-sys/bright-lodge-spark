@@ -425,7 +425,7 @@ export default function OfficersTracker() {
               key={k}
               onClick={() => setTab(k)}
               className={`px-4 py-2 text-sm font-sans transition-colors border-b-2 -mb-px ${
-                tab === k ? "border-gold text-gold" : "border-transparent text-primary-foreground/60 hover:text-gold"
+                tab === k ? "border-gold text-gold" : "border-transparent text-primary-foreground/80 hover:text-gold"
               }`}
             >
               {label}
@@ -576,7 +576,7 @@ function BoardView({
               {!vacant && appt && (
                 <button
                   onClick={() => onClear(appt.id)}
-                  className="text-primary-foreground/40 hover:text-amber-300"
+                  className="text-primary-foreground/80 hover:text-amber-300"
                   title="Clear appointment"
                 >
                   <X className="w-4 h-4" />
@@ -587,12 +587,12 @@ function BoardView({
               {cell.member?.full_name ?? "— vacant —"}
             </p>
             {appt && (
-              <p className="text-xs text-primary-foreground/60 mt-1">
+              <p className="text-xs text-primary-foreground/80 mt-1">
                 Appointed {appt.appointed_on ?? "—"}
               </p>
             )}
             <div className="mt-3">
-              <label className="text-[10px] uppercase tracking-wider text-primary-foreground/60">
+              <label className="text-[10px] uppercase tracking-wider text-primary-foreground/80">
                 Assign holder
               </label>
               <select
@@ -736,13 +736,13 @@ function LadderView({
                 <h3 className="font-serif text-lg text-primary-foreground">
                   {POSITION_LABELS[editing.pos]} · {formatMasonicYear(editing.year)}
                 </h3>
-                <p className="text-xs text-primary-foreground/60">
+                <p className="text-xs text-primary-foreground/80">
                   {editing.year === currentYear
                     ? "Change the current holder."
                     : "Set a manual override (a brother taking a year out, declining progression, etc.)."}
                 </p>
               </div>
-              <button onClick={() => setEditing(null)} className="text-primary-foreground/50 hover:text-gold">
+              <button onClick={() => setEditing(null)} className="text-primary-foreground/80 hover:text-gold">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -788,7 +788,7 @@ function LadderView({
               <div className="flex gap-2">
                 <button
                   onClick={() => setEditing(null)}
-                  className="text-xs text-primary-foreground/60 px-3 py-1.5"
+                  className="text-xs text-primary-foreground/80 px-3 py-1.5"
                 >
                   Cancel
                 </button>
@@ -902,7 +902,7 @@ function ReadinessView({
                         readiness === "ready"
                           ? "bg-gold/15 border-gold/40 text-gold"
                           : readiness === "non_progressive"
-                            ? "bg-primary-foreground/5 border-primary-foreground/20 text-primary-foreground/60"
+                            ? "bg-primary-foreground/5 border-primary-foreground/20 text-primary-foreground/80"
                             : "bg-navy-dark border-gold/20 text-primary-foreground"
                       }`}
                     >
@@ -943,7 +943,7 @@ function ReadinessView({
                         <UserPlus className="w-3 h-3" /> Promote to Inner Guard
                       </button>
                     ) : (
-                      <span className="text-[11px] text-primary-foreground/40 flex items-center gap-1">
+                      <span className="text-[11px] text-primary-foreground/80 flex items-center gap-1">
                         <ShieldAlert className="w-3 h-3" /> Tag as Ready first
                       </span>
                     )}
@@ -953,7 +953,7 @@ function ReadinessView({
             })}
             {eligible.length === 0 && (
               <tr>
-                <td colSpan={8} className="px-3 py-8 text-center text-primary-foreground/50 text-sm">
+                <td colSpan={8} className="px-3 py-8 text-center text-primary-foreground/80 text-sm">
                   All active members are currently on the progression ladder.
                 </td>
               </tr>
@@ -1004,7 +1004,7 @@ function NonProgressiveBoard({
     <section className="mt-10">
       <header className="mb-4">
         <h2 className="font-serif text-2xl text-gold">Non-Progressive Offices</h2>
-        <p className="text-xs text-primary-foreground/60 mt-1">
+        <p className="text-xs text-primary-foreground/80 mt-1">
           Appointed annually outside the ladder. The “First held” date shows tenure so you
           can see who has served longest, in case it’s time to give another brother a chance.
         </p>
@@ -1029,7 +1029,7 @@ function NonProgressiveBoard({
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-[10px] uppercase tracking-wider text-gold/70">
+                  <p className="text-[10px] uppercase tracking-wider text-gold">
                     {vacant ? "Vacant" : "Officer"}
                   </p>
                   <h3 className="font-serif text-base text-primary-foreground">
@@ -1039,7 +1039,7 @@ function NonProgressiveBoard({
                 {!vacant && appt && (
                   <button
                     onClick={() => onClear(appt.id)}
-                    className="text-primary-foreground/40 hover:text-amber-300"
+                    className="text-primary-foreground/80 hover:text-amber-300"
                     title="Clear appointment"
                   >
                     <X className="w-4 h-4" />
@@ -1052,14 +1052,14 @@ function NonProgressiveBoard({
               </p>
 
               {!vacant && (
-                <p className="text-[11px] text-primary-foreground/60 mt-1">
+                <p className="text-[11px] text-primary-foreground/80 mt-1">
                   First held: <span className="text-gold">{since ?? "—"}</span>
                   {since && <span className="ml-1">· {tenureSince(since)}</span>}
                 </p>
               )}
 
               <div className="mt-3 space-y-2">
-                <label className="block text-[10px] uppercase tracking-wider text-primary-foreground/60">
+                <label className="block text-[10px] uppercase tracking-wider text-primary-foreground/80">
                   Holder
                 </label>
                 <select
@@ -1077,7 +1077,7 @@ function NonProgressiveBoard({
 
                 {!vacant && appt && (
                   <div>
-                    <label className="block text-[10px] uppercase tracking-wider text-primary-foreground/60 mb-1">
+                    <label className="block text-[10px] uppercase tracking-wider text-primary-foreground/80 mb-1">
                       Date first held this post
                     </label>
                     <FirstHeldDateInput

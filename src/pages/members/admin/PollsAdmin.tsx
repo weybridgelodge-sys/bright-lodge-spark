@@ -135,7 +135,7 @@ function Inner() {
     <MembersLayout>
       <header className="mb-6">
         <h1 className="font-serif text-2xl md:text-3xl text-gold">Polls & Voting</h1>
-        <p className="text-primary-foreground/60 text-sm">Ask the brethren a question. Results appear on the Dashboard.</p>
+        <p className="text-primary-foreground/80 text-sm">Ask the brethren a question. Results appear on the Dashboard.</p>
       </header>
 
       {canManage && (
@@ -190,7 +190,7 @@ function Inner() {
       <section>
         <h2 className="font-serif text-lg text-gold mb-4">All polls</h2>
         {polls.length === 0 ? (
-          <p className="text-sm text-primary-foreground/60">No polls yet.</p>
+          <p className="text-sm text-primary-foreground/80">No polls yet.</p>
         ) : (
           <div className="space-y-4">
             {polls.map((p) => {
@@ -201,7 +201,7 @@ function Inner() {
                   <div className="flex items-start justify-between gap-3 mb-3">
                     <div>
                       <p className="font-serif text-primary-foreground text-lg">{p.question}</p>
-                      <p className="text-xs text-primary-foreground/60 mt-1">
+                      <p className="text-xs text-primary-foreground/80 mt-1">
                         {isOpen ? <span className="text-gold">Open</span> : <span>Closed</span>}
                         {" · "}
                         {p.results_visibility === "live" ? "Live results" : "Results on close"}

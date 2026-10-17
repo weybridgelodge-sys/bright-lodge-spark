@@ -4,8 +4,11 @@ import { expectNoAxeViolations } from "./helpers/axe";
 // Faithful worst-case diary data: long notes/reasons, cancelled and installation rows.
 const rule = { id: "r1", unit_id: "u", mode: "weekday_rule", installation_month: 10, installation_ordinal: "3", installation_weekday: 3, fixed_day: null, applies_from_year: null, unit_number: "6787", default_venue: "Guildford Masonic Centre, Hitherbury Close, Portsmouth Road, Guildford GU2 4DR", election_month: 5, ritual: "Emulation", consecration_date: "1949-01-01" };
 const meetings = [
-  { id: "m1", meeting_date: "2027-10-20", meeting_type: "installation", status: "published", notes: null, cancelled_at: null, cancel_reason: null, series_id: null },
-  { id: "m2", meeting_date: "2027-12-09", meeting_type: "regular", status: "draft", notes: null, cancelled_at: null, cancel_reason: null, series_id: "s1" },
+  { id: "m0", meeting_date: "2026-09-12", meeting_type: "regular", status: "draft", notes: null, cancelled_at: null, cancel_reason: null, series_id: null },
+  { id: "m1", meeting_date: "2026-10-21", meeting_type: "installation", status: "published", notes: null, cancelled_at: null, cancel_reason: null, series_id: null },
+  { id: "m2", meeting_date: "2026-12-09", meeting_type: "regular", status: "draft", notes: null, cancelled_at: null, cancel_reason: null, series_id: null },
+  { id: "m4", meeting_date: "2027-02-17", meeting_type: "regular", status: "draft", notes: null, cancelled_at: null, cancel_reason: null, series_id: null },
+  { id: "m5", meeting_date: "2027-05-12", meeting_type: "regular", status: "draft", notes: null, cancelled_at: null, cancel_reason: null, series_id: null },
   { id: "m3", meeting_date: "2028-02-16", meeting_type: "emergency", status: "draft", notes: null, cancelled_at: "2026-10-01T00:00:00Z", cancel_reason: "Venue unavailable because of the extended refurbishment of the main temple and dining room", series_id: null },
 ];
 
@@ -14,7 +17,7 @@ test("Meeting diary has no overflow at 320px", { timeout: 90_000 }, async ({ pag
   await page.route("**/rest/v1/installation_rule_settings**", (r) => r.fulfill({ json: rule }));
   await page.route("**/rest/v1/officer_installation_dates**", (r) => r.fulfill({ json: [{ lodge_year: 2026, installation_date: "2026-10-21" }] }));
   await page.route("**/rest/v1/festive_board_meetings**", (r) => r.fulfill({ json: meetings }));
-  await page.route("**/rest/v1/meeting_series**", (r) => r.fulfill({ json: [{ id: "s1", name: "Regular meetings", meeting_type: "regular", ordinal: "2", weekday: 4, months: [10, 11, 12, 1, 2, 3, 4, 5], active: true }] }));
+  await page.route("**/rest/v1/meeting_series**", (r) => r.fulfill({ json: [] }));
   await page.route("**/rest/v1/meeting_diary_audit**", (r) => r.fulfill({ json: [] }));
   await page.route("**/rest/v1/rpc/meeting_dependencies**", (r) => r.fulfill({ json: { attendance: 30, bookings: 4, summonses: 1, dining_invoices: 2, booking_page: 1 } }));
   page.on("pageerror", (e) => console.log("PAGEERR", e.message)); page.on("console", (m) => m.type() === "error" && console.log("CONSOLE", m.text().slice(0, 200)));
@@ -38,7 +41,7 @@ test("Meeting diary has no overflow at 320px", { timeout: 90_000 }, async ({ pag
     const lum = (c: number[]) => c.slice(0, 3).map((v) => v / 255).map((v) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4)).reduce((s, v, i) => s + v * [0.2126, 0.7152, 0.0722][i], 0);
     const ratio = (a: number[], b: number[]) => { const [x, y] = [lum(a), lum(b)].sort((p, q) => q - p); return (x + 0.05) / (y + 0.05); };
     const issues: string[] = [];
-    for (const el of document.querySelectorAll<HTMLInputElement>("main input:not([type=hidden]), main select, main textarea")) {
+    for (const el of document.querySelectorAll<HTMLInputElement>("main input:not([type=hidden]):not([type=checkbox]), main select, main textarea")) {
       if (!el.getBoundingClientRect().width) continue;
       const name = (el.labels?.[0]?.innerText || el.getAttribute("aria-label") || "").trim();
       if (!name) issues.push("unlabelled " + el.outerHTML.slice(0, 80));
@@ -51,8 +54,14 @@ test("Meeting diary has no overflow at 320px", { timeout: 90_000 }, async ({ pag
     return issues;
   });
   expect(fieldIssues).toEqual([]);
+  for (const l of await page.locator("main label:has(input[type=checkbox])").all()) expect((await l.boundingBox())!.height).toBeGreaterThanOrEqual(44);
   await expect(page.getByText("Format dd/mm/yyyy")).toBeVisible();
   await page.getByPlaceholder("e.g. Emulation").fill("Emulation working");
+  await expect(page.getByTestId("outside-schedule")).toContainText("12 Sep");
+  await page.getByLabel("March", { exact: true }).check();
+  await expect(page.getByLabel("March week", { exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: /Add \d+ new meeting|No new meetings/ })).toBeVisible();
+  await check("schedule");
   await expectNoAxeViolations(page, "diary page");
   await page.evaluate(() => document.documentElement.classList.add("dark"));
   await expectNoAxeViolations(page, "diary page dark");

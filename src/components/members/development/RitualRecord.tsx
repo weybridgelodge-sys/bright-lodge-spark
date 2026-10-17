@@ -94,13 +94,13 @@ export default function RitualRecord({
               </table>
             </div>
             {savingId && list.some((r) => r.id === savingId) && (
-              <p className="text-[10px] text-gold/60 mt-1">Saving…</p>
+              <p className="text-[10px] text-gold mt-1">Saving…</p>
             )}
           </div>
         );
       })}
       {!canEdit && (
-        <p className="text-[11px] text-primary-foreground/60 italic">Read-only. The Director of Ceremonies or your Mentor fills in dates as you learn and deliver each piece.</p>
+        <p className="text-[11px] text-primary-foreground/80 italic">Read-only. The Director of Ceremonies or your Mentor fills in dates as you learn and deliver each piece.</p>
       )}
     </div>
   );

@@ -71,7 +71,7 @@ export default function MembersDashboard() {
         <h1 className="font-serif text-3xl text-gold mb-2">
           Welcome, {(profile as { preferred_name?: string | null } | null)?.preferred_name?.trim() || profile?.first_name?.trim() || "Brother"}
         </h1>
-        <p className="text-primary-foreground/60 text-sm">
+        <p className="text-primary-foreground/80 text-sm">
           The private area for brethren of Weybridge Lodge No. 6787.
         </p>
       </div>
@@ -93,7 +93,7 @@ export default function MembersDashboard() {
               <Activity className="w-4 h-4 text-gold shrink-0" />
               Lodge Health: {BAND_LABEL[health.overall]}
             </p>
-            <p className="text-xs text-primary-foreground/60 mt-0.5">{healthSummary(health)}</p>
+            <p className="text-xs text-primary-foreground/80 mt-0.5">{healthSummary(health)}</p>
           </div>
         </section>
       )}
@@ -105,7 +105,7 @@ export default function MembersDashboard() {
             <h2 className="font-serif text-lg text-gold">Latest notices</h2>
           </div>
           {notices.length === 0 ? (
-            <p className="text-xs text-primary-foreground/50">No notices yet.</p>
+            <p className="text-xs text-primary-foreground/80">No notices yet.</p>
           ) : (
             <ul className="space-y-3">
               {notices.map((n) => (
@@ -122,8 +122,8 @@ export default function MembersDashboard() {
                         {new Date(n.event_date).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" })}
                       </p>
                     )}
-                    <p className="text-xs text-primary-foreground/60 mt-1 line-clamp-3 whitespace-pre-wrap">{n.body}</p>
-                    <p className="text-[10px] text-gold/70 mt-1 uppercase tracking-wider">Click to read more</p>
+                    <p className="text-xs text-primary-foreground/80 mt-1 line-clamp-3 whitespace-pre-wrap">{n.body}</p>
+                    <p className="text-[10px] text-gold mt-1 uppercase tracking-wider">Click to read more</p>
                   </button>
                 </li>
               ))}
@@ -143,13 +143,13 @@ export default function MembersDashboard() {
             </Link>
           </div>
           {docs.length === 0 ? (
-            <p className="text-xs text-primary-foreground/50">No documents have been uploaded yet.</p>
+            <p className="text-xs text-primary-foreground/80">No documents have been uploaded yet.</p>
           ) : (
             <ul className="space-y-2">
               {docs.map((d) => (
                 <li key={d.id} className="text-sm flex items-center justify-between gap-2">
                   <span className="truncate">{d.title}</span>
-                  <span className="text-[10px] uppercase tracking-wider text-gold/70 shrink-0">{d.category}</span>
+                  <span className="text-[10px] uppercase tracking-wider text-gold shrink-0">{d.category}</span>
                 </li>
               ))}
             </ul>
@@ -166,7 +166,7 @@ export default function MembersDashboard() {
           <Link to="/members/working-groups" className="text-xs text-gold hover:underline">All groups →</Link>
         </div>
         {myGroups.length === 0 ? (
-          <p className="text-xs text-primary-foreground/50">You are not yet assigned to a working group. Every brother has a role — speak with the Secretary.</p>
+          <p className="text-xs text-primary-foreground/80">You are not yet assigned to a working group. Every brother has a role — speak with the Secretary.</p>
         ) : (
           <div className="flex flex-wrap gap-2">
             {myGroups.filter((g) => g.group).map((g) => (

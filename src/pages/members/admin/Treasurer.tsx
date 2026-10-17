@@ -119,7 +119,7 @@ function ReconciliationTab({
         </div>
         <div className="divide-y divide-gold/10">
           {periods.length === 0 && (
-            <p className="px-4 py-6 text-center text-primary-foreground/50">No periods yet.</p>
+            <p className="px-4 py-6 text-center text-primary-foreground/80">No periods yet.</p>
           )}
           {periods.map((p) => (
             <div key={p.id} className="p-4 space-y-2">
@@ -132,7 +132,7 @@ function ReconciliationTab({
                       ? <Badge variant="outline" className="border-gold/60 text-gold"><Lock className="w-3 h-3 mr-1" />Locked</Badge>
                       : <Badge variant="outline" className="border-emerald-500/60 text-emerald-300"><Unlock className="w-3 h-3 mr-1" />Open</Badge>}
                   </div>
-                  <p className="text-xs text-primary-foreground/60">
+                  <p className="text-xs text-primary-foreground/80">
                     {p.period_start && new Date(p.period_start).toLocaleDateString("en-GB")}
                     {p.period_start && p.period_end && " → "}
                     {p.period_end && new Date(p.period_end).toLocaleDateString("en-GB")}
@@ -170,10 +170,10 @@ function ReconciliationTab({
                   </p>
                   {p.unlock_reason && <p className="text-sm text-primary-foreground/85 italic">"{p.unlock_reason}"</p>}
                   <div className="flex flex-wrap items-center gap-3 text-xs">
-                    <span className={p.unlock_approved_by_treasurer ? "text-emerald-300" : "text-primary-foreground/50"}>
+                    <span className={p.unlock_approved_by_treasurer ? "text-emerald-300" : "text-primary-foreground/80"}>
                       {p.unlock_approved_by_treasurer ? "✓" : "○"} Treasurer approved
                     </span>
-                    <span className={p.unlock_approved_by_secretary ? "text-emerald-300" : "text-primary-foreground/50"}>
+                    <span className={p.unlock_approved_by_secretary ? "text-emerald-300" : "text-primary-foreground/80"}>
                       {p.unlock_approved_by_secretary ? "✓" : "○"} Secretary approved
                     </span>
                   </div>
@@ -246,7 +246,7 @@ function PeriodDialog({
           <div>
             <Label>Month</Label>
             <Input type="month" value={month} onChange={(e) => setMonth(e.target.value)} />
-            <p className="text-xs text-primary-foreground/60 mt-1">
+            <p className="text-xs text-primary-foreground/80 mt-1">
               The period covers the whole calendar month (1st to last day), labelled automatically.
             </p>
           </div>
@@ -292,13 +292,13 @@ function Inner() {
     <MembersLayout>
       <header className="mb-6">
         <h1 className="font-serif text-2xl md:text-3xl text-gold">Treasurer</h1>
-        <p className="text-primary-foreground/60 text-sm">
+        <p className="text-primary-foreground/80 text-sm">
           Journals, reports, bank reconciliation and period locking. Access follows the current Treasurer, Auditor 1, and Auditor 2 offices — it rotates automatically at Installation.
         </p>
       </header>
 
       {loading ? (
-        <p className="text-primary-foreground/60"><Loader2 className="w-4 h-4 mr-1 inline animate-spin" /> Loading…</p>
+        <p className="text-primary-foreground/80"><Loader2 className="w-4 h-4 mr-1 inline animate-spin" /> Loading…</p>
       ) : (
         <Tabs value={tab} onValueChange={setTab}>
           <TabsList className="flex flex-col w-full h-auto items-stretch gap-1 bg-navy p-2 rounded-sm border border-gold/20 mb-4">

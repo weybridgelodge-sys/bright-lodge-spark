@@ -625,14 +625,14 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
   };
 
   if (loading) {
-    return <p className="text-primary-foreground/60"><Loader2 className="w-4 h-4 mr-1 inline animate-spin" /> Loading…</p>;
+    return <p className="text-primary-foreground/80"><Loader2 className="w-4 h-4 mr-1 inline animate-spin" /> Loading…</p>;
   }
 
   return (
     <div className="space-y-4">
       <div className="rounded-sm border border-gold/20 bg-navy-light/30 p-4">
         <h2 className="font-serif text-lg text-gold mb-1">Event Accounts</h2>
-        <p className="text-primary-foreground/60 text-sm mb-3">
+        <p className="text-primary-foreground/80 text-sm mb-3">
           The Treasurer's own record of an event — budget, bookings, guests, catering numbers and money in.
           Nothing here is public-facing.
         </p>
@@ -690,13 +690,13 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
                 toast({ title: val ? "Now shown on the public Events page" : "Hidden from the public Events page" });
               }}
             />
-            <span>Ready to promote publicly <span className="text-primary-foreground/60">— shows a Ladies Festival tile on the public Events page and homepage</span></span>
+            <span>Ready to promote publicly <span className="text-primary-foreground/80">— shows a Ladies Festival tile on the public Events page and homepage</span></span>
           </label>
         )}
       </div>
 
       {!event ? (
-        <p className="text-primary-foreground/60 text-sm">No event selected.</p>
+        <p className="text-primary-foreground/80 text-sm">No event selected.</p>
       ) : (
         <>
           {/* Budget */}
@@ -704,7 +704,7 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
             <div className="overflow-x-auto">
               <table className="w-full text-sm min-w-[520px]">
                 <thead>
-                  <tr className="text-left text-xs uppercase tracking-wider text-primary-foreground/60 border-b border-gold/15">
+                  <tr className="text-left text-xs uppercase tracking-wider text-primary-foreground/80 border-b border-gold/15">
                     <th className="px-2 py-2">Category</th>
                     <th className="px-2 py-2">Mode</th>
                     <th className="px-2 py-2 text-right">Planned (£)</th>
@@ -713,7 +713,7 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
                 </thead>
                 <tbody>
                   {budget.length === 0 && (
-                    <tr><td colSpan={4} className="px-2 py-4 text-primary-foreground/50">No budget lines yet.</td></tr>
+                    <tr><td colSpan={4} className="px-2 py-4 text-primary-foreground/80">No budget lines yet.</td></tr>
                   )}
                   {(["income", "expense"] as const).map((t) => {
                     const ls = t === "income" ? incomeLines : expenseLines;
@@ -734,7 +734,7 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
                                   <div>
                                     <span className="font-medium text-primary-foreground">{l.category}</span>
                                     <span className="ml-2 text-[11px] uppercase tracking-wider text-gold border border-gold/30 rounded-sm px-1">Fixed</span>
-                                    <p className="text-xs text-primary-foreground/60">{SYSTEM_LINE_NOTE[l.system_key]}</p>
+                                    <p className="text-xs text-primary-foreground/80">{SYSTEM_LINE_NOTE[l.system_key]}</p>
                                     {canEdit && l.system_key === "ticket_sales" && (
                                       <Button type="button" size="sm" variant="outline" className="mt-1 border-gold/30 min-h-[44px]"
                                         disabled={!defaultTicketPlan(event?.adult_price_pence, event?.capacity)}
@@ -750,7 +750,7 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
                                 <div className="inline-flex rounded-sm border border-gold/20 overflow-hidden">
                                   {(["income", "expense"] as const).map((k) => (
                                     <button key={k} type="button" disabled={!canEdit}
-                                      className={`px-2 py-0.5 text-xs capitalize ${l.line_type === k ? "bg-gold text-navy" : "text-primary-foreground/60 hover:text-primary-foreground"}`}
+                                      className={`px-2 py-0.5 text-xs capitalize ${l.line_type === k ? "bg-gold text-navy" : "text-primary-foreground/80 hover:text-primary-foreground"}`}
                                       onClick={() => l.line_type !== k && updateBudgetLine(l.id, { line_type: k })}>
                                       {k}
                                     </button>
@@ -763,7 +763,7 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
                               <div className="inline-flex rounded-sm border border-gold/20 overflow-hidden">
                                 {(["total", "perHead"] as const).map((m) => (
                                   <button key={m} type="button" disabled={!canEdit}
-                                    className={`px-2 py-1 text-xs ${lineMode(l) === m ? "bg-gold text-navy" : "text-primary-foreground/60 hover:text-primary-foreground"}`}
+                                    className={`px-2 py-1 text-xs ${lineMode(l) === m ? "bg-gold text-navy" : "text-primary-foreground/80 hover:text-primary-foreground"}`}
                                     onClick={() => lineMode(l) !== m && setBudgetLineMode(l, m)}>
                                     {m === "total" ? "Total" : "Per head"}
                                   </button>
@@ -778,13 +778,13 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
                                     defaultValue={fromPence(l.unit_cost_pence ?? 0)}
                                     key={`u-${l.id}-${l.unit_cost_pence}`}
                                     onBlur={(e) => updatePerHead(l, toPence(e.target.value), l.quantity ?? 0)} />
-                                  <span className="text-primary-foreground/60">×</span>
+                                  <span className="text-primary-foreground/80">×</span>
                                   <Input type="number" min="0" step="1" className="w-20 text-right" disabled={!canEdit}
                                     aria-label="Quantity"
                                     defaultValue={String(l.quantity ?? 0)}
                                     key={`q-${l.id}-${l.quantity}`}
                                     onBlur={(e) => updatePerHead(l, l.unit_cost_pence ?? 0, Math.max(0, Math.round(parseFloat(e.target.value || "0") || 0)))} />
-                                  <span className="text-primary-foreground/60">=</span>
+                                  <span className="text-primary-foreground/80">=</span>
                                   <span className="tabular-nums text-gold font-medium">{money(l.planned_pence)}</span>
                                 </div>
                               ) : (
@@ -797,7 +797,7 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
                             {canEdit && (
                               <td className="px-2 py-1.5">
                                 {!l.system_key && <Button variant="ghost" size="icon" aria-label="Delete budget line"
-                                  className="text-primary-foreground/60 hover:text-destructive"
+                                  className="text-primary-foreground/80 hover:text-destructive"
                                   onClick={() => deleteBudgetLine(l.id)}>
                                   <Trash2 className="w-4 h-4" />
                                 </Button>}
@@ -830,7 +830,7 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
                   <div className="inline-flex rounded-sm border border-gold/20 overflow-hidden h-9">
                     {(["income", "expense"] as const).map((k) => (
                       <button key={k} type="button"
-                        className={`px-2 text-xs capitalize ${newLineType === k ? "bg-gold text-navy" : "text-primary-foreground/60 hover:text-primary-foreground"}`}
+                        className={`px-2 text-xs capitalize ${newLineType === k ? "bg-gold text-navy" : "text-primary-foreground/80 hover:text-primary-foreground"}`}
                         onClick={() => setNewLineType(k)}>
                         {k}
                       </button>
@@ -842,7 +842,7 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
                   <div className="inline-flex rounded-sm border border-gold/20 overflow-hidden h-9">
                     {(["total", "perHead"] as const).map((m) => (
                       <button key={m} type="button"
-                        className={`px-2 text-xs ${newMode === m ? "bg-gold text-navy" : "text-primary-foreground/60 hover:text-primary-foreground"}`}
+                        className={`px-2 text-xs ${newMode === m ? "bg-gold text-navy" : "text-primary-foreground/80 hover:text-primary-foreground"}`}
                         onClick={() => setNewMode(m)}>
                         {m === "total" ? "Total" : "Per head"}
                       </button>
@@ -885,7 +885,7 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
                 <span>{projectedResult >= 0 ? "Projected surplus" : "Projected deficit"}</span>
                 <span className="tabular-nums">{money(Math.abs(projectedResult))}</span>
               </div>
-              <p className="text-xs text-primary-foreground/50">
+              <p className="text-xs text-primary-foreground/80">
                 Planning figures only — what you intend to charge and spend. Actual money received or paid appears in Budget vs Actual and Event Reconciliation below.
               </p>
             </div>
@@ -903,7 +903,7 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
             ) : undefined}
           >
             {bookings.length === 0 ? (
-              <p className="text-primary-foreground/50 text-sm">No bookings recorded yet.</p>
+              <p className="text-primary-foreground/80 text-sm">No bookings recorded yet.</p>
             ) : (
               <div className="space-y-2">
                 {bookings.map((b) => {
@@ -916,7 +916,7 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
                           {open ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
                         </button>
                         <span className="text-primary-foreground font-medium">{b.payer_name}</span>
-                        <span className="text-primary-foreground/60 text-xs">
+                        <span className="text-primary-foreground/80 text-xs">
                           {b.ticket_count} ticket{b.ticket_count === 1 ? "" : "s"}
                           {b.is_placeholder ? " · names TBC" : ""} · {bGuests.length} guest row{bGuests.length === 1 ? "" : "s"}
                         </span>
@@ -940,7 +940,7 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
                               <Pencil className="w-4 h-4" />
                             </Button>
                             <Button variant="ghost" size="icon" aria-label="Delete booking"
-                              className="text-primary-foreground/60 hover:text-destructive" onClick={() => deleteBooking(b.id)}>
+                              className="text-primary-foreground/80 hover:text-destructive" onClick={() => deleteBooking(b.id)}>
                               <Trash2 className="w-4 h-4" />
                             </Button>
                           </>
@@ -948,10 +948,10 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
                       </div>
                       {open && (
                         <div className="border-t border-gold/10 px-3 py-2 space-y-2">
-                          {b.notes && <p className="text-xs text-primary-foreground/60">{b.notes}</p>}
+                          {b.notes && <p className="text-xs text-primary-foreground/80">{b.notes}</p>}
                           {preOrders.some((p) => p.booking_id === b.id) && (
                             <div className="text-sm">
-                              <p className="text-xs uppercase tracking-wider text-primary-foreground/60">Pre-orders (fixed at booking)</p>
+                              <p className="text-xs uppercase tracking-wider text-primary-foreground/80">Pre-orders (fixed at booking)</p>
                               <ul className="text-primary-foreground/90">
                                 {preOrders.filter((p) => p.booking_id === b.id).map((p, i) => <li key={i}>{p.quantity} × {p.name_snapshot} · {money(p.line_total_pence)}</li>)}
                               </ul>
@@ -960,7 +960,7 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
                           <div className="overflow-x-auto">
                             <table className="w-full text-sm min-w-[640px]">
                               <thead>
-                                <tr className="text-left text-xs uppercase tracking-wider text-primary-foreground/60">
+                                <tr className="text-left text-xs uppercase tracking-wider text-primary-foreground/80">
                                   <th className="px-2 py-1">Guest</th>
                                   <th className="px-2 py-1">Seating</th>
                                   <th className="px-2 py-1">Menu</th>
@@ -971,19 +971,19 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
                               </thead>
                               <tbody>
                                 {bGuests.length === 0 && (
-                                  <tr><td colSpan={6} className="px-2 py-2 text-primary-foreground/50">No guests entered.</td></tr>
+                                  <tr><td colSpan={6} className="px-2 py-2 text-primary-foreground/80">No guests entered.</td></tr>
                                 )}
                                 {bGuests.map((g) => (
                                   <tr key={g.id} className="border-t border-gold/10">
                                     <td className="px-2 py-1">
-                                      {g.name || <span className="text-primary-foreground/50">TBC</span>}
+                                      {g.name || <span className="text-primary-foreground/80">TBC</span>}
                                       {canEdit ? (
                                         <>
                                           <button type="button" title="Toggle female"
-                                            className={`ml-2 px-1.5 py-0.5 rounded-sm text-[10px] font-semibold border ${g.is_female ? "bg-gold text-navy border-gold" : "border-gold/30 text-primary-foreground/50"}`}
+                                            className={`ml-2 px-1.5 py-0.5 rounded-sm text-[10px] font-semibold border ${g.is_female ? "bg-gold text-navy border-gold" : "border-gold/30 text-primary-foreground/80"}`}
                                             onClick={() => toggleGuestFlag(g, "is_female")}>F</button>
                                           <button type="button" title="Toggle VIP"
-                                            className={`ml-1 px-1.5 py-0.5 rounded-sm text-[10px] font-semibold border ${g.is_vip ? "bg-gold text-navy border-gold" : "border-gold/30 text-primary-foreground/50"}`}
+                                            className={`ml-1 px-1.5 py-0.5 rounded-sm text-[10px] font-semibold border ${g.is_vip ? "bg-gold text-navy border-gold" : "border-gold/30 text-primary-foreground/80"}`}
                                             onClick={() => toggleGuestFlag(g, "is_vip")}>VIP</button>
                                         </>
                                       ) : (
@@ -1003,7 +1003,7 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
                                           <Pencil className="w-4 h-4" />
                                         </Button>
                                         <Button variant="ghost" size="icon" aria-label="Delete guest"
-                                          className="text-primary-foreground/60 hover:text-destructive" onClick={() => deleteGuest(g.id)}>
+                                          className="text-primary-foreground/80 hover:text-destructive" onClick={() => deleteGuest(g.id)}>
                                           <Trash2 className="w-4 h-4" />
                                         </Button>
                                       </td>
@@ -1033,7 +1033,7 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
           {/* Catering rollup */}
           <div className="grid gap-4 md:grid-cols-2">
             <Card title="Catering — menu choices">
-              {rollup.menu.length === 0 ? <p className="text-primary-foreground/50 text-sm">No guests entered.</p> : (
+              {rollup.menu.length === 0 ? <p className="text-primary-foreground/80 text-sm">No guests entered.</p> : (
                 <ul className="text-sm space-y-1">
                   {rollup.menu.map(([k, v]) => (
                     <li key={k} className="flex justify-between"><span className="text-primary-foreground/80">{k}</span><span className="text-gold tabular-nums">{v}</span></li>
@@ -1042,7 +1042,7 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
               )}
             </Card>
             <Card title="Catering — wine pre-orders">
-              {rollup.wine.length === 0 ? <p className="text-primary-foreground/50 text-sm">No guests entered.</p> : (
+              {rollup.wine.length === 0 ? <p className="text-primary-foreground/80 text-sm">No guests entered.</p> : (
                 <ul className="text-sm space-y-1">
                   {rollup.wine.map(([k, v]) => (
                     <li key={k} className="flex justify-between"><span className="text-primary-foreground/80">{k}</span><span className="text-gold tabular-nums">{v}</span></li>
@@ -1057,7 +1057,7 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
             <div className="overflow-x-auto">
               <table className="w-full text-sm min-w-[560px]">
                 <thead>
-                  <tr className="text-left text-xs uppercase tracking-wider text-primary-foreground/60 border-b border-gold/15">
+                  <tr className="text-left text-xs uppercase tracking-wider text-primary-foreground/80 border-b border-gold/15">
                     <th className="px-2 py-2">Category</th>
                     <th className="px-2 py-2 text-right">Planned</th>
                     <th className="px-2 py-2 text-right">Actual</th>
@@ -1069,7 +1069,7 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
                     <td colSpan={4} className="px-2 py-1.5 text-xs uppercase tracking-wider text-gold">Income actually received</td>
                   </tr>
                   {budgetVsActual.incomeRows.length === 0 && (
-                    <tr><td colSpan={4} className="px-2 py-2 text-primary-foreground/50">No income budget lines.</td></tr>
+                    <tr><td colSpan={4} className="px-2 py-2 text-primary-foreground/80">No income budget lines.</td></tr>
                   )}
                   {budgetVsActual.incomeRows.map((r) => (
                     <tr key={r.key} className="border-b border-gold/10">
@@ -1089,7 +1089,7 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
                     <td colSpan={4} className="px-2 py-1.5 text-xs uppercase tracking-wider text-gold">Costs actually incurred</td>
                   </tr>
                   {budgetVsActual.expenseRows.length === 0 && (
-                    <tr><td colSpan={4} className="px-2 py-2 text-primary-foreground/50">No expense budget lines.</td></tr>
+                    <tr><td colSpan={4} className="px-2 py-2 text-primary-foreground/80">No expense budget lines.</td></tr>
                   )}
                   {budgetVsActual.expenseRows.map((r) => (
                     <tr key={r.key} className="border-b border-gold/10">
@@ -1116,17 +1116,17 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
             </div>
             {(budgetVsActual.unmatchedIncome.length > 0 || budgetVsActual.unmatchedExpense.length > 0) && (
               <div className="pt-2">
-                <p className="text-xs uppercase tracking-wider text-primary-foreground/60 mb-1">Ledger amounts not matched to a budget category</p>
+                <p className="text-xs uppercase tracking-wider text-primary-foreground/80 mb-1">Ledger amounts not matched to a budget category</p>
                 <ul className="text-sm space-y-1">
                   {budgetVsActual.unmatchedIncome.map((a) => (
                     <li key={`i-${a.code}`} className="flex justify-between">
-                      <span className="text-primary-foreground/80">{a.code} — {a.name} <span className="text-primary-foreground/50">(income)</span></span>
+                      <span className="text-primary-foreground/80">{a.code} — {a.name} <span className="text-primary-foreground/80">(income)</span></span>
                       <span className="tabular-nums">{money(a.pence)}</span>
                     </li>
                   ))}
                   {budgetVsActual.unmatchedExpense.map((a) => (
                     <li key={`e-${a.code}`} className="flex justify-between">
-                      <span className="text-primary-foreground/80">{a.code} — {a.name} <span className="text-primary-foreground/50">(cost)</span></span>
+                      <span className="text-primary-foreground/80">{a.code} — {a.name} <span className="text-primary-foreground/80">(cost)</span></span>
                       <span className="tabular-nums">{money(a.pence)}</span>
                     </li>
                   ))}
@@ -1134,7 +1134,7 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
               </div>
             )}
 
-            <p className="text-xs text-primary-foreground/50">
+            <p className="text-xs text-primary-foreground/80">
               Fixed lines come from paid bookings and real Stripe fees. Other lines are journal lines tagged to this event (Transaction Detail). Event money is held for others (2300), never lodge income.
             </p>
           </Card>
@@ -1172,25 +1172,25 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
             {stripeBalance && (
               <p className="text-sm text-primary-foreground/80">
                 Events Stripe account (all events): available {money(stripeBalance.available_pence)} + pending {money(stripeBalance.pending_pence)} = <strong>{money(stripeBalance.available_pence + stripeBalance.pending_pence)}</strong>
-                <span className="text-primary-foreground/60"> · checked {new Date(stripeBalance.checked_at).toLocaleString("en-GB")}</span>
+                <span className="text-primary-foreground/80"> · checked {new Date(stripeBalance.checked_at).toLocaleString("en-GB")}</span>
               </p>
             )}
-            <p className="text-xs text-primary-foreground/60">Tag each Lloyds payout credit to this event as Dr 1000 / Cr 2300 in Transaction Detail; vendor payments out as Dr 2300 / Cr 1000.</p>
+            <p className="text-xs text-primary-foreground/80">Tag each Lloyds payout credit to this event as Dr 1000 / Cr 2300 in Transaction Detail; vendor payments out as Dr 2300 / Cr 1000.</p>
           </Card>
 
           <Card title="Cash/cheque awaiting banking">
-            {cashBookings.length === 0 ? <p className="text-sm text-primary-foreground/50">No cash or cheque bookings.</p> : (
+            {cashBookings.length === 0 ? <p className="text-sm text-primary-foreground/80">No cash or cheque bookings.</p> : (
               <ul className="text-sm space-y-1">
                 {cashBookings.map((b) => (
                   <li key={b.id} className="flex justify-between gap-3"><span className="text-primary-foreground/80 break-words min-w-0">{b.reference || b.payer_name || "Booking"}</span><span className="tabular-nums shrink-0">{money(receivedSplit(b).cash)}</span></li>
                 ))}
               </ul>
             )}
-            <p className="text-xs text-primary-foreground/60">Recorded only — nothing is posted when marked paid. When banked, tag the Lloyds credit to this event (Dr 1000 / Cr 2300). Still to bank: {money(tie.cashAwaitingBanking)}.</p>
+            <p className="text-xs text-primary-foreground/80">Recorded only — nothing is posted when marked paid. When banked, tag the Lloyds credit to this event (Dr 1000 / Cr 2300). Still to bank: {money(tie.cashAwaitingBanking)}.</p>
           </Card>
 
           <Card title="Events Stripe payouts">
-            {payouts.length === 0 ? <p className="text-sm text-primary-foreground/50">No payouts received from the events Stripe account yet.</p> : (
+            {payouts.length === 0 ? <p className="text-sm text-primary-foreground/80">No payouts received from the events Stripe account yet.</p> : (
               <ul className="space-y-2">
                 {payouts.map((p) => {
                   const used = allocatedByPayout(p.id);
@@ -1199,7 +1199,7 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
                     <li key={p.id} className="rounded-sm border border-gold/15 p-3 text-sm space-y-2">
                       <div className="flex flex-wrap justify-between gap-2">
                         <span className="text-primary-foreground">{new Date(`${p.arrival_date}T12:00:00`).toLocaleDateString("en-GB")} · <span className="tabular-nums">{money(p.amount_pence)}</span></span>
-                        <span className="text-primary-foreground/60 break-all">{p.stripe_payout_id}</span>
+                        <span className="text-primary-foreground/80 break-all">{p.stripe_payout_id}</span>
                       </div>
                       <p className="text-primary-foreground/70">Allocated: {money(used)} · Unallocated: {money(p.amount_pence - used)}{mine ? ` · This event: ${money(mine.amount_pence)}` : ""}</p>
                       {canEdit && (

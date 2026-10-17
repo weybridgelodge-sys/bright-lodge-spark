@@ -84,7 +84,7 @@ export default function EventBalancesPanel({ bookings, canRegenerate, onRecorded
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="text-left text-primary-foreground/60 text-xs">
+            <tr className="text-left text-primary-foreground/80 text-xs">
               <th className="py-1 pr-3 font-normal">Ref</th><th className="py-1 pr-3 font-normal">Name</th>
               <th className="py-1 pr-3 font-normal text-right">Paid</th><th className="py-1 pr-3 font-normal text-right">Due</th>
               <th className="py-1 pr-3 font-normal">Due date</th><th className="py-1 pr-3 font-normal">Last reminder</th><th className="py-1 font-normal">Link</th>
@@ -103,7 +103,7 @@ export default function EventBalancesPanel({ bookings, canRegenerate, onRecorded
                     {ukDate(b.balance_due_date)}
                     {overdue && <span className="ml-2 inline-block rounded-sm border border-destructive px-1.5 text-xs font-semibold text-destructive">Overdue</span>}
                   </td>
-                  <td className="py-2 pr-3 text-primary-foreground/60">{lastSent[b.id] ? ukDate(lastSent[b.id].slice(0, 10)) : "—"}</td>
+                  <td className="py-2 pr-3 text-primary-foreground/80">{lastSent[b.id] ? ukDate(lastSent[b.id].slice(0, 10)) : "—"}</td>
                   <td className="py-2">
                     <div className="flex flex-wrap gap-1">
                       <Button size="sm" variant="outline" className="border-gold/30" disabled={!!busy} onClick={() => act(b, "get")}>Copy link</Button>
@@ -129,7 +129,7 @@ export default function EventBalancesPanel({ bookings, canRegenerate, onRecorded
                         <div className="sm:col-span-3 flex flex-wrap gap-2">
                           <Button type="submit" size="sm" disabled={saving}>{saving ? "Saving…" : "Record payment"}</Button>
                           <Button type="button" size="sm" variant="ghost" disabled={saving} onClick={() => setDraft(null)}>Cancel</Button>
-                          <span className="text-xs text-primary-foreground/60 self-center">Up to {money(b.balance_due_pence ?? 0)}. Part payments are allowed; no fee applies.</span>
+                          <span className="text-xs text-primary-foreground/80 self-center">Up to {money(b.balance_due_pence ?? 0)}. Part payments are allowed; no fee applies.</span>
                         </div>
                       </form>
                     </td>
@@ -140,7 +140,7 @@ export default function EventBalancesPanel({ bookings, canRegenerate, onRecorded
           </tbody>
         </table>
       </div>
-      <p className="text-xs text-primary-foreground/50">Overdue balances are flagged only — seats are never released automatically.</p>
+      <p className="text-xs text-primary-foreground/80">Overdue balances are flagged only — seats are never released automatically.</p>
     </div>
   );
 }

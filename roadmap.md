@@ -99,3 +99,8 @@
 - [x] Record balance received (Admin/Treasurer), partial allowed, idempotent, audited
 - [x] Tie-out split cash vs online per payment row
 - [x] Tests; deploy event-record-balance
+
+## Accessibility + diary schedule (Oct 2026)
+- [x] Shared field style; diary passes 320px + axe in both themes
+- [x] Per-month meeting schedule with inference, preview, outside-schedule list
+- [ ] Fix remaining axe findings on 32 portal phone tests (awaiting user decision on larger items)

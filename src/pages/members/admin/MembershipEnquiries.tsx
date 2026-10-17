@@ -99,7 +99,7 @@ function Inner() {
       <header className="mb-4 flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <h1 className="font-serif text-2xl md:text-3xl text-gold">Membership Enquiries</h1>
-          <p className="text-primary-foreground/60 text-sm">Enquiries from the public Join Us form, plus any you add by hand. Convert genuine ones to candidates and dismiss the rest.</p>
+          <p className="text-primary-foreground/80 text-sm">Enquiries from the public Join Us form, plus any you add by hand. Convert genuine ones to candidates and dismiss the rest.</p>
         </div>
         {canEdit && (
           <button onClick={() => setAdding(true)} className="inline-flex items-center gap-1.5 min-h-11 px-4 rounded-sm text-sm text-accent-foreground bg-gold-shimmer font-semibold">
@@ -119,9 +119,9 @@ function Inner() {
       </div>
 
       {loading ? (
-        <p className="text-sm text-primary-foreground/60">Loading…</p>
+        <p className="text-sm text-primary-foreground/80">Loading…</p>
       ) : visible.length === 0 ? (
-        <p className="text-sm text-primary-foreground/60 italic">No enquiries in this view.</p>
+        <p className="text-sm text-primary-foreground/80 italic">No enquiries in this view.</p>
       ) : (
         <div className="space-y-3">
           {visible.map((e) => {
@@ -135,7 +135,7 @@ function Inner() {
                     <p className="text-xs text-primary-foreground/70 break-all">
                       {[e.email, e.phone].filter(Boolean).join(" · ") || "No contact details"}
                     </p>
-                    <p className="text-[11px] text-primary-foreground/50 mt-0.5">
+                    <p className="text-[11px] text-primary-foreground/80 mt-0.5">
                       {new Date(e.created_at).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" })}
                       {e.source && ` · Source: ${e.source}`}
                     </p>
@@ -145,7 +145,7 @@ function Inner() {
                   </span>
                 </div>
                 {e.reason && <p className="text-sm text-primary-foreground/80 mt-3 whitespace-pre-line">{e.reason}</p>}
-                {e.notes && <p className="text-xs text-primary-foreground/60 mt-2 whitespace-pre-line italic">{e.notes}</p>}
+                {e.notes && <p className="text-xs text-primary-foreground/80 mt-2 whitespace-pre-line italic">{e.notes}</p>}
 
                 <div className="flex flex-wrap items-center gap-2 mt-3">
                   {t === "converted" ? (
@@ -176,7 +176,7 @@ function Inner() {
                             aria-label="Dismissal note"
                             className="flex-1 min-w-[12rem] bg-navy border border-gold/20 rounded-sm px-2 py-1.5 text-xs text-primary-foreground" />
                           <button disabled={busy === e.id} onClick={() => dismiss(e)} className={`${btn} border border-gold/40 text-gold`}>Confirm dismiss</button>
-                          <button onClick={() => { setDismissing(null); setNote(""); }} className={`${btn} text-primary-foreground/60`}>Cancel</button>
+                          <button onClick={() => { setDismissing(null); setNote(""); }} className={`${btn} text-primary-foreground/80`}>Cancel</button>
                         </div>
                       ) : (
                         <button disabled={busy === e.id} onClick={() => { setDismissing(e.id); setNote(""); }} className={`${btn} border border-gold/20 text-primary-foreground/70 hover:border-gold/50`}>

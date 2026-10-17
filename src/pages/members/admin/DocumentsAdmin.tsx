@@ -189,7 +189,7 @@ function Inner() {
     <MembersLayout>
       <div className="mb-6 border-b border-gold/15 pb-4">
         <h1 className="font-serif text-3xl text-gold mb-1">Document Archive — Admin</h1>
-        <p className="text-xs text-primary-foreground/60">Upload, replace, and manage Lodge documents.</p>
+        <p className="text-xs text-primary-foreground/80">Upload, replace, and manage Lodge documents.</p>
       </div>
 
       <div className="mb-4 bg-gold/5 border border-gold/20 rounded-sm p-3 flex flex-wrap items-center gap-3">
@@ -220,7 +220,7 @@ function Inner() {
         </select>
         {category === "learning_development" && (
           <label className="md:col-span-2 flex flex-col gap-1">
-            <span className="text-[11px] uppercase tracking-wider text-gold/70 font-semibold">Minimum degree to view</span>
+            <span className="text-[11px] uppercase tracking-wider text-gold font-semibold">Minimum degree to view</span>
             <select value={degree} onChange={(e) => setDegree(e.target.value as DegreeOrGeneral)}
               className="bg-navy border border-gold/20 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-gold">
               <option value="general">{GENERAL_LABEL}</option>
@@ -244,13 +244,13 @@ function Inner() {
           <button key={c} onClick={() => setFilter(c)}
             className={`px-3 py-1.5 sm:py-1 text-xs uppercase tracking-wider rounded-sm border ${
               filter === c ? "border-gold text-gold bg-gold/10"
-                : "border-gold/20 text-primary-foreground/60 hover:text-gold"
+                : "border-gold/20 text-primary-foreground/80 hover:text-gold"
             }`}>{c === "all" ? "All" : CATEGORY_LABELS[c]}</button>
         ))}
       </div>
 
       {filtered.length === 0 ? (
-        <p className="text-sm text-primary-foreground/50">No documents in this category.</p>
+        <p className="text-sm text-primary-foreground/80">No documents in this category.</p>
       ) : (
         <ul className="divide-y divide-gold/10 border border-gold/15 rounded-sm bg-navy-dark/40">
           {filtered.map((d) => (
@@ -260,7 +260,7 @@ function Inner() {
                 <div className="min-w-0">
                   <p className="text-sm font-semibold leading-tight line-clamp-2" title={d.title}>{d.title}</p>
                   {d.description && <p className="text-xs text-primary-foreground/70 mt-1 whitespace-pre-wrap">{d.description}</p>}
-                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-[11px] text-primary-foreground/50">
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-[11px] text-primary-foreground/80">
                     <span className="text-gold bg-gold/5 px-2 py-0.5 rounded-sm border border-gold/15">{CATEGORY_LABELS[d.category]}</span>
                     <span>{new Date(d.created_at).toLocaleDateString("en-GB")}</span>
                     {d.category === "learning_development" && (

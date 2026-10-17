@@ -84,14 +84,14 @@ export default function MemberImport({ onDone }: { onDone: () => void }) {
             {preview.results.map((r) => (
               <li key={r.row} className="p-3 text-sm flex flex-col gap-1">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-primary-foreground/50 text-xs">Row {r.row}</span>
+                  <span className="text-primary-foreground/80 text-xs">Row {r.row}</span>
                   <span className="break-all">{r.email || "—"}</span>
                   <span className={`text-[10px] uppercase tracking-wider border rounded-sm px-2 py-0.5 ${r.action === "error" ? "border-destructive text-destructive" : "border-gold/40 text-gold"}`}>
                     {LABEL[r.action]}
                   </span>
                 </div>
                 {r.message && <p className="text-xs text-destructive break-words">{r.message}</p>}
-                {r.fields?.length ? <p className="text-xs text-primary-foreground/60 break-words">{r.fields.join(", ")}</p> : null}
+                {r.fields?.length ? <p className="text-xs text-primary-foreground/80 break-words">{r.fields.join(", ")}</p> : null}
               </li>
             ))}
           </ul>

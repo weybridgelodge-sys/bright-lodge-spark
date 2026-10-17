@@ -182,7 +182,7 @@ export default function BalanceSheetReport({ canEdit }: { canEdit: boolean }) {
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="text-primary-foreground/60 border-b border-gold/20">
+            <tr className="text-primary-foreground/80 border-b border-gold/20">
               <th className="text-left py-2 font-normal">Account</th>
               <th className="text-right py-2 font-normal">{curLabel}</th>
               <th className="text-right py-2 font-normal">{priLabel}</th>
@@ -190,7 +190,7 @@ export default function BalanceSheetReport({ canEdit }: { canEdit: boolean }) {
           </thead>
           <tbody>
             {rows.length === 0 && (
-              <tr><td colSpan={3} className="py-3 text-primary-foreground/50">No balances on either date.</td></tr>
+              <tr><td colSpan={3} className="py-3 text-primary-foreground/80">No balances on either date.</td></tr>
             )}
             {rows.map((r) => (
               <DrillAccountRow key={r.code} code={r.code} name={r.name} current={r.current} prior={r.prior}
@@ -213,7 +213,7 @@ export default function BalanceSheetReport({ canEdit }: { canEdit: boolean }) {
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <h2 className="font-serif text-lg text-gold mb-1">Balance Sheet</h2>
-            <p className="text-primary-foreground/60 text-sm">
+            <p className="text-primary-foreground/80 text-sm">
               Cumulative balances to the chosen date. Reserves are derived (General Fund brought forward plus
               the year-to-date surplus or deficit). Once a year is closed on Year End, its closing journal carries that surplus into the General Fund brought forward.
             </p>
@@ -278,12 +278,12 @@ export default function BalanceSheetReport({ canEdit }: { canEdit: boolean }) {
             </Select>
           </div>
         </div>
-        <p className="text-primary-foreground/50 text-xs mt-2">
+        <p className="text-primary-foreground/80 text-xs mt-2">
           {cur.label} · comparative {pri.label}
         </p>
 
         {loading ? (
-          <p className="text-primary-foreground/60 mt-4"><Loader2 className="w-4 h-4 mr-1 inline animate-spin" /> Building report…</p>
+          <p className="text-primary-foreground/80 mt-4"><Loader2 className="w-4 h-4 mr-1 inline animate-spin" /> Building report…</p>
         ) : (
           <>
             <Section title="Assets" rows={assets} totalLabel="Total assets" tc={assetCur} tp={assetPri} />
@@ -338,7 +338,7 @@ export default function BalanceSheetReport({ canEdit }: { canEdit: boolean }) {
         )}
         {!canEdit && <p className="sr-only">Read only</p>}
         {accounts.length === 0 && !loading && (
-          <p className="text-primary-foreground/50 text-xs mt-3">No chart of accounts found.</p>
+          <p className="text-primary-foreground/80 text-xs mt-3">No chart of accounts found.</p>
         )}
       </section>
       <AccountDrilldown target={drill} onClose={() => setDrill(null)} />

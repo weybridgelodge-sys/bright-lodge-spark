@@ -18,7 +18,7 @@ export default function PiecePeopleDrawer({
     <div>
       <h3 className={`text-xs uppercase tracking-wider mb-2 ${tone}`}>{title} ({list.length})</h3>
       {list.length === 0 ? (
-        <p className="text-xs text-primary-foreground/50 italic">None.</p>
+        <p className="text-xs text-primary-foreground/80 italic">None.</p>
       ) : (
         <ul className="flex flex-wrap gap-2">
           {list.map((m) => (
@@ -44,17 +44,17 @@ export default function PiecePeopleDrawer({
       >
         <div className="flex items-start justify-between gap-3 mb-4">
           <div>
-            <p className="text-[10px] uppercase tracking-wider text-gold/70">{rehearsalDisplayLabel(piece.ritual_group)}</p>
+            <p className="text-[10px] uppercase tracking-wider text-gold">{rehearsalDisplayLabel(piece.ritual_group)}</p>
             <h2 className="font-serif text-lg text-primary-foreground">{piece.piece}</h2>
           </div>
-          <button onClick={onClose} className="text-gold/70 hover:text-gold p-1" aria-label="Close">
+          <button onClick={onClose} className="text-gold hover:text-gold p-1" aria-label="Close">
             <X className="w-5 h-5" />
           </button>
         </div>
         <div className="space-y-5">
           <Section title="Available now (Rehearsal / Lodge)" list={delivered} tone="text-emerald-300" />
           <Section title="Candidates (Learned / Assessed)" list={candidates} tone="text-gold" />
-          <Section title="Not started" list={notStarted} tone="text-primary-foreground/60" />
+          <Section title="Not started" list={notStarted} tone="text-primary-foreground/80" />
         </div>
       </aside>
     </div>

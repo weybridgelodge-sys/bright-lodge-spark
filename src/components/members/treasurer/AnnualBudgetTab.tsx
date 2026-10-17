@@ -23,10 +23,10 @@ const Group = ({ title, rows, totalPence, totalLabel, hint, amounts, canEdit, on
 }) => (
   <div className="mt-5">
     <h4 className="font-serif text-gold mb-2">{title}</h4>
-    {hint && <p className="text-[11px] text-primary-foreground/50 mb-2">{hint}</p>}
+    {hint && <p className="text-[11px] text-primary-foreground/80 mb-2">{hint}</p>}
     <div className="space-y-2">
       {rows.length === 0 && (
-        <p className="text-xs text-primary-foreground/50">No categories defined.</p>
+        <p className="text-xs text-primary-foreground/80">No categories defined.</p>
       )}
       {rows.map((a) => (
         <div key={a.id} className="grid grid-cols-[1fr_auto] items-center gap-3">
@@ -172,13 +172,13 @@ export default function AnnualBudgetTab({ canEdit }: { canEdit: boolean }) {
           </Select>
         </div>
 
-        <p className="text-xs text-primary-foreground/60">
+        <p className="text-xs text-primary-foreground/80">
           Lodge year {new Date(ly.start).toLocaleDateString("en-GB")} → {new Date(ly.end).toLocaleDateString("en-GB")}.
           One budgeted figure per category; each lodge year is independent.
         </p>
 
         {loading ? (
-          <p className="text-primary-foreground/60"><Loader2 className="w-4 h-4 mr-1 inline animate-spin" /> Loading…</p>
+          <p className="text-primary-foreground/80"><Loader2 className="w-4 h-4 mr-1 inline animate-spin" /> Loading…</p>
         ) : (
           <>
             <Group

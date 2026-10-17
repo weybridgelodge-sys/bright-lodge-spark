@@ -177,7 +177,7 @@ function Inner() {
       <div className="flex items-end justify-between gap-3 flex-wrap">
         <div>
           <h1 className="font-serif text-2xl text-primary-foreground">Ad-hoc Socials</h1>
-          <p className="text-xs text-primary-foreground/60 mt-1">
+          <p className="text-xs text-primary-foreground/80 mt-1">
             Casual events outside the summons — Sunday lunches, quiz nights, family days.
           </p>
         </div>
@@ -228,7 +228,7 @@ function Inner() {
               rows={2}
               placeholder="candidate@example.com, friend@example.com"
             />
-            <p className="text-xs text-primary-foreground/50 mt-1">
+            <p className="text-xs text-primary-foreground/80 mt-1">
               These addresses will receive the same invite alongside all active members.
             </p>
           </div>
@@ -284,9 +284,9 @@ function SocialsList({
 }) {
   return (
     <div>
-      <h2 className="text-xs uppercase tracking-widest text-primary-foreground/50 mb-2">{heading}</h2>
+      <h2 className="text-xs uppercase tracking-widest text-primary-foreground/80 mb-2">{heading}</h2>
       {items.length === 0 ? (
-        <div className="text-sm text-primary-foreground/40 italic py-4">Nothing to show.</div>
+        <div className="text-sm text-primary-foreground/80 italic py-4">Nothing to show.</div>
       ) : (
         <div className="space-y-2">
           {items.map((s) => (
@@ -306,12 +306,12 @@ function SocialsList({
                     </p>
                   )}
                   {s.guest_count > 0 && (
-                    <p className="text-xs text-primary-foreground/50 mt-2">
+                    <p className="text-xs text-primary-foreground/80 mt-2">
                       + {s.guest_count} guest{s.guest_count === 1 ? "" : "s"} invited
                     </p>
                   )}
                   {s.notified_at && (
-                    <p className="text-xs text-primary-foreground/40 mt-1">
+                    <p className="text-xs text-primary-foreground/80 mt-1">
                       Invited {s.notified_member_count} recipients on {fmt(s.notified_at)}
                     </p>
                   )}

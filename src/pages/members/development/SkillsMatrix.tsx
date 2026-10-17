@@ -50,7 +50,7 @@ function Inner() {
       <div className="flex items-end justify-between gap-3 flex-wrap">
         <div>
           <h1 className="font-serif text-2xl text-primary-foreground">Lodge Ritual Skills Matrix</h1>
-          <p className="text-xs text-primary-foreground/60 mt-1">
+          <p className="text-xs text-primary-foreground/80 mt-1">
             Every active member by every ritual piece. Red = no one qualified · Amber = single point of failure · Green = two or more.
           </p>
         </div>

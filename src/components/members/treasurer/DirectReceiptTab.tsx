@@ -383,13 +383,13 @@ export default function DirectReceiptTab({ canEdit }: { canEdit: boolean }) {
     <div className="min-w-0 space-y-6 overflow-x-hidden">
       <section className="min-w-0 rounded-lg border border-gold/20 bg-primary-foreground/5 p-4">
         <h2 className="font-serif text-lg text-gold mb-1">Record a Direct Receipt</h2>
-        <p className="text-primary-foreground/60 text-sm mb-4">
+        <p className="text-primary-foreground/80 text-sm mb-4">
           For money received straight into the bank — e.g. a bank transfer or cash paid in. Posts a double-entry:
           Dr 1000 Bank, Cr the selected income account. Add extra lines if the banking doesn't map to a single account.
         </p>
 
         {loading ? (
-          <p className="text-primary-foreground/60"><Loader2 className="w-4 h-4 mr-1 inline animate-spin" /> Loading…</p>
+          <p className="text-primary-foreground/80"><Loader2 className="w-4 h-4 mr-1 inline animate-spin" /> Loading…</p>
         ) : (
           <>
             <div className="mb-4 min-w-0 max-w-xl">
@@ -404,7 +404,7 @@ export default function DirectReceiptTab({ canEdit }: { canEdit: boolean }) {
                   <SelectItem className="whitespace-normal" value="clear_prepayment">Subscription: clear an advance payment now the year has been charged</SelectItem>
                 </SelectContent>
               </Select>
-              <p className="break-words text-primary-foreground/50 text-xs mt-1">
+              <p className="break-words text-primary-foreground/80 text-xs mt-1">
                 {mode === "candidate" && "Dr 1000 Bank · Cr 4000 Subscriptions, 3100 reserve pots (tagged) and 2200 Relief Chest — the full split, because no charge exists yet for this person."}
                 {mode === "advance" && "Dr 1000 Bank · Cr 2100 Deferred Income. No split — nothing is recognised as income yet. Use \"clear an advance payment\" after October's charge to move it onto their account."}
                 {mode === "in_year" && "Dr 1000 Bank · Cr 1100 Debtors. No split — the reserves and Relief Chest shares were posted when the year was charged."}
@@ -436,7 +436,7 @@ export default function DirectReceiptTab({ canEdit }: { canEdit: boolean }) {
                       ))}
                     </SelectContent>
                   </Select>
-                  <p className="text-primary-foreground/50 text-xs mt-1">
+                  <p className="text-primary-foreground/80 text-xs mt-1">
                     Card fee-cover and new-member registration fees are handled by their own dedicated tabs — use this
                     for everything else, including bank-transfer or cash payments that don't go through Stripe.
                   </p>
@@ -598,11 +598,11 @@ function ClearPrepayment({ lines, pick, setPick, canEdit, saving, onSubmit, peri
   return (
     <div className="space-y-3">
       <div className="grid gap-3 sm:grid-cols-2">{dateInput}{period}</div>
-      <p className="text-primary-foreground/60 text-sm">
+      <p className="text-primary-foreground/80 text-sm">
         Outstanding subscription charges. Tick each member whose prepayment is sitting in 2100 Deferred Income — each gets its own pair of lines.
       </p>
       {lines.length === 0 ? (
-        <p className="text-primary-foreground/50 text-sm">No outstanding charges found.</p>
+        <p className="text-primary-foreground/80 text-sm">No outstanding charges found.</p>
       ) : (
         <ul className="divide-y divide-gold/10 rounded border border-gold/10">
           {lines.map((l) => (
@@ -610,7 +610,7 @@ function ClearPrepayment({ lines, pick, setPick, canEdit, saving, onSubmit, peri
               <Checkbox id={`clr-${l.id}`} checked={!!pick[l.id]} disabled={!canEdit}
                 onCheckedChange={(v) => setPick({ ...pick, [l.id]: v === true })} />
               <Label htmlFor={`clr-${l.id}`} className="min-w-0 cursor-pointer break-words">{l.name}</Label>
-              <span className="col-start-2 text-primary-foreground/50 text-xs sm:col-start-auto">{l.entry_number ? `JE-${String(l.entry_number).padStart(6, "0")}` : ""}</span>
+              <span className="col-start-2 text-primary-foreground/80 text-xs sm:col-start-auto">{l.entry_number ? `JE-${String(l.entry_number).padStart(6, "0")}` : ""}</span>
               <span className="row-span-2 w-20 text-right text-gold sm:row-span-1">{fmt(l.pence)}</span>
             </li>
           ))}

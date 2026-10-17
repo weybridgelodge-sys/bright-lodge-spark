@@ -150,7 +150,7 @@ export default function LoiAdmin() {
           <h1 className="font-serif text-3xl text-gold mb-1 flex items-center gap-2">
             <GraduationCap className="w-6 h-6" /> Rehearsal Register
           </h1>
-          <p className="text-primary-foreground/60 text-sm">
+          <p className="text-primary-foreground/80 text-sm">
             Rehearsal Night sessions, attendance and parts taken.
           </p>
         </div>
@@ -169,9 +169,9 @@ export default function LoiAdmin() {
       <section className="bg-navy-dark/60 border border-gold/15 rounded-sm p-5">
         <h2 className="font-serif text-lg text-gold mb-3">Past sessions</h2>
         {loading ? (
-          <p className="text-xs text-primary-foreground/50">Loading…</p>
+          <p className="text-xs text-primary-foreground/80">Loading…</p>
         ) : sessions.length === 0 ? (
-          <p className="text-xs text-primary-foreground/50 italic">
+          <p className="text-xs text-primary-foreground/80 italic">
             No rehearsal sessions recorded yet.
           </p>
         ) : (
@@ -193,12 +193,12 @@ export default function LoiAdmin() {
                           month: "short",
                           year: "numeric",
                         })}{" "}
-                        <span className="text-primary-foreground/60 font-normal">
+                        <span className="text-primary-foreground/80 font-normal">
                           · {focusLabel(s.focus, s.focus_other)}
                         </span>
                       </p>
                       {s.notes && (
-                        <p className="text-xs text-primary-foreground/50 mt-0.5 line-clamp-1">
+                        <p className="text-xs text-primary-foreground/80 mt-0.5 line-clamp-1">
                           {s.notes}
                         </p>
                       )}
@@ -208,7 +208,7 @@ export default function LoiAdmin() {
                         {rows.length} of {members.length} attended
                       </span>
                       <ChevronRight
-                        className={`w-4 h-4 text-primary-foreground/40 transition-transform ${
+                        className={`w-4 h-4 text-primary-foreground/80 transition-transform ${
                           isOpen ? "rotate-90" : ""
                         }`}
                       />
@@ -227,7 +227,7 @@ export default function LoiAdmin() {
                         </p>
                       )}
                       {rows.length === 0 ? (
-                        <p className="text-xs italic text-primary-foreground/50">
+                        <p className="text-xs italic text-primary-foreground/80">
                           No attendance recorded.
                         </p>
                       ) : (
@@ -451,22 +451,22 @@ function SessionDialog({
         <div className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="text-xs uppercase tracking-wider text-primary-foreground/60 mb-1 block">
+              <label className="text-xs uppercase tracking-wider text-primary-foreground/80 mb-1 block">
                 Date
               </label>
               <Input
                 type="date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
-                className="bg-navy border-gold/30 text-primary-foreground placeholder:text-primary-foreground/40"
+                className="bg-navy border-gold/30 text-primary-foreground placeholder:text-primary-foreground/80"
               />
             </div>
             <div>
-              <label className="text-xs uppercase tracking-wider text-primary-foreground/60 mb-1 block">
+              <label className="text-xs uppercase tracking-wider text-primary-foreground/80 mb-1 block">
                 Focus
               </label>
               <Select value={focus} onValueChange={setFocus}>
-                <SelectTrigger className="bg-navy border-gold/30 text-primary-foreground placeholder:text-primary-foreground/40">
+                <SelectTrigger className="bg-navy border-gold/30 text-primary-foreground placeholder:text-primary-foreground/80">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -485,16 +485,16 @@ function SessionDialog({
               placeholder="Specify focus"
               value={focusOther}
               onChange={(e) => setFocusOther(e.target.value)}
-              className="bg-navy border-gold/30 text-primary-foreground placeholder:text-primary-foreground/40"
+              className="bg-navy border-gold/30 text-primary-foreground placeholder:text-primary-foreground/80"
             />
           )}
 
           <div>
-            <label className="text-xs uppercase tracking-wider text-primary-foreground/60 mb-1 block">
+            <label className="text-xs uppercase tracking-wider text-primary-foreground/80 mb-1 block">
               KPI block (optional override — auto-grouped by date if blank)
             </label>
             <Select value={kpiCategory || "auto"} onValueChange={(v) => setKpiCategory(v === "auto" ? "" : v)}>
-              <SelectTrigger className="bg-navy border-gold/30 text-primary-foreground placeholder:text-primary-foreground/40">
+              <SelectTrigger className="bg-navy border-gold/30 text-primary-foreground placeholder:text-primary-foreground/80">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -509,14 +509,14 @@ function SessionDialog({
           </div>
 
           <div>
-            <label className="text-xs uppercase tracking-wider text-primary-foreground/60 mb-1 block">
+            <label className="text-xs uppercase tracking-wider text-primary-foreground/80 mb-1 block">
               Notes (optional)
             </label>
             <Textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               rows={2}
-              className="bg-navy border-gold/30 text-primary-foreground placeholder:text-primary-foreground/40"
+              className="bg-navy border-gold/30 text-primary-foreground placeholder:text-primary-foreground/80"
               placeholder="e.g. focus on Working Tools"
             />
           </div>
@@ -558,7 +558,7 @@ function SessionDialog({
                             setDraft(m.id, { part: v as LoiPart })
                           }
                         >
-                          <SelectTrigger className="h-8 flex-1 sm:flex-none sm:w-[180px] bg-navy border-gold/30 text-primary-foreground placeholder:text-primary-foreground/40 text-xs">
+                          <SelectTrigger className="h-8 flex-1 sm:flex-none sm:w-[180px] bg-navy border-gold/30 text-primary-foreground placeholder:text-primary-foreground/80 text-xs">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -576,7 +576,7 @@ function SessionDialog({
                               setDraft(m.id, { partOther: e.target.value })
                             }
                             placeholder="Specify"
-                            className="h-8 flex-1 sm:flex-none sm:w-32 bg-navy border-gold/30 text-primary-foreground placeholder:text-primary-foreground/40 text-xs"
+                            className="h-8 flex-1 sm:flex-none sm:w-32 bg-navy border-gold/30 text-primary-foreground placeholder:text-primary-foreground/80 text-xs"
                           />
                         )}
                       </div>
@@ -585,7 +585,7 @@ function SessionDialog({
                 );
               })}
               {members.length === 0 && (
-                <p className="p-3 text-xs italic text-primary-foreground/50">
+                <p className="p-3 text-xs italic text-primary-foreground/80">
                   No active members found.
                 </p>
               )}

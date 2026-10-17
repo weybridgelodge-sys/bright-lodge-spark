@@ -9,7 +9,7 @@ const logo = assetUrl(logoAsset);
 
 const navCls = ({ isActive }: { isActive: boolean }) =>
   `flex items-center gap-2 px-3 py-2 rounded-sm text-sm font-sans transition-colors ${
-    isActive ? "bg-gold/15 text-gold" : "text-primary-foreground/70 hover:text-gold hover:bg-navy-light/40"
+    isActive ? "bg-gold/15 text-gold" : "text-cream/70 hover:text-gold hover:bg-navy-light/40"
   }`;
 
 export default function MembersLayout({ children }: { children: React.ReactNode }) {
@@ -101,7 +101,7 @@ export default function MembersLayout({ children }: { children: React.ReactNode 
   );
 
   return (
-    <div className="min-h-screen min-h-[100dvh] bg-navy text-primary-foreground">
+    <div className="min-h-screen min-h-[100dvh] bg-navy text-cream">
       <header className="border-b border-gold/20 bg-navy-dark/80 backdrop-blur sticky top-0 z-40 pt-[max(0px,env(safe-area-inset-top))]">
         <div className="container mx-auto px-4 sm:px-6 max-lg:pl-[max(1rem,env(safe-area-inset-left))] max-lg:pr-[max(1rem,env(safe-area-inset-right))] h-16 flex items-center justify-between gap-2 sm:gap-4">
           <div className="flex min-w-0 flex-1 lg:flex-none items-center gap-2 sm:gap-3">
@@ -109,14 +109,14 @@ export default function MembersLayout({ children }: { children: React.ReactNode 
               <SheetTrigger asChild>
                 <button
                   aria-label="Open navigation menu"
-                  className="lg:hidden inline-flex shrink-0 items-center justify-center w-11 h-11 rounded-sm text-primary-foreground/80 hover:text-gold hover:bg-navy-light/40"
+                  className="lg:hidden inline-flex shrink-0 items-center justify-center w-11 h-11 rounded-sm text-cream/80 hover:text-gold hover:bg-navy-light/40"
                 >
                   <Menu className="w-5 h-5" />
                 </button>
               </SheetTrigger>
-              <SheetContent side="left" className="w-72 bg-navy border-gold/20 text-primary-foreground p-0 flex flex-col overflow-hidden">
+              <SheetContent side="left" className="w-72 bg-navy border-gold/20 text-cream p-0 flex flex-col overflow-hidden">
                 <SheetHeader className="px-4 py-4 border-b border-gold/20 text-left shrink-0 pt-[max(1rem,env(safe-area-inset-top))]">
-                  <SheetTitle className="font-serif text-primary-foreground text-base">Members Portal</SheetTitle>
+                  <SheetTitle className="font-serif text-cream text-base">Members Portal</SheetTitle>
                 </SheetHeader>
                 <nav
                   aria-label="Members navigation"
@@ -140,10 +140,10 @@ export default function MembersLayout({ children }: { children: React.ReactNode 
           </div>
 
           <div className="flex shrink-0 items-center gap-3">
-            <Link to="/" className="text-xs text-primary-foreground/60 hover:text-gold hidden sm:inline">
+            <Link to="/" className="text-xs text-cream/60 hover:text-gold hidden sm:inline">
               ← Public site
             </Link>
-            <span className="text-xs text-primary-foreground/60 hidden md:inline">
+            <span className="text-xs text-cream/60 hidden md:inline">
               {profile?.full_name || profile?.email}
             </span>
             <button
@@ -174,23 +174,23 @@ export default function MembersLayout({ children }: { children: React.ReactNode 
           paddingBottom: "max(0.5rem, env(safe-area-inset-bottom))",
         }}
       >
-        <NavLink to="/members" end className={({ isActive }) => `flex flex-col items-center justify-center gap-1 leading-none text-[10px] font-bold ${isActive ? "text-gold" : "text-primary-foreground/60"}`}>
+        <NavLink to="/members" end className={({ isActive }) => `flex flex-col items-center justify-center gap-1 leading-none text-[10px] font-bold ${isActive ? "text-gold" : "text-cream/60"}`}>
           <Shield className="h-5 w-5" />
           Hub
         </NavLink>
-        <NavLink to="/members/calendar" className={({ isActive }) => `flex flex-col items-center justify-center gap-1 leading-none text-[10px] font-bold ${isActive ? "text-gold" : "text-primary-foreground/60"}`}>
+        <NavLink to="/members/calendar" className={({ isActive }) => `flex flex-col items-center justify-center gap-1 leading-none text-[10px] font-bold ${isActive ? "text-gold" : "text-cream/60"}`}>
           <CalendarDays className="h-5 w-5" />
           Calendar
         </NavLink>
-        <NavLink to="/members/directory" className={({ isActive }) => `flex flex-col items-center justify-center gap-1 leading-none text-[10px] font-bold ${isActive ? "text-gold" : "text-primary-foreground/60"}`}>
+        <NavLink to="/members/directory" className={({ isActive }) => `flex flex-col items-center justify-center gap-1 leading-none text-[10px] font-bold ${isActive ? "text-gold" : "text-cream/60"}`}>
           <Users className="h-5 w-5" />
           Directory
         </NavLink>
-        <NavLink to="/members/profile" className={({ isActive }) => `flex flex-col items-center justify-center gap-1 leading-none text-[10px] font-bold ${isActive ? "text-gold" : "text-primary-foreground/60"}`}>
+        <NavLink to="/members/profile" className={({ isActive }) => `flex flex-col items-center justify-center gap-1 leading-none text-[10px] font-bold ${isActive ? "text-gold" : "text-cream/60"}`}>
           <UserIcon className="h-5 w-5" />
           Profile
         </NavLink>
-        <NavLink to="/members/ritual" className={({ isActive }) => `flex flex-col items-center justify-center gap-1 leading-none text-[10px] font-bold ${isActive ? "text-gold" : "text-primary-foreground/60"}`}>
+        <NavLink to="/members/ritual" className={({ isActive }) => `flex flex-col items-center justify-center gap-1 leading-none text-[10px] font-bold ${isActive ? "text-gold" : "text-cream/60"}`}>
           <BookOpen className="h-5 w-5" />
           Ritual
         </NavLink>

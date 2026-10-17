@@ -57,11 +57,11 @@ export default function AbsencesPanel({ members, userId }: { members: Member[]; 
       <div className="flex-1 min-w-0">
         <p className="text-sm text-primary-foreground">
           <span className="font-semibold">{memberName(memberMap.get(r.member_id))}</span>
-          <span className="text-primary-foreground/60"> — {REASON_LABEL[r.reason]}</span>
+          <span className="text-primary-foreground/80"> — {REASON_LABEL[r.reason]}</span>
         </p>
-        <p className="text-[11px] text-primary-foreground/60">{fmt(r.period_start)} → {fmt(r.period_end)}{r.notes ? ` · ${r.notes}` : ""}</p>
+        <p className="text-[11px] text-primary-foreground/80">{fmt(r.period_start)} → {fmt(r.period_end)}{r.notes ? ` · ${r.notes}` : ""}</p>
       </div>
-      {canEditAlmoner && <button onClick={() => archive(r.id)} className="p-1.5 text-primary-foreground/40 hover:text-red-400" aria-label="Archive">
+      {canEditAlmoner && <button onClick={() => archive(r.id)} className="p-1.5 text-primary-foreground/80 hover:text-red-400" aria-label="Archive">
         <Trash2 className="w-4 h-4" />
       </button>}
     </div>
@@ -72,7 +72,7 @@ export default function AbsencesPanel({ members, userId }: { members: Member[]; 
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
           <h3 className="font-serif text-lg text-primary-foreground">Member Absences</h3>
-          <p className="text-xs text-primary-foreground/60">Known reasons members are away — illness, travel, work</p>
+          <p className="text-xs text-primary-foreground/80">Known reasons members are away — illness, travel, work</p>
         </div>
         {canEditAlmoner && <Button size="sm" className="bg-gold text-navy hover:bg-gold/90" onClick={() => setShowForm((v) => !v)}>
           {showForm ? <><X className="w-4 h-4 mr-1" /> Cancel</> : <><Plus className="w-4 h-4 mr-1" /> Log absence</>}
@@ -84,14 +84,14 @@ export default function AbsencesPanel({ members, userId }: { members: Member[]; 
       <section>
         <p className="text-[11px] uppercase tracking-wider text-gold mb-2">Currently absent</p>
         {current.length === 0
-          ? <p className="text-sm text-primary-foreground/60 italic">No currently logged absences.</p>
+          ? <p className="text-sm text-primary-foreground/80 italic">No currently logged absences.</p>
           : <div className="space-y-1.5">{current.map(renderRow)}</div>}
       </section>
 
       <section>
         <p className="text-[11px] uppercase tracking-wider text-gold mb-2 mt-4">Past absences</p>
         {past.length === 0
-          ? <p className="text-sm text-primary-foreground/60 italic">No past absences on record.</p>
+          ? <p className="text-sm text-primary-foreground/80 italic">No past absences on record.</p>
           : <div className="space-y-1.5">{past.map(renderRow)}</div>}
       </section>
     </div>

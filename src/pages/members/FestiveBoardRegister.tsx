@@ -69,7 +69,7 @@ export default function FestiveBoardRegister() {
         <h1 className="font-serif text-3xl text-gold mb-1 flex items-center gap-2">
           <Utensils className="w-6 h-6" /> Lodge Meetings
         </h1>
-        <p className="text-primary-foreground/60 text-sm">
+        <p className="text-primary-foreground/80 text-sm">
           Your personal record of Lodge Meeting attendance.
         </p>
       </div>
@@ -77,12 +77,12 @@ export default function FestiveBoardRegister() {
       {/* My attendance */}
       <section className="bg-navy-dark/60 border border-gold/15 rounded-sm p-5 mb-6">
         <h2 className="font-serif text-lg text-gold mb-3">My Lodge Meeting attendance</h2>
-        <p className="text-xs text-primary-foreground/60 mb-3">
+        <p className="text-xs text-primary-foreground/80 mb-3">
           <span className="text-gold font-semibold">{myAttendedCount}</span> meeting
           {myAttendedCount === 1 ? "" : "s"} attended
         </p>
         {myAttendance.length === 0 ? (
-          <p className="text-xs text-primary-foreground/50 italic">
+          <p className="text-xs text-primary-foreground/80 italic">
             No Lodge Meeting attendance recorded for you yet.
           </p>
         ) : (
@@ -94,7 +94,7 @@ export default function FestiveBoardRegister() {
               >
                 <span>
                   {fmtDate(m!.meeting_date)}{" "}
-                  <span className="text-primary-foreground/60">
+                  <span className="text-primary-foreground/80">
                     · {meetingTypeLabel(m!.meeting_type)}
                   </span>
                 </span>

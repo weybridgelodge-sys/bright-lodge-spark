@@ -208,7 +208,7 @@ function Inner() {
     <MembersLayout>
       <div className="mb-6 border-b border-gold/15 pb-4">
         <h1 className="font-serif text-3xl text-gold mb-1">Ritual Library — Admin</h1>
-        <p className="text-xs text-primary-foreground/60">Upload, replace, and manage ritual rehearsal material.</p>
+        <p className="text-xs text-primary-foreground/80">Upload, replace, and manage ritual rehearsal material.</p>
       </div>
 
       <div className="mb-6 bg-gold/5 border border-gold/20 rounded-sm p-3 flex flex-wrap items-center gap-3">
@@ -224,7 +224,7 @@ function Inner() {
           {DEGREES.map((d) => <option key={d} value={d}>{DEGREE_LABEL[d]}</option>)}
         </select>
         {previewDegree && (
-          <span className="text-[11px] text-primary-foreground/60">
+          <span className="text-[11px] text-primary-foreground/80">
             Showing what a <span className="text-gold">{DEGREE_LABEL[previewDegree]}</span> would see.
           </span>
         )}
@@ -236,20 +236,20 @@ function Inner() {
           <h2 className="font-serif text-base">Upload ritual document</h2>
         </div>
         <label className="flex flex-col gap-1">
-          <span className="text-[11px] uppercase tracking-wider text-gold/70 font-semibold">Title</span>
+          <span className="text-[11px] uppercase tracking-wider text-gold font-semibold">Title</span>
           <input required value={title} onChange={(e) => setTitle(e.target.value)}
             placeholder="e.g. First Degree Tracing Board"
             className="bg-navy border border-gold/20 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-gold" />
         </label>
         <label className="flex flex-col gap-1">
-          <span className="text-[11px] uppercase tracking-wider text-gold/70 font-semibold">Degree</span>
+          <span className="text-[11px] uppercase tracking-wider text-gold font-semibold">Degree</span>
           <select value={degree} onChange={(e) => setDegree(e.target.value as DegreeOrGeneral)}
             className="bg-navy border border-gold/20 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-gold">
             {UPLOAD_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
           </select>
         </label>
         <label className="flex flex-col gap-1">
-          <span className="text-[11px] uppercase tracking-wider text-gold/70 font-semibold">Document type</span>
+          <span className="text-[11px] uppercase tracking-wider text-gold font-semibold">Document type</span>
           <select value={docType} onChange={(e) => setDocType(e.target.value as DocType)}
             className="bg-navy border border-gold/20 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-gold">
             <option value="text">Text (PDF, doc, image)</option>
@@ -258,16 +258,16 @@ function Inner() {
           </select>
         </label>
         <label className="flex flex-col gap-1">
-          <span className="text-[11px] uppercase tracking-wider text-gold/70 font-semibold">Description (optional)</span>
+          <span className="text-[11px] uppercase tracking-wider text-gold font-semibold">Description (optional)</span>
           <input value={description} onChange={(e) => setDescription(e.target.value)}
             placeholder="Short summary or notes"
             className="bg-navy border border-gold/20 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-gold" />
         </label>
         <label className="md:col-span-2 flex flex-col gap-1">
-          <span className="text-[11px] uppercase tracking-wider text-gold/70 font-semibold">File</span>
+          <span className="text-[11px] uppercase tracking-wider text-gold font-semibold">File</span>
           <input id="ritual-file" required type="file" onChange={(e) => setFile(e.target.files?.[0] ?? null)}
             className="text-sm text-primary-foreground/70 file:mr-3 file:border-0 file:bg-gold/15 file:text-gold file:px-3 file:py-1.5 file:rounded-sm file:text-xs" />
-          <span className="text-[11px] text-primary-foreground/50">Max file size: {formatFileSize(MAX_FILE_SIZE_BYTES)}.</span>
+          <span className="text-[11px] text-primary-foreground/80">Max file size: {formatFileSize(MAX_FILE_SIZE_BYTES)}.</span>
         </label>
         <button disabled={busy}
           className="md:col-span-2 bg-gold-shimmer text-accent-foreground px-4 py-2 rounded-sm text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-50">
@@ -276,14 +276,14 @@ function Inner() {
       </form>
 
       <div className="mb-3 relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary-foreground/40" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary-foreground/80" />
         <input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Search by title or description…"
           className="w-full bg-navy border border-gold/20 rounded-sm pl-9 pr-3 py-2 text-sm focus:outline-none focus:border-gold" />
       </div>
 
       <div className="mb-4 flex flex-wrap items-center gap-2">
-        <span className="text-[11px] uppercase tracking-wider text-gold/70 font-semibold mr-1">Filter by type</span>
+        <span className="text-[11px] uppercase tracking-wider text-gold font-semibold mr-1">Filter by type</span>
         {TYPE_FILTERS.map((f) => (
           <button key={f.value} onClick={() => setTypeFilter(f.value)}
             className={`px-3 py-1.5 rounded-sm text-xs border transition-colors ${
@@ -294,11 +294,11 @@ function Inner() {
       </div>
 
       {loading ? (
-        <div className="text-center py-12 text-primary-foreground/60 text-sm flex items-center justify-center gap-2">
+        <div className="text-center py-12 text-primary-foreground/80 text-sm flex items-center justify-center gap-2">
           <Loader2 className="w-4 h-4 animate-spin" /> Loading…
         </div>
       ) : visibleDocs.length === 0 ? (
-        <p className="text-sm text-primary-foreground/50">No ritual documents match your filters.</p>
+        <p className="text-sm text-primary-foreground/80">No ritual documents match your filters.</p>
       ) : (
         <ul className="space-y-3">
           {visibleDocs.map((d) => {
@@ -309,7 +309,7 @@ function Inner() {
                   <div className="p-2.5 bg-gold/10 rounded-sm text-gold shrink-0"><BookOpen className="w-5 h-5" /></div>
                   <div className="min-w-0">
                     <h3 className="text-sm font-semibold leading-tight line-clamp-2" title={d.title}>{d.title}</h3>
-                    {d.description && <p className="text-xs text-primary-foreground/60 mt-1">{d.description}</p>}
+                    {d.description && <p className="text-xs text-primary-foreground/80 mt-1">{d.description}</p>}
                     <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-[11px] text-primary-foreground/55">
                       <span className="text-gold bg-gold/5 px-2 py-0.5 rounded-sm border border-gold/15">
                         {d.is_general ? GENERAL_LABEL : DEGREE_LABEL[d.required_degree]}

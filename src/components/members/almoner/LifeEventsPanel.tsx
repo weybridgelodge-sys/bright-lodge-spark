@@ -183,7 +183,7 @@ export default function LifeEventsPanel({ members, userId }: { members: Member[]
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
           <h3 className="font-serif text-lg text-primary-foreground">Life Events</h3>
-          <p className="text-xs text-primary-foreground/60">
+          <p className="text-xs text-primary-foreground/80">
             Birthdays, initiation &amp; Worshipful Master milestone anniversaries pulled from member records · add weddings, bereavements and other milestones below
           </p>
         </div>
@@ -197,7 +197,7 @@ export default function LifeEventsPanel({ members, userId }: { members: Member[]
       <section>
         <p className="text-[11px] uppercase tracking-wider text-gold mb-2">Upcoming · next 3 months</p>
         {upcoming.length === 0 ? (
-          <p className="text-sm text-primary-foreground/60 italic">Nothing in the next 3 months.</p>
+          <p className="text-sm text-primary-foreground/80 italic">Nothing in the next 3 months.</p>
         ) : (
           <div className="space-y-1.5">
             {upcoming.map((x) => (
@@ -206,9 +206,9 @@ export default function LifeEventsPanel({ members, userId }: { members: Member[]
                 <div className="flex-1 min-w-0">
                   <p className="text-sm text-primary-foreground">
                     <span className="font-semibold">{memberName(memberMap.get(x.memberId))}</span>
-                    <span className="text-primary-foreground/60"> — {TYPE_LABEL[x.type]}{x.milestone != null && x.milestone > 0 ? ` · ${x.milestone}${x.type === "initiation_anniversary" || x.type === "wm_anniversary" ? " years" : ""}` : ""}</span>
+                    <span className="text-primary-foreground/80"> — {TYPE_LABEL[x.type]}{x.milestone != null && x.milestone > 0 ? ` · ${x.milestone}${x.type === "initiation_anniversary" || x.type === "wm_anniversary" ? " years" : ""}` : ""}</span>
                   </p>
-                  <p className="text-[11px] text-primary-foreground/60">
+                  <p className="text-[11px] text-primary-foreground/80">
                     {fmt(x.when)} · {x.days === 0 ? "today" : x.days === 1 ? "tomorrow" : `in ${x.days} days`}
                     {x.notes ? ` · ${x.notes}` : ""}
                     {x.derived ? " · from member record" : ""}
@@ -230,7 +230,7 @@ export default function LifeEventsPanel({ members, userId }: { members: Member[]
             return days >= -1 && days <= HORIZON_DAYS;
           });
           if (visibleManual.length === 0) {
-            return <p className="text-sm text-primary-foreground/60 italic">No manual events due in the next 3 months.</p>;
+            return <p className="text-sm text-primary-foreground/80 italic">No manual events due in the next 3 months.</p>;
           }
           return (
             <div className="space-y-1.5">
@@ -238,16 +238,16 @@ export default function LifeEventsPanel({ members, userId }: { members: Member[]
                 const when = nextOccurrence(e.event_date, e.recurring);
                 return (
                   <div key={e.id} className="flex items-center gap-3 bg-navy-light/30 border border-gold/10 rounded p-2.5">
-                    <Calendar className="w-4 h-4 text-primary-foreground/50 shrink-0" />
+                    <Calendar className="w-4 h-4 text-primary-foreground/80 shrink-0" />
                     <div className="flex-1 min-w-0">
                       <p className="text-sm text-primary-foreground truncate">
-                        {memberName(memberMap.get(e.member_id))} <span className="text-primary-foreground/60">— {TYPE_LABEL[e.event_type]}</span>
+                        {memberName(memberMap.get(e.member_id))} <span className="text-primary-foreground/80">— {TYPE_LABEL[e.event_type]}</span>
                       </p>
-                      <p className="text-[11px] text-primary-foreground/60">
+                      <p className="text-[11px] text-primary-foreground/80">
                         {fmt(when)}{e.recurring ? " · annual" : ""}{e.notes ? ` · ${e.notes}` : ""}
                       </p>
                     </div>
-                    {canEditAlmoner && (<button onClick={() => archive(e.id)} className="text-primary-foreground/40 hover:text-red-400" aria-label="Archive">
+                    {canEditAlmoner && (<button onClick={() => archive(e.id)} className="text-primary-foreground/80 hover:text-red-400" aria-label="Archive">
                       <Trash2 className="w-4 h-4" />
                     </button>)}
                   </div>
@@ -288,7 +288,7 @@ function NewEventForm({ members, userId, onSaved }: { members: Member[]; userId:
 
   return (
     <form onSubmit={submit} className="bg-navy-light/60 border border-gold/30 rounded p-4 space-y-3">
-      <p className="text-[11px] text-primary-foreground/60">
+      <p className="text-[11px] text-primary-foreground/80">
         Birthdays, initiation and Worshipful Master milestone anniversaries are pulled automatically from member records — use this form for weddings, bereavements and other milestones only.
       </p>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

@@ -127,11 +127,11 @@ export default function MembersDirectory() {
     <MembersLayout>
       <div className="mb-6">
         <h1 className="font-serif text-3xl text-gold mb-2">Brethren Directory</h1>
-        <p className="text-sm text-primary-foreground/60">Approved members of Weybridge Lodge.</p>
+        <p className="text-sm text-primary-foreground/80">Approved members of Weybridge Lodge.</p>
       </div>
 
       <div className="relative mb-6 max-w-md">
-        <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-primary-foreground/40" />
+        <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-primary-foreground/80" />
         <input
           value={q}
           onChange={(e) => setQ(e.target.value)}
@@ -141,7 +141,7 @@ export default function MembersDirectory() {
       </div>
 
       {filtered.length === 0 ? (
-        <p className="text-sm text-primary-foreground/50">No members to show.</p>
+        <p className="text-sm text-primary-foreground/80">No members to show.</p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {filtered.map((m) => {
@@ -159,7 +159,7 @@ export default function MembersDirectory() {
                 </div>
                 {office && <p className="text-xs text-primary-foreground/70 mb-1">Office: {office}</p>}
                 {m.joined_year && (
-                  <p className="text-xs text-primary-foreground/50 mb-2">Joined {m.joined_year}</p>
+                  <p className="text-xs text-primary-foreground/80 mb-2">Joined {m.joined_year}</p>
                 )}
                 <div className="space-y-1 text-xs">
                   {m.email && (

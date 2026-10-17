@@ -65,7 +65,7 @@ export default function CorrespondencePanel({ members, userId }: { members: Memb
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
           <h3 className="font-serif text-lg text-primary-foreground">Correspondence Log</h3>
-          <p className="text-xs text-primary-foreground/60">Cards, letters, calls and flowers sent or received</p>
+          <p className="text-xs text-primary-foreground/80">Cards, letters, calls and flowers sent or received</p>
         </div>
         {canEditAlmoner && (<Button size="sm" className="bg-gold text-navy hover:bg-gold/90" onClick={() => { setEditing(null); setShowForm((v) => !v); }}>
           {showForm && !editing ? <><X className="w-4 h-4 mr-1" /> Cancel</> : <><Plus className="w-4 h-4 mr-1" /> New entry</>}
@@ -84,7 +84,7 @@ export default function CorrespondencePanel({ members, userId }: { members: Memb
       )}
 
       {rows.length === 0 ? (
-        <p className="text-sm text-primary-foreground/60 italic">No correspondence logged yet.</p>
+        <p className="text-sm text-primary-foreground/80 italic">No correspondence logged yet.</p>
       ) : (
         <div className="space-y-2">
           {rows.map((r) => (
@@ -97,7 +97,7 @@ export default function CorrespondencePanel({ members, userId }: { members: Memb
                   <p className="text-sm text-primary-foreground">
                     <span className="font-semibold">{r.subject}</span>
                   </p>
-                  <p className="text-[11px] text-primary-foreground/60 mt-0.5">
+                  <p className="text-[11px] text-primary-foreground/80 mt-0.5">
                     {fmt(r.correspondence_date)} · {METHOD_LABEL[r.method]} · {r.direction === "outgoing" ? "to" : "from"}{" "}
                     {r.member_id ? memberName(memberMap.get(r.member_id)) : "general"}
                   </p>
@@ -106,7 +106,7 @@ export default function CorrespondencePanel({ members, userId }: { members: Memb
                 <div className="flex items-center gap-1.5">
                   {canEditAlmoner && (<button
                     onClick={() => { setShowForm(false); setEditing(r); }}
-                    className="p-1.5 text-primary-foreground/40 hover:text-gold"
+                    className="p-1.5 text-primary-foreground/80 hover:text-gold"
                     aria-label="Edit"
                     title="Edit"
                   >
@@ -122,7 +122,7 @@ export default function CorrespondencePanel({ members, userId }: { members: Memb
                       <Paperclip className="w-4 h-4" />
                     </button>
                   )}
-                  {canEditAlmoner && (<button onClick={() => archive(r.id)} className="p-1.5 text-primary-foreground/40 hover:text-red-400" aria-label="Archive" title="Archive">
+                  {canEditAlmoner && (<button onClick={() => archive(r.id)} className="p-1.5 text-primary-foreground/80 hover:text-red-400" aria-label="Archive" title="Archive">
                     <Trash2 className="w-4 h-4" />
                   </button>)}
                 </div>
@@ -204,7 +204,7 @@ function EntryForm({ members, userId, existing, onSaved, onCancel }: {
         <p className="text-xs font-semibold text-gold uppercase tracking-wide">
           {existing ? "Edit entry" : "New entry"}
         </p>
-        <button type="button" onClick={onCancel} className="text-primary-foreground/60 hover:text-primary-foreground" aria-label="Cancel">
+        <button type="button" onClick={onCancel} className="text-primary-foreground/80 hover:text-primary-foreground" aria-label="Cancel">
           <X className="w-4 h-4" />
         </button>
       </div>
@@ -265,7 +265,7 @@ function EntryForm({ members, userId, existing, onSaved, onCancel }: {
           onChange={(e) => setFile(e.target.files?.[0] ?? null)}
           className="mt-1 text-sm text-primary-foreground/70 file:mr-3 file:border-0 file:bg-gold/15 file:text-gold file:px-3 file:py-1.5 file:rounded-sm file:text-xs"
         />
-        {file && <p className="mt-1 text-[11px] text-primary-foreground/60">Will {existing?.attachment_path ? "replace existing" : "upload"}: {file.name}</p>}
+        {file && <p className="mt-1 text-[11px] text-primary-foreground/80">Will {existing?.attachment_path ? "replace existing" : "upload"}: {file.name}</p>}
       </div>
       <div className="flex gap-2">
         <Button type="submit" disabled={busy} className="bg-gold text-navy hover:bg-gold/90">

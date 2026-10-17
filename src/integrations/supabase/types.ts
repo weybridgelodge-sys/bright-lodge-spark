@@ -3726,6 +3726,7 @@ export type Database = {
           months: number[]
           name: string
           ordinal: string
+          schedule: Json
           unit_id: string
           updated_at: string
           weekday: number
@@ -3739,6 +3740,7 @@ export type Database = {
           months?: number[]
           name: string
           ordinal: string
+          schedule?: Json
           unit_id?: string
           updated_at?: string
           weekday: number
@@ -3752,6 +3754,7 @@ export type Database = {
           months?: number[]
           name?: string
           ordinal?: string
+          schedule?: Json
           unit_id?: string
           updated_at?: string
           weekday?: number

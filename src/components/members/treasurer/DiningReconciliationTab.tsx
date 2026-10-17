@@ -422,7 +422,7 @@ function MeetingPanel({
       <div className="flex items-center justify-between gap-2 flex-wrap px-4 py-3 border-b border-gold/15">
         <h3 className="font-serif text-gold">
           {new Date(meeting.meeting_date).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}
-          <span className="text-primary-foreground/60 text-sm ml-2">{meetingTypeLabel(meeting.meeting_type)}</span>
+          <span className="text-primary-foreground/80 text-sm ml-2">{meetingTypeLabel(meeting.meeting_type)}</span>
         </h3>
         {fullyReconciled ? (
           <Badge variant="outline" className="border-emerald-500/60 text-emerald-300">
@@ -438,14 +438,14 @@ function MeetingPanel({
       <div className="grid lg:grid-cols-2 gap-4 p-4">
         {/* Portal side */}
         <div className="space-y-2">
-          <h4 className="text-sm uppercase tracking-wider text-primary-foreground/60">Portal dining register</h4>
+          <h4 className="text-sm uppercase tracking-wider text-primary-foreground/80">Portal dining register</h4>
           <div className="text-sm text-primary-foreground">
             <span className="text-gold font-medium tabular-nums">{summary.total}</span> dining
-            <span className="text-primary-foreground/60"> ({summary.members} members, {summary.visitors} visitors)</span>
+            <span className="text-primary-foreground/80"> ({summary.members} members, {summary.visitors} visitors)</span>
           </div>
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-left text-xs uppercase tracking-wider text-primary-foreground/60 border-b border-gold/15">
+              <tr className="text-left text-xs uppercase tracking-wider text-primary-foreground/80 border-b border-gold/15">
                 <th className="py-1">Payment method</th>
                 <th className="py-1 text-right">Diners</th>
                 <th className="py-1 text-right">Collected</th>
@@ -453,7 +453,7 @@ function MeetingPanel({
             </thead>
             <tbody>
               {summary.byMethod.length === 0 && (
-                <tr><td colSpan={3} className="py-3 text-primary-foreground/50">No dining attendees recorded.</td></tr>
+                <tr><td colSpan={3} className="py-3 text-primary-foreground/80">No dining attendees recorded.</td></tr>
               )}
               {summary.byMethod.map(([m, v]) => (
                 <tr key={m} className="border-b border-gold/10">
@@ -475,7 +475,7 @@ function MeetingPanel({
 
         {/* GMC invoice side */}
         <div className="space-y-3">
-          <h4 className="text-sm uppercase tracking-wider text-primary-foreground/60">GMC invoice</h4>
+          <h4 className="text-sm uppercase tracking-wider text-primary-foreground/80">GMC invoice</h4>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <Label>Invoice number — optional</Label>
@@ -509,7 +509,7 @@ function MeetingPanel({
           </div>
 
           <div className="mt-3 rounded-sm border border-gold/15 p-3 space-y-1">
-            <h5 className="text-xs uppercase tracking-wider text-primary-foreground/60 mb-1">
+            <h5 className="text-xs uppercase tracking-wider text-primary-foreground/80 mb-1">
               Stripe fee reconciliation
             </h5>
             <div className="flex items-baseline justify-between text-sm">
@@ -562,7 +562,7 @@ function MeetingPanel({
           </div>
 
           <div className="mt-3 rounded-sm border border-gold/15 p-3 space-y-2">
-            <h5 className="text-xs uppercase tracking-wider text-primary-foreground/60">Stripe receipts in the ledger</h5>
+            <h5 className="text-xs uppercase tracking-wider text-primary-foreground/80">Stripe receipts in the ledger</h5>
             <div className="text-sm text-primary-foreground/70">
               <span className="tabular-nums text-primary-foreground">{receiptSets.posted.length}</span> of{" "}
               <span className="tabular-nums text-primary-foreground">{receiptSets.syncable.length}</span> Stripe receipts posted to ledger
@@ -661,16 +661,16 @@ export default function DiningReconciliationTab({
   const invMap = useMemo(() => new Map(invoices.map((i) => [i.meeting_id, i])), [invoices]);
 
   if (loading) {
-    return <p className="text-primary-foreground/60"><Loader2 className="w-4 h-4 mr-1 inline animate-spin" /> Loading…</p>;
+    return <p className="text-primary-foreground/80"><Loader2 className="w-4 h-4 mr-1 inline animate-spin" /> Loading…</p>;
   }
 
   return (
     <div className="space-y-4">
-      <p className="text-sm text-primary-foreground/60">
+      <p className="text-sm text-primary-foreground/80">
         Dining headcounts are derived from the Festive Board Register (booked or attended, dining only — meeting-only attendees are excluded).
         Enter the GMC invoice figures to check them against the register and post the invoice to the ledger.
       </p>
-      {meetings.length === 0 && <p className="text-primary-foreground/50">No Festive Board meetings recorded.</p>}
+      {meetings.length === 0 && <p className="text-primary-foreground/80">No Festive Board meetings recorded.</p>}
       {meetings.map((m) => (
         <MeetingPanel
           key={m.id}

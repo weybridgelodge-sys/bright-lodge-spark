@@ -63,7 +63,7 @@ export default function MembersProfile() {
 
   const inputCls =
     "w-full bg-navy border border-gold/20 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-gold";
-  const labelCls = "block text-xs uppercase tracking-wider text-primary-foreground/60 mb-1";
+  const labelCls = "block text-xs uppercase tracking-wider text-primary-foreground/80 mb-1";
 
   const fmtDate = (d?: string | null) => {
     if (!d) return "—";
@@ -80,7 +80,7 @@ export default function MembersProfile() {
   const ReadOnly = ({ label, value }: { label: string; value: React.ReactNode }) => (
     <div>
       <div className={labelCls}>{label}</div>
-      <div className="text-sm text-primary-foreground/90 py-2">{value || <span className="text-primary-foreground/40">—</span>}</div>
+      <div className="text-sm text-primary-foreground/90 py-2">{value || <span className="text-primary-foreground/80">—</span>}</div>
     </div>
   );
 
@@ -88,7 +88,7 @@ export default function MembersProfile() {
     <MembersLayout>
       <div className="mb-6">
         <h1 className="font-serif text-3xl text-gold mb-2">My Profile</h1>
-        <p className="text-sm text-primary-foreground/60">
+        <p className="text-sm text-primary-foreground/80">
           Status:{" "}
           <span className="text-gold uppercase tracking-wider text-xs">{profile?.status}</span>
           {profile?.degree && (
@@ -112,7 +112,7 @@ export default function MembersProfile() {
       <div className="max-w-2xl mb-6 bg-navy-dark/60 border border-gold/15 rounded-sm p-4 sm:p-6 space-y-4">
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <h2 className="font-serif text-xl text-gold">Official details</h2>
-          <span className="text-[10px] uppercase tracking-wider text-gold/60 border border-gold/30 rounded-sm px-2 py-0.5">Read only</span>
+          <span className="text-[10px] uppercase tracking-wider text-gold border border-gold/30 rounded-sm px-2 py-0.5">Read only</span>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-[120px_1fr_1fr] gap-4">
           <ReadOnly label="Title" value={profile?.title} />
@@ -135,7 +135,7 @@ export default function MembersProfile() {
           <ReadOnly label="Royal Arch" value={profile?.is_royal_arch ? "Yes" : "No"} />
           <ReadOnly label="Honorary member" value={profile?.is_honorary_member ? "Yes" : "No"} />
         </div>
-        <p className="text-xs text-primary-foreground/60 pt-3 border-t border-gold/10">
+        <p className="text-xs text-primary-foreground/80 pt-3 border-t border-gold/10">
           These details are maintained by the Lodge. Contact the Secretary to update them.
         </p>
       </div>
@@ -170,7 +170,7 @@ export default function MembersProfile() {
         </div>
 
         <div className="pt-3 mt-2 border-t border-gold/10">
-          <p className="text-xs uppercase tracking-wider text-gold/70 mb-3">Address</p>
+          <p className="text-xs uppercase tracking-wider text-gold mb-3">Address</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="sm:col-span-2">
               <label className={labelCls}>Address line 1</label>
@@ -210,12 +210,12 @@ export default function MembersProfile() {
             placeholder="e.g. Vegetarian; nut allergy"
             className={inputCls}
           />
-          <p className="text-xs text-primary-foreground/50 mt-1">
+          <p className="text-xs text-primary-foreground/80 mt-1">
             Private: seen only by you and the Lodge officers who arrange dining. Used to pre-fill your bookings, and you can still change it for any one event.
           </p>
         </div>
 
-        <p className="text-xs text-primary-foreground/50 pt-2 border-t border-gold/10">
+        <p className="text-xs text-primary-foreground/80 pt-2 border-t border-gold/10">
           Degree, Past Master status and active/pending status can only be changed by an admin.
         </p>
 

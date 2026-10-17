@@ -10,8 +10,8 @@ const gbp = (n: number) =>
 function Line({ label, value, muted }: { label: string; value: string; muted?: boolean }) {
   return (
     <div className="flex items-baseline justify-between gap-3">
-      <span className={`text-xs ${muted ? "text-primary-foreground/50" : "text-primary-foreground/70"}`}>{label}</span>
-      <span className={`text-sm tabular-nums ${muted ? "text-primary-foreground/60" : "text-primary-foreground"}`}>{value}</span>
+      <span className={`text-xs ${muted ? "text-primary-foreground/80" : "text-primary-foreground/70"}`}>{label}</span>
+      <span className={`text-sm tabular-nums ${muted ? "text-primary-foreground/80" : "text-primary-foreground"}`}>{value}</span>
     </div>
   );
 }
@@ -32,7 +32,7 @@ export default function TreasuryBudgetCard() {
   if (loading) {
     return (
       <section className="mb-6 bg-navy-dark/60 border border-gold/15 rounded-sm p-6">
-        <p className="text-xs text-primary-foreground/50"><Loader2 className="w-3 h-3 mr-1 inline animate-spin" /> Loading treasury summary…</p>
+        <p className="text-xs text-primary-foreground/80"><Loader2 className="w-3 h-3 mr-1 inline animate-spin" /> Loading treasury summary…</p>
       </section>
     );
   }
@@ -48,12 +48,12 @@ export default function TreasuryBudgetCard() {
       </div>
 
       {!snap.quarter ? (
-        <p className="text-xs text-primary-foreground/60 mt-2">
+        <p className="text-xs text-primary-foreground/80 mt-2">
           No closed quarter yet this lodge year — figures appear once all three months of a quarter have been locked in Period Close.
         </p>
       ) : (
         <>
-          <p className="text-[11px] uppercase tracking-wider text-gold/70 mb-4">
+          <p className="text-[11px] uppercase tracking-wider text-gold mb-4">
             Most recent closed quarter: {snap.quarter.label}
           </p>
 
@@ -67,7 +67,7 @@ export default function TreasuryBudgetCard() {
                 muted={!snap.budget}
               />
               {snap.budget && (
-                <p className="text-[11px] text-primary-foreground/60">
+                <p className="text-[11px] text-primary-foreground/80">
                   {pct(snap.incomeActualPence, snap.budget.incomePence) ?? "No budget figure set"}
                 </p>
               )}
@@ -82,7 +82,7 @@ export default function TreasuryBudgetCard() {
                 muted={!snap.budget}
               />
               {snap.budget && (
-                <p className="text-[11px] text-primary-foreground/60">
+                <p className="text-[11px] text-primary-foreground/80">
                   {pct(snap.expenditureActualPence, snap.budget.expenditurePence) ?? "No budget figure set"}
                 </p>
               )}

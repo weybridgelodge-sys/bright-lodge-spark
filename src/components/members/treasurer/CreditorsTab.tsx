@@ -252,7 +252,7 @@ export default function CreditorsTab({ canEdit }: { canEdit: boolean }) {
     <div className="space-y-6">
       <section className="rounded-lg border border-gold/20 bg-primary-foreground/5 p-4">
         <h2 className="font-serif text-lg text-gold mb-1">Record a Creditor Payment</h2>
-        <p className="text-primary-foreground/60 text-sm mb-4">
+        <p className="text-primary-foreground/80 text-sm mb-4">
           Posts a double-entry: Dr 2000 Creditors, Cr 1000 Bank.
         </p>
         <div className="grid gap-3 sm:grid-cols-2">
@@ -294,7 +294,7 @@ export default function CreditorsTab({ canEdit }: { canEdit: boolean }) {
 
       <section className="rounded-lg border border-gold/20 bg-primary-foreground/5 p-4">
         <h2 className="font-serif text-lg text-gold mb-1">Recognise a Liability</h2>
-        <p className="text-primary-foreground/60 text-sm mb-4">
+        <p className="text-primary-foreground/80 text-sm mb-4">
           Records money the lodge owes before it is paid. Posts a double-entry: Dr the chosen account, Cr 2000 Creditors.
         </p>
         <div className="grid gap-3 sm:grid-cols-2">
@@ -352,7 +352,7 @@ export default function CreditorsTab({ canEdit }: { canEdit: boolean }) {
       <section className="rounded-lg border border-gold/20 bg-primary-foreground/5 p-4">
         <h2 className="font-serif text-lg text-gold mb-3">Creditors Balance</h2>
         {loading ? (
-          <p className="text-primary-foreground/60"><Loader2 className="w-4 h-4 mr-1 inline animate-spin" /> Loading…</p>
+          <p className="text-primary-foreground/80"><Loader2 className="w-4 h-4 mr-1 inline animate-spin" /> Loading…</p>
         ) : (
           <>
             <p className="text-primary-foreground mb-4">
@@ -360,14 +360,14 @@ export default function CreditorsTab({ canEdit }: { canEdit: boolean }) {
             </p>
             <table className="w-full text-sm">
               <thead>
-                <tr className="text-left text-primary-foreground/60 border-b border-gold/20">
+                <tr className="text-left text-primary-foreground/80 border-b border-gold/20">
                   <th className="py-2">Payee</th>
                   <th className="py-2 text-right">Net movement</th>
                 </tr>
               </thead>
               <tbody>
                 {byPayee.length === 0 ? (
-                  <tr><td colSpan={2} className="py-3 text-primary-foreground/60">No creditor entries yet.</td></tr>
+                  <tr><td colSpan={2} className="py-3 text-primary-foreground/80">No creditor entries yet.</td></tr>
                 ) : byPayee.map(([name, pence]) => (
                   <tr key={name} className="border-b border-gold/10">
                     <td className="py-2 text-primary-foreground">{name}</td>

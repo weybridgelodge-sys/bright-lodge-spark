@@ -94,11 +94,11 @@ function Inner() {
 
       <section className="rounded-sm border border-gold/20 bg-navy-dark/40 p-5">
         <h2 className="font-serif text-gold text-lg mb-3">Group Members</h2>
-        <div className="text-xs text-primary-foreground/60 mb-2">
+        <div className="text-xs text-primary-foreground/80 mb-2">
           Lead: <span className="text-primary-foreground">{leadMember ? displayName(leadMember.profiles) : "Not yet assigned"}</span>
         </div>
         <div className="flex flex-wrap gap-2">
-          {members.length === 0 && <span className="text-primary-foreground/50 italic text-xs">No members yet.</span>}
+          {members.length === 0 && <span className="text-primary-foreground/80 italic text-xs">No members yet.</span>}
           {members.map((m) => (
             <span key={m.id} className={`text-xs px-2 py-1 rounded-sm border ${m.role === "lead" ? "border-gold text-gold" : "border-gold/30 text-primary-foreground/80"}`}>
               {displayName(m.profiles)}{m.role === "lead" ? " · Lead" : ""}
@@ -113,12 +113,12 @@ function Inner() {
         {canLog && (
           <div className="grid grid-cols-1 md:grid-cols-[120px_140px_1fr_auto] gap-2 items-end">
             <div>
-              <label className="text-[10px] text-primary-foreground/60 uppercase">Date</label>
+              <label className="text-[10px] text-primary-foreground/80 uppercase">Date</label>
               <Input type="date" value={form.activity_date} onChange={(e) => setForm({ ...form, activity_date: e.target.value })}
                 className="bg-navy text-primary-foreground" />
             </div>
             <div>
-              <label className="text-[10px] text-primary-foreground/60 uppercase">Type</label>
+              <label className="text-[10px] text-primary-foreground/80 uppercase">Type</label>
               <Select value={form.kind} onValueChange={(v) => setForm({ ...form, kind: v as any })}>
                 <SelectTrigger className="bg-navy text-primary-foreground"><SelectValue /></SelectTrigger>
                 <SelectContent>
@@ -129,7 +129,7 @@ function Inner() {
               </Select>
             </div>
             <div>
-              <label className="text-[10px] text-primary-foreground/60 uppercase">Title</label>
+              <label className="text-[10px] text-primary-foreground/80 uppercase">Title</label>
               <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })}
                 className="bg-navy text-primary-foreground" placeholder="e.g. Planning meeting" />
             </div>
@@ -156,7 +156,7 @@ function Inner() {
                     <td className="p-2 text-primary-foreground/70">{a.notes ?? ""}</td>
                   </tr>
                 ))}
-                {activities.length === 0 && <tr><td colSpan={4} className="p-4 text-center text-primary-foreground/60 italic">No activity recorded yet.</td></tr>}
+                {activities.length === 0 && <tr><td colSpan={4} className="p-4 text-center text-primary-foreground/80 italic">No activity recorded yet.</td></tr>}
               </tbody>
             </table>
           </div>

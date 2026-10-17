@@ -98,7 +98,7 @@ function Inner() {
       <div className="flex-1 min-w-[200px]">
         <p className="font-serif text-gold">{e.title}</p>
         <p className="text-sm text-primary-foreground/80">{fmtDate(e.event_date)} · {hm(e.time_from)}–{hm(e.time_to)}</p>
-        <p className="text-xs text-primary-foreground/60">{e.venue}</p>
+        <p className="text-xs text-primary-foreground/80">{e.venue}</p>
         {e.description && <p className="text-sm text-primary-foreground/70 mt-1 whitespace-pre-line">{e.description}</p>}
       </div>
       {canEdit && (
@@ -115,7 +115,7 @@ function Inner() {
       <header className="mb-6 flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="font-serif text-2xl md:text-3xl text-gold flex items-center gap-2"><CalendarClock className="w-7 h-7" /> Rehearsal Schedule</h1>
-          <p className="text-primary-foreground/60 text-sm">Planned rehearsals and training sessions — feeds every member's personal calendar.</p>
+          <p className="text-primary-foreground/80 text-sm">Planned rehearsals and training sessions — feeds every member's personal calendar.</p>
         </div>
         {canEdit && !draft && (
           <button onClick={() => setDraft(blank())} className="inline-flex items-center gap-2 px-4 py-2 bg-gold text-navy font-semibold text-sm rounded-sm hover:bg-gold/90"><Plus className="w-4 h-4" /> Add entry</button>
@@ -126,7 +126,7 @@ function Inner() {
         <div className="mb-6 rounded-sm border border-gold/40 bg-navy-light/40 p-5 space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="font-serif text-gold text-lg">{draft.id ? "Edit entry" : "New entry"}</h2>
-            <button onClick={() => setDraft(null)} aria-label="Cancel" className="text-primary-foreground/60 hover:text-gold"><X className="w-5 h-5" /></button>
+            <button onClick={() => setDraft(null)} aria-label="Cancel" className="text-primary-foreground/80 hover:text-gold"><X className="w-5 h-5" /></button>
           </div>
           <div className="grid sm:grid-cols-2 gap-4">
             <div className="sm:col-span-2"><label className={labelCls}>Title</label><input className={inputCls} value={draft.title} onChange={(e) => setDraft({ ...draft, title: e.target.value })} /></div>
@@ -144,12 +144,12 @@ function Inner() {
       )}
 
       {loading ? (
-        <p className="text-primary-foreground/60 flex items-center gap-2"><Loader2 className="w-4 h-4 animate-spin" /> Loading…</p>
+        <p className="text-primary-foreground/80 flex items-center gap-2"><Loader2 className="w-4 h-4 animate-spin" /> Loading…</p>
       ) : (
         <>
           <h2 className="font-serif text-gold text-lg mb-3">Upcoming</h2>
           {upcoming.length === 0 ? (
-            <p className="text-primary-foreground/60 text-sm mb-6">No upcoming sessions scheduled yet.</p>
+            <p className="text-primary-foreground/80 text-sm mb-6">No upcoming sessions scheduled yet.</p>
           ) : (
             <ul className="space-y-3 mb-6">{upcoming.map((e) => <Row key={e.id} e={e} />)}</ul>
           )}

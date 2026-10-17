@@ -97,7 +97,7 @@ function isCommitteeAgenda(row: Row | null): boolean {
 const currentLodgeYear = masonicYearStart();
 const MASONIC_YEAR_OPTIONS = Array.from({ length: 21 }, (_, i) => currentLodgeYear - 5 + i);
 
-const INPUT = "bg-navy border-gold/20 text-primary-foreground placeholder:text-primary-foreground/40";
+const INPUT = "bg-navy border-gold/20 text-primary-foreground placeholder:text-primary-foreground/80";
 const DATE_INPUT = `${INPUT} [color-scheme:dark]`;
 
 function flattenAgenda(items: AgendaItem[], depth = 0): string[] {
@@ -1048,7 +1048,7 @@ function Inner() {
             <h1 className="font-serif text-2xl md:text-3xl text-gold flex items-center gap-2">
               <NotebookPen className="w-6 h-6" /> {editing.title}
             </h1>
-            <p className="text-primary-foreground/60 text-sm">
+            <p className="text-primary-foreground/80 text-sm">
               {TYPE_LABELS[editing.meeting_type]} meeting · {fmtDateTime(editing.meeting_at)}
             </p>
           </div>
@@ -1098,7 +1098,7 @@ function Inner() {
 
           <section>
             <label className="text-xs text-primary-foreground/70">Paste full minutes text</label>
-            <p className="text-xs text-primary-foreground/50 mb-1">
+            <p className="text-xs text-primary-foreground/80 mb-1">
               Paste the complete finished minutes as one block, then click Parse — this replaces the sections below.
             </p>
             <Textarea
@@ -1118,7 +1118,7 @@ function Inner() {
           <section>
             <div className="mb-3">
               <h2 className="font-serif text-gold text-lg">Committee Agenda</h2>
-              <p className="text-xs text-primary-foreground/60">Secretary: {secretaryName}</p>
+              <p className="text-xs text-primary-foreground/80">Secretary: {secretaryName}</p>
             </div>
             <div className="space-y-3">
               <div className="rounded-sm border border-gold/15 bg-navy-light/30 p-3 text-sm text-primary-foreground">
@@ -1153,7 +1153,7 @@ function Inner() {
               <Button size="sm" variant="outline" onClick={addSection}><Plus className="w-3 h-3 mr-1" /> Add section</Button>
             </div>
             <div className="space-y-3">
-              {editing.sections.length === 0 && <p className="text-primary-foreground/60 text-sm">No sections yet.</p>}
+              {editing.sections.length === 0 && <p className="text-primary-foreground/80 text-sm">No sections yet.</p>}
               {editing.sections.map((s, i) => (
                 <div key={i} className="rounded-sm border border-gold/15 bg-navy-light/30 p-3 space-y-2">
                   <div className="flex items-center gap-2">
@@ -1186,7 +1186,7 @@ function Inner() {
               <Button size="sm" variant="outline" onClick={addAction}><Plus className="w-3 h-3 mr-1" /> Add row</Button>
             </div>
             {editing.action_items.length === 0 ? (
-              <p className="text-primary-foreground/60 text-sm">No action items.</p>
+              <p className="text-primary-foreground/80 text-sm">No action items.</p>
             ) : (
               <div className="space-y-2">
                 {editing.action_items.map((a, i) => (
@@ -1286,7 +1286,7 @@ function Inner() {
           <h1 className="font-serif text-2xl md:text-3xl text-gold flex items-center gap-2">
             <NotebookPen className="w-6 h-6" /> Minutes & Agenda Generator
           </h1>
-          <p className="text-primary-foreground/60 text-sm">
+          <p className="text-primary-foreground/80 text-sm">
             Regular and Committee meeting minutes, Committee agendas, action items, and the source transcript.
           </p>
         </div>
@@ -1342,9 +1342,9 @@ function Inner() {
       </div>
 
       {loading ? (
-        <p className="text-primary-foreground/60 text-sm">Loading…</p>
+        <p className="text-primary-foreground/80 text-sm">Loading…</p>
       ) : filtered.length === 0 ? (
-        <p className="text-primary-foreground/60 text-sm">No minutes recorded yet.</p>
+        <p className="text-primary-foreground/80 text-sm">No minutes recorded yet.</p>
       ) : (
         <div className="space-y-2">
           {filtered.map((r) => (
@@ -1364,7 +1364,7 @@ function Inner() {
                     {STATUS_LABELS[r.status]}
                   </Badge>
                 </div>
-                <p className="text-primary-foreground/60 text-xs mt-1">
+                <p className="text-primary-foreground/80 text-xs mt-1">
                   {fmtDateTime(r.meeting_at)} · {r.sections.length} section{r.sections.length === 1 ? "" : "s"} · {r.action_items.length} action{r.action_items.length === 1 ? "" : "s"}
                   {r.approved_date ? ` · confirmed ${r.approved_date}` : ""}
                 </p>
@@ -1391,7 +1391,7 @@ function Inner() {
           <DialogHeader>
             <DialogTitle>{nAgenda ? "New Committee Agenda" : "New minutes"}</DialogTitle>
             {nAgenda && (
-              <p className="text-xs text-primary-foreground/60">
+              <p className="text-xs text-primary-foreground/80">
                 Starts with the seven standard headings — just add the date, time, and title below.
               </p>
             )}
@@ -1455,7 +1455,7 @@ function Inner() {
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-3">
-            <p className="text-xs text-primary-foreground/60">
+            <p className="text-xs text-primary-foreground/80">
               Creates a new draft for review. Nothing existing is changed.
             </p>
 
@@ -1509,7 +1509,7 @@ function Inner() {
                   className="text-xs text-primary-foreground/70 file:mr-2 file:rounded file:border-0 file:bg-gold/20 file:px-2 file:py-1 file:text-gold"
                 />
                 {gTranscript && (
-                  <span className="text-xs text-primary-foreground/50">
+                  <span className="text-xs text-primary-foreground/80">
                     {gTranscript.length.toLocaleString()} characters
                   </span>
                 )}
@@ -1519,7 +1519,7 @@ function Inner() {
             {gType === "committee" && (
               <div>
                 <label className="text-xs text-primary-foreground/70">Committee agenda (optional)</label>
-                <p className="text-xs text-primary-foreground/50 mb-1">
+                <p className="text-xs text-primary-foreground/80 mb-1">
                   If you have the pre-meeting agenda for this Committee meeting, paste it here too — it often has the next meeting date already proposed on it.
                 </p>
                 <Textarea
@@ -1537,7 +1537,7 @@ function Inner() {
                     className="text-xs text-primary-foreground/70 file:mr-2 file:rounded file:border-0 file:bg-gold/20 file:px-2 file:py-1 file:text-gold"
                   />
                   {gAgenda && (
-                    <span className="text-xs text-primary-foreground/50">
+                    <span className="text-xs text-primary-foreground/80">
                       {gAgenda.length.toLocaleString()} characters
                     </span>
                   )}

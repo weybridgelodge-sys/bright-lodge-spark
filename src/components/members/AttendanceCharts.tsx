@@ -157,7 +157,7 @@ export default function AttendanceCharts() {
     <div className="space-y-5">
       {/* Tab toggle */}
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-xs text-primary-foreground/60">
+        <p className="text-xs text-primary-foreground/80">
           {liveFestive && activeTab === "festive"
             ? `Live from the Lodge Meetings Register — ${liveFestive.recordCount} meeting${liveFestive.recordCount === 1 ? "" : "s"} recorded.`
             : !liveFestive && activeTab === "festive"
@@ -240,7 +240,7 @@ export default function AttendanceCharts() {
                     <div style={{ height: `${visPct}%` }} className="bg-gold/40 group-hover:bg-gold/60 transition-colors w-full" />
                     <div style={{ height: `${subPct}%` }} className="bg-gold group-hover:bg-gold/90 transition-colors w-full border-t border-background/20" />
                   </div>
-                  <span className="text-[9px] text-primary-foreground/60 mt-2 text-center whitespace-nowrap">
+                  <span className="text-[9px] text-primary-foreground/80 mt-2 text-center whitespace-nowrap">
                     {data.month.split(" ")[0]} {data.month.split(" ")[1]}
                   </span>
                 </div>
@@ -259,7 +259,7 @@ export default function AttendanceCharts() {
                 <div className="flex items-center justify-between text-xs">
                   <span className="font-medium text-primary-foreground">
                     {block.block}{" "}
-                    <span className="text-primary-foreground/60 font-normal">
+                    <span className="text-primary-foreground/80 font-normal">
                       ({block.sessionsCount} sessions)
                     </span>
                   </span>
@@ -273,7 +273,7 @@ export default function AttendanceCharts() {
                 </div>
               </div>
             ))}
-            <p className="text-[11px] text-primary-foreground/60 pt-2 italic">
+            <p className="text-[11px] text-primary-foreground/80 pt-2 italic">
               {liveLoi
                 ? `Live from the Rehearsal Register — ${liveLoi.totalSessions} session${liveLoi.totalSessions === 1 ? "" : "s"} recorded.`
                 : "Insight: rehearsal turnout dips mid-season. Targeted reminders to Junior Officers help maintain ritual accuracy ahead of degree workings."}
@@ -290,7 +290,7 @@ function StatBanner({ icon, label, value }: { icon: React.ReactNode; label: stri
     <div className="bg-navy/60 border border-gold/10 rounded-sm p-3 flex items-center gap-3">
       <div className="p-2 bg-gold/10 rounded-sm text-gold">{icon}</div>
       <div>
-        <p className="text-[10px] uppercase tracking-wider text-primary-foreground/60">{label}</p>
+        <p className="text-[10px] uppercase tracking-wider text-primary-foreground/80">{label}</p>
         <p className="font-serif text-lg text-gold mt-0.5">{value}</p>
       </div>
     </div>
