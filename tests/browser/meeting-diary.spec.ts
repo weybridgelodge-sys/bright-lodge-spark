@@ -32,6 +32,25 @@ test("Meeting diary has no overflow at 320px", { timeout: 90_000 }, async ({ pag
     expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth), ctx).toBeLessThanOrEqual(1);
   };
   await check("page");
+  const fieldIssues = await page.evaluate(() => {
+    const rgb = (c: string) => (c.match(/[\d.]+/g) || []).slice(0, 4).map(Number);
+    const lum = (c: number[]) => c.slice(0, 3).map((v) => v / 255).map((v) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4)).reduce((s, v, i) => s + v * [0.2126, 0.7152, 0.0722][i], 0);
+    const ratio = (a: number[], b: number[]) => { const [x, y] = [lum(a), lum(b)].sort((p, q) => q - p); return (x + 0.05) / (y + 0.05); };
+    const issues: string[] = [];
+    for (const el of document.querySelectorAll<HTMLInputElement>("main input:not([type=hidden]), main select, main textarea")) {
+      if (!el.getBoundingClientRect().width) continue;
+      const name = (el.labels?.[0]?.innerText || el.getAttribute("aria-label") || "").trim();
+      if (!name) issues.push("unlabelled " + el.outerHTML.slice(0, 80));
+      const cs = getComputedStyle(el); const bg = rgb(cs.backgroundColor);
+      if (bg[3] === 0) issues.push(name + ": transparent field");
+      const t = ratio(rgb(cs.color), bg); if (t < 4.5) issues.push(`${name}: text ${t.toFixed(2)}`);
+      if (el.placeholder) { const p = ratio(rgb(getComputedStyle(el, "::placeholder").color), bg); if (p < 4.5) issues.push(`${name}: placeholder ${p.toFixed(2)}`); }
+      if (el.getBoundingClientRect().height < 44) issues.push(name + ": under 44px");
+    }
+    return issues;
+  });
+  expect(fieldIssues).toEqual([]);
+  await expect(page.getByText("Format dd/mm/yyyy")).toBeVisible();
   for (const b of await page.locator("main button:visible").all()) {
     const box = await b.boundingBox();
     if (box) expect(box.height, await b.innerText()).toBeGreaterThanOrEqual(44);

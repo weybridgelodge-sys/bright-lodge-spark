@@ -27,3 +27,4 @@
 - Manual membership enquiries are inserted only via add_manual_enquiry (admin/Secretary/Assistant Secretary, request_id idempotent, created_by audit); no table INSERT policy. Why: public Join Us insert path stays server-only.
 - Masonic year = Installation to day before next (via _shared/masonicYear.ts, settings rule, stored dates override); KPI Movement uses member_status_history; new tables carry unit_id. Why: multi-lodge-ready, accurate movement.
 - Meeting diary: festive_board_meetings via diary_* RPCs; cancel, never delete; Installation moves update its stored date; triggers audit. Why: one shared register.
+- Portal form fields use fieldCls (src/lib/fieldStyle.ts): text/placeholder ≥4.5:1, visible label, date inputs show a format hint. Why: dark inputs were unreadable on phones.
