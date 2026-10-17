@@ -100,10 +100,9 @@ Deno.serve(async (req) => {
 
   // Look up who signs the enquirer's confirmation (Secretary) and who is
   // named in the body as the caller (Membership Officer)
-  const now = new Date()
-  const lodgeYear = now.getUTCMonth() + 1 >= 10 ? now.getUTCFullYear() : now.getUTCFullYear() - 1
-  const secretary = await lookupOfficer(supabase, 'secretary', lodgeYear, 'Lodge Secretary')
-  const membershipOfficer = await lookupOfficer(supabase, 'membership_officer', lodgeYear, 'Membership Officer')
+  // Officers in post today: Installation-to-Installation year, offices carry forward.
+  const secretary = await lookupOfficer(supabase, 'secretary', 'Lodge Secretary')
+  const membershipOfficer = await lookupOfficer(supabase, 'membership_officer', 'Membership Officer')
   console.log('Confirmation sign-off:', secretary, '| Body caller:', membershipOfficer)
 
   // 2) Confirmation to the enquirer
@@ -145,22 +144,16 @@ function json(body: unknown, status: number) {
 async function lookupOfficer(
   supabase: ReturnType<typeof createClient>,
   positionKey: string,
-  lodgeYear: number,
   fallbackLabel: string,
 ): Promise<{ name: string; office: string }> {
   let name = ''
   let office = fallbackLabel
   try {
-    const { data: appts, error } = await supabase
-      .from('officer_appointments')
-      .select('member_id')
-      .eq('position_key', positionKey)
-      .eq('lodge_year', lodgeYear)
-      .limit(1)
-    if (error) console.error(`${positionKey} appt lookup error`, error)
-    const memberId = (appts as any)?.[0]?.member_id
+    const { data: holder, error } = await supabase.rpc('current_officer_holder', { _position_key: positionKey })
+    if (error) console.error(`${positionKey} holder lookup error`, error)
+    const memberId = (holder as string | null) ?? null
     if (!memberId) {
-      console.warn(`No ${positionKey} appointment for lodge year`, lodgeYear)
+      console.warn(`No current ${positionKey} holder`)
       return { name, office }
     }
     const { data: prof } = await supabase
