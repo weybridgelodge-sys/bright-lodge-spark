@@ -204,7 +204,7 @@ function Inner() {
         </div>
         <div className="grid w-full min-w-0 grid-cols-1 gap-2 sm:flex sm:w-auto sm:flex-wrap sm:items-center">
           <Select value={String(year)} onValueChange={(v) => setYear(Number(v))}>
-            <SelectTrigger className="w-full sm:w-32"><SelectValue /></SelectTrigger>
+            <SelectTrigger aria-label="Installation year" className="w-full sm:w-32"><SelectValue /></SelectTrigger>
             <SelectContent>{years.map((y) => <SelectItem key={y} value={String(y)}>{formatMasonicYear(y)}</SelectItem>)}</SelectContent>
           </Select>
           <Button className="w-full sm:w-auto" variant="outline" onClick={load} disabled={loading}><RefreshCw className="w-4 h-4 mr-1" />Refresh</Button>
@@ -262,7 +262,7 @@ function Inner() {
             <div className="mt-3 flex min-w-0 flex-col items-stretch gap-2 text-xs sm:flex-row sm:flex-wrap sm:items-center">
               <span>Membership Officer lodge email:</span>
               <Select value={data.membershipLodgeEmail} onValueChange={setMembershipEmail} disabled={!(isAdmin || isSecretary)}>
-                <SelectTrigger className="h-8 w-full min-w-0 sm:w-72"><SelectValue /></SelectTrigger>
+                <SelectTrigger aria-label="Membership Officer lodge email" className="h-8 w-full min-w-0 sm:w-72"><SelectValue /></SelectTrigger>
                 <SelectContent>{MEMBERSHIP_EMAIL_OPTIONS.map((e) => <SelectItem key={e} value={e}>{e}</SelectItem>)}</SelectContent>
               </Select>
             </div>

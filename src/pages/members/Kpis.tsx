@@ -302,7 +302,7 @@ export default function Kpis() {
           {conv.length === 0 ? (
             <p className="text-sm text-primary-foreground/80">No Light Blues currently eligible.</p>
           ) : (
-            <div className="overflow-x-auto">
+            <div tabIndex={0} role="region" aria-label="Scrollable table" className="overflow-x-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-gold">
               <table className="w-full text-sm">
                 <thead className="text-xs uppercase tracking-wider text-primary-foreground/80">
                   <tr>
@@ -485,7 +485,7 @@ export default function Kpis() {
           {visitors.length === 0 ? (
             <p className="text-sm text-primary-foreground/80">No visitor attendances recorded yet.</p>
           ) : (
-            <div className="overflow-x-auto">
+            <div tabIndex={0} role="region" aria-label="Scrollable table" className="overflow-x-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-gold">
               <table className="w-full text-sm">
                 <thead className="text-xs uppercase tracking-wider text-primary-foreground/80">
                   <tr>
@@ -519,7 +519,7 @@ export default function Kpis() {
           {quarterly.length === 0 ? (
             <p className="text-sm text-primary-foreground/80">No past meetings recorded yet.</p>
           ) : (
-            <div className="overflow-x-auto">
+            <div tabIndex={0} role="region" aria-label="Scrollable table" className="overflow-x-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-gold">
               <table className="w-full text-sm">
                 <thead className="text-xs uppercase tracking-wider text-primary-foreground/80">
                   <tr>

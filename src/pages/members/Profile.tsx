@@ -156,7 +156,7 @@ export default function MembersProfile() {
 
         <div>
           <label className={labelCls}>Preferred name (optional)</label>
-          <input
+          <input aria-label="Preferred name (optional)"
             value={preferredName}
             onChange={(e) => setPreferredName(e.target.value)}
             placeholder="e.g. Bob (shown as 'Welcome Bob' in the portal)"
@@ -166,7 +166,7 @@ export default function MembersProfile() {
 
         <div>
           <label className={labelCls}>Phone (optional)</label>
-          <input value={phone} onChange={(e) => setPhone(e.target.value)} className={inputCls} />
+          <input aria-label="Phone (optional)" value={phone} onChange={(e) => setPhone(e.target.value)} className={inputCls} />
         </div>
 
         <div className="pt-3 mt-2 border-t border-gold/10">
@@ -174,27 +174,27 @@ export default function MembersProfile() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="sm:col-span-2">
               <label className={labelCls}>Address line 1</label>
-              <input value={addressLine1} onChange={(e) => setAddressLine1(e.target.value)} className={inputCls} />
+              <input aria-label="Address line 1" value={addressLine1} onChange={(e) => setAddressLine1(e.target.value)} className={inputCls} />
             </div>
             <div className="sm:col-span-2">
               <label className={labelCls}>Address line 2</label>
-              <input value={addressLine2} onChange={(e) => setAddressLine2(e.target.value)} className={inputCls} />
+              <input aria-label="Address line 2" value={addressLine2} onChange={(e) => setAddressLine2(e.target.value)} className={inputCls} />
             </div>
             <div className="sm:col-span-2">
               <label className={labelCls}>Address line 3</label>
-              <input value={addressLine3} onChange={(e) => setAddressLine3(e.target.value)} className={inputCls} />
+              <input aria-label="Address line 3" value={addressLine3} onChange={(e) => setAddressLine3(e.target.value)} className={inputCls} />
             </div>
             <div>
               <label className={labelCls}>Town</label>
-              <input value={town} onChange={(e) => setTown(e.target.value)} className={inputCls} />
+              <input aria-label="Town" value={town} onChange={(e) => setTown(e.target.value)} className={inputCls} />
             </div>
             <div>
               <label className={labelCls}>County</label>
-              <input value={county} onChange={(e) => setCounty(e.target.value)} className={inputCls} />
+              <input aria-label="County" value={county} onChange={(e) => setCounty(e.target.value)} className={inputCls} />
             </div>
             <div>
               <label className={labelCls}>Post code</label>
-              <input value={postcode} onChange={(e) => setPostcode(e.target.value)} className={`${inputCls} uppercase`} />
+              <input aria-label="Post code" value={postcode} onChange={(e) => setPostcode(e.target.value)} className={`${inputCls} uppercase`} />
             </div>
           </div>
         </div>

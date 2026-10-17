@@ -263,12 +263,12 @@ export default function NewMemberFeesTab({ canEdit }: { canEdit: boolean }) {
             <div className="grid gap-3 sm:grid-cols-2 [&>*]:min-w-0">
               <div>
                 <Label>New member name</Label>
-                <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. John Smith" disabled={!canEdit} />
+                <Input aria-label="New member name" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. John Smith" disabled={!canEdit} />
               </div>
               <div>
                 <Label>Meeting initiated at</Label>
                 <Select value={meeting} onValueChange={setMeeting} disabled={!canEdit}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectTrigger aria-label="Meeting initiated at"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     {MEETINGS.map((m) => <SelectItem key={m.key} value={m.key}>{m.label}</SelectItem>)}
                   </SelectContent>
@@ -276,18 +276,18 @@ export default function NewMemberFeesTab({ canEdit }: { canEdit: boolean }) {
               </div>
               <div>
                 <Label>Date received</Label>
-                <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} disabled={!canEdit} />
+                <Input aria-label="Date received" type="date" value={date} onChange={(e) => setDate(e.target.value)} disabled={!canEdit} />
               </div>
               <PeriodPicker periods={posting.periods} value={posting.periodId} autoId={posting.autoId} onChange={posting.setPeriodId} disabled={!canEdit} />
               <div>
                 <Label>Annual subscription rate (£)</Label>
-                <Input type="number" step="0.01" min="0" value={subRate} onChange={(e) => setSubRate(e.target.value)} disabled={!canEdit} />
+                <Input aria-label="Annual subscription rate (£)" type="number" step="0.01" min="0" value={subRate} onChange={(e) => setSubRate(e.target.value)} disabled={!canEdit} />
               </div>
               <div className="space-y-3">
                 <div>
                   <Label>New member&apos;s age</Label>
                   <Select value={ageBracket} onValueChange={(v) => applyAgeBandDefault(v as "over25" | "under25")} disabled={!canEdit}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectTrigger aria-label="New member&apos;s age"><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="over25">25 and over</SelectItem>
                       <SelectItem value="under25">Under 25</SelectItem>
@@ -299,16 +299,16 @@ export default function NewMemberFeesTab({ canEdit }: { canEdit: boolean }) {
                 </div>
                 <div>
                   <Label>UGLE registration fee (£)</Label>
-                  <Input type="number" step="0.01" min="0" value={ugleFee} onChange={(e) => setUgleFee(e.target.value)} disabled={!canEdit} />
+                  <Input aria-label="UGLE registration fee (£)" type="number" step="0.01" min="0" value={ugleFee} onChange={(e) => setUgleFee(e.target.value)} disabled={!canEdit} />
                 </div>
                 <div>
                   <Label>PGL registration fee (£)</Label>
-                  <Input type="number" step="0.01" min="0" value={pglFee} onChange={(e) => setPglFee(e.target.value)} disabled={!canEdit} />
+                  <Input aria-label="PGL registration fee (£)" type="number" step="0.01" min="0" value={pglFee} onChange={(e) => setPglFee(e.target.value)} disabled={!canEdit} />
                 </div>
               </div>
               <div className="sm:col-span-2">
                 <Label>Bank reference *</Label>
-                <Input value={bankReference} onChange={(e) => setBankReference(e.target.value)} placeholder="Required" disabled={!canEdit} />
+                <Input aria-label="Bank reference" value={bankReference} onChange={(e) => setBankReference(e.target.value)} placeholder="Required" disabled={!canEdit} />
                 <p className="text-primary-foreground/80 text-xs mt-1">
                   Lodge Number + Registration Fee (RF) + Candidate&apos;s Surname (e.g. L6787 RF Smith)
                 </p>

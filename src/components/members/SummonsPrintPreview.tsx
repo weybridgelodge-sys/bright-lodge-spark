@@ -110,7 +110,7 @@ export default function SummonsPrintPreview({ template, officers, members }: Pro
         <div className="flex-1 min-w-[240px]">
           <label className="text-xs text-primary-foreground/70 block mb-1">Pick a saved summons</label>
           <Select value={pickedId} onValueChange={setPickedId}>
-            <SelectTrigger><SelectValue placeholder="Pick a summons…" /></SelectTrigger>
+            <SelectTrigger aria-label="Pick a saved summons"><SelectValue placeholder="Pick a summons…" /></SelectTrigger>
             <SelectContent>
               {list.map((s) => (
                 <SelectItem key={s.id} value={s.id}>

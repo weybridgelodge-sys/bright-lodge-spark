@@ -167,12 +167,12 @@ export default function GeneralJournalTab({ canEdit }: { canEdit: boolean }) {
             <div className="grid gap-3 sm:grid-cols-2 mb-5 [&>*]:min-w-0">
               <div>
                 <Label>Date</Label>
-                <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} disabled={!canEdit} />
+                <Input aria-label="Date" type="date" value={date} onChange={(e) => setDate(e.target.value)} disabled={!canEdit} />
               </div>
               <PeriodPicker periods={posting.periods} value={posting.periodId} autoId={posting.autoId} onChange={posting.setPeriodId} disabled={!canEdit} />
               <div>
                 <Label>Description</Label>
-                <Input
+                <Input aria-label="Description"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="e.g. Opening balances as at 30 Sept 2026"
@@ -187,7 +187,7 @@ export default function GeneralJournalTab({ canEdit }: { canEdit: boolean }) {
                   <div className="min-w-0">
                     <Label className="text-xs">Account</Label>
                     <Select value={line.accountId} onValueChange={(v) => updateLine(line.key, { accountId: v })} disabled={!canEdit}>
-                      <SelectTrigger><SelectValue placeholder="Choose an account" /></SelectTrigger>
+                      <SelectTrigger aria-label="Account"><SelectValue placeholder="Choose an account" /></SelectTrigger>
                       <SelectContent>
                         {accounts.map((a) => (
                           <SelectItem key={a.id} value={a.id}>{a.code} — {a.name}</SelectItem>
@@ -198,7 +198,7 @@ export default function GeneralJournalTab({ canEdit }: { canEdit: boolean }) {
                   <div>
                     <Label className="text-xs">Dr / Cr</Label>
                     <Select value={line.side} onValueChange={(v) => updateLine(line.key, { side: v as "dr" | "cr" })} disabled={!canEdit}>
-                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectTrigger aria-label="Dr / Cr"><SelectValue /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="dr">Debit</SelectItem>
                         <SelectItem value="cr">Credit</SelectItem>
@@ -207,17 +207,17 @@ export default function GeneralJournalTab({ canEdit }: { canEdit: boolean }) {
                   </div>
                   <div>
                     <Label className="text-xs">Amount (£)</Label>
-                    <Input type="number" step="0.01" min="0" value={line.amount} onChange={(e) => updateLine(line.key, { amount: e.target.value })} disabled={!canEdit} />
+                    <Input aria-label="Amount (£)" type="number" step="0.01" min="0" value={line.amount} onChange={(e) => updateLine(line.key, { amount: e.target.value })} disabled={!canEdit} />
                   </div>
                   <div>
                     <Label className="text-xs">Line description (optional)</Label>
-                    <Input value={line.description} onChange={(e) => updateLine(line.key, { description: e.target.value })} disabled={!canEdit} />
+                    <Input aria-label="Line description (optional)" value={line.description} onChange={(e) => updateLine(line.key, { description: e.target.value })} disabled={!canEdit} />
                   </div>
                   {line.accountId && line.accountId === accounts.find((a) => a.code === "3100")?.id ? (
                     <div className="min-w-0 sm:col-span-5 sm:order-last">
                       <Label className="text-xs">Reserve pot</Label>
                       <Select value={line.fundCode} onValueChange={(v) => updateLine(line.key, { fundCode: v })} disabled={!canEdit}>
-                        <SelectTrigger><SelectValue placeholder="Choose the reserve pot" /></SelectTrigger>
+                        <SelectTrigger aria-label="Reserve pot"><SelectValue placeholder="Choose the reserve pot" /></SelectTrigger>
                         <SelectContent className="max-w-[calc(100vw-2rem)]">
                           {pots.map((p) => (
                             <SelectItem className="whitespace-normal" key={p.fund_code} value={p.fund_code}>{p.label} ({p.fund_code})</SelectItem>

@@ -1155,17 +1155,17 @@ export default function MembersAdmin() {
         </div>
       )}
       <AlertDialog open={!!pendingStatus} onOpenChange={(o) => !o && setPendingStatus(null)}>
-        <AlertDialogContent>
+        <AlertDialogContent className="bg-navy text-cream border-gold/30">
           <AlertDialogHeader>
-            <AlertDialogTitle>Mark {pendingStatus?.name} as {STATUSES.find((s) => s.value === pendingStatus?.status)?.label}?</AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogTitle className="text-gold">Mark {pendingStatus?.name} as {STATUSES.find((s) => s.value === pendingStatus?.status)?.label}?</AlertDialogTitle>
+            <AlertDialogDescription className="text-cream">
               This changes the member's status and records today as the date of change. It can be reversed later, but please check you have the right member.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="min-h-[48px]">Cancel</AlertDialogCancel>
+            <AlertDialogCancel className="min-h-[48px] bg-transparent border-gold/60 text-cream hover:bg-navy-light hover:text-cream">Cancel</AlertDialogCancel>
             <AlertDialogAction
-              className="min-h-[48px]"
+              className="min-h-[48px] bg-gold text-navy hover:bg-gold/90"
               onClick={() => { if (pendingStatus) setStatus(pendingStatus.id, pendingStatus.status); setPendingStatus(null); }}
             >
               Confirm

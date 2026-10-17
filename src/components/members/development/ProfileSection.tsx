@@ -147,7 +147,7 @@ export default function ProfileSection({
             <div>
               <Label className="text-xs text-primary-foreground/70">Assigned Mentor</Label>
               <Select value={mentorId || "none"} onValueChange={(v) => setMentorId(v === "none" ? "" : v)}>
-                <SelectTrigger className={fieldCls}><SelectValue placeholder="Select mentor" /></SelectTrigger>
+                <SelectTrigger aria-label="Assigned Mentor" className={fieldCls}><SelectValue placeholder="Select mentor" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">— None —</SelectItem>
                   {mentors.map((m) => (

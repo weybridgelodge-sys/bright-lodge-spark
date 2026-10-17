@@ -176,11 +176,11 @@ export default function BankStatementsTab({ canEdit }: { canEdit: boolean }) {
           <div className="grid sm:grid-cols-2 gap-3">
             <div>
               <Label>Period label *</Label>
-              <Input value={period} onChange={(e) => setPeriod(e.target.value)} placeholder="e.g. January 2025" />
+              <Input aria-label="Period label" value={period} onChange={(e) => setPeriod(e.target.value)} placeholder="e.g. January 2025" />
             </div>
             <div>
               <Label>QIF file (.qif or .txt)</Label>
-              <Input
+              <Input aria-label="QIF file (.qif or .txt)"
                 type="file"
                 accept=".qif,.txt,text/plain"
                 onChange={(e) => setFile(e.target.files?.[0] ?? null)}
@@ -252,7 +252,7 @@ export default function BankStatementsTab({ canEdit }: { canEdit: boolean }) {
                         <p className="text-sm text-gold/90 mb-2">
                           {txs.length} transaction{txs.length === 1 ? "" : "s"} · {money(paidIn)} paid in · {money(paidOut)} paid out
                         </p>
-                        <div className="overflow-x-auto">
+                        <div tabIndex={0} role="region" aria-label="Scrollable table" className="overflow-x-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-gold">
                           <table className="w-full text-sm min-w-[620px]">
                             <thead className="bg-navy text-gold uppercase text-[10px] tracking-wider">
                               <tr>

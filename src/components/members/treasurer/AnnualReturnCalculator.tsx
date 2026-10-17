@@ -238,7 +238,7 @@ export default function AnnualReturnCalculator({ canEdit }: { canEdit: boolean }
       <div className="grid gap-3 sm:grid-cols-2 mb-4">
         <div>
           <Label>Return year ending 30 September</Label>
-          <select
+          <select aria-label="Return year ending 30 September"
             value={year}
             onChange={(e) => setYear(Number(e.target.value))}
             disabled={!canEdit}
@@ -297,12 +297,12 @@ export default function AnnualReturnCalculator({ canEdit }: { canEdit: boolean }
             <div className="grid grid-cols-2 gap-2">
               <div>
                 <span className="text-xs text-primary-foreground/80">Rate (£)</span>
-                <Input type="number" step="0.01" min="0" inputMode="decimal" value={r.rate} disabled={!canEdit}
+                <Input aria-label={`${r.label} rate (£)`} type="number" step="0.01" min="0" inputMode="decimal" value={r.rate} disabled={!canEdit}
                   onChange={(e) => setRow(r.key, "rate", e.target.value)} />
               </div>
               <div>
                 <span className="text-xs text-primary-foreground/80">Count</span>
-                <Input type="number" step="1" min="0" inputMode="numeric" value={r.count} disabled={!canEdit}
+                <Input aria-label={`${r.label} count`} type="number" step="1" min="0" inputMode="numeric" value={r.count} disabled={!canEdit}
                   onChange={(e) => setRow(r.key, "count", e.target.value)} />
               </div>
             </div>

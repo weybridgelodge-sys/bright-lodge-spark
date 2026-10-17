@@ -81,7 +81,7 @@ export default function EventBalancesPanel({ bookings, canRegenerate, onRecorded
   return (
     <div className="rounded-sm border border-gold/20 bg-navy-light/30 p-4 space-y-3">
       <h3 className="font-serif text-gold text-base">Balances outstanding</h3>
-      <div className="overflow-x-auto">
+      <div tabIndex={0} role="region" aria-label="Scrollable table" className="overflow-x-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-gold">
         <table className="w-full text-sm">
           <thead>
             <tr className="text-left text-primary-foreground/80 text-xs">

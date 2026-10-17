@@ -16,13 +16,22 @@ const ScrollToTopButton = () => {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  // Hide while a modal dialog locks scrolling, so it is never focusable behind the dialog.
+  const [locked, setLocked] = useState(false);
+  useEffect(() => {
+    const check = () => setLocked(document.body.hasAttribute("data-scroll-locked"));
+    const mo = new MutationObserver(check);
+    mo.observe(document.body, { attributes: true, attributeFilter: ["data-scroll-locked"] });
+    return () => mo.disconnect();
+  }, []);
+
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
 
   if (hidesScrollToTop(pathname)) return null;
 
   return (
     <AnimatePresence>
-      {visible && (
+      {visible && !locked && (
         <motion.button
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}

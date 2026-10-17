@@ -295,20 +295,20 @@ function NewEventForm({ members, userId, onSaved }: { members: Member[]; userId:
         <div>
           <Label className="text-xs">Member</Label>
           <Select value={memberId} onValueChange={setMemberId}>
-            <SelectTrigger className={inputCls}><SelectValue placeholder="Select…" /></SelectTrigger>
+            <SelectTrigger aria-label="Member" className={inputCls}><SelectValue placeholder="Select…" /></SelectTrigger>
             <SelectContent>{sortedMembers.map((m) => <SelectItem key={m.id} value={m.id}>{memberName(m)}</SelectItem>)}</SelectContent>
           </Select>
         </div>
         <div>
           <Label className="text-xs">Type</Label>
           <Select value={eventType} onValueChange={(v) => setEventType(v as ManualEventType)}>
-            <SelectTrigger className={inputCls}><SelectValue /></SelectTrigger>
+            <SelectTrigger aria-label="Type" className={inputCls}><SelectValue /></SelectTrigger>
             <SelectContent>{MANUAL_TYPES.map((k) => <SelectItem key={k} value={k}>{TYPE_LABEL[k]}</SelectItem>)}</SelectContent>
           </Select>
         </div>
         <div>
           <Label className="text-xs">Date</Label>
-          <Input type="date" value={eventDate} onChange={(e) => setEventDate(e.target.value)} className={inputCls} required />
+          <Input aria-label="Date" type="date" value={eventDate} onChange={(e) => setEventDate(e.target.value)} className={inputCls} required />
         </div>
         <div className="flex items-end">
           <label className="flex items-center gap-2 text-sm text-primary-foreground/80">
@@ -319,7 +319,7 @@ function NewEventForm({ members, userId, onSaved }: { members: Member[]; userId:
       </div>
       <div>
         <Label className="text-xs">Notes</Label>
-        <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} className={inputCls} rows={2} maxLength={500} />
+        <Textarea aria-label="Notes" value={notes} onChange={(e) => setNotes(e.target.value)} className={inputCls} rows={2} maxLength={500} />
       </div>
       <Button type="submit" disabled={busy} className="bg-gold text-navy hover:bg-gold/90">Save event</Button>
     </form>

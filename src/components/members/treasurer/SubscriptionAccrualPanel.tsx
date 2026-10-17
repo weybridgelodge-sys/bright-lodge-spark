@@ -61,7 +61,7 @@ export default function SubscriptionAccrualPanel({ canEdit }: { canEdit: boolean
         <div>
           <Label>Lodge year</Label>
           <Select value={String(year)} onValueChange={(v) => { setYear(Number(v)); setRows(null); }} disabled={!canEdit}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectTrigger aria-label="Lodge year"><SelectValue /></SelectTrigger>
             <SelectContent>
               {[now, now + 1].map((y) => <SelectItem key={y} value={String(y)}>FY {yLabel(y)}</SelectItem>)}
             </SelectContent>

@@ -74,14 +74,14 @@ export default function EngagementTracker({
         <div className="rounded-sm border border-gold/20 bg-navy-dark/30 p-3 grid grid-cols-1 md:grid-cols-[120px_180px_1fr_auto] gap-2 items-end">
           <div>
             <label className="text-[10px] text-primary-foreground/80 uppercase">Date</label>
-            <Input type="date" value={form.occurred_on}
+            <Input aria-label="Date" type="date" value={form.occurred_on}
               onChange={(e) => setForm({ ...form, occurred_on: e.target.value })}
               className="bg-navy text-primary-foreground" />
           </div>
           <div>
             <label className="text-[10px] text-primary-foreground/80 uppercase">Category</label>
             <Select value={form.category} onValueChange={(v) => setForm({ ...form, category: v as EngagementCategory })}>
-              <SelectTrigger className="bg-navy text-primary-foreground"><SelectValue /></SelectTrigger>
+              <SelectTrigger aria-label="Category" className="bg-navy text-primary-foreground"><SelectValue /></SelectTrigger>
               <SelectContent>
                 {Object.entries(ENGAGEMENT_CATEGORY_LABEL).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}
               </SelectContent>
@@ -89,7 +89,7 @@ export default function EngagementTracker({
           </div>
           <div>
             <label className="text-[10px] text-primary-foreground/80 uppercase">Summary</label>
-            <Textarea rows={1} value={form.summary} onChange={(e) => setForm({ ...form, summary: e.target.value })}
+            <Textarea aria-label="Summary" rows={1} value={form.summary} onChange={(e) => setForm({ ...form, summary: e.target.value })}
               className="bg-navy text-primary-foreground min-h-[40px]" placeholder="e.g. Attended Topgolf social" />
           </div>
           <Button onClick={onAdd} disabled={busy} className="bg-gold text-navy hover:bg-gold/90">
@@ -99,7 +99,7 @@ export default function EngagementTracker({
       )}
 
       <div className="rounded-sm border border-gold/20 overflow-hidden">
-        <div className="overflow-x-auto">
+        <div tabIndex={0} role="region" aria-label="Scrollable table" className="overflow-x-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-gold">
           <table className="w-full text-sm">
             <thead className="bg-navy-light/40 text-gold uppercase text-[10px] tracking-wider">
               <tr>

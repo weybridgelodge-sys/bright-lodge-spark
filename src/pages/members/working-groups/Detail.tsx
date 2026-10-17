@@ -114,13 +114,13 @@ function Inner() {
           <div className="grid grid-cols-1 md:grid-cols-[120px_140px_1fr_auto] gap-2 items-end">
             <div>
               <label className="text-[10px] text-primary-foreground/80 uppercase">Date</label>
-              <Input type="date" value={form.activity_date} onChange={(e) => setForm({ ...form, activity_date: e.target.value })}
+              <Input aria-label="Date" type="date" value={form.activity_date} onChange={(e) => setForm({ ...form, activity_date: e.target.value })}
                 className="bg-navy text-primary-foreground" />
             </div>
             <div>
               <label className="text-[10px] text-primary-foreground/80 uppercase">Type</label>
               <Select value={form.kind} onValueChange={(v) => setForm({ ...form, kind: v as any })}>
-                <SelectTrigger className="bg-navy text-primary-foreground"><SelectValue /></SelectTrigger>
+                <SelectTrigger aria-label="Type" className="bg-navy text-primary-foreground"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="meeting">Meeting</SelectItem>
                   <SelectItem value="event">Event</SelectItem>
@@ -130,19 +130,19 @@ function Inner() {
             </div>
             <div>
               <label className="text-[10px] text-primary-foreground/80 uppercase">Title</label>
-              <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })}
+              <Input aria-label="Title" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })}
                 className="bg-navy text-primary-foreground" placeholder="e.g. Planning meeting" />
             </div>
             <Button onClick={onAdd} disabled={busy} className="bg-gold text-navy hover:bg-gold/90">
               <Plus className="w-4 h-4 mr-1" /> Add
             </Button>
-            <Textarea rows={2} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })}
+            <Textarea aria-label="Notes / outcomes (optional)" rows={2} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })}
               className="md:col-span-4 bg-navy text-primary-foreground" placeholder="Notes / outcomes (optional)" />
           </div>
         )}
 
         <div className="rounded-sm border border-gold/20 overflow-hidden">
-          <div className="overflow-x-auto">
+          <div tabIndex={0} role="region" aria-label="Scrollable table" className="overflow-x-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-gold">
             <table className="w-full text-sm">
               <thead className="bg-navy-light/40 text-gold uppercase text-[10px] tracking-wider">
                 <tr><th className="text-left p-2 w-32">Date</th><th className="text-left p-2 w-28">Type</th><th className="text-left p-2">Title</th><th className="text-left p-2">Notes</th></tr>

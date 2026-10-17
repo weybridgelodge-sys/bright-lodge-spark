@@ -127,7 +127,7 @@ function CollectionsTab({ collections, donations, canEdit, canPost, onChange }: 
             </Button>
           )}
         </div>
-        <div className="overflow-x-auto">
+        <div tabIndex={0} role="region" aria-label="Scrollable table" className="overflow-x-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-gold">
           <table className="w-full text-sm">
             <thead>
               <tr className="text-left text-xs uppercase tracking-wider text-primary-foreground/80 border-b border-gold/15">
@@ -263,30 +263,30 @@ function CollectionDialog({ open, onOpenChange, editing, onSaved }: {
       <DialogContent className="bg-navy text-primary-foreground border-gold/30 max-h-[90vh] overflow-y-auto">
         <DialogHeader><DialogTitle className="font-serif text-gold">{editing ? "Edit collection" : "New collection"}</DialogTitle></DialogHeader>
         <div className="space-y-3">
-          <div><Label>Date</Label><Input type="date" value={date} onChange={(e) => setDate(e.target.value)} /></div>
+          <div><Label>Date</Label><Input aria-label="Date" type="date" value={date} onChange={(e) => setDate(e.target.value)} /></div>
           <div>
             <Label>Type</Label>
             <Select value={type} onValueChange={(v) => setType(v as CollectionType)}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectTrigger aria-label="Type"><SelectValue /></SelectTrigger>
               <SelectContent>
                 {Object.entries(COLLECTION_TYPE_LABEL).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}
               </SelectContent>
             </Select>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <div><Label>Gross amount (£)</Label><Input type="number" step="0.01" value={gross} onChange={(e) => setGross(e.target.value)} /></div>
-            <div><Label>Costs (£)</Label><Input type="number" step="0.01" value={costs} onChange={(e) => setCosts(e.target.value)} /></div>
+            <div><Label>Gross amount (£)</Label><Input aria-label="Gross amount (£)" type="number" step="0.01" value={gross} onChange={(e) => setGross(e.target.value)} /></div>
+            <div><Label>Costs (£)</Label><Input aria-label="Gross amount (£)" type="number" step="0.01" value={costs} onChange={(e) => setCosts(e.target.value)} /></div>
           </div>
           <div>
             <Label>Stripe fee (£)</Label>
-            <Input type="number" step="0.01" value={stripeFee} onChange={(e) => setStripeFee(e.target.value)} />
+            <Input aria-label="Stripe fee (£)" type="number" step="0.01" value={stripeFee} onChange={(e) => setStripeFee(e.target.value)} />
             <p className="text-xs text-primary-foreground/80 mt-1">Card processing fee on online payments — posted to Bank &amp; card charges (5410), separate from prize costs (5310).</p>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <div><Label>Banked date</Label><Input type="date" value={bankedDate} onChange={(e) => setBankedDate(e.target.value)} /></div>
-            <div><Label>Banked by</Label><Input value={bankedBy} onChange={(e) => setBankedBy(e.target.value)} placeholder="e.g. Charity Steward" /></div>
+            <div><Label>Banked date</Label><Input aria-label="e.g. Charity Steward" type="date" value={bankedDate} onChange={(e) => setBankedDate(e.target.value)} /></div>
+            <div><Label>Banked by</Label><Input aria-label="Banked date" value={bankedBy} onChange={(e) => setBankedBy(e.target.value)} placeholder="e.g. Charity Steward" /></div>
           </div>
-          <div><Label>Notes</Label><Textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} /></div>
+          <div><Label>Notes</Label><Textarea aria-label="Banked by" value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} /></div>
         </div>
         <DialogFooter className="flex items-center justify-between gap-2">
           {editing && <Button variant="ghost" className="text-red-300 hover:text-red-200" onClick={remove}><Trash2 className="w-4 h-4 mr-1" /> Delete</Button>}
@@ -367,7 +367,7 @@ function DonationsTab({ donations, charities, festival, canEdit, canPost, onChan
         {charities.length === 0 && (
           <p className="px-4 py-3 text-xs text-amber-300">Add at least one charity to the Charity Ledger before logging a donation.</p>
         )}
-        <div className="overflow-x-auto">
+        <div tabIndex={0} role="region" aria-label="Scrollable table" className="overflow-x-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-gold">
           <table className="w-full text-sm">
             <thead>
               <tr className="text-left text-xs uppercase tracking-wider text-primary-foreground/80 border-b border-gold/15">
@@ -543,8 +543,8 @@ function DonationDialog({ open, onOpenChange, editing, charities, onSaved }: {
         <DialogHeader><DialogTitle className="font-serif text-gold">{editing ? "Edit donation" : "New donation"}</DialogTitle></DialogHeader>
         <div className="space-y-3">
           <div className="grid grid-cols-2 gap-3">
-            <div><Label>Date</Label><Input type="date" value={date} onChange={(e) => setDate(e.target.value)} /></div>
-            <div><Label>Amount (£)</Label><Input type="number" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} /></div>
+            <div><Label>Date</Label><Input aria-label="Date" type="date" value={date} onChange={(e) => setDate(e.target.value)} /></div>
+            <div><Label>Amount (£)</Label><Input aria-label="Date" type="number" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} /></div>
           </div>
           <div className="space-y-2 rounded-sm border border-gold/15 bg-navy-light/30 p-3">
             <label className="flex items-center gap-2 text-sm">
@@ -553,7 +553,7 @@ function DonationDialog({ open, onOpenChange, editing, charities, onSaved }: {
             {hasMatch && (
               <div>
                 <Label>Match funding received (£)</Label>
-                <Input type="number" step="0.01" value={matchAmount} onChange={(e) => setMatchAmount(e.target.value)} />
+                <Input aria-label="Match funding received (£)" type="number" step="0.01" value={matchAmount} onChange={(e) => setMatchAmount(e.target.value)} />
                 <p className="text-xs text-primary-foreground/80 mt-1">Total donation to charity: <span className="text-gold tabular-nums">{gbp((Number(amount) || 0) + (Number(matchAmount) || 0))}</span></p>
               </div>
             )}
@@ -562,32 +562,32 @@ function DonationDialog({ open, onOpenChange, editing, charities, onSaved }: {
           <div>
             <Label>Charity</Label>
             <Select value={charityId} onValueChange={setCharityId}>
-              <SelectTrigger><SelectValue placeholder="Select charity" /></SelectTrigger>
+              <SelectTrigger aria-label="Charity"><SelectValue placeholder="Select charity" /></SelectTrigger>
               <SelectContent>{charities.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
             </Select>
           </div>
-          <div><Label>Purpose / occasion</Label><Textarea value={purpose} onChange={(e) => setPurpose(e.target.value)} rows={2} /></div>
+          <div><Label>Purpose / occasion</Label><Textarea aria-label="Purpose / occasion" value={purpose} onChange={(e) => setPurpose(e.target.value)} rows={2} /></div>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <Label>Payment method</Label>
               <Select value={method} onValueChange={(v) => setMethod(v as PaymentMethod)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger aria-label="Payment method"><SelectValue /></SelectTrigger>
                 <SelectContent>{Object.entries(PAYMENT_METHOD_LABEL).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}</SelectContent>
               </Select>
             </div>
-            <div><Label>Reference</Label><Input value={reference} onChange={(e) => setReference(e.target.value)} placeholder="Cheque no. / BACS ref" /></div>
+            <div><Label>Reference</Label><Input aria-label="Cheque no. / BACS ref" value={reference} onChange={(e) => setReference(e.target.value)} placeholder="Cheque no. / BACS ref" /></div>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <Label>Date payment left the bank</Label>
-              <Input type="date" value={bankedDate} onChange={(e) => setBankedDate(e.target.value)} />
+              <Input aria-label="Date payment left the bank" type="date" value={bankedDate} onChange={(e) => setBankedDate(e.target.value)} />
             </div>
-            <div><Label>Paid by</Label><Input value={bankedBy} onChange={(e) => setBankedBy(e.target.value)} placeholder="e.g. Treasurer" /></div>
+            <div><Label>Paid by</Label><Input aria-label="Date payment left the bank" value={bankedBy} onChange={(e) => setBankedBy(e.target.value)} placeholder="e.g. Treasurer" /></div>
           </div>
           <div>
             <Label>Authorised by</Label>
             <Select value={authBy} onValueChange={(v) => setAuthBy(v as AuthorisedBy)}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectTrigger aria-label="Authorised by"><SelectValue /></SelectTrigger>
               <SelectContent>{Object.entries(AUTHORISED_LABEL).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}</SelectContent>
             </Select>
           </div>
@@ -667,7 +667,7 @@ function LedgerTab({ charities, donations, canEdit, onChange }: {
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-3">
-        <Input placeholder="Search charities…" value={search} onChange={(e) => setSearch(e.target.value)} className="max-w-xs" />
+        <Input aria-label="Search charities…" placeholder="Search charities…" value={search} onChange={(e) => setSearch(e.target.value)} className="max-w-xs" />
         <Select value={sort} onValueChange={(v) => setSort(v as any)}>
           <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
           <SelectContent>
@@ -831,25 +831,25 @@ function CharityDialog({ open, onOpenChange, editing, onSaved }: {
       <DialogContent className="bg-navy text-primary-foreground border-gold/30 max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader><DialogTitle className="font-serif text-gold">{editing ? "Edit charity" : "New charity"}</DialogTitle></DialogHeader>
         <div className="space-y-3">
-          <div><Label>Name</Label><Input value={name} onChange={(e) => setName(e.target.value)} /></div>
+          <div><Label>Name</Label><Input aria-label="Name" value={name} onChange={(e) => setName(e.target.value)} /></div>
           <div className="grid grid-cols-2 gap-3">
-            <div><Label>Registered charity no.</Label><Input value={chNum} onChange={(e) => setChNum(e.target.value)} /></div>
+            <div><Label>Registered charity no.</Label><Input aria-label="Name" value={chNum} onChange={(e) => setChNum(e.target.value)} /></div>
             <div>
               <Label>Status</Label>
               <Select value={status} onValueChange={(v) => setStatus(v as any)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger aria-label="Status"><SelectValue /></SelectTrigger>
                 <SelectContent><SelectItem value="active">Active</SelectItem><SelectItem value="inactive">Inactive</SelectItem></SelectContent>
               </Select>
             </div>
           </div>
-          <div><Label>Description</Label><Textarea value={desc} onChange={(e) => setDesc(e.target.value)} rows={3} /></div>
+          <div><Label>Description</Label><Textarea aria-label="Description" value={desc} onChange={(e) => setDesc(e.target.value)} rows={3} /></div>
           <div className="grid grid-cols-2 gap-3">
-            <div><Label>Contact name</Label><Input value={contact} onChange={(e) => setContact(e.target.value)} /></div>
-            <div><Label>Email</Label><Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} /></div>
+            <div><Label>Contact name</Label><Input aria-label="Description" value={contact} onChange={(e) => setContact(e.target.value)} /></div>
+            <div><Label>Email</Label><Input aria-label="Contact name" type="email" value={email} onChange={(e) => setEmail(e.target.value)} /></div>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <div><Label>Phone</Label><Input value={phone} onChange={(e) => setPhone(e.target.value)} /></div>
-            <div><Label>Website</Label><Input value={website} onChange={(e) => setWebsite(e.target.value)} placeholder="https://" /></div>
+            <div><Label>Phone</Label><Input aria-label="Email" value={phone} onChange={(e) => setPhone(e.target.value)} /></div>
+            <div><Label>Website</Label><Input aria-label="Phone" value={website} onChange={(e) => setWebsite(e.target.value)} placeholder="https://" /></div>
           </div>
         </div>
         <DialogFooter className="flex items-center justify-between gap-2">
@@ -1025,31 +1025,31 @@ function FestivalTab({ donations, charities, festival, canEdit, onChange }: {
           <div className="space-y-3">
             <div>
               <Label>Festival name</Label>
-              <Input value={name} onChange={(e) => setName(e.target.value)} />
+              <Input aria-label="Festival name" value={name} onChange={(e) => setName(e.target.value)} />
             </div>
             <div className="grid sm:grid-cols-2 gap-3">
               <div>
                 <Label>Bronze target (£)</Label>
-                <Input type="number" step="0.01" value={bronzeTarget} placeholder="Not set" onChange={(e) => setBronzeTarget(e.target.value)} />
+                <Input aria-label="Bronze target (£)" type="number" step="0.01" value={bronzeTarget} placeholder="Not set" onChange={(e) => setBronzeTarget(e.target.value)} />
               </div>
               <div>
                 <Label>Silver target (£)</Label>
-                <Input type="number" step="0.01" value={silverTarget} placeholder="Not set" onChange={(e) => setSilverTarget(e.target.value)} />
+                <Input aria-label="Silver target (£)" type="number" step="0.01" value={silverTarget} placeholder="Not set" onChange={(e) => setSilverTarget(e.target.value)} />
               </div>
             </div>
             <div className="grid sm:grid-cols-2 gap-3">
               <div>
                 <Label>Gold target (£)</Label>
-                <Input type="number" step="0.01" value={target} onChange={(e) => setTarget(e.target.value)} />
+                <Input aria-label="Gold target (£)" type="number" step="0.01" value={target} onChange={(e) => setTarget(e.target.value)} />
               </div>
               <div>
                 <Label>Platinum target (£)</Label>
-                <Input type="number" step="0.01" value={platinumTarget} placeholder="Not set" onChange={(e) => setPlatinumTarget(e.target.value)} />
+                <Input aria-label="Platinum target (£)" type="number" step="0.01" value={platinumTarget} placeholder="Not set" onChange={(e) => setPlatinumTarget(e.target.value)} />
               </div>
             </div>
             <div>
               <Label>Provincial Festival communications / notes</Label>
-              <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} />
+              <Textarea aria-label="Provincial Festival communications / notes" value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} />
             </div>
             <Button onClick={save} disabled={saving} className="bg-gold text-navy hover:bg-gold/90">
               {saving ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Save className="w-4 h-4 mr-1" />} Save settings
@@ -1226,22 +1226,22 @@ function PeriodicReportsSection({ charities, collections, donations, festival, c
         <div className="space-y-3">
           <div>
             <Label>Report title</Label>
-            <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Q1 2026 Charity Review" disabled={!canEdit || isEditingFinalised} />
+            <Input aria-label="Report title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Q1 2026 Charity Review" disabled={!canEdit || isEditingFinalised} />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <Label>From</Label>
-              <Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} disabled={!canEdit || isEditingFinalised} />
+              <Input aria-label="From" type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} disabled={!canEdit || isEditingFinalised} />
             </div>
             <div>
               <Label>To</Label>
-              <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} disabled={!canEdit || isEditingFinalised} />
+              <Input aria-label="To" type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} disabled={!canEdit || isEditingFinalised} />
             </div>
           </div>
         </div>
         <div>
           <Label>Report summary (shown at start of PDF)</Label>
-          <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={5} placeholder="Verbal-report notes from the Charity Steward…" disabled={!canEdit || isEditingFinalised} />
+          <Textarea aria-label="Report summary (shown at start of PDF)" value={notes} onChange={(e) => setNotes(e.target.value)} rows={5} placeholder="Verbal-report notes from the Charity Steward…" disabled={!canEdit || isEditingFinalised} />
         </div>
         <div className="flex flex-wrap gap-2 pt-1">
           <Button onClick={downloadCurrent} className="bg-gold text-navy hover:bg-gold/90">
@@ -1269,7 +1269,7 @@ function PeriodicReportsSection({ charities, collections, donations, festival, c
         ) : rows.length === 0 ? (
           <p className="text-xs text-primary-foreground/80 italic">No periodic reports yet.</p>
         ) : (
-          <div className="overflow-x-auto">
+          <div tabIndex={0} role="region" aria-label="Scrollable table" className="overflow-x-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-gold">
             <table className="w-full text-sm">
               <thead>
                 <tr className="text-left text-xs uppercase tracking-wider text-primary-foreground/80 border-b border-gold/15">
@@ -1400,7 +1400,7 @@ function ReportTab({ charities, collections, donations, festival, canEdit }: {
         <div>
           <Label>Masonic year</Label>
           <Select value={String(year)} onValueChange={(v) => setYear(Number(v))}>
-            <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
+            <SelectTrigger aria-label="Masonic year" className="w-44"><SelectValue /></SelectTrigger>
             <SelectContent>{yearsAvailable.map((y) => <SelectItem key={y} value={String(y)}>{masonicYearBounds(y).label}</SelectItem>)}</SelectContent>
           </Select>
         </div>
@@ -1408,7 +1408,7 @@ function ReportTab({ charities, collections, donations, festival, canEdit }: {
           {downloading ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Download className="w-4 h-4 mr-1" />} Download PDF
         </Button>
         {canEdit && (
-          <Button variant="outline" onClick={finalise} disabled={saving} className="border-gold/40 text-gold">
+          <Button variant="outline" onClick={finalise} disabled={saving} className="bg-transparent border-gold/40 text-gold hover:text-gold">
             {saving ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Save className="w-4 h-4 mr-1" />} Finalise &amp; snapshot
           </Button>
         )}
@@ -1427,7 +1427,7 @@ function ReportTab({ charities, collections, donations, festival, canEdit }: {
         </Card>
 
         <Card title="Report summary (shown at start of PDF)">
-          <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={10} placeholder="Optional verbal-report notes from the Charity Steward…" />
+          <Textarea aria-label="Optional verbal-report notes from the Charity Steward…" value={notes} onChange={(e) => setNotes(e.target.value)} rows={10} placeholder="Optional verbal-report notes from the Charity Steward…" />
         </Card>
       </div>
       </div>
@@ -1468,8 +1468,8 @@ function FeedTab({ festival, canEdit, onChange }: { festival: FestivalSettings |
           Configure the homepage CTA and Our Charities page widgets. The displayed total = the baseline below + every donation logged on or after the start date.
         </p>
         <div className="grid sm:grid-cols-2 gap-3">
-          <div><Label>Public feed start date</Label><Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} disabled={!canEdit} /></div>
-          <div><Label>Baseline amount already raised (£)</Label><Input type="number" step="0.01" value={startAmount} onChange={(e) => setStartAmount(e.target.value)} disabled={!canEdit} /></div>
+          <div><Label>Public feed start date</Label><Input aria-label="Public feed start date" type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} disabled={!canEdit} /></div>
+          <div><Label>Baseline amount already raised (£)</Label><Input aria-label="Public feed start date" type="number" step="0.01" value={startAmount} onChange={(e) => setStartAmount(e.target.value)} disabled={!canEdit} /></div>
         </div>
         {canEdit && (
           <Button onClick={save} disabled={saving} className="bg-gold text-navy hover:bg-gold/90">

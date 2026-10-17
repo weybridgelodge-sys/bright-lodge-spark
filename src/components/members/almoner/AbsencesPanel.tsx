@@ -129,29 +129,29 @@ function NewForm({ members, userId, onSaved }: { members: Member[]; userId: stri
         <div className="sm:col-span-2">
           <Label className="text-xs">Member</Label>
           <Select value={memberId} onValueChange={setMemberId}>
-            <SelectTrigger className={inputCls}><SelectValue placeholder="Select…" /></SelectTrigger>
+            <SelectTrigger aria-label="Member" className={inputCls}><SelectValue placeholder="Select…" /></SelectTrigger>
             <SelectContent>{sortedMembers.map((m) => <SelectItem key={m.id} value={m.id}>{memberName(m)}</SelectItem>)}</SelectContent>
           </Select>
         </div>
         <div>
           <Label className="text-xs">From</Label>
-          <Input type="date" value={start} onChange={(e) => setStart(e.target.value)} className={inputCls} required />
+          <Input aria-label="From" type="date" value={start} onChange={(e) => setStart(e.target.value)} className={inputCls} required />
         </div>
         <div>
           <Label className="text-xs">To (optional)</Label>
-          <Input type="date" value={end} onChange={(e) => setEnd(e.target.value)} className={inputCls} />
+          <Input aria-label="To (optional)" type="date" value={end} onChange={(e) => setEnd(e.target.value)} className={inputCls} />
         </div>
       </div>
       <div>
         <Label className="text-xs">Reason</Label>
         <Select value={reason} onValueChange={(v) => setReason(v as Reason)}>
-          <SelectTrigger className={inputCls}><SelectValue /></SelectTrigger>
+          <SelectTrigger aria-label="Reason" className={inputCls}><SelectValue /></SelectTrigger>
           <SelectContent>{(Object.keys(REASON_LABEL) as Reason[]).map((k) => <SelectItem key={k} value={k}>{REASON_LABEL[k]}</SelectItem>)}</SelectContent>
         </Select>
       </div>
       <div>
         <Label className="text-xs">Notes</Label>
-        <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} className={inputCls} rows={2} maxLength={1000} />
+        <Textarea aria-label="Notes" value={notes} onChange={(e) => setNotes(e.target.value)} className={inputCls} rows={2} maxLength={1000} />
       </div>
       <Button type="submit" disabled={busy} className="bg-gold text-navy hover:bg-gold/90">Save absence</Button>
     </form>

@@ -320,39 +320,39 @@ function Inner() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label className="text-primary-foreground/80">Host lodge name *</Label>
-              <Input value={lodgeName} onChange={(e) => setLodgeName(e.target.value)} placeholder="Cobham Lodge" />
+              <Input aria-label="Host lodge name" value={lodgeName} onChange={(e) => setLodgeName(e.target.value)} placeholder="Cobham Lodge" />
             </div>
             <div>
               <Label className="text-primary-foreground/80">Lodge number</Label>
-              <Input value={lodgeNumber} onChange={(e) => setLodgeNumber(e.target.value)} placeholder="4230" />
+              <Input aria-label="Lodge number" value={lodgeNumber} onChange={(e) => setLodgeNumber(e.target.value)} placeholder="4230" />
             </div>
             <div>
               <Label className="text-primary-foreground/80">Starts *</Label>
-              <Input type="datetime-local" value={startsAt} onChange={(e) => setStartsAt(e.target.value)} />
+              <Input aria-label="Starts" type="datetime-local" value={startsAt} onChange={(e) => setStartsAt(e.target.value)} />
             </div>
             <div>
               <Label className="text-primary-foreground/80">Ends</Label>
-              <Input type="datetime-local" value={endsAt} onChange={(e) => setEndsAt(e.target.value)} />
+              <Input aria-label="Ends" type="datetime-local" value={endsAt} onChange={(e) => setEndsAt(e.target.value)} />
             </div>
             <div className="md:col-span-2">
               <Label className="text-primary-foreground/80">Venue *</Label>
-              <Input value={venue} onChange={(e) => setVenue(e.target.value)} placeholder="Cobham Masonic Centre" />
+              <Input aria-label="Venue" value={venue} onChange={(e) => setVenue(e.target.value)} placeholder="Cobham Masonic Centre" />
             </div>
             <div>
               <Label className="text-primary-foreground/80">Cost *</Label>
-              <Input value={cost} onChange={(e) => setCost(e.target.value)} placeholder="£45 including dinner" />
+              <Input aria-label="Cost" value={cost} onChange={(e) => setCost(e.target.value)} placeholder="£45 including dinner" />
             </div>
             <div>
               <Label className="text-primary-foreground/80">Host Secretary email *</Label>
-              <Input type="email" value={secretaryEmail} onChange={(e) => setSecretaryEmail(e.target.value)} placeholder="secretary@cobhamlodge.org.uk" />
+              <Input aria-label="Host Secretary email" type="email" value={secretaryEmail} onChange={(e) => setSecretaryEmail(e.target.value)} placeholder="secretary@cobhamlodge.org.uk" />
             </div>
             <div className="md:col-span-2">
               <Label className="text-primary-foreground/80">Host Secretary name</Label>
-              <Input value={secretaryName} onChange={(e) => setSecretaryName(e.target.value)} />
+              <Input aria-label="Host Secretary name" value={secretaryName} onChange={(e) => setSecretaryName(e.target.value)} />
             </div>
             <div className="md:col-span-2">
               <Label className="text-primary-foreground/80">Payment details *</Label>
-              <Textarea
+              <Textarea aria-label="Payment details"
                 value={paymentDetails}
                 onChange={(e) => setPaymentDetails(e.target.value)}
                 rows={3}
@@ -361,11 +361,11 @@ function Inner() {
             </div>
             <div className="md:col-span-2">
               <Label className="text-primary-foreground/80">Notes</Label>
-              <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} />
+              <Textarea aria-label="Notes" value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} />
             </div>
             <div className="md:col-span-2">
               <Label className="text-primary-foreground/80">Summons PDF *</Label>
-              <Input
+              <Input aria-label="Summons PDF"
                 type="file"
                 accept="application/pdf"
                 onChange={(e) => setPdf(e.target.files?.[0] ?? null)}
@@ -521,7 +521,7 @@ function DirectoryTable({
           No lodges yet — the directory populates automatically from visit entries.
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-sm border border-gold/20">
+        <div tabIndex={0} role="region" aria-label="Scrollable table" className="overflow-x-auto rounded-sm border border-gold/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold">
           <table className="w-full text-sm">
             <thead className="bg-navy-dark text-gold text-left">
               <tr>

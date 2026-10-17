@@ -132,12 +132,12 @@ function Inner() {
           Lodge Development Summary Report <ChevronRight className="w-3 h-3" />
         </Link>
       </div>
-      <Input placeholder="Filter by name" value={filter} onChange={(e) => setFilter(e.target.value)} className={`max-w-sm ${fieldCls}`} />
+      <Input aria-label="Filter by name" placeholder="Filter by name" value={filter} onChange={(e) => setFilter(e.target.value)} className={`max-w-sm ${fieldCls}`} />
       {loading ? (
         <div className="flex items-center justify-center py-20"><Loader2 className="w-6 h-6 text-gold animate-spin" /></div>
       ) : (
         <div className="rounded-sm border border-gold/20 overflow-hidden">
-          <div className="overflow-x-auto">
+          <div tabIndex={0} role="region" aria-label="Scrollable table" className="overflow-x-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-gold">
             <table className="w-full text-sm">
               <thead className="bg-navy-light/40 text-gold uppercase text-[10px] tracking-wider">
                 <tr>

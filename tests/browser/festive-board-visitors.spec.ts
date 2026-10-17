@@ -43,7 +43,8 @@ for (const width of [900, 1280]) {
       const box = await first.getByLabel(label, { exact: true }).boundingBox();
       expect(box, label).not.toBeNull();
       expect(box!.width, `${label} width`).toBeGreaterThanOrEqual(min);
-      expect(box!.height, `${label} height`).toBeGreaterThanOrEqual(44);
+      // Round to the device pixel: layout can report 43.98px for a 44px box.
+      expect(Math.round(box!.height), `${label} height`).toBeGreaterThanOrEqual(44);
     }
     await expect(first.getByLabel("Visitor name", { exact: true })).toHaveValue("W Bro. Maximilian Featherstonehaugh-Wolstenholme");
     await expect(first.getByText("Synced")).toBeVisible();

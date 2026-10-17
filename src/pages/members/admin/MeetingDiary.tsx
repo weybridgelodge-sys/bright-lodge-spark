@@ -328,7 +328,7 @@ function Inner() {
             {Object.entries(cfg.stored).sort().map(([y, d]) => <li key={y} className="break-words">{y}: {fmt(d)}</li>)}
             {!Object.keys(cfg.stored).length && <li className="text-cream/70">None stored.</li>}
           </ul>
-          <Button variant="outline" className="min-h-[44px] border-gold/50 text-gold bg-transparent hover:bg-gold/10"
+          <Button variant="outline" className="min-h-[44px] border-gold/50 text-gold bg-transparent hover:bg-gold/10 hover:text-gold"
             onClick={() => { setOvYear(thisYear); setOvDate(cfg.stored[thisYear] ?? ruleDateFor(thisYear, cfg.rule) ?? ""); setOvOpen(true); }}>
             Set or clear a stored date
           </Button>
@@ -338,7 +338,7 @@ function Inner() {
           <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
             <h2 id="mt-h" className="font-serif text-gold text-lg">Meetings</h2>
             <div className="flex flex-wrap gap-2">
-              <Button variant="outline" className="min-h-[44px] border-gold/50 text-gold bg-transparent hover:bg-gold/10" onClick={() => setShowPast((v) => !v)}>
+              <Button variant="outline" className="min-h-[44px] border-gold/50 text-gold bg-transparent hover:bg-gold/10 hover:text-gold" onClick={() => setShowPast((v) => !v)}>
                 {showPast ? "Hide past" : "Show past"}
               </Button>
               <Button className="min-h-[44px] bg-gold text-navy hover:bg-gold/90" onClick={() => openAction("add")}>Add meeting</Button>
@@ -356,10 +356,10 @@ function Inner() {
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {m.cancelled_at ? (
-                    <Button variant="outline" className="min-h-[44px] border-gold/50 text-gold bg-transparent hover:bg-gold/10" disabled={busy} onClick={() => restore(m)}>Restore</Button>
+                    <Button variant="outline" className="min-h-[44px] border-gold/50 text-gold bg-transparent hover:bg-gold/10 hover:text-gold" disabled={busy} onClick={() => restore(m)}>Restore</Button>
                   ) : (<>
-                    <Button variant="outline" className="min-h-[44px] border-gold/50 text-gold bg-transparent hover:bg-gold/10" onClick={() => openAction("move", m)}>Move</Button>
-                    <Button variant="outline" className="min-h-[44px] border-destructive/60 text-destructive-foreground bg-transparent hover:bg-destructive/20" onClick={() => openAction("drop", m)}>Drop</Button>
+                    <Button variant="outline" className="min-h-[44px] border-gold/50 text-gold bg-transparent hover:bg-gold/10 hover:text-gold" onClick={() => openAction("move", m)}>Move</Button>
+                    <Button variant="outline" className="min-h-[44px] border-destructive/60 text-destructive-foreground bg-transparent hover:bg-destructive/20 hover:text-destructive-foreground" onClick={() => openAction("drop", m)}>Drop</Button>
                   </>)}
                 </div>
               </li>
@@ -409,7 +409,7 @@ function Inner() {
               })}
             </ul>
           </fieldset>
-          <Button variant="outline" className="mt-3 min-h-[44px] border-gold/70 text-gold bg-transparent hover:bg-gold/10" disabled={busy || (!sched && !!saved)} onClick={saveSchedule}>Save schedule</Button>
+          <Button variant="outline" className="mt-3 min-h-[44px] border-gold/70 text-gold bg-transparent hover:bg-gold/10 hover:text-gold" disabled={busy || (!sched && !!saved)} onClick={saveSchedule}>Save schedule</Button>
 
           <label className={`${labelCls} mt-4`}>Season starting in
             <Input type="number" className={`mt-1 ${fieldCls}`} value={sYear} onChange={(e) => setSYear(Number(e.target.value) || thisYear)} />
@@ -500,7 +500,7 @@ function Inner() {
             )}
             {action?.kind !== "move" && (
               <label className={labelCls}>{action?.kind === "drop" ? "Reason (optional)" : newType === "dispensation" ? "Dispensation reason or reference (optional)" : "Notes (optional)"}
-                <Textarea className={`mt-1 ${fieldCls}`} rows={2} placeholder={newType === "dispensation" ? "e.g. Dispensation ref. PGM/2026/14" : undefined} value={notes} onChange={(e) => setNotes(e.target.value)} />
+                <Textarea className={`mt-1 ${fieldCls}`} rows={2} placeholder={newType === "dispensation" ? "Reason or dispensation reference" : undefined} value={notes} onChange={(e) => setNotes(e.target.value)} />
               </label>
             )}
             {movePlan && movePlan.ok === false && newDate !== action?.meeting?.meeting_date && <p role="alert" className="text-sm text-destructive-foreground">{movePlan.error}</p>}

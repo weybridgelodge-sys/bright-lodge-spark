@@ -194,24 +194,24 @@ function Inner() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label className="text-primary-foreground/80">Title *</Label>
-              <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Summer Family BBQ" />
+              <Input aria-label="Title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Summer Family BBQ" />
             </div>
             <div>
               <Label className="text-primary-foreground/80">Venue *</Label>
-              <Input value={venue} onChange={(e) => setVenue(e.target.value)} placeholder="Masonic Centre" />
+              <Input aria-label="Venue" value={venue} onChange={(e) => setVenue(e.target.value)} placeholder="Masonic Centre" />
             </div>
             <div>
               <Label className="text-primary-foreground/80">Starts *</Label>
-              <Input type="datetime-local" value={startsAt} onChange={(e) => setStartsAt(e.target.value)} />
+              <Input aria-label="Starts" type="datetime-local" value={startsAt} onChange={(e) => setStartsAt(e.target.value)} />
             </div>
             <div>
               <Label className="text-primary-foreground/80">Ends (optional)</Label>
-              <Input type="datetime-local" value={endsAt} onChange={(e) => setEndsAt(e.target.value)} />
+              <Input aria-label="Ends (optional)" type="datetime-local" value={endsAt} onChange={(e) => setEndsAt(e.target.value)} />
             </div>
           </div>
           <div>
             <Label className="text-primary-foreground/80">Description</Label>
-            <Textarea
+            <Textarea aria-label="Description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={4}
@@ -222,7 +222,7 @@ function Inner() {
             <Label className="text-primary-foreground/80">
               Additional guest emails (comma-separated)
             </Label>
-            <Textarea
+            <Textarea aria-label="Additional guest emails (comma-separated)"
               value={guestsRaw}
               onChange={(e) => setGuestsRaw(e.target.value)}
               rows={2}

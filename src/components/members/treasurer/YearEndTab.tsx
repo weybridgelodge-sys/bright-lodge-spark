@@ -329,7 +329,7 @@ export default function YearEndTab({ canEdit, onOpenTab }: { canEdit: boolean; o
                   if (!rs.length) return null;
                   return (
                     <div>
-                      <Button variant="ghost" className="min-h-[48px] max-w-full whitespace-normal text-gold px-2" onClick={() => setHistory(history === y ? null : y)} aria-expanded={history === y}>
+                      <Button variant="ghost" className="min-h-[48px] max-w-full whitespace-normal text-gold px-2 hover:text-gold" onClick={() => setHistory(history === y ? null : y)} aria-expanded={history === y}>
                         <History className="w-4 h-4 mr-1" /> Review history ({rs.length} round{rs.length > 1 ? "s" : ""})
                       </Button>
                       {history === y && (
@@ -379,7 +379,7 @@ export default function YearEndTab({ canEdit, onOpenTab }: { canEdit: boolean; o
               {draft.j.lines.length === 0 ? (
                 <p className="text-sm text-primary-foreground/70">No income or expenditure to close for this year.</p>
               ) : (
-                <div className="overflow-x-auto">
+                <div tabIndex={0} role="region" aria-label="Scrollable table" className="overflow-x-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-gold">
                   <table className="w-full text-sm font-sans">
                     <thead><tr className="text-primary-foreground/80 border-b border-gold/20">
                       <th className="text-left py-2 font-normal">Account</th>

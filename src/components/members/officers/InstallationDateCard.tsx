@@ -115,11 +115,11 @@ export default function InstallationDateCard({
           <h2 id="inst-date-h" className="font-serif text-gold text-base">Installation date</h2>
         </div>
         <div className="flex items-center gap-1">
-          <Button variant="ghost" size="icon" className="h-11 w-11 text-gold" aria-label="Previous officers' year" onClick={() => setYear(year - 1)}>
+          <Button variant="ghost" size="icon" className="h-11 w-11 text-gold hover:text-gold" aria-label="Previous officers' year" onClick={() => setYear(year - 1)}>
             <ChevronLeft className="w-4 h-4" />
           </Button>
           <span className="text-sm text-primary-foreground tabular-nums min-w-[4.5rem] text-center">{formatMasonicYear(year)}</span>
-          <Button variant="ghost" size="icon" className="h-11 w-11 text-gold" aria-label="Next officers' year" onClick={() => setYear(year + 1)}>
+          <Button variant="ghost" size="icon" className="h-11 w-11 text-gold hover:text-gold" aria-label="Next officers' year" onClick={() => setYear(year + 1)}>
             <ChevronRight className="w-4 h-4" />
           </Button>
         </div>
@@ -130,7 +130,7 @@ export default function InstallationDateCard({
           <span className="text-primary-foreground/80 text-xs">{isStored ? "(set)" : "(default from the installation rule)"}</span>
         </p>
         {canEdit && (
-          <Button size="sm" variant="outline" className="border-gold/50 text-gold bg-transparent hover:bg-gold/10 min-h-[44px]" onClick={startEdit}>
+          <Button size="sm" variant="outline" className="border-gold/50 text-gold bg-transparent hover:bg-gold/10 min-h-[44px] hover:text-gold" onClick={startEdit}>
             {isStored ? "Change" : "Set date"}
           </Button>
         )}

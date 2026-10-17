@@ -130,7 +130,7 @@ export default function IncomeExpenditureReport({ canEdit }: { canEdit: boolean 
   const Section = ({ title, rows, totalLabel, tc, tp }: { title: string; rows: Row[]; totalLabel: string; tc: number; tp: number }) => (
     <div className="mt-5">
       <h3 className="font-serif text-gold mb-2">{title}</h3>
-      <div className="overflow-x-auto">
+      <div tabIndex={0} role="region" aria-label="Scrollable table" className="overflow-x-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-gold">
         <table className="w-full text-sm">
           <thead>
             <tr className="text-primary-foreground/80 border-b border-gold/20">
@@ -214,11 +214,11 @@ export default function IncomeExpenditureReport({ canEdit }: { canEdit: boolean 
             <>
               <div>
                 <Label>Start date</Label>
-                <Input type="date" className="min-h-[48px]" value={customStart} onChange={(e) => setCustomStart(e.target.value)} />
+                <Input aria-label="Start date" type="date" className="min-h-[48px]" value={customStart} onChange={(e) => setCustomStart(e.target.value)} />
               </div>
               <div>
                 <Label>End date</Label>
-                <Input type="date" className="min-h-[48px]" value={customEnd} onChange={(e) => setCustomEnd(e.target.value)} />
+                <Input aria-label="End date" type="date" className="min-h-[48px]" value={customEnd} onChange={(e) => setCustomEnd(e.target.value)} />
               </div>
             </>
           )}

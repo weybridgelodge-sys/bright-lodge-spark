@@ -479,28 +479,28 @@ function MeetingPanel({
           <div className="grid grid-cols-2 gap-3">
             <div>
               <Label>Invoice number — optional</Label>
-              <Input value={invoiceNumber} disabled={!canEdit} onChange={(e) => setInvoiceNumber(e.target.value)} placeholder="e.g. GMC-2026-014" />
+              <Input aria-label="Invoice number — optional" value={invoiceNumber} disabled={!canEdit} onChange={(e) => setInvoiceNumber(e.target.value)} placeholder="e.g. GMC-2026-014" />
             </div>
             <div>
               <Label>Invoice date — optional</Label>
-              <Input type="date" value={invoiceDate} disabled={!canEdit} onChange={(e) => setInvoiceDate(e.target.value)} />
+              <Input aria-label="Invoice date — optional" type="date" value={invoiceDate} disabled={!canEdit} onChange={(e) => setInvoiceDate(e.target.value)} />
             </div>
             <PeriodPicker label="Posting period" periods={invoicePosting.periods} value={invoicePosting.periodId} autoId={invoicePosting.autoId} onChange={invoicePosting.setPeriodId} disabled={!canEdit} />
             <div>
               <Label>Invoice headcount</Label>
-              <Input inputMode="numeric" value={headcount} disabled={!canEdit} onChange={(e) => setHeadcount(e.target.value)} placeholder="34" />
+              <Input aria-label="Invoice headcount" inputMode="numeric" value={headcount} disabled={!canEdit} onChange={(e) => setHeadcount(e.target.value)} placeholder="34" />
             </div>
             <div>
               <Label>Per head (£)</Label>
-              <Input inputMode="decimal" value={perHead} disabled={!canEdit} onChange={(e) => setPerHead(e.target.value)} placeholder="32.00" />
+              <Input aria-label="Per head (£)" inputMode="decimal" value={perHead} disabled={!canEdit} onChange={(e) => setPerHead(e.target.value)} placeholder="32.00" />
             </div>
             <div className="col-span-2">
               <Label>Override total (£) — optional</Label>
-              <Input inputMode="decimal" value={override} disabled={!canEdit} onChange={(e) => setOverride(e.target.value)} placeholder="Leave blank for headcount × rate" />
+              <Input aria-label="Override total (£) — optional" inputMode="decimal" value={override} disabled={!canEdit} onChange={(e) => setOverride(e.target.value)} placeholder="Leave blank for headcount × rate" />
             </div>
             <div className="col-span-2">
               <Label>Notes</Label>
-              <Input value={notes} disabled={!canEdit} onChange={(e) => setNotes(e.target.value)} placeholder="e.g. includes 2 complimentary covers" />
+              <Input aria-label="Notes" value={notes} disabled={!canEdit} onChange={(e) => setNotes(e.target.value)} placeholder="e.g. includes 2 complimentary covers" />
             </div>
           </div>
           <div className="flex items-baseline justify-between text-sm border-t border-gold/15 pt-2">

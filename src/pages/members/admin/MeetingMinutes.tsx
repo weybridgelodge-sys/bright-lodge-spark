@@ -1064,12 +1064,12 @@ function Inner() {
           <div className="grid sm:grid-cols-2 gap-3">
             <div>
               <label className="text-xs text-primary-foreground/70">Title</label>
-              <Input value={editing.title} onChange={(e) => patch({ title: e.target.value })} className={INPUT} />
+              <Input aria-label="Title" value={editing.title} onChange={(e) => patch({ title: e.target.value })} className={INPUT} />
             </div>
             <div>
               <label className="text-xs text-primary-foreground/70">Meeting date</label>
               <div className="grid grid-cols-2 gap-2">
-                <Input
+                <Input aria-label="Meeting date"
                   type="date"
                   value={datePart(editing.meeting_at)}
                   onChange={(e) => patch({ meeting_at: combine(e.target.value, timePart(editing.meeting_at)) ?? editing.meeting_at })}
@@ -1088,12 +1088,12 @@ function Inner() {
           {!isAgendaEditing && <>
           <div>
             <label className="text-xs text-primary-foreground/70">Apologies</label>
-            <Textarea rows={2} value={editing.apologies ?? ""} onChange={(e) => patch({ apologies: e.target.value })} className={INPUT} />
+            <Textarea aria-label="Apologies" rows={2} value={editing.apologies ?? ""} onChange={(e) => patch({ apologies: e.target.value })} className={INPUT} />
           </div>
 
           <div>
             <label className="text-xs text-primary-foreground/70">Minutes of the previous meeting (confirmation / amendments)</label>
-            <Textarea rows={2} value={editing.previous_minutes_note ?? ""} onChange={(e) => patch({ previous_minutes_note: e.target.value })} className={INPUT} />
+            <Textarea aria-label="Minutes of the previous meeting (confirmation / amendments)" rows={2} value={editing.previous_minutes_note ?? ""} onChange={(e) => patch({ previous_minutes_note: e.target.value })} className={INPUT} />
           </div>
 
           <section>
@@ -1101,7 +1101,7 @@ function Inner() {
             <p className="text-xs text-primary-foreground/80 mb-1">
               Paste the complete finished minutes as one block, then click Parse — this replaces the sections below.
             </p>
-            <Textarea
+            <Textarea aria-label="Paste full minutes text"
               rows={8}
               value={pasteText}
               onChange={(e) => setPasteText(e.target.value)}
@@ -1136,7 +1136,7 @@ function Inner() {
                 return (
                   <div key={i} className="flex items-center gap-2 rounded-sm border border-gold/15 bg-navy-light/30 p-3">
                     <span className="w-6 shrink-0 text-sm font-semibold text-gold">{i + 1}.</span>
-                    <Input value={s.heading} placeholder="Agenda point" onChange={(e) => setAgendaPoint(i, e.target.value)} className={INPUT} />
+                    <Input aria-label="Agenda point" value={s.heading} placeholder="Agenda point" onChange={(e) => setAgendaPoint(i, e.target.value)} className={INPUT} />
                     <Button size="sm" variant="outline" onClick={() => moveSection(i, -1)} disabled={i === 3}><ArrowUp className="w-3 h-3" /></Button>
                     <Button size="sm" variant="outline" onClick={() => moveSection(i, 1)} disabled={i === editing.sections.length - 1}><ArrowDown className="w-3 h-3" /></Button>
                     <Button size="sm" variant="outline" onClick={() => removeSection(i)}><X className="w-3 h-3" /></Button>
@@ -1191,8 +1191,8 @@ function Inner() {
               <div className="space-y-2">
                 {editing.action_items.map((a, i) => (
                   <div key={i} className="grid md:grid-cols-[1fr_180px_150px_70px_40px] gap-2 items-center">
-                    <Input value={a.task} placeholder="Task" onChange={(e) => setAction(i, { task: e.target.value })} className={INPUT} />
-                    <Input value={a.responsible} placeholder="Responsible" onChange={(e) => setAction(i, { responsible: e.target.value })} className={INPUT} />
+                    <Input aria-label="Task" value={a.task} placeholder="Task" onChange={(e) => setAction(i, { task: e.target.value })} className={INPUT} />
+                    <Input aria-label="Responsible" value={a.responsible} placeholder="Responsible" onChange={(e) => setAction(i, { responsible: e.target.value })} className={INPUT} />
                     <Input type="date" value={a.deadline} onChange={(e) => setAction(i, { deadline: e.target.value })} className={DATE_INPUT} />
                     <label className="flex items-center gap-2 text-xs text-primary-foreground/70">
                       <Checkbox checked={a.done} onCheckedChange={(v) => setAction(i, { done: v === true })} /> Done
@@ -1208,7 +1208,7 @@ function Inner() {
             <div>
               <label className="text-xs text-primary-foreground/70">Next meeting date</label>
               <div className="grid grid-cols-2 gap-2">
-                <Input
+                <Input aria-label="Next meeting date"
                   type="date"
                   value={datePart(editing.next_meeting_at)}
                   onChange={(e) => patch({ next_meeting_at: combine(e.target.value, timePart(editing.next_meeting_at) || DEFAULT_START_TIME) })}
@@ -1225,7 +1225,7 @@ function Inner() {
             <div>
               <label className="text-xs text-primary-foreground/70">Status</label>
               <Select value={editing.status} onValueChange={(v) => patch({ status: v as MinutesStatus })}>
-                <SelectTrigger className={INPUT}><SelectValue /></SelectTrigger>
+                <SelectTrigger aria-label="Status" className={INPUT}><SelectValue /></SelectTrigger>
                 <SelectContent>
                   {(Object.keys(STATUS_LABELS) as MinutesStatus[]).map((s) => (
                     <SelectItem key={s} value={s}>{STATUS_LABELS[s]}</SelectItem>
@@ -1236,7 +1236,7 @@ function Inner() {
             {editing.status === "approved" && (
               <div>
                 <label className="text-xs text-primary-foreground/70">Date confirmed</label>
-                <Input type="date" value={editing.approved_date ?? ""} onChange={(e) => patch({ approved_date: e.target.value })} className={DATE_INPUT} />
+                <Input aria-label="Date confirmed" type="date" value={editing.approved_date ?? ""} onChange={(e) => patch({ approved_date: e.target.value })} className={DATE_INPUT} />
               </div>
             )}
           </div>
@@ -1294,14 +1294,14 @@ function Inner() {
           <Button
             onClick={startGenerate}
             variant="outline"
-            className="border-gold/40 text-gold hover:bg-gold/10"
+            className="bg-transparent border-gold/40 text-gold hover:bg-gold/10 hover:text-gold"
           >
             <Sparkles className="w-4 h-4 mr-1" /> Generate from transcript
           </Button>
           <Button
             onClick={startNewAgenda}
             variant="outline"
-            className="border-gold/40 text-gold hover:bg-gold/10"
+            className="bg-transparent border-gold/40 text-gold hover:bg-gold/10 hover:text-gold"
           >
             <Plus className="w-4 h-4 mr-1" /> New Committee Agenda
           </Button>
@@ -1313,7 +1313,7 @@ function Inner() {
 
       <div className="grid sm:grid-cols-3 gap-3 mb-5">
         <Select value={fType} onValueChange={setFType}>
-          <SelectTrigger className={INPUT}><SelectValue placeholder="All types" /></SelectTrigger>
+          <SelectTrigger aria-label="All types" className={INPUT}><SelectValue placeholder="All types" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All types</SelectItem>
             {(Object.keys(TYPE_LABELS) as MinutesType[]).map((t) => (
@@ -1322,7 +1322,7 @@ function Inner() {
           </SelectContent>
         </Select>
         <Select value={fStatus} onValueChange={setFStatus}>
-          <SelectTrigger className={INPUT}><SelectValue placeholder="All statuses" /></SelectTrigger>
+          <SelectTrigger aria-label="All statuses" className={INPUT}><SelectValue placeholder="All statuses" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All statuses</SelectItem>
             {(Object.keys(STATUS_LABELS) as MinutesStatus[]).map((s) => (
@@ -1331,7 +1331,7 @@ function Inner() {
           </SelectContent>
         </Select>
         <Select value={fYear} onValueChange={setFYear}>
-          <SelectTrigger className={INPUT}><SelectValue placeholder="All years" /></SelectTrigger>
+          <SelectTrigger aria-label="All years" className={INPUT}><SelectValue placeholder="All years" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All years</SelectItem>
             {MASONIC_YEAR_OPTIONS.map((y) => (
@@ -1400,7 +1400,7 @@ function Inner() {
             <div>
               <label className="text-xs text-primary-foreground/70">Meeting type</label>
               <Select value={nType} onValueChange={(v) => setNType(v as MinutesType)}>
-                <SelectTrigger className={INPUT}><SelectValue /></SelectTrigger>
+                <SelectTrigger aria-label="Meeting type" className={INPUT}><SelectValue /></SelectTrigger>
                 <SelectContent>
                   {(Object.keys(TYPE_LABELS) as MinutesType[]).map((t) => (
                     <SelectItem key={t} value={t}>{TYPE_LABELS[t]}</SelectItem>
@@ -1413,7 +1413,7 @@ function Inner() {
               <div>
                 <label className="text-xs text-primary-foreground/70">Linked meeting (loads the Summons agenda)</label>
                 <Select value={nEventId || "none"} onValueChange={(v) => setNEventId(v === "none" ? "" : v)}>
-                  <SelectTrigger className={INPUT}><SelectValue placeholder="Not linked" /></SelectTrigger>
+                  <SelectTrigger aria-label="Linked meeting (loads the Summons agenda)" className={INPUT}><SelectValue placeholder="Not linked" /></SelectTrigger>
                   <SelectContent className="max-h-64">
                     <SelectItem value="none">Not linked</SelectItem>
                     {events.map((e) => (
@@ -1428,13 +1428,13 @@ function Inner() {
 
             <div>
               <label className="text-xs text-primary-foreground/70">Title</label>
-              <Input value={nTitle} onChange={(e) => setNTitle(e.target.value)} placeholder="e.g. Lodge Committee Meeting" className={INPUT} />
+              <Input aria-label="Title" value={nTitle} onChange={(e) => setNTitle(e.target.value)} placeholder="e.g. Lodge Committee Meeting" className={INPUT} />
             </div>
             <div>
               <label className="text-xs text-primary-foreground/70">Meeting date and time</label>
               <div className="grid grid-cols-2 gap-2">
-                <Input type="date" value={nDate} onChange={(e) => setNDate(e.target.value)} className={DATE_INPUT} />
-                <Input type="time" value={nTime} onChange={(e) => setNTime(e.target.value)} className={DATE_INPUT} />
+                <Input aria-label="Meeting date and time" type="date" value={nDate} onChange={(e) => setNDate(e.target.value)} className={DATE_INPUT} />
+                <Input aria-label="Meeting date and time" type="time" value={nTime} onChange={(e) => setNTime(e.target.value)} className={DATE_INPUT} />
               </div>
             </div>
           </div>
@@ -1462,7 +1462,7 @@ function Inner() {
             <div>
               <label className="text-xs text-primary-foreground/70">Meeting type</label>
               <Select value={gType} onValueChange={(v) => setGType(v as "committee" | "lodge")}>
-                <SelectTrigger className={INPUT}><SelectValue /></SelectTrigger>
+                <SelectTrigger aria-label="Meeting type" className={INPUT}><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="committee">Committee meeting</SelectItem>
                   <SelectItem value="lodge">Lodge meeting (follows the Summons agenda)</SelectItem>
@@ -1472,14 +1472,14 @@ function Inner() {
 
             <div>
               <label className="text-xs text-primary-foreground/70">Meeting date</label>
-              <Input type="date" value={gDate} onChange={(e) => setGDate(e.target.value)} className={DATE_INPUT} />
+              <Input aria-label="Meeting date" type="date" value={gDate} onChange={(e) => setGDate(e.target.value)} className={DATE_INPUT} />
             </div>
 
             {gType === "lodge" && (
               <div>
                 <label className="text-xs text-primary-foreground/70">Lodge meeting</label>
                 <Select value={gEventId || "none"} onValueChange={(v) => setGEventId(v === "none" ? "" : v)}>
-                  <SelectTrigger className={INPUT}><SelectValue placeholder="Choose a meeting" /></SelectTrigger>
+                  <SelectTrigger aria-label="Lodge meeting" className={INPUT}><SelectValue placeholder="Choose a meeting" /></SelectTrigger>
                   <SelectContent className="max-h-64">
                     <SelectItem value="none">Choose a meeting</SelectItem>
                     {events.map((e) => (
@@ -1494,7 +1494,7 @@ function Inner() {
 
             <div>
               <label className="text-xs text-primary-foreground/70">Transcript</label>
-              <Textarea
+              <Textarea aria-label="Transcript"
                 value={gTranscript}
                 onChange={(e) => setGTranscript(e.target.value)}
                 rows={12}
@@ -1522,7 +1522,7 @@ function Inner() {
                 <p className="text-xs text-primary-foreground/80 mb-1">
                   If you have the pre-meeting agenda for this Committee meeting, paste it here too — it often has the next meeting date already proposed on it.
                 </p>
-                <Textarea
+                <Textarea aria-label="Committee agenda (optional)"
                   value={gAgenda}
                   onChange={(e) => setGAgenda(e.target.value)}
                   rows={6}

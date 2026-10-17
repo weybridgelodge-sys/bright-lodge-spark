@@ -160,18 +160,18 @@ function NewForm({ members, userId, onSaved }: { members: Member[]; userId: stri
         <div className="sm:col-span-2">
           <Label className="text-xs">Member</Label>
           <Select value={memberId} onValueChange={setMemberId}>
-            <SelectTrigger className={inputCls}><SelectValue placeholder="Select…" /></SelectTrigger>
+            <SelectTrigger aria-label="Member" className={inputCls}><SelectValue placeholder="Select…" /></SelectTrigger>
             <SelectContent>{sortedMembers.map((m) => <SelectItem key={m.id} value={m.id}>{memberName(m)}</SelectItem>)}</SelectContent>
           </Select>
         </div>
         <div>
           <Label className="text-xs">Date</Label>
-          <Input type="date" value={referralDate} onChange={(e) => setReferralDate(e.target.value)} className={inputCls} required />
+          <Input aria-label="Date" type="date" value={referralDate} onChange={(e) => setReferralDate(e.target.value)} className={inputCls} required />
         </div>
         <div>
           <Label className="text-xs">Status</Label>
           <Select value={status} onValueChange={(v) => setStatus(v as Status)}>
-            <SelectTrigger className={inputCls}><SelectValue /></SelectTrigger>
+            <SelectTrigger aria-label="Status" className={inputCls}><SelectValue /></SelectTrigger>
             <SelectContent>{(Object.keys(STATUS_LABEL) as Status[]).map((k) => <SelectItem key={k} value={k}>{STATUS_LABEL[k]}</SelectItem>)}</SelectContent>
           </Select>
         </div>
@@ -179,13 +179,13 @@ function NewForm({ members, userId, onSaved }: { members: Member[]; userId: stri
       <div>
         <Label className="text-xs">Type</Label>
         <Select value={referralType} onValueChange={(v) => setReferralType(v as ReferralType)}>
-          <SelectTrigger className={inputCls}><SelectValue /></SelectTrigger>
+          <SelectTrigger aria-label="Type" className={inputCls}><SelectValue /></SelectTrigger>
           <SelectContent>{(Object.keys(TYPE_LABEL) as ReferralType[]).map((k) => <SelectItem key={k} value={k}>{TYPE_LABEL[k]}</SelectItem>)}</SelectContent>
         </Select>
       </div>
       <div>
         <Label className="text-xs">Summary</Label>
-        <Textarea value={summary} onChange={(e) => setSummary(e.target.value)} className={inputCls} rows={4} required maxLength={3000} />
+        <Textarea aria-label="Summary" value={summary} onChange={(e) => setSummary(e.target.value)} className={inputCls} rows={4} required maxLength={3000} />
       </div>
       <Button type="submit" disabled={busy} className="bg-gold text-navy hover:bg-gold/90">Save referral</Button>
     </form>

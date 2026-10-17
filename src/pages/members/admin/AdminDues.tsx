@@ -73,7 +73,7 @@ function MembersTab({ members, subs, payments, calcs, onRefresh }: {
 
   return (
     <>
-      <div className="overflow-x-auto rounded border border-gold/20">
+      <div tabIndex={0} role="region" aria-label="Scrollable table" className="overflow-x-auto rounded border border-gold/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold">
         <table className="w-full text-sm text-primary-foreground">
           <thead className="bg-navy-light/60 text-left text-xs uppercase tracking-wide text-gold">
             <tr>
@@ -162,7 +162,7 @@ function MembersTab({ members, subs, payments, calcs, onRefresh }: {
             <DialogDescription>All Stripe payment and refund events for this member (test mode).</DialogDescription>
           </DialogHeader>
           <div className="max-h-96 overflow-y-auto">
-            <div className="overflow-x-auto">
+            <div tabIndex={0} role="region" aria-label="Scrollable table" className="overflow-x-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-gold">
               <table className="w-full text-sm">
                 <thead className="text-left text-xs uppercase text-cream/80">
                   <tr>
@@ -248,11 +248,11 @@ function RefundDialog({ payment, onClose, onDone }: { payment: DuesPayment | nul
         <div className="space-y-3">
           <div>
             <Label>Amount (£)</Label>
-            <Input type="number" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} />
+            <Input aria-label="Amount (£)" type="number" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} />
           </div>
           <div>
             <Label>Note (optional)</Label>
-            <Input value={note} onChange={(e) => setNote(e.target.value)} placeholder="e.g. Overpayment refund" />
+            <Input aria-label="Note (optional)" value={note} onChange={(e) => setNote(e.target.value)} placeholder="e.g. Overpayment refund" />
           </div>
         </div>
         <DialogFooter>
@@ -317,11 +317,11 @@ function SettingsTab({ settings, onRefresh }: { settings: DuesSetting[]; onRefre
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div>
             <Label>New annual amount (£)</Label>
-            <Input type="number" step="0.01" value={newAmount} onChange={(e) => setNewAmount(e.target.value)} placeholder="e.g. 265.00" />
+            <Input aria-label="New annual amount (£)" type="number" step="0.01" value={newAmount} onChange={(e) => setNewAmount(e.target.value)} placeholder="e.g. 265.00" />
           </div>
           <div>
             <Label>Effective lodge year</Label>
-            <Input type="number" value={newYear} onChange={(e) => setNewYear(e.target.value)} />
+            <Input aria-label="Effective lodge year" type="number" value={newYear} onChange={(e) => setNewYear(e.target.value)} />
           </div>
           <div className="flex items-end">
             <Button onClick={schedule} disabled={busy === "schedule"}>Schedule</Button>
@@ -404,7 +404,7 @@ function DemoTab({ members }: { members: Profile[] }) {
         <div>
           <Label>Member</Label>
           <Select value={memberId} onValueChange={setMemberId}>
-            <SelectTrigger><SelectValue placeholder="Select a member" /></SelectTrigger>
+            <SelectTrigger aria-label="Member"><SelectValue placeholder="Select a member" /></SelectTrigger>
             <SelectContent>
               {members.map(m => <SelectItem key={m.id} value={m.id}>{m.full_name || m.email}</SelectItem>)}
             </SelectContent>
