@@ -4,9 +4,9 @@
 - Portal routing: `/members` is the dashboard; `/members/dashboard` and the inner catch-all redirect there so every portal URL resolves.
 - Auth bootstrap must always settle: retain getSession error handling, the 8s guard, and swallowed profile-load rejections.
 - AppErrorBoundary wraps routes; Suspense uses PageLoader; retain chunk retry and magic-link error surfacing.
-- Accounts distribution uses the separate secure link and record_accounts_sent; never attach it to an already-sent summons.
+- Accounts distribution uses its separate secure link and record_accounts_sent; never attach to an already-sent summons.
 - Only the Secretary is exempt from subscriptions (latest Secretary appointment on or before the year); the Treasurer pays like any member. Honorary members remain exempt.
-- Public/member Thursday wording is "Rehearsal Night", never "Lodge of Instruction"/"LOI" (no subscriptions collected). Keep internal `loi` identifiers.
+- Public/member Thursday wording is "Rehearsal Night", never "Lodge of Instruction"/"LOI". Keep internal `loi` identifiers.
 - Installation Returns resolve live and fill exact AcroForm IDs; signatures and dispensation remain blank.
 - Changed `/members` screens must pass 320px tests with real or faithful worst-case data: no overflow, unreachable controls or obscured content.
 - Browser layout tests may use only a Vite `e2e`-mode, localhost-only synthetic identity; it never grants backend access or ships in production.
