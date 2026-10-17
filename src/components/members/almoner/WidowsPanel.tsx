@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { ArrowLeft, Flower2, Gift, Pencil, Plus, ShieldAlert, Trash2, X } from "lucide-react";
 import { computeContactDue, formatPartialDob, isValidPartialDob, partialDobAge } from "@/lib/widowContactDue";
-import { GIFT_LABEL, formatGiftHistory, fundingFromChoice, fundingLabel, raffleCollectionLabel, type FundingSource, type GiftType } from "@/lib/widowGifts";
+import { GIFT_LABEL, formatGiftHistory, fundingFromChoice, fundingLabel, raffleCollectionLabel, raffleOptionLines, type FundingSource, type GiftType } from "@/lib/widowGifts";
 
 type Widow = {
   id: string; full_name: string; preferred_address: string | null; address: string | null;
@@ -372,7 +372,7 @@ function WidowDetail({ widow, members, canEdit, onBack, onChanged }: { widow: Wi
 }
 
 type GiftRow = { id: string; widow_id: string; lodge_year: number; gift_type: GiftType; description: string | null; amount: number | null; date_sent: string; funding_source: FundingSource | null; funding_collection_id: string | null; notes: string | null; logged_by: string | null };
-type Raffle = { id: string; collection_date: string; event_title: string | null; net_amount: number | null; allocated: number };
+type Raffle = { id: string; collection_date: string; event_title: string | null; net_amount: number | null; allocated: number; notes?: string | null };
 const raffleLabel = (r: Raffle) => raffleCollectionLabel(r, fmt);
 
 function GiftsSection({ widowId, canEdit, memberMap }: { widowId: string; canEdit: boolean; memberMap: Map<string, Member> }) {
@@ -471,11 +471,11 @@ function GiftForm({ widowId, raffles, onSaved }: { widowId: string; raffles: Raf
         <div className="sm:col-span-2">
           <Label className="text-xs">Funded by</Label>
           <Select value={fund} onValueChange={setFund}>
-            <SelectTrigger className={inputCls} aria-label="Funded by"><SelectValue /></SelectTrigger>
-            <SelectContent>
+            <SelectTrigger className={`${inputCls} h-auto min-h-11 text-left [&>span]:line-clamp-none [&>span]:whitespace-normal [&>span]:break-words`} aria-label="Funded by"><SelectValue /></SelectTrigger>
+            <SelectContent tone="navy">
               <SelectItem value="lodge_account">Lodge account</SelectItem>
               <SelectItem value="almoner_fund">Almoner fund</SelectItem>
-              {raffles.map((r) => <SelectItem key={r.id} value={r.id}>{fundingLabel("raffle", raffleLabel(r))} · £{Number(r.allocated).toFixed(2)} allocated</SelectItem>)}
+              {raffles.map((r) => { const l = raffleOptionLines(r, fmt); return <SelectItem key={r.id} value={r.id}><span className="block">{l.first}</span><span className="block text-xs">{l.second}</span></SelectItem>; })}
               <SelectItem value="none">Not linked</SelectItem>
             </SelectContent>
           </Select>

@@ -284,7 +284,7 @@ const mockWidow = async (page: import("@playwright/test").Page) => {
     { id: "g2", widow_id: "w1", lodge_year: 2024, gift_type: "hamper", description: null, amount: null, date_sent: "2024-12-12", funding_collection_id: null, notes: null, logged_by: null },
     { id: "g3", widow_id: "w1", lodge_year: 2025, gift_type: "voucher", description: null, amount: 25, date_sent: "2025-12-10", funding_collection_id: "c2", notes: null, logged_by: null },
   ] }));
-  await page.route("**/rest/v1/rpc/get_almoner_raffle_collections**", (r) => r.fulfill({ json: [{ id: "c1", collection_date: "2025-12-17", event_title: "Christmas Regular Meeting and Festive Board", net_amount: 412.5, allocated: 50, notes: null }, { id: "c2", collection_date: "2025-12-10", event_title: null, net_amount: 300, allocated: 0, notes: null }] }));
+  await page.route("**/rest/v1/rpc/get_almoner_raffle_collections**", (r) => r.fulfill({ json: [{ id: "c1", collection_date: "2025-12-17", event_title: "Christmas Regular Meeting and Festive Board", net_amount: 412.5, allocated: 50, notes: null }, { id: "c2", collection_date: "2025-12-10", event_title: null, net_amount: 300, allocated: 0, notes: null }, { id: "c3", collection_date: "2026-09-12", event_title: null, net_amount: 9.76, allocated: 0, notes: "Stripe payment for raffle tickets" }, { id: "c4", collection_date: "2026-09-12", event_title: null, net_amount: 135, allocated: 0, notes: "£135 collected in cash, £10 by stripe donation at the Super Saturday double passing ceremonies" }] }));
 };
 
 test("Widow gifts section fits 320px; editor form has 48px controls", async ({ page }) => {
@@ -329,9 +329,44 @@ test("Raffle funding label never repeats 'Raffle' at 320px", async ({ page }) =>
   await expect(page.getByText("Raffle — Raffle")).toHaveCount(0);
   await page.getByRole("button", { name: "Record gift" }).click();
   await page.getByLabel("Funded by").click();
-  await expect(page.getByRole("option", { name: "Raffle — 10 Dec 2025 · net £300.00" })).toBeVisible();
-  await expect(page.getByRole("option", { name: "Raffle — Raffle" })).toHaveCount(0);
+  await expect(page.getByRole("option", { name: /Raffle — 10 Dec 2025.*net £300\.00 · £0\.00 allocated/ })).toBeVisible();
+  await expect(page.getByRole("option", { name: /Raffle — Raffle/ })).toHaveCount(0);
   await expectNoViewportOverflow(page, "Raffle funding labels");
+});
+
+for (const width of [320, 390]) test(`Funded by list wraps every option inside a ${width}px screen`, async ({ page }) => {
+  await page.setViewportSize({ width, height: 800 });
+  await page.addInitScript(() => sessionStorage.setItem("almoner-confidentiality", "1"));
+  await mockWidow(page);
+  await page.goto("/members/almoner");
+  await waitForPortal(page);
+  await page.getByRole("tab", { name: /Widows/ }).click();
+  await page.getByText("Doris Featherstonehaugh-Wolstenholme").first().click();
+  await page.getByRole("button", { name: "Record gift" }).click();
+  await page.getByLabel("Funded by").click();
+  const list = page.getByRole("listbox");
+  await expect(list).toBeVisible();
+  // Same-date raffles are told apart by the Charity Steward's note.
+  await expect(page.getByRole("option", { name: /12 Sept? 2026 · Stripe payment for raffle tickets/ })).toBeVisible();
+  await expect(page.getByRole("option", { name: /12 Sept? 2026 · £135 collected in cash/ })).toBeVisible();
+  const r = await page.evaluate(() => {
+    const vw = document.documentElement.clientWidth;
+    const lb = document.querySelector<HTMLElement>("[role=listbox]")!;
+    const box = lb.getBoundingClientRect();
+    const clipped = [...lb.querySelectorAll<HTMLElement>("[role=option], [role=option] span")]
+      .filter((el) => el.scrollWidth > el.clientWidth + 1 || el.getBoundingClientRect().right > box.right + 1)
+      .map((el) => el.textContent);
+    return { left: box.left, right: box.right, vw, sideScroll: lb.scrollWidth > lb.clientWidth + 1, clipped, page: document.documentElement.scrollWidth > vw };
+  });
+  expect(r.left).toBeGreaterThanOrEqual(0);
+  expect(r.right).toBeLessThanOrEqual(r.vw);
+  expect(r.sideScroll).toBe(false);
+  expect(r.page).toBe(false);
+  expect(r.clipped).toEqual([]);
+  await page.waitForTimeout(400); // let the open animation finish before measuring contrast
+  await expectNoAxeViolations(page, `Funded by open at ${width}px`);
+  await page.keyboard.press("Escape");
+  await expect(page.getByLabel("Funded by")).toBeFocused();
 });
 
 test("Report widows section drafts lines and fits 320px", async ({ page }) => {
