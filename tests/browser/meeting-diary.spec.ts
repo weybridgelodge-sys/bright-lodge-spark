@@ -4,7 +4,7 @@ import { expectNoAxeViolations } from "./helpers/axe";
 // Faithful worst-case diary data: long notes/reasons, cancelled and installation rows.
 const rule = { id: "r1", unit_id: "u", mode: "weekday_rule", installation_month: 10, installation_ordinal: "3", installation_weekday: 3, fixed_day: null, applies_from_year: null, unit_number: "6787", default_venue: "Guildford Masonic Centre, Hitherbury Close, Portsmouth Road, Guildford GU2 4DR", election_month: 5, ritual: "Emulation", consecration_date: "1949-01-01" };
 const meetings = [
-  { id: "m0", meeting_date: "2026-09-12", meeting_type: "regular", status: "draft", notes: null, cancelled_at: null, cancel_reason: null, series_id: null },
+  { id: "m0", meeting_date: "2026-09-12", meeting_type: "dispensation", status: "draft", notes: "Dispensation for a Saturday meeting granted by the Provincial Grand Master, reference PGM/2026/14", cancelled_at: null, cancel_reason: null, series_id: null },
   { id: "m1", meeting_date: "2026-10-21", meeting_type: "installation", status: "published", notes: null, cancelled_at: null, cancel_reason: null, series_id: null },
   { id: "m2", meeting_date: "2026-12-09", meeting_type: "regular", status: "draft", notes: null, cancelled_at: null, cancel_reason: null, series_id: null },
   { id: "m4", meeting_date: "2027-02-17", meeting_type: "regular", status: "draft", notes: null, cancelled_at: null, cancel_reason: null, series_id: null },
@@ -57,7 +57,8 @@ test("Meeting diary has no overflow at 320px", { timeout: 90_000 }, async ({ pag
   for (const l of await page.locator("main label:has(input[type=checkbox])").all()) expect((await l.boundingBox())!.height).toBeGreaterThanOrEqual(44);
   await expect(page.getByText("Format dd/mm/yyyy")).toBeVisible();
   await page.getByPlaceholder("e.g. Emulation").fill("Emulation working");
-  await expect(page.getByTestId("outside-schedule")).toContainText("12 Sep");
+  await expect(page.getByTestId("one-off-meetings")).toContainText("12 Sep");
+  await expect(page.getByTestId("outside-schedule")).toHaveCount(0);
   await page.getByLabel("March", { exact: true }).check();
   await expect(page.getByLabel("March week", { exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: /Add \d+ new meeting|No new meetings/ })).toBeVisible();
