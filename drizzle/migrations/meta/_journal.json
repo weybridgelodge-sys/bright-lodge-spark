@@ -701,6 +701,13 @@
       "when": 1792265062908,
       "tag": "0099_masonic_year_rule_and_status_history",
       "breakpoints": true
+    },
+    {
+      "idx": 100,
+      "version": "7",
+      "when": 1792266822358,
+      "tag": "0100_installation_rule_fallback_and_meeting_diary",
+      "breakpoints": true
     }
   ]
 }

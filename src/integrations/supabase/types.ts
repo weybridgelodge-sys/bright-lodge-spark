@@ -2494,6 +2494,9 @@ export type Database = {
       }
       festive_board_meetings: {
         Row: {
+          cancel_reason: string | null
+          cancelled_at: string | null
+          cancelled_by: string | null
           created_at: string
           created_by: string | null
           dining_price_pence: number
@@ -2504,10 +2507,15 @@ export type Database = {
           meeting_date: string
           meeting_type: Database["public"]["Enums"]["festive_meeting_type"]
           notes: string | null
+          series_id: string | null
           status: Database["public"]["Enums"]["meeting_status"]
+          unit_id: string
           updated_at: string
         }
         Insert: {
+          cancel_reason?: string | null
+          cancelled_at?: string | null
+          cancelled_by?: string | null
           created_at?: string
           created_by?: string | null
           dining_price_pence?: number
@@ -2518,10 +2526,15 @@ export type Database = {
           meeting_date: string
           meeting_type?: Database["public"]["Enums"]["festive_meeting_type"]
           notes?: string | null
+          series_id?: string | null
           status?: Database["public"]["Enums"]["meeting_status"]
+          unit_id?: string
           updated_at?: string
         }
         Update: {
+          cancel_reason?: string | null
+          cancelled_at?: string | null
+          cancelled_by?: string | null
           created_at?: string
           created_by?: string | null
           dining_price_pence?: number
@@ -2532,10 +2545,20 @@ export type Database = {
           meeting_date?: string
           meeting_type?: Database["public"]["Enums"]["festive_meeting_type"]
           notes?: string | null
+          series_id?: string | null
           status?: Database["public"]["Enums"]["meeting_status"]
+          unit_id?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "festive_board_meetings_series_id_fkey"
+            columns: ["series_id"]
+            isOneToOne: false
+            referencedRelation: "meeting_series"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       installation_return_submissions: {
         Row: {
@@ -2576,40 +2599,55 @@ export type Database = {
       installation_rule_settings: {
         Row: {
           applies_from_year: number | null
+          consecration_date: string | null
           created_at: string
+          default_venue: string | null
+          election_month: number | null
           fixed_day: number | null
           id: string
           installation_month: number
           installation_ordinal: string | null
           installation_weekday: number | null
           mode: string
+          ritual: string | null
           unit_id: string
+          unit_number: string | null
           updated_at: string
           updated_by: string | null
         }
         Insert: {
           applies_from_year?: number | null
+          consecration_date?: string | null
           created_at?: string
+          default_venue?: string | null
+          election_month?: number | null
           fixed_day?: number | null
           id?: string
           installation_month: number
           installation_ordinal?: string | null
           installation_weekday?: number | null
           mode?: string
+          ritual?: string | null
           unit_id?: string
+          unit_number?: string | null
           updated_at?: string
           updated_by?: string | null
         }
         Update: {
           applies_from_year?: number | null
+          consecration_date?: string | null
           created_at?: string
+          default_venue?: string | null
+          election_month?: number | null
           fixed_day?: number | null
           id?: string
           installation_month?: number
           installation_ordinal?: string | null
           installation_weekday?: number | null
           mode?: string
+          ritual?: string | null
           unit_id?: string
+          unit_number?: string | null
           updated_at?: string
           updated_by?: string | null
         }
@@ -3527,6 +3565,42 @@ export type Database = {
         }
         Relationships: []
       }
+      meeting_diary_audit: {
+        Row: {
+          action: string
+          actor: string | null
+          after: Json | null
+          before: Json | null
+          created_at: string
+          id: string
+          target_id: string | null
+          target_table: string
+          unit_id: string
+        }
+        Insert: {
+          action: string
+          actor?: string | null
+          after?: Json | null
+          before?: Json | null
+          created_at?: string
+          id?: string
+          target_id?: string | null
+          target_table: string
+          unit_id?: string
+        }
+        Update: {
+          action?: string
+          actor?: string | null
+          after?: Json | null
+          before?: Json | null
+          created_at?: string
+          id?: string
+          target_id?: string | null
+          target_table?: string
+          unit_id?: string
+        }
+        Relationships: []
+      }
       meeting_minutes: {
         Row: {
           action_items: Json
@@ -3641,6 +3715,48 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      meeting_series: {
+        Row: {
+          active: boolean
+          created_at: string
+          created_by: string | null
+          id: string
+          meeting_type: Database["public"]["Enums"]["festive_meeting_type"]
+          months: number[]
+          name: string
+          ordinal: string
+          unit_id: string
+          updated_at: string
+          weekday: number
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          meeting_type?: Database["public"]["Enums"]["festive_meeting_type"]
+          months?: number[]
+          name: string
+          ordinal: string
+          unit_id?: string
+          updated_at?: string
+          weekday: number
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          meeting_type?: Database["public"]["Enums"]["festive_meeting_type"]
+          months?: number[]
+          name?: string
+          ordinal?: string
+          unit_id?: string
+          updated_at?: string
+          weekday?: number
+        }
+        Relationships: []
       }
       member_calendar_tokens: {
         Row: {
@@ -4589,6 +4705,7 @@ export type Database = {
           installation_date: string
           lodge_year: number
           notes: string | null
+          unit_id: string
           updated_at: string
         }
         Insert: {
@@ -4596,6 +4713,7 @@ export type Database = {
           installation_date: string
           lodge_year: number
           notes?: string | null
+          unit_id?: string
           updated_at?: string
         }
         Update: {
@@ -4603,6 +4721,7 @@ export type Database = {
           installation_date?: string
           lodge_year?: number
           notes?: string | null
+          unit_id?: string
           updated_at?: string
         }
         Relationships: []
@@ -6862,6 +6981,7 @@ export type Database = {
         Returns: boolean
       }
       can_edit_newsletter: { Args: { _user: string }; Returns: boolean }
+      can_manage_diary: { Args: { _uid: string }; Returns: boolean }
       can_manage_meeting_minutes: { Args: { _user: string }; Returns: boolean }
       can_manage_public_events: { Args: { _uid: string }; Returns: boolean }
       can_manage_secretary_returns: {
@@ -6896,6 +7016,27 @@ export type Database = {
       degree_level: {
         Args: { _d: Database["public"]["Enums"]["masonic_degree"] }
         Returns: number
+      }
+      diary_add_meeting: {
+        Args: {
+          _date: string
+          _notes?: string
+          _series_id?: string
+          _type: Database["public"]["Enums"]["festive_meeting_type"]
+        }
+        Returns: string
+      }
+      diary_cancel_meeting: {
+        Args: { _meeting_id: string; _reason?: string }
+        Returns: undefined
+      }
+      diary_move_meeting: {
+        Args: { _meeting_id: string; _new_date: string }
+        Returns: undefined
+      }
+      diary_restore_meeting: {
+        Args: { _meeting_id: string }
+        Returns: undefined
       }
       dues_calculate_amount: {
         Args: { _lodge_year: number; _member_id: string }
@@ -7078,6 +7219,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      installation_rule_date: {
+        Args: { _unit?: string; _year: number }
+        Returns: string
+      }
       is_active_member: { Args: { _user_id: string }; Returns: boolean }
       is_current_officer: {
         Args: { _position_key: string; _user_id: string }
@@ -7131,6 +7276,7 @@ export type Database = {
         Args: { _social_id: string }
         Returns: string[]
       }
+      meeting_dependencies: { Args: { _meeting_id: string }; Returns: Json }
       officer_appointment_effective: {
         Args: {
           _appointed_on: string
