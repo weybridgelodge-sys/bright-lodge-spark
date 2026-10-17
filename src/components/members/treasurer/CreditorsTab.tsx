@@ -258,13 +258,13 @@ export default function CreditorsTab({ canEdit }: { canEdit: boolean }) {
         <div className="grid gap-3 sm:grid-cols-2">
           <div>
             <Label>Date</Label>
-            <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} disabled={!canEdit} />
+            <Input aria-label="Date" type="date" value={date} onChange={(e) => setDate(e.target.value)} disabled={!canEdit} />
           </div>
           <PeriodPicker periods={posting.periods} value={posting.periodId} autoId={posting.autoId} onChange={posting.setPeriodId} disabled={!canEdit} />
           <div>
             <Label>Payee</Label>
             <Select value={payee} onValueChange={setPayee} disabled={!canEdit}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectTrigger aria-label="Payee"><SelectValue /></SelectTrigger>
               <SelectContent>
                 {PAYEES.map((p) => <SelectItem key={p} value={p}>{p}</SelectItem>)}
               </SelectContent>
@@ -273,16 +273,16 @@ export default function CreditorsTab({ canEdit }: { canEdit: boolean }) {
           {payee === "Other" && (
             <div>
               <Label>Payee name</Label>
-              <Input value={otherPayee} onChange={(e) => setOtherPayee(e.target.value)} placeholder="e.g. Surrey Masonic Hall Ltd" disabled={!canEdit} />
+              <Input aria-label="Payee name" value={otherPayee} onChange={(e) => setOtherPayee(e.target.value)} placeholder="e.g. Surrey Masonic Hall Ltd" disabled={!canEdit} />
             </div>
           )}
           <div>
             <Label>Amount (£)</Label>
-            <Input type="number" step="0.01" min="0" value={amount} onChange={(e) => setAmount(e.target.value)} disabled={!canEdit} />
+            <Input aria-label="Amount (£)" type="number" step="0.01" min="0" value={amount} onChange={(e) => setAmount(e.target.value)} disabled={!canEdit} />
           </div>
           <div className="sm:col-span-2">
             <Label>Description / reference</Label>
-            <Input value={reference} onChange={(e) => setReference(e.target.value)} placeholder="Optional — e.g. invoice 1042" disabled={!canEdit} />
+            <Input aria-label="Description / reference" value={reference} onChange={(e) => setReference(e.target.value)} placeholder="Optional — e.g. invoice 1042" disabled={!canEdit} />
           </div>
         </div>
         <div className="mt-4">
@@ -300,13 +300,13 @@ export default function CreditorsTab({ canEdit }: { canEdit: boolean }) {
         <div className="grid gap-3 sm:grid-cols-2">
           <div>
             <Label>Date</Label>
-            <Input type="date" value={recDate} onChange={(e) => setRecDate(e.target.value)} disabled={!canEdit} />
+            <Input aria-label="Date" type="date" value={recDate} onChange={(e) => setRecDate(e.target.value)} disabled={!canEdit} />
           </div>
           <PeriodPicker periods={recPosting.periods} value={recPosting.periodId} autoId={recPosting.autoId} onChange={recPosting.setPeriodId} disabled={!canEdit} />
           <div>
             <Label>Type</Label>
             <Select value={recPayee} onValueChange={setRecPayee} disabled={!canEdit}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectTrigger aria-label="Type"><SelectValue /></SelectTrigger>
               <SelectContent>
                 {RECOGNITION_TYPES.map((p) => <SelectItem key={p} value={p}>{p}</SelectItem>)}
               </SelectContent>
@@ -315,14 +315,14 @@ export default function CreditorsTab({ canEdit }: { canEdit: boolean }) {
           {recPayee === "Other" && (
             <div className="sm:col-span-2">
               <Label>Payee name</Label>
-              <Input value={recOtherPayee} onChange={(e) => setRecOtherPayee(e.target.value)} placeholder="e.g. Metropolitan Grand Lodge" disabled={!canEdit} />
+              <Input aria-label="Payee name" value={recOtherPayee} onChange={(e) => setRecOtherPayee(e.target.value)} placeholder="e.g. Metropolitan Grand Lodge" disabled={!canEdit} />
             </div>
           )}
           {recPayee === "Other" && (
             <div className="sm:col-span-2">
               <Label>Debit account</Label>
               <Select value={recAccountId} onValueChange={setRecAccountId} disabled={!canEdit}>
-                <SelectTrigger><SelectValue placeholder="Choose the debit account" /></SelectTrigger>
+                <SelectTrigger aria-label="Debit account"><SelectValue placeholder="Choose the debit account" /></SelectTrigger>
                 <SelectContent>
                   {allAccounts.map((a) => (
                     <SelectItem key={a.id} value={a.id}>{a.code} — {a.name}</SelectItem>
@@ -333,11 +333,11 @@ export default function CreditorsTab({ canEdit }: { canEdit: boolean }) {
           )}
           <div>
             <Label>Amount (£)</Label>
-            <Input type="number" step="0.01" min="0" value={recAmount} onChange={(e) => setRecAmount(e.target.value)} disabled={!canEdit} />
+            <Input aria-label="Amount (£)" type="number" step="0.01" min="0" value={recAmount} onChange={(e) => setRecAmount(e.target.value)} disabled={!canEdit} />
           </div>
           <div className="sm:col-span-2">
             <Label>Reference / description</Label>
-            <Input value={recReference} onChange={(e) => setRecReference(e.target.value)} placeholder="Optional — e.g. Annual Return year ending 30 Sept 2027" disabled={!canEdit} />
+            <Input aria-label="Reference / description" value={recReference} onChange={(e) => setRecReference(e.target.value)} placeholder="Optional — e.g. Annual Return year ending 30 Sept 2027" disabled={!canEdit} />
           </div>
         </div>
         <div className="mt-4">

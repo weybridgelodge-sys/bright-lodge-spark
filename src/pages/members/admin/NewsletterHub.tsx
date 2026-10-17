@@ -815,13 +815,13 @@ function NewsletterHubInner() {
 
           <div>
             <label className="block text-xs font-semibold uppercase tracking-wider text-primary-foreground/70 mb-1.5">Subject line (shared)</label>
-            <input type="text" value={subject} onChange={(e) => setSubject(e.target.value)} required
+            <input aria-label="Subject line (shared)" type="text" value={subject} onChange={(e) => setSubject(e.target.value)} required
               className="w-full bg-navy-dark border border-gold/20 rounded-md px-3 py-2 text-sm text-primary-foreground focus:outline-none focus:border-gold/60" />
           </div>
 
           <div>
             <label className="block text-xs font-semibold uppercase tracking-wider text-primary-foreground/70 mb-1.5">Status</label>
-            <select value={status} onChange={(e) => setStatus(e.target.value as Status)}
+            <select aria-label="Status" value={status} onChange={(e) => setStatus(e.target.value as Status)}
               className="w-full bg-navy-dark border border-gold/20 rounded-md px-3 py-2 text-sm text-primary-foreground focus:outline-none focus:border-gold/60">
               <option value="draft">Draft — work in progress</option>
               <option value="ready_to_send">Ready to send</option>
@@ -994,7 +994,7 @@ function NewsletterHubInner() {
                     ? "Unsaved changes"
                     : savedSnapshot !== null ? "All changes saved" : ""}
             </span>
-            <Button type="button" variant="outline" onClick={saveDraft} disabled={saving} className="border-gold/40 text-gold hover:bg-gold/10 h-auto min-h-10 whitespace-normal text-center leading-snug py-2">
+            <Button type="button" variant="outline" onClick={saveDraft} disabled={saving} className="bg-transparent border-gold/40 text-gold hover:bg-gold/10 h-auto min-h-10 whitespace-normal text-center leading-snug py-2">
               {saving ? <Loader2 className="h-4 w-4 mr-1.5 shrink-0 animate-spin" /> : <Save className="h-4 w-4 mr-1.5 shrink-0" />}
               Save
             </Button>
@@ -1019,7 +1019,7 @@ function NewsletterHubInner() {
                 className="flex-1 rounded-md bg-navy border border-gold/30 px-3 py-2 text-sm text-primary-foreground placeholder:text-primary-foreground/30"
               />
               <Button type="button" variant="outline" onClick={sendTest} disabled={testing || !broadcastId}
-                className="border-gold/40 text-gold hover:bg-gold/10 h-auto min-h-10 whitespace-normal text-center leading-snug py-2"
+                className="bg-transparent border-gold/40 text-gold hover:bg-gold/10 h-auto min-h-10 whitespace-normal text-center leading-snug py-2"
                 title={!broadcastId ? "Save first" : "Send a test copy to this address"}>
                 {testing ? <Loader2 className="h-4 w-4 mr-1.5 shrink-0 animate-spin" /> : <Send className="h-4 w-4 mr-1.5 shrink-0" />}
                 Send test

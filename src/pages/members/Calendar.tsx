@@ -284,7 +284,7 @@ function Inner() {
                 aria-label={format(day, "EEEE d MMMM yyyy")}
                 onClick={() => setSelected(day)}
                 className={`bg-navy-dark min-h-[92px] text-left p-1.5 transition-colors ${
-                  inMonth ? "" : "opacity-40"
+                  inMonth ? "" : "bg-navy [&_span]:text-primary-foreground/70 [&_span]:font-normal"
                 } ${isSel ? "ring-1 ring-gold/70 ring-inset" : ""} hover:bg-navy`}
               >
                 <div className="flex items-center justify-between">

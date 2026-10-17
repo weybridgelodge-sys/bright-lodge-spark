@@ -144,14 +144,14 @@ function Inner() {
           <div className="space-y-4">
             <div>
               <Label className="text-primary-foreground/80">Question</Label>
-              <Input value={question} onChange={(e) => setQuestion(e.target.value)} placeholder="e.g. Which charity should we support next?" />
+              <Input aria-label="Question" value={question} onChange={(e) => setQuestion(e.target.value)} placeholder="e.g. Which charity should we support next?" />
             </div>
             <div>
               <Label className="text-primary-foreground/80">Options</Label>
               <div className="space-y-2 mt-1">
                 {options.map((o, i) => (
                   <div key={i} className="flex gap-2">
-                    <Input
+                    <Input aria-label="Options"
                       value={o}
                       onChange={(e) => setOptions(options.map((x, j) => (i === j ? e.target.value : x)))}
                       placeholder={`Option ${i + 1}`}
@@ -171,7 +171,7 @@ function Inner() {
             <div className="grid sm:grid-cols-2 gap-4">
               <div>
                 <Label className="text-primary-foreground/80">Closes at (optional)</Label>
-                <Input type="datetime-local" value={closesAt} onChange={(e) => setClosesAt(e.target.value)} />
+                <Input aria-label="Closes at (optional)" type="datetime-local" value={closesAt} onChange={(e) => setClosesAt(e.target.value)} />
               </div>
               <div className="flex items-end">
                 <label className="flex items-center gap-2 text-sm text-primary-foreground/85 cursor-pointer">

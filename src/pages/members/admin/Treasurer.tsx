@@ -198,7 +198,7 @@ function ReconciliationTab({
           <DialogHeader><DialogTitle className="font-serif text-gold">Request unlock</DialogTitle></DialogHeader>
           <p className="text-sm text-primary-foreground/70">Both Treasurer and Secretary must approve before the period reopens.</p>
           <Label>Reason</Label>
-          <Textarea rows={3} value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Why does this period need to reopen?" />
+          <Textarea aria-label="Reason" rows={3} value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Why does this period need to reopen?" />
           <DialogFooter>
             <Button variant="outline" onClick={() => setUnlockFor(null)}>Cancel</Button>
             <Button className="bg-gold text-navy hover:bg-gold/90" onClick={submitUnlock}>Submit request</Button>
@@ -245,7 +245,7 @@ function PeriodDialog({
         <div className="space-y-3">
           <div>
             <Label>Month</Label>
-            <Input type="month" value={month} onChange={(e) => setMonth(e.target.value)} />
+            <Input aria-label="Month" type="month" value={month} onChange={(e) => setMonth(e.target.value)} />
             <p className="text-xs text-primary-foreground/80 mt-1">
               The period covers the whole calendar month (1st to last day), labelled automatically.
             </p>

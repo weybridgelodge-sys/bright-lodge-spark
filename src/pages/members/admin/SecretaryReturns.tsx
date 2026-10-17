@@ -286,7 +286,7 @@ function Inner() {
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
         <Select value={fType} onValueChange={setFType}>
-          <SelectTrigger className="bg-navy border-gold/20 text-primary-foreground"><SelectValue placeholder="All types" /></SelectTrigger>
+          <SelectTrigger aria-label="All types" className="bg-navy border-gold/20 text-primary-foreground"><SelectValue placeholder="All types" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All types</SelectItem>
             {(Object.keys(TYPE_LABELS) as ReturnType[]).map((t) => (
@@ -295,7 +295,7 @@ function Inner() {
           </SelectContent>
         </Select>
         <Select value={fStatus} onValueChange={setFStatus}>
-          <SelectTrigger className="bg-navy border-gold/20 text-primary-foreground"><SelectValue placeholder="All statuses" /></SelectTrigger>
+          <SelectTrigger aria-label="All statuses" className="bg-navy border-gold/20 text-primary-foreground"><SelectValue placeholder="All statuses" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All statuses</SelectItem>
             {(Object.keys(STATUS_LABELS) as ReturnStatus[]).map((s) => (
@@ -304,7 +304,7 @@ function Inner() {
           </SelectContent>
         </Select>
         <Select value={fYear} onValueChange={setFYear}>
-          <SelectTrigger className="bg-navy border-gold/20 text-primary-foreground"><SelectValue placeholder="All years" /></SelectTrigger>
+          <SelectTrigger aria-label="All years" className="bg-navy border-gold/20 text-primary-foreground"><SelectValue placeholder="All years" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All years</SelectItem>
             {MASONIC_YEAR_OPTIONS.map((y) => (
@@ -312,7 +312,7 @@ function Inner() {
             ))}
           </SelectContent>
         </Select>
-        <Input placeholder="Search name" value={fSearch} onChange={(e) => setFSearch(e.target.value)} className="bg-navy border-gold/20 text-primary-foreground placeholder:text-primary-foreground/80" />
+        <Input aria-label="Search name" placeholder="Search name" value={fSearch} onChange={(e) => setFSearch(e.target.value)} className="bg-navy border-gold/20 text-primary-foreground placeholder:text-primary-foreground/80" />
       </div>
 
       {loading ? (
@@ -390,7 +390,7 @@ function Inner() {
             <div>
               <label className="text-xs text-primary-foreground/70">Person (member or candidate)</label>
               <Select value={form.personKey || "none"} onValueChange={(v) => setForm({ ...form, personKey: v === "none" ? "" : v })}>
-                <SelectTrigger className="bg-navy border-gold/20 text-primary-foreground"><SelectValue placeholder="Not person-specific" /></SelectTrigger>
+                <SelectTrigger aria-label="Person (member or candidate)" className="bg-navy border-gold/20 text-primary-foreground"><SelectValue placeholder="Not person-specific" /></SelectTrigger>
                 <SelectContent className="max-h-64">
                   <SelectItem value="none">Not person-specific</SelectItem>
                   {people.map((p) => (
@@ -404,7 +404,7 @@ function Inner() {
               <div>
                 <label className="text-xs text-primary-foreground/70">Masonic year</label>
                 <Select value={form.masonic_year} onValueChange={(v) => setForm({ ...form, masonic_year: v })}>
-                  <SelectTrigger className="bg-navy border-gold/20 text-primary-foreground"><SelectValue /></SelectTrigger>
+                  <SelectTrigger aria-label="Masonic year" className="bg-navy border-gold/20 text-primary-foreground"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     {MASONIC_YEAR_OPTIONS.map((y) => (
                       <SelectItem key={y} value={String(y)}>Masonic year {treasurerYearBounds(y).label}</SelectItem>
@@ -415,7 +415,7 @@ function Inner() {
               <div>
                 <label className="text-xs text-primary-foreground/70">Status</label>
                 <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v as ReturnStatus })}>
-                  <SelectTrigger className="bg-navy border-gold/20 text-primary-foreground"><SelectValue /></SelectTrigger>
+                  <SelectTrigger aria-label="Status" className="bg-navy border-gold/20 text-primary-foreground"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     {(Object.keys(STATUS_LABELS) as ReturnStatus[]).map((s) => (
                       <SelectItem key={s} value={s}>{STATUS_LABELS[s]}</SelectItem>
@@ -425,7 +425,7 @@ function Inner() {
               </div>
               <div>
                 <label className="text-xs text-primary-foreground/70">Date submitted</label>
-                <Input
+                <Input aria-label="Date submitted"
                   type="date"
                   value={form.date_submitted}
                   onChange={(e) => {
@@ -441,18 +441,18 @@ function Inner() {
               </div>
               <div>
                 <label className="text-xs text-primary-foreground/70">Date due</label>
-                <Input type="date" value={form.date_due} onChange={(e) => setForm({ ...form, date_due: e.target.value })} className="bg-navy border-gold/20 text-primary-foreground placeholder:text-primary-foreground/80 [color-scheme:dark]" />
+                <Input aria-label="Date due" type="date" value={form.date_due} onChange={(e) => setForm({ ...form, date_due: e.target.value })} className="bg-navy border-gold/20 text-primary-foreground placeholder:text-primary-foreground/80 [color-scheme:dark]" />
               </div>
             </div>
 
             <div>
               <label className="text-xs text-primary-foreground/70">Notes</label>
-              <Textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} rows={3} className="bg-navy border-gold/20 text-primary-foreground placeholder:text-primary-foreground/80" />
+              <Textarea aria-label="Notes" value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} rows={3} className="bg-navy border-gold/20 text-primary-foreground placeholder:text-primary-foreground/80" />
             </div>
 
             <div>
               <label className="text-xs text-primary-foreground/70">Attachment (PDF)</label>
-              <Input type="file" accept="application/pdf" onChange={(e) => setFile(e.target.files?.[0] ?? null)} className="bg-navy border-gold/20 text-primary-foreground placeholder:text-primary-foreground/80" />
+              <Input aria-label="Attachment (PDF)" type="file" accept="application/pdf" onChange={(e) => setFile(e.target.files?.[0] ?? null)} className="bg-navy border-gold/20 text-primary-foreground placeholder:text-primary-foreground/80" />
             </div>
           </div>
           <DialogFooter>

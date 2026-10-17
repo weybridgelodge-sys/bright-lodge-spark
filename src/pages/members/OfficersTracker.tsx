@@ -595,7 +595,7 @@ function BoardView({
               <label className="text-[10px] uppercase tracking-wider text-primary-foreground/80">
                 Assign holder
               </label>
-              <select
+              <select aria-label={`Assign holder for ${POSITION_LABELS[pos]}`}
                 value={cell.member?.id ?? ""}
                 onChange={(e) => onAssign(pos, e.target.value || null)}
                 className="mt-1 w-full bg-navy-dark border border-gold/20 text-primary-foreground rounded-sm px-2 py-1.5 text-sm"
@@ -749,7 +749,7 @@ function LadderView({
 
             <div className="space-y-1">
               <label className="text-xs uppercase tracking-wider text-gold">Member</label>
-              <select
+              <select aria-label="Member"
                 value={editMember}
                 onChange={(e) => setEditMember(e.target.value)}
                 className="w-full bg-navy-dark border border-gold/20 text-primary-foreground rounded-sm px-2 py-1.5 text-sm"
@@ -766,7 +766,7 @@ function LadderView({
             {editing.year !== currentYear && (
               <div className="space-y-1">
                 <label className="text-xs uppercase tracking-wider text-gold">Override reason</label>
-                <input
+                <input aria-label="Override reason"
                   value={editReason}
                   onChange={(e) => setEditReason(e.target.value)}
                   placeholder="e.g. Taking a year out for work"
@@ -854,7 +854,7 @@ function ReadinessView({
         is next in line. Set an Initiation date for any joining member whose Initiation was in another lodge.
       </div>
 
-      <div className="overflow-x-auto border border-gold/20 rounded-sm">
+      <div tabIndex={0} role="region" aria-label="Scrollable table" className="overflow-x-auto border border-gold/20 rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-gold">
         <table className="min-w-full text-sm">
           <thead className="bg-navy-dark/70 text-gold font-serif">
             <tr>
@@ -895,7 +895,7 @@ function ReadinessView({
                     {m.rank ?? "—"}
                   </td>
                   <td className="px-3 py-2 border-b border-gold/10">
-                    <select
+                    <select aria-label={`Readiness for ${m.full_name ?? "member"}`}
                       value={readiness}
                       onChange={(e) => onSetReadiness(m.id, e.target.value as Readiness)}
                       className={`text-xs rounded-sm px-2 py-1 border ${
@@ -1062,7 +1062,7 @@ function NonProgressiveBoard({
                 <label className="block text-[10px] uppercase tracking-wider text-primary-foreground/80">
                   Holder
                 </label>
-                <select
+                <select aria-label={`Holder for ${POSITION_LABELS[pos]}`}
                   value={memberId}
                   onChange={(e) => onAssign(pos, e.target.value || null, since)}
                   className="w-full bg-navy-dark border border-gold/20 text-primary-foreground rounded-sm px-2 py-1.5 text-sm"

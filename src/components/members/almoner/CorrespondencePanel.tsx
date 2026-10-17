@@ -211,12 +211,12 @@ function EntryForm({ members, userId, existing, onSaved, onCancel }: {
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
         <div>
           <Label className="text-xs">Date</Label>
-          <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} className={inputCls} required />
+          <Input aria-label="Date" type="date" value={date} onChange={(e) => setDate(e.target.value)} className={inputCls} required />
         </div>
         <div>
           <Label className="text-xs">Direction</Label>
           <Select value={direction} onValueChange={(v) => setDirection(v as Direction)}>
-            <SelectTrigger className={inputCls}><SelectValue /></SelectTrigger>
+            <SelectTrigger aria-label="Direction" className={inputCls}><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="outgoing">Outgoing</SelectItem>
               <SelectItem value="incoming">Incoming</SelectItem>
@@ -226,14 +226,14 @@ function EntryForm({ members, userId, existing, onSaved, onCancel }: {
         <div>
           <Label className="text-xs">Method</Label>
           <Select value={method} onValueChange={(v) => setMethod(v as Method)}>
-            <SelectTrigger className={inputCls}><SelectValue /></SelectTrigger>
+            <SelectTrigger aria-label="Method" className={inputCls}><SelectValue /></SelectTrigger>
             <SelectContent>{(Object.keys(METHOD_LABEL) as Method[]).map((k) => <SelectItem key={k} value={k}>{METHOD_LABEL[k]}</SelectItem>)}</SelectContent>
           </Select>
         </div>
         <div>
           <Label className="text-xs">Member</Label>
           <Select value={memberId} onValueChange={setMemberId}>
-            <SelectTrigger className={inputCls}><SelectValue /></SelectTrigger>
+            <SelectTrigger aria-label="Member" className={inputCls}><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="__none">— General / not a member</SelectItem>
               {sortedMembers.map((m) => <SelectItem key={m.id} value={m.id}>{memberName(m)}</SelectItem>)}
@@ -243,11 +243,11 @@ function EntryForm({ members, userId, existing, onSaved, onCancel }: {
       </div>
       <div>
         <Label className="text-xs">Subject</Label>
-        <Input value={subject} onChange={(e) => setSubject(e.target.value)} className={inputCls} maxLength={160} required />
+        <Input aria-label="Subject" value={subject} onChange={(e) => setSubject(e.target.value)} className={inputCls} maxLength={160} required />
       </div>
       <div>
         <Label className="text-xs">Body / notes</Label>
-        <Textarea value={body} onChange={(e) => setBody(e.target.value)} className={inputCls} rows={3} maxLength={2000} />
+        <Textarea aria-label="Body / notes" value={body} onChange={(e) => setBody(e.target.value)} className={inputCls} rows={3} maxLength={2000} />
       </div>
       <div>
         <Label className="text-xs flex items-center gap-1.5"><Paperclip className="w-3 h-3" /> Attachment (optional, max 15 MB)</Label>
@@ -271,7 +271,7 @@ function EntryForm({ members, userId, existing, onSaved, onCancel }: {
         <Button type="submit" disabled={busy} className="bg-gold text-navy hover:bg-gold/90">
           {existing ? "Update entry" : "Save entry"}
         </Button>
-        <Button type="button" variant="outline" onClick={onCancel}>Cancel</Button>
+        <Button type="button" variant="outline" className="bg-transparent border-gold/40 text-cream hover:bg-gold/10 hover:text-cream" onClick={onCancel}>Cancel</Button>
       </div>
     </form>
   );

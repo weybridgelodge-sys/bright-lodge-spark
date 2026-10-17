@@ -113,7 +113,7 @@ export default function CandidatesManager({ onChange }: { onChange?: () => void 
               <Label>Stage</Label>
               <StageSelect value={draft.stage} onChange={(s) => setDraft({ ...draft, stage: s })} />
             </div>
-            <Input
+            <Input aria-label="Stage"
               label="Date of enquiry"
               type="date"
               value={draft.date_of_enquiry ?? ""}
@@ -135,7 +135,7 @@ export default function CandidatesManager({ onChange }: { onChange?: () => void 
           </div>
           <div>
             <Label>Notes</Label>
-            <textarea
+            <textarea aria-label="Notes"
               value={draft.notes ?? ""}
               onChange={(e) => setDraft({ ...draft, notes: e.target.value })}
               className="w-full bg-navy border border-gold/20 rounded-sm px-2 py-1.5 text-xs"
@@ -196,7 +196,7 @@ export default function CandidatesManager({ onChange }: { onChange?: () => void 
               />
               <div>
                 <Label>Initiation</Label>
-                <input
+                <input aria-label="Initiation"
                   type="date"
                   value={c.initiation_scheduled_date ?? ""}
                   onChange={(e) =>
@@ -245,7 +245,7 @@ function Input({
   return (
     <div>
       <Label>{label}</Label>
-      <input
+      <input aria-label={`${label}`}
         type={type}
         value={value}
         onChange={(e) => onChange(e.target.value)}
@@ -263,7 +263,7 @@ function StageSelect({
   onChange: (s: CandidateStage) => void;
 }) {
   return (
-    <select
+    <select aria-label="Candidate stage"
       value={value}
       onChange={(e) => onChange(e.target.value as CandidateStage)}
       className="bg-navy border border-gold/20 rounded-sm px-2 py-1.5 text-xs text-primary-foreground"
@@ -285,7 +285,7 @@ function ReferralSelect({
   onChange: (v: ReferralSource | null) => void;
 }) {
   return (
-    <select
+    <select aria-label="Referral source"
       value={value ?? ""}
       onChange={(e) => onChange((e.target.value || null) as ReferralSource | null)}
       className="w-full bg-navy border border-gold/20 rounded-sm px-2 py-1.5 text-xs text-primary-foreground"

@@ -201,11 +201,11 @@ function Inner() {
       <div className="flex items-end gap-3 flex-wrap rounded-sm border border-gold/20 bg-navy-light/30 p-4">
         <div>
           <label className="text-xs text-primary-foreground/80 block mb-1">Period start</label>
-          <Input type="date" value={start} onChange={(e) => setStart(e.target.value)} className={fieldCls} />
+          <Input aria-label="Period start" type="date" value={start} onChange={(e) => setStart(e.target.value)} className={fieldCls} />
         </div>
         <div>
           <label className="text-xs text-primary-foreground/80 block mb-1">Period end</label>
-          <Input type="date" value={end} onChange={(e) => setEnd(e.target.value)} className={fieldCls} />
+          <Input aria-label="Period end" type="date" value={end} onChange={(e) => setEnd(e.target.value)} className={fieldCls} />
         </div>
         <Button size="sm" variant="outline" className="border-gold/40 bg-navy-dark text-gold hover:bg-gold/10 hover:text-gold" onClick={generate} disabled={loading}>
           {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <RefreshCw className="w-4 h-4 mr-2" />}

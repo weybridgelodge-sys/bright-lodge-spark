@@ -152,7 +152,7 @@ export function EntryDrilldownBody({ entryId, highlightLineId, onNavigate, prevI
         <Field k="Reconciled" v={e.reconciled ? "Yes" : "No"} />
       </dl>
 
-      <div className="overflow-x-auto rounded-md border border-border">
+      <div tabIndex={0} role="region" aria-label="Scrollable table" className="overflow-x-auto rounded-md border border-border focus:outline-none focus-visible:ring-2 focus-visible:ring-gold">
         <table className="w-full text-sm">
           <thead>
             <tr className="bg-muted/50 text-left">

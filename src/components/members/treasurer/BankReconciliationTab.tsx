@@ -396,7 +396,7 @@ export default function BankReconciliationTab({ canEdit }: { canEdit: boolean })
       <div className="rounded-lg border border-gold/20 bg-primary-foreground/5 p-4">
         <Label>Statement</Label>
         <Select value={statementId} onValueChange={setStatementId}>
-          <SelectTrigger><SelectValue placeholder="Choose a statement" /></SelectTrigger>
+          <SelectTrigger aria-label="Statement"><SelectValue placeholder="Choose a statement" /></SelectTrigger>
           <SelectContent>
             {statements.map((s) => (
               <SelectItem key={s.id} value={s.id}>{s.period_label} — {s.file_name}</SelectItem>

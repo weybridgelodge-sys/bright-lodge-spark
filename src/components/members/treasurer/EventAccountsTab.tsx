@@ -640,7 +640,7 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
           <div className="min-w-[240px] flex-1">
             <Label className="text-xs">Event</Label>
             <Select value={eventId} onValueChange={setEventId}>
-              <SelectTrigger><SelectValue placeholder="Choose an event" /></SelectTrigger>
+              <SelectTrigger aria-label="Event"><SelectValue placeholder="Choose an event" /></SelectTrigger>
               <SelectContent>
                 {events.map((e) => (
                   <SelectItem key={e.id} value={e.id}>
@@ -701,7 +701,7 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
         <>
           {/* Budget */}
           <Card title="Budget">
-            <div className="overflow-x-auto">
+            <div tabIndex={0} role="region" aria-label="Scrollable table" className="overflow-x-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-gold">
               <table className="w-full text-sm min-w-[520px]">
                 <thead>
                   <tr className="text-left text-xs uppercase tracking-wider text-primary-foreground/80 border-b border-gold/15">
@@ -788,7 +788,7 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
                                   <span className="tabular-nums text-gold font-medium">{money(l.planned_pence)}</span>
                                 </div>
                               ) : (
-                                <Input type="number" step="0.01" className="text-right" disabled={!canEdit}
+                                <Input aria-label="Planned amount (£)" type="number" step="0.01" className="text-right" disabled={!canEdit}
                                   defaultValue={fromPence(l.planned_pence)}
                                   key={`p-${l.id}-${l.planned_pence}`}
                                   onBlur={(e) => updateBudgetLine(l.id, { planned_pence: toPence(e.target.value) })} />
@@ -823,7 +823,7 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
               <div className="flex flex-wrap gap-2 items-end pt-1">
                 <div className="flex-1 min-w-[180px]">
                   <Label className="text-xs">New category</Label>
-                  <Input value={newCategory} onChange={(e) => setNewCategory(e.target.value)} placeholder="e.g. Venue" />
+                  <Input aria-label="New category" value={newCategory} onChange={(e) => setNewCategory(e.target.value)} placeholder="e.g. Venue" />
                 </div>
                 <div>
                   <Label className="text-xs">Type</Label>
@@ -853,11 +853,11 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
                   <>
                     <div className="w-28">
                       <Label className="text-xs">{newLineType === "income" ? "Price per head (£)" : "Cost per head (£)"}</Label>
-                      <Input type="number" step="0.01" value={newUnitCost} onChange={(e) => setNewUnitCost(e.target.value)} />
+                      <Input aria-label="Unit cost (£)" type="number" step="0.01" value={newUnitCost} onChange={(e) => setNewUnitCost(e.target.value)} />
                     </div>
                     <div className="w-20">
                       <Label className="text-xs">Quantity</Label>
-                      <Input type="number" min="0" step="1" value={newQuantity} onChange={(e) => setNewQuantity(e.target.value)} />
+                      <Input aria-label="Quantity" type="number" min="0" step="1" value={newQuantity} onChange={(e) => setNewQuantity(e.target.value)} />
                     </div>
                     <div className="text-sm text-primary-foreground/80 pb-2 tabular-nums">
                       = {money(toPence(newUnitCost) * Math.max(0, Math.round(parseFloat(newQuantity || "0") || 0)))}
@@ -866,7 +866,7 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
                 ) : (
                   <div className="w-32">
                     <Label className="text-xs">Planned (£)</Label>
-                    <Input type="number" step="0.01" value={newPlanned} onChange={(e) => setNewPlanned(e.target.value)} />
+                    <Input aria-label="Planned (£)" type="number" step="0.01" value={newPlanned} onChange={(e) => setNewPlanned(e.target.value)} />
                   </div>
                 )}
                 <Button className="bg-gold text-navy hover:bg-gold/90" onClick={addBudgetLine}>
@@ -957,7 +957,7 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
                               </ul>
                             </div>
                           )}
-                          <div className="overflow-x-auto">
+                          <div tabIndex={0} role="region" aria-label="Scrollable table" className="overflow-x-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-gold">
                             <table className="w-full text-sm min-w-[640px]">
                               <thead>
                                 <tr className="text-left text-xs uppercase tracking-wider text-primary-foreground/80">
@@ -1054,7 +1054,7 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
 
           {/* Budget vs actual */}
           <Card title="Budget vs Actual">
-            <div className="overflow-x-auto">
+            <div tabIndex={0} role="region" aria-label="Scrollable table" className="overflow-x-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-gold">
               <table className="w-full text-sm min-w-[560px]">
                 <thead>
                   <tr className="text-left text-xs uppercase tracking-wider text-primary-foreground/80 border-b border-gold/15">
@@ -1206,7 +1206,7 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
                         <div className="flex flex-wrap items-end gap-2">
                           <div className="w-32">
                             <Label className="text-xs">Allocate to this event (£)</Label>
-                            <Input type="number" step="0.01" value={allocDraft[p.id] ?? fromPence(mine?.amount_pence ?? Math.max(0, p.amount_pence - used))}
+                            <Input aria-label="Allocate to this event (£)" type="number" step="0.01" value={allocDraft[p.id] ?? fromPence(mine?.amount_pence ?? Math.max(0, p.amount_pence - used))}
                               onChange={(e) => setAllocDraft((d) => ({ ...d, [p.id]: e.target.value }))} />
                           </div>
                           <Button size="sm" className="min-h-[44px]" onClick={() => allocatePayout(p)}>{mine ? "Update" : "Allocate"}</Button>
@@ -1229,16 +1229,16 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
           <div className="space-y-3">
             <div>
               <Label>Name</Label>
-              <Input value={eventDraft.name} onChange={(e) => setEventDraft({ ...eventDraft, name: e.target.value })} />
+              <Input aria-label="Name" value={eventDraft.name} onChange={(e) => setEventDraft({ ...eventDraft, name: e.target.value })} />
             </div>
             <div>
               <Label>Date</Label>
-              <Input type="date" value={eventDraft.event_date} onChange={(e) => setEventDraft({ ...eventDraft, event_date: e.target.value })} />
+              <Input aria-label="Date" type="date" value={eventDraft.event_date} onChange={(e) => setEventDraft({ ...eventDraft, event_date: e.target.value })} />
             </div>
             <div>
               <Label>Status</Label>
               <Select value={eventDraft.status} onValueChange={(v) => setEventDraft({ ...eventDraft, status: v })}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger aria-label="Status"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   {STATUSES.map((s) => <SelectItem key={s} value={s} className="capitalize">{s}</SelectItem>)}
                 </SelectContent>
@@ -1260,11 +1260,11 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
               <div className="grid gap-3 sm:grid-cols-2">
                 <div>
                   <Label>Payer name</Label>
-                  <Input value={bookingDraft.payer_name} onChange={(e) => setBookingDraft({ ...bookingDraft, payer_name: e.target.value })} />
+                  <Input aria-label="Payer name" value={bookingDraft.payer_name} onChange={(e) => setBookingDraft({ ...bookingDraft, payer_name: e.target.value })} />
                 </div>
                 <div>
                   <Label>Tickets</Label>
-                  <Input type="number" min="0" value={bookingDraft.ticket_count}
+                  <Input aria-label="Tickets" type="number" min="0" value={bookingDraft.ticket_count}
                     onChange={(e) => setBookingDraft({ ...bookingDraft, ticket_count: e.target.value })} />
                 </div>
               </div>
@@ -1276,14 +1276,14 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
               <div className="grid gap-3 sm:grid-cols-3">
                 <div>
                   <Label>Deposit (£)</Label>
-                  <Input type="number" step="0.01" value={bookingDraft.deposit}
+                  <Input aria-label="Deposit (£)" type="number" step="0.01" value={bookingDraft.deposit}
                     onChange={(e) => setBookingDraft({ ...bookingDraft, deposit: e.target.value })} />
                 </div>
                 <div>
                   <Label>Deposit method</Label>
                   <Select value={bookingDraft.deposit_method ?? "bank_transfer"}
                     onValueChange={(v) => setBookingDraft({ ...bookingDraft, deposit_method: v })}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectTrigger aria-label="Deposit method"><SelectValue /></SelectTrigger>
                     <SelectContent>{METHODS.map((m) => <SelectItem key={m} value={m}>{m.replace("_", " ")}</SelectItem>)}</SelectContent>
                   </Select>
                 </div>
@@ -1296,14 +1296,14 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
               <div className="grid gap-3 sm:grid-cols-3">
                 <div>
                   <Label>Balance (£)</Label>
-                  <Input type="number" step="0.01" value={bookingDraft.balance}
+                  <Input aria-label="Balance (£)" type="number" step="0.01" value={bookingDraft.balance}
                     onChange={(e) => setBookingDraft({ ...bookingDraft, balance: e.target.value })} />
                 </div>
                 <div>
                   <Label>Balance method</Label>
                   <Select value={bookingDraft.balance_method ?? "bank_transfer"}
                     onValueChange={(v) => setBookingDraft({ ...bookingDraft, balance_method: v })}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectTrigger aria-label="Balance method"><SelectValue /></SelectTrigger>
                     <SelectContent>{METHODS.map((m) => <SelectItem key={m} value={m}>{m.replace("_", " ")}</SelectItem>)}</SelectContent>
                   </Select>
                 </div>
@@ -1315,7 +1315,7 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
               </div>
               <div>
                 <Label>Notes</Label>
-                <Textarea value={bookingDraft.notes ?? ""} onChange={(e) => setBookingDraft({ ...bookingDraft, notes: e.target.value })} />
+                <Textarea aria-label="Notes" value={bookingDraft.notes ?? ""} onChange={(e) => setBookingDraft({ ...bookingDraft, notes: e.target.value })} />
               </div>
             </div>
           )}
@@ -1333,23 +1333,23 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
             <div className="space-y-3">
               <div>
                 <Label>Name (leave blank while TBC)</Label>
-                <Input value={guestDraft.name ?? ""} onChange={(e) => setGuestDraft({ ...guestDraft, name: e.target.value })} />
+                <Input aria-label="Name (leave blank while TBC)" value={guestDraft.name ?? ""} onChange={(e) => setGuestDraft({ ...guestDraft, name: e.target.value })} />
               </div>
               <div>
                 <Label>Seating preference</Label>
-                <Input value={guestDraft.seating_preference ?? ""} onChange={(e) => setGuestDraft({ ...guestDraft, seating_preference: e.target.value })} />
+                <Input aria-label="Seating preference" value={guestDraft.seating_preference ?? ""} onChange={(e) => setGuestDraft({ ...guestDraft, seating_preference: e.target.value })} />
               </div>
               <div>
                 <Label>Menu choice</Label>
-                <Input value={guestDraft.menu_choice ?? ""} onChange={(e) => setGuestDraft({ ...guestDraft, menu_choice: e.target.value })} />
+                <Input aria-label="Menu choice" value={guestDraft.menu_choice ?? ""} onChange={(e) => setGuestDraft({ ...guestDraft, menu_choice: e.target.value })} />
               </div>
               <div>
                 <Label>Allergies / dietary</Label>
-                <Input value={guestDraft.allergies ?? ""} onChange={(e) => setGuestDraft({ ...guestDraft, allergies: e.target.value })} />
+                <Input aria-label="Allergies / dietary" value={guestDraft.allergies ?? ""} onChange={(e) => setGuestDraft({ ...guestDraft, allergies: e.target.value })} />
               </div>
               <div>
                 <Label>Wine pre-order</Label>
-                <Input value={guestDraft.wine_preorder ?? ""} onChange={(e) => setGuestDraft({ ...guestDraft, wine_preorder: e.target.value })} />
+                <Input aria-label="Wine pre-order" value={guestDraft.wine_preorder ?? ""} onChange={(e) => setGuestDraft({ ...guestDraft, wine_preorder: e.target.value })} />
               </div>
               <div className="flex items-center gap-6">
                 <label className="flex items-center gap-2 text-sm">

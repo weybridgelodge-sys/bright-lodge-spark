@@ -500,7 +500,7 @@ function Inner() {
             )}
             {action?.kind !== "move" && (
               <label className={labelCls}>{action?.kind === "drop" ? "Reason (optional)" : newType === "dispensation" ? "Dispensation reason or reference (optional)" : "Notes (optional)"}
-                <Textarea className={`mt-1 ${fieldCls}`} rows={2} placeholder={newType === "dispensation" ? "e.g. Dispensation ref. PGM/2026/14" : undefined} value={notes} onChange={(e) => setNotes(e.target.value)} />
+                <Textarea className={`mt-1 ${fieldCls}`} rows={2} placeholder={newType === "dispensation" ? "Reason or dispensation reference" : undefined} value={notes} onChange={(e) => setNotes(e.target.value)} />
               </label>
             )}
             {movePlan && movePlan.ok === false && newDate !== action?.meeting?.meeting_date && <p role="alert" className="text-sm text-destructive-foreground">{movePlan.error}</p>}

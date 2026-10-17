@@ -177,7 +177,7 @@ export default function CreditorDebtorBalances({ canEdit }: { canEdit: boolean }
               Nothing outstanding on {heading}.
             </p>
           ) : (
-            <div className="overflow-x-auto rounded-md border border-border">
+            <div tabIndex={0} role="region" aria-label="Scrollable table" className="overflow-x-auto rounded-md border border-border focus:outline-none focus-visible:ring-2 focus-visible:ring-gold">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="bg-muted/50 text-left">
@@ -211,7 +211,7 @@ export default function CreditorDebtorBalances({ canEdit }: { canEdit: boolean }
                         {isOpen && (
                           <tr className="border-t border-border bg-muted/20">
                             <td colSpan={3} className="px-3 py-2">
-                              <div className="overflow-x-auto rounded-md border border-white/15 bg-navy text-cream">
+                              <div tabIndex={0} role="region" aria-label="Scrollable table" className="overflow-x-auto rounded-md border border-white/15 bg-navy text-cream focus:outline-none focus-visible:ring-2 focus-visible:ring-gold">
                                 <table className="w-full text-sm">
                                   <thead>
                                     <tr className="bg-navy-dark text-left text-cream">

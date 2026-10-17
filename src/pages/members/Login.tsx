@@ -320,7 +320,7 @@ export default function MembersLogin() {
                         </label>
                         <div className="relative">
                           <Mail className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-primary-foreground/80" />
-                          <input
+                          <input aria-label="Registered Email Address"
                             required
                             type="email"
                             value={loginEmail}
@@ -589,7 +589,7 @@ function Field({
   return (
     <div>
       <label className="block text-[10px] uppercase tracking-wider text-primary-foreground/80 mb-1.5">{label}</label>
-      <input
+      <input aria-label={`${label}`}
         required={required}
         type={type}
         value={value}

@@ -126,7 +126,7 @@ function Inner() {
         <div>
           <p className="text-[10px] uppercase tracking-wider text-gold mb-1">Rehearsal Session</p>
           <Select value={sessionId} onValueChange={setSessionId}>
-            <SelectTrigger className="bg-navy-dark text-primary-foreground w-72"><SelectValue placeholder="Select session" /></SelectTrigger>
+            <SelectTrigger aria-label="Select session" className="bg-navy-dark text-primary-foreground w-72"><SelectValue placeholder="Select session" /></SelectTrigger>
             <SelectContent>
               {sessions.map((s) => (
                 <SelectItem key={s.id} value={s.id}>
@@ -151,7 +151,7 @@ function Inner() {
       </div>
 
       <div className="rounded-sm border border-gold/20 overflow-hidden">
-        <div className="overflow-x-auto">
+        <div tabIndex={0} role="region" aria-label="Scrollable table" className="overflow-x-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-gold">
           <table className="w-full text-xs">
             <thead className="bg-navy-light/40 text-gold uppercase text-[10px] tracking-wider">
               <tr>
@@ -179,7 +179,7 @@ function Inner() {
                         onValueChange={(v) => setAssignments((a) => ({ ...a, [k]: v === "none" ? "" : v }))}
                         disabled={!checked}
                       >
-                        <SelectTrigger className="bg-navy-dark text-primary-foreground h-8 text-xs"><SelectValue placeholder="Unassigned" /></SelectTrigger>
+                        <SelectTrigger aria-label="Unassigned" className="bg-navy-dark text-primary-foreground h-8 text-xs"><SelectValue placeholder="Unassigned" /></SelectTrigger>
                         <SelectContent>
                           <SelectItem value="none">— Unassigned —</SelectItem>
                           {all.map((m) => (

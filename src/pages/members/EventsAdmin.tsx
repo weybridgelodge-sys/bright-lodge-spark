@@ -348,17 +348,17 @@ function EventEditor({ id, onBack, onDeleted }: { id: string; onBack: () => void
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className={labelCls}>Heading / Title</label>
-            <input className={inputCls} value={event.title} onChange={(e) => update("title", e.target.value)} placeholder="e.g. Initiation Ceremony — April Meeting" />
+            <input aria-label="Heading / Title" className={inputCls} value={event.title} onChange={(e) => update("title", e.target.value)} placeholder="e.g. Initiation Ceremony — April Meeting" />
           </div>
           <div>
             <label className={labelCls}>Meeting Date & Time</label>
-            <input type="datetime-local" className={inputCls} value={toLocalInput(event.event_date)} onChange={(e) => update("event_date", new Date(e.target.value).toISOString())} />
+            <input aria-label="Meeting Date & Time" type="datetime-local" className={inputCls} value={toLocalInput(event.event_date)} onChange={(e) => update("event_date", new Date(e.target.value).toISOString())} />
           </div>
         </div>
 
         <div>
           <label className={labelCls}>Intro paragraphs</label>
-          <textarea rows={8} className={inputCls} value={event.intro} onChange={(e) => update("intro", e.target.value)} placeholder="Use blank lines to separate paragraphs. Use **bold** for emphasis." />
+          <textarea aria-label="Intro paragraphs" rows={8} className={inputCls} value={event.intro} onChange={(e) => update("intro", e.target.value)} placeholder="Use blank lines to separate paragraphs. Use **bold** for emphasis." />
           <p className="text-[11px] text-primary-foreground/80 mt-1">Separate paragraphs with blank lines. Wrap text in **double asterisks** for bold.</p>
         </div>
 
@@ -396,28 +396,28 @@ function EventEditor({ id, onBack, onDeleted }: { id: string; onBack: () => void
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className={labelCls}>Tyling Time</label>
-              <input className={inputCls} value={event.tyling_time} onChange={(e) => update("tyling_time", e.target.value)} placeholder="Tyling at 6.00 pm prompt" />
+              <input aria-label="Tyling Time" className={inputCls} value={event.tyling_time} onChange={(e) => update("tyling_time", e.target.value)} placeholder="Tyling at 6.00 pm prompt" />
             </div>
             <div>
               <label className={labelCls}>Dining Time</label>
-              <input className={inputCls} value={event.dining_time} onChange={(e) => update("dining_time", e.target.value)} placeholder="Festive Board Dining at 7:45 pm" />
+              <input aria-label="Dining Time" className={inputCls} value={event.dining_time} onChange={(e) => update("dining_time", e.target.value)} placeholder="Festive Board Dining at 7:45 pm" />
             </div>
             <div className="md:col-span-2">
               <label className={labelCls}>Location</label>
-              <input className={inputCls} value={event.location} onChange={(e) => update("location", e.target.value)} />
+              <input aria-label="Location" className={inputCls} value={event.location} onChange={(e) => update("location", e.target.value)} />
             </div>
             <div className="md:col-span-2">
               <label className={labelCls}>Dress Code</label>
-              <input className={inputCls} value={event.dress_code} onChange={(e) => update("dress_code", e.target.value)} />
+              <input aria-label="Dress Code" className={inputCls} value={event.dress_code} onChange={(e) => update("dress_code", e.target.value)} />
             </div>
             <div className="md:col-span-2">
               <label className={labelCls}>Event label</label>
-              <input className={inputCls} value={event.event_label ?? "Festive Board"} onChange={(e) => update("event_label" as any, e.target.value)} placeholder="Festive Board" maxLength={60} />
+              <input aria-label="Event label" className={inputCls} value={event.event_label ?? "Festive Board"} onChange={(e) => update("event_label" as any, e.target.value)} placeholder="Festive Board" maxLength={60} />
               <p className="text-xs text-cream/80 mt-1">Shown on the booking form, e.g. "Festive Board" or "White Table".</p>
             </div>
             <div>
               <label className={labelCls}>Booking Deadline</label>
-              <input type="date" className={inputCls} value={event.booking_deadline || ""} onChange={(e) => update("booking_deadline", e.target.value)} />
+              <input aria-label="Booking Deadline" type="date" className={inputCls} value={event.booking_deadline || ""} onChange={(e) => update("booking_deadline", e.target.value)} />
             </div>
           </div>
         </fieldset>
@@ -427,10 +427,10 @@ function EventEditor({ id, onBack, onDeleted }: { id: string; onBack: () => void
           <legend className="px-2 text-gold font-serif text-sm">Festive Board Menu</legend>
           {courses.map((c, i) => (
             <div key={c.id || c._tempId || i} className="grid grid-cols-1 md:grid-cols-[140px_1fr_auto] gap-2 items-start border-b border-gold/10 pb-3 last:border-b-0">
-              <input className={inputCls} placeholder="Course (e.g. Main)" value={c.course_label || ""} onChange={(e) => setCourses(courses.map((x, j) => j === i ? { ...x, course_label: e.target.value } : x))} />
+              <input aria-label="Course (e.g. Main)" className={inputCls} placeholder="Course (e.g. Main)" value={c.course_label || ""} onChange={(e) => setCourses(courses.map((x, j) => j === i ? { ...x, course_label: e.target.value } : x))} />
               <div className="space-y-2">
-                <input className={inputCls} placeholder="Dish" value={c.dish || ""} onChange={(e) => setCourses(courses.map((x, j) => j === i ? { ...x, dish: e.target.value } : x))} />
-                <input className={inputCls} placeholder="Description (optional)" value={c.description || ""} onChange={(e) => setCourses(courses.map((x, j) => j === i ? { ...x, description: e.target.value } : x))} />
+                <input aria-label="Dish" className={inputCls} placeholder="Dish" value={c.dish || ""} onChange={(e) => setCourses(courses.map((x, j) => j === i ? { ...x, dish: e.target.value } : x))} />
+                <input aria-label="Description (optional)" className={inputCls} placeholder="Description (optional)" value={c.description || ""} onChange={(e) => setCourses(courses.map((x, j) => j === i ? { ...x, description: e.target.value } : x))} />
               </div>
               <button type="button" onClick={() => setCourses(courses.filter((_, j) => j !== i))} className="text-red-400 hover:text-red-300 p-2" aria-label="Remove course">
                 <Trash2 className="w-4 h-4" />
@@ -448,10 +448,10 @@ function EventEditor({ id, onBack, onDeleted }: { id: string; onBack: () => void
           <p className="text-[11px] text-primary-foreground/80 -mt-1">Members choose one of these when booking. Price is per head.</p>
           {options.map((o, i) => (
             <div key={o.id || o._tempId || i} className="grid grid-cols-1 md:grid-cols-[1fr_120px_auto_auto] gap-2 items-center border-b border-gold/10 pb-3 last:border-b-0">
-              <input className={inputCls} placeholder="Label (e.g. 3-course dinner)" value={o.label || ""} onChange={(e) => setOptions(options.map((x, j) => j === i ? { ...x, label: e.target.value } : x))} />
+              <input aria-label="Label (e.g. 3-course dinner)" className={inputCls} placeholder="Label (e.g. 3-course dinner)" value={o.label || ""} onChange={(e) => setOptions(options.map((x, j) => j === i ? { ...x, label: e.target.value } : x))} />
               <div className="relative">
                 <span className="absolute left-3 top-2 text-primary-foreground/80 text-sm">£</span>
-                <input type="number" min={0} step="0.01" className={inputCls + " pl-6"} placeholder="32.00" value={o.price_pence != null ? (o.price_pence / 100).toFixed(2) : ""} onChange={(e) => setOptions(options.map((x, j) => j === i ? { ...x, price_pence: Math.round(parseFloat(e.target.value || "0") * 100) } : x))} />
+                <input aria-label="32.00" type="number" min={0} step="0.01" className={inputCls + " pl-6"} placeholder="32.00" value={o.price_pence != null ? (o.price_pence / 100).toFixed(2) : ""} onChange={(e) => setOptions(options.map((x, j) => j === i ? { ...x, price_pence: Math.round(parseFloat(e.target.value || "0") * 100) } : x))} />
               </div>
               <label className="flex items-center gap-1 text-xs text-primary-foreground/70 whitespace-nowrap">
                 <input type="radio" name="default-option" checked={!!o.is_default} onChange={() => setOptions(options.map((x, j) => ({ ...x, is_default: j === i })))} className="accent-[hsl(var(--gold))]" />

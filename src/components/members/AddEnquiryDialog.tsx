@@ -46,10 +46,10 @@ export default function AddEnquiryDialog({ open, onOpenChange, onSaved }: { open
 
   return (
     <Dialog open={open} onOpenChange={change}>
-      <DialogContent className="max-h-[90dvh] overflow-y-auto w-[calc(100vw-1rem)] max-w-lg p-4 sm:p-6">
+      <DialogContent className="max-h-[90dvh] overflow-y-auto w-[calc(100vw-1rem)] max-w-lg p-4 sm:p-6 bg-navy text-cream border-gold/30">
         <DialogHeader>
           <DialogTitle className="font-serif text-gold">Add enquiry</DialogTitle>
-          <DialogDescription>Log an enquiry received by email, phone or in person.</DialogDescription>
+          <DialogDescription className="text-cream">Log an enquiry received by email, phone or in person.</DialogDescription>
         </DialogHeader>
         <form onSubmit={submit} noValidate className="space-y-3">
           <div>

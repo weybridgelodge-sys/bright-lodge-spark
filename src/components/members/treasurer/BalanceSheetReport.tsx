@@ -179,7 +179,7 @@ export default function BalanceSheetReport({ canEdit }: { canEdit: boolean }) {
   const Section = ({ title, rows, totalLabel, tc, tp }: { title: string; rows: Row[]; totalLabel: string; tc: number; tp: number }) => (
     <div className="mt-5">
       <h3 className="font-serif text-gold mb-2">{title}</h3>
-      <div className="overflow-x-auto">
+      <div tabIndex={0} role="region" aria-label="Scrollable table" className="overflow-x-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-gold">
         <table className="w-full text-sm">
           <thead>
             <tr className="text-primary-foreground/80 border-b border-gold/20">
@@ -264,7 +264,7 @@ export default function BalanceSheetReport({ canEdit }: { canEdit: boolean }) {
           {kind === "custom" && (
             <div>
               <Label>As at date</Label>
-              <Input type="date" className="min-h-[48px]" value={customDate} onChange={(e) => setCustomDate(e.target.value)} />
+              <Input aria-label="As at date" type="date" className="min-h-[48px]" value={customDate} onChange={(e) => setCustomDate(e.target.value)} />
             </div>
           )}
           <div>

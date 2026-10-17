@@ -163,7 +163,7 @@ export default function AnnualBudgetTab({ canEdit }: { canEdit: boolean }) {
         <div className="space-y-1.5 max-w-xs">
           <Label>Lodge year</Label>
           <Select value={yearStart} onValueChange={setYearStart}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectTrigger aria-label="Lodge year"><SelectValue /></SelectTrigger>
             <SelectContent>
               {years.map((y) => (
                 <SelectItem key={y.start} value={y.start}>{y.label}</SelectItem>

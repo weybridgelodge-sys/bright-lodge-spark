@@ -96,7 +96,7 @@ export default function MentoringChecklist({
                             </Select>
                           </label>
                         </div>
-                        <Textarea disabled={!canEdit} rows={2} placeholder="Mentor notes"
+                        <Textarea aria-label="Mentor notes" disabled={!canEdit} rows={2} placeholder="Mentor notes"
                           value={r.mentor_notes ?? ""}
                           onChange={(e) => patch(r.id, { mentor_notes: e.target.value })}
                           className={`mt-2 ${fieldCls}`} />

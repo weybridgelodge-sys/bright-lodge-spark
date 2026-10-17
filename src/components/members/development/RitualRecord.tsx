@@ -48,7 +48,7 @@ export default function RitualRecord({
         return (
           <div key={group}>
             <h3 className="font-serif text-gold text-sm mb-2">{rehearsalDisplayLabel(group)}</h3>
-            <div className="overflow-x-auto rounded-sm border border-gold/20">
+            <div tabIndex={0} role="region" aria-label="Scrollable table" className="overflow-x-auto rounded-sm border border-gold/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold">
               <table className="w-full text-xs">
                 <thead className="bg-navy-light/40 text-gold uppercase text-[10px] tracking-wider">
                   <tr>

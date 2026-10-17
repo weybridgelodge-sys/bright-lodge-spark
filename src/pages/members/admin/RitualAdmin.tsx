@@ -215,7 +215,7 @@ function Inner() {
         <div className="flex items-center gap-2 text-gold text-[11px] font-semibold uppercase tracking-wider">
           <Eye className="w-3.5 h-3.5" /> Preview as member
         </div>
-        <select
+        <select aria-label="Preview as member"
           value={previewDegree ?? ""}
           onChange={(e) => setPreviewDegree((e.target.value || null) as Degree | null)}
           className="bg-navy border border-gold/20 rounded-sm px-3 py-1.5 text-xs focus:outline-none focus:border-gold text-primary-foreground"
@@ -237,7 +237,7 @@ function Inner() {
         </div>
         <label className="flex flex-col gap-1">
           <span className="text-[11px] uppercase tracking-wider text-gold font-semibold">Title</span>
-          <input required value={title} onChange={(e) => setTitle(e.target.value)}
+          <input aria-label="e.g. First Degree Tracing Board" required value={title} onChange={(e) => setTitle(e.target.value)}
             placeholder="e.g. First Degree Tracing Board"
             className="bg-navy border border-gold/20 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-gold" />
         </label>
@@ -259,7 +259,7 @@ function Inner() {
         </label>
         <label className="flex flex-col gap-1">
           <span className="text-[11px] uppercase tracking-wider text-gold font-semibold">Description (optional)</span>
-          <input value={description} onChange={(e) => setDescription(e.target.value)}
+          <input aria-label="Short summary or notes" value={description} onChange={(e) => setDescription(e.target.value)}
             placeholder="Short summary or notes"
             className="bg-navy border border-gold/20 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-gold" />
         </label>
@@ -277,7 +277,7 @@ function Inner() {
 
       <div className="mb-3 relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary-foreground/80" />
-        <input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
+        <input aria-label="Search by title or description…" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Search by title or description…"
           className="w-full bg-navy border border-gold/20 rounded-sm pl-9 pr-3 py-2 text-sm focus:outline-none focus:border-gold" />
       </div>

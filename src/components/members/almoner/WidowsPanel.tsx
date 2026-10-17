@@ -167,9 +167,9 @@ function WidowForm({ widow, onSaved, onCancel }: { widow?: Widow; onSaved: (id?:
   return (
     <form onSubmit={submit} className="bg-navy-light/60 border border-gold/30 rounded p-4 space-y-3">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <div><Label className="text-xs">Full name</Label><Input value={f.full_name} onChange={set("full_name")} className={inputCls} required maxLength={200} /></div>
-        <div><Label className="text-xs">Preferred form of address</Label><Input value={f.preferred_address} onChange={set("preferred_address")} className={inputCls} placeholder="e.g. Mrs Smith or Joan" maxLength={100} /></div>
-        <div><Label className="text-xs">Phone</Label><Input type="tel" value={f.phone} onChange={set("phone")} className={inputCls} maxLength={50} /></div>
+        <div><Label className="text-xs">Full name</Label><Input aria-label="e.g. Mrs Smith or Joan" value={f.full_name} onChange={set("full_name")} className={inputCls} required maxLength={200} /></div>
+        <div><Label className="text-xs">Preferred form of address</Label><Input aria-label="Full name" value={f.preferred_address} onChange={set("preferred_address")} className={inputCls} placeholder="e.g. Mrs Smith or Joan" maxLength={100} /></div>
+        <div><Label className="text-xs">Phone</Label><Input aria-label="Preferred form of address" type="tel" value={f.phone} onChange={set("phone")} className={inputCls} maxLength={50} /></div>
         <div>
           <Label className="text-xs">Lives in</Label>
           <Select value={f.home_type} onValueChange={(v) => setF((p) => ({ ...p, home_type: v as Widow["home_type"] }))}>
@@ -178,11 +178,11 @@ function WidowForm({ widow, onSaved, onCancel }: { widow?: Widow; onSaved: (id?:
           </Select>
         </div>
       </div>
-      <div><Label className="text-xs">{f.home_type === "care_home" ? "Previous / correspondence address" : "Address"}</Label><Textarea value={f.address} onChange={set("address")} className={inputCls} rows={2} maxLength={500} /></div>
+      <div><Label className="text-xs">{f.home_type === "care_home" ? "Previous / correspondence address" : "Address"}</Label><Textarea aria-label={f.home_type === "care_home" ? "Previous / correspondence address" : "Address"} value={f.address} onChange={set("address")} className={inputCls} rows={2} maxLength={500} /></div>
       {f.home_type === "care_home" && (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div><Label className="text-xs">Care home name</Label><Input value={f.care_home_name} onChange={set("care_home_name")} className={inputCls} maxLength={200} /></div>
-          <div><Label className="text-xs">Care home address</Label><Input value={f.care_home_address} onChange={set("care_home_address")} className={inputCls} maxLength={500} /></div>
+          <div><Label className="text-xs">Care home name</Label><Input aria-label="Care home name" value={f.care_home_name} onChange={set("care_home_name")} className={inputCls} maxLength={200} /></div>
+          <div><Label className="text-xs">Care home address</Label><Input aria-label="Care home name" value={f.care_home_address} onChange={set("care_home_address")} className={inputCls} maxLength={500} /></div>
           <div className="sm:col-span-2"><Label className="text-xs">Contact hours</Label><Input aria-label="Contact hours" value={f.care_home_contact_hours} onChange={set("care_home_contact_hours")} className={inputCls} maxLength={200} placeholder="e.g. Ring between 2pm and 6pm, visiting Saturdays only" /></div>
         </div>
       )}
@@ -201,24 +201,24 @@ function WidowForm({ widow, onSaved, onCancel }: { widow?: Widow; onSaved: (id?:
         </div>
       </fieldset>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <div><Label className="text-xs">Husband's name</Label><Input value={f.husband_name} onChange={set("husband_name")} className={inputCls} maxLength={200} /></div>
-        <div><Label className="text-xs">His Lodge name and number</Label><Input value={f.husband_lodge} onChange={set("husband_lodge")} className={inputCls} maxLength={200} /></div>
+        <div><Label className="text-xs">Husband's name</Label><Input aria-label="Husband's name" value={f.husband_name} onChange={set("husband_name")} className={inputCls} maxLength={200} /></div>
+        <div><Label className="text-xs">His Lodge name and number</Label><Input aria-label="Husband's name" value={f.husband_lodge} onChange={set("husband_lodge")} className={inputCls} maxLength={200} /></div>
         <div>
           <Label className="text-xs">Connection</Label>
           <Select value={f.connection_source} onValueChange={(v) => setF((p) => ({ ...p, connection_source: v as Widow["connection_source"] }))}>
-            <SelectTrigger className={inputCls}><SelectValue /></SelectTrigger>
+            <SelectTrigger aria-label="Connection" className={inputCls}><SelectValue /></SelectTrigger>
             <SelectContent><SelectItem value="lodge_member">Widow of a Weybridge Lodge member</SelectItem><SelectItem value="smwa">Assigned via SMWA</SelectItem></SelectContent>
           </Select>
         </div>
-        <div><Label className="text-xs">Contact every (days)</Label><Input type="number" min={7} max={730} value={f.contact_interval_days} onChange={set("contact_interval_days")} className={inputCls} /></div>
+        <div><Label className="text-xs">Contact every (days)</Label><Input aria-label="Contact every (days)" type="number" min={7} max={730} value={f.contact_interval_days} onChange={set("contact_interval_days")} className={inputCls} /></div>
       </div>
       {f.connection_source === "smwa" && (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div><Label className="text-xs">SMWA reference</Label><Input value={f.smwa_reference} onChange={set("smwa_reference")} className={inputCls} maxLength={100} /></div>
-          <div><Label className="text-xs">SMWA liaison contact</Label><Input value={f.smwa_liaison} onChange={set("smwa_liaison")} className={inputCls} maxLength={300} /></div>
+          <div><Label className="text-xs">SMWA reference</Label><Input aria-label="Contact every (days)" value={f.smwa_reference} onChange={set("smwa_reference")} className={inputCls} maxLength={100} /></div>
+          <div><Label className="text-xs">SMWA liaison contact</Label><Input aria-label="SMWA reference" value={f.smwa_liaison} onChange={set("smwa_liaison")} className={inputCls} maxLength={300} /></div>
         </div>
       )}
-      <div><Label className="text-xs">Notes</Label><Textarea value={f.notes} onChange={set("notes")} className={inputCls} rows={2} maxLength={2000} /></div>
+      <div><Label className="text-xs">Notes</Label><Textarea aria-label="SMWA liaison contact" value={f.notes} onChange={set("notes")} className={inputCls} rows={2} maxLength={2000} /></div>
       {!widow && (
         <div className="border border-dashed border-gold/30 rounded p-3">
           <p className="font-serif text-sm text-primary-foreground">Next of kin</p>
@@ -482,7 +482,7 @@ function GiftForm({ widowId, raffles, onSaved }: { widowId: string; raffles: Raf
           {raffles.length === 0 && <p className="text-[11px] text-primary-foreground/80 mt-1">No raffle collections recorded by the Charity Steward yet.</p>}
         </div>
       </div>
-      <div><Label className="text-xs">Notes</Label><Textarea value={notes} onChange={(e) => setNotes(e.target.value)} className={inputCls} rows={2} maxLength={2000} /></div>
+      <div><Label className="text-xs">Notes</Label><Textarea aria-label="Notes" value={notes} onChange={(e) => setNotes(e.target.value)} className={inputCls} rows={2} maxLength={2000} /></div>
       <Button type="submit" disabled={busy} className={btnGold}>Save gift</Button>
     </form>
   );
@@ -508,19 +508,19 @@ function KinForm({ widowId, onSaved }: { widowId: string; onSaved: () => void })
   return (
     <form onSubmit={submit} className="bg-navy-light/60 border border-gold/30 rounded p-3 space-y-3">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <div><Label className="text-xs">Name</Label><Input value={f.name} onChange={set("name")} className={inputCls} required maxLength={200} /></div>
+        <div><Label className="text-xs">Name</Label><Input aria-label="Name" value={f.name} onChange={set("name")} className={inputCls} required maxLength={200} /></div>
         <div>
           <Label className="text-xs">Relationship</Label>
           <Select value={f.relationship} onValueChange={(v) => setF((p) => ({ ...p, relationship: v }))}>
-            <SelectTrigger className={inputCls}><SelectValue /></SelectTrigger>
+            <SelectTrigger aria-label="Relationship" className={inputCls}><SelectValue /></SelectTrigger>
             <SelectContent>{Object.entries(REL_LABEL).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}</SelectContent>
           </Select>
         </div>
-        {f.relationship === "other" && <div className="sm:col-span-2"><Label className="text-xs">Describe relationship</Label><Input value={f.relationship_other} onChange={set("relationship_other")} className={inputCls} maxLength={100} placeholder="e.g. niece, carer" /></div>}
-        <div><Label className="text-xs">Phone</Label><Input type="tel" value={f.phone} onChange={set("phone")} className={inputCls} maxLength={50} /></div>
-        <div><Label className="text-xs">Email</Label><Input type="email" value={f.email} onChange={set("email")} className={inputCls} maxLength={200} /></div>
+        {f.relationship === "other" && <div className="sm:col-span-2"><Label className="text-xs">Describe relationship</Label><Input aria-label="e.g. niece, carer" value={f.relationship_other} onChange={set("relationship_other")} className={inputCls} maxLength={100} placeholder="e.g. niece, carer" /></div>}
+        <div><Label className="text-xs">Phone</Label><Input aria-label="Describe relationship" type="tel" value={f.phone} onChange={set("phone")} className={inputCls} maxLength={50} /></div>
+        <div><Label className="text-xs">Email</Label><Input aria-label="Phone" type="email" value={f.email} onChange={set("email")} className={inputCls} maxLength={200} /></div>
       </div>
-      <div><Label className="text-xs">Notes</Label><Textarea value={f.notes} onChange={set("notes")} className={inputCls} rows={2} maxLength={1000} /></div>
+      <div><Label className="text-xs">Notes</Label><Textarea aria-label="Email" value={f.notes} onChange={set("notes")} className={inputCls} rows={2} maxLength={1000} /></div>
       <Button type="submit" disabled={busy} className={btnGold}>Save next of kin</Button>
     </form>
   );
@@ -547,16 +547,16 @@ function ContactForm({ widowId, onSaved }: { widowId: string; onSaved: () => voi
   return (
     <form onSubmit={submit} className="bg-navy-light/60 border border-gold/30 rounded p-3 space-y-3">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <div><Label className="text-xs">Date</Label><Input type="date" value={date} max={today} onChange={(e) => setDate(e.target.value)} className={inputCls} required /></div>
+        <div><Label className="text-xs">Date</Label><Input aria-label="Date" type="date" value={date} max={today} onChange={(e) => setDate(e.target.value)} className={inputCls} required /></div>
         <div>
           <Label className="text-xs">Type</Label>
           <Select value={type} onValueChange={setType}>
-            <SelectTrigger className={inputCls}><SelectValue /></SelectTrigger>
+            <SelectTrigger aria-label="Type" className={inputCls}><SelectValue /></SelectTrigger>
             <SelectContent>{Object.entries(CONTACT_LABEL).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}</SelectContent>
           </Select>
         </div>
       </div>
-      <div><Label className="text-xs">Notes</Label><Textarea value={notes} onChange={(e) => setNotes(e.target.value)} className={inputCls} rows={3} maxLength={3000} /></div>
+      <div><Label className="text-xs">Notes</Label><Textarea aria-label="Notes" value={notes} onChange={(e) => setNotes(e.target.value)} className={inputCls} rows={3} maxLength={3000} /></div>
       <label className="flex items-center gap-3 min-h-[48px] text-sm text-primary-foreground/85 cursor-pointer">
         <Checkbox checked={concern} onCheckedChange={(v) => setConcern(v === true)} aria-label="Flag welfare concern" />
         Flag a welfare concern

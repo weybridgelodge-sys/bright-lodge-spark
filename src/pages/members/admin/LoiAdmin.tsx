@@ -454,7 +454,7 @@ function SessionDialog({
               <label className="text-xs uppercase tracking-wider text-primary-foreground/80 mb-1 block">
                 Date
               </label>
-              <Input
+              <Input aria-label="Date"
                 type="date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
@@ -466,7 +466,7 @@ function SessionDialog({
                 Focus
               </label>
               <Select value={focus} onValueChange={setFocus}>
-                <SelectTrigger className="bg-navy border-gold/30 text-primary-foreground placeholder:text-primary-foreground/80">
+                <SelectTrigger aria-label="Focus" className="bg-navy border-gold/30 text-primary-foreground placeholder:text-primary-foreground/80">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -481,7 +481,7 @@ function SessionDialog({
           </div>
 
           {focus === "other" && (
-            <Input
+            <Input aria-label="Specify focus"
               placeholder="Specify focus"
               value={focusOther}
               onChange={(e) => setFocusOther(e.target.value)}
@@ -494,7 +494,7 @@ function SessionDialog({
               KPI block (optional override — auto-grouped by date if blank)
             </label>
             <Select value={kpiCategory || "auto"} onValueChange={(v) => setKpiCategory(v === "auto" ? "" : v)}>
-              <SelectTrigger className="bg-navy border-gold/30 text-primary-foreground placeholder:text-primary-foreground/80">
+              <SelectTrigger aria-label="KPI block (optional override — auto-grouped by date if blank)" className="bg-navy border-gold/30 text-primary-foreground placeholder:text-primary-foreground/80">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -512,7 +512,7 @@ function SessionDialog({
             <label className="text-xs uppercase tracking-wider text-primary-foreground/80 mb-1 block">
               Notes (optional)
             </label>
-            <Textarea
+            <Textarea aria-label="Notes (optional)"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               rows={2}

@@ -395,7 +395,7 @@ export default function DirectReceiptTab({ canEdit }: { canEdit: boolean }) {
             <div className="mb-4 min-w-0 max-w-xl">
               <Label>What is this receipt?</Label>
               <Select value={mode} onValueChange={(v) => setMode(v as SubMode)} disabled={!canEdit}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger aria-label="What is this receipt?"><SelectValue /></SelectTrigger>
                 <SelectContent className="max-w-[calc(100vw-2rem)]">
                   <SelectItem className="whitespace-normal" value="none">Not a subscription — ordinary receipt</SelectItem>
                   <SelectItem className="whitespace-normal" value="candidate">Subscription: new candidate&apos;s first payment (not yet a member, never charged)</SelectItem>
@@ -421,7 +421,7 @@ export default function DirectReceiptTab({ canEdit }: { canEdit: boolean }) {
                 saving={saving}
                 onSubmit={submitClear}
                 period={<PeriodPicker periods={posting.periods} value={posting.periodId} autoId={posting.autoId} onChange={posting.setPeriodId} disabled={!canEdit} />}
-                dateInput={<div><Label>Date</Label><Input type="date" value={date} onChange={(e) => setDate(e.target.value)} disabled={!canEdit} /></div>}
+                dateInput={<div><Label>Date</Label><Input aria-label="Date" type="date" value={date} onChange={(e) => setDate(e.target.value)} disabled={!canEdit} /></div>}
               />
             ) : (<>
             <div className="grid gap-3 sm:grid-cols-2 [&>*]:min-w-0">
@@ -429,7 +429,7 @@ export default function DirectReceiptTab({ canEdit }: { canEdit: boolean }) {
                 <div className="sm:col-span-2">
                   <Label>Income account</Label>
                   <Select value={accountId} onValueChange={setAccountId} disabled={!canEdit}>
-                    <SelectTrigger><SelectValue placeholder="Choose an income account" /></SelectTrigger>
+                    <SelectTrigger aria-label="Income account"><SelectValue placeholder="Choose an income account" /></SelectTrigger>
                     <SelectContent>
                       {accounts.map((a) => (
                         <SelectItem key={a.id} value={a.id}>{a.code} — {a.name}</SelectItem>
@@ -445,12 +445,12 @@ export default function DirectReceiptTab({ canEdit }: { canEdit: boolean }) {
                 <>
                   <div>
                     <Label>Member name</Label>
-                    <Input value={memberName} onChange={(e) => setMemberName(e.target.value)} placeholder="e.g. John Smith" disabled={!canEdit} />
+                    <Input aria-label="Member name" value={memberName} onChange={(e) => setMemberName(e.target.value)} placeholder="e.g. John Smith" disabled={!canEdit} />
                   </div>
                   {mode === "candidate" && <div>
                     <Label>Member&apos;s age</Label>
                     <Select value={ageBracket} onValueChange={(v) => setAgeBracket(v as "over25" | "under25")} disabled={!canEdit}>
-                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectTrigger aria-label="Member&apos;s age"><SelectValue /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="over25">25 and over</SelectItem>
                         <SelectItem value="under25">Under 25</SelectItem>
@@ -461,23 +461,23 @@ export default function DirectReceiptTab({ canEdit }: { canEdit: boolean }) {
               )}
               <div>
                 <Label>Date</Label>
-                <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} disabled={!canEdit} />
+                <Input aria-label="Date" type="date" value={date} onChange={(e) => setDate(e.target.value)} disabled={!canEdit} />
               </div>
               <PeriodPicker periods={posting.periods} value={posting.periodId} autoId={posting.autoId} onChange={posting.setPeriodId} disabled={!canEdit} />
               <div>
                 <Label>Amount (£) — banked to 1000 Bank</Label>
-                <Input type="number" step="0.01" min="0" value={amount} onChange={(e) => onAmountChange(e.target.value)} disabled={!canEdit} />
+                <Input aria-label="Amount (£) — banked to 1000 Bank" type="number" step="0.01" min="0" value={amount} onChange={(e) => onAmountChange(e.target.value)} disabled={!canEdit} />
               </div>
               {extraLines.length > 0 && (
                 <div>
                   <Label>Income line amount (£) — credit</Label>
-                  <Input type="number" step="0.01" min="0" value={presetAmount} onChange={(e) => setPresetAmount(e.target.value)} disabled={!canEdit} />
+                  <Input aria-label="Income line amount (£) — credit" type="number" step="0.01" min="0" value={presetAmount} onChange={(e) => setPresetAmount(e.target.value)} disabled={!canEdit} />
                 </div>
               )}
               {!isRenewal && (
                 <div className="sm:col-span-2">
                   <Label>Description</Label>
-                  <Input
+                  <Input aria-label="Description"
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                     placeholder="e.g. Raffle proceeds paid in — September meeting"
@@ -487,11 +487,11 @@ export default function DirectReceiptTab({ canEdit }: { canEdit: boolean }) {
               )}
               <div>
                 <Label>Document / receipt number</Label>
-                <Input value={documentNumber} onChange={(e) => setDocumentNumber(e.target.value)} placeholder="Optional" disabled={!canEdit} />
+                <Input aria-label="Document / receipt number" value={documentNumber} onChange={(e) => setDocumentNumber(e.target.value)} placeholder="Optional" disabled={!canEdit} />
               </div>
               <div>
                 <Label>Bank payment reference</Label>
-                <Input value={bankReference} onChange={(e) => setBankReference(e.target.value)} placeholder="Optional" disabled={!canEdit} />
+                <Input aria-label="Bank payment reference" value={bankReference} onChange={(e) => setBankReference(e.target.value)} placeholder="Optional" disabled={!canEdit} />
               </div>
             </div>
 
@@ -526,7 +526,7 @@ export default function DirectReceiptTab({ canEdit }: { canEdit: boolean }) {
                     <div className="sm:col-span-5">
                       <Label>Account</Label>
                       <Select value={l.accountId} onValueChange={(v) => updateLine(l.key, { accountId: v })} disabled={!canEdit}>
-                        <SelectTrigger><SelectValue placeholder="Choose an account" /></SelectTrigger>
+                        <SelectTrigger aria-label="Account"><SelectValue placeholder="Choose an account" /></SelectTrigger>
                         <SelectContent>
                           {allAccounts.map((a) => (
                             <SelectItem key={a.id} value={a.id}>{a.code} — {a.name}</SelectItem>
@@ -537,7 +537,7 @@ export default function DirectReceiptTab({ canEdit }: { canEdit: boolean }) {
                     <div className="sm:col-span-2">
                       <Label>Dr / Cr</Label>
                       <Select value={l.direction} onValueChange={(v) => updateLine(l.key, { direction: v as "debit" | "credit" })} disabled={!canEdit}>
-                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectTrigger aria-label="Dr / Cr"><SelectValue /></SelectTrigger>
                         <SelectContent>
                           <SelectItem value="debit">Debit</SelectItem>
                           <SelectItem value="credit">Credit</SelectItem>
@@ -546,11 +546,11 @@ export default function DirectReceiptTab({ canEdit }: { canEdit: boolean }) {
                     </div>
                     <div className="sm:col-span-2">
                       <Label>Amount (£)</Label>
-                      <Input type="number" step="0.01" min="0" value={l.amount} onChange={(e) => updateLine(l.key, { amount: e.target.value })} disabled={!canEdit} />
+                      <Input aria-label="Amount (£)" type="number" step="0.01" min="0" value={l.amount} onChange={(e) => updateLine(l.key, { amount: e.target.value })} disabled={!canEdit} />
                     </div>
                     <div className="sm:col-span-2">
                       <Label>Line note</Label>
-                      <Input value={l.description} onChange={(e) => updateLine(l.key, { description: e.target.value })} placeholder="Optional" disabled={!canEdit} />
+                      <Input aria-label="Line note" value={l.description} onChange={(e) => updateLine(l.key, { description: e.target.value })} placeholder="Optional" disabled={!canEdit} />
                     </div>
                     <div className="sm:col-span-1">
                       <Button type="button" variant="ghost" size="icon" onClick={() => removeLine(l.key)} disabled={!canEdit}>

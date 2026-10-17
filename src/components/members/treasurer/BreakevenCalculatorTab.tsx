@@ -155,7 +155,7 @@ export default function BreakevenCalculatorTab({ canEdit }: { canEdit: boolean }
             <div className="grid gap-3 sm:grid-cols-2">
               <div>
                 <Label>Chargeable members</Label>
-                <Input type="number" min="0" value={memberCount} onChange={(e) => setMemberCount(e.target.value)} disabled={!canEdit} />
+                <Input aria-label="Chargeable members" type="number" min="0" value={memberCount} onChange={(e) => setMemberCount(e.target.value)} disabled={!canEdit} />
                 <p className="text-primary-foreground/80 text-xs mt-1">
                   Active, non-honorary members, excluding 1 exempt membership: the Secretary
                   {excludedNames.length ? ` (${excludedNames.join(", ")})` : ""}. The Treasurer pays.
@@ -163,7 +163,7 @@ export default function BreakevenCalculatorTab({ canEdit }: { canEdit: boolean }
               </div>
               <div>
                 <Label>Annual subscription rate (£)</Label>
-                <Input type="number" step="0.01" min="0" value={subRate} onChange={(e) => setSubRate(e.target.value)} disabled={!canEdit} />
+                <Input aria-label="Annual subscription rate (£)" type="number" step="0.01" min="0" value={subRate} onChange={(e) => setSubRate(e.target.value)} disabled={!canEdit} />
                 <p className="text-primary-foreground/80 text-xs mt-1">Under-25 members pay half: {money(subUnder)}.</p>
               </div>
             </div>
@@ -172,27 +172,27 @@ export default function BreakevenCalculatorTab({ canEdit }: { canEdit: boolean }
             <div className="grid gap-3 sm:grid-cols-2">
               <div>
                 <Label>UGLE fee — 25 and over (£)</Label>
-                <Input type="number" step="0.01" min="0" value={ugleOver} onChange={(e) => setUgleOver(e.target.value)} disabled={!canEdit} />
+                <Input aria-label="UGLE fee — 25 and over (£)" type="number" step="0.01" min="0" value={ugleOver} onChange={(e) => setUgleOver(e.target.value)} disabled={!canEdit} />
               </div>
               <div>
                 <Label>UGLE fee — under 25 (£)</Label>
-                <Input type="number" step="0.01" min="0" value={ugleUnder} onChange={(e) => setUgleUnder(e.target.value)} disabled={!canEdit} />
+                <Input aria-label="UGLE fee — under 25 (£)" type="number" step="0.01" min="0" value={ugleUnder} onChange={(e) => setUgleUnder(e.target.value)} disabled={!canEdit} />
               </div>
               <div>
                 <Label>PGL fee — 25 and over (£)</Label>
-                <Input type="number" step="0.01" min="0" value={pglOver} onChange={(e) => setPglOver(e.target.value)} disabled={!canEdit} />
+                <Input aria-label="PGL fee — 25 and over (£)" type="number" step="0.01" min="0" value={pglOver} onChange={(e) => setPglOver(e.target.value)} disabled={!canEdit} />
               </div>
               <div>
                 <Label>PGL fee — under 25 (£)</Label>
-                <Input type="number" step="0.01" min="0" value={pglUnder} onChange={(e) => setPglUnder(e.target.value)} disabled={!canEdit} />
+                <Input aria-label="PGL fee — under 25 (£)" type="number" step="0.01" min="0" value={pglUnder} onChange={(e) => setPglUnder(e.target.value)} disabled={!canEdit} />
               </div>
               <div>
                 <Label>PGL SPCF (£, flat)</Label>
-                <Input type="number" step="0.01" min="0" value={spcf} onChange={(e) => setSpcf(e.target.value)} disabled={!canEdit} />
+                <Input aria-label="PGL SPCF (£, flat)" type="number" step="0.01" min="0" value={spcf} onChange={(e) => setSpcf(e.target.value)} disabled={!canEdit} />
               </div>
               <div>
                 <Label>Levy (£, flat)</Label>
-                <Input type="number" step="0.01" min="0" value={levy} onChange={(e) => setLevy(e.target.value)} disabled={!canEdit} />
+                <Input aria-label="Levy (£, flat)" type="number" step="0.01" min="0" value={levy} onChange={(e) => setLevy(e.target.value)} disabled={!canEdit} />
               </div>
             </div>
 
@@ -201,7 +201,7 @@ export default function BreakevenCalculatorTab({ canEdit }: { canEdit: boolean }
               {fixed.map((f) => (
                 <div key={f.key}>
                   <Label>{f.label} (£)</Label>
-                  <Input
+                  <Input aria-label={`${f.label} (£)`}
                     type="number"
                     step="0.01"
                     min="0"
@@ -221,7 +221,7 @@ export default function BreakevenCalculatorTab({ canEdit }: { canEdit: boolean }
               {reserveFull.map((r) => (
                 <div key={r.fund_code}>
                   <Label>{r.label} (£ per member, per year)</Label>
-                  <Input
+                  <Input aria-label={`${r.label} (£ per member, per year)`}
                     type="number"
                     step="0.01"
                     min="0"

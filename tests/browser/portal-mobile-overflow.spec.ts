@@ -70,9 +70,9 @@ async function expectNoViewportOverflow(page: Page, context: string) {
     };
   });
 
-  expect(result.offenders, `${context}: interactive controls outside the viewport`).toEqual([]);
-  expect(result.documentWidth, `${context}: document overflowed`).toBeLessThanOrEqual(result.viewportWidth);
-  expect(result.bodyWidth, `${context}: body overflowed`).toBeLessThanOrEqual(result.viewportWidth);
+  expect.soft(result.offenders, `OVERFLOW ${context}: interactive controls outside the viewport`).toEqual([]);
+  expect.soft(result.documentWidth, `OVERFLOW ${context}: document overflowed`).toBeLessThanOrEqual(result.viewportWidth);
+  expect.soft(result.bodyWidth, `OVERFLOW ${context}: body overflowed`).toBeLessThanOrEqual(result.viewportWidth);
   // Every mobile check also runs the WCAG 2.1 AA axe scan (incl. colour-contrast).
   await expectNoAxeViolations(page, context);
 }
@@ -205,6 +205,7 @@ test("Secretary-only Member Management fits 320px and shows approve/suspend, hid
   await expect(page.getByRole("alertdialog")).toBeVisible();
   await expectNoViewportOverflow(page, "Secretary status confirmation");
   await page.getByRole("button", { name: "Cancel" }).click();
+  await expect(page.getByRole("alertdialog")).toHaveCount(0);
   for (const name of ["Make admin", "Assign Almoner role", "Delete member"]) {
     await expect(page.getByRole("button", { name, exact: true })).toHaveCount(0);
   }

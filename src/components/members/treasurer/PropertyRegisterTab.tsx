@@ -374,7 +374,7 @@ export default function PropertyRegisterTab({ canEdit }: { canEdit: boolean }) {
           <div className="flex flex-wrap gap-2">
             <Button
               variant="outline"
-              className="border-gold/40 text-gold hover:bg-gold/10 hover:text-gold"
+              className="bg-transparent border-gold/40 text-gold hover:bg-gold/10 hover:text-gold"
               onClick={exportPdf}
               disabled={loading || rows.length === 0}
             >
@@ -391,7 +391,7 @@ export default function PropertyRegisterTab({ canEdit }: { canEdit: boolean }) {
         {loading ? (
           <p className="text-primary-foreground/80"><Loader2 className="w-4 h-4 mr-1 inline animate-spin" /> Loading…</p>
         ) : (
-          <div className="overflow-x-auto">
+          <div tabIndex={0} role="region" aria-label="Scrollable table" className="overflow-x-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-gold">
             <table className="w-full min-w-[980px] text-sm">
               <thead>
                 <tr className="text-left text-primary-foreground/80 border-b border-gold/20">
@@ -475,26 +475,26 @@ export default function PropertyRegisterTab({ canEdit }: { canEdit: boolean }) {
           <div className="grid gap-3">
             <div>
               <Label className="text-primary-foreground">Item</Label>
-              <Input value={item} onChange={(e) => setItem(e.target.value)} placeholder="e.g. Master's chair" />
+              <Input aria-label="Item" value={item} onChange={(e) => setItem(e.target.value)} placeholder="e.g. Master's chair" />
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
               <div>
                 <Label className="text-primary-foreground">Count</Label>
-                <Input type="number" min="0" step="1" value={count} onChange={(e) => setCount(e.target.value)} />
+                <Input aria-label="Count" type="number" min="0" step="1" value={count} onChange={(e) => setCount(e.target.value)} />
               </div>
               <div>
                 <Label className="text-primary-foreground">Value (£)</Label>
-                <Input type="number" min="0" step="0.01" value={value} onChange={(e) => setValue(e.target.value)} />
+                <Input aria-label="Value (£)" type="number" min="0" step="0.01" value={value} onChange={(e) => setValue(e.target.value)} />
               </div>
             </div>
             <div>
               <Label className="text-primary-foreground">Location</Label>
-              <Input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="e.g. Lodge Room, GMC store, Secretary's custody" />
+              <Input aria-label="Location" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="e.g. Lodge Room, GMC store, Secretary's custody" />
             </div>
             <div>
               <Label className="text-primary-foreground">Condition</Label>
               <Select value={condition} onValueChange={setCondition}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger aria-label="Condition"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   {CONDITIONS.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                 </SelectContent>
@@ -502,16 +502,16 @@ export default function PropertyRegisterTab({ canEdit }: { canEdit: boolean }) {
             </div>
             <div>
               <Label className="text-primary-foreground">Date acquired</Label>
-              <Input type="date" value={dateAcquired} onChange={(e) => setDateAcquired(e.target.value)} />
+              <Input aria-label="Date acquired" type="date" value={dateAcquired} onChange={(e) => setDateAcquired(e.target.value)} />
             </div>
             <div>
               <Label className="text-primary-foreground">Last audited</Label>
               <div className="flex items-center gap-2">
-                <Input type="date" value={lastAudited} onChange={(e) => setLastAudited(e.target.value)} />
+                <Input aria-label="Last audited" type="date" value={lastAudited} onChange={(e) => setLastAudited(e.target.value)} />
                 <Button
                   type="button"
                   variant="outline"
-                  className="border-gold/40 text-gold hover:bg-gold/10 hover:text-gold whitespace-nowrap"
+                  className="bg-transparent border-gold/40 text-gold hover:bg-gold/10 hover:text-gold whitespace-nowrap"
                   onClick={() => setLastAudited(new Date().toISOString().slice(0, 10))}
                 >
                   <CheckCircle2 className="w-4 h-4 mr-1" /> Mark as audited today
@@ -520,14 +520,14 @@ export default function PropertyRegisterTab({ canEdit }: { canEdit: boolean }) {
             </div>
             <div>
               <Label className="text-primary-foreground">Notes</Label>
-              <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Optional — condition detail, provenance, insurance notes" />
+              <Textarea aria-label="Notes" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Optional — condition detail, provenance, insurance notes" />
             </div>
             <div>
               <Label className="text-primary-foreground">Photos</Label>
               {editingId ? (
                 <>
                   <div className="mt-1 flex items-center gap-2">
-                    <Input
+                    <Input aria-label="Photos"
                       type="file"
                       accept="image/*"
                       multiple

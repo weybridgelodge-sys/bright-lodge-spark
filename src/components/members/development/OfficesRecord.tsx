@@ -72,7 +72,7 @@ export default function OfficesRecord({
     <div className="space-y-6">
       <div>
         <h3 className="font-serif text-gold text-sm mb-2">Lodge offices (from Officers Tracker)</h3>
-        <div className="overflow-x-auto rounded-sm border border-gold/20">
+        <div tabIndex={0} role="region" aria-label="Scrollable table" className="overflow-x-auto rounded-sm border border-gold/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold">
           <table className="w-full text-xs">
             <thead className="bg-navy-light/40 text-gold uppercase text-[10px] tracking-wider">
               <tr>
@@ -101,7 +101,7 @@ export default function OfficesRecord({
 
       <div>
         <h3 className="font-serif text-gold text-sm mb-2">Provincial &amp; UGLE appointments</h3>
-        <div className="overflow-x-auto rounded-sm border border-gold/20">
+        <div tabIndex={0} role="region" aria-label="Scrollable table" className="overflow-x-auto rounded-sm border border-gold/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold">
           <table className="w-full text-xs">
             <thead className="bg-navy-light/40 text-gold uppercase text-[10px] tracking-wider">
               <tr>
@@ -144,8 +144,8 @@ export default function OfficesRecord({
         <div className="rounded-sm border border-gold/20 bg-navy-light/30 p-4">
           <p className="text-xs uppercase tracking-wider text-gold mb-3">Add appointment</p>
           <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-2">
-            <Input placeholder="Office" value={office} onChange={(e) => setOffice(e.target.value)} className={fieldCls} />
-            <Input placeholder="Masonic year (e.g. 2024–25)" value={year} onChange={(e) => setYear(e.target.value)} className={fieldCls} />
+            <Input aria-label="Office" placeholder="Office" value={office} onChange={(e) => setOffice(e.target.value)} className={fieldCls} />
+            <Input aria-label="Masonic year (e.g. 2024–25)" placeholder="Masonic year (e.g. 2024–25)" value={year} onChange={(e) => setYear(e.target.value)} className={fieldCls} />
             <Select value={level} onValueChange={(v) => setLevel(v as ExternalAppointment["level"])}>
               <SelectTrigger className={fieldCls}><SelectValue /></SelectTrigger>
               <SelectContent>
@@ -161,7 +161,7 @@ export default function OfficesRecord({
             <label className="text-[10px] uppercase tracking-wider text-gold">Installed
               <Input type="date" value={installed} onChange={(e) => setInstalled(e.target.value)} className={`mt-1 ${fieldCls}`} />
             </label>
-            <Input placeholder="Notes" value={notes} onChange={(e) => setNotes(e.target.value)} className={fieldCls} />
+            <Input aria-label="Notes" placeholder="Notes" value={notes} onChange={(e) => setNotes(e.target.value)} className={fieldCls} />
           </div>
           <div className="flex justify-end mt-3">
             <Button onClick={add} disabled={adding} className="bg-gold text-navy hover:bg-gold/90">

@@ -297,7 +297,7 @@ function TemplateTab() {
     <div className="space-y-1">
       <Label>{label}</Label>
       {type === "textarea" ? (
-        <Textarea
+        <Textarea aria-label={`${label}`}
           rows={3}
           value={(t as any)[k] ?? ""}
           onChange={(e) => setT({ ...t, [k]: e.target.value || null } as any)}
@@ -352,8 +352,8 @@ function TemplateTab() {
         <div className="space-y-2 mt-1">
           {reps.map((r, i) => (
             <div key={i} className="grid min-w-0 grid-cols-1 gap-2 rounded-sm border border-gold/10 p-2 sm:grid-cols-[1fr_1fr_1fr_auto] sm:border-0 sm:p-0">
-              <Input className="min-w-0" placeholder="Role" value={r.role} onChange={(e) => setReps(reps.map((x, j) => j === i ? { ...x, role: e.target.value } : x))} />
-              <Input className="min-w-0" placeholder="Name" value={r.name} onChange={(e) => setReps(reps.map((x, j) => j === i ? { ...x, name: e.target.value } : x))} />
+              <Input aria-label="Role" className="min-w-0" placeholder="Role" value={r.role} onChange={(e) => setReps(reps.map((x, j) => j === i ? { ...x, role: e.target.value } : x))} />
+              <Input aria-label="Name" className="min-w-0" placeholder="Name" value={r.name} onChange={(e) => setReps(reps.map((x, j) => j === i ? { ...x, name: e.target.value } : x))} />
               <MemberLink label={`${r.role || "Representative"} linked member`} members={pick} value={r.member_id} onChange={(id) => setReps(reps.map((x, j) => j === i ? { ...x, member_id: id } : x))} />
               <Button type="button" variant="destructive" size="sm" aria-label="Remove representative" onClick={() => setReps(reps.filter((_, j) => j !== i))}><Trash2 className="w-4 h-4" /></Button>
             </div>
@@ -383,7 +383,7 @@ function OfficerRollTab() {
       {loading ? (
         <p className="text-sm text-primary-foreground/70">Loading…</p>
       ) : (
-        <div className="overflow-x-auto">
+        <div tabIndex={0} role="region" aria-label="Scrollable table" className="overflow-x-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-gold">
           <table className="w-full text-sm">
             <tbody>
               {rows.map((r, i) => (
@@ -829,12 +829,12 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
         <div className="grid sm:grid-cols-3 gap-3">
           <div>
             <Label>Meeting number</Label>
-            <Input type="number" value={summons.meeting_number} onChange={(e) => setSummons({ ...summons, meeting_number: parseInt(e.target.value, 10) || 0 })} />
+            <Input aria-label="Meeting number" type="number" value={summons.meeting_number} onChange={(e) => setSummons({ ...summons, meeting_number: parseInt(e.target.value, 10) || 0 })} />
           </div>
           <div>
             <Label>Link to Meeting Event</Label>
             <Select value={selectedEvent} onValueChange={onPickEvent}>
-              <SelectTrigger><SelectValue placeholder="Pick from schedule…" /></SelectTrigger>
+              <SelectTrigger aria-label="Link to Meeting Event"><SelectValue placeholder="Pick from schedule…" /></SelectTrigger>
               <SelectContent>
                 {events.map((e) => (
                   <SelectItem key={e.id} value={e.id}>
@@ -847,7 +847,7 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
           <div>
             <Label>Meeting type</Label>
             <Select value={summons.meeting_type ?? "Regular"} onValueChange={(v) => setSummons({ ...summons, meeting_type: v })}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectTrigger aria-label="Meeting type"><SelectValue /></SelectTrigger>
               <SelectContent>
                 {["Regular","Installation","Emergency"].map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}
               </SelectContent>
@@ -855,31 +855,31 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
           </div>
           <div>
             <Label>Date</Label>
-            <Input type="date" value={summons.meeting_date ?? ""} onChange={(e) => setSummons({ ...summons, meeting_date: e.target.value || null })} />
+            <Input aria-label="Date" type="date" value={summons.meeting_date ?? ""} onChange={(e) => setSummons({ ...summons, meeting_date: e.target.value || null })} />
           </div>
           <div>
             <Label>Time</Label>
-            <Input value={summons.meeting_time ?? ""} onChange={(e) => setSummons({ ...summons, meeting_time: e.target.value || null })} />
+            <Input aria-label="Time" value={summons.meeting_time ?? ""} onChange={(e) => setSummons({ ...summons, meeting_time: e.target.value || null })} />
           </div>
           <div>
             <Label>Dress code</Label>
-            <Input value={summons.dress_code ?? ""} onChange={(e) => setSummons({ ...summons, dress_code: e.target.value || null })} />
+            <Input aria-label="Dress code" value={summons.dress_code ?? ""} onChange={(e) => setSummons({ ...summons, dress_code: e.target.value || null })} />
           </div>
           <div>
             <Label>Minutes to confirm (date)</Label>
-            <Input type="date" value={summons.minutes_confirmation_date ?? ""} onChange={(e) => setSummons({ ...summons, minutes_confirmation_date: e.target.value || null })} />
+            <Input aria-label="Minutes to confirm (date)" type="date" value={summons.minutes_confirmation_date ?? ""} onChange={(e) => setSummons({ ...summons, minutes_confirmation_date: e.target.value || null })} />
           </div>
           <div>
             <Label>Next meeting</Label>
-            <Input type="date" value={summons.next_meeting_date ?? ""} onChange={(e) => setSummons({ ...summons, next_meeting_date: e.target.value || null })} />
+            <Input aria-label="Next meeting" type="date" value={summons.next_meeting_date ?? ""} onChange={(e) => setSummons({ ...summons, next_meeting_date: e.target.value || null })} />
           </div>
           <div>
             <Label>Officer Night</Label>
-            <Input type="date" value={summons.officer_night_date ?? ""} onChange={(e) => setSummons({ ...summons, officer_night_date: e.target.value || null })} />
+            <Input aria-label="Officer Night" type="date" value={summons.officer_night_date ?? ""} onChange={(e) => setSummons({ ...summons, officer_night_date: e.target.value || null })} />
           </div>
           <div>
             <Label>Officer Night venue (optional override)</Label>
-            <Input placeholder="Masonic Centre" value={summons.officer_night_venue ?? ""} onChange={(e) => setSummons({ ...summons, officer_night_venue: e.target.value || null })} />
+            <Input aria-label="Officer Night venue (optional override)" placeholder="Masonic Centre" value={summons.officer_night_venue ?? ""} onChange={(e) => setSummons({ ...summons, officer_night_venue: e.target.value || null })} />
           </div>
         </div>
       </Section>
@@ -890,7 +890,7 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
           <div className="flex-1">
             <Label>Add preset item</Label>
             <Select value={presetIndex} onValueChange={setPresetIndex}>
-              <SelectTrigger><SelectValue placeholder="Pick a preset…" /></SelectTrigger>
+              <SelectTrigger aria-label="Add preset item"><SelectValue placeholder="Pick a preset…" /></SelectTrigger>
               <SelectContent>
                 {AGENDA_PRESETS.map((p, i) => <SelectItem key={i} value={String(i)}>{p.label}</SelectItem>)}
               </SelectContent>
@@ -991,22 +991,22 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
         <div className="grid sm:grid-cols-2 gap-3">
           <div>
             <Label>Menu</Label>
-            <Textarea rows={3} value={summons.dining_menu ?? ""} onChange={(e) => setSummons({ ...summons, dining_menu: e.target.value || null })} />
+            <Textarea aria-label="Menu" rows={3} value={summons.dining_menu ?? ""} onChange={(e) => setSummons({ ...summons, dining_menu: e.target.value || null })} />
           </div>
           <div className="space-y-2">
             <div>
               <Label>Price</Label>
-              <Input value={summons.dining_price ?? ""} onChange={(e) => setSummons({ ...summons, dining_price: e.target.value || null })} />
+              <Input aria-label="Price" value={summons.dining_price ?? ""} onChange={(e) => setSummons({ ...summons, dining_price: e.target.value || null })} />
             </div>
             <div>
               <Label>Booking deadline</Label>
-              <Input type="date" value={summons.dining_deadline ?? ""} onChange={(e) => setSummons({ ...summons, dining_deadline: e.target.value || null })} />
+              <Input aria-label="Booking deadline" type="date" value={summons.dining_deadline ?? ""} onChange={(e) => setSummons({ ...summons, dining_deadline: e.target.value || null })} />
             </div>
             <div>
               <Label>Dining enquiry contact</Label>
-              <Input placeholder="Name" value={summons.dining_enquiry_name ?? ""} onChange={(e) => setSummons({ ...summons, dining_enquiry_name: e.target.value || null })} />
+              <Input aria-label="Dining enquiry contact" placeholder="Name" value={summons.dining_enquiry_name ?? ""} onChange={(e) => setSummons({ ...summons, dining_enquiry_name: e.target.value || null })} />
             </div>
-            <Input placeholder="Email" value={summons.dining_enquiry_email ?? ""} onChange={(e) => setSummons({ ...summons, dining_enquiry_email: e.target.value || null })} />
+            <Input aria-label="Dining enquiry contact" placeholder="Email" value={summons.dining_enquiry_email ?? ""} onChange={(e) => setSummons({ ...summons, dining_enquiry_email: e.target.value || null })} />
           </div>
         </div>
       </Section>
@@ -1059,7 +1059,7 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
           </label>
           {attachable.length > 1 && (
             <Select value={attachId} onValueChange={setAttachId}>
-              <SelectTrigger className="max-w-md"><SelectValue placeholder="Choose which year" /></SelectTrigger>
+              <SelectTrigger aria-label="Choose which year" className="max-w-md"><SelectValue placeholder="Choose which year" /></SelectTrigger>
               <SelectContent>
                 {attachable.map((a) => <SelectItem key={a.approval_id} value={a.approval_id}>{accountsOptionLabel(a)}</SelectItem>)}
               </SelectContent>
@@ -1166,7 +1166,7 @@ function HistoryTab({ onEdit }: { onEdit: (id: string) => void }) {
   return (
     <div className="bg-navy-light/40 border border-gold/20 rounded p-4">
         {rows.length === 0 ? <p className="text-sm text-primary-foreground/80">No summonses saved yet.</p> : (
-        <div className="overflow-x-auto">
+        <div tabIndex={0} role="region" aria-label="Scrollable table" className="overflow-x-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-gold">
           <table className="w-full text-sm">
             <thead className="text-xs text-primary-foreground/80">
               <tr><th className="text-left py-1">#</th><th className="text-left">Date</th><th className="text-left">Type</th><th className="text-left">Status</th><th className="text-left">Sent to</th><th></th></tr>
@@ -1488,7 +1488,8 @@ function VisitorEmailDialog(props: {
                     <div className="flex items-start gap-2">
                       <Checkbox
                         className="mt-1"
-                        checked={!!selected[r.id]}
+                        aria-label={`Select ${r.name || r.email || "visitor"}`}
+                    checked={!!selected[r.id]}
                         onCheckedChange={(v) => setSelected((s) => ({ ...s, [r.id]: !!v }))}
                       />
                       <div className="min-w-0">
@@ -1519,7 +1520,8 @@ function VisitorEmailDialog(props: {
                     <tr key={r.id} className="border-t border-gold/10">
                       <td className="p-2 align-top">
                         <Checkbox
-                          checked={!!selected[r.id]}
+                          aria-label={`Select ${r.name || r.email || "visitor"}`}
+                    checked={!!selected[r.id]}
                           onCheckedChange={(v) => setSelected((s) => ({ ...s, [r.id]: !!v }))}
                         />
                       </td>

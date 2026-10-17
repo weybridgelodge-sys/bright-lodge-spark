@@ -143,7 +143,7 @@ export default function TrialBalanceReport() {
           {kind === "custom" && (
             <div>
               <Label>As at date</Label>
-              <Input type="date" className="min-h-[48px]" value={customDate} onChange={(e) => setCustomDate(e.target.value)} />
+              <Input aria-label="As at date" type="date" className="min-h-[48px]" value={customDate} onChange={(e) => setCustomDate(e.target.value)} />
             </div>
           )}
           <label className="flex min-h-[48px] items-center gap-2 text-sm text-primary-foreground/80">

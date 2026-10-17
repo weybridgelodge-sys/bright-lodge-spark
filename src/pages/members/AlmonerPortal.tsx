@@ -492,7 +492,7 @@ function MemberRecord({ member, currentStatus, onBack }: {
           <div className="flex items-center gap-2">
             <Label className="text-xs uppercase tracking-wider text-primary-foreground/80">Status</Label>
             <Select value={status} onValueChange={(v) => saveStatus(v as WelfareStatus)} disabled={!canEditAlmoner}>
-              <SelectTrigger className="w-[200px] bg-navy text-primary-foreground border-gold/30">
+              <SelectTrigger aria-label="Status" className="w-[200px] bg-navy text-primary-foreground border-gold/30">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -619,12 +619,12 @@ function NewLogEntryForm({ memberId, loggedBy, onSaved }: {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div>
           <Label className="text-xs">Date of contact</Label>
-          <Input type="date" value={contactDate} onChange={(e) => setContactDate(e.target.value)} className={inputCls} required />
+          <Input aria-label="Date of contact" type="date" value={contactDate} onChange={(e) => setContactDate(e.target.value)} className={inputCls} required />
         </div>
         <div>
           <Label className="text-xs">Type</Label>
           <Select value={contactType} onValueChange={(v) => setContactType(v as ContactType)}>
-            <SelectTrigger className={inputCls}><SelectValue /></SelectTrigger>
+            <SelectTrigger aria-label="Type" className={inputCls}><SelectValue /></SelectTrigger>
             <SelectContent>
               {(Object.keys(CONTACT_TYPE_LABEL) as ContactType[]).map((k) => (
                 <SelectItem key={k} value={k}>{CONTACT_TYPE_LABEL[k]}</SelectItem>
@@ -635,7 +635,7 @@ function NewLogEntryForm({ memberId, loggedBy, onSaved }: {
         <div>
           <Label className="text-xs">Nature</Label>
           <Select value={contactNature} onValueChange={(v) => setContactNature(v as ContactNature)}>
-            <SelectTrigger className={inputCls}><SelectValue /></SelectTrigger>
+            <SelectTrigger aria-label="Nature" className={inputCls}><SelectValue /></SelectTrigger>
             <SelectContent>
               {(Object.keys(NATURE_LABEL) as ContactNature[]).map((k) => (
                 <SelectItem key={k} value={k}>{NATURE_LABEL[k]}</SelectItem>
@@ -647,21 +647,21 @@ function NewLogEntryForm({ memberId, loggedBy, onSaved }: {
       {contactNature === "other" && (
         <div>
           <Label className="text-xs">Nature detail</Label>
-          <Input value={natureDetail} onChange={(e) => setNatureDetail(e.target.value)} className={inputCls} maxLength={120} />
+          <Input aria-label="Nature detail" value={natureDetail} onChange={(e) => setNatureDetail(e.target.value)} className={inputCls} maxLength={120} />
         </div>
       )}
       <div>
         <Label className="text-xs">Notes</Label>
-        <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} className={inputCls} rows={3} maxLength={2000} />
+        <Textarea aria-label="Notes" value={notes} onChange={(e) => setNotes(e.target.value)} className={inputCls} rows={3} maxLength={2000} />
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
           <Label className="text-xs">Action taken</Label>
-          <Input value={actionTaken} onChange={(e) => setActionTaken(e.target.value)} className={inputCls} maxLength={300} />
+          <Input aria-label="Action taken" value={actionTaken} onChange={(e) => setActionTaken(e.target.value)} className={inputCls} maxLength={300} />
         </div>
         <div>
           <Label className="text-xs">Next follow-up (optional)</Label>
-          <Input type="date" value={followUp} onChange={(e) => setFollowUp(e.target.value)} className={inputCls} />
+          <Input aria-label="Next follow-up (optional)" type="date" value={followUp} onChange={(e) => setFollowUp(e.target.value)} className={inputCls} />
         </div>
       </div>
       <div className="flex justify-end gap-2 pt-1">

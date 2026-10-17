@@ -42,7 +42,7 @@ export default function YearSnapshotView({ snap, round }: { snap: YearSnapshot; 
       {snap.accounts?.length ? (
         <details>
           <summary className="cursor-pointer text-gold text-xs min-h-[48px] flex items-center">Account balances ({snap.accounts.length})</summary>
-          <div className="overflow-x-auto">
+          <div tabIndex={0} role="region" aria-label="Scrollable table" className="overflow-x-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-gold">
           <table className="w-full min-w-[28rem] text-xs mt-1">
             <tbody>
               {snap.accounts.map((a) => {

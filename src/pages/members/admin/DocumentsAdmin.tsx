@@ -196,7 +196,7 @@ function Inner() {
         <div className="flex items-center gap-2 text-gold text-[11px] font-semibold uppercase tracking-wider">
           <Eye className="w-3.5 h-3.5" /> Preview L&amp;D as member
         </div>
-        <select
+        <select aria-label="Preview Learning and Development as member"
           value={previewDegree ?? ""}
           onChange={(e) => setPreviewDegree((e.target.value || null) as Degree | null)}
           className="bg-navy border border-gold/20 rounded-sm px-3 py-1.5 text-xs focus:outline-none focus:border-gold text-primary-foreground"
@@ -211,10 +211,10 @@ function Inner() {
           <Upload className="w-4 h-4" />
           <h2 className="font-serif text-base">Upload a document</h2>
         </div>
-        <input required value={title} onChange={(e) => setTitle(e.target.value)}
+        <input aria-label="Title (e.g. October Summons)" required value={title} onChange={(e) => setTitle(e.target.value)}
           placeholder="Title (e.g. October Summons)"
           className="bg-navy border border-gold/20 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-gold" />
-        <select value={category} onChange={(e) => setCategory(e.target.value as typeof CATEGORIES[number])}
+        <select aria-label="Category" value={category} onChange={(e) => setCategory(e.target.value as typeof CATEGORIES[number])}
           className="bg-navy border border-gold/20 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-gold">
           {CATEGORIES.map((c) => <option key={c} value={c}>{CATEGORY_LABELS[c]}</option>)}
         </select>
@@ -228,10 +228,10 @@ function Inner() {
             </select>
           </label>
         )}
-        <input value={description} onChange={(e) => setDescription(e.target.value)}
+        <input aria-label="Optional description" value={description} onChange={(e) => setDescription(e.target.value)}
           placeholder="Optional description"
           className="md:col-span-2 bg-navy border border-gold/20 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-gold" />
-        <input id="doc-file" required type="file" onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+        <input aria-label="Document file" id="doc-file" required type="file" onChange={(e) => setFile(e.target.files?.[0] ?? null)}
           className="md:col-span-2 text-sm text-primary-foreground/70 file:mr-3 file:border-0 file:bg-gold/15 file:text-gold file:px-3 file:py-1.5 file:rounded-sm file:text-xs" />
         <button disabled={busy}
           className="md:col-span-2 bg-gold-shimmer text-accent-foreground px-4 py-2 rounded-sm text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-50">

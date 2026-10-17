@@ -62,16 +62,16 @@ function GroupEditor({ group, profiles, onSaved }: { group: WorkingGroup; profil
       <div className="space-y-3 mt-4">
         <div>
           <label className="text-[10px] text-primary-foreground/80 uppercase">Name</label>
-          <Input value={name} onChange={(e) => setName(e.target.value)} className="bg-navy text-primary-foreground" />
+          <Input aria-label="Name" value={name} onChange={(e) => setName(e.target.value)} className="bg-navy text-primary-foreground" />
         </div>
         <div>
           <label className="text-[10px] text-primary-foreground/80 uppercase">Remit</label>
-          <Textarea rows={3} value={remit} onChange={(e) => setRemit(e.target.value)} className="bg-navy text-primary-foreground" />
+          <Textarea aria-label="Remit" rows={3} value={remit} onChange={(e) => setRemit(e.target.value)} className="bg-navy text-primary-foreground" />
         </div>
         <div>
           <label className="text-[10px] text-primary-foreground/80 uppercase">Lead Brother</label>
           <Select value={leadId} onValueChange={setLeadId}>
-            <SelectTrigger className="bg-navy text-primary-foreground"><SelectValue /></SelectTrigger>
+            <SelectTrigger aria-label="Lead Brother" className="bg-navy text-primary-foreground"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="none">— None —</SelectItem>
               {profiles.map((p) => <SelectItem key={p.id} value={p.id}>{displayName(p)}</SelectItem>)}
@@ -156,7 +156,7 @@ function Inner() {
         <div className="flex items-end gap-2 flex-wrap">
           <div>
             <label className="text-[10px] text-primary-foreground/80 uppercase">Mentoring threshold date</label>
-            <Input type="date" value={threshold} onChange={(e) => setThreshold(e.target.value)} className="bg-navy text-primary-foreground" />
+            <Input aria-label="Mentoring threshold date" type="date" value={threshold} onChange={(e) => setThreshold(e.target.value)} className="bg-navy text-primary-foreground" />
           </div>
           <Button onClick={saveThreshold} disabled={savingThreshold} className="bg-gold text-navy hover:bg-gold/90">
             <Save className="w-4 h-4 mr-1" /> Save
@@ -171,7 +171,7 @@ function Inner() {
         <div className="flex items-end gap-2">
           <div className="flex-1 max-w-sm">
             <label className="text-[10px] text-primary-foreground/80 uppercase">New group name</label>
-            <Input value={newName} onChange={(e) => setNewName(e.target.value)} className="bg-navy text-primary-foreground" placeholder="e.g. Mentoring Sub-Committee" />
+            <Input aria-label="New group name" value={newName} onChange={(e) => setNewName(e.target.value)} className="bg-navy text-primary-foreground" placeholder="e.g. Mentoring Sub-Committee" />
           </div>
           <Button onClick={createGroup} className="bg-gold text-navy hover:bg-gold/90">
             <Plus className="w-4 h-4 mr-1" /> Create

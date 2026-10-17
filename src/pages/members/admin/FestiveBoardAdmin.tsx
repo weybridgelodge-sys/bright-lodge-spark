@@ -442,7 +442,7 @@ export default function FestiveBoardAdmin() {
                         size="sm"
                         variant="outline"
                         onClick={() => closeWaitlistForMeeting(meetingId, activeCount)}
-                        className="border-destructive/50 text-destructive-foreground hover:bg-destructive/10 min-h-11 sm:min-h-0"
+                        className="bg-transparent border-destructive/50 text-destructive-foreground hover:bg-destructive/10 min-h-11 sm:min-h-0"
                       >
                         Close waitlist & refund now
                       </Button>
@@ -474,7 +474,7 @@ export default function FestiveBoardAdmin() {
                                 size="sm"
                                 variant="outline"
                                 onClick={() => promoteWaitlistBooking(b)}
-                                className="border-gold/40 text-gold hover:bg-gold/10 min-h-11 sm:min-h-0"
+                                className="bg-transparent border-gold/40 text-gold hover:bg-gold/10 min-h-11 sm:min-h-0"
                               >
                                 Promote now
                               </Button>
@@ -659,7 +659,7 @@ export default function FestiveBoardAdmin() {
                             variant="outline"
                             size="sm"
                             onClick={() => setEditing(mtg)}
-                            className="border-gold/40 text-gold hover:bg-gold/10 min-h-11 sm:min-h-0"
+                            className="bg-transparent border-gold/40 text-gold hover:bg-gold/10 min-h-11 sm:min-h-0"
                           >
                             <Pencil className="w-3 h-3 mr-1" /> Edit / mark attendance
                           </Button>
@@ -667,7 +667,7 @@ export default function FestiveBoardAdmin() {
                             variant="outline"
                             size="sm"
                             onClick={() => exportPerfectTablePlan(mtg)}
-                            className="border-gold/40 text-gold hover:bg-gold/10 min-h-11 sm:min-h-0"
+                            className="bg-transparent border-gold/40 text-gold hover:bg-gold/10 min-h-11 sm:min-h-0"
                           >
                             <Download className="w-3 h-3 mr-1" /> Export for PerfectTablePlan
                           </Button>
@@ -675,7 +675,7 @@ export default function FestiveBoardAdmin() {
                             variant="outline"
                             size="sm"
                             onClick={() => handleDelete(mtg.id)}
-                            className="border-destructive/40 text-destructive-foreground hover:bg-destructive/10 min-h-11 sm:min-h-0"
+                            className="bg-transparent border-destructive/40 text-destructive-foreground hover:bg-destructive/10 min-h-11 sm:min-h-0"
                           >
                             <Trash2 className="w-3 h-3 mr-1" /> Delete
                           </Button>
@@ -1272,7 +1272,7 @@ function MeetingDialog({
               <label className="text-xs uppercase tracking-wider text-primary-foreground/80 mb-1 block">
                 Date
               </label>
-              <Input
+              <Input aria-label="Date"
                 type="date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
@@ -1284,7 +1284,7 @@ function MeetingDialog({
                 Meeting type
               </label>
               <Select value={type} onValueChange={(v) => setType(v as FbMeetingType)}>
-                <SelectTrigger className="bg-navy border-gold/20 text-primary-foreground">
+                <SelectTrigger aria-label="Meeting type" className="bg-navy border-gold/20 text-primary-foreground">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -1300,7 +1300,7 @@ function MeetingDialog({
               <label className="text-xs uppercase tracking-wider text-primary-foreground/80 mb-1 block">
                 Headcount override
               </label>
-              <Input
+              <Input aria-label="Headcount override"
                 type="number"
                 min={0}
                 placeholder={`auto: ${computedAttended.total}`}
@@ -1318,7 +1318,7 @@ function MeetingDialog({
                 Bookings status
               </label>
               <Select value={status} onValueChange={(v) => setStatus(v as typeof status)}>
-                <SelectTrigger className="bg-navy border-gold/20 h-9 text-primary-foreground"><SelectValue /></SelectTrigger>
+                <SelectTrigger aria-label="Bookings status" className="bg-navy border-gold/20 h-9 text-primary-foreground"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="draft">Draft (not yet open)</SelectItem>
                   <SelectItem value="published">Published (live on /bookings)</SelectItem>
@@ -1330,7 +1330,7 @@ function MeetingDialog({
               <label className="text-xs uppercase tracking-wider text-primary-foreground/80 mb-1 block">
                 Dining price (£)
               </label>
-              <Input
+              <Input aria-label="Dining price (£)"
                 type="number" step="0.01" min={0}
                 value={diningPricePounds}
                 onChange={(e) => setDiningPricePounds(e.target.value)}
@@ -1341,7 +1341,7 @@ function MeetingDialog({
               <label className="text-xs uppercase tracking-wider text-primary-foreground/80 mb-1 block">
                 Public booking slug
               </label>
-              <Input
+              <Input aria-label="Public booking slug"
                 value={eventKey}
                 onChange={(e) => setEventKey(e.target.value)}
                 placeholder={`festive-board-${date}`}
@@ -1364,7 +1364,7 @@ function MeetingDialog({
             <label className="text-xs uppercase tracking-wider text-primary-foreground/80 mb-1 block">
               Notes
             </label>
-            <Textarea
+            <Textarea aria-label="Notes"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               rows={2}
@@ -1464,7 +1464,7 @@ function MeetingDialog({
                 variant="outline"
                 size="sm"
                 onClick={addVisitor}
-                className="border-gold/40 text-gold hover:bg-gold/10"
+                className="bg-transparent border-gold/40 text-gold hover:bg-gold/10"
               >
                 <UserPlus className="w-3 h-3 mr-1" /> Add visitor / walk-in
               </Button>
