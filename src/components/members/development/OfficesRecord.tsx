@@ -1,3 +1,4 @@
+import { fieldCls } from "@/lib/fieldStyle";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -143,10 +144,10 @@ export default function OfficesRecord({
         <div className="rounded-sm border border-gold/20 bg-navy-light/30 p-4">
           <p className="text-xs uppercase tracking-wider text-gold mb-3">Add appointment</p>
           <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-2">
-            <Input placeholder="Office" value={office} onChange={(e) => setOffice(e.target.value)} className="bg-navy-dark text-primary-foreground" />
-            <Input placeholder="Masonic year (e.g. 2024–25)" value={year} onChange={(e) => setYear(e.target.value)} className="bg-navy-dark text-primary-foreground" />
+            <Input placeholder="Office" value={office} onChange={(e) => setOffice(e.target.value)} className={fieldCls} />
+            <Input placeholder="Masonic year (e.g. 2024–25)" value={year} onChange={(e) => setYear(e.target.value)} className={fieldCls} />
             <Select value={level} onValueChange={(v) => setLevel(v as ExternalAppointment["level"])}>
-              <SelectTrigger className="bg-navy-dark text-primary-foreground"><SelectValue /></SelectTrigger>
+              <SelectTrigger className={fieldCls}><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="lodge">Lodge</SelectItem>
                 <SelectItem value="province">Province</SelectItem>
@@ -155,12 +156,12 @@ export default function OfficesRecord({
               </SelectContent>
             </Select>
             <label className="text-[10px] uppercase tracking-wider text-gold/70">Appointed
-              <Input type="date" value={appointed} onChange={(e) => setAppointed(e.target.value)} className="mt-1 bg-navy-dark text-primary-foreground" />
+              <Input type="date" value={appointed} onChange={(e) => setAppointed(e.target.value)} className={`mt-1 ${fieldCls}`} />
             </label>
             <label className="text-[10px] uppercase tracking-wider text-gold/70">Installed
-              <Input type="date" value={installed} onChange={(e) => setInstalled(e.target.value)} className="mt-1 bg-navy-dark text-primary-foreground" />
+              <Input type="date" value={installed} onChange={(e) => setInstalled(e.target.value)} className={`mt-1 ${fieldCls}`} />
             </label>
-            <Input placeholder="Notes" value={notes} onChange={(e) => setNotes(e.target.value)} className="bg-navy-dark text-primary-foreground" />
+            <Input placeholder="Notes" value={notes} onChange={(e) => setNotes(e.target.value)} className={fieldCls} />
           </div>
           <div className="flex justify-end mt-3">
             <Button onClick={add} disabled={adding} className="bg-gold text-navy hover:bg-gold/90">

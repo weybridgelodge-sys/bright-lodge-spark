@@ -120,7 +120,7 @@
     min-height: 48px;
     background-color: hsl(var(--navy));
     color: hsl(var(--cream));
-    border-color: hsl(var(--gold) / 0.55);
+    border-color: hsl(var(--gold) / 0.7);
   }
 
   html.portal-canvas input[type="date"]::-webkit-calendar-picker-indicator,

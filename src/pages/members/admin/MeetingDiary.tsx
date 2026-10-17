@@ -8,6 +8,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useInitialLoading } from "@/hooks/useInitialLoading";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { fieldCls, fieldLabelCls, fieldHintCls } from "@/lib/fieldStyle";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -32,8 +33,8 @@ const TYPES: { value: MeetingType; label: string }[] = [
   { value: "regular", label: "Regular" }, { value: "installation", label: "Installation" }, { value: "emergency", label: "Emergency" },
 ];
 const typeLabel = (t: string) => TYPES.find((x) => x.value === t)?.label ?? t;
-const selectCls = "mt-1 w-full min-h-[44px] rounded-md border border-input bg-navy-dark px-3 text-sm text-primary-foreground";
-const labelCls = "block text-xs uppercase tracking-wider text-gold/80";
+const selectCls = `mt-1 ${fieldCls}`;
+const labelCls = fieldLabelCls;
 const card = "rounded-sm border border-gold/20 bg-navy-light/30 p-3 sm:p-4 min-w-0";
 const fmt = (iso: string) => formatRangeDate(iso);
 const tableLabel: Record<string, string> = {
@@ -270,11 +271,11 @@ function Inner() {
               </label>
             </>) : (
               <label className={labelCls}>Day of month
-                <Input type="number" min={1} max={31} className="mt-1 min-h-[44px] bg-navy-dark" value={rule.fixed_day ?? ""} onChange={(e) => set({ fixed_day: num(e.target.value) })} />
+                <Input type="number" min={1} max={31} className={`mt-1 ${fieldCls}`} value={rule.fixed_day ?? ""} onChange={(e) => set({ fixed_day: num(e.target.value) })} />
               </label>
             )}
             <label className={labelCls}>Applies from year (optional)
-              <Input type="number" className="mt-1 min-h-[44px] bg-navy-dark" value={rule.applies_from_year ?? ""} onChange={(e) => set({ applies_from_year: num(e.target.value) })} />
+              <Input type="number" className={`mt-1 ${fieldCls}`} value={rule.applies_from_year ?? ""} onChange={(e) => set({ applies_from_year: num(e.target.value) })} />
             </label>
           </div>
           <div className="mt-3 text-sm" aria-live="polite">
@@ -289,10 +290,10 @@ function Inner() {
           <h3 className="font-serif text-gold mt-4 mb-2">Unit details (Year Book)</h3>
           <div className="grid gap-3 sm:grid-cols-2">
             <label className={labelCls}>Unit number
-              <Input className="mt-1 min-h-[44px] bg-navy-dark" value={rule.unit_number ?? ""} onChange={(e) => set({ unit_number: e.target.value })} />
+              <Input className={`mt-1 ${fieldCls}`} placeholder="e.g. 6787" value={rule.unit_number ?? ""} onChange={(e) => set({ unit_number: e.target.value })} />
             </label>
             <label className={labelCls}>Usual venue
-              <Input className="mt-1 min-h-[44px] bg-navy-dark" value={rule.default_venue ?? ""} onChange={(e) => set({ default_venue: e.target.value })} />
+              <Input className={`mt-1 ${fieldCls}`} placeholder="e.g. South West Surrey Masonic Centre" value={rule.default_venue ?? ""} onChange={(e) => set({ default_venue: e.target.value })} />
             </label>
             <label className={labelCls}>Election month
               <select className={selectCls} value={rule.election_month ?? ""} onChange={(e) => set({ election_month: num(e.target.value) })}>
@@ -301,10 +302,11 @@ function Inner() {
               </select>
             </label>
             <label className={labelCls}>Ritual
-              <Input className="mt-1 min-h-[44px] bg-navy-dark" value={rule.ritual ?? ""} onChange={(e) => set({ ritual: e.target.value })} />
+              <Input className={`mt-1 ${fieldCls}`} placeholder="e.g. Emulation" value={rule.ritual ?? ""} onChange={(e) => set({ ritual: e.target.value })} />
             </label>
             <label className={labelCls}>Consecration date
-              <Input type="date" className="mt-1 min-h-[44px] bg-navy-dark" value={rule.consecration_date ?? ""} onChange={(e) => set({ consecration_date: e.target.value || null })} />
+              <Input type="date" aria-describedby="consecration-hint" className={`mt-1 ${fieldCls}`} value={rule.consecration_date ?? ""} onChange={(e) => set({ consecration_date: e.target.value || null })} />
+              <span id="consecration-hint" className={fieldHintCls}>Format dd/mm/yyyy</span>
             </label>
           </div>
           <Button className="mt-4 min-h-[44px] bg-gold text-navy hover:bg-gold/90" disabled={busy} onClick={saveRule}>Save rule and details</Button>
@@ -362,10 +364,10 @@ function Inner() {
           <p className="text-sm text-primary-foreground/70 mb-3">Creates dated meetings for one season. Each date can still be moved or dropped on its own.</p>
           <div className="grid gap-3 sm:grid-cols-2">
             <label className={labelCls}>Series name
-              <Input className="mt-1 min-h-[44px] bg-navy-dark" value={sName} onChange={(e) => setSName(e.target.value)} />
+              <Input className={`mt-1 ${fieldCls}`} value={sName} onChange={(e) => setSName(e.target.value)} />
             </label>
             <label className={labelCls}>Season starting in
-              <Input type="number" className="mt-1 min-h-[44px] bg-navy-dark" value={sYear} onChange={(e) => setSYear(Number(e.target.value) || thisYear)} />
+              <Input type="number" className={`mt-1 ${fieldCls}`} value={sYear} onChange={(e) => setSYear(Number(e.target.value) || thisYear)} />
             </label>
             <label className={labelCls}>Which week
               <select className={selectCls} value={sOrd} onChange={(e) => setSOrd(e.target.value as Ordinal)}>
@@ -421,10 +423,10 @@ function Inner() {
           </DialogHeader>
           <div className="grid gap-3">
             <label className={labelCls}>Year
-              <Input type="number" className="mt-1 min-h-[44px] bg-navy-dark" value={ovYear} onChange={(e) => setOvYear(Number(e.target.value) || thisYear)} />
+              <Input type="number" className={`mt-1 ${fieldCls}`} value={ovYear} onChange={(e) => setOvYear(Number(e.target.value) || thisYear)} />
             </label>
             <label className={labelCls}>Date
-              <Input type="date" className="mt-1 min-h-[44px] bg-navy-dark" value={ovDate} onChange={(e) => setOvDate(e.target.value)} />
+              <Input type="date" className={`mt-1 ${fieldCls}`} value={ovDate} onChange={(e) => setOvDate(e.target.value)} />
             </label>
             {ovDate && !ovValid && <p role="alert" className="text-sm text-destructive-foreground">The date must be in {ovYear}.</p>}
             {ovValid && <KpiEffect cfg={cfg} year={ovYear} date={ovDate} />}
@@ -449,7 +451,7 @@ function Inner() {
           <div className="grid gap-3">
             {action?.kind !== "drop" && (
               <label className={labelCls}>{action?.kind === "move" ? "New date" : "Date"}
-                <Input type="date" className="mt-1 min-h-[44px] bg-navy-dark" value={newDate} onChange={(e) => setNewDate(e.target.value)} />
+                <Input type="date" className={`mt-1 ${fieldCls}`} value={newDate} onChange={(e) => setNewDate(e.target.value)} />
               </label>
             )}
             {action?.kind === "add" && (
@@ -461,7 +463,7 @@ function Inner() {
             )}
             {action?.kind !== "move" && (
               <label className={labelCls}>{action?.kind === "drop" ? "Reason (optional)" : "Notes (optional)"}
-                <Textarea className="mt-1 bg-navy-dark" rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} />
+                <Textarea className={`mt-1 ${fieldCls}`} rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} />
               </label>
             )}
             {movePlan && movePlan.ok === false && newDate !== action?.meeting?.meeting_date && <p role="alert" className="text-sm text-destructive-foreground">{movePlan.error}</p>}
