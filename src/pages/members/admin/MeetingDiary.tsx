@@ -399,7 +399,7 @@ function Inner() {
                         </label>
                         <label className={labelCls}>Type
                           <select aria-label={`${name} meeting type`} className={selectCls} value={row.meeting_type} onChange={(e) => editMonth(month, { meeting_type: e.target.value as MeetingType })}>
-                            {TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
+                            {TYPES.filter((t) => SCHEDULED_TYPES.includes(t.value)).map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
                           </select>
                         </label>
                       </div>
@@ -499,8 +499,8 @@ function Inner() {
               </label>
             )}
             {action?.kind !== "move" && (
-              <label className={labelCls}>{action?.kind === "drop" ? "Reason (optional)" : "Notes (optional)"}
-                <Textarea className={`mt-1 ${fieldCls}`} rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} />
+              <label className={labelCls}>{action?.kind === "drop" ? "Reason (optional)" : newType === "dispensation" ? "Dispensation reason or reference (optional)" : "Notes (optional)"}
+                <Textarea className={`mt-1 ${fieldCls}`} rows={2} placeholder={newType === "dispensation" ? "e.g. Dispensation ref. PGM/2026/14" : undefined} value={notes} onChange={(e) => setNotes(e.target.value)} />
               </label>
             )}
             {movePlan && movePlan.ok === false && newDate !== action?.meeting?.meeting_date && <p role="alert" className="text-sm text-destructive-foreground">{movePlan.error}</p>}
