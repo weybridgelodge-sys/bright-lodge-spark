@@ -18,8 +18,8 @@
 - Registration numbers (ugle/mmh/rose_croix) are private (get_profiles_pii), edited only in Edit Member by admin/Secretary. Why: Secretary-owned records.
 - Almoner two-tier: can_view_almoner gates SELECT, can_edit_almoner writes (incl. welfare-attachments, Widows archive by status, never delete); app mirrors canAccessAlmoner/canEditAlmoner. can_access_almoner deprecated. Why: read-only offices.
 - Page/list loading uses useInitialLoading, never useState(true), so save refreshes retain content and scroll.
-- Meeting event label (lodge_events.event_label, default 'Festive Board') drives booking-form/email wording; title-aware attendance options live in src/lib/bookingTitles.ts. Why: White Table and other non-Festive-Board events reuse one form.
-- Public event bookings (/events/:slug) use the separate events Stripe account (_shared/stripe-events.ts, STRIPE_EVENTS_*) and event_accounts/event_bookings, never lodge Stripe. Why: events money is kept apart from the lodge ledger.
+- lodge_events.event_label (default 'Festive Board') drives booking/email wording; title options in src/lib/bookingTitles.ts. Why: non-Festive-Board events reuse one form.
+- Public event bookings use the separate events Stripe (_shared/stripe-events.ts, STRIPE_EVENTS_*) and event_* tables, never lodge Stripe. Why: events money stays off the lodge ledger.
 - Public calendars: _shared/publicEventCalendar; member Calendar: member-calendar-feed. Why: same events everywhere.
 - Event pricing via _shared/eventPricing.ts; form pieces via events/booking/BookingCore. Why: one shared rule.
 - Event module tables: public read via is_event_published(), writes via can_write_event_content(), copies via duplicate_event_content(). Why: drafts hidden, copies atomic.
