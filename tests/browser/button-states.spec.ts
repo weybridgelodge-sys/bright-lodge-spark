@@ -22,8 +22,10 @@ async function measure(page: Page) {
     if (!btn) return null;
     const base = bgOf(btn);
     const s = getComputedStyle(btn);
-    if (/gradient\((?!hsla?\([^)]*\/ ?0\.1\))/.test(s.backgroundImage) && !/0\.1\)/.test(s.backgroundImage)) return null; // shimmer/gradient fills: covered by axe at rest
-    const tint = s.backgroundImage.includes("gradient") ? { r: 203, g: 165, b: 77, a: 0.1 } : null;
+    const img = s.backgroundImage;
+    const isTint = /^linear-gradient\(rgba\([^)]*, 0\.1\), rgba\([^)]*, 0\.1\)\)$/.test(img);
+    if (img !== "none" && !isTint) return null; // shimmer/gradient fills: covered by axe at rest
+    const tint = isTint ? parse(img.slice(16)) : null;
     const bg = tint ? over(tint, base) : base;
     const fg = over({ ...parse(s.color), a: parse(s.color).a * Number(s.opacity) }, bg);
     const [x, y] = [lum(fg), lum(bg)].sort((p, q) => q - p);
