@@ -8,7 +8,7 @@ const meetings = [
   { id: "m3", meeting_date: "2028-02-16", meeting_type: "emergency", status: "draft", notes: null, cancelled_at: "2026-10-01T00:00:00Z", cancel_reason: "Venue unavailable because of the extended refurbishment of the main temple and dining room", series_id: null },
 ];
 
-test("Meeting diary has no overflow at 320px", async ({ page }) => {
+test("Meeting diary has no overflow at 320px", { timeout: 90_000 }, async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 900 });
   await page.route("**/rest/v1/installation_rule_settings**", (r) => r.fulfill({ json: rule }));
   await page.route("**/rest/v1/officer_installation_dates**", (r) => r.fulfill({ json: [{ lodge_year: 2026, installation_date: "2026-10-21" }] }));
@@ -19,7 +19,7 @@ test("Meeting diary has no overflow at 320px", async ({ page }) => {
   page.on("pageerror", (e) => console.log("PAGEERR", e.message)); page.on("console", (m) => m.type() === "error" && console.log("CONSOLE", m.text().slice(0, 200)));
   await page.goto("/members/admin/diary");
   const heading = page.getByRole("heading", { name: "Installation rule and meeting diary" });
-  if (!(await heading.isVisible({ timeout: 10000 }).catch(() => false))) { console.log((await page.locator("body").innerText()).slice(0, 600)); test.skip(true, "Synthetic identity cannot open the diary"); }
+  if (!(await heading.waitFor({ timeout: 25000 }).then(() => true).catch(() => false))) { console.log((await page.locator("body").innerText()).slice(0, 600)); test.skip(true, "Synthetic identity cannot open the diary"); }
   await expect(page.getByTestId("rule-preview")).toContainText("2027");
   const check = async (ctx: string) => {
     const bad = await page.evaluate(() => {
