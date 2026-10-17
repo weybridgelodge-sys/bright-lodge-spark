@@ -231,7 +231,7 @@ function Inner() {
                         <div key={i}>
                           <div className="flex justify-between text-sm mb-1">
                             <span className="text-primary-foreground/90">{opt}</span>
-                            <span className="text-gold/80">{counts[i]} · {pct}%</span>
+                            <span className="text-gold">{counts[i]} · {pct}%</span>
                           </div>
                           <div className="h-2 bg-navy border border-gold/15 rounded-sm overflow-hidden">
                             <div className="h-full bg-gold/70" style={{ width: `${pct}%` }} />

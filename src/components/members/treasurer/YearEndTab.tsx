@@ -375,7 +375,7 @@ export default function YearEndTab({ canEdit, onOpenTab }: { canEdit: boolean; o
                   Nothing is posted until you confirm.
                 </DialogDescription>
               </DialogHeader>
-              {draft.j.fundMissing && <p className="text-sm text-destructive">Account 3000 General Fund is missing from the chart of accounts.</p>}
+              {draft.j.fundMissing && <p className="text-sm text-destructive-foreground">Account 3000 General Fund is missing from the chart of accounts.</p>}
               {draft.j.lines.length === 0 ? (
                 <p className="text-sm text-primary-foreground/70">No income or expenditure to close for this year.</p>
               ) : (

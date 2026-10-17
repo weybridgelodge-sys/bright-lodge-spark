@@ -494,7 +494,7 @@ export default function MembersAdmin() {
 
       {tab === "users" && (
         <div className="bg-navy-dark/60 border border-gold/15 rounded-sm lg:overflow-x-auto">
-          <MemberTable aria-label="Members" className="block w-full min-w-0 text-sm lg:table">
+          <MemberTable role={stackedMembers ? "group" : undefined} aria-label="Members" className="block w-full min-w-0 text-sm lg:table">
             {!stackedMembers && <thead className="hidden lg:table-header-group text-xs uppercase tracking-wider text-primary-foreground/80">
               <tr>
                 <th className="text-left p-3">Member</th>

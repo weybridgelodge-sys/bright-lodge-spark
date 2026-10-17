@@ -221,7 +221,7 @@ export default function PublicEventsAdmin() {
           </button>
           <button type="button" onClick={() => duplicate(r)} className={`${actionBtn} border-gold/40 text-gold hover:bg-gold/15`}><Copy className="w-4 h-4" aria-hidden="true" /> Duplicate</button>
           {r.is_public && r.slug && <button type="button" onClick={() => setQrFor(r)} className={`${actionBtn} border-gold/40 text-gold hover:bg-gold/15`}><QrCode className="w-4 h-4" aria-hidden="true" /> Event QR</button>}
-          <button type="button" onClick={() => remove(r)} className={`${actionBtn} border-destructive/40 text-destructive hover:bg-destructive/10`}><Trash2 className="w-4 h-4" aria-hidden="true" /> Delete</button>
+          <button type="button" onClick={() => remove(r)} className={`${actionBtn} border-destructive/40 text-destructive-foreground hover:bg-destructive/10`}><Trash2 className="w-4 h-4" aria-hidden="true" /> Delete</button>
           <Link to={`/members/admin/treasurer?tab=event-accounts&event=${r.id}`} className={`${actionBtn} border-gold/30 text-gold hover:bg-gold/10`}><Wallet className="w-4 h-4" aria-hidden="true" /> Treasurer view</Link>
           {r.is_public && r.slug && <Link to={`/events/${r.slug}`} className={`${actionBtn} border-gold/30 text-gold hover:bg-gold/10`}><ExternalLink className="w-4 h-4" aria-hidden="true" /> View page</Link>}
         </div>

@@ -139,7 +139,7 @@ export default function ActivePoll() {
                   <span className={`${mine ? "text-gold" : "text-primary-foreground/90"} flex items-center gap-1`}>
                     {mine && <CheckCircle2 className="w-3 h-3" />} {opt}
                   </span>
-                  <span className="text-gold/80">{counts[i]} · {pct}%</span>
+                  <span className="text-gold">{counts[i]} · {pct}%</span>
                 </div>
                 <div className="h-2 bg-navy border border-gold/15 rounded-sm overflow-hidden">
                   <div

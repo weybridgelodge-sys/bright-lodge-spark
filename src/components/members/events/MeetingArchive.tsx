@@ -106,7 +106,7 @@ export function ArchivedMeetingCard({ event, onRestore, onDelete }: { event: Lod
           <button type="button" onClick={onRestore} className={`${btn} flex-1 border-gold/40 text-gold hover:bg-gold/15 sm:flex-none`} aria-label={`Restore ${event.title}`}>
             <ArchiveRestore className="w-4 h-4" /> Restore
           </button>
-          <button type="button" onClick={onDelete} className={`${btn} flex-1 border-destructive/40 text-destructive hover:bg-destructive/10 sm:flex-none`} aria-label={`Delete ${event.title}`}>
+          <button type="button" onClick={onDelete} className={`${btn} flex-1 border-destructive/40 text-destructive-foreground hover:bg-destructive/10 sm:flex-none`} aria-label={`Delete ${event.title}`}>
             <Trash2 className="w-4 h-4" /> Delete
           </button>
         </div>

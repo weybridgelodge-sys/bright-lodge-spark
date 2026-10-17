@@ -133,7 +133,7 @@ export default function MembersRitual() {
               <>
                 {" "}— currently{" "}
                 <span className="text-gold font-medium">{DEGREE_LABEL[myDegree]}</span>
-                {isPastMaster && <span className="text-gold/80"> · Past Master (Installed Masters access)</span>}.
+                {isPastMaster && <span className="text-gold"> · Past Master (Installed Masters access)</span>}.
               </>
             )}
           </p>
@@ -161,7 +161,7 @@ export default function MembersRitual() {
             onClick={() => setTypeFilter(f.value)}
             className={`px-3 py-1.5 rounded-sm text-xs border transition-colors ${
               typeFilter === f.value
-                ? "bg-gold/20 text-gold border-gold/40"
+                ? "bg-gold/20 text-gold-light border-gold/40"
                 : "bg-navy border-gold/15 text-primary-foreground/70 hover:border-gold/30"
             }`}
           >

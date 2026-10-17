@@ -6,17 +6,17 @@
 - AppErrorBoundary wraps routes; Suspense uses PageLoader; retain chunk retry and magic-link error surfacing.
 - Accounts distribution uses its separate secure link and record_accounts_sent; never attach to an already-sent summons.
 - Only the Secretary is exempt from subscriptions (latest Secretary appointment on or before the year); the Treasurer pays like any member. Honorary members remain exempt.
-- Public/member Thursday wording is "Rehearsal Night", never "Lodge of Instruction"/"LOI" (no subs collected). Keep internal `loi` identifiers.
+- Public/member Thursday wording: "Rehearsal Night", never "Lodge of Instruction"/"LOI" (no subs collected). Keep internal `loi` identifiers.
 - Installation Returns resolve live and fill exact AcroForm IDs; signatures and dispensation remain blank.
-- Changed `/members` screens must pass 320px tests with real or faithful worst-case data: no overflow, unreachable controls or obscured content.
-- Browser layout tests may use only a Vite `e2e`-mode, localhost-only synthetic identity; it never grants backend access or ships in production.
-- Officer access uses the Installation year: current_officer_holder() = latest confirmed appointment in effect (stored date, else installation_rule_date(); non-progressive also not before appointed_on); offices carry forward; current Almoner/Charity Steward/Mentor appointments grant portals. Officer lookups never switch on 1 Oct; sync labels: masonicYearStartSync. Dues/accounts/periods and Almoner year stay Oct–Sep.
+- Changed `/members` screens pass 320px tests with real or faithful worst-case data: no overflow, unreachable or obscured controls.
+- Browser layout tests use only a Vite `e2e`-mode, localhost-only synthetic identity; never backend access or production.
+- Officer access = Installation year: current_officer_holder() is the latest confirmed appointment in effect (stored date, else installation_rule_date(); non-progressive also >= appointed_on); offices carry forward; current Almoner/Charity Steward/Mentor get portals. Lookups never switch on 1 Oct; sync labels: masonicYearStartSync. Dues/accounts/periods/Almoner year stay Oct–Sep.
 - Officer appointment changes log via swallow-on-error AFTER trigger to officer_appointment_audit (admin/Secretary read); offices-held history only via get_member_offices_held (same effective-date rule, visibility enforced in DB).
-- Member records: admin or is_lodge_secretary() list/add/edit via get_admin_profiles and admin-invite-member, and set others' member_status (own status admin-only); roles, deletion and sign-in email stay admin-only server-side. Why: Secretary owns member data; admin is operator.
+- Member records: admin or is_lodge_secretary() list/add/edit via get_admin_profiles/admin-invite-member and set others' member_status (own: admin-only); roles, deletion, sign-in email admin-only server-side. Why: Secretary owns member data; admin is operator.
 - Profile dietary_requirements is private health data: no column SELECT grant; read only via get_profiles_pii; booking forms pre-fill it only while empty. Why: allergies are special-category data.
 - Bulk import only via admin-import-members (validation in _shared/memberImport.ts); fills blanks only, never roles, sign-in email or status. Why: safe re-runs.
 - Registration numbers (ugle/mmh/rose_croix) are private (get_profiles_pii), edited only in Edit Member by admin/Secretary. Why: Secretary-owned records.
-- Almoner two-tier: can_view_almoner gates SELECT, can_edit_almoner writes (incl. welfare-attachments, Widows archive by status, never delete); app mirrors canAccessAlmoner/canEditAlmoner. can_access_almoner deprecated. Why: read-only offices.
+- Almoner two-tier: can_view_almoner gates SELECT, can_edit_almoner writes (incl. welfare-attachments, Widows archive by status, never delete); app mirrors canAccessAlmoner/canEditAlmoner; can_access_almoner deprecated. Why: read-only offices.
 - Page/list loading uses useInitialLoading, never useState(true), so save refreshes retain content and scroll.
 - lodge_events.event_label drives booking/email wording; titles in lib/bookingTitles. Why: non-Festive-Board events reuse one form.
 - Public event bookings use the separate events Stripe (_shared/stripe-events.ts, STRIPE_EVENTS_*) and event_* tables, never lodge Stripe. Why: events money stays off the lodge ledger.
@@ -26,5 +26,5 @@
 - Event money: one event_booking_payments row per Stripe charge; totals via recomputeBooking; balance tokens service-role only. Why: per-payment refunds, private links.
 - Manual membership enquiries are inserted only via add_manual_enquiry (admin/Secretary/Asst Sec, request_id idempotent, created_by audit); no table INSERT policy. Why: public Join Us insert path stays server-only.
 - Masonic year = Installation to day before next (_shared/masonicYear.ts; rule, stored dates override); KPI Movement uses member_status_history; new tables carry unit_id. Why: multi-lodge-ready, accurate movement.
-- Meeting diary: festive_board_meetings via diary_* RPCs; cancel, never delete; Installation moves update stored date; series = per-month meeting_series.schedule, inferred from diary, skip existing; only regular/installation scheduled, others one-off. Why: one register.
-- Changed screens pass the 320px test + axe WCAG 2.1 AA scan (helpers/axe), both themes; fieldCls, >=4.5:1, no placeholder-only labels. Why: unreadable dark fields.
+- Diary: festive_board_meetings via diary_* RPCs; cancel, never delete; Installation move updates stored date; per-month meeting_series.schedule inferred from diary, skips existing; only regular/installation scheduled, rest one-off. Why: one register.
+- Every new or changed screen: run the 320px mobile test AND its axe scan (helpers/axe, WCAG 2.1 AA, incl. colour-contrast); placeholders, typed text and borders use theme tokens that pass contrast (fieldCls); no placeholder-only labels. Why: unreadable fields on dark surfaces.

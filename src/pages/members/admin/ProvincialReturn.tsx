@@ -141,7 +141,7 @@ function Inner() {
 
   return (
     <MembersLayout>
-      <Link to="/members/admin/secretary" className="inline-flex min-h-[48px] items-center gap-1 text-sm text-gold/80 hover:text-gold"><ArrowLeft className="w-4 h-4" /> Secretary Portal</Link>
+      <Link to="/members/admin/secretary" className="inline-flex min-h-[48px] items-center gap-1 text-sm text-gold hover:text-gold"><ArrowLeft className="w-4 h-4" /> Secretary Portal</Link>
       <header className="mb-4 flex min-w-0 flex-col items-stretch gap-3 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
         <div className="min-w-0">
           <h1 className="font-serif text-2xl md:text-3xl text-gold break-words">Provincial Installation Return</h1>
@@ -263,7 +263,7 @@ function Inner() {
                 <p><strong>Subject:</strong> Weybridge Lodge No. 6787 — Provincial Installation Return {formatMasonicYear(year)}</p>
                 <p><strong>Documents:</strong> Word and PDF, built just now from the live records, sent as 30-day download links. <a href={pending?.docxUrl} download={`${fileBase(year)}.docx`} className="underline">Open the Word file</a> · <a href={pending?.pdfUrl} target="_blank" rel="noopener noreferrer" className="underline">Open the PDF</a></p>
                 <p><strong>Signature dates:</strong> {data ? signatureDate(data) : "—"}. Signatures are left blank.</p>
-                {data && data.issues.length > 0 && <p className="text-destructive">{data.issues.length} warning(s) are still showing on the page.</p>}
+                {data && data.issues.length > 0 && <p className="text-destructive-foreground">{data.issues.length} warning(s) are still showing on the page.</p>}
                 <p>This is an official document to an external body and can't be recalled once sent.</p>
               </div>
             </AlertDialogDescription>

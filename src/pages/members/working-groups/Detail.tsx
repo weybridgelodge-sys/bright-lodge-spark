@@ -144,7 +144,7 @@ function Inner() {
         <div className="rounded-sm border border-gold/20 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-navy-light/40 text-gold/80 uppercase text-[10px] tracking-wider">
+              <thead className="bg-navy-light/40 text-gold uppercase text-[10px] tracking-wider">
                 <tr><th className="text-left p-2 w-32">Date</th><th className="text-left p-2 w-28">Type</th><th className="text-left p-2">Title</th><th className="text-left p-2">Notes</th></tr>
               </thead>
               <tbody>

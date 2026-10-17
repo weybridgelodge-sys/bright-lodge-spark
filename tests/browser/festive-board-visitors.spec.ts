@@ -1,5 +1,10 @@
 import { expect, test } from "@playwright/test";
 
+import { expectNoAxeViolations } from "./helpers/axe";
+
+// Every mobile check ends with the WCAG 2.1 AA axe scan of the final (populated) state.
+test.afterEach(async ({ page }, info) => { if (info.status === "passed") await expectNoAxeViolations(page, info.title); });
+
 const meeting = { id: "m1", meeting_date: "2026-10-21", meeting_type: "installation", headcount_override: null, notes: null, price_pence: 3500 };
 const members = [
   { id: "p1", full_name: "Bartholomew Featherstonehaugh-Wolstenholme", first_name: "Bartholomew", last_name: "Featherstonehaugh-Wolstenholme", title: "W Bro.", is_past_master: true },

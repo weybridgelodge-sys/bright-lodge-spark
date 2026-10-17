@@ -797,7 +797,7 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
                             {canEdit && (
                               <td className="px-2 py-1.5">
                                 {!l.system_key && <Button variant="ghost" size="icon" aria-label="Delete budget line"
-                                  className="text-primary-foreground/80 hover:text-destructive"
+                                  className="text-primary-foreground/80 hover:text-destructive-foreground"
                                   onClick={() => deleteBudgetLine(l.id)}>
                                   <Trash2 className="w-4 h-4" />
                                 </Button>}
@@ -940,7 +940,7 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
                               <Pencil className="w-4 h-4" />
                             </Button>
                             <Button variant="ghost" size="icon" aria-label="Delete booking"
-                              className="text-primary-foreground/80 hover:text-destructive" onClick={() => deleteBooking(b.id)}>
+                              className="text-primary-foreground/80 hover:text-destructive-foreground" onClick={() => deleteBooking(b.id)}>
                               <Trash2 className="w-4 h-4" />
                             </Button>
                           </>
@@ -1003,7 +1003,7 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
                                           <Pencil className="w-4 h-4" />
                                         </Button>
                                         <Button variant="ghost" size="icon" aria-label="Delete guest"
-                                          className="text-primary-foreground/80 hover:text-destructive" onClick={() => deleteGuest(g.id)}>
+                                          className="text-primary-foreground/80 hover:text-destructive-foreground" onClick={() => deleteGuest(g.id)}>
                                           <Trash2 className="w-4 h-4" />
                                         </Button>
                                       </td>

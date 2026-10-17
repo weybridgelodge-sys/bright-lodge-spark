@@ -567,7 +567,7 @@ function BoardView({
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-[10px] uppercase tracking-wider text-gold/80">{vacant ? "Vacant" : "Officer"}</p>
+                <p className="text-[10px] uppercase tracking-wider text-gold">{vacant ? "Vacant" : "Officer"}</p>
                 <h3 className="font-serif text-lg text-primary-foreground flex items-center gap-2">
                   {pos === "worshipful_master" && <Crown className="w-4 h-4 text-gold" />}
                   {POSITION_LABELS[pos]}

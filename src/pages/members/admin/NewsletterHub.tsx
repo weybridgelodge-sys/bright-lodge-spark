@@ -718,7 +718,7 @@ function NewsletterHubInner() {
   return (
     <MembersLayout>
       <header className="mb-6">
-        <p className="text-xs uppercase tracking-wider text-gold/80">Communications Engine</p>
+        <p className="text-xs uppercase tracking-wider text-gold">Communications Engine</p>
         <h1 className="font-serif text-2xl md:text-3xl text-gold mt-1">Newsletter Dispatch Hub</h1>
         <p className="text-primary-foreground/70 text-sm mt-1">
           Compose one issue, then choose your audience. <strong className="text-gold">Lodge Members &amp; Visitors</strong> covers
@@ -869,7 +869,7 @@ function NewsletterHubInner() {
                 {!unifiedContent && (
                   <div className="flex justify-end">
                     <button type="button" onClick={() => copyFromOther(s.id)}
-                      className="text-[10px] inline-flex items-center gap-1 px-2 py-0.5 rounded border border-gold/30 text-gold/80 hover:bg-gold/10"
+                      className="text-[10px] inline-flex items-center gap-1 px-2 py-0.5 rounded border border-gold/30 text-gold hover:bg-gold/10"
                       title={`Copy this section's body from the ${effectiveAudience === "members" ? "Public" : "Members & Visitors"} variant`}>
                       <Copy className="h-3 w-3" /> Copy from {effectiveAudience === "members" ? "Public" : "Members & Visitors"}
                     </button>

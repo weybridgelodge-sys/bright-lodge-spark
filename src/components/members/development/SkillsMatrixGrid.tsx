@@ -44,7 +44,7 @@ export default function SkillsMatrixGrid({ matrix }: { matrix: SkillsMatrix }) {
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-3">
         <div className="flex items-center gap-1 text-xs">
-          <span className="text-gold/80 uppercase tracking-wider text-[10px]">Group</span>
+          <span className="text-gold uppercase tracking-wider text-[10px]">Group</span>
           <select
             value={groupFilter}
             onChange={(e) => setGroupFilter(e.target.value)}
@@ -55,7 +55,7 @@ export default function SkillsMatrixGrid({ matrix }: { matrix: SkillsMatrix }) {
           </select>
         </div>
         <div className="flex items-center gap-1 text-xs">
-          <span className="text-gold/80 uppercase tracking-wider text-[10px]">Gap</span>
+          <span className="text-gold uppercase tracking-wider text-[10px]">Gap</span>
           {(["all", "red", "amber"] as const).map((g) => (
             <button
               key={g}
@@ -87,7 +87,7 @@ export default function SkillsMatrixGrid({ matrix }: { matrix: SkillsMatrix }) {
               {matrix.members.map((m) => (
                 <th
                   key={m.id}
-                  className="p-1 border-b border-gold/20 text-[10px] text-gold/80 font-sans uppercase tracking-wider"
+                  className="p-1 border-b border-gold/20 text-[10px] text-gold font-sans uppercase tracking-wider"
                   title={displayMember(m)}
                 >
                   <Link to={`/members/development/${m.id}`} className="hover:text-gold inline-block px-1">

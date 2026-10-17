@@ -39,7 +39,7 @@ type CalEvent = {
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
 
 const KIND_STYLES: Record<CalEvent["kind"], { dot: string; pill: string; label: string; legend?: string }> = {
-  meeting:  { dot: "bg-gold",       pill: "bg-gold/20 text-gold border-gold/40",           label: "Meeting" },
+  meeting:  { dot: "bg-gold",       pill: "bg-gold/20 text-gold-light border-gold/40",           label: "Meeting" },
   social:   { dot: "bg-emerald-400",pill: "bg-emerald-500/15 text-emerald-200 border-emerald-500/40", label: "Social" },
   officers: { dot: "bg-purple-400", pill: "bg-purple-500/15 text-purple-200 border-purple-500/40",   label: "Officers Night" },
   loi:      { dot: "bg-sky-400",    pill: "bg-sky-500/15 text-sky-200 border-sky-500/40",   label: "Rehearsal", legend: "Rehearsals" },
@@ -470,7 +470,7 @@ function SubscribePanel({
       <button
         type="button"
         onClick={() => setShowHelp((s) => !s)}
-        className="mt-3 flex items-center text-[11px] text-gold hover:text-gold/80 transition-colors"
+        className="mt-3 flex items-center text-[11px] text-gold hover:text-gold transition-colors"
         aria-expanded={showHelp}
       >
         <Info className="w-3 h-3 mr-1" />

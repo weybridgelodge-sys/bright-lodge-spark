@@ -232,7 +232,7 @@ export default function GeneralJournalTab({ canEdit }: { canEdit: boolean }) {
                     onClick={() => removeLine(line.key)}
                     disabled={!canEdit || lines.length <= 2}
                     aria-label={`Remove line ${idx + 1}`}
-                    className="justify-self-end text-primary-foreground/80 hover:text-destructive sm:justify-self-auto"
+                    className="justify-self-end text-primary-foreground/80 hover:text-destructive-foreground sm:justify-self-auto"
                   >
                     <Trash2 className="w-4 h-4" />
                   </Button>

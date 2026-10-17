@@ -474,7 +474,7 @@ function MemberRecord({ member, currentStatus, onBack }: {
 
   return (
     <div>
-      <button onClick={onBack} className="flex items-center gap-1.5 text-sm text-gold hover:text-gold/80 mb-4">
+      <button onClick={onBack} className="flex items-center gap-1.5 text-sm text-gold hover:text-gold mb-4">
         <ArrowLeft className="w-4 h-4" /> Back to Welfare Board
       </button>
 
@@ -539,7 +539,7 @@ function MemberRecord({ member, currentStatus, onBack }: {
               {canEditAlmoner && (
                 <button
                   onClick={() => dismissSystem(l.id)}
-                  className="min-h-[48px] text-[11px] uppercase tracking-wider text-gold hover:text-gold/80"
+                  className="min-h-[48px] text-[11px] uppercase tracking-wider text-gold hover:text-gold"
                 >
                   Dismiss
                 </button>

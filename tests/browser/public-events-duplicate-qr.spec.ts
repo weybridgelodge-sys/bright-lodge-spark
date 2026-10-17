@@ -1,5 +1,10 @@
 import { expect, test } from "@playwright/test";
 
+import { expectNoAxeViolations } from "./helpers/axe";
+
+// Every mobile check ends with the WCAG 2.1 AA axe scan of the final (populated) state.
+test.afterEach(async ({ page }, info) => { if (info.status === "passed") await expectNoAxeViolations(page, info.title); });
+
 const row = {
   id: "e1", name: "Christmas Party 2026 with an extremely long accounts name for wrapping", public_title: "Joint Christmas Party 2026 at Guildford Masonic Centre",
   slug: "christmas-party-2026", event_date: "2026-12-19", start_time: "17:00:00", end_time: "00:00:00", is_public: true, archived_at: null,

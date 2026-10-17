@@ -124,7 +124,7 @@ function Inner() {
 
       <div className="flex flex-wrap items-end gap-3">
         <div>
-          <p className="text-[10px] uppercase tracking-wider text-gold/80 mb-1">Rehearsal Session</p>
+          <p className="text-[10px] uppercase tracking-wider text-gold mb-1">Rehearsal Session</p>
           <Select value={sessionId} onValueChange={setSessionId}>
             <SelectTrigger className="bg-navy-dark text-primary-foreground w-72"><SelectValue placeholder="Select session" /></SelectTrigger>
             <SelectContent>
@@ -137,7 +137,7 @@ function Inner() {
           </Select>
         </div>
         <div>
-          <p className="text-[10px] uppercase tracking-wider text-gold/80 mb-1">Ritual group</p>
+          <p className="text-[10px] uppercase tracking-wider text-gold mb-1">Ritual group</p>
           <Select value={groupFilter} onValueChange={setGroupFilter}>
             <SelectTrigger className="bg-navy-dark text-primary-foreground w-56"><SelectValue /></SelectTrigger>
             <SelectContent>
@@ -153,7 +153,7 @@ function Inner() {
       <div className="rounded-sm border border-gold/20 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-xs">
-            <thead className="bg-navy-light/40 text-gold/80 uppercase text-[10px] tracking-wider">
+            <thead className="bg-navy-light/40 text-gold uppercase text-[10px] tracking-wider">
               <tr>
                 <th className="p-2 text-left w-10"></th>
                 <th className="p-2 text-left">Piece</th>

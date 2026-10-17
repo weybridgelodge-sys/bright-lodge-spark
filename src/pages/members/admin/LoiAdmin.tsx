@@ -217,7 +217,7 @@ export default function LoiAdmin() {
                   {isOpen && (
                     <div className="mt-3 pl-3 border-l-2 border-gold/20 space-y-2">
                       {s.kpi_category && (
-                        <p className="text-[11px] text-gold/80 uppercase tracking-wider">
+                        <p className="text-[11px] text-gold uppercase tracking-wider">
                           KPI block: {kpiCategoryLabel(s.kpi_category)}
                         </p>
                       )}
@@ -265,7 +265,7 @@ export default function LoiAdmin() {
                             variant="outline"
                             size="sm"
                             onClick={() => handleDelete(s.id)}
-                            className="border-destructive/40 text-destructive hover:bg-destructive/10 min-h-11 sm:min-h-0"
+                            className="border-destructive/40 text-destructive-foreground hover:bg-destructive/10 min-h-11 sm:min-h-0"
                           >
                             <Trash2 className="w-3 h-3 mr-1" /> Delete
                           </Button>
@@ -528,7 +528,7 @@ function SessionDialog({
               </h3>
             </div>
             {officeConflicts.length > 0 && (
-              <p className="text-xs text-destructive mb-2">
+              <p className="text-xs text-destructive-foreground mb-2">
                 Office conflict: two members assigned —{" "}
                 {officeConflicts.map((p) => partLabel(p)).join(", ")}
               </p>

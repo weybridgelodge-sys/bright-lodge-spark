@@ -181,7 +181,7 @@ export default function MembersDocuments() {
             <p className="text-[11px] text-primary-foreground/55 mt-2">
               Learning &amp; Development material is displayed according to your verified Masonic degree — currently{" "}
               <span className="text-gold font-medium">{DEGREE_LABEL[myDegree]}</span>
-              {isPastMaster && <span className="text-gold/80"> · Past Master (Installed Masters access)</span>}.
+              {isPastMaster && <span className="text-gold"> · Past Master (Installed Masters access)</span>}.
             </p>
           )}
         </div>

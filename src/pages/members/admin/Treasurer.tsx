@@ -127,7 +127,7 @@ function ReconciliationTab({
                 <div>
                   <div className="flex items-center gap-2 flex-wrap">
                     <h4 className="font-serif text-gold">{p.label}</h4>
-                    {p.period_type === "closing" && <Badge variant="outline" className="border-gold/40 text-gold/80">Year-end close</Badge>}
+                    {p.period_type === "closing" && <Badge variant="outline" className="border-gold/40 text-gold">Year-end close</Badge>}
                     {p.status === "locked"
                       ? <Badge variant="outline" className="border-gold/60 text-gold"><Lock className="w-3 h-3 mr-1" />Locked</Badge>
                       : <Badge variant="outline" className="border-emerald-500/60 text-emerald-300"><Unlock className="w-3 h-3 mr-1" />Open</Badge>}

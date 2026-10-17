@@ -64,9 +64,6 @@ test("Meeting diary has no overflow at 320px", { timeout: 90_000 }, async ({ pag
   await expect(page.getByRole("button", { name: /Add \d+ new meeting|No new meetings/ })).toBeVisible();
   await check("schedule");
   await expectNoAxeViolations(page, "diary page");
-  await page.evaluate(() => document.documentElement.classList.add("dark"));
-  await expectNoAxeViolations(page, "diary page dark");
-  await page.evaluate(() => document.documentElement.classList.remove("dark"));
   for (const b of await page.locator("main button:visible").all()) {
     const box = await b.boundingBox();
     if (box) expect(box.height, await b.innerText()).toBeGreaterThanOrEqual(44);

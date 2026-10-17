@@ -115,7 +115,7 @@ export default function CorrespondencePanel({ members, userId }: { members: Memb
                   {r.attachment_path && (
                     <button
                       onClick={() => openAttachment(r.attachment_path!)}
-                      className="p-1.5 text-gold/80 hover:text-gold"
+                      className="p-1.5 text-gold hover:text-gold"
                       aria-label="Open attachment"
                       title={r.attachment_name || "Open attachment"}
                     >

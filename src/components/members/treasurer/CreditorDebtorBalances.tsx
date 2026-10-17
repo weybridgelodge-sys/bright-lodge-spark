@@ -126,7 +126,7 @@ export default function CreditorDebtorBalances({ canEdit }: { canEdit: boolean }
     <div className="space-y-4">
       <div>
         <h3 className="font-serif text-lg text-primary">Creditor &amp; Debtor Balances</h3>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-sm text-cream/80">
           Net outstanding balance per counterparty. A positive figure means money is owed — by the lodge on
           Creditors, to the lodge on Debtors.
         </p>
@@ -165,15 +165,15 @@ export default function CreditorDebtorBalances({ canEdit }: { canEdit: boolean }
 
           {loading ? (
             <div className="flex justify-center py-10">
-              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+              <Loader2 className="h-6 w-6 animate-spin text-cream/80" />
             </div>
           ) : error ? (
-            <div className="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-4 text-sm text-destructive">
+            <div className="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-4 text-sm text-destructive-foreground">
               <p className="font-medium">Report failed to load — no results are shown.</p>
               <p className="mt-1 break-words">{error}</p>
             </div>
           ) : groups.length === 0 ? (
-            <p className="text-sm text-muted-foreground py-6 text-center">
+            <p className="text-sm text-cream/80 py-6 text-center">
               Nothing outstanding on {heading}.
             </p>
           ) : (

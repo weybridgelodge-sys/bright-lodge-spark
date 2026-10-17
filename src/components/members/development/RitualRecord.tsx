@@ -50,7 +50,7 @@ export default function RitualRecord({
             <h3 className="font-serif text-gold text-sm mb-2">{rehearsalDisplayLabel(group)}</h3>
             <div className="overflow-x-auto rounded-sm border border-gold/20">
               <table className="w-full text-xs">
-                <thead className="bg-navy-light/40 text-gold/80 uppercase text-[10px] tracking-wider">
+                <thead className="bg-navy-light/40 text-gold uppercase text-[10px] tracking-wider">
                   <tr>
                     <th className="text-left p-2">Ritual / Part</th>
                     <th className="text-left p-2 w-32">Learned</th>

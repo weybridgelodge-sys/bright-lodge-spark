@@ -181,10 +181,10 @@ export default function Kpis() {
             <span
               className={`text-[11px] uppercase tracking-wider font-semibold px-2.5 py-1 rounded-sm border ${
                 health.overall === "green"
-                  ? "border-health-green/50 text-health-green"
+                  ? "border-health-green/50 text-cream"
                   : health.overall === "amber"
-                    ? "border-health-amber/50 text-health-amber"
-                    : "border-health-red/50 text-health-red"
+                    ? "border-health-amber/50 text-cream"
+                    : "border-health-red/50 text-cream"
               }`}
             >
               Overall: {health.overall}

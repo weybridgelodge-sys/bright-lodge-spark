@@ -63,7 +63,7 @@ export default function MentoringChecklist({
               <AccordionTrigger className="px-3 hover:no-underline">
                 <div className="flex-1 flex items-center justify-between gap-3 pr-2">
                   <span className="font-serif text-primary-foreground">{stage}</span>
-                  <span className="text-[11px] text-gold/80 tabular-nums">{done}/{rows.length} · {pct}%</span>
+                  <span className="text-[11px] text-gold tabular-nums">{done}/{rows.length} · {pct}%</span>
                 </div>
               </AccordionTrigger>
               <AccordionContent className="px-3 pb-3">
