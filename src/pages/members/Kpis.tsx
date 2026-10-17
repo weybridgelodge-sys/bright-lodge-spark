@@ -23,6 +23,9 @@ import {
   visitorFrequency,
   quarterlyEngagement,
   disengagementRisk,
+  movementPeriod,
+  MOVEMENT_PERIOD_LABELS,
+  type MovementPeriodKey,
   type EngagementBundle,
   type KpiBundle,
 } from "@/lib/kpis";
@@ -30,6 +33,7 @@ import { exportVoReport, exportFullKpi } from "@/lib/kpiExports";
 import AttendanceCharts from "@/components/members/AttendanceCharts";
 import CandidatesManager from "@/components/members/CandidatesManager";
 import { useInitialLoading } from "@/hooks/useInitialLoading";
+import { getMasonicYear, localIsoDate } from "@/lib/masonicYear";
 
 function Section({ title, children, defaultOpen = true }: { title: string; children: React.ReactNode; defaultOpen?: boolean }) {
   return (
@@ -74,6 +78,7 @@ export default function Kpis() {
   const [bundle, setBundle] = useState<KpiBundle | null>(null);
   const [eng, setEng] = useState<EngagementBundle | null>(null);
   const [loading, setLoading] = useInitialLoading();
+  const [periodKey, setPeriodKey] = useState<MovementPeriodKey>("current");
 
   const load = async () => {
     setLoading(true);
@@ -114,10 +119,15 @@ export default function Kpis() {
   }
 
   const s = snapshot(bundle.members);
-  const mv = movement(bundle.members);
+  const cfg = bundle.installation ?? { rule: null, stored: {} };
+  const period = movementPeriod(periodKey, cfg);
+  const mv = period
+    ? movement(bundle.members, { start: period.start, end: period.end, history: bundle.statusHistory })
+    : null;
+  const curYear = getMasonicYear(localIsoDate(), cfg);
   const ra = uglePortal(bundle.members);
   const conv = raConversion(bundle.members);
-  const ms = milestones(bundle.members, bundle.wmTerms);
+  const ms = milestones(bundle.members, bundle.wmTerms, curYear ?? undefined);
   const oh = officersHealth(bundle);
   const pl = pipeline(bundle);
   const health = lodgeHealth(bundle);
@@ -149,13 +159,13 @@ export default function Kpis() {
         </div>
         <div className="flex gap-2">
           <button
-            onClick={() => exportVoReport(bundle)}
+            onClick={() => exportVoReport(bundle, period)}
             className="flex items-center gap-1.5 border border-gold/40 text-gold px-3 py-2 rounded-sm text-xs uppercase tracking-wider hover:bg-gold/10"
           >
             <FileText className="w-3.5 h-3.5" /> Export VO Report
           </button>
           <button
-            onClick={() => exportFullKpi(bundle, eng)}
+            onClick={() => exportFullKpi(bundle, eng, period)}
             className="flex items-center gap-1.5 bg-gold-shimmer text-accent-foreground px-3 py-2 rounded-sm text-xs uppercase tracking-wider font-semibold"
           >
             <Download className="w-3.5 h-3.5" /> Export Full KPI
@@ -232,8 +242,28 @@ export default function Kpis() {
           </div>
         </Section>
 
-        {/* Section 2 */}
-        <Section title="2 · Movement (rolling 12 months)">
+        {/* Section 2 — KPI dashboard / Members: period-aware movement */}
+        <Section title={`2 · Movement${period ? ` (${period.rangeLabel})` : ""}`}>
+          <div className="mb-4">
+            <label htmlFor="movement-period" className="block text-[11px] uppercase tracking-wider text-primary-foreground/60 mb-1">
+              Period
+            </label>
+            <select
+              id="movement-period"
+              value={periodKey}
+              onChange={(e) => setPeriodKey(e.target.value as MovementPeriodKey)}
+              className="w-full sm:w-72 min-h-[44px] bg-navy border border-gold/20 rounded-sm px-2 text-sm"
+            >
+              {(Object.keys(MOVEMENT_PERIOD_LABELS) as MovementPeriodKey[]).map((k) => (
+                <option key={k} value={k}>{MOVEMENT_PERIOD_LABELS[k]}</option>
+              ))}
+            </select>
+          </div>
+          {!mv ? (
+            <p className="text-sm text-primary-foreground/60">
+              No Installation date could be worked out for this period. Check the Installation rule.
+            </p>
+          ) : (
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <Stat label="Initiated" value={mv.initiated.length} />
             <Stat label="Joined" value={mv.joined.length} />
@@ -243,6 +273,7 @@ export default function Kpis() {
             <Stat label="Year Out" value={mv.yearOut.length} sub="Not counted in net" />
             <Stat label="Net movement" value={mv.net >= 0 ? `+${mv.net}` : mv.net} />
           </div>
+          )}
         </Section>
 
         {/* Section 3 */}
