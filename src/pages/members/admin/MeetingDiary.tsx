@@ -464,7 +464,7 @@ function Inner() {
                 <Textarea className="mt-1 bg-navy-dark" rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} />
               </label>
             )}
-            {movePlan && !movePlan.ok && newDate !== action?.meeting?.meeting_date && <p role="alert" className="text-sm text-destructive-foreground">{movePlan.error}</p>}
+            {movePlan && movePlan.ok === false && newDate !== action?.meeting?.meeting_date && <p role="alert" className="text-sm text-destructive-foreground">{movePlan.error}</p>}
             {addClash && <p role="alert" className="text-sm text-destructive-foreground">Another meeting is already on that date.</p>}
             {!!warnings.length && (
               <div role="alert" className="rounded-sm border border-destructive/60 p-3 text-sm break-words">
