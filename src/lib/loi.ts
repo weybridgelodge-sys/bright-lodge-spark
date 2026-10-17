@@ -1,3 +1,4 @@
+import { masonicYearStartSync } from "@/lib/masonicYear";
 // Shared LOI constants and helpers
 
 export const LOI_FOCUS_OPTIONS = [
@@ -59,14 +60,8 @@ export function kpiCategoryLabel(value: string) {
   return LOI_KPI_CATEGORIES.find((c) => c.value === value)?.label ?? value;
 }
 
-function thirdWednesdayInOctober(year: number): Date {
-  const dt = new Date(year, 9, 15);
-  while (dt.getDay() !== 3) dt.setDate(dt.getDate() + 1);
-  return new Date(Date.UTC(year, 9, dt.getDate()));
-}
 
-/** Returns the Masonic year (3rd Wed in Oct → 3rd Wed in Oct) start year for a given date. */
+/** Start year of the Masonic year (Installation to Installation, unit rule) containing `d`. */
 export function masonicYearStart(d: Date = new Date()): number {
-  const start = thirdWednesdayInOctober(d.getFullYear());
-  return d >= start ? d.getFullYear() : d.getFullYear() - 1;
+  return masonicYearStartSync(d);
 }

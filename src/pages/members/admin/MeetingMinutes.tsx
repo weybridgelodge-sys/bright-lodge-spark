@@ -395,7 +395,7 @@ function Inner() {
     const [m, e, yearResult] = await Promise.all([
       (supabase.from as any)("meeting_minutes").select("*").order("meeting_at", { ascending: false }),
       supabase.from("lodge_events").select("id,title,event_date").order("event_date", { ascending: false }),
-      (supabase as any).rpc("current_lodge_year"),
+      (supabase as any).rpc("current_officer_year"),
     ]);
     if (m.error) toast({ title: "Could not load minutes", description: m.error.message, variant: "destructive" });
     setRows(((m.data as any[]) ?? []).map((r) => ({

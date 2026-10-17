@@ -1,3 +1,4 @@
+import { masonicYearStartSync, masonicYearBoundsSync } from "@/lib/masonicYear";
 import { supabase } from "@/integrations/supabase/client";
 
 export type CollectionType = "charity_column" | "raffle" | "ad_hoc" | "relief_chest" | "other";
@@ -84,30 +85,13 @@ export type FestivalSettings = {
   public_feed_start_amount: number;
 };
 
-function thirdWednesdayInOctober(year: number): Date {
-  const d = new Date(year, 9, 15); // Oct 15 (month 0-indexed)
-  while (d.getDay() !== 3) {
-    d.setDate(d.getDate() + 1);
-  }
-  // Return at midnight UTC to avoid timezone drift on string comparison
-  return new Date(Date.UTC(year, 9, d.getDate()));
-}
 
 export function currentMasonicYear(): number {
-  const d = new Date();
-  const start = thirdWednesdayInOctober(d.getFullYear());
-  return d >= start ? d.getFullYear() : d.getFullYear() - 1;
+  return masonicYearStartSync();
 }
 
 export function masonicYearBounds(year: number): { start: string; end: string; label: string } {
-  const start = thirdWednesdayInOctober(year);
-  const end = thirdWednesdayInOctober(year + 1);
-  end.setDate(end.getDate() - 1); // run up to day before next year's 3rd Wednesday
-  return {
-    start: start.toISOString().slice(0, 10),
-    end: end.toISOString().slice(0, 10),
-    label: `${year}/${year + 1}`,
-  };
+  return masonicYearBoundsSync(year);
 }
 
 export async function fetchCharities(): Promise<Charity[]> {

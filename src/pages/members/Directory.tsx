@@ -1,3 +1,4 @@
+import { masonicYearStartSync } from "@/lib/masonicYear";
 import { useEffect, useState } from "react";
 import MembersLayout from "@/components/members/MembersLayout";
 import { supabase } from "@/integrations/supabase/client";
@@ -54,10 +55,8 @@ type Member = {
   postcode?: string | null;
 };
 
-// Lodge year rolls over in October (installation season)
-function currentLodgeYear(d = new Date()) {
-  return d.getMonth() + 1 >= 10 ? d.getFullYear() : d.getFullYear() - 1;
-}
+// Officers hold office Installation to Installation (unit rule / stored date).
+const currentLodgeYear = () => masonicYearStartSync();
 
 export default function MembersDirectory() {
   const [members, setMembers] = useState<Member[]>([]);

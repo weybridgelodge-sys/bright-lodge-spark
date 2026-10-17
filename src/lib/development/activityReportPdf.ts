@@ -1,3 +1,4 @@
+import { masonicYearStartSync, masonicYearBoundsSync } from "@/lib/masonicYear";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { assetUrl } from "@/lib/assetUrl";
@@ -17,19 +18,11 @@ const PANEL: [number, number, number] = [250, 250, 247];   // BRAND.panel #fafaf
 const fmt = (s: string | null | undefined) =>
   s ? new Date(s).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) : "—";
 
-// Masonic year runs 3rd Wednesday in October → day before 3rd Wednesday in October.
-function thirdWednesdayInOctober(year: number): Date {
-  const dt = new Date(year, 9, 15);
-  while (dt.getDay() !== 3) dt.setDate(dt.getDate() + 1);
-  return new Date(Date.UTC(year, 9, dt.getDate()));
-}
 
 export function masonicYearWindow(now = new Date()) {
-  const startYear = now >= thirdWednesdayInOctober(now.getFullYear()) ? now.getFullYear() : now.getFullYear() - 1;
-  const start = thirdWednesdayInOctober(startYear);
-  const end = thirdWednesdayInOctober(startYear + 1);
-  end.setDate(end.getDate() - 1);
-  return { start: start.toISOString().slice(0, 10), end: end.toISOString().slice(0, 10), label: `${startYear}–${startYear + 1}` };
+  const startYear = masonicYearStartSync(now);
+  const { start, end } = masonicYearBoundsSync(startYear);
+  return { start, end, label: `${startYear}–${startYear + 1}` };
 }
 
 export async function buildWorkingGroupsActivityPdf() {

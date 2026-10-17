@@ -1,3 +1,4 @@
+import { masonicYearStartSync } from "@/lib/masonicYear";
 import { useEffect, useMemo, useState } from "react";
 import MembersLayout from "@/components/members/MembersLayout";
 import ProtectedRoute from "@/components/members/ProtectedRoute";
@@ -1348,7 +1349,7 @@ function ReportTab({ charities, collections, donations, festival, canEdit }: {
     const ys = new Set<number>([currentMasonicYear()]);
     [...collections, ...donations].forEach((x: any) => {
       const d = x.collection_date ?? x.donation_date;
-      const yr = new Date(d).getMonth() >= 9 ? new Date(d).getFullYear() : new Date(d).getFullYear() - 1;
+      const yr = masonicYearStartSync(String(d));
       ys.add(yr);
     });
     return Array.from(ys).sort((a, b) => b - a);
