@@ -1,3 +1,4 @@
+import { fieldCls } from "@/lib/fieldStyle";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Textarea } from "@/components/ui/textarea";
@@ -57,7 +58,7 @@ export default function PreceptorNotesField({
         value={value}
         onChange={(e) => setValue(e.target.value)}
         placeholder="Qualitative observations — not visible to the member."
-        className="bg-navy-dark text-primary-foreground text-xs"
+        className={fieldCls}
       />
       <div className="flex justify-end mt-1">
         <Button size="sm" onClick={save} disabled={saving} className="bg-gold text-navy hover:bg-gold/90 h-7 px-3 text-[11px]">
