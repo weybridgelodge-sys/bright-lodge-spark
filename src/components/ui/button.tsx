@@ -11,11 +11,11 @@ const buttonVariants = cva(
       variant: {
         default: "bg-primary text-primary-foreground hover:bg-primary/90",
         destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90",
-        // Hover/pressed lay a gold tint OVER the caller's own fill and never set a text colour,
-        // so gold-on-navy and navy-on-cream outlined buttons both stay readable after a tap.
-        outline: "border border-input bg-background text-foreground hover:[background-image:linear-gradient(hsl(var(--accent)/0.06),hsl(var(--accent)/0.06))] active:[background-image:linear-gradient(hsl(var(--accent)/0.06),hsl(var(--accent)/0.06))] active:border-accent",
+        // Hover/pressed change only the border/inner outline, never the fill or text colour,
+        // so gold-on-navy and navy-on-cream outlined buttons keep their contrast after a tap.
+        outline: "border border-input bg-background text-foreground hover:border-accent hover:shadow-[inset_0_0_0_1px_hsl(var(--accent))] active:shadow-[inset_0_0_0_2px_hsl(var(--accent))]",
         secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-        ghost: "hover:[background-image:linear-gradient(hsl(var(--accent)/0.06),hsl(var(--accent)/0.06))] active:[background-image:linear-gradient(hsl(var(--accent)/0.06),hsl(var(--accent)/0.06))]",
+        ghost: "hover:underline underline-offset-4 active:shadow-[inset_0_0_0_2px_hsl(var(--accent))]",
         link: "text-primary underline-offset-4 hover:underline",
       },
       size: {

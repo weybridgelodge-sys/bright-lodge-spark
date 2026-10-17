@@ -22,11 +22,8 @@ async function measure(page: Page) {
     if (!btn) return null;
     const base = bgOf(btn);
     const s = getComputedStyle(btn);
-    const img = s.backgroundImage;
-    const isTint = /^linear-gradient\(rgba\([^)]*, 0\.1\), rgba\([^)]*, 0\.1\)\)$/.test(img);
-    if (img !== "none" && !isTint) return null; // shimmer/gradient fills: covered by axe at rest
-    const tint = isTint ? parse(img.slice(16)) : null;
-    const bg = tint ? over(tint, base) : base;
+    if (s.backgroundImage !== "none") return null; // gradient/shimmer fills: covered by axe at rest
+    const bg = base;
     const fg = over({ ...parse(s.color), a: parse(s.color).a * Number(s.opacity) }, bg);
     const [x, y] = [lum(fg), lum(bg)].sort((p, q) => q - p);
     return { ratio: (x + 0.05) / (y + 0.05), text: (btn.innerText || btn.getAttribute("aria-label") || "").trim().slice(0, 40), bg: s.backgroundColor, color: s.color };
