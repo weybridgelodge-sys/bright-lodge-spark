@@ -20,11 +20,11 @@
 - Page/list loading uses useInitialLoading, never useState(true), so save refreshes retain content and scroll.
 - lodge_events.event_label drives booking/email wording; titles in lib/bookingTitles. Why: non-Festive-Board events reuse one form.
 - Public event bookings use the separate events Stripe (_shared/stripe-events.ts, STRIPE_EVENTS_*) and event_* tables, never lodge Stripe. Why: events money stays off the lodge ledger.
-- Calendars: public via _shared/publicEventCalendar, member via member-calendar-feed. Why: same events.
+- Calendars: public _shared/publicEventCalendar, member member-calendar-feed. Why: same events.
 - Event pricing: _shared/eventPricing.ts; form: events/booking/BookingCore. Why: one rule.
 - Event module tables: public read via is_event_published(), writes via can_write_event_content(), copies via duplicate_event_content(). Why: drafts hidden, copies atomic.
 - Event money: one event_booking_payments row per Stripe charge; totals via recomputeBooking; balance tokens service-role only. Why: per-payment refunds, private links.
-- Manual membership enquiries are inserted only via add_manual_enquiry (admin/Secretary/Assistant Secretary, request_id idempotent, created_by audit); no table INSERT policy. Why: public Join Us insert path stays server-only.
+- Manual membership enquiries are inserted only via add_manual_enquiry (admin/Secretary/Asst Sec, request_id idempotent, created_by audit); no table INSERT policy. Why: public Join Us insert path stays server-only.
 - Masonic year = Installation to day before next (_shared/masonicYear.ts; rule, stored dates override); KPI Movement uses member_status_history; new tables carry unit_id. Why: multi-lodge-ready, accurate movement.
 - Meeting diary: festive_board_meetings via diary_* RPCs; cancel, never delete; Installation moves update stored date; series = per-month meeting_series.schedule, inferred from diary, skip existing; only regular/installation scheduled, others one-off. Why: one register.
-- Changed screens pass the 320px test + axe WCAG 2.1 AA scan (helpers/axe), both themes; fields use fieldCls, tokens >=4.5:1, no placeholder-only labels. Why: unreadable dark fields.
+- Changed screens pass the 320px test + axe WCAG 2.1 AA scan (helpers/axe), both themes; fieldCls, >=4.5:1, no placeholder-only labels. Why: unreadable dark fields.
