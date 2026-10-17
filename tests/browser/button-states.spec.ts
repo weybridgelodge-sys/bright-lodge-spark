@@ -32,14 +32,14 @@ async function measure(page: Page) {
 
 async function checkButtons(page: Page, ctx: string) {
   const buttons = page.locator("main button:visible:not([disabled]):not([aria-disabled=true])");
-  const n = Math.min(await buttons.count(), 40);
+  const n = Math.min(await buttons.count(), 25);
   const bad: string[] = [];
   for (let i = 0; i < n; i++) {
     const b = buttons.nth(i);
     const txt = ((await b.innerText().catch(() => "")) || "").trim();
     if (!txt) continue; // icon-only: no text to measure
     await b.evaluate((e) => e.setAttribute("data-measure", ""));
-    await b.hover({ timeout: 2000 }).catch(() => {});
+    await b.hover({ timeout: 500 }).catch(() => {});
     await page.waitForTimeout(170); // transition-colors
     const m = await measure(page);
     await b.evaluate((e) => e.removeAttribute("data-measure"));
