@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { inferSchedule, outsideSchedule, planSchedule, type ScheduleMeeting, type ScheduleMonth } from "@/lib/meetingDiary";
+import { inferSchedule, oneOffMeetings, outsideSchedule, planSchedule, type ScheduleMeeting, type ScheduleMonth } from "@/lib/meetingDiary";
 
-const m = (d: string, t: "regular" | "installation" = "regular", status = "draft"): ScheduleMeeting => ({ id: d, meeting_date: d, meeting_type: t, cancelled_at: null, status });
+const m = (d: string, t: "regular" | "installation" | "dispensation" | "emergency" = "regular", status = "draft"): ScheduleMeeting => ({ id: d, meeting_date: d, meeting_type: t, cancelled_at: null, status });
 // The seven meetings in the diary today.
 const diary = [m("2026-09-12"), m("2026-02-18"), m("2026-05-13"), m("2027-05-12"), m("2027-02-17"), m("2026-12-09"), m("2026-10-21", "installation")];
 
@@ -36,4 +36,12 @@ describe("per-month meeting schedule", () => {
     expect(planSchedule(sched, 2027, 10, []).length).toBe(4);
   });
   it("starts empty when nothing can be inferred", () => expect(inferSchedule([])).toEqual([]));
+  it("dispensation and emergency meetings are one-off, never outside schedule, moved or skipped", () => {
+    const withDisp = diary.map((x) => (x.id === "2026-09-12" ? { ...x, meeting_type: "dispensation" as const } : x)).concat(m("2026-12-02", "emergency"));
+    const s2 = inferSchedule(withDisp);
+    expect(s2).toEqual(sched);
+    expect(outsideSchedule(s2, withDisp)).toEqual([]);
+    expect(oneOffMeetings(withDisp).map((x) => x.meeting_date)).toEqual(["2026-09-12", "2026-12-02"]);
+    expect(planSchedule(s2, 2026, 10, withDisp).find((r) => r.date === "2026-12-09")?.status).toBe("existing");
+  });
 });

@@ -17,7 +17,7 @@ import {
   type InstallationConfig, type InstallationRule,
 } from "@/lib/masonicYear";
 import {
-  MONTHS, WEEKDAYS, ORDINALS, planMove, inferSchedule, planSchedule, outsideSchedule, dependencyWarnings, installationEffect,
+  MONTHS, WEEKDAYS, ORDINALS, planMove, inferSchedule, planSchedule, outsideSchedule, oneOffMeetings, SCHEDULED_TYPES, dependencyWarnings, installationEffect,
   type DiaryMeeting, type Dependencies, type MeetingType, type Ordinal, type ScheduleMonth,
 } from "@/lib/meetingDiary";
 
@@ -30,7 +30,7 @@ type Series = { id: string; name: string; meeting_type: MeetingType; ordinal: Or
 type Audit = { id: string; action: string; target_table: string; created_at: string; actor: string | null };
 
 const TYPES: { value: MeetingType; label: string }[] = [
-  { value: "regular", label: "Regular" }, { value: "installation", label: "Installation" }, { value: "emergency", label: "Emergency" },
+  { value: "regular", label: "Regular" }, { value: "installation", label: "Installation" }, { value: "emergency", label: "Emergency" }, { value: "dispensation", label: "Dispensation" },
 ];
 const typeLabel = (t: string) => TYPES.find((x) => x.value === t)?.label ?? t;
 const selectCls = `mt-1 ${fieldCls}`;
@@ -203,6 +203,7 @@ function Inner() {
   const plan = planSchedule(schedule, sYear, startMonth, meetings);
   const toAdd = plan.filter((r) => r.status === "new");
   const outside = outsideSchedule(schedule, meetings);
+  const oneOffs = oneOffMeetings(meetings);
   const editMonth = (month: number, p: Partial<ScheduleMonth> | null) => {
     const cur = schedule.filter((x) => x.month !== month);
     const old = schedule.find((x) => x.month === month);
@@ -398,7 +399,7 @@ function Inner() {
                         </label>
                         <label className={labelCls}>Type
                           <select aria-label={`${name} meeting type`} className={selectCls} value={row.meeting_type} onChange={(e) => editMonth(month, { meeting_type: e.target.value as MeetingType })}>
-                            {TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
+                            {TYPES.filter((t) => SCHEDULED_TYPES.includes(t.value)).map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
                           </select>
                         </label>
                       </div>
@@ -427,6 +428,12 @@ function Inner() {
             <div className="mt-3 text-sm" data-testid="outside-schedule">
               <p className="text-gold">Outside schedule (kept as they are):</p>
               <ul className="space-y-1">{outside.map((o) => <li key={o.id} className="text-cream break-words">{fmt(o.meeting_date)} · {typeLabel(o.meeting_type)} · {(o as Meeting).status}</li>)}</ul>
+            </div>
+          )}
+          {!!oneOffs.length && (
+            <div className="mt-3 text-sm" data-testid="one-off-meetings">
+              <p className="text-gold">One-off meetings (not part of the schedule):</p>
+              <ul className="space-y-1">{oneOffs.map((o) => <li key={o.id} className="text-cream break-words">{fmt(o.meeting_date)} · {typeLabel(o.meeting_type)} · One-off{(o as Meeting).notes ? ` · ${(o as Meeting).notes}` : ""}</li>)}</ul>
             </div>
           )}
           <Button className="mt-3 min-h-[44px] bg-gold text-navy hover:bg-gold/90" disabled={busy || !toAdd.length} onClick={generate}>
@@ -492,8 +499,8 @@ function Inner() {
               </label>
             )}
             {action?.kind !== "move" && (
-              <label className={labelCls}>{action?.kind === "drop" ? "Reason (optional)" : "Notes (optional)"}
-                <Textarea className={`mt-1 ${fieldCls}`} rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} />
+              <label className={labelCls}>{action?.kind === "drop" ? "Reason (optional)" : newType === "dispensation" ? "Dispensation reason or reference (optional)" : "Notes (optional)"}
+                <Textarea className={`mt-1 ${fieldCls}`} rows={2} placeholder={newType === "dispensation" ? "e.g. Dispensation ref. PGM/2026/14" : undefined} value={notes} onChange={(e) => setNotes(e.target.value)} />
               </label>
             )}
             {movePlan && movePlan.ok === false && newDate !== action?.meeting?.meeting_date && <p role="alert" className="text-sm text-destructive-foreground">{movePlan.error}</p>}

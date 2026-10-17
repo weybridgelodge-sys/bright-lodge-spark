@@ -6,7 +6,10 @@ import {
   type InstallationConfig, type MasonicYearRange,
 } from "../../supabase/functions/_shared/masonicYear";
 
-export type MeetingType = "regular" | "installation" | "emergency";
+export type MeetingType = "regular" | "installation" | "emergency" | "dispensation";
+/** Only these types follow the per-month schedule; others are one-off meetings. */
+export const SCHEDULED_TYPES: MeetingType[] = ["regular", "installation"];
+export const isOneOff = (t: string) => !SCHEDULED_TYPES.includes(t as MeetingType);
 export type Ordinal = "1" | "2" | "3" | "4" | "last";
 
 export type DiaryMeeting = {
@@ -112,7 +115,7 @@ export function ordinalOf(iso: string): Ordinal {
  * are ignored. Each month takes its most common week; Installation wins the type.
  */
 export function inferSchedule(meetings: ScheduleMeeting[]): ScheduleMonth[] {
-  const live = meetings.filter((m) => !m.cancelled_at && m.meeting_type !== "emergency");
+  const live = meetings.filter((m) => !m.cancelled_at && !isOneOff(m.meeting_type));
   if (!live.length) return [];
   const count = <T,>(xs: T[]) => { const c = new Map<T, number>(); xs.forEach((x) => c.set(x, (c.get(x) ?? 0) + 1)); return [...c.entries()].sort((a, b) => b[1] - a[1]); };
   const wd = count(live.map((m) => parts(m.meeting_date).wd))[0][0];
@@ -140,9 +143,10 @@ export type PlanRow = { date: string; meeting_type: MeetingType; status: "existi
 
 /** Preview a season: skip dates already in the diary (date + type), flag months whose meeting sits on another date. */
 export function planSchedule(schedule: ScheduleMonth[], startYear: number, startMonth: number, meetings: ScheduleMeeting[]): PlanRow[] {
-  const live = meetings.filter((m) => !m.cancelled_at);
+  const all = meetings.filter((m) => !m.cancelled_at);
+  const live = all.filter((m) => !isOneOff(m.meeting_type));
   return scheduleDates(schedule, startYear, startMonth).map(({ date, meeting_type }) => {
-    const warning = bankHoliday(date) ?? (live.some((m) => m.meeting_date === date && m.meeting_type !== meeting_type) ? "Another meeting is on this date" : undefined);
+    const warning = bankHoliday(date) ?? (all.some((m) => m.meeting_date === date && m.meeting_type !== meeting_type) ? "Another meeting is on this date" : undefined);
     if (live.some((m) => m.meeting_date === date && m.meeting_type === meeting_type)) return { date, meeting_type, status: "existing", warning: undefined };
     const sameMonth = live.find((m) => m.meeting_date.slice(0, 7) === date.slice(0, 7) && m.meeting_type === meeting_type);
     if (sameMonth) return { date, meeting_type, status: "moved", existingDate: sameMonth.meeting_date, warning };
@@ -150,10 +154,13 @@ export function planSchedule(schedule: ScheduleMonth[], startYear: number, start
   });
 }
 
+/** One-off meetings (dispensation, emergency): never governed by the schedule. */
+export const oneOffMeetings = <T extends ScheduleMeeting>(meetings: T[]) => meetings.filter((m) => !m.cancelled_at && isOneOff(m.meeting_type));
+
 /** Diary meetings that do not match the schedule (kept and editable, never removed). */
 export function outsideSchedule(schedule: ScheduleMonth[], meetings: ScheduleMeeting[]) {
   return meetings.filter((m) => {
-    if (m.cancelled_at) return false;
+    if (m.cancelled_at || isOneOff(m.meeting_type)) return false;
     const p = parts(m.meeting_date);
     const s = schedule.find((x) => x.month === p.m);
     return !s || nthWeekdayOfMonth(p.y, p.m, s.ordinal, s.weekday) !== m.meeting_date;

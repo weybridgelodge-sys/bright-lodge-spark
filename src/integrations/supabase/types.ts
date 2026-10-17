@@ -7415,7 +7415,11 @@ export type Database = {
         | "no_show"
         | "cancelled_refunded"
         | "apologies"
-      festive_meeting_type: "regular" | "installation" | "emergency"
+      festive_meeting_type:
+        | "regular"
+        | "installation"
+        | "emergency"
+        | "dispensation"
       festive_payment_method:
         | "stripe"
         | "paid_on_night_cash"
@@ -7651,7 +7655,12 @@ export const Constants = {
         "cancelled_refunded",
         "apologies",
       ],
-      festive_meeting_type: ["regular", "installation", "emergency"],
+      festive_meeting_type: [
+        "regular",
+        "installation",
+        "emergency",
+        "dispensation",
+      ],
       festive_payment_method: [
         "stripe",
         "paid_on_night_cash",

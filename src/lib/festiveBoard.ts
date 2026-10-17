@@ -4,6 +4,7 @@ export const FB_MEETING_TYPES = [
   { value: "regular", label: "Regular" },
   { value: "installation", label: "Installation" },
   { value: "emergency", label: "Emergency" },
+  { value: "dispensation", label: "Dispensation" },
 ] as const;
 
 export const FB_ATTENDANCE_STATUSES = [
@@ -83,7 +84,7 @@ export function shortMonthLabel(dateStr: string, type: string): string {
   const d = new Date(dateStr);
   const day = d.getDate();
   const m = d.toLocaleDateString("en-GB", { month: "short" });
-  const suffix = type === "installation" ? " (Inst.)" : type === "emergency" ? " (Emerg.)" : "";
+  const suffix = type === "installation" ? " (Inst.)" : type === "emergency" ? " (Emerg.)" : type === "dispensation" ? " (Disp.)" : "";
   return `${day} ${m}${suffix}`;
 }
 

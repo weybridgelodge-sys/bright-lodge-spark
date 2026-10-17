@@ -1,0 +1,1 @@
+ALTER TYPE public.festive_meeting_type ADD VALUE IF NOT EXISTS 'dispensation';
