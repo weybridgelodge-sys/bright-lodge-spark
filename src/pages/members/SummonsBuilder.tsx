@@ -48,6 +48,7 @@ import { accountsOptionLabel, type AttachableAccounts } from "@/lib/treasurer/ye
 import SummonsPrintPreview from "@/components/members/SummonsPrintPreview";
 import {
   NON_PROGRESSIVE_LABELS,
+  fetchOfficerYear,
   NonProgressiveKey,
   POSITION_LABELS,
   PositionKey,
