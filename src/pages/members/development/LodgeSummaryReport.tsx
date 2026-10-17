@@ -1,3 +1,4 @@
+import { fieldCls } from "@/lib/fieldStyle";
 import { useEffect, useMemo, useState } from "react";
 import MembersLayout from "@/components/members/MembersLayout";
 import ProtectedRoute from "@/components/members/ProtectedRoute";
@@ -200,11 +201,11 @@ function Inner() {
       <div className="flex items-end gap-3 flex-wrap rounded-sm border border-gold/20 bg-navy-light/30 p-4">
         <div>
           <label className="text-xs text-primary-foreground/60 block mb-1">Period start</label>
-          <Input type="date" value={start} onChange={(e) => setStart(e.target.value)} className="bg-navy-dark text-primary-foreground" />
+          <Input type="date" value={start} onChange={(e) => setStart(e.target.value)} className={fieldCls} />
         </div>
         <div>
           <label className="text-xs text-primary-foreground/60 block mb-1">Period end</label>
-          <Input type="date" value={end} onChange={(e) => setEnd(e.target.value)} className="bg-navy-dark text-primary-foreground" />
+          <Input type="date" value={end} onChange={(e) => setEnd(e.target.value)} className={fieldCls} />
         </div>
         <Button size="sm" variant="outline" className="border-gold/40 bg-navy-dark text-gold hover:bg-gold/10 hover:text-gold" onClick={generate} disabled={loading}>
           {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <RefreshCw className="w-4 h-4 mr-2" />}
@@ -352,7 +353,7 @@ function Inner() {
                 onChange={(e) => setStatement(e.target.value)}
                 rows={8}
                 placeholder="Brethren, in the period under review…"
-                className="bg-navy-dark text-primary-foreground"
+                className={fieldCls}
               />
             </Card>
           </div>

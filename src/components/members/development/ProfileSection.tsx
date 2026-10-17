@@ -1,3 +1,4 @@
+import { fieldCls } from "@/lib/fieldStyle";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
@@ -112,12 +113,12 @@ export default function ProfileSection({
           <>
             <div>
               <Label htmlFor="passing-scheduled" className="text-xs text-primary-foreground/70">Passing scheduled</Label>
-              <Input id="passing-scheduled" type="date" value={passingScheduled ?? ""} onChange={(e) => setPassingScheduled(e.target.value)} className="bg-navy-dark text-primary-foreground" />
+              <Input id="passing-scheduled" type="date" value={passingScheduled ?? ""} onChange={(e) => setPassingScheduled(e.target.value)} className={fieldCls} />
             </div>
             <Field label="Passed" value={fmt(profile.passing_date)} />
             <div>
               <Label htmlFor="raising-scheduled" className="text-xs text-primary-foreground/70">Raising scheduled</Label>
-              <Input id="raising-scheduled" type="date" value={raisingScheduled ?? ""} onChange={(e) => setRaisingScheduled(e.target.value)} className="bg-navy-dark text-primary-foreground" />
+              <Input id="raising-scheduled" type="date" value={raisingScheduled ?? ""} onChange={(e) => setRaisingScheduled(e.target.value)} className={fieldCls} />
             </div>
             <Field label="Raised" value={fmt(profile.raising_date)} />
           </>
@@ -137,16 +138,16 @@ export default function ProfileSection({
           <div className="grid sm:grid-cols-3 gap-3">
             <div>
               <Label htmlFor="ra" className="text-xs text-primary-foreground/70">Royal Arch date</Label>
-              <Input id="ra" type="date" value={royalArchDate ?? ""} onChange={(e) => setRoyalArchDate(e.target.value)} className="bg-navy-dark text-primary-foreground" />
+              <Input id="ra" type="date" value={royalArchDate ?? ""} onChange={(e) => setRoyalArchDate(e.target.value)} className={fieldCls} />
             </div>
             <div>
               <Label htmlFor="pr" className="text-xs text-primary-foreground/70">Proposer</Label>
-              <Input id="pr" value={proposer ?? ""} onChange={(e) => setProposer(e.target.value)} className="bg-navy-dark text-primary-foreground" />
+              <Input id="pr" value={proposer ?? ""} onChange={(e) => setProposer(e.target.value)} className={fieldCls} />
             </div>
             <div>
               <Label className="text-xs text-primary-foreground/70">Assigned Mentor</Label>
               <Select value={mentorId || "none"} onValueChange={(v) => setMentorId(v === "none" ? "" : v)}>
-                <SelectTrigger className="bg-navy-dark text-primary-foreground"><SelectValue placeholder="Select mentor" /></SelectTrigger>
+                <SelectTrigger className={fieldCls}><SelectValue placeholder="Select mentor" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">— None —</SelectItem>
                   {mentors.map((m) => (
@@ -158,7 +159,7 @@ export default function ProfileSection({
           </div>
           <div>
             <Label htmlFor="exp" className="text-xs text-primary-foreground/70">Previous Masonic Experience</Label>
-            <Textarea id="exp" rows={3} value={experience ?? ""} onChange={(e) => setExperience(e.target.value)} className="bg-navy-dark text-primary-foreground" />
+            <Textarea id="exp" rows={3} value={experience ?? ""} onChange={(e) => setExperience(e.target.value)} className={fieldCls} />
           </div>
           <div className="flex justify-end">
             <Button onClick={save} disabled={saving} className="bg-gold text-navy hover:bg-gold/90">{saving ? "Saving…" : "Save"}</Button>

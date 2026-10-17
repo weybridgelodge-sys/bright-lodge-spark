@@ -18,8 +18,8 @@
 - Registration numbers (ugle/mmh/rose_croix) are private (get_profiles_pii), edited only in Edit Member by admin/Secretary. Why: Secretary-owned records.
 - Almoner two-tier: can_view_almoner gates SELECT, can_edit_almoner writes (incl. welfare-attachments, Widows archive by status, never delete); app mirrors canAccessAlmoner/canEditAlmoner. can_access_almoner deprecated. Why: read-only offices.
 - Page/list loading uses useInitialLoading, never useState(true), so save refreshes retain content and scroll.
-- Meeting event label (lodge_events.event_label, default 'Festive Board') drives booking-form/email wording; title-aware attendance options live in src/lib/bookingTitles.ts. Why: White Table and other non-Festive-Board events reuse one form.
-- Public event bookings (/events/:slug) use the separate events Stripe account (_shared/stripe-events.ts, STRIPE_EVENTS_*) and event_accounts/event_bookings, never lodge Stripe. Why: events money is kept apart from the lodge ledger.
+- lodge_events.event_label drives booking/email wording; titles in lib/bookingTitles. Why: non-Festive-Board events reuse one form.
+- Public event bookings use the separate events Stripe (_shared/stripe-events.ts, STRIPE_EVENTS_*) and event_* tables, never lodge Stripe. Why: events money stays off the lodge ledger.
 - Public calendars: _shared/publicEventCalendar; member Calendar: member-calendar-feed. Why: same events everywhere.
 - Event pricing via _shared/eventPricing.ts; form pieces via events/booking/BookingCore. Why: one shared rule.
 - Event module tables: public read via is_event_published(), writes via can_write_event_content(), copies via duplicate_event_content(). Why: drafts hidden, copies atomic.
@@ -27,3 +27,4 @@
 - Manual membership enquiries are inserted only via add_manual_enquiry (admin/Secretary/Assistant Secretary, request_id idempotent, created_by audit); no table INSERT policy. Why: public Join Us insert path stays server-only.
 - Masonic year = Installation to day before next (via _shared/masonicYear.ts, settings rule, stored dates override); KPI Movement uses member_status_history; new tables carry unit_id. Why: multi-lodge-ready, accurate movement.
 - Meeting diary: festive_board_meetings via diary_* RPCs; cancel, never delete; Installation moves update its stored date; triggers audit. Why: one shared register.
+- Form fields use fieldCls (lib/fieldStyle): text/placeholder >=4.5:1, visible label, date format hint. Why: dark inputs unreadable on phones.

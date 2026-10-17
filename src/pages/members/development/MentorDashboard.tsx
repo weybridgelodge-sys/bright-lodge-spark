@@ -1,3 +1,4 @@
+import { fieldCls } from "@/lib/fieldStyle";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import MembersLayout from "@/components/members/MembersLayout";
@@ -131,7 +132,7 @@ function Inner() {
           Lodge Development Summary Report <ChevronRight className="w-3 h-3" />
         </Link>
       </div>
-      <Input placeholder="Filter by name" value={filter} onChange={(e) => setFilter(e.target.value)} className="max-w-sm bg-navy-dark text-primary-foreground" />
+      <Input placeholder="Filter by name" value={filter} onChange={(e) => setFilter(e.target.value)} className={`max-w-sm ${fieldCls}`} />
       {loading ? (
         <div className="flex items-center justify-center py-20"><Loader2 className="w-6 h-6 text-gold animate-spin" /></div>
       ) : (
