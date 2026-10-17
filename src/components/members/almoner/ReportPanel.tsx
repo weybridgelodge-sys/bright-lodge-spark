@@ -599,10 +599,10 @@ export default function ReportPanel({ members }: { members: Member[] }) {
         <div className="bg-navy-light/40 border border-gold/20 rounded p-4">
           <div className="flex items-center justify-end gap-2 mb-2 flex-wrap">
             {canEditAlmoner && (<>
-            <Button size="sm" variant="outline" className="bg-transparent border-gold/40 text-gold hover:bg-gold/10 hover:text-gold" onClick={() => persist("draft")} disabled={saving} className="border-gold/30 text-gold hover:bg-gold/10">
+            <Button size="sm" variant="outline" onClick={() => persist("draft")} disabled={saving} className="bg-transparent border-gold/30 text-gold hover:bg-gold/10 hover:text-gold">
               <Save className="w-4 h-4 mr-1" /> Save draft
             </Button>
-            <Button size="sm" variant="outline" className="bg-transparent border-gold/40 text-gold hover:bg-gold/10 hover:text-gold" onClick={() => persist("final")} disabled={saving} className="border-gold/30 text-gold hover:bg-gold/10">
+            <Button size="sm" variant="outline" onClick={() => persist("final")} disabled={saving} className="bg-transparent border-gold/30 text-gold hover:bg-gold/10 hover:text-gold">
               <CheckCircle2 className="w-4 h-4 mr-1" /> Finalise
             </Button>
             </>)}
@@ -641,14 +641,14 @@ export default function ReportPanel({ members }: { members: Member[] }) {
                   </div>
                 </div>
                 <div className="flex items-center gap-1">
-                  <Button size="sm" variant="ghost" className="text-cream hover:bg-gold/10 hover:text-gold" onClick={() => loadReport(r)} className="text-gold hover:bg-gold/10 h-8 px-2">
+                  <Button size="sm" variant="ghost" onClick={() => loadReport(r)} className="text-gold hover:bg-gold/10 h-8 px-2">
                     <FolderOpen className="w-4 h-4" />
                   </Button>
-                  <Button size="sm" variant="ghost" className="text-cream hover:bg-gold/10 hover:text-gold" onClick={() => reprint(r)} className="text-gold hover:bg-gold/10 h-8 px-2">
+                  <Button size="sm" variant="ghost" onClick={() => reprint(r)} className="text-gold hover:bg-gold/10 h-8 px-2">
                     <Printer className="w-4 h-4" />
                   </Button>
                   {isAdmin && canEditAlmoner && (
-                    <Button size="sm" variant="ghost" className="text-cream hover:bg-gold/10 hover:text-gold" onClick={() => removeReport(r.id)} className="text-red-400 hover:bg-red-500/10 h-8 px-2">
+                    <Button size="sm" variant="ghost" onClick={() => removeReport(r.id)} className="text-red-400 hover:bg-red-500/10 h-8 px-2">
                       <Trash2 className="w-4 h-4" />
                     </Button>
                   )}
