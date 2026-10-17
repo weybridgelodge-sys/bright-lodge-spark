@@ -62,3 +62,19 @@ export function raffleCollectionLabel(r: RaffleCollectionLike, formatDate: (d: s
   const rest = `${formatDate(r.collection_date)} · net £${Number(r.net_amount ?? 0).toFixed(2)}`;
   return title ? `${title} · ${rest}` : rest;
 }
+
+export type RaffleOptionLike = RaffleCollectionLike & { allocated: number | string | null; notes?: string | null };
+
+/**
+ * Two-line "Funded by" option: date and an identifying label first, money second.
+ * Label = meeting/event title, else the Charity Steward's note, else nothing — never invented.
+ */
+export function raffleOptionLines(r: RaffleOptionLike, formatDate: (d: string) => string): { first: string; second: string } {
+  const title = r.event_title?.trim();
+  const note = r.notes?.trim().replace(/\s+/g, " ");
+  const tag = title || note || "";
+  return {
+    first: `Raffle — ${formatDate(r.collection_date)}${tag ? ` · ${tag}` : ""}`,
+    second: `net £${Number(r.net_amount ?? 0).toFixed(2)} · £${Number(r.allocated ?? 0).toFixed(2)} allocated`,
+  };
+}
