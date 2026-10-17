@@ -715,6 +715,13 @@
       "when": 1792268854835,
       "tag": "0101_meeting_series_schedule",
       "breakpoints": true
+    },
+    {
+      "idx": 102,
+      "version": "7",
+      "when": 1792269713607,
+      "tag": "0102_festive_meeting_type_dispensation",
+      "breakpoints": true
     }
   ]
 }
