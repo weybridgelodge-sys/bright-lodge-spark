@@ -90,6 +90,7 @@ for (const route of routePaths) {
 }
 
 test("every Treasurer tab stays within a 320px viewport", async ({ page }) => {
+  test.setTimeout(90_000); // scans every tab; regularly ~30s under a full run
   await page.goto("/members/admin/treasurer");
   await waitForPortal(page);
 
