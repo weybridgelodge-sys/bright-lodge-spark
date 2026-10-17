@@ -23,17 +23,17 @@ describe("buttons on a navy surface", () => {
   it("outline and ghost never set a hover/pressed text colour (callers' gold/cream text survives a tap)", () => {
     for (const v of ["outline", "ghost"] as const) expect(buttonVariants({ variant: v })).not.toMatch(/(hover|active):text-/);
   });
-  it("outlined gold text passes 4.5:1 at rest and on the hover/pressed tint (accent/10)", () => {
-    expect(buttonVariants({ variant: "outline" })).toContain("hover:[background-image:linear-gradient(hsl(var(--accent)/0.1)");
+  it("outlined gold text passes 4.5:1 at rest and on the hover/pressed tint (caller gold/10 + variant accent/6)", () => {
+    expect(buttonVariants({ variant: "outline" })).toContain("hover:[background-image:linear-gradient(hsl(var(--accent)/0.06)");
     // The tint is a layer, not a replacement fill: no hover:bg-* that could swap a cream fill for navy.
     expect(buttonVariants({ variant: "outline" })).not.toMatch(/hover:bg-/);
-    const tint = mix(token("accent"), card, 0.1);
+    const tint = mix(token("accent"), mix(token("accent"), card, 0.1), 0.06);
     expect(ratio(gold, card)).toBeGreaterThanOrEqual(4.5);
     expect(ratio(gold, tint)).toBeGreaterThanOrEqual(4.5);
     expect(ratio(cream, tint)).toBeGreaterThanOrEqual(4.5);
   });
   it("navy text on a cream outline fill stays 4.5:1 under the tint", () =>
-    expect(ratio(navy, mix(token("accent"), token("background"), 0.1))).toBeGreaterThanOrEqual(4.5));
+    expect(ratio(navy, mix(token("accent"), token("background"), 0.06))).toBeGreaterThanOrEqual(4.5));
   it("solid gold (default portal) button: navy text 4.5:1", () => expect(ratio(navy, gold)).toBeGreaterThanOrEqual(4.5));
   it("destructive text 4.5:1", () => expect(ratio(token("destructive-foreground"), token("destructive"))).toBeGreaterThanOrEqual(4.5));
   it("disabled is visibly dimmer (70%) yet gold text stays legible (>= 3:1)", () => {
