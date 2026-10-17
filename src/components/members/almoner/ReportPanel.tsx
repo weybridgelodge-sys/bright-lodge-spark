@@ -641,14 +641,14 @@ export default function ReportPanel({ members }: { members: Member[] }) {
                   </div>
                 </div>
                 <div className="flex items-center gap-1">
-                  <Button size="sm" variant="ghost" onClick={() => loadReport(r)} className="text-gold hover:bg-gold/10 h-8 px-2">
+                  <Button size="sm" variant="ghost" className="text-cream hover:bg-gold/10 hover:text-gold" onClick={() => loadReport(r)} className="text-gold hover:bg-gold/10 h-8 px-2">
                     <FolderOpen className="w-4 h-4" />
                   </Button>
-                  <Button size="sm" variant="ghost" onClick={() => reprint(r)} className="text-gold hover:bg-gold/10 h-8 px-2">
+                  <Button size="sm" variant="ghost" className="text-cream hover:bg-gold/10 hover:text-gold" onClick={() => reprint(r)} className="text-gold hover:bg-gold/10 h-8 px-2">
                     <Printer className="w-4 h-4" />
                   </Button>
                   {isAdmin && canEditAlmoner && (
-                    <Button size="sm" variant="ghost" onClick={() => removeReport(r.id)} className="text-red-400 hover:bg-red-500/10 h-8 px-2">
+                    <Button size="sm" variant="ghost" className="text-cream hover:bg-gold/10 hover:text-gold" onClick={() => removeReport(r.id)} className="text-red-400 hover:bg-red-500/10 h-8 px-2">
                       <Trash2 className="w-4 h-4" />
                     </Button>
                   )}
