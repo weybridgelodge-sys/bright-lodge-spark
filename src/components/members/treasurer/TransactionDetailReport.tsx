@@ -244,7 +244,7 @@ export default function TransactionDetailReport({ canEdit }: { canEdit: boolean 
     <div className="space-y-4">
       <div>
         <h3 className="font-serif text-lg text-primary">Transaction Detail</h3>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-sm text-cream/80">
           Line-level cash-book listing of every journal line in the selected date and account-code range.
         </p>
       </div>
@@ -303,7 +303,7 @@ export default function TransactionDetailReport({ canEdit }: { canEdit: boolean 
           <Input id="td-search" placeholder="e.g. JE-000123" value={search} onChange={(e) => setSearch(e.target.value)} />
         </div>
       </div>
-      <p className="text-xs text-muted-foreground">
+      <p className="text-xs text-cream/80">
         Doc no. is assigned automatically and never changes; every line of the same entry shares it. Gaps in the
         sequence are normal where an entry was deleted. Click any row to see every line of that entry.
       </p>
@@ -316,10 +316,10 @@ export default function TransactionDetailReport({ canEdit }: { canEdit: boolean 
 
       {loading ? (
         <div className="flex justify-center py-10">
-          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+          <Loader2 className="h-6 w-6 animate-spin text-cream/80" />
         </div>
       ) : loadError ? (
-        <div className="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-4 text-sm text-destructive">
+        <div className="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-4 text-sm text-destructive-foreground">
           <p className="font-medium">Report failed to load — no results are shown.</p>
           <p className="mt-1 break-words">{loadError}</p>
           <Button variant="outline" size="sm" className="mt-3" onClick={load}>
@@ -328,7 +328,7 @@ export default function TransactionDetailReport({ canEdit }: { canEdit: boolean 
         </div>
       ) : loaded ? (
         lines.length === 0 ? (
-          <p className="text-sm text-muted-foreground py-6 text-center">
+          <p className="text-sm text-cream/80 py-6 text-center">
             No journal lines found for this date and code range.
           </p>
         ) : (
@@ -367,7 +367,7 @@ export default function TransactionDetailReport({ canEdit }: { canEdit: boolean 
                           : "border-t border-border"
                       }`}
                     >
-                      <td className="px-3 py-1.5 whitespace-nowrap font-mono text-xs text-muted-foreground">
+                      <td className="px-3 py-1.5 whitespace-nowrap font-mono text-xs text-cream/80">
                         {formatEntryNumber(l.entryNumber)}
                       </td>
                       <td className="px-3 py-1.5 whitespace-nowrap">{fmtDate(l.date)}</td>
@@ -405,7 +405,7 @@ export default function TransactionDetailReport({ canEdit }: { canEdit: boolean 
               </table>
             </div>
             <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
-              <span className="text-muted-foreground">{lines.length} line{lines.length === 1 ? "" : "s"}</span>
+              <span className="text-cream/80">{lines.length} line{lines.length === 1 ? "" : "s"}</span>
               <span className="tabular-nums">
                 Total debits <strong>{money(totals.debit)}</strong>
                 {" · "}

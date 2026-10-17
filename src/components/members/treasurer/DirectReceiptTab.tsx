@@ -509,7 +509,7 @@ export default function DirectReceiptTab({ canEdit }: { canEdit: boolean }) {
                     ))}
                   </ul>
                 ) : (
-                  <p className="text-destructive">The amount is smaller than the reserve and Relief Chest shares.</p>
+                  <p className="text-destructive-foreground">The amount is smaller than the reserve and Relief Chest shares.</p>
                 )}
               </div>
             ) : (
@@ -566,7 +566,7 @@ export default function DirectReceiptTab({ canEdit }: { canEdit: boolean }) {
                 {diff === 0 ? (
                   <span className="text-emerald-400">Balanced</span>
                 ) : (
-                  <span className="text-destructive">Out of balance by {fmt(Math.abs(diff))}</span>
+                  <span className="text-destructive-foreground">Out of balance by {fmt(Math.abs(diff))}</span>
                 )}
               </div>
               </>

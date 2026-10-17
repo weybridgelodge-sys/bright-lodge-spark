@@ -431,7 +431,7 @@ export default function FestiveBoardAdmin() {
               return (
                 <div key={meetingId} className="mb-4 last:mb-0">
                   <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
-                    <p className="text-xs font-semibold text-gold/80 uppercase tracking-wider">
+                    <p className="text-xs font-semibold text-gold uppercase tracking-wider">
                       {m ? fmtDate(m.meeting_date) : "Unassigned"}
                       <span className="text-primary-foreground/80 normal-case font-normal">
                         {" "}· {activeCount} waitlisted
@@ -442,7 +442,7 @@ export default function FestiveBoardAdmin() {
                         size="sm"
                         variant="outline"
                         onClick={() => closeWaitlistForMeeting(meetingId, activeCount)}
-                        className="border-destructive/50 text-destructive hover:bg-destructive/10 min-h-11 sm:min-h-0"
+                        className="border-destructive/50 text-destructive-foreground hover:bg-destructive/10 min-h-11 sm:min-h-0"
                       >
                         Close waitlist & refund now
                       </Button>
@@ -599,7 +599,7 @@ export default function FestiveBoardAdmin() {
                             return (
                               <>
                                 <div>
-                                  <h4 className="text-[10px] uppercase tracking-wider text-gold/80 mb-1.5">Members ({membersList.length})</h4>
+                                  <h4 className="text-[10px] uppercase tracking-wider text-gold mb-1.5">Members ({membersList.length})</h4>
                                   {membersBreakdown && (
                                     <p className="text-[10px] text-primary-foreground/80 mb-1.5">{membersBreakdown}</p>
                                   )}
@@ -615,7 +615,7 @@ export default function FestiveBoardAdmin() {
                                             <span className="text-primary-foreground/80 ml-1">· {paymentMethodLabel(r.payment_method)}</span>
                                           )}
                                         </span>
-                                        <span className={r.attendance_status === "attended" ? "text-gold" : r.attendance_status === "no_show" ? "text-destructive" : "text-primary-foreground/80"}>
+                                        <span className={r.attendance_status === "attended" ? "text-gold" : r.attendance_status === "no_show" ? "text-destructive-foreground" : "text-primary-foreground/80"}>
                                           {attendanceStatusLabel(r.attendance_status)}
                                         </span>
                                       </li>
@@ -624,7 +624,7 @@ export default function FestiveBoardAdmin() {
                                   </ul>
                                 </div>
                                 <div>
-                                  <h4 className="text-[10px] uppercase tracking-wider text-gold/80 mb-1.5">Visitors ({visitorsList.length})</h4>
+                                  <h4 className="text-[10px] uppercase tracking-wider text-gold mb-1.5">Visitors ({visitorsList.length})</h4>
                                   {visitorsBreakdown && (
                                     <p className="text-[10px] text-primary-foreground/80 mb-1.5">{visitorsBreakdown}</p>
                                   )}
@@ -640,7 +640,7 @@ export default function FestiveBoardAdmin() {
                                             <span className="text-primary-foreground/80 ml-1">· {paymentMethodLabel(r.payment_method)}</span>
                                           )}
                                         </span>
-                                        <span className={r.attendance_status === "attended" ? "text-gold" : r.attendance_status === "no_show" ? "text-destructive" : "text-primary-foreground/80"}>
+                                        <span className={r.attendance_status === "attended" ? "text-gold" : r.attendance_status === "no_show" ? "text-destructive-foreground" : "text-primary-foreground/80"}>
                                           {attendanceStatusLabel(r.attendance_status)}
                                         </span>
                                       </li>
@@ -675,7 +675,7 @@ export default function FestiveBoardAdmin() {
                             variant="outline"
                             size="sm"
                             onClick={() => handleDelete(mtg.id)}
-                            className="border-destructive/40 text-destructive hover:bg-destructive/10 min-h-11 sm:min-h-0"
+                            className="border-destructive/40 text-destructive-foreground hover:bg-destructive/10 min-h-11 sm:min-h-0"
                           >
                             <Trash2 className="w-3 h-3 mr-1" /> Delete
                           </Button>
@@ -1504,7 +1504,7 @@ function MeetingDialog({
                         variant="ghost"
                         size="icon"
                         onClick={() => removeVisitor(v.id)}
-                        className="text-destructive hover:bg-destructive/10 h-11 w-11 shrink-0"
+                        className="text-destructive-foreground hover:bg-destructive/10 h-11 w-11 shrink-0"
                         aria-label="Remove visitor"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -1617,7 +1617,7 @@ const FB_FIELD = "bg-navy border-gold/20 h-11 min-h-11 w-full min-w-0 text-sm te
 function FbField({ id, label, className, children }: { id: string; label: string; className?: string; children: React.ReactNode }) {
   return (
     <div className={`min-w-0 flex flex-col gap-1 ${className ?? ""}`}>
-      <label htmlFor={id} className="text-[11px] uppercase tracking-wide text-gold/80">{label}</label>
+      <label htmlFor={id} className="text-[11px] uppercase tracking-wide text-gold">{label}</label>
       {children}
     </div>
   );

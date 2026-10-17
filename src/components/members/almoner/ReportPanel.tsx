@@ -582,7 +582,7 @@ export default function ReportPanel({ members }: { members: Member[] }) {
                 <div className="flex items-center justify-between gap-2">
                   <Label htmlFor={`widow-line-${i}`} className="text-xs text-primary-foreground/80 break-words">{w.name}</Label>
                   {canEditAlmoner && (
-                    <button onClick={() => applyWidows(widows.filter((_, j) => j !== i))} className="min-w-[48px] min-h-[48px] flex items-center justify-center text-primary-foreground/80 hover:text-destructive" aria-label={`Remove line for ${w.name}`}><X className="w-4 h-4" /></button>
+                    <button onClick={() => applyWidows(widows.filter((_, j) => j !== i))} className="min-w-[48px] min-h-[48px] flex items-center justify-center text-primary-foreground/80 hover:text-destructive-foreground" aria-label={`Remove line for ${w.name}`}><X className="w-4 h-4" /></button>
                   )}
                 </div>
                 <Textarea id={`widow-line-${i}`} value={w.text} readOnly={!canEditAlmoner} rows={2} maxLength={600}

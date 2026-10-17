@@ -93,7 +93,7 @@ function Inner() {
 
   return (
     <MembersLayout>
-      <Link to="/members/admin/secretary" className="inline-flex items-center gap-1 text-xs text-gold/80 hover:text-gold mb-3">
+      <Link to="/members/admin/secretary" className="inline-flex items-center gap-1 text-xs text-gold hover:text-gold mb-3">
         <ArrowLeft className="w-3 h-3" /> Secretary Portal
       </Link>
       <header className="mb-4 flex flex-wrap items-start justify-between gap-3">

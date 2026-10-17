@@ -115,7 +115,7 @@ export default function WidowsPanel({ members }: { members: Member[] }) {
                     {w.status === "active" && (due.overdue
                       ? <Badge variant="outline" className="border-gold/50 text-gold text-[10px] px-1.5 py-0" title="Gentle check-in prompt">Check-in due · {fmt(due.dueDate)}</Badge>
                       : <span className="text-[10px] text-primary-foreground/80">Next contact by {fmt(due.dueDate)}</span>)}
-                    {last?.welfare_concern && <Badge variant="outline" className="border-destructive/60 text-destructive text-[10px] px-1.5 py-0"><ShieldAlert className="w-3 h-3 mr-1" />Welfare concern</Badge>}
+                    {last?.welfare_concern && <Badge variant="outline" className="border-destructive/60 text-destructive-foreground text-[10px] px-1.5 py-0"><ShieldAlert className="w-3 h-3 mr-1" />Welfare concern</Badge>}
                   </div>
                 </div>
               </div>
@@ -331,7 +331,7 @@ function WidowDetail({ widow, members, canEdit, onBack, onChanged }: { widow: Wi
                   <p className="text-xs text-primary-foreground/70 break-words">{[k.phone, k.email].filter(Boolean).join(" · ") || "No contact details"}</p>
                   {k.notes && <p className="text-xs text-primary-foreground/80 mt-1 whitespace-pre-wrap break-words">{k.notes}</p>}
                 </div>
-                {canEdit && <button onClick={() => del("almoner_widow_kin", k.id, "next of kin")} className="min-w-[48px] min-h-[48px] flex items-center justify-center text-primary-foreground/80 hover:text-destructive" aria-label={`Remove ${k.name}`}><Trash2 className="w-4 h-4" /></button>}
+                {canEdit && <button onClick={() => del("almoner_widow_kin", k.id, "next of kin")} className="min-w-[48px] min-h-[48px] flex items-center justify-center text-primary-foreground/80 hover:text-destructive-foreground" aria-label={`Remove ${k.name}`}><Trash2 className="w-4 h-4" /></button>}
               </li>
             ))}
           </ul>
@@ -356,10 +356,10 @@ function WidowDetail({ widow, members, canEdit, onBack, onChanged }: { widow: Wi
                   <p className="text-xs text-primary-foreground/70 break-words">
                     <span className="font-semibold text-primary-foreground">{CONTACT_LABEL[c.contact_type]}</span> · {fmt(c.contact_date)} · {memberName(c.logged_by ? memberMap.get(c.logged_by) : undefined)}
                   </p>
-                  {c.welfare_concern && <p className="text-[11px] text-destructive flex items-center mt-0.5"><ShieldAlert className="w-3 h-3 mr-1" />Welfare concern</p>}
+                  {c.welfare_concern && <p className="text-[11px] text-destructive-foreground flex items-center mt-0.5"><ShieldAlert className="w-3 h-3 mr-1" />Welfare concern</p>}
                   {c.notes && <p className="text-sm text-primary-foreground/85 mt-1 whitespace-pre-wrap break-words">{c.notes}</p>}
                 </div>
-                {canEdit && <button onClick={() => del("almoner_widow_contacts", c.id, "contact entry")} className="min-w-[48px] min-h-[48px] flex items-center justify-center text-primary-foreground/80 hover:text-destructive" aria-label="Remove contact entry"><Trash2 className="w-4 h-4" /></button>}
+                {canEdit && <button onClick={() => del("almoner_widow_contacts", c.id, "contact entry")} className="min-w-[48px] min-h-[48px] flex items-center justify-center text-primary-foreground/80 hover:text-destructive-foreground" aria-label="Remove contact entry"><Trash2 className="w-4 h-4" /></button>}
               </li>
             ))}
           </ul>
@@ -419,7 +419,7 @@ function GiftsSection({ widowId, canEdit, memberMap }: { widowId: string; canEdi
                   <p className="text-xs text-primary-foreground/70 break-words">Funded by: {fundingLabel(g.funding_source, r ? raffleLabel(r) : null, !!g.funding_collection_id)} · {memberName(g.logged_by ? memberMap.get(g.logged_by) : undefined)}</p>
                   {g.notes && <p className="text-xs text-primary-foreground/80 mt-1 whitespace-pre-wrap break-words">{g.notes}</p>}
                 </div>
-                {canEdit && <button onClick={() => del(g.id)} className="min-w-[48px] min-h-[48px] flex items-center justify-center text-primary-foreground/80 hover:text-destructive" aria-label="Remove gift record"><Trash2 className="w-4 h-4" /></button>}
+                {canEdit && <button onClick={() => del(g.id)} className="min-w-[48px] min-h-[48px] flex items-center justify-center text-primary-foreground/80 hover:text-destructive-foreground" aria-label="Remove gift record"><Trash2 className="w-4 h-4" /></button>}
               </li>
             );
           })}

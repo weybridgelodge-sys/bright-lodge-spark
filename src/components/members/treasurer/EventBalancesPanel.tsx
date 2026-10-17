@@ -101,7 +101,7 @@ export default function EventBalancesPanel({ bookings, canRegenerate, onRecorded
                   <td className="py-2 pr-3 text-right tabular-nums text-primary-foreground">{money(b.balance_due_pence ?? 0)}</td>
                   <td className="py-2 pr-3 text-primary-foreground/80">
                     {ukDate(b.balance_due_date)}
-                    {overdue && <span className="ml-2 inline-block rounded-sm border border-destructive px-1.5 text-xs font-semibold text-destructive">Overdue</span>}
+                    {overdue && <span className="ml-2 inline-block rounded-sm border border-destructive px-1.5 text-xs font-semibold text-destructive-foreground">Overdue</span>}
                   </td>
                   <td className="py-2 pr-3 text-primary-foreground/80">{lastSent[b.id] ? ukDate(lastSent[b.id].slice(0, 10)) : "—"}</td>
                   <td className="py-2">

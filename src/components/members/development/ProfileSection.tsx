@@ -36,7 +36,7 @@ const fmt = (s: string | null | undefined) =>
 
 const Field = ({ label, value }: { label: string; value: string }) => (
   <div>
-    <p className="text-[10px] uppercase tracking-wider text-gold/80">{label}</p>
+    <p className="text-[10px] uppercase tracking-wider text-gold">{label}</p>
     <p className="text-sm text-primary-foreground/90">{value}</p>
   </div>
 );
@@ -171,7 +171,7 @@ export default function ProfileSection({
         <div className="grid sm:grid-cols-2 gap-4">
           <Field label="Assigned Mentor" value={mentors.find((m) => m.id === record.assigned_mentor_id) ? displayName(mentors.find((m) => m.id === record.assigned_mentor_id)!) : "—"} />
           <div className="sm:col-span-2">
-            <p className="text-[10px] uppercase tracking-wider text-gold/80">Previous Masonic Experience</p>
+            <p className="text-[10px] uppercase tracking-wider text-gold">Previous Masonic Experience</p>
             <p className="text-sm text-primary-foreground/90 whitespace-pre-wrap">{record.previous_masonic_experience || "—"}</p>
           </div>
         </div>

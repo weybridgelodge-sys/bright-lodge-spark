@@ -142,7 +142,7 @@ export default function EventsAdmin() {
                     <button type="button" onClick={() => askArchive(e, "archive")} className={`${actionBtn} flex-1 border-gold/40 text-gold hover:bg-gold/15 sm:flex-none`} aria-label={`Archive ${e.title}`}>
                       <Archive className="w-4 h-4" /> Archive
                     </button>
-                    <button type="button" onClick={() => askArchive(e, "delete")} className={`${actionBtn} flex-1 border-destructive/40 text-destructive hover:bg-destructive/10 sm:flex-none`} aria-label={`Delete ${e.title}`}>
+                    <button type="button" onClick={() => askArchive(e, "delete")} className={`${actionBtn} flex-1 border-destructive/40 text-destructive-foreground hover:bg-destructive/10 sm:flex-none`} aria-label={`Delete ${e.title}`}>
                       <Trash2 className="w-4 h-4" /> Delete
                     </button>
                   </div>
@@ -413,7 +413,7 @@ function EventEditor({ id, onBack, onDeleted }: { id: string; onBack: () => void
             <div className="md:col-span-2">
               <label className={labelCls}>Event label</label>
               <input className={inputCls} value={event.event_label ?? "Festive Board"} onChange={(e) => update("event_label" as any, e.target.value)} placeholder="Festive Board" maxLength={60} />
-              <p className="text-xs text-muted-foreground mt-1">Shown on the booking form, e.g. "Festive Board" or "White Table".</p>
+              <p className="text-xs text-cream/80 mt-1">Shown on the booking form, e.g. "Festive Board" or "White Table".</p>
             </div>
             <div>
               <label className={labelCls}>Booking Deadline</label>

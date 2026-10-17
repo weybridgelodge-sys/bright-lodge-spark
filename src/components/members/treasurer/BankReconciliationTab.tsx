@@ -451,7 +451,7 @@ export default function BankReconciliationTab({ canEdit }: { canEdit: boolean })
                       <p className="text-primary-foreground text-sm">
                         {fmtDate(s.line.transaction_date)} · {s.line.description} · {money(s.line.amount_pence)}
                       </p>
-                      <p className="text-gold/80 text-xs">{s.label}</p>
+                      <p className="text-gold text-xs">{s.label}</p>
                     </div>
                     {linePicker(s.line)}
                     <Button size="sm" className="bg-gold text-navy hover:bg-gold/90" disabled={!canEdit || busy === s.line.id} onClick={() => confirm(s)}>

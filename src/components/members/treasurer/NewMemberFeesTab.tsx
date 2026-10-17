@@ -341,7 +341,7 @@ export default function NewMemberFeesTab({ canEdit }: { canEdit: boolean }) {
             </div>
 
             {split.error && (
-              <p role="alert" className="mt-3 rounded-md border border-destructive/50 bg-destructive/10 p-3 text-sm text-destructive">
+              <p role="alert" className="mt-3 rounded-md border border-destructive/50 bg-destructive/10 p-3 text-sm text-destructive-foreground">
                 {split.error}
               </p>
             )}

@@ -126,15 +126,15 @@ export function EntryDrilldownBody({ entryId, highlightLineId, onNavigate, prevI
     if (s?.signedUrl) window.open(s.signedUrl, "_blank", "noopener,noreferrer");
   };
 
-  if (error) return <p className="text-sm text-destructive">{error}</p>;
-  if (!data || !summary) return <div className="flex justify-center py-8"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>;
+  if (error) return <p className="text-sm text-destructive-foreground">{error}</p>;
+  if (!data || !summary) return <div className="flex justify-center py-8"><Loader2 className="h-6 w-6 animate-spin text-cream/80" /></div>;
   const e = data.entry;
   const lineLabel = (id: string | null) => {
     const l = data.lines.find((x) => x.id === id);
     return l ? `${l.code} — ${l.name} (${l.debit ? `Dr ${money(l.debit)}` : `Cr ${money(l.credit)}`})` : "whole entry";
   };
   const Field = ({ k, v }: { k: string; v: React.ReactNode }) => (
-    <div><dt className="text-xs text-muted-foreground">{k}</dt><dd className="break-words">{v}</dd></div>
+    <div><dt className="text-xs text-cream/80">{k}</dt><dd className="break-words">{v}</dd></div>
   );
 
   return (
@@ -166,7 +166,7 @@ export function EntryDrilldownBody({ entryId, highlightLineId, onNavigate, prevI
             {summary.lines.map((l) => (
               <tr key={l.id} className={`border-t border-border ${l.id === highlightLineId ? "bg-gold/15 font-medium" : ""}`} aria-current={l.id === highlightLineId ? "true" : undefined}>
                 <td className="px-3 py-2 whitespace-nowrap">{l.code} — {l.name}</td>
-                <td className="px-3 py-2">{l.description || <span className="text-muted-foreground">—</span>}</td>
+                <td className="px-3 py-2">{l.description || <span className="text-cream/80">—</span>}</td>
                 <td className="px-3 py-2 text-right tabular-nums">{l.debit ? money(l.debit) : ""}</td>
                 <td className="px-3 py-2 text-right tabular-nums">{l.credit ? money(l.credit) : ""}</td>
               </tr>
@@ -178,7 +178,7 @@ export function EntryDrilldownBody({ entryId, highlightLineId, onNavigate, prevI
                 {summary.balanced ? (
                   <span className="inline-flex items-center gap-1 text-emerald-700 dark:text-emerald-400"><Check className="h-4 w-4" /> Balanced</span>
                 ) : (
-                  <span className="inline-flex items-center gap-1 text-destructive"><X className="h-4 w-4" /> Out of balance by {money(summary.difference)}</span>
+                  <span className="inline-flex items-center gap-1 text-destructive-foreground"><X className="h-4 w-4" /> Out of balance by {money(summary.difference)}</span>
                 )}
               </td>
               <td className="px-3 py-2 text-right tabular-nums">{money(summary.debit)}</td>
@@ -191,13 +191,13 @@ export function EntryDrilldownBody({ entryId, highlightLineId, onNavigate, prevI
       <section>
         <h4 className="font-serif text-base text-primary mb-1">Bank match</h4>
         {data.bankRows.length === 0 ? (
-          <p className="text-muted-foreground">Not matched to a bank statement line.</p>
+          <p className="text-cream/80">Not matched to a bank statement line.</p>
         ) : (
           <ul className="space-y-1">
             {data.bankRows.map((r) => (
               <li key={`${r.id}:${r._lineId}`} className="rounded border border-border px-3 py-2">
                 {r.bank_statements?.period_label ?? "Statement"} · {fmtDate(r.transaction_date)} · {money(r.amount_pence)} · {r.description}
-                <div className="text-xs text-muted-foreground">
+                <div className="text-xs text-cream/80">
                   {r.match_type ? `${r.match_type} match` : "Matched"}{r._split ? " (split — additional line)" : ""} · linked to {lineLabel(r._lineId)}
                 </div>
               </li>

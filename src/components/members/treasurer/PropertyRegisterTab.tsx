@@ -446,7 +446,7 @@ export default function PropertyRegisterTab({ canEdit }: { canEdit: boolean }) {
                         <Button variant="ghost" size="icon" className="text-primary-foreground/70 hover:text-gold" onClick={() => openEdit(r)} aria-label={`Edit ${r.item}`}>
                           <Pencil className="w-4 h-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" className="text-primary-foreground/70 hover:text-destructive" onClick={() => remove(r)} aria-label={`Delete ${r.item}`}>
+                        <Button variant="ghost" size="icon" className="text-primary-foreground/70 hover:text-destructive-foreground" onClick={() => remove(r)} aria-label={`Delete ${r.item}`}>
                           <Trash2 className="w-4 h-4" />
                         </Button>
                       </td>

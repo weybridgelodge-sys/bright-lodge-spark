@@ -51,7 +51,7 @@ function Inner() {
               <h2 className="font-serif text-gold text-lg">{t.title}</h2>
             </div>
             <p className="text-primary-foreground/70 text-sm mb-3">{t.description}</p>
-            <span className="inline-flex items-center gap-1 text-xs text-gold/80 group-hover:text-gold">Open <ArrowRight className="w-3 h-3" /></span>
+            <span className="inline-flex items-center gap-1 text-xs text-gold group-hover:text-gold">Open <ArrowRight className="w-3 h-3" /></span>
           </Link>
         ))}
       </div>

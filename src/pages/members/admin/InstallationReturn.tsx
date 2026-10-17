@@ -196,7 +196,7 @@ function Inner() {
 
   return (
     <MembersLayout>
-      <Link to="/members/admin/secretary" className="inline-flex items-center gap-1 text-sm text-gold/80 hover:text-gold mb-3"><ArrowLeft className="w-4 h-4" /> Secretary Portal</Link>
+      <Link to="/members/admin/secretary" className="inline-flex items-center gap-1 text-sm text-gold hover:text-gold mb-3"><ArrowLeft className="w-4 h-4" /> Secretary Portal</Link>
       <header className="mb-4 flex min-w-0 flex-col items-stretch gap-3 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
         <div className="min-w-0">
           <h1 className="font-serif text-2xl md:text-3xl text-gold">UGLE Installation Return</h1>
@@ -334,8 +334,8 @@ function Inner() {
                 <p><strong>Document:</strong> Installation-Return-6787-{year}.pdf, filled just now from the live records (sent as a 30-day download link). <a href={pending?.url} target="_blank" rel="noopener noreferrer" className="underline">Open the exact PDF</a></p>
                 <p><strong>Secretary changed (Y/N):</strong> {secChanged || "left blank"}</p>
                 <p>Signatures are left blank.</p>
-                {data && data.issues.length > 0 && <p className="text-destructive">{data.issues.length} warning(s) are still showing on the page.</p>}
-                {pending && pending.missing > 0 && <p className="text-destructive">{pending.missing} field(s) weren't found in the template.</p>}
+                {data && data.issues.length > 0 && <p className="text-destructive-foreground">{data.issues.length} warning(s) are still showing on the page.</p>}
+                {pending && pending.missing > 0 && <p className="text-destructive-foreground">{pending.missing} field(s) weren't found in the template.</p>}
                 <p>This is an official document to an external body and can't be recalled once sent.</p>
               </div>
             </AlertDialogDescription>

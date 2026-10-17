@@ -164,7 +164,7 @@ function MembersTab({ members, subs, payments, calcs, onRefresh }: {
           <div className="max-h-96 overflow-y-auto">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
-                <thead className="text-left text-xs uppercase text-muted-foreground">
+                <thead className="text-left text-xs uppercase text-cream/80">
                   <tr>
                     <th className="px-2 py-1">Date</th>
                     <th className="px-2 py-1">Type</th>
@@ -194,7 +194,7 @@ function MembersTab({ members, subs, payments, calcs, onRefresh }: {
                     </tr>
                   ))}
                   {payments.filter(p => p.member_id === historyMember?.id).length === 0 && (
-                    <tr><td colSpan={7} className="px-2 py-4 text-center text-muted-foreground">No payments yet.</td></tr>
+                    <tr><td colSpan={7} className="px-2 py-4 text-center text-cream/80">No payments yet.</td></tr>
                   )}
                 </tbody>
               </table>
@@ -309,7 +309,7 @@ function SettingsTab({ settings, onRefresh }: { settings: DuesSetting[]; onRefre
       <Card className="p-5">
         <h3 className="font-serif text-gold text-lg mb-2">Current annual amount</h3>
         <p className="text-3xl font-bold">{current ? gbp(current.annual_amount_pence) : "—"}</p>
-        <p className="text-sm text-muted-foreground">Effective lodge year {current?.effective_lodge_year} (Oct–Sept)</p>
+        <p className="text-sm text-cream/80">Effective lodge year {current?.effective_lodge_year} (Oct–Sept)</p>
       </Card>
 
       <Card className="p-5">
@@ -327,7 +327,7 @@ function SettingsTab({ settings, onRefresh }: { settings: DuesSetting[]; onRefre
             <Button onClick={schedule} disabled={busy === "schedule"}>Schedule</Button>
           </div>
         </div>
-        <p className="text-xs text-muted-foreground mt-2">
+        <p className="text-xs text-cream/80 mt-2">
           After scheduling, send advance notice to affected members. UK Direct Debit rules require at least 10 working days' notice before the collection amount changes.
         </p>
       </Card>
@@ -335,14 +335,14 @@ function SettingsTab({ settings, onRefresh }: { settings: DuesSetting[]; onRefre
       <Card className="p-5">
         <h3 className="font-serif text-gold text-lg mb-3">Scheduled changes</h3>
         {scheduled.length === 0 ? (
-          <p className="text-sm text-muted-foreground">None scheduled.</p>
+          <p className="text-sm text-cream/80">None scheduled.</p>
         ) : (
           <div className="space-y-3">
             {scheduled.map(s => (
               <div key={s.id} className="border rounded p-3 flex flex-wrap gap-3 items-center justify-between">
                 <div>
                   <p className="font-semibold">{gbp(s.annual_amount_pence)} — LY {s.effective_lodge_year}</p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs text-cream/80">
                     {s.notice_sent_at ? `Notice sent ${new Date(s.notice_sent_at).toLocaleString("en-GB")}` : "Notice not yet sent"}
                     {s.applied_at ? ` · Applied ${new Date(s.applied_at).toLocaleString("en-GB")}` : ""}
                   </p>
@@ -397,7 +397,7 @@ function DemoTab({ members }: { members: Profile[] }) {
   return (
     <Card className="p-6 max-w-2xl">
       <h3 className="font-serif text-gold text-lg mb-2">Walk-through as a member</h3>
-      <p className="text-sm text-muted-foreground mb-4">
+      <p className="text-sm text-cream/80 mb-4">
         Pick a member, choose a frequency and method, then open the Stripe test checkout in a new tab. Use Stripe's test details to complete the flow.
       </p>
       <div className="space-y-4">
@@ -428,7 +428,7 @@ function DemoTab({ members }: { members: Profile[] }) {
           {busy && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
           Open Stripe test checkout <ExternalLink className="w-4 h-4 ml-2" />
         </Button>
-        <div className="text-xs text-muted-foreground bg-muted/40 p-3 rounded">
+        <div className="text-xs text-cream/80 bg-muted/40 p-3 rounded">
           <p className="font-semibold mb-1">Stripe test details</p>
           <p>Card: <code>4242 4242 4242 4242</code> · any future expiry · any CVC</p>
           <p>Bacs Direct Debit: sort code <code>10-88-00</code> · account <code>00012345</code> · any name/email</p>

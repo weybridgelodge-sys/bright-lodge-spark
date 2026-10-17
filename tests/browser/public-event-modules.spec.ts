@@ -1,5 +1,10 @@
 import { expect, test, type Page, type Route } from "@playwright/test";
 
+import { expectNoAxeViolations } from "./helpers/axe";
+
+// Every mobile check ends with the WCAG 2.1 AA axe scan of the final (populated) state.
+test.afterEach(async ({ page }, info) => { if (info.status === "passed") await expectNoAxeViolations(page, info.title); });
+
 // Synthetic data only: every backend call is mocked, nothing is booked or written.
 const base = {
   id: "00000000-0000-4000-8000-000000000001", name: "Test", tagline: null, intro_copy: null, theme: "default",

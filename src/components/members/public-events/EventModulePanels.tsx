@@ -16,7 +16,7 @@ const labelCls = "block text-xs uppercase tracking-wider text-gold mb-1.5";
 const fs = "border border-gold/20 rounded-sm p-4 space-y-3";
 const lg = "px-2 text-gold font-serif text-sm";
 const btn = "inline-flex items-center justify-center gap-1.5 min-h-[44px] min-w-11 px-3 rounded-sm border border-gold/40 text-gold hover:bg-gold/15 text-sm disabled:opacity-50";
-const delBtn = "inline-flex items-center justify-center min-h-[44px] min-w-11 rounded-sm border border-destructive/40 text-destructive hover:bg-destructive/10";
+const delBtn = "inline-flex items-center justify-center min-h-[44px] min-w-11 rounded-sm border border-destructive/40 text-destructive-foreground hover:bg-destructive/10";
 const db = supabase as any;
 
 /* ---------------- Event-level settings (saved with the main Save) ---------------- */

@@ -1,5 +1,10 @@
 import { expect, test } from "@playwright/test";
 
+import { expectNoAxeViolations } from "./helpers/axe";
+
+// Every mobile check ends with the WCAG 2.1 AA axe scan of the final (populated) state.
+test.afterEach(async ({ page }, info) => { if (info.status === "passed") await expectNoAxeViolations(page, info.title); });
+
 const title = "Joint Christmas Party at Guildford Masonic Centre";
 const ics = [
   "BEGIN:VCALENDAR", "VERSION:2.0", "BEGIN:VEVENT",

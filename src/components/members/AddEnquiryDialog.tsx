@@ -42,7 +42,7 @@ export default function AddEnquiryDialog({ open, onOpenChange, onSaved }: { open
   };
 
   const field = "min-h-11";
-  const err = (m?: string, id?: string) => m ? <p id={id} role="alert" className="text-xs text-destructive mt-1">{m}</p> : null;
+  const err = (m?: string, id?: string) => m ? <p id={id} role="alert" className="text-xs text-destructive-foreground mt-1">{m}</p> : null;
 
   return (
     <Dialog open={open} onOpenChange={change}>
@@ -66,7 +66,7 @@ export default function AddEnquiryDialog({ open, onOpenChange, onSaved }: { open
             <Label htmlFor="enq-phone">Phone</Label>
             <Input id="enq-phone" type="tel" inputMode="tel" className={field} value={v.phone} maxLength={40} onChange={(e) => set({ phone: e.target.value })} aria-invalid={!!errors.phone || !!errors.contact} placeholder="e.g. 07700 900000" />
             {err(errors.phone)}
-            {errors.contact ? err(errors.contact) : <p className="text-xs text-muted-foreground mt-1">An email or a phone number is required.</p>}
+            {errors.contact ? err(errors.contact) : <p className="text-xs text-cream/80 mt-1">An email or a phone number is required.</p>}
           </div>
           <div>
             <Label htmlFor="enq-channel">How they got in touch</Label>
@@ -84,7 +84,7 @@ export default function AddEnquiryDialog({ open, onOpenChange, onSaved }: { open
           <div>
             <Label htmlFor="enq-message">Message / notes</Label>
             <Textarea id="enq-message" rows={4} maxLength={2000} value={v.message} onChange={(e) => set({ message: e.target.value })} aria-invalid={!!errors.message} placeholder="What they said, or any notes" />
-            <p className="text-xs text-muted-foreground mt-1">{v.message.length}/2000</p>
+            <p className="text-xs text-cream/80 mt-1">{v.message.length}/2000</p>
             {err(errors.message)}
           </div>
           <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-1">

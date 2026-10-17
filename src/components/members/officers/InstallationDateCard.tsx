@@ -149,7 +149,7 @@ export default function InstallationDateCard({
           </DialogHeader>
           {!confirming ? (
             <div className="space-y-3">
-              <label className="block text-xs uppercase tracking-wider text-gold/80">
+              <label className="block text-xs uppercase tracking-wider text-gold">
                 Date
                 <Input type="date" value={draft} 
                   onChange={(e) => setDraft(e.target.value)} className="mt-1 bg-navy-dark text-primary-foreground" />

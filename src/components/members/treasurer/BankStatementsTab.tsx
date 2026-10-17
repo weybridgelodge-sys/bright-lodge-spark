@@ -254,7 +254,7 @@ export default function BankStatementsTab({ canEdit }: { canEdit: boolean }) {
                         </p>
                         <div className="overflow-x-auto">
                           <table className="w-full text-sm min-w-[620px]">
-                            <thead className="bg-navy text-gold/80 uppercase text-[10px] tracking-wider">
+                            <thead className="bg-navy text-gold uppercase text-[10px] tracking-wider">
                               <tr>
                                 <th className="text-left p-2 w-28">Date</th>
                                 <th className="text-left p-2">Description</th>

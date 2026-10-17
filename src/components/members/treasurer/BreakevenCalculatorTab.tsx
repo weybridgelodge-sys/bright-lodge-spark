@@ -243,7 +243,7 @@ export default function BreakevenCalculatorTab({ canEdit }: { canEdit: boolean }
                   Subscription {money(subFull)} − costs {money(costFull)} (UGLE/PGL/SPCF/Levy {money(perMemberFull)} + fixed share{" "}
                   {money(fixedPerMember)} + reserves {money(reserveFullTotal)})
                 </p>
-                <p className={`font-semibold text-lg mt-1 ${resultFull >= 0 ? "text-emerald-400" : "text-destructive"}`}>
+                <p className={`font-semibold text-lg mt-1 ${resultFull >= 0 ? "text-emerald-400" : "text-destructive-foreground"}`}>
                   {resultFull >= 0 ? "Surplus" : "Deficit"} {money(Math.abs(resultFull))}
                 </p>
               </div>
@@ -253,7 +253,7 @@ export default function BreakevenCalculatorTab({ canEdit }: { canEdit: boolean }
                   Subscription {money(subUnder)} − costs {money(costUnder)} (UGLE/PGL/SPCF/Levy {money(perMemberUnder)} + fixed share{" "}
                   {money(fixedPerMember)} + reserves {money(reserveUnderTotal)})
                 </p>
-                <p className={`font-semibold text-lg mt-1 ${resultUnder >= 0 ? "text-emerald-400" : "text-destructive"}`}>
+                <p className={`font-semibold text-lg mt-1 ${resultUnder >= 0 ? "text-emerald-400" : "text-destructive-foreground"}`}>
                   {resultUnder >= 0 ? "Surplus" : "Deficit"} {money(Math.abs(resultUnder))}
                 </p>
                 <p className="text-primary-foreground/80 text-xs mt-1">

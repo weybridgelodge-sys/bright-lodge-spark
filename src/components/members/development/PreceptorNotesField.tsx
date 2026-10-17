@@ -52,7 +52,7 @@ export default function PreceptorNotesField({
   if (!loaded) return null;
   return (
     <div className="mt-2 rounded-sm border border-gold/20 bg-navy-dark/50 p-2">
-      <p className="text-[10px] uppercase tracking-wider text-gold/80 mb-1">Preceptor's Note (DC / WM only)</p>
+      <p className="text-[10px] uppercase tracking-wider text-gold mb-1">Preceptor's Note (DC / WM only)</p>
       <Textarea
         rows={2}
         value={value}

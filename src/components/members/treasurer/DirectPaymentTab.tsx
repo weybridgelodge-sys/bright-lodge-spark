@@ -292,7 +292,7 @@ export default function DirectPaymentTab({ canEdit }: { canEdit: boolean }) {
               {diff === 0 ? (
                 <span className="text-emerald-400">Balanced</span>
               ) : (
-                <span className="text-destructive">Out of balance by {fmt(Math.abs(diff))}</span>
+                <span className="text-destructive-foreground">Out of balance by {fmt(Math.abs(diff))}</span>
               )}
             </div>
 

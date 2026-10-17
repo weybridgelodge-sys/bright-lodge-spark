@@ -92,8 +92,8 @@ function Body({ target }: { target: DrillTarget }) {
     if (!open && scrollRef.current) scrollRef.current.scrollTop = savedScroll.current;
   }, [open]);
 
-  if (error) return <p className="text-destructive text-sm">{error}</p>;
-  if (!drill) return <p className="text-muted-foreground text-sm"><Loader2 className="inline h-4 w-4 mr-1 animate-spin" /> Loading lines…</p>;
+  if (error) return <p className="text-destructive-foreground text-sm">{error}</p>;
+  if (!drill) return <p className="text-cream/80 text-sm"><Loader2 className="inline h-4 w-4 mr-1 animate-spin" /> Loading lines…</p>;
 
   const agree = agreement(drill.total, target.expected);
   const idx = open ? visible.findIndex((r) => r.id === open.lineId) : -1;
@@ -114,7 +114,7 @@ function Body({ target }: { target: DrillTarget }) {
             <Button variant="outline" className="min-h-[48px]" onClick={() => setOpen(null)} aria-label="Back to account lines">
               <ChevronLeft className="mr-1 h-4 w-4" /> Back to {target.account.code} lines
             </Button>
-            <span className="text-xs text-muted-foreground">Line {idx + 1} of {visible.length}</span>
+            <span className="text-xs text-cream/80">Line {idx + 1} of {visible.length}</span>
           </div>
           <EntryDrilldownBody
             entryId={open.entryId}
@@ -149,14 +149,14 @@ function Body({ target }: { target: DrillTarget }) {
         {agree.agrees ? (
           <p className="flex items-center gap-1 text-sm font-semibold text-emerald-600"><Check className="h-4 w-4" /> Agrees to report ({acct(target.expected)})</p>
         ) : (
-          <p className="flex items-center gap-1 text-sm font-semibold text-destructive">
+          <p className="flex items-center gap-1 text-sm font-semibold text-destructive-foreground">
             <AlertTriangle className="h-4 w-4" /> Does not agree: lines total {acct(drill.total)}, report shows {acct(target.expected)} — difference {acct(agree.difference)}
           </p>
         )}
 
         <div ref={scrollRef} className="max-h-[55vh] overflow-y-auto overflow-x-auto rounded border border-border">
           <table className="w-full text-sm">
-            <thead className="sticky top-0 bg-card text-muted-foreground">
+            <thead className="sticky top-0 bg-card text-cream/80">
               <tr className="border-b border-border">
                 <th className="text-left p-2 font-normal">Doc no.</th>
                 <th className="text-left p-2 font-normal">Date</th>
@@ -169,7 +169,7 @@ function Body({ target }: { target: DrillTarget }) {
             </thead>
             <tbody>
               {visible.length === 0 && (
-                <tr><td colSpan={7} className="p-3 text-muted-foreground">No lines{search ? " match your search" : ""}.</td></tr>
+                <tr><td colSpan={7} className="p-3 text-cream/80">No lines{search ? " match your search" : ""}.</td></tr>
               )}
               {visible.map((r) => (
                 <tr
@@ -187,13 +187,13 @@ function Body({ target }: { target: DrillTarget }) {
                     {r.opening && <span className="mr-1 rounded bg-gold/20 px-1 text-xs">Opening b/f</span>}
                     {r.entry_description}
                     {r.line_description && r.line_description !== r.entry_description && (
-                      <span className="block text-xs text-muted-foreground">{r.line_description}</span>
+                      <span className="block text-xs text-cream/80">{r.line_description}</span>
                     )}
                   </td>
                   <td className="p-2 text-right tabular-nums">{r.debit ? money(r.debit) : ""}</td>
                   <td className="p-2 text-right tabular-nums">{r.credit ? money(r.credit) : ""}</td>
                   {isBs && <td className="p-2 text-right tabular-nums">{acct(r.running)}</td>}
-                  <td className="p-2 text-muted-foreground"><ChevronRight className="h-4 w-4" /></td>
+                  <td className="p-2 text-cream/80"><ChevronRight className="h-4 w-4" /></td>
                 </tr>
               ))}
             </tbody>
@@ -208,7 +208,7 @@ function Body({ target }: { target: DrillTarget }) {
             </tfoot>
           </table>
         </div>
-        {search && <p className="text-xs text-muted-foreground">Showing {visible.length} of {drill.rows.length}; totals are for all lines.</p>}
+        {search && <p className="text-xs text-cream/80">Showing {visible.length} of {drill.rows.length}; totals are for all lines.</p>}
       </div>
     </div>
   );

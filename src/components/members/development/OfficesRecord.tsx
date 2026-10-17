@@ -74,7 +74,7 @@ export default function OfficesRecord({
         <h3 className="font-serif text-gold text-sm mb-2">Lodge offices (from Officers Tracker)</h3>
         <div className="overflow-x-auto rounded-sm border border-gold/20">
           <table className="w-full text-xs">
-            <thead className="bg-navy-light/40 text-gold/80 uppercase text-[10px] tracking-wider">
+            <thead className="bg-navy-light/40 text-gold uppercase text-[10px] tracking-wider">
               <tr>
                 <th className="text-left p-2">Office</th>
                 <th className="text-left p-2">Masonic Year</th>
@@ -103,7 +103,7 @@ export default function OfficesRecord({
         <h3 className="font-serif text-gold text-sm mb-2">Provincial &amp; UGLE appointments</h3>
         <div className="overflow-x-auto rounded-sm border border-gold/20">
           <table className="w-full text-xs">
-            <thead className="bg-navy-light/40 text-gold/80 uppercase text-[10px] tracking-wider">
+            <thead className="bg-navy-light/40 text-gold uppercase text-[10px] tracking-wider">
               <tr>
                 <th className="text-left p-2">Office</th>
                 <th className="text-left p-2">Year</th>
@@ -124,7 +124,7 @@ export default function OfficesRecord({
                   <td className="p-2 text-primary-foreground/80">{a.masonic_year || "—"}</td>
                   <td className="p-2 text-primary-foreground/80">{fmt(a.date_appointed)}</td>
                   <td className="p-2 text-primary-foreground/80">{fmt(a.date_installed)}</td>
-                  <td className="p-2 text-[10px] uppercase text-gold/80">{a.level}</td>
+                  <td className="p-2 text-[10px] uppercase text-gold">{a.level}</td>
                   <td className="p-2 text-primary-foreground/80">{a.notes || ""}</td>
                   {canEdit && (
                     <td className="p-2 text-right">

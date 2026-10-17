@@ -104,7 +104,7 @@ function Inner() {
       {canEdit && (
         <div className="flex gap-2">
           <button onClick={() => setDraft({ ...e, time_from: hm(e.time_from), time_to: hm(e.time_to), description: e.description ?? "" })} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs border border-gold/30 text-gold rounded-sm hover:bg-gold/10"><Pencil className="w-3 h-3" /> Edit</button>
-          <button onClick={() => remove(e)} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs border border-destructive/40 text-destructive rounded-sm hover:bg-destructive/10"><Trash2 className="w-3 h-3" /> Delete</button>
+          <button onClick={() => remove(e)} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs border border-destructive/40 text-destructive-foreground rounded-sm hover:bg-destructive/10"><Trash2 className="w-3 h-3" /> Delete</button>
         </div>
       )}
     </li>
@@ -155,7 +155,7 @@ function Inner() {
           )}
           {past.length > 0 && (
             <div>
-              <button onClick={() => setShowPast((s) => !s)} className="inline-flex items-center gap-1 text-sm text-gold/80 hover:text-gold mb-3">
+              <button onClick={() => setShowPast((s) => !s)} className="inline-flex items-center gap-1 text-sm text-gold hover:text-gold mb-3">
                 {showPast ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />} Past sessions ({past.length})
               </button>
               {showPast && <ul className="space-y-3">{past.map((e) => <Row key={e.id} e={e} isPast />)}</ul>}
