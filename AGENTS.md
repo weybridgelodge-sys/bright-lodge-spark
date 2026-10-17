@@ -21,9 +21,9 @@
 - Member Admin: plain stacked rows when narrow, semantic table on desktop, shared handlers; populated mobile tests check details, actions and header. Why: restyled table boxes hid details.
 - Meeting event label (lodge_events.event_label, default 'Festive Board') drives booking-form/email wording; title-aware attendance options live in src/lib/bookingTitles.ts. Why: White Table and other non-Festive-Board events reuse one form.
 - Public event bookings (/events/:slug) use the separate events Stripe account (_shared/stripe-events.ts, STRIPE_EVENTS_*) and event_accounts/event_bookings, never lodge Stripe. Why: events money is kept apart from the lodge ledger.
-- Public calendars read public_events via _shared/publicEventCalendar rules; member Calendar uses member-calendar-feed only. Why: website and webcal show the same events.
+- Public calendars: _shared/publicEventCalendar; member Calendar: member-calendar-feed. Why: same events everywhere.
 - Event pricing via _shared/eventPricing.ts; form pieces via events/booking/BookingCore. Why: one shared rule.
 - Event module tables: public read via is_event_published(), writes via can_write_event_content(), copies via duplicate_event_content(). Why: drafts hidden, copies atomic.
 - Event money: one event_booking_payments row per Stripe charge; booking totals are recomputeBooking roll-ups; balance tokens are service-role only. Why: per-payment deposits/refunds, private links.
 - Manual membership enquiries are inserted only via add_manual_enquiry (admin/Secretary/Assistant Secretary, request_id idempotent, created_by audit); no table INSERT policy. Why: public Join Us insert path stays server-only.
-- Masonic year = Installation to day before next (Installation day is in the new year), via _shared/masonicYear.ts + installation_rule_settings; stored officer_installation_dates override the rule. KPI Movement counts leavers/rejoiners from member_status_history (profiles status trigger). New tables carry unit_id = current_unit_id(). Why: rolling/updated_at windows miscounted movement; ready for multi-lodge.
+- Masonic year = Installation to day before next (via _shared/masonicYear.ts, settings rule, stored dates override); KPI Movement uses member_status_history; new tables carry unit_id. Why: multi-lodge-ready, accurate movement.
