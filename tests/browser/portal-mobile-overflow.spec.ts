@@ -669,7 +669,7 @@ test("KPI Movement period picker fits at 320px", async ({ page }) => {
   }
 });
 
-test("TMPSHOT gifts buttons", async ({ page }) => {
+test("Gifts card: Record gift / Cancel stay gold outlined after a tap at 390px", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 900 });
   await page.addInitScript(() => sessionStorage.setItem("almoner-confidentiality", "1"));
   await mockWidow(page);
@@ -677,14 +677,15 @@ test("TMPSHOT gifts buttons", async ({ page }) => {
   await waitForPortal(page);
   await page.getByRole("tab", { name: /Widows/ }).click();
   await page.getByText("Doris Featherstonehaugh-Wolstenholme").first().click();
-  const rec = page.getByRole("button", { name: "Record gift" });
-  await rec.scrollIntoViewIfNeeded();
-  const css = (l: any) => l.evaluate((e: HTMLElement) => { const s = getComputedStyle(e); return [s.backgroundColor, s.color, s.borderColor, e.className]; });
-  console.log("REC", await css(rec));
-  console.log("LOG", await css(page.getByRole("button", { name: "Log contact" })));
-  await page.screenshot({ path: "/tmp/browser/g1.png" });
-  await rec.click();
-  const c = page.getByRole("button", { name: "Cancel" }).first();
-  console.log("CANCEL", await css(c));
-  await page.screenshot({ path: "/tmp/browser/g2.png" });
+  const style = (name: string) => page.getByRole("button", { name }).first().evaluate((e) => { const s = getComputedStyle(e); return { bg: s.backgroundColor, color: s.color }; });
+  const log = await style("Log contact");
+  await page.getByRole("button", { name: "Record gift" }).click();
+  // The pointer stays on Cancel, as a finger does after a tap: the state the resting scan never reached.
+  await page.getByRole("button", { name: "Cancel" }).first().hover();
+  await page.waitForTimeout(300);
+  const cancel = await style("Cancel");
+  expect(cancel.color).toBe(log.color); // gold, like "Log contact"
+  expect(cancel.bg).toBe(log.bg); // see-through, no grey fill
+  await expectNoAxeViolations(page, "Gifts card with Cancel hovered");
+  await expectNoViewportOverflow(page, "Gifts card");
 });
