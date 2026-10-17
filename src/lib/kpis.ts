@@ -384,11 +384,17 @@ export type Milestone = {
   label: string;
 };
 
-export function milestones(members: KpiMember[], wmTerms: WmTerm[]): Milestone[] {
+export function milestones(
+  members: KpiMember[],
+  wmTerms: WmTerm[],
+  /** Masonic-year window (installation to installation); defaults to 1 Oct–30 Sep. */
+  yearRange?: { start: string; end: string | null }
+): Milestone[] {
   const today = new Date();
   const my = currentMasonicYear(today);
-  const yearStart = new Date(my, 9, 1); // 1 Oct
-  const yearEnd = new Date(my + 1, 8, 30); // 30 Sep
+  const toLocal = (s: string) => { const [y, m, d] = s.split("-").map(Number); return new Date(y, m - 1, d); };
+  const yearStart = yearRange ? toLocal(yearRange.start) : new Date(my, 9, 1);
+  const yearEnd = yearRange?.end ? toLocal(yearRange.end) : new Date(my + 1, 8, 30);
   const out: Milestone[] = [];
 
   // Format a Date as YYYY-MM-DD using local components — avoids the
@@ -543,7 +549,7 @@ export function lodgeHealth(bundle: KpiBundle): LodgeHealth {
   const oh = officersHealth(bundle);
   const pl = pipeline(bundle);
 
-  // Growth — net membership movement over the rolling 12 months.
+  // Growth — net membership movement over the rolling 12 months (deliberately rolling).
   const net = mv.net;
   const growth: HealthComponent =
     net >= 0
@@ -613,7 +619,7 @@ export async function fetchLodgeHealthBundle(): Promise<KpiBundle> {
     supabase
       .from("profiles")
       .select(
-        "id,full_name,first_name,middle_name,last_name,preferred_name,post_nominals,title,status,degree,is_past_master,is_royal_arch,is_honorary_member,initiation_date,passing_date,raising_date,joined_lodge_date,is_ugle_portal_registered,rank,grand_rank,provincial_rank,updated_at"
+        "id,full_name,first_name,middle_name,last_name,preferred_name,post_nominals,title,status,degree,is_past_master,is_royal_arch,is_honorary_member,initiation_date,passing_date,raising_date,joined_lodge_date,is_ugle_portal_registered,rank,grand_rank,provincial_rank,updated_at,status_changed_at"
       ),
     supabase.from("officer_positions").select("key,label,is_progressive,order_index"),
     (supabase as any).rpc("get_lodge_health_aggregates", { _lodge_year: my }),
