@@ -41,5 +41,6 @@ for (const width of [320, 390]) {
     await page.screenshot({ path: `/tmp/browser/public-event-calendars/member-${width}.png` });
     await link.click();
     await expect(page).toHaveURL(/\/events\/christmas-party-2026$/);
+    await expect(page.getByText("Loading…")).toHaveCount(0, { timeout: 15_000 }); // scan the loaded event page, not its spinner
   });
 }
