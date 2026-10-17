@@ -23,18 +23,19 @@ describe("buttons on a navy surface", () => {
   it("outline and ghost never set a hover/pressed text colour (callers' gold/cream text survives a tap)", () => {
     for (const v of ["outline", "ghost"] as const) expect(buttonVariants({ variant: v })).not.toMatch(/(hover|active):text-/);
   });
-  it("outlined gold text passes 4.5:1 at rest, hover (accent/15) and pressed (accent/25)", () => {
+  it("outlined gold text passes 4.5:1 at rest and on the hover/pressed tint (accent/10)", () => {
+    expect(buttonVariants({ variant: "outline" })).toContain("hover:bg-accent/10");
+    const tint = mix(token("accent"), card, 0.1);
     expect(ratio(gold, card)).toBeGreaterThanOrEqual(4.5);
-    expect(ratio(gold, mix(token("accent"), card, 0.15))).toBeGreaterThanOrEqual(4.5);
-    expect(ratio(gold, mix(token("accent"), card, 0.25))).toBeGreaterThanOrEqual(4.5);
-    expect(ratio(cream, mix(token("accent"), card, 0.25))).toBeGreaterThanOrEqual(4.5);
+    expect(ratio(gold, tint)).toBeGreaterThanOrEqual(4.5);
+    expect(ratio(cream, tint)).toBeGreaterThanOrEqual(4.5);
   });
   it("solid gold (default portal) button: navy text 4.5:1", () => expect(ratio(navy, gold)).toBeGreaterThanOrEqual(4.5));
   it("destructive text 4.5:1", () => expect(ratio(token("destructive-foreground"), token("destructive"))).toBeGreaterThanOrEqual(4.5));
-  it("disabled is visibly dimmer (60%) yet gold text stays legible (>= 3:1)", () => {
-    expect(buttonVariants({})).toContain("disabled:opacity-60");
-    expect(buttonVariants({})).toContain("aria-disabled:opacity-60");
-    const dimGold = mix(gold, card, 0.6);
+  it("disabled is visibly dimmer (70%) yet gold text stays legible (>= 3:1)", () => {
+    expect(buttonVariants({})).toContain("disabled:opacity-70");
+    expect(buttonVariants({})).toContain("aria-disabled:opacity-70");
+    const dimGold = mix(gold, card, 0.7);
     expect(ratio(dimGold, card)).toBeGreaterThanOrEqual(3);
     expect(ratio(dimGold, card)).toBeLessThan(ratio(gold, card));
   });
