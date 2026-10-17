@@ -22,7 +22,7 @@ describe("repeating meeting series", () => {
     ];
     const p = planSeries({ ordinal: "2", weekday: 3, months: [12] }, 2026, meetings);
     expect(p.existing).toEqual(["2026-12-09"]);
-    expect(planSeries({ ordinal: "3", weekday: 3, months: [2] }, 2026, meetings).toAdd).toEqual(["2027-02-17"]);
+    expect(planSeries({ ordinal: "3", weekday: 3, months: [2] }, 2027, meetings).toAdd).toEqual(["2027-02-17"]);
   });
 });
 
