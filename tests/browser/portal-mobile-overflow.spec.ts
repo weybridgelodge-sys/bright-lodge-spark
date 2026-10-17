@@ -668,3 +668,25 @@ test("KPI Movement period picker fits at 320px", async ({ page }) => {
     await expectNoViewportOverflow(page, `KPI movement ${v}`);
   }
 });
+
+test("Gifts card: Record gift / Cancel stay gold outlined after a tap at 390px", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 900 });
+  await page.addInitScript(() => sessionStorage.setItem("almoner-confidentiality", "1"));
+  await mockWidow(page);
+  await page.goto("/members/almoner");
+  await waitForPortal(page);
+  await page.getByRole("tab", { name: /Widows/ }).click();
+  await page.getByText("Doris Featherstonehaugh-Wolstenholme").first().click();
+  const style = (name: string) => page.getByRole("button", { name }).first().evaluate((e) => { const s = getComputedStyle(e); return { bg: s.backgroundColor, color: s.color }; });
+  const log = await style("Log contact");
+  await page.getByRole("button", { name: "Record gift" }).click();
+  // The pointer stays on Cancel, as a finger does after a tap: the state the resting scan never reached.
+  await page.getByRole("button", { name: "Cancel" }).first().hover();
+  await page.waitForTimeout(300);
+  const cancel = await style("Cancel");
+  expect(cancel.color).toBe(log.color); // gold, like "Log contact"
+  expect(log.bg).toBe("rgba(0, 0, 0, 0)");
+  expect(cancel.bg).toMatch(/^rgba\(0, 0, 0, 0\)$|^rgba\(203, 165, 77, 0\.1\)$/); // see-through or a faint gold tint, never a grey fill
+  await expectNoAxeViolations(page, "Gifts card with Cancel hovered");
+  await expectNoViewportOverflow(page, "Gifts card");
+});
