@@ -91,3 +91,92 @@ export function installationEffect(cfg: InstallationConfig, year: number, newDat
   });
   return { before: pick(cfg), after: pick(after) };
 }
+
+// ---- Per-month meeting schedule (Year Book "meeting schedule per month") ----
+export type ScheduleMonth = { month: number; ordinal: Ordinal; weekday: number; meeting_type: MeetingType };
+export type ScheduleMeeting = DiaryMeeting & { status?: string };
+
+const pad = (n: number) => String(n).padStart(2, "0");
+const parts = (iso: string) => { const [y, m, d] = iso.split("-").map(Number); return { y, m, d, wd: new Date(Date.UTC(y, m - 1, d)).getUTCDay() }; };
+const daysIn = (y: number, m: number) => new Date(Date.UTC(y, m, 0)).getUTCDate();
+
+/** Week ordinal of a date: 1st–4th, or "last" for a 5th occurrence. */
+export function ordinalOf(iso: string): Ordinal {
+  const n = Math.ceil(parts(iso).d / 7);
+  return n >= 5 ? "last" : (String(n) as Ordinal);
+}
+
+/**
+ * Infer the schedule from dated, non-cancelled meetings. The unit's usual
+ * weekday is the most common one; meetings on another weekday (one-off drafts)
+ * are ignored. Each month takes its most common week; Installation wins the type.
+ */
+export function inferSchedule(meetings: ScheduleMeeting[]): ScheduleMonth[] {
+  const live = meetings.filter((m) => !m.cancelled_at && m.meeting_type !== "emergency");
+  if (!live.length) return [];
+  const count = <T,>(xs: T[]) => { const c = new Map<T, number>(); xs.forEach((x) => c.set(x, (c.get(x) ?? 0) + 1)); return [...c.entries()].sort((a, b) => b[1] - a[1]); };
+  const wd = count(live.map((m) => parts(m.meeting_date).wd))[0][0];
+  const out: ScheduleMonth[] = [];
+  for (let month = 1; month <= 12; month++) {
+    const inMonth = live.filter((m) => parts(m.meeting_date).m === month && parts(m.meeting_date).wd === wd);
+    if (!inMonth.length) continue;
+    out.push({
+      month, weekday: wd,
+      ordinal: count(inMonth.map((m) => ordinalOf(m.meeting_date)))[0][0],
+      meeting_type: inMonth.some((m) => m.meeting_type === "installation") ? "installation" : "regular",
+    });
+  }
+  return out;
+}
+
+/** Season dates: months from `startMonth` in `startYear` through the month before it next year. */
+export function scheduleDates(schedule: ScheduleMonth[], startYear: number, startMonth: number) {
+  return schedule
+    .map((s) => ({ ...s, date: nthWeekdayOfMonth(s.month >= startMonth ? startYear : startYear + 1, s.month, s.ordinal, s.weekday) }))
+    .sort((a, b) => a.date.localeCompare(b.date));
+}
+
+export type PlanRow = { date: string; meeting_type: MeetingType; status: "existing" | "new" | "moved"; existingDate?: string; warning?: string };
+
+/** Preview a season: skip dates already in the diary (date + type), flag months whose meeting sits on another date. */
+export function planSchedule(schedule: ScheduleMonth[], startYear: number, startMonth: number, meetings: ScheduleMeeting[]): PlanRow[] {
+  const live = meetings.filter((m) => !m.cancelled_at);
+  return scheduleDates(schedule, startYear, startMonth).map(({ date, meeting_type }) => {
+    const warning = bankHoliday(date) ?? (live.some((m) => m.meeting_date === date && m.meeting_type !== meeting_type) ? "Another meeting is on this date" : undefined);
+    if (live.some((m) => m.meeting_date === date && m.meeting_type === meeting_type)) return { date, meeting_type, status: "existing", warning: undefined };
+    const sameMonth = live.find((m) => m.meeting_date.slice(0, 7) === date.slice(0, 7) && m.meeting_type === meeting_type);
+    if (sameMonth) return { date, meeting_type, status: "moved", existingDate: sameMonth.meeting_date, warning };
+    return { date, meeting_type, status: "new", warning };
+  });
+}
+
+/** Diary meetings that do not match the schedule (kept and editable, never removed). */
+export function outsideSchedule(schedule: ScheduleMonth[], meetings: ScheduleMeeting[]) {
+  return meetings.filter((m) => {
+    if (m.cancelled_at) return false;
+    const p = parts(m.meeting_date);
+    const s = schedule.find((x) => x.month === p.m);
+    return !s || nthWeekdayOfMonth(p.y, p.m, s.ordinal, s.weekday) !== m.meeting_date;
+  });
+}
+
+function easter(y: number) {
+  const a = y % 19, b = Math.floor(y / 100), c = y % 100, d = Math.floor(b / 4), e = b % 4, f = Math.floor((b + 8) / 25), g = Math.floor((b - f + 1) / 3);
+  const h = (19 * a + b - d - g + 15) % 30, i = Math.floor(c / 4), k = c % 4, l = (32 + 2 * e + 2 * i - h - k) % 7, m = Math.floor((a + 11 * h + 22 * l) / 451);
+  const month = Math.floor((h + l - 7 * m + 114) / 31), day = ((h + l - 7 * m + 114) % 31) + 1;
+  return Date.UTC(y, month - 1, day);
+}
+/** Warning only: England & Wales bank holidays (substitute days not modelled). */
+export function bankHoliday(iso: string): string | undefined {
+  const { y, m, d } = parts(iso);
+  const t = Date.UTC(y, m - 1, d), day = 86400000, e = easter(y);
+  if (t === e - 2 * day) return "Good Friday";
+  if (t === e + day) return "Easter Monday";
+  if (m === 1 && d === 1) return "New Year's Day";
+  if (m === 12 && (d === 25 || d === 26)) return d === 25 ? "Christmas Day" : "Boxing Day";
+  const nth = (mo: number, o: Ordinal) => nthWeekdayOfMonth(y, mo, o, 1);
+  const iso2 = `${y}-${pad(m)}-${pad(d)}`;
+  if (iso2 === nth(5, "1") || iso2 === nth(5, "last") || iso2 === nth(8, "last")) return "Bank holiday";
+  void daysIn;
+  return undefined;
+}

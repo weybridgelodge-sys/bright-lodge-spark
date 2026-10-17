@@ -84,14 +84,14 @@ export default function OfficesRecord({
             </thead>
             <tbody>
               {lodgeAppointments.length === 0 && (
-                <tr><td colSpan={4} className="p-3 text-primary-foreground/60 italic">No Lodge offices recorded.</td></tr>
+                <tr><td colSpan={4} className="p-3 text-primary-foreground/80 italic">No Lodge offices recorded.</td></tr>
               )}
               {lodgeAppointments.map((a) => (
                 <tr key={a.id} className="border-t border-gold/10">
                   <td className="p-2 text-primary-foreground">{a.position_label}</td>
                   <td className="p-2 text-primary-foreground/80">{a.lodge_year}</td>
                   <td className="p-2 text-primary-foreground/80">{fmt(a.appointed_on)}</td>
-                  <td className="p-2 text-[10px] text-gold/70 uppercase">Officers Tracker</td>
+                  <td className="p-2 text-[10px] text-gold uppercase">Officers Tracker</td>
                 </tr>
               ))}
             </tbody>
@@ -116,7 +116,7 @@ export default function OfficesRecord({
             </thead>
             <tbody>
               {externalAppointments.length === 0 && (
-                <tr><td colSpan={canEdit ? 7 : 6} className="p-3 text-primary-foreground/60 italic">No external appointments yet.</td></tr>
+                <tr><td colSpan={canEdit ? 7 : 6} className="p-3 text-primary-foreground/80 italic">No external appointments yet.</td></tr>
               )}
               {externalAppointments.map((a) => (
                 <tr key={a.id} className="border-t border-gold/10">
@@ -155,10 +155,10 @@ export default function OfficesRecord({
                 <SelectItem value="other">Other</SelectItem>
               </SelectContent>
             </Select>
-            <label className="text-[10px] uppercase tracking-wider text-gold/70">Appointed
+            <label className="text-[10px] uppercase tracking-wider text-gold">Appointed
               <Input type="date" value={appointed} onChange={(e) => setAppointed(e.target.value)} className={`mt-1 ${fieldCls}`} />
             </label>
-            <label className="text-[10px] uppercase tracking-wider text-gold/70">Installed
+            <label className="text-[10px] uppercase tracking-wider text-gold">Installed
               <Input type="date" value={installed} onChange={(e) => setInstalled(e.target.value)} className={`mt-1 ${fieldCls}`} />
             </label>
             <Input placeholder="Notes" value={notes} onChange={(e) => setNotes(e.target.value)} className={fieldCls} />

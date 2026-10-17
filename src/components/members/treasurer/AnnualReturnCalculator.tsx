@@ -230,7 +230,7 @@ export default function AnnualReturnCalculator({ canEdit }: { canEdit: boolean }
   return (
     <section className="rounded-lg border-2 border-gold/40 bg-primary-foreground/[0.07] p-4">
       <h2 className="font-serif text-lg text-gold mb-1">UGLE &amp; PGL Annual Return Calculator</h2>
-      <p className="text-primary-foreground/60 text-sm mb-4">
+      <p className="text-primary-foreground/80 text-sm mb-4">
         Every rate and count is editable — fee schedules change. Posts two separate liabilities:
         Dr 5000 UGLE Fees / Cr 2000 Creditors, and Dr 5100 PGL Fees / Cr 2000 Creditors.
       </p>
@@ -296,12 +296,12 @@ export default function AnnualReturnCalculator({ canEdit }: { canEdit: boolean }
             <p className="text-primary-foreground mb-2">{r.label}</p>
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <span className="text-xs text-primary-foreground/60">Rate (£)</span>
+                <span className="text-xs text-primary-foreground/80">Rate (£)</span>
                 <Input type="number" step="0.01" min="0" inputMode="decimal" value={r.rate} disabled={!canEdit}
                   onChange={(e) => setRow(r.key, "rate", e.target.value)} />
               </div>
               <div>
-                <span className="text-xs text-primary-foreground/60">Count</span>
+                <span className="text-xs text-primary-foreground/80">Count</span>
                 <Input type="number" step="1" min="0" inputMode="numeric" value={r.count} disabled={!canEdit}
                   onChange={(e) => setRow(r.key, "count", e.target.value)} />
               </div>
@@ -314,7 +314,7 @@ export default function AnnualReturnCalculator({ canEdit }: { canEdit: boolean }
       <div className="hidden sm:block overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="text-left text-primary-foreground/60 border-b border-gold/20">
+            <tr className="text-left text-primary-foreground/80 border-b border-gold/20">
               <th className="py-2">Line</th>
               <th className="py-2 w-28">Rate (£)</th>
               <th className="py-2 w-24">Count</th>
@@ -342,11 +342,11 @@ export default function AnnualReturnCalculator({ canEdit }: { canEdit: boolean }
 
       <div className="grid gap-3 sm:grid-cols-2 mt-4">
         <div className="rounded-md border border-gold/20 p-3">
-          <p className="text-primary-foreground/60 text-sm">Total Due to UGLE</p>
+          <p className="text-primary-foreground/80 text-sm">Total Due to UGLE</p>
           <p className="text-gold font-serif text-2xl">{money(ugleTotal)}</p>
         </div>
         <div className="rounded-md border border-gold/20 p-3">
-          <p className="text-primary-foreground/60 text-sm">Total Due to PGL</p>
+          <p className="text-primary-foreground/80 text-sm">Total Due to PGL</p>
           <p className="text-gold font-serif text-2xl">{money(pglTotal)}</p>
         </div>
       </div>

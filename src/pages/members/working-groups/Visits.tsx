@@ -287,7 +287,7 @@ function Inner() {
       <div className="flex items-end justify-between gap-3 flex-wrap">
         <div>
           <h1 className="font-serif text-2xl text-primary-foreground">Lodge Visits</h1>
-          <p className="text-xs text-primary-foreground/60 mt-1">
+          <p className="text-xs text-primary-foreground/80 mt-1">
             Organise visits to other lodges and keep a directory of host lodges we know.
           </p>
         </div>
@@ -306,7 +306,7 @@ function Inner() {
             className={`px-3 py-2 text-sm capitalize border-b-2 -mb-px ${
               tab === t
                 ? "border-gold text-gold"
-                : "border-transparent text-primary-foreground/60 hover:text-primary-foreground"
+                : "border-transparent text-primary-foreground/80 hover:text-primary-foreground"
             }`}
           >
             {t === "directory" ? "Lodge Directory" : "Visits"}
@@ -370,7 +370,7 @@ function Inner() {
                 accept="application/pdf"
                 onChange={(e) => setPdf(e.target.files?.[0] ?? null)}
               />
-              <p className="text-xs text-primary-foreground/50 mt-1">Max 10 MB — will be attached to the invite email.</p>
+              <p className="text-xs text-primary-foreground/80 mt-1">Max 10 MB — will be attached to the invite email.</p>
             </div>
             <div className="md:col-span-2 flex items-center gap-2">
               <Checkbox
@@ -428,11 +428,11 @@ function VisitsList({
 }) {
   return (
     <div>
-      <h2 className="text-xs uppercase tracking-widest text-primary-foreground/50 mb-2 mt-6">
+      <h2 className="text-xs uppercase tracking-widest text-primary-foreground/80 mb-2 mt-6">
         {heading}
       </h2>
       {items.length === 0 ? (
-        <div className="text-sm text-primary-foreground/40 italic py-4">Nothing to show.</div>
+        <div className="text-sm text-primary-foreground/80 italic py-4">Nothing to show.</div>
       ) : (
         <div className="space-y-2">
           {items.map((v) => (
@@ -450,9 +450,9 @@ function VisitsList({
                     {fmt(v.starts_at)} • {v.venue}
                   </p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1 mt-2 text-sm text-primary-foreground/80">
-                    <div><span className="text-primary-foreground/50">Cost:</span> {v.cost}</div>
-                    <div><span className="text-primary-foreground/50">Contact:</span> {v.host_secretary_email}</div>
-                    <div className="sm:col-span-2"><span className="text-primary-foreground/50">Payment:</span> {v.payment_details}</div>
+                    <div><span className="text-primary-foreground/80">Cost:</span> {v.cost}</div>
+                    <div><span className="text-primary-foreground/80">Contact:</span> {v.host_secretary_email}</div>
+                    <div className="sm:col-span-2"><span className="text-primary-foreground/80">Payment:</span> {v.payment_details}</div>
                   </div>
                   {v.notes && (
                     <p className="text-sm text-primary-foreground/70 mt-2 whitespace-pre-wrap">{v.notes}</p>
@@ -467,7 +467,7 @@ function VisitsList({
                       <ExternalLink className="w-3 h-3" />
                     </button>
                     {v.notified_at && (
-                      <span className="text-xs text-primary-foreground/40">
+                      <span className="text-xs text-primary-foreground/80">
                         Invited {v.notified_member_count} on {fmtDate(v.notified_at)} ({v.notify_scope === "all_members" ? "all members" : "group only"})
                       </span>
                     )}
@@ -517,7 +517,7 @@ function DirectoryTable({
         className="max-w-md"
       />
       {filtered.length === 0 ? (
-        <div className="text-sm text-primary-foreground/40 italic py-4">
+        <div className="text-sm text-primary-foreground/80 italic py-4">
           No lodges yet — the directory populates automatically from visit entries.
         </div>
       ) : (

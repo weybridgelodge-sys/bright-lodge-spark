@@ -109,7 +109,7 @@ export default function MemberDevelopmentInner({ memberIdOverride, forceReadOnly
           <h1 className="font-serif text-2xl text-primary-foreground">
             {isOwn ? "My Development Record" : `Development Record — ${displayName(profile as any)}`}
           </h1>
-          <p className="text-xs text-primary-foreground/60 mt-1">
+          <p className="text-xs text-primary-foreground/80 mt-1">
             {canEdit ? "You can edit this record." : "Read-only view."}
           </p>
         </div>
@@ -167,7 +167,7 @@ export default function MemberDevelopmentInner({ memberIdOverride, forceReadOnly
 
       <section className="rounded-sm border border-gold/20 bg-navy-dark/40 p-5">
         <h2 className="font-serif text-gold text-lg mb-1">5. Engagement Tracker</h2>
-        <p className="text-xs text-primary-foreground/60 mb-4">
+        <p className="text-xs text-primary-foreground/80 mb-4">
           Non-ceremonial touchpoints: socials, blog contributions, charitable activity, working groups, and mentor conversations.
         </p>
         <EngagementTracker memberId={memberId} canEdit={canEdit || isOwn} loggedBy={user?.id ?? null} />

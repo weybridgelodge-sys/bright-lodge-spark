@@ -41,7 +41,7 @@ function Inner() {
       <div className="flex items-end justify-between gap-3 flex-wrap">
         <div>
           <h1 className="font-serif text-2xl text-primary-foreground">Working Groups</h1>
-          <p className="text-xs text-primary-foreground/60 mt-1">
+          <p className="text-xs text-primary-foreground/80 mt-1">
             Every brother has a role beyond the progressive offices.
           </p>
         </div>
@@ -61,7 +61,7 @@ function Inner() {
         <p className="font-serif italic text-gold text-lg leading-relaxed">
           “{PHILOSOPHY}”
         </p>
-        <footer className="mt-3 text-xs text-primary-foreground/60 not-italic">
+        <footer className="mt-3 text-xs text-primary-foreground/80 not-italic">
           — Lodge philosophy, adopted 2026
         </footer>
       </blockquote>

@@ -56,7 +56,7 @@ export default function LoiRegister() {
         <h1 className="font-serif text-3xl text-gold mb-1 flex items-center gap-2">
           <GraduationCap className="w-6 h-6" /> Rehearsal Register
         </h1>
-        <p className="text-primary-foreground/60 text-sm">
+        <p className="text-primary-foreground/80 text-sm">
           Your personal record of Rehearsal Night attendance.
         </p>
       </div>
@@ -64,13 +64,13 @@ export default function LoiRegister() {
       {/* My attendance */}
       <section className="bg-navy-dark/60 border border-gold/15 rounded-sm p-5 mb-6">
         <h2 className="font-serif text-lg text-gold mb-3">My rehearsal attendance</h2>
-        <p className="text-xs text-primary-foreground/60 mb-3">
+        <p className="text-xs text-primary-foreground/80 mb-3">
           Masonic year {masonicYearStart()}–{masonicYearStart() + 1} ·{" "}
           <span className="text-gold font-semibold">{myYearAttendance.length}</span> session
           {myYearAttendance.length === 1 ? "" : "s"} attended
         </p>
         {myYearAttendance.length === 0 ? (
-          <p className="text-xs text-primary-foreground/50 italic">
+          <p className="text-xs text-primary-foreground/80 italic">
             No attendance recorded yet this Masonic year.
           </p>
         ) : (
@@ -86,7 +86,7 @@ export default function LoiRegister() {
                     month: "short",
                     year: "numeric",
                   })}{" "}
-                  <span className="text-primary-foreground/60">
+                  <span className="text-primary-foreground/80">
                     · {focusLabel(sess!.focus, sess!.focus_other)}
                   </span>
                 </span>

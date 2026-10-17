@@ -284,11 +284,11 @@ export default function MembersLogin() {
                 {!emailSent ? (
                   <>
                     <div className="mb-6">
-                      <p className="text-[10px] uppercase tracking-[0.22em] text-gold/70 flex items-center gap-1.5">
+                      <p className="text-[10px] uppercase tracking-[0.22em] text-gold flex items-center gap-1.5">
                         <Shield className="w-3 h-3" /> Antechamber Access
                       </p>
                       <h1 className="font-serif text-2xl text-primary-foreground mt-2">Member Portal Sign-In</h1>
-                      <p className="text-xs text-primary-foreground/60 mt-2 leading-relaxed">
+                      <p className="text-xs text-primary-foreground/80 mt-2 leading-relaxed">
                         Enter your registered email to receive a secure, passwordless Magic Link. No passwords to remember.
                       </p>
                     </div>
@@ -315,11 +315,11 @@ export default function MembersLogin() {
                       />
 
                       <div>
-                        <label className="block text-[10px] uppercase tracking-wider text-primary-foreground/60 mb-1.5">
+                        <label className="block text-[10px] uppercase tracking-wider text-primary-foreground/80 mb-1.5">
                           Registered Email Address
                         </label>
                         <div className="relative">
-                          <Mail className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-primary-foreground/40" />
+                          <Mail className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-primary-foreground/80" />
                           <input
                             required
                             type="email"
@@ -342,7 +342,7 @@ export default function MembersLogin() {
 
                     {!isNativeApp && (
                       <>
-                        <div className="my-5 flex items-center gap-3 text-[10px] text-primary-foreground/40 uppercase tracking-wider">
+                        <div className="my-5 flex items-center gap-3 text-[10px] text-primary-foreground/80 uppercase tracking-wider">
                           <div className="flex-1 h-px bg-gold/10" /> or <div className="flex-1 h-px bg-gold/10" />
                         </div>
 
@@ -376,7 +376,7 @@ export default function MembersLogin() {
                       <span className="text-gold">{loginEmail}</span>. Click the link inside that message to unlock the portal.
                     </p>
 
-                    <div className="my-6 flex items-center gap-3 text-[10px] text-primary-foreground/40 uppercase tracking-wider">
+                    <div className="my-6 flex items-center gap-3 text-[10px] text-primary-foreground/80 uppercase tracking-wider">
                       <div className="flex-1 h-px bg-gold/10" /> or enter code <div className="flex-1 h-px bg-gold/10" />
                     </div>
 
@@ -411,7 +411,7 @@ export default function MembersLogin() {
                         setEmailSent(false);
                         setOtpCode("");
                       }}
-                      className="text-[11px] font-semibold text-primary-foreground/60 hover:text-gold uppercase tracking-wider mt-6 inline-flex items-center gap-1"
+                      className="text-[11px] font-semibold text-primary-foreground/80 hover:text-gold uppercase tracking-wider mt-6 inline-flex items-center gap-1"
                     >
                       <ArrowLeft className="w-3 h-3" /> Back to Sign In
                     </button>
@@ -431,11 +431,11 @@ export default function MembersLogin() {
                 className="relative"
               >
                 <div className="mb-6">
-                  <p className="text-[10px] uppercase tracking-[0.22em] text-gold/70 flex items-center gap-1.5">
+                  <p className="text-[10px] uppercase tracking-[0.22em] text-gold flex items-center gap-1.5">
                     <UserPlus className="w-3 h-3" /> Credentials Registration
                   </p>
                   <h1 className="font-serif text-2xl text-primary-foreground mt-2">Request Portal Access</h1>
-                  <p className="text-xs text-primary-foreground/60 mt-2 leading-relaxed">
+                  <p className="text-xs text-primary-foreground/80 mt-2 leading-relaxed">
                     Accounts require manual validation by the Lodge Secretary to safeguard sensitive ritual archives.
                   </p>
                 </div>
@@ -525,7 +525,7 @@ export default function MembersLogin() {
                 <div className="w-14 h-14 rounded-full bg-gold/15 flex items-center justify-center mx-auto mb-4">
                   <Clock className="w-7 h-7 text-gold" />
                 </div>
-                <p className="text-[10px] uppercase tracking-[0.22em] text-gold/70">Application Lodged</p>
+                <p className="text-[10px] uppercase tracking-[0.22em] text-gold">Application Lodged</p>
                 <h2 className="font-serif text-xl text-primary-foreground mt-2 mb-3">Awaiting Secretary's Sign-Off</h2>
                 <p className="text-sm text-primary-foreground/70 leading-relaxed max-w-xs mx-auto">
                   Your access request has been received. The Lodge Secretary will verify your Masonic standing and
@@ -540,7 +540,7 @@ export default function MembersLogin() {
                     setRegEmail("");
                     setGdpr(false);
                   }}
-                  className="text-[11px] font-semibold text-primary-foreground/60 hover:text-gold uppercase tracking-wider mt-6 inline-flex items-center gap-1"
+                  className="text-[11px] font-semibold text-primary-foreground/80 hover:text-gold uppercase tracking-wider mt-6 inline-flex items-center gap-1"
                 >
                   <ArrowLeft className="w-3 h-3" /> Back to Sign In
                 </button>
@@ -557,12 +557,12 @@ export default function MembersLogin() {
             onClick={() => {
               Browser.open({ url: "https://weybridgelodge.org.uk" }).catch(() => {});
             }}
-            className="block w-full text-center mt-6 text-xs text-primary-foreground/50 hover:text-gold"
+            className="block w-full text-center mt-6 text-xs text-primary-foreground/80 hover:text-gold"
           >
             Visit weybridgelodge.org.uk ↗
           </button>
         ) : (
-          <Link to="/" className="block text-center mt-6 text-xs text-primary-foreground/50 hover:text-gold">
+          <Link to="/" className="block text-center mt-6 text-xs text-primary-foreground/80 hover:text-gold">
             ← Back to public site
           </Link>
         )}
@@ -588,7 +588,7 @@ function Field({
 }) {
   return (
     <div>
-      <label className="block text-[10px] uppercase tracking-wider text-primary-foreground/60 mb-1.5">{label}</label>
+      <label className="block text-[10px] uppercase tracking-wider text-primary-foreground/80 mb-1.5">{label}</label>
       <input
         required={required}
         type={type}

@@ -107,7 +107,7 @@ function MembersTab({ members, subs, payments, calcs, onRefresh }: {
                         <TooltipProvider delayDuration={100}>
                           <Tooltip>
                             <TooltipTrigger asChild>
-                              <button type="button" className="text-gold/70 hover:text-gold"><Info className="w-3.5 h-3.5" /></button>
+                              <button type="button" className="text-gold hover:text-gold"><Info className="w-3.5 h-3.5" /></button>
                             </TooltipTrigger>
                             <TooltipContent className="max-w-xs text-xs">
                               <p className="font-semibold mb-1">Annual rate {gbp(calc.annual_pence)}</p>
@@ -121,10 +121,10 @@ function MembersTab({ members, subs, payments, calcs, onRefresh }: {
                           </Tooltip>
                         </TooltipProvider>
                       </div>
-                    ) : <span className="text-primary-foreground/40">—</span>}
+                    ) : <span className="text-primary-foreground/80">—</span>}
                   </td>
-                  <td className="px-3 py-2">{sub ? (sub.plan === "monthly" ? "Monthly" : "Lump sum") : <span className="text-primary-foreground/40">—</span>}</td>
-                  <td className="px-3 py-2">{sub ? (sub.method === "bacs" ? "Bacs DD" : "Card") : <span className="text-primary-foreground/40">—</span>}</td>
+                  <td className="px-3 py-2">{sub ? (sub.plan === "monthly" ? "Monthly" : "Lump sum") : <span className="text-primary-foreground/80">—</span>}</td>
+                  <td className="px-3 py-2">{sub ? (sub.method === "bacs" ? "Bacs DD" : "Card") : <span className="text-primary-foreground/80">—</span>}</td>
                   <td className="px-3 py-2">
                     {calc?.is_exempt ? (
                       <span className="px-2 py-0.5 rounded text-xs bg-emerald-500/20 text-emerald-300">exempt</span>
@@ -136,10 +136,10 @@ function MembersTab({ members, subs, payments, calcs, onRefresh }: {
                           ? "bg-red-500/20 text-red-300"
                           : "bg-amber-500/20 text-amber-300"
                       }`}>{sub.status}</span>
-                    ) : <span className="text-primary-foreground/40">no plan</span>}
+                    ) : <span className="text-primary-foreground/80">no plan</span>}
                   </td>
                   <td className="px-3 py-2 text-right">{gbp(paid)}</td>
-                  <td className={`px-3 py-2 text-right ${owed > 0 ? "text-amber-300" : "text-primary-foreground/60"}`}>{sub ? gbp(Math.max(0, owed)) : "—"}</td>
+                  <td className={`px-3 py-2 text-right ${owed > 0 ? "text-amber-300" : "text-primary-foreground/80"}`}>{sub ? gbp(Math.max(0, owed)) : "—"}</td>
                   <td className="px-3 py-2 text-right">{credit > 0 ? gbp(credit) : "—"}</td>
                   <td className="px-3 py-2">
                     <Button variant="outline" size="sm" onClick={() => setHistoryMember(m)}>History</Button>
@@ -148,7 +148,7 @@ function MembersTab({ members, subs, payments, calcs, onRefresh }: {
               );
             })}
             {members.length === 0 && (
-              <tr><td colSpan={9} className="px-3 py-6 text-center text-primary-foreground/60">No active members.</td></tr>
+              <tr><td colSpan={9} className="px-3 py-6 text-center text-primary-foreground/80">No active members.</td></tr>
             )}
           </tbody>
         </table>
@@ -484,7 +484,7 @@ function Inner() {
     <MembersLayout>
       <header className="mb-4">
         <h1 className="font-serif text-2xl md:text-3xl text-gold">Dues &amp; Subscriptions</h1>
-        <p className="text-primary-foreground/60 text-sm">Annual Lodge subscription — collection, refunds, and price changes.</p>
+        <p className="text-primary-foreground/80 text-sm">Annual Lodge subscription — collection, refunds, and price changes.</p>
       </header>
 
       <TestModeBanner />
@@ -495,13 +495,13 @@ function Inner() {
             key={t}
             onClick={() => setTab(t)}
             className={`min-h-[48px] min-w-0 px-3 py-2 text-sm capitalize border-b-2 -mb-px sm:px-4 ${
-              tab === t ? "border-gold text-gold" : "border-transparent text-primary-foreground/60 hover:text-primary-foreground"
+              tab === t ? "border-gold text-gold" : "border-transparent text-primary-foreground/80 hover:text-primary-foreground"
             }`}
           >
             {t === "demo" ? "Demo as member" : t}
           </button>
         ))}
-        <button onClick={load} aria-label="Refresh dues" className="min-h-[48px] min-w-0 p-2 text-primary-foreground/60 hover:text-gold sm:ml-auto" title="Refresh">
+        <button onClick={load} aria-label="Refresh dues" className="min-h-[48px] min-w-0 p-2 text-primary-foreground/80 hover:text-gold sm:ml-auto" title="Refresh">
           <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
         </button>
       </div>

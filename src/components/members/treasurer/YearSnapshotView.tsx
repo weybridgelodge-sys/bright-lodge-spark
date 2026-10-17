@@ -36,7 +36,7 @@ export default function YearSnapshotView({ snap, round }: { snap: YearSnapshot; 
           <Row k="Total funds" v={bs.total_funds} strong />
         </dl>
       </section>
-      <p className="text-xs text-primary-foreground/60">
+      <p className="text-xs text-primary-foreground/80">
         Trial balance: Dr {acct(tb.debit)} · Cr {acct(tb.credit)} {tb.debit === tb.credit ? "· balanced" : "· OUT OF BALANCE"}
       </p>
       {snap.accounts?.length ? (
@@ -51,7 +51,7 @@ export default function YearSnapshotView({ snap, round }: { snap: YearSnapshot; 
                   <tr key={a.code} className="border-b border-gold/10">
                     <td className="py-1 font-mono">{a.code}</td>
                     <td className="py-1">{a.name}</td>
-                    <td className="py-1 capitalize text-primary-foreground/60">{a.type}</td>
+                    <td className="py-1 capitalize text-primary-foreground/80">{a.type}</td>
                     <td className="py-1 text-right tabular-nums">{acct(natural)}</td>
                   </tr>
                 );

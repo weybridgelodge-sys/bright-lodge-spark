@@ -145,7 +145,7 @@ function Inner() {
       <header className="mb-4 flex min-w-0 flex-col items-stretch gap-3 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
         <div className="min-w-0">
           <h1 className="font-serif text-2xl md:text-3xl text-gold break-words">Provincial Installation Return</h1>
-          <p className="text-primary-foreground/60 text-sm break-words">Provincial Grand Lodge of Surrey — built fresh from live records. Download it to check and send yourself, or send it straight to the Provincial Grand Secretary from here.</p>
+          <p className="text-primary-foreground/80 text-sm break-words">Provincial Grand Lodge of Surrey — built fresh from live records. Download it to check and send yourself, or send it straight to the Provincial Grand Secretary from here.</p>
         </div>
         <div className="flex min-w-0 flex-col items-stretch gap-2 sm:flex-row sm:flex-wrap sm:items-center">
           <Select value={String(year)} onValueChange={(v) => setYear(Number(v))}>
@@ -159,7 +159,7 @@ function Inner() {
         </div>
       </header>
 
-      {!data ? <p className="text-primary-foreground/60">{loading ? "Loading…" : ""}</p> : (
+      {!data ? <p className="text-primary-foreground/80">{loading ? "Loading…" : ""}</p> : (
         <div className="space-y-6 min-w-0">
           {data.issues.length > 0 && (
             <div className="rounded-sm border border-amber-500/40 bg-amber-500/10 p-4 text-sm text-primary-foreground/90 min-w-0">
@@ -192,7 +192,7 @@ function Inner() {
                   return (
                     <li key={i} className="flex min-w-0 flex-col gap-1 p-3 sm:flex-row sm:items-center sm:gap-3">
                       <span className="w-32 shrink-0 text-gold text-sm">{r.label}</span>
-                      <span className="min-w-0 flex-1 break-words text-primary-foreground">{name || <em className="text-primary-foreground/50">blank</em>}{r.decorations && <span className="text-primary-foreground/60"> · {r.decorations}</span>}</span>
+                      <span className="min-w-0 flex-1 break-words text-primary-foreground">{name || <em className="text-primary-foreground/80">blank</em>}{r.decorations && <span className="text-primary-foreground/80"> · {r.decorations}</span>}</span>
                       <Badge className={`self-start sm:self-auto ${pl.cls}`}>{pl.text}{r.provenance === "carried" && r.office?.fromYear ? ` from ${formatMasonicYear(r.office.fromYear)}` : ""}</Badge>
                     </li>
                   );
@@ -200,7 +200,7 @@ function Inner() {
               </ul>
             </section>
           ))}
-          <p className="text-xs text-primary-foreground/60">Grey text after a name is the member's post-nominals, printed in the "Civil & Military Decorations" column. Edit it on the member's record if it holds masonic ranks.</p>
+          <p className="text-xs text-primary-foreground/80">Grey text after a name is the member's post-nominals, printed in the "Civil & Military Decorations" column. Edit it on the member's record if it holds masonic ranks.</p>
 
           <section>
             <h2 className="font-serif text-lg text-gold mb-2">Subscribing Past Masters of the Lodge</h2>
@@ -212,7 +212,7 @@ function Inner() {
                 </li>
               ))}
             </ul>
-            <p className="mt-2 text-xs text-primary-foreground/60">A Master is added only once he is confirmed as IPM, with all his years as Master. "Subscribing Past Masters in the Lodge" prints empty.</p>
+            <p className="mt-2 text-xs text-primary-foreground/80">A Master is added only once he is confirmed as IPM, with all his years as Master. "Subscribing Past Masters in the Lodge" prints empty.</p>
           </section>
 
           <section className="rounded-sm border border-gold/20 bg-navy-light/30 p-4 text-sm text-primary-foreground/80 min-w-0">
@@ -228,10 +228,10 @@ function Inner() {
               ) : <span className="break-all">{pgsEmail || "Not set yet"}</span>}
             </div>
             {!canSubmit && <p className="text-xs text-amber-300 mt-2">Only the Secretary or an administrator can submit the return.</p>}
-            <p className="text-xs text-primary-foreground/60 mt-2">The email carries secure 30-day download links to the Word and PDF files (our email service can't send attachments). The download buttons above still work as before.</p>
+            <p className="text-xs text-primary-foreground/80 mt-2">The email carries secure 30-day download links to the Word and PDF files (our email service can't send attachments). The download buttons above still work as before.</p>
             {canSubmit && (<>
               <h3 className="text-gold text-sm mt-3 mb-1">Sent for {formatMasonicYear(year)}</h3>
-              {submissions.length === 0 ? <p className="text-xs text-primary-foreground/60">Not sent yet.</p> : (
+              {submissions.length === 0 ? <p className="text-xs text-primary-foreground/80">Not sent yet.</p> : (
                 <ul className="text-xs space-y-1">{submissions.map((s) => (
                   <li className="break-words" key={s.id}>{new Date(s.sent_at).toLocaleString("en-GB")} — by {s.sent_by_name ?? "unknown"} to {s.recipient_email}</li>
                 ))}</ul>
@@ -247,7 +247,7 @@ function Inner() {
               <p><span className="text-gold">Mobile:</span> {data.secretary.mobile || "—"}</p>
               <p><span className="text-gold">Personal email:</span> {data.secretary.personalEmail || "—"}</p>
               <p><span className="text-gold">Lodge email:</span> {data.secretary.lodgeEmail}</p>
-              <p className="pt-1 text-xs text-primary-foreground/60">Taken from the Secretary's own member record, which only the Secretary, admins, the Master, Almoner and IPM can see.</p>
+              <p className="pt-1 text-xs text-primary-foreground/80">Taken from the Secretary's own member record, which only the Secretary, admins, the Master, Almoner and IPM can see.</p>
             </div>
           </section>
         </div>

@@ -275,7 +275,7 @@ function Inner() {
           <h1 className="font-serif text-2xl md:text-3xl text-gold flex items-center gap-2">
             <FileCheck className="w-6 h-6" /> Returns &amp; Certificates
           </h1>
-          <p className="text-primary-foreground/60 text-sm">
+          <p className="text-primary-foreground/80 text-sm">
             UGLE and Provincial forms, certificates and letters.
           </p>
         </div>
@@ -312,13 +312,13 @@ function Inner() {
             ))}
           </SelectContent>
         </Select>
-        <Input placeholder="Search name" value={fSearch} onChange={(e) => setFSearch(e.target.value)} className="bg-navy border-gold/20 text-primary-foreground placeholder:text-primary-foreground/40" />
+        <Input placeholder="Search name" value={fSearch} onChange={(e) => setFSearch(e.target.value)} className="bg-navy border-gold/20 text-primary-foreground placeholder:text-primary-foreground/80" />
       </div>
 
       {loading ? (
-        <p className="text-primary-foreground/60 text-sm">Loading…</p>
+        <p className="text-primary-foreground/80 text-sm">Loading…</p>
       ) : filtered.length === 0 ? (
-        <p className="text-primary-foreground/60 text-sm">No returns logged yet.</p>
+        <p className="text-primary-foreground/80 text-sm">No returns logged yet.</p>
       ) : (
         <div className="space-y-2">
           {filtered.map((r) => (
@@ -332,11 +332,11 @@ function Inner() {
                   {dueBadge(r)}
                 </div>
                 <p className="text-primary-foreground/80 text-sm mt-1">{personName(r)}</p>
-                <p className="text-primary-foreground/60 text-xs mt-1">
+                <p className="text-primary-foreground/80 text-xs mt-1">
                   {r.masonic_year ? `Masonic year ${r.masonic_year} · ` : ""}
                   Submitted: {r.date_submitted ?? "—"} · Due: {r.date_due ?? "—"}
                 </p>
-                {r.notes && <p className="text-primary-foreground/60 text-xs mt-1 whitespace-pre-wrap">{r.notes}</p>}
+                {r.notes && <p className="text-primary-foreground/80 text-xs mt-1 whitespace-pre-wrap">{r.notes}</p>}
               </div>
               <div className="flex items-center gap-2">
                 {r.file_path && (
@@ -436,23 +436,23 @@ function Inner() {
                       date_due: f.return_type === "lp_a5_certificate" && v ? addDays(v, 28) : f.date_due,
                     }));
                   }}
-                  className="bg-navy border-gold/20 text-primary-foreground placeholder:text-primary-foreground/40 [color-scheme:dark]"
+                  className="bg-navy border-gold/20 text-primary-foreground placeholder:text-primary-foreground/80 [color-scheme:dark]"
                 />
               </div>
               <div>
                 <label className="text-xs text-primary-foreground/70">Date due</label>
-                <Input type="date" value={form.date_due} onChange={(e) => setForm({ ...form, date_due: e.target.value })} className="bg-navy border-gold/20 text-primary-foreground placeholder:text-primary-foreground/40 [color-scheme:dark]" />
+                <Input type="date" value={form.date_due} onChange={(e) => setForm({ ...form, date_due: e.target.value })} className="bg-navy border-gold/20 text-primary-foreground placeholder:text-primary-foreground/80 [color-scheme:dark]" />
               </div>
             </div>
 
             <div>
               <label className="text-xs text-primary-foreground/70">Notes</label>
-              <Textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} rows={3} className="bg-navy border-gold/20 text-primary-foreground placeholder:text-primary-foreground/40" />
+              <Textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} rows={3} className="bg-navy border-gold/20 text-primary-foreground placeholder:text-primary-foreground/80" />
             </div>
 
             <div>
               <label className="text-xs text-primary-foreground/70">Attachment (PDF)</label>
-              <Input type="file" accept="application/pdf" onChange={(e) => setFile(e.target.files?.[0] ?? null)} className="bg-navy border-gold/20 text-primary-foreground placeholder:text-primary-foreground/40" />
+              <Input type="file" accept="application/pdf" onChange={(e) => setFile(e.target.files?.[0] ?? null)} className="bg-navy border-gold/20 text-primary-foreground placeholder:text-primary-foreground/80" />
             </div>
           </div>
           <DialogFooter>

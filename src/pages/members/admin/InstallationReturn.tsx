@@ -177,7 +177,7 @@ function Inner() {
     return (
       <tr className="border-t border-gold/10 align-top">
         <td className="py-2 pr-3 text-gold">{o.label}</td>
-        <td className="py-2 pr-3">{p ? blockName(p) : <span className="text-primary-foreground/50">—</span>}</td>
+        <td className="py-2 pr-3">{p ? blockName(p) : <span className="text-primary-foreground/80">—</span>}</td>
         {email && <td className="py-2 pr-3 text-xs">{p?.email ?? "—"}</td>}
         {email && (
           <td className="py-2 pr-3 text-xs">
@@ -186,7 +186,7 @@ function Inner() {
         )}
         <td className="py-2">
           <Badge className={PROV[o.provenance].cls}>{PROV[o.provenance].label}{o.provenance === "carried" && o.fromYear ? ` (from ${formatMasonicYear(o.fromYear)})` : ""}</Badge>
-          {o.note && <p className="text-xs text-primary-foreground/60 mt-1">{o.note}</p>}
+          {o.note && <p className="text-xs text-primary-foreground/80 mt-1">{o.note}</p>}
         </td>
       </tr>
     );
@@ -200,7 +200,7 @@ function Inner() {
       <header className="mb-4 flex min-w-0 flex-col items-stretch gap-3 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
         <div className="min-w-0">
           <h1 className="font-serif text-2xl md:text-3xl text-gold">UGLE Installation Return</h1>
-          <p className="text-primary-foreground/60 text-sm">Read live from the lodge records every time you open or export it.</p>
+          <p className="text-primary-foreground/80 text-sm">Read live from the lodge records every time you open or export it.</p>
         </div>
         <div className="grid w-full min-w-0 grid-cols-1 gap-2 sm:flex sm:w-auto sm:flex-wrap sm:items-center">
           <Select value={String(year)} onValueChange={(v) => setYear(Number(v))}>
@@ -236,8 +236,8 @@ function Inner() {
             <p>Weybridge Lodge No. 6787</p>
             <p>Installation date prescribed by by-laws (3rd Wednesday in October): <strong>{ukDate(data.prescribedDate)}</strong></p>
             <p>Actual installation meeting: <strong>{data.installationDate ? ukDate(data.installationDate) : "not found"}</strong>
-              {data.installationEventTitle && <span className="text-primary-foreground/60"> — {data.installationEventTitle}</span>}</p>
-            <p className="text-primary-foreground/60">{data.installationDate && data.installationDate !== data.prescribedDate ? "Different from the by-laws, so the 'if different' date is filled." : "Same as the by-laws, so the 'if different' date is left blank."}</p>
+              {data.installationEventTitle && <span className="text-primary-foreground/80"> — {data.installationEventTitle}</span>}</p>
+            <p className="text-primary-foreground/80">{data.installationDate && data.installationDate !== data.prescribedDate ? "Different from the by-laws, so the 'if different' date is filled." : "Same as the by-laws, so the 'if different' date is left blank."}</p>
           </section>
 
           <section className="rounded-sm border border-gold/20 bg-navy-light/30 p-4">
@@ -245,7 +245,7 @@ function Inner() {
             {q?.branch === 1 && <p>Served as Master of Lodge No. {q.lodgeNo} in the year <strong>{q.year}</strong>{q.allYears.length > 1 ? ` (earliest of ${q.allYears.join(", ")})` : ""}.</p>}
             {q?.branch === 2 && <p>Served as {q.office === "senior_warden" ? "Senior" : "Junior"} Warden for a full year in Lodge No. {q.lodgeNo} in the year <strong>{q.year}</strong>.</p>}
             {q?.branch === 0 && <p className="text-amber-300">{q.reason}</p>}
-            <p className="text-xs text-primary-foreground/60 mt-1">The dispensation box is never filled automatically.</p>
+            <p className="text-xs text-primary-foreground/80 mt-1">The dispensation box is never filled automatically.</p>
           </section>
 
           <section className="rounded-sm border border-gold/20 bg-navy-light/30 p-4 overflow-x-auto">
@@ -256,7 +256,7 @@ function Inner() {
           <section className="rounded-sm border border-gold/20 bg-navy-light/30 p-4 overflow-x-auto">
             <h2 className="font-serif text-gold text-lg mb-2">Officers and email addresses</h2>
             <table className="w-full">
-              <thead><tr className="text-left text-xs text-primary-foreground/60"><th>Office</th><th>Name</th><th>Personal</th><th>Lodge</th><th>Status</th></tr></thead>
+              <thead><tr className="text-left text-xs text-primary-foreground/80"><th>Office</th><th>Name</th><th>Personal</th><th>Lodge</th><th>Status</th></tr></thead>
               <tbody>{data.officers.map((o) => <Row key={o.key} o={o} email />)}</tbody>
             </table>
             <div className="mt-3 flex min-w-0 flex-col items-stretch gap-2 text-xs sm:flex-row sm:flex-wrap sm:items-center">
@@ -266,7 +266,7 @@ function Inner() {
                 <SelectContent>{MEMBERSHIP_EMAIL_OPTIONS.map((e) => <SelectItem key={e} value={e}>{e}</SelectItem>)}</SelectContent>
               </Select>
             </div>
-            <p className="text-xs text-primary-foreground/60 mt-2">UGLE's own form has no lodge email box for the Treasurer, so only the personal address can be given.</p>
+            <p className="text-xs text-primary-foreground/80 mt-2">UGLE's own form has no lodge email box for the Treasurer, so only the personal address can be given.</p>
           </section>
 
           <section className="rounded-sm border border-gold/20 bg-navy-light/30 p-4">
@@ -278,7 +278,7 @@ function Inner() {
                 </Button>
               ))}
             </div>
-            <p className="text-xs text-primary-foreground/60 mt-2">Your choice fills the Y/N box on the form. It isn't saved, so check it each time you export.</p>
+            <p className="text-xs text-primary-foreground/80 mt-2">Your choice fills the Y/N box on the form. It isn't saved, so check it each time you export.</p>
           </section>
 
           <section className="rounded-sm border border-gold/20 bg-navy-light/30 p-4">
@@ -293,9 +293,9 @@ function Inner() {
               ) : <span>{provinceEmail || "Not set yet"}</span>}
             </div>
             {!canSubmit && <p className="text-xs text-amber-300 mt-2">Only the Secretary or an administrator can submit the return.</p>}
-            <p className="text-xs text-primary-foreground/60 mt-2">The email carries a secure 30-day download link to the PDF (our email service can't send attachments). Signature boxes stay blank.</p>
+            <p className="text-xs text-primary-foreground/80 mt-2">The email carries a secure 30-day download link to the PDF (our email service can't send attachments). Signature boxes stay blank.</p>
             <h3 className="text-gold text-sm mt-3 mb-1">Sent for {formatMasonicYear(year)}</h3>
-            {submissions.length === 0 ? <p className="text-xs text-primary-foreground/60">Not sent yet.</p> : (
+            {submissions.length === 0 ? <p className="text-xs text-primary-foreground/80">Not sent yet.</p> : (
               <ul className="text-xs space-y-1">{submissions.map((s) => (
                 <li className="break-words" key={s.id}>{new Date(s.sent_at).toLocaleString("en-GB")} — by {s.sent_by_name ?? "unknown"} to {s.recipient_email}{s.secretary_changed ? ` (Secretary changed: ${s.secretary_changed})` : ""}</li>
               ))}</ul>
@@ -306,10 +306,10 @@ function Inner() {
             <h2 className="font-serif text-gold text-lg mb-2">Every field that will be filled</h2>
             <table className="w-full text-xs">
               <tbody>{specs.map((s) => (
-                <tr key={s.id} className="border-t border-gold/10"><td className="py-1 pr-3 text-primary-foreground/60">{s.label}</td><td className="py-1">{s.value || <span className="text-primary-foreground/40">(blank)</span>}</td></tr>
+                <tr key={s.id} className="border-t border-gold/10"><td className="py-1 pr-3 text-primary-foreground/80">{s.label}</td><td className="py-1">{s.value || <span className="text-primary-foreground/80">(blank)</span>}</td></tr>
               ))}</tbody>
             </table>
-            <p className="text-xs text-primary-foreground/60 mt-2">Signatures of the Master and Secretary are always left blank for a real signature. Date signed is prefilled with the installation date and can be changed in the PDF.</p>
+            <p className="text-xs text-primary-foreground/80 mt-2">Signatures of the Master and Secretary are always left blank for a real signature. Date signed is prefilled with the installation date and can be changed in the PDF.</p>
           </section>
 
           {report && (report.missing.length > 0 || report.filled.some((f) => f.fuzzy)) && (

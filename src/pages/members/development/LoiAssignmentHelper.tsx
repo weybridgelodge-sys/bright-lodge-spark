@@ -117,7 +117,7 @@ function Inner() {
     <div className="space-y-6">
       <div>
         <h1 className="font-serif text-2xl text-primary-foreground">Rehearsal Part Assignment Helper</h1>
-        <p className="text-xs text-primary-foreground/60 mt-1">
+        <p className="text-xs text-primary-foreground/80 mt-1">
           Pick a rehearsal session, tick the pieces you'll rehearse, accept the suggested member or override.
         </p>
       </div>

@@ -52,7 +52,7 @@ export default function SubscriptionAccrualPanel({ canEdit }: { canEdit: boolean
   return (
     <section className="rounded-lg border border-gold/20 bg-primary-foreground/5 p-4">
       <h2 className="font-serif text-lg text-gold mb-1">Annual subscriptions charge</h2>
-      <p className="text-primary-foreground/60 text-sm mb-4">
+      <p className="text-primary-foreground/80 text-sm mb-4">
         Charges every active member for the year on 1 October: Dr 1100 Debtors for each member, split across 4000 Subscriptions,
         the 3100 reserve pots (tagged) and 2200 Relief Chest. Under-25s at 1 October pay half. Honorary members and the
         current Secretary (most recent appointment) are exempt; the Treasurer pays as normal. Each year can only be charged once.
@@ -79,7 +79,7 @@ export default function SubscriptionAccrualPanel({ canEdit }: { canEdit: boolean
             {rows.map((r) => (
               <li key={r.member_id} className="flex gap-3 px-3 py-1.5">
                 <span className="flex-1 text-primary-foreground/90">{r.full_name}</span>
-                <span className="text-primary-foreground/50 text-xs">
+                <span className="text-primary-foreground/80 text-xs">
                   {r.exempt_reason ? `Exempt (${r.exempt_reason})` : r.under_25 ? "Under 25" : r.dob_missing ? "No date of birth — full rate" : ""}
                 </span>
                 <span className="text-gold w-20 text-right">{fmt(r.amount_pence)}</span>

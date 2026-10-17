@@ -41,7 +41,7 @@ function Inner() {
     <MembersLayout>
       <header className="mb-6">
         <h1 className="font-serif text-2xl md:text-3xl text-gold">Secretary Portal</h1>
-        <p className="text-primary-foreground/60 text-sm">Meetings, register, summons and lodge reporting.</p>
+        <p className="text-primary-foreground/80 text-sm">Meetings, register, summons and lodge reporting.</p>
       </header>
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {visible.map((t) => (

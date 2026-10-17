@@ -210,7 +210,7 @@ function Inner() {
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
           <h1 className="font-serif text-2xl text-primary-foreground">Member Calendar</h1>
-          <p className="text-xs text-primary-foreground/60 mt-1">
+          <p className="text-xs text-primary-foreground/80 mt-1">
             All lodge meetings, festive boards, ad-hoc socials and Thursday rehearsals — live.
           </p>
         </div>
@@ -256,7 +256,7 @@ function Inner() {
             </Button>
             <h2 className="font-serif text-gold text-lg ml-1">{format(cursor, "MMMM yyyy")}</h2>
           </div>
-          <div className="flex items-center gap-3 text-[11px] text-primary-foreground/60 flex-wrap">
+          <div className="flex items-center gap-3 text-[11px] text-primary-foreground/80 flex-wrap">
             {(["meeting", "social", "officers", "loi"] as const).map((k) => (
               <span key={k} className="inline-flex items-center gap-1">
                 <span className={`w-2 h-2 rounded-full ${KIND_STYLES[k].dot}`} />
@@ -268,7 +268,7 @@ function Inner() {
 
         <div className="grid grid-cols-7 gap-px bg-gold/10 rounded-sm overflow-hidden">
           {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((d) => (
-            <div key={d} className="bg-navy-dark px-2 py-1.5 text-[11px] uppercase tracking-widest text-primary-foreground/50">
+            <div key={d} className="bg-navy-dark px-2 py-1.5 text-[11px] uppercase tracking-widest text-primary-foreground/80">
               {d}
             </div>
           ))}
@@ -303,7 +303,7 @@ function Inner() {
                     </div>
                   ))}
                   {dayEvents.length > 3 && (
-                    <div className="text-[10px] text-primary-foreground/50">+{dayEvents.length - 3} more</div>
+                    <div className="text-[10px] text-primary-foreground/80">+{dayEvents.length - 3} more</div>
                   )}
                 </div>
                 <div className="mt-1 flex flex-wrap items-center gap-1 sm:hidden">
@@ -315,7 +315,7 @@ function Inner() {
                     />
                   ))}
                   {dayEvents.length > 4 && (
-                    <span className="text-[10px] text-primary-foreground/50">+{dayEvents.length - 4}</span>
+                    <span className="text-[10px] text-primary-foreground/80">+{dayEvents.length - 4}</span>
                   )}
                 </div>
               </button>
@@ -324,7 +324,7 @@ function Inner() {
         </div>
 
         {eventsQ.isLoading && (
-          <div className="flex items-center justify-center pt-4 text-primary-foreground/60 text-sm">
+          <div className="flex items-center justify-center pt-4 text-primary-foreground/80 text-sm">
             <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Loading events…
           </div>
         )}
@@ -337,7 +337,7 @@ function Inner() {
         <div className="rounded-sm border border-gold/20 bg-navy-dark/40 p-4">
           <h3 className="font-serif text-gold mb-3">{format(selected, "EEEE d MMMM yyyy")}</h3>
           {selectedEvents.length === 0 ? (
-            <p className="text-sm text-primary-foreground/50 italic">No events on this day.</p>
+            <p className="text-sm text-primary-foreground/80 italic">No events on this day.</p>
           ) : (
             <ul className="space-y-3">
               {selectedEvents.map((ev) => (
@@ -348,7 +348,7 @@ function Inner() {
                     </span>
                     {ev.link ? <Link to={ev.link} className="text-primary-foreground font-medium underline underline-offset-4 min-h-[48px] inline-flex items-center break-words">{ev.title}</Link> : <span className="text-primary-foreground font-medium">{ev.title}</span>}
                   </div>
-                  <p className="text-xs text-primary-foreground/60 mt-1">
+                  <p className="text-xs text-primary-foreground/80 mt-1">
                     {format(ev.start, "HH:mm")}{ev.end ? ` – ${format(ev.end, "HH:mm")}` : ""}
                     {ev.location ? ` • ${ev.location}` : ""}
                   </p>
@@ -378,7 +378,7 @@ function SubscribePanel({
 
 
   if (loading) {
-    return <div className="text-xs text-primary-foreground/50"><Loader2 className="w-3 h-3 animate-spin inline mr-1"/>Preparing your subscription…</div>;
+    return <div className="text-xs text-primary-foreground/80"><Loader2 className="w-3 h-3 animate-spin inline mr-1"/>Preparing your subscription…</div>;
   }
   if (!webcalUrl || !feedUrl) return null;
 
@@ -492,7 +492,7 @@ function SubscribePanel({
             <p className="font-semibold text-gold mb-1 flex items-center gap-1"><Monitor className="w-3 h-3" /> Outlook (web / desktop)</p>
             <p>Add calendar → Subscribe from web → paste the URL. The "Apple Calendar / Outlook desktop" button may also open Outlook directly on Windows.</p>
           </div>
-          <p className="text-primary-foreground/50 italic">
+          <p className="text-primary-foreground/80 italic">
             Keep this link private — it's unique to you.
           </p>
         </div>

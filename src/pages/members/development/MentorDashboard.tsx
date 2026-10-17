@@ -121,7 +121,7 @@ function Inner() {
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
           <h1 className="font-serif text-2xl text-primary-foreground">Member Development</h1>
-          <p className="text-xs text-primary-foreground/60 mt-1">
+          <p className="text-xs text-primary-foreground/80 mt-1">
             {seesAll ? "All members with development records." : "Members assigned to you as Mentor."}
           </p>
         </div>
@@ -173,17 +173,17 @@ function Inner() {
                           <span className={`text-xs inline-flex items-center gap-1 ${stale ? "text-amber-400" : "text-primary-foreground/80"}`}>
                             {stale && <AlertTriangle className="w-3 h-3" />}
                             {fmt(r.lastTouchpoint)}
-                            {days !== null && <span className="text-primary-foreground/50">· {days}d</span>}
+                            {days !== null && <span className="text-primary-foreground/80">· {days}d</span>}
                           </span>
                         ) : (
-                          <span className="text-primary-foreground/40 text-xs">—</span>
+                          <span className="text-primary-foreground/80 text-xs">—</span>
                         )}
                       </td>
                       <td className="p-3">
                         {r.overdue > 0 ? (
                           <span className="inline-flex items-center gap-1 text-amber-400 text-xs"><AlertTriangle className="w-3 h-3" /> {r.overdue}</span>
                         ) : (
-                          <span className="text-primary-foreground/40 text-xs">—</span>
+                          <span className="text-primary-foreground/80 text-xs">—</span>
                         )}
                       </td>
                       <td className="p-3 text-right">
@@ -195,7 +195,7 @@ function Inner() {
                   );
                 })}
                 {filtered.length === 0 && (
-                  <tr><td colSpan={7} className="p-6 text-center text-primary-foreground/60 italic">No members to show.</td></tr>
+                  <tr><td colSpan={7} className="p-6 text-center text-primary-foreground/80 italic">No members to show.</td></tr>
                 )}
               </tbody>
             </table>

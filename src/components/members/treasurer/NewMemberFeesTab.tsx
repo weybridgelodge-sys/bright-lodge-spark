@@ -249,7 +249,7 @@ export default function NewMemberFeesTab({ canEdit }: { canEdit: boolean }) {
     <div className="min-w-0 space-y-6 overflow-x-hidden">
       <section className="min-w-0 rounded-lg border border-gold/20 bg-primary-foreground/5 p-4">
         <h2 className="font-serif text-lg text-gold mb-1">New Member Fees</h2>
-        <p className="text-primary-foreground/60 text-sm mb-4">
+        <p className="text-primary-foreground/80 text-sm mb-4">
           Records the one-off money received from a newly-initiated member: prorated first subscription plus UGLE and
           PGL registration fees. Posts one receipt split across 4000 Subscriptions (prorated remainder), the three 3100
           reserve pots and 2200 Relief Chest (always full annual shares), plus 4500 registration fees, and recognises what
@@ -257,7 +257,7 @@ export default function NewMemberFeesTab({ canEdit }: { canEdit: boolean }) {
         </p>
 
         {loading ? (
-          <p className="text-primary-foreground/60"><Loader2 className="w-4 h-4 mr-1 inline animate-spin" /> Loading…</p>
+          <p className="text-primary-foreground/80"><Loader2 className="w-4 h-4 mr-1 inline animate-spin" /> Loading…</p>
         ) : (
           <>
             <div className="grid gap-3 sm:grid-cols-2 [&>*]:min-w-0">
@@ -293,7 +293,7 @@ export default function NewMemberFeesTab({ canEdit }: { canEdit: boolean }) {
                       <SelectItem value="under25">Under 25</SelectItem>
                     </SelectContent>
                   </Select>
-                  <p className="text-primary-foreground/50 text-xs mt-1">
+                  <p className="text-primary-foreground/80 text-xs mt-1">
                     UGLE Form P &amp; PGL registration rates — confirm these haven&apos;t changed before relying on the defaults.
                   </p>
                 </div>
@@ -309,7 +309,7 @@ export default function NewMemberFeesTab({ canEdit }: { canEdit: boolean }) {
               <div className="sm:col-span-2">
                 <Label>Bank reference *</Label>
                 <Input value={bankReference} onChange={(e) => setBankReference(e.target.value)} placeholder="Required" disabled={!canEdit} />
-                <p className="text-primary-foreground/50 text-xs mt-1">
+                <p className="text-primary-foreground/80 text-xs mt-1">
                   Lodge Number + Registration Fee (RF) + Candidate&apos;s Surname (e.g. L6787 RF Smith)
                 </p>
               </div>
@@ -317,11 +317,11 @@ export default function NewMemberFeesTab({ canEdit }: { canEdit: boolean }) {
 
             <div className="mt-4 grid gap-2 sm:grid-cols-2">
               <div className="min-w-0 rounded-md border border-gold/20 p-3">
-                <p className="text-primary-foreground/60 text-sm">Prorated subscription</p>
+                <p className="text-primary-foreground/80 text-sm">Prorated subscription</p>
                 <p className="text-gold font-semibold text-lg">{money(proratedPence)}</p>
               </div>
               <div className="min-w-0 break-words rounded-md border border-gold/20 p-3">
-                <p className="text-primary-foreground/60 text-sm">How the subscription is split</p>
+                <p className="text-primary-foreground/80 text-sm">How the subscription is split</p>
                 <p className="text-primary-foreground/80 text-xs mt-1">
                   4000 Subscriptions {money(incomePence)} (prorated remainder)
                 </p>
@@ -332,10 +332,10 @@ export default function NewMemberFeesTab({ canEdit }: { canEdit: boolean }) {
                   </span>
                 </div>
                 <p className="text-primary-foreground/80 text-xs">2200 Relief Chest {money(reliefPence)}</p>
-                <p className="text-primary-foreground/50 text-xs mt-1">Reserve and Relief Chest shares are always the full annual amount.</p>
+                <p className="text-primary-foreground/80 text-xs mt-1">Reserve and Relief Chest shares are always the full annual amount.</p>
               </div>
               <div className="min-w-0 rounded-md border border-gold/20 p-3">
-                <p className="text-primary-foreground/60 text-sm">Total received</p>
+                <p className="text-primary-foreground/80 text-sm">Total received</p>
                 <p className="text-gold font-semibold text-lg">{money(totalPence)}</p>
               </div>
             </div>

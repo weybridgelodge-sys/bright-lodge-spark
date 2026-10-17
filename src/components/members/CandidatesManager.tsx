@@ -87,7 +87,7 @@ export default function CandidatesManager({ onChange }: { onChange?: () => void 
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <p className="text-xs text-primary-foreground/60">
+        <p className="text-xs text-primary-foreground/80">
           Prospective candidates feed the Pipeline KPI before initiation.
         </p>
         {!adding && (
@@ -163,9 +163,9 @@ export default function CandidatesManager({ onChange }: { onChange?: () => void 
       )}
 
       {loading ? (
-        <p className="text-sm text-primary-foreground/60">Loading…</p>
+        <p className="text-sm text-primary-foreground/80">Loading…</p>
       ) : rows.length === 0 ? (
-        <p className="text-sm text-primary-foreground/60 italic">
+        <p className="text-sm text-primary-foreground/80 italic">
           No candidates yet. Add the first prospective brother above.
         </p>
       ) : (
@@ -181,14 +181,14 @@ export default function CandidatesManager({ onChange }: { onChange?: () => void 
                   <UserPlus className="w-3.5 h-3.5 text-gold" />
                   {c.first_name} {c.last_name}
                 </p>
-                <p className="text-[11px] text-primary-foreground/60">
+                <p className="text-[11px] text-primary-foreground/80">
                   {[c.email, c.phone].filter(Boolean).join(" · ") || "No contact"}
                   {c.proposer && ` · Prop: ${c.proposer}`}
                   {c.seconder && ` · Sec: ${c.seconder}`}
                   {c.initiation_scheduled_date &&
                     ` · Initiation: ${new Date(c.initiation_scheduled_date).toLocaleDateString("en-GB")}`}
                 </p>
-                {c.notes && <p className="text-[11px] text-primary-foreground/50 mt-1">{c.notes}</p>}
+                {c.notes && <p className="text-[11px] text-primary-foreground/80 mt-1">{c.notes}</p>}
               </div>
               <StageSelect
                 value={c.stage}
@@ -214,7 +214,7 @@ export default function CandidatesManager({ onChange }: { onChange?: () => void 
               </div>
               <button
                 onClick={() => remove(c.id)}
-                className="text-primary-foreground/50 hover:text-red-400 p-2"
+                className="text-primary-foreground/80 hover:text-red-400 p-2"
                 aria-label="Delete candidate"
               >
                 <Trash2 className="w-3.5 h-3.5" />
@@ -228,7 +228,7 @@ export default function CandidatesManager({ onChange }: { onChange?: () => void 
 }
 
 function Label({ children }: { children: React.ReactNode }) {
-  return <label className="block text-[10px] uppercase tracking-wider text-primary-foreground/60 mb-1">{children}</label>;
+  return <label className="block text-[10px] uppercase tracking-wider text-primary-foreground/80 mb-1">{children}</label>;
 }
 
 function Input({

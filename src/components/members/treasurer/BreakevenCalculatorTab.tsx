@@ -142,21 +142,21 @@ export default function BreakevenCalculatorTab({ canEdit }: { canEdit: boolean }
     <div className="space-y-6">
       <section className="rounded-lg border border-gold/20 bg-primary-foreground/5 p-4">
         <h2 className="font-serif text-lg text-gold mb-1">Membership Breakeven Calculator</h2>
-        <p className="text-primary-foreground/60 text-sm mb-4">
+        <p className="text-primary-foreground/80 text-sm mb-4">
           Works out what each member actually costs the Lodge and whether the annual subscription covers it. The
           subscription rate and reserve pot targets saved here are the shared source of truth used by New Member Fees
           and the Direct Receipt subscription toggle.
         </p>
 
         {loading ? (
-          <p className="text-primary-foreground/60"><Loader2 className="w-4 h-4 mr-1 inline animate-spin" /> Loading…</p>
+          <p className="text-primary-foreground/80"><Loader2 className="w-4 h-4 mr-1 inline animate-spin" /> Loading…</p>
         ) : (
           <>
             <div className="grid gap-3 sm:grid-cols-2">
               <div>
                 <Label>Chargeable members</Label>
                 <Input type="number" min="0" value={memberCount} onChange={(e) => setMemberCount(e.target.value)} disabled={!canEdit} />
-                <p className="text-primary-foreground/50 text-xs mt-1">
+                <p className="text-primary-foreground/80 text-xs mt-1">
                   Active, non-honorary members, excluding 1 exempt membership: the Secretary
                   {excludedNames.length ? ` (${excludedNames.join(", ")})` : ""}. The Treasurer pays.
                 </p>
@@ -164,7 +164,7 @@ export default function BreakevenCalculatorTab({ canEdit }: { canEdit: boolean }
               <div>
                 <Label>Annual subscription rate (£)</Label>
                 <Input type="number" step="0.01" min="0" value={subRate} onChange={(e) => setSubRate(e.target.value)} disabled={!canEdit} />
-                <p className="text-primary-foreground/50 text-xs mt-1">Under-25 members pay half: {money(subUnder)}.</p>
+                <p className="text-primary-foreground/80 text-xs mt-1">Under-25 members pay half: {money(subUnder)}.</p>
               </div>
             </div>
 
@@ -212,7 +212,7 @@ export default function BreakevenCalculatorTab({ canEdit }: { canEdit: boolean }
                 </div>
               ))}
             </div>
-            <p className="text-primary-foreground/60 text-sm mt-2">
+            <p className="text-primary-foreground/80 text-sm mt-2">
               Fixed costs {money(fixedTotal)} ÷ {count} members = <span className="text-gold">{money(fixedPerMember)}</span> per member.
             </p>
 
@@ -232,13 +232,13 @@ export default function BreakevenCalculatorTab({ canEdit }: { canEdit: boolean }
                 </div>
               ))}
             </div>
-            <p className="text-primary-foreground/60 text-sm mt-2">
+            <p className="text-primary-foreground/80 text-sm mt-2">
               Reserves total {money(reserveFullTotal)} full rate · {money(reserveUnderTotal)} under 25.
             </p>
 
             <div className="mt-6 grid gap-3 sm:grid-cols-2">
               <div className="rounded-md border border-gold/20 p-3">
-                <p className="text-primary-foreground/60 text-sm">Full-rate member</p>
+                <p className="text-primary-foreground/80 text-sm">Full-rate member</p>
                 <p className="text-primary-foreground/70 text-xs mt-1">
                   Subscription {money(subFull)} − costs {money(costFull)} (UGLE/PGL/SPCF/Levy {money(perMemberFull)} + fixed share{" "}
                   {money(fixedPerMember)} + reserves {money(reserveFullTotal)})
@@ -248,7 +248,7 @@ export default function BreakevenCalculatorTab({ canEdit }: { canEdit: boolean }
                 </p>
               </div>
               <div className="rounded-md border border-gold/20 p-3">
-                <p className="text-primary-foreground/60 text-sm">Under-25 member</p>
+                <p className="text-primary-foreground/80 text-sm">Under-25 member</p>
                 <p className="text-primary-foreground/70 text-xs mt-1">
                   Subscription {money(subUnder)} − costs {money(costUnder)} (UGLE/PGL/SPCF/Levy {money(perMemberUnder)} + fixed share{" "}
                   {money(fixedPerMember)} + reserves {money(reserveUnderTotal)})
@@ -256,7 +256,7 @@ export default function BreakevenCalculatorTab({ canEdit }: { canEdit: boolean }
                 <p className={`font-semibold text-lg mt-1 ${resultUnder >= 0 ? "text-emerald-400" : "text-destructive"}`}>
                   {resultUnder >= 0 ? "Surplus" : "Deficit"} {money(Math.abs(resultUnder))}
                 </p>
-                <p className="text-primary-foreground/50 text-xs mt-1">
+                <p className="text-primary-foreground/80 text-xs mt-1">
                   Under-25 subsidy compared with a full-rate member: {money(Math.abs(resultFull - resultUnder))}.
                 </p>
               </div>

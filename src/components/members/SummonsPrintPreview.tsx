@@ -131,7 +131,7 @@ export default function SummonsPrintPreview({ template, officers, members }: Pro
       </div>
 
       {!current ? (
-        <p className="text-sm text-primary-foreground/60">
+        <p className="text-sm text-primary-foreground/80">
           Save a summons from the New Summons tab to print-preview it here.
         </p>
       ) : (

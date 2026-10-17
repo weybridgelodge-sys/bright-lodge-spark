@@ -109,7 +109,7 @@ export default function EventsAdmin() {
           <div className="flex items-start justify-between mb-6 gap-4 flex-wrap">
             <div className="min-w-0">
               <h1 className="font-serif text-3xl text-gold mb-1">Meeting Events</h1>
-              <p className="text-xs text-primary-foreground/60">Edit the meeting shown on the public Bookings page (intro, useful stuff, menu and dining options).</p>
+              <p className="text-xs text-primary-foreground/80">Edit the meeting shown on the public Bookings page (intro, useful stuff, menu and dining options).</p>
             </div>
             <button onClick={createNew} className="flex items-center gap-2 min-h-11 bg-gold/15 hover:bg-gold/25 text-gold border border-gold/40 px-4 py-2 rounded-sm text-sm">
               <Plus className="w-4 h-4" /> New meeting
@@ -119,7 +119,7 @@ export default function EventsAdmin() {
           {loading ? (
             <div className="flex justify-center py-12"><Loader2 className="w-6 h-6 text-gold animate-spin" /></div>
           ) : active.length === 0 ? (
-            <p className="text-sm text-primary-foreground/60">No current meetings. Click "New meeting" to add one.</p>
+            <p className="text-sm text-primary-foreground/80">No current meetings. Click "New meeting" to add one.</p>
           ) : (
             <ul className="space-y-2">
               {active.map((e) => (
@@ -159,7 +159,7 @@ export default function EventsAdmin() {
               </button>
               {showArchived && (
                 archived.length === 0 ? (
-                  <p className="mt-4 text-sm text-primary-foreground/60">No archived meetings.</p>
+                  <p className="mt-4 text-sm text-primary-foreground/80">No archived meetings.</p>
                 ) : (
                   <ul className="mt-4 space-y-4">
                     {archived.map((e) => (
@@ -173,7 +173,7 @@ export default function EventsAdmin() {
             </section>
           )}
 
-          <p className="mt-8 text-xs text-primary-foreground/50">
+          <p className="mt-8 text-xs text-primary-foreground/80">
             Public page: <Link to="/bookings" className="text-gold underline">/bookings</Link>
             {" "}— it shows the next upcoming published meeting. Archived meetings never appear publicly.
           </p>
@@ -359,7 +359,7 @@ function EventEditor({ id, onBack, onDeleted }: { id: string; onBack: () => void
         <div>
           <label className={labelCls}>Intro paragraphs</label>
           <textarea rows={8} className={inputCls} value={event.intro} onChange={(e) => update("intro", e.target.value)} placeholder="Use blank lines to separate paragraphs. Use **bold** for emphasis." />
-          <p className="text-[11px] text-primary-foreground/40 mt-1">Separate paragraphs with blank lines. Wrap text in **double asterisks** for bold.</p>
+          <p className="text-[11px] text-primary-foreground/80 mt-1">Separate paragraphs with blank lines. Wrap text in **double asterisks** for bold.</p>
         </div>
 
         {/* Header image */}
@@ -368,7 +368,7 @@ function EventEditor({ id, onBack, onDeleted }: { id: string; onBack: () => void
           {imgPreview ? (
             <img src={imgPreview} alt="Current meeting image" className="w-full max-w-md h-auto rounded-sm border border-gold/20 mb-3" />
           ) : (
-            <p className="text-[11px] text-primary-foreground/40 mb-2">No custom image — the standard lodge photo is shown.</p>
+            <p className="text-[11px] text-primary-foreground/80 mb-2">No custom image — the standard lodge photo is shown.</p>
           )}
           <div className="flex items-center gap-3 flex-wrap">
             <label className="cursor-pointer inline-flex items-center gap-2 bg-gold/15 hover:bg-gold/25 text-gold border border-gold/40 px-3 py-2 rounded-sm text-sm">
@@ -445,12 +445,12 @@ function EventEditor({ id, onBack, onDeleted }: { id: string; onBack: () => void
         {/* Dining options */}
         <fieldset className="bg-navy-dark/40 border border-gold/15 rounded-sm p-4 space-y-3">
           <legend className="px-2 text-gold font-serif text-sm">Dining Options (Booking Form)</legend>
-          <p className="text-[11px] text-primary-foreground/50 -mt-1">Members choose one of these when booking. Price is per head.</p>
+          <p className="text-[11px] text-primary-foreground/80 -mt-1">Members choose one of these when booking. Price is per head.</p>
           {options.map((o, i) => (
             <div key={o.id || o._tempId || i} className="grid grid-cols-1 md:grid-cols-[1fr_120px_auto_auto] gap-2 items-center border-b border-gold/10 pb-3 last:border-b-0">
               <input className={inputCls} placeholder="Label (e.g. 3-course dinner)" value={o.label || ""} onChange={(e) => setOptions(options.map((x, j) => j === i ? { ...x, label: e.target.value } : x))} />
               <div className="relative">
-                <span className="absolute left-3 top-2 text-primary-foreground/50 text-sm">£</span>
+                <span className="absolute left-3 top-2 text-primary-foreground/80 text-sm">£</span>
                 <input type="number" min={0} step="0.01" className={inputCls + " pl-6"} placeholder="32.00" value={o.price_pence != null ? (o.price_pence / 100).toFixed(2) : ""} onChange={(e) => setOptions(options.map((x, j) => j === i ? { ...x, price_pence: Math.round(parseFloat(e.target.value || "0") * 100) } : x))} />
               </div>
               <label className="flex items-center gap-1 text-xs text-primary-foreground/70 whitespace-nowrap">

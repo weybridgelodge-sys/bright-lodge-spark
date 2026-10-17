@@ -17,8 +17,8 @@ import {
   type InstallationConfig, type InstallationRule,
 } from "@/lib/masonicYear";
 import {
-  MONTHS, WEEKDAYS, ORDINALS, planMove, planSeries, dependencyWarnings, installationEffect,
-  type DiaryMeeting, type Dependencies, type MeetingType, type Ordinal,
+  MONTHS, WEEKDAYS, ORDINALS, planMove, inferSchedule, planSchedule, outsideSchedule, dependencyWarnings, installationEffect,
+  type DiaryMeeting, type Dependencies, type MeetingType, type Ordinal, type ScheduleMonth,
 } from "@/lib/meetingDiary";
 
 type RuleRow = InstallationRule & {
@@ -26,7 +26,7 @@ type RuleRow = InstallationRule & {
   ritual: string | null; consecration_date: string | null;
 };
 type Meeting = DiaryMeeting & { status: string; notes: string | null; cancel_reason: string | null; series_id: string | null };
-type Series = { id: string; name: string; meeting_type: MeetingType; ordinal: Ordinal; weekday: number; months: number[]; active: boolean };
+type Series = { id: string; name: string; meeting_type: MeetingType; ordinal: Ordinal | null; weekday: number | null; months: number[]; active: boolean; schedule: unknown };
 type Audit = { id: string; action: string; target_table: string; created_at: string; actor: string | null };
 
 const TYPES: { value: MeetingType; label: string }[] = [
@@ -47,11 +47,6 @@ const blankRule = (): RuleRow => ({
   applies_from_year: null, unit_number: null, default_venue: null, election_month: null, ritual: null, consecration_date: null,
 });
 
-function monthsBetween(from: number, to: number): number[] {
-  const out: number[] = [];
-  for (let m = from, i = 0; i < 12; i++) { out.push(m); if (m === to) break; m = (m % 12) + 1; }
-  return out;
-}
 
 function KpiEffect({ cfg, year, date }: { cfg: InstallationConfig; year: number; date: string | null }) {
   const e = installationEffect(cfg, year, date);
@@ -59,8 +54,8 @@ function KpiEffect({ cfg, year, date }: { cfg: InstallationConfig; year: number;
   return (
     <div className="rounded-sm border border-gold/30 p-3 text-sm space-y-1 break-words" data-testid="kpi-effect">
       <p className="text-gold">Effect on the KPI Masonic year</p>
-      <p><span className="text-primary-foreground/70">{year - 1}/{year}:</span> {line(e.before.previous)} → <strong>{line(e.after.previous)}</strong></p>
-      <p><span className="text-primary-foreground/70">{year}/{year + 1}:</span> {line(e.before.next)} → <strong>{line(e.after.next)}</strong></p>
+      <p><span className="text-cream/70">{year - 1}/{year}:</span> {line(e.before.previous)} → <strong>{line(e.after.previous)}</strong></p>
+      <p><span className="text-cream/70">{year}/{year + 1}:</span> {line(e.before.next)} → <strong>{line(e.after.next)}</strong></p>
     </div>
   );
 }
@@ -198,26 +193,39 @@ function Inner() {
     load();
   };
 
-  // ---- Series ----
-  const [sName, setSName] = useState("Regular meetings");
-  const [sOrd, setSOrd] = useState<Ordinal>("2");
-  const [sWd, setSWd] = useState(4);
-  const [sFrom, setSFrom] = useState(10);
-  const [sTo, setSTo] = useState(5);
+  // ---- Per-month schedule ----
+  const saved = series.find((x) => x.active && Array.isArray(x.schedule) && x.schedule.length);
+  const [sched, setSched] = useState<ScheduleMonth[] | null>(null);
+  const schedule = sched ?? (saved?.schedule as ScheduleMonth[] | undefined) ?? inferSchedule(meetings);
+  const inferred = !sched && !saved && schedule.length > 0;
   const [sYear, setSYear] = useState(thisYear);
-  const sMonths = monthsBetween(sFrom, sTo);
-  const sPlan = planSeries({ ordinal: sOrd, weekday: sWd, months: sMonths }, sYear, meetings);
-  const generate = async () => {
-    if (busy || !sPlan.toAdd.length) return;
+  const startMonth = rule.installation_month || 1;
+  const plan = planSchedule(schedule, sYear, startMonth, meetings);
+  const toAdd = plan.filter((r) => r.status === "new");
+  const outside = outsideSchedule(schedule, meetings);
+  const editMonth = (month: number, p: Partial<ScheduleMonth> | null) => {
+    const cur = schedule.filter((x) => x.month !== month);
+    const old = schedule.find((x) => x.month === month);
+    const next = p === null ? cur : [...cur, { month, ordinal: schedule[0]?.ordinal ?? "1", weekday: schedule[0]?.weekday ?? 1, meeting_type: month === rule.installation_month ? "installation" : "regular", ...old, ...p } as ScheduleMonth];
+    setSched(next.sort((x, y) => x.month - y.month));
+  };
+  const saveSchedule = async () => {
     setBusy(true);
-    const { data: row, error } = await (supabase.from as any)("meeting_series")
-      .insert({ name: sName.trim() || "Regular meetings", meeting_type: "regular", ordinal: sOrd, weekday: sWd, months: sMonths })
-      .select("id").single();
-    if (error) { setBusy(false); return toast.error(error.message); }
+    const payload = { name: "Meeting schedule", schedule, ordinal: schedule[0]?.ordinal ?? "1", weekday: schedule[0]?.weekday ?? 1, months: schedule.map((x) => x.month), active: true };
+    const { error } = saved
+      ? await (supabase.from as any)("meeting_series").update(payload).eq("id", saved.id)
+      : await (supabase.from as any)("meeting_series").insert(payload);
+    setBusy(false);
+    if (error) return toast.error(error.message);
+    toast.success("Schedule saved"); setSched(null); load();
+  };
+  const generate = async () => {
+    if (busy || !toAdd.length) return;
+    setBusy(true);
     let added = 0;
-    for (const d of sPlan.toAdd) {
-      const { error: e } = await supabase.rpc("diary_add_meeting" as any, { _date: d, _type: "regular", _series_id: row.id, _notes: null } as any);
-      if (e) { toast.error(`${fmt(d)}: ${e.message}`); break; }
+    for (const r of toAdd) {
+      const { error: e } = await supabase.rpc("diary_add_meeting" as any, { _date: r.date, _type: r.meeting_type, _series_id: saved?.id ?? null, _notes: null } as any);
+      if (e) { toast.error(`${fmt(r.date)}: ${e.message}`); break; }
       added++;
     }
     setBusy(false);
@@ -225,7 +233,7 @@ function Inner() {
     load();
   };
 
-  if (!allowed) return <MembersLayout><p className="text-primary-foreground/70">Only the Secretary and administrators can manage the meeting diary.</p></MembersLayout>;
+  if (!allowed) return <MembersLayout><p className="text-cream/70">Only the Secretary and administrators can manage the meeting diary.</p></MembersLayout>;
 
   const today = localIsoDate();
   const shown = meetings.filter((m) => showPast || m.meeting_date >= today);
@@ -237,12 +245,12 @@ function Inner() {
     <MembersLayout>
       <header className="mb-4 min-w-0">
         <h1 className="font-serif text-2xl md:text-3xl text-gold break-words">Installation rule and meeting diary</h1>
-        <p className="text-primary-foreground/70 text-sm">
+        <p className="text-cream/70 text-sm">
           The installation rule sets when officers change and the Masonic year used by KPIs. The financial year (1 Oct to 30 Sep) is separate.
           {cur && <> Current Masonic year: <strong className="text-gold">{cur.label}</strong> ({fmt(cur.start)} to {cur.end ? fmt(cur.end) : "next Installation"}).</>}
         </p>
       </header>
-      {loading ? <p className="text-primary-foreground/70">Loading…</p> : (
+      {loading ? <p className="text-cream/70">Loading…</p> : (
       <div className="space-y-5 min-w-0">
         <section className={card} aria-labelledby="rule-h">
           <h2 id="rule-h" className="font-serif text-gold text-lg mb-3">Installation rule</h2>
@@ -282,8 +290,8 @@ function Inner() {
             <p className="text-gold/90">Next three Installations</p>
             <ul className="mt-1 space-y-1" data-testid="rule-preview">
               {preview.length ? preview.map((p) => (
-                <li key={p.year} className="break-words">{p.year}: {p.date ? fmt(p.date) : "no date"}{p.stored && <span className="text-primary-foreground/60 text-xs"> (stored date)</span>}</li>
-              )) : <li className="text-primary-foreground/70">No dates — check the rule.</li>}
+                <li key={p.year} className="break-words">{p.year}: {p.date ? fmt(p.date) : "no date"}{p.stored && <span className="text-cream/60 text-xs"> (stored date)</span>}</li>
+              )) : <li className="text-cream/70">No dates — check the rule.</li>}
             </ul>
           </div>
 
@@ -314,10 +322,10 @@ function Inner() {
 
         <section className={card} aria-labelledby="ov-h">
           <h2 id="ov-h" className="font-serif text-gold text-lg mb-2">Stored Installation dates</h2>
-          <p className="text-sm text-primary-foreground/70 mb-2">A stored date overrides the rule for that year.</p>
+          <p className="text-sm text-cream/70 mb-2">A stored date overrides the rule for that year.</p>
           <ul className="space-y-1 text-sm mb-3">
             {Object.entries(cfg.stored).sort().map(([y, d]) => <li key={y} className="break-words">{y}: {fmt(d)}</li>)}
-            {!Object.keys(cfg.stored).length && <li className="text-primary-foreground/70">None stored.</li>}
+            {!Object.keys(cfg.stored).length && <li className="text-cream/70">None stored.</li>}
           </ul>
           <Button variant="outline" className="min-h-[44px] border-gold/50 text-gold bg-transparent hover:bg-gold/10"
             onClick={() => { setOvYear(thisYear); setOvDate(cfg.stored[thisYear] ?? ruleDateFor(thisYear, cfg.rule) ?? ""); setOvOpen(true); }}>
@@ -339,8 +347,8 @@ function Inner() {
             {shown.map((m) => (
               <li key={m.id} className="rounded-sm border border-gold/15 p-3 flex flex-wrap items-center gap-2 justify-between min-w-0">
                 <div className="min-w-0">
-                  <p className={`text-primary-foreground break-words ${m.cancelled_at ? "line-through opacity-70" : ""}`}>{fmt(m.meeting_date)}</p>
-                  <p className="text-xs text-primary-foreground/70 break-words">
+                  <p className={`text-cream break-words ${m.cancelled_at ? "line-through opacity-70" : ""}`}>{fmt(m.meeting_date)}</p>
+                  <p className="text-xs text-cream/70 break-words">
                     {typeLabel(m.meeting_type)} · {m.cancelled_at ? `Cancelled${m.cancel_reason ? `: ${m.cancel_reason}` : ""}` : m.status}
                     {m.series_id && " · series"}
                   </p>
@@ -355,53 +363,75 @@ function Inner() {
                 </div>
               </li>
             ))}
-            {!shown.length && <li className="text-sm text-primary-foreground/70">No meetings in the diary.</li>}
+            {!shown.length && <li className="text-sm text-cream/70">No meetings in the diary.</li>}
           </ul>
         </section>
 
         <section className={card} aria-labelledby="sr-h">
-          <h2 id="sr-h" className="font-serif text-gold text-lg mb-2">Repeating regular meetings</h2>
-          <p className="text-sm text-primary-foreground/70 mb-3">Creates dated meetings for one season. Each date can still be moved or dropped on its own.</p>
-          <div className="grid gap-3 sm:grid-cols-2">
-            <label className={labelCls}>Series name
-              <Input className={`mt-1 ${fieldCls}`} value={sName} onChange={(e) => setSName(e.target.value)} />
-            </label>
-            <label className={labelCls}>Season starting in
-              <Input type="number" className={`mt-1 ${fieldCls}`} value={sYear} onChange={(e) => setSYear(Number(e.target.value) || thisYear)} />
-            </label>
-            <label className={labelCls}>Which week
-              <select className={selectCls} value={sOrd} onChange={(e) => setSOrd(e.target.value as Ordinal)}>
-                {ORDINALS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
-              </select>
-            </label>
-            <label className={labelCls}>Weekday
-              <select className={selectCls} value={sWd} onChange={(e) => setSWd(Number(e.target.value))}>
-                {WEEKDAYS.map((w, i) => <option key={w} value={i}>{w}</option>)}
-              </select>
-            </label>
-            <label className={labelCls}>From month
-              <select className={selectCls} value={sFrom} onChange={(e) => setSFrom(Number(e.target.value))}>
-                {MONTHS.map((m, i) => <option key={m} value={i + 1}>{m}</option>)}
-              </select>
-            </label>
-            <label className={labelCls}>To month
-              <select className={selectCls} value={sTo} onChange={(e) => setSTo(Number(e.target.value))}>
-                {MONTHS.map((m, i) => <option key={m} value={i + 1}>{m}</option>)}
-              </select>
-            </label>
-          </div>
-          <div className="mt-3 text-sm space-y-1" data-testid="series-preview">
-            <p>New dates: {sPlan.toAdd.length ? sPlan.toAdd.map(fmt).join(", ") : "none"}</p>
-            {!!sPlan.existing.length && <p className="text-primary-foreground/70">Already in the diary: {sPlan.existing.map(fmt).join(", ")}</p>}
-          </div>
-          <Button className="mt-3 min-h-[44px] bg-gold text-navy hover:bg-gold/90" disabled={busy || !sPlan.toAdd.length} onClick={generate}>
-            Add {sPlan.toAdd.length} meeting{sPlan.toAdd.length === 1 ? "" : "s"}
-          </Button>
-          {!!series.length && (
-            <ul className="mt-3 text-xs text-primary-foreground/70 space-y-1">
-              {series.map((s) => <li key={s.id} className="break-words">{s.name}: {ORDINALS.find((o) => o.value === s.ordinal)?.label} {WEEKDAYS[s.weekday]}, {s.months.map((m) => MONTHS[m - 1].slice(0, 3)).join(", ")}</li>)}
+          <h2 id="sr-h" className="font-serif text-gold text-lg mb-2">Meeting schedule by month</h2>
+          <p className="text-sm text-cream/80 mb-3">
+            {inferred ? "Read from the meetings already in the diary. Check it, then save." : schedule.length ? "Tick each month the unit meets and choose its week and weekday." : "Nothing ticked yet. Tick each month the unit meets."}
+            {" "}Dated meetings can still be moved or dropped one by one.
+          </p>
+          <fieldset>
+            <legend className="sr-only">Months the unit meets</legend>
+            <ul className="space-y-2">
+              {MONTHS.map((name, i) => {
+                const month = i + 1; const row = schedule.find((x) => x.month === month); const id = `meets-${month}`;
+                return (
+                  <li key={name} className="rounded-sm border border-gold/20 p-2 min-w-0">
+                    <label htmlFor={id} className="flex min-h-[44px] items-center gap-3 text-cream text-sm">
+                      <input id={id} type="checkbox" className="h-5 w-5 accent-gold" checked={!!row} onChange={(e) => editMonth(month, e.target.checked ? {} : null)} />
+                      <span>{name}{month === rule.installation_month && <span className="text-gold"> (Installation month)</span>}</span>
+                    </label>
+                    {row && (
+                      <div className="mt-2 grid gap-2 grid-cols-1 sm:grid-cols-3">
+                        <label className={labelCls}>Week
+                          <select aria-label={`${name} week`} className={selectCls} value={row.ordinal} onChange={(e) => editMonth(month, { ordinal: e.target.value as Ordinal })}>
+                            {ORDINALS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+                          </select>
+                        </label>
+                        <label className={labelCls}>Weekday
+                          <select aria-label={`${name} weekday`} className={selectCls} value={row.weekday} onChange={(e) => editMonth(month, { weekday: Number(e.target.value) })}>
+                            {WEEKDAYS.map((w, j) => <option key={w} value={j}>{w}</option>)}
+                          </select>
+                        </label>
+                        <label className={labelCls}>Type
+                          <select aria-label={`${name} meeting type`} className={selectCls} value={row.meeting_type} onChange={(e) => editMonth(month, { meeting_type: e.target.value as MeetingType })}>
+                            {TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
+                          </select>
+                        </label>
+                      </div>
+                    )}
+                  </li>
+                );
+              })}
             </ul>
+          </fieldset>
+          <Button variant="outline" className="mt-3 min-h-[44px] border-gold/70 text-gold bg-transparent hover:bg-gold/10" disabled={busy || (!sched && !!saved)} onClick={saveSchedule}>Save schedule</Button>
+
+          <label className={`${labelCls} mt-4`}>Season starting in
+            <Input type="number" className={`mt-1 ${fieldCls}`} value={sYear} onChange={(e) => setSYear(Number(e.target.value) || thisYear)} />
+            <span className={fieldHintCls}>Season runs from {MONTHS[startMonth - 1]} {sYear} to the month before {MONTHS[startMonth - 1]} {sYear + 1}.</span>
+          </label>
+          <ul className="mt-3 text-sm space-y-1" data-testid="series-preview" aria-live="polite">
+            {!plan.length && <li className="text-cream/80">No months ticked, so no dates.</li>}
+            {plan.map((r) => (
+              <li key={r.date} className="break-words text-cream">
+                {fmt(r.date)} · {typeLabel(r.meeting_type)} · <strong>{r.status === "existing" ? "Already in diary (skipped)" : r.status === "moved" ? `Moved from rule: diary has ${fmt(r.existingDate!)} (skipped)` : "New"}</strong>
+                {r.warning && <span className="block text-gold">Warning: {r.warning}</span>}
+              </li>
+            ))}
+          </ul>
+          {!!outside.length && (
+            <div className="mt-3 text-sm" data-testid="outside-schedule">
+              <p className="text-gold">Outside schedule (kept as they are):</p>
+              <ul className="space-y-1">{outside.map((o) => <li key={o.id} className="text-cream break-words">{fmt(o.meeting_date)} · {typeLabel(o.meeting_type)} · {(o as Meeting).status}</li>)}</ul>
+            </div>
           )}
+          <Button className="mt-3 min-h-[44px] bg-gold text-navy hover:bg-gold/90" disabled={busy || !toAdd.length} onClick={generate}>
+            {toAdd.length ? `Add ${toAdd.length} new meeting${toAdd.length === 1 ? "" : "s"}` : "No new meetings to add"}
+          </Button>
         </section>
 
         <section className={card} aria-labelledby="au-h">
@@ -410,16 +440,16 @@ function Inner() {
             {audit.map((a) => (
               <li key={a.id} className="break-words">{new Date(a.created_at).toLocaleString("en-GB")}: {tableLabel[a.target_table] ?? a.target_table} {a.action === "insert" ? "added" : a.action === "delete" ? "removed" : "changed"}</li>
             ))}
-            {!audit.length && <li className="text-primary-foreground/70">No changes yet.</li>}
+            {!audit.length && <li className="text-cream/70">No changes yet.</li>}
           </ul>
         </section>
       </div>)}
 
       <Dialog open={ovOpen} onOpenChange={(o) => !busy && setOvOpen(o)}>
-        <DialogContent className="bg-navy border-gold/30 text-primary-foreground max-w-[calc(100vw-1rem)] sm:max-w-lg max-h-[90vh] overflow-y-auto">
+        <DialogContent className="bg-navy border-gold/30 text-cream max-w-[calc(100vw-1rem)] sm:max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="font-serif text-gold">Stored Installation date</DialogTitle>
-            <DialogDescription className="text-primary-foreground/70">Officers change on this date; it also sets the KPI Masonic year.</DialogDescription>
+            <DialogDescription className="text-cream/70">Officers change on this date; it also sets the KPI Masonic year.</DialogDescription>
           </DialogHeader>
           <div className="grid gap-3">
             <label className={labelCls}>Year
@@ -439,12 +469,12 @@ function Inner() {
       </Dialog>
 
       <Dialog open={!!action} onOpenChange={(o) => !busy && !o && setAction(null)}>
-        <DialogContent className="bg-navy border-gold/30 text-primary-foreground max-w-[calc(100vw-1rem)] sm:max-w-lg max-h-[90vh] overflow-y-auto">
+        <DialogContent className="bg-navy border-gold/30 text-cream max-w-[calc(100vw-1rem)] sm:max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="font-serif text-gold">
               {action?.kind === "add" ? "Add meeting" : action?.kind === "move" ? "Move meeting" : "Drop meeting"}
             </DialogTitle>
-            <DialogDescription className="text-primary-foreground/70">
+            <DialogDescription className="text-cream/70">
               {action?.meeting ? `${typeLabel(action.meeting.meeting_type)} meeting on ${fmt(action.meeting.meeting_date)}` : "Adds a draft meeting to the diary."}
             </DialogDescription>
           </DialogHeader>

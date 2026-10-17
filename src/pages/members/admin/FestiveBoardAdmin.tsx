@@ -396,7 +396,7 @@ export default function FestiveBoardAdmin() {
           <h1 className="font-serif text-3xl text-gold mb-1 flex items-center gap-2">
             <Utensils className="w-6 h-6" /> Festive Board Register
           </h1>
-          <p className="text-primary-foreground/60 text-sm">
+          <p className="text-primary-foreground/80 text-sm">
             Meeting attendance, visitors, walk-ins and payment records.
           </p>
         </div>
@@ -415,7 +415,7 @@ export default function FestiveBoardAdmin() {
       {waitlist.length > 0 && (
         <section className="bg-navy-dark/60 border border-gold/15 rounded-sm p-5 mb-6">
           <h2 className="font-serif text-lg text-gold mb-1">Dining waitlist</h2>
-          <p className="text-xs text-primary-foreground/60 mb-3">
+          <p className="text-xs text-primary-foreground/80 mb-3">
             Bookings held on the waitlist because the venue's dining room was at capacity when they booked.
             Payment has been captured — they'll be promoted automatically as seats free up, or refunded in full after the event if not seated.
           </p>
@@ -433,7 +433,7 @@ export default function FestiveBoardAdmin() {
                   <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
                     <p className="text-xs font-semibold text-gold/80 uppercase tracking-wider">
                       {m ? fmtDate(m.meeting_date) : "Unassigned"}
-                      <span className="text-primary-foreground/40 normal-case font-normal">
+                      <span className="text-primary-foreground/80 normal-case font-normal">
                         {" "}· {activeCount} waitlisted
                       </span>
                     </p>
@@ -457,16 +457,16 @@ export default function FestiveBoardAdmin() {
                           <div className="min-w-0">
                             <p className="text-primary-foreground truncate">
                               <span className="font-semibold">{b.contact_name}</span>
-                              <span className="text-primary-foreground/50"> · {seats} seat{seats === 1 ? "" : "s"}</span>
+                              <span className="text-primary-foreground/80"> · {seats} seat{seats === 1 ? "" : "s"}</span>
                               {b.total_pence != null && (
-                                <span className="text-primary-foreground/50"> · £{(b.total_pence / 100).toFixed(2)}</span>
+                                <span className="text-primary-foreground/80"> · £{(b.total_pence / 100).toFixed(2)}</span>
                               )}
                             </p>
-                            <p className="text-[11px] text-primary-foreground/50">{b.event_label}</p>
+                            <p className="text-[11px] text-primary-foreground/80">{b.event_label}</p>
                           </div>
                           <div className="flex items-center gap-2">
                             {isRefunded ? (
-                              <span className="text-[10px] uppercase tracking-wider text-primary-foreground/60 border border-primary-foreground/30 rounded px-1.5 py-0.5">
+                              <span className="text-[10px] uppercase tracking-wider text-primary-foreground/80 border border-primary-foreground/30 rounded px-1.5 py-0.5">
                                 Refunded
                               </span>
                             ) : canManageLOI ? (
@@ -500,9 +500,9 @@ export default function FestiveBoardAdmin() {
       <section className="bg-navy-dark/60 border border-gold/15 rounded-sm p-5">
         <h2 className="font-serif text-lg text-gold mb-3">Meeting records</h2>
         {loading ? (
-          <p className="text-xs text-primary-foreground/50">Loading…</p>
+          <p className="text-xs text-primary-foreground/80">Loading…</p>
         ) : meetings.length === 0 ? (
-          <p className="text-xs text-primary-foreground/50 italic">
+          <p className="text-xs text-primary-foreground/80 italic">
             No Lodge Meetings recorded yet.
           </p>
         ) : (
@@ -521,12 +521,12 @@ export default function FestiveBoardAdmin() {
                     <div>
                       <p className="font-semibold text-sm">
                         {fmtDate(mtg.meeting_date)}{" "}
-                        <span className="text-primary-foreground/60 font-normal">
+                        <span className="text-primary-foreground/80 font-normal">
                           · {meetingTypeLabel(mtg.meeting_type)}
                         </span>
                       </p>
                       {mtg.notes && (
-                        <p className="text-xs text-primary-foreground/50 mt-0.5 line-clamp-1">
+                        <p className="text-xs text-primary-foreground/80 mt-0.5 line-clamp-1">
                           {mtg.notes}
                         </p>
                       )}
@@ -535,23 +535,23 @@ export default function FestiveBoardAdmin() {
                       <div className="flex flex-col items-end gap-0.5">
                         <span className="text-xs text-gold">
                           {hc.total} attending{" "}
-                          <span className="text-primary-foreground/50">
+                          <span className="text-primary-foreground/80">
                             ({hc.members} M / {hc.visitors} V
                             {hc.isOverride ? " · override" : ""})
                           </span>
                         </span>
-                        <span className="text-[10px] text-primary-foreground/60">
+                        <span className="text-[10px] text-primary-foreground/80">
                           {hc.diningTotal} dining
                           {hc.meetingOnlyCount > 0 && ` · ${hc.meetingOnlyCount} meeting-only`}
                         </span>
                         {statusBreakdown(rows) && (
-                          <span className="text-[10px] text-primary-foreground/50 text-right">
+                          <span className="text-[10px] text-primary-foreground/80 text-right">
                             {statusBreakdown(rows)}
                           </span>
                         )}
                       </div>
                       <ChevronRight
-                        className={`w-4 h-4 text-primary-foreground/40 transition-transform ${
+                        className={`w-4 h-4 text-primary-foreground/80 transition-transform ${
                           isOpen ? "rotate-90" : ""
                         }`}
                       />
@@ -565,7 +565,7 @@ export default function FestiveBoardAdmin() {
                         </p>
                       )}
                       {rows.length === 0 ? (
-                        <p className="text-xs italic text-primary-foreground/50">
+                        <p className="text-xs italic text-primary-foreground/80">
                           No attendees recorded.
                         </p>
                       ) : (
@@ -601,7 +601,7 @@ export default function FestiveBoardAdmin() {
                                 <div>
                                   <h4 className="text-[10px] uppercase tracking-wider text-gold/80 mb-1.5">Members ({membersList.length})</h4>
                                   {membersBreakdown && (
-                                    <p className="text-[10px] text-primary-foreground/60 mb-1.5">{membersBreakdown}</p>
+                                    <p className="text-[10px] text-primary-foreground/80 mb-1.5">{membersBreakdown}</p>
                                   )}
                                   <ul className="space-y-1">
                                     {membersList.map(({ r, name }) => (
@@ -612,21 +612,21 @@ export default function FestiveBoardAdmin() {
                                             <span className="text-[9px] uppercase tracking-wider text-primary-foreground/70 border border-primary-foreground/30 rounded px-1 py-0.5" title="Attending meeting only — not dining">Meeting only</span>
                                           )}
                                           {!r.is_meeting_only && (
-                                            <span className="text-primary-foreground/40 ml-1">· {paymentMethodLabel(r.payment_method)}</span>
+                                            <span className="text-primary-foreground/80 ml-1">· {paymentMethodLabel(r.payment_method)}</span>
                                           )}
                                         </span>
-                                        <span className={r.attendance_status === "attended" ? "text-gold" : r.attendance_status === "no_show" ? "text-destructive" : "text-primary-foreground/60"}>
+                                        <span className={r.attendance_status === "attended" ? "text-gold" : r.attendance_status === "no_show" ? "text-destructive" : "text-primary-foreground/80"}>
                                           {attendanceStatusLabel(r.attendance_status)}
                                         </span>
                                       </li>
                                     ))}
-                                    {membersList.length === 0 && <li className="text-primary-foreground/50 italic">No members.</li>}
+                                    {membersList.length === 0 && <li className="text-primary-foreground/80 italic">No members.</li>}
                                   </ul>
                                 </div>
                                 <div>
                                   <h4 className="text-[10px] uppercase tracking-wider text-gold/80 mb-1.5">Visitors ({visitorsList.length})</h4>
                                   {visitorsBreakdown && (
-                                    <p className="text-[10px] text-primary-foreground/60 mb-1.5">{visitorsBreakdown}</p>
+                                    <p className="text-[10px] text-primary-foreground/80 mb-1.5">{visitorsBreakdown}</p>
                                   )}
                                   <ul className="space-y-1">
                                     {visitorsList.map(({ r, name }) => (
@@ -637,15 +637,15 @@ export default function FestiveBoardAdmin() {
                                             <span className="text-[9px] uppercase tracking-wider text-primary-foreground/70 border border-primary-foreground/30 rounded px-1 py-0.5" title="Attending meeting only — not dining">Meeting only</span>
                                           )}
                                           {!r.is_meeting_only && (
-                                            <span className="text-primary-foreground/40 ml-1">· {paymentMethodLabel(r.payment_method)}</span>
+                                            <span className="text-primary-foreground/80 ml-1">· {paymentMethodLabel(r.payment_method)}</span>
                                           )}
                                         </span>
-                                        <span className={r.attendance_status === "attended" ? "text-gold" : r.attendance_status === "no_show" ? "text-destructive" : "text-primary-foreground/60"}>
+                                        <span className={r.attendance_status === "attended" ? "text-gold" : r.attendance_status === "no_show" ? "text-destructive" : "text-primary-foreground/80"}>
                                           {attendanceStatusLabel(r.attendance_status)}
                                         </span>
                                       </li>
                                     ))}
-                                    {visitorsList.length === 0 && <li className="text-primary-foreground/50 italic">No visitors.</li>}
+                                    {visitorsList.length === 0 && <li className="text-primary-foreground/80 italic">No visitors.</li>}
                                   </ul>
                                 </div>
                               </>
@@ -1269,18 +1269,18 @@ function MeetingDialog({
         <div className="space-y-5">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
-              <label className="text-xs uppercase tracking-wider text-primary-foreground/60 mb-1 block">
+              <label className="text-xs uppercase tracking-wider text-primary-foreground/80 mb-1 block">
                 Date
               </label>
               <Input
                 type="date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
-                className="bg-navy border-gold/20 text-primary-foreground placeholder:text-primary-foreground/40 [color-scheme:dark]"
+                className="bg-navy border-gold/20 text-primary-foreground placeholder:text-primary-foreground/80 [color-scheme:dark]"
               />
             </div>
             <div>
-              <label className="text-xs uppercase tracking-wider text-primary-foreground/60 mb-1 block">
+              <label className="text-xs uppercase tracking-wider text-primary-foreground/80 mb-1 block">
                 Meeting type
               </label>
               <Select value={type} onValueChange={(v) => setType(v as FbMeetingType)}>
@@ -1297,7 +1297,7 @@ function MeetingDialog({
               </Select>
             </div>
             <div>
-              <label className="text-xs uppercase tracking-wider text-primary-foreground/60 mb-1 block">
+              <label className="text-xs uppercase tracking-wider text-primary-foreground/80 mb-1 block">
                 Headcount override
               </label>
               <Input
@@ -1306,7 +1306,7 @@ function MeetingDialog({
                 placeholder={`auto: ${computedAttended.total}`}
                 value={override}
                 onChange={(e) => setOverride(e.target.value)}
-                className="bg-navy border-gold/20 text-primary-foreground placeholder:text-primary-foreground/40"
+                className="bg-navy border-gold/20 text-primary-foreground placeholder:text-primary-foreground/80"
               />
             </div>
           </div>
@@ -1314,7 +1314,7 @@ function MeetingDialog({
           {/* Booking sync controls */}
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 p-3 rounded-sm border border-gold/15 bg-navy/40">
             <div>
-              <label className="text-xs uppercase tracking-wider text-primary-foreground/60 mb-1 block">
+              <label className="text-xs uppercase tracking-wider text-primary-foreground/80 mb-1 block">
                 Bookings status
               </label>
               <Select value={status} onValueChange={(v) => setStatus(v as typeof status)}>
@@ -1327,25 +1327,25 @@ function MeetingDialog({
               </Select>
             </div>
             <div>
-              <label className="text-xs uppercase tracking-wider text-primary-foreground/60 mb-1 block">
+              <label className="text-xs uppercase tracking-wider text-primary-foreground/80 mb-1 block">
                 Dining price (£)
               </label>
               <Input
                 type="number" step="0.01" min={0}
                 value={diningPricePounds}
                 onChange={(e) => setDiningPricePounds(e.target.value)}
-                className="bg-navy border-gold/20 h-9 text-primary-foreground placeholder:text-primary-foreground/40"
+                className="bg-navy border-gold/20 h-9 text-primary-foreground placeholder:text-primary-foreground/80"
               />
             </div>
             <div>
-              <label className="text-xs uppercase tracking-wider text-primary-foreground/60 mb-1 block">
+              <label className="text-xs uppercase tracking-wider text-primary-foreground/80 mb-1 block">
                 Public booking slug
               </label>
               <Input
                 value={eventKey}
                 onChange={(e) => setEventKey(e.target.value)}
                 placeholder={`festive-board-${date}`}
-                className="bg-navy border-gold/20 h-9 text-primary-foreground placeholder:text-primary-foreground/40"
+                className="bg-navy border-gold/20 h-9 text-primary-foreground placeholder:text-primary-foreground/80"
               />
             </div>
             <label className="flex items-center gap-2 text-xs text-primary-foreground/80 mt-5">
@@ -1361,14 +1361,14 @@ function MeetingDialog({
 
 
           <div>
-            <label className="text-xs uppercase tracking-wider text-primary-foreground/60 mb-1 block">
+            <label className="text-xs uppercase tracking-wider text-primary-foreground/80 mb-1 block">
               Notes
             </label>
             <Textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               rows={2}
-              className="bg-navy border-gold/20 text-primary-foreground placeholder:text-primary-foreground/40"
+              className="bg-navy border-gold/20 text-primary-foreground placeholder:text-primary-foreground/80"
               placeholder="Optional context, menu, special guests, etc."
             />
           </div>
@@ -1377,7 +1377,7 @@ function MeetingDialog({
           <div>
             <div className="flex items-center justify-between mb-2">
               <h3 className="font-serif text-base text-gold">Members</h3>
-              <span className="text-[11px] text-primary-foreground/60">
+              <span className="text-[11px] text-primary-foreground/80">
                 {computedAttended.members} attending
               </span>
             </div>
@@ -1416,7 +1416,7 @@ function MeetingDialog({
                           </FbField>
                           <FbField id={`${m.id}-payment`} label="Payment">
                             {d.isMeetingOnly ? (
-                              <div id={`${m.id}-payment`} className="bg-navy border border-gold/20 h-11 rounded-md px-3 flex items-center text-sm text-primary-foreground/40">—</div>
+                              <div id={`${m.id}-payment`} className="bg-navy border border-gold/20 h-11 rounded-md px-3 flex items-center text-sm text-primary-foreground/80">—</div>
                             ) : (
                               <Select value={d.paymentMethod} onValueChange={(v) => setMember(m.id, { paymentMethod: v as FbPaymentMethod })}>
                                 <SelectTrigger id={`${m.id}-payment`} className={FB_FIELD}><SelectValue /></SelectTrigger>
@@ -1448,7 +1448,7 @@ function MeetingDialog({
                 );
               })}
               {members.length === 0 && (
-                <p className="p-3 text-xs italic text-primary-foreground/50">
+                <p className="p-3 text-xs italic text-primary-foreground/80">
                   No active members.
                 </p>
               )}
@@ -1470,7 +1470,7 @@ function MeetingDialog({
               </Button>
             </div>
             {visitorDrafts.length === 0 ? (
-              <p className="text-xs italic text-primary-foreground/50 border border-dashed border-gold/15 rounded-sm p-3">
+              <p className="text-xs italic text-primary-foreground/80 border border-dashed border-gold/15 rounded-sm p-3">
                 No visitors recorded. Use "Add visitor" for guests, late phone bookings or walk-ins paying on the night.
               </p>
             ) : (
@@ -1540,7 +1540,7 @@ function MeetingDialog({
                       </FbField>
                       <FbField id={`${v.id}-payment`} label="Payment">
                         {v.isMeetingOnly ? (
-                          <div id={`${v.id}-payment`} className="bg-navy border border-gold/20 h-11 rounded-md px-3 flex items-center text-sm text-primary-foreground/40">—</div>
+                          <div id={`${v.id}-payment`} className="bg-navy border border-gold/20 h-11 rounded-md px-3 flex items-center text-sm text-primary-foreground/80">—</div>
                         ) : (
                           <Select value={v.paymentMethod} onValueChange={(val) => setVisitor(v.id, { paymentMethod: val as FbPaymentMethod })}>
                             <SelectTrigger id={`${v.id}-payment`} className={FB_FIELD}><SelectValue /></SelectTrigger>
@@ -1572,7 +1572,7 @@ function MeetingDialog({
             )}
           </div>
 
-          <div className="text-xs text-primary-foreground/60 border-t border-gold/10 pt-3 space-y-1">
+          <div className="text-xs text-primary-foreground/80 border-t border-gold/10 pt-3 space-y-1">
             <div>
               Attendance headcount:{" "}
               <span className="text-gold font-semibold">{computedAttended.total}</span>{" "}
@@ -1586,7 +1586,7 @@ function MeetingDialog({
               <span className="text-gold font-semibold">{computedAttended.diningTotal}</span>{" "}
               ({computedAttended.diningMembers} members, {computedAttended.diningVisitors} visitors)
               {computedAttended.meetingOnly > 0 && (
-                <span className="text-primary-foreground/60">
+                <span className="text-primary-foreground/80">
                   {" "}— {computedAttended.meetingOnly} meeting-only excluded
                 </span>
               )}
@@ -1612,7 +1612,7 @@ function MeetingDialog({
   );
 }
 
-const FB_FIELD = "bg-navy border-gold/20 h-11 min-h-11 w-full min-w-0 text-sm text-primary-foreground placeholder:text-primary-foreground/40";
+const FB_FIELD = "bg-navy border-gold/20 h-11 min-h-11 w-full min-w-0 text-sm text-primary-foreground placeholder:text-primary-foreground/80";
 
 function FbField({ id, label, className, children }: { id: string; label: string; className?: string; children: React.ReactNode }) {
   return (
@@ -1657,7 +1657,7 @@ function VisitorNameInput({
         onChange={(e) => { onChange(e.target.value); setOpen(true); }}
         onFocus={() => setOpen(true)}
         onBlur={() => { setTimeout(() => setOpen(false), 150); }}
-        className="bg-navy border-gold/20 h-11 w-full min-w-[220px] text-sm text-primary-foreground placeholder:text-primary-foreground/40"
+        className="bg-navy border-gold/20 h-11 w-full min-w-[220px] text-sm text-primary-foreground placeholder:text-primary-foreground/80"
       />
       {showList && (
         <ul className="absolute z-50 left-0 top-full mt-1 w-[320px] max-w-[90vw] p-1 bg-navy-dark border border-gold/30 rounded-sm text-xs shadow-lg">
@@ -1669,7 +1669,7 @@ function VisitorNameInput({
                 className="w-full text-left px-2 py-1.5 rounded hover:bg-gold/10"
               >
                 <div className="text-primary-foreground">{s.name || "Unnamed visitor"}</div>
-                <div className="text-[10px] text-primary-foreground/60">
+                <div className="text-[10px] text-primary-foreground/80">
                   {s.lodge_name ? `${s.lodge_name}${s.lodge_number ? ` No. ${s.lodge_number}` : ""}` : "Lodge unknown"}
                   {s.last_seen_at ? ` · last seen ${new Date(s.last_seen_at).toLocaleDateString("en-GB", { month: "short", year: "numeric" })}` : ""}
                 </div>

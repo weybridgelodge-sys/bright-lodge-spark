@@ -32,7 +32,7 @@ type SavedReport = {
 function trendIcon(trend: string) {
   if (trend === "improving" || trend === "up") return <TrendingUp className="w-4 h-4 text-emerald-400" />;
   if (trend === "declining" || trend === "down") return <TrendingDown className="w-4 h-4 text-amber-400" />;
-  return <Minus className="w-4 h-4 text-primary-foreground/40" />;
+  return <Minus className="w-4 h-4 text-primary-foreground/80" />;
 }
 
 function Card({ title, children }: { title: string; children: React.ReactNode }) {
@@ -50,14 +50,14 @@ function Stat({ label, value, hint }: { label: string; value: React.ReactNode; h
       <span className="text-primary-foreground/70">{label}</span>
       <span className="text-primary-foreground font-medium tabular-nums">
         {value}
-        {hint && <span className="ml-2 text-xs text-primary-foreground/50">{hint}</span>}
+        {hint && <span className="ml-2 text-xs text-primary-foreground/80">{hint}</span>}
       </span>
     </div>
   );
 }
 
 function NameChips({ items, max = 6 }: { items: { id: string; name: string; detail?: string }[]; max?: number }) {
-  if (!items.length) return <p className="text-xs text-primary-foreground/50 italic">None</p>;
+  if (!items.length) return <p className="text-xs text-primary-foreground/80 italic">None</p>;
   const shown = items.slice(0, max);
   return (
     <div className="flex flex-wrap gap-1.5">
@@ -67,7 +67,7 @@ function NameChips({ items, max = 6 }: { items: { id: string; name: string; deta
         </Badge>
       ))}
       {items.length > max && (
-        <span className="text-[10px] text-primary-foreground/50 self-center">+{items.length - max} more</span>
+        <span className="text-[10px] text-primary-foreground/80 self-center">+{items.length - max} more</span>
       )}
     </div>
   );
@@ -178,7 +178,7 @@ function Inner() {
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
           <h1 className="font-serif text-2xl text-primary-foreground">Lodge Development Summary Report</h1>
-          <p className="text-xs text-primary-foreground/60 mt-1">
+          <p className="text-xs text-primary-foreground/80 mt-1">
             Consolidated view across Members, Mentoring, Ritual, Rehearsals, Working Groups, Engagement and Royal Arch.
           </p>
         </div>
@@ -200,32 +200,32 @@ function Inner() {
 
       <div className="flex items-end gap-3 flex-wrap rounded-sm border border-gold/20 bg-navy-light/30 p-4">
         <div>
-          <label className="text-xs text-primary-foreground/60 block mb-1">Period start</label>
+          <label className="text-xs text-primary-foreground/80 block mb-1">Period start</label>
           <Input type="date" value={start} onChange={(e) => setStart(e.target.value)} className={fieldCls} />
         </div>
         <div>
-          <label className="text-xs text-primary-foreground/60 block mb-1">Period end</label>
+          <label className="text-xs text-primary-foreground/80 block mb-1">Period end</label>
           <Input type="date" value={end} onChange={(e) => setEnd(e.target.value)} className={fieldCls} />
         </div>
         <Button size="sm" variant="outline" className="border-gold/40 bg-navy-dark text-gold hover:bg-gold/10 hover:text-gold" onClick={generate} disabled={loading}>
           {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <RefreshCw className="w-4 h-4 mr-2" />}
           Regenerate
         </Button>
-        <span className="text-xs text-primary-foreground/60 self-center">Default: current Masonic year ({defaultPeriod.label})</span>
+        <span className="text-xs text-primary-foreground/80 self-center">Default: current Masonic year ({defaultPeriod.label})</span>
       </div>
 
       {showHistory && (
         <div className="rounded-sm border border-gold/20 bg-navy-light/30 p-4 space-y-2">
           <h3 className="font-serif text-gold">Saved snapshots</h3>
           {history.length === 0 ? (
-            <p className="text-xs text-primary-foreground/60 italic">No snapshots saved yet.</p>
+            <p className="text-xs text-primary-foreground/80 italic">No snapshots saved yet.</p>
           ) : (
             <ul className="text-sm divide-y divide-gold/10">
               {history.map((h) => (
                 <li key={h.id} className="py-2 flex items-center justify-between gap-3">
                   <span className="text-primary-foreground/80">
                     {h.period_start} → {h.period_end}
-                    <span className="text-xs text-primary-foreground/50 ml-2">saved {new Date(h.generated_at).toLocaleDateString("en-GB")}</span>
+                    <span className="text-xs text-primary-foreground/80 ml-2">saved {new Date(h.generated_at).toLocaleDateString("en-GB")}</span>
                   </span>
                   <Button size="sm" variant="ghost" onClick={() => { setData(h.snapshot); setStatement(h.mentor_statement ?? ""); setStart(h.period_start); setEnd(h.period_end); setShowHistory(false); }}>
                     Load
@@ -268,11 +268,11 @@ function Inner() {
               <Stat label="Engagement risk" value={<span className="inline-flex items-center gap-1">{data.mentoring.engagementRisk.length > 0 && <AlertTriangle className="w-3 h-3 text-amber-400" />}{data.mentoring.engagementRisk.length}</span>} />
               <Stat label="Degrees (I/P/R)" value={`${data.mentoring.initiations} / ${data.mentoring.passings} / ${data.mentoring.raisings}`} />
               <div className="pt-2">
-                <p className="text-xs text-primary-foreground/60 mb-1">Overdue by member</p>
+                <p className="text-xs text-primary-foreground/80 mb-1">Overdue by member</p>
                 <NameChips items={data.mentoring.overdueByMember} />
               </div>
               <div>
-                <p className="text-xs text-primary-foreground/60 mb-1">Engagement risk</p>
+                <p className="text-xs text-primary-foreground/80 mb-1">Engagement risk</p>
                 <NameChips items={data.mentoring.engagementRisk} />
               </div>
             </Card>
@@ -284,13 +284,13 @@ function Inner() {
               <Stat label="Green (≥2 qualified)" value={`${data.ritual.green} (${data.ritual.greenPct}%)`} />
               <Stat label="New deliveries" value={data.ritual.newDeliveries} />
               <div className="pt-2">
-                <p className="text-xs text-primary-foreground/60 mb-1">Amber pieces</p>
+                <p className="text-xs text-primary-foreground/80 mb-1">Amber pieces</p>
                 {data.ritual.amberList.length ? (
                   <p className="text-xs text-primary-foreground/80">{data.ritual.amberList.slice(0, 8).join("; ")}{data.ritual.amberList.length > 8 ? ` +${data.ritual.amberList.length - 8} more` : ""}</p>
-                ) : <p className="text-xs text-primary-foreground/50 italic">None</p>}
+                ) : <p className="text-xs text-primary-foreground/80 italic">None</p>}
               </div>
               <div>
-                <p className="text-xs text-primary-foreground/60 mb-1">First-time Lodge deliveries</p>
+                <p className="text-xs text-primary-foreground/80 mb-1">First-time Lodge deliveries</p>
                 <NameChips items={data.ritual.firstDeliveriesInLodge} />
               </div>
             </Card>
@@ -301,7 +301,7 @@ function Inner() {
               <Stat label="Avg attendance %" value={`${data.loi.avgAttendancePct}%`} />
               <Stat label="Trend" value={<span className="inline-flex items-center gap-2">{trendIcon(data.loi.trend)}{data.loi.trend}</span>} />
               <div className="pt-2">
-                <p className="text-xs text-primary-foreground/60 mb-1">Below 50% attendance</p>
+                <p className="text-xs text-primary-foreground/80 mb-1">Below 50% attendance</p>
                 <NameChips items={data.loi.lowAttenders} />
               </div>
             </Card>
@@ -312,14 +312,14 @@ function Inner() {
               <Stat label="Unassigned" value={data.workingGroups.unassigned.length} />
               {data.workingGroups.activityCountByGroup.length > 0 && (
                 <div className="pt-2 space-y-1">
-                  <p className="text-xs text-primary-foreground/60">Activities per group</p>
+                  <p className="text-xs text-primary-foreground/80">Activities per group</p>
                   {data.workingGroups.activityCountByGroup.map((g) => (
                     <Stat key={g.group} label={g.group} value={g.count} />
                   ))}
                 </div>
               )}
               <div>
-                <p className="text-xs text-primary-foreground/60 mb-1">Unassigned members</p>
+                <p className="text-xs text-primary-foreground/80 mb-1">Unassigned members</p>
                 <NameChips items={data.workingGroups.unassigned} max={data.workingGroups.unassigned.length} />
               </div>
             </Card>
@@ -331,7 +331,7 @@ function Inner() {
               <Stat label="Lodge visits" value={data.engagement.lodgeVisits} />
               <Stat label="Provincial events" value={data.engagement.provincialEvents} />
               <div className="pt-2">
-                <p className="text-xs text-primary-foreground/60 mb-1">Zero-touchpoint novices</p>
+                <p className="text-xs text-primary-foreground/80 mb-1">Zero-touchpoint novices</p>
                 <NameChips items={data.engagement.zeroTouchpoints} />
               </div>
             </Card>
@@ -345,7 +345,7 @@ function Inner() {
             </Card>
 
             <Card title="8. Mentor's Summary Statement">
-              <p className="text-xs text-primary-foreground/60">
+              <p className="text-xs text-primary-foreground/80">
                 Summarise the lodge's development activity, any members of particular note, and your priorities for the coming period. This becomes the spoken report at agenda item 7.
               </p>
               <Textarea

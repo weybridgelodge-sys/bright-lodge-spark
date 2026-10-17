@@ -96,7 +96,7 @@ export default function TrialBalanceReport() {
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <h2 className="font-serif text-lg text-gold mb-1">Trial Balance</h2>
-            <p className="text-primary-foreground/60 text-sm font-sans">
+            <p className="text-primary-foreground/80 text-sm font-sans">
               Every account in the chart of accounts, by code, with its balance as at the chosen date. Balance-sheet accounts
               are cumulative; income and expenditure show the year to date. Click any account to see its transactions.
             </p>
@@ -151,15 +151,15 @@ export default function TrialBalanceReport() {
             Hide zero balances
           </label>
         </div>
-        <p className="text-primary-foreground/50 text-xs mt-2">As at {fmtDate(asAt.date)} · income &amp; expenditure from {fmtDate(tb.yearStart)}</p>
+        <p className="text-primary-foreground/80 text-xs mt-2">As at {fmtDate(asAt.date)} · income &amp; expenditure from {fmtDate(tb.yearStart)}</p>
 
         {loading ? (
-          <p className="text-primary-foreground/60 mt-4"><Loader2 className="w-4 h-4 mr-1 inline animate-spin" /> Building trial balance…</p>
+          <p className="text-primary-foreground/80 mt-4"><Loader2 className="w-4 h-4 mr-1 inline animate-spin" /> Building trial balance…</p>
         ) : (
           <div className="mt-4 overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="text-primary-foreground/60 border-b border-gold/20">
+                <tr className="text-primary-foreground/80 border-b border-gold/20">
                   <th className="text-left py-2 font-normal">Code</th>
                   <th className="text-left py-2 font-normal">Account</th>
                   <th className="text-left py-2 font-normal hidden sm:table-cell">Type</th>
@@ -182,7 +182,7 @@ export default function TrialBalanceReport() {
                       <span className="inline-flex items-center gap-1"><ChevronRight className="h-4 w-4 text-gold" aria-hidden />{r.code}</span>
                     </td>
                     <td className="py-2">{r.name}</td>
-                    <td className="py-2 hidden sm:table-cell text-primary-foreground/60 capitalize">{r.account_type}</td>
+                    <td className="py-2 hidden sm:table-cell text-primary-foreground/80 capitalize">{r.account_type}</td>
                     <td className="py-2 text-right tabular-nums">{amt(r.dr)}</td>
                     <td className="py-2 text-right tabular-nums">{amt(r.cr)}</td>
                   </tr>
@@ -208,7 +208,7 @@ export default function TrialBalanceReport() {
             <p className={`mt-3 flex items-center gap-1 text-sm font-semibold ${balanced ? "text-emerald-400" : "text-red-400"}`}>
               {balanced ? <><Check className="h-4 w-4" /> Balanced</> : <><AlertTriangle className="h-4 w-4" /> Out of balance by {money(tb.difference)}</>}
             </p>
-            <p className="text-primary-foreground/50 text-xs mt-1">
+            <p className="text-primary-foreground/80 text-xs mt-1">
               {tb.rows.length} accounts · {lines.length} ledger lines counted{hideZero ? ` · ${tb.rows.length - shown.length} zero-balance hidden` : ""}
             </p>
           </div>

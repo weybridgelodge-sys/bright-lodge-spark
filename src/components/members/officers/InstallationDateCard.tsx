@@ -127,7 +127,7 @@ export default function InstallationDateCard({
       <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-2">
         <p className="text-primary-foreground text-sm">
           {fmt(current)}{" "}
-          <span className="text-primary-foreground/60 text-xs">{isStored ? "(set)" : "(default from the installation rule)"}</span>
+          <span className="text-primary-foreground/80 text-xs">{isStored ? "(set)" : "(default from the installation rule)"}</span>
         </p>
         {canEdit && (
           <Button size="sm" variant="outline" className="border-gold/50 text-gold bg-transparent hover:bg-gold/10 min-h-[44px]" onClick={startEdit}>
@@ -176,7 +176,7 @@ export default function InstallationDateCard({
                     {changes.map((c) => (
                       <li key={c.position} className="border-t border-gold/10 pt-1.5 break-words">
                         <span className="text-gold">{labelFor(c.position)}</span>: {c.from ? nameOf(c.from) : "vacant"} → {nameOf(c.to)}
-                        {c.effective !== draft && <span className="block text-xs text-primary-foreground/60">From {fmt(c.effective)} (later appointment date)</span>}
+                        {c.effective !== draft && <span className="block text-xs text-primary-foreground/80">From {fmt(c.effective)} (later appointment date)</span>}
                       </li>
                     ))}
                   </ul>

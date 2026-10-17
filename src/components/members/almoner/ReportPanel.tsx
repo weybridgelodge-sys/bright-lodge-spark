@@ -516,7 +516,7 @@ export default function ReportPanel({ members }: { members: Member[] }) {
       <div className="flex items-start justify-between gap-3 flex-wrap">
         <div>
           <h3 className="font-serif text-lg text-primary-foreground">Almoner's Report Generator</h3>
-          <p className="text-xs text-primary-foreground/60">Pulls contacts, correspondence, referrals, absences and life events into a single report for agenda item 7.</p>
+          <p className="text-xs text-primary-foreground/80">Pulls contacts, correspondence, referrals, absences and life events into a single report for agenda item 7.</p>
         </div>
         {currentId && (
           <Button size="sm" variant="outline" onClick={resetForm} className="border-gold/30 text-gold hover:bg-gold/10">
@@ -558,14 +558,14 @@ export default function ReportPanel({ members }: { members: Member[] }) {
           placeholder="Add any advice, recommendations or commentary for the Worshipful Master…"
           className="bg-navy text-primary-foreground border-gold/30"
         />
-        <p className="text-[11px] text-primary-foreground/50">Regenerate after editing to refresh the preview. Note: emoji will be removed from the printed PDF.</p>
+        <p className="text-[11px] text-primary-foreground/80">Regenerate after editing to refresh the preview. Note: emoji will be removed from the printed PDF.</p>
       </div>
 
       <section aria-label="Widows and dependants" className="bg-navy-light/40 border border-gold/20 rounded p-4 space-y-3">
         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
           <div className="min-w-0">
             <h4 className="font-serif text-sm text-gold">Widows &amp; Dependants</h4>
-            <p className="text-[11px] text-primary-foreground/60">Short lines drafted from the widows' contact log and gifts between the From and To dates. Widows with nothing new are left out.</p>
+            <p className="text-[11px] text-primary-foreground/80">Short lines drafted from the widows' contact log and gifts between the From and To dates. Widows with nothing new are left out.</p>
           </div>
           {canEditAlmoner && (
             <Button onClick={draftWidows} disabled={drafting} variant="outline" className="border-gold/30 text-gold hover:bg-gold/10 min-h-[48px] w-full sm:w-auto">
@@ -574,7 +574,7 @@ export default function ReportPanel({ members }: { members: Member[] }) {
           )}
         </div>
         {widows.length === 0 ? (
-          <p className="text-xs text-primary-foreground/50 italic">{widowsNote || "No widow updates in this report."}</p>
+          <p className="text-xs text-primary-foreground/80 italic">{widowsNote || "No widow updates in this report."}</p>
         ) : (
           <ul className="space-y-2">
             {widows.map((w, i) => (
@@ -582,7 +582,7 @@ export default function ReportPanel({ members }: { members: Member[] }) {
                 <div className="flex items-center justify-between gap-2">
                   <Label htmlFor={`widow-line-${i}`} className="text-xs text-primary-foreground/80 break-words">{w.name}</Label>
                   {canEditAlmoner && (
-                    <button onClick={() => applyWidows(widows.filter((_, j) => j !== i))} className="min-w-[48px] min-h-[48px] flex items-center justify-center text-primary-foreground/40 hover:text-destructive" aria-label={`Remove line for ${w.name}`}><X className="w-4 h-4" /></button>
+                    <button onClick={() => applyWidows(widows.filter((_, j) => j !== i))} className="min-w-[48px] min-h-[48px] flex items-center justify-center text-primary-foreground/80 hover:text-destructive" aria-label={`Remove line for ${w.name}`}><X className="w-4 h-4" /></button>
                   )}
                 </div>
                 <Textarea id={`widow-line-${i}`} value={w.text} readOnly={!canEditAlmoner} rows={2} maxLength={600}
@@ -592,7 +592,7 @@ export default function ReportPanel({ members }: { members: Member[] }) {
             ))}
           </ul>
         )}
-        {canEditAlmoner && widows.length > 0 && <p className="text-[11px] text-primary-foreground/50">AI-drafted — check each line before saving. Edits update the report preview below.</p>}
+        {canEditAlmoner && widows.length > 0 && <p className="text-[11px] text-primary-foreground/80">AI-drafted — check each line before saving. Edits update the report preview below.</p>}
       </section>
 
       {report && (
@@ -623,7 +623,7 @@ export default function ReportPanel({ members }: { members: Member[] }) {
       <div className="bg-navy-light/40 border border-gold/20 rounded p-4">
         <h4 className="font-serif text-sm text-gold mb-3">Saved reports ({saved.length})</h4>
         {saved.length === 0 ? (
-          <p className="text-xs text-primary-foreground/50 italic">No saved reports yet. Save a draft or finalise a report to keep it here.</p>
+          <p className="text-xs text-primary-foreground/80 italic">No saved reports yet. Save a draft or finalise a report to keep it here.</p>
         ) : (
           <ul className="space-y-2">
             {saved.map((r) => (
@@ -636,7 +636,7 @@ export default function ReportPanel({ members }: { members: Member[] }) {
                     </Badge>
                     {currentId === r.id && <Badge variant="outline" className="text-[10px] border-gold/40 text-gold">Editing</Badge>}
                   </div>
-                  <div className="text-[11px] text-primary-foreground/50">
+                  <div className="text-[11px] text-primary-foreground/80">
                     {fmt(r.period_from)} → {fmt(r.period_to)} · updated {fmt(r.updated_at)}
                   </div>
                 </div>
@@ -658,7 +658,7 @@ export default function ReportPanel({ members }: { members: Member[] }) {
           </ul>
         )}
         {!isAdmin && saved.length > 0 && (
-          <p className="text-[11px] text-primary-foreground/40 mt-2 italic">Only admins can delete saved reports.</p>
+          <p className="text-[11px] text-primary-foreground/80 mt-2 italic">Only admins can delete saved reports.</p>
         )}
       </div>
     </div>

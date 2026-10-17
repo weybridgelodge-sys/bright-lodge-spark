@@ -367,7 +367,7 @@ export default function PropertyRegisterTab({ canEdit }: { canEdit: boolean }) {
         <div className="flex flex-wrap items-start justify-between gap-3 mb-3">
           <div>
             <h2 className="font-serif text-lg text-gold">Lodge Property Register</h2>
-            <p className="text-primary-foreground/60 text-sm">
+            <p className="text-primary-foreground/80 text-sm">
               Audit of lodge property with estimated values — useful when discussing insurance cover with the Province.
             </p>
           </div>
@@ -389,12 +389,12 @@ export default function PropertyRegisterTab({ canEdit }: { canEdit: boolean }) {
         </div>
 
         {loading ? (
-          <p className="text-primary-foreground/60"><Loader2 className="w-4 h-4 mr-1 inline animate-spin" /> Loading…</p>
+          <p className="text-primary-foreground/80"><Loader2 className="w-4 h-4 mr-1 inline animate-spin" /> Loading…</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[980px] text-sm">
               <thead>
-                <tr className="text-left text-primary-foreground/60 border-b border-gold/20">
+                <tr className="text-left text-primary-foreground/80 border-b border-gold/20">
                   <th className="py-2 pr-3 min-w-[160px]">Item</th>
                   <th className="py-2 pr-3 text-right whitespace-nowrap">Count</th>
                   <th className="py-2 pr-3 min-w-[120px]">Location</th>
@@ -410,7 +410,7 @@ export default function PropertyRegisterTab({ canEdit }: { canEdit: boolean }) {
               <tbody>
                 {rows.length === 0 ? (
                   <tr>
-                    <td colSpan={canEdit ? 10 : 9} className="py-3 text-primary-foreground/60">No property recorded yet.</td>
+                    <td colSpan={canEdit ? 10 : 9} className="py-3 text-primary-foreground/80">No property recorded yet.</td>
                   </tr>
                 ) : rows.map((r) => (
                   <tr key={r.id} className="border-b border-gold/10 align-top">
@@ -429,7 +429,7 @@ export default function PropertyRegisterTab({ canEdit }: { canEdit: boolean }) {
                     <td className="py-2 pr-3 text-primary-foreground/70 whitespace-pre-wrap min-w-[220px]">{r.notes ?? ""}</td>
                     <td className="py-2 pr-3 whitespace-nowrap">
                       {imagesFor(r.id).length === 0 ? (
-                        <span className="text-primary-foreground/40">No photos</span>
+                        <span className="text-primary-foreground/80">No photos</span>
                       ) : (
                         <button
                           type="button"
@@ -543,7 +543,7 @@ export default function PropertyRegisterTab({ canEdit }: { canEdit: boolean }) {
                     />
                     {uploading ? <Loader2 className="w-4 h-4 animate-spin text-gold" /> : <Upload className="w-4 h-4 text-gold" />}
                   </div>
-                  <p className="text-xs text-primary-foreground/60 mt-1">Up to 10MB per photo. Useful for insurance records.</p>
+                  <p className="text-xs text-primary-foreground/80 mt-1">Up to 10MB per photo. Useful for insurance records.</p>
                   <div className="mt-2 flex flex-wrap gap-2">
                     {imagesFor(editingId).map((img) => (
                       <div key={img.id} className="relative">
@@ -565,7 +565,7 @@ export default function PropertyRegisterTab({ canEdit }: { canEdit: boolean }) {
                   </div>
                 </>
               ) : (
-                <p className="text-xs text-primary-foreground/60 mt-1">Save the item first, then reopen it to add photos.</p>
+                <p className="text-xs text-primary-foreground/80 mt-1">Save the item first, then reopen it to add photos.</p>
               )}
             </div>
           </div>

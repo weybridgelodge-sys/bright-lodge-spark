@@ -39,7 +39,7 @@ export default function DuesStatusCard({ memberId, showTestBadge = true }: Props
         <p className="text-sm">
           <span className="text-emerald-300 font-semibold">£0 — Exempt as {calc.exempt_reason}.</span>
         </p>
-        <p className="text-xs text-primary-foreground/60 mt-1">
+        <p className="text-xs text-primary-foreground/80 mt-1">
           The member currently serving as Secretary is exempt from the annual subscription.
         </p>
         {testBadge}
@@ -93,7 +93,7 @@ export default function DuesStatusCard({ memberId, showTestBadge = true }: Props
             {" — "}<span className="text-gold">{gbp(net_paid_pence)}</span> of {gbp(target)}.
           </p>
           {sub.next_payment_at && (
-            <p className="text-xs text-primary-foreground/60 mt-1">
+            <p className="text-xs text-primary-foreground/80 mt-1">
               Next collection: {new Date(sub.next_payment_at).toLocaleDateString("en-GB")}
             </p>
           )}

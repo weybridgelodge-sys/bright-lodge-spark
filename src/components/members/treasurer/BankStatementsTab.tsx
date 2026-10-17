@@ -198,9 +198,9 @@ export default function BankStatementsTab({ canEdit }: { canEdit: boolean }) {
       )}
 
       {loading ? (
-        <p className="text-primary-foreground/60"><Loader2 className="w-4 h-4 mr-1 inline animate-spin" /> Loading…</p>
+        <p className="text-primary-foreground/80"><Loader2 className="w-4 h-4 mr-1 inline animate-spin" /> Loading…</p>
       ) : statements.length === 0 ? (
-        <p className="text-primary-foreground/60 italic">No statements uploaded yet.</p>
+        <p className="text-primary-foreground/80 italic">No statements uploaded yet.</p>
       ) : (
         <div className="space-y-2">
           {statements.map((s) => {
@@ -215,7 +215,7 @@ export default function BankStatementsTab({ canEdit }: { canEdit: boolean }) {
                     {open ? <ChevronDown className="w-4 h-4 text-gold shrink-0" /> : <ChevronRight className="w-4 h-4 text-gold shrink-0" />}
                     <span className="min-w-0">
                       <span className="block text-primary-foreground font-medium truncate">{s.period_label}</span>
-                      <span className="block text-xs text-primary-foreground/60 truncate">
+                      <span className="block text-xs text-primary-foreground/80 truncate">
                         {s.file_name} · {fmtDate(s.uploaded_at)}
                         {s.file_size ? ` · ${(s.file_size / 1024).toFixed(0)} KB` : ""}
                       </span>
@@ -243,7 +243,7 @@ export default function BankStatementsTab({ canEdit }: { canEdit: boolean }) {
                         Could not parse this file — {s.parse_message ?? "unrecognised format."} The original file is still stored and can be downloaded above.
                       </p>
                     ) : txs.length === 0 ? (
-                      <p className="text-primary-foreground/60 text-sm">Loading transactions…</p>
+                      <p className="text-primary-foreground/80 text-sm">Loading transactions…</p>
                     ) : (
                       <>
                         {s.parse_message && (

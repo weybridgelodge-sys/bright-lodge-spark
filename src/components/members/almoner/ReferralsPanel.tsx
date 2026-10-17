@@ -32,7 +32,7 @@ const STATUS_COLOR: Record<Status, string> = {
   under_review: "border-amber-400/50 text-amber-400",
   approved: "border-emerald-400/50 text-emerald-400",
   declined: "border-red-500/50 text-red-400",
-  closed: "border-primary-foreground/20 text-primary-foreground/50",
+  closed: "border-primary-foreground/20 text-primary-foreground/80",
 };
 
 const memberName = (m?: Member) => {
@@ -79,7 +79,7 @@ export default function ReferralsPanel({ members, userId }: { members: Member[];
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
           <h3 className="font-serif text-lg text-primary-foreground">MCF / Provincial Referrals</h3>
-          <p className="text-xs text-primary-foreground/60">Tracked welfare and charitable referrals</p>
+          <p className="text-xs text-primary-foreground/80">Tracked welfare and charitable referrals</p>
         </div>
         {canEditAlmoner && (<Button size="sm" className="bg-gold text-navy hover:bg-gold/90" onClick={() => setShowForm((v) => !v)}>
           {showForm ? <><X className="w-4 h-4 mr-1" /> Cancel</> : <><Plus className="w-4 h-4 mr-1" /> New referral</>}
@@ -89,7 +89,7 @@ export default function ReferralsPanel({ members, userId }: { members: Member[];
       {canEditAlmoner && showForm && <NewForm members={members} userId={userId} onSaved={() => { setShowForm(false); load(); }} />}
 
       {rows.length === 0 ? (
-        <p className="text-sm text-primary-foreground/60 italic">No referrals on record.</p>
+        <p className="text-sm text-primary-foreground/80 italic">No referrals on record.</p>
       ) : (
         <div className="space-y-2">
           {rows.map((r) => (
@@ -99,7 +99,7 @@ export default function ReferralsPanel({ members, userId }: { members: Member[];
                   <LifeBuoy className="w-4 h-4 text-gold mt-0.5 shrink-0" />
                   <div className="min-w-0">
                     <p className="text-sm font-semibold text-primary-foreground">{memberName(memberMap.get(r.member_id))}</p>
-                    <p className="text-[11px] text-primary-foreground/60">{TYPE_LABEL[r.referral_type]} · referred {fmt(r.referral_date)}{r.closed_date ? ` · closed ${fmt(r.closed_date)}` : ""}</p>
+                    <p className="text-[11px] text-primary-foreground/80">{TYPE_LABEL[r.referral_type]} · referred {fmt(r.referral_date)}{r.closed_date ? ` · closed ${fmt(r.closed_date)}` : ""}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 w-full sm:w-auto">
@@ -109,7 +109,7 @@ export default function ReferralsPanel({ members, userId }: { members: Member[];
                     </SelectTrigger>
                     <SelectContent>{(Object.keys(STATUS_LABEL) as Status[]).map((k) => <SelectItem key={k} value={k}>{STATUS_LABEL[k]}</SelectItem>)}</SelectContent>
                   </Select>
-                  {canEditAlmoner && (<button onClick={() => archive(r.id)} className="p-1.5 text-primary-foreground/40 hover:text-red-400" aria-label="Archive">
+                  {canEditAlmoner && (<button onClick={() => archive(r.id)} className="p-1.5 text-primary-foreground/80 hover:text-red-400" aria-label="Archive">
                     <Trash2 className="w-4 h-4" />
                   </button>)}
                 </div>
@@ -118,7 +118,7 @@ export default function ReferralsPanel({ members, userId }: { members: Member[];
               <p className="text-sm text-primary-foreground/85 whitespace-pre-wrap">{r.summary}</p>
               {r.outcome && (
                 <p className="text-xs text-primary-foreground/70 mt-2">
-                  <span className="uppercase tracking-wider text-primary-foreground/50 mr-1">Outcome:</span>{r.outcome}
+                  <span className="uppercase tracking-wider text-primary-foreground/80 mr-1">Outcome:</span>{r.outcome}
                 </p>
               )}
             </article>

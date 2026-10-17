@@ -388,7 +388,7 @@ export default function BankReconciliationTab({ canEdit }: { canEdit: boolean })
   };
 
   if (!statements.length && !loading) {
-    return <p className="text-primary-foreground/60 italic">Upload a statement in the Bank Statement Repository first.</p>;
+    return <p className="text-primary-foreground/80 italic">Upload a statement in the Bank Statement Repository first.</p>;
   }
 
   return (
@@ -406,17 +406,17 @@ export default function BankReconciliationTab({ canEdit }: { canEdit: boolean })
       </div>
 
       {loading ? (
-        <p className="text-primary-foreground/60"><Loader2 className="w-4 h-4 mr-1 inline animate-spin" /> Loading…</p>
+        <p className="text-primary-foreground/80"><Loader2 className="w-4 h-4 mr-1 inline animate-spin" /> Loading…</p>
       ) : (
         <>
           {/* 1. Bank charges */}
           <section className="rounded-lg border border-gold/20 bg-primary-foreground/5 p-4">
             <h2 className="font-serif text-lg text-gold mb-1">Bank charges</h2>
-            <p className="text-primary-foreground/60 text-sm mb-3">
+            <p className="text-primary-foreground/80 text-sm mb-3">
               Posted automatically as Dr 5410 Bank Charges / Cr 1000 Bank, dated to the statement line.
             </p>
             {charges.length === 0 ? (
-              <p className="text-primary-foreground/60 text-sm italic">No unposted bank charges on this statement.</p>
+              <p className="text-primary-foreground/80 text-sm italic">No unposted bank charges on this statement.</p>
             ) : (
               <>
                 <ul className="text-sm mb-3 space-y-1">
@@ -438,11 +438,11 @@ export default function BankReconciliationTab({ canEdit }: { canEdit: boolean })
           {/* 3. Suggested matches */}
           <section className="rounded-lg border border-gold/20 bg-primary-foreground/5 p-4">
             <h2 className="font-serif text-lg text-gold mb-1">Suggested matches</h2>
-            <p className="text-primary-foreground/60 text-sm mb-3">
+            <p className="text-primary-foreground/80 text-sm mb-3">
               Nothing is posted until you confirm. Rejecting leaves the line for manual handling.
             </p>
             {suggestions.length === 0 ? (
-              <p className="text-primary-foreground/60 text-sm italic">No suggestions for this statement.</p>
+              <p className="text-primary-foreground/80 text-sm italic">No suggestions for this statement.</p>
             ) : (
               <ul className="space-y-2">
                 {suggestions.map((s) => (
@@ -470,7 +470,7 @@ export default function BankReconciliationTab({ canEdit }: { canEdit: boolean })
           <section className="rounded-lg border border-gold/20 bg-primary-foreground/5 p-4">
             <h2 className="font-serif text-lg text-gold mb-3">Unmatched bank lines ({unmatched.length})</h2>
             {unmatched.length === 0 ? (
-              <p className="text-primary-foreground/60 text-sm italic">Nothing outstanding.</p>
+              <p className="text-primary-foreground/80 text-sm italic">Nothing outstanding.</p>
             ) : (
               <ul className="text-sm space-y-1">
                 {unmatched.map((l) => (
@@ -496,7 +496,7 @@ export default function BankReconciliationTab({ canEdit }: { canEdit: boolean })
                   <li key={l.id} className="text-primary-foreground/85 flex flex-wrap items-center gap-2 border-b border-gold/10 pb-1">
                     <span className="flex-1 min-w-0">
                       {fmtDate(l.transaction_date)} · {l.description} · {money(l.amount_pence)}
-                      <span className="text-primary-foreground/50 text-xs"> · {l.match_type ?? "matched"}{(splitCounts[l.id] ?? 0) > 0 ? ` · split across ${(splitCounts[l.id] ?? 0) + 1} ledger lines` : ""}</span>
+                      <span className="text-primary-foreground/80 text-xs"> · {l.match_type ?? "matched"}{(splitCounts[l.id] ?? 0) > 0 ? ` · split across ${(splitCounts[l.id] ?? 0) + 1} ledger lines` : ""}</span>
                     </span>
                     {l.matched_journal_line_id && (
                       <Button size="sm" variant="outline" className="min-h-10" disabled={!canEdit || busy === l.id} onClick={() => openManualMatch(l)}>
@@ -509,7 +509,7 @@ export default function BankReconciliationTab({ canEdit }: { canEdit: boolean })
                   </li>
                 ))}
               </ul>
-              <p className="text-primary-foreground/50 text-xs mt-2">Unmatching removes every ledger link for that bank line. Ledger entries themselves are not changed.</p>
+              <p className="text-primary-foreground/80 text-xs mt-2">Unmatching removes every ledger link for that bank line. Ledger entries themselves are not changed.</p>
             </details>
           )}
 
@@ -616,7 +616,7 @@ export default function BankReconciliationTab({ canEdit }: { canEdit: boolean })
                 </tr>
               </tbody>
             </table>
-            <p className="text-primary-foreground/50 text-xs mt-2">
+            <p className="text-primary-foreground/80 text-xs mt-2">
               {matched.length} of {lines.length} statement lines reconciled. This report posts nothing.
             </p>
           </section>

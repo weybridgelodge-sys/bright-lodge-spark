@@ -53,9 +53,9 @@ function Section({ title, children, defaultOpen = true }: { title: string; child
 function Stat({ label, value, sub }: { label: string; value: React.ReactNode; sub?: string }) {
   return (
     <div className="bg-navy/60 border border-gold/10 rounded-sm p-3">
-      <p className="text-[11px] uppercase tracking-wider text-primary-foreground/60">{label}</p>
+      <p className="text-[11px] uppercase tracking-wider text-primary-foreground/80">{label}</p>
       <p className="font-serif text-2xl text-gold mt-1">{value}</p>
-      {sub && <p className="text-[11px] text-primary-foreground/50 mt-1">{sub}</p>}
+      {sub && <p className="text-[11px] text-primary-foreground/80 mt-1">{sub}</p>}
     </div>
   );
 }
@@ -113,7 +113,7 @@ export default function Kpis() {
   if (loading || !bundle) {
     return (
       <MembersLayout>
-        <p className="text-sm text-primary-foreground/60">Loading KPIs…</p>
+        <p className="text-sm text-primary-foreground/80">Loading KPIs…</p>
       </MembersLayout>
     );
   }
@@ -153,7 +153,7 @@ export default function Kpis() {
       <div className="flex flex-wrap items-start justify-between gap-3 mb-6">
         <div>
           <h1 className="font-serif text-3xl text-gold mb-1">Lodge KPI Dashboard</h1>
-          <p className="text-sm text-primary-foreground/60">
+          <p className="text-sm text-primary-foreground/80">
             Live figures from member records · Masonic year {my}/{my + 1}
           </p>
         </div>
@@ -210,7 +210,7 @@ export default function Kpis() {
                     }`}
                     aria-hidden="true"
                   />
-                  <p className="text-[11px] uppercase tracking-wider text-primary-foreground/60">{label}</p>
+                  <p className="text-[11px] uppercase tracking-wider text-primary-foreground/80">{label}</p>
                 </div>
                 <p className="text-xs text-primary-foreground/85">{comp.detail}</p>
               </div>
@@ -232,7 +232,7 @@ export default function Kpis() {
               sub={s.lastInitiation && s.lastInitiation.count > 1 ? s.lastInitiation.label : undefined}
             />
           </div>
-          <p className="text-[11px] uppercase tracking-wider text-primary-foreground/60 mb-2">
+          <p className="text-[11px] uppercase tracking-wider text-primary-foreground/80 mb-2">
             Age distribution
           </p>
           <div className="space-y-1.5">
@@ -245,7 +245,7 @@ export default function Kpis() {
         {/* Section 2 — KPI dashboard / Members: period-aware movement */}
         <Section title={`2 · Movement${period ? ` (${period.rangeLabel})` : ""}`}>
           <div className="mb-4">
-            <label htmlFor="movement-period" className="block text-[11px] uppercase tracking-wider text-primary-foreground/60 mb-1">
+            <label htmlFor="movement-period" className="block text-[11px] uppercase tracking-wider text-primary-foreground/80 mb-1">
               Period
             </label>
             <select
@@ -260,7 +260,7 @@ export default function Kpis() {
             </select>
           </div>
           {!mv ? (
-            <p className="text-sm text-primary-foreground/60">
+            <p className="text-sm text-primary-foreground/80">
               No Installation date could be worked out for this period. Check the Installation rule.
             </p>
           ) : (
@@ -285,7 +285,7 @@ export default function Kpis() {
           </div>
           {ra.unregistered.length > 0 && (
             <div>
-              <p className="text-[11px] uppercase tracking-wider text-primary-foreground/60 mb-2">
+              <p className="text-[11px] uppercase tracking-wider text-primary-foreground/80 mb-2">
                 For Secretary follow-up
               </p>
               <ul className="text-sm space-y-1">
@@ -300,11 +300,11 @@ export default function Kpis() {
         {/* Section 4 */}
         <Section title="4 · Royal Arch Conversion Opportunity">
           {conv.length === 0 ? (
-            <p className="text-sm text-primary-foreground/60">No Light Blues currently eligible.</p>
+            <p className="text-sm text-primary-foreground/80">No Light Blues currently eligible.</p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
-                <thead className="text-xs uppercase tracking-wider text-primary-foreground/50">
+                <thead className="text-xs uppercase tracking-wider text-primary-foreground/80">
                   <tr>
                     <th className="text-left p-2">Brother</th>
                     <th className="text-left p-2">Date Raised</th>
@@ -330,7 +330,7 @@ export default function Kpis() {
         {/* Section 5 */}
         <Section title={`5 · Milestones & Anniversaries (${my}/${my + 1})`}>
           {ms.length === 0 ? (
-            <p className="text-sm text-primary-foreground/60">No milestones this year.</p>
+            <p className="text-sm text-primary-foreground/80">No milestones this year.</p>
           ) : (
             <ul className="space-y-2 text-sm">
               {ms.map((x, i) => (
@@ -340,7 +340,7 @@ export default function Kpis() {
                 >
                   <div>
                     <p className="font-medium">{fullName(x.member)}</p>
-                    <p className="text-[11px] text-primary-foreground/60">{x.label}</p>
+                    <p className="text-[11px] text-primary-foreground/80">{x.label}</p>
                   </div>
                   <p className="text-gold text-xs">{new Date(x.date).toLocaleDateString("en-GB")}</p>
                 </li>
@@ -363,7 +363,7 @@ export default function Kpis() {
               Vacant: {oh.progressiveVacant.map((v) => v.label).join(", ")}
             </p>
           )}
-          <p className="text-[11px] uppercase tracking-wider text-primary-foreground/60 mb-2">
+          <p className="text-[11px] uppercase tracking-wider text-primary-foreground/80 mb-2">
             Critical roles
           </p>
           <div className="space-y-2">
@@ -374,7 +374,7 @@ export default function Kpis() {
               >
                 <div className="flex-1 min-w-[12rem]">
                   <p className="font-medium text-sm">{c.label}</p>
-                  <p className="text-[11px] text-primary-foreground/60">
+                  <p className="text-[11px] text-primary-foreground/80">
                     {c.holder ? fullName(c.holder) : <span className="text-amber-400">VACANT</span>}
                   </p>
                 </div>
@@ -411,7 +411,7 @@ export default function Kpis() {
 
         {/* Section 8 */}
         <Section title="8 · Referral Sources">
-          <p className="text-xs text-primary-foreground/60 mb-3">
+          <p className="text-xs text-primary-foreground/80 mb-3">
             How every candidate on record first heard about the Lodge.
           </p>
           <div className="space-y-1.5">
@@ -433,7 +433,7 @@ export default function Kpis() {
         {/* Section 9 */}
         <Section title="9 · Active vs Inactive Members">
           {!avi ? (
-            <p className="text-sm text-primary-foreground/60">No past meetings recorded yet.</p>
+            <p className="text-sm text-primary-foreground/80">No past meetings recorded yet.</p>
           ) : (
             <>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
@@ -455,14 +455,14 @@ export default function Kpis() {
         {/* Section 10 */}
         <Section title="10 · Disengagement Risk">
           {!risk || risk.meetingsConsidered === 0 ? (
-            <p className="text-sm text-primary-foreground/60">No past meetings recorded yet.</p>
+            <p className="text-sm text-primary-foreground/80">No past meetings recorded yet.</p>
           ) : risk.members.length === 0 ? (
-            <p className="text-sm text-primary-foreground/60">
+            <p className="text-sm text-primary-foreground/80">
               No subscribing member has 2 consecutive unexcused misses or 3 this lodge year.
             </p>
           ) : (
             <>
-              <p className="text-xs text-primary-foreground/60 mb-3">
+              <p className="text-xs text-primary-foreground/80 mb-3">
                 2 consecutive meetings, or 3 this lodge year (Oct–Sep), missed with no apology and no
                 welfare absence on record. Counted from 18 Feb 2026; first-year members excluded.
               </p>
@@ -471,7 +471,7 @@ export default function Kpis() {
                   <li key={m.id} className="text-primary-foreground/80 break-words">
                     • {fullName(m)}
                     {reasons.map((r) => (
-                      <span key={r} className="block pl-3 text-xs text-primary-foreground/60">{r}</span>
+                      <span key={r} className="block pl-3 text-xs text-primary-foreground/80">{r}</span>
                     ))}
                   </li>
                 ))}
@@ -483,11 +483,11 @@ export default function Kpis() {
         {/* Section 11 */}
         <Section title="11 · Visitor Frequency">
           {visitors.length === 0 ? (
-            <p className="text-sm text-primary-foreground/60">No visitor attendances recorded yet.</p>
+            <p className="text-sm text-primary-foreground/80">No visitor attendances recorded yet.</p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
-                <thead className="text-xs uppercase tracking-wider text-primary-foreground/50">
+                <thead className="text-xs uppercase tracking-wider text-primary-foreground/80">
                   <tr>
                     <th className="text-left p-2">Visitor</th>
                     <th className="text-left p-2">Lodge</th>
@@ -517,11 +517,11 @@ export default function Kpis() {
         {/* Section 12 */}
         <Section title="12 · Quarterly Engagement">
           {quarterly.length === 0 ? (
-            <p className="text-sm text-primary-foreground/60">No past meetings recorded yet.</p>
+            <p className="text-sm text-primary-foreground/80">No past meetings recorded yet.</p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
-                <thead className="text-xs uppercase tracking-wider text-primary-foreground/50">
+                <thead className="text-xs uppercase tracking-wider text-primary-foreground/80">
                   <tr>
                     <th className="text-left p-2">Quarter</th>
                     <th className="text-right p-2">Meetings</th>

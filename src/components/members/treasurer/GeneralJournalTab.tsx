@@ -150,18 +150,18 @@ export default function GeneralJournalTab({ canEdit }: { canEdit: boolean }) {
     <div className="min-w-0 space-y-6 overflow-x-hidden">
       <section className="min-w-0 rounded-lg border border-gold/20 bg-primary-foreground/5 p-4">
         <h2 className="font-serif text-lg text-gold mb-1">General Journal</h2>
-        <p className="text-primary-foreground/60 text-sm mb-1">
+        <p className="text-primary-foreground/80 text-sm mb-1">
           For corrections, adjustments, and opening balances. For routine transactions, use the specific
           tab instead (Creditors, Direct Payment, Dining Reconciliation, New Member Fees) — those keep the
           right accounts and safeguards in place automatically.
         </p>
-        <p className="text-primary-foreground/50 text-xs mb-4">
+        <p className="text-primary-foreground/80 text-xs mb-4">
           Posts one journal entry with one line per row entered, to the period you choose — it defaults to the unlocked period containing the entry date.
           Debits must equal credits before the entry can be posted.
         </p>
 
         {loading ? (
-          <p className="text-primary-foreground/60"><Loader2 className="w-4 h-4 mr-1 inline animate-spin" /> Loading…</p>
+          <p className="text-primary-foreground/80"><Loader2 className="w-4 h-4 mr-1 inline animate-spin" /> Loading…</p>
         ) : (
           <>
             <div className="grid gap-3 sm:grid-cols-2 mb-5 [&>*]:min-w-0">
@@ -232,7 +232,7 @@ export default function GeneralJournalTab({ canEdit }: { canEdit: boolean }) {
                     onClick={() => removeLine(line.key)}
                     disabled={!canEdit || lines.length <= 2}
                     aria-label={`Remove line ${idx + 1}`}
-                    className="justify-self-end text-primary-foreground/60 hover:text-destructive sm:justify-self-auto"
+                    className="justify-self-end text-primary-foreground/80 hover:text-destructive sm:justify-self-auto"
                   >
                     <Trash2 className="w-4 h-4" />
                   </Button>

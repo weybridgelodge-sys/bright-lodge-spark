@@ -103,11 +103,11 @@ function CollectionsTab({ collections, donations, canEdit, canPost, onChange }: 
           <div className="border-t border-gold/15 pt-2 mt-2">
             <Stat label="Running balance" value={<span className="text-gold">{gbp(reliefBal)}</span>} />
           </div>
-          <p className="text-[11px] text-primary-foreground/50 italic">Money held in the lodge's Relief Chest, awaiting allocation.</p>
+          <p className="text-[11px] text-primary-foreground/80 italic">Money held in the lodge's Relief Chest, awaiting allocation.</p>
         </Card>
         <Card title="Per-meeting subtotals">
           {meetingRows.length === 0 ? (
-            <p className="text-xs text-primary-foreground/50 italic">No collections recorded this year.</p>
+            <p className="text-xs text-primary-foreground/80 italic">No collections recorded this year.</p>
           ) : (
             <div className="space-y-1 max-h-48 overflow-y-auto">
               {meetingRows.slice(0, 10).map(([date, total]) => (
@@ -130,7 +130,7 @@ function CollectionsTab({ collections, donations, canEdit, canPost, onChange }: 
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-left text-xs uppercase tracking-wider text-primary-foreground/60 border-b border-gold/15">
+              <tr className="text-left text-xs uppercase tracking-wider text-primary-foreground/80 border-b border-gold/15">
                 <th className="px-4 py-2">Date</th>
                 <th className="px-4 py-2">Type</th>
                 <th className="px-4 py-2 text-right">Gross</th>
@@ -145,7 +145,7 @@ function CollectionsTab({ collections, donations, canEdit, canPost, onChange }: 
             </thead>
             <tbody>
               {collections.length === 0 && (
-                <tr><td colSpan={(canEdit ? 9 : 8) + (canPost ? 1 : 0)} className="px-4 py-6 text-center text-primary-foreground/50">No collections recorded.</td></tr>
+                <tr><td colSpan={(canEdit ? 9 : 8) + (canPost ? 1 : 0)} className="px-4 py-6 text-center text-primary-foreground/80">No collections recorded.</td></tr>
               )}
               {collections.map((c) => (
                 <tr key={c.id} className="border-b border-gold/10 hover:bg-navy-light/30">
@@ -157,7 +157,7 @@ function CollectionsTab({ collections, donations, canEdit, canPost, onChange }: 
                   <td className="px-4 py-2 text-right tabular-nums text-gold">{gbp(Number(c.net_amount))}</td>
                   <td className="px-4 py-2 text-xs text-primary-foreground/70 whitespace-nowrap">
                     {c.banked_date ? new Date(c.banked_date).toLocaleDateString("en-GB") : <span className="text-amber-300/80">Not banked</span>}
-                    {c.banked_by && <span className="block text-primary-foreground/50">by {c.banked_by}</span>}
+                    {c.banked_by && <span className="block text-primary-foreground/80">by {c.banked_by}</span>}
                   </td>
                   <td className="px-4 py-2 text-xs text-primary-foreground/70 max-w-[260px] truncate" title={c.notes ?? ""}>{c.notes}</td>
                   {canPost && (
@@ -280,7 +280,7 @@ function CollectionDialog({ open, onOpenChange, editing, onSaved }: {
           <div>
             <Label>Stripe fee (£)</Label>
             <Input type="number" step="0.01" value={stripeFee} onChange={(e) => setStripeFee(e.target.value)} />
-            <p className="text-xs text-primary-foreground/50 mt-1">Card processing fee on online payments — posted to Bank &amp; card charges (5410), separate from prize costs (5310).</p>
+            <p className="text-xs text-primary-foreground/80 mt-1">Card processing fee on online payments — posted to Bank &amp; card charges (5410), separate from prize costs (5310).</p>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div><Label>Banked date</Label><Input type="date" value={bankedDate} onChange={(e) => setBankedDate(e.target.value)} /></div>
@@ -339,15 +339,15 @@ function DonationsTab({ donations, charities, festival, canEdit, canPost, onChan
       <div className="grid md:grid-cols-3 gap-4">
         <Card title="Year to date">
           <div className="space-y-1 text-sm">
-            <div className="flex justify-between"><span className="text-primary-foreground/60">Lodge donations</span><span className="tabular-nums">{gbp(ytdLodge)}</span></div>
-            <div className="flex justify-between"><span className="text-primary-foreground/60">Match funded</span><span className="tabular-nums">{gbp(ytdMatch)}</span></div>
+            <div className="flex justify-between"><span className="text-primary-foreground/80">Lodge donations</span><span className="tabular-nums">{gbp(ytdLodge)}</span></div>
+            <div className="flex justify-between"><span className="text-primary-foreground/80">Match funded</span><span className="tabular-nums">{gbp(ytdMatch)}</span></div>
             <div className="flex justify-between border-t border-gold/15 pt-1 mt-1"><span className="text-gold">Total</span><span className="tabular-nums text-gold">{gbp(ytdTotal)}</span></div>
           </div>
         </Card>
         <Card title="All time">
           <div className="space-y-1 text-sm">
-            <div className="flex justify-between"><span className="text-primary-foreground/60">Lodge donations</span><span className="tabular-nums">{gbp(grandLodge)}</span></div>
-            <div className="flex justify-between"><span className="text-primary-foreground/60">Match funded</span><span className="tabular-nums">{gbp(grandMatch)}</span></div>
+            <div className="flex justify-between"><span className="text-primary-foreground/80">Lodge donations</span><span className="tabular-nums">{gbp(grandLodge)}</span></div>
+            <div className="flex justify-between"><span className="text-primary-foreground/80">Match funded</span><span className="tabular-nums">{gbp(grandMatch)}</span></div>
             <div className="flex justify-between border-t border-gold/15 pt-1 mt-1"><span className="text-gold">Grand total</span><span className="tabular-nums text-gold">{gbp(grandTotal)}</span></div>
           </div>
         </Card>
@@ -370,7 +370,7 @@ function DonationsTab({ donations, charities, festival, canEdit, canPost, onChan
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-left text-xs uppercase tracking-wider text-primary-foreground/60 border-b border-gold/15">
+              <tr className="text-left text-xs uppercase tracking-wider text-primary-foreground/80 border-b border-gold/15">
                 <th className="px-4 py-2">Date</th>
                 <th className="px-4 py-2">Charity</th>
                 <th className="px-4 py-2 text-right">Lodge donation</th>
@@ -386,7 +386,7 @@ function DonationsTab({ donations, charities, festival, canEdit, canPost, onChan
             </thead>
             <tbody>
               {donations.length === 0 && (
-                <tr><td colSpan={(canEdit ? 10 : 9) + (canPost ? 1 : 0)} className="px-4 py-6 text-center text-primary-foreground/50">No donations recorded.</td></tr>
+                <tr><td colSpan={(canEdit ? 10 : 9) + (canPost ? 1 : 0)} className="px-4 py-6 text-center text-primary-foreground/80">No donations recorded.</td></tr>
               )}
               {donations.map((d) => {
                 const lodge = Number(d.amount);
@@ -402,7 +402,7 @@ function DonationsTab({ donations, charities, festival, canEdit, canPost, onChan
                   <td className="px-4 py-2">{PAYMENT_METHOD_LABEL[d.payment_method]}</td>
                   <td className="px-4 py-2 text-xs text-primary-foreground/70 whitespace-nowrap">
                     {d.banked_date ? new Date(d.banked_date).toLocaleDateString("en-GB") : <span className="text-amber-300/80">Not paid</span>}
-                    {d.banked_by && <span className="block text-primary-foreground/50">by {d.banked_by}</span>}
+                    {d.banked_by && <span className="block text-primary-foreground/80">by {d.banked_by}</span>}
                   </td>
                   <td className="px-4 py-2 space-x-1">
                     {isFestivalDonation(d, charities, festival) && <Badge variant="outline" className="border-gold/40 text-gold text-[10px]">Festival</Badge>}
@@ -413,7 +413,7 @@ function DonationsTab({ donations, charities, festival, canEdit, canPost, onChan
                   {canPost && (
                     <td className="px-4 py-2">
                       {d.is_festival_contribution ? (
-                        <span className="text-[11px] text-primary-foreground/50 italic">Memorandum only</span>
+                        <span className="text-[11px] text-primary-foreground/80 italic">Memorandum only</span>
                       ) : d.journal_entry_id ? (
                         <Badge variant="outline" className="border-emerald-400/40 text-emerald-300 text-[10px]">Posted</Badge>
                       ) : (
@@ -554,7 +554,7 @@ function DonationDialog({ open, onOpenChange, editing, charities, onSaved }: {
               <div>
                 <Label>Match funding received (£)</Label>
                 <Input type="number" step="0.01" value={matchAmount} onChange={(e) => setMatchAmount(e.target.value)} />
-                <p className="text-xs text-primary-foreground/60 mt-1">Total donation to charity: <span className="text-gold tabular-nums">{gbp((Number(amount) || 0) + (Number(matchAmount) || 0))}</span></p>
+                <p className="text-xs text-primary-foreground/80 mt-1">Total donation to charity: <span className="text-gold tabular-nums">{gbp((Number(amount) || 0) + (Number(matchAmount) || 0))}</span></p>
               </div>
             )}
           </div>
@@ -686,7 +686,7 @@ function LedgerTab({ charities, donations, canEdit, onChange }: {
       <div className="rounded-sm border border-gold/20 bg-navy-light/30 overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="text-left text-xs uppercase tracking-wider text-primary-foreground/60 border-b border-gold/15">
+            <tr className="text-left text-xs uppercase tracking-wider text-primary-foreground/80 border-b border-gold/15">
               <th className="px-4 py-2">Charity</th>
               <th className="px-4 py-2">Reg no.</th>
               <th className="px-4 py-2">Status</th>
@@ -697,14 +697,14 @@ function LedgerTab({ charities, donations, canEdit, onChange }: {
           </thead>
           <tbody>
             {filtered.length === 0 && (
-              <tr><td colSpan={canEdit ? 6 : 5} className="px-4 py-6 text-center text-primary-foreground/50">No charities yet.</td></tr>
+              <tr><td colSpan={canEdit ? 6 : 5} className="px-4 py-6 text-center text-primary-foreground/80">No charities yet.</td></tr>
             )}
             {filtered.map((c) => (
               <tr key={c.id} className="border-b border-gold/10 hover:bg-navy-light/30 cursor-pointer" onClick={() => setDrawerId(c.id)}>
                 <td className="px-4 py-2 text-primary-foreground">{c.name}</td>
                 <td className="px-4 py-2 text-primary-foreground/70 text-xs">{c.charity_number ?? "—"}</td>
                 <td className="px-4 py-2">
-                  <Badge variant="outline" className={c.status === "active" ? "border-emerald-400/40 text-emerald-300" : "border-primary-foreground/30 text-primary-foreground/60"}>{c.status}</Badge>
+                  <Badge variant="outline" className={c.status === "active" ? "border-emerald-400/40 text-emerald-300" : "border-primary-foreground/30 text-primary-foreground/80"}>{c.status}</Badge>
                 </td>
                 <td className="px-4 py-2 text-right tabular-nums text-gold">{gbp(c.total)}</td>
                 <td className="px-4 py-2 text-xs text-primary-foreground/70">{c.last ? new Date(c.last).toLocaleDateString("en-GB") : "—"}</td>
@@ -759,7 +759,7 @@ function LedgerTab({ charities, donations, canEdit, onChange }: {
               <div className="border-t border-gold/15 pt-3">
                 <h4 className="font-serif text-gold mb-2">Donation history</h4>
                 {drawerDonations.length === 0 ? (
-                  <p className="text-primary-foreground/50 text-xs italic">No donations recorded.</p>
+                  <p className="text-primary-foreground/80 text-xs italic">No donations recorded.</p>
                 ) : (
                   <ul className="divide-y divide-gold/10 max-h-72 overflow-y-auto">
                     {drawerDonations.map((d) => (
@@ -936,7 +936,7 @@ function FestivalTab({ donations, charities, festival, canEdit, onChange }: {
   };
 
   const tierColor = (tierName: string, achieved: boolean) => {
-    if (!achieved) return "border-gold/15 bg-navy-dark/40 text-primary-foreground/50";
+    if (!achieved) return "border-gold/15 bg-navy-dark/40 text-primary-foreground/80";
     switch (tierName) {
       case "Bronze": return "border-amber-700/60 bg-amber-900/20 text-amber-200";
       case "Silver": return "border-slate-300/60 bg-slate-400/10 text-slate-100";
@@ -1060,7 +1060,7 @@ function FestivalTab({ donations, charities, festival, canEdit, onChange }: {
 
       <Card title="Festival contribution history">
         {festivalDonations.length === 0 ? (
-          <p className="text-xs text-primary-foreground/50 italic">No Festival-tagged donations yet.</p>
+          <p className="text-xs text-primary-foreground/80 italic">No Festival-tagged donations yet.</p>
         ) : (
           <ul className="divide-y divide-gold/10">
             {festivalDonations.map((d) => {
@@ -1072,7 +1072,7 @@ function FestivalTab({ donations, charities, festival, canEdit, onChange }: {
                   <span className="text-primary-foreground/80 flex-1">
                     {new Date(d.donation_date).toLocaleDateString("en-GB")} · {d.purpose ?? "—"}
                     {match > 0 && (
-                      <span className="block text-[11px] text-primary-foreground/60">
+                      <span className="block text-[11px] text-primary-foreground/80">
                         Lodge {gbp(cash)} + match {gbp(match)}
                       </span>
                     )}
@@ -1219,7 +1219,7 @@ function PeriodicReportsSection({ charities, collections, donations, festival, c
     <div className="space-y-3">
       <div className="flex items-baseline justify-between gap-2 flex-wrap">
         <h3 className="font-serif text-gold text-lg">Charity Steward's Periodic Report</h3>
-        <p className="text-xs text-primary-foreground/60">Custom date-range reports with save / edit / finalise. Finalised reports cannot be changed.</p>
+        <p className="text-xs text-primary-foreground/80">Custom date-range reports with save / edit / finalise. Finalised reports cannot be changed.</p>
       </div>
 
       <Card title={editing ? `Editing: ${editing.title}${isEditingFinalised ? " (finalised — read-only)" : ""}` : "Create a new periodic report"}>
@@ -1265,14 +1265,14 @@ function PeriodicReportsSection({ charities, collections, donations, festival, c
 
       <Card title="History">
         {loading ? (
-          <p className="text-xs text-primary-foreground/50 italic">Loading…</p>
+          <p className="text-xs text-primary-foreground/80 italic">Loading…</p>
         ) : rows.length === 0 ? (
-          <p className="text-xs text-primary-foreground/50 italic">No periodic reports yet.</p>
+          <p className="text-xs text-primary-foreground/80 italic">No periodic reports yet.</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="text-left text-xs uppercase tracking-wider text-primary-foreground/60 border-b border-gold/15">
+                <tr className="text-left text-xs uppercase tracking-wider text-primary-foreground/80 border-b border-gold/15">
                   <th className="px-2 py-2">Title</th>
                   <th className="px-2 py-2">Period</th>
                   <th className="px-2 py-2">Status</th>
@@ -1464,7 +1464,7 @@ function FeedTab({ festival, canEdit, onChange }: { festival: FestivalSettings |
   return (
     <div className="space-y-4">
       <Card title="Public website widget">
-        <p className="text-xs text-primary-foreground/60">
+        <p className="text-xs text-primary-foreground/80">
           Configure the homepage CTA and Our Charities page widgets. The displayed total = the baseline below + every donation logged on or after the start date.
         </p>
         <div className="grid sm:grid-cols-2 gap-3">
@@ -1540,7 +1540,7 @@ function Inner() {
     <MembersLayout>
       <header className="mb-6">
         <h1 className="font-serif text-2xl md:text-3xl text-gold">Charity Steward</h1>
-        <p className="text-primary-foreground/60 text-sm">Collections, donations, ledger, Festival tracker and annual report.</p>
+        <p className="text-primary-foreground/80 text-sm">Collections, donations, ledger, Festival tracker and annual report.</p>
         {!canEdit && <p className="text-xs text-amber-300 mt-1">Read-only access (Secretary).</p>}
       </header>
 

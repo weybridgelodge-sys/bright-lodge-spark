@@ -127,7 +127,7 @@ export default function MembersRitual() {
       <div className="mb-8 flex items-start justify-between gap-3 border-b border-gold/15 pb-4">
         <div>
           <h1 className="font-serif text-3xl text-gold mb-1">Ritual Rehearsal Syllabus</h1>
-          <p className="text-xs text-primary-foreground/60">
+          <p className="text-xs text-primary-foreground/80">
             Material is displayed according to your verified Masonic degree
             {profile && (
               <>
@@ -144,7 +144,7 @@ export default function MembersRitual() {
       </div>
 
       <div className="mb-3 relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary-foreground/40" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary-foreground/80" />
         <input
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
@@ -154,7 +154,7 @@ export default function MembersRitual() {
       </div>
 
       <div className="mb-4 flex flex-wrap items-center gap-2">
-        <span className="text-[11px] uppercase tracking-wider text-gold/70 font-semibold mr-1">Filter by type</span>
+        <span className="text-[11px] uppercase tracking-wider text-gold font-semibold mr-1">Filter by type</span>
         {TYPE_FILTERS.map((f) => (
           <button
             key={f.value}
@@ -171,11 +171,11 @@ export default function MembersRitual() {
       </div>
 
       {loading ? (
-        <div className="text-center py-12 text-primary-foreground/60 text-sm flex items-center justify-center gap-2">
+        <div className="text-center py-12 text-primary-foreground/80 text-sm flex items-center justify-center gap-2">
           <Loader2 className="w-4 h-4 animate-spin" /> Validating credentials…
         </div>
       ) : visibleDocs.length === 0 ? (
-        <p className="text-sm text-primary-foreground/50">No ritual material is available at your current degree.</p>
+        <p className="text-sm text-primary-foreground/80">No ritual material is available at your current degree.</p>
       ) : (
         <ul className="space-y-3">
           {visibleDocs.map((d) => {
@@ -188,7 +188,7 @@ export default function MembersRitual() {
                   </div>
                   <div className="min-w-0">
                     <h3 className="text-sm font-semibold leading-tight line-clamp-2" title={d.title}>{d.title}</h3>
-                    {d.description && <p className="text-xs text-primary-foreground/60 mt-1">{d.description}</p>}
+                    {d.description && <p className="text-xs text-primary-foreground/80 mt-1">{d.description}</p>}
                     <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-[11px] text-primary-foreground/55">
                       <span className="text-gold bg-gold/5 px-2 py-0.5 rounded-sm border border-gold/15">
                         {d.is_general ? GENERAL_LABEL : DEGREE_LABEL[d.required_degree]}

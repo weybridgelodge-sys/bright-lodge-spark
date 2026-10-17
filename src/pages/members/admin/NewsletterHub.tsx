@@ -670,7 +670,7 @@ function NewsletterHubInner() {
 
 
   if (!accessChecked) {
-    return <MembersLayout><div className="text-primary-foreground/60 text-sm">Checking access…</div></MembersLayout>;
+    return <MembersLayout><div className="text-primary-foreground/80 text-sm">Checking access…</div></MembersLayout>;
   }
   if (!hasAccess) {
     return (
@@ -705,7 +705,7 @@ function NewsletterHubInner() {
               </li>
             ))}
           </ul>
-          <p className="text-[11px] text-primary-foreground/50 mb-6">PDFs are filed under <strong className="text-gold">Documents → Newsletters</strong>, one per audience sent.</p>
+          <p className="text-[11px] text-primary-foreground/80 mb-6">PDFs are filed under <strong className="text-gold">Documents → Newsletters</strong>, one per audience sent.</p>
 
           <Button onClick={() => { setSentSummary(null); resetEditor(); }} variant="outline" className="border-gold/40 text-gold hover:bg-gold/10">
             Compose next issue
@@ -740,7 +740,7 @@ function NewsletterHubInner() {
               <li key={d.id} className="flex items-center justify-between gap-3 py-2">
                 <button onClick={() => loadDraft(d)} className="text-left flex-1 min-w-0">
                   <p className="text-sm text-primary-foreground truncate">{d.subject}</p>
-                  <p className="text-[11px] text-primary-foreground/50">
+                  <p className="text-[11px] text-primary-foreground/80">
                     {d.status === "ready_to_send" ? <span className="text-gold">Ready to send</span> : <span>Draft</span>}
                     {" "}· {new Date(d.created_at).toLocaleDateString("en-GB")}
                     {broadcastId === d.id && <span className="text-gold"> · loaded</span>}
@@ -765,7 +765,7 @@ function NewsletterHubInner() {
         />
         <span>
           <span className="text-sm font-semibold text-gold">Unified content</span>
-          <span className="block text-[11px] text-primary-foreground/60 leading-relaxed">
+          <span className="block text-[11px] text-primary-foreground/80 leading-relaxed">
             One shared write-up for everyone. Hides the Public variant editor; "Send to Both" becomes a single dedup'd merged
             send with one combined PDF archived.
           </span>
@@ -775,7 +775,7 @@ function NewsletterHubInner() {
       {/* Audience editing toggle — hidden in unified mode */}
       {!unifiedContent && (
         <>
-          <div className="mb-2 text-[11px] uppercase tracking-wider text-primary-foreground/60">Editing audience variant</div>
+          <div className="mb-2 text-[11px] uppercase tracking-wider text-primary-foreground/80">Editing audience variant</div>
           <div className="inline-flex bg-navy-light/40 border border-gold/20 rounded-lg p-1 mb-6">
             <button type="button" onClick={() => setAudience("members")}
               className={`px-4 py-2 text-xs font-semibold rounded-md transition-all flex items-center gap-1.5 ${
@@ -799,7 +799,7 @@ function NewsletterHubInner() {
             <h2 className="font-serif text-lg text-gold flex items-center gap-2">
               <FileEdit className="h-4 w-4" />
               {broadcastId ? "Editing draft" : "New newsletter"}
-              <span className="text-[10px] uppercase tracking-wider text-primary-foreground/60 ml-2">
+              <span className="text-[10px] uppercase tracking-wider text-primary-foreground/80 ml-2">
                 {unifiedContent
                   ? "Unified content (all audiences)"
                   : effectiveAudience === "members" ? "Members & Visitors variant" : "Public variant"}
@@ -807,7 +807,7 @@ function NewsletterHubInner() {
 
             </h2>
             {broadcastId && (
-              <button type="button" onClick={resetEditor} className="text-[11px] uppercase tracking-wider text-primary-foreground/60 hover:text-gold">
+              <button type="button" onClick={resetEditor} className="text-[11px] uppercase tracking-wider text-primary-foreground/80 hover:text-gold">
                 New
               </button>
             )}
@@ -826,7 +826,7 @@ function NewsletterHubInner() {
               <option value="draft">Draft — work in progress</option>
               <option value="ready_to_send">Ready to send</option>
             </select>
-            <p className="text-[11px] text-primary-foreground/50 mt-1">
+            <p className="text-[11px] text-primary-foreground/80 mt-1">
               Broadcast buttons are enabled only when status is <em>Ready to send</em>.
             </p>
           </div>
@@ -853,11 +853,11 @@ function NewsletterHubInner() {
                     <option value="masonry">Masonry grid</option>
                   </select>
                   <button type="button" onClick={() => moveSection(s.id, -1)} disabled={idx === 0}
-                    className="p-1.5 text-primary-foreground/60 hover:text-gold disabled:opacity-30" aria-label="Move up">
+                    className="p-1.5 text-primary-foreground/80 hover:text-gold disabled:opacity-30" aria-label="Move up">
                     <ArrowUp className="h-3.5 w-3.5" />
                   </button>
                   <button type="button" onClick={() => moveSection(s.id, 1)} disabled={idx === sections.length - 1}
-                    className="p-1.5 text-primary-foreground/60 hover:text-gold disabled:opacity-30" aria-label="Move down">
+                    className="p-1.5 text-primary-foreground/80 hover:text-gold disabled:opacity-30" aria-label="Move down">
                     <ArrowDown className="h-3.5 w-3.5" />
                   </button>
                   <button type="button" onClick={() => removeSection(s.id)} disabled={sections.length <= 1}
@@ -881,18 +881,18 @@ function NewsletterHubInner() {
                   {s.blocks.map((b, bIdx) => (
                     <div key={b.id} className="rounded border border-gold/10 bg-navy-dark/60 p-2">
                       <div className="flex items-center justify-between mb-1.5">
-                        <span className="text-[10px] uppercase tracking-wider text-gold/70 flex items-center gap-1">
+                        <span className="text-[10px] uppercase tracking-wider text-gold flex items-center gap-1">
                           {b.type === "text" ? <Type className="h-3 w-3" /> : <ImageIcon className="h-3 w-3" />}
                           {b.type}
                         </span>
                         <div className="flex items-center gap-2">
                           <button type="button" onClick={() => moveBlock(s.id, b.id, -1)} disabled={bIdx === 0}
-                            className="text-gold/70 hover:text-gold disabled:opacity-30 disabled:hover:text-gold/70"
+                            className="text-gold hover:text-gold disabled:opacity-30 disabled:hover:text-gold"
                             aria-label="Move block up" title="Move block up">
                             <ArrowUp className="h-3 w-3" />
                           </button>
                           <button type="button" onClick={() => moveBlock(s.id, b.id, 1)} disabled={bIdx === s.blocks.length - 1}
-                            className="text-gold/70 hover:text-gold disabled:opacity-30 disabled:hover:text-gold/70"
+                            className="text-gold hover:text-gold disabled:opacity-30 disabled:hover:text-gold"
                             aria-label="Move block down" title="Move block down">
                             <ArrowDown className="h-3 w-3" />
                           </button>
@@ -910,7 +910,7 @@ function NewsletterHubInner() {
                             value={b.text}
                             onChange={(e) => updateBlock(s.id, b.id, { text: e.target.value })}
                             placeholder={`Write ${unifiedContent ? "shared" : effectiveAudience === "members" ? "Members & Visitors" : "Public"} paragraph text…`}
-                            className="w-full bg-navy-dark border border-gold/20 rounded px-2 py-1.5 text-sm text-primary-foreground placeholder:text-primary-foreground/40 focus:outline-none focus:border-gold/60 leading-relaxed resize-y"
+                            className="w-full bg-navy-dark border border-gold/20 rounded px-2 py-1.5 text-sm text-primary-foreground placeholder:text-primary-foreground/80 focus:outline-none focus:border-gold/60 leading-relaxed resize-y"
                           />
                           <div className="flex items-center gap-2 flex-wrap">
                             <button
@@ -927,7 +927,7 @@ function NewsletterHubInner() {
                             >
                               <MousePointerClick className="h-3 w-3" /> Insert button
                             </button>
-                            <span className="text-[10px] text-primary-foreground/40">
+                            <span className="text-[10px] text-primary-foreground/80">
                               Select text first, or leave unselected to be prompted. Pasted URLs and email addresses link automatically.
                             </span>
                           </div>
@@ -937,15 +937,15 @@ function NewsletterHubInner() {
                           <input type="url" value={b.url}
                             onChange={(e) => updateBlock(s.id, b.id, { url: e.target.value })}
                             placeholder="https://… (public image URL)"
-                            className="w-full bg-navy-dark border border-gold/20 rounded px-2 py-1.5 text-sm text-primary-foreground placeholder:text-primary-foreground/40 focus:outline-none focus:border-gold/60" />
+                            className="w-full bg-navy-dark border border-gold/20 rounded px-2 py-1.5 text-sm text-primary-foreground placeholder:text-primary-foreground/80 focus:outline-none focus:border-gold/60" />
                           <input type="text" value={b.alt || ""}
                             onChange={(e) => updateBlock(s.id, b.id, { alt: e.target.value })}
                             placeholder="Alt text (accessibility)"
-                            className="w-full bg-navy-dark border border-gold/20 rounded px-2 py-1.5 text-xs text-primary-foreground placeholder:text-primary-foreground/40 focus:outline-none focus:border-gold/60" />
+                            className="w-full bg-navy-dark border border-gold/20 rounded px-2 py-1.5 text-xs text-primary-foreground placeholder:text-primary-foreground/80 focus:outline-none focus:border-gold/60" />
                           <input type="text" value={b.caption || ""}
                             onChange={(e) => updateBlock(s.id, b.id, { caption: e.target.value })}
                             placeholder="Caption (optional)"
-                            className="w-full bg-navy-dark border border-gold/20 rounded px-2 py-1.5 text-xs text-primary-foreground placeholder:text-primary-foreground/40 focus:outline-none focus:border-gold/60" />
+                            className="w-full bg-navy-dark border border-gold/20 rounded px-2 py-1.5 text-xs text-primary-foreground placeholder:text-primary-foreground/80 focus:outline-none focus:border-gold/60" />
                         </div>
                       )}
                     </div>
@@ -959,7 +959,7 @@ function NewsletterHubInner() {
                       className="text-[11px] inline-flex items-center gap-1 px-2 py-1 rounded border border-gold/30 text-gold hover:bg-gold/10">
                       <Plus className="h-3 w-3" /> <ImageIcon className="h-3 w-3" /> Image
                     </button>
-                    <span className="text-[10px] text-primary-foreground/40 self-center ml-1 flex items-center gap-1">
+                    <span className="text-[10px] text-primary-foreground/80 self-center ml-1 flex items-center gap-1">
                       {s.layout === "masonry" ? <Columns className="h-3 w-3" /> : <Rows className="h-3 w-3" />}
                       {s.layout === "masonry" ? "Masonry grid" : "Single column"}
                     </span>
@@ -985,7 +985,7 @@ function NewsletterHubInner() {
             <Button type="button" variant="outline" onClick={() => setPreviewOpen((v) => !v)} className="border-gold/40 text-gold hover:bg-gold/10 h-auto min-h-10 whitespace-normal text-center leading-snug py-2">
               <Eye className="h-4 w-4 mr-1.5 shrink-0" /> {previewOpen ? "Hide preview" : "Show preview"}
             </Button>
-            <span className="text-[11px] text-primary-foreground/60" aria-live="polite">
+            <span className="text-[11px] text-primary-foreground/80" aria-live="polite">
               {autosaveError
                 ? <span className="text-red-300">Autosave failed — click Save</span>
                 : autosaving || saving
@@ -1005,7 +1005,7 @@ function NewsletterHubInner() {
             <div className="flex items-center gap-2 text-xs font-semibold text-gold">
               <Eye className="h-4 w-4" /> Send a test copy first
             </div>
-            <p className="text-[11px] text-primary-foreground/60">
+            <p className="text-[11px] text-primary-foreground/80">
               Mails one copy of the exact final newsletter (same renderer used for the real broadcast) to the
               address below. Nothing is logged as a broadcast and no PDF is archived. Subject is prefixed
               <span className="font-mono"> [TEST]</span>.

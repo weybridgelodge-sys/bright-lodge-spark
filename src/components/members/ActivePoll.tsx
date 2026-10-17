@@ -110,7 +110,7 @@ export default function ActivePoll() {
         <Vote className="w-4 h-4 text-gold" />
         <h2 className="font-serif text-lg text-gold">Lodge Poll</h2>
         {poll.results_visibility === "live" && (
-          <span className="ml-auto text-[10px] uppercase tracking-wider text-gold/70">Live results</span>
+          <span className="ml-auto text-[10px] uppercase tracking-wider text-gold">Live results</span>
         )}
       </div>
       <p className="font-serif text-primary-foreground text-xl mb-4">{poll.question}</p>
@@ -150,7 +150,7 @@ export default function ActivePoll() {
               </div>
             );
           })}
-          <p className="text-[11px] text-primary-foreground/60 pt-2">
+          <p className="text-[11px] text-primary-foreground/80 pt-2">
             {total} vote{total === 1 ? "" : "s"} · updating live
           </p>
         </div>

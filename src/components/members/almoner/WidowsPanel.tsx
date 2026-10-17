@@ -75,7 +75,7 @@ export default function WidowsPanel({ members }: { members: Member[] }) {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
         <div className="min-w-0">
           <h3 className="font-serif text-lg text-primary-foreground">Widows &amp; Dependants</h3>
-          <p className="text-xs text-primary-foreground/60">Lodge widows and SMWA-assigned ladies in our care</p>
+          <p className="text-xs text-primary-foreground/80">Lodge widows and SMWA-assigned ladies in our care</p>
         </div>
         {canEditAlmoner && (
           <Button className={btnGold} onClick={() => setAdding((v) => !v)}>
@@ -96,7 +96,7 @@ export default function WidowsPanel({ members }: { members: Member[] }) {
       </div>
 
       {list.length === 0 ? (
-        <p className="text-sm text-primary-foreground/60 italic">{show === "active" ? "No widows on the register." : "No inactive records."}</p>
+        <p className="text-sm text-primary-foreground/80 italic">{show === "active" ? "No widows on the register." : "No inactive records."}</p>
       ) : (
         <div className="space-y-2">
           {list.map(({ w, due, last }) => (
@@ -105,8 +105,8 @@ export default function WidowsPanel({ members }: { members: Member[] }) {
               <div className="flex items-start gap-3">
                 <Flower2 className="w-4 h-4 text-gold mt-0.5 shrink-0" />
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-semibold text-primary-foreground break-words">{w.full_name}{w.preferred_address ? <span className="font-normal text-primary-foreground/60"> · “{w.preferred_address}”</span> : null}</p>
-                  <p className="text-[11px] text-primary-foreground/60 break-words">
+                  <p className="text-sm font-semibold text-primary-foreground break-words">{w.full_name}{w.preferred_address ? <span className="font-normal text-primary-foreground/80"> · “{w.preferred_address}”</span> : null}</p>
+                  <p className="text-[11px] text-primary-foreground/80 break-words">
                     {w.connection_source === "smwa" ? "Assigned via SMWA" : "Weybridge Lodge widow"}
                     {w.home_type === "care_home" ? ` · ${w.care_home_name || "Care home"}` : ""}
                     {w.status === "deceased" ? ` · died ${fmt(w.deceased_on)}` : ` · last contact ${last ? fmt(last.contact_date) : "none yet"}`}
@@ -114,7 +114,7 @@ export default function WidowsPanel({ members }: { members: Member[] }) {
                   <div className="flex flex-wrap gap-1.5 mt-1.5">
                     {w.status === "active" && (due.overdue
                       ? <Badge variant="outline" className="border-gold/50 text-gold text-[10px] px-1.5 py-0" title="Gentle check-in prompt">Check-in due · {fmt(due.dueDate)}</Badge>
-                      : <span className="text-[10px] text-primary-foreground/50">Next contact by {fmt(due.dueDate)}</span>)}
+                      : <span className="text-[10px] text-primary-foreground/80">Next contact by {fmt(due.dueDate)}</span>)}
                     {last?.welfare_concern && <Badge variant="outline" className="border-destructive/60 text-destructive text-[10px] px-1.5 py-0"><ShieldAlert className="w-3 h-3 mr-1" />Welfare concern</Badge>}
                   </div>
                 </div>
@@ -222,7 +222,7 @@ function WidowForm({ widow, onSaved, onCancel }: { widow?: Widow; onSaved: (id?:
       {!widow && (
         <div className="border border-dashed border-gold/30 rounded p-3">
           <p className="font-serif text-sm text-primary-foreground">Next of kin</p>
-          <p className="text-xs text-primary-foreground/60">Save her details first. Her record will then open, where you can add next of kin and log contacts.</p>
+          <p className="text-xs text-primary-foreground/80">Save her details first. Her record will then open, where you can add next of kin and log contacts.</p>
         </div>
       )}
       <div className="flex flex-col sm:flex-row gap-2">
@@ -270,7 +270,7 @@ function WidowDetail({ widow, members, canEdit, onBack, onChanged }: { widow: Wi
   };
 
   const Row = ({ k, v }: { k: string; v: React.ReactNode }) => (
-    <div className="min-w-0"><dt className="text-[10px] uppercase tracking-wider text-primary-foreground/50">{k}</dt><dd className="text-sm text-primary-foreground/90 break-words whitespace-pre-wrap">{v || "—"}</dd></div>
+    <div className="min-w-0"><dt className="text-[10px] uppercase tracking-wider text-primary-foreground/80">{k}</dt><dd className="text-sm text-primary-foreground/90 break-words whitespace-pre-wrap">{v || "—"}</dd></div>
   );
   const shown = concernOnly ? contacts.filter((c) => c.welfare_concern) : contacts;
 
@@ -284,7 +284,7 @@ function WidowDetail({ widow, members, canEdit, onBack, onChanged }: { widow: Wi
             <h3 className="font-serif text-lg text-primary-foreground break-words">{widow.full_name}</h3>
             <div className="flex flex-wrap gap-1.5 mt-1">
               <Badge variant="outline" className="border-gold/40 text-gold text-[10px]">{widow.connection_source === "smwa" ? "Assigned via SMWA" : "Weybridge Lodge widow"}</Badge>
-              {widow.status === "deceased" && <Badge variant="outline" className="border-primary-foreground/30 text-primary-foreground/60 text-[10px]">Deceased {fmt(widow.deceased_on)}</Badge>}
+              {widow.status === "deceased" && <Badge variant="outline" className="border-primary-foreground/30 text-primary-foreground/80 text-[10px]">Deceased {fmt(widow.deceased_on)}</Badge>}
               {widow.status === "active" && due.overdue && <Badge variant="outline" className="border-gold/50 text-gold text-[10px]">Check-in due</Badge>}
             </div>
           </div>
@@ -322,16 +322,16 @@ function WidowDetail({ widow, members, canEdit, onBack, onChanged }: { widow: Wi
           {canEdit && <Button variant="outline" className={btnOutline} onClick={() => setAddKin((v) => !v)}>{addKin ? "Cancel" : <><Plus className="w-4 h-4 mr-1" /> Add next of kin</>}</Button>}
         </div>
         {canEdit && addKin && <KinForm widowId={widow.id} onSaved={() => { setAddKin(false); load(); }} />}
-        {kin.length === 0 ? <p className="text-sm text-primary-foreground/60 italic">No next of kin recorded.</p> : (
+        {kin.length === 0 ? <p className="text-sm text-primary-foreground/80 italic">No next of kin recorded.</p> : (
           <ul className="space-y-2">
             {kin.map((k) => (
               <li key={k.id} className="border border-gold/10 rounded p-3 flex items-start gap-2">
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-semibold text-primary-foreground break-words">{k.name} <span className="font-normal text-primary-foreground/60">· {k.relationship === "other" ? (k.relationship_other || "Other") : REL_LABEL[k.relationship]}</span></p>
+                  <p className="text-sm font-semibold text-primary-foreground break-words">{k.name} <span className="font-normal text-primary-foreground/80">· {k.relationship === "other" ? (k.relationship_other || "Other") : REL_LABEL[k.relationship]}</span></p>
                   <p className="text-xs text-primary-foreground/70 break-words">{[k.phone, k.email].filter(Boolean).join(" · ") || "No contact details"}</p>
-                  {k.notes && <p className="text-xs text-primary-foreground/60 mt-1 whitespace-pre-wrap break-words">{k.notes}</p>}
+                  {k.notes && <p className="text-xs text-primary-foreground/80 mt-1 whitespace-pre-wrap break-words">{k.notes}</p>}
                 </div>
-                {canEdit && <button onClick={() => del("almoner_widow_kin", k.id, "next of kin")} className="min-w-[48px] min-h-[48px] flex items-center justify-center text-primary-foreground/40 hover:text-destructive" aria-label={`Remove ${k.name}`}><Trash2 className="w-4 h-4" /></button>}
+                {canEdit && <button onClick={() => del("almoner_widow_kin", k.id, "next of kin")} className="min-w-[48px] min-h-[48px] flex items-center justify-center text-primary-foreground/80 hover:text-destructive" aria-label={`Remove ${k.name}`}><Trash2 className="w-4 h-4" /></button>}
               </li>
             ))}
           </ul>
@@ -348,7 +348,7 @@ function WidowDetail({ widow, members, canEdit, onBack, onChanged }: { widow: Wi
           <Checkbox checked={concernOnly} onCheckedChange={(v) => setConcernOnly(v === true)} aria-label="Show welfare concerns only" />
           Welfare concerns only
         </label>
-        {shown.length === 0 ? <p className="text-sm text-primary-foreground/60 italic">{concernOnly ? "No welfare concerns logged." : "No contacts logged yet."}</p> : (
+        {shown.length === 0 ? <p className="text-sm text-primary-foreground/80 italic">{concernOnly ? "No welfare concerns logged." : "No contacts logged yet."}</p> : (
           <ul className="space-y-2">
             {shown.map((c) => (
               <li key={c.id} className={`rounded p-3 border flex items-start gap-2 ${c.welfare_concern ? "border-destructive/50 bg-destructive/10" : "border-gold/10"}`}>
@@ -359,7 +359,7 @@ function WidowDetail({ widow, members, canEdit, onBack, onChanged }: { widow: Wi
                   {c.welfare_concern && <p className="text-[11px] text-destructive flex items-center mt-0.5"><ShieldAlert className="w-3 h-3 mr-1" />Welfare concern</p>}
                   {c.notes && <p className="text-sm text-primary-foreground/85 mt-1 whitespace-pre-wrap break-words">{c.notes}</p>}
                 </div>
-                {canEdit && <button onClick={() => del("almoner_widow_contacts", c.id, "contact entry")} className="min-w-[48px] min-h-[48px] flex items-center justify-center text-primary-foreground/40 hover:text-destructive" aria-label="Remove contact entry"><Trash2 className="w-4 h-4" /></button>}
+                {canEdit && <button onClick={() => del("almoner_widow_contacts", c.id, "contact entry")} className="min-w-[48px] min-h-[48px] flex items-center justify-center text-primary-foreground/80 hover:text-destructive" aria-label="Remove contact entry"><Trash2 className="w-4 h-4" /></button>}
               </li>
             ))}
           </ul>
@@ -402,9 +402,9 @@ function GiftsSection({ widowId, canEdit, memberMap }: { widowId: string; canEdi
         <h4 className="font-serif text-base text-primary-foreground flex items-center"><Gift className="w-4 h-4 mr-2 text-gold" />Gifts</h4>
         {canEdit && <Button variant="outline" className={btnOutline} onClick={() => setAdding((v) => !v)}>{adding ? "Cancel" : <><Plus className="w-4 h-4 mr-1" /> Record gift</>}</Button>}
       </div>
-      {history && <p className="text-sm text-primary-foreground/85 break-words"><span className="text-[10px] uppercase tracking-wider text-primary-foreground/50 block">History</span>{history}</p>}
+      {history && <p className="text-sm text-primary-foreground/85 break-words"><span className="text-[10px] uppercase tracking-wider text-primary-foreground/80 block">History</span>{history}</p>}
       {canEdit && adding && <GiftForm widowId={widowId} raffles={raffles} onSaved={() => { setAdding(false); load(); }} />}
-      {gifts.length === 0 ? <p className="text-sm text-primary-foreground/60 italic">No gifts recorded.</p> : (
+      {gifts.length === 0 ? <p className="text-sm text-primary-foreground/80 italic">No gifts recorded.</p> : (
         <ul className="space-y-2">
           {gifts.map((g) => {
             const r = g.funding_collection_id ? raffleMap.get(g.funding_collection_id) : undefined;
@@ -414,12 +414,12 @@ function GiftsSection({ widowId, canEdit, memberMap }: { widowId: string; canEdi
                   <p className="text-sm text-primary-foreground break-words">
                     <span className="font-semibold">{g.gift_type === "other" && g.description ? g.description : GIFT_LABEL[g.gift_type]}</span>
                     {g.amount != null && <> · £{Number(g.amount).toFixed(2)}</>} · {fmt(g.date_sent)}
-                    <span className="text-primary-foreground/60"> · {g.lodge_year}/{String((g.lodge_year + 1) % 100).padStart(2, "0")}</span>
+                    <span className="text-primary-foreground/80"> · {g.lodge_year}/{String((g.lodge_year + 1) % 100).padStart(2, "0")}</span>
                   </p>
                   <p className="text-xs text-primary-foreground/70 break-words">Funded by: {fundingLabel(g.funding_source, r ? raffleLabel(r) : null, !!g.funding_collection_id)} · {memberName(g.logged_by ? memberMap.get(g.logged_by) : undefined)}</p>
-                  {g.notes && <p className="text-xs text-primary-foreground/60 mt-1 whitespace-pre-wrap break-words">{g.notes}</p>}
+                  {g.notes && <p className="text-xs text-primary-foreground/80 mt-1 whitespace-pre-wrap break-words">{g.notes}</p>}
                 </div>
-                {canEdit && <button onClick={() => del(g.id)} className="min-w-[48px] min-h-[48px] flex items-center justify-center text-primary-foreground/40 hover:text-destructive" aria-label="Remove gift record"><Trash2 className="w-4 h-4" /></button>}
+                {canEdit && <button onClick={() => del(g.id)} className="min-w-[48px] min-h-[48px] flex items-center justify-center text-primary-foreground/80 hover:text-destructive" aria-label="Remove gift record"><Trash2 className="w-4 h-4" /></button>}
               </li>
             );
           })}
@@ -479,7 +479,7 @@ function GiftForm({ widowId, raffles, onSaved }: { widowId: string; raffles: Raf
               <SelectItem value="none">Not linked</SelectItem>
             </SelectContent>
           </Select>
-          {raffles.length === 0 && <p className="text-[11px] text-primary-foreground/60 mt-1">No raffle collections recorded by the Charity Steward yet.</p>}
+          {raffles.length === 0 && <p className="text-[11px] text-primary-foreground/80 mt-1">No raffle collections recorded by the Charity Steward yet.</p>}
         </div>
       </div>
       <div><Label className="text-xs">Notes</Label><Textarea value={notes} onChange={(e) => setNotes(e.target.value)} className={inputCls} rows={2} maxLength={2000} /></div>

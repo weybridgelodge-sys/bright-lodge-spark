@@ -74,17 +74,17 @@ export default function MentoringChecklist({
                       <div key={r.id} className={`rounded-sm border p-3 ${overdue ? "border-amber-500/50 bg-amber-500/5" : "border-gold/15 bg-navy-dark/40"}`}>
                         <div className="grid gap-2 md:grid-cols-[1fr_140px_140px_150px]">
                           <p className="text-sm text-primary-foreground">{rehearsalDisplayLabel(r.topic)}</p>
-                          <label className="text-[10px] uppercase tracking-wider text-gold/70">Target
+                          <label className="text-[10px] uppercase tracking-wider text-gold">Target
                             <Input type="date" disabled={!canEdit} value={r.target_date ?? ""}
                               onChange={(e) => patch(r.id, { target_date: e.target.value || null })}
                               className={`mt-1 ${fieldCls}`} />
                           </label>
-                          <label className="text-[10px] uppercase tracking-wider text-gold/70">Completed
+                          <label className="text-[10px] uppercase tracking-wider text-gold">Completed
                             <Input type="date" disabled={!canEdit} value={r.completed_date ?? ""}
                               onChange={(e) => patch(r.id, { completed_date: e.target.value || null })}
                               className={`mt-1 ${fieldCls}`} />
                           </label>
-                          <label className="text-[10px] uppercase tracking-wider text-gold/70">Status
+                          <label className="text-[10px] uppercase tracking-wider text-gold">Status
                             <Select disabled={!canEdit} value={r.status}
                               onValueChange={(v) => patch(r.id, { status: v as ChecklistItem["status"] })}>
                               <SelectTrigger className={`mt-1 ${fieldCls}`}><SelectValue /></SelectTrigger>
@@ -100,12 +100,12 @@ export default function MentoringChecklist({
                           value={r.mentor_notes ?? ""}
                           onChange={(e) => patch(r.id, { mentor_notes: e.target.value })}
                           className={`mt-2 ${fieldCls}`} />
-                        {savingId === r.id && <p className="text-[10px] text-gold/60 mt-1">Saving…</p>}
+                        {savingId === r.id && <p className="text-[10px] text-gold mt-1">Saving…</p>}
                       </div>
                     );
                   })}
                   {rows.length === 0 && (
-                    <p className="text-xs text-primary-foreground/60 italic">No items in this stage.</p>
+                    <p className="text-xs text-primary-foreground/80 italic">No items in this stage.</p>
                   )}
                 </div>
               </AccordionContent>

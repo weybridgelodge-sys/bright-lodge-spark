@@ -1,6 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 import fs from "node:fs";
 import path from "node:path";
+import { expectNoAxeViolations } from "./helpers/axe";
 
 const routesSource = fs.readFileSync(path.resolve("src/MembersRoutes.tsx"), "utf8");
 const routePaths = [...routesSource.matchAll(/<Route\s+path="([^"]+)"/g)]
@@ -72,6 +73,8 @@ async function expectNoViewportOverflow(page: Page, context: string) {
   expect(result.offenders, `${context}: interactive controls outside the viewport`).toEqual([]);
   expect(result.documentWidth, `${context}: document overflowed`).toBeLessThanOrEqual(result.viewportWidth);
   expect(result.bodyWidth, `${context}: body overflowed`).toBeLessThanOrEqual(result.viewportWidth);
+  // Every mobile check also runs the WCAG 2.1 AA axe scan (incl. colour-contrast).
+  await expectNoAxeViolations(page, context);
 }
 
 test("route discovery includes the Treasurer and Secretary tool pages", () => {
