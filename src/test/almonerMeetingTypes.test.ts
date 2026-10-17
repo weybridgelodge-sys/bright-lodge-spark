@@ -23,16 +23,15 @@ const logged = (t1: string, t2: string, c?: string) => {
 };
 
 describe("Almoner counted meeting types", () => {
-  it("Regular, Installation and Dispensation count", () => {
-    for (const t of ["regular", "installation", "dispensation"]) expect(countsForAlmoner({ meeting_type: t })).toBe(true);
+  it("Regular, Installation, Dispensation and Emergency all count", () => {
+    for (const t of ["regular", "installation", "dispensation", "emergency"]) expect(countsForAlmoner({ meeting_type: t })).toBe(true);
     expect(flagged("dispensation", "installation")).toBe(true);
     expect(logged("dispensation", "installation")).toBe(true);
     expect(logged("regular", "regular")).toBe(true);
   });
-  it("Emergency meetings do not count", () => {
-    expect(countsForAlmoner({ meeting_type: "emergency" })).toBe(false);
-    expect(flagged("regular", "emergency")).toBe(false);
-    expect(logged("regular", "emergency")).toBe(false);
+  it("Emergency meetings count", () => {
+    expect(flagged("regular", "emergency")).toBe(true);
+    expect(logged("regular", "emergency")).toBe(true);
   });
   it("Cancelled meetings do not count", () => {
     expect(countsForAlmoner({ meeting_type: "installation", cancelled_at: "2026-10-01" })).toBe(false);

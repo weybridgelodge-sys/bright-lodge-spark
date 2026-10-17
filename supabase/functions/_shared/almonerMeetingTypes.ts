@@ -1,8 +1,8 @@
 // Single definition of which meetings count towards the Almoner "missed
-// meetings" checks (check-in nudge, Auto-Log, KPI Disengagement Risk).
-// Emergency meetings and cancelled meetings never count.
-export const ALMONER_COUNTED_TYPES: readonly string[] = ['regular', 'installation', 'dispensation']
-
+// meetings" checks (check-in nudge, Auto-Log, daily check, KPI Disengagement
+// Risk). Every meeting type counts, including any added in future; only a
+// cancelled meeting (it never took place) is excluded. A future unit setting
+// can narrow this here.
 export function countsForAlmoner(m: { meeting_type: string; cancelled_at?: string | null }): boolean {
-  return ALMONER_COUNTED_TYPES.includes(m.meeting_type) && !m.cancelled_at
+  return !m.cancelled_at
 }
