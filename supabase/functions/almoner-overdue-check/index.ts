@@ -174,6 +174,7 @@ Deno.serve(async (req) => {
       const { data: autoMeetings, error: amErr } = await supabase
         .from('festive_board_meetings')
         .select('id,meeting_date,meeting_type')
+        .is('cancelled_at', null)
         .gte('meeting_date', '2026-02-18')
         .lte('meeting_date', today)
       if (amErr) throw amErr

@@ -1,3 +1,4 @@
+import { countsForAlmoner } from "./almonerMeetingTypes.ts";
 // Soft "check-in nudge" pattern detection for the Almoner.
 //
 // Deliberately gentler than the existing unexplained-no-show alert: any
@@ -5,7 +6,7 @@
 // Cancelled — Refunded, or no record at all). Only "Attended" — and "Booked"
 // for meetings that have not happened yet — breaks a streak.
 
-export type PatternMeeting = { id: string; meeting_date: string; meeting_type: string };
+export type PatternMeeting = { id: string; meeting_date: string; meeting_type: string; cancelled_at?: string | null };
 export type PatternAttendance = { member_id: string | null; meeting_id: string; attendance_status: string };
 
 export type CheckInFlag = {
@@ -61,7 +62,7 @@ export function computeCheckInFlags(
 ): Record<string, CheckInFlag> {
   const todayStr = today.toISOString().slice(0, 10);
   const regular = meetings
-    .filter((m) => m.meeting_type === "regular" && m.meeting_date <= todayStr)
+    .filter((m) => countsForAlmoner(m) && m.meeting_date <= todayStr)
     .sort((a, b) => b.meeting_date.localeCompare(a.meeting_date));
 
   // Only consider meetings that actually have attendance recorded, so an
