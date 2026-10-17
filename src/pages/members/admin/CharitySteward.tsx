@@ -1408,7 +1408,7 @@ function ReportTab({ charities, collections, donations, festival, canEdit }: {
           {downloading ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Download className="w-4 h-4 mr-1" />} Download PDF
         </Button>
         {canEdit && (
-          <Button variant="outline" onClick={finalise} disabled={saving} className="bg-transparent border-gold/40 text-gold">
+          <Button variant="outline" onClick={finalise} disabled={saving} className="bg-transparent border-gold/40 text-gold hover:text-gold">
             {saving ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Save className="w-4 h-4 mr-1" />} Finalise &amp; snapshot
           </Button>
         )}

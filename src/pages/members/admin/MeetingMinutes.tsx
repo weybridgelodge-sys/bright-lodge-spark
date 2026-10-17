@@ -1294,14 +1294,14 @@ function Inner() {
           <Button
             onClick={startGenerate}
             variant="outline"
-            className="bg-transparent border-gold/40 text-gold hover:bg-gold/10"
+            className="bg-transparent border-gold/40 text-gold hover:bg-gold/10 hover:text-gold"
           >
             <Sparkles className="w-4 h-4 mr-1" /> Generate from transcript
           </Button>
           <Button
             onClick={startNewAgenda}
             variant="outline"
-            className="bg-transparent border-gold/40 text-gold hover:bg-gold/10"
+            className="bg-transparent border-gold/40 text-gold hover:bg-gold/10 hover:text-gold"
           >
             <Plus className="w-4 h-4 mr-1" /> New Committee Agenda
           </Button>

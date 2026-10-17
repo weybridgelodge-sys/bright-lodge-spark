@@ -1464,7 +1464,7 @@ function MeetingDialog({
                 variant="outline"
                 size="sm"
                 onClick={addVisitor}
-                className="bg-transparent border-gold/40 text-gold hover:bg-gold/10"
+                className="bg-transparent border-gold/40 text-gold hover:bg-gold/10 hover:text-gold"
               >
                 <UserPlus className="w-3 h-3 mr-1" /> Add visitor / walk-in
               </Button>

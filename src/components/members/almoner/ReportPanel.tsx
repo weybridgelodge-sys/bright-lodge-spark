@@ -519,7 +519,7 @@ export default function ReportPanel({ members }: { members: Member[] }) {
           <p className="text-xs text-primary-foreground/80">Pulls contacts, correspondence, referrals, absences and life events into a single report for agenda item 7.</p>
         </div>
         {currentId && (
-          <Button size="sm" variant="outline" onClick={resetForm} className="bg-transparent border-gold/30 text-gold hover:bg-gold/10">
+          <Button size="sm" variant="outline" onClick={resetForm} className="bg-transparent border-gold/30 text-gold hover:bg-gold/10 hover:text-gold">
             <Plus className="w-4 h-4 mr-1" /> New report
           </Button>
         )}
@@ -568,7 +568,7 @@ export default function ReportPanel({ members }: { members: Member[] }) {
             <p className="text-[11px] text-primary-foreground/80">Short lines drafted from the widows' contact log and gifts between the From and To dates. Widows with nothing new are left out.</p>
           </div>
           {canEditAlmoner && (
-            <Button onClick={draftWidows} disabled={drafting} variant="outline" className="bg-transparent border-gold/30 text-gold hover:bg-gold/10 min-h-[48px] w-full sm:w-auto">
+            <Button onClick={draftWidows} disabled={drafting} variant="outline" className="bg-transparent border-gold/30 text-gold hover:bg-gold/10 min-h-[48px] w-full sm:w-auto hover:text-gold">
               <Sparkles className="w-4 h-4 mr-1" /> {drafting ? "Drafting…" : widows.length ? "Redraft widow updates" : "Draft widow updates"}
             </Button>
           )}
@@ -599,17 +599,17 @@ export default function ReportPanel({ members }: { members: Member[] }) {
         <div className="bg-navy-light/40 border border-gold/20 rounded p-4">
           <div className="flex items-center justify-end gap-2 mb-2 flex-wrap">
             {canEditAlmoner && (<>
-            <Button size="sm" variant="outline" className="bg-transparent border-gold/40 text-gold hover:bg-gold/10" onClick={() => persist("draft")} disabled={saving} className="border-gold/30 text-gold hover:bg-gold/10">
+            <Button size="sm" variant="outline" className="bg-transparent border-gold/40 text-gold hover:bg-gold/10 hover:text-gold" onClick={() => persist("draft")} disabled={saving} className="border-gold/30 text-gold hover:bg-gold/10">
               <Save className="w-4 h-4 mr-1" /> Save draft
             </Button>
-            <Button size="sm" variant="outline" className="bg-transparent border-gold/40 text-gold hover:bg-gold/10" onClick={() => persist("final")} disabled={saving} className="border-gold/30 text-gold hover:bg-gold/10">
+            <Button size="sm" variant="outline" className="bg-transparent border-gold/40 text-gold hover:bg-gold/10 hover:text-gold" onClick={() => persist("final")} disabled={saving} className="border-gold/30 text-gold hover:bg-gold/10">
               <CheckCircle2 className="w-4 h-4 mr-1" /> Finalise
             </Button>
             </>)}
-            <Button size="sm" variant="outline" onClick={copy} className="bg-transparent border-gold/30 text-gold hover:bg-gold/10">
+            <Button size="sm" variant="outline" onClick={copy} className="bg-transparent border-gold/30 text-gold hover:bg-gold/10 hover:text-gold">
               <Copy className="w-4 h-4 mr-1" /> Copy
             </Button>
-            <Button size="sm" variant="outline" onClick={downloadMd} className="bg-transparent border-gold/30 text-gold hover:bg-gold/10">
+            <Button size="sm" variant="outline" onClick={downloadMd} className="bg-transparent border-gold/30 text-gold hover:bg-gold/10 hover:text-gold">
               Download .md
             </Button>
             <Button size="sm" onClick={downloadPdf} className="bg-gold text-navy hover:bg-gold/90">

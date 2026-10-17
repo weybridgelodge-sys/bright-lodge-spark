@@ -329,7 +329,7 @@ export default function YearEndTab({ canEdit, onOpenTab }: { canEdit: boolean; o
                   if (!rs.length) return null;
                   return (
                     <div>
-                      <Button variant="ghost" className="min-h-[48px] max-w-full whitespace-normal text-gold px-2" onClick={() => setHistory(history === y ? null : y)} aria-expanded={history === y}>
+                      <Button variant="ghost" className="min-h-[48px] max-w-full whitespace-normal text-gold px-2 hover:text-gold" onClick={() => setHistory(history === y ? null : y)} aria-expanded={history === y}>
                         <History className="w-4 h-4 mr-1" /> Review history ({rs.length} round{rs.length > 1 ? "s" : ""})
                       </Button>
                       {history === y && (
