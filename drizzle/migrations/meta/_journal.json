@@ -694,6 +694,13 @@
       "when": 1792184942673,
       "tag": "0098_manual_membership_enquiries",
       "breakpoints": true
+    },
+    {
+      "idx": 99,
+      "version": "7",
+      "when": 1792265062908,
+      "tag": "0099_masonic_year_rule_and_status_history",
+      "breakpoints": true
     }
   ]
 }
