@@ -1,6 +1,6 @@
 - Subdirectories may have their own AGENTS.md (e.g. src/components/members/treasurer/); read it before changing files there.
 - Posting periods: any unlocked row is postable; use usePostingPeriod/PeriodPicker and default by entry date, never one global period.
-- Bespoke news SEO overrides belong in staticRoutes ahead of generated Sanity metadata and must be covered by staticMetaParity; why: legacyRoute pages own their search copy even when Sanity lists them.
+- Bespoke news SEO overrides go in staticRoutes ahead of Sanity metadata, covered by staticMetaParity; why: legacy pages own their search copy.
 - Portal routing: `/members` is the dashboard; `/members/dashboard` and the inner catch-all redirect there so every portal URL resolves.
 - Auth bootstrap must always settle: retain getSession error handling, the 8s guard, and swallowed profile-load rejections.
 - AppErrorBoundary wraps routes; Suspense uses PageLoader; retain chunk retry and magic-link error surfacing.
@@ -18,7 +18,6 @@
 - Registration numbers (ugle/mmh/rose_croix) are private (get_profiles_pii), edited only in Edit Member by admin/Secretary. Why: Secretary-owned records.
 - Almoner two-tier: can_view_almoner gates SELECT, can_edit_almoner writes (incl. welfare-attachments, Widows archive by status, never delete); app mirrors canAccessAlmoner/canEditAlmoner. can_access_almoner deprecated. Why: read-only offices.
 - Page/list loading uses useInitialLoading, never useState(true), so save refreshes retain content and scroll.
-- Member Admin: plain stacked rows when narrow, semantic table on desktop, shared handlers; populated mobile tests check details, actions and header. Why: restyled table boxes hid details.
 - Meeting event label (lodge_events.event_label, default 'Festive Board') drives booking-form/email wording; title-aware attendance options live in src/lib/bookingTitles.ts. Why: White Table and other non-Festive-Board events reuse one form.
 - Public event bookings (/events/:slug) use the separate events Stripe account (_shared/stripe-events.ts, STRIPE_EVENTS_*) and event_accounts/event_bookings, never lodge Stripe. Why: events money is kept apart from the lodge ledger.
 - Public calendars: _shared/publicEventCalendar; member Calendar: member-calendar-feed. Why: same events everywhere.
@@ -27,4 +26,4 @@
 - Event money: one event_booking_payments row per Stripe charge; booking totals are recomputeBooking roll-ups; balance tokens are service-role only. Why: per-payment deposits/refunds, private links.
 - Manual membership enquiries are inserted only via add_manual_enquiry (admin/Secretary/Assistant Secretary, request_id idempotent, created_by audit); no table INSERT policy. Why: public Join Us insert path stays server-only.
 - Masonic year = Installation to day before next (via _shared/masonicYear.ts, settings rule, stored dates override); KPI Movement uses member_status_history; new tables carry unit_id. Why: multi-lodge-ready, accurate movement.
-- Meeting diary: festive_board_meetings via diary_* RPCs; cancel, never delete; Installation moves update its stored date; triggers audit. Why: one register feeds calendar, bookings, KPIs.
+- Meeting diary: festive_board_meetings via diary_* RPCs; cancel, never delete; Installation moves update its stored date; triggers audit. Why: one shared register.
