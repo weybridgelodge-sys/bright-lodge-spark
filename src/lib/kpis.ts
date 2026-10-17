@@ -775,6 +775,7 @@ export async function fetchEngagementBundle(): Promise<EngagementBundle> {
     supabase
       .from("festive_board_meetings")
       .select("id,meeting_date,meeting_type")
+      .is("cancelled_at", null)
       .lte("meeting_date", today)
       .order("meeting_date", { ascending: true }),
     supabase.from("festive_board_attendance").select("meeting_id,member_id,attendance_status"),
