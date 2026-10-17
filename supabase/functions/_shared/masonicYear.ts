@@ -88,3 +88,16 @@ export function getMasonicYear(date: string, cfg: InstallationConfig): MasonicYe
 export function localIsoDate(d = new Date()): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
+
+/** Start year of the Masonic year containing `date`, or null if unknown. */
+export function masonicStartYearOf(date: string, cfg: InstallationConfig): number | null {
+  return getMasonicYear(date, cfg)?.startYear ?? null
+}
+
+/** Nth (1–4) or last weekday of a month, as YYYY-MM-DD. month is 1–12, weekday 0 = Sunday. */
+export function nthWeekdayOfMonth(year: number, month: number, ordinal: '1' | '2' | '3' | '4' | 'last', weekday: number): string {
+  return ruleDateFor(year, {
+    mode: 'weekday_rule', installation_month: month, installation_ordinal: ordinal,
+    installation_weekday: weekday, fixed_day: null, applies_from_year: null,
+  }) as string
+}
