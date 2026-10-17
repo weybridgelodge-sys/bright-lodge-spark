@@ -20,8 +20,11 @@ async function measure(page: Page) {
     const lum = (c: any) => [c.r, c.g, c.b].map((v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; }).reduce((s, v, i) => s + v * [0.2126, 0.7152, 0.0722][i], 0);
     const btn = document.querySelector<HTMLElement>("button[data-measure]");
     if (!btn) return null;
-    const bg = bgOf(btn);
+    const base = bgOf(btn);
     const s = getComputedStyle(btn);
+    if (/gradient\((?!hsla?\([^)]*\/ ?0\.1\))/.test(s.backgroundImage) && !/0\.1\)/.test(s.backgroundImage)) return null; // shimmer/gradient fills: covered by axe at rest
+    const tint = s.backgroundImage.includes("gradient") ? { r: 203, g: 165, b: 77, a: 0.1 } : null;
+    const bg = tint ? over(tint, base) : base;
     const fg = over({ ...parse(s.color), a: parse(s.color).a * Number(s.opacity) }, bg);
     const [x, y] = [lum(fg), lum(bg)].sort((p, q) => q - p);
     return { ratio: (x + 0.05) / (y + 0.05), text: (btn.innerText || btn.getAttribute("aria-label") || "").trim().slice(0, 40), bg: s.backgroundColor, color: s.color };

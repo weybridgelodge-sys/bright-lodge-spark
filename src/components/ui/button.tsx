@@ -11,10 +11,11 @@ const buttonVariants = cva(
       variant: {
         default: "bg-primary text-primary-foreground hover:bg-primary/90",
         destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90",
-        // Hover/pressed only tint the fill and never set a text colour, so callers' text colours (e.g. gold on navy) survive a tap.
-        outline: "border border-input bg-background text-foreground hover:bg-accent/10 active:bg-accent/10 active:border-accent",
+        // Hover/pressed lay a gold tint OVER the caller's own fill and never set a text colour,
+        // so gold-on-navy and navy-on-cream outlined buttons both stay readable after a tap.
+        outline: "border border-input bg-background text-foreground hover:[background-image:linear-gradient(hsl(var(--accent)/0.1),hsl(var(--accent)/0.1))] active:[background-image:linear-gradient(hsl(var(--accent)/0.1),hsl(var(--accent)/0.1))] active:border-accent",
         secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-        ghost: "hover:bg-accent/10 active:bg-accent/10 active:border-accent",
+        ghost: "hover:[background-image:linear-gradient(hsl(var(--accent)/0.1),hsl(var(--accent)/0.1))] active:[background-image:linear-gradient(hsl(var(--accent)/0.1),hsl(var(--accent)/0.1))]",
         link: "text-primary underline-offset-4 hover:underline",
       },
       size: {
