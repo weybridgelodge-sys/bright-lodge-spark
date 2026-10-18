@@ -750,6 +750,13 @@
       "when": 1792350514551,
       "tag": "0106_join_costs_skip_cancelled",
       "breakpoints": true
+    },
+    {
+      "idx": 107,
+      "version": "7",
+      "when": 1792351590783,
+      "tag": "0107_join_costs_from_subscription_settings",
+      "breakpoints": true
     }
   ]
 }
