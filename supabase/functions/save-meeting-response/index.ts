@@ -3,6 +3,7 @@ import { z } from "npm:zod@3.23.8";
 import { sendBookingEmails } from "../_shared/send-booking-emails.ts";
 import { DUPLICATE_BOOKING_MESSAGE, findExistingBooking } from "../_shared/duplicate-booking.ts";
 import { verifyTurnstile } from "../_shared/verify-turnstile.ts";
+import { isHoneypotTripped, seatCheckOutcome } from "../_shared/meetingResponseGuards.ts";
 
 
 const corsHeaders = {
@@ -32,6 +33,7 @@ const BodySchema = z.object({
   details: z.record(z.unknown()).optional(),
   environment: z.enum(["sandbox", "live"]).optional(),
   turnstileToken: z.string().trim().max(4096).optional(),
+  website: z.string().max(500).optional().nullable(),
 });
 
 
@@ -69,7 +71,17 @@ Deno.serve(async (req) => {
       details,
       environment,
       turnstileToken,
+      website,
     } = parsed.data;
+
+    // Honeypot: real visitors never fill this hidden field. Pretend success, save nothing.
+    if (isHoneypotTripped(website)) {
+      console.warn("save-meeting-response honeypot tripped", { event_key });
+      return new Response(JSON.stringify({ ok: true }), {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || null;
     const captchaOk = await verifyTurnstile(turnstileToken, ip);
@@ -141,12 +153,16 @@ Deno.serve(async (req) => {
         "check_and_book_seats",
         { _event_key: event_key, _meeting_id: resolvedMeetingId, _seats: seats },
       );
-      if (capErr) {
-        console.error("check_and_book_seats failed:", capErr);
-        initialStatus = "confirmed";
-      } else {
-        initialStatus = (statusResult as string) || "confirmed";
+      const seat = seatCheckOutcome(statusResult, capErr);
+      if (!seat.ok) {
+        // Fail closed: never confirm a seat we could not check.
+        console.error("check_and_book_seats failed (booking not saved):", { event_key, error: capErr });
+        return new Response(JSON.stringify({ error: seat.message }), {
+          status: seat.httpStatus,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
       }
+      initialStatus = seat.status;
     } else {
       initialStatus = "confirmed";
     }

@@ -722,6 +722,20 @@
       "when": 1792269713607,
       "tag": "0102_festive_meeting_type_dispensation",
       "breakpoints": true
+    },
+    {
+      "idx": 103,
+      "version": "7",
+      "when": 1792346513758,
+      "tag": "0103_public_label_contact_settings_newsletter",
+      "breakpoints": true
+    },
+    {
+      "idx": 104,
+      "version": "7",
+      "when": 1792346669508,
+      "tag": "0104_lodge_contact_settings_service_read_only",
+      "breakpoints": true
     }
   ]
 }

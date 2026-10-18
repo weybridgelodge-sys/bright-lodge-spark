@@ -323,6 +323,7 @@ const BookingsEvent = ({
           },
           environment: getStripeEnvironment(),
           turnstileToken,
+          website: honeypot,
         },
       });
 
@@ -743,8 +744,7 @@ useEffect(() => {
                         Hidden from real users via CSS (not display:none — some bots detect that).
                         Positioned off-screen using absolute positioning so it is invisible
                         but still in the DOM for bots that scrape and fill all inputs.
-                        TODO: also check this field server-side in save-meeting-response
-                        edge function — reject any submission where honeypot is non-empty.
+                        Also sent as "website" and checked server-side in save-meeting-response.
                       */}
                       <div
                         aria-hidden="true"

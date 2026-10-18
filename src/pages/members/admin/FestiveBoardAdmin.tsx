@@ -9,6 +9,7 @@ import { saveBlob } from "@/lib/nativeDownload";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { fieldCls, fieldLabelCls } from "@/lib/fieldStyle";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
@@ -50,6 +51,7 @@ type Meeting = {
   meeting_date: string;
   meeting_type: FbMeetingType;
   notes: string | null;
+  public_label?: string | null;
   headcount_override: number | null;
   event_key: string;
   status: "draft" | "published" | "completed";
@@ -777,8 +779,10 @@ function MeetingDialog({
   existing: Meeting | null;
   existingAttendance: Attendance[];
 }) {
-  const { user } = useAuth();
+  const { user, isAdmin, isSecretary } = useAuth();
+  const canEditPublicLabel = isAdmin || isSecretary;
   const { toast } = useToast();
+  const [publicLabel, setPublicLabel] = useState(existing?.public_label ?? "");
   const [date, setDate] = useState(
     existing?.meeting_date ?? new Date().toISOString().slice(0, 10)
   );
@@ -1158,6 +1162,7 @@ function MeetingDialog({
         meeting_date: date,
         meeting_type: type,
         notes: notes.trim() || null,
+        ...(canEditPublicLabel ? { public_label: publicLabel.trim() || null } : {}),
         headcount_override: override.trim() === "" ? null : Number(override),
         created_by: user?.id ?? null,
         event_key: eventKey.trim() || `festive-board-${date}`,
@@ -1372,6 +1377,18 @@ function MeetingDialog({
               placeholder="Optional context, menu, special guests, etc."
             />
           </div>
+
+          {canEditPublicLabel && (
+            <div>
+              <label htmlFor="fb-public-label" className={fieldLabelCls}>
+                Public ceremony label (shown on the website)
+              </label>
+              <Input id="fb-public-label" value={publicLabel} maxLength={120}
+                onChange={(e) => setPublicLabel(e.target.value)}
+                placeholder="e.g. Initiation Ceremony" className={`mt-1 ${fieldCls}`} />
+              <p className="text-xs text-primary-foreground/80 mt-1">Leave empty to show no ceremony on the website.</p>
+            </div>
+          )}
 
           {/* Members grid */}
           <div>

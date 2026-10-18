@@ -3,10 +3,9 @@ import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors'
 import { z } from 'npm:zod@3.23.8'
 import { verifyTurnstile } from '../_shared/verify-turnstile.ts'
 import { sendTransactionalEmail } from '../_shared/send-email.ts'
+import { resolveEnquiryContacts } from '../_shared/enquiryContacts.ts'
 
-const SECRETARY_EMAIL = 'secretary@weybridgelodge.org.uk'
-const MEMBERSHIP_CC_EMAIL = 'membershipsecretary@weybridgelodge.org.uk'
-const GUIDE_URL = 'https://weybridgelodge.org.uk/downloads/information-for-prospective-members.pdf?v=2'
+const UNIT_ID = 'weybridge'
 
 const BodySchema = z.object({
   full_name: z.string().trim().min(2, 'Please enter your full name').max(120),
@@ -55,6 +54,13 @@ Deno.serve(async (req) => {
   if (!ok) return json({ error: 'Verification failed. Please tick the verification box and try again.' }, 400)
 
   const supabase = createClient(supabaseUrl, serviceKey)
+  const { data: contactRow, error: contactErr } = await supabase
+    .from('lodge_contact_settings')
+    .select('secretary_email, membership_cc_email, guide_url')
+    .eq('unit_id', UNIT_ID)
+    .maybeSingle()
+  if (contactErr) console.error('lodge_contact_settings lookup failed, using fallback', contactErr)
+  const contacts = resolveEnquiryContacts(contactRow as any)
 
 
   const ua = req.headers.get('user-agent') || null
@@ -81,7 +87,7 @@ Deno.serve(async (req) => {
   const submittedAt = new Date(row.created_at).toLocaleString('en-GB', { timeZone: 'Europe/London' })
 
   // 1) Notification to secretary (recipient is hard-coded — no caller override)
-  const notifyTo = SECRETARY_EMAIL
+  const notifyTo = contacts.secretaryEmail
   const notifRes = await sendTransactionalEmail({
       templateName: 'enquiry-notification',
       recipientEmail: notifyTo,
@@ -111,7 +117,7 @@ Deno.serve(async (req) => {
     secretaryName: secretary.name,
     secretaryOffice: secretary.office,
     membershipOfficerName: membershipOfficer.name,
-    guideUrl: GUIDE_URL,
+    guideUrl: contacts.guideUrl,
   }
   const confRes = await sendTransactionalEmail({
       templateName: 'enquiry-confirmation',
@@ -124,7 +130,7 @@ Deno.serve(async (req) => {
   // 3) Identical copy to the Membership Officer (email service has no CC field)
   const ccRes = await sendTransactionalEmail({
       templateName: 'enquiry-confirmation',
-      recipientEmail: MEMBERSHIP_CC_EMAIL,
+      recipientEmail: contacts.membershipCcEmail,
       idempotencyKey: `enquiry-confirm-cc-${row.id}`,
       replyTo: email || undefined,
       templateData: confData,

@@ -5,7 +5,7 @@ import { expectNoAxeViolations } from "./helpers/axe";
 const rule = { id: "r1", unit_id: "u", mode: "weekday_rule", installation_month: 10, installation_ordinal: "3", installation_weekday: 3, fixed_day: null, applies_from_year: null, unit_number: "6787", default_venue: "Guildford Masonic Centre, Hitherbury Close, Portsmouth Road, Guildford GU2 4DR", election_month: 5, ritual: "Emulation", consecration_date: "1949-01-01" };
 const meetings = [
   { id: "m0", meeting_date: "2026-09-12", meeting_type: "dispensation", status: "draft", notes: "Dispensation for a Saturday meeting granted by the Provincial Grand Master, reference PGM/2026/14", cancelled_at: null, cancel_reason: null, series_id: null },
-  { id: "m1", meeting_date: "2026-10-21", meeting_type: "installation", status: "published", notes: null, cancelled_at: null, cancel_reason: null, series_id: null },
+  { id: "m1", meeting_date: "2026-10-21", meeting_type: "installation", status: "published", notes: null, public_label: "Installation of the Worshipful Master and Investiture of Officers for the year", cancelled_at: null, cancel_reason: null, series_id: null },
   { id: "m2", meeting_date: "2026-12-09", meeting_type: "regular", status: "draft", notes: null, cancelled_at: null, cancel_reason: null, series_id: null },
   { id: "m4", meeting_date: "2027-02-17", meeting_type: "regular", status: "draft", notes: null, cancelled_at: null, cancel_reason: null, series_id: null },
   { id: "m5", meeting_date: "2027-05-12", meeting_type: "regular", status: "draft", notes: null, cancelled_at: null, cancel_reason: null, series_id: null },
@@ -81,4 +81,18 @@ test("Meeting diary has no overflow at 320px", { timeout: 90_000 }, async ({ pag
   await expect(page.getByRole("dialog")).toContainText("nothing is deleted");
   await check("drop dialog");
   await expectNoAxeViolations(page, "drop dialog");
+  await page.getByRole("dialog").getByRole("button", { name: "Back" }).click();
+  await expect(page.getByTestId("diary-meetings")).toContainText("Website: Installation of the Worshipful Master");
+  const lbl = page.getByRole("button", { name: /^Website label for .*21 Oct/ });
+  await lbl.hover();
+  await expectNoAxeViolations(page, "hovered website label button");
+  await lbl.click();
+  const ld = page.getByRole("dialog");
+  const input = ld.getByLabel("Public ceremony label (shown on the website)");
+  await expect(input).toHaveValue(/Installation of the Worshipful Master/);
+  await input.fill("Initiation Ceremony followed by the Festive Board and white table");
+  await check("label dialog");
+  await expectNoAxeViolations(page, "label dialog");
+  const box = await input.boundingBox();
+  expect(box!.height).toBeGreaterThanOrEqual(44);
 });

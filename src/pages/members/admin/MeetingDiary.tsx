@@ -25,7 +25,7 @@ type RuleRow = InstallationRule & {
   id?: string; unit_number: string | null; default_venue: string | null; election_month: number | null;
   ritual: string | null; consecration_date: string | null;
 };
-type Meeting = DiaryMeeting & { status: string; notes: string | null; cancel_reason: string | null; series_id: string | null };
+type Meeting = DiaryMeeting & { status: string; notes: string | null; public_label: string | null; cancel_reason: string | null; series_id: string | null };
 type Series = { id: string; name: string; meeting_type: MeetingType; ordinal: Ordinal | null; weekday: number | null; months: number[]; active: boolean; schedule: unknown };
 type Audit = { id: string; action: string; target_table: string; created_at: string; actor: string | null };
 
@@ -76,7 +76,7 @@ function Inner() {
     setLoading(true);
     const [r, m, s, a, c] = await Promise.all([
       (supabase.from as any)("installation_rule_settings").select("*").maybeSingle(),
-      (supabase.from as any)("festive_board_meetings").select("id,meeting_date,meeting_type,status,notes,cancelled_at,cancel_reason,series_id").order("meeting_date"),
+      (supabase.from as any)("festive_board_meetings").select("id,meeting_date,meeting_type,status,notes,public_label,cancelled_at,cancel_reason,series_id").order("meeting_date"),
       (supabase.from as any)("meeting_series").select("*").order("created_at"),
       (supabase.from as any)("meeting_diary_audit").select("id,action,target_table,created_at,actor").order("created_at", { ascending: false }).limit(15),
       loadInstallationConfig(),
@@ -145,13 +145,15 @@ function Inner() {
   };
 
   // ---- Meeting actions ----
-  const [action, setAction] = useState<null | { kind: "move" | "drop" | "add"; meeting?: Meeting }>(null);
+  const [action, setAction] = useState<null | { kind: "move" | "drop" | "add" | "label"; meeting?: Meeting }>(null);
   const [deps, setDeps] = useState<Dependencies | null>(null);
   const [newDate, setNewDate] = useState("");
   const [newType, setNewType] = useState<MeetingType>("regular");
   const [notes, setNotes] = useState("");
-  const openAction = async (kind: "move" | "drop" | "add", meeting?: Meeting) => {
-    setAction({ kind, meeting }); setDeps(null); setNotes("");
+  const [publicLabel, setPublicLabel] = useState("");
+  const openAction = async (kind: "move" | "drop" | "add" | "label", meeting?: Meeting) => {
+    setAction({ kind, meeting }); setDeps(null); setNotes(""); setPublicLabel(meeting?.public_label ?? "");
+    if (kind === "label") return;
     setNewDate(meeting?.meeting_date ?? ""); setNewType("regular");
     if (meeting) {
       const { data } = await supabase.rpc("meeting_dependencies" as any, { _meeting_id: meeting.id } as any);
@@ -174,12 +176,14 @@ function Inner() {
       ({ error } = await supabase.rpc("diary_move_meeting" as any, { _meeting_id: action.meeting.id, _new_date: newDate } as any));
     } else if (action.kind === "drop" && action.meeting) {
       ({ error } = await supabase.rpc("diary_cancel_meeting" as any, { _meeting_id: action.meeting.id, _reason: notes } as any));
+    } else if (action.kind === "label" && action.meeting) {
+      ({ error } = await (supabase.from as any)("festive_board_meetings").update({ public_label: publicLabel.trim() || null }).eq("id", action.meeting.id));
     } else if (action.kind === "add") {
       ({ error } = await supabase.rpc("diary_add_meeting" as any, { _date: newDate, _type: newType, _series_id: null, _notes: notes || null } as any));
     }
     setBusy(false);
     if (error) return toast.error(error.message);
-    toast.success(action.kind === "move" ? "Meeting moved" : action.kind === "drop" ? "Meeting cancelled (history kept)" : "Meeting added");
+    toast.success(action.kind === "label" ? "Website label saved" : action.kind === "move" ? "Meeting moved" : action.kind === "drop" ? "Meeting cancelled (history kept)" : "Meeting added");
     setAction(null);
     load();
   };
@@ -352,6 +356,7 @@ function Inner() {
                   <p className="text-xs text-cream/70 break-words">
                     {typeLabel(m.meeting_type)} · {m.cancelled_at ? `Cancelled${m.cancel_reason ? `: ${m.cancel_reason}` : ""}` : m.status}
                     {m.series_id && " · series"}
+                    {m.public_label && ` · Website: ${m.public_label}`}
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-2">
@@ -360,6 +365,7 @@ function Inner() {
                   ) : (<>
                     <Button variant="outline" className="min-h-[44px] border-gold/50 text-gold bg-transparent hover:bg-gold/10 hover:text-gold" onClick={() => openAction("move", m)}>Move</Button>
                     <Button variant="outline" className="min-h-[44px] border-destructive/60 text-destructive-foreground bg-transparent hover:bg-destructive/20 hover:text-destructive-foreground" onClick={() => openAction("drop", m)}>Drop</Button>
+                    <Button variant="outline" className="min-h-[44px] border-gold/50 text-gold bg-transparent hover:bg-gold/10 hover:text-gold" aria-label={`Website label for ${fmt(m.meeting_date)}`} onClick={() => openAction("label", m)}>Website label</Button>
                   </>)}
                 </div>
               </li>
@@ -479,14 +485,20 @@ function Inner() {
         <DialogContent className="bg-navy border-gold/30 text-cream max-w-[calc(100vw-1rem)] sm:max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="font-serif text-gold">
-              {action?.kind === "add" ? "Add meeting" : action?.kind === "move" ? "Move meeting" : "Drop meeting"}
+              {action?.kind === "label" ? "Public ceremony label" : action?.kind === "add" ? "Add meeting" : action?.kind === "move" ? "Move meeting" : "Drop meeting"}
             </DialogTitle>
             <DialogDescription className="text-cream/70">
               {action?.meeting ? `${typeLabel(action.meeting.meeting_type)} meeting on ${fmt(action.meeting.meeting_date)}` : "Adds a draft meeting to the diary."}
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-3">
-            {action?.kind !== "drop" && (
+            {action?.kind === "label" && (
+              <label className={labelCls}>Public ceremony label (shown on the website)
+                <Input className={`mt-1 ${fieldCls}`} maxLength={120} placeholder="e.g. Initiation Ceremony" value={publicLabel} onChange={(e) => setPublicLabel(e.target.value)} />
+                <span className={fieldHintCls}>Leave empty to show no ceremony on the website.</span>
+              </label>
+            )}
+            {action?.kind !== "drop" && action?.kind !== "label" && (
               <label className={labelCls}>{action?.kind === "move" ? "New date" : "Date"}
                 <Input type="date" className={`mt-1 ${fieldCls}`} value={newDate} onChange={(e) => setNewDate(e.target.value)} />
               </label>
@@ -498,7 +510,7 @@ function Inner() {
                 </select>
               </label>
             )}
-            {action?.kind !== "move" && (
+            {action?.kind !== "move" && action?.kind !== "label" && (
               <label className={labelCls}>{action?.kind === "drop" ? "Reason (optional)" : newType === "dispensation" ? "Dispensation reason or reference (optional)" : "Notes (optional)"}
                 <Textarea className={`mt-1 ${fieldCls}`} rows={2} placeholder={newType === "dispensation" ? "Reason or dispensation reference" : undefined} value={notes} onChange={(e) => setNotes(e.target.value)} />
               </label>
