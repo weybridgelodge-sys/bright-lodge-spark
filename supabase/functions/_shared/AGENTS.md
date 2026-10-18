@@ -1,0 +1,1 @@
+- Lodge addresses, site URL and sender names come from lodgeSettings.ts (lodge_contact_settings; fallbacks = old values); sender domains stay in code. Why: one editable source, safe on lookup failure.
