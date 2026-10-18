@@ -54,6 +54,13 @@ Deno.serve(async (req) => {
   if (!ok) return json({ error: 'Verification failed. Please tick the verification box and try again.' }, 400)
 
   const supabase = createClient(supabaseUrl, serviceKey)
+  const { data: contactRow, error: contactErr } = await supabase
+    .from('lodge_contact_settings')
+    .select('secretary_email, membership_cc_email, guide_url')
+    .eq('unit_id', UNIT_ID)
+    .maybeSingle()
+  if (contactErr) console.error('lodge_contact_settings lookup failed, using fallback', contactErr)
+  const contacts = resolveEnquiryContacts(contactRow as any)
 
 
   const ua = req.headers.get('user-agent') || null
@@ -80,7 +87,7 @@ Deno.serve(async (req) => {
   const submittedAt = new Date(row.created_at).toLocaleString('en-GB', { timeZone: 'Europe/London' })
 
   // 1) Notification to secretary (recipient is hard-coded — no caller override)
-  const notifyTo = SECRETARY_EMAIL
+  const notifyTo = contacts.secretaryEmail
   const notifRes = await sendTransactionalEmail({
       templateName: 'enquiry-notification',
       recipientEmail: notifyTo,
@@ -110,7 +117,7 @@ Deno.serve(async (req) => {
     secretaryName: secretary.name,
     secretaryOffice: secretary.office,
     membershipOfficerName: membershipOfficer.name,
-    guideUrl: GUIDE_URL,
+    guideUrl: contacts.guideUrl,
   }
   const confRes = await sendTransactionalEmail({
       templateName: 'enquiry-confirmation',
@@ -123,7 +130,7 @@ Deno.serve(async (req) => {
   // 3) Identical copy to the Membership Officer (email service has no CC field)
   const ccRes = await sendTransactionalEmail({
       templateName: 'enquiry-confirmation',
-      recipientEmail: MEMBERSHIP_CC_EMAIL,
+      recipientEmail: contacts.membershipCcEmail,
       idempotencyKey: `enquiry-confirm-cc-${row.id}`,
       replyTo: email || undefined,
       templateData: confData,
