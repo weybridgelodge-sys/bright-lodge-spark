@@ -20,17 +20,11 @@ const Email = ({ confirmUrl, lodgeName = 'Weybridge Lodge No. 6787', postcode = 
           <Heading style={{ ...brandStyles.brand, fontFamily: 'Georgia, serif' }}>{lodgeName}</Heading>
         </Section>
         <Heading as="h2" style={{ ...brandStyles.h1, fontFamily: 'Georgia, serif' }}>Please confirm your subscription</Heading>
-        <Text style={brandStyles.body}>
-          Someone (hopefully you) asked to receive news from {lodgeName} at this address.
-          Please confirm by pressing the button below.
-        </Text>
+        <Text style={brandStyles.body}>Please confirm you'd like to receive news from {lodgeName}.</Text>
         <Section style={{ textAlign: 'center' as const, margin: '20px 0 24px' }}>
           <Button href={confirmUrl} style={button}>Confirm my subscription</Button>
         </Section>
-        <Text style={brandStyles.body}>
-          The link works once and expires in 14 days. If you didn't ask for this, simply ignore
-          this email and you won't hear from us.
-        </Text>
+        <Text style={brandStyles.body}>If you didn't ask for this, ignore this email.</Text>
         <Hr style={brandStyles.hr} />
         <Text style={footer}>{lodgeName} · Guildford, Surrey {postcode}</Text>
       </Container>
