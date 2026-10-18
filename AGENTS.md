@@ -27,3 +27,4 @@
 - Masonic year = Installation to day before next (_shared/masonicYear.ts; rule, stored dates override); KPI Movement uses member_status_history; new tables carry unit_id. Why: multi-lodge-ready, accurate movement.
 - Diary: festive_board_meetings via diary_* RPCs; cancel, never delete; Installation move updates stored date; per-month meeting_series.schedule inferred from diary, skips existing; only regular/installation scheduled, rest one-off. Why: one register.
 - Every new/changed page/screen/dialog: 320px test (worst-case data; no overflow/obscured controls) + axe (helpers/axe, WCAG 2.1 AA), colour-contrast always on, never disabled; fieldCls tokens; 44px targets; report scanned/unscanned.
+- Newsletter public sign-up is double opt-in via _shared/newsletterOptIn.ts (newsletter-subscribe/newsletter-confirm); store only the token hash; every send/count filters confirmed=true. Why: no subscribing others.
