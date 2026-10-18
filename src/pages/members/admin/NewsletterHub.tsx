@@ -47,6 +47,27 @@ const DEFAULT_SUBJECT = "Weybridge Lodge No. 6787 — Monthly Chronicle & Labour
 const SITE_ORIGIN = "https://bright-lodge-spark.lovable.app";
 const LOGO_URL = `${SITE_ORIGIN}${logoAsset.url}`;
 
+/** Public sign-up counts. Only confirmed addresses receive the Public edition. */
+function PublicListCounts() {
+  const [c, setC] = useState<{ confirmed: number; pending: number } | null>(null);
+  const [failed, setFailed] = useState(false);
+  useEffect(() => {
+    supabase.rpc("get_newsletter_subscriber_counts" as any).then(({ data, error }) => {
+      const row = Array.isArray(data) ? (data[0] as any) : null;
+      if (error || !row) { setFailed(true); return; }
+      setC({ confirmed: row.confirmed_active, pending: row.pending_confirmation });
+    });
+  }, []);
+  if (failed) return <p className="text-primary-foreground/80 text-xs mt-3">Public sign-up numbers couldn't be loaded.</p>;
+  if (!c) return null;
+  return (
+    <dl className="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-sm text-primary-foreground/80" aria-label="Public sign-ups">
+      <div><dt className="inline">Public subscribers (confirmed): </dt><dd className="inline font-semibold text-gold">{c.confirmed}</dd></div>
+      <div><dt className="inline">Pending confirmation: </dt><dd className="inline font-semibold text-gold">{c.pending}</dd></div>
+    </dl>
+  );
+}
+
 const uid = () => Math.random().toString(36).slice(2, 10);
 
 const DEFAULT_SECTIONS = (): Section[] => [
@@ -726,6 +747,7 @@ function NewsletterHubInner() {
           to website newsletter sign-ups. Tick <strong className="text-gold">Unified content</strong> when one shared write-up suits everyone
           (e.g. a social-event poster) — the merged "Send to Both" then dedups by email and files a single combined PDF.
         </p>
+        <PublicListCounts />
 
       </header>
 

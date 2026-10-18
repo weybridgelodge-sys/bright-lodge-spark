@@ -14,6 +14,7 @@ import Index from "./pages/Index";
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const Unsubscribe = lazy(() => import("./pages/Unsubscribe"));
+const NewsletterConfirm = lazy(() => import("./pages/NewsletterConfirm"));
 const SummonsRedirect = lazy(() => import("./pages/SummonsRedirect"));
 const AccountsRedirect = lazy(() => import("./pages/AccountsRedirect"));
 const WhatIsFreemasonry = lazy(() => import("./pages/WhatIsFreemasonry"));
@@ -103,6 +104,7 @@ const App = () => (
             <Route path="/data-protection" element={<DataProtection />} />
             <Route path="/accessibility-statement" element={<AccessibilityStatement />} />
             <Route path="/unsubscribe" element={<Unsubscribe />} />
+            <Route path="/newsletter/confirm" element={<NewsletterConfirm />} />
             <Route path="/summons/:meetingNumber" element={<SummonsRedirect />} />
             <Route path="/accounts/:year" element={<AccountsRedirect />} />
             <Route path="/lodge-profile" element={<LodgeProfile />} />

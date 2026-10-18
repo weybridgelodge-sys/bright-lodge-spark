@@ -29,7 +29,7 @@ export async function confirmNewsletterToken(token: string): Promise<State> {
 }
 
 const QuizCta = () => (
-  <Button asChild variant="gold" className="min-h-[44px] h-auto whitespace-normal py-3 px-5 font-sans">
+  <Button asChild className="min-h-[44px] h-auto whitespace-normal py-3 px-5 font-sans">
     <Link to="/quiz">While you're here, why not try our 2-Minute Suitability Quiz</Link>
   </Button>
 );
