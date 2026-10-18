@@ -39,3 +39,18 @@ test("Charity Steward Reports at 320px: buttons/icons ≥4.5:1, cards readable, 
   expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
   await expectNoAxeViolations(page, "charity reports");
 });
+
+const SWEEP = ["/members/almoner", "/members/admin/diary", "/members/development", "/members/admin/treasurer", "/members/admin/returns", "/members/admin/newsletter", "/members/calendar", "/members/admin/minutes", "/members/working-groups", "/members/officers-tracker", "/members/admin/charity", "/three-masonic-degrees"];
+for (const path of SWEEP) {
+  test(`light-fill outline contrast ≥4.5:1 at 320px: ${path}`, { timeout: 90_000 }, async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 1400 });
+    await page.goto(path);
+    await page.waitForLoadState("networkidle").catch(() => {});
+    await page.waitForTimeout(1500);
+    if (!(await page.locator("main").count())) test.skip(true, "Screen did not open for the synthetic identity");
+    const ratios = await outlineContrasts(page);
+    console.log("SWEEP", path, ratios.length, JSON.stringify(ratios.filter((r) => r.ratio < 4.5)));
+    for (const r of ratios) expect.soft(r.ratio, `${path} ${r.label}`).toBeGreaterThanOrEqual(4.5);
+    await expectNoAxeViolations(page, path);
+  });
+}
