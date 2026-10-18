@@ -54,7 +54,7 @@ const buildCostCards = (amounts: ReturnType<typeof joinUsCostAmounts>): CostCard
   {
     icon: PoundSterling,
     title: "UGLE Registration",
-    amount: amounts.ugle, // UGLE-set fee: typed in lib/joinUsCosts, no lodge setting
+    amount: amounts.ugle, // Treasurer-saved default (lodge_fee_settings), typed fallback
     note: "A one-off fee paid to the United Grand Lodge of England when you are initiated.",
     badge: "50% off for under-25s",
   },

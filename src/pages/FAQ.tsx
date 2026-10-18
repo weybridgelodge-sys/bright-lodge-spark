@@ -1,4 +1,6 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { faqCostAnswer } from "@/lib/joinUsCosts";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
@@ -195,11 +197,24 @@ const faqCategories: FAQCategory[] = [
 ];
 
 // Flat list, in category order, used for the FAQPage structured data.
-const faqs: FAQItem[] = faqCategories.flatMap((c) => c.items);
+const COST_Q = "What does membership cost?";
 
 // ─── Component ────────────────────────────────────────────────────────────────
 const FAQ = () => {
   const shouldReduceMotion = useReducedMotion();
+  const [costRow, setCostRow] = useState<Parameters<typeof faqCostAnswer>[0]>(null);
+  useEffect(() => {
+    let cancelled = false;
+    supabase.rpc("get_join_us_costs").then(({ data, error }) => {
+      if (cancelled || error) return;
+      setCostRow(Array.isArray(data) ? data[0] : data);
+    }, () => {});
+    return () => { cancelled = true; };
+  }, []);
+  const categories = useMemo(() => faqCategories.map((c) => ({
+    ...c, items: c.items.map((i) => (i.question === COST_Q ? { ...i, answer: faqCostAnswer(costRow) } : i)),
+  })), [costRow]);
+  const faqs = useMemo(() => categories.flatMap((c) => c.items), [categories]);
 
   const pageSchema = useMemo(() => {
     // faqSchema receives plain-text answers ONLY — one flat mainEntity array.
@@ -229,7 +244,7 @@ const FAQ = () => {
       faqStructuredData,
       breadcrumb,
     ];
-  }, []);
+  }, [faqs]);
 
   const motionProps = shouldReduceMotion
     ? {}
@@ -278,7 +293,7 @@ const FAQ = () => {
               transition={shouldReduceMotion ? undefined : { duration: 0.6, delay: 0.1 }}
               className="space-y-14"
             >
-              {faqCategories.map((cat) => (
+              {categories.map((cat) => (
                 <div key={cat.id}>
                   <div className="h-0.5 w-16 bg-gold mb-4" aria-hidden="true" />
                   <h2
