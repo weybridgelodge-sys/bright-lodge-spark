@@ -2507,6 +2507,7 @@ export type Database = {
           meeting_date: string
           meeting_type: Database["public"]["Enums"]["festive_meeting_type"]
           notes: string | null
+          public_label: string | null
           series_id: string | null
           status: Database["public"]["Enums"]["meeting_status"]
           unit_id: string
@@ -2526,6 +2527,7 @@ export type Database = {
           meeting_date: string
           meeting_type?: Database["public"]["Enums"]["festive_meeting_type"]
           notes?: string | null
+          public_label?: string | null
           series_id?: string | null
           status?: Database["public"]["Enums"]["meeting_status"]
           unit_id?: string
@@ -2545,6 +2547,7 @@ export type Database = {
           meeting_date?: string
           meeting_type?: Database["public"]["Enums"]["festive_meeting_type"]
           notes?: string | null
+          public_label?: string | null
           series_id?: string | null
           status?: Database["public"]["Enums"]["meeting_status"]
           unit_id?: string
@@ -2799,6 +2802,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      lodge_contact_settings: {
+        Row: {
+          guide_url: string
+          membership_cc_email: string
+          secretary_email: string
+          unit_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          guide_url: string
+          membership_cc_email: string
+          secretary_email: string
+          unit_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          guide_url?: string
+          membership_cc_email?: string
+          secretary_email?: string
+          unit_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
       }
       lodge_development_reports: {
         Row: {
