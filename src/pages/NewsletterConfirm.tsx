@@ -28,15 +28,10 @@ export async function confirmNewsletterToken(token: string): Promise<State> {
   }
 }
 
-const NextStep = () => (
-  <div className="flex flex-col items-center gap-3">
-    <Button asChild className="min-h-[44px] h-auto whitespace-normal py-3 px-5 font-sans">
-      <Link to="/events">See what's coming up</Link>
-    </Button>
-    <Link to="/" className="inline-flex items-center min-h-[44px] px-2 font-sans text-sm text-foreground underline underline-offset-4">
-      Back to the home page
-    </Link>
-  </div>
+const HomeLink = () => (
+  <Link to="/" className="inline-flex items-center min-h-[44px] px-2 font-sans text-sm text-foreground underline underline-offset-4">
+    Back to the home page
+  </Link>
 );
 
 const SubscribeAgain = () => (
@@ -71,11 +66,11 @@ const NewsletterConfirm = () => {
               {state === "loading" && <p className="font-sans text-muted-foreground">Confirming your subscription…</p>}
               {state === "confirmed" && (
                 <>
-                  <h2 className="text-2xl font-serif text-foreground mb-3">You're subscribed</h2>
+                  <h2 className="text-2xl font-serif text-foreground mb-3">You're confirmed. Thank you.</h2>
                   <p className="font-sans text-muted-foreground mb-6">
-                    Thank you for confirming. A short welcome note from our Worshipful Master is on its way to your inbox.
+                    A note from our Worshipful Master is on its way to your inbox.
                   </p>
-                  <NextStep />
+                  <HomeLink />
                 </>
               )}
               {state === "expired" && (
