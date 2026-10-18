@@ -38,10 +38,26 @@ export interface ButtonProps
   asChild?: boolean;
 }
 
+/**
+ * Outline buttons keep the light `bg-background` fill unless the caller sets its own fill.
+ * On that light fill, caller text colours meant for navy (gold, red-300, emerald-300…) fall to ~2:1,
+ * so text and icons are forced to a token that reaches 4.5:1: foreground, or destructive for
+ * delete-style buttons. Caller borders (e.g. gold) and focus rings are kept.
+ */
+export function outlineLightFillClasses(className?: string): string | undefined {
+  const tokens = (className ?? "").split(/\s+/).filter(Boolean);
+  if (tokens.some((t) => /^bg-/.test(t))) return undefined; // caller owns the fill
+  const danger = tokens.some((t) => /(^|:)text-(red|rose|destructive)/.test(t) || /(^|:)border-(red|rose|destructive)/.test(t));
+  return danger
+    ? "text-destructive hover:text-destructive border-destructive/60 hover:bg-background"
+    : "text-foreground hover:text-foreground hover:bg-background";
+}
+
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild = false, ...props }, ref) => {
     const Comp = asChild ? Slot : "button";
-    return <Comp className={cn(buttonVariants({ variant, size, className }))} ref={ref} {...props} />;
+    const forced = variant === "outline" ? outlineLightFillClasses(className) : undefined;
+    return <Comp className={cn(buttonVariants({ variant, size, className }), forced)} ref={ref} {...props} />;
   },
 );
 Button.displayName = "Button";
