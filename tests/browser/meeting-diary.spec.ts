@@ -83,7 +83,7 @@ test("Meeting diary has no overflow at 320px", { timeout: 90_000 }, async ({ pag
   await expectNoAxeViolations(page, "drop dialog");
   await page.getByRole("dialog").getByRole("button", { name: "Back" }).click();
   await expect(page.getByTestId("diary-meetings")).toContainText("Website: Installation of the Worshipful Master");
-  const lbl = page.getByRole("button", { name: /^Website label/ }).nth(1);
+  const lbl = page.getByRole("button", { name: /^Website label for .*21 Oct/ });
   await lbl.hover();
   await expectNoAxeViolations(page, "hovered website label button");
   await lbl.click();
