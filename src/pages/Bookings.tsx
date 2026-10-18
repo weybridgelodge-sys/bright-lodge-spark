@@ -14,7 +14,6 @@ import {
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { getStripeEnvironment } from "@/lib/stripe";
 import { fetchNextEvent, type EventBundle } from "@/lib/lodgeEvents";
 import { normaliseName, normaliseTitle } from "@/lib/nameCase";
 import TurnstileWidget from "@/components/TurnstileWidget";
@@ -321,7 +320,6 @@ const BookingsEvent = ({
             unitPricePence: seatPricePence,
             paymentMethod, totalPence,
           },
-          environment: getStripeEnvironment(),
           turnstileToken,
           website: honeypot,
         },
