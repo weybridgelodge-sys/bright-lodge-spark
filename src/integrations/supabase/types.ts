@@ -2809,6 +2809,7 @@ export type Database = {
           communications_email: string | null
           formal_sender_name: string | null
           guide_url: string
+          lodge_postcode: string | null
           membership_cc_email: string
           secretary_email: string
           sender_name: string | null
@@ -2823,6 +2824,7 @@ export type Database = {
           communications_email?: string | null
           formal_sender_name?: string | null
           guide_url: string
+          lodge_postcode?: string | null
           membership_cc_email: string
           secretary_email: string
           sender_name?: string | null
@@ -2837,6 +2839,7 @@ export type Database = {
           communications_email?: string | null
           formal_sender_name?: string | null
           guide_url?: string
+          lodge_postcode?: string | null
           membership_cc_email?: string
           secretary_email?: string
           sender_name?: string | null
@@ -4635,31 +4638,43 @@ export type Database = {
       }
       newsletter_subscribers: {
         Row: {
+          confirm_sent_at: string | null
+          confirm_token_hash: string | null
           confirmed: boolean
+          confirmed_at: string | null
           created_at: string
           email: string
           id: string
           source: string
+          unit_id: string
           unsubscribe_token: string
           unsubscribed_at: string | null
           updated_at: string
         }
         Insert: {
+          confirm_sent_at?: string | null
+          confirm_token_hash?: string | null
           confirmed?: boolean
+          confirmed_at?: string | null
           created_at?: string
           email: string
           id?: string
           source?: string
+          unit_id?: string
           unsubscribe_token?: string
           unsubscribed_at?: string | null
           updated_at?: string
         }
         Update: {
+          confirm_sent_at?: string | null
+          confirm_token_hash?: string | null
           confirmed?: boolean
+          confirmed_at?: string | null
           created_at?: string
           email?: string
           id?: string
           source?: string
+          unit_id?: string
           unsubscribe_token?: string
           unsubscribed_at?: string | null
           updated_at?: string
@@ -7256,6 +7271,13 @@ export type Database = {
           officer_role: string
           round_number: number
           submitted_at: string
+        }[]
+      }
+      get_newsletter_subscriber_counts: {
+        Args: { _unit_id?: string }
+        Returns: {
+          confirmed_active: number
+          pending_confirmation: number
         }[]
       }
       get_next_public_meeting: {

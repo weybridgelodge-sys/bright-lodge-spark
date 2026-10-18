@@ -771,6 +771,13 @@
       "when": 1792355165024,
       "tag": "0109_revoke_leftover_anon_privileges",
       "breakpoints": true
+    },
+    {
+      "idx": 110,
+      "version": "7",
+      "when": 1792359369132,
+      "tag": "0110_newsletter_double_opt_in",
+      "breakpoints": true
     }
   ]
 }
