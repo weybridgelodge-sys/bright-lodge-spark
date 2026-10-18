@@ -10,7 +10,7 @@ import { toast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 import { fetchReservePots, fetchSubscriptionSettings, type ReservePot } from "@/lib/treasurer/subscriptionSettings";
 import { splitSubscription, type SplitLine } from "@/lib/treasurer/subscriptionSplit";
-import { LODGE_FEE_FALLBACK, feeDefault, validateFeeInputs } from "@/lib/treasurer/lodgeFees";
+import { LODGE_FEE_FALLBACK, discountedPence, feeDefault, validateFeeInputs } from "@/lib/treasurer/lodgeFees";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription,
   AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
@@ -370,6 +370,7 @@ export default function NewMemberFeesTab({ canEdit }: { canEdit: boolean }) {
               </div>
             </div>
 
+            {canEdit && (
             <section aria-labelledby="lodge-default-fees" className="mt-6 min-w-0 rounded-lg border-2 border-gold/60 bg-navy p-4">
               <h3 id="lodge-default-fees" className="font-serif text-base text-gold">Lodge default fees</h3>
               <p className="text-primary-foreground/80 text-xs mt-1 mb-3">
@@ -393,7 +394,7 @@ export default function NewMemberFeesTab({ canEdit }: { canEdit: boolean }) {
                 Annual subscription rate: <span className="text-gold">{money(toPence(subRate))}</span> (read only — edit it on the Breakeven Calculator tab).
               </p>
               <p className="text-primary-foreground/80 text-xs mt-1">
-                Under 25 today: UGLE {money(Math.round(toPence(defUgle) * (100 - (Number(defPct) || 0)) / 100))}, PGL {money(Math.round(toPence(defPgl) * (100 - (Number(defPct) || 0)) / 100))}.
+                Under 25 today: UGLE {money(discountedPence(toPence(defUgle), Number(defPct) || 0))}, PGL {money(discountedPence(toPence(defPgl), Number(defPct) || 0))}.
               </p>
               <p className="text-gold text-xs mt-1">These figures appear on the public Join Us and FAQ pages.</p>
               <p className="text-primary-foreground/80 text-xs mt-1">
@@ -420,6 +421,7 @@ export default function NewMemberFeesTab({ canEdit }: { canEdit: boolean }) {
                 </AlertDialogContent>
               </AlertDialog>
             </section>
+            )}
 
             <div className="mt-4 grid gap-2 sm:grid-cols-2">
               <div className="min-w-0 rounded-md border border-gold/20 p-3">
