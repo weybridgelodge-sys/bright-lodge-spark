@@ -72,6 +72,7 @@ describe("lodge settings fallback", () => {
       assistantSecretaryEmail: "assistantsecretary@weybridgelodge.org.uk",
       webmasterEmail: "webmaster@weybridgelodge.org.uk",
       communicationsEmail: "communications@weybridgelodge.org.uk",
+      lodgePostcode: "GU2 4DR",
     });
   });
   it("stored values win, blanks fall back, trailing slash trimmed", () => {
