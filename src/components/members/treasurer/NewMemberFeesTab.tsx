@@ -10,6 +10,13 @@ import { toast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 import { fetchReservePots, fetchSubscriptionSettings, type ReservePot } from "@/lib/treasurer/subscriptionSettings";
 import { splitSubscription, type SplitLine } from "@/lib/treasurer/subscriptionSplit";
+import { LODGE_FEE_FALLBACK, discountedPence, feeDefault, validateFeeInputs } from "@/lib/treasurer/lodgeFees";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription,
+  AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+
+type FeeDefaults = { ugle: number; pgl: number; pct: number; updatedAt: string | null; updatedBy: string | null };
 
 const MEETINGS = [
   { key: "October", label: "October (100%)", pct: 1 },
@@ -48,9 +55,27 @@ export default function NewMemberFeesTab({ canEdit }: { canEdit: boolean }) {
   const lastUgleDefaultRef = useRef<string>("132.00");
   const lastPglDefaultRef = useRef<string>("15.12");
 
+  // Saved lodge defaults (Treasurer/admin only, enforced by the RPCs).
+  const [defaults, setDefaults] = useState<FeeDefaults>({
+    ugle: LODGE_FEE_FALLBACK.ugle_registration_fee_pence, pgl: LODGE_FEE_FALLBACK.pgl_registration_fee_pence,
+    pct: LODGE_FEE_FALLBACK.under_25_discount_percent, updatedAt: null, updatedBy: null,
+  });
+  const [defUgle, setDefUgle] = useState("132.00");
+  const [defPgl, setDefPgl] = useState("15.12");
+  const [defPct, setDefPct] = useState("50");
+  const [defError, setDefError] = useState<string | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [savingDefaults, setSavingDefaults] = useState(false);
+
+  const prefillFrom = (d: FeeDefaults, band: "over25" | "under25") => {
+    const u = feeDefault(d.ugle, band === "under25", d.pct), g = feeDefault(d.pgl, band === "under25", d.pct);
+    setUgleFee(u); lastUgleDefaultRef.current = u;
+    setPglFee(g); lastPglDefaultRef.current = g;
+  };
+
   const applyAgeBandDefault = (band: "over25" | "under25") => {
-    const nextUgle = band === "over25" ? "132.00" : "66.00";
-    const nextPgl = band === "over25" ? "15.12" : "7.56";
+    const nextUgle = feeDefault(defaults.ugle, band === "under25", defaults.pct);
+    const nextPgl = feeDefault(defaults.pgl, band === "under25", defaults.pct);
     // Only overwrite each field if its current value is still its own last auto-default, blank, or zero.
     if (ugleFee === lastUgleDefaultRef.current || ugleFee === "" || /^0\.?0*$/.test(ugleFee)) {
       setUgleFee(nextUgle);
@@ -65,14 +90,28 @@ export default function NewMemberFeesTab({ canEdit }: { canEdit: boolean }) {
 
   const load = useCallback(async () => {
     setLoading(true);
-    const [{ data: accts, error: acctErr }, potRows, settings] = await Promise.all([
+    const [{ data: accts, error: acctErr }, potRows, settings, feeRes] = await Promise.all([
       supabase
         .from("chart_of_accounts" as any)
         .select("id,code")
         .in("code", ["1000", "2000", "2200", "3100", "4000", "4500", "5000", "5100"]),
       fetchReservePots(),
       fetchSubscriptionSettings(),
+      supabase.rpc("get_lodge_fee_settings" as any),
     ]);
+    const feeRow = Array.isArray(feeRes.data) ? (feeRes.data as any[])[0] : null;
+    if (feeRow) {
+      const d: FeeDefaults = {
+        ugle: feeRow.ugle_registration_fee_pence, pgl: feeRow.pgl_registration_fee_pence,
+        pct: feeRow.under_25_discount_percent, updatedAt: feeRow.updated_at ?? null, updatedBy: feeRow.updated_by_name ?? null,
+      };
+      setDefaults(d);
+      setDefUgle((d.ugle / 100).toFixed(2)); setDefPgl((d.pgl / 100).toFixed(2)); setDefPct(String(d.pct));
+      prefillFrom(d, "over25");
+      setAgeBracket("over25");
+    } else if (feeRes.error) {
+      toast({ title: "Could not load default fees", description: feeRes.error.message, variant: "destructive" });
+    }
     setPots(potRows);
     if (settings) {
       setReliefChestPence(settings.relief_chest_pence ?? 1000);
@@ -109,6 +148,25 @@ export default function NewMemberFeesTab({ canEdit }: { canEdit: boolean }) {
   const potLines = split.lines.filter((l) => l.code === "3100");
   const reliefPence = split.lines.find((l) => l.code === "2200")?.pence ?? 0;
   const reserveTotalPence = potLines.reduce((s, r) => s + r.pence, 0);
+
+  const askSaveDefaults = () => {
+    const v = validateFeeInputs(defUgle, defPgl, defPct);
+    if ("error" in v) { setDefError(v.error); return; }
+    setDefError(null);
+    setConfirmOpen(true);
+  };
+
+  const saveDefaults = async () => {
+    const v = validateFeeInputs(defUgle, defPgl, defPct);
+    if ("error" in v) { setDefError(v.error); return; }
+    setSavingDefaults(true);
+    const { error } = await supabase.rpc("update_lodge_fee_settings" as any, { _ugle_pence: v.ugle, _pgl_pence: v.pgl, _discount_percent: v.pct });
+    setSavingDefaults(false);
+    setConfirmOpen(false);
+    if (error) { toast({ title: "Default fees not saved", description: error.message, variant: "destructive" }); return; }
+    toast({ title: "Default fees saved" });
+    await load();
+  };
 
   const submit = async () => {
     if (!name.trim()) {
@@ -237,10 +295,7 @@ export default function NewMemberFeesTab({ canEdit }: { canEdit: boolean }) {
     setSaving(false);
     setName("");
     setAgeBracket("over25");
-    setUgleFee("132.00");
-    lastUgleDefaultRef.current = "132.00";
-    setPglFee("15.12");
-    lastPglDefaultRef.current = "15.12";
+    prefillFrom(defaults, "over25");
     setBankReference("");
     toast({ title: "New member fees posted", description: `${posted.length} ledger entries created.` });
   };
@@ -314,6 +369,59 @@ export default function NewMemberFeesTab({ canEdit }: { canEdit: boolean }) {
                 </p>
               </div>
             </div>
+
+            {canEdit && (
+            <section aria-labelledby="lodge-default-fees" className="mt-6 min-w-0 rounded-lg border-2 border-gold/60 bg-navy p-4">
+              <h3 id="lodge-default-fees" className="font-serif text-base text-gold">Lodge default fees</h3>
+              <p className="text-primary-foreground/80 text-xs mt-1 mb-3">
+                Saved figures that pre-fill the form above. Changing them never alters anything already posted to the ledger.
+              </p>
+              <div className="grid gap-3 sm:grid-cols-3 [&>*]:min-w-0">
+                <div>
+                  <Label htmlFor="def-ugle">UGLE fee, 25 and over (£)</Label>
+                  <Input id="def-ugle" className="min-h-11" type="number" step="0.01" min="0.01" value={defUgle} onChange={(e) => setDefUgle(e.target.value)} />
+                </div>
+                <div>
+                  <Label htmlFor="def-pgl">PGL fee, 25 and over (£)</Label>
+                  <Input id="def-pgl" className="min-h-11" type="number" step="0.01" min="0.01" value={defPgl} onChange={(e) => setDefPgl(e.target.value)} />
+                </div>
+                <div>
+                  <Label htmlFor="def-pct">Under-25 discount (%)</Label>
+                  <Input id="def-pct" className="min-h-11" type="number" step="1" min="0" max="100" value={defPct} onChange={(e) => setDefPct(e.target.value)} />
+                </div>
+              </div>
+              <p className="text-primary-foreground/80 text-xs mt-3">
+                Annual subscription rate: <span className="text-gold">{money(toPence(subRate))}</span> (read only — edit it on the Breakeven Calculator tab).
+              </p>
+              <p className="text-primary-foreground/80 text-xs mt-1">
+                Under 25 today: UGLE {money(discountedPence(toPence(defUgle), Number(defPct) || 0))}, PGL {money(discountedPence(toPence(defPgl), Number(defPct) || 0))}.
+              </p>
+              <p className="text-gold text-xs mt-1">These figures appear on the public Join Us and FAQ pages.</p>
+              <p className="text-primary-foreground/80 text-xs mt-1">
+                {defaults.updatedAt
+                  ? `Last updated by ${defaults.updatedBy || "unknown"} on ${new Date(defaults.updatedAt).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}`
+                  : "Not yet updated since the figures were first saved."}
+              </p>
+              {defError && <p role="alert" className="mt-2 text-sm text-destructive-foreground">{defError}</p>}
+              <Button className="mt-3 min-h-11 w-full bg-gold text-navy hover:bg-gold/90 sm:w-auto" disabled={savingDefaults} onClick={askSaveDefaults}>
+                {savingDefaults && <Loader2 className="w-4 h-4 mr-1 animate-spin" />}Save default fees
+              </Button>
+              <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Save default fees?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      UGLE £{defUgle}, PGL £{defPgl}, under-25 discount {defPct}%. These figures appear on the public Join Us and FAQ pages. Entries already posted are not changed.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel className="min-h-11">Cancel</AlertDialogCancel>
+                    <AlertDialogAction className="min-h-11" onClick={(e) => { e.preventDefault(); saveDefaults(); }}>Save default fees</AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </section>
+            )}
 
             <div className="mt-4 grid gap-2 sm:grid-cols-2">
               <div className="min-w-0 rounded-md border border-gold/20 p-3">

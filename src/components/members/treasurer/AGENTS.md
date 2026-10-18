@@ -6,3 +6,4 @@
 - Audit rounds/signoffs are immutable server workflows; closing requires approval. Certified packs are frozen and never overwritten.
 - Subscription recognition uses splitSubscription once; receipts and prepayment clears never split again. Under-25 means age on 1 October.
 - Event Accounts is a funds-held subledger (2300): fixed budget lines (system_key) take actuals from paid event_bookings and real events-Stripe fees; bank side is tagged Lloyds 1000 lines plus event_payout_allocations; tie-out lives in src/lib/treasurer/eventTieOut.ts. Why: event money is agency money and must never post to lodge income.
+- Lodge default fees (UGLE/PGL, under-25 %) live in lodge_fee_settings, read/written only via get/update_lodge_fee_settings (admin or current Treasurer); they only pre-fill the New Member Fees form. Annual rate stays in subscription_settings. Why: one public source, posted entries never change.
