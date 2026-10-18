@@ -8,7 +8,6 @@
 - Only the Secretary is exempt from subscriptions (latest Secretary appointment on or before the year); the Treasurer pays like any member. Honorary members remain exempt.
 - Public/member Thursday wording: "Rehearsal Night", never "Lodge of Instruction"/"LOI" (no subs collected). Keep internal `loi` identifiers.
 - Installation Returns resolve live and fill exact AcroForm IDs; signatures and dispensation remain blank.
-- Changed `/members` screens pass 320px tests with real or faithful worst-case data: no overflow, unreachable or obscured controls.
 - Browser layout tests use only a Vite `e2e`-mode, localhost-only synthetic identity; never backend access or production.
 - Officer access = Installation year: current_officer_holder() is the latest confirmed appointment in effect (stored date, else installation_rule_date(); non-progressive also >= appointed_on); offices carry forward; current Almoner/Charity Steward/Mentor: portals. Never switch on 1 Oct; sync labels: masonicYearStartSync. Dues/accounts/periods/Almoner year stay Oct–Sep.
 - Officer appointment changes log via swallow-on-error AFTER trigger to officer_appointment_audit (admin/Secretary read); offices-held history only via get_member_offices_held (same effective-date rule, visibility enforced in DB).
@@ -27,4 +26,4 @@
 - Manual membership enquiries are inserted only via add_manual_enquiry (admin/Secretary/Asst Sec, request_id idempotent, created_by audit); no table INSERT policy. Why: public Join Us insert path stays server-only.
 - Masonic year = Installation to day before next (_shared/masonicYear.ts; rule, stored dates override); KPI Movement uses member_status_history; new tables carry unit_id. Why: multi-lodge-ready, accurate movement.
 - Diary: festive_board_meetings via diary_* RPCs; cancel, never delete; Installation move updates stored date; per-month meeting_series.schedule inferred from diary, skips existing; only regular/installation scheduled, rest one-off. Why: one register.
-- Every new or changed screen: run the 320px mobile test AND its axe scan (helpers/axe, WCAG 2.1 AA, incl. colour-contrast); placeholders, typed text and borders use theme tokens that pass contrast (fieldCls); no placeholder-only labels. Why: unreadable fields on dark surfaces.
+- Every new/changed page/screen/dialog: 320px test (worst-case data; no overflow/obscured controls) + axe (helpers/axe, WCAG 2.1 AA), colour-contrast always on, never disabled; fieldCls tokens; 44px targets; report scanned/unscanned.
