@@ -1,11 +1,13 @@
 /**
  * Join Us cost card amounts. Lodge figures come from get_join_us_costs()
- * (current annual dues + next/latest published meeting dining price); any
+ * (subscription_settings annual rate, as on the Treasurer New member fees
+ * screen + next/latest published meeting dining price); any
  * missing or invalid figure falls back to the previously typed text.
  */
 export const JOIN_US_COST_FALLBACK = {
-  // Set by the United Grand Lodge of England, not the lodge: no settings
-  // source exists, so it stays typed. Check against UGLE's current fee.
+  // No stored source: the Treasurer New member fees screen only has typed
+  // defaults (132.00 for 25 and over, 66.00 under 25). Join Us shows the
+  // full fee; the card's "50% off for under-25s" badge covers the other band.
   ugle: "£132",
   dues: "£250 / year",
   dining: "~£32 per meeting",
