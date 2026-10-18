@@ -29,6 +29,7 @@ function formatLondonDate(iso: string): string {
 const NextMeeting = () => {
   const [meeting, setMeeting] = useState<PublicMeeting | null>(null);
   const [loading, setLoading] = useState(true);
+  const [failed, setFailed] = useState(false);
 
   useEffect(() => {
     let alive = true;
@@ -42,7 +43,12 @@ const NextMeeting = () => {
       .limit(1)
       .then(({ data, error }: any) => {
         if (!alive) return;
+        setFailed(!!error);
         setMeeting(!error && data?.[0] ? (data[0] as PublicMeeting) : null);
+        setLoading(false);
+      }, () => {
+        if (!alive) return;
+        setFailed(true);
         setLoading(false);
       });
     return () => {
@@ -52,6 +58,14 @@ const NextMeeting = () => {
 
   // Between cycles — no published meeting — the section is hidden entirely.
   // The homepage feed above already lists what's coming up.
+  // Request failed: never spin forever — hide the block quietly, point to /events.
+  if (!loading && failed) return (
+    <section id="meeting" className="py-10 bg-warm-white" aria-label="Upcoming meetings">
+      <p className="text-center font-sans text-muted-foreground">
+        <a href="/events" className="inline-flex items-center min-h-[44px] px-2 text-navy underline underline-offset-4 hover:opacity-80">See upcoming meetings on our Events page</a>
+      </p>
+    </section>
+  );
   if (!loading && !meeting) return null;
 
   return (
