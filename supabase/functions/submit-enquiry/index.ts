@@ -3,10 +3,9 @@ import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors'
 import { z } from 'npm:zod@3.23.8'
 import { verifyTurnstile } from '../_shared/verify-turnstile.ts'
 import { sendTransactionalEmail } from '../_shared/send-email.ts'
+import { resolveEnquiryContacts } from '../_shared/enquiryContacts.ts'
 
-const SECRETARY_EMAIL = 'secretary@weybridgelodge.org.uk'
-const MEMBERSHIP_CC_EMAIL = 'membershipsecretary@weybridgelodge.org.uk'
-const GUIDE_URL = 'https://weybridgelodge.org.uk/downloads/information-for-prospective-members.pdf?v=2'
+const UNIT_ID = 'weybridge'
 
 const BodySchema = z.object({
   full_name: z.string().trim().min(2, 'Please enter your full name').max(120),
