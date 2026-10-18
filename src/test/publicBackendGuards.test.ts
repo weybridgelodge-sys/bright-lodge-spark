@@ -41,12 +41,7 @@ describe("enquiry contacts", () => {
 
 describe("create-checkout seat check", () => {
   it("rejected promise / RPC error means no booking: 503 with the shared message", () => {
-    const r = seatCheckOutcome(null, new Error("network"));
-    expect(r.ok).toBe(false);
-    if (!r.ok) {
-      expect(r.httpStatus).toBe(503);
-      expect(r.message).toBe(SEAT_CHECK_UNAVAILABLE_MESSAGE);
-    }
+    expect(seatCheckOutcome(null, new Error("network"))).toEqual({ ok: false, httpStatus: 503, message: SEAT_CHECK_UNAVAILABLE_MESSAGE });
   });
   it("empty result with no error still counts as confirmed (pending payment)", () => {
     expect(seatCheckOutcome(null, null)).toEqual({ ok: true, status: "confirmed" });
