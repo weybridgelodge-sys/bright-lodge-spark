@@ -41,3 +41,22 @@ test("/join-us falls back to typed figures when lookup fails", async ({ page }) 
   await expect(page.getByText("~£32 per meeting")).toBeVisible({ timeout: 20000 });
   await expect(page.getByText("£250 / year")).toBeVisible();
 });
+
+test("Lodge default fees box: 320px, 44px controls, axe clean, validates", { timeout: 90_000 }, async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 1200 });
+  await page.route("**/rest/v1/rpc/get_lodge_fee_settings**", (r) => r.fulfill({ json: [{ ugle_registration_fee_pence: 13200, pgl_registration_fee_pence: 1512, under_25_discount_percent: 50, updated_at: "2026-10-18T10:00:00Z", updated_by_name: "Test Treasurer" }] }));
+  await page.goto("/members/admin/treasurer");
+  const tab = page.getByRole("tab", { name: "New Member Fees", exact: true });
+  if (!(await tab.waitFor({ timeout: 25000 }).then(() => true).catch(() => false))) test.skip(true, "Synthetic identity cannot open the Treasurer portal");
+  await tab.click();
+  const box = page.getByRole("region", { name: "Lodge default fees" });
+  await expect(box).toBeVisible({ timeout: 15000 });
+  await expect(box.getByText("Last updated by Test Treasurer on 18 October 2026")).toBeVisible();
+  await expect(page.getByLabel("UGLE registration fee (£)")).toHaveValue("132.00");
+  for (const el of await box.locator("input, button").all()) expect((await el.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+  await box.getByLabel("Under-25 discount (%)").fill("150");
+  await box.getByRole("button", { name: "Save default fees" }).click();
+  await expect(box.getByText("Discount must be a whole number from 0 to 100")).toBeVisible();
+  await noOverflow(page);
+  await expectNoAxeViolations(page, "lodge default fees");
+});
