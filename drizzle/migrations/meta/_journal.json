@@ -764,6 +764,13 @@
       "when": 1792353531936,
       "tag": "0108_lodge_fee_settings",
       "breakpoints": true
+    },
+    {
+      "idx": 109,
+      "version": "7",
+      "when": 1792355165024,
+      "tag": "0109_revoke_leftover_anon_privileges",
+      "breakpoints": true
     }
   ]
 }
