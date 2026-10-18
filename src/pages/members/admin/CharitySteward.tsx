@@ -1254,10 +1254,10 @@ function PeriodicReportsSection({ charities, collections, donations, festival, c
           </Button>
           {canEdit && !isEditingFinalised && (
             <>
-              <Button variant="outline" onClick={() => save(false)} disabled={busy} className="border-gold/40 text-gold">
+              <Button variant="outline" onClick={() => save(false)} disabled={busy} className="min-h-[44px] border-gold/60">
                 {busy ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Save className="w-4 h-4 mr-1" />} {editing ? "Update" : "Save draft"}
               </Button>
-              <Button variant="outline" onClick={() => save(true)} disabled={busy} className="border-gold/40 text-gold">
+              <Button variant="outline" onClick={() => save(true)} disabled={busy} className="min-h-[44px] border-gold/60">
                 {busy ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Save className="w-4 h-4 mr-1" />} Save &amp; Finalise
               </Button>
             </>
@@ -1276,50 +1276,40 @@ function PeriodicReportsSection({ charities, collections, donations, festival, c
         ) : rows.length === 0 ? (
           <p className="text-xs text-primary-foreground/80 italic">No periodic reports yet.</p>
         ) : (
-          <div tabIndex={0} role="region" aria-label="Scrollable table" className="overflow-x-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-gold">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="text-left text-xs uppercase tracking-wider text-primary-foreground/80 border-b border-gold/15">
-                  <th className="px-2 py-2">Title</th>
-                  <th className="px-2 py-2">Period</th>
-                  <th className="px-2 py-2">Status</th>
-                  <th className="px-2 py-2">Updated</th>
-                  <th className="px-2 py-2 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {rows.map((r) => (
-                  <tr key={r.id} className="border-b border-gold/10">
-                    <td className="px-2 py-2 text-primary-foreground">{r.title}</td>
-                    <td className="px-2 py-2 text-primary-foreground/80">{fmtDate(r.start_date)} – {fmtDate(r.end_date)}</td>
-                    <td className="px-2 py-2">
+          <ul className="space-y-3" aria-label="Periodic reports">
+            {rows.map((r) => {
+              const title = r.title ? r.title.charAt(0).toUpperCase() + r.title.slice(1) : "Untitled report";
+              return (
+                <li key={r.id} className="rounded-sm border border-gold/20 bg-navy-dark/40 p-3 sm:flex sm:items-center sm:gap-4">
+                  <div className="min-w-0 flex-1 space-y-1">
+                    <p className="font-serif text-primary-foreground break-words">{title}</p>
+                    <p className="font-sans text-sm text-primary-foreground/80"><span className="sr-only">Period: </span><span className="whitespace-nowrap">{fmtDate(r.start_date)}</span> – <span className="whitespace-nowrap">{fmtDate(r.end_date)}</span></p>
+                    <div className="flex flex-wrap items-center gap-2 text-xs text-primary-foreground/80">
                       {r.finalised_at
                         ? <Badge className="bg-emerald-700/60 text-emerald-50">Finalised</Badge>
                         : <Badge variant="outline" className="border-gold/40 text-gold">Draft</Badge>}
-                    </td>
-                    <td className="px-2 py-2 text-primary-foreground/70 text-xs">{fmtDate(r.updated_at)}</td>
-                    <td className="px-2 py-2 text-right">
-                      <div className="inline-flex flex-wrap gap-1 justify-end">
-                        <Button size="sm" variant="outline" onClick={() => downloadFor(r)} className="h-8 border-gold/40 text-gold hover:bg-gold/10" title="Download PDF">
-                          <Download className="w-4 h-4" />
-                        </Button>
-                        {canEdit && !r.finalised_at && (
-                          <Button size="sm" variant="outline" onClick={() => loadIntoForm(r)} className="h-8 border-gold/40 text-gold hover:bg-gold/10" title="Edit">
-                            <Pencil className="w-4 h-4" />
-                          </Button>
-                        )}
-                        {canEdit && !r.finalised_at && (
-                          <Button size="sm" variant="outline" onClick={() => remove(r)} className="h-8 border-red-500/40 text-red-300 hover:bg-red-500/10" title="Delete">
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                      <span>Updated <span className="whitespace-nowrap">{fmtDate(r.updated_at)}</span></span>
+                    </div>
+                  </div>
+                  <div className="mt-3 sm:mt-0 flex flex-wrap gap-2 shrink-0">
+                    <Button size="icon" variant="outline" onClick={() => downloadFor(r)} className="h-11 w-11 border-gold/60" aria-label={`Download PDF: ${title}`} title="Download PDF">
+                      <Download className="w-4 h-4" aria-hidden="true" />
+                    </Button>
+                    {canEdit && !r.finalised_at && (
+                      <Button size="icon" variant="outline" onClick={() => loadIntoForm(r)} className="h-11 w-11 border-gold/60" aria-label={`Edit: ${title}`} title="Edit">
+                        <Pencil className="w-4 h-4" aria-hidden="true" />
+                      </Button>
+                    )}
+                    {canEdit && !r.finalised_at && (
+                      <Button size="icon" variant="outline" onClick={() => remove(r)} className="h-11 w-11 border-destructive/60 text-destructive" aria-label={`Delete: ${title}`} title="Delete">
+                        <Trash2 className="w-4 h-4" aria-hidden="true" />
+                      </Button>
+                    )}
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
         )}
       </Card>
     </div>
