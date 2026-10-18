@@ -36,6 +36,7 @@ function Inner() {
     { to: "/members/admin/dues", title: "Dues & Subscriptions (TEST)", description: "Annual subscription collection, refunds, and price changes. Sandbox only.", icon: CreditCard, visible: isAdmin },
     { to: "/members/admin/newsletter", title: "Newsletter Hub", description: "Compose and broadcast the Monthly Chronicle.", icon: Mail, visible: canEditNewsletter },
     { to: "/members/admin/polls", title: "Polls & Voting", description: "Ask the brethren a question; live results on the Dashboard.", icon: Vote, visible: isAdmin || isSecretary || isWorshipfulMaster },
+    { to: "/members/admin/contact-settings", title: "Enquiry contact settings", description: "Who receives website membership enquiries, and the guide link sent to enquirers.", icon: Mail, visible: isAdmin || isSecretary },
     { to: "/members/admin/ritual", title: "Ritual Library", description: "Upload, replace, and manage ritual rehearsal material.", icon: BookOpen, visible: isAdmin },
   ];
 

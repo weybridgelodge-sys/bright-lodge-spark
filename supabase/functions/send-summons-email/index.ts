@@ -8,6 +8,7 @@
 
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { sendTransactionalEmail } from "../_shared/send-email.ts";
+import { loadLodgeSettings } from "../_shared/lodgeSettings.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -118,7 +119,8 @@ Deno.serve(async (req) => {
     }
     // …but the link we send is branded on the Lodge's own domain. It resolves
     // to a freshly signed storage URL on click (summons-link function).
-    const pdfUrl = `https://weybridgelodge.org.uk/summons/${summons.meeting_number}?k=${summons.id}`;
+    const site = (await loadLodgeSettings()).siteUrl;
+    const pdfUrl = `${site}/summons/${summons.meeting_number}?k=${summons.id}`;
 
     // Optional: certified annual accounts as a second branded link.
     // - live full send / test: only an approved, stored, not-yet-sent year, on an unsent summons
@@ -155,7 +157,7 @@ Deno.serve(async (req) => {
       }
       accounts = { id: r.row.id, year: r.row.masonic_year, certifiedAt: r.certifiedAt };
     }
-    const accountsUrl = accounts ? `https://weybridgelodge.org.uk/accounts/${accounts.year}?k=${accounts.id}` : undefined;
+    const accountsUrl = accounts ? `${site}/accounts/${accounts.year}?k=${accounts.id}` : undefined;
     const accountsYearLabel = accounts ? `FY${accounts.year}/${String(accounts.year + 1).slice(-2)}` : undefined;
     const accountsCertifiedLabel = accounts?.certifiedAt
       ? new Date(accounts.certifiedAt).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "Europe/London" })

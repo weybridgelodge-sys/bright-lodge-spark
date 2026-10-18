@@ -6,6 +6,7 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { z } from "npm:zod@3";
 import { sendTransactionalEmail } from "../_shared/send-email.ts";
+import { loadLodgeSettings } from "../_shared/lodgeSettings.ts";
 
 const SETTING = "provincial_return_province_email";
 const LINK_DAYS = 30;
@@ -68,7 +69,7 @@ Deno.serve(async (req) => {
       templateName: "provincial-return-submission",
       recipientEmail: configured,
       idempotencyKey: `provincial-return-${submissionId}`,
-      replyTo: "secretary@weybridgelodge.org.uk",
+      replyTo: (await loadLodgeSettings()).secretaryEmail,
       templateData: {
         yearLabel,
         installationDate: b.installation_date ?? "",

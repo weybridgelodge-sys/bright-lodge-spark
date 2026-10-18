@@ -4,10 +4,10 @@
 
 import { createClient, SupabaseClient } from 'npm:@supabase/supabase-js@2'
 import { sendTransactionalEmail } from './send-email.ts'
+import { loadLodgeSettings } from './lodgeSettings.ts'
 
 export const ASSISTANT_SECRETARY_EMAIL = 'assistantsecretary@weybridgelodge.org.uk'
 export const WEBMASTER_EMAIL = 'webmaster@weybridgelodge.org.uk'
-const NOTIFY_RECIPIENTS = [ASSISTANT_SECRETARY_EMAIL, WEBMASTER_EMAIL]
 
 interface SendOpts {
   stage: 'submitted' | 'paid' | 'backfill'
@@ -101,6 +101,7 @@ async function lookupSecretarySignature(supabase: SupabaseClient) {
 }
 
 export async function sendBookingEmails(bookingId: string, opts: SendOpts) {
+  const lodge = await loadLodgeSettings()
   const supabaseUrl = Deno.env.get('SUPABASE_URL')
   const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
   if (!supabaseUrl || !serviceKey) {
@@ -183,7 +184,7 @@ export async function sendBookingEmails(bookingId: string, opts: SendOpts) {
         if (s?.pdf_storage_path) {
           // Branded redirect on the Lodge's own domain (resolves to a signed URL
           // on click). Same trust model: possession of the link is the credential.
-          summonsPdfUrl = `https://weybridgelodge.org.uk/summons/${s.meeting_number}?k=${s.id}`
+          summonsPdfUrl = `${lodge.siteUrl}/summons/${s.meeting_number}?k=${s.id}`
           summonsMeetingNumber = s.meeting_number ?? undefined
         }
       }
@@ -229,7 +230,7 @@ export async function sendBookingEmails(bookingId: string, opts: SendOpts) {
           templateName: 'ladies-festival-confirmation',
           recipientEmail: b.contact_email,
           idempotencyKey: `lf-confirm-${b.id}-${opts.stage}`,
-          replyTo: ASSISTANT_SECRETARY_EMAIL,
+          replyTo: lodge.assistantSecretaryEmail,
           templateData: {
             firstName,
             eventLabel: eventLabel || 'Ladies Festival 2026',
@@ -251,7 +252,7 @@ export async function sendBookingEmails(bookingId: string, opts: SendOpts) {
       if (confRes.error) console.error('Ladies Festival confirmation email failed', confRes.error)
     }
 
-    const notifyRecipients = opts.overrideNotifyEmail ? [opts.overrideNotifyEmail] : NOTIFY_RECIPIENTS
+    const notifyRecipients = opts.overrideNotifyEmail ? [opts.overrideNotifyEmail] : [lodge.assistantSecretaryEmail, lodge.webmasterEmail]
     await Promise.all(notifyRecipients.map(async (notifyTo) => {
       const notifRes = await sendTransactionalEmail({
           templateName: 'ladies-festival-notification',
@@ -288,7 +289,7 @@ export async function sendBookingEmails(bookingId: string, opts: SendOpts) {
         templateName: 'booking-confirmation',
         recipientEmail: opts.overrideBookerEmail || b.contact_email,
         idempotencyKey: `booking-confirm-${b.id}-${opts.stage}${opts.overrideBookerEmail ? `-test-${crypto.randomUUID()}` : ''}`,
-        replyTo: ASSISTANT_SECRETARY_EMAIL,
+        replyTo: lodge.assistantSecretaryEmail,
         templateData: {
           firstName,
           eventLabel,
@@ -313,7 +314,7 @@ export async function sendBookingEmails(bookingId: string, opts: SendOpts) {
 
   // 2) Assistant Secretary notification
   if (opts.skipNotify) return
-  const notifyRecipients = opts.overrideNotifyEmail ? [opts.overrideNotifyEmail] : NOTIFY_RECIPIENTS
+  const notifyRecipients = opts.overrideNotifyEmail ? [opts.overrideNotifyEmail] : [lodge.assistantSecretaryEmail, lodge.webmasterEmail]
   await Promise.all(notifyRecipients.map(async (notifyTo) => {
     const notifRes = await sendTransactionalEmail({
         templateName: 'booking-notification',

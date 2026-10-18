@@ -5,6 +5,7 @@ import Stripe from "https://esm.sh/stripe@22.0.2";
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { sendTransactionalEmail } from "./send-email.ts";
 import { bookingBalanceState, type PaymentRow } from "./eventPricing.ts";
+import { loadLodgeSettings } from "./lodgeSettings.ts";
 
 export function eventsStripe(): Stripe {
   const key = Deno.env.get("STRIPE_EVENTS_SECRET_KEY");
@@ -39,7 +40,6 @@ export async function verifyEventsWebhook(req: Request): Promise<any> {
 }
 
 const SITE = "https://weybridgelodge.org.uk";
-const SECRETARY_EMAIL = "secretary@weybridgelodge.org.uk";
 const gbp = (p: number) => new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP" }).format((p || 0) / 100);
 const fmtDate = (d: string) =>
   new Date(`${d}T12:00:00`).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
@@ -53,13 +53,13 @@ export const capFirst = (n?: string | null) => {
 export const methodLabel = (m?: string | null) =>
   ({ card: "Card", pay_by_bank: "Pay by Bank", bank_transfer: "Bank transfer", manual: "Cash / cheque" } as Record<string, string>)[m || ""] || m || "";
 
-const WEBMASTER_EMAIL = "webmaster@weybridgelodge.org.uk";
 /** Lodge recipients: events_notify_email, else Secretary + Webmaster. */
 async function lodgeRecipients(sb: any, ev: any): Promise<string[]> {
   if (ev.events_notify_email) {
     return String(ev.events_notify_email).split(/[,;\s]+/).filter((e: string) => e.includes("@"));
   }
-  return [SECRETARY_EMAIL, WEBMASTER_EMAIL];
+  const l = await loadLodgeSettings();
+  return [l.secretaryEmail, l.webmasterEmail];
 }
 
 export type EventEmailStage = "booked" | "paid" | "deposit" | "balance_paid" | "reminder" | "choices" | "link";
@@ -162,7 +162,7 @@ export async function sendEventBookingEmails(sb: any, bookingId: string, stage: 
       templateName: "event-booking-customer",
       recipientEmail: b.contact_email,
       idempotencyKey: `event-booking-customer-${b.id}-${stage}${opts.reminderKind ? `-${opts.reminderKind}` : ""}${suffix}`,
-      replyTo: SECRETARY_EMAIL,
+      replyTo: (await loadLodgeSettings()).secretaryEmail,
       templateData: data,
     });
     if (r.error) { ok = false; console.error("event customer email failed", r.error); }

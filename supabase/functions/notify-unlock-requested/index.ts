@@ -2,6 +2,7 @@
 // office holders (officer_appointments) when a period unlock is requested.
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { sendTransactionalEmail } from "../_shared/send-email.ts";
+import { loadLodgeSettings } from "../_shared/lodgeSettings.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -61,7 +62,7 @@ Deno.serve(async (req) => {
           reason: p.unlock_reason ?? "",
           requestedBy: requester,
           approveAs: offices.sort().reverse().join(" & "),
-          dashboardUrl: "https://weybridgelodge.org.uk/members/dashboard",
+          dashboardUrl: `${(await loadLodgeSettings()).siteUrl}/members/dashboard`,
         },
       });
       if (res.ok) sent++; else failures.push(email);

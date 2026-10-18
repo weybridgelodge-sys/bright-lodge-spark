@@ -15,9 +15,10 @@ import { sendTransactionalEmail } from '../_shared/send-email.ts'
 import { evaluateAutoLog } from '../_shared/almonerAutoLog.ts'
 import { computeCheckInFlags } from '../_shared/almonerCheckIn.ts'
 import { isDigestDay, digestWindowStart, datesBetween, addDays } from '../_shared/almonerDigestSchedule.ts'
+import { loadLodgeSettings } from "../_shared/lodgeSettings.ts";
 
-const SITE_URL = 'https://weybridgelodge.org.uk'
-const PORTAL_URL = `${SITE_URL}/members/almoner`
+let SITE_URL = 'https://weybridgelodge.org.uk'
+let PORTAL_URL = `${SITE_URL}/members/almoner`
 
 
 const displayName = (m: any): string => {
@@ -28,6 +29,8 @@ const displayName = (m: any): string => {
 }
 
 Deno.serve(async (req) => {
+  SITE_URL = (await loadLodgeSettings()).siteUrl
+  PORTAL_URL = `${SITE_URL}/members/almoner`
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }

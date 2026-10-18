@@ -9,6 +9,7 @@
 
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { BRAND, LOGO_URL } from "../_shared/transactional-email-templates/_brand.ts";
+import { loadLodgeSettings } from "../_shared/lodgeSettings.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -17,7 +18,7 @@ const corsHeaders = {
 };
 
 const GATEWAY_URL = "https://connector-gateway.lovable.dev/resend";
-const FROM_ADDRESS = "Weybridge Lodge <notify@events.weybridgelodge.org.uk>";
+const FROM_ADDRESS_DOMAIN = "notify@events.weybridgelodge.org.uk";
 
 type Recipient = { email: string; salutation: string; visitor_contact_id?: string | null; force?: boolean };
 
@@ -243,7 +244,7 @@ Deno.serve(async (req) => {
             "Idempotency-Key": `summons-visitors-${summons.id}-${email}-${contentHash}${r.force ? `-force-${Date.now()}-${crypto.randomUUID().slice(0, 8)}` : ""}`,
           },
           body: JSON.stringify({
-            from: FROM_ADDRESS,
+            from: `${(await loadLodgeSettings()).senderName} <${FROM_ADDRESS_DOMAIN}>`,
             to: [email],
             subject,
             html,

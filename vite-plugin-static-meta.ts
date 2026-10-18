@@ -199,7 +199,7 @@ export const staticRoutes: RouteMeta[] = [
     title:
       "Officers of the Lodge | Freemasons in Guildford, Surrey — Weybridge Lodge No. 6787",
     description:
-      "Meet the officers of Weybridge Lodge No. 6787, Guildford, Surrey, for the Masonic Year 2025–2026 — from Worshipful Master to Stewards, with Provincial and Grand honours shown.",
+      "Meet the current officers of Weybridge Lodge No. 6787, Guildford, Surrey — from Worshipful Master to Stewards, with Provincial and Grand honours shown.",
     canonical: "/officers",
   },
   {

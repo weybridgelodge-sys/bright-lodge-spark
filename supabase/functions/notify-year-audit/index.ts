@@ -4,6 +4,7 @@
 //   query / approved -> current Treasurer (only if the caller signed this round)
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { sendTransactionalEmail } from "../_shared/send-email.ts";
+import { loadLodgeSettings } from "../_shared/lodgeSettings.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -12,9 +13,10 @@ const corsHeaders = {
 };
 const json = (b: unknown, status = 200) =>
   new Response(JSON.stringify(b), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-const URL_BASE = "https://weybridgelodge.org.uk";
+let URL_BASE = "https://weybridgelodge.org.uk";
 
 Deno.serve(async (req) => {
+  URL_BASE = (await loadLodgeSettings()).siteUrl;
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   try {
     const URL_ = Deno.env.get("SUPABASE_URL")!;
