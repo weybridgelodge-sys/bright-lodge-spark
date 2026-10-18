@@ -2805,28 +2805,46 @@ export type Database = {
       }
       lodge_contact_settings: {
         Row: {
+          assistant_secretary_email: string | null
+          communications_email: string | null
+          formal_sender_name: string | null
           guide_url: string
           membership_cc_email: string
           secretary_email: string
+          sender_name: string | null
+          site_url: string | null
           unit_id: string
           updated_at: string
           updated_by: string | null
+          webmaster_email: string | null
         }
         Insert: {
+          assistant_secretary_email?: string | null
+          communications_email?: string | null
+          formal_sender_name?: string | null
           guide_url: string
           membership_cc_email: string
           secretary_email: string
+          sender_name?: string | null
+          site_url?: string | null
           unit_id?: string
           updated_at?: string
           updated_by?: string | null
+          webmaster_email?: string | null
         }
         Update: {
+          assistant_secretary_email?: string | null
+          communications_email?: string | null
+          formal_sender_name?: string | null
           guide_url?: string
           membership_cc_email?: string
           secretary_email?: string
+          sender_name?: string | null
+          site_url?: string | null
           unit_id?: string
           updated_at?: string
           updated_by?: string | null
+          webmaster_email?: string | null
         }
         Relationships: []
       }
@@ -7140,6 +7158,22 @@ export type Database = {
           town: string
         }[]
       }
+      get_join_us_costs: {
+        Args: never
+        Returns: {
+          annual_dues_pence: number
+          dining_price_pence: number
+        }[]
+      }
+      get_lodge_contact_settings: {
+        Args: { _unit_id?: string }
+        Returns: {
+          guide_url: string
+          membership_cc_email: string
+          secretary_email: string
+          updated_at: string
+        }[]
+      }
       get_lodge_health_aggregates: {
         Args: { _lodge_year: number }
         Returns: Json
@@ -7206,6 +7240,7 @@ export type Database = {
           title: string
         }[]
       }
+      get_officers_public_year: { Args: never; Returns: number }
       get_profiles_pii: {
         Args: { _ids: string[] }
         Returns: {
@@ -7390,6 +7425,15 @@ export type Database = {
         Returns: string[]
       }
       unlink_bank_row: { Args: { p_bank_txn_id: string }; Returns: undefined }
+      update_lodge_contact_settings: {
+        Args: {
+          _guide_url: string
+          _membership_cc_email: string
+          _secretary_email: string
+          _unit_id?: string
+        }
+        Returns: undefined
+      }
       year_audit_snapshot: { Args: { _year: number }; Returns: Json }
       year_audit_snapshot_base: { Args: { _year: number }; Returns: Json }
       year_live_snapshot: { Args: { _year: number }; Returns: Json }

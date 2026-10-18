@@ -5,6 +5,7 @@
 
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { sendTransactionalEmail } from "../_shared/send-email.ts";
+import { loadLodgeSettings } from "../_shared/lodgeSettings.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -64,7 +65,7 @@ Deno.serve(async (req) => {
     const options = ((poll as any).options as string[]) ?? [];
     const closesAt = (poll as any).closes_at as string | null;
     const liveResults = (poll as any).results_visibility === "live";
-    const dashboardUrl = "https://weybridgelodge.org.uk/members/dashboard";
+    const dashboardUrl = `${(await loadLodgeSettings()).siteUrl}/members/dashboard`;
 
     const isTest = !!test_recipient;
     let recipients: { email: string; user_id: string | null }[] = [];

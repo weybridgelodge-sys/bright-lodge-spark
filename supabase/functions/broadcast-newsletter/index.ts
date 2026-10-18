@@ -1,5 +1,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { sendLovableEmail } from "npm:@lovable.dev/email-js";
+import { loadLodgeSettings, resolveLodgeSettings } from "../_shared/lodgeSettings.ts";
+let LODGE = resolveLodgeSettings(null);
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -18,8 +20,8 @@ const SENDER_DOMAIN = "notify.email.weybridgelodge.org.uk";
 const FROM_DOMAIN = "email.weybridgelodge.org.uk";
 const FROM_ADDRESS =
   Deno.env.get("NEWSLETTER_FROM_EMAIL") ??
-  `Weybridge Lodge No. 6787 <noreply@${FROM_DOMAIN}>`;
-const REPLY_TO = "communications@weybridgelodge.org.uk";
+  null;
+const fromAddress = (l: { formalSenderName: string }) => FROM_ADDRESS ?? `${l.formalSenderName} <noreply@${FROM_DOMAIN}>`;
 
 const admin = createClient(SUPABASE_URL, SERVICE_KEY);
 
@@ -355,8 +357,8 @@ async function sendBatch(emails: Array<{ to: string; html: string; subject: stri
       await sendLovableEmail(
         {
           to: e.to,
-          from: FROM_ADDRESS,
-          reply_to: REPLY_TO,
+          from: fromAddress(LODGE),
+          reply_to: LODGE.communicationsEmail,
           sender_domain: SENDER_DOMAIN,
           subject: e.subject,
           html: e.html,
@@ -606,6 +608,7 @@ async function dispatchOneAudience(opts: {
 }
 
 Deno.serve(async (req) => {
+  LODGE = await loadLodgeSettings();
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   if (req.method !== "POST") return new Response("Method not allowed", { status: 405, headers: corsHeaders });
 
@@ -703,7 +706,7 @@ Deno.serve(async (req) => {
         { to: testEmail, subject: `[TEST] ${subject}`, html },
       ]);
       if (!result.ok) {
-        console.error("Test send failed", { testEmail, from: FROM_ADDRESS, error: result.error });
+        console.error("Test send failed", { testEmail, from: fromAddress(LODGE), error: result.error });
         return new Response(JSON.stringify({ error: result.error || "Test send failed" }), {
           status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });

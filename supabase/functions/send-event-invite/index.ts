@@ -3,6 +3,7 @@
 // Reused by three modules: Officers Night (auto), Ad-hoc Socials, Lodge Visits.
 
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { loadLodgeSettings } from "../_shared/lodgeSettings.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -13,7 +14,7 @@ const corsHeaders = {
 const GATEWAY_URL = "https://connector-gateway.lovable.dev/resend";
 // Resend-verified sender domain. Kept separate from email.weybridgelodge.org.uk
 // (which is delegated to Lovable Emails) so both providers can coexist.
-const FROM_ADDRESS = "Weybridge Lodge <notify@events.weybridgelodge.org.uk>";
+const FROM_ADDRESS_DOMAIN = "notify@events.weybridgelodge.org.uk";
 
 type Recipient = { email: string; user_id?: string | null };
 type Attachment = { filename: string; content: string; content_type?: string };
@@ -183,7 +184,7 @@ Deno.serve(async (req) => {
             "Idempotency-Key": `${body.idempotencyPrefix}-${r.email}`,
           },
           body: JSON.stringify({
-            from: FROM_ADDRESS,
+            from: `${(await loadLodgeSettings()).senderName} <${FROM_ADDRESS_DOMAIN}>`,
             to: [r.email],
             subject: body.subject,
             html: body.html,

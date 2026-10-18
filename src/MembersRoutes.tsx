@@ -53,6 +53,7 @@ const InstallationReturn = lazy(() => import("./pages/members/admin/Installation
 const ProvincialReturn = lazy(() => import("./pages/members/admin/ProvincialReturn"));
 const SecretaryReturns = lazy(() => import("./pages/members/admin/SecretaryReturns"));
 const MeetingMinutes = lazy(() => import("./pages/members/admin/MeetingMinutes"));
+const ContactSettings = lazy(() => import("./pages/members/admin/ContactSettings"));
 const MembershipEnquiries = lazy(() => import("./pages/members/admin/MembershipEnquiries"));
 
 const MembersRoutes = () => (
@@ -108,6 +109,7 @@ const MembersRoutes = () => (
         <Route path="admin/provincial-return" element={<ProtectedRoute><ProvincialReturn /></ProtectedRoute>} />
         <Route path="admin/returns" element={<ProtectedRoute><SecretaryReturns /></ProtectedRoute>} />
         <Route path="admin/minutes" element={<ProtectedRoute><MeetingMinutes /></ProtectedRoute>} />
+        <Route path="admin/contact-settings" element={<ContactSettings />} />
         <Route path="admin/enquiries" element={<MembershipEnquiries />} />
         <Route path="working-groups" element={<WorkingGroupsIndex />} />
         <Route path="working-groups/admin" element={<WorkingGroupsAdmin />} />

@@ -1,4 +1,6 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { joinUsCostAmounts } from "@/lib/joinUsCosts";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
@@ -48,25 +50,25 @@ const reasons: string[] = [
   "Become part of a tradition in Surrey dating back centuries",
 ];
 
-const costCards: CostCard[] = [
+const buildCostCards = (amounts: ReturnType<typeof joinUsCostAmounts>): CostCard[] => [
   {
     icon: PoundSterling,
     title: "UGLE Registration",
-    amount: "£132",
+    amount: amounts.ugle, // UGLE-set fee: typed in lib/joinUsCosts, no lodge setting
     note: "A one-off fee paid to the United Grand Lodge of England when you are initiated.",
     badge: "50% off for under-25s",
   },
   {
     icon: CalendarDays,
     title: "Annual Subscription",
-    amount: "£250 / year",
+    amount: amounts.dues,
     note: "Pro-rated based on when you join during the Lodge year.",
     badge: "50% off for under-25s",
   },
   {
     icon: Utensils,
     title: "Dining at Meetings",
-    amount: "~£32 per meeting",
+    amount: amounts.dining,
     note: "A proper three-course dinner with the brethren at the Festive Board after every Lodge meeting.",
   },
   {
@@ -106,6 +108,21 @@ const profilePoints: ProfilePoint[] = [
 
 // ─── Component ────────────────────────────────────────────────────────────────
 const JoinUs = () => {
+  const [costRow, setCostRow] = useState<Parameters<typeof joinUsCostAmounts>[0]>(null);
+  useEffect(() => {
+    let cancelled = false;
+    supabase.rpc("get_join_us_costs").then(
+      ({ data, error }) => {
+        if (cancelled) return;
+        if (error) { console.error("get_join_us_costs failed:", error); return; }
+        setCostRow(Array.isArray(data) ? data[0] : data);
+      },
+      () => {},
+    );
+    return () => { cancelled = true; };
+  }, []);
+  const costCards = useMemo(() => buildCostCards(joinUsCostAmounts(costRow)), [costRow]);
+
   const shouldReduceMotion = useReducedMotion();
 
   const pageSchema = useMemo(() => {

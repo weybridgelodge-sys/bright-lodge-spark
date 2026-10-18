@@ -15,9 +15,10 @@ import { createClient } from 'npm:@supabase/supabase-js@2'
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors'
 import { sendTransactionalEmail } from '../_shared/send-email.ts'
 import { findMissing, idempotencyKey, isSendWindow } from './logic.ts'
+import { loadLodgeSettings } from "../_shared/lodgeSettings.ts";
 
-const SITE_URL = 'https://weybridgelodge.org.uk'
-const ADMIN_URL = `${SITE_URL}/members/admin`
+let SITE_URL = 'https://weybridgelodge.org.uk'
+let ADMIN_URL = `${SITE_URL}/members/admin`
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
@@ -34,6 +35,8 @@ const londonToday = (): string =>
   }).format(new Date())
 
 Deno.serve(async (req) => {
+  SITE_URL = (await loadLodgeSettings()).siteUrl
+  ADMIN_URL = `${SITE_URL}/members/admin`
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders })
 
   const url = new URL(req.url)

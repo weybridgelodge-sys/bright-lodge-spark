@@ -108,12 +108,20 @@ const fadeUp = {
 const Officers = () => {
   const shouldReduceMotion = useReducedMotion();
   const [rpcRows, setRpcRows] = useState<OfficerRpcRow[] | null>(null);
+  // Masonic year of the Worshipful Master appointment currently in effect
+  // (get_officers_public_year). Null while loading or if none: no year shown.
+  const [officerYear, setOfficerYear] = useState<number | null>(null);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const { data, error } = await supabase.rpc("get_officers_public", { _year: null });
+      const [{ data, error }, yearRes] = await Promise.all([
+        supabase.rpc("get_officers_public", { _year: null }),
+        supabase.rpc("get_officers_public_year"),
+      ]);
       if (cancelled) return;
+      if (yearRes.error) console.error("get_officers_public_year failed:", yearRes.error);
+      else if (typeof yearRes.data === "number") setOfficerYear(yearRes.data);
       if (error) {
         console.error("get_officers_public failed:", error);
         setRpcRows([]);
@@ -168,7 +176,7 @@ const Officers = () => {
         url: "https://weybridgelodge.org.uk/officers",
         name: "Officers of the Lodge | Freemasons in Guildford, Surrey — Weybridge Lodge No. 6787",
         description:
-          "Meet the officers of Weybridge Lodge No. 6787, Guildford, Surrey, for the Masonic Year 2025–2026 — from Worshipful Master to Stewards, with Provincial and Grand honours shown.",
+          "Meet the current officers of Weybridge Lodge No. 6787, Guildford, Surrey — from Worshipful Master to Stewards, with Provincial and Grand honours shown.",
         inLanguage: "en-GB",
         isPartOf: {
           "@id": "https://weybridgelodge.org.uk/#website",
@@ -177,6 +185,8 @@ const Officers = () => {
       breadcrumb,
     ];
   }, []);
+
+  const yearLabel = officerYear ? `${officerYear}–${officerYear + 1}` : null;
 
   const firstProgressiveIdx = officers.findIndex((o) => o.progressive);
 
@@ -219,7 +229,7 @@ const Officers = () => {
     <div className="min-h-screen overflow-x-hidden">
       <SEO
         title="Officers of the Lodge | Freemasons in Guildford, Surrey — Weybridge Lodge No. 6787"
-        description="Meet the officers of Weybridge Lodge No. 6787, Guildford, Surrey, for the Masonic Year 2025–2026 — from Worshipful Master to Stewards, with Provincial and Grand honours shown."
+        description="Meet the current officers of Weybridge Lodge No. 6787, Guildford, Surrey — from Worshipful Master to Stewards, with Provincial and Grand honours shown."
         canonical="/officers"
         type="website"
         schema={pageSchema}
@@ -234,7 +244,7 @@ const Officers = () => {
       <main id="main-content">
 
         <PageHeader
-          title="Officers of Weybridge Lodge — Masonic Year 2025–2026"
+          title={yearLabel ? `Officers of Weybridge Lodge — Masonic Year ${yearLabel}` : "Officers of Weybridge Lodge"}
           subtitle="The serving officers of our Freemasons Lodge in Guildford, Surrey"
         />
 
@@ -258,8 +268,11 @@ const Officers = () => {
                 How a Masonic Lodge in Surrey is run
               </h2>
               <p className="text-muted-foreground font-sans leading-relaxed">
-                Weybridge Lodge is served by a full complement of officers for the Masonic Year
-                2025–2026, appointed at the Installation Meeting in October 2025. Like all Masonic
+                Weybridge Lodge is served by a full complement of officers
+                {officerYear
+                  ? ` for the Masonic Year ${yearLabel}, appointed at the Installation Meeting in October ${officerYear}`
+                  : ", appointed at each year's Installation Meeting"}
+                . Like all Masonic
                 Lodges in Surrey and across England, our officers fill the roles necessary to
                 conduct ceremonies, administer the Lodge, and look after the welfare of our members
                 at the Guildford Masonic Centre, Weybourne House, Hitherbury Close, Guildford,{" "}
@@ -292,9 +305,11 @@ const Officers = () => {
               whileInView={shouldReduceMotion ? "static" : "visible"}
               viewport={{ once: true }}
             >
-              <p className="text-gold text-sm font-sans uppercase tracking-wide mb-2">
-                Masonic Year 2025–2026
-              </p>
+              {yearLabel && (
+                <p className="text-gold text-sm font-sans uppercase tracking-wide mb-2">
+                  Masonic Year {yearLabel}
+                </p>
+              )}
               <h2
                 id="officers-table-heading"
                 className="text-2xl md:text-3xl font-serif text-gold mb-8"
@@ -302,12 +317,12 @@ const Officers = () => {
                 Officers of the Lodge
               </h2>
 
-              <div className="overflow-x-auto -mx-6 px-6 md:mx-0 md:px-0">
+              <div className="overflow-x-auto -mx-6 px-6 md:mx-0 md:px-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold" tabIndex={0} role="region" aria-label="Officers table (scrolls sideways on small screens)">
                 <div className="bg-card border border-gold/30 rounded-sm p-4 sm:p-6 md:p-8 min-w-[480px] md:min-w-0">
                   <table className="w-full text-left">
                     <caption className="sr-only">
-                      Officers of Weybridge Lodge No. 6787, Guildford, Surrey — Masonic Year
-                      2025–2026. Progressive offices are marked with a star.
+                      Officers of Weybridge Lodge No. 6787, Guildford, Surrey
+                      {yearLabel ? ` — Masonic Year ${yearLabel}` : ""}. Progressive offices are marked with a star.
                     </caption>
                     <thead>
                       <tr className="border-b border-gold/30">

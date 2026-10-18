@@ -1,4 +1,5 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { loadLodgeSettings } from "../_shared/lodgeSettings.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -6,7 +7,7 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "GET, OPTIONS",
 };
 
-const SITE_UNSUBSCRIBE_URL = "https://weybridgelodge.org.uk/unsubscribe";
+let SITE_UNSUBSCRIBE_URL = "https://weybridgelodge.org.uk/unsubscribe";
 
 function buildRedirectHeaders(location: string) {
   const headers = new Headers();
@@ -31,6 +32,7 @@ const supabase = createClient(
 );
 
 Deno.serve(async (req) => {
+  SITE_UNSUBSCRIBE_URL = `${(await loadLodgeSettings()).siteUrl}/unsubscribe`;
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   const url = new URL(req.url);
   const token = url.searchParams.get("token");

@@ -10,6 +10,7 @@
 //   ?test_email=a@b.c   send the real email to this address only (no push, no marking)
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { sendTransactionalEmail } from "../_shared/send-email.ts";
+import { loadLodgeSettings } from "../_shared/lodgeSettings.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -152,7 +153,7 @@ Deno.serve(async (req) => {
             templateData: {
               meetingDate,
               deadlineDate,
-              bookingUrl: "https://weybridgelodge.org.uk/bookings",
+              bookingUrl: `${(await loadLodgeSettings()).siteUrl}/bookings`,
             },
           });
           if (!res.ok) throw new Error(String((res.error as any) ?? `HTTP ${res.status}`));

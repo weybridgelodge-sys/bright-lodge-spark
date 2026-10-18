@@ -2,6 +2,7 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { z } from "https://esm.sh/zod@3.23.8";
 import { type StripeEnv, createStripeClient } from "../_shared/stripe.ts";
+import { seatCheckOutcome } from "../_shared/meetingResponseGuards.ts";
 import { DUPLICATE_BOOKING_MESSAGE, findExistingBooking } from "../_shared/duplicate-booking.ts";
 
 const supabase = createClient(
@@ -128,18 +129,22 @@ Deno.serve(async (req) => {
     // waitlisted. Waitlisted rows still go through Stripe and pay in full;
     // they get auto-refunded later if never promoted.
     const seatsRequested = input.line_items.reduce((s, li) => s + li.qty, 0);
-    let initialStatus = "pending";
-    try {
-      const { data: statusResult } = await supabase.rpc("check_and_book_seats", {
-        _event_key: input.event_key,
-        _meeting_id: resolvedMeetingId,
-        _seats: seatsRequested,
-      });
-      const decided = (statusResult as string) || "confirmed";
-      initialStatus = decided === "waitlisted" ? "waitlisted" : "pending";
-    } catch (e) {
-      console.error("check_and_book_seats failed, defaulting to pending:", e);
+    // Fail closed: if the seat check cannot complete, save nothing and
+    // create no Stripe session (same rule as save-meeting-response).
+    const { data: statusResult, error: seatErr } = await supabase.rpc("check_and_book_seats", {
+      _event_key: input.event_key,
+      _meeting_id: resolvedMeetingId,
+      _seats: seatsRequested,
+    }).then((r) => r, (e) => ({ data: null, error: e }));
+    const seat = seatCheckOutcome(statusResult, seatErr);
+    if (!seat.ok) {
+      console.error("check_and_book_seats failed; refusing paid booking:", seatErr);
+      return new Response(
+        JSON.stringify({ error: seat.message }),
+        { status: seat.httpStatus, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
     }
+    const initialStatus = seat.status === "waitlisted" ? "waitlisted" : "pending";
 
     // Persist booking BEFORE checkout so webhook has a row to update.
     const { data: booking, error: insErr } = await supabase

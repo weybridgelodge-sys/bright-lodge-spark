@@ -6,6 +6,7 @@
 
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { createStripeClient } from "../_shared/stripe.ts";
+import { loadLodgeSettings } from "../_shared/lodgeSettings.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -41,7 +42,7 @@ Deno.serve(async (req) => {
     const memberId: string = body.member_id ?? user.id;
     const plan: "lump_sum" | "monthly" = body.plan;
     const method: "card" | "bacs" = body.method;
-    const returnUrl: string = body.return_url ?? "https://weybridgelodge.org.uk/members/admin/dues?checkout=complete";
+    const returnUrl: string = body.return_url ?? `${(await loadLodgeSettings()).siteUrl}/members/admin/dues?checkout=complete`;
 
     if (!["lump_sum", "monthly"].includes(plan)) return json({ error: "Invalid plan" }, 400);
     if (!["card", "bacs"].includes(method)) return json({ error: "Invalid method" }, 400);
