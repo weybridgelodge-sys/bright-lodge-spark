@@ -28,10 +28,15 @@ export async function confirmNewsletterToken(token: string): Promise<State> {
   }
 }
 
-const QuizCta = () => (
-  <Button asChild className="min-h-[44px] h-auto whitespace-normal py-3 px-5 font-sans">
-    <Link to="/quiz">While you're here, why not try our 2-Minute Suitability Quiz</Link>
-  </Button>
+const NextStep = () => (
+  <div className="flex flex-col items-center gap-3">
+    <Button asChild className="min-h-[44px] h-auto whitespace-normal py-3 px-5 font-sans">
+      <Link to="/events">See what's coming up</Link>
+    </Button>
+    <Link to="/" className="inline-flex items-center min-h-[44px] px-2 font-sans text-sm text-foreground underline underline-offset-4">
+      Back to the home page
+    </Link>
+  </div>
 );
 
 const SubscribeAgain = () => (
@@ -68,9 +73,9 @@ const NewsletterConfirm = () => {
                 <>
                   <h2 className="text-2xl font-serif text-foreground mb-3">You're subscribed</h2>
                   <p className="font-sans text-muted-foreground mb-6">
-                    Thank you for confirming. We've sent you a short welcome email.
+                    Thank you for confirming. A short welcome note from our Worshipful Master is on its way to your inbox.
                   </p>
-                  <QuizCta />
+                  <NextStep />
                 </>
               )}
               {state === "expired" && (
