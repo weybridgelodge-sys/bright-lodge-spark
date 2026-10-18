@@ -100,7 +100,8 @@ export async function handleConfirm(deps: ConfirmDeps, token: unknown, now = new
   const hash = await hashToken(token);
   const row = await deps.findByTokenHash(hash);
   const state = tokenState(row, now);
-  if (state !== "valid" || !row) return state;
+  if (state !== "valid") return state;
+  if (!row) return "invalid";
   const done = await deps.confirm(row.id, hash, now.toISOString());
   if (!done) return "invalid";
   try { await deps.sendWelcome(done.email, `newsletter-welcome-${done.id}-${hash.slice(0, 16)}`); }
