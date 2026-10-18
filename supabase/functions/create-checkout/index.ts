@@ -26,7 +26,6 @@ const BodySchema = z.object({
   details: z.record(z.unknown()).optional(),
   cover_fee: z.boolean().default(false),
   return_url: z.string().url(),
-  environment: z.enum(["sandbox", "live"]),
 });
 
 // Card surcharge when the payer opts in to cover processing costs:
@@ -56,7 +55,8 @@ Deno.serve(async (req) => {
       );
     }
     const input = parsed.data;
-    const env: StripeEnv = input.environment;
+    // Payments are always live; any client-sent `environment` is stripped by zod.
+    const env: StripeEnv = "live";
 
     let resolvedMeetingId: string | null = null;
     if (input.meeting_id) {

@@ -31,7 +31,6 @@ const BodySchema = z.object({
     "apologies",
   ]),
   details: z.record(z.unknown()).optional(),
-  environment: z.enum(["sandbox", "live"]).optional(),
   turnstileToken: z.string().trim().max(4096).optional(),
   website: z.string().max(500).optional().nullable(),
 });
@@ -69,7 +68,6 @@ Deno.serve(async (req) => {
       contact_phone,
       meeting_option,
       details,
-      environment,
       turnstileToken,
       website,
     } = parsed.data;
@@ -182,7 +180,7 @@ Deno.serve(async (req) => {
         fee_pence: 0,
         total_pence: 0,
         payment_status: initialStatus,
-        environment: environment ?? "sandbox",
+        environment: "live", // fixed server-side; client value ignored
       })
       .select()
       .single();

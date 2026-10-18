@@ -1,5 +1,5 @@
 import { EmbeddedCheckoutProvider, EmbeddedCheckout } from "@stripe/react-stripe-js";
-import { getStripe, getStripeEnvironment } from "@/lib/stripe";
+import { getStripe } from "@/lib/stripe";
 import { supabase } from "@/integrations/supabase/client";
 import { readFunctionError } from "@/lib/functionError";
 
@@ -40,7 +40,6 @@ export function StripeEmbeddedCheckoutPanel(props: Props) {
         details: props.details ?? {},
         cover_fee: props.cover_fee,
         return_url: props.return_url,
-        environment: getStripeEnvironment(),
       },
     });
     if (error || !data?.clientSecret) {
