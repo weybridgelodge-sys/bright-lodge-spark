@@ -1,74 +1,80 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { verifyTurnstile } from "../_shared/verify-turnstile.ts";
-
+import { loadLodgeSettings } from "../_shared/lodgeSettings.ts";
+import { handleSignup, type SubscriberRow } from "../_shared/newsletterOptIn.ts";
+import { sendTemplateEmail } from "../_shared/transactional-email-templates/send-email.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
+const json = (b: unknown, status = 200) =>
+  new Response(JSON.stringify(b), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
-const supabase = createClient(
-  Deno.env.get("SUPABASE_URL")!,
-  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-);
-
+const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+const UNIT_ID = "weybridge";
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const COLS = "id,email,confirmed,unsubscribed_at,confirm_token_hash,confirm_sent_at";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
-  if (req.method !== "POST") {
-    return new Response("Method not allowed", { status: 405, headers: corsHeaders });
-  }
+  if (req.method !== "POST") return new Response("Method not allowed", { status: 405, headers: corsHeaders });
   try {
     const { email, honeypot, turnstileToken } = await req.json();
-    if (typeof honeypot === "string" && honeypot.length > 0) {
-      // Silent success for bots
-      return new Response(JSON.stringify({ ok: true }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-    if (typeof email !== "string" || !EMAIL_RE.test(email) || email.length > 255) {
-      return new Response(JSON.stringify({ error: "Please enter a valid email address." }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    if (typeof honeypot === "string" && honeypot.length > 0) return json({ ok: true });
+    if (typeof email !== "string" || !EMAIL_RE.test(email.trim()) || email.length > 255) {
+      return json({ error: "Please enter a valid email address." }, 400);
     }
     const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || null;
-    const ok = await verifyTurnstile(turnstileToken, ip);
-    if (!ok) {
-      return new Response(JSON.stringify({ error: "Verification failed. Please tick the verification box and try again." }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    if (!(await verifyTurnstile(turnstileToken, ip))) {
+      return json({ error: "Verification failed. Please tick the verification box and try again." }, 400);
     }
     const cleanEmail = email.trim().toLowerCase();
+    const lodge = await loadLodgeSettings(UNIT_ID);
 
+    await handleSignup({
+      // On-signup cleanup: unconfirmed, never-unsubscribed rows older than 30 days.
+      async cleanupPending(olderThan) {
+        const { error } = await supabase.from("newsletter_subscribers").delete()
+          .eq("unit_id", UNIT_ID).eq("confirmed", false).is("unsubscribed_at", null).lt("created_at", olderThan);
+        if (error) throw error;
+      },
+      async findByEmail(e) {
+        const { data, error } = await supabase.from("newsletter_subscribers").select(COLS).eq("email", e).maybeSingle();
+        if (error) throw error;
+        return data as SubscriberRow | null;
+      },
+      async insertPending(e, hash, sentAt) {
+        const { data, error } = await supabase.from("newsletter_subscribers")
+          .insert({ email: e, unit_id: UNIT_ID, source: "public_signup", confirmed: false, confirm_token_hash: hash, confirm_sent_at: sentAt })
+          .select(COLS).single();
+        if (error) throw error;
+        return data as SubscriberRow;
+      },
+      async refreshPending(id, hash, sentAt) {
+        const { error } = await supabase.from("newsletter_subscribers")
+          .update({ confirm_token_hash: hash, confirm_sent_at: sentAt }).eq("id", id);
+        if (error) throw error;
+      },
+      async clearSentAt(id) {
+        await supabase.from("newsletter_subscribers").update({ confirm_sent_at: null, confirm_token_hash: null }).eq("id", id);
+      },
+      async sendConfirm(to, confirmUrl, idempotencyKey) {
+        await sendTemplateEmail("newsletter-confirm", to, {
+          templateData: { confirmUrl, lodgeName: lodge.formalSenderName, postcode: lodge.lodgePostcode },
+          idempotencyKey,
+          fromName: lodge.formalSenderName,
+          replyTo: lodge.communicationsEmail,
+        });
+      },
+      log: (m, e) => console.error(`newsletter-subscribe: ${m}`, e instanceof Error ? e.message : e),
+    }, cleanEmail, lodge.siteUrl);
 
-    // Upsert idempotently
-    const { error } = await supabase
-      .from("newsletter_subscribers")
-      .upsert(
-        { email: cleanEmail, source: "public_signup", confirmed: true, unsubscribed_at: null },
-        { onConflict: "email" },
-      );
-
-    if (error) {
-      console.error("newsletter-subscribe error:", error);
-      return new Response(JSON.stringify({ error: "Could not subscribe. Please try again later." }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    return new Response(JSON.stringify({ ok: true }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    // Same neutral answer for new, pending, throttled and already-subscribed addresses.
+    return json({ ok: true });
   } catch (e) {
-    console.error("newsletter-subscribe exception:", e);
-    return new Response(JSON.stringify({ error: "Unexpected error" }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    console.error("newsletter-subscribe exception:", e instanceof Error ? e.message : e);
+    return json({ error: "Could not subscribe. Please try again later." }, 500);
   }
 });

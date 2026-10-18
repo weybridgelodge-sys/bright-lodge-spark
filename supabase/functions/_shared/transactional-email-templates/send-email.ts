@@ -72,7 +72,9 @@ export async function sendTemplateEmail(
     await sendLovableEmail(
       {
         to: recipient,
-        from: `"${(options.fromName || SITE_NAME).replace(/["\r\n<>]/g, '')}" <noreply@${FROM_DOMAIN}>`,
+        from: options.fromName
+          ? `"${options.fromName.replace(/["\r\n<>]/g, '')}" <noreply@${FROM_DOMAIN}>`
+          : `${SITE_NAME} <noreply@${FROM_DOMAIN}>`,
         sender_domain: SENDER_DOMAIN,
         subject,
         html,
