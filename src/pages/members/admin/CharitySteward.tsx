@@ -1107,6 +1107,7 @@ function PeriodicReportsSection({ charities, collections, donations, festival, c
 }) {
   const [rows, setRows] = useState<PeriodicReportRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [editing, setEditing] = useState<PeriodicReportRow | null>(null);
   const [title, setTitle] = useState("");
   const [startDate, setStartDate] = useState("");
@@ -1115,14 +1116,18 @@ function PeriodicReportsSection({ charities, collections, donations, festival, c
   const [busy, setBusy] = useState(false);
 
   const load = async () => {
-    setLoading(true);
-    const { data, error } = await supabase
-      .from("charity_periodic_reports")
-      .select("id,title,start_date,end_date,notes,finalised_at,created_at,updated_at")
-      .order("created_at", { ascending: false });
-    setLoading(false);
-    if (error) { console.error("[periodic-reports] load failed", error); toast({ title: "Load failed", description: error.message, variant: "destructive" }); return; }
-    setRows((data ?? []) as PeriodicReportRow[]);
+    setLoading(true); setLoadError(false);
+    try {
+      const { data, error } = await supabase
+        .from("charity_periodic_reports")
+        .select("id,title,start_date,end_date,notes,finalised_at,created_at,updated_at")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      setRows((data ?? []) as PeriodicReportRow[]);
+    } catch (error) {
+      console.error("[periodic-reports] load failed", error);
+      setLoadError(true);
+    } finally { setLoading(false); }
   };
 
   useEffect(() => { load(); }, []);
@@ -1266,6 +1271,8 @@ function PeriodicReportsSection({ charities, collections, donations, festival, c
       <Card title="History">
         {loading ? (
           <p className="text-xs text-primary-foreground/80 italic">Loading…</p>
+        ) : loadError ? (
+          <LoadErrorNotice what="periodic reports" onRetry={load} />
         ) : rows.length === 0 ? (
           <p className="text-xs text-primary-foreground/80 italic">No periodic reports yet.</p>
         ) : (
@@ -1499,13 +1506,16 @@ function Inner() {
   const [donations, setDonations] = useState<Donation[]>([]);
   const [festival, setFestival] = useState<FestivalSettings | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
 
   const reload = async () => {
+    setLoadError(false);
     try {
       const [c, col, don, fest] = await Promise.all([fetchCharities(), fetchCollections(), fetchDonations(), fetchFestivalSettings()]);
       setCharities(c); setCollections(col); setDonations(don); setFestival(fest);
     } catch (e: any) {
-      toast({ title: "Load failed", description: e.message, variant: "destructive" });
+      console.error("[charity-steward] load failed", e);
+      setLoadError(true);
     } finally { setLoading(false); }
   };
 
@@ -1513,11 +1523,13 @@ function Inner() {
     (async () => {
       // Probe edit capability by attempting a no-op update on settings? Easier: rely on server—try to read; if user has charity_steward role they'll be able to write.
       // Simpler: ask the DB.
-      const { data: u } = await supabase.auth.getUser();
-      if (u.user) {
-        const { data } = await supabase.rpc("can_edit_charity" as any, { _user: u.user.id });
-        if (typeof data === "boolean") setCanEdit(data);
-      }
+      try {
+        const { data: u } = await supabase.auth.getUser();
+        if (u.user) {
+          const { data } = await supabase.rpc("can_edit_charity" as any, { _user: u.user.id });
+          if (typeof data === "boolean") setCanEdit(data);
+        }
+      } catch (e) { console.error("[charity-steward] role check failed", e); }
       reload();
     })();
   }, []);
@@ -1527,6 +1539,13 @@ function Inner() {
   if (loading) return (
     <MembersLayout>
       <div className="flex items-center gap-2 text-primary-foreground/70"><Loader2 className="w-4 h-4 animate-spin" /> Loading charity records…</div>
+    </MembersLayout>
+  );
+
+  if (loadError) return (
+    <MembersLayout>
+      <h1 className="font-serif text-2xl md:text-3xl text-gold mb-4">Charity Steward</h1>
+      <LoadErrorNotice what="charity records" onRetry={() => { setLoading(true); reload(); }} />
     </MembersLayout>
   );
 
@@ -1597,6 +1616,15 @@ function Inner() {
         <TabsContent value="feed"><FeedTab festival={festival} canEdit={canEdit} onChange={reload} /></TabsContent>
       </Tabs>
     </MembersLayout>
+  );
+}
+
+function LoadErrorNotice({ what, onRetry }: { what: string; onRetry: () => void }) {
+  return (
+    <div role="alert" className="flex flex-col sm:flex-row sm:items-center gap-3 p-4 rounded-sm border border-gold/30 bg-navy-light/40">
+      <p className="font-sans text-sm text-primary-foreground">Couldn't load the {what}. Please check your connection and try again.</p>
+      <Button type="button" onClick={onRetry} className="min-h-[44px] bg-gold text-navy hover:bg-gold/90">Retry</Button>
+    </div>
   );
 }
 

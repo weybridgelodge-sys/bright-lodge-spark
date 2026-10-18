@@ -5,7 +5,13 @@ import { highestAwardAchieved } from "@/lib/charity/festivalAwards";
 const gbp = (n: number) => new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP", maximumFractionDigits: 0 }).format(n);
 
 type YearRow = { charity_id: string; name: string; website: string | null; year_total: number };
-type Totals = { total_raised: number; current_year_total: number; public_feed_start_date: string | null };
+type Totals = { total_raised: number; current_year_total: number | null; public_feed_start_date: string | null };
+
+/** This-year figure: metrics value when known; else the sum of a successful breakdown with rows; else null (hide, never a fake £0). */
+export function thisYearTotal(metricsValue: number | null | undefined, rows: { year_total: number }[]): number | null {
+  if (typeof metricsValue === "number" && Number.isFinite(metricsValue)) return metricsValue;
+  return rows.length > 0 ? rows.reduce((a, r) => a + r.year_total, 0) : null;
+}
 type Festival = { festival_name: string; target_amount: number };
 type FeedMetrics = {
   total_raised: number;
@@ -28,7 +34,7 @@ export default function OurCharitiesLiveFeed() {
         (supabase as any).from("charity_public_feed_metrics").select("total_raised,current_year_total,festival_name,festival_target_amount,festival_total,public_feed_start_date").maybeSingle(),
         (supabase as any).from("public_charity_totals").select("total_raised,public_feed_start_date").maybeSingle(),
         (supabase as any).from("public_charity_year_breakdown").select("charity_id,name,website,year_total"),
-      ]);
+      ].map((q) => Promise.resolve(q).catch(() => ({ data: null }))));
       if (m) {
         const metrics = m as FeedMetrics;
         setTotals({
@@ -41,7 +47,7 @@ export default function OurCharitiesLiveFeed() {
       } else if (t) {
         setTotals({
           total_raised: Number((t as any).total_raised),
-          current_year_total: 0,
+          current_year_total: null, // fallback has no this-year figure: unknown, never £0
           public_feed_start_date: (t as any).public_feed_start_date,
         });
       }
@@ -57,7 +63,7 @@ export default function OurCharitiesLiveFeed() {
 
   if (!totals && rows.length === 0) return null;
 
-  const yearTotal = totals ? totals.current_year_total : rows.reduce((a, r) => a + r.year_total, 0);
+  const yearTotal = thisYearTotal(totals?.current_year_total, rows);
   const rawPct = festival && festival.target_amount > 0 ? (festivalCumulative / festival.target_amount) * 100 : 0;
   const barPct = Math.min(100, rawPct);
   const targetReached = festival ? festivalCumulative >= festival.target_amount && festival.target_amount > 0 : false;
@@ -70,11 +76,13 @@ export default function OurCharitiesLiveFeed() {
         <h2 className="font-serif text-2xl md:text-3xl text-primary-foreground text-center mb-2">Our Charitable Giving</h2>
         <p className="text-primary-foreground/60 font-sans text-center text-sm mb-10">Live totals from the Lodge's charity records</p>
 
-        <div className="grid sm:grid-cols-2 gap-4 mb-10">
-          <div className="p-6 rounded-sm border border-gold/20 bg-navy-light/40 text-center">
-            <p className="text-xs uppercase tracking-widest text-gold mb-2">This Masonic Year</p>
-            <p className="font-serif text-3xl md:text-4xl text-primary-foreground">{gbp(yearTotal)}</p>
-          </div>
+        <div className={`grid ${yearTotal !== null ? "sm:grid-cols-2" : ""} gap-4 mb-10`}>
+          {yearTotal !== null && (
+            <div className="p-6 rounded-sm border border-gold/20 bg-navy-light/40 text-center" data-testid="year-total">
+              <p className="text-xs uppercase tracking-widest text-gold mb-2">This Masonic Year</p>
+              <p className="font-serif text-3xl md:text-4xl text-primary-foreground">{gbp(yearTotal)}</p>
+            </div>
+          )}
           <div className="p-6 rounded-sm border border-gold/20 bg-navy-light/40 text-center">
             <p className="text-xs uppercase tracking-widest text-gold mb-2">All-Time Total</p>
             <p className="font-serif text-3xl md:text-4xl text-primary-foreground">{totals ? gbp(totals.total_raised) : "—"}</p>
