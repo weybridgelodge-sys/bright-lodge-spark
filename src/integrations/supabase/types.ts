@@ -3093,6 +3093,33 @@ export type Database = {
           },
         ]
       }
+      lodge_fee_settings: {
+        Row: {
+          pgl_registration_fee_pence: number
+          ugle_registration_fee_pence: number
+          under_25_discount_percent: number
+          unit_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          pgl_registration_fee_pence: number
+          ugle_registration_fee_pence: number
+          under_25_discount_percent?: number
+          unit_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          pgl_registration_fee_pence?: number
+          ugle_registration_fee_pence?: number
+          under_25_discount_percent?: number
+          unit_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       lodge_property_images: {
         Row: {
           file_name: string
@@ -7023,6 +7050,7 @@ export type Database = {
       can_access_almoner: { Args: { _user_id: string }; Returns: boolean }
       can_edit_almoner: { Args: { _user_id: string }; Returns: boolean }
       can_edit_charity: { Args: { _user: string }; Returns: boolean }
+      can_edit_lodge_fees: { Args: { _uid: string }; Returns: boolean }
       can_edit_member_development: {
         Args: { _editor: string; _member: string }
         Returns: boolean
@@ -7163,6 +7191,7 @@ export type Database = {
         Returns: {
           annual_dues_pence: number
           dining_price_pence: number
+          ugle_fee_pence: number
         }[]
       }
       get_lodge_contact_settings: {
@@ -7172,6 +7201,16 @@ export type Database = {
           membership_cc_email: string
           secretary_email: string
           updated_at: string
+        }[]
+      }
+      get_lodge_fee_settings: {
+        Args: { _unit_id?: string }
+        Returns: {
+          pgl_registration_fee_pence: number
+          ugle_registration_fee_pence: number
+          under_25_discount_percent: number
+          updated_at: string
+          updated_by_name: string
         }[]
       }
       get_lodge_health_aggregates: {
@@ -7430,6 +7469,15 @@ export type Database = {
           _guide_url: string
           _membership_cc_email: string
           _secretary_email: string
+          _unit_id?: string
+        }
+        Returns: undefined
+      }
+      update_lodge_fee_settings: {
+        Args: {
+          _discount_percent: number
+          _pgl_pence: number
+          _ugle_pence: number
           _unit_id?: string
         }
         Returns: undefined
