@@ -15,10 +15,10 @@ function signupDeps(existing: SubscriberRow | null, sendFails = false) {
   const d = {
     cleanupPending: vi.fn(async () => {}),
     findByEmail: vi.fn(async () => existing),
-    insertPending: vi.fn(async (email: string) => row({ id: "new", email })),
+    insertPending: vi.fn(async (email: string, _h: string, _s: string) => row({ id: "new", email })),
     refreshPending: vi.fn(async () => {}),
     clearSentAt: vi.fn(async () => {}),
-    sendConfirm: vi.fn(async () => { if (sendFails) throw new Error("down"); }),
+    sendConfirm: vi.fn(async (_e: string, _u: string, _k: string) => { if (sendFails) throw new Error("down"); }),
     log: vi.fn(),
   } satisfies SignupDeps;
   return d;
