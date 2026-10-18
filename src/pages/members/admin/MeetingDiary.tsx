@@ -356,6 +356,7 @@ function Inner() {
                   <p className="text-xs text-cream/70 break-words">
                     {typeLabel(m.meeting_type)} · {m.cancelled_at ? `Cancelled${m.cancel_reason ? `: ${m.cancel_reason}` : ""}` : m.status}
                     {m.series_id && " · series"}
+                    {m.public_label && ` · Website: ${m.public_label}`}
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-2">
