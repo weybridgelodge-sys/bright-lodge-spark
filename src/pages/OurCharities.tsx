@@ -188,10 +188,9 @@ const OurCharities = () => {
                 </p>
                 <Link
                   to="/thames-challenge"
-                  aria-label="Read the Thames Towpath Challenge charity story from Weybridge Lodge"
                   className="inline-flex items-center gap-2 bg-gold-shimmer text-accent-foreground px-6 py-3 rounded-sm text-sm font-semibold font-sans hover:opacity-90 transition-opacity min-h-[48px]"
                 >
-                  Read the feature
+                  Read the feature<span className="sr-only"> about the Thames Towpath Challenge</span>
                   <ArrowRight className="w-4 h-4" aria-hidden="true" />
                 </Link>
               </div>
