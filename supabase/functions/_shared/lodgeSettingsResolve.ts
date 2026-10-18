@@ -8,6 +8,7 @@ export const LODGE_FALLBACK = {
   assistantSecretaryEmail: "assistantsecretary@weybridgelodge.org.uk",
   webmasterEmail: "webmaster@weybridgelodge.org.uk",
   communicationsEmail: "communications@weybridgelodge.org.uk",
+  lodgePostcode: "GU2 4DR",
 } as const;
 
 export type LodgeSettings = { -readonly [K in keyof typeof LODGE_FALLBACK]: string };
@@ -26,6 +27,7 @@ export function resolveLodgeSettings(row: Row): LodgeSettings {
     assistantSecretaryEmail: pick(row?.assistant_secretary_email, f.assistantSecretaryEmail),
     webmasterEmail: pick(row?.webmaster_email, f.webmasterEmail),
     communicationsEmail: pick(row?.communications_email, f.communicationsEmail),
+    lodgePostcode: pick(row?.lodge_postcode, f.lodgePostcode),
   };
 }
 
