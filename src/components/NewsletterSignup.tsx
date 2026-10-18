@@ -66,9 +66,9 @@ const NewsletterSignup = () => {
         <div className="flex items-start gap-3">
           <CheckCircle2 className="h-5 w-5 text-gold shrink-0 mt-0.5" />
           <div>
-            <p className="font-serif text-primary-foreground text-sm font-semibold">Subscription confirmed</p>
+            <p className="font-serif text-primary-foreground text-sm font-semibold">Please check your inbox</p>
             <p className="text-primary-foreground/75 text-xs mt-1 leading-relaxed">
-              Thank you — look out for the next Monthly Chronicle from Weybridge Lodge.
+              Thank you. If this address isn't already on our list, we've sent an email with a link to confirm your subscription.
             </p>
           </div>
         </div>
@@ -77,7 +77,7 @@ const NewsletterSignup = () => {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-2xl border border-gold/20 bg-navy-light/30 p-5 text-left" noValidate>
+    <form id="newsletter-signup" onSubmit={handleSubmit} className="rounded-2xl border border-gold/20 bg-navy-light/30 p-5 text-left" noValidate>
       <h2 className="font-serif text-primary-foreground text-sm mb-1">Monthly Chronicle</h2>
       <p className="text-primary-foreground/70 text-xs mb-3 leading-relaxed">
         Historic vignettes, charity updates and open social notifications, direct from the Lodge.

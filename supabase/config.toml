@@ -49,6 +49,10 @@ project_id = "kntcjlztmcgmagwgheyx"
     verify_jwt = false
   [functions.event-balance-reminders]
     verify_jwt = false
+  [functions.newsletter-subscribe]
+    verify_jwt = false
+  [functions.newsletter-confirm]
+    verify_jwt = false
 
 [functions.event-image]
   verify_jwt = false

@@ -19,6 +19,8 @@ import { template as provincialReturnSubmission } from './provincial-return-subm
 import { template as secretaryUgleMissing } from './secretary-ugle-missing.tsx'
 import { template as eventBookingCustomer } from './event-booking-customer.tsx'
 import { template as eventBookingLodge } from './event-booking-lodge.tsx'
+import { template as newsletterConfirm } from './newsletter-confirm.tsx'
+import { template as newsletterWelcome } from './newsletter-welcome.tsx'
 
 export interface TemplateEntry {
   component: any
@@ -50,4 +52,6 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'secretary-ugle-missing': secretaryUgleMissing,
   'event-booking-customer': eventBookingCustomer,
   'event-booking-lodge': eventBookingLodge,
+  'newsletter-confirm': newsletterConfirm,
+  'newsletter-welcome': newsletterWelcome,
 }

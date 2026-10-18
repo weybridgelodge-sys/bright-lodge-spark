@@ -287,6 +287,7 @@ async function getRecipients(audience: Audience): Promise<Recipient[]> {
     const { data: subs } = await admin
       .from("newsletter_subscribers")
       .select("email,unsubscribe_token")
+      .eq("confirmed", true) // double opt-in: never send to unconfirmed addresses
       .is("unsubscribed_at", null);
     for (const r of subs ?? []) {
       const email = (r.email ?? "").trim().toLowerCase();
