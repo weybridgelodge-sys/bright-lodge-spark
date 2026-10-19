@@ -167,7 +167,7 @@ export default function FestiveBoardAdmin() {
         .order("last_name", { ascending: true }),
       supabase
         .from("bookings")
-        .select("id, contact_name, contact_email, event_label, event_key, meeting_id, payment_status, total_pence, details, created_at")
+        .select("id, contact_name, contact_email, event_label, event_key, meeting_id, payment_status, total_pence, stripe_payment_intent_id, stripe_session_id, details, created_at")
         .in("payment_status", ["waitlisted", "waitlisted_refunded"] as any)
         .order("created_at", { ascending: true }),
     ]);
@@ -456,7 +456,7 @@ export default function FestiveBoardAdmin() {
                               <span className="font-semibold">{b.contact_name}</span>
                               <span className="text-primary-foreground/80"> · {seats} seat{seats === 1 ? "" : "s"}</span>
                               {b.total_pence != null && (
-                                <span className="text-primary-foreground/80"> · £{(b.total_pence / 100).toFixed(2)}</span>
+                                <span className="text-primary-foreground/80"> · £{(b.total_pence / 100).toFixed(2)}{!(b.stripe_payment_intent_id || b.stripe_session_id) && " (expected)"}</span>
                               )}
                             </p>
                             <p className="text-[11px] text-primary-foreground/80">{b.event_label}</p>

@@ -34,3 +34,18 @@ export function isExpiryCandidate(b: { payment_status: string; stripe_session_id
   if (b.payment_status === "pending") return true;
   return b.payment_status === "waitlisted" && !!b.stripe_session_id && !b.paid_at;
 }
+
+/** Amount lines appear in booking emails only for Stripe-paid bookings (payment intent or session present). */
+export function isStripeBooking(b: { stripe_payment_intent_id?: string | null; stripe_session_id?: string | null }): boolean {
+  return !!(b.stripe_payment_intent_id || b.stripe_session_id);
+}
+
+/** Expected base price for a non-card Festive Board booking: (1 + guests) × meeting dining price; fee is never added. */
+export function expectedDiningPence(meetingOption: string, paymentMethod: string | null | undefined, guestCount: unknown, diningPricePence: number | null | undefined): number {
+  if (meetingOption !== "meeting-and-festive-board") return 0;
+  if (paymentMethod === "card") return 0;
+  const price = Number(diningPricePence ?? 0);
+  if (!Number.isFinite(price) || price <= 0) return 0;
+  const guests = Math.max(0, Math.floor(Number(guestCount) || 0));
+  return (1 + guests) * price;
+}
