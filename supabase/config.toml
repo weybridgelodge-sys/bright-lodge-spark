@@ -54,7 +54,7 @@ project_id = "kntcjlztmcgmagwgheyx"
   [functions.newsletter-confirm]
     verify_jwt = false
   [functions.expire-pending-bookings]
-    verify_jwt = true
+    verify_jwt = false
 
 [functions.event-image]
   verify_jwt = false

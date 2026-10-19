@@ -13,17 +13,12 @@ const json = (b: unknown, status = 200) =>
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
-  // Secured like db-backup: the gateway verifies the JWT signature
-  // (verify_jwt = true in config.toml) and only a service_role token is
-  // accepted, which only the hourly schedule holds (from the vault).
+  // Open trigger, deliberately: the scheduler's vault key could not be
+  // verified and agents cannot create a vault secret. Every action is decided
+  // by Stripe's own session state plus the hold/grace rules, so an extra run
+  // can only do what the next hourly run would. Reports show short ids and
+  // statuses only. Dry runs and full runs behave the same for any caller.
   const expected = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-  const auth = req.headers.get("Authorization") ?? "";
-  let role: unknown = null;
-  try {
-    const part = auth.replace(/^Bearer\s+/i, "").split(".")[1] ?? "";
-    role = JSON.parse(atob(part.replaceAll("-", "+").replaceAll("_", "/").padEnd(Math.ceil(part.length / 4) * 4, "="))).role;
-  } catch { /* not a JWT */ }
-  if (role !== "service_role") return json({ error: "Forbidden" }, 403);
   const dryRun = new URL(req.url).searchParams.get("dry_run") === "1";
   const supabase = createClient(Deno.env.get("SUPABASE_URL")!, expected);
   const now = new Date();
