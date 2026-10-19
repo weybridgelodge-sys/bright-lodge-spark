@@ -224,6 +224,10 @@ export default function FestiveBoardAdmin() {
       dietary: string | null;
     }>;
 
+    // Meeting-only attendees are not diners — leave them out of the seating export.
+    const diningRows = filterPtpDiningRows(rowsRaw);
+    const meetingOnlyLeftOut = rowsRaw.length - diningRows.length;
+
     // Fetch linked profiles (for member names/titles)
     const memberIds = Array.from(new Set(diningRows.map((r) => r.member_id).filter(Boolean) as string[]));
     const profilesMap = new Map<string, Member>();
