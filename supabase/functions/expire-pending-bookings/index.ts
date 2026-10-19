@@ -13,10 +13,11 @@ const json = (b: unknown, status = 200) =>
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
-  // No caller secret: like the other hourly jobs here, anyone may trigger a
-  // run, but every action is decided by Stripe's own session state and the
-  // hold/grace rules, so an extra run can only do what the next hourly run
-  // would. Reports expose short ids and statuses only (no names, emails).
+  // Open trigger, deliberately: the scheduler's vault key could not be
+  // verified and agents cannot create a vault secret. Every action is decided
+  // by Stripe's own session state plus the hold/grace rules, so an extra run
+  // can only do what the next hourly run would. Reports show short ids and
+  // statuses only. Dry runs and full runs behave the same for any caller.
   const expected = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
   const dryRun = new URL(req.url).searchParams.get("dry_run") === "1";
   const supabase = createClient(Deno.env.get("SUPABASE_URL")!, expected);

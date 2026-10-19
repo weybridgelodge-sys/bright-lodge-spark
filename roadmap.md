@@ -107,3 +107,6 @@
 
 ## Pending bookings addendum (Oct 2026)
 - [x] Find what updated bookings at 08:40:17 UTC 19 Oct; confirm trigger skips pending; confirm deletes cover ::g rows; paid-row manual delete behaviour; dry-run list
+- [x] Hourly expire-pending-bookings live (25 past each hour)
+- [ ] 3a3712ad clears about 19:25 UTC 19 Oct
+- [ ] Scheduler vault key sends no auth header (weekly backups stopped after 13 Sep); needs Lovable support
