@@ -317,8 +317,7 @@ export default function FestiveBoardAdmin() {
         if (guest) dietary = String(guest?.dietary ?? "").trim();
         else if (booking) dietary = String(bDetails.dietary ?? "").trim();
       }
-      // Last resort for members: their profile dietary note.
-      if (!cleanDiet(dietary) && r.member_id && !guest) dietary = profileDiet.get(r.member_id) ?? "";
+      // The booking's own text only (pre-filled from the member record at booking time); never the profile.
 
       rows.push({
         Title: title,
@@ -326,12 +325,12 @@ export default function FestiveBoardAdmin() {
         "Last Name": last,
         Group: group,
         Meal: meal,
-        "Special requirements": cleanDiet(dietary),
+        "Special req.": cleanDiet(dietary),
         "RSVP status": "Attending",
       });
     }
 
-    const headers = ["Title", "First Name", "Last Name", "Group", "Meal", "Special requirements", "RSVP status"];
+    const headers = ["Title", "First Name", "Last Name", "Group", "Meal", "Special req.", "RSVP status"];
     const esc = (v: string) => {
       const s = v ?? "";
       return /[",\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
