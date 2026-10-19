@@ -75,6 +75,7 @@ type Attendance = {
   amount_pence: number;
   is_meeting_only: boolean;
   booking_id: string | null;
+  suspected_member_id?: string | null;
   source?: "manual" | "booking" | null;
   source_booking_id?: string | null;
   dietary?: string | null;
@@ -604,6 +605,14 @@ export default function FestiveBoardAdmin() {
                                       <li key={r.id} className="flex flex-wrap justify-between gap-3 border-b border-gold/5 pb-1">
                                         <span className="flex items-center gap-1.5 flex-wrap">
                                           <span className="text-primary-foreground">{name}</span>
+                                          {r.suspected_member_id && (() => {
+                                            const sm = members.find((x) => x.id === r.suspected_member_id);
+                                            return (
+                                              <span role="note" className="text-[10px] text-gold border border-gold/60 rounded px-1 py-0.5">
+                                                Check: name matches member {sm ? memberDisplay(sm) : ""} but email does not
+                                              </span>
+                                            );
+                                          })()}
                                           {r.is_meeting_only && (
                                             <span className="text-[9px] uppercase tracking-wider text-primary-foreground/70 border border-primary-foreground/30 rounded px-1 py-0.5" title="Attending meeting only — not dining">Meeting only</span>
                                           )}
@@ -629,6 +638,14 @@ export default function FestiveBoardAdmin() {
                                       <li key={r.id} className="flex flex-wrap justify-between gap-3 border-b border-gold/5 pb-1">
                                         <span className="flex items-center gap-1.5 flex-wrap">
                                           <span className="text-primary-foreground/80 italic">{name}</span>
+                                          {r.suspected_member_id && (() => {
+                                            const sm = members.find((x) => x.id === r.suspected_member_id);
+                                            return (
+                                              <span role="note" className="text-[10px] text-gold border border-gold/60 rounded px-1 py-0.5">
+                                                Check: name matches member {sm ? memberDisplay(sm) : ""} but email does not
+                                              </span>
+                                            );
+                                          })()}
                                           {r.is_meeting_only && (
                                             <span className="text-[9px] uppercase tracking-wider text-primary-foreground/70 border border-primary-foreground/30 rounded px-1 py-0.5" title="Attending meeting only — not dining">Meeting only</span>
                                           )}
