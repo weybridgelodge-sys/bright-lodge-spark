@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Shield, Mail, ArrowRight, CheckCircle2, UserPlus, Clock, ArrowLeft } from "lucide-react";
@@ -13,6 +13,7 @@ import { useAuth } from "@/hooks/useAuth";
 import logoAsset from "@/assets/weybridge-logo-no-bg.png.asset.json";
 import { assetUrl } from "@/lib/assetUrl";
 const logo = assetUrl(logoAsset);
+const TurnstileWidget = lazy(() => import("@/components/TurnstileWidget"));
 
 const isNativeApp = Capacitor.isNativePlatform();
 const membersRedirectUrl = isNativeApp
@@ -32,7 +33,6 @@ function describeLinkError(code: string): string {
 
 const registerSchema = z.object({
   fullName: z.string().trim().min(2, "Enter your full name").max(120),
-  ugleRegNumber: z.string().trim().min(2, "UGLE registration number is required").max(40),
   motherLodge: z.string().trim().min(2, "Mother Lodge name and number is required").max(160),
   email: emailSchema,
 });
@@ -51,7 +51,7 @@ export default function MembersLogin() {
 
   // register
   const [fullName, setFullName] = useState("");
-  const [ugleReg, setUgleReg] = useState("");
+  const [turnstileToken, setTurnstileToken] = useState("");
   const [motherLodge, setMotherLodge] = useState("");
   const [regEmail, setRegEmail] = useState("");
   const [gdpr, setGdpr] = useState(false);
@@ -87,10 +87,12 @@ export default function MembersLogin() {
     setBusy(true);
     const { error } = await supabase.auth.signInWithOtp({
       email: loginEmail.trim(),
-      options: { emailRedirectTo: membersRedirectUrl },
+      // Never creates an account: only existing members get a link.
+      options: { emailRedirectTo: membersRedirectUrl, shouldCreateUser: false },
     });
     setBusy(false);
-    if (error) {
+    // Unknown emails get the same neutral screen, so the form can't reveal who is a member.
+    if (error && !/signups? not allowed|not found|user not found/i.test(error.message)) {
       toast.error(error.message);
       return;
     }
@@ -151,36 +153,23 @@ export default function MembersLogin() {
       toast.error("Please confirm the Data Protection notice");
       return;
     }
-    const parsed = registerSchema.safeParse({
-      fullName,
-      ugleRegNumber: ugleReg,
-      motherLodge,
-      email: regEmail,
-    });
+    const parsed = registerSchema.safeParse({ fullName, motherLodge, email: regEmail });
     if (!parsed.success) {
       toast.error(parsed.error.issues[0].message);
       return;
     }
+    if (!turnstileToken) {
+      toast.error("Please tick the verification box");
+      return;
+    }
     setBusy(true);
-    // Sign up with a strong random password — users only ever use magic links.
-    const tempPassword = crypto.randomUUID() + crypto.randomUUID().slice(0, 8) + "Aa1!";
-    const { error } = await supabase.auth.signUp({
-      email: parsed.data.email,
-      password: tempPassword,
-      options: {
-        emailRedirectTo: membersRedirectUrl,
-        data: {
-          full_name: parsed.data.fullName,
-          ugle_reg_number: parsed.data.ugleRegNumber,
-          mother_lodge: parsed.data.motherLodge,
-        },
-      },
+    // Notifies the Secretary only; no account is created.
+    const { error } = await supabase.functions.invoke("request-portal-access", {
+      body: { ...parsed.data, company: honeypot, turnstileToken },
     });
-    // Immediately sign out — they must wait for approval and confirm email
-    await supabase.auth.signOut();
     setBusy(false);
     if (error) {
-      toast.error(error.message);
+      toast.error("We couldn't send your request. Please try again later.");
       return;
     }
     setView("request-sent");
@@ -436,26 +425,26 @@ export default function MembersLogin() {
                   </p>
                   <h1 className="font-serif text-2xl text-primary-foreground mt-2">Request Portal Access</h1>
                   <p className="text-xs text-primary-foreground/80 mt-2 leading-relaxed">
-                    Accounts require manual validation by the Lodge Secretary to safeguard sensitive ritual archives.
+                    This sends your details to the Lodge Secretary. No account is created until he sends you an invitation.
                   </p>
                 </div>
 
                 <form onSubmit={handleRegister} className="space-y-3">
-                  <input
-                    type="text"
-                    name="company"
-                    value={honeypot}
-                    onChange={(e) => setHoneypot(e.target.value)}
-                    className="hidden"
-                    tabIndex={-1}
-                    autoComplete="off"
-                    aria-hidden="true"
-                  />
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <Field label="Full Name" value={fullName} onChange={setFullName} required placeholder="Bro. John Smith" />
-                    <Field label="UGLE Reg Number" value={ugleReg} onChange={setUgleReg} required placeholder="e.g. 1234567" />
+                  <div className="hidden" aria-hidden="true">
+                    <label>
+                      Company
+                      <input
+                        type="text"
+                        name="company"
+                        value={honeypot}
+                        onChange={(e) => setHoneypot(e.target.value)}
+                        tabIndex={-1}
+                        autoComplete="off"
+                      />
+                    </label>
                   </div>
+
+                  <Field label="Full Name" value={fullName} onChange={setFullName} required placeholder="Bro. John Smith" />
 
                   <Field
                     label="Mother Lodge Name & Number"
@@ -492,10 +481,14 @@ export default function MembersLogin() {
                     </span>
                   </label>
 
+                  <Suspense fallback={null}>
+                    <TurnstileWidget theme="dark" onToken={setTurnstileToken} onExpire={() => setTurnstileToken("")} />
+                  </Suspense>
+
                   <button
                     disabled={busy}
                     type="submit"
-                    className="w-full bg-gold-shimmer text-accent-foreground px-4 py-2.5 rounded-sm text-sm font-semibold font-sans hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-2 transition-opacity"
+                    className="w-full min-h-[44px] bg-gold-shimmer text-accent-foreground px-4 py-2.5 rounded-sm text-sm font-semibold font-sans hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-2 transition-opacity"
                   >
                     Submit Access Request <ArrowRight className="w-4 h-4" />
                   </button>
@@ -529,13 +522,12 @@ export default function MembersLogin() {
                 <h2 className="font-serif text-xl text-primary-foreground mt-2 mb-3">Awaiting Secretary's Sign-Off</h2>
                 <p className="text-sm text-primary-foreground/70 leading-relaxed max-w-xs mx-auto">
                   Your access request has been received. The Lodge Secretary will verify your Masonic standing and
-                  activate your account. You'll receive an email once approved.
+                  send you an invitation email if approved.
                 </p>
                 <button
                   onClick={() => {
                     setView("login");
                     setFullName("");
-                    setUgleReg("");
                     setMotherLodge("");
                     setRegEmail("");
                     setGdpr(false);
