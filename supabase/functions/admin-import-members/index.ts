@@ -97,7 +97,8 @@ Deno.serve(async (req) => {
         const profile: Record<string, unknown> = { full_name, email: record.email };
         for (const [k, v] of Object.entries(record)) if (k !== "email" && v !== null) profile[k] = v;
         profile.degree = record.degree ?? "master_mason";
-        profile.status = record.status ?? "active";
+        profile.status = "active"; // imported members are always active
+        profile.unit_id = unitId;
         const { error: perr } = await admin.from("profiles").update(profile).eq("id", created.user.id);
         if (perr) { results.push({ row: rowNo, email: record.email, action: "error", message: `Sign-in created but details not saved: ${perr.message}` }); continue; }
         byEmail.set(record.email, { ...profile, id: created.user.id });

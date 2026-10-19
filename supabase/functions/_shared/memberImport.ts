@@ -18,7 +18,7 @@ export const TEMPLATE_COLUMNS = [
   "provincial_rank", "grand_rank", "phone", "address_line1", "address_line2", "address_line3",
   "town", "county", "postcode", "date_of_birth", "initiation_date", "passing_date", "raising_date",
   "joined_lodge_date", "degree", "grand_lodge_number", "is_past_master", "is_royal_arch",
-  "is_honorary_member", "dietary_requirements", "status",
+  "is_honorary_member", "dietary_requirements",
 ];
 
 const TITLES = ["Bro", "W Bro", "VW Bro", "RW Bro"];
