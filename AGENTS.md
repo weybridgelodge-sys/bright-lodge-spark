@@ -1,4 +1,4 @@
-- Subdirectories may have their own AGENTS.md (e.g. src/components/members/treasurer/); read it before changing files there.
+- Subdirectories may have their own AGENTS.md; read it before changing files there.
 - Posting periods: any unlocked row is postable; use usePostingPeriod/PeriodPicker and default by entry date, never one global period.
 - Bespoke news SEO overrides go in staticRoutes ahead of Sanity metadata, covered by staticMetaParity; why: legacy pages own their search copy.
 - Portal routing: `/members` is the dashboard; `/members/dashboard` and the inner catch-all redirect there so every portal URL resolves.
