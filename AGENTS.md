@@ -16,7 +16,7 @@
 - Bulk import only via admin-import-members (validation in _shared/memberImport.ts); fills blanks only, never roles, sign-in email or status. Why: safe re-runs.
 - Registration numbers (ugle/mmh/rose_croix) are private (get_profiles_pii), edited only in Edit Member by admin/Secretary. Why: Secretary-owned records.
 - Almoner 2-tier: can_view_almoner reads, can_edit_almoner writes (+welfare-attachments, Widows archive by status, no delete); app: canAccessAlmoner/canEditAlmoner; can_access_almoner dead;missed: almonerMeetingTypes (non-cancelled). Why: read-only roles
-- Page/list loading uses useInitialLoading, never useState(true), so refreshes keep content and scroll.
+- Page/list loading uses useInitialLoading, never useState(true), so refreshes keep content+scroll.
 - lodge_events.event_label drives booking/email wording; titles in lib/bookingTitles. Why: non-Festive-Board events reuse one form.
 - Public event bookings use the separate events Stripe (_shared/stripe-events.ts, STRIPE_EVENTS_*) and event_* tables, never lodge Stripe. Why: events money stays off the lodge ledger.
 - Event module tables: public read via is_event_published(), writes via can_write_event_content(), copies via duplicate_event_content(). Why: drafts hidden, copies atomic.
