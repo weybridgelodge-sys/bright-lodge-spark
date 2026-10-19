@@ -13,11 +13,13 @@ const json = (b: unknown, status = 200) =>
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
-  // No caller secret: like the other hourly jobs here, anyone may trigger a
-  // run, but every action is decided by Stripe's own session state and the
-  // hold/grace rules, so an extra run can only do what the next hourly run
-  // would. Reports expose short ids and statuses only (no names, emails).
-  const expected = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+  // Secured like almoner-overdue-check / secretary reminders: the hourly
+  // schedule sends the service-role key from the vault; every other caller
+  // (including dry runs) is refused.
+  const expected = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+  const auth = req.headers.get("Authorization") ?? "";
+  const token = auth.startsWith("Bearer ") ? auth.slice(7) : "";
+  if (!expected || token !== expected) return json({ error: "Unauthorized" }, 401);
   const dryRun = new URL(req.url).searchParams.get("dry_run") === "1";
   const supabase = createClient(Deno.env.get("SUPABASE_URL")!, expected);
   const now = new Date();
