@@ -5,6 +5,7 @@
 import { createClient, SupabaseClient } from 'npm:@supabase/supabase-js@2'
 import { sendTransactionalEmail } from './send-email.ts'
 import { loadLodgeSettings } from './lodgeSettings.ts'
+import { bookingFirstName } from './greeting.ts'
 
 export const ASSISTANT_SECRETARY_EMAIL = 'assistantsecretary@weybridgelodge.org.uk'
 export const WEBMASTER_EMAIL = 'webmaster@weybridgelodge.org.uk'
@@ -212,7 +213,7 @@ export async function sendBookingEmails(bookingId: string, opts: SendOpts) {
   const dietary = details.dietary || details.dietaryRequirements || ''
   const bookingRef = String(b.id).slice(0, 8)
   const eventLabel = b.event_label || ''
-  const firstName = (details.firstName || (b.contact_name || '').split(' ')[0] || '').trim()
+  const firstName = bookingFirstName(details, b.contact_name)
   const submittedAt = new Date(b.created_at).toLocaleString('en-GB', { timeZone: 'Europe/London' })
 
   const { secretaryName, secretaryOffice } = await lookupSecretarySignature(supabase)

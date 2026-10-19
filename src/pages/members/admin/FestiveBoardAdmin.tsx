@@ -1,4 +1,5 @@
 import { fetchProfilesPii } from "@/lib/profilePii";
+import { firstNameFromContact } from "../../../../supabase/functions/_shared/greeting";
 import { useEffect, useMemo, useState } from "react";
 import MembersLayout from "@/components/members/MembersLayout";
 import { useAuth } from "@/hooks/useAuth";
@@ -283,7 +284,7 @@ export default function FestiveBoardAdmin() {
         const name = String(guest?.name ?? r.visitor_name ?? "").trim();
         const parts = name.split(/\s+/);
         title = String(guest?.title ?? "").trim();
-        first = String(guest?.firstName ?? parts[0] ?? "").trim();
+        first = String(guest?.firstName ?? "").trim() || firstNameFromContact(name);
         last = String(guest?.lastName ?? parts.slice(1).join(" ") ?? "").trim();
         group = String(guest?.lodge ?? r.visitor_lodge_name ?? bDetails.lodge ?? "").trim();
       } else if (booking) {
@@ -296,8 +297,8 @@ export default function FestiveBoardAdmin() {
         // Manual visitor entry — no linked booking
         const name = String(r.visitor_name ?? "").trim();
         const parts = name.split(/\s+/);
-        first = parts[0] ?? "";
-        last = parts.slice(1).join(" ") ?? "";
+        first = firstNameFromContact(name);
+        last = parts.slice(parts.indexOf(first) + 1).join(" ");
         group = String(r.visitor_lodge_name ?? "").trim();
       }
 

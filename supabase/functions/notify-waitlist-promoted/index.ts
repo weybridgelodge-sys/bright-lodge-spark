@@ -5,6 +5,7 @@
 // trigger-driven promotions (Secretary marks a booking as apologies).
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { sendTransactionalEmail } from '../_shared/send-email.ts'
+import { bookingFirstName } from '../_shared/greeting.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -61,7 +62,7 @@ Deno.serve(async (req) => {
       }
     } catch { /* ignore */ }
 
-    const firstName = (b.contact_name || '').trim().split(/\s+/)[0] || undefined
+    const firstName = bookingFirstName(b.details, b.contact_name) || undefined
     try {
       const res = await sendTransactionalEmail({
           templateName: 'waitlist-promoted',

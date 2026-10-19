@@ -4,6 +4,7 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { createStripeClient, type StripeEnv } from '../_shared/stripe.ts'
 import { sendTransactionalEmail } from '../_shared/send-email.ts'
+import { bookingFirstName } from '../_shared/greeting.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -91,7 +92,7 @@ Deno.serve(async (req) => {
 
   const { data: waitlisted } = await supabase
     .from('bookings')
-    .select('id, contact_name, contact_email, event_label, meeting_id, total_pence, stripe_payment_intent_id, environment, waitlist_refunded_at')
+    .select('id, contact_name, contact_email, event_label, meeting_id, details, total_pence, stripe_payment_intent_id, environment, waitlist_refunded_at')
     .in('meeting_id', meetingIds)
     .eq('payment_status', 'waitlisted')
 
@@ -117,7 +118,7 @@ Deno.serve(async (req) => {
       }).eq('id', b.id)
 
       // Send apology + refund confirmation
-      const firstName = (b.contact_name || '').trim().split(/\s+/)[0] || undefined
+      const firstName = bookingFirstName(b.details, b.contact_name) || undefined
       const totalAmount = b.total_pence
         ? new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' }).format(b.total_pence / 100)
         : undefined

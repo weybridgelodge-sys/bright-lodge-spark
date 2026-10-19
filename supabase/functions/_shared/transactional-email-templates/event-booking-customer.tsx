@@ -1,6 +1,7 @@
 import * as React from 'npm:react@18.3.1'
 import { Body, Container, Head, Heading, Hr, Html, Img, Link, Preview, Section, Text } from 'npm:@react-email/components@0.0.22'
 import type { TemplateEntry } from './registry.ts'
+import { firstNameFromContact } from '../greeting.ts'
 import { BRAND, LOGO_HEIGHT, LOGO_URL, LOGO_WIDTH } from './_brand.ts'
 
 export interface EventBookingData {
@@ -82,7 +83,7 @@ export function stageCopy(d: EventBookingData) {
 const Email = (d: EventBookingData) => {
   const paid = d.stage === 'paid' || d.stage === 'balance_paid' || d.stage === 'deposit' || d.paymentStatus === 'Paid' || d.paymentStatus === 'Deposit paid'
   const copy = stageCopy(d)
-  const first = (d.bookerName || '').split(' ')[0]
+  const first = firstNameFromContact(d.bookerName)
   return (
     <Html lang="en" dir="ltr">
       <Head />
