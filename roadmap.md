@@ -110,3 +110,11 @@
 - [x] Hourly expire-pending-bookings live (25 past each hour)
 - [ ] 3a3712ad clears about 19:25 UTC 19 Oct
 - [ ] Scheduler vault key sends no auth header (weekly backups stopped after 13 Sep); needs Lovable support
+
+## Booking tidy-ups, sign-up redesign, dietary/import (Oct 2026)
+- [x] Fee line on return page and booking emails; date no longer repeated
+- [x] Waitlisted unpaid card bookings in hourly cleanup
+- [x] Self sign-up closed; Request access form; invite emails on create/import
+- [x] "Update my saved requirements" tick box; PTP "Special req." from booking only
+- [ ] Name backfill for 2 bookings (awaiting Julien's go-ahead)
+- [ ] Auto-invite when a candidate is initiated (awaiting decision)
