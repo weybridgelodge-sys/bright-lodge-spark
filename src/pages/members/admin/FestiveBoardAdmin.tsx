@@ -1,3 +1,4 @@
+import { bookingCreatesRegisterRow } from "../../../../supabase/functions/_shared/pendingBookingExpiry";
 import { fetchProfilesPii } from "@/lib/profilePii";
 import { firstNameFromContact } from "../../../../supabase/functions/_shared/greeting";
 import { useEffect, useMemo, useState } from "react";
@@ -940,6 +941,8 @@ function MeetingDialog({
         const d = (b.details ?? {}) as Record<string, unknown>;
         const opt = String(d.meetingOption ?? "");
         if (opt === "apologies" || b.payment_status === "apologies") continue;
+        // Unpaid card bookings never join the register.
+        if (!bookingCreatesRegisterRow(b.payment_status)) continue;
         const amount = opt === "meeting-and-festive-board" ? (diningPence / 100).toFixed(2) : "0.00";
         const meetingOnly = opt === "meeting-only";
 

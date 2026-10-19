@@ -507,6 +507,7 @@ export type Database = {
           stripe_session_id: string | null
           subtotal_pence: number
           total_pence: number
+          unit_id: string
           updated_at: string
           user_id: string | null
           waitlist_refunded_at: string | null
@@ -540,6 +541,7 @@ export type Database = {
           stripe_session_id?: string | null
           subtotal_pence?: number
           total_pence?: number
+          unit_id?: string
           updated_at?: string
           user_id?: string | null
           waitlist_refunded_at?: string | null
@@ -573,6 +575,7 @@ export type Database = {
           stripe_session_id?: string | null
           subtotal_pence?: number
           total_pence?: number
+          unit_id?: string
           updated_at?: string
           user_id?: string | null
           waitlist_refunded_at?: string | null
