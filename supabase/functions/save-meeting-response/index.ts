@@ -5,6 +5,7 @@ import { DUPLICATE_BOOKING_MESSAGE, findExistingBooking } from "../_shared/dupli
 import { verifyTurnstile } from "../_shared/verify-turnstile.ts";
 import { isHoneypotTripped, seatCheckOutcome } from "../_shared/meetingResponseGuards.ts";
 import { cleanSpaces, trimBookingNames } from "../_shared/greeting.ts";
+import { expectedDiningPence } from "../_shared/bookingAmounts.ts";
 
 
 const corsHeaders = {
@@ -97,21 +98,22 @@ Deno.serve(async (req) => {
     // Link to the published Festive Board record by direct id when available,
     // otherwise by the public Meeting Event slug stored in event_key.
     let resolvedMeetingId: string | null = null;
+    let diningPricePence: number | null = null; // read server-side, never from the browser
     if (meeting_id) {
       const { data: m } = await supabase
         .from("festive_board_meetings")
-        .select("id,status")
+        .select("id,status,dining_price_pence")
         .eq("id", meeting_id)
         .maybeSingle();
-      if (m && m.status === "published") resolvedMeetingId = m.id;
+      if (m && m.status === "published") { resolvedMeetingId = m.id; diningPricePence = m.dining_price_pence ?? null; }
     }
     if (!resolvedMeetingId) {
       const { data: m } = await supabase
         .from("festive_board_meetings")
-        .select("id,status")
+        .select("id,status,dining_price_pence")
         .eq("event_key", event_key)
         .maybeSingle();
-      if (m && m.status === "published") resolvedMeetingId = m.id;
+      if (m && m.status === "published") { resolvedMeetingId = m.id; diningPricePence = m.dining_price_pence ?? null; }
     }
 
     // HARD DUPLICATE GUARD — same rule as paid checkout: one live response per
@@ -166,6 +168,11 @@ Deno.serve(async (req) => {
       initialStatus = "confirmed";
     }
 
+    // Expected base price for non-card dining bookings (card bookings go through create-checkout).
+    const expectedPence = initialStatus === "apologies" ? 0 : expectedDiningPence(
+      meeting_option, (details as any)?.paymentMethod ?? null, (details as any)?.guestCount, diningPricePence,
+    );
+
     const { data: booking, error } = await supabase
       .from("bookings")
       .insert({
@@ -177,9 +184,9 @@ Deno.serve(async (req) => {
         contact_phone: contact_phone ?? null,
         details: trimBookingNames(details ?? {}),
         line_items: [],
-        subtotal_pence: 0,
+        subtotal_pence: expectedPence,
         fee_pence: 0,
-        total_pence: 0,
+        total_pence: expectedPence,
         payment_status: initialStatus,
         environment: "live", // fixed server-side; client value ignored
       })
