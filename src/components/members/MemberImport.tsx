@@ -59,7 +59,7 @@ export default function MemberImport({ onDone }: { onDone: () => void }) {
       <ul className="text-sm text-primary-foreground/70 list-disc pl-5 space-y-1">
         <li>Matches existing members by email, then by Grand Lodge number.</li>
         <li>For existing members it only fills in blank details and never overwrites anything. Running the same file again changes nothing.</li>
-        <li>New people get a sign-in (no email is sent) and are set to Active unless the file gives a status.</li>
+        <li>New people are set to Active and sent the lodge invitation email when you confirm. Nothing is sent during the preview.</li>
         <li>Roles, sign-in emails and existing members' status are never changed.</li>
       </ul>
       <div className="flex flex-col sm:flex-row gap-2">
