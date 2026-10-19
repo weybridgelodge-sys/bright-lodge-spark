@@ -106,4 +106,4 @@
 - [ ] Fix remaining axe findings on 32 portal phone tests (awaiting user decision on larger items)
 
 ## Pending bookings addendum (Oct 2026)
-- [ ] Find what updated bookings at 08:40:17 UTC 19 Oct; confirm trigger skips pending; confirm deletes cover ::g rows; paid-row manual delete behaviour; dry-run list
+- [x] Find what updated bookings at 08:40:17 UTC 19 Oct; confirm trigger skips pending; confirm deletes cover ::g rows; paid-row manual delete behaviour; dry-run list
