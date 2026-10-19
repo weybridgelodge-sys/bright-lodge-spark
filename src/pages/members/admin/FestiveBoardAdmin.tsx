@@ -238,7 +238,7 @@ export default function FestiveBoardAdmin() {
     // Fetch linked bookings for Meal / dietary fallback. source_booking_id can be `<uuid>` or `<uuid>::gN`.
     const bookingIds = Array.from(
       new Set(
-        rowsRaw
+        diningRows
           .map((r) => (r.source_booking_id ? r.source_booking_id.split("::")[0] : null))
           .filter(Boolean) as string[],
       ),
@@ -252,11 +252,8 @@ export default function FestiveBoardAdmin() {
       for (const b of (bks ?? []) as any[]) bookingsMap.set(b.id, b);
     }
 
-    const cleanDiet = (s: string) => (/^none$/i.test(s.trim()) ? "" : s.trim());
+    const rows = buildPtpRows(diningRows, profilesMap, bookingsMap);
 
-    const rows: Array<Record<string, string>> = [];
-    for (const r of rowsRaw) {
-      const parentBookingId = r.source_booking_id ? r.source_booking_id.split("::")[0] : null;
       const guestIdx = r.source_booking_id && r.source_booking_id.includes("::g")
         ? parseInt(r.source_booking_id.split("::g")[1] ?? "", 10)
         : null;
