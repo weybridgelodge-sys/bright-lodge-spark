@@ -118,3 +118,9 @@
 - [x] "Update my saved requirements" tick box; PTP "Special req." from booking only
 - [ ] Name backfill for 2 bookings (awaiting Julien's go-ahead)
 - [ ] Auto-invite when a candidate is initiated (awaiting decision)
+
+## Expected amount on non-card bookings (Oct 2026)
+- [x] Emails show amount lines only for Stripe bookings
+- [x] save-meeting-response stores expected base price for non-card dining bookings
+- [x] Admin waitlist list labels non-card amounts "(expected)"
+- [ ] Backfill existing bookings — waiting for the user to decide whether £32 register rows or the bookings' own £35 is correct
