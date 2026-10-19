@@ -5,6 +5,7 @@
 import { createClient, SupabaseClient } from 'npm:@supabase/supabase-js@2'
 import { sendTransactionalEmail } from './send-email.ts'
 import { loadLodgeSettings } from './lodgeSettings.ts'
+import { bookingFirstName } from './greeting.ts'
 
 export const ASSISTANT_SECRETARY_EMAIL = 'assistantsecretary@weybridgelodge.org.uk'
 export const WEBMASTER_EMAIL = 'webmaster@weybridgelodge.org.uk'

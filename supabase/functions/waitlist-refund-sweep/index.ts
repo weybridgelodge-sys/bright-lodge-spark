@@ -4,6 +4,7 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { createStripeClient, type StripeEnv } from '../_shared/stripe.ts'
 import { sendTransactionalEmail } from '../_shared/send-email.ts'
+import { bookingFirstName } from '../_shared/greeting.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',

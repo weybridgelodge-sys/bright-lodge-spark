@@ -5,6 +5,7 @@
 // trigger-driven promotions (Secretary marks a booking as apologies).
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { sendTransactionalEmail } from '../_shared/send-email.ts'
+import { bookingFirstName } from '../_shared/greeting.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',

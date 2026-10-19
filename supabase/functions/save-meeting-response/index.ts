@@ -4,6 +4,7 @@ import { sendBookingEmails } from "../_shared/send-booking-emails.ts";
 import { DUPLICATE_BOOKING_MESSAGE, findExistingBooking } from "../_shared/duplicate-booking.ts";
 import { verifyTurnstile } from "../_shared/verify-turnstile.ts";
 import { isHoneypotTripped, seatCheckOutcome } from "../_shared/meetingResponseGuards.ts";
+import { trimBookingNames } from "../_shared/greeting.ts";
 
 
 const corsHeaders = {

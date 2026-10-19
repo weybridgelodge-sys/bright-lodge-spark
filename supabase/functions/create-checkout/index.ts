@@ -4,6 +4,7 @@ import { z } from "https://esm.sh/zod@3.23.8";
 import { type StripeEnv, createStripeClient } from "../_shared/stripe.ts";
 import { seatCheckOutcome } from "../_shared/meetingResponseGuards.ts";
 import { DUPLICATE_BOOKING_MESSAGE, findExistingBooking } from "../_shared/duplicate-booking.ts";
+import { trimBookingNames } from "../_shared/greeting.ts";
 
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL")!,
