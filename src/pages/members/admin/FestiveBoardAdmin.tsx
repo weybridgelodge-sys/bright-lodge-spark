@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { formatMemberLine, type MemberRow } from "@/lib/summons";
 import { normaliseName } from "@/lib/nameCase";
 import { saveBlob } from "@/lib/nativeDownload";
+import { buildPtpRows, filterPtpDiningRows, ptpExportMessage } from "@/lib/ptpExport";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -224,7 +225,7 @@ export default function FestiveBoardAdmin() {
     }>;
 
     // Fetch linked profiles (for member names/titles)
-    const memberIds = Array.from(new Set(rowsRaw.map((r) => r.member_id).filter(Boolean) as string[]));
+    const memberIds = Array.from(new Set(diningRows.map((r) => r.member_id).filter(Boolean) as string[]));
     const profilesMap = new Map<string, Member>();
     if (memberIds.length) {
       const { data: profs } = await supabase
@@ -265,7 +266,7 @@ export default function FestiveBoardAdmin() {
       rows.map((r) => headers.map((h) => esc(r[h] ?? "")).join(",")).join("\r\n");
     const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8" });
     await saveBlob(blob, `perfecttableplan-${mtg.meeting_date}-${mtg.id.slice(0, 8)}.csv`);
-    toast({ title: "Exported", description: `${rows.length} attendee row${rows.length === 1 ? "" : "s"}.` });
+    toast({ title: "Exported", description: ptpExportMessage(rows.length, meetingOnlyLeftOut) });
   };
 
   const promoteWaitlistBooking = async (b: any) => {
