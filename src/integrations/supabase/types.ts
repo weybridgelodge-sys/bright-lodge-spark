@@ -2417,6 +2417,7 @@ export type Database = {
           payment_method: Database["public"]["Enums"]["festive_payment_method"]
           source: Database["public"]["Enums"]["attendance_source"]
           source_booking_id: string | null
+          suspected_member_id: string | null
           updated_at: string
           visitor_lodge_name: string | null
           visitor_lodge_number: string | null
@@ -2438,6 +2439,7 @@ export type Database = {
           payment_method?: Database["public"]["Enums"]["festive_payment_method"]
           source?: Database["public"]["Enums"]["attendance_source"]
           source_booking_id?: string | null
+          suspected_member_id?: string | null
           updated_at?: string
           visitor_lodge_name?: string | null
           visitor_lodge_number?: string | null
@@ -2459,6 +2461,7 @@ export type Database = {
           payment_method?: Database["public"]["Enums"]["festive_payment_method"]
           source?: Database["public"]["Enums"]["attendance_source"]
           source_booking_id?: string | null
+          suspected_member_id?: string | null
           updated_at?: string
           visitor_lodge_name?: string | null
           visitor_lodge_number?: string | null
@@ -2489,6 +2492,20 @@ export type Database = {
           {
             foreignKeyName: "festive_board_attendance_member_id_fkey"
             columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "festive_board_attendance_suspected_member_id_fkey"
+            columns: ["suspected_member_id"]
+            isOneToOne: false
+            referencedRelation: "calendar_subscription_status"
+            referencedColumns: ["member_id"]
+          },
+          {
+            foreignKeyName: "festive_board_attendance_suspected_member_id_fkey"
+            columns: ["suspected_member_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -7063,6 +7080,10 @@ export type Database = {
       approve_unlock_treasurer_period: {
         Args: { _period_id: string }
         Returns: undefined
+      }
+      booking_name_member_suspect: {
+        Args: { _first: string; _last: string }
+        Returns: string
       }
       booking_seat_count: {
         Args: { _details: Json; _line_items: Json }
