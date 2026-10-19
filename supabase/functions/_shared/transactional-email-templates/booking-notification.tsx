@@ -90,7 +90,7 @@ const Email = ({
           <Hr style={hr} />
           {!isApologies && <Row label="Attending" value={meetingOptionLabel} />}
           {dietary && <Row label="Dietary" value={dietary} />}
-          {totalAmount && {amountLines && amountLines.length ? amountLines.map((l) => <Row key={l.label} label={l.label} value={l.value} />) : <Row label="Total" value={totalAmount} />}}
+          {totalAmount && (amountLines && amountLines.length ? amountLines.map((l) => <Row key={l.label} label={l.label} value={l.value} />) : <Row label="Total" value={totalAmount} />)}
           {paymentMethodLabel && <Row label="Payment method" value={paymentMethodLabel} />}
           {paymentStatusLabel && <Row label="Payment status" value={paymentStatusLabel} />}
 
