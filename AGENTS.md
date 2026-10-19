@@ -28,3 +28,4 @@
 - Diary: festive_board_meetings via diary_* RPCs; cancel, never delete; Installation move updates stored date; per-month meeting_series.schedule inferred from diary, skips existing; only regular/installation scheduled, rest one-off. Why: one register.
 - Every new/changed page/screen/dialog: 320px test (worst-case data; no overflow/obscured controls) + axe (helpers/axe, WCAG 2.1 AA), colour-contrast always on, never disabled; fieldCls tokens; 44px targets; report scanned/unscanned.
 - Newsletter sign-up is double opt-in (_shared/newsletterOptIn.ts); store token hash only; sends/counts need confirmed=true. Why: no subscribing others.
+- Booking greetings use _shared/greeting.ts (details.firstName, else first non-title word, else "there"); booking saves trim name fields. Why: titles like Mrs/W Bro were greeted as names.
