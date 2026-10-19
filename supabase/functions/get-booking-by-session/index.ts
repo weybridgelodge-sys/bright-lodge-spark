@@ -1,5 +1,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { bookingFirstName } from "../_shared/greeting.ts";
+import { createStripeClient } from "../_shared/stripe.ts";
+import { envFromSessionId, isSessionExpiredForReturn } from "../_shared/pendingBookingExpiry.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -55,7 +57,20 @@ Deno.serve(async (req) => {
         }
       : null;
 
-    return new Response(JSON.stringify({ booking: sanitised }), {
+    // Unpaid hold lapsed (or the row has been cleared): tell the return page.
+    let sessionExpired = false;
+    if (!data || data.payment_status === "pending") {
+      const env = envFromSessionId(session_id);
+      if (env) {
+        try {
+          const s = await createStripeClient(env).checkout.sessions.retrieve(session_id);
+          sessionExpired = isSessionExpiredForReturn(data?.payment_status ?? null,
+            { status: s.status, payment_status: s.payment_status, expires_at: s.expires_at }, new Date());
+        } catch (_e) { /* unknown session: leave as not found */ }
+      }
+    }
+
+    return new Response(JSON.stringify({ booking: sessionExpired ? null : sanitised, session_expired: sessionExpired }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

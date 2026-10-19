@@ -70,7 +70,7 @@ export default function EventsAdmin() {
   const askArchive = async (e: LodgeEvent, mode: ArchiveTarget["mode"]) => {
     let bookings = 0;
     if (mode !== "restore") {
-      const { count } = await supabase.from("bookings").select("id", { count: "exact", head: true }).eq("event_key", e.slug);
+      const { count } = await supabase.from("bookings").select("id", { count: "exact", head: true }).eq("event_key", e.slug).not("payment_status", "in", "(pending,failed)");
       bookings = count ?? 0;
     }
     setTarget({ event: e, mode, bookings });

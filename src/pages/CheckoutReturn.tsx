@@ -5,8 +5,9 @@ import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
 import { supabase } from "@/integrations/supabase/client";
 import { CheckCircle2, Clock, AlertCircle } from "lucide-react";
+import { classifyReturn, EXPIRED_SESSION_MESSAGE } from "@/lib/checkoutReturnState";
 
-type Status = "loading" | "paid" | "pending" | "waitlisted" | "error";
+type Status = "loading" | "paid" | "pending" | "waitlisted" | "expired" | "error";
 
 const CheckoutReturn = () => {
   const [params] = useSearchParams();
@@ -26,16 +27,13 @@ const CheckoutReturn = () => {
       const { data: resp } = await supabase.functions.invoke("get-booking-by-session", {
         body: { session_id: sessionId },
       });
-      const data = resp?.booking ?? null;
       if (cancelled) return;
-      if (data?.payment_status === "waitlisted") {
+      const kind = classifyReturn(resp ?? null);
+      const data = resp?.booking ?? null;
+      if (kind === "expired") { setStatus("expired"); return; }
+      if (kind === "waitlisted" || kind === "paid") {
         setBooking(data);
-        setStatus("waitlisted");
-        return;
-      }
-      if (data?.payment_status === "paid") {
-        setBooking(data);
-        setStatus("paid");
+        setStatus(kind);
         return;
       }
       if (data && attempts < 8) {
@@ -124,6 +122,19 @@ const CheckoutReturn = () => {
                   className="inline-flex items-center justify-center bg-gold-shimmer text-accent-foreground px-8 py-3 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity"
                 >
                   Back to Home
+                </Link>
+              </>
+            )}
+            {status === "expired" && (
+              <>
+                <Clock className="w-12 h-12 text-gold-dark mx-auto mb-4" aria-hidden="true" />
+                <h1 className="text-2xl font-serif text-foreground mb-2">Booking session expired</h1>
+                <p className="text-muted-foreground font-sans mb-6">{EXPIRED_SESSION_MESSAGE}</p>
+                <Link
+                  to="/bookings"
+                  className="inline-flex items-center justify-center min-h-[44px] bg-gold-shimmer text-accent-foreground px-8 py-3 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest hover:opacity-90 transition-opacity"
+                >
+                  Start a new booking
                 </Link>
               </>
             )}

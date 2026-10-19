@@ -778,6 +778,13 @@
       "when": 1792359369132,
       "tag": "0110_newsletter_double_opt_in",
       "breakpoints": true
+    },
+    {
+      "idx": 111,
+      "version": "7",
+      "when": 1792399595171,
+      "tag": "0111_pending_bookings_register_and_unit",
+      "breakpoints": true
     }
   ]
 }

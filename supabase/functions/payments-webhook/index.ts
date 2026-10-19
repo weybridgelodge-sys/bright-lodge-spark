@@ -1,8 +1,6 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { type StripeEnv, verifyWebhook } from "../_shared/stripe.ts";
-import { syncBookingStripeFee } from "../_shared/stripe-fees.ts";
-
-import { sendBookingEmails } from "../_shared/send-booking-emails.ts";
+import { markBookingPaid } from "../_shared/markBookingPaid.ts";
 
 let _supabase: ReturnType<typeof createClient> | null = null;
 function getSupabase() {
@@ -41,52 +39,11 @@ async function handleCheckoutCompleted(session: any, env: StripeEnv) {
     return;
   }
 
-  const bookingId = session.metadata?.booking_id;
-  if (!bookingId) {
+  if (!session.metadata?.booking_id) {
     console.warn("checkout.session.completed without booking_id metadata", session.id);
     return;
   }
-  const { data: existing } = await getSupabase()
-    .from("bookings")
-    .select("payment_status")
-    .eq("id", bookingId)
-    .eq("environment", env)
-    .maybeSingle();
-  const isWaitlisted = existing?.payment_status === "waitlisted";
-  const { error } = await getSupabase()
-    .from("bookings")
-    .update({
-      payment_status: isWaitlisted ? "waitlisted" : "paid",
-      stripe_payment_intent_id: session.payment_intent ?? null,
-      paid_at: new Date().toISOString(),
-    })
-    .eq("id", bookingId)
-    .eq("environment", env);
-  if (error) {
-    console.error("Failed to mark booking paid:", error);
-    return;
-  }
-  // Record the ACTUAL Stripe processing fee from the balance transaction so
-  // Treasurer dining reconciliation is automatic for future meetings.
-  await recordActualStripeFee(bookingId, session.payment_intent, env);
-  try {
-    await sendBookingEmails(bookingId, { stage: "paid" });
-  } catch (e) {
-    console.error("sendBookingEmails (paid) failed:", e);
-  }
-}
-
-async function recordActualStripeFee(
-  bookingId: string,
-  paymentIntentId: string | null | undefined,
-  env: StripeEnv,
-) {
-  // Two attempts, ~3s apart: Stripe sometimes hasn't attached the
-  // balance_transaction yet the instant checkout completes. Never throws.
-  await syncBookingStripeFee(getSupabase(), bookingId, paymentIntentId, env, {
-    attempts: 2,
-    retryDelayMs: 3000,
-  });
+  await markBookingPaid(getSupabase(), session, env);
 }
 
 

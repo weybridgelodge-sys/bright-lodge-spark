@@ -1,3 +1,4 @@
+import { bookingCreatesRegisterRow } from "../../../../supabase/functions/_shared/pendingBookingExpiry";
 import { fetchProfilesPii } from "@/lib/profilePii";
 import { firstNameFromContact } from "../../../../supabase/functions/_shared/greeting";
 import { useEffect, useMemo, useState } from "react";
@@ -844,6 +845,9 @@ function MeetingDialog({
     return initial;
   });
 
+  // Bookings that hold a paid/confirmed place: their register rows can't be
+  // removed here (the booking would put them straight back). Cancel/refund first.
+  const [heldBookingIds, setHeldBookingIds] = useState<Set<string>>(new Set());
   const [visitorDrafts, setVisitorDrafts] = useState<VisitorDraft[]>(() =>
     existingAttendance
       .filter((a) => !a.member_id)
@@ -903,6 +907,7 @@ function MeetingDialog({
         .select("id,contact_name,contact_email,details,payment_status")
         .or(`meeting_id.eq.${existing.id},event_key.eq.${existing.event_key}`);
       if (cancelled || !bookings?.length) return;
+      setHeldBookingIds(new Set(bookings.filter((b) => ["paid", "confirmed", "waitlisted"].includes(String(b.payment_status))).map((b) => b.id)));
 
       const alreadySynced = new Set(
         existingAttendance.map((a) => a.source_booking_id).filter(Boolean) as string[]
@@ -940,6 +945,8 @@ function MeetingDialog({
         const d = (b.details ?? {}) as Record<string, unknown>;
         const opt = String(d.meetingOption ?? "");
         if (opt === "apologies" || b.payment_status === "apologies") continue;
+        // Unpaid card bookings never join the register.
+        if (!bookingCreatesRegisterRow(b.payment_status)) continue;
         const amount = opt === "meeting-and-festive-board" ? (diningPence / 100).toFixed(2) : "0.00";
         const meetingOnly = opt === "meeting-only";
 
@@ -1101,8 +1108,19 @@ function MeetingDialog({
     ]);
 
 
-  const removeVisitor = (id: string) =>
-    setVisitorDrafts((p) => p.filter((v) => v.id !== id));
+  const isHeldByBooking = (sourceBookingId?: string | null) =>
+    !!sourceBookingId && heldBookingIds.has(sourceBookingId.split("::")[0]);
+  const blockHeldRemoval = () =>
+    toast({
+      title: "This place is held by a paid booking",
+      description: "Cancel or refund the booking first. While the booking stands, this register row can't be removed.",
+      variant: "destructive",
+    });
+  const removeVisitor = (id: string) => {
+    const v = visitorDrafts.find((x) => x.id === id);
+    if (isHeldByBooking(v?.sourceBookingId)) { blockHeldRemoval(); return; }
+    setVisitorDrafts((p) => p.filter((x) => x.id !== id));
+  };
 
   const computedAttended = useMemo(() => {
     const presentMembers = Object.values(memberDrafts).filter(
@@ -1408,7 +1426,7 @@ function MeetingDialog({
                     <label className="flex items-center gap-3 min-h-11 min-w-0 cursor-pointer">
                       <Checkbox
                         checked={d.present}
-                        onCheckedChange={(v) => setMember(m.id, { present: !!v })}
+                        onCheckedChange={(v) => { if (!v && isHeldByBooking(memberDrafts[m.id]?.sourceBookingId)) { blockHeldRemoval(); return; } setMember(m.id, { present: !!v }); }}
                         aria-label={`Attending: ${memberDisplay(m)}`}
                       />
                       <span className="min-w-0 break-words flex items-center gap-1.5 flex-wrap">

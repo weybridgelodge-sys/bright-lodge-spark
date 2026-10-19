@@ -5,6 +5,7 @@ import { type StripeEnv, createStripeClient } from "../_shared/stripe.ts";
 import { seatCheckOutcome } from "../_shared/meetingResponseGuards.ts";
 import { DUPLICATE_BOOKING_MESSAGE, findExistingBooking } from "../_shared/duplicate-booking.ts";
 import { cleanSpaces, trimBookingNames } from "../_shared/greeting.ts";
+import { holdExpiresAtUnix } from "../_shared/pendingBookingExpiry.ts";
 
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL")!,
@@ -216,6 +217,8 @@ Deno.serve(async (req) => {
       mode: "payment",
       ui_mode: "embedded_page",
       return_url: input.return_url,
+      // Card bookings are held for 60 minutes, not Stripe's 24 h default.
+      expires_at: holdExpiresAtUnix(new Date()),
       customer_email: input.contact_email,
       payment_intent_data: {
         description,
