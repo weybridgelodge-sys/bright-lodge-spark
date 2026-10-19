@@ -1,4 +1,5 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { bookingFirstName } from "../_shared/greeting.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -19,10 +20,6 @@ function maskEmail(email: string | null | undefined): string | null {
   return `${visible}${"*".repeat(Math.max(1, user.length - 1))}@${domain}`;
 }
 
-function firstNameOnly(name: string | null | undefined): string | null {
-  if (!name) return null;
-  return name.trim().split(/\s+/)[0] || null;
-}
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
@@ -36,7 +33,7 @@ Deno.serve(async (req) => {
     }
     const { data, error } = await supabase
       .from("bookings")
-      .select("id, contact_name, contact_email, event_label, total_pence, payment_status, paid_at")
+      .select("id, contact_name, details, contact_email, event_label, total_pence, payment_status, paid_at")
       .eq("stripe_session_id", session_id)
       .maybeSingle();
     if (error) {
@@ -49,7 +46,7 @@ Deno.serve(async (req) => {
     const sanitised = data
       ? {
           id: data.id,
-          contact_name: firstNameOnly(data.contact_name),
+          contact_name: bookingFirstName(data.details as Record<string, unknown> | null, data.contact_name) || null,
           contact_email: maskEmail(data.contact_email),
           event_label: data.event_label,
           total_pence: data.total_pence,

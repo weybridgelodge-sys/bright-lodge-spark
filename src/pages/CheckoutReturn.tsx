@@ -74,7 +74,7 @@ const CheckoutReturn = () => {
                 <CheckCircle2 className="w-14 h-14 text-green-600 mx-auto mb-4" />
                 <h1 className="text-2xl font-serif text-foreground mb-2">Booking confirmed</h1>
                 <p className="text-muted-foreground mb-6">
-                  Thank you, <strong>{booking?.contact_name}</strong>. We've received your payment for{" "}
+                  Thank you{booking?.contact_name ? <>, <strong>{booking.contact_name}</strong></> : null}. We've received your payment for{" "}
                   <strong>{booking?.event_label}</strong>.
                 </p>
                 <p className="text-muted-foreground text-sm mb-2">
@@ -108,7 +108,7 @@ const CheckoutReturn = () => {
                 <Clock className="w-12 h-12 text-gold mx-auto mb-4" />
                 <h1 className="text-2xl font-serif text-foreground mb-2">You're on the waitlist</h1>
                 <p className="text-muted-foreground mb-4">
-                  Thank you, <strong>{booking?.contact_name}</strong>. The dining room for{" "}
+                  Thank you{booking?.contact_name ? <>, <strong>{booking.contact_name}</strong></> : null}. The dining room for{" "}
                   <strong>{booking?.event_label}</strong> is currently full, so your booking is being held on the waitlist.
                 </p>
                 <p className="text-muted-foreground text-sm mb-4">

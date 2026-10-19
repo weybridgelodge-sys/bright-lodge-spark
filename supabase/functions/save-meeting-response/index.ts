@@ -174,7 +174,7 @@ Deno.serve(async (req) => {
         contact_name,
         contact_email,
         contact_phone: contact_phone ?? null,
-        details: details ?? {},
+        details: trimBookingNames(details ?? {}),
         line_items: [],
         subtotal_pence: 0,
         fee_pence: 0,
