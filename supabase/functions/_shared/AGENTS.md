@@ -1,1 +1,6 @@
 - Lodge addresses, site URL and sender names come from lodgeSettings.ts (lodge_contact_settings; fallbacks = old values); sender domains stay in code. Why: one editable source, safe on lookup failure.
+- Public event bookings use the separate events Stripe (_shared/stripe-events.ts, STRIPE_EVENTS_*) and event_* tables, never lodge Stripe. Why: events money stays off the lodge ledger.
+- Event money: one event_booking_payments row per Stripe charge; totals via recomputeBooking; balance tokens service-role only. Why: per-payment refunds, private links.
+- Newsletter sign-up is double opt-in (_shared/newsletterOptIn.ts); store token hash only; sends/counts need confirmed=true. Why: no subscribing others.
+- Booking greetings via _shared/greeting.ts; saves trim names. Why: titles greeted as names.
+- Unpaid lodge card bookings: 60-min Stripe hold; hourly expire-pending-bookings asks Stripe first (paid → shared markBookingPaid, expired+15-min grace → delete); register rows only for non-pending/failed bookings (trigger WHEN + _shared/pendingBookingExpiry.ts). Why: never lose a payment, no ghost register rows.
