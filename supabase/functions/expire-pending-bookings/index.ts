@@ -13,13 +13,17 @@ const json = (b: unknown, status = 200) =>
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
-  // Secured like almoner-overdue-check / secretary reminders: the hourly
-  // schedule sends the service-role key from the vault; every other caller
-  // (including dry runs) is refused.
-  const expected = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+  // Secured like db-backup: the gateway verifies the JWT signature
+  // (verify_jwt = true in config.toml) and only a service_role token is
+  // accepted, which only the hourly schedule holds (from the vault).
+  const expected = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
   const auth = req.headers.get("Authorization") ?? "";
-  const token = auth.startsWith("Bearer ") ? auth.slice(7) : "";
-  if (!expected || token !== expected) return json({ error: "Unauthorized" }, 401);
+  let role: unknown = null;
+  try {
+    const part = auth.replace(/^Bearer\s+/i, "").split(".")[1] ?? "";
+    role = JSON.parse(atob(part.replaceAll("-", "+").replaceAll("_", "/").padEnd(Math.ceil(part.length / 4) * 4, "="))).role;
+  } catch { /* not a JWT */ }
+  if (role !== "service_role") return json({ error: "Forbidden" }, 403);
   const dryRun = new URL(req.url).searchParams.get("dry_run") === "1";
   const supabase = createClient(Deno.env.get("SUPABASE_URL")!, expected);
   const now = new Date();
