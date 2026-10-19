@@ -34,3 +34,20 @@ describe("waitlist cleanup candidates", () => {
     expect(isExpiryCandidate({ payment_status: "waitlisted", stripe_session_id: null, paid_at: null })).toBe(false);
   });
 });
+
+import { expectedDiningPence, isStripeBooking } from "../../supabase/functions/_shared/bookingAmounts";
+
+describe("expected amount for non-card dining bookings", () => {
+  it("one diner by bank transfer is 3500", () => expect(expectedDiningPence("meeting-and-festive-board", "bank-transfer", 0, 3500)).toBe(3500));
+  it("member plus one guest by bank transfer is 7000", () => expect(expectedDiningPence("meeting-and-festive-board", "bank-transfer", 1, 3500)).toBe(7000));
+  it("member plus one guest paying on the night is 7000", () => expect(expectedDiningPence("meeting-and-festive-board", "cash-cheque", "1", 3500)).toBe(7000));
+  it("meeting only is 0", () => expect(expectedDiningPence("meeting-only", "bank-transfer", 0, 3500)).toBe(0));
+  it("apologies is 0", () => expect(expectedDiningPence("apologies", "", 0, 3500)).toBe(0));
+  it("card is left to checkout", () => expect(expectedDiningPence("meeting-and-festive-board", "card", 0, 3500)).toBe(0));
+});
+
+describe("amount lines only for Stripe bookings", () => {
+  it("a bank or pay-on-the-night booking is not a Stripe booking", () => expect(isStripeBooking({ stripe_payment_intent_id: null, stripe_session_id: null })).toBe(false));
+  it("a booking with a payment intent is a Stripe booking", () => expect(isStripeBooking({ stripe_payment_intent_id: "pi_1" })).toBe(true));
+  it("a booking with only a session is a Stripe booking", () => expect(isStripeBooking({ stripe_session_id: "cs_1" })).toBe(true));
+});
