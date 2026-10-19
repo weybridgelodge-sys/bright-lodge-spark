@@ -1,6 +1,5 @@
 import { bookingCreatesRegisterRow } from "../../../../supabase/functions/_shared/pendingBookingExpiry";
 import { fetchProfilesPii } from "@/lib/profilePii";
-import { firstNameFromContact } from "../../../../supabase/functions/_shared/greeting";
 import { useEffect, useMemo, useState } from "react";
 import MembersLayout from "@/components/members/MembersLayout";
 import { useAuth } from "@/hooks/useAuth";
@@ -254,72 +253,6 @@ export default function FestiveBoardAdmin() {
 
     const rows = buildPtpRows(diningRows, profilesMap, bookingsMap);
 
-      const guestIdx = r.source_booking_id && r.source_booking_id.includes("::g")
-        ? parseInt(r.source_booking_id.split("::g")[1] ?? "", 10)
-        : null;
-      const booking = parentBookingId ? bookingsMap.get(parentBookingId) : null;
-      const bDetails: any = booking?.details ?? {};
-      const guest: any = guestIdx != null && Array.isArray(bDetails.guests) ? bDetails.guests[guestIdx] ?? {} : null;
-
-      let title = "";
-      let first = "";
-      let last = "";
-      let group = "";
-
-      if (r.member_id) {
-        const p = profilesMap.get(r.member_id);
-        title = (p?.title ?? "").trim();
-        first = (p?.preferred_name ?? p?.first_name ?? "").trim();
-        last = (p?.last_name ?? "").trim();
-        group = "Weybridge 6787";
-      } else if (guest) {
-        const name = String(guest?.name ?? r.visitor_name ?? "").trim();
-        const parts = name.split(/\s+/);
-        title = String(guest?.title ?? "").trim();
-        first = String(guest?.firstName ?? "").trim() || firstNameFromContact(name);
-        last = String(guest?.lastName ?? parts.slice(1).join(" ") ?? "").trim();
-        group = String(guest?.lodge ?? r.visitor_lodge_name ?? bDetails.lodge ?? "").trim();
-      } else if (booking) {
-        // Primary respondent from a booking
-        title = String(bDetails.title ?? "").trim();
-        first = String(bDetails.firstName ?? "").trim();
-        last = String(bDetails.lastName ?? "").trim();
-        group = String(bDetails.lodge ?? r.visitor_lodge_name ?? "").trim();
-      } else {
-        // Manual visitor entry — no linked booking
-        const name = String(r.visitor_name ?? "").trim();
-        const parts = name.split(/\s+/);
-        first = firstNameFromContact(name);
-        last = parts.slice(parts.indexOf(first) + 1).join(" ");
-        group = String(r.visitor_lodge_name ?? "").trim();
-      }
-
-      // Meal: from linked booking's diningOption (or guest.diningOption/meal); blank when meeting-only or manual
-      let meal = "";
-      if (!r.is_meeting_only) {
-        if (guest) meal = String(guest?.diningOption ?? guest?.meal ?? bDetails.diningOption ?? "").trim();
-        else if (booking) meal = String(bDetails.diningOption ?? "").trim();
-      }
-
-      // Dietary: manual field on attendance row wins; else fallback to booking's dietary
-      const manualDiet = (r.dietary ?? "").trim();
-      let dietary = manualDiet;
-      if (!dietary) {
-        if (guest) dietary = String(guest?.dietary ?? "").trim();
-        else if (booking) dietary = String(bDetails.dietary ?? "").trim();
-      }
-      // The booking's own text only (pre-filled from the member record at booking time); never the profile.
-
-      rows.push({
-        Title: title,
-        "First Name": first,
-        "Last Name": last,
-        Group: group,
-        Meal: meal,
-        "Special req.": cleanDiet(dietary),
-        "RSVP status": "Attending",
-      });
-    }
 
     const headers = ["Title", "First Name", "Last Name", "Group", "Meal", "Special req.", "RSVP status"];
     const esc = (v: string) => {
