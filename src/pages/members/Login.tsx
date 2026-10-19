@@ -10,6 +10,7 @@ import { App as CapacitorApp } from "@capacitor/app";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { useAuth } from "@/hooks/useAuth";
+import { isUnknownMemberOtpError } from "@/lib/authAccess";
 import logoAsset from "@/assets/weybridge-logo-no-bg.png.asset.json";
 import { assetUrl } from "@/lib/assetUrl";
 const logo = assetUrl(logoAsset);
@@ -92,7 +93,7 @@ export default function MembersLogin() {
     });
     setBusy(false);
     // Unknown emails get the same neutral screen, so the form can't reveal who is a member.
-    if (error && !/signups? not allowed|not found|user not found/i.test(error.message)) {
+    if (error && !isUnknownMemberOtpError(error.message)) {
       toast.error(error.message);
       return;
     }
