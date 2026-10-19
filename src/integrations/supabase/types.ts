@@ -4998,6 +4998,7 @@ export type Database = {
           title: string | null
           town: string | null
           ugle_reg_number: string | null
+          unit_id: string
           updated_at: string
         }
         Insert: {
@@ -5044,6 +5045,7 @@ export type Database = {
           title?: string | null
           town?: string | null
           ugle_reg_number?: string | null
+          unit_id?: string
           updated_at?: string
         }
         Update: {
@@ -5090,6 +5092,7 @@ export type Database = {
           title?: string | null
           town?: string | null
           ugle_reg_number?: string | null
+          unit_id?: string
           updated_at?: string
         }
         Relationships: []

@@ -35,7 +35,7 @@ Deno.serve(async (req) => {
     }
     const { data, error } = await supabase
       .from("bookings")
-      .select("id, contact_name, details, contact_email, event_label, total_pence, payment_status, paid_at")
+      .select("id, contact_name, details, contact_email, event_label, subtotal_pence, fee_pence, total_pence, payment_status, paid_at")
       .eq("stripe_session_id", session_id)
       .maybeSingle();
     if (error) {
@@ -51,6 +51,8 @@ Deno.serve(async (req) => {
           contact_name: bookingFirstName(data.details as Record<string, unknown> | null, data.contact_name) || null,
           contact_email: maskEmail(data.contact_email),
           event_label: data.event_label,
+          subtotal_pence: data.subtotal_pence,
+          fee_pence: data.fee_pence,
           total_pence: data.total_pence,
           payment_status: data.payment_status,
           paid_at: data.paid_at,

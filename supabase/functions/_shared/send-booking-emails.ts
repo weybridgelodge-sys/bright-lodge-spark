@@ -6,6 +6,7 @@ import { createClient, SupabaseClient } from 'npm:@supabase/supabase-js@2'
 import { sendTransactionalEmail } from './send-email.ts'
 import { loadLodgeSettings } from './lodgeSettings.ts'
 import { bookingFirstName, bookingFullName, cleanSpaces } from './greeting.ts'
+import { bookingAmountLines, eventLabelWithoutDate } from './bookingAmounts.ts'
 
 export const ASSISTANT_SECRETARY_EMAIL = 'assistantsecretary@weybridgelodge.org.uk'
 export const WEBMASTER_EMAIL = 'webmaster@weybridgelodge.org.uk'
@@ -207,12 +208,13 @@ export async function sendBookingEmails(bookingId: string, opts: SendOpts) {
   })) : []
 
   const totalAmount = formatGBP(b.total_pence)
+  const amountLines = bookingAmountLines(b.subtotal_pence, b.fee_pence, b.total_pence)
   const pmLabel = paymentMethodLabel(details.paymentMethod)
   const psLabel = paymentStatusLabel(b.payment_status)
   const lodgeName = details.lodge || ''
   const dietary = details.dietary || details.dietaryRequirements || ''
   const bookingRef = String(b.id).slice(0, 8)
-  const eventLabel = b.event_label || ''
+  const eventLabel = eventLabelWithoutDate(b.event_label, !!eventDate)
   const firstName = bookingFirstName(details, b.contact_name)
   const submittedAt = new Date(b.created_at).toLocaleString('en-GB', { timeZone: 'Europe/London' })
 
@@ -300,6 +302,7 @@ export async function sendBookingEmails(bookingId: string, opts: SendOpts) {
           guests,
           dietary,
           totalAmount,
+          amountLines,
           paymentMethodLabel: pmLabel,
           paymentStatusLabel: psLabel,
           isApologies,
@@ -333,6 +336,7 @@ export async function sendBookingEmails(bookingId: string, opts: SendOpts) {
           guests,
           dietary,
           totalAmount,
+          amountLines,
           paymentMethodLabel: pmLabel,
           paymentStatusLabel: psLabel,
           isApologies,

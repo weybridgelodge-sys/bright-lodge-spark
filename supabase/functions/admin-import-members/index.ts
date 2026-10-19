@@ -7,11 +7,13 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { z } from "npm:zod@3";
+import { loadLodgeSettings } from "../_shared/lodgeSettings.ts";
 import { composeFullName, fillBlanks, normaliseHeader, validateRow } from "../_shared/memberImport.ts";
 
 const MAX_ROWS = 250;
 const Body = z.object({
   dry_run: z.boolean().default(true),
+  unit_id: z.string().regex(/^[a-z0-9_-]{1,40}$/).default("weybridge"),
   rows: z.array(z.record(z.string(), z.string().max(1000))).min(1).max(MAX_ROWS),
 });
 
@@ -42,10 +44,11 @@ Deno.serve(async (req) => {
 
     const parsed = Body.safeParse(await req.json());
     if (!parsed.success) return json({ error: `Invalid import — ${parsed.error.issues[0]?.message ?? "check the file"} (max ${MAX_ROWS} rows)` }, 400);
-    const { dry_run, rows } = parsed.data;
+    const { dry_run, rows, unit_id: unitId } = parsed.data;
+    const lodge = await loadLodgeSettings(unitId);
 
     // Load existing members once (service role; never returned to the caller beyond field names).
-    const { data: existing, error: eerr } = await admin.from("profiles").select("*");
+    const { data: existing, error: eerr } = await admin.from("profiles").select("*").eq("unit_id", unitId);
     if (eerr) return json({ error: eerr.message }, 500);
     const byEmail = new Map<string, Record<string, unknown>>();
     const byUgle = new Map<string, Record<string, unknown>>();
@@ -86,14 +89,16 @@ Deno.serve(async (req) => {
       const fields = Object.entries(record).filter(([k, v]) => k !== "email" && v !== null && v !== false).map(([k]) => k);
       if (!dry_run) {
         const full_name = composeFullName(record.title, record.first_name, record.last_name);
-        const { data: created, error: cerr } = await admin.auth.admin.createUser({
-          email: record.email, email_confirm: true, user_metadata: { full_name },
+        // Import and invite are one step: each new member gets the branded invite email.
+        const { data: created, error: cerr } = await admin.auth.admin.inviteUserByEmail(record.email, {
+          data: { full_name }, redirectTo: `${lodge.siteUrl}/members`,
         });
         if (cerr || !created.user) { results.push({ row: rowNo, email: record.email, action: "error", message: cerr?.message ?? "Could not create sign-in" }); continue; }
         const profile: Record<string, unknown> = { full_name, email: record.email };
         for (const [k, v] of Object.entries(record)) if (k !== "email" && v !== null) profile[k] = v;
         profile.degree = record.degree ?? "master_mason";
-        profile.status = record.status ?? "active";
+        profile.status = "active"; // imported members are always active
+        profile.unit_id = unitId;
         const { error: perr } = await admin.from("profiles").update(profile).eq("id", created.user.id);
         if (perr) { results.push({ row: rowNo, email: record.email, action: "error", message: `Sign-in created but details not saved: ${perr.message}` }); continue; }
         byEmail.set(record.email, { ...profile, id: created.user.id });

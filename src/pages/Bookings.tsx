@@ -192,12 +192,15 @@ const BookingsEvent = ({
   const [dietary, setDietary] = useState("");
   // Pre-fill (only while empty) from a signed-in member's own private profile note.
   const dietaryTouched = useRef(false);
+  const [memberUid, setMemberUid] = useState<string | null>(null);
+  const [updateSavedDiet, setUpdateSavedDiet] = useState(false);
   useEffect(() => {
     let cancelled = false;
     (async () => {
       const { data: { session } } = await supabase.auth.getSession();
       const uid = session?.user?.id;
       if (!uid) return;
+      if (!cancelled) setMemberUid(uid);
       const { data } = await (supabase as any).rpc("get_profiles_pii", { _ids: [uid] });
       const note = Array.isArray(data) && data[0]?.dietary_requirements ? String(data[0].dietary_requirements).trim() : "";
       if (!cancelled && note && !dietaryTouched.current) setDietary((d) => (d.trim() ? d : note));
@@ -339,10 +342,19 @@ const BookingsEvent = ({
     }
   };
 
+  // The saved note on the member record changes only when he ticks the box.
+  const saveDietIfAsked = async () => {
+    if (!memberUid || !updateSavedDiet) return;
+    const { error } = await supabase.from("profiles")
+      .update({ dietary_requirements: dietary.trim().slice(0, 500) || null } as never).eq("id", memberUid);
+    if (error) console.error("Could not update saved dietary requirements", error.message);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (honeypot) return; // Silently discard bot submissions
     if (!validateStep1() || !validateStep2()) return;
+    await saveDietIfAsked();
     if (meetingOption === "apologies" || meetingOption === "meeting-only") {
       await saveBooking(meetingOption);
       return;
@@ -974,6 +986,17 @@ useEffect(() => {
                               className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                               placeholder="Please note any dietary allergies or requirements for yourself or guests"
                             />
+                            {memberUid && (
+                              <label className="mt-2 flex min-h-[44px] items-center gap-3 font-sans text-sm text-foreground cursor-pointer">
+                                <input
+                                  type="checkbox"
+                                  checked={updateSavedDiet}
+                                  onChange={(e) => setUpdateSavedDiet(e.target.checked)}
+                                  className="h-5 w-5 accent-navy"
+                                />
+                                Update my saved requirements
+                              </label>
+                            )}
                           </div>
                           {/* bg-background replaces unapproved bg-warm-white */}
                           <div className="bg-background border border-border rounded-sm p-4 flex items-center justify-between">

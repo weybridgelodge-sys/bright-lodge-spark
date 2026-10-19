@@ -5,7 +5,7 @@ import type { StripeEnv } from "./stripe.ts";
 import { decidePendingBooking, type StripeSessionInfo } from "./pendingBookingExpiry.ts";
 import { markBookingPaid } from "./markBookingPaid.ts";
 
-type Booking = { id: string; created_at: string; stripe_session_id: string | null };
+type Booking = { id: string; created_at: string; stripe_session_id: string | null; payment_status?: string };
 
 export async function processPendingBooking(
   supabase: SupabaseClient,
@@ -40,14 +40,16 @@ export async function processPendingBooking(
     catch (e) { entry.result = `expire_failed: ${(e as Error).message}`; }
   } else if (d.action === "delete") {
     // Status guard: a payment landing mid-run is never lost.
-    const { data: still } = await supabase.from("bookings").select("payment_status").eq("id", b.id).maybeSingle();
-    if ((still as any)?.payment_status !== "pending") { entry.result = "skipped_status_changed"; return entry; }
+    // Paid waitlisted rows keep status "waitlisted" but gain paid_at; never delete those.
+    const expected = b.payment_status === "waitlisted" ? "waitlisted" : "pending";
+    const { data: still } = await supabase.from("bookings").select("payment_status, paid_at").eq("id", b.id).maybeSingle();
+    if ((still as any)?.payment_status !== expected || (still as any)?.paid_at) { entry.result = "skipped_status_changed"; return entry; }
     // Register rows from before the "register only when paid" rule.
     await supabase.from("festive_board_attendance").delete()
       .eq("source", "booking")
       .or(`source_booking_id.eq.${b.id},source_booking_id.like.${b.id}::g*,booking_id.eq.${b.id}`);
     const { error: delErr, count } = await supabase.from("bookings").delete({ count: "exact" })
-      .eq("id", b.id).eq("payment_status", "pending");
+      .eq("id", b.id).eq("payment_status", expected).is("paid_at", null);
     entry.result = delErr ? `delete_failed: ${delErr.message}` : count ? "deleted" : "skipped_status_changed";
   }
   return entry;

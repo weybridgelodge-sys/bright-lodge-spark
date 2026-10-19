@@ -7,6 +7,7 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { type StripeEnv, createStripeClient } from "../_shared/stripe.ts";
 import { processPendingBooking } from "../_shared/processPendingBooking.ts";
+import { isExpiryCandidate } from "../_shared/bookingAmounts.ts";
 
 const json = (b: unknown, status = 200) =>
   new Response(JSON.stringify(b), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
@@ -23,13 +24,15 @@ Deno.serve(async (req) => {
   const supabase = createClient(Deno.env.get("SUPABASE_URL")!, expected);
   const now = new Date();
 
-  const { data: rows, error } = await supabase
+  // Unpaid pending bookings, plus unpaid waitlisted card bookings (paid_at null).
+  const { data: all, error } = await supabase
     .from("bookings")
-    .select("id, unit_id, environment, created_at, stripe_session_id")
-    .eq("payment_status", "pending")
+    .select("id, unit_id, environment, created_at, stripe_session_id, payment_status, paid_at")
+    .in("payment_status", ["pending", "waitlisted"])
     .order("created_at", { ascending: true })
     .limit(500);
   if (error) return json({ error: error.message }, 500);
+  const rows = (all ?? []).filter((r: any) => isExpiryCandidate(r));
 
   // Group per unit, then per environment, so each unit's live and test
   // bookings are handled with that environment's Stripe credentials.

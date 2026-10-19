@@ -2,6 +2,7 @@
 // - Create: provisions a new auth user (email_confirm:true) + fills profile.
 // - Update: updates an existing profile by user_id.
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { loadLodgeSettings } from "../_shared/lodgeSettings.ts";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { z } from "npm:zod@3";
 
@@ -159,10 +160,11 @@ Deno.serve(async (req) => {
 
     if (!userId) {
       // CREATE
-      const { data: created, error: cerr } = await admin.auth.admin.createUser({
-        email: b.email,
-        email_confirm: true,
-        user_metadata: { full_name },
+      // Sends the lodge's branded invite email: the member claims the account from it.
+      const lodge = await loadLodgeSettings();
+      const { data: created, error: cerr } = await admin.auth.admin.inviteUserByEmail(b.email, {
+        data: { full_name },
+        redirectTo: `${lodge.siteUrl}/members`,
       });
       if (cerr || !created.user) {
         return json({ error: cerr?.message ?? "Could not create user" }, 400);

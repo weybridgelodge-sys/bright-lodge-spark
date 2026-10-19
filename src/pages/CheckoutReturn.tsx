@@ -1,3 +1,4 @@
+import { bookingAmountLines } from "../../supabase/functions/_shared/bookingAmounts";
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import Header from "@/components/Header";
@@ -79,9 +80,13 @@ const CheckoutReturn = () => {
                   A card receipt has been emailed to <strong>{booking?.contact_email}</strong>.
                 </p>
                 {booking?.total_pence != null && (
-                  <p className="text-foreground font-sans font-semibold mb-6">
-                    Total paid: £{(booking.total_pence / 100).toFixed(2)}
-                  </p>
+                  <dl className="text-foreground font-sans mb-6 mx-auto max-w-xs space-y-1">
+                    {bookingAmountLines(booking.subtotal_pence, booking.fee_pence, booking.total_pence).map((l) => (
+                      <div key={l.label} className={`flex justify-between gap-4 ${l.label === "Total" ? "font-semibold" : "text-muted-foreground"}`}>
+                        <dt>{l.label === "Total" ? "Total paid" : l.label}</dt><dd>{l.value}</dd>
+                      </div>
+                    ))}
+                  </dl>
                 )}
                 <Link
                   to="/"

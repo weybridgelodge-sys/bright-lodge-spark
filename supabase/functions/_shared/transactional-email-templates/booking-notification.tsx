@@ -26,6 +26,7 @@ interface Props {
   lodgeName?: string
   guests?: Guest[]
   dietary?: string
+  amountLines?: { label: string; value: string }[]
   totalAmount?: string
   paymentMethodLabel?: string
   paymentStatusLabel?: string
@@ -45,6 +46,7 @@ const Email = ({
   guests = [],
   dietary,
   totalAmount,
+  amountLines,
   paymentMethodLabel,
   paymentStatusLabel,
   isApologies,
@@ -75,7 +77,7 @@ const Email = ({
           {isApologies ? 'Apologies received' : 'New booking received'}
         </Heading>
         <Text style={meta}>
-          {eventLabel || 'Event'}{eventDate ? ` · ${eventDate}` : ''}
+          {eventLabel || 'Event'}{eventDate && !String(eventLabel || '').includes(eventDate) ? ` · ${eventDate}` : ''}
           {submittedAt ? ` · booked at ${submittedAt}` : ''}
         </Text>
 
@@ -88,7 +90,7 @@ const Email = ({
           <Hr style={hr} />
           {!isApologies && <Row label="Attending" value={meetingOptionLabel} />}
           {dietary && <Row label="Dietary" value={dietary} />}
-          {totalAmount && <Row label="Total" value={totalAmount} />}
+          {totalAmount && (amountLines && amountLines.length ? amountLines.map((l) => <Row key={l.label} label={l.label} value={l.value} />) : <Row label="Total" value={totalAmount} />)}
           {paymentMethodLabel && <Row label="Payment method" value={paymentMethodLabel} />}
           {paymentStatusLabel && <Row label="Payment status" value={paymentStatusLabel} />}
 

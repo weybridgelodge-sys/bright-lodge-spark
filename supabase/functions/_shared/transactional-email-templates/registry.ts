@@ -21,6 +21,7 @@ import { template as eventBookingCustomer } from './event-booking-customer.tsx'
 import { template as eventBookingLodge } from './event-booking-lodge.tsx'
 import { template as newsletterConfirm } from './newsletter-confirm.tsx'
 import { template as newsletterWelcome } from './newsletter-welcome.tsx'
+import { template as portalAccessRequest } from './portal-access-request.tsx'
 
 export interface TemplateEntry {
   component: any
@@ -54,4 +55,5 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'event-booking-lodge': eventBookingLodge,
   'newsletter-confirm': newsletterConfirm,
   'newsletter-welcome': newsletterWelcome,
+  'portal-access-request': portalAccessRequest,
 }
