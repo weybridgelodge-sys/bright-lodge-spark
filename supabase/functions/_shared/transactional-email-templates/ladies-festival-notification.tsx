@@ -75,7 +75,7 @@ const Email = ({
         <Heading style={h1}>New Ladies Festival booking</Heading>
         <Text style={meta}>
           {eventLabel || 'Ladies Festival 2026'}{eventDate ? ` · ${eventDate}` : ''}
-          {submittedAt ? ` · submitted ${submittedAt}` : ''}
+          {submittedAt ? ` · booked at ${submittedAt}` : ''}
         </Text>
 
         <Section style={card}>
@@ -171,7 +171,7 @@ const Row = ({ label, value }: { label: string; value?: string }) => (
 
 export const template = {
   component: Email,
-  subject: (d: any) => `New Ladies Festival booking — ${d?.bookerName || 'visitor'}`,
+  subject: (d: any) => `New Ladies Festival booking — ${String(d?.bookerName || '').replace(/\s+/g, ' ').trim() || 'visitor'}`,
   displayName: 'Ladies Festival notification',
   previewData: {
     bookerName: 'John Smith',

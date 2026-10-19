@@ -5,7 +5,7 @@
 import { createClient, SupabaseClient } from 'npm:@supabase/supabase-js@2'
 import { sendTransactionalEmail } from './send-email.ts'
 import { loadLodgeSettings } from './lodgeSettings.ts'
-import { bookingFirstName } from './greeting.ts'
+import { bookingFirstName, bookingFullName, cleanSpaces } from './greeting.ts'
 
 export const ASSISTANT_SECRETARY_EMAIL = 'assistantsecretary@weybridgelodge.org.uk'
 export const WEBMASTER_EMAIL = 'webmaster@weybridgelodge.org.uk'
@@ -198,7 +198,7 @@ export async function sendBookingEmails(bookingId: string, opts: SendOpts) {
   }
 
   const guests = Array.isArray(details.guests) ? details.guests.map((g: any) => ({
-    name: g?.name || '',
+    name: cleanSpaces(g?.name),
     lodge: g?.lodge || '',
     dietary: g?.dietary || g?.dietaryRequirements || '',
     starter: g?.starter || '',
@@ -261,7 +261,7 @@ export async function sendBookingEmails(bookingId: string, opts: SendOpts) {
           idempotencyKey: `lf-notify-${b.id}-${opts.stage}-${notifyTo}`,
           replyTo: b.contact_email || undefined,
           templateData: {
-            bookerName: b.contact_name,
+            bookerName: bookingFullName(details, b.contact_name),
             bookerEmail: b.contact_email,
             bookerPhone: b.contact_phone,
             eventLabel: eventLabel || 'Ladies Festival 2026',
@@ -323,7 +323,7 @@ export async function sendBookingEmails(bookingId: string, opts: SendOpts) {
         idempotencyKey: `booking-notify-${b.id}-${opts.stage}-${notifyTo}`,
         replyTo: b.contact_email || undefined,
         templateData: {
-          bookerName: b.contact_name,
+          bookerName: bookingFullName(details, b.contact_name),
           bookerEmail: b.contact_email,
           bookerPhone: b.contact_phone,
           eventLabel,

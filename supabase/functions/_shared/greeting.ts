@@ -40,12 +40,27 @@ export function greetingName(
   return bookingFirstName(details, contactName) || "there";
 }
 
+/** Collapse runs of whitespace and trim. */
+export function cleanSpaces(s: unknown): string {
+  return typeof s === "string" ? s.replace(/\s+/g, " ").trim() : "";
+}
+
+/** "Title First Last" from details, else the stored contact_name, whitespace collapsed. */
+export function bookingFullName(
+  details: { title?: unknown; firstName?: unknown; lastName?: unknown } | null | undefined,
+  contactName: string | null | undefined,
+): string {
+  const joined = cleanSpaces([details?.title, details?.firstName, details?.lastName].map(cleanSpaces).join(" "));
+  const hasName = cleanSpaces(details?.firstName) || cleanSpaces(details?.lastName);
+  return (hasName ? joined : "") || cleanSpaces(contactName);
+}
+
 /** Trim the name fields of a booking before it is saved. Returns a copy. */
 export function trimBookingNames<T extends Record<string, unknown> | undefined>(details: T): T {
   if (!details) return details;
   const out: Record<string, unknown> = { ...details };
   for (const k of ["title", "firstName", "lastName"]) {
-    if (typeof out[k] === "string") out[k] = (out[k] as string).trim();
+    if (typeof out[k] === "string") out[k] = cleanSpaces(out[k]);
   }
   return out as T;
 }
