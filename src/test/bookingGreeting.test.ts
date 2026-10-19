@@ -33,3 +33,13 @@ describe("booking greeting", () => {
       .toEqual({ title: "Mrs", firstName: "Isabelle", lastName: "Tidmarsh", qty: 2 });
   });
 });
+
+import { bookingFullName } from "../../supabase/functions/_shared/greeting";
+describe("booking full name", () => {
+  it("collapses double spaces from a trailing-space first name", () => {
+    expect(bookingFullName({ title: "Mrs", firstName: "Isabelle ", lastName: "Tidmarsh " }, "Mrs Isabelle  Tidmarsh ")).toBe("Mrs Isabelle Tidmarsh");
+  });
+  it("falls back to contact_name collapsed", () => {
+    expect(bookingFullName({}, " W Bro  John   French ")).toBe("W Bro John French");
+  });
+});

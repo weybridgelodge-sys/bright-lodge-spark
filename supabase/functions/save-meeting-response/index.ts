@@ -4,7 +4,7 @@ import { sendBookingEmails } from "../_shared/send-booking-emails.ts";
 import { DUPLICATE_BOOKING_MESSAGE, findExistingBooking } from "../_shared/duplicate-booking.ts";
 import { verifyTurnstile } from "../_shared/verify-turnstile.ts";
 import { isHoneypotTripped, seatCheckOutcome } from "../_shared/meetingResponseGuards.ts";
-import { trimBookingNames } from "../_shared/greeting.ts";
+import { cleanSpaces, trimBookingNames } from "../_shared/greeting.ts";
 
 
 const corsHeaders = {
@@ -22,7 +22,7 @@ const BodySchema = z.object({
   event_key: z.string().trim().min(1).max(120),
   event_label: z.string().trim().min(1).max(200),
   meeting_id: z.string().uuid().optional().nullable(),
-  contact_name: z.string().trim().min(1).max(200),
+  contact_name: z.string().transform(cleanSpaces).pipe(z.string().min(1).max(200)),
   contact_email: z.string().trim().email().max(255),
   contact_phone: z.string().trim().max(40).optional().nullable(),
   meeting_option: z.enum([

@@ -76,7 +76,7 @@ const Email = ({
         </Heading>
         <Text style={meta}>
           {eventLabel || 'Event'}{eventDate ? ` · ${eventDate}` : ''}
-          {submittedAt ? ` · submitted ${submittedAt}` : ''}
+          {submittedAt ? ` · booked at ${submittedAt}` : ''}
         </Text>
 
         <Section style={card}>
@@ -132,8 +132,8 @@ export const template = {
   component: Email,
   subject: (d: any) =>
     d?.isApologies
-      ? `Apologies — ${d?.bookerName || 'visitor'} for ${d?.eventLabel || 'event'}`
-      : `New booking — ${d?.bookerName || 'visitor'} for ${d?.eventLabel || 'event'}`,
+      ? `Apologies — ${String(d?.bookerName || '').replace(/\s+/g, ' ').trim() || 'visitor'} for ${d?.eventLabel || 'event'}`
+      : `New booking — ${String(d?.bookerName || '').replace(/\s+/g, ' ').trim() || 'visitor'} for ${d?.eventLabel || 'event'}`,
   displayName: 'Booking notification (assistant secretary)',
   previewData: {
     bookerName: 'John Smith',

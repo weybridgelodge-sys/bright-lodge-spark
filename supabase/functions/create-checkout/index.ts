@@ -4,7 +4,7 @@ import { z } from "https://esm.sh/zod@3.23.8";
 import { type StripeEnv, createStripeClient } from "../_shared/stripe.ts";
 import { seatCheckOutcome } from "../_shared/meetingResponseGuards.ts";
 import { DUPLICATE_BOOKING_MESSAGE, findExistingBooking } from "../_shared/duplicate-booking.ts";
-import { trimBookingNames } from "../_shared/greeting.ts";
+import { cleanSpaces, trimBookingNames } from "../_shared/greeting.ts";
 
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL")!,
@@ -21,7 +21,7 @@ const BodySchema = z.object({
   event_key: z.string().min(1).max(120),
   meeting_id: z.string().uuid().nullable().optional(),
   event_label: z.string().min(1).max(200),
-  contact_name: z.string().trim().min(1).max(200),
+  contact_name: z.string().transform(cleanSpaces).pipe(z.string().min(1).max(200)),
   contact_email: z.string().email().max(255),
   contact_phone: z.string().max(40).optional().nullable(),
   line_items: z.array(LineItemSchema).min(1).max(50),
