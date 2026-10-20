@@ -26,4 +26,4 @@
 - Events: calendars public _shared/publicEventCalendar, member member-calendar-feed; pricing _shared/eventPricing.ts, form events/booking/BookingCore. Why: one rule.
 - Accounts are created only by admin/Secretary via inviteUserByEmail (admin-invite-member, admin-import-members); public sign-up is disabled and magic links use shouldCreateUser:false. Why: no account for an unverified identity.
 - Booking→register member match: active-member email links (any title/lodge text); name-only sets festive_board_attendance.suspected_member_id (flag, no visitor contact), never links; mirror in lib/bookingMemberMatch. Why: no silent guesses.
-- Member "Book my place" (/members/book): items from get_my_bookable_items() (host unit = profile unit_id; meetings + public event_accounts.unit_id), rules in lib/memberBookings (stored deadline, blank → 7 days before), gated by module_settings key member_bookings (off unless true). Why: one booking process, multi-unit by query change.
+- Book my place: get_my_bookable_items() (host unit = profile unit_id) + lib/memberBookings rules; gated by module_settings member_bookings. Why: one booking process.
