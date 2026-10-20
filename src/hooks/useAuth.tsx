@@ -69,7 +69,9 @@ const Ctx = createContext<AuthCtx | undefined>(undefined);
 const isLocalLayoutTest =
   import.meta.env.MODE === "e2e" &&
   typeof window !== "undefined" &&
-  (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
+  (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") &&
+  // "?e2e_as=visitor": local layout tests of signed-out pages (no synthetic identity).
+  new URLSearchParams(window.location.search).get("e2e_as") !== "visitor";
 
 const layoutTestUser = {
   id: "00000000-0000-4000-8000-000000000001",

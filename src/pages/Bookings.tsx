@@ -6,7 +6,8 @@ import SEO, { eventSchema, breadcrumbSchema } from "@/components/SEO";
 import { PaymentTestModeBanner } from "@/components/payments/PaymentTestModeBanner";
 import { StripeEmbeddedCheckoutPanel, type BookingLineItem } from "@/components/payments/StripeEmbeddedCheckout";
 import { motion, useReducedMotion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
+import { usePortalRedirect } from "@/hooks/usePortalRedirect";
 import {
   Calendar, Clock, MapPin, Shirt, CalendarClock,
   UtensilsCrossed, CheckCircle, Loader2, ArrowRight,
@@ -74,6 +75,7 @@ const labelClass = "block text-sm font-sans font-medium text-foreground mb-1";
 
 // ─── Loader: decides between bookable page and Save the Date ─────────────────
 const Bookings = () => {
+  const redirectTo = usePortalRedirect();
   const [state, setState] = useState<
     | { kind: "loading" }
     | { kind: "bookable"; bundle: EventBundle; publishedMeeting: { id: string; event_key: string } | null }
@@ -105,6 +107,7 @@ const Bookings = () => {
     return () => { cancelled = true; };
   }, []);
 
+  if (redirectTo) return <Navigate to={redirectTo} replace />;
   if (state.kind === "loading") {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
