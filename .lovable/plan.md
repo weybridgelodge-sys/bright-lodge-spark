@@ -57,3 +57,18 @@ The register, the dining reconciliation panel, ledger posting, the GMC invoice a
 1. Deadline: keep the per-event stored date (the 21 Oct deadline is 16 Oct), or apply "date minus 7" as the default when it's blank?
 2. Socials: leave them out until they have prices and booking?
 3. The Christmas party is in `event_bookings`, not `bookings`. Is matching by member id/email there acceptable?
+
+## Step 3 (plan only) — members-only group visit with payment up front
+
+Findings:
+- (a) Members-only: not possible today. `event_accounts.is_public` false hides an event from the public, but nothing then shows it in the portal; `lodge_events` is meeting-only and its `published` makes it public. `lodge_visits` records visits to other lodges (host lodge, cost, payment details, host Secretary email) but takes no bookings or payments.
+- (b) Up-front payment: yes. The events engine already takes full card payment at booking (`payment_mode` full, card fee optional), and `booking_deadline` closes it in `create-event-checkout`. Bank transfer is held as pending, so "paid before the group booking is sent" needs card or a confirmed bank receipt.
+- (c) Paid list export: no export exists for `event_bookings`. Treasurer/admin can read the rows; there is no "paid members" CSV for the Secretary.
+- (d) Missing: a visibility mode (public / members of host unit); portal listing (Step 1 already does this once the mode exists); a member-only booking gate in `create-event-checkout` (signed-in active member of the host unit; member_id stored from the token); a paid-only export for the host Secretary/admin; optional link from a `lodge_visits` row to its event.
+
+Proposed shape:
+- Add `event_accounts.audience` ('public' | 'members'), default 'public'. `public_events` view and the public page exclude 'members'. `get_my_bookable_items` includes 'members' events for the host unit.
+- `create-event-checkout`: for 'members' events, require a signed-in active member whose unit is the event's unit; store `member_id`. One booking per member per event (guests only where the event allows them).
+- Collection deadline = `booking_deadline` (the existing rule). After it, the card reads "Booking closed, contact the Secretary".
+- "Paid members" export (CSV: title, name, lodge, email, dietary only for roles allowed to see it, amount paid, paid date). Paid rows only. Available to admin, Secretary and the host unit's Secretary.
+- Nullable `lodge_visits.event_account_id` so a visit can open bookings. Host unit drives everything; no names, URLs or emails are hard-coded.

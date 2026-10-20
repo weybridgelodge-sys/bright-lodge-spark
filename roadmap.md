@@ -124,3 +124,8 @@
 - [x] save-meeting-response stores expected base price for non-card dining bookings
 - [x] Admin waitlist list labels non-card amounts "(expected)"
 - [ ] Backfill existing bookings — waiting for the user to decide whether £32 register rows or the bookings' own £35 is correct
+
+## Book my place (members portal)
+- [x] Step 1: screen, statuses, deadlines, Hub tile, behind member_bookings switch (off)
+- [ ] Step 2: in-portal form, guest add-on, public redirect — awaiting go-ahead
+- [ ] Step 3: members-only group visit — plan only, awaiting go-ahead
