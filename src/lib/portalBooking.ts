@@ -32,3 +32,11 @@ export const MEMBER_BOOKINGS_REDIRECT_KEY = "member_bookings_redirect";
 export function shouldRedirectToPortal(o: { signedIn: boolean; activeMember: boolean; switchOn: boolean; search: string }): boolean {
   return o.signedIn && o.activeMember && o.switchOn && !o.search.replace(/^\?/, "");
 }
+
+/** The meeting form's title choices; a member's stored title ("W Bro.") is matched ignoring dots/spaces/case. */
+export const MEETING_FORM_TITLES = ["Bro", "W. Bro", "VW. Bro", "RW. Bro", "Mr", "Mrs"] as const;
+const titleKey = (t: string) => t.toLowerCase().replace(/[.\s]/g, "");
+export function matchFormTitle(stored: string | null | undefined): string {
+  const k = titleKey(stored ?? "");
+  return MEETING_FORM_TITLES.find((t) => titleKey(t) === k) ?? "";
+}

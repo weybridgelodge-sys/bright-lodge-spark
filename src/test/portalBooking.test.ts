@@ -13,3 +13,12 @@ describe("Book button target", () => {
   it("meetings book inside the portal", () => expect(portalBookPath({ kind: "meeting", id: "m1", book_path: "/bookings" })).toBe("/members/book/meeting/m1"));
   it("events keep their public page", () => expect(portalBookPath({ kind: "event", id: "e1", book_path: "/events/x" })).toBe("/events/x"));
 });
+import { matchFormTitle } from "@/lib/portalBooking";
+describe("prefill title", () => {
+  it("matches stored Masonic titles to the form's choices", () => {
+    expect(matchFormTitle("W Bro.")).toBe("W. Bro");
+    expect(matchFormTitle("RW Bro.")).toBe("RW. Bro");
+    expect(matchFormTitle("Bro.")).toBe("Bro");
+  });
+  it("leaves unknown titles blank for the member to choose", () => expect(matchFormTitle("Dr")).toBe(""));
+});

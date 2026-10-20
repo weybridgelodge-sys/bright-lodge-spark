@@ -9,7 +9,7 @@ import { useInitialLoading } from "@/hooks/useInitialLoading";
 import { useMemberBookingsEnabled } from "@/hooks/useMemberBookingsEnabled";
 import { type EventBundle } from "@/lib/lodgeEvents";
 import { cardFooter, isBookingClosed, memberStatus, type BookableItem } from "@/lib/memberBookings";
-import { loadMeetingBundle } from "@/lib/portalBooking";
+import { loadMeetingBundle, matchFormTitle } from "@/lib/portalBooking";
 
 type Loaded = { item: BookableItem; bundle: EventBundle; meeting: { id: string; event_key: string } } | null;
 
@@ -46,7 +46,7 @@ export default function BookMeeting() {
   const status = loaded ? memberStatus(loaded.item.bookings, loaded.item.register) : "not_booked";
   const footer = loaded ? cardFooter(status, isBookingClosed(loaded.item)) : null;
   const prefill: MeetingBookingPrefill = {
-    title: profile?.title?.trim() || "", firstName: profile?.first_name?.trim() || "", lastName: profile?.last_name?.trim() || "",
+    title: matchFormTitle(profile?.title), firstName: profile?.first_name?.trim() || "", lastName: profile?.last_name?.trim() || "",
     lodge: lodgeName ?? "", email: profile?.email?.trim() || "", phone: profile?.phone?.trim() || "",
   };
 
