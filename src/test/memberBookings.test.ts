@@ -49,3 +49,15 @@ describe("Book my place register-only status", () => {
   it("no booking and no register is Not booked", () => expect(memberStatus([], [])).toBe("not_booked"));
   it("no_show and cancelled_refunded rows do not count", () => expect(memberStatus([], ["no_show", "cancelled_refunded"])).toBe("not_booked"));
 });
+
+import { cardFooter, PENDING_HOLD_MESSAGE } from "@/lib/memberBookings";
+describe("cardFooter", () => {
+  const msg = (s: Parameters<typeof cardFooter>[0], c: boolean) => { const f = cardFooter(s, c); return f.kind === "message" ? f.text : "BOOK"; };
+  it("booked ignores the deadline", () => { for (const c of [true, false]) expect(msg("booked", c)).toBe("You are booked. To change this booking, contact the Secretary."); });
+  it("waitlisted ignores the deadline", () => { for (const c of [true, false]) expect(msg("waitlisted", c)).toBe("You are on the waiting list. The Secretary will contact you if a place becomes free."); });
+  it("pending keeps the hold wording", () => { for (const c of [true, false]) expect(msg("pending", c)).toBe(PENDING_HOLD_MESSAGE); });
+  it("apologies after deadline", () => expect(msg("apologies", true)).toBe("Your apologies are recorded. To attend, contact the Secretary."));
+  it("apologies before deadline can book", () => expect(msg("apologies", false)).toBe("BOOK"));
+  it("not booked after deadline", () => expect(msg("not_booked", true)).toBe("Booking closed, contact the Secretary."));
+  it("not booked before deadline can book", () => expect(msg("not_booked", false)).toBe("BOOK"));
+});
