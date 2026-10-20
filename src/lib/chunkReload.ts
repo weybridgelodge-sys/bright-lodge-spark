@@ -36,8 +36,9 @@ export function claimReload(getStorage: StorageGetter, now: number): boolean {
   try {
     const s = getStorage();
     if (!s) return false;
-    const last = Number(s.getItem(CHUNK_RELOAD_KEY) || 0);
-    if (Number.isFinite(last) && now - last < RELOAD_WINDOW_MS && now >= last) return false;
+    const raw = s.getItem(CHUNK_RELOAD_KEY);
+    const last = Number(raw);
+    if (raw && Number.isFinite(last) && now - last < RELOAD_WINDOW_MS && now >= last) return false;
     s.setItem(CHUNK_RELOAD_KEY, String(now));
     return s.getItem(CHUNK_RELOAD_KEY) === String(now);
   } catch {
