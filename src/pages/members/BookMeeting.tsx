@@ -19,7 +19,7 @@ export default function BookMeeting() {
   const enabled = useMemberBookingsEnabled();
   const { profile } = useAuth();
   const [loaded, setLoaded] = useState<Loaded>(null);
-  const [lodgeName, setLodgeName] = useState<string>("");
+  const [lodgeName, setLodgeName] = useState<string | null>(null);
   const [loading, setLoading] = useInitialLoading();
 
   useEffect(() => {
@@ -36,10 +36,10 @@ export default function BookMeeting() {
 
   const unitId = (profile as { unit_id?: string | null } | null)?.unit_id ?? null;
   useEffect(() => {
-    if (!unitId) return;
+    if (!unitId) { if (profile) setLodgeName(""); return; }
     supabase.from("units" as never).select("name").eq("id", unitId).maybeSingle()
-      .then(({ data }) => setLodgeName(((data as { name?: string | null } | null)?.name ?? "").trim()), () => {});
-  }, [unitId]);
+      .then(({ data }) => setLodgeName(((data as { name?: string | null } | null)?.name ?? "").trim()), () => setLodgeName(""));
+  }, [unitId, profile]);
 
   if (enabled === false) return <Navigate to="/members" replace />;
 
@@ -47,14 +47,14 @@ export default function BookMeeting() {
   const footer = loaded ? cardFooter(status, isBookingClosed(loaded.item)) : null;
   const prefill: MeetingBookingPrefill = {
     title: profile?.title?.trim() || "", firstName: profile?.first_name?.trim() || "", lastName: profile?.last_name?.trim() || "",
-    lodge: lodgeName, email: profile?.email?.trim() || "", phone: profile?.phone?.trim() || "",
+    lodge: lodgeName ?? "", email: profile?.email?.trim() || "", phone: profile?.phone?.trim() || "",
   };
 
   return (
     <MembersLayout>
       <PaymentTestModeBanner />
       <p className="mb-4"><Link to="/members/book" className="font-sans text-sm text-gold underline underline-offset-4 inline-flex items-center min-h-[44px]">Back to Book my place</Link></p>
-      {enabled === null || loading || (unitId && !lodgeName && profile === undefined) ? (
+      {enabled === null || loading || lodgeName === null ? (
         <p className="font-sans text-sm text-primary-foreground/80" role="status">Loading…</p>
       ) : !loaded ? (
         <p className="font-sans text-sm text-primary-foreground" role="alert">This meeting is not open to book.</p>
@@ -66,7 +66,7 @@ export default function BookMeeting() {
       ) : (
         <>
           <h1 className="font-serif text-2xl text-gold mb-4 break-words">{loaded.item.title}</h1>
-          <PortalForm key={lodgeName} bundle={loaded.bundle} meeting={loaded.meeting} prefill={prefill} />
+          <PortalForm bundle={loaded.bundle} meeting={loaded.meeting} prefill={prefill} />
         </>
       )}
     </MembersLayout>
