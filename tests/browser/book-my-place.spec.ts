@@ -11,6 +11,8 @@ const items = [
   { kind: "event", id: "e2", title: "Booked event", event_date: far(50), price_pence: 4000, booking_deadline: null, book_path: "/events/y", bookings: [{ status: "paid" }] },
   { kind: "event", id: "e3", title: "Waitlisted event", event_date: far(51), price_pence: 4000, booking_deadline: null, book_path: "/events/z", bookings: [{ status: "waitlisted" }] },
   { kind: "event", id: "e4", title: "Closed event", event_date: far(3), price_pence: 4000, booking_deadline: far(-1), book_path: "/events/w", bookings: [{ status: "apologies" }] },
+  { kind: "event", id: "e5", title: "Closed not booked", event_date: far(3), price_pence: 4000, booking_deadline: far(-1), book_path: "/events/v", bookings: [] },
+  { kind: "event", id: "e6", title: "Closed booked", event_date: far(3), price_pence: 4000, booking_deadline: far(-1), book_path: "/events/u", bookings: [{ status: "paid" }] },
 ];
 
 const on = async (page: import("@playwright/test").Page, value: boolean) => {
@@ -23,9 +25,12 @@ test("Book my place at 320px with every status", async ({ page }) => {
   await on(page, true);
   await page.goto("/members/book");
   await expect(page.getByRole("heading", { name: "Book my place", level: 1 })).toBeVisible({ timeout: 15000 });
-  await expect(page.getByRole("listitem")).toHaveCount(5);
-  for (const s of ["Not booked", "Pending payment", "Booked", "Waitlisted", "Apologies"]) await expect(page.getByText(s, { exact: true })).toBeVisible();
-  await expect(page.getByText("Booking closed, contact the Secretary.")).toBeVisible();
+  await expect(page.getByRole("listitem")).toHaveCount(7);
+  for (const s of ["Not booked", "Pending payment", "Waitlisted", "Apologies"]) await expect(page.getByText(s, { exact: true }).first()).toBeVisible();
+  await expect(page.getByText("Booking closed, contact the Secretary.")).toHaveCount(1);
+  await expect(page.getByText("Your apologies are recorded. To attend, contact the Secretary.")).toHaveCount(1);
+  await expect(page.getByText("You are booked. To change this booking, contact the Secretary.")).toHaveCount(2);
+  await expect(page.getByText("You are on the waiting list. The Secretary will contact you if a place becomes free.")).toHaveCount(1);
   const book = page.getByRole("link", { name: /Book my place\s*:/ });
   await expect(book).toHaveCount(1);
   expect(Math.round((await book.boundingBox())!.height)).toBeGreaterThanOrEqual(44);

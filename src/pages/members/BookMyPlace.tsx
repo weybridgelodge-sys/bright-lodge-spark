@@ -6,7 +6,7 @@ import { useInitialLoading } from "@/hooks/useInitialLoading";
 import { useMemberBookingsEnabled } from "@/hooks/useMemberBookingsEnabled";
 import { CalendarDays, CalendarClock, PoundSterling } from "lucide-react";
 import {
-  effectiveDeadline, isBookingClosed, memberStatus, STATUS_LABEL, visibleItems,
+  cardFooter, effectiveDeadline, isBookingClosed, memberStatus, STATUS_LABEL, visibleItems,
   type BookableItem, type MemberBookingStatus,
 } from "@/lib/memberBookings";
 import { formatGBP } from "@/lib/publicEvents";
@@ -24,8 +24,7 @@ const BADGE: Record<MemberBookingStatus, string> = {
 
 function Card({ item }: { item: BookableItem }) {
   const status = memberStatus(item.bookings, item.register);
-  const closed = isBookingClosed(item);
-  const canBook = !closed && (status === "not_booked" || status === "apologies");
+  const footer = cardFooter(status, isBookingClosed(item));
   return (
     <li className="bg-navy-dark/60 border border-gold/15 rounded-sm p-5 min-w-0">
       <div className="flex flex-wrap items-start justify-between gap-2 mb-3">
@@ -44,16 +43,12 @@ function Card({ item }: { item: BookableItem }) {
           <dd>Book by {fmtDeadline(effectiveDeadline(item.booking_deadline, item.event_date))}</dd></div>
       </dl>
       <div className="mt-4">
-        {closed ? (
-          <p className="font-sans text-sm text-primary-foreground">Booking closed, contact the Secretary.</p>
-        ) : canBook ? (
+        {footer.kind === "book" ? (
           <Link to={item.book_path} className="inline-flex items-center justify-center min-h-[44px] px-5 rounded-sm bg-gold text-navy font-sans font-semibold text-sm hover:bg-gold-light">
             Book my place<span className="sr-only">: {item.title}</span>
           </Link>
-        ) : status === "pending" ? (
-          <p className="font-sans text-sm text-primary-foreground">Your card payment is being held. If it is not completed within the hour the hold is released.</p>
         ) : (
-          <p className="font-sans text-sm text-primary-foreground">To change this booking, contact the Secretary.</p>
+          <p className="font-sans text-sm text-primary-foreground">{footer.text}</p>
         )}
       </div>
     </li>

@@ -57,3 +57,17 @@ export function memberStatus(bookings: RawBooking[], register: string[] = []): M
   if (r.has("apologies")) return "apologies";
   return "not_booked";
 }
+
+export type CardFooter = { kind: "book" } | { kind: "message"; text: string };
+export const PENDING_HOLD_MESSAGE = "Your card payment is being held. If it is not completed within the hour the hold is released.";
+
+/** Card footer: status first; the deadline only matters for apologies and not-booked. */
+export function cardFooter(status: MemberBookingStatus, closed: boolean): CardFooter {
+  switch (status) {
+    case "booked": return { kind: "message", text: "You are booked. To change this booking, contact the Secretary." };
+    case "waitlisted": return { kind: "message", text: "You are on the waiting list. The Secretary will contact you if a place becomes free." };
+    case "pending": return { kind: "message", text: PENDING_HOLD_MESSAGE };
+    case "apologies": return closed ? { kind: "message", text: "Your apologies are recorded. To attend, contact the Secretary." } : { kind: "book" };
+    default: return closed ? { kind: "message", text: "Booking closed, contact the Secretary." } : { kind: "book" };
+  }
+}
