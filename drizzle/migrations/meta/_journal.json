@@ -806,6 +806,13 @@
       "when": 1792433908499,
       "tag": "0114_booking_member_match_email_first",
       "breakpoints": true
+    },
+    {
+      "idx": 115,
+      "version": "7",
+      "when": 1792461686483,
+      "tag": "0115_member_bookings_step1",
+      "breakpoints": true
     }
   ]
 }
