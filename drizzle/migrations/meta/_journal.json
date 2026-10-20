@@ -820,6 +820,13 @@
       "when": 1792462013339,
       "tag": "0116_units_and_event_host_unit",
       "breakpoints": true
+    },
+    {
+      "idx": 117,
+      "version": "7",
+      "when": 1792476798862,
+      "tag": "0117_book_my_place_register_status",
+      "breakpoints": true
     }
   ]
 }

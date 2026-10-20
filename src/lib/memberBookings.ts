@@ -11,6 +11,8 @@ export type BookableItem = {
   kind: "meeting" | "event"; id: string; title: string; meeting_type?: string | null;
   event_date: string; price_pence: number | null; child_price_pence?: number | null;
   booking_deadline: string | null; book_path: string; bookings: RawBooking[];
+  /** Meetings only: the member's own festive_board_attendance statuses (incl. hand-added rows). */
+  register?: string[];
 };
 
 export const STATUS_LABEL: Record<MemberBookingStatus, string> = {
@@ -39,13 +41,19 @@ export function visibleItems<T extends Pick<BookableItem, "event_date">>(items: 
 }
 
 const BOOKED = new Set(["paid", "confirmed", "deposit_paid", "completed"]);
+/** festive_attendance_status values: booked/attended = attending (meeting-only too); no_show/cancelled_refunded ignored. */
+const REGISTER_ATTENDING = new Set(["booked", "attended"]);
 
-/** Strongest status wins: booked > waitlisted > pending > apologies; refunded/failed/cancelled are ignored. */
-export function memberStatus(bookings: RawBooking[]): MemberBookingStatus {
+/** Strongest status wins: booked > waitlisted > pending > apologies; refunded/failed/cancelled are ignored.
+ *  With no booking-derived status, the member's register row(s) decide. */
+export function memberStatus(bookings: RawBooking[], register: string[] = []): MemberBookingStatus {
   const s = new Set(bookings.map((b) => (b.status ?? "").toLowerCase()));
   if ([...s].some((x) => BOOKED.has(x))) return "booked";
   if (s.has("waitlisted")) return "waitlisted";
   if (s.has("pending")) return "pending";
   if (s.has("apologies")) return "apologies";
+  const r = new Set(register.map((x) => (x ?? "").toLowerCase()));
+  if ([...r].some((x) => REGISTER_ATTENDING.has(x))) return "booked";
+  if (r.has("apologies")) return "apologies";
   return "not_booked";
 }
