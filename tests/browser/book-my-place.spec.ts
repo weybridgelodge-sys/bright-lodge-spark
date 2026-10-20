@@ -26,6 +26,7 @@ test("Book my place at 320px with every status", async ({ page }) => {
   await expect(page.getByRole("listitem")).toHaveCount(5);
   for (const s of ["Not booked", "Pending payment", "Booked", "Waitlisted", "Apologies"]) await expect(page.getByText(s, { exact: true })).toBeVisible();
   await expect(page.getByText("Booking closed, contact the Secretary.")).toBeVisible();
+  console.log("LINKS", await page.getByRole("link").allInnerTexts());
   const book = page.getByRole("link", { name: /Book my place:/ });
   await expect(book).toHaveCount(1);
   expect(Math.round((await book.boundingBox())!.height)).toBeGreaterThanOrEqual(44);
