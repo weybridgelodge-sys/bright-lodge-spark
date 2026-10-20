@@ -23,7 +23,7 @@ type Draft = {
   parking: string; dress_code: string; timings: string; access: string;
   menu_items: string; dietary_choices: string; highlights: string;
   adult_price: string; child_price: string; theme: "default" | "christmas"; hosting_lodges: string;
-  reference_prefix: string; statement_descriptor: string; events_notify_email: string; short_link: string; is_public: boolean;
+  reference_prefix: string; statement_descriptor: string; events_notify_email: string; short_link: string; is_public: boolean; unit_id: string | null;
 } & ModuleSettings;
 
 const pIn = (p: number | null | undefined) => (p == null ? "" : (p / 100).toFixed(2));
@@ -36,7 +36,7 @@ const slugify = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").repla
 function toDraft(r: Row): Draft {
   const u = r.useful_stuff ?? {};
   return {
-    id: r.id, name: r.name, public_title: r.public_title ?? "", slug: r.slug ?? "", tagline: r.tagline ?? "", intro_copy: r.intro_copy ?? "",
+    id: r.id, unit_id: r.unit_id ?? null, name: r.name, public_title: r.public_title ?? "", slug: r.slug ?? "", tagline: r.tagline ?? "", intro_copy: r.intro_copy ?? "",
     event_date: r.event_date, start_time: (r.start_time ?? "").slice(0, 5), end_time: (r.end_time ?? "").slice(0, 5),
     venue: r.venue ?? DEFAULT_VENUE, booking_deadline: r.booking_deadline ? new Date(r.booking_deadline).toISOString().slice(0, 16) : "",
     capacity: r.capacity == null ? "" : String(r.capacity),
@@ -261,6 +261,21 @@ export default function PublicEventsAdmin() {
   );
 }
 
+/** Host lodge is set by the backend from the creator's unit; shown read-only. */
+function HostUnit({ unitId }: { unitId: string | null }) {
+  const [name, setName] = useState<string | null>(null);
+  useEffect(() => {
+    if (!unitId) return;
+    supabase.from("units" as any).select("name").eq("id", unitId).maybeSingle().then(({ data }: any) => setName(data?.name ?? unitId));
+  }, [unitId]);
+  return (
+    <p className="text-sm text-primary-foreground">
+      <span className="font-semibold">Host lodge:</span> {name ?? "Set automatically when saved"}
+      <span className="block text-xs text-primary-foreground/80">Members of the host lodge see this event in the portal. Set automatically; it cannot be changed here.</span>
+    </p>
+  );
+}
+
 function Editor({ draft: initial, onBack, duplicatedFrom, onQr }: { draft: Draft; onBack: () => void; duplicatedFrom: string | null; onQr: (d: Draft) => void }) {
   const [d, setD] = useState<Draft>(initial);
   const [saving, setSaving] = useState(false);
@@ -304,6 +319,7 @@ function Editor({ draft: initial, onBack, duplicatedFrom, onQr }: { draft: Draft
         <button type="button" onClick={() => onQr(d)} className={`${actionBtn} border-gold/40 text-gold hover:bg-gold/15`}><QrCode className="w-4 h-4" aria-hidden="true" /> Event QR</button>
       )}
       <fieldset className={fs}><legend className={lg}>Basics</legend>
+        <HostUnit unitId={d.unit_id} />
         {field("public_title", "Public title")}
         {field("name", "Accounts name (e.g. Christmas Party 2026)")}
         {field("slug", "Page address /events/…", { placeholder: "christmas-party-2026" })}
