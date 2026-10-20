@@ -23,7 +23,7 @@ const BADGE: Record<MemberBookingStatus, string> = {
 };
 
 function Card({ item }: { item: BookableItem }) {
-  const status = memberStatus(item.bookings);
+  const status = memberStatus(item.bookings, item.register);
   const closed = isBookingClosed(item);
   const canBook = !closed && (status === "not_booked" || status === "apologies");
   return (

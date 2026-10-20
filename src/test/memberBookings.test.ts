@@ -38,3 +38,14 @@ describe("Book my place member status", () => {
   });
   it("refunded/failed bookings count as Not booked", () => expect(memberStatus([{ status: "refunded" }, { status: "failed" }])).toBe("not_booked"));
 });
+
+describe("Book my place register-only status", () => {
+  it("register-only attending is Booked (booked, attended)", () => {
+    expect(memberStatus([], ["booked"])).toBe("booked");
+    expect(memberStatus([], ["attended"])).toBe("booked");
+  });
+  it("register-only apologies is Apologies", () => expect(memberStatus([], ["apologies"])).toBe("apologies"));
+  it("booking beats register", () => expect(memberStatus([{ status: "apologies" }], ["booked"])).toBe("apologies"));
+  it("no booking and no register is Not booked", () => expect(memberStatus([], [])).toBe("not_booked"));
+  it("no_show and cancelled_refunded rows do not count", () => expect(memberStatus([], ["no_show", "cancelled_refunded"])).toBe("not_booked"));
+});
