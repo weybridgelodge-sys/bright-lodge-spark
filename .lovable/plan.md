@@ -1,74 +1,125 @@
-# Book my place (members portal) — findings and plan
+# Officer signatures — stored per member, placed on the Provincial Installation Return
 
-Nothing goes live before the 21 Oct 2026 meeting. Step 2 is built only after Step 1 is reviewed.
+Plan only. Nothing is built, deployed or published until approved, and nothing goes live before 21 Oct. Step 2 parts C and D stay paused. Register, dining reconciliation, ledger, GMC invoice and PTP export are not touched.
 
-## Findings (read-only)
+## Findings (read from the current code)
 
-**a) How booking works today**
-- Meetings: public `/bookings` (`src/pages/Bookings.tsx`) loads the next published `lodge_events` row (`fetchNextEvent`), links it to its register meeting via `get_published_meeting_for_event`, and submits through `save-meeting-response` (bank / pay on the night / apologies) or `create-checkout` + `StripeEmbeddedCheckoutPanel` (card). With no open event it shows Save the Date. The form lives inside the page, not as a reusable component.
-- Public events (e.g. Christmas party): `/events/:slug` (`PublicEvent.tsx`) reads the `public_events` view of `event_accounts`, uses `BookingCore` for the form and `create-event-checkout`; bookings go to a separate table, `event_bookings`.
-- Socials (`lodge_socials`): an invite/notification list only. No price, deadline or booking flow. They cannot become "Book" cards without new work.
-- Reusable: `BookingCore`, `StripeEmbeddedCheckoutPanel`, `bookingTitles`, `nameCase`, pricing helpers. The meeting form must be lifted out of `Bookings.tsx` into a shared component so both pages render the same thing.
+- **The Provincial return is not an AcroForm.** `src/lib/provincialReturnDoc.ts` draws it fresh in the browser: `buildDocx` (Word, via `docx`) and `buildPdf` (pdf-lib, standard Times font). There are **no field IDs**. The signatures are two printed text lines from `signatureLines()`: `Signed ……… Sec Date <date>` then `Signed ……… WM Date <date>`. They are drawn on page 2 (PDF line ~331, 70pt apart) and as Word paragraphs (line ~222).
+- **How it's delivered:** `ProvincialReturn.tsx` builds both files in the browser and uploads them to the private `secretary-returns` bucket under `provincial-returns/<year>/`. `submit-provincial-return` then emails 30-day signed links. Download is browser-only.
+- **The UGLE Installation Return does have signature fields.** `installationReturn.ts` lists `NEVER_FILL = ["Worshipful MasterRow1", "SecretaryRow1", "Date of Disp"]`, so the WM and Secretary signature fields are `Worshipful MasterRow1` and `SecretaryRow1`. This plan reports them but doesn't wire them.
+- **WM and Secretary** come from `loadProvincialData` (`resolveLadderOffice` / `resolveContinuingOffice`), which apply the same effective-date rule as `current_officer_holder()`.
+- **Hard-coded lodge details already in this area:** `L6787` in file names (ProvincialReturn.tsx, submit-provincial-return) and "Weybridge" in `lodgeLine()`. These are older code and not in scope. New code won't add any, and I'm flagging these for a later clean-up.
 
-**b) Finding a member's own booking**
-- `bookings.user_id` exists. `create-checkout` already fills it when a signed-in token is sent, but the public page doesn't send one, and `save-meeting-response` never sets it. That is why 7c7125aa has no user.
-- `event_bookings` has no user or member column.
-- Proposed key, in this order: (1) `bookings.user_id` = member (set server-side from the token, never from the browser); (2) register row `festive_board_attendance.member_id` for that meeting; (3) an active-member email match on `contact_email` (same rule as the register trigger). For events: a new nullable `event_bookings.member_id`, otherwise an email match.
-- Older bookings: members who booked with their own email, or who already have a linked register row, show their correct status. Anyone who booked with another email and has no register link shows "Not booked". Name-only matches never count.
+## Design answers
 
-**c) Deadline and event types**
-- The deadline isn't calculated as "meeting date minus 7". It's typed in per event: `lodge_events.booking_deadline` (a date; 21 Oct is set to 16 Oct, 5 days before) and `event_accounts.booking_deadline` (date and time). If it's blank, public events close at the end of the event day. I'll use the stored value and won't add a new rule; please confirm.
-- Meeting type comes from `festive_board_meetings.meeting_type` (regular / installation / emergency / dispensation), plus `status` and `cancelled_at`. Public events come from `event_accounts` (`is_public`, `event_type`, `archived_at`, `hosting_lodges` as free text).
-- Host unit: `festive_board_meetings`, `bookings` and `profiles` have `unit_id`. **`event_accounts` and `lodge_socials` have no `unit_id`.** Host-unit filtering for public events needs a new column, backfilled to the single current unit.
+**a) Table `member_signatures`:** `id`, `unit_id` (FK to `units`, required), `member_id` (FK to profiles), `storage_path`, `content_type` (always image/png after processing), `width`, `height`, `byte_size`, `active`, `created_at`, `created_by`, `source` (self_upload / self_drawn / on_behalf), `consent_note` (required when on_behalf), `consent_recorded_by`, `revoked_at`, `revoked_by`. A partial unique index allows only one active row per member. Old rows stay as inactive history; their files are deleted. No lodge name, URL, email or UUID appears anywhere. The feature sits behind module key `officer_signatures`, off by default.
 
-**d) Risk to the live booking pipeline**
-A portal booking calls the same functions, so:
-- 60-minute hold and hourly expiry: unchanged. A card hold appears on the card as "Pending payment" until it's paid or expired.
-- Register rows only for paid/confirmed: unchanged.
-- Member-matching trigger: a portal booking uses the member's profile email, so it always links. This is better than today.
-- Expected amount on non-card bookings: unchanged (worked out on the server).
-- Waitlist promotion: unchanged; shown as "Waitlisted".
-- Double-booking risks: (1) A member with a pending card hold opens the form again. The duplicate guard ignores `pending`, so he could start a second checkout. Fix: the card hides "Book" while a hold is open, and the server refuses a second pending booking for the same user and meeting. (2) A member who booked publicly under another email isn't seen by the duplicate guard. Fix: the guard also checks `user_id` and the register member link. (3) An abandoned checkout tab leaves a pending row, which the hourly expiry already clears.
-- Add a guest after booking: a second linked booking with guests only (`details.parentBookingId`, no diner row for the member himself), priced per person, using the same payment methods. The first booking is never edited.
+**Audit table `signature_usage_audit`:** `unit_id`, `form_key` (e.g. `provincial_return`), `lodge_year`, `office_key`, `signer_member_id`, `signature_id`, `generated_by`, `generated_at`, `output_path`. Capture, replace and revoke actions are audited too, in `signature_event_audit`: who, whose, action, consent note and when. Neither table ever stores image contents or URLs.
 
-## Plan
+**b) Storage:** a new private bucket `member-signatures`, path `<unit_id>/<member_id>/<signature_id>.png`. There is no public URL and no SELECT policy on the bucket for anyone. Browsers never read the bucket directly.
+- **Writes** go only through edge function `signature-upload`, which checks the caller is the member himself, or admin/Secretary with a consent note. It does its own processing check, then writes with the service role.
+- **Preview:** the owner, admin, Secretary or WM can see a preview through `signature-preview`. It returns the image bytes directly, with `Cache-Control: no-store`. The URL is not signed and not logged.
+- **RLS on `member_signatures`:**
+  - The member sees his own row.
+  - Admin, `is_lodge_secretary()` and current WM can see metadata rows in their unit.
+  - Nobody can insert, update or delete from the client; edge functions do this.
 
-**Step 1 — screen and Hub tile (nothing changes in the booking pipeline)**
-- New page `/members/book` ("Book my place"), plus a tile on the members Hub and in the portal menu. Module key: `member_bookings`.
-- A security-definer function `get_my_bookable_items()` returns, for the signed-in member's units: the next non-cancelled published Regular/Installation meeting with an open `lodge_events` row, and open public `event_accounts` hosted by those units. Each item carries its title, date, per-person price, deadline and the member's status, worked out by the key in (b). Past events are excluded. After the deadline the item stays, marked closed, until the event date.
-- Cards show the event, date, price per person, deadline and a status badge: Not booked / Pending payment / Booked / Waitlisted / Apologies / "Booking closed, contact the Secretary". There's no cancel button. In Step 1, "Book" opens the existing public page.
-- Migration: add `event_accounts.unit_id` (nullable, backfilled to the current unit) and `event_bookings.member_id` (nullable). Nothing is hard-coded: no lodge name, URL or email.
-- Socials appear only once they have a price and a booking flow. That would be a separate decision.
+**Server-side generation.** The PDF and Word builders move to (or are shared with) a new edge function `generate-provincial-return`. The browser sends only the year. The function:
+1. Re-checks that the caller may generate the return, using the same roles as today.
+2. Resolves WM and Secretary server-side.
+3. Fetches their active signatures with the service role.
+4. Embeds them and writes the files to `secretary-returns`.
+5. Writes the audit rows.
+6. Returns the file paths and short-lived (10-minute) signed download links.
 
-**Step 2 — in-portal booking**
-- Lift the meeting form out of `Bookings.tsx` into `components/bookings/MeetingBookingForm.tsx`, used unchanged by both pages. The portal pre-fills it from the profile and the dietary note via `get_profiles_pii`.
-- The portal sends the member's sign-in token. `save-meeting-response`, `create-checkout` and `create-event-checkout` set `user_id` / `member_id` from the token on the server.
-- Duplicate guard extended (no second pending hold; checks user and register links). Add a "+ Add a guest" button on booked cards, which creates the linked guest booking.
-- Redirect: a signed-in member opening `/bookings` goes to `/members/book`. Deep links with a query, email links and QR codes still work: visitors aren't affected, and links to `/events/:slug` are left alone. Inside the native app the same redirect applies. The redirect runs in the app, so cached pages don't matter.
+The browser never gets the raw signature image, only the finished document, as it already does today. The existing `submit-provincial-return` flow is unchanged.
+
+**c) Capture screen** (Profile, "My signature" section, plus a dialog in Edit Member for admin/Secretary):
+- Upload PNG/JPEG up to 2 MB, or draw on a pointer pad (finger/mouse/stylus) with Clear and Undo.
+- The browser processes the image on a canvas:
+  - near-white pixels become transparent;
+  - the image is trimmed to the ink;
+  - it is resized to at most 600×200 px, aspect ratio kept;
+  - it is re-encoded as PNG, which strips EXIF and other metadata.
+- The server checks it again:
+  - magic bytes show PNG;
+  - size ≤ 200 KB after processing;
+  - dimensions within the limits;
+  - anything else is rejected.
+- A preview shows on a plain light surface token before saving.
+- The on-behalf dialog requires a consent note ("Member agreed on <date>"), a date and a confirm tick. The form has a honeypot in a hidden container.
+
+**d) Use and audit:** a signature is only placed inside `generate-provincial-return` after the role check, and every placement writes one audit row. There is no list or download endpoint. `signature-preview` returns one image for one member, and only to the owner or an entitled officer. There's no bulk export. Previews are rate-limited per caller.
+
+**e) Revoke:** the member (or admin/Secretary, audited) presses Remove. This sets the row inactive with `revoked_at`/`revoked_by` and deletes the file from storage. Documents already generated aren't changed; they stay as issued documents.
+
+**f) Provincial return behaviour:**
+- **Placement:** each `Signed ……` line becomes a fixed signature box.
+  - In the PDF, the box is about 220×40pt above the dotted line. The image is scaled to fit inside it with aspect ratio kept, left-aligned and vertically centred.
+  - In Word, an inline image goes in the same position with the same fit rule.
+  - The dotted line and date stay.
+- **Before generating,** the screen shows "Will be signed by:" with Secretary and WM names, each marked "signature on file" or "no signature on file — will be left blank". There's a small preview for viewers allowed to see it. The download and send buttons still work when one or both are missing.
+- **Same person as WM and Secretary:** both lines use the same signature, with one audit row per office, and the screen notes "same person holds both offices".
+- **Vacant office:** the field is left blank and the screen warns "No Secretary resolved for <year>".
+- **Delivery:** unchanged. Files go to `secretary-returns`, then the existing email gives 30-day links.
+
+**g) Data protection** (the minimum safe approach):
+- Private bucket with no direct client read.
+- RLS limits metadata rows.
+- Server-only embedding.
+- Consent is required when uploading on someone's behalf.
+- Full audit of capture, use and revoke.
+- Delete on revoke.
+- No bulk access.
+- No logging of image bytes, signed URLs or base64. Edge function logs record IDs only.
+- I'll add a line to the Data Protection page stating that signatures are held for lodge returns and can be removed by the member.
+
+## AGENTS.md wording change
+
+Current: `- Installation Returns: live data, exact AcroForm IDs; signatures/dispensation blank.`
+
+New: `- Installation Returns: live data, exact AcroForm IDs; dispensation always blank; signature fields use the current office holder's active member_signatures image embedded server-side (blank if vacant or none), audited per placement. Why: signatures follow the office, never a named person.`
+
+New rule: `- Member signatures: private bucket, no client read, written/embedded only by edge functions, one active per member, unit_id-scoped. Why: fraud-sensitive personal data.`
+
+## Files and tables
+
+- Migration: `member_signatures`, `signature_usage_audit`, `signature_event_audit` (all with `unit_id`, GRANTs, RLS), plus the `officer_signatures` module key row (false).
+- New bucket: `member-signatures` (private), with no client SELECT policy on `storage.objects`.
+- Edge functions (new): `signature-upload`, `signature-revoke`, `signature-preview`, `generate-provincial-return`. The document builder is shared via `supabase/functions/_shared/provincialReturnDoc.ts`, and the browser imports the same pure layout code.
+- Frontend:
+  - `components/members/SignatureCapture.tsx` (upload plus draw pad);
+  - `lib/signatureImage.ts` (white removal, trim, resize: pure, testable);
+  - Profile section;
+  - Edit Member dialog;
+  - `ProvincialReturn.tsx`, which shows who will sign and calls the new function.
+- `AGENTS.md`, plus `DataProtection.tsx` (one sentence).
 
 ## Tests
-- Unit: status key order (user_id, then register member, then email; a name-only match never counts); deadline/closed/past visibility; host-unit filter; second-pending refusal; guest-only linked booking pricing; redirect only when signed in.
-- Browser: `/members/book` at 320px with worst-case data (long titles, every status) using the e2e synthetic identity, checked for overflow and 44px targets; axe WCAG 2.1 AA with colour contrast on. Same for the Hub tile and the in-portal form.
 
-## Will not touch
-The register, the dining reconciliation panel, ledger posting, the GMC invoice and the PerfectTablePlan export.
+- **Unit:**
+  - white-to-transparent, trim and fit-in-box maths (aspect ratio kept);
+  - only PNG/JPEG accepted, size cap;
+  - signer resolution, including a vacant office leaving the field blank and a missing signature leaving it blank;
+  - same person as WM and Secretary gives both placements and two audit rows;
+  - officers changing between years changes whose signature is used;
+  - consent note required on behalf of someone.
+- **Database (as real roles, in the test unit):**
+  - an ordinary member cannot select another member's `member_signatures` row or any `member-signatures` object;
+  - an ordinary member cannot call `signature-preview` for someone else;
+  - an ordinary member cannot call `generate-provincial-return`.
+- **Browser:** a real 320px check plus an axe scan (colour contrast on) for the Profile signature section, the draw pad, the on-behalf dialog and the updated Provincial Return panel; 44px targets; keyboard-reachable pad controls; no overflow.
+- **Regression:** the existing `provincialReturn.test.ts` structure test still passes. The UGLE return keeps `NEVER_FILL` untouched.
 
-## Decisions needed
-1. Deadline: keep the per-event stored date (the 21 Oct deadline is 16 Oct), or apply "date minus 7" as the default when it's blank?
-2. Socials: leave them out until they have prices and booking?
-3. The Christmas party is in `event_bookings`, not `bookings`. Is matching by member id/email there acceptable?
+## Risks
 
-## Step 3 (plan only) — members-only group visit with payment up front
+- **Moving generation to the server** is the biggest change. pdf-lib works in Deno, and `docx` should too, but bundling still needs a check. If it fails, the fallback is to keep the Word file browser-built and unsigned, and sign only the PDF on the server. I'll tell you before taking that route.
+- **White removal on poor scans** (grey paper) may leave haze. The threshold will be adjustable, and the preview shows the result before saving.
+- **Edge functions deploy as soon as they're saved.** They are new functions behind a module key that is off, and the existing Provincial page keeps working until it is published. Nothing touches the 21 Oct booking pipeline.
+- **The draw pad on small phones** needs a sensible minimum height. The 320px test covers this.
+- **Unit tests can't prove deletion from Cloud storage.** I'll verify it once with a test image in the test unit and then remove it.
 
-Findings:
-- (a) Members-only: not possible today. `event_accounts.is_public` false hides an event from the public, but nothing then shows it in the portal; `lodge_events` is meeting-only and its `published` makes it public. `lodge_visits` records visits to other lodges (host lodge, cost, payment details, host Secretary email) but takes no bookings or payments.
-- (b) Up-front payment: yes. The events engine already takes full card payment at booking (`payment_mode` full, card fee optional), and `booking_deadline` closes it in `create-event-checkout`. Bank transfer is held as pending, so "paid before the group booking is sent" needs card or a confirmed bank receipt.
-- (c) Paid list export: no export exists for `event_bookings`. Treasurer/admin can read the rows; there is no "paid members" CSV for the Secretary.
-- (d) Missing: a visibility mode (public / members of host unit); portal listing (Step 1 already does this once the mode exists); a member-only booking gate in `create-event-checkout` (signed-in active member of the host unit; member_id stored from the token); a paid-only export for the host Secretary/admin; optional link from a `lodge_visits` row to its event.
+## Open decisions
 
-Proposed shape:
-- Add `event_accounts.audience` ('public' | 'members'), default 'public'. `public_events` view and the public page exclude 'members'. `get_my_bookable_items` includes 'members' events for the host unit.
-- `create-event-checkout`: for 'members' events, require a signed-in active member whose unit is the event's unit; store `member_id`. One booking per member per event (guests only where the event allows them).
-- Collection deadline = `booking_deadline` (the existing rule). After it, the card reads "Booking closed, contact the Secretary".
-- "Paid members" export (CSV: title, name, lodge, email, dietary only for roles allowed to see it, amount paid, paid date). Paid rows only. Available to admin, Secretary and the host unit's Secretary.
-- Nullable `lodge_visits.event_account_id` so a visit can open bookings. Host unit drives everything; no names, URLs or emails are hard-coded.
+1. Should the current WM be able to upload on someone's behalf (the brief says Secretary/admin only), or only view previews? Assumed: view only.
+2. For signed Word output, is the Word copy still needed at all once the PDF is signed? Assumed: yes, both signed.
