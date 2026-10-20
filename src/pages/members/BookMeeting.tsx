@@ -17,7 +17,7 @@ type Loaded = { item: BookableItem; bundle: EventBundle; meeting: { id: string; 
 export default function BookMeeting() {
   const { itemId = "" } = useParams();
   const enabled = useMemberBookingsEnabled();
-  const { profile } = useAuth();
+  const { profile, user } = useAuth();
   const [loaded, setLoaded] = useState<Loaded>(null);
   const [lodgeName, setLodgeName] = useState<string | null>(null);
   const [loading, setLoading] = useInitialLoading();
@@ -66,19 +66,19 @@ export default function BookMeeting() {
       ) : (
         <>
           <h1 className="font-serif text-2xl text-gold mb-4 break-words">{loaded.item.title}</h1>
-          <PortalForm bundle={loaded.bundle} meeting={loaded.meeting} prefill={prefill} />
+          <PortalForm memberId={user?.id ?? null} bundle={loaded.bundle} meeting={loaded.meeting} prefill={prefill} />
         </>
       )}
     </MembersLayout>
   );
 }
 
-function PortalForm({ bundle, meeting, prefill }: { bundle: EventBundle; meeting: { id: string; event_key: string }; prefill: MeetingBookingPrefill }) {
+function PortalForm({ bundle, meeting, prefill, memberId }: { bundle: EventBundle; meeting: { id: string; event_key: string }; prefill: MeetingBookingPrefill; memberId: string | null }) {
   const [diningOptionId, setDiningOptionId] = useDiningOption(bundle.diningOptions);
   return (
-    <div className="max-w-2xl">
+    <div className="max-w-2xl text-foreground">
       <MeetingBookingForm bundle={bundle} publishedMeeting={meeting} diningOptionId={diningOptionId} setDiningOptionId={setDiningOptionId}
-        prefill={prefill} doneHref="/members/book" doneLabel="Back to Book my place" />
+        prefill={prefill} memberId={memberId} doneHref="/members/book" doneLabel="Back to Book my place" />
     </div>
   );
 }

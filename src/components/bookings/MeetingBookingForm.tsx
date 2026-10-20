@@ -55,13 +55,15 @@ export function useDiningOption(diningOptions: EventBundle["diningOptions"]) {
 }
 
 export default function MeetingBookingForm({
-  bundle, publishedMeeting, diningOptionId, setDiningOptionId, prefill, doneHref = "/", doneLabel = "Back to Home",
+  bundle, publishedMeeting, diningOptionId, setDiningOptionId, prefill, memberId, doneHref = "/", doneLabel = "Back to Home",
 }: {
   bundle: EventBundle;
   publishedMeeting: { id: string; event_key: string } | null;
   diningOptionId: string;
   setDiningOptionId: (id: string) => void;
   prefill?: MeetingBookingPrefill;
+  /** Portal only: the signed-in member (from the portal session) for the dietary pre-fill. */
+  memberId?: string | null;
   doneHref?: string;
   doneLabel?: string;
 }) {
@@ -106,8 +108,7 @@ export default function MeetingBookingForm({
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      const uid = session?.user?.id;
+      const uid = memberId ?? (await supabase.auth.getSession()).data.session?.user?.id;
       if (!uid) return;
       if (!cancelled) setMemberUid(uid);
       const { data } = await (supabase as any).rpc("get_profiles_pii", { _ids: [uid] });
@@ -115,7 +116,7 @@ export default function MeetingBookingForm({
       if (!cancelled && note && !dietaryTouched.current) setDietary((d) => (d.trim() ? d : note));
     })().catch(() => {});
     return () => { cancelled = true; };
-  }, []);
+  }, [memberId]);
   const [paymentMethod, setPaymentMethod] = useState<"card" | "bank-transfer" | "cash-cheque" | "">("");
   const [coverFee, setCoverFee] = useState(true);
 
