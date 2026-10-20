@@ -49,3 +49,17 @@ test("switched off: no tile and the page sends members home", async ({ page }) =
   await expect(page).toHaveURL(/\/members\/?$/, { timeout: 15000 });
   await expect(page.getByRole("link", { name: /Book my place/ })).toHaveCount(0);
 });
+
+test("event editor shows the host lodge read-only at 320px", async ({ page }) => {
+  const row = { id: "e1", name: "Party", public_title: "Party", slug: "party", event_date: far(40), start_time: "17:00:00", end_time: "23:00:00",
+    is_public: false, archived_at: null, adult_price_pence: 3500, child_price_pence: 1500, useful_stuff: {}, short_link: null, unit_id: "u1" };
+  await page.route("**/rpc/is_lodge_secretary**", (r) => r.fulfill({ json: true }));
+  await page.route("**/rpc/is_current_officer**", (r) => r.fulfill({ json: true }));
+  await page.route("**/rest/v1/event_accounts?**", (r) => r.fulfill({ json: [row] }));
+  await page.route("**/rest/v1/units?**", (r) => r.fulfill({ json: { name: "Example Lodge of Very Long Name No. 99999" } }));
+  await page.goto("/members/public-events");
+  await page.getByRole("button", { name: /^Edit/ }).first().click();
+  await expect(page.getByText("Example Lodge of Very Long Name No. 99999")).toBeVisible({ timeout: 10000 });
+  await expect(page.getByLabel(/Host lodge/i)).toHaveCount(0);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(0);
+});
