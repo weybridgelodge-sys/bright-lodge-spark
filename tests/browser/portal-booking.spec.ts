@@ -28,7 +28,7 @@ async function fillAndSubmitBank(page: Page, bodies: unknown[]) {
   await page.locator("#evf-guests").selectOption("1");
   await page.locator("#g0").fill("Guest Person");
   await page.getByRole("button", { name: "Next" }).click();
-  await page.getByText(/bank transfer/i).first().click();
+  await page.getByRole("radio", { name: /Bank Transfer/ }).check();
   await page.getByRole("button", { name: "Submit Booking" }).click();
 }
 
@@ -77,7 +77,7 @@ test("portal booking form at 320px: prefilled, guests, bank transfer, axe", { ti
   expect(await overflow()).toBeLessThanOrEqual(1);
   await expectNoAxeViolations(page, "portal booking step 2 with guest");
   await page.getByRole("button", { name: "Next" }).click();
-  await expect(page.getByText(/bank transfer/i).first()).toBeVisible();
+  await expect(page.getByRole("radio", { name: /Bank Transfer/ })).toBeVisible();
   expect(await overflow()).toBeLessThanOrEqual(1);
   await expectNoAxeViolations(page, "portal booking payment step");
   await page.screenshot({ path: "/tmp/browser/portal-booking-pay-320.png" });
@@ -87,7 +87,7 @@ test("portal booking form at 320px: prefilled, guests, bank transfer, axe", { ti
   const bodies: any[] = [];
   await page.route("**/functions/v1/save-meeting-response", async (r) => { bodies.push(r.request().postDataJSON()); await r.fulfill({ json: { bookingId: "b1" } }); });
   await page.getByRole("button", { name: "Next" }).click();
-  await page.getByText(/bank transfer/i).first().click();
+  await page.getByRole("radio", { name: /Bank Transfer/ }).check();
   await page.getByRole("button", { name: "Submit Booking" }).click();
   await expect(page.getByRole("heading", { name: "Booking Confirmed" })).toBeVisible();
   expect(bodies[0].details).toMatchObject({ guestCount: 1, paymentMethod: "bank-transfer", totalPence: 7000 });

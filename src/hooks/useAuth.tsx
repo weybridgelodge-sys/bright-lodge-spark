@@ -108,6 +108,7 @@ const layoutTestProfile: Profile = {
   avatar_url: null,
   status: "active",
   degree: "installed_master",
+  ...({ unit_id: "layout-test-unit" } as object),
 };
 
 // Local layout tests only: "?e2e_as=secretary" narrows the synthetic identity
