@@ -4,10 +4,10 @@
 - Portal routing: `/members` is the dashboard; `/members/dashboard` and the inner catch-all redirect there so every portal URL resolves.
 - Auth bootstrap must always settle: retain getSession error handling, the 8s guard, and swallowed profile-load rejections.
 - AppErrorBoundary wraps routes; Suspense uses PageLoader; retain chunk retry and magic-link error surfacing.
-- Accounts distribution uses its separate secure link and record_accounts_sent; never attach to an already-sent summons.
+- Accounts distribution: own secure link + record_accounts_sent; never attach to a sent summons.
 - Only the Secretary is exempt from subscriptions (latest Secretary appointment on or before the year); the Treasurer pays like any member. Honorary members remain exempt.
 - Public/member Thursday wording: "Rehearsal Night", never "Lodge of Instruction"/"LOI" (no subs collected). Keep internal `loi` identifiers.
-- Installation Returns resolve live and fill exact AcroForm IDs; signatures and dispensation remain blank.
+- Installation Returns: live data, exact AcroForm IDs; signatures/dispensation blank.
 - Browser layout tests use only a Vite `e2e`-mode, localhost-only synthetic identity; never backend access or production.
 - Officer access = Installation year: current_officer_holder() is the latest confirmed appointment in effect (stored date, else installation_rule_date(); non-progressive also >= appointed_on); offices carry forward; current Almoner/Charity Steward/Mentor: portals. Never switch on 1 Oct; sync labels: masonicYearStartSync. Dues/accounts/periods/Almoner year stay Oct–Sep.
 - Officer appointment changes log via swallow-on-error AFTER trigger to officer_appointment_audit (admin/Secretary read); offices-held history only via get_member_offices_held (same effective-date rule, visibility enforced in DB).
@@ -15,7 +15,7 @@
 - Profile dietary_requirements is private health data: no column SELECT grant; read only via get_profiles_pii; booking forms pre-fill it only while empty. Why: allergies are special-category data.
 - Bulk import only via admin-import-members (validation in _shared/memberImport.ts); fills blanks only, never roles, sign-in email or status. Why: safe re-runs.
 - Registration numbers (ugle/mmh/rose_croix) are private (get_profiles_pii), edited only in Edit Member by admin/Secretary. Why: Secretary-owned records.
-- Almoner 2-tier: can_view_almoner reads, can_edit_almoner writes (+welfare-attachments, Widows archive by status, no delete); app: canAccessAlmoner/canEditAlmoner; can_access_almoner dead;missed: almonerMeetingTypes (non-cancelled). Why: read-only roles
+- Almoner 2-tier: can_view_almoner reads, can_edit_almoner writes (+welfare-attachments, Widows archive by status, no delete); app canAccessAlmoner/canEditAlmoner; missed = almonerMeetingTypes (non-cancelled). Why: read-only roles.
 - Page/list loading uses useInitialLoading, never useState(true), so refreshes keep content+scroll.
 - lodge_events.event_label drives booking/email wording; titles in lib/bookingTitles. Why: non-Festive-Board events reuse one form.
 - Event module tables: public read via is_event_published(), writes via can_write_event_content(), copies via duplicate_event_content(). Why: drafts hidden, copies atomic.
@@ -26,4 +26,4 @@
 - Events: calendars publicEventCalendar+member-calendar-feed; pricing eventPricing; form BookingCore. Why: one rule.
 - Accounts are created only by admin/Secretary via inviteUserByEmail (admin-invite-member, admin-import-members); public sign-up is disabled and magic links use shouldCreateUser:false. Why: no account for an unverified identity.
 - Booking→register member match: active-member email links (any title/lodge text); name-only sets festive_board_attendance.suspected_member_id (flag, no visitor contact), never links; mirror in lib/bookingMemberMatch. Why: no silent guesses.
-- Book my place: get_my_bookable_items() (host = profile unit_id; event_accounts.unit_id FK units, set by trigger) + lib/memberBookings; switch member_bookings. Why: one flow.
+- Book my place: get_my_bookable_items() (host = profile unit_id) + lib/memberBookings, switch member_bookings; meetings book via shared MeetingBookingForm + lib/portalBooking; /bookings redirect behind member_bookings_redirect. Why: one flow.

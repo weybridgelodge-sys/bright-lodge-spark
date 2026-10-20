@@ -10,6 +10,7 @@ import {
   type BookableItem, type MemberBookingStatus,
 } from "@/lib/memberBookings";
 import { formatGBP } from "@/lib/publicEvents";
+import { portalBookPath } from "@/lib/portalBooking";
 
 const fmtDate = (d: string) => new Date(`${d}T12:00:00`).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "long", year: "numeric" });
 const fmtDeadline = (d: Date) => d.toLocaleString("en-GB", { day: "numeric", month: "long", year: "numeric", hour: "numeric", minute: "2-digit" });
@@ -44,7 +45,7 @@ function Card({ item }: { item: BookableItem }) {
       </dl>
       <div className="mt-4">
         {footer.kind === "book" ? (
-          <Link to={item.book_path} className="inline-flex items-center justify-center min-h-[44px] px-5 rounded-sm bg-gold text-navy font-sans font-semibold text-sm hover:bg-gold-light">
+          <Link to={portalBookPath(item)} className="inline-flex items-center justify-center min-h-[44px] px-5 rounded-sm bg-gold text-navy font-sans font-semibold text-sm hover:bg-gold-light">
             Book my place<span className="sr-only">: {item.title}</span>
           </Link>
         ) : (
