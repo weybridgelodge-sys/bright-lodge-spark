@@ -23,6 +23,7 @@
 - Masonic year = Installation to day before next (_shared/masonicYear.ts; rule, stored dates override); KPI Movement uses member_status_history; new tables carry unit_id. Why: multi-lodge-ready, accurate movement.
 - Diary: festive_board_meetings via diary_* RPCs; cancel, never delete; Installation move updates stored date; per-month meeting_series.schedule inferred from diary, skips existing; only regular/installation scheduled, rest one-off. Why: one register.
 - Every new/changed page/screen/dialog: 320px test (worst-case data; no overflow/obscured controls) + axe (helpers/axe, WCAG 2.1 AA), colour-contrast always on, never disabled; fieldCls tokens; 44px targets; report scanned/unscanned.
-- Events: calendars public _shared/publicEventCalendar, member member-calendar-feed; pricing _shared/eventPricing.ts, form events/booking/BookingCore. Why: one rule.
+- Events: calendars _shared/publicEventCalendar + member-calendar-feed; pricing _shared/eventPricing; form BookingCore. Why: one rule.
 - Accounts are created only by admin/Secretary via inviteUserByEmail (admin-invite-member, admin-import-members); public sign-up is disabled and magic links use shouldCreateUser:false. Why: no account for an unverified identity.
 - Booking→register member match: active-member email links (any title/lodge text); name-only sets festive_board_attendance.suspected_member_id (flag, no visitor contact), never links; mirror in lib/bookingMemberMatch. Why: no silent guesses.
+- Book my place: get_my_bookable_items() (host unit = profile unit_id) + lib/memberBookings rules; gated by module_settings member_bookings. Why: one process.

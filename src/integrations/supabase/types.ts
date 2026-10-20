@@ -1382,6 +1382,7 @@ export type Database = {
           status: string
           tagline: string | null
           theme: string
+          unit_id: string | null
           updated_at: string
           useful_stuff: Json
           venue: string | null
@@ -1425,6 +1426,7 @@ export type Database = {
           status?: string
           tagline?: string | null
           theme?: string
+          unit_id?: string | null
           updated_at?: string
           useful_stuff?: Json
           venue?: string | null
@@ -1468,6 +1470,7 @@ export type Database = {
           status?: string
           tagline?: string | null
           theme?: string
+          unit_id?: string | null
           updated_at?: string
           useful_stuff?: Json
           venue?: string | null
@@ -1714,6 +1717,7 @@ export type Database = {
           is_placeholder: boolean
           items_subtotal_pence: number
           lodge_label: string | null
+          member_id: string | null
           notes: string | null
           paid_at: string | null
           payer_name: string
@@ -1760,6 +1764,7 @@ export type Database = {
           is_placeholder?: boolean
           items_subtotal_pence?: number
           lodge_label?: string | null
+          member_id?: string | null
           notes?: string | null
           paid_at?: string | null
           payer_name: string
@@ -1806,6 +1811,7 @@ export type Database = {
           is_placeholder?: boolean
           items_subtotal_pence?: number
           lodge_label?: string | null
+          member_id?: string | null
           notes?: string | null
           paid_at?: string | null
           payer_name?: string
@@ -1841,6 +1847,20 @@ export type Database = {
             columns: ["event_id"]
             isOneToOne: false
             referencedRelation: "public_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_bookings_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "calendar_subscription_status"
+            referencedColumns: ["member_id"]
+          },
+          {
+            foreignKeyName: "event_bookings_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -7279,6 +7299,7 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_my_bookable_items: { Args: never; Returns: Json }
       get_my_pending_unlock_approvals: {
         Args: never
         Returns: {

@@ -12,7 +12,8 @@ import PendingUnlockApprovalBanner from "@/components/members/PendingUnlockAppro
 import YearAuditReviewBanner from "@/components/members/YearAuditReviewBanner";
 import TreasuryBudgetCard from "@/components/members/TreasuryBudgetCard";
 import { fetchLodgeHealthBundle, lodgeHealth, type LodgeHealth, type HealthBand } from "@/lib/kpis";
-import { Activity } from "lucide-react";
+import { Activity, Ticket } from "lucide-react";
+import { useMemberBookingsEnabled } from "@/hooks/useMemberBookingsEnabled";
 
 const BAND_LABEL: Record<HealthBand, string> = { green: "Green", amber: "Amber", red: "Red" };
 const BAND_SWATCH: Record<HealthBand, string> = {
@@ -43,6 +44,7 @@ export default function MembersDashboard() {
   const [myGroups, setMyGroups] = useState<MyGroup[]>([]);
   const [activeNotice, setActiveNotice] = useState<Notice | null>(null);
   const [health, setHealth] = useState<LodgeHealth | null>(null);
+  const bookingsOn = useMemberBookingsEnabled();
 
 
 
@@ -78,6 +80,16 @@ export default function MembersDashboard() {
 
       {user?.id && <PendingUnlockApprovalBanner />}
       {user?.id && <YearAuditReviewBanner />}
+
+      {bookingsOn && (
+        <Link to="/members/book" className="mb-6 flex items-center gap-3 min-h-[44px] bg-navy-dark/60 border border-gold/30 hover:border-gold rounded-sm px-5 py-4">
+          <Ticket className="w-5 h-5 text-gold shrink-0" aria-hidden="true" />
+          <span className="min-w-0">
+            <span className="block font-serif text-lg text-gold">Book my place</span>
+            <span className="block font-sans text-xs text-primary-foreground/80">Book meetings and events, and see what you have booked.</span>
+          </span>
+        </Link>
+      )}
 
       {isAdmin && user?.id && <DuesAttentionBanner memberId={user.id} />}
 
