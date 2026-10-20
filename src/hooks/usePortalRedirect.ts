@@ -1,25 +1,27 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/hooks/useAuth";
 import { MEMBER_BOOKINGS_MODULE_KEY } from "@/lib/memberBookings";
 import { MEMBER_BOOKINGS_REDIRECT_KEY, shouldRedirectToPortal } from "@/lib/portalBooking";
 
 /** "/members/book" when a signed-in active member opens the public Bookings page and both switches are on; else null.
- *  Visitors never wait on this: with no session it resolves to null straight away. */
+ *  The public site has no auth context, so this reads the session directly. module_settings is readable only by
+ *  active members (RLS), so readable rows also prove active membership. Visitors never query anything. */
 export function usePortalRedirect(): string | null {
-  const { session, profile } = useAuth();
   const { search } = useLocation();
-  const [switchOn, setSwitchOn] = useState(false);
+  const [state, setState] = useState({ signedIn: false, activeMember: false, switchOn: false });
   useEffect(() => {
-    if (!session) { setSwitchOn(false); return; }
     let live = true;
-    supabase.from("module_settings").select("key, value").in("key", [MEMBER_BOOKINGS_MODULE_KEY, MEMBER_BOOKINGS_REDIRECT_KEY])
-      .then(({ data }) => {
-        const on = (k: string) => (data ?? []).some((r: { key: string; value: unknown }) => r.key === k && r.value === true);
-        if (live) setSwitchOn(on(MEMBER_BOOKINGS_MODULE_KEY) && on(MEMBER_BOOKINGS_REDIRECT_KEY));
-      }, () => {});
+    (async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+      const { data } = await supabase.from("module_settings").select("key, value")
+        .in("key", [MEMBER_BOOKINGS_MODULE_KEY, MEMBER_BOOKINGS_REDIRECT_KEY]);
+      const rows = (data ?? []) as { key: string; value: unknown }[];
+      const on = (k: string) => rows.some((r) => r.key === k && r.value === true);
+      if (live) setState({ signedIn: true, activeMember: rows.length > 0, switchOn: on(MEMBER_BOOKINGS_MODULE_KEY) && on(MEMBER_BOOKINGS_REDIRECT_KEY) });
+    })().catch(() => {});
     return () => { live = false; };
-  }, [session]);
-  return shouldRedirectToPortal({ signedIn: !!session, activeMember: profile?.status === "active", switchOn, search }) ? "/members/book" : null;
+  }, []);
+  return shouldRedirectToPortal({ ...state, search }) ? "/members/book" : null;
 }
