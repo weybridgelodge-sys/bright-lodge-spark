@@ -4,10 +4,10 @@
 - Portal routing: `/members` is the dashboard; `/members/dashboard` and the inner catch-all redirect there so every portal URL resolves.
 - Auth bootstrap must always settle: retain getSession error handling, the 8s guard, and swallowed profile-load rejections.
 - AppErrorBoundary wraps routes; Suspense uses PageLoader; retain chunk retry and magic-link error surfacing.
-- Accounts distribution uses its separate secure link and record_accounts_sent; never attach to an already-sent summons.
+- Accounts distribution: own secure link + record_accounts_sent; never attach to a sent summons.
 - Only the Secretary is exempt from subscriptions (latest Secretary appointment on or before the year); the Treasurer pays like any member. Honorary members remain exempt.
 - Public/member Thursday wording: "Rehearsal Night", never "Lodge of Instruction"/"LOI" (no subs collected). Keep internal `loi` identifiers.
-- Installation Returns resolve live and fill exact AcroForm IDs; signatures and dispensation remain blank.
+- Installation Returns: live data, exact AcroForm IDs; signatures/dispensation blank.
 - Browser layout tests use only a Vite `e2e`-mode, localhost-only synthetic identity; never backend access or production.
 - Officer access = Installation year: current_officer_holder() is the latest confirmed appointment in effect (stored date, else installation_rule_date(); non-progressive also >= appointed_on); offices carry forward; current Almoner/Charity Steward/Mentor: portals. Never switch on 1 Oct; sync labels: masonicYearStartSync. Dues/accounts/periods/Almoner year stay Oct–Sep.
 - Officer appointment changes log via swallow-on-error AFTER trigger to officer_appointment_audit (admin/Secretary read); offices-held history only via get_member_offices_held (same effective-date rule, visibility enforced in DB).
