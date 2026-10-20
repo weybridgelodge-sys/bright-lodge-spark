@@ -3,33 +3,24 @@ import { HelmetProvider } from "react-helmet-async";
 import App from "./App.tsx";
 import "./index.css";
 
-// Auto-recover from stale lazy-chunk hashes after a redeploy. If the browser
-// still holds an old index.html referencing a chunk filename that no longer
-// exists on the CDN, force a one-time hard reload to pick up the new manifest.
-// Retries are allowed again after 60s, and each reload adds a cache-busting
-// query so a stale edge-cached index.html isn't served a second time. If it
-// still fails, AppErrorBoundary shows a Reload button.
-const CHUNK_RELOAD_KEY = "chunk-reload-attempted-at";
-const isChunkLoadError = (msg: unknown) =>
-  typeof msg === "string" &&
-  (msg.includes("Failed to fetch dynamically imported module") ||
-    msg.includes("error loading dynamically imported module") ||
-    msg.includes("Importing a module script failed"));
+import { stripCacheBust, tryChunkReload } from "./lib/chunkReload";
 
-const handleChunkError = (message: unknown) => {
-  if (!isChunkLoadError(message)) return;
-  const last = Number(sessionStorage.getItem(CHUNK_RELOAD_KEY) || 0);
-  if (Date.now() - last < 60_000) return;
-  sessionStorage.setItem(CHUNK_RELOAD_KEY, String(Date.now()));
-  const url = new URL(window.location.href);
-  url.searchParams.set("_r", Date.now().toString(36));
-  window.location.replace(url.toString());
-};
+// Auto-recover from stale lazy-chunk hashes after a redeploy: reload once per
+// 60s with a cache-busting query (lib/chunkReload). If it still fails,
+// AppErrorBoundary shows the error with a Reload button.
+window.addEventListener("vite:preloadError", (e) => {
+  if (tryChunkReload((e as Event & { payload?: unknown }).payload ?? "Failed to fetch dynamically imported module")) e.preventDefault();
+});
+window.addEventListener("error", (e) => void tryChunkReload(e.error ?? e.message));
+window.addEventListener("unhandledrejection", (e) => void tryChunkReload(e.reason));
 
-window.addEventListener("error", (e) => handleChunkError(e.message));
-window.addEventListener("unhandledrejection", (e) =>
-  handleChunkError(e.reason?.message ?? String(e.reason)),
-);
+// Remove only the cache-bust param after load; path, other query and hash (auth tokens) untouched.
+try {
+  const clean = stripCacheBust(window.location.href);
+  if (clean) window.history.replaceState(window.history.state, "", clean);
+} catch {
+  /* ignore */
+}
 
 // Magic-link failures come back as #error=...&error_code=otp_expired (or in the
 // query string). Remember it so the sign-in page can explain what happened.
