@@ -23,7 +23,7 @@ import sixFellowcraftsAprons from "@/assets/six-fellowcrafts-aprons.png.asset.js
 
 
 
-import MeetingBookingForm, { calcCardFeePence, useDiningOption } from "@/components/bookings/MeetingBookingForm";
+import MeetingBookingForm, { useDiningOption } from "@/components/bookings/MeetingBookingForm";
 import SaveTheDate from "@/components/bookings/SaveTheDate";
 import { fetchUpcomingRegisterMeetings, type RegisterMeeting } from "@/lib/lodgeEvents";
 
