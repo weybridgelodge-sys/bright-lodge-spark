@@ -13,6 +13,7 @@ const MembersPending = lazy(() => import("./pages/members/Pending"));
 const MembersDashboard = lazy(() => import("./pages/members/Dashboard"));
 const MembersDirectory = lazy(() => import("./pages/members/Directory"));
 const MembersDocuments = lazy(() => import("./pages/members/Documents"));
+const BookMyPlace = lazy(() => import("./pages/members/BookMyPlace"));
 const MembersProfile = lazy(() => import("./pages/members/Profile"));
 const MembersAdmin = lazy(() => import("./pages/members/Admin"));
 const EventsAdmin = lazy(() => import("./pages/members/EventsAdmin"));
@@ -74,6 +75,7 @@ const MembersRoutes = () => (
         <Route path="" element={<ProtectedRoute><MembersDashboard /></ProtectedRoute>} />
         <Route path="directory" element={<ProtectedRoute><MembersDirectory /></ProtectedRoute>} />
         <Route path="documents" element={<ProtectedRoute><MembersDocuments /></ProtectedRoute>} />
+        <Route path="book" element={<ProtectedRoute><BookMyPlace /></ProtectedRoute>} />
         <Route path="ritual" element={<ProtectedRoute><MembersRitual /></ProtectedRoute>} />
         <Route path="profile" element={<ProtectedRoute><MembersProfile /></ProtectedRoute>} />
         <Route path="admin" element={<ProtectedRoute><MembersAdmin /></ProtectedRoute>} />
