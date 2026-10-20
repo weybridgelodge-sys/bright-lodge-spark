@@ -26,7 +26,7 @@ test("Book my place at 320px with every status", async ({ page }) => {
   await page.goto("/members/book");
   await expect(page.getByRole("heading", { name: "Book my place", level: 1 })).toBeVisible({ timeout: 15000 });
   await expect(page.getByRole("listitem")).toHaveCount(7);
-  for (const s of ["Not booked", "Pending payment", "Waitlisted", "Apologies"]) await expect(page.getByText(s, { exact: true })).toBeVisible();
+  for (const s of ["Not booked", "Pending payment", "Waitlisted", "Apologies"]) await expect(page.getByText(s, { exact: true }).first()).toBeVisible();
   await expect(page.getByText("Booking closed, contact the Secretary.")).toHaveCount(1);
   await expect(page.getByText("Your apologies are recorded. To attend, contact the Secretary.")).toHaveCount(1);
   await expect(page.getByText("You are booked. To change this booking, contact the Secretary.")).toHaveCount(2);
