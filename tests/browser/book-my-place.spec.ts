@@ -10,7 +10,7 @@ const items = [
   { kind: "event", id: "e1", title: "Joint Christmas Party with Neighbouring Lodges", event_date: far(40), price_pence: 3500, child_price_pence: 1500, booking_deadline: null, book_path: "/events/x", bookings: [{ status: "pending" }] },
   { kind: "event", id: "e2", title: "Booked event", event_date: far(50), price_pence: 4000, booking_deadline: null, book_path: "/events/y", bookings: [{ status: "paid" }] },
   { kind: "event", id: "e3", title: "Waitlisted event", event_date: far(51), price_pence: 4000, booking_deadline: null, book_path: "/events/z", bookings: [{ status: "waitlisted" }] },
-  { kind: "event", id: "e4", title: "Closed event", event_date: far(3), price_pence: 4000, booking_deadline: far(1), book_path: "/events/w", bookings: [{ status: "apologies" }] },
+  { kind: "event", id: "e4", title: "Closed event", event_date: far(3), price_pence: 4000, booking_deadline: far(-1), book_path: "/events/w", bookings: [{ status: "apologies" }] },
 ];
 
 const on = async (page: import("@playwright/test").Page, value: boolean) => {
