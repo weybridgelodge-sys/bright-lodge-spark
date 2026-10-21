@@ -235,18 +235,19 @@ const continued = () => new Paragraph({
   children: [new TextRun({ text: "PLEASE CHECK THE PRINTED DETAILS ON THIS FORM AND CORRECT ANY ERRORS", font: "Times New Roman", size: 15 })],
 });
 
-/** Signed variant: a fixed-height signature box (image or empty) above each line; same total spacing. */
+/** Signed variant: a signature box (image, or empty when none/vacant) above each line. */
 function signedLinesDocx(d: ProvincialData, sigs: DocSignatures) {
   const px = (pt: number) => Math.round((pt * 96) / 72);
   const out: Paragraph[] = [];
   signatureLines(d).forEach((text, i) => {
     const img = i === 0 ? sigs.sec : sigs.wm;
-    const box = new Paragraph({
+    const f = img ? fitSig(img.width, img.height) : null;
+    out.push(new Paragraph({
       spacing: { before: i === 0 ? 0 : 300, after: 0 }, indent: { left: 700 },
-      children: img ? [(() => { const f = fitSig(img.width, img.height); return new ImageRun({ type: "png", data: img.png, transformation: { width: px(f.w), height: px(f.h) } }); })()] : [new TextRun({ text: "", size: 20 })],
-    });
-    if (!img) box.addRunToFront?.(new TextRun(""));
-    out.push(img ? box : new Paragraph({ spacing: { before: i === 0 ? 0 : 300 }, children: [new TextRun({ text: "", size: 20 })] }));
+      children: img && f
+        ? [new ImageRun({ type: "png", data: img.png, transformation: { width: px(f.w), height: px(f.h) } })]
+        : [new TextRun({ text: "", size: 20 })],
+    }));
     out.push(new Paragraph({ spacing: { before: img ? 0 : 560 }, children: [new TextRun({ text, font: "Times New Roman", size: 20 })] }));
   });
   return out;
