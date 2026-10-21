@@ -21,6 +21,7 @@ export type ProvincialData = {
   year: number; consecrated: string; scheduledDate: string; actualDate: string | null; venue: string; meetingPattern: string;
   rows: ProvRow[]; lowerRows: ProvRow[]; pastMasters: { years: number[]; name: string }[];
   secretary: { name: string; address: string; mobile: string; personalEmail: string; lodgeEmail: string; visible?: boolean };
+  appended?: string[]; issues?: string[];
 };
 
 /** A processed signature (PNG) to place on a signature line. Never logged. */

@@ -8,7 +8,6 @@ import {
   type ApptRow, type StatusRow, type ResolvedOffice, type Provenance,
 } from "@/lib/installationReturn";
 import type { PositionKey } from "@/lib/officersProgression";
-import { ukLongDate } from "../../supabase/functions/_shared/provincialReturnDoc";
 export { PM_NOTE, PROVINCE_TITLE, PROVINCE_SUBTITLE, ukLongDate } from "../../supabase/functions/_shared/provincialReturnDoc";
 
 export const LADDER_KEYS = new Set([
