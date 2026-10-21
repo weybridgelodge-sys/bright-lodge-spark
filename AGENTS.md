@@ -18,7 +18,7 @@
 - Bulk import only via admin-import-members (validation in _shared/memberImport.ts); fills blanks only, never roles, sign-in email or status. Why: safe re-runs.
 - Registration numbers (ugle/mmh/rose_croix) are private (get_profiles_pii), edited only in Edit Member by admin/Secretary. Why: Secretary-owned records.
 - Almoner: can_view_almoner reads, can_edit_almoner writes (app canAccessAlmoner/canEditAlmoner); no delete. Why: read-only roles.
-- Lists load via useInitialLoading, never useState(true).
+- Lists load via useInitialLoading, not useState(true).
 - lodge_events.event_label drives booking/email wording; titles in lib/bookingTitles. Why: non-Festive-Board events reuse one form.
 - Event module tables: public read via is_event_published(), writes via can_write_event_content(), copies via duplicate_event_content(). Why: drafts hidden, copies atomic.
 - Manual membership enquiries are inserted only via add_manual_enquiry (admin/Secretary/Asst Sec, request_id idempotent, created_by audit); no table INSERT policy. Why: public Join Us insert path stays server-only.
