@@ -8,6 +8,7 @@ import {
   type ApptRow, type StatusRow, type ResolvedOffice, type Provenance,
 } from "@/lib/installationReturn";
 import type { PositionKey } from "@/lib/officersProgression";
+export { PM_NOTE, PROVINCE_TITLE, PROVINCE_SUBTITLE, ukLongDate } from "../../supabase/functions/_shared/provincialReturnDoc";
 
 export const LADDER_KEYS = new Set([
   "worshipful_master", "senior_warden", "junior_warden", "senior_deacon", "junior_deacon",
@@ -52,7 +53,6 @@ export const LOWER_ROWS: { label: string; key: string | null; rep?: string }[] =
   { label: "LMO", key: "membership_officer" },
 ];
 export const TABLE_NOTE = "*The invested Organist must be a subscribing Member of the Lodge. **Please show full name and rank(s) of the Tyler if he is not a Member of the Lodge.";
-export const PM_NOTE = "Please ensure that Civil and Masonic honours are up-to-date. Do NOT include Honorary Members. Ensure that Founders are marked with an asterisk.";
 
 export type Person = { id: string; first_name: string | null; middle_name: string | null; last_name: string | null; full_name: string | null; post_nominals: string | null; email: string | null; status: string | null; initiation_date: string | null };
 export type ProvRow = { label: string; key: string | null; office: ResolvedOffice | null; firstNames: string; surname: string; decorations: string; provenance: Provenance | "none" | "rep"; vacantRep?: boolean };
@@ -228,11 +228,5 @@ export async function loadProvincialData(year: number, opts: { canAppend: boolea
   };
 }
 
-export const PROVINCE_TITLE = "PROVINCIAL GRAND LODGE OF SURREY";
-export const PROVINCE_SUBTITLE = "RETURN TO BE COMPLETED AND SENT TO PROVINCIAL GRAND SECRETARY IMMEDIATELY AFTER INSTALLATION MEETING";
 export const lodgeLine = () => `WEYBRIDGE L${LODGE_NUMBER}`;
 export const fileBase = (year: number) => `L${LODGE_NUMBER}-PROVINCIAL_RETURN_${year}-${year + 1}`;
-export function ukLongDate(iso: string | null) {
-  if (!iso) return "";
-  return new Date(`${iso}T12:00:00Z`).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
-}

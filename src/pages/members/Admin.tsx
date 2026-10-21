@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import MemberImport from "@/components/members/MemberImport";
+import SignatureCapture from "@/components/members/SignatureCapture";
+import { useOfficerSignaturesEnabled } from "@/hooks/useOfficerSignaturesEnabled";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import MembersLayout from "@/components/members/MembersLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -166,6 +169,8 @@ export default function MembersAdmin() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [busy, setBusy] = useState(false);
   const isEdit = !!form.id;
+  const signaturesOn = useOfficerSignaturesEnabled();
+  const [sigOpen, setSigOpen] = useState(false);
   const navigate = useNavigate();
   const [memberReturns, setMemberReturns] = useState<any[]>([]);
 
@@ -1075,6 +1080,12 @@ export default function MembersAdmin() {
             >
               {busy ? "Saving…" : isEdit ? "Save changes" : "Add member"}
             </button>
+            {isEdit && signaturesOn && (
+              <button type="button" onClick={() => setSigOpen(true)}
+                className="min-h-11 px-4 py-2 rounded-sm text-sm font-semibold border border-gold/70 text-gold hover:bg-gold/10">
+                Signature
+              </button>
+            )}
             {isEdit && (
               <button
                 type="button"
@@ -1088,6 +1099,19 @@ export default function MembersAdmin() {
               </button>
             )}
           </div>
+          {isEdit && signaturesOn && (
+            <Dialog open={sigOpen} onOpenChange={setSigOpen}>
+              <DialogContent className="bg-navy-dark border-gold/30 max-h-[90vh] overflow-y-auto w-[calc(100vw-1rem)] max-w-lg">
+                <DialogHeader>
+                  <DialogTitle className="font-serif text-gold">Signature for {[form.first_name, form.last_name].filter(Boolean).join(" ") || "this member"}</DialogTitle>
+                  <DialogDescription className="text-primary-foreground/80">
+                    Acting on the member's behalf. A consent note, date and confirmation are required and recorded.
+                  </DialogDescription>
+                </DialogHeader>
+                <SignatureCapture memberId={form.id!} memberName={[form.first_name, form.last_name].filter(Boolean).join(" ")} onBehalf />
+              </DialogContent>
+            </Dialog>
+          )}
         </form>
       )}
 

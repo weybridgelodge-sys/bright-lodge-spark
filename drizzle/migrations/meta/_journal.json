@@ -827,6 +827,20 @@
       "when": 1792476798862,
       "tag": "0117_book_my_place_register_status",
       "breakpoints": true
+    },
+    {
+      "idx": 118,
+      "version": "7",
+      "when": 1792581840130,
+      "tag": "0118_officer_signatures",
+      "breakpoints": true
+    },
+    {
+      "idx": 119,
+      "version": "7",
+      "when": 1792581880801,
+      "tag": "0119_signature_policies_unit_helper",
+      "breakpoints": true
     }
   ]
 }

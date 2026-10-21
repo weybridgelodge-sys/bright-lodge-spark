@@ -15,6 +15,19 @@ import { formatMasonicYear } from "@/lib/officersProgression";
 import { loadProvincialData, fileBase, ukLongDate, lodgeLine, type ProvincialData } from "@/lib/provincialReturn";
 import { buildDocx, buildPdf, signatureDate } from "@/lib/provincialReturnDoc";
 import { saveBlob } from "@/lib/nativeDownload";
+import { useOfficerSignaturesEnabled } from "@/hooks/useOfficerSignaturesEnabled";
+import SignersPanel from "@/components/members/SignersPanel";
+import { readFunctionError } from "@/lib/functionError";
+
+type Generated = { docx_path: string; pdf_path: string; docx_url: string | null; pdf_url: string | null };
+/** Signed path (officer_signatures on): the server builds and stores both files with signatures embedded. */
+async function generateSigned(year: number, data: ProvincialData): Promise<Generated> {
+  const { data: res, error } = await supabase.functions.invoke("generate-provincial-return", {
+    body: { lodge_year: year, data, file_stem: fileBase(year) },
+  });
+  if (error || !res?.ok) throw new Error(await readFunctionError(error, res, "Could not generate the signed return"));
+  return res as Generated;
+}
 
 const PROV_LABEL: Record<string, { text: string; cls: string }> = {
   confirmed: { text: "Confirmed", cls: "bg-emerald-700/40 text-primary-foreground" },
@@ -49,6 +62,7 @@ function Inner() {
   const [data, setData] = useState<ProvincialData | null>(null);
   const [loading, setLoading] = useState(false);
   const [busy, setBusy] = useState<"" | "docx" | "pdf">("");
+  const signaturesOn = useOfficerSignaturesEnabled() === true;
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -72,6 +86,14 @@ function Inner() {
     try {
       const fresh = await loadProvincialData(year, { canAppend });
       setData(fresh);
+      if (signaturesOn) {
+        const g = await generateSigned(year, fresh);
+        const url = kind === "docx" ? g.docx_url : g.pdf_url;
+        if (!url) throw new Error("Download link could not be created");
+        const blob = await (await fetch(url)).blob();
+        await saveBlob(blob, `${fileBase(year)}.${kind}`);
+        return;
+      }
       const blob = kind === "docx"
         ? await buildDocx(fresh)
         : new Blob([(await buildPdf(fresh)) as BlobPart], { type: "application/pdf" });
@@ -96,6 +118,12 @@ function Inner() {
     try {
       const fresh = await loadProvincialData(year, { canAppend });
       setData(fresh);
+      if (signaturesOn) {
+        const g = await generateSigned(year, fresh);
+        if (!g.pdf_url || !g.docx_url) throw new Error("Preview links could not be created");
+        setPending({ docxPath: g.docx_path, pdfPath: g.pdf_path, docxUrl: g.docx_url, pdfUrl: g.pdf_url });
+        return;
+      }
       const docx = await buildDocx(fresh);
       const pdf = new Blob([(await buildPdf(fresh)) as BlobPart], { type: "application/pdf" });
       const stamp = Date.now();
@@ -169,6 +197,13 @@ function Inner() {
           )}
           {data.appended.length > 0 && (
             <p className="rounded-sm border border-gold/30 bg-navy-light/30 p-3 text-sm text-primary-foreground/80 break-words">Added to the Past Masters roll from the appointment records: {data.appended.join("; ")}.</p>
+          )}
+
+          {signaturesOn && (
+            <SignersPanel year={formatMasonicYear(year)} signers={(["secretary", "worshipful_master"] as const).map((k) => {
+              const r = data.rows.find((x) => x.key === k);
+              return { office: k === "secretary" ? "Secretary" : "Worshipful Master", memberId: r?.office?.memberId ?? null, name: r ? [r.firstNames, r.surname].filter(Boolean).join(" ") : "" };
+            })} />
           )}
 
           <section className="rounded-sm border border-gold/20 bg-navy-light/30 p-4 text-sm text-primary-foreground/80 space-y-1 break-words">
