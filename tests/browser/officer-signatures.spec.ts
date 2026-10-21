@@ -22,7 +22,7 @@ async function scribble(page: Page) {
 
 async function check44(page: Page, names: string[]) {
   for (const n of names) {
-    const b = await page.getByRole("button", { name: n, exact: true }).boundingBox();
+    const b = await page.getByRole(["Draw", "Upload image"].includes(n) ? "radio" : "button", { name: n, exact: true }).boundingBox();
     expect(b!.height, n).toBeGreaterThanOrEqual(44);
     expect(b!.x + b!.width, n).toBeLessThanOrEqual(320);
   }
@@ -58,9 +58,9 @@ test("Profile: upload mode at 320px", async ({ page }) => {
   await mock(page, true, true);
   await page.goto("/members/profile");
   await expect(page.getByText("A signature is on file.")).toBeVisible({ timeout: 15000 });
-  await page.getByRole("button", { name: "Upload image" }).click();
+  await page.getByRole("radio", { name: "Upload image" }).click();
   await expect(page.getByLabel(/Signature image/)).toBeVisible();
-  await check44(page, ["Show saved signature", "Remove signature", "Replace signature"]);
+  await check44(page, ["Draw", "Upload image", "Show saved signature", "Remove signature", "Replace signature"]);
   expect(await overflow(page)).toBeLessThanOrEqual(0);
   await expectNoAxeViolations(page, "profile signature upload");
 });
