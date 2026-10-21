@@ -21,7 +21,7 @@ const GENERAL_LABEL = "General (all members)";
 
 type Category =
   | "summons" | "meeting_minutes" | "committee_minutes" | "committee_agendas"
-  | "media_files" | "ritual" | "newsletter" | "learning_development" | "other";
+  | "media_files" | "ritual" | "newsletter" | "learning_development" | "returns" | "other";
 
 type Doc = {
   id: string;
@@ -37,7 +37,7 @@ type Doc = {
 
 const CATEGORIES = [
   "summons", "meeting_minutes", "committee_minutes", "committee_agendas",
-  "media_files", "newsletter", "learning_development", "other",
+  "media_files", "newsletter", "learning_development", "returns", "other",
 ] as const;
 
 const CATEGORY_LABELS: Record<typeof CATEGORIES[number] | "ritual", string> = {
@@ -48,6 +48,7 @@ const CATEGORY_LABELS: Record<typeof CATEGORIES[number] | "ritual", string> = {
   media_files: "Media files",
   newsletter: "Newsletters",
   learning_development: "Learning & Development",
+  returns: "Returns",
   other: "Other",
   ritual: "Ritual",
 };
@@ -240,7 +241,7 @@ function Inner() {
       </form>
 
       <div className="flex gap-2 mb-4 flex-wrap">
-        {(["all", ...CATEGORIES] as const).map((c) => (
+        {(["all", ...CATEGORIES] as const).filter((c) => c !== "returns" || docs.some((d) => d.category === "returns")).map((c) => (
           <button key={c} onClick={() => setFilter(c)}
             className={`px-3 py-1.5 sm:py-1 text-xs uppercase tracking-wider rounded-sm border ${
               filter === c ? "border-gold text-gold bg-gold/10"
