@@ -6,6 +6,8 @@ async function mock(page: Page, on: boolean) {
   await page.route("**/rest/v1/member_progression_status**", (r) => r.fulfill({ json: [] }));
   await page.route("**/rest/v1/lodge_events**", (r) => r.fulfill({ json: [] }));
   await page.route("**/rest/v1/past_masters**", (r) => r.fulfill({ json: [] }));
+  await page.route("**/rest/v1/profiles?**", (r) => r.fulfill({ json: [] }));
+  await page.route("**/rest/v1/lodge_template**", (r) => r.fulfill({ json: { venue_address: "Masonic Hall", regular_meeting_pattern: "Third Wednesday", lodge_representatives: [], consecration_date: "1949-01-19" } }));
   await page.route("**/rest/v1/provincial_return_submissions**", (r) => r.fulfill({ json: [] }));
   await page.route("**/rest/v1/member_signatures**", (r) => r.fulfill({ json: [] }));
   await page.route("**/rest/v1/module_settings**", (r) => {
