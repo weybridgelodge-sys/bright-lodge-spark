@@ -1,13 +1,38 @@
 // Builds the Provincial return as Word (.docx) and PDF, following Surrey's paper form.
 import {
   AlignmentType, BorderStyle, Document, HeightRule, PageBreak, Packer, Paragraph,
-  ShadingType, Table, TableCell, TableRow, TextRun, VerticalAlign, WidthType,
+  ShadingType, Table, TableCell, TableRow, TextRun, VerticalAlign, WidthType, ImageRun,
 } from "docx";
 import { PDFDocument, StandardFonts, rgb, type PDFFont, type PDFPage } from "pdf-lib";
-import {
-  PM_NOTE, PROVINCE_SUBTITLE, PROVINCE_TITLE, ukLongDate,
-  type ProvincialData, type ProvRow,
-} from "@/lib/provincialReturn";
+// Shared by the browser (src/lib/provincialReturnDoc.ts re-exports it) and generate-provincial-return.
+// Keep it free of app imports: bare "docx"/"pdf-lib" resolve via Vite in the browser and via deno.json on the server.
+
+export const PM_NOTE = "Please ensure that Civil and Masonic honours are up-to-date. Do NOT include Honorary Members. Ensure that Founders are marked with an asterisk.";
+export const PROVINCE_TITLE = "PROVINCIAL GRAND LODGE OF SURREY";
+export const PROVINCE_SUBTITLE = "RETURN TO BE COMPLETED AND SENT TO PROVINCIAL GRAND SECRETARY IMMEDIATELY AFTER INSTALLATION MEETING";
+export function ukLongDate(iso: string | null) {
+  if (!iso) return "";
+  return new Date(`${iso}T12:00:00Z`).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
+}
+
+/** Structural subset of the browser's ProvincialData that the document needs. */
+export type ProvRow = { label: string; key: string | null; firstNames: string; surname: string; decorations: string; office?: { memberId?: string | null } | null };
+export type ProvincialData = {
+  year: number; consecrated: string; scheduledDate: string; actualDate: string | null; venue: string; meetingPattern: string;
+  rows: ProvRow[]; lowerRows: ProvRow[]; pastMasters: { years: number[]; name: string }[];
+  secretary: { name: string; address: string; mobile: string; personalEmail: string; lodgeEmail: string; visible?: boolean };
+};
+
+/** A processed signature (PNG) to place on a signature line. Never logged. */
+export type SigImage = { png: Uint8Array; width: number; height: number };
+export type DocSignatures = { sec?: SigImage | null; wm?: SigImage | null };
+/** Signature box above each "Signed ……" line, in points (PDF) — Word uses the same size at 96 dpi. */
+export const SIG_BOX_W = 220;
+export const SIG_BOX_H = 40;
+export function fitSig(w: number, h: number, boxW = SIG_BOX_W, boxH = SIG_BOX_H) {
+  const s = Math.min(boxW / w, boxH / h);
+  return { w: w * s, h: h * s, dy: (boxH - h * s) / 2 };
+}
 
 const PAGE_W = 11906;
 const PAGE_H = 16838;
@@ -210,7 +235,24 @@ const continued = () => new Paragraph({
   children: [new TextRun({ text: "PLEASE CHECK THE PRINTED DETAILS ON THIS FORM AND CORRECT ANY ERRORS", font: "Times New Roman", size: 15 })],
 });
 
-export async function buildDocx(d: ProvincialData): Promise<Blob> {
+/** Signed variant: a fixed-height signature box (image or empty) above each line; same total spacing. */
+function signedLinesDocx(d: ProvincialData, sigs: DocSignatures) {
+  const px = (pt: number) => Math.round((pt * 96) / 72);
+  const out: Paragraph[] = [];
+  signatureLines(d).forEach((text, i) => {
+    const img = i === 0 ? sigs.sec : sigs.wm;
+    const box = new Paragraph({
+      spacing: { before: i === 0 ? 0 : 300, after: 0 }, indent: { left: 700 },
+      children: img ? [(() => { const f = fitSig(img.width, img.height); return new ImageRun({ type: "png", data: img.png, transformation: { width: px(f.w), height: px(f.h) } }); })()] : [new TextRun({ text: "", size: 20 })],
+    });
+    if (!img) box.addRunToFront?.(new TextRun(""));
+    out.push(img ? box : new Paragraph({ spacing: { before: i === 0 ? 0 : 300 }, children: [new TextRun({ text: "", size: 20 })] }));
+    out.push(new Paragraph({ spacing: { before: img ? 0 : 560 }, children: [new TextRun({ text, font: "Times New Roman", size: 20 })] }));
+  });
+  return out;
+}
+
+export async function buildDocx(d: ProvincialData, sigs?: DocSignatures): Promise<Blob> {
   const c = content(d);
   const doc = new Document({
     styles: { default: { document: { run: { font: "Arial", size: 16 } } } },
@@ -219,7 +261,7 @@ export async function buildDocx(d: ProvincialData): Promise<Blob> {
       children: [
         ...formHeader(), topTable(d), gap(350), officersTable(c.main, true), notesTable(), pageBreak(),
         ...formHeader(), officersTable(c.lower, false), gap(360), secretaryTable(c.secretary), gap(900),
-        ...signatureLines(d).map((text, i) => new Paragraph({ spacing: { before: i === 0 ? 0 : 1100 }, children: [new TextRun({ text, font: "Times New Roman", size: 20 })] })),
+        ...(sigs ? signedLinesDocx(d, sigs) : signatureLines(d).map((text, i) => new Paragraph({ spacing: { before: i === 0 ? 0 : 1100 }, children: [new TextRun({ text, font: "Times New Roman", size: 20 })] }))),
         gap(600),
         continued(),
         new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: "CONTINUED OVERLEAF", font: "Times New Roman", size: 15 })] }),
@@ -238,7 +280,7 @@ export async function buildDocx(d: ProvincialData): Promise<Blob> {
 
 type PdfGridOpts = { header?: boolean; rowHeight?: number; headerHeight?: number; fontSize?: number };
 
-export async function buildPdf(d: ProvincialData): Promise<Uint8Array> {
+export async function buildPdf(d: ProvincialData, sigs?: DocSignatures): Promise<Uint8Array> {
   const c = content(d);
   const pdf = await PDFDocument.create();
   const times = await pdf.embedFont(StandardFonts.TimesRoman);
@@ -329,6 +371,15 @@ export async function buildPdf(d: ProvincialData): Promise<Uint8Array> {
   });
   y -= 70;
   signatureLines(d).forEach((txt, i) => drawText(txt, M + 5, y - i * 70, times, 10.5));
+  if (sigs) {
+    const x = M + 5 + times.widthOfTextAtSize("Signed ", 10.5);
+    for (const [i, img] of [sigs.sec, sigs.wm].entries()) {
+      if (!img) continue;
+      const png = await pdf.embedPng(img.png);
+      const f = fitSig(img.width, img.height);
+      page.drawImage(png, { x, y: y - i * 70 + 2 + f.dy, width: f.w, height: f.h });
+    }
+  }
   continuedPdf();
 
   // Page 3 — Past Masters, matching the attached form's separate final section.
