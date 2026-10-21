@@ -4,3 +4,4 @@
 - Newsletter sign-up is double opt-in (_shared/newsletterOptIn.ts); store token hash only; sends/counts need confirmed=true. Why: no subscribing others.
 - Booking greetings via _shared/greeting.ts; saves trim names. Why: titles greeted as names.
 - Unpaid lodge card bookings: 60-min Stripe hold; hourly expire-pending-bookings asks Stripe first (paid → shared markBookingPaid, expired+15-min grace → delete); register rows only for non-pending/failed bookings (trigger WHEN + _shared/pendingBookingExpiry.ts). Why: never lose a payment, no ghost register rows.
+- Return emails (Provincial, UGLE) Cc the current Secretary/WM and file the sent PDF to Documents 'returns' via returnFiling.ts; who sees Returns = public.can_view_return_documents(). Why: one rule, one place to change.

@@ -129,3 +129,8 @@
 - [x] Step 1: screen, statuses, deadlines, Hub tile, behind member_bookings switch (off)
 - [ ] Step 2: in-portal form, guest add-on, public redirect — awaiting go-ahead
 - [ ] Step 3: members-only group visit — plan only, awaiting go-ahead
+
+## Return emails Cc and Documents filing
+- [x] Cc current Secretary and WM on Provincial and UGLE return emails; record Cc on submission rows
+- [x] File sent return PDF into Documents under restricted "Returns" category
+- [x] Data Protection signatures sentence only when signatures switched on
