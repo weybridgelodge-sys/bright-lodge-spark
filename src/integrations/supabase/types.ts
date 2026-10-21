@@ -4439,6 +4439,88 @@ export type Database = {
           },
         ]
       }
+      member_signatures: {
+        Row: {
+          active: boolean
+          byte_size: number
+          consent_date: string | null
+          consent_note: string | null
+          consent_recorded_by: string | null
+          content_type: string
+          created_at: string
+          created_by: string
+          height: number
+          id: string
+          member_id: string
+          revoked_at: string | null
+          revoked_by: string | null
+          source: string
+          storage_path: string
+          unit_id: string
+          width: number
+        }
+        Insert: {
+          active?: boolean
+          byte_size: number
+          consent_date?: string | null
+          consent_note?: string | null
+          consent_recorded_by?: string | null
+          content_type?: string
+          created_at?: string
+          created_by: string
+          height: number
+          id?: string
+          member_id: string
+          revoked_at?: string | null
+          revoked_by?: string | null
+          source: string
+          storage_path: string
+          unit_id: string
+          width: number
+        }
+        Update: {
+          active?: boolean
+          byte_size?: number
+          consent_date?: string | null
+          consent_note?: string | null
+          consent_recorded_by?: string | null
+          content_type?: string
+          created_at?: string
+          created_by?: string
+          height?: number
+          id?: string
+          member_id?: string
+          revoked_at?: string | null
+          revoked_by?: string | null
+          source?: string
+          storage_path?: string
+          unit_id?: string
+          width?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "member_signatures_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "calendar_subscription_status"
+            referencedColumns: ["member_id"]
+          },
+          {
+            foreignKeyName: "member_signatures_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "member_signatures_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       member_status_history: {
         Row: {
           created_at: string
@@ -5365,6 +5447,100 @@ export type Database = {
             columns: ["member_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      signature_event_audit: {
+        Row: {
+          action: string
+          actor_id: string
+          consent_date: string | null
+          consent_note: string | null
+          created_at: string
+          id: string
+          member_id: string
+          on_behalf: boolean
+          signature_id: string | null
+          unit_id: string
+        }
+        Insert: {
+          action: string
+          actor_id: string
+          consent_date?: string | null
+          consent_note?: string | null
+          created_at?: string
+          id?: string
+          member_id: string
+          on_behalf?: boolean
+          signature_id?: string | null
+          unit_id: string
+        }
+        Update: {
+          action?: string
+          actor_id?: string
+          consent_date?: string | null
+          consent_note?: string | null
+          created_at?: string
+          id?: string
+          member_id?: string
+          on_behalf?: boolean
+          signature_id?: string | null
+          unit_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "signature_event_audit_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      signature_usage_audit: {
+        Row: {
+          form_key: string
+          generated_at: string
+          generated_by: string
+          id: string
+          lodge_year: number
+          office_key: string
+          output_path: string | null
+          signature_id: string
+          signer_member_id: string
+          unit_id: string
+        }
+        Insert: {
+          form_key: string
+          generated_at?: string
+          generated_by: string
+          id?: string
+          lodge_year: number
+          office_key: string
+          output_path?: string | null
+          signature_id: string
+          signer_member_id: string
+          unit_id: string
+        }
+        Update: {
+          form_key?: string
+          generated_at?: string
+          generated_by?: string
+          id?: string
+          lodge_year?: number
+          office_key?: string
+          output_path?: string | null
+          signature_id?: string
+          signer_member_id?: string
+          unit_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "signature_usage_audit_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "units"
             referencedColumns: ["id"]
           },
         ]
