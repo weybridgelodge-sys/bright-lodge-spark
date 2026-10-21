@@ -7,6 +7,13 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 const DataProtection = () => {
+  // The signatures sentence shows only while the officer_signatures switch is on (public-safe check).
+  const [signaturesOn, setSignaturesOn] = useState(false);
+  useEffect(() => {
+    let live = true;
+    supabase.rpc("officer_signatures_enabled").then(({ data }) => { if (live) setSignaturesOn(data === true); }, () => {});
+    return () => { live = false; };
+  }, []);
   return (
     <div className="min-h-screen">
       <SEO
@@ -41,7 +48,9 @@ const DataProtection = () => {
               <li><strong>Welfare records:</strong> where a member is supported by the Lodge's Almoner, records of contact, welfare status, and any referrals to Masonic charitable bodies such as the Masonic Charitable Foundation are kept. These records are strictly confidential and are visible only to the Almoner and the current Worshipful Master — access is revoked automatically once a new Master is installed. Welfare records are never shared with other members, and are held separately from general membership records.</li>
               <li><strong>Financial records:</strong> dues subscription and payment records, where a member pays Lodge subscriptions through the Portal.</li>
               <li><strong>Device and notification data:</strong> if you enable push notifications in the mobile app, we store a device token to deliver reminders (such as meeting and booking deadlines) to your device. This token is not linked to any advertising identifier and is not shared with third parties for marketing.</li>
-              <li><strong>Signatures:</strong> if you choose to store your signature (or agree for an officer to store it for you), it is kept privately and used only to sign the Lodge's official returns while you hold an office that signs them. Each use is recorded, and you can remove it at any time from your Profile.</li>
+              {signaturesOn && (
+                <li><strong>Signatures:</strong> if you choose to store your signature (or agree for an officer to store it for you), it is kept privately and used only to sign the Lodge's official returns while you hold an office that signs them. Each use is recorded, and you can remove it at any time from your Profile.</li>
+              )}
             </ul>
             <p>This information is used solely for the internal administration of the Lodge, its charitable and welfare activities, and its statutory and Masonic reporting obligations (including to the Provincial Grand Secretary's office). It is not used for any commercial purpose and is not sold or shared outside the Lodge's officers acting in their official capacity, except where welfare records are shared with Masonic charitable bodies (such as the Masonic Charitable Foundation) as part of a referral you or the Almoner have agreed to.</p>
             <p>Access to different categories of this data is restricted by role — for example, welfare records are visible only to the Almoner and current Worshipful Master, and financial records only to the Treasurer and relevant auditing officers — rather than being available to all Portal administrators.</p>
