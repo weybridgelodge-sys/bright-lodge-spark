@@ -7,6 +7,7 @@ import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { z } from "npm:zod@3";
 import { sendTransactionalEmail } from "../_shared/send-email.ts";
 import { loadLodgeSettings } from "../_shared/lodgeSettings.ts";
+import { fileReturnDocument, resolveReturnCc } from "../_shared/returnFiling.ts";
 
 const SETTING = "installation_return_province_email";
 const LINK_DAYS = 30;
@@ -61,12 +62,14 @@ Deno.serve(async (req) => {
     const yearLabel = `${b.lodge_year}/${String(b.lodge_year + 1).slice(2)}`;
     const expires = new Date(Date.now() + LINK_DAYS * 86400000).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "Europe/London" });
     const submissionId = crypto.randomUUID();
+    const { cc, used: ccUsed } = await resolveReturnCc(admin, configured);
 
     const res = await sendTransactionalEmail({
       templateName: "installation-return-submission",
       recipientEmail: configured,
       idempotencyKey: `installation-return-${submissionId}`,
       replyTo: (await loadLodgeSettings()).secretaryEmail,
+      cc,
       templateData: {
         yearLabel,
         installationDate: b.installation_date ?? "",
@@ -85,11 +88,16 @@ Deno.serve(async (req) => {
       sent_by: user.id,
       sent_by_name: senderName,
       recipient_email: configured,
+      cc_emails: cc,
       storage_path: b.storage_path,
       secretary_changed: b.secretary_changed || null,
     }).select().single();
     if (lErr) console.error("submission log failed", lErr.message);
-    return json({ ok: true, submission: row });
+    // Sent: file the PDF into Documents (Returns). Failure here never undoes the send.
+    const docId = await fileReturnDocument(admin, { formKey: "installation_return", formLabel: "UGLE Installation Return", lodgeYear: b.lodge_year, sourcePath: b.storage_path, uploadedBy: user.id });
+    if (docId && row) await admin.from("installation_return_submissions").update({ lodge_document_id: docId }).eq("id", submissionId);
+    console.log("return sent", { form: "installation_return", year: b.lodge_year, cc_offices: ccUsed.map((u) => `${u.office}:${u.source}`), filed: !!docId });
+    return json({ ok: true, submission: row, cc, filed: !!docId });
   } catch (e) {
     console.error(e);
     return json({ error: "Unexpected error" }, 500);

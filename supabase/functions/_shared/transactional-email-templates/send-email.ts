@@ -1,6 +1,6 @@
 import * as React from 'npm:react@18.3.1'
 import { renderAsync } from 'npm:@react-email/components@0.0.22'
-import { EmailAPIError, sendLovableEmail } from 'npm:@lovable.dev/email-js@0.1.0'
+import { EmailAPIError, sendLovableEmail } from 'npm:@lovable.dev/email-js@0.3.1'
 import { TEMPLATES } from './registry.ts'
 
 // Server-only: reads LOVABLE_API_KEY. Import from edge functions only — never
@@ -24,6 +24,8 @@ export interface SendTemplateEmailOptions {
   /** Dedupes retries of the same logical send; defaults to a random UUID (no dedupe). */
   idempotencyKey?: string
   replyTo?: string
+  /** Visible Cc addresses (the service caps To+Cc+Bcc at 5). Empty/omitted = no Cc. */
+  cc?: string[]
   /** Optional From display name (e.g. from lodge settings); defaults to SITE_NAME. */
   fromName?: string
 }
@@ -83,6 +85,7 @@ export async function sendTemplateEmail(
         label: templateName,
         idempotency_key: options.idempotencyKey || crypto.randomUUID(),
         reply_to: options.replyTo,
+        ...(options.cc && options.cc.length ? { cc: options.cc.slice(0, 4) } : {}),
       },
       { apiKey, sendUrl: Deno.env.get('LOVABLE_SEND_URL') }
     )

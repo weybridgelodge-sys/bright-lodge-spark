@@ -2613,7 +2613,9 @@ export type Database = {
       }
       installation_return_submissions: {
         Row: {
+          cc_emails: string[]
           id: string
+          lodge_document_id: string | null
           lodge_year: number
           note: string | null
           recipient_email: string
@@ -2624,7 +2626,9 @@ export type Database = {
           storage_path: string
         }
         Insert: {
+          cc_emails?: string[]
           id?: string
+          lodge_document_id?: string | null
           lodge_year: number
           note?: string | null
           recipient_email: string
@@ -2635,7 +2639,9 @@ export type Database = {
           storage_path: string
         }
         Update: {
+          cc_emails?: string[]
           id?: string
+          lodge_document_id?: string | null
           lodge_year?: number
           note?: string | null
           recipient_email?: string
@@ -5226,7 +5232,9 @@ export type Database = {
       }
       provincial_return_submissions: {
         Row: {
+          cc_emails: string[]
           id: string
+          lodge_document_id: string | null
           lodge_year: number
           recipient_email: string
           sent_at: string
@@ -5235,7 +5243,9 @@ export type Database = {
           storage_path: string
         }
         Insert: {
+          cc_emails?: string[]
           id?: string
+          lodge_document_id?: string | null
           lodge_year: number
           recipient_email: string
           sent_at?: string
@@ -5244,7 +5254,9 @@ export type Database = {
           storage_path: string
         }
         Update: {
+          cc_emails?: string[]
           id?: string
+          lodge_document_id?: string | null
           lodge_year?: number
           recipient_email?: string
           sent_at?: string
@@ -7336,6 +7348,7 @@ export type Database = {
       can_read_event_content: { Args: { _uid: string }; Returns: boolean }
       can_view_almoner: { Args: { _user_id: string }; Returns: boolean }
       can_view_charity: { Args: { _user: string }; Returns: boolean }
+      can_view_return_documents: { Args: { _user: string }; Returns: boolean }
       can_view_skills_matrix: { Args: { _user: string }; Returns: boolean }
       can_view_year_audit: { Args: { _user: string }; Returns: boolean }
       can_write_event_content: { Args: { _uid: string }; Returns: boolean }
@@ -7665,6 +7678,7 @@ export type Database = {
         }
         Returns: string
       }
+      officer_signatures_enabled: { Args: never; Returns: boolean }
       officer_year_at: { Args: { _at: string }; Returns: number }
       officer_year_start: { Args: { _year: number }; Returns: string }
       post_subscription_accrual: {
@@ -7804,6 +7818,7 @@ export type Database = {
         | "other"
         | "newsletter"
         | "learning_development"
+        | "returns"
       festive_attendance_status:
         | "booked"
         | "attended"
@@ -8042,6 +8057,7 @@ export const Constants = {
         "other",
         "newsletter",
         "learning_development",
+        "returns",
       ],
       festive_attendance_status: [
         "booked",

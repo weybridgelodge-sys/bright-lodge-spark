@@ -14,6 +14,8 @@ export interface SendEmailPayload {
   recipientEmail: string
   idempotencyKey?: string
   replyTo?: string
+  /** Visible Cc addresses; used by lodge return emails (see _shared/returnFiling.ts). */
+  cc?: string[]
   templateData?: Record<string, unknown>
 }
 
@@ -55,6 +57,7 @@ export async function sendTransactionalEmail(
       templateData: payload.templateData as Record<string, any> | undefined,
       idempotencyKey: payload.idempotencyKey,
       replyTo: payload.replyTo,
+      cc: payload.cc,
     })
 
     if (result.sent) {
