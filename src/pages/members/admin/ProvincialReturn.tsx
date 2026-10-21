@@ -23,7 +23,7 @@ type Generated = { docx_path: string; pdf_path: string; docx_url: string | null;
 /** Signed path (officer_signatures on): the server builds and stores both files with signatures embedded. */
 async function generateSigned(year: number, data: ProvincialData): Promise<Generated> {
   const { data: res, error } = await supabase.functions.invoke("generate-provincial-return", {
-    body: { lodge_year: year, data, file_stem: `L6787-Provincial-Return-${year}` },
+    body: { lodge_year: year, data, file_stem: fileBase(year) },
   });
   if (error || !res?.ok) throw new Error(await readFunctionError(error, res, "Could not generate the signed return"));
   return res as Generated;
