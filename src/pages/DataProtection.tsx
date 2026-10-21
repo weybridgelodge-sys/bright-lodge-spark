@@ -3,6 +3,8 @@ import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
 import SEO from "@/components/SEO";
 import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 const DataProtection = () => {
   return (
