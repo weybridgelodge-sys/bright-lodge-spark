@@ -47,3 +47,36 @@ describe("consent on behalf", () => {
   it("requires the tick", () => expect(checkConsent({ note: "x", date: today, confirmed: false }, today)).toMatch(/confirm/));
   it("passes when complete", () => expect(checkConsent({ note: "Member agreed", date: today, confirmed: true }, today)).toBeNull());
 });
+
+import { resolvePlacements, validInstallDate } from "../../supabase/functions/_shared/signatures";
+describe("signature placement on the Provincial return", () => {
+  const active = { sec1: { id: "s-sec" }, wm1: { id: "s-wm" }, wm2: { id: "s-wm2" } };
+  it("places Secretary and WM signatures", () => {
+    expect(resolvePlacements({ secretary: "sec1", worshipful_master: "wm1" }, active)).toEqual([
+      { office_key: "secretary", member_id: "sec1", signature_id: "s-sec" },
+      { office_key: "worshipful_master", member_id: "wm1", signature_id: "s-wm" },
+    ]);
+  });
+  it("vacant office leaves that line blank", () => {
+    expect(resolvePlacements({ secretary: null, worshipful_master: "wm1" }, active).map((p) => p.office_key)).toEqual(["worshipful_master"]);
+  });
+  it("no signature on file leaves that line blank", () => {
+    expect(resolvePlacements({ secretary: "nobody", worshipful_master: "wm1" }, active)).toHaveLength(1);
+  });
+  it("same person in both offices: two placements, two audit rows", () => {
+    const p = resolvePlacements({ secretary: "wm1", worshipful_master: "wm1" }, active);
+    expect(p).toHaveLength(2);
+    expect(new Set(p.map((x) => x.signature_id))).toEqual(new Set(["s-wm"]));
+  });
+  it("a change of office holder between years changes whose signature is used", () => {
+    const y1 = resolvePlacements({ secretary: "sec1", worshipful_master: "wm1" }, active);
+    const y2 = resolvePlacements({ secretary: "sec1", worshipful_master: "wm2" }, active);
+    expect(y1[1].signature_id).toBe("s-wm");
+    expect(y2[1].signature_id).toBe("s-wm2");
+  });
+  it("installation date must sit inside the Masonic year", () => {
+    expect(validInstallDate(2026, "2026-09-19")).toBe(true);
+    expect(validInstallDate(2026, "2027-09-01")).toBe(false);
+    expect(validInstallDate(2026, "2026-08-31")).toBe(false);
+  });
+});

@@ -68,3 +68,23 @@ export function base64ToBytes(b64: string): Uint8Array {
   for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
   return out;
 }
+
+export type Placement = { office_key: "secretary" | "worshipful_master"; member_id: string; signature_id: string };
+/**
+ * Which signature goes on which line. Vacant office or no active signature → that line stays blank.
+ * One placement (and one audit row) per office, even when one person holds both.
+ */
+export function resolvePlacements(holders: { secretary: string | null; worshipful_master: string | null }, active: Record<string, { id: string } | undefined>): Placement[] {
+  const out: Placement[] = [];
+  for (const office_key of ["secretary", "worshipful_master"] as const) {
+    const m = holders[office_key];
+    const s = m ? active[m] : undefined;
+    if (m && s) out.push({ office_key, member_id: m, signature_id: s.id });
+  }
+  return out;
+}
+
+/** Installation date for the signature lines must fall inside that Masonic year (Sept–Aug window). */
+export function validInstallDate(year: number, iso: string): boolean {
+  return /^\d{4}-\d{2}-\d{2}$/.test(iso) && iso >= `${year}-09-01` && iso < `${year + 1}-09-01`;
+}
