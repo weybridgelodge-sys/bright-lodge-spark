@@ -6,6 +6,8 @@ import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import DuesStatusCard from "@/components/members/DuesStatusCard";
 import OfficesHeld from "@/components/members/OfficesHeld";
+import SignatureCapture from "@/components/members/SignatureCapture";
+import { useOfficerSignaturesEnabled } from "@/hooks/useOfficerSignaturesEnabled";
 
 export default function MembersProfile() {
   const { profile, user, refreshProfile, isAdmin } = useAuth();
@@ -19,6 +21,7 @@ export default function MembersProfile() {
   const [postcode, setPostcode] = useState("");
   const [dietary, setDietary] = useState("");
   const [busy, setBusy] = useState(false);
+  const signaturesOn = useOfficerSignaturesEnabled();
 
   useEffect(() => {
     if (!profile) return;
@@ -145,6 +148,16 @@ export default function MembersProfile() {
           <h2 className="font-serif text-xl text-gold mb-3">Offices held</h2>
           <OfficesHeld memberId={user.id} />
         </div>
+      )}
+
+      {user?.id && signaturesOn && (
+        <section aria-labelledby="my-signature" className="max-w-2xl mb-6 bg-navy-dark/60 border border-gold/15 rounded-sm p-4 sm:p-6">
+          <h2 id="my-signature" className="font-serif text-xl text-gold mb-2">My signature</h2>
+          <p className="text-xs text-primary-foreground/80 mb-4">
+            Used only to sign lodge returns while you hold an office that signs them. Stored privately; you can remove it at any time.
+          </p>
+          <SignatureCapture memberId={user.id} />
+        </section>
       )}
 
       {/* Editable member-controlled fields */}
