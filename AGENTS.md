@@ -11,7 +11,7 @@
 - Member signatures: private member-signatures bucket, no client access; signature-*/generate-provincial-return functions only; one active per member, unit-scoped; on-behalf needs consent, audited; never log image data/URLs. Why: fraud-sensitive.
 - Provincial return layout: supabase/functions/_shared/provincialReturnDoc.ts (browser re-exports). Why: one layout signed/unsigned.
 - Browser layout tests use only a Vite `e2e`-mode, localhost-only synthetic identity; never backend access or production.
-- Officer access = Installation year: current_officer_holder() is the latest confirmed appointment in effect (stored date, else installation_rule_date(); non-progressive also >= appointed_on); offices carry forward; current Almoner/Charity Steward/Mentor: portals. Never switch on 1 Oct; sync labels: masonicYearStartSync. Dues/accounts/periods/Almoner year stay Oct–Sep.
+- Officer access = Installation year via current_officer_holder() (latest confirmed appointment in effect; stored date else installation_rule_date()); offices carry forward; labels sync via masonicYearStartSync. Dues/accounts/periods/Almoner year stay Oct–Sep.
 - Officer appointment changes log via swallow-on-error AFTER trigger to officer_appointment_audit (admin/Secretary read); offices-held history only via get_member_offices_held (same effective-date rule, visibility enforced in DB).
 - Member records: admin or is_lodge_secretary() list/add/edit via get_admin_profiles/admin-invite-member and set others' member_status (own: admin-only); roles, deletion, sign-in email admin-only server-side. Why: Secretary owns member data; admin is operator.
 - Profile dietary_requirements is private health data: no column SELECT grant; read only via get_profiles_pii; booking forms pre-fill it only while empty. Why: allergies are special-category data.
@@ -23,8 +23,8 @@
 - Event module tables: public read via is_event_published(), writes via can_write_event_content(), copies via duplicate_event_content(). Why: drafts hidden, copies atomic.
 - Manual membership enquiries are inserted only via add_manual_enquiry (admin/Secretary/Asst Sec, request_id idempotent, created_by audit); no table INSERT policy. Why: public Join Us insert path stays server-only.
 - Masonic year = Installation to day before next (_shared/masonicYear.ts; rule, stored dates override); KPI Movement uses member_status_history; new tables carry unit_id. Why: multi-lodge-ready, accurate movement.
-- Diary: festive_board_meetings via diary_* RPCs; cancel, never delete; Installation move updates stored date; per-month meeting_series.schedule inferred from diary, skips existing; only regular/installation scheduled, rest one-off. Why: one register.
-- Every new/changed page/screen/dialog: 320px test (worst-case data; no overflow/obscured controls) + axe (helpers/axe, WCAG 2.1 AA), colour-contrast always on, never disabled; fieldCls tokens; 44px targets; report scanned/unscanned.
+- Diary: festive_board_meetings via diary_* RPCs; cancel, never delete; only regular/installation scheduled from meeting_series. Why: one register.
+- Every new/changed screen: 320px test (worst-case data) + axe (helpers/axe, contrast always on); fieldCls tokens; 44px targets; report scanned/unscanned.
 - Events: calendars publicEventCalendar+member-calendar-feed; pricing eventPricing; form BookingCore. Why: one rule.
 - Accounts are created only by admin/Secretary via inviteUserByEmail (admin-invite-member, admin-import-members); public sign-up is disabled and magic links use shouldCreateUser:false. Why: no account for an unverified identity.
 - Booking→register member match: active-member email links (any title/lodge text); name-only sets festive_board_attendance.suspected_member_id (flag, no visitor contact), never links; mirror in lib/bookingMemberMatch. Why: no silent guesses.
