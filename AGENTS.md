@@ -12,12 +12,12 @@
 - Provincial return layout: supabase/functions/_shared/provincialReturnDoc.ts (browser re-exports). Why: one layout signed/unsigned.
 - Browser layout tests use only a Vite `e2e`-mode, localhost-only synthetic identity; never backend access or production.
 - Officer access = Installation year via current_officer_holder() (latest confirmed appointment in effect; stored date else installation_rule_date()); offices carry forward; labels sync via masonicYearStartSync. Dues/accounts/periods/Almoner year stay Oct–Sep.
-- Officer appointment changes log via swallow-on-error AFTER trigger to officer_appointment_audit (admin/Secretary read); offices-held history only via get_member_offices_held (same effective-date rule, visibility enforced in DB).
+- Officer appointment changes audit to officer_appointment_audit (swallow-on-error trigger); offices-held only via get_member_offices_held.
 - Member records: admin or is_lodge_secretary() list/add/edit via get_admin_profiles/admin-invite-member and set others' member_status (own: admin-only); roles, deletion, sign-in email admin-only server-side. Why: Secretary owns member data; admin is operator.
 - Profile dietary_requirements is private health data: no column SELECT grant; read only via get_profiles_pii; booking forms pre-fill it only while empty. Why: allergies are special-category data.
 - Bulk import only via admin-import-members (validation in _shared/memberImport.ts); fills blanks only, never roles, sign-in email or status. Why: safe re-runs.
 - Registration numbers (ugle/mmh/rose_croix) are private (get_profiles_pii), edited only in Edit Member by admin/Secretary. Why: Secretary-owned records.
-- Almoner 2-tier: can_view_almoner reads, can_edit_almoner writes (+welfare-attachments, Widows archive by status, no delete); app canAccessAlmoner/canEditAlmoner; missed = almonerMeetingTypes (non-cancelled). Why: read-only roles.
+- Almoner: can_view_almoner reads, can_edit_almoner writes (app canAccessAlmoner/canEditAlmoner); no delete. Why: read-only roles.
 - Page/list loading uses useInitialLoading, never useState(true), so refreshes keep content+scroll.
 - lodge_events.event_label drives booking/email wording; titles in lib/bookingTitles. Why: non-Festive-Board events reuse one form.
 - Event module tables: public read via is_event_published(), writes via can_write_event_content(), copies via duplicate_event_content(). Why: drafts hidden, copies atomic.
