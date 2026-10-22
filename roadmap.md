@@ -145,3 +145,5 @@
 
 ## Unit Setup (Oct 2026)
 - [x] Unit Setup screen, audited saves, seeded bank details, public booking lookup; booking form/pages read it
+- [x] Unit Setup sections (venue, contacts, web/social, province, newsletter, calendar, return files); header/footer, newsletter, calendar feed, visitor invites, return file names switched
+- [ ] Remaining typed lodge copy in public page bodies, news articles, email templates, SEO (see Job E audit)
