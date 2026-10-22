@@ -21,6 +21,8 @@ test("Meeting diary has no overflow at 320px", { timeout: 90_000 }, async ({ pag
   await page.route("**/rest/v1/meeting_diary_audit**", (r) => r.fulfill({ json: [] }));
   await page.route("**/rest/v1/rpc/meeting_dependencies**", (r) => r.fulfill({ json: { attendance: 30, bookings: 4, summonses: 1, dining_invoices: 2, booking_page: 1 } }));
   page.on("pageerror", (e) => console.log("PAGEERR", e.message)); page.on("console", (m) => m.type() === "error" && console.log("CONSOLE", m.text().slice(0, 200)));
+  // Fixed "today" so the 21 Oct 2026 Installation is still upcoming (movable) whatever the real date.
+  await page.clock.setFixedTime(new Date("2026-10-01T09:00:00Z"));
   await page.goto("/members/admin/diary");
   const heading = page.getByRole("heading", { name: "Installation rule and meeting diary" });
   if (!(await heading.waitFor({ timeout: 25000 }).then(() => true).catch(() => false))) { console.log((await page.locator("body").innerText()).slice(0, 600)); test.skip(true, "Synthetic identity cannot open the diary"); }
