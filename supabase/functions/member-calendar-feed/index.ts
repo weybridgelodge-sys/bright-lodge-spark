@@ -11,6 +11,7 @@
 // the calendar client rewinds it to London local time.
 
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { loadLodgeSettings, LODGE_FALLBACK } from "../_shared/lodgeSettings.ts";
 import { londonToday, matchesPublicCalendarEvent, publicCalendarTimes, upcomingPublicCalendarRows, type PublicCalendarRow } from "../_shared/publicEventCalendar.ts";
 
 const cors = {
@@ -19,8 +20,10 @@ const cors = {
   "Access-Control-Allow-Methods": "GET, OPTIONS",
 };
 
-const LODGE_DOMAIN = "weybridgelodge.org.uk";
-const CAL_NAME = "Weybridge Lodge No. 6787";
+// Calendar name, event-ID domain and file name come from Unit Setup (fallbacks in lodgeSettingsResolve).
+let LODGE_DOMAIN = new URL(LODGE_FALLBACK.siteUrl).host;
+let CAL_NAME: string = LODGE_FALLBACK.calendarName;
+let CAL_FILE = "calendar";
 const LONDON = "Europe/London";
 
 function pad(n: number) { return String(n).padStart(2, "0"); }
@@ -186,6 +189,9 @@ const LONDON_VTIMEZONE = [
 ];
 
 Deno.serve(async (req) => {
+  const lodge = await loadLodgeSettings();
+  LODGE_DOMAIN = new URL(lodge.siteUrl).host; CAL_NAME = lodge.calendarName;
+  CAL_FILE = lodge.senderName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "calendar";
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
 
   try {
@@ -366,7 +372,7 @@ Deno.serve(async (req) => {
     const lines: string[] = [
       "BEGIN:VCALENDAR",
       "VERSION:2.0",
-      "PRODID:-//Weybridge Lodge No 6787//Member Calendar//EN",
+      `PRODID:-//${CAL_NAME.replace(/\./g, "")}//Member Calendar//EN`,
       "CALSCALE:GREGORIAN",
       "METHOD:PUBLISH",
       `X-WR-CALNAME:${escText(CAL_NAME)}`,
@@ -403,7 +409,7 @@ Deno.serve(async (req) => {
       headers: {
         ...cors,
         "Content-Type": "text/calendar; charset=utf-8",
-        "Content-Disposition": 'inline; filename="weybridge-lodge.ics"',
+        "Content-Disposition": `inline; filename="${CAL_FILE}.ics"`,
         "Cache-Control": "no-store",
       },
     });

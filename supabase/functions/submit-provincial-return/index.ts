@@ -6,7 +6,7 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { z } from "npm:zod@3";
 import { sendTransactionalEmail } from "../_shared/send-email.ts";
-import { loadLodgeSettings } from "../_shared/lodgeSettings.ts";
+import { loadLodgeSettings, returnFileName } from "../_shared/lodgeSettings.ts";
 import { fileReturnDocument, resolveReturnCc } from "../_shared/returnFiling.ts";
 
 const SETTING = "provincial_return_province_email";
@@ -54,9 +54,10 @@ Deno.serve(async (req) => {
     }
 
     const bucket = admin.storage.from("secretary-returns");
+    const filePattern = (await loadLodgeSettings()).provincialReturnFile;
     const [pdf, docx] = await Promise.all([
-      bucket.createSignedUrl(b.pdf_path, LINK_DAYS * 86400, { download: `L6787-Provincial-Return-${b.lodge_year}.pdf` }),
-      bucket.createSignedUrl(b.docx_path, LINK_DAYS * 86400, { download: `L6787-Provincial-Return-${b.lodge_year}.docx` }),
+      bucket.createSignedUrl(b.pdf_path, LINK_DAYS * 86400, { download: returnFileName(filePattern, b.lodge_year, "pdf") }),
+      bucket.createSignedUrl(b.docx_path, LINK_DAYS * 86400, { download: returnFileName(filePattern, b.lodge_year, "docx") }),
     ]);
     if (pdf.error || docx.error || !pdf.data?.signedUrl || !docx.data?.signedUrl) return json({ error: "The generated files could not be found." }, 400);
 
