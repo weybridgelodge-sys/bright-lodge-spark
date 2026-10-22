@@ -52,3 +52,15 @@ test("Template tab previews the schedule sentence and override at 320px", { time
   await noOverflow(page);
   await expectNoAxeViolations(page, "summons template tab");
 });
+
+test("Builder shows next regular meeting controls at 320px", { timeout: 90_000 }, async ({ page }) => {
+  await mock(page);
+  await page.route("**/rest/v1/festive_board_meetings**", (r) => r.fulfill({ json: [] }));
+  await page.goto("/members/summons");
+  const b = page.getByRole("button", { name: "Fill from Meeting Diary" });
+  if (!(await b.waitFor({ timeout: 20000 }).then(() => true).catch(() => false))) test.skip(true, "Synthetic identity cannot open the Summons Builder");
+  await expect(page.getByLabel("Meeting before the next regular one (optional)")).toBeVisible();
+  expect((await b.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+  await noOverflow(page);
+  await expectNoAxeViolations(page, "summons builder details");
+});

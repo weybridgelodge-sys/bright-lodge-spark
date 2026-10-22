@@ -164,6 +164,7 @@ function rowToSummons(r: any): SummonsRow {
     dress_code: r.dress_code,
     minutes_confirmation_date: r.minutes_confirmation_date,
     next_meeting_date: r.next_meeting_date,
+    interim_meeting_note: r.notice_overrides?.interimMeetingNote ?? null,
     officer_night_date: r.officer_night_date,
     agenda: r.agenda ?? [],
     candidates: r.candidates ?? [],
