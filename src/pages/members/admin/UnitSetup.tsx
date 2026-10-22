@@ -17,10 +17,10 @@ type Form = {
   venue_id: string; assistant_secretary_email: string; webmaster_email: string; communications_email: string; site_url: string;
   sender_name: string; formal_sender_name: string; facebook_url: string; instagram_url: string; twitter_url: string;
   province_name: string; ico_number: string; newsletter_masthead: string; newsletter_footer_note: string; calendar_name: string;
-  provincial_file: string; installation_file: string;
+  provincial_file: string; installation_file: string; provincial_return_email: string; installation_return_email: string;
 };
 type Venue = { id: string; name: string; address: string | null; display_lines: string[] | null };
-const EMPTY: Form = { lodge_name: "", lodge_number: "", consecration_date: "", account_name: "", sort_code: "", account_number: "", reference_pattern: "", card_wording: "", cheque_payee: "", sign_off_override: "", booking_contact_email: "", venue_id: "", assistant_secretary_email: "", webmaster_email: "", communications_email: "", site_url: "", sender_name: "", formal_sender_name: "", facebook_url: "", instagram_url: "", twitter_url: "", province_name: "", ico_number: "", newsletter_masthead: "", newsletter_footer_note: "", calendar_name: "", provincial_file: "", installation_file: "" };
+const EMPTY: Form = { lodge_name: "", lodge_number: "", consecration_date: "", account_name: "", sort_code: "", account_number: "", reference_pattern: "", card_wording: "", cheque_payee: "", sign_off_override: "", booking_contact_email: "", venue_id: "", assistant_secretary_email: "", webmaster_email: "", communications_email: "", site_url: "", sender_name: "", formal_sender_name: "", facebook_url: "", instagram_url: "", twitter_url: "", province_name: "", ico_number: "", newsletter_masthead: "", newsletter_footer_note: "", calendar_name: "", provincial_file: "", installation_file: "", provincial_return_email: "", installation_return_email: "" };
 type Audit = { id: string; key: string; old_value: unknown; new_value: unknown; changed_by: string | null; changed_at: string };
 type Errs = Partial<Record<keyof Form, string>>;
 
@@ -42,7 +42,7 @@ async function loadForm() {
   const [id, rows, setup] = await Promise.all([loadLodgeIdentity(), (supabase.from("unit_settings" as never) as any).select("key,value"), rpc("get_unit_setup")]);
   if (rows.error) throw rows.error;
   if (setup.error) throw setup.error;
-  const su = (setup.data ?? {}) as { contacts?: Record<string, string | null>; venues?: Venue[]; province_emails?: Record<string, unknown> };
+  const su = (setup.data ?? {}) as { contacts?: Record<string, string | null>; venues?: Venue[]; can_edit_province_emails?: boolean };
   const c = su.contacts ?? {};
   const by: Record<string, Record<string, string | null>> = {};
   for (const r of (rows.data ?? []) as { key: string; value: Record<string, string | null> }[]) by[r.key] = r.value ?? {};
@@ -58,8 +58,9 @@ async function loadForm() {
     province_name: by.province?.name ?? "", ico_number: by.registrations?.ico_number ?? "", newsletter_masthead: by.newsletter?.masthead ?? "",
     newsletter_footer_note: by.newsletter?.footer_note ?? "", calendar_name: by.calendar_feed?.name ?? "",
     provincial_file: by.return_files?.provincial ?? "", installation_file: by.return_files?.installation ?? "",
+    provincial_return_email: by.province?.provincial_return_email ?? "", installation_return_email: by.province?.installation_return_email ?? "",
   };
-  return { form, contactEmail: id.secretaryEmail, venues: su.venues ?? [], provEmails: su.province_emails ?? {} };
+  return { form, contactEmail: id.secretaryEmail, venues: su.venues ?? [], canEditProv: su.can_edit_province_emails === true };
 }
 
 function Inner() {
@@ -68,7 +69,7 @@ function Inner() {
   const [loadError, setLoadError] = useState("");
   const [contactEmail, setContactEmail] = useState("");
   const [venues, setVenues] = useState<Venue[]>([]);
-  const [provEmails, setProvEmails] = useState<{ provincial_return?: unknown; installation_return?: unknown }>({});
+  const [canEditProv, setCanEditProv] = useState(false);
   const [canView, setCanView] = useState<boolean | null>(null);
   const [canEdit, setCanEdit] = useState(false);
   const [errs, setErrs] = useState<Errs>({});
@@ -97,7 +98,7 @@ function Inner() {
       if (v.data !== true) { setLoading(false); return; }
       try {
         const r = await loadForm();
-        setVenues(r.venues); setProvEmails(r.provEmails); setContactEmail(r.contactEmail);
+        setVenues(r.venues); setCanEditProv(r.canEditProv); setContactEmail(r.contactEmail);
         setF(r.form); setOrig(r.form);
       } catch {
         // Never show blanks as if they were the saved values: saving stays off.
@@ -140,10 +141,10 @@ function Inner() {
   const only = (m: FieldMap<Form>) => (ch: (keyof Form)[]) => patchFor(f, ch, m);
 
   const ro = !canEdit;
-  const field = (k: keyof Form, label: string, opts: { hint?: string; type?: string; inputMode?: "numeric" | "text" | "email" } = {}) => (
+  const field = (k: keyof Form, label: string, opts: { hint?: string; type?: string; inputMode?: "numeric" | "text" | "email"; readOnly?: boolean } = {}) => (
     <div>
       <label htmlFor={`us-${k}`} className={fieldLabelCls}>{label}</label>
-      <input id={`us-${k}`} type={opts.type ?? "text"} inputMode={opts.inputMode} value={f[k]} readOnly={ro} autoComplete="off"
+      <input id={`us-${k}`} type={opts.type ?? "text"} inputMode={opts.inputMode} value={f[k]} readOnly={ro || opts.readOnly} autoComplete="off"
         aria-invalid={!!errs[k]} aria-describedby={[opts.hint ? `us-${k}-hint` : "", errs[k] ? `us-${k}-err` : ""].filter(Boolean).join(" ") || undefined}
         onChange={(e) => setF((x) => ({ ...x, [k]: e.target.value }))} className={`${fieldCls} mt-1 min-h-[44px]`} />
       {opts.hint && <span id={`us-${k}-hint`} className={fieldHintCls}>{opts.hint}</span>}
@@ -239,13 +240,19 @@ function Inner() {
 
         <Section title="Province">
           {field("province_name", "Province name", { hint: "e.g. Province of Somewhere" })}
-          <div className="text-sm">
-            <p className={fieldLabelCls}>Return email addresses</p>
-            <p className="mt-1 break-words">Provincial return: {typeof provEmails.provincial_return === "string" && provEmails.provincial_return ? provEmails.provincial_return : "Not set"}</p>
-            <p className="break-words">Installation return: {typeof provEmails.installation_return === "string" && provEmails.installation_return ? provEmails.installation_return : "Not set"}</p>
-            <span className={fieldHintCls}>These are set on the return screens, where they are checked again before sending.</span>
-          </div>
-          {saveBtn("province", () => save("province", [{ key: "province", fields: ["province_name"], value: only({ province_name: "name" }) }], () => (f.province_name.trim() ? {} : { province_name: "Enter the province name." })))}
+          <p role="note" className="rounded-sm border border-gold/40 p-3 font-sans text-sm text-gold-light">Signed returns are emailed to these addresses. Check them carefully.</p>
+          {field("provincial_return_email", "Provincial return email (Provincial Grand Secretary)", { type: "email", inputMode: "email", readOnly: !canEditProv, hint: canEditProv ? undefined : "Only the Secretary or an administrator can change this." })}
+          {field("installation_return_email", "Installation return email (Provincial Office)", { type: "email", inputMode: "email", readOnly: !canEditProv, hint: canEditProv ? undefined : "Only the Secretary or an administrator can change this." })}
+          {saveBtn("province", () => save("province", [{ key: "province", fields: canEditProv ? ["province_name", "provincial_return_email", "installation_return_email"] : ["province_name"],
+            // Both addresses always travel together so the server can check the pair.
+            value: (ch) => { const v = only({ province_name: "name", provincial_return_email: "provincial_return_email", installation_return_email: "installation_return_email" })(ch) as Record<string, unknown>;
+              if (ch.includes("provincial_return_email") || ch.includes("installation_return_email")) { v.provincial_return_email = f.provincial_return_email.trim(); v.installation_return_email = f.installation_return_email.trim(); }
+              return v; } }], () => {
+            const e: Errs = {};
+            if (!f.province_name.trim()) e.province_name = "Enter the province name.";
+            if (canEditProv) for (const k of ["provincial_return_email", "installation_return_email"] as const) if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(f[k].trim())) e[k] = "Enter a valid email address. This address is required.";
+            return e;
+          }))}
         </Section>
 
         <Section title="Newsletter">
