@@ -18,7 +18,9 @@ async function mock(page: Page) {
   await page.route("**/rest/v1/rpc/get_published_meeting_for_event**", (r) => r.fulfill({ json: [{ id: "m1", event_key: ev.slug }] }));
   await page.route("**/rest/v1/rpc/get_my_bookable_items**", (r) => r.fulfill({ json: [item] }));
   await page.route("**/rest/v1/rpc/get_profiles_pii**", (r) => r.fulfill({ json: [{ dietary_requirements: "No shellfish" }] }));
-  await page.route("**/rest/v1/units**", (r) => r.fulfill({ json: { name: "Sample Lodge No. 1234 with a Very Long Name" } }));
+  await page.route("**/rest/v1/rpc/get_public_booking_details**", (r) => r.fulfill({ json: { lodge_name: "Sample Lodge with a Very Long Name", lodge_number: "1234",
+    account_name: "Sample Account", sort_code: "11-22-33", account_number: "12345678", reference_pattern: "Dining + {surname}", card_wording: "", cheque_payee: "Sample Payee",
+    sign_off_override: null, contact_email: "queries@example.invalid" } }));
   await page.route("**/rest/v1/module_settings**", (r) => r.fulfill({ json: r.request().url().includes("member_bookings") && !r.request().url().includes("in.") ? { value: true } : [] }));
 }
 
@@ -45,6 +47,9 @@ test("public Bookings: visitor flow unchanged (bank transfer, 1 guest)", { timeo
   const bodies: any[] = [];
   await fillAndSubmitBank(page, bodies);
   await expect(page.getByRole("heading", { name: "Booking Confirmed" })).toBeVisible();
+  await expect(page.getByText("Sort code: 11-22-33")).toBeVisible();
+  await expect(page.getByText("Reference: Dining + Person")).toBeVisible();
+  await expect(page.getByText("WM Sample Lodge with a Very Long Name 1234")).toBeVisible();
   expect(page.url()).toContain("/bookings");
   expect(bodies).toHaveLength(1);
   expect(bodies[0]).toMatchObject({ event_key: ev.slug, meeting_id: "m1", contact_email: "visitor@example.invalid", meeting_option: "meeting-and-festive-board", website: "" });
@@ -62,7 +67,7 @@ test("portal booking form at 320px: prefilled, guests, bank transfer, axe", { ti
   await expect(page.locator("#evf-title")).toHaveValue("W. Bro");
   await expect(page.locator("#evf-first")).toHaveValue("Bartholomew");
   await expect(page.locator("#evf-last")).toHaveValue("Montgomery-Smythe");
-  await expect(page.locator("#evf-lodge")).toHaveValue("Sample Lodge No. 1234 with a Very Long Name");
+  await expect(page.locator("#evf-lodge")).toHaveValue("Sample Lodge with a Very Long Name No. 1234");
   await expect(page.locator("#evf-email")).toHaveValue("portal-layout-test@localhost.invalid");
   await expect(page.locator("#website, #evf-website")).toHaveCount(1);
   const overflow = () => page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);

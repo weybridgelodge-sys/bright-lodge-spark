@@ -20,6 +20,15 @@ const GUARDED = [
   "supabase/functions/_shared/provincialReturnDoc.ts",
   "supabase/functions/generate-provincial-return/index.ts",
 ];
+// Booking form, portal booking pages and Unit Setup: also no bank details or sign-offs.
+const BOOKING_GUARDED = [
+  "src/components/bookings/MeetingBookingForm.tsx",
+  "src/pages/Bookings.tsx",
+  "src/pages/members/BookMeeting.tsx",
+  "src/pages/members/BookMyPlace.tsx",
+  "src/pages/members/admin/UnitSetup.tsx",
+  "src/lib/bookingDetails.ts",
+];
 const BANNED: [string, RegExp][] = [
   ["lodge name", /weybridge/i],
   ["lodge number", /\b6787\b/],
@@ -28,6 +37,23 @@ const BANNED: [string, RegExp][] = [
   ["email", /[a-z0-9._%+-]+@[a-z0-9-]+\.[a-z.]{2,}/i],
   ["UUID", /\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b/i],
 ];
+
+const BANK: [string, RegExp][] = [
+  ["lodge number", /\b6787\b/],
+  ["bank account number", /\b\d{8}\b/],
+  ["sort code", /\b\d{2}-\d{2}-\d{2}\b|\b\d{6}\b/],
+  ["sign-off with lodge", /Fraternally,\\nWM [A-Z]/],
+  ["lodge email", /[a-z0-9._%+-]+@(?!example\.)[a-z0-9-]+\.[a-z.]{2,}/i],
+];
+describe("booking pages carry no typed lodge, bank or sign-off details", () => {
+  for (const f of BOOKING_GUARDED) {
+    it(f, () => {
+      // Search-engine title is static by design (must match the pre-rendered head; staticMetaParity).
+      const src = fs.readFileSync(f, "utf8").split("\n").filter((l) => !/title="Dining & Bookings \|/.test(l)).join("\n");
+      for (const [what, re] of BANK) expect(src.match(re)?.[0] ?? null, `${what} in ${f}`).toBeNull();
+    });
+  }
+});
 
 describe("no typed lodge details", () => {
   for (const f of GUARDED) {
@@ -112,5 +138,17 @@ describe("meeting event heading", () => {
   });
   it("clears intro_heading on save", () => {
     expect(lodgeEventSavePayload(ev, "s").intro_heading).toBeNull();
+  });
+});
+
+describe("seeded bank/sign-off values never typed in src or edge functions", () => {
+  it("no bank literals anywhere", () => {
+    const { execSync } = require("child_process");
+    const hits = execSync(`rg -l -e ${"1487" + "8862"} -e ${"30-99" + "-80"} -e ${"3099" + "80"} src supabase/functions || true`, { encoding: "utf8" }).trim();
+    expect(hits).toBe("");
+  });
+  it("public Bookings page has no typed contact email", () => {
+    const src = fs.readFileSync("src/pages/Bookings.tsx", "utf8");
+    expect(src).not.toMatch(/assistantsecretary@/);
   });
 });

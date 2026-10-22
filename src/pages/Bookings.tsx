@@ -1,3 +1,4 @@
+import { useBookingDetails } from "@/lib/bookingDetails";
 import { attendanceOptions, diningEventLabel, isNonMasonTitle, lodgeRequired } from "@/lib/bookingTitles";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -130,6 +131,7 @@ const BookingsEvent = ({
   bundle: EventBundle;
   publishedMeeting: { id: string; event_key: string } | null;
 }) => {
+  const bookingDetails = useBookingDetails();
   const { toast } = useToast();
   const shouldReduceMotion = useReducedMotion();
 
@@ -391,16 +393,14 @@ useEffect(() => {
                 </p>
               )}
               {/* text-gold/60 replaces unapproved text-primary-foreground/60 */}
-              <p className="text-primary-foreground/80 font-sans text-xs mt-2">
-                Queries? Email{" "}
-                <a
-                  href="mailto:assistantsecretary@weybridgelodge.org.uk"
-                  // hover:text-gold/80 replaces unapproved hover:text-gold-light
-                  className="text-gold hover:text-gold/80 transition-colors underline underline-offset-4"
-                >
-                  assistantsecretary@weybridgelodge.org.uk
-                </a>
-              </p>
+              {bookingDetails.contactEmail && (
+                <p className="text-primary-foreground/80 font-sans text-xs mt-2">
+                  Queries? Email{" "}
+                  <a href={`mailto:${bookingDetails.contactEmail}`} className="text-gold hover:text-gold/80 transition-colors underline underline-offset-4">
+                    {bookingDetails.contactEmail}
+                  </a>
+                </p>
+              )}
             </motion.div>
 
             <MeetingBookingForm bundle={bundle} publishedMeeting={publishedMeeting} diningOptionId={diningOptionId} setDiningOptionId={setDiningOptionId} />
@@ -415,7 +415,7 @@ useEffect(() => {
           <div className="container mx-auto px-4 sm:px-6 text-center">
             <Link
               to="/events"
-              aria-label="View all upcoming events at Weybridge Lodge No. 6787"
+              aria-label="View all upcoming events"
               className="inline-flex items-center justify-center border border-border text-foreground px-8 py-4 rounded-sm text-sm font-sans uppercase tracking-widest hover:border-gold hover:text-gold-dark transition-colors min-h-[48px]"
             >
               View All Events

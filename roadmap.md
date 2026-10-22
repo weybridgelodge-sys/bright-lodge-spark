@@ -142,3 +142,6 @@
 
 ## Festive Board register link (Oct 2026)
 - [x] Replace typed booking slug with linked booking page (by event id), backfill, switch readers, tests, 320px axe
+
+## Unit Setup (Oct 2026)
+- [x] Unit Setup screen, audited saves, seeded bank details, public booking lookup; booking form/pages read it

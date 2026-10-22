@@ -9,6 +9,7 @@ import { useInitialLoading } from "@/hooks/useInitialLoading";
 import { useMemberBookingsEnabled } from "@/hooks/useMemberBookingsEnabled";
 import { type EventBundle } from "@/lib/lodgeEvents";
 import { cardFooter, isBookingClosed, memberStatus, type BookableItem } from "@/lib/memberBookings";
+import { loadBookingDetails } from "@/lib/bookingDetails";
 import { loadMeetingBundle, matchFormTitle } from "@/lib/portalBooking";
 
 type Loaded = { item: BookableItem; bundle: EventBundle; meeting: { id: string; event_key: string } } | null;
@@ -34,12 +35,12 @@ export default function BookMeeting() {
     return () => { live = false; };
   }, [enabled, itemId, setLoading]);
 
-  const unitId = (profile as { unit_id?: string | null } | null)?.unit_id ?? null;
+  // Lodge Name & No. prefilled from the unit record (still editable on the form).
   useEffect(() => {
-    if (!unitId) { if (profile) setLodgeName(""); return; }
-    supabase.from("units" as never).select("name").eq("id", unitId).maybeSingle()
-      .then(({ data }) => setLodgeName(((data as { name?: string | null } | null)?.name ?? "").trim()), () => setLodgeName(""));
-  }, [unitId, profile]);
+    let live = true;
+    loadBookingDetails().then((d) => live && setLodgeName([d.lodgeName, d.lodgeNumber ? `No. ${d.lodgeNumber}` : ""].filter(Boolean).join(" ")), () => live && setLodgeName(""));
+    return () => { live = false; };
+  }, []);
 
   if (enabled === false) return <Navigate to="/members" replace />;
 
