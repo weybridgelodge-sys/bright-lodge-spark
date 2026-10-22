@@ -8,7 +8,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { useInitialLoading } from "@/hooks/useInitialLoading";
 import { useMemberBookingsEnabled } from "@/hooks/useMemberBookingsEnabled";
 import { type EventBundle } from "@/lib/lodgeEvents";
-import { cardFooter, isBookingClosed, memberStatus, type BookableItem } from "@/lib/memberBookings";
+import { itemFooter, type BookableItem } from "@/lib/memberBookings";
+import { ResumeCardPayment } from "@/components/payments/ResumeCardPayment";
 import { loadBookingDetails } from "@/lib/bookingDetails";
 import { loadMeetingBundle, matchFormTitle } from "@/lib/portalBooking";
 
@@ -44,8 +45,7 @@ export default function BookMeeting() {
 
   if (enabled === false) return <Navigate to="/members" replace />;
 
-  const status = loaded ? memberStatus(loaded.item.bookings, loaded.item.register) : "not_booked";
-  const footer = loaded ? cardFooter(status, isBookingClosed(loaded.item)) : null;
+  const footer = loaded ? itemFooter(loaded.item).footer : null;
   const prefill: MeetingBookingPrefill = {
     title: matchFormTitle(profile?.title), firstName: profile?.first_name?.trim() || "", lastName: profile?.last_name?.trim() || "",
     lodge: lodgeName ?? "", email: profile?.email?.trim() || "", phone: profile?.phone?.trim() || "",
@@ -62,7 +62,11 @@ export default function BookMeeting() {
       ) : footer?.kind !== "book" ? (
         <>
           <h1 className="font-serif text-2xl text-gold mb-2 break-words">{loaded.item.title}</h1>
-          <p className="font-sans text-sm text-primary-foreground">{footer?.text}</p>
+          {footer?.kind === "resume" ? (
+            <div className="max-w-md"><ResumeCardPayment bookingId={footer.bookingId} totalPence={footer.totalPence} holdUntil={footer.holdUntil} title={loaded.item.title} /></div>
+          ) : (
+            <p className="font-sans text-sm text-primary-foreground">{footer && "text" in footer ? footer.text : ""}</p>
+          )}
         </>
       ) : (
         <>

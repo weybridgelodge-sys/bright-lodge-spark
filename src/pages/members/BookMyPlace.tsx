@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { ResumeCardPayment } from "@/components/payments/ResumeCardPayment";
 import { Link, Navigate } from "react-router-dom";
 import MembersLayout from "@/components/members/MembersLayout";
 import { supabase } from "@/integrations/supabase/client";
@@ -6,7 +7,7 @@ import { useInitialLoading } from "@/hooks/useInitialLoading";
 import { useMemberBookingsEnabled } from "@/hooks/useMemberBookingsEnabled";
 import { CalendarDays, CalendarClock, PoundSterling } from "lucide-react";
 import {
-  cardFooter, effectiveDeadline, isBookingClosed, memberStatus, STATUS_LABEL, visibleItems,
+  effectiveDeadline, itemFooter, STATUS_LABEL, visibleItems,
   type BookableItem, type MemberBookingStatus,
 } from "@/lib/memberBookings";
 import { formatGBP } from "@/lib/publicEvents";
@@ -23,9 +24,10 @@ const BADGE: Record<MemberBookingStatus, string> = {
   apologies: "border-primary-foreground/50 text-primary-foreground",
 };
 
-function Card({ item }: { item: BookableItem }) {
-  const status = memberStatus(item.bookings, item.register);
-  const footer = cardFooter(status, isBookingClosed(item));
+function Card({ item: original }: { item: BookableItem }) {
+  const [released, setReleased] = useState<string | null>(null);
+  const item = released ? { ...original, bookings: original.bookings.filter((b) => b.id !== released) } : original;
+  const { status, footer } = itemFooter(item);
   return (
     <li className="bg-navy-dark/60 border border-gold/15 rounded-sm p-5 min-w-0">
       <div className="flex flex-wrap items-start justify-between gap-2 mb-3">
@@ -48,6 +50,9 @@ function Card({ item }: { item: BookableItem }) {
           <Link to={portalBookPath(item)} className="inline-flex items-center justify-center min-h-[44px] px-5 rounded-sm bg-gold text-navy font-sans font-semibold text-sm hover:bg-gold-light">
             Book my place<span className="sr-only">: {item.title}</span>
           </Link>
+        ) : footer.kind === "resume" ? (
+          <ResumeCardPayment bookingId={footer.bookingId} totalPence={footer.totalPence} holdUntil={footer.holdUntil} title={item.title}
+            onReleased={() => setReleased(footer.bookingId)} />
         ) : (
           <p className="font-sans text-sm text-primary-foreground">{footer.text}</p>
         )}
