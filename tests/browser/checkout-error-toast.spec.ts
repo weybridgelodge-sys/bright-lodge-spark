@@ -32,8 +32,7 @@ test("duplicate 409: toast wraps at 320px, form keeps step and values", { timeou
   await page.locator("#evf-phone").fill("07000000000");
   await page.getByRole("button", { name: "Next" }).click();
   await page.locator("#evf-meeting").selectOption("meeting-and-festive-board");
-  await page.getByRole("button", { name: "Next" }).click();
-  await page.getByRole("radio", { name: /Card/ }).check();
+  await page.getByRole("radio", { name: /Debit/ }).check();
   await page.getByRole("button", { name: "Submit Booking" }).click();
 
   const toast = page.locator("li[data-state=open]").filter({ hasText: "Checkout error" });
@@ -52,10 +51,9 @@ test("duplicate 409: toast wraps at 320px, form keeps step and values", { timeou
 
   // Form is back on step 3 with every value kept; no checkout panel / skeleton left behind.
   await expect(page.getByRole("heading", { name: "Secure Card Payment" })).toHaveCount(0);
-  await expect(page.getByRole("radio", { name: /Card/ })).toBeChecked();
+  await expect(page.getByRole("radio", { name: /Debit/ })).toBeChecked();
   await expect(page.getByRole("button", { name: "Submit Booking" })).toBeVisible();
   await expectNoAxeViolations(page, "checkout error toast");
-  await page.getByRole("button", { name: "Back" }).click();
   await expect(page.locator("#evf-meeting")).toHaveValue("meeting-and-festive-board");
   await page.getByRole("button", { name: "Back" }).click();
   await expect(page.locator("#evf-first")).toHaveValue("Repeat");
