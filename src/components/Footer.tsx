@@ -105,8 +105,9 @@ const Footer = () => {
           <div>
             <h2 className="font-serif text-primary-foreground mb-4 text-sm">Follow Us</h2>
             <div className="flex gap-2">
+              {unit.instagramUrl && (
               <a
-                href={unit.instagramUrl || undefined}
+                href={unit.instagramUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-primary-foreground/80 hover:text-gold transition-colors min-h-[48px] min-w-[48px] flex items-center justify-center"
@@ -114,8 +115,10 @@ const Footer = () => {
               >
                 <Instagram className="w-5 h-5" />
               </a>
+              )}
+              {unit.facebookUrl && (
               <a
-                href={unit.facebookUrl || undefined}
+                href={unit.facebookUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-primary-foreground/80 hover:text-gold transition-colors min-h-[48px] min-w-[48px] flex items-center justify-center"
@@ -123,8 +126,10 @@ const Footer = () => {
               >
                 <Facebook className="w-5 h-5" />
               </a>
+              )}
+              {unit.twitterUrl && (
               <a
-                href={unit.twitterUrl || undefined}
+                href={unit.twitterUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-primary-foreground/80 hover:text-gold transition-colors min-h-[48px] min-w-[48px] flex items-center justify-center"
@@ -132,6 +137,7 @@ const Footer = () => {
               >
                 <Twitter className="w-5 h-5" />
               </a>
+              )}
             </div>
             <div className="mt-2 flex flex-col gap-1">
               <a href="https://surreyfreemasons.org.uk/" target="_blank" rel="noopener noreferrer" className="text-xs text-primary-foreground/75 hover:text-gold transition-colors font-sans min-h-[48px] inline-flex items-center">

@@ -22,10 +22,15 @@ test("header and footer read the unit record at 320px", async ({ page }) => {
 
 test("public Bookings subtitle from the unit record", async ({ page }) => {
   await page.route("**/rest/v1/rpc/get_public_unit_profile**", (r) => r.fulfill({ json: { lodge_name: "Sample Lodge", lodge_number: "1234", venue_name: "Sample Hall", venue_lines: ["Sample Hall,", "Town AB1 2CD"] } }));
-  await page.route("**/rest/v1/lodge_events**", (r) => r.fulfill({ json: [] }));
+  const day = new Date(Date.now() + 30 * 864e5).toISOString().slice(0, 10);
+  const ev = { id: "ev1", slug: "s", title: "Regular Meeting", intro: "Join us.", intro_heading: null, event_date: `${day}T18:00:00+00:00`, tyling_time: "5pm", dining_time: "7pm",
+    location: "Test Hall", dress_code: "Dark suit", event_label: null, booking_deadline: null, header_image_url: null, published: true, sort_order: 0, archived_at: null };
+  await page.route("**/rest/v1/lodge_events**", (r) => r.fulfill({ json: [ev] }));
+  await page.route("**/rest/v1/lodge_event_courses**", (r) => r.fulfill({ json: [] }));
+  await page.route("**/rest/v1/lodge_event_dining_options**", (r) => r.fulfill({ json: [] }));
+  await page.route("**/rest/v1/rpc/get_published_meeting_for_event**", (r) => r.fulfill({ json: [{ id: "m1", event_key: "s" }] }));
   await page.goto("/bookings?e2e_as=visitor");
-  await page.waitForTimeout(3000);
-  const sub = page.getByText("Reserve your place at the next Sample Lodge meeting at the Sample Hall, AB1 2CD");
-  if (await sub.count()) await expect(sub).toBeVisible();
+  await expect(page.getByText("Reserve your place at the next Sample Lodge meeting at the Sample Hall, AB1 2CD")).toBeVisible({ timeout: 20000 });
+  await expect(page.locator("footer").getByRole("link", { name: "Facebook" })).toHaveCount(0);
   await expectNoAxeViolations(page, "bookings with unit subtitle");
 });
