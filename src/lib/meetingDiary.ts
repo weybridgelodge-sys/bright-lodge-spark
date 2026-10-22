@@ -187,3 +187,23 @@ export function bankHoliday(iso: string): string | undefined {
   void daysIn;
   return undefined;
 }
+
+/** "3rd Wednesday in February, 2nd Wednesday in May, 3rd Wednesday in October (Installation) and 2nd Wednesday in December."
+ *  Calendar order; only scheduled (regular/installation) months. "" when nothing is scheduled. */
+export function meetingPatternSentence(schedule: ScheduleMonth[]): string {
+  const ord: Record<string, string> = { "1": "1st", "2": "2nd", "3": "3rd", "4": "4th", last: "Last" };
+  const parts = [...schedule]
+    .filter((s) => SCHEDULED_TYPES.includes(s.meeting_type) && s.month >= 1 && s.month <= 12)
+    .sort((a, b) => a.month - b.month)
+    .map((s) => `${ord[s.ordinal] ?? s.ordinal} ${WEEKDAYS[s.weekday]} in ${MONTHS[s.month - 1]}${s.meeting_type === "installation" ? " (Installation)" : ""}`);
+  if (!parts.length) return "";
+  const body = parts.length === 1 ? parts[0] : `${parts.slice(0, -1).join(", ")} and ${parts[parts.length - 1]}`;
+  return `${body}.`;
+}
+
+/** Which pattern text prints: the manual override only when switched on (or when no schedule is saved). */
+export function chooseMeetingPattern(opts: { generated: string; manualText: string | null | undefined; manualOverride: boolean }): { text: string; source: "schedule" | "manual" } {
+  const manual = (opts.manualText ?? "").replace(/\s+/g, " ").trim();
+  if (opts.manualOverride || !opts.generated) return { text: manual, source: "manual" };
+  return { text: opts.generated, source: "schedule" };
+}

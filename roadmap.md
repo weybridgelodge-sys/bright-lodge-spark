@@ -134,3 +134,8 @@
 - [x] Cc current Secretary and WM on Provincial and UGLE return emails; record Cc on submission rows
 - [x] File sent return PDF into Documents under restricted "Returns" category
 - [x] Data Protection signatures sentence only when signatures switched on
+
+## Single sources: officers, representatives, meeting pattern
+- [x] Phase 1: shared officer roll on Summons; meeting-pattern sentence + override; member-derived rep/Royal Arch/honorary names
+- [ ] Phase 2 (waits on WM approval): position categories migration, Representatives group, backfill dry-run, public Lodge Profile, remove hard-coded lodge literals
+- [ ] Meeting Diary 320px browser check fails on "Format dd/mm/yyyy" hint (screen not touched in phase 1; investigate)

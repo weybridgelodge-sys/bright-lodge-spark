@@ -4,16 +4,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { fetchProfilesPii } from "@/lib/profilePii";
 import {
   LODGE_NUMBER, LODGE_EMAIL_DOMAIN,
-  resolveContinuingOffice, resolveLadderOffice, prescribedInstallationDate,
+  prescribedInstallationDate,
   type ApptRow, type StatusRow, type ResolvedOffice, type Provenance,
 } from "@/lib/installationReturn";
-import type { PositionKey } from "@/lib/officersProgression";
+import { LADDER_KEYS, resolveRollOffice } from "@/lib/officerRoll";
+import { meetingPatternFor } from "@/lib/meetingPattern";
 export { PM_NOTE, PROVINCE_TITLE, PROVINCE_SUBTITLE, ukLongDate } from "../../supabase/functions/_shared/provincialReturnDoc";
 
-export const LADDER_KEYS = new Set([
-  "worshipful_master", "senior_warden", "junior_warden", "senior_deacon", "junior_deacon",
-  "inner_guard", "senior_steward", "steward_1", "steward_2", "steward_3", "steward_4", "steward_5",
-]);
+export { LADDER_KEYS };
 
 /** Main officer table, in the Province form's exact order. `key: null` = always blank. */
 export const PROVINCIAL_ROWS: { label: string; key: string | null }[] = [
@@ -159,7 +157,7 @@ export async function loadProvincialData(year: number, opts: { canAppend: boolea
 
   const cache = new Map<string, ResolvedOffice>();
   const resolve = (key: string, label: string) => {
-    if (!cache.has(key)) cache.set(key, LADDER_KEYS.has(key) ? resolveLadderOffice(key as PositionKey, label, ladder) : resolveContinuingOffice(key, label, year, appts));
+    if (!cache.has(key)) cache.set(key, resolveRollOffice(key, label, ladder));
     return cache.get(key)!;
   };
   const officeRow = (label: string, key: string | null): ProvRow => {
@@ -212,7 +210,7 @@ export async function loadProvincialData(year: number, opts: { canAppend: boolea
     scheduledDate,
     actualDate: actual && actual !== scheduledDate ? actual : null,
     venue: (tpl.venue_address ?? "").replace(/\s+/g, " ").trim(),
-    meetingPattern: (tpl.regular_meeting_pattern ?? "").replace(/\s+/g, " ").trim(),
+    meetingPattern: await meetingPatternFor(tpl.regular_meeting_pattern),
     rows, lowerRows,
     pastMasters: groupPastMasters(roll),
     appended,
