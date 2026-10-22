@@ -30,7 +30,7 @@ interface Body {
   meeting_date_label: string;     // e.g. "Saturday 12 September 2026"
   meeting_time_label?: string;    // e.g. "6:15 pm for 6:45 pm"
   meeting_type_label?: string;    // e.g. "Regular Meeting"
-  venue: string;                  // e.g. "Masonic Centre, Guildford"
+  venue: string;                  // venue line as printed on the summons
   secretary_display_name?: string; // preferred — resolved from officer_appointments client-side
   wm_display_name?: string;        // legacy — accepted for back-compat but no longer displayed
   ics: string;

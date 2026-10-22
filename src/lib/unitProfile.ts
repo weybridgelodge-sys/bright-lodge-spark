@@ -24,6 +24,12 @@ export function parseUnitProfile(row: unknown): UnitProfile {
 export const unitTitle = (p: Pick<UnitProfile, "lodgeName" | "lodgeNumber">) =>
   [p.lodgeName, p.lodgeNumber ? `No. ${p.lodgeNumber}` : ""].filter(Boolean).join(" ");
 
+/** "<venue>, <postcode>" for short public lines; postcode taken from the venue's address lines. */
+export function venueShort(p: Pick<UnitProfile, "venueName" | "venueLines">): string {
+  const pc = p.venueLines.join(" ").match(/[A-Z]{1,2}\d[A-Z\d]? ?\d[A-Z]{2}/)?.[0] ?? "";
+  return [p.venueName, pc].filter(Boolean).join(", ");
+}
+
 const KEY = "unit-profile-v1";
 const read = (): UnitProfile | null => { try { const v = sessionStorage.getItem(KEY); return v ? parseUnitProfile(JSON.parse(v)) : null; } catch { return null; } };
 let inflight: Promise<unknown> | null = null;
