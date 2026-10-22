@@ -182,6 +182,17 @@ describe("seeded bank/sign-off values never typed in src or edge functions", () 
     const hits = execSync(`rg -l -e ${"1487" + "8862"} -e ${"30-99" + "-80"} -e ${"3099" + "80"} src supabase/functions || true`, { encoding: "utf8" }).trim();
     expect(hits).toBe("");
   });
+  for (const f of ["supabase/functions/_shared/duplicate-booking.ts", "src/pages/CheckoutReturn.tsx", "supabase/functions/_shared/lodgeSettingsResolve.ts", "supabase/functions/create-checkout/index.ts"]) {
+    it(`${f}: no typed Assistant Secretary address`, () => {
+      expect(fs.readFileSync(f, "utf8")).not.toMatch(/assistantsecretary@/i);
+    });
+  }
+  for (const f of ["supabase/functions/_shared/duplicate-booking.ts", "src/pages/CheckoutReturn.tsx"]) {
+    it(`${f}: no lodge name, domain, email or UUID literals`, () => {
+      const src = fs.readFileSync(f, "utf8");
+      expect(src).not.toMatch(/weybridge|6787|[\w.-]+@[\w-]+\.[a-z]{2,}|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i);
+    });
+  }
   it("public Bookings page has no typed contact email", () => {
     const src = fs.readFileSync("src/pages/Bookings.tsx", "utf8");
     expect(src).not.toMatch(/assistantsecretary@/);
