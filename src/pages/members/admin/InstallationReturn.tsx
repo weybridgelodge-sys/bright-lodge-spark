@@ -1,3 +1,4 @@
+import { EmailText } from "@/components/ui/email-text";
 import { lodgeTitle } from "@/lib/lodgeIdentity";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
@@ -314,7 +315,7 @@ function Inner() {
             <h2 className="font-serif text-gold text-lg mb-2">Submit to Province</h2>
             <div className="flex min-w-0 flex-col items-stretch gap-2 sm:flex-row sm:flex-wrap sm:items-center">
               <span className="text-xs">Provincial Office email:</span>
-              <span className="break-all">{provinceEmail || "Not set yet"}</span>
+              {provinceEmail ? <EmailText email={provinceEmail} /> : <span>Not set yet</span>}
               <span className="text-xs">(change in Unit Setup &gt; Province)</span>
             </div>
             {!canSubmit && <p className="text-xs text-amber-300 mt-2">Only the Secretary or an administrator can submit the return.</p>}
@@ -356,8 +357,8 @@ function Inner() {
             <AlertDialogTitle>Send the Installation Return to Province?</AlertDialogTitle>
             <AlertDialogDescription asChild>
               <div className="space-y-2 text-sm">
-                <p><strong>To:</strong> {provinceEmail}</p>
-                <p><strong>Reply-to:</strong> {data?.identity.secretaryEmail}</p>
+                <p><strong>To:</strong> <EmailText email={provinceEmail} /></p>
+                <p><strong>Reply-to:</strong> <EmailText email={data?.identity.secretaryEmail} /></p>
                 <p><strong>Subject:</strong> {data ? lodgeTitle(data.identity) : ""} — Installation Return {formatMasonicYear(year)}</p>
                 <p><strong>Document:</strong> {returnFileStem(data?.identity.lodgeNumber, year)}.pdf, filled just now from the live records (sent as a 30-day download link). <a href={pending?.url} target="_blank" rel="noopener noreferrer" className="underline">Open the exact PDF</a></p>
                 <p><strong>Secretary changed (Y/N):</strong> {secChanged || "left blank"}</p>
