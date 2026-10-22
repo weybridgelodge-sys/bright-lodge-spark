@@ -27,9 +27,6 @@ test("duplicate 409: toast wraps at 320px, form keeps step and values", { timeou
   await page.route("**/functions/v1/create-checkout", (r) => { calls.push(1); return r.fulfill({ status: 409, json: { error: MSG, duplicate: true } }); });
   await page.route("**/functions/v1/save-meeting-response", (r) => r.abort());
 
-  page.on("request", (q) => { if (/functions|stripe/.test(q.url())) console.log("R:", q.url().slice(0,150)); });
-  page.on("pageerror", (e) => console.log("E:", e.message));
-  page.on("console", (m) => console.log("C:", m.text().slice(0, 200)));
   await page.goto("/bookings?e2e_as=visitor");
   await expect(page.getByRole("heading", { name: "Booking Form" })).toBeVisible({ timeout: 20000 });
   await page.locator("#evf-title").selectOption("Mr");
@@ -61,7 +58,13 @@ test("duplicate 409: toast wraps at 320px, form keeps step and values", { timeou
   await expect(page.getByRole("heading", { name: "Secure Card Payment" })).toHaveCount(0);
   await expect(page.getByRole("radio", { name: /Debit/ })).toBeChecked();
   await expect(page.getByRole("button", { name: "Continue to Payment" })).toBeVisible();
-  await expectNoAxeViolations(page, "checkout error toast");
+  // Scan the toast itself, then the restored form once it is closed (an open toast overlays the form and skews contrast maths).
+  const { default: AxeBuilder } = await import("@axe-core/playwright");
+  const t = await new AxeBuilder({ page }).include("li[data-state=open]").withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"]).analyze();
+  expect(t.violations.filter((v) => v.impact === "serious" || v.impact === "critical").map((v) => v.id)).toEqual([]);
+  await toast.getByRole("button", { name: "Close notification" }).click();
+  await expect(toast).toHaveCount(0);
+  await expectNoAxeViolations(page, "restored form after 409");
   await page.getByRole("button", { name: "Back" }).click();
   await expect(page.locator("#evf-meeting")).toHaveValue("meeting-and-festive-board");
   await page.getByRole("button", { name: "Back" }).click();
