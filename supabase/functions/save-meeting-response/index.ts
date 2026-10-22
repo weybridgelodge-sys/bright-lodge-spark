@@ -1,7 +1,8 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { z } from "npm:zod@3.23.8";
 import { sendBookingEmails } from "../_shared/send-booking-emails.ts";
-import { DUPLICATE_BOOKING_MESSAGE, findExistingBooking } from "../_shared/duplicate-booking.ts";
+import { duplicateBookingMessage, findExistingBooking } from "../_shared/duplicate-booking.ts";
+import { loadLodgeSettings } from "../_shared/lodgeSettings.ts";
 import { verifyTurnstile } from "../_shared/verify-turnstile.ts";
 import { isHoneypotTripped, seatCheckOutcome } from "../_shared/meetingResponseGuards.ts";
 import { cleanSpaces, trimBookingNames } from "../_shared/greeting.ts";
@@ -133,7 +134,7 @@ Deno.serve(async (req) => {
       });
       return new Response(
         JSON.stringify({
-          error: DUPLICATE_BOOKING_MESSAGE,
+          error: duplicateBookingMessage((await loadLodgeSettings()).bookingContactEmail),
           existingBookingId: existingBooking.id,
         }),
         { status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" } },
