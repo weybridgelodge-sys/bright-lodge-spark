@@ -1,6 +1,7 @@
 // Names on the Summons that come from member records, not typed text.
 // Typed template text is a fallback only when no member is linked / flagged.
 import { formatMemberLineFormal, type MemberRow } from "@/lib/summons";
+import type { ResolvedRep } from "@/lib/representatives";
 
 type Rep = { role: string; name: string; member_id?: string | null };
 type NamedTemplate = {
@@ -24,8 +25,18 @@ export function derivedHonorary(members: MemberRow[], typed: string | null | und
   return flagged.length ? flagged.join("; ") : clean(typed);
 }
 
-export function applyDerivedNames<T extends NamedTemplate>(tpl: T, members: MemberRow[]): T {
+export function applyDerivedNames<T extends NamedTemplate>(tpl: T, members: MemberRow[], reps?: ResolvedRep[] | null): T {
   const byId = Object.fromEntries(members.map((m) => [m.id, m]));
+  if (reps) {
+    const ra = reps.find((r) => r.key === "rep_royal_arch");
+    return {
+      ...tpl,
+      lodge_representatives: reps.filter((r) => r.key !== "rep_royal_arch" && (r.member_id || r.name || r.hadTemplateEntry))
+        .map((r) => ({ role: r.role, name: derivedName(r, byId), member_id: r.member_id })),
+      royal_arch_rep: (ra ? derivedName(ra, byId) : "") || null,
+      honorary_members: derivedHonorary(members, tpl.honorary_members) || null,
+    };
+  }
   return {
     ...tpl,
     lodge_representatives: (tpl.lodge_representatives ?? []).map((r) => ({ ...r, name: derivedName(r, byId) })),

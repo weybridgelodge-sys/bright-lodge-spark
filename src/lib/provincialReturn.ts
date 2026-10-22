@@ -9,6 +9,8 @@ import {
 } from "@/lib/installationReturn";
 import { LADDER_KEYS, resolveRollOffice } from "@/lib/officerRoll";
 import { meetingPatternFor } from "@/lib/meetingPattern";
+import { resolveRepresentatives, repForWord } from "@/lib/representatives";
+import { POSITION_SELECT } from "@/lib/officerPositions";
 export { PM_NOTE, PROVINCE_TITLE, PROVINCE_SUBTITLE, ukLongDate } from "../../supabase/functions/_shared/provincialReturnDoc";
 
 export { LADDER_KEYS };
@@ -140,7 +142,7 @@ export function formatAddress(p: { address_line1?: string | null; address_line2?
 export async function loadProvincialData(year: number, opts: { canAppend: boolean }): Promise<ProvincialData> {
   const issues: string[] = [];
   const [apptRes, statusRes, eventRes, tplRes, profRes] = await Promise.all([
-    supabase.from("officer_appointments").select("position_key,member_id,lodge_year,is_projection,override_reason"),
+    supabase.from("officer_appointments").select("position_key,member_id,lodge_year,is_projection,override_reason,display_name"),
     supabase.from("member_progression_status").select("member_id,readiness,seniority_initiation_date,seniority_tiebreaker"),
     supabase.from("lodge_events").select("title,event_date").ilike("title", "%installation%").eq("published", true)
       .gte("event_date", `${year}-09-01`).lt("event_date", `${year + 1}-09-01`).order("event_date"),
@@ -166,12 +168,11 @@ export async function loadProvincialData(year: number, opts: { canAppend: boolea
     const p = office.memberId ? byId[office.memberId] : null;
     return { label, key, office, firstNames: firstNames(p), surname: surnameUpper(p), decorations: p?.post_nominals?.trim() ?? "", provenance: office.provenance };
   };
-  const repList = (tpl.lodge_representatives ?? []) as { role?: string; name?: string; member_id?: string | null }[];
+  const posRes = await supabase.from("officer_positions").select(POSITION_SELECT).eq("category", "representative");
+  const reps = resolveRepresentatives({ year, consumer: "provincial_return", positions: (posRes.data ?? []) as any, appts: appts as any, template: tpl });
   const repRow = (label: string, word: string): ProvRow => {
-    const entry = word === "royal_arch"
-      ? { name: tpl.royal_arch_rep ?? "", member_id: (tpl as any).royal_arch_rep_member_id ?? null }
-      : (repList.find((x) => (x.role ?? "").toLowerCase().includes(word)) ?? { name: "", member_id: null });
-    return buildRepRow(label, entry, byId);
+    const r = repForWord(reps, word);
+    return buildRepRow(label, { name: r?.name ?? "", member_id: r?.member_id ?? null }, byId);
   };
   const rows = PROVINCIAL_ROWS.map(({ label, key }) => officeRow(label, key));
   const lowerRows = LOWER_ROWS.map(({ label, key, rep }) => (rep ? repRow(label, rep) : officeRow(label, key)));

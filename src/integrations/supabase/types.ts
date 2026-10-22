@@ -7552,6 +7552,8 @@ export type Database = {
         Args: { _lodge_year: number }
         Returns: Json
       }
+      get_lodge_identity: { Args: never; Returns: Json }
+      get_meeting_pattern: { Args: never; Returns: Json }
       get_member_offices_held: {
         Args: { _member: string }
         Returns: {
