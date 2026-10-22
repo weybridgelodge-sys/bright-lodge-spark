@@ -730,7 +730,7 @@ const AgendaPanel: React.FC<{
         <Text style={s.sectionHeading}>Candidate Details</Text>
         {summons.candidates.map((c) => (
           <Text key={c.id} style={[s.smallText, { marginBottom: 3 }]}>
-            <Text style={s.bold}>{candidateHeading(c, summons.agenda)}: {c.name}</Text>
+            <Text style={s.bold}>{candidateHeading(c, summons.agenda, summons.candidates.filter((x: any) => x.id !== c.id).map((x: any) => x.id))}: {c.name}</Text>
             {c.dob ? `, D.O.B ${formatDateShort(c.dob)}` : ""}
             {c.occupation ? `, ${c.occupation}` : ""}
             {c.address ? `, of ${c.address}` : ""}

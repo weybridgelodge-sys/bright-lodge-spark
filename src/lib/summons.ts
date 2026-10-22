@@ -2,7 +2,7 @@
 // member-list balancing, overflow priority logic.
 
 export type AgendaKind = "standing" | "variable" | "candidate";
-export type AgendaItem = { id: string; label: string; kind: AgendaKind; children?: AgendaItem[]; action?: "ballot" | "ballot_initiate" | "pass" | "raise" };
+export type AgendaItem = { id: string; label: string; kind: AgendaKind; children?: AgendaItem[]; action?: "ballot" | "ballot_initiate" | "pass" | "raise"; builder_added?: boolean };
 
 // a, b, c ... z, aa, ab ...
 export function subLetter(i: number): string {

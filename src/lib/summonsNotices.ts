@@ -35,7 +35,9 @@ export type AgendaAction = "ballot" | "ballot_initiate" | "pass" | "raise";
 export function agendaAction(item: Pick<AgendaItem, "label"> & { action?: AgendaAction }): AgendaAction | null {
   if (item.action) return item.action;
   const l = item.label ?? "";
-  if (/\binitiat/i.test(l)) return "ballot_initiate";
+  // The verb "Initiate" marks ballot-and-initiate; the noun "initiation" alone
+  // (e.g. "in readiness for initiation on …") does not.
+  if (/\binitiate\b/i.test(l)) return "ballot_initiate";
   if (/^\s*ballot\b/i.test(l)) return "ballot";
   if (/\bpass\b.*second degree/i.test(l)) return "pass";
   if (/\braise\b.*third degree/i.test(l)) return "raise";
@@ -45,17 +47,67 @@ export function agendaAction(item: Pick<AgendaItem, "label"> & { action?: Agenda
 const HEADING: Record<AgendaAction, string> = { ballot: "Ballot", ballot_initiate: "Initiation", pass: "Passing", raise: "Raising" };
 const norm = (s: string) => s.replace(/\s+/g, " ").trim().toLowerCase();
 
-/** Agenda item for a candidate: the linked line (`<id>-a`) first, else a line naming them. */
-export function candidateAgendaItem(c: Candidate, agenda: AgendaItem[]): AgendaItem | null {
-  const linked = agenda.find((a) => a.id === `${c.id}-a`);
-  if (linked) return linked;
-  const name = norm(c.name);
-  if (!name) return null;
-  return agenda.find((a) => norm(a.label).includes(name) && agendaAction(a)) ?? null;
+const TITLE_RE = /^(mr|mrs|ms|dr|rev|bro|w|rw|vw)\.?$/i;
+const tokens = (s: string) => norm(s).replace(/[.,;:()]/g, " ").split(" ").filter((t) => t && !TITLE_RE.test(t));
+const isBallotLine = (a: AgendaItem) => /\bballot\b/i.test(a.label ?? "");
+
+/** True when the line names the candidate: full name (titles ignored) or surname as a whole word. */
+export function namesCandidate(label: string, c: Candidate): boolean {
+  const name = tokens(c.name);
+  if (!name.length) return false;
+  const line = tokens(label);
+  const full = name.join(" ");
+  if (` ${line.join(" ")} `.includes(` ${full} `)) return true;
+  return line.includes(name[name.length - 1]);
 }
 
-export function candidateHeading(c: Candidate, agenda: AgendaItem[]): string {
-  const item = candidateAgendaItem(c, agenda);
+const linkedTo = (a: AgendaItem, ids: string[]) => ids.some((id) => a.id === `${id}-a`);
+
+/** Agenda item for a candidate: the linked line (`<id>-a`) first, else a line naming them (not another candidate's linked line). */
+export function candidateAgendaItem(c: Candidate, agenda: AgendaItem[], otherIds: string[] = []): AgendaItem | null {
+  const linked = agenda.find((a) => a.id === `${c.id}-a`);
+  if (linked) return linked;
+  const named = agenda.filter((a) => !linkedTo(a, otherIds) && namesCandidate(a.label ?? "", c) && agendaAction(a));
+  return named.find((a) => a.action) ?? named.find((a) => norm(a.label).includes(norm(c.name))) ?? named[0] ?? null;
+}
+
+/** The "Ballot only" tick: an explicit ballot action, or the builder's own line already worded as ballot-only. */
+export function isBallotOnlyTicked(c: Candidate, agenda: AgendaItem[], otherIds: string[] = []): boolean {
+  const it = candidateAgendaItem(c, agenda, otherIds);
+  return !!it && (it.action === "ballot" || (it.id === `${c.id}-a` && agendaAction(it) === "ballot"));
+}
+
+/** Where builder ballot lines go: the same slot ready-made lines use, never after the closing items. */
+export function ballotInsertIndex(agenda: AgendaItem[]): number {
+  const find = (re: RegExp) => agenda.findIndex((x) => re.test(x.label ?? ""));
+  for (const re of [/Receive reports/i, /Circulate the Charity Column/i, /^\s*Risings\b/i, /Close the Lodge/i]) {
+    const i = find(re);
+    if (i !== -1) return i;
+  }
+  return agenda.length;
+}
+
+/**
+ * Apply the "Ballot only at this meeting" tick box. Hand-typed lines keep their wording;
+ * only the builder's own added line is ever removed. `label` is the builder's wording.
+ */
+export function applyBallotOnly(c: Candidate, agenda: AgendaItem[], on: boolean, label: (ballotOnly: boolean) => string, otherIds: string[] = []): AgendaItem[] {
+  const id = `${c.id}-a`;
+  const linked = agenda.find((a) => a.id === id);
+  if (linked) {
+    if (!on && linked.builder_added) return agenda.filter((a) => a.id !== id);
+    return agenda.map((a) => a.id === id ? { ...a, action: on ? "ballot" : "ballot_initiate", label: label(on) } : a);
+  }
+  const hand = agenda.find((a) => !linkedTo(a, otherIds) && isBallotLine(a) && namesCandidate(a.label ?? "", c));
+  if (hand) return agenda.map((a) => a.id === hand.id ? { ...a, action: on ? "ballot" : undefined } : a);
+  if (!on) return agenda;
+  const out = [...agenda];
+  out.splice(ballotInsertIndex(agenda), 0, { id, label: label(true), kind: "candidate", action: "ballot", builder_added: true });
+  return out;
+}
+
+export function candidateHeading(c: Candidate, agenda: AgendaItem[], otherIds: string[] = []): string {
+  const item = candidateAgendaItem(c, agenda, otherIds);
   const act = item ? agendaAction(item) : null;
   return act ? HEADING[act] : c.ceremony_type;
 }
