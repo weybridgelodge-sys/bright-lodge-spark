@@ -1160,7 +1160,7 @@ function MeetingDialog({
       } else {
         const { data, error } = await supabase
           .from("festive_board_meetings")
-          .insert(payload)
+          .insert(payload as typeof payload & { event_key?: string } as any) // event_key is derived by the database
           .select("id")
           .single();
         if (error) throw error;
