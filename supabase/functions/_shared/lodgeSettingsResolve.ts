@@ -5,7 +5,8 @@ export const LODGE_FALLBACK = {
   formalSenderName: "Weybridge Lodge No. 6787",
   secretaryEmail: "secretary@weybridgelodge.org.uk",
   membershipCcEmail: "membershipsecretary@weybridgelodge.org.uk",
-  assistantSecretaryEmail: "assistantsecretary@weybridgelodge.org.uk",
+  // No typed fallback: unknown = "" and callers word around it (see bookingContactEmail).
+  assistantSecretaryEmail: "",
   webmasterEmail: "webmaster@weybridgelodge.org.uk",
   communicationsEmail: "communications@weybridgelodge.org.uk",
   lodgePostcode: "GU2 4DR",
@@ -22,7 +23,7 @@ export const LODGE_FALLBACK = {
   installationReturnFile: "Installation-Return-6787-{year}",
 } as const;
 
-export type LodgeSettings = { -readonly [K in keyof typeof LODGE_FALLBACK]: string };
+export type LodgeSettings = { -readonly [K in keyof typeof LODGE_FALLBACK]: string } & { bookingContactEmail: string };
 
 type Row = Record<string, string | null | undefined> | null | undefined;
 /** unit_settings rows keyed by setting key. */
@@ -42,6 +43,8 @@ export function resolveLodgeSettings(row: Row, us?: UnitSettingsMap): LodgeSetti
     webmasterEmail: pick(row?.webmaster_email, f.webmasterEmail),
     communicationsEmail: pick(row?.communications_email, f.communicationsEmail),
     lodgePostcode: pick(row?.lodge_postcode, f.lodgePostcode),
+    // Unit Setup booking_contact_email (null/blank = not set), else the Assistant Secretary's lodge address, else "".
+    bookingContactEmail: pick(u("booking_contact_email", "").email, pick(row?.assistant_secretary_email, "")),
     provinceName: pick(u("province", "").name, f.provinceName),
     facebookUrl: pick(u("web_social", "").facebook_url, f.facebookUrl),
     instagramUrl: pick(u("web_social", "").instagram_url, f.instagramUrl),

@@ -3,7 +3,7 @@ import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { z } from "https://esm.sh/zod@3.23.8";
 import { type StripeEnv, createStripeClient } from "../_shared/stripe.ts";
 import { seatCheckOutcome } from "../_shared/meetingResponseGuards.ts";
-import { DUPLICATE_BOOKING_MESSAGE, findExistingBooking } from "../_shared/duplicate-booking.ts";
+import { duplicateBookingMessage, findExistingBooking } from "../_shared/duplicate-booking.ts";
 import { cleanSpaces, trimBookingNames } from "../_shared/greeting.ts";
 import { holdExpiresAtUnix } from "../_shared/pendingBookingExpiry.ts";
 
@@ -106,7 +106,7 @@ Deno.serve(async (req) => {
       });
       return new Response(
         JSON.stringify({
-          error: DUPLICATE_BOOKING_MESSAGE,
+          error: duplicateBookingMessage((await loadLodgeSettings()).bookingContactEmail),
           existingBookingId: existingBooking.id,
         }),
         { status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" } },
@@ -177,7 +177,7 @@ Deno.serve(async (req) => {
       return new Response(
         JSON.stringify({
           error: duplicate
-            ? "You already have a booking for this event. If you need to change it, please contact the Assistant Secretary."
+            ? duplicateBookingMessage((await loadLodgeSettings()).bookingContactEmail)
             : "Could not create booking record.",
         }),
         {

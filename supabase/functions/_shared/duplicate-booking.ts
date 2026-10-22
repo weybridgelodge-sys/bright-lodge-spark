@@ -17,8 +17,11 @@ export const BLOCKING_STATUSES = [
   "waitlisted_refunded",
 ];
 
-export const DUPLICATE_BOOKING_MESSAGE =
-  "You already have a booking for this event. If you need to change or cancel it, please contact the Assistant Secretary at assistantsecretary@weybridgelodge.org.uk.";
+/** "Already booked" wording; the address comes from loadLodgeSettings().bookingContactEmail, omitted when unknown. */
+export function duplicateBookingMessage(contactEmail?: string | null): string {
+  const e = typeof contactEmail === "string" ? contactEmail.trim() : "";
+  return `You already have a booking for this event. If you need to change or cancel it, please contact the Assistant Secretary${e ? ` at ${e}` : ""}.`;
+}
 
 export interface DuplicateCheckArgs {
   supabase: SupabaseClient;
