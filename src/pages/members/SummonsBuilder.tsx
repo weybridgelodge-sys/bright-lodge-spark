@@ -313,6 +313,7 @@ function TemplateTab() {
         />
       ) : (
         <Input
+          aria-label={label}
           type={type}
           value={(t as any)[k] ?? ""}
           onChange={(e) => setT({ ...t, [k]: e.target.value || null } as any)}
