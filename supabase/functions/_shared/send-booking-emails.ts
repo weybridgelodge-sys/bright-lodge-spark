@@ -234,7 +234,7 @@ export async function sendBookingEmails(bookingId: string, opts: SendOpts) {
           templateName: 'ladies-festival-confirmation',
           recipientEmail: b.contact_email,
           idempotencyKey: `lf-confirm-${b.id}-${opts.stage}`,
-          replyTo: lodge.assistantSecretaryEmail || undefined,
+          replyTo: lodge.bookingContactEmail || undefined,
           templateData: {
             firstName,
             eventLabel: eventLabel || 'Ladies Festival 2026',
@@ -256,7 +256,7 @@ export async function sendBookingEmails(bookingId: string, opts: SendOpts) {
       if (confRes.error) console.error('Ladies Festival confirmation email failed', confRes.error)
     }
 
-    const notifyRecipients = opts.overrideNotifyEmail ? [opts.overrideNotifyEmail] : [lodge.assistantSecretaryEmail, lodge.webmasterEmail].filter(Boolean)
+    const notifyRecipients = opts.overrideNotifyEmail ? [opts.overrideNotifyEmail] : [...new Set([lodge.bookingContactEmail, lodge.webmasterEmail].map((e) => (e || "").trim().toLowerCase()).filter(Boolean))]
     await Promise.all(notifyRecipients.map(async (notifyTo) => {
       const notifRes = await sendTransactionalEmail({
           templateName: 'ladies-festival-notification',
@@ -293,7 +293,7 @@ export async function sendBookingEmails(bookingId: string, opts: SendOpts) {
         templateName: 'booking-confirmation',
         recipientEmail: opts.overrideBookerEmail || b.contact_email,
         idempotencyKey: `booking-confirm-${b.id}-${opts.stage}${opts.overrideBookerEmail ? `-test-${crypto.randomUUID()}` : ''}`,
-        replyTo: lodge.assistantSecretaryEmail || undefined,
+        replyTo: lodge.bookingContactEmail || undefined,
         templateData: {
           firstName,
           eventLabel,
@@ -317,9 +317,9 @@ export async function sendBookingEmails(bookingId: string, opts: SendOpts) {
     if (confRes.error) console.error('Booking confirmation email failed', confRes.error)
   }
 
-  // 2) Assistant Secretary notification
+  // 2) Booking contact notification (Assistant Secretary if appointed, else Secretary)
   if (opts.skipNotify) return
-  const notifyRecipients = opts.overrideNotifyEmail ? [opts.overrideNotifyEmail] : [lodge.assistantSecretaryEmail, lodge.webmasterEmail].filter(Boolean)
+  const notifyRecipients = opts.overrideNotifyEmail ? [opts.overrideNotifyEmail] : [...new Set([lodge.bookingContactEmail, lodge.webmasterEmail].map((e) => (e || "").trim().toLowerCase()).filter(Boolean))]
   await Promise.all(notifyRecipients.map(async (notifyTo) => {
     const notifRes = await sendTransactionalEmail({
         templateName: 'booking-notification',

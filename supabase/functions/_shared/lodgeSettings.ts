@@ -25,9 +25,10 @@ export async function loadLodgeSettings(unitIdIn?: string): Promise<LodgeSetting
       if (!units || units.length !== 1) return resolveLodgeSettings(null);
       unitId = String(units[0].id);
     }
-    const [{ data, error }, us] = await Promise.all([
+    const [{ data, error }, us, asst] = await Promise.all([
       db.from("lodge_contact_settings").select("*").eq("unit_id", unitId).maybeSingle(),
       db.from("unit_settings").select("key,value").eq("unit_id", unitId),
+      db.rpc("current_officer_holder", { _position_key: "assistant_secretary" }),
     ]);
     if (error) { console.error("lodge settings lookup failed, using fallback", error); return resolveLodgeSettings(null); }
     const map: Record<string, Record<string, unknown>> = Object.fromEntries(((us.data ?? []) as { key: string; value: Record<string, unknown> }[]).map((r) => [r.key, r.value]));
@@ -36,7 +37,7 @@ export async function loadLodgeSettings(unitIdIn?: string): Promise<LodgeSetting
       const { data: v } = await db.from("venues").select("name").eq("id", venueId).maybeSingle();
       if (v?.name) map.meeting_place = { ...map.meeting_place, venue_name: v.name };
     }
-    const value = resolveLodgeSettings(data as Record<string, string | null>, map);
+    const value = resolveLodgeSettings(data as Record<string, string | null>, map, { assistantSecretaryHeld: !asst.error && !!asst.data });
     cache = { at: Date.now(), value };
     return value;
   } catch (e) {
