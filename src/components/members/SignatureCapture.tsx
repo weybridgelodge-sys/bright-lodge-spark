@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { fieldCls } from "@/lib/fieldStyle";
 import { readFunctionError } from "@/lib/functionError";
+import { previewToPng, savedLine } from "@/lib/signaturePreview";
 import { blobToBase64, checkInputFile, processToPng, DEFAULT_WHITE_THRESHOLD } from "@/lib/signatureImage";
 
 type Props = { memberId: string; memberName?: string; onBehalf?: boolean };
@@ -17,6 +18,7 @@ const todayIso = () => new Date().toISOString().slice(0, 10);
 /** Upload or draw a signature; stored only through the signature-upload function. Never logs image data. */
 export default function SignatureCapture({ memberId, memberName, onBehalf = false }: Props) {
   const [hasSig, setHasSig] = useState<boolean | null>(null);
+  const [savedAt, setSavedAt] = useState<string | null>(null);
   const [savedUrl, setSavedUrl] = useState<string | null>(null);
   const [mode, setMode] = useState<"draw" | "upload">("draw");
   const [strokes, setStrokes] = useState<Pt[][]>([]);
@@ -33,8 +35,9 @@ export default function SignatureCapture({ memberId, memberName, onBehalf = fals
   const idp = `sig-${memberId.slice(0, 8)}`;
 
   const loadStatus = useCallback(async () => {
-    const { data } = await supabase.from("member_signatures").select("id").eq("member_id", memberId).eq("active", true).maybeSingle();
+    const { data } = await supabase.from("member_signatures").select("id,created_at").eq("member_id", memberId).eq("active", true).maybeSingle();
     setHasSig(!!data);
+    setSavedAt((data as { created_at?: string } | null)?.created_at ?? null);
   }, [memberId]);
   useEffect(() => { loadStatus(); }, [loadStatus]);
   useEffect(() => () => { if (savedUrl) URL.revokeObjectURL(savedUrl); }, [savedUrl]);
@@ -79,6 +82,15 @@ export default function SignatureCapture({ memberId, memberName, onBehalf = fals
   const consentOk = !onBehalf || (note.trim() && cDate && confirmed);
   const consentBody = onBehalf ? { consent_note: note.trim(), consent_date: cDate, consent_confirmed: confirmed } : {};
 
+  const showSaved = async () => {
+    setBusy(true);
+    const { data, error } = await supabase.functions.invoke("signature-preview", { body: { member_id: memberId } });
+    setBusy(false);
+    const png = error ? null : previewToPng(data);
+    if (!png) { toast.error(await readFunctionError(error, null, "The saved signature could not be shown. Please try again.")); return; }
+    setSavedUrl(URL.createObjectURL(png));
+  };
+
   const save = async () => {
     if (!pending || hp) return;
     if (!consentOk) { toast.error("Please record the member's consent first."); return; }
@@ -90,7 +102,8 @@ export default function SignatureCapture({ memberId, memberName, onBehalf = fals
     if (error || !data?.ok) { toast.error(await readFunctionError(error, data, "The signature could not be saved.")); return; }
     toast.success("Signature saved");
     setPending(null); setStrokes([]); setFile(null); setSavedUrl(null);
-    loadStatus();
+    await loadStatus();
+    await showSaved();
   };
 
   const remove = async () => {
@@ -103,18 +116,10 @@ export default function SignatureCapture({ memberId, memberName, onBehalf = fals
     setSavedUrl(null); loadStatus();
   };
 
-  const showSaved = async () => {
-    setBusy(true);
-    const { data, error } = await supabase.functions.invoke("signature-preview", { body: { member_id: memberId } });
-    setBusy(false);
-    if (error || !(data instanceof Blob)) { toast.error(await readFunctionError(error, data, "No signature on file.")); return; }
-    setSavedUrl(URL.createObjectURL(data));
-  };
-
   return (
     <div className="space-y-4 font-sans">
       <p className="text-sm text-primary-foreground/90" aria-live="polite">
-        {hasSig === null ? "Checking…" : hasSig ? `A signature is on file${memberName ? ` for ${memberName}` : ""}.` : `No signature on file${memberName ? ` for ${memberName}` : ""}.`}
+        {hasSig === null ? "Checking…" : hasSig ? savedLine(savedAt, memberName) : `No signature on file${memberName ? ` for ${memberName}` : ""}.`}
       </p>
       {hasSig && (
         <div className="flex flex-wrap gap-2">
