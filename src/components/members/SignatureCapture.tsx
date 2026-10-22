@@ -5,7 +5,7 @@ import { Loader2 } from "lucide-react";
 import { fieldCls } from "@/lib/fieldStyle";
 import { readFunctionError } from "@/lib/functionError";
 import { previewToPng, savedLine } from "@/lib/signaturePreview";
-import { blobToBase64, checkInputFile, processToPng, DEFAULT_WHITE_THRESHOLD } from "@/lib/signatureImage";
+import { blobToBase64, processToPng, readFileOnce, decodeToCanvas, DEFAULT_WHITE_THRESHOLD, SIG_MSG_NO_INK, SIG_MSG_UNDECODABLE } from "@/lib/signatureImage";
 
 type Props = { memberId: string; memberName?: string; onBehalf?: boolean };
 type Pt = { x: number; y: number };
@@ -24,7 +24,8 @@ export default function SignatureCapture({ memberId, memberName, onBehalf = fals
   const [strokes, setStrokes] = useState<Pt[][]>([]);
   const [pending, setPending] = useState<{ blob: Blob; url: string; method: "upload" | "drawn" } | null>(null);
   const [threshold, setThreshold] = useState(DEFAULT_WHITE_THRESHOLD);
-  const [file, setFile] = useState<File | null>(null);
+  const [file, setFile] = useState<HTMLCanvasElement | null>(null); // decoded once, reused for every re-process
+  const [working, setWorking] = useState(false);
   const [note, setNote] = useState("");
   const [cDate, setCDate] = useState(todayIso());
   const [confirmed, setConfirmed] = useState(false);
@@ -69,14 +70,24 @@ export default function SignatureCapture({ memberId, memberName, onBehalf = fals
     setPendingBlob(r.blob, "drawn");
   };
 
-  const processFile = async (f: File, t = threshold) => {
-    const err = checkInputFile(f); if (err) { toast.error(err); return; }
-    const bmp = await createImageBitmap(f).catch(() => null);
-    if (!bmp) { toast.error("That image could not be read."); return; }
-    const r = await processToPng(bmp, bmp.width, bmp.height, t);
-    bmp.close();
-    if (!r) { toast.error("No ink found in that image. Try a darker scan or lower the background setting."); return; }
+  // Re-process the in-memory decoded copy; a failure keeps the previous preview.
+  const reprocess = async (c: HTMLCanvasElement, t: number) => {
+    setWorking(true);
+    const r = await processToPng(c, c.width, c.height, t).catch(() => null);
+    setWorking(false);
+    if (!r) { toast.error(SIG_MSG_NO_INK); return; }
     setPendingBlob(r.blob, "upload");
+  };
+
+  const pickFile = async (f: File) => {
+    setWorking(true);
+    const read = await readFileOnce(f);
+    if (!read.ok) { setWorking(false); toast.error(read.error); return; }
+    const c = await decodeToCanvas(read.blob).catch(() => null);
+    setWorking(false);
+    if (!c) { toast.error(SIG_MSG_UNDECODABLE); return; }
+    setFile(c);
+    await reprocess(c, threshold);
   };
 
   const consentOk = !onBehalf || (note.trim() && cDate && confirmed);
@@ -135,7 +146,7 @@ export default function SignatureCapture({ memberId, memberName, onBehalf = fals
 
       <div role="radiogroup" aria-label="How to add a signature" className="flex flex-wrap gap-2">
         {(["draw", "upload"] as const).map((m) => (
-          <button key={m} type="button" role="radio" aria-checked={mode === m} onClick={() => { setMode(m); setPending(null); }}
+          <button key={m} type="button" role="radio" aria-checked={mode === m} onClick={() => { if (m !== mode) { setMode(m); setPending(null); } }}
             className={`${btn} ${mode === m ? "bg-gold/15" : ""}`}>{m === "draw" ? "Draw" : "Upload image"}</button>
         ))}
       </div>
@@ -156,12 +167,13 @@ export default function SignatureCapture({ memberId, memberName, onBehalf = fals
         <div className="space-y-2">
           <label htmlFor={`${idp}-file`} className={labelCls}>Signature image (PNG or JPEG, up to 2 MB)</label>
           <input id={`${idp}-file`} type="file" accept="image/png,image/jpeg" className={fieldCls}
-            onChange={(e) => { const f = e.target.files?.[0] ?? null; setFile(f); if (f) processFile(f); }} />
+            onChange={(e) => { const f = e.target.files?.[0]; if (f) pickFile(f); }} />
+          {working && <p className="text-xs text-primary-foreground/80" aria-live="polite">Processing image…</p>}
           {file && (
             <div>
               <label htmlFor={`${idp}-thr`} className={labelCls}>Background removal ({threshold})</label>
               <input id={`${idp}-thr`} type="range" min={180} max={250} value={threshold} className="w-full min-h-11 accent-gold"
-                onChange={(e) => setThreshold(Number(e.target.value))} onPointerUp={() => processFile(file, threshold)} onKeyUp={() => processFile(file, threshold)} />
+                onChange={(e) => setThreshold(Number(e.target.value))} onPointerUp={(e) => reprocess(file, Number(e.currentTarget.value))} onKeyUp={(e) => reprocess(file, Number(e.currentTarget.value))} />
             </div>
           )}
         </div>
