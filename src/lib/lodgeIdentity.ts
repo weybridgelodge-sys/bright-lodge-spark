@@ -43,7 +43,7 @@ export async function loadLodgeIdentity(): Promise<LodgeIdentity> {
   return parseLodgeIdentity(data);
 }
 
-/** "Weybridge Lodge No. 6787" built from the record; blank parts are skipped. */
+/** "<name> No. <number>" built from the record; blank parts are skipped. */
 export const lodgeTitle = (id: Pick<LodgeIdentity, "lodgeName" | "lodgeNumber">) =>
   [id.lodgeName, id.lodgeNumber ? `No. ${id.lodgeNumber}` : ""].filter(Boolean).join(" ");
 
