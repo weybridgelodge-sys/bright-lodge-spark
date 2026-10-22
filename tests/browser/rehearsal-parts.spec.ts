@@ -11,6 +11,8 @@ const member = { id: "p1", first_name: "Test", last_name: "Brother-With-A-Long-S
 
 test("rehearsal dialog offers officer parts incl. Tyler and saves it, at 320px", async ({ page }) => {
   let saved: any = null;
+  await page.route("**/rest/v1/installation_rule_settings**", (r) => r.fulfill({ json: [] }));
+  await page.route("**/rest/v1/officer_installation_dates**", (r) => r.fulfill({ json: [] }));
   await page.route("**/rest/v1/officer_positions**", (r) => r.fulfill({ json: positions }));
   await page.route("**/rest/v1/loi_sessions**", (r) =>
     r.request().method() === "POST" ? r.fulfill({ json: { id: "s1" } }) : r.fulfill({ json: [] }));
