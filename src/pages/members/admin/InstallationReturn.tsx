@@ -25,7 +25,7 @@ import { ugleSignedDate } from "@/lib/ugleReturnSignatures";
 
 type SignedResult = { path: string; url: string | null; signed: { secretary: boolean; worshipful_master: boolean } };
 /** Signed path (officer_signatures on): store the filled form, then the server adds the stored signatures and dates. */
-export async function signFilledReturn(year: number, d: ReturnData, bytes: Uint8Array): Promise<SignedResult> {
+async function signFilledReturn(year: number, d: ReturnData, bytes: Uint8Array): Promise<SignedResult> {
   const unsigned = `installation-returns/${year}/${returnFileStem(d.identity.lodgeNumber, year)}-${Date.now()}-unsigned.pdf`;
   const up = await supabase.storage.from(TEMPLATE_BUCKET).upload(unsigned, new Blob([bytes as unknown as BlobPart], { type: "application/pdf" }), { contentType: "application/pdf" });
   if (up.error) throw up.error;
