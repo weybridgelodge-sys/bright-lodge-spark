@@ -58,3 +58,6 @@ project_id = "kntcjlztmcgmagwgheyx"
 
 [functions.event-image]
   verify_jwt = false
+
+[functions.resume-booking-checkout]
+verify_jwt = false

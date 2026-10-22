@@ -6,7 +6,11 @@ export const MEMBER_BOOKINGS_MODULE_KEY = "member_bookings";
 export const DEFAULT_DEADLINE_DAYS = 7;
 
 export type MemberBookingStatus = "not_booked" | "pending" | "booked" | "waitlisted" | "apologies";
-export type RawBooking = { status: string | null; method?: string | null; created_at?: string | null };
+export type RawBooking = {
+  status: string | null; method?: string | null; created_at?: string | null;
+  /** Meeting bookings only: row id, has a Stripe session, agreed total incl. card fee, hold end. */
+  id?: string; card?: boolean; total_pence?: number | null; hold_until?: string | null;
+};
 export type BookableItem = {
   kind: "meeting" | "event"; id: string; title: string; meeting_type?: string | null;
   event_date: string; price_pence: number | null; child_price_pence?: number | null;
@@ -46,8 +50,8 @@ const REGISTER_ATTENDING = new Set(["booked", "attended"]);
 
 /** Strongest status wins: booked > waitlisted > pending > apologies; refunded/failed/cancelled are ignored.
  *  With no booking-derived status, the member's register row(s) decide. */
-export function memberStatus(bookings: RawBooking[], register: string[] = []): MemberBookingStatus {
-  const s = new Set(bookings.map((b) => (b.status ?? "").toLowerCase()));
+export function memberStatus(bookings: RawBooking[], register: string[] = [], now = new Date()): MemberBookingStatus {
+  const s = new Set(liveBookings(bookings, now).map((b) => (b.status ?? "").toLowerCase()));
   if ([...s].some((x) => BOOKED.has(x))) return "booked";
   if (s.has("waitlisted")) return "waitlisted";
   if (s.has("pending")) return "pending";
@@ -71,3 +75,32 @@ export function cardFooter(status: MemberBookingStatus, closed: boolean): CardFo
     default: return closed ? { kind: "message", text: "Booking closed, contact the Secretary." } : { kind: "book" };
   }
 }
+
+/** A pending card booking is a Stripe-session booking still "pending". */
+export const isPendingCard = (b: RawBooking) =>
+  (b.status ?? "").toLowerCase() === "pending" && (b.card === true || (b.method ?? "").toLowerCase() === "card");
+
+/** Pending card bookings whose 60-minute hold has passed are released: they no longer count. */
+export function liveBookings(bookings: RawBooking[], now = new Date()): RawBooking[] {
+  return bookings.filter((b) => !(isPendingCard(b) && b.hold_until && new Date(b.hold_until).getTime() <= now.getTime()));
+}
+
+/** The member's pending card booking that can still be paid (hold not yet expired), if any. */
+export function resumableCardBooking(bookings: RawBooking[], now = new Date()): (RawBooking & { id: string; hold_until: string }) | null {
+  const b = liveBookings(bookings, now).find((x) => isPendingCard(x) && x.id && x.hold_until);
+  return (b as (RawBooking & { id: string; hold_until: string })) ?? null;
+}
+
+export type ItemFooter = CardFooter | { kind: "resume"; bookingId: string; totalPence: number | null; holdUntil: string };
+
+/** Full card footer: a live pending card booking offers "Continue to payment"; everything else as cardFooter. */
+export function itemFooter(item: Pick<BookableItem, "bookings" | "register" | "booking_deadline" | "event_date">, now = new Date()): { status: MemberBookingStatus; footer: ItemFooter } {
+  const status = memberStatus(item.bookings, item.register, now);
+  const resume = status === "pending" ? resumableCardBooking(item.bookings, now) : null;
+  if (resume) return { status, footer: { kind: "resume", bookingId: resume.id, totalPence: resume.total_pence ?? null, holdUntil: resume.hold_until } };
+  return { status, footer: cardFooter(status, isBookingClosed(item, now)) };
+}
+
+/** "Held until HH:MM" in UK time. */
+export const heldUntilLabel = (iso: string) =>
+  `Held until ${new Date(iso).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "Europe/London" })}`;
