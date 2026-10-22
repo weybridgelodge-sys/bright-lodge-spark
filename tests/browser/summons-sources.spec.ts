@@ -20,7 +20,7 @@ async function mock(page: Page) {
   await page.route("**/rest/v1/profiles?**", (r) => r.fulfill({ json: profiles }));
   await page.route("**/rest/v1/meeting_series**", (r) => r.fulfill({ json: [{ schedule, active: true, created_at: "2026-01-01" }] }));
   await page.route("**/rest/v1/lodge_template**", (r) => r.fulfill({ json: { id: "default", regular_meeting_pattern: "Typed manual pattern text", lodge_representatives: [{ role: "Lodge representative to Sports", name: "", member_id: "p2" }], royal_arch_rep: null, honorary_members: null } }));
-  await page.route("**/rest/v1/module_settings**", (r) => r.request().url().includes("meeting_pattern_manual_override") ? r.fulfill({ json: null }) : r.fallback());
+  await page.route("**/rest/v1/unit_settings**", (r) => r.fulfill({ json: null }));
 }
 
 async function open(page: Page, tab: RegExp) {
