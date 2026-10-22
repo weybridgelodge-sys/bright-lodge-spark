@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { loadProvinceReturnEmail } from "@/lib/provinceReturnEmail";
 import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, Download, RefreshCw, AlertTriangle, FileText, Send } from "lucide-react";
 import { formatMasonicYear } from "@/lib/officersProgression";
@@ -39,8 +40,6 @@ const PROV_LABEL: Record<string, { text: string; cls: string }> = {
   none: { text: "Always blank", cls: "bg-navy-light text-primary-foreground/70" },
 };
 
-/** Separate from the UGLE tool's installation_return_province_email — a different recipient. */
-const PGS_EMAIL_SETTING = "provincial_return_province_email";
 const FIRST_YEAR = 2025; // no member records before 2025/26
 const BUCKET = "secretary-returns";
 
@@ -53,7 +52,6 @@ function Inner() {
   const { canManageSummons, isAdmin, isSecretary, isAssistantSecretary, isWorshipfulMaster, isCurrentSecretary } = useAuth();
   const canSubmit = isAdmin || isSecretary || isCurrentSecretary;
   const [pgsEmail, setPgsEmail] = useState("");
-  const [pgsDraft, setPgsDraft] = useState("");
   const [submissions, setSubmissions] = useState<any[]>([]);
   const [pending, setPending] = useState<{ pdfPath: string; docxPath: string; pdfUrl: string; docxUrl: string } | null>(null);
   const [sending, setSending] = useState(false);
@@ -69,9 +67,7 @@ function Inner() {
     setLoading(true);
     try {
       setData(await loadProvincialData(year, { canAppend }));
-      const { data: pe } = await supabase.from("module_settings").select("value").eq("key", PGS_EMAIL_SETTING).maybeSingle();
-      const v = typeof pe?.value === "string" ? pe.value : "";
-      setPgsEmail(v); setPgsDraft(v);
+      setPgsEmail(await loadProvinceReturnEmail("provincial"));
       if (canSubmit) {
         const { data: subs } = await supabase.from("provincial_return_submissions").select("*").eq("lodge_year", year).order("sent_at", { ascending: false });
         setSubmissions(subs ?? []);
@@ -103,18 +99,10 @@ function Inner() {
     finally { setBusy(""); }
   };
 
-  const savePgsEmail = async () => {
-    const v = pgsDraft.trim().toLowerCase();
-    if (v && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) return toast.error("That doesn't look like an email address");
-    const { error } = await supabase.from("module_settings").upsert({ key: PGS_EMAIL_SETTING, value: v as any }, { onConflict: "key" });
-    if (error) return toast.error(error.message);
-    toast.success("Provincial Grand Secretary's address saved");
-    load();
-  };
 
   // Build both files fresh from live records, store them, then show the confirmation.
   const prepareSubmit = async () => {
-    if (!pgsEmail) return toast.error("Set the Provincial Grand Secretary's email address first.");
+    if (!pgsEmail) return toast.error("Set the Provincial Grand Secretary's email address in Unit Setup > Province first.");
     setBusy("pdf");
     try {
       const fresh = await loadProvincialData(year, { canAppend });
@@ -256,12 +244,8 @@ function Inner() {
             <p className="mb-2 break-words"><span className="text-gold">Signature dates:</span> both pre-filled with {data ? signatureDate(data) : "—"} (the Installation date). Signatures stay blank.</p>
             <div className="flex min-w-0 flex-col items-stretch gap-2 sm:flex-row sm:flex-wrap sm:items-center">
               <span className="text-xs">Provincial Grand Secretary's email:</span>
-              {canSubmit ? (
-                <>
-                  <Input className="min-h-[48px] w-full min-w-0 sm:w-72" type="email" value={pgsDraft} onChange={(e) => setPgsDraft(e.target.value)} placeholder="Not set yet" aria-label="Provincial Grand Secretary email address" />
-                  <Button className="min-h-[48px] w-full sm:w-auto" variant="outline" onClick={savePgsEmail} disabled={pgsDraft.trim().toLowerCase() === pgsEmail}>Save</Button>
-                </>
-              ) : <span className="break-all">{pgsEmail || "Not set yet"}</span>}
+              <span className="break-all">{pgsEmail || "Not set yet"}</span>
+              <span className="text-xs">(change in Unit Setup &gt; Province)</span>
             </div>
             {!canSubmit && <p className="text-xs text-amber-300 mt-2">Only the Secretary or an administrator can submit the return.</p>}
             <p className="text-xs text-primary-foreground/80 mt-2">The email carries secure 30-day download links to the Word and PDF files (our email service can't send attachments). The download buttons above still work as before.</p>
