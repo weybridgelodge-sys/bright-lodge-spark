@@ -19,7 +19,11 @@ const GUARDED = [
   "src/pages/members/admin/ProvincialReturn.tsx",
   "supabase/functions/_shared/provincialReturnDoc.ts",
   "supabase/functions/generate-provincial-return/index.ts",
+];
+// Booking form, portal booking pages and Unit Setup: also no bank details or sign-offs.
+const BOOKING_GUARDED = [
   "src/components/bookings/MeetingBookingForm.tsx",
+  "src/pages/Bookings.tsx",
   "src/pages/members/BookMeeting.tsx",
   "src/pages/members/BookMyPlace.tsx",
   "src/pages/members/admin/UnitSetup.tsx",
@@ -31,11 +35,24 @@ const BANNED: [string, RegExp][] = [
   ["consecration date", /1949/],
   ["URL", /https?:\/\/(?!localhost)[a-z0-9.-]+\.[a-z]{2,}/i],
   ["email", /[a-z0-9._%+-]+@[a-z0-9-]+\.[a-z.]{2,}/i],
+  ["UUID", /\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b/i],
+];
+
+const BANK: [string, RegExp][] = [
+  ["lodge number", /\b6787\b/],
   ["bank account number", /\b\d{8}\b/],
   ["sort code", /\b\d{2}-\d{2}-\d{2}\b|\b\d{6}\b/],
   ["sign-off with lodge", /Fraternally,\\nWM [A-Z]/],
-  ["UUID", /\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b/i],
+  ["lodge email", /[a-z0-9._%+-]+@(?!example\.)[a-z0-9-]+\.[a-z.]{2,}/i],
 ];
+describe("booking pages carry no typed lodge, bank or sign-off details", () => {
+  for (const f of BOOKING_GUARDED) {
+    it(f, () => {
+      const src = fs.readFileSync(f, "utf8");
+      for (const [what, re] of BANK) expect(src.match(re)?.[0] ?? null, `${what} in ${f}`).toBeNull();
+    });
+  }
+});
 
 describe("no typed lodge details", () => {
   for (const f of GUARDED) {

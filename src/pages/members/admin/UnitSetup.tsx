@@ -141,7 +141,7 @@ function Inner() {
         <Section title="Bank details for dining and event payments">
           <p role="note" className="rounded-sm border border-gold/40 p-3 text-sm">Changes appear on public booking confirmations immediately.</p>
           {field("account_name", "Account name")}
-          {field("sort_code", "Sort code", { inputMode: "numeric", hint: "6 digits, e.g. 12-34-56 or 123456." })}
+          {field("sort_code", "Sort code", { inputMode: "numeric", hint: "6 digits, with or without dashes." })}
           {field("account_number", "Account number", { inputMode: "numeric", hint: "8 digits." })}
           {field("reference_pattern", "Payment reference pattern", { hint: `Use {surname} for the booker's surname. Example: ${paymentReference(f.reference_pattern, "Smith")}` })}
           {saveBtn("bank", () => save("bank", "bank_details", { account_name: f.account_name.trim(), sort_code: f.sort_code, account_number: f.account_number, reference_pattern: f.reference_pattern.trim() }, () => {
