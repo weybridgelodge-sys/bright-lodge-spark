@@ -7750,6 +7750,10 @@ export type Database = {
         Args: { _year: number }
         Returns: string[]
       }
+      swap_member_signature: {
+        Args: { _actor: string; _row: Json }
+        Returns: string
+      }
       unlink_bank_row: { Args: { p_bank_txn_id: string }; Returns: undefined }
       update_lodge_contact_settings: {
         Args: {
