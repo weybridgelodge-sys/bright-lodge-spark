@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import MembersLayout from "@/components/members/MembersLayout";
 import { useAuth } from "@/hooks/useAuth";
+import { loadProvinceReturnEmail } from "@/lib/provinceReturnEmail";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -14,7 +15,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { formatMasonicYear } from "@/lib/officersProgression";
 import {
   buildFieldSpecs, fillTemplate, returnFileStem, loadReturnData, blockName, lodgeEmailFor, ukDate,
-  membershipEmailOptions, MEMBERSHIP_EMAIL_SETTING, TEMPLATE_BUCKET, TEMPLATE_PATH, PROVINCE_EMAIL_SETTING,
+  membershipEmailOptions, MEMBERSHIP_EMAIL_SETTING, TEMPLATE_BUCKET, TEMPLATE_PATH,
   type YesNo, type Provenance, type ResolvedOffice, type ReturnData, type FillReport,
 } from "@/lib/installationReturn";
 
@@ -36,7 +37,6 @@ function Inner() {
   const canSubmit = isAdmin || isSecretary || isCurrentSecretary;
   const [secChanged, setSecChanged] = useState<YesNo>("");
   const [provinceEmail, setProvinceEmail] = useState("");
-  const [provinceDraft, setProvinceDraft] = useState("");
   const [submissions, setSubmissions] = useState<any[]>([]);
   const [pending, setPending] = useState<{ path: string; url: string; missing: number } | null>(null);
   const [sending, setSending] = useState(false);
@@ -53,9 +53,7 @@ function Inner() {
       setData(await loadReturnData(year));
       const { data: list } = await supabase.storage.from(TEMPLATE_BUCKET).list("templates");
       setHasTemplate(!!list?.some((f) => f.name === "New_IR_Craft.pdf"));
-      const { data: pe } = await supabase.from("module_settings").select("value").eq("key", PROVINCE_EMAIL_SETTING).maybeSingle();
-      const v = typeof pe?.value === "string" ? pe.value : "";
-      setProvinceEmail(v); setProvinceDraft(v);
+      setProvinceEmail(await loadProvinceReturnEmail("installation"));
       const { data: subs } = await supabase.from("installation_return_submissions").select("*").eq("lodge_year", year).order("sent_at", { ascending: false });
       setSubmissions(subs ?? []);
     } catch (e: any) {
@@ -112,18 +110,10 @@ function Inner() {
     }
   };
 
-  const saveProvinceEmail = async () => {
-    const v = provinceDraft.trim().toLowerCase();
-    if (v && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) return toast.error("That doesn't look like an email address");
-    const { error } = await supabase.from("module_settings").upsert({ key: PROVINCE_EMAIL_SETTING, value: v as any }, { onConflict: "key" });
-    if (error) return toast.error(error.message);
-    toast.success("Provincial Office address saved");
-    load();
-  };
 
   // Step 1: build the final PDF fresh, store it, then show the confirmation.
   const prepareSubmit = async () => {
-    if (!provinceEmail) return toast.error("Set the Provincial Office email address first.");
+    if (!provinceEmail) return toast.error("Set the Provincial Office email address in Unit Setup > Province first.");
     setBusy(true);
     try {
       const fresh = await loadReturnData(year);
@@ -286,12 +276,8 @@ function Inner() {
             <h2 className="font-serif text-gold text-lg mb-2">Submit to Province</h2>
             <div className="flex min-w-0 flex-col items-stretch gap-2 sm:flex-row sm:flex-wrap sm:items-center">
               <span className="text-xs">Provincial Office email:</span>
-              {canSubmit ? (
-                <>
-                  <Input className="h-8 w-full min-w-0 sm:w-72" type="email" value={provinceDraft} onChange={(e) => setProvinceDraft(e.target.value)} placeholder="Not set yet" aria-label="Provincial Office email address" />
-                  <Button className="w-full sm:w-auto" size="sm" variant="outline" onClick={saveProvinceEmail} disabled={provinceDraft.trim().toLowerCase() === provinceEmail}>Save</Button>
-                </>
-              ) : <span>{provinceEmail || "Not set yet"}</span>}
+              <span className="break-all">{provinceEmail || "Not set yet"}</span>
+              <span className="text-xs">(change in Unit Setup &gt; Province)</span>
             </div>
             {!canSubmit && <p className="text-xs text-amber-300 mt-2">Only the Secretary or an administrator can submit the return.</p>}
             <p className="text-xs text-primary-foreground/80 mt-2">The email carries a secure 30-day download link to the PDF (our email service can't send attachments). Signature boxes stay blank.</p>

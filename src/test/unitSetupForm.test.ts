@@ -23,6 +23,6 @@ describe("Unit Setup save safety", () => {
     expect(clearedRequired(cur, changedFields(loaded, cur, ["cheque_payee"]), [...REQUIRED_UNIT_FIELDS]).cheque_payee).toBeTruthy();
   });
   it("required fields are cheque payee, account name, sort code and account number", () => {
-    expect([...REQUIRED_UNIT_FIELDS].sort()).toEqual(["account_name", "account_number", "cheque_payee", "sort_code"]);
+    expect([...REQUIRED_UNIT_FIELDS].sort()).toEqual(["account_name", "account_number", "cheque_payee", "installation_return_email", "provincial_return_email", "sort_code"]);
   });
 });

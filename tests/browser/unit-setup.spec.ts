@@ -13,20 +13,20 @@ function seed(): Store {
     meeting_place: { venue_id: "v1" },
     web_social: { facebook_url: "https://facebook.example.invalid/sample", instagram_url: "https://instagram.example.invalid/sample", twitter_url: "https://x.example.invalid/sample" },
     registrations: { ico_number: "ZZ000001" },
-    province: { name: "Province of Example" },
+    province: { name: "Province of Example", provincial_return_email: "pgs@example.invalid", installation_return_email: "office@example.invalid" },
     newsletter: { masthead: "Sample Masthead", footer_note: "Sample Hall, AB1 2CD" },
     calendar_feed: { name: "Sample Calendar" },
     return_files: { provincial: "L1234-Provincial-Return-{year}", installation: "Installation-Return-1234-{year}" },
   };
 }
-async function mock(page: Page, edit: boolean, saved: any[], store: Store = seed(), fail = false) {
+async function mock(page: Page, edit: boolean, saved: any[], store: Store = seed(), fail = false, editProv = edit) {
   await page.route("**/rest/v1/rpc/can_view_unit_setup**", (r) => r.fulfill({ json: true }));
   await page.route("**/rest/v1/rpc/can_edit_unit_setup**", (r) => r.fulfill({ json: edit }));
   await page.route("**/rest/v1/rpc/get_lodge_identity**", (r) => r.fulfill({ json: { unit_id: "u1", lodge_name: "Sample Lodge with an Unusually Long Name", lodge_number: "1234", consecration_date: "1950-01-01", secretary_email: "secretary@example.invalid" } }));
   await page.route("**/rest/v1/unit_settings?**", (r) => r.fulfill({ json: Object.entries(store).map(([key, value]) => ({ key, value })) }));
   await page.route("**/rest/v1/unit_settings_audit**", (r) => r.fulfill({ json: [] }));
   await page.route("**/rest/v1/rpc/get_unit_setup**", (r) => r.fulfill({ json: { contacts: { assistant_secretary_email: "asst@example.invalid", webmaster_email: "web@example.invalid", communications_email: "comms@example.invalid", site_url: "https://example.invalid", sender_name: "Sample Lodge", formal_sender_name: "Sample Lodge No. 1234" },
-    venues: [{ id: "v1", name: "A Very Long Shared Venue Name For Layout Testing", address: "1 Road, Town", display_lines: ["A Very Long Shared Venue Name For Layout Testing,", "1 Road,", "Town AB1 2CD"] }], province_emails: { provincial_return: "prov@example.invalid" } } }));
+    venues: [{ id: "v1", name: "A Very Long Shared Venue Name For Layout Testing", address: "1 Road, Town", display_lines: ["A Very Long Shared Venue Name For Layout Testing,", "1 Road,", "Town AB1 2CD"] }], can_edit_province_emails: editProv } }));
   await page.route("**/rest/v1/rpc/save_unit_setup**", (r) => {
     const body = r.request().postDataJSON(); saved.push(body);
     if (fail) return r.fulfill({ status: 400, json: { message: "Server refused", code: "22023" } });
@@ -47,7 +47,7 @@ test("every field shows its stored value", async ({ page }) => {
     ["Assistant Secretary email", "asst@example.invalid"], ["Webmaster email", "web@example.invalid"], ["Communications email", "comms@example.invalid"],
     ["Email sender name", "Sample Lodge"], ["Formal lodge title", "Sample Lodge No. 1234"], ["Website address", "https://example.invalid"],
     ["Facebook link", "https://facebook.example.invalid/sample"], ["Instagram link", "https://instagram.example.invalid/sample"], ["X (Twitter) link", "https://x.example.invalid/sample"],
-    ["ICO registration number", "ZZ000001"], ["Province name", "Province of Example"], ["Masthead and footer name", "Sample Masthead"], ["Footer address line", "Sample Hall, AB1 2CD"],
+    ["ICO registration number", "ZZ000001"], ["Province name", "Province of Example"], ["Provincial return email (Provincial Grand Secretary)", "pgs@example.invalid"], ["Installation return email (Provincial Office)", "office@example.invalid"], ["Masthead and footer name", "Sample Masthead"], ["Footer address line", "Sample Hall, AB1 2CD"],
     ["Calendar name", "Sample Calendar"], ["Provincial return file name", "L1234-Provincial-Return-{year}"], ["Installation return file name", "Installation-Return-1234-{year}"],
     ["Account name", "Sample Account"], ["Sort code", "11-22-33"], ["Account number", "12345678"], ["Payment reference pattern", "Dining + {surname}"],
     ["Card payment option wording", "Pay online by card"], ["Cheques payable to", "Sample Lodge No 1234"], ["Booking queries email", "bookings@example.invalid"],
@@ -132,4 +132,39 @@ test("Unit Setup read-only for viewers", async ({ page }) => {
   await expect(page.getByRole("button", { name: "Save" })).toHaveCount(0);
   await expect(page.getByLabel("Sort code")).toHaveAttribute("readonly", "");
   await expectNoAxeViolations(page, "unit setup read-only");
+});
+
+test("Province return emails: warning, required, dirty-only save; Treasurer read-only", async ({ page }) => {
+  const saved: any[] = [];
+  await mock(page, true, saved);
+  await open(page);
+  const prov = page.getByRole("region", { name: "Province" });
+  await expect(prov.getByText("Signed returns are emailed to these addresses. Check them carefully.")).toBeVisible();
+  const pgs = page.getByLabel("Provincial return email (Provincial Grand Secretary)", { exact: true });
+  await pgs.fill("");
+  await prov.getByRole("button", { name: "Save" }).click();
+  await expect(prov.getByText(/required/).first()).toBeVisible();
+  await pgs.fill("not-an-email");
+  await prov.getByRole("button", { name: "Save" }).click();
+  expect(saved).toHaveLength(0);
+  await expectNoAxeViolations(page, "province errors");
+  await pgs.fill("new-pgs@example.invalid");
+  await prov.getByRole("button", { name: "Save" }).click();
+  await expect(prov.getByText(/Saved at/)).toBeVisible();
+  expect(saved[0]).toEqual({ _key: "province", _value: { provincial_return_email: "new-pgs@example.invalid", installation_return_email: "office@example.invalid" } });
+  expect(await overflow(page)).toBeLessThanOrEqual(1);
+});
+
+test("Province return emails read-only when user may edit Unit Setup but is not admin/Secretary", async ({ page }) => {
+  const saved: any[] = [];
+  await mock(page, true, saved, seed(), false, false);
+  await open(page);
+  const pgs = page.getByLabel("Provincial return email (Provincial Grand Secretary)", { exact: true });
+  await expect(pgs).toHaveAttribute("readonly", "");
+  await expect(page.getByText("Only the Secretary or an administrator can change this.").first()).toBeVisible();
+  await page.getByLabel("Province name", { exact: true }).fill("Province of Elsewhere");
+  await page.getByRole("region", { name: "Province" }).getByRole("button", { name: "Save" }).click();
+  await expect(page.getByRole("region", { name: "Province" }).getByText(/Saved at/)).toBeVisible();
+  expect(saved[0]).toEqual({ _key: "province", _value: { name: "Province of Elsewhere" } });
+  await expectNoAxeViolations(page, "province read-only emails");
 });

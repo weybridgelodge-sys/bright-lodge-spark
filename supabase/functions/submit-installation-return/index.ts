@@ -1,5 +1,5 @@
 // submit-installation-return — emails the generated UGLE Installation Return to the
-// Provincial Office (address from module_settings, never from the browser) and logs
+// Provincial Office (address from Unit Setup > Province, never from the browser) and logs
 // who sent it, when and to whom. Restricted to admin / Secretary.
 // Attachments aren't supported by the email service, so the PDF goes as a signed link.
 import { createClient } from "npm:@supabase/supabase-js@2";
@@ -8,8 +8,8 @@ import { z } from "npm:zod@3";
 import { sendTransactionalEmail } from "../_shared/send-email.ts";
 import { loadLodgeSettings, returnFileName } from "../_shared/lodgeSettings.ts";
 import { fileReturnDocument, resolveReturnCc } from "../_shared/returnFiling.ts";
+import { loadProvinceReturnEmail } from "../_shared/provinceReturnEmail.ts";
 
-const SETTING = "installation_return_province_email";
 const LINK_DAYS = 30;
 const json = (b: unknown, status = 200) =>
   new Response(JSON.stringify(b), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
@@ -45,9 +45,9 @@ Deno.serve(async (req) => {
     const b = parsed.data;
     if (!b.storage_path.startsWith(`installation-returns/${b.lodge_year}/`)) return json({ error: "File does not match the year." }, 400);
 
-    const { data: setting } = await admin.from("module_settings").select("value").eq("key", SETTING).maybeSingle();
-    const configured = typeof setting?.value === "string" ? setting.value.trim().toLowerCase() : "";
-    if (!configured) return json({ error: "The Provincial Office email address hasn't been set yet." }, 400);
+    // Destination comes only from Unit Setup > Province; missing = refuse (never a fallback).
+    const configured = await loadProvinceReturnEmail(admin, user.id, "installation");
+    if (!configured) return json({ error: "The Provincial Office email address is not set in Unit Setup > Province. Nothing was sent." }, 400);
     if (configured !== b.recipient_email.trim().toLowerCase()) {
       return json({ error: "The Provincial Office address changed since you opened the confirmation. Please review and try again." }, 409);
     }

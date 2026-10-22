@@ -21,4 +21,4 @@ export function patchFor<F extends Record<string, string>>(current: F, changed: 
   return out;
 }
 
-export const REQUIRED_UNIT_FIELDS = ["account_name", "sort_code", "account_number", "cheque_payee"] as const;
+export const REQUIRED_UNIT_FIELDS = ["account_name", "sort_code", "account_number", "cheque_payee", "provincial_return_email", "installation_return_email"] as const;

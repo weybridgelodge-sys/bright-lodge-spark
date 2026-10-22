@@ -1,5 +1,5 @@
 // submit-provincial-return — emails the generated Provincial (Surrey) Installation Return to the
-// Provincial Grand Secretary (address from module_settings key provincial_return_province_email,
+// Provincial Grand Secretary (address from Unit Setup > Province,
 // never from the browser) and logs who sent it, when and to whom. Admin / Secretary only.
 // The email service can't attach files, so the Word and PDF go as signed 30-day links.
 import { createClient } from "npm:@supabase/supabase-js@2";
@@ -8,8 +8,8 @@ import { z } from "npm:zod@3";
 import { sendTransactionalEmail } from "../_shared/send-email.ts";
 import { loadLodgeSettings, returnFileName } from "../_shared/lodgeSettings.ts";
 import { fileReturnDocument, resolveReturnCc } from "../_shared/returnFiling.ts";
+import { loadProvinceReturnEmail } from "../_shared/provinceReturnEmail.ts";
 
-const SETTING = "provincial_return_province_email";
 const LINK_DAYS = 30;
 const json = (b: unknown, status = 200) =>
   new Response(JSON.stringify(b), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
@@ -46,9 +46,9 @@ Deno.serve(async (req) => {
     const prefix = `provincial-returns/${b.lodge_year}/`;
     if (!b.pdf_path.startsWith(prefix) || !b.docx_path.startsWith(prefix)) return json({ error: "Files do not match the year." }, 400);
 
-    const { data: setting } = await admin.from("module_settings").select("value").eq("key", SETTING).maybeSingle();
-    const configured = typeof setting?.value === "string" ? setting.value.trim().toLowerCase() : "";
-    if (!configured) return json({ error: "The Provincial Grand Secretary's email address hasn't been set yet." }, 400);
+    // Destination comes only from Unit Setup > Province; missing = refuse (never a fallback).
+    const configured = await loadProvinceReturnEmail(admin, user.id, "provincial");
+    if (!configured) return json({ error: "The Provincial Grand Secretary's email address is not set in Unit Setup > Province. Nothing was sent." }, 400);
     if (configured !== b.recipient_email.trim().toLowerCase()) {
       return json({ error: "The Provincial Grand Secretary's address changed since you opened the confirmation. Please review and try again." }, 409);
     }
