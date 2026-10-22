@@ -8,9 +8,9 @@ export function changedFields<F extends Record<string, string>>(loaded: F, curre
 }
 
 /** Errors for required fields the user emptied. */
-export function clearedRequired<F extends Record<string, string>>(current: F, changed: (keyof F)[], required: (keyof F)[], label = "This field is required and cannot be cleared.") {
+export function clearedRequired<F extends Record<string, string>>(current: F, changed: (keyof F)[], required: readonly string[], label = "This field is required and cannot be cleared.") {
   const e: Partial<Record<keyof F, string>> = {};
-  for (const k of changed) if (required.includes(k) && !(current[k] ?? "").trim()) e[k] = label;
+  for (const k of changed) if (required.includes(k as string) && !(current[k] ?? "").trim()) e[k] = label;
   return e;
 }
 
