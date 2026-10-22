@@ -132,7 +132,7 @@ function Inner() {
       if (error || !blob) throw new Error("UGLE template not found — upload New_IR_Craft.pdf first.");
       const { bytes, report } = await fillTemplate(await blob.arrayBuffer(), buildFieldSpecs(fresh, { secretaryChanged: secChanged }));
       setReport(report);
-      const path = `installation-returns/${year}/${returnFileStem(data?.identity.lodgeNumber, year)}-${Date.now()}.pdf`;
+      const path = `installation-returns/${year}/${returnFileStem(fresh.identity.lodgeNumber, year)}-${Date.now()}.pdf`;
       const pdfBlob = new Blob([bytes as unknown as BlobPart], { type: "application/pdf" });
       const { error: upErr } = await supabase.storage.from(TEMPLATE_BUCKET).upload(path, pdfBlob, { contentType: "application/pdf" });
       if (upErr) throw upErr;
