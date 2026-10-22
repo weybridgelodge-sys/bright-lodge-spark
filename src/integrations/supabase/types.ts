@@ -7711,6 +7711,7 @@ export type Database = {
           id: string
         }[]
       }
+      get_unit_setup: { Args: never; Returns: Json }
       get_upcoming_public_meetings: {
         Args: never
         Returns: {
