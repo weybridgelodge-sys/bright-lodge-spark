@@ -1,7 +1,7 @@
 // Places stored WM / Secretary signatures and their signed dates on the filled UGLE Installation
 // Return (AcroForm). Pure pdf-lib — shared by sign-installation-return and unit tests.
 // Keep free of app imports: bare "pdf-lib" resolves via Vite/vitest in the browser and via deno.json on the server.
-import { PDFDocument, PDFDict, PDFName, PDFTextField, TextAlignment, type PDFPage } from "pdf-lib";
+import { PDFDocument, PDFDict, PDFTextField, TextAlignment, type PDFPage } from "pdf-lib";
 
 export type StampImage = { png: Uint8Array; width: number; height: number };
 export const UGLE_SIGNATURE_FIELDS = {
@@ -62,7 +62,6 @@ export async function stampUgleSignatures(
     } catch { missingFields.push(names.date); }
     placed.push(office);
   }
-  void PDFName; // keep import list stable for Deno type-check
   return { bytes: await pdf.save(), placed, missingFields };
 }
 

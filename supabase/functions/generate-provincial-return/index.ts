@@ -7,8 +7,9 @@
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { z } from "npm:zod@3";
 import { json, signatureContext } from "../_shared/signatureAuth.ts";
-import { SIGNATURE_BUCKET, resolvePlacements, validInstallDate } from "../_shared/signatures.ts";
-import { buildDocx, buildPdf, type DocSignatures, type ProvincialData, type SigImage } from "../_shared/provincialReturnDoc.ts";
+import { validInstallDate } from "../_shared/signatures.ts";
+import { loadReturnSigners, resolveReturnHolders } from "../_shared/returnSigners.ts";
+import { buildDocx, buildPdf, type DocSignatures, type ProvincialData } from "../_shared/provincialReturnDoc.ts";
 
 const OUT_BUCKET = "secretary-returns";
 const LINK_SECONDS = 600;
@@ -50,33 +51,13 @@ Deno.serve(async (req) => {
     if (!validInstallDate(year, installDate)) return json({ error: "Installation date is outside that year." }, 400);
 
     // Resolve the signers on the server, using the same effective-date rule as current_officer_holder().
-    const [w, s] = await Promise.all([
-      admin.rpc("current_officer_holder", { _position_key: "worshipful_master", _at: installDate }),
-      admin.rpc("current_officer_holder", { _position_key: "secretary", _at: installDate }),
-    ]);
-    const holders = { worshipful_master: (w.data as string | null) ?? null, secretary: (s.data as string | null) ?? null };
+    const holders = await resolveReturnHolders(admin, installDate);
     const shown = (key: string) => (data.rows.find((r) => r.key === key)?.office?.memberId as string | null | undefined) ?? null;
     if (shown("worshipful_master") !== holders.worshipful_master || shown("secretary") !== holders.secretary) {
       return json({ error: "The WM or Secretary on the page no longer matches the officer records. Please refresh and try again." }, 409);
     }
-
-    const ids = [...new Set([holders.secretary, holders.worshipful_master].filter(Boolean))] as string[];
-    const { data: sigRows } = ids.length
-      ? await admin.from("member_signatures").select("id,member_id,storage_path,width,height").in("member_id", ids).eq("active", true)
-      : { data: [] as { id: string; member_id: string; storage_path: string; width: number; height: number }[] };
-    const byMember = Object.fromEntries((sigRows ?? []).map((r) => [r.member_id, r]));
-    const placements = resolvePlacements(holders, byMember);
-
-    const images: Record<string, SigImage> = {};
-    for (const p of placements) {
-      if (images[p.signature_id]) continue;
-      const r = byMember[p.member_id];
-      const dl = await admin.storage.from(SIGNATURE_BUCKET).download(r.storage_path);
-      if (dl.error || !dl.data) { console.error("signature file missing", { signature: r.id }); continue; }
-      images[p.signature_id] = { png: new Uint8Array(await dl.data.arrayBuffer()), width: r.width, height: r.height };
-    }
-    const pick = (office: string) => { const p = placements.find((x) => x.office_key === office); return p ? images[p.signature_id] ?? null : null; };
-    const sigs: DocSignatures = { sec: pick("secretary"), wm: pick("worshipful_master") };
+    const { sigs: loaded, usable } = await loadReturnSigners(admin, holders);
+    const sigs: DocSignatures = loaded;
 
     const doc = data as unknown as ProvincialData;
     const [docxBlob, pdfBytes] = await Promise.all([buildDocx(doc, sigs), buildPdf(doc, sigs)]);
@@ -93,7 +74,6 @@ Deno.serve(async (req) => {
     }
 
     const unitId = ctx.unitId;
-    const usable = placements.filter((p) => images[p.signature_id]);
     if (usable.length && unitId) {
       await admin.from("signature_usage_audit").insert(usable.map((p) => ({
         unit_id: unitId, form_key: "provincial_return", lodge_year: year, office_key: p.office_key,
