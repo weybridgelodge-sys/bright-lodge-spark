@@ -17,7 +17,12 @@ export function ukLongDate(iso: string | null) {
 
 /** Structural subset of the browser's ProvincialData that the document needs. */
 export type ProvRow = { label: string; key: string | null; firstNames: string; surname: string; decorations: string; office?: { memberId?: string | null } | null };
+/** Lodge as printed on the form: name without "Lodge", upper case; number as "L<number>". Blank when unset. */
+export const formLodge = (d: { lodgeName?: string | null }) => (d.lodgeName ?? "").replace(/\s+lodge$/i, "").trim().toUpperCase();
+export const formNumber = (d: { lodgeNumber?: string | null }) => ((d.lodgeNumber ?? "").trim() ? `L${(d.lodgeNumber ?? "").trim()}` : "");
 export type ProvincialData = {
+  lodgeName?: string;
+  lodgeNumber?: string;
   year: number; consecrated: string; scheduledDate: string; actualDate: string | null; venue: string; meetingPattern: string;
   rows: ProvRow[]; lowerRows: ProvRow[]; pastMasters: { years: number[]; name: string }[];
   secretary: { name: string; address: string; mobile: string; personalEmail: string; lodgeEmail: string; visible?: boolean };
@@ -161,7 +166,7 @@ function topTable(d: ProvincialData) {
     columnWidths: widths,
     rows: [
       row(["CONSECRATED", "LODGE", "NUMBER"], [widths[0], widths[1] + widths[2], widths[3]], { bold: true, center: true, height: 300 }),
-      row([ukLongDate(d.consecrated), "WEYBRIDGE", "L6787"], [widths[0], widths[1] + widths[2], widths[3]], { center: true, height: 300 }),
+      row([ukLongDate(d.consecrated), formLodge(d), formNumber(d)], [widths[0], widths[1] + widths[2], widths[3]], { center: true, height: 300 }),
       row(["VENUE", "DAYS OF MEETINGS"], [widths[0], widths[1] + widths[2] + widths[3]], { bold: true, center: true, height: 300 }),
       row([d.venue, d.meetingPattern], [widths[0], widths[1] + widths[2] + widths[3]], { center: true, height: 820 }),
       row(["Scheduled\nInstallation date", ukLongDate(d.scheduledDate), "Actual Installation\ndate (if different from scheduled)", ukLongDate(d.actualDate)], widths, { center: true, height: 650 }),
@@ -271,7 +276,7 @@ export async function buildDocx(d: ProvincialData, sigs?: DocSignatures): Promis
         ...formHeader(),
         new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "PLEASE CHECK AND AMEND THE LISTS OF SUBSCRIBING PAST MASTERS OF THE LODGE", bold: true, italics: true, underline: {}, font: "Times New Roman", size: 17 })] }),
         new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 100 }, children: [new TextRun({ text: "AND OTHER PAST MASTERS IN THE LODGE.", bold: true, italics: true, underline: {}, font: "Times New Roman", size: 17 })] }),
-        new Paragraph({ spacing: { after: 80 }, children: [new TextRun({ text: "Lodge No. L6787", bold: true, font: "Times New Roman", size: 17 })] }),
+        new Paragraph({ spacing: { after: 80 }, children: [new TextRun({ text: `Lodge No. ${formNumber(d)}`, bold: true, font: "Times New Roman", size: 17 })] }),
         pastMastersTable(c.pastMasters),
         new Paragraph({ spacing: { before: 150 }, children: [new TextRun({ text: `NOTES     ${PM_NOTE}`, font: "Times New Roman", size: 17 })] }),
       ],
@@ -342,7 +347,7 @@ export async function buildPdf(d: ProvincialData, sigs?: DocSignatures): Promise
   addPage(); header();
   const topRows = [
     ["CONSECRATED", "LODGE", "NUMBER"],
-    [ukLongDate(d.consecrated), "WEYBRIDGE", "L6787"],
+    [ukLongDate(d.consecrated), formLodge(d), formNumber(d)],
     ["VENUE", "DAYS OF MEETINGS", ""],
     [d.venue, d.meetingPattern, ""],
     ["Scheduled Installation date", ukLongDate(d.scheduledDate), `Actual Installation date (if different): ${ukLongDate(d.actualDate)}`],
@@ -388,7 +393,7 @@ export async function buildPdf(d: ProvincialData, sigs?: DocSignatures): Promise
   addPage(); header();
   centerText("PLEASE CHECK AND AMEND THE LISTS OF SUBSCRIBING PAST MASTERS OF THE LODGE", y, timesItalic, 8.5); y -= 12;
   centerText("AND OTHER PAST MASTERS IN THE LODGE.", y, timesItalic, 8.5); y -= 22;
-  drawText("Lodge No. L6787", M, y, timesBold, 9); y -= 15;
+  drawText(`Lodge No. ${formNumber(d)}`, M, y, timesBold, 9); y -= 15;
   const half = full / 2;
   page.drawRectangle({ x: M, y: y - 22, width: half, height: 22, borderColor: line, borderWidth: 0.55 });
   page.drawRectangle({ x: M + half, y: y - 22, width: half, height: 22, borderColor: line, borderWidth: 0.55 });
