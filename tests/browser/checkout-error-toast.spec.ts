@@ -21,7 +21,7 @@ test("duplicate 409: toast wraps at 320px, form keeps step and values", { timeou
   await page.route("**/rest/v1/module_settings**", (r) => r.fulfill({ json: [] }));
   // Fake Stripe module (no payments token in e2e builds): its embedded checkout just calls fetchClientSecret, like the real one.
   await page.route(/\/src\/lib\/stripe\.ts/, (r) => r.fulfill({ contentType: "application/javascript", body:
-    "const f=()=>{};const fake={elements:f,createToken:f,createPaymentMethod:f,confirmCardPayment:f,registerAppInfo:f,_registerWrapper:f,initEmbeddedCheckout:async(o)=>{await o.fetchClientSecret();return {mount(){},unmount(){},destroy(){}};}};" +
+    "const f=()=>{};const fake={elements:f,createToken:f,createPaymentMethod:f,confirmCardPayment:f,registerAppInfo:f,_registerWrapper:f,createEmbeddedCheckoutPage:async(o)=>{await o.fetchClientSecret();return {mount(){},unmount(){},destroy(){}};}};" +
     "export const getStripe=()=>Promise.resolve(fake);export const getStripeEnvironment=()=>'sandbox';export const isPaymentsConfigured=()=>true;" }));
   const calls: unknown[] = [];
   await page.route("**/functions/v1/create-checkout", (r) => { calls.push(1); return r.fulfill({ status: 409, json: { error: MSG, duplicate: true } }); });
