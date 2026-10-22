@@ -27,6 +27,7 @@ test("duplicate 409: toast wraps at 320px, form keeps step and values", { timeou
   await page.route("**/functions/v1/create-checkout", (r) => { calls.push(1); return r.fulfill({ status: 409, json: { error: MSG, duplicate: true } }); });
   await page.route("**/functions/v1/save-meeting-response", (r) => r.abort());
 
+  page.on("console", (m) => console.log("C:", m.text().slice(0, 200)));
   await page.goto("/bookings?e2e_as=visitor");
   await expect(page.getByRole("heading", { name: "Booking Form" })).toBeVisible({ timeout: 20000 });
   await page.locator("#evf-title").selectOption("Mr");
