@@ -54,6 +54,7 @@ import {
   PositionKey,
 } from "@/lib/officersProgression";
 import { resolveOfficeRoll, provenanceLabel } from "@/lib/officerRoll";
+import { lodgeTitle, loadLodgeIdentity } from "@/lib/lodgeIdentity";
 import { applyDerivedNames } from "@/lib/summonsSources";
 import { resolveRepresentatives, type ResolvedRep } from "@/lib/representatives";
 import { POSITION_SELECT } from "@/lib/officerPositions";
@@ -63,6 +64,13 @@ import { chooseMeetingPattern } from "@/lib/meetingDiary";
 /** Template as it prints: member-derived names and the single-source meeting pattern. */
 async function printableTemplate(raw: any, members: MemberRow[]): Promise<LodgeTemplate> {
   const base = normaliseTemplateAssets({ ...EMPTY_TEMPLATE, ...raw, lodge_representatives: raw?.lodge_representatives ?? [] }) as LodgeTemplate;
+  try {
+    // Blank name/number/consecration come from the lodge record, never typed defaults.
+    const id = await loadLodgeIdentity();
+    base.lodge_name = base.lodge_name?.trim() || id.lodgeName || null as any;
+    base.lodge_number = base.lodge_number?.trim() || id.lodgeNumber || null as any;
+    base.consecration_date = base.consecration_date || id.consecrationDate || null;
+  } catch { /* keep template values */ }
   let pattern = base.regular_meeting_pattern;
   try { pattern = chooseMeetingPattern({ ...(await loadMeetingPatternSources()), manualText: base.regular_meeting_pattern }).text || null; } catch { /* keep typed text */ }
   let reps: ResolvedRep[] | null = null;
@@ -122,8 +130,8 @@ function MemberLink({ value, onChange, members, label }: { value?: string | null
 }
 
 const EMPTY_TEMPLATE: LodgeTemplate = {
-  lodge_name: "Weybridge Lodge",
-  lodge_number: "6787",
+  lodge_name: "",
+  lodge_number: "",
   province: "Surrey",
   consecration_date: null,
   logo_url: DEFAULT_LOGO_URL,
@@ -1376,7 +1384,7 @@ function VisitorEmailDialog(props: {
     const startIso = startDate.toISOString();
     const endIso = new Date(startDate.getTime() + 3 * 60 * 60 * 1000).toISOString();
     const venue = template.venue_address || "Masonic Centre, Guildford";
-    const title = `Weybridge Lodge No. 6787 — ${summons.meeting_type || "Meeting"} — ${meetingDateLabel}`;
+    const title = `${lodgeTitle({ lodgeName: template.lodge_name ?? "", lodgeNumber: template.lodge_number ?? "" }) || "Lodge"} — ${summons.meeting_type || "Meeting"} — ${meetingDateLabel}`;
     const ics = generateICS({
       title, location: venue, startTime: startIso, endTime: endIso,
       description: "Summons for the meeting is attached.",
