@@ -2,13 +2,16 @@ import { expect, test, type Page } from "@playwright/test";
 import { expectNoAxeViolations } from "./helpers/axe";
 
 // Synthetic scribble only — never a real signature.
+// 1x1 synthetic PNG (not a signature).
+const TINY_PNG = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
 const overflow = (page: Page) => page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
 
 async function mock(page: Page, on: boolean, hasSig = false) {
   await page.route("**/rest/v1/module_settings**", (r) =>
     r.request().url().includes("officer_signatures") ? r.fulfill({ json: on ? { value: true } : null }) : r.fallback());
-  await page.route("**/rest/v1/member_signatures**", (r) => r.fulfill({ json: hasSig ? { id: "s1" } : null }));
+  await page.route("**/rest/v1/member_signatures**", (r) => r.fulfill({ json: hasSig ? { id: "s1", created_at: "2026-10-22T06:14:59Z" } : null }));
   await page.route("**/functions/v1/signature-upload", (r) => r.fulfill({ json: { ok: true, signature: { id: "s2", width: 300, height: 90 } } }));
+  await page.route("**/functions/v1/signature-preview", (r) => r.fulfill({ status: 200, contentType: "application/octet-stream", body: Buffer.from(TINY_PNG, "base64") }));
 }
 
 async function scribble(page: Page) {
@@ -57,7 +60,7 @@ test("Profile: draw pad, preview and save at 320px", async ({ page }) => {
 test("Profile: upload mode at 320px", async ({ page }) => {
   await mock(page, true, true);
   await page.goto("/members/profile");
-  await expect(page.getByText("A signature is on file.")).toBeVisible({ timeout: 15000 });
+  await expect(page.getByText("Signature on file, saved 22 Oct 2026.")).toBeVisible({ timeout: 15000 });
   await page.getByRole("radio", { name: "Upload image" }).click();
   await expect(page.getByLabel(/Signature image/)).toBeVisible();
   await check44(page, ["Draw", "Upload image", "Show saved signature", "Remove signature", "Replace signature"]);
@@ -88,4 +91,32 @@ test("Edit Member: on-behalf signature dialog needs consent, at 320px", async ({
   expect(await overflow(page)).toBeLessThanOrEqual(0);
   await page.screenshot({ path: "/tmp/browser/signature-dialog-320.png" });
   await expectNoAxeViolations(page, "edit member signature dialog");
+});
+
+test("Profile: save then the saved signature shows straight away", async ({ page }) => {
+  let saved = false;
+  await mock(page, true);
+  await page.route("**/rest/v1/member_signatures**", (r) => r.fulfill({ json: saved ? { id: "s2", created_at: "2026-10-22T06:14:59Z" } : null }));
+  await page.route("**/functions/v1/signature-upload", (r) => { saved = true; return r.fulfill({ json: { ok: true, signature: { id: "s2", width: 300, height: 90 } } }); });
+  await page.goto("/members/profile");
+  await expect(page.getByRole("heading", { name: "My signature" })).toBeVisible({ timeout: 15000 });
+  await page.getByRole("heading", { name: "My signature" }).scrollIntoViewIfNeeded();
+  await scribble(page);
+  await page.getByRole("button", { name: "Preview", exact: true }).click();
+  await page.getByRole("button", { name: "Save signature" }).click();
+  await expect(page.getByText("Signature on file, saved 22 Oct 2026.")).toBeVisible();
+  await expect(page.getByAltText("Saved signature")).toBeVisible();
+  await expect(page.getByText("No signature on file.")).toHaveCount(0);
+  expect(await overflow(page)).toBeLessThanOrEqual(0);
+  await expectNoAxeViolations(page, "profile signature saved state");
+});
+
+test("Profile: Show saved signature works after reload", async ({ page }) => {
+  await mock(page, true, true);
+  await page.goto("/members/profile");
+  await page.reload();
+  await expect(page.getByText("Signature on file, saved 22 Oct 2026.")).toBeVisible({ timeout: 15000 });
+  await page.getByRole("button", { name: "Show saved signature" }).click();
+  await expect(page.getByAltText("Saved signature")).toBeVisible();
+  await expect(page.getByText("No signature on file.")).toHaveCount(0);
 });
