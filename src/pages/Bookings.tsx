@@ -15,7 +15,7 @@ import {
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { fetchNextEvent, type EventBundle } from "@/lib/lodgeEvents";
+import { fetchNextEvent, publicEventHeading, type EventBundle } from "@/lib/lodgeEvents";
 import { normaliseName, normaliseTitle } from "@/lib/nameCase";
 import TurnstileWidget from "@/components/TurnstileWidget";
 import { assetUrl } from "@/lib/assetUrl";
