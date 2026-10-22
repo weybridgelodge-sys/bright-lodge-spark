@@ -35,6 +35,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 const rpc = (name: string, args?: object) => (supabase.rpc as any)(name, args);
 
+const CONTACTS: FieldMap<Form> = { assistant_secretary_email: "assistant_secretary_email", webmaster_email: "webmaster_email", communications_email: "communications_email", site_url: "site_url", sender_name: "sender_name", formal_sender_name: "formal_sender_name" };
 type Step = { key: string; fields: (keyof Form)[]; value: (changed: (keyof Form)[]) => object };
 
 async function loadForm() {
@@ -167,6 +168,7 @@ function Inner() {
         <h1 className="font-serif text-2xl md:text-3xl text-gold">Unit Setup</h1>
         <p className="font-sans text-sm text-primary-foreground/80">Lodge details used across the portal and the public booking pages.{ro && " You can view these details; only the Admin, Secretary or Treasurer can change them."}</p>
       </header>
+      {loadError && <p role="alert" className="mb-4 max-w-2xl rounded-sm border border-gold/60 p-3 font-sans text-sm text-primary-foreground">{loadError}</p>}
       <div className="max-w-2xl space-y-6 font-sans text-primary-foreground">
         <Section title="Lodge identity">
           {field("lodge_name", "Lodge name")}
@@ -177,7 +179,7 @@ function Inner() {
             <p className="mt-1 break-words text-sm">{contactEmail || "Not set"}</p>
             <Link to="/members/admin/contact-settings" className="inline-flex min-h-[44px] items-center text-sm text-gold underline underline-offset-4">Change in Enquiry contact settings</Link>
           </div>
-          {saveBtn("identity", () => save("identity", "identity", { lodge_name: f.lodge_name.trim(), lodge_number: f.lodge_number.trim(), consecration_date: f.consecration_date }, () => {
+          {saveBtn("identity", () => save("identity", [{ key: "identity", fields: ["lodge_name", "lodge_number", "consecration_date"], value: whole({ lodge_name: "lodge_name", lodge_number: "lodge_number", consecration_date: "consecration_date" }) }], () => {
             const e: Errs = {};
             if (!f.lodge_name.trim()) e.lodge_name = "Enter the lodge name.";
             if (!/^\d{1,6}$/.test(f.lodge_number.trim())) e.lodge_number = "Enter the lodge number in digits.";
@@ -200,7 +202,7 @@ function Inner() {
             <span className={fieldHintCls}>The venue's address is part of the shared venue record, not this lodge.</span>
           </div>
           {(() => { const v = venues.find((x) => x.id === f.venue_id); const lines = v?.display_lines?.length ? v.display_lines : v?.address ? [v.address] : []; return lines.length ? <p className="whitespace-pre-line text-sm">{lines.join("\n")}</p> : null; })()}
-          {saveBtn("venue", () => save("venue", "meeting_place", { venue_id: f.venue_id }, () => (f.venue_id ? {} : { venue_id: "Choose a venue." })))}
+          {saveBtn("venue", () => save("venue", [{ key: "meeting_place", fields: ["venue_id"], value: only({ venue_id: "venue_id" }) }], () => (f.venue_id ? {} : { venue_id: "Choose a venue." })))}
         </Section>
 
         <Section title="Contacts">
@@ -209,7 +211,7 @@ function Inner() {
           {field("communications_email", "Communications email", { type: "email", inputMode: "email" })}
           {field("sender_name", "Email sender name", { hint: "Shown as the sender of lodge emails." })}
           {field("formal_sender_name", "Formal lodge title", { hint: "Used in invitations and formal emails." })}
-          {saveBtn("contacts", () => save("contacts", "contacts", { assistant_secretary_email: f.assistant_secretary_email.trim(), webmaster_email: f.webmaster_email.trim(), communications_email: f.communications_email.trim(), site_url: f.site_url.trim(), sender_name: f.sender_name.trim(), formal_sender_name: f.formal_sender_name.trim() }, () => {
+          {saveBtn("contacts", () => save("contacts", [{ key: "contacts", fields: ["assistant_secretary_email", "webmaster_email", "communications_email", "sender_name", "formal_sender_name"], value: only(CONTACTS) }], () => {
             const e: Errs = {};
             for (const k of ["assistant_secretary_email", "webmaster_email", "communications_email"] as const) if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(f[k].trim())) e[k] = "Enter a valid email address.";
             if (!f.sender_name.trim()) e.sender_name = "Enter a sender name.";
@@ -224,14 +226,15 @@ function Inner() {
           {field("instagram_url", "Instagram link")}
           {field("twitter_url", "X (Twitter) link")}
           {field("ico_number", "ICO registration number")}
-          {saveBtn("web", async () => {
+          {saveBtn("web", () => save("web", [
+            { key: "contacts", fields: ["site_url"], value: only(CONTACTS) },
+            { key: "web_social", fields: ["facebook_url", "instagram_url", "twitter_url"], value: only({ facebook_url: "facebook_url", instagram_url: "instagram_url", twitter_url: "twitter_url" }) },
+            { key: "registrations", fields: ["ico_number"], value: only({ ico_number: "ico_number" }) },
+          ], () => {
             const e: Errs = {};
             for (const k of ["site_url", "facebook_url", "instagram_url", "twitter_url"] as const) if ((k === "site_url" || f[k].trim()) && !/^https:\/\/[^\s/]+\.[^\s]+$/.test(f[k].trim())) e[k] = "Enter a link starting with https://";
-            if (Object.keys(e).length) { setErrs(e); setStatus((x) => ({ ...x, web: "Please correct the highlighted fields." })); return; }
-            await save("web", "contacts", { assistant_secretary_email: f.assistant_secretary_email.trim(), webmaster_email: f.webmaster_email.trim(), communications_email: f.communications_email.trim(), site_url: f.site_url.trim(), sender_name: f.sender_name.trim(), formal_sender_name: f.formal_sender_name.trim() }, () => ({}));
-            await save("web", "web_social", { facebook_url: f.facebook_url.trim(), instagram_url: f.instagram_url.trim(), twitter_url: f.twitter_url.trim() }, () => ({}));
-            await save("web", "registrations", { ico_number: f.ico_number.trim() }, () => ({}));
-          })}
+            return e;
+          }))}
         </Section>
 
         <Section title="Province">
@@ -242,24 +245,24 @@ function Inner() {
             <p className="break-words">Installation return: {typeof provEmails.installation_return === "string" && provEmails.installation_return ? provEmails.installation_return : "Not set"}</p>
             <span className={fieldHintCls}>These are set on the return screens, where they are checked again before sending.</span>
           </div>
-          {saveBtn("province", () => save("province", "province", { name: f.province_name.trim() }, () => (f.province_name.trim() ? {} : { province_name: "Enter the province name." })))}
+          {saveBtn("province", () => save("province", [{ key: "province", fields: ["province_name"], value: only({ province_name: "name" }) }], () => (f.province_name.trim() ? {} : { province_name: "Enter the province name." })))}
         </Section>
 
         <Section title="Newsletter">
           {field("newsletter_masthead", "Masthead and footer name")}
           {field("newsletter_footer_note", "Footer address line")}
-          {saveBtn("newsletter", () => save("newsletter", "newsletter", { masthead: f.newsletter_masthead.trim(), footer_note: f.newsletter_footer_note.trim() }, () => ({})))}
+          {saveBtn("newsletter", () => save("newsletter", [{ key: "newsletter", fields: ["newsletter_masthead", "newsletter_footer_note"], value: only({ newsletter_masthead: "masthead", newsletter_footer_note: "footer_note" }) }], () => ({})))}
         </Section>
 
         <Section title="Calendar feed">
           {field("calendar_name", "Calendar name", { hint: "Shown in members' calendar apps." })}
-          {saveBtn("calendar", () => save("calendar", "calendar_feed", { name: f.calendar_name.trim() }, () => ({})))}
+          {saveBtn("calendar", () => save("calendar", [{ key: "calendar_feed", fields: ["calendar_name"], value: only({ calendar_name: "name" }) }], () => ({})))}
         </Section>
 
         <Section title="Return file naming">
           {field("provincial_file", "Provincial return file name", { hint: `Use {year}. Example: ${f.provincial_file.replace(/\{year\}/g, "2026")}.pdf` })}
           {field("installation_file", "Installation return file name", { hint: `Use {year}. Example: ${f.installation_file.replace(/\{year\}/g, "2026")}.pdf` })}
-          {saveBtn("files", () => save("files", "return_files", { provincial: f.provincial_file.trim(), installation: f.installation_file.trim() }, () => {
+          {saveBtn("files", () => save("files", [{ key: "return_files", fields: ["provincial_file", "installation_file"], value: only({ provincial_file: "provincial", installation_file: "installation" }) }], () => {
             const e: Errs = {};
             for (const k of ["provincial_file", "installation_file"] as const) {
               if (!/\{year\}/.test(f[k])) e[k] = "Include {year} in the file name.";
@@ -275,7 +278,7 @@ function Inner() {
           {field("sort_code", "Sort code", { inputMode: "numeric", hint: "6 digits, with or without dashes." })}
           {field("account_number", "Account number", { inputMode: "numeric", hint: "8 digits." })}
           {field("reference_pattern", "Payment reference pattern", { hint: `Use {surname} for the booker's surname. Example: ${paymentReference(f.reference_pattern, "Smith")}` })}
-          {saveBtn("bank", () => save("bank", "bank_details", { account_name: f.account_name.trim(), sort_code: f.sort_code, account_number: f.account_number, reference_pattern: f.reference_pattern.trim() }, () => {
+          {saveBtn("bank", () => save("bank", [{ key: "bank_details", fields: ["account_name", "sort_code", "account_number", "reference_pattern"], value: only({ account_name: "account_name", sort_code: "sort_code", account_number: "account_number", reference_pattern: "reference_pattern" }) }], () => {
             const e: Errs = {};
             if (!f.account_name.trim()) e.account_name = "Enter the account name.";
             if (!canonicalSortCode(f.sort_code)) e.sort_code = "Sort code must be 6 digits.";
@@ -288,14 +291,14 @@ function Inner() {
           {field("card_wording", "Card payment option wording", { hint: "Leave blank to use the standard wording." })}
           {field("cheque_payee", "Cheques payable to")}
           {field("booking_contact_email", "Booking queries email", { type: "email", inputMode: "email", hint: "Shown on the public Bookings page. Leave blank to use the Assistant Secretary address." })}
-          {saveBtn("payment", async () => {
-            await save("payment", "payment_wording", { card_wording: f.card_wording.trim(), cheque_payee: f.cheque_payee.trim() }, () => ({}));
-            await save("payment", "booking_contact_email", { email: f.booking_contact_email.trim() }, () => {
-              const e: Errs = {};
-              if (f.booking_contact_email.trim() && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(f.booking_contact_email.trim())) e.booking_contact_email = "Enter a valid email address.";
-              return e;
-            });
-          })}
+          {saveBtn("payment", () => save("payment", [
+            { key: "payment_wording", fields: ["card_wording", "cheque_payee"], value: only({ card_wording: "card_wording", cheque_payee: "cheque_payee" }) },
+            { key: "booking_contact_email", fields: ["booking_contact_email"], value: only({ booking_contact_email: "email" }) },
+          ], () => {
+            const e: Errs = {};
+            if (f.booking_contact_email.trim() && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(f.booking_contact_email.trim())) e.booking_contact_email = "Enter a valid email address.";
+            return e;
+          }))}
         </Section>
 
         <Section title="Sign-off">
@@ -309,7 +312,7 @@ function Inner() {
             <p className={fieldLabelCls}>Preview</p>
             <p className="mt-1 whitespace-pre-line text-sm">{preview}</p>
           </div>
-          {saveBtn("signoff", () => save("signoff", "sign_off", { override: f.sign_off_override.trim() }, () => ({})))}
+          {saveBtn("signoff", () => save("signoff", [{ key: "sign_off", fields: ["sign_off_override"], value: only({ sign_off_override: "override" }) }], () => ({})))}
         </Section>
 
         <Section title="Change history">
