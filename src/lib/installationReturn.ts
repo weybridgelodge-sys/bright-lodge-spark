@@ -2,7 +2,7 @@
 // Every call reads current database state; nothing is cached.
 import { PDFDocument, PDFTextField, PDFCheckBox, PDFRadioGroup, PDFDropdown, PDFName, PDFDict, TextAlignment } from "pdf-lib";
 import { supabase } from "@/integrations/supabase/client";
-import { cachedInstallationConfig, ruleDateFor } from "@/lib/masonicYear";
+import { cachedInstallationConfig, loadInstallationConfig, ruleDateFor } from "@/lib/masonicYear";
 import { identityIssues, installationRuleWording, loadLodgeIdentity, type LodgeIdentity } from "@/lib/lodgeIdentity";
 import { computeProjection, type Appointment, type MemberLite, type PositionKey } from "@/lib/officersProgression";
 
@@ -179,6 +179,7 @@ export async function loadReturnData(year: number): Promise<ReturnData> {
     supabase.from("module_settings").select("value").eq("key", MEMBERSHIP_EMAIL_SETTING).maybeSingle(),
     loadLodgeIdentity(),
   ]);
+  const installCfg = await loadInstallationConfig();
   issues.push(...identityIssues(identity));
   if (apptRes.error) throw apptRes.error;
   const appts = (apptRes.data ?? []) as ApptRow[];
@@ -206,7 +207,7 @@ export async function loadReturnData(year: number): Promise<ReturnData> {
 
   const settingVal = (settingRes.data?.value as string | undefined) ?? null;
   const membershipLodgeEmail = settingVal || membershipEmailOptions(identity.emailDomain)[0] || "";
-  if (!settingVal) issues.push("Membership Officer lodge email has not been chosen yet; using membershipsecretary@ until it is.");
+  if (!settingVal) issues.push("Membership Officer lodge email has not been chosen yet; using the Membership Secretary address until it is.");
 
   for (const o of [wm, sw, jw, ipm, ...officers]) {
     if (o.memberId && !byId[o.memberId]?.email) issues.push(`${o.label}: no personal email on their profile.`);
@@ -223,7 +224,7 @@ export async function loadReturnData(year: number): Promise<ReturnData> {
     wm, sw, jw, ipm, officers,
     qualification: resolveQualification(wm.memberId, year, appts, identity.lodgeNumber),
     identity,
-    ruleWording: installationRuleWording(cachedInstallationConfig().rule as any),
+    ruleWording: installationRuleWording(installCfg.rule as any),
     profiles: byId,
     membershipLodgeEmail,
     issues,
@@ -382,3 +383,7 @@ export async function fillTemplate(templateBytes: ArrayBuffer | Uint8Array, spec
   const bytes = await pdf.save();
   return { bytes, report };
 }
+
+/** "Installation-Return-<number>-<year>"; number omitted when not set. */
+export const returnFileStem = (lodgeNumber: string | null | undefined, year: number) =>
+  ["Installation-Return", lodgeNumber || null, year].filter(Boolean).join("-");
