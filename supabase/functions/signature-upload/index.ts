@@ -42,27 +42,29 @@ Deno.serve(async (req) => {
     const { data: prev } = await ctx.admin.from("member_signatures").select("id,storage_path").eq("member_id", b.member_id).eq("active", true).maybeSingle();
     const id = crypto.randomUUID();
     const path = signaturePath(targetUnit, b.member_id, id);
+    // 1) Upload the new file first; the old row and file are untouched.
     const up = await ctx.admin.storage.from(SIGNATURE_BUCKET).upload(path, bytes, { contentType: "image/png", upsert: false });
     if (up.error) { console.error("signature upload failed", { member: b.member_id }); return json({ error: "The signature could not be saved." }, 500); }
 
-    if (prev) {
-      await ctx.admin.from("member_signatures").update({ active: false, revoked_at: new Date().toISOString(), revoked_by: ctx.userId }).eq("id", prev.id);
-      await ctx.admin.storage.from(SIGNATURE_BUCKET).remove([prev.storage_path]);
-    }
-    const { error: insErr } = await ctx.admin.from("member_signatures").insert({
-      id, unit_id: targetUnit, member_id: b.member_id, storage_path: path, content_type: "image/png",
-      width: check.width, height: check.height, byte_size: bytes.length,
-      source: perm.onBehalf ? "on_behalf" : b.method === "drawn" ? "self_drawn" : "self_upload",
-      consent_note: perm.onBehalf ? b.consent_note!.trim() : null,
-      consent_date: perm.onBehalf ? b.consent_date : null,
-      consent_recorded_by: perm.onBehalf ? ctx.userId : null,
-      created_by: ctx.userId,
+    // 2) Deactivate old + insert new in one transaction (one-active unique index), so there is never a gap.
+    const { error: insErr } = await ctx.admin.rpc("swap_member_signature", {
+      _actor: ctx.userId,
+      _row: {
+        id, unit_id: targetUnit, member_id: b.member_id, storage_path: path,
+        width: check.width, height: check.height, byte_size: bytes.length,
+        source: perm.onBehalf ? "on_behalf" : b.method === "drawn" ? "self_drawn" : "self_upload",
+        consent_note: perm.onBehalf ? b.consent_note!.trim() : null,
+        consent_date: perm.onBehalf ? b.consent_date : null,
+        consent_recorded_by: perm.onBehalf ? ctx.userId : null,
+      },
     });
     if (insErr) {
       await ctx.admin.storage.from(SIGNATURE_BUCKET).remove([path]);
       console.error("signature row failed", { member: b.member_id, code: insErr.code });
       return json({ error: "The signature could not be saved." }, 500);
     }
+    // 3) Only now remove the old file.
+    if (prev) await ctx.admin.storage.from(SIGNATURE_BUCKET).remove([prev.storage_path]);
     await ctx.admin.from("signature_event_audit").insert({
       unit_id: targetUnit, member_id: b.member_id, signature_id: id, action: prev ? "replace" : "capture",
       actor_id: ctx.userId, on_behalf: perm.onBehalf,
