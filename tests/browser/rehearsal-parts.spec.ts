@@ -25,6 +25,7 @@ test("rehearsal dialog offers officer parts incl. Tyler and saves it, at 320px",
   page.on("pageerror", (e) => console.log("PAGEERR", e.message));
   page.on("console", (m) => console.log("CONSOLE", m.text().slice(0, 200)));
   await page.goto("/members/admin/loi");
+  await page.waitForTimeout(20000); console.log("BODY", (await page.locator("body").innerHTML()).slice(0, 1500));
   const add = page.getByRole("button", { name: /New session|Add session|New rehearsal/i }).first();
   if (!(await add.isVisible({ timeout: 30000 }).catch(() => false))) { await page.screenshot({ path: "/tmp/browser/rp.png" }); test.skip(true, "Synthetic identity cannot manage rehearsals"); }
   await add.click();
