@@ -107,7 +107,7 @@ Deno.serve(async (req) => {
       });
       return new Response(
         JSON.stringify({
-          error: ((l) => duplicateBookingMessage(l.bookingContactEmail, l.bookingContactOffice))(await loadLodgeSettings()),
+          error: ((l: { bookingContactEmail: string; bookingContactOffice: string }) => duplicateBookingMessage(l.bookingContactEmail, l.bookingContactOffice))(await loadLodgeSettings()),
           existingBookingId: existingBooking.id,
         }),
         { status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" } },
@@ -178,7 +178,7 @@ Deno.serve(async (req) => {
       return new Response(
         JSON.stringify({
           error: duplicate
-            ? ((l) => duplicateBookingMessage(l.bookingContactEmail, l.bookingContactOffice))(await loadLodgeSettings())
+            ? ((l: { bookingContactEmail: string; bookingContactOffice: string }) => duplicateBookingMessage(l.bookingContactEmail, l.bookingContactOffice))(await loadLodgeSettings())
             : "Could not create booking record.",
         }),
         {

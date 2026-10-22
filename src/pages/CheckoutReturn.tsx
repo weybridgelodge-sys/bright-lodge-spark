@@ -16,8 +16,8 @@ const CheckoutReturn = () => {
   const sessionId = params.get("session_id");
   const [status, setStatus] = useState<Status>("loading");
   const [booking, setBooking] = useState<any>(null);
-  // Unit Setup booking contact, else the Assistant Secretary (get_public_booking_details).
-  const contactEmail = useBookingDetails().contactEmail;
+  // Booking contact + office from get_public_booking_details (rule: _shared/bookingContact.ts).
+  const { contactEmail, contactOffice } = useBookingDetails();
 
   useEffect(() => {
     if (!sessionId) {
@@ -151,7 +151,7 @@ const CheckoutReturn = () => {
                 <AlertCircle className="w-12 h-12 text-destructive mx-auto mb-4" />
                 <h1 className="text-2xl font-serif text-foreground mb-2">Booking not found</h1>
                 <p className="text-muted-foreground mb-6">
-                  We couldn't match this return link to a booking. If you were charged, please contact the Assistant Secretary
+                  We couldn't match this return link to a booking. If you were charged, please contact {contactOffice ? `the ${contactOffice}` : contactEmail ? "us" : "the Secretary"}
                   {contactEmail ? (
                     <>{" at "}<a className="text-gold-dark underline underline-offset-4 break-all" href={`mailto:${contactEmail}`}>{contactEmail}</a></>
                   ) : null}.
