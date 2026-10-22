@@ -23,7 +23,7 @@ test("rehearsal dialog offers officer parts incl. Tyler and saves it, at 320px",
   await page.route("**/rest/v1/profiles?**", (r) => r.fulfill({ json: [member] }));
   await page.goto("/members/admin/loi");
   const add = page.getByRole("button", { name: /New session|Add session|New rehearsal/i }).first();
-  if (!(await add.isVisible({ timeout: 60000 }).catch(() => false))) { test.skip(true, "Synthetic identity cannot manage rehearsals"); }
+  await expect(add).toBeVisible({ timeout: 90000 });
   await add.click();
   const dialog = page.getByRole("dialog");
   await dialog.getByRole("checkbox").first().click();
