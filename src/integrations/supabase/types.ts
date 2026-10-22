@@ -2552,6 +2552,7 @@ export type Database = {
           headcount_override: number | null
           id: string
           is_white_table: boolean
+          lodge_event_id: string | null
           meeting_date: string
           meeting_type: Database["public"]["Enums"]["festive_meeting_type"]
           notes: string | null
@@ -2572,6 +2573,7 @@ export type Database = {
           headcount_override?: number | null
           id?: string
           is_white_table?: boolean
+          lodge_event_id?: string | null
           meeting_date: string
           meeting_type?: Database["public"]["Enums"]["festive_meeting_type"]
           notes?: string | null
@@ -2592,6 +2594,7 @@ export type Database = {
           headcount_override?: number | null
           id?: string
           is_white_table?: boolean
+          lodge_event_id?: string | null
           meeting_date?: string
           meeting_type?: Database["public"]["Enums"]["festive_meeting_type"]
           notes?: string | null
@@ -2602,6 +2605,20 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "festive_board_meetings_lodge_event_id_fkey"
+            columns: ["lodge_event_id"]
+            isOneToOne: false
+            referencedRelation: "lodge_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "festive_board_meetings_lodge_event_id_fkey"
+            columns: ["lodge_event_id"]
+            isOneToOne: false
+            referencedRelation: "public_lodge_meetings"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "festive_board_meetings_series_id_fkey"
             columns: ["series_id"]

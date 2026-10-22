@@ -19,7 +19,7 @@ const Row = z.object({
   office: z.object({ memberId: z.string().uuid().nullable().optional() }).passthrough().nullable().optional(),
 }).passthrough();
 const Data = z.object({
-  year: z.number().int(), consecrated: z.string().max(20), scheduledDate: z.string().max(10), actualDate: z.string().max(10).nullable(),
+  year: z.number().int(), lodgeName: z.string().max(120).optional(), lodgeNumber: z.string().max(20).optional(), consecrated: z.string().max(20), scheduledDate: z.string().max(10), actualDate: z.string().max(10).nullable(),
   venue: z.string().max(500), meetingPattern: z.string().max(500),
   rows: z.array(Row).max(60), lowerRows: z.array(Row).max(30),
   pastMasters: z.array(z.object({ years: z.array(z.number().int()).max(20), name: z.string().max(200) })).max(200),

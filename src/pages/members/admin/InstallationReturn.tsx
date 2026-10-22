@@ -1,3 +1,4 @@
+import { lodgeTitle } from "@/lib/lodgeIdentity";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import MembersLayout from "@/components/members/MembersLayout";
@@ -12,8 +13,8 @@ import { Input } from "@/components/ui/input";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { formatMasonicYear } from "@/lib/officersProgression";
 import {
-  buildFieldSpecs, fillTemplate, loadReturnData, blockName, lodgeEmailFor, ukDate,
-  MEMBERSHIP_EMAIL_OPTIONS, MEMBERSHIP_EMAIL_SETTING, TEMPLATE_BUCKET, TEMPLATE_PATH, PROVINCE_EMAIL_SETTING,
+  buildFieldSpecs, fillTemplate, returnFileStem, loadReturnData, blockName, lodgeEmailFor, ukDate,
+  membershipEmailOptions, MEMBERSHIP_EMAIL_SETTING, TEMPLATE_BUCKET, TEMPLATE_PATH, PROVINCE_EMAIL_SETTING,
   type YesNo, type Provenance, type ResolvedOffice, type ReturnData, type FillReport,
 } from "@/lib/installationReturn";
 
@@ -99,7 +100,7 @@ function Inner() {
       const url = URL.createObjectURL(new Blob([bytes as unknown as BlobPart], { type: "application/pdf" }));
       const a = document.createElement("a");
       a.href = url;
-      a.download = `Installation-Return-6787-${fresh.year}.pdf`;
+      a.download = `${returnFileStem(fresh.identity.lodgeNumber, fresh.year)}.pdf`;
       a.click();
       setTimeout(() => URL.revokeObjectURL(url), 5000);
       if (report.missing.length) toast.warning(`${report.missing.length} field(s) not found in the template — see below.`);
@@ -131,7 +132,7 @@ function Inner() {
       if (error || !blob) throw new Error("UGLE template not found — upload New_IR_Craft.pdf first.");
       const { bytes, report } = await fillTemplate(await blob.arrayBuffer(), buildFieldSpecs(fresh, { secretaryChanged: secChanged }));
       setReport(report);
-      const path = `installation-returns/${year}/Installation-Return-6787-${year}-${Date.now()}.pdf`;
+      const path = `installation-returns/${year}/${returnFileStem(fresh.identity.lodgeNumber, year)}-${Date.now()}.pdf`;
       const pdfBlob = new Blob([bytes as unknown as BlobPart], { type: "application/pdf" });
       const { error: upErr } = await supabase.storage.from(TEMPLATE_BUCKET).upload(path, pdfBlob, { contentType: "application/pdf" });
       if (upErr) throw upErr;
@@ -181,7 +182,7 @@ function Inner() {
         {email && <td className="py-2 pr-3 text-xs">{p?.email ?? "—"}</td>}
         {email && (
           <td className="py-2 pr-3 text-xs">
-            {o.key === "treasurer" ? <span className="text-amber-300">No lodge email field on UGLE's form</span> : lodgeEmailFor(o.key, data!.membershipLodgeEmail)}
+            {o.key === "treasurer" ? <span className="text-amber-300">No lodge email field on UGLE's form</span> : lodgeEmailFor(o.key, data!.membershipLodgeEmail, data!.identity.emailDomain)}
           </td>
         )}
         <td className="py-2">
@@ -233,8 +234,8 @@ function Inner() {
 
           <section className="rounded-sm border border-gold/20 bg-navy-light/30 p-4">
             <h2 className="font-serif text-gold text-lg mb-2">Lodge &amp; dates</h2>
-            <p>Weybridge Lodge No. 6787</p>
-            <p>Installation date prescribed by by-laws (3rd Wednesday in October): <strong>{ukDate(data.prescribedDate)}</strong></p>
+            <p>{lodgeTitle(data.identity) || "Lodge name and number not set"}</p>
+            <p>Installation date prescribed by by-laws{data.ruleWording ? ` (${data.ruleWording})` : ""}: <strong>{ukDate(data.prescribedDate)}</strong></p>
             <p>Actual installation meeting: <strong>{data.installationDate ? ukDate(data.installationDate) : "not found"}</strong>
               {data.installationEventTitle && <span className="text-primary-foreground/80"> — {data.installationEventTitle}</span>}</p>
             <p className="text-primary-foreground/80">{data.installationDate && data.installationDate !== data.prescribedDate ? "Different from the by-laws, so the 'if different' date is filled." : "Same as the by-laws, so the 'if different' date is left blank."}</p>
@@ -263,7 +264,7 @@ function Inner() {
               <span>Membership Officer lodge email:</span>
               <Select value={data.membershipLodgeEmail} onValueChange={setMembershipEmail} disabled={!(isAdmin || isSecretary)}>
                 <SelectTrigger aria-label="Membership Officer lodge email" className="h-8 w-full min-w-0 sm:w-72"><SelectValue /></SelectTrigger>
-                <SelectContent>{MEMBERSHIP_EMAIL_OPTIONS.map((e) => <SelectItem key={e} value={e}>{e}</SelectItem>)}</SelectContent>
+                <SelectContent>{membershipEmailOptions(data.identity.emailDomain).map((e) => <SelectItem key={e} value={e}>{e}</SelectItem>)}</SelectContent>
               </Select>
             </div>
             <p className="text-xs text-primary-foreground/80 mt-2">UGLE's own form has no lodge email box for the Treasurer, so only the personal address can be given.</p>
@@ -329,9 +330,9 @@ function Inner() {
             <AlertDialogDescription asChild>
               <div className="space-y-2 text-sm">
                 <p><strong>To:</strong> {provinceEmail}</p>
-                <p><strong>Reply-to:</strong> secretary@weybridgelodge.org.uk</p>
-                <p><strong>Subject:</strong> Weybridge Lodge No. 6787 — Installation Return {formatMasonicYear(year)}</p>
-                <p><strong>Document:</strong> Installation-Return-6787-{year}.pdf, filled just now from the live records (sent as a 30-day download link). <a href={pending?.url} target="_blank" rel="noopener noreferrer" className="underline">Open the exact PDF</a></p>
+                <p><strong>Reply-to:</strong> {data?.identity.secretaryEmail}</p>
+                <p><strong>Subject:</strong> {data ? lodgeTitle(data.identity) : ""} — Installation Return {formatMasonicYear(year)}</p>
+                <p><strong>Document:</strong> {returnFileStem(data?.identity.lodgeNumber, year)}.pdf, filled just now from the live records (sent as a 30-day download link). <a href={pending?.url} target="_blank" rel="noopener noreferrer" className="underline">Open the exact PDF</a></p>
                 <p><strong>Secretary changed (Y/N):</strong> {secChanged || "left blank"}</p>
                 <p>Signatures are left blank.</p>
                 {data && data.issues.length > 0 && <p className="text-destructive-foreground">{data.issues.length} warning(s) are still showing on the page.</p>}

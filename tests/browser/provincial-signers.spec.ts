@@ -2,6 +2,7 @@ import { expect, test, type Page } from "@playwright/test";
 import { expectNoAxeViolations } from "./helpers/axe";
 
 async function mock(page: Page, on: boolean) {
+  await page.route("**/rest/v1/rpc/get_lodge_identity**", (r) => r.fulfill({ json: { lodge_name: "Testbury Lodge", lodge_number: "1234", secretary_email: "sec@example.org" } }));
   await page.route("**/rest/v1/officer_appointments**", (r) => r.fulfill({ json: [] }));
   await page.route("**/rest/v1/member_progression_status**", (r) => r.fulfill({ json: [] }));
   await page.route("**/rest/v1/lodge_events**", (r) => r.fulfill({ json: [] }));

@@ -2,7 +2,7 @@
 // schedule, with the Summons template text used only as an explicit manual
 // override. The override switch is per unit (unit_settings), never global.
 import { supabase } from "@/integrations/supabase/client";
-import { chooseMeetingPattern, meetingPatternSentence, type ScheduleMonth } from "@/lib/meetingDiary";
+import { chooseMeetingPattern, meetingPatternSentence, WEEKDAYS, type ScheduleMonth } from "@/lib/meetingDiary";
 
 export const MEETING_PATTERN_OVERRIDE_KEY = "meeting_pattern_manual_override";
 
@@ -45,4 +45,27 @@ export async function saveMeetingPatternOverride(on: boolean) {
     { unit_id: unitId, key: MEETING_PATTERN_OVERRIDE_KEY, value: on, updated_at: new Date().toISOString() },
     { onConflict: "unit_id,key" },
   );
+}
+
+export type PublicMeetingPattern = { items: string[]; meetingDay: string; perYear: number };
+
+/**
+ * Public Lodge Profile parts from get_meeting_pattern(): one line per scheduled
+ * meeting, the weekday(s) and the count. Null when no schedule is saved, so the
+ * page keeps its existing text.
+ */
+export function publicMeetingPattern(rpc: unknown): PublicMeetingPattern | null {
+  const sched = ((rpc as { schedule?: unknown } | null)?.schedule ?? []) as ScheduleMonth[];
+  if (!Array.isArray(sched) || !sched.length) return null;
+  const items = [...sched].sort((a, b) => a.month - b.month)
+    .map((m) => meetingPatternSentence([m]).replace(/\.$/, "")).filter(Boolean);
+  if (!items.length) return null;
+  const days = [...new Set([...sched].sort((a, b) => a.month - b.month).map((m) => WEEKDAYS[m.weekday]).filter(Boolean))];
+  return { items, meetingDay: days.join(" / "), perYear: items.length };
+}
+
+export async function fetchPublicMeetingPattern(): Promise<PublicMeetingPattern | null> {
+  const { data, error } = await (supabase.rpc as any)("get_meeting_pattern");
+  if (error) return null;
+  return publicMeetingPattern(data);
 }

@@ -876,6 +876,20 @@
       "when": 1792668123205,
       "tag": "0124_lodge_identity_meeting_pattern_unit_helper",
       "breakpoints": true
+    },
+    {
+      "idx": 125,
+      "version": "7",
+      "when": 1792678010211,
+      "tag": "0125_unit_helpers_no_default_unit",
+      "breakpoints": true
+    },
+    {
+      "idx": 126,
+      "version": "7",
+      "when": 1792678910987,
+      "tag": "0126_festive_board_link_by_event_id",
+      "breakpoints": true
     }
   ]
 }

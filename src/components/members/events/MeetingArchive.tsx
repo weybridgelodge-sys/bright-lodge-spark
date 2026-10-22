@@ -118,7 +118,7 @@ export function ArchivedMeetingCard({ event, onRestore, onDelete }: { event: Lod
         <div className="flex justify-center py-4"><Loader2 className="w-5 h-5 text-gold animate-spin" /></div>
       ) : (
         <div className="space-y-3">
-          <CopyBlock label="Heading" text={bundle.event.intro_heading || bundle.event.title} />
+          <CopyBlock label="Heading" text={bundle.event.title} />
           <CopyBlock label="Intro" text={bundle.event.intro} />
           <CopyBlock label="The useful stuff" text={useful} />
           <CopyBlock label="Festive Board menu" text={menu} />

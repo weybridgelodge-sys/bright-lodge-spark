@@ -127,3 +127,25 @@ export async function fetchEventBundle(id: string): Promise<EventBundle | null> 
     diningOptions: (optsRes.data as DiningOption[]) ?? [],
   };
 }
+
+/** The public heading is the event Title, always. intro_heading is retired and ignored. */
+export const publicEventHeading = (e: Pick<LodgeEvent, "title">) => (e.title ?? "").trim();
+
+/** Fields written on save. Every field here is visible in the editor; intro_heading is always cleared. */
+export function lodgeEventSavePayload(event: LodgeEvent, slug: string) {
+  return {
+    slug,
+    title: event.title,
+    intro: event.intro,
+    intro_heading: null,
+    event_date: event.event_date,
+    tyling_time: event.tyling_time,
+    dining_time: event.dining_time,
+    location: event.location,
+    dress_code: event.dress_code,
+    event_label: (event.event_label || "").trim() || "Festive Board",
+    booking_deadline: event.booking_deadline || null,
+    header_image_url: event.header_image_url || null,
+    published: event.published,
+  };
+}

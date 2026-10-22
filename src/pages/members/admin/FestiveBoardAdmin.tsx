@@ -3,6 +3,7 @@ import { fetchProfilesPii } from "@/lib/profilePii";
 import { useEffect, useMemo, useState } from "react";
 import MembersLayout from "@/components/members/MembersLayout";
 import { useAuth } from "@/hooks/useAuth";
+import { linkedPageLine, meetingLinkPayload, type LinkableEvent } from "@/lib/meetingEventLink";
 import { supabase } from "@/integrations/supabase/client";
 import { formatMemberLine, type MemberRow } from "@/lib/summons";
 import { normaliseName } from "@/lib/nameCase";
@@ -56,6 +57,7 @@ type Meeting = {
   public_label?: string | null;
   headcount_override: number | null;
   event_key: string;
+  lodge_event_id?: string | null;
   status: "draft" | "published" | "completed";
   is_white_table: boolean;
   dining_price_pence: number;
@@ -742,7 +744,12 @@ function MeetingDialog({
   const [diningPricePounds, setDiningPricePounds] = useState<string>(
     existing ? ((existing.dining_price_pence ?? 3500) / 100).toFixed(2) : "35.00"
   );
-  const [eventKey, setEventKey] = useState<string>(existing?.event_key ?? `festive-board-${date}`);
+  const [linkedEventId, setLinkedEventId] = useState<string | null>(existing?.lodge_event_id ?? null);
+  const [linkableEvents, setLinkableEvents] = useState<LinkableEvent[]>([]);
+  useEffect(() => {
+    supabase.from("lodge_events").select("id,title,event_date,archived_at").order("event_date", { ascending: false })
+      .then(({ data }) => setLinkableEvents(((data ?? []) as LinkableEvent[])));
+  }, []);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -764,7 +771,7 @@ function MeetingDialog({
       .then(({ data }) => {
         if (cancelled || !data) return;
         const event = data as LodgeEventLink;
-        setEventKey(event.slug);
+        setLinkedEventId(event.id);
         if (event.published) setStatus("published");
         setNotes((current) => current || event.title);
       });
@@ -1128,7 +1135,7 @@ function MeetingDialog({
         ...(canEditPublicLabel ? { public_label: publicLabel.trim() || null } : {}),
         headcount_override: override.trim() === "" ? null : Number(override),
         created_by: user?.id ?? null,
-        event_key: eventKey.trim() || `festive-board-${date}`,
+        ...meetingLinkPayload(linkedEventId),
         status,
         is_white_table: isWhiteTable,
         dining_price_pence: parsePounds(diningPricePounds) || 3500,
@@ -1153,7 +1160,7 @@ function MeetingDialog({
       } else {
         const { data, error } = await supabase
           .from("festive_board_meetings")
-          .insert(payload)
+          .insert(payload as typeof payload & { event_key?: string } as any) // event_key is derived by the database
           .select("id")
           .single();
         if (error) throw error;
@@ -1306,15 +1313,18 @@ function MeetingDialog({
               />
             </div>
             <div>
-              <label className="text-xs uppercase tracking-wider text-primary-foreground/80 mb-1 block">
-                Public booking slug
-              </label>
-              <Input aria-label="Public booking slug"
-                value={eventKey}
-                onChange={(e) => setEventKey(e.target.value)}
-                placeholder={`festive-board-${date}`}
-                className="bg-navy border-gold/20 h-9 text-primary-foreground placeholder:text-primary-foreground/80"
-              />
+              <p className="text-sm text-primary-foreground break-words" data-testid="linked-page">{linkedPageLine(linkedEventId, linkableEvents)}</p>
+              <label htmlFor="linked-event" className="text-xs uppercase tracking-wider text-primary-foreground/80 mt-2 mb-1 block">Change linked booking page</label>
+              <select id="linked-event"
+                value={linkedEventId ?? ""}
+                onChange={(e) => setLinkedEventId(e.target.value || null)}
+                className="w-full min-h-[44px] rounded-md bg-navy border border-gold/20 px-2 text-sm text-primary-foreground"
+              >
+                <option value="">Not linked</option>
+                {linkableEvents.filter((e) => !e.archived_at || e.id === linkedEventId).map((e) => (
+                  <option key={e.id} value={e.id}>{e.title} ({e.event_date.slice(0, 10)})</option>
+                ))}
+              </select>
             </div>
             <label className="flex items-center gap-2 text-xs text-primary-foreground/80 mt-5">
               <input
