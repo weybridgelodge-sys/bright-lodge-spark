@@ -19,6 +19,10 @@ test("duplicate 409: toast wraps at 320px, form keeps step and values", { timeou
   await page.route("**/rest/v1/rpc/get_published_meeting_for_event**", (r) => r.fulfill({ json: [{ id: "m1", event_key: ev.slug }] }));
   await page.route("**/rest/v1/rpc/get_public_booking_details**", (r) => r.fulfill({ json: { lodge_name: "Sample Lodge", lodge_number: "1", contact_email: null } }));
   await page.route("**/rest/v1/module_settings**", (r) => r.fulfill({ json: [] }));
+  // Fake Stripe module (no payments token in e2e builds): its embedded checkout just calls fetchClientSecret, like the real one.
+  await page.route(/\/src\/lib\/stripe\.ts/, (r) => r.fulfill({ contentType: "application/javascript", body:
+    "const fake={initEmbeddedCheckout:async(o)=>{await o.fetchClientSecret();return {mount(){},unmount(){},destroy(){}};}};" +
+    "export const getStripe=()=>Promise.resolve(fake);export const getStripeEnvironment=()=>'sandbox';export const isPaymentsConfigured=()=>true;" }));
   const calls: unknown[] = [];
   await page.route("**/functions/v1/create-checkout", (r) => { calls.push(1); return r.fulfill({ status: 409, json: { error: MSG, duplicate: true } }); });
   await page.route("**/functions/v1/save-meeting-response", (r) => r.abort());
