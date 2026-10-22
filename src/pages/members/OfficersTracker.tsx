@@ -25,6 +25,7 @@ import { Loader2, AlertTriangle, Crown, Download, UserPlus, Lock, ShieldAlert, X
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { saveJsPdf } from "@/lib/nativeDownload";
+import RepresentativesBoard from "@/components/members/officers/RepresentativesBoard";
 import InstallationDateCard from "@/components/members/officers/InstallationDateCard";
 import { useInitialLoading } from "@/hooks/useInitialLoading";
 
@@ -479,6 +480,12 @@ export default function OfficersTracker() {
               onClear={(id) => removeAppointment(id)}
               onUpdateDate={(id, appointedOn) => updateAppointmentDate(id, appointedOn)}
             />
+            <RepresentativesBoard
+              year={currentYear}
+              members={members.map((m) => ({ id: m.id, label: memberLabel(m) }))}
+              canEdit={isAdmin || isSecretary}
+              unitId={((profile as { unit_id?: string | null } | null)?.unit_id) ?? null}
+            />
           </>
         )}
 
@@ -508,6 +515,12 @@ export default function OfficersTracker() {
               }
               onClear={(id) => removeAppointment(id)}
               onUpdateDate={(id, appointedOn) => updateAppointmentDate(id, appointedOn)}
+            />
+            <RepresentativesBoard
+              year={currentYear}
+              members={members.map((m) => ({ id: m.id, label: memberLabel(m) }))}
+              canEdit={isAdmin || isSecretary}
+              unitId={((profile as { unit_id?: string | null } | null)?.unit_id) ?? null}
             />
           </>
         )}
