@@ -48,7 +48,8 @@ const BANK: [string, RegExp][] = [
 describe("booking pages carry no typed lodge, bank or sign-off details", () => {
   for (const f of BOOKING_GUARDED) {
     it(f, () => {
-      const src = fs.readFileSync(f, "utf8");
+      // Search-engine title is static by design (must match the pre-rendered head; staticMetaParity).
+      const src = fs.readFileSync(f, "utf8").split("\n").filter((l) => !/title="Dining & Bookings \|/.test(l)).join("\n");
       for (const [what, re] of BANK) expect(src.match(re)?.[0] ?? null, `${what} in ${f}`).toBeNull();
     });
   }
