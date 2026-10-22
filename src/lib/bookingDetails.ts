@@ -36,7 +36,7 @@ export const paymentReference = (pattern: string, surname: string) =>
 export const lodgePlaceholder = (d: Pick<BookingDetails, "lodgeName" | "lodgeNumber">) =>
   d.lodgeName ? `e.g. ${[d.lodgeName, d.lodgeNumber ? `No. ${d.lodgeNumber}` : ""].filter(Boolean).join(" ")}` : "";
 
-/** Accepts 30-99-80 / 309980 / "30 99 80"; returns canonical NN-NN-NN or null. */
+/** Accepts dashed, spaced or plain six digits; returns canonical NN-NN-NN or null. */
 export function canonicalSortCode(v: string): string | null {
   const d = v.replace(/[\s-]/g, "");
   return /^\d{6}$/.test(d) ? `${d.slice(0, 2)}-${d.slice(2, 4)}-${d.slice(4)}` : null;

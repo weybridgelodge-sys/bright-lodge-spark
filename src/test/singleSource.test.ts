@@ -126,7 +126,7 @@ describe("meeting event heading", () => {
 describe("seeded bank/sign-off values never typed in src or edge functions", () => {
   it("no bank literals anywhere", () => {
     const { execSync } = require("child_process");
-    const hits = execSync("rg -l -e 14878862 -e '30-99-80' -e 309980 src supabase/functions || true", { encoding: "utf8" }).trim();
+    const hits = execSync(`rg -l -e ${"1487" + "8862"} -e ${"30-99" + "-80"} -e ${"3099" + "80"} src supabase/functions || true`, { encoding: "utf8" }).trim();
     expect(hits).toBe("");
   });
   it("public Bookings page has no typed contact email", () => {
