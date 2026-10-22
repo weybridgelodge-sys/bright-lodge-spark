@@ -2,8 +2,8 @@
 // Generated fresh from live records each time (no template fields). Nothing is cached.
 import { supabase } from "@/integrations/supabase/client";
 import { fetchProfilesPii } from "@/lib/profilePii";
+import { identityIssues, loadLodgeIdentity } from "@/lib/lodgeIdentity";
 import {
-  LODGE_NUMBER, LODGE_EMAIL_DOMAIN,
   prescribedInstallationDate,
   type ApptRow, type StatusRow, type ResolvedOffice, type Provenance,
 } from "@/lib/installationReturn";
@@ -61,6 +61,8 @@ type RollRow = { display_name: string; lodge_year: number; member_id: string | n
 
 export type ProvincialData = {
   year: number;
+  lodgeName: string;
+  lodgeNumber: string;
   consecrated: string;
   scheduledDate: string;
   actualDate: string | null; // only when different
@@ -141,14 +143,16 @@ export function formatAddress(p: { address_line1?: string | null; address_line2?
 
 export async function loadProvincialData(year: number, opts: { canAppend: boolean }): Promise<ProvincialData> {
   const issues: string[] = [];
-  const [apptRes, statusRes, eventRes, tplRes, profRes] = await Promise.all([
+  const [apptRes, statusRes, eventRes, tplRes, profRes, identity] = await Promise.all([
     supabase.from("officer_appointments").select("position_key,member_id,lodge_year,is_projection,override_reason,display_name"),
     supabase.from("member_progression_status").select("member_id,readiness,seniority_initiation_date,seniority_tiebreaker"),
     supabase.from("lodge_events").select("title,event_date").ilike("title", "%installation%").eq("published", true)
       .gte("event_date", `${year}-09-01`).lt("event_date", `${year + 1}-09-01`).order("event_date"),
     supabase.from("lodge_template").select("venue_address,regular_meeting_pattern,royal_arch_rep,royal_arch_rep_member_id,lodge_representatives,consecration_date").eq("id", "default").maybeSingle(),
     supabase.from("profiles").select("id,first_name,middle_name,last_name,full_name,post_nominals,email,status,initiation_date"),
+    loadLodgeIdentity(),
   ]);
+  issues.push(...identityIssues(identity));
   if (apptRes.error) throw apptRes.error;
   if (profRes.error) throw profRes.error;
   const appts = (apptRes.data ?? []) as ApptRow[];
@@ -207,7 +211,9 @@ export async function loadProvincialData(year: number, opts: { canAppend: boolea
 
   return {
     year,
-    consecrated: tpl.consecration_date ?? "1949-01-19",
+    lodgeName: identity.lodgeName,
+    lodgeNumber: identity.lodgeNumber,
+    consecrated: identity.consecrationDate || tpl.consecration_date || "",
     scheduledDate,
     actualDate: actual && actual !== scheduledDate ? actual : null,
     venue: (tpl.venue_address ?? "").replace(/\s+/g, " ").trim(),
@@ -220,12 +226,16 @@ export async function loadProvincialData(year: number, opts: { canAppend: boolea
       address: pii ? formatAddress(pii) : "",
       mobile: pii?.phone ?? "",
       personalEmail: sec?.email ?? "",
-      lodgeEmail: `secretary@${LODGE_EMAIL_DOMAIN}`,
+      lodgeEmail: identity.secretaryEmail,
       visible: !!pii,
     },
     issues,
   };
 }
 
-export const lodgeLine = () => `WEYBRIDGE L${LODGE_NUMBER}`;
-export const fileBase = (year: number) => `L${LODGE_NUMBER}-PROVINCIAL_RETURN_${year}-${year + 1}`;
+/** Lodge as printed on the Province form: name without "Lodge", upper case. */
+export const docLodgeName = (name: string) => name.replace(/\s+lodge$/i, "").trim().toUpperCase();
+export const lodgeLine = (d: Pick<ProvincialData, "lodgeName" | "lodgeNumber">) =>
+  [docLodgeName(d.lodgeName), d.lodgeNumber ? `L${d.lodgeNumber}` : ""].filter(Boolean).join(" ");
+export const fileBase = (year: number, lodgeNumber: string) =>
+  [lodgeNumber ? `L${lodgeNumber}` : "", `PROVINCIAL_RETURN_${year}-${year + 1}`].filter(Boolean).join("-");

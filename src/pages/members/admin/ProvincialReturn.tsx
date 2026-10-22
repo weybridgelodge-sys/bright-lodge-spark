@@ -14,6 +14,7 @@ import { ArrowLeft, Download, RefreshCw, AlertTriangle, FileText, Send } from "l
 import { formatMasonicYear } from "@/lib/officersProgression";
 import { loadProvincialData, fileBase, ukLongDate, lodgeLine, type ProvincialData } from "@/lib/provincialReturn";
 import { buildDocx, buildPdf, signatureDate } from "@/lib/provincialReturnDoc";
+import { lodgeTitle } from "@/lib/lodgeIdentity";
 import { saveBlob } from "@/lib/nativeDownload";
 import { useOfficerSignaturesEnabled } from "@/hooks/useOfficerSignaturesEnabled";
 import SignersPanel from "@/components/members/SignersPanel";
@@ -23,7 +24,7 @@ type Generated = { docx_path: string; pdf_path: string; docx_url: string | null;
 /** Signed path (officer_signatures on): the server builds and stores both files with signatures embedded. */
 async function generateSigned(year: number, data: ProvincialData): Promise<Generated> {
   const { data: res, error } = await supabase.functions.invoke("generate-provincial-return", {
-    body: { lodge_year: year, data, file_stem: fileBase(year) },
+    body: { lodge_year: year, data, file_stem: fileBase(year, data.lodgeNumber) },
   });
   if (error || !res?.ok) throw new Error(await readFunctionError(error, res, "Could not generate the signed return"));
   return res as Generated;
@@ -91,13 +92,13 @@ function Inner() {
         const url = kind === "docx" ? g.docx_url : g.pdf_url;
         if (!url) throw new Error("Download link could not be created");
         const blob = await (await fetch(url)).blob();
-        await saveBlob(blob, `${fileBase(year)}.${kind}`);
+        await saveBlob(blob, `${fileBase(year, fresh.lodgeNumber)}.${kind}`);
         return;
       }
       const blob = kind === "docx"
         ? await buildDocx(fresh)
         : new Blob([(await buildPdf(fresh)) as BlobPart], { type: "application/pdf" });
-      await saveBlob(blob, `${fileBase(year)}.${kind}`);
+      await saveBlob(blob, `${fileBase(year, fresh.lodgeNumber)}.${kind}`);
     } catch (e: any) { toast.error(e?.message ?? "Download failed"); }
     finally { setBusy(""); }
   };
@@ -127,8 +128,8 @@ function Inner() {
       const docx = await buildDocx(fresh);
       const pdf = new Blob([(await buildPdf(fresh)) as BlobPart], { type: "application/pdf" });
       const stamp = Date.now();
-      const docxPath = `provincial-returns/${year}/L6787-Provincial-Return-${year}-${stamp}.docx`;
-      const pdfPath = `provincial-returns/${year}/L6787-Provincial-Return-${year}-${stamp}.pdf`;
+      const docxPath = `provincial-returns/${year}/${fileBase(year, fresh.lodgeNumber)}-${stamp}.docx`;
+      const pdfPath = `provincial-returns/${year}/${fileBase(year, fresh.lodgeNumber)}-${stamp}.pdf`;
       const up1 = await supabase.storage.from(BUCKET).upload(docxPath, docx, { contentType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" });
       if (up1.error) throw up1.error;
       const up2 = await supabase.storage.from(BUCKET).upload(pdfPath, pdf, { contentType: "application/pdf" });
@@ -208,7 +209,7 @@ function Inner() {
 
           <section className="rounded-sm border border-gold/20 bg-navy-light/30 p-4 text-sm text-primary-foreground/80 space-y-1 break-words">
             <p><span className="text-gold">Consecrated:</span> {ukLongDate(data.consecrated)}</p>
-            <p><span className="text-gold">Lodge:</span> {lodgeLine()}</p>
+            <p><span className="text-gold">Lodge:</span> {lodgeLine(data) || "Lodge name and number not set"}</p>
             <p><span className="text-gold">Venue:</span> {data.venue}</p>
             <p><span className="text-gold">Meeting days:</span> {data.meetingPattern}</p>
             <p><span className="text-gold">Scheduled Installation:</span> {ukLongDate(data.scheduledDate)}</p>
@@ -294,9 +295,9 @@ function Inner() {
             <AlertDialogDescription asChild>
               <div className="space-y-2 text-sm break-words">
                 <p><strong>To:</strong> <span className="break-all">{pgsEmail}</span> (Provincial Grand Secretary)</p>
-                <p><strong>Reply-to:</strong> <span className="break-all">secretary@weybridgelodge.org.uk</span></p>
-                <p><strong>Subject:</strong> Weybridge Lodge No. 6787 — Provincial Installation Return {formatMasonicYear(year)}</p>
-                <p><strong>Documents:</strong> Word and PDF, built just now from the live records, sent as 30-day download links. <a href={pending?.docxUrl} download={`${fileBase(year)}.docx`} className="underline">Open the Word file</a> · <a href={pending?.pdfUrl} target="_blank" rel="noopener noreferrer" className="underline">Open the PDF</a></p>
+                <p><strong>Reply-to:</strong> <span className="break-all">{data?.secretary.lodgeEmail}</span></p>
+                <p><strong>Subject:</strong> {data ? lodgeTitle(data) : ""} — Provincial Installation Return {formatMasonicYear(year)}</p>
+                <p><strong>Documents:</strong> Word and PDF, built just now from the live records, sent as 30-day download links. <a href={pending?.docxUrl} download={`${fileBase(year, data?.lodgeNumber ?? "")}.docx`} className="underline">Open the Word file</a> · <a href={pending?.pdfUrl} target="_blank" rel="noopener noreferrer" className="underline">Open the PDF</a></p>
                 <p><strong>Signature dates:</strong> {data ? signatureDate(data) : "—"}. Signatures are left blank.</p>
                 {data && data.issues.length > 0 && <p className="text-destructive-foreground">{data.issues.length} warning(s) are still showing on the page.</p>}
                 <p>This is an official document to an external body and can't be recalled once sent.</p>
