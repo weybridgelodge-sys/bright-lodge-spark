@@ -736,7 +736,7 @@ export default function MeetingBookingForm({
                               className="mt-1 accent-[hsl(var(--gold))]"
                             />
                             <span className="text-sm font-sans text-foreground">
-                              Debit / Credit card payment (Preferred — pay securely below)
+                              {bd.cardWording || "Debit / Credit card payment (Preferred — pay securely below)"}
                             </span>
                           </label>
                           <label className="flex items-start gap-3 cursor-pointer min-h-[48px] py-1">
