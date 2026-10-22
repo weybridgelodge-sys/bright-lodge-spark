@@ -717,15 +717,8 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
   };
 
   const setBallotOnly = (c: Candidate, ballotOnly: boolean) => {
-    const id = c.id + "-a";
-    const action = ballotOnly ? "ballot" as const : "ballot_initiate" as const;
-    const exists = summons.agenda.some((x) => x.id === id);
-    setSummons({
-      ...summons,
-      agenda: exists
-        ? summons.agenda.map((x) => x.id === id ? { ...x, action, label: candidateAgendaLabel(c, ballotOnly) } : x)
-        : [...summons.agenda, { id, label: candidateAgendaLabel(c, ballotOnly), kind: "candidate", action }],
-    });
+    const others = summons.candidates.filter((x) => x.id !== c.id).map((x) => x.id);
+    setSummons({ ...summons, agenda: applyBallotOnly(c, summons.agenda, ballotOnly, (b) => candidateAgendaLabel(c, b), others) });
   };
 
   const addCandidate = () => {
@@ -1038,7 +1031,7 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
                   </Select>
                   {c.ceremony_type === "Initiation" && (
                     <label className="mt-2 flex min-h-11 items-center gap-2 font-sans text-sm text-primary-foreground">
-                      <input type="checkbox" className="h-5 w-5" checked={(() => { const it = candidateAgendaItem(c, summons.agenda); return !!it && agendaAction(it) === "ballot"; })()} onChange={(e) => setBallotOnly(c, e.target.checked)} />
+                      <input type="checkbox" className="h-5 w-5" checked={isBallotOnlyTicked(c, summons.agenda, summons.candidates.filter((x) => x.id !== c.id).map((x) => x.id))} onChange={(e) => setBallotOnly(c, e.target.checked)} />
                       Ballot only at this meeting (initiate later)
                     </label>
                   )}
