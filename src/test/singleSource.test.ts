@@ -28,7 +28,35 @@ const BOOKING_GUARDED = [
   "src/pages/members/BookMyPlace.tsx",
   "src/pages/members/admin/UnitSetup.tsx",
   "src/lib/bookingDetails.ts",
+  "src/lib/unitProfile.ts",
+  "src/components/Footer.tsx",
+  "src/components/Header.tsx",
 ];
+// Server functions switched to Unit Setup: no lodge name/number, social links or venue typed.
+const SERVER_GUARDED = [
+  "supabase/functions/send-summons-to-visitors/index.ts",
+  "supabase/functions/broadcast-newsletter/index.ts",
+  "supabase/functions/member-calendar-feed/index.ts",
+  "supabase/functions/submit-provincial-return/index.ts",
+  "supabase/functions/submit-installation-return/index.ts",
+  "supabase/functions/_shared/send-booking-emails.ts",
+];
+const SERVER_BANNED: [string, RegExp][] = [
+  ["lodge number", /\b6787\b/],
+  ["lodge name text", /Weybridge Lodge/],
+  ["social link", /(facebook|instagram|twitter)\.com/i],
+  ["venue", /Masonic Centre|GU2 4DR|Hitherbury|Weybourne/i],
+  ["mailbox", /(assistantsecretary|secretary|treasurer)@/i],
+];
+describe("switched server functions carry no typed lodge details", () => {
+  for (const f of SERVER_GUARDED) {
+    it(f, () => {
+      // Sender domains and the hosted logo stay in code (tied to verified sending infrastructure).
+      const src = fs.readFileSync(f, "utf8").split("\n").filter((l) => !/(SENDER_DOMAIN|FROM_DOMAIN|FROM_ADDRESS_DOMAIN|LOGO_URL) =/.test(l)).join("\n");
+      for (const [what, re] of SERVER_BANNED) expect(src.match(re)?.[0] ?? null, `${what} in ${f}`).toBeNull();
+    });
+  }
+});
 const BANNED: [string, RegExp][] = [
   ["lodge name", /weybridge/i],
   ["lodge number", /\b6787\b/],
@@ -40,6 +68,10 @@ const BANNED: [string, RegExp][] = [
 
 const BANK: [string, RegExp][] = [
   ["lodge number", /\b6787\b/],
+  ["lodge name text", />\s*Weybridge Lodge|"Weybridge Lodge|Weybridge Lodge No/],
+  ["social link", /(facebook|instagram|twitter)\.com/i],
+  ["venue", /Hitherbury|Weybourne|GU2 4DR/i],
+  ["ICO number", /ZC\d{6}/],
   ["bank account number", /\b\d{8}\b/],
   ["sort code", /\b\d{2}-\d{2}-\d{2}\b|\b\d{6}\b/],
   ["sign-off with lodge", /Fraternally,\\nWM [A-Z]/],
@@ -49,7 +81,7 @@ describe("booking pages carry no typed lodge, bank or sign-off details", () => {
   for (const f of BOOKING_GUARDED) {
     it(f, () => {
       // Search-engine title is static by design (must match the pre-rendered head; staticMetaParity).
-      const src = fs.readFileSync(f, "utf8").split("\n").filter((l) => !/title="Dining & Bookings \|/.test(l)).join("\n");
+      const src = fs.readFileSync(f, "utf8").split("\n").filter((l) => !/title="Dining & Bookings \||description=\{`Book your place/.test(l)).join("\n");
       for (const [what, re] of BANK) expect(src.match(re)?.[0] ?? null, `${what} in ${f}`).toBeNull();
     });
   }

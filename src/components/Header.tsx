@@ -1,3 +1,4 @@
+import { unitTitle, useUnitProfile } from "@/lib/unitProfile";
 import { useState, useRef, useEffect } from "react";
 import { Menu, X, Phone, ChevronDown, Mail, Lock } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
@@ -201,6 +202,7 @@ const DropdownMenu = ({ item }: { item: NavItem }) => {
 };
 
 const Header = () => {
+  const unit = useUnitProfile();
   const festivalName = useLadiesFestivalPromo();
   const navItems: NavItem[] = festivalName
     ? baseNavItems.map((item) =>
@@ -354,10 +356,10 @@ const Header = () => {
     <header className="fixed top-0 left-0 right-0 z-50 bg-navy/95 backdrop-blur-md border-b border-gold/20">
       <div className="container mx-auto px-4 sm:px-6 flex items-center justify-between h-16 md:h-20">
         <Link to="/" className="flex items-center gap-3">
-          <img src={logo} alt="Weybridge Lodge No. 6787 crest — Freemasons Lodge in Guildford, Surrey" width={48} height={48} fetchPriority="high" decoding="async" className="h-10 w-10 md:h-12 md:w-12 bg-primary-foreground/80 rounded-full p-0.5" />
+          <img src={logo} alt={`${unitTitle(unit)} crest — Freemasons Lodge in Guildford, Surrey`} width={48} height={48} fetchPriority="high" decoding="async" className="h-10 w-10 md:h-12 md:w-12 bg-primary-foreground/80 rounded-full p-0.5" />
           <div>
-            <p className="font-serif text-primary-foreground text-sm md:text-base font-semibold leading-tight">Weybridge Lodge</p>
-            <p className="text-gold text-sm">No. 6787</p>
+            <p className="font-serif text-primary-foreground text-sm md:text-base font-semibold leading-tight min-h-[1.25em]">{unit.lodgeName}</p>
+            <p className="text-gold text-sm min-h-[1.25em]">{unit.lodgeNumber && `No. ${unit.lodgeNumber}`}</p>
           </div>
         </Link>
 

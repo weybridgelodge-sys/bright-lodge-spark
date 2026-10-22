@@ -1,3 +1,4 @@
+import { unitTitle, useUnitProfile } from "@/lib/unitProfile";
 import { Instagram, Facebook, Twitter } from "lucide-react";
 import { Link } from "react-router-dom";
 import logoAsset from "@/assets/weybridge-logo-96.webp.asset.json";
@@ -70,6 +71,7 @@ const baseFooterColumns: FooterColumn[] = [
 ];
 
 const Footer = () => {
+  const unit = useUnitProfile();
   const festivalName = useLadiesFestivalPromo();
   const footerColumns: FooterColumn[] = festivalName
     ? baseFooterColumns.map((col) =>
@@ -84,29 +86,28 @@ const Footer = () => {
         {/* Top: brand + meeting + social */}
         <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-8 sm:gap-12 mb-12 items-start">
           <div className="relative text-left pr-14">
-            <img src={logo} alt="Weybridge Lodge No. 6787 crest — Freemasons Lodge in Guildford, Surrey" width={40} height={40} loading="lazy" decoding="async" className="absolute right-0 top-0 h-10 w-10" />
-            <p className="font-serif text-primary-foreground text-sm font-semibold">Weybridge Lodge No. 6787</p>
-            <p className="text-gold text-xs font-sans mb-3">Province of Surrey</p>
+            <img src={logo} alt={`${unitTitle(unit)} crest — Freemasons Lodge in Guildford, Surrey`} width={40} height={40} loading="lazy" decoding="async" className="absolute right-0 top-0 h-10 w-10" />
+            <p className="font-serif text-primary-foreground text-sm font-semibold">{unitTitle(unit)}</p>
+            <p className="text-gold text-xs font-sans mb-3">{unit.provinceName}</p>
             <p className="text-white/70 text-sm font-sans leading-relaxed mb-4">
-              A Freemasons Lodge in Guildford, Surrey. Consecrated 1949.
+              A Freemasons Lodge in Guildford, Surrey.{unit.consecrationYear && ` Consecrated ${unit.consecrationYear}.`}
             </p>
-            <img src={charterMark} alt="United Grand Lodge of England Charter Mark awarded to Weybridge Lodge" width={270} height={108} loading="lazy" decoding="async" className="h-24 w-auto brightness-0 invert opacity-95" />
+            <img src={charterMark} alt={`United Grand Lodge of England Charter Mark awarded to ${unit.lodgeName}`} width={270} height={108} loading="lazy" decoding="async" className="h-24 w-auto brightness-0 invert opacity-95" />
           </div>
 
           <div>
             <h2 className="font-serif text-primary-foreground mb-4 text-sm">Meeting Location</h2>
             <p className="text-primary-foreground/80 text-sm font-sans leading-relaxed">
-              Guildford Masonic Centre, Weybourne House,<br />
-              Hitherbury Close,<br />
-              Guildford, Surrey GU2 4DR
+              {unit.venueLines.map((l, i) => <span key={i}>{l}{i < unit.venueLines.length - 1 && <br />}</span>)}
             </p>
           </div>
 
           <div>
             <h2 className="font-serif text-primary-foreground mb-4 text-sm">Follow Us</h2>
             <div className="flex gap-2">
+              {unit.instagramUrl && (
               <a
-                href="https://instagram.com/weybridgelodge/"
+                href={unit.instagramUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-primary-foreground/80 hover:text-gold transition-colors min-h-[48px] min-w-[48px] flex items-center justify-center"
@@ -114,8 +115,10 @@ const Footer = () => {
               >
                 <Instagram className="w-5 h-5" />
               </a>
+              )}
+              {unit.facebookUrl && (
               <a
-                href="https://facebook.com/people/Weybridge-Lodge-No-6787/61551808420513/"
+                href={unit.facebookUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-primary-foreground/80 hover:text-gold transition-colors min-h-[48px] min-w-[48px] flex items-center justify-center"
@@ -123,8 +126,10 @@ const Footer = () => {
               >
                 <Facebook className="w-5 h-5" />
               </a>
+              )}
+              {unit.twitterUrl && (
               <a
-                href="https://twitter.com/weybridgelodge"
+                href={unit.twitterUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-primary-foreground/80 hover:text-gold transition-colors min-h-[48px] min-w-[48px] flex items-center justify-center"
@@ -132,6 +137,7 @@ const Footer = () => {
               >
                 <Twitter className="w-5 h-5" />
               </a>
+              )}
             </div>
             <div className="mt-2 flex flex-col gap-1">
               <a href="https://surreyfreemasons.org.uk/" target="_blank" rel="noopener noreferrer" className="text-xs text-primary-foreground/75 hover:text-gold transition-colors font-sans min-h-[48px] inline-flex items-center">
@@ -179,10 +185,10 @@ const Footer = () => {
         <div className="border-t border-gold/10 pt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
           <div className="text-center sm:text-left">
             <p className="text-xs text-primary-foreground/75 font-sans">
-              © {new Date().getFullYear()} Weybridge Lodge No. 6787. All rights reserved.
+              © {new Date().getFullYear()} {unitTitle(unit)}. All rights reserved.
             </p>
             <p className="text-xs text-primary-foreground/75 font-sans mt-1">
-              ICO Registration: ZC194126
+              {unit.icoNumber && `ICO Registration: ${unit.icoNumber}`}
             </p>
           </div>
           <div className="flex gap-6">

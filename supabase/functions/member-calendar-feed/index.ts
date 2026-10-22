@@ -11,6 +11,7 @@
 // the calendar client rewinds it to London local time.
 
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { loadLodgeSettings, LODGE_FALLBACK } from "../_shared/lodgeSettings.ts";
 import { londonToday, matchesPublicCalendarEvent, publicCalendarTimes, upcomingPublicCalendarRows, type PublicCalendarRow } from "../_shared/publicEventCalendar.ts";
 
 const cors = {
@@ -19,8 +20,11 @@ const cors = {
   "Access-Control-Allow-Methods": "GET, OPTIONS",
 };
 
-const LODGE_DOMAIN = "weybridgelodge.org.uk";
-const CAL_NAME = "Weybridge Lodge No. 6787";
+// Calendar name, event-ID domain and file name come from Unit Setup (fallbacks in lodgeSettingsResolve).
+let LODGE_DOMAIN = new URL(LODGE_FALLBACK.siteUrl).host;
+let CAL_NAME: string = LODGE_FALLBACK.calendarName;
+let CAL_FILE = "calendar";
+let VENUE: string = LODGE_FALLBACK.meetingVenue;
 const LONDON = "Europe/London";
 
 function pad(n: number) { return String(n).padStart(2, "0"); }
@@ -140,7 +144,7 @@ function loiFromSchedule(rows: any[]): CalEvent[] {
     return {
       uid: `loi-${r.id}@${LODGE_DOMAIN}`,
       title: r.title,
-      location: r.venue ?? "Guildford Masonic Centre",
+      location: r.venue ?? VENUE,
       description: r.description ?? "",
       start: wall(ymd.y, ymd.m1, ymd.d, f.hh, f.mm),
       end: wall(ymd.y, ymd.m1, ymd.d, t.hh, t.mm),
@@ -186,6 +190,9 @@ const LONDON_VTIMEZONE = [
 ];
 
 Deno.serve(async (req) => {
+  const lodge = await loadLodgeSettings();
+  LODGE_DOMAIN = new URL(lodge.siteUrl).host; CAL_NAME = lodge.calendarName; VENUE = lodge.meetingVenue;
+  CAL_FILE = lodge.senderName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "calendar";
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
 
   try {
@@ -277,7 +284,7 @@ Deno.serve(async (req) => {
       cal.push({
         uid: `event-${ev.id}@${LODGE_DOMAIN}`,
         title: classifyEventTitle(ev.title),
-        location: ev.location ?? "Guildford Masonic Centre",
+        location: ev.location ?? VENUE,
         description: descParts.join("\n\n"),
         start, end,
         slug: ev.slug,
@@ -292,7 +299,7 @@ Deno.serve(async (req) => {
       cal.push({
         uid: `fbm-${(m as any).id}@${LODGE_DOMAIN}`,
         title: `Meeting: ${(m as any).meeting_type ?? "Regular meeting"}`,
-        location: "Guildford Masonic Centre",
+        location: VENUE,
         description: (m as any).notes ?? "",
         start, end,
         slug: (m as any).event_key,
@@ -330,7 +337,7 @@ Deno.serve(async (req) => {
       cal.push({
         uid: `officers-night-${so.id}@${LODGE_DOMAIN}`,
         title: "Officers Night: Rehearsal",
-        location: so.officer_night_venue ?? "Masonic Centre, Guildford",
+        location: so.officer_night_venue ?? VENUE,
         description: "Officers rehearsal ahead of the next regular meeting.",
         start, end,
       });
@@ -358,7 +365,7 @@ Deno.serve(async (req) => {
       cal.push({
         uid, title: `Social: ${row.public_title}`, start,
         end: times.end ? toWall(times.end) : addHours(start, 3),
-        location: row.venue ?? "Guildford Masonic Centre", description: row.intro_copy ?? "",
+        location: row.venue ?? VENUE, description: row.intro_copy ?? "",
         url: `https://${LODGE_DOMAIN}/events/${row.slug}`,
       });
     }
@@ -366,7 +373,7 @@ Deno.serve(async (req) => {
     const lines: string[] = [
       "BEGIN:VCALENDAR",
       "VERSION:2.0",
-      "PRODID:-//Weybridge Lodge No 6787//Member Calendar//EN",
+      `PRODID:-//${CAL_NAME.replace(/\./g, "")}//Member Calendar//EN`,
       "CALSCALE:GREGORIAN",
       "METHOD:PUBLISH",
       `X-WR-CALNAME:${escText(CAL_NAME)}`,
@@ -403,7 +410,7 @@ Deno.serve(async (req) => {
       headers: {
         ...cors,
         "Content-Type": "text/calendar; charset=utf-8",
-        "Content-Disposition": 'inline; filename="weybridge-lodge.ics"',
+        "Content-Disposition": `inline; filename="${CAL_FILE}.ics"`,
         "Cache-Control": "no-store",
       },
     });

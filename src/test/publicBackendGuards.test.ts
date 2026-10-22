@@ -63,7 +63,7 @@ describe("create-checkout wiring", () => {
 import { resolveLodgeSettings } from "../../supabase/functions/_shared/lodgeSettingsResolve";
 describe("lodge settings fallback", () => {
   it("missing row keeps every previously typed value", () => {
-    expect(resolveLodgeSettings(null)).toEqual({
+    expect(resolveLodgeSettings(null)).toMatchObject({
       siteUrl: "https://weybridgelodge.org.uk",
       senderName: "Weybridge Lodge",
       formalSenderName: "Weybridge Lodge No. 6787",

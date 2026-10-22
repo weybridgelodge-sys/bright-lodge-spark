@@ -6555,6 +6555,7 @@ export type Database = {
           address: string | null
           created_at: string
           dining_capacity: number
+          display_lines: Json | null
           id: string
           name: string
           updated_at: string
@@ -6563,6 +6564,7 @@ export type Database = {
           address?: string | null
           created_at?: string
           dining_capacity: number
+          display_lines?: Json | null
           id?: string
           name: string
           updated_at?: string
@@ -6571,6 +6573,7 @@ export type Database = {
           address?: string | null
           created_at?: string
           dining_capacity?: number
+          display_lines?: Json | null
           id?: string
           name?: string
           updated_at?: string
@@ -7693,6 +7696,7 @@ export type Database = {
         }[]
       }
       get_public_booking_details: { Args: never; Returns: Json }
+      get_public_unit_profile: { Args: never; Returns: Json }
       get_published_meeting_for_event: {
         Args: { _event_key: string }
         Returns: {
@@ -7707,6 +7711,7 @@ export type Database = {
           id: string
         }[]
       }
+      get_unit_setup: { Args: never; Returns: Json }
       get_upcoming_public_meetings: {
         Args: never
         Returns: {

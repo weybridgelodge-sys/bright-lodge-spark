@@ -178,10 +178,10 @@ function renderHtml(opts: { subject: string; content: NewsletterContent; unsubsc
   <div style="background:#1B2A4A;padding:20px 24px;border-bottom:4px solid #C9A432">
     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0"><tr>
       <td width="72" valign="middle" style="padding-right:14px">
-        <img src="${LOGO_URL}" alt="Weybridge Lodge crest" width="64" height="64" style="display:block;width:64px;height:64px;border:0">
+        <img src="${LOGO_URL}" alt="${escapeHtml(LODGE.senderName)} crest" width="64" height="64" style="display:block;width:64px;height:64px;border:0">
       </td>
       <td valign="middle" align="left">
-        <div style="font-family:'Playfair Display',Georgia,serif;color:#C9A432;font-size:24px;letter-spacing:0.5px;line-height:1.1">Weybridge Lodge No. 6787</div>
+        <div style="font-family:'Playfair Display',Georgia,serif;color:#C9A432;font-size:24px;letter-spacing:0.5px;line-height:1.1">${escapeHtml(LODGE.newsletterMasthead)}</div>
         <div style="color:rgba(246,241,226,0.85);font-size:12px;margin-top:4px;letter-spacing:2px;text-transform:uppercase;font-family:Arial,sans-serif">Monthly Chronicle &amp; Labours</div>
       </td>
     </tr></table>
@@ -189,14 +189,14 @@ function renderHtml(opts: { subject: string; content: NewsletterContent; unsubsc
   <div style="padding:24px 28px">${sectionsHtml}</div>
   <div style="background:#1B2A4A;padding:18px 28px 8px;text-align:center">
     <table role="presentation" align="center" cellspacing="0" cellpadding="0" border="0" style="margin:0 auto 10px"><tr>
-      <td style="padding:0 6px"><a href="https://instagram.com/weybridgelodge/" style="display:inline-block;background:#C9A432;color:#1B2A4A;font-family:Arial,sans-serif;font-size:11px;font-weight:bold;text-decoration:none;width:28px;height:28px;line-height:28px;border-radius:14px;text-align:center">IG</a></td>
-      <td style="padding:0 6px"><a href="https://facebook.com/people/Weybridge-Lodge-No-6787/61551808420513/" style="display:inline-block;background:#C9A432;color:#1B2A4A;font-family:Arial,sans-serif;font-size:13px;font-weight:bold;text-decoration:none;width:28px;height:28px;line-height:28px;border-radius:14px;text-align:center">f</a></td>
-      <td style="padding:0 6px"><a href="https://twitter.com/weybridgelodge" style="display:inline-block;background:#C9A432;color:#1B2A4A;font-family:Arial,sans-serif;font-size:12px;font-weight:bold;text-decoration:none;width:28px;height:28px;line-height:28px;border-radius:14px;text-align:center">X</a></td>
-      <td style="padding:0 6px"><a href="https://weybridgelodge.org.uk" style="display:inline-block;background:#C9A432;color:#1B2A4A;font-family:Arial,sans-serif;font-size:10px;font-weight:bold;text-decoration:none;width:28px;height:28px;line-height:28px;border-radius:14px;text-align:center">Web</a></td>
+      <td style="padding:0 6px"><a href="${escapeHtml(LODGE.instagramUrl)}" style="display:inline-block;background:#C9A432;color:#1B2A4A;font-family:Arial,sans-serif;font-size:11px;font-weight:bold;text-decoration:none;width:28px;height:28px;line-height:28px;border-radius:14px;text-align:center">IG</a></td>
+      <td style="padding:0 6px"><a href="${escapeHtml(LODGE.facebookUrl)}" style="display:inline-block;background:#C9A432;color:#1B2A4A;font-family:Arial,sans-serif;font-size:13px;font-weight:bold;text-decoration:none;width:28px;height:28px;line-height:28px;border-radius:14px;text-align:center">f</a></td>
+      <td style="padding:0 6px"><a href="${escapeHtml(LODGE.twitterUrl)}" style="display:inline-block;background:#C9A432;color:#1B2A4A;font-family:Arial,sans-serif;font-size:12px;font-weight:bold;text-decoration:none;width:28px;height:28px;line-height:28px;border-radius:14px;text-align:center">X</a></td>
+      <td style="padding:0 6px"><a href="${escapeHtml(LODGE.siteUrl)}" style="display:inline-block;background:#C9A432;color:#1B2A4A;font-family:Arial,sans-serif;font-size:10px;font-weight:bold;text-decoration:none;width:28px;height:28px;line-height:28px;border-radius:14px;text-align:center">Web</a></td>
     </tr></table>
     <div style="color:rgba(246,241,226,0.85);font-family:Arial,sans-serif;font-size:12px;padding:6px 0 14px;line-height:1.6">
-      &copy; ${new Date().getFullYear()} Weybridge Lodge No. 6787 &middot; Guildford Masonic Centre, GU2 4DR<br>
-      You're receiving this because Weybridge Lodge No. 6787 sends newsletters to members and visitors.
+      &copy; ${new Date().getFullYear()} ${escapeHtml(LODGE.newsletterMasthead)} &middot; ${escapeHtml(LODGE.newsletterFooterNote)}<br>
+      You're receiving this because ${escapeHtml(LODGE.newsletterMasthead)} sends newsletters to members and visitors.
       <!-- The email API always appends its own mandatory unsubscribe footer (it cannot
            be suppressed), which opts the address out of ALL mail from this domain.
            This link is the newsletter-only alternative, deliberately NOT worded as a
@@ -406,7 +406,7 @@ async function renderNewsletterPdf(opts: {
   const drawHeader = () => {
     page.drawRectangle({ x: 0, y: A4.h - 96, width: A4.w, height: 96, color: navy });
     page.drawRectangle({ x: 0, y: A4.h - 100, width: A4.w, height: 4, color: gold });
-    page.drawText("Weybridge Lodge No. 6787", { x: marginX, y: A4.h - 50, size: 20, font: helvBold, color: gold });
+    page.drawText(LODGE.newsletterMasthead, { x: marginX, y: A4.h - 50, size: 20, font: helvBold, color: gold });
     page.drawText("MONTHLY CHRONICLE & LABOURS", { x: marginX, y: A4.h - 72, size: 9, font: helv, color: rgb(1, 1, 1) });
     y = A4.h - 120;
   };
@@ -488,7 +488,7 @@ async function renderNewsletterPdf(opts: {
   newPageIfNeeded(30);
   y = Math.max(y, 50);
   page.drawLine({ start: { x: marginX, y: 50 }, end: { x: A4.w - marginX, y: 50 }, thickness: 0.5, color: rgb(0.85, 0.83, 0.8) });
-  page.drawText(`© ${new Date().getFullYear()} Weybridge Lodge No. 6787 · Guildford Masonic Centre, GU2 4DR`,
+  page.drawText(`© ${new Date().getFullYear()} ${LODGE.newsletterMasthead} · ${LODGE.newsletterFooterNote}`,
     { x: marginX, y: 36, size: 8, font: helv, color: muted });
   return await pdf.save();
 }
@@ -507,7 +507,7 @@ async function archiveToDocuments(opts: {
 }) {
   const tag = AUDIENCE_FILENAME[opts.audience];
   const safeSubject = opts.subject.replace(/[^a-zA-Z0-9._-]/g, "_").slice(0, 60);
-  const fileName = `${issuePrefix()}_WeybridgeChronicle_${tag}_${safeSubject || "Issue"}.pdf`;
+  const fileName = `${issuePrefix()}_${LODGE.senderName.split(/\s+/)[0].replace(/[^A-Za-z0-9]/g, "")}Chronicle_${tag}_${safeSubject || "Issue"}.pdf`;
   const path = `newsletter/${Date.now()}-${opts.broadcastId}-${tag}-${safeSubject}.pdf`;
   let pdfBytes: Uint8Array;
   try {

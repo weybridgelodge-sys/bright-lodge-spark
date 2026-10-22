@@ -1,7 +1,7 @@
 // send-summons-to-visitors — email a finalised summons to visitor contacts.
 // Personalised salutation per recipient, branded HTML matching the shared
-// Weybridge Lodge transactional email style (centered crest, "Weybridge
-// Lodge" heading, gold "No. 6787 — Province of Surrey" subtitle, white body),
+// Shared transactional email style (centred crest, lodge name heading, gold number and province
+// subtitle, white body); lodge details come from Unit Setup via loadLodgeSettings.
 // with the summons PDF + .ics calendar file attached.
 //
 // Role-gated to admin / secretary / worshipful_master and logged into
@@ -9,7 +9,9 @@
 
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { BRAND, LOGO_URL } from "../_shared/transactional-email-templates/_brand.ts";
-import { loadLodgeSettings } from "../_shared/lodgeSettings.ts";
+import { loadLodgeSettings, resolveLodgeSettings } from "../_shared/lodgeSettings.ts";
+let LODGE = resolveLodgeSettings(null);
+const lodgeNo = () => LODGE.formalSenderName.replace(LODGE.senderName, "").trim();
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -28,7 +30,7 @@ interface Body {
   meeting_date_label: string;     // e.g. "Saturday 12 September 2026"
   meeting_time_label?: string;    // e.g. "6:15 pm for 6:45 pm"
   meeting_type_label?: string;    // e.g. "Regular Meeting"
-  venue: string;                  // e.g. "Masonic Centre, Guildford"
+  venue: string;                  // venue line as printed on the summons
   secretary_display_name?: string; // preferred — resolved from officer_appointments client-side
   wm_display_name?: string;        // legacy — accepted for back-compat but no longer displayed
   ics: string;
@@ -64,8 +66,8 @@ function renderHtml(o: {
   unsubscribeUrl?: string;
 }): string {
   // Style matches the shared brand (see supabase/functions/_shared/transactional-email-templates/_brand.ts
-  // and almoner-overdue-digest.tsx): white body, centered crest, navy "Weybridge Lodge" title
-  // with a gold "No. 6787 — Province of Surrey" subtitle, then Arial body copy.
+  // and almoner-overdue-digest.tsx): white body, centered crest, navy lodge-name title
+  // with a gold "No. <number> — <province>" subtitle, then Arial body copy.
   const detailRow = (label: string, value: string) => `
     <tr>
       <td style="padding:4px 12px 4px 0;color:${BRAND.muted};font-size:14px;vertical-align:top;">${esc(label)}</td>
@@ -79,15 +81,15 @@ function renderHtml(o: {
     <tr><td align="center">
       <table role="presentation" width="${parseInt(BRAND.containerMaxWidth, 10)}" cellspacing="0" cellpadding="0" style="max-width:${BRAND.containerMaxWidth};margin:0 auto;padding:24px;">
         <tr><td align="center" style="padding:8px 0 16px;">
-          <img src="${LOGO_URL}" width="120" height="120" alt="Weybridge Lodge crest" style="display:block;margin:0 auto;" />
-          <h1 style="color:${BRAND.navy};font-size:24px;margin:12px 0 0;letter-spacing:0.5px;font-family:${BRAND.fontStack};">Weybridge Lodge</h1>
-          <div style="color:${BRAND.gold};font-size:12px;letter-spacing:2px;text-transform:uppercase;margin:4px 0 12px;">No. 6787 — Province of Surrey</div>
+          <img src="${LOGO_URL}" width="120" height="120" alt="${esc(LODGE.senderName)} crest" style="display:block;margin:0 auto;" />
+          <h1 style="color:${BRAND.navy};font-size:24px;margin:12px 0 0;letter-spacing:0.5px;font-family:${BRAND.fontStack};">${esc(LODGE.senderName)}</h1>
+          <div style="color:${BRAND.gold};font-size:12px;letter-spacing:2px;text-transform:uppercase;margin:4px 0 12px;">${esc(lodgeNo())} — ${esc(LODGE.provinceName)}</div>
         </td></tr>
         <tr><td style="padding:0;">
           <h2 style="color:${BRAND.navy};font-size:22px;margin:0 0 6px;font-family:${BRAND.fontStack};">Invitation to our next Meeting</h2>
           <p style="color:${BRAND.body};font-size:14px;line-height:1.55;margin:14px 0;">Dear ${esc(o.salutation)},</p>
           <p style="color:${BRAND.body};font-size:14px;line-height:1.55;margin:0 0 14px;">
-            On behalf of the Worshipful Master and the Brethren of Weybridge Lodge No. 6787,
+            On behalf of the Worshipful Master and the Brethren of ${esc(LODGE.formalSenderName)},
             I am pleased to invite you to our next meeting. The Summons is attached along
             with a calendar file so you can add the event to your diary.
           </p>
@@ -101,11 +103,11 @@ function renderHtml(o: {
           <p style="color:${BRAND.body};font-size:14px;line-height:1.55;margin:0 0 4px;">Kind regards</p>
           <p style="color:${BRAND.body};font-size:14px;line-height:1.55;margin:0 0 14px;">S&amp;F</p>
           <p style="margin:0;color:${BRAND.navy};font-size:14px;"><strong>${esc(o.secretaryName)}</strong>, Secretary</p>
-          <p style="margin:0;color:${BRAND.navy};font-size:14px;">Weybridge Lodge No. 6787</p>
+          <p style="margin:0;color:${BRAND.navy};font-size:14px;">${esc(LODGE.formalSenderName)}</p>
           <hr style="border:none;border-top:1px solid ${BRAND.hairline};margin:20px 0 10px;" />
           <p style="color:${BRAND.muted};font-size:12px;margin:0;">
             ${o.unsubscribeUrl
-              ? `If you would prefer not to receive further invitations, <a href="${esc(o.unsubscribeUrl)}" style="color:${BRAND.gold};">click here to unsubscribe</a> from future Weybridge Lodge emails.`
+              ? `If you would prefer not to receive further invitations, <a href="${esc(o.unsubscribeUrl)}" style="color:${BRAND.gold};">click here to unsubscribe</a> from future ${esc(LODGE.senderName)} emails.`
               : `If you would prefer not to receive further invitations, please let the Secretary know and we will remove you from our visitor list.`}
           </p>
 
@@ -116,6 +118,7 @@ function renderHtml(o: {
 }
 
 Deno.serve(async (req) => {
+  LODGE = await loadLodgeSettings();
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
@@ -194,7 +197,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    const subject = `Invitation — Weybridge Lodge No. 6787 — ${body.meeting_date_label}`;
+    const subject = `Invitation — ${LODGE.formalSenderName} — ${body.meeting_date_label}`;
     let sent = 0;
     const failures: { email: string; error: string }[] = [];
 

@@ -6,7 +6,7 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { z } from "npm:zod@3";
 import { sendTransactionalEmail } from "../_shared/send-email.ts";
-import { loadLodgeSettings } from "../_shared/lodgeSettings.ts";
+import { loadLodgeSettings, returnFileName } from "../_shared/lodgeSettings.ts";
 import { fileReturnDocument, resolveReturnCc } from "../_shared/returnFiling.ts";
 
 const SETTING = "installation_return_province_email";
@@ -53,7 +53,7 @@ Deno.serve(async (req) => {
     }
 
     const { data: signed, error: sErr } = await admin.storage.from("secretary-returns").createSignedUrl(b.storage_path, LINK_DAYS * 86400, {
-      download: `Installation-Return-6787-${b.lodge_year}.pdf`,
+      download: returnFileName((await loadLodgeSettings()).installationReturnFile, b.lodge_year, "pdf"),
     });
     if (sErr || !signed?.signedUrl) return json({ error: "The generated PDF could not be found." }, 400);
 

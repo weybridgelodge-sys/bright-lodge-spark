@@ -1,3 +1,4 @@
+import { useUnitProfile, venueShort } from "@/lib/unitProfile";
 import { useBookingDetails } from "@/lib/bookingDetails";
 import { attendanceOptions, diningEventLabel, isNonMasonTitle, lodgeRequired } from "@/lib/bookingTitles";
 import Header from "@/components/Header";
@@ -132,6 +133,7 @@ const BookingsEvent = ({
   publishedMeeting: { id: string; event_key: string } | null;
 }) => {
   const bookingDetails = useBookingDetails();
+  const unit = useUnitProfile();
   const { toast } = useToast();
   const shouldReduceMotion = useReducedMotion();
 
@@ -200,7 +202,7 @@ useEffect(() => {
       <main id="main-content">
         <PageHeader
           title="Dining & Bookings"
-          subtitle="Reserve your place at the next Weybridge Lodge meeting at the Guildford Masonic Centre, GU2 4DR"
+          subtitle={unit.lodgeName ? `Reserve your place at the next ${unit.lodgeName} meeting${venueShort(unit) ? ` at the ${venueShort(unit)}` : ""}` : "Reserve your place at the next meeting"}
         />
 
         {/* ── Event Introduction ── */}
@@ -415,7 +417,7 @@ useEffect(() => {
           <div className="container mx-auto px-4 sm:px-6 text-center">
             <Link
               to="/events"
-              aria-label="View all upcoming events"
+             
               className="inline-flex items-center justify-center border border-border text-foreground px-8 py-4 rounded-sm text-sm font-sans uppercase tracking-widest hover:border-gold hover:text-gold-dark transition-colors min-h-[48px]"
             >
               View All Events
