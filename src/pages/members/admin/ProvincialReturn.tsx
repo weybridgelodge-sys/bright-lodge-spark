@@ -1,3 +1,4 @@
+import { EmailText } from "@/components/ui/email-text";
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import MembersLayout from "@/components/members/MembersLayout";
@@ -245,7 +246,7 @@ function Inner() {
             <p className="mb-2 break-words"><span className="text-gold">Signature dates:</span> both pre-filled with {data ? signatureDate(data) : "—"} (the Installation date). {signaturesOn ? SIGNATURES_ON_HELP : "Signatures stay blank."}</p>
             <div className="flex min-w-0 flex-col items-stretch gap-2 sm:flex-row sm:flex-wrap sm:items-center">
               <span className="text-xs">Provincial Grand Secretary's email:</span>
-              <span className="break-all">{pgsEmail || "Not set yet"}</span>
+              {pgsEmail ? <EmailText email={pgsEmail} /> : <span>Not set yet</span>}
               <span className="text-xs">(change in Unit Setup &gt; Province)</span>
             </div>
             {!canSubmit && <p className="text-xs text-amber-300 mt-2">Only the Secretary or an administrator can submit the return.</p>}
@@ -279,8 +280,8 @@ function Inner() {
             <AlertDialogTitle>Send the Provincial Return to Province?</AlertDialogTitle>
             <AlertDialogDescription asChild>
               <div className="space-y-2 text-sm break-words">
-                <p><strong>To:</strong> <span className="break-all">{pgsEmail}</span> (Provincial Grand Secretary)</p>
-                <p><strong>Reply-to:</strong> <span className="break-all">{data?.secretary.lodgeEmail}</span></p>
+                <p><strong>To:</strong> <EmailText email={pgsEmail} /> (Provincial Grand Secretary)</p>
+                <p><strong>Reply-to:</strong> <EmailText email={data?.secretary.lodgeEmail} /></p>
                 <p><strong>Subject:</strong> {data ? lodgeTitle(data) : ""} — Provincial Installation Return {formatMasonicYear(year)}</p>
                 <p><strong>Documents:</strong> Word and PDF, built just now from the live records, sent as 30-day download links. <a href={pending?.docxUrl} download={`${fileBase(year, data?.lodgeNumber ?? "")}.docx`} className="underline">Open the Word file</a> · <a href={pending?.pdfUrl} target="_blank" rel="noopener noreferrer" className="underline">Open the PDF</a></p>
                 <p><strong>Signature dates:</strong> {data ? signatureDate(data) : "—"}. {signaturesSummary(signaturesOn && !!pending?.signed, pending?.signed)}</p>
