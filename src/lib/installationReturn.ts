@@ -3,18 +3,15 @@
 import { PDFDocument, PDFTextField, PDFCheckBox, PDFRadioGroup, PDFDropdown, PDFName, PDFDict, TextAlignment } from "pdf-lib";
 import { supabase } from "@/integrations/supabase/client";
 import { cachedInstallationConfig, ruleDateFor } from "@/lib/masonicYear";
+import { identityIssues, installationRuleWording, loadLodgeIdentity, type LodgeIdentity } from "@/lib/lodgeIdentity";
 import { computeProjection, type Appointment, type MemberLite, type PositionKey } from "@/lib/officersProgression";
 
-export const LODGE_NAME = "Weybridge Lodge";
-export const LODGE_NUMBER = "6787";
-export const LODGE_EMAIL_DOMAIN = "weybridgelodge.org.uk";
 export const TEMPLATE_BUCKET = "secretary-returns";
 export const TEMPLATE_PATH = "templates/New_IR_Craft.pdf";
 export const MEMBERSHIP_EMAIL_SETTING = "installation_return_membership_officer_email";
-export const MEMBERSHIP_EMAIL_OPTIONS = [
-  `membershipsecretary@${LODGE_EMAIL_DOMAIN}`,
-  `membershipofficer@${LODGE_EMAIL_DOMAIN}`,
-];
+/** Membership Officer address choices at the lodge's own email domain. */
+export const membershipEmailOptions = (domain: string) =>
+  domain ? [`membershipsecretary@${domain}`, `membershipofficer@${domain}`] : [];
 
 /** confirmed = saved, non-projection row for this year; planned = saved ladder projection row;
  *  computed = ladder engine output, not saved; carried = presumed continuing from an earlier year. */
@@ -68,6 +65,9 @@ export type ReturnData = {
     | { branch: 2; lodgeNo: string; year: number; office: "senior_warden" | "junior_warden" }
     | { branch: 0; reason: string };
   profiles: Record<string, ProfileLite>;
+  identity: LodgeIdentity;
+  /** By-law wording from the installation rule, e.g. "3rd Wednesday in October". */
+  ruleWording: string;
   membershipLodgeEmail: string;
   issues: string[];
 };
@@ -134,20 +134,20 @@ export function resolveLadderOffice(key: PositionKey, label: string, input: Ladd
   return { key, label, memberId: null, provenance: "vacant", fromYear: year, note: "The Progression Ladder has no candidate." };
 }
 
-export function resolveQualification(wmId: string | null, year: number, appts: ApptRow[]): ReturnData["qualification"] {
+export function resolveQualification(wmId: string | null, year: number, appts: ApptRow[], lodgeNo = ""): ReturnData["qualification"] {
   if (!wmId) return { branch: 0, reason: "No incoming Master resolved." };
   const confirmedPrior = appts.filter((a) => a.member_id === wmId && a.lodge_year < year && !a.is_projection);
   const wmYears = confirmedPrior.filter((a) => a.position_key === "worshipful_master").map((a) => a.lodge_year).sort((a, b) => a - b);
-  if (wmYears.length) return { branch: 1, lodgeNo: LODGE_NUMBER, year: wmYears[0], allYears: wmYears };
+  if (wmYears.length) return { branch: 1, lodgeNo, year: wmYears[0], allYears: wmYears };
   const warden = confirmedPrior.find((a) => a.lodge_year === year - 1 && (a.position_key === "senior_warden" || a.position_key === "junior_warden"));
-  if (warden) return { branch: 2, lodgeNo: LODGE_NUMBER, year: year - 1, office: warden.position_key as "senior_warden" | "junior_warden" };
+  if (warden) return { branch: 2, lodgeNo, year: year - 1, office: warden.position_key as "senior_warden" | "junior_warden" };
   return { branch: 0, reason: "The incoming Master has no recorded year as Master, and was not a Warden in the preceding year. This needs a human decision (possibly a dispensation)." };
 }
 
-export function lodgeEmailFor(key: string, membershipEmail: string): string {
+export function lodgeEmailFor(key: string, membershipEmail: string, domain: string): string {
   if (key === "membership_officer") return membershipEmail;
   const o = EMAIL_OFFICES.find((x) => x.key === key);
-  return o ? `${o.slug}@${LODGE_EMAIL_DOMAIN}` : "";
+  return o && domain ? `${o.slug}@${domain}` : "";
 }
 
 export function forenames(p?: ProfileLite | null) {
@@ -165,7 +165,7 @@ export function blockName(p?: ProfileLite | null) {
 
 export async function loadReturnData(year: number): Promise<ReturnData> {
   const issues: string[] = [];
-  const [apptRes, statusRes, eventRes, settingRes] = await Promise.all([
+  const [apptRes, statusRes, eventRes, settingRes, identity] = await Promise.all([
     supabase.from("officer_appointments").select("position_key,member_id,lodge_year,is_projection,override_reason"),
     supabase.from("member_progression_status").select("member_id,readiness,seniority_initiation_date,seniority_tiebreaker"),
     supabase
@@ -177,7 +177,9 @@ export async function loadReturnData(year: number): Promise<ReturnData> {
       .lt("event_date", `${year + 1}-09-01`)
       .order("event_date", { ascending: true }),
     supabase.from("module_settings").select("value").eq("key", MEMBERSHIP_EMAIL_SETTING).maybeSingle(),
+    loadLodgeIdentity(),
   ]);
+  issues.push(...identityIssues(identity));
   if (apptRes.error) throw apptRes.error;
   const appts = (apptRes.data ?? []) as ApptRow[];
   const statuses = (statusRes.data ?? []) as StatusRow[];
@@ -203,7 +205,7 @@ export async function loadReturnData(year: number): Promise<ReturnData> {
   if (!ev) issues.push(`No published Installation meeting found for ${year}. Installation date fields will be blank.`);
 
   const settingVal = (settingRes.data?.value as string | undefined) ?? null;
-  const membershipLodgeEmail = settingVal || MEMBERSHIP_EMAIL_OPTIONS[0];
+  const membershipLodgeEmail = settingVal || membershipEmailOptions(identity.emailDomain)[0] || "";
   if (!settingVal) issues.push("Membership Officer lodge email has not been chosen yet; using membershipsecretary@ until it is.");
 
   for (const o of [wm, sw, jw, ipm, ...officers]) {
@@ -219,7 +221,9 @@ export async function loadReturnData(year: number): Promise<ReturnData> {
     prescribedDate: prescribedInstallationDate(year),
     installationEventTitle: ev?.title ?? null,
     wm, sw, jw, ipm, officers,
-    qualification: resolveQualification(wm.memberId, year, appts),
+    qualification: resolveQualification(wm.memberId, year, appts, identity.lodgeNumber),
+    identity,
+    ruleWording: installationRuleWording(cachedInstallationConfig().rule as any),
     profiles: byId,
     membershipLodgeEmail,
     issues,
@@ -258,8 +262,8 @@ export function buildFieldSpecs(d: ReturnData, opts: { secretaryChanged?: YesNo 
   const instDate = ukDate(d.installationDate);
 
   const specs: FieldSpec[] = [
-    { id: "Lodge Name", label: "Lodge name", value: LODGE_NAME },
-    { id: "Lodge Number", label: "Lodge number", value: LODGE_NUMBER },
+    { id: "Lodge Name", label: "Lodge name", value: d.identity.lodgeName },
+    { id: "Lodge Number", label: "Lodge number", value: d.identity.lodgeNumber },
     { id: "DD", label: "Prescribed date — day", value: prescribed.dd },
     { id: "MMM", label: "Prescribed date — month", value: prescribed.mmm },
     { id: "YYYY", label: "Prescribed date — year", value: prescribed.yyyy },
@@ -288,7 +292,7 @@ export function buildFieldSpecs(d: ReturnData, opts: { secretaryChanged?: YesNo 
   for (const o of d.officers) {
     const p = P(o.memberId);
     // No holder → no lodge email either (a mailbox nobody reads helps no one).
-    const lodgeEmail = o.memberId ? lodgeEmailFor(o.key, d.membershipLodgeEmail) : "";
+    const lodgeEmail = o.memberId ? lodgeEmailFor(o.key, d.membershipLodgeEmail, d.identity.emailDomain) : "";
     if (o.key === "membership_officer") {
       specs.push(
         { id: "Name (Block Letters)_Membership Oﬃcer", label: "Membership Officer name", value: blockName(p), center: true, match: has("name", "membership") },
