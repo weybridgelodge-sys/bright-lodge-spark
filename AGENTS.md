@@ -9,7 +9,7 @@
 - Public/member Thursday wording: "Rehearsal Night", never "Lodge of Instruction"/"LOI" (no subs collected). Keep internal `loi` identifiers.
 - Installation Returns: live data, exact AcroForm IDs; dispensation blank; signatures = current holder's active member_signatures image, embedded server-side, audited, only when officer_signatures is on. Why: signatures follow the office.
 - Member signatures: private member-signatures bucket, no client access; signature-*/generate-provincial-return functions only; one active per member, unit-scoped; on-behalf needs consent, audited; never log image data/URLs. Why: fraud-sensitive.
-- Provincial return layout: supabase/functions/_shared/provincialReturnDoc.ts (browser re-exports). Why: one layout signed/unsigned.
+- Provincial return layout: supabase/functions/_shared/provincialReturnDoc.ts (browser re-exports). Signed returns (Provincial, UGLE) load signers only via _shared/returnSigners.ts; UGLE stamping in _shared/ugleReturnSignatures.ts. Why: one layout and one signature source.
 - Browser layout tests use only a Vite `e2e`-mode, localhost-only synthetic identity; never backend access or production.
 - Officer access = Inst. year via current_officer_holder (latest confirmed; stored date else installation_rule_date); offices carry; rolls: lib/officerRoll; reps: category representative+positionsFor; labels masonicYearStartSync. Dues/periods/Almoner Oct–Sep.
 - Officer appointment changes audit to officer_appointment_audit (swallow-on-error trigger); offices-held only via get_member_offices_held.
