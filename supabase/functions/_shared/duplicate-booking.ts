@@ -6,6 +6,8 @@
 // idempotent, nothing stopped a member paying twice for the same meeting.
 // This check runs BEFORE any Stripe session is created.
 
+import { bookingContactPhrase } from "./bookingContact.ts";
+
 // Structural client type so this file also typechecks when the browser bundle/tests import it.
 // deno-lint-ignore no-explicit-any
 type SupabaseClient = { from: (table: string) => any };
@@ -19,10 +21,9 @@ export const BLOCKING_STATUSES = [
   "waitlisted_refunded",
 ];
 
-/** "Already booked" wording; the address comes from loadLodgeSettings().bookingContactEmail, omitted when unknown. */
-export function duplicateBookingMessage(contactEmail?: string | null): string {
-  const e = typeof contactEmail === "string" ? contactEmail.trim() : "";
-  return `You already have a booking for this event. If you need to change or cancel it, please contact the Assistant Secretary${e ? ` at ${e}` : ""}.`;
+/** "Already booked" wording from loadLodgeSettings().bookingContactEmail/bookingContactOffice; address omitted when unknown. */
+export function duplicateBookingMessage(contactEmail?: string | null, office?: string | null): string {
+  return `You already have a booking for this event. If you need to change or cancel it, ${bookingContactPhrase(contactEmail, office)}.`;
 }
 
 export interface DuplicateCheckArgs {

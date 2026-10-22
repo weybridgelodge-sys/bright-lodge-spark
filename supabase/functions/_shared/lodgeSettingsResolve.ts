@@ -1,4 +1,5 @@
 // Pure part of lodgeSettings (unit-tested in src/test).
+import { resolveBookingContact } from "./bookingContact.ts";
 export const LODGE_FALLBACK = {
   siteUrl: "https://weybridgelodge.org.uk",
   senderName: "Weybridge Lodge",
@@ -23,16 +24,23 @@ export const LODGE_FALLBACK = {
   installationReturnFile: "Installation-Return-6787-{year}",
 } as const;
 
-export type LodgeSettings = { -readonly [K in keyof typeof LODGE_FALLBACK]: string } & { bookingContactEmail: string };
+export type LodgeSettings = { -readonly [K in keyof typeof LODGE_FALLBACK]: string } & { bookingContactEmail: string; bookingContactOffice: string };
 
 type Row = Record<string, string | null | undefined> | null | undefined;
 /** unit_settings rows keyed by setting key. */
 export type UnitSettingsMap = Record<string, Record<string, unknown> | null | undefined> | null | undefined;
 const pick = (v: unknown, fb: string) => (typeof v === "string" && v.trim() ? v.trim() : fb);
 
-export function resolveLodgeSettings(row: Row, us?: UnitSettingsMap): LodgeSettings {
+/** officers.assistantSecretaryHeld: current_officer_holder("assistant_secretary") is not null. */
+export function resolveLodgeSettings(row: Row, us?: UnitSettingsMap, officers?: { assistantSecretaryHeld?: boolean }): LodgeSettings {
   const f = LODGE_FALLBACK;
   const u = (k: string, _f?: string) => (us?.[k] ?? {}) as Record<string, unknown>;
+  const bc = resolveBookingContact({
+    explicitEmail: u("booking_contact_email", "").email,
+    assistantSecretaryHeld: !!officers?.assistantSecretaryHeld,
+    assistantSecretaryEmail: row?.assistant_secretary_email,
+    secretaryEmail: row?.secretary_email,
+  });
   return {
     siteUrl: pick(row?.site_url, f.siteUrl).replace(/\/+$/, ""),
     senderName: pick(row?.sender_name, f.senderName),
@@ -43,8 +51,9 @@ export function resolveLodgeSettings(row: Row, us?: UnitSettingsMap): LodgeSetti
     webmasterEmail: pick(row?.webmaster_email, f.webmasterEmail),
     communicationsEmail: pick(row?.communications_email, f.communicationsEmail),
     lodgePostcode: pick(row?.lodge_postcode, f.lodgePostcode),
-    // Unit Setup booking_contact_email (null/blank = not set), else the Assistant Secretary's lodge address, else "".
-    bookingContactEmail: pick(u("booking_contact_email", "").email, pick(row?.assistant_secretary_email, "")),
+    // Booking queries: see bookingContact.ts (Unit Setup, else held Assistant Secretary, else Secretary).
+    bookingContactEmail: bc.email,
+    bookingContactOffice: bc.office,
     provinceName: pick(u("province", "").name, f.provinceName),
     facebookUrl: pick(u("web_social", "").facebook_url, f.facebookUrl),
     instagramUrl: pick(u("web_social", "").instagram_url, f.instagramUrl),

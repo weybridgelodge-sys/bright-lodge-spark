@@ -187,7 +187,13 @@ describe("seeded bank/sign-off values never typed in src or edge functions", () 
       expect(fs.readFileSync(f, "utf8")).not.toMatch(/assistantsecretary@/i);
     });
   }
-  for (const f of ["supabase/functions/_shared/duplicate-booking.ts", "src/pages/CheckoutReturn.tsx"]) {
+  it("booking contact rule lives only in bookingContact.ts", () => {
+    for (const f of ["supabase/functions/_shared/send-booking-emails.ts", "supabase/functions/_shared/duplicate-booking.ts"]) {
+      expect(fs.readFileSync(f, "utf8")).not.toMatch(/assistantSecretaryEmail/);
+    }
+    expect(fs.readFileSync("supabase/functions/_shared/lodgeSettings.ts", "utf8")).toMatch(/current_officer_holder", \{ _position_key: "assistant_secretary"/);
+  });
+  for (const f of ["supabase/functions/_shared/duplicate-booking.ts", "src/pages/CheckoutReturn.tsx", "supabase/functions/_shared/bookingContact.ts", "supabase/functions/_shared/send-booking-emails.ts"]) {
     it(`${f}: no lodge name, domain, email or UUID literals`, () => {
       // Pre-rendered SEO copy stays typed (project rule), so the <SEO .../> line is exempt.
       const src = fs.readFileSync(f, "utf8").split("\n").filter((l) => !/<SEO /.test(l)).join("\n");

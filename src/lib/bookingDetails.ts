@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 export type BookingDetails = {
   lodgeName: string; lodgeNumber: string; accountName: string; sortCode: string; accountNumber: string;
-  referencePattern: string; cardWording: string; chequePayee: string; signOffOverride: string; contactEmail: string;
+  referencePattern: string; cardWording: string; chequePayee: string; signOffOverride: string; contactEmail: string; contactOffice: string;
 };
 
 const s = (v: unknown) => (typeof v === "string" ? v.trim() : "");
@@ -18,6 +18,8 @@ export function parseBookingDetails(row: unknown): BookingDetails {
     sortCode: s(r.sort_code), accountNumber: s(r.account_number), referencePattern: s(r.reference_pattern),
     cardWording: s(r.card_wording), chequePayee: s(r.cheque_payee), signOffOverride: s(r.sign_off_override),
     contactEmail: s(r.contact_email),
+    // "" = explicit Unit Setup contact ("contact us"); else office title. Missing field = Secretary wording.
+    contactOffice: r.contact_office === undefined || r.contact_office === null ? "Secretary" : s(r.contact_office),
   };
 }
 
