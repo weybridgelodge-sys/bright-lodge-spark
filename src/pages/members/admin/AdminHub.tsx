@@ -4,7 +4,7 @@ import ProtectedRoute from "@/components/members/ProtectedRoute";
 import { useAuth } from "@/hooks/useAuth";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { HeartHandshake, GraduationCap, BarChart3, Banknote, Mail, Vote, ArrowRight, CreditCard, BookOpen, FileText, Wallet } from "lucide-react";
+import { HeartHandshake, GraduationCap, BarChart3, Banknote, Mail, Vote, ArrowRight, CreditCard, BookOpen, FileText, Wallet, Building2 } from "lucide-react";
 
 type Tile = { to: string; title: string; description: string; icon: React.ComponentType<{ className?: string }>; visible: boolean };
 
@@ -12,15 +12,18 @@ function Inner() {
   const { isAdmin, isSecretary, isWorshipfulMaster, canAccessAlmoner, canAccessMentorPortal, canAccessCharity, canManageSummons, canAccessTreasurer } = useAuth();
   const [isCharitySteward, setIsCharitySteward] = useState(false);
   const [canEditNewsletter, setCanEditNewsletter] = useState(false);
+  const [canViewUnitSetup, setCanViewUnitSetup] = useState(false);
 
   useEffect(() => {
     (async () => {
       const { data: u } = await supabase.auth.getUser();
       if (!u.user) return;
-      const [{ data: charity }, { data: newsletter }] = await Promise.all([
+      const [{ data: charity }, { data: newsletter }, { data: unitSetup }] = await Promise.all([
         supabase.rpc("can_edit_charity" as any, { _user: u.user.id }),
         supabase.rpc("can_edit_newsletter" as any, { _user: u.user.id } as any),
+        supabase.rpc("can_view_unit_setup" as any, { _user: u.user.id } as any),
       ]);
+      if (typeof unitSetup === "boolean") setCanViewUnitSetup(unitSetup);
       if (typeof charity === "boolean") setIsCharitySteward(charity);
       if (typeof newsletter === "boolean") setCanEditNewsletter(newsletter);
     })();
@@ -37,6 +40,7 @@ function Inner() {
     { to: "/members/admin/newsletter", title: "Newsletter Hub", description: "Compose and broadcast the Monthly Chronicle.", icon: Mail, visible: canEditNewsletter },
     { to: "/members/admin/polls", title: "Polls & Voting", description: "Ask the brethren a question; live results on the Dashboard.", icon: Vote, visible: isAdmin || isSecretary || isWorshipfulMaster },
     { to: "/members/admin/contact-settings", title: "Enquiry contact settings", description: "Who receives website membership enquiries, and the guide link sent to enquirers.", icon: Mail, visible: isAdmin || isSecretary },
+    { to: "/members/admin/unit-setup", title: "Unit Setup", description: "Lodge identity, bank details, payment wording and sign-off used on booking pages.", icon: Building2, visible: canViewUnitSetup },
     { to: "/members/admin/ritual", title: "Ritual Library", description: "Upload, replace, and manage ritual rehearsal material.", icon: BookOpen, visible: isAdmin },
   ];
 

@@ -18,6 +18,15 @@ const EMPTY: Form = { lodge_name: "", lodge_number: "", consecration_date: "", a
 type Audit = { id: string; key: string; old_value: unknown; new_value: unknown; changed_by: string | null; changed_at: string };
 type Errs = Partial<Record<keyof Form, string>>;
 
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <section className="rounded-sm border border-gold/20 bg-navy-light/30 p-4 space-y-4" aria-label={title}>
+      <h2 className="font-serif text-lg text-gold">{title}</h2>
+      {children}
+    </section>
+  );
+}
+
 const rpc = (name: string, args?: object) => (supabase.rpc as any)(name, args);
 
 function Inner() {
@@ -28,12 +37,19 @@ function Inner() {
   const [errs, setErrs] = useState<Errs>({});
   const [status, setStatus] = useState<Record<string, string>>({});
   const [audit, setAudit] = useState<Audit[]>([]);
+  const [names, setNames] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState("");
   const [loading, setLoading] = useInitialLoading();
 
   const loadAudit = async () => {
     const { data } = await (supabase.from("unit_settings_audit" as never) as any).select("*").order("changed_at", { ascending: false }).limit(20);
-    setAudit((data as Audit[]) ?? []);
+    const rows = (data as Audit[]) ?? [];
+    setAudit(rows);
+    const ids = [...new Set(rows.map((r) => r.changed_by).filter(Boolean))] as string[];
+    if (ids.length) {
+      const { data: ps } = await supabase.from("profiles").select("id,first_name,last_name").in("id", ids);
+      setNames(Object.fromEntries(((ps ?? []) as { id: string; first_name: string | null; last_name: string | null }[]).map((p) => [p.id, [p.first_name, p.last_name].filter(Boolean).join(" ")])));
+    }
   };
 
   useEffect(() => {
@@ -87,13 +103,6 @@ function Inner() {
       <p role="status" className="font-sans text-sm text-primary-foreground/90">{status[section]}</p>
     </div>
   );
-  const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
-    <section className="rounded-sm border border-gold/20 bg-navy-light/30 p-4 space-y-4" aria-label={title}>
-      <h2 className="font-serif text-lg text-gold">{title}</h2>
-      {children}
-    </section>
-  );
-
   if (loading || canView === null) return <MembersLayout><p role="status" className="font-sans text-sm text-primary-foreground/80">Loading…</p></MembersLayout>;
   if (!canView) return <MembersLayout><p className="font-sans text-sm text-primary-foreground">You don't have access to Unit Setup.</p></MembersLayout>;
 
@@ -177,7 +186,7 @@ function Inner() {
             <ul className="space-y-3 text-sm">
               {audit.map((a) => (
                 <li key={a.id} className="border-t border-gold/20 pt-2 break-words">
-                  <p className="font-semibold">{a.key.replace(/_/g, " ")} · {new Date(a.changed_at).toLocaleString("en-GB")}</p>
+                  <p className="font-semibold">{a.key.replace(/_/g, " ")} · {new Date(a.changed_at).toLocaleString("en-GB")} · {(a.changed_by && names[a.changed_by]) || "Unknown member"}</p>
                   <p>From: {fmt(a.old_value)}</p>
                   <p>To: {fmt(a.new_value)}</p>
                 </li>
