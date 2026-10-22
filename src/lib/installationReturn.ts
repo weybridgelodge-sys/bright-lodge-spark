@@ -1,6 +1,6 @@
 // UGLE Installation Return — live resolver + AcroForm filler.
 // Every call reads current database state; nothing is cached.
-import { PDFDocument, PDFTextField, PDFCheckBox, PDFRadioGroup, PDFDropdown, PDFName, PDFDict, TextAlignment } from "pdf-lib";
+import { PDFDocument, StandardFonts, type PDFFont, PDFTextField, PDFCheckBox, PDFRadioGroup, PDFDropdown, PDFName, PDFDict, TextAlignment } from "pdf-lib";
 import { supabase } from "@/integrations/supabase/client";
 import { cachedInstallationConfig, loadInstallationConfig, ruleDateFor } from "@/lib/masonicYear";
 import { identityIssues, installationRuleWording, loadLodgeIdentity, type LodgeIdentity } from "@/lib/lodgeIdentity";
@@ -320,7 +320,31 @@ export function buildFieldSpecs(d: ReturnData, opts: { secretaryChanged?: YesNo 
 // Signature fields are listed so we can prove they are left untouched.
 export const NEVER_FILL = ["Worshipful MasterRow1", "SecretaryRow1", "Date of Disp"];
 
-export type FillReport = { filled: { id: string; field: string; fuzzy: boolean }[]; missing: string[]; templateFields: string[] };
+export type FillReport = { filled: { id: string; field: string; fuzzy: boolean }[]; missing: string[]; templateFields: string[]; long: string[] };
+
+export const MIN_EMAIL_FONT = 6;
+const isEmailSpec = (s: FieldSpec) => /email address/i.test(s.id);
+
+/** Largest font size (default first, then down to MIN_EMAIL_FONT) at which text fits the width; null if not even at the minimum. */
+export function fitFontSize(widthAt: (size: number) => number, available: number, defaultSize: number): number | null {
+  if (widthAt(defaultSize) <= available) return defaultSize;
+  for (let s = Math.floor(defaultSize * 4) / 4; s >= MIN_EMAIL_FONT; s -= 0.25) if (widthAt(s) <= available) return s;
+  return null;
+}
+
+function shrinkToFit(f: PDFTextField, value: string, font: PDFFont): "fits" | "shrunk" | "too-long" {
+  const da = f.acroField.getDefaultAppearance() ?? "";
+  const m = da.match(/([\d.]+)\s+Tf/);
+  const def = m ? Number(m[1]) : 0;
+  const w = f.acroField.getWidgets()[0];
+  if (!value || !w) return "fits";
+  const available = w.getRectangle().width - 4; // pdf-lib's text padding each side
+  const base = def > 0 ? def : 12;
+  const size = fitFontSize((s) => font.widthOfTextAtSize(value, s), available, base);
+  if (size === base && def > 0) return "fits";
+  f.setFontSize(size ?? MIN_EMAIL_FONT);
+  return size === null ? "too-long" : "shrunk";
+}
 
 /** Some fields (e.g. "Treasurer Lodge Email Address") are authored as widgets that inherit
  *  /FT from their parent node instead of setting it directly. pdf-lib classifies fields by the
@@ -348,7 +372,8 @@ export async function fillTemplate(templateBytes: ArrayBuffer | Uint8Array, spec
     names = form.acroForm.getAllFields().map(([f]) => f.dict.lookup(PDFName.of("T"))?.toString() ?? "");
   }
   const used = new Set<string>();
-  const report: FillReport = { filled: [], missing: [], templateFields: names };
+  const report: FillReport = { filled: [], missing: [], templateFields: names, long: [] };
+  const helv = await pdf.embedFont(StandardFonts.Helvetica);
   for (const s of specs) {
     let name = names.includes(s.id) ? s.id : null;
     let fuzzy = false;
@@ -364,6 +389,7 @@ export async function fillTemplate(templateBytes: ArrayBuffer | Uint8Array, spec
       if (f instanceof PDFTextField) {
         f.setText(s.value || "");
         if (s.center) f.setAlignment(TextAlignment.Center);
+        if (isEmailSpec(s) && shrinkToFit(f, s.value || "", helv) === "too-long") report.long.push(`long value in field ${name}`);
         report.filled.push({ id: s.id, field: name, fuzzy });
       } else if (f instanceof PDFCheckBox) {
         if (s.value === "Y") f.check(); else f.uncheck();
