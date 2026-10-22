@@ -61,16 +61,17 @@ test("expanded attendance rows never clip long names at 320px", async ({ page })
   const toggle = page.getByRole("button", { name: /attended/ }).first();
   await expect(toggle).toBeVisible({ timeout: 90000 });
   await toggle.click();
-  const names = page.getByTestId("loi-attendance-name");
-  await expect(names).toHaveCount(2);
-  await expect(names.first()).toContainText("Grundy");
-  for (const n of await names.all()) {
+  const rows = page.getByRole("listitem").filter({ hasText: "W Bro." });
+  await expect(rows).toHaveCount(2);
+  for (const row of await rows.all()) {
+    const n = row.locator("span").first();
     const s = await n.evaluate((el) => ({ sw: el.scrollWidth, cw: el.clientWidth, to: getComputedStyle(el).textOverflow }));
     expect(s.sw).toBeLessThanOrEqual(s.cw);
     expect(s.to).not.toBe("ellipsis");
   }
-  await expect(page.getByTestId("loi-attendance-row").first()).toContainText("Immediate Past Master");
+  await expect(rows.nth(1)).toContainText("Grundy");
+  await expect(rows.nth(1)).toContainText("Immediate Past Master");
   expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(0);
-  await page.getByTestId("loi-attendance-row").first().screenshot({ path: "/tmp/browser/loi-row-after.png" });
+  await rows.nth(1).screenshot({ path: "/tmp/browser/loi-row-after.png" });
   await expectNoAxeViolations(page, "rehearsal attendance rows");
 });
