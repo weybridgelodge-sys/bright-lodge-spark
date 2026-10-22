@@ -11,7 +11,7 @@ describe("signature upload helpers", () => {
     expect(sniffImageType(new Uint8Array([1, 2, 3]))).toBeNull();
   });
   it("reads a file once into a typed in-memory copy, even with an empty type", async () => {
-    const r = await readFileOnce(new Blob([jpeg]));
+    const r = await readFileOnce({ size: jpeg.length, arrayBuffer: async () => jpeg.slice().buffer } as unknown as Blob);
     expect(r.ok && r.blob.type).toBe("image/jpeg");
   });
   it("reports an unreadable file as 'choose again'", async () => {
@@ -19,7 +19,7 @@ describe("signature upload helpers", () => {
     expect(await readFileOnce(bad)).toEqual({ ok: false, error: SIG_MSG_UNREADABLE });
   });
   it("rejects a non-image file", async () => {
-    const r = await readFileOnce(new Blob([new Uint8Array([1, 2, 3, 4])]));
+    const r = await readFileOnce({ size: 4, arrayBuffer: async () => new Uint8Array([1, 2, 3, 4]).buffer } as unknown as Blob);
     expect(r.ok).toBe(false);
   });
 });
