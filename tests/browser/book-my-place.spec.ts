@@ -99,7 +99,7 @@ test("pending card: Continue to payment resumes the same booking once; expired h
   expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(0);
   await page.screenshot({ path: "/tmp/browser/resume-card-320.png" });
   await btn.dblclick();
-  await expect(page.getByText("Your card hold has been released. You can book again.")).toBeVisible();
+  await expect(page.getByRole("link", { name: /Book my place\s*:\s*Regular Meeting/ })).toBeVisible();
   expect(calls).toEqual(["11111111-1111-4111-8111-111111111111"]);
   await expect(page.getByRole("link", { name: /Book my place\s*:\s*Expired hold meeting/ })).toBeVisible();
   await expect(page.getByText("Your card payment is being held. If it is not completed within the hour the hold is released.")).toHaveCount(1);
