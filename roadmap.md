@@ -139,3 +139,6 @@
 - [x] Phase 1: shared officer roll on Summons; meeting-pattern sentence + override; member-derived rep/Royal Arch/honorary names
 - [ ] Phase 2 (waits on WM approval): position categories migration, Representatives group, backfill dry-run, public Lodge Profile, remove hard-coded lodge literals
 - [ ] Meeting Diary 320px browser check fails on "Format dd/mm/yyyy" hint (screen not touched in phase 1; investigate)
+
+## Festive Board register link (Oct 2026)
+- [ ] Replace typed booking slug with linked booking page (by event id), backfill, switch readers, tests, 320px axe
