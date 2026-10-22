@@ -992,24 +992,24 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
             <li key={a.id} className="space-y-1">
               <div className="flex items-center gap-2">
                 <span className="w-6 text-xs text-primary-foreground/80">{i + 1}.</span>
-                <Input value={a.label} onChange={(e) => updateAgenda(a.id, e.target.value)} />
+                <Input aria-label={`Agenda item ${i + 1}`} value={a.label} onChange={(e) => updateAgenda(a.id, e.target.value)} />
                 {a.kind !== "standing" && (
                   <Badge variant="outline" className="text-[10px]">{a.kind}</Badge>
                 )}
-                <Button type="button" size="sm" variant="ghost" className="text-gold hover:text-gold hover:bg-gold/10" onClick={() => addSubItem(a.id)} title="Add sub-item"><CornerDownRight className="w-4 h-4" /></Button>
-                <Button type="button" size="sm" variant="ghost" className="text-gold hover:text-gold hover:bg-gold/10" onClick={() => moveAgenda(i, -1)}><ArrowUp className="w-4 h-4" /></Button>
-                <Button type="button" size="sm" variant="ghost" className="text-gold hover:text-gold hover:bg-gold/10" onClick={() => moveAgenda(i, 1)}><ArrowDown className="w-4 h-4" /></Button>
-                <Button type="button" size="sm" variant="destructive" onClick={() => removeAgenda(a.id)}><Trash2 className="w-4 h-4" /></Button>
+                <Button type="button" size="sm" variant="ghost" className="text-gold hover:text-gold hover:bg-gold/10" onClick={() => addSubItem(a.id)} title="Add sub-item" aria-label={`Add sub-item to agenda item ${i + 1}`}><CornerDownRight className="w-4 h-4" /></Button>
+                <Button type="button" size="sm" variant="ghost" className="text-gold hover:text-gold hover:bg-gold/10" onClick={() => moveAgenda(i, -1)} aria-label={`Move agenda item ${i + 1} up`}><ArrowUp className="w-4 h-4" /></Button>
+                <Button type="button" size="sm" variant="ghost" className="text-gold hover:text-gold hover:bg-gold/10" onClick={() => moveAgenda(i, 1)} aria-label={`Move agenda item ${i + 1} down`}><ArrowDown className="w-4 h-4" /></Button>
+                <Button type="button" size="sm" variant="destructive" onClick={() => removeAgenda(a.id)} aria-label={`Remove agenda item ${i + 1}`}><Trash2 className="w-4 h-4" /></Button>
               </div>
               {a.children && a.children.length > 0 && (
                 <ol className="space-y-1 pl-8">
                   {a.children.map((c, ci) => (
                     <li key={c.id} className="flex items-center gap-2">
                       <span className="w-6 text-xs text-primary-foreground/80">{subLetter(ci)}.</span>
-                      <Input value={c.label} onChange={(e) => updateAgenda(c.id, e.target.value)} />
-                      <Button type="button" size="sm" variant="ghost" className="text-gold hover:text-gold hover:bg-gold/10" onClick={() => moveSubItem(a.id, ci, -1)}><ArrowUp className="w-4 h-4" /></Button>
-                      <Button type="button" size="sm" variant="ghost" className="text-gold hover:text-gold hover:bg-gold/10" onClick={() => moveSubItem(a.id, ci, 1)}><ArrowDown className="w-4 h-4" /></Button>
-                      <Button type="button" size="sm" variant="destructive" onClick={() => removeAgenda(c.id)}><Trash2 className="w-4 h-4" /></Button>
+                      <Input aria-label={`Agenda item ${i + 1}${subLetter(ci)}`} value={c.label} onChange={(e) => updateAgenda(c.id, e.target.value)} />
+                      <Button type="button" size="sm" variant="ghost" className="text-gold hover:text-gold hover:bg-gold/10" onClick={() => moveSubItem(a.id, ci, -1)} aria-label={`Move item ${i + 1}${subLetter(ci)} up`}><ArrowUp className="w-4 h-4" /></Button>
+                      <Button type="button" size="sm" variant="ghost" className="text-gold hover:text-gold hover:bg-gold/10" onClick={() => moveSubItem(a.id, ci, 1)} aria-label={`Move item ${i + 1}${subLetter(ci)} down`}><ArrowDown className="w-4 h-4" /></Button>
+                      <Button type="button" size="sm" variant="destructive" onClick={() => removeAgenda(c.id)} aria-label={`Remove item ${i + 1}${subLetter(ci)}`}><Trash2 className="w-4 h-4" /></Button>
                     </li>
                   ))}
                 </ol>
