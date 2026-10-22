@@ -10,6 +10,7 @@ import type { EventBundle } from "@/lib/lodgeEvents";
 import { normaliseName, normaliseTitle } from "@/lib/nameCase";
 import TurnstileWidget from "@/components/TurnstileWidget";
 import { readFunctionError } from "@/lib/functionError";
+import { lodgePlaceholder, paymentReference, signOff, useBookingDetails } from "@/lib/bookingDetails";
 
 // Meeting booking form shared by the public Bookings page and the portal (Book my place).
 // Lifted verbatim from pages/Bookings.tsx; the public page passes no prefill and behaves as before.
@@ -70,6 +71,8 @@ export default function MeetingBookingForm({
   const { toast } = useToast();
   const shouldReduceMotion = useReducedMotion();
   const { event, diningOptions } = bundle;
+  const bd = useBookingDetails();
+  const so = signOff(bd);
 
   // ── Form state ──────────────────────────────────────────────────────────────
   const [step, setStep] = useState(1);
@@ -301,10 +304,10 @@ export default function MeetingBookingForm({
                   </h3>
                   <div className="text-muted-foreground font-sans leading-relaxed whitespace-pre-line text-left sm:text-center">
                     {submissionStatus === "meeting-only" && (
-                      <p>{"Thank you for booking into our next meeting, we look forward to seeing you.\n\nSincerely and Fraternally,\nWM Weybridge Lodge 6787"}</p>
+                      <p>{`Thank you for booking into our next meeting, we look forward to seeing you.\n\n${so}`}</p>
                     )}
                     {submissionStatus === "apologies" && (
-                      <p>{"Sorry to hear that you are unable to attend this meeting, your apologies will be duly recorded with the Secretary. We hope to see you at a future meeting.\n\nSincerely and Fraternally,\nWM Weybridge Lodge 6787"}</p>
+                      <p>{`Sorry to hear that you are unable to attend this meeting, your apologies will be duly recorded with the Secretary. We hope to see you at a future meeting.\n\n${so}`}</p>
                     )}
                     {submissionStatus === "bank-transfer" && (
                       <div className="space-y-4">
@@ -315,16 +318,16 @@ export default function MeetingBookingForm({
                         </p>
                         {/* bg-background border border-border replaces unapproved bg-muted/50 */}
                         <div className="bg-background border border-border rounded-sm p-4 text-sm text-foreground space-y-1">
-                          <div><span className="text-muted-foreground">Account name:</span> Weybridge Lodge No 6787</div>
-                          <div><span className="text-muted-foreground">Sort code:</span> 30-99-80</div>
-                          <div><span className="text-muted-foreground">Account no:</span> 14878862</div>
-                          <div><span className="text-muted-foreground">Reference:</span> Dining + {lastName || "Your Surname"}</div>
+                          <div><span className="text-muted-foreground">Account name:</span> {bd.accountName}</div>
+                          <div><span className="text-muted-foreground">Sort code:</span> {bd.sortCode}</div>
+                          <div><span className="text-muted-foreground">Account no:</span> {bd.accountNumber}</div>
+                          <div><span className="text-muted-foreground">Reference:</span> {paymentReference(bd.referencePattern, lastName)}</div>
                         </div>
-                        <p>{"We look forward to seeing you on the night.\n\nSincerely and Fraternally,\nWM Weybridge Lodge 6787"}</p>
+                        <p>{`We look forward to seeing you on the night.\n\n${so}`}</p>
                       </div>
                     )}
                     {submissionStatus === "cash-cheque" && (
-                      <p>{`Thank you for your booking. Please see the Treasurer on the night to settle your dining fee of ${fmtGbp(totalPence)} by cash or cheque (cheques payable to "Weybridge Lodge No 6787").\n\nWe look forward to seeing you on the night.\n\nSincerely and Fraternally,\nWM Weybridge Lodge 6787`}</p>
+                      <p>{`Thank you for your booking. Please see the Treasurer on the night to settle your dining fee of ${fmtGbp(totalPence)} by cash or cheque${bd.chequePayee ? ` (cheques payable to "${bd.chequePayee}")` : ""}.\n\nWe look forward to seeing you on the night.\n\n${so}`}</p>
                     )}
                   </div>
                 </div>
@@ -508,7 +511,7 @@ export default function MeetingBookingForm({
                           onChange={(e) => setLodge(e.target.value)}
                           required={!nonMason}
                           className={inputClass}
-                          placeholder="e.g. Weybridge Lodge No. 6787"
+                          placeholder={lodgePlaceholder(bd)}
                         />
                       </div>
                       <div>
@@ -640,7 +643,7 @@ export default function MeetingBookingForm({
                                   value={g.lodge}
                                   onChange={(e) => setGuests((prev) => prev.map((x, j) => j === i ? { ...x, lodge: e.target.value } : x))}
                                   className={inputClass}
-                                  placeholder="e.g. Weybridge Lodge No. 6787"
+                                  placeholder={lodgePlaceholder(bd)}
                                 />
                               </div>
                             </div>
@@ -749,7 +752,7 @@ export default function MeetingBookingForm({
                               Bank Transfer
                               <br />
                               <span className="text-muted-foreground text-xs">
-                                Sort code: 30-99-80 · Account: 14878862 · Ref: Dining+Your Surname
+                                Sort code: {bd.sortCode} · Account: {bd.accountNumber} · Ref: {paymentReference(bd.referencePattern, "")}
                               </span>
                             </span>
                           </label>
