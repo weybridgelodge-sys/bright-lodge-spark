@@ -69,7 +69,7 @@ describe("lodge settings fallback", () => {
       formalSenderName: "Weybridge Lodge No. 6787",
       secretaryEmail: "secretary@weybridgelodge.org.uk",
       membershipCcEmail: "membershipsecretary@weybridgelodge.org.uk",
-      assistantSecretaryEmail: "assistantsecretary@weybridgelodge.org.uk",
+      assistantSecretaryEmail: "", // no typed fallback (JOB P)
       webmasterEmail: "webmaster@weybridgelodge.org.uk",
       communicationsEmail: "communications@weybridgelodge.org.uk",
       lodgePostcode: "GU2 4DR",

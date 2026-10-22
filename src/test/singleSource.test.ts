@@ -189,7 +189,8 @@ describe("seeded bank/sign-off values never typed in src or edge functions", () 
   }
   for (const f of ["supabase/functions/_shared/duplicate-booking.ts", "src/pages/CheckoutReturn.tsx"]) {
     it(`${f}: no lodge name, domain, email or UUID literals`, () => {
-      const src = fs.readFileSync(f, "utf8");
+      // Pre-rendered SEO copy stays typed (project rule), so the <SEO .../> line is exempt.
+      const src = fs.readFileSync(f, "utf8").split("\n").filter((l) => !/<SEO /.test(l)).join("\n");
       expect(src).not.toMatch(/weybridge|6787|[\w.-]+@[\w-]+\.[a-z]{2,}|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i);
     });
   }
