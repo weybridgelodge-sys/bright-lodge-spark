@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { fieldCls, fieldLabelCls, fieldHintCls } from "@/lib/fieldStyle";
 import { useInitialLoading } from "@/hooks/useInitialLoading";
 import { loadLodgeIdentity } from "@/lib/lodgeIdentity";
+import { changedFields, clearedRequired, patchFor, REQUIRED_UNIT_FIELDS, type FieldMap } from "@/lib/unitSetupForm";
 import { canonicalSortCode, signOff, validAccountNumber, paymentReference } from "@/lib/bookingDetails";
 
 type Form = {
@@ -34,8 +35,36 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 const rpc = (name: string, args?: object) => (supabase.rpc as any)(name, args);
 
+type Step = { key: string; fields: (keyof Form)[]; value: (changed: (keyof Form)[]) => object };
+
+async function loadForm() {
+  const [id, rows, setup] = await Promise.all([loadLodgeIdentity(), (supabase.from("unit_settings" as never) as any).select("key,value"), rpc("get_unit_setup")]);
+  if (rows.error) throw rows.error;
+  if (setup.error) throw setup.error;
+  const su = (setup.data ?? {}) as { contacts?: Record<string, string | null>; venues?: Venue[]; province_emails?: Record<string, unknown> };
+  const c = su.contacts ?? {};
+  const by: Record<string, Record<string, string | null>> = {};
+  for (const r of (rows.data ?? []) as { key: string; value: Record<string, string | null> }[]) by[r.key] = r.value ?? {};
+  const b = by.bank_details ?? {}, p = by.payment_wording ?? {};
+  const form: Form = {
+    lodge_name: id.lodgeName, lodge_number: id.lodgeNumber, consecration_date: id.consecrationDate,
+    account_name: b.account_name ?? "", sort_code: b.sort_code ?? "", account_number: b.account_number ?? "", reference_pattern: b.reference_pattern ?? "",
+    card_wording: p.card_wording ?? "", cheque_payee: p.cheque_payee ?? "", sign_off_override: by.sign_off?.override ?? "",
+    booking_contact_email: by.booking_contact_email?.email ?? "",
+    venue_id: by.meeting_place?.venue_id ?? "", assistant_secretary_email: c.assistant_secretary_email ?? "", webmaster_email: c.webmaster_email ?? "",
+    communications_email: c.communications_email ?? "", site_url: c.site_url ?? "", sender_name: c.sender_name ?? "", formal_sender_name: c.formal_sender_name ?? "",
+    facebook_url: by.web_social?.facebook_url ?? "", instagram_url: by.web_social?.instagram_url ?? "", twitter_url: by.web_social?.twitter_url ?? "",
+    province_name: by.province?.name ?? "", ico_number: by.registrations?.ico_number ?? "", newsletter_masthead: by.newsletter?.masthead ?? "",
+    newsletter_footer_note: by.newsletter?.footer_note ?? "", calendar_name: by.calendar_feed?.name ?? "",
+    provincial_file: by.return_files?.provincial ?? "", installation_file: by.return_files?.installation ?? "",
+  };
+  return { form, contactEmail: id.secretaryEmail, venues: su.venues ?? [], provEmails: su.province_emails ?? {} };
+}
+
 function Inner() {
   const [f, setF] = useState<Form>(EMPTY);
+  const [orig, setOrig] = useState<Form | null>(null);
+  const [loadError, setLoadError] = useState("");
   const [contactEmail, setContactEmail] = useState("");
   const [venues, setVenues] = useState<Venue[]>([]);
   const [provEmails, setProvEmails] = useState<{ provincial_return?: unknown; installation_return?: unknown }>({});
@@ -65,42 +94,49 @@ function Inner() {
       const [v, e] = await Promise.all([rpc("can_view_unit_setup", { _user: uid }), rpc("can_edit_unit_setup", { _user: uid })]);
       setCanView(v.data === true); setCanEdit(e.data === true);
       if (v.data !== true) { setLoading(false); return; }
-      const [id, rows, setup] = await Promise.all([loadLodgeIdentity().catch(() => null), (supabase.from("unit_settings" as never) as any).select("key,value"), rpc("get_unit_setup")]);
-      const su = (setup.data ?? {}) as { contacts?: Record<string, string | null>; venues?: Venue[]; province_emails?: Record<string, unknown> };
-      const c = su.contacts ?? {};
-      setVenues(su.venues ?? []); setProvEmails(su.province_emails ?? {});
-      const by: Record<string, Record<string, string | null>> = {};
-      for (const r of (rows.data ?? []) as { key: string; value: Record<string, string | null> }[]) by[r.key] = r.value ?? {};
-      const b = by.bank_details ?? {}, p = by.payment_wording ?? {};
-      setContactEmail(id?.secretaryEmail ?? "");
-      setF({
-        lodge_name: id?.lodgeName ?? "", lodge_number: id?.lodgeNumber ?? "", consecration_date: id?.consecrationDate ?? "",
-        account_name: b.account_name ?? "", sort_code: b.sort_code ?? "", account_number: b.account_number ?? "", reference_pattern: b.reference_pattern ?? "",
-        card_wording: p.card_wording ?? "", cheque_payee: p.cheque_payee ?? "", sign_off_override: by.sign_off?.override ?? "",
-        booking_contact_email: by.booking_contact_email?.email ?? "",
-        venue_id: by.meeting_place?.venue_id ?? "", assistant_secretary_email: c.assistant_secretary_email ?? "", webmaster_email: c.webmaster_email ?? "",
-        communications_email: c.communications_email ?? "", site_url: c.site_url ?? "", sender_name: c.sender_name ?? "", formal_sender_name: c.formal_sender_name ?? "",
-        facebook_url: by.web_social?.facebook_url ?? "", instagram_url: by.web_social?.instagram_url ?? "", twitter_url: by.web_social?.twitter_url ?? "",
-        province_name: by.province?.name ?? "", ico_number: by.registrations?.ico_number ?? "", newsletter_masthead: by.newsletter?.masthead ?? "",
-        newsletter_footer_note: by.newsletter?.footer_note ?? "", calendar_name: by.calendar_feed?.name ?? "",
-        provincial_file: by.return_files?.provincial ?? "", installation_file: by.return_files?.installation ?? "",
-      });
-      await loadAudit();
+      try {
+        const r = await loadForm();
+        setVenues(r.venues); setProvEmails(r.provEmails); setContactEmail(r.contactEmail);
+        setF(r.form); setOrig(r.form);
+      } catch {
+        // Never show blanks as if they were the saved values: saving stays off.
+        setLoadError("The saved details could not be loaded, so saving is switched off. Reload the page to try again.");
+      }
+      await loadAudit().catch(() => {});
       setLoading(false);
     })().catch(() => { setCanView(false); setLoading(false); });
   }, []);
 
-  const save = async (section: string, key: string, value: object, check: () => Errs) => {
-    const e = check(); setErrs(e);
+  const save = async (section: string, steps: Step[], check: () => Errs) => {
+    if (!orig) return;
+    const all = steps.flatMap((s) => s.fields);
+    const changed = changedFields(orig, f, all);
+    if (!changed.length) { setErrs({}); setStatus((s) => ({ ...s, [section]: "No changes to save." })); return; }
+    const e = { ...check(), ...clearedRequired(f, changed, [...REQUIRED_UNIT_FIELDS]) };
+    for (const k of Object.keys(e) as (keyof Form)[]) if (!all.includes(k)) delete e[k];
+    setErrs(e);
     if (Object.keys(e).length) { setStatus((s) => ({ ...s, [section]: "Please correct the highlighted fields." })); return; }
     setBusy(section); setStatus((s) => ({ ...s, [section]: "" }));
-    const { data, error } = await rpc("save_unit_setup", { _key: key, _value: value });
+    let failed = "";
+    for (const st of steps) {
+      const ch = changed.filter((k) => st.fields.includes(k));
+      if (!ch.length) continue;
+      const { error } = await rpc("save_unit_setup", { _key: st.key, _value: st.value(ch) });
+      if (error) { failed = error.message; break; }
+    }
+    // Refresh the stored values; keep what the user typed if the save failed.
+    try {
+      const r = await loadForm();
+      setOrig(r.form);
+      if (!failed) setF((x) => { const n = { ...x }; for (const k of all) n[k] = r.form[k]; return n; });
+    } catch { /* keep the form as typed */ }
     setBusy("");
-    if (error) { setStatus((s) => ({ ...s, [section]: `Not saved: ${error.message}` })); return; }
-    if (key === "bank_details" && data?.sort_code) setF((x) => ({ ...x, sort_code: data.sort_code, account_number: data.account_number }));
-    setStatus((s) => ({ ...s, [section]: "Saved." }));
-    loadAudit();
+    const at = new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+    setStatus((s) => ({ ...s, [section]: failed ? `Not saved: ${failed}. Your changes are still in the form.` : `Saved at ${at}.` }));
+    loadAudit().catch(() => {});
   };
+  const whole = (m: FieldMap<Form>) => () => patchFor(f, Object.keys(m) as (keyof Form)[], m);
+  const only = (m: FieldMap<Form>) => (ch: (keyof Form)[]) => patchFor(f, ch, m);
 
   const ro = !canEdit;
   const field = (k: keyof Form, label: string, opts: { hint?: string; type?: string; inputMode?: "numeric" | "text" | "email" } = {}) => (
@@ -115,7 +151,7 @@ function Inner() {
   );
   const saveBtn = (section: string, onClick: () => void) => canEdit && (
     <div className="flex flex-wrap items-center gap-3 pt-2">
-      <Button type="button" onClick={onClick} disabled={busy === section} className="min-h-[44px]">{busy === section ? "Saving…" : "Save"}</Button>
+      <Button type="button" onClick={onClick} disabled={busy === section || !orig} className="min-h-[44px]">{busy === section ? "Saving…" : "Save"}</Button>
       <p role="status" className="font-sans text-sm text-primary-foreground/90">{status[section]}</p>
     </div>
   );
