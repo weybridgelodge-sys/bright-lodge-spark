@@ -18,6 +18,26 @@ import {
   membershipEmailOptions, MEMBERSHIP_EMAIL_SETTING, TEMPLATE_BUCKET, TEMPLATE_PATH,
   type YesNo, type Provenance, type ResolvedOffice, type ReturnData, type FillReport,
 } from "@/lib/installationReturn";
+import { useOfficerSignaturesEnabled } from "@/hooks/useOfficerSignaturesEnabled";
+import SignersPanel from "@/components/members/SignersPanel";
+import { readFunctionError } from "@/lib/functionError";
+import { ugleSignedDate } from "@/lib/ugleReturnSignatures";
+
+type SignedResult = { path: string; url: string | null; signed: { secretary: boolean; worshipful_master: boolean } };
+/** Signed path (officer_signatures on): store the filled form, then the server adds the stored signatures and dates. */
+export async function signFilledReturn(year: number, d: ReturnData, bytes: Uint8Array): Promise<SignedResult> {
+  const unsigned = `installation-returns/${year}/${returnFileStem(d.identity.lodgeNumber, year)}-${Date.now()}-unsigned.pdf`;
+  const up = await supabase.storage.from(TEMPLATE_BUCKET).upload(unsigned, new Blob([bytes as unknown as BlobPart], { type: "application/pdf" }), { contentType: "application/pdf" });
+  if (up.error) throw up.error;
+  const { data: res, error } = await supabase.functions.invoke("sign-installation-return", {
+    body: { lodge_year: year, unsigned_path: unsigned, installation_date: d.installationDate, prescribed_date: d.prescribedDate, wm_member_id: d.wm.memberId, secretary_member_id: d.officers.find((o) => o.key === "secretary")?.memberId ?? null },
+  });
+  if (error || !res?.ok) {
+    await supabase.storage.from(TEMPLATE_BUCKET).remove([unsigned]);
+    throw new Error(await readFunctionError(error, res, "Could not add the signatures"));
+  }
+  return res as SignedResult;
+}
 
 const PROV: Record<Provenance, { label: string; cls: string }> = {
   confirmed: { label: "Confirmed for this year", cls: "bg-emerald-600/80 text-primary-foreground" },
@@ -46,6 +66,7 @@ function Inner() {
   const [hasTemplate, setHasTemplate] = useState<boolean | null>(null);
   const [report, setReport] = useState<FillReport | null>(null);
   const [busy, setBusy] = useState(false);
+  const signaturesOn = useOfficerSignaturesEnabled() === true;
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -95,7 +116,10 @@ function Inner() {
       if (error || !blob) throw new Error("UGLE template not found — upload New_IR_Craft.pdf first.");
       const { bytes, report } = await fillTemplate(await blob.arrayBuffer(), buildFieldSpecs(fresh, { secretaryChanged: secChanged }));
       setReport(report);
-      const url = URL.createObjectURL(new Blob([bytes as unknown as BlobPart], { type: "application/pdf" }));
+      const pdfOut = signaturesOn
+        ? await (async () => { const g = await signFilledReturn(year, fresh, bytes); if (!g.url) throw new Error("Download link could not be created"); return (await fetch(g.url)).blob(); })()
+        : new Blob([bytes as unknown as BlobPart], { type: "application/pdf" });
+      const url = URL.createObjectURL(pdfOut);
       const a = document.createElement("a");
       a.href = url;
       a.download = `${returnFileStem(fresh.identity.lodgeNumber, fresh.year)}.pdf`;
@@ -122,6 +146,12 @@ function Inner() {
       if (error || !blob) throw new Error("UGLE template not found — upload New_IR_Craft.pdf first.");
       const { bytes, report } = await fillTemplate(await blob.arrayBuffer(), buildFieldSpecs(fresh, { secretaryChanged: secChanged }));
       setReport(report);
+      if (signaturesOn) {
+        const g = await signFilledReturn(year, fresh, bytes);
+        if (!g.url) throw new Error("Preview link could not be created");
+        setPending({ path: g.path, url: g.url, missing: report.missing.length });
+        return;
+      }
       const path = `installation-returns/${year}/${returnFileStem(fresh.identity.lodgeNumber, year)}-${Date.now()}.pdf`;
       const pdfBlob = new Blob([bytes as unknown as BlobPart], { type: "application/pdf" });
       const { error: upErr } = await supabase.storage.from(TEMPLATE_BUCKET).upload(path, pdfBlob, { contentType: "application/pdf" });
@@ -136,7 +166,7 @@ function Inner() {
 
   const cancelSubmit = async () => {
     if (pending) {
-      URL.revokeObjectURL(pending.url);
+      if (pending.url.startsWith("blob:")) URL.revokeObjectURL(pending.url);
       await supabase.storage.from(TEMPLATE_BUCKET).remove([pending.path]);
     }
     setPending(null);
@@ -154,7 +184,7 @@ function Inner() {
       try { msg = msg ?? (await (error as any)?.context?.json())?.error; } catch { /* ignore */ }
       return toast.error(msg ?? "Sending failed");
     }
-    URL.revokeObjectURL(pending.url);
+    if (pending.url.startsWith("blob:")) URL.revokeObjectURL(pending.url);
     setPending(null);
     toast.success(`Installation Return sent to ${provinceEmail}`);
     load();
@@ -272,6 +302,13 @@ function Inner() {
             <p className="text-xs text-primary-foreground/80 mt-2">Your choice fills the Y/N box on the form. It isn't saved, so check it each time you export.</p>
           </section>
 
+          {signaturesOn && (
+            <SignersPanel year={formatMasonicYear(year)} signers={[
+              { office: "Worshipful Master", memberId: data.wm.memberId, name: blockName(P(data.wm)) },
+              (() => { const s = data.officers.find((o) => o.key === "secretary"); return { office: "Secretary", memberId: s?.memberId ?? null, name: s ? blockName(P(s)) : "" }; })(),
+            ]} />
+          )}
+
           <section className="rounded-sm border border-gold/20 bg-navy-light/30 p-4">
             <h2 className="font-serif text-gold text-lg mb-2">Submit to Province</h2>
             <div className="flex min-w-0 flex-col items-stretch gap-2 sm:flex-row sm:flex-wrap sm:items-center">
@@ -280,7 +317,7 @@ function Inner() {
               <span className="text-xs">(change in Unit Setup &gt; Province)</span>
             </div>
             {!canSubmit && <p className="text-xs text-amber-300 mt-2">Only the Secretary or an administrator can submit the return.</p>}
-            <p className="text-xs text-primary-foreground/80 mt-2">The email carries a secure 30-day download link to the PDF (our email service can't send attachments). Signature boxes stay blank.</p>
+            <p className="text-xs text-primary-foreground/80 mt-2">The email carries a secure 30-day download link to the PDF (our email service can't send attachments). {signaturesOn ? "Stored signatures are added where on file; a missing one leaves its box blank." : "Signature boxes stay blank."}</p>
             <h3 className="text-gold text-sm mt-3 mb-1">Sent for {formatMasonicYear(year)}</h3>
             {submissions.length === 0 ? <p className="text-xs text-primary-foreground/80">Not sent yet.</p> : (
               <ul className="text-xs space-y-1">{submissions.map((s) => (
@@ -296,7 +333,9 @@ function Inner() {
                 <tr key={s.id} className="border-t border-gold/10"><td className="py-1 pr-3 text-primary-foreground/80">{s.label}</td><td className="py-1">{s.value || <span className="text-primary-foreground/80">(blank)</span>}</td></tr>
               ))}</tbody>
             </table>
-            <p className="text-xs text-primary-foreground/80 mt-2">Signatures of the Master and Secretary are always left blank for a real signature. Date signed is prefilled with the installation date and can be changed in the PDF.</p>
+            <p className="text-xs text-primary-foreground/80 mt-2">{signaturesOn
+              ? `Stored signatures of the Master and Secretary are added on the server; each signed box gets the date ${ugleSignedDate(data.installationDate, data.prescribedDate).text || "—"}. A box with no signature on file stays blank.`
+              : "Signatures of the Master and Secretary are always left blank for a real signature. Date signed is prefilled with the installation date and can be changed in the PDF."}</p>
           </section>
 
           {report && (report.missing.length > 0 || report.filled.some((f) => f.fuzzy)) && (
@@ -320,7 +359,7 @@ function Inner() {
                 <p><strong>Subject:</strong> {data ? lodgeTitle(data.identity) : ""} — Installation Return {formatMasonicYear(year)}</p>
                 <p><strong>Document:</strong> {returnFileStem(data?.identity.lodgeNumber, year)}.pdf, filled just now from the live records (sent as a 30-day download link). <a href={pending?.url} target="_blank" rel="noopener noreferrer" className="underline">Open the exact PDF</a></p>
                 <p><strong>Secretary changed (Y/N):</strong> {secChanged || "left blank"}</p>
-                <p>Signatures are left blank.</p>
+                <p>{signaturesOn ? "Stored signatures are on the PDF where on file (open it to check)." : "Signatures are left blank."}</p>
                 {data && data.issues.length > 0 && <p className="text-destructive-foreground">{data.issues.length} warning(s) are still showing on the page.</p>}
                 {pending && pending.missing > 0 && <p className="text-destructive-foreground">{pending.missing} field(s) weren't found in the template.</p>}
                 <p>This is an official document to an external body and can't be recalled once sent.</p>
