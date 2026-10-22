@@ -166,7 +166,7 @@ export default function SignatureCapture({ memberId, memberName, onBehalf = fals
       ) : (
         <div className="space-y-2">
           <label htmlFor={`${idp}-file`} className={labelCls}>Signature image (PNG or JPEG, up to 2 MB)</label>
-          <input id={`${idp}-file`} type="file" accept="image/png,image/jpeg" className={fieldCls}
+          <input id={`${idp}-file`} type="file" accept="image/png,image/jpeg,.png,.jpg,.jpeg" className={fieldCls}
             onChange={(e) => { const f = e.target.files?.[0]; if (f) pickFile(f); }} />
           {working && <p className="text-xs text-primary-foreground/80" aria-live="polite">Processing image…</p>}
           {file && (

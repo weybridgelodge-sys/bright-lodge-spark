@@ -120,3 +120,33 @@ test("Profile: Show saved signature works after reload", async ({ page }) => {
   await expect(page.getByAltText("Saved signature")).toBeVisible();
   await expect(page.getByText("No signature on file.")).toHaveCount(0);
 });
+
+const FIXTURE = new URL("./fixtures/synthetic-signature.jpg", import.meta.url).pathname;
+
+test("Profile: uploading a phone-style JPEG shows a preview straight away and enables Save", async ({ page }) => {
+  await mock(page, true);
+  await page.goto("/members/profile");
+  await expect(page.getByRole("heading", { name: "My signature" })).toBeVisible({ timeout: 15000 });
+  await page.getByRole("radio", { name: "Upload image" }).click();
+  await page.getByLabel(/Signature image/).setInputFiles(FIXTURE);
+  await expect(page.getByAltText("Signature preview")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Save signature" })).toBeEnabled();
+  expect(await overflow(page)).toBeLessThanOrEqual(0);
+  await expectNoAxeViolations(page, "profile signature jpeg preview");
+});
+
+test("Profile: moving the background slider keeps the preview", async ({ page }) => {
+  await mock(page, true);
+  await page.goto("/members/profile");
+  await expect(page.getByRole("heading", { name: "My signature" })).toBeVisible({ timeout: 15000 });
+  await page.getByRole("radio", { name: "Upload image" }).click();
+  await page.getByLabel(/Signature image/).setInputFiles(FIXTURE);
+  await expect(page.getByAltText("Signature preview")).toBeVisible();
+  const slider = page.getByLabel(/Background removal/);
+  for (const key of ["ArrowLeft", "ArrowLeft", "ArrowRight"]) { await slider.press(key); }
+  const b = (await slider.boundingBox())!;
+  await page.mouse.click(b.x + b.width * 0.15, b.y + b.height / 2);
+  await expect(page.getByAltText("Signature preview")).toBeVisible();
+  await expect(page.getByText(/could not be/)).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Save signature" })).toBeEnabled();
+});
