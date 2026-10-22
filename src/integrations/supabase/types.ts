@@ -6481,6 +6481,36 @@ export type Database = {
           },
         ]
       }
+      unit_settings_audit: {
+        Row: {
+          changed_at: string
+          changed_by: string | null
+          id: string
+          key: string
+          new_value: Json | null
+          old_value: Json | null
+          unit_id: string
+        }
+        Insert: {
+          changed_at?: string
+          changed_by?: string | null
+          id?: string
+          key: string
+          new_value?: Json | null
+          old_value?: Json | null
+          unit_id: string
+        }
+        Update: {
+          changed_at?: string
+          changed_by?: string | null
+          id?: string
+          key?: string
+          new_value?: Json | null
+          old_value?: Json | null
+          unit_id?: string
+        }
+        Relationships: []
+      }
       units: {
         Row: {
           created_at: string
@@ -7411,6 +7441,7 @@ export type Database = {
         Returns: boolean
       }
       can_edit_newsletter: { Args: { _user: string }; Returns: boolean }
+      can_edit_unit_setup: { Args: { _user: string }; Returns: boolean }
       can_manage_diary: { Args: { _uid: string }; Returns: boolean }
       can_manage_meeting_minutes: { Args: { _user: string }; Returns: boolean }
       can_manage_public_events: { Args: { _uid: string }; Returns: boolean }
@@ -7425,6 +7456,7 @@ export type Database = {
       can_view_charity: { Args: { _user: string }; Returns: boolean }
       can_view_return_documents: { Args: { _user: string }; Returns: boolean }
       can_view_skills_matrix: { Args: { _user: string }; Returns: boolean }
+      can_view_unit_setup: { Args: { _user: string }; Returns: boolean }
       can_view_year_audit: { Args: { _user: string }; Returns: boolean }
       can_write_event_content: { Args: { _uid: string }; Returns: boolean }
       check_and_book_seats: {
@@ -7660,6 +7692,7 @@ export type Database = {
           ugle_reg_number: string
         }[]
       }
+      get_public_booking_details: { Args: never; Returns: Json }
       get_published_meeting_for_event: {
         Args: { _event_key: string }
         Returns: {
@@ -7793,6 +7826,7 @@ export type Database = {
         Args: { _period_id: string; _reason: string }
         Returns: undefined
       }
+      save_unit_setup: { Args: { _key: string; _value: Json }; Returns: Json }
       save_year_remarks: {
         Args: { _remarks: string; _year: number }
         Returns: undefined
