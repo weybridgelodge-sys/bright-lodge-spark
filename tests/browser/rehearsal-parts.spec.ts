@@ -20,6 +20,7 @@ test("rehearsal dialog offers officer parts incl. Tyler and saves it, at 320px",
   });
   await page.route("**/rest/v1/profiles?**", (r) => r.fulfill({ json: [member] }));
   page.on("request", (q) => { if (q.url().includes("/rest/") || q.url().includes("/auth/")) console.log("REQ", q.method(), q.url().slice(0, 140)); });
+  page.on("pageerror", (e) => console.log("PAGEERR", e.message));
   page.on("console", (m) => console.log("CONSOLE", m.text().slice(0, 200)));
   await page.goto("/members/admin/loi");
   const add = page.getByRole("button", { name: /New session|Add session|New rehearsal/i }).first();
