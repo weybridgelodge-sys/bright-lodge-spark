@@ -6,7 +6,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 
 import { resolveLodgeSettings, type LodgeSettings } from "./lodgeSettingsResolve.ts";
-export { LODGE_FALLBACK, resolveLodgeSettings, type LodgeSettings } from "./lodgeSettingsResolve.ts";
+export { LODGE_FALLBACK, resolveLodgeSettings, returnFileName, type LodgeSettings } from "./lodgeSettingsResolve.ts";
 
 let cache: { at: number; value: LodgeSettings } | null = null;
 const TTL_MS = 5 * 60 * 1000;
@@ -17,10 +17,14 @@ export async function loadLodgeSettings(unitId = "weybridge"): Promise<LodgeSett
   try {
     const url = Deno.env.get("SUPABASE_URL"); const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
     if (!url || !key) return resolveLodgeSettings(null);
-    const { data, error } = await createClient(url, key)
-      .from("lodge_contact_settings").select("*").eq("unit_id", unitId).maybeSingle();
+    const db = createClient(url, key);
+    const [{ data, error }, us] = await Promise.all([
+      db.from("lodge_contact_settings").select("*").eq("unit_id", unitId).maybeSingle(),
+      db.from("unit_settings").select("key,value").eq("unit_id", unitId),
+    ]);
     if (error) { console.error("lodge settings lookup failed, using fallback", error); return resolveLodgeSettings(null); }
-    const value = resolveLodgeSettings(data as Record<string, string | null>);
+    const map = Object.fromEntries(((us.data ?? []) as { key: string; value: Record<string, unknown> }[]).map((r) => [r.key, r.value]));
+    const value = resolveLodgeSettings(data as Record<string, string | null>, map);
     cache = { at: Date.now(), value };
     return value;
   } catch (e) {
