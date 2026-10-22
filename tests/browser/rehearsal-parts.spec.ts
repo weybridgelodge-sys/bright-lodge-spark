@@ -61,7 +61,7 @@ test("expanded attendance rows never clip long names at 320px", async ({ page })
   const toggle = page.getByRole("button", { name: /attended/ }).first();
   await expect(toggle).toBeVisible({ timeout: 90000 });
   await toggle.click();
-  const rows = page.getByRole("listitem").filter({ hasText: "W Bro." });
+  const rows = page.locator("li li");
   await expect(rows).toHaveCount(2);
   for (const row of await rows.all()) {
     const n = row.locator("span").first();
