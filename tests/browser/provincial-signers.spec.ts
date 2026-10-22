@@ -53,3 +53,22 @@ test("Provincial Return: no address set -> Submit disabled", async ({ page }) =>
   const btn = page.getByRole("button", { name: /Submit to Province/ });
   if (await btn.count()) await expect(btn).toBeDisabled();
 });
+
+for (const [name, signed, text] of [
+  ["both", { secretary: true, worshipful_master: true }, "Signatures: Secretary and Worshipful Master added from the stored signatures."],
+  ["WM only", { secretary: false, worshipful_master: true }, "Signatures: Worshipful Master added; the Secretary has none on file, so that box is blank."],
+  ["none", { secretary: false, worshipful_master: false }, "Signatures: none on file; boxes left blank."],
+] as const) {
+  test(`Provincial send dialog (${name}) at 320px`, async ({ page }) => {
+    await mock(page, true);
+    await page.route("**/functions/v1/generate-provincial-return", (r) => r.fulfill({ json: { ok: true, docx_path: "a.docx", pdf_path: "a.pdf", docx_url: "http://localhost/a.docx", pdf_url: "http://localhost/a.pdf", signed } }));
+    await page.route("**/storage/v1/**", (r) => r.fulfill({ json: [] }));
+    await page.goto("/members/admin/provincial-return");
+    await page.getByRole("button", { name: /Submit to Province/ }).click({ timeout: 15000 });
+    const dlg = page.getByRole("alertdialog");
+    await expect(dlg.getByText(text)).toBeVisible();
+    await expect(dlg.getByText("Signatures are left blank.")).toHaveCount(0);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(0);
+    await expectNoAxeViolations(page, `provincial send dialog ${name}`);
+  });
+}

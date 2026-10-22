@@ -20,8 +20,9 @@ import { saveBlob } from "@/lib/nativeDownload";
 import { useOfficerSignaturesEnabled } from "@/hooks/useOfficerSignaturesEnabled";
 import SignersPanel from "@/components/members/SignersPanel";
 import { readFunctionError } from "@/lib/functionError";
+import { signaturesSummary, SIGNATURES_ON_HELP, type SignedPlacement } from "@/lib/signatureSummary";
 
-type Generated = { docx_path: string; pdf_path: string; docx_url: string | null; pdf_url: string | null };
+type Generated = { docx_path: string; pdf_path: string; docx_url: string | null; pdf_url: string | null; signed?: SignedPlacement };
 /** Signed path (officer_signatures on): the server builds and stores both files with signatures embedded. */
 async function generateSigned(year: number, data: ProvincialData): Promise<Generated> {
   const { data: res, error } = await supabase.functions.invoke("generate-provincial-return", {
@@ -53,7 +54,7 @@ function Inner() {
   const canSubmit = isAdmin || isSecretary || isCurrentSecretary;
   const [pgsEmail, setPgsEmail] = useState("");
   const [submissions, setSubmissions] = useState<any[]>([]);
-  const [pending, setPending] = useState<{ pdfPath: string; docxPath: string; pdfUrl: string; docxUrl: string } | null>(null);
+  const [pending, setPending] = useState<{ pdfPath: string; docxPath: string; pdfUrl: string; docxUrl: string; signed?: SignedPlacement | null } | null>(null);
   const [sending, setSending] = useState(false);
   const allowed = canManageSummons || isWorshipfulMaster;
   const canAppend = isAdmin || isSecretary || isAssistantSecretary || isWorshipfulMaster;
@@ -110,7 +111,7 @@ function Inner() {
       if (signaturesOn) {
         const g = await generateSigned(year, fresh);
         if (!g.pdf_url || !g.docx_url) throw new Error("Preview links could not be created");
-        setPending({ docxPath: g.docx_path, pdfPath: g.pdf_path, docxUrl: g.docx_url, pdfUrl: g.pdf_url });
+        setPending({ docxPath: g.docx_path, pdfPath: g.pdf_path, docxUrl: g.docx_url, pdfUrl: g.pdf_url, signed: g.signed ?? null });
         return;
       }
       const docx = await buildDocx(fresh);
@@ -241,7 +242,7 @@ function Inner() {
 
           <section className="rounded-sm border border-gold/20 bg-navy-light/30 p-4 text-sm text-primary-foreground/80 min-w-0">
             <h2 className="font-serif text-lg text-gold mb-2">Submit to Province</h2>
-            <p className="mb-2 break-words"><span className="text-gold">Signature dates:</span> both pre-filled with {data ? signatureDate(data) : "—"} (the Installation date). Signatures stay blank.</p>
+            <p className="mb-2 break-words"><span className="text-gold">Signature dates:</span> both pre-filled with {data ? signatureDate(data) : "—"} (the Installation date). {signaturesOn ? SIGNATURES_ON_HELP : "Signatures stay blank."}</p>
             <div className="flex min-w-0 flex-col items-stretch gap-2 sm:flex-row sm:flex-wrap sm:items-center">
               <span className="text-xs">Provincial Grand Secretary's email:</span>
               <span className="break-all">{pgsEmail || "Not set yet"}</span>
@@ -282,8 +283,8 @@ function Inner() {
                 <p><strong>Reply-to:</strong> <span className="break-all">{data?.secretary.lodgeEmail}</span></p>
                 <p><strong>Subject:</strong> {data ? lodgeTitle(data) : ""} — Provincial Installation Return {formatMasonicYear(year)}</p>
                 <p><strong>Documents:</strong> Word and PDF, built just now from the live records, sent as 30-day download links. <a href={pending?.docxUrl} download={`${fileBase(year, data?.lodgeNumber ?? "")}.docx`} className="underline">Open the Word file</a> · <a href={pending?.pdfUrl} target="_blank" rel="noopener noreferrer" className="underline">Open the PDF</a></p>
-                <p><strong>Signature dates:</strong> {data ? signatureDate(data) : "—"}. Signatures are left blank.</p>
-                {data && data.issues.length > 0 && <p className="text-destructive-foreground">{data.issues.length} warning(s) are still showing on the page.</p>}
+                <p><strong>Signature dates:</strong> {data ? signatureDate(data) : "—"}. {signaturesSummary(signaturesOn && !!pending?.signed, pending?.signed)}</p>
+                {data && data.issues.length > 0 && <p className="font-semibold text-destructive">{data.issues.length} warning(s) are still showing on the page.</p>}
                 <p>This is an official document to an external body and can't be recalled once sent.</p>
               </div>
             </AlertDialogDescription>
