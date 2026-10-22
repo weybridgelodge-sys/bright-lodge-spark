@@ -72,3 +72,19 @@ for (const [name, signed, text] of [
     await expectNoAxeViolations(page, `provincial send dialog ${name}`);
   });
 }
+
+test("Provincial send dialog: long addresses break only after @ at 320px", async ({ page }) => {
+  await mock(page, true, "provincialgrandsecretary@example-province.org.uk");
+  await page.route("**/functions/v1/generate-provincial-return", (r) => r.fulfill({ json: { ok: true, docx_path: "a.docx", pdf_path: "a.pdf", docx_url: "http://localhost/a.docx", pdf_url: "http://localhost/a.pdf", signed: { secretary: true, worshipful_master: true } } }));
+  await page.route("**/storage/v1/**", (r) => r.fulfill({ json: [] }));
+  await page.goto("/members/admin/provincial-return");
+  await page.getByRole("button", { name: /Submit to Province/ }).click({ timeout: 15000 });
+  const dlg = page.getByRole("alertdialog");
+  await expect(dlg.getByText("example-province.org.uk")).toBeVisible();
+  const halves = await dlg.locator("span.whitespace-nowrap").evaluateAll((els) => els.map((e) => e.getClientRects().length));
+  expect(halves.length).toBeGreaterThanOrEqual(2);
+  for (const n of halves) expect(n).toBe(1);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(0);
+  await dlg.screenshot({ path: "/tmp/browser/prov-dialog-email-320.png" });
+  await expectNoAxeViolations(page, "provincial send dialog emails");
+});
