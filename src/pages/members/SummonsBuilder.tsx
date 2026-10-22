@@ -53,6 +53,18 @@ import {
   POSITION_LABELS,
   PositionKey,
 } from "@/lib/officersProgression";
+import { resolveOfficeRoll, provenanceLabel } from "@/lib/officerRoll";
+import { applyDerivedNames } from "@/lib/summonsSources";
+import { loadMeetingPatternSources, saveMeetingPatternOverride } from "@/lib/meetingPattern";
+import { chooseMeetingPattern } from "@/lib/meetingDiary";
+
+/** Template as it prints: member-derived names and the single-source meeting pattern. */
+async function printableTemplate(raw: any, members: MemberRow[]): Promise<LodgeTemplate> {
+  const base = normaliseTemplateAssets({ ...EMPTY_TEMPLATE, ...raw, lodge_representatives: raw?.lodge_representatives ?? [] }) as LodgeTemplate;
+  let pattern = base.regular_meeting_pattern;
+  try { pattern = chooseMeetingPattern({ ...(await loadMeetingPatternSources()), manualText: base.regular_meeting_pattern }).text || null; } catch { /* keep typed text */ }
+  return applyDerivedNames({ ...base, regular_meeting_pattern: pattern }, members);
+}
 
 // ----- Visitor salutation parsing -----
 // Turns a free-text visitor name like "W Bro. RD Smith (Richard)" into
@@ -251,10 +263,7 @@ function PrintPreviewTab() {
           .select("id,title,first_name,middle_name,last_name,full_name,preferred_name,post_nominals,rank,grand_rank,provincial_rank,initiation_date,joined_lodge_date,joined_year,is_past_master,is_royal_arch,is_honorary_member,status")
           .eq("status", "active"),
       ]);
-      if (tpl.data) {
-        const merged = normaliseTemplateAssets({ ...EMPTY_TEMPLATE, ...(tpl.data as any), lodge_representatives: (tpl.data as any).lodge_representatives ?? [] });
-        setTemplate(merged);
-      }
+      if (tpl.data) setTemplate(await printableTemplate(tpl.data, (mem.data ?? []) as any));
       if (mem.data) setMembers(mem.data as any);
       loadOfficers(setOfficers, () => {});
     })();
@@ -378,7 +387,7 @@ function OfficerRollTab() {
     <div className="bg-navy-light/40 border border-gold/20 rounded p-4">
       <h2 className="font-serif text-lg text-gold mb-2">Annual Officer Roll</h2>
       <p className="text-xs text-primary-foreground/70 mb-3">
-        Auto-populated from the Progressive Officers Tracker for the current Masonic year.
+        Worked out for the current Installation year: progressive offices follow the Progression Ladder; other offices carry forward from the latest confirmed appointment. The status column is shown here only, not on the printed summons.
       </p>
       {loading ? (
         <p className="text-sm text-primary-foreground/70">Loading…</p>
@@ -389,7 +398,8 @@ function OfficerRollTab() {
               {rows.map((r, i) => (
                 <tr key={i} className="border-b border-gold/10">
                   <td className="py-1.5 pr-2 font-medium text-primary-foreground/80">{r.label}</td>
-                  <td className="py-1.5">{r.member || <span className="text-primary-foreground/80">—</span>}</td>
+                  <td className="py-1.5">{r.member || <span className="text-primary-foreground/80">Vacant</span>}</td>
+                  <td className="py-1.5 pl-2 text-xs text-primary-foreground/80">{provenanceLabel({ provenance: r.provenance ?? "vacant", fromYear: r.fromYear ?? null })}</td>
                 </tr>
               ))}
             </tbody>
@@ -400,41 +410,43 @@ function OfficerRollTab() {
   );
 }
 
+const ROLL_KEYS: string[] = [
+  "worshipful_master","senior_warden","junior_warden",
+  "immediate_past_master","chaplain","treasurer","secretary","assistant_secretary",
+  "director_of_ceremonies","assistant_director_of_ceremonies",
+  "senior_deacon","junior_deacon","inner_guard",
+  "almoner","charity_steward","mentor","membership_officer",
+  "senior_steward","steward_1","steward_2","steward_3","steward_4","steward_5",
+  "tyler","assistant_tyler",
+];
+
 async function loadOfficers(setRows: (rows: OfficerRollRow[]) => void, setLoading: (b: boolean) => void) {
   setLoading(true);
-  // Officers in post for the current Masonic year (Installation day = new year).
+  // Officers for the current Installation year, resolved by the shared rule used by the returns.
   const lodgeYear = await fetchOfficerYear();
-  const { data: appts } = await supabase
-    .from("officer_appointments")
-    .select("position_key,member_id")
-    .eq("lodge_year", lodgeYear);
-  const memberIds = Array.from(new Set((appts ?? []).map((a) => a.member_id).filter(Boolean)));
-  const { data: profs } = memberIds.length
-    ? await supabase.from("profiles").select("id,title,first_name,middle_name,last_name,full_name,preferred_name,post_nominals,rank,grand_rank,provincial_rank,is_past_master,is_royal_arch,is_honorary_member,initiation_date,joined_lodge_date,joined_year,status,email").in("id", memberIds)
-    : { data: [] as any[] };
+  const [apptRes, statusRes, profRes] = await Promise.all([
+    supabase.from("officer_appointments").select("position_key,member_id,lodge_year,is_projection,override_reason"),
+    supabase.from("member_progression_status").select("member_id,readiness,seniority_initiation_date,seniority_tiebreaker"),
+    supabase.from("profiles").select("id,title,first_name,middle_name,last_name,full_name,preferred_name,post_nominals,rank,grand_rank,provincial_rank,is_past_master,is_royal_arch,is_honorary_member,initiation_date,joined_lodge_date,joined_year,status,email"),
+  ]);
+  const profs = (profRes.data ?? []) as any[];
+  const labelFor = (k: string) =>
+    (POSITION_LABELS as any)[k as PositionKey] || (NON_PROGRESSIVE_LABELS as any)[k as NonProgressiveKey] || k;
+  const resolved = resolveOfficeRoll(ROLL_KEYS.map((k) => ({ key: k, label: labelFor(k) })), {
+    year: lodgeYear, appts: (apptRes.data ?? []) as any, profiles: profs, statuses: (statusRes.data ?? []) as any,
+  });
+  const memberIds = Array.from(new Set(resolved.map((r) => r.memberId).filter(Boolean))) as string[];
   // Merge phone (PII) via secure RPC for secretary/admin/WM
-  let phoneById: Record<string, string | null> = {};
+  const phoneById: Record<string, string | null> = {};
   if (memberIds.length) {
     const { data: pii } = await (supabase as any).rpc("get_profiles_pii", { _ids: memberIds });
     for (const row of (pii as { id: string; phone: string | null }[]) ?? []) phoneById[row.id] = row.phone ?? null;
   }
-  const byId = new Map((profs ?? []).map((p: any) => [p.id, { ...p, phone: phoneById[p.id] ?? null }]));
-  const allKeys: string[] = [
-    "worshipful_master","senior_warden","junior_warden",
-    "immediate_past_master","chaplain","treasurer","secretary","assistant_secretary",
-    "director_of_ceremonies","assistant_director_of_ceremonies",
-    "senior_deacon","junior_deacon","inner_guard",
-    "almoner","charity_steward","mentor","membership_officer",
-    "senior_steward","steward_1","steward_2","steward_3","steward_4","steward_5",
-    "tyler","assistant_tyler",
-  ];
-  const labelFor = (k: string) =>
-    (POSITION_LABELS as any)[k as PositionKey] || (NON_PROGRESSIVE_LABELS as any)[k as NonProgressiveKey] || k;
-  const rows: OfficerRollRow[] = allKeys.map((k) => {
-    const a = (appts ?? []).find((x) => x.position_key === k);
-    const p = a?.member_id ? byId.get(a.member_id) : null;
+  const byId = new Map(profs.map((p) => [p.id, { ...p, phone: phoneById[p.id] ?? null }]));
+  setRows(resolved.map((o) => {
+    const p = o.memberId ? byId.get(o.memberId) : null;
     return {
-      label: labelFor(k),
+      label: o.label,
       member: p ? formatMemberLine(p as MemberRow) : "",
       member_formal: p ? formatMemberLineFormal(p as MemberRow) : "",
       post_nominals: p?.post_nominals ?? null,
@@ -443,9 +455,10 @@ async function loadOfficers(setRows: (rows: OfficerRollRow[]) => void, setLoadin
       rank: p?.rank ?? null,
       email: p?.email ?? null,
       phone: p?.phone ?? null,
+      provenance: p ? o.provenance : "vacant",
+      fromYear: o.fromYear,
     };
-  });
-  setRows(rows);
+  }));
   setLoading(false);
 }
 
@@ -488,7 +501,7 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
         supabase.from("festive_board_meetings").select("id,meeting_date,notes").order("meeting_date", { ascending: true }),
         supabase.from("summonses").select("meeting_number").order("meeting_number", { ascending: false }).limit(1),
       ]);
-      if (tpl.data) setTemplate(normaliseTemplateAssets({ ...EMPTY_TEMPLATE, ...(tpl.data as any), lodge_representatives: (tpl.data as any).lodge_representatives ?? [] }));
+      if (tpl.data) setTemplate(await printableTemplate(tpl.data, (mem.data ?? []) as any));
       if (mem.data) setMembers(mem.data as any);
       if (evs.data) setEvents(evs.data);
       if (fb.data) setFestive(fb.data);

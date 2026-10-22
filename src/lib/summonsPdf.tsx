@@ -86,6 +86,9 @@ export type OfficerRollRow = {
   rank?: string | null;
   email?: string | null;
   phone?: string | null;
+  /** On-screen only (Officer Roll tab); never printed. */
+  provenance?: "confirmed" | "planned" | "computed" | "carried" | "vacant";
+  fromYear?: number | null;
 };
 
 export type SummonsData = {
