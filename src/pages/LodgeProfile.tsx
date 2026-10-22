@@ -1,4 +1,5 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { fetchPublicMeetingPattern, type PublicMeetingPattern } from "@/lib/meetingPattern";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
@@ -41,6 +42,13 @@ const fadeUp = {
 
 const LodgeProfile = () => {
   const shouldReduceMotion = useReducedMotion();
+  // Saved Meeting Diary schedule wins; the typed text above is used only when none is saved.
+  const [pattern, setPattern] = useState<PublicMeetingPattern | null>(null);
+  useEffect(() => { let on = true; fetchPublicMeetingPattern().then((p) => { if (on) setPattern(p); }).catch(() => {}); return () => { on = false; }; }, []);
+  const shownDates = pattern?.items ?? meetingDates;
+  const shownStats = pattern
+    ? stats.map((st) => st.label === "Meeting Day" ? { ...st, value: pattern.meetingDay } : st.label === "Meetings Per Year" ? { ...st, value: String(pattern.perYear) } : st)
+    : stats;
   const pageSchema = useMemo(() => {
     const breadcrumb = breadcrumbSchema([
       { name: "Home", url: "/" },
@@ -156,7 +164,7 @@ const LodgeProfile = () => {
               <h2 id="schedule-heading" className="text-2xl md:text-3xl font-serif text-gold mb-6">When Do We Meet?</h2>
               <p className="text-primary-foreground/80 font-sans leading-relaxed mb-8">Our Lodge meets at the Guildford Masonic Centre, Weybourne House, Hitherbury Close, Guildford, <span className="font-semibold text-gold">GU2 4DR</span>. We hold four meetings each year, which usually start between 5.30 pm and 6.00 pm.</p>
               <ul className="space-y-3 mb-8 list-none p-0 m-0">
-                {meetingDates.map((date) => (
+                {shownDates.map((date) => (
                   <li key={date} className="flex items-center gap-3">
                     <div className="w-1.5 h-1.5 rounded-full bg-gold flex-shrink-0" aria-hidden="true" />
                     <span className="text-primary-foreground/80 font-sans">{date}</span>
