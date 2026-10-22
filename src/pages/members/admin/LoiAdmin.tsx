@@ -232,10 +232,11 @@ export default function LoiAdmin() {
                             .map(({ r, name }) => (
                               <li
                                 key={r.id}
-                                className="flex flex-wrap justify-between gap-x-3 gap-y-0.5 border-b border-gold/5 pb-1"
+                                data-testid="loi-attendance-row"
+                                className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5 border-b border-gold/5 pb-1 font-sans"
                               >
-                                <span className="min-w-0 truncate flex-1">{name}</span>
-                                <span className="text-gold shrink-0">
+                                <span data-testid="loi-attendance-name" className="min-w-0 basis-48 grow break-words text-primary-foreground">{name}</span>
+                                <span className="ml-auto max-w-full break-words text-right text-gold">
                                   {partLabel(r.part, r.part_other)}
                                 </span>
                               </li>
