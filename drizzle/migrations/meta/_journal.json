@@ -869,6 +869,13 @@
       "when": 1792665515289,
       "tag": "0123_officer_representatives_and_unit_settings",
       "breakpoints": true
+    },
+    {
+      "idx": 124,
+      "version": "7",
+      "when": 1792668123205,
+      "tag": "0124_lodge_identity_meeting_pattern_unit_helper",
+      "breakpoints": true
     }
   ]
 }
