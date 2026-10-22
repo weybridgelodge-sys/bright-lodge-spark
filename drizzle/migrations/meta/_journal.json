@@ -932,6 +932,13 @@
       "when": 1792702628678,
       "tag": "0132_province_return_emails_in_unit_setup",
       "breakpoints": true
+    },
+    {
+      "idx": 133,
+      "version": "7",
+      "when": 1792703811612,
+      "tag": "0133_book_my_place_resume_card",
+      "breakpoints": true
     }
   ]
 }
