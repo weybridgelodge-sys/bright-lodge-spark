@@ -29,6 +29,7 @@ test("Lodge Profile at 320px uses the saved schedule", async ({ page }) => {
   await expect(page.getByText("Last Tuesday in November (Installation)")).toBeVisible();
   await expect(page.getByText("2nd Wednesday in May")).toHaveCount(0);
   await noOverflow(page);
+  await page.waitForTimeout(1500); // let fade-in animations finish before the contrast scan
   await expectNoAxeViolations(page, "lodge profile (schedule)");
 });
 
@@ -37,6 +38,7 @@ test("Lodge Profile keeps its text when no schedule is saved", async ({ page }) 
   await page.goto("/lodge-profile");
   await expect(page.getByText("2nd Wednesday in May")).toBeVisible({ timeout: 15000 });
   await noOverflow(page);
+  await page.waitForTimeout(1500); // let fade-in animations finish before the contrast scan
   await expectNoAxeViolations(page, "lodge profile (fallback)");
 });
 
