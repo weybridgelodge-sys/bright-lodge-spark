@@ -32,6 +32,7 @@ test("duplicate 409: toast wraps at 320px, form keeps step and values", { timeou
   await page.locator("#evf-phone").fill("07000000000");
   await page.getByRole("button", { name: "Next" }).click();
   await page.locator("#evf-meeting").selectOption("meeting-and-festive-board");
+  await page.getByRole("button", { name: "Next" }).click();
   await page.getByRole("radio", { name: /Debit/ }).check();
   await page.getByRole("button", { name: "Submit Booking" }).click();
 
@@ -54,6 +55,7 @@ test("duplicate 409: toast wraps at 320px, form keeps step and values", { timeou
   await expect(page.getByRole("radio", { name: /Debit/ })).toBeChecked();
   await expect(page.getByRole("button", { name: "Submit Booking" })).toBeVisible();
   await expectNoAxeViolations(page, "checkout error toast");
+  await page.getByRole("button", { name: "Back" }).click();
   await expect(page.locator("#evf-meeting")).toHaveValue("meeting-and-festive-board");
   await page.getByRole("button", { name: "Back" }).click();
   await expect(page.locator("#evf-first")).toHaveValue("Repeat");
