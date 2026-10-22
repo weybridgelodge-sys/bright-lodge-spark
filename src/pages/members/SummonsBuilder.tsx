@@ -334,17 +334,20 @@ function TemplateTab() {
         {F("cover_right_image_url", "Cover right image URL")}
       </div>
       {F("venue_address", "Venue full address", "textarea")}
-      {F("regular_meeting_pattern", "Regular meeting pattern", "textarea")}
+      <MeetingPatternField t={t} setT={setT} />
       {F("loi_details", "Rehearsal Night (day / time / venue)", "textarea")}
       <div className="grid sm:grid-cols-2 gap-3">
         {F("provincial_website", "Provincial website")}
         {F("mcf_contact", "MCF contact", "textarea")}
         <div className="min-w-0 space-y-2">
           {F("royal_arch_rep", "Royal Arch Representative", "textarea")}
-          <Label className="text-xs">Linked member (used by the Provincial Return only)</Label>
+          <Label className="text-xs">Linked member (when linked, the Summons and Provincial Return print the member's name and ranks; the text above is used only for a non-member)</Label>
           <MemberLink label="Royal Arch Representative linked member" members={pick} value={(t as any).royal_arch_rep_member_id} onChange={(id) => setT({ ...t, royal_arch_rep_member_id: id } as any)} />
         </div>
-        {F("honorary_members", "Honorary members", "textarea")}
+        <div className="min-w-0 space-y-1">
+          {F("honorary_members", "Honorary members (non-members only)", "textarea")}
+          <p className="text-xs text-primary-foreground/80">Members marked as honorary on their member record print automatically; this text is used only when none are marked.</p>
+        </div>
         {F("wm_contact", "Worshipful Master — home address & contact", "textarea")}
         {F("secretary_contact", "Secretary — contact", "textarea")}
       </div>
@@ -357,7 +360,7 @@ function TemplateTab() {
 
       <div>
         <Label>Lodge Representatives</Label>
-        <p className="text-xs text-primary-foreground/80">The Summons prints the Name as typed. The linked member is used only by the Provincial Return, to split first names, surname and decorations.</p>
+        <p className="text-xs text-primary-foreground/80">When a member is linked, the Summons and Provincial Return print that member's name and ranks from the member record. The typed Name is used only for a non-member.</p>
         <div className="space-y-2 mt-1">
           {reps.map((r, i) => (
             <div key={i} className="grid min-w-0 grid-cols-1 gap-2 rounded-sm border border-gold/10 p-2 sm:grid-cols-[1fr_1fr_1fr_auto] sm:border-0 sm:p-0">
@@ -373,6 +376,36 @@ function TemplateTab() {
 
       <Button onClick={save} disabled={saving} className="bg-gold text-navy hover:bg-gold/90"><Save className="w-4 h-4 mr-2" /> {saving ? "Saving…" : "Save template"}</Button>
     </div>
+  );
+}
+
+function MeetingPatternField({ t, setT }: { t: LodgeTemplate; setT: (t: LodgeTemplate) => void }) {
+  const [src, setSrc] = useState<{ generated: string; manualOverride: boolean } | null>(null);
+  const [busy, setBusy] = useState(false);
+  useEffect(() => { loadMeetingPatternSources().then(setSrc).catch(() => setSrc({ generated: "", manualOverride: false })); }, []);
+  const toggle = async (on: boolean) => {
+    setBusy(true);
+    const { error } = await saveMeetingPatternOverride(on);
+    setBusy(false);
+    if (error) return toast.error(error.message);
+    setSrc((x) => (x ? { ...x, manualOverride: on } : x));
+  };
+  const chosen = src ? chooseMeetingPattern({ ...src, manualText: t.regular_meeting_pattern }) : null;
+  return (
+    <fieldset className="min-w-0 space-y-2 rounded-sm border border-gold/20 p-3">
+      <legend className="px-1 text-sm font-medium">Regular meeting pattern</legend>
+      <p className="text-xs text-primary-foreground/80">
+        Worked out from the saved schedule in Meeting Diary.{" "}
+        {src && !src.generated && "No schedule is saved there yet, so the text below is used."}
+      </p>
+      <p className="text-sm" data-testid="pattern-generated"><span className="text-primary-foreground/80">From schedule: </span>{src?.generated || "—"}</p>
+      <label className="flex min-h-11 items-center gap-2 text-sm">
+        <Checkbox checked={!!src?.manualOverride} disabled={!src || busy} onCheckedChange={(v) => toggle(v === true)} aria-label="Use manual text instead of the schedule" />
+        Use manual text instead of the schedule
+      </label>
+      <Textarea aria-label="Manual meeting pattern text" rows={3} value={t.regular_meeting_pattern ?? ""} onChange={(e) => setT({ ...t, regular_meeting_pattern: e.target.value || null })} />
+      {chosen && <p className="text-xs" data-testid="pattern-prints"><span className="text-primary-foreground/80">Prints: </span>{chosen.text || "—"} ({chosen.source === "schedule" ? "from schedule" : "manual text"})</p>}
+    </fieldset>
   );
 }
 
