@@ -249,7 +249,6 @@ export function ukDate(iso: string | null) {
 export type FieldSpec = { id: string; label: string; value: string; match?: (name: string) => boolean; center?: boolean };
 
 export const SECRETARY_CHANGED_FIELD = "LodgeHas the Secretary or his details changed YN";
-export const PROVINCE_EMAIL_SETTING = "installation_return_province_email";
 export type YesNo = "Y" | "N" | "";
 
 const has = (...parts: string[]) => (n: string) => parts.every((p) => n.toLowerCase().includes(p.toLowerCase()));
