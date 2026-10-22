@@ -274,6 +274,7 @@ export default function LoiAdmin() {
       {(creating || editing) && (
         <SessionDialog
           open
+          partOptions={partOptions}
           onClose={() => {
             setCreating(false);
             setEditing(null);
@@ -554,7 +555,7 @@ function SessionDialog({
                             setDraft(m.id, { part: v as LoiPart })
                           }
                         >
-                          <SelectTrigger className="h-8 flex-1 sm:flex-none sm:w-[180px] bg-navy border-gold/30 text-primary-foreground placeholder:text-primary-foreground/80 text-xs">
+                          <SelectTrigger aria-label={`Part for ${memberDisplay(m)}`} className="min-h-11 flex-1 sm:flex-none sm:w-[220px] bg-navy border-gold/30 text-primary-foreground placeholder:text-primary-foreground/80 text-xs">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
