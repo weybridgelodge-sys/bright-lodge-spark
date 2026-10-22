@@ -9,7 +9,9 @@
 
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { BRAND, LOGO_URL } from "../_shared/transactional-email-templates/_brand.ts";
-import { loadLodgeSettings } from "../_shared/lodgeSettings.ts";
+import { loadLodgeSettings, resolveLodgeSettings } from "../_shared/lodgeSettings.ts";
+let LODGE = resolveLodgeSettings(null);
+const lodgeNo = () => LODGE.formalSenderName.replace(LODGE.senderName, "").trim();
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -79,15 +81,15 @@ function renderHtml(o: {
     <tr><td align="center">
       <table role="presentation" width="${parseInt(BRAND.containerMaxWidth, 10)}" cellspacing="0" cellpadding="0" style="max-width:${BRAND.containerMaxWidth};margin:0 auto;padding:24px;">
         <tr><td align="center" style="padding:8px 0 16px;">
-          <img src="${LOGO_URL}" width="120" height="120" alt="Weybridge Lodge crest" style="display:block;margin:0 auto;" />
-          <h1 style="color:${BRAND.navy};font-size:24px;margin:12px 0 0;letter-spacing:0.5px;font-family:${BRAND.fontStack};">Weybridge Lodge</h1>
-          <div style="color:${BRAND.gold};font-size:12px;letter-spacing:2px;text-transform:uppercase;margin:4px 0 12px;">No. 6787 — Province of Surrey</div>
+          <img src="${LOGO_URL}" width="120" height="120" alt="${esc(LODGE.senderName)} crest" style="display:block;margin:0 auto;" />
+          <h1 style="color:${BRAND.navy};font-size:24px;margin:12px 0 0;letter-spacing:0.5px;font-family:${BRAND.fontStack};">${esc(LODGE.senderName)}</h1>
+          <div style="color:${BRAND.gold};font-size:12px;letter-spacing:2px;text-transform:uppercase;margin:4px 0 12px;">${esc(lodgeNo())} — ${esc(LODGE.provinceName)}</div>
         </td></tr>
         <tr><td style="padding:0;">
           <h2 style="color:${BRAND.navy};font-size:22px;margin:0 0 6px;font-family:${BRAND.fontStack};">Invitation to our next Meeting</h2>
           <p style="color:${BRAND.body};font-size:14px;line-height:1.55;margin:14px 0;">Dear ${esc(o.salutation)},</p>
           <p style="color:${BRAND.body};font-size:14px;line-height:1.55;margin:0 0 14px;">
-            On behalf of the Worshipful Master and the Brethren of Weybridge Lodge No. 6787,
+            On behalf of the Worshipful Master and the Brethren of ${esc(LODGE.formalSenderName)},
             I am pleased to invite you to our next meeting. The Summons is attached along
             with a calendar file so you can add the event to your diary.
           </p>
@@ -101,7 +103,7 @@ function renderHtml(o: {
           <p style="color:${BRAND.body};font-size:14px;line-height:1.55;margin:0 0 4px;">Kind regards</p>
           <p style="color:${BRAND.body};font-size:14px;line-height:1.55;margin:0 0 14px;">S&amp;F</p>
           <p style="margin:0;color:${BRAND.navy};font-size:14px;"><strong>${esc(o.secretaryName)}</strong>, Secretary</p>
-          <p style="margin:0;color:${BRAND.navy};font-size:14px;">Weybridge Lodge No. 6787</p>
+          <p style="margin:0;color:${BRAND.navy};font-size:14px;">${esc(LODGE.formalSenderName)}</p>
           <hr style="border:none;border-top:1px solid ${BRAND.hairline};margin:20px 0 10px;" />
           <p style="color:${BRAND.muted};font-size:12px;margin:0;">
             ${o.unsubscribeUrl
@@ -116,6 +118,7 @@ function renderHtml(o: {
 }
 
 Deno.serve(async (req) => {
+  LODGE = await loadLodgeSettings();
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
@@ -194,7 +197,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    const subject = `Invitation — Weybridge Lodge No. 6787 — ${body.meeting_date_label}`;
+    const subject = `Invitation — ${LODGE.formalSenderName} — ${body.meeting_date_label}`;
     let sent = 0;
     const failures: { email: string; error: string }[] = [];
 

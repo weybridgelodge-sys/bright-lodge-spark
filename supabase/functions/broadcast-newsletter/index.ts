@@ -178,7 +178,7 @@ function renderHtml(opts: { subject: string; content: NewsletterContent; unsubsc
   <div style="background:#1B2A4A;padding:20px 24px;border-bottom:4px solid #C9A432">
     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0"><tr>
       <td width="72" valign="middle" style="padding-right:14px">
-        <img src="${LOGO_URL}" alt="Weybridge Lodge crest" width="64" height="64" style="display:block;width:64px;height:64px;border:0">
+        <img src="${LOGO_URL}" alt="${escapeHtml(LODGE.senderName)} crest" width="64" height="64" style="display:block;width:64px;height:64px;border:0">
       </td>
       <td valign="middle" align="left">
         <div style="font-family:'Playfair Display',Georgia,serif;color:#C9A432;font-size:24px;letter-spacing:0.5px;line-height:1.1">${escapeHtml(LODGE.newsletterMasthead)}</div>
@@ -192,7 +192,7 @@ function renderHtml(opts: { subject: string; content: NewsletterContent; unsubsc
       <td style="padding:0 6px"><a href="${escapeHtml(LODGE.instagramUrl)}" style="display:inline-block;background:#C9A432;color:#1B2A4A;font-family:Arial,sans-serif;font-size:11px;font-weight:bold;text-decoration:none;width:28px;height:28px;line-height:28px;border-radius:14px;text-align:center">IG</a></td>
       <td style="padding:0 6px"><a href="${escapeHtml(LODGE.facebookUrl)}" style="display:inline-block;background:#C9A432;color:#1B2A4A;font-family:Arial,sans-serif;font-size:13px;font-weight:bold;text-decoration:none;width:28px;height:28px;line-height:28px;border-radius:14px;text-align:center">f</a></td>
       <td style="padding:0 6px"><a href="${escapeHtml(LODGE.twitterUrl)}" style="display:inline-block;background:#C9A432;color:#1B2A4A;font-family:Arial,sans-serif;font-size:12px;font-weight:bold;text-decoration:none;width:28px;height:28px;line-height:28px;border-radius:14px;text-align:center">X</a></td>
-      <td style="padding:0 6px"><a href="https://weybridgelodge.org.uk" style="display:inline-block;background:#C9A432;color:#1B2A4A;font-family:Arial,sans-serif;font-size:10px;font-weight:bold;text-decoration:none;width:28px;height:28px;line-height:28px;border-radius:14px;text-align:center">Web</a></td>
+      <td style="padding:0 6px"><a href="${escapeHtml(LODGE.siteUrl)}" style="display:inline-block;background:#C9A432;color:#1B2A4A;font-family:Arial,sans-serif;font-size:10px;font-weight:bold;text-decoration:none;width:28px;height:28px;line-height:28px;border-radius:14px;text-align:center">Web</a></td>
     </tr></table>
     <div style="color:rgba(246,241,226,0.85);font-family:Arial,sans-serif;font-size:12px;padding:6px 0 14px;line-height:1.6">
       &copy; ${new Date().getFullYear()} ${escapeHtml(LODGE.newsletterMasthead)} &middot; ${escapeHtml(LODGE.newsletterFooterNote)}<br>
