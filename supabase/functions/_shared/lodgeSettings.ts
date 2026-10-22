@@ -12,12 +12,19 @@ let cache: { at: number; value: LodgeSettings } | null = null;
 const TTL_MS = 5 * 60 * 1000;
 
 /** Never throws; returns fallbacks on any error. Cached per warm instance. */
-export async function loadLodgeSettings(unitId = "weybridge"): Promise<LodgeSettings> {
+export async function loadLodgeSettings(unitIdIn?: string): Promise<LodgeSettings> {
   if (cache && Date.now() - cache.at < TTL_MS) return cache.value;
   try {
     const url = Deno.env.get("SUPABASE_URL"); const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
     if (!url || !key) return resolveLodgeSettings(null);
     const db = createClient(url, key);
+    // No unit given: use the only unit (multi-lodge callers must pass one).
+    let unitId = unitIdIn ?? "";
+    if (!unitId) {
+      const { data: units } = await db.from("units").select("id").limit(2);
+      if (!units || units.length !== 1) return resolveLodgeSettings(null);
+      unitId = String(units[0].id);
+    }
     const [{ data, error }, us] = await Promise.all([
       db.from("lodge_contact_settings").select("*").eq("unit_id", unitId).maybeSingle(),
       db.from("unit_settings").select("key,value").eq("unit_id", unitId),
