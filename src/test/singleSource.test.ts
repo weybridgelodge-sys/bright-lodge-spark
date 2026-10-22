@@ -19,6 +19,11 @@ const GUARDED = [
   "src/pages/members/admin/ProvincialReturn.tsx",
   "supabase/functions/_shared/provincialReturnDoc.ts",
   "supabase/functions/generate-provincial-return/index.ts",
+  "src/components/bookings/MeetingBookingForm.tsx",
+  "src/pages/members/BookMeeting.tsx",
+  "src/pages/members/BookMyPlace.tsx",
+  "src/pages/members/admin/UnitSetup.tsx",
+  "src/lib/bookingDetails.ts",
 ];
 const BANNED: [string, RegExp][] = [
   ["lodge name", /weybridge/i],
@@ -26,6 +31,9 @@ const BANNED: [string, RegExp][] = [
   ["consecration date", /1949/],
   ["URL", /https?:\/\/(?!localhost)[a-z0-9.-]+\.[a-z]{2,}/i],
   ["email", /[a-z0-9._%+-]+@[a-z0-9-]+\.[a-z.]{2,}/i],
+  ["bank account number", /\b\d{8}\b/],
+  ["sort code", /\b\d{2}-\d{2}-\d{2}\b|\b\d{6}\b/],
+  ["sign-off with lodge", /Fraternally,\\nWM [A-Z]/],
   ["UUID", /\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b/i],
 ];
 
@@ -112,5 +120,17 @@ describe("meeting event heading", () => {
   });
   it("clears intro_heading on save", () => {
     expect(lodgeEventSavePayload(ev, "s").intro_heading).toBeNull();
+  });
+});
+
+describe("seeded bank/sign-off values never typed in src or edge functions", () => {
+  it("no bank literals anywhere", () => {
+    const { execSync } = require("child_process");
+    const hits = execSync("rg -l -e 14878862 -e '30-99-80' -e 309980 src supabase/functions || true", { encoding: "utf8" }).trim();
+    expect(hits).toBe("");
+  });
+  it("public Bookings page has no typed contact email", () => {
+    const src = fs.readFileSync("src/pages/Bookings.tsx", "utf8");
+    expect(src).not.toMatch(/assistantsecretary@/);
   });
 });
