@@ -19,6 +19,9 @@ const GUARDED = [
   "src/pages/members/admin/ProvincialReturn.tsx",
   "supabase/functions/_shared/provincialReturnDoc.ts",
   "supabase/functions/generate-provincial-return/index.ts",
+  "supabase/functions/sign-installation-return/index.ts",
+  "supabase/functions/_shared/returnSigners.ts",
+  "supabase/functions/_shared/ugleReturnSignatures.ts",
 ];
 // Booking form, portal booking pages and Unit Setup: also no bank details or sign-offs.
 const BOOKING_GUARDED = [
