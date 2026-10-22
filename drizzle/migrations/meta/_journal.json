@@ -855,6 +855,13 @@
       "when": 1792649866787,
       "tag": "0121_signature_swap_rpc",
       "breakpoints": true
+    },
+    {
+      "idx": 122,
+      "version": "7",
+      "when": 1792651276500,
+      "tag": "0122_fix_swap_signature_unit_text",
+      "breakpoints": true
     }
   ]
 }
