@@ -372,7 +372,7 @@ export default function MeetingBookingForm({
                     paymentMethod,
                   }}
                   return_url={`${window.location.origin}/checkout/return?session_id={CHECKOUT_SESSION_ID}`}
-                  onError={(msg) => toast({ title: "Checkout error", description: msg, variant: "destructive" })}
+                  onError={(msg) => { setShowCheckout(false); toast({ title: "Checkout error", description: msg, variant: "destructive" }); }}
                 />
               </div>
 
