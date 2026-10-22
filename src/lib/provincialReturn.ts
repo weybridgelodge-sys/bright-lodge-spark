@@ -11,6 +11,7 @@ import { LADDER_KEYS, resolveRollOffice } from "@/lib/officerRoll";
 import { meetingPatternFor } from "@/lib/meetingPattern";
 import { resolveRepresentatives, repForWord } from "@/lib/representatives";
 import { POSITION_SELECT } from "@/lib/officerPositions";
+import { formLodge, formNumber } from "../../supabase/functions/_shared/provincialReturnDoc";
 export { PM_NOTE, PROVINCE_TITLE, PROVINCE_SUBTITLE, ukLongDate } from "../../supabase/functions/_shared/provincialReturnDoc";
 
 export { LADDER_KEYS };
@@ -233,9 +234,7 @@ export async function loadProvincialData(year: number, opts: { canAppend: boolea
   };
 }
 
-/** Lodge as printed on the Province form: name without "Lodge", upper case. */
-export const docLodgeName = (name: string) => name.replace(/\s+lodge$/i, "").trim().toUpperCase();
 export const lodgeLine = (d: Pick<ProvincialData, "lodgeName" | "lodgeNumber">) =>
-  [docLodgeName(d.lodgeName), d.lodgeNumber ? `L${d.lodgeNumber}` : ""].filter(Boolean).join(" ");
+  [formLodge(d), formNumber(d)].filter(Boolean).join(" ");
 export const fileBase = (year: number, lodgeNumber: string) =>
   [lodgeNumber ? `L${lodgeNumber}` : "", `PROVINCIAL_RETURN_${year}-${year + 1}`].filter(Boolean).join("-");
