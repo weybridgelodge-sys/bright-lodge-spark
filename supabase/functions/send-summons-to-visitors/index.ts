@@ -1,7 +1,7 @@
 // send-summons-to-visitors — email a finalised summons to visitor contacts.
 // Personalised salutation per recipient, branded HTML matching the shared
-// Weybridge Lodge transactional email style (centered crest, "Weybridge
-// Lodge" heading, gold "No. 6787 — Province of Surrey" subtitle, white body),
+// Shared transactional email style (centred crest, lodge name heading, gold number and province
+// subtitle, white body); lodge details come from Unit Setup via loadLodgeSettings.
 // with the summons PDF + .ics calendar file attached.
 //
 // Role-gated to admin / secretary / worshipful_master and logged into
@@ -66,8 +66,8 @@ function renderHtml(o: {
   unsubscribeUrl?: string;
 }): string {
   // Style matches the shared brand (see supabase/functions/_shared/transactional-email-templates/_brand.ts
-  // and almoner-overdue-digest.tsx): white body, centered crest, navy "Weybridge Lodge" title
-  // with a gold "No. 6787 — Province of Surrey" subtitle, then Arial body copy.
+  // and almoner-overdue-digest.tsx): white body, centered crest, navy lodge-name title
+  // with a gold "No. <number> — <province>" subtitle, then Arial body copy.
   const detailRow = (label: string, value: string) => `
     <tr>
       <td style="padding:4px 12px 4px 0;color:${BRAND.muted};font-size:14px;vertical-align:top;">${esc(label)}</td>
