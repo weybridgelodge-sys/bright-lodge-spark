@@ -6,7 +6,9 @@
 // idempotent, nothing stopped a member paying twice for the same meeting.
 // This check runs BEFORE any Stripe session is created.
 
-import type { SupabaseClient } from "npm:@supabase/supabase-js@2";
+// Structural client type so this file also typechecks when the browser bundle/tests import it.
+// deno-lint-ignore no-explicit-any
+type SupabaseClient = { from: (table: string) => any };
 
 /** Statuses that mean "this person already has a live response/booking". */
 export const BLOCKING_STATUSES = [
