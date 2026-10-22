@@ -862,6 +862,13 @@
       "when": 1792651276500,
       "tag": "0122_fix_swap_signature_unit_text",
       "breakpoints": true
+    },
+    {
+      "idx": 123,
+      "version": "7",
+      "when": 1792665515289,
+      "tag": "0123_officer_representatives_and_unit_settings",
+      "breakpoints": true
     }
   ]
 }

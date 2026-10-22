@@ -4857,6 +4857,7 @@ export type Database = {
         Row: {
           appointed_on: string | null
           created_at: string
+          display_name: string | null
           id: string
           is_projection: boolean
           lodge_year: number
@@ -4869,6 +4870,7 @@ export type Database = {
         Insert: {
           appointed_on?: string | null
           created_at?: string
+          display_name?: string | null
           id?: string
           is_projection?: boolean
           lodge_year: number
@@ -4881,6 +4883,7 @@ export type Database = {
         Update: {
           appointed_on?: string | null
           created_at?: string
+          display_name?: string | null
           id?: string
           is_projection?: boolean
           lodge_year?: number
@@ -4957,24 +4960,47 @@ export type Database = {
       }
       officer_positions: {
         Row: {
+          active: boolean
+          category: string
+          include_in: Json
           is_progressive: boolean
           key: string
           label: string
           order_index: number
+          print_label: string | null
+          unit_id: string | null
         }
         Insert: {
+          active?: boolean
+          category?: string
+          include_in?: Json
           is_progressive?: boolean
           key: string
           label: string
           order_index: number
+          print_label?: string | null
+          unit_id?: string | null
         }
         Update: {
+          active?: boolean
+          category?: string
+          include_in?: Json
           is_progressive?: boolean
           key?: string
           label?: string
           order_index?: number
+          print_label?: string | null
+          unit_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "officer_positions_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "units"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       past_masters: {
         Row: {
@@ -6406,6 +6432,38 @@ export type Database = {
           },
         ]
       }
+      unit_settings: {
+        Row: {
+          key: string
+          unit_id: string
+          updated_at: string
+          updated_by: string | null
+          value: Json
+        }
+        Insert: {
+          key: string
+          unit_id: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: Json
+        }
+        Update: {
+          key?: string
+          unit_id?: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "unit_settings_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       units: {
         Row: {
           created_at: string
@@ -7625,6 +7683,7 @@ export type Database = {
       is_event_published: { Args: { _event_id: string }; Returns: boolean }
       is_lodge_secretary: { Args: { _user: string }; Returns: boolean }
       is_period_locked: { Args: { p_period_id: string }; Returns: boolean }
+      is_representative_position: { Args: { _key: string }; Returns: boolean }
       is_working_group_lead: {
         Args: { _group: string; _user: string }
         Returns: boolean

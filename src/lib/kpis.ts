@@ -141,7 +141,7 @@ export async function fetchKpiBundle(): Promise<KpiBundle> {
     (supabase.from as any)("member_wm_terms").select("id,member_id,year_started,year_ended"),
     (supabase.from as any)("succession_risks").select("id,role_key,note,is_at_risk"),
     supabase.from("officer_appointments").select("position_key,member_id,lodge_year"),
-    supabase.from("officer_positions").select("key,label,is_progressive,order_index"),
+    supabase.from("officer_positions").select("key,label,is_progressive,order_index").eq("category", "office"),
     (supabase.from as any)("candidates").select("*"),
     (supabase.from as any)("member_status_history").select("profile_id,kind,status,effective_date,created_at"),
     fetchInstallationConfig(),
@@ -616,7 +616,7 @@ export async function fetchLodgeHealthBundle(): Promise<KpiBundle> {
       .select(
         "id,full_name,first_name,middle_name,last_name,preferred_name,post_nominals,title,status,degree,is_past_master,is_royal_arch,is_honorary_member,initiation_date,passing_date,raising_date,joined_lodge_date,is_ugle_portal_registered,rank,grand_rank,provincial_rank,updated_at,status_changed_at"
       ),
-    supabase.from("officer_positions").select("key,label,is_progressive,order_index"),
+    supabase.from("officer_positions").select("key,label,is_progressive,order_index").eq("category", "office"),
     (supabase as any).rpc("get_lodge_health_aggregates", { _lodge_year: my }),
   ]);
   const a = (agg.data ?? {}) as {

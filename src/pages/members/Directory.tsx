@@ -81,7 +81,8 @@ export default function MembersDirectory() {
 
       const { data: a } = await supabase
         .from("officer_appointments")
-        .select("member_id, position:officer_positions(label, order_index, is_progressive)")
+        .select("member_id, position:officer_positions!inner(label, order_index, is_progressive, category)")
+        .eq("position.category", "office")
         .eq("lodge_year", currentLodgeYear());
 
       const map: Record<string, { label: string; order: number; isProgressive: boolean }[]> = {};
