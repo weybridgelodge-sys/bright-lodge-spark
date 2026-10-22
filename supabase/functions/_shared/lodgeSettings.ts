@@ -30,7 +30,12 @@ export async function loadLodgeSettings(unitIdIn?: string): Promise<LodgeSetting
       db.from("unit_settings").select("key,value").eq("unit_id", unitId),
     ]);
     if (error) { console.error("lodge settings lookup failed, using fallback", error); return resolveLodgeSettings(null); }
-    const map = Object.fromEntries(((us.data ?? []) as { key: string; value: Record<string, unknown> }[]).map((r) => [r.key, r.value]));
+    const map: Record<string, Record<string, unknown>> = Object.fromEntries(((us.data ?? []) as { key: string; value: Record<string, unknown> }[]).map((r) => [r.key, r.value]));
+    const venueId = map.meeting_place?.venue_id;
+    if (typeof venueId === "string" && venueId) {
+      const { data: v } = await db.from("venues").select("name").eq("id", venueId).maybeSingle();
+      if (v?.name) map.meeting_place = { ...map.meeting_place, venue_name: v.name };
+    }
     const value = resolveLodgeSettings(data as Record<string, string | null>, map);
     cache = { at: Date.now(), value };
     return value;

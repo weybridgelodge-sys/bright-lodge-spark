@@ -17,6 +17,7 @@ export const LODGE_FALLBACK = {
   newsletterMasthead: "Weybridge Lodge No. 6787",
   newsletterFooterNote: "Guildford Masonic Centre, GU2 4DR",
   calendarName: "Weybridge Lodge No. 6787",
+  meetingVenue: "Guildford Masonic Centre",
   provincialReturnFile: "L6787-Provincial-Return-{year}",
   installationReturnFile: "Installation-Return-6787-{year}",
 } as const;
@@ -48,6 +49,7 @@ export function resolveLodgeSettings(row: Row, us?: UnitSettingsMap): LodgeSetti
     newsletterMasthead: pick(u("newsletter", "").masthead, f.newsletterMasthead),
     newsletterFooterNote: pick(u("newsletter", "").footer_note, f.newsletterFooterNote),
     calendarName: pick(u("calendar_feed", "").name, f.calendarName),
+    meetingVenue: pick(u("meeting_place", "").venue_name, f.meetingVenue),
     provincialReturnFile: pick(u("return_files", "").provincial, f.provincialReturnFile),
     installationReturnFile: pick(u("return_files", "").installation, f.installationReturnFile),
   };

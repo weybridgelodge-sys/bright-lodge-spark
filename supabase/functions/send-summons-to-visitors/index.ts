@@ -107,7 +107,7 @@ function renderHtml(o: {
           <hr style="border:none;border-top:1px solid ${BRAND.hairline};margin:20px 0 10px;" />
           <p style="color:${BRAND.muted};font-size:12px;margin:0;">
             ${o.unsubscribeUrl
-              ? `If you would prefer not to receive further invitations, <a href="${esc(o.unsubscribeUrl)}" style="color:${BRAND.gold};">click here to unsubscribe</a> from future Weybridge Lodge emails.`
+              ? `If you would prefer not to receive further invitations, <a href="${esc(o.unsubscribeUrl)}" style="color:${BRAND.gold};">click here to unsubscribe</a> from future ${esc(LODGE.senderName)} emails.`
               : `If you would prefer not to receive further invitations, please let the Secretary know and we will remove you from our visitor list.`}
           </p>
 
