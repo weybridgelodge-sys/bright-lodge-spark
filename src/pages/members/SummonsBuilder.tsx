@@ -1,4 +1,4 @@
-import { nextMeetingNotice, candidateAgendaItem, agendaAction } from "@/lib/summonsNotices";
+import { nextMeetingNotice, applyBallotOnly, isBallotOnlyTicked } from "@/lib/summonsNotices";
 import { useEffect, useMemo, useState } from "react";
 import MembersLayout from "@/components/members/MembersLayout";
 import { useAuth } from "@/hooks/useAuth";
