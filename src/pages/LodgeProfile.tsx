@@ -132,7 +132,7 @@ const LodgeProfile = () => {
               <p className="text-gold text-sm font-sans uppercase tracking-wide mb-2">By the Numbers</p>
               <h2 id="glance-heading" className="text-2xl md:text-3xl font-serif text-gold mb-10">Lodge at a Glance</h2>
               <dl className="grid grid-cols-1 sm:grid-cols-2 gap-px bg-gold/30 border border-gold/30 rounded-sm overflow-hidden">
-                {stats.map((s) => (
+                {shownStats.map((s) => (
                   <div key={s.label} className="bg-navy/80 p-5">
                     <dt className="text-xs font-sans uppercase tracking-wider text-primary-foreground/80 mb-2">{s.label}</dt>
                     <dd className="text-xl md:text-2xl font-serif text-gold">{s.value}</dd>
