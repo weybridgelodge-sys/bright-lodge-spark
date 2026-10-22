@@ -9,6 +9,7 @@
 // the panels read in the correct order: Front → Inside-L → Inside-R → Back.
 import { masonicYearStartSync } from "@/lib/masonicYear";
 import React from "react";
+import { candidateHeading, printAgendaLabel } from "@/lib/summonsNotices";
 import {
   Document,
   Page,
@@ -99,6 +100,8 @@ export type SummonsData = {
   dress_code: string | null;
   minutes_confirmation_date: string | null;
   next_meeting_date: string | null;
+  /** Editable sentence for a dispensation/emergency meeting before the next regular one. */
+  interim_meeting_note?: string | null;
   officer_night_date: string | null;
   officer_night_venue?: string | null;
   agenda: AgendaItem[];
@@ -690,7 +693,7 @@ const AgendaPanel: React.FC<{
         <View key={item.id} wrap={false}>
           <View style={[s.agendaRow, ad.row]}>
             <Text style={[s.agendaNum, ad.text]}>{i + 1}.</Text>
-            <Text style={[s.agendaText, ad.text]}>{item.label}</Text>
+            <Text style={[s.agendaText, ad.text]}>{printAgendaLabel(item.label)}</Text>
           </View>
           {item.children && item.children.length > 0 && (
             <View style={{ marginLeft: 16, marginBottom: 2 }}>
@@ -727,7 +730,7 @@ const AgendaPanel: React.FC<{
         <Text style={s.sectionHeading}>Candidate Details</Text>
         {summons.candidates.map((c) => (
           <Text key={c.id} style={[s.smallText, { marginBottom: 3 }]}>
-            <Text style={s.bold}>{c.ceremony_type}: {c.name}</Text>
+            <Text style={s.bold}>{candidateHeading(c, summons.agenda)}: {c.name}</Text>
             {c.dob ? `, D.O.B ${formatDateShort(c.dob)}` : ""}
             {c.occupation ? `, ${c.occupation}` : ""}
             {c.address ? `, of ${c.address}` : ""}
@@ -742,7 +745,7 @@ const AgendaPanel: React.FC<{
       </View>
     )}
 
-    {(summons.next_meeting_date || summons.officer_night_date) && (
+    {(summons.next_meeting_date || summons.interim_meeting_note || summons.officer_night_date) && (
       <View style={s.thinDivider} />
     )}
     {summons.next_meeting_date && (
@@ -750,6 +753,9 @@ const AgendaPanel: React.FC<{
         The date of the next regular meeting is{" "}
         <Text style={s.bold}>{formatDateLong(summons.next_meeting_date)}</Text>.
       </Text>
+    )}
+    {summons.interim_meeting_note && summons.interim_meeting_note.trim() && (
+      <Text style={[s.smallText, s.centered]}>{summons.interim_meeting_note.trim()}</Text>
     )}
     {summons.officer_night_date && (
       <Text style={[s.smallText, s.bold, s.centered, { marginTop: 3, textDecoration: "underline" }]}>

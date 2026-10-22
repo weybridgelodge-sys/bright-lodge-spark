@@ -2,7 +2,7 @@
 // member-list balancing, overflow priority logic.
 
 export type AgendaKind = "standing" | "variable" | "candidate";
-export type AgendaItem = { id: string; label: string; kind: AgendaKind; children?: AgendaItem[] };
+export type AgendaItem = { id: string; label: string; kind: AgendaKind; children?: AgendaItem[]; action?: "ballot" | "ballot_initiate" | "pass" | "raise" };
 
 // a, b, c ... z, aa, ab ...
 export function subLetter(i: number): string {
@@ -55,7 +55,7 @@ export const defaultAgenda = (): AgendaItem[] =>
 export type AgendaPreset = { label: string; children?: string[] };
 
 export const AGENDA_PRESETS: AgendaPreset[] = [
-  { label: "Confirm Minutes of [date]" },
+  { label: "Confirm the Minutes of [date]" },
   { label: "Ballot for and Initiate [name]" },
   { label: "Pass to the Second Degree" },
   { label: "Raise to the Third Degree" },
@@ -98,8 +98,9 @@ export const newCandidate = (): Candidate => ({
   ceremony_type: "Initiation",
 });
 
-export const candidateAgendaLabel = (c: Candidate): string => {
+export const candidateAgendaLabel = (c: Candidate, ballotOnly = false): string => {
   const who = c.name || "candidate";
+  if (ballotOnly && c.ceremony_type === "Initiation") return `Ballot for Mr ${who}`;
   switch (c.ceremony_type) {
     case "Initiation":
       return `Ballot for and Initiate Mr ${who}`;

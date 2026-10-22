@@ -1,3 +1,4 @@
+import { nextMeetingNotice, candidateAgendaItem, agendaAction } from "@/lib/summonsNotices";
 import { useEffect, useMemo, useState } from "react";
 import MembersLayout from "@/components/members/MembersLayout";
 import { useAuth } from "@/hooks/useAuth";
@@ -551,7 +552,7 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
           .select("id,title,first_name,middle_name,last_name,full_name,preferred_name,post_nominals,rank,grand_rank,provincial_rank,initiation_date,joined_lodge_date,joined_year,is_past_master,is_royal_arch,is_honorary_member,status")
           .eq("status", "active"),
         supabase.from("lodge_events").select("id,title,event_date,tyling_time,dress_code,location").order("event_date", { ascending: true }),
-        supabase.from("festive_board_meetings").select("id,meeting_date,notes").order("meeting_date", { ascending: true }),
+        supabase.from("festive_board_meetings").select("id,meeting_date,notes,meeting_type,cancelled_at").order("meeting_date", { ascending: true }),
         supabase.from("summonses").select("meeting_number").order("meeting_number", { ascending: false }).limit(1),
       ]);
       if (tpl.data) setTemplate(await printableTemplate(tpl.data, (mem.data ?? []) as any));
@@ -593,6 +594,7 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
         dress_code: r.dress_code,
         minutes_confirmation_date: r.minutes_confirmation_date,
         next_meeting_date: r.next_meeting_date,
+        interim_meeting_note: (r.notice_overrides as any)?.interimMeetingNote ?? null,
         officer_night_date: r.officer_night_date,
         officer_night_venue: (r as any).officer_night_venue ?? null,
         agenda: (r.agenda as any) ?? defaultAgenda(),
@@ -630,11 +632,9 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
     if (fb) {
       setSummons((s) => ({ ...s, dining_menu: fb.notes ?? s.dining_menu }));
     }
-    // Find next meeting
-    const futureIdx = events.findIndex((e) => e.id === id);
-    if (futureIdx >= 0 && futureIdx + 1 < events.length) {
-      setSummons((s) => ({ ...s, next_meeting_date: new Date(events[futureIdx + 1].event_date).toISOString().slice(0, 10) }));
-    }
+    // Next REGULAR meeting from the register, plus any dispensation/emergency meeting before it.
+    const n = nextMeetingNotice(festive, iso);
+    setSummons((s) => ({ ...s, next_meeting_date: n.nextRegular, interim_meeting_note: n.interimNote }));
   };
 
   const moveAgenda = (i: number, dir: -1 | 1) => {
@@ -711,6 +711,23 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
     });
   };
 
+  const fillNextFromRegister = () => {
+    const n = nextMeetingNotice(festive, summons.meeting_date);
+    setSummons({ ...summons, next_meeting_date: n.nextRegular, interim_meeting_note: n.interimNote });
+  };
+
+  const setBallotOnly = (c: Candidate, ballotOnly: boolean) => {
+    const id = c.id + "-a";
+    const action = ballotOnly ? "ballot" as const : "ballot_initiate" as const;
+    const exists = summons.agenda.some((x) => x.id === id);
+    setSummons({
+      ...summons,
+      agenda: exists
+        ? summons.agenda.map((x) => x.id === id ? { ...x, action, label: candidateAgendaLabel(c, ballotOnly) } : x)
+        : [...summons.agenda, { id, label: candidateAgendaLabel(c, ballotOnly), kind: "candidate", action }],
+    });
+  };
+
   const addCandidate = () => {
     const c = newCandidate();
     setSummons({
@@ -726,7 +743,7 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
     setSummons({
       ...summons,
       candidates: next,
-      agenda: summons.agenda.map((x) => x.id === id + "-a" ? { ...x, label: candidateAgendaLabel(updated) } : x),
+      agenda: summons.agenda.map((x) => x.id === id + "-a" ? { ...x, label: candidateAgendaLabel(updated, x.action === "ballot"), ...(updated.ceremony_type !== "Initiation" ? { action: undefined } : {}) } : x),
     });
   };
 
@@ -771,7 +788,7 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
         dining_menu: summons.dining_menu,
         dining_price: summons.dining_price,
         dining_deadline: summons.dining_deadline,
-        notice_overrides: { manualHidden } as any,
+        notice_overrides: { manualHidden, interimMeetingNote: summons.interim_meeting_note ?? null } as any,
         pdf_storage_path: path,
         status: action === "email" ? "sent" : "finalised",
       };
@@ -936,8 +953,13 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
             <Input aria-label="Minutes to confirm (date)" type="date" value={summons.minutes_confirmation_date ?? ""} onChange={(e) => setSummons({ ...summons, minutes_confirmation_date: e.target.value || null })} />
           </div>
           <div>
-            <Label>Next meeting</Label>
-            <Input aria-label="Next meeting" type="date" value={summons.next_meeting_date ?? ""} onChange={(e) => setSummons({ ...summons, next_meeting_date: e.target.value || null })} />
+            <Label>Next regular meeting</Label>
+            <Input aria-label="Next regular meeting" type="date" value={summons.next_meeting_date ?? ""} onChange={(e) => setSummons({ ...summons, next_meeting_date: e.target.value || null })} />
+            <Button type="button" variant="outline" size="sm" className="mt-2 min-h-11" onClick={fillNextFromRegister} disabled={!summons.meeting_date}>Fill from Meeting Diary</Button>
+          </div>
+          <div className="sm:col-span-2">
+            <Label htmlFor="interim-meeting-note">Meeting before the next regular one (optional)</Label>
+            <Input id="interim-meeting-note" className="min-h-11" placeholder="e.g. A meeting by dispensation will be held on …" value={summons.interim_meeting_note ?? ""} onChange={(e) => setSummons({ ...summons, interim_meeting_note: e.target.value || null })} />
           </div>
           <div>
             <Label>Officer Night</Label>
@@ -1014,6 +1036,12 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
                     <SelectTrigger className="min-h-11" aria-label="Ceremony"><SelectValue /></SelectTrigger>
                     <SelectContent>{CEREMONY_TYPES.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
                   </Select>
+                  {c.ceremony_type === "Initiation" && (
+                    <label className="mt-2 flex min-h-11 items-center gap-2 font-sans text-sm text-primary-foreground">
+                      <input type="checkbox" className="h-5 w-5" checked={(() => { const it = candidateAgendaItem(c, summons.agenda); return !!it && agendaAction(it) === "ballot"; })()} onChange={(e) => setBallotOnly(c, e.target.checked)} />
+                      Ballot only at this meeting (initiate later)
+                    </label>
+                  )}
                 </div>
                 <div>
                   <Label htmlFor={`${c.id}-dob`}>Date of birth</Label>
