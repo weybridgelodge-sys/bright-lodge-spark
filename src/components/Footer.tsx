@@ -71,6 +71,7 @@ const baseFooterColumns: FooterColumn[] = [
 ];
 
 const Footer = () => {
+  const unit = useUnitProfile();
   const festivalName = useLadiesFestivalPromo();
   const footerColumns: FooterColumn[] = festivalName
     ? baseFooterColumns.map((col) =>
