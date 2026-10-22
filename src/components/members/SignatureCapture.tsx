@@ -82,7 +82,7 @@ export default function SignatureCapture({ memberId, memberName, onBehalf = fals
   const pickFile = async (f: File) => {
     setWorking(true);
     const read = await readFileOnce(f);
-    if (!read.ok) { setWorking(false); toast.error(read.error); return; }
+    if ("error" in read) { setWorking(false); toast.error(read.error); return; }
     const c = await decodeToCanvas(read.blob).catch(() => null);
     setWorking(false);
     if (!c) { toast.error(SIG_MSG_UNDECODABLE); return; }
