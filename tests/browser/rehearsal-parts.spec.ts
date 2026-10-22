@@ -21,13 +21,9 @@ test("rehearsal dialog offers officer parts incl. Tyler and saves it, at 320px",
     return r.fulfill({ json: [] });
   });
   await page.route("**/rest/v1/profiles?**", (r) => r.fulfill({ json: [member] }));
-  page.on("request", (q) => { if (q.url().includes("/rest/") || q.url().includes("/auth/")) console.log("REQ", q.method(), q.url().slice(0, 140)); });
-  page.on("pageerror", (e) => console.log("PAGEERR", e.message));
-  page.on("console", (m) => console.log("CONSOLE", m.text().slice(0, 200)));
   await page.goto("/members/admin/loi");
-  await page.waitForTimeout(20000); console.log("BODY", (await page.locator("body").innerHTML()).slice(0, 1500));
   const add = page.getByRole("button", { name: /New session|Add session|New rehearsal/i }).first();
-  if (!(await add.isVisible({ timeout: 30000 }).catch(() => false))) { await page.screenshot({ path: "/tmp/browser/rp.png" }); test.skip(true, "Synthetic identity cannot manage rehearsals"); }
+  if (!(await add.isVisible({ timeout: 60000 }).catch(() => false))) { test.skip(true, "Synthetic identity cannot manage rehearsals"); }
   await add.click();
   const dialog = page.getByRole("dialog");
   await dialog.getByRole("checkbox").first().click();
@@ -37,6 +33,7 @@ test("rehearsal dialog offers officer parts incl. Tyler and saves it, at 320px",
   const opts = await page.getByRole("option").allTextContents();
   expect(opts).toEqual(["Candidate (rehearsal stand-in)", "Inner Guard", "Immediate Past Master", "Tyler", "Observing / No Part", "Other"]);
   await page.getByRole("option", { name: "Tyler" }).click();
+  await expect(part).toHaveText("Tyler");
   expect(await dialog.evaluate((el) => el.scrollWidth - el.clientWidth)).toBeLessThanOrEqual(1);
   await expectNoAxeViolations(page, "rehearsal session dialog");
   await dialog.getByRole("button", { name: /Create session/ }).click();

@@ -540,13 +540,14 @@ function SessionDialog({
                     className="flex flex-wrap items-center gap-2 p-2 text-sm"
                   >
                     <Checkbox
+                      aria-label={`Present: ${memberDisplay(m)}`}
                       checked={d.present}
                       onCheckedChange={(v) =>
                         setDraft(m.id, { present: !!v })
                       }
-                      className="border-gold/40"
+                      className="border-gold/40 h-5 w-5"
                     />
-                    <span className="flex-1 min-w-[140px]">{memberDisplay(m)}</span>
+                    <span className="flex-1 min-w-[140px] min-h-11 flex items-center">{memberDisplay(m)}</span>
                     {d.present && (
                       <div className="w-full sm:w-auto flex gap-2">
                         <Select
