@@ -219,7 +219,7 @@ useEffect(() => {
                 id="event-intro-heading"
                 className="text-2xl md:text-3xl font-serif text-foreground mb-4"
               >
-                {event.intro_heading || event.title}
+                {publicEventHeading(event)}
               </h2>
               {introParagraphs.map((p, i) => (
                 <p key={i} className="text-muted-foreground font-sans leading-relaxed mb-4 last:mb-0">

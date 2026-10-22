@@ -261,21 +261,7 @@ function EventEditor({ id, onBack, onDeleted }: { id: string; onBack: () => void
 
       const { error: evErr } = await supabase
         .from("lodge_events")
-        .update({
-          slug,
-          title: event.title,
-          intro: event.intro,
-          intro_heading: event.intro_heading || event.title,
-          event_date: event.event_date,
-          tyling_time: event.tyling_time,
-          dining_time: event.dining_time,
-          location: event.location,
-          dress_code: event.dress_code,
-          event_label: (event.event_label || "").trim() || "Festive Board",
-          booking_deadline: event.booking_deadline || null,
-          header_image_url: event.header_image_url || null,
-          published: event.published,
-        })
+        .update(lodgeEventSavePayload(event, slug))
         .eq("id", event.id);
       if (evErr) throw evErr;
 
