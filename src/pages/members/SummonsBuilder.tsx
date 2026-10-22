@@ -55,6 +55,8 @@ import {
 } from "@/lib/officersProgression";
 import { resolveOfficeRoll, provenanceLabel } from "@/lib/officerRoll";
 import { applyDerivedNames } from "@/lib/summonsSources";
+import { resolveRepresentatives, type ResolvedRep } from "@/lib/representatives";
+import { POSITION_SELECT } from "@/lib/officerPositions";
 import { loadMeetingPatternSources, saveMeetingPatternOverride } from "@/lib/meetingPattern";
 import { chooseMeetingPattern } from "@/lib/meetingDiary";
 
@@ -63,7 +65,16 @@ async function printableTemplate(raw: any, members: MemberRow[]): Promise<LodgeT
   const base = normaliseTemplateAssets({ ...EMPTY_TEMPLATE, ...raw, lodge_representatives: raw?.lodge_representatives ?? [] }) as LodgeTemplate;
   let pattern = base.regular_meeting_pattern;
   try { pattern = chooseMeetingPattern({ ...(await loadMeetingPatternSources()), manualText: base.regular_meeting_pattern }).text || null; } catch { /* keep typed text */ }
-  return applyDerivedNames({ ...base, regular_meeting_pattern: pattern }, members);
+  let reps: ResolvedRep[] | null = null;
+  try {
+    const [year, pos, ap] = await Promise.all([
+      fetchOfficerYear(),
+      supabase.from("officer_positions").select(POSITION_SELECT).eq("category", "representative"),
+      supabase.from("officer_appointments").select("position_key,member_id,lodge_year,is_projection,display_name").like("position_key", "rep_%"),
+    ]);
+    if (!pos.error && !ap.error) reps = resolveRepresentatives({ year, consumer: "summons", positions: (pos.data ?? []) as any, appts: (ap.data ?? []) as any, template: base as any });
+  } catch { /* template fallback */ }
+  return applyDerivedNames({ ...base, regular_meeting_pattern: pattern }, members, reps);
 }
 
 // ----- Visitor salutation parsing -----
