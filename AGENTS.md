@@ -11,7 +11,7 @@
 - Member signatures: private member-signatures bucket, no client access; signature-*/generate-provincial-return functions only; one active per member, unit-scoped; on-behalf needs consent, audited; never log image data/URLs. Why: fraud-sensitive.
 - Provincial return layout: supabase/functions/_shared/provincialReturnDoc.ts (browser re-exports). Why: one layout signed/unsigned.
 - Browser layout tests use only a Vite `e2e`-mode, localhost-only synthetic identity; never backend access or production.
-- Officer access = Installation year via current_officer_holder() (latest confirmed appt; stored date else installation_rule_date()); offices carry forward; client rolls via lib/officerRoll; labels sync via masonicYearStartSync. Dues/accounts/periods/Almoner year Oct–Sep.
+- Officer access = Installation year via current_officer_holder() (latest confirmed appt; stored date else installation_rule_date()); offices carry forward; rolls: lib/officerRoll; labels: masonicYearStartSync. Dues/accounts/periods/Almoner year Oct–Sep.
 - Officer appointment changes audit to officer_appointment_audit (swallow-on-error trigger); offices-held only via get_member_offices_held.
 - Member records: admin or is_lodge_secretary() list/add/edit via get_admin_profiles/admin-invite-member and set others' member_status (own: admin-only); roles, deletion, sign-in email admin-only server-side. Why: Secretary owns member data; admin is operator.
 - Profile dietary_requirements is private health data: no column SELECT grant; read only via get_profiles_pii; booking forms pre-fill it only while empty. Why: allergies are special-category data.
