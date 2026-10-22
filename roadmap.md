@@ -141,4 +141,4 @@
 - [ ] Meeting Diary 320px browser check fails on "Format dd/mm/yyyy" hint (screen not touched in phase 1; investigate)
 
 ## Festive Board register link (Oct 2026)
-- [ ] Replace typed booking slug with linked booking page (by event id), backfill, switch readers, tests, 320px axe
+- [x] Replace typed booking slug with linked booking page (by event id), backfill, switch readers, tests, 320px axe
