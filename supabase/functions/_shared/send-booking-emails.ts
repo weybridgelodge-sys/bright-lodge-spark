@@ -8,7 +8,6 @@ import { loadLodgeSettings } from './lodgeSettings.ts'
 import { bookingFirstName, bookingFullName, cleanSpaces } from './greeting.ts'
 import { bookingAmountLines, isStripeBooking, eventLabelWithoutDate } from './bookingAmounts.ts'
 
-export const WEBMASTER_EMAIL = 'webmaster@weybridgelodge.org.uk'
 
 interface SendOpts {
   stage: 'submitted' | 'paid' | 'backfill'
