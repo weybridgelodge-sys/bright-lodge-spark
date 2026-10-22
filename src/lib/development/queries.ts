@@ -141,8 +141,9 @@ export async function loadExternalAppointments(memberId: string): Promise<Extern
 export async function loadLodgeAppointmentsForMember(memberId: string) {
   const { data } = await supabase
     .from("officer_appointments")
-    .select("id, lodge_year, appointed_on, position_key, officer_positions(label, order_index)")
+    .select("id, lodge_year, appointed_on, position_key, officer_positions!inner(label, order_index, category)")
     .eq("member_id", memberId)
+    .eq("officer_positions.category", "office")
     .order("lodge_year", { ascending: false });
   return (data ?? []) as Array<{
     id: string;
