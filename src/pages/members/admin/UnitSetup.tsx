@@ -13,8 +13,13 @@ type Form = {
   lodge_name: string; lodge_number: string; consecration_date: string;
   account_name: string; sort_code: string; account_number: string; reference_pattern: string;
   card_wording: string; cheque_payee: string; sign_off_override: string; booking_contact_email: string;
+  venue_id: string; assistant_secretary_email: string; webmaster_email: string; communications_email: string; site_url: string;
+  sender_name: string; formal_sender_name: string; facebook_url: string; instagram_url: string; twitter_url: string;
+  province_name: string; ico_number: string; newsletter_masthead: string; newsletter_footer_note: string; calendar_name: string;
+  provincial_file: string; installation_file: string;
 };
-const EMPTY: Form = { lodge_name: "", lodge_number: "", consecration_date: "", account_name: "", sort_code: "", account_number: "", reference_pattern: "", card_wording: "", cheque_payee: "", sign_off_override: "", booking_contact_email: "" };
+type Venue = { id: string; name: string; address: string | null; display_lines: string[] | null };
+const EMPTY: Form = { lodge_name: "", lodge_number: "", consecration_date: "", account_name: "", sort_code: "", account_number: "", reference_pattern: "", card_wording: "", cheque_payee: "", sign_off_override: "", booking_contact_email: "", venue_id: "", assistant_secretary_email: "", webmaster_email: "", communications_email: "", site_url: "", sender_name: "", formal_sender_name: "", facebook_url: "", instagram_url: "", twitter_url: "", province_name: "", ico_number: "", newsletter_masthead: "", newsletter_footer_note: "", calendar_name: "", provincial_file: "", installation_file: "" };
 type Audit = { id: string; key: string; old_value: unknown; new_value: unknown; changed_by: string | null; changed_at: string };
 type Errs = Partial<Record<keyof Form, string>>;
 
@@ -32,6 +37,8 @@ const rpc = (name: string, args?: object) => (supabase.rpc as any)(name, args);
 function Inner() {
   const [f, setF] = useState<Form>(EMPTY);
   const [contactEmail, setContactEmail] = useState("");
+  const [venues, setVenues] = useState<Venue[]>([]);
+  const [provEmails, setProvEmails] = useState<{ provincial_return?: unknown; installation_return?: unknown }>({});
   const [canView, setCanView] = useState<boolean | null>(null);
   const [canEdit, setCanEdit] = useState(false);
   const [errs, setErrs] = useState<Errs>({});
@@ -58,7 +65,10 @@ function Inner() {
       const [v, e] = await Promise.all([rpc("can_view_unit_setup", { _user: uid }), rpc("can_edit_unit_setup", { _user: uid })]);
       setCanView(v.data === true); setCanEdit(e.data === true);
       if (v.data !== true) { setLoading(false); return; }
-      const [id, rows] = await Promise.all([loadLodgeIdentity().catch(() => null), (supabase.from("unit_settings" as never) as any).select("key,value")]);
+      const [id, rows, setup] = await Promise.all([loadLodgeIdentity().catch(() => null), (supabase.from("unit_settings" as never) as any).select("key,value"), rpc("get_unit_setup")]);
+      const su = (setup.data ?? {}) as { contacts?: Record<string, string | null>; venues?: Venue[]; province_emails?: Record<string, unknown> };
+      const c = su.contacts ?? {};
+      setVenues(su.venues ?? []); setProvEmails(su.province_emails ?? {});
       const by: Record<string, Record<string, string | null>> = {};
       for (const r of (rows.data ?? []) as { key: string; value: Record<string, string | null> }[]) by[r.key] = r.value ?? {};
       const b = by.bank_details ?? {}, p = by.payment_wording ?? {};
@@ -68,6 +78,12 @@ function Inner() {
         account_name: b.account_name ?? "", sort_code: b.sort_code ?? "", account_number: b.account_number ?? "", reference_pattern: b.reference_pattern ?? "",
         card_wording: p.card_wording ?? "", cheque_payee: p.cheque_payee ?? "", sign_off_override: by.sign_off?.override ?? "",
         booking_contact_email: by.booking_contact_email?.email ?? "",
+        venue_id: by.meeting_place?.venue_id ?? "", assistant_secretary_email: c.assistant_secretary_email ?? "", webmaster_email: c.webmaster_email ?? "",
+        communications_email: c.communications_email ?? "", site_url: c.site_url ?? "", sender_name: c.sender_name ?? "", formal_sender_name: c.formal_sender_name ?? "",
+        facebook_url: by.web_social?.facebook_url ?? "", instagram_url: by.web_social?.instagram_url ?? "", twitter_url: by.web_social?.twitter_url ?? "",
+        province_name: by.province?.name ?? "", ico_number: by.registrations?.ico_number ?? "", newsletter_masthead: by.newsletter?.masthead ?? "",
+        newsletter_footer_note: by.newsletter?.footer_note ?? "", calendar_name: by.calendar_feed?.name ?? "",
+        provincial_file: by.return_files?.provincial ?? "", installation_file: by.return_files?.installation ?? "",
       });
       await loadAudit();
       setLoading(false);
@@ -136,6 +152,85 @@ function Inner() {
         <Section title="Meetings">
           <p className="text-sm">Meeting dates and the meeting pattern are kept in the Meeting Diary.</p>
           <Link to="/members/admin/secretary" className="inline-flex min-h-[44px] items-center text-sm text-gold underline underline-offset-4">Open the Secretary Portal (Meeting Diary)</Link>
+        </Section>
+
+        <Section title="Venue and meeting place">
+          <div>
+            <label htmlFor="us-venue_id" className={fieldLabelCls}>Meeting place</label>
+            <select id="us-venue_id" value={f.venue_id} disabled={ro} onChange={(e) => setF((x) => ({ ...x, venue_id: e.target.value }))} className={`${fieldCls} mt-1 min-h-[44px]`}>
+              <option value="">Choose a venue</option>
+              {venues.map((v) => <option key={v.id} value={v.id}>{v.name}</option>)}
+            </select>
+            <span className={fieldHintCls}>The venue's address is part of the shared venue record, not this lodge.</span>
+          </div>
+          {(() => { const v = venues.find((x) => x.id === f.venue_id); const lines = v?.display_lines?.length ? v.display_lines : v?.address ? [v.address] : []; return lines.length ? <p className="whitespace-pre-line text-sm">{lines.join("\n")}</p> : null; })()}
+          {saveBtn("venue", () => save("venue", "meeting_place", { venue_id: f.venue_id }, () => (f.venue_id ? {} : { venue_id: "Choose a venue." })))}
+        </Section>
+
+        <Section title="Contacts">
+          {field("assistant_secretary_email", "Assistant Secretary email", { type: "email", inputMode: "email" })}
+          {field("webmaster_email", "Webmaster email", { type: "email", inputMode: "email" })}
+          {field("communications_email", "Communications email", { type: "email", inputMode: "email" })}
+          {field("sender_name", "Email sender name", { hint: "Shown as the sender of lodge emails." })}
+          {field("formal_sender_name", "Formal lodge title", { hint: "Used in invitations and formal emails." })}
+          {saveBtn("contacts", () => save("contacts", "contacts", { assistant_secretary_email: f.assistant_secretary_email.trim(), webmaster_email: f.webmaster_email.trim(), communications_email: f.communications_email.trim(), site_url: f.site_url.trim(), sender_name: f.sender_name.trim(), formal_sender_name: f.formal_sender_name.trim() }, () => {
+            const e: Errs = {};
+            for (const k of ["assistant_secretary_email", "webmaster_email", "communications_email"] as const) if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(f[k].trim())) e[k] = "Enter a valid email address.";
+            if (!f.sender_name.trim()) e.sender_name = "Enter a sender name.";
+            if (!f.formal_sender_name.trim()) e.formal_sender_name = "Enter the formal title.";
+            return e;
+          }))}
+        </Section>
+
+        <Section title="Web and social">
+          {field("site_url", "Website address", { hint: "Starts with https://" })}
+          {field("facebook_url", "Facebook link")}
+          {field("instagram_url", "Instagram link")}
+          {field("twitter_url", "X (Twitter) link")}
+          {field("ico_number", "ICO registration number")}
+          {saveBtn("web", async () => {
+            const e: Errs = {};
+            for (const k of ["site_url", "facebook_url", "instagram_url", "twitter_url"] as const) if ((k === "site_url" || f[k].trim()) && !/^https:\/\/[^\s/]+\.[^\s]+$/.test(f[k].trim())) e[k] = "Enter a link starting with https://";
+            if (Object.keys(e).length) { setErrs(e); setStatus((x) => ({ ...x, web: "Please correct the highlighted fields." })); return; }
+            await save("web", "contacts", { assistant_secretary_email: f.assistant_secretary_email.trim(), webmaster_email: f.webmaster_email.trim(), communications_email: f.communications_email.trim(), site_url: f.site_url.trim(), sender_name: f.sender_name.trim(), formal_sender_name: f.formal_sender_name.trim() }, () => ({}));
+            await save("web", "web_social", { facebook_url: f.facebook_url.trim(), instagram_url: f.instagram_url.trim(), twitter_url: f.twitter_url.trim() }, () => ({}));
+            await save("web", "registrations", { ico_number: f.ico_number.trim() }, () => ({}));
+          })}
+        </Section>
+
+        <Section title="Province">
+          {field("province_name", "Province name", { hint: "e.g. Province of Somewhere" })}
+          <div className="text-sm">
+            <p className={fieldLabelCls}>Return email addresses</p>
+            <p className="mt-1 break-words">Provincial return: {typeof provEmails.provincial_return === "string" && provEmails.provincial_return ? provEmails.provincial_return : "Not set"}</p>
+            <p className="break-words">Installation return: {typeof provEmails.installation_return === "string" && provEmails.installation_return ? provEmails.installation_return : "Not set"}</p>
+            <span className={fieldHintCls}>These are set on the return screens, where they are checked again before sending.</span>
+          </div>
+          {saveBtn("province", () => save("province", "province", { name: f.province_name.trim() }, () => (f.province_name.trim() ? {} : { province_name: "Enter the province name." })))}
+        </Section>
+
+        <Section title="Newsletter">
+          {field("newsletter_masthead", "Masthead and footer name")}
+          {field("newsletter_footer_note", "Footer address line")}
+          {saveBtn("newsletter", () => save("newsletter", "newsletter", { masthead: f.newsletter_masthead.trim(), footer_note: f.newsletter_footer_note.trim() }, () => ({})))}
+        </Section>
+
+        <Section title="Calendar feed">
+          {field("calendar_name", "Calendar name", { hint: "Shown in members' calendar apps." })}
+          {saveBtn("calendar", () => save("calendar", "calendar_feed", { name: f.calendar_name.trim() }, () => ({})))}
+        </Section>
+
+        <Section title="Return file naming">
+          {field("provincial_file", "Provincial return file name", { hint: `Use {year}. Example: ${f.provincial_file.replace(/\{year\}/g, "2026")}.pdf` })}
+          {field("installation_file", "Installation return file name", { hint: `Use {year}. Example: ${f.installation_file.replace(/\{year\}/g, "2026")}.pdf` })}
+          {saveBtn("files", () => save("files", "return_files", { provincial: f.provincial_file.trim(), installation: f.installation_file.trim() }, () => {
+            const e: Errs = {};
+            for (const k of ["provincial_file", "installation_file"] as const) {
+              if (!/\{year\}/.test(f[k])) e[k] = "Include {year} in the file name.";
+              else if (/[\\/]/.test(f[k])) e[k] = "File names cannot contain slashes.";
+            }
+            return e;
+          }))}
         </Section>
 
         <Section title="Bank details for dining and event payments">
