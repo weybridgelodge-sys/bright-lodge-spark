@@ -7444,6 +7444,7 @@ export type Database = {
         Returns: boolean
       }
       can_edit_newsletter: { Args: { _user: string }; Returns: boolean }
+      can_edit_province_emails: { Args: { _user: string }; Returns: boolean }
       can_edit_unit_setup: { Args: { _user: string }; Returns: boolean }
       can_manage_diary: { Args: { _uid: string }; Returns: boolean }
       can_manage_meeting_minutes: { Args: { _user: string }; Returns: boolean }
