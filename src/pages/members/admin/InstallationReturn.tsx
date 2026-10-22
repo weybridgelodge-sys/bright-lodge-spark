@@ -125,6 +125,7 @@ function Inner() {
       a.download = `${returnFileStem(fresh.identity.lodgeNumber, fresh.year)}.pdf`;
       a.click();
       setTimeout(() => URL.revokeObjectURL(url), 5000);
+      if (report.long.length) toast.warning(`${report.long.length} value(s) too long for their box — see below.`);
       if (report.missing.length) toast.warning(`${report.missing.length} field(s) not found in the template — see below.`);
       else toast.success("Installation Return exported");
     } catch (e: any) {
@@ -338,10 +339,11 @@ function Inner() {
               : "Signatures of the Master and Secretary are always left blank for a real signature. Date signed is prefilled with the installation date and can be changed in the PDF."}</p>
           </section>
 
-          {report && (report.missing.length > 0 || report.filled.some((f) => f.fuzzy)) && (
+          {report && (report.missing.length > 0 || report.long.length > 0 || report.filled.some((f) => f.fuzzy)) && (
             <section className="rounded-sm border border-amber-400/40 bg-amber-400/10 p-4 text-xs">
               <h2 className="font-semibold text-amber-300 mb-1">Template check from last export</h2>
               {report.missing.length > 0 && <p>Not found in the template: {report.missing.join("; ")}</p>}
+              {report.long.length > 0 && <p className="break-words">Too long to fit even at the smallest size (check the PDF): {report.long.join("; ")}</p>}
               {report.filled.filter((f) => f.fuzzy).map((f) => <p key={f.id}>Filled "{f.field}" for {f.id}</p>)}
             </section>
           )}
