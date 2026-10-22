@@ -3,7 +3,8 @@ import MembersLayout from "@/components/members/MembersLayout";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { GraduationCap } from "lucide-react";
-import { focusLabel, partLabel, masonicYearStart } from "@/lib/loi";
+import { focusLabel, masonicYearStart } from "@/lib/loi";
+import { loadPartOptions, partLabelFrom, type PartOption } from "@/lib/loiParts";
 
 type Session = {
   id: string;
@@ -24,6 +25,9 @@ export default function LoiRegister() {
   const { user } = useAuth();
   const [sessions, setSessions] = useState<Session[]>([]);
   const [attendance, setAttendance] = useState<Attendance[]>([]);
+  const [partOptions, setPartOptions] = useState<PartOption[]>([]);
+  useEffect(() => { loadPartOptions().then(setPartOptions).catch(() => {}); }, []);
+  const partLabel = (v: string, o?: string | null) => partLabelFrom(partOptions, v, o);
 
   useEffect(() => {
     (async () => {

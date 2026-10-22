@@ -1,5 +1,6 @@
 import { masonicYearStartSync } from "@/lib/masonicYear";
-// Shared LOI constants and helpers
+import { partLabelFrom } from "@/lib/loiParts";
+// Shared LOI constants and helpers. Part options: lib/loiParts (from officer_positions).
 
 export const LOI_FOCUS_OPTIONS = [
   { value: "first_degree", label: "First Degree" },
@@ -7,21 +8,6 @@ export const LOI_FOCUS_OPTIONS = [
   { value: "third_degree", label: "Third Degree" },
   { value: "installation", label: "Installation Ceremony" },
   { value: "general", label: "General Learning" },
-  { value: "other", label: "Other" },
-] as const;
-
-export const LOI_PART_OPTIONS = [
-  { value: "candidate", label: "Candidate (rehearsal stand-in)" },
-  { value: "inner_guard", label: "Inner Guard" },
-  { value: "junior_deacon", label: "Junior Deacon" },
-  { value: "senior_deacon", label: "Senior Deacon" },
-  { value: "junior_warden", label: "Junior Warden" },
-  { value: "senior_warden", label: "Senior Warden" },
-  { value: "worshipful_master", label: "Worshipful Master" },
-  { value: "director_of_ceremonies", label: "Director of Ceremonies" },
-  { value: "ipm", label: "IPM" },
-  { value: "chaplain", label: "Chaplain" },
-  { value: "observing", label: "Observing / No Part" },
   { value: "other", label: "Other" },
 ] as const;
 
@@ -33,7 +19,8 @@ export const LOI_KPI_CATEGORIES = [
   { value: "general", label: "General" },
 ] as const;
 
-export type LoiPart = (typeof LOI_PART_OPTIONS)[number]["value"];
+/** Stored part value: candidate/observing/other, an office key, or a legacy alias (e.g. "ipm"). */
+export type LoiPart = string;
 export type LoiFocus = (typeof LOI_FOCUS_OPTIONS)[number]["value"];
 
 export function focusLabel(value: string, other?: string | null) {
@@ -42,8 +29,7 @@ export function focusLabel(value: string, other?: string | null) {
 }
 
 export function partLabel(value: string, other?: string | null) {
-  if (value === "other") return other?.trim() || "Other";
-  return LOI_PART_OPTIONS.find((o) => o.value === value)?.label ?? value;
+  return partLabelFrom([], value, other);
 }
 
 /** Auto-categorise a session date into a KPI block based on month. */

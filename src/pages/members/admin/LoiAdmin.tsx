@@ -25,14 +25,13 @@ import { useToast } from "@/hooks/use-toast";
 import { GraduationCap, Plus, Pencil, ChevronRight, Trash2 } from "lucide-react";
 import {
   LOI_FOCUS_OPTIONS,
-  LOI_PART_OPTIONS,
   LOI_KPI_CATEGORIES,
   type LoiPart,
   focusLabel,
-  partLabel,
   kpiCategoryLabel,
   autoKpiCategory,
 } from "@/lib/loi";
+import { loadPartOptions, normalisePart, partLabelFrom, isOfficePart, partToSave, type PartOption } from "@/lib/loiParts";
 
 type Session = {
   id: string;
@@ -66,17 +65,6 @@ type Member = {
   provincial_rank: string | null;
 };
 
-const SINGLE_OFFICE_PARTS: LoiPart[] = [
-  "inner_guard",
-  "junior_deacon",
-  "senior_deacon",
-  "junior_warden",
-  "senior_warden",
-  "worshipful_master",
-  "director_of_ceremonies",
-  "ipm",
-  "chaplain",
-];
 
 function memberDisplay(m: Member) {
   return formatMemberLine(m as any) || "Unnamed brother";
@@ -93,6 +81,9 @@ export default function LoiAdmin() {
   const [editing, setEditing] = useState<Session | null>(null);
   const [creating, setCreating] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [partOptions, setPartOptions] = useState<PartOption[]>([]);
+  useEffect(() => { loadPartOptions().then(setPartOptions).catch(() => setPartOptions([])); }, []);
+  const partLabel = (v: string, o?: string | null) => partLabelFrom(partOptions, v, o);
 
   const loadAll = async () => {
     setLoading(true);
@@ -283,6 +274,7 @@ export default function LoiAdmin() {
       {(creating || editing) && (
         <SessionDialog
           open
+          partOptions={partOptions}
           onClose={() => {
             setCreating(false);
             setEditing(null);
@@ -309,6 +301,7 @@ type Draft = {
   present: boolean;
   part: LoiPart;
   partOther: string;
+  original?: string | null;
 };
 
 function SessionDialog({
@@ -318,6 +311,7 @@ function SessionDialog({
   members,
   existing,
   existingAttendance,
+  partOptions,
 }: {
   open: boolean;
   onClose: () => void;
@@ -325,7 +319,9 @@ function SessionDialog({
   members: Member[];
   existing: Session | null;
   existingAttendance: Attendance[];
+  partOptions: PartOption[];
 }) {
+  const partLabel = (v: string, o?: string | null) => partLabelFrom(partOptions, v, o);
   const { user } = useAuth();
   const { toast } = useToast();
   const [date, setDate] = useState(
@@ -345,7 +341,8 @@ function SessionDialog({
       const existingRow = existingAttendance.find((a) => a.member_id === m.id);
       initial[m.id] = {
         present: !!existingRow,
-        part: (existingRow?.part as LoiPart) ?? "observing",
+        part: existingRow ? normalisePart(existingRow.part) : "observing",
+        original: existingRow?.part ?? null,
         partOther: existingRow?.part_other ?? "",
       };
     }
@@ -357,7 +354,7 @@ function SessionDialog({
     const counts: Record<string, string[]> = {};
     Object.entries(drafts).forEach(([mid, d]) => {
       if (!d.present) return;
-      if (!SINGLE_OFFICE_PARTS.includes(d.part)) return;
+      if (!isOfficePart(d.part)) return;
       (counts[d.part] ??= []).push(mid);
     });
     return Object.entries(counts)
@@ -418,7 +415,7 @@ function SessionDialog({
         .map(([mid, d]) => ({
           session_id: sessionId!,
           member_id: mid,
-          part: d.part,
+          part: partToSave(d.part, d.original),
           part_other: d.part === "other" ? d.partOther.trim() || null : null,
         }));
       if (rows.length) {
@@ -543,13 +540,14 @@ function SessionDialog({
                     className="flex flex-wrap items-center gap-2 p-2 text-sm"
                   >
                     <Checkbox
+                      aria-label={`Present: ${memberDisplay(m)}`}
                       checked={d.present}
                       onCheckedChange={(v) =>
                         setDraft(m.id, { present: !!v })
                       }
-                      className="border-gold/40"
+                      className="border-gold/40 h-5 w-5"
                     />
-                    <span className="flex-1 min-w-[140px]">{memberDisplay(m)}</span>
+                    <span className="flex-1 min-w-[140px] min-h-11 flex items-center">{memberDisplay(m)}</span>
                     {d.present && (
                       <div className="w-full sm:w-auto flex gap-2">
                         <Select
@@ -558,11 +556,11 @@ function SessionDialog({
                             setDraft(m.id, { part: v as LoiPart })
                           }
                         >
-                          <SelectTrigger className="h-8 flex-1 sm:flex-none sm:w-[180px] bg-navy border-gold/30 text-primary-foreground placeholder:text-primary-foreground/80 text-xs">
+                          <SelectTrigger aria-label={`Part for ${memberDisplay(m)}`} className="min-h-11 flex-1 sm:flex-none sm:w-[220px] bg-navy border-gold/30 text-primary-foreground placeholder:text-primary-foreground/80 text-xs">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            {LOI_PART_OPTIONS.map((o) => (
+                            {partOptions.map((o) => (
                               <SelectItem key={o.value} value={o.value}>
                                 {o.label}
                               </SelectItem>
