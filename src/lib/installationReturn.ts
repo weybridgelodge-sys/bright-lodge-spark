@@ -4,6 +4,7 @@ import { PDFDocument, StandardFonts, type PDFFont, PDFTextField, PDFCheckBox, PD
 import { supabase } from "@/integrations/supabase/client";
 import { cachedInstallationConfig, loadInstallationConfig, ruleDateFor } from "@/lib/masonicYear";
 import { identityIssues, installationRuleWording, loadLodgeIdentity, type LodgeIdentity } from "@/lib/lodgeIdentity";
+import { ugleSignedDate } from "@/lib/ugleReturnSignatures";
 import { computeProjection, type Appointment, type MemberLite, type PositionKey } from "@/lib/officersProgression";
 
 export const TEMPLATE_BUCKET = "secretary-returns";
@@ -259,7 +260,8 @@ export function buildFieldSpecs(d: ReturnData, opts: { secretaryChanged?: YesNo 
   const actualDiffers = !!d.installationDate && d.installationDate !== d.prescribedDate;
   const actual = dateParts(actualDiffers ? d.installationDate : null);
   const q = d.qualification;
-  const instDate = ukDate(d.installationDate);
+  // One date rule for the Installation column and both Date Signed boxes (same helper as the signing step).
+  const instDate = ugleSignedDate(d.installationDate, d.prescribedDate).text;
 
   const specs: FieldSpec[] = [
     { id: "Lodge Name", label: "Lodge name", value: d.identity.lodgeName },
@@ -284,7 +286,9 @@ export function buildFieldSpecs(d: ReturnData, opts: { secretaryChanged?: YesNo 
       {
         id: `Date of Installation Investiture or reason for Absence${tag}`,
         label: `${tag} date of installation / investiture`,
+        // IPM is neither installed nor invested at this meeting. No absence reasons are recorded in officer data.
         value: tag === "IPM" ? "" : o.memberId ? instDate : "",
+        center: true,
         match: (n) => n.toLowerCase().startsWith("date") && !n.toLowerCase().startsWith("date signed") && n.endsWith(tag),
       },
     );
@@ -323,7 +327,7 @@ export const NEVER_FILL = ["Worshipful MasterRow1", "SecretaryRow1", "Date of Di
 export type FillReport = { filled: { id: string; field: string; fuzzy: boolean }[]; missing: string[]; templateFields: string[]; long: string[] };
 
 export const MIN_EMAIL_FONT = 6;
-const isEmailSpec = (s: FieldSpec) => /email address/i.test(s.id);
+const isEmailSpec = (s: FieldSpec) => /email address|^Date of Installation/i.test(s.id);
 
 /** Largest font size (default first, then down to MIN_EMAIL_FONT) at which text fits the width; null if not even at the minimum. */
 export function fitFontSize(widthAt: (size: number) => number, available: number, defaultSize: number): number | null {
