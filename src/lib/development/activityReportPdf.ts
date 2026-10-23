@@ -29,7 +29,7 @@ export async function buildWorkingGroupsActivityPdf(deps: PdfBrandDeps = {}) {
   const { start, end, label } = masonicYearWindow();
   const [items, groups] = await Promise.all([listAllReportItemsInYear(start, end), listGroups()]);
 
-  const doc = new jsPDF({ unit: "pt", format: "a4" });
+  const doc = new jsPDF({ unit: "pt", format: "a4", compress: true });
   const { identity, crest } = await loadPdfBrand(deps);
   const ID = identity;
   const pageW = doc.internal.pageSize.getWidth();

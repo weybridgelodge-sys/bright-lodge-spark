@@ -24,7 +24,7 @@ export async function buildSummaryReportPdf(args: {
   mentorStatement: string;
 }, deps: PdfBrandDeps = {}) {
   const { data, mentorStatement } = args;
-  const doc = new jsPDF({ unit: "pt", format: "a4" });
+  const doc = new jsPDF({ unit: "pt", format: "a4", compress: true });
   const { identity, crest } = await loadPdfBrand(deps);
   const pageW = doc.internal.pageSize.getWidth();
   const pageH = doc.internal.pageSize.getHeight();
