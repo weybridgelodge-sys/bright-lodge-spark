@@ -6,14 +6,14 @@ import {
   Heading,
   Hr,
   Html,
-  Img,
   Link,
   Preview,
   Section,
   Text,
 } from 'npm:@react-email/components@0.0.22'
 import type { TemplateEntry } from './registry.ts'
-import { LOGO_HEIGHT, LOGO_URL, LOGO_WIDTH } from './_brand.ts'
+import { BRAND } from './_brand.ts'
+import { EmailBrandFooter, EmailBrandHeader } from './_brandHeader.tsx'
 
 interface Props {
   name?: string
@@ -22,25 +22,21 @@ interface Props {
   reason?: string
   submittedAt?: string
   source?: string
+  crestUrl?: string | null
+  lodgeName?: string
+  lodgeNumber?: string
+  provinceName?: string
 }
 
-const Email = ({ name, email, phone, reason, submittedAt, source }: Props) => (
+const Email = ({ name, email, phone, reason, submittedAt, source, crestUrl, lodgeName, lodgeNumber, provinceName }: Props) => {
+  const id = { crestUrl, lodgeName, lodgeNumber, provinceName }
+  return (
   <Html lang="en" dir="ltr">
     <Head />
     <Preview>New membership enquiry from {name || 'website visitor'}</Preview>
     <Body style={main}>
       <Container style={container}>
-        <Section style={{ textAlign: 'center', padding: '8px 0 16px' }}>
-          <Img
-            src={LOGO_URL}
-            width={LOGO_WIDTH}
-            height={LOGO_HEIGHT}
-            alt="Weybridge Lodge crest"
-            style={{ margin: '0 auto', display: 'block' }}
-          />
-          <Heading style={brand}>Weybridge Lodge</Heading>
-          <Text style={brandSub}>No. 6787 — Province of Surrey</Text>
-        </Section>
+        <EmailBrandHeader {...id} />
         <Heading style={h1}>New Membership Enquiry</Heading>
         <Text style={meta}>Source: {source || 'join-us'} · {submittedAt || ''}</Text>
 
@@ -62,14 +58,16 @@ const Email = ({ name, email, phone, reason, submittedAt, source }: Props) => (
           )}{' '}
           to make contact.
         </Text>
+        <EmailBrandFooter {...id} />
       </Container>
     </Body>
   </Html>
-)
+  )
+}
 
 const Row = ({ label, value }: { label: string; value?: string }) => (
   <Text style={rowStyle}>
-    <strong style={{ color: '#1B2A4A' }}>{label}: </strong>
+    <strong style={{ color: BRAND.navy }}>{label}: </strong>
     <span style={{ color: '#2a2a2a' }}>{value || '—'}</span>
   </Text>
 )
@@ -85,6 +83,7 @@ export const template = {
     reason: 'I would like to learn more about Freemasonry.',
     submittedAt: new Date().toISOString(),
     source: 'join-us',
+    crestUrl: 'https://placehold.co/240x240/png', lodgeName: 'Example Lodge', lodgeNumber: '1234', provinceName: 'Province of Testshire',
   },
 } satisfies TemplateEntry
 
@@ -99,5 +98,3 @@ const reasonStyle = { color: '#2a2a2a', fontSize: '14px', lineHeight: '1.6', mar
 const hr = { borderColor: '#e8e3d3', margin: '14px 0' }
 const footerText = { color: '#666', fontSize: '12px', margin: '18px 0 0' }
 const emailLink = { color: '#1B2A4A', textDecoration: 'underline', fontWeight: 600 as const }
-const brand = { color: '#1B2A4A', fontSize: '24px', margin: '12px 0 0', letterSpacing: '0.5px' }
-const brandSub = { color: '#C9A432', fontSize: '12px', letterSpacing: '2px', textTransform: 'uppercase' as const, margin: '4px 0 12px' }

@@ -1,14 +1,17 @@
 import * as React from 'npm:react@18.3.1'
 import {
-  Body, Button, Container, Head, Heading, Hr, Html, Img, Link, Preview, Section, Text,
+  Body, Button, Container, Head, Heading, Hr, Html, Link, Preview, Section, Text,
 } from 'npm:@react-email/components@0.0.22'
 import type { TemplateEntry } from './registry.ts'
-import { BRAND, LODGE_NAME, LOGO_HEIGHT, LOGO_URL, LOGO_WIDTH, brandStyles } from './_brand.ts'
+import { BRAND, brandHeaderLines, brandStyles } from './_brand.ts'
+import { EmailBrandFooter, EmailBrandHeader } from './_brandHeader.tsx'
 
 interface Entry { name: string; initiationLabel: string; url: string }
-interface Props { members?: Entry[]; adminUrl?: string }
+interface Props { members?: Entry[]; adminUrl?: string; crestUrl?: string | null; lodgeName?: string; lodgeNumber?: string; provinceName?: string }
 
-const Email = ({ members = [], adminUrl = 'https://weybridgelodge.org.uk/members/admin' }: Props) => (
+const Email = ({ members = [], adminUrl, crestUrl, lodgeName, lodgeNumber, provinceName }: Props) => {
+  const id = { crestUrl, lodgeName, lodgeNumber, provinceName }
+  return (
   <Html lang="en" dir="ltr">
     <Head />
     <Preview>
@@ -16,13 +19,7 @@ const Email = ({ members = [], adminUrl = 'https://weybridgelodge.org.uk/members
     </Preview>
     <Body style={brandStyles.main}>
       <Container style={brandStyles.container}>
-        <Section style={brandStyles.crestWrap}>
-          <Img src={LOGO_URL} width={LOGO_WIDTH} height={LOGO_HEIGHT} alt="Weybridge Lodge crest"
-            style={{ margin: '0 auto', display: 'block' }} />
-          <Heading style={brandStyles.brand}>{LODGE_NAME}</Heading>
-          <Text style={brandStyles.brandSub}>Province of Surrey</Text>
-        </Section>
-
+        <EmailBrandHeader {...id} />
         <Heading style={brandStyles.h1}>Grand Lodge numbers still to add</Heading>
         <Text style={brandStyles.body}>
           These initiated members don't have a Grand Lodge Reference Number recorded yet — usually
@@ -40,26 +37,31 @@ const Email = ({ members = [], adminUrl = 'https://weybridgelodge.org.uk/members
           ))}
         </Section>
 
-        <Section style={{ textAlign: 'center', margin: '24px 0' }}>
-          <Button href={adminUrl} style={button}>Add Grand Lodge numbers</Button>
-        </Section>
+        {adminUrl && (
+          <Section style={{ textAlign: 'center', margin: '24px 0' }}>
+            <Button href={adminUrl} style={button}>Add Grand Lodge numbers</Button>
+          </Section>
+        )}
 
         <Hr style={brandStyles.hr} />
         <Text style={foot}>Automated monthly reminder for the Lodge Secretary.</Text>
+        <EmailBrandFooter {...id} />
       </Container>
     </Body>
   </Html>
-)
+  )
+}
 
 export const template = {
   component: Email,
-  subject: () => `Grand Lodge numbers still to add — ${LODGE_NAME}`,
+  subject: (d: any) => ['Grand Lodge numbers still to add', brandHeaderLines(d).footer].filter(Boolean).join(' — '),
   displayName: 'Secretary — missing Grand Lodge numbers',
   previewData: {
-    adminUrl: 'https://weybridgelodge.org.uk/members/admin',
+    crestUrl: 'https://placehold.co/240x240/png', lodgeName: 'Example Lodge', lodgeNumber: '1234', provinceName: 'Province of Testshire',
+    adminUrl: 'https://example.org/members/admin',
     members: [
-      { name: 'Bro. John Smith', initiationLabel: '11 February 2026', url: 'https://weybridgelodge.org.uk/members/admin' },
-      { name: 'Bro. Peter Jones', initiationLabel: '13 May 2026', url: 'https://weybridgelodge.org.uk/members/admin' },
+      { name: 'Bro. John Smith', initiationLabel: '11 February 2026', url: 'https://example.org/members/admin' },
+      { name: 'Bro. Peter Jones', initiationLabel: '13 May 2026', url: 'https://example.org/members/admin' },
     ],
   },
 } satisfies TemplateEntry

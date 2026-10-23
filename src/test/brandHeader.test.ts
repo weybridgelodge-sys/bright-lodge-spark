@@ -85,9 +85,16 @@ describe("PDF brand header", () => {
 const PILOT = [
   "supabase/functions/_shared/transactional-email-templates/portal-access-request.tsx",
   "supabase/functions/_shared/transactional-email-templates/_brandHeader.tsx",
+  "supabase/functions/_shared/transactional-email-templates/enquiry-notification.tsx",
+  "supabase/functions/_shared/transactional-email-templates/period-unlock-requested.tsx",
+  "supabase/functions/_shared/transactional-email-templates/year-audit-update.tsx",
+  "supabase/functions/_shared/transactional-email-templates/secretary-ugle-missing.tsx",
+  "supabase/functions/_shared/transactional-email-templates/secretary-returns-digest.tsx",
+  "supabase/functions/_shared/transactional-email-templates/installation-return-submission.tsx",
+  "supabase/functions/_shared/transactional-email-templates/provincial-return-submission.tsx",
   "src/lib/pdfBrand.ts", "src/lib/treasurer/brandedReportDoc.ts", "src/components/members/treasurer/TrialBalanceReport.tsx",
 ];
-const BANNED = /LOGO_URL|@\/assets\/|\.asset\.json|lovable\.app|__l5e|weybridge|6787|Province of Surrey/i;
+const BANNED = /LOGO_URL|LOGO_WIDTH|LOGO_HEIGHT|crestWrap|LODGE_NAME|@\/assets\/|\.asset\.json|lovable\.app|__l5e|weybridge|6787|Province of Surrey/i;
 describe("pilot files carry no typed crest or host literal", () => {
   for (const f of PILOT) it(f, () => {
     const bad = fs.readFileSync(f, "utf8").split("\n").filter((l) => BANNED.test(l));

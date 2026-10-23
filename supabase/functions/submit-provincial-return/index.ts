@@ -68,11 +68,12 @@ Deno.serve(async (req) => {
     const submissionId = crypto.randomUUID();
     const { cc, used: ccUsed } = await resolveReturnCc(admin, configured);
 
+    const lodge = await loadLodgeSettings();
     const res = await sendTransactionalEmail({
       templateName: "provincial-return-submission",
       recipientEmail: configured,
       idempotencyKey: `provincial-return-${submissionId}`,
-      replyTo: (await loadLodgeSettings()).secretaryEmail,
+      replyTo: lodge.secretaryEmail,
       cc,
       templateData: {
         yearLabel,
@@ -82,6 +83,7 @@ Deno.serve(async (req) => {
         wordUrl: docx.data.signedUrl,
         pdfUrl: pdf.data.signedUrl,
         expiresOn: expires,
+        crestUrl: lodge.crestImageUrl || null, lodgeName: lodge.lodgeName, lodgeNumber: lodge.lodgeNumber, provinceName: lodge.provinceName,
       },
     });
     if (!res.ok) return json({ error: "The email could not be sent. Nothing was recorded — please try again." }, 502);

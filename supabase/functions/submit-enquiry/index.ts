@@ -4,6 +4,7 @@ import { z } from 'npm:zod@3.23.8'
 import { verifyTurnstile } from '../_shared/verify-turnstile.ts'
 import { sendTransactionalEmail } from '../_shared/send-email.ts'
 import { resolveEnquiryContacts } from '../_shared/enquiryContacts.ts'
+import { loadLodgeSettings } from '../_shared/lodgeSettings.ts'
 
 const UNIT_ID = 'weybridge'
 
@@ -88,6 +89,7 @@ Deno.serve(async (req) => {
 
   // 1) Notification to secretary (recipient is hard-coded — no caller override)
   const notifyTo = contacts.secretaryEmail
+  const lodge = await loadLodgeSettings(UNIT_ID).catch(() => null)
   const notifRes = await sendTransactionalEmail({
       templateName: 'enquiry-notification',
       recipientEmail: notifyTo,
@@ -100,6 +102,7 @@ Deno.serve(async (req) => {
         reason,
         submittedAt,
         source: source || 'join-us',
+        crestUrl: lodge?.crestImageUrl || null, lodgeName: lodge?.lodgeName, lodgeNumber: lodge?.lodgeNumber, provinceName: lodge?.provinceName,
       },
   })
   if (notifRes.error) console.error('Notification email failed', notifRes.error)
