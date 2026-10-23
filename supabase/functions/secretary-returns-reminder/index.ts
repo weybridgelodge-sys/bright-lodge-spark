@@ -13,6 +13,7 @@ import { loadLodgeSettings } from "../_shared/lodgeSettings.ts";
 
 // Site address from contacts.site_url only; blank = no link.
 let SITE_URL = ''
+let BRAND_ID: Record<string, unknown> = {}
 let PORTAL_URL: string | undefined
 
 const TYPE_LABELS: Record<string, string> = {
