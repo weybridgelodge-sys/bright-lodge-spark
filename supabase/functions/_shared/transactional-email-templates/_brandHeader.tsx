@@ -11,7 +11,7 @@ export const EmailBrandHeader = (props: BrandIdentity) => {
   return (
     <Section style={{ borderTop: `4px solid ${BRAND.navy}`, textAlign: 'center' as const, padding: '20px 0 0', backgroundColor: BRAND.bg }}>
       {l.crestUrl && (
-        <Img src={l.crestUrl} width={96} height={96} alt={l.name ? `${l.name} crest` : 'Lodge crest'} style={{ margin: '0 auto', display: 'block', objectFit: 'contain' as const }} />
+        <Img src={l.crestUrl} width={120} height={120} alt={l.name ? `${l.name} crest` : 'Lodge crest'} style={{ margin: '0 auto', display: 'block', objectFit: 'contain' as const }} />
       )}
       {l.name && (
         <Heading as="h1" style={{ color: BRAND.navy, fontFamily: 'Georgia, "Times New Roman", serif', fontSize: '24px', fontWeight: 700, margin: l.crestUrl ? '12px 0 0' : '0', letterSpacing: '0.5px' }}>{l.name}</Heading>
