@@ -5024,6 +5024,7 @@ export type Database = {
           created_at: string
           display_name: string
           id: string
+          installed_on: string | null
           lodge_year: number
           member_id: string | null
           source: string
@@ -5032,6 +5033,7 @@ export type Database = {
           created_at?: string
           display_name: string
           id?: string
+          installed_on?: string | null
           lodge_year: number
           member_id?: string | null
           source?: string
@@ -5040,6 +5042,7 @@ export type Database = {
           created_at?: string
           display_name?: string
           id?: string
+          installed_on?: string | null
           lodge_year?: number
           member_id?: string | null
           source?: string
