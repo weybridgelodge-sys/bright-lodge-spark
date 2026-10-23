@@ -347,7 +347,7 @@ const FrontCoverPanel: React.FC<{
   const rightSrc = coverRightDataUrl || resolveAssetUrl(template.cover_right_image_url, DEFAULT_COVER_RIGHT_URL);
   return (
   <View style={[s.panel]}>
-    <SummonsCoverHeader brand={coverBrand} template={template} leftSrc={leftSrc} rightSrc={rightSrc} />
+    <SummonsCoverHeader brand={coverBrand} fallback={{ name: template.lodge_name, number: template.lodge_number, province: template.province }} leftSrc={leftSrc} rightSrc={rightSrc} />
      </View>
 
     {wmFromRoll && (

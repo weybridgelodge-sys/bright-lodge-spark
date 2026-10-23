@@ -45,9 +45,9 @@ async function build(crest: { dataUrl: string; format: "PNG" } | null, id = iden
 
 describe("summons cover brand", () => {
   it("Unit Setup identity wins; template only fills blanks", () => {
-    expect(summonsCoverIdentity({ identity, crest: null }, template)).toEqual({ name: "Testbury Lodge", number: "1234", province: "Testshire" });
-    expect(summonsCoverIdentity({ identity: { ...identity, provinceName: "" }, crest: null }, template).province).toBe("Templateshire");
-    expect(summonsCoverIdentity({ identity: null, crest: null }, { lodge_name: "", lodge_number: "", province: "" })).toEqual({ name: "", number: "", province: "" });
+    expect(summonsCoverIdentity({ identity, crest: null }, { name: template.lodge_name, number: template.lodge_number, province: template.province })).toEqual({ name: "Testbury Lodge", number: "1234", province: "Testshire" });
+    expect(summonsCoverIdentity({ identity: { ...identity, provinceName: "" }, crest: null }, { name: template.lodge_name, number: template.lodge_number, province: template.province }).province).toBe("Templateshire");
+    expect(summonsCoverIdentity({ identity: null, crest: null }, { name: "", number: "", province: "" })).toEqual({ name: "", number: "", province: "" });
   });
 
   it("crest is 100pt and long names shrink", () => {

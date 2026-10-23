@@ -23,14 +23,15 @@ export async function loadSummonsCoverBrand(deps: PdfBrandDeps = {}): Promise<Su
   }
 }
 
-type TemplateIdentity = { lodge_name?: string | null; lodge_number?: string | null; province?: string | null };
+/** The summons template's own name/number/province fields, used only where Unit Setup is blank. */
+export type CoverFallback = { name?: string | null; number?: string | null; province?: string | null };
 
 /** Unit Setup wins where it has a value; template field otherwise; blank stays blank. */
-export function summonsCoverIdentity(brand: SummonsCoverBrand, t: TemplateIdentity) {
+export function summonsCoverIdentity(brand: SummonsCoverBrand, t: CoverFallback) {
   const pick = (a?: string | null, b?: string | null) => (a || "").trim() || (b || "").trim();
   return {
-    name: pick(brand.identity?.lodgeName, t.lodge_name),
-    number: pick(brand.identity?.lodgeNumber, t.lodge_number),
+    name: pick(brand.identity?.lodgeName, t.name),
+    number: pick(brand.identity?.lodgeNumber, t.number),
     province: pick(brand.identity?.provinceName, t.province),
   };
 }
@@ -53,11 +54,11 @@ const st = StyleSheet.create({
 
 export const SummonsCoverHeader: React.FC<{
   brand: SummonsCoverBrand;
-  template: TemplateIdentity;
+  fallback: CoverFallback;
   leftSrc?: string | null;
   rightSrc?: string | null;
-}> = ({ brand, template, leftSrc, rightSrc }) => {
-  const id = summonsCoverIdentity(brand, template);
+}> = ({ brand, fallback, leftSrc, rightSrc }) => {
+  const id = summonsCoverIdentity(brand, fallback);
   const title = [id.name, id.number ? `No. ${id.number}` : ""].filter(Boolean).join(" ");
   return (
     <View>
