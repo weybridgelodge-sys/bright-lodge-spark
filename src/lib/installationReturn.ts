@@ -10,10 +10,7 @@ import { computeProjection, type Appointment, type MemberLite, type PositionKey 
 
 export const TEMPLATE_BUCKET = "secretary-returns";
 export const TEMPLATE_PATH = "templates/New_IR_Craft.pdf";
-export const MEMBERSHIP_EMAIL_SETTING = "installation_return_membership_officer_email";
-/** Membership Officer address choices at the lodge's own email domain. */
-export const membershipEmailOptions = (domain: string) =>
-  domain ? [`membershipsecretary@${domain}`, `membershipofficer@${domain}`] : [];
+export const MEMBERSHIP_EMAIL_SETTING = MEMBERSHIP_OVERRIDE_SETTING;
 
 /** confirmed = saved, non-projection row for this year; planned = saved ladder projection row;
  *  computed = ladder engine output, not saved; carried = presumed continuing from an earlier year. */
