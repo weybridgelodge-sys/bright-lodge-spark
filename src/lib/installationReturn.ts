@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { cachedInstallationConfig, loadInstallationConfig, ruleDateFor } from "@/lib/masonicYear";
 import { identityIssues, installationRuleWording, loadLodgeIdentity, type LodgeIdentity } from "@/lib/lodgeIdentity";
 import { ugleSignedDate } from "@/lib/ugleReturnSignatures";
+import { findInstallationMeeting, noInstallationMeetingIssue } from "@/lib/installationMeeting";
 import { computeProjection, type Appointment, type MemberLite, type PositionKey } from "@/lib/officersProgression";
 
 export const TEMPLATE_BUCKET = "secretary-returns";
@@ -166,17 +167,10 @@ export function blockName(p?: ProfileLite | null) {
 
 export async function loadReturnData(year: number): Promise<ReturnData> {
   const issues: string[] = [];
-  const [apptRes, statusRes, eventRes, settingRes, identity] = await Promise.all([
+  const [apptRes, statusRes, installRes, settingRes, identity] = await Promise.all([
     supabase.from("officer_appointments").select("position_key,member_id,lodge_year,is_projection,override_reason"),
     supabase.from("member_progression_status").select("member_id,readiness,seniority_initiation_date,seniority_tiebreaker"),
-    supabase
-      .from("lodge_events")
-      .select("title,event_date,published")
-      .ilike("title", "%installation%")
-      .eq("published", true)
-      .gte("event_date", `${year}-09-01`)
-      .lt("event_date", `${year + 1}-09-01`)
-      .order("event_date", { ascending: true }),
+    findInstallationMeeting(year),
     supabase.from("module_settings").select("value").eq("key", MEMBERSHIP_EMAIL_SETTING).maybeSingle(),
     loadLodgeIdentity(),
   ]);
@@ -200,11 +194,9 @@ export async function loadReturnData(year: number): Promise<ReturnData> {
   const ipm = resolveContinuingOffice("immediate_past_master", "Immediate Past Master", year, appts);
   const officers = EMAIL_OFFICES.map((o) => resolveContinuingOffice(o.key, o.label, year, appts));
 
-  const events = (eventRes.data ?? []) as { title: string; event_date: string }[];
-  if (events.length > 1) issues.push(`${events.length} published Installation meetings found in ${year}/${(year + 1) % 100}; using the earliest.`);
-  const ev = events[0];
-  const installationDate = ev ? ev.event_date.slice(0, 10) : null;
-  if (!ev) issues.push(`No published Installation meeting found for ${year}. Installation date fields will be blank.`);
+  issues.push(...installRes.issues);
+  const installationDate = installRes.meeting?.date ?? null;
+  if (!installRes.meeting) issues.push(`${noInstallationMeetingIssue(year)}. Installation date fields will be blank.`);
 
   const settingVal = (settingRes.data?.value as string | undefined) ?? null;
   const membershipLodgeEmail = settingVal || membershipEmailOptions(identity.emailDomain)[0] || "";
@@ -221,7 +213,7 @@ export async function loadReturnData(year: number): Promise<ReturnData> {
     year,
     installationDate,
     prescribedDate: prescribedInstallationDate(year),
-    installationEventTitle: ev?.title ?? null,
+    installationEventTitle: installRes.meeting?.title ?? null,
     wm, sw, jw, ipm, officers,
     qualification: resolveQualification(wm.memberId, year, appts, identity.lodgeNumber),
     identity,

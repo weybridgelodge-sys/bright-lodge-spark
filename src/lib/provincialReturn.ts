@@ -9,12 +9,18 @@ import {
 } from "@/lib/installationReturn";
 import { LADDER_KEYS, resolveRollOffice } from "@/lib/officerRoll";
 import { meetingPatternFor } from "@/lib/meetingPattern";
+import { findInstallationMeeting, noInstallationMeetingIssue } from "@/lib/installationMeeting";
 import { resolveRepresentatives, repForWord } from "@/lib/representatives";
 import { POSITION_SELECT } from "@/lib/officerPositions";
 import { formLodge, formNumber } from "../../supabase/functions/_shared/provincialReturnDoc";
 export { PM_NOTE, PROVINCE_TITLE, PROVINCE_SUBTITLE, ukLongDate } from "../../supabase/functions/_shared/provincialReturnDoc";
 
 export { LADDER_KEYS };
+
+/** Offices that may be left vacant: printed blank, no warning. */
+export const OPTIONAL_VACANT_KEYS = new Set(["steward_4", "steward_5", "assistant_secretary"]);
+export const vacancyIssues = (rows: { key: string | null; label: string; provenance: string }[]) =>
+  rows.filter((r) => r.key && r.provenance === "vacant" && !OPTIONAL_VACANT_KEYS.has(r.key)).map((r) => `${r.label}: nobody resolved.`);
 
 /** Main officer table, in the Province form's exact order. `key: null` = always blank. */
 export const PROVINCIAL_ROWS: { label: string; key: string | null }[] = [
@@ -144,11 +150,10 @@ export function formatAddress(p: { address_line1?: string | null; address_line2?
 
 export async function loadProvincialData(year: number, opts: { canAppend: boolean }): Promise<ProvincialData> {
   const issues: string[] = [];
-  const [apptRes, statusRes, eventRes, tplRes, profRes, identity] = await Promise.all([
+  const [apptRes, statusRes, installRes, tplRes, profRes, identity] = await Promise.all([
     supabase.from("officer_appointments").select("position_key,member_id,lodge_year,is_projection,override_reason,display_name"),
     supabase.from("member_progression_status").select("member_id,readiness,seniority_initiation_date,seniority_tiebreaker"),
-    supabase.from("lodge_events").select("title,event_date").ilike("title", "%installation%").eq("published", true)
-      .gte("event_date", `${year}-09-01`).lt("event_date", `${year + 1}-09-01`).order("event_date"),
+    findInstallationMeeting(year),
     supabase.from("lodge_template").select("venue_address,regular_meeting_pattern,royal_arch_rep,royal_arch_rep_member_id,lodge_representatives,consecration_date").eq("id", "default").maybeSingle(),
     supabase.from("profiles").select("id,first_name,middle_name,last_name,full_name,post_nominals,email,status,initiation_date"),
     loadLodgeIdentity(),
@@ -204,11 +209,11 @@ export async function loadProvincialData(year: number, opts: { canAppend: boolea
   if (secId && !pii) issues.push("You don't have access to the Secretary's home contact details, so that section is blank.");
 
   const scheduledDate = prescribedInstallationDate(year);
-  const ev = ((eventRes.data ?? []) as { event_date: string }[])[0];
-  const actual = ev?.event_date?.slice(0, 10) ?? null;
-  if (!actual) issues.push(`No published Installation meeting found for ${year}; only the scheduled date is shown.`);
+  issues.push(...installRes.issues);
+  const actual = installRes.meeting?.date ?? null;
+  if (!actual) issues.push(`${noInstallationMeetingIssue(year)}; only the scheduled date is shown.`);
 
-  for (const r of rows) if (r.key && r.provenance === "vacant" && r.key !== "steward_4" && r.key !== "steward_5") issues.push(`${r.label}: nobody resolved.`);
+  issues.push(...vacancyIssues(rows));
 
   return {
     year,
