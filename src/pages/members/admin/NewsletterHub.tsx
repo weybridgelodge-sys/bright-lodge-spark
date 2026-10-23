@@ -9,7 +9,7 @@ import ProtectedRoute from "@/components/members/ProtectedRoute";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import logoAsset from "@/assets/weybridge-logo-white.png.asset.json";
+import { loadNewsletterBrand, newsletterDefaultSubject, newsletterFooterHtml, newsletterHeaderHtml, type NewsletterPreviewBrand } from "@/lib/newsletterBrand";
 
 type Audience = "members" | "visitors";
 type Status = "draft" | "ready_to_send";
@@ -43,9 +43,6 @@ interface DraftRow {
 }
 
 
-const DEFAULT_SUBJECT = "Weybridge Lodge No. 6787 — Monthly Chronicle & Labours";
-const SITE_ORIGIN = "https://bright-lodge-spark.lovable.app";
-const LOGO_URL = `${SITE_ORIGIN}${logoAsset.url}`;
 
 /** Public sign-up counts. Only confirmed addresses receive the Public edition. */
 function PublicListCounts() {
@@ -269,7 +266,9 @@ function NewsletterHubInner() {
   const [broadcastId, setBroadcastId] = useState<string | null>(null);
   const [audience, setAudience] = useState<Audience>("members");
   const [unifiedContent, setUnifiedContent] = useState<boolean>(false);
-  const [subject, setSubject] = useState(DEFAULT_SUBJECT);
+  const [nlBrand, setNlBrand] = useState<NewsletterPreviewBrand | null>(null);
+  const DEFAULT_SUBJECT = nlBrand?.defaultSubject ?? newsletterDefaultSubject(null);
+  const [subject, setSubject] = useState("");
   const [membersSections, setMembersSections] = useState<Section[]>(DEFAULT_SECTIONS());
   const [visitorsSections, setVisitorsSections] = useState<Section[]>(() =>
     DEFAULT_SECTIONS().map((s) => ({ ...s, blocks: s.blocks.map((b) => b.type === "text" ? { ...b, text: "" } : b) })),
@@ -284,6 +283,17 @@ function NewsletterHubInner() {
   const [testEmail, setTestEmail] = useState("");
   const [sentSummary, setSentSummary] = useState<Array<{ audience: string; sent: number; error?: string | null }> | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  // Lodge brand for the preview and the default subject (same sources as the sent email).
+  useEffect(() => {
+    let live = true;
+    loadNewsletterBrand().then((b) => {
+      if (!live) return;
+      setNlBrand(b);
+      setSubject((prev) => prev || b.defaultSubject);
+    }).catch(() => { /* preview keeps a plain header */ });
+    return () => { live = false; };
+  }, []);
 
   // Default the test address to the signed-in sender's own email.
   useEffect(() => {
@@ -1083,18 +1093,13 @@ function NewsletterHubInner() {
         <div className={`${previewOpen ? "block" : "hidden lg:block"}`}>
           <div className="rounded-2xl overflow-hidden border border-gold/20 shadow-inner bg-white text-black">
             <div className="px-5 py-3 border-b border-slate-200 text-[11px] text-slate-500 space-y-0.5">
-              <p><strong>From:</strong> Weybridge Lodge No. 6787 &lt;chronicle@weybridgelodge.org.uk&gt;</p>
+              <p><strong>From:</strong> {nlBrand?.fromName || "…"}</p>
               <p><strong>To:</strong> {unifiedContent ? "Members & Visitors + Public (deduplicated)" : effectiveAudience === "members" ? "Members & Visitors" : "Public Subscribers"}</p>
               <p><strong>Subject:</strong> {subject || "…"}</p>
             </div>
 
-            <div className="bg-[#1B2A4A] px-5 py-4 border-b-4 border-[#C9A432] flex items-center gap-4">
-              <img src={LOGO_URL} alt="Weybridge Lodge crest" className="h-14 w-14 object-contain shrink-0" />
-              <div className="text-left">
-                <div className="font-serif text-[#C9A432] text-xl leading-tight">Weybridge Lodge No. 6787</div>
-                <div className="text-[10px] uppercase tracking-[0.2em] text-white/70 mt-1">Monthly Chronicle &amp; Labours</div>
-              </div>
-            </div>
+            {/* Same header HTML as the sent email (crest from Unit Setup; omitted if blank). */}
+            <div dangerouslySetInnerHTML={{ __html: newsletterHeaderHtml(nlBrand?.brand) }} />
 
             <div className="px-6 py-5 space-y-5">
               {sections.map((s) => (
@@ -1107,26 +1112,8 @@ function NewsletterHubInner() {
               ))}
             </div>
 
-            <div className="bg-[#1B2A4A] px-5 pt-4 pb-3 text-center">
-              <div className="flex justify-center gap-3 mb-3">
-                <a href="https://instagram.com/weybridgelodge/" className="inline-block">
-                  <span className="inline-grid place-items-center h-7 w-7 rounded-full bg-[#C9A432] text-[#1B2A4A] text-xs font-bold">IG</span>
-                </a>
-                <a href="https://facebook.com/people/Weybridge-Lodge-No-6787/61551808420513/" className="inline-block">
-                  <span className="inline-grid place-items-center h-7 w-7 rounded-full bg-[#C9A432] text-[#1B2A4A] text-xs font-bold">f</span>
-                </a>
-                <a href="https://twitter.com/weybridgelodge" className="inline-block">
-                  <span className="inline-grid place-items-center h-7 w-7 rounded-full bg-[#C9A432] text-[#1B2A4A] text-xs font-bold">𝕏</span>
-                </a>
-                <a href="https://weybridgelodge.org.uk/news" className="inline-block">
-                  <span className="inline-grid place-items-center h-7 w-7 rounded-full bg-[#C9A432] text-[#1B2A4A] text-[10px] font-bold">Web</span>
-                </a>
-              </div>
-              <div className="text-white/80 text-[10px] leading-relaxed">
-                © {new Date().getFullYear()} Weybridge Lodge No. 6787 · Guildford Masonic Centre, GU2 4DR<br />
-                Unsubscribe link is added automatically per recipient.
-              </div>
-            </div>
+            {/* Same footer HTML as the sent email; the preferences link is per recipient when sent. */}
+            <div dangerouslySetInnerHTML={{ __html: newsletterFooterHtml(nlBrand?.brand, "#") }} />
           </div>
         </div>
       </div>
