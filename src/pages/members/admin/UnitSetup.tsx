@@ -145,19 +145,19 @@ function Inner() {
   const only = (m: FieldMap<Form>) => (ch: (keyof Form)[]) => patchFor(f, ch, m);
 
   const ro = !canEdit;
-  const field = (k: keyof Form, label: string, opts: { hint?: string; type?: string; inputMode?: "numeric" | "text" | "email"; readOnly?: boolean } = {}) => (
+  const field = (k: keyof Form, label: string, opts: { hint?: string; type?: string; inputMode?: "numeric" | "text" | "email" | "url"; readOnly?: boolean; tall?: boolean } = {}) => (
     <div>
       <label htmlFor={`us-${k}`} className={fieldLabelCls}>{label}</label>
       <input id={`us-${k}`} type={opts.type ?? "text"} inputMode={opts.inputMode} value={f[k]} readOnly={ro || opts.readOnly} autoComplete="off"
         aria-invalid={!!errs[k]} aria-describedby={[opts.hint ? `us-${k}-hint` : "", errs[k] ? `us-${k}-err` : ""].filter(Boolean).join(" ") || undefined}
-        onChange={(e) => setF((x) => ({ ...x, [k]: e.target.value }))} className={`${fieldCls} mt-1 min-h-[44px]`} />
+        onChange={(e) => setF((x) => ({ ...x, [k]: e.target.value }))} className={`${fieldCls} mt-1 ${opts.tall ? "min-h-[48px]" : "min-h-[44px]"}`} />
       {opts.hint && <span id={`us-${k}-hint`} className={fieldHintCls}>{opts.hint}</span>}
       {errs[k] && <span id={`us-${k}-err`} className="mt-1 block text-sm text-gold-light">{errs[k]}</span>}
     </div>
   );
-  const saveBtn = (section: string, onClick: () => void) => canEdit && (
+  const saveBtn = (section: string, onClick: () => void, tall = false) => canEdit && (
     <div className="flex flex-wrap items-center gap-3 pt-2">
-      <Button type="button" onClick={onClick} disabled={busy === section || !orig} className="min-h-[44px]">{busy === section ? "Saving…" : "Save"}</Button>
+      <Button type="button" onClick={onClick} disabled={busy === section || !orig} className={tall ? "min-h-[48px]" : "min-h-[44px]"}>{busy === section ? "Saving…" : "Save"}</Button>
       <p role="status" className="font-sans text-sm text-primary-foreground/90">{status[section]}</p>
     </div>
   );
@@ -325,7 +325,7 @@ function Inner() {
         </Section>
 
         <Section title="Lodge crest image">
-          {field("crest_image_url", "Crest image address (https)", { type: "url", inputMode: "url", hint: "A public https:// link to the crest picture, used in emails and printed documents. Leave blank to leave the crest out." })}
+          {field("crest_image_url", "Crest image address (https)", { type: "url", inputMode: "url", hint: "A public https:// link to the crest picture, used in emails and printed documents. Leave blank to leave the crest out.", tall: true })}
           {crestUrlFrom({ url: f.crest_image_url }) && (
             <div className="flex min-w-0 items-center gap-3">
               <img src={crestUrlFrom({ url: f.crest_image_url })!} alt="Crest preview" width={64} height={64} className="h-16 w-16 shrink-0 rounded-sm bg-primary-foreground object-contain p-1" />
@@ -339,7 +339,7 @@ function Inner() {
             const m = crestUrlError(f.crest_image_url);
             if (m) e.crest_image_url = m;
             return e;
-          }))}
+          }), true)}
         </Section>
 
         <Section title="Sign-off">
