@@ -36,7 +36,9 @@ const londonToday = (): string =>
   }).format(new Date())
 
 Deno.serve(async (req) => {
-  SITE_URL = (await loadLodgeSettings()).configuredSiteUrl
+  const lodge = await loadLodgeSettings()
+  SITE_URL = lodge.configuredSiteUrl
+  BRAND_ID = { crestUrl: lodge.crestImageUrl || null, lodgeName: lodge.lodgeName, lodgeNumber: lodge.lodgeNumber, provinceName: lodge.provinceName, }
   ADMIN_URL = SITE_URL ? `${SITE_URL}/members/admin` : undefined
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders })
 
@@ -118,6 +120,7 @@ Deno.serve(async (req) => {
           url: ADMIN_URL ? `${ADMIN_URL}#member-${m.id}` : undefined,
         })),
         adminUrl: ADMIN_URL,
+        ...BRAND_ID,
       },
     })
     if (!resp.ok) {

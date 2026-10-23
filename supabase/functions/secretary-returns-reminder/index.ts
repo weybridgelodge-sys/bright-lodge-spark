@@ -61,7 +61,9 @@ const DEFAULT_LEAD_DAYS = 14
 const MAX_LEAD_DAYS = 3650
 
 Deno.serve(async (req) => {
-  SITE_URL = (await loadLodgeSettings()).configuredSiteUrl
+  const lodge = await loadLodgeSettings()
+  SITE_URL = lodge.configuredSiteUrl
+  BRAND_ID = { crestUrl: lodge.crestImageUrl || null, lodgeName: lodge.lodgeName, lodgeNumber: lodge.lodgeNumber, provinceName: lodge.provinceName, }
   PORTAL_URL = SITE_URL ? `${SITE_URL}/members/admin/returns` : undefined
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
@@ -199,7 +201,7 @@ Deno.serve(async (req) => {
       templateName: 'secretary-returns-digest',
       recipientEmail: secretaryEmail,
       idempotencyKey,
-      templateData: { overdue, dueSoon, reportDate, portalUrl: PORTAL_URL },
+      templateData: { overdue, dueSoon, reportDate, portalUrl: PORTAL_URL, ...BRAND_ID },
     })
     if (!resp.ok) {
       console.error('secretary returns digest send failed', resp.status, resp.error)

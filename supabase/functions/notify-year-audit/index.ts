@@ -15,9 +15,12 @@ const json = (b: unknown, status = 200) =>
   new Response(JSON.stringify(b), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 // Site address from contacts.site_url only; blank = no link.
 let URL_BASE = "";
+let BRAND_ID: Record<string, unknown> = {};
 
 Deno.serve(async (req) => {
-  URL_BASE = (await loadLodgeSettings()).configuredSiteUrl;
+  const lodge = await loadLodgeSettings();
+  URL_BASE = lodge.configuredSiteUrl;
+  BRAND_ID = { crestUrl: lodge.crestImageUrl || null, lodgeName: lodge.lodgeName, lodgeNumber: lodge.lodgeNumber, provinceName: lodge.provinceName, };
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   try {
     const URL_ = Deno.env.get("SUPABASE_URL")!;
@@ -71,6 +74,7 @@ Deno.serve(async (req) => {
         templateData: {
           kind, yearLabel, yearEnd, round: a.round_number, actor, note, office: OFFICE[ap.position_key],
           url: !URL_BASE ? undefined : kind === "review_needed" ? `${URL_BASE}/members` : `${URL_BASE}/members/admin/treasurer`,
+          ...BRAND_ID,
         },
       });
       if (res.ok) sent++; else failures.push(email);

@@ -63,6 +63,7 @@ Deno.serve(async (req) => {
           requestedBy: requester,
           approveAs: offices.sort().reverse().join(" & "),
           dashboardUrl: `${(await loadLodgeSettings()).siteUrl}/members/dashboard`,
+          ...(await (async () => { const l = await loadLodgeSettings(); return { crestUrl: l.crestImageUrl || null, lodgeName: l.lodgeName, lodgeNumber: l.lodgeNumber, provinceName: l.provinceName, } })()),
         },
       });
       if (res.ok) sent++; else failures.push(email);
