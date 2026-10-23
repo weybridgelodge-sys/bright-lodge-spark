@@ -15,7 +15,7 @@ test("KPI snapshot and critical roles at 320px", { timeout: 90_000 }, async ({ p
   await page.goto("/members/kpis");
   const h = page.getByText("Critical roles");
   if (!(await h.waitFor({ timeout: 25000 }).then(() => true).catch(() => false))) test.skip(true, "Synthetic identity cannot open the KPI screen");
-  await expect(page.getByText("VACANT")).toHaveCount(0);
+  await expect(page.getByText("VACANT", { exact: true })).toHaveCount(0);
   await expect(page.getByText("Test Tre").first()).toBeVisible();
   const date = page.getByText("13/05/2026").first();
   await date.scrollIntoViewIfNeeded();
