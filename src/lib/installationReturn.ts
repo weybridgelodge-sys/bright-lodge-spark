@@ -213,7 +213,7 @@ export async function loadReturnData(year: number): Promise<ReturnData> {
     year,
     installationDate,
     prescribedDate: prescribedInstallationDate(year),
-    installationEventTitle: ev?.title ?? null,
+    installationEventTitle: installRes.meeting?.title ?? null,
     wm, sw, jw, ipm, officers,
     qualification: resolveQualification(wm.memberId, year, appts, identity.lodgeNumber),
     identity,
