@@ -1,0 +1,1 @@
+ALTER TABLE public.past_masters ADD COLUMN installed_on date;
