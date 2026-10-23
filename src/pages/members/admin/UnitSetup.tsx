@@ -308,6 +308,18 @@ function Inner() {
           }))}
         </Section>
 
+        <Section title="Membership Officer lodge email">
+          {field("membership_officer_email", "Membership Officer lodge email", { type: "email", inputMode: "email", hint: "Used on the UGLE Installation Return. The Secretary can override it on the return itself. Leave blank to use the fallback address." })}
+          {saveBtn("membership", () => save("membership", [
+            { key: MEMBERSHIP_OFFICER_UNIT_KEY, fields: ["membership_officer_email"], value: (ch) => ({ email: ch.includes("membership_officer_email") ? normaliseEmail(f.membership_officer_email) : undefined }) },
+          ], () => {
+            const e: Errs = {};
+            const m = emailError(f.membership_officer_email);
+            if (m) e.membership_officer_email = m;
+            return e;
+          }))}
+        </Section>
+
         <Section title="Sign-off">
           <div>
             <label htmlFor="us-sign_off_override" className={fieldLabelCls}>Optional sign-off override</label>

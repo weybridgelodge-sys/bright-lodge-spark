@@ -16,13 +16,14 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { formatMasonicYear } from "@/lib/officersProgression";
 import {
   buildFieldSpecs, fillTemplate, returnFileStem, loadReturnData, blockName, lodgeEmailFor, ukDate,
-  membershipEmailOptions, MEMBERSHIP_EMAIL_SETTING, secretaryChoiceError, secretaryChangedValue, secretaryChoiceSummary, TEMPLATE_BUCKET, TEMPLATE_PATH,
+  MEMBERSHIP_EMAIL_SETTING, secretaryChoiceError, secretaryChangedValue, secretaryChoiceSummary, TEMPLATE_BUCKET, TEMPLATE_PATH,
   type YesNo, type Provenance, type ResolvedOffice, type ReturnData, type FillReport,
 } from "@/lib/installationReturn";
 import { useOfficerSignaturesEnabled } from "@/hooks/useOfficerSignaturesEnabled";
 import SignersPanel from "@/components/members/SignersPanel";
 import { readFunctionError } from "@/lib/functionError";
 import { ugleSignedDate } from "@/lib/ugleReturnSignatures";
+import { emailError, INVALID_EMAIL, membershipSourceText, normaliseEmail } from "@/lib/membershipOfficerEmail";
 
 type SignedResult = { path: string; url: string | null; signed: { secretary: boolean; worshipful_master: boolean } };
 /** Signed path (officer_signatures on): store the filled form, then the server adds the stored signatures and dates. */
@@ -47,6 +48,50 @@ const PROV: Record<Provenance, { label: string; cls: string }> = {
   carried: { label: "Carried forward, not reconfirmed", cls: "bg-sky-500/70 text-primary-foreground" },
   vacant: { label: "Blank — nobody holds it", cls: "bg-destructive/80 text-destructive-foreground" },
 };
+
+export function MembershipEmailField({ data, canEdit, onSave }: { data: ReturnData; canEdit: boolean; onSave: (v: string) => Promise<string | null> }) {
+  const [editing, setEditing] = useState(false);
+  const [value, setValue] = useState("");
+  const [err, setErr] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const isOverride = data.membershipEmailSource === "override";
+  const submit = async (v: string) => {
+    const pre = emailError(v) ?? (v.trim() ? null : INVALID_EMAIL);
+    if (pre) { setErr(pre); return; }
+    setSaving(true);
+    const e = await onSave(v);
+    setSaving(false);
+    if (e) setErr(e); else { setEditing(false); setErr(null); }
+  };
+  return (
+    <div className="mt-3 min-w-0 space-y-2 font-sans text-sm">
+      <label htmlFor="mo-email" className="block text-primary-foreground">Membership Officer lodge email</label>
+      <Input id="mo-email" type="email" inputMode="email" autoComplete="off" readOnly={!editing}
+        value={editing ? value : data.membershipLodgeEmail}
+        onChange={(e) => { setValue(e.target.value); setErr(null); }}
+        aria-describedby={`mo-email-source${err ? " mo-email-error" : ""}`} aria-invalid={err ? true : undefined}
+        className="min-h-12 w-full min-w-0 sm:w-96" />
+      <p id="mo-email-source" className="text-xs text-primary-foreground/80">{editing ? "Type the address to use on this return." : membershipSourceText(data.membershipEmailSource)}</p>
+      {err && <p id="mo-email-error" role="alert" className="text-xs font-semibold text-destructive-foreground bg-destructive/80 rounded-sm px-2 py-1">{err}</p>}
+      {canEdit && (
+        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+          {editing ? (
+            <>
+              <Button type="button" className="min-h-12" disabled={saving} onClick={() => submit(value)}>Save override</Button>
+              <Button type="button" variant="outline" className="min-h-12" disabled={saving} onClick={() => { setEditing(false); setErr(null); }}>Cancel</Button>
+            </>
+          ) : (
+            <Button type="button" variant="outline" className="min-h-12" onClick={() => { setValue(data.membershipOverride || data.membershipLodgeEmail); setEditing(true); }}>Use a different address</Button>
+          )}
+          {isOverride && !editing && (
+            <Button type="button" variant="outline" className="min-h-12" disabled={saving} onClick={async () => { setSaving(true); const e = await onSave(""); setSaving(false); setErr(e); }}>Clear override</Button>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 
 function defaultYear() {
   const d = new Date();
@@ -115,10 +160,16 @@ function Inner() {
     load();
   };
 
-  const setMembershipEmail = async (v: string) => {
-    const { error } = await supabase.from("module_settings").upsert({ key: MEMBERSHIP_EMAIL_SETTING, value: v as any }, { onConflict: "key" });
-    if (error) return toast.error(error.message);
-    load();
+  /** Saves (or with "" clears) the override; returns an error message or null. */
+  const saveMembershipOverride = async (v: string): Promise<string | null> => {
+    const err = emailError(v);
+    if (err) return err;
+    const n = normaliseEmail(v);
+    const { error } = await supabase.from("module_settings").upsert({ key: MEMBERSHIP_EMAIL_SETTING, value: (n || null) as any }, { onConflict: "key" });
+    if (error) return error.message;
+    toast.success(n ? "Override saved" : "Override cleared");
+    await load();
+    return null;
   };
 
   const exportPdf = async () => {
@@ -299,13 +350,7 @@ function Inner() {
               <thead><tr className="text-left text-xs text-primary-foreground/80"><th>Office</th><th>Name</th><th>Personal</th><th>Lodge</th><th>Status</th></tr></thead>
               <tbody>{data.officers.map((o) => <Row key={o.key} o={o} email />)}</tbody>
             </table>
-            <div className="mt-3 flex min-w-0 flex-col items-stretch gap-2 text-xs sm:flex-row sm:flex-wrap sm:items-center">
-              <span>Membership Officer lodge email:</span>
-              <Select value={data.membershipLodgeEmail} onValueChange={setMembershipEmail} disabled={!(isAdmin || isSecretary)}>
-                <SelectTrigger aria-label="Membership Officer lodge email" className="h-8 w-full min-w-0 sm:w-72"><SelectValue /></SelectTrigger>
-                <SelectContent>{membershipEmailOptions(data.identity.emailDomain).map((e) => <SelectItem key={e} value={e}>{e}</SelectItem>)}</SelectContent>
-              </Select>
-            </div>
+            <MembershipEmailField data={data} canEdit={isAdmin || isSecretary} onSave={saveMembershipOverride} />
             <p className="text-xs text-primary-foreground/80 mt-2">UGLE's own form has no lodge email box for the Treasurer, so only the personal address can be given.</p>
           </section>
 
