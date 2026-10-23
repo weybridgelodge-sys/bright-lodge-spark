@@ -7,15 +7,13 @@ import {
   Heading,
   Hr,
   Html,
-  Img,
   Preview,
   Section,
   Text,
 } from 'npm:@react-email/components@0.0.22'
 import type { TemplateEntry } from './registry.ts'
-import { LOGO_HEIGHT, LOGO_URL, LOGO_WIDTH } from './_brand.ts'
-
-const DEFAULT_GUIDE_URL = 'https://weybridgelodge.org.uk/downloads/information-for-prospective-members.pdf'
+import { brandHeaderLines } from './_brand.ts'
+import { EmailBrandFooter, EmailBrandHeader } from './_brandHeader.tsx'
 
 interface Props {
   name?: string
@@ -23,30 +21,27 @@ interface Props {
   secretaryOffice?: string
   membershipOfficerName?: string
   guideUrl?: string
+  crestUrl?: string | null
+  lodgeName?: string
+  lodgeNumber?: string
+  provinceName?: string
 }
 
-const Email = ({ name, secretaryName, secretaryOffice, membershipOfficerName, guideUrl }: Props) => (
+const Email = ({ name, secretaryName, secretaryOffice, membershipOfficerName, guideUrl, crestUrl, lodgeName, lodgeNumber, provinceName }: Props) => {
+  const id = { crestUrl, lodgeName, lodgeNumber, provinceName }
+  const lodge = brandHeaderLines(id).name || 'the Lodge'
+  return (
   <Html lang="en" dir="ltr">
     <Head />
-    <Preview>Great to hear from you — a short guide to Weybridge Lodge</Preview>
+    <Preview>Great to hear from you — a short guide to {lodge}</Preview>
     <Body style={main}>
       <Container style={container}>
-        <Section style={header}>
-          <Img
-            src={LOGO_URL}
-            width={LOGO_WIDTH}
-            height={LOGO_HEIGHT}
-            alt="Weybridge Lodge crest"
-            style={logo}
-          />
-          <Heading style={brand}>Weybridge Lodge</Heading>
-          <Text style={brandSub}>No. 6787 — Province of Surrey</Text>
-        </Section>
+        <EmailBrandHeader {...id} />
 
         <Section style={card}>
           <Heading as="h2" style={h2}>Thank you{name ? `, ${name}` : ''}</Heading>
           <Text style={p}>
-            Thanks so much for reaching out to Weybridge Lodge — it's great to
+            Thanks so much for reaching out to {lodge} — it's great to
             hear you're curious about Freemasonry here in Guildford.
           </Text>
           <Text style={p}>
@@ -55,9 +50,11 @@ const Email = ({ name, secretaryName, secretaryOffice, membershipOfficerName, gu
             what joining actually involves:
           </Text>
           <Section style={{ textAlign: 'center' as const, margin: '8px 0 16px' }}>
-            <Button href={guideUrl || DEFAULT_GUIDE_URL} style={button}>
-              Read the guide
-            </Button>
+            {guideUrl && (
+              <Button href={guideUrl} style={button}>
+                Read the guide
+              </Button>
+            )}
           </Section>
           <Text style={p}>
             Our membership secretary{membershipOfficerName ? ` ${membershipOfficerName}` : ''} will
@@ -75,36 +72,27 @@ const Email = ({ name, secretaryName, secretaryOffice, membershipOfficerName, gu
           </Text>
         </Section>
 
-        <Section style={footer}>
-          <Text style={footerText}>
-            Weybridge Lodge No. 6787 · Consecrated 1949 · Guildford, Surrey
-          </Text>
-        </Section>
+        <EmailBrandFooter {...id} />
       </Container>
     </Body>
   </Html>
-)
+  )
+}
 
 export const template = {
   component: Email,
   subject: (d: Props) => (d?.name ? `Great to hear from you, ${d.name}!` : 'Great to hear from you!'),
   displayName: 'Enquiry confirmation',
-  previewData: { name: 'Jane', secretaryName: 'W Bro. Richard Smith', secretaryOffice: 'Lodge Secretary', membershipOfficerName: 'W Bro. Ben Connolly', guideUrl: DEFAULT_GUIDE_URL },
+  previewData: { name: 'Jane', secretaryName: 'W Bro. Richard Smith', secretaryOffice: 'Lodge Secretary', membershipOfficerName: 'W Bro. Ben Connolly', guideUrl: 'https://example.org/guide.pdf', crestUrl: 'https://placehold.co/240x240/png', lodgeName: 'Example Lodge', lodgeNumber: '1234', provinceName: 'Province of Testshire', },
 } satisfies TemplateEntry
 
 const main = { backgroundColor: '#ffffff', fontFamily: 'Georgia, "Times New Roman", serif', margin: 0, padding: 0 }
 const container = { maxWidth: '600px', margin: '0 auto', padding: '24px' }
-const header = { textAlign: 'center' as const, padding: '16px 0 24px' }
-const logo = { margin: '0 auto 12px', display: 'block' }
-const brand = { color: '#1B2A4A', fontSize: '28px', margin: 0, letterSpacing: '0.5px' }
-const brandSub = { color: '#C9A432', fontSize: '13px', letterSpacing: '2px', textTransform: 'uppercase' as const, margin: '4px 0 0' }
 const card = { backgroundColor: '#fafaf7', border: '1px solid #e8e3d3', borderRadius: '4px', padding: '28px 28px 22px' }
 const h2 = { color: '#1B2A4A', fontSize: '20px', margin: '0 0 12px' }
 const p = { color: '#2a2a2a', fontSize: '15px', lineHeight: '1.6', margin: '0 0 12px', fontFamily: 'Arial, sans-serif' }
 const hr = { borderColor: '#e8e3d3', margin: '18px 0' }
 const small = { color: '#666', fontSize: '12px', lineHeight: '1.5', margin: 0, fontFamily: 'Arial, sans-serif' }
-const footer = { textAlign: 'center' as const, padding: '20px 0' }
-const footerText = { color: '#888', fontSize: '11px', margin: 0, fontFamily: 'Arial, sans-serif' }
 const signOff = { color: '#2a2a2a', fontSize: '15px', lineHeight: '1.5', margin: '0 0 8px', fontFamily: 'Arial, sans-serif' }
 const signName = { color: '#1B2A4A', fontSize: '15px', fontWeight: 600, lineHeight: '1.4', margin: 0, fontFamily: 'Arial, sans-serif' }
 const signOffice = { color: '#1B2A4A', fontSize: '14px', lineHeight: '1.4', margin: 0, fontFamily: 'Arial, sans-serif', fontStyle: 'italic' as const }

@@ -81,3 +81,28 @@ export function provincialGrandLodge(province?: string | null): string {
   const p = clean(province).replace(/^(the\s+)?province\s+of\s+/i, '')
   return p ? `Provincial Grand Lodge of ${p}` : 'Provincial Grand Lodge'
 }
+
+// ---- Plain-HTML twin of EmailBrandHeader/EmailBrandFooter (for emails built as strings:
+// visitor summons, member event invites). Same styles; blank crest = image omitted.
+const escHtml = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+
+export function brandHeaderHtml(id: BrandIdentity | null | undefined): string {
+  const l = brandHeaderLines(id)
+  const img = l.crestUrl
+    ? `<img src="${escHtml(l.crestUrl)}" width="120" height="120" alt="${escHtml(l.name ? `${l.name} crest` : 'Lodge crest')}" style="display:block;margin:0 auto;object-fit:contain;" />`
+    : ''
+  const name = l.name
+    ? `<h1 style="color:${BRAND.navy};font-family:Georgia,'Times New Roman',serif;font-size:24px;font-weight:700;margin:${l.crestUrl ? '12px 0 0' : '0'};letter-spacing:0.5px;">${escHtml(l.name)}</h1>`
+    : ''
+  const sub = l.sub
+    ? `<p style="color:${BRAND.muted};font-family:${BRAND.fontStack};font-size:12px;letter-spacing:2px;text-transform:uppercase;margin:4px 0 0;">${escHtml(l.sub)}</p>`
+    : ''
+  return `<div style="border-top:4px solid ${BRAND.navy};text-align:center;padding:20px 0 0;background-color:${BRAND.bg};">${img}${name}${sub}<div style="border-top:2px solid ${BRAND.gold};width:120px;margin:14px auto 20px;line-height:0;font-size:0;">&nbsp;</div></div>`
+}
+
+export function brandFooterHtml(id: BrandIdentity | null | undefined, note?: string): string {
+  const l = brandHeaderLines(id)
+  const n = note ? `<p style="color:${BRAND.muted};font-family:${BRAND.fontStack};font-size:12px;margin:0 0 4px;">${escHtml(note)}</p>` : ''
+  const f = l.footer ? `<p style="color:${BRAND.navy};font-family:Georgia,'Times New Roman',serif;font-size:12px;letter-spacing:0.08em;margin:0;">${escHtml(l.footer)}</p>` : ''
+  return `<div style="border-top:1px solid ${BRAND.navy};margin-top:24px;padding-top:10px;text-align:center;">${n}${f}</div>`
+}
