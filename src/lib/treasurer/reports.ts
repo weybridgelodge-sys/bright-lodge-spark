@@ -1,3 +1,4 @@
+import { loadDocIdentity, docTitle, docSubtitle, docFileName, docGroupName } from "@/lib/docIdentity";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { assetUrl } from "@/lib/assetUrl";
@@ -119,6 +120,7 @@ export async function reportPdfDoc(subtitle: string, periodLine: string, hideGen
   const margin = 40;
 
   const logoData = await loadReportLogo();
+  const LT = docTitle(await loadDocIdentity());
 
   doc.setFillColor(...NAVY);
   doc.rect(0, 0, pageW, 110, "F");
@@ -128,7 +130,7 @@ export async function reportPdfDoc(subtitle: string, periodLine: string, hideGen
   doc.setTextColor(255, 255, 255);
   doc.setFont("times", "bold");
   doc.setFontSize(20);
-  doc.text("Weybridge Lodge No. 6787", margin + 80, 50);
+  doc.text(LT, margin + 80, 50);
   doc.setFont("times", "italic");
   doc.setFontSize(13);
   doc.setTextColor(...GOLD);

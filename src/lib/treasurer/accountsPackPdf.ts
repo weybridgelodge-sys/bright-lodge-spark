@@ -1,3 +1,4 @@
+import { loadDocIdentity, docTitle, docSubtitle, docFileName, docGroupName } from "@/lib/docIdentity";
 import jsPDF from "jspdf";
 import { supabase } from "@/integrations/supabase/client";
 import { assetUrl } from "@/lib/assetUrl";
@@ -22,11 +23,11 @@ async function loadImageData(input: { url?: string }): Promise<string | null> {
   } catch { return null; }
 }
 
-function pageHeader(doc: jsPDF, pageW: number, margin: number, title: string, draft: boolean) {
+function pageHeader(doc: jsPDF, pageW: number, margin: number, title: string, draft: boolean, LT: string) {
   doc.setFillColor(...NAVY); doc.rect(0, 0, pageW, 60, "F");
   doc.setFillColor(...GOLD); doc.rect(0, 60, pageW, 2, "F");
   doc.setTextColor(255, 255, 255); doc.setFont("times", "bold"); doc.setFontSize(14);
-  doc.text("Weybridge Lodge No. 6787", margin, 28);
+  doc.text(LT, margin, 28);
   doc.setFont("times", "italic"); doc.setFontSize(11); doc.setTextColor(...GOLD);
   doc.text(title, margin, 46);
   if (draft) { doc.setFont("helvetica", "bold"); doc.setFontSize(10); doc.text("DRAFT — not yet approved", pageW - margin, 46, { align: "right" }); }
@@ -39,6 +40,7 @@ export async function buildAccountsPackPdf(src: PackSource, year: number, certif
   const endLabel = `30 September ${year + 1}`;
   const logo = await loadReportLogo();
   const coverLogo = await loadImageData(coverLogoAsset);
+  const ID = await loadDocIdentity(); const LT = docTitle(ID);
 
   // 1. Cover
   doc.setFillColor(250, 250, 247); doc.rect(0, 0, pageW, pageH, "F");
@@ -47,9 +49,9 @@ export async function buildAccountsPackPdf(src: PackSource, year: number, certif
   doc.setDrawColor(...NAVY); doc.setLineWidth(1); doc.rect(margin, 132, pageW - margin * 2, 548);
   if (coverLogo) { try { doc.addImage(coverLogo, "PNG", pageW / 2 - 65, 172, 130, 130); } catch { /* ignore */ } }
   doc.setTextColor(...NAVY); doc.setFont("times", "bold"); doc.setFontSize(26);
-  doc.text("Weybridge Lodge No. 6787", pageW / 2, 350, { align: "center" });
+  doc.text(LT, pageW / 2, 350, { align: "center" });
   doc.setFont("times", "italic"); doc.setFontSize(14); doc.setTextColor(...GOLD);
-  doc.text("Province of Surrey", pageW / 2, 375, { align: "center" });
+  doc.text(ID.provinceName, pageW / 2, 375, { align: "center" });
   doc.setFillColor(...GOLD); doc.rect(pageW / 2 - 90, 402, 180, 2, "F");
   doc.setFont("times", "bold"); doc.setFontSize(18); doc.setTextColor(...NAVY);
   doc.text("Annual Accounts", pageW / 2, 455, { align: "center" });
@@ -67,11 +69,11 @@ export async function buildAccountsPackPdf(src: PackSource, year: number, certif
 
   // 2. Treasurer's Remarks
   doc.addPage();
-  let y = pageHeader(doc, pageW, margin, "Treasurer's Remarks", src.draft);
+  let y = pageHeader(doc, pageW, margin, "Treasurer's Remarks", src.draft, LT);
   doc.setFont("helvetica", "normal"); doc.setFontSize(10.5); doc.setTextColor(...INK);
   const text = src.remarks?.trim() || "No remarks.";
   for (const line of doc.splitTextToSize(text, pageW - margin * 2) as string[]) {
-    if (y > pageH - 60) { doc.addPage(); y = pageHeader(doc, pageW, margin, "Treasurer's Remarks (continued)", src.draft); doc.setFont("helvetica", "normal"); doc.setFontSize(10.5); doc.setTextColor(...INK); }
+    if (y > pageH - 60) { doc.addPage(); y = pageHeader(doc, pageW, margin, "Treasurer's Remarks (continued)", src.draft, LT); doc.setFont("helvetica", "normal"); doc.setFontSize(10.5); doc.setTextColor(...INK); }
     doc.text(line, margin, y); y += 15;
   }
 
@@ -103,7 +105,7 @@ export async function buildAccountsPackPdf(src: PackSource, year: number, certif
 
   // 3. Balance Sheet
   doc.addPage();
-  y = pageHeader(doc, pageW, margin, `Balance Sheet as at ${endLabel}`, src.draft);
+  y = pageHeader(doc, pageW, margin, `Balance Sheet as at ${endLabel}`, src.draft, LT);
   if (st.hasPrior) {
     doc.setFont("helvetica", "italic"); doc.setFontSize(8.5); doc.setTextColor(...MUTED);
     doc.text(`Comparative figures: as at 30 September ${year}.`, margin, y - 8);
@@ -121,7 +123,7 @@ export async function buildAccountsPackPdf(src: PackSource, year: number, certif
 
   // 4. Income & Expenditure
   doc.addPage();
-  y = pageHeader(doc, pageW, margin, `Income & Expenditure for the year ended ${endLabel}`, src.draft);
+  y = pageHeader(doc, pageW, margin, `Income & Expenditure for the year ended ${endLabel}`, src.draft, LT);
   if (st.hasPrior) {
     doc.setFont("helvetica", "italic"); doc.setFontSize(8.5); doc.setTextColor(...MUTED);
     doc.text(`Comparative figures: year ended 30 September ${year}.`, margin, y - 8);
@@ -135,9 +137,9 @@ export async function buildAccountsPackPdf(src: PackSource, year: number, certif
   // 5. Certificate (approved only)
   if (!src.draft && certifiers.length) {
     doc.addPage();
-    y = pageHeader(doc, pageW, margin, "Auditors' Certificate", false);
+    y = pageHeader(doc, pageW, margin, "Auditors' Certificate", false, LT);
     doc.setFont("times", "normal"); doc.setFontSize(12); doc.setTextColor(...INK);
-    const cert = `We have examined the accounts of Weybridge Lodge No. 6787 for the year ended ${endLabel}, comprising the Balance Sheet and the Income & Expenditure account set out in this document, and believe them to be accurate.`;
+    const cert = `We have examined the accounts of ${LT || "the Lodge"} for the year ended ${endLabel}, comprising the Balance Sheet and the Income & Expenditure account set out in this document, and believe them to be accurate.`;
     for (const line of doc.splitTextToSize(cert, pageW - margin * 2) as string[]) { doc.text(line, margin, y); y += 17; }
     y += 30;
     for (const c of certifiers) {

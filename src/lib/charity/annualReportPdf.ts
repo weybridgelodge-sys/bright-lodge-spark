@@ -1,3 +1,4 @@
+import { loadDocIdentity, docTitle, docSubtitle, docFileName, docGroupName } from "@/lib/docIdentity";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { assetUrl } from "@/lib/assetUrl";
@@ -53,6 +54,7 @@ export async function buildCharityAnnualReportPdf(args: {
   const festivalCumulative = donations.filter((d) => isFestivalDonation(d, charities, festival)).reduce((a, d) => a + combined(d), 0);
 
   const doc = new jsPDF({ unit: "pt", format: "a4" });
+  const LT = docTitle(await loadDocIdentity());
   const pageW = doc.internal.pageSize.getWidth();
   const pageH = doc.internal.pageSize.getHeight();
   const margin = 40;
@@ -77,7 +79,7 @@ export async function buildCharityAnnualReportPdf(args: {
   doc.setTextColor(255, 255, 255);
   doc.setFont("times", "bold");
   doc.setFontSize(20);
-  doc.text("Weybridge Lodge No. 6787", margin + 80, 50);
+  doc.text(LT, margin + 80, 50);
   doc.setFont("times", "italic");
   doc.setFontSize(13);
   doc.setTextColor(...GOLD);
@@ -187,7 +189,7 @@ export async function buildCharityAnnualReportPdf(args: {
     doc.setTextColor(...NAVY);
     doc.setFont("times", "bold");
     doc.setFontSize(8);
-    doc.text("Weybridge Lodge No. 6787", pageW / 2, pageH - 28, { align: "center" });
+    doc.text(LT, pageW / 2, pageH - 28, { align: "center" });
     doc.setFont("times", "italic");
     doc.setTextColor(...MUTED);
     doc.text("Confidential — Annual Charity Steward's Report. For Charity Steward, WM, Treasurer, and Secretary.", margin, pageH - 16);
