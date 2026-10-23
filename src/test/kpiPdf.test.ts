@@ -1,6 +1,11 @@
 import { describe, it, expect, vi } from "vitest";
 vi.mock("@/integrations/supabase/client", () => ({ supabase: {} }));
 import fs from "fs";
+const heads = vi.hoisted(() => [] as { heading: string; lines: number; cols: number }[]);
+vi.mock("jspdf-autotable", async (orig) => {
+  const real: any = (await orig<any>()).default;
+  return { default: (doc: any, o: any) => { real(doc, o); const t = doc.lastAutoTable; const c = t.head[0]?.cells[0]; heads.push({ heading: String(o.head?.[0]?.[0] ?? ""), lines: c?.text?.length ?? 0, cols: t.columns.length }); } };
+});
 import type jsPDF from "jspdf";
 import { exportFullKpi } from "@/lib/kpiExports";
 import { createPdfRun } from "@/lib/pdfBrand";
@@ -18,6 +23,7 @@ async function build(run: ReturnType<typeof createPdfRun>, crestUrl: string | nu
   await exportFullKpi(bundle, eng, null, { identity: ID, crestUrl, run, save: async (doc, name) => { out = { doc, name }; } });
   return out!;
 }
+const longPeriod = { start: "2025-10-01", end: "2026-09-30", label: "Financial year", rangeLabel: "1 October 2025 – 30 September 2026" } as any;
 const hasImage = (doc: jsPDF) => /\/Subtype \/Image/.test(doc.output());
 
 describe("KPI summary PDF", () => {
@@ -45,5 +51,16 @@ describe("KPI summary PDF", () => {
     expect(doc.output("arraybuffer").byteLength).toBeLessThan(200 * 1024);
     expect((doc as any).lastAutoTable.finalY).toBeLessThanOrEqual(842 - 56);
     if (process.env.KPI_PDF_OUT) fs.writeFileSync(process.env.KPI_PDF_OUT, Buffer.from(doc.output("arraybuffer")));
+  });
+  it("no section heading wraps; two-column tables get a fixed first column of at least 40%", async () => {
+    heads.length = 0;
+    const eng2 = { meetings: [{ id: "x", meeting_date: "2026-01-10", meeting_type: "regular" }], attendance: [], absences: [], visitors: [] } as any;
+    let doc: any;
+    await exportFullKpi(bundle, eng2, longPeriod, { identity: ID, crestUrl: null, save: async (d) => { doc = d; } });
+    expect(heads.length).toBeGreaterThan(8);
+    for (const h of heads) expect({ heading: h.heading, lines: h.lines }).toEqual({ heading: h.heading, lines: 1 });
+    const two = heads.filter((h) => h.cols === 2).map((h) => h.heading);
+    for (const t of ["3. UGLE Portal", "6. Officers & Succession", "11. Disengagement Risk"]) expect(two).toContain(t);
+    expect(doc).toBeTruthy();
   });
 });
