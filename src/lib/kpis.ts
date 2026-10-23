@@ -97,6 +97,8 @@ export type KpiBundle = {
   officerYear?: number;
   members: KpiMember[];
   wmTerms: WmTerm[];
+  /** Past Masters roll (member_id, lodge_year, installed_on) — WM milestone source. */
+  pastMasters?: PastMasterRow[];
   risks: SuccessionRisk[];
   appointments: Appointment[];
   positions: { key: string; label: string; is_progressive: boolean; order_index: number }[];
@@ -133,7 +135,7 @@ export function monthsBetween(fromIso: string, to: Date = new Date()): number {
 }
 
 export async function fetchKpiBundle(): Promise<KpiBundle> {
-  const [m, w, r, a, p, c, h, cfg] = await Promise.all([
+  const [m, w, r, a, p, c, h, cfg, pm] = await Promise.all([
     supabase
       .from("profiles")
       .select(
@@ -146,6 +148,7 @@ export async function fetchKpiBundle(): Promise<KpiBundle> {
     (supabase.from as any)("candidates").select("*"),
     (supabase.from as any)("member_status_history").select("profile_id,kind,status,effective_date,created_at"),
     fetchInstallationConfig(),
+    (supabase.from as any)("past_masters").select("member_id,lodge_year,installed_on"),
   ]);
   const baseMembers = ((m.data as unknown) as KpiMember[]) ?? [];
   // Merge DOB (PII) via secure RPC; caller must have admin/secretary/WM/almoner/IPM role
@@ -160,6 +163,7 @@ export async function fetchKpiBundle(): Promise<KpiBundle> {
   return {
     members,
     wmTerms: (w.data as WmTerm[]) ?? [],
+    pastMasters: (pm?.data as PastMasterRow[]) ?? [],
     risks: (r.data as SuccessionRisk[]) ?? [],
     appointments: (a.data as Appointment[]) ?? [],
     positions: (p.data as KpiBundle["positions"]) ?? [],

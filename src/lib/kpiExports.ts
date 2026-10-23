@@ -12,6 +12,7 @@ import {
   uglePortal,
   raConversion,
   milestones,
+  milestoneDateLabel,
   officersHealth,
   pipeline,
   lodgeHealth,
@@ -138,7 +139,7 @@ export async function exportFullKpi(bundle: KpiBundle, eng?: EngagementBundle | 
   const ra = uglePortal(bundle.members);
   const conv = raConversion(bundle.members);
   const curYear = bundle.installation ? getMasonicYear(localIsoDate(), bundle.installation) : null;
-  const ms = milestones(bundle.members, bundle.wmTerms, curYear ?? undefined);
+  const ms = milestones(bundle.members, bundle.pastMasters ?? [], curYear ?? undefined);
   const oh = officersHealth(bundle);
   const pl = pipeline(bundle);
   const lh = lodgeHealth(bundle);
@@ -217,7 +218,7 @@ export async function exportFullKpi(bundle: KpiBundle, eng?: EngagementBundle | 
     autoTable(doc, {
       pageBreak: "avoid",
       head: [["5. Milestones", "Date", "Detail"]],
-      body: ms.map((x) => [fullName(x.member), new Date(x.date).toLocaleDateString("en-GB"), x.label]),
+      body: ms.map((x) => [fullName(x.member), milestoneDateLabel(x), x.label]),
       theme: "striped",
       headStyles: { fillColor: [27, 42, 74], textColor: [201, 164, 50] },
     });

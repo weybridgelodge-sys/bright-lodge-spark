@@ -11,6 +11,7 @@ import {
   uglePortal,
   raConversion,
   milestones,
+  milestoneDateLabel,
   officersHealth,
   pipeline,
   lodgeHealth,
@@ -128,7 +129,7 @@ export default function Kpis() {
   const curYear = getMasonicYear(localIsoDate(), cfg);
   const ra = uglePortal(bundle.members);
   const conv = raConversion(bundle.members);
-  const ms = milestones(bundle.members, bundle.wmTerms, curYear ?? undefined);
+  const ms = milestones(bundle.members, bundle.pastMasters ?? [], curYear ?? undefined);
   const oh = officersHealth(bundle);
   const pl = pipeline(bundle);
   const health = lodgeHealth(bundle);
@@ -344,7 +345,7 @@ export default function Kpis() {
                     <p className="font-medium">{fullName(x.member)}</p>
                     <p className="text-[11px] text-primary-foreground/80">{x.label}</p>
                   </div>
-                  <p className="text-gold text-xs">{new Date(x.date).toLocaleDateString("en-GB")}</p>
+                  <p className="text-gold text-xs">{milestoneDateLabel(x)}</p>
                 </li>
               ))}
             </ul>
