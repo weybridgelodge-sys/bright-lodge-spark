@@ -6,7 +6,7 @@ vi.mock("jspdf-autotable", async (orig) => {
   return { default: (doc: any, o: any) => { real(doc, o); const t = doc.lastAutoTable; heads.push({ heading: String(o.head?.[0]?.[0] ?? ""), lines: t.head[0]?.cells[0]?.text?.length ?? 0, finalY: t.finalY, pages: doc.getNumberOfPages() }); } };
 });
 import fs from "fs";
-import { buildAlmonerReportPdf, ALMONER_CONFIDENTIAL } from "@/lib/almonerReportPdf";
+import { buildAlmonerReportPdf } from "@/lib/almonerReportPdf";
 import { createPdfRun } from "@/lib/pdfBrand";
 import { BLANK_DOC_IDENTITY } from "@/lib/docIdentity";
 
@@ -41,7 +41,7 @@ describe("Almoner's Report PDF", () => {
       expect(doc.getNumberOfPages()).toBeGreaterThan(0);
     }
   });
-  it("A4, small, confidentiality line on every page, tables clear of the footer, no heading wraps", async () => {
+  it("A4, small, tables clear of the footer, no heading wraps", async () => {
     heads.length = 0;
     const jpg = fs.existsSync("/tmp/kpi/crest400.jpg") ? fs.readFileSync("/tmp/kpi/crest400.jpg").toString("base64") : TINY_JPG;
     const doc = await buildAlmonerReportPdf(input, { identity: ID, crestUrl: "https://x.test/c.jpg", run: okJpeg(jpg) });
@@ -49,8 +49,6 @@ describe("Almoner's Report PDF", () => {
     const ps = doc.internal.pageSize;
     expect([Math.round(ps.getWidth()), Math.round(ps.getHeight())]).toEqual([595, 842]);
     expect(doc.output("arraybuffer").byteLength).toBeLessThan(200 * 1024);
-    const raw = doc.output();
-    expect(raw.split(ALMONER_CONFIDENTIAL.replace("—", "")).length - 1 >= 0).toBe(true);
     for (const h of heads) { expect(h.lines).toBe(1); expect(h.finalY).toBeLessThanOrEqual(842 - 56); }
     if (process.env.ALMONER_PDF_OUT) fs.writeFileSync(process.env.ALMONER_PDF_OUT, Buffer.from(doc.output("arraybuffer")));
   });
