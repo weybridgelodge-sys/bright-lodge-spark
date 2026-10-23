@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Cake, Calendar, Plus, Trash2, X } from "lucide-react";
 import { pastMasterTerms } from "@/lib/pastMastersRoll";
+import { nextOccurrence, daysUntil, LIFE_EVENT_HORIZON_DAYS } from "@/lib/lifeEvents";
 
 type Member = {
   id: string; first_name: string | null; last_name: string | null;
@@ -41,17 +42,6 @@ const memberName = (m?: Member) => {
   return [f, m.last_name?.trim() || ""].filter(Boolean).join(" ") || m.full_name || "Unnamed";
 };
 
-const nextOccurrence = (iso: string, recurring: boolean): Date => {
-  const d = new Date(iso);
-  if (!recurring) return d;
-  const now = new Date();
-  const next = new Date(now.getFullYear(), d.getMonth(), d.getDate());
-  if (next < new Date(now.getFullYear(), now.getMonth(), now.getDate())) {
-    next.setFullYear(now.getFullYear() + 1);
-  }
-  return next;
-};
-const daysUntil = (d: Date) => Math.ceil((d.getTime() - Date.now()) / 86_400_000);
 const fmt = (d: Date) => d.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
 const yearsBetween = (fromIso: string, on: Date) => {
   const f = new Date(fromIso);
@@ -60,7 +50,7 @@ const yearsBetween = (fromIso: string, on: Date) => {
   return y;
 };
 
-const HORIZON_DAYS = 92; // ~3 months
+const HORIZON_DAYS = LIFE_EVENT_HORIZON_DAYS;
 
 type UpcomingItem = {
   key: string; memberId: string; type: EventType; when: Date; days: number;
