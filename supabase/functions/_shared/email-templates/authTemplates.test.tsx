@@ -46,3 +46,15 @@ if (CASES.length) {
     assert(html.includes('111222'))
   })
 }
+
+Deno.test('body wording uses the given lodge name; neutral fallback has no lodge name', async () => {
+  const { siteNameFor } = await import('../authEmailBrand.ts')
+  const named = siteNameFor({ lodgeName: 'Testbury Lodge', lodgeNumber: '1234' })
+  assert(named === 'Testbury Lodge No. 1234')
+  assert(siteNameFor(null) === 'Members Portal' && siteNameFor({ lodgeName: ' ' }) === 'Members Portal')
+  setAuthEmailBrand(null)
+  const html = await renderAsync(React.createElement(MagicLinkEmail, { siteName: named, confirmationUrl: URL_ }))
+  assert(html.includes('sign in to the Testbury Lodge No. 1234') && html.includes('Your Testbury Lodge No. 1234 sign-in link'))
+  const re = await renderAsync(React.createElement(ReauthenticationEmail, { token: '1' }))
+  assert(re.includes('Your Members Portal verification code') && !/Weybridge|6787/.test(re))
+})

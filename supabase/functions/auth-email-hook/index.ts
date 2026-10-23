@@ -25,7 +25,7 @@ const ROOT_DOMAIN = "email.weybridgelodge.org.uk"
 const FROM_DOMAIN = "email.weybridgelodge.org.uk"
 const SITE_URL = `https://${ROOT_DOMAIN}`
 
-// Header/footer identity (layout only). Text-only from SITE_NAME unless Unit Setup is read in
+// Header/footer identity (layout only). Neutral text-only header unless Unit Setup is read in
 // time: render uses the cached identity, else waits for ONE shared lookup for at most 1500ms.
 // Timeout or any error keeps the text-only header; the lookup can never throw or fail a send.
 const TEXT_ONLY_BRAND = { lodgeName: NEUTRAL_SITE_NAME, lodgeNumber: '' }
