@@ -6,14 +6,14 @@ import {
   Heading,
   Hr,
   Html,
-  Img,
   Link,
   Preview,
   Section,
   Text,
 } from 'npm:@react-email/components@0.0.22'
 import type { TemplateEntry } from './registry.ts'
-import { BRAND, LOGO_HEIGHT, LOGO_URL, LOGO_WIDTH, brandStyles } from './_brand.ts'
+import { BRAND, BRAND_GOLD_DARK, brandStyles } from './_brand.ts'
+import { EmailBrandFooter, EmailBrandHeader } from './_brandHeader.tsx'
 
 interface FlaggedMember {
   name: string
@@ -41,6 +41,10 @@ interface Props {
   reportDate?: string
   sinceDate?: string
   portalUrl?: string
+  crestUrl?: string | null
+  lodgeName?: string
+  lodgeNumber?: string
+  provinceName?: string
 }
 
 
@@ -61,7 +65,9 @@ function fmtDay(s: string | undefined): string {
   }
 }
 
-const Email = ({ members = [], celebrations = [], reportDate, sinceDate, portalUrl }: Props) => (
+const Email = ({ members = [], celebrations = [], reportDate, sinceDate, portalUrl, crestUrl, lodgeName, lodgeNumber, provinceName }: Props) => {
+  const id = { crestUrl, lodgeName, lodgeNumber, provinceName }
+  return (
   <Html lang="en" dir="ltr">
     <Head />
     <Preview>
@@ -69,17 +75,7 @@ const Email = ({ members = [], celebrations = [], reportDate, sinceDate, portalU
     </Preview>
     <Body style={main}>
       <Container style={container}>
-        <Section style={brandStyles.crestWrap}>
-          <Img
-            src={LOGO_URL}
-            width={LOGO_WIDTH}
-            height={LOGO_HEIGHT}
-            alt="Weybridge Lodge crest"
-            style={{ margin: '0 auto', display: 'block' }}
-          />
-          <Heading style={brand}>Weybridge Lodge</Heading>
-          <Text style={brandSub}>No. 6787 — Province of Surrey</Text>
-        </Section>
+        <EmailBrandHeader {...id} />
 
 
         <Heading style={h1}>Almoner — weekly welfare summary</Heading>
@@ -174,10 +170,12 @@ const Email = ({ members = [], celebrations = [], reportDate, sinceDate, portalU
         <Text style={confidential}>
           This is an automated lodge notification, not a personal subscription. Clicking unsubscribe below removes you from all future lodge emails entirely, not just this one. If you are unsure why you received this email, please contact the Lodge Secretary.
         </Text>
+        <EmailBrandFooter {...id} />
       </Container>
     </Body>
   </Html>
-)
+  )
+}
 
 export const template = {
   component: Email,
@@ -188,9 +186,10 @@ export const template = {
   },
   displayName: 'Almoner weekly welfare summary',
   previewData: {
+    crestUrl: 'https://placehold.co/240x240/png', lodgeName: 'Example Lodge', lodgeNumber: '1234', provinceName: 'Province of Testshire',
     reportDate: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
     sinceDate: '05 Oct 2026',
-    portalUrl: 'https://weybridgelodge.org.uk/members/almoner',
+    portalUrl: 'https://example.org/members/almoner',
     celebrations: [
       {
         name: 'W Bro. Kevin Brennan',
@@ -217,14 +216,14 @@ export const template = {
         name: 'W Bro. John Smith',
         overdueFollowUp: '2026-07-10',
         missedMeetings: false,
-        portalUrl: 'https://weybridgelodge.org.uk/members/almoner',
+        portalUrl: 'https://example.org/members/almoner',
       },
       {
         name: 'Bro. Peter Jones',
         overdueFollowUp: null,
         missedMeetings: true,
         checkIn: 'Not at the last 2 meetings — worth a call?',
-        portalUrl: 'https://weybridgelodge.org.uk/members/almoner',
+        portalUrl: 'https://example.org/members/almoner',
       },
     ],
   },
@@ -248,11 +247,9 @@ const memberName = { color: BRAND.navy, fontSize: '15px', fontWeight: 'bold' as 
 const flagRed = { color: '#b91c1c', fontSize: '13px', margin: '2px 0' }
 const flagAmber = { color: '#b45309', fontSize: '13px', margin: '2px 0' }
 const flagSoft = { color: BRAND.navy, fontSize: '13px', margin: '2px 0' }
-const linkStyle = brandStyles.link
+const linkStyle = { ...brandStyles.link, color: BRAND_GOLD_DARK }
 const footerText = brandStyles.footerText
 const hr = brandStyles.hr
 const confidential = { color: '#888', fontSize: '11px', fontStyle: 'italic' as const, textAlign: 'center' as const, margin: '4px 0' }
-const brand = brandStyles.brand
-const brandSub = brandStyles.brandSub
 
 

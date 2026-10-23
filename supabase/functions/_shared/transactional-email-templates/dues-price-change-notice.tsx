@@ -36,7 +36,7 @@ const Email = ({
   return (
   <Html lang="en" dir="ltr">
     <Head />
-    <Preview>Notice of change to your {[brandHeaderLines(id).name, 'Lodge'].filter(Boolean)[0]} subscription</Preview>
+    <Preview>Notice of change to your {brandHeaderLines(id).name || 'Lodge'} subscription</Preview>
     <Body style={main}>
       <Container style={container}>
         <EmailBrandHeader {...id} />

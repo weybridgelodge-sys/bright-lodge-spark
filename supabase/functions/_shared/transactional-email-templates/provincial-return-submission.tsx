@@ -18,6 +18,12 @@ interface Props {
   provinceName?: string
 }
 
+/** "Province of Surrey" / "Surrey" -> "Provincial Grand Lodge of Surrey"; blank -> "Provincial Grand Lodge". */
+export const provincialGrandLodge = (province?: string | null) => {
+  const p = (province ?? '').replace(/\s+/g, ' ').trim().replace(/^(the\s+)?province\s+of\s+/i, '')
+  return p ? `Provincial Grand Lodge of ${p}` : 'Provincial Grand Lodge'
+}
+
 const button = { ...brandStyles.link, display: 'inline-block', padding: '10px 18px', border: `1px solid ${BRAND.gold}`, borderRadius: '4px', margin: '4px' }
 
 const Email = ({
@@ -42,7 +48,7 @@ const Email = ({
         <Heading style={brandStyles.h1}>Provincial Installation Return {yearLabel}</Heading>
         <Text style={brandStyles.body}>Dear Provincial Grand Secretary,</Text>
         <Text style={brandStyles.body}>
-          Please find the Provincial Grand Lodge of Surrey Installation Return {title ? `for ${title} ` : ''}for {yearLabel}
+          Please find the {provincialGrandLodge(provinceName)} Installation Return {title ? `for ${title} ` : ''}for {yearLabel}
           {installationDate ? `, following our Installation Meeting on ${installationDate}` : ''}. It includes the officers, the Secretary's contact details and the lists of Past Masters.
         </Text>
         <Section style={brandStyles.card}>
