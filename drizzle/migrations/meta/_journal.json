@@ -967,6 +967,13 @@
       "when": 1792769652008,
       "tag": "0137_past_masters_installed_on",
       "breakpoints": true
+    },
+    {
+      "idx": 138,
+      "version": "7",
+      "when": 1792771056763,
+      "tag": "0138_public_lodge_figures",
+      "breakpoints": true
     }
   ]
 }

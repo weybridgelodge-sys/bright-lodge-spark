@@ -7700,6 +7700,7 @@ export type Database = {
         }[]
       }
       get_public_booking_details: { Args: never; Returns: Json }
+      get_public_lodge_figures: { Args: never; Returns: Json }
       get_public_unit_profile: { Args: never; Returns: Json }
       get_published_meeting_for_event: {
         Args: { _event_key: string }
