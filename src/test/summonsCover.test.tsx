@@ -1,3 +1,4 @@
+// @vitest-environment node
 // Job AM: summons front cover on the shared brand look. Crest from Unit Setup only;
 // failure omits the image and the two-page booklet still builds.
 import { describe, it, expect, vi } from "vitest";
