@@ -6,7 +6,7 @@ vi.mock("@/lib/pdfBrand", async (orig) => {
   const r: any = await orig(); const jpg = fs.readFileSync("/tmp/kpi/crest400.jpg").toString("base64");
   return { ...r, fetchCrestUrl: async () => "https://x.test/crest.jpg", createPdfRun: () => ({ crest: async (u: any) => (u ? { dataUrl: `data:image/jpeg;base64,${jpg}`, format: "JPEG" } : null) }) };
 });
-const png = (f: string) => new Response(fs.readFileSync(f), { headers: { "content-type": "image/png" } });
+const png = (f: string) => ({ ok: true, headers: { get: () => "image/png" }, blob: async () => new Blob([fs.readFileSync(f)], { type: "image/png" }) });
 (globalThis as any).fetch = async (u: string) => String(u).includes("white") ? png("/tmp/kpi/white.png") : String(u).includes("navy") ? png("/tmp/kpi/navy.png") : new Response("", { status: 404 });
 import { buildAccountsPackPdf } from "@/lib/treasurer/accountsPackPdf";
 import { buildMinutesPdf, buildAgendaPdf } from "@/pages/members/admin/MeetingMinutes";
