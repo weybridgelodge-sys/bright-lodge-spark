@@ -2,6 +2,8 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 import { sendLovableEmail } from "npm:@lovable.dev/email-js";
 import { loadLodgeSettings, resolveLodgeSettings } from "../_shared/lodgeSettings.ts";
 import { buildNewsletterArchivePdf } from "../_shared/newsletterArchivePdf.ts";
+import { loadCrest, type ProcessedCrest } from "../_shared/pdfLibBrand.ts";
+import { once, runSendsThenArchives } from "../_shared/newsletterDispatch.ts";
 import { newsletterBrandFrom, newsletterFooterHtml, newsletterHeaderHtml } from "../_shared/newsletterBrand.ts";
 let LODGE = resolveLodgeSettings(null);
 
@@ -360,8 +362,10 @@ async function renderNewsletterPdf(opts: {
   audienceLabel: string;
   recipientCount: number;
   content: NewsletterContent;
+  crest?: () => Promise<ProcessedCrest | null>;
 }): Promise<Uint8Array> {
-  return await buildNewsletterArchivePdf({ ...opts, brand: newsletterBrandFrom(LODGE) });
+  const { crest, ...rest } = opts;
+  return await buildNewsletterArchivePdf({ ...rest, brand: newsletterBrandFrom(LODGE), ...(crest ? { loadCrestImpl: () => crest() } : {}) });
 }
 
 function issuePrefix(d = new Date()): string {
@@ -375,6 +379,7 @@ async function archiveToDocuments(opts: {
   content: NewsletterContent;
   userId: string;
   recipientCount: number;
+  crest?: () => Promise<ProcessedCrest | null>;
 }) {
   const tag = AUDIENCE_FILENAME[opts.audience];
   const safeSubject = opts.subject.replace(/[^a-zA-Z0-9._-]/g, "_").slice(0, 60);
@@ -387,6 +392,7 @@ async function archiveToDocuments(opts: {
       audienceLabel: AUDIENCE_LABEL[opts.audience],
       recipientCount: opts.recipientCount,
       content: opts.content,
+      crest: opts.crest,
     });
   } catch (e) {
     console.error("archiveToDocuments PDF render error:", e);
@@ -414,6 +420,8 @@ function sectionsHaveContent(content: NewsletterContent | null | undefined): boo
   );
 }
 
+type DispatchResult = { audience: Audience; sent: number; error?: string; archivedId?: string; archive?: () => Promise<void> };
+
 async function dispatchOneAudience(opts: {
   broadcastId: string;
   audience: Audience;
@@ -421,7 +429,8 @@ async function dispatchOneAudience(opts: {
   content: NewsletterContent;
   userId: string;
   unifiedContent: boolean;
-}): Promise<{ audience: Audience; sent: number; error?: string; archivedId?: string }> {
+  crest?: () => Promise<ProcessedCrest | null>;
+}): Promise<DispatchResult> {
   const { audience, subject, content, userId, broadcastId, unifiedContent } = opts;
 
   const recipients = await getRecipients(audience);
@@ -470,13 +479,12 @@ async function dispatchOneAudience(opts: {
     recipient_count: sentCount,
   }).eq("id", archived.id);
 
-  if (!firstError) {
-    await archiveToDocuments({
-      broadcastId: archived.id, subject, audience, content, userId, recipientCount: sentCount,
-    });
-  }
+  // Archive PDF is built later, after every audience's emails have gone out (Job AS-2).
+  const archive = firstError ? undefined : () => archiveToDocuments({
+    broadcastId: archived.id, subject, audience, content, userId, recipientCount: sentCount, crest: opts.crest,
+  });
 
-  return { audience, sent: sentCount, error: firstError, archivedId: archived.id };
+  return { audience, sent: sentCount, error: firstError, archivedId: archived.id, archive };
 }
 
 Deno.serve(async (req) => {
@@ -607,27 +615,31 @@ Deno.serve(async (req) => {
       .update({ status: "sending", sent_by: userId })
       .eq("id", body.broadcastId);
 
-    const results: Array<{ audience: Audience; sent: number; error?: string; archivedId?: string }> = [];
-    for (const aud of requested) {
-      const r = await dispatchOneAudience({
+    // One crest load per send, shared by every audience's archive PDF.
+    const crestOnce = once(() => loadCrest(newsletterBrandFrom(LODGE).crestUrl));
+    let errors: DispatchResult[] = [];
+    const results = await runSendsThenArchives<Audience, DispatchResult>({
+      audiences: requested,
+      send: (aud) => dispatchOneAudience({
         broadcastId: body.broadcastId,
         audience: aud,
         subject,
         content: variantFor(aud),
         userId,
         unifiedContent: unified,
-      });
-      results.push(r);
-    }
-
+        crest: crestOnce,
+      }),
+      afterSends: async (rs) => {
+        const totalSent = rs.reduce((s, r) => s + r.sent, 0);
+        errors = rs.filter((r) => r.error);
+        await admin.from("newsletter_broadcasts").update({
+          status: errors.length === rs.length ? "failed" : "sent",
+          error: errors.length ? errors.map((e) => `${e.audience}: ${e.error}`).join("; ") : null,
+          recipient_count: totalSent,
+        }).eq("id", body.broadcastId);
+      },
+    });
     const totalSent = results.reduce((s, r) => s + r.sent, 0);
-    const errors = results.filter((r) => r.error);
-
-    await admin.from("newsletter_broadcasts").update({
-      status: errors.length === results.length ? "failed" : "sent",
-      error: errors.length ? errors.map((e) => `${e.audience}: ${e.error}`).join("; ") : null,
-      recipient_count: totalSent,
-    }).eq("id", body.broadcastId);
 
     if (errors.length === results.length) {
       return new Response(JSON.stringify({ error: errors[0].error, results }), {
