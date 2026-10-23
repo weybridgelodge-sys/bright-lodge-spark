@@ -2,8 +2,8 @@ import { loadDocIdentity, docTitle, docSubtitle, docFileName, docGroupName } fro
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { saveJsPdf } from "./nativeDownload";
-import { assetUrl } from "./assetUrl";
-import crestAsset from "@/assets/weybridge-logo-navy-transparent.png.asset.json";
+import { createPdfRun, drawBrandFooter, drawBrandHeader, fetchCrestUrl, HEADER_START_Y, type CrestImage } from "@/lib/pdfBrand";
+import type { DocIdentity } from "@/lib/docIdentity";
 import {
   type KpiBundle,
   type EngagementBundle,
@@ -48,28 +48,38 @@ function header(doc: jsPDF, title: string, LODGE: string) {
   doc.text(`Generated ${new Date().toLocaleDateString("en-GB")}`, 14, 25);
 }
 
-async function dashboardHeader(doc: jsPDF): Promise<number> {
-  const centre = doc.internal.pageSize.getWidth() / 2;
-  const response = await fetch(assetUrl(crestAsset), { signal: AbortSignal.timeout(15000) });
-  if (!response.ok) throw new Error("The Lodge crest could not be loaded. Please retry the export.");
-  const crest = new Uint8Array(await response.arrayBuffer());
-  doc.addImage(crest, "PNG", centre - 16, 10, 32, 32);
+// KPI summary PDF (A4 portrait, pt) on the shared white brand header/footer (src/lib/pdfBrand).
+export const KPI_MARGIN = 40;
+// Bottom margin keeps every table clear of the footer rule (pageH - 40).
+const KPI_TABLE_MARGIN = { top: KPI_MARGIN, bottom: 56, left: KPI_MARGIN, right: KPI_MARGIN };
+const KPI_HEAD = { fillColor: [27, 42, 74] as [number, number, number], textColor: [255, 255, 255] as [number, number, number] };
+function kpiTable(doc: jsPDF, opts: Parameters<typeof autoTable>[1]) {
+  autoTable(doc, { ...opts, margin: KPI_TABLE_MARGIN, headStyles: { ...(opts.headStyles ?? {}), ...KPI_HEAD } });
+}
 
-  doc.setTextColor(27, 42, 74);
-  doc.setFont("times", "bold");
-  doc.setFontSize(22);
-  doc.text("Lodge KPI Dashboard", centre, 53, { align: "center" });
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(10);
+export type KpiPdfDeps = {
+  identity?: DocIdentity;
+  crestUrl?: string | null;
+  run?: ReturnType<typeof createPdfRun>;
+  save?: (doc: jsPDF, filename: string) => Promise<void>;
+};
+
+/** Draws the brand header; a missing/failed crest only omits the image. Returns the body start y. */
+export async function kpiDashboardHeader(doc: jsPDF, deps: KpiPdfDeps = {}): Promise<{ y: number; identity: DocIdentity; crest: CrestImage | null }> {
+  const [identity, crestUrl] = await Promise.all([
+    deps.identity ? Promise.resolve(deps.identity) : loadDocIdentity(),
+    deps.crestUrl !== undefined ? Promise.resolve(deps.crestUrl) : fetchCrestUrl(),
+  ]);
+  const crest = await (deps.run ?? createPdfRun()).crest(crestUrl).catch(() => null);
   const year = currentMasonicYear();
-  doc.text(`Live figures from member records · Masonic year ${year}/${year + 1}`, centre, 61, { align: "center" });
-  doc.setFontSize(9);
-  doc.text(`Generated ${new Date().toLocaleDateString("en-GB")}`, centre, 68, { align: "center" });
-  doc.setDrawColor(201, 164, 50);
-  doc.setLineWidth(0.3);
-  doc.line(14, 74, doc.internal.pageSize.getWidth() - 14, 74);
+  drawBrandHeader(doc, {
+    identity, crest, margin: KPI_MARGIN,
+    title: "Lodge KPI Dashboard",
+    periodLine: `Live figures from member records · Masonic year ${year}/${year + 1}`,
+    rightLine: `Generated ${new Date().toLocaleDateString("en-GB")}`,
+  });
   doc.setTextColor(0);
-  return 82;
+  return { y: HEADER_START_Y, identity, crest };
 }
 
 export async function exportVoReport(bundle: KpiBundle, period?: MovementPeriod | null) {
@@ -132,8 +142,8 @@ export async function exportVoReport(bundle: KpiBundle, period?: MovementPeriod 
   await saveJsPdf(doc, `vo-report-${new Date().toISOString().slice(0, 10)}.pdf`);
 }
 
-export async function exportFullKpi(bundle: KpiBundle, eng?: EngagementBundle | null, period?: MovementPeriod | null) {
-  const doc = new jsPDF();
+export async function exportFullKpi(bundle: KpiBundle, eng?: EngagementBundle | null, period?: MovementPeriod | null, deps: KpiPdfDeps = {}) {
+  const doc = new jsPDF({ unit: "pt", format: "a4", compress: true });
   const s = snapshot(bundle.members);
   const mv = periodMovement(bundle, period);
   const ra = uglePortal(bundle.members);
@@ -145,9 +155,9 @@ export async function exportFullKpi(bundle: KpiBundle, eng?: EngagementBundle | 
   const lh = lodgeHealth(bundle);
   const rr = referralRate(bundle.candidates);
 
-  const firstSectionY = await dashboardHeader(doc);
+  const { y: firstSectionY, identity } = await kpiDashboardHeader(doc, deps);
 
-  autoTable(doc, {
+  kpiTable(doc, {
     startY: firstSectionY,
     pageBreak: "avoid",
     head: [["Lodge Health", `OVERALL: ${lh.overall.toUpperCase()}`]],
@@ -160,9 +170,9 @@ export async function exportFullKpi(bundle: KpiBundle, eng?: EngagementBundle | 
     headStyles: { fillColor: [27, 42, 74], textColor: [201, 164, 50] },
   });
 
-  autoTable(doc, {
+  kpiTable(doc, {
     // Continue below Lodge Health rather than overlapping it.
-    startY: (doc as any).lastAutoTable.finalY + 8,
+    startY: (doc as any).lastAutoTable.finalY + 16,
     pageBreak: "avoid",
     head: [["1. Snapshot", "Value"]],
     body: [
@@ -177,7 +187,7 @@ export async function exportFullKpi(bundle: KpiBundle, eng?: EngagementBundle | 
     headStyles: { fillColor: [27, 42, 74], textColor: [201, 164, 50] },
   });
 
-  autoTable(doc, {
+  kpiTable(doc, {
     pageBreak: "avoid",
     head: [[`2. Movement (${periodTitle(period)})`, "Count"]],
     body: [
@@ -193,7 +203,7 @@ export async function exportFullKpi(bundle: KpiBundle, eng?: EngagementBundle | 
     headStyles: { fillColor: [27, 42, 74], textColor: [201, 164, 50] },
   });
 
-  autoTable(doc, {
+  kpiTable(doc, {
     pageBreak: "avoid",
     head: [["3. UGLE Portal", ""]],
     body: [
@@ -205,7 +215,7 @@ export async function exportFullKpi(bundle: KpiBundle, eng?: EngagementBundle | 
   });
 
   if (conv.length) {
-    autoTable(doc, {
+    kpiTable(doc, {
       pageBreak: "avoid",
       head: [["4. RA Conversion", "Raised", "Months"]],
       body: conv.map((r) => [fullName(r.member), r.member.raising_date ?? "—", String(r.monthsEligible)]),
@@ -215,7 +225,7 @@ export async function exportFullKpi(bundle: KpiBundle, eng?: EngagementBundle | 
   }
 
   if (ms.length) {
-    autoTable(doc, {
+    kpiTable(doc, {
       pageBreak: "avoid",
       head: [["5. Milestones", "Date", "Detail"]],
       body: ms.map((x) => [fullName(x.member), milestoneDateLabel(x), x.label]),
@@ -224,7 +234,7 @@ export async function exportFullKpi(bundle: KpiBundle, eng?: EngagementBundle | 
     });
   }
 
-  autoTable(doc, {
+  kpiTable(doc, {
     pageBreak: "avoid",
     head: [["6. Officers & Succession", ""]],
     body: [
@@ -246,7 +256,7 @@ export async function exportFullKpi(bundle: KpiBundle, eng?: EngagementBundle | 
     headStyles: { fillColor: [27, 42, 74], textColor: [201, 164, 50] },
   });
 
-  autoTable(doc, {
+  kpiTable(doc, {
     pageBreak: "avoid",
     head: [["7. Pipeline", "Count"]],
     body: [
@@ -259,7 +269,7 @@ export async function exportFullKpi(bundle: KpiBundle, eng?: EngagementBundle | 
     headStyles: { fillColor: [27, 42, 74], textColor: [201, 164, 50] },
   });
 
-  autoTable(doc, {
+  kpiTable(doc, {
     pageBreak: "avoid",
     head: [["7a. Referral Sources (all candidates recorded)", "Count"]],
     body: (Object.keys(REFERRAL_SOURCE_LABELS) as (keyof typeof REFERRAL_SOURCE_LABELS)[]).map(
@@ -271,7 +281,7 @@ export async function exportFullKpi(bundle: KpiBundle, eng?: EngagementBundle | 
 
   if (eng) {
     const avi = activeVsInactive(bundle.members, eng);
-    autoTable(doc, {
+    kpiTable(doc, {
       pageBreak: "avoid",
       head: [["8. Active vs Inactive Members", ""]],
       body: [
@@ -286,7 +296,7 @@ export async function exportFullKpi(bundle: KpiBundle, eng?: EngagementBundle | 
 
     const qe = quarterlyEngagement(eng);
     if (qe.length) {
-      autoTable(doc, {
+      kpiTable(doc, {
         pageBreak: "avoid",
         head: [["9. Quarterly Engagement", "Meetings", "Members", "Visitors", "Avg members"]],
         body: qe.map((q) => [
@@ -362,7 +372,7 @@ export async function exportFullKpi(bundle: KpiBundle, eng?: EngagementBundle | 
       byLodge.set(key, cur);
     }
     const topLodges = [...byLodge.values()].sort((a, b) => b.visits - a.visits).slice(0, 3);
-    autoTable(doc, {
+    kpiTable(doc, {
       pageBreak: "avoid",
       head: [["10. Visitor Frequency (aggregate)", ""]],
       body: [
@@ -378,7 +388,7 @@ export async function exportFullKpi(bundle: KpiBundle, eng?: EngagementBundle | 
 
     // Pastoral-sensitive: count only, names stay in the access-controlled portal.
     const dr = disengagementRisk(bundle.members, eng);
-    autoTable(doc, {
+    kpiTable(doc, {
       pageBreak: "avoid",
       head: [["11. Disengagement Risk", ""]],
       body: [
@@ -396,21 +406,7 @@ export async function exportFullKpi(bundle: KpiBundle, eng?: EngagementBundle | 
     });
   }
 
-  // Final pagination gives accurate totals; the default 14mm table margin
-  // reserves space above the footer.
-  const totalPages = doc.getNumberOfPages();
-  for (let page = 1; page <= totalPages; page++) {
-    doc.setPage(page);
-    const width = doc.internal.pageSize.getWidth();
-    const height = doc.internal.pageSize.getHeight();
-    doc.setDrawColor(201, 164, 50);
-    doc.setLineWidth(0.3);
-    doc.line(14, height - 11, width - 14, height - 11);
-    doc.setTextColor(27, 42, 74);
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(9);
-    doc.text(`Page ${page} of ${totalPages}`, width / 2, height - 6, { align: "center" });
-  }
+  drawBrandFooter(doc, identity, KPI_MARGIN);
 
-  await saveJsPdf(doc, `kpi-summary-${new Date().toISOString().slice(0, 10)}.pdf`);
+  await (deps.save ?? saveJsPdf)(doc, `kpi-summary-${new Date().toISOString().slice(0, 10)}.pdf`);
 }
