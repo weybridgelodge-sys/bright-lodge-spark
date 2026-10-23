@@ -6,7 +6,7 @@ import zlib from "node:zlib";
 vi.mock("@/integrations/supabase/client", () => ({ supabase: {} }));
 
 import { generateSummonsBlob, type LodgeTemplate, type SummonsData } from "@/lib/summonsPdf";
-import { summonsCoverIdentity, coverNameSize, SUMMONS_COVER_CREST_PT } from "@/lib/summonsCover";
+import { coverProvinceLine, summonsCoverIdentity, coverNameSize, SUMMONS_COVER_CREST_PT } from "@/lib/summonsCover";
 import type { DocIdentity } from "@/lib/docIdentity";
 import { BLANK_DOC_IDENTITY } from "@/lib/docIdentity";
 
@@ -51,8 +51,16 @@ describe("summons cover brand", () => {
     expect(summonsCoverIdentity({ identity: null, crest: null }, { name: "", number: "", province: "" })).toEqual({ name: "", number: "", province: "" });
   });
 
-  it("crest is 100pt and long names shrink", () => {
-    expect(SUMMONS_COVER_CREST_PT).toBe(100);
+  it("province line never doubles", () => {
+    expect(coverProvinceLine("Surrey")).toBe("PROVINCE OF SURREY");
+    expect(coverProvinceLine("Province of Surrey")).toBe("PROVINCE OF SURREY");
+    expect(coverProvinceLine("PROVINCE OF surrey")).toBe("PROVINCE OF SURREY");
+    expect(coverProvinceLine("Provincial Grand Lodge of Surrey")).toBe("Provincial Grand Lodge of Surrey");
+    expect(coverProvinceLine("")).toBe("");
+  });
+
+  it("crest is 125pt and long names shrink", () => {
+    expect(SUMMONS_COVER_CREST_PT).toBe(125);
     expect(coverNameSize("Testbury Lodge No. 1234")).toBe(22);
     expect(coverNameSize("The Lodge of Antiquity and Perpetual Friendship No. 12345")).toBe(14);
   });

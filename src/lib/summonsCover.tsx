@@ -10,7 +10,15 @@ import type { DocIdentity } from "@/lib/docIdentity";
 const NAVY = "#1B2A4A";
 const GOLD = "#C9A432"; // rules only
 const MUTED = "#5A6070";
-export const SUMMONS_COVER_CREST_PT = 100;
+export const SUMMONS_COVER_CREST_PT = 125;
+
+/** "Testshire" or "Province of Testshire" -> "PROVINCE OF TESTSHIRE"; "Provincial Grand Lodge of …" kept as typed; never doubled. */
+export function coverProvinceLine(province: string): string {
+  const p = (province || "").trim();
+  if (!p) return "";
+  if (/^provincial grand lodge\b/i.test(p)) return p;
+  return `PROVINCE OF ${p.replace(/^province\s+of\s+/i, "").toUpperCase()}`;
+}
 
 export type SummonsCoverBrand = { identity: DocIdentity | null; crest: CrestImage | null };
 
@@ -63,7 +71,7 @@ export const SummonsCoverHeader: React.FC<{
   return (
     <View>
       {title ? <Text style={[st.name, { fontSize: coverNameSize(title) }]}>{title}</Text> : null}
-      {id.province ? <Text style={st.sub}>PROVINCE OF {id.province.toUpperCase()}</Text> : null}
+      {id.province ? <Text style={st.sub}>{coverProvinceLine(id.province)}</Text> : null}
       <View style={st.rule} />
       <View style={{ flexDirection: "row", alignItems: "center", marginTop: 6, marginBottom: 4 }}>
         <View style={{ flex: 1, alignItems: "flex-start" }}>
