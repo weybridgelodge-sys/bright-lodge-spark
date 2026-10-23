@@ -59,7 +59,7 @@ Deno.test("loadCrest: network error, HTTP error, non-image, blank, timeout all g
 
 Deno.test("real crest is downscaled and the file stays small", async () => {
   const png = await crestPng();
-  const crest = await loadCrest("https://x/c.png", { fetchImpl: async () => new Response(png, { headers: { "content-type": "image/png" } }) });
+  const crest = await loadCrest("https://x/c.png", { fetchImpl: async () => new Response(png as BodyInit, { headers: { "content-type": "image/png" } }) });
   assert(crest, "crest processed");
   const bytes = await buildNewsletterArchivePdf({ subject: "S", audienceLabel: "Members", recipientCount: 1, content, brand, loadCrestImpl: async () => crest, fetchImpl: noFetch });
   assert(/\/Subtype\s*\/Image/.test(new TextDecoder("latin1").decode(bytes)));
