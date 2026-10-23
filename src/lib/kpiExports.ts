@@ -53,8 +53,22 @@ export const KPI_MARGIN = 40;
 // Bottom margin keeps every table clear of the footer rule (pageH - 40).
 const KPI_TABLE_MARGIN = { top: KPI_MARGIN, bottom: 56, left: KPI_MARGIN, right: KPI_MARGIN };
 const KPI_HEAD = { fillColor: [27, 42, 74] as [number, number, number], textColor: [255, 255, 255] as [number, number, number] };
+/**
+ * Two-column tables get a fixed first column: 40% of the table width, widened only
+ * as far as the heading needs to stay on one line (capped at 65%).
+ */
+export function kpiFirstColumnWidth(doc: jsPDF, heading: string): number {
+  const tableW = doc.internal.pageSize.getWidth() - KPI_TABLE_MARGIN.left - KPI_TABLE_MARGIN.right;
+  doc.setFont("helvetica", "bold"); doc.setFontSize(10);
+  const need = doc.getTextWidth(heading) + 2 * 5 + 4; // default 5pt cell padding each side + slack
+  return Math.min(Math.max(tableW * 0.4, need), tableW * 0.65);
+}
 function kpiTable(doc: jsPDF, opts: Parameters<typeof autoTable>[1]) {
-  autoTable(doc, { ...opts, margin: KPI_TABLE_MARGIN, headStyles: { ...(opts.headStyles ?? {}), ...KPI_HEAD } });
+  const head = (opts.head as unknown[][] | undefined)?.[0];
+  const columnStyles = head && head.length === 2
+    ? { ...(opts.columnStyles ?? {}), 0: { ...((opts.columnStyles as any)?.[0] ?? {}), cellWidth: kpiFirstColumnWidth(doc, String(head[0])) } }
+    : opts.columnStyles;
+  autoTable(doc, { ...opts, columnStyles, margin: KPI_TABLE_MARGIN, headStyles: { ...(opts.headStyles ?? {}), ...KPI_HEAD } });
 }
 
 export type KpiPdfDeps = {
