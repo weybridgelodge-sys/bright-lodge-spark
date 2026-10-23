@@ -6,6 +6,7 @@ import { cachedInstallationConfig, loadInstallationConfig, ruleDateFor } from "@
 import { identityIssues, installationRuleWording, loadLodgeIdentity, type LodgeIdentity } from "@/lib/lodgeIdentity";
 import { ugleSignedDate } from "@/lib/ugleReturnSignatures";
 import { findInstallationMeeting, noInstallationMeetingIssue } from "@/lib/installationMeeting";
+import { MEMBERSHIP_FALLBACK_WARNING, MEMBERSHIP_OFFICER_UNIT_KEY, MEMBERSHIP_OVERRIDE_SETTING, resolveMembershipEmail, type MembershipEmailSource } from "@/lib/membershipOfficerEmail";
 import { computeProjection, type Appointment, type MemberLite, type PositionKey } from "@/lib/officersProgression";
 
 export const TEMPLATE_BUCKET = "secretary-returns";
@@ -68,6 +69,9 @@ export type ReturnData = {
   /** By-law wording from the installation rule, e.g. "3rd Wednesday in October". */
   ruleWording: string;
   membershipLodgeEmail: string;
+  membershipEmailSource: MembershipEmailSource;
+  /** Saved override for this return, "" when none. */
+  membershipOverride: string;
   issues: string[];
 };
 
@@ -164,12 +168,13 @@ export function blockName(p?: ProfileLite | null) {
 
 export async function loadReturnData(year: number): Promise<ReturnData> {
   const issues: string[] = [];
-  const [apptRes, statusRes, installRes, settingRes, identity] = await Promise.all([
+  const [apptRes, statusRes, installRes, settingRes, identity, unitRes] = await Promise.all([
     supabase.from("officer_appointments").select("position_key,member_id,lodge_year,is_projection,override_reason"),
     supabase.from("member_progression_status").select("member_id,readiness,seniority_initiation_date,seniority_tiebreaker"),
     findInstallationMeeting(year),
     supabase.from("module_settings").select("value").eq("key", MEMBERSHIP_EMAIL_SETTING).maybeSingle(),
     loadLodgeIdentity(),
+    (supabase.from("unit_settings" as never) as any).select("value").eq("key", MEMBERSHIP_OFFICER_UNIT_KEY).maybeSingle(),
   ]);
   const installCfg = await loadInstallationConfig();
   issues.push(...identityIssues(identity));
@@ -195,9 +200,9 @@ export async function loadReturnData(year: number): Promise<ReturnData> {
   const installationDate = installRes.meeting?.date ?? null;
   if (!installRes.meeting) issues.push(`${noInstallationMeetingIssue(year)}. Installation date fields will be blank.`);
 
-  const settingVal = (settingRes.data?.value as string | undefined) ?? null;
-  const membershipLodgeEmail = settingVal || membershipEmailOptions(identity.emailDomain)[0] || "";
-  if (!settingVal) issues.push("Membership Officer lodge email has not been chosen yet; using the Membership Secretary address until it is.");
+  const membership = resolveMembershipEmail({ override: settingRes.data?.value, unitSetup: (unitRes?.data?.value as { email?: unknown } | undefined)?.email, domain: identity.emailDomain });
+  const membershipLodgeEmail = membership.email;
+  if (membership.source === "fallback") issues.push(MEMBERSHIP_FALLBACK_WARNING);
 
   for (const o of [wm, sw, jw, ipm, ...officers]) {
     if (o.memberId && !byId[o.memberId]?.email) issues.push(`${o.label}: no personal email on their profile.`);
@@ -217,6 +222,8 @@ export async function loadReturnData(year: number): Promise<ReturnData> {
     ruleWording: installationRuleWording(installCfg.rule as any),
     profiles: byId,
     membershipLodgeEmail,
+    membershipEmailSource: membership.source,
+    membershipOverride: membership.source === "override" ? membership.email : "",
     issues,
   };
 }
