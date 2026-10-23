@@ -1,8 +1,8 @@
 import { loadDocIdentity, docTitle, docSubtitle, docFileName, docGroupName } from "@/lib/docIdentity";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import { assetUrl } from "@/lib/assetUrl";
-import logoAsset from "@/assets/weybridge-logo-white.png.asset.json";
+import { createPdfRun, drawBrandFooter, drawBrandHeader, drawBrandSection, fetchCrestUrl, HEADER_START_Y, PRINT_GOLD, type CrestImage } from "@/lib/pdfBrand";
+import type { DocIdentity } from "@/lib/docIdentity";
 import { supabase } from "@/integrations/supabase/client";
 
 
@@ -101,65 +101,47 @@ export function signedBalance(accountType: string, m: Movement | undefined): num
     : m.credit - m.debit;
 }
 
-/** Lodge crest (white) as a data URL for PDFs; null if it can't be fetched. */
-export async function loadReportLogo(): Promise<string | null> {
-  try {
-    const res = await fetch(assetUrl(logoAsset));
-    const blob = await res.blob();
-    return await new Promise<string>((r) => {
-      const fr = new FileReader();
-      fr.onload = () => r(fr.result as string);
-      fr.readAsDataURL(blob);
-    });
-  } catch { return null; }
+export type ReportPdfDeps = { identity?: DocIdentity; crestUrl?: string | null; run?: ReturnType<typeof createPdfRun> };
+
+/** Unit Setup crest + lodge identity for a report run; any crest failure gives null (image omitted). */
+export async function loadReportBrand(deps: ReportPdfDeps = {}): Promise<{ identity: DocIdentity; crest: CrestImage | null }> {
+  const [identity, crestUrl] = await Promise.all([
+    deps.identity ? Promise.resolve(deps.identity) : loadDocIdentity(),
+    deps.crestUrl !== undefined ? Promise.resolve(deps.crestUrl) : fetchCrestUrl(),
+  ]);
+  const crest = await (deps.run ?? createPdfRun()).crest(crestUrl).catch(() => null);
+  return { identity, crest };
 }
 
-export async function reportPdfDoc(subtitle: string, periodLine: string, hideGeneratedDate = false) {
-  const doc = new jsPDF({ unit: "pt", format: "a4" });
+/**
+ * Treasurer reports, minutes and agenda: A4 portrait on the shared white brand header (src/lib/pdfBrand).
+ * The report name is the title line; call finish() before saving to draw the footer on every page.
+ */
+export async function reportPdfDoc(subtitle: string, periodLine: string, hideGeneratedDate = false, deps: ReportPdfDeps = {}) {
+  const doc = new jsPDF({ unit: "pt", format: "a4", compress: true });
   const pageW = doc.internal.pageSize.getWidth();
   const margin = 40;
-
-  const logoData = await loadReportLogo();
-  const LT = docTitle(await loadDocIdentity());
-
-  doc.setFillColor(...NAVY);
-  doc.rect(0, 0, pageW, 110, "F");
-  doc.setFillColor(...GOLD);
-  doc.rect(0, 110, pageW, 3, "F");
-  if (logoData) { try { doc.addImage(logoData, "PNG", margin, 22, 66, 66); } catch { /* ignore */ } }
-  doc.setTextColor(255, 255, 255);
-  doc.setFont("times", "bold");
-  doc.setFontSize(20);
-  doc.text(LT, margin + 80, 50);
-  doc.setFont("times", "italic");
-  doc.setFontSize(13);
-  doc.setTextColor(...GOLD);
-  doc.text(subtitle, margin + 80, 72);
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(9);
-  doc.setTextColor(230, 230, 235);
-  doc.text(periodLine, margin + 80, 90);
-  if (!hideGeneratedDate) {
-    doc.text(`Generated: ${fmtDate(new Date().toISOString())}`, pageW - margin, 90, { align: "right" });
-  }
-
-  return { doc, pageW, margin };
+  const { identity, crest } = await loadReportBrand(deps);
+  drawBrandHeader(doc, {
+    identity, crest, margin, title: subtitle, periodLine,
+    rightLine: hideGeneratedDate ? undefined : `Generated: ${fmtDate(new Date().toISOString())}`,
+  });
+  return { doc, pageW, margin, startY: HEADER_START_Y, identity, finish: () => drawBrandFooter(doc, identity, margin) };
 }
 
+/** Navy serif section heading with a thin gold rule; starts a new page if too near the footer. */
 export function reportSection(doc: jsPDF, pageW: number, margin: number, y: number, title: string) {
-  doc.setFillColor(...NAVY);
-  doc.rect(margin, y, pageW - margin * 2, 22, "F");
-  doc.setTextColor(...GOLD);
-  doc.setFont("times", "bold");
-  doc.setFontSize(11);
-  doc.text(title, margin + 10, y + 15);
+  if (y > doc.internal.pageSize.getHeight() - 110) { doc.addPage(); y = margin; }
+  const next = drawBrandSection(doc, y, title, margin);
+  doc.setDrawColor(...PRINT_GOLD); doc.setLineWidth(0.6);
+  doc.line(margin, next - 6, pageW - margin, next - 6);
   return y + 32;
 }
 
 export function reportTable(doc: jsPDF, margin: number, y: number, head: string[][], body: any[][]) {
   autoTable(doc, {
     head, body, startY: y,
-    margin: { left: margin, right: margin, bottom: 60 },
+    margin: { top: margin, left: margin, right: margin, bottom: 60 },
     styles: { font: "helvetica", fontSize: 9, cellPadding: 5, textColor: INK, lineColor: [220, 215, 200], lineWidth: 0.4, overflow: "linebreak" },
     headStyles: { fillColor: GOLD, textColor: NAVY, fontStyle: "bold" },
     alternateRowStyles: { fillColor: [250, 247, 238] },
