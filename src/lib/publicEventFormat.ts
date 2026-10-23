@@ -1,5 +1,4 @@
 // Pure public-event constants/formatting (no backend client), safe for build scripts.
-export const DEFAULT_VENUE = "Guildford Masonic Centre, Hitherbury Close, Guildford GU2 4DR";
 export const CHILD_MAX_AGE = 12;
 
 export function formatEventDate(d: string) {

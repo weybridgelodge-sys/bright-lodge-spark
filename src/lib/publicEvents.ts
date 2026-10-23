@@ -9,7 +9,7 @@ export type { PublicEvent };
 export const keepPostcodeTogether = (text: string) => text.replace(/\b(GU2)\s+(4DR)\b/gi, "$1\u00a0$2");
 
 import { CHILD_MAX_AGE } from "./publicEventFormat";
-export { CHILD_MAX_AGE, DEFAULT_VENUE, formatEventDate } from "./publicEventFormat";
+export { CHILD_MAX_AGE, formatEventDate } from "./publicEventFormat";
 export const STATEMENT_DESCRIPTOR_MAX = 22;
 
 /** Total in pence: adults × adult price + children × child price. */

@@ -2,10 +2,7 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Calendar, MapPin, Clock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-
-// Venue is a genuinely fixed fact, not something that changes per meeting.
-const VENUE_NAME = "Guildford Masonic Centre";
-const VENUE_ADDRESS = "Hitherbury Close, Guildford GU2 4DR";
+import { useUnitProfile, venueAddress } from "@/lib/unitProfile";
 
 /** Public-safe slice of the Meetings Register via public_lodge_meetings. */
 interface PublicMeeting {
@@ -30,6 +27,10 @@ const NextMeeting = () => {
   const [meeting, setMeeting] = useState<PublicMeeting | null>(null);
   const [loading, setLoading] = useState(true);
   const [failed, setFailed] = useState(false);
+  // Venue comes from Unit Setup (meeting place); hidden when not set.
+  const unit = useUnitProfile();
+  const venueName = unit.venueName;
+  const venueAddr = venueAddress(unit);
 
   useEffect(() => {
     let alive = true;
@@ -132,13 +133,15 @@ const NextMeeting = () => {
                 </div>
               </div>
 
+              {venueName && (
               <div className="flex items-start gap-4">
                 <MapPin className="w-5 h-5 text-gold mt-0.5 shrink-0" aria-hidden="true" />
                 <div>
-                  <p className="font-sans font-medium text-foreground">{VENUE_NAME}</p>
-                  <p className="text-sm text-navy font-sans">{VENUE_ADDRESS}</p>
+                  <p className="font-sans font-medium text-foreground">{venueName}</p>
+                  {venueAddr && <p className="text-sm text-navy font-sans">{venueAddr}</p>}
                 </div>
               </div>
+              )}
 
               <div className="flex items-start gap-4">
                 <Clock className="w-5 h-5 text-gold mt-0.5 shrink-0" aria-hidden="true" />

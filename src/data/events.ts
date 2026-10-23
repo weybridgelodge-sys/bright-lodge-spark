@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { fetchPublicEvents } from "@/lib/publicEvents";
+import { isUnitVenue, loadUnitProfile, parseUnitProfile, venueAddress, type UnitProfile } from "@/lib/unitProfile";
 import { matchesPublicCalendarEvent, publicCalendarTimes } from "../../supabase/functions/_shared/publicEventCalendar";
 
 // Single source of truth for all lodge events.
@@ -40,7 +41,12 @@ export const typeBadgeClass: Record<EventType, string> = {
 /** All events are now live from the portal — no hardcoded entries. */
 const fixedEvents: LodgeEvent[] = [];
 
-const GMC_ADDRESS = "Hitherbury Close, Guildford GU2 4DR";
+/** Venue + address for a row: the row's own venue wins; blank falls back to the
+ *  lodge's meeting place from Unit Setup; the address shows only for that venue. */
+export function venueFor(own: string | null | undefined, unit: UnitProfile): { venue: string; address?: string } {
+  const venue = own?.trim() || unit.venueName;
+  return isUnitVenue(venue, unit) ? { venue: unit.venueName, address: venueAddress(unit) || undefined } : { venue };
+}
 
 function londonParts(iso: string) {
   const d = new Date(iso);
@@ -51,17 +57,14 @@ function londonParts(iso: string) {
   return { y: +p.year, m: +p.month, d: +p.day, hh: +p.hour % 24, mm: +p.minute };
 }
 
-function meetingRowToEvent(r: { title: string | null; event_date: string | null; location: string | null; description: string | null }): LodgeEvent | null {
+function meetingRowToEvent(r: { title: string | null; event_date: string | null; location: string | null; description: string | null }, unit: UnitProfile): LodgeEvent | null {
   if (!r.event_date) return null;
   const { y, m, d, hh, mm } = londonParts(r.event_date);
-  const loc = r.location || "Guildford Masonic Centre";
-  const isGmc = /guildford masonic centre/i.test(loc);
   return {
     title: r.title || "Lodge Meeting",
     date: new Date(y, m - 1, d, hh, mm),
     time: fmtTime(`${hh}:${String(mm).padStart(2, "0")}`),
-    venue: isGmc ? "Guildford Masonic Centre" : loc,
-    address: isGmc ? GMC_ADDRESS : undefined,
+    ...venueFor(r.location, unit),
     type: "meeting",
     description: r.description ?? undefined,
     highlight: true,
@@ -69,16 +72,14 @@ function meetingRowToEvent(r: { title: string | null; event_date: string | null;
   };
 }
 
-function officersRowToEvent(r: { officer_night_date: string | null; venue: string | null }): LodgeEvent | null {
+function officersRowToEvent(r: { officer_night_date: string | null; venue: string | null }, unit: UnitProfile): LodgeEvent | null {
   if (!r.officer_night_date) return null;
   const [y, m, d] = r.officer_night_date.slice(0, 10).split("-").map(Number);
-  const venue = r.venue || "Guildford Masonic Centre";
   return {
     title: "Officers Night",
     date: new Date(y, m - 1, d, 19, 0),
     time: "7.00 pm – 9.30 pm",
-    venue,
-    address: /guildford masonic centre|masonic centre/i.test(venue) ? GMC_ADDRESS : undefined,
+    ...venueFor(r.venue, unit),
     type: "officers",
     description: "Officers rehearsal ahead of the next regular meeting.",
   };
@@ -115,19 +116,17 @@ function publicRehearsalTitle(t: string | null): string {
 function loiRowToEvent(r: {
   title: string | null; event_date: string | null; time_from: string | null;
   time_to: string | null; venue: string | null; description: string | null;
-}): LodgeEvent | null {
+}, unit: UnitProfile): LodgeEvent | null {
   if (!r.event_date) return null;
   const [y, mo, d] = r.event_date.split("-").map(Number);
   const [hh, mm] = (r.time_from ?? "19:30").split(":").map(Number);
   const from = fmtTime(r.time_from);
   const to = fmtTime(r.time_to);
-  const venue = r.venue || "Guildford Masonic Centre";
   return {
     title: publicRehearsalTitle(r.title),
     date: new Date(y, mo - 1, d, hh || 0, mm || 0),
     time: from && to ? `${from} – ${to}` : from,
-    venue,
-    address: venue === "Guildford Masonic Centre" ? "Hitherbury Close, Guildford GU2 4DR" : undefined,
+    ...venueFor(r.venue, unit),
     type: "loi",
     description: r.description ?? undefined,
     link: "/events#rehearsal-night",
@@ -169,12 +168,13 @@ export function useLadiesFestivalPromo(): string | null {
 export async function getEventsAsync(): Promise<LodgeEvent[]> {
   const { supabase } = await import("@/integrations/supabase/client");
   const sb = supabase as any;
-  const [loi, mtg, off, fest, publicEvents] = await Promise.all([
+  const [loi, mtg, off, fest, publicEvents, unit] = await Promise.all([
     sb.from("public_loi_schedule").select("title,event_date,time_from,time_to,venue,description"),
     sb.from("public_lodge_meetings").select("title,event_date,location,description"),
     sb.from("public_officers_nights").select("officer_night_date,venue"),
     fetchLadiesFestivalPromo(),
     fetchPublicEvents(),
+    loadUnitProfile().catch(() => parseUnitProfile(null)),
   ]);
   for (const [n, r] of [["LOI", loi], ["meetings", mtg], ["officers", off], ["festival", fest]] as const) {
     if (r.error) console.error(`${n} fetch failed`, r.error);
@@ -182,9 +182,9 @@ export async function getEventsAsync(): Promise<LodgeEvent[]> {
   const keep = (e: LodgeEvent | null): e is LodgeEvent => !!e;
   const existing = [
     ...fixedEvents,
-    ...(loi.data ?? []).map(loiRowToEvent).filter(keep),
-    ...(mtg.data ?? []).map(meetingRowToEvent).filter(keep),
-    ...(off.data ?? []).map(officersRowToEvent).filter(keep),
+    ...(loi.data ?? []).map((r: any) => loiRowToEvent(r, unit)).filter(keep),
+    ...(mtg.data ?? []).map((r: any) => meetingRowToEvent(r, unit)).filter(keep),
+    ...(off.data ?? []).map((r: any) => officersRowToEvent(r, unit)).filter(keep),
     ...(fest.data ?? []).map(festivalRowToEvent).filter(keep),
   ];
   const publicRows = publicEvents.map((r): LodgeEvent => {
@@ -192,7 +192,7 @@ export async function getEventsAsync(): Promise<LodgeEvent[]> {
     return {
       title: r.public_title, date: new Date(start), type: "social",
       time: [fmtTime(r.start_time), fmtTime(r.end_time)].filter(Boolean).join(" – "),
-      venue: r.venue || "Guildford Masonic Centre", description: r.intro_copy ?? undefined,
+      venue: venueFor(r.venue, unit).venue, description: r.intro_copy ?? undefined,
       link: `/events/${r.slug}`,
     };
   });

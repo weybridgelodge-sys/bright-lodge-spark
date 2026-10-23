@@ -55,8 +55,11 @@ export type PublicMeetingPattern = { items: string[]; meetingDay: string; perYea
  * page keeps its existing text.
  */
 export function publicMeetingPattern(rpc: unknown): PublicMeetingPattern | null {
-  const sched = ((rpc as { schedule?: unknown } | null)?.schedule ?? []) as ScheduleMonth[];
-  if (!Array.isArray(sched) || !sched.length) return null;
+  const r = (rpc ?? {}) as { schedule?: unknown; manual_text?: unknown; manual_override?: unknown };
+  const sched = (r.schedule ?? []) as ScheduleMonth[];
+  const manual = manualMeetingPattern(r.manual_text);
+  if (r.manual_override === true && manual) return manual;
+  if (!Array.isArray(sched) || !sched.length) return manual;
   const items = [...sched].sort((a, b) => a.month - b.month)
     .map((m) => meetingPatternSentence([m]).replace(/\.$/, "")).filter(Boolean);
   if (!items.length) return null;
@@ -68,4 +71,19 @@ export async function fetchPublicMeetingPattern(): Promise<PublicMeetingPattern 
   const { data, error } = await (supabase.rpc as any)("get_meeting_pattern");
   if (error) return null;
   return publicMeetingPattern(data);
+}
+
+/**
+ * Lodge record's saved pattern text ("3rd Wednesday in February, 2nd Wednesday
+ * in May … and 2nd Wednesday in December.") split into one line per meeting.
+ * Null when no text is saved.
+ */
+export function manualMeetingPattern(text: unknown): PublicMeetingPattern | null {
+  if (typeof text !== "string") return null;
+  const clean = text.replace(/\s+/g, " ").trim().replace(/\.$/, "");
+  if (!clean) return null;
+  const items = clean.split(/\s*,\s*|\s+and\s+/i).map((x) => x.trim()).filter(Boolean);
+  if (!items.length) return null;
+  const days = WEEKDAYS.filter((d) => d && new RegExp(`\\b${d}\\b`, "i").test(clean));
+  return { items, meetingDay: days.join(" / "), perYear: items.length };
 }

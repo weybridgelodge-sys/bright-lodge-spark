@@ -10,7 +10,7 @@ import { renderQrPng, type QrStyle } from "@/lib/eventQr";
 import { saveBlob } from "@/lib/nativeDownload";
 import { CataloguePanel, CoursesPanel, EventTypePanel, FeeCoverPanel, InfoBlocksPanel, PaymentSchedulePanel, SeoPanel, type ModuleSettings } from "@/components/members/public-events/EventModulePanels";
 import { paymentScheduleErrors, parseModules, remapImagePath } from "@/lib/eventModules";
-import { canDeleteEvent, DEFAULT_VENUE, formatTime, publishBlockers, STATEMENT_DESCRIPTOR_MAX } from "@/lib/publicEvents";
+import { canDeleteEvent, formatTime, publishBlockers, STATEMENT_DESCRIPTOR_MAX } from "@/lib/publicEvents";
 
 const inputCls = "w-full min-h-[44px] bg-navy-dark/50 border border-gold/20 rounded-sm px-3 py-2 text-sm text-primary-foreground placeholder:text-primary-foreground/80 focus:outline-none focus:border-gold/60";
 const labelCls = "block text-xs uppercase tracking-wider text-gold mb-1.5";
@@ -38,7 +38,7 @@ function toDraft(r: Row): Draft {
   return {
     id: r.id, unit_id: r.unit_id ?? null, name: r.name, public_title: r.public_title ?? "", slug: r.slug ?? "", tagline: r.tagline ?? "", intro_copy: r.intro_copy ?? "",
     event_date: r.event_date, start_time: (r.start_time ?? "").slice(0, 5), end_time: (r.end_time ?? "").slice(0, 5),
-    venue: r.venue ?? DEFAULT_VENUE, booking_deadline: r.booking_deadline ? new Date(r.booking_deadline).toISOString().slice(0, 16) : "",
+    venue: r.venue ?? "", booking_deadline: r.booking_deadline ? new Date(r.booking_deadline).toISOString().slice(0, 16) : "",
     capacity: r.capacity == null ? "" : String(r.capacity),
     parking: u.parking ?? "", dress_code: r.dress_code ?? "", timings: u.timings ?? "", access: u.access ?? "",
     menu_items: arr(r.menu_items).join("\n"), dietary_choices: arr(r.dietary_choices).join("\n"), highlights: arr(r.highlights).join("\n"),

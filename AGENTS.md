@@ -33,3 +33,4 @@
 - Unit facts live in Unit Setup (unit_settings + existing identity/contact tables; venue facts on venues), written only via save_unit_setup (audited; merges partial values, client sends changed fields only). Public reads: get_public_booking_details/get_public_unit_profile; server: loadLodgeSettings. Pre-rendered SEO stays typed, guarded by seoUnitDrift test. Return To addresses: unit_settings province via _shared/provinceReturnEmail (admin/Secretary edit; missing = refuse send). Why: one source, SEO-safe.
 
 - Members' PDFs, exports, file names and .ics files take lodge name/number/province/email from lib/docIdentity (blank stays blank); guarded by docIdentity.test. Why: no host-lodge literals.
+- Public Lodge Profile figures come only from get_public_lodge_figures (counts/numbers, KPI Snapshot member rules) via lib/lodgeFigures; public venues from the unit profile (venueFull/venueFor; own event venue wins, blank = hidden). Why: one source, no typed figures.

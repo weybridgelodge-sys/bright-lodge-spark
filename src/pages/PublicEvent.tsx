@@ -8,7 +8,7 @@ import { depositAllowed, depositLineName, depositPence, orderTotalPence, planMet
 import { supabase } from "@/integrations/supabase/client";
 import { readFunctionError } from "@/lib/functionError";
 import {
-  CHILD_MAX_AGE, DEFAULT_VENUE, eventBookingState, fetchPublicEvent, formatEventDate,
+  CHILD_MAX_AGE, eventBookingState, fetchPublicEvent, formatEventDate,
   formatGBP, formatTime, isChildAge, seatsLeft, keepPostcodeTogether, type PublicEvent as Ev,
 } from "@/lib/publicEvents";
 import {
@@ -17,6 +17,7 @@ import {
 } from "@/components/events/booking/BookingCore";
 import { CatalogueSteppers, CourseSelects, DECIDE_LATER, eventImageUrl, InfoBlocks, useEventContent } from "@/components/events/booking/ModuleSections";
 import { buildEventSeo } from "@/lib/eventSeo";
+import { isUnitVenue, useUnitProfile, venueFull, venueShort } from "@/lib/unitProfile";
 import { coursesForGuest, orderModules } from "@/lib/eventOrder";
 
 const LODGES = ["Weybridge", "Astolat", "Other", "Guest"] as const;
@@ -90,7 +91,11 @@ export default function PublicEvent() {
   const state = ev ? eventBookingState(ev) : "closed";
   const left = ev ? seatsLeft(ev) : null;
   const festive = ev?.theme === "christmas";
-  const venue = ev?.venue || DEFAULT_VENUE;
+  const unit = useUnitProfile();
+  const venue = ev?.venue?.trim() || venueFull(unit);
+  // Short hero line: the lodge venue as "<name>, <postcode>", or the event's own venue.
+  const venueLine = !ev?.venue?.trim() || isUnitVenue(ev.venue, unit) ? venueShort(unit) : ev.venue.trim();
+  const venueName = !ev?.venue?.trim() || isUnitVenue(ev.venue, unit) ? unit.venueName : ev.venue.split(",")[0].trim();
   const title = ev?.public_title || "";
   const time = ev ? [formatTime(ev.start_time), formatTime(ev.end_time)].filter(Boolean).join(" – ") : "";
 
@@ -177,7 +182,7 @@ export default function PublicEvent() {
               <ul className="flex flex-col sm:flex-row flex-wrap justify-center gap-3 sm:gap-6 text-background/90 font-sans">
                 <li className="flex items-center justify-center gap-2"><Calendar className="w-4 h-4 text-gold" aria-hidden="true" />{formatEventDate(ev.event_date)}</li>
                 {time && <li className="flex items-center justify-center gap-2"><Clock className="w-4 h-4 text-gold" aria-hidden="true" />{time}</li>}
-                <li className="inline-flex self-center sm:self-auto items-start justify-center gap-2 max-w-full"><MapPin className="w-4 h-4 text-gold shrink-0 mt-1" aria-hidden="true" /><span className="min-w-0">{keepPostcodeTogether("Guildford Masonic Centre, GU2 4DR")}</span></li>
+                {venueLine && <li className="inline-flex self-center sm:self-auto items-start justify-center gap-2 max-w-full"><MapPin className="w-4 h-4 text-gold shrink-0 mt-1" aria-hidden="true" /><span className="min-w-0">{keepPostcodeTogether(venueLine)}</span></li>}
               </ul>
               <a href="#book" className="mt-8 inline-flex items-center justify-center min-h-[48px] px-8 bg-gold-shimmer text-accent-foreground font-semibold rounded-sm">
                 Book your places <ArrowRight className="w-4 h-4 ml-2" aria-hidden="true" />
@@ -193,7 +198,7 @@ export default function PublicEvent() {
               {!ev.intro_copy && (
                 <p>
                   {festive
-                    ? `Celebrate the season with friends and family at Guildford Masonic Centre. ${ev.hosting_lodges.join(" and ") || "Weybridge Lodge"} warmly invite members, families and guests — you do not need to be a Freemason to come along. It is a relaxed way to meet a friendly Masonic Lodge in Surrey and the Freemasons in Guildford.`
+                    ? `Celebrate the season with friends and family${venueName ? ` at ${venueName}` : ""}. ${ev.hosting_lodges.join(" and ") || unit.lodgeName || "We"} warmly invite members, families and guests — you do not need to be a Freemason to come along. It is a relaxed way to meet a friendly Masonic Lodge in Surrey and the Freemasons in Guildford.`
                     : "Members, families and guests are all welcome — you do not need to be a Freemason to attend. It is a relaxed way to meet a friendly Masonic Lodge in Surrey and the Freemasons in Guildford."}
                 </p>
               )}

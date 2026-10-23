@@ -4,6 +4,7 @@ import ProtectedRoute from "@/components/members/ProtectedRoute";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useUnitProfile } from "@/lib/unitProfile";
 import { Plus, Trash2, Pencil, Save, Loader2, X, CalendarClock, ChevronDown, ChevronRight } from "lucide-react";
 
 type Entry = {
@@ -21,12 +22,12 @@ type Draft = Omit<Entry, "id"> & { id?: string };
 const inputCls = "w-full bg-navy-dark/50 border border-gold/20 rounded-sm px-3 py-2 text-sm text-primary-foreground placeholder:text-primary-foreground/30 focus:outline-none focus:border-gold/60";
 const labelCls = "block text-xs uppercase tracking-wider text-gold mb-1.5";
 
-const blank = (): Draft => ({
+const blank = (venue: string): Draft => ({
   title: "Rehearsal Night",
   event_date: new Date().toISOString().slice(0, 10),
   time_from: "19:30",
   time_to: "21:30",
-  venue: "Guildford Masonic Centre",
+  venue,
   description: "",
 });
 
@@ -37,6 +38,7 @@ const fmtDate = (d: string) =>
 function Inner() {
   const { isAdmin, isSecretary, isAssistantSecretary, isWorshipfulMaster } = useAuth();
   const canEdit = isAdmin || isSecretary || isAssistantSecretary || isWorshipfulMaster;
+  const unit = useUnitProfile();
   const [entries, setEntries] = useState<Entry[]>([]);
   const [loading, setLoading] = useState(true);
   const [draft, setDraft] = useState<Draft | null>(null);
@@ -67,7 +69,7 @@ function Inner() {
       event_date: draft.event_date,
       time_from: draft.time_from,
       time_to: draft.time_to,
-      venue: draft.venue.trim() || "Guildford Masonic Centre",
+      venue: draft.venue.trim() || unit.venueName,
       description: draft.description?.trim() || null,
       updated_by: u.user?.id ?? null,
     };
@@ -118,7 +120,7 @@ function Inner() {
           <p className="text-primary-foreground/80 text-sm">Planned rehearsals and training sessions — feeds every member's personal calendar.</p>
         </div>
         {canEdit && !draft && (
-          <button onClick={() => setDraft(blank())} className="inline-flex items-center gap-2 px-4 py-2 bg-gold text-navy font-semibold text-sm rounded-sm hover:bg-gold/90"><Plus className="w-4 h-4" /> Add entry</button>
+          <button onClick={() => setDraft(blank(unit.venueName))} className="inline-flex items-center gap-2 px-4 py-2 bg-gold text-navy font-semibold text-sm rounded-sm hover:bg-gold/90"><Plus className="w-4 h-4" /> Add entry</button>
         )}
       </header>
 
