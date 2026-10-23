@@ -1,3 +1,4 @@
+import { loadDocIdentity, docTitle, docSubtitle, docFileName, docGroupName } from "@/lib/docIdentity";
 import { fieldCls } from "@/lib/fieldStyle";
 import { useEffect, useMemo, useState } from "react";
 import MembersLayout from "@/components/members/MembersLayout";
@@ -137,7 +138,7 @@ function Inner() {
   const downloadPdf = async () => {
     if (!data) return;
     const doc = await buildSummaryReportPdf({ data, mentorStatement: statement });
-    await saveJsPdf(doc, `weybridge-development-summary-${data.period.start}.pdf`);
+    await saveJsPdf(doc, `${docFileName({ lodgeName: data.lodgeName }, `development-summary-${data.period.start}`)}.pdf`);
   };
 
   const copyText = async () => {

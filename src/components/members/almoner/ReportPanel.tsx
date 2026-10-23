@@ -1,3 +1,4 @@
+import { loadDocIdentity, docTitle, docSubtitle, docFileName, docGroupName } from "@/lib/docIdentity";
 import { useAuth } from "@/hooks/useAuth";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -358,6 +359,7 @@ export default function ReportPanel({ members }: { members: Member[] }) {
     const pageW = doc.internal.pageSize.getWidth();
     const pageH = doc.internal.pageSize.getHeight();
     const margin = 40;
+    const LT = docTitle(await loadDocIdentity());
 
     let logoData: string | null = null;
     try {
@@ -381,7 +383,7 @@ export default function ReportPanel({ members }: { members: Member[] }) {
     doc.setTextColor(255, 255, 255);
     doc.setFont("times", "bold");
     doc.setFontSize(20);
-    doc.text("Weybridge Lodge No. 6787", margin + 80, 50);
+    doc.text(LT, margin + 80, 50);
     doc.setFont("times", "italic");
     doc.setFontSize(13);
     doc.setTextColor(...GOLD);
@@ -494,7 +496,7 @@ export default function ReportPanel({ members }: { members: Member[] }) {
       doc.text(`Page ${i} of ${pageCount}`, pageW - margin, pageH - 22, { align: "right" });
       doc.setTextColor(...NAVY);
       doc.setFont("times", "bold");
-      doc.text("Weybridge Lodge No. 6787", pageW / 2, pageH - 22, { align: "center" });
+      doc.text(LT, pageW / 2, pageH - 22, { align: "center" });
     }
 
     return doc;

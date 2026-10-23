@@ -1,3 +1,4 @@
+import { loadDocIdentity, docTitle, docSubtitle, docFileName, docGroupName } from "@/lib/docIdentity";
 import { useEffect, useMemo, useRef, useState } from "react";
 import MembersLayout from "@/components/members/MembersLayout";
 import { useAuth } from "@/hooks/useAuth";
@@ -89,6 +90,8 @@ const READINESS_LABEL: Record<Readiness, string> = {
 export default function OfficersTracker() {
   const { user, profile, isAdmin, isSecretary } = useAuth();
   const [tab, setTab] = useState<Tab>("board");
+  const [lodgeHeading, setLodgeHeading] = useState("");
+  useEffect(() => { let live = true; loadDocIdentity().then((id) => { if (live) setLodgeHeading(docTitle(id)); }); return () => { live = false; }; }, []);
   const [loading, setLoading] = useInitialLoading();
 
   const [members, setMembers] = useState<ProfileRow[]>([]);
@@ -285,7 +288,7 @@ export default function OfficersTracker() {
     doc.setFont("times", "bold");
     doc.setTextColor(27, 42, 74);
     doc.setFontSize(18);
-    doc.text("Weybridge Lodge No. 6787", 40, 40);
+    doc.text(docTitle(await loadDocIdentity()), 40, 40);
     doc.setFontSize(13);
     doc.setTextColor(201, 164, 50);
     doc.text("Progressive Officers Projection", 40, 60);
@@ -381,7 +384,7 @@ export default function OfficersTracker() {
       }
     }
 
-    await saveJsPdf(doc, `weybridge-officers-projection-${formatMasonicYear(currentYear)}.pdf`);
+    await saveJsPdf(doc, `${docFileName(await loadDocIdentity(), `officers-projection-${formatMasonicYear(currentYear)}`)}.pdf`);
   };
 
   // ---------- UI ----------
@@ -402,7 +405,7 @@ export default function OfficersTracker() {
         <header>
           <h1 className="font-serif text-3xl text-primary-foreground">Progressive Officers Tracker</h1>
           <p className="text-primary-foreground/70 text-sm mt-1">
-            Weybridge Lodge No. 6787 · Eight-year progression based on initiation seniority, plus non-progressive offices.
+            {lodgeHeading ? `${lodgeHeading} · ` : ""}Eight-year progression based on initiation seniority, plus non-progressive offices.
           </p>
         </header>
 

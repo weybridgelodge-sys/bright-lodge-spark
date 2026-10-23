@@ -1,3 +1,4 @@
+import { loadDocIdentity, docTitle, docSubtitle, docFileName, docGroupName } from "@/lib/docIdentity";
 import { supabase } from "@/integrations/supabase/client";
 import { generateICS, icsFilename, type ICSEventInput } from "./generateICS";
 
@@ -21,8 +22,9 @@ export interface SendEventInviteArgs {
 export async function sendEventInvite(args: SendEventInviteArgs): Promise<{
   ok: boolean; sent: number; recipients: number; failures: { email: string; error: string }[];
 }> {
-  const ics = generateICS(args.event);
-  const filename = icsFilename(args.event.title);
+  const ident = await loadDocIdentity();
+  const ics = generateICS(args.event, ident);
+  const filename = icsFilename(args.event.title, ident.lodgeName);
 
   const { data, error } = await supabase.functions.invoke("send-event-invite", {
     body: {
