@@ -48,8 +48,8 @@ import {
   DEFAULT_COVER_LEFT_URL,
   DEFAULT_COVER_RIGHT_URL,
 } from "./summons";
-import { POSITION_LABELS, PositionKey } from "./officersProgression";
 import { assetUrl } from "./assetUrl";
+import { printableOfficers, printableReps } from "./summonsOfficers";
 
 export type LodgeTemplate = {
   lodge_name: string;
@@ -585,22 +585,14 @@ const OfficersDiningPanel: React.FC<{
   density?: number;
 }> = ({ template, officers, hidden, shortened, density = 0 }) => {
   const d = densityStyles(density);
-  // Steward positions are only printed when filled; all other offices are
-  // always shown, even if vacant, to preserve the full office structure.
-  const VACANT_STEWARD_LABELS = new Set(
-    ["senior_steward", "steward_1", "steward_2", "steward_3", "steward_4", "steward_5"].map(
-      (k) => POSITION_LABELS[k as PositionKey]
-    )
-  );
-  const printableOfficers = officers.filter(
-    (o) => o.member || !VACANT_STEWARD_LABELS.has(o.label)
-  );
+  // Only posts with a holder print (shared rule in summonsOfficers.ts).
+  const officerLines = printableOfficers(officers);
+  const repLines = printableReps(template.lodge_representatives);
   return (
     <View style={s.panel}>
       <Text style={[s.panelHeading, d.heading]}>OFFICERS {officerSeason()}</Text>
 
-      {printableOfficers.map((o, i) =>
-        o.member ? (
+      {officerLines.map((o, i) => (
           <View key={i} style={[s.officerRow, d.officerRow]}>
             <BoldNameText
               style={[s.officerName, d.officerText]}
@@ -612,20 +604,14 @@ const OfficersDiningPanel: React.FC<{
             />
             <Text style={[s.officerRole, d.officerText]}>{shortRole(o.label)}</Text>
           </View>
-        ) : (
-          <View key={i} style={[s.officerRow, d.officerRow]}>
-            <Text style={[s.officerName, d.officerText]}>Vacant</Text>
-            <Text style={[s.officerRole, d.officerText]}>{shortRole(o.label)}</Text>
-          </View>
-        )
-      )}
+      ))}
 
 
-      {template.lodge_representatives?.length > 0 && (
+      {repLines.length > 0 && (
       <>
         <View style={[s.thinDivider, d.divider]} />
         <View>
-          {template.lodge_representatives.map((r, i) => {
+          {repLines.map((r, i) => {
             const cleanedRole = (r.role ?? "")
               .replace(/^\s*lodge\s+representative\s+to\s+/i, "")
               .trim();

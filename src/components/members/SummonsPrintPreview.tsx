@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Printer, Loader2 } from "lucide-react";
 import { formatDateShort, MemberRow } from "@/lib/summons";
+import OmittedPostsNote from "@/components/members/OmittedPostsNote";
 import {
   LodgeTemplate,
   OfficerRollRow,
@@ -129,6 +130,8 @@ export default function SummonsPrintPreview({ template, officers, members }: Pro
           Print
         </Button>
       </div>
+      <OmittedPostsNote officers={officers} reps={template.lodge_representatives} />
+
 
       {!current ? (
         <p className="text-sm text-primary-foreground/80">

@@ -60,6 +60,7 @@ import { lodgeTitle, loadLodgeIdentity } from "@/lib/lodgeIdentity";
 import { applyDerivedNames } from "@/lib/summonsSources";
 import { resolveRepresentatives, type ResolvedRep } from "@/lib/representatives";
 import { POSITION_SELECT } from "@/lib/officerPositions";
+import OmittedPostsNote from "@/components/members/OmittedPostsNote";
 import { loadMeetingPatternSources, saveMeetingPatternOverride } from "@/lib/meetingPattern";
 import { chooseMeetingPattern } from "@/lib/meetingDiary";
 
@@ -1160,6 +1161,7 @@ function NewSummonsTab({ editingId, onDoneEditing }: { editingId: string | null;
         </div>
       )}
 
+      <OmittedPostsNote officers={officers} reps={template.lodge_representatives} />
       <div className="flex flex-wrap gap-2">
         <Button onClick={() => generatePdf("download")} disabled={busy}><Download className="w-4 h-4 mr-2" /> Download PDF</Button>
         <Button variant="outline" className="text-navy" onClick={() => generatePdf("save")} disabled={busy}><Save className="w-4 h-4 mr-2" /> Save to history</Button>
