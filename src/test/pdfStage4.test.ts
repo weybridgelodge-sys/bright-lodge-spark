@@ -192,3 +192,15 @@ describe("Charity, Development and Officers PDFs on the shared header", () => {
     });
   }
 });
+
+// ---- 4. Accounts pack: every section heading starts on the same page as its table ---------------
+import { buildAccountsPackPdf } from "@/lib/treasurer/accountsPackPdf";
+describe("accounts pack headings travel with their tables", () => {
+  const s = (n: number, k = 1) => ({ masonic_year: 2025, as_at: "2026-09-30", taken_at: "2026-10-05T10:00:00Z", income_expenditure: { income: 1, expenditure: 1, surplus: 0 }, balance_sheet: { assets: 1, liabilities: 1, net_assets: 0, fund_bf: 0, surplus: 0, total_funds: 0 }, trial_balance: { debit: 1, credit: 1 }, accounts: Array.from({ length: n }, (_, i) => ({ code: String(1000 + i * 100), name: `Account ${i}`, type: ["asset", "liability", "income", "expense"][i % 4], net: (i + 1) * 12345 * k })) });
+  for (const n of [8, 16, 24, 40, 60]) it(`${n} accounts`, async () => {
+    const doc = await buildAccountsPackPdf({ draft: true, snap: { ...s(n), comparative: s(n, 0.9) }, remarks: "Remarks.", round: null, certifiers: [] } as any, 2025, [], { identity: ID, crestUrl: null } as any);
+    const trace = reportLayoutTrace(doc);
+    expect(trace.filter((e) => e.kind === "heading").length).toBe(5);
+    trace.forEach((e, i) => { if (e.kind === "heading") { expect(trace[i + 1]?.kind).toBe("table"); expect(trace[i + 1].page).toBe(e.page); } });
+  });
+});
