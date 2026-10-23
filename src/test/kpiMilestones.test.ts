@@ -19,9 +19,9 @@ describe("KPI WM milestones from the Past Masters roll", () => {
     expect(milestoneDateLabel(ms[0])).toBe("October 2027");
   });
 
-  it("year-only with no installation month shows just the year", () => {
+  it("year-only with no installation month is not listed", () => {
     const ms = milestones([member("f")], [{ member_id: "f", lodge_year: 2017, installed_on: null }], window2027, () => null);
-    expect(milestoneDateLabel(ms[0])).toBe("2027");
+    expect(ms).toEqual([]);
   });
 
   it("uses the earliest of two terms", () => {
@@ -53,5 +53,42 @@ describe("KPI WM milestones from the Past Masters roll", () => {
       window2027, oct,
     );
     expect(ms.map(milestoneDateLabel)).toEqual(["18/10/2027", "October 2027"]);
+  });
+});
+
+// Live-shaped window: 21 Oct 2026 to 19 Oct 2027.
+const live = { start: "2026-10-21", end: "2027-10-19" };
+const wm = (installed_on: string | null, lodge_year: number, month = oct) =>
+  milestones([member("m")], [{ member_id: "m", lodge_year, installed_on }], live, month).filter((x) => x.kind === "wm");
+
+describe("KPI WM milestones at the window edges", () => {
+  it("exact date on the start boundary is included", () => {
+    expect(wm("2016-10-21", 2016).map(milestoneDateLabel)).toEqual(["21/10/2026"]);
+  });
+  it("exact date on the end boundary is included", () => {
+    expect(wm("2017-10-19", 2017).map(milestoneDateLabel)).toEqual(["19/10/2027"]);
+  });
+  it("one day before the start is excluded (Smith, 19/10/2016)", () => {
+    expect(wm("2016-10-19", 2016)).toEqual([]);
+    expect(wm("2016-10-20", 2016)).toEqual([]);
+  });
+  it("one day after the end is excluded", () => {
+    expect(wm("2017-10-20", 2017)).toEqual([]);
+  });
+  it("year-only, month wholly inside the window, shows month+year", () => {
+    expect(wm(null, 2017, () => 3).map(milestoneDateLabel)).toEqual(["March 2027"]);
+  });
+  it("year-only, month straddling the window start is not shown", () => {
+    expect(wm(null, 2016)).toEqual([]);
+  });
+  it("year-only, month straddling the window end is not shown", () => {
+    expect(wm(null, 2017)).toEqual([]);
+  });
+  it("no roll entry gives no milestone", () => {
+    expect(milestones([member("m")], [], live, oct)).toEqual([]);
+  });
+  it("Coleman 15/10/2027 and Scott 18/10/2027 still show", () => {
+    expect(wm("1997-10-15", 1997).map(milestoneDateLabel)).toEqual(["15/10/2027"]);
+    expect(wm("2017-10-18", 2017).map(milestoneDateLabel)).toEqual(["18/10/2027"]);
   });
 });

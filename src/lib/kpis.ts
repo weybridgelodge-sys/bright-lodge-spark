@@ -400,7 +400,6 @@ export function milestones(
   const toLocal = (s: string) => { const [y, m, d] = s.split("-").map(Number); return new Date(y, m - 1, d); };
   const yearStart = yearRange ? toLocal(yearRange.start) : new Date(my, 9, 1);
   const yearEnd = yearRange?.end ? toLocal(yearRange.end) : new Date(my + 1, 8, 30);
-  const masonicYearOf = (d: Date) => d.getFullYear();
   const out: Milestone[] = [];
 
   // Format a Date as YYYY-MM-DD using local components — avoids the
