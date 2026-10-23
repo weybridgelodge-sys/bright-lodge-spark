@@ -1,4 +1,4 @@
-- Lodge addresses, site URL and sender names come from lodgeSettings.ts (lodge_contact_settings; fallbacks = old values); sender domains stay in code. Why: one editable source, safe on lookup failure.
+- Lodge addresses, site URL and sender names come from lodgeSettings.ts (lodge_contact_settings; fallbacks = old values); sender domains stay in code; links in emails use configuredSiteUrl (no fallback; blank = no link). Why: one editable source, safe on lookup failure, no invented address.
 - Public event bookings use the separate events Stripe (_shared/stripe-events.ts, STRIPE_EVENTS_*) and event_* tables, never lodge Stripe. Why: events money stays off the lodge ledger.
 - Event money: one event_booking_payments row per Stripe charge; totals via recomputeBooking; balance tokens service-role only. Why: per-payment refunds, private links.
 - Newsletter sign-up is double opt-in (_shared/newsletterOptIn.ts); store token hash only; sends/counts need confirmed=true. Why: no subscribing others.
