@@ -16,7 +16,7 @@ import {
   deleteSocial,
   type LodgeSocial,
 } from "@/lib/lodgeSocials";
-import { sendEventInvite, formatEventEmailHtml } from "@/lib/sendEventInvite";
+import { sendEventInvite, formatEventEmailHtml, loadEventEmailBrand } from "@/lib/sendEventInvite";
 import { listMyGroups } from "@/lib/workingGroups";
 
 const SOCIAL_SLUGS = ["socials", "social-committee", "social"];
@@ -113,6 +113,7 @@ function Inner() {
         guest_emails: guests,
       });
 
+      const brand = await loadEventEmailBrand();
       const html = formatEventEmailHtml({
         heading: title.trim(),
         intro: "Brethren, you are warmly invited to the following social event:",
@@ -123,7 +124,8 @@ function Inner() {
         bodyHtml: description.trim()
           ? `<p style="margin:0 0 12px 0;">${description.trim().replace(/\n/g, "<br/>")}</p>`
           : undefined,
-        footer: "S&F, Weybridge Lodge Social Committee",
+        footer: `S&F, ${brand.lodgeName ? `${brand.lodgeName} ` : ""}Social Committee`,
+        identity: brand,
       });
 
       const result = await sendEventInvite({

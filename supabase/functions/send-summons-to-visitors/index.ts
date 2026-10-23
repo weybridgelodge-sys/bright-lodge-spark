@@ -1,7 +1,7 @@
 // send-summons-to-visitors — email a finalised summons to visitor contacts.
 // Personalised salutation per recipient, branded HTML matching the shared
-// Shared transactional email style (centred crest, lodge name heading, gold number and province
-// subtitle, white body); lodge details come from Unit Setup via loadLodgeSettings.
+// shared brand header/footer (brandHeaderHtml/brandFooterHtml in _brand.ts); crest and
+// lodge details come from Unit Setup / lodge record via loadLodgeSettings.
 // with the summons PDF + .ics calendar file attached.
 //
 // Role-gated to admin / secretary / worshipful_master and logged into

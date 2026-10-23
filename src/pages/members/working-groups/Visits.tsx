@@ -19,7 +19,7 @@ import {
   buildDirectory,
   type LodgeVisit,
 } from "@/lib/lodgeVisits";
-import { sendEventInvite, formatEventEmailHtml } from "@/lib/sendEventInvite";
+import { sendEventInvite, formatEventEmailHtml, loadEventEmailBrand } from "@/lib/sendEventInvite";
 import { listMyGroups } from "@/lib/workingGroups";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -196,6 +196,7 @@ function Inner() {
       // 3) Send invitation email (separate step; failure does not undo the save)
       step = "invite";
       const displayName = lodgeName.trim() + (lodgeNumber.trim() ? ` No. ${lodgeNumber.trim()}` : "");
+      const brand = await loadEventEmailBrand();
       const html = formatEventEmailHtml({
         heading: `Visit to ${displayName}`,
         intro: "Brethren, a visit to another lodge has been arranged. Details are below and the host lodge's summons is attached.",
@@ -209,7 +210,8 @@ function Inner() {
         bodyHtml: notes.trim()
           ? `<p style="margin:0 0 12px 0;">${notes.trim().replace(/\n/g, "<br/>")}</p>`
           : undefined,
-        footer: "S&F, Weybridge Lodge Visits Working Group",
+        footer: `S&F, ${brand.lodgeName ? `${brand.lodgeName} ` : ""}Visits Working Group`,
+        identity: brand,
       });
 
       const result = await sendEventInvite({
