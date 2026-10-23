@@ -111,7 +111,7 @@ function inlineFormat(text: string): string {
     const href = safeUrl(addr);
     return href ? pre + stash(`<a href="${href}" style="${LINK_STYLE}">${addr}</a>`) : pre + addr;
   });
-  // Bare domains without a scheme, e.g. "weybridgelodge.org.uk/bookings".
+  // Bare domains without a scheme, e.g. "example.org/bookings".
   s = s.replace(
     /(^|[\s(])((?:[a-z0-9-]+\.)+(?:co\.uk|org\.uk|ac\.uk|com|org|net|uk|io|dev)(?:\/[^\s<)]*)?)/gi,
     (_m, pre, url) => {
