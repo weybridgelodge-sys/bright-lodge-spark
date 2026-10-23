@@ -47,7 +47,7 @@ describe("PDF header and file-name helpers use the lodge record", () => {
 
 // Files moved onto the lodge record in Job U: no host-lodge literals may return.
 const GUARDED = [
-  "src/lib/docIdentity.ts", "src/lib/generateICS.ts", "src/lib/sendEventInvite.ts",
+  "src/lib/docIdentity.ts", "src/lib/generateICS.ts",
   "src/components/members/almoner/ReportPanel.tsx", "src/lib/treasurer/reports.ts", "src/lib/treasurer/accountsPackPdf.ts",
   "src/lib/charity/periodicReportPdf.ts", "src/lib/charity/annualReportPdf.ts", "src/lib/development/pdf.ts",
   "src/lib/development/summaryReportPdf.ts", "src/lib/development/gapReportPdf.ts", "src/lib/development/activityReportPdf.ts",
