@@ -6,7 +6,7 @@ import { createPdfRun, drawBrandFooter, drawBrandHeader, fetchCrestUrl } from "@
 import { fmtDate } from "./reports";
 
 export async function brandedReportPdfDoc(title: string, periodLine: string, hideGeneratedDate = false) {
-  const doc = new jsPDF({ unit: "pt", format: "a4" });
+  const doc = new jsPDF({ unit: "pt", format: "a4", compress: true });
   const pageW = doc.internal.pageSize.getWidth();
   const margin = 40;
   const run = createPdfRun();

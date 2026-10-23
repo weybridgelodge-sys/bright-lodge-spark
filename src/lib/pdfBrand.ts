@@ -14,14 +14,55 @@ export const PRINT_INK: [number, number, number] = [30, 30, 35];
 export const PRINT_MUTED: [number, number, number] = [90, 90, 100];
 export const CREST_FETCH_TIMEOUT_MS = 12_000;
 
+export const CREST_PT = 100; // printed crest box (pt, square, aspect kept)
+export const CREST_PX = 400; // processed pixels on the long side (~2x print size)
+export const HEADER_RULE_Y = 132; // gold rule
+export const HEADER_START_Y = 148; // content start
+
 export type CrestImage = { dataUrl: string; format: "PNG" | "JPEG" };
+
+/** Long side scaled to max px, aspect kept, never upscaled. */
+export function crestTargetSize(w: number, h: number, max = CREST_PX) {
+  const s = Math.min(1, max / Math.max(w || 1, h || 1));
+  return { width: Math.max(1, Math.round((w || 1) * s)), height: Math.max(1, Math.round((h || 1) * s)) };
+}
+
+type Canvasish = { width: number; height: number; getContext(t: "2d"): any; toDataURL(type: string, q?: number): string };
+export type ProcessDeps = {
+  decode: (b: Blob) => Promise<{ width: number; height: number; close?: () => void }>;
+  createCanvas: (w: number, h: number) => Canvasish;
+};
+const browserDeps = (): ProcessDeps => ({
+  decode: (b) => createImageBitmap(b),
+  createCanvas: (w, h) => { const c = document.createElement("canvas"); c.width = w; c.height = h; return c as unknown as Canvasish; },
+});
+
+/** Downscale, flatten onto white (no alpha → no SMask), keep the smaller of PNG / JPEG 0.92. Any failure = null. */
+export async function processCrest(blob: Blob, deps?: ProcessDeps): Promise<CrestImage | null> {
+  try {
+    const d = deps ?? browserDeps();
+    const bmp = await d.decode(blob);
+    const { width, height } = crestTargetSize(bmp.width, bmp.height);
+    const c = d.createCanvas(width, height);
+    const ctx = c.getContext("2d");
+    if (!ctx) return null;
+    ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = "high";
+    ctx.fillStyle = "#ffffff"; ctx.fillRect(0, 0, width, height);
+    ctx.drawImage(bmp, 0, 0, width, height);
+    bmp.close?.();
+    const png = c.toDataURL("image/png");
+    const jpg = c.toDataURL("image/jpeg", 0.92);
+    const okPng = png.startsWith("data:image/png"), okJpg = jpg.startsWith("data:image/jpeg");
+    if (!okPng && !okJpg) return null;
+    if (okJpg && (!okPng || jpg.length < png.length)) return { dataUrl: jpg, format: "JPEG" };
+    return { dataUrl: png, format: "PNG" };
+  } catch { return null; }
+}
 type FetchLike = (url: string, init?: { signal?: AbortSignal }) => Promise<{ ok: boolean; headers: { get(n: string): string | null }; blob(): Promise<Blob> }>;
 
-const toDataUrl = (blob: Blob) =>
-  new Promise<string>((res, rej) => { const fr = new FileReader(); fr.onload = () => res(String(fr.result)); fr.onerror = () => rej(fr.error); fr.readAsDataURL(blob); });
-
 /** One export run: each crest URL is fetched at most once; any failure (timeout, HTTP, type) = null. */
-export function createPdfRun(opts: { timeoutMs?: number; fetchImpl?: FetchLike } = {}) {
+export function createPdfRun(opts: { timeoutMs?: number; fetchImpl?: FetchLike; process?: (b: Blob) => Promise<CrestImage | null> } = {}) {
+  const proc = opts.process ?? ((b: Blob) => processCrest(b));
   const cache = new Map<string, Promise<CrestImage | null>>();
   const timeoutMs = opts.timeoutMs ?? CREST_FETCH_TIMEOUT_MS;
   const doFetch: FetchLike = opts.fetchImpl ?? ((u, i) => fetch(u, i as RequestInit));
@@ -40,9 +81,8 @@ export function createPdfRun(opts: { timeoutMs?: number; fetchImpl?: FetchLike }
               const res = await doFetch(u, ctl ? { signal: ctl.signal } : undefined);
               if (!res.ok) return null;
               const type = (res.headers.get("content-type") ?? "").toLowerCase();
-              const format = type.includes("png") ? "PNG" : type.includes("jpeg") || type.includes("jpg") ? "JPEG" : null;
-              if (!format) return null;
-              return { dataUrl: await toDataUrl(await res.blob()), format } as CrestImage;
+              if (!(type.includes("png") || type.includes("jpeg") || type.includes("jpg"))) return null;
+              return await proc(await res.blob());
             })(),
             timeout,
           ]);
@@ -73,27 +113,28 @@ export function drawBrandHeader(doc: jsPDF, o: BrandHeaderOpts): number {
   doc.setFillColor(...PRINT_NAVY);
   doc.rect(0, 0, pageW, 6, "F"); // slim navy band edge
   let x = m;
+  const top = 20; // crest box top; text block centred on it
   if (o.crest) {
     try {
       const p = doc.getImageProperties(o.crest.dataUrl);
-      const s = 64 / Math.max(p.width || 1, p.height || 1);
+      const s = CREST_PT / Math.max(p.width || 1, p.height || 1);
       const w = (p.width || 1) * s, h = (p.height || 1) * s;
-      doc.addImage(o.crest.dataUrl, o.crest.format, m + (64 - w) / 2, 22 + (64 - h) / 2, w, h);
-      x = m + 80;
+      doc.addImage(o.crest.dataUrl, o.crest.format, m + (CREST_PT - w) / 2, top + (CREST_PT - h) / 2, w, h, undefined, "FAST");
+      x = m + CREST_PT + 14;
     } catch { /* bad image: omit, keep the rest */ }
   }
   const name = docTitle({ lodgeName: o.identity.lodgeName, lodgeNumber: "" });
   const sub = docSubtitle(o.identity);
-  if (name) { doc.setFont("times", "bold"); doc.setFontSize(20); doc.setTextColor(...PRINT_NAVY); doc.text(name, x, 42); }
-  if (sub) { doc.setFont("helvetica", "normal"); doc.setFontSize(9); doc.setTextColor(...PRINT_MUTED); doc.text(sub, x, 56); }
+  if (name) { doc.setFont("times", "bold"); doc.setFontSize(20); doc.setTextColor(...PRINT_NAVY); doc.text(name, x, 50); }
+  if (sub) { doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(...PRINT_MUTED); doc.text(sub, x, 63); }
   doc.setFont("times", "italic"); doc.setFontSize(13); doc.setTextColor(...PRINT_GOLD_DARK);
-  doc.text(o.title, x, 76);
+  doc.text(o.title, x, 88);
   doc.setFont("helvetica", "normal"); doc.setFontSize(9); doc.setTextColor(...PRINT_INK);
-  if (o.periodLine) doc.text(o.periodLine, x, 92);
-  if (o.rightLine) doc.text(o.rightLine, pageW - m, 92, { align: "right" });
+  if (o.periodLine) doc.text(o.periodLine, x, 104);
+  if (o.rightLine) doc.text(o.rightLine, pageW - m, 104, { align: "right" });
   doc.setDrawColor(...PRINT_GOLD); doc.setLineWidth(1.5);
-  doc.line(m, 106, pageW - m, 106); // gold accent rule
-  return 122;
+  doc.line(m, HEADER_RULE_Y, pageW - m, HEADER_RULE_Y); // gold accent rule
+  return HEADER_START_Y;
 }
 
 /** Navy section heading in serif (no filled band). Returns next y. */

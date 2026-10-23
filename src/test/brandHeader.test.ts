@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from "vitest";
 import fs from "fs";
 import { brandHeaderLines } from "../../supabase/functions/_shared/transactional-email-templates/_brand";
 import { resolveLodgeSettings } from "../../supabase/functions/_shared/lodgeSettingsResolve";
-import { createPdfRun, drawBrandHeader, drawBrandFooter } from "@/lib/pdfBrand";
+import { createPdfRun, drawBrandHeader, drawBrandFooter, processCrest, crestTargetSize } from "@/lib/pdfBrand";
 import { BLANK_DOC_IDENTITY } from "@/lib/docIdentity";
 
 const ID = { ...BLANK_DOC_IDENTITY, lodgeName: "Example Lodge", lodgeNumber: "1234", provinceName: "Province of Testshire" };
@@ -30,7 +30,7 @@ describe("email brand header lines", () => {
 describe("PDF crest loader", () => {
   it("fetches once per run (cached)", async () => {
     const f = vi.fn(async () => okRes());
-    const run = createPdfRun({ fetchImpl: f as any });
+    const run = createPdfRun({ fetchImpl: f as any, process: async () => ({ dataUrl: "data:image/png;base64,AA==", format: "PNG" }) });
     const a = await run.crest("https://cdn.example.test/c.png");
     const b = await run.crest("https://cdn.example.test/c.png");
     expect(a?.format).toBe("PNG");
@@ -63,13 +63,15 @@ describe("PDF brand header", () => {
     expect(calls.some((c) => c.fn === "addImage")).toBe(false);
     const texts = calls.filter((c) => c.fn === "text").map((c) => c.args[0]);
     expect(texts).toEqual(expect.arrayContaining(["Example Lodge", "No. 1234  —  Province of Testshire", "Trial Balance", "As at 30 Sep 2026"]));
-    expect(y).toBeGreaterThan(106);
+    expect(y).toBe(148);
   });
   it("with crest: image drawn and text moves right of it", () => {
     const { doc, calls } = mockDoc();
     drawBrandHeader(doc, { identity: ID, crest: { dataUrl: "data:image/png;base64,AA==", format: "PNG" }, title: "Trial Balance" });
     expect(calls.some((c) => c.fn === "addImage")).toBe(true);
-    expect(calls.find((c) => c.fn === "text" && c.args[0] === "Example Lodge")!.args[1]).toBe(120);
+    expect(calls.find((c) => c.fn === "text" && c.args[0] === "Example Lodge")!.args[1]).toBe(154);
+    const img = calls.find((c) => c.fn === "addImage")!.args;
+    expect([img[4], img[5]]).toEqual([100, 100]);
   });
   it("footer on every page with lodge title and page count", () => {
     const { doc, calls } = mockDoc();
@@ -90,5 +92,33 @@ describe("pilot files carry no typed crest or host literal", () => {
   for (const f of PILOT) it(f, () => {
     const bad = fs.readFileSync(f, "utf8").split("\n").filter((l) => BANNED.test(l));
     expect(bad).toEqual([]);
+  });
+});
+
+describe("crest processing", () => {
+  const canvas = (png = "data:image/png;base64,LONGLONGLONG", jpg = "data:image/jpeg;base64,SHORT") => {
+    const ops: string[] = [];
+    const ctx: any = { set fillStyle(v: string) { ops.push(`fill:${v}`); }, fillRect: () => ops.push("fillRect"), drawImage: (_b: unknown, _x: number, _y: number, w: number, h: number) => ops.push(`draw:${w}x${h}`) };
+    let size = "";
+    return { ops, get size() { return size; }, deps: { decode: async () => ({ width: 1006, height: 1006 }), createCanvas: (w: number, h: number) => { size = `${w}x${h}`; return { width: w, height: h, getContext: () => ctx, toDataURL: (t: string) => (t === "image/png" ? png : jpg) }; } } };
+  };
+  it("downscales to 400px long side, never upscales", () => {
+    expect(crestTargetSize(1006, 1006)).toEqual({ width: 400, height: 400 });
+    expect(crestTargetSize(1000, 500)).toEqual({ width: 400, height: 200 });
+    expect(crestTargetSize(200, 100)).toEqual({ width: 200, height: 100 });
+  });
+  it("flattens onto white before drawing and keeps the smaller encoding", async () => {
+    const c = canvas();
+    const out = await processCrest(new Blob([]), c.deps as any);
+    expect(c.size).toBe("400x400");
+    expect(c.ops).toEqual(["fill:#ffffff", "fillRect", "draw:400x400"]);
+    expect(out?.format).toBe("JPEG");
+    const c2 = canvas("data:image/png;base64,S", "data:image/jpeg;base64,MUCHLONGER");
+    expect((await processCrest(new Blob([]), c2.deps as any))?.format).toBe("PNG");
+  });
+  it("any failure gives null", async () => {
+    expect(await processCrest(new Blob([]), { decode: async () => { throw new Error("bad"); }, createCanvas: () => { throw new Error(); } } as any)).toBeNull();
+    const c = canvas("data:,", "data:,");
+    expect(await processCrest(new Blob([]), c.deps as any)).toBeNull();
   });
 });
