@@ -11,8 +11,9 @@ import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors'
 import { sendTransactionalEmail } from '../_shared/send-email.ts'
 import { loadLodgeSettings } from "../_shared/lodgeSettings.ts";
 
-let SITE_URL = 'https://weybridgelodge.org.uk'
-let PORTAL_URL = `${SITE_URL}/members/admin/returns`
+// Site address from contacts.site_url only; blank = no link.
+let SITE_URL = ''
+let PORTAL_URL: string | undefined
 
 const TYPE_LABELS: Record<string, string> = {
   form_p: 'Form P',
@@ -60,8 +61,8 @@ const DEFAULT_LEAD_DAYS = 14
 const MAX_LEAD_DAYS = 3650
 
 Deno.serve(async (req) => {
-  SITE_URL = (await loadLodgeSettings()).siteUrl
-  PORTAL_URL = `${SITE_URL}/members/admin/returns`
+  SITE_URL = (await loadLodgeSettings()).configuredSiteUrl
+  PORTAL_URL = SITE_URL ? `${SITE_URL}/members/admin/returns` : undefined
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }

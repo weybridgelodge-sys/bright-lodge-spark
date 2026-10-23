@@ -17,8 +17,9 @@ import { computeCheckInFlags } from '../_shared/almonerCheckIn.ts'
 import { isDigestDay, digestWindowStart, datesBetween, addDays } from '../_shared/almonerDigestSchedule.ts'
 import { loadLodgeSettings } from "../_shared/lodgeSettings.ts";
 
-let SITE_URL = 'https://weybridgelodge.org.uk'
-let PORTAL_URL = `${SITE_URL}/members/almoner`
+// Site address from contacts.site_url only; blank = no link.
+let SITE_URL = ''
+let PORTAL_URL: string | undefined
 
 
 const displayName = (m: any): string => {
@@ -29,8 +30,8 @@ const displayName = (m: any): string => {
 }
 
 Deno.serve(async (req) => {
-  SITE_URL = (await loadLodgeSettings()).siteUrl
-  PORTAL_URL = `${SITE_URL}/members/almoner`
+  SITE_URL = (await loadLodgeSettings()).configuredSiteUrl
+  PORTAL_URL = SITE_URL ? `${SITE_URL}/members/almoner` : undefined
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }

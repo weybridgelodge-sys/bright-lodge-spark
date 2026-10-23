@@ -24,7 +24,7 @@ export const LODGE_FALLBACK = {
   installationReturnFile: "Installation-Return-6787-{year}",
 } as const;
 
-export type LodgeSettings = { -readonly [K in keyof typeof LODGE_FALLBACK]: string } & { bookingContactEmail: string; bookingContactOffice: string };
+export type LodgeSettings = { -readonly [K in keyof typeof LODGE_FALLBACK]: string } & { bookingContactEmail: string; bookingContactOffice: string; /** site_url as saved, "" when not set (no fallback). */ configuredSiteUrl: string };
 
 type Row = Record<string, string | null | undefined> | null | undefined;
 /** unit_settings rows keyed by setting key. */
@@ -43,6 +43,7 @@ export function resolveLodgeSettings(row: Row, us?: UnitSettingsMap, officers?: 
   });
   return {
     siteUrl: pick(row?.site_url, f.siteUrl).replace(/\/+$/, ""),
+    configuredSiteUrl: pick(row?.site_url, "").replace(/\/+$/, ""),
     senderName: pick(row?.sender_name, f.senderName),
     formalSenderName: pick(row?.formal_sender_name, f.formalSenderName),
     secretaryEmail: pick(row?.secretary_email, f.secretaryEmail),

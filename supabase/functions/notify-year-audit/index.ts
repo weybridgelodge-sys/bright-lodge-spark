@@ -13,10 +13,11 @@ const corsHeaders = {
 };
 const json = (b: unknown, status = 200) =>
   new Response(JSON.stringify(b), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-let URL_BASE = "https://weybridgelodge.org.uk";
+// Site address from contacts.site_url only; blank = no link.
+let URL_BASE = "";
 
 Deno.serve(async (req) => {
-  URL_BASE = (await loadLodgeSettings()).siteUrl;
+  URL_BASE = (await loadLodgeSettings()).configuredSiteUrl;
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   try {
     const URL_ = Deno.env.get("SUPABASE_URL")!;
@@ -69,7 +70,7 @@ Deno.serve(async (req) => {
         idempotencyKey: `year-audit-${a.id}-r${a.round_number}-${kind}-${ap.member_id}`,
         templateData: {
           kind, yearLabel, yearEnd, round: a.round_number, actor, note, office: OFFICE[ap.position_key],
-          url: kind === "review_needed" ? `${URL_BASE}/members` : `${URL_BASE}/members/admin/treasurer`,
+          url: !URL_BASE ? undefined : kind === "review_needed" ? `${URL_BASE}/members` : `${URL_BASE}/members/admin/treasurer`,
         },
       });
       if (res.ok) sent++; else failures.push(email);
