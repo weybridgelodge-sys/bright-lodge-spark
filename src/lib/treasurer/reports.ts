@@ -143,6 +143,7 @@ const pageNo = (doc: jsPDF) => (doc as any).internal.getCurrentPageInfo().pageNu
 export function measureTableHeight(doc: jsPDF, opts: Record<string, any>): number {
   const w = doc.internal.pageSize.getWidth();
   const scratch = new jsPDF({ unit: "pt", format: [w, 14000] });
+  (scratch as any).__measureOnly = true; // never saved; lets content tests ignore the dry run
   const body = opts.pageBreak === "avoid" ? opts.body : (opts.body ?? []).slice(0, 2);
   const foot = opts.pageBreak === "avoid" ? opts.foot : undefined;
   autoTable(scratch, { ...opts, body, foot, startY: 0, pageBreak: "auto", margin: { ...(opts.margin ?? {}), top: 0, bottom: 0 }, didDrawCell: undefined, didDrawPage: undefined });

@@ -28,6 +28,7 @@ vi.mock("jspdf-autotable", async (orig) => {
   const cell = (c: any) => (c && typeof c === "object" ? String(c.content ?? "") : String(c ?? ""));
   return {
     default: (doc: any, o: any) => {
+      if (doc.__measureOnly) return real(doc, o); // height dry-run on a scratch doc, not output
       for (const part of ["head", "body", "foot"]) for (const row of o[part] ?? []) rec.items.push(`${part}:${row.map(cell).join(" | ")}`);
       rec.inTable++; try { real(doc, o); } finally { rec.inTable--; }
     },
