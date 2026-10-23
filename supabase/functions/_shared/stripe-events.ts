@@ -125,6 +125,7 @@ export async function sendEventBookingEmails(sb: any, bookingId: string, stage: 
   const order = b.subtotal_pence ?? b.total_pence;
   let link: string | null = null;
   if ((deposit && (b.balance_due_pence ?? 0) > 0) || CUSTOMER_ONLY.includes(stage)) link = balanceUrl(await ensureBalanceToken(sb, b.id));
+  const lodge = await loadLodgeSettings();
   const data = {
     stage,
     reminderKind: opts.reminderKind ?? null,
