@@ -1,3 +1,4 @@
+import { loadDocIdentity, docTitle, docSubtitle, docFileName, docGroupName } from "@/lib/docIdentity";
 import { masonicYearStartSync, masonicYearBoundsSync } from "@/lib/masonicYear";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -30,6 +31,7 @@ export async function buildWorkingGroupsActivityPdf() {
   const [items, groups] = await Promise.all([listAllReportItemsInYear(start, end), listGroups()]);
 
   const doc = new jsPDF({ unit: "pt", format: "a4" });
+  const ID = await loadDocIdentity(); const LT = docTitle(ID);
   const pageW = doc.internal.pageSize.getWidth();
   const pageH = doc.internal.pageSize.getHeight();
   const margin = 40;
@@ -46,7 +48,7 @@ export async function buildWorkingGroupsActivityPdf() {
   } catch { /* ignore */ }
 
   // Branded header: white background, centered navy crest, navy title,
-  // gold "No. 6787 — Province of Surrey" subtitle, gold hairline divider.
+  // gold "No. <number> — <province>" subtitle, gold hairline divider.
   const crestSize = 72;
   const crestX = (pageW - crestSize) / 2;
   const crestY = 32;
@@ -55,12 +57,12 @@ export async function buildWorkingGroupsActivityPdf() {
   doc.setTextColor(...NAVY);
   doc.setFont("times", "bold");
   doc.setFontSize(22);
-  doc.text("Weybridge Lodge", pageW / 2, crestY + crestSize + 24, { align: "center" });
+  doc.text(ID.lodgeName, pageW / 2, crestY + crestSize + 24, { align: "center" });
 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(9);
   doc.setTextColor(...GOLD);
-  doc.text("NO. 6787  —  PROVINCE OF SURREY", pageW / 2, crestY + crestSize + 40, {
+  doc.text(docSubtitle(ID).toUpperCase(), pageW / 2, crestY + crestSize + 40, {
     align: "center",
     charSpace: 2,
   });
@@ -121,10 +123,10 @@ export async function buildWorkingGroupsActivityPdf() {
     doc.setDrawColor(...GOLD); doc.setLineWidth(0.6);
     doc.line(margin, pageH - 36, pageW - margin, pageH - 36);
     doc.setFont("helvetica", "italic"); doc.setFontSize(8); doc.setTextColor(...MUTED);
-    doc.text("Weybridge Lodge — Working Groups Activity Report.", margin, pageH - 22);
+    doc.text(`${ID.lodgeName ? ID.lodgeName + " — " : ""}Working Groups Activity Report.`, margin, pageH - 22);
     doc.text(`Page ${i} of ${pageCount}`, pageW - margin, pageH - 22, { align: "right" });
     doc.setTextColor(...NAVY); doc.setFont("times", "bold");
-    doc.text("Weybridge Lodge No. 6787", pageW / 2, pageH - 22, { align: "center" });
+    doc.text(LT, pageW / 2, pageH - 22, { align: "center" });
   }
   return doc;
 }

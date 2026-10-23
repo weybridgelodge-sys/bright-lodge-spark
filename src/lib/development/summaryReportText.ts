@@ -12,7 +12,7 @@ const list = (items: { name: string; detail?: string }[], max = 8) => {
 
 export function buildSummaryReportText(d: SummaryReportData, mentorStatement: string): string {
   const lines: string[] = [];
-  lines.push(`WEYBRIDGE LODGE No. 6787 — LODGE DEVELOPMENT SUMMARY REPORT`);
+  lines.push(`${d.lodgeTitle ? d.lodgeTitle.toUpperCase() + " — " : ""}LODGE DEVELOPMENT SUMMARY REPORT`);
   lines.push(`Period: ${fmtDate(d.period.start)} – ${fmtDate(d.period.end)} (${d.period.label})`);
   lines.push(`Generated: ${fmtDate(d.generatedAt)}`);
   lines.push("");

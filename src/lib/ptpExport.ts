@@ -32,6 +32,8 @@ export function buildPtpRows(
   rowsRaw: PtpAttendanceRow[],
   profilesMap: Map<string, PtpProfileLike>,
   bookingsMap: Map<string, any>,
+  /** This lodge's group label (docGroupName); "" when the lodge record is blank. */
+  memberGroup = "",
 ): Array<Record<string, string>> {
   const cleanDiet = (s: string) => (/^none$/i.test(s.trim()) ? "" : s.trim());
 
@@ -55,7 +57,7 @@ export function buildPtpRows(
       title = (p?.title ?? "").trim();
       first = (p?.preferred_name ?? p?.first_name ?? "").trim();
       last = (p?.last_name ?? "").trim();
-      group = "Weybridge 6787";
+      group = memberGroup;
     } else if (guest) {
       const name = String(guest?.name ?? r.visitor_name ?? "").trim();
       const parts = name.split(/\s+/);

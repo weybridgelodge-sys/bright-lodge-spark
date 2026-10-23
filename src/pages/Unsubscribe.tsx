@@ -4,6 +4,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
 import SEO from "@/components/SEO";
+import { useUnitProfile } from "@/lib/unitProfile";
 import { Button } from "@/components/ui/button";
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
@@ -12,6 +13,7 @@ const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as strin
 type State = "loading" | "valid" | "invalid" | "used" | "confirming" | "success" | "error";
 
 const Unsubscribe = () => {
+  const { lodgeName } = useUnitProfile();
   const [params] = useSearchParams();
   const token = params.get("token") || "";
   const status = params.get("status") || "";
@@ -90,7 +92,7 @@ const Unsubscribe = () => {
 
   return (
     <div className="min-h-screen">
-      <SEO title="Unsubscribe" description="Manage your email subscription for Weybridge Lodge." canonical="/unsubscribe" />
+      <SEO title="Unsubscribe" description={`Manage your email subscription for ${lodgeName || "the Lodge"}.`} canonical="/unsubscribe" />
       <Header />
       <main>
         <PageHeader title="Unsubscribe" subtitle="Manage your email preferences" />

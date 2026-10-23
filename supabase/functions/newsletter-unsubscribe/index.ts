@@ -7,7 +7,8 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "GET, OPTIONS",
 };
 
-let SITE_UNSUBSCRIBE_URL = "https://weybridgelodge.org.uk/unsubscribe";
+// From contacts.site_url only; blank = plain reply instead of a redirect.
+let SITE_UNSUBSCRIBE_URL = "";
 
 function buildRedirectHeaders(location: string) {
   const headers = new Headers();
@@ -18,6 +19,10 @@ function buildRedirectHeaders(location: string) {
 }
 
 function redirectToStatus(status: "success" | "invalid" | "not-found") {
+  if (!SITE_UNSUBSCRIBE_URL) {
+    const text = status === "success" ? "You have been unsubscribed." : "This unsubscribe link is not valid.";
+    return new Response(text, { status: status === "success" ? 200 : 400, headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" } });
+  }
   const url = new URL(SITE_UNSUBSCRIBE_URL);
   url.searchParams.set("status", status);
   return new Response(null, {
@@ -32,7 +37,8 @@ const supabase = createClient(
 );
 
 Deno.serve(async (req) => {
-  SITE_UNSUBSCRIBE_URL = `${(await loadLodgeSettings()).siteUrl}/unsubscribe`;
+  const site = (await loadLodgeSettings()).configuredSiteUrl;
+  SITE_UNSUBSCRIBE_URL = site ? `${site}/unsubscribe` : "";
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   const url = new URL(req.url);
   const token = url.searchParams.get("token");

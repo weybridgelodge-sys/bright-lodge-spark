@@ -4,6 +4,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
+import { useUnitProfile } from "@/lib/unitProfile";
 import { supabase } from "@/integrations/supabase/client";
 import { CheckCircle2, Clock, AlertCircle } from "lucide-react";
 import { useBookingDetails } from "@/lib/bookingDetails";
@@ -12,6 +13,7 @@ import { classifyReturn, EXPIRED_SESSION_MESSAGE } from "@/lib/checkoutReturnSta
 type Status = "loading" | "paid" | "pending" | "waitlisted" | "expired" | "error";
 
 const CheckoutReturn = () => {
+  const { lodgeName } = useUnitProfile();
   const [params] = useSearchParams();
   const sessionId = params.get("session_id");
   const [status, setStatus] = useState<Status>("loading");
@@ -59,7 +61,7 @@ const CheckoutReturn = () => {
 
   return (
     <div className="min-h-screen">
-      <SEO title="Booking Confirmation" description="Confirmation of your Weybridge Lodge dining or event booking — view your reference and next steps." canonical="/checkout/return" />
+      <SEO title="Booking Confirmation" description={`Confirmation of your ${lodgeName || "Lodge"} dining or event booking — view your reference and next steps.`} canonical="/checkout/return" />
       <Header />
       <main className="bg-navy-gradient py-24 min-h-[60vh]">
         <div className="container mx-auto px-4 max-w-2xl">

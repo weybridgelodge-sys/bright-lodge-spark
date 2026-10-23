@@ -1,3 +1,4 @@
+import { loadDocIdentity, docTitle, docSubtitle, docFileName, docGroupName } from "@/lib/docIdentity";
 import { masonicYearStartSync, masonicYearBoundsSync } from "@/lib/masonicYear";
 // Aggregator: pulls together a Lodge Development Summary Report for a date range.
 import { supabase } from "@/integrations/supabase/client";
@@ -17,6 +18,9 @@ export type SummaryPeriod = { start: string; end: string; label: string };
 export type FlaggedMember = { id: string; name: string; detail?: string };
 
 export type SummaryReportData = {
+  /** Lodge name/title from the lodge record; "" when not set. */
+  lodgeName: string;
+  lodgeTitle: string;
   period: SummaryPeriod;
   previousPeriod: SummaryPeriod;
   generatedAt: string;
@@ -381,7 +385,10 @@ export async function buildSummaryReport(period: SummaryPeriod): Promise<Summary
   const raTrend: "up" | "down" | "flat" =
     exaltedInPeriod > exaltedPrevious ? "up" : exaltedInPeriod < exaltedPrevious ? "down" : "flat";
 
+  const ident = await loadDocIdentity();
   const data: SummaryReportData = {
+    lodgeName: ident.lodgeName,
+    lodgeTitle: docTitle(ident),
     period,
     previousPeriod,
     generatedAt: new Date().toISOString(),
@@ -455,7 +462,7 @@ export function buildExecSummary(d: SummaryReportData): string {
   const bits: string[] = [];
   const noviceN = d.membership.novice;
   bits.push(
-    `Weybridge Lodge currently has ${noviceN} member${noviceN === 1 ? "" : "s"} in formal mentoring, with an average checklist completion of ${d.mentoring.avgCompletionPct}%.`
+    `${d.lodgeName || "The Lodge"} currently has ${noviceN} member${noviceN === 1 ? "" : "s"} in formal mentoring, with an average checklist completion of ${d.mentoring.avgCompletionPct}%.`
   );
   const redV = `${d.ritual.red} ${d.ritual.red === 1 ? "is" : "are"} unrecorded`;
   const amberV = `${d.ritual.amber} ${d.ritual.amber === 1 ? "is" : "are"} amber single-point-of-failure risk${d.ritual.amber === 1 ? "" : "s"}`;

@@ -4,6 +4,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
 import SEO from "@/components/SEO";
+import { useUnitProfile } from "@/lib/unitProfile";
 import { Button } from "@/components/ui/button";
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
@@ -41,6 +42,7 @@ const SubscribeAgain = () => (
 );
 
 const NewsletterConfirm = () => {
+  const { lodgeName } = useUnitProfile();
   const [params] = useSearchParams();
   const token = params.get("token") || "";
   const [state, setState] = useState<State>("loading");
@@ -56,7 +58,7 @@ const NewsletterConfirm = () => {
 
   return (
     <div className="min-h-screen">
-      <SEO title="Confirm your subscription" description="Confirm your subscription to news from Weybridge Lodge." canonical="/newsletter/confirm" noindex />
+      <SEO title="Confirm your subscription" description={`Confirm your subscription to news from ${lodgeName || "the Lodge"}.`} canonical="/newsletter/confirm" noindex />
       <Header />
       <main id="main-content">
         <PageHeader title="Newsletter" subtitle="Confirm your subscription" />

@@ -1,3 +1,4 @@
+import { loadDocIdentity, docTitle, docSubtitle, docFileName, docGroupName } from "@/lib/docIdentity";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { saveJsPdf } from "./nativeDownload";
@@ -35,9 +36,7 @@ function periodMovement(bundle: KpiBundle, period?: MovementPeriod | null) {
 const periodTitle = (period?: MovementPeriod | null) =>
   period ? `${period.label}: ${period.rangeLabel}` : "rolling 12 months";
 
-const LODGE = "Weybridge Lodge No. 6787";
-
-function header(doc: jsPDF, title: string) {
+function header(doc: jsPDF, title: string, LODGE: string) {
   doc.setFont("helvetica", "bold");
   doc.setFontSize(14);
   doc.text(LODGE, 14, 14);
@@ -78,7 +77,7 @@ export async function exportVoReport(bundle: KpiBundle, period?: MovementPeriod 
   const mv = periodMovement(bundle, period);
   const ra = uglePortal(bundle.members);
 
-  header(doc, "Membership Snapshot — Visiting Officer Report");
+  header(doc, "Membership Snapshot — Visiting Officer Report", docTitle(await loadDocIdentity()));
 
   autoTable(doc, {
     startY: 32,

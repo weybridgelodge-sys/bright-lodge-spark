@@ -1,3 +1,4 @@
+import { loadDocIdentity, docTitle, docSubtitle, docFileName, docGroupName } from "@/lib/docIdentity";
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -150,7 +151,7 @@ export default function YearEndTab({ canEdit, onOpenTab }: { canEdit: boolean; o
     setPackBusy(year);
     try {
       const a = approvals.get(year);
-      const name = `weybridge-annual-accounts-${year}-${year + 1}`;
+      const name = docFileName(await loadDocIdentity(), `annual-accounts-${year}-${year + 1}`);
       if (a?.status === "approved" && a.certified_pack_path) {
         const { data, error } = await supabase.storage.from("lodge-docs").download(a.certified_pack_path);
         if (error) throw error;

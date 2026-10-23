@@ -2,8 +2,11 @@ import { useEffect, useState } from "react";
 import { useParams, useSearchParams, Link } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import SEO from "@/components/SEO";
+import { useUnitProfile } from "@/lib/unitProfile";
+import { EmailText } from "@/components/ui/email-text";
 
 export default function SummonsRedirect() {
+  const { secretaryEmail } = useUnitProfile();
   const { meetingNumber } = useParams();
   const [params] = useSearchParams();
   const key = params.get("k") ?? "";
@@ -51,10 +54,15 @@ export default function SummonsRedirect() {
             <h1 className="font-playfair text-2xl text-gold">Summons unavailable</h1>
             <p className="text-primary-foreground/80">{error}</p>
             <p className="text-sm text-primary-foreground/60">
-              If this keeps happening, please contact the Secretary at{" "}
-              <a className="text-gold underline" href="mailto:secretary@weybridgelodge.org.uk">
-                secretary@weybridgelodge.org.uk
-              </a>
+              If this keeps happening, please contact the Secretary
+              {secretaryEmail ? (
+                <>
+                  {" "}at{" "}
+                  <a className="text-gold underline" href={`mailto:${secretaryEmail}`}>
+                    <EmailText email={secretaryEmail} />
+                  </a>
+                </>
+              ) : null}
               .
             </p>
             <Link to="/" className="inline-block text-gold underline">

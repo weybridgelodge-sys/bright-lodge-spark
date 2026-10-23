@@ -29,8 +29,8 @@ describe("province return destination (Unit Setup > Province)", () => {
     }
   });
   it("confirmation still shows the destination before sending", () => {
-    expect(read("src/pages/members/admin/ProvincialReturn.tsx")).toMatch(/<strong>To:<\/strong> <span className="break-all">\{pgsEmail\}/);
-    expect(read("src/pages/members/admin/InstallationReturn.tsx")).toContain("<strong>To:</strong> {provinceEmail}");
+    expect(read("src/pages/members/admin/ProvincialReturn.tsx")).toContain("<strong>To:</strong> <EmailText email={pgsEmail} />");
+    expect(read("src/pages/members/admin/InstallationReturn.tsx")).toContain("<strong>To:</strong> <EmailText email={provinceEmail} />");
   });
   it("To is never also a Cc", () => {
     const r = pickReturnCc("pgs@example.org", [{ office: "secretary", memberId: "a", roleEmail: "PGS@example.org", memberEmail: null }, { office: "worshipful_master", memberId: "b", roleEmail: null, memberEmail: "wm@example.org" }]);

@@ -17,8 +17,9 @@ import { sendTransactionalEmail } from '../_shared/send-email.ts'
 import { findMissing, idempotencyKey, isSendWindow } from './logic.ts'
 import { loadLodgeSettings } from "../_shared/lodgeSettings.ts";
 
-let SITE_URL = 'https://weybridgelodge.org.uk'
-let ADMIN_URL = `${SITE_URL}/members/admin`
+// Site address from contacts.site_url only; blank = no link.
+let SITE_URL = ''
+let ADMIN_URL: string | undefined
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
@@ -35,8 +36,8 @@ const londonToday = (): string =>
   }).format(new Date())
 
 Deno.serve(async (req) => {
-  SITE_URL = (await loadLodgeSettings()).siteUrl
-  ADMIN_URL = `${SITE_URL}/members/admin`
+  SITE_URL = (await loadLodgeSettings()).configuredSiteUrl
+  ADMIN_URL = SITE_URL ? `${SITE_URL}/members/admin` : undefined
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders })
 
   const url = new URL(req.url)
@@ -114,7 +115,7 @@ Deno.serve(async (req) => {
         members: missing.map((m) => ({
           name: m.name,
           initiationLabel: m.initiationLabel,
-          url: `${ADMIN_URL}#member-${m.id}`,
+          url: ADMIN_URL ? `${ADMIN_URL}#member-${m.id}` : undefined,
         })),
         adminUrl: ADMIN_URL,
       },

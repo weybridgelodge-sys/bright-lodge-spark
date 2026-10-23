@@ -1,3 +1,4 @@
+import { loadDocIdentity, docTitle, docSubtitle, docFileName, docGroupName } from "@/lib/docIdentity";
 import { nextMeetingNotice, applyBallotOnly, isBallotOnlyTicked } from "@/lib/summonsNotices";
 import { useEffect, useMemo, useState } from "react";
 import MembersLayout from "@/components/members/MembersLayout";
@@ -1406,11 +1407,12 @@ function VisitorEmailDialog(props: {
     const endIso = new Date(startDate.getTime() + 3 * 60 * 60 * 1000).toISOString();
     const venue = template.venue_address || "Masonic Centre, Guildford";
     const title = `${lodgeTitle({ lodgeName: template.lodge_name ?? "", lodgeNumber: template.lodge_number ?? "" }) || "Lodge"} — ${summons.meeting_type || "Meeting"} — ${meetingDateLabel}`;
+    const ident = await loadDocIdentity();
     const ics = generateICS({
       title, location: venue, startTime: startIso, endTime: endIso,
       description: "Summons for the meeting is attached.",
-    });
-    const ics_filename = icsFilename(title);
+    }, ident);
+    const ics_filename = icsFilename(title, ident.lodgeName);
     const id = await generatePdf("email");
     if (!id) return null;
     return {

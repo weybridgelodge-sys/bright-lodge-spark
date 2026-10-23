@@ -1,3 +1,4 @@
+import { loadDocIdentity, docTitle, docSubtitle, docFileName, docGroupName } from "@/lib/docIdentity";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { assetUrl } from "@/lib/assetUrl";
@@ -11,6 +12,7 @@ const MUTED: [number, number, number] = [110, 110, 120];
 
 export async function buildGapReportPdf(matrix: SkillsMatrix) {
   const doc = new jsPDF({ unit: "pt", format: "a4" });
+  const LT = docTitle(await loadDocIdentity());
   const pageW = doc.internal.pageSize.getWidth();
   const pageH = doc.internal.pageSize.getHeight();
   const margin = 40;
@@ -30,7 +32,7 @@ export async function buildGapReportPdf(matrix: SkillsMatrix) {
   doc.setFillColor(...GOLD); doc.rect(0, 110, pageW, 3, "F");
   if (logoData) { try { doc.addImage(logoData, "PNG", margin, 22, 66, 66); } catch {} }
   doc.setTextColor(255, 255, 255); doc.setFont("times", "bold"); doc.setFontSize(20);
-  doc.text("Weybridge Lodge No. 6787", margin + 80, 50);
+  doc.text(LT, margin + 80, 50);
   doc.setFont("times", "italic"); doc.setFontSize(13); doc.setTextColor(...GOLD);
   doc.text("Lodge Skills Gap Report", margin + 80, 72);
   doc.setFont("helvetica", "normal"); doc.setFontSize(9); doc.setTextColor(230, 230, 235);
@@ -100,7 +102,7 @@ export async function buildGapReportPdf(matrix: SkillsMatrix) {
     doc.text("Confidential — Director of Ceremonies / Worshipful Master only.", margin, pageH - 22);
     doc.text(`Page ${i} of ${pageCount}`, pageW - margin, pageH - 22, { align: "right" });
     doc.setTextColor(...NAVY); doc.setFont("times", "bold");
-    doc.text("Weybridge Lodge No. 6787", pageW / 2, pageH - 22, { align: "center" });
+    doc.text(LT, pageW / 2, pageH - 22, { align: "center" });
   }
   return doc;
 }

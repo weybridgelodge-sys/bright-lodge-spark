@@ -1,3 +1,4 @@
+import { loadDocIdentity, docTitle, docSubtitle, docFileName, docGroupName } from "@/lib/docIdentity";
 import { bookingCreatesRegisterRow } from "../../../../supabase/functions/_shared/pendingBookingExpiry";
 import { fetchProfilesPii } from "@/lib/profilePii";
 import { useEffect, useMemo, useState } from "react";
@@ -258,7 +259,7 @@ export default function FestiveBoardAdmin() {
       for (const b of (bks ?? []) as any[]) bookingsMap.set(b.id, b);
     }
 
-    const rows = buildPtpRows(diningRows, profilesMap, bookingsMap);
+    const rows = buildPtpRows(diningRows, profilesMap, bookingsMap, docGroupName(await loadDocIdentity()));
 
 
     const headers = ["Title", "First Name", "Last Name", "Group", "Meal", "Special req.", "RSVP status"];
