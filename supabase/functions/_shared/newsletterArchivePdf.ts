@@ -120,7 +120,7 @@ export async function buildNewsletterArchivePdf(opts: {
           const limit = opts.imageTimeoutMs ?? IMAGE_FETCH_TIMEOUT_MS;
           let timer: number | undefined;
           const timedOut = new Promise<never>((_, rej) => {
-            timer = setTimeout(() => { ctrl.abort(); rej(new Error(`image fetch timed out after ${limit}ms`)); }, limit) as unknown as number;
+            timer = setTimeout(() => { rej(new Error(`image fetch timed out after ${limit}ms`)); ctrl.abort(); }, limit) as unknown as number;
           });
           let ct = ""; let bytes: Uint8Array;
           try {

@@ -41,7 +41,7 @@ Deno.test("image fetch times out -> [Image unavailable] line, PDF still built", 
   const ms = performance.now() - t0;
   assert(aborted, "fetch aborted");
   assert(ms < 1500, `took ${ms}ms`);
-  assert(JSON.stringify(warns).includes("timed out"));
+  assert(warns.map((w) => String((w as unknown[])[2])).join(" ").includes("timed out"));
 });
 
 Deno.test("default image limit is 10 seconds", async () => {
