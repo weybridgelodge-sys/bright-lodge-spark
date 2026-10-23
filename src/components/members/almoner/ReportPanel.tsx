@@ -13,7 +13,7 @@ import { defaultWidowReportFrom } from "@/lib/widowGifts";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { saveBlob, saveJsPdf } from "@/lib/nativeDownload";
-import { firstWmYearForMember } from "@/data/worshipfulMasters";
+import { pastMasterTerms } from "@/lib/pastMastersRoll";
 import { assetUrl } from "@/lib/assetUrl";
 import logoAsset from "@/assets/weybridge-logo-navy.png.asset.json";
 const logoUrl = assetUrl(logoAsset);
@@ -127,13 +127,6 @@ export default function ReportPanel({ members }: { members: Member[] }) {
       const cur = firstWmByMember.get(t.member_id);
       if (cur == null || t.year_started < cur) firstWmByMember.set(t.member_id, t.year_started);
     }
-    for (const m of members) {
-      const fromRoll = firstWmYearForMember(m.first_name, m.last_name);
-      if (fromRoll != null) {
-        const cur = firstWmByMember.get(m.id);
-        if (cur == null || fromRoll < cur) firstWmByMember.set(m.id, fromRoll);
-      }
-    }
 
     const items: { when: Date; row: LifeEventRow }[] = [];
 
@@ -243,9 +236,10 @@ export default function ReportPanel({ members }: { members: Member[] }) {
         (supabase as any).from("welfare_member_status").select("*").in("status", ["amber", "red"]),
         (supabase as any).from("welfare_life_events").select("*").is("deleted_at", null),
         (supabase as any).from("member_wm_terms").select("member_id,year_started"),
+        (supabase as any).from("past_masters").select("member_id,lodge_year"),
       ]);
 
-      const derivedLife = buildLifeEvents(to, wm.data ?? []);
+      const derivedLife = buildLifeEvents(to, [...(wm.data ?? []), ...pastMasterTerms(pmRoll.data)]);
       const manualLife = (life.data ?? [])
         .filter((e: any) => e.event_type !== "birthday" && e.event_type !== "initiation_anniversary" && e.event_type !== "wm_anniversary")
         .map((e: any) => ({

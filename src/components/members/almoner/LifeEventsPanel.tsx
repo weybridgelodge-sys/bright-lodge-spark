@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Cake, Calendar, Plus, Trash2, X } from "lucide-react";
-import { firstWmYearForMember } from "@/data/worshipfulMasters";
+import { pastMasterTerms } from "@/lib/pastMastersRoll";
 
 type Member = {
   id: string; first_name: string | null; last_name: string | null;
@@ -75,15 +75,17 @@ export default function LifeEventsPanel({ members, userId }: { members: Member[]
   const memberMap = useMemo(() => new Map(members.map((m) => [m.id, m])), [members]);
 
   const load = async () => {
-    const [{ data: ev, error: evErr }, { data: wm, error: wmErr }] = await Promise.all([
+    const [{ data: ev, error: evErr }, { data: wm, error: wmErr }, { data: pm, error: pmErr }] = await Promise.all([
       (supabase as any).from("welfare_life_events")
         .select("*").is("deleted_at", null).order("event_date", { ascending: true }),
       (supabase as any).from("member_wm_terms").select("member_id,year_started"),
+      (supabase as any).from("past_masters").select("member_id,lodge_year"),
     ]);
     if (evErr) { toast.error(evErr.message); return; }
     if (wmErr) { toast.error(wmErr.message); return; }
+    if (pmErr) { toast.error(pmErr.message); return; }
     setEvents(ev ?? []);
-    setWmTerms(wm ?? []);
+    setWmTerms([...(wm ?? []), ...pastMasterTerms(pm)]);
   };
   useEffect(() => { load(); }, []);
 
@@ -95,22 +97,15 @@ export default function LifeEventsPanel({ members, userId }: { members: Member[]
     [events],
   );
 
-  // Earliest WM year per member: from member_wm_terms + historical roll by name match
+  // Earliest WM year per member: member_wm_terms + the Past Masters roll (by member, not name)
   const firstWmByMember = useMemo(() => {
     const map = new Map<string, number>();
     for (const t of wmTerms) {
       const cur = map.get(t.member_id);
       if (cur == null || t.year_started < cur) map.set(t.member_id, t.year_started);
     }
-    for (const m of members) {
-      const fromRoll = firstWmYearForMember(m.first_name, m.last_name);
-      if (fromRoll != null) {
-        const cur = map.get(m.id);
-        if (cur == null || fromRoll < cur) map.set(m.id, fromRoll);
-      }
-    }
     return map;
-  }, [wmTerms, members]);
+  }, [wmTerms]);
 
   const upcoming = useMemo<UpcomingItem[]>(() => {
     const items: UpcomingItem[] = [];
