@@ -47,7 +47,7 @@ export function ordinalDay(n: number): string {
   return `${n}${({ 1: "st", 2: "nd", 3: "rd" } as Record<number, string>)[n % 10] ?? "th"}`;
 }
 
-/** "13th May 2026" from YYYY-MM-DD; "" when blank or invalid. */
+/** "1st March 2020" from YYYY-MM-DD; "" when blank or invalid. */
 export function longDate(iso: string): string {
   const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso ?? "");
   if (!m || +m[2] < 1 || +m[2] > 12) return "";

@@ -31,7 +31,7 @@ export function venueShort(p: Pick<UnitProfile, "venueName" | "venueLines">): st
   return [p.venueName, pc].filter(Boolean).join(", ");
 }
 
-/** Venue address lines without the venue name, joined: "Weybourne House, Hitherbury Close, …". "" when not set. */
+/** Venue address lines without the venue name, joined: "<street>, <town postcode>". "" when not set. */
 export function venueAddress(p: Pick<UnitProfile, "venueName" | "venueLines">): string {
   const parts = p.venueLines.join(" ").split(",").map((x) => x.trim()).filter(Boolean);
   const name = p.venueName.trim().toLowerCase();
