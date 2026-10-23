@@ -123,7 +123,16 @@ const PILOT = [
   "src/lib/charity/annualReportPdf.ts", "src/lib/charity/periodicReportPdf.ts",
   "src/lib/development/pdf.ts", "src/lib/development/gapReportPdf.ts", "src/lib/development/summaryReportPdf.ts", "src/lib/development/activityReportPdf.ts",
   "src/lib/officersProjectionPdf.ts", "src/pages/members/OfficersTracker.tsx",
+  "src/lib/summonsCover.tsx",
 ];
+
+describe("summons cover crest comes only from Unit Setup", () => {
+  const src = fs.readFileSync("src/lib/summonsPdf.tsx", "utf8");
+  it("summons PDF never reads the template logo or its typed default", () => {
+    expect(src).not.toMatch(/LOGO_URL|logo_url\b(?!: string)/);
+    expect(src).not.toMatch(/@\/assets\/|\.asset\.json/);
+  });
+});
 const BANNED = /LOGO_URL|LOGO_WIDTH|LOGO_HEIGHT|crestWrap|LODGE_NAME|@\/assets\/|\.asset\.json|lovable\.app|__l5e|weybridge|6787|Province of Surrey|Guildford|Consecrated 1949|\.org\.uk/i;
 describe("pilot files carry no typed crest or host literal", () => {
   for (const f of PILOT) it(f, () => {

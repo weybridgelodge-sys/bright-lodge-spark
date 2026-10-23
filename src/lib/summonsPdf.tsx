@@ -46,7 +46,6 @@ import {
   splitTwoColumns,
   subLetter,
   resolveAssetUrl,
-  DEFAULT_LOGO_URL,
   DEFAULT_COVER_LEFT_URL,
   DEFAULT_COVER_RIGHT_URL,
 } from "./summons";
@@ -315,7 +314,6 @@ function BoldNameText({
 
 
 export {
-  DEFAULT_LOGO_URL,
   DEFAULT_COVER_LEFT_URL,
   DEFAULT_COVER_RIGHT_URL,
 } from "./summons";
