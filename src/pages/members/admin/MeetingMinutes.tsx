@@ -26,7 +26,7 @@ import { NotebookPen, Plus, Pencil, Trash2, Download, ArrowUp, ArrowDown, X, Che
 import { readFunctionError } from "@/lib/functionError";
 import { masonicYearStart } from "@/lib/loi";
 import { treasurerYearBounds } from "@/lib/treasurer/reports";
-import { reportPdfDoc, reportSection, INK, MUTED, GOLD, NAVY, fmtDate } from "@/lib/treasurer/reports";
+import { reportPdfDoc, reportSection, measureTableHeight, drawTracedTable, INK, MUTED, GOLD, NAVY, fmtDate } from "@/lib/treasurer/reports";
 import { fetchProfilesPii, indexPii } from "@/lib/profilePii";
 import { formatMemberLine, type MemberRow } from "@/lib/summons";
 import autoTable from "jspdf-autotable";
@@ -194,9 +194,10 @@ export async function buildMinutesPdf(row: Row) {
     y += 8;
   };
 
-  const heading = (title: string) => {
+  // A heading always travels with what follows it: by default its first two lines of text.
+  const heading = (title: string, keepWith = 30) => {
     ensure(40);
-    y = reportSection(doc, pageW, margin, y, title);
+    y = reportSection(doc, pageW, margin, y, title, keepWith);
   };
 
   if (row.apologies) {
@@ -214,9 +215,7 @@ export async function buildMinutesPdf(row: Row) {
   }
 
   if ((row.action_items ?? []).length) {
-    heading("Action items");
-    autoTable(doc, {
-      startY: y,
+    const actions = {
       head: [["Task", "Responsible", "Deadline", "Done"]],
       body: row.action_items.map((a) => [a.task, a.responsible, a.deadline, a.done ? "Yes" : "No"]),
       margin: { top: margin, left: margin, right: margin, bottom: 60 },
@@ -225,8 +224,10 @@ export async function buildMinutesPdf(row: Row) {
       alternateRowStyles: { fillColor: [250, 247, 238] },
       theme: "grid",
       columnStyles: { 0: { cellWidth: 250 }, 1: { cellWidth: 110 }, 2: { cellWidth: 90 }, 3: { cellWidth: 50 } },
-      rowPageBreak: "avoid",
-    });
+      rowPageBreak: "avoid" as const,
+    };
+    heading("Action items", measureTableHeight(doc, actions));
+    drawTracedTable(doc, { ...actions, startY: y });
     y = (doc as any).lastAutoTable.finalY + 20;
   }
 
