@@ -478,15 +478,16 @@ export function milestones(
         }
         continue;
       }
+      // Year-only: list as month+year only when the WHOLE month lies inside
+      // the window (a part-month could hide a real day outside it). With no
+      // month rule we show nothing rather than an ambiguous date.
       const month = installMonthFor(y); // 1-12 or null
       if (month) {
         const mStart = new Date(y, month - 1, 1);
         const mEnd = new Date(y, month, 0);
-        if (mEnd >= yearStart && mStart <= yearEnd) {
+        if (mStart >= yearStart && mEnd <= yearEnd) {
           out.push({ member: m, kind: "wm", years: target, date: `${y}-${String(month).padStart(2, "0")}`, precision: "month", label });
         }
-      } else if (y === masonicYearOf(yearStart)) {
-        out.push({ member: m, kind: "wm", years: target, date: String(y), precision: "year", label });
       }
     }
   }
