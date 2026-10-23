@@ -17,7 +17,7 @@ vi.mock("jspdf", async (orig) => {
   function Wrapped(this: any, ...a: any[]) {
     const d = new Real(...a);
     const t = d.text.bind(d);
-    d.text = (s: any, ...r: any[]) => { if (!rec.inTable) (Array.isArray(s) ? s : [s]).forEach((x: any) => rec.items.push(`T:${String(x)}`)); return t(s, ...r); };
+    d.text = (s: any, ...r: any[]) => { if (!rec.inTable && !d.__measureOnly) (Array.isArray(s) ? s : [s]).forEach((x: any) => rec.items.push(`T:${String(x)}`)); return t(s, ...r); };
     return d;
   }
   (Wrapped as any).API = Real.API;
