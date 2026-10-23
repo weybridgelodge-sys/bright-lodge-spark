@@ -118,6 +118,7 @@ export async function buildAlmonerReportPdf(i: AlmonerPdfInput, deps: AlmonerPdf
   const cleanAdvice = stripEmoji(adviceText).trim();
   if (cleanAdvice) {
     section(`${wl.length ? 8 : 7}. Almoner's Advice & Notes`);
+    y += 8; // clear the heading rule
     doc.setTextColor(...PRINT_INK);
     doc.setFont("helvetica", "normal");
     doc.setFontSize(10);
