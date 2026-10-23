@@ -35,3 +35,4 @@
 - Members' PDFs, exports, file names and .ics files take lodge name/number/province/email from lib/docIdentity (blank stays blank); guarded by docIdentity.test. Why: no host-lodge literals.
 - Public Lodge Profile figures come only from get_public_lodge_figures (counts/numbers, KPI Snapshot member rules) via lib/lodgeFigures; public venues from the unit profile (venueFull/venueFor; own event venue wins, blank = hidden). Why: one source, no typed figures.
 - Membership Officer lodge email: one resolver lib/membershipOfficerEmail (return override in module_settings → Unit Setup membership_officer_email → single typed fallback). Why: every return agrees, no typed mailboxes elsewhere.
+- Host-lodge crest in emails/PDFs/exports comes only from unit_settings crest_image ({url}, https, via lib/crestImage); blank = omit the image, never a typed URL. Why: multi-lodge, no host literals.
