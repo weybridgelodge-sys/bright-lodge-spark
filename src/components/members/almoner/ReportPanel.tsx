@@ -14,6 +14,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { saveBlob, saveJsPdf } from "@/lib/nativeDownload";
 import { pastMasterTerms } from "@/lib/pastMastersRoll";
+import { upcomingManualDate, dateKey } from "@/lib/lifeEvents";
 import { assetUrl } from "@/lib/assetUrl";
 import logoAsset from "@/assets/weybridge-logo-navy.png.asset.json";
 const logoUrl = assetUrl(logoAsset);
@@ -44,7 +45,14 @@ const GOLD: [number, number, number] = [201, 164, 50];
 const INK: [number, number, number] = [30, 30, 35];
 const MUTED: [number, number, number] = [110, 110, 120];
 
-type LifeEventRow = { member: string; type: string; date: string; detail: string };
+type LifeEventRow = { member: string; type: string; date: string; detail: string; at?: string };
+
+/** Automated and manual life events together, by date (rows without a key keep their order). */
+const sortedLifeRows = (d: SnapshotData): LifeEventRow[] =>
+  [...d.derivedLife, ...d.manualLife]
+    .map((r, i) => ({ r, i }))
+    .sort((a, b) => (a.r.at && b.r.at ? a.r.at.localeCompare(b.r.at) : 0) || a.i - b.i)
+    .map((x) => x.r);
 
 type WidowLine = { widow_id: string; name: string; text: string };
 
@@ -164,7 +172,7 @@ export default function ReportPanel({ members }: { members: Member[] }) {
       }
     }
 
-    return items.sort((a, b) => a.when.getTime() - b.when.getTime()).map((x) => x.row);
+    return items.sort((a, b) => a.when.getTime() - b.when.getTime()).map((x) => ({ ...x.row, at: dateKey(x.when) }));
   };
 
   const buildMarkdown = (fromD: string, toD: string, adviceText: string, d: SnapshotData) => {
@@ -202,8 +210,7 @@ export default function ReportPanel({ members }: { members: Member[] }) {
     lines.push(`## 6. Life Events — next 3 months (${d.derivedLife.length + d.manualLife.length})`);
     if (d.derivedLife.length === 0 && d.manualLife.length === 0) lines.push(`Nothing in the next 3 months.`);
     else {
-      for (const e of d.derivedLife) lines.push(`- ${e.date} · **${e.member}** · ${e.type} — ${e.detail}`);
-      for (const e of d.manualLife) lines.push(`- ${e.date} · **${e.member}** · ${e.type}${e.detail ? ` — ${e.detail}` : ""}`);
+      for (const e of sortedLifeRows(d)) lines.push(`- ${e.date} · **${e.member}** · ${e.type}${e.detail ? ` — ${e.detail}` : ""}`);
     }
     lines.push("");
     const wl = d.widows ?? [];
@@ -242,11 +249,14 @@ export default function ReportPanel({ members }: { members: Member[] }) {
       const derivedLife = buildLifeEvents(to, [...(wm.data ?? []), ...pastMasterTerms(pmRoll.data)]);
       const manualLife = (life.data ?? [])
         .filter((e: any) => e.event_type !== "birthday" && e.event_type !== "initiation_anniversary" && e.event_type !== "wm_anniversary")
-        .map((e: any) => ({
+        .map((e: any) => ({ e, when: upcomingManualDate(e.event_date, !!e.recurring) }))
+        .filter((x: any) => x.when)
+        .map(({ e, when }: any) => ({
           member: memberName(memberMap.get(e.member_id)),
           type: e.event_type.replace(/_/g, " "),
-          date: fmt(e.event_date),
+          date: when.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }),
           detail: e.notes || "",
+          at: dateKey(when),
         }));
 
       const snap: SnapshotData = {
@@ -449,8 +459,7 @@ export default function ReportPanel({ members }: { members: Member[] }) {
       d.absRows.map((a: any) => [memberName(memberMap.get(a.member_id)), a.reason, fmt(a.period_start), fmt(a.period_end), a.notes || ""]));
 
     const lifeRows = [
-      ...d.derivedLife.map((e) => [e.date, e.member, e.type, e.detail]),
-      ...d.manualLife.map((e) => [e.date, e.member, e.type, e.detail]),
+      ...sortedLifeRows(d).map((e) => [e.date, e.member, e.type, e.detail]),
     ];
     section("6. Life Events — next 3 months", lifeRows.length);
     if (lifeRows.length === 0) empty("Nothing in the next 3 months.");
