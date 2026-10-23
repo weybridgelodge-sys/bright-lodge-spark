@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import fs from "fs";
-import { brandHeaderLines } from "../../supabase/functions/_shared/transactional-email-templates/_brand";
+import { brandHeaderLines, provincialGrandLodge } from "../../supabase/functions/_shared/transactional-email-templates/_brand";
 import { resolveLodgeSettings } from "../../supabase/functions/_shared/lodgeSettingsResolve";
 import { createPdfRun, drawBrandHeader, drawBrandFooter, processCrest, crestTargetSize } from "@/lib/pdfBrand";
 import { BLANK_DOC_IDENTITY } from "@/lib/docIdentity";
@@ -112,8 +112,7 @@ describe("pilot files carry no typed crest or host literal", () => {
 describe("provincial return letter province wording", () => {
   const src = fs.readFileSync("supabase/functions/_shared/transactional-email-templates/provincial-return-submission.tsx", "utf8");
   it("has no typed province", () => { expect(src).not.toMatch(/Surrey/); });
-  it("takes the province from settings; blank gives the neutral wording", async () => {
-    const { provincialGrandLodge } = await import("../../supabase/functions/_shared/transactional-email-templates/provincial-return-submission.tsx?raw").then(() => ({ provincialGrandLodge: new Function("return " + src.match(/export const provincialGrandLodge = ([\s\S]*?\n\})/)![1])() }));
+  it("takes the province from settings; blank gives the neutral wording", () => {
     expect(provincialGrandLodge("Province of Testshire")).toBe("Provincial Grand Lodge of Testshire");
     expect(provincialGrandLodge("Testshire")).toBe("Provincial Grand Lodge of Testshire");
     expect(provincialGrandLodge("")).toBe("Provincial Grand Lodge");

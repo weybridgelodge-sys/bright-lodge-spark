@@ -75,3 +75,9 @@ export function brandHeaderLines(id: BrandIdentity | null | undefined) {
     footer: [name, numLine].filter(Boolean).join(' '),
   }
 }
+
+/** Letter wording from the Unit Setup province: "Province of X" or "X" -> "Provincial Grand Lodge of X"; blank -> "Provincial Grand Lodge". */
+export function provincialGrandLodge(province?: string | null): string {
+  const p = clean(province).replace(/^(the\s+)?province\s+of\s+/i, '')
+  return p ? `Provincial Grand Lodge of ${p}` : 'Provincial Grand Lodge'
+}

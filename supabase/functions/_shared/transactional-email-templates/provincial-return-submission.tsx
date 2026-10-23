@@ -1,7 +1,7 @@
 import * as React from 'npm:react@18.3.1'
 import { Body, Container, Head, Heading, Hr, Html, Link, Preview, Section, Text } from 'npm:@react-email/components@0.0.22'
 import type { TemplateEntry } from './registry.ts'
-import { BRAND, brandHeaderLines, brandStyles } from './_brand.ts'
+import { BRAND, brandHeaderLines, brandStyles, provincialGrandLodge } from './_brand.ts'
 import { EmailBrandFooter, EmailBrandHeader } from './_brandHeader.tsx'
 
 interface Props {
@@ -16,12 +16,6 @@ interface Props {
   lodgeName?: string
   lodgeNumber?: string
   provinceName?: string
-}
-
-/** "Province of X" / "X" -> "Provincial Grand Lodge of X"; blank -> "Provincial Grand Lodge". */
-export const provincialGrandLodge = (province?: string | null) => {
-  const p = (province ?? '').replace(/\s+/g, ' ').trim().replace(/^(the\s+)?province\s+of\s+/i, '')
-  return p ? `Provincial Grand Lodge of ${p}` : 'Provincial Grand Lodge'
 }
 
 const button = { ...brandStyles.link, display: 'inline-block', padding: '10px 18px', border: `1px solid ${BRAND.gold}`, borderRadius: '4px', margin: '4px' }
