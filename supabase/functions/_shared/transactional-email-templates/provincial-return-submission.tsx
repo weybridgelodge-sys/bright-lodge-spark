@@ -18,7 +18,7 @@ interface Props {
   provinceName?: string
 }
 
-/** "Province of Surrey" / "Surrey" -> "Provincial Grand Lodge of Surrey"; blank -> "Provincial Grand Lodge". */
+/** "Province of X" / "X" -> "Provincial Grand Lodge of X"; blank -> "Provincial Grand Lodge". */
 export const provincialGrandLodge = (province?: string | null) => {
   const p = (province ?? '').replace(/\s+/g, ' ').trim().replace(/^(the\s+)?province\s+of\s+/i, '')
   return p ? `Provincial Grand Lodge of ${p}` : 'Provincial Grand Lodge'

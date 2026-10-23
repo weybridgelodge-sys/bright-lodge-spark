@@ -4,6 +4,7 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { createStripeClient, type StripeEnv } from '../_shared/stripe.ts'
 import { sendTransactionalEmail } from '../_shared/send-email.ts'
+import { loadLodgeSettings } from "../_shared/lodgeSettings.ts";
 import { bookingFirstName } from '../_shared/greeting.ts'
 
 const corsHeaders = {
@@ -128,6 +129,7 @@ Deno.serve(async (req) => {
             weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Europe/London',
           })
         : ''
+      const lodge = await loadLodgeSettings()
       await sendTransactionalEmail({
           templateName: 'waitlist-refunded',
           recipientEmail: b.contact_email,
@@ -135,6 +137,7 @@ Deno.serve(async (req) => {
           templateData: {
             firstName, eventLabel: b.event_label, eventDate, totalAmount,
             bookingRef: b.id.slice(0, 8),
+            crestUrl: lodge.crestImageUrl || null, lodgeName: lodge.lodgeName, lodgeNumber: lodge.lodgeNumber, provinceName: lodge.provinceName,
           },
       })
       refunded++

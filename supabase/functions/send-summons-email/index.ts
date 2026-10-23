@@ -119,7 +119,8 @@ Deno.serve(async (req) => {
     }
     // …but the link we send is branded on the Lodge's own domain. It resolves
     // to a freshly signed storage URL on click (summons-link function).
-    const site = (await loadLodgeSettings()).siteUrl;
+    const lodge = await loadLodgeSettings();
+    const site = lodge.siteUrl;
     const pdfUrl = `${site}/summons/${summons.meeting_number}?k=${summons.id}`;
 
     // Optional: certified annual accounts as a second branded link.
@@ -243,6 +244,7 @@ Deno.serve(async (req) => {
             accountsUrl,
             accountsYearLabel,
             accountsCertifiedLabel,
+            crestUrl: lodge.crestImageUrl || null, lodgeName: lodge.lodgeName, lodgeNumber: lodge.lodgeNumber, provinceName: lodge.provinceName,
           },
         });
         if (!res.ok) throw new Error(String((res.error as any) ?? `HTTP ${res.status}`));

@@ -65,7 +65,9 @@ Deno.serve(async (req) => {
     const options = ((poll as any).options as string[]) ?? [];
     const closesAt = (poll as any).closes_at as string | null;
     const liveResults = (poll as any).results_visibility === "live";
-    const dashboardUrl = `${(await loadLodgeSettings()).siteUrl}/members/dashboard`;
+    const lodge = await loadLodgeSettings();
+    // Blank site address = no button (configuredSiteUrl has no fallback).
+    const dashboardUrl = lodge.configuredSiteUrl ? `${lodge.configuredSiteUrl}/members/dashboard` : "";
 
     const isTest = !!test_recipient;
     let recipients: { email: string; user_id: string | null }[] = [];
@@ -105,6 +107,7 @@ Deno.serve(async (req) => {
             dashboardUrl,
             closesAt,
             liveResults,
+            crestUrl: lodge.crestImageUrl || null, lodgeName: lodge.lodgeName, lodgeNumber: lodge.lodgeNumber, provinceName: lodge.provinceName,
           },
         });
         if (!res.ok) throw new Error(String((res.error as any) ?? `HTTP ${res.status}`));
