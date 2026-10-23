@@ -1,6 +1,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { sendLovableEmail } from "npm:@lovable.dev/email-js";
 import { loadLodgeSettings, resolveLodgeSettings } from "../_shared/lodgeSettings.ts";
+import { newsletterBrandFrom, newsletterFooterHtml, newsletterHeaderHtml } from "../_shared/newsletterBrand.ts";
 let LODGE = resolveLodgeSettings(null);
 
 const corsHeaders = {
@@ -58,8 +59,6 @@ const AUDIENCE_FILENAME: Record<Audience, string> = {
   all: "All",
 };
 
-const LOGO_URL = "https://weybridgelodge.org.uk/__l5e/assets-v1/c8d69345-d84c-4619-a96a-e59f04aa0481/weybridge-logo-white.png";
-
 function escapeHtml(s: string): string {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
 }
@@ -112,7 +111,7 @@ function inlineFormat(text: string): string {
     const href = safeUrl(addr);
     return href ? pre + stash(`<a href="${href}" style="${LINK_STYLE}">${addr}</a>`) : pre + addr;
   });
-  // Bare domains without a scheme, e.g. "weybridgelodge.org.uk/bookings".
+  // Bare domains without a scheme, e.g. "example.org/bookings".
   s = s.replace(
     /(^|[\s(])((?:[a-z0-9-]+\.)+(?:co\.uk|org\.uk|ac\.uk|com|org|net|uk|io|dev)(?:\/[^\s<)]*)?)/gi,
     (_m, pre, url) => {
@@ -175,37 +174,9 @@ function renderHtml(opts: { subject: string; content: NewsletterContent; unsubsc
 </head>
 <body style="margin:0;background:#f4f1ea;font-family:Georgia,'Times New Roman',serif">
 <div style="max-width:640px;margin:0 auto;background:#ffffff">
-  <div style="background:#1B2A4A;padding:20px 24px;border-bottom:4px solid #C9A432">
-    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0"><tr>
-      <td width="72" valign="middle" style="padding-right:14px">
-        <img src="${LOGO_URL}" alt="${escapeHtml(LODGE.senderName)} crest" width="64" height="64" style="display:block;width:64px;height:64px;border:0">
-      </td>
-      <td valign="middle" align="left">
-        <div style="font-family:'Playfair Display',Georgia,serif;color:#C9A432;font-size:24px;letter-spacing:0.5px;line-height:1.1">${escapeHtml(LODGE.newsletterMasthead)}</div>
-        <div style="color:rgba(246,241,226,0.85);font-size:12px;margin-top:4px;letter-spacing:2px;text-transform:uppercase;font-family:Arial,sans-serif">Monthly Chronicle &amp; Labours</div>
-      </td>
-    </tr></table>
-  </div>
+  ${newsletterHeaderHtml(newsletterBrandFrom(LODGE))}
   <div style="padding:24px 28px">${sectionsHtml}</div>
-  <div style="background:#1B2A4A;padding:18px 28px 8px;text-align:center">
-    <table role="presentation" align="center" cellspacing="0" cellpadding="0" border="0" style="margin:0 auto 10px"><tr>
-      <td style="padding:0 6px"><a href="${escapeHtml(LODGE.instagramUrl)}" style="display:inline-block;background:#C9A432;color:#1B2A4A;font-family:Arial,sans-serif;font-size:11px;font-weight:bold;text-decoration:none;width:28px;height:28px;line-height:28px;border-radius:14px;text-align:center">IG</a></td>
-      <td style="padding:0 6px"><a href="${escapeHtml(LODGE.facebookUrl)}" style="display:inline-block;background:#C9A432;color:#1B2A4A;font-family:Arial,sans-serif;font-size:13px;font-weight:bold;text-decoration:none;width:28px;height:28px;line-height:28px;border-radius:14px;text-align:center">f</a></td>
-      <td style="padding:0 6px"><a href="${escapeHtml(LODGE.twitterUrl)}" style="display:inline-block;background:#C9A432;color:#1B2A4A;font-family:Arial,sans-serif;font-size:12px;font-weight:bold;text-decoration:none;width:28px;height:28px;line-height:28px;border-radius:14px;text-align:center">X</a></td>
-      <td style="padding:0 6px"><a href="${escapeHtml(LODGE.siteUrl)}" style="display:inline-block;background:#C9A432;color:#1B2A4A;font-family:Arial,sans-serif;font-size:10px;font-weight:bold;text-decoration:none;width:28px;height:28px;line-height:28px;border-radius:14px;text-align:center">Web</a></td>
-    </tr></table>
-    <div style="color:rgba(246,241,226,0.85);font-family:Arial,sans-serif;font-size:12px;padding:6px 0 14px;line-height:1.6">
-      &copy; ${new Date().getFullYear()} ${escapeHtml(LODGE.newsletterMasthead)} &middot; ${escapeHtml(LODGE.newsletterFooterNote)}<br>
-      You're receiving this because ${escapeHtml(LODGE.newsletterMasthead)} sends newsletters to members and visitors.
-      <!-- The email API always appends its own mandatory unsubscribe footer (it cannot
-           be suppressed), which opts the address out of ALL mail from this domain.
-           This link is the newsletter-only alternative, deliberately NOT worded as a
-           second "unsubscribe" so there is only one unsubscribe link in the email. -->
-      To receive lodge summonses and booking confirmations but no further newsletters,
-      <a href="${unsubscribeUrl}" style="color:#C9A432;text-decoration:underline">change your newsletter preferences here</a>.
-    </div>
-
-  </div>
+  ${newsletterFooterHtml(newsletterBrandFrom(LODGE), unsubscribeUrl)}
 </div>
 </body></html>`;
 }
