@@ -1,7 +1,8 @@
 import { loadDocIdentity, docTitle, docSubtitle, docFileName, docGroupName } from "@/lib/docIdentity";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import { drawBrandFooter, drawBrandHeader, drawBrandSectionRule, HEADER_START_Y, loadPdfBrand, type CrestImage, type PdfBrandDeps } from "@/lib/pdfBrand";
+import { drawBrandFooter, drawBrandHeader, drawBrandSectionRule, HEADER_START_Y, loadPdfBrand, measureTableHeight, type CrestImage, type PdfBrandDeps } from "@/lib/pdfBrand";
+export { measureTableHeight };
 import type { DocIdentity } from "@/lib/docIdentity";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -134,21 +135,6 @@ const trace = (doc: jsPDF, e: { kind: "heading" | "table"; page: number; title?:
   const l = layoutTrace.get(doc) ?? []; l.push(e); layoutTrace.set(doc, l);
 };
 const pageNo = (doc: jsPDF) => (doc as any).internal.getCurrentPageInfo().pageNumber as number;
-
-/**
- * Height a table will need before it can start: the whole table when it is kept together
- * (pageBreak "avoid"), otherwise the head plus its first two rows. Measured on a scratch
- * document with the same width, so nothing is drawn on the real one.
- */
-export function measureTableHeight(doc: jsPDF, opts: Record<string, any>): number {
-  const w = doc.internal.pageSize.getWidth();
-  const scratch = new jsPDF({ unit: "pt", format: [w, 14000] });
-  (scratch as any).__measureOnly = true; // never saved; lets content tests ignore the dry run
-  const body = opts.pageBreak === "avoid" ? opts.body : (opts.body ?? []).slice(0, 2);
-  const foot = opts.pageBreak === "avoid" ? opts.foot : undefined;
-  autoTable(scratch, { ...opts, body, foot, startY: 0, pageBreak: "auto", margin: { ...(opts.margin ?? {}), top: 0, bottom: 0 }, didDrawCell: undefined, didDrawPage: undefined });
-  return (scratch as any).lastAutoTable.finalY;
-}
 
 /**
  * Navy serif section heading with a thin gold rule. Starts a new page BEFORE drawing the heading

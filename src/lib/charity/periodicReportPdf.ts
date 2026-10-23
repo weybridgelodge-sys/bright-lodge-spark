@@ -1,7 +1,7 @@
 import { loadDocIdentity, docTitle, docSubtitle, docFileName, docGroupName } from "@/lib/docIdentity";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import { drawBrandFooter, drawBrandHeader, drawBrandSectionRule, HEADER_START_Y, loadPdfBrand, type PdfBrandDeps } from "@/lib/pdfBrand";
+import { drawBrandFooter, drawBrandHeader, drawBrandSectionRule, HEADER_START_Y, loadPdfBrand, measureTableHeight, type PdfBrandDeps } from "@/lib/pdfBrand";
 import { gbp, COLLECTION_TYPE_LABEL, type Collection, type Donation, type Charity, type FestivalSettings, reliefChestBalance, isFestivalDonation } from "./queries";
 
 const NAVY: [number, number, number] = [27, 42, 74];
@@ -75,14 +75,21 @@ export async function buildCharityPeriodicReportPdf(args: {
   const ensureSpace = (needed: number) => {
     if (y + needed > pageH - FOOTER_RESERVE) { doc.addPage(); y = margin; }
   };
+  // A heading is drawn only when what follows is known, so it always travels with its table.
+  let pending: { title: string; following: number } | null = null;
+  const drawPending = (needed: number) => {
+    if (!pending) return;
+    ensureSpace(32 + Math.max(pending.following, needed));
+    y = drawBrandSectionRule(doc, y, pending.title, margin);
+    pending = null;
+  };
   const section = (t: string, followingHeight = 80) => {
-    ensureSpace(32 + followingHeight);
-    drawBrandSectionRule(doc, y, t, margin);
-    y += 32;
+    drawPending(0);
+    pending = { title: t, following: followingHeight };
   };
   const table = (head: string[][], body: any[][], colStyles?: Record<number, any>, keepTogether = true) => {
-    autoTable(doc, {
-      head, body, startY: y,
+    const opts = {
+      head, body,
       margin: { left: margin, right: margin, bottom: FOOTER_RESERVE },
       styles: { font: "helvetica", fontSize: 9, cellPadding: 5, textColor: INK, lineColor: [220, 215, 200], lineWidth: 0.4, overflow: "linebreak" },
       headStyles: { fillColor: GOLD, textColor: NAVY, fontStyle: "bold" },
@@ -90,13 +97,16 @@ export async function buildCharityPeriodicReportPdf(args: {
       theme: "grid",
       columnStyles: colStyles ?? { 0: { cellWidth: 320 }, 1: { cellWidth: 195, halign: "right" } },
       rowPageBreak: "avoid",
-      pageBreak: keepTogether ? "avoid" : "auto",
-    });
+      pageBreak: (keepTogether ? "avoid" : "auto") as "avoid" | "auto",
+    } as any;
+    drawPending(measureTableHeight(doc, opts));
+    autoTable(doc, { ...opts, startY: y });
     y = (doc as any).lastAutoTable.finalY + 16;
   };
 
   if (stewardNotes?.trim()) {
     section("Report Summary");
+    drawPending(0);
     doc.setFont("times", "italic");
     doc.setFontSize(10);
     doc.setTextColor(...INK);

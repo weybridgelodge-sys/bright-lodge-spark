@@ -1,7 +1,8 @@
 // Shared jsPDF brand header/footer (Batch C). Navy crest from Unit Setup on white,
 // thin navy band edge, gold accent rule under the title block, navy footer rule.
 // Crest fetched with a timeout, cached for the run, omitted on any failure.
-import type jsPDF from "jspdf";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 import { supabase } from "@/integrations/supabase/client";
 import { CREST_IMAGE_UNIT_KEY, crestUrlFrom } from "@/lib/crestImage";
 import { docSubtitle, docTitle, loadDocIdentity, type DocIdentity } from "@/lib/docIdentity";
@@ -210,3 +211,19 @@ export async function loadPdfBrand(deps: PdfBrandDeps = {}): Promise<{ identity:
   const crest = await (deps.run ?? createPdfRun()).crest(crestUrl).catch(() => null);
   return { identity, crest };
 }
+
+/**
+ * Height a table will need before it can start: the whole table when it is kept together
+ * (pageBreak "avoid"), otherwise the head plus its first two rows. Measured on a scratch
+ * document with the same width, so nothing is drawn on the real one.
+ */
+export function measureTableHeight(doc: jsPDF, opts: Record<string, any>): number {
+  const w = doc.internal.pageSize.getWidth();
+  const scratch = new jsPDF({ unit: "pt", format: [w, 14000] });
+  (scratch as any).__measureOnly = true; // never saved; lets content tests ignore the dry run
+  const body = opts.pageBreak === "avoid" ? opts.body : (opts.body ?? []).slice(0, 2);
+  const foot = opts.pageBreak === "avoid" ? opts.foot : undefined;
+  autoTable(scratch, { ...opts, body, foot, startY: 0, pageBreak: "auto", margin: { ...(opts.margin ?? {}), top: 0, bottom: 0 }, didDrawCell: undefined, didDrawPage: undefined });
+  return (scratch as any).lastAutoTable.finalY;
+}
+

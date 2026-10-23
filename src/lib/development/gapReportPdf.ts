@@ -25,7 +25,7 @@ export async function buildGapReportPdf(matrix: SkillsMatrix, deps: PdfBrandDeps
 
   let y = HEADER_START_Y;
   const section = (title: string, count: number, tone: [number, number, number]) => {
-    if (y > pageH - 100) { doc.addPage(); y = margin; }
+    if (y > pageH - 140) { doc.addPage(); y = margin; }
     drawBrandSectionRule(doc, y, `${title} (${count})`, margin);
     doc.setFillColor(...tone); doc.rect(pageW - margin - 10, y + 7, 8, 8, "F");
     y += 32;
@@ -50,7 +50,7 @@ export async function buildGapReportPdf(matrix: SkillsMatrix, deps: PdfBrandDeps
     autoTable(doc, {
       startY: y, head: [["Group", "Ritual Piece"]],
       body: red.map((p) => [p.ritual_group, p.piece]),
-      margin: { left: margin, right: margin },
+      margin: { top: margin, left: margin, right: margin, bottom: 60 },
       styles: { font: "helvetica", fontSize: 9, cellPadding: 5, textColor: INK, lineColor: [220, 215, 200], lineWidth: 0.4 },
       headStyles: { fillColor: GOLD, textColor: NAVY, fontStyle: "bold" },
       alternateRowStyles: { fillColor: [253, 240, 240] },
@@ -67,7 +67,7 @@ export async function buildGapReportPdf(matrix: SkillsMatrix, deps: PdfBrandDeps
     autoTable(doc, {
       startY: y, head: [["Group", "Ritual Piece", "Sole qualified member"]],
       body: amber.map((p) => [p.ritual_group, p.piece, p.holder]),
-      margin: { left: margin, right: margin },
+      margin: { top: margin, left: margin, right: margin, bottom: 60 },
       styles: { font: "helvetica", fontSize: 9, cellPadding: 5, textColor: INK, lineColor: [220, 215, 200], lineWidth: 0.4 },
       headStyles: { fillColor: GOLD, textColor: NAVY, fontStyle: "bold" },
       alternateRowStyles: { fillColor: [253, 248, 232] },

@@ -46,7 +46,7 @@ export async function buildWorkingGroupsActivityPdf(deps: PdfBrandDeps = {}) {
   let y = HEADER_START_Y;
 
   for (const g of groups) {
-    if (y > pageH - 120) { doc.addPage(); y = margin; }
+    if (y > pageH - 160) { doc.addPage(); y = margin; }
     drawBrandSectionRule(doc, y, g.name, margin);
     y += 28;
 
@@ -64,7 +64,7 @@ export async function buildWorkingGroupsActivityPdf(deps: PdfBrandDeps = {}) {
         startY: y,
         head: [["Date", "Type", "Title", "Detail"]],
         body: rows.map((r) => [fmt(r.item_date), r.item_type.toUpperCase(), r.title, r.detail ?? ""]),
-        margin: { left: margin, right: margin },
+        margin: { top: margin, left: margin, right: margin, bottom: 60 },
         styles: { font: "helvetica", fontSize: 9, cellPadding: 5, textColor: INK, lineColor: HAIRLINE, lineWidth: 0.4 },
         headStyles: { fillColor: GOLD, textColor: NAVY, fontStyle: "bold" },
         alternateRowStyles: { fillColor: PANEL },
