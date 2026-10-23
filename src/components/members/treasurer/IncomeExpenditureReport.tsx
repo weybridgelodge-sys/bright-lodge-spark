@@ -94,17 +94,17 @@ export default function IncomeExpenditureReport({ canEdit }: { canEdit: boolean 
       let y = startY;
       const head = [["Account", period.label, period.priorLabel]];
 
-            y = reportSectionTable(doc, pageW, margin, y, "Income", head, [
+      y = reportSectionTable(doc, pageW, margin, y, "Income", head, [
         ...income.map((r) => [`${r.code} — ${r.name}`, acct(r.current), acct(r.prior)]),
         ["Total income", acct(incCur), acct(incPri)],
       ]);
 
-            y = reportSectionTable(doc, pageW, margin, y, "Expenditure", head, [
+      y = reportSectionTable(doc, pageW, margin, y, "Expenditure", head, [
         ...expense.map((r) => [`${r.code} — ${r.name}`, acct(r.current), acct(r.prior)]),
         ["Total expenditure", acct(expCur), acct(expPri)],
       ]);
 
-            reportSectionTable(doc, pageW, margin, y, "Result for the Period", head, [
+      reportSectionTable(doc, pageW, margin, y, "Result for the Period", head, [
         ["Surplus / (Deficit)", acct(surCur), acct(surPri)],
       ]);
 

@@ -142,23 +142,23 @@ export default function BalanceSheetReport({ canEdit }: { canEdit: boolean }) {
       let y = startY;
       const head = [["Account", curLabel, priLabel]];
 
-            y = reportSectionTable(doc, pageW, margin, y, "Assets", head, [
+      y = reportSectionTable(doc, pageW, margin, y, "Assets", head, [
         ...assets.map((r) => [`${r.code} — ${r.name}`, acct(r.current), acct(r.prior)]),
         ["Total assets", acct(assetCur), acct(assetPri)],
       ]);
 
-            y = reportSectionTable(doc, pageW, margin, y, "Liabilities", head, [
+      y = reportSectionTable(doc, pageW, margin, y, "Liabilities", head, [
         ...liabilities.map((r) => [`${r.code} — ${r.name}`, acct(r.current), acct(r.prior)]),
         ["Total liabilities", acct(liabCur), acct(liabPri)],
       ]);
 
-            y = reportSectionTable(doc, pageW, margin, y, "Reserves", head, [
+      y = reportSectionTable(doc, pageW, margin, y, "Reserves", head, [
         ["General Fund brought forward", acct(reserves.curBf), acct(reserves.priBf)],
         ["Surplus / (Deficit) for the year to date", acct(reserves.curYtd), acct(reserves.priYtd)],
         ["Total reserves", acct(resCur), acct(resPri)],
       ]);
 
-            reportSectionTable(doc, pageW, margin, y, "Balance Check", head, [
+      reportSectionTable(doc, pageW, margin, y, "Balance Check", head, [
         ["Total assets", acct(assetCur), acct(assetPri)],
         ["Total liabilities + reserves", acct(liabCur + resCur), acct(liabPri + resPri)],
         ["Difference", acct(diffCur), acct(diffPri)],
