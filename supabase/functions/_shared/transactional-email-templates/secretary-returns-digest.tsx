@@ -6,14 +6,14 @@ import {
   Heading,
   Hr,
   Html,
-  Img,
   Link,
   Preview,
   Section,
   Text,
 } from 'npm:@react-email/components@0.0.22'
 import type { TemplateEntry } from './registry.ts'
-import { BRAND, LOGO_HEIGHT, LOGO_URL, LOGO_WIDTH, brandStyles } from './_brand.ts'
+import { BRAND, brandStyles } from './_brand.ts'
+import { EmailBrandFooter, EmailBrandHeader } from './_brandHeader.tsx'
 
 interface ReturnRow {
   typeLabel: string
@@ -70,7 +70,9 @@ const Rows = ({ rows, tone }: { rows: ReturnRow[]; tone: 'red' | 'amber' }) => (
   </Section>
 )
 
-const Email = ({ overdue = [], dueSoon = [], reportDate, portalUrl }: Props) => (
+const Email = ({ overdue = [], dueSoon = [], reportDate, portalUrl, crestUrl, lodgeName, lodgeNumber, provinceName }: Props) => {
+  const id = { crestUrl, lodgeName, lodgeNumber, provinceName }
+  return (
   <Html lang="en" dir="ltr">
     <Head />
     <Preview>
@@ -80,18 +82,7 @@ const Email = ({ overdue = [], dueSoon = [], reportDate, portalUrl }: Props) => 
     </Preview>
     <Body style={main}>
       <Container style={container}>
-        <Section style={brandStyles.crestWrap}>
-          <Img
-            src={LOGO_URL}
-            width={LOGO_WIDTH}
-            height={LOGO_HEIGHT}
-            alt="Weybridge Lodge crest"
-            style={{ margin: '0 auto', display: 'block' }}
-          />
-          <Heading style={brand}>Weybridge Lodge</Heading>
-          <Text style={brandSub}>No. 6787 — Province of Surrey</Text>
-        </Section>
-
+        <EmailBrandHeader {...id} />
         <Heading style={h1}>Secretary — returns &amp; certificates reminder</Heading>
         <Text style={meta}>
           {reportDate ? `Report for ${reportDate}` : ''} · {overdue.length} overdue · {dueSoon.length} due soon
@@ -131,10 +122,12 @@ const Email = ({ overdue = [], dueSoon = [], reportDate, portalUrl }: Props) => 
         <Text style={confidential}>
           This is an automated lodge notification, not a personal subscription. Clicking unsubscribe below removes you from all future lodge emails entirely, not just this one. If you are unsure why you received this email, please contact the Lodge Secretary.
         </Text>
+        <EmailBrandFooter {...id} />
       </Container>
     </Body>
   </Html>
-)
+  )
+}
 
 export const template = {
   component: Email,
@@ -147,8 +140,9 @@ export const template = {
   },
   displayName: 'Secretary returns reminder',
   previewData: {
+    crestUrl: 'https://placehold.co/240x240/png', lodgeName: 'Example Lodge', lodgeNumber: '1234', provinceName: 'Province of Testshire',
     reportDate: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
-    portalUrl: 'https://weybridgelodge.org.uk/members/admin/secretary-returns',
+    portalUrl: 'https://example.org/members/admin/returns',
     overdue: [
       { typeLabel: 'Form P', masonicYear: '2025/2026', dateDue: '2026-09-01', person: 'John Smith', personLabel: 'Candidate' },
     ],
@@ -179,5 +173,3 @@ const linkStyle = brandStyles.link
 const footerText = brandStyles.footerText
 const hr = brandStyles.hr
 const confidential = { color: '#888', fontSize: '11px', fontStyle: 'italic' as const, textAlign: 'center' as const, margin: '4px 0' }
-const brand = brandStyles.brand
-const brandSub = brandStyles.brandSub
