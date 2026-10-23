@@ -37,42 +37,13 @@ export async function buildWorkingGroupsActivityPdf(deps: PdfBrandDeps = {}) {
   const margin = 40;
 
 
-  // Branded header: white background, centered navy crest, navy title,
-  // gold "No. <number> — <province>" subtitle, gold hairline divider.
-  const crestSize = 72;
-  const crestX = (pageW - crestSize) / 2;
-  const crestY = 32;
-  if (logoData) { try { doc.addImage(logoData, "PNG", crestX, crestY, crestSize, crestSize); } catch {} }
-
-  doc.setTextColor(...NAVY);
-  doc.setFont("times", "bold");
-  doc.setFontSize(22);
-  doc.text(ID.lodgeName, pageW / 2, crestY + crestSize + 24, { align: "center" });
-
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(9);
-  doc.setTextColor(...GOLD);
-  doc.text(docSubtitle(ID).toUpperCase(), pageW / 2, crestY + crestSize + 40, {
-    align: "center",
-    charSpace: 2,
+  // Shared brand header (Unit Setup crest, lodge name, sub-line, gold-dark title line).
+  drawBrandHeader(doc, {
+    identity, crest, margin,
+    title: `Working Groups Activity Report — ${label}`,
+    rightLine: `Generated: ${fmt(new Date().toISOString())}`,
   });
-
-  const dividerY = crestY + crestSize + 54;
-  doc.setDrawColor(...GOLD);
-  doc.setLineWidth(1);
-  doc.line(margin, dividerY, pageW - margin, dividerY);
-
-  doc.setFont("times", "italic");
-  doc.setFontSize(15);
-  doc.setTextColor(...NAVY);
-  doc.text(`Working Groups Activity Report — ${label}`, pageW / 2, dividerY + 22, { align: "center" });
-
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(9);
-  doc.setTextColor(...MUTED);
-  doc.text(`Generated: ${fmt(new Date().toISOString())}`, pageW / 2, dividerY + 36, { align: "center" });
-
-  let y = dividerY + 60;
+  let y = HEADER_START_Y;
 
   for (const g of groups) {
     if (y > pageH - 120) { doc.addPage(); y = margin; }
