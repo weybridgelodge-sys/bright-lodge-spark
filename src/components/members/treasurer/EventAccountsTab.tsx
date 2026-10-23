@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { toast } from "@/hooks/use-toast";
 import { Loader2, Plus, Trash2, FileDown, ChevronDown, ChevronRight, Pencil } from "lucide-react";
 import autoTable from "jspdf-autotable";
-import { reportPdfDoc, reportSection, INK, GOLD, NAVY, MUTED } from "@/lib/treasurer/reports";
+import { reportPdfDoc, reportSection, measureTableHeight, drawTracedTable, INK, GOLD, NAVY, MUTED } from "@/lib/treasurer/reports";
 import { saveJsPdf, saveText } from "@/lib/nativeDownload";
 import { Link } from "react-router-dom";
 import { eventActuals, eventTieOut, defaultTicketPlan, hasReceipts, receivedSplit } from "@/lib/treasurer/eventTieOut";
@@ -512,16 +512,17 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
     };
 
     // Planning stage — intentions only, nothing from the ledger.
-    let y = reportSection(doc, pageW, margin, startY, "Budget plan (planning stage — not actual money)");
-    autoTable(doc, {
-      startY: y,
+    const _t0 = {
       head: [["Planned income", "", "", "Amount"]],
       body: incomeLines.length
         ? incomeLines.map((l) => [l.category, l.quantity != null ? `${money(l.unit_cost_pence ?? 0)} × ${l.quantity}` : "Total", "", money(l.planned_pence)])
         : [["No planned income lines", "", "", money(0)]],
       foot: [[{ content: "Total planned income", colSpan: 3 }, money(plannedIncomeTotal)]],
       ...tableStyle,
-    });
+    };
+    // Heading travels with its table (measured first).
+    let y = reportSection(doc, pageW, margin, startY, "Budget plan (planning stage — not actual money)", measureTableHeight(doc, _t0));
+    drawTracedTable(doc, { ..._t0, startY: y });
     y = (doc as any).lastAutoTable.finalY + 12;
     autoTable(doc, {
       startY: y,
@@ -545,16 +546,17 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
     );
     y += 22;
 
-    y = reportSection(doc, pageW, margin, y, "Budget vs Actual (posted to the ledger)");
-    autoTable(doc, {
-      startY: y,
+    const _t1 = {
       head: [["Income category", "Planned", "Actual", "Variance"]],
       body: budgetVsActual.incomeRows.length
         ? budgetVsActual.incomeRows.map((r) => [r.category, money(r.planned), money(r.actual), money(r.variance)])
         : [["No income budget lines", money(0), money(actualIncomeTotal), money(0)]],
       foot: [["Total income", money(plannedIncomeTotal), money(actualIncomeTotal), money(actualIncomeTotal - plannedIncomeTotal)]],
       ...tableStyle,
-    });
+    };
+    // Heading travels with its table (measured first).
+    y = reportSection(doc, pageW, margin, y, "Budget vs Actual (posted to the ledger)", measureTableHeight(doc, _t1));
+    drawTracedTable(doc, { ..._t1, startY: y });
     y = (doc as any).lastAutoTable.finalY + 12;
     autoTable(doc, {
       startY: y,
@@ -575,9 +577,7 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
       ...budgetVsActual.unmatchedExpense.map((a) => ({ ...a, kind: "Cost" })),
     ];
     if (unmatched.length) {
-      y = reportSection(doc, pageW, margin, y, "Ledger amounts not matched to a budget category");
-      autoTable(doc, {
-        startY: y,
+      const _t2 = {
         head: [["Account", "Type", "Actual"]],
         body: unmatched.map((a) => [`${a.code} — ${a.name}`, a.kind, money(a.pence)]),
         margin: { top: margin, left: margin, right: margin, bottom: 60 },
@@ -585,14 +585,15 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
         headStyles: { fillColor: GOLD, textColor: NAVY, fontStyle: "bold" },
         theme: "grid",
         columnStyles: { 0: { cellWidth: 280 }, 2: { halign: "right" } },
-      });
+      };
+      // Heading travels with its table (measured first).
+      y = reportSection(doc, pageW, margin, y, "Ledger amounts not matched to a budget category", measureTableHeight(doc, _t2));
+      drawTracedTable(doc, { ..._t2, startY: y });
       y = (doc as any).lastAutoTable.finalY + 20;
     }
 
 
-    y = reportSection(doc, pageW, margin, y, "Bookings & reconciliation");
-    autoTable(doc, {
-      startY: y,
+    const _t3 = {
       head: [["Payer", "Tickets", "Deposit", "Balance", "Received"]],
       body: bookings.map((b) => [
         b.payer_name + (b.is_placeholder ? " (names TBC)" : ""),
@@ -608,7 +609,10 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
       footStyles: { fillColor: [250, 247, 238], textColor: INK, fontStyle: "bold" },
       theme: "grid",
       columnStyles: { 1: { halign: "right" }, 2: { halign: "right" }, 3: { halign: "right" }, 4: { halign: "right" } },
-    });
+    };
+    // Heading travels with its table (measured first).
+    y = reportSection(doc, pageW, margin, y, "Bookings & reconciliation", measureTableHeight(doc, _t3));
+    drawTracedTable(doc, { ..._t3, startY: y });
     y = (doc as any).lastAutoTable.finalY + 20;
     // Keep the closing tie-out lines together and clear of the footer.
     if (y + 50 > doc.internal.pageSize.getHeight() - 56) { doc.addPage(); y = margin; }
