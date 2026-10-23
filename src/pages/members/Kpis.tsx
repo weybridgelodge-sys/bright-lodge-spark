@@ -50,11 +50,12 @@ function Section({ title, children, defaultOpen = true }: { title: string; child
   );
 }
 
-function Stat({ label, value, sub }: { label: string; value: React.ReactNode; sub?: string }) {
+function Stat({ label, value, sub, valueClass }: { label: string; value: React.ReactNode; sub?: string; valueClass?: string }) {
   return (
     <div className="min-w-0 bg-navy/60 border border-gold/10 rounded-sm p-3">
       <p className="text-[11px] uppercase tracking-wider text-primary-foreground/80">{label}</p>
-      <p className="font-serif text-xl sm:text-2xl text-gold mt-1 break-words [overflow-wrap:anywhere]">{value}</p>
+      {/* Numeric/date values must never break mid-number: no overflow-wrap:anywhere here. */}
+      <p className={`font-serif text-xl sm:text-2xl text-gold mt-1 tabular-nums${valueClass ? ` ${valueClass}` : ""}`}>{value}</p>
       {sub && <p className="text-[11px] text-primary-foreground/80 mt-1">{sub}</p>}
     </div>
   );
@@ -228,6 +229,7 @@ export default function Kpis() {
             <Stat label="Light Blues" value={s.lightBlueCount} />
             <Stat
               label="Last Initiation"
+              valueClass="whitespace-nowrap text-lg sm:text-2xl"
               value={s.lastInitiation ? new Date(s.lastInitiation.date).toLocaleDateString("en-GB") : "—"}
               sub={s.lastInitiation && s.lastInitiation.count > 1 ? s.lastInitiation.label : undefined}
             />
