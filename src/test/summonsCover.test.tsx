@@ -40,6 +40,7 @@ async function build(crest: { dataUrl: string; format: "PNG" } | null, id = iden
   for (const m of raw.matchAll(/stream\r?\n([\s\S]*?)endstream/g)) {
     try { text += zlib.inflateSync(Buffer.from(m[1], "latin1")).toString("latin1"); } catch { /* not deflate */ }
   }
+  if (process.env.SUMMONS_DUMP) (await import("node:fs")).writeFileSync(`/tmp/summons-${id.lodgeName.length}-${crest ? "c" : "n"}.pdf`, buf);
   return { size: buf.length, raw, text, urls, pages: (raw.match(/\/Type\s*\/Page[^s]/g) || []).length };
 }
 
