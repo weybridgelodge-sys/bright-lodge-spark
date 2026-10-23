@@ -1,7 +1,7 @@
 import { masonicYearStartSync, masonicYearBoundsSync } from "@/lib/masonicYear";
 import { evaluateAutoLog, AUTO_LOG_FROM, type AutoLogEscalation } from "../../supabase/functions/_shared/almonerAutoLog";
 import { supabase } from "@/integrations/supabase/client";
-import { firstWmYearForMember } from "@/data/worshipfulMasters";
+import { prescribedInstallationDate } from "@/lib/installationReturn";
 import { formatMemberLine } from "@/lib/summons";
 import { OPTIONAL_POSITIONS, fetchOfficerYear } from "@/lib/officersProgression";
 import { resolveOfficeRoll } from "@/lib/officerRoll";
@@ -376,21 +376,27 @@ export type Milestone = {
   member: KpiMember;
   kind: "initiation" | "wm" | "birthday";
   years?: number;
+  /** YYYY-MM-DD (day), YYYY-MM (month only) or YYYY (year only). */
   date: string;
+  precision?: "day" | "month" | "year";
   label: string;
 };
 
+export type PastMasterRow = { member_id: string | null; lodge_year: number; installed_on: string | null };
+
 export function milestones(
   members: KpiMember[],
-  wmTerms: WmTerm[],
+  pastMasters: PastMasterRow[],
   /** Masonic-year window (installation to installation); defaults to 1 Oct–30 Sep. */
-  yearRange?: { start: string; end: string | null }
+  yearRange?: { start: string; end: string | null },
+  installMonthFor: (year: number) => number | null = defaultInstallMonthFor,
 ): Milestone[] {
   const today = new Date();
   const my = currentMasonicYear(today);
   const toLocal = (s: string) => { const [y, m, d] = s.split("-").map(Number); return new Date(y, m - 1, d); };
   const yearStart = yearRange ? toLocal(yearRange.start) : new Date(my, 9, 1);
   const yearEnd = yearRange?.end ? toLocal(yearRange.end) : new Date(my + 1, 8, 30);
+  const masonicYearOf = (d: Date) => d.getFullYear();
   const out: Milestone[] = [];
 
   // Format a Date as YYYY-MM-DD using local components — avoids the
@@ -443,39 +449,68 @@ export function milestones(
     }
   }
 
-  // WM anniversaries — earliest year a member was installed as WM.
-  // Source 1: member_wm_terms table. Source 2: name match against the
-  // historical Worshipful Masters roll (src/data/worshipfulMasters.ts).
-  const firstWmByMember = new Map<string, number>();
-  for (const t of wmTerms) {
-    const cur = firstWmByMember.get(t.member_id);
-    if (cur == null || t.year_started < cur) firstWmByMember.set(t.member_id, t.year_started);
+  // WM anniversaries — from the Past Masters roll only (by member_id). The
+  // earliest lodge_year is the first installation; its installed_on gives the
+  // exact day when recorded. Without it we never invent a day.
+  const firstByMember = new Map<string, PastMasterRow>();
+  for (const r of pastMasters) {
+    if (!r.member_id) continue;
+    const cur = firstByMember.get(r.member_id);
+    if (!cur || r.lodge_year < cur.lodge_year) firstByMember.set(r.member_id, r);
   }
+  const memberIds = new Set(members.map((m) => m.id));
   for (const m of members) {
-    const fromRoll = firstWmYearForMember(m.first_name, m.last_name);
-    if (fromRoll != null) {
-      const cur = firstWmByMember.get(m.id);
-      if (cur == null || fromRoll < cur) firstWmByMember.set(m.id, fromRoll);
-    }
-  }
-  for (const m of members) {
-    const first = firstWmByMember.get(m.id);
+    if (["deceased", "resigned", "excluded"].includes(m.status) || !memberIds.has(m.id)) continue;
+    const first = firstByMember.get(m.id);
     if (!first) continue;
+    const exact = first.installed_on ? parseLocalDate(first.installed_on) : null;
     for (const target of [10, 25, 30, 40, 50]) {
-      const anniv = new Date(first + target, 9, 1); // installation is in October
-      if (anniv >= yearStart && anniv <= yearEnd) {
-        out.push({
-          member: m,
-          kind: "wm",
-          years: target,
-          date: fmtLocal(anniv),
-          label: `${target} years since first installed as WM`,
-        });
+      const y = first.lodge_year + target;
+      const label = `${target} years since first installed as WM`;
+      if (exact) {
+        const anniv = new Date(exact.getFullYear() + target, exact.getMonth(), exact.getDate());
+        if (anniv >= yearStart && anniv <= yearEnd) {
+          out.push({ member: m, kind: "wm", years: target, date: fmtLocal(anniv), precision: "day", label });
+        }
+        continue;
+      }
+      const month = installMonthFor(y); // 1-12 or null
+      if (month) {
+        const mStart = new Date(y, month - 1, 1);
+        const mEnd = new Date(y, month, 0);
+        if (mEnd >= yearStart && mStart <= yearEnd) {
+          out.push({ member: m, kind: "wm", years: target, date: `${y}-${String(month).padStart(2, "0")}`, precision: "month", label });
+        }
+      } else if (y === masonicYearOf(yearStart)) {
+        out.push({ member: m, kind: "wm", years: target, date: String(y), precision: "year", label });
       }
     }
   }
 
-  return out.sort((a, b) => (a.date < b.date ? -1 : 1));
+  return out.sort((a, b) => (milestoneSortKey(a) < milestoneSortKey(b) ? -1 : 1));
+}
+
+/** Sort key: exact days in order; a month-only entry sorts after the days of that month; year-only last in its year. */
+export function milestoneSortKey(x: Pick<Milestone, "date" | "precision">): string {
+  if (x.precision === "month") return `${x.date}-99`;
+  if (x.precision === "year") return `${x.date}-99-99`;
+  return x.date;
+}
+
+const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+/** On-screen/PDF date: dd/mm/yyyy for exact days, "October 2027" for month-only, "2027" for year-only. */
+export function milestoneDateLabel(x: Pick<Milestone, "date" | "precision">): string {
+  if (x.precision === "month") { const [y, m] = x.date.split("-"); return `${MONTHS[+m - 1]} ${y}`; }
+  if (x.precision === "year") return x.date;
+  const [y, m, d] = x.date.slice(0, 10).split("-");
+  return `${d}/${m}/${y}`;
+}
+
+/** Installation month (1–12) for a year from the Unit Setup rule, else null. */
+export function defaultInstallMonthFor(year: number): number | null {
+  const d = prescribedInstallationDate(year);
+  const m = /^\d{4}-(\d{2})-\d{2}/.exec(d ?? "");
+  return m ? +m[1] : null;
 }
 
 // ───── Section 6: Officers & succession
