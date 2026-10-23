@@ -12,6 +12,10 @@ interface Props {
   wordUrl?: string
   pdfUrl?: string
   expiresOn?: string
+  crestUrl?: string | null
+  lodgeName?: string
+  lodgeNumber?: string
+  provinceName?: string
 }
 
 const button = { ...brandStyles.link, display: 'inline-block', padding: '10px 18px', border: `1px solid ${BRAND.gold}`, borderRadius: '4px', margin: '4px' }

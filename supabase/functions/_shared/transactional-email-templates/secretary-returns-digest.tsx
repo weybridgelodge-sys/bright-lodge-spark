@@ -30,6 +30,10 @@ interface Props {
   dueSoon?: ReturnRow[]
   reportDate?: string
   portalUrl?: string
+  crestUrl?: string | null
+  lodgeName?: string
+  lodgeNumber?: string
+  provinceName?: string
 }
 
 const fmt = (s?: string | null) => {
