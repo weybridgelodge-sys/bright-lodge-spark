@@ -5,7 +5,6 @@ import { GOLD, INK, MUTED, NAVY, acct, fmtDate, drawTracedTable, loadReportBrand
 import { drawBrandHeader, HEADER_START_Y, PRINT_GOLD_DARK, PRINT_NAVY, type CrestImage } from "@/lib/pdfBrand";
 import type { DocIdentity } from "@/lib/docIdentity";
 import { AUDITOR_LABEL, type Approval, type Round, type Signoff, type YearSnapshot } from "./yearAudit";
-import autoTable from "jspdf-autotable";
 import { certifiedPackPath, packComparative, selectPackSource, type CompLine, type PackSource } from "./accountsPack";
 
 export type Certifier = { role: string; name: string; rank: string; date: string };
