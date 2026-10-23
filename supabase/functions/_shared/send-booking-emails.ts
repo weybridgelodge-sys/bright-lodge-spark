@@ -250,6 +250,7 @@ export async function sendBookingEmails(bookingId: string, opts: SendOpts) {
             bookingRef,
             secretaryName,
             secretaryOffice,
+            crestUrl: lodge.crestImageUrl || null, lodgeName: lodge.lodgeName, lodgeNumber: lodge.lodgeNumber, provinceName: lodge.provinceName,
           },
       })
       if (confRes.error) console.error('Ladies Festival confirmation email failed', confRes.error)
@@ -279,6 +280,7 @@ export async function sendBookingEmails(bookingId: string, opts: SendOpts) {
             paymentStatusLabel: psLabel,
             bookingRef,
             submittedAt,
+            crestUrl: lodge.crestImageUrl || null, lodgeName: lodge.lodgeName, lodgeNumber: lodge.lodgeNumber, provinceName: lodge.provinceName,
           },
       })
       if (notifRes.error) console.error('Ladies Festival notification email failed', notifyTo, notifRes.error)
@@ -311,6 +313,7 @@ export async function sendBookingEmails(bookingId: string, opts: SendOpts) {
           secretaryOffice,
           summonsPdfUrl,
           summonsMeetingNumber,
+          crestUrl: lodge.crestImageUrl || null, hostLodgeName: lodge.lodgeName, lodgeNumber: lodge.lodgeNumber, provinceName: lodge.provinceName,
         },
     })
     if (confRes.error) console.error('Booking confirmation email failed', confRes.error)
@@ -342,6 +345,7 @@ export async function sendBookingEmails(bookingId: string, opts: SendOpts) {
           isApologies,
           bookingRef,
           submittedAt,
+          crestUrl: lodge.crestImageUrl || null, hostLodgeName: lodge.lodgeName, lodgeNumber: lodge.lodgeNumber, provinceName: lodge.provinceName,
         },
     })
     if (notifRes.error) console.error('Booking notification email failed', notifyTo, notifRes.error)

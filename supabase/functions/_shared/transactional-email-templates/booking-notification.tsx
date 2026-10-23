@@ -6,14 +6,13 @@ import {
   Heading,
   Hr,
   Html,
-  Img,
   Preview,
   Link,
   Section,
   Text,
 } from 'npm:@react-email/components@0.0.22'
 import type { TemplateEntry } from './registry.ts'
-import { LOGO_HEIGHT, LOGO_URL, LOGO_WIDTH } from './_brand.ts'
+import { EmailBrandFooter, EmailBrandHeader } from './_brandHeader.tsx'
 
 interface Guest { name?: string; lodge?: string; dietary?: string }
 interface Props {
@@ -33,6 +32,11 @@ interface Props {
   isApologies?: boolean
   bookingRef?: string
   submittedAt?: string
+  /** Host lodge identity (header/footer). `lodgeName` above is the booker's own lodge. */
+  crestUrl?: string | null
+  hostLodgeName?: string
+  lodgeNumber?: string
+  provinceName?: string
 }
 
 const Email = ({
@@ -52,7 +56,10 @@ const Email = ({
   isApologies,
   bookingRef,
   submittedAt,
-}: Props) => (
+  crestUrl, hostLodgeName, lodgeNumber, provinceName,
+}: Props) => {
+  const id = { crestUrl, lodgeName: hostLodgeName, lodgeNumber, provinceName }
+  return (
   <Html lang="en" dir="ltr">
     <Head />
     <Preview>
@@ -62,17 +69,7 @@ const Email = ({
     </Preview>
     <Body style={main}>
       <Container style={container}>
-        <Section style={{ textAlign: 'center', padding: '8px 0 16px' }}>
-          <Img
-            src={LOGO_URL}
-            width={LOGO_WIDTH}
-            height={LOGO_HEIGHT}
-            alt="Weybridge Lodge crest"
-            style={{ margin: '0 auto', display: 'block' }}
-          />
-          <Heading style={brand}>Weybridge Lodge</Heading>
-          <Text style={brandSub}>No. 6787 — Province of Surrey</Text>
-        </Section>
+        <EmailBrandHeader {...id} />
         <Heading style={h1}>
           {isApologies ? 'Apologies received' : 'New booking received'}
         </Heading>
@@ -118,10 +115,12 @@ const Email = ({
           )}{' '}
           to make contact.
         </Text>
+        <EmailBrandFooter {...id} />
       </Container>
     </Body>
   </Html>
-)
+  )
+}
 
 const Row = ({ label, value }: { label: string; value?: string }) => (
   <Text style={rowStyle}>
@@ -144,12 +143,13 @@ export const template = {
     eventLabel: 'Regular Meeting & Festive Board',
     eventDate: 'Thursday 8 January 2026',
     meetingOptionLabel: 'Meeting & Festive Board',
-    lodgeName: 'Weybridge Lodge No. 6787',
+    lodgeName: 'Visiting Lodge No. 9999',
     totalAmount: '£35.00',
     paymentMethodLabel: 'Card (Stripe)',
     paymentStatusLabel: 'Paid',
     bookingRef: '0e0fb8f3',
     submittedAt: new Date().toLocaleString('en-GB'),
+    crestUrl: 'https://placehold.co/240x240/png', hostLodgeName: 'Example Lodge', lodgeNumber: '1234', provinceName: 'Province of Testshire',
   },
 } satisfies TemplateEntry
 
@@ -164,5 +164,3 @@ const guestLine = { color: '#2a2a2a', fontSize: '14px', lineHeight: '1.5', margi
 const hr = { borderColor: '#e8e3d3', margin: '14px 0' }
 const footerText = { color: '#666', fontSize: '12px', margin: '18px 0 0' }
 const emailLink = { color: '#1B2A4A', textDecoration: 'underline', fontWeight: 600 as const }
-const brand = { color: '#1B2A4A', fontSize: '24px', margin: '12px 0 0', letterSpacing: '0.5px' }
-const brandSub = { color: '#C9A432', fontSize: '12px', letterSpacing: '2px', textTransform: 'uppercase' as const, margin: '4px 0 12px' }

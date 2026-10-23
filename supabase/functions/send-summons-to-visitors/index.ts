@@ -1,17 +1,17 @@
 // send-summons-to-visitors — email a finalised summons to visitor contacts.
 // Personalised salutation per recipient, branded HTML matching the shared
-// Shared transactional email style (centred crest, lodge name heading, gold number and province
-// subtitle, white body); lodge details come from Unit Setup via loadLodgeSettings.
+// shared brand header/footer (brandHeaderHtml/brandFooterHtml in _brand.ts); crest and
+// lodge details come from Unit Setup / lodge record via loadLodgeSettings.
 // with the summons PDF + .ics calendar file attached.
 //
 // Role-gated to admin / secretary / worshipful_master and logged into
 // summons_email_log so history clearly shows which visitors were invited.
 
 import { createClient } from "npm:@supabase/supabase-js@2";
-import { BRAND, LOGO_URL } from "../_shared/transactional-email-templates/_brand.ts";
+import { BRAND, BRAND_GOLD_DARK, brandFooterHtml, brandHeaderHtml } from "../_shared/transactional-email-templates/_brand.ts";
 import { loadLodgeSettings, resolveLodgeSettings } from "../_shared/lodgeSettings.ts";
 let LODGE = resolveLodgeSettings(null);
-const lodgeNo = () => LODGE.formalSenderName.replace(LODGE.senderName, "").trim();
+const brandId = () => ({ crestUrl: LODGE.crestImageUrl || null, lodgeName: LODGE.lodgeName, lodgeNumber: LODGE.lodgeNumber, provinceName: LODGE.provinceName });
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -65,9 +65,7 @@ function renderHtml(o: {
   secretaryName: string;
   unsubscribeUrl?: string;
 }): string {
-  // Style matches the shared brand (see supabase/functions/_shared/transactional-email-templates/_brand.ts
-  // and almoner-overdue-digest.tsx): white body, centered crest, navy lodge-name title
-  // with a gold "No. <number> — <province>" subtitle, then Arial body copy.
+  // Shared brand header/footer (navy crest on white, from Unit Setup; blank crest = no image).
   const detailRow = (label: string, value: string) => `
     <tr>
       <td style="padding:4px 12px 4px 0;color:${BRAND.muted};font-size:14px;vertical-align:top;">${esc(label)}</td>
@@ -80,11 +78,7 @@ function renderHtml(o: {
   <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:${BRAND.bg};">
     <tr><td align="center">
       <table role="presentation" width="${parseInt(BRAND.containerMaxWidth, 10)}" cellspacing="0" cellpadding="0" style="max-width:${BRAND.containerMaxWidth};margin:0 auto;padding:24px;">
-        <tr><td align="center" style="padding:8px 0 16px;">
-          <img src="${LOGO_URL}" width="120" height="120" alt="${esc(LODGE.senderName)} crest" style="display:block;margin:0 auto;" />
-          <h1 style="color:${BRAND.navy};font-size:24px;margin:12px 0 0;letter-spacing:0.5px;font-family:${BRAND.fontStack};">${esc(LODGE.senderName)}</h1>
-          <div style="color:${BRAND.gold};font-size:12px;letter-spacing:2px;text-transform:uppercase;margin:4px 0 12px;">${esc(lodgeNo())} — ${esc(LODGE.provinceName)}</div>
-        </td></tr>
+        <tr><td>${brandHeaderHtml(brandId())}</td></tr>
         <tr><td style="padding:0;">
           <h2 style="color:${BRAND.navy};font-size:22px;margin:0 0 6px;font-family:${BRAND.fontStack};">Invitation to our next Meeting</h2>
           <p style="color:${BRAND.body};font-size:14px;line-height:1.55;margin:14px 0;">Dear ${esc(o.salutation)},</p>
@@ -107,10 +101,10 @@ function renderHtml(o: {
           <hr style="border:none;border-top:1px solid ${BRAND.hairline};margin:20px 0 10px;" />
           <p style="color:${BRAND.muted};font-size:12px;margin:0;">
             ${o.unsubscribeUrl
-              ? `If you would prefer not to receive further invitations, <a href="${esc(o.unsubscribeUrl)}" style="color:${BRAND.gold};">click here to unsubscribe</a> from future ${esc(LODGE.senderName)} emails.`
+              ? `If you would prefer not to receive further invitations, <a href="${esc(o.unsubscribeUrl)}" style="color:${BRAND_GOLD_DARK};">click here to unsubscribe</a> from future ${esc(LODGE.senderName)} emails.`
               : `If you would prefer not to receive further invitations, please let the Secretary know and we will remove you from our visitor list.`}
           </p>
-
+          ${brandFooterHtml(brandId())}
         </td></tr>
       </table>
     </td></tr>

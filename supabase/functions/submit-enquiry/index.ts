@@ -121,6 +121,7 @@ Deno.serve(async (req) => {
     secretaryOffice: secretary.office,
     membershipOfficerName: membershipOfficer.name,
     guideUrl: contacts.guideUrl,
+    crestUrl: lodge?.crestImageUrl || null, lodgeName: lodge?.lodgeName, lodgeNumber: lodge?.lodgeNumber, provinceName: lodge?.provinceName,
   }
   const confRes = await sendTransactionalEmail({
       templateName: 'enquiry-confirmation',

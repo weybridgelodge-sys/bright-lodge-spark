@@ -1,4 +1,6 @@
-import { loadDocIdentity, docTitle, docSubtitle, docFileName, docGroupName } from "@/lib/docIdentity";
+import { loadDocIdentity } from "@/lib/docIdentity";
+import { fetchCrestUrl } from "@/lib/pdfBrand";
+import { brandFooterHtml, brandHeaderHtml, brandHeaderLines, type BrandIdentity } from "../../supabase/functions/_shared/transactional-email-templates/_brand";
 import { supabase } from "@/integrations/supabase/client";
 import { generateICS, icsFilename, type ICSEventInput } from "./generateICS";
 
@@ -45,12 +47,9 @@ export async function sendEventInvite(args: SendEventInviteArgs): Promise<{
   return data as any;
 }
 
-// Shared brand palette — mirrors supabase/functions/_shared/transactional-email-templates/_brand.ts
-// so member-triggered event invite emails (Visits, Socials, Summons) match the
-// React Email templates (almoner digest, poll opened, visitor invitation).
+// Brand palette/header shared with the server emails (supabase/functions/_shared/transactional-email-templates/_brand.ts).
 const BRAND = {
   navy: "#1B2A4A",
-  gold: "#C9A432",
   body: "#2a2a2a",
   muted: "#666",
   hairline: "#e8e3d3",
@@ -58,8 +57,12 @@ const BRAND = {
   bg: "#ffffff",
   fontStack: "Arial, sans-serif",
 } as const;
-const LOGO_URL =
-  "https://bright-lodge-spark.lovable.app/__l5e/assets-v1/7caf0014-2e5c-4614-8622-ee60d204fdcc/weybridge-logo-navy-transparent.png";
+
+/** Host lodge identity for invite emails: name/number/province from the lodge record, crest from Unit Setup (blank = no image). */
+export async function loadEventEmailBrand(): Promise<BrandIdentity> {
+  const [ident, crestUrl] = await Promise.all([loadDocIdentity(), fetchCrestUrl()]);
+  return { crestUrl, lodgeName: ident.lodgeName, lodgeNumber: ident.lodgeNumber, provinceName: ident.provinceName };
+}
 
 export function formatEventEmailHtml(opts: {
   heading: string;
@@ -67,7 +70,9 @@ export function formatEventEmailHtml(opts: {
   fields: { label: string; value: string }[];
   bodyHtml?: string;
   footer?: string;
+  identity?: BrandIdentity | null;
 }): string {
+  const brandFooter = brandHeaderLines(opts.identity).footer;
   const rows = opts.fields
     .map(
       (f) =>
@@ -79,11 +84,7 @@ export function formatEventEmailHtml(opts: {
   <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:${BRAND.bg};">
     <tr><td align="center" style="padding:24px 12px;">
       <table role="presentation" width="600" cellspacing="0" cellpadding="0" style="max-width:600px;width:100%;">
-        <tr><td align="center" style="padding:8px 0 16px;">
-          <img src="${LOGO_URL}" width="120" height="120" alt="Weybridge Lodge crest" style="display:block;margin:0 auto;" />
-          <h1 style="color:${BRAND.navy};font-size:24px;margin:12px 0 0;letter-spacing:0.5px;font-family:${BRAND.fontStack};">Weybridge Lodge</h1>
-          <div style="color:${BRAND.gold};font-size:12px;letter-spacing:2px;text-transform:uppercase;margin:4px 0 12px;">No. 6787 — Province of Surrey</div>
-        </td></tr>
+        <tr><td>${brandHeaderHtml(opts.identity)}</td></tr>
         <tr><td style="padding:0 24px;">
           <h2 style="color:${BRAND.navy};font-size:22px;margin:0 0 12px;font-family:${BRAND.fontStack};">${opts.heading}</h2>
           <p style="color:${BRAND.body};font-size:14px;line-height:1.55;margin:0 0 14px;">${opts.intro}</p>
@@ -95,7 +96,8 @@ export function formatEventEmailHtml(opts: {
           ${opts.bodyHtml ?? ""}
           <p style="color:${BRAND.muted};font-size:13px;margin:20px 0 0;">A calendar invitation is attached — open it to add this event to your calendar.</p>
           <hr style="border:none;border-top:1px solid ${BRAND.hairline};margin:20px 0 10px;" />
-          <p style="color:${BRAND.muted};font-size:13px;margin:18px 0 24px;">${opts.footer ?? "S&F, Weybridge Lodge No. 6787"}</p>
+          <p style="color:${BRAND.muted};font-size:13px;margin:18px 0 24px;">${opts.footer ?? (brandFooter ? `S&F, ${brandFooter}` : "S&F")}</p>
+          ${brandFooterHtml(opts.identity)}
         </td></tr>
       </table>
     </td></tr>

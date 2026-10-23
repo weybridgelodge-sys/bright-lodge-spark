@@ -6,14 +6,14 @@ import {
   Heading,
   Hr,
   Html,
-  Img,
   Link,
   Preview,
   Section,
   Text,
 } from 'npm:@react-email/components@0.0.22'
 import type { TemplateEntry } from './registry.ts'
-import { LOGO_HEIGHT, LOGO_URL, LOGO_WIDTH } from './_brand.ts'
+import { brandHeaderLines } from './_brand.ts'
+import { EmailBrandFooter, EmailBrandHeader } from './_brandHeader.tsx'
 
 interface Guest { name?: string; lodge?: string; dietary?: string }
 interface Props {
@@ -34,6 +34,11 @@ interface Props {
   secretaryOffice?: string
   summonsPdfUrl?: string
   summonsMeetingNumber?: number
+  /** Host lodge identity (header/footer). `lodgeName` above is the booker's own lodge. */
+  crestUrl?: string | null
+  hostLodgeName?: string
+  lodgeNumber?: string
+  provinceName?: string
 }
 
 const Email = ({
@@ -54,7 +59,10 @@ const Email = ({
   secretaryOffice,
   summonsPdfUrl,
   summonsMeetingNumber,
-}: Props) => (
+  crestUrl, hostLodgeName, lodgeNumber, provinceName,
+}: Props) => {
+  const id = { crestUrl, lodgeName: hostLodgeName, lodgeNumber, provinceName }
+  return (
   <Html lang="en" dir="ltr">
     <Head />
     <Preview>
@@ -64,11 +72,7 @@ const Email = ({
     </Preview>
     <Body style={main}>
       <Container style={container}>
-        <Section style={header}>
-          <Img src={LOGO_URL} width={LOGO_WIDTH} height={LOGO_HEIGHT} alt="Weybridge Lodge crest" style={logo} />
-          <Heading style={brand}>Weybridge Lodge</Heading>
-          <Text style={brandSub}>No. 6787 — Province of Surrey</Text>
-        </Section>
+        <EmailBrandHeader {...id} />
 
         <Section style={card}>
           <Heading as="h2" style={h2}>
@@ -146,15 +150,12 @@ const Email = ({
           </Text>
         </Section>
 
-        <Section style={footer}>
-          <Text style={footerText}>
-            Weybridge Lodge No. 6787 · Consecrated 1949 · Guildford, Surrey
-          </Text>
-        </Section>
+        <EmailBrandFooter {...id} />
       </Container>
     </Body>
   </Html>
-)
+  )
+}
 
 const Row = ({ label, value }: { label: string; value?: string }) => (
   <Text style={rowStyle}>
@@ -167,15 +168,15 @@ export const template = {
   component: Email,
   subject: (d: any) =>
     d?.isApologies
-      ? `Apologies received — ${d?.eventLabel || 'Weybridge Lodge'}`
-      : `Booking confirmation — ${d?.eventLabel || 'Weybridge Lodge'}`,
+      ? `Apologies received — ${d?.eventLabel || brandHeaderLines({ lodgeName: d?.hostLodgeName }).name || 'the Lodge'}`
+      : `Booking confirmation — ${d?.eventLabel || brandHeaderLines({ lodgeName: d?.hostLodgeName }).name || 'the Lodge'}`,
   displayName: 'Booking confirmation',
   previewData: {
     firstName: 'John',
     eventLabel: 'Regular Meeting & Festive Board',
     eventDate: 'Thursday 8 January 2026',
     meetingOptionLabel: 'Meeting & Festive Board',
-    lodgeName: 'Weybridge Lodge No. 6787',
+    lodgeName: 'Visiting Lodge No. 9999',
     guests: [{ name: 'Bro. Guest One', lodge: 'Visiting Lodge' }],
     totalAmount: '£35.00',
     paymentMethodLabel: 'Card (Stripe)',
@@ -183,15 +184,12 @@ export const template = {
     bookingRef: '0e0fb8f3',
     secretaryName: 'W Bro. Richard Smith',
     secretaryOffice: 'Lodge Secretary',
+    crestUrl: 'https://placehold.co/240x240/png', hostLodgeName: 'Example Lodge', lodgeNumber: '1234', provinceName: 'Province of Testshire',
   },
 } satisfies TemplateEntry
 
 const main = { backgroundColor: '#ffffff', fontFamily: 'Georgia, "Times New Roman", serif', margin: 0, padding: 0 }
 const container = { maxWidth: '600px', margin: '0 auto', padding: '24px' }
-const header = { textAlign: 'center' as const, padding: '16px 0 24px' }
-const logo = { margin: '0 auto 12px', display: 'block' }
-const brand = { color: '#1B2A4A', fontSize: '28px', margin: 0, letterSpacing: '0.5px' }
-const brandSub = { color: '#C9A432', fontSize: '13px', letterSpacing: '2px', textTransform: 'uppercase' as const, margin: '4px 0 0' }
 const card = { backgroundColor: '#fafaf7', border: '1px solid #e8e3d3', borderRadius: '4px', padding: '28px 28px 22px' }
 const h2 = { color: '#1B2A4A', fontSize: '20px', margin: '0 0 12px' }
 const p = { color: '#2a2a2a', fontSize: '15px', lineHeight: '1.6', margin: '0 0 12px', fontFamily: 'Arial, sans-serif' }
@@ -201,8 +199,6 @@ const labelStyle = { color: '#1B2A4A', fontWeight: 'bold' as const, fontSize: '1
 const guestLine = { color: '#2a2a2a', fontSize: '14px', lineHeight: '1.5', margin: '2px 0', fontFamily: 'Arial, sans-serif' }
 const buttonStyle = { display: 'inline-block', backgroundColor: '#1B2A4A', color: '#ffffff', fontFamily: 'Arial, sans-serif', fontSize: '14px', fontWeight: 'bold' as const, textDecoration: 'none', padding: '12px 22px', borderRadius: '3px', border: '1px solid #C9A432', margin: '10px 0 4px' }
 const small = { color: '#666', fontSize: '12px', lineHeight: '1.5', margin: 0, fontFamily: 'Arial, sans-serif' }
-const footer = { textAlign: 'center' as const, padding: '20px 0' }
-const footerText = { color: '#888', fontSize: '11px', margin: 0, fontFamily: 'Arial, sans-serif' }
 const signOff = { color: '#2a2a2a', fontSize: '15px', lineHeight: '1.5', margin: '0 0 8px', fontFamily: 'Arial, sans-serif' }
 const signName = { color: '#1B2A4A', fontSize: '15px', fontWeight: 600, lineHeight: '1.4', margin: 0, fontFamily: 'Arial, sans-serif' }
 const signOffice = { color: '#1B2A4A', fontSize: '14px', lineHeight: '1.4', margin: 0, fontFamily: 'Arial, sans-serif', fontStyle: 'italic' as const }

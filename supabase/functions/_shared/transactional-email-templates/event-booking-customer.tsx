@@ -1,8 +1,9 @@
 import * as React from 'npm:react@18.3.1'
-import { Body, Container, Head, Heading, Hr, Html, Img, Link, Preview, Section, Text } from 'npm:@react-email/components@0.0.22'
+import { Body, Container, Head, Heading, Hr, Html, Link, Preview, Section, Text } from 'npm:@react-email/components@0.0.22'
 import type { TemplateEntry } from './registry.ts'
 import { firstNameFromContact } from '../greeting.ts'
-import { BRAND, LOGO_HEIGHT, LOGO_URL, LOGO_WIDTH } from './_brand.ts'
+import { BRAND } from './_brand.ts'
+import { EmailBrandFooter, EmailBrandHeader } from './_brandHeader.tsx'
 
 export interface EventBookingData {
   stage?: 'booked' | 'paid' | 'deposit' | 'balance_paid' | 'reminder' | 'choices' | 'link'
@@ -33,19 +34,20 @@ export interface EventBookingData {
   bank?: { account_holder_name?: string; sort_code?: string; account_number?: string; reference?: string } | null
   eventUrl?: string
   adminUrl?: string
+  crestUrl?: string | null
+  lodgeName?: string
+  lodgeNumber?: string
+  provinceName?: string
 }
 
 export const Row = ({ label, value }: { label: string; value?: React.ReactNode }) => (
   <Text style={row}><strong style={{ color: BRAND.navy }}>{label}: </strong><span style={{ color: BRAND.body }}>{value || '—'}</span></Text>
 )
 
-export const Crest = () => (
-  <Section style={{ textAlign: 'center', padding: '8px 0 16px' }}>
-    <Img src={LOGO_URL} width={LOGO_WIDTH} height={LOGO_HEIGHT} alt="Weybridge Lodge crest" style={{ margin: '0 auto', display: 'block' }} />
-    <Heading style={brand}>Weybridge Lodge</Heading>
-    <Text style={brandSub}>No. 6787 — Province of Surrey</Text>
-  </Section>
-)
+/** Host lodge identity from the sender (Unit Setup / lodge record). */
+export const brandId = (d: EventBookingData) => ({ crestUrl: d.crestUrl, lodgeName: d.lodgeName, lodgeNumber: d.lodgeNumber, provinceName: d.provinceName })
+export const Crest = ({ d }: { d: EventBookingData }) => <EmailBrandHeader {...brandId(d)} />
+export const Footer = ({ d }: { d: EventBookingData }) => <EmailBrandFooter {...brandId(d)} />
 
 export const GuestList = ({ guests = [] }: { guests?: EventBookingData['guests'] }) => (
   <>
@@ -90,7 +92,7 @@ const Email = (d: EventBookingData) => {
       <Preview>{copy.preview}</Preview>
       <Body style={main}>
         <Container style={container}>
-          <Crest />
+          <Crest d={d} />
           <Heading style={h1}>{copy.heading}</Heading>
           <Text style={p}>Dear {first || 'guest'},</Text>
           <Text style={p}>{copy.intro}</Text>
@@ -133,6 +135,7 @@ const Email = (d: EventBookingData) => {
           )}
           {d.eventUrl && <Text style={small}>Event details: <Link href={d.eventUrl} style={link}>{d.eventUrl}</Link></Text>}
           <Text style={small}>Questions? Simply reply to this email.</Text>
+          <Footer d={d} />
         </Container>
       </Body>
     </Html>
@@ -155,11 +158,12 @@ export const template = {
   },
   displayName: 'Event booking (customer)',
   previewData: {
-    stage: 'booked', eventTitle: 'Joint Christmas Party at Guildford Masonic Centre', eventDate: 'Saturday 19 December 2026',
-    venue: 'Guildford Masonic Centre, Hitherbury Close, Guildford GU2 4DR', bookerName: 'John Smith', reference: 'XMAS26-0001',
+    stage: 'booked', eventTitle: 'Joint Christmas Party at Example Hall', eventDate: 'Saturday 19 December 2026',
+    venue: 'Example Hall, 1 High Street, Exampletown EX1 1AA', bookerName: 'John Smith', reference: 'XMAS26-0001',
     guests: [{ name: 'John Smith' }, { name: 'Amy Smith', isChild: true, age: 8, dietary: 'Nut allergy' }],
     total: '£0.00', paymentMethod: 'Bank transfer', paymentStatus: 'Awaiting payment',
     bank: { account_holder_name: 'Example', sort_code: '00-00-00', account_number: '00000000', reference: 'EXAMPLE' },
+    crestUrl: 'https://placehold.co/240x240/png', lodgeName: 'Example Lodge', lodgeNumber: '1234', provinceName: 'Province of Testshire',
   },
 } satisfies TemplateEntry
 
@@ -176,5 +180,3 @@ export const small = { color: BRAND.muted, fontSize: '13px', margin: '16px 0 0' 
 export const notice = { backgroundColor: BRAND.bg, border: `2px solid ${BRAND.gold}`, borderRadius: '4px', padding: '14px 16px', margin: '16px 0 0' }
 export const noticeText = { color: BRAND.navy, fontSize: '14px', fontWeight: 'bold' as const, lineHeight: '1.5', margin: '0' }
 export const link = { color: BRAND.navy, textDecoration: 'underline' }
-const brand = { color: BRAND.navy, fontSize: '24px', margin: '12px 0 0', letterSpacing: '0.5px' }
-const brandSub = { color: BRAND.gold, fontSize: '12px', letterSpacing: '2px', textTransform: 'uppercase' as const, margin: '4px 0 12px' }
