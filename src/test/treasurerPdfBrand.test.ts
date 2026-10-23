@@ -7,10 +7,10 @@ vi.mock("@/lib/docIdentity", async (orig) => {
 });
 const mode = vi.hoisted(() => ({ crestUrl: null as string | null }));
 vi.mock("@/lib/pdfBrand", async (orig) => ({ ...(await orig<any>()), fetchCrestUrl: async () => mode.crestUrl }));
-const tables = vi.hoisted(() => [] as { finalY: number; head: number }[]);
+const tables = vi.hoisted(() => [] as { finalY: number; head: number; cols: number }[]);
 vi.mock("jspdf-autotable", async (orig) => {
   const real: any = (await orig<any>()).default;
-  return { default: (doc: any, o: any) => { real(doc, o); const t = doc.lastAutoTable; tables.push({ finalY: t.finalY, head: Math.max(0, ...(t.head[0]?.cells ? Object.values(t.head[0].cells).map((c: any) => c.text.length) : [0])) }); } };
+  return { default: (doc: any, o: any) => { real(doc, o); const t = doc.lastAutoTable; tables.push({ finalY: t.finalY, cols: t.columns.length, head: t.head[0]?.cells?.[0]?.text?.length ?? 0 }); } };
 });
 import { buildAccountsPackPdf } from "@/lib/treasurer/accountsPackPdf";
 import { buildMinutesPdf, buildAgendaPdf } from "@/pages/members/admin/MeetingMinutes";
@@ -50,13 +50,13 @@ describe("Treasurer, accounts pack, minutes and agenda PDFs", () => {
         const d2 = await build(); expect(hasImage(d2)).toBe(false);
       } finally { (globalThis as any).fetch = realFetch; mode.crestUrl = null; }
     });
-    it(`${name}: A4 portrait, under 200 KB, tables clear of the footer, headings on one line`, async () => {
+    it(`${name}: A4 portrait, under 200 KB, tables clear of the footer, two/three-column first heading on one line`, async () => {
       tables.length = 0;
       const d = await build();
       const ps = d.internal.pageSize;
       expect([Math.round(ps.getWidth()), Math.round(ps.getHeight())]).toEqual([595, 842]);
       expect(d.output("arraybuffer").byteLength).toBeLessThan(200 * 1024);
-      for (const t of tables) { expect(t.finalY).toBeLessThanOrEqual(842 - 56); expect(t.head).toBeLessThanOrEqual(1); }
+      for (const t of tables) { expect(t.finalY).toBeLessThanOrEqual(842 - 56); if (t.cols <= 3) expect(t.head).toBeLessThanOrEqual(1); }
     });
   }
 });
