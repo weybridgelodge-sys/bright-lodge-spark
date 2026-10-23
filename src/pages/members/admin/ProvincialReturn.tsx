@@ -276,7 +276,7 @@ function Inner() {
         </div>
       )}
       <AlertDialog open={!!pending} onOpenChange={(o) => { if (!o && !sending) cancelSubmit(); }}>
-        <AlertDialogContent className="max-h-[90vh] overflow-y-auto">
+        <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Send the Provincial Return to Province?</AlertDialogTitle>
             <AlertDialogDescription asChild>
