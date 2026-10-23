@@ -1,7 +1,8 @@
 import { loadDocIdentity, docTitle, docSubtitle, docFileName, docGroupName } from "@/lib/docIdentity";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import { createPdfRun, drawBrandFooter, drawBrandHeader, drawBrandSection, fetchCrestUrl, HEADER_START_Y, PRINT_GOLD, type CrestImage } from "@/lib/pdfBrand";
+import { drawBrandFooter, drawBrandHeader, drawBrandSectionRule, HEADER_START_Y, fetchCrestUrl, loadPdfBrand, measureTableHeight, type CrestImage, type PdfBrandDeps } from "@/lib/pdfBrand";
+export { measureTableHeight };
 import type { DocIdentity } from "@/lib/docIdentity";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -101,16 +102,12 @@ export function signedBalance(accountType: string, m: Movement | undefined): num
     : m.credit - m.debit;
 }
 
-export type ReportPdfDeps = { identity?: DocIdentity; crestUrl?: string | null; run?: ReturnType<typeof createPdfRun> };
+export type ReportPdfDeps = PdfBrandDeps;
 
 /** Unit Setup crest + lodge identity for a report run; any crest failure gives null (image omitted). */
 export async function loadReportBrand(deps: ReportPdfDeps = {}): Promise<{ identity: DocIdentity; crest: CrestImage | null }> {
-  const [identity, crestUrl] = await Promise.all([
-    deps.identity ? Promise.resolve(deps.identity) : loadDocIdentity(),
-    deps.crestUrl !== undefined ? Promise.resolve(deps.crestUrl) : fetchCrestUrl(),
-  ]);
-  const crest = await (deps.run ?? createPdfRun()).crest(crestUrl).catch(() => null);
-  return { identity, crest };
+  const crestUrl = deps.crestUrl !== undefined ? deps.crestUrl : await fetchCrestUrl();
+  return loadPdfBrand({ ...deps, crestUrl });
 }
 
 /**
@@ -129,29 +126,70 @@ export async function reportPdfDoc(subtitle: string, periodLine: string, hideGen
   return { doc, pageW, margin, startY: HEADER_START_Y, identity, finish: () => drawBrandFooter(doc, identity, margin) };
 }
 
-/** Navy serif section heading with a thin gold rule; starts a new page if too near the footer. */
-export function reportSection(doc: jsPDF, pageW: number, margin: number, y: number, title: string) {
-  if (y > doc.internal.pageSize.getHeight() - 110) { doc.addPage(); y = margin; }
-  const next = drawBrandSection(doc, y, title, margin);
-  doc.setDrawColor(...PRINT_GOLD); doc.setLineWidth(0.6);
-  doc.line(margin, next - 6, pageW - margin, next - 6);
-  return y + 32;
+/** Space reserved above the footer for tables and text (matches autoTable bottom margin). */
+export const REPORT_BOTTOM = 60;
+
+/** Test-only layout trace: headings and the page their following table starts on. */
+const layoutTrace = new WeakMap<jsPDF, { kind: "heading" | "table"; page: number; title?: string }[]>();
+export const reportLayoutTrace = (doc: jsPDF) => layoutTrace.get(doc) ?? [];
+const trace = (doc: jsPDF, e: { kind: "heading" | "table"; page: number; title?: string }) => {
+  const l = layoutTrace.get(doc) ?? []; l.push(e); layoutTrace.set(doc, l);
+};
+const pageNo = (doc: jsPDF) => (doc as any).internal.getCurrentPageInfo().pageNumber as number;
+
+/**
+ * Navy serif section heading with a thin gold rule. Starts a new page BEFORE drawing the heading
+ * when it is too near the footer, or when `keepWith` (the height of what follows, e.g. from
+ * measureTableHeight) would not fit under it — a heading never sits alone at the foot of a page.
+ */
+export function reportSection(doc: jsPDF, pageW: number, margin: number, y: number, title: string, keepWith = 0) {
+  const pageH = doc.internal.pageSize.getHeight();
+  if (y > pageH - 110 || (keepWith > 0 && y + 32 + keepWith > pageH - REPORT_BOTTOM)) { doc.addPage(); y = margin; }
+  trace(doc, { kind: "heading", page: pageNo(doc), title });
+  return drawBrandSectionRule(doc, y, title, margin);
 }
 
-export function reportTable(doc: jsPDF, margin: number, y: number, head: string[][], body: any[][]) {
-  autoTable(doc, {
+const DEFAULT_COLUMNS = { 0: { cellWidth: 275 }, 1: { cellWidth: 120, halign: "right" }, 2: { cellWidth: 120, halign: "right" } };
+
+/** autoTable options for the standard report table; columnStyles replaces the 3-column default. */
+export function reportTableOpts(margin: number, y: number, head: string[][], body: any[][], columnStyles?: Record<number, any>) {
+  return {
     head, body, startY: y,
-    margin: { top: margin, left: margin, right: margin, bottom: 60 },
-    styles: { font: "helvetica", fontSize: 9, cellPadding: 5, textColor: INK, lineColor: [220, 215, 200], lineWidth: 0.4, overflow: "linebreak" },
-    headStyles: { fillColor: GOLD, textColor: NAVY, fontStyle: "bold" },
-    alternateRowStyles: { fillColor: [250, 247, 238] },
-    theme: "grid",
-    columnStyles: { 0: { cellWidth: 275 }, 1: { cellWidth: 120, halign: "right" }, 2: { cellWidth: 120, halign: "right" } },
-    rowPageBreak: "avoid",
+    margin: { top: margin, left: margin, right: margin, bottom: REPORT_BOTTOM },
+    styles: { font: "helvetica" as const, fontSize: 9, cellPadding: 5, textColor: INK, lineColor: [220, 215, 200] as [number, number, number], lineWidth: 0.4, overflow: "linebreak" as const },
+    headStyles: { fillColor: GOLD, textColor: NAVY, fontStyle: "bold" as const },
+    alternateRowStyles: { fillColor: [250, 247, 238] as [number, number, number] },
+    theme: "grid" as const,
+    columnStyles: columnStyles ?? DEFAULT_COLUMNS,
+    rowPageBreak: "avoid" as const,
     // Short tables (totals, balance checks) move whole to the next page instead of splitting.
-    pageBreak: body.length <= 8 ? "avoid" : "auto",
-  });
-  return (doc as any).lastAutoTable.finalY + 16;
+    pageBreak: (body.length <= 8 ? "avoid" : "auto") as "avoid" | "auto",
+  };
+}
+
+/** Draws an autoTable and records (for tests) the page its first row lands on. Returns finalY. */
+export function drawTracedTable(doc: jsPDF, opts: Record<string, any>): number {
+  let first = true;
+  const userHook = opts.didDrawCell;
+  autoTable(doc, {
+    ...opts,
+    didDrawCell: (d: any) => {
+      if (first) { first = false; trace(doc, { kind: "table", page: pageNo(doc) }); }
+      userHook?.(d);
+    },
+  } as any);
+  return (doc as any).lastAutoTable.finalY;
+}
+
+export function reportTable(doc: jsPDF, margin: number, y: number, head: string[][], body: any[][], columnStyles?: Record<number, any>) {
+  return drawTracedTable(doc, reportTableOpts(margin, y, head, body, columnStyles)) + 16;
+}
+
+/** Heading + table that always travel together (measured first; new page before the heading if needed). */
+export function reportSectionTable(doc: jsPDF, pageW: number, margin: number, y: number, title: string, head: string[][], body: any[][], columnStyles?: Record<number, any>) {
+  const keep = measureTableHeight(doc, reportTableOpts(margin, 0, head, body, columnStyles));
+  const ty = reportSection(doc, pageW, margin, y, title, keep);
+  return reportTable(doc, margin, ty, head, body, columnStyles);
 }
 
 /** Month keys (YYYY-MM, newest first, incl. future periods) from treasurer_periods, plus ledger date extremes. */

@@ -2,8 +2,7 @@ import { loadDocIdentity, docTitle, docSubtitle, docFileName, docGroupName } fro
 import { masonicYearStartSync, masonicYearBoundsSync } from "@/lib/masonicYear";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import { assetUrl } from "@/lib/assetUrl";
-import logoAsset from "@/assets/weybridge-logo-navy-transparent.png.asset.json";
+import { drawBrandFooter, drawBrandHeader, drawBrandSectionRule, HEADER_START_Y, loadPdfBrand, type PdfBrandDeps } from "@/lib/pdfBrand";
 import { listAllReportItemsInYear, listGroups } from "@/lib/workingGroups";
 
 // Mirrors supabase/functions/_shared/transactional-email-templates/_brand.ts
@@ -26,70 +25,29 @@ export function masonicYearWindow(now = new Date()) {
   return { start, end, label: `${startYear}–${startYear + 1}` };
 }
 
-export async function buildWorkingGroupsActivityPdf() {
+export async function buildWorkingGroupsActivityPdf(deps: PdfBrandDeps = {}) {
   const { start, end, label } = masonicYearWindow();
   const [items, groups] = await Promise.all([listAllReportItemsInYear(start, end), listGroups()]);
 
-  const doc = new jsPDF({ unit: "pt", format: "a4" });
-  const ID = await loadDocIdentity(); const LT = docTitle(ID);
+  const doc = new jsPDF({ unit: "pt", format: "a4", compress: true });
+  const { identity, crest } = await loadPdfBrand(deps);
+  const ID = identity;
   const pageW = doc.internal.pageSize.getWidth();
   const pageH = doc.internal.pageSize.getHeight();
   const margin = 40;
 
-  let logoData: string | null = null;
-  try {
-    const res = await fetch(assetUrl(logoAsset));
-    const blob = await res.blob();
-    logoData = await new Promise<string>((resolve) => {
-      const r = new FileReader();
-      r.onload = () => resolve(r.result as string);
-      r.readAsDataURL(blob);
-    });
-  } catch { /* ignore */ }
 
-  // Branded header: white background, centered navy crest, navy title,
-  // gold "No. <number> — <province>" subtitle, gold hairline divider.
-  const crestSize = 72;
-  const crestX = (pageW - crestSize) / 2;
-  const crestY = 32;
-  if (logoData) { try { doc.addImage(logoData, "PNG", crestX, crestY, crestSize, crestSize); } catch {} }
-
-  doc.setTextColor(...NAVY);
-  doc.setFont("times", "bold");
-  doc.setFontSize(22);
-  doc.text(ID.lodgeName, pageW / 2, crestY + crestSize + 24, { align: "center" });
-
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(9);
-  doc.setTextColor(...GOLD);
-  doc.text(docSubtitle(ID).toUpperCase(), pageW / 2, crestY + crestSize + 40, {
-    align: "center",
-    charSpace: 2,
+  // Shared brand header (Unit Setup crest, lodge name, sub-line, gold-dark title line).
+  drawBrandHeader(doc, {
+    identity, crest, margin,
+    title: `Working Groups Activity Report — ${label}`,
+    rightLine: `Generated: ${fmt(new Date().toISOString())}`,
   });
-
-  const dividerY = crestY + crestSize + 54;
-  doc.setDrawColor(...GOLD);
-  doc.setLineWidth(1);
-  doc.line(margin, dividerY, pageW - margin, dividerY);
-
-  doc.setFont("times", "italic");
-  doc.setFontSize(15);
-  doc.setTextColor(...NAVY);
-  doc.text(`Working Groups Activity Report — ${label}`, pageW / 2, dividerY + 22, { align: "center" });
-
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(9);
-  doc.setTextColor(...MUTED);
-  doc.text(`Generated: ${fmt(new Date().toISOString())}`, pageW / 2, dividerY + 36, { align: "center" });
-
-  let y = dividerY + 60;
+  let y = HEADER_START_Y;
 
   for (const g of groups) {
-    if (y > pageH - 120) { doc.addPage(); y = margin; }
-    doc.setFillColor(...NAVY);
-    doc.rect(margin, y, pageW - margin * 2, 22, "F");
-    doc.setTextColor(...GOLD); doc.setFont("times", "bold"); doc.setFontSize(11);
-    doc.text(g.name, margin + 10, y + 15);
+    if (y > pageH - 160) { doc.addPage(); y = margin; }
+    drawBrandSectionRule(doc, y, g.name, margin);
     y += 28;
 
     doc.setTextColor(...MUTED); doc.setFont("helvetica", "italic"); doc.setFontSize(8.5);
@@ -106,7 +64,7 @@ export async function buildWorkingGroupsActivityPdf() {
         startY: y,
         head: [["Date", "Type", "Title", "Detail"]],
         body: rows.map((r) => [fmt(r.item_date), r.item_type.toUpperCase(), r.title, r.detail ?? ""]),
-        margin: { left: margin, right: margin },
+        margin: { top: margin, left: margin, right: margin, bottom: 60 },
         styles: { font: "helvetica", fontSize: 9, cellPadding: 5, textColor: INK, lineColor: HAIRLINE, lineWidth: 0.4 },
         headStyles: { fillColor: GOLD, textColor: NAVY, fontStyle: "bold" },
         alternateRowStyles: { fillColor: PANEL },
@@ -117,16 +75,6 @@ export async function buildWorkingGroupsActivityPdf() {
     }
   }
 
-  const pageCount = (doc as any).internal.getNumberOfPages();
-  for (let i = 1; i <= pageCount; i++) {
-    doc.setPage(i);
-    doc.setDrawColor(...GOLD); doc.setLineWidth(0.6);
-    doc.line(margin, pageH - 36, pageW - margin, pageH - 36);
-    doc.setFont("helvetica", "italic"); doc.setFontSize(8); doc.setTextColor(...MUTED);
-    doc.text(`${ID.lodgeName ? ID.lodgeName + " — " : ""}Working Groups Activity Report.`, margin, pageH - 22);
-    doc.text(`Page ${i} of ${pageCount}`, pageW - margin, pageH - 22, { align: "right" });
-    doc.setTextColor(...NAVY); doc.setFont("times", "bold");
-    doc.text(LT, pageW / 2, pageH - 22, { align: "center" });
-  }
+  drawBrandFooter(doc, identity, margin, { note: `${ID.lodgeName ? ID.lodgeName + " — " : ""}Working Groups Activity Report.` });
   return doc;
 }

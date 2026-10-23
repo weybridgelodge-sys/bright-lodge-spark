@@ -23,8 +23,7 @@ import {
   tenureSince,
 } from "@/lib/officersProgression";
 import { Loader2, AlertTriangle, Crown, Download, UserPlus, Lock, ShieldAlert, X } from "lucide-react";
-import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
+import { buildOfficersProjectionPdf } from "@/lib/officersProjectionPdf";
 import { saveJsPdf } from "@/lib/nativeDownload";
 import RepresentativesBoard from "@/components/members/officers/RepresentativesBoard";
 import InstallationDateCard from "@/components/members/officers/InstallationDateCard";
@@ -284,106 +283,10 @@ export default function OfficersTracker() {
   // ---------- PDF Export ----------
 
   const exportPdf = async () => {
-    const doc = new jsPDF({ orientation: "landscape", unit: "pt", format: "a4" });
-    doc.setFont("times", "bold");
-    doc.setTextColor(27, 42, 74);
-    doc.setFontSize(18);
-    doc.text(docTitle(await loadDocIdentity()), 40, 40);
-    doc.setFontSize(13);
-    doc.setTextColor(201, 164, 50);
-    doc.text("Progressive Officers Projection", 40, 60);
-    doc.setFontSize(10);
-    doc.setTextColor(60, 60, 60);
-    doc.text(`Generated ${new Date().toLocaleDateString("en-GB")} · Prepared by ${profile?.full_name ?? "Secretary"}`, 40, 76);
-
-    // ----- Summary banner -----
-    const cyGrid = projection.grid[currentYear];
-    const inLine = POSITION_ORDER.filter((p) => cyGrid[p].member).length;
-    const vacantFeeders = POSITION_ORDER.filter((p) => !cyGrid[p].member).length;
-    const jwMemberId = cyGrid["junior_warden"].member?.id;
-    let jwChairYear = "—";
-    if (jwMemberId) {
-      const found = projection.years.find(
-        (y) => projection.grid[y]["worshipful_master"].member?.id === jwMemberId
-      );
-      jwChairYear = found ? formatMasonicYear(found) : "Not projected";
-    }
-
-    const bannerY = 92;
-    const bannerH = 56;
-    const pageW = doc.internal.pageSize.getWidth();
-    const margin = 40;
-    const bannerW = pageW - margin * 2;
-    doc.setFillColor(27, 42, 74);
-    doc.roundedRect(margin, bannerY, bannerW, bannerH, 4, 4, "F");
-    const colW = bannerW / 3;
-    const stats: [string, string][] = [
-      [String(inLine), "Officers in progressive line"],
-      [String(vacantFeeders), "Vacant feeder positions"],
-      [jwChairYear, "JW projected to Chair"],
-    ];
-    stats.forEach(([val, label], i) => {
-      const cx = margin + colW * i + colW / 2;
-      doc.setFont("times", "bold");
-      doc.setFontSize(20);
-      doc.setTextColor(201, 164, 50);
-      doc.text(val, cx, bannerY + 26, { align: "center" });
-      doc.setFont("times", "normal");
-      doc.setFontSize(9);
-      doc.setTextColor(240, 235, 220);
-      doc.text(label, cx, bannerY + 44, { align: "center" });
+    const doc = await buildOfficersProjectionPdf({
+      currentYear, projection, dupWarnings, membersById: membersById as any,
+      preparedBy: profile?.full_name ?? "Secretary",
     });
-
-    const head = [["Office", ...projection.years.map((y) => formatMasonicYear(y))]];
-    const body = POSITION_ORDER.map((pos) => {
-      const row: string[] = [POSITION_LABELS[pos]];
-      for (const y of projection.years) {
-        const cell = projection.grid[y][pos];
-        const name = cell.member?.full_name ?? "VACANT";
-        const tag = cell.isOverride ? `\n(override: ${cell.overrideReason ?? "—"})` : "";
-        row.push(`${name}${tag}`);
-      }
-      return row;
-    });
-
-    autoTable(doc, {
-      startY: bannerY + bannerH + 14,
-      head,
-      body,
-      theme: "grid",
-      styles: { font: "times", fontSize: 9, cellPadding: 6, textColor: [30, 30, 30] },
-      headStyles: { fillColor: [27, 42, 74], textColor: [201, 164, 50], halign: "center" },
-      columnStyles: { 0: { fontStyle: "bold", fillColor: [245, 240, 225] } },
-    });
-
-    let y = (doc as any).lastAutoTable.finalY + 20;
-    if (projection.warnings.length || dupWarnings.length) {
-      doc.setFontSize(11);
-      doc.setTextColor(180, 80, 0);
-      doc.text("Warnings", 40, y);
-      y += 14;
-      doc.setFontSize(9);
-      doc.setTextColor(60, 60, 60);
-      const all = [
-        ...projection.warnings.map((w) =>
-          w.kind === "vacant_feeder"
-            ? `Vacant office: ${POSITION_LABELS[w.position]} in ${w.year}`
-            : w.kind === "gap"
-              ? `Gap in projection: ${POSITION_LABELS[w.position]} in ${w.year}`
-              : ""
-        ),
-        ...dupWarnings.map((w) =>
-          w.kind === "duplicate_initiation"
-            ? `Shared initiation date ${w.date}: ${w.memberIds.map((id) => membersById[id]?.full_name ?? "—").join(", ")} — set precedence manually.`
-            : ""
-        ),
-      ].filter(Boolean);
-      for (const line of all) {
-        doc.text(`• ${line}`, 50, y);
-        y += 12;
-      }
-    }
-
     await saveJsPdf(doc, `${docFileName(await loadDocIdentity(), `officers-projection-${formatMasonicYear(currentYear)}`)}.pdf`);
   };
 

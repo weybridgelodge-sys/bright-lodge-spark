@@ -1,8 +1,7 @@
 import { loadDocIdentity, docTitle, docSubtitle, docFileName, docGroupName } from "@/lib/docIdentity";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import { assetUrl } from "@/lib/assetUrl";
-import logoAsset from "@/assets/weybridge-logo-white.png.asset.json";
+import { drawBrandFooter, drawBrandHeader, drawBrandSectionRule, HEADER_START_Y, loadPdfBrand, measureTableHeight, type PdfBrandDeps } from "@/lib/pdfBrand";
 import { gbp, COLLECTION_TYPE_LABEL, type Collection, type Donation, type Charity, type FestivalSettings, reliefChestBalance, isFestivalDonation } from "./queries";
 
 const NAVY: [number, number, number] = [27, 42, 74];
@@ -25,7 +24,7 @@ export async function buildCharityPeriodicReportPdf(args: {
   festival: FestivalSettings | null;
   stewardNotes: string;
   finalised?: boolean;
-}) {
+}, deps: PdfBrandDeps = {}) {
   const { title, startDate, endDate, collections, donations, charities, festival, stewardNotes, finalised } = args;
   const charityById = new Map(charities.map((c) => [c.id, c]));
 
@@ -57,60 +56,40 @@ export async function buildCharityPeriodicReportPdf(args: {
   const festivalPeriod = periodDon.filter((d) => isFestivalDonation(d, charities, festival)).reduce((a, d) => a + combined(d), 0);
   const festivalCumulative = donations.filter((d) => isFestivalDonation(d, charities, festival)).reduce((a, d) => a + combined(d), 0);
 
-  const doc = new jsPDF({ unit: "pt", format: "a4" });
-  const LT = docTitle(await loadDocIdentity());
+  const doc = new jsPDF({ unit: "pt", format: "a4", compress: true });
+  const { identity, crest } = await loadPdfBrand(deps);
   const pageW = doc.internal.pageSize.getWidth();
   const pageH = doc.internal.pageSize.getHeight();
   const margin = 40;
 
-  let logoData: string | null = null;
-  try {
-    const res = await fetch(assetUrl(logoAsset));
-    const blob = await res.blob();
-    logoData = await new Promise<string>((r) => {
-      const fr = new FileReader();
-      fr.onload = () => r(fr.result as string);
-      fr.readAsDataURL(blob);
-    });
-  } catch { /* ignore */ }
 
-  doc.setFillColor(...NAVY);
-  doc.rect(0, 0, pageW, 110, "F");
-  doc.setFillColor(...GOLD);
-  doc.rect(0, 110, pageW, 3, "F");
-  if (logoData) { try { doc.addImage(logoData, "PNG", margin, 22, 66, 66); } catch { /* ignore */ } }
-  doc.setTextColor(255, 255, 255);
-  doc.setFont("times", "bold");
-  doc.setFontSize(20);
-  doc.text(LT, margin + 80, 50);
-  doc.setFont("times", "italic");
-  doc.setFontSize(13);
-  doc.setTextColor(...GOLD);
-  doc.text(`Charity Steward's Periodic Report${finalised ? " (Finalised)" : ""}`, margin + 80, 72);
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(9);
-  doc.setTextColor(230, 230, 235);
-  doc.text(`${title} · ${fmt(startDate)} – ${fmt(endDate)}`, margin + 80, 90);
-  doc.text(`Generated: ${fmt(new Date().toISOString())}`, pageW - margin, 90, { align: "right" });
+  drawBrandHeader(doc, {
+    identity, crest, margin,
+    title: `Charity Steward's Periodic Report${finalised ? " (Finalised)" : ""}`,
+    periodLine: `${title} · ${fmt(startDate)} – ${fmt(endDate)}`,
+    rightLine: `Generated: ${fmt(new Date().toISOString())}`,
+  });
 
-  let y = 130;
+  let y = HEADER_START_Y;
   const FOOTER_RESERVE = 60;
   const ensureSpace = (needed: number) => {
     if (y + needed > pageH - FOOTER_RESERVE) { doc.addPage(); y = margin; }
   };
+  // A heading is drawn only when what follows is known, so it always travels with its table.
+  let pending: { title: string; following: number } | null = null;
+  const drawPending = (needed: number) => {
+    if (!pending) return;
+    ensureSpace(32 + Math.max(pending.following, needed));
+    y = drawBrandSectionRule(doc, y, pending.title, margin);
+    pending = null;
+  };
   const section = (t: string, followingHeight = 80) => {
-    ensureSpace(32 + followingHeight);
-    doc.setFillColor(...NAVY);
-    doc.rect(margin, y, pageW - margin * 2, 22, "F");
-    doc.setTextColor(...GOLD);
-    doc.setFont("times", "bold");
-    doc.setFontSize(11);
-    doc.text(t, margin + 10, y + 15);
-    y += 32;
+    drawPending(0);
+    pending = { title: t, following: followingHeight };
   };
   const table = (head: string[][], body: any[][], colStyles?: Record<number, any>, keepTogether = true) => {
-    autoTable(doc, {
-      head, body, startY: y,
+    const opts = {
+      head, body,
       margin: { left: margin, right: margin, bottom: FOOTER_RESERVE },
       styles: { font: "helvetica", fontSize: 9, cellPadding: 5, textColor: INK, lineColor: [220, 215, 200], lineWidth: 0.4, overflow: "linebreak" },
       headStyles: { fillColor: GOLD, textColor: NAVY, fontStyle: "bold" },
@@ -118,13 +97,16 @@ export async function buildCharityPeriodicReportPdf(args: {
       theme: "grid",
       columnStyles: colStyles ?? { 0: { cellWidth: 320 }, 1: { cellWidth: 195, halign: "right" } },
       rowPageBreak: "avoid",
-      pageBreak: keepTogether ? "avoid" : "auto",
-    });
+      pageBreak: (keepTogether ? "avoid" : "auto") as "avoid" | "auto",
+    } as any;
+    drawPending(measureTableHeight(doc, opts));
+    autoTable(doc, { ...opts, startY: y });
     y = (doc as any).lastAutoTable.finalY + 16;
   };
 
   if (stewardNotes?.trim()) {
     section("Report Summary");
+    drawPending(0);
     doc.setFont("times", "italic");
     doc.setFontSize(10);
     doc.setTextColor(...INK);
@@ -204,20 +186,6 @@ export async function buildCharityPeriodicReportPdf(args: {
     ],
   );
 
-  const pageCount = (doc as any).internal.getNumberOfPages();
-  for (let i = 1; i <= pageCount; i++) {
-    doc.setPage(i);
-    doc.setDrawColor(...GOLD);
-    doc.setLineWidth(0.6);
-    doc.line(margin, pageH - 40, pageW - margin, pageH - 40);
-    doc.setTextColor(...NAVY);
-    doc.setFont("times", "bold");
-    doc.setFontSize(8);
-    doc.text(LT, pageW / 2, pageH - 28, { align: "center" });
-    doc.setFont("times", "italic");
-    doc.setTextColor(...MUTED);
-    doc.text("Confidential — Charity Steward's Periodic Report. For Charity Steward, WM, Treasurer, and Secretary.", margin, pageH - 16);
-    doc.text(`Page ${i} of ${pageCount}`, pageW - margin, pageH - 16, { align: "right" });
-  }
+  drawBrandFooter(doc, identity, margin, { note: "Confidential — Charity Steward's Periodic Report. For Charity Steward, WM, Treasurer, and Secretary." });
   return doc;
 }

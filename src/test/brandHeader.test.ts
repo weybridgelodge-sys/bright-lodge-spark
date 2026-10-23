@@ -119,6 +119,10 @@ const PILOT = [
   "src/components/members/treasurer/IncomeExpenditureReport.tsx", "src/components/members/treasurer/BalanceSheetReport.tsx",
   "src/components/members/treasurer/BankReconciliationTab.tsx", "src/components/members/treasurer/EventAccountsTab.tsx",
   "src/components/members/treasurer/PropertyRegisterTab.tsx",
+  "src/lib/treasurer/bankRecPdf.ts",
+  "src/lib/charity/annualReportPdf.ts", "src/lib/charity/periodicReportPdf.ts",
+  "src/lib/development/pdf.ts", "src/lib/development/gapReportPdf.ts", "src/lib/development/summaryReportPdf.ts", "src/lib/development/activityReportPdf.ts",
+  "src/lib/officersProjectionPdf.ts", "src/pages/members/OfficersTracker.tsx",
 ];
 const BANNED = /LOGO_URL|LOGO_WIDTH|LOGO_HEIGHT|crestWrap|LODGE_NAME|@\/assets\/|\.asset\.json|lovable\.app|__l5e|weybridge|6787|Province of Surrey|Guildford|Consecrated 1949|\.org\.uk/i;
 describe("pilot files carry no typed crest or host literal", () => {

@@ -1,11 +1,10 @@
 import { loadDocIdentity, docTitle, docSubtitle, docFileName, docGroupName } from "@/lib/docIdentity";
 import jsPDF from "jspdf";
 import { supabase } from "@/integrations/supabase/client";
-import { GOLD, INK, MUTED, NAVY, acct, fmtDate, loadReportBrand, reportSection, type ReportPdfDeps } from "./reports";
+import { GOLD, INK, MUTED, NAVY, acct, fmtDate, drawTracedTable, loadReportBrand, measureTableHeight, reportSection, type ReportPdfDeps } from "./reports";
 import { drawBrandHeader, HEADER_START_Y, PRINT_GOLD_DARK, PRINT_NAVY, type CrestImage } from "@/lib/pdfBrand";
 import type { DocIdentity } from "@/lib/docIdentity";
 import { AUDITOR_LABEL, type Approval, type Round, type Signoff, type YearSnapshot } from "./yearAudit";
-import autoTable from "jspdf-autotable";
 import { certifiedPackPath, packComparative, selectPackSource, type CompLine, type PackSource } from "./accountsPack";
 
 export type Certifier = { role: string; name: string; rank: string; date: string };
@@ -26,7 +25,7 @@ export async function buildAccountsPackPdf(src: PackSource, year: number, certif
   const LT = docTitle(ID);
 
   // 1. Cover
-  doc.setFillColor(250, 250, 247); doc.rect(0, 0, pageW, pageH, "F");
+  doc.setFillColor(255, 255, 255); doc.rect(0, 0, pageW, pageH, "F"); // pure white: matches the crest, flattened on white
   // Cover on white: slim navy edge + gold rule (as the shared header), navy crest from Unit Setup, 130pt.
   doc.setFillColor(...NAVY); doc.rect(0, 0, pageW, 6, "F");
   doc.setDrawColor(...GOLD); doc.setLineWidth(1.5); doc.line(margin, 96, pageW - margin, 96);
@@ -76,8 +75,7 @@ export async function buildAccountsPackPdf(src: PackSource, year: number, certif
   const p = (v: number | null | undefined) => (st.hasPrior && v != null ? acct(v) : "");
   const rows = (ls: CompLine[]) => ls.map((l) => [`${l.code} — ${l.name}`, acct(l.cur), p(l.pri)]);
   const tot = (label: string, c: number, pr: number | null | undefined) => [label, acct(c), p(pr)];
-  const table = (yy: number, body: string[][], boldFrom: number, showAccountHeading = true) => {
-    autoTable(doc, {
+  const tableOpts = (yy: number, body: string[][], boldFrom: number, showAccountHeading = true) => ({
       head: [[showAccountHeading ? "Account" : "", curH, st.hasPrior ? priH : ""]], body, startY: yy,
       margin: { top: margin, left: margin, right: margin, bottom: 60 },
       styles: { font: "helvetica", fontSize: 9, cellPadding: 5, textColor: INK, lineColor: [220, 215, 200], lineWidth: 0.4, overflow: "linebreak" },
@@ -92,9 +90,11 @@ export async function buildAccountsPackPdf(src: PackSource, year: number, certif
         if (d.section === "head" && d.column.index === 0) d.cell.styles.halign = "left";
         if (d.section === "body" && d.row.index >= boldFrom) d.cell.styles.fontStyle = "bold";
       },
-    });
-    return (doc as any).lastAutoTable.finalY + 16;
-  };
+  });
+  const table = (yy: number, body: string[][], boldFrom: number, showAccountHeading = true) =>
+    drawTracedTable(doc, tableOpts(yy, body, boldFrom, showAccountHeading)) + 16;
+  // Heading travels with its table: measured first, new page before the heading if it won't fit.
+  const keep = (body: string[][], boldFrom: number, show = true) => measureTableHeight(doc, tableOpts(0, body, boldFrom, show));
 
   // 3. Balance Sheet
   doc.addPage();
@@ -103,16 +103,19 @@ export async function buildAccountsPackPdf(src: PackSource, year: number, certif
     doc.setFont("helvetica", "italic"); doc.setFontSize(8.5); doc.setTextColor(...MUTED);
     doc.text(`Comparative figures: as at 30 September ${year}.`, margin, y - 8);
   }
-  y = reportSection(doc, pageW, margin, y, "Assets");
-  y = table(y, [...rows(st.assets), tot("Total assets", bs.assets, pbs?.assets)], st.assets.length);
-  y = reportSection(doc, pageW, margin, y, "Liabilities");
-  y = table(y, [...rows(st.liabilities), tot("Total liabilities", bs.liabilities, pbs?.liabilities), tot("Net assets", bs.net_assets, pbs?.net_assets)], st.liabilities.length);
-  y = reportSection(doc, pageW, margin, y, "Funds");
-  table(y, [
+  { const b = [...rows(st.assets), tot("Total assets", bs.assets, pbs?.assets)];
+    y = reportSection(doc, pageW, margin, y, "Assets", keep(b, st.assets.length));
+    y = table(y, b, st.assets.length); }
+  { const b = [...rows(st.liabilities), tot("Total liabilities", bs.liabilities, pbs?.liabilities), tot("Net assets", bs.net_assets, pbs?.net_assets)];
+    y = reportSection(doc, pageW, margin, y, "Liabilities", keep(b, st.liabilities.length));
+    y = table(y, b, st.liabilities.length); }
+  { const b = [
     tot("General Fund brought forward", bs.fund_bf, pbs?.fund_bf),
     tot("Surplus/(deficit) for the year", bs.surplus, pbs?.surplus),
     tot("Total funds", bs.total_funds, pbs?.total_funds),
-  ], 2, false);
+  ];
+    y = reportSection(doc, pageW, margin, y, "Funds", keep(b, 2, false));
+    table(y, b, 2, false); }
 
   // 4. Income & Expenditure
   doc.addPage();
@@ -121,10 +124,12 @@ export async function buildAccountsPackPdf(src: PackSource, year: number, certif
     doc.setFont("helvetica", "italic"); doc.setFontSize(8.5); doc.setTextColor(...MUTED);
     doc.text(`Comparative figures: year ended 30 September ${year}.`, margin, y - 8);
   }
-  y = reportSection(doc, pageW, margin, y, "Income");
-  y = table(y, [...rows(st.income), tot("Total income", ie.income, pie?.income)], st.income.length);
-  y = reportSection(doc, pageW, margin, y, "Expenditure");
-  y = table(y, [...rows(st.expense), tot("Total expenditure", ie.expenditure, pie?.expenditure)], st.expense.length);
+  { const b = [...rows(st.income), tot("Total income", ie.income, pie?.income)];
+    y = reportSection(doc, pageW, margin, y, "Income", keep(b, st.income.length));
+    y = table(y, b, st.income.length); }
+  { const b = [...rows(st.expense), tot("Total expenditure", ie.expenditure, pie?.expenditure)];
+    y = reportSection(doc, pageW, margin, y, "Expenditure", keep(b, st.expense.length));
+    y = table(y, b, st.expense.length); }
   table(y, [tot("Surplus/(deficit) for the year", ie.surplus, pie?.surplus)], 0, false);
 
   // 5. Certificate (approved only)

@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "@/hooks/use-toast";
 import { Download, Loader2 } from "lucide-react";
 import {
-  acct, fetchAccounts, fetchMovements, fetchReportCalendar, fmtDate, money, reportPdfDoc, reportSection, reportTable,
+  acct, fetchAccounts, fetchMovements, fetchReportCalendar, fmtDate, money, reportPdfDoc, reportSectionTable,
   signedBalance, treasurerYearBounds, type Account,
 } from "@/lib/treasurer/reports";
 import {
@@ -94,20 +94,17 @@ export default function IncomeExpenditureReport({ canEdit }: { canEdit: boolean 
       let y = startY;
       const head = [["Account", period.label, period.priorLabel]];
 
-      y = reportSection(doc, pageW, margin, y, "Income");
-      y = reportTable(doc, margin, y, head, [
+      y = reportSectionTable(doc, pageW, margin, y, "Income", head, [
         ...income.map((r) => [`${r.code} — ${r.name}`, acct(r.current), acct(r.prior)]),
         ["Total income", acct(incCur), acct(incPri)],
       ]);
 
-      y = reportSection(doc, pageW, margin, y, "Expenditure");
-      y = reportTable(doc, margin, y, head, [
+      y = reportSectionTable(doc, pageW, margin, y, "Expenditure", head, [
         ...expense.map((r) => [`${r.code} — ${r.name}`, acct(r.current), acct(r.prior)]),
         ["Total expenditure", acct(expCur), acct(expPri)],
       ]);
 
-      y = reportSection(doc, pageW, margin, y, "Result for the Period");
-      reportTable(doc, margin, y, head, [
+      reportSectionTable(doc, pageW, margin, y, "Result for the Period", head, [
         ["Surplus / (Deficit)", acct(surCur), acct(surPri)],
       ]);
 

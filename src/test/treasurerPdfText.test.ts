@@ -17,7 +17,7 @@ vi.mock("jspdf", async (orig) => {
   function Wrapped(this: any, ...a: any[]) {
     const d = new Real(...a);
     const t = d.text.bind(d);
-    d.text = (s: any, ...r: any[]) => { if (!rec.inTable) (Array.isArray(s) ? s : [s]).forEach((x: any) => rec.items.push(`T:${String(x)}`)); return t(s, ...r); };
+    d.text = (s: any, ...r: any[]) => { if (!rec.inTable && !d.__measureOnly) (Array.isArray(s) ? s : [s]).forEach((x: any) => rec.items.push(`T:${String(x)}`)); return t(s, ...r); };
     return d;
   }
   (Wrapped as any).API = Real.API;
@@ -28,6 +28,7 @@ vi.mock("jspdf-autotable", async (orig) => {
   const cell = (c: any) => (c && typeof c === "object" ? String(c.content ?? "") : String(c ?? ""));
   return {
     default: (doc: any, o: any) => {
+      if (doc.__measureOnly) return real(doc, o); // height dry-run on a scratch doc, not output
       for (const part of ["head", "body", "foot"]) for (const row of o[part] ?? []) rec.items.push(`${part}:${row.map(cell).join(" | ")}`);
       rec.inTable++; try { real(doc, o); } finally { rec.inTable--; }
     },
