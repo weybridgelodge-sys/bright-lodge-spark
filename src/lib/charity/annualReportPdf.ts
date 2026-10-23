@@ -54,7 +54,6 @@ export async function buildCharityAnnualReportPdf(args: {
 
   const doc = new jsPDF({ unit: "pt", format: "a4" });
   const { identity, crest } = await loadPdfBrand(deps);
-  const LT = docTitle(identity);
   const pageW = doc.internal.pageSize.getWidth();
   const pageH = doc.internal.pageSize.getHeight();
   const margin = 40;

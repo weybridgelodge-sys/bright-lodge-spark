@@ -12,7 +12,6 @@ const MUTED: [number, number, number] = [110, 110, 120];
 export async function buildGapReportPdf(matrix: SkillsMatrix, deps: PdfBrandDeps = {}) {
   const doc = new jsPDF({ unit: "pt", format: "a4" });
   const { identity, crest } = await loadPdfBrand(deps);
-  const LT = docTitle(identity);
   const pageW = doc.internal.pageSize.getWidth();
   const pageH = doc.internal.pageSize.getHeight();
   const margin = 40;
