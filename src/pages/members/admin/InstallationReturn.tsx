@@ -430,7 +430,7 @@ function Inner() {
                 <p><strong>Document:</strong> {returnFileStem(data?.identity.lodgeNumber, year)}.pdf, filled just now from the live records (sent as a 30-day download link). <a href={pending?.url} target="_blank" rel="noopener noreferrer" className="underline">Open the exact PDF</a></p>
                 <p><strong>Secretary changed (Y/N):</strong> {secChanged}</p>
                 <p>{signaturesOn ? "Stored signatures are on the PDF where on file (open it to check)." : "Signatures are left blank."}</p>
-                {data && data.issues.length > 0 && <p className="text-destructive-foreground">{data.issues.length} warning(s) are still showing on the page.</p>}
+                <SendWarningsNote count={data?.issues.length ?? 0} />
                 {pending && pending.missing > 0 && <p className="text-destructive-foreground">{pending.missing} field(s) weren't found in the template.</p>}
                 <p>This is an official document to an external body and can't be recalled once sent.</p>
               </div>
