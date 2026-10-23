@@ -92,13 +92,32 @@ const PILOT = [
   "supabase/functions/_shared/transactional-email-templates/secretary-returns-digest.tsx",
   "supabase/functions/_shared/transactional-email-templates/installation-return-submission.tsx",
   "supabase/functions/_shared/transactional-email-templates/provincial-return-submission.tsx",
+  "supabase/functions/_shared/transactional-email-templates/summons-distribution.tsx",
+  "supabase/functions/_shared/transactional-email-templates/meeting-deadline-reminder.tsx",
+  "supabase/functions/_shared/transactional-email-templates/poll-opened.tsx",
+  "supabase/functions/_shared/transactional-email-templates/waitlist-promoted.tsx",
+  "supabase/functions/_shared/transactional-email-templates/waitlist-refunded.tsx",
+  "supabase/functions/_shared/transactional-email-templates/dues-price-change-notice.tsx",
+  "supabase/functions/_shared/transactional-email-templates/almoner-overdue-digest.tsx",
   "src/lib/pdfBrand.ts", "src/lib/treasurer/brandedReportDoc.ts", "src/components/members/treasurer/TrialBalanceReport.tsx",
 ];
-const BANNED = /LOGO_URL|LOGO_WIDTH|LOGO_HEIGHT|crestWrap|LODGE_NAME|@\/assets\/|\.asset\.json|lovable\.app|__l5e|weybridge|6787|Province of Surrey/i;
+const BANNED = /LOGO_URL|LOGO_WIDTH|LOGO_HEIGHT|crestWrap|LODGE_NAME|@\/assets\/|\.asset\.json|lovable\.app|__l5e|weybridge|6787|Province of Surrey|Guildford|Consecrated 1949|\.org\.uk/i;
 describe("pilot files carry no typed crest or host literal", () => {
   for (const f of PILOT) it(f, () => {
     const bad = fs.readFileSync(f, "utf8").split("\n").filter((l) => BANNED.test(l));
     expect(bad).toEqual([]);
+  });
+});
+
+describe("provincial return letter province wording", () => {
+  const src = fs.readFileSync("supabase/functions/_shared/transactional-email-templates/provincial-return-submission.tsx", "utf8");
+  it("has no typed province", () => { expect(src).not.toMatch(/Surrey/); });
+  it("takes the province from settings; blank gives the neutral wording", async () => {
+    const { provincialGrandLodge } = await import("../../supabase/functions/_shared/transactional-email-templates/provincial-return-submission.tsx?raw").then(() => ({ provincialGrandLodge: new Function("return " + src.match(/export const provincialGrandLodge = ([\s\S]*?\n\})/)![1])() }));
+    expect(provincialGrandLodge("Province of Testshire")).toBe("Provincial Grand Lodge of Testshire");
+    expect(provincialGrandLodge("Testshire")).toBe("Provincial Grand Lodge of Testshire");
+    expect(provincialGrandLodge("")).toBe("Provincial Grand Lodge");
+    expect(provincialGrandLodge(null)).toBe("Provincial Grand Lodge");
   });
 });
 
