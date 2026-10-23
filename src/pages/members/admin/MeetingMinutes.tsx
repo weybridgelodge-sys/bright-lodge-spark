@@ -29,7 +29,6 @@ import { treasurerYearBounds } from "@/lib/treasurer/reports";
 import { reportPdfDoc, reportSection, measureTableHeight, drawTracedTable, INK, MUTED, GOLD, NAVY, fmtDate } from "@/lib/treasurer/reports";
 import { fetchProfilesPii, indexPii } from "@/lib/profilePii";
 import { formatMemberLine, type MemberRow } from "@/lib/summons";
-import autoTable from "jspdf-autotable";
 
 type MinutesType = "regular" | "committee";
 type MinutesStatus = "draft" | "approved";
