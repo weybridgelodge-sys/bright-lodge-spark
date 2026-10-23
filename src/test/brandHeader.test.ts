@@ -113,12 +113,13 @@ const PILOT = [
   "src/lib/newsletterBrand.ts",
   "src/pages/members/admin/NewsletterHub.tsx",
   "src/lib/pdfBrand.ts", "src/lib/treasurer/brandedReportDoc.ts", "src/components/members/treasurer/TrialBalanceReport.tsx",
+  "src/lib/kpiExports.ts",
 ];
 const BANNED = /LOGO_URL|LOGO_WIDTH|LOGO_HEIGHT|crestWrap|LODGE_NAME|@\/assets\/|\.asset\.json|lovable\.app|__l5e|weybridge|6787|Province of Surrey|Guildford|Consecrated 1949|\.org\.uk/i;
 describe("pilot files carry no typed crest or host literal", () => {
   for (const f of PILOT) it(f, () => {
-    // Known exceptions: sender domain (stays in code by rule); enquiry-confirmation body names the town (no Unit Setup field for it yet).
-    const bad = fs.readFileSync(f, "utf8").split("\n").filter((l) => BANNED.test(l) && !/curious about Freemasonry here in Guildford\.$/.test(l.trim()) && !/^const (FROM_ADDRESS_DOMAIN|SENDER_DOMAIN|FROM_DOMAIN) = /.test(l.trim()));
+    // Known exceptions: KPI visitor rows' own lodge_name field (not a host literal); sender domain (stays in code by rule); enquiry-confirmation body names the town (no Unit Setup field for it yet).
+    const bad = fs.readFileSync(f, "utf8").split("\n").filter((l) => BANNED.test(l) && !/curious about Freemasonry here in Guildford\.$/.test(l.trim()) && !/^const lodge = \(v\.lodge_name \?\? ""\)\.trim\(\);$/.test(l.trim()) && !/^const (FROM_ADDRESS_DOMAIN|SENDER_DOMAIN|FROM_DOMAIN) = /.test(l.trim()));
     expect(bad).toEqual([]);
   });
 });
