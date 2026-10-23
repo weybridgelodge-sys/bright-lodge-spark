@@ -9,6 +9,8 @@
 // the panels read in the correct order: Front → Inside-L → Inside-R → Back.
 import { masonicYearStartSync } from "@/lib/masonicYear";
 import React from "react";
+import { SummonsCoverHeader, loadSummonsCoverBrand, type SummonsCoverBrand } from "@/lib/summonsCover";
+import type { PdfBrandDeps } from "@/lib/pdfBrand";
 import { candidateHeading, printAgendaLabel } from "@/lib/summonsNotices";
 import {
   Document,
@@ -44,7 +46,6 @@ import {
   splitTwoColumns,
   subLetter,
   resolveAssetUrl,
-  DEFAULT_LOGO_URL,
   DEFAULT_COVER_LEFT_URL,
   DEFAULT_COVER_RIGHT_URL,
 } from "./summons";
@@ -313,7 +314,6 @@ function BoldNameText({
 
 
 export {
-  DEFAULT_LOGO_URL,
   DEFAULT_COVER_LEFT_URL,
   DEFAULT_COVER_RIGHT_URL,
 } from "./summons";
@@ -323,10 +323,10 @@ const FrontCoverPanel: React.FC<{
   template: LodgeTemplate;
   summons: SummonsData;
   officers: OfficerRollRow[];
-  logoDataUrl?: string | null;
+  coverBrand: SummonsCoverBrand;
   coverLeftDataUrl?: string | null;
   coverRightDataUrl?: string | null;
-}> = ({ template, summons, officers, logoDataUrl, coverLeftDataUrl, coverRightDataUrl }) => {
+}> = ({ template, summons, officers, coverBrand, coverLeftDataUrl, coverRightDataUrl }) => {
   const wmFromRoll = officers.find((o) => o.label === "Worshipful Master")?.member_formal || officers.find((o) => o.label === "Worshipful Master")?.member;
   const secOfficer = officers.find((o) => o.label === "Secretary");
   const secFromRoll = secOfficer?.member_formal || secOfficer?.member;
@@ -343,26 +343,11 @@ const FrontCoverPanel: React.FC<{
     ? rawSecLines.slice(1)
     : rawSecLines;
   const secName = secFromRoll || rawSecLines[0] || "—";
-  const logoSrc = logoDataUrl || resolveAssetUrl(template.logo_url, DEFAULT_LOGO_URL);
   const leftSrc = coverLeftDataUrl || resolveAssetUrl(template.cover_left_image_url, DEFAULT_COVER_LEFT_URL);
   const rightSrc = coverRightDataUrl || resolveAssetUrl(template.cover_right_image_url, DEFAULT_COVER_RIGHT_URL);
   return (
   <View style={[s.panel]}>
-    <Text style={s.lodgeName}>{template.lodge_name} No. {template.lodge_number}</Text>
-    <Text style={s.province}>PROVINCE OF {(template.province || "").toUpperCase()}</Text>
-    <View style={s.divider} />
-
-     <View style={{ flexDirection: "row", alignItems: "center", marginTop: 6, marginBottom: 4 }}>
-       <View style={{ flex: 1, alignItems: "flex-start" }}>
-         {leftSrc ? <Image src={leftSrc} style={{ height: 75 }} /> : null}
-       </View>
-       <View style={{ flex: 1, alignItems: "center" }}>
-         {logoSrc ? <Image src={logoSrc} style={s.crest} /> : null}
-       </View>
-       <View style={{ flex: 1, alignItems: "flex-end" }}>
-         {rightSrc ? <Image src={rightSrc} style={{ height: 75 }} /> : null}
-       </View>
-     </View>
+    <SummonsCoverHeader brand={coverBrand} fallback={{ name: template.lodge_name, number: template.lodge_number, province: template.province }} leftSrc={leftSrc} rightSrc={rightSrc} />
 
     {wmFromRoll && (
       <Text style={s.province}>{wmFromRoll} - Worshipful Master</Text>
@@ -838,13 +823,13 @@ const SummonsDocument: React.FC<{
   members: MemberRow[];
   summons: SummonsData;
   diningQrDataUrl: string | null;
-  logoDataUrl: string | null;
+  coverBrand: SummonsCoverBrand;
   coverLeftDataUrl: string | null;
   coverRightDataUrl: string | null;
   overflow: OverflowPlan;
   manualHidden?: NoticeKey[];
   density?: number;
-}> = ({ template, officers, members, summons, diningQrDataUrl, logoDataUrl, coverLeftDataUrl, coverRightDataUrl, overflow, manualHidden = [], density = 0 }) => {
+}> = ({ template, officers, members, summons, diningQrDataUrl, coverBrand, coverLeftDataUrl, coverRightDataUrl, overflow, manualHidden = [], density = 0 }) => {
   const hidden = new Set<NoticeKey>([...overflow.hidden, ...manualHidden]);
   const shortened = new Set<NoticeKey>(overflow.shortened);
   // Last-resort density steps: shorten, then drop, the longest static notices.
@@ -866,7 +851,7 @@ const SummonsDocument: React.FC<{
           />
         </View>
         <View style={{ flex: 1, padding: 0 }}>
-          <FrontCoverPanel template={template} summons={summons} officers={officers} logoDataUrl={logoDataUrl} coverLeftDataUrl={coverLeftDataUrl} coverRightDataUrl={coverRightDataUrl} />
+          <FrontCoverPanel template={template} summons={summons} officers={officers} coverBrand={coverBrand} coverLeftDataUrl={coverLeftDataUrl} coverRightDataUrl={coverRightDataUrl} />
         </View>
       </Page>
 
@@ -924,6 +909,8 @@ export async function generateSummonsBlob(args: {
   members: MemberRow[];
   summons: SummonsData;
   manualHidden?: NoticeKey[];
+  /** Test seam: Unit Setup identity/crest overrides. */
+  brandDeps?: PdfBrandDeps;
 }): Promise<Blob> {
   let diningQrDataUrl: string | null = null;
   if (args.template.dining_booking_url) {
@@ -936,10 +923,9 @@ export async function generateSummonsBlob(args: {
       diningQrDataUrl = null;
     }
   }
-  const logoUrl = resolveAssetUrl(args.template.logo_url, DEFAULT_LOGO_URL);
   const coverLeftUrl = resolveAssetUrl(args.template.cover_left_image_url, DEFAULT_COVER_LEFT_URL);
   const coverRightUrl = resolveAssetUrl(args.template.cover_right_image_url, DEFAULT_COVER_RIGHT_URL);
-  const logoDataUrl = logoUrl ? await fetchImageAsDataUrl(logoUrl) : null;
+  const coverBrand = await loadSummonsCoverBrand(args.brandDeps);
   const coverLeftDataUrl = coverLeftUrl ? await fetchImageAsDataUrl(coverLeftUrl) : null;
   const coverRightDataUrl = coverRightUrl ? await fetchImageAsDataUrl(coverRightUrl) : null;
   const overflow = planOverflow(args.members.length);
@@ -952,7 +938,7 @@ export async function generateSummonsBlob(args: {
         members={args.members}
         summons={args.summons}
         diningQrDataUrl={diningQrDataUrl}
-        logoDataUrl={logoDataUrl}
+        coverBrand={coverBrand}
         coverLeftDataUrl={coverLeftDataUrl}
         coverRightDataUrl={coverRightDataUrl}
         overflow={overflow}
