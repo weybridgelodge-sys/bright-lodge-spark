@@ -13,6 +13,10 @@ interface Props {
   note?: string
   office?: string
   url?: string
+  crestUrl?: string | null
+  lodgeName?: string
+  lodgeNumber?: string
+  provinceName?: string
 }
 
 const HEAD = { review_needed: 'Accounts awaiting your review', query: 'Audit query raised', approved: 'Accounts approved — ready to close' }
