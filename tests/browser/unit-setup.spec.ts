@@ -169,3 +169,24 @@ test("Province return emails read-only when user may edit Unit Setup but is not 
   expect(saved[0]).toEqual({ _key: "province", _value: { name: "Province of Elsewhere" } });
   await expectNoAxeViolations(page, "province read-only emails");
 });
+
+test("Membership Officer lodge email: validated, normalised, 320px + axe", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 1800 });
+  const saved: any[] = [];
+  await mock(page, true, saved);
+  await open(page);
+  const card = page.getByRole("region", { name: "Membership Officer lodge email" });
+  const input = card.getByLabel("Membership Officer lodge email", { exact: true });
+  await expect(input).toHaveValue("membership@example.invalid");
+  await input.fill("nope");
+  await card.getByRole("button", { name: "Save" }).click();
+  await expect(card.getByText("Enter a valid email address.")).toBeVisible();
+  expect(saved).toHaveLength(0);
+  await expectNoAxeViolations(page, "membership email error");
+  await input.fill("  New.MO@Example.INVALID ");
+  await card.getByRole("button", { name: "Save" }).click();
+  await expect(card.getByText(/Saved at/)).toBeVisible();
+  expect(saved[0]).toEqual({ _key: "membership_officer_email", _value: { email: "new.mo@example.invalid" } });
+  expect(await overflow(page)).toBeLessThanOrEqual(1);
+  await expectNoAxeViolations(page, "membership email saved");
+});
