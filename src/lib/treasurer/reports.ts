@@ -1,7 +1,7 @@
 import { loadDocIdentity, docTitle, docSubtitle, docFileName, docGroupName } from "@/lib/docIdentity";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import { drawBrandFooter, drawBrandHeader, drawBrandSectionRule, HEADER_START_Y, loadPdfBrand, measureTableHeight, type CrestImage, type PdfBrandDeps } from "@/lib/pdfBrand";
+import { drawBrandFooter, drawBrandHeader, drawBrandSectionRule, HEADER_START_Y, fetchCrestUrl, loadPdfBrand, measureTableHeight, type CrestImage, type PdfBrandDeps } from "@/lib/pdfBrand";
 export { measureTableHeight };
 import type { DocIdentity } from "@/lib/docIdentity";
 import { supabase } from "@/integrations/supabase/client";
@@ -106,7 +106,8 @@ export type ReportPdfDeps = PdfBrandDeps;
 
 /** Unit Setup crest + lodge identity for a report run; any crest failure gives null (image omitted). */
 export async function loadReportBrand(deps: ReportPdfDeps = {}): Promise<{ identity: DocIdentity; crest: CrestImage | null }> {
-  return loadPdfBrand(deps);
+  const crestUrl = deps.crestUrl !== undefined ? deps.crestUrl : await fetchCrestUrl();
+  return loadPdfBrand({ ...deps, crestUrl });
 }
 
 /**
