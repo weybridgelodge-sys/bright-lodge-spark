@@ -50,3 +50,28 @@ export const brandStyles = {
 
 // Shared lodge name for automated emails (subject lines and headings).
 export const LODGE_NAME = 'Weybridge Lodge No. 6787'
+
+// ---- Shared brand header/footer data (Batch C). Pure, unit-tested in src/test. ----
+// Navy crest on white; name/number/province from the lodge record; no host literals.
+export const BRAND_GOLD_DARK = '#6E4F0C' // gold-toned text on white only
+export type BrandIdentity = {
+  crestUrl?: string | null
+  lodgeName?: string | null
+  lodgeNumber?: string | null
+  provinceName?: string | null
+}
+const clean = (v: unknown) => (typeof v === 'string' ? v.replace(/\s+/g, ' ').trim() : '')
+
+/** Header/footer lines; blank parts are skipped, an invalid or blank crest becomes null (image omitted). */
+export function brandHeaderLines(id: BrandIdentity | null | undefined) {
+  const crest = clean(id?.crestUrl)
+  const name = clean(id?.lodgeName)
+  const num = clean(id?.lodgeNumber)
+  const numLine = num ? `No. ${num}` : ''
+  return {
+    crestUrl: /^https:\/\/\S+$/.test(crest) ? crest : null,
+    name,
+    sub: [numLine, clean(id?.provinceName)].filter(Boolean).join(' — '),
+    footer: [name, numLine].filter(Boolean).join(' '),
+  }
+}
