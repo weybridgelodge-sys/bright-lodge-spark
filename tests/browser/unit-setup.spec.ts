@@ -10,6 +10,7 @@ function seed(): Store {
     payment_wording: { card_wording: "Pay online by card", cheque_payee: "Sample Lodge No 1234" },
     booking_contact_email: { email: "bookings@example.invalid" },
     membership_officer_email: { email: "membership@example.invalid" },
+    crest_image: { url: "https://example.invalid/assets/crest.png" },
     sign_off: { override: "Yours, the Sample Lodge" },
     meeting_place: { venue_id: "v1" },
     web_social: { facebook_url: "https://facebook.example.invalid/sample", instagram_url: "https://instagram.example.invalid/sample", twitter_url: "https://x.example.invalid/sample" },
@@ -189,4 +190,34 @@ test("Membership Officer lodge email: validated, normalised, 320px + axe", async
   expect(saved[0]).toEqual({ _key: "membership_officer_email", _value: { email: "new.mo@example.invalid" } });
   expect(await overflow(page)).toBeLessThanOrEqual(1);
   await expectNoAxeViolations(page, "membership email saved");
+});
+
+test("Crest image: https only, trimmed, blank allowed, 48px, 320px + axe", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 1800 });
+  const saved: any[] = [];
+  await page.route("https://example.invalid/**", (r) => r.fulfill({ status: 200, contentType: "image/svg+xml", body: '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10"/>' }));
+  await mock(page, true, saved);
+  await open(page);
+  const card = page.getByRole("region", { name: "Lodge crest image" });
+  const input = card.getByLabel("Crest image address (https)");
+  await expect(input).toHaveValue("https://example.invalid/assets/crest.png");
+  await expect(card.getByRole("img", { name: "Crest preview" })).toBeVisible();
+  expect((await input.boundingBox())!.height).toBeGreaterThanOrEqual(48);
+  expect((await card.getByRole("button", { name: "Save" }).boundingBox())!.height).toBeGreaterThanOrEqual(48);
+  await input.fill("http://example.invalid/crest.png");
+  await card.getByRole("button", { name: "Save" }).click();
+  await expect(card.getByText("Enter a public https:// image address.")).toBeVisible();
+  expect(saved).toHaveLength(0);
+  await expectNoAxeViolations(page, "crest error");
+  await input.fill("  https://example.invalid/assets-v1/x/sample-crest.png ");
+  await card.getByRole("button", { name: "Save" }).click();
+  await expect(card.getByText(/Saved at/)).toBeVisible();
+  expect(saved[0]).toEqual({ _key: "crest_image", _value: { url: "https://example.invalid/assets-v1/x/sample-crest.png" } });
+  await input.fill("");
+  await card.getByRole("button", { name: "Save" }).click();
+  await expect.poll(() => saved.length).toBe(2);
+  expect(saved[1]).toEqual({ _key: "crest_image", _value: { url: "" } });
+  await expect(card.getByRole("img", { name: "Crest preview" })).toHaveCount(0);
+  expect(await overflow(page)).toBeLessThanOrEqual(1);
+  await expectNoAxeViolations(page, "crest saved");
 });

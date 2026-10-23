@@ -9,19 +9,20 @@ import { useInitialLoading } from "@/hooks/useInitialLoading";
 import { loadLodgeIdentity } from "@/lib/lodgeIdentity";
 import { changedFields, clearedRequired, patchFor, REQUIRED_UNIT_FIELDS, type FieldMap } from "@/lib/unitSetupForm";
 import { emailError, MEMBERSHIP_OFFICER_UNIT_KEY, normaliseEmail } from "@/lib/membershipOfficerEmail";
+import { CREST_IMAGE_UNIT_KEY, crestUrlError, crestUrlFrom, normaliseCrestUrl } from "@/lib/crestImage";
 import { canonicalSortCode, signOff, validAccountNumber, paymentReference } from "@/lib/bookingDetails";
 
 type Form = {
   lodge_name: string; lodge_number: string; consecration_date: string;
   account_name: string; sort_code: string; account_number: string; reference_pattern: string;
-  card_wording: string; cheque_payee: string; sign_off_override: string; booking_contact_email: string; membership_officer_email: string;
+  card_wording: string; cheque_payee: string; sign_off_override: string; booking_contact_email: string; membership_officer_email: string; crest_image_url: string;
   venue_id: string; assistant_secretary_email: string; webmaster_email: string; communications_email: string; site_url: string;
   sender_name: string; formal_sender_name: string; facebook_url: string; instagram_url: string; twitter_url: string;
   province_name: string; ico_number: string; newsletter_masthead: string; newsletter_footer_note: string; calendar_name: string;
   provincial_file: string; installation_file: string; provincial_return_email: string; installation_return_email: string;
 };
 type Venue = { id: string; name: string; address: string | null; display_lines: string[] | null };
-const EMPTY: Form = { lodge_name: "", lodge_number: "", consecration_date: "", account_name: "", sort_code: "", account_number: "", reference_pattern: "", card_wording: "", cheque_payee: "", sign_off_override: "", booking_contact_email: "", membership_officer_email: "", venue_id: "", assistant_secretary_email: "", webmaster_email: "", communications_email: "", site_url: "", sender_name: "", formal_sender_name: "", facebook_url: "", instagram_url: "", twitter_url: "", province_name: "", ico_number: "", newsletter_masthead: "", newsletter_footer_note: "", calendar_name: "", provincial_file: "", installation_file: "", provincial_return_email: "", installation_return_email: "" };
+const EMPTY: Form = { lodge_name: "", lodge_number: "", consecration_date: "", account_name: "", sort_code: "", account_number: "", reference_pattern: "", card_wording: "", cheque_payee: "", sign_off_override: "", booking_contact_email: "", membership_officer_email: "", crest_image_url: "", venue_id: "", assistant_secretary_email: "", webmaster_email: "", communications_email: "", site_url: "", sender_name: "", formal_sender_name: "", facebook_url: "", instagram_url: "", twitter_url: "", province_name: "", ico_number: "", newsletter_masthead: "", newsletter_footer_note: "", calendar_name: "", provincial_file: "", installation_file: "", provincial_return_email: "", installation_return_email: "" };
 type Audit = { id: string; key: string; old_value: unknown; new_value: unknown; changed_by: string | null; changed_at: string };
 type Errs = Partial<Record<keyof Form, string>>;
 
@@ -54,6 +55,7 @@ async function loadForm() {
     card_wording: p.card_wording ?? "", cheque_payee: p.cheque_payee ?? "", sign_off_override: by.sign_off?.override ?? "",
     booking_contact_email: by.booking_contact_email?.email ?? "",
     membership_officer_email: by[MEMBERSHIP_OFFICER_UNIT_KEY]?.email ?? "",
+    crest_image_url: by[CREST_IMAGE_UNIT_KEY]?.url ?? "",
     venue_id: by.meeting_place?.venue_id ?? "", assistant_secretary_email: c.assistant_secretary_email ?? "", webmaster_email: c.webmaster_email ?? "",
     communications_email: c.communications_email ?? "", site_url: c.site_url ?? "", sender_name: c.sender_name ?? "", formal_sender_name: c.formal_sender_name ?? "",
     facebook_url: by.web_social?.facebook_url ?? "", instagram_url: by.web_social?.instagram_url ?? "", twitter_url: by.web_social?.twitter_url ?? "",
@@ -143,19 +145,19 @@ function Inner() {
   const only = (m: FieldMap<Form>) => (ch: (keyof Form)[]) => patchFor(f, ch, m);
 
   const ro = !canEdit;
-  const field = (k: keyof Form, label: string, opts: { hint?: string; type?: string; inputMode?: "numeric" | "text" | "email"; readOnly?: boolean } = {}) => (
+  const field = (k: keyof Form, label: string, opts: { hint?: string; type?: string; inputMode?: "numeric" | "text" | "email" | "url"; readOnly?: boolean; tall?: boolean } = {}) => (
     <div>
       <label htmlFor={`us-${k}`} className={fieldLabelCls}>{label}</label>
       <input id={`us-${k}`} type={opts.type ?? "text"} inputMode={opts.inputMode} value={f[k]} readOnly={ro || opts.readOnly} autoComplete="off"
         aria-invalid={!!errs[k]} aria-describedby={[opts.hint ? `us-${k}-hint` : "", errs[k] ? `us-${k}-err` : ""].filter(Boolean).join(" ") || undefined}
-        onChange={(e) => setF((x) => ({ ...x, [k]: e.target.value }))} className={`${fieldCls} mt-1 min-h-[44px]`} />
+        onChange={(e) => setF((x) => ({ ...x, [k]: e.target.value }))} className={`${fieldCls} mt-1 ${opts.tall ? "min-h-[48px]" : "min-h-[44px]"}`} />
       {opts.hint && <span id={`us-${k}-hint`} className={fieldHintCls}>{opts.hint}</span>}
       {errs[k] && <span id={`us-${k}-err`} className="mt-1 block text-sm text-gold-light">{errs[k]}</span>}
     </div>
   );
-  const saveBtn = (section: string, onClick: () => void) => canEdit && (
+  const saveBtn = (section: string, onClick: () => void, tall = false) => canEdit && (
     <div className="flex flex-wrap items-center gap-3 pt-2">
-      <Button type="button" onClick={onClick} disabled={busy === section || !orig} className="min-h-[44px]">{busy === section ? "Saving…" : "Save"}</Button>
+      <Button type="button" onClick={onClick} disabled={busy === section || !orig} className={tall ? "min-h-[48px]" : "min-h-[44px]"}>{busy === section ? "Saving…" : "Save"}</Button>
       <p role="status" className="font-sans text-sm text-primary-foreground/90">{status[section]}</p>
     </div>
   );
@@ -320,6 +322,24 @@ function Inner() {
             if (m) e.membership_officer_email = m;
             return e;
           }))}
+        </Section>
+
+        <Section title="Lodge crest image">
+          {field("crest_image_url", "Crest image address (https)", { type: "url", inputMode: "url", hint: "A public https:// link to the crest picture, used in emails and printed documents. Leave blank to leave the crest out.", tall: true })}
+          {crestUrlFrom({ url: f.crest_image_url }) && (
+            <div className="flex min-w-0 items-center gap-3">
+              <img src={crestUrlFrom({ url: f.crest_image_url })!} alt="Crest preview" width={64} height={64} className="h-16 w-16 shrink-0 rounded-sm bg-primary-foreground object-contain p-1" />
+              <span className="font-sans text-xs text-primary-foreground/80">Preview. If no picture appears, the address can't be loaded.</span>
+            </div>
+          )}
+          {saveBtn("crest", () => save("crest", [
+            { key: CREST_IMAGE_UNIT_KEY, fields: ["crest_image_url"], value: () => ({ url: normaliseCrestUrl(f.crest_image_url) }) },
+          ], () => {
+            const e: Errs = {};
+            const m = crestUrlError(f.crest_image_url);
+            if (m) e.crest_image_url = m;
+            return e;
+          }), true)}
         </Section>
 
         <Section title="Sign-off">
