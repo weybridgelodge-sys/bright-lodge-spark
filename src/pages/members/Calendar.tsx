@@ -118,6 +118,7 @@ function unescapeICS(v: string): string {
 
 function Inner() {
   const { user } = useAuth();
+  const { siteUrl } = useUnitProfile();
   const [cursor, setCursor] = useState<Date>(startOfMonth(new Date()));
   const [selected, setSelected] = useState<Date | null>(new Date());
 

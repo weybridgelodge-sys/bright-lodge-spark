@@ -38,6 +38,7 @@ const fmtDate = (d: string) =>
 function Inner() {
   const { isAdmin, isSecretary, isAssistantSecretary, isWorshipfulMaster } = useAuth();
   const canEdit = isAdmin || isSecretary || isAssistantSecretary || isWorshipfulMaster;
+  const unit = useUnitProfile();
   const [entries, setEntries] = useState<Entry[]>([]);
   const [loading, setLoading] = useState(true);
   const [draft, setDraft] = useState<Draft | null>(null);
@@ -68,7 +69,7 @@ function Inner() {
       event_date: draft.event_date,
       time_from: draft.time_from,
       time_to: draft.time_to,
-      venue: draft.venue.trim() || unit.venueName || null,
+      venue: draft.venue.trim() || unit.venueName,
       description: draft.description?.trim() || null,
       updated_by: u.user?.id ?? null,
     };
@@ -119,7 +120,7 @@ function Inner() {
           <p className="text-primary-foreground/80 text-sm">Planned rehearsals and training sessions — feeds every member's personal calendar.</p>
         </div>
         {canEdit && !draft && (
-          <button onClick={() => setDraft(blank())} className="inline-flex items-center gap-2 px-4 py-2 bg-gold text-navy font-semibold text-sm rounded-sm hover:bg-gold/90"><Plus className="w-4 h-4" /> Add entry</button>
+          <button onClick={() => setDraft(blank(unit.venueName))} className="inline-flex items-center gap-2 px-4 py-2 bg-gold text-navy font-semibold text-sm rounded-sm hover:bg-gold/90"><Plus className="w-4 h-4" /> Add entry</button>
         )}
       </header>
 
