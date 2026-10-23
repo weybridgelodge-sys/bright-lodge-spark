@@ -8,24 +8,23 @@ import { motion, useReducedMotion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import pastMastersJewel from "@/assets/news/past-masters-jewel.png";
+import { useUnitProfile, venueFull, venueShort } from "@/lib/unitProfile";
+import { useLodgeFigures, membersLabel, longDate, totalMembers, ageRangePhrase, countWord, provinceShort, DASH, type LodgeFigures } from "@/lib/lodgeFigures";
+import type { UnitProfile } from "@/lib/unitProfile";
 
-const meetingDates: string[] = [
-  "3rd Wednesday in February",
-  "2nd Wednesday in May",
-  "3rd Wednesday in October (Installation)",
-  "2nd Wednesday in December",
-];
-
-const stats: { label: string; value: string }[] = [
-  { label: "Lodge Number", value: "6787" },
-  { label: "Consecrated", value: "19th January 1949" },
-  { label: "Subscribing Members", value: "22 (incl. 1 honorary)" },
-  { label: "Average Member Age", value: "53" },
-  { label: "Meeting Day", value: "Wednesday" },
-  { label: "Meetings Per Year", value: "4" },
-  { label: "Most Recent Initiation", value: "13th May 2026" },
-  { label: "Province", value: "Surrey" },
-];
+/** "Lodge at a Glance" cards — every value from the lodge record; "—" when not known. */
+export function glanceStats(f: LodgeFigures, u: Pick<UnitProfile, "lodgeNumber" | "consecrationDate" | "provinceName">, pattern: PublicMeetingPattern | null) {
+  return [
+    { label: "Lodge Number", value: u.lodgeNumber || DASH },
+    { label: "Consecrated", value: longDate(u.consecrationDate) || DASH },
+    { label: "Subscribing Members", value: membersLabel(f) },
+    { label: "Average Member Age", value: f.averageAge != null ? String(f.averageAge) : DASH },
+    { label: "Meeting Day", value: pattern?.meetingDay || DASH },
+    { label: "Meetings Per Year", value: pattern?.perYear ? String(pattern.perYear) : DASH },
+    { label: "Most Recent Initiation", value: longDate(f.latestInitiationDate) || DASH },
+    { label: "Province", value: provinceShort(u.provinceName) || DASH },
+  ];
+}
 
 const values: { name: string; description: string }[] = [
   { name: "Integrity", description: "Members hold themselves to a standard of honesty and moral consistency, on and off the temple floor." },
@@ -42,13 +41,17 @@ const fadeUp = {
 
 const LodgeProfile = () => {
   const shouldReduceMotion = useReducedMotion();
-  // Saved Meeting Diary schedule wins; the typed text above is used only when none is saved.
+  // Meeting Diary schedule, else the lodge record's saved pattern text; nothing typed here.
   const [pattern, setPattern] = useState<PublicMeetingPattern | null>(null);
   useEffect(() => { let on = true; fetchPublicMeetingPattern().then((p) => { if (on) setPattern(p); }).catch(() => {}); return () => { on = false; }; }, []);
-  const shownDates = pattern?.items ?? meetingDates;
-  const shownStats = pattern
-    ? stats.map((st) => st.label === "Meeting Day" ? { ...st, value: pattern.meetingDay } : st.label === "Meetings Per Year" ? { ...st, value: String(pattern.perYear) } : st)
-    : stats;
+  const unit = useUnitProfile();
+  const figures = useLodgeFigures();
+  const shownDates = pattern?.items ?? [];
+  const shownStats = glanceStats(figures, unit, pattern);
+  const total = totalMembers(figures);
+  const ages = ageRangePhrase(figures);
+  const venueLong = venueFull(unit);
+  const venueBrief = venueShort(unit);
   const pageSchema = useMemo(() => {
     const breadcrumb = breadcrumbSchema([
       { name: "Home", url: "/" },
@@ -102,8 +105,8 @@ const LodgeProfile = () => {
             <motion.div variants={fadeUp} initial="hidden" whileInView={shouldReduceMotion ? "static" : "visible"} viewport={{ once: true }} custom={0}>
               <div className="h-px w-16 bg-gold mb-6" aria-hidden="true" />
               <h2 id="overview-heading" className="text-2xl md:text-3xl font-serif text-foreground mb-6">About Weybridge Lodge No. 6787 — Freemasons in Guildford, Surrey</h2>
-              <p className="text-muted-foreground font-sans leading-relaxed mb-4">Weybridge Lodge No. 6787 is a Lodge of Freemasons meeting in Guildford, Surrey. Founded in 1948 by members of our Mother Lodge, Noel Money No. 2521, and by workers from the Vickers-Armstrong aircraft factory at Brooklands in Weybridge, the Lodge was consecrated on 19th January 1949.</p>
-              <p className="text-muted-foreground font-sans leading-relaxed mb-4">From those wartime roots — aircraft engineers, local tradesmen, shopkeepers and professionals bound together by a shared Wednesday afternoon — Weybridge Lodge has grown into the diverse, active community it is today. Our 22 members range in age from 18 to 83 and bring with them a wide spectrum of backgrounds, professions and interests. We are proud of our friendliness to new members and visitors alike — those who come to our meetings consistently remark on the warmth of the welcome and the quality of the ceremony, and many return.</p>
+              <p className="text-muted-foreground font-sans leading-relaxed mb-4">Weybridge Lodge No. 6787 is a Lodge of Freemasons meeting in Guildford, Surrey. Founded in 1948 by members of our Mother Lodge, Noel Money No. 2521, and by workers from the Vickers-Armstrong aircraft factory at Brooklands in Weybridge, the Lodge was consecrated{longDate(unit.consecrationDate) ? ` on ${longDate(unit.consecrationDate)}` : ""}.</p>
+              <p className="text-muted-foreground font-sans leading-relaxed mb-4">From those wartime roots — aircraft engineers, local tradesmen, shopkeepers and professionals bound together by a shared Wednesday afternoon — Weybridge Lodge has grown into the diverse, active community it is today. {total != null ? <>Our {total} members{ages ? <> range in age {ages} and</> : null} bring</> : <>Our members bring</>} with them a wide spectrum of backgrounds, professions and interests. We are proud of our friendliness to new members and visitors alike — those who come to our meetings consistently remark on the warmth of the welcome and the quality of the ceremony, and many return.</p>
               <p className="text-muted-foreground font-sans leading-relaxed">The Lodge holds a strong reputation within the Province of Surrey and plays an active role in Provincial life, including the <Link to="/our-charities" className="text-gold-dark underline underline-offset-4">Surrey 2030 Festival</Link> — a major fundraising programme supporting Masonic and non-Masonic charities across the county. In 2026, members of Weybridge Lodge completed the <Link to="/thames-challenge" className="text-gold-dark underline underline-offset-4">Thames Towpath Challenge</Link> — 183 miles in 10 days — raising £10,000 for the Festival. That spirit of fellowship in action is what Weybridge Lodge is about. Learn more about <Link to="/history" className="text-gold-dark underline underline-offset-4">our history</Link>.</p>
             </motion.div>
           </div>
@@ -162,15 +165,15 @@ const LodgeProfile = () => {
             <motion.div variants={fadeUp} initial="hidden" whileInView={shouldReduceMotion ? "static" : "visible"} viewport={{ once: true }} custom={0}>
               <p className="text-gold text-sm font-sans uppercase tracking-wide mb-2">Meeting Schedule</p>
               <h2 id="schedule-heading" className="text-2xl md:text-3xl font-serif text-gold mb-6">When Do We Meet?</h2>
-              <p className="text-primary-foreground/80 font-sans leading-relaxed mb-8">Our Lodge meets at the Guildford Masonic Centre, Weybourne House, Hitherbury Close, Guildford, <span className="font-semibold text-gold">GU2 4DR</span>. We hold four meetings each year, which usually start between 5.30 pm and 6.00 pm.</p>
-              <ul className="space-y-3 mb-8 list-none p-0 m-0">
+              <p className="text-primary-foreground/80 font-sans leading-relaxed mb-8">{venueLong ? `Our Lodge meets at ${venueLong}. ` : ""}{pattern?.perYear ? `We hold ${countWord(pattern.perYear)} meetings each year, which usually start between 5.30 pm and 6.00 pm.` : "Our meetings usually start between 5.30 pm and 6.00 pm."}</p>
+              {shownDates.length > 0 && <ul className="space-y-3 mb-8 list-none p-0 m-0">
                 {shownDates.map((date) => (
                   <li key={date} className="flex items-center gap-3">
                     <div className="w-1.5 h-1.5 rounded-full bg-gold flex-shrink-0" aria-hidden="true" />
                     <span className="text-primary-foreground/80 font-sans">{date}</span>
                   </li>
                 ))}
-              </ul>
+              </ul>}
               <p className="text-primary-foreground/80 font-sans leading-relaxed">Our December meeting is a particularly special evening, kept specifically for initiating new members — though you would not necessarily need to wait for this date to join. Meetings are followed by a Festive Board — a formal dinner at which the fellowship of the Lodge really comes to life. You can <Link to="/events" className="text-gold underline underline-offset-4">view our upcoming meetings</Link> on the events page.</p>
             </motion.div>
           </div>
@@ -181,8 +184,8 @@ const LodgeProfile = () => {
             <motion.div variants={fadeUp} initial="hidden" whileInView={shouldReduceMotion ? "static" : "visible"} viewport={{ once: true }} custom={0}>
               <div className="h-px w-16 bg-gold mb-6" aria-hidden="true" />
               <h2 id="quality-heading" className="text-2xl md:text-3xl font-serif text-foreground mb-6">A Lodge Built on Quality</h2>
-              <p className="text-muted-foreground font-sans leading-relaxed mb-4">We currently have 22 members whose ages range from 18 to 83. We welcome men of all ages and backgrounds — whether you are a young professional looking for personal development and new friendships, or more established in your career. Weybridge Lodge prides itself on its friendliness to new members and visitors alike.</p>
-              <p className="text-muted-foreground font-sans leading-relaxed">The Lodge has a long-established reputation for the quality of its ceremonies. This is due in no small part to our very active weekly Rehearsal Night, which meets every Thursday at 7.30 pm at the Guildford Masonic Centre, GU2 4DR. Rehearsal Night is strongly supported by all members, and particularly by our more senior brethren, whose aim is to guide, mentor and entertain our newer members as they learn the Craft.</p>
+              <p className="text-muted-foreground font-sans leading-relaxed mb-4">{total != null ? `We currently have ${total} members${ages ? ` whose ages range ${ages}` : ""}. ` : ""}We welcome men of all ages and backgrounds — whether you are a young professional looking for personal development and new friendships, or more established in your career. Weybridge Lodge prides itself on its friendliness to new members and visitors alike.</p>
+              <p className="text-muted-foreground font-sans leading-relaxed">The Lodge has a long-established reputation for the quality of its ceremonies. This is due in no small part to our very active weekly Rehearsal Night, which meets every Thursday at 7.30 pm{venueBrief ? ` at ${venueBrief}` : ""}. Rehearsal Night is strongly supported by all members, and particularly by our more senior brethren, whose aim is to guide, mentor and entertain our newer members as they learn the Craft.</p>
             </motion.div>
           </div>
         </section>
@@ -229,7 +232,7 @@ const LodgeProfile = () => {
               <div className="h-px w-16 bg-gold mb-6" aria-hidden="true" />
               <h2 id="mission-heading" className="text-2xl md:text-3xl font-serif text-foreground mb-6">Why Weybridge Lodge?</h2>
               <p className="text-muted-foreground font-sans leading-relaxed mb-6">Weybridge Lodge No. 6787 brings together men of good character from Guildford and the surrounding Surrey area to build lifelong friendships, support one another's personal development, and give practical, generous service to local and national charitable causes — all within the structure and ceremony of English Freemasonry.</p>
-              <p className="text-muted-foreground font-sans leading-relaxed">If that sounds like the kind of friendship, structure and purpose you're looking for, the best next step is <Link to="/freemason-initiation-night" className="text-gold-dark underline underline-offset-4">Your Initiation Night</Link> — it walks through exactly what to expect, from enquiry to your first evening at Guildford Masonic Centre.</p>
+              <p className="text-muted-foreground font-sans leading-relaxed">If that sounds like the kind of friendship, structure and purpose you're looking for, the best next step is <Link to="/freemason-initiation-night" className="text-gold-dark underline underline-offset-4">Your Initiation Night</Link> — it walks through exactly what to expect, from enquiry to your first evening{unit.venueName ? ` at ${unit.venueName}` : " with us"}.</p>
             </motion.div>
           </div>
         </section>
