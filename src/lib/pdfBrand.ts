@@ -4,7 +4,7 @@
 import type jsPDF from "jspdf";
 import { supabase } from "@/integrations/supabase/client";
 import { CREST_IMAGE_UNIT_KEY, crestUrlFrom } from "@/lib/crestImage";
-import { docSubtitle, docTitle, type DocIdentity } from "@/lib/docIdentity";
+import { docSubtitle, docTitle, loadDocIdentity, type DocIdentity } from "@/lib/docIdentity";
 
 // Print shorthand values from the Brand Identity Reference (PDF only; screens use theme tokens).
 export const PRINT_NAVY: [number, number, number] = [27, 42, 74]; // #1B2A4A
@@ -130,11 +130,37 @@ export function drawBrandHeader(doc: jsPDF, o: BrandHeaderOpts): number {
   doc.setFont("times", "italic"); doc.setFontSize(13); doc.setTextColor(...PRINT_GOLD_DARK);
   doc.text(o.title, x, 88);
   doc.setFont("helvetica", "normal"); doc.setFontSize(9); doc.setTextColor(...PRINT_INK);
-  if (o.periodLine) doc.text(o.periodLine, x, 104);
   if (o.rightLine) doc.text(o.rightLine, pageW - m, 104, { align: "right" });
+  if (o.periodLine) {
+    const lay = layoutPeriodLine(doc, o.periodLine, pageW - m - x, o.rightLine ? doc.getTextWidth(o.rightLine) : 0);
+    doc.setFontSize(lay.fontSize);
+    lay.lines.forEach((l, i) => doc.text(l, x, 104 + i * lay.leading));
+    doc.setFontSize(9);
+  }
   doc.setDrawColor(...PRINT_GOLD); doc.setLineWidth(1.5);
   doc.line(m, HEADER_RULE_Y, pageW - m, HEADER_RULE_Y); // gold accent rule
   return HEADER_START_Y;
+}
+
+export const PERIOD_GAP = 12; // minimum space between the period line and the right-hand line
+const PERIOD_MAX_LINES = 3; // 104, 115, 126 — all above the gold rule at HEADER_RULE_Y
+
+/**
+ * Period line layout: one line when it fits beside the right-hand line; otherwise wrapped to the
+ * width left of it (never overprints), stepping down to 8pt only if 3 lines at 9pt are not enough.
+ */
+export function layoutPeriodLine(doc: jsPDF, text: string, avail: number, rightW: number): { lines: string[]; fontSize: number; leading: number } {
+  const width = Math.max(40, avail - (rightW ? rightW + PERIOD_GAP : 0));
+  const prev = doc.getFontSize();
+  let out = { lines: [text], fontSize: 9, leading: 11 };
+  for (const fs of [9, 8]) {
+    doc.setFontSize(fs);
+    const lines = doc.splitTextToSize(text, width) as string[];
+    out = { lines: lines.slice(0, PERIOD_MAX_LINES), fontSize: fs, leading: fs === 9 ? 11 : 10 };
+    if (lines.length <= PERIOD_MAX_LINES) break;
+  }
+  doc.setFontSize(prev);
+  return out;
 }
 
 /** Navy section heading in serif (no filled band). Returns next y. */
@@ -145,7 +171,7 @@ export function drawBrandSection(doc: jsPDF, y: number, title: string, margin = 
 }
 
 /** Thin navy rule + lodge name/number left, page x of y right, on every page. */
-export function drawBrandFooter(doc: jsPDF, identity: DocIdentity, margin = 40) {
+export function drawBrandFooter(doc: jsPDF, identity: DocIdentity, margin = 40, opts: { note?: string } = {}) {
   const n = doc.getNumberOfPages();
   const pageW = doc.internal.pageSize.getWidth(), pageH = doc.internal.pageSize.getHeight();
   const line = docTitle(identity);
@@ -157,5 +183,30 @@ export function drawBrandFooter(doc: jsPDF, identity: DocIdentity, margin = 40) 
     if (line) doc.text(line, margin, pageH - 28);
     doc.setFont("helvetica", "normal");
     doc.text(`Page ${i} of ${n}`, pageW - margin, pageH - 28, { align: "right" });
+    if (opts.note) {
+      doc.setFont("times", "italic"); doc.setTextColor(...PRINT_MUTED);
+      doc.text(opts.note, margin, pageH - 16, { maxWidth: pageW - margin * 2 });
+    }
   }
+}
+
+/** Navy serif heading + thin gold rule (replaces the old filled navy band). Returns y + 32, the old band spacing. */
+export function drawBrandSectionRule(doc: jsPDF, y: number, title: string, margin = 40): number {
+  const pageW = doc.internal.pageSize.getWidth();
+  const next = drawBrandSection(doc, y, title, margin);
+  doc.setDrawColor(...PRINT_GOLD); doc.setLineWidth(0.6);
+  doc.line(margin, next - 6, pageW - margin, next - 6);
+  return y + 32;
+}
+
+export type PdfBrandDeps = { identity?: DocIdentity; crestUrl?: string | null; run?: ReturnType<typeof createPdfRun> };
+
+/** Unit Setup crest + lodge identity for one PDF run; any crest failure gives null (image omitted). Never throws for the crest. */
+export async function loadPdfBrand(deps: PdfBrandDeps = {}): Promise<{ identity: DocIdentity; crest: CrestImage | null }> {
+  const [identity, crestUrl] = await Promise.all([
+    deps.identity ? Promise.resolve(deps.identity) : loadDocIdentity(),
+    deps.crestUrl !== undefined ? Promise.resolve(deps.crestUrl) : fetchCrestUrl(),
+  ]);
+  const crest = await (deps.run ?? createPdfRun()).crest(crestUrl).catch(() => null);
+  return { identity, crest };
 }
