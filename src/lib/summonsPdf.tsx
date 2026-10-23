@@ -348,7 +348,6 @@ const FrontCoverPanel: React.FC<{
   return (
   <View style={[s.panel]}>
     <SummonsCoverHeader brand={coverBrand} fallback={{ name: template.lodge_name, number: template.lodge_number, province: template.province }} leftSrc={leftSrc} rightSrc={rightSrc} />
-     </View>
 
     {wmFromRoll && (
       <Text style={s.province}>{wmFromRoll} - Worshipful Master</Text>
