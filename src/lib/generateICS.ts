@@ -12,9 +12,8 @@ export interface ICSEventInput {
   uid?: string;
 }
 
-const LODGE_DOMAIN = "weybridgelodge.org.uk";
-const DEFAULT_ORGANIZER_EMAIL = `secretary@${LODGE_DOMAIN}`;
-const DEFAULT_ORGANIZER_NAME = "Weybridge Lodge Secretary";
+/** Lodge details from the lodge record (loadDocIdentity); blanks are omitted, never guessed. */
+export type ICSIdentity = { lodgeName?: string; lodgeNumber?: string; secretaryEmail?: string; emailDomain?: string };
 
 // ICS requires DTSTART/DTSTAMP as UTC in the compact form YYYYMMDDTHHMMSSZ
 function toUtcICS(iso: string): string {
@@ -69,24 +68,26 @@ export function slugify(v: string): string {
     .slice(0, 60);
 }
 
-export function icsFilename(title: string): string {
-  return `${slugify(title) || "event"}-weybridge-lodge.ics`;
+export function icsFilename(title: string, lodgeName = ""): string {
+  return `${[slugify(title) || "event", slugify(lodgeName)].filter(Boolean).join("-")}.ics`;
 }
 
-export function generateICS(event: ICSEventInput): string {
-  const uid = event.uid ?? `${makeUid()}@${LODGE_DOMAIN}`;
+export function generateICS(event: ICSEventInput, id: ICSIdentity = {}): string {
+  const domain = (id.emailDomain ?? "").trim();
+  const title = [id.lodgeName?.trim(), id.lodgeNumber?.trim() ? `No ${id.lodgeNumber.trim()}` : ""].filter(Boolean).join(" ");
+  const uid = event.uid ?? (domain ? `${makeUid()}@${domain}` : makeUid());
   const start = new Date(event.startTime);
   const end = event.endTime
     ? new Date(event.endTime)
     : new Date(start.getTime() + 2 * 60 * 60 * 1000);
 
-  const organizerEmail = event.organizerEmail ?? DEFAULT_ORGANIZER_EMAIL;
-  const organizerName = event.organizerName ?? DEFAULT_ORGANIZER_NAME;
+  const organizerEmail = (event.organizerEmail ?? id.secretaryEmail ?? "").trim();
+  const organizerName = event.organizerName ?? (id.lodgeName?.trim() ? `${id.lodgeName.trim()} Secretary` : "Secretary");
 
   const lines: string[] = [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
-    "PRODID:-//Weybridge Lodge No 6787//Lodge Portal//EN",
+    `PRODID:-//${escapeText(title || "Lodge")}//Lodge Portal//EN`,
     "CALSCALE:GREGORIAN",
     // PUBLISH keeps this as an add-to-calendar file rather than a meeting
     // request, which prevents some mail clients from rendering an invite panel
@@ -105,8 +106,8 @@ export function generateICS(event: ICSEventInput): string {
     lines.push(`DESCRIPTION:${escapeText(event.description)}`);
   }
 
+  if (organizerEmail) lines.push(`ORGANIZER;CN=${escapeText(organizerName)}:mailto:${organizerEmail}`);
   lines.push(
-    `ORGANIZER;CN=${escapeText(organizerName)}:mailto:${organizerEmail}`,
     "STATUS:CONFIRMED",
     "SEQUENCE:0",
     "TRANSP:OPAQUE",

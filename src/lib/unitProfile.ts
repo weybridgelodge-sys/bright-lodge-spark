@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 export type UnitProfile = {
   lodgeName: string; lodgeNumber: string; consecrationYear: string; provinceName: string; icoNumber: string;
-  facebookUrl: string; instagramUrl: string; twitterUrl: string; venueName: string; venueLines: string[]; siteUrl: string;
+  facebookUrl: string; instagramUrl: string; twitterUrl: string; venueName: string; venueLines: string[]; siteUrl: string; secretaryEmail: string;
 };
 const s = (v: unknown) => (typeof v === "string" ? v.trim() : typeof v === "number" ? String(v) : "");
 
@@ -17,6 +17,7 @@ export function parseUnitProfile(row: unknown): UnitProfile {
     provinceName: s(r.province_name), icoNumber: s(r.ico_number), facebookUrl: s(r.facebook_url),
     instagramUrl: s(r.instagram_url), twitterUrl: s(r.twitter_url), venueName: s(r.venue_name),
     venueLines: Array.isArray(r.venue_lines) ? r.venue_lines.map(s).filter(Boolean) : [], siteUrl: s(r.site_url),
+    secretaryEmail: s(r.secretary_email).includes("@") ? s(r.secretary_email) : "",
   };
 }
 
@@ -30,7 +31,7 @@ export function venueShort(p: Pick<UnitProfile, "venueName" | "venueLines">): st
   return [p.venueName, pc].filter(Boolean).join(", ");
 }
 
-const KEY = "unit-profile-v1";
+const KEY = "unit-profile-v2";
 const read = (): UnitProfile | null => { try { const v = sessionStorage.getItem(KEY); return v ? parseUnitProfile(JSON.parse(v)) : null; } catch { return null; } };
 let inflight: Promise<unknown> | null = null;
 
