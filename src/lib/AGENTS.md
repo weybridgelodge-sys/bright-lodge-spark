@@ -1,2 +1,2 @@
-- KPI Summary: async crest header, explicit table start, final page-count loop in bottom margin; VO unchanged. Why: prevent overlap, ensure correct totals.
+- KPI Summary PDF: A4 pt on src/lib/pdfBrand (drawBrandHeader/Footer, Unit Setup crest, failure omits image) via kpiTable margins clearing the footer; VO report unchanged. Why: one brand header, small files, no footer overlap.
 - Public event duplication goes through buildDuplicatePayload (src/lib/eventDuplicate.ts): drafts only, never copies bookings/money/publish/archive state; QR PNGs render client-side via src/lib/eventQr.ts and are decode-tested. Why: annual events repeat safely without a paid QR service.
