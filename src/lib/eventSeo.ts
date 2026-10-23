@@ -1,16 +1,20 @@
 // Event page meta + JSON-LD, built only from event data (nothing event-specific in code).
-import { CHILD_MAX_AGE, DEFAULT_VENUE, formatEventDate } from "./publicEventFormat";
+import { CHILD_MAX_AGE, formatEventDate } from "./publicEventFormat";
+
+// SEO/JSON-LD copy is pre-rendered at build time (vite-plugin-static-meta) and
+// stays typed until the SEO batch; kept here so no screen imports it.
+export const SEO_DEFAULT_VENUE = "Guildford Masonic Centre, Hitherbury Close, Guildford GU2 4DR";
 import type { PublicEvent } from "./publicEventTypes";
 
 const SITE = "https://weybridgelodge.org.uk";
 
 export function buildEventSeo(ev: PublicEvent, opts: { open: boolean; imageUrl?: string }) {
   const title = ev.public_title;
-  const venue = ev.venue?.trim() || DEFAULT_VENUE;
+  const venue = ev.venue?.trim() || SEO_DEFAULT_VENUE;
   const auto = `${title} on ${formatEventDate(ev.event_date)} at Guildford Masonic Centre, GU2 4DR. Hosted by ${ev.hosting_lodges.join(" and ") || "Weybridge Lodge No. 6787"} — Freemasons in Guildford. Book online.`.slice(0, 300);
   const url = `${SITE}/events/${ev.slug}`;
   // The structured Guildford address applies only when the venue is the default one.
-  const location = venue === DEFAULT_VENUE
+  const location = venue === SEO_DEFAULT_VENUE
     ? { "@type": "Place", name: "Guildford Masonic Centre", address: { "@type": "PostalAddress", streetAddress: "Weybourne House, Hitherbury Close", addressLocality: "Guildford", addressRegion: "Surrey", postalCode: "GU2 4DR", addressCountry: "GB" } }
     : { "@type": "Place", name: venue.split(",")[0].trim(), address: venue };
   const prices = [ev.adult_price_pence, ev.child_price_pence].filter((p): p is number => p != null);

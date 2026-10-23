@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 export type UnitProfile = {
-  lodgeName: string; lodgeNumber: string; consecrationYear: string; provinceName: string; icoNumber: string;
+  lodgeName: string; lodgeNumber: string; consecrationYear: string; consecrationDate: string; provinceName: string; icoNumber: string;
   facebookUrl: string; instagramUrl: string; twitterUrl: string; venueName: string; venueLines: string[]; siteUrl: string; secretaryEmail: string;
 };
 const s = (v: unknown) => (typeof v === "string" ? v.trim() : typeof v === "number" ? String(v) : "");
@@ -13,7 +13,7 @@ const s = (v: unknown) => (typeof v === "string" ? v.trim() : typeof v === "numb
 export function parseUnitProfile(row: unknown): UnitProfile {
   const r = (row ?? {}) as Record<string, unknown>;
   return {
-    lodgeName: s(r.lodge_name), lodgeNumber: s(r.lodge_number), consecrationYear: s(r.consecration_year),
+    lodgeName: s(r.lodge_name), lodgeNumber: s(r.lodge_number), consecrationYear: s(r.consecration_year), consecrationDate: s(r.consecration_date).slice(0, 10),
     provinceName: s(r.province_name), icoNumber: s(r.ico_number), facebookUrl: s(r.facebook_url),
     instagramUrl: s(r.instagram_url), twitterUrl: s(r.twitter_url), venueName: s(r.venue_name),
     venueLines: Array.isArray(r.venue_lines) ? r.venue_lines.map(s).filter(Boolean) : [], siteUrl: s(r.site_url),
@@ -31,7 +31,32 @@ export function venueShort(p: Pick<UnitProfile, "venueName" | "venueLines">): st
   return [p.venueName, pc].filter(Boolean).join(", ");
 }
 
-const KEY = "unit-profile-v2";
+/** Venue address lines without the venue name, joined: "Weybourne House, Hitherbury Close, …". "" when not set. */
+export function venueAddress(p: Pick<UnitProfile, "venueName" | "venueLines">): string {
+  const parts = p.venueLines.join(" ").split(",").map((x) => x.trim()).filter(Boolean);
+  const name = p.venueName.trim().toLowerCase();
+  return (name && parts[0]?.toLowerCase() === name ? parts.slice(1) : parts).join(", ");
+}
+
+/** Venue name plus address on one line; "" when no venue is set. */
+export const venueFull = (p: Pick<UnitProfile, "venueName" | "venueLines">) =>
+  [p.venueName, venueAddress(p)].filter(Boolean).join(", ");
+
+/** True when a free-text location names the unit's own venue. */
+export const isUnitVenue = (text: string | null | undefined, p: Pick<UnitProfile, "venueName">) =>
+  !!p.venueName && !!text && text.toLowerCase().includes(p.venueName.toLowerCase());
+
+/** One-off public read (no React), for data loaders. Blank profile on failure. */
+export async function loadUnitProfile(): Promise<UnitProfile> {
+  const cached = read();
+  if (cached && cached.venueName) return cached;
+  const { data, error } = await (supabase.rpc as any)("get_public_unit_profile");
+  if (error || !data) return cached ?? parseUnitProfile(null);
+  try { sessionStorage.setItem(KEY, JSON.stringify(data)); } catch { /* storage unavailable */ }
+  return parseUnitProfile(data);
+}
+
+const KEY = "unit-profile-v3";
 const read = (): UnitProfile | null => { try { const v = sessionStorage.getItem(KEY); return v ? parseUnitProfile(JSON.parse(v)) : null; } catch { return null; } };
 let inflight: Promise<unknown> | null = null;
 

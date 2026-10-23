@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { buildEventSeo } from "@/lib/eventSeo";
-import { DEFAULT_VENUE, type PublicEvent } from "@/lib/publicEvents";
+import { buildEventSeo, SEO_DEFAULT_VENUE as DEFAULT_VENUE } from "@/lib/eventSeo";
+import { type PublicEvent } from "@/lib/publicEvents";
 
 const ev = {
   id: "e", slug: "festival-2027", public_title: "Festival 2027", name: "Festival", tagline: "A night", intro_copy: null, theme: "default",

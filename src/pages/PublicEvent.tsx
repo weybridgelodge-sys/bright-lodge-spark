@@ -8,7 +8,7 @@ import { depositAllowed, depositLineName, depositPence, orderTotalPence, planMet
 import { supabase } from "@/integrations/supabase/client";
 import { readFunctionError } from "@/lib/functionError";
 import {
-  CHILD_MAX_AGE, DEFAULT_VENUE, eventBookingState, fetchPublicEvent, formatEventDate,
+  CHILD_MAX_AGE, eventBookingState, fetchPublicEvent, formatEventDate,
   formatGBP, formatTime, isChildAge, seatsLeft, keepPostcodeTogether, type PublicEvent as Ev,
 } from "@/lib/publicEvents";
 import {
@@ -17,6 +17,7 @@ import {
 } from "@/components/events/booking/BookingCore";
 import { CatalogueSteppers, CourseSelects, DECIDE_LATER, eventImageUrl, InfoBlocks, useEventContent } from "@/components/events/booking/ModuleSections";
 import { buildEventSeo } from "@/lib/eventSeo";
+import { useUnitProfile, venueFull } from "@/lib/unitProfile";
 import { coursesForGuest, orderModules } from "@/lib/eventOrder";
 
 const LODGES = ["Weybridge", "Astolat", "Other", "Guest"] as const;
@@ -90,7 +91,8 @@ export default function PublicEvent() {
   const state = ev ? eventBookingState(ev) : "closed";
   const left = ev ? seatsLeft(ev) : null;
   const festive = ev?.theme === "christmas";
-  const venue = ev?.venue || DEFAULT_VENUE;
+  const unit = useUnitProfile();
+  const venue = ev?.venue?.trim() || venueFull(unit);
   const title = ev?.public_title || "";
   const time = ev ? [formatTime(ev.start_time), formatTime(ev.end_time)].filter(Boolean).join(" – ") : "";
 

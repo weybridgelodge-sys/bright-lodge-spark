@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useUnitProfile } from "@/lib/unitProfile";
 
 function getPlatformHint(): "apple" | "android" | "desktop" {
   if (typeof navigator === "undefined") return "desktop";
@@ -57,7 +58,8 @@ function classify(rawTitle: string): { kind: CalEvent["kind"]; clean: string } {
 }
 
 /** Minimal ICS parser sufficient for our feed (VEVENT blocks only). */
-function parseICS(ics: string): CalEvent[] {
+function parseICS(ics: string, siteUrl = ""): CalEvent[] {
+  const eventsPrefix = siteUrl ? `${siteUrl.replace(/\/+$/, "")}/events/` : "";
   const unfolded = ics.replace(/\r?\n[ \t]/g, "");
   const lines = unfolded.split(/\r?\n/);
   const events: CalEvent[] = [];
@@ -86,7 +88,7 @@ function parseICS(ics: string): CalEvent[] {
           end,
           location: cur.LOCATION ? unescapeICS(cur.LOCATION) : undefined,
           description: cur.DESCRIPTION ? unescapeICS(cur.DESCRIPTION) : undefined,
-          link: cur.URL?.startsWith("https://weybridgelodge.org.uk/events/") ? new URL(cur.URL).pathname : undefined,
+          link: eventsPrefix && cur.URL?.startsWith(eventsPrefix) ? new URL(cur.URL).pathname : undefined,
         });
       }
       cur = null;
@@ -143,14 +145,14 @@ function Inner() {
   }, [feedUrl]);
 
   const eventsQ = useQuery({
-    queryKey: ["member-calendar-feed", tokenQ.data],
+    queryKey: ["member-calendar-feed", tokenQ.data, siteUrl],
     enabled: !!feedUrl,
     queryFn: async () => {
       if (!feedUrl) throw new Error("Calendar link unavailable");
       const res = await fetch(feedUrl, { cache: "no-store" });
       if (!res.ok) throw new Error(`Feed failed: ${res.status}`);
       const text = await res.text();
-      return parseICS(text);
+      return parseICS(text, siteUrl);
     },
   });
 
