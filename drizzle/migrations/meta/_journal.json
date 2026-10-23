@@ -981,6 +981,13 @@
       "when": 1792779942390,
       "tag": "0139_unit_setup_membership_officer_email",
       "breakpoints": true
+    },
+    {
+      "idx": 140,
+      "version": "7",
+      "when": 1792782264679,
+      "tag": "0140_unit_setup_crest_image",
+      "breakpoints": true
     }
   ]
 }
