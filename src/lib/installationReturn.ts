@@ -243,6 +243,17 @@ export type FieldSpec = { id: string; label: string; value: string; match?: (nam
 
 export const SECRETARY_CHANGED_FIELD = "LodgeHas the Secretary or his details changed YN";
 export type YesNo = "Y" | "N" | "";
+export const SECRETARY_CHOICE_ERROR = "Choose Yes or No before exporting";
+/** Export / Submit are allowed only once Y or N has been chosen on the page. */
+export function secretaryChoiceError(v: YesNo | null | undefined): string | null {
+  return v === "Y" || v === "N" ? null : SECRETARY_CHOICE_ERROR;
+}
+/** The value the UI path writes into the form; throws rather than ever producing a blank. */
+export function secretaryChangedValue(v: YesNo | null | undefined): "Y" | "N" {
+  if (v === "Y" || v === "N") return v;
+  throw new Error(SECRETARY_CHOICE_ERROR);
+}
+export const secretaryChoiceSummary = (v: YesNo) => (v === "Y" ? "Yes" : v === "N" ? "No" : "");
 
 const has = (...parts: string[]) => (n: string) => parts.every((p) => n.toLowerCase().includes(p.toLowerCase()));
 
