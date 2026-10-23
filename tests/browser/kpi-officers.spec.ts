@@ -19,6 +19,8 @@ test("KPI snapshot and critical roles at 320px", { timeout: 90_000 }, async ({ p
   await expect(page.getByText("Bro. T Tre (Test)").first()).toBeVisible();
   const date = page.getByText("13/05/2026").first();
   await date.scrollIntoViewIfNeeded();
+  // One line: innerText preserves a mid-number wrap as a newline, so it must read back whole.
+  expect(await date.innerText()).toBe("13/05/2026");
   const card = await date.locator("xpath=..").boundingBox();
   const box = await date.boundingBox();
   expect(box!.x + box!.width).toBeLessThanOrEqual(card!.x + card!.width + 1);
