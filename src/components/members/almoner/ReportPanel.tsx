@@ -224,7 +224,7 @@ export default function ReportPanel({ members }: { members: Member[] }) {
   const generate = async () => {
     setBusy(true);
     try {
-      const [logs, corr, refs, abs, status, life, wm] = await Promise.all([
+      const [logs, corr, refs, abs, status, life, wm, pmRoll] = await Promise.all([
         (supabase as any).from("welfare_log_entries").select("*")
           .gte("contact_date", from).lte("contact_date", to).is("deleted_at", null)
           .order("contact_date", { ascending: false }),
