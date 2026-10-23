@@ -12,7 +12,7 @@ const GOLD = "#C9A432"; // rules only
 const MUTED = "#5A6070";
 export const SUMMONS_COVER_CREST_PT = 125;
 
-/** "Surrey" or "Province of Surrey" -> "PROVINCE OF SURREY"; "Provincial Grand Lodge of …" kept as typed; never doubled. */
+/** "Testshire" or "Province of Testshire" -> "PROVINCE OF TESTSHIRE"; "Provincial Grand Lodge of …" kept as typed; never doubled. */
 export function coverProvinceLine(province: string): string {
   const p = (province || "").trim();
   if (!p) return "";
