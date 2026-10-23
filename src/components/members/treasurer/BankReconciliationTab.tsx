@@ -13,9 +13,8 @@ import { Loader2, Check, X, FileDown, Zap, Link2 } from "lucide-react";
 import { saveJsPdf } from "@/lib/nativeDownload";
 import { formatEntryNumber, entryNumberMatches } from "@/lib/treasurer/entryNumber";
 import EntryDrilldown from "@/components/members/treasurer/EntryDrilldown";
-import {
-  reportPdfDoc, reportSection, reportTable, fmtDate as fmtLong,
-} from "@/lib/treasurer/reports";
+import { fmtDate as fmtLong } from "@/lib/treasurer/reports";
+import { buildBankRecPdf } from "@/lib/treasurer/bankRecPdf";
 import {
   BankLine, Suggestion, OutstandingBalance, BankLedgerLine,
   money, isBankCharge, isUnreconciled, buildSuggestions,
