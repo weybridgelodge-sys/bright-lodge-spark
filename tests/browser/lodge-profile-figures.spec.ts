@@ -48,6 +48,7 @@ test("Lodge Profile with nothing set shows — and no typed figures", async ({ p
   await expect(glance.locator("dd")).toHaveText(Array(8).fill("—"), { timeout: 20000 });
   const body = await page.locator("main").innerText();
   for (const old of ["22 members", "18 to 83", "13th May 2026", "GU2 4DR", "Hitherbury"]) expect(body).not.toContain(old);
+  await page.waitForTimeout(1000); // let the fade-in finish before the contrast scan
   await noScroll(page);
   await expectNoAxeViolations(page, "lodge profile blank");
 });
