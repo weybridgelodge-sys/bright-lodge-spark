@@ -20,7 +20,7 @@ vi.mock("jspdf-autotable", async (orig) => {
       tables.push({
         doc, finalY: t.finalY, pageH: doc.internal.pageSize.getHeight(),
         cols: t.columns.map((c: any) => ({ width: c.width, idx: c.index })),
-        body: t.body.flatMap((r: any) => Object.values(r.cells).map((c: any) => ({ col: c.column?.index ?? 0, text: c.text, raw: String(c.raw ?? "") }))),
+        body: t.body.flatMap((r: any) => Object.entries(r.cells).map(([k, c]: [string, any]) => ({ col: Number(k), text: c.text, raw: String(c.raw ?? "") }))),
       });
     },
   };
