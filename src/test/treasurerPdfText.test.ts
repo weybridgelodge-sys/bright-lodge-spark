@@ -44,7 +44,8 @@ const TITLE_LINES = new Set<string>();
 function take(): string[] {
   const out = rec.items
     .filter((s) => !HEADERISH.some((r) => r.test(s)) && !TITLE_LINES.has(s))
-    .map((s) => s.replace(/ · page \d+ of \d+$/, " · page"));
+    .map((s) => s.replace(/ · page \d+ of \d+$/, " · page"))
+    .filter((s, i, a) => !(s.endsWith(" · page") && a[i - 1] === s)); // one footer entry per run of pages
   rec.items = [];
   return out;
 }
