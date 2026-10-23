@@ -24,7 +24,9 @@ export const LODGE_FALLBACK = {
   installationReturnFile: "Installation-Return-6787-{year}",
 } as const;
 
-export type LodgeSettings = { -readonly [K in keyof typeof LODGE_FALLBACK]: string } & { bookingContactEmail: string; bookingContactOffice: string; /** site_url as saved, "" when not set (no fallback). */ configuredSiteUrl: string };
+export type LodgeSettings = { -readonly [K in keyof typeof LODGE_FALLBACK]: string } & { bookingContactEmail: string; bookingContactOffice: string; /** site_url as saved, "" when not set (no fallback). */ configuredSiteUrl: string;
+  /** Unit Setup crest_image url (https only), "" when not set: no fallback, callers omit the image. */ crestImageUrl: string;
+  /** Lodge record name/number (get_lodge_identity sources), "" when not set: no fallback. */ lodgeName: string; lodgeNumber: string };
 
 type Row = Record<string, string | null | undefined> | null | undefined;
 /** unit_settings rows keyed by setting key. */
@@ -32,7 +34,7 @@ export type UnitSettingsMap = Record<string, Record<string, unknown> | null | un
 const pick = (v: unknown, fb: string) => (typeof v === "string" && v.trim() ? v.trim() : fb);
 
 /** officers.assistantSecretaryHeld: current_officer_holder("assistant_secretary") is not null. */
-export function resolveLodgeSettings(row: Row, us?: UnitSettingsMap, officers?: { assistantSecretaryHeld?: boolean }): LodgeSettings {
+export function resolveLodgeSettings(row: Row, us?: UnitSettingsMap, officers?: { assistantSecretaryHeld?: boolean }, identity?: { lodgeName?: string | null; lodgeNumber?: string | null }): LodgeSettings {
   const f = LODGE_FALLBACK;
   const u = (k: string, _f?: string) => (us?.[k] ?? {}) as Record<string, unknown>;
   const bc = resolveBookingContact({
@@ -44,6 +46,9 @@ export function resolveLodgeSettings(row: Row, us?: UnitSettingsMap, officers?: 
   return {
     siteUrl: pick(row?.site_url, f.siteUrl).replace(/\/+$/, ""),
     configuredSiteUrl: pick(row?.site_url, "").replace(/\/+$/, ""),
+    crestImageUrl: ((v) => (/^https:\/\/\S+$/.test(v) ? v : ""))(pick(u("crest_image", "").url, "")),
+    lodgeName: pick(identity?.lodgeName, pick(row?.sender_name, "")),
+    lodgeNumber: pick(identity?.lodgeNumber, ""),
     senderName: pick(row?.sender_name, f.senderName),
     formalSenderName: pick(row?.formal_sender_name, f.formalSenderName),
     secretaryEmail: pick(row?.secretary_email, f.secretaryEmail),

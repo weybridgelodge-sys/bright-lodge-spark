@@ -30,6 +30,15 @@ export async function loadLodgeSettings(unitIdIn?: string): Promise<LodgeSetting
       db.from("unit_settings").select("key,value").eq("unit_id", unitId),
       db.rpc("current_officer_holder", { _position_key: "assistant_secretary" }),
     ]);
+    // Lodge name/number, same sources as get_lodge_identity (no typed fallback).
+    const [rule, tpl] = await Promise.all([
+      db.from("installation_rule_settings").select("unit_number").eq("unit_id", unitId).maybeSingle(),
+      db.from("lodge_template").select("lodge_name,lodge_number").order("updated_at", { ascending: false, nullsFirst: false }).limit(1).maybeSingle(),
+    ]).catch(() => [{ data: null }, { data: null }] as const);
+    const identity = {
+      lodgeName: (tpl as any)?.data?.lodge_name ?? null,
+      lodgeNumber: (rule as any)?.data?.unit_number || (tpl as any)?.data?.lodge_number || null,
+    };
     if (error) { console.error("lodge settings lookup failed, using fallback", error); return resolveLodgeSettings(null); }
     const map: Record<string, Record<string, unknown>> = Object.fromEntries(((us.data ?? []) as { key: string; value: Record<string, unknown> }[]).map((r) => [r.key, r.value]));
     const venueId = map.meeting_place?.venue_id;
@@ -37,7 +46,7 @@ export async function loadLodgeSettings(unitIdIn?: string): Promise<LodgeSetting
       const { data: v } = await db.from("venues").select("name").eq("id", venueId).maybeSingle();
       if (v?.name) map.meeting_place = { ...map.meeting_place, venue_name: v.name };
     }
-    const value = resolveLodgeSettings(data as Record<string, string | null>, map, { assistantSecretaryHeld: !asst.error && !!asst.data });
+    const value = resolveLodgeSettings(data as Record<string, string | null>, map, { assistantSecretaryHeld: !asst.error && !!asst.data }, identity);
     cache = { at: Date.now(), value };
     return value;
   } catch (e) {
