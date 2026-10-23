@@ -174,7 +174,7 @@ export function drawTracedTable(doc: jsPDF, opts: Record<string, any>): number {
   autoTable(doc, {
     ...opts,
     didDrawCell: (d: any) => {
-      if (first) { first = false; trace(doc, { kind: "table", page: d.pageNumber ?? pageNo(doc) }); }
+      if (first) { first = false; trace(doc, { kind: "table", page: pageNo(doc) }); }
       userHook?.(d);
     },
   } as any);
