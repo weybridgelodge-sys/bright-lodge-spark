@@ -35,4 +35,10 @@ test("UGLE return: Secretary Y/N required before export, 320px + axe", async ({ 
   await page.getByRole("button", { name: "Refresh" }).click();
   await expect(page.getByText("Secretary change: No")).toBeVisible();
   await expectNoAxeViolations(page, "ugle secretary choice (chosen)");
+
+  // Changing the year clears the choice.
+  await page.getByRole("combobox", { name: "Installation year" }).click();
+  await page.getByRole("option").first().click();
+  await expect(page.getByText("Secretary change: No")).toHaveCount(0);
+  await expect(page.getByRole("radio", { checked: true })).toHaveCount(0);
 });
