@@ -10,8 +10,6 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Copy, FileText, FileDown, Save, CheckCircle2, Trash2, FolderOpen, Printer, Plus, Sparkles, X } from "lucide-react";
 import { defaultWidowReportFrom } from "@/lib/widowGifts";
-import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
 import { saveBlob, saveJsPdf } from "@/lib/nativeDownload";
 import { pastMasterTerms } from "@/lib/pastMastersRoll";
 import { upcomingManualDate, dateKey } from "@/lib/lifeEvents";
@@ -38,10 +36,6 @@ const stripEmoji = (s: string) =>
     .replace(/[\u{1F000}-\u{1FFFF}\u{2600}-\u{27BF}\u{2300}-\u{23FF}\u{2B00}-\u{2BFF}\u{1F1E6}-\u{1F1FF}\u{FE0F}\u{200D}]/gu, "")
     .replace(/[^\x00-\xFF]/g, "");
 
-const NAVY: [number, number, number] = [27, 42, 74];
-const GOLD: [number, number, number] = [201, 164, 50];
-const INK: [number, number, number] = [30, 30, 35];
-const MUTED: [number, number, number] = [110, 110, 120];
 
 type LifeEventRow = { member: string; type: string; date: string; detail: string; at?: string };
 
