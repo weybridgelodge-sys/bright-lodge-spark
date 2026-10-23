@@ -133,7 +133,8 @@ export function drawBrandHeader(doc: jsPDF, o: BrandHeaderOpts): number {
   doc.setFont("helvetica", "normal"); doc.setFontSize(9); doc.setTextColor(...PRINT_INK);
   if (o.rightLine) doc.text(o.rightLine, pageW - m, 104, { align: "right" });
   if (o.periodLine) {
-    const lay = layoutPeriodLine(doc, o.periodLine, pageW - m - x, o.rightLine ? doc.getTextWidth(o.rightLine) : 0);
+    const rightW = o.rightLine && typeof doc.getTextWidth === "function" ? Number(doc.getTextWidth(o.rightLine)) || 0 : 0;
+    const lay = layoutPeriodLine(doc, o.periodLine, pageW - m - x, rightW);
     doc.setFontSize(lay.fontSize);
     lay.lines.forEach((l, i) => doc.text(l, x, 104 + i * lay.leading));
     doc.setFontSize(9);
@@ -151,12 +152,13 @@ const PERIOD_MAX_LINES = 3; // 104, 115, 126 — all above the gold rule at HEAD
  * width left of it (never overprints), stepping down to 8pt only if 3 lines at 9pt are not enough.
  */
 export function layoutPeriodLine(doc: jsPDF, text: string, avail: number, rightW: number): { lines: string[]; fontSize: number; leading: number } {
-  const width = Math.max(40, avail - (rightW ? rightW + PERIOD_GAP : 0));
-  const prev = doc.getFontSize();
+  const width = Math.max(40, avail - (rightW > 0 ? rightW + PERIOD_GAP : 0));
+  const prev = typeof doc.getFontSize === "function" ? doc.getFontSize() : 9;
   let out = { lines: [text], fontSize: 9, leading: 11 };
   for (const fs of [9, 8]) {
     doc.setFontSize(fs);
-    const lines = doc.splitTextToSize(text, width) as string[];
+    const split = typeof doc.splitTextToSize === "function" ? doc.splitTextToSize(text, width) : null;
+    const lines: string[] = Array.isArray(split) && split.length ? split : [text];
     out = { lines: lines.slice(0, PERIOD_MAX_LINES), fontSize: fs, leading: fs === 9 ? 11 : 10 };
     if (lines.length <= PERIOD_MAX_LINES) break;
   }
