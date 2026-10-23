@@ -125,7 +125,7 @@ const PILOT = [
   "src/lib/officersProjectionPdf.ts", "src/pages/members/OfficersTracker.tsx",
   "src/lib/summonsCover.tsx",
   "supabase/functions/_shared/pdfLibBrand.ts", "supabase/functions/_shared/newsletterArchivePdf.ts",
-  "supabase/functions/_shared/email-templates/_layout.tsx",
+  "supabase/functions/_shared/email-templates/_layout.tsx", "supabase/functions/_shared/authEmailBrand.ts", "supabase/functions/_shared/newsletterDispatch.ts",
   "supabase/functions/_shared/email-templates/signup.tsx", "supabase/functions/_shared/email-templates/invite.tsx",
   "supabase/functions/_shared/email-templates/magic-link.tsx", "supabase/functions/_shared/email-templates/recovery.tsx",
   "supabase/functions/_shared/email-templates/email-change.tsx", "supabase/functions/_shared/email-templates/reauthentication.tsx",

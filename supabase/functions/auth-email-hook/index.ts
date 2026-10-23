@@ -9,6 +9,7 @@ import { EmailChangeEmail } from '../_shared/email-templates/email-change.tsx'
 import { ReauthenticationEmail } from '../_shared/email-templates/reauthentication.tsx'
 import { setAuthEmailBrand } from '../_shared/email-templates/_layout.tsx'
 import { loadLodgeSettings } from '../_shared/lodgeSettings.ts'
+import { createAuthBrandLookup, keepAlive } from '../_shared/authEmailBrand.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -23,26 +24,29 @@ const ROOT_DOMAIN = "email.weybridgelodge.org.uk"
 const FROM_DOMAIN = "email.weybridgelodge.org.uk"
 const SITE_URL = `https://${ROOT_DOMAIN}`
 
-// Header/footer identity (layout only). Starts text-only from SITE_NAME; Unit Setup is loaded
-// in the background and never awaited, so a slow or failed lookup cannot block or delay a send.
+// Header/footer identity (layout only). Text-only from SITE_NAME unless Unit Setup is read in
+// time: render uses the cached identity, else waits for ONE shared lookup for at most 1500ms.
+// Timeout or any error keeps the text-only header; the lookup can never throw or fail a send.
 const siteNameParts = SITE_NAME.match(/^(.*?)\s*No\.\s*(\S+)$/)
-setAuthEmailBrand({ lodgeName: siteNameParts ? siteNameParts[1] : SITE_NAME, lodgeNumber: siteNameParts ? siteNameParts[2] : '' })
-let brandLoadedAt = 0
-let brandLoading = false
-function refreshAuthEmailBrand(): void {
-  if (brandLoading || Date.now() - brandLoadedAt < 5 * 60_000) return
-  brandLoading = true
-  loadLodgeSettings()
-    .then((l) => {
-      if (l?.lodgeName) {
-        setAuthEmailBrand({ crestUrl: l.crestImageUrl || null, lodgeName: l.lodgeName, lodgeNumber: l.lodgeNumber, provinceName: l.provinceName })
-        brandLoadedAt = Date.now()
-      }
-    })
-    .catch(() => { /* keep the text-only header */ })
-    .finally(() => { brandLoading = false })
+const TEXT_ONLY_BRAND = { lodgeName: siteNameParts ? siteNameParts[1] : SITE_NAME, lodgeNumber: siteNameParts ? siteNameParts[2] : '' }
+setAuthEmailBrand(TEXT_ONLY_BRAND)
+const brandLookup = createAuthBrandLookup({
+  load: () => loadLodgeSettings(),
+  timeoutMs: 1500,
+  missingReason: () =>
+    !Deno.env.get('SUPABASE_URL') || !Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+      ? 'settings missing'
+      : 'no lodge identity: not exactly one unit or lodge name blank',
+})
+async function applyAuthEmailBrand(): Promise<void> {
+  try {
+    const b = await brandLookup.get()
+    setAuthEmailBrand(b ?? TEXT_ONLY_BRAND)
+  } catch {
+    try { setAuthEmailBrand(TEXT_ONLY_BRAND) } catch { /* keep current header */ }
+  }
 }
-try { refreshAuthEmailBrand() } catch { /* never block boot */ }
+try { keepAlive(brandLookup.start()) } catch { /* never block boot */ }
 
 // Template mapping for preview mode
 const EMAIL_TEMPLATES: Record<string, React.ComponentType<any>> = {
@@ -172,56 +176,68 @@ const handler = createAuthEmailHandler({
   emails: {
     signup: {
       subject: 'Confirm your email',
-      render: (data) =>
-        React.createElement(SignupEmail, {
+      render: async (data) => {
+        await applyAuthEmailBrand()
+        return React.createElement(SignupEmail, {
           siteName: SITE_NAME,
           siteUrl: SITE_URL,
           recipient: data.email,
           confirmationUrl: data.url,
-        }),
+        })
+      },
     },
     invite: {
       subject: "You've been invited",
-      render: (data) =>
-        React.createElement(InviteEmail, {
+      render: async (data) => {
+        await applyAuthEmailBrand()
+        return React.createElement(InviteEmail, {
           siteName: SITE_NAME,
           siteUrl: SITE_URL,
           confirmationUrl: data.url,
-        }),
+        })
+      },
     },
     magiclink: {
       subject: 'Your login link',
-      render: (data) =>
-        React.createElement(MagicLinkEmail, {
+      render: async (data) => {
+        await applyAuthEmailBrand()
+        return React.createElement(MagicLinkEmail, {
           siteName: SITE_NAME,
           confirmationUrl: data.url,
           token: data.token,
           client: extractClientHint(data.url),
-        }),
+        })
+      },
     },
     recovery: {
       subject: 'Reset your password',
-      render: (data) =>
-        React.createElement(RecoveryEmail, {
+      render: async (data) => {
+        await applyAuthEmailBrand()
+        return React.createElement(RecoveryEmail, {
           siteName: SITE_NAME,
           confirmationUrl: data.url,
-        }),
+        })
+      },
     },
     email_change: {
       subject: 'Confirm your new email',
-      render: (data) =>
-        React.createElement(EmailChangeEmail, {
+      render: async (data) => {
+        await applyAuthEmailBrand()
+        return React.createElement(EmailChangeEmail, {
           siteName: SITE_NAME,
           oldEmail: data.old_email ?? '',
           email: data.email,
           newEmail: data.new_email ?? '',
           confirmationUrl: data.url,
-        }),
+        })
+      },
     },
     reauthentication: {
       subject: 'Your verification code',
-      render: (data) =>
-        React.createElement(ReauthenticationEmail, { token: data.token ?? '' }),
+      render: async (data) => {
+        await applyAuthEmailBrand()
+        return React.createElement(ReauthenticationEmail, { token: data.token ?? '' })
+      },
     },
   },
 })
@@ -239,6 +255,6 @@ Deno.serve(async (req) => {
     return handlePreview(req)
   }
 
-  try { refreshAuthEmailBrand() } catch { /* never block a send */ }
+  try { keepAlive(brandLookup.start()) } catch { /* never block a send */ }
   return handler(req)
 })

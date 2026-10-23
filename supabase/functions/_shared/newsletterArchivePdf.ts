@@ -6,6 +6,8 @@ import { PDFDocument, StandardFonts, rgb } from "npm:pdf-lib@1.17.1";
 import { CONTENT_BOTTOM_Y, GOLD, INK, MUTED, NAVY, drawPdfLibBrandFooter, drawPdfLibBrandHeader, loadCrest, type ProcessedCrest } from "./pdfLibBrand.ts";
 import type { NewsletterBrand } from "./newsletterBrand.ts";
 
+export const IMAGE_FETCH_TIMEOUT_MS = 10_000;
+
 type Block =
   | { id?: string; type: "text"; text: string }
   | { id?: string; type: "image"; url: string; alt?: string; caption?: string };
@@ -20,6 +22,8 @@ export async function buildNewsletterArchivePdf(opts: {
   /** Test seams. */
   loadCrestImpl?: (url: string | null | undefined) => Promise<ProcessedCrest | null>;
   fetchImpl?: typeof fetch;
+  /** Per-image fetch limit; a timeout becomes the "[Image unavailable: ...]" line. */
+  imageTimeoutMs?: number;
   now?: Date;
 }): Promise<Uint8Array> {
   const now = opts.now ?? new Date();
@@ -112,10 +116,23 @@ export async function buildNewsletterArchivePdf(opts: {
         }
       } else if (block.type === "image" && block.url) {
         try {
-          const res = await doFetch(block.url);
-          if (!res.ok) throw new Error(`fetch ${res.status}`);
-          const ct = (res.headers.get("content-type") || "").toLowerCase();
-          const bytes = new Uint8Array(await res.arrayBuffer());
+          const ctrl = new AbortController();
+          const limit = opts.imageTimeoutMs ?? IMAGE_FETCH_TIMEOUT_MS;
+          let timer: number | undefined;
+          const timedOut = new Promise<never>((_, rej) => {
+            timer = setTimeout(() => { rej(new Error(`image fetch timed out after ${limit}ms`)); ctrl.abort(); }, limit) as unknown as number;
+          });
+          let ct = ""; let bytes: Uint8Array;
+          try {
+            [ct, bytes] = await Promise.race([
+              (async () => {
+                const res = await doFetch(block.url, { signal: ctrl.signal });
+                if (!res.ok) throw new Error(`fetch ${res.status}`);
+                return [(res.headers.get("content-type") || "").toLowerCase(), new Uint8Array(await res.arrayBuffer())] as [string, Uint8Array];
+              })(),
+              timedOut,
+            ]);
+          } finally { clearTimeout(timer); }
           const img = ct.includes("png") ? await pdf.embedPng(bytes) : await pdf.embedJpg(bytes);
           const maxW = contentWidth; const maxH = 260;
           const scale = Math.min(maxW / img.width, maxH / img.height, 1);
