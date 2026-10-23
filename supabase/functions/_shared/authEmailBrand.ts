@@ -1,8 +1,8 @@
 // Job AS-1: Unit Setup identity for sign-in email headers. One shared lookup, a 5-minute
 // cache, and a HARD time limit at render time. Never throws, never rejects: on timeout,
 // error or missing identity the caller keeps the text-only header.
-export type AuthBrand = { crestUrl: string | null; lodgeName: string; lodgeNumber: string; provinceName: string };
-type Settings = { lodgeName?: string; lodgeNumber?: string; provinceName?: string; crestImageUrl?: string } | null | undefined;
+export type AuthBrand = { crestUrl: string | null; lodgeName: string; lodgeNumber: string; provinceName: string; /** Unit Setup formal sender name as saved ("" = derive). */ senderName?: string };
+type Settings = { lodgeName?: string; lodgeNumber?: string; provinceName?: string; crestImageUrl?: string; configuredFormalSenderName?: string } | null | undefined;
 
 export function createAuthBrandLookup(opts: {
   load: () => Promise<Settings>;
@@ -26,7 +26,7 @@ export function createAuthBrandLookup(opts: {
     try {
       p = Promise.resolve(opts.load()).then((l) => {
         if (l?.lodgeName) {
-          const value: AuthBrand = { crestUrl: l.crestImageUrl || null, lodgeName: l.lodgeName, lodgeNumber: l.lodgeNumber ?? "", provinceName: l.provinceName ?? "" };
+          const value: AuthBrand = { crestUrl: l.crestImageUrl || null, lodgeName: l.lodgeName, lodgeNumber: l.lodgeNumber ?? "", provinceName: l.provinceName ?? "", senderName: (l.configuredFormalSenderName ?? "").trim() };
           cached = { at: now(), value };
           return value;
         }
@@ -81,4 +81,11 @@ export function siteNameFor(b: { lodgeName?: string; lodgeNumber?: string } | nu
   if (!name) return NEUTRAL_SITE_NAME;
   const num = (b?.lodgeNumber ?? "").trim();
   return num ? `${name} No. ${num}` : name;
+}
+
+/** Sender display name: Unit Setup formal sender name, else siteNameFor(identity), else neutral. Header-safe. */
+export function senderDisplayName(b: { senderName?: string; lodgeName?: string; lodgeNumber?: string } | null | undefined): string {
+  const raw = (b?.senderName ?? "").trim() || siteNameFor(b);
+  const safe = raw.replace(/[\r\n<>"\\]/g, " ").replace(/\s+/g, " ").trim();
+  return safe || NEUTRAL_SITE_NAME;
 }

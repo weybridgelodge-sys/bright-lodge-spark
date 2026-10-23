@@ -9,7 +9,7 @@ import { EmailChangeEmail } from '../_shared/email-templates/email-change.tsx'
 import { ReauthenticationEmail } from '../_shared/email-templates/reauthentication.tsx'
 import { setAuthEmailBrand } from '../_shared/email-templates/_layout.tsx'
 import { loadLodgeSettings } from '../_shared/lodgeSettings.ts'
-import { createAuthBrandLookup, keepAlive, siteNameFor, NEUTRAL_SITE_NAME } from '../_shared/authEmailBrand.ts'
+import { createAuthBrandLookup, keepAlive, siteNameFor, senderDisplayName, NEUTRAL_SITE_NAME } from '../_shared/authEmailBrand.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -18,8 +18,6 @@ const corsHeaders = {
 }
 
 // Configuration
-// Sender display name only (sending setup, like the sender domains). Never used in email wording.
-const FROM_NAME = "Weybridge Lodge No.6787"
 const SENDER_DOMAIN = "notify.email.weybridgelodge.org.uk"
 const ROOT_DOMAIN = "email.weybridgelodge.org.uk"
 const FROM_DOMAIN = "email.weybridgelodge.org.uk"
@@ -172,12 +170,29 @@ function extractClientHint(url: string | undefined): string | undefined {
 
 // The SDK handler owns verification, dispatch, and retry semantics; this file
 // owns only the email decisions: subjects, templates, and per-type props.
-const handler = createAuthEmailHandler({
-  apiKey: Deno.env.get('LOVABLE_API_KEY')!,
-  from: `${FROM_NAME} <noreply@${FROM_DOMAIN}>`,
-  senderDomain: SENDER_DOMAIN,
-  sendUrl: Deno.env.get('LOVABLE_SEND_URL'),
-  emails: {
+// Sender display name comes from Unit Setup (senderDisplayName); the SDK fixes `from` per handler,
+// so one handler is kept per display name. Address and domains unchanged.
+const handlers = new Map<string, (req: Request) => Promise<Response>>()
+function handlerFor(name: string) {
+  let h = handlers.get(name)
+  if (!h) {
+    h = createAuthEmailHandler({
+      apiKey: Deno.env.get('LOVABLE_API_KEY')!,
+      from: `${name} <noreply@${FROM_DOMAIN}>`,
+      senderDomain: SENDER_DOMAIN,
+      sendUrl: Deno.env.get('LOVABLE_SEND_URL'),
+      emails: AUTH_EMAILS,
+    })
+    handlers.set(name, h)
+  }
+  return h
+}
+// Same bounded lookup (cache, else ≤1500ms); never throws; neutral name on any failure.
+async function currentSenderName(): Promise<string> {
+  try { return senderDisplayName(await brandLookup.get()) } catch { return NEUTRAL_SITE_NAME }
+}
+
+const AUTH_EMAILS: Parameters<typeof createAuthEmailHandler>[0]['emails'] = {
     signup: {
       subject: 'Confirm your email',
       render: async (data) => {
@@ -243,8 +258,7 @@ const handler = createAuthEmailHandler({
         return React.createElement(ReauthenticationEmail, { token: data.token ?? '', siteName })
       },
     },
-  },
-})
+}
 
 Deno.serve(async (req) => {
   const url = new URL(req.url)
@@ -260,5 +274,5 @@ Deno.serve(async (req) => {
   }
 
   try { keepAlive(brandLookup.start()) } catch { /* never block a send */ }
-  return handler(req)
+  return handlerFor(await currentSenderName())(req)
 })
