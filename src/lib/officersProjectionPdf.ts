@@ -86,6 +86,8 @@ export async function buildOfficersProjectionPdf(input: OfficersProjectionPdfInp
 
   let y = (doc as any).lastAutoTable.finalY + 20;
   if (projection.warnings.length || dupWarnings.length) {
+  // Keep the "Warnings" heading with its first lines.
+  if (y + 40 > doc.internal.pageSize.getHeight() - 60) { doc.addPage(); y = margin; }
     doc.setFontSize(11);
     doc.setTextColor(180, 80, 0);
     doc.text("Warnings", 40, y);
