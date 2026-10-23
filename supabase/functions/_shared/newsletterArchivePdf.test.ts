@@ -24,12 +24,13 @@ async function crestPng(): Promise<Uint8Array> {
 
 async function textOf(bytes: Uint8Array) {
   // pdf-lib writes standard-font text as hex strings; decode them for assertions.
-  let raw = new TextDecoder("latin1").decode(bytes);
+  const bin = (u: Uint8Array) => { let o = ""; for (let i = 0; i < u.length; i += 0x8000) o += String.fromCharCode(...u.subarray(i, i + 0x8000)); return o; };
+  let raw = bin(bytes);
   for (const m of raw.matchAll(/stream\r?\n([\s\S]*?)endstream/g)) {
     try {
       const buf = Uint8Array.from(m[1].replace(/\r?\n$/, ""), (ch) => ch.charCodeAt(0));
       const out = await new Response(new Blob([buf]).stream().pipeThrough(new DecompressionStream("deflate"))).arrayBuffer();
-      raw += new TextDecoder("latin1").decode(out);
+      raw += bin(new Uint8Array(out));
     } catch { /* not deflate */ }
   }
   return [...raw.matchAll(/<([0-9A-Fa-f]+)> Tj/g)].map((m) => m[1].match(/../g)!.map((h) => String.fromCharCode(parseInt(h, 16))).join("")).join("\n");
