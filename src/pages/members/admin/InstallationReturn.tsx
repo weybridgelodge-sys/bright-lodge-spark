@@ -1,6 +1,6 @@
 import { EmailText } from "@/components/ui/email-text";
 import { lodgeTitle } from "@/lib/lodgeIdentity";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import MembersLayout from "@/components/members/MembersLayout";
 import { useAuth } from "@/hooks/useAuth";
@@ -16,7 +16,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { formatMasonicYear } from "@/lib/officersProgression";
 import {
   buildFieldSpecs, fillTemplate, returnFileStem, loadReturnData, blockName, lodgeEmailFor, ukDate,
-  membershipEmailOptions, MEMBERSHIP_EMAIL_SETTING, TEMPLATE_BUCKET, TEMPLATE_PATH,
+  membershipEmailOptions, MEMBERSHIP_EMAIL_SETTING, secretaryChoiceError, secretaryChangedValue, secretaryChoiceSummary, TEMPLATE_BUCKET, TEMPLATE_PATH,
   type YesNo, type Provenance, type ResolvedOffice, type ReturnData, type FillReport,
 } from "@/lib/installationReturn";
 import { useOfficerSignaturesEnabled } from "@/hooks/useOfficerSignaturesEnabled";
@@ -57,6 +57,8 @@ function Inner() {
   const { canManageSummons, isWorshipfulMaster, isAdmin, isSecretary, isCurrentSecretary } = useAuth();
   const canSubmit = isAdmin || isSecretary || isCurrentSecretary;
   const [secChanged, setSecChanged] = useState<YesNo>("");
+  const [secError, setSecError] = useState<string | null>(null);
+  const secFirstRef = useRef<HTMLButtonElement | null>(null);
   const [provinceEmail, setProvinceEmail] = useState("");
   const [submissions, setSubmissions] = useState<any[]>([]);
   const [pending, setPending] = useState<{ path: string; url: string; missing: number } | null>(null);
@@ -85,6 +87,18 @@ function Inner() {
     }
   }, [year]);
   useEffect(() => { load(); }, [load]);
+  // Must be chosen consciously for each year; Refresh keeps it.
+  useEffect(() => { setSecChanged(""); setSecError(null); }, [year]);
+  /** Returns true when the Y/N choice is missing (shows the error and moves focus to the field). */
+  const secretaryChoiceMissing = () => {
+    const err = secretaryChoiceError(secChanged);
+    setSecError(err);
+    if (err) {
+      secFirstRef.current?.scrollIntoView({ block: "center" });
+      secFirstRef.current?.focus();
+    }
+    return !!err;
+  };
 
   const specs = useMemo(() => (data ? buildFieldSpecs(data, { secretaryChanged: secChanged }) : []), [data, secChanged]);
 
@@ -108,6 +122,7 @@ function Inner() {
   };
 
   const exportPdf = async () => {
+    if (secretaryChoiceMissing()) return;
     setBusy(true);
     try {
       // Re-read everything at the moment of export — no stale data.
@@ -115,7 +130,7 @@ function Inner() {
       setData(fresh);
       const { data: blob, error } = await supabase.storage.from(TEMPLATE_BUCKET).download(TEMPLATE_PATH);
       if (error || !blob) throw new Error("UGLE template not found — upload New_IR_Craft.pdf first.");
-      const { bytes, report } = await fillTemplate(await blob.arrayBuffer(), buildFieldSpecs(fresh, { secretaryChanged: secChanged }));
+      const { bytes, report } = await fillTemplate(await blob.arrayBuffer(), buildFieldSpecs(fresh, { secretaryChanged: secretaryChangedValue(secChanged) }));
       setReport(report);
       const pdfOut = signaturesOn
         ? await (async () => { const g = await signFilledReturn(year, fresh, bytes); if (!g.url) throw new Error("Download link could not be created"); return (await fetch(g.url)).blob(); })()
@@ -139,6 +154,7 @@ function Inner() {
 
   // Step 1: build the final PDF fresh, store it, then show the confirmation.
   const prepareSubmit = async () => {
+    if (secretaryChoiceMissing()) return;
     if (!provinceEmail) return toast.error("Set the Provincial Office email address in Unit Setup > Province first.");
     setBusy(true);
     try {
@@ -146,7 +162,7 @@ function Inner() {
       setData(fresh);
       const { data: blob, error } = await supabase.storage.from(TEMPLATE_BUCKET).download(TEMPLATE_PATH);
       if (error || !blob) throw new Error("UGLE template not found — upload New_IR_Craft.pdf first.");
-      const { bytes, report } = await fillTemplate(await blob.arrayBuffer(), buildFieldSpecs(fresh, { secretaryChanged: secChanged }));
+      const { bytes, report } = await fillTemplate(await blob.arrayBuffer(), buildFieldSpecs(fresh, { secretaryChanged: secretaryChangedValue(secChanged) }));
       setReport(report);
       if (signaturesOn) {
         const g = await signFilledReturn(year, fresh, bytes);
@@ -178,7 +194,7 @@ function Inner() {
     if (!pending || !data) return;
     setSending(true);
     const { data: res, error } = await supabase.functions.invoke("submit-installation-return", {
-      body: { lodge_year: year, storage_path: pending.path, recipient_email: provinceEmail, secretary_changed: secChanged, installation_date: data.installationDate ? ukDate(data.installationDate) : "" },
+      body: { lodge_year: year, storage_path: pending.path, recipient_email: provinceEmail, secretary_changed: secretaryChangedValue(secChanged), installation_date: data.installationDate ? ukDate(data.installationDate) : "" },
     });
     setSending(false);
     if (error || (res as any)?.error) {
@@ -233,6 +249,7 @@ function Inner() {
           <Button className="w-full sm:w-auto" variant="outline" onClick={load} disabled={loading}><RefreshCw className="w-4 h-4 mr-1" />Refresh</Button>
           <Button className="w-full sm:w-auto" onClick={exportPdf} disabled={busy || !data || !hasTemplate}><Download className="w-4 h-4 mr-1" />Export PDF</Button>
           {canSubmit && <Button className="w-full sm:w-auto" variant="secondary" onClick={prepareSubmit} disabled={busy || !data || !hasTemplate || !provinceEmail}><Send className="w-4 h-4 mr-1" />Submit to Province</Button>}
+          {secChanged && <p className="text-xs text-primary-foreground/80 sm:basis-full sm:text-right">Secretary change: {secretaryChoiceSummary(secChanged)}</p>}
         </div>
       </header>
 
@@ -293,15 +310,20 @@ function Inner() {
           </section>
 
           <section className="rounded-sm border border-gold/20 bg-navy-light/30 p-4">
-            <h2 className="font-serif text-gold text-lg mb-2">Has the Secretary or his details changed?</h2>
-            <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Has the Secretary or his details changed">
-              {(["Y", "N", ""] as YesNo[]).map((v) => (
-                <Button key={v || "blank"} size="sm" role="radio" aria-checked={secChanged === v} variant={secChanged === v ? "default" : "outline"} onClick={() => setSecChanged(v)}>
-                  {v === "Y" ? "Yes (Y)" : v === "N" ? "No (N)" : "Leave blank"}
+            <h2 id="sec-changed-label" className="font-serif text-gold text-lg mb-2">Has the Secretary or his details changed? (required)</h2>
+            <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap" role="radiogroup" aria-labelledby="sec-changed-label" aria-required="true"
+              aria-invalid={secError ? true : undefined} aria-describedby={secError ? "sec-changed-error" : undefined}>
+              {(["Y", "N"] as const).map((v, i) => (
+                <Button key={v} ref={i === 0 ? secFirstRef : undefined} type="button" role="radio" aria-checked={secChanged === v}
+                  aria-invalid={secError ? true : undefined} aria-describedby={secError ? "sec-changed-error" : undefined}
+                  className="min-h-12 h-auto w-full whitespace-normal text-left sm:w-auto" variant={secChanged === v ? "default" : "outline"}
+                  onClick={() => { setSecChanged(v); setSecError(null); }}>
+                  {v === "Y" ? "Yes, the Secretary or his details have changed" : "No change"}
                 </Button>
               ))}
             </div>
-            <p className="text-xs text-primary-foreground/80 mt-2">Your choice fills the Y/N box on the form. It isn't saved, so check it each time you export.</p>
+            {secError && <p id="sec-changed-error" role="alert" className="mt-2 text-sm font-semibold text-destructive-foreground bg-destructive/80 rounded-sm px-2 py-1">{secError}</p>}
+            <p className="text-xs text-primary-foreground/80 mt-2">Your choice fills the Y/N box on the form. It isn't saved: choose it each time you open this page or change the year. Export and Submit need it.</p>
           </section>
 
           {signaturesOn && (
@@ -361,7 +383,7 @@ function Inner() {
                 <p><strong>Reply-to:</strong> <EmailText email={data?.identity.secretaryEmail} /></p>
                 <p><strong>Subject:</strong> {data ? lodgeTitle(data.identity) : ""} — Installation Return {formatMasonicYear(year)}</p>
                 <p><strong>Document:</strong> {returnFileStem(data?.identity.lodgeNumber, year)}.pdf, filled just now from the live records (sent as a 30-day download link). <a href={pending?.url} target="_blank" rel="noopener noreferrer" className="underline">Open the exact PDF</a></p>
-                <p><strong>Secretary changed (Y/N):</strong> {secChanged || "left blank"}</p>
+                <p><strong>Secretary changed (Y/N):</strong> {secChanged}</p>
                 <p>{signaturesOn ? "Stored signatures are on the PDF where on file (open it to check)." : "Signatures are left blank."}</p>
                 {data && data.issues.length > 0 && <p className="text-destructive-foreground">{data.issues.length} warning(s) are still showing on the page.</p>}
                 {pending && pending.missing > 0 && <p className="text-destructive-foreground">{pending.missing} field(s) weren't found in the template.</p>}
