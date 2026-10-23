@@ -113,8 +113,8 @@ const PILOT = [
 const BANNED = /LOGO_URL|LOGO_WIDTH|LOGO_HEIGHT|crestWrap|LODGE_NAME|@\/assets\/|\.asset\.json|lovable\.app|__l5e|weybridge|6787|Province of Surrey|Guildford|Consecrated 1949|\.org\.uk/i;
 describe("pilot files carry no typed crest or host literal", () => {
   for (const f of PILOT) it(f, () => {
-    // Known exception: enquiry-confirmation body names the town (no Unit Setup field for it yet).
-    const bad = fs.readFileSync(f, "utf8").split("\n").filter((l) => BANNED.test(l) && !/curious about Freemasonry here in Guildford\.$/.test(l.trim()));
+    // Known exceptions: sender domain (stays in code by rule); enquiry-confirmation body names the town (no Unit Setup field for it yet).
+    const bad = fs.readFileSync(f, "utf8").split("\n").filter((l) => BANNED.test(l) && !/curious about Freemasonry here in Guildford\.$/.test(l.trim()) && !/^const FROM_ADDRESS_DOMAIN = /.test(l.trim()));
     expect(bad).toEqual([]);
   });
 });
