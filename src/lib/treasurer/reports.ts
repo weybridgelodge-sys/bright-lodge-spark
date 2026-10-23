@@ -148,6 +148,8 @@ export function reportTable(doc: jsPDF, margin: number, y: number, head: string[
     theme: "grid",
     columnStyles: { 0: { cellWidth: 275 }, 1: { cellWidth: 120, halign: "right" }, 2: { cellWidth: 120, halign: "right" } },
     rowPageBreak: "avoid",
+    // Short tables (totals, balance checks) move whole to the next page instead of splitting.
+    pageBreak: body.length <= 8 ? "avoid" : "auto",
   });
   return (doc as any).lastAutoTable.finalY + 16;
 }

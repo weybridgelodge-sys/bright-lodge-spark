@@ -86,6 +86,8 @@ export async function buildAccountsPackPdf(src: PackSource, year: number, certif
       theme: "grid",
       columnStyles: { 0: { cellWidth: 274 }, 1: { cellWidth: 120, halign: "right" }, 2: { cellWidth: 120, halign: "right", textColor: MUTED } },
       rowPageBreak: "avoid",
+      // Short tables (totals, funds) move whole to the next page instead of splitting.
+      pageBreak: body.length <= 8 ? "avoid" : "auto",
       didParseCell: (d) => {
         if (d.section === "head" && d.column.index === 0) d.cell.styles.halign = "left";
         if (d.section === "body" && d.row.index >= boldFrom) d.cell.styles.fontStyle = "bold";
