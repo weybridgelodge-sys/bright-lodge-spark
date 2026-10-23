@@ -496,13 +496,13 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
   // ─── PDF ──────────────────────────────────────────────────────────────────
   const exportPdf = async () => {
     if (!event) return;
-    const { doc, pageW, margin } = await reportPdfDoc(
+    const { doc, pageW, margin, startY, finish } = await reportPdfDoc(
       `Event Account — ${event.name}`,
       `Event date: ${new Date(event.event_date).toLocaleDateString("en-GB")}`,
     );
     
     const tableStyle = {
-      margin: { left: margin, right: margin, bottom: 50 },
+      margin: { top: margin, left: margin, right: margin, bottom: 60 },
       styles: { font: "helvetica" as const, fontSize: 9, cellPadding: 5, textColor: INK, lineColor: [220, 215, 200] as [number, number, number], lineWidth: 0.4 },
       headStyles: { fillColor: GOLD, textColor: NAVY, fontStyle: "bold" as const },
       footStyles: { fillColor: [250, 247, 238] as [number, number, number], textColor: INK, fontStyle: "bold" as const },
@@ -512,7 +512,7 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
     };
 
     // Planning stage — intentions only, nothing from the ledger.
-    let y = reportSection(doc, pageW, margin, 135, "Budget plan (planning stage — not actual money)");
+    let y = reportSection(doc, pageW, margin, startY, "Budget plan (planning stage — not actual money)");
     autoTable(doc, {
       startY: y,
       head: [["Planned income", "", "", "Amount"]],
@@ -580,7 +580,7 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
         startY: y,
         head: [["Account", "Type", "Actual"]],
         body: unmatched.map((a) => [`${a.code} — ${a.name}`, a.kind, money(a.pence)]),
-        margin: { left: margin, right: margin, bottom: 50 },
+        margin: { top: margin, left: margin, right: margin, bottom: 60 },
         styles: { font: "helvetica", fontSize: 9, cellPadding: 5, textColor: INK, lineColor: [220, 215, 200], lineWidth: 0.4 },
         headStyles: { fillColor: GOLD, textColor: NAVY, fontStyle: "bold" },
         theme: "grid",
@@ -602,7 +602,7 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
         money((b.deposit_paid ? b.deposit_pence : 0) + (b.balance_paid ? b.balance_pence : 0)),
       ]),
       foot: [["Total", String(ticketTotal), "", "", money(expectedIncome)]],
-      margin: { left: margin, right: margin, bottom: 50 },
+      margin: { top: margin, left: margin, right: margin, bottom: 60 },
       styles: { font: "helvetica", fontSize: 9, cellPadding: 5, textColor: INK, lineColor: [220, 215, 200], lineWidth: 0.4 },
       headStyles: { fillColor: GOLD, textColor: NAVY, fontStyle: "bold" },
       footStyles: { fillColor: [250, 247, 238], textColor: INK, fontStyle: "bold" },
@@ -610,6 +610,8 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
       columnStyles: { 1: { halign: "right" }, 2: { halign: "right" }, 3: { halign: "right" }, 4: { halign: "right" } },
     });
     y = (doc as any).lastAutoTable.finalY + 20;
+    // Keep the closing tie-out lines together and clear of the footer.
+    if (y + 50 > doc.internal.pageSize.getHeight() - 56) { doc.addPage(); y = margin; }
 
     doc.setFont("helvetica", "normal");
     doc.setFontSize(10);
@@ -621,6 +623,7 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
     doc.setFontSize(8);
     doc.text("Catering figures are computed live from guest entries and are not stored.", margin, y + 46);
 
+    finish();
     await saveJsPdf(doc, `event-account-${event.name.toLowerCase().replace(/\s+/g, "-")}.pdf`);
   };
 

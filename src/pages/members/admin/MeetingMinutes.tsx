@@ -156,15 +156,15 @@ function fmtDateTime(v?: string | null): string {
 
 
 export async function buildMinutesPdf(row: Row) {
-  const { doc, pageW, margin } = await reportPdfDoc(
+  const { doc, pageW, margin, startY, finish } = await reportPdfDoc(
     `${TYPE_LABELS[row.meeting_type]} Meeting Minutes`,
     `${row.title} — ${fmtDateTime(row.meeting_at)}`,
   );
   const usableW = pageW - margin * 2;
-  let y = 135;
+  let y = startY;
 
   const ensure = (needed: number) => {
-    if (y + needed > doc.internal.pageSize.getHeight() - 50) {
+    if (y + needed > doc.internal.pageSize.getHeight() - 60) {
       doc.addPage();
       y = 50;
     }
@@ -219,7 +219,7 @@ export async function buildMinutesPdf(row: Row) {
       startY: y,
       head: [["Task", "Responsible", "Deadline", "Done"]],
       body: row.action_items.map((a) => [a.task, a.responsible, a.deadline, a.done ? "Yes" : "No"]),
-      margin: { left: margin, right: margin, bottom: 50 },
+      margin: { top: margin, left: margin, right: margin, bottom: 60 },
       styles: { font: "helvetica", fontSize: 9, cellPadding: 5, textColor: INK, lineColor: [220, 215, 200], lineWidth: 0.4, overflow: "linebreak" },
       headStyles: { fillColor: GOLD, textColor: NAVY, fontStyle: "bold" },
       alternateRowStyles: { fillColor: [250, 247, 238] },
@@ -262,6 +262,7 @@ export async function buildMinutesPdf(row: Row) {
     y,
   );
 
+  finish();
   return doc;
 }
 
@@ -274,12 +275,12 @@ export type Letterhead = { secretary?: OfficerContact | null; treasurer?: Office
  * omitted — none of that exists before the meeting takes place.
  */
 export async function buildAgendaPdf(row: Row, letterhead: Letterhead = {}) {
-  const { doc, pageW, margin } = await reportPdfDoc("AGENDA", `${row.title} — ${fmtDateTime(row.meeting_at)}`, true);
+  const { doc, pageW, margin, startY, finish } = await reportPdfDoc("AGENDA", `${row.title} — ${fmtDateTime(row.meeting_at)}`, true);
   const usableW = pageW - margin * 2;
-  let y = 135;
+  let y = startY;
 
   const ensure = (needed: number) => {
-    if (y + needed > doc.internal.pageSize.getHeight() - 50) {
+    if (y + needed > doc.internal.pageSize.getHeight() - 60) {
       doc.addPage();
       y = 50;
     }
@@ -347,6 +348,7 @@ export async function buildAgendaPdf(row: Row, letterhead: Letterhead = {}) {
     doc.text(`Date of the next Committee meeting: ${fmtDateTime(row.next_meeting_at)}`, margin, y);
   }
 
+  finish();
   return doc;
 }
 
