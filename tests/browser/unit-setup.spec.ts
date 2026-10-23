@@ -9,6 +9,7 @@ function seed(): Store {
     bank_details: { account_name: "Sample Account", sort_code: "11-22-33", account_number: "12345678", reference_pattern: "Dining + {surname}" },
     payment_wording: { card_wording: "Pay online by card", cheque_payee: "Sample Lodge No 1234" },
     booking_contact_email: { email: "bookings@example.invalid" },
+    membership_officer_email: { email: "membership@example.invalid" },
     sign_off: { override: "Yours, the Sample Lodge" },
     meeting_place: { venue_id: "v1" },
     web_social: { facebook_url: "https://facebook.example.invalid/sample", instagram_url: "https://instagram.example.invalid/sample", twitter_url: "https://x.example.invalid/sample" },
