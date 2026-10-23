@@ -76,12 +76,12 @@ function auditBadge(r: Item) {
 }
 
 export async function buildPropertyRegisterPdf(rows: Item[], totalPence: number) {
-  const { doc, pageW, margin } = await reportPdfDoc(
+  const { doc, pageW, margin, startY, finish } = await reportPdfDoc(
     "Lodge Property Register",
     `Stock check sheet — ${rows.length} line${rows.length === 1 ? "" : "s"}`,
   );
   autoTable(doc, {
-    startY: 135,
+    startY,
     head: [["Item", "Count", "Location", "Value", "Condition", "Date acquired", "Last audited", "Notes", "Checked / present?"]],
     body: rows.map((r) => [
       r.item,
@@ -95,7 +95,7 @@ export async function buildPropertyRegisterPdf(rows: Item[], totalPence: number)
       "",
     ]),
     foot: [["Total estimated value", "", "", money(totalPence), "", "", "", "", ""]],
-    margin: { left: margin, right: margin, bottom: 50 },
+    margin: { top: margin, left: margin, right: margin, bottom: 60 },
     styles: { font: "helvetica", fontSize: 8, cellPadding: 4, textColor: INK, lineColor: [220, 215, 200], lineWidth: 0.4, overflow: "linebreak" },
     headStyles: { fillColor: GOLD, textColor: NAVY, fontStyle: "bold" },
     footStyles: { fillColor: [250, 247, 238], textColor: INK, fontStyle: "bold" },
@@ -119,12 +119,14 @@ export async function buildPropertyRegisterPdf(rows: Item[], totalPence: number)
     },
     rowPageBreak: "avoid",
   });
-  const y = (doc as any).lastAutoTable.finalY + 24;
+  let y = (doc as any).lastAutoTable.finalY + 24;
+  if (y > doc.internal.pageSize.getHeight() - 60) { doc.addPage(); y = margin + 10; }
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
   doc.setTextColor(...INK);
   doc.text("Checked by: ______________________________", margin, y);
   doc.text(`Date: ______________________`, pageW - margin - 160, y);
+  finish();
   return doc;
 }
 

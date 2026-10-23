@@ -87,11 +87,11 @@ export default function IncomeExpenditureReport({ canEdit }: { canEdit: boolean 
 
   const exportPdf = async () => {
     try {
-      const { doc, pageW, margin } = await reportPdfDoc(
+      const { doc, pageW, margin, startY, finish } = await reportPdfDoc(
         "Income & Expenditure Account",
         `${period.label} (${fmtDate(period.start)} – ${fmtDate(period.end)}) · comparative: ${period.priorLabel} (${fmtDate(period.priorStart)} – ${fmtDate(period.priorEnd)})`,
       );
-      let y = 130;
+      let y = startY;
       const head = [["Account", period.label, period.priorLabel]];
 
       y = reportSection(doc, pageW, margin, y, "Income");
@@ -111,6 +111,7 @@ export default function IncomeExpenditureReport({ canEdit }: { canEdit: boolean 
         ["Surplus / (Deficit)", acct(surCur), acct(surPri)],
       ]);
 
+      finish();
       doc.save(`income-expenditure-${period.label.replace(/[^\w]+/g, "-")}.pdf`);
     } catch (e: any) {
       toast({ title: "PDF export failed", description: e?.message, variant: "destructive" });

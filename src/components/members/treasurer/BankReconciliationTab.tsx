@@ -348,8 +348,8 @@ export default function BankReconciliationTab({ canEdit }: { canEdit: boolean })
     const periodLine = period
       ? `${fmtLong(period.from)} – ${fmtLong(period.to)}`
       : (stmt?.period_label ?? "");
-    const { doc, pageW, margin } = await reportPdfDoc("Bank Reconciliation", periodLine);
-    let y = 140;
+    const { doc, pageW, margin, startY, finish } = await reportPdfDoc("Bank Reconciliation", periodLine);
+    let y = startY;
 
     y = reportSection(doc, pageW, margin, y, `Statement — ${stmt?.period_label ?? ""}`);
     y = reportTable(doc, margin, y,
@@ -377,13 +377,15 @@ export default function BankReconciliationTab({ canEdit }: { canEdit: boolean })
 
     const remaining = lines.filter((l) => isUnreconciled(l));
     if (remaining.length) {
-      reportSection(doc, pageW, margin, y, "Bank lines still unreconciled");
-      reportTable(doc, margin, y + 0,
+      // Table starts below its heading (it used to be drawn over it).
+      y = reportSection(doc, pageW, margin, y, "Bank lines still unreconciled");
+      reportTable(doc, margin, y,
         [["Date", "Description", "Amount"]],
         remaining.map((l) => [fmtDate(l.transaction_date), l.description ?? "—", money(l.amount_pence)]),
       );
     }
 
+    finish();
     await saveJsPdf(doc, `bank-reconciliation-${(stmt?.period_label ?? "statement").toLowerCase().replace(/[^a-z0-9]+/g, "-")}.pdf`);
   };
 

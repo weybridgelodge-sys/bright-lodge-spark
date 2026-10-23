@@ -138,8 +138,8 @@ export default function BalanceSheetReport({ canEdit }: { canEdit: boolean }) {
 
   const exportPdf = async () => {
     try {
-      const { doc, pageW, margin } = await reportPdfDoc("Balance Sheet", `${cur.label} · comparative: ${pri.label}`);
-      let y = 130;
+      const { doc, pageW, margin, startY, finish } = await reportPdfDoc("Balance Sheet", `${cur.label} · comparative: ${pri.label}`);
+      let y = startY;
       const head = [["Account", curLabel, priLabel]];
 
       y = reportSection(doc, pageW, margin, y, "Assets");
@@ -168,6 +168,7 @@ export default function BalanceSheetReport({ canEdit }: { canEdit: boolean }) {
         ["Difference", acct(diffCur), acct(diffPri)],
       ]);
 
+      finish();
       doc.save(`balance-sheet-${asAt}.pdf`);
     } catch (e: any) {
       toast({ title: "PDF export failed", description: e?.message, variant: "destructive" });

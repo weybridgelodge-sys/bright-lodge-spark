@@ -1,56 +1,47 @@
 import { loadDocIdentity, docTitle, docSubtitle, docFileName, docGroupName } from "@/lib/docIdentity";
 import jsPDF from "jspdf";
 import { supabase } from "@/integrations/supabase/client";
-import { assetUrl } from "@/lib/assetUrl";
-import coverLogoAsset from "@/assets/weybridge-logo-navy-transparent.png.asset.json";
-import { GOLD, INK, MUTED, NAVY, acct, fmtDate, loadReportLogo, reportSection } from "./reports";
+import { GOLD, INK, MUTED, NAVY, acct, fmtDate, loadReportBrand, reportSection, type ReportPdfDeps } from "./reports";
+import { drawBrandHeader, HEADER_START_Y, PRINT_GOLD_DARK, PRINT_NAVY, type CrestImage } from "@/lib/pdfBrand";
+import type { DocIdentity } from "@/lib/docIdentity";
 import { AUDITOR_LABEL, type Approval, type Round, type Signoff, type YearSnapshot } from "./yearAudit";
 import autoTable from "jspdf-autotable";
 import { certifiedPackPath, packComparative, selectPackSource, type CompLine, type PackSource } from "./accountsPack";
 
 export type Certifier = { role: string; name: string; rank: string; date: string };
 
-async function loadImageData(input: { url?: string }): Promise<string | null> {
-  try {
-    const res = await fetch(assetUrl(input));
-    if (!res.ok) return null;
-    const blob = await res.blob();
-    return await new Promise<string>((resolve) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
-      reader.readAsDataURL(blob);
-    });
-  } catch { return null; }
+export const COVER_CREST_PT = 130;
+
+/** Inner pages: the shared white brand header; the page title is the title line, DRAFT on the right. */
+function pageHeader(doc: jsPDF, margin: number, title: string, draft: boolean, identity: DocIdentity, crest: CrestImage | null) {
+  drawBrandHeader(doc, { identity, crest, margin, title, rightLine: draft ? "DRAFT — not yet approved" : undefined });
+  return HEADER_START_Y;
 }
 
-function pageHeader(doc: jsPDF, pageW: number, margin: number, title: string, draft: boolean, LT: string) {
-  doc.setFillColor(...NAVY); doc.rect(0, 0, pageW, 60, "F");
-  doc.setFillColor(...GOLD); doc.rect(0, 60, pageW, 2, "F");
-  doc.setTextColor(255, 255, 255); doc.setFont("times", "bold"); doc.setFontSize(14);
-  doc.text(LT, margin, 28);
-  doc.setFont("times", "italic"); doc.setFontSize(11); doc.setTextColor(...GOLD);
-  doc.text(title, margin, 46);
-  if (draft) { doc.setFont("helvetica", "bold"); doc.setFontSize(10); doc.text("DRAFT — not yet approved", pageW - margin, 46, { align: "right" }); }
-  return 90;
-}
-
-export async function buildAccountsPackPdf(src: PackSource, year: number, certifiers: Certifier[]): Promise<jsPDF> {
-  const doc = new jsPDF({ unit: "pt", format: "a4" });
+export async function buildAccountsPackPdf(src: PackSource, year: number, certifiers: Certifier[], deps: ReportPdfDeps = {}): Promise<jsPDF> {
+  const doc = new jsPDF({ unit: "pt", format: "a4", compress: true });
   const pageW = doc.internal.pageSize.getWidth(), pageH = doc.internal.pageSize.getHeight(), margin = 40;
   const endLabel = `30 September ${year + 1}`;
-  const logo = await loadReportLogo();
-  const coverLogo = await loadImageData(coverLogoAsset);
-  const ID = await loadDocIdentity(); const LT = docTitle(ID);
+  const { identity: ID, crest } = await loadReportBrand(deps);
+  const LT = docTitle(ID);
 
   // 1. Cover
   doc.setFillColor(250, 250, 247); doc.rect(0, 0, pageW, pageH, "F");
-  doc.setFillColor(...NAVY); doc.rect(0, 0, pageW, 96, "F");
-  doc.setFillColor(...GOLD); doc.rect(0, 96, pageW, 3, "F");
+  // Cover on white: slim navy edge + gold rule (as the shared header), navy crest from Unit Setup, 130pt.
+  doc.setFillColor(...NAVY); doc.rect(0, 0, pageW, 6, "F");
+  doc.setDrawColor(...GOLD); doc.setLineWidth(1.5); doc.line(margin, 96, pageW - margin, 96);
   doc.setDrawColor(...NAVY); doc.setLineWidth(1); doc.rect(margin, 132, pageW - margin * 2, 548);
-  if (coverLogo) { try { doc.addImage(coverLogo, "PNG", pageW / 2 - 65, 172, 130, 130); } catch { /* ignore */ } }
+  if (crest) {
+    try {
+      const ip = doc.getImageProperties(crest.dataUrl);
+      const k = COVER_CREST_PT / Math.max(ip.width || 1, ip.height || 1);
+      const w = (ip.width || 1) * k, h = (ip.height || 1) * k;
+      doc.addImage(crest.dataUrl, crest.format, pageW / 2 - w / 2, 172 + (COVER_CREST_PT - h) / 2, w, h, undefined, "FAST");
+    } catch { /* bad image: omit, keep the cover text */ }
+  }
   doc.setTextColor(...NAVY); doc.setFont("times", "bold"); doc.setFontSize(26);
   doc.text(LT, pageW / 2, 350, { align: "center" });
-  doc.setFont("times", "italic"); doc.setFontSize(14); doc.setTextColor(...GOLD);
+  doc.setFont("times", "italic"); doc.setFontSize(14); doc.setTextColor(...PRINT_GOLD_DARK);
   doc.text(ID.provinceName, pageW / 2, 375, { align: "center" });
   doc.setFillColor(...GOLD); doc.rect(pageW / 2 - 90, 402, 180, 2, "F");
   doc.setFont("times", "bold"); doc.setFontSize(18); doc.setTextColor(...NAVY);
@@ -69,11 +60,11 @@ export async function buildAccountsPackPdf(src: PackSource, year: number, certif
 
   // 2. Treasurer's Remarks
   doc.addPage();
-  let y = pageHeader(doc, pageW, margin, "Treasurer's Remarks", src.draft, LT);
+  let y = pageHeader(doc, margin, "Treasurer's Remarks", src.draft, ID, crest);
   doc.setFont("helvetica", "normal"); doc.setFontSize(10.5); doc.setTextColor(...INK);
   const text = src.remarks?.trim() || "No remarks.";
   for (const line of doc.splitTextToSize(text, pageW - margin * 2) as string[]) {
-    if (y > pageH - 60) { doc.addPage(); y = pageHeader(doc, pageW, margin, "Treasurer's Remarks (continued)", src.draft, LT); doc.setFont("helvetica", "normal"); doc.setFontSize(10.5); doc.setTextColor(...INK); }
+    if (y > pageH - 66) { doc.addPage(); y = pageHeader(doc, margin, "Treasurer's Remarks (continued)", src.draft, ID, crest); doc.setFont("helvetica", "normal"); doc.setFontSize(10.5); doc.setTextColor(...INK); }
     doc.text(line, margin, y); y += 15;
   }
 
@@ -88,13 +79,15 @@ export async function buildAccountsPackPdf(src: PackSource, year: number, certif
   const table = (yy: number, body: string[][], boldFrom: number, showAccountHeading = true) => {
     autoTable(doc, {
       head: [[showAccountHeading ? "Account" : "", curH, st.hasPrior ? priH : ""]], body, startY: yy,
-      margin: { left: margin, right: margin, bottom: 60 },
+      margin: { top: margin, left: margin, right: margin, bottom: 60 },
       styles: { font: "helvetica", fontSize: 9, cellPadding: 5, textColor: INK, lineColor: [220, 215, 200], lineWidth: 0.4, overflow: "linebreak" },
       headStyles: { fillColor: GOLD, textColor: NAVY, fontStyle: "bold", halign: "right" },
       alternateRowStyles: { fillColor: [250, 247, 238] },
       theme: "grid",
       columnStyles: { 0: { cellWidth: 274 }, 1: { cellWidth: 120, halign: "right" }, 2: { cellWidth: 120, halign: "right", textColor: MUTED } },
       rowPageBreak: "avoid",
+      // Short tables (totals, funds) move whole to the next page instead of splitting.
+      pageBreak: body.length <= 8 ? "avoid" : "auto",
       didParseCell: (d) => {
         if (d.section === "head" && d.column.index === 0) d.cell.styles.halign = "left";
         if (d.section === "body" && d.row.index >= boldFrom) d.cell.styles.fontStyle = "bold";
@@ -105,7 +98,7 @@ export async function buildAccountsPackPdf(src: PackSource, year: number, certif
 
   // 3. Balance Sheet
   doc.addPage();
-  y = pageHeader(doc, pageW, margin, `Balance Sheet as at ${endLabel}`, src.draft, LT);
+  y = pageHeader(doc, margin, `Balance Sheet as at ${endLabel}`, src.draft, ID, crest);
   if (st.hasPrior) {
     doc.setFont("helvetica", "italic"); doc.setFontSize(8.5); doc.setTextColor(...MUTED);
     doc.text(`Comparative figures: as at 30 September ${year}.`, margin, y - 8);
@@ -123,7 +116,7 @@ export async function buildAccountsPackPdf(src: PackSource, year: number, certif
 
   // 4. Income & Expenditure
   doc.addPage();
-  y = pageHeader(doc, pageW, margin, `Income & Expenditure for the year ended ${endLabel}`, src.draft, LT);
+  y = pageHeader(doc, margin, `Income & Expenditure for the year ended ${endLabel}`, src.draft, ID, crest);
   if (st.hasPrior) {
     doc.setFont("helvetica", "italic"); doc.setFontSize(8.5); doc.setTextColor(...MUTED);
     doc.text(`Comparative figures: year ended 30 September ${year}.`, margin, y - 8);
@@ -137,7 +130,7 @@ export async function buildAccountsPackPdf(src: PackSource, year: number, certif
   // 5. Certificate (approved only)
   if (!src.draft && certifiers.length) {
     doc.addPage();
-    y = pageHeader(doc, pageW, margin, "Auditors' Certificate", false, LT);
+    y = pageHeader(doc, margin, "Auditors' Certificate", false, ID, crest);
     doc.setFont("times", "normal"); doc.setFontSize(12); doc.setTextColor(...INK);
     const cert = `We have examined the accounts of ${LT || "the Lodge"} for the year ended ${endLabel}, comprising the Balance Sheet and the Income & Expenditure account set out in this document, and believe them to be accurate.`;
     for (const line of doc.splitTextToSize(cert, pageW - margin * 2) as string[]) { doc.text(line, margin, y); y += 17; }
@@ -154,8 +147,13 @@ export async function buildAccountsPackPdf(src: PackSource, year: number, certif
 
   const n = doc.getNumberOfPages();
   for (let i = 2; i <= n; i++) {
-    doc.setPage(i); doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(...MUTED);
-    doc.text(`Annual Accounts ${year}/${year + 1}${src.draft ? " · DRAFT" : ""} · page ${i} of ${n}`, pageW / 2, pageH - 25, { align: "center" });
+    // Shared footer style: navy rule, lodge name left, the pack's own page line right (wording unchanged).
+    doc.setPage(i);
+    doc.setDrawColor(...PRINT_NAVY); doc.setLineWidth(0.6); doc.line(margin, pageH - 40, pageW - margin, pageH - 40);
+    doc.setFont("times", "normal"); doc.setFontSize(8); doc.setTextColor(...PRINT_NAVY);
+    if (LT) doc.text(LT, margin, pageH - 28);
+    doc.setFont("helvetica", "normal"); doc.setTextColor(...MUTED);
+    doc.text(`Annual Accounts ${year}/${year + 1}${src.draft ? " · DRAFT" : ""} · page ${i} of ${n}`, pageW - margin, pageH - 28, { align: "right" });
   }
   return doc;
 }
