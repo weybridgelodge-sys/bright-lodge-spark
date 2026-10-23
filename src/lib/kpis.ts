@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { firstWmYearForMember } from "@/data/worshipfulMasters";
 import { formatMemberLine } from "@/lib/summons";
 import { OPTIONAL_POSITIONS, fetchOfficerYear } from "@/lib/officersProgression";
+import { resolveOfficeRoll } from "@/lib/officerRoll";
 import {
   fetchInstallationConfig,
   formatRangeDate,

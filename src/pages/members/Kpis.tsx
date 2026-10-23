@@ -54,7 +54,7 @@ function Stat({ label, value, sub }: { label: string; value: React.ReactNode; su
   return (
     <div className="bg-navy/60 border border-gold/10 rounded-sm p-3">
       <p className="text-[11px] uppercase tracking-wider text-primary-foreground/80">{label}</p>
-      <p className="font-serif text-2xl text-gold mt-1">{value}</p>
+      <p className="font-serif text-xl sm:text-2xl text-gold mt-1 break-words [overflow-wrap:anywhere]">{value}</p>
       {sub && <p className="text-[11px] text-primary-foreground/80 mt-1">{sub}</p>}
     </div>
   );
