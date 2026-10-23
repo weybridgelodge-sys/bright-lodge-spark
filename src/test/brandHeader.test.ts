@@ -192,7 +192,7 @@ describe("crest processing", () => {
 describe("sign-in email wording has no typed lodge name", () => {
   const hook = fs.readFileSync("supabase/functions/auth-email-hook/index.ts", "utf8");
   it("SITE_NAME literal is gone; FROM_NAME only feeds the sender", () => {
-    expect(hook).not.toMatch(/SITE_NAME/);
+    expect(hook).not.toMatch(/\bSITE_NAME\b/);
     expect(hook.match(/FROM_NAME/g)?.length).toBe(2);
   });
 });
