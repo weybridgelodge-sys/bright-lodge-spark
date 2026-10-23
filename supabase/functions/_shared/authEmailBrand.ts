@@ -72,3 +72,13 @@ export function keepAlive(p: Promise<unknown>): void {
     if (rt && typeof rt.waitUntil === "function") rt.waitUntil(p.catch(() => {}));
   } catch { /* no-op */ }
 }
+
+/** Neutral wording when the Unit Setup identity is unavailable (no lodge literal). */
+export const NEUTRAL_SITE_NAME = "Members Portal";
+/** Lodge name for sign-in email wording, from the same identity as the header. */
+export function siteNameFor(b: { lodgeName?: string; lodgeNumber?: string } | null | undefined): string {
+  const name = (b?.lodgeName ?? "").trim();
+  if (!name) return NEUTRAL_SITE_NAME;
+  const num = (b?.lodgeNumber ?? "").trim();
+  return num ? `${name} No. ${num}` : name;
+}

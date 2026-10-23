@@ -27,12 +27,13 @@ import {
 
 interface ReauthenticationEmailProps {
   token: string
+  siteName?: string
 }
 
-export const ReauthenticationEmail = ({ token }: ReauthenticationEmailProps) => (
+export const ReauthenticationEmail = ({ token, siteName = 'Members Portal' }: ReauthenticationEmailProps) => (
   <Html lang="en" dir="ltr">
     <Head />
-    <Preview>Your Weybridge Lodge verification code</Preview>
+    <Preview>Your {siteName} verification code</Preview>
     <Body style={main}>
       <Container style={container}>
         <BrandHeader />

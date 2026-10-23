@@ -17,7 +17,7 @@ export const EmailBrandHeader = (props: BrandIdentity) => {
         <Heading as="h1" style={{ color: BRAND.navy, fontFamily: 'Georgia, "Times New Roman", serif', fontSize: '24px', fontWeight: 700, margin: l.crestUrl ? '12px 0 0' : '0', letterSpacing: '0.5px' }}>{l.name}</Heading>
       )}
       {l.sub && (
-        <Text style={{ color: BRAND.muted, fontFamily: BRAND.fontStack, fontSize: '12px', letterSpacing: '2px', textTransform: 'uppercase' as const, margin: '4px 0 0' }}>{l.sub}</Text>
+        <Text style={{ color: BRAND.muted, fontFamily: BRAND.fontStack, fontSize: '11px', letterSpacing: '0.5px', textTransform: 'uppercase' as const, margin: '4px 0 0' }}>{l.sub}</Text>
       )}
       <div style={{ borderTop: `2px solid ${BRAND.gold}`, width: '120px', margin: '14px auto 20px', lineHeight: '0', fontSize: '0' }}>&nbsp;</div>
     </Section>
