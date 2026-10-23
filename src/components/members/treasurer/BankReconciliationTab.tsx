@@ -348,13 +348,11 @@ export default function BankReconciliationTab({ canEdit }: { canEdit: boolean })
     const periodLine = period
       ? `${fmtLong(period.from)} – ${fmtLong(period.to)}`
       : (stmt?.period_label ?? "");
-    const { doc, pageW, margin, startY, finish } = await reportPdfDoc("Bank Reconciliation", periodLine);
-    let y = startY;
-
-    y = reportSection(doc, pageW, margin, y, `Statement — ${stmt?.period_label ?? ""}`);
-    y = reportTable(doc, margin, y,
-      [["", "", "Amount"]],
-      [
+    const remaining = lines.filter((l) => isUnreconciled(l));
+    const doc = await buildBankRecPdf({
+      periodLine,
+      statementLabel: stmt?.period_label ?? "",
+      statementRows: [
         ["Bank statement closing balance", "", money(statementClosing)],
         [`Add: ledger receipts not on the statement (${unmatchedLedgerReceipts.length})`, "", money(addTotal)],
         [`Less: ledger payments not on the statement (${unmatchedLedgerPayments.length})`, "", `(${money(lessTotal)})`],
@@ -362,30 +360,12 @@ export default function BankReconciliationTab({ canEdit }: { canEdit: boolean })
         [`1000 Bank nominal balance as at ${period ? fmtLong(period.to) : "date"}`, "", money(nominal)],
         [balanced ? "BALANCED" : "OUT OF BALANCE", "", money(adjusted - nominal)],
       ],
-    );
-
-    if (unmatchedLedgerReceipts.length || unmatchedLedgerPayments.length) {
-      y = reportSection(doc, pageW, margin, y, "Unpresented ledger items");
-      y = reportTable(doc, margin, y,
-        [["Doc no.", "Date", "Description", "Amount"]],
-        [
-          ...unmatchedLedgerReceipts.map((l) => [formatEntryNumber(l.entry_number), fmtDate(l.entry_date), l.description ?? "—", money(l.debit_pence)]),
-          ...unmatchedLedgerPayments.map((l) => [formatEntryNumber(l.entry_number), fmtDate(l.entry_date), l.description ?? "—", `(${money(l.credit_pence)})`]),
-        ],
-      );
-    }
-
-    const remaining = lines.filter((l) => isUnreconciled(l));
-    if (remaining.length) {
-      // Table starts below its heading (it used to be drawn over it).
-      y = reportSection(doc, pageW, margin, y, "Bank lines still unreconciled");
-      reportTable(doc, margin, y,
-        [["Date", "Description", "Amount"]],
-        remaining.map((l) => [fmtDate(l.transaction_date), l.description ?? "—", money(l.amount_pence)]),
-      );
-    }
-
-    finish();
+      unpresentedRows: (unmatchedLedgerReceipts.length || unmatchedLedgerPayments.length) ? [
+        ...unmatchedLedgerReceipts.map((l) => [formatEntryNumber(l.entry_number), fmtDate(l.entry_date), l.description ?? "—", money(l.debit_pence)]),
+        ...unmatchedLedgerPayments.map((l) => [formatEntryNumber(l.entry_number), fmtDate(l.entry_date), l.description ?? "—", `(${money(l.credit_pence)})`]),
+      ] : [],
+      remainingRows: remaining.map((l) => [fmtDate(l.transaction_date), l.description ?? "—", money(l.amount_pence)]),
+    });
     await saveJsPdf(doc, `bank-reconciliation-${(stmt?.period_label ?? "statement").toLowerCase().replace(/[^a-z0-9]+/g, "-")}.pdf`);
   };
 
