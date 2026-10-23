@@ -13,7 +13,7 @@ function data(actual: string | null): ReturnData {
     wm: off("worshipful_master", "w"), sw: off("senior_warden", "s"), jw: off("junior_warden", "j"), ipm: off("immediate_past_master", "i"),
     officers: [off("secretary", "x")], qualification: { branch: 0, reason: "" }, profiles: {},
     identity: { lodgeName: "Synthetic", lodgeNumber: "1", emailDomain: "example.org" } as any,
-    ruleWording: "", membershipLodgeEmail: "", issues: [],
+    ruleWording: "", membershipLodgeEmail: "", membershipEmailSource: "fallback", membershipOverride: "", issues: [],
   };
 }
 const val = (d: ReturnData, id: string) => buildFieldSpecs(d, { secretaryChanged: "N" }).find((s) => s.id === id)!.value;

@@ -28,7 +28,7 @@ describe("UGLE return: Secretary Y/N is mandatory", () => {
       ipm: { key: "immediate_past_master", label: "IPM", memberId: null, provenance: "vacant" },
       officers: [], qualification: { branch: 0, reason: "" },
       identity: { lodgeName: "", lodgeNumber: "", emailDomain: "", secretaryEmail: "" },
-      ruleWording: "", profiles: {}, membershipLodgeEmail: "", issues: [],
+      ruleWording: "", profiles: {}, membershipLodgeEmail: "", membershipEmailSource: "fallback", membershipOverride: "", issues: [],
     } as unknown as ReturnData;
     for (const v of ["Y", "N"] as const) {
       const spec = buildFieldSpecs(d, { secretaryChanged: secretaryChangedValue(v) }).find((s) => s.id === SECRETARY_CHANGED_FIELD)!;

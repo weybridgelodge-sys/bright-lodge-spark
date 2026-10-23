@@ -8,19 +8,20 @@ import { fieldCls, fieldLabelCls, fieldHintCls } from "@/lib/fieldStyle";
 import { useInitialLoading } from "@/hooks/useInitialLoading";
 import { loadLodgeIdentity } from "@/lib/lodgeIdentity";
 import { changedFields, clearedRequired, patchFor, REQUIRED_UNIT_FIELDS, type FieldMap } from "@/lib/unitSetupForm";
+import { emailError, MEMBERSHIP_OFFICER_UNIT_KEY, normaliseEmail } from "@/lib/membershipOfficerEmail";
 import { canonicalSortCode, signOff, validAccountNumber, paymentReference } from "@/lib/bookingDetails";
 
 type Form = {
   lodge_name: string; lodge_number: string; consecration_date: string;
   account_name: string; sort_code: string; account_number: string; reference_pattern: string;
-  card_wording: string; cheque_payee: string; sign_off_override: string; booking_contact_email: string;
+  card_wording: string; cheque_payee: string; sign_off_override: string; booking_contact_email: string; membership_officer_email: string;
   venue_id: string; assistant_secretary_email: string; webmaster_email: string; communications_email: string; site_url: string;
   sender_name: string; formal_sender_name: string; facebook_url: string; instagram_url: string; twitter_url: string;
   province_name: string; ico_number: string; newsletter_masthead: string; newsletter_footer_note: string; calendar_name: string;
   provincial_file: string; installation_file: string; provincial_return_email: string; installation_return_email: string;
 };
 type Venue = { id: string; name: string; address: string | null; display_lines: string[] | null };
-const EMPTY: Form = { lodge_name: "", lodge_number: "", consecration_date: "", account_name: "", sort_code: "", account_number: "", reference_pattern: "", card_wording: "", cheque_payee: "", sign_off_override: "", booking_contact_email: "", venue_id: "", assistant_secretary_email: "", webmaster_email: "", communications_email: "", site_url: "", sender_name: "", formal_sender_name: "", facebook_url: "", instagram_url: "", twitter_url: "", province_name: "", ico_number: "", newsletter_masthead: "", newsletter_footer_note: "", calendar_name: "", provincial_file: "", installation_file: "", provincial_return_email: "", installation_return_email: "" };
+const EMPTY: Form = { lodge_name: "", lodge_number: "", consecration_date: "", account_name: "", sort_code: "", account_number: "", reference_pattern: "", card_wording: "", cheque_payee: "", sign_off_override: "", booking_contact_email: "", membership_officer_email: "", venue_id: "", assistant_secretary_email: "", webmaster_email: "", communications_email: "", site_url: "", sender_name: "", formal_sender_name: "", facebook_url: "", instagram_url: "", twitter_url: "", province_name: "", ico_number: "", newsletter_masthead: "", newsletter_footer_note: "", calendar_name: "", provincial_file: "", installation_file: "", provincial_return_email: "", installation_return_email: "" };
 type Audit = { id: string; key: string; old_value: unknown; new_value: unknown; changed_by: string | null; changed_at: string };
 type Errs = Partial<Record<keyof Form, string>>;
 
@@ -52,6 +53,7 @@ async function loadForm() {
     account_name: b.account_name ?? "", sort_code: b.sort_code ?? "", account_number: b.account_number ?? "", reference_pattern: b.reference_pattern ?? "",
     card_wording: p.card_wording ?? "", cheque_payee: p.cheque_payee ?? "", sign_off_override: by.sign_off?.override ?? "",
     booking_contact_email: by.booking_contact_email?.email ?? "",
+    membership_officer_email: by[MEMBERSHIP_OFFICER_UNIT_KEY]?.email ?? "",
     venue_id: by.meeting_place?.venue_id ?? "", assistant_secretary_email: c.assistant_secretary_email ?? "", webmaster_email: c.webmaster_email ?? "",
     communications_email: c.communications_email ?? "", site_url: c.site_url ?? "", sender_name: c.sender_name ?? "", formal_sender_name: c.formal_sender_name ?? "",
     facebook_url: by.web_social?.facebook_url ?? "", instagram_url: by.web_social?.instagram_url ?? "", twitter_url: by.web_social?.twitter_url ?? "",
@@ -304,6 +306,18 @@ function Inner() {
           ], () => {
             const e: Errs = {};
             if (f.booking_contact_email.trim() && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(f.booking_contact_email.trim())) e.booking_contact_email = "Enter a valid email address.";
+            return e;
+          }))}
+        </Section>
+
+        <Section title="Membership Officer lodge email">
+          {field("membership_officer_email", "Membership Officer lodge email", { type: "email", inputMode: "email", hint: "Used on the UGLE Installation Return. The Secretary can override it on the return itself. Leave blank to use the fallback address." })}
+          {saveBtn("membership", () => save("membership", [
+            { key: MEMBERSHIP_OFFICER_UNIT_KEY, fields: ["membership_officer_email"], value: (ch) => { const p = only({ membership_officer_email: "email" })(ch); return { ...p, email: normaliseEmail(p.email) }; } },
+          ], () => {
+            const e: Errs = {};
+            const m = emailError(f.membership_officer_email);
+            if (m) e.membership_officer_email = m;
             return e;
           }))}
         </Section>
