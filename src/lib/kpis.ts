@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { firstWmYearForMember } from "@/data/worshipfulMasters";
 import { formatMemberLine } from "@/lib/summons";
 import { OPTIONAL_POSITIONS, fetchOfficerYear } from "@/lib/officersProgression";
+import { resolveOfficeRoll } from "@/lib/officerRoll";
 import {
   fetchInstallationConfig,
   formatRangeDate,
@@ -53,7 +54,7 @@ export type KpiMember = {
 
 export type WmTerm = { id: string; member_id: string; year_started: number; year_ended: number | null };
 export type SuccessionRisk = { id: string; role_key: string; note: string | null; is_at_risk: boolean };
-export type Appointment = { position_key: string; member_id: string; lodge_year: number };
+export type Appointment = { position_key: string; member_id: string | null; lodge_year: number; is_projection?: boolean };
 
 export type CandidateStage =
   | "enquiry"
@@ -140,7 +141,7 @@ export async function fetchKpiBundle(): Promise<KpiBundle> {
       ),
     (supabase.from as any)("member_wm_terms").select("id,member_id,year_started,year_ended"),
     (supabase.from as any)("succession_risks").select("id,role_key,note,is_at_risk"),
-    supabase.from("officer_appointments").select("position_key,member_id,lodge_year"),
+    supabase.from("officer_appointments").select("position_key,member_id,lodge_year,is_projection"),
     supabase.from("officer_positions").select("key,label,is_progressive,order_index").eq("category", "office"),
     (supabase.from as any)("candidates").select("*"),
     (supabase.from as any)("member_status_history").select("profile_id,kind,status,effective_date,created_at"),
@@ -436,7 +437,7 @@ export function milestones(
           kind: "birthday",
           years: age,
           date: fmtLocal(next),
-          label: `${age}th birthday`,
+          label: `${ordinal(age)} birthday`,
         });
       }
     }
@@ -488,24 +489,45 @@ export const CRITICAL_ROLE_LABELS: Record<(typeof CRITICAL_ROLES)[number], strin
 
 export function officersHealth(bundle: KpiBundle) {
   const my = bundle.officerYear ?? currentMasonicYear();
-  const yearAppointments = bundle.appointments.filter((a) => a.lodge_year === my);
-  const filledKeys = new Set(yearAppointments.map((a) => a.position_key));
+  // Same rule as every other roll: latest confirmed appointment carries
+  // forward until replaced (officerRoll), never a lodge_year equality match.
+  const rollInput = {
+    year: my,
+    appts: bundle.appointments.map((a) => ({ ...a, is_projection: !!a.is_projection })),
+    profiles: bundle.members.map((m) => ({
+      id: m.id, first_name: m.first_name, middle_name: m.middle_name, last_name: m.last_name,
+      full_name: m.full_name, email: null, status: m.status,
+    })),
+    statuses: [],
+  };
+  const isHeld = (o: { memberId: string | null; provenance: string }) =>
+    !!o.memberId && o.provenance !== "vacant" && o.provenance !== "computed";
   // Steward offices are optional: lodges need not appoint them, so an empty
   // steward slot is neither a vacancy to report nor a succession risk.
   const progressive = bundle.positions.filter(
     (p) => p.is_progressive && !OPTIONAL_POSITIONS.has(p.key)
   );
-  const filled = progressive.filter((p) => filledKeys.has(p.key));
-  const vacant = progressive.filter((p) => !filledKeys.has(p.key));
+  const resolved = resolveOfficeRoll(progressive.map((p) => ({ key: p.key, label: p.label })), rollInput);
+  const filled = progressive.filter((_, i) => isHeld(resolved[i]));
+  const vacant = progressive.filter((_, i) => !isHeld(resolved[i]));
 
   const criticals = CRITICAL_ROLES.map((key) => {
-    const appt = yearAppointments.find((a) => a.position_key === key);
-    const holder = appt ? bundle.members.find((m) => m.id === appt.member_id) ?? null : null;
+    const o = resolveOfficeRoll([{ key, label: CRITICAL_ROLE_LABELS[key] }], rollInput)[0];
+    const held = isHeld(o);
+    const holder = held ? bundle.members.find((m) => m.id === o.memberId) ?? null : null;
     const risk = bundle.risks.find((r) => r.role_key === key) ?? null;
-    return { key, label: CRITICAL_ROLE_LABELS[key], holder, risk };
+    return { key, label: CRITICAL_ROLE_LABELS[key], holder, held, risk };
   });
 
   return { progressiveFilled: filled, progressiveVacant: vacant, progressiveTotal: progressive.length, criticals };
+}
+
+/** English ordinal: 1st, 2nd, 3rd, 4th, 11th–13th, 21st, 83rd. */
+export function ordinal(n: number): string {
+  const t = Math.abs(n) % 100;
+  if (t >= 11 && t <= 13) return `${n}th`;
+  const suffix = ({ 1: "st", 2: "nd", 3: "rd" } as Record<number, string>)[t % 10] ?? "th";
+  return `${n}${suffix}`;
 }
 
 // ───── Section 7: Pipeline
@@ -556,8 +578,15 @@ export function lodgeHealth(bundle: KpiBundle): LodgeHealth {
   // Succession — progressive vacancies and critical-role risk flags.
   const vacant = oh.progressiveVacant;
   const riskyCriticals = oh.criticals.filter((c) => c.risk?.is_at_risk);
+  const vacantCriticals = oh.criticals.filter((c) => !c.held);
   let succession: HealthComponent;
-  if (vacant.length === 0 && riskyCriticals.length === 0) {
+  if (vacant.length === 0 && riskyCriticals.length === 0 && vacantCriticals.length > 0) {
+    const names = vacantCriticals.map((c) => c.label).join(", ");
+    succession = {
+      band: "amber",
+      detail: `All progressive offices filled, but ${names} ${vacantCriticals.length === 1 ? "has" : "have"} no holder`,
+    };
+  } else if (vacant.length === 0 && riskyCriticals.length === 0) {
     succession = { band: "green", detail: "All progressive offices filled and no key roles flagged at risk" };
   } else if (vacant.length > 0 && riskyCriticals.length > 0) {
     succession = {
@@ -632,7 +661,8 @@ export async function fetchLodgeHealthBundle(): Promise<KpiBundle> {
     officerYear: my,
     members: ((m.data as unknown) as KpiMember[]) ?? [],
     wmTerms: [],
-    appointments: filled.map((key) => ({ position_key: key, member_id: "", lodge_year: my })),
+    // Aggregate holders already use current_officer_holder; mark them confirmed this year.
+    appointments: filled.map((key) => ({ position_key: key, member_id: `aggregate:${key}`, lodge_year: my })),
     risks: risks.map((role_key, i) => ({ id: String(i), role_key, note: null, is_at_risk: true })),
     positions: (p.data as KpiBundle["positions"]) ?? [],
     // Count-only stubs — lodgeHealth/pipeline only inspect stage + length.
