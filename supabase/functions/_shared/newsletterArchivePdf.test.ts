@@ -33,7 +33,7 @@ async function textOf(bytes: Uint8Array) {
       raw += bin(new Uint8Array(out));
     } catch { /* not deflate */ }
   }
-  return [...raw.matchAll(/<([0-9A-Fa-f]+)> Tj/g)].map((m) => m[1].match(/../g)!.map((h) => String.fromCharCode(parseInt(h, 16))).join("")).join("\n");
+  return [...raw.matchAll(/<([0-9A-Fa-f]+)> Tj/g)].map((m) => m[1].match(/../g)!.map((h) => String.fromCharCode(parseInt(h, 16))).join("")).join("\n").replace(/\x97/g, "—");
 }
 
 Deno.test("header shows lodge identity, masthead and wording; every page has Page x of y", async () => {
