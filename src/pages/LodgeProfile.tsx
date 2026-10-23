@@ -9,22 +9,8 @@ import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import pastMastersJewel from "@/assets/news/past-masters-jewel.png";
 import { useUnitProfile, venueFull, venueShort } from "@/lib/unitProfile";
-import { useLodgeFigures, membersLabel, longDate, totalMembers, ageRangePhrase, countWord, provinceShort, DASH, type LodgeFigures } from "@/lib/lodgeFigures";
-import type { UnitProfile } from "@/lib/unitProfile";
+import { useLodgeFigures, glanceStats, longDate, totalMembers, ageRangePhrase, countWord } from "@/lib/lodgeFigures";
 
-/** "Lodge at a Glance" cards — every value from the lodge record; "—" when not known. */
-export function glanceStats(f: LodgeFigures, u: Pick<UnitProfile, "lodgeNumber" | "consecrationDate" | "provinceName">, pattern: PublicMeetingPattern | null) {
-  return [
-    { label: "Lodge Number", value: u.lodgeNumber || DASH },
-    { label: "Consecrated", value: longDate(u.consecrationDate) || DASH },
-    { label: "Subscribing Members", value: membersLabel(f) },
-    { label: "Average Member Age", value: f.averageAge != null ? String(f.averageAge) : DASH },
-    { label: "Meeting Day", value: pattern?.meetingDay || DASH },
-    { label: "Meetings Per Year", value: pattern?.perYear ? String(pattern.perYear) : DASH },
-    { label: "Most Recent Initiation", value: longDate(f.latestInitiationDate) || DASH },
-    { label: "Province", value: provinceShort(u.provinceName) || DASH },
-  ];
-}
 
 const values: { name: string; description: string }[] = [
   { name: "Integrity", description: "Members hold themselves to a standard of honesty and moral consistency, on and off the temple floor." },

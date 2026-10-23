@@ -3,6 +3,8 @@
 // missing stays blank and is shown as "—" or hidden, never a typed figure.
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import type { PublicMeetingPattern } from "@/lib/meetingPattern";
+import type { UnitProfile } from "@/lib/unitProfile";
 
 export type LodgeFigures = {
   subscribingCount: number | null;
@@ -71,6 +73,20 @@ export const countWord = (n: number) => WORDS[n] ?? String(n);
 
 /** "Province of Surrey" → "Surrey" for the short stat card. */
 export const provinceShort = (name: string) => name.replace(/^\s*province of\s+/i, "").trim();
+
+/** "Lodge at a Glance" cards — every value from the lodge record; "—" when not known. */
+export function glanceStats(f: LodgeFigures, u: Pick<UnitProfile, "lodgeNumber" | "consecrationDate" | "provinceName">, pattern: PublicMeetingPattern | null) {
+  return [
+    { label: "Lodge Number", value: u.lodgeNumber || DASH },
+    { label: "Consecrated", value: longDate(u.consecrationDate) || DASH },
+    { label: "Subscribing Members", value: membersLabel(f) },
+    { label: "Average Member Age", value: f.averageAge != null ? String(f.averageAge) : DASH },
+    { label: "Meeting Day", value: pattern?.meetingDay || DASH },
+    { label: "Meetings Per Year", value: pattern?.perYear ? String(pattern.perYear) : DASH },
+    { label: "Most Recent Initiation", value: longDate(f.latestInitiationDate) || DASH },
+    { label: "Province", value: provinceShort(u.provinceName) || DASH },
+  ];
+}
 
 export async function loadLodgeFigures(): Promise<LodgeFigures> {
   const { data, error } = await (supabase.rpc as any)("get_public_lodge_figures");
