@@ -24,7 +24,7 @@ export const LODGE_FALLBACK = {
   installationReturnFile: "Installation-Return-6787-{year}",
 } as const;
 
-export type LodgeSettings = { -readonly [K in keyof typeof LODGE_FALLBACK]: string } & { bookingContactEmail: string; bookingContactOffice: string; /** site_url as saved, "" when not set (no fallback). */ configuredSiteUrl: string;
+export type LodgeSettings = { -readonly [K in keyof typeof LODGE_FALLBACK]: string } & { bookingContactEmail: string; bookingContactOffice: string; /** site_url as saved, "" when not set (no fallback). */ configuredSiteUrl: string; /** formal_sender_name as saved, "" when not set (no fallback). */ configuredFormalSenderName: string;
   /** Unit Setup crest_image url (https only), "" when not set: no fallback, callers omit the image. */ crestImageUrl: string;
   /** Lodge record name/number (get_lodge_identity sources), "" when not set: no fallback. */ lodgeName: string; lodgeNumber: string };
 
@@ -51,6 +51,7 @@ export function resolveLodgeSettings(row: Row, us?: UnitSettingsMap, officers?: 
     lodgeNumber: pick(identity?.lodgeNumber, ""),
     senderName: pick(row?.sender_name, f.senderName),
     formalSenderName: pick(row?.formal_sender_name, f.formalSenderName),
+    configuredFormalSenderName: pick(row?.formal_sender_name, ""),
     secretaryEmail: pick(row?.secretary_email, f.secretaryEmail),
     membershipCcEmail: pick(row?.membership_cc_email, f.membershipCcEmail),
     assistantSecretaryEmail: pick(row?.assistant_secretary_email, f.assistantSecretaryEmail),

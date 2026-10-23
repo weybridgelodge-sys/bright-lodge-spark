@@ -3,7 +3,7 @@
 import * as React from 'npm:react@18.3.1'
 import { renderAsync } from 'npm:@react-email/components@0.0.22'
 import { assert, assertEquals } from 'https://deno.land/std@0.224.0/assert/mod.ts'
-import { createAuthBrandLookup, keepAlive } from './authEmailBrand.ts'
+import { createAuthBrandLookup, keepAlive, senderDisplayName } from './authEmailBrand.ts'
 import { setAuthEmailBrand } from './email-templates/_layout.tsx'
 import { SignupEmail } from './email-templates/signup.tsx'
 import { InviteEmail } from './email-templates/invite.tsx'
@@ -85,4 +85,16 @@ Deno.test('keepAlive is a no-op without EdgeRuntime and uses waitUntil when pres
   ;(globalThis as any).EdgeRuntime = { waitUntil: () => { got++ } }
   try { keepAlive(Promise.resolve()) } finally { delete (globalThis as any).EdgeRuntime }
   assertEquals(got, 1)
+})
+
+Deno.test('sender name: Unit Setup sender name, else lodge name/number, else neutral', async () => {
+  const lk = createAuthBrandLookup({ load: async () => ({ lodgeName: 'Testbury Lodge', lodgeNumber: '1234', configuredFormalSenderName: 'Testbury Lodge No. 1234 (Formal)' }), warn: () => {} })
+  assertEquals(senderDisplayName(await lk.get()), 'Testbury Lodge No. 1234 (Formal)')
+  const lk2 = createAuthBrandLookup({ load: async () => ({ lodgeName: 'Testbury Lodge', lodgeNumber: '1234', configuredFormalSenderName: '' }), warn: () => {} })
+  assertEquals(senderDisplayName(await lk2.get()), 'Testbury Lodge No. 1234')
+  const lk3 = createAuthBrandLookup({ load: async () => { throw new Error('down') }, warn: () => {} })
+  assertEquals(senderDisplayName(await lk3.get()), 'Members Portal')
+  const lk4 = createAuthBrandLookup({ load: () => new Promise(() => {}), timeoutMs: 20, warn: () => {} })
+  assertEquals(senderDisplayName(await lk4.get()), 'Members Portal')
+  assertEquals(senderDisplayName({ senderName: 'Bad <x@y> "n"\r\n' }), 'Bad x@y n')
 })
