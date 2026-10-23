@@ -182,7 +182,7 @@ export default function PublicEvent() {
               <ul className="flex flex-col sm:flex-row flex-wrap justify-center gap-3 sm:gap-6 text-background/90 font-sans">
                 <li className="flex items-center justify-center gap-2"><Calendar className="w-4 h-4 text-gold" aria-hidden="true" />{formatEventDate(ev.event_date)}</li>
                 {time && <li className="flex items-center justify-center gap-2"><Clock className="w-4 h-4 text-gold" aria-hidden="true" />{time}</li>}
-                <li className="inline-flex self-center sm:self-auto items-start justify-center gap-2 max-w-full"><MapPin className="w-4 h-4 text-gold shrink-0 mt-1" aria-hidden="true" /><span className="min-w-0">{keepPostcodeTogether(venueLine)}</span></li>
+                {venueLine && <li className="inline-flex self-center sm:self-auto items-start justify-center gap-2 max-w-full"><MapPin className="w-4 h-4 text-gold shrink-0 mt-1" aria-hidden="true" /><span className="min-w-0">{keepPostcodeTogether(venueLine)}</span></li>}
               </ul>
               <a href="#book" className="mt-8 inline-flex items-center justify-center min-h-[48px] px-8 bg-gold-shimmer text-accent-foreground font-semibold rounded-sm">
                 Book your places <ArrowRight className="w-4 h-4 ml-2" aria-hidden="true" />
