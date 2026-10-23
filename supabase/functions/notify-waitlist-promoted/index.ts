@@ -5,6 +5,7 @@
 // trigger-driven promotions (Secretary marks a booking as apologies).
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { sendTransactionalEmail } from '../_shared/send-email.ts'
+import { loadLodgeSettings } from "../_shared/lodgeSettings.ts";
 import { bookingFirstName } from '../_shared/greeting.ts'
 
 const corsHeaders = {
@@ -64,6 +65,7 @@ Deno.serve(async (req) => {
 
     const firstName = bookingFirstName(b.details, b.contact_name) || undefined
     try {
+      const lodge = await loadLodgeSettings()
       const res = await sendTransactionalEmail({
           templateName: 'waitlist-promoted',
           recipientEmail: b.contact_email,
@@ -73,6 +75,7 @@ Deno.serve(async (req) => {
             eventLabel: b.event_label,
             eventDate,
             bookingRef: b.id.slice(0, 8),
+            crestUrl: lodge.crestImageUrl || null, lodgeName: lodge.lodgeName, lodgeNumber: lodge.lodgeNumber, provinceName: lodge.provinceName,
           },
       })
       if (res.error) { console.error('promoted email failed', b.id, res.error); continue }

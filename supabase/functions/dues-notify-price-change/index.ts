@@ -6,6 +6,7 @@
 
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { sendTransactionalEmail } from "../_shared/send-email.ts";
+import { loadLodgeSettings } from "../_shared/lodgeSettings.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -85,6 +86,7 @@ Deno.serve(async (req) => {
     const byMember = new Map<string, any>();
     for (const p of profiles ?? []) byMember.set((p as any).id, p);
 
+    const lodge = await loadLodgeSettings();
     let sent = 0;
     const failures: { email: string; error: string }[] = [];
     for (const s of subs ?? []) {
@@ -103,6 +105,7 @@ Deno.serve(async (req) => {
             effectiveDate,
             method: (s as any).method,
             noticeDays: 10,
+            crestUrl: lodge.crestImageUrl || null, lodgeName: lodge.lodgeName, lodgeNumber: lodge.lodgeNumber, provinceName: lodge.provinceName,
           },
         });
         if (!res.ok) throw new Error(String((res.error as any) ?? `HTTP ${res.status}`));

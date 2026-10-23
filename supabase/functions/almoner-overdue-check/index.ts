@@ -452,6 +452,7 @@ Deno.serve(async (req) => {
         reportDate,
         sinceDate,
         portalUrl: PORTAL_URL,
+        ...(await (async () => { const lodge = await loadLodgeSettings(); return { crestUrl: lodge.crestImageUrl || null, lodgeName: lodge.lodgeName, lodgeNumber: lodge.lodgeNumber, provinceName: lodge.provinceName, } })()),
       },
     })
     if (!resp.ok) {

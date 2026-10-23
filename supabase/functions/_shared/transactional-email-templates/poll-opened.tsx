@@ -6,14 +6,14 @@ import {
   Heading,
   Hr,
   Html,
-  Img,
   Link,
   Preview,
   Section,
   Text,
 } from 'npm:@react-email/components@0.0.22'
 import type { TemplateEntry } from './registry.ts'
-import { BRAND, LOGO_HEIGHT, LOGO_URL, LOGO_WIDTH, brandStyles } from './_brand.ts'
+import { BRAND, BRAND_GOLD_DARK, brandHeaderLines, brandStyles } from './_brand.ts'
+import { EmailBrandFooter, EmailBrandHeader } from './_brandHeader.tsx'
 
 interface Props {
   question?: string
@@ -21,6 +21,10 @@ interface Props {
   dashboardUrl?: string
   closesAt?: string | null
   liveResults?: boolean
+  crestUrl?: string | null
+  lodgeName?: string
+  lodgeNumber?: string
+  provinceName?: string
 }
 
 const fmt = (s?: string | null) => {
@@ -41,26 +45,20 @@ const fmt = (s?: string | null) => {
 const Email = ({
   question = '',
   options = [],
-  dashboardUrl = 'https://weybridgelodge.org.uk/members/dashboard',
+  dashboardUrl = '',
   closesAt,
   liveResults,
-}: Props) => (
+  crestUrl, lodgeName, lodgeNumber, provinceName,
+}: Props) => {
+  const id = { crestUrl, lodgeName, lodgeNumber, provinceName }
+  const name = brandHeaderLines(id).name
+  return (
   <Html lang="en" dir="ltr">
     <Head />
     <Preview>A new poll is open: {question}</Preview>
     <Body style={brandStyles.main}>
       <Container style={brandStyles.container}>
-        <Section style={brandStyles.crestWrap}>
-          <Img
-            src={LOGO_URL}
-            width={LOGO_WIDTH}
-            height={LOGO_HEIGHT}
-            alt="Weybridge Lodge crest"
-            style={{ margin: '0 auto', display: 'block' }}
-          />
-          <Heading style={brandStyles.brand}>Weybridge Lodge</Heading>
-          <Text style={brandStyles.brandSub}>No. 6787 — Province of Surrey</Text>
-        </Section>
+        <EmailBrandHeader {...id} />
 
         <Heading style={brandStyles.h1}>A new poll is open</Heading>
         <Text style={brandStyles.meta}>
@@ -71,7 +69,7 @@ const Email = ({
 
         <Text style={brandStyles.body}>Brethren,</Text>
         <Text style={brandStyles.body}>
-          A new poll has been opened for the members of Weybridge Lodge. Your view is invited on the
+          A new poll has been opened for the members of {name || 'the Lodge'}. Your view is invited on the
           question below.
         </Text>
 
@@ -88,9 +86,11 @@ const Email = ({
           )}
         </Section>
 
-        <Text style={{ ...brandStyles.body, textAlign: 'center', margin: '22px 0 6px' }}>
-          <Link href={dashboardUrl} style={ctaLink}>Cast your vote on the Dashboard →</Link>
-        </Text>
+        {dashboardUrl && (
+          <Text style={{ ...brandStyles.body, textAlign: 'center', margin: '22px 0 6px' }}>
+            <Link href={dashboardUrl} style={ctaLink}>Cast your vote on the Dashboard →</Link>
+          </Text>
+        )}
 
         <Hr style={brandStyles.hr} />
         <Text style={confidential}>
@@ -99,10 +99,12 @@ const Email = ({
         <Text style={confidential}>
           This is an automated lodge notification, not a personal subscription. Clicking unsubscribe below removes you from all future lodge emails entirely, not just this one. If you are unsure why you received this email, please contact the Lodge Secretary.
         </Text>
+        <EmailBrandFooter {...id} />
       </Container>
     </Body>
   </Html>
-)
+  )
+}
 
 export const template = {
   component: Email,
@@ -114,9 +116,10 @@ export const template = {
   previewData: {
     question: 'Which charity should we support next?',
     options: ['Surrey 2030 Festival', 'SANDS', 'The TLC Trust'],
-    dashboardUrl: 'https://weybridgelodge.org.uk/members/dashboard',
+    dashboardUrl: 'https://example.org/members',
     closesAt: null,
     liveResults: true,
+    crestUrl: 'https://placehold.co/240x240/png', lodgeName: 'Example Lodge', lodgeNumber: '1234', provinceName: 'Province of Testshire',
   },
 } satisfies TemplateEntry
 
@@ -134,6 +137,7 @@ const optionStyle = {
 }
 const ctaLink = {
   ...brandStyles.link,
+  color: BRAND_GOLD_DARK,
   display: 'inline-block',
   padding: '10px 18px',
   border: `1px solid ${BRAND.gold}`,

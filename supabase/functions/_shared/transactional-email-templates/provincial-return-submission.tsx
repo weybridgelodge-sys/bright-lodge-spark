@@ -1,7 +1,7 @@
 import * as React from 'npm:react@18.3.1'
 import { Body, Container, Head, Heading, Hr, Html, Link, Preview, Section, Text } from 'npm:@react-email/components@0.0.22'
 import type { TemplateEntry } from './registry.ts'
-import { BRAND, brandHeaderLines, brandStyles } from './_brand.ts'
+import { BRAND, brandHeaderLines, brandStyles, provincialGrandLodge } from './_brand.ts'
 import { EmailBrandFooter, EmailBrandHeader } from './_brandHeader.tsx'
 
 interface Props {
@@ -42,7 +42,7 @@ const Email = ({
         <Heading style={brandStyles.h1}>Provincial Installation Return {yearLabel}</Heading>
         <Text style={brandStyles.body}>Dear Provincial Grand Secretary,</Text>
         <Text style={brandStyles.body}>
-          Please find the Provincial Grand Lodge of Surrey Installation Return {title ? `for ${title} ` : ''}for {yearLabel}
+          Please find the {provincialGrandLodge(provinceName)} Installation Return {title ? `for ${title} ` : ''}for {yearLabel}
           {installationDate ? `, following our Installation Meeting on ${installationDate}` : ''}. It includes the officers, the Secretary's contact details and the lists of Past Masters.
         </Text>
         <Section style={brandStyles.card}>

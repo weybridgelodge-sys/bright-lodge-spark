@@ -153,7 +153,7 @@ Deno.serve(async (req) => {
             templateData: {
               meetingDate,
               deadlineDate,
-              bookingUrl: `${(await loadLodgeSettings()).siteUrl}/bookings`,
+              ...(await (async () => { const lodge = await loadLodgeSettings(); return { bookingUrl: lodge.configuredSiteUrl ? `${lodge.configuredSiteUrl}/bookings` : "", crestUrl: lodge.crestImageUrl || null, lodgeName: lodge.lodgeName, lodgeNumber: lodge.lodgeNumber, provinceName: lodge.provinceName, }; })()),
             },
           });
           if (!res.ok) throw new Error(String((res.error as any) ?? `HTTP ${res.status}`));
