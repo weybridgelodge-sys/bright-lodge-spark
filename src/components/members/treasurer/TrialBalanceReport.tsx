@@ -7,8 +7,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "@/hooks/use-toast";
 import { Check, ChevronRight, Download, Loader2, AlertTriangle } from "lucide-react";
 import autoTable from "jspdf-autotable";
+import { brandedReportPdfDoc } from "@/lib/treasurer/brandedReportDoc";
 import {
-  GOLD, INK, NAVY, fetchAccounts, fetchLedgerLines, fetchReportCalendar, fmtDate, money, reportPdfDoc,
+  GOLD, INK, NAVY, fetchAccounts, fetchLedgerLines, fetchReportCalendar, fmtDate, money,
   treasurerYearBounds, type Account,
 } from "@/lib/treasurer/reports";
 import { bsAsAt, computeTrialBalance, masonicYearOf, masonicYearOptions, ymOf, type BSKind } from "@/lib/treasurer/reportPeriods";
@@ -70,13 +71,13 @@ export default function TrialBalanceReport() {
 
   const exportPdf = async () => {
     try {
-      const { doc, margin } = await reportPdfDoc("Trial Balance", `As at ${fmtDate(asAt.date)}`);
+      const { doc, margin, startY, finish } = await brandedReportPdfDoc("Trial Balance", `As at ${fmtDate(asAt.date)}`);
       const body: any[][] = shown.map((r) => [r.code, r.name, r.account_type, amt(r.dr), amt(r.cr)]);
       if (showPrior) body.push(["", priorLabel, "", amt(tb.priorSurplus.dr), amt(tb.priorSurplus.cr)]);
       body.push(["", "Total", "", money(tb.totalDr), money(tb.totalCr)]);
       body.push(["", balanced ? "Balanced" : `Out of balance by ${money(tb.difference)}`, "", "", ""]);
       autoTable(doc, {
-        head: [["Code", "Account", "Type", "Dr", "Cr"]], body, startY: 130,
+        head: [["Code", "Account", "Type", "Dr", "Cr"]], body, startY,
         margin: { left: margin, right: margin, bottom: 60 },
         styles: { font: "helvetica", fontSize: 9, cellPadding: 5, textColor: INK, lineColor: [220, 215, 200], lineWidth: 0.4 },
         headStyles: { fillColor: GOLD, textColor: NAVY, fontStyle: "bold" },
@@ -84,6 +85,7 @@ export default function TrialBalanceReport() {
         theme: "grid",
         columnStyles: { 0: { cellWidth: 45 }, 1: { cellWidth: 235 }, 2: { cellWidth: 65 }, 3: { cellWidth: 85, halign: "right" }, 4: { cellWidth: 85, halign: "right" } },
       });
+      finish();
       doc.save(`trial-balance-${asAt.date}.pdf`);
     } catch (e: any) {
       toast({ title: "PDF export failed", description: e?.message, variant: "destructive" });

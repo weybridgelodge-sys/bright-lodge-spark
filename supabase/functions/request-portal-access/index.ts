@@ -41,7 +41,10 @@ Deno.serve(async (req) => {
       fullName: d.fullName,
       email: d.email.toLowerCase(),
       motherLodge: d.motherLodge,
-      lodgeName: lodge.formalSenderName,
+      crestUrl: lodge.crestImageUrl || null,
+      lodgeName: lodge.lodgeName,
+      lodgeNumber: lodge.lodgeNumber,
+      provinceName: lodge.provinceName,
       submittedAt: new Date().toLocaleString("en-GB", { timeZone: "Europe/London" }),
     },
   });
