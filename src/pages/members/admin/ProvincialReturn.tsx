@@ -1,4 +1,5 @@
 import { EmailText } from "@/components/ui/email-text";
+import SendWarningsNote from "@/components/members/SendWarningsNote";
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import MembersLayout from "@/components/members/MembersLayout";
@@ -285,7 +286,7 @@ function Inner() {
                 <p><strong>Subject:</strong> {data ? lodgeTitle(data) : ""} — Provincial Installation Return {formatMasonicYear(year)}</p>
                 <p><strong>Documents:</strong> Word and PDF, built just now from the live records, sent as 30-day download links. <a href={pending?.docxUrl} download={`${fileBase(year, data?.lodgeNumber ?? "")}.docx`} className="underline">Open the Word file</a> · <a href={pending?.pdfUrl} target="_blank" rel="noopener noreferrer" className="underline">Open the PDF</a></p>
                 <p><strong>Signature dates:</strong> {data ? signatureDate(data) : "—"}. {signaturesSummary(signaturesOn && !!pending?.signed, pending?.signed)}</p>
-                {data && data.issues.length > 0 && <p className="font-semibold text-destructive">{data.issues.length} warning(s) are still showing on the page.</p>}
+                <SendWarningsNote count={data?.issues.length ?? 0} />
                 <p>This is an official document to an external body and can't be recalled once sent.</p>
               </div>
             </AlertDialogDescription>
