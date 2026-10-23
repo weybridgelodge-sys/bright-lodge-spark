@@ -1,13 +1,14 @@
 // One rule for which officer and representative lines print on the Summons.
 // A post prints only when it has a holder (member or typed non-member name).
 // Empty posts are left off the print and reported to the builder screen.
-import { POSITION_LABELS, type PositionKey } from "./officersProgression";
+import { NON_PROGRESSIVE_LABELS, POSITION_LABELS } from "./officersProgression";
 
 type OfficerLine = { label: string; member?: string | null };
 type RepLine = { role?: string | null; name?: string | null };
 
-const KEY_POST_KEYS: PositionKey[] = ["worshipful_master", "senior_warden", "junior_warden", "secretary", "treasurer"] as PositionKey[];
-export const KEY_POST_LABELS = new Set(KEY_POST_KEYS.map((k) => POSITION_LABELS[k]));
+const LABELS: Record<string, string> = { ...POSITION_LABELS, ...NON_PROGRESSIVE_LABELS };
+const KEY_POST_KEYS = ["worshipful_master", "senior_warden", "junior_warden", "secretary", "treasurer"];
+export const KEY_POST_LABELS = new Set(KEY_POST_KEYS.map((k) => LABELS[k]).filter(Boolean));
 
 const filled = (s: string | null | undefined) => !!(s ?? "").trim();
 
