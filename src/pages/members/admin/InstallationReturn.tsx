@@ -1,4 +1,5 @@
 import { EmailText } from "@/components/ui/email-text";
+import SendWarningsNote from "@/components/members/SendWarningsNote";
 import { lodgeTitle } from "@/lib/lodgeIdentity";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
