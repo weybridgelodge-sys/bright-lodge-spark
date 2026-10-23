@@ -1,5 +1,5 @@
 // Batch C pilot: Treasurer report PDF on the shared white brand header (src/lib/pdfBrand).
-// Only the Trial Balance uses this for now; other reports keep reportPdfDoc until stage 3.
+// Other Treasurer reports, minutes and agenda use reportPdfDoc (reports.ts) on the same header.
 import jsPDF from "jspdf";
 import { loadDocIdentity } from "@/lib/docIdentity";
 import { createPdfRun, drawBrandFooter, drawBrandHeader, fetchCrestUrl } from "@/lib/pdfBrand";

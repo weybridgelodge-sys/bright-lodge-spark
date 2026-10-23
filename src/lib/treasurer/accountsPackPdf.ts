@@ -79,7 +79,7 @@ export async function buildAccountsPackPdf(src: PackSource, year: number, certif
   const table = (yy: number, body: string[][], boldFrom: number, showAccountHeading = true) => {
     autoTable(doc, {
       head: [[showAccountHeading ? "Account" : "", curH, st.hasPrior ? priH : ""]], body, startY: yy,
-      margin: { left: margin, right: margin, bottom: 60 },
+      margin: { top: margin, left: margin, right: margin, bottom: 60 },
       styles: { font: "helvetica", fontSize: 9, cellPadding: 5, textColor: INK, lineColor: [220, 215, 200], lineWidth: 0.4, overflow: "linebreak" },
       headStyles: { fillColor: GOLD, textColor: NAVY, fontStyle: "bold", halign: "right" },
       alternateRowStyles: { fillColor: [250, 247, 238] },
