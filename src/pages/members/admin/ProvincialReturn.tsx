@@ -276,7 +276,7 @@ function Inner() {
         </div>
       )}
       <AlertDialog open={!!pending} onOpenChange={(o) => { if (!o && !sending) cancelSubmit(); }}>
-        <AlertDialogContent className="max-h-[90vh] overflow-y-auto">
+        <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Send the Provincial Return to Province?</AlertDialogTitle>
             <AlertDialogDescription asChild>
@@ -292,8 +292,8 @@ function Inner() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={sending}>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={(e) => { e.preventDefault(); confirmSubmit(); }} disabled={sending}>{sending ? "Sending…" : "Send to Province"}</AlertDialogAction>
+            <AlertDialogCancel className="min-h-[48px]" disabled={sending}>Cancel</AlertDialogCancel>
+            <AlertDialogAction className="min-h-[48px]" onClick={(e) => { e.preventDefault(); confirmSubmit(); }} disabled={sending}>{sending ? "Sending…" : "Send to Province"}</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
