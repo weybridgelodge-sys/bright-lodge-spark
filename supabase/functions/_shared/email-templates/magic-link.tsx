@@ -47,7 +47,7 @@ export const MagicLinkEmail = ({
     <Html lang="en" dir="ltr">
       <Head />
       <Preview>
-        Your Weybridge Lodge sign-in {showCode && !showLink ? 'code' : 'link'}
+        Your {siteName} sign-in {showCode && !showLink ? 'code' : 'link'}
       </Preview>
       <Body style={main}>
         <Container style={container}>

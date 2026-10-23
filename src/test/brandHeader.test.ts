@@ -129,6 +129,7 @@ const PILOT = [
   "supabase/functions/_shared/email-templates/signup.tsx", "supabase/functions/_shared/email-templates/invite.tsx",
   "supabase/functions/_shared/email-templates/magic-link.tsx", "supabase/functions/_shared/email-templates/recovery.tsx",
   "supabase/functions/_shared/email-templates/email-change.tsx", "supabase/functions/_shared/email-templates/reauthentication.tsx",
+  "supabase/functions/auth-email-hook/index.ts",
 ];
 
 describe("summons cover crest comes only from Unit Setup", () => {
@@ -143,8 +144,8 @@ describe("pilot files carry no typed crest or host literal", () => {
   for (const f of PILOT) it(f, () => {
     // Known exceptions: KPI visitor rows' own lodge_name field (not a host literal); sender domain (stays in code by rule); enquiry-confirmation body names the town (no Unit Setup field for it yet).
     const bad = fs.readFileSync(f, "utf8").split("\n").filter((l) => BANNED.test(l) && !/curious about Freemasonry here in Guildford\.$/.test(l.trim()) && !/^const lodge = \(v\.lodge_name \?\? ""\)\.trim\(\);$/.test(l.trim()) && !/^const (FROM_ADDRESS_DOMAIN|SENDER_DOMAIN|FROM_DOMAIN) = /.test(l.trim())
-      // Sign-in emails' inbox preview text (wording, not the header; kept unchanged by Job AP).
-      && !/^<Preview>Your Weybridge Lodge verification code<\/Preview>$/.test(l.trim()) && !/^Your Weybridge Lodge sign-in \{showCode && !showLink \? 'code' : 'link'\}$/.test(l.trim()));
+      // Sending setup in auth-email-hook (sender display name, sender/link domains, preview-only sample URL); never email wording.
+      && !/^const (FROM_NAME|ROOT_DOMAIN|SAMPLE_PROJECT_URL) = "[^"]*"$/.test(l.trim()));
     expect(bad).toEqual([]);
   });
 });
@@ -185,5 +186,13 @@ describe("crest processing", () => {
     expect(await processCrest(new Blob([]), { decode: async () => { throw new Error("bad"); }, createCanvas: () => { throw new Error(); } } as any)).toBeNull();
     const c = canvas("data:,", "data:,");
     expect(await processCrest(new Blob([]), c.deps as any)).toBeNull();
+  });
+});
+
+describe("sign-in email wording has no typed lodge name", () => {
+  const hook = fs.readFileSync("supabase/functions/auth-email-hook/index.ts", "utf8");
+  it("SITE_NAME literal is gone; FROM_NAME only feeds the sender", () => {
+    expect(hook).not.toMatch(/\bSITE_NAME\b/);
+    expect(hook.match(/FROM_NAME/g)?.length).toBe(2);
   });
 });

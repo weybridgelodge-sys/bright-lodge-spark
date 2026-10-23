@@ -9,7 +9,7 @@ import { EmailChangeEmail } from '../_shared/email-templates/email-change.tsx'
 import { ReauthenticationEmail } from '../_shared/email-templates/reauthentication.tsx'
 import { setAuthEmailBrand } from '../_shared/email-templates/_layout.tsx'
 import { loadLodgeSettings } from '../_shared/lodgeSettings.ts'
-import { createAuthBrandLookup, keepAlive } from '../_shared/authEmailBrand.ts'
+import { createAuthBrandLookup, keepAlive, siteNameFor, NEUTRAL_SITE_NAME } from '../_shared/authEmailBrand.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -18,17 +18,17 @@ const corsHeaders = {
 }
 
 // Configuration
-const SITE_NAME = "Weybridge Lodge No.6787"
+// Sender display name only (sending setup, like the sender domains). Never used in email wording.
+const FROM_NAME = "Weybridge Lodge No.6787"
 const SENDER_DOMAIN = "notify.email.weybridgelodge.org.uk"
 const ROOT_DOMAIN = "email.weybridgelodge.org.uk"
 const FROM_DOMAIN = "email.weybridgelodge.org.uk"
 const SITE_URL = `https://${ROOT_DOMAIN}`
 
-// Header/footer identity (layout only). Text-only from SITE_NAME unless Unit Setup is read in
+// Header/footer identity (layout only). Neutral text-only header unless Unit Setup is read in
 // time: render uses the cached identity, else waits for ONE shared lookup for at most 1500ms.
 // Timeout or any error keeps the text-only header; the lookup can never throw or fail a send.
-const siteNameParts = SITE_NAME.match(/^(.*?)\s*No\.\s*(\S+)$/)
-const TEXT_ONLY_BRAND = { lodgeName: siteNameParts ? siteNameParts[1] : SITE_NAME, lodgeNumber: siteNameParts ? siteNameParts[2] : '' }
+const TEXT_ONLY_BRAND = { lodgeName: NEUTRAL_SITE_NAME, lodgeNumber: '' }
 setAuthEmailBrand(TEXT_ONLY_BRAND)
 const brandLookup = createAuthBrandLookup({
   load: () => loadLodgeSettings(),
@@ -38,12 +38,15 @@ const brandLookup = createAuthBrandLookup({
       ? 'settings missing'
       : 'no lodge identity: not exactly one unit or lodge name blank',
 })
-async function applyAuthEmailBrand(): Promise<void> {
+// Returns the body-text lodge name from the same lookup (neutral wording when unavailable).
+async function applyAuthEmailBrand(): Promise<string> {
   try {
     const b = await brandLookup.get()
     setAuthEmailBrand(b ?? TEXT_ONLY_BRAND)
+    return siteNameFor(b)
   } catch {
     try { setAuthEmailBrand(TEXT_ONLY_BRAND) } catch { /* keep current header */ }
+    return NEUTRAL_SITE_NAME
   }
 }
 try { keepAlive(brandLookup.start()) } catch { /* never block boot */ }
@@ -67,32 +70,33 @@ const SAMPLE_PROJECT_URL = "https://bright-lodge-spark.lovable.app"
 const SAMPLE_EMAIL = "user@example.test"
 const SAMPLE_DATA: Record<string, object> = {
   signup: {
-    siteName: SITE_NAME,
+    siteName: NEUTRAL_SITE_NAME,
     siteUrl: SAMPLE_PROJECT_URL,
     recipient: SAMPLE_EMAIL,
     confirmationUrl: SAMPLE_PROJECT_URL,
   },
   magiclink: {
-    siteName: SITE_NAME,
+    siteName: NEUTRAL_SITE_NAME,
     confirmationUrl: SAMPLE_PROJECT_URL,
   },
   recovery: {
-    siteName: SITE_NAME,
+    siteName: NEUTRAL_SITE_NAME,
     confirmationUrl: SAMPLE_PROJECT_URL,
   },
   invite: {
-    siteName: SITE_NAME,
+    siteName: NEUTRAL_SITE_NAME,
     siteUrl: SAMPLE_PROJECT_URL,
     confirmationUrl: SAMPLE_PROJECT_URL,
   },
   email_change: {
-    siteName: SITE_NAME,
+    siteName: NEUTRAL_SITE_NAME,
     oldEmail: SAMPLE_EMAIL,
     email: SAMPLE_EMAIL,
     newEmail: SAMPLE_EMAIL,
     confirmationUrl: SAMPLE_PROJECT_URL,
   },
   reauthentication: {
+    siteName: NEUTRAL_SITE_NAME,
     token: '123456',
   },
 }
@@ -170,16 +174,16 @@ function extractClientHint(url: string | undefined): string | undefined {
 // owns only the email decisions: subjects, templates, and per-type props.
 const handler = createAuthEmailHandler({
   apiKey: Deno.env.get('LOVABLE_API_KEY')!,
-  from: `${SITE_NAME} <noreply@${FROM_DOMAIN}>`,
+  from: `${FROM_NAME} <noreply@${FROM_DOMAIN}>`,
   senderDomain: SENDER_DOMAIN,
   sendUrl: Deno.env.get('LOVABLE_SEND_URL'),
   emails: {
     signup: {
       subject: 'Confirm your email',
       render: async (data) => {
-        await applyAuthEmailBrand()
+        const siteName = await applyAuthEmailBrand()
         return React.createElement(SignupEmail, {
-          siteName: SITE_NAME,
+          siteName,
           siteUrl: SITE_URL,
           recipient: data.email,
           confirmationUrl: data.url,
@@ -189,9 +193,9 @@ const handler = createAuthEmailHandler({
     invite: {
       subject: "You've been invited",
       render: async (data) => {
-        await applyAuthEmailBrand()
+        const siteName = await applyAuthEmailBrand()
         return React.createElement(InviteEmail, {
-          siteName: SITE_NAME,
+          siteName,
           siteUrl: SITE_URL,
           confirmationUrl: data.url,
         })
@@ -200,9 +204,9 @@ const handler = createAuthEmailHandler({
     magiclink: {
       subject: 'Your login link',
       render: async (data) => {
-        await applyAuthEmailBrand()
+        const siteName = await applyAuthEmailBrand()
         return React.createElement(MagicLinkEmail, {
-          siteName: SITE_NAME,
+          siteName,
           confirmationUrl: data.url,
           token: data.token,
           client: extractClientHint(data.url),
@@ -212,9 +216,9 @@ const handler = createAuthEmailHandler({
     recovery: {
       subject: 'Reset your password',
       render: async (data) => {
-        await applyAuthEmailBrand()
+        const siteName = await applyAuthEmailBrand()
         return React.createElement(RecoveryEmail, {
-          siteName: SITE_NAME,
+          siteName,
           confirmationUrl: data.url,
         })
       },
@@ -222,9 +226,9 @@ const handler = createAuthEmailHandler({
     email_change: {
       subject: 'Confirm your new email',
       render: async (data) => {
-        await applyAuthEmailBrand()
+        const siteName = await applyAuthEmailBrand()
         return React.createElement(EmailChangeEmail, {
-          siteName: SITE_NAME,
+          siteName,
           oldEmail: data.old_email ?? '',
           email: data.email,
           newEmail: data.new_email ?? '',
@@ -235,8 +239,8 @@ const handler = createAuthEmailHandler({
     reauthentication: {
       subject: 'Your verification code',
       render: async (data) => {
-        await applyAuthEmailBrand()
-        return React.createElement(ReauthenticationEmail, { token: data.token ?? '' })
+        const siteName = await applyAuthEmailBrand()
+        return React.createElement(ReauthenticationEmail, { token: data.token ?? '', siteName })
       },
     },
   },
