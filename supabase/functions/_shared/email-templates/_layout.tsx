@@ -1,32 +1,29 @@
 /// <reference types="npm:@types/react@18.3.1" />
 
-// Shared branded layout for auth emails, matching the transactional
-// templates (crest + "Weybridge Lodge" + "No. 6787 — Province of Surrey").
+// Shared layout for auth (sign-in) emails: the same EmailBrandHeader/EmailBrandFooter as the
+// transactional emails. Identity is set once per function instance by auth-email-hook via
+// setAuthEmailBrand (Unit Setup, loaded in the background); until then, or on any lookup
+// failure, a text-only header is used. Rendering never waits for, or fails on, settings.
 import * as React from 'npm:react@18.3.1'
-import { Heading, Img, Section, Text } from 'npm:@react-email/components@0.0.22'
 import {
   BRAND,
-  LOGO_HEIGHT,
-  LOGO_URL,
-  LOGO_WIDTH,
   brandStyles,
+  type BrandIdentity,
 } from '../transactional-email-templates/_brand.ts'
+import { EmailBrandFooter, EmailBrandHeader } from '../transactional-email-templates/_brandHeader.tsx'
 
 export { BRAND, brandStyles }
 
-export const BrandHeader = () => (
-  <Section style={brandStyles.crestWrap}>
-    <Img
-      src={LOGO_URL}
-      width={LOGO_WIDTH}
-      height={LOGO_HEIGHT}
-      alt="Weybridge Lodge crest"
-      style={{ margin: '0 auto', display: 'block' }}
-    />
-    <Heading style={brandStyles.brand}>Weybridge Lodge</Heading>
-    <Text style={brandStyles.brandSub}>No. 6787 — Province of Surrey</Text>
-  </Section>
-)
+let current: BrandIdentity = {}
+export function setAuthEmailBrand(b: BrandIdentity | null | undefined) {
+  current = { ...(b ?? {}) }
+}
+export function getAuthEmailBrand(): BrandIdentity {
+  return current
+}
+
+export const BrandHeader = () => <EmailBrandHeader {...current} />
+export const BrandFooter = () => <EmailBrandFooter {...current} />
 
 export const main = brandStyles.main
 export const container = brandStyles.container

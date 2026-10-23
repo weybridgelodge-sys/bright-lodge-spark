@@ -13,12 +13,12 @@ import {
   Text,
 } from 'npm:@react-email/components@0.0.22'
 import {
+  BrandFooter,
   BrandHeader,
   codeStyle,
   codeWrap,
   container,
   footer,
-  footerBrand,
   h1,
   hr,
   main,
@@ -50,9 +50,7 @@ export const ReauthenticationEmail = ({ token }: ReauthenticationEmailProps) => 
           This code expires shortly. If you didn't request it, you can safely
           ignore this email.
         </Text>
-        <Text style={footerBrand}>
-          Weybridge Lodge No. 6787 · Guildford, Surrey
-        </Text>
+        <BrandFooter />
       </Container>
     </Body>
   </Html>

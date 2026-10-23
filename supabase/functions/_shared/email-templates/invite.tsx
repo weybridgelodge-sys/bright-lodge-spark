@@ -15,12 +15,12 @@ import {
   Text,
 } from 'npm:@react-email/components@0.0.22'
 import {
+  BrandFooter,
   BrandHeader,
   button,
   buttonWrap,
   container,
   footer,
-  footerBrand,
   h1,
   hr,
   link,
@@ -64,9 +64,7 @@ export const InviteEmail = ({
           If you weren't expecting this invitation, you can safely ignore this
           email.
         </Text>
-        <Text style={footerBrand}>
-          Weybridge Lodge No. 6787 · Guildford, Surrey
-        </Text>
+        <BrandFooter />
       </Container>
     </Body>
   </Html>

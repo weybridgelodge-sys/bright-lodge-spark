@@ -14,12 +14,12 @@ import {
   Text,
 } from 'npm:@react-email/components@0.0.22'
 import {
+  BrandFooter,
   BrandHeader,
   button,
   buttonWrap,
   container,
   footer,
-  footerBrand,
   h1,
   hr,
   main,
@@ -57,9 +57,7 @@ export const RecoveryEmail = ({
           If you didn't request a password reset, you can safely ignore this
           email — your password will not be changed.
         </Text>
-        <Text style={footerBrand}>
-          Weybridge Lodge No. 6787 · Guildford, Surrey
-        </Text>
+        <BrandFooter />
       </Container>
     </Body>
   </Html>

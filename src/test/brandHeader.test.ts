@@ -124,6 +124,11 @@ const PILOT = [
   "src/lib/development/pdf.ts", "src/lib/development/gapReportPdf.ts", "src/lib/development/summaryReportPdf.ts", "src/lib/development/activityReportPdf.ts",
   "src/lib/officersProjectionPdf.ts", "src/pages/members/OfficersTracker.tsx",
   "src/lib/summonsCover.tsx",
+  "supabase/functions/_shared/pdfLibBrand.ts", "supabase/functions/_shared/newsletterArchivePdf.ts",
+  "supabase/functions/_shared/email-templates/_layout.tsx",
+  "supabase/functions/_shared/email-templates/signup.tsx", "supabase/functions/_shared/email-templates/invite.tsx",
+  "supabase/functions/_shared/email-templates/magic-link.tsx", "supabase/functions/_shared/email-templates/recovery.tsx",
+  "supabase/functions/_shared/email-templates/email-change.tsx", "supabase/functions/_shared/email-templates/reauthentication.tsx",
 ];
 
 describe("summons cover crest comes only from Unit Setup", () => {
@@ -137,7 +142,9 @@ const BANNED = /LOGO_URL|LOGO_WIDTH|LOGO_HEIGHT|crestWrap|LODGE_NAME|@\/assets\/
 describe("pilot files carry no typed crest or host literal", () => {
   for (const f of PILOT) it(f, () => {
     // Known exceptions: KPI visitor rows' own lodge_name field (not a host literal); sender domain (stays in code by rule); enquiry-confirmation body names the town (no Unit Setup field for it yet).
-    const bad = fs.readFileSync(f, "utf8").split("\n").filter((l) => BANNED.test(l) && !/curious about Freemasonry here in Guildford\.$/.test(l.trim()) && !/^const lodge = \(v\.lodge_name \?\? ""\)\.trim\(\);$/.test(l.trim()) && !/^const (FROM_ADDRESS_DOMAIN|SENDER_DOMAIN|FROM_DOMAIN) = /.test(l.trim()));
+    const bad = fs.readFileSync(f, "utf8").split("\n").filter((l) => BANNED.test(l) && !/curious about Freemasonry here in Guildford\.$/.test(l.trim()) && !/^const lodge = \(v\.lodge_name \?\? ""\)\.trim\(\);$/.test(l.trim()) && !/^const (FROM_ADDRESS_DOMAIN|SENDER_DOMAIN|FROM_DOMAIN) = /.test(l.trim())
+      // Sign-in emails' inbox preview text (wording, not the header; kept unchanged by Job AP).
+      && !/^<Preview>Your Weybridge Lodge verification code<\/Preview>$/.test(l.trim()) && !/^Your Weybridge Lodge sign-in \{showCode && !showLink \? 'code' : 'link'\}$/.test(l.trim()));
     expect(bad).toEqual([]);
   });
 });

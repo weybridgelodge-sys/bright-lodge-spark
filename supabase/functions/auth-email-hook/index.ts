@@ -7,6 +7,8 @@ import { MagicLinkEmail } from '../_shared/email-templates/magic-link.tsx'
 import { RecoveryEmail } from '../_shared/email-templates/recovery.tsx'
 import { EmailChangeEmail } from '../_shared/email-templates/email-change.tsx'
 import { ReauthenticationEmail } from '../_shared/email-templates/reauthentication.tsx'
+import { setAuthEmailBrand } from '../_shared/email-templates/_layout.tsx'
+import { loadLodgeSettings } from '../_shared/lodgeSettings.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -20,6 +22,27 @@ const SENDER_DOMAIN = "notify.email.weybridgelodge.org.uk"
 const ROOT_DOMAIN = "email.weybridgelodge.org.uk"
 const FROM_DOMAIN = "email.weybridgelodge.org.uk"
 const SITE_URL = `https://${ROOT_DOMAIN}`
+
+// Header/footer identity (layout only). Starts text-only from SITE_NAME; Unit Setup is loaded
+// in the background and never awaited, so a slow or failed lookup cannot block or delay a send.
+const siteNameParts = SITE_NAME.match(/^(.*?)\s*No\.\s*(\S+)$/)
+setAuthEmailBrand({ lodgeName: siteNameParts ? siteNameParts[1] : SITE_NAME, lodgeNumber: siteNameParts ? siteNameParts[2] : '' })
+let brandLoadedAt = 0
+let brandLoading = false
+function refreshAuthEmailBrand(): void {
+  if (brandLoading || Date.now() - brandLoadedAt < 5 * 60_000) return
+  brandLoading = true
+  loadLodgeSettings()
+    .then((l) => {
+      if (l?.lodgeName) {
+        setAuthEmailBrand({ crestUrl: l.crestImageUrl || null, lodgeName: l.lodgeName, lodgeNumber: l.lodgeNumber, provinceName: l.provinceName })
+        brandLoadedAt = Date.now()
+      }
+    })
+    .catch(() => { /* keep the text-only header */ })
+    .finally(() => { brandLoading = false })
+}
+try { refreshAuthEmailBrand() } catch { /* never block boot */ }
 
 // Template mapping for preview mode
 const EMAIL_TEMPLATES: Record<string, React.ComponentType<any>> = {
@@ -216,5 +239,6 @@ Deno.serve(async (req) => {
     return handlePreview(req)
   }
 
+  try { refreshAuthEmailBrand() } catch { /* never block a send */ }
   return handler(req)
 })
