@@ -1,8 +1,7 @@
 import { loadDocIdentity, docTitle, docSubtitle, docFileName, docGroupName } from "@/lib/docIdentity";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import { assetUrl } from "@/lib/assetUrl";
-import logoAsset from "@/assets/weybridge-logo-white.png.asset.json";
+import { drawBrandFooter, drawBrandHeader, drawBrandSectionRule, HEADER_START_Y, loadPdfBrand, type PdfBrandDeps } from "@/lib/pdfBrand";
 import { pieceRisk, type SkillsMatrix, displayMember, piecePeople } from "./skillsMatrix";
 
 const NAVY: [number, number, number] = [27, 42, 74];
@@ -10,40 +9,25 @@ const GOLD: [number, number, number] = [201, 164, 50];
 const INK: [number, number, number] = [30, 30, 35];
 const MUTED: [number, number, number] = [110, 110, 120];
 
-export async function buildGapReportPdf(matrix: SkillsMatrix) {
+export async function buildGapReportPdf(matrix: SkillsMatrix, deps: PdfBrandDeps = {}) {
   const doc = new jsPDF({ unit: "pt", format: "a4" });
-  const LT = docTitle(await loadDocIdentity());
+  const { identity, crest } = await loadPdfBrand(deps);
+  const LT = docTitle(identity);
   const pageW = doc.internal.pageSize.getWidth();
   const pageH = doc.internal.pageSize.getHeight();
   const margin = 40;
 
-  let logoData: string | null = null;
-  try {
-    const res = await fetch(assetUrl(logoAsset));
-    const blob = await res.blob();
-    logoData = await new Promise<string>((resolve) => {
-      const r = new FileReader();
-      r.onload = () => resolve(r.result as string);
-      r.readAsDataURL(blob);
-    });
-  } catch { /* ignore */ }
 
-  doc.setFillColor(...NAVY); doc.rect(0, 0, pageW, 110, "F");
-  doc.setFillColor(...GOLD); doc.rect(0, 110, pageW, 3, "F");
-  if (logoData) { try { doc.addImage(logoData, "PNG", margin, 22, 66, 66); } catch {} }
-  doc.setTextColor(255, 255, 255); doc.setFont("times", "bold"); doc.setFontSize(20);
-  doc.text(LT, margin + 80, 50);
-  doc.setFont("times", "italic"); doc.setFontSize(13); doc.setTextColor(...GOLD);
-  doc.text("Lodge Skills Gap Report", margin + 80, 72);
-  doc.setFont("helvetica", "normal"); doc.setFontSize(9); doc.setTextColor(230, 230, 235);
-  doc.text(`Generated: ${new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}`, pageW - margin, 90, { align: "right" });
+  drawBrandHeader(doc, {
+    identity, crest, margin,
+    title: "Lodge Skills Gap Report",
+    rightLine: `Generated: ${new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}`,
+  });
 
-  let y = 140;
+  let y = HEADER_START_Y;
   const section = (title: string, count: number, tone: [number, number, number]) => {
     if (y > pageH - 100) { doc.addPage(); y = margin; }
-    doc.setFillColor(...NAVY); doc.rect(margin, y, pageW - margin * 2, 22, "F");
-    doc.setTextColor(...GOLD); doc.setFont("times", "bold"); doc.setFontSize(11);
-    doc.text(`${title} (${count})`, margin + 10, y + 15);
+    drawBrandSectionRule(doc, y, `${title} (${count})`, margin);
     doc.setFillColor(...tone); doc.rect(pageW - margin - 10, y + 7, 8, 8, "F");
     y += 32;
   };
@@ -93,16 +77,6 @@ export async function buildGapReportPdf(matrix: SkillsMatrix) {
     y = (doc as any).lastAutoTable.finalY + 18;
   }
 
-  const pageCount = (doc as any).internal.getNumberOfPages();
-  for (let i = 1; i <= pageCount; i++) {
-    doc.setPage(i);
-    doc.setDrawColor(...GOLD); doc.setLineWidth(0.6);
-    doc.line(margin, pageH - 36, pageW - margin, pageH - 36);
-    doc.setFont("times", "italic"); doc.setFontSize(8); doc.setTextColor(...MUTED);
-    doc.text("Confidential — Director of Ceremonies / Worshipful Master only.", margin, pageH - 22);
-    doc.text(`Page ${i} of ${pageCount}`, pageW - margin, pageH - 22, { align: "right" });
-    doc.setTextColor(...NAVY); doc.setFont("times", "bold");
-    doc.text(LT, pageW / 2, pageH - 22, { align: "center" });
-  }
+  drawBrandFooter(doc, identity, margin, { note: "Confidential — Director of Ceremonies / Worshipful Master only." });
   return doc;
 }
