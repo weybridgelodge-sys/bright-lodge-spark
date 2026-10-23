@@ -14,12 +14,12 @@ import {
   Text,
 } from 'npm:@react-email/components@0.0.22'
 import {
+  BrandFooter,
   BrandHeader,
   button,
   buttonWrap,
   container,
   footer,
-  footerBrand,
   h1,
   hr,
   main,
@@ -68,9 +68,7 @@ export const EmailChangeEmail = ({
           If you didn't request this change, please contact the Lodge Secretary
           and secure your account immediately.
         </Text>
-        <Text style={footerBrand}>
-          Weybridge Lodge No. 6787 · Guildford, Surrey
-        </Text>
+        <BrandFooter />
       </Container>
     </Body>
   </Html>
