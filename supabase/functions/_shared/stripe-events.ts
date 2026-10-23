@@ -152,8 +152,9 @@ export async function sendEventBookingEmails(sb: any, bookingId: string, stage: 
     balanceDue: (b.balance_due_pence ?? 0) > 0 && deposit ? gbp(b.balance_due_pence) : null,
     balanceDueDate: b.balance_due_date ? fmtDate(b.balance_due_date) : null,
     balanceUrl: link,
-    eventUrl: `${SITE}/events/${ev.slug}`,
-    adminUrl: `${SITE}/members/admin/treasurer?tab=event-accounts&event=${ev.id}&booking=${b.id}`,
+    crestUrl: lodge.crestImageUrl || null, lodgeName: lodge.lodgeName, lodgeNumber: lodge.lodgeNumber, provinceName: lodge.provinceName,
+    eventUrl: `${lodge.siteUrl}/events/${ev.slug}`,
+    adminUrl: `${lodge.siteUrl}/members/admin/treasurer?tab=event-accounts&event=${ev.id}&booking=${b.id}`,
   };
   let ok = true;
   const suffix = opts.idempotencySuffix ? `-${opts.idempotencySuffix}` : "";
@@ -162,7 +163,7 @@ export async function sendEventBookingEmails(sb: any, bookingId: string, stage: 
       templateName: "event-booking-customer",
       recipientEmail: b.contact_email,
       idempotencyKey: `event-booking-customer-${b.id}-${stage}${opts.reminderKind ? `-${opts.reminderKind}` : ""}${suffix}`,
-      replyTo: (await loadLodgeSettings()).secretaryEmail,
+      replyTo: lodge.secretaryEmail,
       templateData: data,
     });
     if (r.error) { ok = false; console.error("event customer email failed", r.error); }
