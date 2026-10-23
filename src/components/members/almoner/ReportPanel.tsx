@@ -15,9 +15,7 @@ import autoTable from "jspdf-autotable";
 import { saveBlob, saveJsPdf } from "@/lib/nativeDownload";
 import { pastMasterTerms } from "@/lib/pastMastersRoll";
 import { upcomingManualDate, dateKey } from "@/lib/lifeEvents";
-import { assetUrl } from "@/lib/assetUrl";
-import logoAsset from "@/assets/weybridge-logo-navy.png.asset.json";
-const logoUrl = assetUrl(logoAsset);
+import { buildAlmonerReportPdf } from "@/lib/almonerReportPdf";
 
 type Member = {
   id: string; first_name: string | null; last_name: string | null;
@@ -358,152 +356,12 @@ export default function ReportPanel({ members }: { members: Member[] }) {
     await saveBlob(blob, `almoner-report-${to}.md`);
   };
 
-  const buildPdf = async (fromD: string, toD: string, adviceText: string, d: SnapshotData) => {
-    const doc = new jsPDF({ unit: "pt", format: "a4" });
-    const pageW = doc.internal.pageSize.getWidth();
-    const pageH = doc.internal.pageSize.getHeight();
-    const margin = 40;
-    const LT = docTitle(await loadDocIdentity());
-
-    let logoData: string | null = null;
-    try {
-      const res = await fetch(logoUrl);
-      const blob = await res.blob();
-      logoData = await new Promise<string>((resolve) => {
-        const r = new FileReader();
-        r.onload = () => resolve(r.result as string);
-        r.readAsDataURL(blob);
-      });
-    } catch { /* ignore */ }
-
-    doc.setFillColor(...NAVY);
-    doc.rect(0, 0, pageW, 110, "F");
-    doc.setFillColor(...GOLD);
-    doc.rect(0, 110, pageW, 3, "F");
-
-    if (logoData) {
-      try { doc.addImage(logoData, "PNG", margin, 22, 66, 66); } catch { /* ignore */ }
-    }
-    doc.setTextColor(255, 255, 255);
-    doc.setFont("times", "bold");
-    doc.setFontSize(20);
-    doc.text(LT, margin + 80, 50);
-    doc.setFont("times", "italic");
-    doc.setFontSize(13);
-    doc.setTextColor(...GOLD);
-    doc.text("Almoner's Report", margin + 80, 72);
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(9);
-    doc.setTextColor(230, 230, 235);
-    doc.text(`Period: ${fmt(fromD)} — ${fmt(toD)}`, margin + 80, 90);
-    doc.text(`Generated: ${fmt(new Date().toISOString())}`, pageW - margin, 90, { align: "right" });
-
-    let y = 140;
-    const section = (title: string, count?: number) => {
-      if (y > pageH - 100) { doc.addPage(); y = margin; }
-      doc.setFillColor(...NAVY);
-      doc.rect(margin, y, pageW - margin * 2, 22, "F");
-      doc.setTextColor(...GOLD);
-      doc.setFont("times", "bold");
-      doc.setFontSize(11);
-      doc.text(`${title}${count != null ? `  (${count})` : ""}`, margin + 10, y + 15);
-      y += 32;
-    };
-    const empty = (msg: string) => {
-      doc.setTextColor(...MUTED);
-      doc.setFont("helvetica", "italic");
-      doc.setFontSize(9);
-      doc.text(msg, margin + 4, y);
-      y += 18;
-    };
-    const table = (head: string[][], body: any[][]) => {
-      autoTable(doc, {
-        head, body, startY: y,
-        margin: { left: margin, right: margin },
-        styles: { font: "helvetica", fontSize: 9, cellPadding: 5, textColor: INK, lineColor: [220, 215, 200], lineWidth: 0.4 },
-        headStyles: { fillColor: GOLD, textColor: NAVY, fontStyle: "bold" },
-        alternateRowStyles: { fillColor: [250, 247, 238] },
-        theme: "grid",
-      });
-      y = (doc as any).lastAutoTable.finalY + 18;
-    };
-
-    section("1. Members of Concern", d.concern.length);
-    if (d.concern.length === 0) empty("No members currently flagged amber or red.");
-    else table([["Member", "Status", "Notes"]],
-      d.concern.map((s: any) => [memberName(memberMap.get(s.member_id)), s.status.toUpperCase(), s.notes || ""]));
-
-    section("2. Welfare Contacts", d.logRows.length);
-    if (d.logRows.length === 0) empty("No logged contacts in this period.");
-    else table([["Date", "Member", "Type / Nature", "Notes"]],
-      d.logRows.map((l: any) => [fmt(l.contact_date), memberName(memberMap.get(l.member_id)), `${l.contact_type} / ${l.contact_nature}`, l.notes || ""]));
-
-    section("3. Correspondence", d.corrRows.length);
-    if (d.corrRows.length === 0) empty("No correspondence logged.");
-    else table([["Date", "Dir.", "Member", "Method", "Subject"]],
-      d.corrRows.map((c: any) => [
-        fmt(c.correspondence_date),
-        c.direction === "outgoing" ? "Out" : "In",
-        c.member_id ? memberName(memberMap.get(c.member_id)) : "general",
-        c.method, c.subject,
-      ]));
-
-    section("4. Active MCF / Provincial Referrals", d.activeRefs.length);
-    if (d.activeRefs.length === 0) empty("No active referrals.");
-    else table([["Member", "Type", "Status", "Referred", "Summary"]],
-      d.activeRefs.map((r: any) => [memberName(memberMap.get(r.member_id)), r.referral_type, r.status, fmt(r.referral_date), r.summary || ""]));
-
-    section("5. Known Absences", d.absRows.length);
-    if (d.absRows.length === 0) empty("No absences recorded for this period.");
-    else table([["Member", "Reason", "From", "To", "Notes"]],
-      d.absRows.map((a: any) => [memberName(memberMap.get(a.member_id)), a.reason, fmt(a.period_start), fmt(a.period_end), a.notes || ""]));
-
-    const lifeRows = [
-      ...sortedLifeRows(d).map((e) => [e.date, e.member, e.type, e.detail]),
-    ];
-    section("6. Life Events — next 3 months", lifeRows.length);
-    if (lifeRows.length === 0) empty("Nothing in the next 3 months.");
-    else table([["Date", "Member", "Event", "Detail"]], lifeRows);
-
-    const wl = d.widows ?? [];
-    if (wl.length) {
-      section("7. Widows & Dependants", wl.length);
-      table([["Widow", "Update"]], wl.map((w) => [stripEmoji(w.name), stripEmoji(w.text)]));
-    }
-
-    const cleanAdvice = stripEmoji(adviceText).trim();
-    if (cleanAdvice) {
-      section(`${wl.length ? 8 : 7}. Almoner's Advice & Notes`);
-      doc.setTextColor(...INK);
-      doc.setFont("helvetica", "normal");
-      doc.setFontSize(10);
-      const text = doc.splitTextToSize(cleanAdvice, pageW - margin * 2 - 8);
-      for (const line of text) {
-        if (y > pageH - margin - 40) { doc.addPage(); y = margin; }
-        doc.text(line, margin + 4, y);
-        y += 14;
-      }
-      y += 8;
-    }
-
-    const pageCount = (doc as any).internal.getNumberOfPages();
-    for (let i = 1; i <= pageCount; i++) {
-      doc.setPage(i);
-      doc.setDrawColor(...GOLD);
-      doc.setLineWidth(0.6);
-      doc.line(margin, pageH - 36, pageW - margin, pageH - 36);
-      doc.setFont("times", "italic");
-      doc.setFontSize(8);
-      doc.setTextColor(...MUTED);
-      doc.text("Confidential — for use by the Almoner and Worshipful Master only.", margin, pageH - 22);
-      doc.text(`Page ${i} of ${pageCount}`, pageW - margin, pageH - 22, { align: "right" });
-      doc.setTextColor(...NAVY);
-      doc.setFont("times", "bold");
-      doc.text(LT, pageW / 2, pageH - 22, { align: "center" });
-    }
-
-    return doc;
-  };
+  const buildPdf = (fromD: string, toD: string, adviceText: string, d: SnapshotData) =>
+    buildAlmonerReportPdf({
+      fromD, toD, adviceText, d, fmt, stripEmoji,
+      nameOf: (id) => memberName(id ? memberMap.get(id) : undefined),
+      lifeRows: sortedLifeRows(d),
+    });
 
   const downloadPdf = async () => {
     if (!data) return;
