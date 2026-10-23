@@ -1,4 +1,3 @@
-// @vitest-environment node
 // Job AM: summons front cover on the shared brand look. Crest from Unit Setup only;
 // failure omits the image and the two-page booklet still builds.
 import { describe, it, expect, vi } from "vitest";
@@ -35,7 +34,7 @@ async function build(crest: { dataUrl: string; format: "PNG" } | null, id = iden
   const blob = await generateSummonsBlob({ template, officers: [], members: [], summons, brandDeps: { identity: id, crestUrl: "https://x/c.png", run } });
   const urls = fetchSpy.mock.calls.map((c) => String(c[0]));
   fetchSpy.mockRestore();
-  const buf = Buffer.from(await blob.arrayBuffer());
+  const buf = Buffer.from(await new Promise<ArrayBuffer>((res, rej) => { const fr = new FileReader(); fr.onload = () => res(fr.result as ArrayBuffer); fr.onerror = rej; fr.readAsArrayBuffer(blob); }));
   const raw = buf.toString("latin1");
   let text = raw;
   for (const m of raw.matchAll(/stream\r?\n([\s\S]*?)endstream/g)) {
