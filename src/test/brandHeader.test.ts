@@ -113,6 +113,7 @@ const PILOT = [
   "src/lib/newsletterBrand.ts",
   "src/pages/members/admin/NewsletterHub.tsx",
   "src/lib/pdfBrand.ts", "src/lib/treasurer/brandedReportDoc.ts", "src/components/members/treasurer/TrialBalanceReport.tsx",
+  "src/lib/kpiExports.ts",
 ];
 const BANNED = /LOGO_URL|LOGO_WIDTH|LOGO_HEIGHT|crestWrap|LODGE_NAME|@\/assets\/|\.asset\.json|lovable\.app|__l5e|weybridge|6787|Province of Surrey|Guildford|Consecrated 1949|\.org\.uk/i;
 describe("pilot files carry no typed crest or host literal", () => {
