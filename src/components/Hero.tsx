@@ -42,7 +42,7 @@ const Hero = () => {
         </div>
 
         <div className="flex items-center justify-between gap-8">
-          <div className="max-w-2xl hero-rise-in">
+          <div className="max-w-2xl">
             <div className="h-0.5 w-20 bg-gold mb-8 hero-rule" aria-hidden="true" />
             {/* SEO: the h1 now leads with the primary target phrase
                 ("Freemasons in Guildford"), with the original warm hook line
@@ -76,6 +76,9 @@ const Hero = () => {
             </div>
           </div>
 
+          {/* Desktop-only crest: phones get an empty placeholder source so the file is never downloaded. */}
+          <picture className="hidden md:block shrink-0">
+            <source media="(max-width: 767px)" srcSet="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" />
           <img
             src={logo}
             alt="Weybridge Lodge No. 6787 crest — Freemasons Lodge in Guildford, Surrey"
@@ -85,6 +88,7 @@ const Hero = () => {
             className="hidden md:block w-[250px] h-[250px] object-contain shrink-0 brightness-0 invert hero-fade-in"
             style={{ animationDelay: "0.5s" }}
           />
+          </picture>
         </div>
       </div>
 

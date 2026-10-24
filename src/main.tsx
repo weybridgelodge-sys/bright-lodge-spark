@@ -1,3 +1,6 @@
+import { fetchUnitProfileRow } from "./lib/unitProfileFetch";
+// Start the public lodge-details request before React mounts (shared by useUnitProfile).
+void fetchUnitProfileRow();
 import { createRoot } from "react-dom/client";
 import { HelmetProvider } from "react-helmet-async";
 import App from "./App.tsx";
