@@ -17,7 +17,7 @@ const seeded = imageDefaultsFrom([{ key: "summons_cover_images", value: { left_u
 
 describe("summons cover images from Unit Setup", () => {
   it("award images resolve exactly as before for the seeded values", () => {
-    const before = JSON.parse(readFileSync(new URL("./__fixtures__/summonsCoverBefore.json", import.meta.url), "utf8"));
+    const before = JSON.parse(readFileSync(`${process.cwd()}/src/test/__fixtures__/summonsCoverBefore.json`, "utf8"));
     const after = rows.map((r) => normaliseTemplateAssets(r as any, seeded));
     after.forEach((a, i) => {
       expect(a.cover_left_image_url).toBe(before[i].cover_left_image_url);

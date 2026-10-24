@@ -3,7 +3,7 @@ import { readFileSync } from "fs";
 import { EMAIL_DOMAINS } from "../../supabase/functions/_shared/emailDomains";
 import { siteUrlFor, NEUTRAL_SAMPLE_URL } from "../../supabase/functions/_shared/authEmailBrand";
 
-const read = (p: string) => readFileSync(new URL(`../../${p}`, import.meta.url), "utf8");
+const read = (p: string) => readFileSync(`${process.cwd()}/${p}`, "utf8");
 
 describe("deployment email domains (Job BB)", () => {
   it("keep today's verified values", () => {
