@@ -56,3 +56,32 @@ describe("hero text", () => {
     expect(block).not.toMatch(/hero-rise-in|hero-fade-in|opacity-0/);
   });
 });
+
+describe("non-blocking stylesheet", () => {
+  it("rewrites Vite's entry stylesheet to preload + onload swap with a noscript fallback", async () => {
+    const { nonBlockingCss } = await import("../../vite-plugin-non-blocking-css");
+    const out = nonBlockingCss().transformIndexHtml.handler('<link rel="stylesheet" crossorigin href="/assets/index-abc.css">');
+    expect(out).toContain('rel="preload" as="style"');
+    expect(out).toContain("this.rel='stylesheet'");
+    expect(out).toContain('<noscript><link rel="stylesheet" crossorigin href="/assets/index-abc.css"></noscript>');
+  });
+  it("app mount waits for the sheet but never longer than the timeout", async () => {
+    const { appCssReady } = await import("@/lib/appCssReady");
+    const l = document.createElement("link"); l.rel = "preload"; l.setAttribute("data-app-css", ""); document.head.appendChild(l);
+    let done = false; void appCssReady(50).then(() => { done = true; });
+    await new Promise((r) => setTimeout(r, 10)); expect(done).toBe(false);
+    await new Promise((r) => setTimeout(r, 80)); expect(done).toBe(true);
+    l.remove();
+  });
+});
+
+describe("hero paragraph matches the static first paint", () => {
+  it("index.html skeleton paragraph has the same text as the Hero paragraph", () => {
+    const norm = (t: string) => t.replace(/\s+/g, " ").trim();
+    const html = readFileSync("index.html", "utf8");
+    const skel = norm(html.match(/<p class="skeleton-lede">([\s\S]*?)<\/p>/)![1]);
+    const hero = readFileSync("src/components/Hero.tsx", "utf8");
+    const p = norm(hero.match(/font-light leading-relaxed[^>]*>([\s\S]*?)<\/p>/)![1]);
+    expect(skel).toBe(p);
+  });
+});
