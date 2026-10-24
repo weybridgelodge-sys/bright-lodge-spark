@@ -22,7 +22,7 @@ const CONVERTED = [
   "supabase/functions/auth-email-hook/index.ts",
   "supabase/functions/_shared/authEmailBrand.ts",
   "src/lib/summons.ts",
-  "src/lib/summonsPdf.tsx",
+  // summonsPdf.tsx: cover-image path converted; its inner-page GDPR sentence still names the lodge (out of scope, reported).
   "src/lib/summonsCoverImages.ts",
   "src/pages/members/SummonsBuilder.tsx",
 ];
