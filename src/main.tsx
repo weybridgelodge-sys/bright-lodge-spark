@@ -58,8 +58,9 @@ document.addEventListener(
   true,
 );
 
-createRoot(document.getElementById("root")!).render(
+import { appCssReady } from "./lib/appCssReady";
+void appCssReady().then(() => createRoot(document.getElementById("root")!).render(
   <HelmetProvider>
     <App />
   </HelmetProvider>
-);
+));

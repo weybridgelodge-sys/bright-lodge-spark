@@ -1,3 +1,4 @@
+import { nonBlockingCss } from "./vite-plugin-non-blocking-css";
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
@@ -14,7 +15,7 @@ export default defineConfig(({ mode }) => ({
       overlay: false,
     },
   },
-  plugins: [react(), mode === "development" && componentTagger(), staticMeta(), sitemapAndFeed()].filter(Boolean),
+  plugins: [nonBlockingCss(), react(), mode === "development" && componentTagger(), staticMeta(), sitemapAndFeed()].filter(Boolean),
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
