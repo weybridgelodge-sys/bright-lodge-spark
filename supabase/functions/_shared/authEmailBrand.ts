@@ -1,8 +1,8 @@
 // Job AS-1: Unit Setup identity for sign-in email headers. One shared lookup, a 5-minute
 // cache, and a HARD time limit at render time. Never throws, never rejects: on timeout,
 // error or missing identity the caller keeps the text-only header.
-export type AuthBrand = { crestUrl: string | null; lodgeName: string; lodgeNumber: string; provinceName: string; /** Unit Setup formal sender name as saved ("" = derive). */ senderName?: string };
-type Settings = { lodgeName?: string; lodgeNumber?: string; provinceName?: string; crestImageUrl?: string; configuredFormalSenderName?: string } | null | undefined;
+export type AuthBrand = { crestUrl: string | null; lodgeName: string; lodgeNumber: string; provinceName: string; /** Unit Setup formal sender name as saved ("" = derive). */ senderName?: string; /** Unit Setup site_url as saved ("" = not set). */ siteUrl?: string };
+type Settings = { lodgeName?: string; lodgeNumber?: string; provinceName?: string; crestImageUrl?: string; configuredFormalSenderName?: string; configuredSiteUrl?: string } | null | undefined;
 
 export function createAuthBrandLookup(opts: {
   load: () => Promise<Settings>;
@@ -26,7 +26,7 @@ export function createAuthBrandLookup(opts: {
     try {
       p = Promise.resolve(opts.load()).then((l) => {
         if (l?.lodgeName) {
-          const value: AuthBrand = { crestUrl: l.crestImageUrl || null, lodgeName: l.lodgeName, lodgeNumber: l.lodgeNumber ?? "", provinceName: l.provinceName ?? "", senderName: (l.configuredFormalSenderName ?? "").trim() };
+          const value: AuthBrand = { crestUrl: l.crestImageUrl || null, lodgeName: l.lodgeName, lodgeNumber: l.lodgeNumber ?? "", provinceName: l.provinceName ?? "", senderName: (l.configuredFormalSenderName ?? "").trim(), siteUrl: (l.configuredSiteUrl ?? "").trim() };
           cached = { at: now(), value };
           return value;
         }
@@ -88,4 +88,12 @@ export function senderDisplayName(b: { senderName?: string; lodgeName?: string; 
   const raw = (b?.senderName ?? "").trim() || siteNameFor(b);
   const safe = raw.replace(/[\r\n<>"\\]/g, " ").replace(/\s+/g, " ").trim();
   return safe || NEUTRAL_SITE_NAME;
+}
+
+/** Neutral placeholder for preview samples when Unit Setup has no site_url (RFC 2606, never a lodge host). */
+export const NEUTRAL_SAMPLE_URL = "https://example.com";
+/** Unit Setup site_url (https only), else the given fallback. */
+export function siteUrlFor(b: { siteUrl?: string } | null | undefined, fallback: string): string {
+  const u = (b?.siteUrl ?? "").trim().replace(/\/+$/, "");
+  return /^https:\/\/\S+$/.test(u) ? u : fallback;
 }

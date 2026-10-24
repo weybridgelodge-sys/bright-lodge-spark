@@ -2,7 +2,7 @@
 // Records every table (head/body/foot) and every body text line from fixed sample data,
 // with the header/footer lines (lodge identity, report title line, period line, generated date,
 // page numbers) removed, and compares with the snapshot taken from the pre-conversion code.
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeAll, afterAll } from "vitest";
 import fs from "fs";
 
 const rec = vi.hoisted(() => ({ items: [] as string[], inTable: 0 }));
@@ -38,6 +38,10 @@ vi.mock("jspdf-autotable", async (orig) => {
 import { buildAccountsPackPdf } from "@/lib/treasurer/accountsPackPdf";
 import { buildMinutesPdf, buildAgendaPdf } from "@/pages/members/admin/MeetingMinutes";
 import { buildPropertyRegisterPdf } from "@/components/members/treasurer/PropertyRegisterTab";
+
+// The snapshot holds a "generated <date>" line: freeze the clock to the snapshot day (23 Oct 2026, noon UTC).
+beforeAll(() => { vi.useFakeTimers({ toFake: ["Date"] }); vi.setSystemTime(new Date("2026-10-23T12:00:00Z")); });
+afterAll(() => { vi.useRealTimers(); });
 import { reportPdfDoc, reportSection, reportTable } from "@/lib/treasurer/reports";
 
 const HEADERISH = [/^T:Example Lodge( No\. 1234)?$/, /^T:No\. 1234/, /^T:Province of Testshire$/, /^T:Generated:? /, /^T:Page \d+ of \d+$/];

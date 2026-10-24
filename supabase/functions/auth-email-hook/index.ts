@@ -9,7 +9,8 @@ import { EmailChangeEmail } from '../_shared/email-templates/email-change.tsx'
 import { ReauthenticationEmail } from '../_shared/email-templates/reauthentication.tsx'
 import { setAuthEmailBrand } from '../_shared/email-templates/_layout.tsx'
 import { loadLodgeSettings } from '../_shared/lodgeSettings.ts'
-import { createAuthBrandLookup, keepAlive, siteNameFor, senderDisplayName, NEUTRAL_SITE_NAME } from '../_shared/authEmailBrand.ts'
+import { createAuthBrandLookup, keepAlive, siteNameFor, senderDisplayName, siteUrlFor, NEUTRAL_SITE_NAME, NEUTRAL_SAMPLE_URL } from '../_shared/authEmailBrand.ts'
+import { EMAIL_DOMAINS } from '../_shared/emailDomains.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -17,11 +18,14 @@ const corsHeaders = {
     'authorization, x-client-info, apikey, content-type, x-lovable-signature, x-lovable-timestamp, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 }
 
-// Configuration
-const SENDER_DOMAIN = "notify.email.weybridgelodge.org.uk"
-const ROOT_DOMAIN = "email.weybridgelodge.org.uk"
-const FROM_DOMAIN = "email.weybridgelodge.org.uk"
-const SITE_URL = `https://${ROOT_DOMAIN}`
+// Configuration: deployment-level domains (verified email DNS), see _shared/emailDomains.ts.
+const SENDER_DOMAIN = EMAIL_DOMAINS.senderDomain
+const FROM_DOMAIN = EMAIL_DOMAINS.fromDomain
+// Default site link = Unit Setup site_url; previous root-domain link only if Unit Setup is unavailable.
+const LAST_RESORT_SITE_URL = `https://${EMAIL_DOMAINS.rootDomain}`
+async function currentSiteUrl(fallback: string): Promise<string> {
+  try { return siteUrlFor(await brandLookup.get(), fallback) } catch { return fallback }
+}
 
 // Header/footer identity (layout only). Neutral text-only header unless Unit Setup is read in
 // time: render uses the cached identity, else waits for ONE shared lookup for at most 1500ms.
@@ -60,13 +64,12 @@ const EMAIL_TEMPLATES: Record<string, React.ComponentType<any>> = {
 }
 
 // Sample data for preview mode ONLY (not used in actual email sending).
-// URLs are baked in at scaffold time from the project's real data.
+// Sample URL = Unit Setup site_url at preview time, else a neutral placeholder.
 // The sample email uses a fixed placeholder (RFC 6761 .test TLD) so the Go backend
 // can always find-and-replace it with the actual recipient when sending test emails,
 // even if the project's domain has changed since the template was scaffolded.
-const SAMPLE_PROJECT_URL = "https://bright-lodge-spark.lovable.app"
 const SAMPLE_EMAIL = "user@example.test"
-const SAMPLE_DATA: Record<string, object> = {
+const sampleData = (SAMPLE_PROJECT_URL: string): Record<string, object> => ({
   signup: {
     siteName: NEUTRAL_SITE_NAME,
     siteUrl: SAMPLE_PROJECT_URL,
@@ -97,7 +100,7 @@ const SAMPLE_DATA: Record<string, object> = {
     siteName: NEUTRAL_SITE_NAME,
     token: '123456',
   },
-}
+})
 
 // Preview endpoint handler - returns rendered HTML without sending email
 async function handlePreview(req: Request): Promise<Response> {
@@ -140,8 +143,8 @@ async function handlePreview(req: Request): Promise<Response> {
     })
   }
 
-  const sampleData = SAMPLE_DATA[type] || {}
-  const html = await renderAsync(React.createElement(EmailTemplate, sampleData))
+  const sample = sampleData(await currentSiteUrl(NEUTRAL_SAMPLE_URL))[type] || {}
+  const html = await renderAsync(React.createElement(EmailTemplate, sample))
 
   return new Response(html, {
     status: 200,
@@ -199,7 +202,7 @@ const AUTH_EMAILS: Parameters<typeof createAuthEmailHandler>[0]['emails'] = {
         const siteName = await applyAuthEmailBrand()
         return React.createElement(SignupEmail, {
           siteName,
-          siteUrl: SITE_URL,
+          siteUrl: await currentSiteUrl(LAST_RESORT_SITE_URL),
           recipient: data.email,
           confirmationUrl: data.url,
         })
@@ -211,7 +214,7 @@ const AUTH_EMAILS: Parameters<typeof createAuthEmailHandler>[0]['emails'] = {
         const siteName = await applyAuthEmailBrand()
         return React.createElement(InviteEmail, {
           siteName,
-          siteUrl: SITE_URL,
+          siteUrl: await currentSiteUrl(LAST_RESORT_SITE_URL),
           confirmationUrl: data.url,
         })
       },
