@@ -9,7 +9,7 @@ import { useInitialLoading } from "@/hooks/useInitialLoading";
 import { loadLodgeIdentity } from "@/lib/lodgeIdentity";
 import { changedFields, clearedRequired, patchFor, REQUIRED_UNIT_FIELDS, type FieldMap } from "@/lib/unitSetupForm";
 import { emailError, MEMBERSHIP_OFFICER_UNIT_KEY, normaliseEmail } from "@/lib/membershipOfficerEmail";
-import { SUMMONS_COVER_UNIT_KEY, coverImageError, coverImageUrl } from "@/lib/summonsCoverImages";
+import { SUMMONS_COVER_UNIT_KEY, coverImageError } from "@/lib/summonsCoverImages";
 import { CREST_IMAGE_UNIT_KEY, crestUrlError, crestUrlFrom, normaliseCrestUrl } from "@/lib/crestImage";
 import { canonicalSortCode, signOff, validAccountNumber, paymentReference } from "@/lib/bookingDetails";
 
