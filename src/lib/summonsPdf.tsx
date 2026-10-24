@@ -45,10 +45,11 @@ import {
   sortMembersBySeniority,
   splitTwoColumns,
   subLetter,
-  resolveAssetUrl,
-  DEFAULT_COVER_LEFT_URL,
-  DEFAULT_COVER_RIGHT_URL,
+  needsDefault,
+  normaliseTemplateAssets,
+  type SummonsImageDefaults,
 } from "./summons";
+import { loadSummonsImageDefaults } from "./summonsCoverImages";
 import { assetUrl } from "./assetUrl";
 import { printableOfficers, printableReps } from "./summonsOfficers";
 
@@ -313,10 +314,6 @@ function BoldNameText({
 // ---------- panel-level renderers ----------
 
 
-export {
-  DEFAULT_COVER_LEFT_URL,
-  DEFAULT_COVER_RIGHT_URL,
-} from "./summons";
 
 
 const FrontCoverPanel: React.FC<{
@@ -343,8 +340,8 @@ const FrontCoverPanel: React.FC<{
     ? rawSecLines.slice(1)
     : rawSecLines;
   const secName = secFromRoll || rawSecLines[0] || "—";
-  const leftSrc = coverLeftDataUrl || resolveAssetUrl(template.cover_left_image_url, DEFAULT_COVER_LEFT_URL);
-  const rightSrc = coverRightDataUrl || resolveAssetUrl(template.cover_right_image_url, DEFAULT_COVER_RIGHT_URL);
+  const leftSrc = coverLeftDataUrl || template.cover_left_image_url || null;
+  const rightSrc = coverRightDataUrl || template.cover_right_image_url || null;
   return (
   <View style={[s.panel]}>
     <SummonsCoverHeader brand={coverBrand} fallback={{ name: template.lodge_name, number: template.lodge_number, province: template.province }} leftSrc={leftSrc} rightSrc={rightSrc} />
@@ -911,7 +908,15 @@ export async function generateSummonsBlob(args: {
   manualHidden?: NoticeKey[];
   /** Test seam: Unit Setup identity/crest overrides. */
   brandDeps?: PdfBrandDeps;
+  /** Test seam: Unit Setup cover image defaults (else loaded only when needed). */
+  imageDefaults?: SummonsImageDefaults;
 }): Promise<Blob> {
+  {
+    const t = args.template;
+    const need = needsDefault(t.cover_left_image_url) || needsDefault(t.cover_right_image_url);
+    const d = args.imageDefaults ?? (need ? await loadSummonsImageDefaults() : undefined);
+    args = { ...args, template: d ? normaliseTemplateAssets(t, d) : t };
+  }
   let diningQrDataUrl: string | null = null;
   if (args.template.dining_booking_url) {
     try {
@@ -923,8 +928,8 @@ export async function generateSummonsBlob(args: {
       diningQrDataUrl = null;
     }
   }
-  const coverLeftUrl = resolveAssetUrl(args.template.cover_left_image_url, DEFAULT_COVER_LEFT_URL);
-  const coverRightUrl = resolveAssetUrl(args.template.cover_right_image_url, DEFAULT_COVER_RIGHT_URL);
+  const coverLeftUrl = args.template.cover_left_image_url || "";
+  const coverRightUrl = args.template.cover_right_image_url || "";
   const coverBrand = await loadSummonsCoverBrand(args.brandDeps);
   const coverLeftDataUrl = coverLeftUrl ? await fetchImageAsDataUrl(coverLeftUrl) : null;
   const coverRightDataUrl = coverRightUrl ? await fetchImageAsDataUrl(coverRightUrl) : null;

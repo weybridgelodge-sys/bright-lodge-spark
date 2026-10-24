@@ -39,10 +39,8 @@ import {
   LodgeTemplate,
   OfficerRollRow,
   SummonsData,
-  DEFAULT_COVER_LEFT_URL,
-  DEFAULT_COVER_RIGHT_URL,
 } from "@/lib/summonsPdf";
-import { DEFAULT_LOGO_URL } from "@/lib/summons";
+import { loadSummonsImageDefaults } from "@/lib/summonsCoverImages";
 import { generateICS, icsFilename } from "@/lib/generateICS";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -66,7 +64,7 @@ import { chooseMeetingPattern } from "@/lib/meetingDiary";
 
 /** Template as it prints: member-derived names and the single-source meeting pattern. */
 async function printableTemplate(raw: any, members: MemberRow[]): Promise<LodgeTemplate> {
-  const base = normaliseTemplateAssets({ ...EMPTY_TEMPLATE, ...raw, lodge_representatives: raw?.lodge_representatives ?? [] }) as LodgeTemplate;
+  const base = normaliseTemplateAssets({ ...EMPTY_TEMPLATE, ...raw, lodge_representatives: raw?.lodge_representatives ?? [] }, await loadSummonsImageDefaults()) as LodgeTemplate;
   try {
     // Blank name/number/consecration come from the lodge record, never typed defaults.
     const id = await loadLodgeIdentity();
@@ -135,11 +133,11 @@ function MemberLink({ value, onChange, members, label }: { value?: string | null
 const EMPTY_TEMPLATE: LodgeTemplate = {
   lodge_name: "",
   lodge_number: "",
-  province: "Surrey",
+  province: "",
   consecration_date: null,
-  logo_url: DEFAULT_LOGO_URL,
-  cover_left_image_url: DEFAULT_COVER_LEFT_URL,
-  cover_right_image_url: DEFAULT_COVER_RIGHT_URL,
+  logo_url: "",
+  cover_left_image_url: "",
+  cover_right_image_url: "",
   venue_address: null,
   regular_meeting_pattern: null,
   loi_details: null,
@@ -305,7 +303,7 @@ function TemplateTab() {
     (async () => {
       const { data } = await supabase.from("lodge_template").select("*").eq("id", "default").maybeSingle();
       if (data) {
-        const merged = normaliseTemplateAssets({ ...EMPTY_TEMPLATE, ...(data as any), lodge_representatives: (data as any).lodge_representatives ?? [] });
+        const merged = normaliseTemplateAssets({ ...EMPTY_TEMPLATE, ...(data as any), lodge_representatives: (data as any).lodge_representatives ?? [] }, await loadSummonsImageDefaults());
         setT(merged);
         setReps(((data as any).lodge_representatives ?? []) as Rep[]);
       }
