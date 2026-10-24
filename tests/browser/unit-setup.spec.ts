@@ -11,6 +11,7 @@ function seed(): Store {
     booking_contact_email: { email: "bookings@example.invalid" },
     membership_officer_email: { email: "membership@example.invalid" },
     crest_image: { url: "https://example.invalid/assets/crest.png" },
+    summons_cover_images: { left_url: "https://example.invalid/assets/left.png", right_url: "https://example.invalid/assets/right.png" },
     sign_off: { override: "Yours, the Sample Lodge" },
     meeting_place: { venue_id: "v1" },
     web_social: { facebook_url: "https://facebook.example.invalid/sample", instagram_url: "https://instagram.example.invalid/sample", twitter_url: "https://x.example.invalid/sample" },
@@ -220,4 +221,27 @@ test("Crest image: https only, trimmed, blank allowed, 48px, 320px + axe", async
   await expect(card.getByRole("img", { name: "Crest preview" })).toHaveCount(0);
   expect(await overflow(page)).toBeLessThanOrEqual(1);
   await expectNoAxeViolations(page, "crest saved");
+});
+
+test("Summons cover images: shown, validated, changed-only save, 320px + axe", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 1800 });
+  const saved: any[] = [];
+  await mock(page, true, saved);
+  await open(page);
+  const card = page.getByRole("region", { name: "Summons cover images" });
+  const left = card.getByLabel("Left cover image address", { exact: true });
+  await expect(left).toHaveValue("https://example.invalid/assets/left.png");
+  await expect(card.getByLabel("Right cover image address", { exact: true })).toHaveValue("https://example.invalid/assets/right.png");
+  await left.fill("http://example.invalid/x.png");
+  await card.getByRole("button", { name: "Save" }).click();
+  await expect(card.getByText("Enter a public https:// image address.")).toBeVisible();
+  expect(saved).toHaveLength(0);
+  await expectNoAxeViolations(page, "cover images error");
+  await left.fill("");
+  await card.getByRole("button", { name: "Save" }).click();
+  await expect(card.getByText(/Saved at/)).toBeVisible();
+  expect(saved[0]).toEqual({ _key: "summons_cover_images", _value: { left_url: "" } });
+  expect((await card.getByRole("button", { name: "Save" }).boundingBox())!.height).toBeGreaterThanOrEqual(44);
+  expect(await overflow(page)).toBeLessThanOrEqual(1);
+  await expectNoAxeViolations(page, "cover images saved");
 });
