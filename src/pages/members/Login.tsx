@@ -14,7 +14,7 @@ import { App as CapacitorApp } from "@capacitor/app";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { useAuth } from "@/hooks/useAuth";
-import { isUnknownMemberOtpError } from "@/lib/authAccess";
+import { isNoMembershipAuthError, isUnknownMemberOtpError, NO_MEMBERSHIP_MESSAGE } from "@/lib/authAccess";
 import logoAsset from "@/assets/weybridge-logo-no-bg.png.asset.json";
 import { assetUrl } from "@/lib/assetUrl";
 const logo = assetUrl(logoAsset);
@@ -67,16 +67,19 @@ export default function MembersLogin() {
 
   // Expired / already-used magic link: captured from the URL in main.tsx before
   // the auth client strips it, shown once here.
-  const [linkError] = useState<string | null>(() => {
+  const [initialAuthError] = useState<string | null>(() => {
     try {
       const raw = sessionStorage.getItem("auth-link-error");
       if (!raw) return null;
       sessionStorage.removeItem("auth-link-error");
-      return describeLinkError(raw);
+      return raw;
     } catch {
       return null;
     }
   });
+  const linkError = initialAuthError && !isNoMembershipAuthError(initialAuthError) ? describeLinkError(initialAuthError) : null;
+  // Google sign-in for someone the lodge hasn't added (redirect error or popup error).
+  const [noMembership, setNoMembership] = useState<boolean>(() => isNoMembershipAuthError(initialAuthError));
 
   useEffect(() => {
     if (session) navigate("/members", { replace: true });
@@ -233,14 +236,16 @@ export default function MembersLogin() {
         redirect_uri: membersRedirectUrl,
       });
       if (result.error) {
-        toast.error("Google sign-in failed");
+        if (isNoMembershipAuthError(result.error.message)) setNoMembership(true);
+        else toast.error("Google sign-in failed");
         setBusy(false);
         return;
       }
       if (result.redirected) return;
       navigate("/members");
-    } catch {
-      toast.error("Google sign-in failed");
+    } catch (err) {
+      if (isNoMembershipAuthError((err as Error)?.message)) setNoMembership(true);
+      else toast.error("Google sign-in failed");
       setBusy(false);
     }
   };
@@ -287,6 +292,20 @@ export default function MembersLogin() {
                         Enter your registered email to receive a secure, passwordless Magic Link. No passwords to remember.
                       </p>
                     </div>
+
+                    {noMembership && (
+                      <div role="alert" data-testid="no-membership" className="mb-5 rounded-md border border-gold/50 bg-gold/10 p-3 text-sm text-primary-foreground">
+                        <p className="font-semibold text-gold">No membership found</p>
+                        <p className="mt-1 text-primary-foreground/80 text-xs leading-relaxed">{NO_MEMBERSHIP_MESSAGE}</p>
+                        <button
+                          type="button"
+                          onClick={() => { setNoMembership(false); setView("register"); }}
+                          className="mt-2 min-h-[44px] text-xs font-semibold text-gold underline underline-offset-2 inline-flex items-center gap-1.5"
+                        >
+                          <UserPlus className="w-3.5 h-3.5" aria-hidden /> Request portal access
+                        </button>
+                      </div>
+                    )}
 
                     {linkError && (
                       <div role="alert" className="mb-5 rounded-md border border-gold/50 bg-gold/10 p-3 text-sm text-primary-foreground">
