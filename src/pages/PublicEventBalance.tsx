@@ -7,6 +7,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { readFunctionError } from "@/lib/functionError";
 import { formatEventDate, formatGBP } from "@/lib/publicEvents";
 import { quoteBalance } from "@/lib/eventPricing";
+import { focusFirstError, invalidProps, validateBalanceForm, type FieldError } from "@/lib/formErrors";
+import { InlineFieldError } from "@/components/bookings/InlineFieldError";
 import { FeeAndSummary, Honeypot, inputCls, PaymentMethodFieldset, PayNowSummary, type PayMethod } from "@/components/events/booking/BookingCore";
 
 type Balance = {
@@ -27,6 +29,7 @@ export default function PublicEventBalance() {
   const [picks, setPicks] = useState<Record<string, string>>({});
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<FieldError[]>([]);
   const [saved, setSaved] = useState(false);
 
   const load = async () => {
@@ -44,7 +47,9 @@ export default function PublicEventBalance() {
     setError(null);
     const all = b.undecided.flatMap((g) => g.courses);
     const chosen = all.filter((c) => picks[c.choice_id]).map((c) => ({ choice_id: c.choice_id, option_id: picks[c.choice_id] }));
-    if (!chosen.length) { setError("Please choose at least one dish."); return; }
+    const fe = validateBalanceForm({ action: "choices", chosenCount: chosen.length, firstChoiceId: all[0]?.choice_id });
+    setFieldErrors(fe);
+    if (fe.length) { focusFirstError(fe); return; }
     setBusy(true);
     const { data, error: e } = await supabase.functions.invoke("get-event-balance", { body: { token, action: "choices", choices: chosen } });
     setBusy(false);
@@ -55,7 +60,11 @@ export default function PublicEventBalance() {
   const pay = async (ev: React.FormEvent) => {
     ev.preventDefault();
     if (honeypot || !b) return;
-    setError(null); setBusy(true);
+    setError(null);
+    const fe = validateBalanceForm({ action: "pay", method });
+    setFieldErrors(fe);
+    if (fe.length) { focusFirstError(fe); return; }
+    setBusy(true);
     const { data, error: e } = await supabase.functions.invoke("create-event-balance-checkout", {
       body: { token, method, cover_fee: feeOn && coverFee, origin: window.location.origin, website: "" },
     });
@@ -101,10 +110,11 @@ export default function PublicEventBalance() {
                   <p className="text-sm font-semibold text-foreground break-words">{g.guest_name}{g.is_child ? " (child)" : ""}</p>
                   {g.courses.map((c) => (
                     <label key={c.choice_id} className="block"><span className="block text-sm text-foreground mb-1">{c.course_name}</span>
-                      <select className={inputCls} value={picks[c.choice_id] ?? ""} onChange={(e) => setPicks((p) => ({ ...p, [c.choice_id]: e.target.value }))}>
+                      <select id={`bal-choice-${c.choice_id}`} {...invalidProps(fieldErrors, `bal-choice-${c.choice_id}`)} className={inputCls} value={picks[c.choice_id] ?? ""} onChange={(e) => setPicks((p) => ({ ...p, [c.choice_id]: e.target.value }))}>
                         <option value="">Choose…</option>
                         {c.options.map((o) => <option key={o.id} value={o.id}>{o.label}</option>)}
                       </select>
+                      <InlineFieldError errors={fieldErrors} id={`bal-choice-${c.choice_id}`} />
                     </label>
                   ))}
                 </div>
@@ -116,7 +126,8 @@ export default function PublicEventBalance() {
           {b?.can_pay && (
             <form onSubmit={pay} noValidate className="space-y-6">
               <Honeypot value={honeypot} onChange={setHoneypot} />
-              <PaymentMethodFieldset method={method} onChange={setMethod} allowed={["card", "pay_by_bank"]} />
+              <div id="bal-pay" className="scroll-mt-32"><PaymentMethodFieldset method={method} onChange={setMethod} allowed={["card", "pay_by_bank"]} /></div>
+              <InlineFieldError errors={fieldErrors} id="bal-pay" />
               {feeOn && <FeeAndSummary subtotal={q.chargePence} feePence={q.feePence} total={q.totalNowPence} method={method} coverFee={coverFee} onCoverFee={setCoverFee} hideSummary />}
               <PayNowSummary rows={[["Balance", q.chargePence], ...(q.feePence > 0 ? [[method === "card" ? "Card fee" : "Processing fee", q.feePence] as [string, number]] : [])]} totalLabel="Pay now" total={q.totalNowPence} />
               {error && <p role="alert" className="text-destructive font-semibold">{error}</p>}

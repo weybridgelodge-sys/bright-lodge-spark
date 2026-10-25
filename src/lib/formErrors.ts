@@ -73,3 +73,29 @@ export const invalidProps = (errors: FieldError[], id: string) => {
   const has = !!errorFor(errors, id);
   return { "aria-invalid": has ? (true as const) : undefined, "aria-describedby": has ? errorId(id) : undefined };
 };
+
+/** Join Us / Contact enquiry form, in page order. Phone is optional here but must be plausible if given. */
+export function validateEnquiryForm(v: { full_name: string; email: string; phone: string; reason: string }): FieldError[] {
+  const out: FieldError[] = [];
+  if (!v.full_name.trim()) out.push({ id: "full_name", message: "Please enter your full name." });
+  const em = emailError(v.email); if (em) out.push({ id: "email", message: em });
+  if (v.phone.trim() && !isPlausiblePhone(v.phone)) out.push({ id: "phone", message: PHONE_REQUIRED_MESSAGE });
+  const r = v.reason.trim();
+  if (!r) out.push({ id: "reason", message: "Please tell us a little about why you're interested." });
+  else if (r.length < 10) out.push({ id: "reason", message: "Please write at least 10 characters." });
+  return out;
+}
+
+export const NEWSLETTER_EMAIL_ID = "newsletter-email";
+export function validateNewsletterEmail(email: string): FieldError[] {
+  const clean = email.trim();
+  if (!clean) return [{ id: NEWSLETTER_EMAIL_ID, message: "Please enter your email address." }];
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clean) || clean.length > 255) return [{ id: NEWSLETTER_EMAIL_ID, message: "Please enter a valid email address." }];
+  return [];
+}
+
+/** Balance page: menu save needs one dish (error under the first dish box); payment needs a method. */
+export function validateBalanceForm(v: { action: "choices" | "pay"; chosenCount?: number; firstChoiceId?: string; method?: string }): FieldError[] {
+  if (v.action === "choices") return (v.chosenCount ?? 0) > 0 ? [] : [{ id: `bal-choice-${v.firstChoiceId ?? "0"}`, message: "Please choose at least one dish." }];
+  return v.method ? [] : [{ id: "bal-pay", message: "Please choose a payment method." }];
+}
