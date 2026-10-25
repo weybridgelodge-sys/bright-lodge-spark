@@ -1,0 +1,1 @@
+REVOKE ALL ON SEQUENCE public.journal_entry_number_seq, public.officer_appointment_audit_id_seq FROM PUBLIC, anon, authenticated;

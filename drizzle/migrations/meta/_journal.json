@@ -1072,6 +1072,13 @@
       "when": 1792964350898,
       "tag": "0152_revoke_client_pending_account_units",
       "breakpoints": true
+    },
+    {
+      "idx": 153,
+      "version": "7",
+      "when": 1792966583986,
+      "tag": "0153_revoke_client_sequences",
+      "breakpoints": true
     }
   ]
 }
