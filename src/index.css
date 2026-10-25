@@ -338,3 +338,28 @@ select.autofilled-dark:not(.autofill-light) {
 .snowfall-slow { background-size: 320px 320px; opacity: 0.6; animation-duration: 30s; }
 @keyframes snowfall { from { background-position: 0 0; } to { background-position: 40px 400px; } }
 @media (prefers-reduced-motion: reduce) { .snowfall { animation: none; } }
+
+/* Phone keyboards shrink only the visual viewport. Below sm, overlays size and anchor
+   themselves to it (--app-vvh / --app-vvtop from useVisualViewportVars; fallback
+   100dvh / 100vh and 0px). Desktop is untouched. */
+@media (max-width: 639.98px) {
+  .vv-dialog {
+    top: calc(var(--app-vvtop, 0px) + 0.5rem) !important;
+    --tw-translate-y: 0 !important;
+    max-height: calc(100vh - 1rem) !important;
+    max-height: calc(var(--app-vvh, 100dvh) - 1rem) !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    scroll-padding-bottom: 5rem;
+  }
+  .vv-sheet-side {
+    top: var(--app-vvtop, 0px) !important;
+    bottom: auto !important;
+    height: 100vh !important;
+    height: var(--app-vvh, 100dvh) !important;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scroll-padding-bottom: 5rem;
+  }
+}
