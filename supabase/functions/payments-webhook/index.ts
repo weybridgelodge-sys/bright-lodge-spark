@@ -339,7 +339,7 @@ async function handlePayoutPaid(payout: any, env: StripeEnv) {
 
     const periodId = await periodIdForDate(arrivalDate);
 
-    const posted = await insertOnce(`booking refund ${b.id}`, () => getSupabase()
+    const { data: entry, error: entryErr } = await getSupabase()
       .from("journal_entries")
       .insert({
         entry_date: arrivalDate,
