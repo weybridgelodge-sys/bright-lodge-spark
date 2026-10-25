@@ -241,7 +241,8 @@ Deno.serve(async (req) => {
     await sb.from("event_booking_payments").update({ stripe_session_id: session.id }).eq("id", payRow.id);
     return json({ reference: booking.reference, token: booking.access_token, url: session.url });
   } catch (e) {
-    console.error("create-event-checkout error", e);
+    // Code and message only: error details can echo the failing row (guest contact details and requests).
+    console.error("create-event-checkout error", (e as any)?.code ?? "", (e as any)?.message ?? String(e));
     return json({ error: "Sorry, we could not start your booking. Please try again or contact the Secretary." }, 500);
   }
 });

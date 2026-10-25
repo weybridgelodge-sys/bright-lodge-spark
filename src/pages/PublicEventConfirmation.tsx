@@ -14,6 +14,7 @@ type Summary = {
   items?: { name: string; qty: number; unit_pence: number }[]; menus?: { name: string; menu: string }[];
   payment_method: string; payment_status: string;
   payment_plan?: string; amount_paid_pence?: number; balance_due_pence?: number; balance_due_date?: string | null; balance_url?: string | null;
+  guest_requests?: string | null;
   bank: { account_holder_name?: string; sort_code?: string; account_number?: string; reference?: string } | null;
 };
 
@@ -64,6 +65,7 @@ export default function PublicEventConfirmation() {
               {(b.fee_pence ?? 0) > 0 && <p className="text-sm text-muted-foreground">Subtotal {formatGBP(b.subtotal_pence ?? b.total_pence - (b.fee_pence ?? 0))} + {b.payment_method === "Card" ? "card fee" : "processing fee"} {formatGBP(b.fee_pence ?? 0)}</p>}
               {!!b.items?.length && <ul className="text-sm text-muted-foreground break-words">{b.items.map((i, k) => <li key={k}>{i.qty} × {i.name} · {formatGBP(i.qty * i.unit_pence)}</li>)}</ul>}
               {!!b.menus?.length && <ul className="text-sm text-muted-foreground break-words">{b.menus.map((m, k) => <li key={k}><strong className="text-foreground">{m.name}:</strong> {m.menu}</li>)}</ul>}
+              {b.guest_requests && <p className="text-sm text-muted-foreground whitespace-pre-line break-words"><strong className="text-foreground">Your requests:</strong> {b.guest_requests}</p>}
               <p className="text-muted-foreground">Payment: {b.payment_method} — {b.payment_status === "paid" ? "paid" : depositPaid ? "deposit paid" : "pending payment"}</p>
               {isDeposit && paid && (
                 <div className="border-2 border-gold rounded-sm p-4 space-y-1">
