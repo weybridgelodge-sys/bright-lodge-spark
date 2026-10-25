@@ -43,7 +43,8 @@ async function handleCheckoutCompleted(session: any, env: StripeEnv) {
     console.warn("checkout.session.completed without booking_id metadata", session.id);
     return;
   }
-  await markBookingPaid(getSupabase(), session, env);
+  // Fee lookup + emails run after the 200 (EdgeRuntime.waitUntil); mark-paid stays before it.
+  await markBookingPaid(getSupabase(), session, env, { followUp: "after_reply" });
 }
 
 
