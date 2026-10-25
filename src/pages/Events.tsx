@@ -13,7 +13,8 @@ import { Calendar } from "@/components/ui/calendar";
 import { format, isSameDay } from "date-fns";
 import { useEvents, typeLabel, typeBadgeClass } from "@/data/events";
 import { useEffect } from "react";
-import { fetchPublicEvents, formatEventDate, keepPostcodeTogether, type PublicEvent } from "@/lib/publicEvents";
+import { fetchPublicEvents, formatEventDate, formatTime, keepPostcodeTogether, type PublicEvent } from "@/lib/publicEvents";
+import { featuredCardInfo, sortBySoonest } from "@/lib/publicEventCard";
 
 
 // ─── Animation Variants ───────────────────────────────────────────────────────
@@ -104,18 +105,58 @@ const Events = () => {
           <section className="pt-16 bg-background" aria-labelledby="public-events-heading">
             <div className="container mx-auto px-4 sm:px-6 max-w-6xl">
               <h2 id="public-events-heading" className="text-2xl font-serif text-foreground mb-4">Upcoming events — book online</h2>
-              <ul className="space-y-3">
-                {publicEvents.map((pe) => (
+              <ul className="space-y-4">
+                {sortBySoonest(publicEvents).map((pe) => {
+                  const info = featuredCardInfo(pe);
+                  const time = [formatTime(pe.start_time), formatTime(pe.end_time)].filter(Boolean).join(" – ");
+                  const blurb = pe.tagline || pe.intro_copy;
+                  return (
                   <li key={pe.id}>
-                    <Link to={`/events/${pe.slug}`} className="flex items-center justify-between gap-4 w-full min-h-[64px] border border-border bg-card rounded-sm px-5 py-4 hover:border-gold-dark">
-                      <span className="min-w-0">
-                        <span className="block font-serif text-lg text-foreground">{pe.public_title}</span>
-                        <span className="block text-sm font-sans text-muted-foreground">{formatEventDate(pe.event_date)} · {keepPostcodeTogether("Guildford Masonic Centre, GU2 4DR")}</span>
+                    <Link
+                      to={`/events/${pe.slug}`}
+                      aria-label={`${pe.public_title}: ${info.state === "open" ? "Book your places" : `${info.cta}, view details`}`}
+                      className="group block w-full border-2 border-gold bg-card rounded-sm overflow-hidden shadow-sm hover:shadow-md transition-shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    >
+                      <span className="block p-5 sm:p-6">
+                        <span className="inline-block px-2 py-0.5 rounded-full text-sm mb-2 bg-primary text-primary-foreground font-sans">{info.badge}</span>
+                        <span className="block text-xl sm:text-2xl font-serif text-foreground break-words">{pe.public_title}</span>
+                        <span className="mt-3 flex flex-wrap gap-x-6 gap-y-2 text-sm text-muted-foreground font-sans">
+                          <span className="inline-flex items-center gap-1.5">
+                            <CalendarIcon className="w-4 h-4 text-gold-dark shrink-0" aria-hidden="true" />
+                            {formatEventDate(pe.event_date)}
+                          </span>
+                          {time && (
+                            <span className="inline-flex items-center gap-1.5">
+                              <Clock className="w-4 h-4 text-gold-dark shrink-0" aria-hidden="true" />
+                              {time}
+                            </span>
+                          )}
+                          <span className="inline-flex items-start gap-1.5">
+                            <MapPin className="w-4 h-4 text-gold-dark shrink-0 mt-0.5" aria-hidden="true" />
+                            {keepPostcodeTogether(pe.venue || "Guildford Masonic Centre, GU2 4DR")}
+                          </span>
+                        </span>
+                        {blurb && <span className="mt-3 block text-sm text-muted-foreground font-sans leading-relaxed line-clamp-2">{blurb}</span>}
+                        {info.seats && (
+                          <span className="mt-3 inline-flex items-center gap-1.5 text-sm font-sans font-medium text-foreground">
+                            <Ticket className="w-4 h-4 text-gold-dark" aria-hidden="true" />{info.seats}
+                          </span>
+                        )}
+                        {info.state === "open" ? (
+                          <span className="mt-4 flex sm:inline-flex w-full sm:w-auto items-center justify-center gap-2 bg-gold-shimmer text-accent-foreground px-6 py-3 rounded-sm text-sm font-semibold font-sans uppercase tracking-widest min-h-[48px] group-hover:opacity-90 transition-opacity">
+                            Book your places <ArrowRight className="w-4 h-4" aria-hidden="true" />
+                          </span>
+                        ) : (
+                          <span className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 min-h-[48px] font-sans text-sm">
+                            <span className="px-3 py-1 rounded-sm border border-border bg-muted text-foreground font-semibold uppercase tracking-widest">{info.cta}</span>
+                            <span className="inline-flex items-center gap-1.5 font-medium text-gold-dark">View details <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" /></span>
+                          </span>
+                        )}
                       </span>
-                      <ArrowRight className="w-5 h-5 text-gold-dark shrink-0" aria-hidden="true" />
                     </Link>
                   </li>
-                ))}
+                  );
+                })}
               </ul>
             </div>
           </section>
