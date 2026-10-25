@@ -184,9 +184,11 @@ Deno.test("events: deposit plan creates the balance link before the reply", asyn
     event_bookings: [{ id: "e-0000001", payment_plan: "deposit", payment_status: "pending" }],
     event_guest_course_choices: [],
   });
-  const k = counters(300); const { deps, c } = eventDeps(k, (l: string, t: any) => runAfterReply(l, t));
+  const k = counters(300); const bg: Promise<void>[] = [];
+  const { deps, c } = eventDeps(k, (l: string, t: any) => { const p = runAfterReply(l, t); bg.push(p); return p; });
   await eventsMarkPaid(db, meta, "pi_e", 1000, deps);
   assertEquals(c.token, 1); assertEquals(k.c.emailDone, 0);
+  await Promise.all(bg);
 });
 
 Deno.test("runAfterReply hands the task to EdgeRuntime.waitUntil when present", async () => {
