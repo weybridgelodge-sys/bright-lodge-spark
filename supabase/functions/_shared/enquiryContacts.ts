@@ -1,10 +1,10 @@
-// Enquiry recipients/guide link, read from lodge_contact_settings with
-// fallbacks equal to the values used before the settings table existed.
+// Enquiry recipients/guide link, read from lodge_contact_settings. Fallbacks are
+// neutral (blank): never a host-lodge value; callers skip blank recipients/links.
 
 export const ENQUIRY_CONTACT_FALLBACK = {
-  secretaryEmail: "secretary@weybridgelodge.org.uk",
-  membershipCcEmail: "membershipsecretary@weybridgelodge.org.uk",
-  guideUrl: "https://weybridgelodge.org.uk/downloads/information-for-prospective-members.pdf?v=2",
+  secretaryEmail: "",
+  membershipCcEmail: "",
+  guideUrl: "",
 } as const;
 
 export type EnquiryContacts = { secretaryEmail: string; membershipCcEmail: string; guideUrl: string };

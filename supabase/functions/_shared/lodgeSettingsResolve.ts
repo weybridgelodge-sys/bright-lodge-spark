@@ -1,27 +1,29 @@
 // Pure part of lodgeSettings (unit-tested in src/test).
 import { resolveBookingContact } from "./bookingContact.ts";
+// Last-resort values used only when Unit Setup has no value (or the lookup fails).
+// Deliberately NEUTRAL: never a host-lodge value. siteUrl stays a valid URL
+// (RFC 2606 example.com) because callers build links/hosts from it.
 export const LODGE_FALLBACK = {
-  siteUrl: "https://weybridgelodge.org.uk",
-  senderName: "Weybridge Lodge",
-  formalSenderName: "Weybridge Lodge No. 6787",
-  secretaryEmail: "secretary@weybridgelodge.org.uk",
-  membershipCcEmail: "membershipsecretary@weybridgelodge.org.uk",
+  siteUrl: "https://example.com",
+  senderName: "Your Lodge",
+  formalSenderName: "Your Lodge",
+  secretaryEmail: "",
+  membershipCcEmail: "",
   // No typed fallback: unknown = "" and callers word around it (see bookingContactEmail).
   assistantSecretaryEmail: "",
-  webmasterEmail: "webmaster@weybridgelodge.org.uk",
-  communicationsEmail: "communications@weybridgelodge.org.uk",
-  lodgePostcode: "GU2 4DR",
-  // Unit Setup (unit_settings) values; fallbacks = the values typed before Unit Setup.
-  provinceName: "Province of Surrey",
-  facebookUrl: "https://facebook.com/people/Weybridge-Lodge-No-6787/61551808420513/",
-  instagramUrl: "https://instagram.com/weybridgelodge/",
-  twitterUrl: "https://twitter.com/weybridgelodge",
-  newsletterMasthead: "Weybridge Lodge No. 6787",
-  newsletterFooterNote: "Guildford Masonic Centre, GU2 4DR",
-  calendarName: "Weybridge Lodge No. 6787",
-  meetingVenue: "Guildford Masonic Centre",
-  provincialReturnFile: "L6787-Provincial-Return-{year}",
-  installationReturnFile: "Installation-Return-6787-{year}",
+  webmasterEmail: "",
+  communicationsEmail: "",
+  lodgePostcode: "",
+  provinceName: "",
+  facebookUrl: "",
+  instagramUrl: "",
+  twitterUrl: "",
+  newsletterMasthead: "Your Lodge",
+  newsletterFooterNote: "",
+  calendarName: "Your Lodge",
+  meetingVenue: "",
+  provincialReturnFile: "Provincial-Return-{year}",
+  installationReturnFile: "Installation-Return-{year}",
 } as const;
 
 export type LodgeSettings = { -readonly [K in keyof typeof LODGE_FALLBACK]: string } & { bookingContactEmail: string; bookingContactOffice: string; /** site_url as saved, "" when not set (no fallback). */ configuredSiteUrl: string; /** formal_sender_name as saved, "" when not set (no fallback). */ configuredFormalSenderName: string;
