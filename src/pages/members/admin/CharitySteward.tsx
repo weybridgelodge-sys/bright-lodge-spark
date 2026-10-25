@@ -1466,7 +1466,7 @@ function FeedTab({ festival, canEdit, onChange }: { festival: FestivalSettings |
         </p>
         <div className="grid sm:grid-cols-2 gap-3">
           <div><Label>Public feed start date</Label><Input aria-label="Public feed start date" type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} disabled={!canEdit} /></div>
-          <div><Label>Baseline amount already raised (£)</Label><Input aria-label="Public feed start date" type="number" step="0.01" value={startAmount} onChange={(e) => setStartAmount(e.target.value)} disabled={!canEdit} /></div>
+          <div><Label>Baseline amount already raised (£)</Label><Input aria-label="Baseline amount already raised (£)" type="number" step="0.01" value={startAmount} onChange={(e) => setStartAmount(e.target.value)} disabled={!canEdit} /></div>
         </div>
         {canEdit && (
           <Button onClick={save} disabled={saving} className="bg-gold text-navy hover:bg-gold/90">

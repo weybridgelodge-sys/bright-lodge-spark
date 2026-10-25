@@ -1,10 +1,11 @@
 import { describe, it, expect, vi, afterEach, beforeEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, cleanup } from "@testing-library/react";
 import { scrollFocusedFieldIntoView, scrollableAncestor, FIELD_FOCUSED_CLASS, RETRY_MS, kbDebug } from "@/hooks/useVisualViewport";
 import KbDebug, { kbDebugEnabled } from "@/components/KbDebug";
 import { readFileSync } from "node:fs";
 
-function setup() {
+function setup(phone = true) {
+  (window as any).matchMedia = (q: string) => ({ matches: phone && q.includes("max-width"), media: q, addEventListener() {}, removeEventListener() {} });
   const listeners = new Set<() => void>();
   const vv = { height: 760, offsetTop: 0, addEventListener: (_: string, f: () => void) => listeners.add(f), removeEventListener: (_: string, f: () => void) => listeners.delete(f) };
   Object.defineProperty(window, "visualViewport", { value: vv, configurable: true });
@@ -67,13 +68,10 @@ describe("JOB CF focus → native scrollIntoView", () => {
   });
 
   it("desktop width: does nothing", () => {
-    const mm = window.matchMedia;
-    (window as any).matchMedia = () => ({ matches: false });
-    const { ta, siv, dlg } = setup();
+    const { ta, siv, dlg } = setup(false);
     ta.focus(); scrollFocusedFieldIntoView(ta); vi.advanceTimersByTime(1000);
     expect(siv).not.toHaveBeenCalled();
     expect(dlg.classList.contains(FIELD_FOCUSED_CLASS)).toBe(false);
-    (window as any).matchMedia = mm;
   });
 
   it("CSS: spare space is half the visible height, phone-only", () => {
@@ -84,7 +82,7 @@ describe("JOB CF focus → native scrollIntoView", () => {
 });
 
 describe("JOB CF ?kbdebug=1 readout", () => {
-  afterEach(() => { sessionStorage.clear(); document.body.innerHTML = ""; });
+  afterEach(() => { cleanup(); sessionStorage.clear(); });
   it("off without the parameter, on with it, remembered for the tab, off with =0", () => {
     expect(kbDebugEnabled("", sessionStorage)).toBe(false);
     expect(kbDebugEnabled("?kbdebug=1", sessionStorage)).toBe(true);
