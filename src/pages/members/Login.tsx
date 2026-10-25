@@ -15,6 +15,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { useAuth } from "@/hooks/useAuth";
 import { isNoMembershipAuthError, isUnknownMemberOtpError, NO_MEMBERSHIP_MESSAGE } from "@/lib/authAccess";
+import { classifyReturnedAuthError, clearGoogleStarted, markGoogleStarted, takeGoogleStarted } from "@/lib/googleSignInFlag";
 import logoAsset from "@/assets/weybridge-logo-no-bg.png.asset.json";
 import { assetUrl } from "@/lib/assetUrl";
 const logo = assetUrl(logoAsset);
@@ -77,12 +78,18 @@ export default function MembersLogin() {
       return null;
     }
   });
-  const linkError = initialAuthError && !isNoMembershipAuthError(initialAuthError) ? describeLinkError(initialAuthError) : null;
+  // Google flag is single-use; read once with the captured error.
+  const [returnKind] = useState(() =>
+    classifyReturnedAuthError(initialAuthError, takeGoogleStarted(), isNoMembershipAuthError));
+  const linkError = returnKind === "link-error" && initialAuthError ? describeLinkError(initialAuthError) : null;
   // Google sign-in for someone the lodge hasn't added (redirect error or popup error).
-  const [noMembership, setNoMembership] = useState<boolean>(() => isNoMembershipAuthError(initialAuthError));
+  const [noMembership, setNoMembership] = useState<boolean>(() => returnKind === "no-membership");
 
   useEffect(() => {
-    if (session) navigate("/members", { replace: true });
+    if (session) {
+      clearGoogleStarted();
+      navigate("/members", { replace: true });
+    }
   }, [session, navigate]);
 
   const handleMagicLink = async (e: React.FormEvent) => {
@@ -186,6 +193,8 @@ export default function MembersLogin() {
 
   const handleGoogle = async () => {
     setBusy(true);
+    setNoMembership(false);
+    markGoogleStarted(); // web redirect and native Custom Tab both return here with any error
 
     if (isNativeApp) {
       // Native: launch OAuth in a Chrome Custom Tab via the production broker.
