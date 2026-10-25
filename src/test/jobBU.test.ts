@@ -40,4 +40,9 @@ describe("headcount excludes lapsed bookings", () => {
     const guests = ["1", "2", "3", "4"].map((id) => ({ booking_id: id, name: "G" + id }));
     expect(countedGuests(guests, bookings, NOW).map((g) => g.booking_id)).toEqual(["1", "2", "3"]);
   });
+  it("Christmas case: 4 guests, one refunded booking leaves 3", () => {
+    const bookings = [b({ id: "1", payment_status: "paid", balance_paid: true, amount_paid_pence: 3590 }), b({ id: "2", payment_status: "paid", balance_paid: true, amount_paid_pence: 3590 }), b({ id: "3", payment_method: "bank_transfer" }), b({ id: "4", payment_status: "refunded", balance_paid: true, amount_paid_pence: 3590 })];
+    const guests = ["1", "2", "3", "4"].map((id) => ({ booking_id: id, name: "G" + id }));
+    expect(countedGuests(guests, bookings, NOW).map((g) => g.booking_id)).toEqual(["1", "2", "3"]);
+  });
 });
