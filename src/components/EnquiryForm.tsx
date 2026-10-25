@@ -91,7 +91,8 @@ export const EnquiryForm = () => {
         <p className="text-muted-foreground font-sans">
           Thanks so much{firstName ? `, ${firstName}` : ""} — we're really glad you got in
           touch. Check your inbox for a short guide with more about us, and expect a
-          friendly call from our Secretary in the next day or two to have a proper chat.
+          friendly call from our Membership Secretary in the next day or two to have a
+          proper chat.
         </p>
         <button
           type="button"
