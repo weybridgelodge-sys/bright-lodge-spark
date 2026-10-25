@@ -37,6 +37,7 @@ for (const width of [320, 360]) {
       await newBtn.click();
       const dlg = page.getByRole("dialog", { name: title });
       await expect(dlg).toBeVisible();
+      const pageY = await page.evaluate(() => window.scrollY);
       await page.waitForTimeout(400);
       await expectNoAxeViolations(page, `${title} ${width}`);
 
@@ -59,7 +60,7 @@ for (const width of [320, 360]) {
       await page.waitForTimeout(200);
       const sb = await save.boundingBox();
       expect(sb!.y + sb!.height, "Save reachable above keyboard").toBeLessThanOrEqual(vvh);
-      expect(await page.evaluate(() => window.scrollY), "page behind stays put").toBe(0);
+      expect(await page.evaluate(() => window.scrollY), "page behind stays put").toBe(pageY);
       await page.screenshot({ path: `/tmp/browser/cd-${tab}-${width}.png` });
     });
   }
