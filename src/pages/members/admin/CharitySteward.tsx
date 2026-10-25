@@ -275,7 +275,7 @@ function CollectionDialog({ open, onOpenChange, editing, onSaved }: {
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div><Label>Gross amount (£)</Label><Input aria-label="Gross amount (£)" type="number" step="0.01" value={gross} onChange={(e) => setGross(e.target.value)} /></div>
-            <div><Label>Costs (£)</Label><Input aria-label="Gross amount (£)" type="number" step="0.01" value={costs} onChange={(e) => setCosts(e.target.value)} /></div>
+            <div><Label>Costs (£)</Label><Input aria-label="Costs (£)" type="number" step="0.01" value={costs} onChange={(e) => setCosts(e.target.value)} /></div>
           </div>
           <div>
             <Label>Stripe fee (£)</Label>
@@ -283,10 +283,10 @@ function CollectionDialog({ open, onOpenChange, editing, onSaved }: {
             <p className="text-xs text-primary-foreground/80 mt-1">Card processing fee on online payments — posted to Bank &amp; card charges (5410), separate from prize costs (5310).</p>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <div><Label>Banked date</Label><Input aria-label="e.g. Charity Steward" type="date" value={bankedDate} onChange={(e) => setBankedDate(e.target.value)} /></div>
-            <div><Label>Banked by</Label><Input aria-label="Banked date" value={bankedBy} onChange={(e) => setBankedBy(e.target.value)} placeholder="e.g. Charity Steward" /></div>
+            <div><Label>Banked date</Label><Input aria-label="Banked date" type="date" value={bankedDate} onChange={(e) => setBankedDate(e.target.value)} /></div>
+            <div><Label>Banked by</Label><Input aria-label="Banked by" value={bankedBy} onChange={(e) => setBankedBy(e.target.value)} placeholder="e.g. Charity Steward" /></div>
           </div>
-          <div><Label>Notes</Label><Textarea aria-label="Banked by" value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} /></div>
+          <div><Label>Notes</Label><Textarea aria-label="Notes" value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} /></div>
         </div>
         <DialogFooter className="flex items-center justify-between gap-2">
           {editing && <Button variant="ghost" className="text-red-300 hover:text-red-200" onClick={remove}><Trash2 className="w-4 h-4 mr-1" /> Delete</Button>}
@@ -544,7 +544,7 @@ function DonationDialog({ open, onOpenChange, editing, charities, onSaved }: {
         <div className="space-y-3">
           <div className="grid grid-cols-2 gap-3">
             <div><Label>Date</Label><Input aria-label="Date" type="date" value={date} onChange={(e) => setDate(e.target.value)} /></div>
-            <div><Label>Amount (£)</Label><Input aria-label="Date" type="number" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} /></div>
+            <div><Label>Amount (£)</Label><Input aria-label="Amount (£)" type="number" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} /></div>
           </div>
           <div className="space-y-2 rounded-sm border border-gold/15 bg-navy-light/30 p-3">
             <label className="flex items-center gap-2 text-sm">
@@ -575,14 +575,14 @@ function DonationDialog({ open, onOpenChange, editing, charities, onSaved }: {
                 <SelectContent>{Object.entries(PAYMENT_METHOD_LABEL).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}</SelectContent>
               </Select>
             </div>
-            <div><Label>Reference</Label><Input aria-label="Cheque no. / BACS ref" value={reference} onChange={(e) => setReference(e.target.value)} placeholder="Cheque no. / BACS ref" /></div>
+            <div><Label>Reference</Label><Input aria-label="Reference" value={reference} onChange={(e) => setReference(e.target.value)} placeholder="Cheque no. / BACS ref" /></div>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <Label>Date payment left the bank</Label>
               <Input aria-label="Date payment left the bank" type="date" value={bankedDate} onChange={(e) => setBankedDate(e.target.value)} />
             </div>
-            <div><Label>Paid by</Label><Input aria-label="Date payment left the bank" value={bankedBy} onChange={(e) => setBankedBy(e.target.value)} placeholder="e.g. Treasurer" /></div>
+            <div><Label>Paid by</Label><Input aria-label="Paid by" value={bankedBy} onChange={(e) => setBankedBy(e.target.value)} placeholder="e.g. Treasurer" /></div>
           </div>
           <div>
             <Label>Authorised by</Label>
@@ -833,7 +833,7 @@ function CharityDialog({ open, onOpenChange, editing, onSaved }: {
         <div className="space-y-3">
           <div><Label>Name</Label><Input aria-label="Name" value={name} onChange={(e) => setName(e.target.value)} /></div>
           <div className="grid grid-cols-2 gap-3">
-            <div><Label>Registered charity no.</Label><Input aria-label="Name" value={chNum} onChange={(e) => setChNum(e.target.value)} /></div>
+            <div><Label>Registered charity no.</Label><Input aria-label="Registered charity no." value={chNum} onChange={(e) => setChNum(e.target.value)} /></div>
             <div>
               <Label>Status</Label>
               <Select value={status} onValueChange={(v) => setStatus(v as any)}>
@@ -844,12 +844,12 @@ function CharityDialog({ open, onOpenChange, editing, onSaved }: {
           </div>
           <div><Label>Description</Label><Textarea aria-label="Description" value={desc} onChange={(e) => setDesc(e.target.value)} rows={3} /></div>
           <div className="grid grid-cols-2 gap-3">
-            <div><Label>Contact name</Label><Input aria-label="Description" value={contact} onChange={(e) => setContact(e.target.value)} /></div>
-            <div><Label>Email</Label><Input aria-label="Contact name" type="email" value={email} onChange={(e) => setEmail(e.target.value)} /></div>
+            <div><Label>Contact name</Label><Input aria-label="Contact name" value={contact} onChange={(e) => setContact(e.target.value)} /></div>
+            <div><Label>Email</Label><Input aria-label="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} /></div>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <div><Label>Phone</Label><Input aria-label="Email" value={phone} onChange={(e) => setPhone(e.target.value)} /></div>
-            <div><Label>Website</Label><Input aria-label="Phone" value={website} onChange={(e) => setWebsite(e.target.value)} placeholder="https://" /></div>
+            <div><Label>Phone</Label><Input aria-label="Phone" value={phone} onChange={(e) => setPhone(e.target.value)} /></div>
+            <div><Label>Website</Label><Input aria-label="Website" value={website} onChange={(e) => setWebsite(e.target.value)} placeholder="https://" /></div>
           </div>
         </div>
         <DialogFooter className="flex items-center justify-between gap-2">
