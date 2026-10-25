@@ -8,12 +8,15 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 import { resolveLodgeSettings, type LodgeSettings } from "./lodgeSettingsResolve.ts";
 export { LODGE_FALLBACK, resolveLodgeSettings, returnFileName, lodgeNameOr, lodgeShortName, deadlineReminderTitle, accountsFileName, type LodgeSettings } from "./lodgeSettingsResolve.ts";
 
-let cache: { at: number; value: LodgeSettings } | null = null;
+// Cached per unit ("" = the no-unit lookup) so one unit's settings never answer for another.
+const cache = new Map<string, { at: number; value: LodgeSettings }>();
 const TTL_MS = 5 * 60 * 1000;
 
 /** Never throws; returns fallbacks on any error. Cached per warm instance. */
 export async function loadLodgeSettings(unitIdIn?: string): Promise<LodgeSettings> {
-  if (cache && Date.now() - cache.at < TTL_MS) return cache.value;
+  const cacheKey = unitIdIn ?? "";
+  const hit = cache.get(cacheKey);
+  if (hit && Date.now() - hit.at < TTL_MS) return hit.value;
   try {
     const url = Deno.env.get("SUPABASE_URL"); const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
     if (!url || !key) return resolveLodgeSettings(null);
@@ -48,7 +51,7 @@ export async function loadLodgeSettings(unitIdIn?: string): Promise<LodgeSetting
       if (v?.name) map.meeting_place = { ...map.meeting_place, venue_name: v.name, ...(lines.length && { town_line: lines[lines.length - 1] }) };
     }
     const value = resolveLodgeSettings(data as Record<string, string | null>, map, { assistantSecretaryHeld: !asst.error && !!asst.data }, identity);
-    cache = { at: Date.now(), value };
+    cache.set(cacheKey, { at: Date.now(), value });
     return value;
   } catch (e) {
     console.error("lodge settings lookup threw, using fallback", e);

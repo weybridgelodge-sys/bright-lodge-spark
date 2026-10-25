@@ -3,7 +3,7 @@ import { verifyTurnstile } from "../_shared/verify-turnstile.ts";
 import { loadLodgeSettings } from "../_shared/lodgeSettings.ts";
 import { handleSignup, type SubscriberRow } from "../_shared/newsletterOptIn.ts";
 import { resolveUnit } from "../_shared/resolveUnit.ts";
-import { sendTemplateEmail } from "../_shared/transactional-email-templates/send-email.ts";
+import { sendTransactionalEmail } from "../_shared/send-email.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -64,12 +64,16 @@ Deno.serve(async (req) => {
         await supabase.from("newsletter_subscribers").update({ confirm_sent_at: null, confirm_token_hash: null }).eq("id", id);
       },
       async sendConfirm(to, confirmUrl, idempotencyKey) {
-        await sendTemplateEmail("newsletter-confirm", to, {
+        const r = await sendTransactionalEmail({
+          templateName: "newsletter-confirm",
+          recipientEmail: to,
           templateData: { confirmUrl, lodgeName: lodge.formalSenderName, postcode: lodge.lodgePostcode, townLine: lodge.meetingTownLine, crestUrl: lodge.crestImageUrl || null, crestName: lodge.lodgeName },
           idempotencyKey,
           fromName: lodge.formalSenderName,
           replyTo: lodge.communicationsEmail,
         });
+        // Throwing lets handleSignup reset the hourly limit, as before.
+        if (!r.ok) throw new Error(String(r.error ?? "send failed"));
       },
       log: (m, e) => console.error(`newsletter-subscribe: ${m}`, e instanceof Error ? e.message : e),
     }, cleanEmail, lodge.siteUrl);
