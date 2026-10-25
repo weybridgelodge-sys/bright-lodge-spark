@@ -1,13 +1,17 @@
 import * as React from 'npm:react@18.3.1'
 import { Body, Button, Container, Head, Heading, Hr, Html, Img, Preview, Section, Text } from 'npm:@react-email/components@0.0.22'
 import type { TemplateEntry } from './registry.ts'
-import { BRAND, LOGO_HEIGHT, LOGO_URL, LOGO_WIDTH, brandStyles } from './_brand.ts'
+import { BRAND, LOGO_HEIGHT, LOGO_WIDTH, brandStyles } from './_brand.ts'
 
 interface Props {
   quizUrl?: string
   signOffName?: string
   signOffRole?: string | null
   lodgeName?: string
+  /** Unit Setup crest (https); blank = image omitted. */
+  crestUrl?: string | null
+  /** Lodge record name for the crest alt text. */
+  crestName?: string
   postcode?: string
 }
 
@@ -16,7 +20,7 @@ const Email = ({
   signOffName,
   signOffRole,
   lodgeName = 'Your Lodge',
-  postcode = '',
+  postcode = '', crestUrl, crestName,
 }: Props) => (
   <Html lang="en" dir="ltr">
     <Head />
@@ -24,7 +28,7 @@ const Email = ({
     <Body style={brandStyles.main}>
       <Container style={brandStyles.container}>
         <Section style={brandStyles.crestWrap}>
-          <Img src={LOGO_URL} width={LOGO_WIDTH} height={LOGO_HEIGHT} alt="Weybridge Lodge crest" style={{ margin: '0 auto', display: 'block' }} />
+          {crestUrl && /^https:\/\//.test(crestUrl) ? <Img src={crestUrl} width={LOGO_WIDTH} height={LOGO_HEIGHT} alt={crestName ? `${crestName} crest` : 'Lodge crest'} style={{ margin: '0 auto', display: 'block' }} /> : null}
           <Heading style={{ ...brandStyles.brand, fontFamily: 'Georgia, serif' }}>{lodgeName}</Heading>
         </Section>
         <Heading as="h2" style={{ ...brandStyles.h1, fontFamily: 'Georgia, serif' }}>Thank you for subscribing</Heading>
