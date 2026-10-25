@@ -22,6 +22,8 @@ export const LODGE_FALLBACK = {
   newsletterFooterNote: "",
   calendarName: "Your Lodge",
   meetingVenue: "",
+  /** Town line of the meeting venue (last venue display line, e.g. "Town, County POSTCODE"); "" = omit. */
+  meetingTownLine: "",
   provincialReturnFile: "Provincial-Return-{year}",
   installationReturnFile: "Installation-Return-{year}",
 } as const;
@@ -71,6 +73,7 @@ export function resolveLodgeSettings(row: Row, us?: UnitSettingsMap, officers?: 
     newsletterFooterNote: pick(u("newsletter", "").footer_note, f.newsletterFooterNote),
     calendarName: pick(u("calendar_feed", "").name, f.calendarName),
     meetingVenue: pick(u("meeting_place", "").venue_name, f.meetingVenue),
+    meetingTownLine: pick(u("meeting_place", "").town_line, f.meetingTownLine).replace(/,\s*$/, ""),
     provincialReturnFile: pick(u("return_files", "").provincial, f.provincialReturnFile),
     installationReturnFile: pick(u("return_files", "").installation, f.installationReturnFile),
   };

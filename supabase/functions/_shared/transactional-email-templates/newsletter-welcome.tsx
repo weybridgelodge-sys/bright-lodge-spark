@@ -49,7 +49,7 @@ const Email = ({
         </Text>
         {signOffRole ? <Text style={{ ...brandStyles.body, color: BRAND.muted }}>{signOffRole}</Text> : null}
         <Hr style={brandStyles.hr} />
-        <Text style={footer}>{lodgeName} · Guildford, Surrey {postcode}</Text>
+        <Text style={footer}>{[lodgeName, townLine].filter(Boolean).join(' · ')}</Text>
       </Container>
     </Body>
   </Html>

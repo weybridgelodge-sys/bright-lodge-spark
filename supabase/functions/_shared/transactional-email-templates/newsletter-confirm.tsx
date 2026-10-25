@@ -30,7 +30,7 @@ const Email = ({ confirmUrl, lodgeName = 'Your Lodge', postcode = '', crestUrl, 
         </Section>
         <Text style={brandStyles.body}>If you didn't ask for this, ignore this email.</Text>
         <Hr style={brandStyles.hr} />
-        <Text style={footer}>{lodgeName} · Guildford, Surrey {postcode}</Text>
+        <Text style={footer}>{[lodgeName, townLine].filter(Boolean).join(' · ')}</Text>
       </Container>
     </Body>
   </Html>

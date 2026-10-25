@@ -59,6 +59,7 @@ Deno.serve(async (req) => {
             signOffRole: sign.role,
             lodgeName: lodge.formalSenderName,
             postcode: lodge.lodgePostcode,
+            townLine: lodge.meetingTownLine,
             crestUrl: lodge.crestImageUrl || null,
             crestName: lodge.lodgeName,
           },
