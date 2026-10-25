@@ -5,6 +5,7 @@ import { buildNewsletterArchivePdf } from "../_shared/newsletterArchivePdf.ts";
 import { loadCrest, type ProcessedCrest } from "../_shared/pdfLibBrand.ts";
 import { once, runSendsThenArchives } from "../_shared/newsletterDispatch.ts";
 import { newsletterBrandFrom, newsletterFooterHtml, newsletterHeaderHtml } from "../_shared/newsletterBrand.ts";
+import { EMAIL_DOMAINS } from "../_shared/emailDomains.ts";
 let LODGE = resolveLodgeSettings(null);
 
 const corsHeaders = {
