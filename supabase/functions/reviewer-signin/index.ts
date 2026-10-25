@@ -19,6 +19,8 @@
 
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
+import { resolveUnit } from "../_shared/resolveUnit.ts";
+import { releaseAccountUnit, reserveAccountUnit } from "../_shared/pendingAccountUnit.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -65,15 +67,23 @@ Deno.serve(async (req) => {
     }
 
     if (!userId) {
+      // First-time creation needs a trusted lodge: the site the request came
+      // from (unit_domains). No match = refuse; never a default lodge.
+      const unit = await resolveUnit(req, admin);
+      if (!unit.ok) return json({ error: "unit_unresolved" }, 503);
+      const resErr = await reserveAccountUnit(admin, email, unit.unitId, null);
+      if (resErr) return json({ error: "create_failed" }, 500);
       const { data: created, error: createErr } = await admin.auth.admin.createUser({
         email,
         email_confirm: true,
+        app_metadata: { unit_id: unit.unitId },
         user_metadata: {
           full_name: "Play Reviewer",
           is_test_account: true,
         },
       });
       if (createErr || !created?.user) {
+        await releaseAccountUnit(admin, email);
         return json({ error: "create_failed", detail: createErr?.message }, 500);
       }
       userId = created.user.id;

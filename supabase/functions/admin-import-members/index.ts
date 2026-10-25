@@ -9,6 +9,7 @@ import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { z } from "npm:zod@3";
 import { loadLodgeSettings } from "../_shared/lodgeSettings.ts";
 import { composeFullName, fillBlanks, normaliseHeader, validateRow } from "../_shared/memberImport.ts";
+import { releaseAccountUnit, reserveAccountUnit } from "../_shared/pendingAccountUnit.ts";
 
 const MAX_ROWS = 250;
 const Body = z.object({
@@ -93,11 +94,14 @@ Deno.serve(async (req) => {
       const fields = Object.entries(record).filter(([k, v]) => k !== "email" && v !== null && v !== false).map(([k]) => k);
       if (!dry_run) {
         const full_name = composeFullName(record.title, record.first_name, record.last_name);
+        // Trusted lodge for the new sign-in (caller's own unit), recorded before it is created.
+        const rerr2 = await reserveAccountUnit(admin, record.email, unitId, userRes.user.id);
+        if (rerr2) { results.push({ row: rowNo, email: record.email, action: "error", message: rerr2 }); continue; }
         // Import and invite are one step: each new member gets the branded invite email.
         const { data: created, error: cerr } = await admin.auth.admin.inviteUserByEmail(record.email, {
           data: { full_name }, redirectTo: `${lodge.siteUrl}/members`,
         });
-        if (cerr || !created.user) { results.push({ row: rowNo, email: record.email, action: "error", message: cerr?.message ?? "Could not create sign-in" }); continue; }
+        if (cerr || !created.user) { await releaseAccountUnit(admin, record.email); results.push({ row: rowNo, email: record.email, action: "error", message: cerr?.message ?? "Could not create sign-in" }); continue; }
         const profile: Record<string, unknown> = { full_name, email: record.email };
         for (const [k, v] of Object.entries(record)) if (k !== "email" && v !== null) profile[k] = v;
         profile.degree = record.degree ?? "master_mason";

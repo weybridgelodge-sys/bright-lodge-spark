@@ -1044,6 +1044,27 @@
       "when": 1792961698584,
       "tag": "0148_drop_host_unit_defaults",
       "breakpoints": true
+    },
+    {
+      "idx": 149,
+      "version": "7",
+      "when": 1792963082384,
+      "tag": "0149_pending_account_units",
+      "breakpoints": true
+    },
+    {
+      "idx": 150,
+      "version": "7",
+      "when": 1792963140674,
+      "tag": "0150_handle_new_user_requires_unit",
+      "breakpoints": true
+    },
+    {
+      "idx": 151,
+      "version": "7",
+      "when": 1792963149577,
+      "tag": "0151_drop_profiles_unit_default",
+      "breakpoints": true
     }
   ]
 }

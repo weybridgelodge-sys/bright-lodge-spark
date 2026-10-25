@@ -5067,6 +5067,27 @@ export type Database = {
           },
         ]
       }
+      pending_account_units: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          email: string
+          unit_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          email: string
+          unit_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          email?: string
+          unit_id?: string
+        }
+        Relationships: []
+      }
       poll_votes: {
         Row: {
           id: string
@@ -5227,7 +5248,7 @@ export type Database = {
           title?: string | null
           town?: string | null
           ugle_reg_number?: string | null
-          unit_id?: string
+          unit_id: string
           updated_at?: string
         }
         Update: {
