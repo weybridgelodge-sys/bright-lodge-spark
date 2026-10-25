@@ -157,6 +157,7 @@ async function handleDuesChargeRefunded(charge: any, _env: StripeEnv) {
     let sub: { id: string; member_id: string; method: string } | null = null;
     if (charge.payment_intent) sub = await findDuesSubscriptionByPI(charge.payment_intent);
     if (!sub) continue;
+    // Errors are logged, not thrown, as before (no Stripe retry storm).
     await insertOnce(`dues refund ${r.id}`, () => getSupabase().from("dues_payments").insert(
       {
         subscription_id: sub.id,
@@ -171,7 +172,7 @@ async function handleDuesChargeRefunded(charge: any, _env: StripeEnv) {
         note: r.reason ?? "Refund",
         occurred_at: new Date((r.created ?? Date.now() / 1000) * 1000).toISOString(),
       },
-    ));
+    )).catch((e) => console.error("dues refund row failed:", r.id, e));
   }
 }
 
