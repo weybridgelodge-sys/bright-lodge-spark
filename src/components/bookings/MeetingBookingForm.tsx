@@ -783,6 +783,7 @@ export default function MeetingBookingForm({
                             </span>
                           </label>
                         </div>
+                        <InlineFieldError errors={errs} id="evf-pay" />
                       </div>
 
                       {paymentMethod === "card" && seatsToCharge > 0 && (
