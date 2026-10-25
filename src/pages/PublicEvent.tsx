@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { PHONE_REQUIRED_MESSAGE, isPlausiblePhone } from "@/lib/phone";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { ArrowRight, Calendar, Clock, MapPin, Star, Users } from "lucide-react";
 import Header from "@/components/Header";
@@ -44,6 +45,8 @@ export default function PublicEvent() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
+  const [phoneTouched, setPhoneTouched] = useState(false);
+  const phoneError = phoneTouched && !isPlausiblePhone(phone);
   const [lodge, setLodge] = useState<(typeof LODGES)[number]>("Weybridge");
   const [adults, setAdults] = useState(1);
   const [children, setChildren] = useState(0);
@@ -112,6 +115,7 @@ export default function PublicEvent() {
     if (honeypot) return;
     if (!ev) return;
     if (!name.trim() || !email.trim()) { setError("Please enter your name and email."); return; }
+    if (!isPlausiblePhone(phone)) { setPhoneTouched(true); setError(PHONE_REQUIRED_MESSAGE); return; }
     if (adults + children < 1) { setError("Please add at least one guest."); return; }
     if ([...adultRows, ...childRows].some((g) => !g.name.trim())) { setError("Please give a name for every guest."); return; }
     if (childRows.some((g) => !isChildAge(g.age === "" ? null : Number(g.age)))) { setError(`Please give each child's age (${CHILD_MAX_AGE} and under).`); return; }
@@ -291,7 +295,8 @@ export default function PublicEvent() {
                     <legend className="font-serif text-xl text-foreground mb-2">Your details</legend>
                     <label className="block" htmlFor="pev-name"><span className={labelClass}>Full name{req}</span><input id="pev-name" className={inputCls} required value={name} onChange={(e) => setName(e.target.value)} autoComplete="name" /></label>
                     <label className="block" htmlFor="pev-email"><span className={labelClass}>Email{req}</span><input id="pev-email" className={inputCls} type="email" required value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" /></label>
-                    <label className="block" htmlFor="pev-phone"><span className={labelClass}>Phone</span><input id="pev-phone" className={inputCls} type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} autoComplete="tel" /></label>
+                    <label className="block" htmlFor="pev-phone"><span className={labelClass}>Phone{req}</span><input id="pev-phone" className={inputCls} type="tel" inputMode="tel" required aria-required="true" aria-invalid={phoneError ? true : undefined} aria-describedby={phoneError ? "pev-phone-error" : undefined} value={phone} onChange={(e) => setPhone(e.target.value)} onBlur={() => setPhoneTouched(true)} autoComplete="tel" /></label>
+                    {phoneError && <p id="pev-phone-error" className="text-sm text-destructive">{PHONE_REQUIRED_MESSAGE}</p>}
                     <label className="block" htmlFor="pev-lodge"><span className={labelClass}>Lodge</span>
                       <select id="pev-lodge" className={inputCls} value={lodge} onChange={(e) => setLodge(e.target.value as any)}>
                         <option value="Weybridge">Weybridge Lodge</option><option value="Astolat">Astolat Lodge</option><option value="Other">Another lodge</option><option value="Guest">Guest / not a Freemason</option>

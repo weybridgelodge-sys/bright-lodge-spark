@@ -1,4 +1,5 @@
 import { attendanceOptions, diningEventLabel, isNonMasonTitle, lodgeRequired } from "@/lib/bookingTitles";
+import { PHONE_REQUIRED_MESSAGE, isPlausiblePhone } from "@/lib/phone";
 import { StripeEmbeddedCheckoutPanel, type BookingLineItem } from "@/components/payments/StripeEmbeddedCheckout";
 import { motion, useReducedMotion } from "framer-motion";
 import { Link } from "react-router-dom";
@@ -94,6 +95,8 @@ export default function MeetingBookingForm({
   const [lodge, setLodge] = useState(prefill?.lodge ?? "");
   const [email, setEmail] = useState(prefill?.email ?? "");
   const [phone, setPhone] = useState(prefill?.phone ?? "");
+  const [phoneTouched, setPhoneTouched] = useState(false);
+  const phoneError = phoneTouched && !isPlausiblePhone(phone);
   // Honeypot — must remain empty on legitimate submissions
   const [honeypot, setHoneypot] = useState("");
   const [turnstileToken, setTurnstileToken] = useState<string>("");
@@ -158,6 +161,11 @@ export default function MeetingBookingForm({
     if (honeypot) return false;
     if (!title || !firstName.trim() || !lastName.trim() || (lodgeRequired(title) && !lodge.trim()) || !email.trim() || !phone.trim()) {
       toast({ title: "Missing details", description: "Please fill in all required fields.", variant: "destructive" });
+      return false;
+    }
+    if (!isPlausiblePhone(phone)) {
+      setPhoneTouched(true);
+      toast({ title: "Invalid phone number", description: PHONE_REQUIRED_MESSAGE, variant: "destructive" });
       return false;
     }
     if (!/^\S+@\S+\.\S+$/.test(email)) {
@@ -537,10 +545,17 @@ export default function MeetingBookingForm({
                           type="tel"
                           value={phone}
                           onChange={(e) => setPhone(e.target.value)}
+                          onBlur={() => setPhoneTouched(true)}
                           required
+                          aria-required="true"
+                          aria-invalid={phoneError ? true : undefined}
+                          aria-describedby={phoneError ? "evf-phone-error" : undefined}
+                          inputMode="tel"
+                          autoComplete="tel"
                           className={inputClass}
                           placeholder="07xxx xxx xxx"
                         />
+                        {phoneError && <p id="evf-phone-error" className="mt-1 font-sans text-sm text-destructive">{PHONE_REQUIRED_MESSAGE}</p>}
                       </div>
                     </div>
                     <div className="mt-8 flex justify-end">
