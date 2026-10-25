@@ -1,4 +1,4 @@
-// Events Stripe account ("weybridgelodge.org.uk") — deliberately separate from the
+// Events Stripe account — deliberately separate from the
 // Lovable-managed lodge Stripe (./stripe.ts). Uses only STRIPE_EVENTS_* secrets.
 import { encode } from "https://deno.land/std@0.168.0/encoding/hex.ts";
 import Stripe from "https://esm.sh/stripe@22.0.2";
