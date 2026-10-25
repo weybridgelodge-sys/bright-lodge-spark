@@ -6,6 +6,7 @@
 
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { createStripeClient } from "../_shared/stripe.ts";
+import { CROSS_UNIT_MESSAGE, loadCallerUnit, noCallerUnitMessage, recordUnitMatches } from "../_shared/callerUnit.ts";
 import { loadLodgeSettings, lodgeNameOr } from "../_shared/lodgeSettings.ts";
 
 const corsHeaders = {
@@ -37,12 +38,14 @@ Deno.serve(async (req) => {
       _role: "admin",
     });
     if (!isAdmin) return json({ error: "Admin only (test-mode demo)" }, 403);
+    const callerUnit = await loadCallerUnit(admin, user.id);
+    if (!callerUnit) return json({ error: noCallerUnitMessage("start a dues payment") }, 403);
 
     const body = await req.json().catch(() => ({}));
     const memberId: string = body.member_id ?? user.id;
     const plan: "lump_sum" | "monthly" = body.plan;
     const method: "card" | "bacs" = body.method;
-    const returnUrl: string = body.return_url ?? `${(await loadLodgeSettings()).siteUrl}/members/admin/dues?checkout=complete`;
+    const returnUrl: string = body.return_url ?? `${(await loadLodgeSettings(callerUnit)).siteUrl}/members/admin/dues?checkout=complete`;
 
     if (!["lump_sum", "monthly"].includes(plan)) return json({ error: "Invalid plan" }, 400);
     if (!["card", "bacs"].includes(method)) return json({ error: "Invalid method" }, 400);
@@ -50,14 +53,15 @@ Deno.serve(async (req) => {
     // Load member + current settings
     const { data: profile } = await admin
       .from("profiles")
-      .select("id,email,full_name,first_name,last_name")
+      .select("id,email,full_name,first_name,last_name,unit_id")
       .eq("id", memberId)
       .maybeSingle();
     if (!profile) return json({ error: "Member not found" }, 404);
+    if (!recordUnitMatches((profile as any).unit_id, callerUnit)) return json({ error: CROSS_UNIT_MESSAGE }, 403);
 
     const { data: yearRow } = await admin.rpc("current_lodge_year" as any);
     const lodgeYear = Number(yearRow);
-    const lodgeName = lodgeNameOr((await loadLodgeSettings()).lodgeName);
+    const lodgeName = lodgeNameOr((await loadLodgeSettings(callerUnit)).lodgeName);
 
     // Compute prorated / exempt amount via shared DB function
     const { data: calc, error: calcErr } = await admin.rpc("dues_calculate_amount" as any, {

@@ -7,6 +7,7 @@ import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { z } from "npm:zod@3";
 import { sendTransactionalEmail } from "../_shared/send-email.ts";
 import { loadLodgeSettings, returnFileName } from "../_shared/lodgeSettings.ts";
+import { loadCallerUnit, noCallerUnitMessage } from "../_shared/callerUnit.ts";
 import { fileReturnDocument, resolveReturnCc } from "../_shared/returnFiling.ts";
 import { loadProvinceReturnEmail } from "../_shared/provinceReturnEmail.ts";
 
@@ -39,6 +40,8 @@ Deno.serve(async (req) => {
       admin.rpc("is_current_officer", { _user_id: user.id, _position_key: "secretary" }),
     ]);
     if (!(isAdmin || isSec || isCurSec)) return json({ error: "Only the Secretary or an administrator can submit the return." }, 403);
+    const callerUnit = await loadCallerUnit(admin, user.id);
+    if (!callerUnit) return json({ error: noCallerUnitMessage("submit the return") }, 403);
 
     const parsed = Body.safeParse(await req.json().catch(() => ({})));
     if (!parsed.success) return json({ error: "Invalid request", details: parsed.error.flatten().fieldErrors }, 400);
@@ -53,7 +56,7 @@ Deno.serve(async (req) => {
     }
 
     const { data: signed, error: sErr } = await admin.storage.from("secretary-returns").createSignedUrl(b.storage_path, LINK_DAYS * 86400, {
-      download: returnFileName((await loadLodgeSettings()).installationReturnFile, b.lodge_year, "pdf"),
+      download: returnFileName((await loadLodgeSettings(callerUnit)).installationReturnFile, b.lodge_year, "pdf"),
     });
     if (sErr || !signed?.signedUrl) return json({ error: "The generated PDF could not be found." }, 400);
 
@@ -62,9 +65,9 @@ Deno.serve(async (req) => {
     const yearLabel = `${b.lodge_year}/${String(b.lodge_year + 1).slice(2)}`;
     const expires = new Date(Date.now() + LINK_DAYS * 86400000).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "Europe/London" });
     const submissionId = crypto.randomUUID();
-    const { cc, used: ccUsed } = await resolveReturnCc(admin, configured);
+    const { cc, used: ccUsed } = await resolveReturnCc(admin, configured, callerUnit);
 
-    const lodge = await loadLodgeSettings();
+    const lodge = await loadLodgeSettings(callerUnit);
     const res = await sendTransactionalEmail({
       templateName: "installation-return-submission",
       recipientEmail: configured,

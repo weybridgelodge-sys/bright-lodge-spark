@@ -3,6 +3,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { sendTransactionalEmail } from "../_shared/send-email.ts";
 import { loadLodgeSettings } from "../_shared/lodgeSettings.ts";
+import { loadCallerUnit, noCallerUnitMessage } from "../_shared/callerUnit.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -21,6 +22,8 @@ Deno.serve(async (req) => {
     const userClient = createClient(URL_, Deno.env.get("SUPABASE_ANON_KEY")!, { global: { headers: { Authorization: authHeader } } });
     const { data: { user } } = await userClient.auth.getUser();
     if (!user) return json({ error: "Unauthorized" }, 401);
+    const callerUnit = await loadCallerUnit(admin, user.id);
+    if (!callerUnit) return json({ error: noCallerUnitMessage("request an unlock") }, 403);
 
     const { period_id } = await req.json().catch(() => ({}));
     if (!period_id) return json({ error: "period_id required" }, 400);
@@ -34,7 +37,7 @@ Deno.serve(async (req) => {
     // Current holders by the officers' (Installation) year, carrying non-progressive offices forward.
     const appts: { member_id: string; position_key: string }[] = [];
     for (const key of ["treasurer", "secretary"]) {
-      const { data: id } = await admin.rpc("current_officer_holder", { _position_key: key });
+      const { data: id } = await admin.rpc("current_officer_holder", { _position_key: key, _unit: callerUnit });
       if (id) appts.push({ member_id: id as unknown as string, position_key: key });
     }
 
@@ -62,8 +65,8 @@ Deno.serve(async (req) => {
           reason: p.unlock_reason ?? "",
           requestedBy: requester,
           approveAs: offices.sort().reverse().join(" & "),
-          dashboardUrl: `${(await loadLodgeSettings()).siteUrl}/members/dashboard`,
-          ...(await (async () => { const l = await loadLodgeSettings(); return { crestUrl: l.crestImageUrl || null, lodgeName: l.lodgeName, lodgeNumber: l.lodgeNumber, provinceName: l.provinceName, } })()),
+          dashboardUrl: `${(await loadLodgeSettings(callerUnit)).siteUrl}/members/dashboard`,
+          ...(await (async () => { const l = await loadLodgeSettings(callerUnit); return { crestUrl: l.crestImageUrl || null, lodgeName: l.lodgeName, lodgeNumber: l.lodgeNumber, provinceName: l.provinceName, } })()),
         },
       });
       if (res.ok) sent++; else failures.push(email);
