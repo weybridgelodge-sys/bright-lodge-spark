@@ -25,6 +25,8 @@ for (const width of [320, 360]) {
     test(`${title} dialog scrolls above a phone keyboard at ${width}px`, { timeout: 90_000 }, async ({ page }) => {
       await fakeKeyboard(page);
       await page.setViewportSize({ width, height: 760 });
+      await page.route("**/rest/v1/**", (r) => r.request().method() === "GET" ? r.fulfill({ json: [] }) : r.continue());
+      await page.route("**/rest/v1/charity_festival_settings**", (r) => r.fulfill({ json: null }));
       await page.route("**/rest/v1/charity_ledger**", (r) => r.fulfill({ json: [{ id: "c1", name: "Surrey Freemasons' Charitable Trust for Very Long Charity Names", status: "active" }] }));
       await page.goto("/members/admin/charity");
       const tabBtn = page.getByRole("tab", { name: new RegExp(tab, "i") });
