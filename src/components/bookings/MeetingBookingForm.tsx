@@ -32,8 +32,8 @@ const fadeUp = {
 
 // border-input and ring-ring are Shadcn CSS variable tokens — retained as-is
 // since they control focus rings. TODO: verify these are defined in global CSS.
-const inputClass = "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 min-h-[48px]";
-const selectClass = "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 min-h-[48px]";
+const inputClass = "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 min-h-[48px] autofill-light";
+const selectClass = "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 min-h-[48px] autofill-light";
 // Card processing fee charged to the payer when they opt in: 2% of the
 // subtotal plus a flat 20p (covers Stripe fees and the Lodge environmental levy).
 export function calcCardFeePence(subtotalPence: number): number {

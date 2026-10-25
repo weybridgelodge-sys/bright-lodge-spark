@@ -108,7 +108,7 @@ export const EnquiryForm = () => {
   // FIXED: fixed h-10 (40px) is under the 48px minimum touch target for
   // interactive elements — switched to min-h-[48px].
   const inputClass =
-    "flex min-h-[48px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2";
+    "flex min-h-[48px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 autofill-light";
 
   return (
     <form

@@ -9,7 +9,7 @@ import { InlineFieldError } from "@/components/bookings/InlineFieldError";
 export type GuestRow = { name: string; age: string; dietary: string; choice: string };
 export type PayMethod = EventPayMethod;
 
-export const inputCls = "flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground font-sans ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 min-h-[48px]";
+export const inputCls = "flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground font-sans ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 min-h-[48px] autofill-light";
 export const labelClass = "block text-sm font-sans font-medium text-foreground mb-1";
 export const req = <span className="text-destructive"> *</span>;
 
