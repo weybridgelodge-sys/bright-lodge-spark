@@ -54,9 +54,13 @@ const FIELD = "input, textarea, select, [contenteditable='true'], [role='combobo
 export function scrollFocusedFieldIntoView(target: EventTarget | null, delayMs = 300): () => void {
   if (typeof window === "undefined" || !(target instanceof HTMLElement) || !target.matches(FIELD)) return () => {};
   const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches ?? false;
+  // Scroll only the overlay's own scroll area (never the locked page behind it).
   const run = () => {
     if (document.activeElement !== target) return;
-    target.scrollIntoView({ block: "center", inline: "nearest", behavior: reduce ? "auto" : "smooth" });
+    const box = target.closest<HTMLElement>(".vv-dialog, .vv-sheet-side, [role='dialog'], [role='alertdialog']");
+    if (!box) return;
+    const delta = fieldScrollDelta(target.getBoundingClientRect(), box.getBoundingClientRect(), window.visualViewport);
+    if (delta !== 0) box.scrollBy({ top: delta, behavior: reduce ? "auto" : "smooth" });
   };
   const t = window.setTimeout(run, delayMs);
   const vv = window.visualViewport;
@@ -64,4 +68,18 @@ export function scrollFocusedFieldIntoView(target: EventTarget | null, delayMs =
   vv?.addEventListener("resize", onResize);
   const stop = window.setTimeout(() => vv?.removeEventListener("resize", onResize), 1500);
   return () => { window.clearTimeout(t); window.clearTimeout(stop); vv?.removeEventListener("resize", onResize); };
+}
+
+const GAP = 16;
+/** How far the overlay must scroll so the field sits inside the visible part (nearest edge). 0 = already visible. */
+export function fieldScrollDelta(
+  field: { top: number; bottom: number },
+  box: { top: number; bottom: number },
+  vv?: { height: number; offsetTop: number } | null,
+): number {
+  const visTop = Math.max(box.top, vv ? vv.offsetTop : -Infinity);
+  const visBottom = Math.min(box.bottom, vv ? vv.offsetTop + vv.height : Infinity);
+  if (field.top < visTop + GAP) return field.top - visTop - GAP;
+  if (field.bottom > visBottom - GAP) return field.bottom - visBottom + GAP;
+  return 0;
 }
