@@ -360,8 +360,6 @@ select.autofilled-dark:not(.autofill-light) {
     -webkit-overflow-scrolling: touch;
     scroll-padding-bottom: 5rem;
   }
-  /* While a field is focused, leave room below the last field and Save so they can be
-     scrolled above a keyboard that covers the box (--app-kb = 0 when keyboard is closed). */
   /* While a field is focused (class set by scrollFocusedFieldIntoView on the element that
      actually scrolls), give it half the visible height of spare space below the last field,
      so Notes/Save can be centred whatever the keyboard does. */
