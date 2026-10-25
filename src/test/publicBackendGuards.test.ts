@@ -25,12 +25,8 @@ describe("save-meeting-response guards", () => {
 });
 
 describe("enquiry contacts", () => {
-  it("falls back to the previous constants when the row is missing", () => {
-    expect(resolveEnquiryContacts(null)).toEqual({
-      secretaryEmail: "secretary@weybridgelodge.org.uk",
-      membershipCcEmail: "membershipsecretary@weybridgelodge.org.uk",
-      guideUrl: "https://weybridgelodge.org.uk/downloads/information-for-prospective-members.pdf?v=2",
-    });
+  it("falls back to neutral blanks when the row is missing", () => {
+    expect(resolveEnquiryContacts(null)).toEqual({ secretaryEmail: "", membershipCcEmail: "", guideUrl: "" });
   });
   it("uses stored values, blanks fall back", () => {
     const r = resolveEnquiryContacts({ secretary_email: "a@x.org", membership_cc_email: " ", guide_url: null });
@@ -62,22 +58,18 @@ describe("create-checkout wiring", () => {
 
 import { resolveLodgeSettings } from "../../supabase/functions/_shared/lodgeSettingsResolve";
 describe("lodge settings fallback", () => {
-  it("missing row keeps every previously typed value", () => {
+  it("missing row gives neutral values, never a host-lodge value", () => {
     expect(resolveLodgeSettings(null)).toMatchObject({
-      siteUrl: "https://weybridgelodge.org.uk",
-      senderName: "Weybridge Lodge",
-      formalSenderName: "Weybridge Lodge No. 6787",
-      secretaryEmail: "secretary@weybridgelodge.org.uk",
-      membershipCcEmail: "membershipsecretary@weybridgelodge.org.uk",
-      assistantSecretaryEmail: "", // no typed fallback (JOB P)
-      webmasterEmail: "webmaster@weybridgelodge.org.uk",
-      communicationsEmail: "communications@weybridgelodge.org.uk",
-      lodgePostcode: "GU2 4DR",
+      siteUrl: "https://example.com", senderName: "Your Lodge", formalSenderName: "Your Lodge",
+      secretaryEmail: "", membershipCcEmail: "", assistantSecretaryEmail: "", webmasterEmail: "",
+      communicationsEmail: "", lodgePostcode: "", provinceName: "", facebookUrl: "", instagramUrl: "", twitterUrl: "",
+      newsletterMasthead: "Your Lodge", newsletterFooterNote: "", calendarName: "Your Lodge", meetingVenue: "",
+      provincialReturnFile: "Provincial-Return-{year}", installationReturnFile: "Installation-Return-{year}",
     });
   });
   it("stored values win, blanks fall back, trailing slash trimmed", () => {
     const r = resolveLodgeSettings({ site_url: "https://example.org/", webmaster_email: " " });
     expect(r.siteUrl).toBe("https://example.org");
-    expect(r.webmasterEmail).toBe("webmaster@weybridgelodge.org.uk");
+    expect(r.webmasterEmail).toBe("");
   });
 });
