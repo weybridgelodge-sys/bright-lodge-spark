@@ -1,3 +1,5 @@
+import { useUnitProfile } from "@/lib/unitProfile";
+import { siteOriginOr } from "@/lib/unitText";
 import { Facebook, Mail, MessageSquare } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -25,10 +27,11 @@ const InstagramIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
-const BASE_URL = "https://weybridgelodge.org.uk";
 
 const SocialShare = ({ url, title, commentCount }: SocialShareProps) => {
-  const fullUrl = `${BASE_URL}${url}`;
+  const unit = useUnitProfile();
+  const fullUrl = `${siteOriginOr(unit)}${url}`;
+  const instagram = unit.instagramUrl ? unit.instagramUrl.replace(/\/*$/, "/") : "";
   const encodedUrl = encodeURIComponent(fullUrl);
   const encodedTitle = encodeURIComponent(title);
 
@@ -48,11 +51,11 @@ const SocialShare = ({ url, title, commentCount }: SocialShareProps) => {
       href: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
       icon: <Facebook className="h-4 w-4" />,
     },
-    {
+    ...(instagram ? [{
       label: "Share on Instagram",
-      href: "https://www.instagram.com/weybridgelodge/",
+      href: instagram,
       icon: <InstagramIcon className="h-4 w-4" />,
-    },
+    }] : []),
     {
       label: "Share on X",
       href: `https://x.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`,

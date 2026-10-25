@@ -1,3 +1,5 @@
+import { unitTitle, useUnitProfile, venueShort } from "@/lib/unitProfile";
+import { nameOr, titleOr } from "@/lib/unitText";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
@@ -21,13 +23,15 @@ const fmtDate = (isoDate: string) =>
  * is scheduled. No booking form in this state.
  */
 const SaveTheDate = ({ meetings }: { meetings: RegisterMeeting[] }) => {
+  const unit = useUnitProfile();
+  const venue = venueShort(unit);
   const hasMeetings = meetings.length > 0;
 
   return (
     <div className="min-h-screen overflow-x-hidden">
       <SEO
-        title="Dining & Bookings | Weybridge Lodge No. 6787 — Guildford Masonic Centre"
-        description="Upcoming Weybridge Lodge meetings at the Guildford Masonic Centre, Guildford GU2 4DR. Full booking details are published closer to each date."
+        title={["Dining & Bookings", [unitTitle(unit), unit.venueName].filter(Boolean).join(" — ")].filter(Boolean).join(" | ")}
+        description={`Upcoming ${nameOr(unit, "lodge")} meetings${venue ? ` at the ${venue}` : ""}. Full booking details are published closer to each date.`}
         canonical="/bookings"
         type="website"
         schema={[
@@ -43,7 +47,7 @@ const SaveTheDate = ({ meetings }: { meetings: RegisterMeeting[] }) => {
       <main id="main-content">
         <PageHeader
           title="Dining & Bookings"
-          subtitle="Our upcoming meetings at the Guildford Masonic Centre, GU2 4DR"
+          subtitle={`Our upcoming meetings${venue ? ` at the ${venue}` : ""}`}
         />
 
         <section className="py-20 md:py-28 bg-background" aria-labelledby="save-the-date-heading">
@@ -102,7 +106,7 @@ const SaveTheDate = ({ meetings }: { meetings: RegisterMeeting[] }) => {
 
             <Link
               to="/events"
-              aria-label="View the full calendar of upcoming events at Weybridge Lodge No. 6787"
+              aria-label={`View the full calendar of upcoming events at ${titleOr(unit, "the lodge")}`}
               className="inline-flex items-center justify-center border border-border text-foreground px-8 py-4 rounded-sm text-sm font-sans uppercase tracking-widest hover:border-gold hover:text-gold-dark transition-colors min-h-[48px]"
             >
               View the Full Calendar
