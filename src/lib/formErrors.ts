@@ -3,6 +3,7 @@
 import { CHILD_MAX_AGE, isChildAge } from "@/lib/publicEvents";
 import { lodgeRequired } from "@/lib/bookingTitles";
 import { PHONE_REQUIRED_MESSAGE, isPlausiblePhone } from "@/lib/phone";
+import { parseGuestRequests } from "@/lib/guestRequests";
 
 export type FieldError = { id: string; message: string };
 export const errorId = (fieldId: string) => `${fieldId}-error`;
@@ -17,6 +18,7 @@ export const guestFieldId = (child: boolean, i: number, field: "name" | "age") =
 export function validateEventForm(v: {
   name: string; email: string; phone: string;
   adultRows: { name: string }[]; childRows: { name: string; age: string }[];
+  guestRequests?: string;
 }): FieldError[] {
   const out: FieldError[] = [];
   if (!v.name.trim()) out.push({ id: "pev-name", message: "Please enter your full name." });
@@ -27,6 +29,8 @@ export function validateEventForm(v: {
     if (!g.name.trim()) out.push({ id: guestFieldId(true, i, "name"), message: "Please give this child's name." });
     if (!isChildAge(g.age === "" ? null : Number(g.age))) out.push({ id: guestFieldId(true, i, "age"), message: `Please give this child's age (${CHILD_MAX_AGE} and under).` });
   });
+  const gr = parseGuestRequests(v.guestRequests ?? "");
+  if (gr.error) out.push({ id: "pev-requests", message: gr.error });
   return out;
 }
 
