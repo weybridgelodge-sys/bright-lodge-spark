@@ -7,6 +7,7 @@ import { verifyTurnstile } from "../_shared/verify-turnstile.ts";
 import { isHoneypotTripped, seatCheckOutcome } from "../_shared/meetingResponseGuards.ts";
 import { cleanSpaces, trimBookingNames } from "../_shared/greeting.ts";
 import { expectedDiningPence } from "../_shared/bookingAmounts.ts";
+import { PHONE_REQUIRED_MESSAGE, isPlausiblePhone } from "../_shared/phone.ts";
 
 
 const corsHeaders = {
@@ -74,6 +75,10 @@ Deno.serve(async (req) => {
       turnstileToken,
       website,
     } = parsed.data;
+
+    if (!isPlausiblePhone(contact_phone)) {
+      return new Response(JSON.stringify({ error: PHONE_REQUIRED_MESSAGE }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
 
     // Honeypot: real visitors never fill this hidden field. Pretend success, save nothing.
     if (isHoneypotTripped(website)) {

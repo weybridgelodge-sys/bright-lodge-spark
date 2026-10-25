@@ -3,6 +3,7 @@ import { z } from "https://esm.sh/zod@3.23.8";
 import { feeLineItemName } from "../_shared/cardFee.ts";
 import { orderModules, priceOrder, stripeLines, type ItemRow } from "../_shared/eventOrder.ts";
 import { depositAllowed, depositLineName, planMethods, quoteBooking } from "../_shared/eventPricing.ts";
+import { PHONE_REQUIRED_MESSAGE, isPlausiblePhone } from "../_shared/phone.ts";
 import { eventsStripe, londonToday, sendEventBookingEmails, serviceClient } from "../_shared/stripe-events.ts";
 
 const GuestSchema = z.object({
@@ -41,6 +42,7 @@ Deno.serve(async (req) => {
     const parsed = BodySchema.safeParse(await req.json());
     if (!parsed.success) return json({ error: "Please check the form and try again.", details: parsed.error.flatten().fieldErrors }, 400);
     const input = parsed.data;
+    if (!isPlausiblePhone(input.contact_phone)) return json({ error: PHONE_REQUIRED_MESSAGE }, 400);
     const party = input.adults + input.children;
     if (party < 1) return json({ error: "Please add at least one guest." }, 400);
     if (input.guests.length !== party) return json({ error: "Please give a name for every guest." }, 400);
