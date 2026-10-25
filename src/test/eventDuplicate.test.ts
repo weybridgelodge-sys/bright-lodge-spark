@@ -38,8 +38,8 @@ describe("duplicate event", () => {
 
 describe("event QR", () => {
   it("uses short link when set, else canonical URL", () => {
-    expect(eventQrTarget({ slug: "a", short_link: "https://bit.ly/x" })).toBe("https://bit.ly/x");
-    expect(eventQrTarget({ slug: "a", short_link: "" })).toBe("https://weybridgelodge.org.uk/events/a");
+    expect(eventQrTarget({ slug: "a", short_link: "https://bit.ly/x" }, "https://lodge.example")).toBe("https://bit.ly/x");
+    expect(eventQrTarget({ slug: "a", short_link: "" }, "https://lodge.example/")).toBe("https://lodge.example/events/a");
   });
   const colours = { navy: hslTokenToRgb("220 45% 10%"), gold: hslTokenToRgb("42 55% 55%"), white: [255, 255, 255] as [number, number, number] };
   for (const style of ["navy-on-white", "white-on-navy"] as const) {

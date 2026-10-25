@@ -397,7 +397,7 @@ function Editor({ draft: initial, onBack, duplicatedFrom, onQr }: { draft: Draft
 }
 
 function QrDialog({ row, onClose }: { row: Record<string, any> & { name: string }; onClose: () => void }) {
-  const url = eventQrTarget({ slug: row.slug, short_link: row.short_link || null });
+  const url = eventQrTarget({ slug: row.slug, short_link: row.short_link || null }, siteOriginOr(unit));
   const [preview, setPreview] = useState<string | null>(null);
   useEffect(() => {
     if (!url) return;

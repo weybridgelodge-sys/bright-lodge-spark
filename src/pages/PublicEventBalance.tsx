@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { useUnitProfile } from "@/lib/unitProfile";
+import { nameOr } from "@/lib/unitText";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -19,6 +21,7 @@ type Balance = {
 };
 
 export default function PublicEventBalance() {
+  const unit = useUnitProfile();
   const { token = "" } = useParams();
   const [params] = useSearchParams();
   const [b, setB] = useState<Balance | null>(null);
@@ -74,7 +77,7 @@ export default function PublicEventBalance() {
 
   return (
     <div className="min-h-screen overflow-x-hidden">
-      <SEO title="Your booking balance" description="Pay the balance for your Weybridge Lodge event booking." noindex />
+      <SEO title="Your booking balance" description={`Pay the balance for your ${nameOr(unit, "lodge")} event booking.`} noindex />
       <Header />
       <main id="main-content" className="pt-32 pb-20 md:pt-40 bg-background">
         <div className="container mx-auto px-4 sm:px-6 max-w-2xl font-sans space-y-6">

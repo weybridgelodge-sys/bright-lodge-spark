@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
+import { useUnitProfile } from "@/lib/unitProfile";
+import { nameOr } from "@/lib/unitText";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -41,6 +43,7 @@ const memberName = (m?: Member) => {
 const blank = (v: string) => (v.trim() ? v.trim() : null);
 
 export default function WidowsPanel({ members }: { members: Member[] }) {
+  const unit = useUnitProfile();
   const { canEditAlmoner } = useAuth();
   const [widows, setWidows] = useState<Widow[]>([]);
   const [lastContact, setLastContact] = useState<Map<string, Contact>>(new Map());
@@ -107,7 +110,7 @@ export default function WidowsPanel({ members }: { members: Member[] }) {
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-semibold text-primary-foreground break-words">{w.full_name}{w.preferred_address ? <span className="font-normal text-primary-foreground/80"> · “{w.preferred_address}”</span> : null}</p>
                   <p className="text-[11px] text-primary-foreground/80 break-words">
-                    {w.connection_source === "smwa" ? "Assigned via SMWA" : "Weybridge Lodge widow"}
+                    {w.connection_source === "smwa" ? "Assigned via SMWA" : `${nameOr(unit)} widow`}
                     {w.home_type === "care_home" ? ` · ${w.care_home_name || "Care home"}` : ""}
                     {w.status === "deceased" ? ` · died ${fmt(w.deceased_on)}` : ` · last contact ${last ? fmt(last.contact_date) : "none yet"}`}
                   </p>
@@ -128,6 +131,7 @@ export default function WidowsPanel({ members }: { members: Member[] }) {
 }
 
 function WidowForm({ widow, onSaved, onCancel }: { widow?: Widow; onSaved: (id?: string) => void; onCancel?: () => void }) {
+  const unit = useUnitProfile();
   const [f, setF] = useState(() => ({
     full_name: widow?.full_name ?? "", preferred_address: widow?.preferred_address ?? "", address: widow?.address ?? "",
     home_type: widow?.home_type ?? "own_home", care_home_name: widow?.care_home_name ?? "", care_home_address: widow?.care_home_address ?? "", care_home_contact_hours: widow?.care_home_contact_hours ?? "",
@@ -207,7 +211,7 @@ function WidowForm({ widow, onSaved, onCancel }: { widow?: Widow; onSaved: (id?:
           <Label className="text-xs">Connection</Label>
           <Select value={f.connection_source} onValueChange={(v) => setF((p) => ({ ...p, connection_source: v as Widow["connection_source"] }))}>
             <SelectTrigger aria-label="Connection" className={inputCls}><SelectValue /></SelectTrigger>
-            <SelectContent><SelectItem value="lodge_member">Widow of a Weybridge Lodge member</SelectItem><SelectItem value="smwa">Assigned via SMWA</SelectItem></SelectContent>
+            <SelectContent><SelectItem value="lodge_member">Widow of a {nameOr(unit)} member</SelectItem><SelectItem value="smwa">Assigned via SMWA</SelectItem></SelectContent>
           </Select>
         </div>
         <div><Label className="text-xs">Contact every (days)</Label><Input aria-label="Contact every (days)" type="number" min={7} max={730} value={f.contact_interval_days} onChange={set("contact_interval_days")} className={inputCls} /></div>
@@ -234,6 +238,7 @@ function WidowForm({ widow, onSaved, onCancel }: { widow?: Widow; onSaved: (id?:
 }
 
 function WidowDetail({ widow, members, canEdit, onBack, onChanged }: { widow: Widow; members: Member[]; canEdit: boolean; onBack: () => void; onChanged: () => void }) {
+  const unit = useUnitProfile();
   const [editing, setEditing] = useState(false);
   const [kin, setKin] = useState<Kin[]>([]);
   const [contacts, setContacts] = useState<Contact[]>([]);
@@ -283,7 +288,7 @@ function WidowDetail({ widow, members, canEdit, onBack, onChanged }: { widow: Wi
           <div className="min-w-0">
             <h3 className="font-serif text-lg text-primary-foreground break-words">{widow.full_name}</h3>
             <div className="flex flex-wrap gap-1.5 mt-1">
-              <Badge variant="outline" className="border-gold/40 text-gold text-[10px]">{widow.connection_source === "smwa" ? "Assigned via SMWA" : "Weybridge Lodge widow"}</Badge>
+              <Badge variant="outline" className="border-gold/40 text-gold text-[10px]">{widow.connection_source === "smwa" ? "Assigned via SMWA" : `${nameOr(unit)} widow`}</Badge>
               {widow.status === "deceased" && <Badge variant="outline" className="border-primary-foreground/30 text-primary-foreground/80 text-[10px]">Deceased {fmt(widow.deceased_on)}</Badge>}
               {widow.status === "active" && due.overdue && <Badge variant="outline" className="border-gold/50 text-gold text-[10px]">Check-in due</Badge>}
             </div>

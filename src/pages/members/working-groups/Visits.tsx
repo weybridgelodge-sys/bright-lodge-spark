@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
+import { useUnitProfile } from "@/lib/unitProfile";
+import { shortNameOr } from "@/lib/unitText";
 import { Link } from "react-router-dom";
 import MembersLayout from "@/components/members/MembersLayout";
 import ProtectedRoute from "@/components/members/ProtectedRoute";
@@ -46,6 +48,7 @@ function fmtDate(dt: string) {
 }
 
 function Inner() {
+  const unit = useUnitProfile();
   const { user, isAdmin, isWorshipfulMaster, isSecretary } = useAuth();
   const [canManage, setCanManage] = useState(isAdmin || isWorshipfulMaster || isSecretary);
   const [visits, setVisits] = useState<LodgeVisit[]>([]);
@@ -358,7 +361,7 @@ function Inner() {
                 value={paymentDetails}
                 onChange={(e) => setPaymentDetails(e.target.value)}
                 rows={3}
-                placeholder="Bank transfer — Sort code 12-34-56, Account 00000000, Ref: Weybridge visit"
+                placeholder={`Bank transfer — Sort code 12-34-56, Account 00000000, Ref: ${shortNameOr(unit)} visit`}
               />
             </div>
             <div className="md:col-span-2">

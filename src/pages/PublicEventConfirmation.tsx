@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { useUnitProfile } from "@/lib/unitProfile";
+import { titleOr } from "@/lib/unitText";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { CheckCircle2, Clock } from "lucide-react";
 import Header from "@/components/Header";
@@ -16,6 +18,7 @@ type Summary = {
 };
 
 export default function PublicEventConfirmation() {
+  const unit = useUnitProfile();
   const { slug } = useParams();
   const [params] = useSearchParams();
   const ref = params.get("ref") || "";
@@ -44,7 +47,7 @@ export default function PublicEventConfirmation() {
   const isDeposit = b?.payment_plan === "deposit";
   return (
     <div className="min-h-screen overflow-x-hidden">
-      <SEO title="Booking confirmation" description="Your event booking with Weybridge Lodge No. 6787." noindex />
+      <SEO title="Booking confirmation" description={`Your event booking with ${titleOr(unit, "the lodge")}.`} noindex />
       <Header />
       <main id="main-content" className="pt-32 pb-20 md:pt-40 bg-background">
         <div className="container mx-auto px-4 sm:px-6 max-w-2xl font-sans">

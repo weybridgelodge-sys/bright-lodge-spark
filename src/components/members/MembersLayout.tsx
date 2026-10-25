@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { useUnitProfile } from "@/lib/unitProfile";
+import { crestAlt, nameNumber } from "@/lib/unitText";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { LayoutDashboard, Users, FileText, User as UserIcon, ShieldCheck, LogOut, Shield, CalendarDays, BookOpen, Crown, CalendarPlus, BarChart3, GraduationCap, Utensils, Mail, HeartHandshake, Sprout, Hexagon, Banknote, Wallet, Menu } from "lucide-react";
@@ -13,6 +15,7 @@ const navCls = ({ isActive }: { isActive: boolean }) =>
   }`;
 
 export default function MembersLayout({ children }: { children: React.ReactNode }) {
+  const unit = useUnitProfile();
   const { profile, isAdmin, isWorshipfulMaster, isDirectorOfCeremonies, canAccessMentorPortal, canManageSummons, canAccessAlmoner, canAccessCharity, canAccessTreasurer, canAccessAdminArea, signOut } = useAuth();
   const navigate = useNavigate();
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -131,10 +134,10 @@ export default function MembersLayout({ children }: { children: React.ReactNode 
 
             </Sheet>
             <Link to="/members" className="flex min-w-0 flex-1 lg:flex-none items-center gap-2 sm:gap-3">
-              <img src={logo} alt="Weybridge Lodge crest" width={44} height={44} decoding="async" className="h-11 w-11 shrink-0 bg-primary-foreground/90 rounded-full p-0.5" />
+              <img src={logo} alt={crestAlt(unit)} width={44} height={44} decoding="async" className="h-11 w-11 shrink-0 bg-primary-foreground/90 rounded-full p-0.5" />
               <div className="min-w-0">
                 <p className="font-serif text-sm font-semibold leading-tight truncate">Members Portal</p>
-                <p className="text-gold text-[10px] uppercase tracking-wider truncate">Weybridge Lodge 6787</p>
+                <p className="text-gold text-[10px] uppercase tracking-wider truncate">{nameNumber(unit)}</p>
               </div>
             </Link>
           </div>

@@ -1,4 +1,8 @@
 import { lazy, Suspense, useEffect, useState } from "react";
+import { useUnitProfile } from "@/lib/unitProfile";
+import { unitTitle } from "@/lib/unitProfile";
+import { crestAlt, nameOr } from "@/lib/unitText";
+import { DEPLOYMENT_HOST, DEPLOYMENT_ORIGIN } from "@/lib/deployment";
 import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Shield, Mail, ArrowRight, CheckCircle2, UserPlus, Clock, ArrowLeft } from "lucide-react";
@@ -18,7 +22,7 @@ const TurnstileWidget = lazy(() => import("@/components/TurnstileWidget"));
 
 const isNativeApp = Capacitor.isNativePlatform();
 const membersRedirectUrl = isNativeApp
-  ? "https://weybridgelodge.org.uk/members?client=app"
+  ? `${DEPLOYMENT_ORIGIN}/members?client=app`
   : `${window.location.origin}/members?client=web`;
 
 type View = "login" | "register" | "request-sent";
@@ -39,6 +43,7 @@ const registerSchema = z.object({
 });
 
 export default function MembersLogin() {
+  const unit = useUnitProfile();
   const navigate = useNavigate();
   const { session } = useAuth();
   const [view, setView] = useState<View>("login");
@@ -193,7 +198,7 @@ export default function MembersLogin() {
 
         const params = new URLSearchParams({
           provider: "google",
-          redirect_uri: "https://weybridgelodge.org.uk/members",
+          redirect_uri: `${DEPLOYMENT_ORIGIN}/members`,
           state,
           project_id: "af7769c0-3910-4ce1-9c23-387cf7643cdb",
         });
@@ -250,10 +255,10 @@ export default function MembersLogin() {
 
       <div className="w-full max-w-md relative">
         <Link to="/" className="flex items-center justify-center gap-3 mb-8">
-          <img src={logo} alt="Weybridge Lodge crest" width={48} height={48} decoding="async" className="h-12 w-12 bg-primary-foreground/80 rounded-full p-0.5" />
+          <img src={logo} alt={crestAlt(unit)} width={48} height={48} decoding="async" className="h-12 w-12 bg-primary-foreground/80 rounded-full p-0.5" />
           <div className="text-center">
-            <p className="font-serif text-lg font-semibold">Weybridge Lodge</p>
-            <p className="text-gold text-xs uppercase tracking-[0.18em]">No. 6787 · Members Portal</p>
+            <p className="font-serif text-lg font-semibold">{nameOr(unit)}</p>
+            <p className="text-gold text-xs uppercase tracking-[0.18em]">{[unit.lodgeNumber ? `No. ${unit.lodgeNumber}` : "", "Members Portal"].filter(Boolean).join(" · ")}</p>
           </div>
         </Link>
 
@@ -452,7 +457,7 @@ export default function MembersLogin() {
                     value={motherLodge}
                     onChange={setMotherLodge}
                     required
-                    placeholder="e.g. Weybridge Lodge No. 6787"
+                    placeholder={`e.g. ${unitTitle(unit) || "Example Lodge No. 1234"}`}
                   />
 
                   <Field
@@ -473,7 +478,7 @@ export default function MembersLogin() {
                       className="mt-0.5 h-4 w-4 rounded border-gold/40 text-gold focus:ring-gold accent-gold shrink-0"
                     />
                     <span className="text-[11px] text-primary-foreground/70 leading-relaxed">
-                      I consent to Weybridge Lodge processing my data to verify my Masonic standing. Data is processed
+                      I consent to {nameOr(unit)} processing my data to verify my Masonic standing. Data is processed
                       strictly in accordance with our{" "}
                       <Link to="/data-protection" target="_blank" rel="noopener" className="text-gold hover:underline">
                         Data Protection Policy
@@ -548,11 +553,11 @@ export default function MembersLogin() {
           <button
             type="button"
             onClick={() => {
-              Browser.open({ url: "https://weybridgelodge.org.uk" }).catch(() => {});
+              Browser.open({ url: DEPLOYMENT_ORIGIN }).catch(() => {});
             }}
             className="block w-full text-center mt-6 text-xs text-primary-foreground/80 hover:text-gold"
           >
-            Visit weybridgelodge.org.uk ↗
+            Visit {DEPLOYMENT_HOST} ↗
           </button>
         ) : (
           <Link to="/" className="block text-center mt-6 text-xs text-primary-foreground/80 hover:text-gold">
