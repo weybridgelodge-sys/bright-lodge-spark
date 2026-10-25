@@ -382,8 +382,11 @@ select.autofilled-dark:not(.autofill-light) {
   html.portal-canvas input[type="datetime-local"]::-webkit-calendar-picker-indicator,
   html.portal-canvas input[type="month"]::-webkit-calendar-picker-indicator,
   html.portal-canvas input[type="week"]::-webkit-calendar-picker-indicator {
-    width: 32px; padding: 6px; margin: 0;
+    width: 28px; height: 28px; padding: 4px; margin: 0 0 0 2px;
   }
+  input[type="date"]::-webkit-datetime-edit,
+  input[type="date"]::-webkit-datetime-edit-fields-wrapper { padding: 0; }
+  input[type="date"]::-webkit-date-and-time-value { text-align: left; }
   .vv-sheet-side {
     top: var(--app-vvtop, 0px) !important;
     bottom: auto !important;
