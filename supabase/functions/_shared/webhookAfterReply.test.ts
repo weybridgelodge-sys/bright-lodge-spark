@@ -167,9 +167,22 @@ Deno.test("events (c): resend after completion does nothing", async () => {
   assertEquals([k.c.fee, k.c.email], [1, 1]);
 });
 
-Deno.test("events (d): background failure is logged, response unchanged, emails skipped after fee throw is logged", async () => {
+Deno.test("events (d): fee refresh throws -> 200, error logged, emails still run exactly once", async () => {
   const db = eventsDb(); const k = counters(0, true); const cap = captureErrors(); const bg: Promise<void>[] = [];
   const { deps } = eventDeps(k, (l: string, t: any) => { const p = runAfterReply(l, t); bg.push(p); return p; });
+  try {
+    const res = await respond(() => eventsMarkPaid(db, meta, "pi_e", 5000, deps));
+    assertEquals(res.status, 200); await res.text();
+    await Promise.all(bg);
+  } finally { cap.restore(); }
+  assert(cap.errs.some((e) => String(e[0]).includes("Stripe fee refresh failed")));
+  assertEquals([k.c.fee, k.c.email, k.c.emailDone], [1, 1, 1]);
+});
+
+Deno.test("events (d2): email failure after the reply is logged, response unchanged", async () => {
+  const db = eventsDb(); const k = counters(); const cap = captureErrors(); const bg: Promise<void>[] = [];
+  const { deps } = eventDeps(k, (l: string, t: any) => { const p = runAfterReply(l, t); bg.push(p); return p; });
+  deps.sendEmails = async () => { throw new Error("fake email failure"); };
   try {
     const res = await respond(() => eventsMarkPaid(db, meta, "pi_e", 5000, deps));
     assertEquals(res.status, 200); await res.text();
