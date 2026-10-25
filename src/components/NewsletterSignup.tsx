@@ -1,4 +1,6 @@
-import React, { lazy, Suspense, useEffect, useRef, useState } from "react";
+import React, { lazy, Suspense, useState } from "react";
+import { FitTurnstile } from "@/components/FitTurnstile";
+import { NEWSLETTER_EMAIL_ID, errorId, focusFirstError, invalidProps, validateNewsletterEmail, type FieldError } from "@/lib/formErrors";
 import { Mail, CheckCircle2, ArrowRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -14,35 +16,13 @@ const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string;
 
 
-// Turnstile "normal" renders a fixed 300x65 box. Scale it down from the left to
-// the container's real width (never up) and reserve the scaled height, so the
-// footer card never grows wider than its column on narrow phones.
-const TURNSTILE_W = 300;
-const TURNSTILE_H = 65;
-const FitTurnstile = ({ children }: { children: React.ReactNode }) => {
-  const ref = useRef<HTMLDivElement>(null);
-  const [scale, setScale] = useState(1);
-  useEffect(() => {
-    const el = ref.current;
-    if (!el || typeof ResizeObserver === "undefined") return;
-    const ro = new ResizeObserver(([entry]) => setScale(Math.min(1, entry.contentRect.width / TURNSTILE_W)));
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, []);
-  return (
-    <div ref={ref} data-testid="newsletter-turnstile-fit" className="w-full max-w-full min-w-0 overflow-hidden" style={{ height: Math.ceil(TURNSTILE_H * scale) }}>
-      <div style={{ width: TURNSTILE_W, transform: `scale(${scale})`, transformOrigin: "top left" }}>{children}</div>
-    </div>
-  );
-};
-
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const NewsletterSignup = () => {
   const [email, setEmail] = useState("");
   const [honeypot, setHoneypot] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "done" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<FieldError[]>([]);
   const [turnstileToken, setTurnstileToken] = useState<string>("");
   const [showTurnstile, setShowTurnstile] = useState(false);
 
@@ -51,10 +31,9 @@ const NewsletterSignup = () => {
     if (honeypot) return; // silent bot block
     setError(null);
     const clean = email.trim().toLowerCase();
-    if (!EMAIL_RE.test(clean) || clean.length > 255) {
-      setError("Please enter a valid email address.");
-      return;
-    }
+    const fe = validateNewsletterEmail(clean);
+    setFieldErrors(fe);
+    if (fe.length) { focusFirstError(fe); return; }
     if (!turnstileToken) {
       setShowTurnstile(true);
       setError("Please complete the verification below.");
@@ -126,7 +105,9 @@ const NewsletterSignup = () => {
             onChange={(e) => setEmail(e.target.value)}
             onFocus={() => setShowTurnstile(true)}
             placeholder="your@email.com"
+            id={NEWSLETTER_EMAIL_ID}
             aria-label="Email address"
+            {...invalidProps(fieldErrors, NEWSLETTER_EMAIL_ID)}
             className="w-full bg-navy-dark border border-gold/20 rounded-md pl-8 pr-2 py-2 min-h-[44px] text-xs text-primary-foreground placeholder:text-primary-foreground/40 focus:outline-none focus:border-gold/60 autofill-light"
           />
         </div>
@@ -138,16 +119,17 @@ const NewsletterSignup = () => {
           {status === "loading" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <>Join <ArrowRight className="ml-1 h-3 w-3" /></>}
         </Button>
       </div>
+      {fieldErrors[0] && <p id={errorId(NEWSLETTER_EMAIL_ID)} className="text-xs text-primary-foreground mt-2 font-sans"><span aria-hidden="true">⚠ </span>{fieldErrors[0].message}</p>}
       {showTurnstile && (
         <div className="mt-3 min-w-0">
-          <FitTurnstile>
+          <FitTurnstile testId="newsletter-turnstile-fit">
             <Suspense fallback={<div className="text-xs text-primary-foreground/50">Loading verification…</div>}>
               <TurnstileWidget theme="dark" onToken={setTurnstileToken} onExpire={() => setTurnstileToken("")} />
             </Suspense>
           </FitTurnstile>
         </div>
       )}
-      {error && <p className="text-xs text-red-300 mt-2">{error}</p>}
+      {error && <p role="alert" className="text-xs text-primary-foreground mt-2">{error}</p>}
 
       <p className="text-[10px] text-primary-foreground/60 mt-3 leading-relaxed">
         No spam. Unsubscribe with one click. Handled in line with our Data Protection Policy.
