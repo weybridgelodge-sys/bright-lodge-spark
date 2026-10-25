@@ -69,3 +69,11 @@ export const isPdfSafe = (s: string) => [...s].every((c) => {
 });
 /** Replace characters the PDF font cannot draw (guest-entered text). */
 export const pdfSafe = (s: string) => [...s].map((c) => (isPdfSafe(c) ? c : "?")).join("");
+
+/** Headcount/catering: a booking counts unless reportGroup says "hidden". */
+export const countsForHeadcount = (b: ReportBooking, now = Date.now()) => reportGroup(b, now) !== "hidden";
+/** Guests whose booking counts for headcount and catering. */
+export function countedGuests<G extends { booking_id: string }>(guests: G[], bookings: (ReportBooking & { id: string })[], now = Date.now()): G[] {
+  const ok = new Set(bookings.filter((b) => countsForHeadcount(b, now)).map((b) => b.id));
+  return guests.filter((g) => ok.has(g.booking_id));
+}

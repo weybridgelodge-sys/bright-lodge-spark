@@ -15,7 +15,7 @@ import { saveJsPdf, saveText } from "@/lib/nativeDownload";
 import { Link } from "react-router-dom";
 import { eventActuals, eventTieOut, defaultTicketPlan, hasReceipts, receivedSplit } from "@/lib/treasurer/eventTieOut";
 import EventBalancesPanel from "@/components/members/treasurer/EventBalancesPanel";
-import { amountDue, lodgeDisplay, paidTicketTotal, pdfSafe, reportGroup, statusLabel } from "@/lib/treasurer/eventBookingReport";
+import { countedGuests, countsForHeadcount, amountDue, lodgeDisplay, paidTicketTotal, pdfSafe, reportGroup, statusLabel } from "@/lib/treasurer/eventBookingReport";
 import { guestRequestsPreview } from "@/lib/guestRequests";
 import { unitTitle, useUnitProfile } from "@/lib/unitProfile";
 
@@ -177,10 +177,14 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
   const unit = useUnitProfile();
 
   // ─── Derived: catering rollup (always computed, never stored) ─────────────
+  // Headcount/catering exclude lapsed, cancelled and expired bookings with no money (reportGroup "hidden").
+  const countedBookings = useMemo(() => bookings.filter((b) => countsForHeadcount(b)), [bookings]);
+  const headGuests = useMemo(() => countedGuests(guests, bookings), [guests, bookings]);
+  const excludedCount = bookings.length - countedBookings.length;
   const rollup = useMemo(() => {
     const menu = new Map<string, number>();
     const wine = new Map<string, number>();
-    for (const g of guests) {
+    for (const g of headGuests) {
       const m = (g.menu_choice || "").trim() || "Not chosen";
       menu.set(m, (menu.get(m) ?? 0) + 1);
       const w = (g.wine_preorder || "").trim() || "None";
@@ -188,10 +192,10 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
     }
     const sort = (m: Map<string, number>) => [...m.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
     return { menu: sort(menu), wine: sort(wine) };
-  }, [guests]);
+  }, [headGuests]);
 
-  const ticketTotal = bookings.reduce((s, b) => s + (b.ticket_count ?? 0), 0);
-  const namedGuests = guests.filter((g) => (g.name || "").trim()).length;
+  const ticketTotal = countedBookings.reduce((s, b) => s + (b.ticket_count ?? 0), 0);
+  const namedGuests = headGuests.filter((g) => (g.name || "").trim()).length;
 
   // ─── Derived: planning-stage budget totals (no ledger involvement) ────────
   const incomeLines = useMemo(() => budget.filter((b) => b.line_type === "income"), [budget]);
@@ -471,7 +475,7 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
   const exportCsv = async () => {
     if (!event) return;
     const bookingById = new Map(bookings.map((b) => [b.id, b]));
-    const rows = guests
+    const rows = countedGuests(guests, bookings)
       .filter((g) => (g.name || "").trim())
       .map((g) => {
         const b = bookingById.get(g.booking_id);
@@ -1089,7 +1093,8 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
               </div>
             )}
             <p className="text-sm text-primary-foreground/80">
-              {bookings.length} booking{bookings.length === 1 ? "" : "s"} · {ticketTotal} ticket{ticketTotal === 1 ? "" : "s"} · {namedGuests} named guest{namedGuests === 1 ? "" : "s"}
+              {countedBookings.length} booking{countedBookings.length === 1 ? "" : "s"} · {ticketTotal} ticket{ticketTotal === 1 ? "" : "s"} · {namedGuests} named guest{namedGuests === 1 ? "" : "s"}
+              {excludedCount > 0 && ` (${excludedCount} expired or cancelled not counted)`}
             </p>
           </Card>
 
