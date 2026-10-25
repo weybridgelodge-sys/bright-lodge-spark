@@ -541,7 +541,7 @@ export type Database = {
           stripe_session_id?: string | null
           subtotal_pence?: number
           total_pence?: number
-          unit_id?: string
+          unit_id: string
           updated_at?: string
           user_id?: string | null
           waitlist_refunded_at?: string | null
@@ -7448,7 +7448,7 @@ export type Database = {
         Returns: undefined
       }
       booking_name_member_suspect: {
-        Args: { _first: string; _last: string }
+        Args: { _first: string; _last: string; _unit?: string }
         Returns: string
       }
       booking_seat_count: {
@@ -7498,7 +7498,7 @@ export type Database = {
       current_lodge_year: { Args: never; Returns: number }
       current_office_label: { Args: { _user_id: string }; Returns: string }
       current_officer_holder: {
-        Args: { _at?: string; _position_key: string }
+        Args: { _at?: string; _position_key: string; _unit?: string }
         Returns: string
       }
       current_officer_year: { Args: never; Returns: number }
