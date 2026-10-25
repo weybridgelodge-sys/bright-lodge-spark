@@ -167,6 +167,13 @@
     filter: brightness(0) saturate(100%) invert(71%) sepia(64%) saturate(465%) hue-rotate(357deg) brightness(91%) contrast(85%);
   }
 
+  /* Light (default token) date fields keep the browser's own dark glyph on white. */
+  html.portal-canvas input.bg-background::-webkit-calendar-picker-indicator,
+  html.portal-canvas input.bg-background:focus::-webkit-calendar-picker-indicator,
+  html.portal-canvas input.bg-background:focus-visible::-webkit-calendar-picker-indicator {
+    filter: none;
+  }
+
   h1, h2, h3, h4 {
     font-family: 'Playfair Display', serif;
   }
