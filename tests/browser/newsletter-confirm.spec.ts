@@ -37,3 +37,18 @@ for (const [status, heading] of [["expired", "This link has expired"], ["invalid
     await expectNoAxeViolations(page, `newsletter ${status}`);
   });
 }
+
+test("timeout: clear message, Retry and home link, 44px, axe clean at 320px", { timeout: 120_000 }, async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 900 });
+  await page.clock.install();
+  await page.route("**/functions/v1/newsletter-confirm", () => { /* never answers */ });
+  await page.goto(`/newsletter/confirm?token=${TOKEN}`);
+  await expect(page.getByText("Confirming your subscription…")).toBeVisible({ timeout: 20000 });
+  await page.clock.runFor(21_000);
+  await expect(page.getByRole("heading", { name: "We could not confirm that just now" })).toBeVisible();
+  for (const el of [page.getByRole("button", { name: "Retry" }), page.getByRole("link", { name: "Back to the home page" })]) {
+    expect((await el.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+  }
+  expect(await noOverflow(page)).toBeLessThanOrEqual(1);
+  await expectNoAxeViolations(page, "newsletter timeout");
+});
