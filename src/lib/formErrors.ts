@@ -43,12 +43,16 @@ export function validateMeetingStep1(v: { title: string; firstName: string; last
 
 export function validateMeetingStep2(v: { meetingOption: string; diningOptionId: string | null | undefined; guests: { name: string }[] }): FieldError[] {
   const out: FieldError[] = [];
-  if (!v.meetingOption) { out.push({ id: "evf-meeting-option", message: "Please choose a meeting option." }); return out; }
+  if (!v.meetingOption) { out.push({ id: "evf-meeting", message: "Please choose a meeting option." }); return out; }
   if (v.meetingOption === "meeting-and-festive-board") {
-    if (!v.diningOptionId) out.push({ id: "evf-dining-option", message: "Please choose a dining option." });
-    v.guests.forEach((g, i) => { if (!g.name.trim()) out.push({ id: `evf-guest-${i}-name`, message: "Please give this guest's name." }); });
+    if (!v.diningOptionId) out.push({ id: "evf-dining", message: "Please choose a dining option." });
+    v.guests.forEach((g, i) => { if (!g.name.trim()) out.push({ id: `g${i}`, message: "Please give this guest's name." }); });
   }
   return out;
+}
+
+export function validateMeetingStep3(paymentMethod: string): FieldError[] {
+  return paymentMethod ? [] : [{ id: "evf-pay", message: "Please choose a payment method." }];
 }
 
 /** Scroll the first invalid field into view (motion-aware) and focus it. */

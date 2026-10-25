@@ -1,5 +1,6 @@
 import { attendanceOptions, diningEventLabel, isNonMasonTitle, lodgeRequired } from "@/lib/bookingTitles";
-import { PHONE_REQUIRED_MESSAGE, isPlausiblePhone } from "@/lib/phone";
+import { focusFirstError, invalidProps, validateMeetingStep1, validateMeetingStep2, validateMeetingStep3 } from "@/lib/formErrors";
+import { InlineFieldError } from "@/components/bookings/InlineFieldError";
 import { StripeEmbeddedCheckoutPanel, type BookingLineItem } from "@/components/payments/StripeEmbeddedCheckout";
 import { motion, useReducedMotion } from "framer-motion";
 import { Link } from "react-router-dom";
@@ -96,7 +97,7 @@ export default function MeetingBookingForm({
   const [email, setEmail] = useState(prefill?.email ?? "");
   const [phone, setPhone] = useState(prefill?.phone ?? "");
   const [phoneTouched, setPhoneTouched] = useState(false);
-  const phoneError = phoneTouched && !isPlausiblePhone(phone);
+  const [attempted, setAttempted] = useState({ 1: false, 2: false, 3: false });
   // Honeypot — must remain empty on legitimate submissions
   const [honeypot, setHoneypot] = useState("");
   const [turnstileToken, setTurnstileToken] = useState<string>("");
@@ -156,42 +157,27 @@ export default function MeetingBookingForm({
     if (nonMason && meetingOption === "meeting-only") setMeetingOption("");
   }, [nonMason, meetingOption]);
 
+  // Inline errors: shown per step once that step has been attempted (phone also on blur).
+  const errs1All = validateMeetingStep1({ title, firstName, lastName, lodge, email, phone });
+  const errs1 = attempted[1] ? errs1All : errs1All.filter((e) => e.id === "evf-phone" && phoneTouched);
+  const errs2All = validateMeetingStep2({ meetingOption, diningOptionId, guests });
+  const errs2 = attempted[2] ? errs2All : [];
+  const errs3 = attempted[3] ? validateMeetingStep3(paymentMethod) : [];
+  const errs = [...errs1, ...errs2, ...errs3];
+
+  const failStep = (n: 1 | 2 | 3, found: { id: string; message: string }[]) => {
+    setAttempted((a) => ({ ...a, [n]: true }));
+    if (!found.length) return true;
+    setStep(n);
+    focusFirstError(found);
+    return false;
+  };
   const validateStep1 = (): boolean => {
     // Honeypot check — bots fill hidden fields, humans don't
     if (honeypot) return false;
-    if (!title || !firstName.trim() || !lastName.trim() || (lodgeRequired(title) && !lodge.trim()) || !email.trim() || !phone.trim()) {
-      toast({ title: "Missing details", description: "Please fill in all required fields.", variant: "destructive" });
-      return false;
-    }
-    if (!isPlausiblePhone(phone)) {
-      setPhoneTouched(true);
-      toast({ title: "Invalid phone number", description: PHONE_REQUIRED_MESSAGE, variant: "destructive" });
-      return false;
-    }
-    if (!/^\S+@\S+\.\S+$/.test(email)) {
-      toast({ title: "Invalid email", description: "Please enter a valid email address.", variant: "destructive" });
-      return false;
-    }
-    return true;
+    return failStep(1, errs1All);
   };
-
-  const validateStep2 = (): boolean => {
-    if (!meetingOption) {
-      toast({ title: "Select a meeting option", variant: "destructive" });
-      return false;
-    }
-    if (meetingOption === "meeting-and-festive-board") {
-      if (!diningOptionId) {
-        toast({ title: "Choose a dining option", variant: "destructive" });
-        return false;
-      }
-      if (guests.some((g) => !g.name.trim())) {
-        toast({ title: "Guest details required", description: "Please enter each guest's name.", variant: "destructive" });
-        return false;
-      }
-    }
-    return true;
-  };
+  const validateStep2 = (): boolean => failStep(2, errs2All);
 
   const lineItems: BookingLineItem[] = useMemo(() => {
     if (seatsToCharge === 0 || !selectedOption) return [];
@@ -272,10 +258,7 @@ export default function MeetingBookingForm({
       await saveBooking(meetingOption);
       return;
     }
-    if (!paymentMethod) {
-      toast({ title: "Choose a payment method", variant: "destructive" });
-      return;
-    }
+    if (!failStep(3, validateMeetingStep3(paymentMethod))) return;
     if (paymentMethod === "bank-transfer" || paymentMethod === "cash-cheque") {
       await saveBooking(paymentMethod);
       return;
@@ -466,6 +449,7 @@ export default function MeetingBookingForm({
                         </label>
                         <select
                           id="evf-title"
+                          {...invalidProps(errs, "evf-title")}
                           value={title}
                           onChange={(e) => setTitle(e.target.value)}
                           required
@@ -479,6 +463,7 @@ export default function MeetingBookingForm({
                           <option value="Mr">Mr</option>
                           <option value="Mrs">Mrs</option>
                         </select>
+                        <InlineFieldError errors={errs} id={"evf-title"} />
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div>
@@ -487,12 +472,14 @@ export default function MeetingBookingForm({
                           </label>
                           <input
                             id="evf-first"
+                            {...invalidProps(errs, "evf-first")}
                             type="text"
                             value={firstName}
                             onChange={(e) => setFirstName(e.target.value)}
                             required
                             className={inputClass}
                           />
+                          <InlineFieldError errors={errs} id={"evf-first"} />
                         </div>
                         <div>
                           <label htmlFor="evf-last" className={labelClass}>
@@ -500,12 +487,14 @@ export default function MeetingBookingForm({
                           </label>
                           <input
                             id="evf-last"
+                            {...invalidProps(errs, "evf-last")}
                             type="text"
                             value={lastName}
                             onChange={(e) => setLastName(e.target.value)}
                             required
                             className={inputClass}
                           />
+                          <InlineFieldError errors={errs} id={"evf-last"} />
                         </div>
                       </div>
                       <div>
@@ -514,6 +503,7 @@ export default function MeetingBookingForm({
                         </label>
                         <input
                           id="evf-lodge"
+                          {...invalidProps(errs, "evf-lodge")}
                           type="text"
                           value={lodge}
                           onChange={(e) => setLodge(e.target.value)}
@@ -521,6 +511,7 @@ export default function MeetingBookingForm({
                           className={inputClass}
                           placeholder={lodgePlaceholder(bd)}
                         />
+                        <InlineFieldError errors={errs} id={"evf-lodge"} />
                       </div>
                       <div>
                         <label htmlFor="evf-email" className={labelClass}>
@@ -528,6 +519,7 @@ export default function MeetingBookingForm({
                         </label>
                         <input
                           id="evf-email"
+                          {...invalidProps(errs, "evf-email")}
                           type="email"
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
@@ -535,6 +527,7 @@ export default function MeetingBookingForm({
                           className={inputClass}
                           placeholder="you@example.com"
                         />
+                        <InlineFieldError errors={errs} id={"evf-email"} />
                       </div>
                       <div>
                         <label htmlFor="evf-phone" className={labelClass}>
@@ -542,20 +535,19 @@ export default function MeetingBookingForm({
                         </label>
                         <input
                           id="evf-phone"
+                          {...invalidProps(errs, "evf-phone")}
                           type="tel"
                           value={phone}
                           onChange={(e) => setPhone(e.target.value)}
                           onBlur={() => setPhoneTouched(true)}
                           required
                           aria-required="true"
-                          aria-invalid={phoneError ? true : undefined}
-                          aria-describedby={phoneError ? "evf-phone-error" : undefined}
                           inputMode="tel"
                           autoComplete="tel"
                           className={inputClass}
                           placeholder="07xxx xxx xxx"
                         />
-                        {phoneError && <p id="evf-phone-error" className="mt-1 font-sans text-sm text-destructive">{PHONE_REQUIRED_MESSAGE}</p>}
+                        <InlineFieldError errors={errs} id={"evf-phone"} />
                       </div>
                     </div>
                     <div className="mt-8 flex justify-end">
@@ -579,6 +571,7 @@ export default function MeetingBookingForm({
                         </label>
                         <select
                           id="evf-meeting"
+                          {...invalidProps(errs, "evf-meeting")}
                           value={meetingOption}
                           onChange={(e) => setMeetingOption(e.target.value as typeof meetingOption)}
                           required
@@ -590,6 +583,7 @@ export default function MeetingBookingForm({
                           ))}
                           <option value="apologies">Not Attending (Apologies for absence)</option>
                         </select>
+                        <InlineFieldError errors={errs} id={"evf-meeting"} />
                       </div>
 
                       {meetingOption === "meeting-and-festive-board" && (
@@ -601,6 +595,7 @@ export default function MeetingBookingForm({
                               </label>
                               <select
                                 id="evf-dining"
+                                {...invalidProps(errs, "evf-dining")}
                                 value={diningOptionId}
                                 onChange={(e) => setDiningOptionId(e.target.value)}
                                 required
@@ -612,6 +607,7 @@ export default function MeetingBookingForm({
                                   </option>
                                 ))}
                               </select>
+                              <InlineFieldError errors={errs} id={"evf-dining"} />
                             </div>
                           )}
                           <div>
@@ -640,6 +636,7 @@ export default function MeetingBookingForm({
                                 </label>
                                 <input
                                   id={`g${i}`}
+                                  {...invalidProps(errs, `g${i}`)}
                                   type="text"
                                   value={g.name}
                                   onChange={(e) => setGuests((prev) => prev.map((x, j) => j === i ? { ...x, name: e.target.value } : x))}
@@ -647,6 +644,7 @@ export default function MeetingBookingForm({
                                   className={inputClass}
                                   placeholder={`Guest ${i + 1} full name`}
                                 />
+                                <InlineFieldError errors={errs} id={`g${i}`} />
                               </div>
                               <div>
                                 <label htmlFor={`gl${i}`} className={labelClass}>
@@ -740,7 +738,7 @@ export default function MeetingBookingForm({
                         <p className={labelClass}>
                           Payment Method <span className="text-destructive">*</span>
                         </p>
-                        <div className="space-y-2 mt-1" role="radiogroup" aria-label="Payment method">
+                        <div id="evf-pay" className="space-y-2 mt-1 scroll-mt-28" role="radiogroup" aria-label="Payment method" aria-required="true" {...invalidProps(errs, "evf-pay")}>
                           <label className="flex items-start gap-3 cursor-pointer min-h-[48px] py-1">
                             <input
                               type="radio"
