@@ -22,14 +22,26 @@ describe("headcount excludes lapsed bookings", () => {
     expect(countsForHeadcount(b({ payment_status: "expired" }), NOW)).toBe(false);
     expect(countsForHeadcount(b({ payment_status: "cancelled" }), NOW)).toBe(false);
   });
-  it("refunded with money recorded counts (unchanged behaviour)", () => {
-    expect(countsForHeadcount(b({ payment_status: "refunded", balance_paid: true, amount_paid_pence: 3590 }), NOW)).toBe(true);
+  it("refunded with money recorded does not count (JOB BV)", () => {
+    expect(countsForHeadcount(b({ payment_status: "refunded", balance_paid: true, amount_paid_pence: 3590 }), NOW)).toBe(false);
+  });
+  it("refunded written with odd case or trailing space does not count", () => {
+    expect(countsForHeadcount(b({ payment_status: "Refunded ", balance_paid: true, amount_paid_pence: 3590 }), NOW)).toBe(false);
+    expect(countsForHeadcount(b({ payment_status: "  REFUNDED" }), NOW)).toBe(false);
+  });
+  it("refunded after a partial refund (money still recorded) does not count", () => {
+    expect(countsForHeadcount(b({ payment_status: "refunded", deposit_paid: true, amount_paid_pence: 1200 }), NOW)).toBe(false);
   });
   it("bank transfer pending never lapses", () => {
     expect(countsForHeadcount(b({ payment_method: "bank_transfer", created_at: ago(30 * 24 * 60 * MIN) }), NOW)).toBe(true);
   });
   it("Christmas case: 4 guests, one expired booking leaves 3", () => {
     const bookings = [b({ id: "1", payment_status: "paid", balance_paid: true, amount_paid_pence: 3590 }), b({ id: "2", payment_status: "paid", balance_paid: true, amount_paid_pence: 3590 }), b({ id: "3", payment_method: "bank_transfer" }), b({ id: "4", created_at: ago(60 * MIN) })];
+    const guests = ["1", "2", "3", "4"].map((id) => ({ booking_id: id, name: "G" + id }));
+    expect(countedGuests(guests, bookings, NOW).map((g) => g.booking_id)).toEqual(["1", "2", "3"]);
+  });
+  it("Christmas case: 4 guests, one refunded booking leaves 3", () => {
+    const bookings = [b({ id: "1", payment_status: "paid", balance_paid: true, amount_paid_pence: 3590 }), b({ id: "2", payment_status: "paid", balance_paid: true, amount_paid_pence: 3590 }), b({ id: "3", payment_method: "bank_transfer" }), b({ id: "4", payment_status: "refunded", balance_paid: true, amount_paid_pence: 3590 })];
     const guests = ["1", "2", "3", "4"].map((id) => ({ booking_id: id, name: "G" + id }));
     expect(countedGuests(guests, bookings, NOW).map((g) => g.booking_id)).toEqual(["1", "2", "3"]);
   });
