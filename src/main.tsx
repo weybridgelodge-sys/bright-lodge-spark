@@ -35,6 +35,9 @@ try {
   if (code) {
     const desc = params.get("error_description") || query.get("error_description") || "";
     sessionStorage.setItem("auth-link-error", `${code} ${desc}`.trim());
+  } else if (params.get("access_token")) {
+    // Successful sign-in return: no Google-started residue.
+    sessionStorage.removeItem("oauth-google-started");
   }
 } catch {
   /* ignore */

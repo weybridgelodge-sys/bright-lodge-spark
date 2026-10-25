@@ -5,7 +5,7 @@ export function isUnknownMemberOtpError(message: string | null | undefined): boo
 }
 
 export const NO_MEMBERSHIP_MESSAGE =
-  "We couldn't find a membership for this account. Please use Request portal access.";
+  "We couldn't find a membership for this Google account. If you are a member, sign in with the email address your Secretary has on file, or use Request portal access.";
 
 // A new sign-in with no lodge-created account: sign-up is closed ("Signups not
 // allowed") or the account-creation rule refused it ("Database error saving new
