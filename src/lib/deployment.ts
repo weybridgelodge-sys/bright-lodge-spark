@@ -7,3 +7,5 @@ export const DEPLOYMENT_ORIGIN = "https://weybridgelodge.org.uk";
 export const PRODUCTION_HOSTS = ["weybridgelodge.org.uk", "www.weybridgelodge.org.uk"] as const;
 /** Host shown in "Visit <host>" in the native app. */
 export const DEPLOYMENT_HOST = new URL(DEPLOYMENT_ORIGIN).host;
+/** News editing studio (a deployment-level hosted address, not a Unit Setup value). */
+export const SANITY_STUDIO_URL = "https://weybridge-lodge-mcp.sanity.studio/";
