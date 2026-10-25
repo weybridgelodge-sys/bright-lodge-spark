@@ -929,7 +929,7 @@ function MeetingDialog({
               },
             });
           } else {
-            // Unmatched Weybridge respondent — reconcile via roster before falling back to a visitor row
+            // Unmatched host-lodge respondent — reconcile via roster before falling back to a visitor row
             pushVisitorOrMember({
               id: tempId(),
               name: String(b.contact_name ?? ""),
