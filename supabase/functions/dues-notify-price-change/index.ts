@@ -97,6 +97,7 @@ Deno.serve(async (req) => {
       if (!p?.email) continue;
       try {
         const res = await sendTransactionalEmail({
+          unitId: callerUnit,
           templateName: "dues-price-change-notice",
           recipientEmail: p.email,
           idempotencyKey: `dues-notice-${settings_id}-${(s as any).member_id}`,

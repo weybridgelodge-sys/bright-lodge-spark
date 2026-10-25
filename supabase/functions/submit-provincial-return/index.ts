@@ -73,6 +73,7 @@ Deno.serve(async (req) => {
 
     const lodge = await loadLodgeSettings(callerUnit);
     const res = await sendTransactionalEmail({
+      unitId: callerUnit,
       templateName: "provincial-return-submission",
       recipientEmail: configured,
       idempotencyKey: `provincial-return-${submissionId}`,

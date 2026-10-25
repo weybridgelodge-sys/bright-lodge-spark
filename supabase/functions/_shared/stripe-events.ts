@@ -166,6 +166,7 @@ export async function sendEventBookingEmails(sb: any, bookingId: string, stage: 
   const suffix = opts.idempotencySuffix ? `-${opts.idempotencySuffix}` : "";
   if (b.contact_email) {
     const r = await sendTransactionalEmail({
+      unitId: eventUnit(ev),
       templateName: "event-booking-customer",
       recipientEmail: b.contact_email,
       idempotencyKey: `event-booking-customer-${b.id}-${stage}${opts.reminderKind ? `-${opts.reminderKind}` : ""}${suffix}`,
@@ -178,6 +179,7 @@ export async function sendEventBookingEmails(sb: any, bookingId: string, stage: 
   // Parallel: each recipient keeps its own unchanged idempotency key.
   await Promise.all((await lodgeRecipients(sb, ev)).map(async (to) => {
     const r = await sendTransactionalEmail({
+      unitId: eventUnit(ev),
       templateName: "event-booking-lodge",
       recipientEmail: to,
       idempotencyKey: `event-booking-lodge-${b.id}-${stage}-${to}`,

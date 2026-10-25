@@ -236,6 +236,7 @@ Deno.serve(async (req) => {
           : `summons-${summons.id}-${r.email}`;
       try {
         const res = await sendTransactionalEmail({
+          unitId: callerUnit,
           templateName: "summons-distribution",
           recipientEmail: r.email,
           idempotencyKey,

@@ -57,6 +57,7 @@ Deno.serve(async (req) => {
       const email = profs?.find((x: any) => x.id === mid)?.email;
       if (!email) continue;
       const res = await sendTransactionalEmail({
+        unitId: callerUnit,
         templateName: "period-unlock-requested",
         recipientEmail: email,
         idempotencyKey: `unlock-req-${p.id}-${p.unlock_requested_at}-${mid}`,
