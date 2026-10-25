@@ -22,8 +22,15 @@ describe("headcount excludes lapsed bookings", () => {
     expect(countsForHeadcount(b({ payment_status: "expired" }), NOW)).toBe(false);
     expect(countsForHeadcount(b({ payment_status: "cancelled" }), NOW)).toBe(false);
   });
-  it("refunded with money recorded counts (unchanged behaviour)", () => {
-    expect(countsForHeadcount(b({ payment_status: "refunded", balance_paid: true, amount_paid_pence: 3590 }), NOW)).toBe(true);
+  it("refunded with money recorded does not count (JOB BV)", () => {
+    expect(countsForHeadcount(b({ payment_status: "refunded", balance_paid: true, amount_paid_pence: 3590 }), NOW)).toBe(false);
+  });
+  it("refunded written with odd case or trailing space does not count", () => {
+    expect(countsForHeadcount(b({ payment_status: "Refunded ", balance_paid: true, amount_paid_pence: 3590 }), NOW)).toBe(false);
+    expect(countsForHeadcount(b({ payment_status: "  REFUNDED" }), NOW)).toBe(false);
+  });
+  it("refunded after a partial refund (money still recorded) does not count", () => {
+    expect(countsForHeadcount(b({ payment_status: "refunded", deposit_paid: true, amount_paid_pence: 1200 }), NOW)).toBe(false);
   });
   it("bank transfer pending never lapses", () => {
     expect(countsForHeadcount(b({ payment_method: "bank_transfer", created_at: ago(30 * 24 * 60 * MIN) }), NOW)).toBe(true);

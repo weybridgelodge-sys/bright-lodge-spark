@@ -177,7 +177,7 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
   const unit = useUnitProfile();
 
   // ─── Derived: catering rollup (always computed, never stored) ─────────────
-  // Headcount/catering exclude lapsed, cancelled and expired bookings with no money (reportGroup "hidden").
+  // Headcount/catering exclude lapsed, cancelled and expired bookings with no money (reportGroup "hidden") and refunded bookings.
   const countedBookings = useMemo(() => bookings.filter((b) => countsForHeadcount(b)), [bookings]);
   const headGuests = useMemo(() => countedGuests(guests, bookings), [guests, bookings]);
   const excludedCount = bookings.length - countedBookings.length;
@@ -1094,7 +1094,7 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
             )}
             <p className="text-sm text-primary-foreground/80">
               {countedBookings.length} booking{countedBookings.length === 1 ? "" : "s"} · {ticketTotal} ticket{ticketTotal === 1 ? "" : "s"} · {namedGuests} named guest{namedGuests === 1 ? "" : "s"}
-              {excludedCount > 0 && ` (${excludedCount} expired or cancelled not counted)`}
+              {excludedCount > 0 && ` (${excludedCount} expired, cancelled or refunded not counted)`}
             </p>
           </Card>
 
