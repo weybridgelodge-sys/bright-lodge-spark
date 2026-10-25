@@ -60,7 +60,7 @@ Deno.serve(async (req) => {
     if (!ev) return json({ error: "Event not found." }, 404);
     const hosting = Array.isArray(ev.hosting_lodges) ? ev.hosting_lodges : [];
     const owning = hosting.some((l: unknown) => String(l ?? "").trim()) ? "" :
-      await loadLodgeSettings().then((l) => [l.lodgeName, l.lodgeNumber ? `No. ${l.lodgeNumber}` : ""].filter(Boolean).join(" "));
+      await loadLodgeSettings(ev.unit_id || undefined).then((l) => [l.lodgeName, l.lodgeNumber ? `No. ${l.lodgeNumber}` : ""].filter(Boolean).join(" "));
     const lodgeLabel = matchLodgeOption(input.lodge_label, eventLodgeOptions(hosting, owning));
     if (!lodgeLabel) return json({ error: "Please choose your lodge from the list." }, 400);
     if (ev.adult_price_pence == null || ev.child_price_pence == null) return json({ error: "Booking is not open yet." }, 409);
