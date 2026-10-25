@@ -8,7 +8,8 @@ describe("migration 0148 drops host-lodge unit defaults", () => {
     expect(m).toContain(`ALTER TABLE public.${t} ALTER COLUMN unit_id DROP DEFAULT;`);
   });
   it("keeps NOT NULL, leaves profiles alone, rewrites no rows", () => {
-    expect(m).not.toMatch(/NOT NULL|profiles|^\s*(UPDATE|DELETE|INSERT|TRUNCATE)\b/im);
+    const sql = m.replace(/^--.*$/gm, "");
+    expect(sql).not.toMatch(/NOT NULL|profiles|^\s*(UPDATE|DELETE|INSERT|TRUNCATE)\b/im);
   });
 });
 
