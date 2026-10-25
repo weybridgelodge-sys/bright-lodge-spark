@@ -1051,6 +1051,13 @@
       "when": 1792963082384,
       "tag": "0149_pending_account_units",
       "breakpoints": true
+    },
+    {
+      "idx": 150,
+      "version": "7",
+      "when": 1792963140674,
+      "tag": "0150_handle_new_user_requires_unit",
+      "breakpoints": true
     }
   ]
 }
