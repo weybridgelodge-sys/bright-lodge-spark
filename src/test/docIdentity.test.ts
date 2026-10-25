@@ -58,6 +58,7 @@ const GUARDED = [
   "supabase/functions/almoner-overdue-check/index.ts", "supabase/functions/secretary-returns-reminder/index.ts",
   "supabase/functions/secretary-ugle-reminder/index.ts", "supabase/functions/notify-year-audit/index.ts",
   "supabase/functions/newsletter-unsubscribe/index.ts",
+  "supabase/functions/_shared/lodgeSettingsResolve.ts", "supabase/functions/_shared/enquiryContacts.ts",
 ];
 // Asset file names (e.g. the crest image path) are not lodge wording, so lines importing @/assets are skipped.
 const BANNED = /Weybridge|WEYBRIDGE|6787|weybridgelodge\.org\.uk|Province of Surrey|weybridge-(?!logo)/;
