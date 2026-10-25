@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { PHONE_REQUIRED_MESSAGE, isPlausiblePhone } from "@/lib/phone";
+import { focusFirstError, invalidProps, validateEventForm } from "@/lib/formErrors";
+import { InlineFieldError } from "@/components/bookings/InlineFieldError";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { ArrowRight, Calendar, Clock, MapPin, Star, Users } from "lucide-react";
 import Header from "@/components/Header";
@@ -10,7 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { readFunctionError } from "@/lib/functionError";
 import {
   CHILD_MAX_AGE, eventBookingState, fetchPublicEvent, formatEventDate,
-  formatGBP, formatTime, isChildAge, seatsLeft, keepPostcodeTogether, type PublicEvent as Ev,
+  formatGBP, formatTime, seatsLeft, keepPostcodeTogether, type PublicEvent as Ev,
 } from "@/lib/publicEvents";
 import {
   emptyGuest, FeeAndSummary, GuestRowsFieldset, Honeypot, inputCls, labelClass, PaymentMethodFieldset, PaymentPlanFieldset, PayNowSummary, req,
@@ -46,7 +47,7 @@ export default function PublicEvent() {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [phoneTouched, setPhoneTouched] = useState(false);
-  const phoneError = phoneTouched && !isPlausiblePhone(phone);
+  const [attempted, setAttempted] = useState(false);
   const [lodge, setLodge] = useState<(typeof LODGES)[number]>("Weybridge");
   const [adults, setAdults] = useState(1);
   const [children, setChildren] = useState(0);
@@ -109,16 +110,17 @@ export default function PublicEvent() {
     return [seo.jsonLd, breadcrumbSchema([{ name: "Home", url: "/" }, { name: "Events", url: "/events" }, { name: title, url: `/events/${ev.slug}` }])];
   }, [ev, seo, title]);
 
+  const fieldErrorsAll = validateEventForm({ name, email, phone, adultRows, childRows });
+  const fieldErrors = attempted ? fieldErrorsAll : fieldErrorsAll.filter((x) => x.id === "pev-phone" && phoneTouched);
+
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     if (honeypot) return;
     if (!ev) return;
-    if (!name.trim() || !email.trim()) { setError("Please enter your name and email."); return; }
-    if (!isPlausiblePhone(phone)) { setPhoneTouched(true); setError(PHONE_REQUIRED_MESSAGE); return; }
+    setAttempted(true);
+    if (fieldErrorsAll.length) { focusFirstError(fieldErrorsAll); return; }
     if (adults + children < 1) { setError("Please add at least one guest."); return; }
-    if ([...adultRows, ...childRows].some((g) => !g.name.trim())) { setError("Please give a name for every guest."); return; }
-    if (childRows.some((g) => !isChildAge(g.age === "" ? null : Number(g.age)))) { setError(`Please give each child's age (${CHILD_MAX_AGE} and under).`); return; }
     if (content && mods.courses) {
       const missing = [...adultRows.map((_, i) => ({ k: `a-${i}`, child: false })), ...childRows.map((_, i) => ({ k: `c-${i}`, child: true }))]
         .some(({ k, child }) => coursesForGuest(content, mods, child).some((c) => !courseSel[k]?.[c.id]));
@@ -293,10 +295,12 @@ export default function PublicEvent() {
                   <Honeypot value={honeypot} onChange={setHoneypot} />
                   <fieldset className="space-y-3">
                     <legend className="font-serif text-xl text-foreground mb-2">Your details</legend>
-                    <label className="block" htmlFor="pev-name"><span className={labelClass}>Full name{req}</span><input id="pev-name" className={inputCls} required value={name} onChange={(e) => setName(e.target.value)} autoComplete="name" /></label>
-                    <label className="block" htmlFor="pev-email"><span className={labelClass}>Email{req}</span><input id="pev-email" className={inputCls} type="email" required value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" /></label>
-                    <label className="block" htmlFor="pev-phone"><span className={labelClass}>Phone{req}</span><input id="pev-phone" className={inputCls} type="tel" inputMode="tel" required aria-required="true" aria-invalid={phoneError ? true : undefined} aria-describedby={phoneError ? "pev-phone-error" : undefined} value={phone} onChange={(e) => setPhone(e.target.value)} onBlur={() => setPhoneTouched(true)} autoComplete="tel" /></label>
-                    {phoneError && <p id="pev-phone-error" className="text-sm text-destructive">{PHONE_REQUIRED_MESSAGE}</p>}
+                    <label className="block" htmlFor="pev-name"><span className={labelClass}>Full name{req}</span><input id="pev-name" className={inputCls} required aria-required="true" {...invalidProps(fieldErrors, "pev-name")} value={name} onChange={(e) => setName(e.target.value)} autoComplete="name" /></label>
+                    <InlineFieldError errors={fieldErrors} id="pev-name" />
+                    <label className="block" htmlFor="pev-email"><span className={labelClass}>Email{req}</span><input id="pev-email" className={inputCls} type="email" required aria-required="true" {...invalidProps(fieldErrors, "pev-email")} value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" /></label>
+                    <InlineFieldError errors={fieldErrors} id="pev-email" />
+                    <label className="block" htmlFor="pev-phone"><span className={labelClass}>Phone{req}</span><input id="pev-phone" className={inputCls} type="tel" inputMode="tel" required aria-required="true" {...invalidProps(fieldErrors, "pev-phone")} value={phone} onChange={(e) => setPhone(e.target.value)} onBlur={() => setPhoneTouched(true)} autoComplete="tel" /></label>
+                    <InlineFieldError errors={fieldErrors} id="pev-phone" />
                     <label className="block" htmlFor="pev-lodge"><span className={labelClass}>Lodge</span>
                       <select id="pev-lodge" className={inputCls} value={lodge} onChange={(e) => setLodge(e.target.value as any)}>
                         <option value="Weybridge">Weybridge Lodge</option><option value="Astolat">Astolat Lodge</option><option value="Other">Another lodge</option><option value="Guest">Guest / not a Freemason</option>
@@ -312,7 +316,7 @@ export default function PublicEvent() {
                   </fieldset>
 
                   {(adults + children) > 0 && (
-                    <GuestRowsFieldset adultRows={adultRows} childRows={childRows} setAdultRows={setAdultRows} setChildRows={setChildRows} dietaryChoices={ev.dietary_choices}
+                    <GuestRowsFieldset errors={fieldErrors} adultRows={adultRows} childRows={childRows} setAdultRows={setAdultRows} setChildRows={setChildRows} dietaryChoices={ev.dietary_choices}
                       {...(content && mods.courses && { renderExtra: (child: boolean, i: number) => {
                         const k = `${child ? "c" : "a"}-${i}`;
                         return <CourseSelects content={content} modules={ev.modules} eventType={ev.event_type!} isChild={child} guestLabel={child ? `Child ${i + 1}` : `Adult ${i + 1}`}

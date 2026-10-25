@@ -76,10 +76,6 @@ Deno.serve(async (req) => {
       website,
     } = parsed.data;
 
-    if (!isPlausiblePhone(contact_phone)) {
-      return new Response(JSON.stringify({ error: PHONE_REQUIRED_MESSAGE }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-    }
-
     // Honeypot: real visitors never fill this hidden field. Pretend success, save nothing.
     if (isHoneypotTripped(website)) {
       console.warn("save-meeting-response honeypot tripped", { event_key });
@@ -87,6 +83,10 @@ Deno.serve(async (req) => {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
+    }
+
+    if (!isPlausiblePhone(contact_phone)) {
+      return new Response(JSON.stringify({ error: PHONE_REQUIRED_MESSAGE }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
     const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || null;
