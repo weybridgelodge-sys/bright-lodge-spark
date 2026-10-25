@@ -111,11 +111,11 @@
      calendar and clock glyphs that disappear against the Lodge's navy fields.
      Keep this portal-wide so every present and future date, time,
      datetime-local, month and week input is accessible. */
-  html.portal-canvas input[type="date"],
-  html.portal-canvas input[type="time"],
-  html.portal-canvas input[type="datetime-local"],
-  html.portal-canvas input[type="month"],
-  html.portal-canvas input[type="week"] {
+  html.portal-canvas input[type="date"]:not(.bg-background),
+  html.portal-canvas input[type="time"]:not(.bg-background),
+  html.portal-canvas input[type="datetime-local"]:not(.bg-background),
+  html.portal-canvas input[type="month"]:not(.bg-background),
+  html.portal-canvas input[type="week"]:not(.bg-background) {
     color-scheme: dark;
     min-height: 48px;
     background-color: hsl(var(--navy));
@@ -352,6 +352,26 @@ select.autofilled-dark:not(.autofill-light) {
     overscroll-behavior: contain;
     -webkit-overflow-scrolling: touch;
     scroll-padding-bottom: 5rem;
+  }
+  /* While a field is focused, leave room below the last field and Save so they can be
+     scrolled above a keyboard that covers the box (--app-kb = 0 when keyboard is closed). */
+  .vv-dialog:focus-within,
+  .vv-sheet-side:focus-within {
+    padding-bottom: calc(1.5rem + var(--app-kb, 0px)) !important;
+  }
+  /* Date/time controls in half-width columns: keep the full value visible at 320px. */
+  input[type="date"], input[type="time"], input[type="datetime-local"], input[type="month"], input[type="week"] {
+    padding-left: 0.5rem !important;
+    padding-right: 0.25rem !important;
+    font-size: 0.875rem !important;
+    min-height: 44px;
+  }
+  html.portal-canvas input[type="date"]::-webkit-calendar-picker-indicator,
+  html.portal-canvas input[type="time"]::-webkit-calendar-picker-indicator,
+  html.portal-canvas input[type="datetime-local"]::-webkit-calendar-picker-indicator,
+  html.portal-canvas input[type="month"]::-webkit-calendar-picker-indicator,
+  html.portal-canvas input[type="week"]::-webkit-calendar-picker-indicator {
+    width: 32px; padding: 6px; margin: 0;
   }
   .vv-sheet-side {
     top: var(--app-vvtop, 0px) !important;
