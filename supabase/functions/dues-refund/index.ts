@@ -3,6 +3,7 @@
 // Uses Stripe SANDBOX explicitly.
 
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { insertOnce } from "../_shared/insertOnce.ts";
 import { createStripeClient } from "../_shared/stripe.ts";
 
 const corsHeaders = {
@@ -74,7 +75,7 @@ Deno.serve(async (req) => {
     });
 
     // Bacs refunds arrive with status 'pending' and settle later.
-    const { error: insErr } = await admin.from("dues_payments").insert({
+    await insertOnce(`dues refund ${refund.id}`, () => admin.from("dues_payments").insert({
       subscription_id: (payment as any).subscription_id,
       member_id: (payment as any).member_id,
       type: "refund",
@@ -86,8 +87,7 @@ Deno.serve(async (req) => {
       status: refund.status === "succeeded" ? "succeeded" : (refund.status ?? "pending"),
       note: note ?? "Manual refund by admin",
       occurred_at: new Date().toISOString(),
-    });
-    if (insErr) throw insErr;
+    }));
 
     return json({
       ok: true,
