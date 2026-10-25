@@ -170,7 +170,8 @@ export async function sendEventBookingEmails(sb: any, bookingId: string, stage: 
     if (r.error) { ok = false; console.error("event customer email failed", r.error); }
   } else ok = false;
   if (CUSTOMER_ONLY.includes(stage)) return { ok };
-  for (const to of await lodgeRecipients(sb, ev)) {
+  // Parallel: each recipient keeps its own unchanged idempotency key.
+  await Promise.all((await lodgeRecipients(sb, ev)).map(async (to) => {
     const r = await sendTransactionalEmail({
       templateName: "event-booking-lodge",
       recipientEmail: to,
@@ -179,7 +180,7 @@ export async function sendEventBookingEmails(sb: any, bookingId: string, stage: 
       templateData: data,
     });
     if (r.error) console.error("event lodge email failed", to, r.error);
-  }
+  }));
   return { ok };
 }
 
