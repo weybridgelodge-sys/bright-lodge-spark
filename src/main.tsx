@@ -49,6 +49,11 @@ document.addEventListener(
   (e) => {
     const target = e.target as HTMLElement | null;
     if (!(target instanceof HTMLElement)) return;
+    // Public light forms keep their own autofill look (.autofill-light).
+    if (target.classList.contains("autofill-light")) {
+      target.classList.remove("autofilled-dark");
+      return;
+    }
     if (e.animationName === "onAutoFillStart") {
       target.classList.add("autofilled-dark");
     } else if (e.animationName === "onAutoFillCancel") {
