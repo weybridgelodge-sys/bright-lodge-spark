@@ -3,6 +3,8 @@
 import { Minus, Plus } from "lucide-react";
 import { calcProcessingFeePence, feeQuestion, type EventPayMethod } from "@/lib/cardFee";
 import { CHILD_MAX_AGE, formatGBP } from "@/lib/publicEvents";
+import { guestFieldId, invalidProps, type FieldError } from "@/lib/formErrors";
+import { InlineFieldError } from "@/components/bookings/InlineFieldError";
 
 export type GuestRow = { name: string; age: string; dietary: string; choice: string };
 export type PayMethod = EventPayMethod;
@@ -43,7 +45,9 @@ export function Honeypot({ value, onChange }: { value: string; onChange: (v: str
   );
 }
 
-export function GuestRowsFieldset({ adultRows, childRows, setAdultRows, setChildRows, dietaryChoices, renderExtra }: {
+export function GuestRowsFieldset({ adultRows, childRows, setAdultRows, setChildRows, dietaryChoices, renderExtra, errors = [] }: {
+  /** Inline field errors (ids from guestFieldId). */
+  errors?: FieldError[];
   adultRows: GuestRow[]; childRows: GuestRow[];
   setAdultRows: React.Dispatch<React.SetStateAction<GuestRow[]>>; setChildRows: React.Dispatch<React.SetStateAction<GuestRow[]>>;
   dietaryChoices: string[];
@@ -59,8 +63,10 @@ export function GuestRowsFieldset({ adultRows, childRows, setAdultRows, setChild
           <div key={`${child}-${i}`} className="border border-border bg-background rounded-sm p-3 space-y-2">
             <p className="text-sm font-semibold text-foreground">{child ? `Child ${i + 1}` : `Adult ${i + 1}`}</p>
             <div className="grid sm:grid-cols-[1fr_6rem] gap-2">
-              <label className="block"><span className="sr-only">Name</span><input className={inputCls} placeholder="Name" value={g.name} onChange={(e) => set({ name: e.target.value })} /></label>
-              {child && <label className="block"><span className="sr-only">Age</span><input className={inputCls} type="number" min={0} max={CHILD_MAX_AGE} placeholder="Age" value={g.age} onChange={(e) => set({ age: e.target.value })} /></label>}
+              <div><label className="block"><span className="sr-only">{child ? `Child ${i + 1} name` : `Adult ${i + 1} name`}</span><input id={guestFieldId(child, i, "name")} className={`${inputCls} scroll-mt-28`} placeholder="Name" aria-required="true" {...invalidProps(errors, guestFieldId(child, i, "name"))} value={g.name} onChange={(e) => set({ name: e.target.value })} /></label>
+                <InlineFieldError errors={errors} id={guestFieldId(child, i, "name")} /></div>
+              {child && <div><label className="block"><span className="sr-only">{`Child ${i + 1} age`}</span><input id={guestFieldId(child, i, "age")} className={`${inputCls} scroll-mt-28`} type="number" inputMode="numeric" min={0} max={CHILD_MAX_AGE} placeholder="Age" aria-required="true" {...invalidProps(errors, guestFieldId(child, i, "age"))} value={g.age} onChange={(e) => set({ age: e.target.value })} /></label>
+                <InlineFieldError errors={errors} id={guestFieldId(child, i, "age")} /></div>}
             </div>
             {renderExtra?.(child, i)}
             {dietaryChoices.length > 0 && (

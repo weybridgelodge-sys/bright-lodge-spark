@@ -379,6 +379,7 @@ export default function MeetingBookingForm({
                 <form
                   ref={formRef}
                   onSubmit={handleSubmit}
+                  noValidate
                   className="bg-card rounded-sm border border-border p-5 sm:p-8 scroll-mt-24"
                 >
                   {/* ── Step Indicator ── */}
