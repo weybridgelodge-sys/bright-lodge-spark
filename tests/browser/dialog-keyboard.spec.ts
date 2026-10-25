@@ -93,7 +93,6 @@ for (const width of [320, 360]) {
       const bd = dlg.locator('input[type="date"]').nth(1);
       await bd.fill("2026-10-21");
       const neighbourBg = await dlg.locator('input:not([type="date"])').first().evaluate((el) => getComputedStyle(el).backgroundColor);
-      console.log("DBG", await bd.evaluate((el: HTMLInputElement) => JSON.stringify({cw: el.clientWidth, sw: el.scrollWidth, fs: getComputedStyle(el).fontSize, pl: getComputedStyle(el).paddingLeft, cls: el.className})));
       const d = await bd.evaluate((el: HTMLInputElement) => ({ bg: getComputedStyle(el).backgroundColor, h: el.getBoundingClientRect().height, ov: el.scrollWidth - el.clientWidth }));
       expect(d.bg, "light field like its neighbours").toBe(neighbourBg);
       expect(d.h).toBeGreaterThanOrEqual(44);
