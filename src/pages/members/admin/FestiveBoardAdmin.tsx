@@ -3,6 +3,7 @@ import { bookingCreatesRegisterRow } from "../../../../supabase/functions/_share
 import { fetchProfilesPii } from "@/lib/profilePii";
 import { useEffect, useMemo, useState } from "react";
 import MembersLayout from "@/components/members/MembersLayout";
+import { useUnitProfile } from "@/lib/unitProfile";
 import { useAuth } from "@/hooks/useAuth";
 import { linkedPageLine, meetingLinkPayload, type LinkableEvent } from "@/lib/meetingEventLink";
 import { supabase } from "@/integrations/supabase/client";
@@ -43,7 +44,7 @@ import {
   attendanceStatusLabel,
   paymentMethodLabel,
   computeHeadcount,
-  isWeybridgeLodge,
+  isHostLodge,
   statusRank,
   surnameKey,
   statusBreakdown,
@@ -144,6 +145,7 @@ export default function FestiveBoardAdmin() {
   const canEdit = isAdmin || isSecretary || isAssistantSecretary;
   const canManageLOI = canEdit;
   const { toast } = useToast();
+  const unit = useUnitProfile();
   const [meetings, setMeetings] = useState<Meeting[]>([]);
   const [attendance, setAttendance] = useState<Attendance[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
@@ -444,7 +446,7 @@ export default function FestiveBoardAdmin() {
           <ul className="divide-y divide-gold/10">
             {meetings.map((mtg) => {
               const rows = attendanceByMeeting[mtg.id] ?? [];
-              const hc = computeHeadcount(rows, mtg.headcount_override);
+              const hc = computeHeadcount(rows, mtg.headcount_override, unit);
               const isOpen = expandedId === mtg.id;
               return (
                 <li key={mtg.id} className="py-3">
@@ -521,7 +523,7 @@ export default function FestiveBoardAdmin() {
                                         }`
                                       : ""
                                   }`;
-                              return { r, name, isMember: !!m || isWeybridgeLodge(r.visitor_lodge_name) };
+                              return { r, name, isMember: !!m || isHostLodge(r.visitor_lodge_name, unit) };
                             });
                             const byStatusThenName = (a: typeof enriched[number], b: typeof enriched[number]) => {
                               const d = statusRank(a.r.attendance_status) - statusRank(b.r.attendance_status);
@@ -731,6 +733,7 @@ function MeetingDialog({
   const { user, isAdmin, isSecretary } = useAuth();
   const canEditPublicLabel = isAdmin || isSecretary;
   const { toast } = useToast();
+  const unit = useUnitProfile();
   const [publicLabel, setPublicLabel] = useState(existing?.public_label ?? "");
   const [date, setDate] = useState(
     existing?.meeting_date ?? new Date().toISOString().slice(0, 10)
@@ -904,7 +907,7 @@ function MeetingDialog({
 
         // Respondent
         const respLodge = String(d.lodge ?? "");
-        const respondentIsMember = isWeybridgeLodge(respLodge);
+        const respondentIsMember = isHostLodge(respLodge, unit);
         if (respondentIsMember) {
           // Try to match by email or full name
           const targetName = (b.contact_name ?? "").toLowerCase().trim();
@@ -963,7 +966,7 @@ function MeetingDialog({
           const gLodge = String(g.lodge ?? "");
           const guestBookingId = `${b.id}::g${gi}`;
           if (alreadySynced.has(guestBookingId)) continue;
-          const guestIsMember = isWeybridgeLodge(gLodge);
+          const guestIsMember = isHostLodge(gLodge, unit);
           if (guestIsMember) {
             const targetName = (g.name ?? "").toLowerCase().trim();
             const match = members.find((m) => {
