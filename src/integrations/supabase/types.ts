@@ -5067,6 +5067,27 @@ export type Database = {
           },
         ]
       }
+      pending_account_units: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          email: string
+          unit_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          email: string
+          unit_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          email?: string
+          unit_id?: string
+        }
+        Relationships: []
+      }
       poll_votes: {
         Row: {
           id: string
