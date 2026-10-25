@@ -1,5 +1,5 @@
 import { masonicYearStartSync } from "@/lib/masonicYear";
-// Progressive Officers projection logic for Weybridge Lodge No. 6787.
+// Progressive Officers projection logic for the lodge.
 // Six offices, ordered junior → senior:
 //   Inner Guard → Junior Deacon → Senior Deacon → Junior Warden → Senior Warden → Worshipful Master
 // Each year, everyone advances one rung. The WM rolls off. The Inner Guard

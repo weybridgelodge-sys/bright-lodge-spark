@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { useUnitProfile } from "@/lib/unitProfile";
+import { siteOriginOr } from "@/lib/unitText";
 import { Link, useSearchParams } from "react-router-dom";
 import MembersLayout from "@/components/members/MembersLayout";
 import { useAuth } from "@/hooks/useAuth";
@@ -397,7 +399,8 @@ function Editor({ draft: initial, onBack, duplicatedFrom, onQr }: { draft: Draft
 }
 
 function QrDialog({ row, onClose }: { row: Record<string, any> & { name: string }; onClose: () => void }) {
-  const url = eventQrTarget({ slug: row.slug, short_link: row.short_link || null });
+  const unit = useUnitProfile();
+  const url = eventQrTarget({ slug: row.slug, short_link: row.short_link || null }, siteOriginOr(unit));
   const [preview, setPreview] = useState<string | null>(null);
   useEffect(() => {
     if (!url) return;

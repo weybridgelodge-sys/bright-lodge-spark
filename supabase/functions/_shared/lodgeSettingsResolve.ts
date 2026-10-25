@@ -81,3 +81,16 @@ export function returnFileName(pattern: string, year: string | number, ext: stri
   return `${pattern.replace(/\{year\}/g, String(year)).replace(/[\\/:*?"<>|]+/g, "-")}.${ext}`;
 }
 
+
+/** Lodge name for running text; neutral when Unit Setup has none. */
+export const lodgeNameOr = (name?: string | null) => (typeof name === "string" && name.trim() ? name.trim() : "Your Lodge");
+/** "Example Lodge" -> "Example"; neutral "Your Lodge" when blank. */
+export const lodgeShortName = (name?: string | null) => {
+  const n = typeof name === "string" ? name.trim() : "";
+  return n ? (n.replace(/\s+Lodge$/i, "").trim() || n) : "Your Lodge";
+};
+/** Members' booking-deadline reminder title. */
+export const deadlineReminderTitle = (name?: string | null) => `Booking Deadline For ${lodgeShortName(name)} Meeting Approaching`;
+/** Certified accounts download name, e.g. "<Name-Lodge>-Accounts-FY2025-26.pdf". */
+export const accountsFileName = (name: string | null | undefined, year: number) =>
+  `${lodgeNameOr(name).replace(/[^A-Za-z0-9]+/g, "-").replace(/(^-|-$)/g, "")}-Accounts-FY${year}-${String(year + 1).slice(-2)}.pdf`;

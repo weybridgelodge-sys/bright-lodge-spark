@@ -1,11 +1,12 @@
 import { useEffect } from "react";
+import { PRODUCTION_HOSTS as DEPLOYMENT_HOSTS } from "@/lib/deployment";
 
 /**
  * Injects <meta name="robots" content="noindex, nofollow"> on every hostname
  * that is NOT the production domain. Purely additive: the production domain
- * (weybridgelodge.org.uk / www.weybridgelodge.org.uk) is never touched.
+ * (PRODUCTION_HOSTS in lib/deployment) is never touched.
  */
-const PRODUCTION_HOSTS = ["weybridgelodge.org.uk", "www.weybridgelodge.org.uk"];
+const PRODUCTION_HOSTS: readonly string[] = DEPLOYMENT_HOSTS;
 const MARKER = "data-noindex-guard";
 
 const NoindexGuard = () => {

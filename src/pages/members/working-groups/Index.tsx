@@ -1,4 +1,6 @@
 import { Link } from "react-router-dom";
+import { useUnitProfile } from "@/lib/unitProfile";
+import { nameOr } from "@/lib/unitText";
 import { useEffect, useState } from "react";
 import MembersLayout from "@/components/members/MembersLayout";
 import ProtectedRoute from "@/components/members/ProtectedRoute";
@@ -10,9 +12,10 @@ import { buildWorkingGroupsActivityPdf } from "@/lib/development/activityReportP
 import { saveJsPdf } from "@/lib/nativeDownload";
 import { toast } from "sonner";
 
-const PHILOSOPHY = `Weybridge Lodge operates on the principle of the beehive. Every brother, from the newest Entered Apprentice to the most senior Past Master, contributes to the life of the lodge. Working groups exist so that every member has a role, a purpose, and a home in the lodge beyond the progressive offices.`;
+const philosophy = (name: string) => `${name} operates on the principle of the beehive. Every brother, from the newest Entered Apprentice to the most senior Past Master, contributes to the life of the lodge. Working groups exist so that every member has a role, a purpose, and a home in the lodge beyond the progressive offices.`;
 
 function Inner() {
+  const unit = useUnitProfile();
   const { isAdmin, isWorshipfulMaster, isSecretary } = useAuth();
   const canManage = isAdmin || isWorshipfulMaster || isSecretary;
   const [groups, setGroups] = useState<WorkingGroup[]>([]);
@@ -59,7 +62,7 @@ function Inner() {
 
       <blockquote className="border-l-4 border-gold pl-6 py-2 bg-navy-dark/40 rounded-r-sm">
         <p className="font-serif italic text-gold text-lg leading-relaxed">
-          “{PHILOSOPHY}”
+          “{philosophy(nameOr(unit))}”
         </p>
         <footer className="mt-3 text-xs text-primary-foreground/80 not-italic">
           — Lodge philosophy, adopted 2026

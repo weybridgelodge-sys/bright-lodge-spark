@@ -303,10 +303,10 @@ function Inner() {
           <h3 className="font-serif text-gold mt-4 mb-2">Unit details (Year Book)</h3>
           <div className="grid gap-3 sm:grid-cols-2">
             <label className={labelCls}>Unit number
-              <Input className={`mt-1 ${fieldCls}`} placeholder="e.g. 6787" value={rule.unit_number ?? ""} onChange={(e) => set({ unit_number: e.target.value })} />
+              <Input className={`mt-1 ${fieldCls}`} placeholder="e.g. 1234" value={rule.unit_number ?? ""} onChange={(e) => set({ unit_number: e.target.value })} />
             </label>
             <label className={labelCls}>Usual venue
-              <Input className={`mt-1 ${fieldCls}`} placeholder="e.g. South West Surrey Masonic Centre" value={rule.default_venue ?? ""} onChange={(e) => set({ default_venue: e.target.value })} />
+              <Input className={`mt-1 ${fieldCls}`} placeholder="e.g. your usual venue" value={rule.default_venue ?? ""} onChange={(e) => set({ default_venue: e.target.value })} />
             </label>
             <label className={labelCls}>Election month
               <select className={selectCls} value={rule.election_month ?? ""} onChange={(e) => set({ election_month: num(e.target.value) })}>

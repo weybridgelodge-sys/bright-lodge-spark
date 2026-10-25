@@ -9,6 +9,7 @@
 
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { BRAND, BRAND_GOLD_DARK, brandFooterHtml, brandHeaderHtml } from "../_shared/transactional-email-templates/_brand.ts";
+import { EVENTS_FROM_ADDRESS } from "../_shared/emailDomains.ts";
 import { loadLodgeSettings, resolveLodgeSettings } from "../_shared/lodgeSettings.ts";
 let LODGE = resolveLodgeSettings(null);
 const brandId = () => ({ crestUrl: LODGE.crestImageUrl || null, lodgeName: LODGE.lodgeName, lodgeNumber: LODGE.lodgeNumber, provinceName: LODGE.provinceName });
@@ -20,7 +21,7 @@ const corsHeaders = {
 };
 
 const GATEWAY_URL = "https://connector-gateway.lovable.dev/resend";
-const FROM_ADDRESS_DOMAIN = "notify@events.weybridgelodge.org.uk";
+const FROM_ADDRESS_DOMAIN = EVENTS_FROM_ADDRESS;
 
 type Recipient = { email: string; salutation: string; visitor_contact_id?: string | null; force?: boolean };
 

@@ -3,7 +3,7 @@ import { Capacitor } from "@capacitor/core";
 // Production origin used by the native Capacitor app to resolve
 // Lovable CDN asset URLs (which are absolute paths like `/__l5e/...`).
 // On the web, we keep URLs relative so they resolve against the current origin.
-const PROD_ORIGIN = "https://weybridgelodge.org.uk";
+import { DEPLOYMENT_ORIGIN as PROD_ORIGIN } from "@/lib/deployment";
 
 /**
  * Resolve a Lovable `.asset.json` pointer (or a raw URL string) to a URL that

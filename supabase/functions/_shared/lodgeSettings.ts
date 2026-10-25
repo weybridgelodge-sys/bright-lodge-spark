@@ -6,7 +6,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 
 import { resolveLodgeSettings, type LodgeSettings } from "./lodgeSettingsResolve.ts";
-export { LODGE_FALLBACK, resolveLodgeSettings, returnFileName, type LodgeSettings } from "./lodgeSettingsResolve.ts";
+export { LODGE_FALLBACK, resolveLodgeSettings, returnFileName, lodgeNameOr, lodgeShortName, deadlineReminderTitle, accountsFileName, type LodgeSettings } from "./lodgeSettingsResolve.ts";
 
 let cache: { at: number; value: LodgeSettings } | null = null;
 const TTL_MS = 5 * 60 * 1000;

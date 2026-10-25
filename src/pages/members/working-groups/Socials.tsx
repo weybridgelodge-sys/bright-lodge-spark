@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
+import { useUnitProfile } from "@/lib/unitProfile";
+import { nameOr } from "@/lib/unitText";
 import { Link } from "react-router-dom";
 import MembersLayout from "@/components/members/MembersLayout";
 import ProtectedRoute from "@/components/members/ProtectedRoute";
@@ -44,6 +46,7 @@ function fmt(dt: string) {
 }
 
 function Inner() {
+  const unit = useUnitProfile();
   const { user, isAdmin, isWorshipfulMaster, isSecretary } = useAuth();
   const [canManage, setCanManage] = useState(isAdmin || isWorshipfulMaster || isSecretary);
   const [socials, setSocials] = useState<LodgeSocial[]>([]);
@@ -130,7 +133,7 @@ function Inner() {
 
       const result = await sendEventInvite({
         event: {
-          title: `Weybridge Lodge Social — ${title.trim()}`,
+          title: `${nameOr(unit)} Social — ${title.trim()}`,
           description: description.trim() || undefined,
           location: venue.trim(),
           startTime: startIso,

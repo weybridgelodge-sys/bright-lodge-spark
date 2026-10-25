@@ -3,6 +3,7 @@
 // Reused by three modules: Officers Night (auto), Ad-hoc Socials, Lodge Visits.
 
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { EVENTS_FROM_ADDRESS } from "../_shared/emailDomains.ts";
 import { loadLodgeSettings } from "../_shared/lodgeSettings.ts";
 
 const corsHeaders = {
@@ -12,9 +13,8 @@ const corsHeaders = {
 };
 
 const GATEWAY_URL = "https://connector-gateway.lovable.dev/resend";
-// Resend-verified sender domain. Kept separate from email.weybridgelodge.org.uk
-// (which is delegated to Lovable Emails) so both providers can coexist.
-const FROM_ADDRESS_DOMAIN = "notify@events.weybridgelodge.org.uk";
+// Resend-verified sender address: deployment-level, see _shared/emailDomains.ts.
+const FROM_ADDRESS_DOMAIN = EVENTS_FROM_ADDRESS;
 
 type Recipient = { email: string; user_id?: string | null };
 type Attachment = { filename: string; content: string; content_type?: string };

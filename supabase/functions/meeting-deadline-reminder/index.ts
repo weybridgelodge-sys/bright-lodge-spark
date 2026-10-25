@@ -10,7 +10,7 @@
 //   ?test_email=a@b.c   send the real email to this address only (no push, no marking)
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { sendTransactionalEmail } from "../_shared/send-email.ts";
-import { loadLodgeSettings } from "../_shared/lodgeSettings.ts";
+import { deadlineReminderTitle, loadLodgeSettings } from "../_shared/lodgeSettings.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -40,7 +40,6 @@ function ordinalDate(iso: string): string {
   return `${day}${suffix} ${month}`;
 }
 
-const TITLE = "Booking Deadline For Weybridge Meeting Approaching";
 const bodyCopy = (meetingDate: string, deadlineDate: string) =>
   `The deadline for our next meeting on ${meetingDate} is approaching. Please book your space by ${deadlineDate}.`;
 
@@ -52,6 +51,7 @@ Deno.serve(async (req) => {
   const dryRun = url.searchParams.get("dry_run") === "1";
   const meetingIdParam = url.searchParams.get("meeting_id");
   const testEmail = url.searchParams.get("test_email")?.trim() || null;
+  const TITLE = deadlineReminderTitle((await loadLodgeSettings()).lodgeName);
 
   const londonHour = parseInt(
     new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/London", hour: "2-digit", hour12: false })

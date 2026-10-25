@@ -41,7 +41,7 @@ Deno.serve(async (req) => {
       const r = await sendEventBookingEmails(sb, b.id, "link", { idempotencySuffix: String(Date.now()) });
       if (!r.ok) return json({ error: "The email could not be sent" }, 502);
     }
-    return json({ url: balanceUrl(token) });
+    return json({ url: await balanceUrl(token) });
   } catch (e) {
     console.error("event-balance-link error", e);
     return json({ error: "Something went wrong" }, 500);

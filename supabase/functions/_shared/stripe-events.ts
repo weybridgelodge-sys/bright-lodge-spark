@@ -1,4 +1,4 @@
-// Events Stripe account ("weybridgelodge.org.uk") — deliberately separate from the
+// Events Stripe account — deliberately separate from the
 // Lovable-managed lodge Stripe (./stripe.ts). Uses only STRIPE_EVENTS_* secrets.
 import { encode } from "https://deno.land/std@0.168.0/encoding/hex.ts";
 import Stripe from "https://esm.sh/stripe@22.0.2";
@@ -39,7 +39,6 @@ export async function verifyEventsWebhook(req: Request): Promise<any> {
   return JSON.parse(body);
 }
 
-const SITE = "https://weybridgelodge.org.uk";
 const gbp = (p: number) => new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP" }).format((p || 0) / 100);
 const fmtDate = (d: string) =>
   new Date(`${d}T12:00:00`).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
@@ -88,7 +87,9 @@ export function newBalanceToken(): string {
   const b = crypto.getRandomValues(new Uint8Array(32));
   return btoa(String.fromCharCode(...b)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
-export const balanceUrl = (token: string) => `${SITE}/events/balance/${token}`;
+/** Balance page link on the Unit Setup site address. */
+export const balanceUrlFor = (siteUrl: string, token: string) => `${siteUrl.replace(/\/+$/, "")}/events/balance/${token}`;
+export const balanceUrl = async (token: string) => balanceUrlFor((await loadLodgeSettings()).siteUrl, token);
 export const londonToday = () => new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/London", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
 
 /** Recompute paid / balance / status from the booking's payment rows (deposit plans move status; full plans keep today's rules). */
@@ -124,14 +125,14 @@ export async function sendEventBookingEmails(sb: any, bookingId: string, stage: 
   const confirmed = b.payment_status === "paid" || b.payment_status === "deposit_paid";
   const order = b.subtotal_pence ?? b.total_pence;
   let link: string | null = null;
-  if ((deposit && (b.balance_due_pence ?? 0) > 0) || CUSTOMER_ONLY.includes(stage)) link = balanceUrl(await ensureBalanceToken(sb, b.id));
+  if ((deposit && (b.balance_due_pence ?? 0) > 0) || CUSTOMER_ONLY.includes(stage)) link = await balanceUrl(await ensureBalanceToken(sb, b.id));
   const lodge = await loadLodgeSettings();
   const data = {
     stage,
     reminderKind: opts.reminderKind ?? null,
     eventTitle: ev.public_title || ev.name,
     eventDate: fmtDate(ev.event_date),
-    venue: ev.venue || "Guildford Masonic Centre, Hitherbury Close, Guildford GU2 4DR",
+    venue: ev.venue || lodge.meetingVenue,
     bookerName: capFirst(b.payer_name),
     bookerEmail: b.contact_email,
     bookerPhone: b.contact_phone,

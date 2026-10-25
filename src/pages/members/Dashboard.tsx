@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { useUnitProfile } from "@/lib/unitProfile";
+import { titleOr } from "@/lib/unitText";
 import { Link } from "react-router-dom";
 import MembersLayout from "@/components/members/MembersLayout";
 import { useAuth } from "@/hooks/useAuth";
@@ -38,6 +40,7 @@ type Doc = { id: string; title: string; category: string; created_at: string };
 type MyGroup = { role: "lead" | "member"; group: { id: string; slug: string; name: string; remit: string } | null };
 
 export default function MembersDashboard() {
+  const unit = useUnitProfile();
   const { profile, user, isAdmin } = useAuth();
   const [notices, setNotices] = useState<Notice[]>([]);
   const [docs, setDocs] = useState<Doc[]>([]);
@@ -74,7 +77,7 @@ export default function MembersDashboard() {
           Welcome, {(profile as { preferred_name?: string | null } | null)?.preferred_name?.trim() || profile?.first_name?.trim() || "Brother"}
         </h1>
         <p className="text-primary-foreground/80 text-sm">
-          The private area for brethren of Weybridge Lodge No. 6787.
+          The private area for brethren of {titleOr(unit)}.
         </p>
       </div>
 

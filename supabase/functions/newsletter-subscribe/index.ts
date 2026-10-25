@@ -62,7 +62,7 @@ Deno.serve(async (req) => {
       },
       async sendConfirm(to, confirmUrl, idempotencyKey) {
         await sendTemplateEmail("newsletter-confirm", to, {
-          templateData: { confirmUrl, lodgeName: lodge.formalSenderName, postcode: lodge.lodgePostcode },
+          templateData: { confirmUrl, lodgeName: lodge.formalSenderName, postcode: lodge.lodgePostcode, crestUrl: lodge.crestImageUrl || null, crestName: lodge.lodgeName },
           idempotencyKey,
           fromName: lodge.formalSenderName,
           replyTo: lodge.communicationsEmail,

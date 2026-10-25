@@ -28,6 +28,6 @@ Deno.serve(async (req) => {
     bank: confirmed ? null : b.bank_instructions,
     payment_plan: b.payment_plan, amount_paid_pence: b.amount_paid_pence ?? 0,
     balance_due_pence: b.payment_plan === "deposit" ? (b.balance_due_pence ?? 0) : 0, balance_due_date: b.balance_due_date,
-    balance_url: tok?.token ? balanceUrl(tok.token) : null,
+    balance_url: tok?.token ? await balanceUrl(tok.token) : null,
   });
 });

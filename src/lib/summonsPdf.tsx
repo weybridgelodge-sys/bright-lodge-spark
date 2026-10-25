@@ -565,7 +565,10 @@ const OfficersDiningPanel: React.FC<{
   hidden: Set<NoticeKey>;
   shortened: Set<NoticeKey>;
   density?: number;
-}> = ({ template, officers, hidden, shortened, density = 0 }) => {
+  /** Lodge record name (Unit Setup), for the newsletter consent line. */
+  lodgeName?: string;
+}> = ({ template, officers, hidden, shortened, density = 0, lodgeName }) => {
+  const consentName = lodgeName?.trim() || template.lodge_name?.trim() || "Your Lodge";
   const d = densityStyles(density);
   // Only posts with a holder print (shared rule in summonsOfficers.ts).
   const officerLines = printableOfficers(officers);
@@ -627,11 +630,11 @@ const OfficersDiningPanel: React.FC<{
     )}
     {/* Newsletter consent — establishes lawful basis for adding visiting
         Freemasons captured via summons / Festive Board portal to the
-        Weybridge Chronicle list. Existing members are covered by separate
+        lodge newsletter list. Existing members are covered by separate
         membership data-handling terms (see Data Protection notice above). */}
     <Text style={[s.microLarge, d.notice, { marginTop: density >= 1 ? 3 : 6 }]}>
       <Text style={s.bold}>Newsletter consent: </Text>
-      As part of receiving this summons, Weybridge Lodge will send you newsletters or other Masonic-related information.
+      As part of receiving this summons, {consentName} will send you newsletters or other Masonic-related information.
       You can unsubscribe at any time using the link in the footer of each newsletter.
     </Text>
   </View>
@@ -857,6 +860,7 @@ const SummonsDocument: React.FC<{
       <Page size="A4" orientation="landscape" style={s.page}>
         <View style={[s.panel, s.panelLeft, { flex: 1, padding: 0 }]}>
           <OfficersDiningPanel
+            lodgeName={coverBrand.identity?.lodgeName}
             template={template}
             officers={officers}
             summons={summons}

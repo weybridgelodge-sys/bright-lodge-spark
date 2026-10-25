@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useUnitProfile } from "@/lib/unitProfile";
 import { supabase } from "@/integrations/supabase/client";
 import { usePostingPeriod } from "@/lib/treasurer/periods";
 import PeriodPicker from "@/components/members/treasurer/PeriodPicker";
@@ -35,6 +36,7 @@ const toPence = (v: string) => {
 };
 
 export default function NewMemberFeesTab({ canEdit }: { canEdit: boolean }) {
+  const unit = useUnitProfile();
   const [accounts, setAccounts] = useState<Map<string, string>>(new Map());
   const [pots, setPots] = useState<ReservePot[]>([]);
   const [reliefChestPence, setReliefChestPence] = useState(1000);
@@ -365,7 +367,7 @@ export default function NewMemberFeesTab({ canEdit }: { canEdit: boolean }) {
                 <Label>Bank reference *</Label>
                 <Input aria-label="Bank reference" value={bankReference} onChange={(e) => setBankReference(e.target.value)} placeholder="Required" disabled={!canEdit} />
                 <p className="text-primary-foreground/80 text-xs mt-1">
-                  Lodge Number + Registration Fee (RF) + Candidate&apos;s Surname (e.g. L6787 RF Smith)
+                  Lodge Number + Registration Fee (RF) + Candidate&apos;s Surname (e.g. L{unit.lodgeNumber || "1234"} RF Smith)
                 </p>
               </div>
             </div>

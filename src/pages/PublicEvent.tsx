@@ -20,6 +20,7 @@ import {
 import { CatalogueSteppers, CourseSelects, DECIDE_LATER, eventImageUrl, InfoBlocks, useEventContent } from "@/components/events/booking/ModuleSections";
 import { buildEventSeo } from "@/lib/eventSeo";
 import { isUnitVenue, useUnitProfile, venueFull, venueShort } from "@/lib/unitProfile";
+import { eventPromo, nameOr } from "@/lib/unitText";
 import { coursesForGuest, orderModules } from "@/lib/eventOrder";
 
 const LODGES = ["Weybridge", "Astolat", "Other", "Guest"] as const;
@@ -303,7 +304,7 @@ export default function PublicEvent() {
                     <InlineFieldError errors={fieldErrors} id="pev-phone" />
                     <label className="block" htmlFor="pev-lodge"><span className={labelClass}>Lodge</span>
                       <select id="pev-lodge" className={inputCls} value={lodge} onChange={(e) => setLodge(e.target.value as any)}>
-                        <option value="Weybridge">Weybridge Lodge</option><option value="Astolat">Astolat Lodge</option><option value="Other">Another lodge</option><option value="Guest">Guest / not a Freemason</option>
+                        <option value="Weybridge">{nameOr(unit, "Our lodge")}</option><option value="Astolat">Astolat Lodge</option><option value="Other">Another lodge</option><option value="Guest">Guest / not a Freemason</option>
                       </select>
                     </label>
                   </fieldset>
@@ -353,7 +354,7 @@ export default function PublicEvent() {
           <section className="py-20 md:py-28 bg-navy" aria-labelledby="next-heading">
             <div className="container mx-auto px-4 sm:px-6 max-w-3xl text-center">
               <h2 id="next-heading" className="font-serif text-3xl text-gold">Curious about Freemasonry?</h2>
-              <p className="mt-4 font-sans text-background/90">Weybridge Lodge is a friendly Masonic Lodge in Surrey. If you are not yet a member, see what a first visit is like or take our 2-minute quiz.</p>
+              <p className="mt-4 font-sans text-background/90">{eventPromo(unit)} If you are not yet a member, see what a first visit is like or take our 2-minute quiz.</p>
               <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
                 <Link to="/freemason-initiation-night" className="inline-flex items-center justify-center min-h-[48px] px-6 bg-gold-shimmer text-accent-foreground font-semibold rounded-sm">First Visit Guide <ArrowRight className="w-4 h-4 ml-2" aria-hidden="true" /></Link>
                 <Link to="/quiz" className="inline-flex items-center justify-center min-h-[48px] px-6 border border-gold text-gold font-semibold rounded-sm">Take the 2-Min Quiz</Link>

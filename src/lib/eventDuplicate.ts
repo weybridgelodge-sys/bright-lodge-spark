@@ -1,6 +1,6 @@
 /** Pure helpers for duplicating a public event into next year's draft. */
 
-export const PUBLIC_SITE_ORIGIN = "https://weybridgelodge.org.uk";
+
 
 /** Bump 4-digit years (2026 -> 2027) and 2-digit year suffixes after letters (XMAS26 -> XMAS27). */
 export function bumpYear(s: string): { text: string; changed: boolean } {
@@ -58,10 +58,11 @@ export function buildDuplicatePayload(row: Record<string, any>, existingSlugs: I
 }
 
 /** The QR encodes the short link when set, otherwise the canonical public page. */
-export function eventQrTarget(row: { slug: string | null; short_link?: string | null }): string | null {
+/** siteOrigin: Unit Setup site address (see unitText.siteOriginOr). */
+export function eventQrTarget(row: { slug: string | null; short_link?: string | null }, siteOrigin: string): string | null {
   const s = row.short_link?.trim();
   if (s) return s;
-  return row.slug ? `${PUBLIC_SITE_ORIGIN}/events/${row.slug}` : null;
+  return row.slug ? `${siteOrigin.replace(/\/+$/, "")}/events/${row.slug}` : null;
 }
 
 export const isValidShortLink = (s: string) => s.trim() === "" || /^https:\/\/[^\s/]+\.[^\s]+$/i.test(s.trim());

@@ -1,4 +1,6 @@
 import { masonicYearStartSync } from "@/lib/masonicYear";
+import { useUnitProfile } from "@/lib/unitProfile";
+import { nameOr } from "@/lib/unitText";
 import { useEffect, useState } from "react";
 import MembersLayout from "@/components/members/MembersLayout";
 import { supabase } from "@/integrations/supabase/client";
@@ -59,6 +61,7 @@ type Member = {
 const currentLodgeYear = () => masonicYearStartSync();
 
 export default function MembersDirectory() {
+  const unit = useUnitProfile();
   const [members, setMembers] = useState<Member[]>([]);
   const [offices, setOffices] = useState<Record<string, string>>({});
   const [q, setQ] = useState("");
@@ -128,7 +131,7 @@ export default function MembersDirectory() {
     <MembersLayout>
       <div className="mb-6">
         <h1 className="font-serif text-3xl text-gold mb-2">Brethren Directory</h1>
-        <p className="text-sm text-primary-foreground/80">Approved members of Weybridge Lodge.</p>
+        <p className="text-sm text-primary-foreground/80">Approved members of {nameOr(unit, "your lodge")}.</p>
       </div>
 
       <div className="relative mb-6 max-w-md">

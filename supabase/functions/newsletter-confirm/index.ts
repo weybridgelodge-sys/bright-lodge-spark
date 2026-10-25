@@ -59,6 +59,8 @@ Deno.serve(async (req) => {
             signOffRole: sign.role,
             lodgeName: lodge.formalSenderName,
             postcode: lodge.lodgePostcode,
+            crestUrl: lodge.crestImageUrl || null,
+            crestName: lodge.lodgeName,
           },
           idempotencyKey,
           fromName: lodge.formalSenderName,
