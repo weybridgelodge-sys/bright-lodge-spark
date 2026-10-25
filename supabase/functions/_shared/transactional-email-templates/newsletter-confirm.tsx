@@ -9,7 +9,7 @@ interface Props {
   postcode?: string
 }
 
-const Email = ({ confirmUrl, lodgeName = 'Weybridge Lodge No. 6787', postcode = 'GU2 4DR' }: Props) => (
+const Email = ({ confirmUrl, lodgeName = 'Your Lodge', postcode = '' }: Props) => (
   <Html lang="en" dir="ltr">
     <Head />
     <Preview>One click to confirm your subscription</Preview>
@@ -47,7 +47,7 @@ const footer = { color: BRAND.muted, fontSize: '12px', margin: '8px 0 0', textAl
 
 export const template = {
   component: Email,
-  subject: (d: Props) => `Please confirm your subscription to ${d?.lodgeName || 'Weybridge Lodge No. 6787'}`,
+  subject: (d: Props) => `Please confirm your subscription to ${d?.lodgeName || 'Your Lodge'}`,
   displayName: 'Newsletter: confirm subscription',
-  previewData: { confirmUrl: 'https://weybridgelodge.org.uk/newsletter/confirm?token=preview', lodgeName: 'Weybridge Lodge No. 6787', postcode: 'GU2 4DR' },
+  previewData: { confirmUrl: 'https://example.com/newsletter/confirm?token=preview', lodgeName: 'Example Lodge No. 1', postcode: 'AB1 2CD' },
 } satisfies TemplateEntry

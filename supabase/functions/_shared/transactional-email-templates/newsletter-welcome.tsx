@@ -12,11 +12,11 @@ interface Props {
 }
 
 const Email = ({
-  quizUrl = 'https://weybridgelodge.org.uk/quiz',
+  quizUrl = 'https://example.com/quiz',
   signOffName,
   signOffRole,
-  lodgeName = 'Weybridge Lodge No. 6787',
-  postcode = 'GU2 4DR',
+  lodgeName = 'Your Lodge',
+  postcode = '',
 }: Props) => (
   <Html lang="en" dir="ltr">
     <Head />
@@ -66,7 +66,7 @@ const footer = { color: BRAND.muted, fontSize: '12px', margin: '8px 0 0', textAl
 
 export const template = {
   component: Email,
-  subject: (d: Props) => `Welcome to news from ${d?.lodgeName || 'Weybridge Lodge No. 6787'}`,
+  subject: (d: Props) => `Welcome to news from ${d?.lodgeName || 'Your Lodge'}`,
   displayName: 'Newsletter: welcome from the WM',
-  previewData: { quizUrl: 'https://weybridgelodge.org.uk/quiz', signOffName: 'W Bro. Example Name', signOffRole: 'Worshipful Master, Weybridge Lodge No. 6787', lodgeName: 'Weybridge Lodge No. 6787', postcode: 'GU2 4DR' },
+  previewData: { quizUrl: 'https://example.com/quiz', signOffName: 'W Bro. Example Name', signOffRole: 'Worshipful Master, Example Lodge No. 1', lodgeName: 'Example Lodge No. 1', postcode: 'AB1 2CD' },
 } satisfies TemplateEntry

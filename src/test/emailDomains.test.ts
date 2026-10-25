@@ -25,6 +25,8 @@ const CONVERTED = [
   // summonsPdf.tsx: cover-image path converted; its inner-page GDPR sentence still names the lodge (out of scope, reported).
   "src/lib/summonsCoverImages.ts",
   "src/pages/members/SummonsBuilder.tsx",
+  // Job BD. send-email.ts not yet listed: SITE_NAME literal held pending a decision (space in "No.6787").
+  "supabase/functions/broadcast-newsletter/index.ts",
 ];
 describe("Job BB literal guard", () => {
   for (const f of CONVERTED) it(f, () => {
