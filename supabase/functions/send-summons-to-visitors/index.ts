@@ -80,7 +80,7 @@ function renderHtml(LODGE: LodgeSettings, o: {
   <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:${BRAND.bg};">
     <tr><td align="center">
       <table role="presentation" width="${parseInt(BRAND.containerMaxWidth, 10)}" cellspacing="0" cellpadding="0" style="max-width:${BRAND.containerMaxWidth};margin:0 auto;padding:24px;">
-        <tr><td>${brandHeaderHtml(brandId())}</td></tr>
+        <tr><td>${brandHeaderHtml(brandId(LODGE))}</td></tr>
         <tr><td style="padding:0;">
           <h2 style="color:${BRAND.navy};font-size:22px;margin:0 0 6px;font-family:${BRAND.fontStack};">Invitation to our next Meeting</h2>
           <p style="color:${BRAND.body};font-size:14px;line-height:1.55;margin:14px 0;">Dear ${esc(o.salutation)},</p>
