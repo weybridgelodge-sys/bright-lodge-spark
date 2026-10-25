@@ -16,6 +16,13 @@ async function fakeKeyboard(page: Page) {
     };
     Object.defineProperty(window, "visualViewport", { value: vv, configurable: true });
     (window as any).__openKeyboard = () => { state.h = Math.round(window.innerHeight / 2); listeners.resize.forEach((f) => f(new Event("resize"))); };
+    // Staged opening, like a real keyboard animation: several resize events.
+    (window as any).__openKeyboardStaged = () => {
+      const full = window.innerHeight;
+      [0.85, 0.65, 0.5].forEach((f, i) => setTimeout(() => { state.h = Math.round(full * f); listeners.resize.forEach((fn) => fn(new Event("resize"))); }, 80 * (i + 1)));
+    };
+    // Layout-viewport shrink (resizes-content): visual viewport follows innerHeight.
+    (window as any).__followLayout = () => { state.h = window.innerHeight; listeners.resize.forEach((fn) => fn(new Event("resize"))); };
     void real;
   });
 }
@@ -62,6 +69,48 @@ for (const width of [320, 360]) {
       expect(sb!.y + sb!.height, "Save reachable above keyboard").toBeLessThanOrEqual(vvh);
       expect(await page.evaluate(() => window.scrollY), "page behind stays put").toBe(pageY);
       await page.screenshot({ path: `/tmp/browser/cd-${tab}-${width}.png` });
+    });
+  }
+}
+
+for (const width of [320, 360]) {
+  for (const mode of ["visual", "layout"] as const) {
+    test(`New collection: Notes (last field) visible above a ${mode}-shrink keyboard at ${width}px`, { timeout: 90_000 }, async ({ page }) => {
+      await fakeKeyboard(page);
+      await page.setViewportSize({ width, height: 760 });
+      await page.route("**/rest/v1/**", (r) => r.request().method() === "GET" ? r.fulfill({ json: [] }) : r.continue());
+      await page.route("**/rest/v1/charity_festival_settings**", (r) => r.fulfill({ json: null }));
+      await page.goto("/members/admin/charity");
+      const tabBtn = page.getByRole("tab", { name: /Collections/i });
+      if (!(await tabBtn.waitFor({ timeout: 25000 }).then(() => true).catch(() => false))) test.skip(true, "Synthetic identity cannot open Charity Steward");
+      await tabBtn.click();
+      await page.getByRole("tabpanel").getByRole("button", { name: /^New$/ }).click();
+      const dlg = page.getByRole("dialog", { name: "New collection" });
+      await expect(dlg).toBeVisible();
+      await page.waitForTimeout(400);
+
+      // Banked date: light token field, full date visible, 44px tall.
+      const bd = dlg.locator('input[type="date"]').nth(1);
+      await bd.fill("2026-10-21");
+      const neighbourBg = await dlg.locator('input:not([type="date"])').first().evaluate((el) => getComputedStyle(el).backgroundColor);
+      const d = await bd.evaluate((el: HTMLInputElement) => ({ bg: getComputedStyle(el).backgroundColor, h: el.getBoundingClientRect().height, ov: el.scrollWidth - el.clientWidth }));
+      expect(d.bg, "light field like its neighbours").toBe(neighbourBg);
+      expect(d.h).toBeGreaterThanOrEqual(44);
+      expect(d.ov, "date not clipped").toBeLessThanOrEqual(0);
+      await bd.screenshot({ path: `/tmp/browser/ce-date-${width}.png` });
+
+      const notes = dlg.locator("textarea");
+      await notes.focus();
+      if (mode === "visual") await page.evaluate(() => (window as any).__openKeyboardStaged());
+      else { await page.setViewportSize({ width, height: 380 }); await page.evaluate(() => (window as any).__followLayout()); }
+      await page.waitForTimeout(1200);
+      const visBottom = await page.evaluate(() => Math.min((window as any).visualViewport.height, window.innerHeight));
+      const nb = await notes.boundingBox();
+      expect(nb!.y, "Notes below dialog top").toBeGreaterThanOrEqual(0);
+      expect(nb!.y + nb!.height, "Notes above keyboard").toBeLessThanOrEqual(visBottom);
+      await expect(notes).toBeFocused();
+      await expectNoAxeViolations(page, `CE ${mode} ${width}`);
+      await page.screenshot({ path: `/tmp/browser/ce-${mode}-${width}.png` });
     });
   }
 }
