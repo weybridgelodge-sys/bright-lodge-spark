@@ -85,7 +85,8 @@ describe("migration 0146/0147 shape", () => {
   });
   it("drops the host-lodge default on bookings.unit_id and writes no rows", () => {
     expect(m146).toMatch(/ALTER TABLE public\.bookings ALTER COLUMN unit_id DROP DEFAULT;/);
-    expect(m146 + m147).not.toMatch(/\b(UPDATE|DELETE FROM|INSERT INTO public\.festive_board_attendance\s+SELECT)\b/);
+    // Statements at top level (outside function bodies) never touch rows.
+    expect(m146 + m147).not.toMatch(/^(UPDATE|DELETE|INSERT|TRUNCATE)\b/m);
     expect(m146 + m147).not.toMatch(/'weybridge'/);
   });
   it("positions with no unit stay visible when a unit is passed", () => {
