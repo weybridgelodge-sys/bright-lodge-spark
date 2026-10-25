@@ -7,6 +7,7 @@ import { duplicateBookingMessage, findExistingBooking } from "../_shared/duplica
 import { loadLodgeSettings } from "../_shared/lodgeSettings.ts";
 import { cleanSpaces, trimBookingNames } from "../_shared/greeting.ts";
 import { holdExpiresAtUnix } from "../_shared/pendingBookingExpiry.ts";
+import { PHONE_REQUIRED_MESSAGE, isPlausiblePhone } from "../_shared/phone.ts";
 
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL")!,
@@ -25,7 +26,7 @@ const BodySchema = z.object({
   event_label: z.string().min(1).max(200),
   contact_name: z.string().transform(cleanSpaces).pipe(z.string().min(1).max(200)),
   contact_email: z.string().email().max(255),
-  contact_phone: z.string().max(40).optional().nullable(),
+  contact_phone: z.string().trim().max(40).optional().nullable(),
   line_items: z.array(LineItemSchema).min(1).max(50),
   details: z.record(z.unknown()).optional(),
   cover_fee: z.boolean().default(false),
@@ -59,6 +60,9 @@ Deno.serve(async (req) => {
       );
     }
     const input = parsed.data;
+    if (!isPlausiblePhone(input.contact_phone)) {
+      return new Response(JSON.stringify({ error: PHONE_REQUIRED_MESSAGE }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
     // Payments are always live; any client-sent `environment` is stripped by zod.
     const env: StripeEnv = "live";
 
@@ -159,7 +163,7 @@ Deno.serve(async (req) => {
         event_label: input.event_label,
         contact_name: input.contact_name,
         contact_email: input.contact_email,
-        contact_phone: input.contact_phone ?? null,
+        contact_phone: input.contact_phone!.trim(),
         details: trimBookingNames(input.details ?? {}),
         line_items: input.line_items,
         subtotal_pence: subtotalPence,
