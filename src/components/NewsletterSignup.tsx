@@ -1,4 +1,4 @@
-import React, { lazy, Suspense, useState } from "react";
+import React, { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { Mail, CheckCircle2, ArrowRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -13,6 +13,28 @@ const TurnstileWidget = lazy(() => import("@/components/TurnstileWidget"));
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string;
 
+
+// Turnstile "normal" renders a fixed 300x65 box. Scale it down from the left to
+// the container's real width (never up) and reserve the scaled height, so the
+// footer card never grows wider than its column on narrow phones.
+const TURNSTILE_W = 300;
+const TURNSTILE_H = 65;
+const FitTurnstile = ({ children }: { children: React.ReactNode }) => {
+  const ref = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(1);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || typeof ResizeObserver === "undefined") return;
+    const ro = new ResizeObserver(([entry]) => setScale(Math.min(1, entry.contentRect.width / TURNSTILE_W)));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+  return (
+    <div ref={ref} data-testid="newsletter-turnstile-fit" className="w-full max-w-full min-w-0 overflow-hidden" style={{ height: Math.ceil(TURNSTILE_H * scale) }}>
+      <div style={{ width: TURNSTILE_W, transform: `scale(${scale})`, transformOrigin: "top left" }}>{children}</div>
+    </div>
+  );
+};
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -77,7 +99,7 @@ const NewsletterSignup = () => {
   }
 
   return (
-    <form id="newsletter-signup" onSubmit={handleSubmit} className="rounded-2xl border border-gold/20 bg-navy-light/30 p-5 text-left" noValidate>
+    <form id="newsletter-signup" onSubmit={handleSubmit} className="w-full max-w-full min-w-0 rounded-2xl border border-gold/20 bg-navy-light/30 p-5 text-left" noValidate>
       <h2 className="font-serif text-primary-foreground text-sm mb-1">Monthly Chronicle</h2>
       <p className="text-primary-foreground/70 text-xs mb-3 leading-relaxed">
         Historic vignettes, charity updates and open social notifications, direct from the Lodge.
@@ -94,8 +116,8 @@ const NewsletterSignup = () => {
         className="hidden"
       />
 
-      <div className="flex gap-2">
-        <div className="relative flex-1">
+      <div className="flex gap-2 min-w-0">
+        <div className="relative flex-1 min-w-0">
           <Mail className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-primary-foreground/60" />
           <input
             type="email"
@@ -105,22 +127,24 @@ const NewsletterSignup = () => {
             onFocus={() => setShowTurnstile(true)}
             placeholder="your@email.com"
             aria-label="Email address"
-            className="w-full bg-navy-dark border border-gold/20 rounded-md pl-8 pr-2 py-2 text-xs text-primary-foreground placeholder:text-primary-foreground/40 focus:outline-none focus:border-gold/60 autofill-light"
+            className="w-full bg-navy-dark border border-gold/20 rounded-md pl-8 pr-2 py-2 min-h-[44px] text-xs text-primary-foreground placeholder:text-primary-foreground/40 focus:outline-none focus:border-gold/60 autofill-light"
           />
         </div>
         <Button
           type="submit"
           disabled={status === "loading"}
-          className="bg-gold hover:bg-gold/90 text-navy text-xs font-semibold px-3 h-auto"
+          className="bg-gold hover:bg-gold/90 text-navy text-xs font-semibold px-3 h-auto min-h-[44px] shrink-0"
         >
           {status === "loading" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <>Join <ArrowRight className="ml-1 h-3 w-3" /></>}
         </Button>
       </div>
       {showTurnstile && (
-        <div className="mt-3 flex justify-start min-h-[65px]">
-          <Suspense fallback={<div className="text-xs text-primary-foreground/50">Loading verification…</div>}>
-            <TurnstileWidget theme="dark" onToken={setTurnstileToken} onExpire={() => setTurnstileToken("")} />
-          </Suspense>
+        <div className="mt-3 min-w-0">
+          <FitTurnstile>
+            <Suspense fallback={<div className="text-xs text-primary-foreground/50">Loading verification…</div>}>
+              <TurnstileWidget theme="dark" onToken={setTurnstileToken} onExpire={() => setTurnstileToken("")} />
+            </Suspense>
+          </FitTurnstile>
         </div>
       )}
       {error && <p className="text-xs text-red-300 mt-2">{error}</p>}

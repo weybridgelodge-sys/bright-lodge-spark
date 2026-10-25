@@ -151,8 +151,8 @@ const Footer = () => {
         </div>
 
         {/* Newsletter signup */}
-        <div className="border-t border-gold/10 pt-10 grid md:grid-cols-3 gap-8">
-          <div className="md:col-span-2 max-w-md">
+        <div className="border-t border-gold/10 pt-10 grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="md:col-span-2 max-w-md min-w-0">
             <NewsletterSignup />
           </div>
         </div>
