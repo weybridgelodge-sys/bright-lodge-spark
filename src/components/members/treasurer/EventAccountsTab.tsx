@@ -15,6 +15,11 @@ import { saveJsPdf, saveText } from "@/lib/nativeDownload";
 import { Link } from "react-router-dom";
 import { eventActuals, eventTieOut, defaultTicketPlan, hasReceipts, receivedSplit } from "@/lib/treasurer/eventTieOut";
 import EventBalancesPanel from "@/components/members/treasurer/EventBalancesPanel";
+import { amountDue, lodgeDisplay, paidTicketTotal, pdfSafe, reportGroup, statusLabel } from "@/lib/treasurer/eventBookingReport";
+import { guestRequestsPreview } from "@/lib/guestRequests";
+import { unitTitle, useUnitProfile } from "@/lib/unitProfile";
+
+export const NO_COSTS_NOTE = "Income less fees so far; no costs have been posted yet.";
 
 const money = (pence: number) =>
   `${pence < 0 ? "-" : ""}£${(Math.abs(pence) / 100).toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -52,7 +57,7 @@ type Booking = {
   deposit_pence: number; deposit_paid: boolean; deposit_method: string | null;
   balance_pence: number; balance_paid: boolean; balance_method: string | null; notes: string | null;
   reference?: string | null; payment_method?: string | null; payment_status?: string | null; source?: string | null; created_at?: string | null;
-  contact_email?: string | null; lodge_label?: string | null;
+  contact_email?: string | null; lodge_label?: string | null; guest_requests?: string | null;
   subtotal_pence?: number | null; fee_pence?: number | null; total_pence?: number | null;
   stripe_payment_intent_id?: string | null; stripe_fee_pence?: number | null; stripe_other_fees_pence?: number | null;
   payment_plan?: string | null; amount_paid_pence?: number | null; balance_due_pence?: number | null; balance_due_date?: string | null;
@@ -169,6 +174,7 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
   useEffect(() => { loadEventData(eventId); }, [eventId, loadEventData]);
 
   const event = events.find((e) => e.id === eventId) ?? null;
+  const unit = useUnitProfile();
 
   // ─── Derived: catering rollup (always computed, never stored) ─────────────
   const rollup = useMemo(() => {
@@ -974,6 +980,7 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
                           {b.is_placeholder ? " · names TBC" : ""} · {bGuests.length} guest row{bGuests.length === 1 ? "" : "s"}
                         </span>
                         {b.reference && <span className="text-xs text-gold">{b.reference}</span>}
+                        {lodgeOf(b) && <span className="text-xs text-primary-foreground/80">{lodgeOf(b)}</span>}
                         {b.source === "public" && (
                           <span className="text-xs text-primary-foreground/80">
                             {b.payment_method?.replace(/_/g, " ")} · {b.payment_status === "paid" ? "paid" : b.payment_status === "deposit_paid" ? `deposit paid — ${money(b.balance_due_pence ?? 0)} due${b.balance_due_date ? ` by ${new Date(`${b.balance_due_date}T12:00:00`).toLocaleDateString("en-GB")}` : ""}` : b.payment_status === "refunded" ? "refunded" : (b.payment_status === "pending" && b.payment_method !== "bank_transfer" && b.created_at && Date.now() - new Date(b.created_at).getTime() > 30 * 60 * 1000) ? "EXPIRED — unpaid, seats released" : b.payment_status === "cancelled" ? "cancelled" : "pending payment"}
@@ -999,6 +1006,9 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
                           </>
                         )}
                       </div>
+                      {b.guest_requests && (
+                        <p className="px-3 pb-2 text-xs text-primary-foreground/90 whitespace-pre-line break-words"><span className="font-semibold">Guest request:</span> {b.guest_requests}</p>
+                      )}
                       {open && (
                         <div className="border-t border-gold/10 px-3 py-2 space-y-2">
                           {b.notes && <p className="text-xs text-primary-foreground/80">{b.notes}</p>}
