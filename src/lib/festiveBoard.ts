@@ -104,9 +104,9 @@ export function isHostLodge(lodgeText: string | null | undefined, unit: HostLodg
   const t = lodgeText.toLowerCase();
   const name = (unit.lodgeName ?? "").trim().toLowerCase();
   const base = name.replace(/^lodge\s+(of\s+)?/, "").replace(/\s+lodge$/, "").trim();
-  for (const n of [name, base]) if (n && new RegExp(`(^|[^a-z0-9])${esc(n)}([^a-z0-9]|$)`).test(t)) return true;
+  for (const n of [name, base]) if (n && new RegExp(`(^|[^a-z0-9_])${esc(n)}([^a-z0-9_]|$)`).test(t)) return true;
   const num = (unit.lodgeNumber ?? "").trim();
-  if (num && new RegExp(`(^|[^0-9])${esc(num)}([^0-9]|$)`).test(t)) return true;
+  if (num && new RegExp(`(^|[^a-z0-9_])${esc(num)}([^a-z0-9_]|$)`).test(t)) return true;
   return false;
 }
 
