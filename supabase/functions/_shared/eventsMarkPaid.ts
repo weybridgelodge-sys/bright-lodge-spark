@@ -64,7 +64,12 @@ export async function eventsMarkPaid(sb: any, meta: any, piId: string | null | u
   const stage = pay.kind === "deposit" ? (state?.status === "paid" ? "paid" : "deposit") : pay.kind === "balance" ? "balance_paid" : "paid";
   const feePi = piId ?? pay.stripe_payment_intent_id ?? b.stripe_payment_intent_id;
   void (deps.runner ?? runAfterReply)(`event-paid ${String(bookingId).slice(0, 8)}`, async () => {
-    await deps.syncFees(sb, bookingId, feePi);
+    // Fee first, but a fee failure must never stop the paid emails (a resend can't recover them).
+    try {
+      await deps.syncFees(sb, bookingId, feePi);
+    } catch (e) {
+      console.error("events webhook: Stripe fee refresh failed (emails still sent)", { bookingId }, e);
+    }
     await deps.sendEmails(sb, bookingId, stage);
   });
   return "paid";
