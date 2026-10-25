@@ -7,6 +7,8 @@ import { verifyTurnstile } from "../_shared/verify-turnstile.ts";
 import { isHoneypotTripped, seatCheckOutcome } from "../_shared/meetingResponseGuards.ts";
 import { cleanSpaces, trimBookingNames } from "../_shared/greeting.ts";
 import { expectedDiningPence } from "../_shared/bookingAmounts.ts";
+import { resolveUnit } from "../_shared/resolveUnit.ts";
+import { unitFor } from "../_shared/requestUnit.ts";
 import { PHONE_REQUIRED_MESSAGE, isPlausiblePhone } from "../_shared/phone.ts";
 
 
@@ -105,21 +107,27 @@ Deno.serve(async (req) => {
     // otherwise by the public Meeting Event slug stored in event_key.
     let resolvedMeetingId: string | null = null;
     let diningPricePence: number | null = null; // read server-side, never from the browser
+    let meetingUnit: unknown = null;
     if (meeting_id) {
       const { data: m } = await supabase
         .from("festive_board_meetings")
-        .select("id,status,dining_price_pence")
+        .select("id,status,dining_price_pence,unit_id")
         .eq("id", meeting_id)
         .maybeSingle();
-      if (m && m.status === "published") { resolvedMeetingId = m.id; diningPricePence = m.dining_price_pence ?? null; }
+      if (m && m.status === "published") { resolvedMeetingId = m.id; diningPricePence = m.dining_price_pence ?? null; meetingUnit = m.unit_id; }
     }
     if (!resolvedMeetingId) {
       const { data: m } = await supabase
         .from("festive_board_meetings")
-        .select("id,status,dining_price_pence")
+        .select("id,status,dining_price_pence,unit_id")
         .eq("event_key", event_key)
         .maybeSingle();
-      if (m && m.status === "published") { resolvedMeetingId = m.id; diningPricePence = m.dining_price_pence ?? null; }
+      if (m && m.status === "published") { resolvedMeetingId = m.id; diningPricePence = m.dining_price_pence ?? null; meetingUnit = m.unit_id; }
+    }
+    // Unit: the meeting's own, else the web address; neither = refuse (no default).
+    const unit = await unitFor(meetingUnit, () => resolveUnit(req, supabase));
+    if (!unit.ok) {
+      return new Response(JSON.stringify({ error: unit.error }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
     // HARD DUPLICATE GUARD — same rule as paid checkout: one live response per
@@ -139,7 +147,7 @@ Deno.serve(async (req) => {
       });
       return new Response(
         JSON.stringify({
-          error: ((l: { bookingContactEmail: string; bookingContactOffice: string }) => duplicateBookingMessage(l.bookingContactEmail, l.bookingContactOffice))(await loadLodgeSettings()),
+          error: ((l: { bookingContactEmail: string; bookingContactOffice: string }) => duplicateBookingMessage(l.bookingContactEmail, l.bookingContactOffice))(await loadLodgeSettings(unit.unitId)),
           existingBookingId: existingBooking.id,
         }),
         { status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" } },
@@ -182,6 +190,7 @@ Deno.serve(async (req) => {
     const { data: booking, error } = await supabase
       .from("bookings")
       .insert({
+        unit_id: unit.unitId,
         event_key,
         event_label,
         meeting_id: resolvedMeetingId,

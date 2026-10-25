@@ -7,6 +7,8 @@ import { duplicateBookingMessage, findExistingBooking } from "../_shared/duplica
 import { loadLodgeSettings } from "../_shared/lodgeSettings.ts";
 import { cleanSpaces, trimBookingNames } from "../_shared/greeting.ts";
 import { holdExpiresAtUnix } from "../_shared/pendingBookingExpiry.ts";
+import { resolveUnit } from "../_shared/resolveUnit.ts";
+import { unitFor } from "../_shared/requestUnit.ts";
 import { PHONE_REQUIRED_MESSAGE, isPlausiblePhone } from "../_shared/phone.ts";
 
 const supabase = createClient(
@@ -67,21 +69,27 @@ Deno.serve(async (req) => {
     const env: StripeEnv = "live";
 
     let resolvedMeetingId: string | null = null;
+    let meetingUnit: unknown = null;
     if (input.meeting_id) {
       const { data: meeting } = await supabase
         .from("festive_board_meetings")
-        .select("id,status")
+        .select("id,status,unit_id")
         .eq("id", input.meeting_id)
         .maybeSingle();
-      if (meeting?.status === "published") resolvedMeetingId = meeting.id;
+      if (meeting?.status === "published") { resolvedMeetingId = meeting.id; meetingUnit = meeting.unit_id; }
     }
     if (!resolvedMeetingId) {
       const { data: meeting } = await supabase
         .from("festive_board_meetings")
-        .select("id,status")
+        .select("id,status,unit_id")
         .eq("event_key", input.event_key)
         .maybeSingle();
-      if (meeting?.status === "published") resolvedMeetingId = meeting.id;
+      if (meeting?.status === "published") { resolvedMeetingId = meeting.id; meetingUnit = meeting.unit_id; }
+    }
+    // Unit: the meeting's own, else the web address; neither = refuse (no default).
+    const unit = await unitFor(meetingUnit, () => resolveUnit(req, supabase));
+    if (!unit.ok) {
+      return new Response(JSON.stringify({ error: unit.error }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
     // Optional: link booking to user if Authorization is provided
@@ -111,7 +119,7 @@ Deno.serve(async (req) => {
       });
       return new Response(
         JSON.stringify({
-          error: ((l: { bookingContactEmail: string; bookingContactOffice: string }) => duplicateBookingMessage(l.bookingContactEmail, l.bookingContactOffice))(await loadLodgeSettings()),
+          error: ((l: { bookingContactEmail: string; bookingContactOffice: string }) => duplicateBookingMessage(l.bookingContactEmail, l.bookingContactOffice))(await loadLodgeSettings(unit.unitId)),
           existingBookingId: existingBooking.id,
         }),
         { status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" } },
@@ -158,6 +166,7 @@ Deno.serve(async (req) => {
       .from("bookings")
       .insert({
         user_id: userId,
+        unit_id: unit.unitId,
         event_key: input.event_key,
         meeting_id: resolvedMeetingId,
         event_label: input.event_label,
@@ -182,7 +191,7 @@ Deno.serve(async (req) => {
       return new Response(
         JSON.stringify({
           error: duplicate
-            ? ((l: { bookingContactEmail: string; bookingContactOffice: string }) => duplicateBookingMessage(l.bookingContactEmail, l.bookingContactOffice))(await loadLodgeSettings())
+            ? ((l: { bookingContactEmail: string; bookingContactOffice: string }) => duplicateBookingMessage(l.bookingContactEmail, l.bookingContactOffice))(await loadLodgeSettings(unit.unitId))
             : "Could not create booking record.",
         }),
         {

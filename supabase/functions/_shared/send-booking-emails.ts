@@ -101,7 +101,6 @@ async function lookupSecretarySignature(supabase: SupabaseClient) {
 }
 
 export async function sendBookingEmails(bookingId: string, opts: SendOpts) {
-  const lodge = await loadLodgeSettings()
   const supabaseUrl = Deno.env.get('SUPABASE_URL')
   const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
   if (!supabaseUrl || !serviceKey) {
@@ -121,6 +120,8 @@ export async function sendBookingEmails(bookingId: string, opts: SendOpts) {
   }
 
   const b: any = booking
+  // Booking's own unit (always set: column default). Blank = single-unit lookup, unchanged.
+  const lodge = await loadLodgeSettings((typeof b.unit_id === 'string' && b.unit_id.trim()) || undefined)
   const details: any = b.details || {}
   const meetingOpt: string = details.meetingOption || ''
   const isApologies = meetingOpt === 'apologies' || b.payment_status === 'apologies'
