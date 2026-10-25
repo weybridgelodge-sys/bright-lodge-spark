@@ -6452,6 +6452,24 @@ export type Database = {
           },
         ]
       }
+      unit_domains: {
+        Row: {
+          created_at: string
+          host: string
+          unit_id: string
+        }
+        Insert: {
+          created_at?: string
+          host: string
+          unit_id: string
+        }
+        Update: {
+          created_at?: string
+          host?: string
+          unit_id?: string
+        }
+        Relationships: []
+      }
       unit_settings: {
         Row: {
           key: string

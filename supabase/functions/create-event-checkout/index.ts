@@ -3,6 +3,8 @@ import { z } from "https://esm.sh/zod@3.23.8";
 import { feeLineItemName } from "../_shared/cardFee.ts";
 import { orderModules, priceOrder, stripeLines, type ItemRow } from "../_shared/eventOrder.ts";
 import { depositAllowed, depositLineName, planMethods, quoteBooking } from "../_shared/eventPricing.ts";
+import { eventLodgeOptions, matchLodgeOption } from "../_shared/eventLodges.ts";
+import { loadLodgeSettings } from "../_shared/lodgeSettings.ts";
 import { PHONE_REQUIRED_MESSAGE, isPlausiblePhone } from "../_shared/phone.ts";
 import { eventsStripe, londonToday, sendEventBookingEmails, serviceClient } from "../_shared/stripe-events.ts";
 
@@ -20,7 +22,7 @@ const BodySchema = z.object({
   contact_name: z.string().trim().min(1).max(200),
   contact_email: z.string().trim().email().max(255),
   contact_phone: z.string().trim().max(40).optional().default(""),
-  lodge_label: z.enum(["Weybridge", "Astolat", "Other", "Guest"]),
+  lodge_label: z.string().trim().min(1).max(200), // checked against this event's lodge options below
   adults: z.number().int().min(0).max(50),
   children: z.number().int().min(0).max(50),
   guests: z.array(GuestSchema).max(100),
@@ -52,6 +54,11 @@ Deno.serve(async (req) => {
     const sb = serviceClient();
     const { data: ev } = await sb.from("event_accounts").select("*").eq("slug", input.slug).eq("is_public", true).is("archived_at", null).maybeSingle();
     if (!ev) return json({ error: "Event not found." }, 404);
+    const hosting = Array.isArray(ev.hosting_lodges) ? ev.hosting_lodges : [];
+    const owning = hosting.some((l: unknown) => String(l ?? "").trim()) ? "" :
+      await loadLodgeSettings().then((l) => [l.lodgeName, l.lodgeNumber ? `No. ${l.lodgeNumber}` : ""].filter(Boolean).join(" "));
+    const lodgeLabel = matchLodgeOption(input.lodge_label, eventLodgeOptions(hosting, owning));
+    if (!lodgeLabel) return json({ error: "Please choose your lodge from the list." }, 400);
     if (ev.adult_price_pence == null || ev.child_price_pence == null) return json({ error: "Booking is not open yet." }, 409);
     const deadline = ev.booking_deadline ? new Date(ev.booking_deadline) : new Date(`${ev.event_date}T23:59:59Z`);
     if (new Date() > deadline) return json({ error: "Booking for this event has closed." }, 409);
@@ -114,7 +121,7 @@ Deno.serve(async (req) => {
         reference,
         contact_email: input.contact_email,
         contact_phone: input.contact_phone || null,
-        lodge_label: input.lodge_label,
+        lodge_label: lodgeLabel,
         adult_count: input.adults,
         child_count: input.children,
         subtotal_pence: subtotal,

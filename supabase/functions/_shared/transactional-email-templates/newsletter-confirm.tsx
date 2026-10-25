@@ -11,9 +11,11 @@ interface Props {
   /** Lodge record name for the crest alt text. */
   crestName?: string
   postcode?: string
+  /** Venue town line from Unit Setup; blank = line omitted. */
+  townLine?: string
 }
 
-const Email = ({ confirmUrl, lodgeName = 'Your Lodge', postcode = '', crestUrl, crestName }: Props) => (
+const Email = ({ confirmUrl, lodgeName = 'Your Lodge', postcode = '', townLine = '', crestUrl, crestName }: Props) => (
   <Html lang="en" dir="ltr">
     <Head />
     <Preview>One click to confirm your subscription</Preview>
@@ -30,7 +32,7 @@ const Email = ({ confirmUrl, lodgeName = 'Your Lodge', postcode = '', crestUrl, 
         </Section>
         <Text style={brandStyles.body}>If you didn't ask for this, ignore this email.</Text>
         <Hr style={brandStyles.hr} />
-        <Text style={footer}>{lodgeName} · Guildford, Surrey {postcode}</Text>
+        <Text style={footer}>{[lodgeName, townLine].filter(Boolean).join(' · ')}</Text>
       </Container>
     </Body>
   </Html>

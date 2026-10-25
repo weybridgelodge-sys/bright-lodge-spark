@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useUnitProfile } from "@/lib/unitProfile";
 import { supabase } from "@/integrations/supabase/client";
 import { usePostingPeriod, fetchUnlockedPeriods, periodIdForDate } from "@/lib/treasurer/periods";
 import PeriodPicker from "@/components/members/treasurer/PeriodPicker";
@@ -9,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
 import { Loader2, Check, AlertTriangle, Save, Plus } from "lucide-react";
 import {
-  isWeybridgeLodge,
+  isHostLodge,
   meetingTypeLabel,
   paymentMethodLabel,
 } from "@/lib/festiveBoard";
@@ -91,6 +92,7 @@ function MeetingPanel({
   onChanged: () => void;
 }) {
 
+  const unit = useUnitProfile();
   const [headcount, setHeadcount] = useState("");
   const [perHead, setPerHead] = useState("");
   const [override, setOverride] = useState("");
@@ -123,7 +125,7 @@ function MeetingPanel({
     const byMethod = new Map<string, { count: number; pence: number }>();
     let collected = 0;
     for (const r of diners) {
-      if (r.member_id || isWeybridgeLodge(r.visitor_lodge_name)) members += 1;
+      if (r.member_id || isHostLodge(r.visitor_lodge_name, unit)) members += 1;
       else visitors += 1;
       const key = r.payment_method ?? "unknown";
       const cur = byMethod.get(key) ?? { count: 0, pence: 0 };
@@ -139,7 +141,7 @@ function MeetingPanel({
       collected,
       byMethod: [...byMethod.entries()].sort((a, b) => b[1].count - a[1].count),
     };
-  }, [rows]);
+  }, [rows, unit]);
 
   // ── Stripe side: actual charged / fees / net from the bookings ledger ──
   const stripeSummary = useMemo(() => {

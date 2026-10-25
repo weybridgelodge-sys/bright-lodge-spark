@@ -13,7 +13,6 @@ import { composeFullName, fillBlanks, normaliseHeader, validateRow } from "../_s
 const MAX_ROWS = 250;
 const Body = z.object({
   dry_run: z.boolean().default(true),
-  unit_id: z.string().regex(/^[a-z0-9_-]{1,40}$/).default("weybridge"),
   rows: z.array(z.record(z.string(), z.string().max(1000))).min(1).max(MAX_ROWS),
 });
 
@@ -44,7 +43,12 @@ Deno.serve(async (req) => {
 
     const parsed = Body.safeParse(await req.json());
     if (!parsed.success) return json({ error: `Invalid import — ${parsed.error.issues[0]?.message ?? "check the file"} (max ${MAX_ROWS} rows)` }, 400);
-    const { dry_run, rows, unit_id: unitId } = parsed.data;
+    const { dry_run, rows } = parsed.data;
+    // Members are imported into the caller's own lodge; there is no default lodge.
+    const { data: me, error: merr } = await admin.from("profiles").select("unit_id").eq("id", userRes.user.id).maybeSingle();
+    if (merr) return json({ error: merr.message }, 500);
+    const unitId = typeof me?.unit_id === "string" ? me.unit_id.trim() : "";
+    if (!unitId) return json({ error: "Your member record has no lodge set, so members cannot be imported. Ask an administrator to set your lodge first." }, 400);
     const lodge = await loadLodgeSettings(unitId);
 
     // Load existing members once (service role; never returned to the caller beyond field names).

@@ -87,6 +87,21 @@ const GUARDED = [
   // Bookings.tsx: its <SEO> title/description are pre-rendered and must stay typed (staticMetaParity).
   "src/pages/PublicEventBalance.tsx",
   "src/pages/PublicEventConfirmation.tsx",
+  // Job BR
+  "src/pages/PublicEvent.tsx",
+  "src/lib/festiveBoard.ts",
+  "src/lib/eventLodges.ts",
+  "src/lib/sanity.ts",
+  "src/pages/members/admin/FestiveBoardAdmin.tsx",
+  "src/components/members/treasurer/DiningReconciliationTab.tsx",
+  "supabase/functions/_shared/resolveUnit.ts",
+  "supabase/functions/_shared/eventLodges.ts",
+  "supabase/functions/newsletter-subscribe/index.ts",
+  "supabase/functions/newsletter-confirm/index.ts",
+  "supabase/functions/submit-enquiry/index.ts",
+  "supabase/functions/request-portal-access/index.ts",
+  "supabase/functions/admin-import-members/index.ts",
+  "supabase/functions/create-event-checkout/index.ts",
 ];
 // Asset file names (weybridge-logo-*.png) are out of scope, so import paths are stripped first.
 const strip = (s: string) => s.replace(/@\/assets\/weybridge-[\w.-]+/g, "");
@@ -94,9 +109,12 @@ describe("Job BQ literal guard", () => {
   for (const f of GUARDED) it(f, () => {
     expect(strip(read(f))).not.toMatch(/weybridgelodge|Weybridge|\b6787\b|bright-lodge-spark|lovable\.app\/__l5e|GU2 4DR|Guildford Masonic/);
   });
-  it("PublicEvent.tsx: only the out-of-scope lodge_label enum remains", () => {
-    const left = read("src/pages/PublicEvent.tsx").match(/Weybridge[^"]*/g) ?? [];
-    expect(left.every((m) => m === "Weybridge")).toBe(true);
-    expect(read("src/pages/PublicEvent.tsx")).not.toMatch(/Weybridge Lodge|\b6787\b/);
+  it("Job BR: no typed lodge choices, unit defaults or footer town remain", () => {
+    expect(read("src/pages/PublicEvent.tsx")).not.toMatch(/Astolat|LODGES/);
+    expect(read("supabase/functions/create-event-checkout/index.ts")).not.toMatch(/z\.enum\(\["Weybridge"/);
+    for (const f of ["newsletter-subscribe", "submit-enquiry", "request-portal-access", "admin-import-members"])
+      expect(read(`supabase/functions/${f}/index.ts`)).not.toMatch(/["']weybridge["']/);
+    for (const f of ["newsletter-confirm", "newsletter-welcome"])
+      expect(read(`supabase/functions/_shared/transactional-email-templates/${f}.tsx`)).not.toMatch(/Guildford|Surrey/);
   });
 });

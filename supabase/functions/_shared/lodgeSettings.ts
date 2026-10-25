@@ -43,8 +43,9 @@ export async function loadLodgeSettings(unitIdIn?: string): Promise<LodgeSetting
     const map: Record<string, Record<string, unknown>> = Object.fromEntries(((us.data ?? []) as { key: string; value: Record<string, unknown> }[]).map((r) => [r.key, r.value]));
     const venueId = map.meeting_place?.venue_id;
     if (typeof venueId === "string" && venueId) {
-      const { data: v } = await db.from("venues").select("name").eq("id", venueId).maybeSingle();
-      if (v?.name) map.meeting_place = { ...map.meeting_place, venue_name: v.name };
+      const { data: v } = await db.from("venues").select("name,display_lines").eq("id", venueId).maybeSingle();
+      const lines = Array.isArray(v?.display_lines) ? (v.display_lines as unknown[]).map(String).filter((l) => l.trim()) : [];
+      if (v?.name) map.meeting_place = { ...map.meeting_place, venue_name: v.name, ...(lines.length && { town_line: lines[lines.length - 1] }) };
     }
     const value = resolveLodgeSettings(data as Record<string, string | null>, map, { assistantSecretaryHeld: !asst.error && !!asst.data }, identity);
     cache = { at: Date.now(), value };

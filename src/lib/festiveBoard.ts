@@ -38,7 +38,8 @@ export const paymentMethodLabel = (v: string) =>
 /** Computed headcount = expected covers (booked or attended). Override wins for total. */
 export function computeHeadcount(
   rows: { attendance_status: string; member_id: string | null; visitor_lodge_name?: string | null; is_meeting_only?: boolean | null }[],
-  override: number | null
+  override: number | null,
+  unit?: HostLodge | null
 ): {
   members: number;
   visitors: number;
@@ -56,7 +57,7 @@ export function computeHeadcount(
   let meetingOnlyCount = 0;
   for (const r of rows) {
     if (r.attendance_status !== "attended" && r.attendance_status !== "booked") continue;
-    const isMember = !!r.member_id || isWeybridgeLodge(r.visitor_lodge_name);
+    const isMember = !!r.member_id || isHostLodge(r.visitor_lodge_name, unit);
     if (isMember) members += 1;
     else visitors += 1;
     if (r.is_meeting_only) {
@@ -88,12 +89,24 @@ export function shortMonthLabel(dateStr: string, type: string): string {
   return `${day} ${m}${suffix}`;
 }
 
-// Detect a Weybridge Lodge No. 6787 reference in a free-text Lodge field.
-export function isWeybridgeLodge(lodgeText: string | null | undefined): boolean {
-  if (!lodgeText) return false;
+/** The host lodge as recorded in Unit Setup (public unit profile). */
+export type HostLodge = { lodgeName?: string | null; lodgeNumber?: string | null };
+
+const esc = (v: string) => v.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+/**
+ * Does a free-text Lodge field name the host lodge? Matches the Unit Setup lodge
+ * name with or without the word "Lodge", or the lodge number, as whole words
+ * (case-insensitive). Blank Unit Setup matches nothing.
+ */
+export function isHostLodge(lodgeText: string | null | undefined, unit: HostLodge | null | undefined): boolean {
+  if (!lodgeText || !unit) return false;
   const t = lodgeText.toLowerCase();
-  if (/\bweybridge\b/.test(t)) return true;
-  if (/\b6787\b/.test(t)) return true;
+  const name = (unit.lodgeName ?? "").trim().toLowerCase();
+  const base = name.replace(/^lodge\s+(of\s+)?/, "").replace(/\s+lodge$/, "").trim();
+  for (const n of [name, base]) if (n && new RegExp(`(^|[^a-z0-9_])${esc(n)}([^a-z0-9_]|$)`).test(t)) return true;
+  const num = (unit.lodgeNumber ?? "").trim();
+  if (num && new RegExp(`(^|[^a-z0-9_])${esc(num)}([^a-z0-9_]|$)`).test(t)) return true;
   return false;
 }
 

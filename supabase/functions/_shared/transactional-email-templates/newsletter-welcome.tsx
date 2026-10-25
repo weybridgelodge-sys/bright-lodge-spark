@@ -13,6 +13,8 @@ interface Props {
   /** Lodge record name for the crest alt text. */
   crestName?: string
   postcode?: string
+  /** Venue town line from Unit Setup; blank = line omitted. */
+  townLine?: string
 }
 
 const Email = ({
@@ -20,7 +22,7 @@ const Email = ({
   signOffName,
   signOffRole,
   lodgeName = 'Your Lodge',
-  postcode = '', crestUrl, crestName,
+  postcode = '', townLine = '', crestUrl, crestName,
 }: Props) => (
   <Html lang="en" dir="ltr">
     <Head />
@@ -49,7 +51,7 @@ const Email = ({
         </Text>
         {signOffRole ? <Text style={{ ...brandStyles.body, color: BRAND.muted }}>{signOffRole}</Text> : null}
         <Hr style={brandStyles.hr} />
-        <Text style={footer}>{lodgeName} · Guildford, Surrey {postcode}</Text>
+        <Text style={footer}>{[lodgeName, townLine].filter(Boolean).join(' · ')}</Text>
       </Container>
     </Body>
   </Html>

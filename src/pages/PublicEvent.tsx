@@ -19,11 +19,10 @@ import {
 } from "@/components/events/booking/BookingCore";
 import { CatalogueSteppers, CourseSelects, DECIDE_LATER, eventImageUrl, InfoBlocks, useEventContent } from "@/components/events/booking/ModuleSections";
 import { buildEventSeo } from "@/lib/eventSeo";
-import { isUnitVenue, useUnitProfile, venueFull, venueShort } from "@/lib/unitProfile";
-import { eventPromo, nameOr } from "@/lib/unitText";
+import { isUnitVenue, unitTitle, useUnitProfile, venueFull, venueShort } from "@/lib/unitProfile";
+import { eventPromo } from "@/lib/unitText";
+import { eventLodgeOptions } from "@/lib/eventLodges";
 import { coursesForGuest, orderModules } from "@/lib/eventOrder";
-
-const LODGES = ["Weybridge", "Astolat", "Other", "Guest"] as const;
 
 export const Divider = ({ festive }: { festive: boolean }) => (
   <div className="flex items-center justify-center gap-3 my-6" aria-hidden="true">
@@ -49,7 +48,7 @@ export default function PublicEvent() {
   const [phone, setPhone] = useState("");
   const [phoneTouched, setPhoneTouched] = useState(false);
   const [attempted, setAttempted] = useState(false);
-  const [lodge, setLodge] = useState<(typeof LODGES)[number]>("Weybridge");
+  const [lodge, setLodge] = useState("");
   const [adults, setAdults] = useState(1);
   const [children, setChildren] = useState(0);
   const [adultRows, setAdultRows] = useState<GuestRow[]>([emptyGuest()]);
@@ -97,6 +96,8 @@ export default function PublicEvent() {
   const left = ev ? seatsLeft(ev) : null;
   const festive = ev?.theme === "christmas";
   const unit = useUnitProfile();
+  const lodgeOptions = useMemo(() => eventLodgeOptions(ev?.hosting_lodges, unitTitle(unit)), [ev?.hosting_lodges, unit]);
+  const lodgeValue = lodgeOptions.some((o) => o.value === lodge) ? lodge : lodgeOptions[0].value;
   const venue = ev?.venue?.trim() || venueFull(unit);
   // Short hero line: the lodge venue as "<name>, <postcode>", or the event's own venue.
   const venueLine = !ev?.venue?.trim() || isUnitVenue(ev.venue, unit) ? venueShort(unit) : ev.venue.trim();
@@ -141,7 +142,7 @@ export default function PublicEvent() {
     ];
     const items = Object.entries(itemQty).filter(([, q]) => q > 0).map(([item_id, qty]) => ({ item_id, qty }));
     const { data, error: fnErr } = await supabase.functions.invoke("create-event-checkout", {
-      body: { slug, contact_name: name.trim(), contact_email: email.trim(), contact_phone: phone.trim(), lodge_label: lodge, adults, children, guests, payment_method: method, cover_fee: feeEnabled && coverFee, ...(items.length && { items }), ...(canDeposit && { plan: activePlan }), origin: window.location.origin, website: "" },
+      body: { slug, contact_name: name.trim(), contact_email: email.trim(), contact_phone: phone.trim(), lodge_label: lodgeValue, adults, children, guests, payment_method: method, cover_fee: feeEnabled && coverFee, ...(items.length && { items }), ...(canDeposit && { plan: activePlan }), origin: window.location.origin, website: "" },
     });
     if (fnErr || data?.error) {
       setError(await readFunctionError(fnErr, data, "Sorry, we could not start your booking."));
@@ -303,8 +304,8 @@ export default function PublicEvent() {
                     <label className="block" htmlFor="pev-phone"><span className={labelClass}>Phone{req}</span><input id="pev-phone" className={inputCls} type="tel" inputMode="tel" required aria-required="true" {...invalidProps(fieldErrors, "pev-phone")} value={phone} onChange={(e) => setPhone(e.target.value)} onBlur={() => setPhoneTouched(true)} autoComplete="tel" /></label>
                     <InlineFieldError errors={fieldErrors} id="pev-phone" />
                     <label className="block" htmlFor="pev-lodge"><span className={labelClass}>Lodge</span>
-                      <select id="pev-lodge" className={inputCls} value={lodge} onChange={(e) => setLodge(e.target.value as any)}>
-                        <option value="Weybridge">{nameOr(unit, "Our lodge")}</option><option value="Astolat">Astolat Lodge</option><option value="Other">Another lodge</option><option value="Guest">Guest / not a Freemason</option>
+                      <select id="pev-lodge" className={inputCls} value={lodgeValue} onChange={(e) => setLodge(e.target.value)}>
+                        {lodgeOptions.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
                       </select>
                     </label>
                   </fieldset>
