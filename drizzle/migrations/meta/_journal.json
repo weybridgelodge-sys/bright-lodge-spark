@@ -1037,6 +1037,13 @@
       "when": 1792960948533,
       "tag": "0147_officer_holder_unscoped_positions",
       "breakpoints": true
+    },
+    {
+      "idx": 148,
+      "version": "7",
+      "when": 1792961698584,
+      "tag": "0148_drop_host_unit_defaults",
+      "breakpoints": true
     }
   ]
 }
