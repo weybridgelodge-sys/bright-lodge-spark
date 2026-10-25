@@ -1721,6 +1721,7 @@ export type Database = {
           event_id: string
           fee_pence: number
           fees_paid_pence: number
+          guest_requests: string | null
           id: string
           is_placeholder: boolean
           items_subtotal_pence: number
@@ -1768,6 +1769,7 @@ export type Database = {
           event_id: string
           fee_pence?: number
           fees_paid_pence?: number
+          guest_requests?: string | null
           id?: string
           is_placeholder?: boolean
           items_subtotal_pence?: number
@@ -1815,6 +1817,7 @@ export type Database = {
           event_id?: string
           fee_pence?: number
           fees_paid_pence?: number
+          guest_requests?: string | null
           id?: string
           is_placeholder?: boolean
           items_subtotal_pence?: number
