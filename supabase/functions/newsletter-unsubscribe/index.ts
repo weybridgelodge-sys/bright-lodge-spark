@@ -1,5 +1,6 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { loadLodgeSettings } from "../_shared/lodgeSettings.ts";
+import { ownUnit } from "../_shared/requestUnit.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -7,8 +8,6 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "GET, OPTIONS",
 };
 
-// From contacts.site_url only; blank = plain reply instead of a redirect.
-let SITE_UNSUBSCRIBE_URL = "";
 
 function buildRedirectHeaders(location: string) {
   const headers = new Headers();
@@ -18,7 +17,10 @@ function buildRedirectHeaders(location: string) {
   return headers;
 }
 
-function redirectToStatus(status: "success" | "invalid" | "not-found") {
+// From contacts.site_url of the row's own unit (unknown = single-unit lookup); blank = plain reply.
+async function redirectToStatus(status: "success" | "invalid" | "not-found", unitId?: string) {
+  const site = (await loadLodgeSettings(unitId)).configuredSiteUrl;
+  const SITE_UNSUBSCRIBE_URL = site ? `${site}/unsubscribe` : "";
   if (!SITE_UNSUBSCRIBE_URL) {
     const text = status === "success" ? "You have been unsubscribed." : "This unsubscribe link is not valid.";
     return new Response(text, { status: status === "success" ? 200 : 400, headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" } });
@@ -37,8 +39,6 @@ const supabase = createClient(
 );
 
 Deno.serve(async (req) => {
-  const site = (await loadLodgeSettings()).configuredSiteUrl;
-  SITE_UNSUBSCRIBE_URL = site ? `${site}/unsubscribe` : "";
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   const url = new URL(req.url);
   const token = url.searchParams.get("token");
@@ -54,7 +54,8 @@ Deno.serve(async (req) => {
     .select("user_id")
     .maybeSingle();
   if (member) {
-    return redirectToStatus("success");
+    const { data: prof } = await supabase.from("profiles").select("unit_id").eq("id", member.user_id).maybeSingle();
+    return redirectToStatus("success", ownUnit(prof?.unit_id) || undefined);
   }
 
   // 2. Visiting Freemasons (festive board contacts).
@@ -73,10 +74,10 @@ Deno.serve(async (req) => {
     .from("newsletter_subscribers")
     .update({ unsubscribed_at: new Date().toISOString() })
     .eq("unsubscribe_token", token)
-    .select("email")
+    .select("email,unit_id")
     .maybeSingle();
   if (sub) {
-    return redirectToStatus("success");
+    return redirectToStatus("success", ownUnit(sub.unit_id) || undefined);
   }
 
   return redirectToStatus("not-found");
