@@ -5,8 +5,8 @@ import { verifyTurnstile } from '../_shared/verify-turnstile.ts'
 import { sendTransactionalEmail } from '../_shared/send-email.ts'
 import { resolveEnquiryContacts } from '../_shared/enquiryContacts.ts'
 import { loadLodgeSettings } from '../_shared/lodgeSettings.ts'
+import { resolveUnit } from '../_shared/resolveUnit.ts'
 
-const UNIT_ID = 'weybridge'
 
 const BodySchema = z.object({
   full_name: z.string().trim().min(2, 'Please enter your full name').max(120),
@@ -55,6 +55,9 @@ Deno.serve(async (req) => {
   if (!ok) return json({ error: 'Verification failed. Please tick the verification box and try again.' }, 400)
 
   const supabase = createClient(supabaseUrl, serviceKey)
+  const unit = await resolveUnit(req, supabase)
+  if (!unit.ok) return json({ error: unit.error }, 400)
+  const UNIT_ID = unit.unitId
   const { data: contactRow, error: contactErr } = await supabase
     .from('lodge_contact_settings')
     .select('secretary_email, membership_cc_email, guide_url')

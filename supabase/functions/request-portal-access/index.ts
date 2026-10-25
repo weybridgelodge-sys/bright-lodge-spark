@@ -5,7 +5,9 @@ import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { z } from "npm:zod@3.23.8";
 import { verifyTurnstile } from "../_shared/verify-turnstile.ts";
 import { sendTransactionalEmail } from "../_shared/send-email.ts";
+import { createClient } from "npm:@supabase/supabase-js@2";
 import { loadLodgeSettings } from "../_shared/lodgeSettings.ts";
+import { resolveUnit } from "../_shared/resolveUnit.ts";
 
 const Body = z.object({
   fullName: z.string().trim().min(2).max(120),
@@ -13,7 +15,6 @@ const Body = z.object({
   email: z.string().trim().email().max(255),
   company: z.string().max(200).optional(), // honeypot
   turnstileToken: z.string().trim().max(4096).optional(),
-  unitId: z.string().trim().regex(/^[a-z0-9_-]{1,40}$/).optional(),
 });
 
 const json = (b: unknown, status = 200) =>
@@ -32,7 +33,10 @@ Deno.serve(async (req) => {
     return json({ error: "Verification failed. Please tick the verification box and try again." }, 400);
   }
 
-  const lodge = await loadLodgeSettings(d.unitId ?? "weybridge");
+  // Unit comes from the web address the form was sent from, never from the body.
+  const unit = await resolveUnit(req, createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!));
+  if (!unit.ok) return json({ error: unit.error }, 400);
+  const lodge = await loadLodgeSettings(unit.unitId);
   const res = await sendTransactionalEmail({
     templateName: "portal-access-request",
     recipientEmail: lodge.secretaryEmail,
