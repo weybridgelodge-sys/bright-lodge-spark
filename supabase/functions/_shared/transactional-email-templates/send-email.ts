@@ -30,6 +30,8 @@ export interface SendTemplateEmailOptions {
   cc?: string[]
   /** Optional From display name (e.g. from lodge settings); defaults to the Unit Setup formal sender name (fallback "Your Lodge"). */
   fromName?: string
+  /** Lodge for the default sender name; omitted = single-unit lookup. */
+  unitId?: string
 }
 
 /**
@@ -78,7 +80,7 @@ export async function sendTemplateEmail(
         to: recipient,
         from: options.fromName
           ? `"${options.fromName.replace(/["\r\n<>]/g, '')}" <noreply@${FROM_DOMAIN}>`
-          : `${defaultSenderName((await loadLodgeSettings()).formalSenderName)} <noreply@${FROM_DOMAIN}>`,
+          : `${defaultSenderName((await loadLodgeSettings(options.unitId)).formalSenderName)} <noreply@${FROM_DOMAIN}>`,
         sender_domain: SENDER_DOMAIN,
         subject,
         html,

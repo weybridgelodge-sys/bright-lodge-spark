@@ -19,6 +19,8 @@ export interface SendEmailPayload {
   templateData?: Record<string, unknown>
   /** Optional From display name (see transactional-email-templates/send-email.ts). */
   fromName?: string
+  /** Lodge whose Unit Setup sender name is used; omitted = single-unit lookup (callers still omitting it are listed in JOB CC). */
+  unitId?: string
 }
 
 function logClient() {
@@ -61,6 +63,7 @@ export async function sendTransactionalEmail(
       replyTo: payload.replyTo,
       cc: payload.cc,
       fromName: payload.fromName,
+      unitId: payload.unitId,
     })
 
     if (result.sent) {

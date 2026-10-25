@@ -52,12 +52,16 @@ export const capFirst = (n?: string | null) => {
 export const methodLabel = (m?: string | null) =>
   ({ card: "Card", pay_by_bank: "Pay by Bank", bank_transfer: "Bank transfer", manual: "Cash / cheque" } as Record<string, string>)[m || ""] || m || "";
 
+/** The record's own unit_id, or undefined when blank (single-unit lookup, as before). */
+const eventUnit = (ev: any): string | undefined => (typeof ev?.unit_id === "string" && ev.unit_id.trim()) ? ev.unit_id.trim() : undefined;
+
 /** Lodge recipients: events_notify_email, else Secretary + Webmaster. */
 async function lodgeRecipients(sb: any, ev: any): Promise<string[]> {
   if (ev.events_notify_email) {
     return String(ev.events_notify_email).split(/[,;\s]+/).filter((e: string) => e.includes("@"));
   }
-  const l = await loadLodgeSettings();
+  // The event's own lodge; a blank event unit keeps the single-unit lookup.
+  const l = await loadLodgeSettings(eventUnit(ev));
   return [l.secretaryEmail, l.webmasterEmail];
 }
 
@@ -89,7 +93,7 @@ export function newBalanceToken(): string {
 }
 /** Balance page link on the Unit Setup site address. */
 export const balanceUrlFor = (siteUrl: string, token: string) => `${siteUrl.replace(/\/+$/, "")}/events/balance/${token}`;
-export const balanceUrl = async (token: string) => balanceUrlFor((await loadLodgeSettings()).siteUrl, token);
+export const balanceUrl = async (token: string, unitId?: string) => balanceUrlFor((await loadLodgeSettings(unitId)).siteUrl, token);
 export const londonToday = () => new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/London", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
 
 /** Recompute paid / balance / status from the booking's payment rows (deposit plans move status; full plans keep today's rules). */
@@ -125,8 +129,8 @@ export async function sendEventBookingEmails(sb: any, bookingId: string, stage: 
   const confirmed = b.payment_status === "paid" || b.payment_status === "deposit_paid";
   const order = b.subtotal_pence ?? b.total_pence;
   let link: string | null = null;
-  if ((deposit && (b.balance_due_pence ?? 0) > 0) || CUSTOMER_ONLY.includes(stage)) link = await balanceUrl(await ensureBalanceToken(sb, b.id));
-  const lodge = await loadLodgeSettings();
+  if ((deposit && (b.balance_due_pence ?? 0) > 0) || CUSTOMER_ONLY.includes(stage)) link = await balanceUrl(await ensureBalanceToken(sb, b.id), eventUnit(ev));
+  const lodge = await loadLodgeSettings(eventUnit(ev));
   const data = {
     stage,
     reminderKind: opts.reminderKind ?? null,
