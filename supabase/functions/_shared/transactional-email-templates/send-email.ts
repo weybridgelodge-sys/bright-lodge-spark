@@ -3,15 +3,19 @@ import { renderAsync } from 'npm:@react-email/components@0.0.22'
 import { EmailAPIError, sendLovableEmail } from 'npm:@lovable.dev/email-js@0.3.1'
 import { TEMPLATES } from './registry.ts'
 import { EMAIL_DOMAINS } from '../emailDomains.ts'
+import { loadLodgeSettings } from '../lodgeSettings.ts'
 
 // Server-only: reads LOVABLE_API_KEY. Import from edge functions only — never
 // expose sending to the browser.
 
-// Configuration baked in at scaffold time
-const SITE_NAME = "Weybridge Lodge No.6787"
 // Sending domains are deployment-level (verified email DNS); single source: _shared/emailDomains.ts.
 const SENDER_DOMAIN = EMAIL_DOMAINS.senderDomain
 const FROM_DOMAIN = EMAIL_DOMAINS.fromDomain
+
+/** Header-safe sender display name; neutral "Your Lodge" when blank. */
+export function defaultSenderName(formal: string | null | undefined): string {
+  return (formal ?? '').replace(/[\r\n<>"\\]/g, ' ').replace(/\s+/g, ' ').trim() || 'Your Lodge'
+}
 
 export type SendTemplateEmailResult =
   | { sent: true }
@@ -24,7 +28,7 @@ export interface SendTemplateEmailOptions {
   replyTo?: string
   /** Visible Cc addresses (the service caps To+Cc+Bcc at 5). Empty/omitted = no Cc. */
   cc?: string[]
-  /** Optional From display name (e.g. from lodge settings); defaults to SITE_NAME. */
+  /** Optional From display name (e.g. from lodge settings); defaults to the Unit Setup formal sender name (fallback "Your Lodge"). */
   fromName?: string
 }
 
@@ -74,7 +78,7 @@ export async function sendTemplateEmail(
         to: recipient,
         from: options.fromName
           ? `"${options.fromName.replace(/["\r\n<>]/g, '')}" <noreply@${FROM_DOMAIN}>`
-          : `${SITE_NAME} <noreply@${FROM_DOMAIN}>`,
+          : `${defaultSenderName((await loadLodgeSettings()).formalSenderName)} <noreply@${FROM_DOMAIN}>`,
         sender_domain: SENDER_DOMAIN,
         subject,
         html,
