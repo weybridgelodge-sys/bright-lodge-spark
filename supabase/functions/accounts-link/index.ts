@@ -6,6 +6,7 @@
 // GET /accounts-link?y=2025&k=<approval uuid>&redirect=1 → 302 to signed URL
 
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { accountsFileName, loadLodgeSettings } from "../_shared/lodgeSettings.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -64,7 +65,7 @@ Deno.serve(async (req) => {
     const { data: signed, error: signErr } = await admin.storage
       .from("lodge-docs")
       .createSignedUrl(a.certified_pack_path, SIGNED_URL_TTL, {
-        download: `Weybridge-Lodge-Accounts-FY${year}-${String(year + 1).slice(-2)}.pdf`,
+        download: accountsFileName((await loadLodgeSettings()).lodgeName, year),
       });
     if (signErr || !signed?.signedUrl) {
       return json({ error: "sign_failed", message: "We couldn't open those accounts right now." }, 500);

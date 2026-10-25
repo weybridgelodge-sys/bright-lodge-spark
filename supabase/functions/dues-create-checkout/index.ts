@@ -6,7 +6,7 @@
 
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { createStripeClient } from "../_shared/stripe.ts";
-import { loadLodgeSettings } from "../_shared/lodgeSettings.ts";
+import { loadLodgeSettings, lodgeNameOr } from "../_shared/lodgeSettings.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -57,6 +57,7 @@ Deno.serve(async (req) => {
 
     const { data: yearRow } = await admin.rpc("current_lodge_year" as any);
     const lodgeYear = Number(yearRow);
+    const lodgeName = lodgeNameOr((await loadLodgeSettings()).lodgeName);
 
     // Compute prorated / exempt amount via shared DB function
     const { data: calc, error: calcErr } = await admin.rpc("dues_calculate_amount" as any, {
@@ -129,7 +130,7 @@ Deno.serve(async (req) => {
         line_items: [{
           price_data: {
             currency: "gbp",
-            product_data: { name: `Weybridge Lodge annual subscription ${lodgeYear}/${lodgeYear + 1}` },
+            product_data: { name: `${lodgeName} annual subscription ${lodgeYear}/${lodgeYear + 1}` },
             unit_amount: annual,
           },
           quantity: 1,
@@ -146,7 +147,7 @@ Deno.serve(async (req) => {
         currency: "gbp",
         unit_amount: monthly,
         recurring: { interval: "month" },
-        product_data: { name: `Weybridge Lodge monthly subscription (${lodgeYear}/${lodgeYear + 1})` },
+        product_data: { name: `${lodgeName} monthly subscription (${lodgeYear}/${lodgeYear + 1})` },
       });
       const session = await stripe.checkout.sessions.create({
         mode: "subscription",
@@ -158,7 +159,7 @@ Deno.serve(async (req) => {
         metadata,
         subscription_data: {
           metadata,
-          description: `Weybridge Lodge dues (12 monthly instalments)`,
+          description: `${lodgeName} dues (12 monthly instalments)`,
         },
       });
       sessionUrl = session.url;

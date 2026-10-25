@@ -10,3 +10,7 @@ export const EMAIL_DOMAINS = {
   /** Domain used in the From address (noreply@...). */
   fromDomain: "email.weybridgelodge.org.uk",
 } as const;
+
+/** Resend-verified From address for visitor summonses and member event invites
+ *  (kept separate from EMAIL_DOMAINS, which is delegated to Lovable Emails). */
+export const EVENTS_FROM_ADDRESS = "notify@events.weybridgelodge.org.uk";

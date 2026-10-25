@@ -6,6 +6,7 @@
 
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { createStripeClient } from "../_shared/stripe.ts";
+import { loadLodgeSettings, lodgeNameOr } from "../_shared/lodgeSettings.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -77,6 +78,7 @@ Deno.serve(async (req) => {
       .eq("plan", "monthly")
       .in("status", ["active", "past_due"]);
 
+    const lodgeName = lodgeNameOr((await loadLodgeSettings()).lodgeName);
     let updated = 0;
     const failures: { sub_id: string; error: string }[] = [];
     for (const s of subs ?? []) {
@@ -88,7 +90,7 @@ Deno.serve(async (req) => {
           currency: "gbp",
           unit_amount: monthly,
           recurring: { interval: "month" },
-          product_data: { name: `Weybridge Lodge monthly subscription (effective LY ${(setting as any).effective_lodge_year})` },
+          product_data: { name: `${lodgeName} monthly subscription (effective LY ${(setting as any).effective_lodge_year})` },
         });
         const existing = await stripe.subscriptions.retrieve(stripeSubId);
         const itemId = existing.items.data[0].id;
