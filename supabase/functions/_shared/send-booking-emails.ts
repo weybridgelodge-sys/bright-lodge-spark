@@ -69,12 +69,12 @@ function paymentStatusLabel(status?: string): string {
   }
 }
 
-async function lookupSecretarySignature(supabase: SupabaseClient) {
+async function lookupSecretarySignature(supabase: SupabaseClient, unitId?: string) {
   let secretaryName = ''
   let secretaryOffice = 'Lodge Secretary'
   try {
     // Secretary in post today (Installation year, carries forward).
-    const { data: holder } = await supabase.rpc('current_officer_holder', { _position_key: 'secretary' })
+    const { data: holder } = await supabase.rpc('current_officer_holder', { _position_key: 'secretary', ...(unitId ? { _unit: unitId } : {}) })
     const memberId = (holder as string | null) ?? null
     if (memberId) {
       const { data: prof } = await supabase
