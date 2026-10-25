@@ -219,7 +219,7 @@ export async function sendBookingEmails(bookingId: string, opts: SendOpts) {
   const firstName = bookingFirstName(details, b.contact_name)
   const submittedAt = new Date(b.created_at).toLocaleString('en-GB', { timeZone: 'Europe/London' })
 
-  const { secretaryName, secretaryOffice } = await lookupSecretarySignature(supabase)
+  const { secretaryName, secretaryOffice } = await lookupSecretarySignature(supabase, (typeof b.unit_id === 'string' && b.unit_id.trim()) || undefined)
 
   // ── Ladies Festival branch (dedicated templates) ──────────────────────────
   if (isLadiesFestival) {
