@@ -222,10 +222,12 @@
   .autofill-light:-webkit-autofill:hover,
   .autofill-light:-webkit-autofill:focus,
   .autofill-light:-webkit-autofill:active {
-    -webkit-text-fill-color: hsl(var(--foreground));
+    -webkit-text-fill-color: hsl(var(--foreground)) !important;
     caret-color: hsl(var(--foreground));
-    -webkit-box-shadow: 0 0 0 1000px hsl(var(--background)) inset;
-    box-shadow: 0 0 0 1000px hsl(var(--background)) inset;
+    -webkit-box-shadow: 0 0 0 1000px hsl(var(--background)) inset !important;
+    box-shadow: 0 0 0 1000px hsl(var(--background)) inset !important;
+    background-color: hsl(var(--background)) !important;
+    color-scheme: light;
     transition: background-color 9999s ease-out 0s;
   }
   .text-gradient-gold {
@@ -280,18 +282,18 @@
 @keyframes onAutoFillStart { from { /**/ } to { /**/ } }
 @keyframes onAutoFillCancel { from { /**/ } to { /**/ } }
 
-input:-webkit-autofill,
-input:-webkit-autofill:hover,
-input:-webkit-autofill:focus,
-input:-webkit-autofill:active,
-textarea:-webkit-autofill,
-textarea:-webkit-autofill:hover,
-textarea:-webkit-autofill:focus,
-textarea:-webkit-autofill:active,
-select:-webkit-autofill,
-select:-webkit-autofill:hover,
-select:-webkit-autofill:focus,
-select:-webkit-autofill:active {
+input:-webkit-autofill:not(.autofill-light),
+input:-webkit-autofill:not(.autofill-light):hover,
+input:-webkit-autofill:not(.autofill-light):focus,
+input:-webkit-autofill:not(.autofill-light):active,
+textarea:-webkit-autofill:not(.autofill-light),
+textarea:-webkit-autofill:not(.autofill-light):hover,
+textarea:-webkit-autofill:not(.autofill-light):focus,
+textarea:-webkit-autofill:not(.autofill-light):active,
+select:-webkit-autofill:not(.autofill-light),
+select:-webkit-autofill:not(.autofill-light):hover,
+select:-webkit-autofill:not(.autofill-light):focus,
+select:-webkit-autofill:not(.autofill-light):active {
   -webkit-text-fill-color: hsl(var(--primary-foreground)) !important;
   -webkit-box-shadow: 0 0 0 1000px hsl(var(--navy-dark)) inset !important;
   box-shadow: 0 0 0 1000px hsl(var(--navy-dark)) inset !important;
@@ -309,10 +311,10 @@ select:not(:-webkit-autofill) {
 
 /* Class applied by the autofill JS detector (main.tsx) as a hard-override
    fallback for Chrome versions that ignore the pseudo-class styling above. */
-.autofilled-dark,
-input.autofilled-dark,
-textarea.autofilled-dark,
-select.autofilled-dark {
+.autofilled-dark:not(.autofill-light),
+input.autofilled-dark:not(.autofill-light),
+textarea.autofilled-dark:not(.autofill-light),
+select.autofilled-dark:not(.autofill-light) {
   -webkit-text-fill-color: hsl(var(--primary-foreground)) !important;
   color: hsl(var(--primary-foreground)) !important;
   -webkit-box-shadow: 0 0 0 1000px hsl(var(--navy-dark)) inset !important;
