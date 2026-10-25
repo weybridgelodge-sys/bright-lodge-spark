@@ -244,15 +244,17 @@ export default function MembersLogin() {
       const result = await lovable.auth.signInWithOAuth("google", {
         redirect_uri: membersRedirectUrl,
       });
+      if (result.redirected) return; // flag survives the round trip
+      clearGoogleStarted(); // pop-up path answered in-page: no residue
       if (result.error) {
         if (isNoMembershipAuthError(result.error.message)) setNoMembership(true);
         else toast.error("Google sign-in failed");
         setBusy(false);
         return;
       }
-      if (result.redirected) return;
       navigate("/members");
     } catch (err) {
+      clearGoogleStarted();
       if (isNoMembershipAuthError((err as Error)?.message)) setNoMembership(true);
       else toast.error("Google sign-in failed");
       setBusy(false);
