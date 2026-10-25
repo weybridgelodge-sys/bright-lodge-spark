@@ -18,10 +18,9 @@ const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
 const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY")!;
 
-// Verified sender subdomain delegated to Lovable's nameservers — must match the
-// value used by send-transactional-email, or the email API rejects the send.
-const SENDER_DOMAIN = "notify.email.weybridgelodge.org.uk";
-const FROM_DOMAIN = "email.weybridgelodge.org.uk";
+// Sending domains are deployment-level (verified email DNS); single source: _shared/emailDomains.ts.
+const SENDER_DOMAIN = EMAIL_DOMAINS.senderDomain;
+const FROM_DOMAIN = EMAIL_DOMAINS.fromDomain;
 const FROM_ADDRESS =
   Deno.env.get("NEWSLETTER_FROM_EMAIL") ??
   null;

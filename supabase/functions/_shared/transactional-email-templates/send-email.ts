@@ -2,18 +2,16 @@ import * as React from 'npm:react@18.3.1'
 import { renderAsync } from 'npm:@react-email/components@0.0.22'
 import { EmailAPIError, sendLovableEmail } from 'npm:@lovable.dev/email-js@0.3.1'
 import { TEMPLATES } from './registry.ts'
+import { EMAIL_DOMAINS } from '../emailDomains.ts'
 
 // Server-only: reads LOVABLE_API_KEY. Import from edge functions only — never
 // expose sending to the browser.
 
 // Configuration baked in at scaffold time
 const SITE_NAME = "Weybridge Lodge No.6787"
-// SENDER_DOMAIN is the verified sender subdomain FQDN (e.g., "notify.example.com").
-// It MUST match the subdomain delegated to Lovable's nameservers. NEVER use the root domain.
-const SENDER_DOMAIN = "notify.email.weybridgelodge.org.uk"
-// FROM_DOMAIN is the domain shown in the From: header (e.g., "example.com").
-// Can be the root domain when display_from_root is enabled — this is cosmetic only.
-const FROM_DOMAIN = "email.weybridgelodge.org.uk"
+// Sending domains are deployment-level (verified email DNS); single source: _shared/emailDomains.ts.
+const SENDER_DOMAIN = EMAIL_DOMAINS.senderDomain
+const FROM_DOMAIN = EMAIL_DOMAINS.fromDomain
 
 export type SendTemplateEmailResult =
   | { sent: true }
