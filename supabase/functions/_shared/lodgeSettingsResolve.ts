@@ -84,7 +84,7 @@ export function returnFileName(pattern: string, year: string | number, ext: stri
 
 /** Lodge name for running text; neutral when Unit Setup has none. */
 export const lodgeNameOr = (name?: string | null) => (typeof name === "string" && name.trim() ? name.trim() : "Your Lodge");
-/** "Weybridge Lodge" -> "Weybridge"; neutral "Your Lodge" when blank. */
+/** "Example Lodge" -> "Example"; neutral "Your Lodge" when blank. */
 export const lodgeShortName = (name?: string | null) => {
   const n = typeof name === "string" ? name.trim() : "";
   return n ? (n.replace(/\s+Lodge$/i, "").trim() || n) : "Your Lodge";

@@ -84,7 +84,7 @@ const GUARDED = [
   "src/pages/members/working-groups/Index.tsx",
   "src/pages/members/working-groups/Visits.tsx",
   "src/pages/members/admin/MeetingDiary.tsx",
-  "src/pages/Bookings.tsx",
+  // Bookings.tsx: its <SEO> title/description are pre-rendered and must stay typed (staticMetaParity).
   "src/pages/PublicEventBalance.tsx",
   "src/pages/PublicEventConfirmation.tsx",
 ];

@@ -1,5 +1,4 @@
-import { unitTitle, useUnitProfile, venueFull, venueShort } from "@/lib/unitProfile";
-import { nameOr } from "@/lib/unitText";
+import { useUnitProfile, venueShort } from "@/lib/unitProfile";
 import { useBookingDetails } from "@/lib/bookingDetails";
 import { attendanceOptions, diningEventLabel, isNonMasonTitle, lodgeRequired } from "@/lib/bookingTitles";
 import Header from "@/components/Header";
@@ -180,8 +179,8 @@ useEffect(() => {
   return (
     <div className="min-h-screen overflow-x-hidden">
       <SEO
-        title={["Dining & Bookings", [unitTitle(unit), unit.venueName].filter(Boolean).join(" — ")].filter(Boolean).join(" | ")}
-        description={`Book your place at the next ${nameOr(unit, "lodge")} meeting${venueFull(unit) ? ` at the ${venueFull(unit)}` : ""}. View the ${diningLabel.toLowerCase()} menu and reserve your seat.`}
+        title="Dining & Bookings | Weybridge Lodge No. 6787 — Guildford Masonic Centre"
+        description={`Book your place at the next Weybridge Lodge meeting at the Guildford Masonic Centre, Weybourne House, Hitherbury Close, Guildford GU2 4DR. View the ${diningLabel.toLowerCase()} menu and reserve your seat.`}
         canonical="/bookings"
         type="website"
         schema={[
