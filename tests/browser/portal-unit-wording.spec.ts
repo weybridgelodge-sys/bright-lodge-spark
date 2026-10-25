@@ -19,7 +19,7 @@ const noSideScroll = async (page: import("@playwright/test").Page) =>
   expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(0);
 
 test("Login at 320px shows the unit's name and number", async ({ page }) => {
-  await page.goto("/members/login");
+  await page.goto("/members/login?e2e_as=visitor");
   await expect(page.getByText("Weybridge Lodge", { exact: true })).toBeVisible({ timeout: 15000 });
   await expect(page.getByText("No. 6787 · Members Portal")).toBeVisible();
   await expect(page.getByAltText("Weybridge Lodge crest")).toBeVisible();
