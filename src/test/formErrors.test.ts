@@ -45,3 +45,42 @@ describe("meeting form inline errors", () => {
     expect(validateMeetingStep3("card")).toEqual([]);
   });
 });
+
+import { readFileSync } from "node:fs";
+import { validateEnquiryForm, validateNewsletterEmail, validateBalanceForm } from "@/lib/formErrors";
+
+describe("enquiry form inline errors", () => {
+  it("empty form: name, email, reason in order; blank phone is fine", () => {
+    expect(ids(validateEnquiryForm({ full_name: "", email: "", phone: "", reason: "" }))).toEqual(["full_name", "email", "reason"]);
+  });
+  it("phone if given must be plausible", () => {
+    expect(validateEnquiryForm({ full_name: "A", email: "a@b.co", phone: "12", reason: "I would like to join" })).toEqual([{ id: "phone", message: PHONE_REQUIRED_MESSAGE }]);
+  });
+  it("reason under 10 characters fails", () => {
+    expect(ids(validateEnquiryForm({ full_name: "A", email: "a@b.co", phone: "", reason: "short" }))).toEqual(["reason"]);
+  });
+  it("EnquiryForm uses the shared FitTurnstile", () => {
+    const src = readFileSync("src/components/EnquiryForm.tsx", "utf8");
+    expect(src).toContain('import { FitTurnstile } from "@/components/FitTurnstile"');
+    expect(src).toContain("<FitTurnstile");
+  });
+});
+
+describe("newsletter email inline error", () => {
+  it("empty and invalid fail, valid passes", () => {
+    expect(validateNewsletterEmail("")[0].message).toBe("Please enter your email address.");
+    expect(validateNewsletterEmail("nope")[0].message).toBe("Please enter a valid email address.");
+    expect(validateNewsletterEmail("a@b.co")).toEqual([]);
+  });
+});
+
+describe("balance page inline errors", () => {
+  it("no dish chosen: error under the first dish box", () => {
+    expect(ids(validateBalanceForm({ action: "choices", chosenCount: 0, firstChoiceId: "x1" }))).toEqual(["bal-choice-x1"]);
+    expect(validateBalanceForm({ action: "choices", chosenCount: 1, firstChoiceId: "x1" })).toEqual([]);
+  });
+  it("pay needs a method", () => {
+    expect(ids(validateBalanceForm({ action: "pay", method: "" }))).toEqual(["bal-pay"]);
+    expect(validateBalanceForm({ action: "pay", method: "card" })).toEqual([]);
+  });
+});

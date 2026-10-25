@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 const nl = readFileSync("src/components/NewsletterSignup.tsx", "utf8");
+const fit = readFileSync("src/components/FitTurnstile.tsx", "utf8");
 const footer = readFileSync("src/components/Footer.tsx", "utf8");
 describe("newsletter card fits its column (Job BM)", () => {
   it("card, row and field can shrink", () => {
@@ -9,9 +10,10 @@ describe("newsletter card fits its column (Job BM)", () => {
     expect(nl).toContain('relative flex-1 min-w-0');
   });
   it("Turnstile is contained and scaled from the left by container width", () => {
-    expect(nl).toContain("max-w-full min-w-0 overflow-hidden");
-    expect(nl).toContain("ResizeObserver");
-    expect(nl).toContain('transformOrigin: "top left"');
+    expect(nl).toContain("<FitTurnstile");
+    expect(fit).toContain("max-w-full min-w-0 overflow-hidden");
+    expect(fit).toContain("ResizeObserver");
+    expect(fit).toContain('transformOrigin: "top left"');
   });
   it("footer column can shrink", () => {
     expect(footer).toContain("grid grid-cols-1 md:grid-cols-3");
