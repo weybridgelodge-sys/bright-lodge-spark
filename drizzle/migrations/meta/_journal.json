@@ -1065,6 +1065,13 @@
       "when": 1792963149577,
       "tag": "0151_drop_profiles_unit_default",
       "breakpoints": true
+    },
+    {
+      "idx": 152,
+      "version": "7",
+      "when": 1792964350898,
+      "tag": "0152_revoke_client_pending_account_units",
+      "breakpoints": true
     }
   ]
 }
