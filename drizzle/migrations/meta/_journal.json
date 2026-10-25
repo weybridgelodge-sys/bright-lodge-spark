@@ -1030,6 +1030,13 @@
       "when": 1792960899266,
       "tag": "0146_unit_aware_member_matching",
       "breakpoints": true
+    },
+    {
+      "idx": 147,
+      "version": "7",
+      "when": 1792960948533,
+      "tag": "0147_officer_holder_unscoped_positions",
+      "breakpoints": true
     }
   ]
 }
