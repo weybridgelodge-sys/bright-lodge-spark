@@ -2,13 +2,10 @@
 // auth user is created; handle_new_user reads it (and deletes it). Sign-in
 // metadata is never trusted for the unit. There is deliberately no default.
 
-export const NO_CALLER_UNIT_MESSAGE =
-  "Your member record has no lodge set, so you cannot add members. Ask an administrator to set your lodge first.";
+import { callerUnitFrom, noCallerUnitMessage } from "./callerUnit.ts";
+export { callerUnitFrom };
 
-/** Caller's own lodge from their profile row; "" when blank/missing. */
-export function callerUnitFrom(profile: { unit_id?: unknown } | null | undefined): string {
-  return typeof profile?.unit_id === "string" ? profile.unit_id.trim() : "";
-}
+export const NO_CALLER_UNIT_MESSAGE = noCallerUnitMessage("add members");
 
 // deno-lint-ignore no-explicit-any
 export async function reserveAccountUnit(db: any, email: string, unitId: string, createdBy: string | null): Promise<string | null> {
