@@ -43,7 +43,7 @@ describe("JOB CE repeated keyboard resizes", () => {
     expect(listeners.size).toBe(0);
     // blur ends early
     scrollFocusedFieldIntoView(ta);
-    expect(listeners.size).toBe(2);
+    expect(listeners.size).toBe(1); // same handler for resize + scroll
     ta.blur();
     expect(listeners.size).toBe(0);
   });
