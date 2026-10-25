@@ -25,7 +25,7 @@ describe("event form inline errors", () => {
 describe("meeting form inline errors", () => {
   it("step 1 empty: title first, all fields listed", () => {
     expect(ids(validateMeetingStep1({ title: "", firstName: "", lastName: "", lodge: "", email: "", phone: "" })))
-      .toEqual(["evf-title", "evf-first", "evf-last", "evf-email", "evf-phone"]);
+      .toEqual(["evf-title", "evf-first", "evf-last", "evf-lodge", "evf-email", "evf-phone"]);
   });
   it("lodge required for a Mason title", () => {
     expect(ids(validateMeetingStep1({ title: "Bro", firstName: "A", lastName: "B", lodge: "", email: "a@b.co", phone: "07700 900123" }))).toEqual(["evf-lodge"]);
