@@ -52,7 +52,7 @@ for (const width of [320, 360]) {
       const field = dlg.locator("input").nth(1);
       await field.focus();
       await page.evaluate(() => (window as any).__openKeyboard());
-      await page.waitForTimeout(700);
+      await page.waitForTimeout(1600); // let the 1.5s re-centring window finish
       const vvh = await page.evaluate(() => (window as any).visualViewport.height);
       const box = await dlg.boundingBox();
       expect(box!.y, "anchored to the top").toBeLessThan(20);
