@@ -11,7 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { readFunctionError } from "@/lib/functionError";
 import {
   CHILD_MAX_AGE, eventBookingState, fetchPublicEvent, formatEventDate,
-  formatGBP, formatTime, isChildAge, seatsLeft, keepPostcodeTogether, type PublicEvent as Ev,
+  formatGBP, formatTime, seatsLeft, keepPostcodeTogether, type PublicEvent as Ev,
 } from "@/lib/publicEvents";
 import {
   emptyGuest, FeeAndSummary, GuestRowsFieldset, Honeypot, inputCls, labelClass, PaymentMethodFieldset, PaymentPlanFieldset, PayNowSummary, req,
