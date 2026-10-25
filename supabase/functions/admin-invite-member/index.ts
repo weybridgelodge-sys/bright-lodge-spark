@@ -3,6 +3,7 @@
 // - Update: updates an existing profile by user_id.
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { loadLodgeSettings } from "../_shared/lodgeSettings.ts";
+import { callerUnitFrom, NO_CALLER_UNIT_MESSAGE, releaseAccountUnit, reserveAccountUnit } from "../_shared/pendingAccountUnit.ts";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { z } from "npm:zod@3";
 
@@ -159,14 +160,21 @@ Deno.serve(async (req) => {
     }
 
     if (!userId) {
-      // CREATE
+      // CREATE — the new member joins the caller's own lodge (no default).
+      const { data: me, error: merr } = await admin.from("profiles").select("unit_id").eq("id", userRes.user.id).maybeSingle();
+      if (merr) return json({ error: merr.message }, 500);
+      const unitId = callerUnitFrom(me);
+      if (!unitId) return json({ error: NO_CALLER_UNIT_MESSAGE }, 400);
+      const rerr2 = await reserveAccountUnit(admin, b.email, unitId, userRes.user.id);
+      if (rerr2) return json({ error: rerr2 }, 500);
       // Sends the lodge's branded invite email: the member claims the account from it.
-      const lodge = await loadLodgeSettings();
+      const lodge = await loadLodgeSettings(unitId);
       const { data: created, error: cerr } = await admin.auth.admin.inviteUserByEmail(b.email, {
         data: { full_name },
         redirectTo: `${lodge.siteUrl}/members`,
       });
       if (cerr || !created.user) {
+        await releaseAccountUnit(admin, b.email);
         return json({ error: cerr?.message ?? "Could not create user" }, 400);
       }
       userId = created.user.id;
