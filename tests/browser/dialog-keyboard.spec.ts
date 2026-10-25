@@ -52,7 +52,7 @@ for (const width of [320, 360]) {
       const field = dlg.locator("input").nth(1);
       await field.focus();
       await page.evaluate(() => (window as any).__openKeyboard());
-      await page.waitForTimeout(700);
+      await page.waitForTimeout(1600); // let the 1.5s re-centring window finish
       const vvh = await page.evaluate(() => (window as any).visualViewport.height);
       const box = await dlg.boundingBox();
       expect(box!.y, "anchored to the top").toBeLessThan(20);
@@ -80,7 +80,7 @@ for (const width of [320, 360]) {
       await page.setViewportSize({ width, height: 760 });
       await page.route("**/rest/v1/**", (r) => r.request().method() === "GET" ? r.fulfill({ json: [] }) : r.continue());
       await page.route("**/rest/v1/charity_festival_settings**", (r) => r.fulfill({ json: null }));
-      await page.goto("/members/admin/charity");
+      await page.goto("/members/admin/charity?kbdebug=1");
       const tabBtn = page.getByRole("tab", { name: /Collections/i });
       if (!(await tabBtn.waitFor({ timeout: 25000 }).then(() => true).catch(() => false))) test.skip(true, "Synthetic identity cannot open Charity Steward");
       await tabBtn.click();
@@ -109,8 +109,50 @@ for (const width of [320, 360]) {
       expect(nb!.y, "Notes below dialog top").toBeGreaterThanOrEqual(0);
       expect(nb!.y + nb!.height, "Notes above keyboard").toBeLessThanOrEqual(visBottom);
       await expect(notes).toBeFocused();
+      // DOM: the dialog box itself is the scroller (form inside it, no separate inner scroller).
+      const dom = await notes.evaluate((el) => {
+        const box = el.closest('[role="dialog"]') as HTMLElement;
+        const scrollers: string[] = [];
+        for (let n: HTMLElement | null = el.parentElement; n && n !== document.body; n = n.parentElement) {
+          const oy = getComputedStyle(n).overflowY; if (oy === "auto" || oy === "scroll") scrollers.push(n === box ? "dialog" : n.tagName);
+        }
+        return { scrollers, focusedClass: box.classList.contains("vv-field-focused"), pb: parseFloat(getComputedStyle(box).paddingBottom) };
+      });
+      expect(dom.scrollers).toEqual(["dialog"]);
+      expect(dom.focusedClass).toBe(true);
+      expect(dom.pb).toBeGreaterThanOrEqual(visBottom * 0.5 - 1);
+      await expect(page.getByTestId("kbdebug")).toContainText("vv.h:");
       await expectNoAxeViolations(page, `CE ${mode} ${width}`);
       await page.screenshot({ path: `/tmp/browser/ce-${mode}-${width}.png` });
     });
   }
+}
+
+// Worst case seen on the real phone: the browser reports NO keyboard at all (no visual
+// viewport change, no layout change). The spare space alone must let Notes be centred.
+for (const width of [320, 360]) {
+  test(`New collection: Notes centred with no keyboard information at ${width}px`, { timeout: 90_000 }, async ({ page }) => {
+    await page.setViewportSize({ width, height: 640 });
+    await page.route("**/rest/v1/**", (r) => r.request().method() === "GET" ? r.fulfill({ json: [] }) : r.continue());
+    await page.route("**/rest/v1/charity_festival_settings**", (r) => r.fulfill({ json: null }));
+    await page.goto("/members/admin/charity");
+    const tabBtn = page.getByRole("tab", { name: /Collections/i });
+    if (!(await tabBtn.waitFor({ timeout: 25000 }).then(() => true).catch(() => false))) test.skip(true, "Synthetic identity cannot open Charity Steward");
+    await tabBtn.click();
+    await page.getByRole("tabpanel").getByRole("button", { name: /^New$/ }).click();
+    const dlg = page.getByRole("dialog", { name: "New collection" });
+    await expect(dlg).toBeVisible();
+    await page.waitForTimeout(400);
+    await expect(dlg.getByRole("textbox", { name: "Notes" })).toBeVisible();
+    await expect(dlg.getByRole("spinbutton", { name: "Costs (£)" })).toBeVisible();
+    await expect(dlg.getByLabel("Banked by", { exact: true })).toHaveAttribute("placeholder", "e.g. Charity Steward");
+    const notes = dlg.getByRole("textbox", { name: "Notes" });
+    await notes.focus();
+    await page.waitForTimeout(1100);
+    const nb = await notes.boundingBox();
+    const mid = nb!.y + nb!.height / 2;
+    expect(Math.abs(mid - 640 / 2), "Notes centred in the visible area").toBeLessThan(80);
+    await expectNoAxeViolations(page, `CF centred ${width}`);
+    await page.screenshot({ path: `/tmp/browser/cf-centred-${width}.png` });
+  });
 }
