@@ -2903,7 +2903,7 @@ export type Database = {
           secretary_email: string
           sender_name?: string | null
           site_url?: string | null
-          unit_id?: string
+          unit_id: string
           updated_at?: string
           updated_by?: string | null
           webmaster_email?: string | null
@@ -3183,7 +3183,7 @@ export type Database = {
           pgl_registration_fee_pence: number
           ugle_registration_fee_pence: number
           under_25_discount_percent?: number
-          unit_id?: string
+          unit_id: string
           updated_at?: string
           updated_by?: string | null
         }
@@ -4816,7 +4816,7 @@ export type Database = {
           email: string
           id?: string
           source?: string
-          unit_id?: string
+          unit_id: string
           unsubscribe_token?: string
           unsubscribed_at?: string | null
           updated_at?: string
