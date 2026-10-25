@@ -56,58 +56,80 @@ export function keyboardInset(layoutHeight: number, vv: { height: number; offset
   return Math.max(0, Math.round(layoutHeight - vv.height - vv.offsetTop));
 }
 
-/** Nearest ancestor (inside the overlay) that actually scrolls; falls back to the overlay box. */
+/**
+ * The element that actually scrolls the field: nearest ancestor inside the overlay whose
+ * overflow-y is auto/scroll (it may not overflow YET — spare space is added once focused);
+ * falls back to the overlay box itself.
+ */
 export function scrollableAncestor(el: HTMLElement, box: HTMLElement): HTMLElement {
-  for (let n = el.parentElement; n && n !== box.parentElement; n = n.parentElement) {
+  for (let n = el.parentElement; n; n = n.parentElement) {
     const oy = getComputedStyle(n).overflowY;
-    if ((oy === "auto" || oy === "scroll") && n.scrollHeight > n.clientHeight) return n;
+    if (oy === "auto" || oy === "scroll") return n;
     if (n === box) break;
   }
   return box;
 }
 
-const RETRY_MS = [0, 300, 600];
-const WINDOW_MS = 1500;
+/** Class put on the overlay's scroller while a field inside it is focused (phones: adds spare space below the last field). */
+export const FIELD_FOCUSED_CLASS = "vv-field-focused";
+export const RETRY_MS = [0, 150, 300, 600, 900];
+export const WINDOW_MS = 1500;
+const PHONE = "(max-width: 639.98px)";
+
+/** Live numbers for the ?kbdebug=1 readout (no logging, no tracking). */
+export type KbDebugSnapshot = { delta: number | null; at: number };
+export const kbDebug: KbDebugSnapshot & { listeners: Set<() => void> } = { delta: null, at: 0, listeners: new Set() };
+function noteDelta(delta: number) {
+  kbDebug.delta = delta; kbDebug.at = Date.now();
+  kbDebug.listeners.forEach((f) => f());
+}
 
 /**
- * Focus handler for an overlay. Keyboards animate and fire several visualViewport
- * resize/scroll events, so we re-check on focus, at 300ms and 600ms, and on EVERY
- * resize/scroll for 1.5s (stopping early on blur). Scrolls only the overlay's own
- * scroll area (never the locked page). Never moves focus or caret.
+ * Focus handler for an overlay (phones only; desktop untouched). Primary path: the
+ * browser's own target.scrollIntoView({block:"center"}) at 0/150/300/600/900ms and on
+ * every visualViewport resize/scroll for 1.5s, stopping on blur. While focused the
+ * scroller gets FIELD_FOCUSED_CLASS, which adds half a screen of spare space below the
+ * last field, so centring works without knowing the keyboard height. Fallback: measured
+ * delta + scrollBy on the scroller. Never moves focus or caret.
  */
 export function scrollFocusedFieldIntoView(target: EventTarget | null, _delayMs = 300): () => void {
   if (typeof window === "undefined" || !(target instanceof HTMLElement) || !target.matches(FIELD)) return () => {};
-  const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches ?? false;
+  if (window.matchMedia && !window.matchMedia(PHONE).matches) return () => {};
+  const box = target.closest<HTMLElement>(".vv-dialog, .vv-sheet-side, [role='dialog'], [role='alertdialog']");
+  if (!box) return () => {};
+  const scroller = scrollableAncestor(target, box);
+  scroller.classList.add(FIELD_FOCUSED_CLASS);
   const vv = window.visualViewport;
   const run = () => {
     if (document.activeElement !== target) return;
-    const box = target.closest<HTMLElement>(".vv-dialog, .vv-sheet-side, [role='dialog'], [role='alertdialog']");
-    if (!box) return;
-    const scroller = scrollableAncestor(target, box);
+    if (typeof target.scrollIntoView === "function") target.scrollIntoView({ block: "center", behavior: "auto" });
     const delta = fieldScrollDelta(target.getBoundingClientRect(), scroller.getBoundingClientRect(), vv, window.innerHeight);
-    if (delta === 0) return;
-    if (typeof scroller.scrollBy === "function") {
-      const before = scroller.scrollTop;
-      scroller.scrollBy({ top: delta, behavior: reduce ? "auto" : "smooth" });
-      // If the scroller could not move at all (smooth scrolling still pending is fine), fall back.
-      if (reduce && scroller.scrollTop === before) target.scrollIntoView?.({ block: "nearest" });
-    } else target.scrollIntoView?.({ block: "nearest" });
+    noteDelta(delta);
+    if (delta !== 0 && typeof scroller.scrollBy === "function") scroller.scrollBy({ top: delta, behavior: "auto" });
   };
   const timers = RETRY_MS.map((ms) => window.setTimeout(run, ms));
   let done = false;
-  const stop = () => {
-    if (done) return; done = true;
+  const stopRetries = () => {
     timers.forEach((t) => window.clearTimeout(t));
     window.clearTimeout(end);
     vv?.removeEventListener("resize", run);
     vv?.removeEventListener("scroll", run);
-    target.removeEventListener("blur", stop);
+  };
+  const onBlur = () => {
+    if (done) return; done = true;
+    stopRetries();
+    target.removeEventListener("blur", onBlur);
+    // Keep the spare space if focus just moved to another field in the same scroller.
+    window.setTimeout(() => {
+      const a = document.activeElement;
+      if (!(a instanceof HTMLElement && a.matches(FIELD) && scroller.contains(a))) scroller.classList.remove(FIELD_FOCUSED_CLASS);
+    }, 0);
   };
   vv?.addEventListener("resize", run);
   vv?.addEventListener("scroll", run);
-  target.addEventListener("blur", stop);
-  const end = window.setTimeout(stop, WINDOW_MS);
-  return stop;
+  target.addEventListener("blur", onBlur);
+  const end = window.setTimeout(stopRetries, WINDOW_MS);
+  return onBlur;
 }
 
 const GAP = 16;

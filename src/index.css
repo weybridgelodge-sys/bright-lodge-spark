@@ -362,13 +362,11 @@ select.autofilled-dark:not(.autofill-light) {
   }
   /* While a field is focused, leave room below the last field and Save so they can be
      scrolled above a keyboard that covers the box (--app-kb = 0 when keyboard is closed). */
-  .vv-dialog:focus-within::after,
-  .vv-sheet-side:focus-within::after {
-    content: "";
-    display: block;
-    flex-shrink: 0;
-    height: var(--app-kb, 0px);
-    pointer-events: none;
+  /* While a field is focused (class set by scrollFocusedFieldIntoView on the element that
+     actually scrolls), give it half the visible height of spare space below the last field,
+     so Notes/Save can be centred whatever the keyboard does. */
+  .vv-field-focused {
+    padding-bottom: calc(var(--app-vvh, 100dvh) * 0.5) !important;
   }
   /* Date/time controls in half-width columns: keep the full value visible at 320px. */
   input[type="date"], input[type="time"], input[type="datetime-local"], input[type="month"], input[type="week"] {
