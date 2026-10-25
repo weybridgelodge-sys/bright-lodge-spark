@@ -10,9 +10,10 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { BRAND, BRAND_GOLD_DARK, brandFooterHtml, brandHeaderHtml } from "../_shared/transactional-email-templates/_brand.ts";
 import { EVENTS_FROM_ADDRESS } from "../_shared/emailDomains.ts";
-import { loadLodgeSettings, resolveLodgeSettings } from "../_shared/lodgeSettings.ts";
-let LODGE = resolveLodgeSettings(null);
-const brandId = () => ({ crestUrl: LODGE.crestImageUrl || null, lodgeName: LODGE.lodgeName, lodgeNumber: LODGE.lodgeNumber, provinceName: LODGE.provinceName });
+import { loadLodgeSettings, type LodgeSettings } from "../_shared/lodgeSettings.ts";
+import { loadCallerUnit, noCallerUnitMessage } from "../_shared/callerUnit.ts";
+// Lodge settings are per request (caller's own unit); never a module-level value shared across units.
+const brandId = (LODGE: LodgeSettings) => ({ crestUrl: LODGE.crestImageUrl || null, lodgeName: LODGE.lodgeName, lodgeNumber: LODGE.lodgeNumber, provinceName: LODGE.provinceName });
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -57,7 +58,7 @@ function esc(s: string): string {
 }
 function isEmail(v: string): boolean { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
 
-function renderHtml(o: {
+function renderHtml(LODGE: LodgeSettings, o: {
   salutation: string;
   meetingDateLabel: string;
   meetingTimeLabel?: string;
@@ -79,7 +80,7 @@ function renderHtml(o: {
   <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:${BRAND.bg};">
     <tr><td align="center">
       <table role="presentation" width="${parseInt(BRAND.containerMaxWidth, 10)}" cellspacing="0" cellpadding="0" style="max-width:${BRAND.containerMaxWidth};margin:0 auto;padding:24px;">
-        <tr><td>${brandHeaderHtml(brandId())}</td></tr>
+        <tr><td>${brandHeaderHtml(brandId(LODGE))}</td></tr>
         <tr><td style="padding:0;">
           <h2 style="color:${BRAND.navy};font-size:22px;margin:0 0 6px;font-family:${BRAND.fontStack};">Invitation to our next Meeting</h2>
           <p style="color:${BRAND.body};font-size:14px;line-height:1.55;margin:14px 0;">Dear ${esc(o.salutation)},</p>
@@ -105,7 +106,7 @@ function renderHtml(o: {
               ? `If you would prefer not to receive further invitations, <a href="${esc(o.unsubscribeUrl)}" style="color:${BRAND_GOLD_DARK};">click here to unsubscribe</a> from future ${esc(LODGE.senderName)} emails.`
               : `If you would prefer not to receive further invitations, please let the Secretary know and we will remove you from our visitor list.`}
           </p>
-          ${brandFooterHtml(brandId())}
+          ${brandFooterHtml(brandId(LODGE))}
         </td></tr>
       </table>
     </td></tr>
@@ -113,7 +114,6 @@ function renderHtml(o: {
 }
 
 Deno.serve(async (req) => {
-  LODGE = await loadLodgeSettings();
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
@@ -136,6 +136,9 @@ Deno.serve(async (req) => {
       ["admin", "secretary", "worshipful_master", "assistant_secretary"].includes(r.role)
     );
     if (!allowed) return json({ error: "Forbidden" }, 403);
+    const callerUnit = await loadCallerUnit(admin, user.id);
+    if (!callerUnit) return json({ error: noCallerUnitMessage("send invitations") }, 403);
+    const LODGE = await loadLodgeSettings(callerUnit);
 
     const body = (await req.json().catch(() => ({}))) as Body;
     if (!body.summons_id || !Array.isArray(body.recipients) || body.recipients.length === 0) {
@@ -213,7 +216,7 @@ Deno.serve(async (req) => {
       const unsubscribeUrl = token
         ? `${SUPABASE_URL}/functions/v1/newsletter-unsubscribe?token=${encodeURIComponent(token)}`
         : undefined;
-      const html = renderHtml({
+      const html = renderHtml(LODGE, {
         salutation,
         meetingDateLabel: body.meeting_date_label,
         meetingTimeLabel: body.meeting_time_label,
@@ -242,7 +245,7 @@ Deno.serve(async (req) => {
             "Idempotency-Key": `summons-visitors-${summons.id}-${email}-${contentHash}${r.force ? `-force-${Date.now()}-${crypto.randomUUID().slice(0, 8)}` : ""}`,
           },
           body: JSON.stringify({
-            from: `${(await loadLodgeSettings()).senderName} <${FROM_ADDRESS_DOMAIN}>`,
+            from: `${LODGE.senderName} <${FROM_ADDRESS_DOMAIN}>`,
             to: [email],
             subject,
             html,

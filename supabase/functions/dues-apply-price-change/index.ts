@@ -6,6 +6,7 @@
 
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { createStripeClient } from "../_shared/stripe.ts";
+import { loadCallerUnit, noCallerUnitMessage } from "../_shared/callerUnit.ts";
 import { loadLodgeSettings, lodgeNameOr } from "../_shared/lodgeSettings.ts";
 
 const corsHeaders = {
@@ -43,6 +44,8 @@ Deno.serve(async (req) => {
     const admin = createClient(SUPABASE_URL, SERVICE_ROLE);
     const { data: isAdmin } = await admin.rpc("has_role" as any, { _user_id: user.id, _role: "admin" });
     if (!isAdmin) return json({ error: "Admin only" }, 403);
+    const callerUnit = await loadCallerUnit(admin, user.id);
+    if (!callerUnit) return json({ error: noCallerUnitMessage("apply a dues change") }, 403);
 
     const { settings_id, force } = await req.json().catch(() => ({}));
     if (!settings_id) return json({ error: "settings_id required" }, 400);
@@ -78,7 +81,7 @@ Deno.serve(async (req) => {
       .eq("plan", "monthly")
       .in("status", ["active", "past_due"]);
 
-    const lodgeName = lodgeNameOr((await loadLodgeSettings()).lodgeName);
+    const lodgeName = lodgeNameOr((await loadLodgeSettings(callerUnit)).lodgeName);
     let updated = 0;
     const failures: { sub_id: string; error: string }[] = [];
     for (const s of subs ?? []) {

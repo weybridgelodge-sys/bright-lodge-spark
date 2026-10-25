@@ -6,6 +6,7 @@
 
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { sendTransactionalEmail } from "../_shared/send-email.ts";
+import { loadCallerUnit, noCallerUnitMessage } from "../_shared/callerUnit.ts";
 import { loadLodgeSettings } from "../_shared/lodgeSettings.ts";
 
 const corsHeaders = {
@@ -40,6 +41,8 @@ Deno.serve(async (req) => {
     const admin = createClient(SUPABASE_URL, SERVICE_ROLE);
     const { data: isAdmin } = await admin.rpc("has_role" as any, { _user_id: user.id, _role: "admin" });
     if (!isAdmin) return json({ error: "Admin only" }, 403);
+    const callerUnit = await loadCallerUnit(admin, user.id);
+    if (!callerUnit) return json({ error: noCallerUnitMessage("send a dues notice") }, 403);
 
     const { settings_id } = await req.json().catch(() => ({}));
     if (!settings_id) return json({ error: "settings_id required" }, 400);
@@ -86,7 +89,7 @@ Deno.serve(async (req) => {
     const byMember = new Map<string, any>();
     for (const p of profiles ?? []) byMember.set((p as any).id, p);
 
-    const lodge = await loadLodgeSettings();
+    const lodge = await loadLodgeSettings(callerUnit);
     let sent = 0;
     const failures: { email: string; error: string }[] = [];
     for (const s of subs ?? []) {
@@ -94,6 +97,7 @@ Deno.serve(async (req) => {
       if (!p?.email) continue;
       try {
         const res = await sendTransactionalEmail({
+          unitId: callerUnit,
           templateName: "dues-price-change-notice",
           recipientEmail: p.email,
           idempotencyKey: `dues-notice-${settings_id}-${(s as any).member_id}`,

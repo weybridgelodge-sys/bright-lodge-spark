@@ -9,11 +9,11 @@ import { pickReturnCc, returnDocumentPath, returnDocumentTitle, type CcUsed } fr
 export * from "./returnFilingRules.ts";
 
 /** Resolves today's Secretary and WM from officer records and returns the Cc list for a return email. */
-export async function resolveReturnCc(admin: SupabaseClient, to: string): Promise<{ cc: string[]; used: CcUsed[] }> {
+export async function resolveReturnCc(admin: SupabaseClient, to: string, unitId: string): Promise<{ cc: string[]; used: CcUsed[] }> {
   const [s, w, settings] = await Promise.all([
-    admin.rpc("current_officer_holder", { _position_key: "secretary" }),
-    admin.rpc("current_officer_holder", { _position_key: "worshipful_master" }),
-    loadLodgeSettings(),
+    admin.rpc("current_officer_holder", { _position_key: "secretary", _unit: unitId }),
+    admin.rpc("current_officer_holder", { _position_key: "worshipful_master", _unit: unitId }),
+    loadLodgeSettings(unitId),
   ]);
   const secId = (s.data as string | null) ?? null;
   const wmId = (w.data as string | null) ?? null;

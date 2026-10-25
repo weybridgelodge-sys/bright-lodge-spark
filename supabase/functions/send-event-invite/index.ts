@@ -5,6 +5,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { EVENTS_FROM_ADDRESS } from "../_shared/emailDomains.ts";
 import { loadLodgeSettings } from "../_shared/lodgeSettings.ts";
+import { loadCallerUnit, noCallerUnitMessage } from "../_shared/callerUnit.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -98,6 +99,9 @@ Deno.serve(async (req) => {
     const { data: roles } = await admin.from("user_roles").select("role").eq("user_id", user.id);
     const has = (roles ?? []).some((r: { role: string }) => requireRole.includes(r.role));
     if (!has) return json({ error: "Forbidden" }, 403);
+    const callerUnit = await loadCallerUnit(admin, user.id);
+    if (!callerUnit) return json({ error: noCallerUnitMessage("send an event invitation") }, 403);
+    const lodge = await loadLodgeSettings(callerUnit);
 
     // Resolve recipients
     const map = new Map<string, Recipient>();
@@ -184,7 +188,7 @@ Deno.serve(async (req) => {
             "Idempotency-Key": `${body.idempotencyPrefix}-${r.email}`,
           },
           body: JSON.stringify({
-            from: `${(await loadLodgeSettings()).senderName} <${FROM_ADDRESS_DOMAIN}>`,
+            from: `${lodge.senderName} <${FROM_ADDRESS_DOMAIN}>`,
             to: [r.email],
             subject: body.subject,
             html: body.html,

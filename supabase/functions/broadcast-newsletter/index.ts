@@ -1,12 +1,18 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { sendLovableEmail } from "npm:@lovable.dev/email-js";
-import { loadLodgeSettings, resolveLodgeSettings } from "../_shared/lodgeSettings.ts";
+import { AsyncLocalStorage } from "node:async_hooks";
+import { loadLodgeSettings, resolveLodgeSettings, type LodgeSettings } from "../_shared/lodgeSettings.ts";
+import { loadCallerUnit, noCallerUnitMessage } from "../_shared/callerUnit.ts";
 import { buildNewsletterArchivePdf } from "../_shared/newsletterArchivePdf.ts";
 import { loadCrest, type ProcessedCrest } from "../_shared/pdfLibBrand.ts";
 import { once, runSendsThenArchives } from "../_shared/newsletterDispatch.ts";
 import { newsletterBrandFrom, newsletterFooterHtml, newsletterHeaderHtml } from "../_shared/newsletterBrand.ts";
 import { EMAIL_DOMAINS } from "../_shared/emailDomains.ts";
-let LODGE = resolveLodgeSettings(null);
+// Lodge settings are per request (the caller's own unit). Each request gets its own
+// box via AsyncLocalStorage, so concurrent sends for different units never share one.
+const lodgeBox = new AsyncLocalStorage<{ value: LodgeSettings }>();
+const NEUTRAL_LODGE = resolveLodgeSettings(null);
+const lodgeNow = (): LodgeSettings => lodgeBox.getStore()?.value ?? NEUTRAL_LODGE;
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -177,9 +183,9 @@ function renderHtml(opts: { subject: string; content: NewsletterContent; unsubsc
 </head>
 <body style="margin:0;background:#f4f1ea;font-family:Georgia,'Times New Roman',serif">
 <div style="max-width:640px;margin:0 auto;background:#ffffff">
-  ${newsletterHeaderHtml(newsletterBrandFrom(LODGE))}
+  ${newsletterHeaderHtml(newsletterBrandFrom(lodgeNow()))}
   <div style="padding:24px 28px">${sectionsHtml}</div>
-  ${newsletterFooterHtml(newsletterBrandFrom(LODGE), unsubscribeUrl)}
+  ${newsletterFooterHtml(newsletterBrandFrom(lodgeNow()), unsubscribeUrl)}
 </div>
 </body></html>`;
 }
@@ -332,8 +338,8 @@ async function sendBatch(emails: Array<{ to: string; html: string; subject: stri
       await sendLovableEmail(
         {
           to: e.to,
-          from: fromAddress(LODGE),
-          reply_to: LODGE.communicationsEmail,
+          from: fromAddress(lodgeNow()),
+          reply_to: lodgeNow().communicationsEmail,
           sender_domain: SENDER_DOMAIN,
           subject: e.subject,
           html: e.html,
@@ -365,7 +371,7 @@ async function renderNewsletterPdf(opts: {
   crest?: () => Promise<ProcessedCrest | null>;
 }): Promise<Uint8Array> {
   const { crest, ...rest } = opts;
-  return await buildNewsletterArchivePdf({ ...rest, brand: newsletterBrandFrom(LODGE), ...(crest ? { loadCrestImpl: () => crest() } : {}) });
+  return await buildNewsletterArchivePdf({ ...rest, brand: newsletterBrandFrom(lodgeNow()), ...(crest ? { loadCrestImpl: () => crest() } : {}) });
 }
 
 function issuePrefix(d = new Date()): string {
@@ -383,7 +389,7 @@ async function archiveToDocuments(opts: {
 }) {
   const tag = AUDIENCE_FILENAME[opts.audience];
   const safeSubject = opts.subject.replace(/[^a-zA-Z0-9._-]/g, "_").slice(0, 60);
-  const fileName = `${issuePrefix()}_${LODGE.senderName.split(/\s+/)[0].replace(/[^A-Za-z0-9]/g, "")}Chronicle_${tag}_${safeSubject || "Issue"}.pdf`;
+  const fileName = `${issuePrefix()}_${lodgeNow().senderName.split(/\s+/)[0].replace(/[^A-Za-z0-9]/g, "")}Chronicle_${tag}_${safeSubject || "Issue"}.pdf`;
   const path = `newsletter/${Date.now()}-${opts.broadcastId}-${tag}-${safeSubject}.pdf`;
   let pdfBytes: Uint8Array;
   try {
@@ -487,8 +493,9 @@ async function dispatchOneAudience(opts: {
   return { audience, sent: sentCount, error: firstError, archivedId: archived.id, archive };
 }
 
-Deno.serve(async (req) => {
-  LODGE = await loadLodgeSettings();
+Deno.serve((req) => lodgeBox.run({ value: NEUTRAL_LODGE }, () => handle(req)));
+
+async function handle(req: Request): Promise<Response> {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   if (req.method !== "POST") return new Response("Method not allowed", { status: 405, headers: corsHeaders });
 
@@ -516,6 +523,13 @@ Deno.serve(async (req) => {
         status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+    const callerUnit = await loadCallerUnit(admin, userId);
+    if (!callerUnit) {
+      return new Response(JSON.stringify({ error: noCallerUnitMessage("send the newsletter") }), {
+        status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    lodgeBox.getStore()!.value = await loadLodgeSettings(callerUnit);
 
 
 
@@ -586,7 +600,7 @@ Deno.serve(async (req) => {
         { to: testEmail, subject: `[TEST] ${subject}`, html },
       ]);
       if (!result.ok) {
-        console.error("Test send failed", { testEmail, from: fromAddress(LODGE), error: result.error });
+        console.error("Test send failed", { testEmail, from: fromAddress(lodgeNow()), error: result.error });
         return new Response(JSON.stringify({ error: result.error || "Test send failed" }), {
           status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
@@ -616,7 +630,7 @@ Deno.serve(async (req) => {
       .eq("id", body.broadcastId);
 
     // One crest load per send, shared by every audience's archive PDF.
-    const crestOnce = once(() => loadCrest(newsletterBrandFrom(LODGE).crestUrl));
+    const crestOnce = once(() => loadCrest(newsletterBrandFrom(lodgeNow()).crestUrl));
     let errors: DispatchResult[] = [];
     const results = await runSendsThenArchives<Audience, DispatchResult>({
       audiences: requested,
@@ -658,4 +672,4 @@ Deno.serve(async (req) => {
       status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
-});
+}

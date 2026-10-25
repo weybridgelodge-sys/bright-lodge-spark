@@ -9,6 +9,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { sendTransactionalEmail } from "../_shared/send-email.ts";
 import { loadLodgeSettings } from "../_shared/lodgeSettings.ts";
+import { loadCallerUnit, noCallerUnitMessage } from "../_shared/callerUnit.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -64,6 +65,8 @@ Deno.serve(async (req) => {
         return false;
       }
     })();
+    // Lodge: signed-in caller = own profile unit; service-role caller must name unit_id. Never a default.
+    let callerUnit = "";
     if (!isServiceRole) {
       const userClient = createClient(SUPABASE_URL, ANON, {
         global: { headers: { Authorization: authHeader } },
@@ -80,9 +83,12 @@ Deno.serve(async (req) => {
         ["admin", "secretary", "assistant_secretary"].includes(r.role)
       );
       if (!allowed) return json({ error: "Forbidden" }, 403);
+      callerUnit = await loadCallerUnit(admin, user.id);
     }
 
     const body = await req.json().catch(() => ({}));
+    if (isServiceRole) callerUnit = typeof body.unit_id === "string" ? body.unit_id.trim() : "";
+    if (!callerUnit) return json({ error: noCallerUnitMessage("send a summons") }, 403);
     const summons_id: string | undefined = body.summons_id;
     const test_recipient: string | undefined = body.test_recipient?.trim();
     const secretary_name_override: string | undefined = body.secretary_name;
@@ -119,7 +125,7 @@ Deno.serve(async (req) => {
     }
     // …but the link we send is branded on the Lodge's own domain. It resolves
     // to a freshly signed storage URL on click (summons-link function).
-    const lodge = await loadLodgeSettings();
+    const lodge = await loadLodgeSettings(callerUnit);
     const site = lodge.siteUrl;
     const pdfUrl = `${site}/summons/${summons.meeting_number}?k=${summons.id}`;
 
@@ -197,7 +203,7 @@ Deno.serve(async (req) => {
     let secretaryTitle = "";
     if (!secretary_name_override) {
       // Current Secretary = latest confirmed appointment in the officers' (Installation) year.
-      const { data: secId } = await admin.rpc("current_officer_holder", { _position_key: "secretary" });
+      const { data: secId } = await admin.rpc("current_officer_holder", { _position_key: "secretary", _unit: callerUnit });
       const appt = secId ? { member_id: secId as unknown as string } : null;
       if (appt?.member_id) {
         const { data: prof } = await admin
@@ -230,6 +236,7 @@ Deno.serve(async (req) => {
           : `summons-${summons.id}-${r.email}`;
       try {
         const res = await sendTransactionalEmail({
+          unitId: callerUnit,
           templateName: "summons-distribution",
           recipientEmail: r.email,
           idempotencyKey,
