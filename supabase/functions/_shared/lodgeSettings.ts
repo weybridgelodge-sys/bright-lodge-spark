@@ -31,7 +31,7 @@ export async function loadLodgeSettings(unitIdIn?: string): Promise<LodgeSetting
     const [{ data, error }, us, asst] = await Promise.all([
       db.from("lodge_contact_settings").select("*").eq("unit_id", unitId).maybeSingle(),
       db.from("unit_settings").select("key,value").eq("unit_id", unitId),
-      db.rpc("current_officer_holder", { _position_key: "assistant_secretary" }),
+      db.rpc("current_officer_holder", { _position_key: "assistant_secretary", _unit: unitId }),
     ]);
     // Lodge name/number, same sources as get_lodge_identity (no typed fallback).
     const [rule, tpl] = await Promise.all([

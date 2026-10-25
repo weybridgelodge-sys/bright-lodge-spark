@@ -69,12 +69,12 @@ function paymentStatusLabel(status?: string): string {
   }
 }
 
-async function lookupSecretarySignature(supabase: SupabaseClient) {
+async function lookupSecretarySignature(supabase: SupabaseClient, unitId?: string) {
   let secretaryName = ''
   let secretaryOffice = 'Lodge Secretary'
   try {
     // Secretary in post today (Installation year, carries forward).
-    const { data: holder } = await supabase.rpc('current_officer_holder', { _position_key: 'secretary' })
+    const { data: holder } = await supabase.rpc('current_officer_holder', { _position_key: 'secretary', ...(unitId ? { _unit: unitId } : {}) })
     const memberId = (holder as string | null) ?? null
     if (memberId) {
       const { data: prof } = await supabase
@@ -219,7 +219,7 @@ export async function sendBookingEmails(bookingId: string, opts: SendOpts) {
   const firstName = bookingFirstName(details, b.contact_name)
   const submittedAt = new Date(b.created_at).toLocaleString('en-GB', { timeZone: 'Europe/London' })
 
-  const { secretaryName, secretaryOffice } = await lookupSecretarySignature(supabase)
+  const { secretaryName, secretaryOffice } = await lookupSecretarySignature(supabase, (typeof b.unit_id === 'string' && b.unit_id.trim()) || undefined)
 
   // ── Ladies Festival branch (dedicated templates) ──────────────────────────
   if (isLadiesFestival) {
