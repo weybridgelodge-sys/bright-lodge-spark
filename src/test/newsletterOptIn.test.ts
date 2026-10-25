@@ -75,7 +75,8 @@ describe("newsletter confirm", () => {
   const deps = (found: SubscriberRow | null, confirmed: { id: string; email: string } | null) => ({
     findByTokenHash: vi.fn(async () => found),
     confirm: vi.fn(async () => confirmed),
-    sendWelcome: vi.fn(async () => {}),
+    sendWelcome: vi.fn(async (_e: string, _k: string, _u: string | null) => {}),
+    defer: vi.fn((_l: string, task: () => Promise<unknown>) => { void task(); }),
     log: vi.fn(),
   } satisfies ConfirmDeps);
   it("valid token confirms, burns and sends welcome once", async () => {
@@ -100,6 +101,50 @@ describe("newsletter confirm", () => {
     const d = deps(null, null);
     expect(await handleConfirm(d, "abc", NOW)).toBe("invalid");
     expect(d.findByTokenHash).not.toHaveBeenCalled();
+  });
+});
+
+describe("newsletter confirm replies first (Job BS)", () => {
+  const tok = "c".repeat(64);
+  const base = (send: () => Promise<void>) => {
+    const tasks: Promise<unknown>[] = [];
+    const d = {
+      findByTokenHash: vi.fn(async () => row({ confirm_sent_at: ago(D), unit_id: "unit-b" })),
+      confirm: vi.fn(async () => ({ id: "r1", email: "a@b.co", unit_id: "unit-b" })),
+      sendWelcome: vi.fn(async (_e: string, _k: string, _u: string | null) => send()),
+      defer: vi.fn((_l: string, t: () => Promise<unknown>) => { tasks.push(t()); }),
+      log: vi.fn(),
+    } satisfies ConfirmDeps;
+    return { d, tasks };
+  };
+  it("replies confirmed when the welcome send throws, and logs it", async () => {
+    const { d, tasks } = base(async () => { throw new Error("down"); });
+    expect(await handleConfirm(d, tok, NOW)).toBe("confirmed");
+    await Promise.all(tasks);
+    expect(d.log).toHaveBeenCalledWith("welcome email send failed", expect.any(Error));
+  });
+  it("replies confirmed when the welcome send never resolves; times out at 15s", async () => {
+    vi.useFakeTimers();
+    try {
+      const { d, tasks } = base(() => new Promise<void>(() => {}));
+      expect(await handleConfirm(d, tok, NOW)).toBe("confirmed");
+      expect(d.log).not.toHaveBeenCalled();
+      await vi.advanceTimersByTimeAsync(15_000);
+      await Promise.all(tasks);
+      expect(d.log).toHaveBeenCalledWith("welcome email send failed", expect.objectContaining({ message: expect.stringMatching(/timed out/) }));
+    } finally { vi.useRealTimers(); }
+  });
+  it("welcome uses the subscriber row's unit (two units)", async () => {
+    const { d, tasks } = base(async () => {});
+    await handleConfirm(d, tok, NOW);
+    await Promise.all(tasks);
+    expect(d.sendWelcome.mock.calls[0][2]).toBe("unit-b");
+  });
+  it("second click after confirm is still 'invalid' with no welcome", async () => {
+    const { d } = base(async () => {});
+    d.confirm.mockResolvedValueOnce(null as never);
+    expect(await handleConfirm(d, tok, NOW)).toBe("invalid");
+    expect(d.defer).not.toHaveBeenCalled();
   });
 });
 

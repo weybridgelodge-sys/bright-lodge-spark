@@ -17,6 +17,8 @@ export interface SendEmailPayload {
   /** Visible Cc addresses; used by lodge return emails (see _shared/returnFiling.ts). */
   cc?: string[]
   templateData?: Record<string, unknown>
+  /** Optional From display name (see transactional-email-templates/send-email.ts). */
+  fromName?: string
 }
 
 function logClient() {
@@ -58,6 +60,7 @@ export async function sendTransactionalEmail(
       idempotencyKey: payload.idempotencyKey,
       replyTo: payload.replyTo,
       cc: payload.cc,
+      fromName: payload.fromName,
     })
 
     if (result.sent) {

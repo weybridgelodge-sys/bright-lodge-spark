@@ -12,6 +12,8 @@ export interface SubscriberRow {
   unsubscribed_at: string | null;
   confirm_token_hash: string | null;
   confirm_sent_at: string | null;
+  /** Owning unit; drives which lodge's settings the welcome email uses. */
+  unit_id?: string | null;
 }
 
 export type SignupDecision = "insert_and_send" | "refresh_and_send" | "throttled" | "silent_already_subscribed";
@@ -85,17 +87,29 @@ export async function handleSignup(deps: SignupDeps, email: string, siteUrl: str
   return decision;
 }
 
+export const WELCOME_TIMEOUT_MS = 15_000; // hard cap on the background welcome send
+
+/** Rejects after ms; the timer is cleared either way so nothing leaks. */
+export function withTimeout<T>(p: Promise<T>, ms: number, label: string): Promise<T> {
+  let t: ReturnType<typeof setTimeout> | undefined;
+  const timer = new Promise<never>((_, rej) => { t = setTimeout(() => rej(new Error(`${label} timed out after ${ms}ms`)), ms); });
+  return Promise.race([p, timer]).finally(() => clearTimeout(t));
+}
+
 export interface ConfirmDeps {
   findByTokenHash(hash: string): Promise<SubscriberRow | null>;
-  /** Atomically confirm and burn the token; returns the row id or null if it was already used. */
-  confirm(id: string, hash: string, nowIso: string): Promise<{ id: string; email: string } | null>;
-  sendWelcome(email: string, idempotencyKey: string): Promise<void>;
+  /** Atomically confirm and burn the token; returns the row or null if it was already used. */
+  confirm(id: string, hash: string, nowIso: string): Promise<{ id: string; email: string; unit_id?: string | null } | null>;
+  sendWelcome(email: string, idempotencyKey: string, unitId: string | null): Promise<void>;
+  /** Runs work after the HTTP reply (afterReply.runAfterReply in the function). Must not throw. */
+  defer(label: string, task: () => Promise<unknown>): unknown;
   log(msg: string, err?: unknown): void;
 }
 
 export type ConfirmResult = "confirmed" | "expired" | "invalid";
 
-export async function handleConfirm(deps: ConfirmDeps, token: unknown, now = new Date()): Promise<ConfirmResult> {
+/** Replies as soon as the row is confirmed; the welcome email runs afterwards with a hard timeout. */
+export async function handleConfirm(deps: ConfirmDeps, token: unknown, now = new Date(), welcomeTimeoutMs = WELCOME_TIMEOUT_MS): Promise<ConfirmResult> {
   if (!isWellFormedToken(token)) return "invalid";
   const hash = await hashToken(token);
   const row = await deps.findByTokenHash(hash);
@@ -104,8 +118,14 @@ export async function handleConfirm(deps: ConfirmDeps, token: unknown, now = new
   if (!row) return "invalid";
   const done = await deps.confirm(row.id, hash, now.toISOString());
   if (!done) return "invalid";
-  try { await deps.sendWelcome(done.email, `newsletter-welcome-${done.id}-${hash.slice(0, 16)}`); }
-  catch (e) { deps.log("welcome email send failed", e); }
+  const unitId = done.unit_id ?? row.unit_id ?? null;
+  try {
+    deps.defer("newsletter welcome", async () => {
+      try {
+        await withTimeout(Promise.resolve().then(() => deps.sendWelcome(done.email, `newsletter-welcome-${done.id}-${hash.slice(0, 16)}`, unitId)), welcomeTimeoutMs, "welcome email");
+      } catch (e) { deps.log("welcome email send failed", e); }
+    });
+  } catch (e) { deps.log("welcome email could not be scheduled", e); }
   return "confirmed";
 }
 

@@ -1,7 +1,8 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { loadLodgeSettings } from "../_shared/lodgeSettings.ts";
 import { handleConfirm, welcomeSignOff, type SubscriberRow } from "../_shared/newsletterOptIn.ts";
-import { sendTemplateEmail } from "../_shared/transactional-email-templates/send-email.ts";
+import { sendTransactionalEmail } from "../_shared/send-email.ts";
+import { runAfterReply } from "../_shared/afterReply.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -12,7 +13,7 @@ const json = (b: unknown, status = 200) =>
   new Response(JSON.stringify(b), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
 const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
-const COLS = "id,email,confirmed,unsubscribed_at,confirm_token_hash,confirm_sent_at";
+const COLS = "id,email,confirmed,unsubscribed_at,confirm_token_hash,confirm_sent_at,unit_id";
 
 async function wmName(): Promise<string | null> {
   try {
@@ -45,14 +46,16 @@ Deno.serve(async (req) => {
         // Matching on the hash makes this single-use even if two clicks race.
         const { data, error } = await supabase.from("newsletter_subscribers")
           .update({ confirmed: true, confirmed_at: nowIso, unsubscribed_at: null, confirm_token_hash: null })
-          .eq("id", id).eq("confirm_token_hash", hash).select("id,email").maybeSingle();
+          .eq("id", id).eq("confirm_token_hash", hash).select("id,email,unit_id").maybeSingle();
         if (error) throw error;
-        return data as { id: string; email: string } | null;
+        return data as { id: string; email: string; unit_id: string | null } | null;
       },
-      async sendWelcome(to, idempotencyKey) {
-        const lodge = await loadLodgeSettings();
+      async sendWelcome(to, idempotencyKey, unitId) {
+        const lodge = await loadLodgeSettings(unitId ?? undefined);
         const sign = welcomeSignOff(await wmName(), lodge.formalSenderName);
-        await sendTemplateEmail("newsletter-welcome", to, {
+        const r = await sendTransactionalEmail({
+          templateName: "newsletter-welcome",
+          recipientEmail: to,
           templateData: {
             quizUrl: `${lodge.siteUrl}/quiz`,
             signOffName: sign.name,
@@ -67,7 +70,10 @@ Deno.serve(async (req) => {
           fromName: lodge.formalSenderName,
           replyTo: lodge.communicationsEmail,
         });
+        if (!r.ok) throw new Error(String(r.error ?? "send failed"));
       },
+      // Reply first; the welcome email finishes in the background (Job BS).
+      defer: runAfterReply,
       log: (m, e) => console.error(`newsletter-confirm: ${m}`, e instanceof Error ? e.message : e),
     }, (body as any)?.token);
     return json({ status: result });
