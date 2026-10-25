@@ -6,6 +6,7 @@ import { depositAllowed, depositLineName, planMethods, quoteBooking } from "../_
 import { eventLodgeOptions, matchLodgeOption } from "../_shared/eventLodges.ts";
 import { loadLodgeSettings } from "../_shared/lodgeSettings.ts";
 import { PHONE_REQUIRED_MESSAGE, isPlausiblePhone } from "../_shared/phone.ts";
+import { parseGuestRequests } from "../_shared/guestRequests.ts";
 import { eventsStripe, londonToday, sendEventBookingEmails, serviceClient } from "../_shared/stripe-events.ts";
 
 const GuestSchema = z.object({
@@ -32,6 +33,7 @@ const BodySchema = z.object({
   items: z.array(z.object({ item_id: z.string().uuid(), qty: z.number().int().min(0).max(500) })).max(100).optional(),
   origin: z.string().url(),
   website: z.string().max(0).optional().default(""), // honeypot
+  guest_requests: z.string().max(5000).nullable().optional(), // optional; older pages omit it. Never logged or sent to Stripe.
 });
 
 const json = (body: unknown, status = 200) =>
@@ -45,6 +47,8 @@ Deno.serve(async (req) => {
     if (!parsed.success) return json({ error: "Please check the form and try again.", details: parsed.error.flatten().fieldErrors }, 400);
     const input = parsed.data;
     if (!isPlausiblePhone(input.contact_phone)) return json({ error: PHONE_REQUIRED_MESSAGE }, 400);
+    const guestRequests = parseGuestRequests(input.guest_requests);
+    if (guestRequests.error) return json({ error: guestRequests.error }, 400);
     const party = input.adults + input.children;
     if (party < 1) return json({ error: "Please add at least one guest." }, 400);
     if (input.guests.length !== party) return json({ error: "Please give a name for every guest." }, 400);
@@ -121,6 +125,7 @@ Deno.serve(async (req) => {
         reference,
         contact_email: input.contact_email,
         contact_phone: input.contact_phone || null,
+        guest_requests: guestRequests.value,
         lodge_label: lodgeLabel,
         adult_count: input.adults,
         child_count: input.children,
@@ -236,7 +241,8 @@ Deno.serve(async (req) => {
     await sb.from("event_booking_payments").update({ stripe_session_id: session.id }).eq("id", payRow.id);
     return json({ reference: booking.reference, token: booking.access_token, url: session.url });
   } catch (e) {
-    console.error("create-event-checkout error", e);
+    // Code and message only: error details can echo the failing row (guest contact details and requests).
+    console.error("create-event-checkout error", (e as any)?.code ?? "", (e as any)?.message ?? String(e));
     return json({ error: "Sorry, we could not start your booking. Please try again or contact the Secretary." }, 500);
   }
 });

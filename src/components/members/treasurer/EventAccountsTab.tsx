@@ -15,6 +15,11 @@ import { saveJsPdf, saveText } from "@/lib/nativeDownload";
 import { Link } from "react-router-dom";
 import { eventActuals, eventTieOut, defaultTicketPlan, hasReceipts, receivedSplit } from "@/lib/treasurer/eventTieOut";
 import EventBalancesPanel from "@/components/members/treasurer/EventBalancesPanel";
+import { amountDue, lodgeDisplay, paidTicketTotal, pdfSafe, reportGroup, statusLabel } from "@/lib/treasurer/eventBookingReport";
+import { guestRequestsPreview } from "@/lib/guestRequests";
+import { unitTitle, useUnitProfile } from "@/lib/unitProfile";
+
+export const NO_COSTS_NOTE = "Income less fees so far; no costs have been posted yet.";
 
 const money = (pence: number) =>
   `${pence < 0 ? "-" : ""}£${(Math.abs(pence) / 100).toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -52,7 +57,7 @@ type Booking = {
   deposit_pence: number; deposit_paid: boolean; deposit_method: string | null;
   balance_pence: number; balance_paid: boolean; balance_method: string | null; notes: string | null;
   reference?: string | null; payment_method?: string | null; payment_status?: string | null; source?: string | null; created_at?: string | null;
-  contact_email?: string | null; lodge_label?: string | null;
+  contact_email?: string | null; lodge_label?: string | null; guest_requests?: string | null;
   subtotal_pence?: number | null; fee_pence?: number | null; total_pence?: number | null;
   stripe_payment_intent_id?: string | null; stripe_fee_pence?: number | null; stripe_other_fees_pence?: number | null;
   payment_plan?: string | null; amount_paid_pence?: number | null; balance_due_pence?: number | null; balance_due_date?: string | null;
@@ -169,6 +174,7 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
   useEffect(() => { loadEventData(eventId); }, [eventId, loadEventData]);
 
   const event = events.find((e) => e.id === eventId) ?? null;
+  const unit = useUnitProfile();
 
   // ─── Derived: catering rollup (always computed, never stored) ─────────────
   const rollup = useMemo(() => {
@@ -249,6 +255,11 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
 
   
   const actualExpenseTotal = budgetVsActual.expenseRows.reduce((s, r) => s + r.actual, 0) + budgetVsActual.unmatchedExpense.reduce((s, a) => s + a.pence, 0);
+  // Expense actual on the Stripe-fees system line(s); the PDF note shows when nothing else is posted.
+  const stripeFeeExpense = expenseLines.some((l) => l.system_key === "stripe_fees") ? bookingActuals.stripeFees * expenseLines.filter((l) => l.system_key === "stripe_fees").length : 0;
+  const noCostsYet = actualExpenseTotal - stripeFeeExpense === 0;
+  const owningLodge = unitTitle(unit);
+  const lodgeOf = (b: Booking) => lodgeDisplay(b.lodge_label, (event as any)?.hosting_lodges, owningLodge);
   const actualIncomeTotal = budgetVsActual.incomeRows.reduce((s, r) => s + r.actual, 0) + budgetVsActual.unmatchedIncome.reduce((s, a) => s + a.pence, 0);
 
   // ─── Derived: event reconciliation ────────────────────────────────────────
@@ -571,6 +582,13 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
       ...tableStyle,
     });
     y = (doc as any).lastAutoTable.finalY + 20;
+    if (noCostsYet) {
+      doc.setFont("helvetica", "italic");
+      doc.setFontSize(8);
+      doc.setTextColor(...MUTED);
+      doc.text(NO_COSTS_NOTE, margin, y - 8);
+      y += 8;
+    }
 
     const unmatched = [
       ...budgetVsActual.unmatchedIncome.map((a) => ({ ...a, kind: "Income" })),
@@ -593,27 +611,61 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
     }
 
 
+    // Paid group = money received; awaiting = no money yet (incl. unknown status); cancelled/expired are left out.
+    const now = Date.now();
+    const paidRows = bookings.filter((b) => reportGroup(b, now) === "paid");
+    const awaitingRows = bookings.filter((b) => reportGroup(b, now) === "awaiting");
+    const payerCell = (b: Booking) => {
+      const name = pdfSafe(b.payer_name + (b.is_placeholder ? " (names TBC)" : ""));
+      const req = guestRequestsPreview(b.guest_requests);
+      return req ? `${name}\nRequest: ${pdfSafe(req)}` : name;
+    };
     const _t3 = {
-      head: [["Payer", "Tickets", "Deposit", "Balance", "Received"]],
-      body: bookings.map((b) => [
-        b.payer_name + (b.is_placeholder ? " (names TBC)" : ""),
+      head: [["Payer", "Lodge", "Tickets", "Deposit", "Balance", "Received", "Status"]],
+      body: paidRows.length ? paidRows.map((b) => [
+        payerCell(b),
+        pdfSafe(lodgeOf(b)),
         String(b.ticket_count),
-        `${money(b.deposit_pence)}${b.deposit_paid ? " ✓" : ""}`,
-        `${money(b.balance_pence)}${b.balance_paid ? " ✓" : ""}`,
+        money(b.deposit_pence),
+        money(b.balance_pence),
         money((b.deposit_paid ? b.deposit_pence : 0) + (b.balance_paid ? b.balance_pence : 0)),
-      ]),
-      foot: [["Total", String(ticketTotal), "", "", money(expectedIncome)]],
+        statusLabel(b),
+      ]) : [["No paid bookings yet", "", "", "", "", "", ""]],
+      foot: [["Total", "", String(paidTicketTotal(bookings, now)), "", "", money(expectedIncome), ""]],
       margin: { top: margin, left: margin, right: margin, bottom: 60 },
-      styles: { font: "helvetica", fontSize: 9, cellPadding: 5, textColor: INK, lineColor: [220, 215, 200], lineWidth: 0.4 },
+      styles: { font: "helvetica", fontSize: 8, cellPadding: 4, textColor: INK, lineColor: [220, 215, 200], lineWidth: 0.4, overflow: "linebreak" },
       headStyles: { fillColor: GOLD, textColor: NAVY, fontStyle: "bold" },
       footStyles: { fillColor: [250, 247, 238], textColor: INK, fontStyle: "bold" },
       theme: "grid",
-      columnStyles: { 1: { halign: "right" }, 2: { halign: "right" }, 3: { halign: "right" }, 4: { halign: "right" } },
+      columnStyles: {
+        0: { cellWidth: 135 }, 1: { cellWidth: 95 }, 2: { halign: "right", cellWidth: 40 },
+        3: { halign: "right" }, 4: { halign: "right" }, 5: { halign: "right" }, 6: { cellWidth: 55 },
+      },
     };
     // Heading travels with its table (measured first).
     y = reportSection(doc, pageW, margin, y, "Bookings & reconciliation", measureTableHeight(doc, _t3));
     drawTracedTable(doc, { ..._t3, startY: y });
-    y = (doc as any).lastAutoTable.finalY + 20;
+    y = (doc as any).lastAutoTable.finalY + 14;
+    if (awaitingRows.length) {
+      autoTable(doc, {
+        startY: y,
+        head: [["Awaiting payment", "Tickets", "Amount due", "Status"]],
+        body: awaitingRows.map((b) => [payerCell(b), String(b.ticket_count), money(amountDue(b)), statusLabel(b)]),
+        margin: { top: margin, left: margin, right: margin, bottom: 60 },
+        styles: { font: "helvetica", fontSize: 8, cellPadding: 4, textColor: INK, lineColor: [220, 215, 200], lineWidth: 0.4, overflow: "linebreak" },
+        headStyles: { fillColor: [250, 247, 238], textColor: NAVY, fontStyle: "bold" },
+        theme: "grid",
+        columnStyles: { 0: { cellWidth: 230 }, 1: { halign: "right" }, 2: { halign: "right" } },
+      });
+      y = (doc as any).lastAutoTable.finalY + 6;
+      doc.setFont("helvetica", "italic");
+      doc.setFontSize(8);
+      doc.setTextColor(...MUTED);
+      doc.text("Not included in the ticket total or money received.", margin, y + 6);
+      y += 20;
+    } else {
+      y += 6;
+    }
     // Keep the closing tie-out lines together and clear of the footer.
     if (y + 50 > doc.internal.pageSize.getHeight() - 56) { doc.addPage(); y = margin; }
 
@@ -928,6 +980,7 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
                           {b.is_placeholder ? " · names TBC" : ""} · {bGuests.length} guest row{bGuests.length === 1 ? "" : "s"}
                         </span>
                         {b.reference && <span className="text-xs text-gold">{b.reference}</span>}
+                        {lodgeOf(b) && <span className="text-xs text-primary-foreground/80">{lodgeOf(b)}</span>}
                         {b.source === "public" && (
                           <span className="text-xs text-primary-foreground/80">
                             {b.payment_method?.replace(/_/g, " ")} · {b.payment_status === "paid" ? "paid" : b.payment_status === "deposit_paid" ? `deposit paid — ${money(b.balance_due_pence ?? 0)} due${b.balance_due_date ? ` by ${new Date(`${b.balance_due_date}T12:00:00`).toLocaleDateString("en-GB")}` : ""}` : b.payment_status === "refunded" ? "refunded" : (b.payment_status === "pending" && b.payment_method !== "bank_transfer" && b.created_at && Date.now() - new Date(b.created_at).getTime() > 30 * 60 * 1000) ? "EXPIRED — unpaid, seats released" : b.payment_status === "cancelled" ? "cancelled" : "pending payment"}
@@ -953,6 +1006,9 @@ export default function EventAccountsTab({ canEdit }: { canEdit: boolean }) {
                           </>
                         )}
                       </div>
+                      {b.guest_requests && (
+                        <p className="px-3 pb-2 text-xs text-primary-foreground/90 whitespace-pre-line break-words"><span className="font-semibold">Guest request:</span> {b.guest_requests}</p>
+                      )}
                       {open && (
                         <div className="border-t border-gold/10 px-3 py-2 space-y-2">
                           {b.notes && <p className="text-xs text-primary-foreground/80">{b.notes}</p>}

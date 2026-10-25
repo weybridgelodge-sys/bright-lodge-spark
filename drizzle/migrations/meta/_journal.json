@@ -1016,6 +1016,13 @@
       "when": 1792953405080,
       "tag": "0144_unit_domains",
       "breakpoints": true
+    },
+    {
+      "idx": 145,
+      "version": "7",
+      "when": 1792957414810,
+      "tag": "0145_event_bookings_guest_requests",
+      "breakpoints": true
     }
   ]
 }

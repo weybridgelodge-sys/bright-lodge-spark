@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { focusFirstError, invalidProps, validateEventForm } from "@/lib/formErrors";
 import { InlineFieldError } from "@/components/bookings/InlineFieldError";
+import { Textarea } from "@/components/ui/textarea";
+import { cleanGuestRequests, GUEST_REQUESTS_MAX } from "@/lib/guestRequests";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { ArrowRight, Calendar, Clock, MapPin, Star, Users } from "lucide-react";
 import Header from "@/components/Header";
@@ -57,6 +59,7 @@ export default function PublicEvent() {
   const [coverFee, setCoverFee] = useState(true);
   const [plan, setPlan] = useState<"full" | "deposit">("full");
   const [honeypot, setHoneypot] = useState("");
+  const [requests, setRequests] = useState("");
   const [courseSel, setCourseSel] = useState<Record<string, Record<string, string>>>({});
   const [itemQty, setItemQty] = useState<Record<string, number>>({});
   const [error, setError] = useState<string | null>(null);
@@ -112,7 +115,7 @@ export default function PublicEvent() {
     return [seo.jsonLd, breadcrumbSchema([{ name: "Home", url: "/" }, { name: "Events", url: "/events" }, { name: title, url: `/events/${ev.slug}` }])];
   }, [ev, seo, title]);
 
-  const fieldErrorsAll = validateEventForm({ name, email, phone, adultRows, childRows });
+  const fieldErrorsAll = validateEventForm({ name, email, phone, adultRows, childRows, guestRequests: requests });
   const fieldErrors = attempted ? fieldErrorsAll : fieldErrorsAll.filter((x) => x.id === "pev-phone" && phoneTouched);
 
   const submit = async (e: React.FormEvent) => {
@@ -142,7 +145,7 @@ export default function PublicEvent() {
     ];
     const items = Object.entries(itemQty).filter(([, q]) => q > 0).map(([item_id, qty]) => ({ item_id, qty }));
     const { data, error: fnErr } = await supabase.functions.invoke("create-event-checkout", {
-      body: { slug, contact_name: name.trim(), contact_email: email.trim(), contact_phone: phone.trim(), lodge_label: lodgeValue, adults, children, guests, payment_method: method, cover_fee: feeEnabled && coverFee, ...(items.length && { items }), ...(canDeposit && { plan: activePlan }), origin: window.location.origin, website: "" },
+      body: { slug, contact_name: name.trim(), contact_email: email.trim(), contact_phone: phone.trim(), lodge_label: lodgeValue, adults, children, guests, payment_method: method, cover_fee: feeEnabled && coverFee, ...(items.length && { items }), ...(cleanGuestRequests(requests) && { guest_requests: cleanGuestRequests(requests) }), ...(canDeposit && { plan: activePlan }), origin: window.location.origin, website: "" },
     });
     if (fnErr || data?.error) {
       setError(await readFunctionError(fnErr, data, "Sorry, we could not start your booking."));
@@ -325,6 +328,15 @@ export default function PublicEvent() {
                           value={courseSel[k] ?? {}} onChange={(v) => setCourseSel((s) => ({ ...s, [k]: v }))} />;
                       } })} />
                   )}
+
+                  <div>
+                    <label htmlFor="pev-requests" className={labelClass}>Seating requests or anything we should know</label>
+                    <Textarea id="pev-requests" className="font-sans min-h-[88px] autofill-light" maxLength={GUEST_REQUESTS_MAX} placeholder="e.g. please seat us with Fred and Jill"
+                      {...invalidProps(fieldErrors, "pev-requests")} aria-describedby={["pev-requests-count", invalidProps(fieldErrors, "pev-requests")["aria-describedby"]].filter(Boolean).join(" ")}
+                      value={requests} onChange={(e) => setRequests(e.target.value.slice(0, GUEST_REQUESTS_MAX))} />
+                    <p id="pev-requests-count" className="mt-1 text-right text-sm text-muted-foreground" aria-live="polite">{requests.length} / {GUEST_REQUESTS_MAX}</p>
+                    <InlineFieldError errors={fieldErrors} id="pev-requests" />
+                  </div>
 
                   {content && mods.catalogue && showSection("drinks") && <CatalogueSteppers content={content} qty={itemQty} onChange={setItemQty} />}
 

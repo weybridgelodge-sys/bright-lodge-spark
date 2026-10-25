@@ -11,7 +11,7 @@ Deno.serve(async (req) => {
   if (!p.success) return json({ error: "Invalid request" }, 400);
   const sb = serviceClient();
   const { data: b } = await sb.from("event_bookings")
-    .select("reference,payer_name,adult_count,child_count,subtotal_pence,fee_pence,total_pence,payment_method,payment_status,bank_instructions,event_id,id,items_subtotal_pence,payment_plan,amount_paid_pence,balance_due_pence,balance_due_date")
+    .select("reference,payer_name,adult_count,child_count,subtotal_pence,fee_pence,total_pence,payment_method,payment_status,bank_instructions,event_id,id,items_subtotal_pence,payment_plan,amount_paid_pence,balance_due_pence,balance_due_date,guest_requests")
     .eq("reference", p.data.reference).eq("access_token", p.data.token).maybeSingle();
   if (!b) return json({ error: "Booking not found" }, 404);
   const [{ data: items }, { data: guests }] = await Promise.all([
@@ -28,6 +28,7 @@ Deno.serve(async (req) => {
     bank: confirmed ? null : b.bank_instructions,
     payment_plan: b.payment_plan, amount_paid_pence: b.amount_paid_pence ?? 0,
     balance_due_pence: b.payment_plan === "deposit" ? (b.balance_due_pence ?? 0) : 0, balance_due_date: b.balance_due_date,
+    guest_requests: b.guest_requests ?? null,
     balance_url: tok?.token ? await balanceUrl(tok.token) : null,
   });
 });

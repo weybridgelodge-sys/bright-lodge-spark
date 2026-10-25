@@ -1,0 +1,3 @@
+ALTER TABLE public.event_bookings ADD COLUMN IF NOT EXISTS guest_requests text NULL;
+ALTER TABLE public.event_bookings ADD CONSTRAINT event_bookings_guest_requests_len CHECK (guest_requests IS NULL OR char_length(guest_requests) <= 300);
+COMMENT ON COLUMN public.event_bookings.guest_requests IS 'Guest-entered seating/other requests from the public booking form (max 300). Separate from treasurer-only notes.';
