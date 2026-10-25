@@ -1,4 +1,5 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { insertOnce } from "../_shared/insertOnce.ts";
 import { type StripeEnv, verifyWebhook } from "../_shared/stripe.ts";
 import { markBookingPaid } from "../_shared/markBookingPaid.ts";
 
@@ -156,7 +157,7 @@ async function handleDuesChargeRefunded(charge: any, _env: StripeEnv) {
     let sub: { id: string; member_id: string; method: string } | null = null;
     if (charge.payment_intent) sub = await findDuesSubscriptionByPI(charge.payment_intent);
     if (!sub) continue;
-    await getSupabase().from("dues_payments").upsert(
+    await insertOnce(`dues refund ${r.id}`, () => getSupabase().from("dues_payments").insert(
       {
         subscription_id: sub.id,
         member_id: sub.member_id,
@@ -170,8 +171,7 @@ async function handleDuesChargeRefunded(charge: any, _env: StripeEnv) {
         note: r.reason ?? "Refund",
         occurred_at: new Date((r.created ?? Date.now() / 1000) * 1000).toISOString(),
       },
-      { onConflict: "stripe_refund_id" },
-    );
+    ));
   }
 }
 
@@ -234,7 +234,7 @@ async function handleBookingChargeRefunded(charge: any, env: StripeEnv) {
     const periodId = await periodIdForDate(today);
     const label = `Refund — ${b.contact_name ?? "Unknown"} — ${b.event_label ?? "Dining"}`;
 
-    const { data: entry, error: entryErr } = await getSupabase()
+    const posted = await insertOnce(`booking refund ${b.id}`, () => getSupabase()
       .from("journal_entries")
       .insert({
         entry_date: today,
@@ -245,8 +245,9 @@ async function handleBookingChargeRefunded(charge: any, env: StripeEnv) {
         created_by: null,
       })
       .select("id")
-      .single();
-    if (entryErr) throw entryErr;
+      .single());
+    if (posted.status === "already_posted") return;
+    const entry = posted.data as { id: string };
 
     const lines: any[] = [
       { entry_id: entry.id, account_id: diningIncome, debit_pence: drSub, credit_pence: 0, description: label },
@@ -338,7 +339,7 @@ async function handlePayoutPaid(payout: any, env: StripeEnv) {
 
     const periodId = await periodIdForDate(arrivalDate);
 
-    const { data: entry, error: entryErr } = await getSupabase()
+    const posted = await insertOnce(`booking refund ${b.id}`, () => getSupabase()
       .from("journal_entries")
       .insert({
         entry_date: arrivalDate,
