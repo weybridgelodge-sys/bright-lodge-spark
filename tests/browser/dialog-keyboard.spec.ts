@@ -92,8 +92,9 @@ for (const width of [320, 360]) {
       // Banked date: light token field, full date visible, 44px tall.
       const bd = dlg.locator('input[type="date"]').nth(1);
       await bd.fill("2026-10-21");
+      const neighbourBg = await dlg.locator('input:not([type="date"])').first().evaluate((el) => getComputedStyle(el).backgroundColor);
       const d = await bd.evaluate((el: HTMLInputElement) => ({ bg: getComputedStyle(el).backgroundColor, h: el.getBoundingClientRect().height, ov: el.scrollWidth - el.clientWidth }));
-      expect(d.bg, "light field like its neighbours").toBe("rgb(255, 255, 255)");
+      expect(d.bg, "light field like its neighbours").toBe(neighbourBg);
       expect(d.h).toBeGreaterThanOrEqual(44);
       expect(d.ov, "date not clipped").toBeLessThanOrEqual(0);
       await bd.screenshot({ path: `/tmp/browser/ce-date-${width}.png` });

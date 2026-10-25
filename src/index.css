@@ -362,9 +362,13 @@ select.autofilled-dark:not(.autofill-light) {
   }
   /* While a field is focused, leave room below the last field and Save so they can be
      scrolled above a keyboard that covers the box (--app-kb = 0 when keyboard is closed). */
-  .vv-dialog:focus-within,
-  .vv-sheet-side:focus-within {
-    padding-bottom: calc(1.5rem + var(--app-kb, 0px)) !important;
+  .vv-dialog:focus-within::after,
+  .vv-sheet-side:focus-within::after {
+    content: "";
+    display: block;
+    flex-shrink: 0;
+    height: var(--app-kb, 0px);
+    pointer-events: none;
   }
   /* Date/time controls in half-width columns: keep the full value visible at 320px. */
   input[type="date"], input[type="time"], input[type="datetime-local"], input[type="month"], input[type="week"] {
