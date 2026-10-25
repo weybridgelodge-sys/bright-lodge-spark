@@ -141,7 +141,7 @@ function MeetingPanel({
       collected,
       byMethod: [...byMethod.entries()].sort((a, b) => b[1].count - a[1].count),
     };
-  }, [rows]);
+  }, [rows, unit]);
 
   // ── Stripe side: actual charged / fees / net from the bookings ledger ──
   const stripeSummary = useMemo(() => {
