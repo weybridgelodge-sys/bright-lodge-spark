@@ -73,7 +73,7 @@ describe("JOB DF member calendar meetings", () => {
 
 // JOB DG: a meeting with no linked event gets a readable title from its type.
 const meetingOnly = (type: string | null) =>
-  vevents(buildFeed(scopeRows({ ...empty, meetings: [m("g1", "2027-03-10", type ?? "", "published", "k-g1", "u1")] }, "u1", false), LODGE, NOW))[0];
+  vevents(buildFeed(scopeRows({ ...empty, events: [], meetings: [m("g1", "2027-03-10", type ?? "", "published", "k-g1", "u1")] }, "u1", false), LODGE, NOW))[0];
 
 describe("JOB DG meeting-only titles", () => {
   it("regular, installation and dispensation map to readable titles", () => {
