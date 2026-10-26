@@ -1757,6 +1757,7 @@ export type Database = {
           ticket_count: number
           tickets_subtotal_pence: number | null
           total_pence: number | null
+          unit_id: string | null
           updated_at: string
         }
         Insert: {
@@ -1805,6 +1806,7 @@ export type Database = {
           ticket_count?: number
           tickets_subtotal_pence?: number | null
           total_pence?: number | null
+          unit_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -1853,6 +1855,7 @@ export type Database = {
           ticket_count?: number
           tickets_subtotal_pence?: number | null
           total_pence?: number | null
+          unit_id?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -1882,6 +1885,13 @@ export type Database = {
             columns: ["member_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_bookings_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "units"
             referencedColumns: ["id"]
           },
         ]
@@ -4926,6 +4936,7 @@ export type Database = {
           override_by: string | null
           override_reason: string | null
           position_key: string
+          unit_id: string | null
           updated_at: string
         }
         Insert: {
@@ -4939,6 +4950,7 @@ export type Database = {
           override_by?: string | null
           override_reason?: string | null
           position_key: string
+          unit_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -4952,6 +4964,7 @@ export type Database = {
           override_by?: string | null
           override_reason?: string | null
           position_key?: string
+          unit_id?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -4989,6 +5002,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "officer_positions"
             referencedColumns: ["key"]
+          },
+          {
+            foreignKeyName: "officer_appointments_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "units"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -6744,6 +6764,7 @@ export type Database = {
           lodge_number: string | null
           name: string | null
           opted_out_at: string | null
+          unit_id: string | null
           unsubscribe_token: string
           updated_at: string
         }
@@ -6757,6 +6778,7 @@ export type Database = {
           lodge_number?: string | null
           name?: string | null
           opted_out_at?: string | null
+          unit_id?: string | null
           unsubscribe_token?: string
           updated_at?: string
         }
@@ -6770,10 +6792,19 @@ export type Database = {
           lodge_number?: string | null
           name?: string | null
           opted_out_at?: string | null
+          unit_id?: string | null
           unsubscribe_token?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "visitor_contacts_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "units"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       welfare_absences: {
         Row: {
