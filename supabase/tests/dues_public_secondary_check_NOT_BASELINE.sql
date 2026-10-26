@@ -1,3 +1,4 @@
+-- SECONDARY CHECK ONLY, NOT A BASELINE: includes time-dependent fields. The dues/public baseline is dues_public_fingerprint.sql (a913a47c30b1ee10b37e7d3b444a74b7, 58 lines).
 -- JOB CS: dues/public fingerprint (reconstructed; the CQ-era script was never saved, so this
 -- is a NEW baseline, not comparable to a913a47c...). Read-only; ends with RAISE.
 -- Covers: dues_calculate_amount for every profile for lodge years 2024-2027,
