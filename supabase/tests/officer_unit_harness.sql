@@ -8,6 +8,7 @@ DECLARE
   d date := DATE '2026-10-26';
   wm uuid; sec uuid; tre uuid; alm uuid; x uuid; blank_user uuid; ap record; acc uuid;
   m1 uuid; m3 uuid; b record; ok boolean; out text := ''; fails int := 0;
+  top_role text := current_user; -- the harness's own role, read at start; checks switch back to this
 BEGIN
   IF (SELECT count(*) FROM public.units) <> 1 THEN RAISE EXCEPTION 'harness expects exactly one real lodge'; END IF;
   wm  := public.current_officer_holder('worshipful_master', d, u);
@@ -78,7 +79,7 @@ BEGIN
   PERFORM set_config('request.jwt.claims', '', true);
 
   -- 7 (Job CS). plain own-lodge member (no admin/Secretary/WM role) cannot insert, update or delete appointments
-  DECLARE plain uuid; n int; ins_ok boolean := false; tgt uuid; before_member uuid; orig_role text := current_user;
+  DECLARE plain uuid; n int; ins_ok boolean := false; tgt uuid; before_member uuid; orig_role text := top_role;
   BEGIN
     SELECT p.id INTO plain FROM public.profiles p WHERE p.status = 'active' AND p.unit_id = u
        AND NOT EXISTS (SELECT 1 FROM public.user_roles r WHERE r.user_id = p.id AND r.role IN ('admin','secretary','worshipful_master'))
@@ -131,7 +132,7 @@ BEGIN
   out := out || CASE WHEN ok THEN 'PASS' ELSE 'FAIL' END || ' CP: booking corrected to the account''s lodge (insert, update, service role)' || E'\n'; fails := fails + (NOT ok)::int;
 
   -- 8 (Job CS / 0166). officer_positions lodge rules
-  DECLARE orig_role text := current_user; n int; nb int; ins_ok boolean := false; newrow record; plain2 uuid;
+  DECLARE orig_role text := top_role; n int; nb int; ins_ok boolean := false; newrow record; plain2 uuid;
   BEGIN
     -- a lodge-B representative post (made as the session role, which bypasses the access rules)
     INSERT INTO public.officer_positions (key, label, order_index, category, unit_id) VALUES ('rep_cs_lodge_b', 'CS Lodge B Rep', 300, 'representative', u2);
