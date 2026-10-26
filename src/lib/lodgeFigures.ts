@@ -118,6 +118,17 @@ export const heroAgeClause = (f: Pick<LodgeFigures, "youngestAge" | "oldestAge">
   return r ? ` — aged ${r} —` : "";
 };
 
+/** Figures plus whether the shared request has settled (Hero reserves space until then). */
+export function useLodgeFiguresState(): { figures: LodgeFigures; settled: boolean } {
+  const [s, setS] = useState({ figures: BLANK_FIGURES, settled: false });
+  useEffect(() => {
+    let on = true;
+    sharedLodgeFigures().then((x) => { if (on) setS({ figures: x, settled: true }); }, () => { if (on) setS({ figures: BLANK_FIGURES, settled: true }); });
+    return () => { on = false; };
+  }, []);
+  return s;
+}
+
 export function useLodgeFigures(): LodgeFigures {
   const [f, setF] = useState<LodgeFigures>(BLANK_FIGURES);
   useEffect(() => {

@@ -78,7 +78,7 @@ describe("live age range", () => {
   });
   it("no hard-coded 83 range in the three files", () => {
     for (const f of ["src/components/Hero.tsx", "src/pages/JoinUs.tsx", "src/pages/FAQ.tsx", "index.html"]) {
-      expect(readFileSync(f, "utf8")).not.toMatch(/18 to 83|18 and 83|\b83\b/);
+      expect(readFileSync(f, "utf8").replace(/00 to 00/g, "")).not.toMatch(/18 to 83|18 and 83|\b83\b/);
     }
   });
 });

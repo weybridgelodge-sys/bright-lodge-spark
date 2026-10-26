@@ -37,6 +37,8 @@ for (const ok of [true, false]) {
     expect(ld).toContain(ans);
     if (!ok) expect(ld).not.toContain("range in age");
     expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await page.waitForTimeout(1500); // let scroll-in fades finish before the contrast scan
     await expectNoAxeViolations(page, "FAQ");
   });
 }
@@ -56,5 +58,6 @@ for (const w of [320, 1280]) {
     await expect(lede).toContainText("aged from 32 to 82");
     const after = (await lede.boundingBox())!.height;
     console.log(`DE hero lede ${w}px: before=${before} after=${after}`);
+    expect(after).toBe(before);
   });
 }
