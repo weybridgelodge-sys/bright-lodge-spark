@@ -26,15 +26,19 @@ import {
   link,
   main,
   text,
+  type BrandIdentity,
 } from './_layout.tsx'
 
 interface InviteEmailProps {
+  /** Lodge identity for this render only (JOB CJ); omitted = text-only header. */
+  brand?: BrandIdentity | null
   siteName: string
   siteUrl: string
   confirmationUrl: string
 }
 
 export const InviteEmail = ({
+  brand,
   siteName,
   siteUrl,
   confirmationUrl,
@@ -44,7 +48,7 @@ export const InviteEmail = ({
     <Preview>You've been invited to join {siteName}</Preview>
     <Body style={main}>
       <Container style={container}>
-        <BrandHeader />
+        <BrandHeader brand={brand} />
         <Heading style={h1}>You have been invited</Heading>
         <Text style={text}>
           You have been invited to join the{' '}
@@ -64,7 +68,7 @@ export const InviteEmail = ({
           If you weren't expecting this invitation, you can safely ignore this
           email.
         </Text>
-        <BrandFooter />
+        <BrandFooter brand={brand} />
       </Container>
     </Body>
   </Html>

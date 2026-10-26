@@ -23,9 +23,12 @@ import {
   hr,
   main,
   text,
+  type BrandIdentity,
 } from './_layout.tsx'
 
 interface ReauthenticationEmailProps {
+  /** Lodge identity for this render only (JOB CJ); omitted = text-only header. */
+  brand?: BrandIdentity | null
   token: string
   siteName?: string
 }
@@ -36,7 +39,7 @@ export const ReauthenticationEmail = ({ token, siteName = 'Members Portal' }: Re
     <Preview>Your {siteName} verification code</Preview>
     <Body style={main}>
       <Container style={container}>
-        <BrandHeader />
+        <BrandHeader brand={brand} />
         <Heading style={h1}>Confirm your identity</Heading>
         <Text style={text}>Use the code below to confirm your identity:</Text>
         <Section style={codeWrap}>
@@ -51,7 +54,7 @@ export const ReauthenticationEmail = ({ token, siteName = 'Members Portal' }: Re
           This code expires shortly. If you didn't request it, you can safely
           ignore this email.
         </Text>
-        <BrandFooter />
+        <BrandFooter brand={brand} />
       </Container>
     </Body>
   </Html>

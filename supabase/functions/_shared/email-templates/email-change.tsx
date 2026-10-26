@@ -24,9 +24,12 @@ import {
   hr,
   main,
   text,
+  type BrandIdentity,
 } from './_layout.tsx'
 
 interface EmailChangeEmailProps {
+  /** Lodge identity for this render only (JOB CJ); omitted = text-only header. */
+  brand?: BrandIdentity | null
   siteName: string
   // oldEmail is the user's current address (HookData.OldEmail). For the
   // NEW-recipient half of a secure email_change fanout, `email` equals the
@@ -39,6 +42,7 @@ interface EmailChangeEmailProps {
 }
 
 export const EmailChangeEmail = ({
+  brand,
   siteName,
   oldEmail,
   newEmail,
@@ -49,7 +53,7 @@ export const EmailChangeEmail = ({
     <Preview>Confirm your email change for {siteName}</Preview>
     <Body style={main}>
       <Container style={container}>
-        <BrandHeader />
+        <BrandHeader brand={brand} />
         <Heading style={h1}>Confirm your email change</Heading>
         <Text style={text}>
           You requested to change the email address on your {siteName} account
@@ -68,7 +72,7 @@ export const EmailChangeEmail = ({
           If you didn't request this change, please contact the Lodge Secretary
           and secure your account immediately.
         </Text>
-        <BrandFooter />
+        <BrandFooter brand={brand} />
       </Container>
     </Body>
   </Html>
