@@ -190,8 +190,11 @@ BEGIN
     SELECT r.user_id INTO adm FROM public.user_roles r JOIN public.profiles p ON p.id = r.user_id
      WHERE r.role = 'admin' AND p.unit_id = u ORDER BY r.user_id LIMIT 1;
     -- lodge B rows, made as the harness role
+    -- event_accounts take their lodge from the creator's profile (event_accounts_host_unit), so make it as a lodge B member
+    PERFORM set_config('request.jwt.claims', json_build_object('sub', x, 'role', 'authenticated')::text, true);
     INSERT INTO public.event_accounts SELECT * FROM jsonb_populate_record(NULL::public.event_accounts,
       (SELECT to_jsonb(e) || jsonb_build_object('id', gen_random_uuid(), 'unit_id', u2) FROM public.event_accounts e WHERE e.id = acc)) RETURNING id INTO accb;
+    PERFORM set_config('request.jwt.claims', '', true);
     INSERT INTO public.visitor_contacts (email, unit_id) VALUES ('cu.lodgeb@example.invalid', u2) RETURNING id INTO vcb;
     INSERT INTO public.event_bookings (event_id, payer_name) VALUES (accb, 'Cu Lodge B') RETURNING id INTO bkb;
     PERFORM set_config('request.jwt.claims', json_build_object('sub', adm, 'role', 'authenticated')::text, true);
@@ -218,11 +221,13 @@ BEGIN
     ins_ok := false; BEGIN INSERT INTO public.event_bookings (event_id, payer_name) VALUES (accb, 'Cu Into B');
     EXCEPTION WHEN insufficient_privilege THEN ins_ok := true; END;
     out := out || CASE WHEN ins_ok THEN 'PASS' ELSE 'FAIL' END || ' CU event_bookings: insert into lodge B refused' || E'\n'; fails := fails + (NOT ins_ok)::int;
+    -- the host-lodge trigger rewrites unit_id to the caller's lodge, so a "lodge B" insert lands in lodge A (or is refused)
     ins_ok := false; BEGIN
       INSERT INTO public.event_accounts SELECT * FROM jsonb_populate_record(NULL::public.event_accounts,
-        (SELECT to_jsonb(e) || jsonb_build_object('id', gen_random_uuid(), 'unit_id', u2) FROM public.event_accounts e WHERE e.id = acc));
+        (SELECT to_jsonb(e) || jsonb_build_object('id', gen_random_uuid(), 'unit_id', u2) FROM public.event_accounts e WHERE e.id = acc)) RETURNING unit_id INTO err;
+      ins_ok := err = u;
     EXCEPTION WHEN insufficient_privilege THEN ins_ok := true; END;
-    out := out || CASE WHEN ins_ok THEN 'PASS' ELSE 'FAIL' END || ' CU event_accounts: insert into lodge B refused' || E'\n'; fails := fails + (NOT ins_ok)::int;
+    out := out || CASE WHEN ins_ok THEN 'PASS' ELSE 'FAIL' END || ' CU event_accounts: cannot create a lodge B account (lands in own lodge)' || E'\n'; fails := fails + (NOT ins_ok)::int;
     -- own lodge: insert, update, delete allowed
     FOREACH tname IN ARRAY ARRAY['visitor_contacts','event_bookings','event_accounts'] LOOP
       BEGIN
