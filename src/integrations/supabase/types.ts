@@ -7916,6 +7916,7 @@ export type Database = {
       }
       meeting_dependencies: { Args: { _meeting_id: string }; Returns: Json }
       member_unit_id: { Args: { _user: string }; Returns: string }
+      my_unit: { Args: never; Returns: string }
       officer_appointment_effective: {
         Args: {
           _appointed_on: string
