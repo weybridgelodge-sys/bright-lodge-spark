@@ -1289,6 +1289,13 @@
       "when": 1793029540875,
       "tag": "0183_jobdb5_meeting_series_my_unit",
       "breakpoints": true
+    },
+    {
+      "idx": 184,
+      "version": "7",
+      "when": 1793029579200,
+      "tag": "0184_jobdb5_member_status_history_my_unit",
+      "breakpoints": true
     }
   ]
 }
