@@ -387,7 +387,7 @@ function Inner() {
                   }));
                 }}
               >
-                <SelectTrigger className="bg-navy border-gold/20 text-primary-foreground"><SelectValue /></SelectTrigger>
+                <SelectTrigger aria-label="Return type" className="bg-navy border-gold/20 text-primary-foreground"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   {(Object.keys(TYPE_LABELS) as ReturnType[]).map((t) => (
                     <SelectItem key={t} value={t}>{TYPE_LABELS[t]}</SelectItem>
