@@ -7,10 +7,12 @@ import heroJpg from "@/assets/hero-lodge.optimized.jpg.asset.json";
 import logoAsset from "@/assets/weybridge-crest-500.webp.asset.json";
 import logoSmallAsset from "@/assets/weybridge-crest-300.webp.asset.json";
 import { assetUrl } from "@/lib/assetUrl";
+import { useLodgeFigures, heroAgeClause } from "@/lib/lodgeFigures";
 const logo = assetUrl(logoAsset);
 const logoSmall = assetUrl(logoSmallAsset);
 
 const Hero = () => {
+  const ageClause = heroAgeClause(useLodgeFigures());
   return (
     <section className="relative min-h-screen flex items-center justify-start overflow-hidden">
       <picture>
@@ -58,7 +60,7 @@ const Hero = () => {
             </p>
 
             <p className="text-lg md:text-xl text-warm-white/80 font-sans font-light leading-relaxed mb-10 max-w-xl">
-              Weybridge Lodge No. 6787 is a friendly Masonic Lodge in Surrey, a group of men in Guildford — aged 18 to 83 — who meet to make genuine friendships, support local charities, and grow as people. New members are always welcome.
+              Weybridge Lodge No. 6787 is a friendly Masonic Lodge in Surrey, a group of men in Guildford{ageClause} who meet to make genuine friendships, support local charities, and grow as people. New members are always welcome.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <Link
