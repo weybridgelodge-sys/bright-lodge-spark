@@ -72,8 +72,10 @@ export async function unitMemberEmail(db: Db, memberId: string | null, unitId: s
 export async function unitRoleHolder(db: Db, role: string, unitId: string): Promise<{ id: string; email: string } | null> {
   const { data: rows } = await db.from("user_roles").select("user_id").eq("role", role);
   for (const r of (rows ?? []) as { user_id: string }[]) {
-    const email = await unitMemberEmail(db, r.user_id, unitId);
-    if (email) return { id: r.user_id, email };
+    const { data: p } = await db.from("profiles").select("email,unit_id").eq("id", r.user_id).maybeSingle();
+    if (!p || recordUnit(p.unit_id) !== unitId) continue;
+    // First in-unit holder decides, as the old limit(1) did; no email = no recipient.
+    return p.email ? { id: r.user_id, email: p.email } : null;
   }
   return null;
 }
