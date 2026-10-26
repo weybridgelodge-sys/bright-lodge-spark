@@ -1,4 +1,3 @@
--- 0189 check: bank_details visible only to Unit Setup roles + current Treasurer. Rolled back (ends with RAISE EXCEPTION).
 DO $$
 DECLARE
   m uuid; home text; other_n int; total int; out text := ''; pass int := 0; fail int := 0;
