@@ -1303,6 +1303,27 @@
       "when": 1793029610148,
       "tag": "0185_jobdb5_officer_installation_dates_my_unit",
       "breakpoints": true
+    },
+    {
+      "idx": 186,
+      "version": "7",
+      "when": 1793030577969,
+      "tag": "0186_jobdb5_installation_dates_read_own_unit",
+      "breakpoints": true
+    },
+    {
+      "idx": 187,
+      "version": "7",
+      "when": 1793030629053,
+      "tag": "0187_jobdb5_unit_settings_my_unit",
+      "breakpoints": true
+    },
+    {
+      "idx": 188,
+      "version": "7",
+      "when": 1793030660113,
+      "tag": "0188_jobdb5_unit_settings_audit_my_unit",
+      "breakpoints": true
     }
   ]
 }

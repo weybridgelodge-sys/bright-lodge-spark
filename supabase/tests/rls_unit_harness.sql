@@ -7,7 +7,8 @@ DO $$
 DECLARE
   admin_u text := 'de693c92-6f3d-49b6-afc3-406fc4c0acd9';
   member_u text := '40192a1a-1990-48a5-b360-f67ce5c965d8';
-  tabs text[] := ARRAY['secretary_returns'];
+  tabs text[] := ARRAY['secretary_returns','installation_rule_settings','meeting_diary_audit','meeting_series','member_status_history','unit_settings_audit'];
+  -- officer_installation_dates and unit_settings have no id column: covered by jobdb5_check.sql.
   t text; n int; n2 int; out text := ''; rowj jsonb; vid text; ok boolean;
 BEGIN
   INSERT INTO public.units(id, name) VALUES ('zz_harness', 'Harness Lodge') ON CONFLICT DO NOTHING;
@@ -28,8 +29,8 @@ BEGIN
       EXECUTE format('SELECT count(*) FROM public.%I', t) INTO n2;
       out := out || ' afterOtherLodge=' || n2 || CASE WHEN n2 = n-1 THEN ' OK' ELSE ' FAIL' END;
       -- 3. update of other-lodge row affects 0 rows
-      EXECUTE format('UPDATE public.%I SET unit_id = unit_id WHERE id::text = %L', t, vid);
-      GET DIAGNOSTICS n2 = ROW_COUNT;
+      BEGIN EXECUTE format('UPDATE public.%I SET unit_id = unit_id WHERE id::text = %L', t, vid);
+      GET DIAGNOSTICS n2 = ROW_COUNT; EXCEPTION WHEN insufficient_privilege THEN n2 := 0; END;
       out := out || ' otherUpdate=' || n2 || CASE WHEN n2 = 0 THEN ' OK' ELSE ' FAIL' END;
       EXECUTE 'RESET ROLE';
       EXECUTE format('UPDATE public.%I SET unit_id = %L WHERE id::text = %L', t, 'weybridge', vid);
@@ -37,7 +38,8 @@ BEGIN
       EXECUTE 'SET LOCAL ROLE authenticated';
       BEGIN
         EXECUTE format('UPDATE public.%I SET unit_id = %L WHERE id::text = %L', t, 'zz_harness', vid);
-        out := out || ' move=ALLOWED FAIL';
+        GET DIAGNOSTICS n2 = ROW_COUNT;
+        out := out || CASE WHEN n2 = 0 THEN ' move=0rows OK' ELSE ' move=ALLOWED FAIL' END;
       EXCEPTION WHEN insufficient_privilege THEN out := out || ' move=refused OK';
       END;
       -- 5. insert into other lodge refused
