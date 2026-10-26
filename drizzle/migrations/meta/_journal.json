@@ -1268,6 +1268,41 @@
       "when": 1793028087566,
       "tag": "0180_jobdb4_unit_defaults_to_fill_trigger",
       "breakpoints": true
+    },
+    {
+      "idx": 181,
+      "version": "7",
+      "when": 1793029436424,
+      "tag": "0181_jobdb5_installation_rule_settings_my_unit",
+      "breakpoints": true
+    },
+    {
+      "idx": 182,
+      "version": "7",
+      "when": 1793029503820,
+      "tag": "0182_jobdb5_meeting_diary_audit_my_unit",
+      "breakpoints": true
+    },
+    {
+      "idx": 183,
+      "version": "7",
+      "when": 1793029540875,
+      "tag": "0183_jobdb5_meeting_series_my_unit",
+      "breakpoints": true
+    },
+    {
+      "idx": 184,
+      "version": "7",
+      "when": 1793029579200,
+      "tag": "0184_jobdb5_member_status_history_my_unit",
+      "breakpoints": true
+    },
+    {
+      "idx": 185,
+      "version": "7",
+      "when": 1793029610148,
+      "tag": "0185_jobdb5_officer_installation_dates_my_unit",
+      "breakpoints": true
     }
   ]
 }

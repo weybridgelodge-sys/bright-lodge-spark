@@ -1,0 +1,8 @@
+-- JOB DB5: meeting_series policies current_unit_id() -> public.my_unit() (strict: blank lodge = no access).
+-- Type (PERMISSIVE), command, roles and role tests unchanged; ALTER POLICY keeps them.
+-- ORIGINAL: "Admin or Secretary insert series" PERMISSIVE INSERT TO authenticated WITH CHECK ((unit_id = current_unit_id()) AND (has_role(auth.uid(), 'admin'::app_role) OR is_lodge_secretary(auth.uid())))
+ALTER POLICY "Admin or Secretary insert series" ON public.meeting_series WITH CHECK ((unit_id = public.my_unit()) AND (has_role(auth.uid(), 'admin'::app_role) OR is_lodge_secretary(auth.uid())));
+-- ORIGINAL: "Admin or Secretary update series" PERMISSIVE UPDATE TO authenticated USING ((unit_id = current_unit_id()) AND (has_role(auth.uid(), 'admin'::app_role) OR is_lodge_secretary(auth.uid()))) WITH CHECK ((unit_id = current_unit_id()) AND (has_role(auth.uid(), 'admin'::app_role) OR is_lodge_secretary(auth.uid())))
+ALTER POLICY "Admin or Secretary update series" ON public.meeting_series USING ((unit_id = public.my_unit()) AND (has_role(auth.uid(), 'admin'::app_role) OR is_lodge_secretary(auth.uid()))) WITH CHECK ((unit_id = public.my_unit()) AND (has_role(auth.uid(), 'admin'::app_role) OR is_lodge_secretary(auth.uid())));
+-- ORIGINAL: "Members read unit series" PERMISSIVE SELECT TO authenticated USING ((unit_id = current_unit_id()) AND is_active_member(auth.uid()))
+ALTER POLICY "Members read unit series" ON public.meeting_series USING ((unit_id = public.my_unit()) AND is_active_member(auth.uid()));

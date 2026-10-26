@@ -1,0 +1,4 @@
+-- JOB DB5: officer_installation_dates policies current_unit_id() -> public.my_unit() (strict: blank lodge = no access).
+-- Type (PERMISSIVE), command, roles and role tests unchanged; ALTER POLICY keeps them.
+-- ORIGINAL: "Admin or Secretary manage installation dates" PERMISSIVE ALL TO authenticated USING ((unit_id = current_unit_id()) AND (has_role(auth.uid(), 'admin'::app_role) OR is_lodge_secretary(auth.uid()))) WITH CHECK ((unit_id = current_unit_id()) AND (has_role(auth.uid(), 'admin'::app_role) OR is_lodge_secretary(auth.uid())))
+ALTER POLICY "Admin or Secretary manage installation dates" ON public.officer_installation_dates USING ((unit_id = public.my_unit()) AND (has_role(auth.uid(), 'admin'::app_role) OR is_lodge_secretary(auth.uid()))) WITH CHECK ((unit_id = public.my_unit()) AND (has_role(auth.uid(), 'admin'::app_role) OR is_lodge_secretary(auth.uid())));
