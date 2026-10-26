@@ -1,7 +1,8 @@
 // Shared signer + stored-signature loader for every signed return (Provincial, UGLE Installation).
 // Resolves the WM and Secretary with current_officer_holder() at the signing date and loads each one's
 // single active signature from the private bucket. Images stay on the server; logs IDs only.
-import type { SupabaseClient } from "npm:@supabase/supabase-js@2";
+// deno-lint-ignore no-explicit-any
+type SupabaseClient = any; // local alias keeps this file importable by vitest/typecheck
 import { SIGNATURE_BUCKET, resolvePlacements, type Placement } from "./signatures.ts";
 
 export type SigImage = { png: Uint8Array; width: number; height: number };
