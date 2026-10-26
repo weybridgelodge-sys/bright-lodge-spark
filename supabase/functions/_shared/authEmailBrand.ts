@@ -97,3 +97,41 @@ export function siteUrlFor(b: { siteUrl?: string } | null | undefined, fallback:
   const u = (b?.siteUrl ?? "").trim().replace(/\/+$/, "");
   return /^https:\/\/\S+$/.test(u) ? u : fallback;
 }
+
+/**
+ * JOB CJ: one bounded lookup PER UNIT (each with its own 5-minute cache and
+ * shared in-flight load). Blank unit = null at once (neutral text-only brand).
+ * Never throws; a failing unit only affects its own emails.
+ */
+export function createUnitBrandLookups(opts: {
+  load: (unitId: string) => Promise<Settings>;
+  timeoutMs?: number;
+  ttlMs?: number;
+  warn?: (msg: string) => void;
+  now?: () => number;
+}) {
+  const byUnit = new Map<string, ReturnType<typeof createAuthBrandLookup>>();
+  const lookupFor = (unitId: string) => {
+    let l = byUnit.get(unitId);
+    if (!l) {
+      l = createAuthBrandLookup({ ...opts, load: () => opts.load(unitId), missingReason: () => `no lodge identity for unit ${unitId}` });
+      byUnit.set(unitId, l);
+    }
+    return l;
+  };
+  return {
+    async get(unitId: string): Promise<AuthBrand | null> {
+      const u = (unitId ?? "").trim();
+      if (!u) return null;
+      try { return await lookupFor(u).get(); } catch { return null; }
+    },
+  };
+}
+
+/** Resolves within ms or gives the fallback; never rejects. */
+export async function within<T>(p: Promise<T>, ms: number, fallback: T): Promise<T> {
+  let timer: number | undefined;
+  try {
+    return await Promise.race([p.catch(() => fallback), new Promise<T>((r) => { timer = setTimeout(() => r(fallback), ms) as unknown as number; })]);
+  } finally { clearTimeout(timer); }
+}
