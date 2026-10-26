@@ -69,7 +69,7 @@ Deno.serve(async (req) => {
 
     const [eventsRes, meetingsRes, socialsRes, officersRes, loiRes, publicRes, unitsRes, archivedRes] = await Promise.all([
       admin.from("lodge_events")
-        .select("id,slug,title,event_date,tyling_time,location,intro")
+        .select("id,slug,title,event_date,tyling_time,location,intro,unit_id")
         .eq("published", true)
         .is("archived_at", null)
         .gte("event_date", fromIso)
@@ -81,18 +81,18 @@ Deno.serve(async (req) => {
         .eq("unit_id", unitId)
         .gte("meeting_date", fromIso.slice(0, 10)),
       admin.from("lodge_socials")
-        .select("id,title,starts_at,ends_at,venue,description")
+        .select("id,title,starts_at,ends_at,venue,description,unit_id")
         .gte("starts_at", fromIso),
       admin.from("summonses")
-        .select("id,officer_night_date,officer_night_venue,meeting_date")
+        .select("id,officer_night_date,officer_night_venue,meeting_date,unit_id")
         .not("officer_night_date", "is", null)
         .gte("officer_night_date", fromIso.slice(0, 10)),
       admin.from("loi_schedule_entries")
-        .select("id,title,event_date,time_from,time_to,venue,description")
+        .select("id,title,event_date,time_from,time_to,venue,description,unit_id")
         .gte("event_date", fromIso.slice(0, 10))
         .lte("event_date", toIso.slice(0, 10)),
       admin.from("public_events")
-        .select("id,slug,public_title,name,event_date,start_time,end_time,venue,intro_copy")
+        .select("id,slug,public_title,name,event_date,start_time,end_time,venue,intro_copy,unit_id")
         .gte("event_date", londonToday())
         .lte("event_date", toIso.slice(0, 10)),
       admin.from("units").select("id"),

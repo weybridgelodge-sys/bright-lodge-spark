@@ -11,9 +11,8 @@ export function feedUnitFor(profile: { unit_id?: unknown } | null | undefined): 
 }
 
 /**
- * A row's own unit_id wins. Rows with no unit (lodge_events, lodge_socials,
- * summonses, loi_schedule_entries and public_events have no unit column yet)
- * belong to the lodge only when exactly ONE lodge exists; otherwise they are
+ * A row's own unit_id wins (strict match; all feed tables carry unit_id since
+ * JOB CL). A row whose unit is still null belongs to the lodge only when exactly ONE lodge exists; otherwise they are
  * left out rather than shown to another lodge's members.
  */
 export function scopeRows(r: FeedRows, unitId: string, singleUnit: boolean): FeedRows {
