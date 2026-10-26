@@ -29,3 +29,6 @@ ALTER POLICY "Admin or Secretary update own unit settings" ON public.unit_settin
 
 -- ===== unit_settings_audit =====
 ALTER POLICY "Unit setup viewers read own unit audit" ON public.unit_settings_audit USING (can_view_unit_setup(auth.uid()) AND (unit_id = current_unit_id()));
+
+-- ===== officer_installation_dates read policy (0186) =====
+ALTER POLICY "Members read installation dates" ON public.officer_installation_dates USING (true);
