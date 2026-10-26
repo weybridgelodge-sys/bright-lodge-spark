@@ -121,4 +121,3 @@ IC|steward_2|ddd0c922-801d-4555-b5dc-765d0cc79c12|true|Assistant Director of Cer
 IC|treasurer|62d06793-7494-41f0-8e92-9bca5366c528|true|Treasurer
 IC|tyler|b6596f4f-0e31-4332-80b5-e4283924e690|true|Tyler
 IC|worshipful_master|de693c92-6f3d-49b6-afc3-406fc4c0acd9|true|Worshipful Master
-
