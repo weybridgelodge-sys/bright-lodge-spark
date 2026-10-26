@@ -70,3 +70,25 @@ describe("JOB DF member calendar meetings", () => {
     expect(ics).not.toContain("fbm-b1@");
   });
 });
+
+// JOB DG: a meeting with no linked event gets a readable title from its type.
+const meetingOnly = (type: string | null) =>
+  vevents(buildFeed(scopeRows({ ...empty, meetings: [m("g1", "2027-03-10", type ?? "", "published", "k-g1", "u1")] }, "u1", false), LODGE, NOW))[0];
+
+describe("JOB DG meeting-only titles", () => {
+  it("regular, installation and dispensation map to readable titles", () => {
+    expect(meetingOnly("regular").summary).toBe("Meeting: Regular meeting");
+    expect(meetingOnly("installation").summary).toBe("Meeting: Installation meeting");
+    expect(meetingOnly("dispensation").summary).toBe("Meeting: Dispensation meeting");
+  });
+  it("unknown type: separators become spaces, first letter capitalised, 'meeting' appended", () => {
+    expect(meetingOnly("social_evening").summary).toBe("Meeting: Social evening meeting");
+    expect(meetingOnly("white-table_meeting").summary).toBe("Meeting: White table meeting");
+  });
+  it("missing type falls back to Regular meeting; notes still the description", () => {
+    const e = meetingOnly(null);
+    expect(e.summary).toBe("Meeting: Regular meeting");
+    expect(e.desc).toBe("");
+    expect(meetingOnly("regular").desc).toBe("Notes here");
+  });
+});
