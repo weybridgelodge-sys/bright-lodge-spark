@@ -1121,6 +1121,13 @@
       "when": 1792977846229,
       "tag": "0159_jobco_b4_lodge_events_unit",
       "breakpoints": true
+    },
+    {
+      "idx": 160,
+      "version": "7",
+      "when": 1792977875627,
+      "tag": "0160_jobco_b5_lodge_socials_unit",
+      "breakpoints": true
     }
   ]
 }
