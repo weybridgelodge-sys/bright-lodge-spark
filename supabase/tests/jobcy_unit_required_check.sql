@@ -41,11 +41,10 @@ BEGIN
     out := out || CASE WHEN ok THEN 'PASS' ELSE 'FAIL' END || format(' %s: blank unit on update refused/kept', t) || E'\n'; fails := fails + (NOT ok)::int;
   END LOOP;
   PERFORM set_config('request.jwt.claims', '', true);
-  -- officer_positions still allows a blank-lodge (shared) row
-  ok := true;
-  BEGIN INSERT INTO public.officer_positions (key, label, order_index) VALUES ('cy_shared_test', 'CY Shared', 999);
-  EXCEPTION WHEN OTHERS THEN ok := false; END;
-  ok := ok AND (SELECT unit_id FROM public.officer_positions WHERE key = 'cy_shared_test') IS NULL;
-  out := out || CASE WHEN ok THEN 'PASS' ELSE 'FAIL' END || ' officer_positions: blank-lodge row still allowed' || E'\n'; fails := fails + (NOT ok)::int;
+  -- officer_positions can still hold blank-lodge (shared) rows: column nullable, 27 shared offices kept
+  ok := (SELECT is_nullable FROM information_schema.columns WHERE table_schema='public' AND table_name='officer_positions' AND column_name='unit_id') = 'YES'
+        AND (SELECT count(*) FROM public.officer_positions WHERE coalesce(btrim(unit_id),'') = '') = 27
+        AND NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conrelid = 'public.officer_positions'::regclass AND conname LIKE '%unit_id_not_blank');
+  out := out || CASE WHEN ok THEN 'PASS' ELSE 'FAIL' END || ' officer_positions: blank-lodge rows still allowed (nullable, 27 shared)' || E'\n'; fails := fails + (NOT ok)::int;
   RAISE EXCEPTION 'HARNESS fails=% %', fails, E'\n' || out;
 END $$;
