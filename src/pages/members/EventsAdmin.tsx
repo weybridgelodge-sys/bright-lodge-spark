@@ -53,6 +53,7 @@ export default function EventsAdmin() {
     const slug = `event_${Date.now()}`;
     const { data, error } = await supabase
       .from("lodge_events")
+      // unit_id is filled server-side by fill_unit_from_caller; never sent from the browser.
       .insert({
         slug,
         title,

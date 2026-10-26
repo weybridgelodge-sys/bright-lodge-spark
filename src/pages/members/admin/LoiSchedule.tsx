@@ -75,7 +75,7 @@ function Inner() {
     };
     const { error } = draft.id
       ? await supabase.from("loi_schedule_entries").update(payload).eq("id", draft.id)
-      : await supabase.from("loi_schedule_entries").insert({ ...payload, created_by: u.user?.id ?? null });
+      : await supabase.from("loi_schedule_entries").insert({ ...payload, created_by: u.user?.id ?? null } as typeof payload & { created_by: string | null; unit_id: string }); // unit_id filled server-side
     setSaving(false);
     if (error) { toast.error(error.message); return; }
     toast.success(draft.id ? "Entry updated" : "Entry added");

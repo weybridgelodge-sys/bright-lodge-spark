@@ -224,7 +224,7 @@ export default function OfficersTracker() {
     if (existing) {
       ({ error } = await supabase.from("officer_appointments").update(payload).eq("id", existing.id));
     } else {
-      ({ error } = await supabase.from("officer_appointments").insert(payload));
+      ({ error } = await supabase.from("officer_appointments").insert(payload as typeof payload & { unit_id: string })); // unit_id filled server-side
     }
     if (error) {
       toast.error(error.message);
