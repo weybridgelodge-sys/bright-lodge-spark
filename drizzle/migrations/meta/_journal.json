@@ -1282,6 +1282,13 @@
       "when": 1793029503820,
       "tag": "0182_jobdb5_meeting_diary_audit_my_unit",
       "breakpoints": true
+    },
+    {
+      "idx": 183,
+      "version": "7",
+      "when": 1793029540875,
+      "tag": "0183_jobdb5_meeting_series_my_unit",
+      "breakpoints": true
     }
   ]
 }
