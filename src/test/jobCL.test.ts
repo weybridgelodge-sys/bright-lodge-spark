@@ -49,7 +49,7 @@ describe("calendar feed after backfill", () => {
       expect(sb[k].every((x: any) => x.unit_id === "u2")).toBe(true);
       expect(sb[k]).toHaveLength(1);
     }
-    expect(buildFeed(sb, feedLodgeFrom(LODGE_B))).not.toMatch(/Alpha|alpha|Ladies Festival|Quiz\r?\n/);
+    expect(buildFeed(sb, feedLodgeFrom(LODGE_B))).not.toMatch(/Alpha|alpha|Ladies Festival|Installation Meeting|UID:[a-z]+-(e1|s1|o1|l1|p1)@/);
   });
   it("null unit rows keep the single-lodge fallback only", () => {
     expect(scopeRows(rows(null), "u1", true).events).toHaveLength(1);
