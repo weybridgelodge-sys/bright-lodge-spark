@@ -42,6 +42,8 @@ async function writeLog(
     template_name: payload.templateName,
     recipient_email: payload.recipientEmail,
     status,
+    // Lodge tag so per-lodge jobs (e.g. the Almoner digest window) read only their own sends.
+    ...(payload.unitId ? { metadata: { unit_id: payload.unitId } } : {}),
     ...(errorMessage ? { error_message: errorMessage.slice(0, 1000) } : {}),
   })
   if (error) {
