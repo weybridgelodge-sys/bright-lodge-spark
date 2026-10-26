@@ -7734,7 +7734,7 @@ export type Database = {
         }[]
       }
       get_join_us_costs: {
-        Args: never
+        Args: { _unit?: string }
         Returns: {
           annual_dues_pence: number
           dining_price_pence: number
@@ -7764,8 +7764,8 @@ export type Database = {
         Args: { _lodge_year: number }
         Returns: Json
       }
-      get_lodge_identity: { Args: never; Returns: Json }
-      get_meeting_pattern: { Args: never; Returns: Json }
+      get_lodge_identity: { Args: { _unit?: string }; Returns: Json }
+      get_meeting_pattern: { Args: { _unit?: string }; Returns: Json }
       get_member_offices_held: {
         Args: { _member: string }
         Returns: {
@@ -7856,8 +7856,8 @@ export type Database = {
         }[]
       }
       get_public_booking_details: { Args: { _unit?: string }; Returns: Json }
-      get_public_lodge_figures: { Args: never; Returns: Json }
-      get_public_unit_profile: { Args: never; Returns: Json }
+      get_public_lodge_figures: { Args: { _unit?: string }; Returns: Json }
+      get_public_unit_profile: { Args: { _unit?: string }; Returns: Json }
       get_published_meeting_for_event: {
         Args: { _event_key: string }
         Returns: {
