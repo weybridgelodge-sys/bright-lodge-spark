@@ -67,7 +67,7 @@ BEGIN
   SELECT value INTO v FROM public.unit_settings WHERE unit_id = home AND key='bank_details';
   SET LOCAL ROLE authenticated;
   BEGIN
-    PERFORM public.save_unit_setup(jsonb_build_object('bank_details', coalesce(v,'{}'::jsonb) || '{"reference_pattern":"0189-TEST"}'::jsonb));
+    PERFORM public.save_unit_setup('bank_details', coalesce(v,'{}'::jsonb) || '{"reference_pattern":"0189-TEST"}'::jsonb);
   EXCEPTION WHEN OTHERS THEN out := out || 'save err: '||SQLERRM||'; ';
   END;
   RESET ROLE;
