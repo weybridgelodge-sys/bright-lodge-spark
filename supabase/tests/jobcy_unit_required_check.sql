@@ -37,7 +37,7 @@ BEGIN
     ok := false;
     BEGIN EXECUTE format('UPDATE public.%I SET unit_id = ''  '' WHERE id = %L', t, rid);
     EXCEPTION WHEN check_violation THEN ok := true; WHEN OTHERS THEN ok := t = 'event_accounts'; END; -- event_accounts update trigger keeps the old lodge
-    IF t = 'event_accounts' AND ok THEN ok := (SELECT unit_id FROM public.event_accounts WHERE id = rid) = u; END IF;
+    IF t = 'event_accounts' THEN ok := (SELECT unit_id FROM public.event_accounts WHERE id = rid) = u; END IF;
     out := out || CASE WHEN ok THEN 'PASS' ELSE 'FAIL' END || format(' %s: blank unit on update refused/kept', t) || E'\n'; fails := fails + (NOT ok)::int;
   END LOOP;
   PERFORM set_config('request.jwt.claims', '', true);
