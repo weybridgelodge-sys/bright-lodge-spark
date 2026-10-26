@@ -2,7 +2,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { readFileSync } from "fs";
 import { fakeDb } from "./helpers/fakeDb";
-import { resolveLodgeSettings } from "../../supabase/functions/_shared/lodgeSettingsResolve";
+import { resolveLodgeSettings, deadlineReminderTitle } from "../../supabase/functions/_shared/lodgeSettingsResolve";
 import { forEachUnit, listActiveUnits, unitOfficerRecipient } from "../../supabase/functions/_shared/units";
 import * as deadline from "../../supabase/functions/meeting-deadline-reminder/run";
 import * as ugle from "../../supabase/functions/secretary-ugle-reminder/run";
@@ -89,7 +89,7 @@ describe("meeting-deadline-reminder per unit", () => {
       templateData: { meetingDate: "11th October", deadlineDate: "4th October", bookingUrl: "https://alpha.example/bookings", ...BRAND_A },
     }]);
     expect(push).toHaveBeenCalledWith({
-      member_ids: ["a1"], title: "Alpha Lodge — booking deadline approaching".length ? expect.any(String) : "",
+      member_ids: ["a1"], title: deadlineReminderTitle("Alpha Lodge"),
       body: "The deadline for our next meeting on 11th October is approaching. Please book your space by 4th October.",
       data: { type: "meeting_deadline", meeting_id: "ma" },
     });
