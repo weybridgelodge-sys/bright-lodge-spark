@@ -57,6 +57,15 @@ const STATUS_LABELS: Record<ReturnStatus, string> = {
 const currentLodgeYear = masonicYearStart();
 const MASONIC_YEAR_OPTIONS = Array.from({ length: 21 }, (_, i) => currentLodgeYear - 5 + i);
 
+/**
+ * Short label shown in a select trigger ("2026/27") so it never truncates in a
+ * half-width column on a phone. The dropdown keeps the full "Masonic year 2026/27".
+ */
+function yearTriggerLabel(value: string) {
+  const year = Number(value);
+  return value !== "" && Number.isFinite(year) ? treasurerYearBounds(year).label : "";
+}
+
 type Row = {
   id: string;
   return_type: ReturnType;
