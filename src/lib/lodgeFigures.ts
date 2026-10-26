@@ -97,11 +97,43 @@ export async function loadLodgeFigures(): Promise<LodgeFigures> {
   return parseLodgeFigures(data);
 }
 
+// One shared request per tab: Hero, Join Us, FAQ and Lodge Profile reuse it.
+// A blank result (unknown site / error) is not kept, so a later page may retry.
+let shared: Promise<LodgeFigures> | null = null;
+export function sharedLodgeFigures(): Promise<LodgeFigures> {
+  if (!shared) {
+    shared = loadLodgeFigures().then((x) => {
+      if (x === BLANK_FIGURES) shared = null;
+      return x;
+    }, (e) => { shared = null; throw e; });
+  }
+  return shared;
+}
+/** Test hook: forget the shared request. */
+export const resetSharedLodgeFigures = () => { shared = null; };
+
+/** Hero sentence clause: " — aged from 32 to 82 —" or "" (sentence reads without it). */
+export const heroAgeClause = (f: Pick<LodgeFigures, "youngestAge" | "oldestAge">) => {
+  const r = ageRangePhrase(f);
+  return r ? ` — aged ${r} —` : "";
+};
+
+/** Figures plus whether the shared request has settled (Hero reserves space until then). */
+export function useLodgeFiguresState(): { figures: LodgeFigures; settled: boolean } {
+  const [s, setS] = useState({ figures: BLANK_FIGURES, settled: false });
+  useEffect(() => {
+    let on = true;
+    sharedLodgeFigures().then((x) => { if (on) setS({ figures: x, settled: true }); }, () => { if (on) setS({ figures: BLANK_FIGURES, settled: true }); });
+    return () => { on = false; };
+  }, []);
+  return s;
+}
+
 export function useLodgeFigures(): LodgeFigures {
   const [f, setF] = useState<LodgeFigures>(BLANK_FIGURES);
   useEffect(() => {
     let on = true;
-    loadLodgeFigures().then((x) => { if (on) setF(x); }, () => {});
+    sharedLodgeFigures().then((x) => { if (on) setF(x); }, () => {});
     return () => { on = false; };
   }, []);
   return f;

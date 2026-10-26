@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { faqCostAnswer, fetchJoinUsCostRow } from "@/lib/joinUsCosts";
+import { useLodgeFigures, ageRangePhrase } from "@/lib/lodgeFigures";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
@@ -89,7 +90,7 @@ const faqCategories: FAQCategory[] = [
       {
         question: "Can anyone join a Masonic Lodge in Surrey?",
         answer:
-          "Freemasonry is open to men of good character aged 18 or over who hold a belief in a supreme being — the specific faith or denomination is not prescribed. Applications are considered individually, and no particular background, profession, or connection to existing members is required. If you are curious, the best first step is simply to get in touch. Our members currently range in age from 18 to 83.",
+          "Freemasonry is open to men of good character aged 18 or over who hold a belief in a supreme being — the specific faith or denomination is not prescribed. Applications are considered individually, and no particular background, profession, or connection to existing members is required. If you are curious, the best first step is simply to get in touch.",
       },
       {
         question: "Can I join with a friend?",
@@ -197,6 +198,10 @@ const faqCategories: FAQCategory[] = [
 
 // Flat list, in category order, used for the FAQPage structured data.
 const COST_Q = "What does membership cost?";
+const ELIGIBILITY_Q = "Can anyone join a Masonic Lodge in Surrey?";
+/** Eligibility answer with the live age range; the sentence is omitted when unknown. */
+export const eligibilityAnswer = (base: string, ages: string) =>
+  ages ? `${base} Our members currently range in age ${ages}.` : base;
 
 // ─── Component ────────────────────────────────────────────────────────────────
 const FAQ = () => {
@@ -207,9 +212,11 @@ const FAQ = () => {
     fetchJoinUsCostRow().then((row) => { if (!cancelled && row) setCostRow(row); }, () => {});
     return () => { cancelled = true; };
   }, []);
+  const ages = ageRangePhrase(useLodgeFigures());
   const categories = useMemo(() => faqCategories.map((c) => ({
-    ...c, items: c.items.map((i) => (i.question === COST_Q ? { ...i, answer: faqCostAnswer(costRow) } : i)),
-  })), [costRow]);
+    ...c, items: c.items.map((i) => (i.question === COST_Q ? { ...i, answer: faqCostAnswer(costRow) }
+      : i.question === ELIGIBILITY_Q ? { ...i, answer: eligibilityAnswer(i.answer, ages) } : i)),
+  })), [costRow, ages]);
   const faqs = useMemo(() => categories.flatMap((c) => c.items), [categories]);
 
   const pageSchema = useMemo(() => {

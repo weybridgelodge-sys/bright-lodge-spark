@@ -84,9 +84,10 @@ describe("hero paragraph matches the static first paint", () => {
   it("index.html skeleton paragraph has the same text as the Hero paragraph", () => {
     const norm = (t: string) => t.replace(/\s+/g, " ").trim();
     const html = readFileSync("index.html", "utf8");
-    const skel = norm(html.match(/<p class="skeleton-lede">([\s\S]*?)<\/p>/)![1]);
+    const skel = norm(html.match(/<p class="skeleton-lede">([\s\S]*?)<\/p>/)![1].replace(/<span[^>]*aria-hidden="true">[^<]*<\/span>/, ""));
     const hero = readFileSync("src/components/Hero.tsx", "utf8");
-    const p = norm(hero.match(/font-light leading-relaxed[^>]*>([\s\S]*?)<\/p>/)![1]);
+    // The live age clause ({ageClause}) is added after first paint; the skeleton is the no-figures text.
+    const p = norm(hero.match(/font-light leading-relaxed[^>]*>([\s\S]*?)<\/p>/)![1].replace("{ageClause}{agePlaceholder}", ""));
     expect(skel).toBe(p);
   });
 });

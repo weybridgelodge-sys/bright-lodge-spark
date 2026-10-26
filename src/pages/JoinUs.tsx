@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { joinUsCostAmounts, fetchJoinUsCostRow } from "@/lib/joinUsCosts";
+import { useLodgeFigures, ageRangePhrase } from "@/lib/lodgeFigures";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
@@ -78,10 +79,11 @@ const buildCostCards = (amounts: ReturnType<typeof joinUsCostAmounts>): CostCard
   },
 ];
 
-const profilePoints: ProfilePoint[] = [
+/** "our members currently range from X to Y" clause, omitted when the figures are unknown. */
+export const buildProfilePoints = (ages: string): ProfilePoint[] => [
   {
     icon: MapPin,
-    text: "You're a man of any adult age — our members currently range from 18 to 83 — living in or near Guildford, Woking, Godalming, Farnham, Cranleigh or Leatherhead.",
+    text: `You're a man of any adult age${ages ? ` — our members currently range ${ages} —` : ""} living in or near Guildford, Woking, Godalming, Farnham, Cranleigh or Leatherhead.`,
   },
   {
     icon: HeartHandshake,
@@ -107,6 +109,8 @@ const profilePoints: ProfilePoint[] = [
 
 // ─── Component ────────────────────────────────────────────────────────────────
 const JoinUs = () => {
+  const ages = ageRangePhrase(useLodgeFigures());
+  const profilePoints = useMemo(() => buildProfilePoints(ages), [ages]);
   const [costRow, setCostRow] = useState<Parameters<typeof joinUsCostAmounts>[0]>(null);
   useEffect(() => {
     let cancelled = false;
