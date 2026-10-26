@@ -1,6 +1,6 @@
 // One unit's run of the Secretary returns digest (JOB CI). Pure: db and email injected.
 //
-// secretary_returns has no unit_id. A row's unit = its member's profile unit.
+// A row's own unit_id wins (JOB CL); else its member's profile unit.
 // Rows with no member (candidate letters, lodge-level returns) have no unit:
 // they belong to the lodge only when exactly ONE unit exists (the same
 // single-unit rule loadLodgeSettings() uses); otherwise they are skipped and
@@ -42,7 +42,7 @@ export async function runUnit(deps: Deps, unitId: string, lodge: LodgeSettings, 
   const { today } = o;
   const { data: rows, error } = await db.from("secretary_returns")
     .select(
-      "id,return_type,masonic_year,date_due,member_id,candidate_id,reminder_lead_days," +
+      "id,unit_id,return_type,masonic_year,date_due,member_id,candidate_id,reminder_lead_days," +
         "member:profiles!secretary_returns_member_id_fkey(full_name,preferred_name,first_name,last_name,unit_id)," +
         "candidate:candidates!secretary_returns_candidate_id_fkey(first_name,last_name)",
     )
@@ -52,7 +52,7 @@ export async function runUnit(deps: Deps, unitId: string, lodge: LodgeSettings, 
 
   let skippedNoUnit = 0;
   const mine = ((rows ?? []) as any[]).filter((r) => {
-    const u = r.member_id ? recordUnit(r.member?.unit_id) : "";
+    const u = recordUnit(r.unit_id) || (r.member_id ? recordUnit(r.member?.unit_id) : "");
     if (u) return u === unitId;
     if (o.singleUnit) return true;
     skippedNoUnit++;

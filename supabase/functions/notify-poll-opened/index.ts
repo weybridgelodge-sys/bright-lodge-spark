@@ -3,6 +3,7 @@
 // per poll; not per vote. Reuses the same "all active members" recipient
 // pattern as send-summons-email.
 
+import { pollUnitAllowed } from "./unit.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { sendTransactionalEmail } from "../_shared/send-email.ts";
 import { loadLodgeSettings } from "../_shared/lodgeSettings.ts";
@@ -58,7 +59,7 @@ Deno.serve(async (req) => {
 
     const { data: poll, error: pErr } = await admin
       .from("polls")
-      .select("id,question,options,closes_at,results_visibility,status")
+      .select("id,question,options,closes_at,results_visibility,status,unit_id")
       .eq("id", poll_id)
       .maybeSingle();
     if (pErr || !poll) return json({ error: "Poll not found" }, 404);
@@ -69,6 +70,8 @@ Deno.serve(async (req) => {
     // The caller's own lodge decides recipients, links and branding; blank = refuse.
     const unitId = await loadCallerUnit(admin, user.id);
     if (!unitId) return json({ error: noCallerUnitMessage("send poll notices") }, 403);
+    // A poll with its own lodge may only be announced by that lodge's officers.
+    if (!pollUnitAllowed((poll as any).unit_id, unitId)) return json({ error: "This poll belongs to another lodge." }, 403);
     const lodge = await loadLodgeSettings(unitId);
     const push = async (b: Record<string, unknown>) => {
       const r = await fetch(`${SUPABASE_URL}/functions/v1/send-push-notification`, {
