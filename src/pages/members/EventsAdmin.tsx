@@ -60,7 +60,7 @@ export default function EventsAdmin() {
         intro: "",
         event_date: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
         published: false,
-      })
+      } as { slug: string; title: string; intro: string; event_date: string; published: boolean; unit_id: string })
       .select("id")
       .single();
     if (error) { toast.error(error.message); return; }
