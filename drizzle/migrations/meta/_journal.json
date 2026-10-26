@@ -1240,6 +1240,13 @@
       "when": 1793023339426,
       "tag": "0176_jobdb1_lodge_detail_unit_param",
       "breakpoints": true
+    },
+    {
+      "idx": 177,
+      "version": "7",
+      "when": 1793024106327,
+      "tag": "0177_jobdc_rep_post_remove",
+      "breakpoints": true
     }
   ]
 }

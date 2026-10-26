@@ -7643,6 +7643,7 @@ export type Database = {
         Args: { _d: Database["public"]["Enums"]["masonic_degree"] }
         Returns: number
       }
+      delete_representative_position: { Args: { _key: string }; Returns: Json }
       diary_add_meeting: {
         Args: {
           _date: string
