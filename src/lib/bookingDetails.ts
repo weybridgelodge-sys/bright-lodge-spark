@@ -3,6 +3,7 @@
 // nothing here is typed in code. Edited on Members > Admin > Unit Setup.
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { resolveSiteUnit } from "./siteUnit";
 
 export type BookingDetails = {
   lodgeName: string; lodgeNumber: string; accountName: string; sortCode: string; accountNumber: string;
@@ -47,8 +48,11 @@ export const validAccountNumber = (v: string) => /^\d{8}$/.test(v.replace(/\s/g,
 
 export const EMPTY_BOOKING_DETAILS = parseBookingDetails(null);
 
+/** Details for this web address's lodge; unknown address = error (callers keep their empty state). */
 export async function loadBookingDetails(): Promise<BookingDetails> {
-  const { data, error } = await (supabase.rpc as any)("get_public_booking_details");
+  const unit = await resolveSiteUnit();
+  if (!unit) throw new Error("lodge not resolved for this site");
+  const { data, error } = await (supabase.rpc as any)("get_public_booking_details", { _unit: unit });
   if (error) throw error;
   return parseBookingDetails(data);
 }

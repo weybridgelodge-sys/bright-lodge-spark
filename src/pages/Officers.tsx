@@ -7,6 +7,7 @@ import { motion, useReducedMotion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { resolveSiteUnit } from "@/lib/siteUnit";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface OfficerRow {
@@ -115,9 +116,13 @@ const Officers = () => {
   useEffect(() => {
     let cancelled = false;
     (async () => {
+      // Lodge for this web address first; never call without it.
+      const unit = await resolveSiteUnit();
+      if (cancelled) return;
+      if (!unit) { setRpcRows([]); return; }
       const [{ data, error }, yearRes] = await Promise.all([
-        supabase.rpc("get_officers_public", { _year: null }),
-        supabase.rpc("get_officers_public_year"),
+        supabase.rpc("get_officers_public", { _year: null, _unit: unit }),
+        supabase.rpc("get_officers_public_year", { _unit: unit }),
       ]);
       if (cancelled) return;
       if (yearRes.error) console.error("get_officers_public_year failed:", yearRes.error);

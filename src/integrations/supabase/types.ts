@@ -7823,7 +7823,7 @@ export type Database = {
         }[]
       }
       get_officers_public: {
-        Args: { _year?: number }
+        Args: { _unit?: string; _year?: number }
         Returns: {
           first_name: string
           grand_rank: string
@@ -7836,7 +7836,7 @@ export type Database = {
           title: string
         }[]
       }
-      get_officers_public_year: { Args: never; Returns: number }
+      get_officers_public_year: { Args: { _unit?: string }; Returns: number }
       get_profiles_pii: {
         Args: { _ids: string[] }
         Returns: {
@@ -7855,7 +7855,7 @@ export type Database = {
           ugle_reg_number: string
         }[]
       }
-      get_public_booking_details: { Args: never; Returns: Json }
+      get_public_booking_details: { Args: { _unit?: string }; Returns: Json }
       get_public_lodge_figures: { Args: never; Returns: Json }
       get_public_unit_profile: { Args: never; Returns: Json }
       get_published_meeting_for_event: {
