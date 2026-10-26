@@ -14,18 +14,33 @@ const TTL_MS = 5 * 60 * 1000;
 
 /** Never throws; returns fallbacks on any error. Cached per warm instance. */
 export async function loadLodgeSettings(unitIdIn?: string): Promise<LodgeSettings> {
+  return load(unitIdIn, false);
+}
+
+/** Per-unit scheduled runs: throws instead of falling back, so a broken unit is skipped and reported (JOB CI). */
+export async function loadLodgeSettingsStrict(unitId: string): Promise<LodgeSettings> {
+  if (!unitId) throw new Error("lodge settings: no unit");
+  return load(unitId, true);
+}
+
+async function load(unitIdIn: string | undefined, strict: boolean): Promise<LodgeSettings> {
+  const fail = (why: string, e?: unknown): LodgeSettings => {
+    if (strict) throw new Error(`lodge settings unavailable: ${why}`);
+    if (e !== undefined) console.error(`lodge settings ${why}, using fallback`, e);
+    return resolveLodgeSettings(null);
+  };
   const cacheKey = unitIdIn ?? "";
   const hit = cache.get(cacheKey);
   if (hit && Date.now() - hit.at < TTL_MS) return hit.value;
   try {
     const url = Deno.env.get("SUPABASE_URL"); const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-    if (!url || !key) return resolveLodgeSettings(null);
+    if (!url || !key) return fail("no service credentials");
     const db = createClient(url, key);
     // No unit given: use the only unit (multi-lodge callers must pass one).
     let unitId = unitIdIn ?? "";
     if (!unitId) {
       const { data: units } = await db.from("units").select("id").limit(2);
-      if (!units || units.length !== 1) return resolveLodgeSettings(null);
+      if (!units || units.length !== 1) return fail("no single unit");
       unitId = String(units[0].id);
     }
     const [{ data, error }, us, asst] = await Promise.all([
@@ -42,7 +57,8 @@ export async function loadLodgeSettings(unitIdIn?: string): Promise<LodgeSetting
       lodgeName: (tpl as any)?.data?.lodge_name ?? null,
       lodgeNumber: (rule as any)?.data?.unit_number || (tpl as any)?.data?.lodge_number || null,
     };
-    if (error) { console.error("lodge settings lookup failed, using fallback", error); return resolveLodgeSettings(null); }
+    if (error) return fail("lookup failed", error);
+    if (strict && us.error) return fail("unit settings lookup failed");
     const map: Record<string, Record<string, unknown>> = Object.fromEntries(((us.data ?? []) as { key: string; value: Record<string, unknown> }[]).map((r) => [r.key, r.value]));
     const venueId = map.meeting_place?.venue_id;
     if (typeof venueId === "string" && venueId) {
@@ -54,7 +70,7 @@ export async function loadLodgeSettings(unitIdIn?: string): Promise<LodgeSetting
     cache.set(cacheKey, { at: Date.now(), value });
     return value;
   } catch (e) {
-    console.error("lodge settings lookup threw, using fallback", e);
-    return resolveLodgeSettings(null);
+    if (strict) throw e;
+    return fail("lookup threw", e);
   }
 }
