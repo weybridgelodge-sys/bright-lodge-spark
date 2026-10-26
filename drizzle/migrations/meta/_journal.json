@@ -1268,6 +1268,13 @@
       "when": 1793028087566,
       "tag": "0180_jobdb4_unit_defaults_to_fill_trigger",
       "breakpoints": true
+    },
+    {
+      "idx": 181,
+      "version": "7",
+      "when": 1793029436424,
+      "tag": "0181_jobdb5_installation_rule_settings_my_unit",
+      "breakpoints": true
     }
   ]
 }

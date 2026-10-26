@@ -1,0 +1,8 @@
+-- JOB DB5: installation_rule_settings policies current_unit_id() -> public.my_unit() (strict: blank lodge = no access).
+-- Type (PERMISSIVE), command, roles and role tests unchanged; ALTER POLICY keeps them.
+-- ORIGINAL: "Admin or Secretary insert installation rule" PERMISSIVE INSERT TO authenticated WITH CHECK ((unit_id = current_unit_id()) AND (has_role(auth.uid(), 'admin'::app_role) OR is_lodge_secretary(auth.uid())))
+ALTER POLICY "Admin or Secretary insert installation rule" ON public.installation_rule_settings WITH CHECK ((unit_id = public.my_unit()) AND (has_role(auth.uid(), 'admin'::app_role) OR is_lodge_secretary(auth.uid())));
+-- ORIGINAL: "Admin or Secretary update installation rule" PERMISSIVE UPDATE TO authenticated USING ((unit_id = current_unit_id()) AND (has_role(auth.uid(), 'admin'::app_role) OR is_lodge_secretary(auth.uid()))) WITH CHECK ((unit_id = current_unit_id()) AND (has_role(auth.uid(), 'admin'::app_role) OR is_lodge_secretary(auth.uid())))
+ALTER POLICY "Admin or Secretary update installation rule" ON public.installation_rule_settings USING ((unit_id = public.my_unit()) AND (has_role(auth.uid(), 'admin'::app_role) OR is_lodge_secretary(auth.uid()))) WITH CHECK ((unit_id = public.my_unit()) AND (has_role(auth.uid(), 'admin'::app_role) OR is_lodge_secretary(auth.uid())));
+-- ORIGINAL: "Members read own unit installation rule" PERMISSIVE SELECT TO authenticated USING (unit_id = current_unit_id())
+ALTER POLICY "Members read own unit installation rule" ON public.installation_rule_settings USING (unit_id = public.my_unit());
