@@ -77,6 +77,28 @@ BEGIN
   out := out || CASE WHEN ok THEN 'PASS' ELSE 'FAIL' END || ' offices held shows the member''s own lodge appointment' || E'\n'; fails := fails + (NOT ok)::int;
   PERFORM set_config('request.jwt.claims', '', true);
 
+  -- 7 (Job CS). plain own-lodge member (no admin/Secretary/WM role) cannot insert, update or delete appointments
+  DECLARE plain uuid; n int; ins_ok boolean := false; tgt uuid; before_member uuid;
+  BEGIN
+    SELECT p.id INTO plain FROM public.profiles p WHERE p.status = 'active' AND p.unit_id = u
+       AND NOT EXISTS (SELECT 1 FROM public.user_roles r WHERE r.user_id = p.id AND r.role IN ('admin','secretary','worshipful_master'))
+       AND p.id NOT IN (x, blank_user) ORDER BY p.id LIMIT 1;
+    SELECT id, member_id INTO tgt, before_member FROM public.officer_appointments WHERE unit_id = u ORDER BY id LIMIT 1;
+    PERFORM set_config('request.jwt.claims', json_build_object('sub', plain, 'role', 'authenticated')::text, true);
+    PERFORM set_config('role', 'authenticated', true);
+    BEGIN
+      INSERT INTO public.officer_appointments (position_key, lodge_year, member_id, unit_id) VALUES ('steward', 2031, plain, u);
+    EXCEPTION WHEN insufficient_privilege THEN ins_ok := true; END;
+    UPDATE public.officer_appointments SET member_id = plain WHERE id = tgt; GET DIAGNOSTICS n = ROW_COUNT;
+    ok := plain IS NOT NULL AND ins_ok AND n = 0;
+    DELETE FROM public.officer_appointments WHERE id = tgt; GET DIAGNOSTICS n = ROW_COUNT;
+    ok := ok AND n = 0;
+    PERFORM set_config('role', 'postgres', true);
+    PERFORM set_config('request.jwt.claims', '', true);
+    ok := ok AND (SELECT member_id FROM public.officer_appointments WHERE id = tgt) IS NOT DISTINCT FROM before_member;
+    out := out || CASE WHEN ok THEN 'PASS' ELSE 'FAIL' END || ' CS: plain own-lodge member cannot insert/update/delete appointments' || E'\n'; fails := fails + (NOT ok)::int;
+  END;
+
   -- CP checks ---------------------------------------------------------------
   -- same office+year twice in one lodge refused
   ok := false;
