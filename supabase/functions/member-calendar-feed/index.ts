@@ -96,8 +96,6 @@ Deno.serve(async (req) => {
         .lte("event_date", toIso.slice(0, 10)),
       admin.from("units").select("id"),
     ]);
-    if (eventsRes.error) throw eventsRes.error;
-    if (meetingsRes.error) throw meetingsRes.error;
     if (loiRes.error) throw loiRes.error;
     if (publicRes.error) throw publicRes.error;
     if (unitsRes.error) throw unitsRes.error;
