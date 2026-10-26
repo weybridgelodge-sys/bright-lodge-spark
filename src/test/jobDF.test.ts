@@ -87,7 +87,7 @@ describe("JOB DG meeting-only titles", () => {
   });
   it("missing type falls back to Regular meeting; notes still the description", () => {
     expect(meetingOnly(null).summary).toBe("Meeting: Regular meeting");
-    const withNotes = vevents(buildFeed(scopeRows({ ...empty, meetings: [{ id: "g2", event_key: "k-g2", meeting_date: "2027-03-10", meeting_type: "regular", notes: "Order of business", status: "published", unit_id: "u1" }] }, "u1", false), LODGE, NOW))[0];
+    const withNotes = vevents(buildFeed(scopeRows({ ...empty, events: [], meetings: [{ id: "g2", event_key: "k-g2", meeting_date: "2027-03-10", meeting_type: "regular", notes: "Order of business", status: "published", unit_id: "u1" }] }, "u1", false), LODGE, NOW))[0];
     expect(withNotes.summary).toBe("Meeting: Regular meeting");
     expect(withNotes.desc).toBe("Order of business");
   });
