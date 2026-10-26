@@ -1170,6 +1170,34 @@
       "when": 1792982772137,
       "tag": "0166_officer_positions_unit_rls",
       "breakpoints": true
+    },
+    {
+      "idx": 167,
+      "version": "7",
+      "when": 1793012774530,
+      "tag": "0167_0167_officer_appointments_unit_rls",
+      "breakpoints": true
+    },
+    {
+      "idx": 168,
+      "version": "7",
+      "when": 1793012788043,
+      "tag": "0168_0168_visitor_contacts_unit_rls",
+      "breakpoints": true
+    },
+    {
+      "idx": 169,
+      "version": "7",
+      "when": 1793012799442,
+      "tag": "0169_0169_event_bookings_unit_rls",
+      "breakpoints": true
+    },
+    {
+      "idx": 170,
+      "version": "7",
+      "when": 1793012814311,
+      "tag": "0170_0170_event_accounts_unit_rls",
+      "breakpoints": true
     }
   ]
 }

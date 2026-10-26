@@ -133,7 +133,7 @@ BEGIN
   out := out || CASE WHEN ok THEN 'PASS' ELSE 'FAIL' END || ' CP: booking corrected to the account''s lodge (insert, update, service role)' || E'\n'; fails := fails + (NOT ok)::int;
 
   -- 8 (Job CS / 0166). officer_positions lodge rules
-  DECLARE orig_role text := top_role; n int; nb int; ins_ok boolean := false; newrow record; plain2 uuid;
+  DECLARE orig_role text := top_role; own_reps int := (SELECT count(*) FROM public.officer_positions WHERE unit_id = u); n int; nb int; ins_ok boolean := false; newrow record; plain2 uuid;
   BEGIN
     PERFORM set_config('role', orig_role, true); -- the CP block above left the role as service_role
     -- a lodge-B representative post (made as the session role, which bypasses the access rules)
@@ -145,8 +145,8 @@ BEGIN
     -- lodge A member reads 27 shared + 4 lodge rows
     PERFORM set_config('request.jwt.claims', json_build_object('sub', plain2, 'role', 'authenticated')::text, true);
     ok := (SELECT count(*) FROM public.officer_positions WHERE coalesce(btrim(unit_id),'') = '') = 27
-      AND (SELECT count(*) FROM public.officer_positions WHERE unit_id = u) = 4
-      AND (SELECT count(*) FROM public.officer_positions) = 31;
+      AND (SELECT count(*) FROM public.officer_positions WHERE unit_id = u) = own_reps
+      AND (SELECT count(*) FROM public.officer_positions) = 27 + own_reps;
     out := out || CASE WHEN ok THEN 'PASS' ELSE 'FAIL' END || ' CS: lodge member reads 27 shared + 4 own-lodge positions only' || E'
 '; fails := fails + (NOT ok)::int;
     -- blank-lodge member reads only the 27 shared
@@ -179,6 +179,78 @@ BEGIN
     PERFORM set_config('request.jwt.claims', '', true);
     ok := current_user = orig_role;
     out := out || CASE WHEN ok THEN 'PASS' ELSE 'FAIL' END || ' harness role restored to ' || current_user || E'\n'; fails := fails + (NOT ok)::int;
+  END;
+
+  -- 9 (Job CU / 0168-0170). two-lodge checks: lodge A admin vs lodge B rows
+  DECLARE orig_role text := top_role; adm uuid; accb uuid; vcb uuid; bkb uuid; vca uuid; bka uuid; acca uuid; tname text;
+          n int; ins_ok boolean; rd int; own int; err text;
+  BEGIN
+    PERFORM set_config('role', orig_role, true);
+    PERFORM set_config('request.jwt.claims', '', true);
+    SELECT r.user_id INTO adm FROM public.user_roles r JOIN public.profiles p ON p.id = r.user_id
+     WHERE r.role = 'admin' AND p.unit_id = u ORDER BY r.user_id LIMIT 1;
+    -- lodge B rows, made as the harness role
+    -- event_accounts take their lodge from the creator's profile (event_accounts_host_unit), so make it as a lodge B member
+    PERFORM set_config('request.jwt.claims', json_build_object('sub', x, 'role', 'authenticated')::text, true);
+    INSERT INTO public.event_accounts SELECT * FROM jsonb_populate_record(NULL::public.event_accounts,
+      (SELECT to_jsonb(e) || jsonb_build_object('id', gen_random_uuid(), 'slug', 'cu-test-' || gen_random_uuid(), 'unit_id', u2) FROM public.event_accounts e WHERE e.id = acc)) RETURNING id INTO accb;
+    PERFORM set_config('request.jwt.claims', '', true);
+    INSERT INTO public.visitor_contacts (email, unit_id) VALUES ('cu.lodgeb@example.invalid', u2) RETURNING id INTO vcb;
+    INSERT INTO public.event_bookings (event_id, payer_name) VALUES (accb, 'Cu Lodge B') RETURNING id INTO bkb;
+    PERFORM set_config('request.jwt.claims', json_build_object('sub', adm, 'role', 'authenticated')::text, true);
+    PERFORM set_config('role', 'authenticated', true);
+    FOREACH tname IN ARRAY ARRAY['visitor_contacts','event_bookings','event_accounts'] LOOP
+      -- read: lodge B hidden, own lodge visible
+      EXECUTE format('SELECT count(*) FROM public.%I WHERE unit_id = %L', tname, u2) INTO rd;
+      EXECUTE format('SELECT count(*) FROM public.%I WHERE unit_id = %L', tname, u) INTO own;
+      ok := adm IS NOT NULL AND rd = 0 AND own > 0;
+      out := out || CASE WHEN ok THEN 'PASS' ELSE 'FAIL' END || ' CU ' || tname || ': lodge A reads own rows, not lodge B' || E'\n'; fails := fails + (NOT ok)::int;
+      -- update/delete lodge B row: 0 rows
+      EXECUTE format('UPDATE public.%I SET unit_id = unit_id WHERE id = %L', tname,
+        CASE tname WHEN 'visitor_contacts' THEN vcb WHEN 'event_bookings' THEN bkb ELSE accb END); GET DIAGNOSTICS n = ROW_COUNT;
+      ok := n = 0;
+      EXECUTE format('DELETE FROM public.%I WHERE id = %L', tname,
+        CASE tname WHEN 'visitor_contacts' THEN vcb WHEN 'event_bookings' THEN bkb ELSE accb END); GET DIAGNOSTICS n = ROW_COUNT;
+      ok := ok AND n = 0;
+      out := out || CASE WHEN ok THEN 'PASS' ELSE 'FAIL' END || ' CU ' || tname || ': lodge A cannot update/delete lodge B row' || E'\n'; fails := fails + (NOT ok)::int;
+    END LOOP;
+    -- insert into lodge B refused
+    ins_ok := false; BEGIN INSERT INTO public.visitor_contacts (email, unit_id) VALUES ('cu.intob@example.invalid', u2);
+    EXCEPTION WHEN insufficient_privilege THEN ins_ok := true; END;
+    out := out || CASE WHEN ins_ok THEN 'PASS' ELSE 'FAIL' END || ' CU visitor_contacts: insert into lodge B refused' || E'\n'; fails := fails + (NOT ins_ok)::int;
+    ins_ok := false; BEGIN INSERT INTO public.event_bookings (event_id, payer_name) VALUES (accb, 'Cu Into B');
+    EXCEPTION WHEN insufficient_privilege THEN ins_ok := true; END;
+    out := out || CASE WHEN ins_ok THEN 'PASS' ELSE 'FAIL' END || ' CU event_bookings: insert into lodge B refused' || E'\n'; fails := fails + (NOT ins_ok)::int;
+    -- the host-lodge trigger rewrites unit_id to the caller's lodge, so a "lodge B" insert lands in lodge A (or is refused)
+    ins_ok := false; BEGIN
+      INSERT INTO public.event_accounts SELECT * FROM jsonb_populate_record(NULL::public.event_accounts,
+        (SELECT to_jsonb(e) || jsonb_build_object('id', gen_random_uuid(), 'slug', 'cu-test-' || gen_random_uuid(), 'unit_id', u2) FROM public.event_accounts e WHERE e.id = acc)) RETURNING unit_id INTO err;
+      ins_ok := err = u;
+    EXCEPTION WHEN insufficient_privilege THEN ins_ok := true; END;
+    out := out || CASE WHEN ins_ok THEN 'PASS' ELSE 'FAIL' END || ' CU event_accounts: cannot create a lodge B account (lands in own lodge)' || E'\n'; fails := fails + (NOT ins_ok)::int;
+    -- own lodge: insert, update, delete allowed
+    FOREACH tname IN ARRAY ARRAY['visitor_contacts','event_bookings','event_accounts'] LOOP
+      BEGIN
+        IF tname = 'visitor_contacts' THEN
+          INSERT INTO public.visitor_contacts (email, unit_id) VALUES ('cu.own@example.invalid', u) RETURNING id INTO vca;
+        ELSIF tname = 'event_bookings' THEN
+          INSERT INTO public.event_bookings (event_id, payer_name) VALUES (acc, 'Cu Own') RETURNING id INTO bka;
+        ELSE
+          INSERT INTO public.event_accounts SELECT * FROM jsonb_populate_record(NULL::public.event_accounts,
+            (SELECT to_jsonb(e) || jsonb_build_object('id', gen_random_uuid(), 'slug', 'cu-test-' || gen_random_uuid(), 'unit_id', u) FROM public.event_accounts e WHERE e.id = acc)) RETURNING id INTO acca;
+        END IF;
+        EXECUTE format('UPDATE public.%I SET unit_id = unit_id WHERE id = %L', tname,
+          CASE tname WHEN 'visitor_contacts' THEN vca WHEN 'event_bookings' THEN bka ELSE acca END); GET DIAGNOSTICS n = ROW_COUNT;
+        ok := n = 1;
+        EXECUTE format('DELETE FROM public.%I WHERE id = %L', tname,
+          CASE tname WHEN 'visitor_contacts' THEN vca WHEN 'event_bookings' THEN bka ELSE acca END); GET DIAGNOSTICS n = ROW_COUNT;
+        ok := ok AND n = 1; err := '';
+      EXCEPTION WHEN OTHERS THEN ok := false; err := ' (' || SQLSTATE || ': ' || left(SQLERRM, 80) || ')';
+      END;
+      out := out || CASE WHEN ok THEN 'PASS' ELSE 'FAIL' END || ' CU ' || tname || ': lodge A can insert/update/delete own row' || err || E'\n'; fails := fails + (NOT ok)::int;
+    END LOOP;
+    PERFORM set_config('role', orig_role, true);
+    PERFORM set_config('request.jwt.claims', '', true);
   END;
 
   RAISE EXCEPTION 'HARNESS fails=% %', fails, E'\n' || out;
