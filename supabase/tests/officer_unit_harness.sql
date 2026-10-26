@@ -8,8 +8,10 @@ DECLARE
   d date := DATE '2026-10-26';
   wm uuid; sec uuid; tre uuid; alm uuid; x uuid; blank_user uuid; ap record; acc uuid;
   m1 uuid; m3 uuid; b record; ok boolean; out text := ''; fails int := 0;
+  top_role text := current_user; -- the harness's own role, read at start; checks switch back to this
 BEGIN
   IF (SELECT count(*) FROM public.units) <> 1 THEN RAISE EXCEPTION 'harness expects exactly one real lodge'; END IF;
+  out := out || 'harness role at start: ' || top_role || E'\n';
   wm  := public.current_officer_holder('worshipful_master', d, u);
   sec := public.current_officer_holder('secretary', d, u);
   tre := public.current_officer_holder('treasurer', d, u);
@@ -78,7 +80,7 @@ BEGIN
   PERFORM set_config('request.jwt.claims', '', true);
 
   -- 7 (Job CS). plain own-lodge member (no admin/Secretary/WM role) cannot insert, update or delete appointments
-  DECLARE plain uuid; n int; ins_ok boolean := false; tgt uuid; before_member uuid;
+  DECLARE plain uuid; n int; ins_ok boolean := false; tgt uuid; before_member uuid; orig_role text := top_role;
   BEGIN
     SELECT p.id INTO plain FROM public.profiles p WHERE p.status = 'active' AND p.unit_id = u
        AND NOT EXISTS (SELECT 1 FROM public.user_roles r WHERE r.user_id = p.id AND r.role IN ('admin','secretary','worshipful_master'))
@@ -93,10 +95,10 @@ BEGIN
     ok := plain IS NOT NULL AND ins_ok AND n = 0;
     DELETE FROM public.officer_appointments WHERE id = tgt; GET DIAGNOSTICS n = ROW_COUNT;
     ok := ok AND n = 0;
-    PERFORM set_config('role', 'postgres', true);
+    PERFORM set_config('role', orig_role, true);
     PERFORM set_config('request.jwt.claims', '', true);
-    ok := ok AND (SELECT member_id FROM public.officer_appointments WHERE id = tgt) IS NOT DISTINCT FROM before_member;
-    out := out || CASE WHEN ok THEN 'PASS' ELSE 'FAIL' END || ' CS: plain own-lodge member cannot insert/update/delete appointments' || E'\n'; fails := fails + (NOT ok)::int;
+    ok := ok AND (SELECT member_id FROM public.officer_appointments WHERE id = tgt) IS NOT DISTINCT FROM before_member AND current_user = orig_role;
+    out := out || CASE WHEN ok THEN 'PASS' ELSE 'FAIL' END || ' CS: plain own-lodge member cannot insert/update/delete appointments (role back to ' || current_user || ')' || E'\n'; fails := fails + (NOT ok)::int;
   END;
 
   -- CP checks ---------------------------------------------------------------
@@ -129,6 +131,55 @@ BEGIN
   INSERT INTO public.event_bookings (event_id, payer_name, unit_id) VALUES (acc, 'Cq Service', u2) RETURNING * INTO b;
   ok := ok AND b.unit_id = u;
   out := out || CASE WHEN ok THEN 'PASS' ELSE 'FAIL' END || ' CP: booking corrected to the account''s lodge (insert, update, service role)' || E'\n'; fails := fails + (NOT ok)::int;
+
+  -- 8 (Job CS / 0166). officer_positions lodge rules
+  DECLARE orig_role text := top_role; n int; nb int; ins_ok boolean := false; newrow record; plain2 uuid;
+  BEGIN
+    PERFORM set_config('role', orig_role, true); -- the CP block above left the role as service_role
+    -- a lodge-B representative post (made as the session role, which bypasses the access rules)
+    INSERT INTO public.officer_positions (key, label, order_index, category, unit_id) VALUES ('rep_cs_lodge_b', 'CS Lodge B Rep', 300, 'representative', u2);
+    SELECT p.id INTO plain2 FROM public.profiles p WHERE p.status = 'active' AND p.unit_id = u
+       AND NOT EXISTS (SELECT 1 FROM public.user_roles r WHERE r.user_id = p.id AND r.role IN ('admin','secretary'))
+       AND NOT public.is_lodge_secretary(p.id) AND p.id NOT IN (x, blank_user) ORDER BY p.id LIMIT 1;
+    PERFORM set_config('role', 'authenticated', true);
+    -- lodge A member reads 27 shared + 4 lodge rows
+    PERFORM set_config('request.jwt.claims', json_build_object('sub', plain2, 'role', 'authenticated')::text, true);
+    ok := (SELECT count(*) FROM public.officer_positions WHERE coalesce(btrim(unit_id),'') = '') = 27
+      AND (SELECT count(*) FROM public.officer_positions WHERE unit_id = u) = 4
+      AND (SELECT count(*) FROM public.officer_positions) = 31;
+    out := out || CASE WHEN ok THEN 'PASS' ELSE 'FAIL' END || ' CS: lodge member reads 27 shared + 4 own-lodge positions only' || E'
+'; fails := fails + (NOT ok)::int;
+    -- blank-lodge member reads only the 27 shared
+    PERFORM set_config('request.jwt.claims', json_build_object('sub', blank_user, 'role', 'authenticated')::text, true);
+    ok := (SELECT count(*) FROM public.officer_positions) = 27
+      AND (SELECT count(*) FROM public.officer_positions WHERE coalesce(btrim(unit_id),'') <> '') = 0;
+    out := out || CASE WHEN ok THEN 'PASS' ELSE 'FAIL' END || ' CS: blank-lodge member reads only the 27 shared positions' || E'
+'; fails := fails + (NOT ok)::int;
+    -- lodge A Secretary cannot rename or insert a lodge-B representative row
+    PERFORM set_config('request.jwt.claims', json_build_object('sub', sec, 'role', 'authenticated')::text, true);
+    UPDATE public.officer_positions SET label = 'Hijacked' WHERE key = 'rep_cs_lodge_b'; GET DIAGNOSTICS n = ROW_COUNT;
+    BEGIN
+      INSERT INTO public.officer_positions (key, label, order_index, category, unit_id) VALUES ('rep_cs_into_b', 'Into B', 310, 'representative', u2);
+    EXCEPTION WHEN insufficient_privilege THEN ins_ok := true; END;
+    UPDATE public.officer_positions SET label = 'Shared hijack' WHERE key = 'worshipful_master'; GET DIAGNOSTICS nb = ROW_COUNT;
+    ok := sec IS NOT NULL AND n = 0 AND ins_ok AND nb = 0;
+    -- Rename and Deactivate work on the four own-lodge rows
+    UPDATE public.officer_positions SET label = label || ' (CS)' WHERE key IN ('rep_royal_arch','rep_petitions','rep_sports','rep_halls'); GET DIAGNOSTICS n = ROW_COUNT;
+    ok := ok AND n = 4;
+    UPDATE public.officer_positions SET active = false WHERE key IN ('rep_royal_arch','rep_petitions','rep_sports','rep_halls'); GET DIAGNOSTICS n = ROW_COUNT;
+    ok := ok AND n = 4;
+    out := out || CASE WHEN ok THEN 'PASS' ELSE 'FAIL' END || ' CS: Secretary renames/deactivates own 4 rows; cannot touch lodge-B or shared rows' || E'
+'; fails := fails + (NOT ok)::int;
+    -- a new post with no unit_id gets the caller's lodge
+    INSERT INTO public.officer_positions (key, label, order_index, category) VALUES ('rep_cs_new', 'CS New Rep', 340, 'representative') RETURNING * INTO newrow;
+    ok := newrow.unit_id = u;
+    out := out || CASE WHEN ok THEN 'PASS' ELSE 'FAIL' END || ' CS: new representative post with no lodge gets the caller''s lodge' || E'
+'; fails := fails + (NOT ok)::int;
+    PERFORM set_config('role', orig_role, true);
+    PERFORM set_config('request.jwt.claims', '', true);
+    ok := current_user = orig_role;
+    out := out || CASE WHEN ok THEN 'PASS' ELSE 'FAIL' END || ' harness role restored to ' || current_user || E'\n'; fails := fails + (NOT ok)::int;
+  END;
 
   RAISE EXCEPTION 'HARNESS fails=% %', fails, E'\n' || out;
 END $$;
