@@ -24,6 +24,8 @@ import { buildProfilePoints } from "@/pages/JoinUs";
 import FAQ, { eligibilityAnswer } from "@/pages/FAQ";
 
 const wrap = (ui: React.ReactNode) => render(<HelmetProvider><MemoryRouter>{ui}</MemoryRouter></HelmetProvider>);
+class IO { observe() {} unobserve() {} disconnect() {} takeRecords() { return []; } }
+(globalThis as any).IntersectionObserver ??= IO;
 beforeEach(() => { resetSharedLodgeFigures(); state.rpc = []; state.figures = { youngest_age: 32, oldest_age: 82 }; });
 
 describe("live age range", () => {
