@@ -135,3 +135,17 @@ export async function within<T>(p: Promise<T>, ms: number, fallback: T): Promise
     return await Promise.race([p.catch(() => fallback), new Promise<T>((r) => { timer = setTimeout(() => r(fallback), ms) as unknown as number; })]);
   } finally { clearTimeout(timer); }
 }
+
+/** Header identity when no lodge is known: text-only, neutral wording. */
+export const TEXT_ONLY_BRAND = { lodgeName: NEUTRAL_SITE_NAME, lodgeNumber: "" };
+
+/** Everything one sign-in email needs from its lodge, built per send (never stored). */
+export function authRenderContext(b: AuthBrand | null, lastResortSiteUrl: string) {
+  return {
+    brand: b ? { crestUrl: b.crestUrl, lodgeName: b.lodgeName, lodgeNumber: b.lodgeNumber, provinceName: b.provinceName } : TEXT_ONLY_BRAND,
+    siteName: siteNameFor(b),
+    siteUrl: siteUrlFor(b, lastResortSiteUrl),
+    senderName: senderDisplayName(b),
+  };
+}
+export type AuthRenderContext = ReturnType<typeof authRenderContext>;
