@@ -7,6 +7,7 @@ import { motion, useReducedMotion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { resolveSiteUnit } from "@/lib/siteUnit";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface OfficerRow {
