@@ -1,5 +1,8 @@
 import { expect, test, type Page } from "@playwright/test";
 import { expectNoAxeViolations } from "./helpers/axe";
+import { mockSiteUnit } from "./helpers/siteUnit";
+
+test.beforeEach(async ({ page }) => { await mockSiteUnit(page, "layout-test-unit"); });
 
 // Mocked public lookups only (synthetic lodge); Lodge Profile figures + venue at 320px.
 const unit = { lodge_name: "Sample Lodge", lodge_number: "1234", consecration_year: "1950", consecration_date: "1950-03-02", province_name: "Province of Sampleshire",

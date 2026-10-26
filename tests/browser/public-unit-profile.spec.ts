@@ -1,5 +1,8 @@
 import { expect, test } from "@playwright/test";
 import { expectNoAxeViolations } from "./helpers/axe";
+import { mockSiteUnit } from "./helpers/siteUnit";
+
+test.beforeEach(async ({ page }) => { await mockSiteUnit(page, "layout-test-unit"); });
 
 // Mocked public lookup only; checks header/footer render from the unit record at 320px.
 test("header and footer read the unit record at 320px", async ({ page }) => {

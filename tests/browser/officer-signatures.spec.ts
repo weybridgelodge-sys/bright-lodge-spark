@@ -16,6 +16,7 @@ async function mock(page: Page, on: boolean, hasSig = false) {
 
 async function scribble(page: Page) {
   const pad = page.getByLabel(/Signature pad/);
+  await pad.scrollIntoViewIfNeeded();
   const b = (await pad.boundingBox())!;
   await page.mouse.move(b.x + 20, b.y + b.height / 2);
   await page.mouse.down();

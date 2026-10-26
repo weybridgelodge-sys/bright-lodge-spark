@@ -1,5 +1,8 @@
 import { expect, test } from "@playwright/test";
 import { expectNoAxeViolations } from "./helpers/axe";
+import { mockSiteUnit } from "./helpers/siteUnit";
+
+test.beforeEach(async ({ page }) => { await mockSiteUnit(page, "layout-test-unit"); });
 
 const noOverflow = async (page: import("@playwright/test").Page) =>
   expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);

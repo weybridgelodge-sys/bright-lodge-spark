@@ -13,7 +13,13 @@ vi.mock("@/integrations/supabase/client", () => ({
 import { loadBookingDetails } from "@/lib/bookingDetails";
 import { resetSiteUnit, resolveSiteUnit } from "@/lib/siteUnit";
 
-beforeEach(() => { state.rpc = []; resetSiteUnit(); });
+beforeEach(() => {
+  state.rpc = []; resetSiteUnit();
+  // Site lookup is a plain fetch to resolve-site-unit since Job DB2.
+  vi.stubEnv("VITE_SUPABASE_URL", "https://example.test");
+  vi.stubEnv("VITE_SUPABASE_PUBLISHABLE_KEY", "anon");
+  vi.stubGlobal("fetch", async () => new Response(JSON.stringify({ unit_id: state.site }), { status: 200 }));
+});
 
 describe("booking details use the site's lodge", () => {
   it("lodge B site gets lodge B", async () => {

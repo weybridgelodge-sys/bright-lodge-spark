@@ -4,6 +4,7 @@ import { readFileSync } from "node:fs";
 import { render, waitFor } from "@testing-library/react";
 import { useUnitProfile } from "@/lib/unitProfile";
 import { __resetUnitProfileFetch, fetchUnitProfileRow } from "@/lib/unitProfileFetch";
+import { __resetSiteUnitFetch } from "@/lib/siteUnitFetch";
 
 const row = { lodge_name: "Testbury Lodge", lodge_number: "1234", venue_name: "Test Hall" };
 
@@ -14,6 +15,7 @@ function Probe({ id }: { id: string }) {
 
 beforeEach(() => {
   __resetUnitProfileFetch();
+  __resetSiteUnitFetch();
   sessionStorage.clear();
   localStorage.clear();
   vi.stubEnv("VITE_SUPABASE_URL", "https://example.test");
@@ -22,12 +24,15 @@ beforeEach(() => {
 
 describe("public unit profile startup", () => {
   it("Header, Footer and NextMeeting consumers share one request", async () => {
-    const f = vi.fn(async () => new Response(JSON.stringify(row), { status: 200 }));
+    const f = vi.fn(async (url: string) => new Response(JSON.stringify(String(url).includes("resolve-site-unit") ? { unit_id: "test-unit" } : row), { status: 200 }));
     vi.stubGlobal("fetch", f);
     void fetchUnitProfileRow(); // main.tsx early start
     const r = render(<><Probe id="h" /><Probe id="f" /><Probe id="n" /></>);
     await waitFor(() => expect(r.getByTestId("n").textContent).toBe("Testbury Lodge"));
-    expect(f).toHaveBeenCalledTimes(1);
+    // Job DB2: one site lookup, then one profile request for that lodge.
+    expect(f).toHaveBeenCalledTimes(2);
+    expect(String(f.mock.calls[0][0])).toContain("resolve-site-unit");
+    expect(JSON.parse((f.mock.calls[1] as any)[1].body)).toEqual({ _unit: "test-unit" });
     expect(JSON.parse(localStorage.getItem("unit-profile-last-good-v1")!).lodge_name).toBe("Testbury Lodge");
   });
 
