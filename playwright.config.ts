@@ -7,14 +7,14 @@ export default defineConfig({
   workers: 1,
   reporter: "line",
   use: {
-    baseURL: "http://127.0.0.1:4173",
+    baseURL: "http://localhost:4173", // host must be in unit_domains (resolve-site-unit)
     viewport: { width: 320, height: 900 },
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
   },
   webServer: {
     command: "bunx vite --mode e2e --host 127.0.0.1 --port 4173",
-    url: "http://127.0.0.1:4173",
+    url: "http://localhost:4173",
     reuseExistingServer: true,
     timeout: 120_000,
   },

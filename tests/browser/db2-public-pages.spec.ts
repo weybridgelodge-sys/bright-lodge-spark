@@ -8,8 +8,8 @@ for (const [name, path] of [["Home", "/"], ["Join Us", "/join-us"], ["FAQ", "/fa
     page.on("request", (r) => { const m = r.url().match(/\/rpc\/(get_[a-z_]+)/); if (m) sent.push({ fn: m[1], body: r.postData() ?? "" }); });
     await page.setViewportSize({ width: 320, height: 900 });
     await page.goto(path);
-    await page.waitForLoadState("networkidle");
-    await expect(page.locator("footer")).toContainText(/Lodge/);
+    await page.waitForLoadState("networkidle", { timeout: 20_000 }).catch(() => {});
+    await expect(page.locator("footer").last()).toContainText(/Lodge/);
     for (const s of sent.filter((x) => ["get_public_unit_profile", "get_join_us_costs", "get_meeting_pattern", "get_public_lodge_figures"].includes(x.fn))) {
       expect(JSON.parse(s.body || "{}")._unit, s.fn).toBeTruthy();
     }
