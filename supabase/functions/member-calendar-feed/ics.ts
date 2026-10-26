@@ -263,7 +263,7 @@ export function buildFeed(r: FeedRows, c: FeedLodge, now: Date = new Date()): st
     });
   }
 
-  for (const l of loiFromSchedule(r.loi)) cal.push(l);
+  for (const l of loiFromSchedule(r.loi, c)) cal.push(l);
 
   for (const row of upcomingPublicCalendarRows(r.publicRows as PublicCalendarRow[])) {
     const matching = cal.filter((e) => matchesPublicCalendarEvent(row, {
