@@ -5,7 +5,6 @@ DECLARE
   member_u uuid := '40192a1a-1990-48a5-b360-f67ce5c965d8';
   out text := ''; pass int := 0; fail int := 0; u text; mid uuid; ev uuid := gen_random_uuid(); d date;
   home text;
-  PROCEDURE_ok boolean;
 BEGIN
   SELECT unit_id INTO home FROM public.profiles WHERE id = admin_u;
   INSERT INTO public.units(id, name) VALUES ('zz_db3', 'DB3 Harness Lodge') ON CONFLICT DO NOTHING;
