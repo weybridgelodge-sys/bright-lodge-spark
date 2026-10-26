@@ -8,7 +8,7 @@ DECLARE
   d date; dates date[]; u text := (SELECT min(id) FROM public.units);
   r record;
 BEGIN
-  dates := ARRAY(SELECT make_date(y, 12, 1) FROM generate_series(2020, 2027) y) || (now() AT TIME ZONE 'Europe/London')::date;
+  dates := ARRAY(SELECT make_date(y, 12, 1) FROM generate_series(2020, 2027) y) || DATE '2026-10-26'; -- fixed: baseline date
   -- 1. holders, with and without the unit argument
   FOR r IN SELECT key FROM public.officer_positions ORDER BY key LOOP
     FOREACH d IN ARRAY dates LOOP
