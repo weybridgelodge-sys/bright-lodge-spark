@@ -80,7 +80,7 @@ for (const width of [320, 360]) {
       await page.setViewportSize({ width, height: 760 });
       await page.route("**/rest/v1/**", (r) => r.request().method() === "GET" ? r.fulfill({ json: [] }) : r.continue());
       await page.route("**/rest/v1/charity_festival_settings**", (r) => r.fulfill({ json: null }));
-      await page.goto("/members/admin/charity?kbdebug=1");
+      await page.goto("/members/admin/charity");
       const tabBtn = page.getByRole("tab", { name: /Collections/i });
       if (!(await tabBtn.waitFor({ timeout: 25000 }).then(() => true).catch(() => false))) test.skip(true, "Synthetic identity cannot open Charity Steward");
       await tabBtn.click();
@@ -121,7 +121,6 @@ for (const width of [320, 360]) {
       expect(dom.scrollers).toEqual(["dialog"]);
       expect(dom.focusedClass).toBe(true);
       expect(dom.pb).toBeGreaterThanOrEqual(visBottom * 0.5 - 1);
-      await expect(page.getByTestId("kbdebug")).toContainText("vv.h:");
       await expectNoAxeViolations(page, `CE ${mode} ${width}`);
       await page.screenshot({ path: `/tmp/browser/ce-${mode}-${width}.png` });
     });

@@ -8,7 +8,6 @@ import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-route
 import NoindexGuard from "./components/NoindexGuard";
 import ScrollToTop from "./components/ScrollToTop";
 import ScrollToTopButton from "./components/ScrollToTopButton";
-import KbDebug from "./components/KbDebug";
 import Index from "./pages/Index";
 
 // Lazy-load everything except the landing page to keep the initial bundle tiny.
@@ -88,7 +87,6 @@ const App = () => (
     <TooltipProvider>
       <DeferredToasters />
       <NoindexGuard />
-      <KbDebug />
       <BrowserRouter>
         <AppErrorBoundary>
         <ScrollToTop />
