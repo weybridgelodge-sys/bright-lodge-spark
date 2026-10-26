@@ -16,8 +16,8 @@ export function repSlugKey(label: string, suffix: string): string {
   return `rep_${slug}_${suffix}`;
 }
 
-export default function RepresentativesBoard({ year, members, canEdit, unitId }: {
-  year: number; members: MemberOpt[]; canEdit: boolean; unitId: string | null;
+export default function RepresentativesBoard({ year, members, canEdit }: {
+  year: number; members: MemberOpt[]; canEdit: boolean;
 }) {
   const [positions, setPositions] = useState<PositionRow[]>([]);
   const [appts, setAppts] = useState<Appt[]>([]);
@@ -29,12 +29,13 @@ export default function RepresentativesBoard({ year, members, canEdit, unitId }:
       (supabase.from as any)("officer_positions").select(POSITION_SELECT).eq("category", "representative").order("order_index"),
       (supabase.from as any)("officer_appointments").select("id,position_key,member_id,display_name,lodge_year").order("lodge_year", { ascending: false }),
     ]);
-    const rows = ((p.data ?? []) as PositionRow[]).filter((x) => !x.unit_id || !unitId || x.unit_id === unitId);
+    // Access rules already limit rows to shared offices + the caller's own lodge.
+    const rows = (p.data ?? []) as PositionRow[];
     setPositions(rows);
     const keys = new Set(rows.map((r) => r.key));
     setAppts(((a.data ?? []) as Appt[]).filter((x) => keys.has(x.position_key)));
   };
-  useEffect(() => { load(); }, [unitId]);
+  useEffect(() => { load(); }, []);
 
   const nameOf = useMemo(() => Object.fromEntries(members.map((m) => [m.id, m.label])), [members]);
   const holderText = (x: Appt) => (x.member_id ? nameOf[x.member_id] ?? "Former member" : x.display_name || "Vacant");
@@ -57,12 +58,13 @@ export default function RepresentativesBoard({ year, members, canEdit, unitId }:
 
   const addPosition = async () => {
     const label = newLabel.trim();
-    if (!label || !unitId) return;
+    if (!label) return;
     const { data: mx } = await (supabase.from as any)("officer_positions").select("order_index").order("order_index", { ascending: false }).limit(1);
     const next = ((mx?.[0]?.order_index as number) ?? 0) + 10;
+    // No unit_id: the database fills the caller's lodge and checks it.
     await run(async () => (supabase.from as any)("officer_positions").insert({
       key: repSlugKey(label, Date.now().toString(36)), label, order_index: next, is_progressive: false,
-      category: "representative", unit_id: unitId, include_in: { summons: true, provincial_return: true },
+      category: "representative", include_in: { summons: true, provincial_return: true },
     }), "Representative position added");
     setNewLabel("");
   };
@@ -120,7 +122,7 @@ export default function RepresentativesBoard({ year, members, canEdit, unitId }:
             <span className={fieldLabelCls}>New representative position</span>
             <input className={fieldCls} value={newLabel} onChange={(e) => setNewLabel(e.target.value)} placeholder="e.g. Lodge representative to the Province" />
           </label>
-          <button type="button" onClick={addPosition} disabled={busy || !newLabel.trim() || !unitId}
+          <button type="button" onClick={addPosition} disabled={busy || !newLabel.trim()}
             className="min-h-[44px] rounded-md bg-gold px-4 text-sm font-medium text-navy disabled:opacity-60">Add position</button>
         </div>
       )}

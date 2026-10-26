@@ -390,7 +390,6 @@ export default function OfficersTracker() {
               year={currentYear}
               members={members.map((m) => ({ id: m.id, label: memberLabel(m) }))}
               canEdit={isAdmin || isSecretary}
-              unitId={((profile as { unit_id?: string | null } | null)?.unit_id) ?? null}
             />
           </>
         )}
@@ -426,7 +425,6 @@ export default function OfficersTracker() {
               year={currentYear}
               members={members.map((m) => ({ id: m.id, label: memberLabel(m) }))}
               canEdit={isAdmin || isSecretary}
-              unitId={((profile as { unit_id?: string | null } | null)?.unit_id) ?? null}
             />
           </>
         )}
