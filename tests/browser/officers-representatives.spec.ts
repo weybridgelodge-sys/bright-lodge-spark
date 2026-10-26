@@ -33,4 +33,14 @@ test("Representatives group at 320px", { timeout: 90_000 }, async ({ page }) => 
   }
   await expectNoAxeViolations(page, "officers with representatives");
   await page.getByRole("heading", { name: "Representatives" }).screenshot({ path: "/tmp/browser/reps-320.png" });
+  // Job CT: Add position enabled once a name is typed (no lodge needed in the browser)
+  const name = page.getByLabel("New representative position");
+  if (await name.isVisible()) {
+    const add = page.getByRole("button", { name: "Add position" });
+    await expect(add).toBeDisabled();
+    await name.fill("Lodge representative to the Province");
+    await expect(add).toBeEnabled();
+    await expectNoAxeViolations(page, "representatives add form filled");
+    await page.locator("[aria-labelledby=reps-heading]").screenshot({ path: "/tmp/browser/reps-add-320.png" });
+  }
 });
