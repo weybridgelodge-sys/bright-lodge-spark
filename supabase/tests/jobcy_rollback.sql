@@ -1,0 +1,24 @@
+-- JOB CY rollback: undo 0173 (drop blank CHECKs, drop NOT NULL, drop event_accounts_fill_unit).
+ALTER TABLE public.candidates DROP CONSTRAINT candidates_unit_id_not_blank;
+ALTER TABLE public.candidates ALTER COLUMN unit_id DROP NOT NULL;
+ALTER TABLE public.event_accounts DROP CONSTRAINT event_accounts_unit_id_not_blank;
+ALTER TABLE public.event_accounts ALTER COLUMN unit_id DROP NOT NULL;
+ALTER TABLE public.event_bookings DROP CONSTRAINT event_bookings_unit_id_not_blank;
+ALTER TABLE public.event_bookings ALTER COLUMN unit_id DROP NOT NULL;
+ALTER TABLE public.lodge_events DROP CONSTRAINT lodge_events_unit_id_not_blank;
+ALTER TABLE public.lodge_events ALTER COLUMN unit_id DROP NOT NULL;
+ALTER TABLE public.lodge_socials DROP CONSTRAINT lodge_socials_unit_id_not_blank;
+ALTER TABLE public.lodge_socials ALTER COLUMN unit_id DROP NOT NULL;
+ALTER TABLE public.loi_schedule_entries DROP CONSTRAINT loi_schedule_entries_unit_id_not_blank;
+ALTER TABLE public.loi_schedule_entries ALTER COLUMN unit_id DROP NOT NULL;
+ALTER TABLE public.officer_appointments DROP CONSTRAINT officer_appointments_unit_id_not_blank;
+ALTER TABLE public.officer_appointments ALTER COLUMN unit_id DROP NOT NULL;
+ALTER TABLE public.polls DROP CONSTRAINT polls_unit_id_not_blank;
+ALTER TABLE public.polls ALTER COLUMN unit_id DROP NOT NULL;
+ALTER TABLE public.secretary_returns DROP CONSTRAINT secretary_returns_unit_id_not_blank;
+ALTER TABLE public.secretary_returns ALTER COLUMN unit_id DROP NOT NULL;
+ALTER TABLE public.summonses DROP CONSTRAINT summonses_unit_id_not_blank;
+ALTER TABLE public.summonses ALTER COLUMN unit_id DROP NOT NULL;
+ALTER TABLE public.visitor_contacts DROP CONSTRAINT visitor_contacts_unit_id_not_blank;
+ALTER TABLE public.visitor_contacts ALTER COLUMN unit_id DROP NOT NULL;
+DROP TRIGGER event_accounts_fill_unit ON public.event_accounts;
