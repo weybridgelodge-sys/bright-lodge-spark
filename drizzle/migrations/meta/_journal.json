@@ -1247,6 +1247,13 @@
       "when": 1793024106327,
       "tag": "0177_jobdc_rep_post_remove",
       "breakpoints": true
+    },
+    {
+      "idx": 178,
+      "version": "7",
+      "when": 1793024814473,
+      "tag": "0178_jobdd_public_officers_skip_inactive",
+      "breakpoints": true
     }
   ]
 }
