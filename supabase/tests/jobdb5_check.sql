@@ -6,7 +6,6 @@ DECLARE
   admin_u uuid := 'de693c92-6f3d-49b6-afc3-406fc4c0acd9';
   member_u uuid := '40192a1a-1990-48a5-b360-f67ce5c965d8';
   home text; total int; homeN int; n int; pass int := 0; fail int := 0; out text := ''; rowj jsonb;
-  PROCEDURE_dummy int;
 BEGIN
   SELECT unit_id INTO home FROM public.profiles WHERE id = admin_u;
   EXECUTE format('SELECT count(*) FROM public.%I', t) INTO total;
