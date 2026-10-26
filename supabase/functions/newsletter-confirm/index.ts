@@ -15,9 +15,11 @@ const json = (b: unknown, status = 200) =>
 const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 const COLS = "id,email,confirmed,unsubscribed_at,confirm_token_hash,confirm_sent_at,unit_id";
 
-async function wmName(): Promise<string | null> {
+// WM of the subscriber's own lodge; blank lodge = no name (never a guessed lodge).
+async function wmName(unitId: string): Promise<string | null> {
+  if (!unitId) return null;
   try {
-    const { data: id, error } = await supabase.rpc("current_officer_holder", { _position_key: "worshipful_master" });
+    const { data: id, error } = await supabase.rpc("current_officer_holder", { _position_key: "worshipful_master", _unit: unitId });
     if (error || !id) return null;
     const { data: p } = await supabase.from("profiles")
       .select("full_name, first_name, last_name, is_past_master").eq("id", id as string).maybeSingle();
@@ -52,7 +54,7 @@ Deno.serve(async (req) => {
       },
       async sendWelcome(to, idempotencyKey, unitId) {
         const lodge = await loadLodgeSettings(unitId ?? undefined);
-        const sign = welcomeSignOff(await wmName(), lodge.formalSenderName);
+        const sign = welcomeSignOff(await wmName((unitId ?? "").trim()), lodge.formalSenderName);
         const r = await sendTransactionalEmail({
           templateName: "newsletter-welcome",
           recipientEmail: to,

@@ -113,8 +113,8 @@ Deno.serve(async (req) => {
   // Look up who signs the enquirer's confirmation (Secretary) and who is
   // named in the body as the caller (Membership Officer)
   // Officers in post today: Installation-to-Installation year, offices carry forward.
-  const secretary = await lookupOfficer(supabase, 'secretary', 'Lodge Secretary')
-  const membershipOfficer = await lookupOfficer(supabase, 'membership_officer', 'Membership Officer')
+  const secretary = await lookupOfficer(supabase, UNIT_ID, 'secretary', 'Lodge Secretary')
+  const membershipOfficer = await lookupOfficer(supabase, UNIT_ID, 'membership_officer', 'Membership Officer')
   console.log('Confirmation sign-off:', secretary, '| Body caller:', membershipOfficer)
 
   // 2) Confirmation to the enquirer
@@ -156,13 +156,14 @@ function json(body: unknown, status: number) {
 
 async function lookupOfficer(
   supabase: ReturnType<typeof createClient>,
+  unitId: string,
   positionKey: string,
   fallbackLabel: string,
 ): Promise<{ name: string; office: string }> {
   let name = ''
   let office = fallbackLabel
   try {
-    const { data: holder, error } = await supabase.rpc('current_officer_holder', { _position_key: positionKey })
+    const { data: holder, error } = await supabase.rpc('current_officer_holder', { _position_key: positionKey, _unit: unitId })
     if (error) console.error(`${positionKey} holder lookup error`, error)
     const memberId = (holder as string | null) ?? null
     if (!memberId) {

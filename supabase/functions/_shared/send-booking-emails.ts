@@ -72,9 +72,11 @@ function paymentStatusLabel(status?: string): string {
 async function lookupSecretarySignature(supabase: SupabaseClient, unitId?: string) {
   let secretaryName = ''
   let secretaryOffice = 'Lodge Secretary'
+  // Blank booking lodge = no Secretary lookup (never a guessed lodge); plain sign-off.
+  if (!unitId) return { secretaryName, secretaryOffice }
   try {
     // Secretary in post today (Installation year, carries forward).
-    const { data: holder } = await supabase.rpc('current_officer_holder', { _position_key: 'secretary', ...(unitId ? { _unit: unitId } : {}) })
+    const { data: holder } = await supabase.rpc('current_officer_holder', { _position_key: 'secretary', _unit: unitId })
     const memberId = (holder as string | null) ?? null
     if (memberId) {
       const { data: prof } = await supabase
