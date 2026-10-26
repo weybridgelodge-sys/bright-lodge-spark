@@ -22,6 +22,26 @@ BEGIN
    ORDER BY p.id LIMIT 1;
   SELECT p.id INTO blank_user FROM public.profiles p WHERE p.status = 'active' AND p.id NOT IN (x, wm, sec, tre, alm) ORDER BY p.id DESC LIMIT 1;
 
+  -- JOB CX: fallback removed. Exactly one lodge exists here.
+  PERFORM set_config('request.jwt.claims', '', true);
+  ok := public.officer_lookup_unit(NULL) IS NULL AND public.current_officer_holder('secretary', d) IS NULL
+        AND NOT EXISTS (SELECT 1 FROM public.get_officers_public());
+  out := out || CASE WHEN ok THEN 'PASS' ELSE 'FAIL' END || ' CX (a) one lodge + no session + no unit: lookup, holder, officers all empty' || E'\n'; fails := fails + (NOT ok)::int;
+  ok := public.officer_lookup_unit(u) = u AND public.current_officer_holder('secretary', d, u) = sec AND sec IS NOT NULL
+        AND EXISTS (SELECT 1 FROM public.get_officers_public(NULL, u));
+  out := out || CASE WHEN ok THEN 'PASS' ELSE 'FAIL' END || ' CX (b) explicit unit + no session: lodge data returned' || E'\n'; fails := fails + (NOT ok)::int;
+  PERFORM set_config('request.jwt.claims', json_build_object('sub', sec, 'role', 'authenticated')::text, true);
+  ok := public.officer_lookup_unit(NULL) = u AND public.current_officer_holder('secretary', d) = sec
+        AND EXISTS (SELECT 1 FROM public.get_officers_public(NULL, u));
+  out := out || CASE WHEN ok THEN 'PASS' ELSE 'FAIL' END || ' CX (c) signed-in caller unchanged (own lodge)' || E'\n'; fails := fails + (NOT ok)::int;
+  PERFORM set_config('request.jwt.claims', '', true);
+  ok := public.current_officer_holder('secretary', d, 'cx-unknown-lodge') IS NULL
+        AND NOT EXISTS (SELECT 1 FROM public.get_officers_public(NULL, 'cx-unknown-lodge'))
+        AND public.get_officers_public_year('cx-unknown-lodge') IS NULL;
+  out := out || CASE WHEN ok THEN 'PASS' ELSE 'FAIL' END || ' CX (d) unknown unit returns nothing' || E'\n'; fails := fails + (NOT ok)::int;
+  ok := public.get_officers_public_year() IS NULL AND (public.get_public_booking_details() IS NOT NULL);
+  out := out || CASE WHEN ok THEN 'PASS' ELSE 'FAIL' END || ' CX no-arg: officers year NULL, booking details still returned' || E'\n'; fails := fails + (NOT ok)::int;
+
   INSERT INTO public.units (id, name) VALUES (u2, 'CQ Test Lodge 2');
   UPDATE public.profiles SET unit_id = u2 WHERE id = x;
   SELECT * INTO ap FROM public.officer_appointments WHERE unit_id = u AND position_key = 'treasurer' AND member_id = tre ORDER BY lodge_year DESC LIMIT 1;
