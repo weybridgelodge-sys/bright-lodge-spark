@@ -9,7 +9,7 @@ BEGIN
   sec := public.current_officer_holder('secretary', DATE '2026-10-26');
   wm  := public.current_officer_holder('worshipful_master', DATE '2026-10-26');
   SELECT p.id INTO ord FROM public.profiles p
-   WHERE p.member_status = 'active'
+   WHERE p.status = 'active'
      AND NOT EXISTS (SELECT 1 FROM public.officer_positions op WHERE public.current_officer_holder(op.key, DATE '2026-10-26') = p.id)
    ORDER BY p.id LIMIT 1;
   FOR v IN SELECT * FROM (VALUES ('secretary', sec), ('wm', wm), ('ordinary', ord)) x(role, id) LOOP
