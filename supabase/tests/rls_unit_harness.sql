@@ -51,7 +51,7 @@ BEGIN
       EXECUTE 'RESET ROLE';
     END IF;
     -- 6. blank-lodge member sees nothing
-    UPDATE public.profiles SET unit_id = NULL WHERE id::text = admin_u;
+    UPDATE public.profiles SET unit_id = '' WHERE id::text = admin_u;
     EXECUTE 'SET LOCAL ROLE authenticated';
     EXECUTE format('SELECT count(*) FROM public.%I', t) INTO n2;
     out := out || ' blankLodge=' || n2 || CASE WHEN n2 = 0 THEN ' OK' ELSE ' FAIL' END;
