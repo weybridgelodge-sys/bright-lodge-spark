@@ -28,7 +28,7 @@ const liveEvents = [
 ];
 const feed = (meetings = liveMeetings, events = liveEvents) =>
   buildFeed(scopeRows({ ...empty, meetings, events }, "u1", false), LODGE, NOW);
-const vevents = (ics: string) => ics.split("BEGIN:VEVENT").slice(1).map((b) => ({
+const vevents = (raw: string) => raw.replace(/\r\n /g, "").split("BEGIN:VEVENT").slice(1).map((b) => ({
   uid: b.match(/UID:(\S+)/)![1], start: b.match(/DTSTART;TZID=Europe\/London:(\S+)/)![1],
   summary: b.match(/SUMMARY:(.*)/)![1].trim(), desc: b.match(/\nDESCRIPTION:(.*)\r?\nSTATUS/)?.[1] ?? "",
 }));
