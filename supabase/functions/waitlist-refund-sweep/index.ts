@@ -4,8 +4,10 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { createStripeClient, type StripeEnv } from '../_shared/stripe.ts'
 import { sendTransactionalEmail } from '../_shared/send-email.ts'
-import { loadLodgeSettings } from "../_shared/lodgeSettings.ts";
-import { bookingFirstName } from '../_shared/greeting.ts'
+import { loadLodgeSettingsStrict } from "../_shared/lodgeSettings.ts";
+import { forEachUnit, listActiveUnits, recordUnit } from "../_shared/units.ts";
+import { loadCallerUnit, noCallerUnitMessage, CROSS_UNIT_MESSAGE } from "../_shared/callerUnit.ts";
+import { runUnit } from "./run.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -31,6 +33,9 @@ Deno.serve(async (req) => {
     } catch { /* no body */ }
   }
 
+  const json = (b: unknown, status = 200) =>
+    new Response(JSON.stringify(b), { status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+  let manualUnits: string[] | null = null
   if (manualMeetingId) {
     // Require authenticated Secretary/WM/Admin for on-demand refunds.
     const authHeader = req.headers.get('Authorization') ?? ''
@@ -56,98 +61,33 @@ Deno.serve(async (req) => {
         status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
+    // Manual run acts on one meeting: only the caller's own lodge, and only that meeting's lodge.
+    const callerUnit = await loadCallerUnit(supabase, uid)
+    if (!callerUnit) return json({ error: noCallerUnitMessage('refund a waitlist') }, 403)
+    const { data: mt } = await supabase.from('festive_board_meetings').select('unit_id').eq('id', manualMeetingId).maybeSingle()
+    if (!mt) return json({ ok: true, units: [] })
+    const mu = recordUnit(mt.unit_id)
+    if (!mu) return json({ ok: true, units: [], skipped_no_unit: 1 })
+    if (mu !== callerUnit) return json({ error: CROSS_UNIT_MESSAGE }, 403)
+    manualUnits = [mu]
   }
 
 
-  let meetings: any[] = []
-  if (manualMeetingId) {
-    const { data, error } = await supabase
-      .from('festive_board_meetings')
-      .select('id, meeting_date, status, event_key')
-      .eq('id', manualMeetingId)
-    if (error) {
-      return new Response(JSON.stringify({ error: error.message }), {
-        status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      })
-    }
-    meetings = data ?? []
-  } else {
+  try {
     const today = new Date().toISOString().slice(0, 10)
-    const { data, error } = await supabase
-      .from('festive_board_meetings')
-      .select('id, meeting_date, status, event_key')
-      .or(`status.eq.completed,meeting_date.lt.${today}`)
-    if (error) {
-      return new Response(JSON.stringify({ error: error.message }), {
-        status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      })
+    const units = manualUnits ?? await listActiveUnits(supabase)
+    const refund = async (env: string, pi: string) => {
+      const stripe = createStripeClient(env as StripeEnv)
+      return await stripe.refunds.create({ payment_intent: pi })
     }
-    meetings = data ?? []
+    const outcomes = await forEachUnit(units, async (unitId) => {
+      const lodge = await loadLodgeSettingsStrict(unitId)
+      return runUnit({ db: supabase, send: sendTransactionalEmail as any, refund }, unitId, lodge, { manualMeetingId, today })
+    }, 'waitlist-refund-sweep')
+    const refunded = outcomes.reduce((n, o) => n + (o.ok ? o.result.refunded : 0), 0)
+    return json({ ok: true, refunded, units: outcomes })
+  } catch (e) {
+    console.error('waitlist-refund-sweep error', e)
+    return json({ error: e instanceof Error ? e.message : String(e) }, 500)
   }
-  const meetingIds = meetings.map((m: any) => m.id)
-  if (meetingIds.length === 0) {
-    return new Response(JSON.stringify({ ok: true, refunded: 0 }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    })
-  }
-
-  const { data: waitlisted } = await supabase
-    .from('bookings')
-    .select('id, contact_name, contact_email, event_label, meeting_id, details, total_pence, stripe_payment_intent_id, environment, waitlist_refunded_at')
-    .in('meeting_id', meetingIds)
-    .eq('payment_status', 'waitlisted')
-
-  let refunded = 0
-  const failures: any[] = []
-  for (const b of waitlisted ?? []) {
-    if (b.waitlist_refunded_at) continue
-    if (!b.stripe_payment_intent_id) {
-      // Nothing paid — just mark as refunded/no-op and move on
-      await supabase.from('bookings').update({
-        payment_status: 'waitlisted_refunded',
-        waitlist_refunded_at: new Date().toISOString(),
-      }).eq('id', b.id)
-      continue
-    }
-    try {
-      const stripe = createStripeClient(b.environment as StripeEnv)
-      const refund = await stripe.refunds.create({ payment_intent: b.stripe_payment_intent_id })
-      await supabase.from('bookings').update({
-        payment_status: 'waitlisted_refunded',
-        waitlist_refunded_at: new Date().toISOString(),
-        stripe_refund_id: refund.id,
-      }).eq('id', b.id)
-
-      // Send apology + refund confirmation
-      const firstName = bookingFirstName(b.details, b.contact_name) || undefined
-      const totalAmount = b.total_pence
-        ? new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' }).format(b.total_pence / 100)
-        : undefined
-      const meetingRow = (meetings ?? []).find((m: any) => m.id === b.meeting_id)
-      const eventDate = meetingRow?.meeting_date
-        ? new Date(meetingRow.meeting_date).toLocaleDateString('en-GB', {
-            weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Europe/London',
-          })
-        : ''
-      const lodge = await loadLodgeSettings()
-      await sendTransactionalEmail({
-          templateName: 'waitlist-refunded',
-          recipientEmail: b.contact_email,
-          idempotencyKey: `waitlist-refund-${b.id}`,
-          templateData: {
-            firstName, eventLabel: b.event_label, eventDate, totalAmount,
-            bookingRef: b.id.slice(0, 8),
-            crestUrl: lodge.crestImageUrl || null, lodgeName: lodge.lodgeName, lodgeNumber: lodge.lodgeNumber, provinceName: lodge.provinceName,
-          },
-      })
-      refunded++
-    } catch (e) {
-      console.error('refund failed', b.id, e)
-      failures.push({ id: b.id, error: e instanceof Error ? e.message : String(e) })
-    }
-  }
-
-  return new Response(JSON.stringify({ ok: true, refunded, failures }), {
-    status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-  })
 })

@@ -5,6 +5,8 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { sendTransactionalEmail } from "../_shared/send-email.ts";
 import { loadLodgeSettings } from "../_shared/lodgeSettings.ts";
+import { loadCallerUnit, noCallerUnitMessage } from "../_shared/callerUnit.ts";
+import { runUnit } from "./run.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -13,14 +15,7 @@ const corsHeaders = {
 };
 const json = (b: unknown, status = 200) =>
   new Response(JSON.stringify(b), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-// Site address from contacts.site_url only; blank = no link.
-let URL_BASE = "";
-let BRAND_ID: Record<string, unknown> = {};
-
 Deno.serve(async (req) => {
-  const lodge = await loadLodgeSettings();
-  URL_BASE = lodge.configuredSiteUrl;
-  BRAND_ID = { crestUrl: lodge.crestImageUrl || null, lodgeName: lodge.lodgeName, lodgeNumber: lodge.lodgeNumber, provinceName: lodge.provinceName, };
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   try {
     const URL_ = Deno.env.get("SUPABASE_URL")!;
@@ -28,16 +23,15 @@ Deno.serve(async (req) => {
     const userClient = createClient(URL_, Deno.env.get("SUPABASE_ANON_KEY")!, { global: { headers: { Authorization: req.headers.get("Authorization") ?? "" } } });
     const { data: { user } } = await userClient.auth.getUser();
     if (!user) return json({ error: "Unauthorized" }, 401);
+    // The caller's own lodge decides recipients, links and branding; blank = refuse.
+    const unitId = await loadCallerUnit(admin, user.id);
+    if (!unitId) return json({ error: noCallerUnitMessage("send audit notices") }, 403);
 
     const { approval_id } = await req.json().catch(() => ({}));
     if (!approval_id) return json({ error: "approval_id required" }, 400);
     const { data: a } = await admin.from("treasurer_year_approvals")
       .select("id,masonic_year,status,round_number,submitted_by").eq("id", approval_id).maybeSingle();
     if (!a) return json({ error: "Not found" }, 404);
-
-    const y = a.masonic_year as number;
-    const yearLabel = `FY ${y}/${String(y + 1).slice(2)}`;
-    const yearEnd = `30 September ${y + 1}`;
     const { data: sigs } = await admin.from("treasurer_year_signoffs")
       .select("officer_role,signed_by,decision,note").eq("approval_id", a.id).eq("round_number", a.round_number);
 
@@ -52,34 +46,9 @@ Deno.serve(async (req) => {
       if (q) { note = q.note ?? ""; actorId = q.signed_by; }
     } else return json({ ok: true, sent: 0 });
 
-    // Current holders by the officers' (Installation) year, carrying non-progressive offices forward.
-    const appts: { member_id: string; position_key: string }[] = [];
-    for (const key of roles) {
-      const { data: id } = await admin.rpc("current_officer_holder", { _position_key: key });
-      if (id) appts.push({ member_id: id as unknown as string, position_key: key });
-    }
-    const ids = [...new Set([...(appts ?? []).map((x: any) => x.member_id), ...(actorId ? [actorId] : [])])];
-    const { data: profs } = await admin.from("profiles").select("id,email,full_name").in("id", ids);
-    const actor = profs?.find((p: any) => p.id === actorId)?.full_name ?? "";
-    const OFFICE: Record<string, string> = { auditor_1: "Auditor", auditor_2: "Auditor", treasurer: "Treasurer" };
-
-    let sent = 0; const failures: string[] = [];
-    for (const ap of appts ?? []) {
-      const email = profs?.find((p: any) => p.id === ap.member_id)?.email;
-      if (!email) continue;
-      const res = await sendTransactionalEmail({
-        templateName: "year-audit-update",
-        recipientEmail: email,
-        idempotencyKey: `year-audit-${a.id}-r${a.round_number}-${kind}-${ap.member_id}`,
-        templateData: {
-          kind, yearLabel, yearEnd, round: a.round_number, actor, note, office: OFFICE[ap.position_key],
-          url: !URL_BASE ? undefined : kind === "review_needed" ? `${URL_BASE}/members` : `${URL_BASE}/members/admin/treasurer`,
-          ...BRAND_ID,
-        },
-      });
-      if (res.ok) sent++; else failures.push(email);
-    }
-    return json({ ok: true, sent, failures });
+    const lodge = await loadLodgeSettings(unitId);
+    const result = await runUnit({ db: admin, send: sendTransactionalEmail as any }, unitId, lodge, a, roles, kind, note, actorId);
+    return json({ ok: true, ...result });
   } catch (e) {
     console.error(e);
     return json({ error: (e as Error).message }, 500);

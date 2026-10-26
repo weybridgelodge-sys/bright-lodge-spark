@@ -6,6 +6,8 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { sendTransactionalEmail } from "../_shared/send-email.ts";
 import { loadLodgeSettings } from "../_shared/lodgeSettings.ts";
+import { loadCallerUnit, noCallerUnitMessage } from "../_shared/callerUnit.ts";
+import { runUnit } from "./run.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -61,84 +63,23 @@ Deno.serve(async (req) => {
       .maybeSingle();
     if (pErr || !poll) return json({ error: "Poll not found" }, 404);
 
-    const question = (poll as any).question as string;
-    const options = ((poll as any).options as string[]) ?? [];
-    const closesAt = (poll as any).closes_at as string | null;
-    const liveResults = (poll as any).results_visibility === "live";
-    const lodge = await loadLodgeSettings();
-    // Blank site address = no button (configuredSiteUrl has no fallback).
-    const dashboardUrl = lodge.configuredSiteUrl ? `${lodge.configuredSiteUrl}/members/dashboard` : "";
-
-    const isTest = !!test_recipient;
-    let recipients: { email: string; user_id: string | null }[] = [];
-    if (isTest) {
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(test_recipient!)) {
-        return json({ error: "Invalid test_recipient email" }, 400);
-      }
-      recipients = [{ email: test_recipient!, user_id: null }];
-    } else {
-      const { data: actives } = await admin
-        .from("profiles")
-        .select("id,email")
-        .eq("status", "active");
-      recipients = (actives ?? [])
-        .filter((p: any) => !!p.email)
-        .map((p: any) => ({ email: p.email, user_id: p.id }));
+    if (test_recipient && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(test_recipient)) {
+      return json({ error: "Invalid test_recipient email" }, 400);
     }
-
-    if (recipients.length === 0) return json({ ok: true, sent: 0, recipients: 0 });
-
-    const testRunId = isTest ? crypto.randomUUID() : "";
-    let sent = 0;
-    const failures: { email: string; error: string }[] = [];
-
-    for (const r of recipients) {
-      const idempotencyKey = isTest
-        ? `poll-open-${poll.id}-test-${testRunId}-${r.email}`
-        : `poll-open-${poll.id}-${r.email}`;
-      try {
-        const res = await sendTransactionalEmail({
-          templateName: "poll-opened",
-          recipientEmail: r.email,
-          idempotencyKey,
-          templateData: {
-            question,
-            options,
-            dashboardUrl,
-            closesAt,
-            liveResults,
-            crestUrl: lodge.crestImageUrl || null, lodgeName: lodge.lodgeName, lodgeNumber: lodge.lodgeNumber, provinceName: lodge.provinceName,
-          },
-        });
-        if (!res.ok) throw new Error(String((res.error as any) ?? `HTTP ${res.status}`));
-        sent++;
-      } catch (e) {
-        failures.push({ email: r.email, error: (e as Error).message });
-      }
-    }
-
-    // Fire-and-forget push notification. A push failure must never fail or
-    // block the email flow above.
-    if (!isTest) {
-      try {
-        const pushRes = await fetch(`${SUPABASE_URL}/functions/v1/send-push-notification`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json", Authorization: `Bearer ${SERVICE_ROLE}` },
-          body: JSON.stringify({
-            all_active: true,
-            title: "New poll",
-            body: question,
-            data: { type: "poll", poll_id: poll.id },
-          }),
-        });
-        const pushResult = await pushRes.json().catch(() => ({}));
-        console.log("notify-poll-opened push result", pushResult);
-      } catch (e) {
-        console.error("notify-poll-opened push failed (email flow unaffected)", (e as Error).message);
-      }
-    }
-
-    return json({ ok: true, test: isTest, sent, recipients: recipients.length, failures });
+    // The caller's own lodge decides recipients, links and branding; blank = refuse.
+    const unitId = await loadCallerUnit(admin, user.id);
+    if (!unitId) return json({ error: noCallerUnitMessage("send poll notices") }, 403);
+    const lodge = await loadLodgeSettings(unitId);
+    const push = async (b: Record<string, unknown>) => {
+      const r = await fetch(`${SUPABASE_URL}/functions/v1/send-push-notification`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${SERVICE_ROLE}` },
+        body: JSON.stringify(b),
+      });
+      return await r.json().catch(() => ({}));
+    };
+    const result = await runUnit({ db: admin, send: sendTransactionalEmail as any, push }, unitId, lodge, poll, test_recipient || null);
+    return json({ ok: true, ...result });
   } catch (e) {
     console.error(e);
     return json({ error: (e as Error).message }, 500);

@@ -14,13 +14,10 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors'
 import { sendTransactionalEmail } from '../_shared/send-email.ts'
-import { findMissing, idempotencyKey, isSendWindow } from './logic.ts'
-import { loadLodgeSettings } from "../_shared/lodgeSettings.ts";
-
-// Site address from contacts.site_url only; blank = no link.
-let SITE_URL = ''
-let BRAND_ID: Record<string, unknown> = {}
-let ADMIN_URL: string | undefined
+import { isSendWindow } from './logic.ts'
+import { loadLodgeSettingsStrict } from "../_shared/lodgeSettings.ts";
+import { forEachUnit, listActiveUnits } from "../_shared/units.ts";
+import { runUnit } from "./run.ts";
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
@@ -37,10 +34,6 @@ const londonToday = (): string =>
   }).format(new Date())
 
 Deno.serve(async (req) => {
-  const lodge = await loadLodgeSettings()
-  SITE_URL = lodge.configuredSiteUrl
-  BRAND_ID = { crestUrl: lodge.crestImageUrl || null, lodgeName: lodge.lodgeName, lodgeNumber: lodge.lodgeNumber, provinceName: lodge.provinceName, }
-  ADMIN_URL = SITE_URL ? `${SITE_URL}/members/admin` : undefined
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders })
 
   const url = new URL(req.url)
@@ -50,86 +43,23 @@ Deno.serve(async (req) => {
     const expected = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     const auth = req.headers.get('Authorization') ?? ''
     const token = auth.startsWith('Bearer ') ? auth.slice(7) : ''
-    const ok = !!expected && token === expected
-    if (!ok) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-        status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      })
-    }
+    if (!(!!expected && token === expected)) return json({ error: 'Unauthorized' }, 401)
   }
   if (!force && !dryRun && !isSendWindow(new Date())) {
     return json({ ok: true, skipped: true })
   }
 
   const supabase = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!)
-
   try {
-    const { data: rows, error } = await supabase
-      .from('profiles')
-      .select('id,full_name,preferred_name,first_name,last_name,title,status,initiation_date,ugle_reg_number')
-      .eq('status', 'active')
-      .not('initiation_date', 'is', null)
-    if (error) throw error
-
-    const missing = findMissing((rows ?? []) as any[])
-    if (missing.length === 0) {
-      console.log('secretary-ugle-reminder: nothing outstanding')
-      return json({ ok: true, sent: false, reason: 'nothing_outstanding' })
-    }
-
-    // ---- Resolve the current Secretary (same as the Almoner digest) ----
-    let secretaryEmail: string | null = null
-    const { data: holder } = await supabase.rpc('current_officer_holder', { _position_key: 'secretary' })
-    if (holder) {
-      const { data: prof } = await supabase.from('profiles').select('email').eq('id', holder as string).maybeSingle()
-      secretaryEmail = prof?.email ?? null
-    }
-    if (!secretaryEmail) {
-      const { data: rr } = await supabase
-        .from('user_roles').select('user_id').eq('role', 'secretary').limit(1).maybeSingle()
-      if (rr?.user_id) {
-        const { data: prof } = await supabase.from('profiles').select('email').eq('id', rr.user_id).maybeSingle()
-        secretaryEmail = prof?.email ?? null
-      }
-    }
-    if (!secretaryEmail) {
-      console.warn('secretary-ugle-reminder: no secretary recipient found; missing=', missing.length)
-      return json({ ok: false, error: 'no_secretary_recipient', missing: missing.length })
-    }
-
-    if (dryRun) {
-      return json({
-        ok: true,
-        dry_run: true,
-        // Public endpoint: counts only, no names, emails or numbers.
-        recipient_found: true,
-        missing: missing.length,
-      })
-    }
-
     const today = londonToday()
-    const key = force ? `secretary-ugle-${today}-force-${Date.now()}` : idempotencyKey(today, missing)
-    const resp = await sendTransactionalEmail({
-      templateName: 'secretary-ugle-missing',
-      recipientEmail: secretaryEmail,
-      idempotencyKey: key,
-      templateData: {
-        members: missing.map((m) => ({
-          name: m.name,
-          initiationLabel: m.initiationLabel,
-          url: ADMIN_URL ? `${ADMIN_URL}#member-${m.id}` : undefined,
-        })),
-        adminUrl: ADMIN_URL,
-        ...BRAND_ID,
-      },
-    })
-    if (!resp.ok) {
-      console.error('secretary-ugle-reminder send failed', resp.status, resp.error)
-      return json({ ok: false, error: 'send_failed', detail: resp.error }, 500)
-    }
-    console.log('secretary-ugle-reminder: sent', { recipient: secretaryEmail, missing: missing.length })
-    return json({ ok: true, sent: true, recipient: secretaryEmail, missing: missing.length })
+    const units = await listActiveUnits(supabase)
+    const outcomes = await forEachUnit(units, async (unitId) => {
+      const lodge = await loadLodgeSettingsStrict(unitId)
+      const r = await runUnit({ db: supabase, send: sendTransactionalEmail as any }, unitId, lodge, { force, dryRun, today })
+      // Public endpoint on dry runs: counts only, no names, emails or numbers.
+      return dryRun ? { ...r, recipient: undefined } : r
+    }, 'secretary-ugle-reminder')
+    return json({ ok: true, dry_run: dryRun || undefined, units: outcomes })
   } catch (err) {
     console.error('secretary-ugle-reminder error', err)
     return json({ ok: false, error: String(err) }, 500)
