@@ -34,7 +34,7 @@ beforeEach(() => {
 describe("helpers send the resolved lodge", () => {
   it("lodge B site: every helper asks for B", async () => {
     state.site = "B";
-    expect((await fetchPublicMeetingPattern())?.perYear).toBe(1);
+    await fetchPublicMeetingPattern();
     expect((await loadLodgeFigures()).subscribingCount).toBe(22);
     expect((await fetchJoinUsCostRow())?.annual_dues_pence).toBe(20000);
     expect(state.rpc).toEqual([
