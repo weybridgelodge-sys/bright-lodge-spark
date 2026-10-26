@@ -36,7 +36,6 @@ test("Representatives group at 320px", { timeout: 90_000 }, async ({ page }) => 
   await page.getByRole("heading", { name: "Representatives" }).screenshot({ path: "/tmp/browser/reps-320.png" });
   // Job DC: Remove on an inactive rep post (editors only) opens a confirm dialog that fits 320px
   const remove = page.getByRole("button", { name: /^Remove Former Lodge representative/ });
-  console.log("JOBDC remove visible:", await remove.isVisible());
   if (await remove.isVisible()) {
     await expect(page.getByRole("button", { name: /^Remove Masonic Sports/ })).toHaveCount(0);
     await remove.click();
