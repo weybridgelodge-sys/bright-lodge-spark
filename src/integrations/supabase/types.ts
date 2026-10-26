@@ -7956,6 +7956,7 @@ export type Database = {
         }
         Returns: string
       }
+      officer_lookup_unit: { Args: { _unit?: string }; Returns: string }
       officer_signatures_enabled: { Args: never; Returns: boolean }
       officer_year_at: { Args: { _at: string }; Returns: number }
       officer_year_start: { Args: { _year: number }; Returns: string }
