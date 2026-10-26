@@ -3,7 +3,6 @@ DO $$
 DECLARE
   m uuid; home text; other_n int; total int; out text := ''; pass int := 0; fail int := 0;
   r text; n int; nb int; yr text; v jsonb;
-  PROCEDURE_DUMMY int;
 BEGIN
   SELECT p.id, p.unit_id INTO m, home FROM public.profiles p
    WHERE p.status = 'active' AND NOT EXISTS (SELECT 1 FROM public.user_roles ur WHERE ur.user_id = p.id AND ur.role <> 'member')
