@@ -69,7 +69,7 @@ describe("secretary-returns-reminder uses the return's own unit", () => {
     secretary_returns: [row("own-b", "u2", "u1"), row("cand-a", "u1", null), row("cand-b", "u2", null), row("legacy", null, null)],
     profiles: [{ id: "sa", email: "sec@a", unit_id: "u1" }, { id: "sb", email: "sec@b", unit_id: "u2" }], user_roles: [],
   });
-  const H = { rpc: { current_officer_holder: (a: any) => (a.p_position_key === "secretary" ? (a.p_unit_id === "u1" ? "sa" : "sb") : null) } } as any;
+  const H = { current_officer_holder: (a: any) => (({ "u1:secretary": "sa", "u2:secretary": "sb" }) as any)[`${a._unit}:${a._position_key}`] ?? null };
   const run = async (u: string, single: boolean) => {
     const sent: any[] = [];
     const r = await returns.runUnit({ db: fakeDb(t(), H), send: async (x: any) => { sent.push(x); return { ok: true } as any; } } as any, u, lodge(u, `https://${u}.example`), { force: false, today: "2026-10-01", reportDate: "x", singleUnit: single });
