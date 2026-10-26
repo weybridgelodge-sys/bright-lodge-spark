@@ -33,7 +33,7 @@ interface ReauthenticationEmailProps {
   siteName?: string
 }
 
-export const ReauthenticationEmail = ({ token, siteName = 'Members Portal' }: ReauthenticationEmailProps) => (
+export const ReauthenticationEmail = ({ token, siteName = 'Members Portal', brand }: ReauthenticationEmailProps) => (
   <Html lang="en" dir="ltr">
     <Head />
     <Preview>Your {siteName} verification code</Preview>
