@@ -57,6 +57,15 @@ const STATUS_LABELS: Record<ReturnStatus, string> = {
 const currentLodgeYear = masonicYearStart();
 const MASONIC_YEAR_OPTIONS = Array.from({ length: 21 }, (_, i) => currentLodgeYear - 5 + i);
 
+/**
+ * Short label shown in a select trigger ("2026/27") so it never truncates in a
+ * half-width column on a phone. The dropdown keeps the full "Masonic year 2026/27".
+ */
+function yearTriggerLabel(value: string) {
+  const year = Number(value);
+  return value !== "" && Number.isFinite(year) ? treasurerYearBounds(year).label : "";
+}
+
 type Row = {
   id: string;
   return_type: ReturnType;
@@ -304,7 +313,7 @@ function Inner() {
           </SelectContent>
         </Select>
         <Select value={fYear} onValueChange={setFYear}>
-          <SelectTrigger aria-label="All years" className="bg-navy border-gold/20 text-primary-foreground"><SelectValue placeholder="All years" /></SelectTrigger>
+          <SelectTrigger aria-label="All years" className="bg-navy border-gold/20 text-primary-foreground"><SelectValue placeholder="All years">{fYear === "all" ? "All years" : yearTriggerLabel(fYear)}</SelectValue></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All years</SelectItem>
             {MASONIC_YEAR_OPTIONS.map((y) => (
@@ -378,7 +387,7 @@ function Inner() {
                   }));
                 }}
               >
-                <SelectTrigger className="bg-navy border-gold/20 text-primary-foreground"><SelectValue /></SelectTrigger>
+                <SelectTrigger aria-label="Return type" className="bg-navy border-gold/20 text-primary-foreground"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   {(Object.keys(TYPE_LABELS) as ReturnType[]).map((t) => (
                     <SelectItem key={t} value={t}>{TYPE_LABELS[t]}</SelectItem>
@@ -404,7 +413,7 @@ function Inner() {
               <div>
                 <label className="text-xs text-primary-foreground/70">Masonic year</label>
                 <Select value={form.masonic_year} onValueChange={(v) => setForm({ ...form, masonic_year: v })}>
-                  <SelectTrigger aria-label="Masonic year" className="bg-navy border-gold/20 text-primary-foreground"><SelectValue /></SelectTrigger>
+                  <SelectTrigger aria-label="Masonic year" className="bg-navy border-gold/20 text-primary-foreground"><SelectValue>{yearTriggerLabel(form.masonic_year)}</SelectValue></SelectTrigger>
                   <SelectContent>
                     {MASONIC_YEAR_OPTIONS.map((y) => (
                       <SelectItem key={y} value={String(y)}>Masonic year {treasurerYearBounds(y).label}</SelectItem>
