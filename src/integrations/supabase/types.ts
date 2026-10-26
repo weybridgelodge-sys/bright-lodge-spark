@@ -623,6 +623,7 @@ export type Database = {
             | null
           seconder: string | null
           stage: Database["public"]["Enums"]["candidate_stage"]
+          unit_id: string | null
           updated_at: string
         }
         Insert: {
@@ -643,6 +644,7 @@ export type Database = {
             | null
           seconder?: string | null
           stage?: Database["public"]["Enums"]["candidate_stage"]
+          unit_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -663,6 +665,7 @@ export type Database = {
             | null
           seconder?: string | null
           stage?: Database["public"]["Enums"]["candidate_stage"]
+          unit_id?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -678,6 +681,13 @@ export type Database = {
             columns: ["converted_member_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidates_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "units"
             referencedColumns: ["id"]
           },
         ]
@@ -3113,6 +3123,7 @@ export type Database = {
           sort_order: number
           title: string
           tyling_time: string
+          unit_id: string | null
           updated_at: string
           venue_id: string | null
         }
@@ -3135,6 +3146,7 @@ export type Database = {
           sort_order?: number
           title: string
           tyling_time?: string
+          unit_id?: string | null
           updated_at?: string
           venue_id?: string | null
         }
@@ -3157,10 +3169,18 @@ export type Database = {
           sort_order?: number
           title?: string
           tyling_time?: string
+          unit_id?: string | null
           updated_at?: string
           venue_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "lodge_events_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "units"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "lodge_events_venue_id_fkey"
             columns: ["venue_id"]
@@ -3290,6 +3310,7 @@ export type Database = {
           notified_member_count: number
           starts_at: string
           title: string
+          unit_id: string | null
           updated_at: string
           venue: string
           working_group_id: string | null
@@ -3306,6 +3327,7 @@ export type Database = {
           notified_member_count?: number
           starts_at: string
           title: string
+          unit_id?: string | null
           updated_at?: string
           venue: string
           working_group_id?: string | null
@@ -3322,11 +3344,19 @@ export type Database = {
           notified_member_count?: number
           starts_at?: string
           title?: string
+          unit_id?: string | null
           updated_at?: string
           venue?: string
           working_group_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "lodge_socials_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "units"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "lodge_socials_working_group_id_fkey"
             columns: ["working_group_id"]
@@ -3649,6 +3679,7 @@ export type Database = {
           time_from: string
           time_to: string
           title: string
+          unit_id: string | null
           updated_at: string
           updated_by: string | null
           venue: string
@@ -3662,6 +3693,7 @@ export type Database = {
           time_from?: string
           time_to?: string
           title?: string
+          unit_id?: string | null
           updated_at?: string
           updated_by?: string | null
           venue?: string
@@ -3675,11 +3707,20 @@ export type Database = {
           time_from?: string
           time_to?: string
           title?: string
+          unit_id?: string | null
           updated_at?: string
           updated_by?: string | null
           venue?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "loi_schedule_entries_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "units"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       loi_sessions: {
         Row: {
@@ -5130,6 +5171,7 @@ export type Database = {
           question: string
           results_visibility: string
           status: string
+          unit_id: string | null
           updated_at: string
         }
         Insert: {
@@ -5141,6 +5183,7 @@ export type Database = {
           question: string
           results_visibility?: string
           status?: string
+          unit_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -5152,9 +5195,18 @@ export type Database = {
           question?: string
           results_visibility?: string
           status?: string
+          unit_id?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "polls_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "units"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -5461,6 +5513,7 @@ export type Database = {
           reminder_lead_days: number | null
           return_type: Database["public"]["Enums"]["secretary_return_type"]
           status: Database["public"]["Enums"]["secretary_return_status"]
+          unit_id: string | null
           updated_at: string
         }
         Insert: {
@@ -5477,6 +5530,7 @@ export type Database = {
           reminder_lead_days?: number | null
           return_type: Database["public"]["Enums"]["secretary_return_type"]
           status?: Database["public"]["Enums"]["secretary_return_status"]
+          unit_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -5493,6 +5547,7 @@ export type Database = {
           reminder_lead_days?: number | null
           return_type?: Database["public"]["Enums"]["secretary_return_type"]
           status?: Database["public"]["Enums"]["secretary_return_status"]
+          unit_id?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -5529,6 +5584,13 @@ export type Database = {
             columns: ["member_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "secretary_returns_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "units"
             referencedColumns: ["id"]
           },
         ]
@@ -5821,6 +5883,7 @@ export type Database = {
           sent_at: string | null
           sent_to_count: number | null
           status: Database["public"]["Enums"]["summons_status"]
+          unit_id: string | null
           updated_at: string
           visitors_notified_at: string | null
           visitors_notified_count: number | null
@@ -5852,6 +5915,7 @@ export type Database = {
           sent_at?: string | null
           sent_to_count?: number | null
           status?: Database["public"]["Enums"]["summons_status"]
+          unit_id?: string | null
           updated_at?: string
           visitors_notified_at?: string | null
           visitors_notified_count?: number | null
@@ -5883,6 +5947,7 @@ export type Database = {
           sent_at?: string | null
           sent_to_count?: number | null
           status?: Database["public"]["Enums"]["summons_status"]
+          unit_id?: string | null
           updated_at?: string
           visitors_notified_at?: string | null
           visitors_notified_count?: number | null
@@ -5900,6 +5965,13 @@ export type Database = {
             columns: ["lodge_event_id"]
             isOneToOne: false
             referencedRelation: "public_lodge_meetings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "summonses_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "units"
             referencedColumns: ["id"]
           },
         ]
@@ -7281,6 +7353,7 @@ export type Database = {
           start_time: string | null
           tagline: string | null
           theme: string | null
+          unit_id: string | null
           useful_stuff: Json | null
           venue: string | null
         }
@@ -7314,6 +7387,7 @@ export type Database = {
           start_time?: string | null
           tagline?: string | null
           theme?: string | null
+          unit_id?: string | null
           useful_stuff?: Json | null
           venue?: string | null
         }
@@ -7347,10 +7421,19 @@ export type Database = {
           start_time?: string | null
           tagline?: string | null
           theme?: string | null
+          unit_id?: string | null
           useful_stuff?: Json | null
           venue?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "event_accounts_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "units"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       public_ladies_festival_promo: {
         Row: {
