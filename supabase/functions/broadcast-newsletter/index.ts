@@ -6,7 +6,7 @@ import { loadCallerUnit, noCallerUnitMessage } from "../_shared/callerUnit.ts";
 import { buildNewsletterArchivePdf } from "../_shared/newsletterArchivePdf.ts";
 import { loadCrest, type ProcessedCrest } from "../_shared/pdfLibBrand.ts";
 import { once, runSendsThenArchives } from "../_shared/newsletterDispatch.ts";
-import { newsletterBrandFrom, newsletterFooterHtml, newsletterHeaderHtml } from "../_shared/newsletterBrand.ts";
+import { newsletterFooterHtml, newsletterHeaderHtml } from "../_shared/newsletterBrand.ts";
 import { EMAIL_DOMAINS } from "../_shared/emailDomains.ts";
 // Lodge settings are loaded once per request for the caller's own unit and passed
 // explicitly (the `lodge` argument) to every helper. Nothing lodge-specific lives at module level.
