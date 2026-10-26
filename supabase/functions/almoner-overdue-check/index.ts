@@ -1,45 +1,21 @@
 // Daily scheduled edge function: computes overdue Almoner follow-ups and
 // absence flags and creates system Welfare Log entries EVERY day, but emails
-// the summary to the current Almoner only on DIGEST_WEEKDAY (Monday), covering
-// what is still open plus anything new since the last digest actually sent.
-//
-// It also detects "memorable dates" (birthdays and years-as-a-Freemason
-// anniversaries) for the day and, when there are any, sends the Almoner a push
-// notification per celebration whose tap target is a pre-filled WhatsApp
-// deep link. The same celebrations are repeated in the digest email as a
-// backup in case the push is missed.
+// the summary to the current Almoner only on DIGEST_WEEKDAY (Monday). Runs
+// once per lodge (JOB CI); the per-lodge logic lives in run.ts.
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors'
-import { detectCelebrations, londonToday } from './celebrations.ts'
 import { sendTransactionalEmail } from '../_shared/send-email.ts'
-import { evaluateAutoLog } from '../_shared/almonerAutoLog.ts'
-import { computeCheckInFlags } from '../_shared/almonerCheckIn.ts'
-import { isDigestDay, digestWindowStart, datesBetween, addDays } from '../_shared/almonerDigestSchedule.ts'
-import { loadLodgeSettings } from "../_shared/lodgeSettings.ts";
+import { loadLodgeSettingsStrict } from "../_shared/lodgeSettings.ts";
+import { forEachUnit, listActiveUnits } from "../_shared/units.ts";
+import { runUnit } from "./run.ts";
 
-// Site address from contacts.site_url only; blank = no link.
-let SITE_URL = ''
-let PORTAL_URL: string | undefined
-
-
-const displayName = (m: any): string => {
-  const first = (m.preferred_name?.trim() || m.first_name?.trim() || '').trim()
-  const last = (m.last_name?.trim() || '').trim()
-  const composed = [first, last].filter(Boolean).join(' ').trim()
-  return composed || (m.full_name?.trim() || 'Unnamed member')
-}
+const json = (body: unknown, status = 200) =>
+  new Response(JSON.stringify(body), { status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
 
 Deno.serve(async (req) => {
-  SITE_URL = (await loadLodgeSettings()).configuredSiteUrl
-  PORTAL_URL = SITE_URL ? `${SITE_URL}/members/almoner` : undefined
-  if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders })
-  }
+  if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders })
 
-  // Only proceed at 06:00 Europe/London wall-clock time. The cron fires hourly
-  // in UTC; the DST-aware guard below keeps the send at 6am local year-round.
-  // Manual re-triggers can bypass the guard via ?force=1 (used by ops when a
-  // scheduled run failed and the digest still needs to go out today).
+  // Only proceed at 06:00 Europe/London; ?force=1 / ?dry_run=1 need the service key.
   const url = new URL(req.url)
   const dryRun = url.searchParams.get('dry_run') === '1'
   const force = url.searchParams.get('force') === '1' || dryRun
@@ -47,445 +23,35 @@ Deno.serve(async (req) => {
     const expected = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     const auth = req.headers.get('Authorization') ?? ''
     const token = auth.startsWith('Bearer ') ? auth.slice(7) : ''
-    const ok = !!expected && token === expected
-    if (!ok) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-        status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      })
-    }
+    if (!(!!expected && token === expected)) return json({ error: 'Unauthorized' }, 401)
   }
   const londonHour = parseInt(
-    new Intl.DateTimeFormat('en-GB', {
-      timeZone: 'Europe/London',
-      hour: '2-digit',
-      hour12: false,
-    }).format(new Date()),
+    new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/London', hour: '2-digit', hour12: false }).format(new Date()),
     10,
   )
-  if (!force && londonHour !== 6) {
-    return new Response(
-      JSON.stringify({ ok: true, skipped: true, londonHour }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
-    )
-  }
-
-
+  if (!force && londonHour !== 6) return json({ ok: true, skipped: true, londonHour })
 
   const supabaseUrl = Deno.env.get('SUPABASE_URL')!
   const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
   const supabase = createClient(supabaseUrl, serviceKey)
+  const push = (body: Record<string, unknown>) =>
+    fetch(`${supabaseUrl}/functions/v1/send-push-notification`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${serviceKey}` },
+      body: JSON.stringify(body),
+    })
+  const testDate = url.searchParams.get('test_date')
 
   try {
-    const today = new Date().toISOString().slice(0, 10)
-    // Celebrations use Europe/London wall-clock so a birthday never lands a
-    // day early/late. `?test_date=YYYY-MM-DD` lets us rehearse a future date.
-    const testDate = url.searchParams.get('test_date')
-    const celebrationDay = /^\d{4}-\d{2}-\d{2}$/.test(testDate ?? '')
-      ? (testDate as string)
-      : londonToday()
-
-    // ---- Run independent reads in parallel ----
-    // 1) active members, 2) open welfare logs, 3) last two past meetings.
-    const [membersRes, logsRes, meetingsRes] = await Promise.all([
-      supabase
-        .from('profiles')
-        .select(
-          'id,full_name,preferred_name,first_name,last_name,title,status,date_of_birth,initiation_date',
-        )
-        .eq('status', 'active'),
-
-      supabase
-        .from('welfare_log_entries')
-        .select('member_id,contact_date,follow_up_date')
-        .is('deleted_at', null)
-        .eq('is_system', false)
-        .order('contact_date', { ascending: false }),
-      supabase
-        .from('festive_board_meetings')
-        .select('id,meeting_date,meeting_type')
-        .is('cancelled_at', null)
-        .lte('meeting_date', today)
-        .order('meeting_date', { ascending: false })
-        .limit(24),
-    ])
-    if (membersRes.error) throw membersRes.error
-    if (logsRes.error) throw logsRes.error
-
-    const members = membersRes.data ?? []
-    const memberById = new Map<string, any>(members.map((m: any) => [m.id, m]))
-
-    const last: Record<string, string> = {}
-    const followUp: Record<string, string> = {}
-    for (const l of (logsRes.data ?? []) as any[]) {
-      if (!last[l.member_id]) last[l.member_id] = l.contact_date
-      if (l.follow_up_date) {
-        const existing = followUp[l.member_id]
-        if (!existing || l.follow_up_date < existing) followUp[l.member_id] = l.follow_up_date
-      }
-    }
-    const overdue: Record<string, string> = {}
-    for (const [mid, dt] of Object.entries(followUp)) {
-      if (dt < today) {
-        const newest = last[mid]
-        if (!newest || newest <= dt) overdue[mid] = dt
-      }
-    }
-
-    // ---- Absence patterns ----
-    const allMeetings = ((meetingsRes.data as any[]) ?? []) as Array<{ id: string; meeting_date: string; meeting_type: string }>
-    const meetingIds = allMeetings.map((m) => m.id)
-    const absentFlags: Record<string, boolean> = {}
-    const checkInFlags: Record<string, string> = {}
-    if (meetingIds.length > 0) {
-      const { data: att } = await supabase
-        .from('festive_board_attendance')
-        .select('member_id,meeting_id,attendance_status')
-        .in('meeting_id', meetingIds)
-      const rows = ((att as any[]) ?? [])
-
-      // (a) Hard flag: unexplained absence from the last two meetings.
-      // "booked"/"attended" count as present, "apologies" as explained.
-      const present = new Map<string, Set<string>>()
-      for (const a of rows) {
-        if (
-          (a.attendance_status === 'attended' ||
-            a.attendance_status === 'booked' ||
-            a.attendance_status === 'apologies') &&
-          a.member_id
-        ) {
-          if (!present.has(a.member_id)) present.set(a.member_id, new Set())
-          present.get(a.member_id)!.add(a.meeting_id)
-        }
-      }
-      if (meetingIds.length >= 2) {
-        for (const m of members as any[]) {
-          const s = present.get(m.id) ?? new Set()
-          const ack = last[m.id] ?? ''
-          const fresh = allMeetings[0].meeting_date > ack || allMeetings[1].meeting_date > ack
-          if (!s.has(meetingIds[0]) && !s.has(meetingIds[1]) && fresh) absentFlags[m.id] = true
-        }
-      }
-
-      // (b) Soft flag: shared with the Welfare Board badge so they never drift.
-      const flags = computeCheckInFlags(allMeetings, rows, (members as any[]).map((m) => m.id), new Date(), last)
-      for (const [id, f] of Object.entries(flags)) checkInFlags[id] = f.label
-    }
-
-    // ---- Almoner Auto-Log: system Welfare Log entries for genuine disengagement ----
-    const autoLogNew: Array<{ member_id: string; key: string; tier: 1 | 2; trigger_date: string; reason: string }> = []
-    {
-      const { data: autoMeetings, error: amErr } = await supabase
-        .from('festive_board_meetings')
-        .select('id,meeting_date,meeting_type')
-        .is('cancelled_at', null)
-        .gte('meeting_date', '2026-02-18')
-        .lte('meeting_date', today)
-      if (amErr) throw amErr
-      const ids = ((autoMeetings as any[]) ?? []).map((m) => m.id)
-      let autoAtt: any[] = []
-      if (ids.length) {
-        const { data, error } = await supabase
-          .from('festive_board_attendance')
-          .select('member_id,meeting_id,attendance_status')
-          .in('meeting_id', ids)
-        if (error) throw error
-        autoAtt = (data as any[]) ?? []
-      }
-      const { data: absRows, error: absErr } = await supabase
-        .from('welfare_absences')
-        .select('member_id,period_start,period_end,deleted_at')
-      if (absErr) throw absErr
-      const autoAbs = ((absRows as any[]) ?? []).filter((a) => !a.deleted_at)
-      const escalations = evaluateAutoLog(
-        (autoMeetings as any[]) ?? [],
-        autoAtt,
-        (members as any[]).map((m) => ({ id: m.id, initiation_date: m.initiation_date ?? null })),
-        today,
-        undefined,
-        autoAbs,
-        last,
-      )
-      // Existing keys, including dismissed (soft-deleted) ones, are never re-created.
-      const { data: existing, error: exErr } = await supabase
-        .from('welfare_log_entries')
-        .select('member_id,system_key')
-        .not('system_key', 'is', null)
-      if (exErr) throw exErr
-      const seen = new Set(((existing as any[]) ?? []).map((r) => `${r.member_id}|${r.system_key}`))
-      for (const e of escalations) if (!seen.has(`${e.member_id}|${e.key}`)) autoLogNew.push(e)
-      if (!dryRun && autoLogNew.length) {
-        const { error: insErr } = await supabase.from('welfare_log_entries').insert(
-          autoLogNew.map((e) => ({
-            member_id: e.member_id,
-            contact_date: e.trigger_date,
-            contact_type: 'none',
-            contact_nature: 'routine',
-            notes: e.reason,
-            is_system: true,
-            system_reason: e.tier === 2 ? 'new_member_missed' : 'missed_without_apology',
-            system_key: e.key,
-            logged_by: null,
-          })),
-        )
-        if (insErr) throw insErr
-      }
-    }
-    // ---- Weekly email window: "since the last digest actually sent" ----
-    // Detection above runs daily; only the email is weekly (DIGEST_WEEKDAY).
-    const isDigest = isDigestDay(celebrationDay) || (force && !dryRun) || !!testDate
-    const { data: lastSend } = await supabase
-      .from('email_send_log')
-      .select('created_at')
-      .eq('template_name', 'almoner-overdue-digest')
-      .eq('status', 'sent')
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .maybeSingle()
-    const windowStart = digestWindowStart((lastSend as any)?.created_at ?? null, new Date())
-    const windowStartDate = windowStart.slice(0, 10)
-
-    // System entries created since the last email (dismissed ones excluded).
-    const { data: sysRows, error: sysErr } = await supabase
-      .from('welfare_log_entries')
-      .select('member_id,notes,created_at')
-      .eq('is_system', true)
-      .is('deleted_at', null)
-      .gte('created_at', windowStart)
-      .order('created_at', { ascending: true })
-    if (sysErr) throw sysErr
-    const autoLogByMember: Record<string, string[]> = {}
-    for (const r of (sysRows as any[]) ?? []) {
-      if (!memberById.has(r.member_id)) continue
-      const when = new Date(r.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', timeZone: 'Europe/London' })
-      ;(autoLogByMember[r.member_id] ??= []).push(`${String(r.notes ?? '').replace(/^System: /, '')} (logged ${when})`)
-    }
-    if (dryRun) {
-      return new Response(
-        JSON.stringify({
-          ok: true,
-          dry_run: true,
-          digest_day: isDigestDay(celebrationDay),
-          window_start: windowStart,
-          auto_log_new: autoLogNew.map((e) => ({ member_id: e.member_id, key: e.key, tier: e.tier, trigger_date: e.trigger_date })),
-          system_entries_since_last_email: Object.values(autoLogByMember).flat().length,
-          open_flags: new Set([...Object.keys(overdue), ...Object.keys(absentFlags), ...Object.keys(checkInFlags)]).size,
-        }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
-      )
-    }
-
-    // ---- Build flagged list ----
-    const flaggedIds = new Set<string>([
-      ...Object.keys(overdue),
-      ...Object.keys(absentFlags),
-      ...Object.keys(checkInFlags),
-      ...Object.keys(autoLogByMember),
-    ])
-    const flagged = Array.from(flaggedIds)
-      .map((id) => {
-        const m = memberById.get(id)
-        if (!m) return null
-        return {
-          name: displayName(m),
-          overdueFollowUp: overdue[id] ?? null,
-          missedMeetings: !!absentFlags[id],
-          checkIn: checkInFlags[id] ?? null,
-          systemLogged: autoLogByMember[id] ?? [],
-          portalUrl: PORTAL_URL,
-        }
-      })
-      .filter(Boolean) as Array<{ name: string; overdueFollowUp: string | null; missedMeetings: boolean; checkIn: string | null; systemLogged: string[]; portalUrl: string }>
-
-    // ---- Memorable dates ----
-    // Today's drive the daily push; the weekly email lists those since the
-    // last email plus the coming 7 days.
-    const celebrations = detectCelebrations(members as any[], celebrationDay)
-    const weekCelebrations = datesBetween(
-      windowStartDate < celebrationDay ? addDays(windowStartDate, 1) : celebrationDay,
-      addDays(celebrationDay, 7),
-    ).flatMap((d) => detectCelebrations(members as any[], d).map((c) => ({ ...c, date: d })))
-
-    if (!isDigest && celebrations.length === 0) {
-      return new Response(JSON.stringify({ ok: true, sent: false, reason: 'not_digest_day', auto_log_new: autoLogNew.length }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      })
-    }
-    if (isDigest && flagged.length === 0 && weekCelebrations.length === 0 && celebrations.length === 0) {
-      console.log('almoner-overdue-check: nothing to report')
-      return new Response(JSON.stringify({ ok: true, sent: false, reason: 'nothing_flagged' }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      })
-    }
-
-    // Stable sort: overdue first, then by name
-    flagged.sort((a, b) => {
-      const ao = a.overdueFollowUp ? 0 : 1
-      const bo = b.overdueFollowUp ? 0 : 1
-      if (ao !== bo) return ao - bo
-      return a.name.localeCompare(b.name)
-    })
-
-
-    // ---- Resolve Almoner (email + member id for push) ----
-    let almonerEmail: string | null = null
-    let almonerId: string | null = null
-    // Current Almoner = latest confirmed appointment in the officers' (Installation) year.
-    const { data: almonerHolder } = await supabase.rpc('current_officer_holder', { _position_key: 'almoner' })
-    const appt = almonerHolder ? { member_id: almonerHolder as unknown as string } : null
-
-    if (appt?.member_id) {
-      const { data: prof } = await supabase
-        .from('profiles')
-        .select('email')
-        .eq('id', appt.member_id)
-        .maybeSingle()
-      almonerEmail = prof?.email ?? null
-      if (almonerEmail) almonerId = appt.member_id
-    }
-
-    if (!almonerEmail) {
-      // Fallback: anyone with 'almoner' role
-      const { data: rr } = await supabase
-        .from('user_roles')
-        .select('user_id')
-        .eq('role', 'almoner')
-        .limit(1)
-        .maybeSingle()
-      if (rr?.user_id) {
-        const { data: prof } = await supabase
-          .from('profiles')
-          .select('email')
-          .eq('id', rr.user_id)
-          .maybeSingle()
-        almonerEmail = prof?.email ?? null
-        if (almonerEmail) almonerId = rr.user_id
-      }
-    }
-
-    // ---- Push notifications: one per celebration, tap opens WhatsApp ----
-    // Deliberately separate notifications so multiple matches on the same day
-    // stay individually shareable rather than squashed into one message.
-    let pushSent = 0
-    const pushErrors: string[] = []
-    if (almonerId && celebrations.length > 0) {
-      for (const c of celebrations) {
-        try {
-          const pr = await fetch(`${supabaseUrl}/functions/v1/send-push-notification`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${serviceKey}`,
-            },
-            body: JSON.stringify({
-              title: c.type === 'birthday' ? '🎉 Birthday today' : '🎓 Masonic anniversary today',
-              body: c.message,
-              member_ids: [almonerId],
-              data: {
-                kind: 'almoner_celebration',
-                celebration_type: c.type,
-                member_id: c.memberId,
-                message: c.message,
-                // The native tap handler opens this URL.
-                url: c.whatsappUrl,
-              },
-            }),
-          })
-          const pj = await pr.json().catch(() => ({}))
-          if (!pr.ok) pushErrors.push(`${c.name}: HTTP ${pr.status}`)
-          else pushSent += Number(pj.android_sent ?? 0) + Number(pj.ios_sent ?? 0)
-        } catch (e) {
-          pushErrors.push(`${c.name}: ${(e as Error).message}`)
-        }
-      }
-      if (pushErrors.length) console.warn('celebration push failures', pushErrors)
-    }
-
-    // Non-digest days stop after the push: no email.
-    if (!isDigest) {
-      return new Response(
-        JSON.stringify({ ok: true, sent: false, reason: 'not_digest_day', push_sent: pushSent, push_errors: pushErrors }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
-      )
-    }
-    if (flagged.length === 0 && weekCelebrations.length === 0) {
-      return new Response(JSON.stringify({ ok: true, sent: false, reason: 'nothing_flagged', push_sent: pushSent }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      })
-    }
-
-    if (!almonerEmail) {
-      console.warn('almoner-overdue-check: no almoner appointment or role holder found; flagged=', flagged.length)
-      return new Response(
-        JSON.stringify({ ok: false, error: 'no_almoner_recipient', flagged: flagged.length, celebrations: celebrations.length }),
-        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
-      )
-    }
-
-
-    // ---- Weekly email ----
-    const fmtUk = (iso: string) =>
-      new Date(iso).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'Europe/London' })
-    const reportDate = fmtUk(new Date().toISOString())
-    const sinceDate = fmtUk(windowStart)
-    // One email per week: a rerun on the same digest day is de-duplicated.
-    const idempotencyKey = force || testDate
-      ? `almoner-weekly-${today}-force-${Date.now()}`
-      : `almoner-weekly-${celebrationDay}`
-
-
-    const resp = await sendTransactionalEmail({
-      templateName: 'almoner-overdue-digest',
-      recipientEmail: almonerEmail,
-      idempotencyKey,
-      templateData: {
-        members: flagged,
-        celebrations: weekCelebrations.map((c) => ({
-          name: c.name,
-          type: c.type,
-          years: c.years,
-          message: c.message,
-          whatsappUrl: c.whatsappUrl,
-          date: c.date,
-          upcoming: c.date > celebrationDay,
-        })),
-        reportDate,
-        sinceDate,
-        portalUrl: PORTAL_URL,
-        ...(await (async () => { const lodge = await loadLodgeSettings(); return { crestUrl: lodge.crestImageUrl || null, lodgeName: lodge.lodgeName, lodgeNumber: lodge.lodgeNumber, provinceName: lodge.provinceName, } })()),
-      },
-    })
-    if (!resp.ok) {
-      console.error('almoner digest send failed', resp.status, resp.error)
-      return new Response(
-        JSON.stringify({ ok: false, error: 'send_failed', detail: resp.error }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
-      )
-    }
-
-    console.log('almoner-overdue-check: enqueued digest', {
-      recipient: almonerEmail,
-      flagged: flagged.length,
-      celebrations: celebrations.length,
-      pushSent,
-    })
-    return new Response(
-      JSON.stringify({
-        ok: true,
-        sent: true,
-        recipient: almonerEmail,
-        flagged: flagged.length,
-        celebrations,
-        push_sent: pushSent,
-        push_errors: pushErrors,
-      }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
-    )
-
+    const units = await listActiveUnits(supabase)
+    const singleUnit = units.length === 1
+    const outcomes = await forEachUnit(units, async (unitId) => {
+      const lodge = await loadLodgeSettingsStrict(unitId)
+      return runUnit({ db: supabase, send: sendTransactionalEmail as any, push }, unitId, lodge, { dryRun, force, testDate, singleUnit })
+    }, 'almoner-overdue-check')
+    return json({ ok: true, dry_run: dryRun || undefined, units: outcomes })
   } catch (err) {
     console.error('almoner-overdue-check error', err)
-    return new Response(JSON.stringify({ ok: false, error: String(err) }), {
-      status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    })
+    return json({ ok: false, error: String(err) }, 500)
   }
 })
