@@ -1,22 +1,18 @@
 // Lodge for this page's own web address (resolve-site-unit → unit_domains).
 // No default lodge: an unknown address resolves to null and callers show their empty state.
-import { supabase } from "@/integrations/supabase/client";
+// Shares the startup lookup (siteUnitFetch, started from main.tsx) so the site resolves once.
+import { fetchSiteUnitId, __resetSiteUnitFetch } from "@/lib/siteUnitFetch";
 
 let cached: Promise<string | null> | null = null;
 
 export function resolveSiteUnit(): Promise<string | null> {
   if (!cached) {
-    cached = supabase.functions.invoke("resolve-site-unit", { body: {} }).then(
-      ({ data, error }) => {
-        const id = !error && typeof data?.unit_id === "string" ? data.unit_id.trim() : "";
-        if (!id) cached = null; // allow a retry later
-        return id || null;
-      },
-      () => { cached = null; return null; },
-    );
+    const p = fetchSiteUnitId();
+    cached = p;
+    p.then((id) => { if (!id && cached === p) cached = null; }); // allow a retry later
   }
   return cached;
 }
 
 /** Test hook. */
-export const resetSiteUnit = () => { cached = null; };
+export const resetSiteUnit = () => { cached = null; __resetSiteUnitFetch(); };
