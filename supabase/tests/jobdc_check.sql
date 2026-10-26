@@ -6,7 +6,6 @@ DECLARE
                WHERE ur.role = 'secretary' AND p.unit_id = 'weybridge' LIMIT 1);
   yr int := public.current_officer_year();
   out text := ''; pass int := 0; fail int := 0; r jsonb; msg text;
-  PROCEDURE_OK boolean;
 BEGIN
   PERFORM set_config('request.jwt.claims', json_build_object('sub', sec, 'role', 'authenticated')::text, true);
 
