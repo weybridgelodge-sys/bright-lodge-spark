@@ -32,6 +32,8 @@ Deno.serve(async (req) => {
     const { data: a } = await admin.from("treasurer_year_approvals")
       .select("id,masonic_year,status,round_number,submitted_by").eq("id", approval_id).maybeSingle();
     if (!a) return json({ error: "Not found" }, 404);
+    const { data: sigs } = await admin.from("treasurer_year_signoffs")
+      .select("officer_role,signed_by,decision,note").eq("approval_id", a.id).eq("round_number", a.round_number);
 
     let roles: string[]; let kind: string; let note = ""; let actorId: string | null = null;
     if (a.status === "submitted") {
