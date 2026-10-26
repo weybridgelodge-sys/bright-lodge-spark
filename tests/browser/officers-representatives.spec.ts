@@ -7,6 +7,7 @@ const profiles = [prof("p1", "Bartholomew", "Featherstonehaugh-Wolstenholme"), p
 const positions = [
   { key: "rep_sports", label: "Masonic Sports Association Representative", order_index: 320, is_progressive: false, category: "representative", unit_id: null, print_label: "SPORTS REP", active: true, include_in: { summons: true } },
   { key: "rep_long", label: "Lodge representative to the Provincial Grand Charity Steward's Committee for the Festival", order_index: 400, is_progressive: false, category: "representative", unit_id: "layout-test-unit", print_label: null, active: true, include_in: { summons: true } },
+  { key: "rep_old_long", label: "Former Lodge representative to the Provincial Grand Almoner's Welfare Committee", order_index: 410, is_progressive: false, category: "representative", unit_id: "layout-test-unit", print_label: null, active: false, include_in: { summons: true } },
 ];
 const appts = [
   { id: "a1", position_key: "rep_sports", member_id: "p1", display_name: null, lodge_year: 2026, is_projection: false, appointed_on: null },
@@ -33,6 +34,16 @@ test("Representatives group at 320px", { timeout: 90_000 }, async ({ page }) => 
   }
   await expectNoAxeViolations(page, "officers with representatives");
   await page.getByRole("heading", { name: "Representatives" }).screenshot({ path: "/tmp/browser/reps-320.png" });
+  // Job DC: Remove on an inactive rep post (editors only) opens a confirm dialog that fits 320px
+  const remove = page.getByRole("button", { name: /^Remove Former Lodge representative/ });
+  if (await remove.isVisible()) {
+    await expect(page.getByRole("button", { name: /^Remove Masonic Sports/ })).toHaveCount(0);
+    await remove.click();
+    await expect(page.getByRole("alertdialog")).toContainText("cannot be undone");
+    expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
+    await expectNoAxeViolations(page, "remove representative dialog");
+    await page.getByRole("button", { name: "Cancel" }).click();
+  }
   // Job CT: Add position enabled once a name is typed (no lodge needed in the browser)
   const name = page.getByLabel("New representative position");
   if (await name.isVisible()) {
