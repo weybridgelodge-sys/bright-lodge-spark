@@ -1,5 +1,8 @@
 import { expect, test } from "@playwright/test";
 import { expectNoAxeViolations } from "./helpers/axe";
+import { mockSiteUnit } from "./helpers/siteUnit";
+
+test.beforeEach(async ({ page }) => { await mockSiteUnit(page, "weybridge"); });
 
 // Job DB2: public pages resolve their lodge (real backend, localhost is in unit_domains) at 320px.
 for (const [name, path] of [["Home", "/"], ["Join Us", "/join-us"], ["FAQ", "/faq"], ["Lodge Profile", "/lodge-profile"]] as const) {
