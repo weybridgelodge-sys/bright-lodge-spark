@@ -19,7 +19,7 @@ BEGIN
   -- 2. is_current_officer for each profile x each position they have ever held
   FOR r IN SELECT DISTINCT oa.member_id, oa.position_key FROM public.officer_appointments oa
            WHERE oa.member_id IS NOT NULL ORDER BY 1, 2 LOOP
-    s := s || 'C|' || r.member_id || '|' || r.position_key || '|' || public.is_current_officer(r.member_id, r.position_key) || E'\n';
+    s := s || 'C|' || r.member_id || '|' || r.position_key || '|' || coalesce(public.is_current_officer(r.member_id, r.position_key)::text, 'null') || E'\n';
   END LOOP;
   -- 3. appointment rows read by the Installation / Provincial return builders
   FOR r IN SELECT position_key, member_id, lodge_year, is_projection, override_reason, display_name
