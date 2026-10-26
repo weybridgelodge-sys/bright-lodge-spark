@@ -14,8 +14,8 @@ BEGIN
              CASE v WHEN 'blank' THEN ', unit_id' ELSE '' END, CASE WHEN v = 'none' AND false THEN acc ELSE gen_random_uuid() END, 'Cy Test', CASE v WHEN 'blank' THEN ', ''  ''' ELSE '' END)
         WHEN 'visitor_contacts' THEN format('INSERT INTO public.visitor_contacts (email%s) VALUES (%L%s) RETURNING id, unit_id',
              CASE v WHEN 'blank' THEN ', unit_id' ELSE '' END, 'cy.' || v || '@example.invalid', CASE v WHEN 'blank' THEN ', ''  ''' ELSE '' END)
-        WHEN 'officer_appointments' THEN format('INSERT INTO public.officer_appointments (position_key, lodge_year, member_id%s) VALUES (''steward'', 2040, %L%s) RETURNING id, unit_id',
-             CASE v WHEN 'blank' THEN ', unit_id' ELSE '' END, mem, CASE v WHEN 'blank' THEN ', ''  ''' ELSE '' END)
+        WHEN 'officer_appointments' THEN format('INSERT INTO public.officer_appointments (position_key, lodge_year, member_id%s) VALUES (%L, 2040, %L%s) RETURNING id, unit_id',
+             CASE v WHEN 'blank' THEN ', unit_id' ELSE '' END, (SELECT key FROM public.officer_positions WHERE unit_id IS NULL ORDER BY order_index LIMIT 1), mem, CASE v WHEN 'blank' THEN ', ''  ''' ELSE '' END)
         ELSE format('INSERT INTO public.event_accounts SELECT * FROM jsonb_populate_record(NULL::public.event_accounts, (SELECT (to_jsonb(e) - ''unit_id'') || jsonb_build_object(''id'', gen_random_uuid(), ''slug'', ''cy-'' || gen_random_uuid()%s) FROM public.event_accounts e WHERE e.id = %L)) RETURNING id, unit_id',
              CASE v WHEN 'blank' THEN ', ''unit_id'', ''  ''' ELSE '' END, acc)
       END;
@@ -28,7 +28,7 @@ BEGIN
     END LOOP;
     -- signed-in member, no unit given: lands in own lodge
     IF t = 'event_bookings' THEN ins := format('INSERT INTO public.event_bookings (event_id, payer_name) VALUES (%L, ''Cy Own'') RETURNING id, unit_id', acc);
-    ELSE ins := replace(replace(ins, ', ''  ''', ''), ', unit_id)', ')'); ins := replace(ins, ', ''unit_id'', ''  ''', ''); ins := replace(ins, 'cy.blank@', 'cy.own@'); END IF;
+    ELSE ins := replace(ins, ', ''unit_id'', ''  ''', ''); ins := replace(replace(ins, ', ''  ''', ''), ', unit_id)', ')'); ins := replace(ins, 'cy.blank@', 'cy.own@'); END IF;
     PERFORM set_config('request.jwt.claims', json_build_object('sub', mem, 'role', 'authenticated')::text, true);
     BEGIN EXECUTE ins INTO rid, ru; ok := ru = u; st := ru;
     EXCEPTION WHEN OTHERS THEN ok := false; st := SQLSTATE || ' ' || left(SQLERRM, 80); END;
@@ -36,8 +36,9 @@ BEGIN
     -- explicit blank written straight to the column is refused by the CHECK
     ok := false;
     BEGIN EXECUTE format('UPDATE public.%I SET unit_id = ''  '' WHERE id = %L', t, rid);
-    EXCEPTION WHEN check_violation THEN ok := true; WHEN OTHERS THEN ok := t = 'event_accounts'; END; -- event_accounts update trigger keeps the old lodge
-    IF t = 'event_accounts' THEN ok := (SELECT unit_id FROM public.event_accounts WHERE id = rid) = u; END IF;
+      -- no error: a lodge trigger (event_accounts, event_bookings) put the lodge back; check it did
+      EXECUTE format('SELECT unit_id = %L FROM public.%I WHERE id = %L', u, t, rid) INTO ok;
+    EXCEPTION WHEN check_violation THEN ok := true; END;
     out := out || CASE WHEN ok THEN 'PASS' ELSE 'FAIL' END || format(' %s: blank unit on update refused/kept', t) || E'\n'; fails := fails + (NOT ok)::int;
   END LOOP;
   PERFORM set_config('request.jwt.claims', '', true);
