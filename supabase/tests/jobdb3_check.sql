@@ -4,7 +4,7 @@ DECLARE
   admin_u uuid := 'de693c92-6f3d-49b6-afc3-406fc4c0acd9';
   member_u uuid := '40192a1a-1990-48a5-b360-f67ce5c965d8';
   out text := ''; pass int := 0; fail int := 0; u text; mid uuid; ev uuid := gen_random_uuid(); d date;
-  home text;
+  home text; n int;
 BEGIN
   SELECT unit_id INTO home FROM public.profiles WHERE id = admin_u;
   INSERT INTO public.units(id, name) VALUES ('zz_db3', 'DB3 Harness Lodge') ON CONFLICT DO NOTHING;
@@ -20,11 +20,12 @@ BEGIN
 
   -- 2. same for the home lodge (one-lodge behaviour unchanged)
   UPDATE public.profiles SET unit_id = home WHERE id = member_u;
+  SELECT count(*) INTO n FROM public.member_status_history WHERE profile_id = member_u AND unit_id = home;
   EXECUTE 'SET LOCAL ROLE service_role';
   UPDATE public.profiles SET status = CASE WHEN status = 'year_out' THEN 'active'::member_status ELSE 'year_out'::member_status END WHERE id = member_u;
   EXECUTE 'RESET ROLE';
-  SELECT unit_id INTO u FROM public.member_status_history WHERE profile_id = member_u ORDER BY created_at DESC, id DESC LIMIT 1;
-  IF u = home THEN pass := pass+1; out := out || '2 home status OK; '; ELSE fail := fail+1; out := out || '2 FAIL; '; END IF;
+  -- same transaction = same created_at, so count instead of ordering
+  IF (SELECT count(*) FROM public.member_status_history WHERE profile_id = member_u AND unit_id = home) = n + 1 THEN pass := pass+1; out := out || '2 home status OK; '; ELSE fail := fail+1; out := out || '2 FAIL; '; END IF;
 
   -- 3. blank profile lodge: status change refused (never another lodge)
   BEGIN
