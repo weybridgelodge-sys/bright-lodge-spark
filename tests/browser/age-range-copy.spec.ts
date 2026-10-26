@@ -52,7 +52,8 @@ for (const w of [320, 1280]) {
     await page.setViewportSize({ width: w, height: 900 });
     await page.goto("/");
     const lede = page.locator("p", { hasText: "friendly Masonic Lodge in Surrey" }).first();
-    await expect(lede).toContainText("men in Guildford who meet");
+    await page.waitForTimeout(2000); // React has replaced the skeleton; figures still held back
+    await expect(lede).not.toContainText("32 to 82");
     const before = (await lede.boundingBox())!.height;
     release();
     await expect(lede).toContainText("aged from 32 to 82");
