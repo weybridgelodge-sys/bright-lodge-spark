@@ -37,7 +37,7 @@ describe("live age range", () => {
     state.figures = {};
     const { container } = wrap(<Hero />);
     await waitFor(() => expect(state.rpc).toContain("get_public_lodge_figures"));
-    expect(container.textContent).toContain("men in Guildford who meet");
+    await waitFor(() => expect(container.textContent).toContain("men in Guildford who meet"));
     expect(container.textContent).not.toMatch(/aged|NaN/);
   });
   it("Hero clause helper", () => {
