@@ -1212,6 +1212,13 @@
       "when": 1793019127995,
       "tag": "0172_officer_lookup_unit_no_fallback",
       "breakpoints": true
+    },
+    {
+      "idx": 173,
+      "version": "7",
+      "when": 1793019869096,
+      "tag": "0173_lodge_tables_unit_not_null",
+      "breakpoints": true
     }
   ]
 }
