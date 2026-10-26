@@ -13,10 +13,13 @@ export type ReturnSigners = {
   sigs: { sec: SigImage | null; wm: SigImage | null };
 };
 
-export async function resolveReturnHolders(admin: SupabaseClient, atIso: string) {
+/** Holders in the caller's own lodge (unitId passed explicitly); blank lodge = no holders, never a guess. */
+export async function resolveReturnHolders(admin: SupabaseClient, atIso: string, unitId: string | null | undefined) {
+  const unit = typeof unitId === "string" ? unitId.trim() : "";
+  if (!unit) return { worshipful_master: null, secretary: null };
   const [w, s] = await Promise.all([
-    admin.rpc("current_officer_holder", { _position_key: "worshipful_master", _at: atIso }),
-    admin.rpc("current_officer_holder", { _position_key: "secretary", _at: atIso }),
+    admin.rpc("current_officer_holder", { _position_key: "worshipful_master", _at: atIso, _unit: unit }),
+    admin.rpc("current_officer_holder", { _position_key: "secretary", _at: atIso, _unit: unit }),
   ]);
   return { worshipful_master: (w.data as string | null) ?? null, secretary: (s.data as string | null) ?? null };
 }

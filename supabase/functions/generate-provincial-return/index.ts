@@ -51,7 +51,7 @@ Deno.serve(async (req) => {
     if (!validInstallDate(year, installDate)) return json({ error: "Installation date is outside that year." }, 400);
 
     // Resolve the signers on the server, using the same effective-date rule as current_officer_holder().
-    const holders = await resolveReturnHolders(admin, installDate);
+    const holders = await resolveReturnHolders(admin, installDate, ctx.unitId);
     const shown = (key: string) => (data.rows.find((r) => r.key === key)?.office?.memberId as string | null | undefined) ?? null;
     if (shown("worshipful_master") !== holders.worshipful_master || shown("secretary") !== holders.secretary) {
       return json({ error: "The WM or Secretary on the page no longer matches the officer records. Please refresh and try again." }, 409);

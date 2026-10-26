@@ -41,7 +41,7 @@ Deno.serve(async (req) => {
     const signed = ugleSignedDate(b.installation_date, b.prescribed_date);
     if (!validInstallDate(b.lodge_year, signed.iso)) return json({ error: "Installation date is outside that year." }, 400);
 
-    const holders = await resolveReturnHolders(admin, signed.iso);
+    const holders = await resolveReturnHolders(admin, signed.iso, ctx.unitId);
     if (b.wm_member_id !== holders.worshipful_master || b.secretary_member_id !== holders.secretary) {
       return json({ error: "The WM or Secretary on the page no longer matches the officer records. Please refresh and try again." }, 409);
     }
