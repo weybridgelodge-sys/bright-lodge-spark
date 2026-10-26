@@ -10,8 +10,6 @@ import * as React from "react";
 
 export const VVH_VAR = "--app-vvh";
 export const VVTOP_VAR = "--app-vvtop";
-/** Keyboard height covering the layout viewport (0 when the browser shrinks the layout viewport instead). */
-export const KB_VAR = "--app-kb";
 
 let users = 0;
 let detach: (() => void) | null = null;
@@ -24,7 +22,6 @@ function attach(): (() => void) | null {
   const apply = () => {
     root.style.setProperty(VVH_VAR, `${Math.round(vv.height)}px`);
     root.style.setProperty(VVTOP_VAR, `${Math.round(vv.offsetTop)}px`);
-    root.style.setProperty(KB_VAR, `${keyboardInset(window.innerHeight, vv)}px`);
   };
   apply();
   vv.addEventListener("resize", apply);
@@ -34,7 +31,6 @@ function attach(): (() => void) | null {
     vv.removeEventListener("scroll", apply);
     root.style.removeProperty(VVH_VAR);
     root.style.removeProperty(VVTOP_VAR);
-    root.style.removeProperty(KB_VAR);
   };
 }
 
@@ -51,10 +47,6 @@ export function useVisualViewportVars(active = true) {
 
 const FIELD = "input, textarea, select, [contenteditable='true'], [role='combobox']";
 
-/** Height of the layout viewport hidden below the visual viewport (the keyboard), never negative. */
-export function keyboardInset(layoutHeight: number, vv: { height: number; offsetTop: number }): number {
-  return Math.max(0, Math.round(layoutHeight - vv.height - vv.offsetTop));
-}
 
 /**
  * The element that actually scrolls the field: nearest ancestor inside the overlay whose
@@ -76,13 +68,6 @@ export const RETRY_MS = [0, 150, 300, 600, 900];
 export const WINDOW_MS = 1500;
 const PHONE = "(max-width: 639.98px)";
 
-/** Live numbers for the ?kbdebug=1 readout (no logging, no tracking). */
-export type KbDebugSnapshot = { delta: number | null; at: number };
-export const kbDebug: KbDebugSnapshot & { listeners: Set<() => void> } = { delta: null, at: 0, listeners: new Set() };
-function noteDelta(delta: number) {
-  kbDebug.delta = delta; kbDebug.at = Date.now();
-  kbDebug.listeners.forEach((f) => f());
-}
 
 /**
  * Focus handler for an overlay (phones only; desktop untouched). Primary path: the
@@ -104,7 +89,6 @@ export function scrollFocusedFieldIntoView(target: EventTarget | null, _delayMs 
     if (document.activeElement !== target) return;
     if (typeof target.scrollIntoView === "function") target.scrollIntoView({ block: "center", behavior: "auto" });
     const delta = fieldScrollDelta(target.getBoundingClientRect(), scroller.getBoundingClientRect(), vv, window.innerHeight);
-    noteDelta(delta);
     if (delta !== 0 && typeof scroller.scrollBy === "function") scroller.scrollBy({ top: delta, behavior: "auto" });
   };
   const timers = RETRY_MS.map((ms) => window.setTimeout(run, ms));
