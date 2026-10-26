@@ -38,7 +38,6 @@ for (const [name, C, props, action] of CASES) {
 }
 if (CASES.length) {
   Deno.test('magic link app mode keeps the code', async () => {
-    setAuthEmailBrand(null)
     const html = await renderAsync(React.createElement(MagicLinkEmail, { siteName: 'S', confirmationUrl: URL_, token: '111222', client: 'app' }))
     assert(html.includes('111222'))
   })
@@ -49,7 +48,6 @@ Deno.test('body wording uses the given lodge name; neutral fallback has no lodge
   const named = siteNameFor({ lodgeName: 'Testbury Lodge', lodgeNumber: '1234' })
   assert(named === 'Testbury Lodge No. 1234')
   assert(siteNameFor(null) === 'Members Portal' && siteNameFor({ lodgeName: ' ' }) === 'Members Portal')
-  setAuthEmailBrand(null)
   const strip = (h: string) => h.replace(/<!-- -->/g, '').replace(/\s+/g, ' ')
   const html = strip(await renderAsync(React.createElement(MagicLinkEmail, { siteName: named, confirmationUrl: URL_ })))
   assert(html.includes('sign in to the Testbury Lodge No. 1234') && html.includes('Your Testbury Lodge No. 1234 sign-in link'))
