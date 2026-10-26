@@ -229,7 +229,7 @@ export function buildFeed(r: FeedRows, c: FeedLodge, now: Date = new Date()): st
     const end = addHours(start, 3);
     cal.push({
       uid: `fbm-${(m as any).id}@${c.domain}`,
-      title: `Meeting: ${(m as any).meeting_type ?? "Regular meeting"}`,
+      title: `Meeting: ${meetingTypeTitle((m as any).meeting_type)}`,
       location: c.venue,
       description: (m as any).notes ?? "",
       start, end,
