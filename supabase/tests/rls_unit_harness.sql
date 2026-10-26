@@ -7,7 +7,8 @@ DO $$
 DECLARE
   admin_u text := 'de693c92-6f3d-49b6-afc3-406fc4c0acd9';
   member_u text := '40192a1a-1990-48a5-b360-f67ce5c965d8';
-  tabs text[] := ARRAY['secretary_returns'];
+  tabs text[] := ARRAY['secretary_returns','installation_rule_settings','meeting_diary_audit','meeting_series','member_status_history','unit_settings_audit'];
+  -- officer_installation_dates and unit_settings have no id column: covered by jobdb5_check.sql.
   t text; n int; n2 int; out text := ''; rowj jsonb; vid text; ok boolean;
 BEGIN
   INSERT INTO public.units(id, name) VALUES ('zz_harness', 'Harness Lodge') ON CONFLICT DO NOTHING;
