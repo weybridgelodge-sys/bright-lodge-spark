@@ -1100,6 +1100,13 @@
       "when": 1792977690817,
       "tag": "0156_jobco_b1_secretary_returns_unit",
       "breakpoints": true
+    },
+    {
+      "idx": 157,
+      "version": "7",
+      "when": 1792977770953,
+      "tag": "0157_jobco_b2_candidates_unit",
+      "breakpoints": true
     }
   ]
 }
