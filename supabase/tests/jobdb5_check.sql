@@ -19,7 +19,7 @@ BEGIN
   EXECUTE format('SELECT count(*) FROM public.%I', t) INTO n;
   IF n = homeN THEN pass:=pass+1; out:=out||'a.read='||n||' OK; '; ELSE fail:=fail+1; out:=out||'a.read='||n||'/'||homeN||' FAIL; '; END IF;
   EXECUTE format('UPDATE public.%I SET unit_id = unit_id', t); GET DIAGNOSTICS n = ROW_COUNT;
-  IF n = CASE WHEN can_upd THEN homeN ELSE 0 END THEN pass:=pass+1; out:=out||'a.update='||n||' OK; '; ELSE fail:=fail+1; out:=out||'a.update='||n||' FAIL; '; END IF;
+  IF n = (CASE WHEN can_upd THEN homeN ELSE 0 END) THEN pass:=pass+1; out:=out||'a.update='||n||' OK; '; ELSE fail:=fail+1; out:=out||'a.update='||n||' FAIL; '; END IF;
   EXECUTE 'RESET ROLE';
   -- ordinary member read count (reported, for comparison with before)
   PERFORM set_config('request.jwt.claims', json_build_object('sub',member_u,'role','authenticated')::text, true);
