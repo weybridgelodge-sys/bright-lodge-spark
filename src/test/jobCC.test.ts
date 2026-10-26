@@ -96,6 +96,53 @@ describe("JOB CC: no changed function loads settings with no argument", () => {
   it("newsletter and visitor invitations keep no module-level lodge", () => {
     expect(fn("broadcast-newsletter/index.ts")).not.toMatch(/^let LODGE/m);
     expect(fn("send-summons-to-visitors/index.ts")).not.toMatch(/^let LODGE/m);
-    expect(fn("broadcast-newsletter/index.ts")).toContain("lodgeBox.run(");
+  });
+});
+
+describe("JOB CG: broadcast-newsletter passes lodge settings explicitly", () => {
+  const src = () => fn("broadcast-newsletter/index.ts") + fn("broadcast-newsletter/lodgeArgs.ts");
+  it("no async_hooks, no lodgeBox, no module-level lodge state", () => {
+    expect(src()).not.toMatch(/async_hooks|AsyncLocalStorage|lodgeBox|lodgeNow/);
+    expect(src()).not.toMatch(/^(let|var)\s/m);
+    expect(fn("broadcast-newsletter/index.ts")).toContain("Deno.serve(handle);");
+  });
+  it("loads settings once per request after the unit refusal", () => {
+    const s = fn("broadcast-newsletter/index.ts");
+    expect(s.match(/loadLodgeSettings\(/g)?.length).toBe(1);
+    expect(s).toContain("const lodge: LodgeSettings = await loadLodgeSettings(callerUnit);");
+    expect(s.indexOf("const lodge: LodgeSettings")).toBeGreaterThan(s.indexOf("if (!callerUnit)"));
+  });
+  it("every lodge-reading helper takes the lodge argument", () => {
+    const s = fn("broadcast-newsletter/index.ts");
+    for (const f of ["renderHtml", "sendBatch", "renderNewsletterPdf", "archiveToDocuments", "dispatchOneAudience"]) {
+      expect(s).toMatch(new RegExp(`function ${f}\\(lodge: LodgeSettings,`));
+      const calls = s.match(new RegExp(`[^n] ${f}\\(([^)]{0,6})`, "g")) ?? [];
+      expect(calls.length).toBeGreaterThan(0);
+      for (const c of calls) expect(c).toContain("(lodge,");
+    }
+  });
+  it("no host-lodge literals", () => {
+    expect(src()).not.toMatch(/weybridge|6787|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-/i);
+  });
+  it("two concurrent requests for different units keep separate settings", async () => {
+    const { brandFor, senderFields, archiveFileStem } = await import("../../supabase/functions/broadcast-newsletter/lodgeArgs.ts");
+    const { resolveLodgeSettings } = await import("../../supabase/functions/_shared/lodgeSettingsResolve.ts");
+    const { newsletterHeaderHtml } = await import("../../supabase/functions/_shared/newsletterBrand.ts");
+    const base = resolveLodgeSettings(null);
+    const a = { ...base, lodgeName: "Alpha Lodge", senderName: "Alpha Lodge", communicationsEmail: "a@alpha.test", formalSenderName: "Alpha" };
+    const b = { ...base, lodgeName: "Beta Lodge", senderName: "Beta Lodge", communicationsEmail: "b@beta.test", formalSenderName: "Beta" };
+    const from = (l: { formalSenderName: string }) => `${l.formalSenderName} <noreply@x.test>`;
+    const request = async (lodge: typeof base, delay: number) => {
+      const before = newsletterHeaderHtml(brandFor(lodge));
+      await new Promise((r) => setTimeout(r, delay));
+      return { before, after: newsletterHeaderHtml(brandFor(lodge)), sender: senderFields(lodge, from), stem: archiveFileStem(lodge) };
+    };
+    const [ra, rb] = await Promise.all([request(a, 20), request(b, 5)]);
+    expect(ra.after).toContain("Alpha Lodge"); expect(ra.after).not.toContain("Beta");
+    expect(rb.after).toContain("Beta Lodge"); expect(rb.after).not.toContain("Alpha");
+    expect(ra.before).toBe(ra.after);
+    expect(ra.sender).toEqual({ from: "Alpha <noreply@x.test>", reply_to: "a@alpha.test" });
+    expect(rb.sender).toEqual({ from: "Beta <noreply@x.test>", reply_to: "b@beta.test" });
+    expect([ra.stem, rb.stem]).toEqual(["Alpha", "Beta"]);
   });
 });
