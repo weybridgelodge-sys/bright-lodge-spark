@@ -1254,6 +1254,20 @@
       "when": 1793024814473,
       "tag": "0178_jobdd_public_officers_skip_inactive",
       "breakpoints": true
+    },
+    {
+      "idx": 179,
+      "version": "7",
+      "when": 1793027981223,
+      "tag": "0179_jobdb3_writers_take_row_unit",
+      "breakpoints": true
+    },
+    {
+      "idx": 180,
+      "version": "7",
+      "when": 1793028087566,
+      "tag": "0180_jobdb4_unit_defaults_to_fill_trigger",
+      "breakpoints": true
     }
   ]
 }
