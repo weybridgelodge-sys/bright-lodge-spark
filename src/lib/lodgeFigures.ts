@@ -3,6 +3,7 @@
 // missing stays blank and is shown as "—" or hidden, never a typed figure.
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { resolveSiteUnit } from "@/lib/siteUnit";
 import type { PublicMeetingPattern } from "@/lib/meetingPattern";
 import type { UnitProfile } from "@/lib/unitProfile";
 
@@ -89,7 +90,9 @@ export function glanceStats(f: LodgeFigures, u: Pick<UnitProfile, "lodgeNumber" 
 }
 
 export async function loadLodgeFigures(): Promise<LodgeFigures> {
-  const { data, error } = await (supabase.rpc as any)("get_public_lodge_figures");
+  const unit = await resolveSiteUnit();
+  if (!unit) return BLANK_FIGURES; // unknown site: blank figures, never another lodge's
+  const { data, error } = await (supabase.rpc as any)("get_public_lodge_figures", { _unit: unit });
   if (error) return BLANK_FIGURES;
   return parseLodgeFigures(data);
 }

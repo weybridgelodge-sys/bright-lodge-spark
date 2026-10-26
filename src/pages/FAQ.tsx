@@ -205,10 +205,7 @@ const FAQ = () => {
   const [costRow, setCostRow] = useState<Parameters<typeof faqCostAnswer>[0]>(null);
   useEffect(() => {
     let cancelled = false;
-    supabase.rpc("get_join_us_costs").then(({ data, error }) => {
-      if (cancelled || error) return;
-      setCostRow(Array.isArray(data) ? data[0] : data);
-    }, () => {});
+    fetchJoinUsCostRow().then((row) => { if (!cancelled && row) setCostRow(row); }, () => {});
     return () => { cancelled = true; };
   }, []);
   const categories = useMemo(() => faqCategories.map((c) => ({

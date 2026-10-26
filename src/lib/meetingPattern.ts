@@ -2,6 +2,7 @@
 // schedule, with the Summons template text used only as an explicit manual
 // override. The override switch is per unit (unit_settings), never global.
 import { supabase } from "@/integrations/supabase/client";
+import { resolveSiteUnit } from "@/lib/siteUnit";
 import { chooseMeetingPattern, meetingPatternSentence, WEEKDAYS, type ScheduleMonth } from "@/lib/meetingDiary";
 
 export const MEETING_PATTERN_OVERRIDE_KEY = "meeting_pattern_manual_override";
@@ -68,7 +69,9 @@ export function publicMeetingPattern(rpc: unknown): PublicMeetingPattern | null 
 }
 
 export async function fetchPublicMeetingPattern(): Promise<PublicMeetingPattern | null> {
-  const { data, error } = await (supabase.rpc as any)("get_meeting_pattern");
+  const unit = await resolveSiteUnit();
+  if (!unit) return null; // unknown site: page keeps its existing text
+  const { data, error } = await (supabase.rpc as any)("get_meeting_pattern", { _unit: unit });
   if (error) return null;
   return publicMeetingPattern(data);
 }
