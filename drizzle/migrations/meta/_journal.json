@@ -1324,6 +1324,13 @@
       "when": 1793030660113,
       "tag": "0188_jobdb5_unit_settings_audit_my_unit",
       "breakpoints": true
+    },
+    {
+      "idx": 189,
+      "version": "7",
+      "when": 1793046833736,
+      "tag": "0189_0189_unit_settings_bank_details_read",
+      "breakpoints": true
     }
   ]
 }
