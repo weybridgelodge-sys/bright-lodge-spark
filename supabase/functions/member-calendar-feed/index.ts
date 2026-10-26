@@ -67,16 +67,15 @@ Deno.serve(async (req) => {
     const fromIso = new Date(Date.now() - 365 * 86400_000).toISOString();
     const toIso = new Date(Date.now() + 2 * 365 * 86400_000).toISOString();
 
-    const [eventsRes, meetingsRes, socialsRes, officersRes, loiRes, publicRes, unitsRes, archivedRes] = await Promise.all([
+    const [eventsRes, meetingsRes, socialsRes, officersRes, loiRes, publicRes, unitsRes] = await Promise.all([
+      // All events in range; buildFeed shows unpublished/archived ones only via a linked meeting (JOB DF).
       admin.from("lodge_events")
-        .select("id,slug,title,event_date,tyling_time,location,intro,unit_id")
-        .eq("published", true)
-        .is("archived_at", null)
+        .select("id,slug,title,event_date,tyling_time,location,intro,unit_id,published,archived_at")
         .gte("event_date", fromIso)
         .lte("event_date", toIso),
+      // Every non-cancelled meeting, any status (JOB DF).
       admin.from("festive_board_meetings")
         .select("id,event_key,meeting_date,meeting_type,notes,status,unit_id")
-        .eq("status", "published")
         .is("cancelled_at", null)
         .eq("unit_id", unitId)
         .gte("meeting_date", fromIso.slice(0, 10)),
@@ -96,8 +95,6 @@ Deno.serve(async (req) => {
         .gte("event_date", londonToday())
         .lte("event_date", toIso.slice(0, 10)),
       admin.from("units").select("id"),
-      // Archived meetings never appear in the feed.
-      admin.from("lodge_events").select("slug").not("archived_at", "is", null),
     ]);
     if (loiRes.error) throw loiRes.error;
     if (publicRes.error) throw publicRes.error;
@@ -106,7 +103,6 @@ Deno.serve(async (req) => {
     const rows = scopeRows({
       events: eventsRes.data ?? [], meetings: meetingsRes.data ?? [], socials: socialsRes.data ?? [],
       officers: officersRes.data ?? [], loi: loiRes.data ?? [], publicRows: publicRes.data ?? [],
-      archivedKeys: new Set((archivedRes.data ?? []).map((r: any) => r.slug)),
     }, unitId, (unitsRes.data ?? []).length === 1);
     const body = buildFeed(rows, lodge);
 

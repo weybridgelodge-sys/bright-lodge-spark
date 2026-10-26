@@ -16,7 +16,8 @@ export function feedLodgeFrom(lodge: { siteUrl: string; calendarName: string; me
   };
 }
 
-export interface FeedRows { events: any[]; meetings: any[]; socials: any[]; officers: any[]; loi: any[]; publicRows: any[]; archivedKeys: Set<string> }
+/** archivedKeys is no longer used to hide meetings (JOB DF); kept optional for callers. */
+export interface FeedRows { events: any[]; meetings: any[]; socials: any[]; officers: any[]; loi: any[]; publicRows: any[]; archivedKeys?: Set<string> }
 
 const LONDON = "Europe/London";
 
@@ -183,24 +184,33 @@ const LONDON_VTIMEZONE = [
 ];
 
 
+/** A lodge_events row is public copy only when published and not archived (missing flag = published). */
+const eventIsVisible = (ev: any) => ev?.published !== false && !ev?.archived_at;
+
 export function buildFeed(r: FeedRows, c: FeedLodge, now: Date = new Date()): string {
-  const archivedKeys = r.archivedKeys;
-    const cal: CalEvent[] = [];
+  // JOB DF: every non-cancelled meeting appears (any status, past or future);
+  // an archived/unpublished linked event never hides its meeting.
+  const cal: CalEvent[] = [];
 
   const meetingsByKey = new Map<string, any>();
+  const unkeyed: any[] = [];
   for (const m of r.meetings) {
     const k = (m as any).event_key;
-    if (!k || archivedKeys.has(k)) continue;
+    if (!k || meetingsByKey.has(k)) { unkeyed.push(m); continue; }
     meetingsByKey.set(k, m);
   }
   for (const e of r.events) {
     const ev = e as any;
+    const visible = eventIsVisible(ev);
+    const linked = meetingsByKey.get(ev.slug);
+    // Hidden (unpublished/archived) events appear only through their linked meeting.
+    if (!visible && !linked) continue;
     const ymd = londonYMD(ev.event_date);
     const t = parseTime(ev.tyling_time, { hh: 18, mm: 15 });
     const start = wall(ymd.y, ymd.m1, ymd.d, t.hh, t.mm);
     const end = addHours(start, 3);
-    const linked = meetingsByKey.get(ev.slug);
-    const descParts = [ev.intro, linked?.notes].filter(Boolean);
+    // Unpublished copy (intro) is never included for a hidden event.
+    const descParts = [visible ? ev.intro : null, linked?.notes].filter(Boolean);
     cal.push({
       uid: `event-${ev.id}@${c.domain}`,
       title: classifyEventTitle(ev.title),
@@ -211,6 +221,7 @@ export function buildFeed(r: FeedRows, c: FeedLodge, now: Date = new Date()): st
     });
     if (linked) meetingsByKey.delete(ev.slug);
   }
+  for (const m of unkeyed) meetingsByKey.set(`__fbm_${(m as any).id}`, m);
   for (const [, m] of meetingsByKey) {
     const md = (m as any).meeting_date as string; // YYYY-MM-DD
     const ymd = londonYMD(md);
