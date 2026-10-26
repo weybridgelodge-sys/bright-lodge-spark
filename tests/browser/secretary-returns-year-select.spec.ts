@@ -7,7 +7,7 @@ import { expectNoAxeViolations } from "./helpers/axe";
  * is never cut to "Masonic ye…"; the dropdown keeps the full "Masonic year 2026/27".
  */
 
-const YEAR_LABEL = "2026/27";
+const YEAR_LABEL = "2026/2027";
 
 async function waitForPortal(page: Page) {
   await page.waitForLoadState("domcontentloaded");
