@@ -8,7 +8,6 @@ DECLARE
   d date := DATE '2026-10-26';
   wm uuid; sec uuid; tre uuid; alm uuid; x uuid; blank_user uuid; ap record; acc uuid;
   m1 uuid; m3 uuid; b record; ok boolean; out text := ''; fails int := 0;
-  PROCEDURE_DUMMY int;
 BEGIN
   IF (SELECT count(*) FROM public.units) <> 1 THEN RAISE EXCEPTION 'harness expects exactly one real lodge'; END IF;
   wm  := public.current_officer_holder('worshipful_master', d, u);
