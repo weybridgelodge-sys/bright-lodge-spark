@@ -304,7 +304,7 @@ function Inner() {
           </SelectContent>
         </Select>
         <Select value={fYear} onValueChange={setFYear}>
-          <SelectTrigger aria-label="All years" className="bg-navy border-gold/20 text-primary-foreground"><SelectValue placeholder="All years" /></SelectTrigger>
+          <SelectTrigger aria-label="All years" className="bg-navy border-gold/20 text-primary-foreground"><SelectValue placeholder="All years">{fYear === "all" ? "All years" : yearTriggerLabel(fYear)}</SelectValue></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All years</SelectItem>
             {MASONIC_YEAR_OPTIONS.map((y) => (
@@ -404,7 +404,7 @@ function Inner() {
               <div>
                 <label className="text-xs text-primary-foreground/70">Masonic year</label>
                 <Select value={form.masonic_year} onValueChange={(v) => setForm({ ...form, masonic_year: v })}>
-                  <SelectTrigger aria-label="Masonic year" className="bg-navy border-gold/20 text-primary-foreground"><SelectValue /></SelectTrigger>
+                  <SelectTrigger aria-label="Masonic year" className="bg-navy border-gold/20 text-primary-foreground"><SelectValue>{yearTriggerLabel(form.masonic_year)}</SelectValue></SelectTrigger>
                   <SelectContent>
                     {MASONIC_YEAR_OPTIONS.map((y) => (
                       <SelectItem key={y} value={String(y)}>Masonic year {treasurerYearBounds(y).label}</SelectItem>
