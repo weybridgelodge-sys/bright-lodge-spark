@@ -325,7 +325,7 @@ export async function runUnit(deps: Deps, unitId: string, lodge: LodgeSettings, 
     }
 
     if (!almonerEmail) {
-      console.warn('almoner-overdue-check: no almoner appointment or role holder found; flagged=', flagged.length)
+      console.warn('almoner-overdue-check: no almoner recipient', { unit_id: unitId })
       return { error: 'no_almoner_recipient', flagged: flagged.length, celebrations: celebrations.length }
     }
 
@@ -369,7 +369,7 @@ export async function runUnit(deps: Deps, unitId: string, lodge: LodgeSettings, 
     }
 
     console.log('almoner-overdue-check: enqueued digest', {
-      recipient: almonerEmail,
+      unit_id: unitId,
       flagged: flagged.length,
       celebrations: celebrations.length,
       pushSent,
