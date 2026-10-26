@@ -1,7 +1,5 @@
 import { describe, it, expect, vi, afterEach, beforeEach } from "vitest";
-import { render, screen, cleanup } from "@testing-library/react";
-import { scrollFocusedFieldIntoView, scrollableAncestor, FIELD_FOCUSED_CLASS, RETRY_MS, kbDebug } from "@/hooks/useVisualViewport";
-import KbDebug, { kbDebugEnabled } from "@/components/KbDebug";
+import { scrollFocusedFieldIntoView, scrollableAncestor, FIELD_FOCUSED_CLASS, RETRY_MS } from "@/hooks/useVisualViewport";
 import { readFileSync } from "node:fs";
 
 function setup(phone = true) {
@@ -59,7 +57,6 @@ describe("JOB CF focus → native scrollIntoView", () => {
     (window.visualViewport as any).height = 380;
     ta.focus(); scrollFocusedFieldIntoView(ta); vi.advanceTimersByTime(0);
     expect(dlg.scrollBy).toHaveBeenCalledWith({ top: 336, behavior: "auto" });
-    expect(kbDebug.delta).toBe(336);
   });
 
   it("scrollableAncestor picks the overflow-y:auto element even before it overflows", () => {
@@ -81,27 +78,6 @@ describe("JOB CF focus → native scrollIntoView", () => {
   });
 });
 
-describe("JOB CF ?kbdebug=1 readout", () => {
-  afterEach(() => { cleanup(); sessionStorage.clear(); });
-  it("off without the parameter, on with it, remembered for the tab, off with =0", () => {
-    expect(kbDebugEnabled("", sessionStorage)).toBe(false);
-    expect(kbDebugEnabled("?kbdebug=1", sessionStorage)).toBe(true);
-    expect(kbDebugEnabled("", sessionStorage)).toBe(true);
-    expect(kbDebugEnabled("?kbdebug=0", sessionStorage)).toBe(false);
-    expect(kbDebugEnabled("", sessionStorage)).toBe(false);
-  });
-  it("renders nothing without the parameter", () => {
-    render(<KbDebug />);
-    expect(screen.queryByTestId("kbdebug")).toBeNull();
-  });
-  it("renders the readout with the parameter", () => {
-    sessionStorage.setItem("kbdebug", "1");
-    render(<KbDebug />);
-    const el = screen.getByTestId("kbdebug");
-    expect(el.className).toContain("pointer-events-none");
-    expect(el.textContent).toMatch(/innerH:.*vv\.h:.*kb:.*sTop:.*delta:/s);
-  });
-});
 
 describe("JOB CF Charity Steward labels match visible labels", () => {
   const src = readFileSync("src/pages/members/admin/CharitySteward.tsx", "utf8");
