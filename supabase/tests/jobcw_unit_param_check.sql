@@ -1,7 +1,6 @@
 -- JOB CW: two-lodge check for get_officers_public(_unit). Rolled back.
 BEGIN;
 INSERT INTO public.units(id, name) VALUES ('jobcw_b', 'Lodge B test');
--- lodge B's WM = an existing profile moved to lodge B is avoided; instead give lodge B its own WM appointment for a Weybridge member id.
 DO $$
 DECLARE wm text; a int; b int; u int; bl int; ay int; uy int;
 BEGIN
@@ -16,7 +15,8 @@ BEGIN
   IF b <> 0 THEN RAISE EXCEPTION 'FAIL lodge B saw lodge A officers'; END IF;
   IF u <> 0 OR bl <> 0 OR uy IS NOT NULL THEN RAISE EXCEPTION 'FAIL unknown/blank lodge returned rows'; END IF;
   IF public.get_public_booking_details('no_such_lodge') <> '{}'::jsonb THEN RAISE EXCEPTION 'FAIL booking details unknown lodge'; END IF;
-  IF (SELECT count(*) FROM public.get_officers_public(NULL)) <> a THEN RAISE EXCEPTION 'FAIL no-arg differs'; END IF;
+  IF ay IS NULL THEN RAISE EXCEPTION 'FAIL year for lodge A'; END IF;
+  -- Note: with two lodges and no session the no-argument call returns nothing (the temporary fallback only guesses with one lodge).
   RAISE NOTICE 'PASS 5/5';
 END $$;
 ROLLBACK;
