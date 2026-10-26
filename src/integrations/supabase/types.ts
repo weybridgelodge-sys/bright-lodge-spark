@@ -2603,7 +2603,7 @@ export type Database = {
           public_label?: string | null
           series_id?: string | null
           status?: Database["public"]["Enums"]["meeting_status"]
-          unit_id?: string
+          unit_id: string
           updated_at?: string
         }
         Update: {
@@ -2725,7 +2725,7 @@ export type Database = {
           installation_weekday?: number | null
           mode?: string
           ritual?: string | null
-          unit_id?: string
+          unit_id: string
           unit_number?: string | null
           updated_at?: string
           updated_by?: string | null
@@ -3789,7 +3789,7 @@ export type Database = {
           id?: string
           target_id?: string | null
           target_table: string
-          unit_id?: string
+          unit_id: string
         }
         Update: {
           action?: string
@@ -3944,7 +3944,7 @@ export type Database = {
           name: string
           ordinal: string
           schedule?: Json
-          unit_id?: string
+          unit_id: string
           updated_at?: string
           weekday: number
         }
@@ -4619,7 +4619,7 @@ export type Database = {
           profile_id: string
           recorded_by?: string | null
           status: string
-          unit_id?: string
+          unit_id: string
         }
         Update: {
           created_at?: string
@@ -5026,7 +5026,7 @@ export type Database = {
           installation_date: string
           lodge_year: number
           notes?: string | null
-          unit_id?: string
+          unit_id: string
           updated_at?: string
         }
         Update: {
