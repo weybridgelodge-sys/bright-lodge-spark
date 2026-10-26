@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { joinUsCostAmounts } from "@/lib/joinUsCosts";
+import { joinUsCostAmounts, fetchJoinUsCostRow } from "@/lib/joinUsCosts";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
