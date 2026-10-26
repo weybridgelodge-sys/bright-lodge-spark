@@ -1,7 +1,7 @@
 // JOB DE: Hero, Join Us and FAQ take the member age range from the live lodge figures.
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { readFileSync } from "node:fs";
-import { render, waitFor } from "@testing-library/react";
+import { render, waitFor, screen, fireEvent } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 
@@ -60,6 +60,7 @@ describe("live age range", () => {
       state.figures = figs;
       wrap(<FAQ />);
       await waitFor(() => expect(state.rpc).toContain("get_public_lodge_figures"));
+      fireEvent.click(screen.getByRole("button", { name: "Can anyone join a Masonic Lodge in Surrey?" }));
       await waitFor(() => {
         const ld = [...document.querySelectorAll('script[type="application/ld+json"]')].map((s) => JSON.parse(s.textContent || "{}"));
         const all = ld.flatMap((j) => (Array.isArray(j["@graph"]) ? j["@graph"] : [j]));
