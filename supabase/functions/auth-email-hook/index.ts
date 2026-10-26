@@ -45,7 +45,9 @@ async function contextFor(req: Request): Promise<AuthRenderContext> {
     const db = serviceDb()
     if (!payload || !db) return neutral
     return await within((async () => {
-      const { unitId } = await resolveRecipientUnit(db, recipientOf(payload))
+      const { unitId, source } = await resolveRecipientUnit(db, recipientOf(payload))
+      // Unit id and source only (never the address), to learn the real payload shape.
+      console.log(`auth-email-hook: lodge source=${source} unit=${unitId || '-'}`)
       return authRenderContext(await brandLookups.get(unitId), LAST_RESORT_SITE_URL)
     })(), BRAND_TIMEOUT_MS, neutral)
   } catch {
