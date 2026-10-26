@@ -623,7 +623,7 @@ export type Database = {
             | null
           seconder: string | null
           stage: Database["public"]["Enums"]["candidate_stage"]
-          unit_id: string | null
+          unit_id: string
           updated_at: string
         }
         Insert: {
@@ -644,7 +644,7 @@ export type Database = {
             | null
           seconder?: string | null
           stage?: Database["public"]["Enums"]["candidate_stage"]
-          unit_id?: string | null
+          unit_id: string
           updated_at?: string
         }
         Update: {
@@ -665,7 +665,7 @@ export type Database = {
             | null
           seconder?: string | null
           stage?: Database["public"]["Enums"]["candidate_stage"]
-          unit_id?: string | null
+          unit_id?: string
           updated_at?: string
         }
         Relationships: [
@@ -1392,7 +1392,7 @@ export type Database = {
           status: string
           tagline: string | null
           theme: string
-          unit_id: string | null
+          unit_id: string
           updated_at: string
           useful_stuff: Json
           venue: string | null
@@ -1436,7 +1436,7 @@ export type Database = {
           status?: string
           tagline?: string | null
           theme?: string
-          unit_id?: string | null
+          unit_id: string
           updated_at?: string
           useful_stuff?: Json
           venue?: string | null
@@ -1480,7 +1480,7 @@ export type Database = {
           status?: string
           tagline?: string | null
           theme?: string
-          unit_id?: string | null
+          unit_id?: string
           updated_at?: string
           useful_stuff?: Json
           venue?: string | null
@@ -1757,7 +1757,7 @@ export type Database = {
           ticket_count: number
           tickets_subtotal_pence: number | null
           total_pence: number | null
-          unit_id: string | null
+          unit_id: string
           updated_at: string
         }
         Insert: {
@@ -1806,7 +1806,7 @@ export type Database = {
           ticket_count?: number
           tickets_subtotal_pence?: number | null
           total_pence?: number | null
-          unit_id?: string | null
+          unit_id: string
           updated_at?: string
         }
         Update: {
@@ -1855,7 +1855,7 @@ export type Database = {
           ticket_count?: number
           tickets_subtotal_pence?: number | null
           total_pence?: number | null
-          unit_id?: string | null
+          unit_id?: string
           updated_at?: string
         }
         Relationships: [
@@ -3133,7 +3133,7 @@ export type Database = {
           sort_order: number
           title: string
           tyling_time: string
-          unit_id: string | null
+          unit_id: string
           updated_at: string
           venue_id: string | null
         }
@@ -3156,7 +3156,7 @@ export type Database = {
           sort_order?: number
           title: string
           tyling_time?: string
-          unit_id?: string | null
+          unit_id: string
           updated_at?: string
           venue_id?: string | null
         }
@@ -3179,7 +3179,7 @@ export type Database = {
           sort_order?: number
           title?: string
           tyling_time?: string
-          unit_id?: string | null
+          unit_id?: string
           updated_at?: string
           venue_id?: string | null
         }
@@ -3320,7 +3320,7 @@ export type Database = {
           notified_member_count: number
           starts_at: string
           title: string
-          unit_id: string | null
+          unit_id: string
           updated_at: string
           venue: string
           working_group_id: string | null
@@ -3337,7 +3337,7 @@ export type Database = {
           notified_member_count?: number
           starts_at: string
           title: string
-          unit_id?: string | null
+          unit_id: string
           updated_at?: string
           venue: string
           working_group_id?: string | null
@@ -3354,7 +3354,7 @@ export type Database = {
           notified_member_count?: number
           starts_at?: string
           title?: string
-          unit_id?: string | null
+          unit_id?: string
           updated_at?: string
           venue?: string
           working_group_id?: string | null
@@ -3689,7 +3689,7 @@ export type Database = {
           time_from: string
           time_to: string
           title: string
-          unit_id: string | null
+          unit_id: string
           updated_at: string
           updated_by: string | null
           venue: string
@@ -3703,7 +3703,7 @@ export type Database = {
           time_from?: string
           time_to?: string
           title?: string
-          unit_id?: string | null
+          unit_id: string
           updated_at?: string
           updated_by?: string | null
           venue?: string
@@ -3717,7 +3717,7 @@ export type Database = {
           time_from?: string
           time_to?: string
           title?: string
-          unit_id?: string | null
+          unit_id?: string
           updated_at?: string
           updated_by?: string | null
           venue?: string
@@ -4936,7 +4936,7 @@ export type Database = {
           override_by: string | null
           override_reason: string | null
           position_key: string
-          unit_id: string | null
+          unit_id: string
           updated_at: string
         }
         Insert: {
@@ -4950,7 +4950,7 @@ export type Database = {
           override_by?: string | null
           override_reason?: string | null
           position_key: string
-          unit_id?: string | null
+          unit_id: string
           updated_at?: string
         }
         Update: {
@@ -4964,7 +4964,7 @@ export type Database = {
           override_by?: string | null
           override_reason?: string | null
           position_key?: string
-          unit_id?: string | null
+          unit_id?: string
           updated_at?: string
         }
         Relationships: [
@@ -5191,7 +5191,7 @@ export type Database = {
           question: string
           results_visibility: string
           status: string
-          unit_id: string | null
+          unit_id: string
           updated_at: string
         }
         Insert: {
@@ -5203,7 +5203,7 @@ export type Database = {
           question: string
           results_visibility?: string
           status?: string
-          unit_id?: string | null
+          unit_id: string
           updated_at?: string
         }
         Update: {
@@ -5215,7 +5215,7 @@ export type Database = {
           question?: string
           results_visibility?: string
           status?: string
-          unit_id?: string | null
+          unit_id?: string
           updated_at?: string
         }
         Relationships: [
@@ -5533,7 +5533,7 @@ export type Database = {
           reminder_lead_days: number | null
           return_type: Database["public"]["Enums"]["secretary_return_type"]
           status: Database["public"]["Enums"]["secretary_return_status"]
-          unit_id: string | null
+          unit_id: string
           updated_at: string
         }
         Insert: {
@@ -5550,7 +5550,7 @@ export type Database = {
           reminder_lead_days?: number | null
           return_type: Database["public"]["Enums"]["secretary_return_type"]
           status?: Database["public"]["Enums"]["secretary_return_status"]
-          unit_id?: string | null
+          unit_id: string
           updated_at?: string
         }
         Update: {
@@ -5567,7 +5567,7 @@ export type Database = {
           reminder_lead_days?: number | null
           return_type?: Database["public"]["Enums"]["secretary_return_type"]
           status?: Database["public"]["Enums"]["secretary_return_status"]
-          unit_id?: string | null
+          unit_id?: string
           updated_at?: string
         }
         Relationships: [
@@ -5903,7 +5903,7 @@ export type Database = {
           sent_at: string | null
           sent_to_count: number | null
           status: Database["public"]["Enums"]["summons_status"]
-          unit_id: string | null
+          unit_id: string
           updated_at: string
           visitors_notified_at: string | null
           visitors_notified_count: number | null
@@ -5935,7 +5935,7 @@ export type Database = {
           sent_at?: string | null
           sent_to_count?: number | null
           status?: Database["public"]["Enums"]["summons_status"]
-          unit_id?: string | null
+          unit_id: string
           updated_at?: string
           visitors_notified_at?: string | null
           visitors_notified_count?: number | null
@@ -5967,7 +5967,7 @@ export type Database = {
           sent_at?: string | null
           sent_to_count?: number | null
           status?: Database["public"]["Enums"]["summons_status"]
-          unit_id?: string | null
+          unit_id?: string
           updated_at?: string
           visitors_notified_at?: string | null
           visitors_notified_count?: number | null
@@ -6764,7 +6764,7 @@ export type Database = {
           lodge_number: string | null
           name: string | null
           opted_out_at: string | null
-          unit_id: string | null
+          unit_id: string
           unsubscribe_token: string
           updated_at: string
         }
@@ -6778,7 +6778,7 @@ export type Database = {
           lodge_number?: string | null
           name?: string | null
           opted_out_at?: string | null
-          unit_id?: string | null
+          unit_id: string
           unsubscribe_token?: string
           updated_at?: string
         }
@@ -6792,7 +6792,7 @@ export type Database = {
           lodge_number?: string | null
           name?: string | null
           opted_out_at?: string | null
-          unit_id?: string | null
+          unit_id?: string
           unsubscribe_token?: string
           updated_at?: string
         }
