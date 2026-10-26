@@ -26,9 +26,12 @@ import {
   link,
   main,
   text,
+  type BrandIdentity,
 } from './_layout.tsx'
 
 interface SignupEmailProps {
+  /** Lodge identity for this render only (JOB CJ); omitted = text-only header. */
+  brand?: BrandIdentity | null
   siteName: string
   siteUrl: string
   recipient: string
@@ -36,6 +39,7 @@ interface SignupEmailProps {
 }
 
 export const SignupEmail = ({
+  brand,
   siteName,
   siteUrl,
   recipient,
@@ -46,7 +50,7 @@ export const SignupEmail = ({
     <Preview>Confirm your email for {siteName}</Preview>
     <Body style={main}>
       <Container style={container}>
-        <BrandHeader />
+        <BrandHeader brand={brand} />
         <Heading style={h1}>Confirm your email</Heading>
         <Text style={text}>
           Thank you for registering for the{' '}
@@ -68,7 +72,7 @@ export const SignupEmail = ({
         <Text style={footer}>
           If you didn't create an account, you can safely ignore this email.
         </Text>
-        <BrandFooter />
+        <BrandFooter brand={brand} />
       </Container>
     </Body>
   </Html>

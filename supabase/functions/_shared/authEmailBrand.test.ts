@@ -4,7 +4,6 @@ import * as React from 'npm:react@18.3.1'
 import { renderAsync } from 'npm:@react-email/components@0.0.22'
 import { assert, assertEquals } from 'https://deno.land/std@0.224.0/assert/mod.ts'
 import { createAuthBrandLookup, keepAlive, senderDisplayName } from './authEmailBrand.ts'
-import { setAuthEmailBrand } from './email-templates/_layout.tsx'
 import { SignupEmail } from './email-templates/signup.tsx'
 import { InviteEmail } from './email-templates/invite.tsx'
 import { MagicLinkEmail } from './email-templates/magic-link.tsx'
@@ -28,8 +27,7 @@ const has = (html: string, a: string) => html.includes(a) || html.includes(a.rep
 // Mirrors the hook's render step: wait for the lookup (capped), then build the element.
 async function renderWith(lookup: ReturnType<typeof createAuthBrandLookup>, C: React.ComponentType<any>, props: Record<string, unknown>) {
   const b = await lookup.get()
-  setAuthEmailBrand(b ?? TEXT_ONLY)
-  return await renderAsync(React.createElement(C, props))
+  return await renderAsync(React.createElement(C, { ...props, brand: b ?? TEXT_ONLY }))
 }
 
 for (const [name, C, props, action] of CASES) {

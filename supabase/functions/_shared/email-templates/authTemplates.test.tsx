@@ -4,7 +4,6 @@
 import * as React from 'npm:react@18.3.1'
 import { renderAsync } from 'npm:@react-email/components@0.0.22'
 import { assert } from 'https://deno.land/std@0.224.0/assert/mod.ts'
-import { setAuthEmailBrand } from './_layout.tsx'
 import { SignupEmail } from './signup.tsx'
 import { InviteEmail } from './invite.tsx'
 import { MagicLinkEmail } from './magic-link.tsx'
@@ -25,23 +24,20 @@ const enc = (s: string) => s.replace(/&/g, '&amp;')
 
 for (const [name, C, props, action] of CASES) {
   Deno.test(`${name}: settings missing -> text-only header, action kept`, async () => {
-    setAuthEmailBrand(null)
-    const html = await renderAsync(React.createElement(C, props))
+    const html = await renderAsync(React.createElement(C, { ...props, brand: null }))
     assert(html.includes(enc(action)) || html.includes(action), 'action link/code present')
     assert(!/<img/i.test(html), 'no image when settings are missing')
   })
   Deno.test(`${name}: Unit Setup brand -> crest 120, name, province, footer`, async () => {
-    setAuthEmailBrand({ crestUrl: 'https://cdn.example.test/crest.png', lodgeName: 'Testbury Lodge', lodgeNumber: '1234', provinceName: 'Province of Testshire' })
-    const html = await renderAsync(React.createElement(C, props))
+    const brand = { crestUrl: 'https://cdn.example.test/crest.png', lodgeName: 'Testbury Lodge', lodgeNumber: '1234', provinceName: 'Province of Testshire' }
+    const html = await renderAsync(React.createElement(C, { ...props, brand }))
     assert(html.includes(enc(action)) || html.includes(action))
     assert(html.includes('https://cdn.example.test/crest.png') && /width="120"/.test(html))
     assert(html.includes('Testbury Lodge') && html.includes('No. 1234 — Province of Testshire') && html.includes('Testbury Lodge No. 1234'))
-    setAuthEmailBrand(null)
   })
 }
 if (CASES.length) {
   Deno.test('magic link app mode keeps the code', async () => {
-    setAuthEmailBrand(null)
     const html = await renderAsync(React.createElement(MagicLinkEmail, { siteName: 'S', confirmationUrl: URL_, token: '111222', client: 'app' }))
     assert(html.includes('111222'))
   })
@@ -52,7 +48,6 @@ Deno.test('body wording uses the given lodge name; neutral fallback has no lodge
   const named = siteNameFor({ lodgeName: 'Testbury Lodge', lodgeNumber: '1234' })
   assert(named === 'Testbury Lodge No. 1234')
   assert(siteNameFor(null) === 'Members Portal' && siteNameFor({ lodgeName: ' ' }) === 'Members Portal')
-  setAuthEmailBrand(null)
   const strip = (h: string) => h.replace(/<!-- -->/g, '').replace(/\s+/g, ' ')
   const html = strip(await renderAsync(React.createElement(MagicLinkEmail, { siteName: named, confirmationUrl: URL_ })))
   assert(html.includes('sign in to the Testbury Lodge No. 1234') && html.includes('Your Testbury Lodge No. 1234 sign-in link'))

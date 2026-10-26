@@ -97,3 +97,55 @@ export function siteUrlFor(b: { siteUrl?: string } | null | undefined, fallback:
   const u = (b?.siteUrl ?? "").trim().replace(/\/+$/, "");
   return /^https:\/\/\S+$/.test(u) ? u : fallback;
 }
+
+/**
+ * JOB CJ: one bounded lookup PER UNIT (each with its own 5-minute cache and
+ * shared in-flight load). Blank unit = null at once (neutral text-only brand).
+ * Never throws; a failing unit only affects its own emails.
+ */
+export function createUnitBrandLookups(opts: {
+  load: (unitId: string) => Promise<Settings>;
+  timeoutMs?: number;
+  ttlMs?: number;
+  warn?: (msg: string) => void;
+  now?: () => number;
+}) {
+  const byUnit = new Map<string, ReturnType<typeof createAuthBrandLookup>>();
+  const lookupFor = (unitId: string) => {
+    let l = byUnit.get(unitId);
+    if (!l) {
+      l = createAuthBrandLookup({ ...opts, load: () => opts.load(unitId), missingReason: () => `no lodge identity for unit ${unitId}` });
+      byUnit.set(unitId, l);
+    }
+    return l;
+  };
+  return {
+    async get(unitId: string): Promise<AuthBrand | null> {
+      const u = (unitId ?? "").trim();
+      if (!u) return null;
+      try { return await lookupFor(u).get(); } catch { return null; }
+    },
+  };
+}
+
+/** Resolves within ms or gives the fallback; never rejects. */
+export async function within<T>(p: Promise<T>, ms: number, fallback: T): Promise<T> {
+  let timer: number | undefined;
+  try {
+    return await Promise.race([p.catch(() => fallback), new Promise<T>((r) => { timer = setTimeout(() => r(fallback), ms) as unknown as number; })]);
+  } finally { clearTimeout(timer); }
+}
+
+/** Header identity when no lodge is known: text-only, neutral wording. */
+export const TEXT_ONLY_BRAND = { lodgeName: NEUTRAL_SITE_NAME, lodgeNumber: "" };
+
+/** Everything one sign-in email needs from its lodge, built per send (never stored). */
+export function authRenderContext(b: AuthBrand | null, lastResortSiteUrl: string) {
+  return {
+    brand: b ? { crestUrl: b.crestUrl, lodgeName: b.lodgeName, lodgeNumber: b.lodgeNumber, provinceName: b.provinceName } : TEXT_ONLY_BRAND,
+    siteName: siteNameFor(b),
+    siteUrl: siteUrlFor(b, lastResortSiteUrl),
+    senderName: senderDisplayName(b),
+  };
+}
+export type AuthRenderContext = ReturnType<typeof authRenderContext>;

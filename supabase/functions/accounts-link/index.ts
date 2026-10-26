@@ -7,6 +7,7 @@
 
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { accountsFileName, loadLodgeSettings } from "../_shared/lodgeSettings.ts";
+import { accountsLinkUnit } from "./unit.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -48,7 +49,7 @@ Deno.serve(async (req) => {
 
     const { data: a } = await admin
       .from("treasurer_year_approvals")
-      .select("id,masonic_year,status,certified_pack_path")
+      .select("id,masonic_year,status,certified_pack_path,submitted_by")
       .eq("id", k)
       .maybeSingle();
 
@@ -62,10 +63,16 @@ Deno.serve(async (req) => {
       );
     }
 
+    // No signed-in caller here (the link is the credential), so the lodge comes from the
+    // record: the submitting Treasurer's own profile unit. Blank = refuse, never a default.
+    const unit = await accountsLinkUnit(admin, a.submitted_by);
+    if (!unit.ok) return json({ error: "no_lodge", message: unit.message }, 409);
+    const lodge = await loadLodgeSettings(unit.unitId);
+
     const { data: signed, error: signErr } = await admin.storage
       .from("lodge-docs")
       .createSignedUrl(a.certified_pack_path, SIGNED_URL_TTL, {
-        download: accountsFileName((await loadLodgeSettings()).lodgeName, year),
+        download: accountsFileName(lodge.lodgeName, year),
       });
     if (signErr || !signed?.signedUrl) {
       return json({ error: "sign_failed", message: "We couldn't open those accounts right now." }, 500);

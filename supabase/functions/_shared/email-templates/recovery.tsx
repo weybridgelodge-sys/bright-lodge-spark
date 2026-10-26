@@ -24,14 +24,18 @@ import {
   hr,
   main,
   text,
+  type BrandIdentity,
 } from './_layout.tsx'
 
 interface RecoveryEmailProps {
+  /** Lodge identity for this render only (JOB CJ); omitted = text-only header. */
+  brand?: BrandIdentity | null
   siteName: string
   confirmationUrl: string
 }
 
 export const RecoveryEmail = ({
+  brand,
   siteName,
   confirmationUrl,
 }: RecoveryEmailProps) => (
@@ -40,7 +44,7 @@ export const RecoveryEmail = ({
     <Preview>Reset your password for {siteName}</Preview>
     <Body style={main}>
       <Container style={container}>
-        <BrandHeader />
+        <BrandHeader brand={brand} />
         <Heading style={h1}>Reset your password</Heading>
         <Text style={text}>
           We received a request to reset the password for your {siteName}
@@ -57,7 +61,7 @@ export const RecoveryEmail = ({
           If you didn't request a password reset, you can safely ignore this
           email — your password will not be changed.
         </Text>
-        <BrandFooter />
+        <BrandFooter brand={brand} />
       </Container>
     </Body>
   </Html>

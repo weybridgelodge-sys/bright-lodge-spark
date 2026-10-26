@@ -26,9 +26,12 @@ import {
   hr,
   main,
   text,
+  type BrandIdentity,
 } from './_layout.tsx'
 
 interface MagicLinkEmailProps {
+  /** Lodge identity for this render only (JOB CJ); omitted = text-only header. */
+  brand?: BrandIdentity | null
   siteName: string
   confirmationUrl: string
   token?: string
@@ -36,6 +39,7 @@ interface MagicLinkEmailProps {
 }
 
 export const MagicLinkEmail = ({
+  brand,
   siteName,
   confirmationUrl,
   token,
@@ -51,7 +55,7 @@ export const MagicLinkEmail = ({
       </Preview>
       <Body style={main}>
         <Container style={container}>
-          <BrandHeader />
+          <BrandHeader brand={brand} />
           <Heading style={h1}>Members Portal sign-in</Heading>
 
           {showLink ? (
@@ -99,7 +103,7 @@ export const MagicLinkEmail = ({
             If you didn't request this sign-in, you can safely ignore this
             email — no changes have been made to your account.
           </Text>
-          <BrandFooter />
+          <BrandFooter brand={brand} />
         </Container>
       </Body>
     </Html>

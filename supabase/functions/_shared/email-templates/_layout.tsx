@@ -1,9 +1,9 @@
 /// <reference types="npm:@types/react@18.3.1" />
 
 // Shared layout for auth (sign-in) emails: the same EmailBrandHeader/EmailBrandFooter as the
-// transactional emails. Identity is set once per function instance by auth-email-hook via
-// setAuthEmailBrand (Unit Setup, loaded in the background); until then, or on any lookup
-// failure, a text-only header is used. Rendering never waits for, or fails on, settings.
+// transactional emails. The lodge identity is a per-render `brand` prop (JOB CJ): each
+// template passes its own brand to BrandHeader/BrandFooter, so concurrent sends for
+// different lodges never share state. No brand = text-only header.
 import * as React from 'npm:react@18.3.1'
 import {
   BRAND,
@@ -14,16 +14,9 @@ import { EmailBrandFooter, EmailBrandHeader } from '../transactional-email-templ
 
 export { BRAND, brandStyles }
 
-let current: BrandIdentity = {}
-export function setAuthEmailBrand(b: BrandIdentity | null | undefined) {
-  current = { ...(b ?? {}) }
-}
-export function getAuthEmailBrand(): BrandIdentity {
-  return current
-}
-
-export const BrandHeader = () => <EmailBrandHeader {...current} />
-export const BrandFooter = () => <EmailBrandFooter {...current} />
+export type { BrandIdentity }
+export const BrandHeader = ({ brand }: { brand?: BrandIdentity | null }) => <EmailBrandHeader {...(brand ?? {})} />
+export const BrandFooter = ({ brand }: { brand?: BrandIdentity | null }) => <EmailBrandFooter {...(brand ?? {})} />
 
 export const main = brandStyles.main
 export const container = brandStyles.container

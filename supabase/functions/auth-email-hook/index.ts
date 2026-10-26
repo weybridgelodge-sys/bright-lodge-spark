@@ -7,9 +7,10 @@ import { MagicLinkEmail } from '../_shared/email-templates/magic-link.tsx'
 import { RecoveryEmail } from '../_shared/email-templates/recovery.tsx'
 import { EmailChangeEmail } from '../_shared/email-templates/email-change.tsx'
 import { ReauthenticationEmail } from '../_shared/email-templates/reauthentication.tsx'
-import { setAuthEmailBrand } from '../_shared/email-templates/_layout.tsx'
-import { loadLodgeSettings } from '../_shared/lodgeSettings.ts'
-import { createAuthBrandLookup, keepAlive, siteNameFor, senderDisplayName, siteUrlFor, NEUTRAL_SITE_NAME, NEUTRAL_SAMPLE_URL } from '../_shared/authEmailBrand.ts'
+import { loadLodgeSettingsStrict } from '../_shared/lodgeSettings.ts'
+import { createClient } from 'npm:@supabase/supabase-js@2'
+import { authRenderContext, createUnitBrandLookups, within, type AuthRenderContext, NEUTRAL_SITE_NAME, NEUTRAL_SAMPLE_URL } from '../_shared/authEmailBrand.ts'
+import { recipientOf, resolveRecipientUnit } from '../_shared/authRecipientUnit.ts'
 import { EMAIL_DOMAINS } from '../_shared/emailDomains.ts'
 
 const corsHeaders = {
@@ -21,37 +22,36 @@ const corsHeaders = {
 // Configuration: deployment-level domains (verified email DNS), see _shared/emailDomains.ts.
 const SENDER_DOMAIN = EMAIL_DOMAINS.senderDomain
 const FROM_DOMAIN = EMAIL_DOMAINS.fromDomain
-// Default site link = Unit Setup site_url; previous root-domain link only if Unit Setup is unavailable.
+// Default site link = the recipient's lodge Unit Setup site_url; root-domain link only if unknown.
 const LAST_RESORT_SITE_URL = `https://${EMAIL_DOMAINS.rootDomain}`
-async function currentSiteUrl(fallback: string): Promise<string> {
-  try { return siteUrlFor(await brandLookup.get(), fallback) } catch { return fallback }
+const BRAND_TIMEOUT_MS = 1500
+
+// Per-lodge identity (JOB CJ): the lodge of the person the email is for, one
+// cached lookup per lodge (immutable cache values, keyed by unit). Each send
+// builds its own render context and handler, so concurrent sends for
+// different lodges never share header, name, link or sender state.
+const brandLookups = createUnitBrandLookups({ load: (unitId) => loadLodgeSettingsStrict(unitId), timeoutMs: BRAND_TIMEOUT_MS })
+
+function serviceDb() {
+  const url = Deno.env.get('SUPABASE_URL'); const key = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+  return url && key ? createClient(url, key) : null
 }
 
-// Header/footer identity (layout only). Neutral text-only header unless Unit Setup is read in
-// time: render uses the cached identity, else waits for ONE shared lookup for at most 1500ms.
-// Timeout or any error keeps the text-only header; the lookup can never throw or fail a send.
-const TEXT_ONLY_BRAND = { lodgeName: NEUTRAL_SITE_NAME, lodgeNumber: '' }
-setAuthEmailBrand(TEXT_ONLY_BRAND)
-const brandLookup = createAuthBrandLookup({
-  load: () => loadLodgeSettings(),
-  timeoutMs: 1500,
-  missingReason: () =>
-    !Deno.env.get('SUPABASE_URL') || !Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
-      ? 'settings missing'
-      : 'no lodge identity: not exactly one unit or lodge name blank',
-})
-// Returns the body-text lodge name from the same lookup (neutral wording when unavailable).
-async function applyAuthEmailBrand(): Promise<string> {
+/** Never throws; whole lookup (lodge of recipient + its identity) capped at 1500ms. */
+async function contextFor(req: Request): Promise<AuthRenderContext> {
+  const neutral = authRenderContext(null, LAST_RESORT_SITE_URL)
   try {
-    const b = await brandLookup.get()
-    setAuthEmailBrand(b ?? TEXT_ONLY_BRAND)
-    return siteNameFor(b)
+    const payload = await req.clone().json().catch(() => null)
+    const db = serviceDb()
+    if (!payload || !db) return neutral
+    return await within((async () => {
+      const { unitId } = await resolveRecipientUnit(db, recipientOf(payload))
+      return authRenderContext(await brandLookups.get(unitId), LAST_RESORT_SITE_URL)
+    })(), BRAND_TIMEOUT_MS, neutral)
   } catch {
-    try { setAuthEmailBrand(TEXT_ONLY_BRAND) } catch { /* keep current header */ }
-    return NEUTRAL_SITE_NAME
+    return neutral
   }
 }
-try { keepAlive(brandLookup.start()) } catch { /* never block boot */ }
 
 // Template mapping for preview mode
 const EMAIL_TEMPLATES: Record<string, React.ComponentType<any>> = {
@@ -143,7 +143,8 @@ async function handlePreview(req: Request): Promise<Response> {
     })
   }
 
-  const sample = sampleData(await currentSiteUrl(NEUTRAL_SAMPLE_URL))[type] || {}
+  // Preview has no recipient, so no lodge: neutral sample link and text-only header.
+  const sample = sampleData(NEUTRAL_SAMPLE_URL)[type] || {}
   const html = await renderAsync(React.createElement(EmailTemplate, sample))
 
   return new Response(html, {
@@ -173,94 +174,47 @@ function extractClientHint(url: string | undefined): string | undefined {
 
 // The SDK handler owns verification, dispatch, and retry semantics; this file
 // owns only the email decisions: subjects, templates, and per-type props.
-// Sender display name comes from Unit Setup (senderDisplayName); the SDK fixes `from` per handler,
-// so one handler is kept per display name. Address and domains unchanged.
-const handlers = new Map<string, (req: Request) => Promise<Response>>()
-function handlerFor(name: string) {
-  let h = handlers.get(name)
-  if (!h) {
-    h = createAuthEmailHandler({
-      apiKey: Deno.env.get('LOVABLE_API_KEY')!,
-      from: `${name} <noreply@${FROM_DOMAIN}>`,
-      senderDomain: SENDER_DOMAIN,
-      sendUrl: Deno.env.get('LOVABLE_SEND_URL'),
-      emails: AUTH_EMAILS,
-    })
-    handlers.set(name, h)
-  }
-  return h
-}
-// Same bounded lookup (cache, else ≤1500ms); never throws; neutral name on any failure.
-async function currentSenderName(): Promise<string> {
-  try { return senderDisplayName(await brandLookup.get()) } catch { return NEUTRAL_SITE_NAME }
+// The SDK fixes `from` per handler, so each send gets its own handler built from
+// that send's context (sender display name from the recipient's lodge).
+function handlerFor(ctx: AuthRenderContext) {
+  const name = ctx.senderName
+  return createAuthEmailHandler({
+    apiKey: Deno.env.get('LOVABLE_API_KEY')!,
+    from: `${name} <noreply@${FROM_DOMAIN}>`,
+    senderDomain: SENDER_DOMAIN,
+    sendUrl: Deno.env.get('LOVABLE_SEND_URL'),
+    emails: authEmails(ctx),
+  })
 }
 
-const AUTH_EMAILS: Parameters<typeof createAuthEmailHandler>[0]['emails'] = {
+function authEmails(ctx: AuthRenderContext): Parameters<typeof createAuthEmailHandler>[0]['emails'] {
+  const { brand, siteName, siteUrl } = ctx
+  return {
     signup: {
       subject: 'Confirm your email',
-      render: async (data) => {
-        const siteName = await applyAuthEmailBrand()
-        return React.createElement(SignupEmail, {
-          siteName,
-          siteUrl: await currentSiteUrl(LAST_RESORT_SITE_URL),
-          recipient: data.email,
-          confirmationUrl: data.url,
-        })
-      },
+      render: async (data) => React.createElement(SignupEmail, { brand, siteName, siteUrl, recipient: data.email, confirmationUrl: data.url }),
     },
     invite: {
       subject: "You've been invited",
-      render: async (data) => {
-        const siteName = await applyAuthEmailBrand()
-        return React.createElement(InviteEmail, {
-          siteName,
-          siteUrl: await currentSiteUrl(LAST_RESORT_SITE_URL),
-          confirmationUrl: data.url,
-        })
-      },
+      render: async (data) => React.createElement(InviteEmail, { brand, siteName, siteUrl, confirmationUrl: data.url }),
     },
     magiclink: {
       subject: 'Your login link',
-      render: async (data) => {
-        const siteName = await applyAuthEmailBrand()
-        return React.createElement(MagicLinkEmail, {
-          siteName,
-          confirmationUrl: data.url,
-          token: data.token,
-          client: extractClientHint(data.url),
-        })
-      },
+      render: async (data) => React.createElement(MagicLinkEmail, { brand, siteName, confirmationUrl: data.url, token: data.token, client: extractClientHint(data.url) }),
     },
     recovery: {
       subject: 'Reset your password',
-      render: async (data) => {
-        const siteName = await applyAuthEmailBrand()
-        return React.createElement(RecoveryEmail, {
-          siteName,
-          confirmationUrl: data.url,
-        })
-      },
+      render: async (data) => React.createElement(RecoveryEmail, { brand, siteName, confirmationUrl: data.url }),
     },
     email_change: {
       subject: 'Confirm your new email',
-      render: async (data) => {
-        const siteName = await applyAuthEmailBrand()
-        return React.createElement(EmailChangeEmail, {
-          siteName,
-          oldEmail: data.old_email ?? '',
-          email: data.email,
-          newEmail: data.new_email ?? '',
-          confirmationUrl: data.url,
-        })
-      },
+      render: async (data) => React.createElement(EmailChangeEmail, { brand, siteName, oldEmail: data.old_email ?? '', email: data.email, newEmail: data.new_email ?? '', confirmationUrl: data.url }),
     },
     reauthentication: {
       subject: 'Your verification code',
-      render: async (data) => {
-        const siteName = await applyAuthEmailBrand()
-        return React.createElement(ReauthenticationEmail, { token: data.token ?? '', siteName })
-      },
+      render: async (data) => React.createElement(ReauthenticationEmail, { brand, token: data.token ?? '', siteName }),
     },
+  }
 }
 
 Deno.serve(async (req) => {
@@ -276,6 +230,5 @@ Deno.serve(async (req) => {
     return handlePreview(req)
   }
 
-  try { keepAlive(brandLookup.start()) } catch { /* never block a send */ }
-  return handlerFor(await currentSenderName())(req)
+  return handlerFor(await contextFor(req))(req)
 })
