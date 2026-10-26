@@ -11,6 +11,7 @@ DECLARE
   top_role text := current_user; -- the harness's own role, read at start; checks switch back to this
 BEGIN
   IF (SELECT count(*) FROM public.units) <> 1 THEN RAISE EXCEPTION 'harness expects exactly one real lodge'; END IF;
+  out := out || 'harness role at start: ' || top_role || E'\n';
   wm  := public.current_officer_holder('worshipful_master', d, u);
   sec := public.current_officer_holder('secretary', d, u);
   tre := public.current_officer_holder('treasurer', d, u);
@@ -96,8 +97,8 @@ BEGIN
     ok := ok AND n = 0;
     PERFORM set_config('role', orig_role, true);
     PERFORM set_config('request.jwt.claims', '', true);
-    ok := ok AND (SELECT member_id FROM public.officer_appointments WHERE id = tgt) IS NOT DISTINCT FROM before_member;
-    out := out || CASE WHEN ok THEN 'PASS' ELSE 'FAIL' END || ' CS: plain own-lodge member cannot insert/update/delete appointments' || E'\n'; fails := fails + (NOT ok)::int;
+    ok := ok AND (SELECT member_id FROM public.officer_appointments WHERE id = tgt) IS NOT DISTINCT FROM before_member AND current_user = orig_role;
+    out := out || CASE WHEN ok THEN 'PASS' ELSE 'FAIL' END || ' CS: plain own-lodge member cannot insert/update/delete appointments (role back to ' || current_user || ')' || E'\n'; fails := fails + (NOT ok)::int;
   END;
 
   -- CP checks ---------------------------------------------------------------
@@ -134,6 +135,7 @@ BEGIN
   -- 8 (Job CS / 0166). officer_positions lodge rules
   DECLARE orig_role text := top_role; n int; nb int; ins_ok boolean := false; newrow record; plain2 uuid;
   BEGIN
+    PERFORM set_config('role', orig_role, true); -- the CP block above left the role as service_role
     -- a lodge-B representative post (made as the session role, which bypasses the access rules)
     INSERT INTO public.officer_positions (key, label, order_index, category, unit_id) VALUES ('rep_cs_lodge_b', 'CS Lodge B Rep', 300, 'representative', u2);
     SELECT p.id INTO plain2 FROM public.profiles p WHERE p.status = 'active' AND p.unit_id = u
@@ -176,7 +178,7 @@ BEGIN
     PERFORM set_config('role', orig_role, true);
     PERFORM set_config('request.jwt.claims', '', true);
     ok := current_user = orig_role;
-    out := out || CASE WHEN ok THEN 'PASS' ELSE 'FAIL' END || ' harness role restored to ' || orig_role || E'\n'; fails := fails + (NOT ok)::int;
+    out := out || CASE WHEN ok THEN 'PASS' ELSE 'FAIL' END || ' harness role restored to ' || current_user || E'\n'; fails := fails + (NOT ok)::int;
   END;
 
   RAISE EXCEPTION 'HARNESS fails=% %', fails, E'\n' || out;
