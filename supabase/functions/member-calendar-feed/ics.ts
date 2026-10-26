@@ -146,6 +146,18 @@ function loiFromSchedule(rows: any[], c: FeedLodge): CalEvent[] {
   });
 }
 
+/** JOB DG: human title for a meeting with no linked event. The "Meeting:" prefix
+ *  is kept (the page classifies kind by it); the type text is made readable. */
+function meetingTypeTitle(type: string | null | undefined): string {
+  const raw = (type ?? "").trim().toLowerCase();
+  if (!raw || raw === "regular") return "Regular meeting";
+  if (raw === "installation") return "Installation meeting";
+  if (raw === "dispensation") return "Dispensation meeting";
+  const label = raw.replace(/[_-]+/g, " ");
+  const capitalised = label.charAt(0).toUpperCase() + label.slice(1);
+  return /meeting$/.test(label) ? capitalised : `${capitalised} meeting`;
+}
+
 function classifyEventTitle(raw: string): string {
   const s = raw.toLowerCase();
   if (s.includes("installation")) return `Meeting: ${raw}`;
