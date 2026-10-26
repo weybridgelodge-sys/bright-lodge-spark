@@ -7,6 +7,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { fieldCls, fieldLabelCls } from "@/lib/fieldStyle";
 import { POSITION_SELECT, type PositionRow } from "@/lib/officerPositions";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription,
+  AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 type Appt = { id: string; position_key: string; member_id: string | null; display_name: string | null; lodge_year: number };
 type MemberOpt = { id: string; label: string };
@@ -47,6 +51,12 @@ export default function RepresentativesBoard({ year, members, canEdit }: {
     if (error) { toast.error(error.message); return; }
     toast.success(ok); load();
   };
+
+  // Server-enforced: own lodge, representative, already inactive, not on a submitted return.
+  const removePosition = (key: string) => run(async () => {
+    const { error } = await (supabase as any).rpc("delete_representative_position", { _key: key });
+    return { error };
+  }, "Representative post removed");
 
   const saveHolder = (key: string, memberId: string | null, displayName: string | null) => {
     const existing = appts.find((x) => x.position_key === key && x.lodge_year === year);
@@ -112,6 +122,11 @@ export default function RepresentativesBoard({ year, members, canEdit }: {
                   {p.active === false ? `Reactivate ${p.label}` : `Deactivate ${p.label}`}
                 </button>
               )}
+              {canEdit && p.active === false && p.category === "representative" && (
+                <RemovePostButton label={p.label} disabled={busy}
+                  apptCount={appts.filter((x) => x.position_key === p.key).length}
+                  onConfirm={() => removePosition(p.key)} />
+              )}
             </li>
           );
         })}
@@ -168,5 +183,35 @@ function HolderEditor({ label, members, current, disabled, onSave }: {
       <button type="button" disabled={disabled} onClick={() => onSave(mid || null, mid ? null : name)}
         className="min-h-[44px] rounded-md bg-gold px-4 text-sm font-medium text-navy disabled:opacity-60">Save holder</button>
     </div>
+  );
+}
+
+function RemovePostButton({ label, apptCount, disabled, onConfirm }: {
+  label: string; apptCount: number; disabled: boolean; onConfirm: () => void;
+}) {
+  return (
+    <AlertDialog>
+      <AlertDialogTrigger asChild>
+        <button type="button" disabled={disabled}
+          className="mt-3 sm:ml-2 min-h-[44px] rounded-md bg-destructive px-3 font-sans text-sm text-destructive-foreground disabled:opacity-60">
+          Remove {label}
+        </button>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle className="font-serif">Remove {label}?</AlertDialogTitle>
+          <AlertDialogDescription className="font-sans">
+            This deletes the post and {apptCount} appointment record{apptCount === 1 ? "" : "s"} for this lodge. This cannot be undone.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel className="min-h-[44px] font-sans">Cancel</AlertDialogCancel>
+          <AlertDialogAction onClick={onConfirm}
+            className="min-h-[44px] bg-destructive font-sans text-destructive-foreground hover:bg-destructive/90">
+            Remove post
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }
