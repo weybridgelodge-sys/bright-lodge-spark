@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { readFileSync } from "node:fs";
 import ts from "typescript";
@@ -26,7 +26,8 @@ describe("W-2 meeting card payments", () => {
     fireEvent.change(document.querySelector("#evf-meeting") as HTMLSelectElement, { target: { value: "meeting-and-festive-board" } });
     fireEvent.click(screen.getAllByRole("button", { name: "Next" })[1]);
     fireEvent.click(screen.getByRole("radio", { name: /Debit/ }));
-    expect(screen.getAllByText("£35.00")).toHaveLength(2);
+    const paymentStep = document.querySelectorAll("fieldset")[2];
+    expect(within(paymentStep as HTMLElement).getAllByText("£35.00")).toHaveLength(2);
     expect(screen.queryByRole("radiogroup", { name: /fee/i })).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: "Continue to Payment" }));
     expect(screen.getByRole("heading", { name: "Secure Card Payment" })).toBeInTheDocument();

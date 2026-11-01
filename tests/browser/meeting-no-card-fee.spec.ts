@@ -22,7 +22,7 @@ test("meeting card dining is £35 at 320px, with no fee choice", async ({ page }
   await page.locator("#evf-meeting").selectOption("meeting-and-festive-board");
   await page.getByRole("button", { name: "Next" }).click();
   await page.getByRole("radio", { name: /Debit/ }).check();
-  const form = page.locator("form");
+  const form = page.locator("form fieldset:visible");
   await expect(form.getByText("£35.00", { exact: true })).toHaveCount(2);
   await expect(page.getByRole("radiogroup", { name: /fee/i })).toHaveCount(0);
   expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(0);
