@@ -33,7 +33,7 @@ export function ResumeCardPayment({ bookingId, totalPence, holdUntil, title, onR
   return (
     <div className="space-y-2">
       <p className="font-sans text-sm text-primary-foreground">
-        Card payment of {totalPence != null ? formatGBP(totalPence) : "your booking"} (including the card fee) is not finished. {heldUntilLabel(holdUntil)}.
+        Card payment of {totalPence != null ? formatGBP(totalPence) : "your booking"} is not finished. {heldUntilLabel(holdUntil)}.
       </p>
       {!secret && (
         <button type="button" onClick={start} disabled={busy} aria-busy={busy}

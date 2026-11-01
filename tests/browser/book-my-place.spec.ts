@@ -92,7 +92,7 @@ test("pending card: Continue to payment resumes the same booking once; expired h
   await page.goto("/members/book");
   const btn = page.getByRole("button", { name: /Continue to payment\s*:\s*Regular Meeting/ });
   await expect(btn).toBeVisible({ timeout: 15000 });
-  await expect(page.getByText(/£35\.90 \(including the card fee\)/)).toBeVisible();
+  await expect(page.getByText(/Card payment of £35\.90 is not finished/)).toBeVisible();
   await expect(page.getByText(/Held until \d\d:\d\d/)).toBeVisible();
   await expect(page.getByRole("button", { name: /Continue to payment/ })).toHaveCount(1);
   expect(Math.round((await btn.boundingBox())!.height)).toBeGreaterThanOrEqual(44);
