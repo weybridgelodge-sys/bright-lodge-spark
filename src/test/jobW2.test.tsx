@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, within, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { readFileSync } from "node:fs";
 import ts from "typescript";
@@ -19,7 +19,7 @@ vi.mock("@/components/TurnstileWidget", () => ({ default: () => null }));
 afterEach(() => { cleanup(); vi.clearAllMocks(); });
 
 describe("W-2 meeting card payments", () => {
-  it("charges the £35 dining price in the form and checkout", () => {
+  it("charges the £35 dining price in the form and checkout", async () => {
     const bundle = { event: { title: "December meeting", slug: "december", event_date: "2026-12-16" }, diningOptions: [{ id: "d1", label: "Dining", price_pence: 3500 }] } as EventBundle;
     render(<MemoryRouter><MeetingBookingForm bundle={bundle} publishedMeeting={{ id: "m1", event_key: "december" }} diningOptionId="d1" setDiningOptionId={() => {}} prefill={{ title: "Mr", firstName: "Test", lastName: "Member", email: "test@example.invalid", phone: "07000000000" }} /></MemoryRouter>);
     fireEvent.click(screen.getAllByRole("button", { name: "Next" })[0]);
@@ -29,8 +29,8 @@ describe("W-2 meeting card payments", () => {
     const paymentStep = document.querySelectorAll("fieldset")[2];
     expect(within(paymentStep as HTMLElement).getAllByText("£35.00")).toHaveLength(2);
     expect(screen.queryByRole("radiogroup", { name: /fee/i })).toBeNull();
-    fireEvent.click(screen.getByRole("button", { name: "Continue to Payment" }));
-    expect(screen.getByRole("heading", { name: "Secure Card Payment" })).toBeInTheDocument();
+    fireEvent.submit(document.querySelector("form") as HTMLFormElement);
+    await waitFor(() => expect(screen.getByRole("heading", { name: "Secure Card Payment" })).toBeInTheDocument());
     expect(screen.getByText("£35.00")).toBeInTheDocument();
   });
 

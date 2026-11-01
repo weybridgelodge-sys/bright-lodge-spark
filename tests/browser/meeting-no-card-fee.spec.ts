@@ -9,7 +9,7 @@ test("meeting card dining is £35 at 320px, with no fee choice", async ({ page }
   await page.route("**/rest/v1/rpc/get_published_meeting_for_event**", r => r.fulfill({ json: [{ id: "m1", event_key: ev.slug }] }));
   await page.route("**/rest/v1/rpc/get_public_booking_details**", r => r.fulfill({ json: { lodge_name: "Sample Lodge", lodge_number: "1" } }));
   await page.route("**/rest/v1/module_settings**", r => r.fulfill({ json: [] }));
-  await page.route(/\/src\/lib\/stripe\.ts/, r => r.fulfill({ contentType: "application/javascript", body: "const fake={elements(){},registerAppInfo(){},_registerWrapper(){},createEmbeddedCheckoutPage:async(o)=>{await o.fetchClientSecret();return {mount(){},unmount(){},destroy(){}};}};export const getStripe=()=>Promise.resolve(fake);export const getStripeEnvironment=()=>'sandbox';export const isPaymentsConfigured=()=>true;" }));
+  await page.route(/\/src\/lib\/stripe\.ts/, r => r.fulfill({ contentType: "application/javascript", body: "const f=()=>{};const fake={elements:f,createToken:f,createPaymentMethod:f,confirmCardPayment:f,registerAppInfo:f,_registerWrapper:f,createEmbeddedCheckoutPage:async(o)=>{await o.fetchClientSecret();return {mount(){},unmount(){},destroy(){}};}};export const getStripe=()=>Promise.resolve(fake);export const getStripeEnvironment=()=>'sandbox';export const isPaymentsConfigured=()=>true;" }));
   const requests: any[] = [];
   await page.route("**/functions/v1/create-checkout", r => { requests.push(r.request().postDataJSON()); return r.fulfill({ json: { clientSecret: "test-only" } }); });
   await page.goto("/bookings?e2e_as=visitor");
