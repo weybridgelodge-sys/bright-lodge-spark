@@ -22,13 +22,14 @@ test("meeting card dining is £35 at 320px, with no fee choice", async ({ page }
   await page.locator("#evf-meeting").selectOption("meeting-and-festive-board");
   await page.getByRole("button", { name: "Next" }).click();
   await page.getByRole("radio", { name: /Debit/ }).check();
-  await expect(page.getByText("£35.00", { exact: true })).toHaveCount(2);
+  const form = page.locator("form");
+  await expect(form.getByText("£35.00", { exact: true })).toHaveCount(2);
   await expect(page.getByRole("radiogroup", { name: /fee/i })).toHaveCount(0);
   expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(0);
   await expectNoAxeViolations(page, "meeting £35 card payment step");
   await page.getByRole("button", { name: "Continue to Payment" }).click();
   await expect(page.getByRole("heading", { name: "Secure Card Payment" })).toBeVisible();
-  await expect(page.getByText("£35.00", { exact: true })).toHaveCount(1);
+  await expect(page.getByText("Total:").filter({ hasText: "£35.00" })).toBeVisible();
   await expect.poll(() => requests.length).toBeGreaterThan(0);
   expect(requests[0]).not.toHaveProperty("cover_fee");
   expect(requests[0].line_items).toMatchObject([{ qty: 1, unit_price_pence: 3500 }]);

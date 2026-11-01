@@ -22,9 +22,9 @@ describe("W-2 meeting card payments", () => {
   it("charges the £35 dining price in the form and checkout", () => {
     const bundle = { event: { title: "December meeting", slug: "december", event_date: "2026-12-16" }, diningOptions: [{ id: "d1", label: "Dining", price_pence: 3500 }] } as EventBundle;
     render(<MemoryRouter><MeetingBookingForm bundle={bundle} publishedMeeting={{ id: "m1", event_key: "december" }} diningOptionId="d1" setDiningOptionId={() => {}} prefill={{ title: "Mr", firstName: "Test", lastName: "Member", email: "test@example.invalid", phone: "07000000000" }} /></MemoryRouter>);
-    fireEvent.click(screen.getByRole("button", { name: "Next" }));
+    fireEvent.click(screen.getAllByRole("button", { name: "Next" })[0]);
     fireEvent.change(document.querySelector("#evf-meeting") as HTMLSelectElement, { target: { value: "meeting-and-festive-board" } });
-    fireEvent.click(screen.getByRole("button", { name: "Next" }));
+    fireEvent.click(screen.getAllByRole("button", { name: "Next" })[1]);
     fireEvent.click(screen.getByRole("radio", { name: /Debit/ }));
     expect(screen.getAllByText("£35.00")).toHaveLength(2);
     expect(screen.queryByRole("radiogroup", { name: /fee/i })).toBeNull();
