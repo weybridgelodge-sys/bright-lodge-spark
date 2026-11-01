@@ -34,12 +34,6 @@ const fadeUp = {
 // since they control focus rings. TODO: verify these are defined in global CSS.
 const inputClass = "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 min-h-[48px] autofill-light";
 const selectClass = "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 min-h-[48px] autofill-light";
-// Card processing fee charged to the payer when they opt in: 2% of the
-// subtotal plus a flat 20p (covers Stripe fees and the Lodge environmental levy).
-export function calcCardFeePence(subtotalPence: number): number {
-  return subtotalPence > 0 ? Math.ceil(subtotalPence * 0.02) + 20 : 0;
-}
-
 const labelClass = "block text-sm font-sans font-medium text-foreground mb-1";
 
 
@@ -125,7 +119,6 @@ export default function MeetingBookingForm({
     return () => { cancelled = true; };
   }, [memberId]);
   const [paymentMethod, setPaymentMethod] = useState<"card" | "bank-transfer" | "cash-cheque" | "">("");
-  const [coverFee, setCoverFee] = useState(true);
 
   const selectedOption = diningOptions.find((o) => o.id === diningOptionId) || diningOptions[0];
   const seatPricePence = selectedOption?.price_pence ?? 0;
@@ -141,8 +134,7 @@ export default function MeetingBookingForm({
 
   const seatsToCharge = meetingOption === "meeting-and-festive-board" ? 1 + guestCount : 0;
   const subtotalPence = seatsToCharge * seatPricePence;
-  const feePence = paymentMethod === "card" && coverFee ? calcCardFeePence(subtotalPence) : 0;
-  const totalPence = subtotalPence + feePence;
+  const totalPence = subtotalPence;
   const fmtGbp = (p: number) => `£${(p / 100).toFixed(2)}`;
 
   const shortDate = useMemo(
@@ -344,7 +336,6 @@ export default function MeetingBookingForm({
                 </div>
                 <p className="text-sm text-muted-foreground font-sans">
                   Total: <strong className="text-foreground">{fmtGbp(totalPence)}</strong>
-                  {feePence > 0 && <> (includes {fmtGbp(feePence)} card fee)</>}
                 </p>
                 <StripeEmbeddedCheckoutPanel
                   event_key={publishedMeeting?.event_key ?? event.slug}
@@ -353,7 +344,6 @@ export default function MeetingBookingForm({
                   contact_name={`${title} ${firstName} ${lastName}`.replace(/\s+/g, " ").trim()}
                   contact_email={email}
                   contact_phone={phone}
-                  cover_fee={coverFee}
                   line_items={lineItems}
                   details={{
                     title, firstName, lastName, lodge,
@@ -789,46 +779,12 @@ export default function MeetingBookingForm({
 
                       {paymentMethod === "card" && seatsToCharge > 0 && (
                         <div className="border-t border-border pt-4 space-y-3">
-                          <p className={labelClass}>Cover the Stripe card processing fee?</p>
-                          <div className="space-y-2 mt-1" role="radiogroup" aria-label="Card fee preference">
-                            <label className="flex items-center gap-3 cursor-pointer min-h-[48px]">
-                              <input
-                                type="radio"
-                                name="fee"
-                                checked={coverFee}
-                                onChange={() => setCoverFee(true)}
-                                className="accent-[hsl(var(--gold))]"
-                              />
-                              <span className="text-sm font-sans text-foreground">
-                                Yes — add {fmtGbp(calcCardFeePence(subtotalPence))} to my total
-                              </span>
-                            </label>
-                            <label className="flex items-center gap-3 cursor-pointer min-h-[48px]">
-                              <input
-                                type="radio"
-                                name="fee"
-                                checked={!coverFee}
-                                onChange={() => setCoverFee(false)}
-                                className="accent-[hsl(var(--gold))]"
-                              />
-                              <span className="text-sm font-sans text-foreground">
-                                No — the Lodge will cover it
-                              </span>
-                            </label>
-                          </div>
-
                           {/* bg-background replaces unapproved bg-warm-white */}
                           <div className="bg-background border border-border rounded-sm p-4 space-y-1">
                             <div className="flex justify-between text-sm font-sans">
                               <span className="text-muted-foreground">Subtotal</span>
                               <span className="text-foreground">{fmtGbp(subtotalPence)}</span>
                             </div>
-                            {feePence > 0 && (
-                              <div className="flex justify-between text-sm font-sans">
-                                <span className="text-muted-foreground">Card fee</span>
-                                <span className="text-foreground">{fmtGbp(feePence)}</span>
-                              </div>
-                            )}
                             <div className="flex justify-between text-base font-sans font-semibold border-t border-border pt-2 mt-2">
                               <span className="text-foreground">Total</span>
                               {/* text-gold replaces unapproved text-gold-dark */}

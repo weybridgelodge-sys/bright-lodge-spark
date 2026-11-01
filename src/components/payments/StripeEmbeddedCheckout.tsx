@@ -18,7 +18,7 @@ export interface CheckoutRequest {
   contact_phone?: string;
   line_items: BookingLineItem[];
   details?: Record<string, unknown>;
-  cover_fee: boolean;
+  cover_fee?: boolean;
   return_url: string;
 }
 
@@ -38,7 +38,7 @@ export function StripeEmbeddedCheckoutPanel(props: Props) {
         contact_phone: props.contact_phone,
         line_items: props.line_items,
         details: props.details ?? {},
-        cover_fee: props.cover_fee,
+        ...(props.cover_fee === undefined ? {} : { cover_fee: props.cover_fee }),
         return_url: props.return_url,
       },
     });

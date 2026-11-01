@@ -137,7 +137,7 @@ Deno.serve(async (req) => {
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
-    const feePence = calcFeePence(subtotalPence, input.cover_fee);
+    const feePence = calcFeePence(subtotalPence, input.cover_fee && resolvedMeetingId === null);
     const totalPence = subtotalPence + feePence;
 
     // Capacity check — decide up front whether this booking is confirmed or
