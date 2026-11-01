@@ -9,6 +9,7 @@ import { StripeEmbeddedCheckoutPanel } from "@/components/payments/StripeEmbedde
 import type { EventBundle } from "@/lib/lodgeEvents";
 
 const mocks = vi.hoisted(() => ({ invoke: vi.fn(), options: undefined as any }));
+vi.stubGlobal("IntersectionObserver", class { observe() {} unobserve() {} disconnect() {} });
 vi.mock("@/integrations/supabase/client", () => ({ supabase: { auth: { getSession: async () => ({ data: { session: null } }) }, functions: { invoke: mocks.invoke } } }));
 vi.mock("@/lib/stripe", () => ({ getStripe: () => null }));
 vi.mock("@stripe/react-stripe-js", () => ({ EmbeddedCheckoutProvider: ({ options, children }: any) => { mocks.options = options; return children; }, EmbeddedCheckout: () => null }));
